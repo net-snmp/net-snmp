@@ -410,8 +410,6 @@ var_lookupCtlTable(struct variable *vp,
      * this is where we do the value assignments for the mib results.
      */
     switch (vp->magic) {
-
-
     case COLUMN_LOOKUPCTLTARGETADDRESSTYPE:
 #ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_lookupCtlTargetAddressType;
@@ -424,22 +422,18 @@ var_lookupCtlTable(struct variable *vp,
         *write_method = write_lookupCtlTargetAddress;
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = (StorageTmp->lookupCtlTargetAddressLen);
-
         return (u_char *) StorageTmp->lookupCtlTargetAddress;
 
     case COLUMN_LOOKUPCTLOPERSTATUS:
         *var_len = sizeof(StorageTmp->lookupCtlOperStatus);
-
         return (u_char *) & StorageTmp->lookupCtlOperStatus;
 
     case COLUMN_LOOKUPCTLTIME:
         *var_len = sizeof(StorageTmp->lookupCtlTime);
-
         return (u_char *) & StorageTmp->lookupCtlTime;
 
     case COLUMN_LOOKUPCTLRC:
         *var_len = sizeof(StorageTmp->lookupCtlRc);
-
         return (u_char *) & StorageTmp->lookupCtlRc;
 
     case COLUMN_LOOKUPCTLROWSTATUS:
@@ -447,7 +441,6 @@ var_lookupCtlTable(struct variable *vp,
         *write_method = write_lookupCtlRowStatus;
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->lookupCtlRowStatus);
-
         return (u_char *) & StorageTmp->lookupCtlRowStatus;
 
     default:
@@ -465,7 +458,7 @@ add_result(struct lookupTable_data *item, int index,
     temp = SNMP_MALLOC_STRUCT(lookupResultsTable_data);
     if (temp == NULL) {
 	snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
-	exit(1);
+	return NULL;
     }
     temp->lookupResultsIndex = index;
     temp->next = NULL;
@@ -473,7 +466,8 @@ add_result(struct lookupTable_data *item, int index,
     temp->lookupCtlOwnerIndex = malloc(item->lookupCtlOwnerIndexLen + 1);
     if (temp->lookupCtlOwnerIndex == NULL) {
 	snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
-	exit(1);
+	free(temp);
+	return NULL;
     }
     memcpy(temp->lookupCtlOwnerIndex,
 	   item->lookupCtlOwnerIndex,
@@ -484,7 +478,9 @@ add_result(struct lookupTable_data *item, int index,
     temp->lookupCtlOperationName = malloc(item->lookupCtlOperationNameLen + 1);
     if (temp->lookupCtlOperationName == NULL) {
 	snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
-	exit(1);
+	free(temp->lookupCtlOwnerIndex);
+	free(temp);
+	return NULL;
     }
     memcpy(temp->lookupCtlOperationName,
 	   item->lookupCtlOperationName,
@@ -506,7 +502,6 @@ add_result(struct lookupTable_data *item, int index,
 void
 run_lookup(struct lookupTable_data *item)
 {
-
     long            addressType;
     char           *address = NULL;
     size_t          addresslen;
@@ -550,7 +545,7 @@ run_lookup(struct lookupTable_data *item)
             DEBUGMSGTL(("lookupCtlTable",
                         "Can't get a network host entry for ipv4 address: %s\n",
                         address));
-            modify_lookupCtlRc(item, 1L);
+            modify_lookupCtlRc(item, h_errno);
             return;
         } else {
             modify_lookupCtlRc(item, 0L);
@@ -569,21 +564,23 @@ run_lookup(struct lookupTable_data *item)
                 i = i + 1;
                 n = n + 1;
             }
-            current->next = NULL;
-
         }
 
         if (item->ResultsTable != NULL)
             if (lookupResultsTable_add(item) != SNMPERR_SUCCESS)
                 DEBUGMSGTL(("lookupResultsTable",
                             "registered an entry error\n"));
-
         SNMP_FREE(address);
         return;
     }
 
     else if (addressType == INETADDRESSTYPE_DNS) {
 	struct hostent *lookup;
+#if HAVE_GETADDRINFO
+	int             res;
+	struct addrinfo *ais;
+	struct addrinfo hints = { 0, AF_INET6, SOCK_DGRAM };
+#endif
 
         gettimeofday(&tpstart, NULL);
         lookup = gethostbyname(address);
@@ -594,6 +591,7 @@ run_lookup(struct lookupTable_data *item)
             DEBUGMSGTL(("lookupCtlTable",
                         "Can't get a network host entry for %s\n",
                         address));
+            modify_lookupCtlRc(item, h_errno);
         } else {
             while (lookup->h_addr_list[i]) {
 		char buf[64];
@@ -603,16 +601,17 @@ run_lookup(struct lookupTable_data *item)
 		buflen = strlen(buf);
 		switch (lookup->h_addrtype) {
 		case AF_INET:
-		    temp = add_result(item, INETADDRESSTYPE_IPV4, n, buf, buflen);
+		    temp = add_result(item, n, INETADDRESSTYPE_IPV4, buf, buflen);
 		    break;
 		case AF_INET6:
-		    temp = add_result(item, INETADDRESSTYPE_IPV6, n, buf, buflen);
+		    temp = add_result(item, n, INETADDRESSTYPE_IPV6, buf, buflen);
 		    break;
 		default:
 		    snmp_log(LOG_ERR, "nslookup-mib/run_lookup: Unknown address type %d\n", lookup->h_addrtype);
-		    temp = add_result(item, INETADDRESSTYPE_UNKNOWN, n, "", 0);
+		    temp = add_result(item, n, INETADDRESSTYPE_UNKNOWN, "", 0);
 		    break;
 		}
+		DEBUGMSGTL(("lookupCtlTable", "Adding %d %s\n", n, buf));
 
                 if (n == 1)
                     item->ResultsTable = temp;
@@ -624,6 +623,57 @@ run_lookup(struct lookupTable_data *item)
             }
         }
 
+#if HAVE_GETADDRINFO
+        gettimeofday(&tpstart, NULL);
+	res = getaddrinfo(address, NULL, &hints, &ais);
+        gettimeofday(&tpend, NULL);
+        timeuse6 = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
+            tpend.tv_usec - tpstart.tv_usec;
+
+        if (res != 0) {
+            DEBUGMSGTL(("lookupCtlTable",
+                        "Can't get a ipv6 network host entry for %s\n",
+                        address));
+            modify_lookupCtlRc(item, res);
+        } else {
+	    struct addrinfo *aip = ais;
+            while (aip) {
+		char buf[64];
+		int buflen;
+
+		switch (aip->ai_family) {
+		case AF_INET:
+		    inet_ntop(aip->ai_family,
+		    	&((struct sockaddr_in *)aip->ai_addr)->sin_addr,
+			buf, sizeof(buf));
+		    buflen = strlen(buf);
+		    temp = add_result(item, n, INETADDRESSTYPE_IPV4, buf, buflen);
+		    break;
+		case AF_INET6:
+		    inet_ntop(aip->ai_family,
+		    	&((struct sockaddr_in6 *)aip->ai_addr)->sin6_addr,
+			buf, sizeof(buf));
+		    buflen = strlen(buf);
+		    temp = add_result(item, n, INETADDRESSTYPE_IPV6, buf, buflen);
+		    break;
+		default:
+		    snmp_log(LOG_ERR, "nslookup-mib/run_lookup: Unknown address type %d\n", aip->ai_family);
+		    temp = add_result(item, n, INETADDRESSTYPE_UNKNOWN, "", 0);
+		    break;
+		}
+		DEBUGMSGTL(("lookupCtlTable", "Adding %d %s\n", n, buf));
+
+                if (n == 1)
+                    item->ResultsTable = temp;
+                else
+                    current->next = temp;
+                current = temp;
+                n = n + 1;
+		aip = aip->ai_next;
+            }
+	    freeaddrinfo(ais);
+        }
+#elif HAVE_GETHOSTBYNAME2
         gettimeofday(&tpstart, NULL);
         lookup = gethostbyname2(address, AF_INET6);
         gettimeofday(&tpend, NULL);
@@ -634,26 +684,29 @@ run_lookup(struct lookupTable_data *item)
             DEBUGMSGTL(("lookupCtlTable",
                         "Can't get a ipv6 network host entry for %s\n",
                         address));
+            modify_lookupCtlRc(item, h_errno);
         } else {
 	    i = 0;
             while (lookup->h_addr_list[i]) {
 		char buf[64];
 		int buflen;
 
-		inet_ntop(lookup->h_addrtype, lookup->h_addr_list[i], buf, sizeof(buf));
+		inet_ntop(lookup->h_addrtype, lookup->h_addr_list[i],
+			buf, sizeof(buf));
 		buflen = strlen(buf);
 		switch (lookup->h_addrtype) {
 		case AF_INET:
-		    temp = add_result(item, INETADDRESSTYPE_IPV4, n, buf, buflen);
+		    temp = add_result(item, n, INETADDRESSTYPE_IPV4, buf, buflen);
 		    break;
 		case AF_INET6:
-		    temp = add_result(item, INETADDRESSTYPE_IPV6, n, buf, buflen);
+		    temp = add_result(item, n, INETADDRESSTYPE_IPV6, buf, buflen);
 		    break;
 		default:
 		    snmp_log(LOG_ERR, "nslookup-mib/run_lookup: Unknown address type %d\n", lookup->h_addrtype);
-		    temp = add_result(item, INETADDRESSTYPE_UNKNOWN, n, "", 0);
+		    temp = add_result(item, n, INETADDRESSTYPE_UNKNOWN, "", 0);
 		    break;
 		}
+		DEBUGMSGTL(("lookupCtlTable", "Adding %d %s\n", n, buf));
 
                 if (n == 1)
                     item->ResultsTable = temp;
@@ -664,6 +717,7 @@ run_lookup(struct lookupTable_data *item)
 		i = i + 1;
             }
         }
+#endif
 
         timeuse = timeuse4 + timeuse6;
         timeuse /= 1000;
@@ -671,19 +725,14 @@ run_lookup(struct lookupTable_data *item)
         modify_lookupCtlOperStatus(item, 3L);
 
         if (item->ResultsTable != NULL) {
-
             modify_lookupCtlRc(item, 0L);
             if (lookupResultsTable_add(item) != SNMPERR_SUCCESS)
                 DEBUGMSGTL(("lookupResultsTable",
                             "registered an entry error\n"));
-        } else {
-            modify_lookupCtlRc(item, 1L);
         }
         SNMP_FREE(address);
         return;
-
     }
-
 
     else if (addressType == INETADDRESSTYPE_IPV6) {
 	struct in6_addr addr_in6;
@@ -707,35 +756,31 @@ run_lookup(struct lookupTable_data *item)
             DEBUGMSGTL(("lookupCtlTable",
                         "Can't get a network host entry for %s\n",
                         address));
-            modify_lookupCtlRc(item, 1L);
+            modify_lookupCtlRc(item, h_errno);
             return;
         } else {
             modify_lookupCtlRc(item, 0L);
             if (lookup->h_name != NULL) {
-                current = temp = add_result(item, INETADDRESSTYPE_DNS, n,
+                current = temp = add_result(item, n, INETADDRESSTYPE_DNS,
 			    lookup->h_name, strlen(lookup->h_name));
                 n = n + 1;
-
             }
 
             i = 0;
             while (lookup->h_aliases[i]) {
-                current = temp = add_result(item, INETADDRESSTYPE_DNS, n,
+                current = temp = add_result(item, n, INETADDRESSTYPE_DNS,
 			    lookup->h_aliases[i], strlen(lookup->h_aliases[i]));
                 current->next = temp;
                 current = temp;
                 i = i + 1;
                 n = n + 1;
-
             }
 
             if (item->ResultsTable != NULL)
                 current->next = NULL;
             else
                 current = NULL;
-
         }
-
 
         if (item->ResultsTable != NULL)
             if (lookupResultsTable_add(item) != SNMPERR_SUCCESS)
@@ -1331,8 +1376,6 @@ write_lookupCtlRowStatus(int action,
             SNMP_FREE(StorageDel->lookupCtlOperationName);
             SNMP_FREE(StorageDel->lookupCtlTargetAddress);
             SNMP_FREE(StorageDel);
-
-            StorageDel = 0;
             /*
              * XXX: free it, its dead 
              */
