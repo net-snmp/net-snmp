@@ -22937,7 +22937,7 @@ else
     NETSNMP_BUILD_TLS_PROG_FALSE=''
 fi
 if echo " ${security_mod_list} " | grep ' usm ' ; then
-    if "x$enable_read_only" != "xyes" ; then
+    if test "x$enable_read_only" != "xyes" ; then
     	NETSNMP_BUILD_USM_PROG_TRUE=''
     	NETSNMP_BUILD_USM_PROG_FALSE='#'
     else
@@ -22948,7 +22948,7 @@ else
     NETSNMP_BUILD_USM_PROG_TRUE='#'
     NETSNMP_BUILD_USM_PROG_FALSE=''
 fi
-if "x$enable_read_only" != "xyes" ; then
+if test "x$enable_read_only" != "xyes" ; then
     NETSNMP_BUILD_SET_TRUE=""
     NETSNMP_BUILD_SET_FALSE="#"
 else
@@ -24920,7 +24920,7 @@ rm -f core conftest.err conftest.$ac_objext \
     ;;
 
   *)
-    for ac_func in gai_strerror getaddrinfo gethostbyname gethostname
+    for ac_func in gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
