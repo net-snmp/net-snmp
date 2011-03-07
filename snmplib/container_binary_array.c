@@ -65,9 +65,9 @@ array_qsort(void **data, int first, int last, netsnmp_container_compare *f)
     mid = data[(first+last)/2];
     
     do {
-        while ( ((*f)(data[i], mid) < 0) && (i < last))
+        while (i < last && (*f)(data[i], mid) < 0)
             ++i;
-        while ( ((*f)(mid, data[j]) < 0) && (j > first))
+        while (j > first && (*f)(mid, data[j]) < 0)
             --j;
 
         if(i < j) {
