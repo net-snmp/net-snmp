@@ -842,6 +842,7 @@ vacm_createGroupEntry(int securityModel, const char *securityName)
     return gp;
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 void
 vacm_destroyGroupEntry(int securityModel, const char *securityName)
 {
@@ -867,6 +868,7 @@ vacm_destroyGroupEntry(int securityModel, const char *securityName)
     free(vp);
     return;
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 void
 vacm_destroyAllGroupEntries(void)
@@ -1038,6 +1040,7 @@ vacm_createAccessEntry(const char *groupName,
     return vp;
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 void
 vacm_destroyAccessEntry(const char *groupName,
                         const char *contextPrefix,
@@ -1069,6 +1072,7 @@ vacm_destroyAccessEntry(const char *groupName,
     free(vp);
     return;
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 void
 vacm_destroyAllAccessEntries(void)
@@ -1142,12 +1146,14 @@ vacm_createViewEntry(const char *viewName,
                                 viewSubtreeLen);
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 void
 vacm_destroyViewEntry(const char *viewName,
                       oid * viewSubtree, size_t viewSubtreeLen)
 {
     netsnmp_view_destroy( &viewList, viewName, viewSubtree, viewSubtreeLen);
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 void
 vacm_destroyAllViewEntries(void)
