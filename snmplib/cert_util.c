@@ -10,8 +10,14 @@ netsnmp_feature_require(container_fifo)
 netsnmp_feature_child_of(cert_map_remove, netsnmp_unused)
 netsnmp_feature_child_of(cert_map_find, netsnmp_unused)
 netsnmp_feature_child_of(tlstmparams_external, cert_util_all)
+netsnmp_feature_child_of(tlstmparams_container, tlstmparams_external)
+netsnmp_feature_child_of(tlstmparams_remove, tlstmparams_external)
+netsnmp_feature_child_of(tlstmparams_find, tlstmparams_external)
 netsnmp_feature_child_of(tlstmAddr_remove, netsnmp_unused)
 netsnmp_feature_child_of(tlstmaddr_external, cert_util_all)
+netsnmp_feature_child_of(tlstmaddr_container, tlstmaddr_external)
+netsnmp_feature_child_of(tlstmAddr_get_serverId, tlstmaddr_external)
+
 netsnmp_feature_child_of(cert_fingerprints, cert_util_all)
 
 #endif /* NETSNMP_FEATURE_REQUIRE_CERT_UTIL */
@@ -2887,13 +2893,13 @@ _init_tlstmParams(void)
                                 params_help);
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_EXTERNAL
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_CONTAINER
 netsnmp_container *
 netsnmp_tlstmParams_container(void)
 {
     return _tlstmParams;
 }
-#endif /* NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_EXTERNAL */
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_CONTAINER */
 
 snmpTlstmParams *
 netsnmp_tlstmParams_create(const char *name, int hashType, const char *fp,
@@ -2997,7 +3003,7 @@ netsnmp_tlstmParams_add(snmpTlstmParams *stp)
     return 0;
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_EXTERNAL
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_REMOVE
 int
 netsnmp_tlstmParams_remove(snmpTlstmParams *stp)
 {
@@ -3014,7 +3020,9 @@ netsnmp_tlstmParams_remove(snmpTlstmParams *stp)
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_REMOVE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_FIND
 snmpTlstmParams *
 netsnmp_tlstmParams_find(snmpTlstmParams *stp)
 {
@@ -3093,13 +3101,13 @@ _init_tlstmAddr(void)
                             addr_help);
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_TLSTMADDR_EXTERNAL
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMADDR_CONTAINER
 netsnmp_container *
 netsnmp_tlstmAddr_container(void)
 {
     return _tlstmAddr;
 }
-#endif /* NETSNMP_FEATURE_REMOVE_TLSTMADDR_EXTERNAL */
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMADDR_CONTAINER */
 
 /*
  * create a new row in the table 
@@ -3274,7 +3282,7 @@ _find_tlstmAddr_fingerprint(const char *name)
     return result->fingerprint;
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_TLSTMADDR_EXTERNAL
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMADDR_GET_SERVERID
 char *
 netsnmp_tlstmAddr_get_serverId(const char *name)
 {
@@ -3291,7 +3299,7 @@ netsnmp_tlstmAddr_get_serverId(const char *name)
 
     return result->identity;
 }
-#endif /* NETSNMP_FEATURE_REMOVE_TLSTMADDR_EXTERNAL */
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMADDR_GET_SERVERID */
 /*
  * END snmpTlstmAddrTable data
  * ***************************************************************************/

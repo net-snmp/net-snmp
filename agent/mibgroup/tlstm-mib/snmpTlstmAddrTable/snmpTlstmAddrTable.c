@@ -16,7 +16,7 @@
 netsnmp_feature_require(table_tdata)
 netsnmp_feature_require(check_vb_storagetype)
 netsnmp_feature_require(check_vb_type_and_max_size)
-netsnmp_feature_require(tlstmaddr_external)
+netsnmp_feature_require(tlstmaddr_container)
 
 /** XXX - move these to table_data header? */
 #define FATE_NEWLY_CREATED    1

@@ -3752,6 +3752,7 @@ usm_free_user(struct usmUser *user)
 
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 /*
  * take a given user and clone the security info into another 
  */
@@ -3815,6 +3816,7 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
     }
     return to;
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * usm_create_user(void):
