@@ -29,4 +29,6 @@ CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SN
 
 CHECK "foobartestingbaz"
 
+STOPAGENT
+
 FINISHED
