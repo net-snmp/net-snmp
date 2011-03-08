@@ -277,6 +277,9 @@ sub parsefile {
 
   }
 
+  if (! $canwrite) {
+      print "End of $fname reached and we're not reset into 'canwrite' state\n";
+  }
   $TF->close();
 
   return $retval;
