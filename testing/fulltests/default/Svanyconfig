@@ -6,6 +6,9 @@
 if [ "x$snmp_version" = "x" ]; then
   snmp_version="any"
 fi
+if [ "x$snmp_write_access" = "x" ]; then
+  snmp_write_access="none"
+fi
 
 [ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=1.0.0.0
 
@@ -23,4 +26,4 @@ fi
 
 CONFIGAGENT group   testcommunitygroup  $snmp_version     testcommunitysec
 CONFIGAGENT view    all     included .1 80
-CONFIGAGENT 'access  testcommunitygroup  "" any noauth exact all none none'
+CONFIGAGENT "access  testcommunitygroup  '' any noauth exact all $snmp_write_access none"
