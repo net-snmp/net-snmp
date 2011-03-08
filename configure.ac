@@ -12,7 +12,7 @@
 #
 AC_INIT([Net-SNMP], [5.6], [net-snmp-coders@lists.sourceforge.net])
 AC_PREREQ([2.63])
-AC_CONFIG_SRCDIR([agent/mibgroup/ucd-snmp/extensible.c])
+AC_CONFIG_SRCDIR([agent/snmpd.c])
 AC_REVISION([$Revision$])
 
 AC_CONFIG_MACRO_DIR([m4])
