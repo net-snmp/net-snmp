@@ -252,7 +252,7 @@ _vacm_parse_access_common(const char *token, char *param, char **st,
         return PARSE_FAIL;
     }
 
-    if (strcmp(*context, "\"\"") == 0)
+    if (strcmp(*context, "\"\"") == 0 || strcmp(*context, "\'\'") == 0)
         **context = 0;
     if (strcasecmp(model, "any") == 0)
         *imodel = SNMP_SEC_MODEL_ANY;
