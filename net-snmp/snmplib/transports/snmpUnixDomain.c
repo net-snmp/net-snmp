@@ -279,7 +279,7 @@ void netsnmp_unix_dont_create_path(void)
 {
     create_path = 0;
 }
-#endif /* NETSNMP_FEATURE_REMOVE_UNIX_DONT_CREATE_PATH */
+#endif /* NETSNMP_FEATURE_REMOVE_UNIX_SOCKET_PATHS */
 
 /*
  * Open a Unix-domain transport for SNMP.  Local is TRUE if addr is the local
