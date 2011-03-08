@@ -232,6 +232,7 @@ sub parsefile {
   my($fname, $tname) = @_;
   my $FF; my $TF;
   my @fromfile = ();
+  $canwrite = 1;
 
   # ignore file for file names
   if ( (exists $opts{i}) && ("$fname" =~  /$igstring/) ) {
