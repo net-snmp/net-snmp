@@ -75,6 +75,7 @@ find(\&remove_files, $inputDir);
 
 sub remove_files {
     return if (!/\.[ch]$/);
+    return if (/\.h$/); # XXX: we need to delete headers eventually too
     return if (/_constants.h/);
     return if (exists($exceptions{$File::Find::name}));
 
