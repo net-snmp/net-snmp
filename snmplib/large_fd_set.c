@@ -146,7 +146,7 @@ netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
 	 * Unix: clear the file descriptors defined in the resized *fdset
 	 * but that were not defined in the original *fdset.
 	 */
-	for (i = fdset->lfs_setsize + 1; i < setsize; i++)
+	for (i = fdset->lfs_setsize; i < setsize; i++)
 	    FD_CLR(i, fdset->lfs_setptr);
     }
 #endif
