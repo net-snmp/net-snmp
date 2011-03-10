@@ -593,7 +593,7 @@ ipAddressPrefixAdvPreferredLifetime_get(ipAddressPrefixTable_rowreq_ctx *
      * copy (* ipAddressPrefixAdvPreferredLifetime_val_ptr ) from rowreq_ctx->data
      */
     if (INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.ipAddressPrefixType)
-        (*ipAddressPrefixAdvPreferredLifetime_val_ptr) = 4294967295;    /* per MIB */
+        (*ipAddressPrefixAdvPreferredLifetime_val_ptr) = 4294967295U;    /* per MIB */
     else
         (*ipAddressPrefixAdvPreferredLifetime_val_ptr) =
             rowreq_ctx->data.ipAddressPrefixAdvPreferredLifetime;
@@ -660,7 +660,7 @@ ipAddressPrefixAdvValidLifetime_get(ipAddressPrefixTable_rowreq_ctx *
      * copy (* ipAddressPrefixAdvValidLifetime_val_ptr ) from rowreq_ctx->data
      */
     if (INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.ipAddressPrefixType)
-        (*ipAddressPrefixAdvValidLifetime_val_ptr) = 4294967295;        /* per MIB */
+        (*ipAddressPrefixAdvValidLifetime_val_ptr) = 4294967295U;        /* per MIB */
     else
         (*ipAddressPrefixAdvValidLifetime_val_ptr) =
             rowreq_ctx->data.ipAddressPrefixAdvValidLifetime;
