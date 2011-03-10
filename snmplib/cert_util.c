@@ -2355,6 +2355,7 @@ _time_filter(netsnmp_file *f, struct stat *idx)
 #define MAP_CONFIG_TOKEN "certSecName"
 static void _parse_map(const char *token, char *line);
 static void _map_free(netsnmp_cert_map* entry, void *ctx);
+static void _purge_config_entries(void);
 
 static void
 _init_tlstmCertToTSN(void)
@@ -2367,7 +2368,7 @@ _init_tlstmCertToTSN(void)
      */
     _maps = netsnmp_cert_map_container_create(1);
 
-    register_config_handler(NULL, MAP_CONFIG_TOKEN, _parse_map, NULL,
+    register_config_handler(NULL, MAP_CONFIG_TOKEN, _parse_map, _purge_config_entries,
                             certSecName_help);
 }
 
@@ -2552,6 +2553,60 @@ netsnmp_cert_map_container_free(netsnmp_container *c)
 
     CONTAINER_FREE_ALL(c, NULL);
     CONTAINER_FREE(c);
+}
+
+/** clear out config rows
+ * called during reconfig processing (e.g. SIGHUP)
+*/
+static void
+_purge_config_entries(void)
+{
+    /**
+     ** dup container
+     ** iterate looking for NSCM_FROM_CONFIG flag
+     ** delete from original
+     ** delete dup
+     **/
+    netsnmp_iterator   *itr;
+    netsnmp_cert_map   *cert_map;
+    netsnmp_container  *cert_maps = netsnmp_cert_map_container();
+    netsnmp_container  *tmp_maps = NULL;
+
+    if ((NULL == cert_maps) || (CONTAINER_SIZE(cert_maps) == 0))
+        return;
+
+    DEBUGMSGT(("cert:map:reconfig", "removing locally configured rows\n"));
+    
+    /*
+     * duplicate cert_maps and then iterate over the copy. That way we can
+     * add/remove to cert_maps without distrubing the iterator.
+xx
+     */
+    tmp_maps = CONTAINER_DUP(cert_maps, NULL, 0);
+    if (NULL == tmp_maps) {
+        snmp_log(LOG_ERR, "could not duplicate maps for reconfig\n");
+        return;
+    }
+
+    itr = CONTAINER_ITERATOR(tmp_maps);
+    if (NULL == itr) {
+        snmp_log(LOG_ERR, "could not get iterator for reconfig\n");
+        CONTAINER_FREE(tmp_maps);
+        return;
+    }
+    cert_map = ITERATOR_FIRST(itr);
+    for( ; cert_map; cert_map = ITERATOR_NEXT(itr)) {
+
+        if (!(cert_map->flags & NSCM_FROM_CONFIG))
+            continue;
+
+        if (CONTAINER_REMOVE(cert_maps, cert_map) == 0)
+            netsnmp_cert_map_free(cert_map);
+    }
+    ITERATOR_RELEASE(itr);
+    CONTAINER_FREE(tmp_maps);
+
+    return;
 }
 
 /*
