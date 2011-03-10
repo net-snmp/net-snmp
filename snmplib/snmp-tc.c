@@ -161,9 +161,9 @@ date_n_time(const time_t * when, size_t * length)
      */
     {
 #ifdef HAVE_STRUCT_TM_TM_GMTOFF
-    const int tzoffset = tm_p->tm_gmtoff;
+    const int tzoffset = -tm_p->tm_gmtoff;   /* Seconds east of UTC */
 #else
-    const int tzoffset = timezone;
+    const int tzoffset = timezone;           /* Seconds west of UTC */
 #endif
     if (tzoffset > 0)
         string[8] = '-';
