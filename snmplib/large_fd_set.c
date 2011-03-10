@@ -144,6 +144,9 @@ netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
 {
     int             fd_set_bytes;
 
+    if (fdset->lfs_setsize == setsize)
+        return;
+
     if (setsize > FD_SETSIZE) {
         fd_set_bytes = NETSNMP_FD_SET_BYTES(setsize);
         if (fdset->lfs_setsize > FD_SETSIZE)
