@@ -117,6 +117,28 @@ netsnmp_large_fd_set_init(netsnmp_large_fd_set * fdset, int setsize)
     netsnmp_large_fd_set_resize(fdset, setsize);
 }
 
+int
+netsnmp_large_select(int numfds, netsnmp_large_fd_set *readfds,
+                     netsnmp_large_fd_set *writefds,
+                     netsnmp_large_fd_set *exceptfds,
+                     struct timeval *timeout)
+{
+#if defined(cygwin) || !defined(HAVE_WINSOCK_H)
+    /* Bit-set representation: make sure all fds have at least size 'numfds'. */
+    if (readfds && readfds->lfs_setsize < numfds)
+        netsnmp_large_fd_set_resize(readfds, numfds);
+    if (writefds && writefds->lfs_setsize < numfds)
+        netsnmp_large_fd_set_resize(writefds, numfds);
+    if (exceptfds && exceptfds->lfs_setsize < numfds)
+        netsnmp_large_fd_set_resize(exceptfds, numfds);
+#else
+    /* Array representation: no resizing is necessary. */
+#endif
+
+    return select(numfds, readfds->lfs_setptr, writefds->lfs_setptr,
+                  exceptfds->lfs_setptr, timeout);
+}
+
 void
 netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
 {
