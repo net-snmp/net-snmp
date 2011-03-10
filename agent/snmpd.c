@@ -1126,7 +1126,7 @@ static void join_stdin_waiter_thread(void)
  *	0	On success.
  *	-1	System error.
  *
- * Infinite while-loop which monitors incoming messges for the agent.
+ * Infinite while-loop which monitors incoming messages for the agent.
  * Invoke the established message handlers for incoming messages on a per
  * port basis.  Handle timeouts.
  */
