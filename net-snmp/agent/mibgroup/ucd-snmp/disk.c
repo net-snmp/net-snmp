@@ -761,8 +761,7 @@ fill_dsk_entry(int disknum, struct dsk_entry *entry)
 #endif 
 #endif /* defined(HAVE_STRUCT_STATVFS_F_FILES) */
 
-#else
-#if HAVE_FSTAB_H
+#elif HAVE_FSTAB_H
     /*
      * read the disk information 
      */
@@ -796,7 +795,12 @@ fill_dsk_entry(int disknum, struct dsk_entry *entry)
     entry->dskTotal = (unsigned long long)(totalblks * multiplier);
     entry->dskAvail = (unsigned long long)(avail * multiplier);
     entry->dskUsed = (unsigned long long)(used * multiplier);
-#endif
+#else
+    /* MinGW */
+    entry->dskPercent = 0;
+    entry->dskTotal = 0;
+    entry->dskAvail = 0;
+    entry->dskUsed = 0;
 #endif
 
     entry->dskErrorFlag =
