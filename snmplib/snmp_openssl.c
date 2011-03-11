@@ -146,7 +146,7 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
 
     osubj_name = X509_get_subject_name(ocert);
     if (NULL == osubj_name) {
-        DEBUGMSGT(("openssl:dump_names", "no subject name!\n"));
+        DEBUGMSGT(("9:cert:dump:names", "no subject name!\n"));
         return;
     }
 
@@ -167,10 +167,10 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
             prefix_short = OBJ_nid2sn(onid);
         }
 
-        DEBUGMSGT(("9:openssl:dump_names",
+        DEBUGMSGT(("9:cert:dump:names",
                    "[%02d] NID type %d, ASN type %d\n", i, onid,
                    oname_entry->value->type));
-        DEBUGMSGT(("openssl:dump_names", "%s/%s: '%s'\n", prefix_long,
+        DEBUGMSGT(("9:cert:dump:names", "%s/%s: '%s'\n", prefix_long,
                    prefix_short, ASN1_STRING_data(oname_entry->value)));
     }
 }
@@ -368,34 +368,6 @@ _extract_oname(const GENERAL_NAME *oname)
     return rtn;
 }
 
-/**
- */
-/**
- */
-void
-netsnmp_openssl_cert_dump_san(X509 *ocert /*X509_EXTENSION *oext*/)
-{
-    GENERAL_NAMES      *onames;
-    const GENERAL_NAME *oname;
-    char               *buf;
-    int                 count, i;
- 
-    onames = (GENERAL_NAMES *)X509_get_ext_d2i(ocert, NID_subject_alt_name,
-                                               NULL, NULL );
-    if (NULL == onames)
-        return;
-
-    count = sk_GENERAL_NAME_num(onames);
-
-    for (i=0 ; i <count; ++i)  {
-        oname = sk_GENERAL_NAME_value(onames, i);
-        buf = _extract_oname( oname );
-        DEBUGMSGT(("openssl:cert:extension:san", "#%d type %d: %s\n", i,
-                   oname->type, buf ? buf : "NULL"));
-        free(buf);
-    }
-}
-
 netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_OPENSSL_CERT_GET_SUBJECTALTNAMES
 /** netsnmp_openssl_cert_get_subjectAltName: get subjectAltName for cert.
@@ -415,25 +387,41 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
 {
     X509_EXTENSION  *extension;
     const char      *extension_name;
-    char             buf[SNMP_MAXBUF_SMALL], *buf_ptr = buf, *str;
+    char             buf[SNMP_MAXBUF_SMALL], *buf_ptr = buf, *str, *lf;
     int              i, num_extensions, buf_len, nid;
 
     if (NULL == ocert)
         return;
 
+    DEBUGIF("9:cert:dump") 
+        ;
+    else
+        return; /* bail if debug not enabled */
+
     num_extensions = X509_get_ext_count(ocert);
-    DEBUGMSGT(("9:cert:dump:extension", "%02d extensions\n", num_extensions));
+    if (0 == num_extensions)
+        DEBUGMSGT(("9:cert:dump", "    %0 extensions\n"));
     for(i = 0; i < num_extensions; i++) {
         extension = X509_get_ext(ocert, i);
         nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
         extension_name = OBJ_nid2sn(nid);
         buf_len = sizeof(buf);
         str = _cert_get_extension_str_at(ocert, i, &buf_ptr, &buf_len, 0);
-        DEBUGMSGT(("cert:dump:extension", "    %2d: %s = %s\n", i,
+        lf = strchr(str, '\n'); /* look for multiline strings */
+        if (NULL != lf)
+            *lf = '\0'; /* only log first line of multiline here */
+        DEBUGMSGT(("9:cert:dump", "    %2d: %s = %s\n", i,
                    extension_name, str));
-        if (NID_subject_alt_name == nid)
-            DEBUGIF("9:cert:dump:extension")
-                netsnmp_openssl_cert_dump_san(ocert);
+        while(lf) { /* log remaining parts of multiline string */
+            str = ++lf;
+            if (*str == '\0')
+               break;
+            lf = strchr(str, '\n');
+            if (NULL == lf) 
+                break;
+            *lf = '\0';
+            DEBUGMSGT(("9:cert:dump", "        %s\n", str));
+        }
     }
 }
 
@@ -575,7 +563,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         snmp_log(LOG_ERR, "SSL peer has no certificate\n");
         return NULL;
     }
-    DEBUGIF("openssl:dump:extensions") {
+    DEBUGIF("9:cert:dump") {
         netsnmp_openssl_cert_dump_extensions(ocert);
     }
 

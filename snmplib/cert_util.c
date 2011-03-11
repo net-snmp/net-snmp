@@ -1626,28 +1626,24 @@ _cert_print(netsnmp_cert *c, void *context)
     DEBUGMSGT(("cert:dump", "   type %d flags 0x%x (%s)\n",
              c->info.type, c->info.allowed_uses,
               _mode_str(c->info.allowed_uses)));
-    if (NS_CERT_TYPE_KEY == c->info.type) {
-    }
-    else {
-
-        if(c->subject) {
-            if (c->info.allowed_uses & NS_CERT_CA)
-                DEBUGMSGT(("cert:dump", "   CA: %s\n", c->subject));
-            else
-                DEBUGMSGT(("cert:dump", "   subject: %s\n", c->subject));
+    DEBUGIF("9:cert:dump") {
+        if (NS_CERT_TYPE_KEY != c->info.type) {
+            if(c->subject) {
+                if (c->info.allowed_uses & NS_CERT_CA)
+                    DEBUGMSGT(("9:cert:dump", "   CA: %s\n", c->subject));
+                else
+                    DEBUGMSGT(("9:cert:dump", "   subject: %s\n", c->subject));
+            }
+            if(c->issuer)
+                DEBUGMSGT(("9:cert:dump", "   issuer: %s\n", c->issuer));
+            if(c->fingerprint)
+                DEBUGMSGT(("9:cert:dump", "   fingerprint: %s(%d):%s\n",
+                           se_find_label_in_slist("cert_hash_alg", c->hash_type),
+                           c->hash_type, c->fingerprint));
         }
-        if(c->issuer)
-            DEBUGMSGT(("cert:dump", "   issuer: %s\n", c->issuer));
-        if(c->fingerprint)
-            DEBUGMSGT(("cert:dump", "   fingerprint: %s(%d):%s\n",
-                       se_find_label_in_slist("cert_hash_alg", c->hash_type),
-                       c->hash_type, c->fingerprint));
+        /* netsnmp_openssl_cert_dump_names(c->ocert); */
+        netsnmp_openssl_cert_dump_extensions(c->ocert);
     }
-
-    DEBUGIF("9:cert:dump")
-        netsnmp_openssl_cert_dump_names(c->ocert);
-
-    netsnmp_openssl_cert_dump_extensions(c->ocert);
     
 }
 
@@ -1657,8 +1653,7 @@ _key_print(netsnmp_key *k, void *context)
     if (NULL == k)
         return;
 
-    DEBUGMSGT(("cert:dump", "key found in %s %s\n", k->info.dir,
-               k->info.filename));
+    DEBUGMSGT(("cert:dump", "key %s in %s\n", k->info.filename, k->info.dir));
     DEBUGMSGT(("cert:dump", "   type %d flags 0x%x (%s)\n", k->info.type,
               k->info.allowed_uses, _mode_str(k->info.allowed_uses)));
 }
