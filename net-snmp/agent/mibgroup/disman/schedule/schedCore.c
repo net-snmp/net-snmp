@@ -17,9 +17,9 @@ netsnmp_feature_child_of(sched_nextrowtime, netsnmp_unused)
 netsnmp_tdata *schedule_table;
 
 
-#ifndef HAVE_LOCALTIME_R
+#if !defined(HAVE_LOCALTIME_R) && !defined(localtime_r)
 /*
- * localtime_r() replacement for MinGW.
+ * localtime_r() replacement for older MinGW versions.
  * Note: this implementation is not thread-safe, while it should.
  */
 struct tm      *
