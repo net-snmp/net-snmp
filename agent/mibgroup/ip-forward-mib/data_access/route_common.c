@@ -47,11 +47,12 @@ netsnmp_access_route_container_load(netsnmp_container* container, u_int load_fla
 
     DEBUGMSGTL(("access:route:container", "load\n"));
 
-    if (NULL == container)
-        container = netsnmp_container_find("access:_route:table_container");
     if (NULL == container) {
-        snmp_log(LOG_ERR, "no container specified/found for access_route\n");
-        return NULL;
+        container = netsnmp_container_find("access:_route:fifo");
+        if (NULL == container) {
+            snmp_log(LOG_ERR, "no container specified/found for access_route\n");
+            return NULL;
+        }
     }
 
     rc =  netsnmp_access_route_container_arch_load(container, load_flags);
