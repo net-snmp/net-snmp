@@ -2290,7 +2290,7 @@ _inetCidrRouteTable_container_init(inetCidrRouteTable_interface_ctx *
     /*
      * cache init
      */
-    if_ctx->cache = netsnmp_cache_create(30,    /* timeout in seconds */
+    if_ctx->cache = netsnmp_cache_create(INETCIDRROUTETABLE_CACHE_TIMEOUT,
                                          _cache_load, _cache_free,
                                          inetCidrRouteTable_oid,
                                          inetCidrRouteTable_oid_size);
@@ -2306,14 +2306,18 @@ _inetCidrRouteTable_container_init(inetCidrRouteTable_interface_ctx *
     if (NULL == if_ctx->container) {
         if_ctx->container =
             netsnmp_container_find("inetCidrRouteTable:table_container");
-        if (if_ctx->container)
-            if_ctx->container->container_name = strdup("inetCidrRouteTable");
+        if (NULL == if_ctx->container) {
+            snmp_log(LOG_ERR, "error creating container in "
+                     "inetCidrRouteTable_container_init\n");
+            return;
+        }
     }
-    if (NULL == if_ctx->container) {
-        snmp_log(LOG_ERR, "error creating container in "
-                 "inetCidrRouteTable_container_init\n");
-        return;
-    }
+
+    if_ctx->container->container_name = strdup("inetCidrRouteTable");
+
+    /* set allow duplicates this makes insert O(1) */
+    netsnmp_binary_array_options_set(if_ctx->container, 1,
+                                     CONTAINER_KEY_ALLOW_DUPLICATES);
 
     if (NULL != if_ctx->cache)
         if_ctx->cache->magic = (void *) if_ctx->container;
