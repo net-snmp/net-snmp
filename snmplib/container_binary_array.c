@@ -397,8 +397,8 @@ NETSNMP_STATIC_INLINE int
 netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
-    int             new_max, was_dirty = 0;
-    void           *new_data;   /* Used for * a) extending the data table
+    int             new_max, new_size, was_dirty = 0;
+    char           *new_data;   /* Used for * a) extending the data table
                                  * * b) the next entry to use */
     /*
      * check for duplicates
@@ -423,13 +423,14 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
         if (new_max == 0)
             new_max = 10;       /* Start with 10 entries */
 
-        new_data = (void *) calloc(new_max, t->data_size);
+        new_size = new_max * t->data_size;
+        new_data = (char *) realloc(t->data, new_size);
         if (new_data == NULL)
             return -1;
-
-        if (t->data) {
-            memcpy(new_data, t->data, t->max_size * t->data_size);
-            SNMP_FREE(t->data);
+        else {
+            int old_size = t->max_size * t->data_size;
+            int count = new_size - old_size;
+            memset(&new_data[old_size], 0x0, count);
         }
         t->data = (void**)new_data;
         t->max_size = new_max;
