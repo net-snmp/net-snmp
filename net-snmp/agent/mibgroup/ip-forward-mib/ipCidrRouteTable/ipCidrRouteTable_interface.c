@@ -2257,7 +2257,7 @@ _ipCidrRouteTable_container_init(ipCidrRouteTable_interface_ctx * if_ctx)
     /*
      * cache init
      */
-    if_ctx->cache = netsnmp_cache_create(30,    /* timeout in seconds */
+    if_ctx->cache = netsnmp_cache_create(IPCIDRROUTETABLE_CACHE_TIMEOUT,
                                          _cache_load, _cache_free,
                                          ipCidrRouteTable_oid,
                                          ipCidrRouteTable_oid_size);
@@ -2273,14 +2273,18 @@ _ipCidrRouteTable_container_init(ipCidrRouteTable_interface_ctx * if_ctx)
     if (NULL == if_ctx->container) {
         if_ctx->container =
             netsnmp_container_find("ipCidrRouteTable:table_container");
-        if (NULL != if_ctx->container)
-            if_ctx->container->container_name = strdup("ipCidrRouteTable");
+        if (NULL == if_ctx->container) {
+            snmp_log(LOG_ERR, "error creating container in "
+                     "ipCidrRouteTable_container_init\n");
+            return;
+        }
     }
-    if (NULL == if_ctx->container) {
-        snmp_log(LOG_ERR, "error creating container in "
-                 "ipCidrRouteTable_container_init\n");
-        return;
-    }
+
+    if_ctx->container->container_name = strdup("ipCidrRouteTable");
+
+    /* set allow duplicates this makes insert O(1) */
+    netsnmp_binary_array_options_set(if_ctx->container, 1,
+                                     CONTAINER_KEY_ALLOW_DUPLICATES);
 
     if (NULL != if_ctx->cache)
         if_ctx->cache->magic = (void *) if_ctx->container;
