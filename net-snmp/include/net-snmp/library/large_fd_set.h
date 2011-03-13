@@ -125,7 +125,7 @@ void   netsnmp_large_fd_set_resize( netsnmp_large_fd_set *fdset, int setsize);
  *
  * @see See also select(2) for more information.
  */
-int    netsnmp_large_select(int numfds, netsnmp_large_fd_set *readfds,
+int    netsnmp_large_fd_set_select(int numfds, netsnmp_large_fd_set *readfds,
                             netsnmp_large_fd_set *writefds,
                             netsnmp_large_fd_set *exceptfds,
                             struct timeval *timeout);
