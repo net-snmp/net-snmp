@@ -119,10 +119,35 @@ netsnmp_large_fd_set_init(netsnmp_large_fd_set * fdset, int setsize)
     netsnmp_large_fd_set_resize(fdset, setsize);
 }
 
+int
+netsnmp_large_select(int numfds, netsnmp_large_fd_set *readfds,
+                     netsnmp_large_fd_set *writefds,
+                     netsnmp_large_fd_set *exceptfds,
+                     struct timeval *timeout)
+{
+#if defined(cygwin) || !defined(HAVE_WINSOCK_H)
+    /* Bit-set representation: make sure all fds have at least size 'numfds'. */
+    if (readfds && readfds->lfs_setsize < numfds)
+        netsnmp_large_fd_set_resize(readfds, numfds);
+    if (writefds && writefds->lfs_setsize < numfds)
+        netsnmp_large_fd_set_resize(writefds, numfds);
+    if (exceptfds && exceptfds->lfs_setsize < numfds)
+        netsnmp_large_fd_set_resize(exceptfds, numfds);
+#else
+    /* Array representation: no resizing is necessary. */
+#endif
+
+    return select(numfds, readfds->lfs_setptr, writefds->lfs_setptr,
+                  exceptfds->lfs_setptr, timeout);
+}
+
 void
 netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
 {
     int             fd_set_bytes;
+
+    if (fdset->lfs_setsize == setsize)
+        return;
 
     if (setsize > FD_SETSIZE) {
         fd_set_bytes = NETSNMP_FD_SET_BYTES(setsize);
@@ -148,7 +173,7 @@ netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
 	 * Unix: clear the file descriptors defined in the resized *fdset
 	 * but that were not defined in the original *fdset.
 	 */
-	for (i = fdset->lfs_setsize + 1; i < setsize; i++)
+	for (i = fdset->lfs_setsize; i < setsize; i++)
 	    FD_CLR(i, fdset->lfs_setptr);
     }
 #endif

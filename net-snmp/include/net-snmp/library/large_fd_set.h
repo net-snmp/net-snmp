@@ -117,6 +117,19 @@ void   netsnmp_large_fd_set_init(   netsnmp_large_fd_set *fdset, int setsize);
  */
 void   netsnmp_large_fd_set_resize( netsnmp_large_fd_set *fdset, int setsize);
 
+/**
+ * Synchronous I/O multiplexing for large file descriptor sets.
+ *
+ * On POSIX systems, any file descriptor set with size below numfds will be
+ * resized before invoking select().
+ *
+ * @see See also select(2) for more information.
+ */
+int    netsnmp_large_select(int numfds, netsnmp_large_fd_set *readfds,
+                            netsnmp_large_fd_set *writefds,
+                            netsnmp_large_fd_set *exceptfds,
+                            struct timeval *timeout);
+
 /** Deallocate the memory allocated by netsnmp_large_fd_set_init. */
 void   netsnmp_large_fd_set_cleanup(netsnmp_large_fd_set *fdset);
 
