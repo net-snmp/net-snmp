@@ -118,7 +118,7 @@ netsnmp_large_fd_set_init(netsnmp_large_fd_set * fdset, int setsize)
 }
 
 int
-net_snmp_large_select(int numfds, netsnmp_large_fd_set *readfds,
+net_snmp_large_fd_set_select(int numfds, netsnmp_large_fd_set *readfds,
                       netsnmp_large_fd_set *writefds,
                       netsnmp_large_fd_set *exceptfds,
                       struct timeval *timeout)
