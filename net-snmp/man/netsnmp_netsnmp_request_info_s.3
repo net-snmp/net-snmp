@@ -1,15 +1,16 @@
-.TH "netsnmp_request_info_s" 3 "31 May 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_request_info_s" 3 "Mon Mar 14 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_request_info_s \- The netsnmp request info structure.  
-
+netsnmp_request_info_s \- 
 .PP
+The netsnmp request info structure.  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <snmp_agent.h>\fP
 .PP
+\fC#include <snmp_agent.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -64,7 +65,7 @@ netsnmp_request_info_s \- The netsnmp request info structure.
 .RI "struct \fBnetsnmp_request_info_s\fP * \fBprev\fP"
 .br
 .ti -1c
-.RI "struct netsnmp_subtree_s * \fBsubtree\fP"
+.RI "struct \fBnetsnmp_subtree_s\fP * \fBsubtree\fP"
 .br
 .in -1c
 .SH "Detailed Description"

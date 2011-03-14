@@ -1,15 +1,16 @@
-.TH "snmp_session" 3 "31 May 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "Mon Mar 14 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-snmp_session \- The snmp session structure.  
-
+snmp_session \- 
 .PP
+The snmp session structure.  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <snmp_api.h>\fP
 .PP
+\fC#include <snmp_api.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -214,6 +215,7 @@ Definition at line 187 of file snmp_api.h.
 .PP
 Authentication function or NULL if null authentication is used. 
 .PP
+Definition at line 212 of file snmp_api.h.
 .SS "netsnmp_callback \fBsnmp_session::callback\fP"
 .PP
 Function to interpret incoming data. 
@@ -228,14 +230,10 @@ Definition at line 218 of file snmp_api.h.
 .PP
 community for outgoing requests. 
 .PP
-
-.PP
 Definition at line 230 of file snmp_api.h.
 .SS "size_t \fBsnmp_session::community_len\fP"
 .PP
 Length of community name. 
-.PP
-
 .PP
 Definition at line 232 of file snmp_api.h.
 .SS "u_char* \fBsnmp_session::contextEngineID\fP"
@@ -285,9 +283,7 @@ My Domain name or dotted IP address, 0 for default.
 Definition at line 206 of file snmp_api.h.
 .SS "void* \fBsnmp_session::myvoid\fP"
 .PP
-use as you want data 
-.PP
-used by 'SNMP_FLAGS_RESP_CALLBACK' handling in the agent XXX: or should we add a new field into this structure? 
+use as you want data used by 'SNMP_FLAGS_RESP_CALLBACK' handling in the agent XXX: or should we add a new field into this structure? 
 .PP
 Definition at line 308 of file snmp_api.h.
 .SS "char* \fBsnmp_session::paramName\fP"
@@ -304,21 +300,15 @@ Definition at line 202 of file snmp_api.h.
 .PP
 Largest message to try to receive. 
 .PP
-
-.PP
 Definition at line 234 of file snmp_api.h.
 .SS "u_short \fBsnmp_session::remote_port\fP"
 .PP
-UDP port number of peer. 
-.PP
-(NO LONGER USED - USE peername INSTEAD) 
+UDP port number of peer. (NO LONGER USED - USE peername INSTEAD) 
 .PP
 Definition at line 204 of file snmp_api.h.
 .SS "int \fBsnmp_session::retries\fP"
 .PP
 Number of retries before timeout. 
-.PP
-
 .PP
 Definition at line 194 of file snmp_api.h.
 .SS "int \fBsnmp_session::s_errno\fP"
@@ -395,8 +385,6 @@ Definition at line 260 of file snmp_api.h.
 .PP
 Length of securityName. 
 .PP
-
-.PP
 Definition at line 262 of file snmp_api.h.
 .SS "u_char \fBsnmp_session::securityPrivKey\fP[USM_PRIV_KU_LEN]"
 .PP
@@ -436,8 +424,6 @@ Definition at line 224 of file snmp_api.h.
 .SS "size_t \fBsnmp_session::sndMsgMaxSize\fP"
 .PP
 Largest message to try to send. 
-.PP
-
 .PP
 Definition at line 236 of file snmp_api.h.
 .SS "long \fBsnmp_session::timeout\fP"

@@ -1,4 +1,4 @@
-.TH "generic logging for net-snmp" 3 "31 May 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
+.TH "generic logging for net-snmp" 3 "Mon Mar 14 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -53,7 +53,7 @@ generic logging for net-snmp \-
 
 .in +1c
 .ti -1c
-.RI "void \fBnetsnmp_enable_filelog\fP (netsnmp_log_handler *logh, int dont_zero_log)"
+.RI "void \fBnetsnmp_enable_filelog\fP (\fBnetsnmp_log_handler\fP *logh, int dont_zero_log)"
 .br
 .ti -1c
 .RI "int \fBvsnprintf\fP (char *str, size_t count, const char *fmt, va_list arg)"
@@ -81,13 +81,13 @@ generic logging for net-snmp \-
 .br
 .RI "\fIIs logging done? \fP"
 .ti -1c
-.RI "void \fBsnmp_disable_syslog_entry\fP (netsnmp_log_handler *logh)"
+.RI "void \fBsnmp_disable_syslog_entry\fP (\fBnetsnmp_log_handler\fP *logh)"
 .br
 .ti -1c
 .RI "void \fBsnmp_disable_syslog\fP (void)"
 .br
 .ti -1c
-.RI "void \fBsnmp_disable_filelog_entry\fP (netsnmp_log_handler *logh)"
+.RI "void \fBsnmp_disable_filelog_entry\fP (\fBnetsnmp_log_handler\fP *logh)"
 .br
 .ti -1c
 .RI "void \fBsnmp_disable_filelog\fP (void)"
@@ -123,13 +123,13 @@ generic logging for net-snmp \-
 .RI "void \fBsnmp_enable_calllog\fP (void)"
 .br
 .ti -1c
-.RI "netsnmp_log_handler * \fBnetsnmp_find_loghandler\fP (const char *token)"
+.RI "\fBnetsnmp_log_handler\fP * \fBnetsnmp_find_loghandler\fP (const char *token)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_add_loghandler\fP (netsnmp_log_handler *logh)"
+.RI "int \fBnetsnmp_add_loghandler\fP (\fBnetsnmp_log_handler\fP *logh)"
 .br
 .ti -1c
-.RI "netsnmp_log_handler * \fBnetsnmp_register_loghandler\fP (int type, int priority)"
+.RI "\fBnetsnmp_log_handler\fP * \fBnetsnmp_register_loghandler\fP (int type, int priority)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_enable_loghandler\fP (const char *token)"
@@ -138,22 +138,22 @@ generic logging for net-snmp \-
 .RI "int \fBnetsnmp_disable_loghandler\fP (const char *token)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_remove_loghandler\fP (netsnmp_log_handler *logh)"
+.RI "int \fBnetsnmp_remove_loghandler\fP (\fBnetsnmp_log_handler\fP *logh)"
 .br
 .ti -1c
-.RI "int \fBlog_handler_stdouterr\fP (netsnmp_log_handler *logh, int pri, const char *str)"
+.RI "int \fBlog_handler_stdouterr\fP (\fBnetsnmp_log_handler\fP *logh, int pri, const char *str)"
 .br
 .ti -1c
-.RI "int \fBlog_handler_syslog\fP (netsnmp_log_handler *logh, int pri, const char *str)"
+.RI "int \fBlog_handler_syslog\fP (\fBnetsnmp_log_handler\fP *logh, int pri, const char *str)"
 .br
 .ti -1c
-.RI "int \fBlog_handler_file\fP (netsnmp_log_handler *logh, int pri, const char *str)"
+.RI "int \fBlog_handler_file\fP (\fBnetsnmp_log_handler\fP *logh, int pri, const char *str)"
 .br
 .ti -1c
-.RI "int \fBlog_handler_callback\fP (netsnmp_log_handler *logh, int pri, const char *str)"
+.RI "int \fBlog_handler_callback\fP (\fBnetsnmp_log_handler\fP *logh, int pri, const char *str)"
 .br
 .ti -1c
-.RI "int \fBlog_handler_null\fP (netsnmp_log_handler *logh, int pri, const char *str)"
+.RI "int \fBlog_handler_null\fP (\fBnetsnmp_log_handler\fP *logh, int pri, const char *str)"
 .br
 .ti -1c
 .RI "void \fBsnmp_log_string\fP (int priority, const char *str)"
@@ -170,45 +170,39 @@ generic logging for net-snmp \-
 .RI "void \fBsnmp_log_perror\fP (const char *s)"
 .br
 .ti -1c
-.RI "netsnmp_log_handler * \fBget_logh_head\fP (void)"
+.RI "\fBnetsnmp_log_handler\fP * \fBget_logh_head\fP (void)"
 .br
 .in -1c
 .SS "Variables"
 
 .in +1c
 .ti -1c
-.RI "netsnmp_log_handler * \fBlogh_head\fP = NULL"
+.RI "\fBnetsnmp_log_handler\fP * \fBlogh_head\fP = NULL"
 .br
 .ti -1c
-.RI "netsnmp_log_handler * \fBlogh_priorities\fP [LOG_DEBUG+1]"
+.RI "\fBnetsnmp_log_handler\fP * \fBlogh_priorities\fP [LOG_DEBUG+1]"
 .br
 .in -1c
 .SH "Function Documentation"
 .PP 
 .SS "void netsnmp_logging_restart (void)"
 .PP
-
+hmm, don't zero status isn't saved.. i think it's safer not to overwrite, in case a hup is just to re-read config files...
 .PP
-hmm, don't zero status isn't saved.. i think it's safer not to overwrite, in case a hup is just to re-read config files... 
-.PP
-Definition at line 628 of file snmp_logging.c.
+Definition at line 631 of file snmp_logging.c.
 .SS "int snmp_get_do_logging (void)"
 .PP
-Is logging done? 
-.PP
-\fBReturns:\fP
+Is logging done? \fBReturns:\fP
 .RS 4
 Returns 0 if logging is off, 1 when it is done. 
 .RE
 .PP
 
 .PP
-Definition at line 485 of file snmp_logging.c.
-.SS "int snmp_log (int priority, const char * format,  ...)"
+Definition at line 488 of file snmp_logging.c.
+.SS "int snmp_log (intpriority, const char *format, ...)"
 .PP
-This snmp logging function allows variable argument list given the specified format and priority. 
-.PP
-Calls the snmp_vlog function. The default logfile this function writes to is /var/log/snmpd.log.
+This snmp logging function allows variable argument list given the specified format and priority. Calls the snmp_vlog function. The default logfile this function writes to is /var/log/snmpd.log.
 .PP
 \fBSee also:\fP
 .RS 4
@@ -221,12 +215,10 @@ Calls the snmp_vlog function. The default logfile this function writes to is /va
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 1260 of file snmp_logging.c.
-.SS "int snmp_vlog (int priority, const char * format, va_list ap)"
+Definition at line 1263 of file snmp_logging.c.
+.SS "int snmp_vlog (intpriority, const char *format, va_listap)"
 .PP
-This snmp logging function allows variable argument list given the specified priority, format and a populated va_list structure. 
-.PP
-The default logfile this function writes to is /var/log/snmpd.log.
+This snmp logging function allows variable argument list given the specified priority, format and a populated va_list structure. The default logfile this function writes to is /var/log/snmpd.log.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -278,7 +270,7 @@ Returns 0 on success, -1 when the code could not format the log- string, -2 when
 .PP
 
 .PP
-Definition at line 1199 of file snmp_logging.c.
+Definition at line 1202 of file snmp_logging.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

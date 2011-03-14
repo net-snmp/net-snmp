@@ -1,10 +1,11 @@
-.TH "table_iterator" 3 "31 May 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
+.TH "table_iterator" 3 "Mon Mar 14 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-table_iterator \- The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.  
-
+table_iterator \- 
 .PP
+The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.  
+
 .SS "Data Structures"
 
 .in +1c
@@ -33,7 +34,7 @@ table_iterator \- The table iterator helper is designed to simplify the task of 
 
 .in +1c
 .ti -1c
-.RI "typedef struct ti_cache_info_s \fBti_cache_info\fP"
+.RI "typedef struct \fBti_cache_info_s\fP \fBti_cache_info\fP"
 .br
 .ti -1c
 .RI "typedef \fBnetsnmp_variable_list\fP *( \fBNetsnmp_First_Data_Point\fP )(void **loop_context, void **data_context, \fBnetsnmp_variable_list\fP *, struct \fBnetsnmp_iterator_info_s\fP *)"
@@ -146,14 +147,11 @@ the get_next_data_point hook is then called repeatedly and is passed the loop co
 .SS "struct \fBnetsnmp_iterator_info_s\fP \fBnetsnmp_iterator_info\fP"
 .PP
 Typedefs the \fBnetsnmp_iterator_info_s\fP struct into netsnmp_iterator_info. 
-.PP
 .SH "Function Documentation"
 .PP 
-.SS "void * netsnmp_extract_iterator_context (\fBnetsnmp_request_info\fP * request)"
+.SS "void * netsnmp_extract_iterator_context (\fBnetsnmp_request_info\fP *request)"
 .PP
-extracts the table_iterator specific data from a request. 
-.PP
-This function extracts the table iterator specific data from a netsnmp_request_info object. Calls netsnmp_request_get_list_data with request->parent_data set with data from a request that was added previously by a module and TABLE_ITERATOR_NAME handler name.
+extracts the table_iterator specific data from a request. This function extracts the table iterator specific data from a netsnmp_request_info object. Calls netsnmp_request_get_list_data with request->parent_data set with data from a request that was added previously by a module and TABLE_ITERATOR_NAME handler name.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -168,21 +166,19 @@ a void pointer(request->parent_data->data), otherwise NULL is returned if reques
 
 .PP
 Definition at line 234 of file table_iterator.c.
-.SS "\fBnetsnmp_mib_handler\fP * netsnmp_get_table_iterator_handler (\fBnetsnmp_iterator_info\fP * iinfo)"
+.SS "\fBnetsnmp_mib_handler\fP * netsnmp_get_table_iterator_handler (\fBnetsnmp_iterator_info\fP *iinfo)"
 .PP
 returns a netsnmp_mib_handler object for the table_iterator helper 
 .PP
 Definition at line 169 of file table_iterator.c.
-.SS "void netsnmp_insert_iterator_context (\fBnetsnmp_request_info\fP * request, void * data)"
+.SS "void netsnmp_insert_iterator_context (\fBnetsnmp_request_info\fP *request, void *data)"
 .PP
 inserts table_iterator specific data for a newly created row into a request 
 .PP
 Definition at line 242 of file table_iterator.c.
-.SS "int netsnmp_register_table_iterator (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_iterator_info\fP * iinfo)"
+.SS "int netsnmp_register_table_iterator (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_iterator_info\fP *iinfo)"
 .PP
-Creates and registers a table iterator helper handler calling netsnmp_create_handler with a handler name set to TABLE_ITERATOR_NAME and access method, netsnmp_table_iterator_helper_handler. 
-.PP
-If NOT_SERIALIZED is not defined the function injects the serialize handler into the calling chain prior to calling netsnmp_register_table.
+Creates and registers a table iterator helper handler calling netsnmp_create_handler with a handler name set to TABLE_ITERATOR_NAME and access method, netsnmp_table_iterator_helper_handler. If NOT_SERIALIZED is not defined the function injects the serialize handler into the calling chain prior to calling netsnmp_register_table.
 .PP
 \fBParameters:\fP
 .RS 4
