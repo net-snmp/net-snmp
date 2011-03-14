@@ -1,15 +1,16 @@
-.TH "variable_list" 3 "31 May 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
+.TH "variable_list" 3 "Mon Mar 14 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-variable_list \- The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_list.  
-
+variable_list \- 
 .PP
+The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_list.  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <snmp_api.h>\fP
 .PP
+\fC#include <snmp_api.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -30,7 +31,7 @@ variable_list \- The netsnmp variable list binding structure, it's typedef'd to 
 .br
 .RI "\fIASN type of variable. \fP"
 .ti -1c
-.RI "netsnmp_vardata \fBval\fP"
+.RI "\fBnetsnmp_vardata\fP \fBval\fP"
 .br
 .RI "\fIvalue of variable \fP"
 .ti -1c
@@ -40,7 +41,7 @@ variable_list \- The netsnmp variable list binding structure, it's typedef'd to 
 .ti -1c
 .RI "oid \fBname_loc\fP [MAX_OID_LEN]"
 .br
-.RI "\fI90 percentile < 24. \fP"
+.RI "\fIbuffer to hold the OID \fP"
 .ti -1c
 .RI "u_char \fBbuf\fP [40]"
 .br
@@ -73,8 +74,6 @@ Definition at line 521 of file snmp_api.h.
 .PP
 90 percentile < 40. 
 .PP
-
-.PP
 Definition at line 537 of file snmp_api.h.
 .SS "void* \fBvariable_list::data\fP"
 .PP
@@ -85,6 +84,7 @@ Definition at line 539 of file snmp_api.h.
 .PP
 callback to free above 
 .PP
+Definition at line 541 of file snmp_api.h.
 .SS "oid* \fBvariable_list::name\fP"
 .PP
 Object identifier of variable. 
@@ -97,12 +97,10 @@ number of subid's in name
 Definition at line 527 of file snmp_api.h.
 .SS "oid \fBvariable_list::name_loc\fP[MAX_OID_LEN]"
 .PP
-90 percentile < 24. 
-.PP
-
+buffer to hold the OID 
 .PP
 Definition at line 535 of file snmp_api.h.
-.SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP\fC [read]\fP"
+.SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP"
 .PP
 NULL for last variable. 
 .PP
@@ -116,7 +114,7 @@ ASN type of variable.
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 529 of file snmp_api.h.
-.SS "netsnmp_vardata \fBvariable_list::val\fP"
+.SS "\fBnetsnmp_vardata\fP \fBvariable_list::val\fP"
 .PP
 value of variable 
 .PP
