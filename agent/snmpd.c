@@ -1265,7 +1265,7 @@ receive(void)
                     numfds, tvp));
         if(tvp)
             DEBUGMSGTL(("timer", "tvp %ld.%ld\n", tvp->tv_sec, tvp->tv_usec));
-        count = netsnmp_large_select(numfds, &readfds, &writefds, &exceptfds,
+        count = netsnmp_large_fd_set_select(numfds, &readfds, &writefds, &exceptfds,
 				     tvp);
         DEBUGMSGTL(("snmpd/select", "returned, count = %d\n", count));
 
