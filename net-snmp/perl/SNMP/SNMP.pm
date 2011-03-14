@@ -7,7 +7,7 @@
 #     modify it under the same terms as Perl itself.
 
 package SNMP;
-$VERSION = '5.0303';   # current release version number
+$VERSION = '5.0304';   # current release version number
 
 require Exporter;
 require DynaLoader;
