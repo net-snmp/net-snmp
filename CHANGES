@@ -3,6 +3,144 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.3.4*
+
+    snmplib:
+      - [BUG 2838243]: Correct the output of unsigned values
+      - [BUG 2919320]: Avoid accessing freed memory
+      - [BUG 2922390]: Fix test for missing contextName parameter
+      - [BUG 3134323]: Fix crash when comparing invalid OIDs
+      - [BUG 3171878]: Using SNMPv3 context does not work
+      - [PATCH 2871747]: plug memory leak in OID processing
+      - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt...
+      - [PATCH 2952140]: Overflow counter32/gauge32 on 64bit systems correctly
+      - [PATCH 3058645]: Use MSG_DONTWAIT for the unix domain socket
+      - [PATCH 3165878]: Catch buffer overrun on 64-bit systems
+      - Change the parsing of ranges to accept all valid values
+      - Check the return value of strdup in netsnmp_create_data_list
+      - Correct the handling of 'extern "C"' when compiling with __cplusplus
+      - Fix agent crash when sending encrypted SNMPv3 traps
+      - Fix issue with USM using inactive users
+      - Make sure that a mask is given to open when O_CREAT is specified
+
+    snmpd:
+      - [BUG 3178389]: Fix inconsistent handling of TZ offsets
+      - [BUG 1840230]: Don't include the index object as (pseudo-)accessible column.
+      - [BUG 2822355]: Fix memory leaks on udpEndpointTable (linux)
+      - [BUG 2822360]: Fix memory leak when building table OIDs
+      - [BUG 2841008]: Protect against crash following failed AgentX response
+      - [BUG 2873858]: Fix handling of schedOwner index
+      - [BUG 2894059]: Handle errors when counting interfaces
+      - [BUG 2914410]: Fix crash on empty command lines
+      - [BUG 2972579]: fixed checking of snmpTargetAddrRowStatus SET requests.
+      - [BUG 3003981]: Protect against buffer overflow
+      - [BUG 3058101]: Writeable 'int' instances don't work on 64-bit systems
+      - [PATCH 2822337]: Fix memory leak in ipAddressPrefixTable
+      - [PATCH 2825653]: Fix sendmail.cf parsing in certain conditions
+      - [PATCH 2877518]: Fix handling of scoped AgentX variables
+      - [PATCH 2883155]: Fix memory leak in proxy handling
+      - [PATCH 2887816]: Protect against division-by-zero crash
+      - [PATCH 2904900]: Documentation plus assorted handler code fixes
+      - [PATCH 2911323]: Fix agent lockup when monitoring AgentX-delegated information
+      - [PATCH 2911361]: Remove redundant variables
+      - [PATCH 2912584]: Fix null OID handling in Agentx on 64bit
+      - [PATCH 2941811]: Handle successful requests with reqID 0
+      - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt...
+      - [PATCH 2956657]: Handle over-length AgentX OIDs
+      - [PATCH 2968642]: Catch overflow of pass-through command buffer.
+      - [PATCH 2975254]: Avoid callback re-use of closed sessions
+      - [PATCH 3053436]: Fix tcpConnectionTable_data_access invalid memory access
+      - [PATCH 3062526]: Fix security engineID setting in the trapsess directive
+      - [PATCH 3096725]: Don't register v1Trap callback, if SNMPv1 is not supported
+      - [PATCH 3096725]: Include SNMPv1 trap OIDs in nlmLogNotificationID column
+      - [PATCH 3141462]: Fix agentx subagent issues with multiple-object requests
+      - [PATCH 3152412]: Handle (and report) problems reading /proc/vmstat
+
+      - Add newly created/destroyed interfaces to ipv6IfTable
+      - Add support of network interfaces with large HW addresses (eg InfiniBand)
+	  to ipNetToMediaTable and ipNetToPhysicalTable.
+      - Fixed a double free, triggered by cleaning up embedded Perl data structure.
+      - Fixed agent bogus 64-bit wrap warning (ipSystemStats)
+      - Fixed creation of views using snmpusm, OIDs with indexes > 255
+      - Fixed invalid access to memory in TCP-MIB
+      - Fixed IP-MIB::ipIfStatsReasmReqds value (typo)
+      - Fixed logging of 'truncating integer value > 32 bits' in {IP,TCP}-MIB
+      - Fix a strlen calculation
+      - Fix handling of multiple matching VACM entries
+          (Use the "best" match, rather than the first one)
+      - Fix possible crash when 64-bit ipSystemStatsTable counters exceed 2^32
+      - Fix rare race condition when reading RPM database
+      - Fix VACM persistant storage.
+      - Latch large-disk statistics at 2Tb (rather than wrapping.
+      - Make sure that a mask is given to open when O_CREAT is specified
+      - Report real ifSpeed of network interface even it is down
+
+    snmptable:
+      - [BUG 2811577]: Fix bug in GetBulk handling.
+           Don't get confused by index values that contain a ':' character.
+      - [BUG 2837998]: Handle missing instance subidentifiers in results
+      - [PATCH 2850067]: Suppress extraneous "index" header token
+
+    snmptranslate:
+      - fixed printing of ranges with UNSIGNED type.
+
+    snmptrapd:
+      - Fixed a double free, triggered by cleaning up embedded Perl data structure.
+
+    snmptest:
+      - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt...
+
+    build:
+      - [BUG 3102904]: Compile all source files with -fno-strict-aliasing
+      - [PATCH 2952020]: Explicitly set permission on testing output directories
+      - Do not call vacm_standard_views() or init_vacm_config_tokens()
+	   if the corresponding module was not compiled
+      - 'make test TESTOPTS="-P tcp"' works fine now
+
+    man:
+      - clean up manual pages (from Debian patch 56_manpage)
+
+    mib2c:
+      - [BUG 2827269]: Suppress non-ordered TODO comments.
+      - [BUG 2888569]: Fix generation of table columns array
+      - make the mib2c foreach ranges work as advertised in the comments.
+
+    mibs:
+      - [BUG 2973890]: Fix imports, DiskIOEntry list and revision histories
+      - [PATCH 2974716]: Fix issues in the SMUX-MIB
+
+    perl:
+      - [PATCH 2890931]: Better handling of Counter64 values
+      - [PATCH 3049029]: fix a memory leak with snmp bulkwalks
+      - Don't always open stderr as the calls to snmp_log already do this
+           and it messes up the agent when embedded
+      - Handle embedded %'s in the result message.
+
+    Cygwin:
+      - [BUG 2997492]: byte order of udpLocalPort is now correct.
+      - Detect free UDP ports correctly for use in test infrastructure.
+
+    FreeBSD:
+      - Fix perl make test
+
+    Linux:
+      - [PATCH 3074918]: check for CONTAINER_INSERT failures
+      - [PATCH 2926374]: Fixed reading of ipAddressTable from /proc/net/if_inet6
+      - [PATCH 3083027]: Fix RPM spec file to support CentOS
+      - Fixed compilation with rpm-4.6
+      - Fixed value of IP-MIB::ipv6InterfaceForwarding
+
+    OpenBSD:
+      - Support updating the routing table [From OpenBSD patch archive]
+
+    Solaris:
+      - Protect against missing package version information crashing the agent
+
+    Windows:
+      - Fix batch build using recent versions of Visual Studio.
+      - Fix build under MinGW
+
+
 *5.3.3*
 
     snmplib:
