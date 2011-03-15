@@ -399,7 +399,7 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
 
     num_extensions = X509_get_ext_count(ocert);
     if (0 == num_extensions)
-        DEBUGMSGT(("9:cert:dump", "    %0 extensions\n"));
+        DEBUGMSGT(("9:cert:dump", "    0 extensions\n"));
     for(i = 0; i < num_extensions; i++) {
         extension = X509_get_ext(ocert, i);
         nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
