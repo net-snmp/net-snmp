@@ -85,7 +85,7 @@ netsnmp_feature_child_of(cert_fingerprints, cert_util_all)
 
 /*
  * bump this value whenever cert index format changes, so indexes
- * will be reginerated with new format.
+ * will be regenerated with new format.
  */
 #define CERT_INDEX_FORMAT  1
 
