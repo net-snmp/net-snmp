@@ -94,8 +94,6 @@ static netsnmp_container *_keys = NULL;
 static netsnmp_container *_maps = NULL;
 static netsnmp_container *_tlstmParams = NULL;
 static netsnmp_container *_tlstmAddr = NULL;
-static netsnmp_container *chain_map;
-static netsnmp_container *fp;
 static struct snmp_enum_list *_certindexes = NULL;
 
 static netsnmp_container *_trusted_certs = NULL;
@@ -251,14 +249,10 @@ void
 netsnmp_certs_shutdown(void)
 {
     DEBUGMSGT(("cert:util:shutdown","shutdown\n"));
-    if (fp) {
-        CONTAINER_FREE_ALL(fp, NULL);
-        CONTAINER_FREE(fp);
-        fp = NULL;
-    } else if (chain_map) {
-        CONTAINER_FREE_ALL(chain_map, NULL);
-        CONTAINER_FREE(chain_map);
-        chain_map = NULL;
+    if (_maps) {
+        CONTAINER_FREE_ALL(_maps, NULL);
+        CONTAINER_FREE(_maps);
+        _maps = NULL;
     }
     if (NULL != _certs) {
         CONTAINER_FREE_ALL(_certs, NULL);
@@ -2550,6 +2544,8 @@ _map_fp_ncompare(netsnmp_cert_map *lhs, netsnmp_cert_map *rhs)
 netsnmp_container *
 netsnmp_cert_map_container_create(int with_fp)
 {
+    netsnmp_container *chain_map, *fp;
+
     chain_map = netsnmp_container_find("cert_map:stack:binary_array");
     if (NULL == chain_map) {
         snmp_log(LOG_ERR, "could not allocate container for cert_map\n");
