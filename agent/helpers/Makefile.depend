@@ -516,7 +516,7 @@
 ./instance.lo: ../../include/net-snmp/system/generic.h
 ./instance.lo: ../../include/net-snmp/machine/generic.h 
 ./instance.lo: ../../include/net-snmp/net-snmp-includes.h
-./instance.lo: ../../include/net-snmp/definitions.h
+./instance.lo:  ../../include/net-snmp/definitions.h
 ./instance.lo: ../../include/net-snmp/types.h 
 ./instance.lo: ../../include/net-snmp/library/snmp_api.h
 ./instance.lo: ../../include/net-snmp/library/asn1.h
@@ -923,7 +923,7 @@
 ./old_api.lo: ../../include/net-snmp/system/generic.h
 ./old_api.lo: ../../include/net-snmp/machine/generic.h 
 ./old_api.lo: ../../include/net-snmp/net-snmp-includes.h 
-./old_api.lo: ../../include/net-snmp/definitions.h
+./old_api.lo:  ../../include/net-snmp/definitions.h
 ./old_api.lo: ../../include/net-snmp/types.h 
 ./old_api.lo: ../../include/net-snmp/library/snmp_api.h
 ./old_api.lo: ../../include/net-snmp/library/asn1.h
@@ -1230,7 +1230,7 @@
 ./scalar.lo: ../../include/net-snmp/system/generic.h
 ./scalar.lo: ../../include/net-snmp/machine/generic.h 
 ./scalar.lo: ../../include/net-snmp/net-snmp-includes.h 
-./scalar.lo:  ../../include/net-snmp/definitions.h
+./scalar.lo: ../../include/net-snmp/definitions.h
 ./scalar.lo: ../../include/net-snmp/types.h 
 ./scalar.lo: ../../include/net-snmp/library/snmp_api.h
 ./scalar.lo: ../../include/net-snmp/library/asn1.h
@@ -2560,7 +2560,7 @@
 ./watcher.lo: ../../include/net-snmp/system/generic.h
 ./watcher.lo: ../../include/net-snmp/machine/generic.h 
 ./watcher.lo: ../../include/net-snmp/net-snmp-includes.h 
-./watcher.lo:  ../../include/net-snmp/definitions.h
+./watcher.lo: ../../include/net-snmp/definitions.h
 ./watcher.lo: ../../include/net-snmp/types.h 
 ./watcher.lo: ../../include/net-snmp/library/snmp_api.h
 ./watcher.lo: ../../include/net-snmp/library/asn1.h

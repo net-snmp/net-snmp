@@ -328,8 +328,9 @@
 ./snmpget.lo: ../include/net-snmp/system/sysv.h
 ./snmpget.lo: ../include/net-snmp/system/generic.h
 ./snmpget.lo: ../include/net-snmp/machine/generic.h 
-./snmpget.lo: ../include/net-snmp/utilities.h ../include/net-snmp/types.h
-./snmpget.lo:  ../include/net-snmp/definitions.h
+./snmpget.lo:  ../include/net-snmp/utilities.h
+./snmpget.lo: ../include/net-snmp/types.h 
+./snmpget.lo: ../include/net-snmp/definitions.h
 ./snmpget.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpget.lo: ../include/net-snmp/library/asn1.h
 ./snmpget.lo: ../include/net-snmp/library/snmp_impl.h
@@ -883,6 +884,8 @@
 ./snmptrapd_auth.lo: ../include/net-snmp/library/snmpv3-security-includes.h
 ./snmptrapd_auth.lo: ../include/net-snmp/library/snmpusm.h
 ./snmptrapd_auth.lo: snmptrapd_handlers.h snmptrapd_auth.h snmptrapd_ds.h
+./snmptrapd_auth.lo: ../include/net-snmp/agent/agent_module_config.h
+./snmptrapd_auth.lo: ../include/net-snmp/agent/mib_module_config.h
 ./snmptrapd_auth.lo: ../agent/mibgroup/mibII/vacm_conf.h
 ./snmptrapd_auth.lo: ../include/net-snmp/agent/agent_trap.h
 ./snmptrapd.lo: ../include/net-snmp/net-snmp-config.h
