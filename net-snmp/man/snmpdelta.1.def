@@ -148,6 +148,6 @@ screen.
 .nf
 $ snmpdelta -c public -v 1 -Ct -Cs -CS -Cm -Cl -Cp 60 -CP 60
   interlink.sw.net.cmu.edu .1.3.6.1.2.1.2.2.1.16.3 .1.3.6.1.2.1.2.2.1.16.4
-fi
+.fi
 .SH "SEE ALSO"
 snmpcmd(1), variables(5).
