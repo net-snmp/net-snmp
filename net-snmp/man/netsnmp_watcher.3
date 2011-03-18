@@ -1,10 +1,10 @@
-.TH "watcher" 3 "25 Feb 2011" "Version 5.5.1.rc2" "net-snmp" \" -*- nroff -*-
+.TH "watcher" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 watcher \- 
 .PP
-Watch a specified \fBvariable\fP and process it as an instance or scalar object.  
+Watch a specified variable and process it as an instance or scalar object.  
 
 .SS "Functions"
 
@@ -75,7 +75,9 @@ Watch a specified \fBvariable\fP and process it as an instance or scalar object.
 .ti -1c
 .RI "int \fBnetsnmp_register_read_only_counter32_scalar\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
-.in -1c 
+.in -1c
+.SS ""
+
 .in +1c
 .ti -1c
 .RI "#define \fBNETSNMP_WATCHER_DIRECT\fP   MIB_HANDLER_CUSTOM1"
@@ -91,7 +93,7 @@ Watch a specified \fBvariable\fP and process it as an instance or scalar object.
 .ti -1c
 .RI "#define \fBWATCHER_SIZE_IS_PTR\fP"
 .br
-.RI "\fIIf set then the \fBvariable\fP data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. \fP"
+.RI "\fIIf set then the variable data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. \fP"
 .ti -1c
 .RI "#define \fBWATCHER_SIZE_STRLEN\fP"
 .br
@@ -106,7 +108,7 @@ Watch a specified \fBvariable\fP and process it as an instance or scalar object.
 .in -1c
 .SH "Detailed Description"
 .PP 
-Watch a specified \fBvariable\fP and process it as an instance or scalar object. 
+Watch a specified variable and process it as an instance or scalar object. 
 .SH "Define Documentation"
 .PP 
 .SS "#define WATCHER_FIXED_SIZE"
@@ -125,7 +127,7 @@ The maximum size of the watched object is stored in max_size. If WATCHER_SIZE_ST
 Definition at line 32 of file watcher.h.
 .SS "#define WATCHER_SIZE_IS_PTR"
 .PP
-If set then the \fBvariable\fP data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. \fBSince:\fP
+If set then the variable data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. \fBSince:\fP
 .RS 4
 Net-SNMP 5.5 
 .RE
