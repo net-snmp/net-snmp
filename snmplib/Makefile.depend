@@ -106,7 +106,7 @@
 ./check_varbind.lo: ../include/net-snmp/system/generic.h
 ./check_varbind.lo: ../include/net-snmp/machine/generic.h
 ./check_varbind.lo: ../include/net-snmp/net-snmp-includes.h
-./check_varbind.lo: ../include/net-snmp/definitions.h
+./check_varbind.lo:  ../include/net-snmp/definitions.h
 ./check_varbind.lo: ../include/net-snmp/types.h 
 ./check_varbind.lo: ../include/net-snmp/library/types.h
 ./check_varbind.lo: ../include/net-snmp/library/snmp_api.h
@@ -773,7 +773,7 @@
 ./fd_event_manager.lo: ../include/net-snmp/net-snmp-config.h
 ./file_utils.lo: ../include/net-snmp/net-snmp-config.h
 ./file_utils.lo: ../include/net-snmp/net-snmp-includes.h 
-./file_utils.lo: ../include/net-snmp/definitions.h
+./file_utils.lo:  ../include/net-snmp/definitions.h
 ./file_utils.lo: ../include/net-snmp/types.h 
 ./file_utils.lo: ../include/net-snmp/library/types.h
 ./file_utils.lo: ../include/net-snmp/library/snmp_api.h
@@ -1739,7 +1739,7 @@
 ./snmp_client.lo: ../include/net-snmp/library/snmp_debug.h
 ./snmp_debug.lo: ../include/net-snmp/net-snmp-config.h 
 ./snmp_debug.lo:  ../include/net-snmp/types.h
-./snmp_debug.lo:  ../include/net-snmp/library/types.h
+./snmp_debug.lo: ../include/net-snmp/library/types.h
 ./snmp_debug.lo: ../include/net-snmp/definitions.h
 ./snmp_debug.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_debug.lo: ../include/net-snmp/varbind_api.h
@@ -1963,7 +1963,7 @@
 ./snmpksm.lo: ../include/net-snmp/library/snmpksm.h
 ./snmp_logging.lo: ../include/net-snmp/net-snmp-config.h 
 ./snmp_logging.lo: ../include/net-snmp/types.h 
-./snmp_logging.lo:  ../include/net-snmp/library/types.h
+./snmp_logging.lo: ../include/net-snmp/library/types.h
 ./snmp_logging.lo: ../include/net-snmp/definitions.h
 ./snmp_logging.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_logging.lo: ../include/net-snmp/varbind_api.h
@@ -2016,7 +2016,7 @@
 ./snmp_logging.lo: ../include/net-snmp/version.h
 ./snmp_openssl.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_openssl.lo: ../include/net-snmp/net-snmp-includes.h
-./snmp_openssl.lo: ../include/net-snmp/definitions.h
+./snmp_openssl.lo:  ../include/net-snmp/definitions.h
 ./snmp_openssl.lo: ../include/net-snmp/types.h 
 ./snmp_openssl.lo: ../include/net-snmp/library/types.h
 ./snmp_openssl.lo: ../include/net-snmp/library/snmp_api.h
@@ -2192,7 +2192,7 @@
 ./snmp_secmod.lo: ../include/net-snmp/library/snmpusm.h snmpsm_init.h
 ./snmp_service.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_service.lo: ../include/net-snmp/net-snmp-includes.h
-./snmp_service.lo: ../include/net-snmp/definitions.h
+./snmp_service.lo:  ../include/net-snmp/definitions.h
 ./snmp_service.lo: ../include/net-snmp/types.h 
 ./snmp_service.lo: ../include/net-snmp/library/types.h
 ./snmp_service.lo: ../include/net-snmp/library/snmp_api.h
@@ -2811,7 +2811,7 @@
 ./test_binary_array.lo: ../include/net-snmp/library/snmpusm.h
 ./text_utils.lo: ../include/net-snmp/net-snmp-config.h
 ./text_utils.lo: ../include/net-snmp/net-snmp-includes.h 
-./text_utils.lo: ../include/net-snmp/definitions.h
+./text_utils.lo:  ../include/net-snmp/definitions.h
 ./text_utils.lo: ../include/net-snmp/types.h 
 ./text_utils.lo: ../include/net-snmp/library/types.h
 ./text_utils.lo: ../include/net-snmp/library/snmp_api.h

@@ -8662,7 +8662,7 @@
 ./Rmon/alarm.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/alarm.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/alarm.lo: ../../include/net-snmp/net-snmp-includes.h
-./Rmon/alarm.lo:  ../../include/net-snmp/definitions.h
+./Rmon/alarm.lo: ../../include/net-snmp/definitions.h
 ./Rmon/alarm.lo: ../../include/net-snmp/types.h 
 ./Rmon/alarm.lo: ../../include/net-snmp/library/types.h
 ./Rmon/alarm.lo: ../../include/net-snmp/library/snmp_api.h
@@ -8870,7 +8870,7 @@
 ./Rmon/event.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/event.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/event.lo: ../../include/net-snmp/net-snmp-includes.h
-./Rmon/event.lo:  ../../include/net-snmp/definitions.h
+./Rmon/event.lo: ../../include/net-snmp/definitions.h
 ./Rmon/event.lo: ../../include/net-snmp/types.h 
 ./Rmon/event.lo: ../../include/net-snmp/library/types.h
 ./Rmon/event.lo: ../../include/net-snmp/library/snmp_api.h
@@ -13501,7 +13501,7 @@
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_array.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/mfd.h
 ./ucd-snmp/lmSensors.lo: util_funcs/header_simple_table.h
-./ucd-snmp/lmSensors.lo: ./ucd-snmp/lmSensors.h
+./ucd-snmp/lmSensors.lo:  ./ucd-snmp/lmSensors.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/net-snmp-config.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/system/linux.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/system/sysv.h
