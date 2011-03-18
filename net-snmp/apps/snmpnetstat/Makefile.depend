@@ -65,8 +65,7 @@
 ./if.lo: ../../include/net-snmp/library/snmp_secmod.h
 ./if.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
 ./if.lo: ../../include/net-snmp/library/snmpusm.h 
-./if.lo:   main.h
-./if.lo: netstat.h
+./if.lo:  main.h netstat.h
 ./inet6.lo: ../../include/net-snmp/net-snmp-config.h
 ./inet6.lo: ../../include/net-snmp/system/linux.h
 ./inet6.lo: ../../include/net-snmp/system/sysv.h

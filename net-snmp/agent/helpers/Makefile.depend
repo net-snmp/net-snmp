@@ -110,7 +110,7 @@
 ./baby_steps.lo: ../../include/net-snmp/system/generic.h
 ./baby_steps.lo: ../../include/net-snmp/machine/generic.h
 ./baby_steps.lo: ../../include/net-snmp/net-snmp-includes.h
-./baby_steps.lo: ../../include/net-snmp/definitions.h
+./baby_steps.lo:  ../../include/net-snmp/definitions.h
 ./baby_steps.lo: ../../include/net-snmp/types.h 
 ./baby_steps.lo: ../../include/net-snmp/library/types.h
 ./baby_steps.lo: ../../include/net-snmp/library/snmp_api.h
@@ -2072,7 +2072,7 @@
 ./table_data.lo: ../../include/net-snmp/system/generic.h
 ./table_data.lo: ../../include/net-snmp/machine/generic.h
 ./table_data.lo: ../../include/net-snmp/net-snmp-includes.h
-./table_data.lo: ../../include/net-snmp/definitions.h
+./table_data.lo:  ../../include/net-snmp/definitions.h
 ./table_data.lo: ../../include/net-snmp/types.h 
 ./table_data.lo: ../../include/net-snmp/library/types.h
 ./table_data.lo: ../../include/net-snmp/library/snmp_api.h

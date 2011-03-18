@@ -6,7 +6,7 @@
 ./agent_handler.lo: ../include/net-snmp/system/generic.h
 ./agent_handler.lo: ../include/net-snmp/machine/generic.h
 ./agent_handler.lo: ../include/net-snmp/net-snmp-includes.h
-./agent_handler.lo: ../include/net-snmp/definitions.h
+./agent_handler.lo:  ../include/net-snmp/definitions.h
 ./agent_handler.lo: ../include/net-snmp/types.h 
 ./agent_handler.lo: ../include/net-snmp/library/types.h
 ./agent_handler.lo: ../include/net-snmp/library/snmp_api.h
@@ -990,8 +990,7 @@
 ./agent_trap.lo: ../include/net-snmp/system/sysv.h
 ./agent_trap.lo: ../include/net-snmp/system/generic.h
 ./agent_trap.lo: ../include/net-snmp/machine/generic.h 
-./agent_trap.lo:  ../include/net-snmp/utilities.h
-./agent_trap.lo: ../include/net-snmp/types.h 
+./agent_trap.lo: ../include/net-snmp/utilities.h ../include/net-snmp/types.h
 ./agent_trap.lo: ../include/net-snmp/library/types.h
 ./agent_trap.lo: ../include/net-snmp/definitions.h
 ./agent_trap.lo: ../include/net-snmp/library/snmp_api.h
@@ -1570,7 +1569,7 @@
 ./snmpd.lo: ../include/net-snmp/system/sysv.h
 ./snmpd.lo: ../include/net-snmp/system/generic.h
 ./snmpd.lo: ../include/net-snmp/machine/generic.h 
-./snmpd.lo: ../include/net-snmp/net-snmp-includes.h
+./snmpd.lo:  ../include/net-snmp/net-snmp-includes.h
 ./snmpd.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
 ./snmpd.lo:  ../include/net-snmp/library/types.h
 ./snmpd.lo: ../include/net-snmp/library/snmp_api.h
@@ -2960,7 +2959,7 @@
 ./helpers/multiplexer.lo: ../include/net-snmp/agent/mfd.h
 ./helpers/null.lo: ../include/net-snmp/net-snmp-config.h
 ./helpers/null.lo: ../include/net-snmp/net-snmp-includes.h
-./helpers/null.lo: ../include/net-snmp/definitions.h
+./helpers/null.lo:  ../include/net-snmp/definitions.h
 ./helpers/null.lo: ../include/net-snmp/types.h 
 ./helpers/null.lo: ../include/net-snmp/library/types.h
 ./helpers/null.lo: ../include/net-snmp/library/snmp_api.h
@@ -3955,7 +3954,7 @@
 ./helpers/table_array.lo: ../include/net-snmp/agent/mfd.h
 ./helpers/table.lo: ../include/net-snmp/net-snmp-config.h
 ./helpers/table.lo: ../include/net-snmp/net-snmp-includes.h
-./helpers/table.lo: ../include/net-snmp/definitions.h
+./helpers/table.lo:  ../include/net-snmp/definitions.h
 ./helpers/table.lo: ../include/net-snmp/types.h 
 ./helpers/table.lo: ../include/net-snmp/library/types.h
 ./helpers/table.lo: ../include/net-snmp/library/snmp_api.h
