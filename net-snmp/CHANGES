@@ -19,6 +19,7 @@ listing of all changes made to the code.
       - [PATCH 3067540]: Fix IPv4 OID indexes on 64-bit big-endian systems.
       - [PATCH 3058645]: Use MSG_DONTWAIT for the unix domain socket
       - [PATCH 3165878]: Catch buffer overrun on 64-bit systems
+      - [PATCH 3203806]: Add function netsnmp_large_fd_set_select()
       - Added function netsnmp_delete_table_data_set()
       - Added netsnmp_xxx() memory allocation functions
       - Added macro netsnmp_static_assert().
@@ -50,6 +51,7 @@ listing of all changes made to the code.
       - [BUG 3003981]: Protect against buffer overflow
       - [BUG 3058101]: 64-bit systems only support writeable 'long' instances (not int)
       - [BUG 3062538]: Fix com2sec* handling of non-default contexts
+      - [BUG 3178389]: Fix inconsistent handling of TZ offsets
       - [BUG 3185528]: shutdown_master_agent didn't close UDP socket
       - [PATCH 2119725]: Fix skipNFSInHostResources handling of hrStorageTable
       - [PATCH 2825653]: Fix sendmail.cf parsing in certain conditions
@@ -89,6 +91,7 @@ listing of all changes made to the code.
       - Fix IP-MIB::ipIfStatsReasmReqds value (typo)
       - Fix IPv6 forwarding MIB object (boolean, not TruthValue)
       - Fix rare race condition when reading RPM database
+      - Fixed race condition in hrSWRunTable
       - Fix VACM persistant storage.
       - Fix various memory & file-descriptor leaks
       - Handle I/Fs without broadcast addresses (IF/IP-MIBs)
@@ -201,6 +204,7 @@ listing of all changes made to the code.
       - Fix calculation of ifHCInUcastPkts on 32-bit Linux
       - Fix udpTable indexes on big-endian 64bit Linux
       - Fix value of IP-MIB::ipv6InterfaceForwarding
+      - Fixed 32-bit truncation warning on UCD-SNMP-MIB::systemStats
       - Improved EtherLike-MIB support 
       - Pass correct path to rpmdbOpen, and log errors
       - snmpd is again single-threaded.
