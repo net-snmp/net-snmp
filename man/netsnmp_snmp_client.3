@@ -1,8 +1,37 @@
-.TH "various PDU processing routines" 3 "25 Feb 2011" "Version 5.5.1.rc2" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 various PDU processing routines \- 
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBBSD4_2\fP"
+.br
+.ti -1c
+.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)"
+.br
+.ti -1c
+.RI "#define \fBFD_SET\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
+.br
+.ti -1c
+.RI "#define \fBFD_CLR\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))"
+.br
+.ti -1c
+.RI "#define \fBFD_ISSET\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))"
+.br
+.ti -1c
+.RI "#define \fBFD_ZERO\fP(p)   memset((p), 0, sizeof(*(p)))"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef long \fBfd_mask\fP"
+.br
+.in -1c
 .SS "Functions"
 
 .in +1c
@@ -116,12 +145,12 @@ Definition at line 1218 of file snmp_client.c.
 Return a pointer to the default internal query session. 
 .PP
 Definition at line 1208 of file snmp_client.c.
-.SS "\fBnetsnmp_pdu\fP* snmp_pdu_create (int command)"
+.SS "\fBnetsnmp_pdu\fP* snmp_pdu_create (intcommand)"
 .PP
 Library API routines concerned with SNMP PDUs. 
 .PP
 Definition at line 130 of file snmp_client.c.
-.SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const void * val_str, size_t val_len)"
+.SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP *newvar, u_chartype, const void *val_str, size_tval_len)"
 .PP
 snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
 .PP
@@ -148,7 +177,7 @@ returns 0 on success and 1 on a malloc error
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 698 of file snmp_client.c.
-.SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const void * value, size_t len)"
+.SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP *vars, const void *value, size_tlen)"
 .PP
 FALL THROUGH 
 .PP

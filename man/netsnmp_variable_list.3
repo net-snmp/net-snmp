@@ -1,10 +1,10 @@
-.TH "variable_list" 3 "25 Feb 2011" "Version 5.5.1.rc2" "net-snmp" \" -*- nroff -*-
+.TH "variable_list" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 variable_list \- 
 .PP
-The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_variable_list.  
+The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_list.  
 
 .SH SYNOPSIS
 .br
@@ -17,11 +17,11 @@ The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_var
 .ti -1c
 .RI "struct \fBvariable_list\fP * \fBnext_variable\fP"
 .br
-.RI "\fINULL for last \fBvariable\fP. \fP"
+.RI "\fINULL for last variable. \fP"
 .ti -1c
 .RI "oid * \fBname\fP"
 .br
-.RI "\fIObject identifier of \fBvariable\fP. \fP"
+.RI "\fIObject identifier of variable. \fP"
 .ti -1c
 .RI "size_t \fBname_length\fP"
 .br
@@ -29,11 +29,11 @@ The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_var
 .ti -1c
 .RI "u_char \fBtype\fP"
 .br
-.RI "\fIASN type of \fBvariable\fP. \fP"
+.RI "\fIASN type of variable. \fP"
 .ti -1c
 .RI "\fBnetsnmp_vardata\fP \fBval\fP"
 .br
-.RI "\fIvalue of \fBvariable\fP \fP"
+.RI "\fIvalue of variable \fP"
 .ti -1c
 .RI "size_t \fBval_len\fP"
 .br
@@ -60,7 +60,7 @@ The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_var
 .in -1c
 .SH "Detailed Description"
 .PP 
-The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_variable_list. 
+The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_list. 
 .PP
 \fBExamples: \fP
 .in +1c
@@ -83,9 +83,11 @@ Definition at line 130 of file types.h.
 .SS "void(* \fBvariable_list::dataFreeHook\fP)(void *)"
 .PP
 callback to free above 
+.PP
+Definition at line 132 of file types.h.
 .SS "oid* \fBvariable_list::name\fP"
 .PP
-Object identifier of \fBvariable\fP. 
+Object identifier of variable. 
 .PP
 Definition at line 116 of file types.h.
 .SS "size_t \fBvariable_list::name_length\fP"
@@ -98,14 +100,14 @@ Definition at line 118 of file types.h.
 buffer to hold the OID 
 .PP
 Definition at line 126 of file types.h.
-.SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP\fC [read]\fP"
+.SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP"
 .PP
-NULL for last \fBvariable\fP. 
+NULL for last variable. 
 .PP
 Definition at line 114 of file types.h.
 .SS "u_char \fBvariable_list::type\fP"
 .PP
-ASN type of \fBvariable\fP. 
+ASN type of variable. 
 .PP
 \fBExamples: \fP
 .in +1c
@@ -114,7 +116,7 @@ ASN type of \fBvariable\fP.
 Definition at line 120 of file types.h.
 .SS "\fBnetsnmp_vardata\fP \fBvariable_list::val\fP"
 .PP
-value of \fBvariable\fP 
+value of variable 
 .PP
 \fBExamples: \fP
 .in +1c

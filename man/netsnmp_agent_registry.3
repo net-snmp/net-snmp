@@ -1,4 +1,4 @@
-.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "25 Feb 2011" "Version 5.5.1.rc2" "net-snmp" \" -*- nroff -*-
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -215,7 +215,7 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .in -1c
 .SH "Function Documentation"
 .PP 
-.SS "int netsnmp_acm_check_subtree (\fBnetsnmp_pdu\fP * pdu, oid * name, size_t namelen)"
+.SS "int netsnmp_acm_check_subtree (\fBnetsnmp_pdu\fP *pdu, oid *name, size_tnamelen)"
 .PP
 checks to see if everything within a given subtree is either: in view, not in view, or possibly both. If the entire subtree is not-in-view we can use this information to skip calling the sub-handlers entirely. 
 .PP
@@ -237,7 +237,7 @@ the current lookup cache size
 
 .PP
 Definition at line 118 of file agent_registry.c.
-.SS "void netsnmp_set_lookup_cache_size (int newsize)"
+.SS "void netsnmp_set_lookup_cache_size (intnewsize)"
 .PP
 set the lookup cache size for optimized agent registration performance. \fBParameters:\fP
 .RS 4
@@ -247,9 +247,9 @@ set the lookup cache size for optimized agent registration performance. \fBParam
 
 .PP
 Definition at line 105 of file agent_registry.c.
-.SS "int unregister_mib_context (oid * name, size_t len, int priority, int range_subid, oid range_ubound, const char * context)"
+.SS "int unregister_mib_context (oid *name, size_tlen, intpriority, intrange_subid, oidrange_ubound, const char *context)"
 .PP
-Unregisters an OID that has an associated context name value. Typically used when a \fBmodule\fP has multiple contexts defined. The parameters priority, range_subid, and range_ubound should be used in conjunction with agentx, see RFC 2741, otherwise these values should always be 0.
+Unregisters an OID that has an associated context name value. Typically used when a module has multiple contexts defined. The parameters priority, range_subid, and range_ubound should be used in conjunction with agentx, see RFC 2741, otherwise these values should always be 0.
 .PP
 \fBParameters:\fP
 .RS 4
