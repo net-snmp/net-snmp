@@ -568,8 +568,7 @@ static struct variable4 dlmod_variables[] = {
      var_dlmodEntry, 3, {2, 1, 5}},
 };
 
-static oid      dlmod_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 13, 14 };
-static int      dlmod_variables_oid_len = 9;
+static const oid dlmod_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 13, 14 };
 
 void
 init_dlmod(void)
@@ -613,7 +612,7 @@ void
 shutdown_dlmod(void)
 {
     snmpd_unregister_config_handler("dlmod");
-    unregister_mib(dlmod_variables_oid, dlmod_variables_oid_len);
+    unregister_mib(dlmod_variables_oid, OID_LENGTH(dlmod_variables_oid));
 }
 
 #else                           /* no dlopen support */
