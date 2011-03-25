@@ -94,7 +94,6 @@ size_t          netsnmpDTLSUDPDomain_len = OID_LENGTH(netsnmpDTLSUDPDomain);
 
 static netsnmp_tdomain dtlsudpDomain;
 #ifdef NETSNMP_ENABLE_IPV6
-static netsnmp_tdomain dtlsudp6Domain;
 static int openssl_addr_index6 = 0;
 #endif
 
@@ -1432,6 +1431,12 @@ netsnmp_dtlsudp_create_ostring(const u_char * o, size_t o_len, int local)
     return NULL;
 }
 
+void
+netsnmp_dtlsudp_agent_config_tokens_register(void)
+{
+}
+
+
 #ifdef NETSNMP_ENABLE_IPV6
 
 char *
@@ -1479,23 +1484,32 @@ netsnmp_dtlsudp6_transport(struct sockaddr_in6 *addr, int local)
 
     return t;
 }
+#endif
+
 
 netsnmp_transport *
-netsnmp_dtlsudp6_create_tstring(const char *str, int isserver,
+netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
                                const char *default_target)
 {
-    struct sockaddr_in6 addr;
+#ifdef NETSNMP_ENABLE_IPV6
+    struct sockaddr_in6 addr6;
+#endif
+    struct sockaddr_in addr;
     netsnmp_transport *t;
     _netsnmpTLSBaseData *tlsdata;
     char buf[SPRINT_MAX_LEN], *cp;
 
-    if (netsnmp_sockaddr_in6_2(&addr, str, default_target)) {
-        t = netsnmp_dtlsudp6_transport(&addr, isserver);
-    } else {
+    if (netsnmp_sockaddr_in2(&addr, str, default_target))
+        t = netsnmp_dtlsudp_transport(&addr, isserver);
+#ifdef NETSNMP_ENABLE_IPV6
+    else if (netsnmp_sockaddr_in6_2(&addr6, str, default_target))
+        t = netsnmp_dtlsudp6_transport(&addr6, isserver);
+#endif
+    else
         return NULL;
-    }
 
-    /* see if we can extract the remote hostname */
+
+/* see if we can extract the remote hostname */
     if (!isserver && t && t->data && str) {
         tlsdata = (_netsnmpTLSBaseData *) t->data;
         /* search for a : */
@@ -1515,31 +1529,42 @@ netsnmp_dtlsudp6_create_tstring(const char *str, int isserver,
 
 
 netsnmp_transport *
-netsnmp_dtlsudp6_create_ostring(const u_char * o, size_t o_len, int local)
-{
-    struct sockaddr_in6 addr;
+netsnmp_dtlsudp_create_ostring(const u_char * o, size_t o_len, int local)
+ {
+    struct sockaddr_in addr;
 
-    if (o_len == 18) {
-        unsigned short porttmp = (o[16] << 8) + o[17];
-        addr.sin6_family = AF_INET6;
-        memcpy((u_char *) & (addr.sin6_addr.s6_addr), o, 4);
-        addr.sin6_port = htons(porttmp);
-        return netsnmp_dtlsudp6_transport(&addr, local);
+    if (o_len == 6) {
+        unsigned short porttmp = (o[4] << 8) + o[5];
+        addr.sin_family = AF_INET;
+        memcpy((u_char *) & (addr.sin_addr.s_addr), o, 4);
+        addr.sin_port = htons(porttmp);
+        return netsnmp_dtlsudp_transport(&addr, local);
     }
+#ifdef NETSNMP_ENABLE_IPV6
+    else if (o_len == 18) {
+        struct sockaddr_in6 addr6;
+        unsigned short porttmp = (o[16] << 8) + o[17];
+        addr6.sin6_family = AF_INET6;
+        memcpy((u_char *) & (addr6.sin6_addr.s6_addr), o, 4);
+        addr6.sin6_port = htons(porttmp);
+        return netsnmp_dtlsudp6_transport(&addr6, local);
+    }
+#endif
     return NULL;
 }
-#endif
 
 void
 netsnmp_dtlsudp_ctor(void)
 {
     char indexname[] = "_netsnmp_addr_info";
-    const char *prefixes[] = { "dtlsudp", "dtls" };
+    static const char *prefixes[] = { "dtlsudp", "dtls"
+#ifdef NETSNMP_ENABLE_IPV6
+                                      , "dtlsudp6", "dtls6"
+#endif
+    };
     int i, num_prefixes = sizeof(prefixes) / sizeof(char *);
 #ifdef NETSNMP_ENABLE_IPV6
     char indexname6[] = "_netsnmp_addr_info6";
-    const char *prefixes6[] = { "dtlsudp6", "dtls6" };
-    int num_prefixes6 = sizeof(prefixes6) / sizeof(char *);
 #endif
 
     DEBUGMSGTL(("dtlsudp", "registering DTLS constructor\n"));
@@ -1547,21 +1572,9 @@ netsnmp_dtlsudp_ctor(void)
     /* config settings */
 
 #ifdef NETSNMP_ENABLE_IPV6
-    dtlsudp6Domain.name = netsnmpDTLSUDPDomain;
-    dtlsudp6Domain.name_length = netsnmpDTLSUDPDomain_len;
-    dtlsudp6Domain.prefix = (const char**)calloc(num_prefixes6 + 1,
-                                                sizeof(char *));
-    for (i = 0; i < num_prefixes6; ++ i)
-        dtlsudp6Domain.prefix[i] = prefixes6[i];
-
-    dtlsudp6Domain.f_create_from_tstring_new = netsnmp_dtlsudp6_create_tstring;
-    dtlsudp6Domain.f_create_from_ostring = netsnmp_dtlsudp6_create_ostring;
-
     if (!openssl_addr_index6)
         openssl_addr_index6 =
             SSL_get_ex_new_index(0, indexname6, NULL, NULL, NULL);
-
-    netsnmp_tdomain_register(&dtlsudp6Domain);
 #endif
 
     dtlsudpDomain.name = netsnmpDTLSUDPDomain;

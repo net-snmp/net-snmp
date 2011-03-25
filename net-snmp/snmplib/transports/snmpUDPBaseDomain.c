@@ -156,7 +156,8 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
     struct sockaddr *to = NULL;
 
     if (opaque != NULL && *opaque != NULL &&
-        *olength == sizeof(netsnmp_indexed_addr_pair)) {
+        ((*olength == sizeof(netsnmp_indexed_addr_pair) ||
+          (*olength == sizeof(struct sockaddr_in))))) {
         addr_pair = (netsnmp_indexed_addr_pair *) (*opaque);
     } else if (t != NULL && t->data != NULL &&
                 t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
