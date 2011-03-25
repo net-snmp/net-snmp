@@ -112,7 +112,7 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
             return -1;
         } else {
             memset(addr_pair, 0, sizeof(netsnmp_indexed_addr_pair));
-            from = (struct sockaddr *) &(addr_pair->remote_addr);
+            from = &addr_pair->remote_addr.sa;
         }
 
 	while (rc < 0) {
@@ -163,7 +163,7 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
         addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
     }
 
-    to = (struct sockaddr *) &(addr_pair->remote_addr);
+    to = &addr_pair->remote_addr.sa;
 
     if (to != NULL && t != NULL && t->sock >= 0) {
         char *str = netsnmp_udp_fmtaddr(NULL, (void *) addr_pair,
