@@ -1519,7 +1519,7 @@ sub createTlsDir {
 
   # Existing openssl.conf tmpl will be preserved
   if (-f $ssl_cfg_in) {
-    NetSNMP::Cert::dwarn("OpenSSL template exists: preserving...", $opts);
+    NetSNMP::Cert::dwarn("OpenSSL template exists ($ssl_cfg_in): preserving...", $opts);
   }
 
   if (not -f $ssl_cfg_in) {
