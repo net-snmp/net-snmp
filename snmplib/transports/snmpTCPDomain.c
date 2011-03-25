@@ -76,11 +76,10 @@ netsnmp_tcp_accept(netsnmp_transport *t)
     struct sockaddr *farend = NULL;
     netsnmp_udp_addr_pair *addr_pair = NULL;
     int             newsock = -1;
-    socklen_t       farendlen = sizeof(struct sockaddr_in);
+    socklen_t       farendlen = sizeof(netsnmp_udp_addr_pair);
     char           *str = NULL;
 
-    addr_pair = (netsnmp_udp_addr_pair *)malloc(sizeof(netsnmp_udp_addr_pair));
-
+    addr_pair = (netsnmp_udp_addr_pair *)malloc(farendlen);
     if (addr_pair == NULL) {
         /*
          * Indicate that the acceptance of this socket failed.  
@@ -89,7 +88,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
         return -1;
     }
     memset(addr_pair, 0, sizeof *addr_pair);
-    farend = (struct sockaddr *) &(addr_pair->remote_addr);
+    farend = &addr_pair->remote_addr.sa;
 
     if (t != NULL && t->sock >= 0) {
         newsock = accept(t->sock, farend, &farendlen);
@@ -97,7 +96,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
         if (newsock < 0) {
             DEBUGMSGTL(("netsnmp_tcp", "accept failed rc %d errno %d \"%s\"\n",
 			newsock, errno, strerror(errno)));
-            free(farend);
+            free(addr_pair);
             return newsock;
         }
 
@@ -129,7 +128,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
 
         return newsock;
     } else {
-        free(farend);
+        free(addr_pair);
         return -1;
     }
 }
