@@ -628,8 +628,12 @@ netsnmp_tdomain_transport_full(const char *application,
                         "default address \"%s\"\n",
                         match->prefix[0], addr ? addr : "[NIL]",
                         addr2 ? addr2 : "[NIL]"));
-            if (match->f_create_from_tstring)
+            if (match->f_create_from_tstring) {
+                NETSNMP_LOGONCE((LOG_WARNING,
+                                 "transport domain %s uses deprecated f_create_from_tstring\n",
+                                 match->prefix[0]));
                 t = match->f_create_from_tstring(addr, local);
+            }
             else
                 t = match->f_create_from_tstring_new(addr, local, addr2);
             if (t) {
