@@ -711,7 +711,7 @@ tls_get_verify_info_index() {
 
 static void _parse_client_cert(const char *tok, char *line)
 {
-    config_pwarn("clientCert is deprecated. Clients should use ourCert, servers should use theirCert");
+    config_pwarn("clientCert is deprecated. Clients should use localCert, servers should use peerCert");
     if (*line == '"') {
         char buf[SNMP_MAXBUF];
         copy_nword(line, buf, sizeof(buf));
@@ -721,25 +721,10 @@ static void _parse_client_cert(const char *tok, char *line)
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                               NETSNMP_DS_LIB_X509_CLIENT_PUB, line);
 }
-
-#if 0
-static void _parse_defX509ClientPub(const char *tok, char *line)
-{
-    config_pwarn("defX509ClientPub is deprecated. Clients should use ourCert, servers should use theirCert.");
-    if (*line == '"') {
-        char buf[SNMP_MAXBUF];
-        copy_nword(line, buf, sizeof(buf));
-        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                              NETSNMP_DS_LIB_X509_CLIENT_PUB, buf);
-    } else
-        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                              NETSNMP_DS_LIB_X509_CLIENT_PUB, line);
-}
-#endif
 
 static void _parse_server_cert(const char *tok, char *line)
 {
-    config_pwarn("serverCert is deprecated. Clients should use theirCert, servers should use ourCert.");
+    config_pwarn("serverCert is deprecated. Clients should use peerCert, servers should use localCert.");
     if (*line == '"') {
         char buf[SNMP_MAXBUF];
         copy_nword(line, buf, sizeof(buf));
@@ -749,21 +734,6 @@ static void _parse_server_cert(const char *tok, char *line)
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                               NETSNMP_DS_LIB_X509_SERVER_PUB, line);
 }
-
-#if 0
-static void _parse_defX509ServerPub(const char *tok, char *line)
-{
-    config_pwarn("defX509ServerPub is deprecated. Clients should use theirCert, servers should use ourCert.");
-    if (*line == '"') {
-        char buf[SNMP_MAXBUF];
-        copy_nword(line, buf, sizeof(buf));
-        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                              NETSNMP_DS_LIB_X509_CLIENT_PUB, buf);
-    } else
-        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                              NETSNMP_DS_LIB_X509_SERVER_PUB, line);
-}
-#endif
 
 void
 netsnmp_tlsbase_ctor(void) {
@@ -793,9 +763,6 @@ netsnmp_tlsbase_ctor(void) {
     /* the public client cert to authenticate with */
     register_config_handler("snmp", "clientCert", _parse_client_cert, NULL,
                             NULL);
-    /* XXX: this one needs to go away before 5.6 final */
-    register_config_handler("snmp", "defX509ClientPub", _parse_client_cert,
-                            NULL, NULL);
 
     /*
      * for the server
@@ -804,12 +771,8 @@ netsnmp_tlsbase_ctor(void) {
     /* The X509 server key to use */
     register_config_handler("snmp", "serverCert", _parse_server_cert, NULL,
                             NULL);
-    /* XXX: this one needs to go away before 5.6 final */
-    register_config_handler("snmp", "defX509ServerPub", _parse_server_cert,
-                            NULL, NULL);
-    
     /*
-     * remove cert config ambiguity: ourCert, theirCert
+     * remove cert config ambiguity: localCert, peerCert
      */
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "localCert",
                                NETSNMP_DS_LIBRARY_ID,
