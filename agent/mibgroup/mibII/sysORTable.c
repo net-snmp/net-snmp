@@ -8,6 +8,8 @@
 
 #include "sysORTable.h"
 
+#include <net-snmp/net-snmp-features.h>
+
 netsnmp_feature_require(table_container)
 
 

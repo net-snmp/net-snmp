@@ -22,6 +22,8 @@
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/snmp_logging.h>
 
+#include <net-snmp/net-snmp-features.h>
+
 #define TRUE 1
 #define FALSE 0
 
