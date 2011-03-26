@@ -32,6 +32,8 @@
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpv3-security-includes.h>
 
+#include <net-snmp/net-snmp-features.h>
+
 static struct snmp_secmod_list *registered_services = NULL;
 
 static SNMPCallback set_default_secmod;

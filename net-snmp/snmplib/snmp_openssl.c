@@ -6,6 +6,8 @@
 
 #include <net-snmp/net-snmp-includes.h>
 
+#include <net-snmp/net-snmp-features.h>
+
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
 
 #include <ctype.h>

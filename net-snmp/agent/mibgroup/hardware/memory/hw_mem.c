@@ -3,6 +3,8 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/memory.h>
 
+#include <net-snmp/net-snmp-features.h>
+
 netsnmp_feature_child_of(hardware_memory, netsnmp_unused)
 
 netsnmp_feature_child_of(memory_get_cache, hardware_memory)

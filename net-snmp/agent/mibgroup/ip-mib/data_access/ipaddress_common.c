@@ -12,6 +12,8 @@
 
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
 
+#include <net-snmp/net-snmp-features.h>
+
 netsnmp_feature_child_of(ipaddress_common, libnetsnmpmibs)
 
 netsnmp_feature_child_of(ipaddress_common_copy_utilities, ipaddress_common)

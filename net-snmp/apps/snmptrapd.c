@@ -123,6 +123,8 @@ SOFTWARE.
 #include <tcpd.h>
 #endif
 
+#include <net-snmp/net-snmp-features.h>
+
 #ifndef BSD4_3
 #define BSD4_2
 #endif

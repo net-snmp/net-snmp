@@ -75,6 +75,8 @@
 #include <net-snmp/library/snmpusm.h>
 #include <net-snmp/library/transform_oids.h>
 
+#include <net-snmp/net-snmp-features.h>
+
 static u_long   engineBoots = 1;
 static unsigned int engineIDType = ENGINEID_TYPE_NETSNMP_RND;
 static unsigned char *engineID = NULL;

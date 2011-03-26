@@ -18,6 +18,8 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "header_complex.h"
 
+#include <net-snmp/net-snmp-features.h>
+
 netsnmp_feature_child_of(header_complex_all, libnetsnmpmibs)
 
 netsnmp_feature_child_of(header_complex_free_all, header_complex_all)
