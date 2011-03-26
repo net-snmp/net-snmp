@@ -93,7 +93,7 @@ oid             netsnmpDTLSUDPDomain[] = { TRANSPORT_DOMAIN_DTLS_UDP_IP };
 size_t          netsnmpDTLSUDPDomain_len = OID_LENGTH(netsnmpDTLSUDPDomain);
 
 static netsnmp_tdomain dtlsudpDomain;
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 static int openssl_addr_index6 = 0;
 #endif
 
@@ -138,7 +138,7 @@ static bio_cache *find_bio_cache(netsnmp_sockaddr_storage *from_addr) {
               from_addr->sin.sin_addr.s_addr) ||
              (cachep->sas.sin.sin_port != from_addr->sin.sin_port)))
                 continue;
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
         else if ((from_addr->sa.sa_family == AF_INET6) &&
                  ((cachep->sas.sin6.sin6_port != from_addr->sin6.sin6_port) ||
                   (cachep->sas.sin6.sin6_scope_id !=
@@ -278,7 +278,7 @@ start_new_cached_connection(netsnmp_transport *t,
 
     if (remote_addr->sa.sa_family == AF_INET)
         memcpy(&cachep->sas.sin, &remote_addr->sin, sizeof(remote_addr->sin));
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     else if (remote_addr->sa.sa_family == AF_INET6)
         memcpy(&cachep->sas.sin6, &remote_addr->sin6, sizeof(remote_addr->sin6));
 #endif
@@ -1388,7 +1388,7 @@ netsnmp_dtlsudp_agent_config_tokens_register(void)
 }
 
 
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 
 char *
 netsnmp_dtlsudp6_fmtaddr(netsnmp_transport *t, void *data, int len)
@@ -1442,7 +1442,7 @@ netsnmp_transport *
 netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
                                const char *default_target)
 {
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     struct sockaddr_in6 addr6;
 #endif
     struct sockaddr_in addr;
@@ -1452,7 +1452,7 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
 
     if (netsnmp_sockaddr_in2(&addr, str, default_target))
         t = netsnmp_dtlsudp_transport(&addr, isserver);
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     else if (netsnmp_sockaddr_in6_2(&addr6, str, default_target))
         t = netsnmp_dtlsudp6_transport(&addr6, isserver);
 #endif
@@ -1491,7 +1491,7 @@ netsnmp_dtlsudp_create_ostring(const u_char * o, size_t o_len, int local)
         addr.sin_port = htons(porttmp);
         return netsnmp_dtlsudp_transport(&addr, local);
     }
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     else if (o_len == 18) {
         struct sockaddr_in6 addr6;
         unsigned short porttmp = (o[16] << 8) + o[17];
@@ -1509,12 +1509,12 @@ netsnmp_dtlsudp_ctor(void)
 {
     char indexname[] = "_netsnmp_addr_info";
     static const char *prefixes[] = { "dtlsudp", "dtls"
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
                                       , "dtlsudp6", "dtls6"
 #endif
     };
     int i, num_prefixes = sizeof(prefixes) / sizeof(char *);
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     char indexname6[] = "_netsnmp_addr_info6";
 #endif
 
@@ -1522,7 +1522,7 @@ netsnmp_dtlsudp_ctor(void)
 
     /* config settings */
 
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     if (!openssl_addr_index6)
         openssl_addr_index6 =
             SSL_get_ex_new_index(0, indexname6, NULL, NULL, NULL);
@@ -1556,7 +1556,7 @@ unsigned char cookie_secret[NETSNMP_COOKIE_SECRET_LENGTH];
 typedef union {
        struct sockaddr sa;
        struct sockaddr_in s4;
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
        struct sockaddr_in6 s6;
 #endif
 } _peer_union;
@@ -1597,7 +1597,7 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
         length += sizeof(struct in_addr);
         length += sizeof(peer->s4.sin_port);
         break;
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     case AF_INET6:
         length += sizeof(struct in6_addr);
         length += sizeof(peer->s6.sin6_port);
@@ -1624,7 +1624,7 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
                &peer->s4.sin_addr,
                sizeof(struct in_addr));
         break;
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     case AF_INET6:
         memcpy(buffer,
                &peer->s6.sin6_port,
@@ -1678,7 +1678,7 @@ int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
         length += sizeof(struct in_addr);
         length += sizeof(peer->s4.sin_port);
         break;
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     case AF_INET6:
         length += sizeof(struct in6_addr);
         length += sizeof(peer->s6.sin6_port);
@@ -1706,7 +1706,7 @@ int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
                &peer->s4.sin_addr,
                sizeof(struct in_addr));
         break;
-#ifdef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     case AF_INET6:
         memcpy(buffer,
                &peer->s6.sin6_port,
