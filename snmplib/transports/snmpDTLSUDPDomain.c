@@ -1382,55 +1382,6 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 }
 
 
-netsnmp_transport *
-netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
-                               const char *default_target)
-{
-    struct sockaddr_in addr;
-    netsnmp_transport *t;
-    _netsnmpTLSBaseData *tlsdata;
-    char buf[SPRINT_MAX_LEN], *cp;
-
-    if (netsnmp_sockaddr_in2(&addr, str, default_target)) {
-        t = netsnmp_dtlsudp_transport(&addr, isserver);
-    } else {
-        return NULL;
-    }
-
-    /* see if we can extract the remote hostname */
-    if (!isserver && t && t->data && str) {
-        tlsdata = (_netsnmpTLSBaseData *) t->data;
-        /* search for a : */
-        if (NULL != (cp = strrchr(str, ':'))) {
-            strncpy(buf, str, SNMP_MIN(cp-str, sizeof(buf)-1));
-            buf[SNMP_MIN(cp-str, sizeof(buf)-1)] = '\0';
-        } else {
-            /* else the entire spec is a host name only */
-            strncpy(buf, str,
-                    SNMP_MIN(strlen(str), sizeof(buf)-1));
-            buf[SNMP_MIN(strlen(str), sizeof(buf)-1)] = '\0';
-        }
-        tlsdata->their_hostname = strdup(buf);
-    }
-    return t;
-}
-
-
-netsnmp_transport *
-netsnmp_dtlsudp_create_ostring(const u_char * o, size_t o_len, int local)
-{
-    struct sockaddr_in addr;
-
-    if (o_len == 6) {
-        unsigned short porttmp = (o[4] << 8) + o[5];
-        addr.sin_family = AF_INET;
-        memcpy((u_char *) & (addr.sin_addr.s_addr), o, 4);
-        addr.sin_port = htons(porttmp);
-        return netsnmp_dtlsudp_transport(&addr, local);
-    }
-    return NULL;
-}
-
 void
 netsnmp_dtlsudp_agent_config_tokens_register(void)
 {
@@ -1509,7 +1460,7 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
         return NULL;
 
 
-/* see if we can extract the remote hostname */
+    /* see if we can extract the remote hostname */
     if (!isserver && t && t->data && str) {
         tlsdata = (_netsnmpTLSBaseData *) t->data;
         /* search for a : */
