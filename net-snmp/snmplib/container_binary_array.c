@@ -657,7 +657,7 @@ _ba_duplicate(netsnmp_container *c, void *ctx, u_int flags)
     /*
      * shallow copy
      */
-    dupt->data = (void**) calloc(dupt->max_size, sizeof(void*));
+    dupt->data = (void**) malloc(dupt->max_size * sizeof(void*));
     if (NULL == dupt->data) {
         snmp_log(LOG_ERR, "no memory for binary array duplicate\n");
         netsnmp_binary_array_release(dup);
