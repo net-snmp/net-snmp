@@ -410,25 +410,20 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
      */
     if (t->max_size <= t->count) {
         /*
-         * Table is full, so extend it to double the size
+         * Table is full, so extend it to double the size, or use 10 elements
+         * if it is empty.
          */
-        int             new_max, new_size;
-        char           *new_data;   /* Used for extending the data table */
+        size_t const new_max = t->max_size > 0 ? 2 * t->max_size : 10;
+        void ** const new_data =
+            (void**) realloc(t->data, new_max * sizeof(void*));
 
-        new_max = 2 * t->max_size;
-        if (new_max == 0)
-            new_max = 10;       /* Start with 10 entries */
-
-        new_size = new_max * sizeof(void*);
-        new_data = (char *) realloc(t->data, new_size);
         if (new_data == NULL)
             return -1;
-        else {
-            int old_size = t->max_size * sizeof(void*);
-            int count = new_size - old_size;
-            memset(&new_data[old_size], 0x0, count);
-        }
-        t->data = (void**)new_data;
+
+        memset(new_data + t->max_size, 0x0,
+               (new_max - t->max_size) * sizeof(void*));
+
+        t->data = new_data;
         t->max_size = new_max;
     }
 
