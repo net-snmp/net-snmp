@@ -393,16 +393,13 @@ NETSNMP_STATIC_INLINE int
 netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
-    int             new_max, new_size, was_dirty = 0;
-    char           *new_data;   /* Used for * a) extending the data table
-                                 * * b) the next entry to use */
+    int             was_dirty = 0;
     /*
      * check for duplicates
      */
     if (! (c->flags & CONTAINER_KEY_ALLOW_DUPLICATES)) {
         was_dirty = t->dirty;
-        new_data = netsnmp_binary_array_get(c, entry, 1);
-        if (NULL != new_data) {
+        if (NULL != netsnmp_binary_array_get(c, entry, 1)) {
             DEBUGMSGTL(("container","not inserting duplicate key\n"));
             return -1;
         }
@@ -415,6 +412,9 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
         /*
          * Table is full, so extend it to double the size
          */
+        int             new_max, new_size;
+        char           *new_data;   /* Used for extending the data table */
+
         new_max = 2 * t->max_size;
         if (new_max == 0)
             new_max = 10;       /* Start with 10 entries */
