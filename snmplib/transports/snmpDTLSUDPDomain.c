@@ -104,21 +104,24 @@ typedef struct bio_cache_s {
    BIO *read_bio;  /* OpenSSL will read its incoming SSL packets from here */
    BIO *write_bio; /* OpenSSL will write its outgoing SSL packets to here */
    netsnmp_sockaddr_storage sas;
+   u_int flags;
    struct bio_cache_s *next;
    int msgnum;
    char *write_cache;
    size_t write_cache_len;
-    _netsnmpTLSBaseData *tlsdata;
+   _netsnmpTLSBaseData *tlsdata;
 } bio_cache;
 
-bio_cache *biocache = NULL;
+#define NETSNMP_BIO_HAVE_COOKIE        0x0001
+
+static bio_cache *biocache = NULL;
 
 static int openssl_addr_index = 0;
 
-int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
-                               unsigned int cookie_len);
-int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
-                            unsigned int *cookie_len);
+static int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
+                                      unsigned int cookie_len);
+static int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
+                                   unsigned int *cookie_len);
 
 /* this stores remote connections in a list to search through */
 /* XXX: optimize for searching */
@@ -185,6 +188,7 @@ static void free_bio_cache(bio_cache *cachep) {
         BIO_free(cachep->read_bio);
         BIO_free(cachep->write_bio);
 */
+    DEBUGMSGTL(("dtlsudp:bio_cache", "releasing %p\n", cachep));
         SNMP_FREE(cachep->write_cache);
         netsnmp_tlsbase_free_tlsdata(cachep->tlsdata);
 }
@@ -204,7 +208,6 @@ start_new_cached_connection(netsnmp_transport *t,
                             int we_are_client) {
     bio_cache *cachep = NULL;
     _netsnmpTLSBaseData *tlsdata;
-    SSL_CTX *ctx;
 
     DEBUGTRACETOK("dtlsudp");
 
@@ -311,14 +314,14 @@ start_new_cached_connection(netsnmp_transport *t,
         /* XXX: session setting 735 */
     } else {
         /* we're the server */
-        ctx = sslctx_server_setup(DTLSv1_method());
+        SSL_CTX *ctx = sslctx_server_setup(DTLSv1_method());
         if (!ctx) {
             BIO_free(cachep->read_bio);
             BIO_free(cachep->write_bio);
             cachep->read_bio = NULL;
             cachep->write_bio = NULL;
             DIEHERE("failed to create the SSL Context");
-        }            
+        }
 
         /* turn on cookie exchange */
         /* Set DTLS cookie generation and verification callbacks */
@@ -379,8 +382,6 @@ start_new_cached_connection(netsnmp_transport *t,
         SSL_set_accept_state(tlsdata->ssl);
     }
 
-
-
     /* RFC5953: section 5.3.1, step 1:
        6)  The TLSTM-specific session identifier (tlstmSessionID) is set in
            the tmSessionID of the tmStateReference passed to the TLS
@@ -393,6 +394,8 @@ start_new_cached_connection(netsnmp_transport *t,
     /* Implementation notes:
        + our sessionID is stored as the transport's data pointer member
     */
+    DEBUGMSGT(("dtlsudp:bio_cache:created", "%p\n", cachep));
+
     return cachep;
 }
 
@@ -407,6 +410,8 @@ find_or_create_bio_cache(netsnmp_transport *t,
         if (NULL == cachep) {
             snmp_log(LOG_ERR, "failed to open a new dtls connection\n");
         }
+    } else {
+        DEBUGMSGT(("dtlsudp:bio_cache:found", "%p\n", cachep));
     }
     return cachep;
 }
@@ -788,9 +793,15 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                 /* (what would we do differently?) */
             }
 
-            return -1; /* XXX: it's ok, but what's the right return? */
+            rc = -1; /* XXX: it's ok, but what's the right return? */
         }
-        _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
+        else
+            _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
+
+#if 0 /* to dump cache if we don't have a cookie, this is where to do it */
+        if (!(cachep->flags & NETSNMP_BIO_HAVE_COOKIE))
+            remove_and_free_bio_cache(cachep);
+#endif
         return rc;
     }
 
@@ -1481,7 +1492,7 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
 
 netsnmp_transport *
 netsnmp_dtlsudp_create_ostring(const u_char * o, size_t o_len, int local)
- {
+{
     struct sockaddr_in addr;
 
     if (o_len == 6) {
@@ -1567,16 +1578,7 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
     unsigned char *buffer, result[EVP_MAX_MD_SIZE];
     unsigned int length, resultlength;
     bio_cache *cachep = NULL;
-
     _peer_union *peer;
-
-    cachep = SSL_get_ex_data(ssl, openssl_addr_index);
-    peer = (_peer_union *) &cachep->sas;
-
-    if (!peer) {
-        snmp_log(LOG_ERR, "dtls: failed to get the peer address\n");
-        return 0;
-    }
 
     /* Initialize a random secret */
     if (!cookie_initialized) {
@@ -1587,8 +1589,15 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
         cookie_initialized = 1;
     }
 
+    DEBUGMSGT(("dtlsudp:cookie", "generating cookie...\n"));
+
     /* Read peer information */
-    (void)BIO_dgram_get_peer(SSL_get_rbio(ssl), &peer);
+    cachep = SSL_get_ex_data(ssl, openssl_addr_index);
+    peer = (_peer_union *) cachep ? &cachep->sas : NULL;
+    if (!peer) {
+        snmp_log(LOG_ERR, "dtls: failed to get the peer address\n");
+        return 0;
+    }
 
     /* Create buffer with peer's address and port */
     length = 0;
@@ -1609,7 +1618,6 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
         return 0;
     }
     buffer = malloc(length);
-
     if (buffer == NULL) {
         snmp_log(LOG_ERR,"dtls: out of memory\n");
         return 0;
@@ -1647,6 +1655,8 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
     memcpy(cookie, result, resultlength);
     *cookie_len = resultlength;
 
+    DEBUGMSGT(("dtlsudp:cookie", "generated %d byte cookie\n", *cookie_len));
+
     return 1;
 }
 
@@ -1654,18 +1664,18 @@ int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
                                unsigned int cookie_len)
 {
     unsigned char *buffer, result[EVP_MAX_MD_SIZE];
-    unsigned int length, resultlength;
+    unsigned int length, resultlength, rc;
     bio_cache *cachep = NULL;
-
     _peer_union *peer;
 
     /* If secret isn't initialized yet, the cookie can't be valid */
     if (!cookie_initialized)
         return 0;
 
+    DEBUGMSGT(("dtlsudp:cookie", "verifying %d byte cookie\n", cookie_len));
+
     cachep = SSL_get_ex_data(ssl, openssl_addr_index);
     peer = (_peer_union *) &cachep->sas;
-
     if (!peer) {
         snmp_log(LOG_ERR, "dtls: failed to get the peer address\n");
         return 0;
@@ -1691,7 +1701,6 @@ int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
         return 0;
     }
     buffer = malloc(length);
-	
     if (buffer == NULL) {
         snmp_log(LOG_ERR, "dtls: unknown address family generating a cookie\n");
         return 0;
@@ -1728,10 +1737,16 @@ int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
          buffer, length, result, &resultlength);
     OPENSSL_free(buffer);
 
-    if (cookie_len == resultlength && memcmp(result, cookie, resultlength) == 0)
-        return 1;
+    if (cookie_len != resultlength || memcmp(result, cookie, resultlength) != 0)
+        rc = 0;
+    else {
+        rc = 1;
+        cachep->flags |= NETSNMP_BIO_HAVE_COOKIE;
+    }
 
-    return 0;
+    DEBUGMSGT(("dtlsudp:cookie", "verify cookie: %d\n", rc));
+
+    return rc;
 }
 
 #endif /* HAVE_LIBSSL_DTLS */
