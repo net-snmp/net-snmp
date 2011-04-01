@@ -172,12 +172,13 @@ static void free_bio_cache(bio_cache *cachep) {
         BIO_free(cachep->read_bio);
         BIO_free(cachep->write_bio);
 */
-    DEBUGMSGTL(("dtlsudp:bio_cache", "releasing %p\n", cachep));
+    DEBUGMSGTL(("9:dtlsudp:bio_cache", "releasing %p\n", cachep));
         SNMP_FREE(cachep->write_cache);
         netsnmp_tlsbase_free_tlsdata(cachep->tlsdata);
 }
 
 static void remove_and_free_bio_cache(bio_cache *cachep) {
+    /** no debug, remove_bio_cache does it */
     remove_bio_cache(cachep);
     free_bio_cache(cachep);
 }
@@ -193,7 +194,7 @@ start_new_cached_connection(netsnmp_transport *t,
     bio_cache *cachep = NULL;
     _netsnmpTLSBaseData *tlsdata;
 
-    DEBUGTRACETOK("dtlsudp");
+    DEBUGTRACETOK("9:dtlsudp");
 
     /* RFC5953: section 5.3.1, step 1:
        1)  The snmpTlstmSessionOpens counter is incremented.
@@ -373,7 +374,7 @@ start_new_cached_connection(netsnmp_transport *t,
     /* Implementation notes:
        + our sessionID is stored as the transport's data pointer member
     */
-    DEBUGMSGT(("dtlsudp:bio_cache:created", "%p\n", cachep));
+    DEBUGMSGT(("9:dtlsudp:bio_cache:created", "%p\n", cachep));
 
     return cachep;
 }
@@ -389,7 +390,7 @@ find_or_create_bio_cache(netsnmp_transport *t, struct sockaddr_in *from_addr,
             snmp_log(LOG_ERR, "failed to open a new dtls connection\n");
         }
     } else {
-        DEBUGMSGT(("dtlsudp:bio_cache:found", "%p\n", cachep));
+        DEBUGMSGT(("9:dtlsudp:bio_cache:found", "%p\n", cachep));
     }
     return cachep;
 }
@@ -403,15 +404,16 @@ _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep) {
     int outsize, rc2;
     u_char outbuf[65535];
     
-    DEBUGTRACETOK("dtlsudp");
+    DEBUGTRACETOK("9:dtlsudp");
 
     /* for memory bios, we now read from openssl's write
        buffer (ie, the packet to go out) and send it out
        the udp port manually */
 
     outsize = BIO_read(cachep->write_bio, outbuf, sizeof(outbuf));
-    DEBUGMSGTL(("dtlsudp", "have %d bytes to send\n", outsize));
     if (outsize > 0) {
+        DEBUGMSGTL(("dtlsudp", "have %d bytes to send\n", outsize));
+
         /* should always be true. */
 #if defined(XXXFIXME) && defined(linux) && defined(IP_PKTINFO)
         /* XXX: before this can work, we need to remember address we
@@ -427,7 +429,9 @@ _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep) {
         if (rc2 == -1) {
             snmp_log(LOG_ERR, "failed to send a DTLS specific packet\n");
         }
-    }
+    } else
+        DEBUGMSGTL(("9:dtlsudp", "have 0 bytes to send\n"));
+
     return outsize;
 }
 
@@ -443,7 +447,7 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
     int rc;
     _netsnmpTLSBaseData *tlsdata;
     
-    DEBUGTRACETOK("dtlsudp");
+    DEBUGTRACETOK("9:dtlsudp");
 
     tlsdata = cachep->tlsdata;
 
@@ -483,7 +487,7 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
         }
 
         /* retry writing */
-        DEBUGMSGTL(("dtlsudp", "recalling ssl_write\n")); 
+        DEBUGMSGTL(("9:dtlsudp", "recalling ssl_write\n")); 
         rc = SSL_write(tlsdata->ssl, cachep->write_cache,
                        cachep->write_cache_len);
     }
@@ -542,7 +546,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     _netsnmpTLSBaseData *tlsdata;
     bio_cache *cachep;
 
-    DEBUGTRACETOK("dtlsudp");
+    DEBUGTRACETOK("9:dtlsudp");
 
     if (NULL == t || t->sock == 0)
         return -1;
@@ -716,18 +720,17 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             break;
 
         /* retry reading */
-        DEBUGMSGTL(("dtlsudp", "recalling ssl_read\n")); 
+        DEBUGMSGTL(("9:dtlsudp", "recalling ssl_read\n")); 
         rc = SSL_read(tlsdata->ssl, buf, size);
     }
-
-    DEBUGMSGTL(("dtlsudp",
-                "received %d decoded bytes from dtls\n", rc));
 
     if (rc == -1) {
         SNMP_FREE(tmStateRef);
 
+        DEBUGMSGTL(("9:dtlsudp", "no decoded data from dtls\n"));
+
         if (SSL_get_error(tlsdata->ssl, rc) == SSL_ERROR_WANT_READ) {
-            DEBUGMSGTL(("dtlsudp","here: want read!\n"));
+            DEBUGMSGTL(("9dtlsudp","here: want read!\n"));
 
             /* see if we have buffered write date to send out first */
             if (cachep->write_cache) {
@@ -747,6 +750,8 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 #endif
         return rc;
     }
+
+    DEBUGMSGTL(("dtlsudp", "received %d decoded bytes from dtls\n", rc));
 
     if ((0 == rc) && (SSL_get_shutdown(tlsdata->ssl) & SSL_RECEIVED_SHUTDOWN)) {
         DEBUGMSGTL(("dtlsudp", "peer disconnected\n"));
@@ -894,9 +899,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         _netsnmp_send_queued_dtls_pkts(t, cachep);
     }
 
-    {
+    DEBUGIF ("9:dtlsudp") {
         char *str = netsnmp_udp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
-        DEBUGMSGTL(("dtlsudp",
+        DEBUGMSGTL(("9:dtlsudp",
                     "recvfrom fd %d got %d bytes (from %s)\n",
                     t->sock, rc, str));
         free(str);
@@ -949,7 +954,8 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     u_char outbuf[65535];
     _netsnmpTLSBaseData *tlsdata = NULL;
     
-    DEBUGTRACETOK("dtlsudp");
+    DEBUGTRACETOK("9:dtlsudp");
+    DEBUGMSGTL(("dtlsudp", "sending %d bytes\n", size));
 
     /* determine remote addresses */
     if (opaque != NULL && *opaque != NULL &&
@@ -1090,10 +1096,10 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         }
     }
 
-    {
+    DEBUGIF ("9:dtlsudp") {
         char *str = netsnmp_udp_fmtaddr(NULL, (void *) addr_pair,
                                         sizeof(netsnmp_indexed_addr_pair));
-        DEBUGMSGTL(("dtlsudp", "send %d bytes from %p to %s on fd %d\n",
+        DEBUGMSGTL(("9:dtlsudp", "send %d bytes from %p to %s on fd %d\n",
                     size, buf, str, t->sock));
         free(str);
     }
@@ -1145,7 +1151,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
                socket data */ 
             break;
         }
-        DEBUGMSGTL(("dtlsudp", "recalling ssl_write\n")); 
+        DEBUGMSGTL(("9:dtlsudp", "recalling ssl_write\n")); 
         rc = SSL_write(tlsdata->ssl, buf, size);
     }
 
@@ -1181,7 +1187,9 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
     bio_cache *cachep = NULL;
     _netsnmpTLSBaseData *tlsbase = NULL;
 
-    DEBUGTRACETOK("dtlsudp");
+    DEBUGTRACETOK("9:dtlsudp");
+
+    DEBUGMSGTL(("dtlsudp:close", "closing dtlsudp transport %p\n", t));
 
     /* RFC5953: section 5.4, step 1:
         1)  Increment either the snmpTlstmSessionClientCloses or the
@@ -1301,7 +1309,7 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
 
-    DEBUGTRACETOK("dtlsudp");
+    DEBUGTRACETOK("9:dtlsudp");
 
     t = netsnmp_udpipv4base_transport(addr, local);
     if (NULL == t)
@@ -1512,7 +1520,7 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
     memcpy(cookie, result, resultlength);
     *cookie_len = resultlength;
 
-    DEBUGMSGT(("dtlsudp:cookie", "generated %d byte cookie\n", *cookie_len));
+    DEBUGMSGT(("9:dtlsudp:cookie", "generated %d byte cookie\n", *cookie_len));
 
     return 1;
 }
@@ -1529,7 +1537,7 @@ int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
     if (!cookie_initialized)
         return 0;
 
-    DEBUGMSGT(("dtlsudp:cookie", "verifying %d byte cookie\n", cookie_len));
+    DEBUGMSGT(("9:dtlsudp:cookie", "verifying %d byte cookie\n", cookie_len));
 
     cachep = SSL_get_ex_data(ssl, openssl_addr_index);
     if (!cachep) {
