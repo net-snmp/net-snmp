@@ -112,7 +112,10 @@ typedef struct bio_cache_s {
    _netsnmpTLSBaseData *tlsdata;
 } bio_cache;
 
-#define NETSNMP_BIO_HAVE_COOKIE        0x0001
+/** bio_cache flags */
+#define NETSNMP_BIO_HAVE_COOKIE        0x0001 /* verified cookie */
+#define NETSNMP_BIO_CONNECTED          0x0002 /* recieved decoded data */
+#define NETSNMP_BIO_DISCONNECTED       0x0004 /* peer shutdown */
 
 static bio_cache *biocache = NULL;
 
@@ -805,6 +808,14 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         return rc;
     }
 
+    if ((0 == rc) && (SSL_get_shutdown(tlsdata->ssl) & SSL_RECEIVED_SHUTDOWN)) {
+        DEBUGMSGTL(("dtlsudp", "peer disconnected\n"));
+        cachep->flags |= NETSNMP_BIO_DISCONNECTED;
+        remove_and_free_bio_cache(cachep);
+        return rc;
+    }
+    cachep->flags |= NETSNMP_BIO_CONNECTED;
+
     /* Until we've locally assured ourselves that all is well in
        certificate-verification-land we need to be prepared to stop
        here and ensure all our required checks have been done. */ 
@@ -1233,10 +1244,11 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
         3)  If there is no open session associated with the tmSessionID, then
             closeSession processing is completed.
     */
-
+    if (NULL == cachep)
+        return netsnmp_socketbase_close(t);
 
     /* if we have any remaining packtes to send, try to send them */
-    if (NULL != cachep && cachep->write_cache_len > 0) {
+    if (cachep->write_cache_len > 0) {
         int i = 0;
         char buf[8192];
         int rc;
@@ -1244,35 +1256,49 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
         int opaque_len = 0;
         fd_set readfs;
         struct timeval tv;
+ 
+        DEBUGMSGTL(("dtlsudp:close", "%d bytes remain in write_cache\n",
+                    cachep->write_cache_len));
+ 
+        /*
+         * if negotiations have completed and we've received data, try and
+         * send any queued packets.
+         */
+        if (cachep->flags & NETSNMP_BIO_CONNECTED) {
+            /* make configurable:
+               - do this at all?
+               - retries
+               - timeout
+            */
+            for (i = 0; i < 6 && cachep->write_cache_len != 0; ++i) {
 
-        /* make configurable:
-           - do this at all?
-           - retries
-           - timeout
-        */
-        while (i < 6 && cachep->write_cache_len != 0) {
-
-            /* first see if we can send out what we have */
-            _netsnmp_bio_try_and_write_buffered(t, cachep);
-
-            if (cachep->write_cache_len != 0) {
-
+                /* first see if we can send out what we have */
+                _netsnmp_bio_try_and_write_buffered(t, cachep);
+                if (cachep->write_cache_len == 0)
+                    break;
+ 
                 /* if we've failed that, we probably need to wait for packets */
                 FD_ZERO(&readfs);
                 FD_SET(t->sock, &readfs);
                 tv.tv_sec = 0;
-                tv.tv_usec = 500000;
-
-                rc = select(1, &readfs, NULL, NULL, &tv);
-                if (1 || rc > 0) {
+                tv.tv_usec = 50000;
+                rc = select(t->sock+1, &readfs, NULL, NULL, &tv);
+                if (rc > 0) {
                     /* junk recv for catching negotations still in play */
-                    t->base_transport->f_recv(t, buf, sizeof(buf),
-                                              &opaque, &opaque_len);
-                    SNMP_FREE(opaque);
                     opaque_len = 0;
+                    netsnmp_dtlsudp_recv(t, buf, sizeof(buf),
+                                         &opaque, &opaque_len);
+                    SNMP_FREE(opaque);
                 }
-            }
-            i++;
+            } /* for loop */
+        }
+
+        /** dump anything that wasn't sent */
+        if (cachep->write_cache_len > 0) {
+            DEBUGMSGTL(("dtlsudp:close", "dumping %d bytes from write_cache\n",
+                        cachep->write_cache_len));
+            SNMP_FREE(cachep->write_cache);
+            cachep->write_cache_len = 0;
         }
     }
 
@@ -1281,22 +1307,18 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
             sending a close_notify TLS Alert to inform the other side that
             session cleanup may be performed.
     */
-    if (NULL != cachep && NULL != cachep->tlsdata &&
-        NULL != cachep->tlsdata->ssl) {
-        DEBUGMSGTL(("dtlsudp", "closing SSL socket\n"));
+    if (NULL != cachep->tlsdata && NULL != cachep->tlsdata->ssl) {
+
+        DEBUGMSGTL(("dtlsudp:close", "closing SSL socket\n"));
         SSL_shutdown(cachep->tlsdata->ssl);
+
+        /* send the close_notify we maybe generated in step 4 */
+        if (BIO_ctrl_pending(cachep->write_bio) > 0)
+            _netsnmp_send_queued_dtls_pkts(t, cachep);
     }
 
-    /* (this will include the close_notify we maybe generated in step 4 */
-    if (cachep && BIO_ctrl_pending(cachep->write_bio) > 0) {
-        _netsnmp_send_queued_dtls_pkts(t, cachep);
-    }
+    remove_and_free_bio_cache(cachep);
 
-    if (NULL != cachep && NULL != cachep->tlsdata &&
-        NULL != cachep->tlsdata->ssl) {
-        DEBUGMSGTL(("dtlsudp", "freeing OpenSSL datad\n"));
-        remove_and_free_bio_cache(cachep);
-    }
     return netsnmp_socketbase_close(t);
 }
 
@@ -1593,11 +1615,11 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
 
     /* Read peer information */
     cachep = SSL_get_ex_data(ssl, openssl_addr_index);
-    peer = (_peer_union *) cachep ? &cachep->sas : NULL;
-    if (!peer) {
+    if (!cachep) {
         snmp_log(LOG_ERR, "dtls: failed to get the peer address\n");
         return 0;
     }
+    peer = (_peer_union *)&cachep->sas;
 
     /* Create buffer with peer's address and port */
     length = 0;
@@ -1675,11 +1697,11 @@ int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
     DEBUGMSGT(("dtlsudp:cookie", "verifying %d byte cookie\n", cookie_len));
 
     cachep = SSL_get_ex_data(ssl, openssl_addr_index);
-    peer = (_peer_union *) &cachep->sas;
-    if (!peer) {
+    if (!cachep) {
         snmp_log(LOG_ERR, "dtls: failed to get the peer address\n");
         return 0;
     }
+    peer = (_peer_union *)&cachep->sas;
 
     /* Create buffer with peer's address and port */
     length = 0;
