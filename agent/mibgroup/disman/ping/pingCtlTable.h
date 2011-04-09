@@ -92,21 +92,10 @@
 #include <ctype.h>
 #include <linux/errqueue.h>
 
-/* #include <linux/in6.h>  */
-/* #include <linux/ipv6.h> */
-
-#include "in6.h"
-#include "ipv6.h"
-
-
-#include <linux/icmpv6.h>
 #include <sched.h>
 
-
-
-
-#define	BUFSIZE		1500
-
+#include <netinet/ip6.h>
+#include <netinet/icmp6.h>
 
 
 /*

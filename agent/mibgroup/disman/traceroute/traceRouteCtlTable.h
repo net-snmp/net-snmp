@@ -455,23 +455,16 @@ static const char rcsid[] =
 #include <sys/socket.h>
 #include <sys/time.h>
 
-/* include <linux/ipv6.h> */
-/* include <linux/in6.h> */
-
-#include "in6.h"
-#include "ipv6.h"
-
-#include <linux/icmpv6.h>
 
 #include <netinet/in_systm.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
-#include "ip_var.h"
 #include <netinet/ip_icmp.h>
 #include <netinet/udp.h>
-#include "udp_var.h"
 
-/* include <linux/if.h> */
+#include <netinet/ip6.h>
+#include <netinet/icmp6.h>
+
 #include <arpa/inet.h>
 
 #include <ctype.h>
@@ -487,7 +480,6 @@ static const char rcsid[] =
 #include <string.h>
 #include <unistd.h>
 
-#include "gnuc.h"
 #ifdef HAVE_OS_PROTO_H
 #include "os-proto.h"
 #endif
@@ -575,8 +567,8 @@ struct ifaddrlist {
 char           *prog;
 
 struct pkt_format {
-    __u32           ident;
-    __u32           seq;
+    u_int32_t       ident;
+    u_int32_t       seq;
     struct timeval  tv;
 };
 

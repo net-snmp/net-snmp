@@ -176,6 +176,9 @@
 /* Define to 1 if you have the `gethostbyname' function. */
 #undef HAVE_GETHOSTBYNAME
 
+/* Define to 1 if you have the `gethostbyname2' function. */
+#undef HAVE_GETHOSTBYNAME2
+
 /* Define to 1 if you have the `gethostname' function. */
 #undef HAVE_GETHOSTNAME
 
