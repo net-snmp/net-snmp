@@ -79,6 +79,12 @@ typedef enum {
     MIB_TCP6_CONN,
     MIB_UDP6_ENDPOINT,
 #endif
+#ifdef MIB2_SCTP
+    MIB_SCTP,
+    MIB_SCTP_CONN,
+    MIB_SCTP_CONN_LOCAL,
+    MIB_SCTP_CONN_REMOTE,
+#endif
     MIBCACHE_SIZE	
 } mibgroup_e;
 

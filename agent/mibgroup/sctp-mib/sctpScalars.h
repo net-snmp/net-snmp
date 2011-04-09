@@ -9,6 +9,8 @@ config_require(sctp-mib/sctpScalars_common)
 config_require(sctp-mib/sctpScalars_linux)
 #elif defined( freebsd8 ) || defined ( freebsd7 )
 config_require(sctp-mib/sctpScalars_freebsd)	 
+#elif defined( solaris2 )
+config_require(sctp-mib/sctpScalars_solaris2)	 
 #else
 /*
  * couldn't determine the correct file!
