@@ -7,9 +7,6 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -17,8 +14,8 @@
 #if HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_STDLIB_H
-#include <stdlib.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 
 #if TIME_WITH_SYS_TIME
@@ -186,7 +183,7 @@ date_n_time(const time_t * when, size_t * length)
     }
 #endif
 
-#ifdef SYSV
+#if defined(SYSV) && !HAVE_TM_TM_GMTOFF
     /*
      * Daylight saving time
      */
