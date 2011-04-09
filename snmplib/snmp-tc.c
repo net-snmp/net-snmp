@@ -183,7 +183,7 @@ date_n_time(const time_t * when, size_t * length)
     }
 #endif
 
-#if defined(SYSV) && !HAVE_TM_TM_GMTOFF
+#if defined(SYSV) && !HAVE_STRUCT_TM_TM_GMTOFF
     /*
      * Daylight saving time
      */
