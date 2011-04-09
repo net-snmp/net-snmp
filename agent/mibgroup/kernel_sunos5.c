@@ -117,6 +117,14 @@ mibcache        Mibcache[MIBCACHE_SIZE+1] = {
     {MIB_UDP6_ENDPOINT, 1000 * sizeof(mib2_udp6Entry_t), (void *) -1, 0, 30,
      0, 0},
 #endif
+#ifdef MIB2_SCTP
+    {MIB_SCTP, sizeof(mib2_sctp_t), (void *)-1, 0, 60, 0, 0},
+    {MIB_SCTP_CONN, sizeof(mib2_sctpConnEntry_t), (void *)-1, 0, 60, 0, 0},
+    {MIB_SCTP_CONN_LOCAL, sizeof(mib2_sctpConnLocalEntry_t), (void *)-1, 0,
+     60, 0, 0},
+    {MIB_SCTP_CONN_REMOTE, sizeof(mib2_sctpConnRemoteEntry_t), (void *)-1, 0,
+     60, 0, 0},
+#endif
     {0},
 };
 
@@ -146,6 +154,12 @@ mibmap          Mibmap[MIBCACHE_SIZE+1] = {
     {MIB2_IP6, MIB2_IP6_ADDR},
     {MIB2_TCP6, MIB2_TCP6_CONN},
     {MIB2_UDP6, MIB2_UDP6_ENTRY},
+#endif
+#ifdef MIB2_SCTP
+    {MIB2_SCTP, 0},
+    {MIB2_SCTP, MIB2_SCTP_CONN},
+    {MIB2_SCTP, MIB2_SCTP_CONN_LOCAL},
+    {MIB2_SCTP, MIB2_SCTP_CONN_REMOTE},
 #endif
     {0},
 };
