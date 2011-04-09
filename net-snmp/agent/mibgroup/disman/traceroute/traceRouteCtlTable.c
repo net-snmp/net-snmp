@@ -5387,20 +5387,20 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
 
                         switch (i - 1) {
-                        case ICMPV6_PORT_UNREACH:
+                        case ICMP6_DST_UNREACH_NOPORT:
                             ++got_there;
                             break;
 
-                        case ICMPV6_NOROUTE:
+                        case ICMP6_DST_UNREACH_NOROUTE:
                             ++unreachable;
                             Printf(" !N");
                             break;
-                        case ICMPV6_ADDR_UNREACH:
+                        case ICMP6_DST_UNREACH_ADDR:
                             ++unreachable;
                             Printf(" !H");
                             break;
 
-                        case ICMPV6_ADM_PROHIBITED:
+                        case ICMP6_DST_UNREACH_ADMIN:
                             ++unreachable;
                             Printf(" !S");
                             break;
@@ -5728,6 +5728,19 @@ wait_for_reply_v6(int sock, struct sockaddr_in6 *from, int reset_timer,
     return (cc);
 }
 
+/*
+ * send_probe() uses the BSD-ish udpiphdr.
+ * Define something that looks enough like it to work.
+ */
+struct udpiphdr {
+   struct iphdr ui_i;
+   struct udphdr ui_u;
+};
+#define ui_src ui_i.saddr
+#define ui_dst ui_i.daddr
+#define ui_pr ui_i.protocol
+#define ui_len ui_i.tot_len
+
 void
 send_probe(struct sockaddr_in *whereto, register int seq, int ttl,
            register struct timeval *tp, register struct ip *outip,
@@ -5938,23 +5951,23 @@ int
 packet_ok_v6(u_char * buf, int cc, struct sockaddr_in6 *from, int seq,
              struct timeval *tv, pid_t ident)
 {
-    struct icmp6hdr *icp = NULL;
+    struct icmp6_hdr *icp = NULL;
     u_char          type, code;
 
-    icp = (struct icmp6hdr *) buf;
+    icp = (struct icmp6_hdr *) buf;
 
     type = icp->icmp6_type;
     code = icp->icmp6_code;
 
-    if ((type == ICMPV6_TIME_EXCEED && code == ICMPV6_EXC_HOPLIMIT) ||
-        type == ICMPV6_DEST_UNREACH) {
-        struct ipv6hdr *hip = NULL;
+    if ((type == ICMP6_TIME_EXCEEDED && code == ICMP6_TIME_EXCEED_TRANSIT) ||
+        type == ICMP6_DST_UNREACH) {
+        struct ip6_hdr  *hip = NULL;
         struct udphdr  *up = NULL;
         int             nexthdr = 0;
 
-        hip = (struct ipv6hdr *) (icp + 1);
+        hip = (struct ip6_hdr *) (icp + 1);
         up = (struct udphdr *) (hip + 1);
-        nexthdr = hip->nexthdr;
+        nexthdr = hip->ip6_nxt;
 
         if (nexthdr == 44) {
             nexthdr = *(unsigned char *) up;
@@ -5967,7 +5980,7 @@ packet_ok_v6(u_char * buf, int cc, struct sockaddr_in6 *from, int seq,
 
             if (ntohl(pkt->ident) == ident && ntohl(pkt->seq) == seq) {
                 *tv = pkt->tv;
-                return (type == ICMPV6_TIME_EXCEED ? -1 : code + 1);
+                return (type == ICMP6_TIME_EXCEEDED ? -1 : code + 1);
             }
         }
 
