@@ -23,7 +23,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "20 Jul 2010" VVERSIONINFO "Net-SNMP"
+.TH SNMPTRAPD 8 "30 Mar 2011" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmptrapd - Receive and log SNMP trap messages.
 .SH SYNOPSIS
@@ -307,7 +307,8 @@ connection to the master snmpd agent and registering the notification
 log tables.  As long as the snmpd application is started first, it
 will attach itself to it and thus you should be able to view the last
 recorded notifications via the nlmLogTable and nlmLogVariableTable.
-See the snmptrapd.conf file and the "dontRetainLogs" token for turning
+See the snmptrapd.conf file and the "doNotRetainNotificationLogs" token
+for turning
 off this support.  See the NOTIFICATION-LOG-MIB for more details about
 the MIB itself.
 .SH EXTENSIBILITY AND CONFIGURATION
