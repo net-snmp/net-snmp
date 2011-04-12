@@ -132,6 +132,9 @@ bsdi              OBJECT IDENTIFIER ::= { ucdSnmpAgent 11 }
 openbsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 12 }
 win32		  OBJECT IDENTIFIER ::= { ucdSnmpAgent 13 } -- unlucky
 hpux11            OBJECT IDENTIFIER ::= { ucdSnmpAgent 14 }
+aix               OBJECT IDENTIFIER ::= { ucdSnmpAgent 15 }
+macosx            OBJECT IDENTIFIER ::= { ucdSnmpAgent 16 }
+dragonfly         OBJECT IDENTIFIER ::= { ucdSnmpAgent 17 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
 
