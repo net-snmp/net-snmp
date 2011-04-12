@@ -103,6 +103,7 @@ static int      localdebug;
 static int      exitval = 0;
 static int      use_getbulk = 1;
 static int      max_getbulk = 10;
+static int      extra_columns = 0;
 
 void            usage(void);
 void            get_field_names(void);
@@ -352,6 +353,8 @@ main(int argc, char *argv[])
 
     if (total_entries == 0)
         printf("%s: No entries\n", table_name);
+    if (extra_columns)
+	printf("%s: WARNING: More columns on agent than in MIB\n", table_name);
 
     return 0;
 }
@@ -865,6 +868,15 @@ getbulk_table_entries(netsnmp_session * ss)
                         printf("%s => taken\n",
                                buf ? (char *) buf : "[NIL]");
                     }
+                    for (col = 0; col < fields; col++)
+                        if (column[col].subid == vars->name[rootlen])
+                            break;
+		    if (col == fields) {
+			extra_columns = 1;
+			last_var = vars;
+			vars = vars->next_variable;
+			continue;
+		    }
                     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                               NETSNMP_DS_LIB_EXTENDED_INDEX)) {
                         name_p = strchr(buf, '[');
@@ -945,9 +957,6 @@ getbulk_table_entries(netsnmp_session * ss)
                     for (cp = buf; *cp; cp++)
                         if (*cp == '\n')
                             *cp = ' ';
-                    for (col = 0; col < fields; col++)
-                        if (column[col].subid == vars->name[rootlen])
-                            break;
                     dp[col] = buf;
                     i = out_len;
                     buf = NULL;
