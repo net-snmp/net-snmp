@@ -882,7 +882,8 @@ sub process {
 	      foreach $varbind (@{$notifyvars{$currentnotify}}) {
 		#		print "looping on $var for $varbind\n";
 		  $return = do_a_loop($stash, \$vars{$var}, $varbind,
-				      \$currentvarbind, $varbind);
+				          \$currentvarbind, $varbind,
+				              \$currentvar, $varbind);
 	      }
 	    }
             m2c_die("foreach did not end with \@end@") if($return ne "end");
