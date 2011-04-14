@@ -311,7 +311,7 @@ sub process_vars {
 
     # mib substitutions ($var.type -> $mibnode->{'type'})
    if ( $it =~ /\$(\w+)\.(\w+)/ ) {
-    if ($SNMP::MIB{$vars{$1}} && $SNMP::MIB{$vars{$1}}{'label'} =~ /Table$/) {
+    if ($SNMP::MIB{$vars{$1}} && defined($tables{$SNMP::MIB{$vars{$1}}{'label'}})) {
       $it =~ s/\$(\w+)\.(settable)/(table_is_writable($SNMP::MIB{$vars{$1}}{label}))/eg;
       $it =~ s/\$(\w+)\.(creatable)/(table_has_create($SNMP::MIB{$vars{$1}}{label}))/eg;
       $it =~ s/\$(\w+)\.(rowstatus)/(table_has_rowstatus($SNMP::MIB{$vars{$1}}{label}))/eg;
@@ -1045,7 +1045,7 @@ sub mib2c_output {
 
 sub setup_data {
     my $mib = shift;
-    if ($mib->{label} =~ /Table$/) {
+    if ($mib->{label} =~ /Table$/ && $#{$mib->{children}} != -1) {
 	my $tablename = $mib->{label};
 	my $entry = $mib->{children};
 	my $columns = $entry->[0]{children};
