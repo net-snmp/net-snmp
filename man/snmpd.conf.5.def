@@ -667,6 +667,28 @@ Disks mounted after the agent has started will not be monitored.
 .PP
 If neither any \fIdisk\fR directives or \fIincludeAllDisks\fR are defined,
 then walking the \fCdskTable\fR will fail (\fInoSuchObject\fI).
+.SS Disk I/O Monitoring
+This requires that the agent was built with support for the
+\fIucd-snmp/diskio\fR module (which is not included as part of the
+default build configuration).
+.PP
+By default, all block devices known to the operating system are
+included in the diskIOTable. On platforms other than Linux, this module
+has no configuration directives.
+.PP
+On Linux systems, it is possible to exclude several classes of block
+devices from the diskIOTable in order to avoid cluttering the table with
+useless zero statistics for pseudo-devices that often are not in use but
+are configured by default to exist in most recent Linux distributions.
+.IP "diskio_exclude_fd yes"
+Excludes all Linux floppy disk block devices, whose names start with "fd",
+e.g. "fd0"
+.IP "diskio_exclude_loop yes"
+Excludes all Linux loopback block devices, whose names start with "loop",
+e.g. "loop0"
+.IP "diskio_exclude_ram yes"
+Excludes all LInux ramdisk block devices, whose names start with "ram", e.g.
+"ram0"
 .SS System Load Monitoring
 This requires that the agent was built with support for either the
 \fIucd-snmp/loadave\fR module or the \fIucd-snmp/memory\fR module

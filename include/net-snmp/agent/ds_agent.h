@@ -28,9 +28,16 @@
 #define NETSNMP_DS_APP_DONT_LOG         NETSNMP_DS_AGENT_DONT_RETAIN_NOTIFICATIONS /* compat */
 #define NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES    13   /* 1 = don't store NFS entries in hrStorageTable */
 
-/* WARNING: The trap receiver uses DS flags and must not conflict with
-   these!  If you use a value above 15, change the minimimum DS bool
-   value in snmptrapd_log.h */
+   /* Repeated from "apps/snmptrapd_ds.h" */
+#define NETSNMP_DS_APP_NUMERIC_IP       16
+#define NETSNMP_DS_APP_NO_AUTHORIZATION 17
+
+#define NETSNMP_DS_AGENT_DISKIO_NO_FD   18      /* 1 = don't report /dev/fd*   entries in diskIOTable */
+#define NETSNMP_DS_AGENT_DISKIO_NO_LOOP 19      /* 1 = don't report /dev/loop* entries in diskIOTable */
+#define NETSNMP_DS_AGENT_DISKIO_NO_RAM  20      /* 1 = don't report /dev/ram*  entries in diskIOTable */
+
+/* WARNING: The trap receiver also uses DS flags and must not conflict with these!
+ * If you define additional boolean entries, check in "apps/snmptrapd_ds.h" first */
 
 /*
  * strings 
