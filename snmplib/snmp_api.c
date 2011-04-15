@@ -6494,7 +6494,8 @@ netsnmp_oid_is_subtree(const oid * in_name1,
  * @param len1     Length of the first oid.
  * @param in_name2 A pointer to the second oid.
  * @param len2     Length of the second oid.
- * @return length of largest common index of commonality.  1 = first, 0 if none *         or -1 on error.
+ * @return         length of common prefix
+ *                 0 if no common prefix, -1 on error.
  */
 int
 netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
@@ -6511,9 +6512,12 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
     min_size = SNMP_MIN(len1, len2);
     for(i = 0; i < (int)min_size; i++) {
         if (in_name1[i] != in_name2[i])
-            return i + 1;    /* Why +1 ?? */
+            return i;    /* 'í' is the first differing subidentifier
+                            So the common prefix is 0..(i-1), of length i */
     }
-    return min_size;	/* or +1? - the spec isn't totally clear */
+    return min_size;	/* The shorter OID is a prefix of the longer, and
+                           hence is precisely the common prefix of the two.
+                           Return its length. */
 }
 
 static int _check_range(struct tree *tp, long ltmp, int *resptr,
