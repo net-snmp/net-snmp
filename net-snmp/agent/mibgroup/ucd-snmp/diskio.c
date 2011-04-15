@@ -117,6 +117,8 @@ void		devla_getstats(unsigned int regno, void *dummy);
 
 FILE           *file;
 
+static void	diskio_free_config(void);
+
          /*********************
 	 *
 	 *  Initialisation & common implementation functions
@@ -226,7 +228,35 @@ init_diskio(void)
     snmp_alarm_register(DISKIO_SAMPLE_INTERVAL, SA_REPEAT, devla_getstats, NULL);
 #endif
 
+
+#ifdef linux
+    char *app = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                      NETSNMP_DS_LIB_APPTYPE);
+    netsnmp_ds_register_config(ASN_BOOLEAN, app, "diskio_exclude_fd",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_FD);
+    netsnmp_ds_register_config(ASN_BOOLEAN, app, "diskio_exclude_loop",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_LOOP);
+    netsnmp_ds_register_config(ASN_BOOLEAN, app, "diskio_exclude_ram",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_RAM);
+
+        /* or possible an exclusion pattern? */
+#endif
 }
+
+static void
+diskio_free_config(void)
+{
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_DISKIO_NO_FD,   0);
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_DISKIO_NO_LOOP, 0);
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_DISKIO_NO_RAM,  0);
+}
+
 
 #ifdef solaris2
 int
@@ -922,6 +952,23 @@ void devla_getstats(unsigned int regno, void * dummy) {
     }
 }
 
+int is_excluded(const char *name)
+{
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_FD)
+                           && !(strncmp(name, "fd", 2)))
+        return 1;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_LOOP)
+                           && !(strncmp(name, "loop", 4)))
+        return 1;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_RAM)
+                           && !(strncmp(name, "ram", 3)))
+        return 1;
+    return 0;
+}
+
 static int
 getstats(void)
 {
@@ -962,7 +1009,8 @@ getstats(void)
 		    &pTemp->major, &pTemp->minor, pTemp->name,
 		    &pTemp->rio, &pTemp->rsect,
 		    &pTemp->wio, &pTemp->wsect);
-	    head.length++;
+            if (!is_excluded(pTemp->name))
+	        head.length++;
 	}
     }
     else {
@@ -1000,7 +1048,8 @@ getstats(void)
                fclose(parts);
                return 1;
             }
-	    head.length++;
+            if (!is_excluded(pTemp->name))
+	        head.length++;
 	}
     }
 

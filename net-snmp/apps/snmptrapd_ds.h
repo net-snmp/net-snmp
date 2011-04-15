@@ -1,7 +1,12 @@
 #ifndef SNMPTRAPD_DS_H
 #define SNMPTRAPD_DS_H
 
-/* these must not conflict with agent's DS booleans */
+/* booleans
+ *
+ * WARNING: These must not conflict with the agent's DS booleans
+ * If you define additional entries here, check in <agent/ds_agent.h> first
+ *  (and consider repeating the definitions there) */
+
 #define NETSNMP_DS_APP_NUMERIC_IP       16
 #define NETSNMP_DS_APP_NO_AUTHORIZATION 17
 
