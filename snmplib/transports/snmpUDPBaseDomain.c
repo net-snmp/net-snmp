@@ -189,9 +189,12 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
     return rc;
 }
 
-#if defined(linux) && defined(IP_PKTINFO)
-
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
+#if  defined(linux) && defined(IP_PKTINFO)
 # define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
+#elif defined(IP_RECVDSTADDR)
+# define netsnmp_dstaddr(x) (&(struct cmsghr *)(CMSG_DATA(x)))
+#endif
 
 int
 netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
@@ -200,7 +203,11 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 {
     int r, r2;
     struct iovec iov[1];
+#if  defined(linux) && defined(IP_PKTINFO)
     char cmsg[CMSG_SPACE(sizeof(struct in_pktinfo))];
+#elif defined(IP_RECVDSTADDR)
+    char cmsg[CMSG_SPACE(sizeof(struct in_addr))];
+#endif
     struct cmsghdr *cmsgptr;
     struct msghdr msg;
 
@@ -226,6 +233,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 
     DEBUGMSGTL(("udpbase:recv", "got source addr: %s\n",
                 inet_ntoa(((struct sockaddr_in *)from)->sin_addr)));
+#if  defined(linux) && defined(IP_PKTINFO)
     for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
         if (cmsgptr->cmsg_level != SOL_IP || cmsgptr->cmsg_type != IP_PKTINFO)
             continue;
@@ -238,9 +246,19 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                     inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr),
                     *if_index));
     }
+#elif defined(IP_RECVDSTADDR)
+    for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
+        if (cmsgptr->cmsg_level == IPPROTO_IP && cmsgptr->cmsg_type == IP_RECVDSTADDR) {
+            memcpy((void *) dstip, CMSG_DATA(cmsgptr), sizeof(struct in_addr));
+            DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
+                    inet_ntoa(*dstip)));
+        }
+    }
+#endif
     return r;
 }
 
+#if  defined(linux) && defined(IP_PKTINFO)
 int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
                            struct sockaddr *remote, void *data, int len)
 {
@@ -285,4 +303,34 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     }
     return ret;
 }
-#endif /* linux && IP_PKTINFO */
+#elif defined(IP_RECVDSTADDR)
+int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
+                       void *data, int len)
+{
+    struct iovec iov = { data, len };
+    struct cmsghdr *cm;
+    struct in_addr ip;
+    struct msghdr m;
+    char   cmbuf[CMSG_SPACE(sizeof(struct in_addr))];
+
+    memset(&m, 0, sizeof(struct msghdr));
+    m.msg_name         = remote;
+    m.msg_namelen      = sizeof(struct sockaddr_in);
+    m.msg_iov          = &iov;
+    m.msg_iovlen       = 1;
+    m.msg_control      = cmbuf;
+    m.msg_controllen   = sizeof(cmbuf);
+    m.msg_flags                = 0;
+
+    cm = CMSG_FIRSTHDR(&m);
+    cm->cmsg_len = CMSG_LEN(sizeof(struct in_addr));
+    cm->cmsg_level = IPPROTO_IP;
+    cm->cmsg_type = IP_SENDSRCADDR;
+
+    memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
+
+    return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+}
+#endif
+#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
+
