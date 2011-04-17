@@ -40,7 +40,7 @@
 
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 
-#if defined(linux) && defined(IP_PKTINFO)
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
 
 int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                              socklen_t *fromlen, struct sockaddr *dstip,
@@ -55,7 +55,7 @@ int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
 {
     return netsnmp_udpbase_sendto(fd, srcip, if_index, remote, data, len);
 }
-#endif /* linux && IP_PKTINFO */
+#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 
 netsnmp_transport *
 netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
