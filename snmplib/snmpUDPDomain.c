@@ -127,15 +127,22 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 
 
 
-#if defined(linux) && defined(IP_PKTINFO)
-
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
+#if  defined(linux) && defined(IP_PKTINFO)
 # define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
+#elif defined(IP_RECVDSTADDR)
+# define netsnmp_dstaddr(x) (&(struct cmsghr *)(CMSG_DATA(x)))
+#endif
 
 int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct in_addr *dstip)
 {
     int r;
     struct iovec iov[1];
+#if   defined(linux) && defined(IP_PKTINFO)
     char cmsg[CMSG_SPACE(sizeof(struct in_pktinfo))];
+#elif defined(IP_RECVDSTADDR)
+    char cmsg[CMSG_SPACE(sizeof(struct in_addr))];
+#endif
     struct cmsghdr *cmsgptr;
     struct msghdr msg;
 
@@ -157,6 +164,7 @@ int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, sockl
     }
     
     DEBUGMSGTL(("netsnmp_udp", "got source addr: %s\n", inet_ntoa(((struct sockaddr_in *)from)->sin_addr)));
+#if   defined(linux) && defined(IP_PKTINFO)
     for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
         if (cmsgptr->cmsg_level == SOL_IP && cmsgptr->cmsg_type == IP_PKTINFO) {
             memcpy((void *) dstip, netsnmp_dstaddr(cmsgptr), sizeof(struct in_addr));
@@ -164,9 +172,19 @@ int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, sockl
                     inet_ntoa(*dstip)));
         }
     }
+#elif defined(IP_RECVDSTADDR)
+    for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
+        if (cmsgptr->cmsg_level == IPPROTO_IP && cmsgptr->cmsg_type == IP_RECVDSTADDR) {
+            memcpy((void *) dstip, CMSG_DATA(cmsgptr), sizeof(struct in_addr));
+            DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
+                    inet_ntoa(*dstip)));
+        }
+    }
+#endif
     return r;
 }
 
+#if   defined(linux) && defined(IP_PKTINFO)
 int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
 			void *data, int len)
 {
@@ -194,7 +212,36 @@ int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
 
     return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
 }
-#endif /* linux && IP_PKTINFO */
+#elif defined(IP_RECVDSTADDR)
+int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
+			void *data, int len)
+{
+    struct iovec iov = { data, len };
+    struct cmsghdr *cm;
+    struct in_addr ip;
+    struct msghdr m;
+    char   cmbuf[CMSG_SPACE(sizeof(struct in_addr))];
+
+    memset(&m, 0, sizeof(struct msghdr));
+    m.msg_name		= remote;
+    m.msg_namelen	= sizeof(struct sockaddr_in);
+    m.msg_iov		= &iov;
+    m.msg_iovlen	= 1;
+    m.msg_control	= cmbuf;
+    m.msg_controllen	= sizeof(cmbuf);
+    m.msg_flags		= 0;
+
+    cm = CMSG_FIRSTHDR(&m);
+    cm->cmsg_len = CMSG_LEN(sizeof(struct in_addr));
+    cm->cmsg_level = IPPROTO_IP;
+    cm->cmsg_type = IP_SENDSRCADDR;
+
+    memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
+
+    return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+}
+#endif
+#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -223,11 +270,11 @@ netsnmp_udp_recv(netsnmp_transport *t, void *buf, int size,
         }
 
 	while (rc < 0) {
-#if defined(linux) && defined(IP_PKTINFO)
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
             rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen, &(addr_pair->local_addr));
 #else
             rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
-#endif /* linux && IP_PKTINFO */
+#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
@@ -276,11 +323,11 @@ netsnmp_udp_send(netsnmp_transport *t, void *buf, int size,
                     size, buf, str, t->sock));
         free(str);
 	while (rc < 0) {
-#if defined(linux) && defined(IP_PKTINFO)
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
             rc = netsnmp_udp_sendto(t->sock, addr_pair ? &(addr_pair->local_addr) : NULL, to, buf, size);
 #else
             rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
-#endif /* linux && IP_PKTINFO */
+#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 	    if (rc < 0 && errno != EINTR) {
                 DEBUGMSGTL(("netsnmp_udp", "sendto error, rc %d (errno %d)\n",
                             rc, errno));
@@ -659,6 +706,17 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
                 return NULL;
             }
             DEBUGMSGTL(("netsnmp_udp", "set IP_PKTINFO\n"));
+        }
+#elif defined(IP_RECVDSTADDR)
+        { 
+            int sockopt = 1;
+            if (setsockopt(t->sock, IPPROTO_IP, IP_RECVDSTADDR, &sockopt, sizeof sockopt) == -1) {
+                DEBUGMSGTL(("netsnmp_udp", "couldn't set IP_RECVDSTADDR: %s\n",
+                    strerror(errno)));
+                netsnmp_transport_free(t);
+                return NULL;
+            }
+            DEBUGMSGTL(("netsnmp_udp", "set IP_RECVDSTADDR\n"));
         }
 #endif
         rc = bind(t->sock, (struct sockaddr *) addr,
