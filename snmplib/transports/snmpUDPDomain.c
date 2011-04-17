@@ -101,7 +101,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 
 
 
-#if defined(linux) && defined(IP_PKTINFO)
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
 
 int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct sockaddr *dstip, socklen_t *dstlen, int *if_index)
 {
@@ -116,7 +116,7 @@ int netsnmp_udp_sendto(int fd, struct in_addr *srcip, int if_index, struct socka
     /** udpiv4 just calls udpbase. should we skip directly to there? */
     return netsnmp_udpipv4_sendto(fd, srcip, if_index, remote, data, len);
 }
-#endif /* linux && IP_PKTINFO */
+#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 
 /*
  * Open a UDP-based transport for SNMP.  Local is TRUE if addr is the local
