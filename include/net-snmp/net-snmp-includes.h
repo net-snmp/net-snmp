@@ -67,6 +67,7 @@
 #include <net-snmp/definitions.h>
 #include <net-snmp/types.h>
 
+#include <net-snmp/library/getopt.h>
 #include <net-snmp/utilities.h>
 #include <net-snmp/session_api.h>
 #include <net-snmp/pdu_api.h>
