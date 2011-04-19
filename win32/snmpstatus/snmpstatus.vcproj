@@ -41,7 +41,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/snmpstatus.tlb"
+				TypeLibraryName="$(IntDir)/snmpstatus.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -55,7 +55,7 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/snmpstatus.pch"
+				PrecompiledHeaderFile="$(IntDir)/snmpstatus.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -76,7 +76,7 @@
 				OutputFile="../$(IntDir)/snmpstatus.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="../lib/release"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetName).pdb"
 				SubSystem="1"
@@ -94,100 +94,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/snmpstatus.bsc"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug/snmpstatus.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP3"
-				Optimization="0"
-				AdditionalIncludeDirectories=".,..,..\..\snmplib,..\..,..\..\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
-				StringPooling="true"
-				MinimalRebuild="true"
-				RuntimeLibrary="3"
-				BufferSecurityCheck="false"
-				PrecompiledHeaderFile=".\Debug/snmpstatus.pch"
-				BrowseInformation="1"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
-				OutputFile="../$(IntDir)/snmpstatus.exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="../lib/debug"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(IntDir)/$(TargetName).pdb"
-				SubSystem="1"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile=".\Debug/snmpstatus.bsc"
+				OutputFile="$(IntDir)/snmpstatus.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -227,7 +134,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\Release/snmpstatus.tlb"
+				TypeLibraryName="$(IntDir)/snmpstatus.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -241,7 +148,7 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/snmpstatus.pch"
+				PrecompiledHeaderFile="$(IntDir)/snmpstatus.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -262,7 +169,7 @@
 				OutputFile="../$(IntDir)/snmpstatus.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="../lib/release"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetName).pdb"
 				SubSystem="1"
@@ -280,7 +187,100 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/snmpstatus.bsc"
+				OutputFile="$(IntDir)/snmpstatus.bsc"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName="$(IntDir)/snmpstatus.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP3"
+				Optimization="0"
+				AdditionalIncludeDirectories=".,..,..\..\snmplib,..\..,..\..\include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				MinimalRebuild="true"
+				RuntimeLibrary="3"
+				BufferSecurityCheck="false"
+				PrecompiledHeaderFile="$(IntDir)/snmpstatus.pch"
+				BrowseInformation="1"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
+				OutputFile="../$(IntDir)/snmpstatus.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories=""
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(IntDir)/$(TargetName).pdb"
+				SubSystem="1"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				SuppressStartupBanner="true"
+				OutputFile="$(IntDir)/snmpstatus.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -320,7 +320,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\Debug/snmpstatus.tlb"
+				TypeLibraryName="$(IntDir)/snmpstatus.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -333,7 +333,7 @@
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
-				PrecompiledHeaderFile=".\Debug/snmpstatus.pch"
+				PrecompiledHeaderFile="$(IntDir)/snmpstatus.pch"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
@@ -356,7 +356,7 @@
 				OutputFile="../$(IntDir)/snmpstatus.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="../lib/debug"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetName).pdb"
 				SubSystem="1"
@@ -374,7 +374,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/snmpstatus.bsc"
+				OutputFile="$(IntDir)/snmpstatus.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"

@@ -52,7 +52,7 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/netsnmpmibs.pch"
+				PrecompiledHeaderFile="$(IntDir)/netsnmpmibs.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -80,7 +80,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\../lib/release/netsnmpmibs.bsc"
+				OutputFile="../lib/$(IntDir)/netsnmpmibs.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -124,7 +124,7 @@
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
-				PrecompiledHeaderFile=".\Debug/netsnmpmibs.pch"
+				PrecompiledHeaderFile="$(IntDir)/netsnmpmibs.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -153,7 +153,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\../lib/debug/netsnmpmibs.bsc"
+				OutputFile="../lib/$(IntDir)/netsnmpmibs.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -199,7 +199,7 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/netsnmpmibs.pch"
+				PrecompiledHeaderFile="$(IntDir)/netsnmpmibs.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -227,7 +227,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\../lib/release/netsnmpmibs.bsc"
+				OutputFile="../lib/$(IntDir)/netsnmpmibs.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -272,7 +272,7 @@
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
-				PrecompiledHeaderFile=".\Debug/netsnmpmibs.pch"
+				PrecompiledHeaderFile="$(IntDir)/netsnmpmibs.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -301,7 +301,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\../lib/debug/netsnmpmibs.bsc"
+				OutputFile="../lib/$(IntDir)/netsnmpmibs.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
