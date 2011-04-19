@@ -51,7 +51,7 @@
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
-				PrecompiledHeaderFile=".\Debug/libnetsnmptrapd.pch"
+				PrecompiledHeaderFile="$(IntDir)/libnetsnmptrapd.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -80,7 +80,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\../lib/debug/libnetsnmptrapd.bsc"
+				OutputFile="../lib/$(IntDir)/libnetsnmptrapd.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -125,7 +125,7 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/libnetsnmptrapd.pch"
+				PrecompiledHeaderFile="$(IntDir)/libnetsnmptrapd.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -153,7 +153,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\../lib/release/libnetsnmptrapd.bsc"
+				OutputFile="../lib/$(IntDir)/libnetsnmptrapd.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -198,7 +198,7 @@
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
-				PrecompiledHeaderFile=".\Debug/libnetsnmptrapd.pch"
+				PrecompiledHeaderFile="$(IntDir)/libnetsnmptrapd.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -227,7 +227,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\../lib/debug/libnetsnmptrapd.bsc"
+				OutputFile="../lib/$(IntDir)/libnetsnmptrapd.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -273,7 +273,7 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/libnetsnmptrapd.pch"
+				PrecompiledHeaderFile="$(IntDir)/libnetsnmptrapd.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -301,7 +301,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\../lib/release/libnetsnmptrapd.bsc"
+				OutputFile="../lib/$(IntDir)/libnetsnmptrapd.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
