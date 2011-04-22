@@ -13,6 +13,9 @@ netsnmp_feature_require(container_fifo)
 #define MAX_MESSAGE_COUNT 32
 #define BASE_PACKET_SIZE 100 /* should be enough to store SNMPv3 msg headers */
 
+/* if v is !NULL, then estimate it's likely size */
+#define ESTIMATE_VAR_SIZE(v) (v?(v->name_length + v->val_len + 8):0)
+
 void parse_deliver_config(const char *, char *);
 void parse_deliver_maxsize_config(const char *, char *);
 void parse_data_notification_oid_config(const char *, char *);
@@ -298,6 +301,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
 
             /* Set up the notification itself */
             deliver_notification = NULL;
+            estimated_pkt_size = BASE_PACKET_SIZE;
 
             /* add in the notification type */
             snmp_varlist_add_variable(&deliver_notification,
@@ -305,6 +309,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                                       ASN_OBJECT_ID,
                                       data_notification_oid,
                                       data_notification_oid_len * sizeof(oid));
+            estimated_pkt_size += ESTIMATE_VAR_SIZE(deliver_notification);
 
             /* add in the current message number in this sequence */
             if (!(obj->flags & NETSNMP_DELIVER_NO_PERIOD_OID)) {
@@ -315,10 +320,10 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                                           ASN_UNSIGNED,
                                           (const void *) &tmp_long,
                                           sizeof(tmp_long));
+                estimated_pkt_size += ESTIMATE_VAR_SIZE(deliver_notification);
             }
 
             /* add in the current message number in this sequence */
-            estimated_pkt_size = BASE_PACKET_SIZE;
             message_count++;
             if (message_count > MAX_MESSAGE_COUNT) {
                 snmp_log(LOG_ERR, "delivery construct grew too large...  giving up\n");
@@ -334,6 +339,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                                           ASN_UNSIGNED,
                                           (const void *) &message_count,
                                           sizeof(message_count));
+                estimated_pkt_size += ESTIMATE_VAR_SIZE(deliver_notification);
 
                 /* add in the max message number count for this sequence */
                 vartmp = snmp_varlist_add_variable(&deliver_notification,
@@ -342,6 +348,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                                                    ASN_UNSIGNED,
                                                    (const void *) &max_message_count,
                                                    sizeof(max_message_count));
+                estimated_pkt_size += ESTIMATE_VAR_SIZE(deliver_notification);
 
                 /* we'll need to update this counter later */
                 max_message_count_ptrs[message_count-1] =
@@ -356,14 +363,19 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                                           walker->val.string, walker->val_len);
 
                 /* 8 byte padding for ASN encodings an a few extra OID bytes */
-                estimated_pkt_size += walker->name_length + walker->val_len + 8;
+                estimated_pkt_size += ESTIMATE_VAR_SIZE(walker);
 
                 walker = walker->next_variable;
 
                 DEBUGMSGTL(("deliverByNotify", "  size: %d / %d\n",
                             estimated_pkt_size, obj->max_packet_size));
+
+                /* if the current size PLUS the next one (which is now
+                   in 'walker') is greater than the limet then we stop here */
                 if (obj->max_packet_size > 0 &&
-                    estimated_pkt_size >= obj->max_packet_size) {
+                    estimated_pkt_size +
+                    ESTIMATE_VAR_SIZE(walker) >=
+                    obj->max_packet_size) {
                     break;
                 }
             }
