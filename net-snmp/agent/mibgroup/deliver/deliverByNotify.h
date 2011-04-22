@@ -12,6 +12,8 @@
 # endif
 #endif
 
+config_add_mib(NET-SNMP-PERIODIC-NOTIFY-MIB)
+
 void init_deliverByNotify(void);
 
 void parse_deliver_config(const char *, char *);
