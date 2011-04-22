@@ -21,6 +21,8 @@ void free_deliver_config(void);
 
 SNMPAlarmCallback deliver_execute;
 
+#define NETSNMP_DELIVER_NO_PERIOD_OID   0x01
+#define NETSNMP_DELIVER_NO_MSG_COUNTS   0x02
 
 /* implementation details */
 typedef struct deliver_by_notify_s {
@@ -30,6 +32,7 @@ typedef struct deliver_by_notify_s {
    oid    *target;
    size_t  target_len;
    int     max_packet_size;
+   int     flags;
 } deliver_by_notify;
 
 int calculate_time_until_next_run(deliver_by_notify *it, time_t *now);

@@ -47,7 +47,7 @@ init_deliverByNotify(void)
     /* register the config tokens */
     snmpd_register_config_handler("deliverByNotify",
                                   &parse_deliver_config, &free_deliver_config,
-                                  "[-f frequency] [-s maxsize] FREQUENCY OID");
+                                  "[-p] [-m] [-s maxsize] FREQUENCY OID");
 
     snmpd_register_config_handler("deliverByNotifyMaxPacketSize",
                                   &parse_deliver_maxsize_config, NULL,
@@ -77,6 +77,7 @@ parse_deliver_config(const char *token, char *line) {
     oid target_oid[MAX_OID_LEN];
     size_t target_oid_len = MAX_OID_LEN;
     deliver_by_notify *new_notify = NULL;
+    int flags = 0;
 
     while(cp && *cp == '-') {
         switch (*(cp+1)) {
@@ -87,12 +88,21 @@ parse_deliver_config(const char *token, char *line) {
                 return;
             }
             max_size = atoi(cp);
-            cp = skip_token_const(cp);
             break;
+
+        case 'p':
+            flags = flags | NETSNMP_DELIVER_NO_PERIOD_OID;
+            break;
+
+        case 'm':
+            flags = flags | NETSNMP_DELIVER_NO_MSG_COUNTS;
+            break;
+
         default:
             config_perror("unknown flag");
             return;
         }
+        cp = skip_token_const(cp);
     }
 
     if (!cp) {
@@ -125,6 +135,7 @@ parse_deliver_config(const char *token, char *line) {
     new_notify->max_packet_size = max_size;
     new_notify->last_run = time(NULL);
     new_notify->next_run = new_notify->last_run + frequency;
+    new_notify->flags = flags;
 
     new_notify->target = malloc(target_oid_len * sizeof(oid));
     new_notify->target_len = target_oid_len;
@@ -214,12 +225,15 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                                   data_notification_oid_len * sizeof(oid));
 
         /* add in the current message number in this sequence */
-        tmp_long = obj->frequency;
-        snmp_varlist_add_variable(&deliver_notification,
-                                  netsnmp_periodic_time_oid,
-                                  OID_LENGTH(netsnmp_periodic_time_oid),
-                                  ASN_UNSIGNED,
-                                  (const void *) &tmp_long, sizeof(tmp_long));
+        if (!(obj->flags & NETSNMP_DELIVER_NO_PERIOD_OID)) {
+            tmp_long = obj->frequency;
+            snmp_varlist_add_variable(&deliver_notification,
+                                      netsnmp_periodic_time_oid,
+                                      OID_LENGTH(netsnmp_periodic_time_oid),
+                                      ASN_UNSIGNED,
+                                      (const void *) &tmp_long,
+                                      sizeof(tmp_long));
+        }
 
         /* add in the current message number in this sequence */
         message_count++;
@@ -229,22 +243,27 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
             // XXX: send a notification about it?
             return;
         }
-        snmp_varlist_add_variable(&deliver_notification,
-                                  netsnmp_message_number_oid,
-                                  OID_LENGTH(netsnmp_message_number_oid),
-                                  ASN_UNSIGNED, (const void *) &message_count,
-                                  sizeof(message_count));
 
-        /* add in the max message number count for this sequence */
-        vartmp = snmp_varlist_add_variable(&deliver_notification,
-                                           netsnmp_max_message_number_oid,
-                                           OID_LENGTH(netsnmp_max_message_number_oid),
-                                           ASN_UNSIGNED,
-                                           (const void *) &max_message_count,
-                                           sizeof(max_message_count));
+        if (!(obj->flags & NETSNMP_DELIVER_NO_MSG_COUNTS)) {
+            snmp_varlist_add_variable(&deliver_notification,
+                                      netsnmp_message_number_oid,
+                                      OID_LENGTH(netsnmp_message_number_oid),
+                                      ASN_UNSIGNED,
+                                      (const void *) &message_count,
+                                      sizeof(message_count));
 
-        /* we'll need to update this counter later */
-        max_message_count_ptrs[message_count-1] = (u_long *) vartmp->val.integer;
+            /* add in the max message number count for this sequence */
+            vartmp = snmp_varlist_add_variable(&deliver_notification,
+                                               netsnmp_max_message_number_oid,
+                                               OID_LENGTH(netsnmp_max_message_number_oid),
+                                               ASN_UNSIGNED,
+                                               (const void *) &max_message_count,
+                                               sizeof(max_message_count));
+
+            /* we'll need to update this counter later */
+            max_message_count_ptrs[message_count-1] =
+                (u_long *) vartmp->val.integer;
+        }
 
         /* copy in the collected data */
         walker = vars;
