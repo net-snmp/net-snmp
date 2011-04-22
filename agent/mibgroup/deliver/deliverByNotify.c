@@ -3,6 +3,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include <limits.h>
+
 netsnmp_feature_require(container_fifo)
 
 #include "deliverByNotify.h"
@@ -11,13 +13,15 @@ void parse_deliver_config(const char *, char *);
 void parse_deliver_maxsize_config(const char *, char *);
 void free_deliver_config(void);
 
+static void _schedule_next_execute_time(void);
+
 oid test_oid[] = {1, 3, 6, 1, 2, 1, 1}; 
 oid data_notification_oid[] = {1, 3, 6, 1, 4, 1, 8072, 9999, 9999, 123, 0};
 oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
 
 #define DEFAULT_MAX_DELIVER_SIZE -1;
 static int default_max_size;
-
+unsigned int alarm_reg;
 static netsnmp_container *deliver_container;
 
 static int
@@ -42,7 +46,7 @@ init_deliverByNotify(void)
                                   &parse_deliver_maxsize_config, NULL,
                                   "sizeInBytes");
 
-    /* */
+    /* create the container to store the config objects*/
     deliver_container = netsnmp_container_find("deliverByNotify:fifo");
     if (NULL == deliver_container) {
         snmp_log(LOG_ERR,
@@ -51,8 +55,11 @@ init_deliverByNotify(void)
     }
     deliver_container->container_name = strdup("deliverByNotify");
     deliver_container->compare = (netsnmp_container_compare *) _deliver_compare;
-    
+
+    /* set the defaults */
     default_max_size = DEFAULT_MAX_DELIVER_SIZE;
+
+    alarm_reg = 0;
 }
 
 void
@@ -122,6 +129,7 @@ parse_deliver_config(const char *token, char *line) {
 
     /* add it to the container */
     CONTAINER_INSERT(deliver_container, new_notify);
+    _schedule_next_execute_time();
 }
 
 void
@@ -136,61 +144,74 @@ free_deliver_config(void) {
 
 void
 deliver_execute(unsigned int clientreg, void *clientarg) {
-    netsnmp_variable_list *vars, *walker, *delivery_notification;
+    netsnmp_variable_list *vars, *walker, *deliver_notification;
     netsnmp_session *sess;
     int rc;
     deliver_by_notify *obj;
+    netsnmp_iterator *iterator;
+    time_t            now = time(NULL);
 
-    snmp_log(LOG_ERR, "got here: deliver by notify\n");
+    DEBUGMSGTL(("deliverByNotify", "Starting the execute routine\n"));
 
     /* XXX: need to do the whole container */
-    obj = CONTAINER_FIRST(deliver_container);
-    vars = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
-    snmp_set_var_objid( vars, obj->target, obj->target_len );
-    vars->type = ASN_NULL;
+    iterator = CONTAINER_ITERATOR(deliver_container);
+    netsnmp_assert_or_return(iterator != NULL,);
 
     sess = netsnmp_query_get_default_session();
 
-    rc = netsnmp_query_walk(vars, sess);
-    if (rc != SNMP_ERR_NOERROR) {
-        snmp_log(LOG_ERR, "deliverByNotify: failed to issue the query");
-        return;
-    }
+    for(obj = ITERATOR_FIRST(iterator); obj;
+        obj = ITERATOR_NEXT(iterator)) {
 
-    delivery_notification = NULL;
-    /* add in the notification type */
-    snmp_varlist_add_variable(&delivery_notification,
-                              objid_snmptrap, OID_LENGTH(objid_snmptrap),
-                              ASN_OBJECT_ID,
-                              data_notification_oid,
-                              sizeof(data_notification_oid));
+        /* check if we need to run this one yet */
+        if (obj->next_run > now)
+            continue;
+
+        /* fill the varbind list with the target object */
+        vars = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+        snmp_set_var_objid( vars, obj->target, obj->target_len );
+        vars->type = ASN_NULL;
+
+        /* walk the OID tree for the data */
+        rc = netsnmp_query_walk(vars, sess);
+        if (rc != SNMP_ERR_NOERROR) {
+            snmp_log(LOG_ERR, "deliverByNotify: failed to issue the query");
+            return;
+        }
+
+        /* Set up the notification itself */
+        deliver_notification = NULL;
+        /* add in the notification type */
+        snmp_varlist_add_variable(&deliver_notification,
+                                  objid_snmptrap, OID_LENGTH(objid_snmptrap),
+                                  ASN_OBJECT_ID,
+                                  data_notification_oid,
+                                  sizeof(data_notification_oid));
     
-    /* copy in the collected data */
-    walker = vars;
-    while(walker) {
-        //print_variable(walker->name, walker->name_length, walker);
+        /* copy in the collected data */
+        walker = vars;
+        while(walker) {
+            //print_variable(walker->name, walker->name_length, walker);
 
-        snmp_varlist_add_variable(&delivery_notification,
-                                  walker->name, walker->name_length,
-                                  walker->type,
-                                  walker->val.string, walker->val_len);
+            snmp_varlist_add_variable(&deliver_notification,
+                                      walker->name, walker->name_length,
+                                      walker->type,
+                                      walker->val.string, walker->val_len);
 
-        walker = walker->next_variable;
+            walker = walker->next_variable;
+        }
+        snmp_free_varbind(vars);
+
+        /* send out the notification */
+        send_v2trap(deliver_notification);
+
+        /* record this as the time processed */
+        /* XXX: this may creep by a few seconds when processing and maybe we want
+           to do the time stamp at the beginning? */
+        obj->last_run = time(NULL);
     }
-    snmp_free_varbind(vars);
-
-    /* send out the notification */
-    send_v2trap(delivery_notification);
-
-    /* record this as the time processed */
-    /* XXX: this may creep by a few seconds when processing and maybe we want
-       to do the time stamp at the beginning? */
-    obj->last_run = time(NULL);
 
     /* calculate the next time to sleep for */
-    /* XXX: do the whole container */
-    snmp_alarm_register(calculate_time_until_next_run(obj, NULL), 0, 
-                        &deliver_execute, NULL);
+    _schedule_next_execute_time();
 }
 
 int
@@ -203,10 +224,48 @@ calculate_time_until_next_run(deliver_by_notify *it, time_t *now) {
         time(&local_now);
     }
 
+    netsnmp_assert_or_return(it->last_run != 0, -1);
+
     /* set the timestamp for the next run */
     it->next_run = it->last_run + it->frequency;
 
-    /* how long since the last run? */
-    return it->next_run - local_now;
+    /* how long until the next run? */
+    return it->next_run - *now;
+}
+
+static void
+_schedule_next_execute_time(void) {
+    time_t             local_now = time(NULL);
+    int                sleep_for = INT_MAX;
+    int                next_time;
+    netsnmp_iterator  *iterator;
+    deliver_by_notify *obj;
+
+    DEBUGMSGTL(("deliverByNotify", "Calculating scheduling needed\n"));
+
+    if (alarm_reg) {
+        snmp_alarm_unregister(alarm_reg);
+        alarm_reg = 0;
+    }
+
+    iterator = CONTAINER_ITERATOR(deliver_container);
+    if (NULL == iterator)
+        return;
+
+    for(obj = ITERATOR_FIRST(iterator); obj;
+        obj = ITERATOR_NEXT(iterator)) {
+        next_time = calculate_time_until_next_run(obj, &local_now);
+        DEBUGMSGTL(("deliverByNotify", "  obj: %d (last=%d, next_run=%d)\n", next_time, obj->last_run, obj->next_run));
+        if (next_time < sleep_for)
+            sleep_for = next_time;
+    }
+
+    if (sleep_for != INT_MAX) {
+        if (sleep_for < 1)
+            sleep_for = 1; /* give at least a small pause */
+        DEBUGMSGTL(("deliverByNotify", "Next execution in %d (max = %d) seconds\n",
+                    sleep_for, INT_MAX));
+        alarm_reg = snmp_alarm_register(sleep_for, 0, &deliver_execute, NULL);
+    }
 }
 
