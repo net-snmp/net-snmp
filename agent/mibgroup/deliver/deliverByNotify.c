@@ -15,7 +15,6 @@ void free_deliver_config(void);
 
 static void _schedule_next_execute_time(void);
 
-oid test_oid[] = {1, 3, 6, 1, 2, 1, 1}; 
 oid data_notification_oid[] = {1, 3, 6, 1, 4, 1, 8072, 9999, 9999, 123, 0};
 oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
 
