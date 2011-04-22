@@ -1615,11 +1615,6 @@ netsnmp_add_queued(netsnmp_agent_session *asp)
 int
 netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
 {
-#ifndef NETSNMP_NO_WRITE_SUPPORT
-    netsnmp_variable_list *var_ptr;
-    int             i;
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
-
     /*
      * if this request was a set, clear the global now that we are
      * done.
@@ -1703,8 +1698,10 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
          */
         if ((asp->pdu->command != SNMP_MSG_SET) &&
             (asp->pdu->version == SNMP_VERSION_1)) {
-            for (var_ptr = asp->pdu->variables, i = 1;
-                 var_ptr != NULL; var_ptr = var_ptr->next_variable, i++) {
+            netsnmp_variable_list *var_ptr = asp->pdu->variables;
+            int                    i = 1;
+
+            while (var_ptr != NULL) {
                 switch (var_ptr->type) {
                     case SNMP_NOSUCHOBJECT:
                     case SNMP_NOSUCHINSTANCE:
@@ -1715,6 +1712,8 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                         asp->index = i;
                         break;
                 }
+                var_ptr = var_ptr->next_variable;
+                ++i;
             }
         }
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
