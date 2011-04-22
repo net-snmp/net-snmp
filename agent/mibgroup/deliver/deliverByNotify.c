@@ -3,6 +3,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+netsnmp_feature_require(container_fifo)
+
 #include "deliverByNotify.h"
 
 void parse_deliver_config(const char *, char *);
@@ -17,10 +19,22 @@ oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
 #define DEFAULT_MAX_DELIVER_SIZE -1;
 static int default_max_size;
 
+static netsnmp_container *deliver_container;
+
+static int
+_deliver_compare(deliver_by_notify *lhs, deliver_by_notify *rhs) {
+    /* sort by the next_run time */
+    if (lhs->next_run < rhs->next_run)
+        return -1;
+    else
+        return 1;
+}
+
 /** Initializes the mteTrigger module */
 void
 init_deliverByNotify(void)
 {
+    /* register the config tokens */
     snmpd_register_config_handler("deliverByNotify",
                                   &parse_deliver_config, &free_deliver_config,
                                   "[-s maxsize] OID");
@@ -28,6 +42,16 @@ init_deliverByNotify(void)
     snmpd_register_config_handler("deliverByNotifyMaxPacketSize",
                                   &parse_deliver_maxsize_config, NULL,
                                   "sizeInBytes");
+
+    /* */
+    deliver_container = netsnmp_container_find("deliverByNotify:fifo");
+    if (NULL == deliver_container) {
+        snmp_log(LOG_ERR,
+                 "deliverByNotify: failed to initialize our data container\n");
+        return;
+    }
+    deliver_container->container_name = strdup("deliverByNotify");
+    deliver_container->compare = (netsnmp_container_compare *) _deliver_compare;
     
     test_notify.frequency = 5;
     test_notify.last_run = time(NULL);
@@ -58,7 +82,6 @@ free_deliver_config(void) {
 
 void
 deliver_execute(unsigned int clientreg, void *clientarg) {
-    netsnmp_pdu pdu;
     netsnmp_variable_list *vars, *walker, *delivery_notification;
     netsnmp_session *sess;
     int rc;
@@ -116,7 +139,6 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
 int
 calculate_time_until_next_run(deliver_by_notify *it, time_t *now) {
     time_t          local_now;
-    int             time_since_last;
 
     /* if we weren't passed a valid time, fake it */
     if (NULL == now) {
@@ -124,8 +146,10 @@ calculate_time_until_next_run(deliver_by_notify *it, time_t *now) {
         time(&local_now);
     }
 
-    time_since_last = local_now - it->last_run;
+    /* set the timestamp for the next run */
+    it->next_run = it->last_run + it->frequency;
 
-    return it->frequency - time_since_last;
+    /* how long since the last run? */
+    return it->next_run - local_now;
 }
 
