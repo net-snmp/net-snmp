@@ -11,6 +11,7 @@ netsnmp_feature_require(container_fifo)
 
 /* we should never split beyond this */
 #define MAX_MESSAGE_COUNT 32
+#define BASE_PACKET_SIZE 100 /* should be enough to store SNMPv3 msg headers */
 
 void parse_deliver_config(const char *, char *);
 void parse_deliver_maxsize_config(const char *, char *);
@@ -259,6 +260,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
     time_t            now = time(NULL);
     u_long            message_count, max_message_count, tmp_long;
     u_long           *max_message_count_ptrs[MAX_MESSAGE_COUNT];
+    size_t            estimated_pkt_size;
 
     DEBUGMSGTL(("deliverByNotify", "Starting the execute routine\n"));
 
@@ -316,6 +318,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
             }
 
             /* add in the current message number in this sequence */
+            estimated_pkt_size = BASE_PACKET_SIZE;
             message_count++;
             if (message_count > MAX_MESSAGE_COUNT) {
                 snmp_log(LOG_ERR, "delivery construct grew too large...  giving up\n");
@@ -352,7 +355,17 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                                           walker->type,
                                           walker->val.string, walker->val_len);
 
+                /* 8 byte padding for ASN encodings an a few extra OID bytes */
+                estimated_pkt_size += walker->name_length + walker->val_len + 8;
+
                 walker = walker->next_variable;
+
+                DEBUGMSGTL(("deliverByNotify", "  size: %d / %d\n",
+                            estimated_pkt_size, obj->max_packet_size));
+                if (obj->max_packet_size > 0 &&
+                    estimated_pkt_size >= obj->max_packet_size) {
+                    break;
+                }
             }
 
             /* send out the notification */
