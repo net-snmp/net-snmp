@@ -374,9 +374,6 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
 
                 walker = walker->next_variable;
 
-                DEBUGMSGTL(("deliverByNotify", "  size: %d / %d\n",
-                            estimated_pkt_size, obj->max_packet_size));
-
                 /* if the current size PLUS the next one (which is now
                    in 'walker') is greater than the limet then we stop here */
                 if (obj->max_packet_size > 0 &&
