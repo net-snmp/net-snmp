@@ -904,8 +904,6 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 {
     netsnmp_pdu    *pdu;
     int            result;
-    int            len;
-
 
     if (!sess || !template_pdu)
         return;
@@ -939,7 +937,7 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
                 (sess->securityEngineIDLen == 0)) {
             u_char          tmp[SPRINT_MAX_LEN];
 
-            len = snmpv3_get_engineID(tmp, sizeof(tmp));
+            int len = snmpv3_get_engineID(tmp, sizeof(tmp));
             memdup(&pdu->securityEngineID, tmp, len);
             pdu->securityEngineIDLen = len;
         }
