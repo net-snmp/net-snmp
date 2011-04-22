@@ -11,7 +11,9 @@ listing of all changes made to the code.
 
   build:
       - New flags to reduce the amount of compiled code to bare minimums.
+        This is provided by a new generic feature marking/selection mechanism.
         http://www.net-snmp.org/wiki/index.php/Feature_Marking_and_Selection
+      - It's now possible to build without SNMPv3/USM
 
 *5.6*
 
