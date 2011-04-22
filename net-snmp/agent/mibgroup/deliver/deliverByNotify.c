@@ -27,4 +27,21 @@ free_deliver_config(void) {
 
 void
 deliver_execute(unsigned int clientreg, void *clientarg) {
+    
+}
+
+int
+calculate_time_until_next_run(deliver_by_notify *it, time_t *now) {
+    time_t          local_now;
+    int             time_since_last;
+
+    /* if we weren't passed a valid time, fake it */
+    if (NULL == now) {
+        now = &local_now;
+        time(&local_now);
+    }
+
+    time_since_last = local_now - it->last_run;
+
+    return time_since_last - it->frequency;
 }
