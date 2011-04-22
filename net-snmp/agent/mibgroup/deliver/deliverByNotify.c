@@ -10,7 +10,7 @@ void parse_deliver_maxsize_config(const char *, char *);
 void free_deliver_config(void);
 
 deliver_by_notify test_notify;
-oid test_oid[] = {1, 3, 6, 1, 6, 3, 1, 2, 2, 6}; 
+oid test_oid[] = {1, 3, 6, 1, 2, 1, 1}; 
 
 #define DEFAULT_MAX_DELIVER_SIZE -1;
 static int default_max_size;
@@ -27,7 +27,7 @@ init_deliverByNotify(void)
                                   &parse_deliver_maxsize_config, NULL,
                                   "sizeInBytes");
     
-    test_notify.frequency = 15;
+    test_notify.frequency = 5;
     test_notify.last_run = time(NULL);
     test_notify.target = malloc(sizeof(test_oid));
     memcpy(test_notify.target, test_oid, sizeof(test_oid));
@@ -56,7 +56,38 @@ free_deliver_config(void) {
 
 void
 deliver_execute(unsigned int clientreg, void *clientarg) {
+    netsnmp_pdu pdu;
+    netsnmp_variable_list *vars, *walker;
+    netsnmp_session *sess;
+    int rc;
+
     snmp_log(LOG_ERR, "got here: deliver by notify\n");
+
+    vars = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+    snmp_set_var_objid( vars, test_notify.target,
+                        test_notify.target_size );
+    vars->type = ASN_NULL;
+
+    sess = netsnmp_query_get_default_session();
+
+    rc = netsnmp_query_walk(vars, sess);
+    if (rc != SNMP_ERR_NOERROR) {
+        snmp_log(LOG_ERR, "deliveryByNotify: failed to issue the query");
+        return;
+    }
+
+    walker = vars;
+    while(walker) {
+        print_variable(walker->name, walker->name_length, walker);
+        walker = walker->next_variable;
+    }
+    snmp_free_varbind(vars);
+
+    test_notify.last_run = time(NULL);
+
+    /* calculate the next time to sleep for */
+    snmp_alarm_register(calculate_time_until_next_run(&test_notify, NULL), 0, 
+                        &deliver_execute, NULL);
 }
 
 int
