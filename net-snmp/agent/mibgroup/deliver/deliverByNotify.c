@@ -11,7 +11,6 @@ void parse_deliver_config(const char *, char *);
 void parse_deliver_maxsize_config(const char *, char *);
 void free_deliver_config(void);
 
-deliver_by_notify test_notify;
 oid test_oid[] = {1, 3, 6, 1, 2, 1, 1}; 
 oid data_notification_oid[] = {1, 3, 6, 1, 4, 1, 8072, 9999, 9999, 123, 0};
 oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
@@ -37,7 +36,7 @@ init_deliverByNotify(void)
     /* register the config tokens */
     snmpd_register_config_handler("deliverByNotify",
                                   &parse_deliver_config, &free_deliver_config,
-                                  "[-s maxsize] OID");
+                                  "[-f frequency] [-s maxsize] FREQUENCY OID");
 
     snmpd_register_config_handler("deliverByNotifyMaxPacketSize",
                                   &parse_deliver_maxsize_config, NULL,
@@ -53,21 +52,76 @@ init_deliverByNotify(void)
     deliver_container->container_name = strdup("deliverByNotify");
     deliver_container->compare = (netsnmp_container_compare *) _deliver_compare;
     
-    test_notify.frequency = 5;
-    test_notify.last_run = time(NULL);
-    test_notify.target = malloc(sizeof(test_oid));
-    memcpy(test_notify.target, test_oid, sizeof(test_oid));
-    test_notify.target_size = OID_LENGTH(test_oid);
-    test_notify.max_packet_size = -1;
-
-    snmp_alarm_register(calculate_time_until_next_run(&test_notify, NULL), 0, 
-                        &deliver_execute, NULL);
-
     default_max_size = DEFAULT_MAX_DELIVER_SIZE;
 }
 
 void
 parse_deliver_config(const char *token, char *line) {
+    const char *cp = line;
+    int max_size = DEFAULT_MAX_DELIVER_SIZE;
+    int frequency;
+    oid target_oid[MAX_OID_LEN];
+    size_t target_oid_len = MAX_OID_LEN;
+    deliver_by_notify *new_notify = NULL;
+
+    while(cp && *cp == '-') {
+        switch (*(cp+1)) {
+        case 's':
+            cp = skip_token_const(cp);
+            if (!cp) {
+                config_perror("no argument given to -s");
+                return;
+            }
+            max_size = atoi(cp);
+            cp = skip_token_const(cp);
+            break;
+        default:
+            config_perror("unknown flag");
+            return;
+        }
+    }
+
+    if (!cp) {
+        config_perror("no frequency given");
+        return;
+    }
+    frequency = atoi(cp);
+    cp = skip_token_const(cp);
+
+    if (frequency <= 0) {
+        config_perror("illegal frequency given");
+        return;
+    }
+
+    if (!cp) {
+        config_perror("no OID given");
+        return;
+    }
+
+    /* parse the OID given */
+    if (!snmp_parse_oid(cp, target_oid, &target_oid_len)) {
+        config_perror("unknown deliverByNotify OID");
+        DEBUGMSGTL(("deliverByNotify", "The OID with the problem: %s\n", cp));
+        return;
+    }
+
+    /* set up the object to store all the data */
+    new_notify = SNMP_MALLOC_TYPEDEF(deliver_by_notify);
+    new_notify->frequency = frequency;
+    new_notify->max_packet_size = max_size;
+    new_notify->last_run = time(NULL);
+    new_notify->next_run = new_notify->last_run + frequency;
+
+    new_notify->target = malloc(target_oid_len * sizeof(oid));
+    new_notify->target_len = target_oid_len;
+    memcpy(new_notify->target, target_oid, target_oid_len*sizeof(oid));
+
+    /* XXX: need to do the whole container */
+    snmp_alarm_register(calculate_time_until_next_run(new_notify, NULL), 0, 
+                        &deliver_execute, NULL);
+
+    /* add it to the container */
+    CONTAINER_INSERT(deliver_container, new_notify);
 }
 
 void
@@ -85,19 +139,21 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
     netsnmp_variable_list *vars, *walker, *delivery_notification;
     netsnmp_session *sess;
     int rc;
+    deliver_by_notify *obj;
 
     snmp_log(LOG_ERR, "got here: deliver by notify\n");
 
+    /* XXX: need to do the whole container */
+    obj = CONTAINER_FIRST(deliver_container);
     vars = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
-    snmp_set_var_objid( vars, test_notify.target,
-                        test_notify.target_size );
+    snmp_set_var_objid( vars, obj->target, obj->target_len );
     vars->type = ASN_NULL;
 
     sess = netsnmp_query_get_default_session();
 
     rc = netsnmp_query_walk(vars, sess);
     if (rc != SNMP_ERR_NOERROR) {
-        snmp_log(LOG_ERR, "deliveryByNotify: failed to issue the query");
+        snmp_log(LOG_ERR, "deliverByNotify: failed to issue the query");
         return;
     }
 
@@ -129,10 +185,11 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
     /* record this as the time processed */
     /* XXX: this may creep by a few seconds when processing and maybe we want
        to do the time stamp at the beginning? */
-    test_notify.last_run = time(NULL);
+    obj->last_run = time(NULL);
 
     /* calculate the next time to sleep for */
-    snmp_alarm_register(calculate_time_until_next_run(&test_notify, NULL), 0, 
+    /* XXX: do the whole container */
+    snmp_alarm_register(calculate_time_until_next_run(obj, NULL), 0, 
                         &deliver_execute, NULL);
 }
 

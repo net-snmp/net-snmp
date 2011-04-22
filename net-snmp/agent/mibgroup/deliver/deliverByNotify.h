@@ -26,7 +26,7 @@ typedef struct deliver_by_notify_s {
    int     last_run;
    int     next_run;
    oid    *target;
-   size_t  target_size;
+   size_t  target_len;
    int     max_packet_size;
 } deliver_by_notify;
 
