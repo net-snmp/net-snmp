@@ -137,9 +137,22 @@ parse_deliver_maxsize_config(const char *token, char *line) {
     default_max_size = atoi(line);
 }
 
+static void
+_free_deliver_obj(deliver_by_notify *obj, void *context) {
+    netsnmp_assert_or_return(obj != NULL, );
+    SNMP_FREE(obj->target);
+    SNMP_FREE(obj);
+}
+
 void
 free_deliver_config(void) {
     default_max_size = DEFAULT_MAX_DELIVER_SIZE;
+    CONTAINER_CLEAR(deliver_container,
+                    (netsnmp_container_obj_func *) _free_deliver_obj, NULL);
+    if (alarm_reg) {
+        snmp_alarm_unregister(alarm_reg);
+        alarm_reg = 0;
+    }
 }
 
 void
