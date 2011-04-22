@@ -11,6 +11,8 @@ void free_deliver_config(void);
 
 deliver_by_notify test_notify;
 oid test_oid[] = {1, 3, 6, 1, 2, 1, 1}; 
+oid data_notification_oid[] = {1, 3, 6, 1, 4, 1, 8072, 9999, 9999, 123, 0};
+oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
 
 #define DEFAULT_MAX_DELIVER_SIZE -1;
 static int default_max_size;
@@ -57,7 +59,7 @@ free_deliver_config(void) {
 void
 deliver_execute(unsigned int clientreg, void *clientarg) {
     netsnmp_pdu pdu;
-    netsnmp_variable_list *vars, *walker;
+    netsnmp_variable_list *vars, *walker, *delivery_notification;
     netsnmp_session *sess;
     int rc;
 
@@ -76,13 +78,34 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
         return;
     }
 
+    delivery_notification = NULL;
+    /* add in the notification type */
+    snmp_varlist_add_variable(&delivery_notification,
+                              objid_snmptrap, OID_LENGTH(objid_snmptrap),
+                              ASN_OBJECT_ID,
+                              data_notification_oid,
+                              sizeof(data_notification_oid));
+    
+    /* copy in the collected data */
     walker = vars;
     while(walker) {
-        print_variable(walker->name, walker->name_length, walker);
+        //print_variable(walker->name, walker->name_length, walker);
+
+        snmp_varlist_add_variable(&delivery_notification,
+                                  walker->name, walker->name_length,
+                                  walker->type,
+                                  walker->val.string, walker->val_len);
+
         walker = walker->next_variable;
     }
     snmp_free_varbind(vars);
 
+    /* send out the notification */
+    send_v2trap(delivery_notification);
+
+    /* record this as the time processed */
+    /* XXX: this may creep by a few seconds when processing and maybe we want
+       to do the time stamp at the beginning? */
     test_notify.last_run = time(NULL);
 
     /* calculate the next time to sleep for */
