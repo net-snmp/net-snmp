@@ -290,71 +290,76 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
             return;
         }
 
-        /* Set up the notification itself */
-        deliver_notification = NULL;
-
-        /* add in the notification type */
-        snmp_varlist_add_variable(&deliver_notification,
-                                  objid_snmptrap, OID_LENGTH(objid_snmptrap),
-                                  ASN_OBJECT_ID,
-                                  data_notification_oid,
-                                  data_notification_oid_len * sizeof(oid));
-
-        /* add in the current message number in this sequence */
-        if (!(obj->flags & NETSNMP_DELIVER_NO_PERIOD_OID)) {
-            tmp_long = obj->frequency;
-            snmp_varlist_add_variable(&deliver_notification,
-                                      netsnmp_periodic_time_oid,
-                                      netsnmp_periodic_time_oid_len,
-                                      ASN_UNSIGNED,
-                                      (const void *) &tmp_long,
-                                      sizeof(tmp_long));
-        }
-
-        /* add in the current message number in this sequence */
-        message_count++;
-        if (message_count > MAX_MESSAGE_COUNT) {
-            snmp_log(LOG_ERR, "delivery construct grew too large...  giving up\n");
-            // XXX: disable it
-            // XXX: send a notification about it?
-            return;
-        }
-
-        if (!(obj->flags & NETSNMP_DELIVER_NO_MSG_COUNTS)) {
-            snmp_varlist_add_variable(&deliver_notification,
-                                      netsnmp_message_number_oid,
-                                      netsnmp_message_number_oid_len,
-                                      ASN_UNSIGNED,
-                                      (const void *) &message_count,
-                                      sizeof(message_count));
-
-            /* add in the max message number count for this sequence */
-            vartmp = snmp_varlist_add_variable(&deliver_notification,
-                                               netsnmp_max_message_number_oid,
-                                               netsnmp_max_message_number_oid_len,
-                                               ASN_UNSIGNED,
-                                               (const void *) &max_message_count,
-                                               sizeof(max_message_count));
-
-            /* we'll need to update this counter later */
-            max_message_count_ptrs[message_count-1] =
-                (u_long *) vartmp->val.integer;
-        }
-
-        /* copy in the collected data */
         walker = vars;
-        while(walker) {
+
+        while (walker) {
+
+            /* Set up the notification itself */
+            deliver_notification = NULL;
+
+            /* add in the notification type */
             snmp_varlist_add_variable(&deliver_notification,
-                                      walker->name, walker->name_length,
-                                      walker->type,
-                                      walker->val.string, walker->val_len);
+                                      objid_snmptrap, OID_LENGTH(objid_snmptrap),
+                                      ASN_OBJECT_ID,
+                                      data_notification_oid,
+                                      data_notification_oid_len * sizeof(oid));
 
-            walker = walker->next_variable;
+            /* add in the current message number in this sequence */
+            if (!(obj->flags & NETSNMP_DELIVER_NO_PERIOD_OID)) {
+                tmp_long = obj->frequency;
+                snmp_varlist_add_variable(&deliver_notification,
+                                          netsnmp_periodic_time_oid,
+                                          netsnmp_periodic_time_oid_len,
+                                          ASN_UNSIGNED,
+                                          (const void *) &tmp_long,
+                                          sizeof(tmp_long));
+            }
+
+            /* add in the current message number in this sequence */
+            message_count++;
+            if (message_count > MAX_MESSAGE_COUNT) {
+                snmp_log(LOG_ERR, "delivery construct grew too large...  giving up\n");
+                // XXX: disable it
+                // XXX: send a notification about it?
+                return;
+            }
+
+            if (!(obj->flags & NETSNMP_DELIVER_NO_MSG_COUNTS)) {
+                snmp_varlist_add_variable(&deliver_notification,
+                                          netsnmp_message_number_oid,
+                                          netsnmp_message_number_oid_len,
+                                          ASN_UNSIGNED,
+                                          (const void *) &message_count,
+                                          sizeof(message_count));
+
+                /* add in the max message number count for this sequence */
+                vartmp = snmp_varlist_add_variable(&deliver_notification,
+                                                   netsnmp_max_message_number_oid,
+                                                   netsnmp_max_message_number_oid_len,
+                                                   ASN_UNSIGNED,
+                                                   (const void *) &max_message_count,
+                                                   sizeof(max_message_count));
+
+                /* we'll need to update this counter later */
+                max_message_count_ptrs[message_count-1] =
+                    (u_long *) vartmp->val.integer;
+            }
+
+            /* copy in the collected data */
+            while(walker) {
+                snmp_varlist_add_variable(&deliver_notification,
+                                          walker->name, walker->name_length,
+                                          walker->type,
+                                          walker->val.string, walker->val_len);
+
+                walker = walker->next_variable;
+            }
+
+            /* send out the notification */
+            send_v2trap(deliver_notification);
         }
-        snmp_free_varbind(vars);
 
-        /* send out the notification */
-        send_v2trap(deliver_notification);
+        snmp_free_varbind(vars);
 
         /* record this as the time processed */
         /* XXX: this may creep by a few seconds when processing and maybe we want
