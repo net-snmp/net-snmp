@@ -47,7 +47,7 @@ nsNotifyPeriodicNotification        NOTIFICATION-TYPE
 	data sets to deliver.  See the snmpd.conf manual page for
 	details about configuring Net-SNMP agents for sending these
 	notifications out on a regular basis."
-    ::= { netSnmpNotifications 4 }
+    ::= { nsPNotifications 1 }
 
 --
 -- Objects that can be put into the notifications

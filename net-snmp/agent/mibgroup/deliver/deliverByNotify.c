@@ -15,8 +15,10 @@ void free_deliver_config(void);
 
 static void _schedule_next_execute_time(void);
 
-oid data_notification_oid[] = {1, 3, 6, 1, 4, 1, 8072, 9999, 9999, 123, 0};
+oid netsnmp_notification_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 4, 0, 1 };
 oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
+oid *data_notification_oid = netsnmp_notification_oid;
+oid data_notification_oid_len = OID_LENGTH(netsnmp_notification_oid);
 
 #define DEFAULT_MAX_DELIVER_SIZE -1;
 static int default_max_size;
@@ -197,7 +199,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                                   objid_snmptrap, OID_LENGTH(objid_snmptrap),
                                   ASN_OBJECT_ID,
                                   data_notification_oid,
-                                  sizeof(data_notification_oid));
+                                  data_notification_oid_len * sizeof(oid));
     
         /* copy in the collected data */
         walker = vars;
