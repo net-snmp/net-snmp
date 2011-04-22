@@ -256,8 +256,9 @@ free_deliver_config(void) {
 void
 deliver_execute(unsigned int clientreg, void *clientarg) {
     netsnmp_variable_list *vars, *walker, *deliver_notification, *vartmp;
+    netsnmp_variable_list *ready_for_delivery[MAX_MESSAGE_COUNT];
     netsnmp_session *sess;
-    int rc;
+    int rc, i;
     deliver_by_notify *obj;
     netsnmp_iterator *iterator;
     time_t            now = time(NULL);
@@ -332,6 +333,9 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                 return;
             }
 
+            /* store this for later updating and sending */
+            ready_for_delivery[message_count-1] = deliver_notification;
+
             if (!(obj->flags & NETSNMP_DELIVER_NO_MSG_COUNTS)) {
                 snmp_varlist_add_variable(&deliver_notification,
                                           netsnmp_message_number_oid,
@@ -353,8 +357,11 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                 /* we'll need to update this counter later */
                 max_message_count_ptrs[message_count-1] =
                     (u_long *) vartmp->val.integer;
+            } else {
+                /* just to be sure */
+                max_message_count_ptrs[message_count-1] = NULL;
             }
-
+            
             /* copy in the collected data */
             while(walker) {
                 snmp_varlist_add_variable(&deliver_notification,
@@ -382,6 +389,14 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
 
             /* send out the notification */
             send_v2trap(deliver_notification);
+        }
+
+        for(i = 0; i < message_count; i++) {
+            /* update the max count pointer */
+            if (max_message_count_ptrs[i])
+                *(max_message_count_ptrs[i]) = message_count;
+            
+            send_v2trap(ready_for_delivery[i]);
         }
 
         snmp_free_varbind(vars);
