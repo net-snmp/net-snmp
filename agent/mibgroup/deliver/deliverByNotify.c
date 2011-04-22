@@ -14,17 +14,31 @@ netsnmp_feature_require(container_fifo)
 
 void parse_deliver_config(const char *, char *);
 void parse_deliver_maxsize_config(const char *, char *);
+void parse_data_notification_oid_config(const char *, char *);
+void parse_periodic_time_oid_config(const char *, char *);
+void parse_message_number_oid_config(const char *, char *);
+void parse_max_message_number_oid_config(const char *, char *);
 void free_deliver_config(void);
 
 static void _schedule_next_execute_time(void);
 
-oid netsnmp_notification_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 4, 0, 1 };
-oid netsnmp_periodic_time_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 3, 1, 0 };
-oid netsnmp_message_number_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 3, 2, 0 };
-oid netsnmp_max_message_number_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 3, 3, 0 };
+oid    data_notification_oid[MAX_OID_LEN]
+       = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 4, 0, 1 };
+size_t data_notification_oid_len = 13;
+
+oid    netsnmp_periodic_time_oid[MAX_OID_LEN]
+       = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 3, 1, 0 };
+size_t netsnmp_periodic_time_oid_len = 13;
+
+oid    netsnmp_message_number_oid[MAX_OID_LEN]
+       = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 3, 2, 0 };
+size_t netsnmp_message_number_oid_len = 13;
+
+oid    netsnmp_max_message_number_oid[MAX_OID_LEN]
+       = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 3, 3, 0 };
+size_t netsnmp_max_message_number_oid_len = 13;
+
 oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
-oid *data_notification_oid = netsnmp_notification_oid;
-oid data_notification_oid_len = OID_LENGTH(netsnmp_notification_oid);
 
 #define DEFAULT_MAX_DELIVER_SIZE -1;
 static int default_max_size;
@@ -53,6 +67,26 @@ init_deliverByNotify(void)
                                   &parse_deliver_maxsize_config, NULL,
                                   "sizeInBytes");
 
+    snmpd_register_config_handler("deliverByNotifyOid",
+                                  &parse_data_notification_oid_config,
+                                  NULL, // XXX: reset to default
+                                  "OID");
+
+    snmpd_register_config_handler("deliverByNotifyFrequencyOid",
+                                  &parse_periodic_time_oid_config,
+                                  NULL, // XXX: reset to default
+                                  "OID");
+
+    snmpd_register_config_handler("deliverByNotifyMessageNumberOid",
+                                  &parse_message_number_oid_config,
+                                  NULL, // XXX: reset to default
+                                  "OID");
+
+    snmpd_register_config_handler("deliverByNotifyMaxMessageNumberOid",
+                                  &parse_max_message_number_oid_config,
+                                  NULL, // XXX: reset to default
+                                  "OID");
+
     /* create the container to store the config objects*/
     deliver_container = netsnmp_container_find("deliverByNotify:fifo");
     if (NULL == deliver_container) {
@@ -67,6 +101,48 @@ init_deliverByNotify(void)
     default_max_size = DEFAULT_MAX_DELIVER_SIZE;
 
     alarm_reg = 0;
+}
+
+void
+_parse_config_oid(const char *token, char *line,
+                  oid *oid_store, size_t *oid_store_len) {
+    size_t tmp_len = MAX_OID_LEN;
+    /* parse the OID given */
+
+    if (!snmp_parse_oid(line, oid_store, &tmp_len)) {
+        char buf[SPRINT_MAX_LEN];
+        snprintf(buf, SPRINT_MAX_LEN-1, "unknown %s OID: %s", token, line);
+        config_perror(buf);
+        return;
+    }
+
+    *oid_store_len = tmp_len;
+}
+
+void
+parse_data_notification_oid_config(const char *token, char *line) {
+    _parse_config_oid(token, line,
+                      data_notification_oid, &data_notification_oid_len);
+}
+
+void
+parse_periodic_time_oid_config(const char *token, char *line) {
+    _parse_config_oid(token, line,
+                      netsnmp_periodic_time_oid, &netsnmp_periodic_time_oid_len);
+}
+
+void
+parse_message_number_oid_config(const char *token, char *line) {
+    _parse_config_oid(token, line,
+                      netsnmp_message_number_oid,
+                      &netsnmp_message_number_oid_len);
+}
+
+void
+parse_max_message_number_oid_config(const char *token, char *line) {
+    _parse_config_oid(token, line,
+                      netsnmp_max_message_number_oid,
+                      &netsnmp_max_message_number_oid_len);
 }
 
 void
@@ -229,7 +305,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
             tmp_long = obj->frequency;
             snmp_varlist_add_variable(&deliver_notification,
                                       netsnmp_periodic_time_oid,
-                                      OID_LENGTH(netsnmp_periodic_time_oid),
+                                      netsnmp_periodic_time_oid_len,
                                       ASN_UNSIGNED,
                                       (const void *) &tmp_long,
                                       sizeof(tmp_long));
@@ -247,7 +323,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
         if (!(obj->flags & NETSNMP_DELIVER_NO_MSG_COUNTS)) {
             snmp_varlist_add_variable(&deliver_notification,
                                       netsnmp_message_number_oid,
-                                      OID_LENGTH(netsnmp_message_number_oid),
+                                      netsnmp_message_number_oid_len,
                                       ASN_UNSIGNED,
                                       (const void *) &message_count,
                                       sizeof(message_count));
@@ -255,7 +331,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
             /* add in the max message number count for this sequence */
             vartmp = snmp_varlist_add_variable(&deliver_notification,
                                                netsnmp_max_message_number_oid,
-                                               OID_LENGTH(netsnmp_max_message_number_oid),
+                                               netsnmp_max_message_number_oid_len,
                                                ASN_UNSIGNED,
                                                (const void *) &max_message_count,
                                                sizeof(max_message_count));
