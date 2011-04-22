@@ -5,6 +5,10 @@ listing of all changes made to the code.
 
 *5.7*
 
+  snmpd:
+      - Delivery of data via regularily scheduled notifications.
+        (see "Data Delivery via Notfiications" in snmpd.conf)
+
   build:
       - New flags to reduce the amount of compiled code to bare minimums.
         http://www.net-snmp.org/wiki/index.php/Feature_Marking_and_Selection
