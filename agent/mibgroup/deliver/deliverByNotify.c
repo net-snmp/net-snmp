@@ -9,6 +9,9 @@ netsnmp_feature_require(container_fifo)
 
 #include "deliverByNotify.h"
 
+/* we should never split beyond this */
+#define MAX_MESSAGE_COUNT 32
+
 void parse_deliver_config(const char *, char *);
 void parse_deliver_maxsize_config(const char *, char *);
 void free_deliver_config(void);
@@ -16,6 +19,9 @@ void free_deliver_config(void);
 static void _schedule_next_execute_time(void);
 
 oid netsnmp_notification_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 4, 0, 1 };
+oid netsnmp_periodic_time_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 3, 1, 0 };
+oid netsnmp_message_number_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 3, 2, 0 };
+oid netsnmp_max_message_number_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 5, 3, 3, 0 };
 oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
 oid *data_notification_oid = netsnmp_notification_oid;
 oid data_notification_oid_len = OID_LENGTH(netsnmp_notification_oid);
@@ -158,12 +164,14 @@ free_deliver_config(void) {
 
 void
 deliver_execute(unsigned int clientreg, void *clientarg) {
-    netsnmp_variable_list *vars, *walker, *deliver_notification;
+    netsnmp_variable_list *vars, *walker, *deliver_notification, *vartmp;
     netsnmp_session *sess;
     int rc;
     deliver_by_notify *obj;
     netsnmp_iterator *iterator;
     time_t            now = time(NULL);
+    u_long            message_count, max_message_count, tmp_long;
+    u_long           *max_message_count_ptrs[MAX_MESSAGE_COUNT];
 
     DEBUGMSGTL(("deliverByNotify", "Starting the execute routine\n"));
 
@@ -180,6 +188,9 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
         if (obj->next_run > now)
             continue;
 
+        max_message_count = 1;
+        message_count = 0;
+
         /* fill the varbind list with the target object */
         vars = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
         snmp_set_var_objid( vars, obj->target, obj->target_len );
@@ -194,13 +205,47 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
 
         /* Set up the notification itself */
         deliver_notification = NULL;
+
         /* add in the notification type */
         snmp_varlist_add_variable(&deliver_notification,
                                   objid_snmptrap, OID_LENGTH(objid_snmptrap),
                                   ASN_OBJECT_ID,
                                   data_notification_oid,
                                   data_notification_oid_len * sizeof(oid));
-    
+
+        /* add in the current message number in this sequence */
+        tmp_long = obj->frequency;
+        snmp_varlist_add_variable(&deliver_notification,
+                                  netsnmp_periodic_time_oid,
+                                  OID_LENGTH(netsnmp_periodic_time_oid),
+                                  ASN_UNSIGNED,
+                                  (const void *) &tmp_long, sizeof(tmp_long));
+
+        /* add in the current message number in this sequence */
+        message_count++;
+        if (message_count > MAX_MESSAGE_COUNT) {
+            snmp_log(LOG_ERR, "delivery construct grew too large...  giving up\n");
+            // XXX: disable it
+            // XXX: send a notification about it?
+            return;
+        }
+        snmp_varlist_add_variable(&deliver_notification,
+                                  netsnmp_message_number_oid,
+                                  OID_LENGTH(netsnmp_message_number_oid),
+                                  ASN_UNSIGNED, (const void *) &message_count,
+                                  sizeof(message_count));
+
+        /* add in the max message number count for this sequence */
+        vartmp = snmp_varlist_add_variable(&deliver_notification,
+                                           netsnmp_max_message_number_oid,
+                                           OID_LENGTH(netsnmp_max_message_number_oid),
+                                           ASN_UNSIGNED,
+                                           (const void *) &max_message_count,
+                                           sizeof(max_message_count));
+
+        /* we'll need to update this counter later */
+        max_message_count_ptrs[message_count-1] = (u_long *) vartmp->val.integer;
+
         /* copy in the collected data */
         walker = vars;
         while(walker) {
