@@ -25,6 +25,8 @@ void
 free_deliver_config(void) {
 }
 
+typedef void    (SNMPAlarmCallback) 
+
 void
-deliver_execute(void) {
+deliver_execute(unsigned int clientreg, void *clientarg) {
 }

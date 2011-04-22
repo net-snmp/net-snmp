@@ -6,6 +6,6 @@ void init_mteTrigger(void);
 void parse_deliver_config(const char *, char *);
 void free_deliver_config(void);
 
-void deliver_execute(void);
+SNMPAlarmCallback deliver_execute;
 
 #endif /* deliverByNotify_h */
