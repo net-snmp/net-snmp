@@ -1139,6 +1139,9 @@ configures a one-shot SET assignment, to be run at the first matching
 time as specified by the fields MINUTE to WEEKDAY.  The interpretation
 of these fields is exactly the same as for the \fIcron\fR directive.
 .SS "Data Delivery via Notfiications"
+Note: this functionality is only available if the
+\fIdeliver/deliverByNotify\fR mib module was complied in to the agent
+.PP
 In some situations it may be advantageous to deliver SNMP data over
 SNMP Notifications (TRAPs and INFORMs) rather than the typical process
 of having the manager issue requests for the data (via GETs and
