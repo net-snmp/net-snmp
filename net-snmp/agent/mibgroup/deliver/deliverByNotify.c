@@ -6,19 +6,27 @@
 #include "deliverByNotify.h"
 
 void parse_deliver_config(const char *, char *);
+void parse_deliver_maxsize_config(const char *, char *);
 void free_deliver_config(void);
 
 deliver_by_notify test_notify;
 oid test_oid[] = {1, 3, 6, 1, 6, 3, 1, 2, 2, 6}; 
 
+#define DEFAULT_MAX_DELIVER_SIZE -1;
+static int default_max_size;
+
 /** Initializes the mteTrigger module */
 void
 init_deliverByNotify(void)
 {
-    snmpd_register_config_handler("deliver",
+    snmpd_register_config_handler("deliverByNotify",
                                   &parse_deliver_config, &free_deliver_config,
-                                  "foo");
+                                  "[-s maxsize] OID");
 
+    snmpd_register_config_handler("deliverByNotifyMaxPacketSize",
+                                  &parse_deliver_maxsize_config, NULL,
+                                  "sizeInBytes");
+    
     test_notify.frequency = 15;
     test_notify.last_run = time(NULL);
     test_notify.target = malloc(sizeof(test_oid));
@@ -28,6 +36,8 @@ init_deliverByNotify(void)
 
     snmp_alarm_register(calculate_time_until_next_run(&test_notify, NULL), 0, 
                         &deliver_execute, NULL);
+
+    default_max_size = DEFAULT_MAX_DELIVER_SIZE;
 }
 
 void
@@ -35,7 +45,13 @@ parse_deliver_config(const char *token, char *line) {
 }
 
 void
+parse_deliver_maxsize_config(const char *token, char *line) {
+    default_max_size = atoi(line);
+}
+
+void
 free_deliver_config(void) {
+    default_max_size = DEFAULT_MAX_DELIVER_SIZE;
 }
 
 void
