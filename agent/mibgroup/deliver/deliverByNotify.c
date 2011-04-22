@@ -204,8 +204,6 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
         /* copy in the collected data */
         walker = vars;
         while(walker) {
-            //print_variable(walker->name, walker->name_length, walker);
-
             snmp_varlist_add_variable(&deliver_notification,
                                       walker->name, walker->name_length,
                                       walker->type,
