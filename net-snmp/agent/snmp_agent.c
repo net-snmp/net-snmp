@@ -1996,7 +1996,6 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                              netsnmp_subtree *tp)
 {
     netsnmp_request_info *request = NULL;
-    int             cacheid;
 
     DEBUGMSGTL(("snmp_agent", "add_vb_to_cache(%8p, %d, ", asp, vbcount));
     DEBUGMSGOID(("snmp_agent", varbind_ptr->name,
@@ -2071,6 +2070,8 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
             return NULL;        /* shouldn't get here */
         }
     } else {
+        int cacheid;
+
         DEBUGMSGTL(("snmp_agent", "tp->start "));
         DEBUGMSGOID(("snmp_agent", tp->start_a, tp->start_len));
         DEBUGMSG(("snmp_agent", ", tp->end "));
