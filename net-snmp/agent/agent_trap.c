@@ -1217,7 +1217,7 @@ void
 snmpd_parse_config_trapsess(const char *word, char *cptr)
 {
     char           *argv[MAX_ARGS], *cp = cptr;
-    int             argn, arg, rc;
+    int             argn, rc;
     netsnmp_session session, *ss;
     netsnmp_transport *transport;
     size_t          len;
@@ -1238,9 +1238,9 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
         argv[argn] = strdup(tmp);
     }
 
-    arg = netsnmp_parse_args(argn, argv, &session, "C:", trapOptProc,
-                             NETSNMP_PARSE_ARGS_NOLOGGING |
-                             NETSNMP_PARSE_ARGS_NOZERO);
+    netsnmp_parse_args(argn, argv, &session, "C:", trapOptProc,
+                       NETSNMP_PARSE_ARGS_NOLOGGING |
+                       NETSNMP_PARSE_ARGS_NOZERO);
 
     transport = netsnmp_transport_open_client("snmptrap", session.peername);
     if ((rc = netsnmp_sess_config_and_open_transport(&session, transport))
