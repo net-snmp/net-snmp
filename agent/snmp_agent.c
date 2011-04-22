@@ -1095,7 +1095,6 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
     agent_nsap     *a = NULL, *n = NULL, **prevNext = &agent_nsap_list;
     int             handle = 0;
     void           *isp = NULL;
-    int             rc;
 
     if (t == NULL) {
         return -1;
@@ -1128,7 +1127,7 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
 
     /* Optional supplimental transport configuration information and
        final call to actually open the transport */
-    if ((rc = netsnmp_sess_config_transport(s->transport_configuration, t))
+    if (netsnmp_sess_config_transport(s->transport_configuration, t)
         != SNMPERR_SUCCESS) {
         SNMP_FREE(s);
         SNMP_FREE(n);
