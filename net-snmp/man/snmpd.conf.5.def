@@ -1138,6 +1138,65 @@ backwards from the end of the month.
 configures a one-shot SET assignment, to be run at the first matching
 time as specified by the fields MINUTE to WEEKDAY.  The interpretation
 of these fields is exactly the same as for the \fIcron\fR directive.
+.SS "Data Delivery via Notfiications"
+In some situations it may be advantageous to deliver SNMP data over
+SNMP Notifications (TRAPs and INFORMs) rather than the typical process
+of having the manager issue requests for the data (via GETs and
+GETNEXTs).  Reasons for doing this are numerous, but frequently corner
+cases.  The most common reason for wanting this behaviour might be to
+monitor devices that reside behind NATs or Firewalls that prevent
+incoming SNMP traffic.
+.PP
+It should be noted that although most management software is capable
+of logging notifications, very little (if any) management software
+will updated their "knowledge database" based on the contents of SNMP
+notifications.  IE, it won't (for example) update the interface
+traffic counter history that is used to produce graphs.  Most larger
+network management packages have a separate database for storing data
+received via SNMP requests (GETs and GETNEXTs) vs those received from
+notifications.  Researching the capabilities of your management
+station software is required before assuming this functionality will
+solve your data delivery requirements.
+.PP
+Notifications generated via this mechanism will be sent to the
+standard set of configured notification targets.  See the
+"Notification Handling" section of this document for further
+information.
+.IP "deliverByNotify [-p] [-m] [-s MAXSIZE] FREQUENCY OID"
+This directive tells the SNMP agent to self-walk the \fIOID\fR,
+collect all the data and send it out every \fIFREQUENCY\fR seconds.
+By default scalars are included in the notification that specify the
+how often the notification will be sent (unless the \fI-p\fR option is
+specified) and which message number of how many messages a particular
+notification is (unless \fI-m\fR is specified).  To break the
+notifications into manageable packet sizes, use the \fI-s\fR flag to
+specify the approximate maximum number of bytes that a notification
+message should be limited to.  If more than \fIMAXSIZE\fR of bytes is
+needed then multiple notifications will be sent to deliver the data.
+Note that the calculations for ensuring the maximum size is met are
+approximations and thus it can be absolutely guaranteed they'll be
+under that size, so leave a padding buffer if it is critical that you
+avoid fragmentation.  A value of -1 indicates force everything into a
+single message no matter how big it is.
+.IP
+Example usage: the following will deliver the contents of the ifTable
+once an hour and the contents of the system group once every 2 hours:
+.RS
+.nf
+
+deliverByNotify 3600 ifTable
+deliverByNotify 7200 system
+.fi
+.RE
+.IP "deliverByNotifyMaxPacketSize SIZEINBYTES"
+Sets the default notification size limit (see the \fI-s\fR flag above).
+.IP "deliverByNotifyOid OID"
+.IP "deliverByNotifyFrequencyOid OID"
+.IP "deliverByNotifyMessageNumberOid OID"
+.IP "deliverByNotifyMaxMessageNumberOid OID"
+These set the data OID that the notification will be sent under, the
+scalar OID, the message number OID, and the maximum message number
+OID.  These default to objects in the NET-SNMP-PERIODIC-NOTIFY-MIB.
 .SH "EXTENDING AGENT FUNCTIONALITY"
 One of the first distinguishing features of the original UCD suite was
 the ability to extend the functionality of the agent - not just by
