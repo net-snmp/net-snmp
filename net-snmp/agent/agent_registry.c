@@ -751,7 +751,7 @@ netsnmp_subtree_split(netsnmp_subtree *current, oid name[], int name_len)
 int
 netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 {
-    netsnmp_subtree *tree1, *tree2, *new2;
+    netsnmp_subtree *tree1, *tree2;
     netsnmp_subtree *prev, *next;
     int             res, rc = 0;
 
@@ -795,7 +795,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
     /*  Handle new subtrees that start in virgin territory.  */
 
     if (tree1 == NULL) {
-	new2 = NULL;
+        netsnmp_subtree *new2 = NULL;
 	/*  Is there any overlap with later subtrees?  */
 	if (tree2 && snmp_oid_compare(new_sub->end_a, new_sub->end_len,
 				      tree2->start_a, tree2->start_len) > 0) {
@@ -928,15 +928,18 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 
 	case  1:
 	    /*  New subtree contains the existing one.  */
-	    new2 = netsnmp_subtree_split(new_sub, tree1->end_a,tree1->end_len);
-	    res = netsnmp_subtree_load(new_sub, context_name);
-	    if (res != MIB_REGISTERED_OK) {
-                netsnmp_remove_subtree(new2);
-		netsnmp_subtree_free(new2);
-		return res;
-	    }
-	    return netsnmp_subtree_load(new2, context_name);
-	}
+            {
+                netsnmp_subtree *new2 =
+                    netsnmp_subtree_split(new_sub, tree1->end_a,tree1->end_len);
+                res = netsnmp_subtree_load(new_sub, context_name);
+                if (res != MIB_REGISTERED_OK) {
+                    netsnmp_remove_subtree(new2);
+                    netsnmp_subtree_free(new2);
+                    return res;
+                }
+                return netsnmp_subtree_load(new2, context_name);
+            }
+        }
     }
     return 0;
 }
