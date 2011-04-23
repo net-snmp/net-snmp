@@ -1112,7 +1112,7 @@ netsnmp_register_mib(const char *moduleName,
                      int perform_callback)
 {
     netsnmp_subtree *subtree, *sub2;
-    int             res, i;
+    int             res;
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
 
@@ -1193,6 +1193,7 @@ netsnmp_register_mib(const char *moduleName,
 	rest of the range.  */
 
     if (res == MIB_REGISTERED_OK && range_subid != 0) {
+        int i;
 	for (i = mibloc[range_subid - 1] + 1; i <= (int)range_ubound; i++) {
 	    sub2 = netsnmp_subtree_deepcopy(subtree);
 
