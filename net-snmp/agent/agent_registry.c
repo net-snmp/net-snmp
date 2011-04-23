@@ -753,7 +753,6 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 {
     netsnmp_subtree *tree1, *tree2;
     netsnmp_subtree *prev, *next;
-    int             rc = 0;
 
     if (new_sub == NULL) {
         return MIB_REGISTERED_OK;       /* Degenerate case */
@@ -854,10 +853,8 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	    If the new subtree extends beyond this existing region,
 	            split it, and recurse to merge the two parts.  */
 
-	rc = snmp_oid_compare(new_sub->end_a, new_sub->end_len, 
-			      tree1->end_a, tree1->end_len);
-
-        switch (rc) {
+	switch (snmp_oid_compare(new_sub->end_a, new_sub->end_len,
+                                 tree1->end_a, tree1->end_len)) {
 
 	case -1:
 	    /*  Existing subtree contains new one.  */
