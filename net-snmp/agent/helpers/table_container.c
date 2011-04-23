@@ -297,7 +297,6 @@ netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
     }
 
     tad = SNMP_MALLOC_TYPEDEF(container_table_data);
-    tad->refcnt = 1;
     handler = netsnmp_create_handler("table_container",
                                      _container_table_handler);
     if((NULL == tad) || (NULL == handler)) {
@@ -308,6 +307,7 @@ netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
         return NULL;
     }
 
+    tad->refcnt = 1;
     tad->tblreg_info = tabreg;  /* we need it too, but it really is not ours */
     if(key_type)
         tad->key_type = key_type;
