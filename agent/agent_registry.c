@@ -753,7 +753,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 {
     netsnmp_subtree *tree1, *tree2;
     netsnmp_subtree *prev, *next;
-    int             res, rc = 0;
+    int             rc = 0;
 
     if (new_sub == NULL) {
         return MIB_REGISTERED_OK;       /* Degenerate case */
@@ -931,7 +931,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
             {
                 netsnmp_subtree *new2 =
                     netsnmp_subtree_split(new_sub, tree1->end_a,tree1->end_len);
-                res = netsnmp_subtree_load(new_sub, context_name);
+                int res = netsnmp_subtree_load(new_sub, context_name);
                 if (res != MIB_REGISTERED_OK) {
                     netsnmp_remove_subtree(new2);
                     netsnmp_subtree_free(new2);
