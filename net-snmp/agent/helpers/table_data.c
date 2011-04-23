@@ -564,9 +564,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                         /*
                          * equal match, return the next row 
                          */
-                        if (row) {
-                            row = row->next;
-                        }
+                        row = row->next;
                         break;
                     } else if (result > 0) {
                         /*
