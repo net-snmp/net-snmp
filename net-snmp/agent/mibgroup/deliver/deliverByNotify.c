@@ -293,6 +293,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
         rc = netsnmp_query_walk(vars, sess);
         if (rc != SNMP_ERR_NOERROR) {
             snmp_log(LOG_ERR, "deliverByNotify: failed to issue the query");
+            ITERATOR_RELEASE(iterator);
             return;
         }
 
@@ -330,6 +331,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                 snmp_log(LOG_ERR, "delivery construct grew too large...  giving up\n");
                 // XXX: disable it
                 // XXX: send a notification about it?
+                ITERATOR_RELEASE(iterator);
                 return;
             }
 
@@ -404,6 +406,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
            to do the time stamp at the beginning? */
         obj->last_run = time(NULL);
     }
+    ITERATOR_RELEASE(iterator);
 
     /* calculate the next time to sleep for */
     _schedule_next_execute_time();
@@ -462,5 +465,7 @@ _schedule_next_execute_time(void) {
                     sleep_for, INT_MAX));
         alarm_reg = snmp_alarm_register(sleep_for, 0, &deliver_execute, NULL);
     }
+
+    ITERATOR_RELEASE(iterator);
 }
 
