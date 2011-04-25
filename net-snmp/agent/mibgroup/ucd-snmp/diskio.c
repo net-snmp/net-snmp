@@ -117,7 +117,9 @@ void		devla_getstats(unsigned int regno, void *dummy);
 
 FILE           *file;
 
+#if 0
 static void	diskio_free_config(void);
+#endif
 
          /*********************
 	 *
@@ -246,6 +248,7 @@ init_diskio(void)
 #endif
 }
 
+#if 0
 static void
 diskio_free_config(void)
 {
@@ -256,6 +259,7 @@ diskio_free_config(void)
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
 			   NETSNMP_DS_AGENT_DISKIO_NO_RAM,  0);
 }
+#endif
 
 
 #ifdef solaris2
