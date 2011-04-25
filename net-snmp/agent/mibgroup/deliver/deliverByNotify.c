@@ -394,6 +394,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                 *(max_message_count_ptrs[i]) = message_count;
             
             send_v2trap(ready_for_delivery[i]);
+            snmp_free_varbind(ready_for_delivery[i]);
         }
 
         snmp_free_varbind(vars);
