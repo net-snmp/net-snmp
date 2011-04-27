@@ -279,9 +279,10 @@ netsnmp_table_data_set_create_row_from_defaults
     for (; defrow; defrow = defrow->next) {
         netsnmp_set_row_column(row, defrow->column, defrow->type,
                                defrow->data.voidp, defrow->data_len);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         if (defrow->writable)
             netsnmp_mark_row_column_writable(row, defrow->column, 1);
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
     return row;
 }
@@ -1190,8 +1191,10 @@ netsnmp_config_parse_add_row(const char *token, char *line)
                     "adding data at column %d of type %d\n", dr->column,
                     dr->type));
         netsnmp_set_row_column(row, dr->column, dr->type, buf, buf_size);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         if (dr->writable)
             netsnmp_mark_row_column_writable(row, dr->column, 1);       /* make writable */
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
     rc = netsnmp_table_data_add_row(tables->table_set->table, row);
     if (SNMPERR_SUCCESS != rc) {
