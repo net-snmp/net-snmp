@@ -296,6 +296,13 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     int             rc = 0;
     char           *string = NULL;
 
+#ifdef NETSNMP_NO_LISTEN_SUPPORT
+    /* SPECIAL CIRCUMSTANCE: We still want AgentX to be able to operate,
+       so we allow for unix domain socktes to still listen when everything
+       else isn't allowed to.  Thus, we ignore this define in this file.
+    */
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
+
     if (addr == NULL || addr->sun_family != AF_UNIX) {
         return NULL;
     }

@@ -586,6 +586,11 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
                               NETSNMP_DS_LIB_SSHTOSNMP_SOCKET);
     char tmpsockpath[MAXPATHLEN];
 
+#ifdef NETSNMP_NO_LISTEN_SUPPORT
+    if (local)
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
+
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
     }
@@ -609,6 +614,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
     t->data_length = sizeof(netsnmp_ssh_addr_pair);
 
     if (local) {
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
 #ifdef SNMPSSHDOMAIN_USE_EXTERNAL_PIPE
 
         /* XXX: set t->local and t->local_length */
@@ -717,7 +723,9 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
         /* XXX: verify we're inside ssh */
         t->sock = STDIN_FILENO;
 #endif /* ! SNMPSSHDOMAIN_USE_EXTERNAL_PIPE */
-
+#else /* NETSNMP_NO_LISTEN_SUPPORT */
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
         char *username;
         size_t username_len;

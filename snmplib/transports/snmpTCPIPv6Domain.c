@@ -140,6 +140,11 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     int             rc = 0;
     char           *str = NULL;
 
+#ifdef NETSNMP_NO_LISTEN_SUPPORT
+    if (local)
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
+
     if (addr == NULL || addr->sin6_family != AF_INET6) {
         return NULL;
     }
@@ -178,6 +183,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
     if (local) {
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
         int opt = 1;
 
         /*
@@ -246,7 +252,9 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
         /*
          * no buffer size on listen socket - doesn't make sense
          */
-
+#else /* NETSNMP_NO_LISTEN_SUPPORT */
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
         t->remote = (unsigned char*)malloc(18);
         if (t->remote == NULL) {

@@ -67,6 +67,11 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
     netsnmp_indexed_addr_pair addr_pair;
     socklen_t       local_addr_len;
 
+#ifdef NETSNMP_NO_LISTEN_SUPPORT
+    if (local)
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
+
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
     }
@@ -93,6 +98,7 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
     _netsnmp_udp_sockopt_set(t->sock, local);
 
     if (local) {
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
         /*
          * This session is inteneded as a server, so we must bind on to the
          * given IP address, which may include an interface address, or could
@@ -130,6 +136,9 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
         }
         t->data = NULL;
         t->data_length = 0;
+#else /* NETSNMP_NO_LISTEN_SUPPORT */
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
         /*
          * This is a client session.  If we've been given a

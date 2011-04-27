@@ -867,6 +867,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         t->sock = BIO_get_fd(bio, NULL);
 
     } else {
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
         /* Is the server */
         
         /* Create the socket bio */
@@ -893,6 +894,9 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
 
         t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
+#else /* NETSNMP_NO_LISTEN_SUPPORT */
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
     }
     return t;
 }
@@ -911,6 +915,11 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     char *cp;
     char buf[SPRINT_MAX_LEN];
     
+#ifdef NETSNMP_NO_LISTEN_SUPPORT
+    if (isserver)
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
+
     /* allocate our transport structure */
     t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (NULL == t) {

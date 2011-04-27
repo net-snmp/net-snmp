@@ -185,6 +185,11 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
     int             rc = 0;
     char           *str = NULL;
 
+#ifdef NETSNMP_NO_LISTEN_SUPPORT
+    if (local)
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
+
     if (addr == NULL || addr->sin6_family != AF_INET6) {
         return NULL;
     }
@@ -215,6 +220,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
     _netsnmp_udp_sockopt_set(t->sock, local);
 
     if (local) {
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
         /*
          * This session is intended as a server, so we must bind on to the
          * given IP address, which may include an interface address, or could
@@ -250,6 +256,9 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         t->local_length = 18;
         t->data = NULL;
         t->data_length = 0;
+#else /* NETSNMP_NO_LISTEN_SUPPORT */
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
         /*
          * This is a client session.  Save the address in the
