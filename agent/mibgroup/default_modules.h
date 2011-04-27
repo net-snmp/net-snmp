@@ -31,7 +31,9 @@ config_require(target)
 config_require(agent_mibs)
 config_require(agentx)
 config_require(disman/event)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 config_require(disman/schedule)
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 config_require(utilities)
 
 /* default MIBs to auto-include for parsing */
@@ -41,7 +43,9 @@ config_require(utilities)
 config_add_mib(HOST-RESOURCES-MIB)
 config_add_mib(NOTIFICATION-LOG-MIB)
 config_add_mib(DISMAN-EVENT-MIB)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 config_add_mib(DISMAN-SCHEDULE-MIB)
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /* architecture specific extra modules */
 /* these symbols are set in the host specific net-snmp/system/<os>.h files */
