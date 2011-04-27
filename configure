@@ -964,15 +964,15 @@ with_feature
 with_out_feature
 enable_minimalist
 with_minimalist
-enable_read_only
-with_read_only
-enable_readonly
 enable_notify_only
 with_notify_only
 enable_notifyonly
 enable_no_listen
 with_no_listen
 enable_nolisten
+enable_read_only
+with_read_only
+enable_readonly
 enable_mini_agent
 with_mini_agent
 with_miniagent
@@ -1712,9 +1712,9 @@ Optional Features:
   --enable-agentx-dom-sock-only   Disable UDP/TCP transports for agentx.
   --disable-snmptrapd-subagent    Disable agentx subagent code in snmptrapd.
   --enable-minimalist             Remove all non-essential code features.
-  --enable-read-only              Remove all SET support from the code.
   --enable-notify-only            Build tools that can only send notifications.
   --enable-no-listen              Build tools that can't listen to ports.
+  --enable-read-only              Remove all SET support from the code.
   --enable-mini-agent             Build a minimal agent.
   --enable-mfd-rewrites           Use new MFD rewrites of mib modules,
                                   where available. (default is to use
@@ -4562,34 +4562,6 @@ fi
 
 
 
-# Check whether --enable-read-only was given.
-if test "${enable_read_only+set}" = set; then :
-  enableval=$enable_read_only;
-fi
-
-
-# Check whether --with-read-only was given.
-if test "${with_read_only+set}" = set; then :
-  withval=$with_read_only; as_fn_error $? "Invalid option. Use --enable-read-only/--disable-read-only instead" "$LINENO" 5
-fi
-
-if test "x$enable_read_only" = "xyes"; then
-
-$as_echo "#define NETSNMP_NO_WRITE_SUPPORT 1" >>confdefs.h
-
-fi
-
-# Check whether --with-read-only was given.
-if test "${with_read_only+set}" = set; then :
-  withval=$with_read_only; as_fn_error $? "Invalid option. Use --enable-read-only/--disable-read-only instead" "$LINENO" 5
-fi
-
-# Check whether --enable-readonly was given.
-if test "${enable_readonly+set}" = set; then :
-  enableval=$enable_readonly; as_fn_error $? "Invalid option. Use --enable-read-only/--disable-read-only instead" "$LINENO" 5
-fi
-
-
 # Check whether --enable-notify-only was given.
 if test "${enable_notify_only+set}" = set; then :
   enableval=$enable_notify_only;
@@ -4643,6 +4615,34 @@ fi
 # Check whether --enable-nolisten was given.
 if test "${enable_nolisten+set}" = set; then :
   enableval=$enable_nolisten; as_fn_error $? "Invalid option. Use --enable-no-listen/--disable-no-listen instead" "$LINENO" 5
+fi
+
+
+# Check whether --enable-read-only was given.
+if test "${enable_read_only+set}" = set; then :
+  enableval=$enable_read_only;
+fi
+
+
+# Check whether --with-read-only was given.
+if test "${with_read_only+set}" = set; then :
+  withval=$with_read_only; as_fn_error $? "Invalid option. Use --enable-read-only/--disable-read-only instead" "$LINENO" 5
+fi
+
+if test "x$enable_read_only" = "xyes" -o "x$enable_notify_only" = "xyes" ; then
+
+$as_echo "#define NETSNMP_NO_WRITE_SUPPORT 1" >>confdefs.h
+
+fi
+
+# Check whether --with-read-only was given.
+if test "${with_read_only+set}" = set; then :
+  withval=$with_read_only; as_fn_error $? "Invalid option. Use --enable-read-only/--disable-read-only instead" "$LINENO" 5
+fi
+
+# Check whether --enable-readonly was given.
+if test "${enable_readonly+set}" = set; then :
+  enableval=$enable_readonly; as_fn_error $? "Invalid option. Use --enable-read-only/--disable-read-only instead" "$LINENO" 5
 fi
 
 
