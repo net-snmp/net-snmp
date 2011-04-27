@@ -275,12 +275,14 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 
     case MODE_GETNEXT:
     case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
     case MODE_SET_COMMIT:
     case MODE_SET_FREE:
     case MODE_SET_UNDO:
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         snmp_log(LOG_WARNING, "mibII/tcpTable: Unsupported mode (%d)\n",
                                reqinfo->mode);
         break;

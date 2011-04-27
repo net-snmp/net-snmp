@@ -141,6 +141,7 @@ handle_nsCacheTimeout(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if ( request->status != 0 ) {
@@ -162,6 +163,7 @@ handle_nsCacheTimeout(netsnmp_mib_handler *handler,
                            NETSNMP_DS_AGENT_CACHE_TIMEOUT,
                            *requests->requestvb->val.integer);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -191,6 +193,7 @@ handle_nsCacheEnabled(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if ( request->status != 0 ) {
@@ -215,6 +218,7 @@ handle_nsCacheEnabled(netsnmp_mib_handler *handler,
 	netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_NO_CACHING, enabled);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -318,6 +322,7 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         for (request=requests; request; request=request->next) {
             if (request->processed != 0)
@@ -416,6 +421,7 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
 	    }
 	}
 	break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;

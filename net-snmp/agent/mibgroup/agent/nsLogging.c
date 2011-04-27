@@ -190,6 +190,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         for (request=requests; request; request=request->next) {
             if ( request->status != 0 ) {
@@ -462,6 +463,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
 	    }
 	}
 	break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
