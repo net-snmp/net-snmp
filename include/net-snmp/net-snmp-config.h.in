@@ -1307,6 +1307,9 @@
 /* Define if you want to remove all non-essential code features. */
 #undef NETSNMP_MINIMAL_CODE
 
+/* Define if you want to only support sending notifications */
+#undef NETSNMP_NOTIFY_ONLY
+
 /* Define to suppress inclusion of deprecated functions */
 #undef NETSNMP_NO_DEPRECATED_FUNCTIONS
 
@@ -1316,6 +1319,9 @@
 
 /* If we don't want to use kmem. */
 #undef NETSNMP_NO_KMEM_USAGE
+
+/* Define if you want to remove all listening support from the code */
+#undef NETSNMP_NO_LISTEN_SUPPORT
 
 /* If you don't have root access don't exit upon kmem errors */
 #undef NETSNMP_NO_ROOT_ACCESS
@@ -1554,9 +1560,6 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
-
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-#undef size_t
 
 /* Define to the type of an unsigned integer type of width exactly 16 bits if
    such a type exists and the standard includes do not define it. */
