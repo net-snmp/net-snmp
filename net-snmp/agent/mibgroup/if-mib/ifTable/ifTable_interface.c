@@ -309,11 +309,11 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
     reginfo =
         netsnmp_handler_registration_create("ifTable", handler,
                                             ifTable_oid, ifTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP
+                                            HANDLER_CAN_BABY_STEP |
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-                                            | HANDLER_CAN_RWRITE
+                                            HANDLER_CAN_RWRITE
 #else /* ! NETSNMP_NO_WRITE_SUPPORT */
-                                            | HANDLER_CAN_RONLY
+                                            HANDLER_CAN_RONLY
 #endif /* ! NETSNMP_NO_WRITE_SUPPORT */
             );
 
