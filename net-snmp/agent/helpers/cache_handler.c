@@ -601,6 +601,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_GETBULK:
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
         /*
          * only touch cache once per pdu request, to prevent a cache
@@ -622,6 +623,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         /** next handler called automatically - 'AUTO_NEXT' */
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE2:
     case MODE_SET_FREE:
     case MODE_SET_ACTION:
