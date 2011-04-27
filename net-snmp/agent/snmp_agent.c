@@ -1282,6 +1282,7 @@ init_master_agent(void)
         return 0;               /*  No error if ! MASTER_AGENT  */
     }
 
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
     /*
      * Have specific agent ports been specified?  
      */
@@ -1351,6 +1352,7 @@ init_master_agent(void)
         }
     } while(st && *st != '\0');
     SNMP_FREE(buf);
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
 
 #ifdef USING_AGENTX_MASTER_MODULE
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
