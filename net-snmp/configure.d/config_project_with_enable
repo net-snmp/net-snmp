@@ -787,6 +787,7 @@ AC_ARG_ENABLE([notifyonly],,NETSNMP_INVALID_ENABLE([notify-only]))
 NETSNMP_ARG_ENABLE(no-listen,
 [  --enable-no-listen              Build tools that can't listen to ports.])
 if test "x$enable_no_listen" = "xyes" -o "x$enable_notify_only" = "xyes"; then
+   enable_no_listen="yes"
    AC_DEFINE(NETSNMP_NO_LISTEN_SUPPORT, 1,
      [Define if you want to remove all listening support from the code])
 fi
@@ -796,6 +797,7 @@ AC_ARG_ENABLE([nolisten],,NETSNMP_INVALID_ENABLE([no-listen]))
 NETSNMP_ARG_ENABLE(read-only,
 [  --enable-read-only              Remove all SET support from the code.])
 if test "x$enable_read_only" = "xyes" -o "x$enable_notify_only" = "xyes" ; then
+   enable_read_only="yes"
    AC_DEFINE(NETSNMP_NO_WRITE_SUPPORT, 1,
      [Define if you want to remove all SET/write access from the code])
 fi
