@@ -292,6 +292,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
         /* walk the OID tree for the data */
         rc = netsnmp_query_walk(vars, sess);
         if (rc != SNMP_ERR_NOERROR) {
+            /* XXX: disable? and reset the next query time point! */
             snmp_log(LOG_ERR, "deliverByNotify: failed to issue the query");
             ITERATOR_RELEASE(iterator);
             return;
