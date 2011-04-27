@@ -178,6 +178,11 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
     int             rc = 0;
     char           *str = NULL;
 
+#ifdef NETSNMP_NO_LISTEN_SUPPORT
+    if (local)
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
+
     if (addr == NULL || addr->sipx_family != AF_IPX) {
         return NULL;
     }
@@ -205,6 +210,7 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
     }
 
     if (local) {
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
         t->local = (unsigned char*)malloc(12);
         if (t->local == NULL) {
             netsnmp_transport_free(t);
@@ -230,6 +236,9 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
         }
         t->data = NULL;
         t->data_length = 0;
+#else /* NETSNMP_NO_LISTEN_SUPPORT */
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
         t->remote = (unsigned char*)malloc(12);
         if (t->remote == NULL) {

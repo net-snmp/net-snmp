@@ -927,6 +927,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
             DEBUGMSGTL(("dtlsudp", "Verified the server's certificate\n"));
         } else {
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
             /* verify that the client's certificate is the correct one */
         
             if ((verifyresult = netsnmp_tlsbase_verify_client_cert(tlsdata->ssl, tlsdata))
@@ -948,6 +949,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             }
             tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
             DEBUGMSGTL(("dtlsudp", "Verified the client's certificate\n"));
+#else /* NETSNMP_NO_LISTEN_SUPPORT */
+            return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
         }
     }
 

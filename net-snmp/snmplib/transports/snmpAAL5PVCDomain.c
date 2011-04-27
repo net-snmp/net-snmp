@@ -169,6 +169,11 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
     struct atm_qos  qos;
     netsnmp_transport *t = NULL;
 
+#ifdef NETSNMP_NO_LISTEN_SUPPORT
+    if (local)
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
+
     if (addr == NULL || addr->sap_family != AF_ATMPVC) {
         return NULL;
     }
@@ -217,6 +222,7 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
     }
 
     if (local) {
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
         t->local = (unsigned char*)malloc(8);
         if (t->local == NULL) {
             netsnmp_transport_free(t);
@@ -240,6 +246,9 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
             netsnmp_transport_free(t);
             return NULL;
         }
+#else /* NETSNMP_NO_LISTEN_SUPPORT */
+        return NULL;
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
         t->remote = (unsigned char*)malloc(8);
         if (t->remote == NULL) {
