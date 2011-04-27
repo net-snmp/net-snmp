@@ -166,6 +166,7 @@ snmpd_set_agent_group(const char *token, char *cptr)
 }
 #endif
 
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
 void
 snmpd_set_agent_address(const char *token, char *cptr)
 {
@@ -191,6 +192,7 @@ snmpd_set_agent_address(const char *token, char *cptr)
     netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
 			  NETSNMP_DS_AGENT_PORTS, buf);
 }
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
 
 void
 init_agent_read_config(const char *app)
@@ -248,9 +250,11 @@ init_agent_read_config(const char *app)
     register_app_config_handler("agentgroup",
                                 snmpd_set_agent_group, NULL, "groupid");
 #endif
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
     register_app_config_handler("agentaddress",
                                 snmpd_set_agent_address, NULL,
                                 "SNMP bind address");
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
     netsnmp_ds_register_config(ASN_BOOLEAN, app, "quit", 
 			       NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);

@@ -856,6 +856,7 @@ main(int argc, char *argv[])
     }
 
     if (optind < argc) {
+#ifndef NETSNMP_NO_LISTEN_SUPPORT
         /*
          * There are optional transport addresses on the command line.  
          */
@@ -881,6 +882,10 @@ main(int argc, char *argv[])
         DEBUGMSGTL(("snmpd/main", "port spec: %s\n",
                     netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
 					  NETSNMP_DS_AGENT_PORTS)));
+#else /* NETSNMP_NO_LISTEN_SUPPORT */
+        fprintf(stderr, "You specified ports to open; this agent was built to only send notifications\n");
+        exit(1);
+#endif /* NETSNMP_NO_LISTEN_SUPPORT */
     }
 
 #ifdef NETSNMP_LOGFILE
