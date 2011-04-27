@@ -967,6 +967,9 @@ with_minimalist
 enable_read_only
 with_read_only
 enable_readonly
+enable_notify_only
+with_notify_only
+enable_notifyonly
 enable_no_listen
 with_no_listen
 enable_nolisten
@@ -1710,6 +1713,7 @@ Optional Features:
   --disable-snmptrapd-subagent    Disable agentx subagent code in snmptrapd.
   --enable-minimalist             Remove all non-essential code features.
   --enable-read-only              Remove all SET support from the code.
+  --enable-notify-only            Build tools that can only send notifications.
   --enable-no-listen              Build tools that can't listen to ports.
   --enable-mini-agent             Build a minimal agent.
   --enable-mfd-rewrites           Use new MFD rewrites of mib modules,
@@ -4586,6 +4590,34 @@ if test "${enable_readonly+set}" = set; then :
 fi
 
 
+# Check whether --enable-notify-only was given.
+if test "${enable_notify_only+set}" = set; then :
+  enableval=$enable_notify_only;
+fi
+
+
+# Check whether --with-notify-only was given.
+if test "${with_notify_only+set}" = set; then :
+  withval=$with_notify_only; as_fn_error $? "Invalid option. Use --enable-notify-only/--disable-notify-only instead" "$LINENO" 5
+fi
+
+if test "x$enable_notify_only" = "xyes"; then
+
+$as_echo "#define NETSNMP_NOTIFY_ONLY 1" >>confdefs.h
+
+fi
+
+# Check whether --with-notify-only was given.
+if test "${with_notify_only+set}" = set; then :
+  withval=$with_notify_only; as_fn_error $? "Invalid option. Use --enable-notify-only/--disable-notify-only instead" "$LINENO" 5
+fi
+
+# Check whether --enable-notifyonly was given.
+if test "${enable_notifyonly+set}" = set; then :
+  enableval=$enable_notifyonly; as_fn_error $? "Invalid option. Use --enable-notify-only/--disable-notify-only instead" "$LINENO" 5
+fi
+
+
 # Check whether --enable-no-listen was given.
 if test "${enable_no_listen+set}" = set; then :
   enableval=$enable_no_listen;
@@ -4597,9 +4629,9 @@ if test "${with_no_listen+set}" = set; then :
   withval=$with_no_listen; as_fn_error $? "Invalid option. Use --enable-no-listen/--disable-no-listen instead" "$LINENO" 5
 fi
 
-if test "x$enable_read_only" = "xyes"; then
+if test "x$enable_no_listen" = "xyes" -o "x$enable_notify_only" = "xyes"; then
 
-$as_echo "#define NETSNMP_NO_READ_SUPPORT 1" >>confdefs.h
+$as_echo "#define NETSNMP_NO_LISTEN_SUPPORT 1" >>confdefs.h
 
 fi
 
@@ -4612,6 +4644,7 @@ fi
 if test "${enable_nolisten+set}" = set; then :
   enableval=$enable_nolisten; as_fn_error $? "Invalid option. Use --enable-no-listen/--disable-no-listen instead" "$LINENO" 5
 fi
+
 
 
 ##

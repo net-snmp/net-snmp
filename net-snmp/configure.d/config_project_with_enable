@@ -784,14 +784,24 @@ fi
 AC_ARG_WITH([read-only],,NETSNMP_INVALID_ENABLE([read-only]))
 AC_ARG_ENABLE([readonly],,NETSNMP_INVALID_ENABLE([read-only]))
 
+NETSNMP_ARG_ENABLE(notify-only,
+[  --enable-notify-only            Build tools that can only send notifications.])
+if test "x$enable_notify_only" = "xyes"; then
+   AC_DEFINE(NETSNMP_NOTIFY_ONLY, 1,
+     [Define if you want to only support sending notifications])
+fi
+AC_ARG_WITH([notify-only],,NETSNMP_INVALID_ENABLE([notify-only]))
+AC_ARG_ENABLE([notifyonly],,NETSNMP_INVALID_ENABLE([notify-only]))
+
 NETSNMP_ARG_ENABLE(no-listen,
 [  --enable-no-listen              Build tools that can't listen to ports.])
-if test "x$enable_read_only" = "xyes"; then
-   AC_DEFINE(NETSNMP_NO_READ_SUPPORT, 1,
+if test "x$enable_no_listen" = "xyes" -o "x$enable_notify_only" = "xyes"; then
+   AC_DEFINE(NETSNMP_NO_LISTEN_SUPPORT, 1,
      [Define if you want to remove all listening support from the code])
 fi
 AC_ARG_WITH([no-listen],,NETSNMP_INVALID_ENABLE([no-listen]))
 AC_ARG_ENABLE([nolisten],,NETSNMP_INVALID_ENABLE([no-listen]))
+
 
 ##
 #   Project: Agent: MIB module configuration
