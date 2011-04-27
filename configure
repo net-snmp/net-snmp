@@ -4602,6 +4602,7 @@ if test "${with_no_listen+set}" = set; then :
 fi
 
 if test "x$enable_no_listen" = "xyes" -o "x$enable_notify_only" = "xyes"; then
+   enable_no_listen="yes"
 
 $as_echo "#define NETSNMP_NO_LISTEN_SUPPORT 1" >>confdefs.h
 
@@ -4630,6 +4631,7 @@ if test "${with_read_only+set}" = set; then :
 fi
 
 if test "x$enable_read_only" = "xyes" -o "x$enable_notify_only" = "xyes" ; then
+   enable_read_only="yes"
 
 $as_echo "#define NETSNMP_NO_WRITE_SUPPORT 1" >>confdefs.h
 
