@@ -14,6 +14,10 @@ listing of all changes made to the code.
         This is provided by a new generic feature marking/selection mechanism.
         http://www.net-snmp.org/wiki/index.php/Feature_Marking_and_Selection
       - It's now possible to build without SNMPv3/USM
+      - It's possible to build the suite with no SET support
+        configure using --enable-read-only
+      - It's possible to build the agent as a notify-only agent
+        configure using --enable-notify-only
 
 *5.6*
 
