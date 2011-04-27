@@ -278,7 +278,12 @@ _ifXTable_initialize_interface(ifXTable_registration * reg_ptr,
                                             ifXTable_oid,
                                             ifXTable_oid_size,
                                             HANDLER_CAN_BABY_STEP |
-                                            HANDLER_CAN_RWRITE);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+                                            HANDLER_CAN_RWRITE
+#else /* ! NETSNMP_NO_WRITE_SUPPORT */
+                                            HANDLER_CAN_RONLY
+#endif /* ! NETSNMP_NO_WRITE_SUPPORT */
+            );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering table ifXTable\n");
         return;
