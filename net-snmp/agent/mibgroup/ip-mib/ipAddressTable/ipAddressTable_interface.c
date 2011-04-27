@@ -150,6 +150,7 @@ static Netsnmp_Node_Handler _mfd_ipAddressTable_pre_request;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_post_request;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_get_values;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static Netsnmp_Node_Handler _mfd_ipAddressTable_check_objects;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_set_values;
@@ -159,6 +160,7 @@ static Netsnmp_Node_Handler _mfd_ipAddressTable_commit;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_check_dependencies;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /**
  * @internal
@@ -233,6 +235,7 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
     access_multiplexer->post_request = _mfd_ipAddressTable_post_request;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -256,6 +259,7 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
      */
     access_multiplexer->consistency_checks =
         _mfd_ipAddressTable_check_dependencies;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     /*************************************************
      *
@@ -283,17 +287,19 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
+
+    if (access_multiplexer->pre_request)
+        mfd_modes |= BABY_STEP_PRE_REQUEST;
+    if (access_multiplexer->post_request)
+        mfd_modes |= BABY_STEP_POST_REQUEST;
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if (access_multiplexer->object_syntax_checks)
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
-
-    if (access_multiplexer->pre_request)
-        mfd_modes |= BABY_STEP_PRE_REQUEST;
-    if (access_multiplexer->post_request)
-        mfd_modes |= BABY_STEP_POST_REQUEST;
 
     if (access_multiplexer->undo_setup)
         mfd_modes |= BABY_STEP_UNDO_SETUP;
@@ -310,6 +316,7 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -1288,6 +1295,7 @@ _ipAddressTable_check_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
     return rc;
 }                               /* _ipAddressTable_check_column */
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 _mfd_ipAddressTable_check_objects(netsnmp_mib_handler *handler,
                                   netsnmp_handler_registration *reginfo,
@@ -1895,6 +1903,7 @@ _mfd_ipAddressTable_irreversible_commit(netsnmp_mib_handler *handler, netsnmp_ha
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipAddressTable_irreversible_commit */
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /***********************************************************************
  *

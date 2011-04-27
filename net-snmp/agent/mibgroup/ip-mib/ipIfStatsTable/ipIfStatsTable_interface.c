@@ -247,17 +247,19 @@ _ipIfStatsTable_initialize_interface(ipIfStatsTable_registration * reg_ptr,
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
+
+    if (access_multiplexer->pre_request)
+        mfd_modes |= BABY_STEP_PRE_REQUEST;
+    if (access_multiplexer->post_request)
+        mfd_modes |= BABY_STEP_POST_REQUEST;
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if (access_multiplexer->object_syntax_checks)
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
-
-    if (access_multiplexer->pre_request)
-        mfd_modes |= BABY_STEP_PRE_REQUEST;
-    if (access_multiplexer->post_request)
-        mfd_modes |= BABY_STEP_POST_REQUEST;
 
     if (access_multiplexer->undo_setup)
         mfd_modes |= BABY_STEP_UNDO_SETUP;
@@ -274,6 +276,7 @@ _ipIfStatsTable_initialize_interface(ipIfStatsTable_registration * reg_ptr,
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);

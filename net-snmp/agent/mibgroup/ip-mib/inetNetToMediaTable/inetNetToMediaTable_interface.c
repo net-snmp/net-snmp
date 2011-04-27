@@ -154,6 +154,7 @@ static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_pre_request;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_post_request;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_get_values;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_check_objects;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_set_values;
@@ -163,6 +164,7 @@ static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_commit;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_check_dependencies;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /**
  * @internal
@@ -241,6 +243,7 @@ _inetNetToMediaTable_initialize_interface(inetNetToMediaTable_registration
         _mfd_inetNetToMediaTable_post_request;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -265,6 +268,7 @@ _inetNetToMediaTable_initialize_interface(inetNetToMediaTable_registration
      */
     access_multiplexer->consistency_checks =
         _mfd_inetNetToMediaTable_check_dependencies;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     /*************************************************
      *
@@ -292,17 +296,19 @@ _inetNetToMediaTable_initialize_interface(inetNetToMediaTable_registration
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
+
+    if (access_multiplexer->pre_request)
+        mfd_modes |= BABY_STEP_PRE_REQUEST;
+    if (access_multiplexer->post_request)
+        mfd_modes |= BABY_STEP_POST_REQUEST;
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if (access_multiplexer->object_syntax_checks)
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
-
-    if (access_multiplexer->pre_request)
-        mfd_modes |= BABY_STEP_PRE_REQUEST;
-    if (access_multiplexer->post_request)
-        mfd_modes |= BABY_STEP_POST_REQUEST;
 
     if (access_multiplexer->undo_setup)
         mfd_modes |= BABY_STEP_UNDO_SETUP;
@@ -319,6 +325,7 @@ _inetNetToMediaTable_initialize_interface(inetNetToMediaTable_registration
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -1252,6 +1259,7 @@ _inetNetToMediaTable_check_column(inetNetToMediaTable_rowreq_ctx *
     return rc;
 }                               /* _inetNetToMediaTable_check_column */
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 _mfd_inetNetToMediaTable_check_objects(netsnmp_mib_handler *handler, netsnmp_handler_registration
                                        *reginfo, netsnmp_agent_request_info
@@ -1821,6 +1829,7 @@ _mfd_inetNetToMediaTable_irreversible_commit(netsnmp_mib_handler *handler, netsn
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_inetNetToMediaTable_irreversible_commit */
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /***********************************************************************
  *
