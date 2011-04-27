@@ -2046,7 +2046,6 @@ _ifXTable_container_row_restore(const char *token, char *buf)
     }
     if (0 == found) {
         snmp_log(LOG_ERR, "error parsing ifXTable row; no columns found\n");
-        ifTable_release_rowreq_ctx(rowreq_ctx);
         return;
     }
 
