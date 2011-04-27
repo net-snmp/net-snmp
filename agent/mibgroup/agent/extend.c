@@ -1004,6 +1004,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                 }
             }
             break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 
         default:
             netsnmp_set_request_error(reqinfo, request, SNMP_ERR_GENERR);
@@ -1011,6 +1012,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
         }
     }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     /*
      * If we're marking a given row as active,
      *  then we need to check that it's ready.
@@ -1035,8 +1037,8 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
             }
         }
     }
-#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+    
     return SNMP_ERR_NOERROR;
 }
 
@@ -1487,6 +1489,7 @@ fixExec2Error(int action,
     idx = name[name_len-1] -1;
     exten = &compatability_entries[ idx ];
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     switch (action) {
     case MODE_SET_RESERVE1:
         if (var_val_type != ASN_INTEGER) {
@@ -1507,6 +1510,7 @@ fixExec2Error(int action,
     case MODE_SET_COMMIT:
         netsnmp_cache_check_and_reload( exten->efix_entry->cache );
     }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     return SNMP_ERR_NOERROR;
 }
-#endif
+#endif /* USING_UCD_SNMP_EXTENSIBLE_MODULE */
