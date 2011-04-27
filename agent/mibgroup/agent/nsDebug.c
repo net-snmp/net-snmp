@@ -124,6 +124,7 @@ handle_nsDebugEnabled(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if (request->processed != 0)
@@ -149,6 +150,7 @@ handle_nsDebugEnabled(netsnmp_mib_handler *handler,
 	    enabled = 0;
 	snmp_set_do_debugging( enabled );
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -179,6 +181,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if (request->processed != 0)
@@ -204,6 +207,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
 	    enabled = 0;
 	snmp_set_do_debugging( enabled );
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -235,6 +239,7 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if (request->processed != 0)
@@ -261,6 +266,7 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
 	                       NETSNMP_DS_LIB_DUMP_PACKET, enabled);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -345,6 +351,7 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if (request->processed != 0)
@@ -450,6 +457,7 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 	    }
         }
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;

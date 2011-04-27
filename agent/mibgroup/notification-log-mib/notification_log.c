@@ -476,8 +476,10 @@ notification_log_config_handler(netsnmp_mib_handler *handler,
      * configuration variables get set to a value and thus
      * notifications must be possibly deleted from our archives.
      */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (reqinfo->mode == MODE_SET_COMMIT)
         check_log_size(0, NULL);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     return SNMP_ERR_NOERROR;
 }
 
