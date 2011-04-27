@@ -312,7 +312,9 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
                                             HANDLER_CAN_BABY_STEP
 #ifndef NETSNMP_NO_WRITE_SUPPORT
                                             | HANDLER_CAN_RWRITE
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
+#else /* ! NETSNMP_NO_WRITE_SUPPORT */
+                                            | HANDLER_CAN_RONLY
+#endif /* ! NETSNMP_NO_WRITE_SUPPORT */
             );
 
     if (NULL == reginfo) {
