@@ -1346,6 +1346,7 @@ netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column,
     }
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /**
  * Sets a given column in a row with data given a type, value,
@@ -1419,7 +1420,6 @@ netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
     data->data_len = value_len;
     return SNMPERR_SUCCESS;
 }
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 
 /* ==================================
