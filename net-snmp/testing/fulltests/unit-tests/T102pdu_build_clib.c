@@ -30,18 +30,33 @@ pdu->version = session.version;
 
 OKF((pdu != NULL), ("Creating a GET PDU failed"));
 
-#ifndef NETSNMP_NOTIFY_ONLY
 rc = snmp_build(&packet, &packet_len, &offset, ss, pdu);
 
+#ifndef NETSNMP_NOTIFY_ONLY
 OKF((rc == SNMPERR_SUCCESS),
     ("Building a GET PDU/packet should have worked: %d", rc));
-#endif /* ! NETSNMP_NOTIFY_ONLY */
+#else /* NETSNMP_NOTIFY_ONLY */
+OKF((rc != SNMPERR_SUCCESS),
+    ("Building a GET PDU/packet should have failed: %d", rc));
+#endif /* NETSNMP_NOTIFY_ONLY */
 
-#ifdef NETSNMP_NO_WRITE_SUPPORT
 offset = 0;
 pdu->command = 163; /* a SET message */
 rc = snmp_build(&packet, &packet_len, &offset, ss, pdu);
 
-OKF((rc == -1),
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+OKF((rc == SNMPERR_SUCCESS),
+    ("Building a SET PDU/packet should have succeeded: %d", rc));
+#else /* NETSNMP_NO_WRITE_SUPPORT */
+OKF((rc != SNMPERR_SUCCESS),
     ("Building a SET PDU/packet should have failed: %d", rc));
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
+
+
+
+offset = 0;
+pdu->command = SNMP_MSG_INFORM;
+rc = snmp_build(&packet, &packet_len, &offset, ss, pdu);
+
+OKF((rc == SNMPERR_SUCCESS),
+    ("Building an INFORM PDU/packet should have succeed: %d", rc));
