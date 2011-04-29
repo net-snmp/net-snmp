@@ -132,12 +132,12 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
       }
 
     /*
-     * Generate the Command to be executed by SCM 
+     * Generate the command to be executed by the SCM 
      */
     _sntprintf (szServiceCommand, CountOf(szServiceCommand), _T("%s %s"), szServicePath, _T ("-service"));
 
     /*
-     * Create the Desired service 
+     * Create the desired service 
      */
     hService = CreateService (hSCManager, lpszServiceName, lpszServiceDisplayName,
 			SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS,
@@ -158,7 +158,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
       }
 
     /*
-     * Create registry entries for EventLog 
+     * Create registry entries for the event log 
      */
     /*
      * Create registry Application event log key 
@@ -306,7 +306,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
       }
 
     /*
-     * Ready to Log messages 
+     * Ready to log messages 
      */
 
     /*
@@ -433,8 +433,7 @@ UnregisterService (LPCTSTR lpszServiceName, int quiet)
 }
 
     /*
-     * To write message to Windows Event log
-     * Input - Event Type, Message string
+     * Write a message to the Windows event log.
      */
 VOID
 WriteToEventLog (WORD wType, LPCTSTR pszFormat, ...)
@@ -443,6 +442,7 @@ WriteToEventLog (WORD wType, LPCTSTR pszFormat, ...)
   LPTSTR LogStr[1];
   va_list ArgList;
   HANDLE hEventSource = NULL;
+
   va_start (ArgList, pszFormat);
   _vsntprintf (szMessage, CountOf(szMessage), pszFormat, ArgList);
   va_end (ArgList);
@@ -451,7 +451,7 @@ WriteToEventLog (WORD wType, LPCTSTR pszFormat, ...)
   if (hEventSource == NULL)
     return;
   ReportEvent (hEventSource, wType, 0,
-	       DISPLAY_MSG,	/* To Just output the text to event log */
+	       DISPLAY_MSG,
 	       NULL, 1, 0, LogStr, NULL);
   DeregisterEventSource (hEventSource);
 }
@@ -469,7 +469,7 @@ WriteToEventLog (WORD wType, LPCTSTR pszFormat, ...)
 INT
 ParseCmdLineForServiceOption (int argc, TCHAR * argv[], int *quiet)
 {
-  int nReturn = RUN_AS_CONSOLE;	/* Defualted to run as console */
+  int nReturn = RUN_AS_CONSOLE;	/* default is to run as a console application */
 
   if (argc >= 2)
     {
@@ -508,7 +508,7 @@ ParseCmdLineForServiceOption (int argc, TCHAR * argv[], int *quiet)
 }
 
     /*
-     * Write error message to Event Log, console or pop-up window
+     * Write error message to event log, console or pop-up window.
      *
      * If useGetLastError is 1, the last error returned from GetLastError()
      * is appended to pszMessage, separated by a ": ".
@@ -554,7 +554,7 @@ ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int qu
     if (ReportEvent (hEventSource, 
           eventLogType, 
           0,
-          DISPLAY_MSG,	/* To Just output the text to event log */
+          DISPLAY_MSG,	/* just output the text to the event log */
           NULL, 
           1, 
           0, 
@@ -599,9 +599,9 @@ ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int qu
 }
 
     /*
-     *  To update current service status 
-     *  Sends the current service status to the SCM. Also updates
-     *  the global service status structure.
+     * Update current service status.
+     * Sends the current service status to the SCM. Also updates
+     * the global service status structure.
      */
 static BOOL
 UpdateServiceStatus (DWORD dwStatus, DWORD dwErrorCode, DWORD dwWaitHint)
@@ -639,7 +639,7 @@ UpdateServiceStatus (DWORD dwStatus, DWORD dwErrorCode, DWORD dwWaitHint)
 }
 
     /*
-     * Reports current Service status to SCM
+     * Reports current service status to SCM
      */
 static BOOL
 ReportCurrentServiceStatus ()
@@ -648,7 +648,7 @@ ReportCurrentServiceStatus ()
 }
 
     /*
-     * The ServiceMain function to start service.
+     * ServiceMain function.
      */
 VOID WINAPI
 ServiceMain (DWORD argc, LPTSTR argv[])
@@ -657,14 +657,14 @@ ServiceMain (DWORD argc, LPTSTR argv[])
   unsigned threadId;
 
   /*
-   * Input Arguments to function startup 
+   * Input arguments
    */
   DWORD ArgCount = 0;
   LPTSTR *ArgArray = NULL;
   TCHAR szRegKey[512];
   TCHAR szValue[128];
   DWORD nSize;
-  HKEY hParamKey = NULL;	/* To read startup parameters */
+  HKEY hParamKey = NULL;
   DWORD TotalParams = 0;
   DWORD i;
   InputParams ThreadInputParams;
@@ -675,7 +675,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
 
   /*
    * SCM sends Service Name as first arg, increment to point
-   * arguments user specified while starting contorl agent
+   * arguments user specified while starting control agent
    */
 
   /*
@@ -684,7 +684,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
   ArgCount = 1;
 
   /*
-   * Create Registry Key path 
+   * Create registry key path 
    */
   _sntprintf (szRegKey, CountOf(szRegKey), _T("%s%s\\%s"),
 	     _T ("SYSTEM\\CurrentControlSet\\Services\\"), app_name_long,
@@ -694,7 +694,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
     {
 
       /*
-       * Read startup Configuration information 
+       * Read startup configuration information 
        */
       /*
        * Find number of subkeys inside parameters 
@@ -746,7 +746,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
     {
 
       /*
-       * No statup agrs are given 
+       * No startup args are given 
        */
       ThreadInputParams.Argc = argc;
       ThreadInputParams.Argv = argv;
@@ -770,12 +770,12 @@ ServiceMain (DWORD argc, LPTSTR argv[])
     }
 
   /*
-   * Update the service status to START_PENDING 
+   * Update the service status to START_PENDING.
    */
   UpdateServiceStatus (SERVICE_START_PENDING, NO_ERROR, SCM_WAIT_INTERVAL);
 
   /*
-   * Spin of worker thread, which does majority of the work 
+   * Start the worker thread, which does the majority of the work .
    */
   TRY
   {
@@ -796,13 +796,12 @@ ServiceMain (DWORD argc, LPTSTR argv[])
       }
 
     /*
-     * Set Service Status to Running 
+     * Set service status to SERVICE_RUNNING.
      */
     UpdateServiceStatus (SERVICE_RUNNING, NO_ERROR, SCM_WAIT_INTERVAL);
 
     /*
-     * Wait for termination event and worker thread to
-     * * spin down.
+     * Wait until the worker thread finishes.
      */
     WaitForSingleObject (hServiceThread, INFINITE);
   }
@@ -817,12 +816,12 @@ ServiceMain (DWORD argc, LPTSTR argv[])
     FreeSecurityAttributes (&SecurityAttributes);
 
     /*
-     * Delete allocated argument list 
+     * Free allocated argument list 
      */
     if (ArgCount > 1 && ArgArray != NULL)
       {
 	/*
-	 * Delete all strings 
+	 * Free all strings 
 	 */
 	for (i = 0; i < ArgCount; i++)
 	  {
