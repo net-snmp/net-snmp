@@ -295,6 +295,9 @@ extern          "C" {
 
     int             netsnmp_addrstr_hton(char *ptr, size_t len);
 
+    NETSNMP_IMPORT
+    int             netsnmp_string_time_to_secs(char *time_string);
+
 #ifdef __cplusplus
 }
 #endif

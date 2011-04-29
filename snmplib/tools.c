@@ -76,6 +76,7 @@ netsnmp_feature_child_of(tools_all, libnetsnmp)
 
 netsnmp_feature_child_of(memory_wrappers, tools_all)
 netsnmp_feature_child_of(valgrind, tools_all)
+netsnmp_feature_child_of(string_time_to_secs, tools_all)
 netsnmp_feature_child_of(netsnmp_check_definedness, valgrind)
 
 netsnmp_feature_child_of(uatime_ready, netsnmp_unused)
@@ -1163,3 +1164,57 @@ netsnmp_addrstr_hton(char *ptr, size_t len)
 
     return 0;
 }
+
+#ifndef NETSNMP_FEATURE_REMOVE_STRING_TIME_TO_SECS
+/**
+ * Takes a time string like 4h and converts it to seconds
+ *
+ * @param time_string The string to convert
+ *
+ * @return seconds converted from the string
+ * @return -1  : on failure
+ */
+int
+netsnmp_string_time_to_secs(char *time_string) {
+    int secs = -1;
+    if (!time_string || !time_string[0])
+        return secs;
+
+    secs = atoi(time_string);
+    switch (time_string[strlen(time_string)-1]) {
+    case 's':
+    case 'S':
+        /* already in seconds */
+        break;
+
+    case 'm':
+    case 'M':
+        secs = secs * 60;
+        break;
+
+    case 'h':
+    case 'H':
+        secs = secs * 60 * 60;
+        break;
+
+    case 'd':
+    case 'D':
+        secs = secs * 60 * 60 * 24;
+        break;
+
+    case 'w':
+    case 'W':
+        secs = secs * 60 * 60 * 24 * 7;
+        break;
+
+    default:
+        snmp_log(LOG_ERR, "time string %s contains an invalid suffix letter\n",
+                 time_string);
+        return -1;
+    }
+
+    DEBUGMSGTL(("string_time_to_secs", "Converted time string %s to %d\n",
+                time_string, secs));
+    return secs;
+}
+#endif /* NETSNMP_FEATURE_REMOVE_STRING_TIME_TO_SECS */
