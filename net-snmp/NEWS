@@ -8,6 +8,8 @@ listing of all changes made to the code.
   snmpd:
       - Delivery of data via regularily scheduled notifications.
         (see "Data Delivery via Notfiications" in snmpd.conf)
+      - Many time-based config options can take (m)ins, (h)ours, ... arguments
+        (see the snmpd.conf manual page)
 
   build:
       - New flags to reduce the amount of compiled code to bare minimums.
