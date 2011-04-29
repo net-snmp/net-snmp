@@ -992,8 +992,10 @@ between these two options.
 .IP
 See \fIstrictDisman\fR for details of the ordering of notification payloads.
 .IP "-r FREQUENCY"
-monitors the given expression every FREQUENCY seconds.
-By default, the expression will be evaluated every 600s (10 minutes). 
+monitors the given expression every FREQUENCY, where FREQUENCY is in
+seconds or optionally suffixed by one of s (for seconds), m (for
+minutes), h (for hours), d (for days), or w (for weeks).  By default,
+the expression will be evaluated every 600s (10 minutes).
 .IP "-S"
 indicates that the monitor expression should \fInot\fR be evaluated
 when the agent first starts up.  The first evaluation will be done
@@ -1120,7 +1122,9 @@ default build configuration for the most recent distribution).
 There are three ways of specifying the scheduled action:
 .IP "repeat FREQUENCY OID = VALUE"
 configures a SET assignment of the (integer) VALUE to the MIB instance
-OID, to be run every FREQUENCY seconds.
+OID, to be run every FREQUENCY seconds, where FREQUENCY is in
+seconds or optionally suffixed by one of s (for seconds), m (for
+minutes), h (for hours), d (for days), or w (for weeks).
 .IP "cron MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE"
 configures a SET assignment of the (integer) VALUE to the MIB instance
 OID, to be run at the times specified by the fields MINUTE to WEEKDAY.
@@ -1167,20 +1171,22 @@ standard set of configured notification targets.  See the
 information.
 .IP "deliverByNotify [-p] [-m] [-s MAXSIZE] FREQUENCY OID"
 This directive tells the SNMP agent to self-walk the \fIOID\fR,
-collect all the data and send it out every \fIFREQUENCY\fR seconds.
-By default scalars are included in the notification that specify the
-how often the notification will be sent (unless the \fI-p\fR option is
-specified) and which message number of how many messages a particular
-notification is (unless \fI-m\fR is specified).  To break the
-notifications into manageable packet sizes, use the \fI-s\fR flag to
-specify the approximate maximum number of bytes that a notification
-message should be limited to.  If more than \fIMAXSIZE\fR of bytes is
-needed then multiple notifications will be sent to deliver the data.
-Note that the calculations for ensuring the maximum size is met are
-approximations and thus it can be absolutely guaranteed they'll be
-under that size, so leave a padding buffer if it is critical that you
-avoid fragmentation.  A value of -1 indicates force everything into a
-single message no matter how big it is.
+collect all the data and send it out every \fIFREQUENCY\fR seconds,
+where FREQUENCY is in seconds or optionally suffixed by one of s (for
+seconds), m (for minutes), h (for hours), d (for days), or w (for
+weeks).  By default scalars are included in the notification that
+specify the how often the notification will be sent (unless the
+\fI-p\fR option is specified) and which message number of how many
+messages a particular notification is (unless \fI-m\fR is specified).
+To break the notifications into manageable packet sizes, use the
+\fI-s\fR flag to specify the approximate maximum number of bytes that
+a notification message should be limited to.  If more than
+\fIMAXSIZE\fR of bytes is needed then multiple notifications will be
+sent to deliver the data.  Note that the calculations for ensuring the
+maximum size is met are approximations and thus it can be absolutely
+guaranteed they'll be under that size, so leave a padding buffer if it
+is critical that you avoid fragmentation.  A value of -1 indicates
+force everything into a single message no matter how big it is.
 .IP
 Example usage: the following will deliver the contents of the ifTable
 once an hour and the contents of the system group once every 2 hours:
@@ -1620,7 +1626,9 @@ AgentX functionality (unlike the '-x' command-line option).
 .RE
 .IP "agentXTimeout NUM"
 defines the timeout period (NUM seconds) for an AgentX request.
-Default is 1 second.
+Default is 1 second.  NUM also be specified with a suffix of one of s
+(for seconds), m (for minutes), h (for hours), d (for days), or w (for
+weeks).
 .IP "agentXRetries NUM"
 defines the number of retries for an AgentX request.
 Default is 5 retries.
