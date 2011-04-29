@@ -384,14 +384,14 @@ snmp_pdu_type(int type)
         return "GET";
     case SNMP_MSG_GETNEXT:
         return "GETNEXT";
-    case SNMP_MSG_RESPONSE:
-        return "RESPONSE";
+    case SNMP_MSG_GETBULK:
+        return "GETBULK";
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
         return "SET";
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
-    case SNMP_MSG_GETBULK:
-        return "GETBULK";
+    case SNMP_MSG_RESPONSE:
+        return "RESPONSE";
     case SNMP_MSG_INFORM:
         return "INFORM";
     case SNMP_MSG_TRAP2:
@@ -2012,8 +2012,10 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         /*
          * Fallthrough 
          */
+#ifndef NETSNMP_NOTIFY_ONLY
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
+#endif /* ! NETSNMP_NOTIFY_ONLY */
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
@@ -2024,6 +2026,7 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             pdu->errindex = 0;
         break;
 
+#ifndef NETSNMP_NOTIFY_ONLY
     case SNMP_MSG_GETBULK:
         if (pdu->max_repetitions < 0) {
             session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
@@ -2034,6 +2037,7 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             return -1;
         }
         break;
+#endif /* ! NETSNMP_NOTIFY_ONLY */
 
     case SNMP_MSG_TRAP:
         session->s_snmp_errno = SNMPERR_V1_IN_V2;
@@ -2705,8 +2709,10 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         /*
          * Fallthrough 
          */
+#ifndef NETSNMP_NOTIFY_ONLY
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
+#endif /* ! NETSNMP_NOTIFY_ONLY */
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
@@ -2744,6 +2750,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             pdu->errindex = 0;
         break;
 
+#ifndef NETSNMP_NOTIFY_ONLY
     case SNMP_MSG_GETBULK:
         /*
          * not supported in SNMPv1 and SNMPsec 
@@ -2763,6 +2770,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             return -1;
         }
         break;
+#endif /* ! NETSNMP_NOTIFY_ONLY */
 
     case SNMP_MSG_TRAP:
         /*
@@ -4371,14 +4379,16 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
          * fallthrough 
          */
 
+#ifndef NETSNMP_NOTIFY_ONLY
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
     case SNMP_MSG_GETBULK:
-    case SNMP_MSG_TRAP2:
-    case SNMP_MSG_INFORM:
+#endif /* ! NETSNMP_NOTIFY_ONLY */
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
+    case SNMP_MSG_TRAP2:
+    case SNMP_MSG_INFORM:
         /*
          * PDU is not an SNMPv1 TRAP 
          */
@@ -4790,10 +4800,10 @@ _sess_async_send(void *sessp,
      */
     if (pdu->variables == NULL) {
         switch (pdu->command) {
-        case SNMP_MSG_GET:
 #ifndef NETSNMP_NO_WRITE_SUPPORT
         case SNMP_MSG_SET:
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
+        case SNMP_MSG_GET:
         case SNMP_MSG_GETNEXT:
         case SNMP_MSG_GETBULK:
         case SNMP_MSG_RESPONSE:
