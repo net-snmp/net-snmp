@@ -12,6 +12,7 @@
 #include "disman/schedule/schedConf.h"
 
 netsnmp_feature_require(iquery)
+netsnmp_feature_require(string_time_to_secs)
 
 static int schedEntries;
 
@@ -54,7 +55,7 @@ parse_sched_periodic( const char *token, char *line )
 {
     netsnmp_tdata_row       *row;
     struct schedTable_entry *entry;
-    char   buf[24];
+    char   buf[24], tmpbuf[SPRINT_MAX_LEN];
     long   frequency;
     long   value;
     size_t tmpint;
@@ -68,7 +69,13 @@ parse_sched_periodic( const char *token, char *line )
     /*
      *  Parse the configure directive line
      */
-    line = read_config_read_data(ASN_INTEGER,   line, &frequency, &tmpint);
+    line = copy_nword(line, tmpbuf, sizeof(tmpbuf));
+    frequency = netsnmp_string_time_to_secs(tmpbuf);
+    if (frequency == -1) {
+        config_perror("Illegal frequency specified");
+        return;
+    }
+
     line = read_config_read_data(ASN_OBJECT_ID, line, &var_ptr,   &var_len);
     if (var_len == 0) {
         config_perror("invalid specification for schedVariable");

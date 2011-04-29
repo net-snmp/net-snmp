@@ -22,6 +22,7 @@
 #include "agentx/protocol.h"
 
 netsnmp_feature_require(user_information)
+netsnmp_feature_require(string_time_to_secs)
 
 /* ---------------------------------------------------------------------
  *
@@ -119,8 +120,12 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
 void
 agentx_parse_agentx_timeout(const char *token, char *cptr)
 {
-    int x = atoi(cptr);
+    int x = netsnmp_string_time_to_secs(cptr);
     DEBUGMSGTL(("agentx/config/timeout", "%s\n", cptr));
+    if (x == -1) {
+        config_perror("Invalid timeout value");
+        return;
+    }
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                        NETSNMP_DS_AGENT_AGENTX_TIMEOUT, x * ONE_SEC);
 }

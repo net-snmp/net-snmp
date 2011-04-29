@@ -24,6 +24,7 @@
 netsnmp_feature_require(mib_snprint_variable)
 netsnmp_feature_require(tdomain_support)
 netsnmp_feature_require(check_vb_uint)
+netsnmp_feature_require(string_time_to_secs)
 
 /*
  * minimal include directives 
@@ -455,8 +456,17 @@ parse_simple_monitor(const char *token, char *line)
            break;
         case 'r':
             if (cp) {
+                int freq;
                 cp = copy_nword(cp, buf, sizeof(buf));
-                StorageNew->mteTriggerFrequency = strtoul(buf, NULL, 0);
+                freq = netsnmp_string_time_to_secs(buf);
+                if (freq == -1) {
+                    config_perror("Invalid -r value\n");
+                    /*
+                     * XXX: free StorageNew 
+                     */
+                    return;
+                }
+                StorageNew->mteTriggerFrequency = (unsigend long) freq;
             } else {
                 config_perror("No parameter after -r given\n");
                 /*
