@@ -1167,9 +1167,13 @@ netsnmp_addrstr_hton(char *ptr, size_t len)
 
 #ifndef NETSNMP_FEATURE_REMOVE_STRING_TIME_TO_SECS
 /**
- * Takes a time string like 4h and converts it to seconds
+ * Takes a time string like 4h and converts it to seconds.
+ * The string time given may end in 's' for seconds (the default
+ * anyway if no suffix is specified),
+ * 'm' for minutes, 'h' for hours, 'd' for days, or 'w' for weeks.  The
+ * upper case versions are also accepted.
  *
- * @param time_string The string to convert
+ * @param time_string The time string to convert.
  *
  * @return seconds converted from the string
  * @return -1  : on failure
