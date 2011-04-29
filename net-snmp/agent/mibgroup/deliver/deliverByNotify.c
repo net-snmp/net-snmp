@@ -152,6 +152,8 @@ parse_max_message_number_oid_config(const char *token, char *line) {
 void
 parse_deliver_config(const char *token, char *line) {
     const char *cp = line;
+    char buf[SPRINT_MAX_LEN];
+    size_t buf_len = SPRINT_MAX_LEN;
     int max_size = DEFAULT_MAX_DELIVER_SIZE;
     int frequency;
     oid target_oid[MAX_OID_LEN];
@@ -189,7 +191,8 @@ parse_deliver_config(const char *token, char *line) {
         config_perror("no frequency given");
         return;
     }
-    frequency = atoi(cp);
+    copy_nword(cp, buf, buf_len);
+    frequency = netsnmp_string_time_to_secs(buf);
     cp = skip_token_const(cp);
 
     if (frequency <= 0) {
