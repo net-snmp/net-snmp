@@ -30,10 +30,12 @@ pdu->version = session.version;
 
 OKF((pdu != NULL), ("Creating a GET PDU failed"));
 
+#ifndef NETSNMP_NOTIFY_ONLY
 rc = snmp_build(&packet, &packet_len, &offset, ss, pdu);
 
 OKF((rc == SNMPERR_SUCCESS),
     ("Building a GET PDU/packet should have worked: %d", rc));
+#endif /* ! NETSNMP_NOTIFY_ONLY */
 
 #ifdef NETSNMP_NO_WRITE_SUPPORT
 offset = 0;
