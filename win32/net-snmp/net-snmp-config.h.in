@@ -688,7 +688,9 @@
 /* #undef HAVE_STATVFS */
 
 /* Define to 1 if you have the <stdint.h> header file. */
-/* #undef HAVE_STDINT_H */
+#ifdef __MINGW32__
+#define HAVE_STDINT_H 1
+#endif
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
@@ -1337,8 +1339,10 @@
 /* got in_addr_t? */
 /* #undef HAVE_IN_ADDR_T */
 
+#ifdef __MINGW32__
 /* got ssize_t? */
-/* #undef HAVE_SSIZE_T */
+#define HAVE_SSIZE_T
+#endif
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
@@ -1565,7 +1569,10 @@
 
 #ifdef WIN32
 
+#ifndef __MINGW32__
 typedef unsigned short mode_t;
+#endif
+#ifndef HAVE_STDINT_H
 typedef unsigned char uint8_t;
 typedef char int8_t;
 typedef unsigned short uint16_t;
@@ -1577,6 +1584,9 @@ typedef __int64 int64_t;
 typedef unsigned __int64 uintmax_t;
 typedef __int64 intmax_t;
 typedef unsigned short   uint16_t;
+#else /* HAVE_STDINT_H */
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 
 
 /* (u)intptr_t should only be needed for MSVC 6 32-bit. */
@@ -1608,13 +1618,15 @@ typedef unsigned int     uintptr_t;
 /* define to 1 if you do not want to set global snmp_errno */
 #define DONT_SHARE_ERROR_WITH_OTHER_THREADS 1
 
-/* Not needed for MSVC 2008 */
-#if _MSC_VER < 1500
+/* Defining vsnprintf is not necessary for MSVC 2008 or later */
+#if defined(_MSC_VER) && _MSC_VER < 1500
 #define vsnprintf _vsnprintf
 #endif
+#ifdef _MSC_VER
 #define snprintf  _snprintf
+#endif
 
-#if _MSC_VER < 1600
+#if defined(_MSC_VER) && _MSC_VER < 1600
 #define EADDRINUSE	WSAEADDRINUSE
 #endif
 
@@ -1713,6 +1725,7 @@ typedef unsigned int     uintptr_t;
 #define EXTENSIBLEMIB NETSNMP_UCDAVIS_MIB
 #endif
 
+#ifdef _MSC_VER
 /* Windows Vista and higher have inet_ntop but older Windows does not.
  * We'll use the Net-SNMP version instead. */
 #undef HAVE_INET_NTOP
@@ -1729,6 +1742,7 @@ typedef unsigned int     uintptr_t;
 #else
   #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
   #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
+#endif
 #endif
 
 /*
@@ -1791,10 +1805,12 @@ typedef unsigned int     uintptr_t;
 #define HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY 1
 #endif
 
+#ifdef _MSC_VER
 #ifdef _WIN64
 #define NETSNMP_PRIz "I64"
 #else
 #define NETSNMP_PRIz ""
+#endif
 #endif
 
 #endif /* NET_SNMP_CONFIG_H */
