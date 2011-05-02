@@ -684,7 +684,9 @@
 #define HAVE_STDARG_H 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
-/* #undef HAVE_STDINT_H */
+#ifdef __MINGW32__
+#define HAVE_STDINT_H 1
+#endif
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
@@ -1333,8 +1335,10 @@
 /* got in_addr_t? */
 /* #undef HAVE_IN_ADDR_T */
 
+#ifdef __MINGW32__
 /* got ssize_t? */
-/* #undef HAVE_SSIZE_T */
+#define HAVE_SSIZE_T
+#endif
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
@@ -1560,12 +1564,18 @@
 
 #ifdef WIN32
 
+#ifndef __MINGW32__
 typedef unsigned short mode_t;
+#endif
+#ifndef HAVE_STDINT_H
 typedef unsigned __int32 uint32_t;
 typedef long int32_t;
 typedef unsigned __int64 uint64_t;
 typedef __int64 int64_t;
 typedef unsigned short   uint16_t;
+#else /* HAVE_STDINT_H */
+#include <stdint.h>
+#endif /* HAVE_STDINT_H */
 
 /* Define if you have the closesocket function.  */
 #define HAVE_CLOSESOCKET 1
@@ -1576,13 +1586,15 @@ typedef unsigned short   uint16_t;
 /* define to 1 if you do not want to set global snmp_errno */
 #define DONT_SHARE_ERROR_WITH_OTHER_THREADS 1
 
-/* Not needed for MSVC 2008 */
-#if _MSC_VER < 1500
+/* Defining vsnprintf is not necessary for MSVC 2008 or later */
+#if defined(_MSC_VER) && _MSC_VER < 1500
 #define vsnprintf _vsnprintf
 #endif
+#ifdef _MSC_VER
 #define snprintf  _snprintf
+#endif
 
-#if _MSC_VER < 1600
+#if defined(_MSC_VER) && _MSC_VER < 1600
 #define EADDRINUSE	WSAEADDRINUSE
 #endif
 
@@ -1656,6 +1668,7 @@ typedef unsigned short   uint16_t;
 #define EXTENSIBLEMIB NETSNMP_UCDAVIS_MIB
 #endif
 
+#ifdef _MSC_VER
 /* Windows Vista and higher have inet_ntop but older Windows does not.
  * We'll use the Net-SNMP version instead. */
 #undef HAVE_INET_NTOP
@@ -1671,6 +1684,7 @@ typedef unsigned short   uint16_t;
 #else
   #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
   #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
+#endif
 #endif
 
 #ifndef NI_MAXHOST
