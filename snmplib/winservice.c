@@ -673,8 +673,6 @@ ServiceMain (DWORD argc, LPTSTR argv[])
   DWORD ArgCount = 0;
   LPTSTR *ArgArray = NULL;
   TCHAR szRegKey[512];
-  TCHAR szValue[128];
-  DWORD nSize;
   HKEY hParamKey = NULL;
   DWORD TotalParams = 0;
   DWORD i;
@@ -721,7 +719,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
 	      /*
 	       * Allocate memory to hold strings 
 	       */
-	      ArgArray = (LPTSTR *) malloc (sizeof (LPTSTR) * ArgCount);
+	      ArgArray = calloc(ArgCount, sizeof(ArgArray[0]));
               if (ArgArray == 0)
                 {
                   WriteToEventLog (EVENTLOG_ERROR_TYPE,
@@ -735,6 +733,10 @@ ServiceMain (DWORD argc, LPTSTR argv[])
 	      ArgArray[0] = _tcsdup (argv[0]);
 	      for (i = 1; i <= TotalParams; i++)
 		{
+                  DWORD dwErrorcode;
+                  DWORD nSize;
+                  DWORD nRegkeyType;
+                  TCHAR *szValue;
 
 		  /*
 		   * Create Subkey value name 
@@ -742,12 +744,35 @@ ServiceMain (DWORD argc, LPTSTR argv[])
 		  _sntprintf (szRegKey, CountOf(szRegKey), _T("%s%d"), _T("Param"), i);
 
 		  /*
-		   * Set size 
+		   * Query subkey.
 		   */
-		  nSize = 128;
-		  RegQueryValueEx (hParamKey, szRegKey, 0, NULL,
-				   (LPBYTE) & szValue, &nSize);
-		  ArgArray[i] = _tcsdup (szValue);
+		  nSize = 0;
+		  dwErrorcode = RegQueryValueEx(hParamKey, szRegKey, NULL,
+                                                &nRegkeyType, NULL, &nSize);
+                  if (dwErrorcode == ERROR_SUCCESS) {
+                    if (nRegkeyType == REG_SZ || nRegkeyType == REG_EXPAND_SZ) {
+                      szValue = malloc(nSize + sizeof(szValue[0]));
+                      if (szValue) {
+		        dwErrorcode = RegQueryValueEx(hParamKey, szRegKey, NULL,
+                                                      &nRegkeyType, szValue, &nSize);
+                        if (dwErrorcode == ERROR_SUCCESS) {
+                          szValue[nSize] = 0;
+                          ArgArray[i] = szValue;
+                        } else {
+                          free(szValue);
+                          WriteToEventLog(EVENTLOG_ERROR_TYPE, _T("Querying registry key %s failed: error code %ld"), szRegKey, dwErrorcode);
+                        }
+                      } else
+                        WriteToEventLog(EVENTLOG_ERROR_TYPE, _T("Querying registry key %s failed: out of memory"), szRegKey);
+                    } else
+                      WriteToEventLog(EVENTLOG_ERROR_TYPE, _T("Type %ld of registry key %s is incorrect"), nRegkeyType, szRegKey);
+                  } else
+                    WriteToEventLog(EVENTLOG_ERROR_TYPE, _T("Querying registry key %s failed: error code %ld"), szRegKey, dwErrorcode);
+
+                  if (!ArgArray[i]) {
+                    TotalParams = ArgCount = i;
+                    break;
+                  }
 		}
 	    }
 	}
