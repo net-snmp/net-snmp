@@ -40,7 +40,8 @@
 
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 
-#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
+#if (defined(linux) && defined(IP_PKTINFO)) \
+    || defined(IP_RECVDSTADDR) && !defined(_MSC_VER)
 
 int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                              socklen_t *fromlen, struct sockaddr *dstip,
