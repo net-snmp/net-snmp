@@ -131,6 +131,7 @@ CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 
 # libnetsnmpmibs objects.
 @mibgroup_list_lo@
+@mibgroup_list_ft@
 @mibgroup_list_o@
 @agentgroup_list_lo@
 @agentgroup_list_ft@
