@@ -232,5 +232,5 @@ auto_nlist_print_tree(int indent, struct autonlist *ptr)
 #endif
 #else                           /* !NETSNMP_CAN_USE_NLIST */
 #include <net-snmp/agent/auto_nlist.h>
-netsnmp_feature_unused(auto_nlist)
+netsnmp_feature_unused(auto_nlist);
 #endif                          /* NETSNMP_CAN_USE_NLIST */
