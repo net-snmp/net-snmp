@@ -10,6 +10,8 @@
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
 
+netsnmp_feature_require(container_free_all)
+
 #include <ctype.h>
 
 #include <openssl/evp.h>
