@@ -75,6 +75,7 @@ netsnmp_feature_child_of(transport_all, libnetsnmp)
 
 netsnmp_feature_child_of(tdomain_support, transport_all)
 netsnmp_feature_child_of(tdomain_transport_oid, transport_all)
+netsnmp_feature_child_of(sockaddr_size, transport_all)
 
 /*
  * Our list of supported transport domains.  
@@ -237,6 +238,7 @@ netsnmp_transport_peer_string(netsnmp_transport *t, void *data, int len)
     return str;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_SOCKADDR_SIZE
 int
 netsnmp_sockaddr_size(struct sockaddr *sa)
 {
@@ -256,6 +258,7 @@ netsnmp_sockaddr_size(struct sockaddr *sa)
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SOCKADDR_SIZE */
     
 int
 netsnmp_transport_send(netsnmp_transport *t, void *packet, int length,
