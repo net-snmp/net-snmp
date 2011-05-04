@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #ifdef NETSNMP_CAN_USE_NLIST
 #if HAVE_STRING_H
@@ -231,9 +232,5 @@ auto_nlist_print_tree(int indent, struct autonlist *ptr)
 #endif
 #else                           /* !NETSNMP_CAN_USE_NLIST */
 #include <net-snmp/agent/auto_nlist.h>
-int
-auto_nlist_noop(void)
-{
-    return 0;
-}
+netsnmp_feature_unused(auto_nlist)
 #endif                          /* NETSNMP_CAN_USE_NLIST */
