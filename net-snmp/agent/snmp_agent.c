@@ -117,6 +117,7 @@ netsnmp_feature_child_of(check_all_requests_error, snmp_agent)
 netsnmp_feature_child_of(check_requests_error, snmp_agent)
 netsnmp_feature_child_of(request_set_error_idx, snmp_agent)
 netsnmp_feature_child_of(set_agent_uptime, snmp_agent)
+netsnmp_feature_child_of(agent_check_and_process, snmp_agent)
 
 netsnmp_feature_child_of(dump_sess_list, agent_debugging_utilities)
 
@@ -617,7 +618,7 @@ _fix_endofmibview(netsnmp_agent_session *asp)
     }
 }
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_AGENT_CHECK_AND_PROCESS
 /**
  * This function checks for packets arriving on the SNMP port and
  * processes them(snmp_read) if some are found, using the select(). If block
@@ -701,6 +702,7 @@ agent_check_and_process(int block)
 
     return count;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_AGENT_CHECK_AND_PROCESS */
 
 /*
  * Set up the address cache.  

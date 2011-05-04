@@ -86,13 +86,20 @@
 #endif
 
 netsnmp_feature_child_of(logging_all, libnetsnmp)
-netsnmp_feature_want(logging_outputs)
 
 netsnmp_feature_child_of(logging_outputs, logging_all)
 netsnmp_feature_child_of(logging_file, logging_outputs)
 netsnmp_feature_child_of(logging_stdio, logging_outputs)
 netsnmp_feature_child_of(logging_syslog, logging_outputs)
 netsnmp_feature_child_of(logging_external, logging_all)
+
+netsnmp_feature_child_of(enable_stderrlog, logging_all)
+
+netsnmp_feature_child_of(logging_enable_calllog, netsnmp_unused)
+netsnmp_feature_child_of(logging_enable_loghandler, netsnmp_unused)
+
+/* default to the file/stdio/syslog set */
+netsnmp_feature_want(logging_outputs)
 
 /*
  * logh_head:  A list of all log handlers, in increasing order of priority
@@ -864,7 +871,7 @@ snmp_enable_filelog(const char *logfilename, int dont_zero_log)
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_FILE */
 
 
-#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
+#ifndef NETSNMP_FEATURE_REMOVE_ENABLE_STDERRLOG
 /* used in the perl modules and ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_subagent.c */
 void
 snmp_enable_stderrlog(void)
@@ -886,10 +893,8 @@ snmp_enable_stderrlog(void)
             logh->token    = strdup("stderr");
     }
 }
-#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_STDIO */
+#endif /* NETSNMP_FEATURE_REMOVE_ENABLE_STDERRLOG */
 
-
-netsnmp_feature_child_of(logging_enable_calllog, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_ENABLE_CALLLOG
 void
 snmp_enable_calllog(void)	/* XXX - or take a callback routine ??? */
@@ -1030,7 +1035,6 @@ netsnmp_register_loghandler( int type, int priority )
 }
 
 
-netsnmp_feature_child_of(logging_enable_loghandler, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_ENABLE_LOGHANDLER
 int
 netsnmp_enable_loghandler( const char *token )
