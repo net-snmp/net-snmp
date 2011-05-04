@@ -21,6 +21,9 @@ netsnmp_feature_child_of(ipaddress_entry_copy, ipaddress_common)
 netsnmp_feature_child_of(ipaddress_entry_update, ipaddress_common)
 netsnmp_feature_child_of(ipaddress_prefix_copy, ipaddress_common_copy_utilities)
 
+#ifdef NETSNMP_FEATURE_REQUIRE_IPADDRESS_ENTRY_COPY
+netsnmp_feature_require(ipaddress_arch_entry_copy)
+#endif /* NETSNMP_FEATURE_REQUIRE_IPADDRESS_ENTRY_COPY */
 
 /**---------------------------------------------------------------------*/
 /*

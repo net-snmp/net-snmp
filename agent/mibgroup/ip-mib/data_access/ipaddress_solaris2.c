@@ -3,6 +3,7 @@
  *
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -13,6 +14,8 @@
 
 #include "kernel_sunos5.h"
 #include "mibII/mibII_common.h"
+
+netsnmp_feature_child_of(ipaddress_arch_entry_copy, ipaddress_common)
 
 static int _load_v4(netsnmp_container *container, int idx_offset);
 #if defined( NETSNMP_ENABLE_IPV6 )
@@ -43,6 +46,7 @@ netsnmp_arch_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry)
      */
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESS_ARCH_ENTRY_COPY
 /*
  * copy arch specific storage
  */
@@ -55,6 +59,7 @@ netsnmp_arch_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
      */
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESS_ARCH_ENTRY_COPY */
 
 /*
  * create a new entry

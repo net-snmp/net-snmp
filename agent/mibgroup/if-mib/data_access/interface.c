@@ -19,6 +19,10 @@ netsnmp_feature_child_of(interface, interface_all)
 netsnmp_feature_child_of(interface_access_entry_set_admin_status, interface_all)
 netsnmp_feature_child_of(interface_legacy, interface_all)
 
+#ifdef NETSNMP_FEATURE_REQUIRE_INTERFACE_ACCESS_ENTRY_SET_ADMIN_STATUS
+netsnmp_feature_require(interface_arch_set_admin_status)
+#endif /* NETSNMP_FEATURE_REQUIRE_INTERFACE_ACCESS_ENTRY_SET_ADMIN_STATUS */
+
 /**---------------------------------------------------------------------*/
 /*
  * local static vars
@@ -411,7 +415,6 @@ Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
  * @retval < 0 : error
  */
 #ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
-netsnmp_feature_require(interface_arch_set_admin_status)
 int
 netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
                                                 int ifAdminStatus)
