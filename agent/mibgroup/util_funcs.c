@@ -111,6 +111,9 @@ netsnmp_feature_child_of(internal_mib_table, util_funcs)
 netsnmp_feature_child_of(prefix_info_all, util_funcs)
 netsnmp_feature_child_of(prefix_info, prefix_info_all)
 netsnmp_feature_child_of(update_prefix_info, prefix_info_all)
+netsnmp_feature_child_of(delete_prefix_info, prefix_info_all)
+netsnmp_feature_child_of(find_prefix_info, prefix_info_all)
+netsnmp_feature_child_of(create_prefix_info, prefix_info_all)
 #endif /* HAVE_LINUX_RTNETLINK_H */
 
 #ifdef NETSNMP_EXCACHETIME
@@ -1007,7 +1010,7 @@ Retrieve_Table_Data(mib_table_t t, int *max_idx)
 
 #if defined(HAVE_LINUX_RTNETLINK_H)
 
-#ifndef NETSNMP_FEATURE_REMOVE_PREFIX_INFO
+#ifndef NETSNMP_FEATURE_REMOVE_CREATE_PREFIX_INFO
 prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
                                         unsigned long AutonomousFlag,
                                         char *in6ptr)
@@ -1028,7 +1031,9 @@ prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
 
    return node;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CREATE_PREFIX_INFO */
 
+#ifndef NETSNMP_FEATURE_REMOVE_FIND_PREFIX_INFO
 int net_snmp_find_prefix_info(prefix_cbx **head,
                               char *address,
                               prefix_cbx *node_to_find)
@@ -1049,6 +1054,7 @@ int net_snmp_find_prefix_info(prefix_cbx **head,
     } else
        return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_FIND_PREFIX_INFO */
 
 #ifndef NETSNMP_FEATURE_REMOVE_UPDATE_PREFIX_INFO
 int net_snmp_update_prefix_info(prefix_cbx **head,
@@ -1114,6 +1120,7 @@ int net_snmp_search_update_prefix_info(prefix_cbx **head,
     }
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_DELETE_PREFIX_INFO
 int net_snmp_delete_prefix_info(prefix_cbx **head,
                                 char *address)
 {
@@ -1139,6 +1146,7 @@ int net_snmp_delete_prefix_info(prefix_cbx **head,
     }
     return 0;
 }
-#endif /* NETSNMP_FEATURE_REMOVE_PREFIX_INFO */
 #endif
 
+#endif /* HAVE_LINUX_RTNETLINK_H */
+         
