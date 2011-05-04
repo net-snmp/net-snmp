@@ -25,6 +25,9 @@ netsnmp_feature_require(mib_snprint_variable)
 netsnmp_feature_require(tdomain_support)
 netsnmp_feature_require(check_vb_uint)
 netsnmp_feature_require(string_time_to_secs)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(header_complex_find_entry)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * minimal include directives 

@@ -4,6 +4,7 @@
  * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable_constants.h"
@@ -12,6 +13,9 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/data_access/interface.h>
+
+netsnmp_feature_child_of(interface, libnetsnmpmibs)
+netsnmp_feature_child_of(interface_access_entry_set_admin_status, interface)
 
 
 /**---------------------------------------------------------------------*/
@@ -398,6 +402,7 @@ Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
 #endif /* NETSNMP_NO_BACKWARDS_COMPATABILITY */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_ACCESS_ENTRY_SET_ADMIN_STATUS
 /**
  *
  * @retval 0   : success
@@ -426,6 +431,7 @@ netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
     return rc;
 }
 #endif
+#endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ACCESS_ENTRY_SET_ADMIN_STATUS */
 
 /**---------------------------------------------------------------------*/
 /*

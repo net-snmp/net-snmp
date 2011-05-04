@@ -23,6 +23,7 @@
 netsnmp_feature_child_of(header_complex_all, libnetsnmpmibs)
 
 netsnmp_feature_child_of(header_complex_free_all, header_complex_all)
+netsnmp_feature_child_of(header_complex_find_entry, header_complex_all)
 
 int
 header_complex_generate_varoid(netsnmp_variable_list * var)
@@ -505,6 +506,7 @@ header_complex_free_all(struct header_complex_index *thestuff,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_HEADER_COMPLEX_FREE_ALL */
 
+#ifndef NETSNMP_FEATURE_REMOVE_HEADER_COMPLEX_FIND_ENTRY
 struct header_complex_index *
 header_complex_find_entry(struct header_complex_index *thestuff,
                           void *theentry)
@@ -515,6 +517,7 @@ header_complex_find_entry(struct header_complex_index *thestuff,
          hciptr = hciptr->next);
     return hciptr;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HEADER_COMPLEX_FIND_ENTRY */
 
 #ifdef TESTING
 

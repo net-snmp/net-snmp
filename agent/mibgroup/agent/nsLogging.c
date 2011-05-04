@@ -14,7 +14,9 @@
 #include "agent/nsLogging.h"
 
 netsnmp_feature_require(logging_external)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(table_iterator_insert_context)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * OID and columns for the logging table.

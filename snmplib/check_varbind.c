@@ -15,6 +15,7 @@ netsnmp_feature_child_of(check_vb_oid, check_varbind_all)
 netsnmp_feature_child_of(check_vb_type_and_max_size, check_varbind_all)
 netsnmp_feature_child_of(check_vb_type_and_max_size, check_varbind_all)
 netsnmp_feature_child_of(check_vb_rowstatus_with_storagetype, check_varbind_all)
+netsnmp_feature_child_of(check_vb_truthvalue, check_varbind_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_CHECK_VB_ROWSTATUS_WITH_STORAGETYPE
 netsnmp_feature_require(check_rowstatus_with_storagetype_transition)
@@ -194,6 +195,7 @@ netsnmp_check_vb_int_range(const netsnmp_variable_list *var, int low, int high)
     return rc;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_VB_TRUTHVALUE
 int
 netsnmp_check_vb_truthvalue(const netsnmp_variable_list *var)
 {
@@ -207,6 +209,7 @@ netsnmp_check_vb_truthvalue(const netsnmp_variable_list *var)
     
     return netsnmp_check_vb_int_range(var, 1, 2);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_VB_TRUTHVALUE */
 
 NETSNMP_INLINE int
 netsnmp_check_vb_rowstatus_value(const netsnmp_variable_list *var)

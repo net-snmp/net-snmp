@@ -14,7 +14,9 @@
 #include "disman/event/mteTriggerThresholdTable.h"
 
 netsnmp_feature_require(table_tdata)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(check_vb_type_and_max_size)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 static netsnmp_table_registration_info *table_info;
 

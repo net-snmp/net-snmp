@@ -17,8 +17,10 @@
 #endif
 
 netsnmp_feature_require(extract_table_row_data)
-netsnmp_feature_require(insert_table_row)
 netsnmp_feature_require(table_data_delete_table)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(insert_table_row)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 oid  ns_extend_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2 };
 oid  extend_count_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2, 1 };

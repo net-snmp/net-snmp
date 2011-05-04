@@ -14,8 +14,13 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(interface_access_entry_set_admin_status)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * include our parent header 

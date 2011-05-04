@@ -6,6 +6,7 @@
  * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable_constants.h"
@@ -28,6 +29,9 @@
 #include <net/if_dl.h>
 #include <net/if_types.h>
 #include <net/if_media.h>
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(interface_set_)
 
 /*
  * account for minor differences between FreeBSD and OpenBSD.
