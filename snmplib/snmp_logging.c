@@ -86,11 +86,12 @@
 #endif
 
 netsnmp_feature_child_of(logging_all, libnetsnmp)
-netsnmp_feature_want(logging_all)
+netsnmp_feature_want(logging_outputs)
 
-netsnmp_feature_child_of(logging_file, logging_all)
-netsnmp_feature_child_of(logging_stdio, logging_all)
-netsnmp_feature_child_of(logging_syslog, logging_all)
+netsnmp_feature_child_of(logging_outputs, logging_all)
+netsnmp_feature_child_of(logging_file, logging_outputs)
+netsnmp_feature_child_of(logging_stdio, logging_outputs)
+netsnmp_feature_child_of(logging_syslog, logging_outputs)
 netsnmp_feature_child_of(logging_external, logging_all)
 
 /*
