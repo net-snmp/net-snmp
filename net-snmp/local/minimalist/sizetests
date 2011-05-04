@@ -150,7 +150,7 @@ if ($opts{'b'}) {
 	printf STDERR "failed to find set for -b argument: %s\n", $basename;
 	exit(1);
     }
-    @sets = add_in_flags($argumentsets{$basename}, {}, ());
+    @sets = add_in_flags($argumentsets{$basename}, \%base_args, ());
     @sets = @sets[$basenum];
     %base_args = %{$sets[0]};
 }
