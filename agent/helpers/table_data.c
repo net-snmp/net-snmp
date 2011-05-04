@@ -32,6 +32,7 @@ netsnmp_feature_child_of(table_data_remove_delete_row, table_data_extras)
 netsnmp_feature_child_of(table_data_unregister, table_data_extras)
 netsnmp_feature_child_of(table_data_row_count, table_data_extras)
 netsnmp_feature_child_of(table_data_row_operations, table_data_extras)
+netsnmp_feature_child_of(table_data_row_first, table_data_extras)
 
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA
 
