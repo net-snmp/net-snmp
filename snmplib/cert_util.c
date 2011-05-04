@@ -9,6 +9,8 @@ netsnmp_feature_require(container_directory)
 netsnmp_feature_require(container_fifo)
 netsnmp_feature_require(container_dup)
 netsnmp_feature_require(container_free_all)
+netsnmp_feature_require(subcontainer_find)
+
 netsnmp_feature_child_of(cert_map_remove, netsnmp_unused)
 netsnmp_feature_child_of(cert_map_find, netsnmp_unused)
 netsnmp_feature_child_of(tlstmparams_external, cert_util_all)

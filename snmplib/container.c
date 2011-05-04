@@ -23,6 +23,7 @@ netsnmp_feature_child_of(container_types, container_all)
 netsnmp_feature_child_of(container_compare, container_all)
 netsnmp_feature_child_of(container_dup, container_all)
 netsnmp_feature_child_of(container_free_all, container_all)
+netsnmp_feature_child_of(subcontainer_find, container_all)
 
 netsnmp_feature_child_of(container_ncompare_cstring, container_compare)
 netsnmp_feature_child_of(container_compare_mem, container_compare)
@@ -452,6 +453,7 @@ void CONTAINER_FREE_ALL(netsnmp_container *x, void *c)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_FREE_ALL */
 
+#ifndef NETSNMP_FEATURE_REMOVE_SUBCONTAINER_FIND
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the function version in
  * container.c. If you change one, change them both.
@@ -475,6 +477,7 @@ netsnmp_container *SUBCONTAINER_FIND(netsnmp_container *x,
     }
     return x;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SUBCONTAINER_FIND */
 
 
 /*------------------------------------------------------------------
