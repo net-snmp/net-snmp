@@ -9,6 +9,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
 #include <net-snmp/library/snmptsm.h>
@@ -25,6 +26,9 @@
 #ifdef NETSNMP_TRANSPORT_DTLSSCTP_DOMAIN
 #include <net-snmp/library/snmpDTLSSCTPDomain.h>
 #endif
+
+netsnmp_feature_require(snmpv3_probe_contextEngineID_rfc5343)
+
 
 #include <unistd.h>
 

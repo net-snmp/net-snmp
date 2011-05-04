@@ -139,6 +139,7 @@ SOFTWARE.
 netsnmp_feature_child_of(statistics, libnetsnmp)
 netsnmp_feature_child_of(snmp_api, libnetsnmp)
 netsnmp_feature_child_of(oid_is_subtree, snmp_api)
+netsnmp_feature_child_of(snmpv3_probe_contextEngineID_rfc5343, snmp_api)
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 extern void netsnmp_certs_init(void);
@@ -1223,6 +1224,7 @@ snmp_sess_copy(netsnmp_session * pss)
     return psl;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPV3_PROBE_CONTEXTENGINEID_RFC5343
 /**
  * probe for engineID using RFC 5343 probing mechanisms
  *
@@ -1311,6 +1313,7 @@ snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
     }
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPV3_PROBE_CONTEXTENGINEID_RFC5343 */
 
 
 /**
