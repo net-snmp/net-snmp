@@ -13,7 +13,7 @@ my @sets =
      });
 
 
-getopts('t:hlcD:nj:o:', \%opts) || usage();
+getopts('t:hlcD:nj:o:e', \%opts) || usage();
 
 $opts{'j'} = "-j$opts{j}" if (exists($opts{'j'}));
 
@@ -167,6 +167,24 @@ sub add_in_flags {
 
     my @new_flags;
 
+    # do a linear search of the options
+    if (! $opts{'e'}) {
+	@new_flags = @current_flags;
+	foreach my $newargs (keys(%{$argumentset->{'arguments'}})) {
+	    my %flags;
+
+	    $flags{'title'} = "$newargs";
+
+	    foreach my $newflag (keys(%{$argumentset->{'arguments'}{$newargs}})) {
+
+		$flags{$newflag} .= " $argumentset->{'arguments'}{$newargs}{$newflag}";
+	    }
+	    push @new_flags, \%flags;
+	}
+	return @new_flags;
+    }
+
+    # or an exponential search
     foreach my $flags (@current_flags) {
 	foreach my $newargs (keys(%{$argumentset->{'arguments'}})) {
 	    my %flags = %{$flags};  # copy the existing hash-set of flags
@@ -280,6 +298,7 @@ sub usage {
     print "\t-o FILE\tSave a complete summary chart to FILE\n"; 
     print "\t-n\tDry run -- only show the commands to execute\n";
     print "\t-j NUM\tExecute make with parallel building (-jNUM)\n";
+    print "\t-e\tDo an exponential expansion (all combos) of the requested options\n";
     exit;
 }
 
