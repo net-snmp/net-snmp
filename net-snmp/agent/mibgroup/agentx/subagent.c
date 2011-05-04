@@ -45,6 +45,9 @@
 
 #include "subagent.h"
 
+netsnmp_feature_child_of(agentx_subagent, agentx_all)
+netsnmp_feature_child_of(agentx_enable_subagent, agentx_subagent)
+
 netsnmp_feature_require(remove_trap_session)
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
@@ -161,11 +164,13 @@ subagent_init(void)
     return rc;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_AGENTX_ENABLE_SUBAGENT
 void
 netsnmp_enable_subagent(void) {
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE,
                            SUB_AGENT);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_AGENTX_ENABLE_SUBAGENT */
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 struct agent_netsnmp_set_info *

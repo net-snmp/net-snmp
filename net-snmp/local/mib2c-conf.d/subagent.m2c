@@ -27,6 +27,16 @@
 @include generic-source-includes.m2i@
 #include <signal.h>
 
+/*
+ * If compiling within the net-snmp source code, this will trigger the feature
+ * detection mechansim to ensure the agent_check_and_process() function
+ * is left available even if --enable-minimialist is turned on.  If you
+ * have configured net-snmp using --enable-minimialist and want to compile
+ * this code externally to the Net-SNMP code base, then please add
+ * --with-features="agent_check_and_process" to your configure line.
+ */
+netsnmp_feature_require(agent_check_and_process)
+
 static int keep_running;
 
 static RETSIGTYPE

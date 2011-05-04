@@ -113,6 +113,8 @@ netsnmp_feature_child_of(mib_snprint_description, mib_strings_all)
 netsnmp_feature_child_of(mib_snprint_variable, mib_strings_all)
 netsnmp_feature_child_of(mib_string_conversions, mib_strings_all)
 netsnmp_feature_child_of(print_mib, mib_strings_all)
+netsnmp_feature_child_of(snprint_objid, mib_strings_all)
+netsnmp_feature_child_of(snprint_value, mib_strings_all)
 
 netsnmp_feature_child_of(mib_to_asn_type, mib_api)
 
@@ -3312,6 +3314,7 @@ sprint_realloc_objid(u_char ** buf, size_t * buf_len,
     return !buf_overflow;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_SPRINT_OBJID
 int
 snprint_objid(char *buf, size_t buf_len,
               const oid * objid, size_t objidlen)
@@ -3325,6 +3328,7 @@ snprint_objid(char *buf, size_t buf_len,
         return -1;
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SPRINT_OBJID */
 
 /**
  * Prints an oid to stdout.
@@ -3572,6 +3576,7 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
     }
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNPRINT_VALUE
 /* used in the perl module */
 int
 snprint_value(char *buf, size_t buf_len,
@@ -3587,6 +3592,7 @@ snprint_value(char *buf, size_t buf_len,
         return -1;
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNPRINT_VALUE */
 
 void
 print_value(const oid * objid,
