@@ -19,6 +19,7 @@
  ******************************************************************/
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -48,6 +49,8 @@
  */
 #include "agutil_api.h"
 #include "row_api.h"
+
+netsnmp_feature_require(snprint_objid)
 
 /*
  * File scope definitions section 

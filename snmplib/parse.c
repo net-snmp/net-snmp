@@ -108,6 +108,9 @@ SOFTWARE.
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/snmp_api.h>
 
+netsnmp_feature_child_of(find_module, mib_api)
+netsnmp_feature_child_of(get_tc_description, mib_api)
+
 /*
  * A linked list of nodes.
  */
@@ -2136,6 +2139,7 @@ get_tc_descriptor(int tc_index)
     return (tclist[tc_index].descriptor);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_GET_TC_DESCRIPTION
 /* used in the perl module */
 const char     *
 get_tc_description(int tc_index)
@@ -2144,6 +2148,7 @@ get_tc_description(int tc_index)
         return NULL;
     return (tclist[tc_index].description);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_GET_TC_DESCRIPTION */
 
 
 /*
@@ -5260,6 +5265,7 @@ find_node2(const char *name, const char *module)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_PARSE_FIND_NODE2 */
 
+#ifndef NETSNMP_FEATURE_REMOVE_FIND_MODULE
 /* Used in the perl module */
 struct module  *
 find_module(int mid)
@@ -5272,6 +5278,7 @@ find_module(int mid)
     }
     return mp;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_FIND_MODULE */
 
 
 static char     leave_indent[256];

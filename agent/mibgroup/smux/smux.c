@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <sys/types.h>
 #include <ctype.h>
 
@@ -67,6 +68,8 @@
 #include "smux.h"
 #include "mibdefs.h"
 #include "snmpd.h"
+
+netsnmp_feature_require(snprint_objid)
 
 long            smux_long;
 u_long          smux_ulong;

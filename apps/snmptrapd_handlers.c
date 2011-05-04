@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -36,6 +37,8 @@
 #include "snmptrapd_auth.h"
 #include "snmptrapd_log.h"
 #include "notification-log-mib/notification_log.h"
+
+netsnmp_feature_child_of(add_default_traphandler, snmptrapd)
 
 char *syslog_format1 = NULL;
 char *syslog_format2 = NULL;
@@ -400,6 +403,7 @@ netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler *handler)
     return traph;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_ADD_DEFAULT_TRAPHANDLER
 /*
  * Register a new "default" traphandler, to be applied to all
  * traps with no specific trap handlers of their own.
@@ -409,6 +413,7 @@ netsnmp_add_default_traphandler(Netsnmp_Trap_Handler *handler) {
     return netsnmp_add_global_traphandler(NETSNMPTRAPD_DEFAULT_HANDLER,
                                           handler);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_ADD_DEFAULT_TRAPHANDLER */
 
 
 /*
