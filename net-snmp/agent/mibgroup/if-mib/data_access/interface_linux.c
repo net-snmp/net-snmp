@@ -8,7 +8,8 @@
 #include <net-snmp/net-snmp-includes.h>
 
 netsnmp_feature_require(fd_event_manager)
-netsnmp_feature_require(prefix_info)
+netsnmp_feature_require(delete_prefix_info)
+netsnmp_feature_require(create_prefix_info)
 
 #ifdef HAVE_PCI_LOOKUP_NAME
 #include <pci/pci.h>
