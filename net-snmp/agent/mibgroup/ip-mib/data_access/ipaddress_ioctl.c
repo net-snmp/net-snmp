@@ -89,7 +89,7 @@ netsnmp_ioctl_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry)
     netsnmp_remove_list_node(&entry->arch_data, LIST_TOKEN);
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_IPADRESS_IOCTL_ENTRY_COPY
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESS_IOCTL_ENTRY_COPY
 /**
  * copy ioctl extras
  *
@@ -126,7 +126,7 @@ netsnmp_ioctl_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
 
     return rc;
 }
-#endif /* NETSNMP_FEATURE_REMOVE_IPADRESS_IOCTL_ENTRY_COPY */
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESS_IOCTL_ENTRY_COPY */
 
 /**
  * load ipv4 address via ioctl
