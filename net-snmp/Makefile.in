@@ -43,7 +43,7 @@ UCDPERSISTENT_DIRECTORY=@UCDPERSISTENT_DIRECTORY@
 # perl specific
 #
 # yes, order matters here.  default_store must occur before anything else
-PERLMODULES=default_store SNMP ASN OID agent
+PERLMODULES=default_store SNMP ASN OID agent TrapReceiver
 PERLARGS=@PERLARGS@
 
 #
