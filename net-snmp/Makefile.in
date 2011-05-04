@@ -44,12 +44,19 @@ UCDPERSISTENT_DIRECTORY=@UCDPERSISTENT_DIRECTORY@
 #
 # yes, order matters here.  default_store must occur before anything else
 PERLMODULES=default_store SNMP ASN OID agent TrapReceiver
+PERLMODULEFTS=perl/default_store/netsnmp-feature-definitions.ft \
+	perl/SNMP/netsnmp-feature-definitions.ft \
+	perl/ASN/netsnmp-feature-definitions.ft \
+	perl/OID/netsnmp-feature-definitions.ft \
+	perl/agent/netsnmp-feature-definitions.ft \
+	perl/TrapReceiver/netsnmp-feature-definitions.ft
 PERLARGS=@PERLARGS@
 
 #
 # python specific
 #
 PYTHONARGS=@PYTHONARGS@
+PYTHONMODULEFTS=python/netsnmp/netsnmp-feature-definitions.ft
 
 #
 # libtool
@@ -198,10 +205,10 @@ perlrealclean:
 	   ( cd perl ; $(MAKE) realclean ) ; \
 	fi
 
-perlfeatures:
-	@for i in $(PERLMODULES) ; do \
-		$(FEATURECHECK) --feature-global $(top_builddir)/include/net-snmp/feature-details.h perl/$$i perl/$$i/netsnmp-feature-definitions.h perl/$$i/netsnmp-feature-definitions.ft $(CC) -I $(top_builddir)/include -I $(top_srcdir)/include -E $(CPPFLAGS) $(CFLAGS) -c ; \
-	done
+.h.ft:
+	$(FEATURECHECK) --feature-global $(top_builddir)/include/net-snmp/feature-details.h `dirname $<` $< $@ $(CC) -I $(top_builddir)/include -I $(top_srcdir)/include -E $(CPPFLAGS) $(CFLAGS) -c
+
+perlfeatures: $(PERLMODULEFTS)
 
 # python specific build rules
 #
@@ -230,6 +237,7 @@ pythontest:
 pythonclean:
 	@(dir=`pwd`; cd python; $(PYMAKE) clean --basedir=$$dir)
 
+pythonfeatures: $(PYTHONMODULEFTS)
 
 #
 # make distclean completely removes all traces of building including
@@ -436,3 +444,4 @@ FAQ.html:
 	snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus \
 	snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext \
 	encode_keychange snmpdf snmptrap snmptrapd
+.PHONY: perlfeatures pythonfeatures
