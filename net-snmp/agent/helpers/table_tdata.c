@@ -23,6 +23,10 @@
 netsnmp_feature_provide(table_tdata)
 netsnmp_feature_child_of(table_tdata_all, mib_helpers)
 netsnmp_feature_child_of(table_tdata, table_tdata_all)
+netsnmp_feature_child_of(table_tdata_delete_table, table_tdata_all)
+netsnmp_feature_child_of(table_tdata_extract_table, table_tdata_all)
+netsnmp_feature_child_of(table_tdata_remove_row, table_tdata_all)
+
 #ifdef NETSNMP_FEATURE_REQUIRE_TABLE_TDATA
 netsnmp_feature_require(table_container_row_insert)
 netsnmp_feature_require(table_container_row_remove)
@@ -83,6 +87,7 @@ netsnmp_tdata_create_table(const char *name, long flags)
     return table;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_TDATA_DELETE_TABLE
 /** creates and returns a 'tdata' table data structure */
 void
 netsnmp_tdata_delete_table(netsnmp_tdata *table)
@@ -98,6 +103,7 @@ netsnmp_tdata_delete_table(netsnmp_tdata *table)
     SNMP_FREE(table);
     return;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA_DELETE_TABLE */
 
 /** creates and returns a pointer to new row data structure */
 netsnmp_tdata_row *
@@ -413,6 +419,7 @@ netsnmp_tdata_unregister(netsnmp_handler_registration    *reginfo)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TDATA_UNREGISTER */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_TDATA_EXTRACT_TABLE
 /** extracts the tdata table from the request structure */
 netsnmp_tdata *
 netsnmp_tdata_extract_table(netsnmp_request_info *request)
@@ -420,6 +427,7 @@ netsnmp_tdata_extract_table(netsnmp_request_info *request)
     return (netsnmp_tdata *) netsnmp_request_get_list_data(request,
                                                            TABLE_TDATA_TABLE);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA_EXTRACT_TABLE */
 
 /** extracts the tdata container from the request structure */
 netsnmp_feature_child_of(tdata_extract_container, table_tdata_all)
@@ -461,6 +469,7 @@ netsnmp_insert_tdata_row(netsnmp_request_info *request,
     netsnmp_container_table_row_insert(request, (netsnmp_index *)row);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_TDATA_REMOVE_ROW
 /** inserts a newly created tdata row into a request */
 NETSNMP_INLINE void
 netsnmp_remove_tdata_row(netsnmp_request_info *request,
@@ -468,6 +477,7 @@ netsnmp_remove_tdata_row(netsnmp_request_info *request,
 {
     netsnmp_container_table_row_remove(request, (netsnmp_index *)row);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA_REMOVE_ROW */
 
 
 /* ==================================

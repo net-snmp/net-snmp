@@ -20,6 +20,7 @@ netsnmp_feature_require(iquery)
 netsnmp_feature_require(query_set_default_session)
 netsnmp_feature_require(table_tdata)
 netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(table_tdata_extract_table)
 
 /** Initializes the alarmTable module */
 void
