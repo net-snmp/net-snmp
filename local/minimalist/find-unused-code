@@ -42,7 +42,7 @@ foreach my $function (sort { $defined{$a}{'source'} cmp $defined{$b}{'source'} }
 	if (check_for_once_only($defined{$function}{'source'}, $function)) {
 	    printf("%-38s %-38s\n", $defined{$function}{'source'}, $function);
 	    if ($opts{'g'}) {
-		open(P,"find . -name \*.c | xargs grep -n $function|");
+		open(P,"find . -regex '.*.\\(c\\|xs\\)' | xargs grep -n $function|");
 		while(<P>) {
 		    print "  $_";
 		}
