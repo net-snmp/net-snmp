@@ -15,7 +15,7 @@ my @sets =
 my %base_args = %{$sets[0]};
 my ($basename, $basenum);
 
-getopts('t:hlcD:nj:o:eb:', \%opts) || usage();
+getopts('t:hlcD:nj:o:eb:T', \%opts) || usage();
 
 $opts{'j'} = "-j$opts{j}" if (exists($opts{'j'}));
 
@@ -282,6 +282,7 @@ sub build_set {
     System ($file, $num, "3-features", "make features");
     System ($file, $num, "4-make", "make $opts{'j'}");
     System ($file, $num, "5-unused-code", "perl local/minimalist/find-unused-code -g");
+    System ($file, $num, "6-testing", "make -C testing test") if ($opts{'T'});
 
     if (!$opts{'n'}) {
 	analyze_size($arguments->{'title'}, "$opts{'d'}/$num-9-results");
@@ -337,6 +338,7 @@ sub usage {
     print "  -j NUM\tExecute make with parallel building (-jNUM)\n";
     print "  -e\t\tUse exponential expansion (all combos) of the requested options\n";
     print "  -b NAME:NUM\tUse NAME and the NUM'th set as the base arguments to start from\n";
+    print "  -T\t\tRun 'make test' at each step as well\n";
     exit;
 }
 
