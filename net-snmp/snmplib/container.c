@@ -21,6 +21,8 @@ netsnmp_feature_child_of(container_all, libnetsnmp)
 netsnmp_feature_child_of(container_factories, container_all)
 netsnmp_feature_child_of(container_types, container_all)
 netsnmp_feature_child_of(container_compare, container_all)
+netsnmp_feature_child_of(container_dup, container_all)
+netsnmp_feature_child_of(container_free_all, container_all)
 
 netsnmp_feature_child_of(container_ncompare_cstring, container_compare)
 netsnmp_feature_child_of(container_compare_mem, container_compare)
@@ -375,6 +377,7 @@ int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
  * These functions should EXACTLY match the function version in
  * container.c. If you change one, change them both.
  */
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_DUP
 netsnmp_container *CONTAINER_DUP(netsnmp_container *x, void *ctx, u_int flags)
 {
     if (NULL == x->duplicate) {
@@ -384,6 +387,7 @@ netsnmp_container *CONTAINER_DUP(netsnmp_container *x, void *ctx, u_int flags)
     }
     return x->duplicate(x, ctx, flags);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_DUP */
 
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the inline version in
@@ -436,6 +440,7 @@ void CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
     x->clear(x, f, c);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_FREE_ALL
 /*
  * clear all containers. When clearing the *first* container, and
  * *only* the first container, call the free_item function for each item.
@@ -445,6 +450,7 @@ void CONTAINER_FREE_ALL(netsnmp_container *x, void *c)
 {
     CONTAINER_CLEAR(x, x->free_item, c);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_FREE_ALL */
 
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the function version in

@@ -51,6 +51,7 @@
 netsnmp_feature_child_of(container_directory, container_types)
 #ifdef NETSNMP_FEATURE_REQUIRE_CONTAINER_DIRECTORY
 netsnmp_feature_require(file_utils)
+netsnmp_feature_require(container_free_all)
 #endif /* NETSNMP_FEATURE_REQUIRE_DIR_UTILS */
 
 #ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_DIRECTORY
