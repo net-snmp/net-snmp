@@ -103,6 +103,7 @@ netsnmp_feature_child_of(snmp_client_all, libnetsnmp)
 netsnmp_feature_child_of(snmp_split_pdu, snmp_client_all)
 netsnmp_feature_child_of(snmp_reset_var_types, snmp_client_all)
 netsnmp_feature_child_of(query_set_default_session, snmp_client_all)
+netsnmp_feature_child_of(row_create, snmp_client_all)
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -1476,6 +1477,7 @@ netsnmp_state_machine_run( netsnmp_state_machine_input *input)
 }
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
+#ifndef NETSNMP_FEATURE_REMOVE_ROW_CREATE
 /** **************************************************************************
  *
  * row create state machine steps
@@ -1852,6 +1854,7 @@ netsnmp_row_create(netsnmp_session *sess, netsnmp_variable_list *vars,
 
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_ROW_CREATE */
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 

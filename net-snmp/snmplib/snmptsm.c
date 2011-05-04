@@ -28,7 +28,7 @@
 #endif
 
 netsnmp_feature_require(snmpv3_probe_contextEngineID_rfc5343)
-
+netsnmp_feature_require(row_create)
 
 #include <unistd.h>
 
