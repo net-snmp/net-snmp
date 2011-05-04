@@ -20,6 +20,8 @@ netsnmp_feature_child_of(table_data_set_column, table_dataset_all)
 netsnmp_feature_child_of(table_dataset_get_newrow, table_dataset_all)
 netsnmp_feature_child_of(table_set_add_indexes, table_dataset_all)
 netsnmp_feature_child_of(delete_table_data_set, table_dataset_all)
+netsnmp_feature_child_of(table_set_multi_add_default_row, table_dataset_all)
+netsnmp_feature_child_of(table_dataset_unregister_auto_data_table, table_dataset_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_TABLE_DATASET
 netsnmp_feature_require(table_get_or_create_row_stash)
@@ -358,6 +360,7 @@ netsnmp_table_set_add_default_row(netsnmp_table_data_set *table_set,
  *  this is a wrapper around calling netsnmp_table_set_add_default_row
  *  repeatedly for you.
  */
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_SET_MULTI_ADD_DEFAULT_ROW
 void
 netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *tset, ...)
 {
@@ -380,6 +383,7 @@ netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *tset, ...)
 
     va_end(debugargs);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_SET_MULTI_ADD_DEFAULT_ROW */
 
 /* ==================================
  *
@@ -921,6 +925,7 @@ netsnmp_register_auto_data_table(netsnmp_table_data_set *table_set,
                                                    tables, free));     /* XXX */
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET_UNREGISTER_AUTO_DATA_TABLE
 /** Undo the effect of netsnmp_register_auto_data_table().
  */
 void
@@ -930,6 +935,7 @@ netsnmp_unregister_auto_data_table(netsnmp_table_data_set *table_set,
     netsnmp_remove_list_node(&auto_tables, registration_name
 			     ? registration_name : table_set->table->name);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATASET_UNREGISTER_AUTO_DATA_TABLE */
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
 static void
