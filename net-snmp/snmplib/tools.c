@@ -82,6 +82,12 @@ netsnmp_feature_child_of(netsnmp_check_definedness, valgrind)
 netsnmp_feature_child_of(uatime_ready, netsnmp_unused)
 netsnmp_feature_child_of(timeval_tticks, netsnmp_unused)
 
+netsnmp_feature_child_of(memory_strdup, memory_wrappers)
+netsnmp_feature_child_of(memory_calloc, memory_wrappers)
+netsnmp_feature_child_of(memory_malloc, memory_wrappers)
+netsnmp_feature_child_of(memory_realloc, memory_wrappers)
+netsnmp_feature_child_of(memory_free, memory_wrappers)
+
 #ifndef NETSNMP_FEATURE_REMOVE_MEMORY_WRAPPERS
 /**
  * This function is a wrapper for the strdup function.
@@ -93,6 +99,8 @@ char * netsnmp_strdup( const char * ptr)
 {
     return strdup(ptr);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_STRDUP */
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_CALLOC
 /**
  * This function is a wrapper for the calloc function.
  */
@@ -100,7 +108,8 @@ void * netsnmp_calloc(size_t nmemb, size_t size)
 {
     return calloc(nmemb, size);
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_CALLOC */
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_MALLOC
 /**
  * This function is a wrapper for the malloc function.
  */
@@ -108,7 +117,8 @@ void * netsnmp_malloc(size_t size)
 {
     return malloc(size);
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_MALLOC */
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_REALLOC
 /**
  * This function is a wrapper for the realloc function.
  */
@@ -116,7 +126,8 @@ void * netsnmp_realloc( void * ptr, size_t size)
 {
     return realloc(ptr, size);
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_REALLOC */
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_FREE
 /**
  * This function is a wrapper for the free function.
  * It calls free only if the calling parameter has a non-zero value.
@@ -126,7 +137,7 @@ void netsnmp_free( void * ptr)
     if (ptr)
         free(ptr);
 }
-#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_WRAPPERS */
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_FREE */
 
 /**
  * This function increase the size of the buffer pointed at by *buf, which is
