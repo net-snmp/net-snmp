@@ -230,7 +230,8 @@ __libraries_init(char *appname)
             return;
         have_inited = 1;
 
-        snmp_set_quick_print(1);
+        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                               NETSNMP_DS_LIB_QUICK_PRINT, 1);
         init_snmp(appname);
     
         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, 1);
@@ -4810,7 +4811,8 @@ snmp_dump_packet(flag)
 	int		flag
 	CODE:
 	{
-	   snmp_set_dump_packet(flag);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                   NETSNMP_DS_LIB_DUMP_PACKET, flag);
 	}
 
 
@@ -4958,7 +4960,8 @@ snmp_set_save_descriptions(val)
 	int	val
 	CODE:
 	{
-	   snmp_set_save_descriptions(val);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                   NETSNMP_DS_LIB_SAVE_MIB_DESCRS, val);
 	}
 
 void
