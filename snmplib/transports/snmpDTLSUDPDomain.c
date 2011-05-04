@@ -21,6 +21,7 @@
 #include <net-snmp/net-snmp-features.h>
 
 netsnmp_feature_require(cert_util)
+netsnmp_feature_require(sockaddr_size)
 
 #include <net-snmp/library/snmpDTLSUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
