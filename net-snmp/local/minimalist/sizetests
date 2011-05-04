@@ -34,12 +34,12 @@ my @argumentsets =
 		 'with-security-modules'     => 'tsm',
 		 'with-out-security-modules' => 'usm',
 		 'with-transports'           => 'DTLSUDP TLSTCP',
-		 'mib-modules'               => 'tlstm-mib tsm-mib'
+		 'with-mib-modules'          => 'tlstm-mib tsm-mib'
 	     },
 	     usmanddtlsandtls => {
 		 'with-security-modules'     => 'tsm usm',
 		 'with-transports'           => 'DTLSUDP TLSTCP',
-		 'mib-modules'               => 'tlstm-mib tsm-mib'
+		 'with-mib-modules'          => 'tlstm-mib tsm-mib'
 	     }
 	 }
      },
