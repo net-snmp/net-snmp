@@ -629,11 +629,13 @@ LIBOBJS
 ALLOCA
 LAGENTLIBS
 LNETSNMPLIBS
+PYTHONFEATURES
 PYTHONARGS
 PYTHONCLEANTARGS
 PYTHONUNINSTALLTARGS
 PYTHONINSTALLTARGS
 PYTHONTARGS
+PERLFEATURES
 PERLARGS
 PERLUNINSTALLTARGS
 PERLINSTALLTARGS
@@ -23778,12 +23780,14 @@ fi
 PERLTARGS=""
 PERLINSTALLTARGS=""
 PERLUNINSTALLTARGS=""
+PERLFEATURES=""
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we can install the Perl modules" >&5
 $as_echo_n "checking if we can install the Perl modules... " >&6; }
 if test "x$install_perl" = "xyes" ; then
     PERLTARGS="perlmodules"
     PERLINSTALLTARGS="perlinstall"
     PERLUNINSTALLTARGS="perluninstall"
+    PERLFEATURES="perlfeatures"
     if test "x$embed_perl" = "xyes" ; then
 
   cat >> configure-summary << EOF
@@ -23816,6 +23820,7 @@ fi
 
 
 
+
 #       Reset LIBS to pre-libwrap value   (???)
 #
 AGENTLIBS=$LIBS
@@ -23831,6 +23836,7 @@ PYTHONTARGS=""
 PYTHONINSTALLTARGS=""
 PYTHONUNINSTALLTARGS=""
 PYTHONCLEANTARGS=""
+PYTHONFEATURES=""
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we should install the python bindings" >&5
 $as_echo_n "checking if we should install the python bindings... " >&6; }
 if test "x$install_python" = "xyes" ; then
@@ -23838,6 +23844,7 @@ if test "x$install_python" = "xyes" ; then
     PYTHONINSTALLTARGS="pythoninstall"
     PYTHONUNINSTALLTARGS="pythonuninstall"
     PYTHONCLEANTARGS="pythonclean"
+    PYTHONFEATURES="pythonfeatures"
 
   cat >> configure-summary << EOF
   SNMP Python modules:        building for $PYTHONPROG
@@ -23854,6 +23861,7 @@ EOF
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
+
 
 
 

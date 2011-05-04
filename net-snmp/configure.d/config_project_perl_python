@@ -315,11 +315,13 @@ fi
 PERLTARGS=""
 PERLINSTALLTARGS=""
 PERLUNINSTALLTARGS=""
+PERLFEATURES=""
 AC_MSG_CHECKING([if we can install the Perl modules])
 if test "x$install_perl" = "xyes" ; then
     PERLTARGS="perlmodules"
     PERLINSTALLTARGS="perlinstall"
     PERLUNINSTALLTARGS="perluninstall"
+    PERLFEATURES="perlfeatures"
     if test "x$embed_perl" = "xyes" ; then
       AC_MSG_CACHE_ADD(SNMP Perl modules:          building -- embeddable)
       AC_MSG_RESULT([yes -- and embeddable])
@@ -335,6 +337,7 @@ AC_SUBST(PERLTARGS)
 AC_SUBST(PERLINSTALLTARGS)
 AC_SUBST(PERLUNINSTALLTARGS)
 AC_SUBST(PERLARGS)
+AC_SUBST(PERLFEATURES)
 
 
 #       Reset LIBS to pre-libwrap value   (???)
@@ -352,12 +355,14 @@ PYTHONTARGS=""
 PYTHONINSTALLTARGS=""
 PYTHONUNINSTALLTARGS=""
 PYTHONCLEANTARGS=""
+PYTHONFEATURES=""
 AC_MSG_CHECKING([if we should install the python bindings])
 if test "x$install_python" = "xyes" ; then
     PYTHONTARGS="pythonmodules"
     PYTHONINSTALLTARGS="pythoninstall"
     PYTHONUNINSTALLTARGS="pythonuninstall"
     PYTHONCLEANTARGS="pythonclean"
+    PYTHONFEATURES="pythonfeatures"
     AC_MSG_CACHE_ADD(SNMP Python modules:        building for $PYTHONPROG)
     AC_MSG_RESULT([yes])
 else
@@ -369,5 +374,6 @@ AC_SUBST(PYTHONINSTALLTARGS)
 AC_SUBST(PYTHONUNINSTALLTARGS)
 AC_SUBST(PYTHONCLEANTARGS)
 AC_SUBST(PYTHONARGS)
+AC_SUBST(PYTHONFEATURES)
 
 

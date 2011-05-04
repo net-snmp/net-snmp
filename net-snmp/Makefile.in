@@ -57,6 +57,11 @@ PYTHONARGS=@PYTHONARGS@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 
 #
+# feature checks for optional components
+#
+FTOTHERTARGS=@PERLFEATURES@ @PYTHONFEATURES@
+
+#
 # targets
 #
 all:    sedscript EXAMPLE.conf  @FEATURETARGS@ standardall net-snmp-config-x net-snmp-create-v3-user @PERLTARGS@ @PYTHONTARGS@
@@ -193,8 +198,11 @@ perlrealclean:
 	   ( cd perl ; $(MAKE) realclean ) ; \
 	fi
 
+perlfeatures:
+	@for i in $(PERLMODULES) ; do \
+		$(FEATURECHECK) --feature-global $(top_builddir)/include/net-snmp/feature-details.h perl/$$i perl/$$i/netsnmp-feature-definitions.h perl/$$i/netsnmp-feature-definitions.ft $(CC) -I $(top_builddir)/include -I $(top_srcdir)/include -E $(CPPFLAGS) $(CFLAGS) -c ; \
+	done
 
-#
 # python specific build rules
 #
 PYMAKE=$(PYTHON) setup.py $(PYTHONARGS)

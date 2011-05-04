@@ -17,7 +17,7 @@ objs: ${OBJS} ${LOBJS}
 # features require that subdirs be made *first* to get dependency
 # collection processed in the right order
 .PHONY: features ftobjs ftsubdirs
-features: ftsubdirs ftobjs $(FEATUREFILE)
+features: $(FTOTHERTARGS) ftsubdirs ftobjs $(FEATUREFILE)
 ftobjs: $(FTOBJS)
 $(FEATUREFILE): $(FTOBJS) $(top_builddir)/include/net-snmp/feature-details.h
 	cat $(FTOBJS) > $(FEATUREFILE).in
