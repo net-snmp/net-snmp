@@ -12,8 +12,10 @@ my @sets =
 	"with-defaults" => '',
      });
 
+my %base_args = %{$sets[0]};
+my ($basename, $basenum);
 
-getopts('t:hlcD:nj:o:e', \%opts) || usage();
+getopts('t:hlcD:nj:o:eb:', \%opts) || usage();
 
 $opts{'j'} = "-j$opts{j}" if (exists($opts{'j'}));
 
@@ -116,6 +118,12 @@ my @argumentsets =
      },
     );
 
+# map these to a referencable lookup hash
+my %argumentsets;
+foreach my $set (@argumentsets) {
+    $argumentsets{$set->{'title'}} = $set;
+}
+
 if ($opts{'l'}) {
     print "Types available:\n";
     printf("  %-40.40s %s\n", "Test Title", "Number of subtests");
@@ -135,9 +143,24 @@ if ($opts{'t'}) {
     }
 }
 
+if ($opts{'b'}) {
+    # use this set as the base default set of arguments
+    ($basename, $basenum) = ($opts{'b'} =~ /(.*):(\d+)/);
+    if (!exists($argumentsets{$basename})) {
+	printf STDERR "failed to find set for -b argument: %s\n", $basename;
+	exit(1);
+    }
+    @sets = add_in_flags($argumentsets{$basename}, {}, ());
+    @sets = @sets[$basenum];
+    %base_args = %{$sets[0]};
+}
+
 foreach my $set (@argumentsets) {
     if (!$opts{'t'} || exists($types{$set->{'title'}})) {
-	@sets = add_in_flags($set, @sets);
+        if ($basename && $set->{'title'} eq $basename) {
+            next;
+        }
+	@sets = add_in_flags($set, \%base_args, @sets);
     }
 }
 
@@ -163,7 +186,7 @@ foreach my $set (@sets) {
 }
 
 sub add_in_flags {
-    my ($argumentset, @current_flags) = @_;
+    my ($argumentset, $base_flags, @current_flags) = @_;
 
     my @new_flags;
 
@@ -171,9 +194,9 @@ sub add_in_flags {
     if (! $opts{'e'}) {
 	@new_flags = @current_flags;
 	foreach my $newargs (keys(%{$argumentset->{'arguments'}})) {
-	    my %flags;
+	    my %flags = %$base_flags;
 
-	    $flags{'title'} = "$newargs";
+	    $flags{'title'} = "$flags{'title'}:$newargs";
 
 	    foreach my $newflag (keys(%{$argumentset->{'arguments'}{$newargs}})) {
 
@@ -290,15 +313,16 @@ sub analyze_size {
 sub usage {
     print "Usage: $0 [FLAGS]\n\n";
     print "FLAGS:\n";
-    print "\t-h\thelp\n";
-    print "\t-t TYPES\tSelect types to analyze (default = all)\n";
-    print "\t-l\tList available types\n";
-    print "\t-c\tPrint the configuration flags that would be used\n";
-    print "\t-D DIR\tSave data results to this directory\n";
-    print "\t-o FILE\tSave a complete summary chart to FILE\n"; 
-    print "\t-n\tDry run -- only show the commands to execute\n";
-    print "\t-j NUM\tExecute make with parallel building (-jNUM)\n";
-    print "\t-e\tDo an exponential expansion (all combos) of the requested options\n";
+    print "  -h\thelp\n";
+    print "  -t TYPES\tSelect types to analyze (default = all)\n";
+    print "  -l\tList available types\n";
+    print "  -c\tPrint the configuration flags that would be used\n";
+    print "  -D DIR\tSave data results to this directory\n";
+    print "  -o FILE\tSave a complete summary chart to FILE\n"; 
+    print "  -n\tDry run -- only show the commands to execute\n";
+    print "  -j NUM\tExecute make with parallel building (-jNUM)\n";
+    print "  -e\tDo an exponential expansion (all combos) of the requested options\n";
+    print "  -b NAME:NUM\tUse NAME and the NUM'th set as the base arguments to start from\n";
     exit;
 }
 
