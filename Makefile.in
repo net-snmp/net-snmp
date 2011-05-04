@@ -159,7 +159,7 @@ testdirs:
 distall: ${srcdir}/configure ${srcdir}/include/net-snmp/net-snmp-config.h 
 
 OTHERCLEANTARGETS=EXAMPLE.conf sedscript
-OTHERCLEANTODOS=perlclean @PYTHONCLEANTARGS@ cleanfeatures
+OTHERCLEANTODOS=perlclean @PYTHONCLEANTARGS@ cleanfeatures perlcleanfeatures pythoncleanfeatures
 
 #
 # perl specific build rules
@@ -200,6 +200,7 @@ perlclean:
 	@if test -f perl/Makefile; then \
 	   ( cd perl ; $(MAKE) clean ) ; \
 	fi
+
 perlrealclean:
 	@if test -f perl/Makefile; then \
 	   ( cd perl ; $(MAKE) realclean ) ; \
@@ -209,6 +210,10 @@ perlrealclean:
 	$(FEATURECHECK) --feature-global $(top_builddir)/include/net-snmp/feature-details.h `dirname $<` $< $@ $(CC) -I $(top_builddir)/include -I $(top_srcdir)/include -E $(CPPFLAGS) $(CFLAGS) -c
 
 perlfeatures: $(PERLMODULEFTS)
+
+perlcleanfeatures:
+	$(RM) $(PERLMODULEFTS)
+
 
 # python specific build rules
 #
@@ -238,6 +243,9 @@ pythonclean:
 	@(dir=`pwd`; cd python; $(PYMAKE) clean --basedir=$$dir)
 
 pythonfeatures: $(PYTHONMODULEFTS)
+
+pythoncleanfeatures:
+	$(RM) $(PYTHONMODULEFTS)
 
 #
 # make distclean completely removes all traces of building including
