@@ -105,13 +105,16 @@ SOFTWARE.
 #include <net-snmp/library/int64.h>
 #include <net-snmp/library/snmp_client.h>
 
-netsnmp_feature_child_of(mib_strings_all, libnetsnmp)
+netsnmp_feature_child_of(mib_api, libnetsnmp)
+netsnmp_feature_child_of(mib_strings_all, mib_api)
 
 netsnmp_feature_child_of(mib_snprint, mib_strings_all)
 netsnmp_feature_child_of(mib_snprint_description, mib_strings_all)
 netsnmp_feature_child_of(mib_snprint_variable, mib_strings_all)
 netsnmp_feature_child_of(mib_string_conversions, mib_strings_all)
 netsnmp_feature_child_of(print_mib, mib_strings_all)
+
+netsnmp_feature_child_of(mib_to_asn_type, mib_api)
 
 /** @defgroup mib_utilities mib parsing and datatype manipulation routines.
  *  @ingroup library
@@ -6357,6 +6360,7 @@ int main(int argc, const char **argv)
 
 #endif /* test_display_hint */
 
+#ifndef NETSNMP_FEATURE_REMOVE_MIB_TO_ASN_TYPE
 u_char
 mib_to_asn_type(int mib_type)
 {
@@ -6406,6 +6410,7 @@ mib_to_asn_type(int mib_type)
     }
     return -1;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_MIB_TO_ASN_TYPE */
 
 /**
  * Converts a string to its OID form.

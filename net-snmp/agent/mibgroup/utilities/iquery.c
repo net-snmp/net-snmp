@@ -8,6 +8,7 @@
 netsnmp_feature_child_of(iquery_all, libnetsnmpmibs)
 netsnmp_feature_child_of(iquery, iquery_all)
 netsnmp_feature_child_of(iquery_community_session, iquery_all)
+netsnmp_feature_child_of(iquery_pdu_session, iquery_all)
 
 netsnmp_feature_require(query_set_default_session)
 
@@ -129,6 +130,7 @@ void init_iquery(void){
      *
      **************************/
 
+#ifndef NETSNMP_FEATURE_REMOVE_IQUERY_PDU_SESSION
 netsnmp_session *netsnmp_iquery_pdu_session(netsnmp_pdu* pdu) {
     if (!pdu)
        return NULL;
@@ -147,6 +149,7 @@ netsnmp_session *netsnmp_iquery_pdu_session(netsnmp_pdu* pdu) {
                            pdu->securityEngineID,
                            pdu->securityEngineIDLen);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IQUERY_PDU_SESSION */
 
 netsnmp_session *netsnmp_iquery_user_session(char* secName){
     u_char eID[SNMP_MAXBUF_SMALL];

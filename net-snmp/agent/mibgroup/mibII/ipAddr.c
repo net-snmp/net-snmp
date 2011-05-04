@@ -15,6 +15,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
@@ -119,6 +120,8 @@
 #ifdef cygwin
 #include <windows.h>
 #endif
+
+netsnmp_feature_require(interface_legacy)
 
         /*********************
 	 *

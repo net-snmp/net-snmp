@@ -24,6 +24,7 @@
 
 netsnmp_feature_require(ipAddressTable_container_get)
 netsnmp_feature_require(ipaddress_common_copy_utilities)
+netsnmp_feature_require(ipaddress_prefix_copy)
 
 /** @ingroup interface 
  * @addtogroup data_access data_access: Routines to access data

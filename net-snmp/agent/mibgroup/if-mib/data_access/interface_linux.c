@@ -10,6 +10,7 @@
 netsnmp_feature_require(fd_event_manager)
 netsnmp_feature_require(delete_prefix_info)
 netsnmp_feature_require(create_prefix_info)
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
 
 #ifdef HAVE_PCI_LOOKUP_NAME
 #include <pci/pci.h>
@@ -859,6 +860,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     return 0;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS
 int
 netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
                               int ifAdminStatus_val)
@@ -875,6 +877,7 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
     return netsnmp_access_interface_ioctl_flags_set(-1, entry,
                                                     IFF_UP, and_complement);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS */
 
 #ifdef HAVE_LINUX_ETHTOOL_H
 /**

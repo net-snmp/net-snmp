@@ -360,6 +360,7 @@ get_proc_instance(struct myproc *proc, oid inst)
 }
 
 #ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
+netsnmp_feature_require(swrun_count_processes_by_name)
 int
 sh_count_procs(char *procname)
 {

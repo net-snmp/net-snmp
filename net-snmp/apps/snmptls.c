@@ -4,9 +4,12 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #undef NETSNMP_USE_ASSERT
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+netsnmp_feature_require(tls_fingerprint_build)
 
 #include <ctype.h>
 

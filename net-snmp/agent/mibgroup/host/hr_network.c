@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
@@ -22,6 +23,9 @@
 #include "mibII/interfaces.h"
 #include "hr_network.h"
 
+#if !defined( solaris2 )
+netsnmp_feature_require(interface_legacy)
+#endif /* !solaris2 */
 
         /*********************
 	 *
