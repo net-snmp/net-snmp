@@ -12,6 +12,10 @@
 
 netsnmp_feature_require(container_free_all)
 
+netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused)
+netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused)
+netsnmp_feature_child_of(openssl_err_log, netsnmp_unused)
+
 #include <ctype.h>
 
 #include <openssl/evp.h>
@@ -372,7 +376,6 @@ _extract_oname(const GENERAL_NAME *oname)
     return rtn;
 }
 
-netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_OPENSSL_CERT_GET_SUBJECTALTNAMES
 /** netsnmp_openssl_cert_get_subjectAltName: get subjectAltName for cert.
  * if a pointer to a buffer and its length are specified, they will be
@@ -445,7 +448,6 @@ _nid2ht(int nid)
     return 0;
 }
 
-netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_OPENSSL_HT2NID
 int
 _ht2nid(int ht)
@@ -807,7 +809,6 @@ netsnmp_openssl_cert_issued_by(X509 *issuer, X509 *cert)
 }
 
 
-netsnmp_feature_child_of(openssl_err_log, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_OPENSSL_ERR_LOG
 void
 netsnmp_openssl_err_log(const char *prefix)
