@@ -12,6 +12,8 @@
 #include "disman/event/mteObjects.h"
 
 netsnmp_feature_child_of(disman_debugging, libnetsnmpmibs)
+netsnmp_feature_child_of(mteevent, libnetsnmpmibs)
+netsnmp_feature_child_of(mteevent_removeentry, mteevent)
 
 netsnmp_tdata *event_table_data;
 
@@ -200,6 +202,7 @@ mteEvent_createEntry(const char *mteOwner, const char *mteEName, int fixed)
 }
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_MTEEVENT_REMOVEENTRY
 /*
  * Remove a row from the event table 
  */
@@ -214,6 +217,7 @@ mteEvent_removeEntry(netsnmp_tdata_row *row)
         netsnmp_tdata_remove_and_delete_row(event_table_data, row);
     SNMP_FREE(entry);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_MTEEVENT_REMOVEENTRY */
 
     /* ===================================================
      *

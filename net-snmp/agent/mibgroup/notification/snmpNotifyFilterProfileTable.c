@@ -23,12 +23,16 @@
 /*
  * minimal include directives 
  */
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "header_complex.h"
 #include "snmpNotifyFilterProfileTable.h"
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(header_complex_find_entry)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * snmpNotifyFilterProfileTable_variables_oid:

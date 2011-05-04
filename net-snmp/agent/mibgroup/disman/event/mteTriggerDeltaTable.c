@@ -14,7 +14,10 @@
 #include "disman/event/mteTriggerDeltaTable.h"
 
 netsnmp_feature_require(table_tdata)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(check_vb_oid)
+netsnmp_feature_require(check_vb_truthvalue)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /** Initializes the mteTriggerDeltaTable module */
 void

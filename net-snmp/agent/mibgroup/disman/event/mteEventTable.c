@@ -16,7 +16,12 @@
 
 netsnmp_feature_require(iquery)
 netsnmp_feature_require(table_tdata)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(mteevent_removeentry)
+netsnmp_feature_require(check_vb_truthvalue)
+netsnmp_feature_require(table_tdata_insert_row)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 static netsnmp_table_registration_info *table_info;
 

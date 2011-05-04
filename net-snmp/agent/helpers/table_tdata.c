@@ -26,6 +26,7 @@ netsnmp_feature_child_of(table_tdata, table_tdata_all)
 netsnmp_feature_child_of(table_tdata_delete_table, table_tdata_all)
 netsnmp_feature_child_of(table_tdata_extract_table, table_tdata_all)
 netsnmp_feature_child_of(table_tdata_remove_row, table_tdata_all)
+netsnmp_feature_child_of(table_tdata_insert_row, table_tdata_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_TABLE_TDATA
 netsnmp_feature_require(table_container_row_insert)
@@ -463,6 +464,7 @@ netsnmp_tdata_extract_entry(netsnmp_request_info *request)
         return NULL;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_TDATA_INSERT_ROW
 /** inserts a newly created tdata row into a request */
 NETSNMP_INLINE void
 netsnmp_insert_tdata_row(netsnmp_request_info *request,
@@ -470,6 +472,7 @@ netsnmp_insert_tdata_row(netsnmp_request_info *request,
 {
     netsnmp_container_table_row_insert(request, (netsnmp_index *)row);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA_INSERT_ROW */
 
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_TDATA_REMOVE_ROW
 /** inserts a newly created tdata row into a request */

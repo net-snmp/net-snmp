@@ -1,10 +1,15 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/sysORTable.h>
 
 #include "snmp_mib.h"
 #include "updates.h"
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(check_vb_truthvalue)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 static const oid snmp_oid[] = { 1, 3, 6, 1, 2, 1, 11 };
 

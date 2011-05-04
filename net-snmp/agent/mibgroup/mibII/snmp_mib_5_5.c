@@ -10,6 +10,9 @@
 #include "updates.h"
 
 netsnmp_feature_require(helper_statistics)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(check_vb_truthvalue)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 #define SNMP_OID 1, 3, 6, 1, 2, 1, 11
 

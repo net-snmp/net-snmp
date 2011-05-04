@@ -18,8 +18,12 @@ netsnmp_feature_require(iquery)
 netsnmp_feature_require(table_tdata)
 netsnmp_feature_require(date_n_time)
 netsnmp_feature_require(check_vb_uint)
-netsnmp_feature_require(check_vb_oid)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(check_vb_oid)
+netsnmp_feature_require(check_vb_truthvalue)
+netsnmp_feature_require(table_tdata_insert_row)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 static netsnmp_table_registration_info *table_info;
 
