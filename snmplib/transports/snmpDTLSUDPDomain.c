@@ -1429,12 +1429,6 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 }
 
 
-void
-netsnmp_dtlsudp_agent_config_tokens_register(void)
-{
-}
-
-
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 
 char *

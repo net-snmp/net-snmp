@@ -23,6 +23,7 @@ netsnmp_feature_child_of(tlstmaddr_container, tlstmaddr_external)
 netsnmp_feature_child_of(tlstmAddr_get_serverId, tlstmaddr_external)
 
 netsnmp_feature_child_of(cert_fingerprints, cert_util_all)
+netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all)
 
 #endif /* NETSNMP_FEATURE_REQUIRE_CERT_UTIL */
 
@@ -1639,6 +1640,7 @@ _cert_print(netsnmp_cert *c, void *context)
                            se_find_label_in_slist("cert_hash_alg", c->hash_type),
                            c->hash_type, c->fingerprint));
         }
+        /* netsnmp_feature_require(cert_utils_dump_names) */
         /* netsnmp_openssl_cert_dump_names(c->ocert); */
         netsnmp_openssl_cert_dump_extensions(c->ocert);
     }
@@ -1946,6 +1948,7 @@ netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CERT_FINGERPRINTS */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TLS_FINGERPRINT_BUILD
 /**
  * combine a hash type and hex fingerprint into a SnmpTLSFingerprint
  *
@@ -1991,6 +1994,7 @@ netsnmp_tls_fingerprint_build(int hash_type, const char *hex_fp,
                                
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TLS_FINGERPRINT_BUILD */
 
 /**
  * Trusts a given certificate for use in TLS translations.

@@ -37,6 +37,9 @@ netsnmp_feature_require(oid_stash_add_data)
 netsnmp_feature_require(oid_stash)
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
+#ifndef NETSNMP_DISABLE_MIB_LOADING
+netsnmp_feature_require(mib_to_asn_type)
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 static netsnmp_data_list *auto_tables;
 

@@ -2,6 +2,7 @@
  *  Interface MIB architecture support for Solaris
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include "if-mib/ifTable/ifTable_constants.h"
 #include "kernel_sunos5.h"
@@ -15,6 +16,8 @@
 #include <sys/sockio.h>
 #include <strings.h>
 #include <string.h>
+
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
 
 static int _set_ip_flags_v4(netsnmp_interface_entry *, mib2_ifEntry_t *);
 static int _match_ifname_v4addr(void *ifname, void *ipaddr);
@@ -345,6 +348,7 @@ _get_v6addr(mib2_ifEntry_t *ife, mib2_ipv6AddrEntry_t *ipv6e)
 }
 #endif /* SOLARIS_HAVE_IPV6_MIB_SUPPORT */
 
+#ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS
 int
 netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
                               int ifAdminStatus_val)
@@ -356,3 +360,4 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
      */
     return (-1);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS */

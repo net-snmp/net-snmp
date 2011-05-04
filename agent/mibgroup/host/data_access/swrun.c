@@ -18,6 +18,7 @@
 netsnmp_feature_child_of(software_running, libnetsnmpmibs)
 
 netsnmp_feature_child_of(swrun_max_processes, software_running)
+netsnmp_feature_child_of(swrun_count_processes_by_name, software_running)
 
 /**---------------------------------------------------------------------*/
 /*
@@ -90,6 +91,7 @@ swrun_max_processes( void )
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SWRUN_MAX_PROCESSES */
 
+#ifndef NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_NAME
 int
 swrun_count_processes_by_name( char *name )
 {
@@ -110,7 +112,7 @@ swrun_count_processes_by_name( char *name )
 
     return i;
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_NAME */
 
 /**---------------------------------------------------------------------*/
 /*

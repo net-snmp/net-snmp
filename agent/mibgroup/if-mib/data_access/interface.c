@@ -14,9 +14,10 @@
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/data_access/interface.h>
 
-netsnmp_feature_child_of(interface, libnetsnmpmibs)
-netsnmp_feature_child_of(interface_access_entry_set_admin_status, interface)
-
+netsnmp_feature_child_of(interface_all, libnetsnmpmibs)
+netsnmp_feature_child_of(interface, interface_all)
+netsnmp_feature_child_of(interface_access_entry_set_admin_status, interface_all)
+netsnmp_feature_child_of(interface_legacy, interface_all)
 
 /**---------------------------------------------------------------------*/
 /*
@@ -341,6 +342,7 @@ netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry)
     free(entry);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_LEGACY
 /*
  * Blech - backwards compatible mibII/interfaces style interface
  * functions, so we don't have to update older modules to use
@@ -400,7 +402,7 @@ Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
     return 1;
 }
 #endif /* NETSNMP_NO_BACKWARDS_COMPATABILITY */
-
+#endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_LEGACY */
 
 #ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_ACCESS_ENTRY_SET_ADMIN_STATUS
 /**
@@ -409,6 +411,7 @@ Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
  * @retval < 0 : error
  */
 #ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
+netsnmp_feature_require(interface_arch_set_admin_status)
 int
 netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
                                                 int ifAdminStatus)

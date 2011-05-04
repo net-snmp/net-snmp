@@ -15,6 +15,7 @@
 #include "disman/event/mteEventTable.h"
 
 netsnmp_feature_require(iquery)
+netsnmp_feature_require(iquery_pdu_session)
 netsnmp_feature_require(table_tdata)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(check_vb_type_and_max_size)

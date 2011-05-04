@@ -17,6 +17,10 @@
 netsnmp_feature_child_of(ipaddress_common, libnetsnmpmibs)
 
 netsnmp_feature_child_of(ipaddress_common_copy_utilities, ipaddress_common)
+netsnmp_feature_child_of(ipaddress_entry_copy, ipaddress_common)
+netsnmp_feature_child_of(ipaddress_entry_update, ipaddress_common)
+netsnmp_feature_child_of(ipaddress_prefix_copy, ipaddress_common_copy_utilities)
+
 
 /**---------------------------------------------------------------------*/
 /*
@@ -253,6 +257,7 @@ netsnmp_access_ipaddress_entry_set(netsnmp_ipaddress_entry * entry)
     return rc;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESS_ENTRY_UPDATE
 /**
  * update an old ipaddress_entry from a new one
  *
@@ -335,7 +340,9 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
 
     return changed;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESS_ENTRY_UPDATE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESS_ENTRY_COPY
 /**
  * copy an  ipaddress_entry
  *
@@ -367,12 +374,14 @@ netsnmp_access_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
     
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESS_ENTRY_COPY */
 
 /**---------------------------------------------------------------------*/
 /*
  * Utility routines
  */
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESS_PREFIX_COPY
 /**
  * copy the prefix portion of an ip address
  */
@@ -398,6 +407,7 @@ netsnmp_ipaddress_prefix_copy(u_char *dst, u_char *src, int addr_len, int pfx_le
 
     return pfx_len;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESS_PREFIX_COPY */
 
 
 /**

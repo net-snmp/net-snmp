@@ -33,6 +33,8 @@
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(interface_set_)
 
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
+
 /*
  * account for minor differences between FreeBSD and OpenBSD.
  * If this gets unruly, split stuff out into the respective
@@ -555,6 +557,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     return 0;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS
 int
 netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
                               int ifAdminStatus_val)
@@ -569,3 +572,4 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
 
     return -4;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS */

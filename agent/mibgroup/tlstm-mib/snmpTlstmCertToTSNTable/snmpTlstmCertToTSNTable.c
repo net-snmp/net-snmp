@@ -18,6 +18,7 @@ netsnmp_feature_require(cert_fingerprints)
 netsnmp_feature_require(table_tdata_delete_table)
 netsnmp_feature_require(table_tdata_extract_table)
 netsnmp_feature_require(table_tdata_remove_row)
+netsnmp_feature_require(tls_fingerprint_build)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(check_vb_storagetype)
 netsnmp_feature_require(check_vb_type_and_max_size)

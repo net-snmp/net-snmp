@@ -1,8 +1,10 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/fsys.h>
 
+netsnmp_feature_child_of(hw_fsys_get_container, netsnmp_unused)
 
 extern void             netsnmp_fsys_arch_load( void );
 extern void             netsnmp_fsys_arch_init( void );
@@ -59,10 +61,12 @@ void shutdown_hw_fsys( void ) {
     _fsys_free();
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_HW_FSYS_GET_CONTAINER
 /*
  *  Return the main fsys container
  */
 netsnmp_container *netsnmp_fsys_get_container( void ) { return _fsys_container; }
+#endif /* NETSNMP_FEATURE_REMOVE_HW_FSYS_GET_CONTAINER */
 
 /*
  *  Return the main fsys cache control structure (if defined)

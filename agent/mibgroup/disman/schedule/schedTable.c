@@ -15,6 +15,7 @@
 #include "disman/schedule/schedTable.h"
 
 netsnmp_feature_require(iquery)
+netsnmp_feature_require(iquery_pdu_session)
 netsnmp_feature_require(table_tdata)
 netsnmp_feature_require(date_n_time)
 netsnmp_feature_require(check_vb_uint)

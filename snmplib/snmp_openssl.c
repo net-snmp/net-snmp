@@ -15,6 +15,7 @@ netsnmp_feature_require(container_free_all)
 netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused)
 netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused)
 netsnmp_feature_child_of(openssl_err_log, netsnmp_unused)
+netsnmp_feature_child_of(cert_dump_names, netsnmp_unused)
 
 #include <ctype.h>
 
@@ -139,6 +140,7 @@ netsnmp_openssl_cert_get_commonName(X509 *ocert, char **buf, int *len)
     return _cert_get_name(ocert, NID_commonName, buf, len, 0);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CERT_DUMP_NAMES
 /** netsnmp_openssl_cert_dump_name: dump subject names in cert
  */
 void
@@ -182,6 +184,7 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
                    prefix_short, ASN1_STRING_data(oname_entry->value)));
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CERT_DUMP_NAMES */
 
 static char *
 _cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
