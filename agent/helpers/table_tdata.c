@@ -29,7 +29,9 @@ netsnmp_feature_child_of(table_tdata_remove_row, table_tdata_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_TABLE_TDATA
 netsnmp_feature_require(table_container_row_insert)
+#ifdef NETSNMP_FEATURE_REQUIRE_TABLE_TDATA_REMOVE_ROW
 netsnmp_feature_require(table_container_row_remove)
+#endif /* NETSNMP_FEATURE_REQUIRE_TABLE_TDATA_REMOVE_ROW */
 #endif /* NETSNMP_FEATURE_REQUIRE_TABLE_TDATA */
 
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_TDATA
