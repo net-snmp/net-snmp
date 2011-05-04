@@ -313,15 +313,15 @@ sub analyze_size {
 sub usage {
     print "Usage: $0 [FLAGS]\n\n";
     print "FLAGS:\n";
-    print "  -h\thelp\n";
+    print "  -h\t\thelp\n";
     print "  -t TYPES\tSelect types to analyze (default = all)\n";
-    print "  -l\tList available types\n";
-    print "  -c\tPrint the configuration flags that would be used\n";
+    print "  -l\t\tList available types\n";
+    print "  -c\t\tPrint the configuration flags that would be used\n";
     print "  -D DIR\tSave data results to this directory\n";
     print "  -o FILE\tSave a complete summary chart to FILE\n"; 
-    print "  -n\tDry run -- only show the commands to execute\n";
+    print "  -n\t\tDry run -- only show the commands to execute\n";
     print "  -j NUM\tExecute make with parallel building (-jNUM)\n";
-    print "  -e\tDo an exponential expansion (all combos) of the requested options\n";
+    print "  -e\t\tUse exponential expansion (all combos) of the requested options\n";
     print "  -b NAME:NUM\tUse NAME and the NUM'th set as the base arguments to start from\n";
     exit;
 }
