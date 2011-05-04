@@ -4,6 +4,7 @@
  * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable_constants.h"
@@ -12,6 +13,8 @@
 #include <net-snmp/data_access/interface.h>
 #include <net-snmp/data_access/ipaddress.h>
 #include "if-mib/data_access/interface.h"
+
+netsnmp_feature_child_of(interface_ioctl_flags_set, interface_all)
 
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
@@ -277,6 +280,7 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
     return rc;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_IOCTL_FLAGS_SET
 /**
  * interface entry flags ioctl wrapper
  *
@@ -345,6 +349,7 @@ netsnmp_access_interface_ioctl_flags_set(int fd,
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_IOCTL_FLAGS_SET */
 #endif /* SIOCGIFFLAGS */
 
 #ifdef SIOCGIFMTU

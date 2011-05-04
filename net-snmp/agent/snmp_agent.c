@@ -123,7 +123,7 @@ netsnmp_feature_child_of(dump_sess_list, agent_debugging_utilities)
 netsnmp_feature_child_of(agent_remove_list_data, netsnmp_unused)
 netsnmp_feature_child_of(set_all_requests_error, netsnmp_unused)
 netsnmp_feature_child_of(addrcache_age, netsnmp_unused)
-
+netsnmp_feature_child_of(delete_subtree_cache, netsnmp_unused)
 
 
 NETSNMP_INLINE void

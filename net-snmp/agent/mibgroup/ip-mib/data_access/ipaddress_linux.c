@@ -22,6 +22,12 @@
 netsnmp_feature_require(prefix_info)
 netsnmp_feature_require(find_prefix_info)
 
+netsnmp_feature_child_of(ipaddress_arch_entry_copy, ipaddress_common)
+
+#ifdef NETSNMP_FEATURE_REQUIRE_IPADDRESS_ARCH_ENTRY_COPY
+netsnmp_feature_require(ipaddress_ioctl_entry_copy)
+#endif /* NETSNMP_FEATURE_REQUIRE_IPADDRESS_ARCH_ENTRY_COPY */
+
 #if defined (NETSNMP_ENABLE_IPV6)
 #include <linux/types.h>
 #include <asm/types.h>
@@ -87,6 +93,7 @@ netsnmp_arch_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry)
      */
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESS_ARCH_ENTRY_COPY
 /*
  * copy arch specific storage
  */
@@ -110,6 +117,7 @@ netsnmp_arch_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
 
     return rc;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESS_ARCH_ENTRY_COPY */
 
 /*
  * create a new entry
