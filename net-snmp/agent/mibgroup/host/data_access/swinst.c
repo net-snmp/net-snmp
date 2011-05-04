@@ -17,7 +17,7 @@
 
 netsnmp_feature_child_of(software_installed, libnetsnmpmibs)
 
-netsnmp_feature_child_of(swrun_max_processes, netsnmp_unused)
+netsnmp_feature_child_of(swinst_entry_remove, netsnmp_unused)
 
 /* ---------------------------------------------------------------------
  */
