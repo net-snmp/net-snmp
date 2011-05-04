@@ -99,6 +99,20 @@ my @argumentsets =
 	 }
      },
      {
+	 title => 'protocol-support',
+	 arguments =>
+	 {
+	     'everything' => {
+	     },
+	     'read-only' => {
+		 'enable-read-only' => '',
+	     },
+	     'notify-only' => {
+		 'enable-notify-only' => '',
+	     }
+	 }
+     },
+     {
 	 title => 'perl',
 	 arguments =>
 	 { 
