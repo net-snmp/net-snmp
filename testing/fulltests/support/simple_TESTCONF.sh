@@ -128,6 +128,8 @@ if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
     export SNMP_SAVE_TMPDIR
 fi
 
+SNMP_IGNORE_WINDOWS_REGISTRY="true"
+export SNMP_IGNORE_WINDOWS_REGISTRY
 SNMP_ENV_SEPARATOR="`${builddir}/net-snmp-config --env-separator`"
 SNMP_PERLPROG="`${builddir}/net-snmp-config --perlprog`"
 SNMP_TESTDIR="$SNMP_BASEDIR/tests"
