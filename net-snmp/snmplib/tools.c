@@ -953,6 +953,9 @@ char *netsnmp_getenv(const char *name)
   /* Next try HKCU */
   if (temp == NULL)
   {
+    if (getenv("SNMP_IGNORE_WINDOWS_REGISTRY"))
+      return NULL;
+
     if (RegOpenKeyExA(
           HKEY_CURRENT_USER, 
           "SOFTWARE\\Net-SNMP", 
