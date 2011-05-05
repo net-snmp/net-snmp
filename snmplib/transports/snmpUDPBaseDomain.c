@@ -195,6 +195,9 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
 # define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
 #elif defined(IP_RECVDSTADDR)
 # define netsnmp_dstaddr(x) (&(struct cmsghr *)(CMSG_DATA(x)))
+# ifndef IP_SENDSRCADDR
+#  define IP_SENDSRCADDR IP_RECVDSTADDR /* DragonFly BSD */
+# endif
 #endif
 
 int
@@ -252,7 +255,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
         if (cmsgptr->cmsg_level == IPPROTO_IP && cmsgptr->cmsg_type == IP_RECVDSTADDR) {
             memcpy((void *) dstip, CMSG_DATA(cmsgptr), sizeof(struct in_addr));
             DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
-                    inet_ntoa(*dstip)));
+                    inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr)));
         }
     }
 #endif
@@ -304,13 +307,12 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     }
     return ret;
 }
-#elif defined(IP_RECVDSTADDR)
-int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
-                       void *data, int len)
+#elif defined(IP_SENDSRCADDR)
+int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
+			struct sockaddr *remote, void *data, int len)
 {
     struct iovec iov = { data, len };
     struct cmsghdr *cm;
-    struct in_addr ip;
     struct msghdr m;
     char   cmbuf[CMSG_SPACE(sizeof(struct in_addr))];
 
