@@ -194,7 +194,7 @@ static oid      default_enterprise[] = { 1, 3, 6, 1, 4, 1, 3, 1, 1 };
 
 #define DEFAULT_COMMUNITY   "public"
 #define DEFAULT_RETRIES	    5
-#define DEFAULT_TIMEOUT	    1000000L
+#define DEFAULT_TIMEOUT	    ONE_SEC
 #define DEFAULT_REMPORT	    SNMP_PORT
 #define DEFAULT_ENTERPRISE  default_enterprise
 #define DEFAULT_TIME	    0
@@ -780,6 +780,10 @@ register_default_handlers(void)
                                "noContextEngineIDDiscovery",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_NO_DISCOVERY);
+    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "timeout",
+		               NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_TIMEOUT);
+    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "retries",
+		               NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_RETRIES);
 
     netsnmp_register_service_handlers();
 }
@@ -1169,10 +1173,22 @@ _sess_copy(netsnmp_session * in_session)
         session->securityNameLen = strlen(cp);
     }
 
-    if (session->retries == SNMP_DEFAULT_RETRIES)
-        session->retries = DEFAULT_RETRIES;
-    if (session->timeout == SNMP_DEFAULT_TIMEOUT)
-        session->timeout = DEFAULT_TIMEOUT;
+    if (session->retries == SNMP_DEFAULT_RETRIES) {
+        int retry = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_RETRIES);
+        if (retry < 0)
+            session->retries = DEFAULT_RETRIES;
+        else
+            session->retries = retry;
+    }
+    if (session->timeout == SNMP_DEFAULT_TIMEOUT) {
+        int timeout = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                         NETSNMP_DS_LIB_TIMEOUT);
+        if (timeout <= 0)
+            session->timeout = DEFAULT_TIMEOUT;
+        else
+            session->timeout = timeout * ONE_SEC;
+    }
     session->sessid = snmp_get_next_sessid();
 
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SESSION_INIT,

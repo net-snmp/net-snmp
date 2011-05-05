@@ -170,6 +170,10 @@ and hence a smaller network datagram.
 Specifies whether or not the host-specific configuration files are
 loaded.  Set to "true" to turn off the loading of the host specific
 configuration files.
+.IP "retries INTEGER"
+Specifies the number of retries to be used in the requests.
+.IP "timeout INTEGER"
+Specifies the timeout in seconds between retries.
 .\"
 .\" XXX - It is probably about time to remove this choice!
 .\"

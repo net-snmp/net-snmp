@@ -112,6 +112,8 @@ extern          "C" {
 #define NETSNMP_DS_SSHDOMAIN_DIR_PERM      12
 #define NETSNMP_DS_SSHDOMAIN_SOCK_USER     12
 #define NETSNMP_DS_SSHDOMAIN_SOCK_GROUP    13
+#define NETSNMP_DS_LIB_TIMEOUT             14
+#define NETSNMP_DS_LIB_RETRIES             15
     
     /*
      * special meanings for the default SNMP version slot (NETSNMP_DS_LIB_SNMPVERSION) 
