@@ -30,9 +30,6 @@
 #include <net/if_types.h>
 #include <net/if_media.h>
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(interface_set_)
-
 netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
 
 /*
