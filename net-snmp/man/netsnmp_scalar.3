@@ -1,4 +1,4 @@
-.TH "scalar" 3 "23 May 2010" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "scalar" 3 "Fri May 6 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -47,7 +47,7 @@ Returns a pointer to a netsnmp_mib_handler struct which contains the handler's n
 
 .PP
 Definition at line 46 of file scalar.c.
-.SS "int netsnmp_register_read_only_scalar (\fBnetsnmp_handler_registration\fP * reginfo)"
+.SS "int netsnmp_register_read_only_scalar (\fBnetsnmp_handler_registration\fP *reginfo)"
 .PP
 This function registers a read only scalar helper handler. This function is very similar to netsnmp_register_scalar the only addition is that the 'read_only' handler is injected into the handler chain prior to injecting the serialize handler and registering reginfo.
 .PP
@@ -71,7 +71,7 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 
 .PP
 Definition at line 109 of file scalar.c.
-.SS "int netsnmp_register_scalar (\fBnetsnmp_handler_registration\fP * reginfo)"
+.SS "int netsnmp_register_scalar (\fBnetsnmp_handler_registration\fP *reginfo)"
 .PP
 This function registers a scalar helper handler. The registered OID, reginfo->rootoid, space is extended for the instance subid using realloc() but the reginfo->rootoid_len length is not extended just yet. .This function subsequently injects the instance, scalar, and serialize helper handlers before actually registering reginfo.
 .PP

@@ -1,4 +1,4 @@
-.TH "net-snmp agent related processing" 3 "23 May 2010" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "net-snmp agent related processing" 3 "Fri May 6 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -170,7 +170,7 @@ net-snmp agent related processing \-
 .RI "void \fBnetsnmp_remove_and_free_agent_snmp_session\fP (\fBnetsnmp_agent_session\fP *asp)"
 .br
 .ti -1c
-.RI "void \fBnetsnmp_free_agent_snmp_session_by_session\fP (\fBnetsnmp_session\fP *sess, void(*free_request)(\fBnetsnmp_request_list\fP *))"
+.RI "void \fBnetsnmp_free_agent_snmp_session_by_session\fP (\fBnetsnmp_session\fP *sess, void(*free_request)(netsnmp_request_list *))"
 .br
 .ti -1c
 .RI "int \fBhandle_snmp_packet\fP (int op, \fBnetsnmp_session\fP *session, int reqid, \fBnetsnmp_pdu\fP *pdu, void *magic)"
@@ -312,12 +312,12 @@ net-snmp agent related processing \-
 .in -1c
 .SH "Function Documentation"
 .PP 
-.SS "NETSNMP_STATIC_INLINE int _request_set_error (\fBnetsnmp_request_info\fP * request, int mode, int error_value)"
+.SS "NETSNMP_STATIC_INLINE int _request_set_error (\fBnetsnmp_request_info\fP *request, intmode, interror_value)"
 .PP
 set error for a request 
 .PP
-Definition at line 3414 of file snmp_agent.c.
-.SS "int agent_check_and_process (int block)"
+Definition at line 3417 of file snmp_agent.c.
+.SS "int agent_check_and_process (intblock)"
 .PP
 This function checks for packets arriving on the SNMP port and processes them(snmp_read) if some are found, using the select(). If block is non zero, the function call blocks until a packet arrives
 .PP
@@ -334,17 +334,17 @@ Returns a positive integer if packets were processed, and -1 if an error was fou
 
 .PP
 Definition at line 566 of file snmp_agent.c.
-.SS "int check_getnext_results (\fBnetsnmp_agent_session\fP * asp)"
+.SS "int check_getnext_results (\fBnetsnmp_agent_session\fP *asp)"
 .PP
 returns 1 if there are valid GETNEXT requests left. Returns 0 if not. 
 .PP
-Definition at line 2815 of file snmp_agent.c.
-.SS "int handle_getnext_loop (\fBnetsnmp_agent_session\fP * asp)"
+Definition at line 2818 of file snmp_agent.c.
+.SS "int handle_getnext_loop (\fBnetsnmp_agent_session\fP *asp)"
 .PP
 repeatedly calls getnext handlers looking for an answer till all requests are satisified. It's expected that one pass has been made before entering this function 
 .PP
-Definition at line 2932 of file snmp_agent.c.
-.SS "int handle_pdu (\fBnetsnmp_agent_session\fP * asp)"
+Definition at line 2935 of file snmp_agent.c.
+.SS "int handle_pdu (\fBnetsnmp_agent_session\fP *asp)"
 .PP
 This function calls into netsnmp_set_mode_request_error, sets error_value given a reqinfo->mode value. It's used to send specific errors back to the agent to process accordingly.
 .PP
@@ -413,30 +413,30 @@ Returns error_value under all conditions.
 .PP
 
 .PP
-Definition at line 3226 of file snmp_agent.c.
-.SS "int handle_snmp_packet (int op, \fBnetsnmp_session\fP * session, int reqid, \fBnetsnmp_pdu\fP * pdu, void * magic)"
+Definition at line 3229 of file snmp_agent.c.
+.SS "int handle_snmp_packet (intop, \fBnetsnmp_session\fP *session, intreqid, \fBnetsnmp_pdu\fP *pdu, void *magic)"
 .PP
 handles an incoming SNMP packet into the agent 
 .PP
-Definition at line 1771 of file snmp_agent.c.
-.SS "\fBnetsnmp_request_info\fP* netsnmp_add_varbind_to_cache (\fBnetsnmp_agent_session\fP * asp, int vbcount, \fBnetsnmp_variable_list\fP * varbind_ptr, \fBnetsnmp_subtree\fP * tp)"
+Definition at line 1774 of file snmp_agent.c.
+.SS "\fBnetsnmp_request_info\fP* netsnmp_add_varbind_to_cache (\fBnetsnmp_agent_session\fP *asp, intvbcount, \fBnetsnmp_variable_list\fP *varbind_ptr, \fBnetsnmp_subtree\fP *tp)"
 .PP
 \fBTodo\fP
 .RS 4
-make this be more intelligent about ranges. Right now we merely take the highest level commonality of a registration range and use that. At times we might be able to be smarter about checking the range itself as opposed to the \fBnode\fP above where the range exists, but I doubt this will come up all that frequently. 
+make this be more intelligent about ranges. Right now we merely take the highest level commonality of a registration range and use that. At times we might be able to be smarter about checking the range itself as opposed to the node above where the range exists, but I doubt this will come up all that frequently. 
 .RE
 .PP
 
 .PP
-Definition at line 1880 of file snmp_agent.c.
-.SS "int netsnmp_check_transaction_id (int transaction_id)"
+Definition at line 1883 of file snmp_agent.c.
+.SS "int netsnmp_check_transaction_id (inttransaction_id)"
 .PP
 Decide if the requested transaction_id is still being processed within the agent. This is used to validate whether a delayed cache (containing possibly freed pointers) is still usable.
 .PP
 returns SNMPERR_SUCCESS if it's still valid, or SNMPERR_GENERR if not. 
 .PP
-Definition at line 2718 of file snmp_agent.c.
-.SS "int netsnmp_request_set_error (\fBnetsnmp_request_info\fP * request, int error_value)"
+Definition at line 2721 of file snmp_agent.c.
+.SS "int netsnmp_request_set_error (\fBnetsnmp_request_info\fP *request, interror_value)"
 .PP
 set error for a request \fBParameters:\fP
 .RS 4
@@ -447,8 +447,8 @@ set error for a request \fBParameters:\fP
 .PP
 
 .PP
-Definition at line 3482 of file snmp_agent.c.
-.SS "NETSNMP_INLINE int netsnmp_request_set_error_all (\fBnetsnmp_request_info\fP * requests, int error)"
+Definition at line 3485 of file snmp_agent.c.
+.SS "NETSNMP_INLINE int netsnmp_request_set_error_all (\fBnetsnmp_request_info\fP *requests, interror)"
 .PP
 set error for all requests \fBParameters:\fP
 .RS 4
@@ -466,8 +466,8 @@ SNMPERR_SUCCESS, or an error code
 .PP
 paranoid sanity checks 
 .PP
-Definition at line 3525 of file snmp_agent.c.
-.SS "int netsnmp_request_set_error_idx (\fBnetsnmp_request_info\fP * request, int error_value, int idx)"
+Definition at line 3528 of file snmp_agent.c.
+.SS "int netsnmp_request_set_error_idx (\fBnetsnmp_request_info\fP *request, interror_value, intidx)"
 .PP
 set error for a request within a request list \fBParameters:\fP
 .RS 4
@@ -480,8 +480,8 @@ set error for a request within a request list \fBParameters:\fP
 .PP
 
 .PP
-Definition at line 3497 of file snmp_agent.c.
-.SS "int netsnmp_set_all_requests_error (\fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests, int error_value)"
+Definition at line 3500 of file snmp_agent.c.
+.SS "int netsnmp_set_all_requests_error (\fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests, interror_value)"
 .PP
 set error for all request \fBDeprecated\fP
 .RS 4
@@ -504,8 +504,8 @@ error_value
 .PP
 
 .PP
-Definition at line 3699 of file snmp_agent.c.
-.SS "int netsnmp_set_mode_request_error (int mode, \fBnetsnmp_request_info\fP * request, int error_value)"
+Definition at line 3702 of file snmp_agent.c.
+.SS "int netsnmp_set_mode_request_error (intmode, \fBnetsnmp_request_info\fP *request, interror_value)"
 .PP
 set error for a request deprecated, use netsnmp_request_set_error instead
 .PP
@@ -530,8 +530,8 @@ error_value
 .PP
 
 .PP
-Definition at line 3683 of file snmp_agent.c.
-.SS "int netsnmp_set_request_error (\fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * request, int error_value)"
+Definition at line 3686 of file snmp_agent.c.
+.SS "int netsnmp_set_request_error (\fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *request, interror_value)"
 .PP
 set error for a request deprecated, use netsnmp_request_set_error instead
 .PP
@@ -560,12 +560,12 @@ error_value
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 3664 of file snmp_agent.c.
-.SS "int netsnmp_wrap_up_request (\fBnetsnmp_agent_session\fP * asp, int status)"
+Definition at line 3667 of file snmp_agent.c.
+.SS "int netsnmp_wrap_up_request (\fBnetsnmp_agent_session\fP *asp, intstatus)"
 .PP
 if asp->pdu 
 .PP
-Definition at line 1518 of file snmp_agent.c.
+Definition at line 1520 of file snmp_agent.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.
