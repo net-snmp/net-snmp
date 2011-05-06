@@ -599,9 +599,9 @@ sub create_perl_package {
   unlink "perl-tar.out";
   unlink "perl-gzip.out";
   print "  Creating Perl tar file\n";
-  if (system("$tar_command cvf NetSNMP.tar blib > perl-tar.out 2>&1")) { die ("Could not create tar file.  See perl-tar.out"); }
+  if (system("\"$tar_command\" cvf NetSNMP.tar blib > perl-tar.out 2>&1")) { die ("Could not create tar file.  See perl-tar.out"); }
   print "  Compressing Perl tar file\n";
-  if (system("$gzip_command --best NetSNMP.tar > perl-gzip.out 2>&1")) { die ("Could not compress tar file with gzip. See perl-gzip.out"); }
+  if (system("\"$gzip_command\" --best NetSNMP.tar > perl-gzip.out 2>&1")) { die ("Could not compress tar file with gzip. See perl-gzip.out"); }
    
   # Remove chdir..
   chdir $perl_dir || die ("Could not enter Perl directory: $perl_dir");
