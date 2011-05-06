@@ -73,6 +73,7 @@ typedef struct netsnmp_arp_s {
 
    int       flags; /* for net-snmp use */
 
+   unsigned  generation;
    oid       if_index;
 
    u_char    arp_physaddress[NETSNMP_ACCESS_ARP_PHYSADDR_BUF_SIZE];
@@ -86,31 +87,39 @@ typedef struct netsnmp_arp_s {
    u_long    arp_last_updated;   /* timeticks of last update */
 } netsnmp_arp_entry;
 
+#define NETSNMP_ACCESS_ARP_ENTRY_FLAG_DELETE      0x00000001
 
 /**---------------------------------------------------------------------*/
 /*
  * ACCESS function prototypes
  */
-/*
- * ifcontainer init
- */
-netsnmp_container * netsnmp_access_arp_container_init(u_int init_flags);
-#define NETSNMP_ACCESS_ARP_INIT_NOFLAGS               0x0000
+struct netsnmp_arp_access_s;
+typedef struct netsnmp_arp_access_s netsnmp_arp_access;
 
-/*
- * ifcontainer load and free
- */
-netsnmp_container*
-netsnmp_access_arp_container_load(netsnmp_container* container,
-                                    u_int load_flags);
-#define NETSNMP_ACCESS_ARP_LOAD_NOFLAGS               0x0000
+typedef void (NetsnmpAccessArpUpdate)(netsnmp_arp_access *, netsnmp_arp_entry*);
+typedef void (NetsnmpAccessArpGC)    (netsnmp_arp_access *);
 
-void netsnmp_access_arp_container_free(netsnmp_container *container,
-                                         u_int free_flags);
-#define NETSNMP_ACCESS_ARP_FREE_NOFLAGS               0x0000
-#define NETSNMP_ACCESS_ARP_FREE_DONT_CLEAR            0x0001
-#define NETSNMP_ACCESS_ARP_FREE_KEEP_CONTAINER        0x0002
+struct netsnmp_arp_access_s {
+    void *magic;
+    void *arch_magic;
+    int synchronized;
+    unsigned generation;
+    NetsnmpAccessArpUpdate *update_hook;
+    NetsnmpAccessArpGC *gc_hook;
+    int *cache_expired;
+};
 
+netsnmp_arp_access *
+netsnmp_access_arp_create(u_int init_flags,
+                          NetsnmpAccessArpUpdate *update_hook,
+                          NetsnmpAccessArpGC *gc_hook,
+                          int *cache_timeout, int *cache_flags,
+                          int *cache_expired);
+#define NETSNMP_ACCESS_ARP_CREATE_NOFLAGS             0x0000
+
+int netsnmp_access_arp_delete(netsnmp_arp_access *access);
+int netsnmp_access_arp_load(netsnmp_arp_access *access);
+int netsnmp_access_arp_unload(netsnmp_arp_access *access);
 
 /*
  * create/free a arp+entry
