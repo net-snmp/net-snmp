@@ -8,9 +8,11 @@ listing of all changes made to the code.
     snmplib:
       - [BUG 3134323]: Fix crash when comparing invalid OIDs
       - [BUG 3171878]: Using SNMPv3 context does not work
+      - [BUG 3182985]: Fix calculation of common OID prefix length
       - [PATCH 3058645]: Use MSG_DONTWAIT for the unix domain socket
       - [PATCH 3067540]: Fix IPv4 OID indexes on 64-bit big-endian systems
       - [PATCH 3165878]: Catch buffer overrun on 64-bit systems
+      - [PATCH 3183000]: Fix calculation of common OID prefix length
       - Added public declaration for netsnmp_table_data_delete_table()
       - Added function netsnmp_delete_table_data_set().
       - Added function snmp_sess_session_lookup()
@@ -90,6 +92,9 @@ listing of all changes made to the code.
       - clean up manual pages (from Debian patch 56_manpage)
 
     mib2c:
+      - [PATCH 3175323]: Fix handling of 'while (false)' blocks
+      - [PATCH 3204883]: Fix handling of non-table objects named fooTable
+      - [PATCH 3211484]: Support enumerations in notification varbinds
       - Make the mib2c foreach ranges work as advertised
 
     mibs:
@@ -106,6 +111,7 @@ listing of all changes made to the code.
       - [BUG 3088360]: Ensure modules are built against the correct libraries
       - [PATCH 3035328]: Check for failures in creating a session
       - [PATCH 3035578]: Keep error codes up to date
+      - [PATCH 3185085]: Fix segfault on 64-bit systems
 
     testing:
       - Support dynamic analysis of regression tests
@@ -126,6 +132,7 @@ listing of all changes made to the code.
       - Support updating the routing table [From OpenBSD patch archive]
 
     Win32:
+      - [PATCH 3293842]: Eliminate registry argument limit of 127 characters
       - Avoid MSVC warning about redefining EADDRINUSE
       - Fix out-of-range array accesses errors in mibII interfaces table
       - Fix test T030 on MinGW.
@@ -133,6 +140,9 @@ listing of all changes made to the code.
       - Halt snmpd process on key press when run from a command prompt
           (To aid debugging snmpd.exe)
 
+    MinGW:
+      - Make regression tests independent of registry settings
+      - Use <net-snmp/net-snmp-config.h> header file under WinGW
       
 * 5.4.3 *
 
