@@ -11,102 +11,6 @@
 
 /**---------------------------------------------------------------------*/
 /*
- * local static prototypes
- */
-static void _access_arp_entry_release(netsnmp_arp_entry * entry,
-                                      void *unused);
-
-/**---------------------------------------------------------------------*/
-/*
- * external per-architecture functions prototypes
- *
- * These shouldn't be called by the general public, so they aren't in
- * the header file.
- */
-extern int
-netsnmp_access_arp_container_arch_load(netsnmp_container* container,
-                                       u_int load_flags);
-
-
-/**---------------------------------------------------------------------*/
-/*
- * container functions
- */
-/**
- */
-netsnmp_container *
-netsnmp_access_arp_container_init(u_int flags)
-{
-    netsnmp_container *container1;
-
-    DEBUGMSGTL(("access:arp:container", "init\n"));
-
-    /*
-     * create the containers. one indexed by ifIndex, the other
-     * indexed by ifName.
-     */
-    container1 = netsnmp_container_find("access_arp:table_container");
-    if (NULL == container1)
-        return NULL;
-    container1->container_name = strdup("arp");
-    return container1;
-}
-
-/**
- * @retval NULL  error
- * @retval !NULL pointer to container
- */
-netsnmp_container*
-netsnmp_access_arp_container_load(netsnmp_container* container, u_int load_flags)
-{
-    int rc;
-    u_int container_flags = 0;
-
-    DEBUGMSGTL(("access:arp:container", "load\n"));
-
-    if (NULL == container) {
-        container = netsnmp_access_arp_container_init(container_flags);
-    }
-    if (NULL == container) {
-        snmp_log(LOG_ERR, "no container specified/found for access_arp\n");
-        return NULL;
-    }
-
-    rc =  netsnmp_access_arp_container_arch_load(container, load_flags);
-    if (0 != rc) {
-        netsnmp_access_arp_container_free(container,
-                                          NETSNMP_ACCESS_ARP_FREE_NOFLAGS);
-        container = NULL;
-    }
-
-    return container;
-}
-
-void
-netsnmp_access_arp_container_free(netsnmp_container *container, u_int free_flags)
-{
-    DEBUGMSGTL(("access:arp:container", "free\n"));
-
-    if (NULL == container) {
-        snmp_log(LOG_ERR, "invalid container for netsnmp_access_arp_free\n");
-        return;
-    }
-
-    if(! (free_flags & NETSNMP_ACCESS_ARP_FREE_DONT_CLEAR)) {
-        /*
-         * free all items.
-         */
-        CONTAINER_CLEAR(container,
-                        (netsnmp_container_obj_func*)_access_arp_entry_release,
-                        NULL);
-    }
-
-    if(! (free_flags & NETSNMP_ACCESS_ARP_FREE_KEEP_CONTAINER))
-        CONTAINER_FREE(container);
-}
-
-/**---------------------------------------------------------------------*/
-/*
  * arp_entry functions
  */
 /**
@@ -137,14 +41,6 @@ netsnmp_access_arp_entry_free(netsnmp_arp_entry * entry)
  */
 
 /**
- */
-void
-_access_arp_entry_release(netsnmp_arp_entry * entry, void *context)
-{
-    netsnmp_access_arp_entry_free(entry);
-}
-
-/**
  * Update given entry with new data. Calculate new arp_last_updated, if any
  * field is changed.
  */
@@ -153,6 +49,7 @@ void netsnmp_access_arp_entry_update(netsnmp_arp_entry *entry,
 {
     int modified = 0;
 
+    entry->generation = new_data->generation;
     if (entry->arp_ipaddress_len != new_data->arp_ipaddress_len
             || memcmp(entry->arp_ipaddress, new_data->arp_ipaddress, entry->arp_ipaddress_len) != 0 ) {
         modified = 1;

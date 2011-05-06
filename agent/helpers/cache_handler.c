@@ -85,6 +85,14 @@ void            release_cached_resources(unsigned int regNo,
  *  the cache when it expires. This is useful for keeping the cache fresh,
  *  even in the absence of incoming snmp requests.
  *
+ *  If NETSNMP_CACHE_RESET_TIMER_ON_USE is set, the expiry timer will be
+ *  reset on each cache access. In practice the 'timeout' becomes a timer
+ *  which triggers when the cache is no longer needed. This is useful
+ *  if the cache is automatically kept synchronized: e.g. by receiving
+ *  change notifications from Netlink, inotify or similar. This should
+ *  not be used if cache is not synchronized automatically as it would
+ *  result in stale cache information when if polling happens too fast.
+ *
  *
  *  Here are some suggestions for some common situations.
  *
@@ -115,6 +123,13 @@ void            release_cached_resources(unsigned int regNo,
  *          NETSNMP_CACHE_DONT_FREE_EXPIRED
  *          NETSNMP_CACHE_DONT_AUTO_RELEASE
  *          NETSNMP_CACHE_AUTO_RELOAD
+ *
+ *  Dynamically updated, unloaded after timeout:
+ *      If the cache is kept up to date dynamically by listening for
+ *      change notifications somehow, but it should not be in memory
+ *      if it's not needed. Set the following flag:
+ *
+ *          NETSNMP_CACHE_RESET_TIMER_ON_USE
  *
  *  @{
  */
@@ -504,7 +519,8 @@ netsnmp_cache_check_expired(netsnmp_cache *cache)
 {
     if(NULL == cache)
         return 0;
-    
+    if (cache->expired)
+        return 1;
     if(!cache->valid || (NULL == cache->timestamp) || (-1 == cache->timeout))
         cache->expired = 1;
     else
@@ -653,6 +669,8 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
         return SNMP_ERR_GENERR;
     }
+    if (cache->flags & NETSNMP_CACHE_RESET_TIMER_ON_USE)
+        atime_setMarker(cache->timestamp);
     return SNMP_ERR_NOERROR;
 }
 
