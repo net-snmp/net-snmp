@@ -23,7 +23,7 @@ if (! (-f $gzip_command)) {
   die ("Could not find gzip command ($gzip_command)");
 }
 else {
-  print "gzip command: $tar_command\n";
+  print "gzip command: $gzip_command\n";
 }
 
 my $version = "unknown";
