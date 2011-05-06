@@ -163,6 +163,15 @@ SOFTWARE.
 #include <limits.h>
 #endif
 
+#ifdef DNSSEC_LOCAL_VALIDATION
+#if 1 /*HAVE_ARPA_NAMESER_H*/
+#include <arpa/nameser.h>
+#endif
+#include <validator/validator.h>
+/* NetSNMP and DNSSEC-Tools both define FREE. We'll not use either here. */
+#undef FREE
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -170,6 +179,9 @@ SOFTWARE.
 
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/read_config.h> /* for get_temp_file_pattern() */
+
+/* NetSNMP and DNSSEC-Tools both define FREE. We'll not use either here. */
+#undef FREE
 
 netsnmp_feature_child_of(system_all, libnetsnmp)
 
@@ -704,6 +716,9 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
     struct addrinfo *addrs = NULL;
     struct addrinfo hint;
     int             err;
+#ifdef DNSSEC_LOCAL_VALIDATION
+    val_status_t val_status;
+#endif
 
     memset(&hint, 0, sizeof hint);
     hint.ai_flags = 0;
@@ -711,6 +726,7 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
     hint.ai_socktype = SOCK_DGRAM;
     hint.ai_protocol = 0;
 
+#ifndef DNSSEC_LOCAL_VALIDATION
     err = getaddrinfo(name, NULL, &hint, &addrs);
     if (err != 0) {
 #if HAVE_GAI_STRERROR
@@ -722,6 +738,32 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 #endif
         return -1;
     }
+#else /* DNSSEC_LOCAL_VALIDATION */
+    err = val_getaddrinfo(NULL, name, NULL, &hint, &addrs, &val_status);
+    DEBUGMSGTL(("dns:sec:val", "err %d, val_status %d / %s; trusted: %d\n",
+                err, val_status, p_val_status(val_status),
+                val_istrusted(val_status)));
+    if (err != 0) {
+        if (VAL_GETADDRINFO_HAS_STATUS(err) &&
+            !val_istrusted(val_status)) {
+            snmp_log(LOG_WARNING,
+                     "WARNING: UNTRUSTED error in DNS resolution for %s!\n",
+                     name);
+            snmp_log(LOG_WARNING,
+                     "The authenticity of DNS response is not trusted (%s).\n", 
+                     p_val_status(val_status));
+        }
+    }
+    if (!val_istrusted(val_status)) {
+        snmp_log(LOG_WARNING,
+                 "WARNING: UNTRUSTED error in DNS resolution for %s!\n", name);
+        snmp_log(LOG_WARNING,
+                 "The authenticity of DNS response is not trusted (%s)\n.",
+                 p_val_status(val_status));
+        return -1;
+    }
+#endif /* DNSSEC_LOCAL_VALIDATION */
+
     if (addrs != NULL) {
         memcpy(addr_out,
                &((struct sockaddr_in *) addrs->ai_addr)->sin_addr,
