@@ -103,6 +103,9 @@ listing of all changes made to the code.
     mib2c:
       - [BUG 2827269]: Suppress non-ordered TODO comments.
       - [BUG 2888569]: Fix generation of table columns array
+      - [PATCH 3175323]: Fix handling of 'while (false)' blocks
+      - [PATCH 3204883]: Fix handling of non-table objects named fooTable
+      - [PATCH 3211484]: Support enumerations in notification varbinds
       - make the mib2c foreach ranges work as advertised in the comments.
 
     mibs:
