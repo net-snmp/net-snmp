@@ -10267,8 +10267,7 @@ ipe./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_iterator.h
 ipe./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_container.h
 ipe./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_array.h
 ipe./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/mfd.h util_funcs.h
-ipe./ucd-snmp/lmSensors.lo: struct.h 
-ipe./ucd-snmp/lmSensors.lo: ./ucd-snmp/lmSensors.h
+ipe./ucd-snmp/lmSensors.lo: struct.h ./ucd-snmp/lmSensors.h
 ipe./ucd-snmp/loadave.lo: ../../include/net-snmp/net-snmp-config.h
 ipe./ucd-snmp/loadave.lo: ../../include/net-snmp/system/linux.h
 ipe./ucd-snmp/loadave.lo: ../../include/net-snmp/system/sysv.h
