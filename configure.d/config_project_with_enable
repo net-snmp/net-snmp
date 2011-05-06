@@ -140,6 +140,13 @@ if test "x$trykrb5" = "xdefaultyes"; then
       krb5path=/usr/kerberos
 fi
 
+AC_ARG_WITH(dnssec-local-validation,
+        [  --with-dnssec-local-validation Enable local DNSSEC validation using libval (no)], want_dnssec=$withval, want_dnssec=no)
+AC_ARG_ENABLE([dnssec-local-validation],,
+              NETSNMP_INVALID_WITH([dnssec-local-validation]))
+AC_ARG_WITH([dnssec],,NETSNMP_INVALID_WITH([dnssec-local-validation]))
+AC_ARG_ENABLE([dnssec],,NETSNMP_INVALID_WITH([dnssec-local-validation]))
+
 NETSNMP_ARG_WITH(rpm,
 [  --without-rpm                   Don't include support for the RPM package
                                   management system when building the host MIB

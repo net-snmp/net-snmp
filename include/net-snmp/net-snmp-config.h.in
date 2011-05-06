@@ -71,6 +71,9 @@
 /* location of swap device */
 #undef DMEM_LOC
 
+/* Define if you want local DNSSEC validation support */
+#undef DNSSEC_LOCAL_VALIDATION
+
 /* location of mount table list */
 #undef ETC_MNTTAB
 
@@ -317,6 +320,9 @@
 /* Define to 1 if you have the `pkcs11' library (-lpkcs11). */
 #undef HAVE_LIBPKCS11
 
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#undef HAVE_LIBPTHREAD
+
 /* Define to 1 if you have the `rpm' library (-lrpm). */
 #undef HAVE_LIBRPM
 
@@ -325,6 +331,9 @@
 
 /* Define to 1 if you have the `rsaref' library (-lrsaref). */
 #undef HAVE_LIBRSAREF
+
+/* Define to 1 if you have the `sres' library (-lsres). */
+#undef HAVE_LIBSRES
 
 /* Define to 1 if you have the `ssh2' library (-lssh2). */
 #undef HAVE_LIBSSH2
@@ -1195,6 +1204,9 @@
 
 /* Define to 1 if you have the <valgrind/valgrind.h> header file. */
 #undef HAVE_VALGRIND_VALGRIND_H
+
+/* Define to 1 if you have the <validator/validator-config.h> header file. */
+#undef HAVE_VALIDATOR_VALIDATOR_CONFIG_H
 
 /* Define to 1 if you have the <vm/swap_pager.h> header file. */
 #undef HAVE_VM_SWAP_PAGER_H

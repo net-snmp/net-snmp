@@ -96,3 +96,47 @@ AC_MSG_CACHE_ADD(Encryption support:         $encrmodes)
 if test "x$all_warnings" != "x"; then
     AC_MSG_CACHE_ADD(WARNING: $all_warnings)
 fi
+
+#
+# Check whether user wants DNSSEC local validation support
+#
+_libs=${LIBS}
+if ! test "x-$want_dnssec" = "x-no" ; then
+    AC_CHECK_HEADERS([validator/validator-config.h])
+    if test "$ac_cv_header_validator_validator_config_h" != yes; then
+        AC_MSG_ERROR(Can't find validator.h)
+    fi
+    if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -a \
+            "x$ac_cv_lib_eay32_EVP_md5" != "xyes" -o \
+            "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
+        AC_MSG_ERROR(Couldn't find OpenSSL for local DNSSEC validation support.)
+    fi
+    LIBS="$LIBS $LIBCRYPTO"
+    AC_CHECK_LIB(sres, query_send,,AC_MSG_ERROR([Can't find libsres]))
+    VAL_LIBS="-lsres $LIBCRYPTO"
+    LIBS="$LIBS -lsres"
+    AC_CHECK_LIB(val, p_val_status,
+                 LIBS="$LIBS -lval"
+                 VAL_LIBS="$VAL_LIBS -lval"
+                 have_val_res_query=yes,
+                 [ AC_CHECK_LIB(pthread, pthread_rwlock_init)
+		   AC_CHECK_LIB(val-threads, p_val_status,
+                   have_val_res_query=yes
+                   LIBS="-lval-threads $LIBS"
+                   VAL_LIBS="-lval-threads -lpthread $VAL_LIBS"
+                   LIBVAL_SUFFIX="-threads",
+                   AC_MSG_ERROR(Can't find libval or libval-threads))
+                 ])
+    AC_DEFINE(DNSSEC_LOCAL_VALIDATION, 1,
+              [Define if you want local DNSSEC validation support])
+    DNSSEC="enabled"
+else
+    DNSSEC="disabled"
+fi
+
+LIBS=${_libs}
+
+AC_SUBST(VAL_LIBS)
+AC_MSG_CACHE_ADD(Local DNSSEC validation:    $DNSSEC)
+
+ 
