@@ -11974,8 +11974,7 @@
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_container.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_array.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/mfd.h util_funcs.h
-./ucd-snmp/lmSensors.lo: struct.h 
-./ucd-snmp/lmSensors.lo: ./ucd-snmp/lmSensors.h
+./ucd-snmp/lmSensors.lo: struct.h ./ucd-snmp/lmSensors.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/net-snmp-config.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/system/linux.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/system/sysv.h
