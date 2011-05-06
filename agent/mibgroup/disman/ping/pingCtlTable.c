@@ -1908,19 +1908,19 @@ run_ping(unsigned int clientreg, void *clientarg)
         ICMPV6_FILTER_SETBLOCKALL(&filter);
 
         if (!working_recverr) {
-            ICMPV6_FILTER_SETPASS(ICMPV6_DEST_UNREACH, &filter);
-            ICMPV6_FILTER_SETPASS(ICMPV6_PKT_TOOBIG, &filter);
-            ICMPV6_FILTER_SETPASS(ICMPV6_TIME_EXCEED, &filter);
-            ICMPV6_FILTER_SETPASS(ICMPV6_PARAMPROB, &filter);
+            ICMPV6_FILTER_SETPASS(ICMP6_DST_UNREACH, &filter);
+            ICMPV6_FILTER_SETPASS(ICMP6_PACKET_TOO_BIG, &filter);
+            ICMPV6_FILTER_SETPASS(ICMP6_TIME_EXCEEDED, &filter);
+            ICMPV6_FILTER_SETPASS(ICMP6_PARAM_PROB, &filter);
         }
 
-        ICMPV6_FILTER_SETPASS(ICMPV6_ECHO_REPLY, &filter);
+        ICMPV6_FILTER_SETPASS(ICMP6_ECHO_REPLY, &filter);
 
-        err = setsockopt(icmp_sock, SOL_ICMPV6, ICMPV6_FILTER, &filter,
+        err = setsockopt(icmp_sock, SOL_ICMPV6, ICMP6_FILTER, &filter,
                          sizeof(struct icmp6_filter));
 
         if (err < 0) {
-            perror("setsockopt(ICMPV6_FILTER)");
+            perror("setsockopt(ICMP6_FILTER)");
             return;
         }
 
@@ -5539,7 +5539,7 @@ receive_error_msg(int icmp_sock, struct sockaddr_in6 *whereto, int options,
     struct msghdr   msg;
     struct cmsghdr *cmsg;
     struct sock_extended_err *e;
-    struct icmp6hdr icmph;
+    struct icmp6_hdr icmph;
     struct sockaddr_in6 target;
     int             net_errors = 0;
     int             local_errors = 0;
@@ -5588,8 +5588,8 @@ receive_error_msg(int icmp_sock, struct sockaddr_in6 *whereto, int options,
 
         if (res < sizeof(icmph) ||
             memcmp(&target.sin6_addr, &(whereto->sin6_addr), 16) ||
-            icmph.icmp6_type != ICMPV6_ECHO_REQUEST ||
-            icmph.icmp6_identifier != *ident) {
+            icmph.icmp6_type != ICMP6_ECHO_REQUEST ||
+            icmph.icmp6_id != *ident) {
             /*
              * Not our error, not an error at all. Clear. 
              */
@@ -5618,19 +5618,19 @@ send_v6(int icmp_sock, int cmsglen, char *cmsgbuf,
         struct sockaddr_in6 *whereto, int datalen, int timing,
         char *outpack, int *ident, long *ntransmitted, int *confirm)
 {
-    struct icmp6hdr *icmph;
+    struct icmp6_hdr *icmph;
     int             cc;
     int             i;
     int             mx_dup_ck = MAX_DUP_CHK;
 
-    icmph = (struct icmp6hdr *) outpack;
-    icmph->icmp6_type = ICMPV6_ECHO_REQUEST;
+    icmph = (struct icmp6_hdr *) outpack;
+    icmph->icmp6_type = ICMP6_ECHO_REQUEST;
     icmph->icmp6_code = 0;
     icmph->icmp6_cksum = 0;
-    icmph->icmp6_sequence = (*ntransmitted) + 1;
-    icmph->icmp6_identifier = *ident;
+    icmph->icmp6_seq = (*ntransmitted) + 1;
+    icmph->icmp6_id = *ident;
 
-    CLR(icmph->icmp6_sequence % mx_dup_ck);
+    CLR(icmph->icmp6_seq % mx_dup_ck);
 
     if (timing)
         gettimeofday((struct timeval *) &outpack[8],
@@ -5685,7 +5685,7 @@ parse_reply(int *series, struct pingCtlTable_data *item,
     struct sockaddr_in6 *from = addr;
     __u8           *buf = msg->msg_iov->iov_base;
     struct cmsghdr *c;
-    struct icmp6hdr *icmph;
+    struct icmp6_hdr *icmph;
     int             hops = -1;
 
 
@@ -5702,17 +5702,17 @@ parse_reply(int *series, struct pingCtlTable_data *item,
      * Now the ICMP part 
      */
 
-    icmph = (struct icmp6hdr *) buf;
+    icmph = (struct icmp6_hdr *) buf;
     if (cc < 8) {
         if (options & F_VERBOSE)
             fprintf(stderr, "ping: packet too short (%d bytes)\n", cc);
         return 1;
     }
-    if (icmph->icmp6_type == ICMPV6_ECHO_REPLY) {
-        if (icmph->icmp6_identifier != *ident)
+    if (icmph->icmp6_type == ICMP6_ECHO_REPLY) {
+        if (icmph->icmp6_id != *ident)
             return 1;
         if (gather_statistics(series, item, (__u8 *) (icmph + 1), cc,
-                              icmph->icmp6_sequence,
+                              icmph->icmp6_seq,
                               hops, 0, tv, timep, rtt_addend, uid, options,
                               pr_addr(&from->sin6_addr, options), interval,
                               datalen, timing, outpack, rtt, acked,
@@ -5722,8 +5722,8 @@ parse_reply(int *series, struct pingCtlTable_data *item,
             return 0;
     } else {
         int             nexthdr;
-        struct ipv6hdr *iph1 = (struct ipv6hdr *) (icmph + 1);
-        struct icmp6hdr *icmph1 = (struct icmp6hdr *) (iph1 + 1);
+        struct ip6_hdr *iph1 = (struct ip6_hdr *) (icmph + 1);
+        struct icmp6_hdr *icmph1 = (struct icmp6_hdr *) (iph1 + 1);
 
         /*
          * We must not ever fall here. All the messages but
@@ -5733,23 +5733,23 @@ parse_reply(int *series, struct pingCtlTable_data *item,
          * * using RECVRERR. :-)
          */
 
-        if (cc < 8 + sizeof(struct ipv6hdr) + 8)
+        if (cc < 8 + sizeof(struct ip6_hdr) + 8)
             return 1;
 
-        if (memcmp(&iph1->daddr, &(whereto->sin6_addr), 16))
+        if (memcmp(&iph1->ip6_dst, &(whereto->sin6_addr), 16))
             return 1;
 
-        nexthdr = iph1->nexthdr;
+        nexthdr = iph1->ip6_nxt;
 
         if (nexthdr == 44) {
             nexthdr = *(__u8 *) icmph1;
             icmph1++;
         }
         if (nexthdr == IPPROTO_ICMPV6) {
-            if (icmph1->icmp6_type != ICMPV6_ECHO_REQUEST ||
-                icmph1->icmp6_identifier != *ident)
+            if (icmph1->icmp6_type != ICMP6_ECHO_REQUEST ||
+                icmph1->icmp6_id != *ident)
                 return 1;
-            acknowledge(icmph1->icmp6_sequence, acked, ntransmitted,
+            acknowledge(icmph1->icmp6_seq, acked, ntransmitted,
                         pipesize);
             if (working_recverr)
                 return 0;
@@ -5760,7 +5760,7 @@ parse_reply(int *series, struct pingCtlTable_data *item,
             }
             printf("From %s: icmp_seq=%u ",
                    pr_addr(&from->sin6_addr, options),
-                   icmph1->icmp6_sequence);
+                   icmph1->icmp6_seq);
         } else {
             /*
              * We've got something other than an ECHOREPLY 
@@ -5793,7 +5793,7 @@ install_filter(int icmp_sock, int *ident)
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, 0xAAAA, 0, 1),      /* Ours? */
         BPF_STMT(BPF_RET | BPF_K, ~0U), /* Yes, it passes. */
         BPF_STMT(BPF_LD | BPF_B | BPF_ABS, 0),  /* Load icmp type */
-        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, ICMPV6_ECHO_REPLY, 1, 0),   /* Echo? */
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, ICMP6_ECHO_REPLY, 1, 0),   /* Echo? */
         BPF_STMT(BPF_RET | BPF_K, ~0U), /* No. It passes. This must not happen. */
         BPF_STMT(BPF_RET | BPF_K, 0),   /* Echo with wrong ident. Reject. */
     };
@@ -5801,6 +5801,7 @@ install_filter(int icmp_sock, int *ident)
         sizeof insns / sizeof(insns[0]),
         insns
     };
+    int id;
 
     if (once)
         return;
@@ -5809,9 +5810,10 @@ install_filter(int icmp_sock, int *ident)
     /*
      * Patch bpflet for current identifier. 
      */
+    id = htons( *ident );
     insns[1] =
         (struct sock_filter) BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
-                                      __constant_htons(*ident), 0, 1);
+                                      id, 0, 1);
 
     if (setsockopt
         (icmp_sock, SOL_SOCKET, SO_ATTACH_FILTER, &filter, sizeof(filter)))
