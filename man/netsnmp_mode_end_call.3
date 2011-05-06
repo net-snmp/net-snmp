@@ -1,4 +1,4 @@
-.TH "mode_end_call" 3 "23 May 2010" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "mode_end_call" 3 "Fri May 6 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -30,7 +30,7 @@ Handlers that want to loop through a series of requests and then receive a callb
 Multiple mode specific handlers can be registered and will be called in the order they were regestered in. Callbacks regesterd with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all modes. 
 .SH "Function Documentation"
 .PP 
-.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_mode_end_call_handler (\fBnetsnmp_mode_handler_list\fP * endlist)"
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_mode_end_call_handler (\fBnetsnmp_mode_handler_list\fP *endlist)"
 .PP
 returns a mode_end_call handler that can be injected into a given handler chain. \fBParameters:\fP
 .RS 4
@@ -45,7 +45,7 @@ An injectable Net-SNMP handler.
 
 .PP
 Definition at line 45 of file mode_end_call.c.
-.SS "\fBnetsnmp_mode_handler_list\fP* netsnmp_mode_end_call_add_mode_callback (\fBnetsnmp_mode_handler_list\fP * endlist, int mode, \fBnetsnmp_mib_handler\fP * callbackh)"
+.SS "\fBnetsnmp_mode_handler_list\fP* netsnmp_mode_end_call_add_mode_callback (\fBnetsnmp_mode_handler_list\fP *endlist, intmode, \fBnetsnmp_mib_handler\fP *callbackh)"
 .PP
 adds a mode specific callback to the callback list. \fBParameters:\fP
 .RS 4
