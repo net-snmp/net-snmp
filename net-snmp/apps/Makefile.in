@@ -87,14 +87,15 @@ MYSQL_INCLUDES	= @MYSQL_INCLUDES@
 #
 # link path in src dir
 LOCAL_LIBS	= -L../snmplib/.libs -L../snmplib -L../agent/.libs -L../agent
-LIBS		= $(USELIBS) @LIBS@
+VAL_LIBS	= @VAL_LIBS@
+LIBS		= $(USELIBS) $(VAL_LIBS) @LIBS@
 PERLLDOPTS_FOR_APPS = @PERLLDOPTS_FOR_APPS@
 PERLLDOPTS_FOR_LIBS = @PERLLDOPTS_FOR_LIBS@
 
 #
 # hack for compiling trapd when agent is disabled
-TRAPDWITHAGENT  = $(USETRAPLIBS) $(MYSQL_LIBS) @AGENTLIBS@
-TRAPDWITHOUTAGENT = $(LIBS) $(MYSQL_LIBS)
+TRAPDWITHAGENT  = $(USETRAPLIBS) $(MYSQL_LIBS) $(VAL_LIBS) @AGENTLIBS@
+TRAPDWITHOUTAGENT = $(LIBS) $(MYSQL_LIBS) $(VAL_LIBS)
 
 # these will be set by configure to one of the above 2 lines
 TRAPLIBS	= @TRAPLIBS@ $(PERLLDOPTS_FOR_APPS)

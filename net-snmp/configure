@@ -627,6 +627,7 @@ PSCMD
 LPSTAT_PATH
 LIBOBJS
 ALLOCA
+VAL_LIBS
 LAGENTLIBS
 LNETSNMPLIBS
 PYTHONFEATURES
@@ -862,6 +863,10 @@ with_pkcs
 enable_pkcs
 with_krb5
 enable_krb5
+with_dnssec_local_validation
+enable_dnssec_local_validation
+with_dnssec
+enable_dnssec
 with_rpm
 enable_rpm
 with_install_prefix
@@ -1755,6 +1760,7 @@ Compiler Options:
 
   --with-pkcs=PATH                Look for pkcs11 in PATH/lib.
   --with-krb5=PATH                Look for krb5 in PATH/lib.
+  --with-dnssec-local-validation Enable local DNSSEC validation using libval (no)
   --without-rpm                   Don't include support for the RPM package
                                   management system when building the host MIB
                                   module.
@@ -3529,6 +3535,31 @@ if test "x$trykrb5" = "xdefaultyes"; then
       trykrb5=yes
       krb5path=/usr/kerberos
 fi
+
+
+# Check whether --with-dnssec-local-validation was given.
+if test "${with_dnssec_local_validation+set}" = set; then :
+  withval=$with_dnssec_local_validation; want_dnssec=$withval
+else
+  want_dnssec=no
+fi
+
+# Check whether --enable-dnssec-local-validation was given.
+if test "${enable_dnssec_local_validation+set}" = set; then :
+  enableval=$enable_dnssec_local_validation; as_fn_error $? "Invalid option. Use --with-dnssec-local-validation/--without-dnssec-local-validation instead" "$LINENO" 5
+fi
+
+
+# Check whether --with-dnssec was given.
+if test "${with_dnssec+set}" = set; then :
+  withval=$with_dnssec; as_fn_error $? "Invalid option. Use --with-dnssec-local-validation/--without-dnssec-local-validation instead" "$LINENO" 5
+fi
+
+# Check whether --enable-dnssec was given.
+if test "${enable_dnssec+set}" = set; then :
+  enableval=$enable_dnssec; as_fn_error $? "Invalid option. Use --with-dnssec-local-validation/--without-dnssec-local-validation instead" "$LINENO" 5
+fi
+
 
 
 # Check whether --with-rpm was given.
@@ -23994,6 +24025,234 @@ if test "x$all_warnings" != "x"; then
 EOF
 
 fi
+
+#
+# Check whether user wants DNSSEC local validation support
+#
+_libs=${LIBS}
+if ! test "x-$want_dnssec" = "x-no" ; then
+    for ac_header in validator/validator-config.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "validator/validator-config.h" "ac_cv_header_validator_validator_config_h" "$ac_includes_default"
+if test "x$ac_cv_header_validator_validator_config_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_VALIDATOR_VALIDATOR_CONFIG_H 1
+_ACEOF
+
+fi
+
+done
+
+    if test "$ac_cv_header_validator_validator_config_h" != yes; then
+        as_fn_error $? "Can't find validator.h" "$LINENO" 5
+    fi
+    if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -a \
+            "x$ac_cv_lib_eay32_EVP_md5" != "xyes" -o \
+            "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
+        as_fn_error $? "Couldn't find OpenSSL for local DNSSEC validation support." "$LINENO" 5
+    fi
+    LIBS="$LIBS $LIBCRYPTO"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for query_send in -lsres" >&5
+$as_echo_n "checking for query_send in -lsres... " >&6; }
+if ${ac_cv_lib_sres_query_send+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsres  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char query_send ();
+int
+main ()
+{
+return query_send ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_sres_query_send=yes
+else
+  ac_cv_lib_sres_query_send=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_sres_query_send" >&5
+$as_echo "$ac_cv_lib_sres_query_send" >&6; }
+if test "x$ac_cv_lib_sres_query_send" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBSRES 1
+_ACEOF
+
+  LIBS="-lsres $LIBS"
+
+else
+  as_fn_error $? "Can't find libsres" "$LINENO" 5
+fi
+
+    VAL_LIBS="-lsres $LIBCRYPTO"
+    LIBS="$LIBS -lsres"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for p_val_status in -lval" >&5
+$as_echo_n "checking for p_val_status in -lval... " >&6; }
+if ${ac_cv_lib_val_p_val_status+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lval  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char p_val_status ();
+int
+main ()
+{
+return p_val_status ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_val_p_val_status=yes
+else
+  ac_cv_lib_val_p_val_status=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_val_p_val_status" >&5
+$as_echo "$ac_cv_lib_val_p_val_status" >&6; }
+if test "x$ac_cv_lib_val_p_val_status" = xyes; then :
+  LIBS="$LIBS -lval"
+                 VAL_LIBS="$VAL_LIBS -lval"
+                 have_val_res_query=yes
+else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_rwlock_init in -lpthread" >&5
+$as_echo_n "checking for pthread_rwlock_init in -lpthread... " >&6; }
+if ${ac_cv_lib_pthread_pthread_rwlock_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpthread  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pthread_rwlock_init ();
+int
+main ()
+{
+return pthread_rwlock_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pthread_pthread_rwlock_init=yes
+else
+  ac_cv_lib_pthread_pthread_rwlock_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pthread_pthread_rwlock_init" >&5
+$as_echo "$ac_cv_lib_pthread_pthread_rwlock_init" >&6; }
+if test "x$ac_cv_lib_pthread_pthread_rwlock_init" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPTHREAD 1
+_ACEOF
+
+  LIBS="-lpthread $LIBS"
+
+fi
+
+		   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for p_val_status in -lval-threads" >&5
+$as_echo_n "checking for p_val_status in -lval-threads... " >&6; }
+if ${ac_cv_lib_val_threads_p_val_status+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lval-threads  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char p_val_status ();
+int
+main ()
+{
+return p_val_status ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_val_threads_p_val_status=yes
+else
+  ac_cv_lib_val_threads_p_val_status=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_val_threads_p_val_status" >&5
+$as_echo "$ac_cv_lib_val_threads_p_val_status" >&6; }
+if test "x$ac_cv_lib_val_threads_p_val_status" = xyes; then :
+  have_val_res_query=yes
+                   LIBS="-lval-threads $LIBS"
+                   VAL_LIBS="-lval-threads -lpthread $VAL_LIBS"
+                   LIBVAL_SUFFIX="-threads"
+else
+  as_fn_error $? "Can't find libval or libval-threads" "$LINENO" 5
+fi
+
+
+fi
+
+
+$as_echo "#define DNSSEC_LOCAL_VALIDATION 1" >>confdefs.h
+
+    DNSSEC="enabled"
+else
+    DNSSEC="disabled"
+fi
+
+LIBS=${_libs}
+
+
+
+  cat >> configure-summary << EOF
+  Local DNSSEC validation:    $DNSSEC
+EOF
+
+
+
 
 # -*- autoconf -*-
 #########################################
