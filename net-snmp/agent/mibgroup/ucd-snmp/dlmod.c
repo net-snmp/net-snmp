@@ -568,7 +568,7 @@ static struct variable4 dlmod_variables[] = {
      var_dlmodEntry, 3, {2, 1, 5}},
 };
 
-static const oid dlmod_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 13, 14 };
+static oid dlmod_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 13, 14 };
 
 void
 init_dlmod(void)
