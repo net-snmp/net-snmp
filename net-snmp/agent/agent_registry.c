@@ -220,7 +220,7 @@ lookup_cache_replace(lookup_cache *ptr,
  *  @see snmp_oid_compare()
  */
 NETSNMP_STATIC_INLINE lookup_cache *
-lookup_cache_find(const char *context, oid *name, size_t name_len,
+lookup_cache_find(const char *context, const oid *name, size_t name_len,
                   int *retcmp) {
     lookup_cache_context *cptr;
     lookup_cache *ret = NULL;
@@ -964,7 +964,7 @@ clear_subtree (netsnmp_subtree *sub) {
 }
 
 netsnmp_subtree *
-netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
+netsnmp_subtree_find_prev(const oid *name, size_t len, netsnmp_subtree *subtree,
 			  const char *context_name)
 {
     lookup_cache *lookup_cache = NULL;
@@ -1035,7 +1035,7 @@ netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
 }
 
 netsnmp_subtree *
-netsnmp_subtree_find_next(oid *name, size_t len,
+netsnmp_subtree_find_next(const oid *name, size_t len,
 			  netsnmp_subtree *subtree, const char *context_name)
 {
     netsnmp_subtree *myptr = NULL;
@@ -1058,7 +1058,7 @@ netsnmp_subtree_find_next(oid *name, size_t len,
 }
 
 netsnmp_subtree *
-netsnmp_subtree_find(oid *name, size_t len, netsnmp_subtree *subtree, 
+netsnmp_subtree_find(const oid *name, size_t len, netsnmp_subtree *subtree, 
 		     const char *context_name)
 {
     netsnmp_subtree *myptr;
@@ -1404,7 +1404,7 @@ register_mib_context(const char *moduleName,
                      struct variable *var,
                      size_t varsize,
                      size_t numvars,
-                     oid * mibloc,
+                     const oid * mibloc,
                      size_t mibloclen,
                      int priority,
                      int range_subid,
@@ -1469,7 +1469,7 @@ register_mib_range(const char *moduleName,
                    struct variable *var,
                    size_t varsize,
                    size_t numvars,
-                   oid * mibloc,
+                   const oid * mibloc,
                    size_t mibloclen,
                    int priority,
                    int range_subid, oid range_ubound, netsnmp_session * ss)
@@ -1518,7 +1518,7 @@ register_mib_priority(const char *moduleName,
                       struct variable *var,
                       size_t varsize,
                       size_t numvars,
-                      oid * mibloc, size_t mibloclen, int priority)
+                      const oid * mibloc, size_t mibloclen, int priority)
 {
     return register_mib_range(moduleName, var, varsize, numvars,
                               mibloc, mibloclen, priority, 0, 0, NULL);
@@ -1557,7 +1557,7 @@ int
 register_mib(const char *moduleName,
              struct variable *var,
              size_t varsize,
-             size_t numvars, oid * mibloc, size_t mibloclen)
+             size_t numvars, const oid * mibloc, size_t mibloclen)
 {
     return register_mib_priority(moduleName, var, varsize, numvars,
                                  mibloc, mibloclen, DEFAULT_MIB_PRIORITY);
@@ -2139,7 +2139,7 @@ netsnmp_acm_check_subtree(netsnmp_pdu *pdu, oid *name, size_t namelen)
 netsnmp_feature_child_of(get_session_for_oid,netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_GET_SESSION_FOR_OID
 netsnmp_session *
-get_session_for_oid(oid *name, size_t len, const char *context_name)
+get_session_for_oid(const oid *name, size_t len, const char *context_name)
 {
     netsnmp_subtree *myptr;
 

@@ -59,18 +59,21 @@ void             setup_tree		  (void);
 void             shutdown_tree    (void);
 
 
-netsnmp_subtree *netsnmp_subtree_find	  (oid *, size_t, netsnmp_subtree *,
+netsnmp_subtree *netsnmp_subtree_find	  (const oid *, size_t,
+					   netsnmp_subtree *,
 					   const char *context_name);
 
-netsnmp_subtree *netsnmp_subtree_find_next(oid *, size_t, netsnmp_subtree *,
+netsnmp_subtree *netsnmp_subtree_find_next(const oid *, size_t,
+					   netsnmp_subtree *,
 					   const char *context_name);
 
-netsnmp_subtree *netsnmp_subtree_find_prev(oid *, size_t,netsnmp_subtree *,
+netsnmp_subtree *netsnmp_subtree_find_prev(const oid *, size_t,
+					   netsnmp_subtree *,
 					   const char *context_name);
 
 netsnmp_subtree *netsnmp_subtree_find_first(const char *context_name);
 
-netsnmp_session *get_session_for_oid	   (oid *, size_t, 
+netsnmp_session *get_session_for_oid	   (const oid *, size_t, 
 					    const char *context_name);
 
 subtree_context_cache *get_top_context_cache(void);
@@ -87,24 +90,26 @@ int netsnmp_get_lookup_cache_size(void);
 #define DEFAULT_MIB_PRIORITY		127
 
 int             register_mib		   (const char *, struct variable *,
-					    size_t, size_t, oid *, size_t);
+					    size_t, size_t, const oid *,
+					    size_t);
 
 int             register_mib_priority	   (const char *, struct variable *,
-					    size_t, size_t, oid *, size_t,
+					    size_t, size_t, const oid *, size_t,
 					    int);
 
 int             register_mib_range	   (const char *, struct variable *,
-					    size_t, size_t, oid *, size_t, 
-					    int, int, oid, netsnmp_session *);
+					    size_t, size_t, const oid *,
+					    size_t, int, int, oid,
+					    netsnmp_session *);
 
 int		register_mib_context	   (const char *, struct variable *,
-					    size_t, size_t, oid *, size_t,
+					    size_t, size_t, const oid *, size_t,
 					    int, int, oid, netsnmp_session *,
 					    const char *, int, int);
 
 int	netsnmp_register_mib_table_row	   (const char *, struct variable *,
-					    size_t, size_t, oid *, size_t, 
-					    int, int, netsnmp_session *,
+					    size_t, size_t, oid *,
+					    size_t, int, int, netsnmp_session *,
 					    const char *, int, int);
 
 int		unregister_mib		   (oid *, size_t);
