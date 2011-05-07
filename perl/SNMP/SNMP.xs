@@ -2944,7 +2944,7 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
            if (ss == NULL) {
 	      if (verbose) warn("error:snmp_new_v3_session:Couldn't open SNMP session");
            }
-        end:
+
            RETVAL = ss;
 	   SNMP_FREE(session.securityPrivLocalKey);
 	   SNMP_FREE(session.securityPrivProto);
