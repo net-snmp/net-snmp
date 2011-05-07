@@ -22,7 +22,7 @@ netsnmp_access_arp_create(u_int init_flags,
                           NetsnmpAccessArpUpdate *update_hook,
                           NetsnmpAccessArpGC *gc_hook,
                           int *cache_timeout, int *cache_flags,
-                          int *cache_expired)
+                          char *cache_expired)
 {
     netsnmp_arp_access *access;
 

@@ -106,7 +106,7 @@ struct netsnmp_arp_access_s {
     unsigned generation;
     NetsnmpAccessArpUpdate *update_hook;
     NetsnmpAccessArpGC *gc_hook;
-    int *cache_expired;
+    char *cache_expired;
 };
 
 netsnmp_arp_access *
@@ -114,7 +114,7 @@ netsnmp_access_arp_create(u_int init_flags,
                           NetsnmpAccessArpUpdate *update_hook,
                           NetsnmpAccessArpGC *gc_hook,
                           int *cache_timeout, int *cache_flags,
-                          int *cache_expired);
+                          char *cache_expired);
 #define NETSNMP_ACCESS_ARP_CREATE_NOFLAGS             0x0000
 
 int netsnmp_access_arp_delete(netsnmp_arp_access *access);
