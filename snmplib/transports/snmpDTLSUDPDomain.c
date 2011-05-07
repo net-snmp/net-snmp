@@ -1227,7 +1227,8 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
         fd_set readfs;
         struct timeval tv;
 
-        DEBUGMSGTL(("dtlsudp:close", "%d bytes remain in write_cache\n",
+        DEBUGMSGTL(("dtlsudp:close",
+		    "%" NETSNMP_PRIz "d bytes remain in write_cache\n",
                     cachep->write_cache_len));
 
         /*
@@ -1265,7 +1266,8 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
 
         /** dump anything that wasn't sent */
         if (cachep->write_cache_len > 0) {
-            DEBUGMSGTL(("dtlsudp:close", "dumping %d bytes from write_cache\n",
+            DEBUGMSGTL(("dtlsudp:close",
+			"dumping %" NETSNMP_PRIz "d bytes from write_cache\n",
                         cachep->write_cache_len));
             SNMP_FREE(cachep->write_cache);
             cachep->write_cache_len = 0;
