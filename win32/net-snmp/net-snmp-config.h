@@ -1619,7 +1619,7 @@ enum {
 #endif
 
 /* Define NETSNMP_USE_DLL when building or using netsnmp.DLL */
-#define NETSNMP_USE_DLL 1
+/* #undef NETSNMP_USE_DLL */
 
 #if defined(NETSNMP_DLL) && !defined(NETSNMP_USE_DLL)
 #error NETSNMP_USE_DLL must be defined when building libsnmp as a DLL.
