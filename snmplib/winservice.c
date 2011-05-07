@@ -572,7 +572,7 @@ ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int qu
   
   hEventSource = RegisterEventSource (NULL, app_name_long);
   if (hEventSource != NULL) {
-    LPCSTR LogStr[1];
+    LPCTSTR LogStr[1];
     LogStr[0] = pszMessageFull;
     
     if (ReportEvent (hEventSource, 
