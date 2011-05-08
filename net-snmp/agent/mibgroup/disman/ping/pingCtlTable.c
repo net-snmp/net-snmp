@@ -17,6 +17,10 @@
  * This should always be included first before anything else 
  */
 
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -36,16 +40,21 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
 #include "pingCtlTable.h"
 #include "pingResultsTable.h"
 #include "pingProbeHistoryTable.h"
 #include "header_complex.h"
 
+static inline void tvsub(struct timeval *, struct timeval *);
+static inline int schedule_exit(int, int *, long *, long *, long *, long *);
+static inline int in_flight(__u16 *, long *, long *, long *);
+static inline void acknowledge(__u16, __u16 *, long *, int *);
+static inline void advance_ntransmitted(__u16 *, long *);
+static inline void update_interval(int, int, int *, int *);
+static long     llsqrt(long long);
+static __inline__ int ipv6_addr_any(struct in6_addr *);
+static char    *pr_addr(struct in6_addr *, int);
+static char    *pr_addr_n(struct in6_addr *);
 
 /*
  *pingCtlTable_variables_oid:
@@ -66,27 +75,48 @@ struct variable2 pingCtlTable_variables[] = {
     /*
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
-    {COLUMN_PINGCTLTARGETADDRESSTYPE, ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 3}},
-    {COLUMN_PINGCTLTARGETADDRESS,   ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 4}},
-    {COLUMN_PINGCTLDATASIZE,         ASN_UNSIGNED, RONLY, var_pingCtlTable, 2, {1, 5}},
-    {COLUMN_PINGCTLTIMEOUT,          ASN_UNSIGNED, RONLY, var_pingCtlTable, 2, {1, 6}},
-    {COLUMN_PINGCTLPROBECOUNT,       ASN_UNSIGNED, RONLY, var_pingCtlTable, 2, {1, 7}},
-    {COLUMN_PINGCTLADMINSTATUS,       ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 8}},
-    {COLUMN_PINGCTLDATAFILL,        ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 9}},
-    {COLUMN_PINGCTLFREQUENCY,        ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 10}},
-    {COLUMN_PINGCTLMAXROWS,          ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 11}},
-    {COLUMN_PINGCTLSTORAGETYPE,       ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 12}},
-    {COLUMN_PINGCTLTRAPGENERATION,  ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 13}},
-    {COLUMN_PINGCTLTRAPPROBEFAILUREFILTER, ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 14}},
-    {COLUMN_PINGCTLTRAPTESTFAILUREFILTER,  ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 15}},
-    {COLUMN_PINGCTLTYPE,            ASN_OBJECT_ID, RWRITE, var_pingCtlTable, 2, {1, 16}},
-    {COLUMN_PINGCTLDESCR,           ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 17}},
-    {COLUMN_PINGCTLSOURCEADDRESSTYPE, ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 18}},
-    {COLUMN_PINGCTLSOURCEADDRESS,   ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 19}},
-    {COLUMN_PINGCTLIFINDEX,           ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 20}},
-    {COLUMN_PINGCTLBYPASSROUTETABLE,  ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 21}},
-    {COLUMN_PINGCTLDSFIELD,          ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 22}},
-    {COLUMN_PINGCTLROWSTATUS,         ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 23}}
+    {COLUMN_PINGCTLTARGETADDRESSTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 3}},
+    {COLUMN_PINGCTLTARGETADDRESS,   ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 4}},
+    {COLUMN_PINGCTLDATASIZE,         ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingCtlTable, 2, {1, 5}},
+    {COLUMN_PINGCTLTIMEOUT,          ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingCtlTable, 2, {1, 6}},
+    {COLUMN_PINGCTLPROBECOUNT,       ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingCtlTable, 2, {1, 7}},
+    {COLUMN_PINGCTLADMINSTATUS,       ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 8}},
+    {COLUMN_PINGCTLDATAFILL,        ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 9}},
+    {COLUMN_PINGCTLFREQUENCY,        ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 10}},
+    {COLUMN_PINGCTLMAXROWS,          ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 11}},
+    {COLUMN_PINGCTLSTORAGETYPE,       ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 12}},
+    {COLUMN_PINGCTLTRAPGENERATION,  ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 13}},
+    {COLUMN_PINGCTLTRAPPROBEFAILUREFILTER, ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 14}},
+    {COLUMN_PINGCTLTRAPTESTFAILUREFILTER,  ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 15}},
+    {COLUMN_PINGCTLTYPE,            ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 16}},
+    {COLUMN_PINGCTLDESCR,           ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 17}},
+    {COLUMN_PINGCTLSOURCEADDRESSTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 18}},
+    {COLUMN_PINGCTLSOURCEADDRESS,   ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 19}},
+    {COLUMN_PINGCTLIFINDEX,           ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 20}},
+    {COLUMN_PINGCTLBYPASSROUTETABLE,  ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 21}},
+    {COLUMN_PINGCTLDSFIELD,          ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 22}},
+    {COLUMN_PINGCTLROWSTATUS,         ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_pingCtlTable, 2, {1, 23}}
 };
 
 
@@ -638,8 +668,6 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
 }
 
 
-
-
 /*
  * var_pingCtlTable():
  *   Handle this table separately from the scalar value case.
@@ -831,9 +859,7 @@ pingProbeHistoryTable_count(struct pingCtlTable_data *thedata)
 }
 
 
-
-
-int
+void
 pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
 {
     struct header_complex_index *hciptr2 = NULL;
@@ -844,9 +870,8 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len;
     time_t          last_time = 2147483647;
-    struct tm      *tp;
+    time_t          tp;
 
-    tp = (struct tm *) malloc(sizeof(struct tm));
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlOwnerIndex, thedata->pingCtlOwnerIndexLen);       /* pingCtlOwnerIndex */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlOperationName */
 
@@ -861,10 +886,10 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
                 header_complex_get_from_oid(pingProbeHistoryTableStorage,
                                             hciptr2->name,
                                             hciptr2->namelen);
-            strptime(StorageTmp->pingProbeHistoryTime, "%c", tp);
+            tp = StorageTmp->pingProbeHistoryTime_time;
 
-            if (last_time > timegm(tp)) {
-                last_time = timegm(tp);
+            if (last_time > tp) {
+                last_time = tp;
                 hcilast = hciptr2;
             }
 
@@ -875,7 +900,6 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
                                      hcilast);
     DEBUGMSGTL(("pingProbeHistoryTable",
                 "delete the last one success!\n"));
-    SNMP_FREE(tp);
 }
 
 
@@ -886,7 +910,7 @@ sock_ntop_host(const struct sockaddr *sa, socklen_t salen)
 
     switch (sa->sa_family) {
     case AF_INET:{
-            struct sockaddr_in *sin = (struct sockaddr_in *) sa;
+            const struct sockaddr_in *sin = (const struct sockaddr_in *) sa;
 
             if (inet_ntop(AF_INET, &sin->sin_addr, str, sizeof(str)) ==
                 NULL)
@@ -896,7 +920,7 @@ sock_ntop_host(const struct sockaddr *sa, socklen_t salen)
 
 #ifdef	IPV6
     case AF_INET6:{
-            struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) sa;
+            const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *) sa;
 
             if (inet_ntop(AF_INET6, &sin6->sin6_addr, str, sizeof(str)) ==
                 NULL)
@@ -907,7 +931,7 @@ sock_ntop_host(const struct sockaddr *sa, socklen_t salen)
 
 #ifdef	AF_UNIX
     case AF_UNIX:{
-            struct sockaddr_un *unp = (struct sockaddr_un *) sa;
+            const struct sockaddr_un *unp = (const struct sockaddr_un *) sa;
 
             /*
              * OK to have no pathname bound to the socket: happens on
@@ -992,14 +1016,13 @@ in_cksum(unsigned short *addr, int len)
 }
 
 
-
 struct addrinfo *
 host_serv(const char *host, const char *serv, int family, int socktype)
 {
     int             n;
     struct addrinfo hints, *res;
 
-    bzero(&hints, sizeof(struct addrinfo));
+    memset(&hints, '\0', sizeof(struct addrinfo));
     hints.ai_flags = AI_CANONNAME;      /* always return canonical name */
     hints.ai_family = family;   /* AF_UNSPEC, AF_INET, AF_INET6, etc. */
     hints.ai_socktype = socktype;       /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
@@ -1027,7 +1050,7 @@ Host_serv(const char *host, const char *serv, int family, int socktype)
     int             n;
     struct addrinfo hints, *res;
 
-    bzero(&hints, sizeof(struct addrinfo));
+    memset(&hints, '\0', sizeof(struct addrinfo));
     hints.ai_flags = AI_CANONNAME;      /* always return canonical name */
     hints.ai_family = family;   /* 0, AF_INET, AF_INET6, etc. */
     hints.ai_socktype = socktype;       /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
@@ -1063,7 +1086,7 @@ readable_timeo(int fd, int sec)
 /*
  * send trap 
  */
-int
+void
 send_ping_trap(struct pingCtlTable_data *item,
                oid * trap_oid, size_t trap_oid_len)
 {
@@ -1092,7 +1115,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     if ((StorageTmp =
          (struct pingResultsTable_data *)
          header_complex_get(pingResultsTableStorage, vars)) == NULL)
-        return SNMP_ERR_NOSUCHNAME;
+        return ;
 
     /*
      * snmpTrap oid 
@@ -1104,7 +1127,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingCtlTargetAddress 
      */
-    bzero(newoid, MAX_OID_LEN * sizeof(oid));
+    memset(newoid, '\0', MAX_OID_LEN * sizeof(oid));
     header_complex_generate_oid(newoid, &newoid_len, pingCtlTargetAddress,
                                 sizeof(pingCtlTargetAddress) / sizeof(oid),
                                 vars);
@@ -1118,7 +1141,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsMinRtt
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsMinRtt,
                                 sizeof(pingResultsMinRtt) / sizeof(oid),
                                 vars);
@@ -1131,7 +1154,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsMaxRtt 
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsMaxRtt,
                                 sizeof(pingResultsMaxRtt) / sizeof(oid),
                                 vars);
@@ -1145,7 +1168,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsAverageRtt 
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsAverageRtt,
                                 sizeof(pingResultsAverageRtt) /
                                 sizeof(oid), vars);
@@ -1160,7 +1183,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsProbeResponses 
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len,
                                 pingResultsProbeResponses,
                                 sizeof(pingResultsProbeResponses) /
@@ -1176,7 +1199,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsSendProbes 
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsSendProbes,
                                 sizeof(pingResultsSendProbes) /
                                 sizeof(oid), vars);
@@ -1228,6 +1251,10 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
 
     sumrtt = (unsigned long *) malloc(sizeof(unsigned long));
     sockfd = socket(pr->sasend->sa_family, SOCK_RAW, pr->icmpproto);
+    if (sockfd < 0) {
+	snmp_log_perror("pingCtlTable: failed to create socket");
+	return;
+    }
     setuid(getuid());           /* don't need special permissions any more */
 
     size = 60 * 1024;           /* OK if setsockopt fails */
@@ -1264,7 +1291,6 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
         printf("receiver success!\n");
         if (current_probe_temp >= item->pingCtlProbeCount) {
             SNMP_FREE(sumrtt);
-            sumrtt = NULL;
             return;
         }
     }
@@ -1314,7 +1340,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
 
         if (icmp->icmp_type == ICMP_ECHOREPLY) {
             if (icmp->icmp_id != pid)
-                return;         /* not a response to our ECHO_REQUEST */
+                return SNMP_ERR_NOERROR;         /* not a response to our ECHO_REQUEST */
             if (icmplen < 16)
                 printf("icmplen (%d) < 16", icmplen);
 
@@ -1363,17 +1389,10 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             StorageNew->pingResultsRttSumOfSquares =
                 StorageNew->pingResultsRttSumOfSquares + rtt * rtt;
 
-            StorageNew->pingResultsLastGoodProbe =
-                (char *) malloc(strlen(asctime(gmtime(&timep))));
-            StorageNew->pingResultsLastGoodProbe =
-                strdup(asctime(gmtime(&timep)));
-            StorageNew->
-                pingResultsLastGoodProbe[strlen(asctime(gmtime(&timep))) -
-                                         1] = '\0';
-            StorageNew->pingResultsLastGoodProbeLen =
-                strlen(asctime(gmtime(&timep))) - 1;
-
-
+	    StorageNew->pingResultsLastGoodProbe_time = timep;
+            memdup(&StorageNew->pingResultsLastGoodProbe,
+		date_n_time(&timep,
+		    &StorageNew->pingResultsLastGoodProbeLen), 11);
 
             temp = SNMP_MALLOC_STRUCT(pingProbeHistoryTable_data);
 
@@ -1406,13 +1425,9 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             temp->pingProbeHistoryStatus = 1;
             temp->pingProbeHistoryLastRC = 0;
 
-            temp->pingProbeHistoryTime =
-                (char *) malloc(strlen(asctime(gmtime(&timep))));
-            temp->pingProbeHistoryTime = strdup(asctime(gmtime(&timep)));
-            temp->pingProbeHistoryTime[strlen(asctime(gmtime(&timep))) -
-                                       1] = '\0';
-            temp->pingProbeHistoryTimeLen =
-                strlen(asctime(gmtime(&timep))) - 1;
+	    temp->pingProbeHistoryTime_time = timep;
+	    memdup(&temp->pingProbeHistoryTime,
+		date_n_time(&timep, &temp->pingProbeHistoryTimeLen), 11);
 
             if (StorageNew->pingResultsSendProbes == 1)
                 item->pingProbeHis = temp;
@@ -1427,7 +1442,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                 current_temp->next = NULL;
             }
 
-            if (item->pingProbeHis != NULL)
+            if (item->pingProbeHis != NULL) {
                 if (pingProbeHistoryTable_count(item) <
                     item->pingCtlMaxRows) {
                     if (pingProbeHistoryTable_add(current_temp) !=
@@ -1442,7 +1457,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                                     "registered an entry error\n"));
 
                 }
-
+	    }
         }
     }
 
@@ -1502,13 +1517,9 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
         temp->pingProbeHistoryStatus = 4;
         temp->pingProbeHistoryLastRC = 1;
 
-        temp->pingProbeHistoryTime =
-            (char *) malloc(strlen(asctime(gmtime(&timep))));
-        temp->pingProbeHistoryTime = strdup(asctime(gmtime(&timep)));
-        temp->pingProbeHistoryTime[strlen(asctime(gmtime(&timep))) - 1] =
-            '\0';
-        temp->pingProbeHistoryTimeLen =
-            strlen(asctime(gmtime(&timep))) - 1;
+	temp->pingProbeHistoryTime_time = timep;
+	memdup(&temp->pingProbeHistoryTime,
+	    date_n_time(&timep, &temp->pingProbeHistoryTimeLen), 11);
 
         if (StorageNew->pingResultsSendProbes == 1)
             item->pingProbeHis = temp;
@@ -1522,7 +1533,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             current_temp->next = NULL;
         }
 
-        if (item->pingProbeHis != NULL)
+        if (item->pingProbeHis != NULL) {
             if (pingProbeHistoryTable_count(item) < item->pingCtlMaxRows) {
                 if (pingProbeHistoryTable_add(current_temp) !=
                     SNMPERR_SUCCESS)
@@ -1537,6 +1548,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                                 "registered an entry error\n"));
 
             }
+	}
 
         if ((item->
              pingCtlTrapGeneration[0] & PINGTRAPGENERATION_PROBEFAILED) !=
@@ -1577,7 +1589,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
         testFailed = 0;
 
     }
-    return;
+    return SNMP_ERR_NOERROR;
 }
 
 
@@ -1637,8 +1649,6 @@ run_ping(unsigned int clientreg, void *clientarg)
         unsigned long  *averagertt = NULL;
 
         datalen = 56;           /* data that goes with ICMP echo request */
-        unsigned int    n = 1;
-        int             c;
         struct addrinfo *ai = NULL;
         minrtt = malloc(sizeof(unsigned long));
         maxrtt = malloc(sizeof(unsigned long));
@@ -1673,18 +1683,14 @@ run_ping(unsigned int clientreg, void *clientarg)
         readloop(item, ai, datalen, minrtt, maxrtt, averagertt, pid);
 
         SNMP_FREE(minrtt);
-        minrtt = NULL;
         SNMP_FREE(maxrtt);
-        maxrtt = NULL;
         SNMP_FREE(averagertt);
-        averagertt = NULL;
-        free(ai);
-        ai = NULL;
+        SNMP_FREE(ai);
     }
 
     else if (item->pingCtlTargetAddressType == 2) {
 
-        int             ch = 0, hold = 0, packlen = 0;
+        int             hold = 0, packlen = 0;
         u_char         *packet = NULL;
         char           *target = NULL;
         struct sockaddr_in6 firsthop;
@@ -1696,7 +1702,6 @@ run_ping(unsigned int clientreg, void *clientarg)
         int             uid = 0;
         struct sockaddr_in6 source;
         int             preload = 0;
-        struct cmsghdr *srcrt = NULL;
         static unsigned char cmsgbuf[4096];
         static int      cmsglen = 0;
         struct sockaddr_in6 whereto;    /* who to ping */
@@ -1709,7 +1714,6 @@ run_ping(unsigned int clientreg, void *clientarg)
         int             timing = 0;     /* flag to do timing */
         int             working_recverr = 0;
         __u32           flowlabel = 0;
-        __u32           tclass = 0;
 
         int             ident = 0;      /* process id to identify our packets */
         u_char          outpack[MAX_PACKET];
@@ -1758,7 +1762,7 @@ run_ping(unsigned int clientreg, void *clientarg)
 
         if (ipv6_addr_any(&source.sin6_addr)) {
 
-            int             alen;
+            socklen_t       alen;
             int             probe_fd = socket(AF_INET6, SOCK_DGRAM, 0);
 
             if (probe_fd < 0) {
@@ -2050,7 +2054,6 @@ init_resultsTable(struct pingCtlTable_data *item)
     StorageTmp->pingResultsSendProbes = 0;
     StorageTmp->pingResultsRttSumOfSquares = 0;
 
-    StorageTmp->pingResultsLastGoodProbe = strdup("");
     StorageTmp->pingResultsLastGoodProbeLen = 0;
 
     item->pingResults = StorageTmp;
@@ -2062,7 +2065,6 @@ init_resultsTable(struct pingCtlTable_data *item)
         }
     }
     SNMP_FREE(ai);
-    ai = NULL;
 
 }
 
@@ -2167,7 +2169,6 @@ write_pingCtlTargetAddressType(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -2239,6 +2240,7 @@ write_pingCtlTargetAddressType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2325,7 +2327,6 @@ write_pingCtlTargetAddress(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlTargetAddress);
-        StorageTmp->pingCtlTargetAddress = NULL;
         StorageTmp->pingCtlTargetAddress = tmpvar;
         StorageTmp->pingCtlTargetAddressLen = tmplen;
         break;
@@ -2337,6 +2338,7 @@ write_pingCtlTargetAddress(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2353,7 +2355,6 @@ write_pingCtlDataSize(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -2427,6 +2428,7 @@ write_pingCtlDataSize(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2444,7 +2446,6 @@ write_pingCtlTimeOut(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -2518,6 +2519,7 @@ write_pingCtlTimeOut(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2536,7 +2538,6 @@ write_pingCtlProbeCount(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -2611,6 +2612,7 @@ write_pingCtlProbeCount(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2627,7 +2629,6 @@ write_pingCtlAdminStatus(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -2715,7 +2716,7 @@ write_pingCtlAdminStatus(int action,
             modify_ResultsOper(StorageTmp, 2);
         }
 
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2801,7 +2802,6 @@ write_pingCtlDataFill(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlDataFill);
-        StorageTmp->pingCtlDataFill = NULL;
         StorageTmp->pingCtlDataFill = tmpvar;
         StorageTmp->pingCtlDataFillLen = tmplen;
         break;
@@ -2813,6 +2813,7 @@ write_pingCtlDataFill(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2828,7 +2829,6 @@ write_pingCtlFrequency(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -2899,6 +2899,7 @@ write_pingCtlFrequency(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2914,7 +2915,6 @@ write_pingCtlMaxRows(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -2985,6 +2985,7 @@ write_pingCtlMaxRows(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3002,7 +3003,6 @@ write_pingCtlStorageType(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -3073,6 +3073,7 @@ write_pingCtlStorageType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3160,7 +3161,6 @@ write_pingCtlTrapGeneration(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlTrapGeneration);
-        StorageTmp->pingCtlTrapGeneration = NULL;
         StorageTmp->pingCtlTrapGeneration = tmpvar;
         StorageTmp->pingCtlTrapGenerationLen = tmplen;
         break;
@@ -3172,6 +3172,7 @@ write_pingCtlTrapGeneration(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3187,7 +3188,6 @@ write_pingCtlTrapProbeFailureFilter(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -3264,6 +3264,7 @@ write_pingCtlTrapProbeFailureFilter(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3280,7 +3281,6 @@ write_pingCtlTrapTestFailureFilter(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -3356,6 +3356,7 @@ write_pingCtlTrapTestFailureFilter(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3442,7 +3443,6 @@ write_pingCtlType(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlType);
-        StorageTmp->pingCtlType = NULL;
         StorageTmp->pingCtlType = tmpvar;
         StorageTmp->pingCtlTypeLen = tmplen;
         break;
@@ -3454,6 +3454,7 @@ write_pingCtlType(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3539,7 +3540,6 @@ write_pingCtlDescr(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlDescr);
-        StorageTmp->pingCtlDescr = NULL;
         StorageTmp->pingCtlDescr = tmpvar;
         StorageTmp->pingCtlDescrLen = tmplen;
         break;
@@ -3551,6 +3551,7 @@ write_pingCtlDescr(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3566,7 +3567,6 @@ write_pingCtlSourceAddressType(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -3638,6 +3638,7 @@ write_pingCtlSourceAddressType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3725,7 +3726,6 @@ write_pingCtlSourceAddress(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlSourceAddress);
-        StorageTmp->pingCtlSourceAddress = NULL;
         StorageTmp->pingCtlSourceAddress = tmpvar;
         StorageTmp->pingCtlSourceAddressLen = tmplen;
         break;
@@ -3737,6 +3737,7 @@ write_pingCtlSourceAddress(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3753,7 +3754,6 @@ write_pingCtlIfIndex(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -3823,6 +3823,7 @@ write_pingCtlIfIndex(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3840,7 +3841,6 @@ write_pingCtlByPassRouteTable(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -3912,6 +3912,7 @@ write_pingCtlByPassRouteTable(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3930,7 +3931,6 @@ write_pingCtlDSField(int action,
 {
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -4001,6 +4001,7 @@ write_pingCtlDSField(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -4372,6 +4373,7 @@ write_pingCtlRowStatus(int action,
             }
 
         }
+        snmp_store_needed(NULL);
 
         break;
     }
@@ -4632,7 +4634,7 @@ void
 sock_setbufs(int icmp_sock, int alloc, int preload)
 {
     int             rcvbuf, hold;
-    int             tmplen = sizeof(hold);
+    socklen_t       tmplen = sizeof(hold);
     int             sndbuf;
 
     if (!sndbuf)
@@ -4819,7 +4821,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
             break;
         }
         if (npackets && nreceived >= npackets) {
-            printf("npackets,nreceived=%d\n", nreceived);
+            printf("npackets,nreceived=%ld\n", nreceived);
             break;
         }
         if (deadline && nerrors) {
@@ -4993,16 +4995,9 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                     temp->pingProbeHistoryStatus = 4;
                     temp->pingProbeHistoryLastRC = 1;
 
-                    temp->pingProbeHistoryTime =
-                        (char *) malloc(strlen(asctime(gmtime(&timep))));
-                    temp->pingProbeHistoryTime =
-                        strdup(asctime(gmtime(&timep)));
-                    temp->
-                        pingProbeHistoryTime[strlen
-                                             (asctime(gmtime(&timep))) -
-                                             1] = '\0';
-                    temp->pingProbeHistoryTimeLen =
-                        strlen(asctime(gmtime(&timep))) - 1;
+		    temp->pingProbeHistoryTime_time = timep;
+		    memdup(&temp->pingProbeHistoryTime,
+			date_n_time(&timep, &temp->pingProbeHistoryTimeLen), 11);
 
                     if (StorageNew->pingResultsSendProbes == 1)
                         item->pingProbeHis = temp;
@@ -5017,7 +5012,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                         current_temp.next = NULL;
                     }
 
-                    if (item->pingProbeHis != NULL)
+                    if (item->pingProbeHis != NULL) {
                         if (pingProbeHistoryTable_count(item) <
                             item->pingCtlMaxRows) {
                             if (pingProbeHistoryTable_add(&current_temp) !=
@@ -5032,6 +5027,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                                             "registered an entry error\n"));
 
                         }
+		    }
                     if ((item->
                          pingCtlTrapGeneration[0] &
                          PINGTRAPGENERATION_PROBEFAILED) != 0) {
@@ -5253,7 +5249,7 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
          * check the data 
          */
         cp = ((u_char *) ptr) + sizeof(struct timeval);
-        dp = &outpack[8 + sizeof(struct timeval)];
+        dp = (u_char *)&outpack[8 + sizeof(struct timeval)];
         for (i = sizeof(struct timeval); i < datalen; ++i, ++cp, ++dp) {
             if (*cp != *dp) {
                 printf("\nwrong data byte #%d should be 0x%x but was 0x%x",
@@ -5289,13 +5285,9 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
         StorageNew->pingResultsSendProbes + 1;
     StorageNew->pingResultsRttSumOfSquares = *tsum2;
 
-    StorageNew->pingResultsLastGoodProbe =
-        (char *) malloc(strlen(asctime(gmtime(&timep))));
-    StorageNew->pingResultsLastGoodProbe = strdup(asctime(gmtime(&timep)));
-    StorageNew->pingResultsLastGoodProbe[strlen(asctime(gmtime(&timep))) -
-                                         1] = '\0';
-    StorageNew->pingResultsLastGoodProbeLen =
-        strlen(asctime(gmtime(&timep))) - 1;
+    StorageNew->pingResultsLastGoodProbe_time = timep;
+    memdup(&StorageNew->pingResultsLastGoodProbe,
+	date_n_time(&timep, &StorageNew->pingResultsLastGoodProbeLen), 11);
 
     /* ProbeHistory               */
     if (item->pingCtlMaxRows != 0) {
@@ -5329,12 +5321,9 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
         temp->pingProbeHistoryStatus = 1;
         temp->pingProbeHistoryLastRC = 0;
 
-        temp->pingProbeHistoryTime =
-            (char *) malloc(strlen(asctime(gmtime(&timep))));
-        temp->pingProbeHistoryTime = strdup(asctime(gmtime(&timep)));
-        temp->pingProbeHistoryTime[strlen(asctime(gmtime(&timep))) - 1] = '\0';
-        temp->pingProbeHistoryTimeLen =
-            strlen(asctime(gmtime(&timep))) - 1;
+	temp->pingProbeHistoryTime_time = timep;
+	memdup(&temp->pingProbeHistoryTime,
+	    date_n_time(&timep, &temp->pingProbeHistoryTimeLen), 11);
 
         if (StorageNew->pingResultsSendProbes == 1)
             item->pingProbeHis = temp;
@@ -5543,8 +5532,6 @@ receive_error_msg(int icmp_sock, struct sockaddr_in6 *whereto, int options,
                     e->ee_info);
         (*nerrors)++;
     } else if (e->ee_origin == SO_EE_ORIGIN_ICMP6) {
-        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) (e + 1);
-
         if (res < sizeof(icmph) ||
             memcmp(&target.sin6_addr, &(whereto->sin6_addr), 16) ||
             icmph.icmp6_type != ICMP6_ECHO_REQUEST ||

@@ -20,6 +20,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <pthread.h>
+#include <math.h>
 
 #include "traceRouteCtlTable.h"
 #include "traceRouteResultsTable.h"
@@ -76,6 +77,11 @@ struct header_complex_index *traceRouteCtlTableStorage = NULL;
 struct header_complex_index *traceRouteResultsTableStorage = NULL;
 struct header_complex_index *traceRouteProbeHistoryTableStorage = NULL;
 struct header_complex_index *traceRouteHopsTableStorage = NULL;
+
+int
+traceRouteResultsTable_add(struct traceRouteCtlTable_data *thedata);
+int
+traceRouteResultsTable_del(struct traceRouteCtlTable_data *thedata);
 
 void
 init_traceRouteCtlTable(void)
@@ -273,7 +279,6 @@ init_trResultsTable(struct traceRouteCtlTable_data *item)
     StorageTmp->traceRouteResultsTestAttempts = 0;
     StorageTmp->traceRouteResultsTestSuccesses = 0;
 
-    StorageTmp->traceRouteResultsLastGoodPath = strdup("");
     StorageTmp->traceRouteResultsLastGoodPathLen = 0;
 
     item->traceRouteResults = StorageTmp;
@@ -415,7 +420,6 @@ traceRouteCtlTable_add(struct traceRouteCtlTable_data *thedata)
 int
 traceRouteResultsTable_add(struct traceRouteCtlTable_data *thedata)
 {
-    netsnmp_variable_list *vp = NULL;
     netsnmp_variable_list *vars_list = NULL;
     struct traceRouteResultsTable_data *p = NULL;
     p = thedata->traceRouteResults;
@@ -511,11 +515,11 @@ traceRouteProbeHistoryTable_addall(struct traceRouteCtlTable_data *thedata)
                 if (traceRouteProbeHistoryTableStorage != NULL)
                     do {
                         DEBUGMSGTL(("traceRouteProbeHistoryTable",
-                                    "adding data,vars_oid=%u\n ",
-                                    temp->name));
+                                    "adding data,vars_oid="));
+                        DEBUGMSGOID(("traceRouteProbeHistoryTable",
+                                    temp->name, temp->namelen));
                         DEBUGMSGTL(("traceRouteProbeHistoryTable",
-                                    "adding data,vars_oid=%d\n ",
-                                    temp->namelen));
+                                    "\n "));
                         temp = temp->next;
                     } while (temp != NULL);
 
@@ -563,6 +567,7 @@ traceRouteHopsTable_add(struct traceRouteHopsTable_data *thedata)
             return SNMPERR_SUCCESS;
         }
     }
+    return SNMPERR_GENERR;
 }
 
 int
@@ -595,11 +600,11 @@ traceRouteHopsTable_addall(struct traceRouteCtlTable_data *thedata)
                 if (traceRouteHopsTableStorage != NULL)
                     do {
                         DEBUGMSGTL(("traceRouteProbeHistoryTable",
-                                    "adding data,vars_oid=%u\n ",
-                                    temp->name));
+                                    "adding data,vars_oid="));
+                        DEBUGMSGOID(("traceRouteProbeHistoryTable",
+                                    temp->name, temp->namelen));
                         DEBUGMSGTL(("traceRouteProbeHistoryTable",
-                                    "adding data,vars_oid=%d\n ",
-                                    temp->namelen));
+                                    "\n "));
                         temp = temp->next;
                     } while (temp != NULL);
                 DEBUGMSGTL(("traceRouteHopsTable", "out finished\n"));
@@ -671,27 +676,20 @@ traceRouteHopsTable_count(struct traceRouteCtlTable_data *thedata)
 
 
 
-int
+void
 traceRouteProbeHistoryTable_delLast(struct traceRouteCtlTable_data
                                     *thedata)
 {
-    struct traceRouteProbeHistoryTable_data *p = NULL;
-    struct header_complex_index *hciptr1 = NULL;
     struct header_complex_index *hciptr2 = NULL;
     struct header_complex_index *hcilast = NULL;
     struct traceRouteProbeHistoryTable_data *StorageDel = NULL;
     struct traceRouteProbeHistoryTable_data *StorageTmp = NULL;
     netsnmp_variable_list *vars = NULL;
-    netsnmp_variable_list *vars_temp = NULL;
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len = 0;
     time_t          last_time = 2147483647;
-    struct tm      *tp = NULL;
+    time_t          tp;
 
-    tp = (struct tm *) malloc(sizeof(struct tm));
-    if (tp == NULL) {
-        exit(1);
-    }
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlOwnerIndex, thedata->traceRouteCtlOwnerIndexLen);   /* traceRouteCtlOwnerIndex */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlTestName, thedata->traceRouteCtlTestNameLen);       /* traceRouteCtlOperationName */
 
@@ -707,10 +705,10 @@ traceRouteProbeHistoryTable_delLast(struct traceRouteCtlTable_data
                 header_complex_get_from_oid
                 (traceRouteProbeHistoryTableStorage, hciptr2->name,
                  hciptr2->namelen);
-            strptime(StorageTmp->traceRouteProbeHistoryTime, "%c", tp);
+            tp = StorageTmp->traceRouteProbeHistoryTime_time;
 
-            if (last_time > timegm(tp)) {
-                last_time = timegm(tp);
+            if (last_time > tp) {
+                last_time = tp;
                 hcilast = hciptr2;
             }
 
@@ -722,8 +720,6 @@ traceRouteProbeHistoryTable_delLast(struct traceRouteCtlTable_data
     DEBUGMSGTL(("traceRouteProbeHistoryTable",
                 "delete the last one success!\n"));
     vars = NULL;
-    free(tp);
-    tp = NULL;
 }
 
 
@@ -1361,7 +1357,6 @@ traceRouteProbeHistoryTable_del(struct traceRouteCtlTable_data *thedata)
     struct header_complex_index *hciptr2 = NULL;
     struct traceRouteProbeHistoryTable_data *StorageDel = NULL;
     netsnmp_variable_list *vars = NULL;
-    netsnmp_variable_list *vars_temp = NULL;
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len = 0;
 
@@ -1389,16 +1384,12 @@ traceRouteProbeHistoryTable_del(struct traceRouteCtlTable_data *thedata)
 }
 
 
-
-
-
 int
 traceRouteHopsTable_del(struct traceRouteCtlTable_data *thedata)
 {
     struct header_complex_index *hciptr2 = NULL;
     struct traceRouteHopsTable_data *StorageDel = NULL;
     netsnmp_variable_list *vars = NULL;
-    netsnmp_variable_list *vars_temp = NULL;
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len = 0;
 
@@ -1428,12 +1419,11 @@ traceRouteHopsTable_del(struct traceRouteCtlTable_data *thedata)
  * send trap 
  */
 
-int
+void
 send_traceRoute_trap(struct traceRouteCtlTable_data *item,
                      oid * trap_oid, size_t trap_oid_len)
 {
     static oid      objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };     /* snmpTrapIOD.0 */
-    struct traceRouteResultsTable_data *StorageTmp = NULL;
     struct traceRouteHopsTable_data *StorageHops = NULL;
     netsnmp_variable_list *var_list = NULL;
     netsnmp_variable_list *vars = NULL;
@@ -1514,7 +1504,7 @@ send_traceRoute_trap(struct traceRouteCtlTable_data *item,
      * XXX: stuff based on event table 
      */
 
-    DEBUGMSG(("pingTest:send_ping_trap", "success!\n"));
+    DEBUGMSG(("pingTest:send_traceRoute_trap", "success!\n"));
 
     send_v2trap(var_list);
     snmp_free_varbind(vars);
@@ -1534,7 +1524,6 @@ write_traceRouteCtlTargetAddressType(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -1718,7 +1707,6 @@ write_traceRouteCtlByPassRouteTable(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -1800,7 +1788,6 @@ write_traceRouteCtlDataSize(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -1887,7 +1874,6 @@ write_traceRouteCtlTimeOut(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -1977,7 +1963,6 @@ write_traceRouteCtlProbesPerHop(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -2064,7 +2049,6 @@ write_traceRouteCtlPort(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -2146,7 +2130,6 @@ write_traceRouteCtlMaxTtl(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -2231,7 +2214,6 @@ write_traceRouteCtlDSField(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -2313,7 +2295,6 @@ write_traceRouteCtlSourceAddressType(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -2494,7 +2475,6 @@ write_traceRouteCtlIfIndex(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -2673,7 +2653,6 @@ write_traceRouteCtlMaxFailures(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -2762,7 +2741,6 @@ write_traceRouteCtlDontFragment(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -2846,7 +2824,6 @@ write_traceRouteCtlInitialTtl(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -2931,7 +2908,6 @@ write_traceRouteCtlFrequency(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -3016,7 +2992,6 @@ write_traceRouteCtlStorageType(int action,
     static size_t   tmpvar;
     int             set_value;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -3110,7 +3085,6 @@ write_traceRouteCtlAdminStatus(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     netsnmp_variable_list *vars = NULL;
     struct traceRouteResultsTable_data *StorageNew = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -3328,7 +3302,6 @@ write_traceRouteCtlMaxRows(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -3508,7 +3481,6 @@ write_traceRouteCtlCreateHopsEntries(int action,
 {
     static size_t   tmpvar;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len -
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
@@ -3689,7 +3661,7 @@ write_traceRouteCtlRowStatus(int action,
         (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
     static int      old_value;
     int             set_value;
-    static netsnmp_variable_list *vars = NULL, *vp = NULL;
+    static netsnmp_variable_list *vars = NULL;
     struct header_complex_index *hciptr = NULL;
 
     StorageTmp =
@@ -4040,29 +4012,17 @@ write_traceRouteCtlRowStatus(int action,
 }
 
 
-unsigned long
-round(double number)
-{
-    unsigned long   ret_num = 0;
-    if (number - (unsigned long) number < 0.5)
-        ret_num = (unsigned long) number;
-    else
-        ret_num = (unsigned long) number + 1;
-    return ret_num;
-}
-
 void
 run_traceRoute(unsigned int clientreg, void *clientarg)
 {
     struct traceRouteCtlTable_data *item = clientarg;
     u_short         port = item->traceRouteCtlPort;     /* start udp dest port # for probe packets 相当于ctlport */
     int             waittime = item->traceRouteCtlTimeOut;      /* time to wait for response (in seconds) 相等于ctltimeout */
-    prog = "traceroute";
     int             nprobes = item->traceRouteCtlProbesPerHop;
 
     if (item->traceRouteCtlInitialTtl > item->traceRouteCtlMaxTtl) {
         DEBUGMSGTL(("traceRouteCtlTable",
-                    "first ttl (%d) may not be greater than max ttl (%d)\n",
+                    "first ttl (%lu) may not be greater than max ttl (%lu)\n",
                     item->traceRouteCtlInitialTtl,
                     item->traceRouteCtlMaxTtl));
         return;
@@ -4074,8 +4034,8 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
     if (item->traceRouteCtlTargetAddressType == 1
         || item->traceRouteCtlTargetAddressType == 16) {
-        register int    op, code, n;
-        register char  *cp;
+        register int    code, n;
+        const    char  *cp;
         register const char *err;
         register u_char *outp;
         register u_int32_t *ap;
@@ -4423,24 +4383,21 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
             DEBUGMSGTL(("traceRouteCtlTable", " from %s", source));
 
         DEBUGMSGTL(("traceRouteCtlTable",
-                    ", %d hops max, %d byte packets\n",
+                    ", %lu hops max, %d byte packets\n",
                     item->traceRouteCtlMaxTtl, packlen));
         (void) fflush(stderr);
 
         struct traceRouteResultsTable_data *StorageResults = NULL;
         netsnmp_variable_list *vars_results = NULL;
 
-        struct traceRouteHopsTable_data *StorageHops = NULL;
         struct traceRouteHopsTable_data *temp = NULL;
         struct traceRouteHopsTable_data *current_temp = NULL;
         struct traceRouteHopsTable_data *current = NULL;
 
         unsigned long   index = 0;
 
-        struct traceRouteProbeHistoryTable_data *StorageProbe = NULL;
         struct traceRouteProbeHistoryTable_data *temp_his = NULL;
         struct traceRouteProbeHistoryTable_data *current_temp_his = NULL;
-        netsnmp_variable_list *vars_probe = NULL;
 
         snmp_varlist_add_variable(&vars_results, NULL, 0, ASN_OCTET_STR, (char *) item->traceRouteCtlOwnerIndex, item->traceRouteCtlOwnerIndexLen);     /*  traceRouteCtlOwnerIndex  */
         snmp_varlist_add_variable(&vars_results, NULL, 0, ASN_OCTET_STR, (char *) item->traceRouteCtlTestName, item->traceRouteCtlTestNameLen); /*  traceRouteCtlTestName  */
@@ -4554,7 +4511,6 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                 temp->traceRouteHopsSentProbes = 0;
                 temp->traceRouteHopsProbeResponses = 0;
 
-                temp->traceRouteHopsLastGoodProbe = strdup("");
                 temp->traceRouteHopsLastGoodProbeLen = 0;
                 if (index == 1)
                     item->traceRouteHops = temp;
@@ -4784,17 +4740,10 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     temp_his->traceRouteProbeHistoryStatus = 1;
                     temp_his->traceRouteProbeHistoryLastRC = 0;
 
-                    temp_his->traceRouteProbeHistoryTime =
-                        (char *) malloc(strlen(asctime(gmtime(&timep))));
-                    temp_his->traceRouteProbeHistoryTime =
-                        strdup(asctime(gmtime(&timep)));
-                    temp_his->
-                        traceRouteProbeHistoryTime[strlen
-                                                   (asctime
-                                                    (gmtime(&timep))) -
-                                                   1] = '\0';
-                    temp_his->traceRouteProbeHistoryTimeLen =
-                        strlen(asctime(gmtime(&timep))) - 1;
+		    temp_his->traceRouteProbeHistoryTime_time = timep;
+                    memdup(&temp_his->traceRouteProbeHistoryTime,
+                        date_n_time(&timep,
+			    &temp_his->traceRouteProbeHistoryTimeLen), 11);
                     if (probe == 0)
                         item->traceRouteProbeHis = temp_his;
                     else {
@@ -4808,7 +4757,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
                     }
 
-                    if (item->traceRouteProbeHis != NULL)
+                    if (item->traceRouteProbeHis != NULL) {
                         if (traceRouteProbeHistoryTable_count(item) <
                             item->traceRouteCtlMaxRows) {
                             if (traceRouteProbeHistoryTable_add
@@ -4823,7 +4772,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                                             "registered an entry error\n"));
 
                         }
-
+		    }
 
                 }
 
@@ -4867,18 +4816,10 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     current->traceRouteHopsRttSumOfSquares = sumOfSquare;
                     current->traceRouteHopsSentProbes = probe + 1;
                     current->traceRouteHopsProbeResponses = responseProbe;
-                    current->traceRouteHopsLastGoodProbe =
-                        (char *) malloc(strlen(asctime(gmtime(&timep))));
-                    current->traceRouteHopsLastGoodProbe =
-                        strdup(asctime(gmtime(&timep)));
-                    current->
-                        traceRouteHopsLastGoodProbe[strlen
-                                                    (asctime
-                                                     (gmtime(&timep))) -
-                                                    1] = '\0';
-                    current->traceRouteHopsLastGoodProbeLen =
-                        strlen(asctime(gmtime(&timep))) - 1;
-
+		    current->traceRouteHopsLastGoodProbe_time = timep;
+                    memdup(&current->traceRouteHopsLastGoodProbe,
+                        date_n_time(&timep,
+			    &current->traceRouteHopsLastGoodProbeLen), 11);
                 }
 
                 (void) fflush(stdout);
@@ -4896,18 +4837,10 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     StorageResults->traceRouteResultsTestSuccesses =
                         StorageResults->traceRouteResultsTestSuccesses + 1;
 
-                    StorageResults->traceRouteResultsLastGoodPath =
-                        (char *) malloc(strlen(asctime(gmtime(&timep))) -
-                                        1);
-                    StorageResults->traceRouteResultsLastGoodPath =
-                        strdup(asctime(gmtime(&timep)));
-                    StorageResults->
-                        traceRouteResultsLastGoodPath[strlen
-                                                      (asctime
-                                                       (gmtime(&timep))) -
-                                                      1] = '\0';
-                    StorageResults->traceRouteResultsLastGoodPathLen =
-                        strlen(asctime(gmtime(&timep))) - 1;
+		    StorageResults->traceRouteResultsLastGoodPath_time = timep;
+                    memdup(&StorageResults->traceRouteResultsLastGoodPath,
+                        date_n_time(&timep,
+			    &StorageResults->traceRouteResultsLastGoodPathLen), 11);
                     if ((item->
                          traceRouteCtlTrapGeneration[0] &
                          TRACEROUTETRAPGENERATION_TESTCOMPLETED) != 0) {
@@ -4928,7 +4861,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                          TRACEROUTETRAPGENERATION_TESTFAILED) != 0) {
                         DEBUGMSGTL(("traceRouteProbeHistoryTable",
                                     "test Failed!\n"));
-                        send_ping_trap(item, traceRouteTestFailed,
+                        send_traceRoute_trap(item, traceRouteTestFailed,
                                        sizeof(traceRouteTestFailed) /
                                        sizeof(oid));
                     }
@@ -4945,7 +4878,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                      TRACEROUTETRAPGENERATION_TESTFAILED) != 0) {
                     DEBUGMSGTL(("traceRouteProbeHistoryTable",
                                 "test Failed!\n"));
-                    send_ping_trap(item, traceRouteTestFailed,
+                    send_traceRoute_trap(item, traceRouteTestFailed,
                                    sizeof(traceRouteTestFailed) /
                                    sizeof(oid));
                 }
@@ -4967,10 +4900,8 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
         }
     }
     if (item->traceRouteCtlTargetAddressType == 2) {
-        static char     SNAPSHOT[] = "020124";
         int             icmp_sock = 0;  /* receive (icmp) socket file descriptor */
         int             sndsock = 0;    /* send (udp) socket file descriptor */
-        struct timezone tz;     /* leftover */
 
         struct sockaddr_in6 whereto;    /* Who to try to reach */
 
@@ -4983,9 +4914,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
         pid_t           ident = 0;
         u_short         port = 32768 + 666;     /* start udp dest port # for probe packets */
         int             options = 0;    /* socket options */
-        int             verbose = 0;
         int             waittime = 5;   /* time to wait for response (in seconds) */
-        int             nflag = 0;      /* print addresses numerically */
 
         char           *sendbuff = NULL;
         int             datalen = sizeof(struct pkt_format);
@@ -4995,7 +4924,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
         char            pa[64];
         struct hostent *hp = NULL;
         struct sockaddr_in6 from, *to = NULL;
-        int             ch = 0, i = 0, on = 0, probe = 0, seq = 0, tos =
+        int             i = 0, on = 0, probe = 0, seq = 0, tos =
             0, ttl = 0;
         int             socket_errno = 0;
 
@@ -5021,9 +4950,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
         to->sin6_family = AF_INET6;
         to->sin6_port = htons(port);
 
-        if (inet_pton(AF_INET6, hostname, &to->sin6_addr) > 0) {
-            NULL;
-        } else {
+        if (inet_pton(AF_INET6, hostname, &to->sin6_addr) <= 0) {
             hp = gethostbyname2(hostname, AF_INET6);
             if (hp != NULL) {
                 memmove((caddr_t) & to->sin6_addr, hp->h_addr, 16);
@@ -5086,7 +5013,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                               (char *) &on, sizeof(on));
 
         if (source == NULL) {
-            int             alen;
+            socklen_t       alen;
             int             probe_fd = socket(AF_INET6, SOCK_DGRAM, 0);
 
             if (probe_fd < 0) {
@@ -5137,7 +5064,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
         Fprintf(stderr, " from %s",
                 inet_ntop(AF_INET6, &saddr.sin6_addr, pa, 64));
-        Fprintf(stderr, ", %d hops max, %d byte packets\n",
+        Fprintf(stderr, ", %lu hops max, %d byte packets\n",
                 item->traceRouteCtlMaxTtl, datalen);
         (void) fflush(stderr);
 
@@ -5145,17 +5072,14 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
         struct traceRouteResultsTable_data *StorageResults = NULL;
         netsnmp_variable_list *vars_results = NULL;
 
-        struct traceRouteHopsTable_data *StorageHops = NULL;
         struct traceRouteHopsTable_data *temp = NULL;
         struct traceRouteHopsTable_data *current_temp = NULL;
         struct traceRouteHopsTable_data *current = NULL;
 
         unsigned long   index = 0;
 
-        struct traceRouteProbeHistoryTable_data *StorageProbe = NULL;
         struct traceRouteProbeHistoryTable_data *temp_his = NULL;
         struct traceRouteProbeHistoryTable_data *current_temp_his = NULL;
-        netsnmp_variable_list *vars_probe = NULL;
 
         snmp_varlist_add_variable(&vars_results, NULL, 0, ASN_OCTET_STR, (char *) item->traceRouteCtlOwnerIndex, item->traceRouteCtlOwnerIndexLen);     /*  traceRouteCtlOwnerIndex  */
         snmp_varlist_add_variable(&vars_results, NULL, 0, ASN_OCTET_STR, (char *) item->traceRouteCtlTestName, item->traceRouteCtlTestNameLen); /*  traceRouteCtlTestName  */
@@ -5268,7 +5192,6 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                 temp->traceRouteHopsSentProbes = 0;
                 temp->traceRouteHopsProbeResponses = 0;
 
-                temp->traceRouteHopsLastGoodProbe = strdup("");
                 temp->traceRouteHopsLastGoodProbeLen = 0;
                 if (index == 1)
                     item->traceRouteHops = temp;
@@ -5449,17 +5372,10 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     temp_his->traceRouteProbeHistoryStatus = 1;
                     temp_his->traceRouteProbeHistoryLastRC = 0;
 
-                    temp_his->traceRouteProbeHistoryTime =
-                        (char *) malloc(strlen(asctime(gmtime(&timep))));
-                    temp_his->traceRouteProbeHistoryTime =
-                        strdup(asctime(gmtime(&timep)));
-                    temp_his->
-                        traceRouteProbeHistoryTime[strlen
-                                                   (asctime
-                                                    (gmtime(&timep))) -
-                                                   1] = '\0';
-                    temp_his->traceRouteProbeHistoryTimeLen =
-                        strlen(asctime(gmtime(&timep))) - 1;
+		    temp_his->traceRouteProbeHistoryTime_time = timep;
+                    memdup(&temp_his->traceRouteProbeHistoryTime,
+                        date_n_time(&timep,
+			    &temp_his->traceRouteProbeHistoryTimeLen), 11);
 
                     if (probe == 0)
                         item->traceRouteProbeHis = temp_his;
@@ -5473,7 +5389,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                         current_temp_his->next = NULL;
                     }
 
-                    if (item->traceRouteProbeHis != NULL)
+                    if (item->traceRouteProbeHis != NULL) {
                         if (traceRouteProbeHistoryTable_count(item) <
                             item->traceRouteCtlMaxRows) {
                             if (traceRouteProbeHistoryTable_add
@@ -5488,7 +5404,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                                             "registered an entry error\n"));
 
                         }
-
+		    }
 
                 }
                 if (item->traceRouteCtlCreateHopsEntries == 1) {
@@ -5532,17 +5448,10 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     current->traceRouteHopsRttSumOfSquares = sumOfSquare;
                     current->traceRouteHopsSentProbes = probe + 1;
                     current->traceRouteHopsProbeResponses = responseProbe;
-                    current->traceRouteHopsLastGoodProbe =
-                        (char *) malloc(strlen(asctime(gmtime(&timep))));
-                    current->traceRouteHopsLastGoodProbe =
-                        strdup(asctime(gmtime(&timep)));
-                    current->
-                        traceRouteHopsLastGoodProbe[strlen
-                                                    (asctime
-                                                     (gmtime(&timep))) -
-                                                    1] = '\0';
-                    current->traceRouteHopsLastGoodProbeLen =
-                        strlen(asctime(gmtime(&timep))) - 1;
+		    current->traceRouteHopsLastGoodProbe_time = timep;
+                    memdup(&current->traceRouteHopsLastGoodProbe,
+                        date_n_time(&timep,
+			    &current->traceRouteHopsLastGoodProbeLen), 11);
 
                     snmp_free_varbind(vars_hops);
                     vars_hops = NULL;
@@ -5563,18 +5472,10 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
                     StorageResults->traceRouteResultsTestSuccesses =
                         StorageResults->traceRouteResultsTestSuccesses + 1;
-                    StorageResults->traceRouteResultsLastGoodPath =
-                        (char *) malloc(strlen(asctime(gmtime(&timep))) -
-                                        1);
-                    StorageResults->traceRouteResultsLastGoodPath =
-                        strdup(asctime(gmtime(&timep)));
-                    StorageResults->
-                        traceRouteResultsLastGoodPath[strlen
-                                                      (asctime
-                                                       (gmtime(&timep))) -
-                                                      1] = '\0';
-                    StorageResults->traceRouteResultsLastGoodPathLen =
-                        strlen(asctime(gmtime(&timep))) - 1;
+		    StorageResults->traceRouteResultsLastGoodPath_time = timep;
+                    memdup(&StorageResults->traceRouteResultsLastGoodPath,
+                        date_n_time(&timep,
+			    &StorageResults->traceRouteResultsLastGoodPathLen), 11);
                     if ((item->
                          traceRouteCtlTrapGeneration[0] &
                          TRACEROUTETRAPGENERATION_TESTCOMPLETED) != 0) {
@@ -5609,7 +5510,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                      traceRouteCtlTrapGeneration[0] &
                      TRACEROUTETRAPGENERATION_TESTFAILED) != 0) {
                     printf("test Failed!\n");
-                    send_ping_trap(item, traceRouteTestFailed,
+                    send_traceRoute_trap(item, traceRouteTestFailed,
                                    sizeof(traceRouteTestFailed) /
                                    sizeof(oid));
                 }
@@ -5644,7 +5545,7 @@ wait_for_reply(register int sock, register struct sockaddr_in *fromp,
     struct timeval  now, wait;
     struct timezone tz;
     register int    cc = 0;
-    int             fromlen = sizeof(*fromp);
+    socklen_t       fromlen = sizeof(*fromp);
 
     FD_ZERO(&fds);
     FD_SET(sock, &fds);
@@ -5666,7 +5567,7 @@ wait_for_reply_v6(int sock, struct sockaddr_in6 *from, int reset_timer,
     fd_set          fds;
     static struct timeval wait;
     int             cc = 0;
-    int             fromlen = sizeof(*from);
+    socklen_t       fromlen = sizeof(*from);
 
     FD_ZERO(&fds);
     FD_SET(sock, &fds);
@@ -5778,7 +5679,7 @@ send_probe(struct sockaddr_in *whereto, register int seq, int ttl,
     if (setsockopt(sndsock, IPPROTO_IP, IP_TTL,
                    (char *) &ttl, sizeof(ttl)) < 0) {
         Fprintf(stderr, "%s: setsockopt ttl %d: %s\n",
-                prog, ttl, strerror(errno));
+                "traceroute", ttl, strerror(errno));
         exit(1);
     }
 #endif
@@ -5799,9 +5700,9 @@ send_probe(struct sockaddr_in *whereto, register int seq, int ttl,
 #endif
     if (cc < 0 || cc != packlen) {
         if (cc < 0)
-            Fprintf(stderr, "%s: sendto: %s\n", prog, strerror(errno));
+            Fprintf(stderr, "%s: sendto: %s\n", "traceroute", strerror(errno));
         Printf("%s: wrote %s %d chars, ret=%d\n",
-               prog, hostname, packlen, cc);
+               "traceroute", hostname, packlen, cc);
         (void) fflush(stdout);
     }
 }
@@ -5893,7 +5794,6 @@ packet_ok(register u_char * buf, int cc, register struct sockaddr_in *from,
         type == ICMP_UNREACH || type == ICMP_ECHOREPLY) {
         register struct ip *hip;
         register struct udphdr *up;
-        register struct icmp *hicmp;
 
         hip = &icp->icmp_ip;
         hlen = hip->ip_hl << 2;
@@ -6022,12 +5922,12 @@ gethostinfo(register char *hostname)
 
     if (strlen(hostname) > 64) {
         Fprintf(stderr, "%s: hostname \"%.32s...\" is too long\n",
-                prog, hostname);
+                "traceroute", hostname);
         exit(1);
     }
     hi = calloc(1, sizeof(*hi));
     if (hi == NULL) {
-        Fprintf(stderr, "%s: calloc %s\n", prog, strerror(errno));
+        Fprintf(stderr, "%s: calloc %s\n", "traceroute", strerror(errno));
         exit(1);
     }
     addr = inet_addr(hostname);
@@ -6036,7 +5936,7 @@ gethostinfo(register char *hostname)
         hi->n = 1;
         hi->addrs = calloc(1, sizeof(hi->addrs[0]));
         if (hi->addrs == NULL) {
-            Fprintf(stderr, "%s: calloc %s\n", prog, strerror(errno));
+            Fprintf(stderr, "%s: calloc %s\n", "traceroute", strerror(errno));
             exit(1);
         }
         hi->addrs[0] = addr;
@@ -6045,12 +5945,12 @@ gethostinfo(register char *hostname)
 
     hp = gethostbyname(hostname);
     if (hp == NULL) {
-        Fprintf(stderr, "%s: unknown host %s\n", prog, hostname);
+        Fprintf(stderr, "%s: unknown host %s\n", "traceroute", hostname);
         printf("hp=NULL\n");
         exit(1);
     }
     if (hp->h_addrtype != AF_INET || hp->h_length != 4) {
-        Fprintf(stderr, "%s: bad host %s\n", prog, hostname);
+        Fprintf(stderr, "%s: bad host %s\n", "traceroute", hostname);
         exit(1);
     }
     hi->name = strdup(hp->h_name);
@@ -6059,7 +5959,7 @@ gethostinfo(register char *hostname)
     hi->n = n;
     hi->addrs = calloc(n, sizeof(hi->addrs[0]));
     if (hi->addrs == NULL) {
-        Fprintf(stderr, "%s: calloc %s\n", prog, strerror(errno));
+        Fprintf(stderr, "%s: calloc %s\n", "traceroute", strerror(errno));
         exit(1);
     }
     for (ap = hi->addrs, p = hp->h_addr_list; *p != NULL; ++ap, ++p)
@@ -6189,7 +6089,7 @@ ifaddrlist(register struct ifaddrlist **ipaddrp, register char *errbuf)
         if (errno == EINVAL)
             (void) sprintf(errbuf,
                            "SIOCGIFCONF: ifreq struct too small (%d bytes)",
-                           sizeof(ibuf));
+                           (int)sizeof(ibuf));
         else
             (void) sprintf(errbuf, "SIOCGIFCONF: %s", strerror(errno));
         (void) close(fd);
@@ -6254,7 +6154,7 @@ ifaddrlist(register struct ifaddrlist **ipaddrp, register char *errbuf)
         }
 
         if (nipaddr >= MAX_IPADDR) {
-            (void) sprintf(errbuf, "Too many interfaces (%d)", MAX_IPADDR);
+            (void) sprintf(errbuf, "Too many interfaces (%d)", nipaddr);
             (void) close(fd);
             return (-1);
         }
