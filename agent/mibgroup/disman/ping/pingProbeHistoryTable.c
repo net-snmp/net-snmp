@@ -63,6 +63,8 @@ struct variable2 pingProbeHistoryTable_variables[] = {
 
 extern struct header_complex_index *pingCtlTableStorage;
 extern struct header_complex_index *pingProbeHistoryTableStorage;
+int
+pingProbeHistoryTable_inadd(struct pingProbeHistoryTable_data *thedata);
 
 void
 pingProbeHistoryTable_cleaner(struct header_complex_index *thestuff)
