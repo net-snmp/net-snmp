@@ -74,6 +74,8 @@ struct variable2 traceRouteResultsTable_variables[] = {
 
 extern struct header_complex_index *traceRouteCtlTableStorage;
 extern struct header_complex_index *traceRouteResultsTableStorage;
+void
+traceRouteResultsTable_inadd(struct traceRouteResultsTable_data *thedata);
 
 void
 traceRouteResultsTable_cleaner(struct header_complex_index *thestuff)
@@ -319,7 +321,7 @@ store_traceRouteResultsTable(int majorID, int minorID, void *serverarg,
     return SNMPERR_SUCCESS;
 }
 
-int
+void
 traceRouteResultsTable_inadd(struct traceRouteResultsTable_data *thedata)
 {
     netsnmp_variable_list *vars_list = NULL;
