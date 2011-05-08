@@ -80,6 +80,8 @@ struct variable2 pingResultsTable_variables[] = {
 
 extern struct header_complex_index *pingCtlTableStorage;
 extern struct header_complex_index *pingResultsTableStorage;
+int
+pingResultsTable_inadd(struct pingResultsTable_data *thedata);
 
 void
 pingResultsTable_cleaner(struct header_complex_index *thestuff)

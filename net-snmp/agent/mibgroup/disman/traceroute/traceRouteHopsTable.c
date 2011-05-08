@@ -69,6 +69,8 @@ struct variable2 traceRouteHopsTable_variables[] = {
 
 extern struct header_complex_index *traceRouteCtlTableStorage;
 extern struct header_complex_index *traceRouteHopsTableStorage;
+void
+traceRouteHopsTable_inadd(struct traceRouteHopsTable_data *thedata);
 
 void
 traceRouteHopsTable_cleaner(struct header_complex_index *thestuff)
@@ -318,7 +320,7 @@ store_traceRouteHopsTable(int majorID, int minorID, void *serverarg,
 }
 
 
-int
+void
 traceRouteHopsTable_inadd(struct traceRouteHopsTable_data *thedata)
 {
     netsnmp_variable_list *vars_list = NULL;

@@ -60,6 +60,9 @@ struct variable2 traceRouteProbeHistoryTable_variables[] = {
 
 extern struct header_complex_index *traceRouteCtlTableStorage;
 extern struct header_complex_index *traceRouteProbeHistoryTableStorage;
+void
+traceRouteProbeHistoryTable_inadd(struct traceRouteProbeHistoryTable_data
+                                  *thedata);
 
 void
 traceRouteProbeHistoryTable_cleaner(struct header_complex_index *thestuff)
@@ -313,7 +316,7 @@ store_traceRouteProbeHistoryTable(int majorID, int minorID,
 }
 
 
-int
+void
 traceRouteProbeHistoryTable_inadd(struct traceRouteProbeHistoryTable_data
                                   *thedata)
 {
