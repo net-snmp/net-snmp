@@ -10,6 +10,8 @@ listing of all changes made to the code.
         (see "Data Delivery via Notfiications" in snmpd.conf)
       - Many time-based config options can take (m)ins, (h)ours, ... arguments
         (see the snmpd.conf manual page)
+      - The PING and TRACEROUTE MIBs now compile and work-ish on linux
+
 
   build:
       - New flags to reduce the amount of compiled code to bare minimums.
