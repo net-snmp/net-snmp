@@ -190,7 +190,7 @@ sc_init(void)
 
     gettimeofday(&tv, (struct timezone *) 0);
 
-    srandom(tv.tv_sec ^ tv.tv_usec);
+    srandom((unsigned)(tv.tv_sec ^ tv.tv_usec));
 #elif NETSNMP_USE_PKCS11
     DEBUGTRACE;
     rval = pkcs_init();

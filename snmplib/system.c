@@ -922,7 +922,7 @@ calculate_time_diff(const struct timeval *now, const struct timeval *then)
         diff.tv_usec -= 1000000L;
         diff.tv_sec++;
     }
-    return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+    return (int)(diff.tv_sec * 100 + diff.tv_usec / 10000);
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_TIME_DIFF */
 
@@ -942,8 +942,8 @@ calculate_sectime_diff(const struct timeval *now, const struct timeval *then)
         diff.tv_sec++;
     }
     if (diff.tv_usec >= 500000L)
-        return diff.tv_sec + 1;
-    return  diff.tv_sec;
+        return (u_int)(diff.tv_sec + 1);
+    return (u_int)(diff.tv_sec);
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_SECTIME_DIFF */
 

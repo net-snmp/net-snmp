@@ -911,7 +911,7 @@ atime_diff(const_marker_t first, const_marker_t second)
 
     NETSNMP_TIMERSUB((const struct timeval *) second, (const struct timeval *) first, &diff);
 
-    return (diff.tv_sec * 1000 + diff.tv_usec / 1000);
+    return (long)(diff.tv_sec * 1000 + diff.tv_usec / 1000);
 }
 
 /**
