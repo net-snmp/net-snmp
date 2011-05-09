@@ -55,7 +55,7 @@ ucdavis MODULE-IDENTITY
     DESCRIPTION
 	"This file defines the private UCD SNMP MIB extensions."
 
-    REVISION	 "20110514000Z"
+    REVISION	 "201105140000Z"
     DESCRIPTION
 	"New objects for monitoring CPU Steal, Guest and Nice values"
 
