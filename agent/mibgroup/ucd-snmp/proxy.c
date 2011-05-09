@@ -409,10 +409,9 @@ proxy_handler(netsnmp_mib_handler *handler,
         ourlength = request->requestvb->name_length;
 
         if (sp->base_len &&
-                reqinfo->mode == MODE_GETNEXT &&
-                (ourlength < sp->name_len ||
-                        snmp_oid_compare(ourname, sp->name_len, sp->name,
-                              sp->name_len) != 0)) {
+            reqinfo->mode == MODE_GETNEXT &&
+            (snmp_oid_compare(ourname, ourlength,
+                              sp->name, sp->name_len) < 0)) {
             DEBUGMSGTL(( "proxy", "request is out of registered range\n"));
             /*
              * Create GETNEXT request with an OID so the
