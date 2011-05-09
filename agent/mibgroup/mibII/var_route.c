@@ -1047,7 +1047,7 @@ Route_Scan_Reload(void)
     char            name[16], temp[16];
     int             hashsize;
 #endif
-    static int      Time_Of_Last_Reload = 0;
+    static time_t   Time_Of_Last_Reload;
     struct timeval  now;
 
     gettimeofday(&now, (struct timezone *) 0);
@@ -1193,7 +1193,7 @@ Route_Scan_Reload(void)
     int             i, table;
     register char  *cp;
     char            name[16], temp[16];
-    static int      Time_Of_Last_Reload = 0;
+    static time_t   Time_Of_Last_Reload;
     struct timeval  now;
     int             hashsize;
 
@@ -1309,7 +1309,7 @@ Route_Scan_Reload(void)
     char            line[256];
     struct rtentry *rt;
     char            name[16];
-    static int      Time_Of_Last_Reload = 0;
+    static time_t   Time_Of_Last_Reload;
     struct timeval  now;
 
     gettimeofday(&now, (struct timezone *) 0);
@@ -1497,7 +1497,7 @@ var_ipRouteEntry(struct variable *vp,
     DWORD           dwActualSize = 0;
     static PMIB_IPFORWARDTABLE pIpRtrTable = NULL;
     struct timeval  now;
-    static long     Time_Of_Last_Reload = 0;
+    static time_t    Time_Of_Last_Reload;
     static in_addr_t addr_ret;
 
 
