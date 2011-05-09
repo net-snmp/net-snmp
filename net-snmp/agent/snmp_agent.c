@@ -3772,7 +3772,7 @@ netsnmp_set_agent_uptime(u_long hsec)
 
     gettimeofday(&now, NULL);
     new_uptime.tv_sec = hsec / 100;
-    new_uptime.tv_usec = (hsec - new_uptime.tv_sec * 100) * 10000L;
+    new_uptime.tv_usec = (uint32_t)(hsec - new_uptime.tv_sec * 100) * 10000L;
     NETSNMP_TIMERSUB(&now, &new_uptime, &starttime);
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SET_AGENT_UPTIME */

@@ -668,7 +668,7 @@ _init_snmp(void)
     tmpReqid = lrand48();
     tmpMsgid = lrand48();
 #else
-    srandom(tv.tv_sec ^ tv.tv_usec);
+    srandom((unsigned)(tv.tv_sec ^ tv.tv_usec));
     tmpReqid = random();
     tmpMsgid = random();
 #endif
