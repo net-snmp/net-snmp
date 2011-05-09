@@ -408,7 +408,34 @@ proxy_handler(netsnmp_mib_handler *handler,
         ourname = request->requestvb->name;
         ourlength = request->requestvb->name_length;
 
-        if (sp->base_len > 0) {
+        if (sp->base_len &&
+                reqinfo->mode == MODE_GETNEXT &&
+                (ourlength < sp->name_len ||
+                        snmp_oid_compare(ourname, sp->name_len, sp->name,
+                              sp->name_len) != 0)) {
+            DEBUGMSGTL(( "proxy", "request is out of registered range\n"));
+            /*
+             * Create GETNEXT request with an OID so the
+             * master returns the first OID in the registered range.
+             */
+            memcpy(ourname, sp->base, sp->base_len * sizeof(oid));
+            ourlength = sp->base_len;
+            if (ourname[ourlength-1] <= 1) {
+                /*
+                 * The registered range ends with x.y.z.1
+                 * -> ask for the next of x.y.z
+                 */
+                ourlength--;
+            } else {
+                /*
+                 * The registered range ends with x.y.z.A
+                 * -> ask for the next of x.y.z.A-1.MAX_SUBID
+                 */
+                ourname[ourlength-1]--;
+                ourname[ourlength] = MAX_SUBID;
+                ourlength++;
+            }
+        } else if (sp->base_len > 0) {
             if ((ourlength - sp->name_len + sp->base_len) > MAX_OID_LEN) {
                 /*
                  * too large 
