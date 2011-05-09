@@ -36,5 +36,8 @@ void              init_vmstat(void);
 #define CPURAWSOFTIRQ 61
 #define RAWSWAPIN 62
 #define RAWSWAPOUT 63
+#define CPURAWSTEAL 64
+#define CPURAWGUEST 65
+#define CPURAWGUESTNICE 66
 
 #endif                          /* _MIBGROUP_VMSTAT_H */

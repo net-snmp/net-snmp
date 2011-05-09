@@ -99,11 +99,12 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     static char *buff  = NULL;
     static int   bsize = 0;
     static int   first = 1;
-    static int   has_cpu_26 = 1;
+    static int   num_cpuline_elem = 0;
     int          bytes_read, statfd, i;
     char        *b1, *b2;
     unsigned long long cusell = 0, cicell = 0, csysll = 0, cidell = 0,
-                       ciowll = 0, cirqll = 0, csoftll = 0;
+                       ciowll = 0, cirqll = 0, csoftll = 0, cstealll = 0,
+                       cguestll = 0, cguest_nicell = 0;
     netsnmp_cpu_info* cpu;
 
     if ((statfd = open(STAT_FILE, O_RDONLY, 0)) == -1) {
@@ -152,18 +153,29 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
             b1 = b2+5; /* Skip "cpuN " */
         }
 
-	if (!has_cpu_26 ||
-            sscanf(b1, "%llu %llu %llu %llu %llu %llu %llu", &cusell,
-                   &cicell, &csysll, &cidell, &ciowll, &cirqll, &csoftll) != 7) {
-	    has_cpu_26 = 0;
-	    sscanf(b1, "%llu %llu %llu %llu", &cusell, &cicell, &csysll,
-                   &cidell);
+        num_cpuline_elem = sscanf(b1, "%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
+         &cusell, &cicell, &csysll, &cidell, &ciowll, &cirqll, &csoftll, &cstealll, &cguestll, &cguest_nicell);
+        DEBUGMSGTL(("cpu", "/proc/stat cpu line number of elements: %i\n", num_cpuline_elem));
 
-	} else {
+        // kernel 2.6.33 and above
+        if (num_cpuline_elem == 10) {
+            cpu->guestnice_ticks = (unsigned long)cguest_nicell;
+        }
+        // kernel 2.6.24 and above
+        if (num_cpuline_elem >= 9) {
+            cpu->guest_ticks = (unsigned long)cguestll;
+        }
+        // kernel 2.6.11 and above
+        if (num_cpuline_elem >= 8) {
+            cpu->steal_ticks = (unsigned long)cstealll;
+        }
+        // kernel 2.6
+        if (num_cpuline_elem >= 5) {
             cpu->wait_ticks   = (unsigned long)ciowll;
             cpu->intrpt_ticks = (unsigned long)cirqll;
             cpu->sirq_ticks   = (unsigned long)csoftll;
- 	}
+        }
+        // rest
         cpu->user_ticks = (unsigned long)cusell;
         cpu->nice_ticks = (unsigned long)cicell;
         cpu->sys_ticks  = (unsigned long)csysll;

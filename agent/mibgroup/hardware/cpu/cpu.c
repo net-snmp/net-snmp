@@ -227,7 +227,10 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
                            cpu->wait_ticks +
                            cpu->kern_ticks +
                            cpu->intrpt_ticks +
-                           cpu->sirq_ticks;
+                           cpu->sirq_ticks +
+                           cpu->steal_ticks +
+                           cpu->guest_ticks +
+                           cpu->guestnice_ticks;
     }
 }
 
@@ -251,6 +254,9 @@ void _cpu_copy_stats( netsnmp_cpu_info *cpu )
     cpu2->kern_ticks = cpu->kern_ticks;
     cpu2->intrpt_ticks = cpu->intrpt_ticks;
     cpu2->sirq_ticks = cpu->sirq_ticks;
+    cpu2->steal_ticks = cpu->steal_ticks;
+    cpu2->guest_ticks = cpu->guest_ticks;
+    cpu2->guestnice_ticks = cpu->guestnice_ticks;
 
     cpu2->nInterrupts  = cpu->nInterrupts;
     cpu2->nCtxSwitches = cpu->nCtxSwitches;

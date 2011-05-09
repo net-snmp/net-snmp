@@ -33,6 +33,9 @@ struct netsnmp_cpu_info_s {
      long kern_ticks;
      long intrpt_ticks;
      long sirq_ticks;
+     long steal_ticks;
+     long guest_ticks;
+     long guestnice_ticks;
 
      long total_ticks;
      long sys2_ticks;  /* For non-atomic system counts */
