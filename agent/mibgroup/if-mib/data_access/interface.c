@@ -6,13 +6,14 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
-#include "mibII/mibII_common.h"
-#include "if-mib/ifTable/ifTable_constants.h"
-#include "if-mib/data_access/interface.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/data_access/interface.h>
+
+#include "mibII/mibII_common.h"
+#include "if-mib/ifTable/ifTable.h"
+#include "if-mib/data_access/interface.h"
 
 netsnmp_feature_child_of(interface_all, libnetsnmpmibs)
 netsnmp_feature_child_of(interface, interface_all)
@@ -356,42 +357,45 @@ netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry)
     ! defined( NETSNMP_NO_BACKWARDS_COMPATABILITY )
 
 static netsnmp_iterator *it = NULL;
-static netsnmp_container *c = NULL;
-static netsnmp_interface_entry *e = NULL;
+static ifTable_rowreq_ctx *row = NULL;
 
 /**
- * 
+ * Setup an iterator for scanning the interfaces using the cached entry
+ * from if-mib/ifTable.
  */
 void
 Interface_Scan_Init(void)
 {
-    /*
-     * ifTable container shouldn't change, so we shouldn' have to
-     * re-fetch it every time.
-     */
-    if (NULL != c)
-        netsnmp_access_interface_container_free(c, 0);
-
-    c = netsnmp_access_interface_container_load(NULL, 0);
+    netsnmp_container *cont = NULL;
+    netsnmp_cache *cache    = NULL; 
     
-    if (NULL != c) {
+    cache = netsnmp_cache_find_by_oid(ifTable_oid, ifTable_oid_size);
+    if (NULL != cache) {
+        netsnmp_cache_check_and_reload(cache);
+        cont = (netsnmp_container*) cache->magic;
+    }
+    
+    if (NULL != cont) {
         if (NULL != it)
             ITERATOR_RELEASE(it);
     
-        it = CONTAINER_ITERATOR(c);
+        it = CONTAINER_ITERATOR(cont);
     }
    
     if (NULL != it)
-        e = (netsnmp_interface_entry*)ITERATOR_FIRST(it);
+        row = (ifTable_rowreq_ctx*)ITERATOR_FIRST(it);
 }
 
 int
 Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
                     void *dc)
 {
-    if (NULL == e)
-        return 0;
+    netsnmp_interface_entry* e = NULL;
 
+    if (NULL == row)
+        return 0;
+    
+    e = row->data.ifentry;
     if(index)
         *index = e->index;
 
@@ -401,7 +405,7 @@ Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
     if (entry)
         *entry = e;
 
-    e = (netsnmp_interface_entry*)ITERATOR_NEXT(it);
+    row = (ifTable_rowreq_ctx*) ITERATOR_NEXT(it);
 
     return 1;
 }
