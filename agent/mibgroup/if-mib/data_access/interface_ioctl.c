@@ -141,7 +141,7 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
 #ifdef ARPHRD_ETHER
             switch (ifrq.ifr_hwaddr.sa_family) {
             case ARPHRD_ETHER:
-                ifentry->type = 6;
+                ifentry->type = IANAIFTYPE_ETHERNETCSMACD;
                 break;
 #if defined(ARPHRD_TUNNEL) || defined(ARPHRD_IPGRE) || defined(ARPHRD_SIT)
 #ifdef ARPHRD_TUNNEL
@@ -154,7 +154,7 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
 #ifdef ARPHRD_SIT
             case ARPHRD_SIT:
 #endif
-                ifentry->type = 131;
+                ifentry->type = IANAIFTYPE_TUNNEL;
                 break;          /* tunnel */
 #endif
 #ifdef ARPHRD_SLIP
@@ -162,42 +162,42 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
             case ARPHRD_CSLIP:
             case ARPHRD_SLIP6:
             case ARPHRD_CSLIP6:
-                ifentry->type = 28;
+                ifentry->type = IANAIFTYPE_SLIP;
                 break;          /* slip */
 #endif
 #ifdef ARPHRD_PPP
             case ARPHRD_PPP:
-                ifentry->type = 23;
+                ifentry->type = IANAIFTYPE_PPP;
                 break;          /* ppp */
 #endif
 #ifdef ARPHRD_LOOPBACK
             case ARPHRD_LOOPBACK:
-                ifentry->type = 24;
+                ifentry->type = IANAIFTYPE_SOFTWARELOOPBACK;
                 break;          /* softwareLoopback */
 #endif
 #ifdef ARPHRD_FDDI
             case ARPHRD_FDDI:
-                ifentry->type = 15;
+                ifentry->type = IANAIFTYPE_FDDI;
                 break;
 #endif
 #ifdef ARPHRD_ARCNET
             case ARPHRD_ARCNET:
-                ifentry->type = 35;
+                ifentry->type = IANAIFTYPE_ARCNET;
                 break;
 #endif
 #ifdef ARPHRD_LOCALTLK
             case ARPHRD_LOCALTLK:
-                ifentry->type = 42;
+                ifentry->type = IANAIFTYPE_LOCALTALK;
                 break;
 #endif
 #ifdef ARPHRD_HIPPI
             case ARPHRD_HIPPI:
-                ifentry->type = 47;
+                ifentry->type = IANAIFTYPE_HIPPI;
                 break;
 #endif
 #ifdef ARPHRD_ATM
             case ARPHRD_ATM:
-                ifentry->type = 37;
+                ifentry->type = IANAIFTYPE_ATM;
                 break;
 #endif
                 /*
@@ -206,6 +206,7 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
             default:
                 DEBUGMSGTL(("access:interface:ioctl", "unknown entry type %d\n",
                             ifrq.ifr_hwaddr.sa_family));
+		ifentry->type = IANAIFTYPE_OTHER;
             } /* switch */
 #endif /* ARPHRD_LOOPBACK */
 
