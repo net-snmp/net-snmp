@@ -20,7 +20,7 @@ init_vmstat(void)
         netsnmp_create_handler_registration("vmstat", vmstat_handler,
                              vmstat_oid, OID_LENGTH(vmstat_oid),
                              HANDLER_CAN_RONLY),
-        MIBINDEX, RAWSWAPOUT);
+        MIBINDEX, CPURAWGUESTNICE);
 }
 
 
@@ -38,6 +38,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
     switch (reqinfo->mode) {
     case MODE_GET:
         obj = requests->requestvb->name[ requests->requestvb->name_length-2 ];
+
         switch (obj) {
         case MIBINDEX:             /* dummy value */
              snmp_set_var_typed_integer(requests->requestvb, ASN_INTEGER, 1);
@@ -111,6 +112,18 @@ vmstat_handler(netsnmp_mib_handler          *handler,
         case CPURAWSOFTIRQ:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
                                         info->sirq_ticks & 0xffffffff);
+             break;
+        case CPURAWSTEAL:
+             snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
+                                        info->steal_ticks & 0xffffffff);
+             break;
+        case CPURAWGUEST:
+             snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
+                                        info->guest_ticks & 0xffffffff);
+             break;
+        case CPURAWGUESTNICE:
+             snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
+                                        info->guestnice_ticks & 0xffffffff);
              break;
 
         /*

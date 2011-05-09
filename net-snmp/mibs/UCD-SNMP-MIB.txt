@@ -1432,6 +1432,58 @@ ssRawSwapOut OBJECT-TYPE
         "Number of blocks swapped out"
     ::= { systemStats 63 }
 
+ssCpuRawSteal OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The number of 'ticks' (typically 1/100s) spent
+         by the hypervisor code to run other VMs even
+         though the CPU in the current VM had something runnable.
+
+         This object will not be implemented on hosts where
+         the underlying operating system does not measure
+         this particular CPU metric.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
+    ::= { systemStats 64 }
+
+ssCpuRawGuest OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The number of 'ticks' (typically 1/100s) spent
+         by the CPU to run a virtual CPU (guest).
+
+         This object will not be implemented on hosts where
+         the underlying operating system does not measure
+         this particular CPU metric.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
+    ::= { systemStats 65 }
+
+ssCpuRawGuestNice OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The number of 'ticks' (typically 1/100s) spent
+         by the CPU to run a niced virtual CPU (guest).
+
+         This object will not be implemented on hosts where
+         the underlying operating system does not measure
+         this particular CPU metric.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
+    ::= { systemStats 66 }
+
 -- possibly used in the future:
 --
 -- ssErrorFlag OBJECT-TYPE
