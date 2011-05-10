@@ -754,7 +754,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
                       szValue = malloc(nSize + sizeof(szValue[0]));
                       if (szValue) {
 		        dwErrorcode = RegQueryValueEx(hParamKey, szRegKey, NULL,
-                                                      &nRegkeyType, szValue, &nSize);
+                                                      &nRegkeyType, (LPBYTE)szValue, &nSize);
                         if (dwErrorcode == ERROR_SUCCESS) {
                           szValue[nSize] = 0;
                           ArgArray[i] = szValue;
