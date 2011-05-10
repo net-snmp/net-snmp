@@ -73,22 +73,22 @@ init_deliverByNotify(void)
 
     snmpd_register_config_handler("deliverByNotifyOid",
                                   &parse_data_notification_oid_config,
-                                  NULL, // XXX: reset to default
+                                  NULL, /* XXX: reset to default */
                                   "OID");
 
     snmpd_register_config_handler("deliverByNotifyFrequencyOid",
                                   &parse_periodic_time_oid_config,
-                                  NULL, // XXX: reset to default
+                                  NULL, /* XXX: reset to default */
                                   "OID");
 
     snmpd_register_config_handler("deliverByNotifyMessageNumberOid",
                                   &parse_message_number_oid_config,
-                                  NULL, // XXX: reset to default
+                                  NULL, /* XXX: reset to default */
                                   "OID");
 
     snmpd_register_config_handler("deliverByNotifyMaxMessageNumberOid",
                                   &parse_max_message_number_oid_config,
-                                  NULL, // XXX: reset to default
+                                  NULL, /* XXX: reset to default */
                                   "OID");
 
     /* create the container to store the config objects*/
@@ -333,8 +333,8 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
             message_count++;
             if (message_count > MAX_MESSAGE_COUNT) {
                 snmp_log(LOG_ERR, "delivery construct grew too large...  giving up\n");
-                // XXX: disable it
-                // XXX: send a notification about it?
+                /* XXX: disable it */
+                /* XXX: send a notification about it? */
                 ITERATOR_RELEASE(iterator);
                 return;
             }

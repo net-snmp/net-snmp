@@ -151,7 +151,7 @@ _load_v4(netsnmp_arp_access *access)
          * now that we've passed all the possible 'continue', assign
          * index offset.
          */
-        //entry->ns_arp_index = ++idx_offset;
+        /* entry->ns_arp_index = ++idx_offset; */
 
         /*
          * parse ip addr
