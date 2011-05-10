@@ -20,6 +20,8 @@ listing of all changes made to the code.
       - optimizations for large route tables
       - Added a deliveryByNotify config token for regular data delivery
         (see the snmpd.conf manual page and the NET-SNMP-PERIODIC-NOTIFY-MIB)
+      - Patch 3141462: fix agentx subagent issues with multiple-object requests
+      - [PATCH 3057093]: linux uses libpci for creating useful ifDescr strings
 
   libnetsnmp:
       - Removed the older CMU compatibility support
@@ -35,6 +37,7 @@ listing of all changes made to the code.
       - Added a per-variable timed output support to snmpwalk using -CT
       - snmpinform now correctly uses the local engineID for informs
       - A number of mib2c bug fixes
+      - new snmp.conf tokens for timeouts and retries
 
   building:
       - New flags to reduce the amount of compiled code to bare minimums.
