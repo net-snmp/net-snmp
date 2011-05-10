@@ -11,17 +11,67 @@ listing of all changes made to the code.
       - Many time-based config options can take (m)ins, (h)ours, ... arguments
         (see the snmpd.conf manual page)
       - The PING and TRACEROUTE MIBs now compile and work-ish on linux
+        http://www.net-snmp.org/wiki/index.php/DISMAN
+      - Mib handlers can now implement a data_clone function for
+        cloning the myvoid structure variable to avoid dangling pointers
+      - Fixed persistent storage of VACM MIB configuration
+      - Multi-homed agents send UDP responses from the proper IP address
+      - the hrStorageTable implementation now supports large filesystems better
+      - optimizations for large route tables
+      - Added a deliveryByNotify config token for regular data delivery
+        (see the snmpd.conf manual page and the NET-SNMP-PERIODIC-NOTIFY-MIB)
 
+  libnetsnmp:
+      - Removed the older CMU compatibility support
+      - the SSH transport is now configurable
 
-  build:
+  TLS/DTLS support:
+      - The SNMP over DTLS transport now properly supports IPv6
+      - Introduced new configuration tokens: localCert/peerCert
+        (deprecating serverCert, clientCert, defX509ServerPub, defX509ClientPub)
+      - Various fixes for the TLS/DTLS transports
+
+  apss:
+      - Added a per-variable timed output support to snmpwalk using -CT
+      - snmpinform now correctly uses the local engineID for informs
+      - A number of mib2c bug fixes
+
+  building:
       - New flags to reduce the amount of compiled code to bare minimums.
         This is provided by a new generic feature marking/selection mechanism.
         http://www.net-snmp.org/wiki/index.php/Feature_Marking_and_Selection
       - It's now possible to build without SNMPv3/USM
+        (e.g., if you only want TLS/DTLS with SNMPv3/TSM)
       - It's possible to build the suite with no SET support
         configure using --enable-read-only
       - It's possible to build the agent as a notify-only agent
         configure using --enable-notify-only
+      - Added a script to test memory usage with various config options
+        (see the local/minimalist/sizetests script)
+      - Net-SNMP can now be built to perform local DNSSEC validation
+        (install DNSSEC-Tools' libval and use --with-local-dnssec-validation)
+
+  testing:
+      - a number of new API unit-tests have been added to the suite
+        (to run the tests: cd testing && ./RUNFULLTESTS -g unit-tests)
+      - The unit tests can be more easily run under valgrind
+        (See http://bit.ly/jsgRnv for details)
+
+  openbsd:
+      - Support for updating the routing table via SNMP
+
+  win32:
+      - the testing suite works better under win32 environments
+      - Many building fixes for the win32 environment(s)
+
+  solaris:
+      - Net-SNMP now supports the SCTP-MIB
+
+  DragonFlyBSD, FreeBSD8
+      - Net-SNMP should now work on DragonFlyBSD and FreeBSD8
+
+  And of course:
+      - Many other bug fixes.  See the CHANGES and ChangeLog for details.
 
 *5.6*
 
