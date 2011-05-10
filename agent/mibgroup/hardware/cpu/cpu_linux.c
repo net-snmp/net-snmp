@@ -157,25 +157,25 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          &cusell, &cicell, &csysll, &cidell, &ciowll, &cirqll, &csoftll, &cstealll, &cguestll, &cguest_nicell);
         DEBUGMSGTL(("cpu", "/proc/stat cpu line number of elements: %i\n", num_cpuline_elem));
 
-        // kernel 2.6.33 and above
+        /* kernel 2.6.33 and above */
         if (num_cpuline_elem == 10) {
             cpu->guestnice_ticks = (unsigned long)cguest_nicell;
         }
-        // kernel 2.6.24 and above
+        /* kernel 2.6.24 and above */
         if (num_cpuline_elem >= 9) {
             cpu->guest_ticks = (unsigned long)cguestll;
         }
-        // kernel 2.6.11 and above
+        /* kernel 2.6.11 and above */
         if (num_cpuline_elem >= 8) {
             cpu->steal_ticks = (unsigned long)cstealll;
         }
-        // kernel 2.6
+        /* kernel 2.6 */
         if (num_cpuline_elem >= 5) {
             cpu->wait_ticks   = (unsigned long)ciowll;
             cpu->intrpt_ticks = (unsigned long)cirqll;
             cpu->sirq_ticks   = (unsigned long)csoftll;
         }
-        // rest
+        /* rest */
         cpu->user_ticks = (unsigned long)cusell;
         cpu->nice_ticks = (unsigned long)cicell;
         cpu->sys_ticks  = (unsigned long)csysll;
