@@ -1200,7 +1200,7 @@ netsnmp_string_time_to_secs(const char *time_string) {
 
     secs = atoi(time_string);
 
-    if (isdigit(time_string[strlen(time_string)-1]))
+    if (isdigit((unsigned char)time_string[strlen(time_string)-1]))
         return secs; /* no letter specified, it's already in seconds */
     
     switch (time_string[strlen(time_string)-1]) {
