@@ -414,7 +414,7 @@ var_smux_write(int action,
             return SNMP_ERR_GENERR;
         }
 
-        if (sendto(rptr->sr_fd, buf, len, 0, NULL, 0) < 0) {
+        if (sendto(rptr->sr_fd, (void *) buf, len, 0, NULL, 0) < 0) {
             DEBUGMSGTL(("smux", "[var_smux_write] send failed\n"));
             return SNMP_ERR_GENERR;
         }
@@ -423,7 +423,7 @@ var_smux_write(int action,
             /*
              * peek at what's received 
              */
-            if ((len = recvfrom(rptr->sr_fd, buf,
+            if ((len = recvfrom(rptr->sr_fd, (void *) buf,
                             SMUXMAXPKTSIZE, MSG_PEEK, NULL, NULL)) <= 0) {
                 if ((len == -1) && ((errno == EINTR) || (errno == EAGAIN)))
                 {
@@ -463,7 +463,7 @@ var_smux_write(int action,
             do
             {
                len = tmp_len;
-               len = recvfrom(rptr->sr_fd, buf, len, 0, NULL, NULL);
+               len = recvfrom(rptr->sr_fd, (void *) buf, len, 0, NULL, NULL);
             }
             while((len == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -547,7 +547,7 @@ var_smux_write(int action,
                         "[var_smux_write] entering FREE - sending Commit \n"));
         }
 
-        if ((sendto(rptr->sr_fd, sout, 3, 0, NULL, 0)) < 0) {
+        if ((sendto(rptr->sr_fd, (void *) sout, 3, 0, NULL, 0)) < 0) {
             DEBUGMSGTL(("smux",
                         "[var_smux_write] send rollback/commit failed\n"));
             return SNMP_ERR_GENERR;

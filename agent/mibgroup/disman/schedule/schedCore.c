@@ -347,8 +347,8 @@ sched_nextTime( struct schedTable_entry *entry )
          *    the first specified day (in that month)
          */
 
-        localtime_r( &now, &now_tm );
-        localtime_r( &now, &next_tm );
+        (void) localtime_r( &now, &now_tm );
+        (void) localtime_r( &now, &next_tm );
 
         next_tm.tm_mon=-1;
         next_tm.tm_mday=-1;
