@@ -27,7 +27,7 @@ CHECK ".1.3.6.1.2.1.1.4.0 = STRING:"
 
 CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0"
 
-CHECK "foobartestingbaz"
+CHECK "STRING: foobartestingbaz"
 
 STOPAGENT
 
