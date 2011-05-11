@@ -766,12 +766,16 @@ AC_SUBST(FEATURE_REMOVE_FLAGS)
 AC_ARG_WITH(feature,, NETSNMP_INVALID_WITH([features]))
 AC_ARG_WITH(out-feature,, NETSNMP_INVALID_WITH([out-features]))
 
+FEATURETARGS=""
+FEATUREHEADERS=""
 NETSNMP_ARG_ENABLE(minimalist,
 [  --enable-minimalist             Remove all non-essential code features.])
 if test "x$enable_minimalist" = "xyes"; then
    # we'll assume the mini agent is desired here as well
    mini_agent="yes"
    FEATURETARGS="features"
+   FEATUREHEADERS="library/features.h agent/features.h agent/features-mibgroups.h features-snmpnetstat.h features-apps.h"
+
    # needed to bootstrap later checks
    echo "" > include/net-snmp/feature-details.h
    AC_DEFINE(NETSNMP_MINIMAL_CODE, 1,
@@ -779,8 +783,7 @@ if test "x$enable_minimalist" = "xyes"; then
 fi
 AC_ARG_WITH([minimalist],,NETSNMP_INVALID_ENABLE([minimalist]))
 AC_SUBST(FEATURETARGS)
-
-
+AC_SUBST(FEATUREHEADERS)
 
 NETSNMP_ARG_ENABLE(notify-only,
 [  --enable-notify-only            Build tools that can only send notifications.])
