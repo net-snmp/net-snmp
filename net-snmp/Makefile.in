@@ -15,7 +15,7 @@ CPP		= @CPP@ 					        \
 		-DDONT_INC_STRUCTS -DBINDIR=$(bindir) 		        \
 		$(EXTRACPPFLAGS)
 
-INSTALLHEADERS=version.h
+INSTALLHEADERS=version.h net-snmp-features.h
 INCLUDESUBDIR=system
 INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h \
 	darwin.h darwin7.h darwin8.h darwin9.h darwin10.h dragonfly.h dynix.h \
