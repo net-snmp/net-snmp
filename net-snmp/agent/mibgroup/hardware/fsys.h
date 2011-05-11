@@ -3,6 +3,8 @@ config_require(hardware/fsys/hw_fsys)
 config_require(hardware/fsys/fsys_mntctl)
 #elif defined(HAVE_GETVFSSTAT) || defined(HAVE_GETFSSTAT)
 config_require(hardware/fsys/fsys_getfsstats)
-#else
+#elif defined(HAVE_GETMNTENT)
 config_require(hardware/fsys/fsys_mntent)
+#else
+config_require(hardware/fsys/fsys_void)
 #endif
