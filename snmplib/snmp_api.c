@@ -992,6 +992,7 @@ _sess_copy(netsnmp_session * in_session)
      * zero out pointers so if we have to free the session we wont free mem
      * owned by in_session 
      */
+    session->localname = NULL;
     session->peername = NULL;
     session->community = NULL;
     session->contextEngineID = NULL;
@@ -1950,6 +1951,7 @@ static void
 snmp_free_session(netsnmp_session * s)
 {
     if (s) {
+        SNMP_FREE(s->localname);
         SNMP_FREE(s->peername);
         SNMP_FREE(s->community);
         SNMP_FREE(s->contextEngineID);
