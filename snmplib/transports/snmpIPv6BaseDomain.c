@@ -3,6 +3,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#ifdef NETSNMP_ENABLE_IPV6
+
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmpIPv6BaseDomain.h>
 
@@ -388,3 +390,5 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
     sprintf(buf, ":%u", remote_port);
     return netsnmp_sockaddr_in6_2(addr, inpeername, remote_port ? buf : NULL);
 }
+
+#endif /* NETSNMP_ENABLE_IPV6 */
