@@ -2849,7 +2849,7 @@ _mibindex_add( const char *dirname, int i )
          */
         cpp = (char **)malloc( (10+i) * sizeof(char*));
         if ( _mibindexes ) {
-            memcpy( cpp, _mibindexes, _mibindex * sizeof(char*));
+            memcpy( cpp, _mibindexes, _mibindex_max * sizeof(char*));
             free(_mibindexes);
         }
         _mibindexes   = cpp;
