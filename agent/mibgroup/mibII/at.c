@@ -889,6 +889,7 @@ var_atEntry(struct variable *vp,
     UINT            i;
     int             j;
     u_char          dest_addr[4];
+    void           *result = NULL;
     static in_addr_t	addr_ret;
     
     /*
@@ -905,13 +906,9 @@ var_atEntry(struct variable *vp,
 
     status = GetIpNetTable(pIpNetTable, &dwActualSize, TRUE);
     if (status == ERROR_INSUFFICIENT_BUFFER) {
-        pIpNetTable = (PMIB_IPNETTABLE) malloc(dwActualSize);
-        if (pIpNetTable != NULL) {
-            /*
-             * Get the sorted IpNet Table 
-             */
+        pIpNetTable = malloc(dwActualSize);
+        if (pIpNetTable)
             status = GetIpNetTable(pIpNetTable, &dwActualSize, TRUE);
-        }
     }
 
     i = -1;
@@ -984,8 +981,7 @@ var_atEntry(struct variable *vp,
             arp_row->dwType = 4;        /* Static */
             arp_row->dwPhysAddrLen = 0;
         }
-        free(pIpNetTable);
-        return (NULL);
+        goto out;
     }
 
     create_flag = 0;
@@ -999,28 +995,31 @@ var_atEntry(struct variable *vp,
     case IPMEDIAIFINDEX:       /* also ATIFINDEX */
         *var_len = sizeof long_return;
         long_return = pIpNetTable->table[i].dwIndex;
-        free(pIpNetTable);
-        return (u_char *) & long_return;
+        result = &long_return;
+        break;
     case IPMEDIAPHYSADDRESS:   /* also ATPHYSADDRESS */
         *var_len = pIpNetTable->table[i].dwPhysAddrLen;
         memcpy(return_buf, pIpNetTable->table[i].bPhysAddr, *var_len);
-        free(pIpNetTable);
-        return (u_char *) return_buf;
+        result = return_buf;
+        break;
     case IPMEDIANETADDRESS:    /* also ATNETADDRESS */
         *var_len = sizeof(addr_ret);
         addr_ret = pIpNetTable->table[i].dwAddr;
-        free(pIpNetTable);
-        return (u_char *) & addr_ret;
+        result = &addr_ret;
+        break;
     case IPMEDIATYPE:
         *var_len = sizeof long_return;
         long_return = pIpNetTable->table[i].dwType;
-        free(pIpNetTable);
-        return (u_char *) & long_return;
+        result = &long_return;
+        break;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_atEntry\n",
                     vp->magic));
+        break;
     }
-    return NULL;
+out:
+    free(pIpNetTable);
+    return result;
 }
 
 int
