@@ -982,6 +982,7 @@ var_ipAddrEntry(struct variable *vp,
     DWORD           status = NO_ERROR;
     DWORD           statusRetry = NO_ERROR;
     DWORD           dwActualSize = 0;
+    void           *result = NULL;
     static in_addr_t 	addr_ret;
     
     /*
@@ -1018,7 +1019,6 @@ var_ipAddrEntry(struct variable *vp,
                 }
             } else {
                 if (snmp_oid_compare(current, 14, name, *length) > 0) {
-
                     lowinterface = i;
                     memcpy(lowest, current, 14 * sizeof(oid));
                     break;      /* Since the table is sorted, no need to search further  */
@@ -1027,46 +1027,52 @@ var_ipAddrEntry(struct variable *vp,
         }
     }
 
-    if (lowinterface < 0) {
-        free(pIpAddrTable);
-        return NULL;
-    }
+    if (lowinterface < 0)
+        goto out;
+
     i = lowinterface;
     memcpy(name, lowest, 14 * sizeof(oid));
     *length = 14;
     *write_method = 0;
-    *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
-    	 *var_len = sizeof(addr_ret);
-    	 addr_ret = pIpAddrTable->table[i].dwAddr;
-        return (u_char *) & addr_ret;
+        *var_len = sizeof(addr_ret);
+        addr_ret = pIpAddrTable->table[i].dwAddr;
+        result = &addr_ret;
+        break;
 
     case IPADIFINDEX:
+        *var_len = sizeof(long_return);
         long_return = pIpAddrTable->table[i].dwIndex;
-        free(pIpAddrTable);
-        return (u_char *) & long_return;
+        result = &long_return;
+        break;
 
     case IPADNETMASK:
-    	 *var_len = sizeof(addr_ret);
+        *var_len = sizeof(addr_ret);
         addr_ret = pIpAddrTable->table[i].dwMask;
-        free(pIpAddrTable);
-        return (u_char *) & addr_ret;
+        result = &addr_ret;
+        break;
 
     case IPADBCASTADDR:
+        *var_len = sizeof(long_return);
         long_return = pIpAddrTable->table[i].dwBCastAddr;
-        free(pIpAddrTable);
-        return (u_char *) & long_return;
+        result = &long_return;
+        break;
 
     case IPADREASMMAX:
+        *var_len = sizeof(long_return);
         long_return = pIpAddrTable->table[i].dwReasmSize;
-        free(pIpAddrTable);
-        return (u_char *) & long_return;
+        result = &long_return;
+        break;
 
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n",
                     vp->magic));
+        break;
     }
-    return NULL;
+
+out:
+    free(pIpAddrTable);
+    return result;
 }
 #endif                          /* WIN32 cygwin */
