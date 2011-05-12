@@ -1748,19 +1748,19 @@ enum {
 #define USING_AGENTX_MODULE 1
  
 /* CFG Define if compiling with the host module files.  */
-#define USING_HOST_MODULE 1
+/* #undef USING_HOST_MODULE */
  
 /* CFG Define if compiling with the Rmon module files.  */
-#define USING_RMON_MODULE 1
+/* #undef USING_RMON_MODULE */
 
 /* CFG Define if compiling with the disman/event-mib module files.  */
 #define USING_DISMAN_EVENT_MIB_MODULE 1
 
 /* CFG Define if compiling with the smux module files.  */
-#define USING_SMUX_MODULE 1
+/* #undef USING_SMUX_MODULE */
 
 /* Define if compiling with the winExtDLL module.  */
-#define USING_WINEXTDLL_MODULE 1
+/* #undef USING_WINEXTDLL_MODULE */
 
 /*
  * Module configuration and control ends here.
