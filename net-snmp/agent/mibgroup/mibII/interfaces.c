@@ -2619,23 +2619,11 @@ header_ifEntry(struct variable *vp,
      * find "next" ifIndex 
      */
 
-
-    /*
-     * query for buffer size needed 
-     */
     status = GetIfTable(pIfTable, &dwActualSize, TRUE);
-
     if (status == ERROR_INSUFFICIENT_BUFFER) {
-        /*
-         * need more space 
-         */
-        pIfTable = (PMIB_IFTABLE) malloc(dwActualSize);
-        if (pIfTable != NULL) {
-            /*
-             * Get the sorted IF table 
-             */
+        pIfTable = malloc(dwActualSize);
+        if (pIfTable)
             GetIfTable(pIfTable, &dwActualSize, TRUE);
-        }
     }
     count = pIfTable->dwNumEntries;
     for (ifIndex = 0; ifIndex < count; ifIndex++) {
@@ -2649,9 +2637,9 @@ header_ifEntry(struct variable *vp,
     }
     if (ifIndex >= count) {
         DEBUGMSGTL(("mibII/interfaces", "... index out of range\n"));
-        return MATCH_FAILED;
+        count = MATCH_FAILED;
+        goto out;
     }
-
 
     memcpy((char *) name, (char *) newname,
            ((int) vp->namelen + 1) * sizeof(oid));
@@ -2664,6 +2652,7 @@ header_ifEntry(struct variable *vp,
     DEBUGMSG(("mibII/interfaces", "\n"));
 
     count = pIfTable->table[ifIndex].dwIndex;
+out:
     free(pIfTable);
     return count;
 }
