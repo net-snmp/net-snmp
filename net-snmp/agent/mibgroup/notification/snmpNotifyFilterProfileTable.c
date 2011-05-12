@@ -221,7 +221,6 @@ store_snmpNotifyFilterProfileTable(int majorID, int minorID,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
-    size_t          tmpint;
     struct snmpNotifyFilterProfileTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -255,12 +254,12 @@ store_snmpNotifyFilterProfileTable(int majorID, int minorID,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        snmpNotifyFilterProfileStorType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        snmpNotifyFilterProfileRowStatus,
-                                       &tmpint);
+                                       NULL);
 
             snmpd_store_config(line);
         }
