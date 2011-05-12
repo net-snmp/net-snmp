@@ -2822,7 +2822,7 @@ _mibindex_add( const char *dirname, int i )
         i = _mibindex++;
     if ( i >= _mibindex_max ) {
         /*
-         * If the index array is full (or non-exitent)
+         * If the index array is full (or non-existent)
          *   then expand (or create) it
          */
         cpp = (char **)malloc( (10+i) * sizeof(char*));

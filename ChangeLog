@@ -107501,7 +107501,7 @@ Changes: V5.0 -> V5.0.1
 
    * agent/helpers/instance.c:
 
-   Report non-exitent subinstances as 'noSuchInstance' rather than 'noSuchObject'.
+   Report non-existent subinstances as 'noSuchInstance' rather than 'noSuchObject'.
    "snmpget .... .1.3.6.1.6.3.12.1.5.0.99" now responds correctly.
    (though "snmpget .... .1.3.6.1.6.3.12.1.5.1" still returns 'noSuchObject')
    
