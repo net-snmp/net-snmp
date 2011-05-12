@@ -3,9 +3,22 @@
 
 #include <sys/types.h>
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
+#if HAVE_SYS_SOCKET_H
+#ifdef solaris2
+#define _XPG4_2
 #endif
+
+#include <sys/socket.h>
+
+#ifdef solaris2
+# ifndef CMSG_SPACE
+#  define CMSG_SPACE(l) \
+            ((unsigned int)_CMSG_HDR_ALIGN(sizeof (struct cmsghdr) + (l)))
+#  define CMSG_LEN(l)   (_CMSG_HDR_ALIGN(sizeof(struct cmsghdr)) + (l))
+# endif
+#endif
+#endif /* HAVE_SYS_SOCKET_H */
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

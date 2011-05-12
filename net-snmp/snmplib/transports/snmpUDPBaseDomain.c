@@ -18,9 +18,6 @@
 #else
 #include <strings.h>
 #endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -29,6 +26,9 @@
 #endif
 #if HAVE_NETDB_H
 #include <netdb.h>
+#endif
+#if HAVE_SYS_UIO_H
+#include <sys/uio.h>
 #endif
 #include <errno.h>
 
@@ -295,7 +295,11 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     DEBUGMSGTL(("udpbase:sendto", "sending from %s iface %d\n",
                 (srcip ? inet_ntoa(*srcip) : "NULL"), if_index));
     errno = 0;
+#ifdef MSG_NOSIGNAL
     ret = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+#else
+    ret = sendmsg(fd, &m, MSG_DONTWAIT);
+#endif
     if (ret < 0 && errno == EINVAL && srcip) {
         /* The error might be caused by broadcast srcip (i.e. we're responding
          * to broadcast request) - sendmsg does not like it. Try to resend it
@@ -304,7 +308,11 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
         cmsg.ipi.ipi_ifindex = if_index;
         cmsg.ipi.ipi_spec_dst.s_addr = INADDR_ANY;
         DEBUGMSGTL(("udpbase:sendto", "re-sending the message\n"));
+#ifdef MSG_NOSIGNAL
         ret = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+#else
+        ret = sendmsg(fd, &m, MSG_DONTWAIT);
+#endif
     }
     return ret;
 }
@@ -333,7 +341,11 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 
     memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
 
+#ifdef MSG_NOSIGNAL
     return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+#else
+    return sendmsg(fd, &m, MSG_DONTWAIT);
+#endif
 }
 #endif
 #endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
