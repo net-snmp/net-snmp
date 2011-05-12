@@ -9,6 +9,8 @@
 #include <net-snmp/data_access/interface.h>
 
 #include <errno.h>
+#include <sys/types.h>
+#include <linux/types.h>
 #include <linux/rtnetlink.h>
 
 
