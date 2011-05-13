@@ -902,7 +902,8 @@ netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
 
 #ifdef DNSSEC_LOCAL_VALIDATION
     val_status_t val_status;
-    hp = val_gethostbyaddr(NULL, (const char*)&saddr_in->sin_addr,
+    hp = val_gethostbyaddr(NULL, (const void
+*)&saddr_in->sin_addr,
                            sizeof(struct in_addr), AF_INET, &val_status);
     DEBUGMSGTL(("dns:sec:val", "val_status %d / %s; trusted: %d\n",
                 val_status, p_val_status(val_status),
@@ -916,7 +917,7 @@ netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
     else if (val_does_not_exist(val_status) && hp)
         hp = NULL;
 #else
-    hp = gethostbyaddr((gethost_addrptr_t) &saddr_in->sin_addr,
+    hp = gethostbyaddr((const void*) &saddr_in->sin_addr,
                        sizeof(struct in_addr), AF_INET);
 #endif
     if (hp == NULL) {
