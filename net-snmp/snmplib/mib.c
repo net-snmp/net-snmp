@@ -2837,8 +2837,6 @@ netsnmp_mibindex_lookup( const char *dirname )
 int
 _mibindex_add( const char *dirname, int i )
 {
-    char **cpp;
-
     DEBUGMSGTL(("mibindex", "add: %s (%d)\n", dirname, i ));
     if ( i == -1 )
         i = _mibindex++;
@@ -2847,13 +2845,9 @@ _mibindex_add( const char *dirname, int i )
          * If the index array is full (or non-existent)
          *   then expand (or create) it
          */
-        cpp = (char **)malloc( (10+i) * sizeof(char*));
-        if ( _mibindexes ) {
-            memcpy( cpp, _mibindexes, _mibindex_max * sizeof(char*));
-            free(_mibindexes);
-        }
-        _mibindexes   = cpp;
-        _mibindex_max = i+10;
+        _mibindexes = realloc(_mibindexes, (i + 10) * sizeof(char*));
+        netsnmp_assert(_mibindexes);
+        _mibindex_max = i + 10;
     }
     DEBUGMSGTL(("mibindex", "add: %d/%d/%d\n", i, _mibindex, _mibindex_max ));
 
