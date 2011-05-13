@@ -7,6 +7,7 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmpIPv6BaseDomain.h>
+#include <net-snmp/library/system.h>
 
 #include <stddef.h>
 #include <stdio.h>

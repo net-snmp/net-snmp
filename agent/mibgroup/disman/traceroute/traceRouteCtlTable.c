@@ -5981,7 +5981,7 @@ gethostinfo(register char *hostname)
         return (hi);
     }
 
-    hp = gethostbyname(hostname);
+    hp = netsnmp_gethostbyname(hostname);
     if (hp == NULL) {
         Fprintf(stderr, "%s: unknown host %s\n", "traceroute", hostname);
         printf("hp=NULL\n");

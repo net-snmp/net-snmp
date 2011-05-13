@@ -176,6 +176,9 @@
 /* Define to 1 if you have the `getgrnam' function. */
 #undef HAVE_GETGRNAM
 
+/* Define to 1 if you have the `gethostbyaddr' function. */
+#undef HAVE_GETHOSTBYADDR
+
 /* Define to 1 if you have the `gethostbyname' function. */
 #undef HAVE_GETHOSTBYNAME
 

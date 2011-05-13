@@ -63,6 +63,12 @@ case x$target_os in
     ], [ ])
 
     AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <winsock2.h>],
+    [ gethostbyaddr(NULL); ])],
+    [ ac_cv_func_gethostaddr=yes
+      AS_ECHO "#define HAVE_GETHOSTBYADDR 1" >>confdefs.h
+    ], [ ])
+
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <winsock2.h>],
     [ gethostname(NULL, 0); ])],
     [ ac_cv_func_gethostname=yes
       AS_ECHO "#define HAVE_GETHOSTNAME 1" >>confdefs.h
@@ -70,7 +76,7 @@ case x$target_os in
     ;;
 
   *)
-    AC_CHECK_FUNCS([gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname])
+    AC_CHECK_FUNCS([gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname gethostbyaddr])
     ;;
 esac
 

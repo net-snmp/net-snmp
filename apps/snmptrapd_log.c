@@ -655,7 +655,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
          */
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                     NETSNMP_DS_APP_NUMERIC_IP)) {
-            host = gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
+            host = netsnmp_gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
         }
         if (host != NULL) {
             if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
@@ -1373,7 +1373,7 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
      */
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                 NETSNMP_DS_APP_NUMERIC_IP)) {
-        host = gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
+        host = netsnmp_gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
     }
     if (host != (struct hostent *) NULL) {
         if (!snmp_strcat

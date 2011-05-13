@@ -616,7 +616,8 @@ inetname(struct in_addr *inp)
 				cp = np->n_name;
 		}
 		if (cp == NULL) {
-			hp = gethostbyaddr((char *)inp, sizeof (*inp), AF_INET);
+			hp = netsnmp_gethostbyaddr((char *)inp, sizeof (*inp),
+                                                   AF_INET);
 			if (hp) {
 				if ((cp = strchr(hp->h_name, '.')) &&
 				    !strcmp(cp + 1, domain))

@@ -1027,7 +1027,7 @@ host_serv(const char *host, const char *serv, int family, int socktype)
     hints.ai_family = family;   /* AF_UNSPEC, AF_INET, AF_INET6, etc. */
     hints.ai_socktype = socktype;       /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
 
-    if ((n = getaddrinfo(host, serv, &hints, &res)) != 0)
+    if ((n = netsnmp_getaddrinfo(host, serv, &hints, &res)) != 0)
         return (NULL);
 
     return (res);               /* return pointer to first on linked list */
@@ -1055,7 +1055,7 @@ Host_serv(const char *host, const char *serv, int family, int socktype)
     hints.ai_family = family;   /* 0, AF_INET, AF_INET6, etc. */
     hints.ai_socktype = socktype;       /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
 
-    if ((n = getaddrinfo(host, serv, &hints, &res)) != 0)
+    if ((n = netsnmp_getaddrinfo(host, serv, &hints, &res)) != 0)
 #if HAVE_GAI_STRERROR
         printf("host_serv error for %s, %s: %s",
                (host == NULL) ? "(no hostname)" : host,
@@ -5778,8 +5778,8 @@ pr_addr(struct in6_addr *addr, int options)
     struct hostent *hp = NULL;
 
     if (!(options & F_NUMERIC))
-        hp = gethostbyaddr((__u8 *) addr, sizeof(struct in6_addr),
-                           AF_INET6);
+        hp = netsnmp_gethostbyaddr((__u8 *) addr, sizeof(struct in6_addr),
+                                   AF_INET6);
 
     return hp ? hp->h_name : pr_addr_n(addr);
 }

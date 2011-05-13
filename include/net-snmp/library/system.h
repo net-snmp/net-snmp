@@ -137,6 +137,10 @@ SOFTWARE.
     struct hostent *netsnmp_gethostbyname(const char *name);
 
     NETSNMP_IMPORT
+    struct hostent *netsnmp_gethostbyaddr(const void *addr, socklen_t len,
+                                          int type);
+
+    NETSNMP_IMPORT
     int             netsnmp_getaddrinfo(const char *name, const char *service,
                                         const struct addrinfo *hints,
                                         struct addrinfo **res);

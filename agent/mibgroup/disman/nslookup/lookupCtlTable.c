@@ -538,7 +538,7 @@ run_lookup(struct lookupTable_data *item)
         }
 
         gettimeofday(&tpstart, NULL);
-        lookup = gethostbyaddr(&addr_in, sizeof(addr_in), AF_INET);
+        lookup = netsnmp_gethostbyaddr(&addr_in, sizeof(addr_in), AF_INET);
         gettimeofday(&tpend, NULL);
         timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
@@ -588,7 +588,7 @@ run_lookup(struct lookupTable_data *item)
 #endif
 
         gettimeofday(&tpstart, NULL);
-        lookup = gethostbyname(address);
+        lookup = netsnmp_gethostbyname(address);
         gettimeofday(&tpend, NULL);
         timeuse4 = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
@@ -630,7 +630,7 @@ run_lookup(struct lookupTable_data *item)
 
 #if HAVE_GETADDRINFO
         gettimeofday(&tpstart, NULL);
-        res = getaddrinfo(address, NULL, &hints, &ais);
+        res = netsnmp_getaddrinfo(address, NULL, &hints, &ais);
         gettimeofday(&tpend, NULL);
         timeuse6 = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
@@ -749,7 +749,7 @@ run_lookup(struct lookupTable_data *item)
             DEBUGMSGTL(("lookupCtlTable", "error! \n"));
 
         gettimeofday(&tpstart, NULL);
-        lookup = gethostbyaddr(&addr_in6, sizeof(addr_in6), AF_INET6);
+        lookup = netsnmp_gethostbyaddr(&addr_in6, sizeof(addr_in6), AF_INET6);
         gettimeofday(&tpend, NULL);
         timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
