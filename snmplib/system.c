@@ -163,6 +163,10 @@ SOFTWARE.
 #include <limits.h>
 #endif
 
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 #ifdef DNSSEC_LOCAL_VALIDATION
 #if 1 /*HAVE_ARPA_NAMESER_H*/
 #include <arpa/nameser.h>
@@ -711,14 +715,10 @@ get_uptime(void)
 int
 netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 {
-
 #if HAVE_GETADDRINFO
     struct addrinfo *addrs = NULL;
     struct addrinfo hint;
     int             err;
-#ifdef DNSSEC_LOCAL_VALIDATION
-    val_status_t val_status;
-#endif
 
     memset(&hint, 0, sizeof hint);
     hint.ai_flags = 0;
@@ -726,8 +726,7 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
     hint.ai_socktype = SOCK_DGRAM;
     hint.ai_protocol = 0;
 
-#ifndef DNSSEC_LOCAL_VALIDATION
-    err = getaddrinfo(name, NULL, &hint, &addrs);
+    err = netsnmp_getaddrinfo(name, NULL, &hint, &addrs);
     if (err != 0) {
 #if HAVE_GAI_STRERROR
         snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", name,
@@ -738,31 +737,6 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 #endif
         return -1;
     }
-#else /* DNSSEC_LOCAL_VALIDATION */
-    err = val_getaddrinfo(NULL, name, NULL, &hint, &addrs, &val_status);
-    DEBUGMSGTL(("dns:sec:val", "err %d, val_status %d / %s; trusted: %d\n",
-                err, val_status, p_val_status(val_status),
-                val_istrusted(val_status)));
-    if (err != 0) {
-        if (VAL_GETADDRINFO_HAS_STATUS(err) &&
-            !val_istrusted(val_status)) {
-            snmp_log(LOG_WARNING,
-                     "WARNING: UNTRUSTED error in DNS resolution for %s!\n",
-                     name);
-            snmp_log(LOG_WARNING,
-                     "The authenticity of DNS response is not trusted (%s).\n", 
-                     p_val_status(val_status));
-        }
-    }
-    if (!val_istrusted(val_status)) {
-        snmp_log(LOG_WARNING,
-                 "WARNING: UNTRUSTED error in DNS resolution for %s!\n", name);
-        snmp_log(LOG_WARNING,
-                 "The authenticity of DNS response is not trusted (%s)\n.",
-                 p_val_status(val_status));
-        return -1;
-    }
-#endif /* DNSSEC_LOCAL_VALIDATION */
 
     if (addrs != NULL) {
         memcpy(addr_out,
@@ -778,7 +752,7 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 #elif HAVE_GETHOSTBYNAME
     struct hostent *hp = NULL;
 
-    hp = gethostbyname(name);
+    hp = netsnmp_gethostbyname(name);
     if (hp == NULL) {
         DEBUGMSGTL(("get_thisaddr",
                     "hostname (couldn't resolve)\n"));
@@ -813,6 +787,101 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
     return -1;
 #endif
 }
+
+#if HAVE_GETADDRINFO
+int
+netsnmp_getaddrinfo(const char *name, const char *service,
+                    const struct addrinfo *hints, struct addrinfo **res)
+{
+    struct addrinfo *addrs = NULL;
+    struct addrinfo hint;
+    int             err;
+#ifdef DNSSEC_LOCAL_VALIDATION
+    val_status_t    val_status;
+#endif
+
+    DEBUGMSGTL(("dns:getaddrinfo", "looking up %s:%s\n", name, service));
+
+    memset(&hint, 0, sizeof hint);
+    hint.ai_flags = 0;
+    hint.ai_family = PF_INET;
+    hint.ai_socktype = SOCK_DGRAM;
+    hint.ai_protocol = 0;
+
+#ifndef DNSSEC_LOCAL_VALIDATION
+    err = getaddrinfo(name, NULL, &hint, &addrs);
+#else /* DNSSEC_LOCAL_VALIDATION */
+    err = val_getaddrinfo(NULL, name, NULL, &hint, &addrs, &val_status);
+    DEBUGMSGTL(("dns:sec:val", "err %d, val_status %d / %s; trusted: %d\n",
+                err, val_status, p_val_status(val_status),
+                val_istrusted(val_status)));
+    if (val_istrusted(val_status))
+        *res = addrs;
+    else {
+        if ((err != 0) && VAL_GETADDRINFO_HAS_STATUS(err)) {
+            snmp_log(LOG_WARNING,
+                     "WARNING: UNTRUSTED error in DNS resolution for %s!\n",
+                     name);
+            return EAI_FAIL;
+        }
+        snmp_log(LOG_WARNING,
+                 "The authenticity of DNS response is not trusted (%s)\n.",
+                 p_val_status(val_status));
+        return EAI_NONAME;
+    }
+#endif /* DNSSEC_LOCAL_VALIDATION */
+    if ((0 == err) && addrs && addrs->ai_addr) {
+        DEBUGMSGTL(("dns:getaddrinfo", "answer { AF_INET, %s:%hu }\n",
+                    inet_ntoa(((struct sockaddr_in*)addrs->ai_addr)->sin_addr),
+                    ntohs(((struct sockaddr_in*)addrs->ai_addr)->sin_port)));
+    }
+    return 0;
+}
+#endif /* getaddrinfo */
+
+#if HAVE_GETHOSTBYNAME
+struct hostent *
+netsnmp_gethostbyname(const char *name)
+{
+#ifdef DNSSEC_LOCAL_VALIDATION
+    val_status_t val_status;
+#endif
+    struct hostent *hp = NULL;
+
+    if (NULL == name)
+        return NULL;
+
+    DEBUGMSGTL(("dns:gethostbyname", "looking up %s\n", name));
+
+#ifdef DNSSEC_LOCAL_VALIDATION
+    hp  = val_gethostbyname(NULL, name, &val_status);
+    DEBUGMSGTL(("dns:sec:val", "val_status %d / %s; trusted: %d\n",
+                val_status, p_val_status(val_status),
+                val_istrusted(val_status)));
+    if (!val_istrusted(val_status)) {
+        snmp_log(LOG_WARNING,
+                 "The authenticity of DNS response is not trusted (%s)\n.",
+                 p_val_status(val_status));
+        hp = NULL;
+    }
+    else if (val_does_not_exist(val_status) && hp)
+        hp = NULL;
+#else
+    hp = gethostbyname(name);
+#endif
+    if (hp == NULL) {
+        DEBUGMSGTL(("dns:gethostbyname",
+                    "couldn't resolve %s\n", name));
+    } else if (hp->h_addrtype != AF_INET) {
+        DEBUGMSGTL(("dns:gethostbyname",
+                    "warning: response for %s not AF_INET!\n", name));
+    } else {
+        DEBUGMSGTL(("dns:gethostbyname",
+                    "%s resolved okay\n", name));
+    }
+    return hp;
+}
+#endif /* HAVE_GETHOSTBYNAME */
 
 /*******************************************************************/
 

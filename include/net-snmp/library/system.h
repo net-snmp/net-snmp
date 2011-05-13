@@ -131,6 +131,16 @@ SOFTWARE.
     int             netsnmp_gethostbyname_v4(const char* name,
                                              in_addr_t *addr_out);
 
+    /** netsnmp versions of dns resoloution.. may include DNSSEC validation. */
+    struct addrinfo; /* forward declare */
+    NETSNMP_IMPORT
+    struct hostent *netsnmp_gethostbyname(const char *name);
+
+    NETSNMP_IMPORT
+    int             netsnmp_getaddrinfo(const char *name, const char *service,
+                                        const struct addrinfo *hints,
+                                        struct addrinfo **res);
+
     NETSNMP_IMPORT
     in_addr_t       get_myaddr(void);
     NETSNMP_IMPORT
