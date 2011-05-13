@@ -470,7 +470,8 @@ inet6name(const unsigned char *in6)
 #ifdef NETSNMP_ENABLE_IPV6
 	cp = NULL;
 	if (!nflag && !IN6_IS_ADDR_UNSPECIFIED(in6p)) {
-		hp = gethostbyaddr((const char *)in6p, sizeof(*in6p), AF_INET6);
+		hp = netsnmp_gethostbyaddr((const char *)in6p, sizeof(*in6p),
+                                           AF_INET6);
 		if (hp) {
 			if ((cp = strchr(hp->h_name, '.')) &&
 			    !strcmp(cp + 1, domain))

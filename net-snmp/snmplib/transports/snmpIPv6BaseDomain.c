@@ -308,7 +308,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         hint.ai_socktype = SOCK_DGRAM;
         hint.ai_protocol = 0;
 
-        err = getaddrinfo(peername, NULL, &hint, &addrs);
+        err = netsnmp_getaddrinfo(peername, NULL, &hint, &addrs);
         if (err != 0) {
 #if HAVE_GAI_STRERROR
             snmp_log(LOG_ERR, "getaddrinfo(\"%s\", NULL, ...): %s\n", peername,
@@ -341,7 +341,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
         memcpy(&(addr->sin6_addr), hp->h_addr, hp->h_length);
 #elif HAVE_GETHOSTBYNAME
-        hp = gethostbyname(peername);
+        hp = netsnmp_gethostbyname(peername);
         if (hp == NULL) {
             DEBUGMSGTL(("netsnmp_sockaddr_in6",
                         "hostname (couldn't resolve)\n"));
