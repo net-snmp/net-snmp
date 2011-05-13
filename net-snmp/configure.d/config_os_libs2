@@ -86,6 +86,8 @@ xwinsock2)
   AC_SEARCH_LIBS(socket, socket,,AC_MSG_ERROR([socket(2) not found.]))
   AC_SEARCH_LIBS(gethostbyname, [nsl socket])
   AC_CHECK_FUNCS(gethostbyname)
+  AC_SEARCH_LIBS(gethostbyaddr, [nsl socket])
+  AC_CHECK_FUNCS(gethostbyaddr)
   ;;
 esac
 

@@ -287,7 +287,7 @@ routename(in_addr_t in)
 	}
 	cp = NULL;
 	if (!nflag) {
-		hp = gethostbyaddr((char *)&in, sizeof (struct in_addr),
+		hp = netsnmp_gethostbyaddr((char *)&in, sizeof (struct in_addr),
 		    AF_INET);
 		if (hp) {
 			if ((cp = strchr(hp->h_name, '.')) &&
