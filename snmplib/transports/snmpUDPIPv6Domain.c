@@ -544,7 +544,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
 
                 hints.ai_family = AF_INET6;
                 hints.ai_socktype = SOCK_DGRAM;
-                gai_error = getaddrinfo(source, NULL, &hints, &res);
+                gai_error = netsnmp_getaddrinfo(source, NULL, &hints, &res);
                 if (gai_error != 0) {
                     config_perror(gai_strerror(gai_error));
                     return;

@@ -454,7 +454,7 @@ setup_engineID(u_char ** eidp, const char *text)
          * get the host name and save the information 
          */
         gethostname((char *) buf, sizeof(buf));
-        hent = gethostbyname((char *) buf);
+        hent = netsnmp_gethostbyname((char *) buf);
         if (hent && hent->h_addrtype == AF_INET6) {
             localEngineIDType = ENGINEID_TYPE_IPV6;
         } else {
@@ -477,7 +477,7 @@ setup_engineID(u_char ** eidp, const char *text)
          * get the host name and save the information 
          */
         gethostname((char *) buf, sizeof(buf));
-        hent = gethostbyname((char *) buf);
+        hent = netsnmp_gethostbyname((char *) buf);
     }
 #endif
 #endif                          /* HAVE_GETHOSTNAME */
