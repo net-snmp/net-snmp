@@ -835,7 +835,7 @@ netsnmp_getaddrinfo(const char *name, const char *service,
                     inet_ntoa(((struct sockaddr_in*)addrs->ai_addr)->sin_addr),
                     ntohs(((struct sockaddr_in*)addrs->ai_addr)->sin_port)));
     }
-    return 0;
+    return err;
 #else
     NETSNMP_LOGONCE((LOG_ERR, "getaddrinfo not available"));
     return EAI_FAIL;
