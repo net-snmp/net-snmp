@@ -249,6 +249,7 @@ init_diskio(void)
 }
 
 #if 0
+/* to do: make sure diskio_free_config() gets invoked upon SIGHUP. */
 static void
 diskio_free_config(void)
 {
