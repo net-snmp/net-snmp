@@ -23,7 +23,7 @@ fi
 success_count=0
 failed_count=0
 rm -f failed_tests
-for i in "${srcdir}/testing/fulltests/default/T*$1*"; do
+for i in "${srcdir}"/testing/fulltests/default/T*$1*; do
     echo "RUNNING $i"
     ${srcdir}/testing/fulltests/support/simple_run $i
     if [ $? = 0 ]; then
