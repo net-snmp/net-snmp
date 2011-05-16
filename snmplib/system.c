@@ -802,11 +802,16 @@ netsnmp_getaddrinfo(const char *name, const char *service,
 
     DEBUGMSGTL(("dns:getaddrinfo", "looking up %s:%s\n", name, service));
 
-    memset(&hint, 0, sizeof hint);
-    hint.ai_flags = 0;
-    hint.ai_family = PF_INET;
-    hint.ai_socktype = SOCK_DGRAM;
-    hint.ai_protocol = 0;
+    if (NULL == hints) {
+        memset(&hint, 0, sizeof hint);
+        hint.ai_flags = 0;
+        hint.ai_family = PF_INET;
+        hint.ai_socktype = SOCK_DGRAM;
+        hint.ai_protocol = 0;
+        hints = &hint;
+    } else {
+        memcpy(&hint, hints, sizeof hint);
+    }
 
 #ifndef DNSSEC_LOCAL_VALIDATION
     err = getaddrinfo(name, NULL, &hint, &addrs);
