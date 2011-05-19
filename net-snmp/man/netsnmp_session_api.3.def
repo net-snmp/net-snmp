@@ -23,14 +23,16 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH NETSNMP_SESSION_API 3 "13 Aug 2010" VVERSIONINFO "Net-SNMP"
+.TH NETSNMP_SESSION_API 3 "19 May 2011" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmp_sess_init,
 snmp_open,
 snmp_send,
+snmp_async_send,
 snmp_select_info,
 snmp_read,
 snmp_timeout,
+snmp_synch_response,
 snmp_close,
 snmp_perror,
 snmp_sess_perror,
@@ -51,6 +53,15 @@ snmp_api_errstring \- netsnmp_session_api functions
 .BI "netsnmp_pdu *" "pdu" );
 .RE
 .PP
+.BI "int snmp_async_send ( netsnmp_session *" "session,"
+.RS
+.BI "                         netsnmp_pdu *" pdu ", "
+.br
+.BI "                         snmp_callback " callback ", "
+.br
+.BI "                         void *" callbackData ");"
+.RE
+.PP
 .BI "int snmp_select_info ( int * " numfds, "fd_set *" fdset,
 .RS
 .BI "struct timeval *" timeout, "int *" block );
@@ -59,6 +70,13 @@ snmp_api_errstring \- netsnmp_session_api functions
 .BI "void snmp_read ( fd_set *" fdset );
 .PP
 .B  void snmp_timeout ( void );
+.PP
+.BI "int snmp_synch_response ( netsnmp_session *" "session,"
+.RS
+.BI "netsnmp_pdu *" "pdu" ", "
+.br
+.BI "netsnmp_pdu **" "response" );
+.RE
 .PP
 .BI "int snmp_close ( netsnmp_session *" session );
 .br
@@ -98,14 +116,22 @@ returns a pointer to a newly-formed
 object, which the application must use to reference the
 active SNMP session.
 .PP
-.I Snmp_send
-takes as input a pointer to a
+.I snmp_send
+and
+.I snmp_async_send()
+each take as input a pointer to a
 .I netsnmp_pdu
 object.
 This structure contains information that describes a transaction
 that will be performed over an open session.
 .PP
 Consult snmp_api.h for the definitions of these structures.
+.PP
+With the
+.I snmp_async_send()
+call,
+.I snmp_read
+will invoke the specified callback when the response is received.
 .PP
 .I Snmp_read, snmp_select_info,
 and
@@ -156,6 +182,13 @@ If
 times out,
 .I snmp_timeout
 should be called to see if the timeout was intended for SNMP.
+.PP
+.I snmp_synch_response
+is a convenience routine that will send the request,
+wait for the response and process it before returning.
+See the descriptions of
+.I "snmp_send" ", " "snmp_read"
+etc for details.
 .SH DIAGNOSTICS
 .PP
 Previous versions of the library used
