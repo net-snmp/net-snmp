@@ -23,7 +23,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH NETSNMP_SESSION_API 3 "13 Aug 2010" VVERSIONINFO "Net-SNMP"
+.TH NETSNMP_SESSION_API 3 "19 May 2011" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmp_sess_init,
 snmp_open,
