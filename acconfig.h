@@ -756,7 +756,7 @@
 #define CAN_USE_NLIST
 #endif
 
-#if HAVE_DMALLOC_H
+#ifdef HAVE_DMALLOC_H
 #define DMALLOC_FUNC_CHECK
 #endif
 
