@@ -156,10 +156,13 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
         return (SNMPERR_GENERR);
     }
 #elif NETSNMP_USE_INTERNAL_CRYPTO
+#ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
         MD5_Init(&cmd5);
         cryptotype = TYPE_MD5;
-    } else if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
+    } else
+#endif
+           if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
         SHA1_Init(&csha1);
         cryptotype = TYPE_SHA1;
     } else {
