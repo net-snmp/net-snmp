@@ -19,9 +19,9 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMP_API 3 "28 Mar 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMP_API 3 "19 May 2011" VVERSIONINFO "Net-SNMP"
 .SH NAME
-snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close, snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring \- send and receive SNMP messages
+snmp_sess_init, snmp_open, snmp_send, snmp_async_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_synch_response, snmp_close, snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring \- send and receive SNMP messages
 .SH SYNOPSIS
 #include <net-snmp/session_api.h>
 .PP
@@ -37,6 +37,13 @@ int snmp_send ( struct snmp_session *session,
 struct snmp_pdu *pdu );
 .RE
 .PP
+int snmp_async_send ( struct snmp_session *session,
+.RS
+struct snmp_pdu *pdu,
+snmp_callback callback,
+void *callbackData );
+.RE
+.PP
 int snmp_select_info ( int *numfds, fd_set *fdset,
 .RS
 struct timeval *timeout, int *block );
@@ -45,6 +52,12 @@ struct timeval *timeout, int *block );
 void snmp_read ( fd_set *fdset );
 .PP
 void snmp_timeout ( void );
+.PP
+int snmp_synch_response ( struct snmp_session *session,
+.RS
+struct snmp_pdu *pdu,
+struct snmp_pdu **response);
+.RE
 .PP
 int snmp_close ( struct snmp_session *session );
 .PP
@@ -85,7 +98,7 @@ returns a pointer to a newly-formed
 object, which the application must use to reference the
 active SNMP session.
 .PP
-.I Snmp_send
+.I Snmp_send, snmp_async_send
 and
 .I snmp_free_pdu
 each take as input a pointer to a
@@ -95,6 +108,12 @@ This structure contains information that describes a transaction
 that will be performed over an open session.
 .PP
 Consult snmp_api.h for the definitions of these structures.
+.PP
+With the
+.I snmp_async_send()
+call,
+.I snmp_read()
+will invoke the specified callback when the response is received.
 .PP
 .I Snmp_read, snmp_select_info,
 and
@@ -145,6 +164,13 @@ If
 times out,
 .I snmp_timeout
 should be called to see if the timeout was intended for SNMP.
+.PP
+.I snmp_synch_response
+is a convenience routine that will send the request,
+wait for the response and process it before returning.
+See the descriptions of
+.I snmp_send, snmp_read
+etc for details.
 .SH DIAGNOSTICS
 .PP
 Previous versions of the library used
