@@ -1,9 +1,10 @@
-.TH SNMP_SESS_API 3 "12 Jul 2007" VVERSIONINFO "Net-SNMP"
+.TH SNMP_SESS_API 3 "19 May 2011" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmp_sess_init, snmp_sess_open, snmp_sess_session,
 snmp_sess_send, snmp_sess_async_send,
 snmp_sess_select_info, snmp_sess_read,
-snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions
+snmp_sess_timeout, snmp_sess_synch_response,
+snmp_sess_close, snmp_sess_error - session functions
 .SH SYNOPSIS
 .B #include <net-snmp/session_api.h>
 .PP
@@ -34,6 +35,12 @@ snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions
 .BI "int snmp_sess_read(void *" handle ", fd_set *" fdset ");"
 .PP
 .BI "void snmp_sess_timeout(void *" handle ");"
+.PP
+.BI "int snmp_sess_synch_response(void *" handle ","
+.br
+.BI "                         struct snmp_pdu *" pdu ", "
+.br
+.BI "                         struct snmp_pdu **" response ");"
 .PP
 .BI "int snmp_sess_close(void *" handle ");"
 .PP
@@ -93,6 +100,12 @@ an open session.
 .PP
 Consult snmp_api.h for the definitions of these structures.
 .PP
+With the
+.I snmp_sess_async_send()
+call,
+.I snmp_sess_read()
+will invoke the specified callback when the response is received.
+.PP
 .BR snmp_sess_select_info() ", " snmp_sess_read() " and " snmp_sess_timeout()
 provide an interface for the use of the
 .BR select (2)
@@ -142,6 +155,13 @@ times out (that is, it returns zero),
 .B snmp_sess_timeout()
 should be called to see if a timeout has occurred on the SNMP
 session.
+.PP
+.I snmp_sess_synch_response
+is a convenience routine that will send the request,
+wait for the response and process it before returning.
+See the descriptions of
+.I "snmp_sess_send" ", " "snmp_sess_read"
+etc for details.
 .SH DIAGNOSTICS
 .PP
 Error return status from 
