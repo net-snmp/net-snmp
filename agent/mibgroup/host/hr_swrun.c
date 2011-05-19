@@ -480,6 +480,82 @@ header_hrswrunEntry(struct variable *vp,
 	 *
 	 *********************/
 
+#if defined(linux)
+static char     *
+skip_to_next_field(char *cp)
+{
+    while (*cp && ! isspace(*cp)) /* skip past non-space */
+	++cp;
+    while (*cp && isspace(*cp)) /* skip past space */
+	++cp;
+    return cp;
+
+}
+
+static char     *
+get_proc_file_line(char *fmt,
+		    int pid,
+		    char *buf,
+		    int buflen )
+{
+    static char     string[1024];
+    FILE *fp;
+    *buf = '\0';
+    sprintf(string,fmt,pid);
+    if (   ((fp = fopen(string, "r")) == NULL)
+	|| (fgets(buf, buflen, fp) == NULL) ) {
+	if (fp)
+	    fclose(fp);
+	return NULL;
+    }
+    fclose(fp);
+    return buf;
+}
+
+static char     *
+get_proc_stat_field(int pid,
+		    char *buf,
+		    int buflen,
+		    int skip )
+{
+    int i;
+    char *cp;
+
+    if ((cp = get_proc_file_line("/proc/%d/stat", pid, buf, buflen)) == NULL )
+	return NULL;
+    for (i = 0; *cp && i < skip; ++i) {
+	cp = skip_to_next_field(cp);
+    }
+    return cp;
+}
+
+static char *
+get_proc_name_from_cmdline(int pid,
+			    char *buf,
+			    int buflen )
+{
+    return get_proc_file_line("/proc/%d/cmdline", pid, buf, buflen);
+}
+
+static char *
+get_proc_name_from_status(int pid,
+	    char *buf,
+	    int buflen )
+{
+    char *cp,*cp2;
+    if ((cp = get_proc_file_line("/proc/%d/status", pid, buf, buflen)) == NULL )
+	return NULL;
+    cp = strchr(cp, ':');
+    if ( cp == NULL ) {
+	return NULL;    /* the process file is malformed */
+    }
+    cp = skip_to_next_field(cp);
+    cp2 = strchr(cp, '\n');
+    if (cp2)
+	*cp2 = 0;
+    return cp;
+}
+#endif
 
 u_char         *
 var_hrswrun(struct variable * vp,
@@ -628,21 +704,12 @@ var_hrswrun(struct variable * vp,
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
     #endif
 #elif defined(linux)
-        sprintf(string, "/proc/%d/status", pid);
-        if ((fp = fopen(string, "r")) == NULL) {
+	if( (cp=get_proc_name_from_status(pid,buf,sizeof(buf))) == NULL ) {
             strcpy(string, "<exited>");
             *var_len = strlen(string);
             return (u_char *) string;
         }
-        fgets(buf, sizeof(buf), fp);    /* Name: process name */
-        cp = buf;
-        while (*cp != ':')
-            ++cp;
-        ++cp;
-        while (isspace(*cp))
-            ++cp;
         strcpy(string, cp);
-        fclose(fp);
 #elif defined(cygwin)
         /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
         if (lowproc.process_state & PID_EXITED || (lowproc.exitcode & ~0xffff))
@@ -759,40 +826,24 @@ var_hrswrun(struct variable * vp,
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
     #endif
 #elif defined(linux)
-        sprintf(string, "/proc/%d/cmdline", pid);
-        if ((fp = fopen(string, "r")) == NULL) {
+	if( (cp=get_proc_name_from_cmdline(pid,buf,sizeof(buf)-1)) == NULL ) {
             strcpy(string, "<exited>");
             *var_len = strlen(string);
             return (u_char *) string;
         }
-        if (fgets(buf, sizeof(buf) - 1, fp))    /* argv[0] '\0' argv[1] '\0' .... */
-            strcpy(string, buf);
+        if (*cp)    /* argv[0] '\0' argv[1] '\0' .... */
+            strcpy(string, cp);
         else {
             /*
              * swapped out - no cmdline 
              */
-            fclose(fp);
-            sprintf(string, "/proc/%d/status", pid);
-            if ((fp = fopen(string, "r")) == NULL)
-                return NULL;
-            if (!fgets(buf, sizeof(buf), fp)) {
-                fclose(fp);
-                return NULL;    /* the process probably died */
-            }
-            cp = strchr(buf, ':');
-            if ( cp == NULL ) {
-                fclose(fp);
-                return NULL;    /* the process file is malformed */
-            }
-            ++cp;
-            while (isspace(*cp))
-                ++cp;
+	    if( (cp=get_proc_name_from_status(pid,buf,sizeof(buf)-1)) == NULL ) {
+		strcpy(string, "<exited>");
+		*var_len = strlen(string);
+		return (u_char *) string;
+	    }
             strcpy(string, cp);
-            cp = strchr(string, '\n');
-            if (cp)
-                *cp = 0;
         }
-        fclose(fp);
 #elif defined(cygwin)
         /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
         if (lowproc.process_state & PID_EXITED || (lowproc.exitcode & ~0xffff))
@@ -892,25 +943,11 @@ var_hrswrun(struct variable * vp,
             argv++;
         }
 #elif defined(linux)
-        sprintf(string, "/proc/%d/cmdline", pid);
-        if ((fp = fopen(string, "r")) == NULL) {
+        memset(buf, 0, sizeof(buf));
+	if( (cp=get_proc_name_from_cmdline(pid,buf,sizeof(buf)-2)) == NULL ) {
             strcpy(string, "");
             *var_len = 0;
             return (u_char *) string;
-        }
-        memset(buf, 0, sizeof(buf));
-
-        /*
-         * argv[0] '\0' argv[1] '\0' .... 
-         */
-        if (!fgets(buf, sizeof(buf) - 2, fp)) {
-            /*
-             * maybe be empty (even argv[0] is missing) 
-             */
-            string[0] = '\0';
-            *var_len = 0;
-            fclose(fp);
-            return (u_char *)string;
         }
 
         /*
@@ -936,7 +973,6 @@ var_hrswrun(struct variable * vp,
             ++cp;
         ++cp;
         strcpy(string, cp);
-        fclose(fp);
 #elif defined(cygwin)
         string[0] = 0;
 #else
@@ -1076,16 +1112,7 @@ var_hrswrun(struct variable * vp,
         }
 #endif
 #else
-        sprintf(string, "/proc/%d/stat", pid);
-        if ((fp = fopen(string, "r")) != NULL) {
-            fgets(buf, sizeof(buf), fp);
-            cp = buf;
-            for (i = 0; i < 2; ++i) {   /* skip two fields */
-                while (*cp != ' ')
-                    ++cp;
-                ++cp;
-            }
-
+	if ((cp = get_proc_stat_field(pid,buf,sizeof(buf),2)) != NULL ) {
             switch (*cp) {
             case 'R':
                 long_return = 1;        /* running */
@@ -1102,7 +1129,6 @@ var_hrswrun(struct variable * vp,
                 long_return = 4;        /* invalid */
                 break;
             }
-            fclose(fp);
         } else
             long_return = 4;    /* invalid */
 #endif
@@ -1151,26 +1177,16 @@ var_hrswrun(struct variable * vp,
             proc_table[LowProcIndex].kp_proc.p_iticks;
     #endif
 #elif defined(linux)
-        sprintf(string, "/proc/%d/stat", pid);
-        if ((fp = fopen(string, "r")) == NULL) {
+	if ((cp = get_proc_stat_field(pid,buf,sizeof(buf),13)) == NULL ) {
             long_return = 0;
             return (u_char *) & long_return;
-        }
-        fgets(buf, sizeof(buf), fp);
-        cp = buf;
-        for (i = 0; i < 13; ++i) {      /* skip 13 fields */
-            while (*cp != ' ')
-                ++cp;
-            ++cp;
         }
 
         long_return = atoi(cp); /* utime */
 
-        while (*cp != ' ')
-            ++cp;
-        ++cp;
+        cp = skip_to_next_field(cp);
+
         long_return += atoi(cp);        /* + stime */
-        fclose(fp);
 #elif defined(sunos4)
         long_return = proc_table[LowProcIndex].p_time;
 #elif defined(cygwin)
@@ -1279,20 +1295,11 @@ var_hrswrun(struct variable * vp,
         long_return = long_return * (getpagesize() / 1024);
   #endif
 #elif defined(linux)
-        sprintf(string, "/proc/%d/stat", pid);
-        if ((fp = fopen(string, "r")) == NULL) {
+	if ((cp = get_proc_stat_field(pid,buf,sizeof(buf),23)) == NULL ) {
             long_return = 0;
             return (u_char *) & long_return;
         }
-        fgets(buf, sizeof(buf), fp);
-        cp = buf;
-        for (i = 0; i < 23; ++i) {      /* skip 23 fields */
-            while (*cp != ' ')
-                ++cp;
-            ++cp;
-        }
         long_return = atoi(cp) * (getpagesize() / 1024);        /* rss */
-        fclose(fp);
 #elif defined(cygwin)
         {
             DWORD           n = lowproc.dwProcessId;
