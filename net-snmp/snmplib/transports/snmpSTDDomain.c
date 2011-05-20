@@ -278,8 +278,9 @@ netsnmp_std_ctor(void)
     stdDomain.prefix = (const char **)calloc(2, sizeof(char *));
     stdDomain.prefix[0] = "std";
 
+    stdDomain.f_create_from_tstring     = NULL;
     stdDomain.f_create_from_tstring_new = netsnmp_std_create_tstring;
-    stdDomain.f_create_from_ostring = netsnmp_std_create_ostring;
+    stdDomain.f_create_from_ostring     = netsnmp_std_create_ostring;
 
     netsnmp_tdomain_register(&stdDomain);
 }
