@@ -951,8 +951,9 @@ netsnmp_ssh_ctor(void)
     sshDomain.prefix = (const char **)calloc(2, sizeof(char *));
     sshDomain.prefix[0] = "ssh";
 
+    sshDomain.f_create_from_tstring     = NULL;
     sshDomain.f_create_from_tstring_new = netsnmp_ssh_create_tstring;
-    sshDomain.f_create_from_ostring = netsnmp_ssh_create_ostring;
+    sshDomain.f_create_from_ostring     = netsnmp_ssh_create_ostring;
 
     register_config_handler("snmp", "sshtosnmpsocketperms",
                             &sshdomain_parse_socket, NULL,
