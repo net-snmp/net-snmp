@@ -360,8 +360,9 @@ netsnmp_aal5pvc_ctor(void)
     aal5pvcDomain.prefix[0] = "aal5pvc";
     aal5pvcDomain.prefix[1] = "pvc";
 
+    aal5pvcDomain.f_create_from_tstring     = NULL;
     aal5pvcDomain.f_create_from_tstring_new = netsnmp_aal5pvc_create_tstring;
-    aal5pvcDomain.f_create_from_ostring = netsnmp_aal5pvc_create_ostring;
+    aal5pvcDomain.f_create_from_ostring     = netsnmp_aal5pvc_create_ostring;
 
     netsnmp_tdomain_register(&aal5pvcDomain);
 }

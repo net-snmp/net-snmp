@@ -758,8 +758,9 @@ netsnmp_udpipv6_ctor(void)
 {
     udp6Domain.name = netsnmp_UDPIPv6Domain;
     udp6Domain.name_length = sizeof(netsnmp_UDPIPv6Domain) / sizeof(oid);
+    udp6Domain.f_create_from_tstring     = NULL;
     udp6Domain.f_create_from_tstring_new = netsnmp_udp6_create_tstring;
-    udp6Domain.f_create_from_ostring = netsnmp_udp6_create_ostring;
+    udp6Domain.f_create_from_ostring     = netsnmp_udp6_create_ostring;
     udp6Domain.prefix = (const char**)calloc(5, sizeof(char *));
     udp6Domain.prefix[0] = "udp6";
     udp6Domain.prefix[1] = "ipv6";

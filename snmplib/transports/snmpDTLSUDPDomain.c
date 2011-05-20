@@ -1576,8 +1576,9 @@ netsnmp_dtlsudp_ctor(void)
     for (i = 0; i < num_prefixes; ++ i)
         dtlsudpDomain.prefix[i] = prefixes[i];
 
+    dtlsudpDomain.f_create_from_tstring     = NULL;
     dtlsudpDomain.f_create_from_tstring_new = netsnmp_dtlsudp_create_tstring;
-    dtlsudpDomain.f_create_from_ostring = netsnmp_dtlsudp_create_ostring;
+    dtlsudpDomain.f_create_from_ostring     = netsnmp_dtlsudp_create_ostring;
 
     if (!openssl_addr_index)
         openssl_addr_index =
