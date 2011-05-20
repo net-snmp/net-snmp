@@ -509,8 +509,9 @@ netsnmp_udp_ctor(void)
     udpDomain.prefix = (const char**)calloc(2, sizeof(char *));
     udpDomain.prefix[0] = "udp";
 
+    udpDomain.f_create_from_tstring     = NULL;
     udpDomain.f_create_from_tstring_new = netsnmp_udp_create_tstring;
-    udpDomain.f_create_from_ostring = netsnmp_udp_create_ostring;
+    udpDomain.f_create_from_ostring     = netsnmp_udp_create_ostring;
 
     netsnmp_tdomain_register(&udpDomain);
 }
