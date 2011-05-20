@@ -463,8 +463,9 @@ netsnmp_unix_ctor(void)
     unixDomain.prefix = (const char**)calloc(2, sizeof(char *));
     unixDomain.prefix[0] = "unix";
 
+    unixDomain.f_create_from_tstring     = NULL;
     unixDomain.f_create_from_tstring_new = netsnmp_unix_create_tstring;
-    unixDomain.f_create_from_ostring = netsnmp_unix_create_ostring;
+    unixDomain.f_create_from_ostring     = netsnmp_unix_create_ostring;
 
     netsnmp_tdomain_register(&unixDomain);
 }
