@@ -385,15 +385,22 @@ typedef struct request_list {
     /*
      * to determine type of Report from varbind_list 
      */
-#define REPORT_STATS_LEN 9
+#define REPORT_STATS_LEN  9	/* Length of prefix for MPD/USM report statistic objects */
+#define REPORT_STATS_LEN2 8	/* Length of prefix for Target report statistic objects */
+/* From SNMP-MPD-MIB */
 #define REPORT_snmpUnknownSecurityModels_NUM 1
-#define REPORT_snmpInvalidMsgs_NUM 2
+#define REPORT_snmpInvalidMsgs_NUM           2
+#define REPORT_snmpUnknownPDUHandlers_NUM    3
+/* From SNMP-USER-BASED-SM-MIB */
 #define REPORT_usmStatsUnsupportedSecLevels_NUM 1
 #define REPORT_usmStatsNotInTimeWindows_NUM 2
 #define REPORT_usmStatsUnknownUserNames_NUM 3
 #define REPORT_usmStatsUnknownEngineIDs_NUM 4
-#define REPORT_usmStatsWrongDigests_NUM 5
+#define REPORT_usmStatsWrongDigests_NUM     5
 #define REPORT_usmStatsDecryptionErrors_NUM 6
+/* From SNMP-TARGET-MIB */
+#define REPORT_snmpUnavailableContexts_NUM  4
+#define REPORT_snmpUnknownContexts_NUM      5
 
 #define SNMP_DETAIL_SIZE        512
 
