@@ -1177,7 +1177,7 @@ py_netsnmp_attr_void_ptr(PyObject *obj, char * attr_name)
   if (obj && attr_name  && PyObject_HasAttrString(obj, attr_name)) {
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
     if (attr) {
-      val = PyInt_AsVoidPtr(attr);
+      val = PyLong_AsVoidPtr(attr);
       Py_DECREF(attr);
     }
   }
