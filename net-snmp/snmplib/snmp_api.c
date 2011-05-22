@@ -4031,16 +4031,21 @@ int
 snmpv3_get_report_type(netsnmp_pdu *pdu)
 {
     static oid      snmpMPDStats[] = { 1, 3, 6, 1, 6, 3, 11, 2, 1 };
-    static oid      usmStats[] = { 1, 3, 6, 1, 6, 3, 15, 1, 1 };
+    static oid      targetStats[]  = { 1, 3, 6, 1, 6, 3, 12, 1    };
+    static oid      usmStats[]     = { 1, 3, 6, 1, 6, 3, 15, 1, 1 };
     netsnmp_variable_list *vp;
     int             rpt_type = SNMPERR_UNKNOWN_REPORT;
 
     if (pdu == NULL || pdu->variables == NULL)
         return rpt_type;
     vp = pdu->variables;
+    /* MPD or USM based report statistics objects have the same length prefix
+     *   so the actual statistics OID will have this length,
+     *   plus one subidentifier for the scalar MIB object itself,
+     *   and one for the instance subidentifier
+     */
     if (vp->name_length == REPORT_STATS_LEN + 2) {
-        if (memcmp(snmpMPDStats, vp->name, REPORT_STATS_LEN * sizeof(oid))
-            == 0) {
+        if (memcmp(snmpMPDStats, vp->name, REPORT_STATS_LEN * sizeof(oid)) == 0) {
             switch (vp->name[REPORT_STATS_LEN]) {
             case REPORT_snmpUnknownSecurityModels_NUM:
                 rpt_type = SNMPERR_UNKNOWN_SEC_MODEL;
@@ -4048,10 +4053,11 @@ snmpv3_get_report_type(netsnmp_pdu *pdu)
             case REPORT_snmpInvalidMsgs_NUM:
                 rpt_type = SNMPERR_INVALID_MSG;
                 break;
+            case REPORT_snmpUnknownPDUHandlers_NUM:
+                rpt_type = SNMPERR_BAD_VERSION;
+                break;
             }
-        } else
-            if (memcmp(usmStats, vp->name, REPORT_STATS_LEN * sizeof(oid))
-                == 0) {
+        } else if (memcmp(usmStats, vp->name, REPORT_STATS_LEN * sizeof(oid)) == 0) {
             switch (vp->name[REPORT_STATS_LEN]) {
             case REPORT_usmStatsUnsupportedSecLevels_NUM:
                 rpt_type = SNMPERR_UNSUPPORTED_SEC_LEVEL;
@@ -4070,6 +4076,21 @@ snmpv3_get_report_type(netsnmp_pdu *pdu)
                 break;
             case REPORT_usmStatsDecryptionErrors_NUM:
                 rpt_type = SNMPERR_DECRYPTION_ERR;
+                break;
+            }
+        }
+    }
+    /* Context-based report statistics from the Target MIB are similar
+     *   but the OID prefix has a different length
+     */
+    if (vp->name_length == REPORT_STATS_LEN2 + 2) {
+        if (memcmp(targetStats, vp->name, REPORT_STATS_LEN2 * sizeof(oid)) == 0) {
+            switch (vp->name[REPORT_STATS_LEN2]) {
+            case REPORT_snmpUnavailableContexts_NUM:
+                rpt_type = SNMPERR_BAD_CONTEXT;
+                break;
+            case REPORT_snmpUnknownContexts_NUM:
+                rpt_type = SNMPERR_BAD_CONTEXT;
                 break;
             }
         }
