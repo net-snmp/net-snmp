@@ -6,7 +6,7 @@
 #endif
 
 #ifndef EIGHTBIT_SUBIDS
-typedef uint32_t oid;
+typedef u_long oid;
 #define MAX_SUBID   0xFFFFFFFF
 #define NETSNMP_PRIo NETSNMP_PRI32
 #else
