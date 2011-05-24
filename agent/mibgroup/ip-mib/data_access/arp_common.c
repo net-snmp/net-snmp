@@ -114,6 +114,9 @@ netsnmp_access_arp_entry_create(void)
     netsnmp_arp_entry *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_arp_entry);
 
+    if (NULL == entry)
+        return NULL;
+
     entry->oid_index.len = 1;
     entry->oid_index.oids = &entry->ns_arp_index;
 
