@@ -815,6 +815,7 @@ netsnmp_getaddrinfo(const char *name, const char *service,
 
 #ifndef DNSSEC_LOCAL_VALIDATION
     err = getaddrinfo(name, NULL, &hint, &addrs);
+    *res = addrs;
 #else /* DNSSEC_LOCAL_VALIDATION */
     err = val_getaddrinfo(NULL, name, NULL, &hint, &addrs, &val_status);
     DEBUGMSGTL(("dns:sec:val", "err %d, val_status %d / %s; trusted: %d\n",
