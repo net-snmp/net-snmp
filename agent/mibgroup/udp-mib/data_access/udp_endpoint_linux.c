@@ -91,6 +91,9 @@ netsnmp_arch_udp_endpoint_container_load(netsnmp_container *container,
 {
     int rc = 0;
 
+    /* Setup the pid_from_inode table, and fill it.*/
+    netsnmp_get_pid_from_inode_init();
+
     rc = _load4(container, load_flags);
     if(rc < 0) {
         u_int flags = NETSNMP_ACCESS_UDP_ENDPOINT_FREE_KEEP_CONTAINER;

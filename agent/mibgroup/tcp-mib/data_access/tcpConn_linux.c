@@ -84,6 +84,9 @@ netsnmp_arch_tcpconn_container_load(netsnmp_container *container,
     DEBUGMSGTL(("access:tcpconn:container",
                 "tcpconn_container_arch_load (flags %x)\n", load_flags));
 
+    /* Setup the pid_from_inode table, and fill it.*/
+    netsnmp_get_pid_from_inode_init();
+
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_tcpconn\n");
         return -1;
@@ -183,7 +186,7 @@ _load4(netsnmp_container *container, u_int load_flags)
         entry->rmt_port = (unsigned short) remote_port;
         entry->tcpConnState = state;
         entry->pid = netsnmp_get_pid_from_inode(inode);
-        
+
         /** the addr string may need work */
         buf_len = strlen(local_addr);
         if ((8 != buf_len) ||
