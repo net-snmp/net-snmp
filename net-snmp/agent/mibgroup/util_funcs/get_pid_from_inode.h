@@ -28,6 +28,7 @@ config_error(get_pid_from_inode is only suppored on linux)
 
 #include <sys/types.h>
 
+void netsnmp_get_pid_from_inode_init(void);
 pid_t netsnmp_get_pid_from_inode(ino64_t);
 
 #endif /* NETSNMP_MIBGROUP_UTIL_FUNCS_HEADER_SIMPLE_TABLE_H */

@@ -11,7 +11,7 @@ sub InitMakeParams {
     $nsconfig="net-snmp-config"; # in path by default
     my %Params = (
 		  'NAME' => 'Bundle::NetSNMP',
-		  'DIR' => [qw(default_store ASN OID agent SNMP TrapReceiver)]
+		  'DIR' => [qw(default_store ASN OID agent SNMP TrapReceiver)],
 		  );
 
     # bogus, but these options need to be passed to the lower levels
