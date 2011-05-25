@@ -418,7 +418,7 @@ updateTunnels(void)
      */
     for (tunnel = tunnels; tunnel; tunnel = tunnel->next) {
         DEBUGMSG(("tunnel",
-                  "updateTunnels(): updating %s (index=%d)\n",
+                  "updateTunnels(): updating %s (index=%lu)\n",
                   tunnel->ifname, tunnel->ifindex));
         updateTunnel(tunnel);
     }
@@ -464,7 +464,7 @@ updateTunnels(void)
             last_tunnel = tunnel;
 
             DEBUGMSG(("tunnel",
-                      "updateTunnels(): added %s (index=%d state=%d)\n",
+                      "updateTunnels(): added %s (index=%lu state=%d)\n",
                       tunnel->ifname, tunnel->ifindex, tunnel->active));
         }
         if (type == 0)
@@ -486,7 +486,7 @@ getTunnelByIfIndex(int index)
             if (!tunnel->active)
                 break;
             DEBUGMSG(("tunnel",
-                      "%s (index=%d)\n", tunnel->ifname, tunnel->ifindex));
+                      "%s (index=%lu)\n", tunnel->ifname, tunnel->ifindex));
             return tunnel;
         }
     }
@@ -508,7 +508,7 @@ getNextTunnelByIfIndex(int index)
             if (!tunnel->active)
                 continue;
             DEBUGMSG(("tunnel",
-                      "%s (index=%d)\n", tunnel->ifname, tunnel->ifindex));
+                      "%s (index=%lu)\n", tunnel->ifname, tunnel->ifindex));
             return tunnel;
         }
     }
@@ -552,7 +552,7 @@ getTunnelByConfigOid(oid * name, size_t * length)
             if (!tunnel->active)
                 break;
             DEBUGMSG(("tunnel",
-                      "%s (index=%d)\n", tunnel->ifname, tunnel->ifindex));
+                      "%s (index=%lu)\n", tunnel->ifname, tunnel->ifindex));
             return tunnel;
         }
     }
@@ -596,7 +596,7 @@ getNextTunnelByConfigOid(oid * name, size_t * length)
 
     if (last_tunnel) {
         DEBUGMSG(("tunnel",
-                  "%s (index=%d)\n",
+                  "%s (index=%lu)\n",
                   last_tunnel->ifname, last_tunnel->ifindex));
     } else {
         DEBUGMSG(("tunnel", "NONE\n"));
