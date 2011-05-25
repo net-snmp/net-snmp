@@ -418,7 +418,7 @@ updateTunnels(void)
      */
     for (tunnel = tunnels; tunnel; tunnel = tunnel->next) {
         DEBUGMSG(("tunnel",
-                  "updateTunnels(): updating %s (index=%" NETSNMP_PRIo ")\n",
+                  "updateTunnels(): updating %s (index=%" NETSNMP_PRIo "u)\n",
                   tunnel->ifname, tunnel->ifindex));
         updateTunnel(tunnel);
     }
@@ -465,7 +465,7 @@ updateTunnels(void)
 
             DEBUGMSG(("tunnel",
                       "updateTunnels(): added %s (index=%" NETSNMP_PRIo
-                      " state=%d)\n",
+                      "u state=%d)\n",
                       tunnel->ifname, tunnel->ifindex, tunnel->active));
         }
         if (type == 0)
@@ -486,7 +486,7 @@ getTunnelByIfIndex(int index)
         if (tunnel->ifindex == index) {
             if (!tunnel->active)
                 break;
-            DEBUGMSG(("tunnel", "%s (index=%" NETSNMP_PRIo ")\n",
+            DEBUGMSG(("tunnel", "%s (index=%" NETSNMP_PRIo "u)\n",
                      tunnel->ifname, tunnel->ifindex));
             return tunnel;
         }
@@ -508,7 +508,7 @@ getNextTunnelByIfIndex(int index)
         if (tunnel->ifindex > index) {
             if (!tunnel->active)
                 continue;
-            DEBUGMSG(("tunnel", "%s (index=%" NETSNMP_PRIo ")\n",
+            DEBUGMSG(("tunnel", "%s (index=%" NETSNMP_PRIo "u)\n",
                       tunnel->ifname, tunnel->ifindex));
             return tunnel;
         }
@@ -552,7 +552,7 @@ getTunnelByConfigOid(oid * name, size_t * length)
                               (*length) - tunnel_len - 3)) {
             if (!tunnel->active)
                 break;
-            DEBUGMSG(("tunnel", "%s (index=%" NETSNMP_PRIo ")\n",
+            DEBUGMSG(("tunnel", "%s (index=%" NETSNMP_PRIo "u)\n",
                       tunnel->ifname, tunnel->ifindex));
             return tunnel;
         }
@@ -596,7 +596,7 @@ getNextTunnelByConfigOid(oid * name, size_t * length)
     }
 
     if (last_tunnel) {
-        DEBUGMSG(("tunnel", "%s (index=%" NETSNMP_PRIo ")\n",
+        DEBUGMSG(("tunnel", "%s (index=%" NETSNMP_PRIo "u)\n",
                   last_tunnel->ifname, last_tunnel->ifindex));
     } else {
         DEBUGMSG(("tunnel", "NONE\n"));
