@@ -1676,6 +1676,7 @@ typedef unsigned int     uintptr_t;
 #        pragma comment(lib, "libeay32MT.lib")
 #      endif
 #    endif
+#    pragma comment(lib, "gdi32.lib")
 #  endif
 #endif
 
