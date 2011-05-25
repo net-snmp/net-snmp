@@ -82,11 +82,14 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          */
         snprintf( buf2, BUFSIZ, "/proc/%d/status", pid );
         fp = fopen( buf2, "r" );
-        if (!fp)
+        if (!fp) {
+            netsnmp_swrun_entry_free(entry);
             continue; /* file (process) probably went away */
+	}
         memset(buf, 0, sizeof(buf));
         if (fgets( buf, BUFSIZ-1, fp ) == NULL) {
             fclose(fp);
+            netsnmp_swrun_entry_free(entry);
             continue;
         }
         fclose(fp);
@@ -108,11 +111,14 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          */
         snprintf( buf2, BUFSIZ, "/proc/%d/cmdline", pid );
         fp = fopen( buf2, "r" );
-        if (!fp)
+        if (!fp) {
+            netsnmp_swrun_entry_free(entry);
             continue; /* file (process) probably went away */
+	}
         memset(buf, 0, sizeof(buf));
         if ((cp = fgets( buf, BUFSIZ-1, fp )) == NULL) {
             fclose(fp);
+            netsnmp_swrun_entry_free(entry);
             continue;
         }
         fclose(fp);
@@ -154,10 +160,13 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          */
         snprintf( buf, BUFSIZ, "/proc/%d/stat", pid );
         fp = fopen( buf, "r" );
-        if (!fp)
+        if (!fp) {
+            netsnmp_swrun_entry_free(entry);
             continue; /* file (process) probably went away */
+	}
         if (fgets( buf, BUFSIZ-1, fp ) == NULL) {
             fclose(fp);
+            netsnmp_swrun_entry_free(entry);
             continue;
         }
         fclose(fp);
