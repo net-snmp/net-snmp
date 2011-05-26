@@ -2906,10 +2906,11 @@ usm_create_user_from_session(netsnmp_session * session)
 
         user_just_created = 1;
     }
+
     /*
      * copy the auth protocol 
      */
-    if (session->securityAuthProto != NULL) {
+    if (user->authProtocol == NULL && session->securityAuthProto != NULL) {
         SNMP_FREE(user->authProtocol);
         user->authProtocol =
             snmp_duplicate_objid(session->securityAuthProto,
@@ -2924,7 +2925,7 @@ usm_create_user_from_session(netsnmp_session * session)
     /*
      * copy the priv protocol 
      */
-    if (session->securityPrivProto != NULL) {
+    if (user->privProtocol == NULL && session->securityPrivProto != NULL) {
         SNMP_FREE(user->privProtocol);
         user->privProtocol =
             snmp_duplicate_objid(session->securityPrivProto,
@@ -2939,90 +2940,94 @@ usm_create_user_from_session(netsnmp_session * session)
     /*
      * copy in the authentication Key.  If not localized, localize it 
      */
-    if (session->securityAuthLocalKey != NULL
-        && session->securityAuthLocalKeyLen != 0) {
-        /* already localized key passed in.  use it */
-        SNMP_FREE(user->authKey);
-        if (memdup(&user->authKey, session->securityAuthLocalKey,
-                   session->securityAuthLocalKeyLen) != SNMPERR_SUCCESS) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->authKeyLen = session->securityAuthLocalKeyLen;
-    } else if (session->securityAuthKey != NULL
-        && session->securityAuthKeyLen != 0) {
-        SNMP_FREE(user->authKey);
-        user->authKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
-        if (user->authKey == NULL) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
-        if (generate_kul(user->authProtocol, user->authProtocolLen,
-                         session->securityEngineID,
-                         session->securityEngineIDLen,
-                         session->securityAuthKey,
-                         session->securityAuthKeyLen, user->authKey,
-                         &user->authKeyLen) != SNMPERR_SUCCESS) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-    } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-                                           NETSNMP_DS_LIB_AUTHLOCALIZEDKEY))) {
-        size_t buflen = USM_AUTH_KU_LEN;
-        SNMP_FREE(user->authKey);
-        user->authKey = (u_char *)malloc(buflen); /* max length needed */
-        user->authKeyLen = 0;
-        /* it will be a hex string */
-        if (!snmp_hex_to_binary(&user->authKey, &buflen, &user->authKeyLen,
-                                0, cp)) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
+    if (user->authKey == NULL) {
+        if (session->securityAuthLocalKey != NULL
+            && session->securityAuthLocalKeyLen != 0) {
+            /* already localized key passed in.  use it */
+            SNMP_FREE(user->authKey);
+            if (memdup(&user->authKey, session->securityAuthLocalKey,
+                       session->securityAuthLocalKeyLen) != SNMPERR_SUCCESS) {
+                usm_free_user(user);
+                return SNMPERR_GENERR;
+            }
+            user->authKeyLen = session->securityAuthLocalKeyLen;
+        } else if (session->securityAuthKey != NULL
+                   && session->securityAuthKeyLen != 0) {
+            SNMP_FREE(user->authKey);
+            user->authKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
+            if (user->authKey == NULL) {
+                usm_free_user(user);
+                return SNMPERR_GENERR;
+            }
+            user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
+            if (generate_kul(user->authProtocol, user->authProtocolLen,
+                             session->securityEngineID,
+                             session->securityEngineIDLen,
+                             session->securityAuthKey,
+                             session->securityAuthKeyLen, user->authKey,
+                             &user->authKeyLen) != SNMPERR_SUCCESS) {
+                usm_free_user(user);
+                return SNMPERR_GENERR;
+            }
+        } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                               NETSNMP_DS_LIB_AUTHLOCALIZEDKEY))) {
+            size_t buflen = USM_AUTH_KU_LEN;
+            SNMP_FREE(user->authKey);
+            user->authKey = (u_char *)malloc(buflen); /* max length needed */
+            user->authKeyLen = 0;
+            /* it will be a hex string */
+            if (!snmp_hex_to_binary(&user->authKey, &buflen, &user->authKeyLen,
+                                    0, cp)) {
+                usm_free_user(user);
+                return SNMPERR_GENERR;
+            }
         }
     }
 
     /*
      * copy in the privacy Key.  If not localized, localize it 
      */
-    if (session->securityPrivLocalKey != NULL
-        && session->securityPrivLocalKeyLen != 0) {
-        /* already localized key passed in.  use it */
-        SNMP_FREE(user->privKey);
-        if (memdup(&user->privKey, session->securityPrivLocalKey,
-                   session->securityPrivLocalKeyLen) != SNMPERR_SUCCESS) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->privKeyLen = session->securityPrivLocalKeyLen;
-    } else if (session->securityPrivKey != NULL
-        && session->securityPrivKeyLen != 0) {
-        SNMP_FREE(user->privKey);
-        user->privKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
-        if (user->privKey == NULL) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->privKeyLen = USM_LENGTH_KU_HASHBLOCK;
-        if (generate_kul(user->authProtocol, user->authProtocolLen,
-                         session->securityEngineID,
-                         session->securityEngineIDLen,
-                         session->securityPrivKey,
-                         session->securityPrivKeyLen, user->privKey,
-                         &user->privKeyLen) != SNMPERR_SUCCESS) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-    } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-                                           NETSNMP_DS_LIB_PRIVLOCALIZEDKEY))) {
-        size_t buflen = USM_PRIV_KU_LEN;
-        SNMP_FREE(user->privKey);
-        user->privKey = (u_char *)malloc(buflen); /* max length needed */
-        user->privKeyLen = 0;
-        /* it will be a hex string */
-        if (!snmp_hex_to_binary(&user->privKey, &buflen, &user->privKeyLen,
-                                0, cp)) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
+    if (user->privKey == NULL) {
+        if (session->securityPrivLocalKey != NULL
+            && session->securityPrivLocalKeyLen != 0) {
+            /* already localized key passed in.  use it */
+            SNMP_FREE(user->privKey);
+            if (memdup(&user->privKey, session->securityPrivLocalKey,
+                       session->securityPrivLocalKeyLen) != SNMPERR_SUCCESS) {
+                usm_free_user(user);
+                return SNMPERR_GENERR;
+            }
+            user->privKeyLen = session->securityPrivLocalKeyLen;
+        } else if (session->securityPrivKey != NULL
+                   && session->securityPrivKeyLen != 0) {
+            SNMP_FREE(user->privKey);
+            user->privKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
+            if (user->privKey == NULL) {
+                usm_free_user(user);
+                return SNMPERR_GENERR;
+            }
+            user->privKeyLen = USM_LENGTH_KU_HASHBLOCK;
+            if (generate_kul(user->authProtocol, user->authProtocolLen,
+                             session->securityEngineID,
+                             session->securityEngineIDLen,
+                             session->securityPrivKey,
+                             session->securityPrivKeyLen, user->privKey,
+                             &user->privKeyLen) != SNMPERR_SUCCESS) {
+                usm_free_user(user);
+                return SNMPERR_GENERR;
+            }
+        } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                               NETSNMP_DS_LIB_PRIVLOCALIZEDKEY))) {
+            size_t buflen = USM_PRIV_KU_LEN;
+            SNMP_FREE(user->privKey);
+            user->privKey = (u_char *)malloc(buflen); /* max length needed */
+            user->privKeyLen = 0;
+            /* it will be a hex string */
+            if (!snmp_hex_to_binary(&user->privKey, &buflen, &user->privKeyLen,
+                                    0, cp)) {
+                usm_free_user(user);
+                return SNMPERR_GENERR;
+            }
         }
     }
 
