@@ -163,7 +163,8 @@ netsnmp_swinst_entry_create(int32_t swIndex)
 void
 netsnmp_swinst_entry_free(netsnmp_swinst_entry *entry)
 {
-    DEBUGMSGTL(("swinst:entry:free", "index %d\n",entry->swIndex));
+    DEBUGMSGTL(("swinst:entry:free", "index %" NETSNMP_PRIo "u\n",
+                entry->swIndex));
 
     free(entry);
 }
