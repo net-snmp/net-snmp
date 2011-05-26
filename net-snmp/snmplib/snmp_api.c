@@ -1336,6 +1336,8 @@ snmpv3_engineID_probe(struct session_list *slp,
             if (slp->session->securityEngineIDLen == 0) {
                 DEBUGMSGTL(("snmp_api",
                             "unable to determine remote engine ID\n"));
+                /* clear the flag so that probe occurs on next inform */
+                session->flags &= ~SNMP_FLAGS_DONT_PROBE;
                 return 0;
             }
 
