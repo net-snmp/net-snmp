@@ -308,12 +308,30 @@
 	    <command>make</command>
 	  </commands>
 	</step>
-	<step type="system" stepname="build:test" title="build:test">
+	<step type="system" stepname="build:test" title="testing: default tests">
 	  <text>Now we run "make test" which should produce a perfect
 	  set up test results.  If not, this needs to be fixed or at
 	  least understood and accepted as is for some other reason.</text>
 	  <commands>
 	    <command>make test</command>
+	  </commands>
+	</step>
+	<step type="system" stepname="build:test:unit" title="testing: unit-tests">
+	  <text>Now we run the unit-tests which should also produce a perfect
+	  set up test results.  If not, this needs to be fixed or at
+	  least understood and accepted as is for some other reason.</text>
+	  <commands>
+	    <command>cd testing && ./RUNFULLTESTS -g unit-tests</command>
+	  </commands>
+	</step>
+	<step type="system" stepname="build:test:transports" title="testing: transports">
+	  <text>Now we run the transport tests which should also
+	  produce a perfect set up test results, if your machine
+	  supports all the transports.  If not, this needs to be fixed
+	  or at least understood and accepted as is for some other
+	  reason (like you can't do IPv6 on your system).</text>
+	  <commands>
+	    <command>cd testing && ./RUNFULLTESTS -g transports</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="code:checkcomments" title="code:checkcomments">
