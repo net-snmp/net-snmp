@@ -3137,6 +3137,8 @@ int usm_discover_engineid(void *slpv, netsnmp_session *session) {
     if (slp->session->securityEngineIDLen == 0) {
         DEBUGMSGTL(("snmp_api",
                     "unable to determine remote engine ID\n"));
+        /* clear the flag so that probe occurs on next inform */
+        session->flags &= ~SNMP_FLAGS_DONT_PROBE;
         return SNMP_ERR_GENERR;
     }
 
