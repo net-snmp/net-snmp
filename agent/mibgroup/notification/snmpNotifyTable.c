@@ -520,7 +520,7 @@ int
 snmpNotifyTable_add(struct snmpNotifyTable_data *thedata)
 {
     netsnmp_variable_list *vars = NULL;
-
+    int retVal;	
 
     DEBUGMSGTL(("snmpNotifyTable", "adding data...  "));
     /*
@@ -533,12 +533,17 @@ snmpNotifyTable_add(struct snmpNotifyTable_data *thedata)
 
 
 
-    header_complex_add_data(&snmpNotifyTableStorage, vars, thedata);
-    DEBUGMSGTL(("snmpNotifyTable", "registered an entry\n"));
+    if (header_complex_maybe_add_data(&snmpNotifyTableStorage, vars, thedata, 1)
+        != NULL){
+    	DEBUGMSGTL(("snmpNotifyTable", "registered an entry\n"));
+	retVal = SNMPERR_SUCCESS;
+    }else{
+        retVal = SNMPERR_GENERR; 
+    }	
 
 
     DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
-    return SNMPERR_SUCCESS;
+    return retVal;
 }
 
 
@@ -597,7 +602,11 @@ parse_snmpNotifyTable(const char *token, char *line)
         StorageTmp->snmpNotifyRowStatus = RS_ACTIVE;
 
 
-    snmpNotifyTable_add(StorageTmp);
+    if (snmpNotifyTable_add(StorageTmp) != SNMPERR_SUCCESS){
+        SNMP_FREE(StorageTmp->snmpNotifyName);
+        SNMP_FREE(StorageTmp->snmpNotifyTag);
+        SNMP_FREE(StorageTmp);
+    }
 
 
     DEBUGMSGTL(("snmpNotifyTable", "done.\n"));

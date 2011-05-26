@@ -344,8 +344,9 @@ header_complex(struct header_complex_index *datalist,
 }
 
 struct header_complex_index *
-header_complex_add_data(struct header_complex_index **thedata,
-                        netsnmp_variable_list * var, void *data)
+header_complex_maybe_add_data(struct header_complex_index **thedata,
+                              netsnmp_variable_list * var, void *data,
+                              int dont_allow_duplicates)
 {
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len;
@@ -356,7 +357,8 @@ header_complex_add_data(struct header_complex_index **thedata,
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, var);
     ret =
-        header_complex_add_data_by_oid(thedata, newoid, newoid_len, data);
+        header_complex_maybe_add_data_by_oid(thedata, newoid, newoid_len, data,
+                                             dont_allow_duplicates);
     /*
      * free the variable list, but not the enclosed data!  it's not ours! 
      */
@@ -365,34 +367,21 @@ header_complex_add_data(struct header_complex_index **thedata,
 }
 
 struct header_complex_index *
-header_complex_add_data_by_oid(struct header_complex_index **thedata,
-                               oid * newoid, size_t newoid_len, void *data)
+header_complex_add_data(struct header_complex_index **thedata,
+                        netsnmp_variable_list * var, void *data)
 {
-    struct header_complex_index *hciptrn, *hciptrp, *ourself;
-    int rc;
+    return
+        header_complex_maybe_add_data(thedata, var, data, 0);
+}
 
-    if (thedata == NULL || newoid == NULL || data == NULL)
-        return NULL;
 
-    for (hciptrn = *thedata, hciptrp = NULL;
-         hciptrn != NULL; hciptrp = hciptrn, hciptrn = hciptrn->next) {
-        /*
-         * XXX: check for == and error (overlapping table entries) 
-         * 8/2005 rks Ok, I added duplicate entry check, but only log
-         *            warning and continue, because it seems that nobody
-         *            that calls this fucntion does error checking!.
-         */
-        rc = snmp_oid_compare(hciptrn->name, hciptrn->namelen,
-                              newoid, newoid_len);
-        if (rc > 0)
-            break;
-        else if (0 == rc) {
-            snmp_log(LOG_WARNING, "header_complex_add_data_by_oid with "
-                     "duplicate index.\n");
-            /** uncomment null return when callers do error checking */
-            /** return NULL; */
-        }
-    }
+struct header_complex_index *
+_header_complex_add_between(struct header_complex_index **thedata,
+                            struct header_complex_index *hciptrp,
+                            struct header_complex_index *hciptrn,
+                            oid * newoid, size_t newoid_len, void *data)
+{
+    struct header_complex_index *ourself;
 
     /*
      * nptr should now point to the spot that we need to add ourselves
@@ -434,6 +423,50 @@ header_complex_add_data_by_oid(struct header_complex_index **thedata,
     DEBUGMSGTL(("header_complex_add_data", "adding something...\n"));
 
     return hciptrp;
+}
+
+
+struct header_complex_index *
+header_complex_maybe_add_data_by_oid(struct header_complex_index **thedata,
+                                     oid * newoid, size_t newoid_len, void *data,
+                                     int dont_allow_duplicates)
+{
+    struct header_complex_index *hciptrn, *hciptrp;
+    int rc;
+
+    if (thedata == NULL || newoid == NULL || data == NULL)
+        return NULL;
+
+    for (hciptrn = *thedata, hciptrp = NULL;
+         hciptrn != NULL; hciptrp = hciptrn, hciptrn = hciptrn->next) {
+        /*
+         * XXX: check for == and error (overlapping table entries) 
+         * 8/2005 rks Ok, I added duplicate entry check, but only log
+         *            warning and continue, because it seems that nobody
+         *            that calls this fucntion does error checking!.
+         */
+        rc = snmp_oid_compare(hciptrn->name, hciptrn->namelen,
+                              newoid, newoid_len);
+        if (rc > 0)
+            break;
+        else if (0 == rc) {
+            snmp_log(LOG_WARNING, "header_complex_add_data_by_oid with "
+                     "duplicate index.\n");
+            if (dont_allow_duplicates)
+                return NULL;
+        }
+    }
+
+    return _header_complex_add_between(thedata, hciptrp, hciptrn,
+                                       newoid, newoid_len, data);
+}
+
+struct header_complex_index *
+header_complex_add_data_by_oid(struct header_complex_index **thedata,
+                               oid * newoid, size_t newoid_len, void *data)
+{
+    return header_complex_maybe_add_data_by_oid(thedata, newoid, newoid_len,
+                                                data, 0);
 }
 
 /*

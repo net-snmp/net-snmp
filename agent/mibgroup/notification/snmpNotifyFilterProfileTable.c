@@ -135,7 +135,7 @@ snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data
                                  *thedata)
 {
     netsnmp_variable_list *vars = NULL;
-
+    int retVal;
 
     DEBUGMSGTL(("snmpNotifyFilterProfileTable", "adding data...  "));
     /*
@@ -147,13 +147,17 @@ snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data
                               (u_char *) thedata->snmpTargetParamsName,
                               thedata->snmpTargetParamsNameLen);
 
-    header_complex_add_data(&snmpNotifyFilterProfileTableStorage, vars,
-                            thedata);
-    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "registered an entry\n"));
+    if (header_complex_maybe_add_data(&snmpNotifyFilterProfileTableStorage, vars,
+                                      thedata, 1) != NULL){
+       DEBUGMSGTL(("snmpNotifyFilterProfileTable", "registered an entry\n"));
+       retVal = SNMPERR_SUCCESS;
+    }else{
+       retVal = SNMPERR_GENERR;  	
+    }
 
 
     DEBUGMSGTL(("snmpNotifyFilterProfileTable", "done.\n"));
-    return SNMPERR_SUCCESS;
+    return retVal;
 }
 
 
@@ -203,7 +207,11 @@ parse_snmpNotifyFilterProfileTable(const char *token, char *line)
                               &StorageTmp->
                               snmpNotifyFilterProfileRowStatus, &tmpint);
 
-    snmpNotifyFilterProfileTable_add(StorageTmp);
+    if (snmpNotifyFilterProfileTable_add(StorageTmp) != SNMPERR_SUCCESS){
+        SNMP_FREE(StorageTmp->snmpTargetParamsName);
+        SNMP_FREE(StorageTmp->snmpNotifyFilterProfileName);
+        SNMP_FREE(StorageTmp);
+    }
 
     DEBUGMSGTL(("snmpNotifyFilterProfileTable", "done.\n"));
 }
