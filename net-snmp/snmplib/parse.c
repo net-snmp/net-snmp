@@ -107,6 +107,7 @@ SOFTWARE.
 #include <net-snmp/library/parse.h>
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/tools.h>
 
 netsnmp_feature_child_of(find_module, mib_api)
 netsnmp_feature_child_of(get_tc_description, mib_api)
@@ -4986,7 +4987,7 @@ read_all_mibs(void)
         if (gpMibErrorString != NULL) {
             SNMP_FREE(gpMibErrorString);
         }
-        gpMibErrorString = (char *) SNMP_MALLOC(MAXQUOTESTR);
+        gpMibErrorString = (char *) calloc(1, MAXQUOTESTR);
         if (gpMibErrorString == NULL) {
             snmp_log(LOG_CRIT, "failed to allocated memory for gpMibErrorString\n");
         } else {
