@@ -826,12 +826,8 @@ var_hrswrun(struct variable * vp,
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
     #endif
 #elif defined(linux)
-	if( (cp=get_proc_name_from_cmdline(pid,buf,sizeof(buf)-1)) == NULL ) {
-            strcpy(string, "<exited>");
-            *var_len = strlen(string);
-            return (u_char *) string;
-        }
-        if (*cp)    /* argv[0] '\0' argv[1] '\0' .... */
+        cp = get_proc_name_from_cmdline(pid,buf,sizeof(buf)-1);
+        if (cp != NULL && *cp)    /* argv[0] '\0' argv[1] '\0' .... */
             strcpy(string, cp);
         else {
             /*
