@@ -35,13 +35,13 @@ extend_registration_block *ereg_head = NULL;
 
 #ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
 typedef struct netsnmp_old_extend_s {
-    int idx;
+    unsigned int idx;
     netsnmp_extend *exec_entry;
     netsnmp_extend *efix_entry;
 } netsnmp_old_extend;
 
-int             num_compatability_entries = 0;
-int             max_compatability_entries = 50;
+unsigned int             num_compatability_entries = 0;
+unsigned int             max_compatability_entries = 50;
 netsnmp_old_extend *compatability_entries;
 
 WriteMethod fixExec2Error;
@@ -1098,7 +1098,7 @@ _extend_find_entry( netsnmp_request_info       *request,
 {
     netsnmp_extend            *eptr;
     extend_registration_block *ereg;
-    int line_idx;
+    unsigned int line_idx;
     oid oid_buf[MAX_OID_LEN];
     int oid_len;
     int i;
@@ -1276,7 +1276,7 @@ handle_nsExtendOutput2Table(netsnmp_mib_handler          *handler,
     netsnmp_table_request_info *table_info;
     netsnmp_extend             *extension;
     char *cp;
-    int line_idx;
+    unsigned int line_idx;
     int len;
 
     for ( request=requests; request; request=request->next ) {
@@ -1353,13 +1353,15 @@ var_extensible_old(struct variable * vp,
 {
     netsnmp_old_extend *exten = NULL;
     static long     long_ret;
-    int idx;
+    unsigned int idx;
 
     if (header_simple_table
         (vp, name, length, exact, var_len, write_method, num_compatability_entries))
         return (NULL);
 
     idx = name[*length-1] -1;
+	if (idx > max_compatability_entries)
+		return NULL;
     exten = &compatability_entries[ idx ];
     if (exten) {
         switch (vp->magic) {
@@ -1415,7 +1417,7 @@ fixExec2Error(int action,
              u_char * statP, oid * name, size_t name_len)
 {
     netsnmp_old_extend *exten = NULL;
-    int idx;
+    unsigned int idx;
 
     idx = name[name_len-1] -1;
     exten = &compatability_entries[ idx ];
