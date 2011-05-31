@@ -173,9 +173,9 @@ struct diskpart {
 #endif
 
 
-int             numdisks;
+unsigned int    numdisks;
 int             allDisksIncluded = 0;
-int             maxdisks = 0;
+unsigned int    maxdisks = 0;
 struct diskpart *disks;
 
 struct variable2 extensible_disk_variables[] = {
@@ -225,7 +225,7 @@ init_disk(void)
 static void
 disk_free_config(void)
 {
-  int             i;
+  unsigned int             i;
 
   numdisks = 0;
   for (i = 0; i < maxdisks; i++) {    /* init/erase disk db */
@@ -430,7 +430,7 @@ modify_disk_parameters(int index, int minspace, int minpercent)
 
 int disk_exists(char *path) 
 {
-  int index;
+  unsigned int index;
   for(index = 0; index < numdisks; index++) {
     DEBUGMSGTL(("ucd-snmp/disk", "Checking for %s. Found %s at %d\n", path, disks[index].path, index));
     if(strcmp(path, disks[index].path) == 0) {
@@ -680,7 +680,8 @@ var_extensible_disk(struct variable *vp,
                     size_t * var_len, WriteMethod ** write_method)
 {
 
-    int             percent, iserror, disknum = 0;
+    int             percent, iserror;
+    unsigned into   disknum = 0;
 #if !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
     double          totalblks, free, used, avail, availblks;
 #else
@@ -718,6 +719,8 @@ tryAgain:
         (vp, name, length, exact, var_len, write_method, numdisks))
         return (NULL);
     disknum = name[*length - 1] - 1;
+	if (disknum > maxdisks)
+		return NULL;
     switch (vp->magic) {
     case MIBINDEX:
         long_ret = disknum + 1;
