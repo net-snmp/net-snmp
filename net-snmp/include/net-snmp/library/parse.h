@@ -114,6 +114,7 @@ SOFTWARE.
         char           *reference;    /* references (a quoted string) */
         int             reported;       /* 1=report started in print_subtree... */
         char           *defaultValue;
+       char	       *parseErrorString; /* Contains the error string if there are errors in parsing MIBs */
     };
 
     /*

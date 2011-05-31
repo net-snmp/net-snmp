@@ -533,7 +533,11 @@ static struct module_compatability module_map[] = {
  * #define MODULE_LOAD_FAILED   3       
  */
 #define MODULE_LOAD_FAILED	MODULE_NOT_FOUND
+#define MODULE_SYNTAX_ERROR     4
 
+int gMibError = 0,gLoop = 0;
+char *gpMibErrorString = NULL;
+char gMibNames[STRINGMAX];
 
 #define HASHSIZE        32
 #define BUCKET(x)       (x & (HASHSIZE-1))
@@ -2994,6 +2998,15 @@ parse_trapDefinition(FILE * fp, char *name)
         free_node(np);
         return (NULL);
     }
+
+    /* Catch the syntax error */
+    if (np->parent == NULL) {
+        free_node(np->next);
+        free_node(np);
+        gMibError = MODULE_SYNTAX_ERROR;
+        return (NULL);
+    }
+
     np->next->parent = np->parent;
     np->parent = (char *) malloc(strlen(np->parent) + 2);
     if (np->parent == NULL) {
@@ -3903,7 +3916,10 @@ read_module_internal(const char *name)
             File = oldFile;
             mibLine = oldLine;
             current_module = oldModule;
-            return MODULE_LOADED_OK;
+            if (np != NULL)
+                return MODULE_LOADED_OK;
+            else if (gMibError == MODULE_SYNTAX_ERROR) 
+                return MODULE_SYNTAX_ERROR;
         }
 
     return MODULE_NOT_FOUND;
@@ -3991,9 +4007,20 @@ read_module(const char *name)
 struct tree    *
 netsnmp_read_module(const char *name)
 {
-    if (read_module_internal(name) == MODULE_NOT_FOUND)
+    int status = 0;
+    status = read_module_internal(name);
+
+    if (status == MODULE_NOT_FOUND) {
         if (!read_module_replacements(name))
-	    print_module_not_found(name);
+            print_module_not_found(name);
+    } else if (status == MODULE_SYNTAX_ERROR) {
+        gMibError = 0;
+        gLoop = 1;
+
+        strncat(gMibNames, " ", sizeof(gMibNames) - strlen(gMibNames) - 1);
+        strncat(gMibNames, name, sizeof(gMibNames) - strlen(gMibNames) - 1);
+    }
+
     return tree_head;
 }
 
@@ -4953,6 +4980,23 @@ read_all_mibs(void)
             netsnmp_read_module(mp->name);
     adopt_orphans();
 
+    /* If entered the syntax error loop in "read_module()" */
+    if (gLoop == 1) {
+        gLoop = 0;
+        if (gpMibErrorString != NULL) {
+            SNMP_FREE(gpMibErrorString);
+        }
+        gpMibErrorString = (char *) SNMP_MALLOC(MAXQUOTESTR);
+        if (gpMibErrorString == NULL) {
+            snmp_log(LOG_CRIT, "failed to allocated memory for gpMibErrorString\n");
+        } else {
+            snprintf(gpMibErrorString, sizeof(gpMibErrorString)-1, "Error in parsing MIB module(s): %s ! Unable to load corresponding MIB(s)", gMibNames);
+        }
+    }
+
+    /* Caller's responsibility to free this memory */
+    tree_head->parseErrorString = gpMibErrorString;
+	
     return tree_head;
 }
 
