@@ -9,6 +9,8 @@ listing of all changes made to the code.
       - [BUG 3134323]: Fix crash when comparing invalid OIDs
       - [BUG 3171878]: Using SNMPv3 context does not work
       - [BUG 3182985]: Fix calculation of common OID prefix length
+      - [BUG 3234754]: Ensure old f_create_from_tstring hook is initialized to NULL
+      - [BUG 3264852]: Recognise missing report types
       - [PATCH 3058645]: Use MSG_DONTWAIT for the unix domain socket
       - [PATCH 3067540]: Fix IPv4 OID indexes on 64-bit big-endian systems
       - [PATCH 3165878]: Catch buffer overrun on 64-bit systems
@@ -20,6 +22,7 @@ listing of all changes made to the code.
       - Avoid Valgrind complaints about uninitialized data
       - Check the return value of strdup in netsnmp_create_data_list
       - Fix double-free crash when releasing duplicated handlers
+      - Fixed a memory leak in snmp_free_session()
       - Fixed memory corruption triggered by snmpd.conf "enum" keyword
       - Fixed bugs in building/parsing 64-bit integers
       - Fixed leaks-at-exit triggered by using the snmp_enum code
@@ -40,6 +43,7 @@ listing of all changes made to the code.
       - [BUG 3151897]: fd leak with /proc/partitions read in diskio
       - [BUG 3178389]: Fix inconsistent handling of TZ offsets
       - [BUG 3185528]: shutdown_master_agent doesn't close UDP sockets
+      - [BUG 3305157]: Fix ipAddressPrefix handling of IPv6 addresses
       - [PATCH 2119725]: Fix skipNFSInHostResources handling of hrStorageTable
       - [PATCH 2825653]: Fix sendmail.cf parsing in certain conditions
       - [PATCH 2904900]: Documentation plus assorted handler code fixes
@@ -48,10 +52,13 @@ listing of all changes made to the code.
       - [PATCH 2975254]: Avoid callback re-use of closed sessions
       - [PATCH 3053436]: Fix tcpConnectionTable_data_access invalid memory access
       - [PATCH 3062526]: Fix security engineID setting in the trapsess directive
+      - [PATCH 3066862]: Fix comparison of large unsigned indexes (disk/extend tables)
       - [PATCH 3096725]: Don't register v1Trap callback, if SNMPv1 not supported
       - [PATCH 3096725]: sysORTable registation for Notification Log mib
       - [PATCH 3096725]: Include SNMPv1 trap OIDs in nlmLogNotificationID column
       - [PATCH 3141462]: Fix agentx subagent issues with multiple-object requests
+      - [PATCH 3198781]: Ensure disman/{ping,traceroute} do at least compile
+      - [PATCH 3299384]: Fix INFORMs so they retry probing for an engineID
 
       - Add newly created/destroyed interfaces to ipv6IfTable
       - Call shutdown_master_agent() and shutdown_agent() during shutdown
@@ -89,6 +96,7 @@ listing of all changes made to the code.
       - Fix definition of VERSION (number, not expression)
 
     man:
+      - [BUG 3190725]: Document snmp{,_sess}synch_response and snmp_async_send
       - clean up manual pages (from Debian patch 56_manpage)
 
     mib2c:
@@ -109,6 +117,7 @@ listing of all changes made to the code.
 
     python:
       - [BUG 3088360]: Ensure modules are built against the correct libraries
+      - [BUG 3295407]: Fix handling of void pointer
       - [PATCH 3035328]: Check for failures in creating a session
       - [PATCH 3035578]: Keep error codes up to date
       - [PATCH 3185085]: Fix segfault on 64-bit systems
@@ -121,6 +130,7 @@ listing of all changes made to the code.
       - [PATCH 3083027]: Fix RPM spec file to support CentOS
       - [PATCH 3152412]: Handle (and report) problems reading /proc/vmstat
       - Fix a strlen calculation in IF-MIB support
+      - Fixed hrSWRunPath of swapped-out processes
       - Fixed value of IP-MIB::ipv6InterfaceForwarding
 
     NetBSD:
@@ -137,12 +147,14 @@ listing of all changes made to the code.
       - Fix out-of-range array accesses errors in mibII interfaces table
       - Fix test T030 on MinGW.
       - Fix test T200 failures on known Microsoft SNMP extension DLL bugs
+      - Fixed memory leak in the internal (non-winExtDLL) ipNetToMediaTable
       - Halt snmpd process on key press when run from a command prompt
           (To aid debugging snmpd.exe)
 
     MinGW:
       - Make regression tests independent of registry settings
       - Use <net-snmp/net-snmp-config.h> header file under WinGW
+
       
 * 5.4.3 *
 
