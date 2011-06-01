@@ -226,8 +226,8 @@ agentx_got_response(int operation,
     switch (operation) {
     case NETSNMP_CALLBACK_OP_TIMED_OUT:{
             void           *s = snmp_sess_pointer(session);
-            DEBUGMSGTL(("agentx/master", "timeout on session %8p\n",
-                        session));
+            DEBUGMSGTL(("agentx/master", "timeout on session %8p req=0x%x\n",
+                        session, (unsigned)reqid));
 
             netsnmp_handler_mark_requests_as_delegated(requests,
                                        REQUEST_IS_NOT_DELEGATED);
@@ -371,9 +371,9 @@ agentx_got_response(int operation,
             DEBUGMSGOID(("agentx/master", var->name, var->name_length));
             DEBUGMSG(("agentx/master", "\n"));
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_VERBOSE)) {
-                DEBUGMSGTL(("snmp_agent", "    >> "));
-                DEBUGMSGVAR(("snmp_agent", var));
-                DEBUGMSG(("snmp_agent", "\n"));
+                DEBUGMSGTL(("agentx/master", "    >> "));
+                DEBUGMSGVAR(("agentx/master", var));
+                DEBUGMSG(("agentx/master", "\n"));
             }
 
             /*
@@ -601,7 +601,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     /*
      * send the requests out.
      */
-    DEBUGMSGTL(("agentx", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
+    DEBUGMSGTL(("agentx/master", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
                 (unsigned)pdu->reqid, (unsigned)pdu->transid, (unsigned)pdu->sessid));
     result = snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
     if (result == 0) {

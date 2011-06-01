@@ -312,7 +312,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
      * ok, we have a pdu from the net. Modify as needed 
      */
 
-    DEBUGMSGTL(("agentx/subagent", "handling agentx request (req=0x%x,trans="
+    DEBUGMSGTL(("agentx/subagent", "handling AgentX request (req=0x%x,trans="
                 "0x%x,sess=0x%x)\n", (unsigned)pdu->reqid,
 		(unsigned)pdu->transid, (unsigned)pdu->sessid));
     pdu->version = AGENTX_VERSION_1;
@@ -504,8 +504,11 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
 
     pdu = snmp_clone_pdu(pdu);
     DEBUGMSGTL(("agentx/subagent",
-                "handling AgentX response (cmd 0x%02x orig_cmd 0x%02x)\n",
-                pdu->command, smagic->original_command));
+                "handling AgentX response (cmd 0x%02x orig_cmd 0x%02x)"
+                " (req=0x%x,trans=0x%x,sess=0x%x)\n",
+                pdu->command, smagic->original_command,
+                (unsigned)pdu->reqid, (unsigned)pdu->transid,
+                (unsigned)pdu->sessid));
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     if (pdu->command == SNMP_MSG_INTERNAL_SET_FREE ||
