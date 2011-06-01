@@ -12,6 +12,7 @@ listing of all changes made to the code.
       - [BUG 3134323]: Fix crash when comparing invalid OIDs
       - [BUG 3171878]: Using SNMPv3 context does not work
       - [BUG 3182985]: Fix calculation of common OID prefix length
+      - [BUG 3264852]: Recognise missing report types
       - [PATCH 2871747]: plug memory leak in OID processing
       - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt...
       - [PATCH 2952140]: Overflow counter32/gauge32 on 64bit systems correctly
@@ -37,6 +38,7 @@ listing of all changes made to the code.
       - [BUG 2972579]: fixed checking of snmpTargetAddrRowStatus SET requests.
       - [BUG 3003981]: Protect against buffer overflow
       - [BUG 3058101]: Writeable 'int' instances don't work on 64-bit systems
+      - [BUG 3305157]: Fix ipAddressPrefix handling of IPv6 addresses
       - [PATCH 2822337]: Fix memory leak in ipAddressPrefixTable
       - [PATCH 2825653]: Fix sendmail.cf parsing in certain conditions
       - [PATCH 2877518]: Fix handling of scoped AgentX variables
@@ -53,10 +55,13 @@ listing of all changes made to the code.
       - [PATCH 2975254]: Avoid callback re-use of closed sessions
       - [PATCH 3053436]: Fix tcpConnectionTable_data_access invalid memory access
       - [PATCH 3062526]: Fix security engineID setting in the trapsess directive
+      - [PATCH 3066862]: fix comparison of large unsigned indexes (disk/extend tables)
       - [PATCH 3096725]: Don't register v1Trap callback, if SNMPv1 is not supported
       - [PATCH 3096725]: Include SNMPv1 trap OIDs in nlmLogNotificationID column
       - [PATCH 3141462]: Fix agentx subagent issues with multiple-object requests
       - [PATCH 3152412]: Handle (and report) problems reading /proc/vmstat
+      - [PATCH 3198781]: Ensure disman/{ping,traceroute} do at least compile
+      - [PATCH 3299384]: fix INFORMs so they retry probing for an engineID.
 
       - Add newly created/destroyed interfaces to ipv6IfTable
       - Add support of network interfaces with large HW addresses (eg InfiniBand)
@@ -67,6 +72,7 @@ listing of all changes made to the code.
       - Fixed invalid access to memory in TCP-MIB
       - Fixed IP-MIB::ipIfStatsReasmReqds value (typo)
       - Fixed logging of 'truncating integer value > 32 bits' in {IP,TCP}-MIB
+      - Fixed memory leak in TCP-MIB tables introduced by patch #3053436.
       - Fix a strlen calculation
       - Fix handling of multiple matching VACM entries
           (Use the "best" match, rather than the first one)
@@ -100,6 +106,7 @@ listing of all changes made to the code.
       - 'make test TESTOPTS="-P tcp"' works fine now
 
     man:
+      - [BUG 3190725]: Document snmp{,_sess}synch_response and snmp_async_send
       - clean up manual pages (from Debian patch 56_manpage)
 
     mib2c:
