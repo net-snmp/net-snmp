@@ -1,4 +1,4 @@
-.TH "netsnmp_mib_handler_s" 3 "Fri May 6 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_mib_handler_s" 3 "1 Jun 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -51,8 +51,6 @@ Definition at line 47 of file agent_handler.h.
 .SS "int(* \fBnetsnmp_mib_handler_s::access_method\fP)(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
 .PP
 if you add more members, you probably also want to update _clone_handler in \fBagent_handler.c\fP. 
-.PP
-Definition at line 57 of file agent_handler.h.
 .SS "int \fBnetsnmp_mib_handler_s::flags\fP"
 .PP
 for agent_handler's internal use 
