@@ -22,6 +22,7 @@ listing of all changes made to the code.
         (see the snmpd.conf manual page and the NET-SNMP-PERIODIC-NOTIFY-MIB)
       - Patch 3141462: fix agentx subagent issues with multiple-object requests
       - [PATCH 3057093]: linux uses libpci for creating useful ifDescr strings
+      - patch 3131397: from takevos: huge speedups of the TCP/UDP Tables
 
   libnetsnmp:
       - Removed the older CMU compatibility support
