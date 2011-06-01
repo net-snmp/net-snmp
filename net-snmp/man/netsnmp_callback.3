@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "Fri May 6 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "1 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -68,7 +68,7 @@ A generic callback mechanism \-
 .in -1c
 .SH "Function Documentation"
 .PP 
-.SS "int netsnmp_callback_clear_client_arg (void *ptr, inti, intj)"
+.SS "int netsnmp_callback_clear_client_arg (void * ptr, int i, int j)"
 .PP
 find and clear client args that match ptr \fBParameters:\fP
 .RS 4
@@ -82,7 +82,7 @@ find and clear client args that match ptr \fBParameters:\fP
 
 .PP
 Definition at line 477 of file callback.c.
-.SS "int snmp_call_callbacks (intmajor, intminor, void *caller_arg)"
+.SS "int snmp_call_callbacks (int major, int minor, void * caller_arg)"
 .PP
 This function calls the callback function for each registered callback of type major and minor. \fBParameters:\fP
 .RS 4
@@ -108,7 +108,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 
 .PP
 Definition at line 301 of file callback.c.
-.SS "int snmp_register_callback (intmajor, intminor, SNMPCallback *new_callback, void *arg)"
+.SS "int snmp_register_callback (int major, int minor, SNMPCallback * new_callback, void * arg)"
 .PP
 This function registers a generic callback function. The major and minor values are used to set the new_callback function into a global static multi-dimensional array of type struct \fBsnmp_gen_callback\fP. The function makes sure to append this callback function at the end of the link list, snmp_gen_callback->next.
 .PP
@@ -166,7 +166,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 
 .PP
 Definition at line 233 of file callback.c.
-.SS "int snmp_unregister_callback (intmajor, intminor, SNMPCallback *target, void *arg, intmatchargs)"
+.SS "int snmp_unregister_callback (int major, int minor, SNMPCallback * target, void * arg, int matchargs)"
 .PP
 This function unregisters a specified callback function given a major and minor type. Note: no bound checking on major and minor.
 .PP
@@ -178,9 +178,9 @@ This function unregisters a specified callback function given a major and minor 
 .br
 \fItarget\fP is the callback function that will be unregistered.
 .br
-\fIarg\fP is a void pointer used for comparison against the registered callback's sc_client_arg variable.
+\fIarg\fP is a void pointer used for comparison against the registered callback's sc_client_arg \fBvariable\fP.
 .br
-\fImatchargs\fP is an integer used to bypass the comparison of arg and the callback's sc_client_arg variable only when matchargs is set to 0.
+\fImatchargs\fP is an integer used to bypass the comparison of arg and the callback's sc_client_arg \fBvariable\fP only when matchargs is set to 0.
 .RE
 .PP
 \fBReturns:\fP
