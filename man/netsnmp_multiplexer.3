@@ -1,4 +1,4 @@
-.TH "multiplexer" 3 "Fri May 6 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "multiplexer" 3 "1 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -38,12 +38,12 @@ SET requests call the set_method, or if not present return a SNMP_ERR_NOTWRITABL
 
 .SH "Function Documentation"
 .PP 
-.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_multiplexer_handler (\fBnetsnmp_mib_handler_methods\fP *req)"
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_multiplexer_handler (\fBnetsnmp_mib_handler_methods\fP * req)"
 .PP
 returns a multiplixer handler given a \fBnetsnmp_mib_handler_methods\fP structure of subhandlers. 
 .PP
 Definition at line 33 of file multiplexer.c.
-.SS "int netsnmp_multiplexer_helper_handler (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
+.SS "int netsnmp_multiplexer_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 implements the multiplexer helper 
 .PP
