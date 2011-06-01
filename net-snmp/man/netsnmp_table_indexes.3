@@ -1,4 +1,4 @@
-.TH "table_indexes" 3 "Fri May 6 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
+.TH "table_indexes" 3 "1 Jun 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -43,37 +43,37 @@ Routines for working with row indexes.
 Routines for working with row indexes. 
 .SH "Function Documentation"
 .PP 
-.SS "int netsnmp_generic_compare_idx (void *row, \fBnetsnmp_variable_list\fP *index)"
+.SS "int netsnmp_generic_compare_idx (void * row, \fBnetsnmp_variable_list\fP * index)"
 .PP
 Compare a row against the specified index values. 
 .PP
 Definition at line 325 of file table_generic.c.
-.SS "int netsnmp_generic_compare_oid (void *row, oid *instances, size_tlen)"
+.SS "int netsnmp_generic_compare_oid (void * row, oid * instances, size_t len)"
 .PP
 Compare a row against the specified instance OIDs. 
 .PP
 Definition at line 331 of file table_generic.c.
-.SS "int netsnmp_generic_compare_subtree_idx (void *row, \fBnetsnmp_variable_list\fP *index)"
+.SS "int netsnmp_generic_compare_subtree_idx (void * row, \fBnetsnmp_variable_list\fP * index)"
 .PP
 Check if a row lies within a subtree of index values. 
 .PP
 Definition at line 337 of file table_generic.c.
-.SS "int netsnmp_generic_compare_subtree_oid (void *row, oid *instances, size_tlen)"
+.SS "int netsnmp_generic_compare_subtree_oid (void * row, oid * instances, size_t len)"
 .PP
 Check if a row lies within a subtree of instance OIDs. 
 .PP
 Definition at line 343 of file table_generic.c.
-.SS "\fBnetsnmp_variable_list\fP* netsnmp_generic_idx (void *table)"
+.SS "\fBnetsnmp_variable_list\fP* netsnmp_generic_idx (void * table)"
 .PP
 Retrieve the indexing structure of the table. 
 .PP
 Definition at line 307 of file table_generic.c.
-.SS "\fBnetsnmp_variable_list\fP* netsnmp_generic_row_idx (void *row)"
+.SS "\fBnetsnmp_variable_list\fP* netsnmp_generic_row_idx (void * row)"
 .PP
 Report the index values for a row. 
 .PP
 Definition at line 313 of file table_generic.c.
-.SS "size_t netsnmp_generic_row_oid (void *row, oid *instances)"
+.SS "size_t netsnmp_generic_row_oid (void * row, oid * instances)"
 .PP
 Report the instance OIDs for a row. 
 .PP

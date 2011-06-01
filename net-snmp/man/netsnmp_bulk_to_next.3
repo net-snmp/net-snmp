@@ -1,4 +1,4 @@
-.TH "bulk_to_next" 3 "Fri May 6 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
+.TH "bulk_to_next" 3 "1 Jun 2011" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -32,7 +32,7 @@ Convert GETBULK requests into GETNEXT requests for the handler.
 The only purpose of this handler is to convert a GETBULK request to a GETNEXT request. It is inserted into handler chains where the handler has not set the HANDLER_CAN_GETBULK flag. 
 .SH "Function Documentation"
 .PP 
-.SS "void netsnmp_bulk_to_next_fix_requests (\fBnetsnmp_request_info\fP *requests)"
+.SS "void netsnmp_bulk_to_next_fix_requests (\fBnetsnmp_request_info\fP * requests)"
 .PP
 takes answered requests and decrements the repeat count and updates the requests to the next to-do varbind in the list 
 .PP
