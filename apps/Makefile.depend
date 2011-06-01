@@ -72,7 +72,7 @@ ipe./snmpbulkget.lo: ../include/net-snmp/system/generic.h
 ipe./snmpbulkget.lo: ../include/net-snmp/machine/generic.h
 ipe./snmpbulkget.lo:  ../include/net-snmp/utilities.h
 ipe./snmpbulkget.lo: ../include/net-snmp/types.h 
-ipe./snmpbulkget.lo:  ../include/net-snmp/definitions.h
+ipe./snmpbulkget.lo: ../include/net-snmp/definitions.h
 ipe./snmpbulkget.lo: ../include/net-snmp/library/snmp_api.h
 ipe./snmpbulkget.lo: ../include/net-snmp/library/asn1.h
 ipe./snmpbulkget.lo: ../include/net-snmp/library/snmp_impl.h

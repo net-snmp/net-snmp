@@ -915,7 +915,7 @@ ipe./old_api.lo: ../../include/net-snmp/system/sysv.h
 ipe./old_api.lo: ../../include/net-snmp/system/generic.h
 ipe./old_api.lo: ../../include/net-snmp/machine/generic.h
 ipe./old_api.lo: ../../include/net-snmp/net-snmp-includes.h
-ipe./old_api.lo:  ../../include/net-snmp/definitions.h
+ipe./old_api.lo: ../../include/net-snmp/definitions.h
 ipe./old_api.lo: ../../include/net-snmp/types.h 
 ipe./old_api.lo: ../../include/net-snmp/library/snmp_api.h
 ipe./old_api.lo: ../../include/net-snmp/library/asn1.h
@@ -2436,7 +2436,7 @@ ipe./watcher.lo: ../../include/net-snmp/system/sysv.h
 ipe./watcher.lo: ../../include/net-snmp/system/generic.h
 ipe./watcher.lo: ../../include/net-snmp/machine/generic.h
 ipe./watcher.lo: ../../include/net-snmp/net-snmp-includes.h
-ipe./watcher.lo:  ../../include/net-snmp/definitions.h
+ipe./watcher.lo: ../../include/net-snmp/definitions.h
 ipe./watcher.lo: ../../include/net-snmp/types.h 
 ipe./watcher.lo: ../../include/net-snmp/library/snmp_api.h
 ipe./watcher.lo: ../../include/net-snmp/library/asn1.h

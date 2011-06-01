@@ -4931,7 +4931,7 @@ ipe./mibII/ip.lo: ../../include/net-snmp/system/sysv.h
 ipe./mibII/ip.lo: ../../include/net-snmp/system/generic.h
 ipe./mibII/ip.lo: ../../include/net-snmp/machine/generic.h
 ipe./mibII/ip.lo: ./mibII/mibII_common.h 
-ipe./mibII/ip.lo: ../../agent/kernel.h 
+ipe./mibII/ip.lo:  ../../agent/kernel.h
 ipe./mibII/ip.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./mibII/ip.lo: ../../include/net-snmp/definitions.h
 ipe./mibII/ip.lo: ../../include/net-snmp/types.h 
@@ -5518,7 +5518,7 @@ ipe./mibII/kernel_linux.lo: ../../include/net-snmp/agent/table_container.h
 ipe./mibII/kernel_linux.lo: ../../include/net-snmp/agent/table_array.h
 ipe./mibII/kernel_linux.lo: ../../include/net-snmp/agent/mfd.h util_funcs.h
 ipe./mibII/kernel_linux.lo: struct.h 
-ipe./mibII/kernel_linux.lo: ./mibII/kernel_linux.h
+ipe./mibII/kernel_linux.lo:  ./mibII/kernel_linux.h
 ipe./mibII/mta_sendmail.lo: ../../include/net-snmp/net-snmp-config.h
 ipe./mibII/mta_sendmail.lo: ../../include/net-snmp/system/linux.h
 ipe./mibII/mta_sendmail.lo: ../../include/net-snmp/system/sysv.h
@@ -6141,7 +6141,7 @@ ipe./mibII/tcp.lo: ../../include/net-snmp/system/sysv.h
 ipe./mibII/tcp.lo: ../../include/net-snmp/system/generic.h
 ipe./mibII/tcp.lo: ../../include/net-snmp/machine/generic.h
 ipe./mibII/tcp.lo: ./mibII/mibII_common.h 
-ipe./mibII/tcp.lo: ../../agent/kernel.h 
+ipe./mibII/tcp.lo:  ../../agent/kernel.h
 ipe./mibII/tcp.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./mibII/tcp.lo: ../../include/net-snmp/definitions.h
 ipe./mibII/tcp.lo: ../../include/net-snmp/types.h 
@@ -6352,7 +6352,7 @@ ipe./mibII/udp.lo: ../../include/net-snmp/system/sysv.h
 ipe./mibII/udp.lo: ../../include/net-snmp/system/generic.h
 ipe./mibII/udp.lo: ../../include/net-snmp/machine/generic.h
 ipe./mibII/udp.lo: ./mibII/mibII_common.h 
-ipe./mibII/udp.lo: ../../agent/kernel.h 
+ipe./mibII/udp.lo:  ../../agent/kernel.h
 ipe./mibII/udp.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./mibII/udp.lo: ../../include/net-snmp/definitions.h
 ipe./mibII/udp.lo: ../../include/net-snmp/types.h 
