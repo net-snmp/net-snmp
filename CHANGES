@@ -106,6 +106,17 @@ listing of all changes made to the code.
       - refine cert debugging; remove unused function
       - remove inline versions of container funcs
       - snmp_shutdown(): added call to netsnmp_certs_shutdown().
+      - 0 Applied the intent of patch 3044888 to allow applications to read
+	the error messages of a MIB parsing failure.
+      - Fixed a memory leak in snmp_free_session().
+      - [BUG 3184697]: Don't reference internal MD5 when it's explicitly
+	disabled
+      - [BUG 3234754]: Ensure old f_create_from_tstring hook is initialized
+	to NULL
+      - [BUG 3264852]: Recognise missing report types
+	(snmp{Unavailable,Unknown}Contexts,snmpUnknownPDUHandlers)
+      - _mibindex_add() no longer reads past the end of the dynamically
+	allocated array _mibindexes.
 
     snmp:
       - patch: 3096725: sysORTable registation for notification log mib
@@ -320,6 +331,28 @@ listing of all changes made to the code.
       - skip non-AF_INET interfaces when loading ipv4 addrs
       - snmpd is again single-threaded. [PATCH 2959811]: Safranek:
 	Reimplement Linux Netlink IPv6 prefix listener.
+      - Fixed memory leak in TCP-MIB tables introduced by patch #3053436.
+      - Fixed memory leak in TCP-MIB tables introduced by patch #3053436."
+	[PATCH 3053436]: from: takevos: fix: tcpConnectionTable_data_access
+	invalid memory access" the bug 3053436 is fixing was introduced in
+	r17719, and fixed in r17861.
+      - Use proper format specifier in debug statements for printing values
+	of type 'oid'.
+      - [PATCH 3066862]: fix the agent for comparing unsigned large indexes
+	of the disk and extend tables.
+      - fixed hrSWRunPath of swapped-out processes on Linux.   fgets()
+	returns NULL both when /proc/PID/cmdline is empty (= swapped out)
+	and when the process exited after fopen(), so check
+	/proc/PID/status in both cases.
+      - fixed race condition in hrSWRunTable Treat the reads from
+	/proc/<pid>/* carefuly, processes can exit in the middle of
+	processing. (already fixed in V5-5-patches and V5-4-patches in SVN
+	rev. 20115, dunno why I did not patch trunk)
+      - patch 3131397: from takevos: huge speedups of the TCP/UDP Tables
+      - patch 3299384: fix INFORMs so they retry probing for an engineID.
+      - patch 3306476: from tinypyramids: fix memory leak in the swrun
+	container loading
+      - ucd_snmp builds again on MinGW and Cygwin.
 
     snmptrapd:
       - Fixed a double free at exit that was triggered by cleaning up the
@@ -397,6 +430,7 @@ listing of all changes made to the code.
 
     python:
       - [PATCH 3185085]: Fix segfault on 64-bit systems
+      - [BUG 3295407]: Fix handling of void pointer
 
     testing:
       - Add missing preconditions
@@ -439,6 +473,10 @@ listing of all changes made to the code.
 	too; default SNMP_TMP_PERSISTENDIR based on SNMP_TMPDIR for user
 	specified SNMP_TMPDIR
 
+    man:
+      - [BUG 3190725]: Document snmp{,_sess}synch_response and
+	snmp_async_send
+
     Generic:
       - Make it possible to build static applications using net-snmp-config
 	and the -*libs flags once more.
@@ -470,6 +508,7 @@ listing of all changes made to the code.
 	getaddrinfo(), gethostbyname() and gethostname() does now succeed.
       - testing: If the agent has been asked to stop, wait until the snmpd
 	process disappeared before proceeding.
+      - Tests 025 and 026 pass on MinGW even if winExtDLL has been enabled.
 
     NetBSD:
       - DragonFly support [From NetBSD patch archive]
@@ -503,6 +542,12 @@ listing of all changes made to the code.
 	MinGW environment.
       - testing: Avoid that T200 fails on known Microsoft SNMP extension
 	DLL bugs.
+      - Build snmplib/transports/snmpIPv6BaseDomain.c only if
+	NETSNMP_ENABLE_IPV6 has been defined.
+      - Fixed a memory leak in the Net-SNMP (non-winExtDLL) implementation
+	of the MIB-II ipNetToMediaTable.
+      - Microsoft Visual Studio: Link with gdi32.lib if OpenSSL has been
+	enabled because gdi32.lib is a dependency of OpenSSL.
 
 *5.6*
 
