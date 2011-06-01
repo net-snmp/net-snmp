@@ -4050,7 +4050,7 @@
 ./host/hr_print.lo: ../../include/net-snmp/system/sysv.h
 ./host/hr_print.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_print.lo: ../../include/net-snmp/machine/generic.h
-./host/hr_print.lo: host_res.h 
+./host/hr_print.lo: host_res.h  
 ./host/hr_print.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_print.lo: ../../include/net-snmp/definitions.h
 ./host/hr_print.lo: ../../include/net-snmp/types.h 
@@ -7928,7 +7928,7 @@
 ./Rmon/event.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/event.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/event.lo: ../../include/net-snmp/net-snmp-includes.h
-./Rmon/event.lo: ../../include/net-snmp/definitions.h
+./Rmon/event.lo:  ../../include/net-snmp/definitions.h
 ./Rmon/event.lo: ../../include/net-snmp/types.h 
 ./Rmon/event.lo: ../../include/net-snmp/library/snmp_api.h
 ./Rmon/event.lo: ../../include/net-snmp/library/asn1.h
@@ -8134,7 +8134,7 @@
 ./Rmon/rows.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/rows.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/rows.lo: ../../include/net-snmp/net-snmp-includes.h
-./Rmon/rows.lo:  ../../include/net-snmp/definitions.h
+./Rmon/rows.lo: ../../include/net-snmp/definitions.h
 ./Rmon/rows.lo: ../../include/net-snmp/types.h 
 ./Rmon/rows.lo: ../../include/net-snmp/library/snmp_api.h
 ./Rmon/rows.lo: ../../include/net-snmp/library/asn1.h
