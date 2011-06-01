@@ -681,7 +681,7 @@ var_extensible_disk(struct variable *vp,
 {
 
     int             percent, iserror;
-    unsigned into   disknum = 0;
+    unsigned int    disknum = 0;
 #if !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
     double          totalblks, free, used, avail, availblks;
 #else
