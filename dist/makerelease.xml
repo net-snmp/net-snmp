@@ -321,7 +321,7 @@
 	  set up test results.  If not, this needs to be fixed or at
 	  least understood and accepted as is for some other reason.</text>
 	  <commands>
-	    <command>cd testing && ./RUNFULLTESTS -g unit-tests</command>
+	    <command>cd testing &amp;&amp; ./RUNFULLTESTS -g unit-tests</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="build:test:transports" title="testing: transports">
@@ -331,7 +331,7 @@
 	  or at least understood and accepted as is for some other
 	  reason (like you can't do IPv6 on your system).</text>
 	  <commands>
-	    <command>cd testing && ./RUNFULLTESTS -g transports</command>
+	    <command>cd testing &amp;&amp; ./RUNFULLTESTS -g transports</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="code:checkcomments" title="code:checkcomments">
