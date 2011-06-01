@@ -328,9 +328,8 @@
 ./snmpget.lo: ../include/net-snmp/system/sysv.h
 ./snmpget.lo: ../include/net-snmp/system/generic.h
 ./snmpget.lo: ../include/net-snmp/machine/generic.h 
-./snmpget.lo:  ../include/net-snmp/utilities.h
-./snmpget.lo: ../include/net-snmp/types.h 
-./snmpget.lo: ../include/net-snmp/definitions.h
+./snmpget.lo: ../include/net-snmp/utilities.h ../include/net-snmp/types.h
+./snmpget.lo:  ../include/net-snmp/definitions.h
 ./snmpget.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpget.lo: ../include/net-snmp/library/asn1.h
 ./snmpget.lo: ../include/net-snmp/library/snmp_impl.h
