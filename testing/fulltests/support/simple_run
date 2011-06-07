@@ -11,7 +11,8 @@ if [ "x$builddir" = "x" ]; then
     if cd testing 2>/dev/null; then
        :
     else
-       echo "Error: $0 must be started from inside the testing directory."
+       echo "Error: $0 must be started from inside the testing directory in the source tree."
+       echo "The builddir environment variable can be set to point to the build directory."
        exit 1
     fi
 fi
@@ -22,7 +23,8 @@ if [ "x$srcdir" = "x" ]; then
     if cd testing 2>/dev/null; then
        :
     else
-       echo "Error: $0 must be started from inside the testing directory."
+       echo "Error: $0 must be started from inside the testing directory in the source tree."
+       echo "The builddir environment variable can be set to point to the build directory."
        exit 1
     fi
 fi
