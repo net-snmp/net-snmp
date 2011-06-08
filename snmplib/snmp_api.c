@@ -841,6 +841,11 @@ init_snmp(const char *type)
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
     netsnmp_certs_init();
 #endif
+#ifdef DNSSEC_LOCAL_VALIDATION
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "dnssecWarnOnly",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DNSSEC_WARN_ONLY);
+#endif
 
     read_premib_configs();
 #ifndef NETSNMP_DISABLE_MIB_LOADING
