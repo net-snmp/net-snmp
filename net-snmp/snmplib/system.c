@@ -712,6 +712,25 @@ get_uptime(void)
 #endif                          /* ! WIN32 */
 /*******************************************************************/
 
+#ifdef DNSSEC_LOCAL_VALIDATION
+static val_context_t *_val_context = NULL;
+
+static val_context_t *
+netsnmp_validator_context(void)
+{
+    if (NULL == _val_context) {
+        int rc;
+        char *apptype = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                              NETSNMP_DS_LIB_APPTYPE);
+        DEBUGMSGTL(("dns:sec:context", "creating dnssec context for %s\n",
+                    apptype));
+        rc = val_create_context(apptype, &_val_context);
+    }
+
+    return _val_context;
+}
+#endif /* DNSSEC_LOCAL_VALIDATION */
+
 int
 netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 {
@@ -815,27 +834,34 @@ netsnmp_getaddrinfo(const char *name, const char *service,
 
 #ifndef DNSSEC_LOCAL_VALIDATION
     err = getaddrinfo(name, NULL, &hint, &addrs);
-    *res = addrs;
 #else /* DNSSEC_LOCAL_VALIDATION */
-    err = val_getaddrinfo(NULL, name, NULL, &hint, &addrs, &val_status);
+    err = val_getaddrinfo(netsnmp_validator_context(), name, NULL, &hint,
+                          &addrs, &val_status);
     DEBUGMSGTL(("dns:sec:val", "err %d, val_status %d / %s; trusted: %d\n",
                 err, val_status, p_val_status(val_status),
                 val_istrusted(val_status)));
-    if (val_istrusted(val_status))
-        *res = addrs;
-    else {
+    if (! val_istrusted(val_status)) {
+        int rc;
         if ((err != 0) && VAL_GETADDRINFO_HAS_STATUS(err)) {
             snmp_log(LOG_WARNING,
                      "WARNING: UNTRUSTED error in DNS resolution for %s!\n",
                      name);
-            return EAI_FAIL;
+            rc = EAI_FAIL;
+        } else {
+            snmp_log(LOG_WARNING,
+                     "The authenticity of DNS response is not trusted (%s)\n",
+                     p_val_status(val_status));
+            rc = EAI_NONAME;
         }
-        snmp_log(LOG_WARNING,
-                 "The authenticity of DNS response is not trusted (%s)\n.",
-                 p_val_status(val_status));
-        return EAI_NONAME;
+        /** continue anyways if DNSSEC_WARN_ONLY is set */
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                    NETSNMP_DS_LIB_DNSSEC_WARN_ONLY))
+            return rc;
     }
+
+
 #endif /* DNSSEC_LOCAL_VALIDATION */
+    *res = addrs;
     if ((0 == err) && addrs && addrs->ai_addr) {
         DEBUGMSGTL(("dns:getaddrinfo", "answer { AF_INET, %s:%hu }\n",
                     inet_ntoa(((struct sockaddr_in*)addrs->ai_addr)->sin_addr),
@@ -863,15 +889,18 @@ netsnmp_gethostbyname(const char *name)
     DEBUGMSGTL(("dns:gethostbyname", "looking up %s\n", name));
 
 #ifdef DNSSEC_LOCAL_VALIDATION
-    hp  = val_gethostbyname(NULL, name, &val_status);
+    hp  = val_gethostbyname(netsnmp_validator_context(), name, &val_status);
     DEBUGMSGTL(("dns:sec:val", "val_status %d / %s; trusted: %d\n",
                 val_status, p_val_status(val_status),
                 val_istrusted(val_status)));
     if (!val_istrusted(val_status)) {
         snmp_log(LOG_WARNING,
-                 "The authenticity of DNS response is not trusted (%s)\n.",
+                 "The authenticity of DNS response is not trusted (%s)\n",
                  p_val_status(val_status));
-        hp = NULL;
+        /** continue anyways if DNSSEC_WARN_ONLY is set */
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                    NETSNMP_DS_LIB_DNSSEC_WARN_ONLY))
+            hp = NULL;
     }
     else if (val_does_not_exist(val_status) && hp)
         hp = NULL;
@@ -908,17 +937,20 @@ netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
 
 #ifdef DNSSEC_LOCAL_VALIDATION
     val_status_t val_status;
-    hp = val_gethostbyaddr(NULL, (const void
-*)&saddr_in->sin_addr,
+    hp = val_gethostbyaddr(netsnmp_validator_context(),
+                           (const void*)&saddr_in->sin_addr,
                            sizeof(struct in_addr), AF_INET, &val_status);
     DEBUGMSGTL(("dns:sec:val", "val_status %d / %s; trusted: %d\n",
                 val_status, p_val_status(val_status),
                 val_istrusted(val_status)));
     if (!val_istrusted(val_status)) {
         snmp_log(LOG_WARNING,
-                 "The authenticity of DNS response is not trusted (%s)\n.",
+                 "The authenticity of DNS response is not trusted (%s)\n",
                  p_val_status(val_status));
-        hp = NULL;
+        /** continue anyways if DNSSEC_WARN_ONLY is set */
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                    NETSNMP_DS_LIB_DNSSEC_WARN_ONLY))
+            hp = NULL;
     }
     else if (val_does_not_exist(val_status) && hp)
         hp = NULL;
