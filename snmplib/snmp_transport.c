@@ -489,6 +489,7 @@ netsnmp_tdomain_transport_full(const char *application,
 
         /* register a "transport" specifier */
         if (!have_added_handler) {
+            have_added_handler = 1;
             netsnmp_ds_register_config(ASN_OCTET_STR,
                                        "snmp", "transport",
                                        NETSNMP_DS_LIBRARY_ID,
