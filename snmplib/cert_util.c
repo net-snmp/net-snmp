@@ -2,6 +2,10 @@
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #include <ctype.h>
 
 #if HAVE_STRING_H
@@ -10,9 +14,6 @@
 #include <strings.h>
 #endif
 
-#if HAVE_MALLOC_H
-# include <malloc.h>
-#endif
 #if HAVE_SYS_STAT_H
 #   include <sys/stat.h>
 #endif
