@@ -74,6 +74,7 @@ main (int argc, char **argv) {
 
   /* at shutdown time */
   snmp_shutdown("example-demon");
+  shutdown_agent();
   SOCK_CLEANUP;
 
   return 0;
