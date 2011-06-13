@@ -18448,7 +18448,7 @@ for i in $new_with_security; do
   fi
 
   # define a bunch of stuff to enable it
-  security_mod_list="${security_mod_list}$i"
+  security_mod_list="${security_mod_list} $i"
   security_src_list="$security_src_list $cfile"
   security_src_list="$security_src_list $cfile"
   security_hdr_list="$security_hdr_list $hfile"
