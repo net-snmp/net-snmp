@@ -117,6 +117,7 @@ listing of all changes made to the code.
 	(snmp{Unavailable,Unknown}Contexts,snmpUnknownPDUHandlers)
       - _mibindex_add() no longer reads past the end of the dynamically
 	allocated array _mibindexes.
+      - [BUG 3151845]: fix multiple registrations of snmp transport handler
 
     snmp:
       - patch: 3096725: sysORTable registation for notification log mib
@@ -353,6 +354,8 @@ listing of all changes made to the code.
       - patch 3306476: from tinypyramids: fix memory leak in the swrun
 	container loading
       - ucd_snmp builds again on MinGW and Cygwin.
+      - patch 3310250: from fenner: misc fixes for debugging output of
+	agentx
 
     snmptrapd:
       - Fixed a double free at exit that was triggered by cleaning up the
