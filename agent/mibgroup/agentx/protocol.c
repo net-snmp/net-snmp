@@ -1172,7 +1172,7 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
      */
     tmp_oid_len = (prefix ? n_subid + 5 : n_subid);
     if (*oid_len < tmp_oid_len) {
-        DEBUGMSGTL(("agentx", "Oversized Object ID (buf=%d pdu=%d)\n", *oid_len,
+        DEBUGMSGTL(("agentx", "Oversized Object ID (buf=%ld pdu=%d)\n", *oid_len,
                  tmp_oid_len));
         DEBUGINDENTLESS();
         return NULL;
