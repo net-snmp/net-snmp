@@ -61,6 +61,8 @@ netsnmp_swinst_arch_init(void)
     snprintf( pkg_directory, SNMP_MAXPATH, "/var/adm/sw/products" );
 #elif defined(freebsd2)
     snprintf( pkg_directory, SNMP_MAXPATH, "/var/db/pkg" );
+#elif defined(linux)
+    snprintf( pkg_directory, SNMP_MAXPATH, "/var/cache/hrmib" );
 #else
     pkg_directory[0] = '\0';
     snmp_log( LOG_ERR, "SWInst: No package directory\n" );
