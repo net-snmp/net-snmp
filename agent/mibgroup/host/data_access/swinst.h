@@ -26,7 +26,7 @@ config_exclude(host/hr_swinst)
     config_require(host/data_access/swinst_apt)
 #elif defined( HAVE_LIBRPM ) && defined( linux )
     config_require(host/data_access/swinst_rpm)
-#elif defined( HAVE_PKGLOCS_H ) || defined( hpux9 ) || defined( hpux10 ) || defined( hpux11 ) || defined( freebsd2 )
+#elif defined( HAVE_PKGLOCS_H ) || defined( hpux9 ) || defined( hpux10 ) || defined( hpux11 ) || defined( freebsd2 ) || defined( linux )
     config_require(host/data_access/swinst_pkginfo)
 #else
     config_warning(This platform does not yet support hrSWInstalledTable rewrites)
