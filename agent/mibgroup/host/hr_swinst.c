@@ -182,6 +182,9 @@ oid             hrswinst_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 6 };
 #ifdef freebsd2
 #define	_PATH_HRSW_directory	"/var/db/pkg"
 #endif
+#if defined(linux) && !defined(HAVE_LIBRPM)
+#define	_PATH_HRSW_directory	"/var/cache/hrmib"
+#endif
 
 void
 init_hr_swinst(void)
