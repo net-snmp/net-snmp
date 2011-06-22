@@ -1,6 +1,31 @@
 -------------------------------------------------------------
 
-Changes: V5.3.3 -> V5.3.4.rc1
+Changes: V5.3.3 -> V5.3.4
+
+2011-06-22 13:06  dts12
+
+   * configure:
+
+   Version number update
+
+2011-06-22 13:04  dts12
+
+   *  FAQ, README, configure, configure.in, dist/net-snmp.spec,   
+      snmplib/snmp_version.c:
+
+   Version number update
+
+2011-06-01 10:19  dts12
+
+   * CHANGES:
+
+   version update
+
+2011-06-01 10:01  dts12
+
+   * ChangeLog:
+
+   version update
 
 2011-06-01 09:54  dts12
 
