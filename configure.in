@@ -2815,50 +2815,8 @@ if test "x$with_rpm" != "xno" && \
   # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
   _rpmlibs=""
 
-  # zlib is required for newer versions of rpm
-  _cppflags="${CPPFLAGS}"
-  _ldflags="${LDFLAGS}"
-
-  AC_ARG_WITH(zlib,
-  [  --with-zlib[=DIR]         use libz in DIR],[
-    if test -d "$withval"; then
-      CPPFLAGS="${CPPFLAGS} -I$withval/include"
-      LDFLAGS="${LDFLAGS} -L$withval/lib"
-    fi
-  ])
-
-  # dunno if this is needed for rpm-4.0.x, earlier probably needs.
-  AC_CHECK_HEADER(zlib.h,
-      AC_CHECK_LIB(z, gzread, , CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
-      CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
-
-  # two variants of bzip2 need checking.
-  AC_ARG_WITH(bzip2,
-  [  --with-bzip2[=DIR]        use libbz2 in DIR],[
-    if test -d "$withval"; then
-      CPPFLAGS="${CPPFLAGS} -I$withval/include"
-      LDFLAGS="${LDFLAGS} -L$withval/lib"
-    fi
-    if test "x$with_bzip2" != "xno"; then
-  AC_CHECK_LIB(bz2, bzread, [_rpmlibs="$_rpmlibs -lbz2"],
-     AC_CHECK_LIB(bz2, BZ2_bzread, [_rpmlibs="$_rpmlibs -lbz2"],))
-    fi
-  ])
-
-
-  # two variants of db1 need checking.
-  AC_CHECK_LIB(db1, dbopen, [_rpmlibs="-ldb1 $_rpmlibs"],
-     AC_CHECK_LIB(db, dbopen, [_rpmlibs="-ldb $_rpmlibs"]))
-
-  # two variants of db3 need checking.
-  AC_CHECK_LIB(db-3.1, db_create, [_rpmlibs="-ldb-3.1 $_rpmlibs"],
-    AC_CHECK_LIB(db-3.0, db_create, [_rpmlibs="-ldb-3.0 $_rpmlibs"]))
-  
-  # rpm-3.0.5 and later needs popt.
-  AC_CHECK_LIB(popt, poptParseArgvString, [_rpmlibs="-lpopt $_rpmlibs"])
-  
   # rpm-4.0.x needs rpmio.
-  AC_CHECK_LIB(rpmio, Fopen, [_rpmlibs="-lrpmio $_rpmlibs"],,$_rpmlibs)
+  AC_CHECK_LIB(rpmio, rpmGetPath, [_rpmlibs="-lrpmio $_rpmlibs"],,$_rpmlibs)
   
   # now check for rpm using the appropriate libraries.
   AC_CHECK_LIB(rpm, rpmGetFilesystemList,[
