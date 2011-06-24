@@ -3418,7 +3418,7 @@ AC_CHECK_HEADERS(search.h)
 # RPM subdirectory path (sigh)
 if test "x$with_rpm" != "xno" && \
         echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
-  AC_CHECK_HEADERS(rpm/rpmdb.h)
+  AC_CHECK_HEADERS(rpm/rpmts.h, [], [], [[#include <rpm/rpmlib.h>]])
 fi
 
 # OpenBSD 2.6 needs netinet/in.h before netinet/in_pcb.h
