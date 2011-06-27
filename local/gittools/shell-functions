@@ -2,8 +2,8 @@
 # These functions are useful functions when working with a bash shell
 # within a Net-SNMP git checkout.
 
-nsbuildroot=$HOME/ns-build-root
-nsecho=""
+nsbuildroot=${nsbuildroot:=$HOME/ns-build-root}
+nsecho=${nsecho:=}
 
 _ns_maybemkdir () {
     dir=$1
@@ -19,29 +19,29 @@ _ns_switchtobuilddir () {
 }
 
 _ns_getbuilddir() {
-    snmpsuffix="$1"
-    snmpbranch=`git branch | egrep '^\*' | sed 's/^..//'`
-    SNMPBUILDDIR="$snmpbuildroot/$snmpbranch"
-    SNMPSRCDIR="$PWD"
+    nssuffix="$1"
+    nsbranch=`git branch | egrep '^\*' | sed 's/^..//'`
+    NSBUILDDIR="$nsbuildroot/$nsbranch"
+    NSSRCDIR="$PWD"
 
     # add on the suffix if created
-    if [ "$suffix" != "" ]; then
-	SNMPBUILDDIR="$snmpbranch-$snmpsuffix"
+    if [ "$nssuffix" != "" ]; then
+	NSBUILDDIR="$nsbranch-$nssuffix"
     fi
 }
 
 _ns_setbuilddir() {
     _ns_getbuilddir "$1"
-    _ns_switchtobuilddir $SNMPBUILDDIR
+    _ns_switchtobuilddir $NSBUILDDIR
 }
 
 _ns_cleanup() {
-    cd $SNMPSRCDIR
+    cd $NSSRCDIR
 }
 
 #
-# snmpmake [-s suffix]
-#   runs 'make' in $snmpbuildroot/branch[-suffix]
+# nsmake [-s suffix]
+#   runs 'make' in $nsbuildroot/branch[-suffix]
 nsmake () {
     if [ "$1" = "-s" ]; then
 	shift
@@ -57,8 +57,8 @@ nsmake () {
 }
 
 #
-# snmpconfigure [-s suffix] [configure arguments]
-#   runs 'configure' in $snmpbuildroot/branch[-suffix] with passed arguments
+# nsconfigure [-s suffix] [configure arguments]
+#   runs 'configure' in $nsbuildroot/branch[-suffix] with passed arguments
 nsconfigure () {
     if [ "$1" = "-s" ]; then
 	shift
@@ -68,7 +68,7 @@ nsconfigure () {
         _ns_setbuilddir
     fi
     
-    $nsecho $SNMPSRCDIR/configure "$@"
+    $nsecho $NSSRCDIR/configure "$@"
     
     _ns_cleanup
 }
