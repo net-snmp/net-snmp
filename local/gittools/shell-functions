@@ -164,10 +164,27 @@ nsrollup() {
     
     nslastbranch=""
 
+    nsbranchesdone=""
+    nsbranchesnotdone=""
+
     for branch in $nsbranches ; do
 	if [ "$nslastbranch" != "" ] ; then
 	    $nsverbose checking out $branch
 	    $nsecho git checkout $branch
+
+	    if [ -f dist/release ] ; then
+		if [ "`egrep ^$branch dist/release`" = "$branch rc" ] ; then
+		    $nsverbose Skipping: branch is in rc phase of release
+		    nsbranchesnotdone="$nsbranchesnotdone $branch"
+
+		    # comment this out if you want nsrollup to skip the
+		    # branch and roll the changes in the lower branch up
+		    # to the super-parent when the parent is in release status
+		    nslastbranch=$branch
+
+		    continue
+		fi
+	    fi
 
 	    $nsverbose merging $nslastbranch into $branch
 	    $nsecho git merge $nslastbranch
@@ -186,18 +203,38 @@ nsrollup() {
 		echo "  Aborting:"
 		echo "    If instead you want to give up, run"
 		echo "    1) git merge --abort"
+		echo ""
+		echo "Updated the following branches:"
+		echo "  $nsbranchesdone"
+		if [ "$nsbranchesnotdone" != "" ] ; then
+		    echo "Did NOT update the following branches:"
+		    echo "  $nsbranchesnotdone"
+		fi
+		echo "Failed to update this branch:"
+		echo "   $branch"
 		return
 	    fi
 
 	    _ns_checkclean
 	    if [ $NSCLEAN != 1 ] ; then
+		# we really shouldn't git here.  merge will either autocommit
+		# or it will fail
 		$nsverbose committing merge results
 		$nsecho git commit -m "nsrollup: merging $nslastbranch into $branch" -a
 	    fi
+
+	    nsbranchesdone="$nsbranchesdone $branch"
 	fi
 
 	nslastbranch=$branch
     done
 
-    $nsverbose "Rolled all branches upward"
+    echo ""
+    echo "-------------------------------"
+    echo "Updated the following branches:"
+    echo "  $nsbranchesdone"
+    if [ "$nsbranchesnotdone" != "" ] ; then
+	echo "Did NOT update the following branches:"
+	echo "  $nsbranchesnotdone"
+    fi
 }
