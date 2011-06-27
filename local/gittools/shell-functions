@@ -2,23 +2,23 @@
 # These functions are useful functions when working with a bash shell
 # within a Net-SNMP git checkout.
 
-snmpbuildroot=$HOME/snmp-build-root
-snmpecho=""
+nsbuildroot=$HOME/ns-build-root
+nsecho=""
 
-_snmpmaybemkdir () {
+_ns_maybemkdir () {
     dir=$1
     if [ ! -d $dir ] ; then
 	mkdir -p $dir
     fi
 }
 
-_snmpswitchtobuilddir () {
+_ns_switchtobuilddir () {
     dir=$1
-    _snmpmaybemkdir $dir
+    _ns_maybemkdir $dir
     cd $dir
 }
 
-_snmpgetbuilddir() {
+_ns_getbuilddir() {
     snmpsuffix="$1"
     snmpbranch=`git branch | egrep '^\*' | sed 's/^..//'`
     SNMPBUILDDIR="$snmpbuildroot/$snmpbranch"
@@ -30,45 +30,45 @@ _snmpgetbuilddir() {
     fi
 }
 
-_snmpsetbuilddir() {
-    _snmpgetbuilddir "$1"
-    _snmpswitchtobuilddir $SNMPBUILDDIR
+_ns_setbuilddir() {
+    _ns_getbuilddir "$1"
+    _ns_switchtobuilddir $SNMPBUILDDIR
 }
 
-_snmpcleanup() {
+_ns_cleanup() {
     cd $SNMPSRCDIR
 }
 
 #
 # snmpmake [-s suffix]
 #   runs 'make' in $snmpbuildroot/branch[-suffix]
-snmpmake () {
+nsmake () {
     if [ "$1" = "-s" ]; then
 	shift
-        _snmpsetbuilddir "$1"
+        _ns_setbuilddir "$1"
 	shift
     else
-        _snmpsetbuilddir
+        _ns_setbuilddir
     fi
 
-    $snmpecho make "$@"
+    $nsecho make "$@"
 
-    _snmpcleanup
+    _ns_cleanup
 }
 
 #
 # snmpconfigure [-s suffix] [configure arguments]
 #   runs 'configure' in $snmpbuildroot/branch[-suffix] with passed arguments
-snmpconfigure () {
+nsconfigure () {
     if [ "$1" = "-s" ]; then
 	shift
-        _snmpsetbuilddir "$1"
+        _ns_setbuilddir "$1"
 	shift
     else
-        _snmpsetbuilddir
+        _ns_setbuilddir
     fi
     
-    $snmpecho $SNMPSRCDIR/configure "$@"
+    $nsecho $SNMPSRCDIR/configure "$@"
     
-    _snmpcleanup
+    _ns_cleanup
 }
