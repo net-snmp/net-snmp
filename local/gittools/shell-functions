@@ -5,9 +5,13 @@
 nsbuildroot=${nsbuildroot:=$HOME/ns-build-root}
 nsecho=${nsecho:=}
 
+# set nsverbose to ':' if you don't want verbose output of what's going on
+nsverbose=${nsverbose:="echo ::: Net-SNMP: "}
+
 _ns_maybemkdir () {
     dir=$1
     if [ ! -d $dir ] ; then
+	$nsverbose making directory $dir
 	mkdir -p $dir
     fi
 }
@@ -15,18 +19,19 @@ _ns_maybemkdir () {
 _ns_switchtobuilddir () {
     dir=$1
     _ns_maybemkdir $dir
+    $nsverbose cd $dir
     cd $dir
 }
 
 _ns_getbuilddir() {
-    nssuffix="$1"
+    nssuffix=${1:-$nssuffix}
     nsbranch=`git branch | egrep '^\*' | sed 's/^..//'`
     NSBUILDDIR="$nsbuildroot/$nsbranch"
     NSSRCDIR="$PWD"
 
     # add on the suffix if created
     if [ "$nssuffix" != "" ]; then
-	NSBUILDDIR="$nsbranch-$nssuffix"
+	NSBUILDDIR="$nsbuildroot/$nsbranch-$nssuffix"
     fi
 }
 
@@ -36,6 +41,7 @@ _ns_setbuilddir() {
 }
 
 _ns_cleanup() {
+    $nsverbose cd $NSSRCDIR
     cd $NSSRCDIR
 }
 
@@ -51,6 +57,7 @@ nsmake () {
         _ns_setbuilddir
     fi
 
+    $nsverbose make "$@"
     $nsecho make "$@"
 
     _ns_cleanup
@@ -68,6 +75,7 @@ nsconfigure () {
         _ns_setbuilddir
     fi
     
+    $nsverbose running $NSSRCDIR/configure "$@"
     $nsecho $NSSRCDIR/configure "$@"
     
     _ns_cleanup
