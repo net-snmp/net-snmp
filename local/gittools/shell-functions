@@ -4,6 +4,7 @@
 
 nsbuildroot=${nsbuildroot:=$HOME/ns-build-root}
 nsecho=${nsecho:=}
+nsbranches=${nsbranches:="V5-4-patches V5-5-patches V5-6-patches master"}
 
 # set nsverbose to ':' if you don't want verbose output of what's going on
 nsverbose=${nsverbose:="echo ::: Net-SNMP: "}
@@ -45,6 +46,16 @@ _ns_cleanup() {
     cd $NSSRCDIR
 }
 
+_ns_checkclean() {
+    if [ `git status --porcelain --untracked-files=no | wc -l` -gt 0 ] ; then
+	echo "Your directory has outstanding changes!"
+	echo "  Please either commit the changes, discard them or stash them"
+	NSCLEAN=1
+    else
+	NSCLEAN=0
+    fi
+}
+
 #
 # nsmake [-s suffix]
 #   runs 'make' in $nsbuildroot/branch[-suffix]
@@ -79,4 +90,33 @@ nsconfigure () {
     $nsecho $NSSRCDIR/configure "$@"
     
     _ns_cleanup
+}
+
+nstrypatch() {
+    _ns_checkclean
+
+    # remember these branches
+    nsgoodbranches=""
+    nsbadbranches=""
+
+    if [ $NSCLEAN = 0 ]; then
+	for branch in $nsbranches ; do
+	    $nsverbose checking out and applying patch in $branch
+	    $nsecho git checkout $branch
+	    $nsecho patch "$@"
+	    if [ $? = 0 ] ; then
+		$nsverbose Patch succeeded on $branch
+		nsgoodbranches="$nsgoodbranches $branch"
+	    else
+		$nsverbose Patch failed on $branch
+		nsgoodbranches="$nsbadbranches $branch"
+	    fi
+	    git checkout .
+	done
+
+	echo ""
+	echo "Patch application results:"
+	echo "  Success: $nsgoodbranches"
+	echo "     Fail: $nsbadbranches"
+    fi
 }
