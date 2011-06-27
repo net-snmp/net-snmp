@@ -50,9 +50,9 @@ _ns_checkclean() {
     if [ `git status --porcelain --untracked-files=no | wc -l` -gt 0 ] ; then
 	echo "Your directory has outstanding changes!"
 	echo "  Please either commit the changes, discard them or stash them"
-	NSCLEAN=1
-    else
 	NSCLEAN=0
+    else
+	NSCLEAN=1
     fi
 }
 
@@ -92,31 +92,59 @@ nsconfigure () {
     _ns_cleanup
 }
 
-nstrypatch() {
+nspatchtry() {
     _ns_checkclean
+    if [ $NSCLEAN != 1 ]; then
+	return
+    fi
 
     # remember these branches
     nsgoodbranches=""
     nsbadbranches=""
 
-    if [ $NSCLEAN = 0 ]; then
-	for branch in $nsbranches ; do
-	    $nsverbose checking out and applying patch in $branch
-	    $nsecho git checkout $branch
-	    $nsecho patch "$@"
-	    if [ $? = 0 ] ; then
-		$nsverbose Patch succeeded on $branch
-		nsgoodbranches="$nsgoodbranches $branch"
-	    else
-		$nsverbose Patch failed on $branch
-		nsgoodbranches="$nsbadbranches $branch"
-	    fi
-	    git checkout .
-	done
+    # remember the patch args for later use
+    nspatchargs="$@"
 
-	echo ""
-	echo "Patch application results:"
-	echo "  Success: $nsgoodbranches"
-	echo "     Fail: $nsbadbranches"
+    for branch in $nsbranches ; do
+	$nsverbose checking out and applying patch in $branch
+	$nsecho git checkout $branch
+	$nsecho patch "$@"
+	if [ $? = 0 ] ; then
+	    $nsverbose Patch succeeded on $branch
+	    nsgoodbranches="$nsgoodbranches $branch"
+	else
+	    $nsverbose Patch failed on $branch
+	    nsgoodbranches="$nsbadbranches $branch"
+	fi
+	git checkout .
+    done
+
+    echo ""
+    echo "Patch application results:"
+    echo "  Success: $nsgoodbranches"
+    echo "     Fail: $nsbadbranches"
+}
+
+nspatchapply() {
+    _ns_checkclean
+    if [ $NSCLEAN != 1 ]; then
+	return
+    fi
+
+    patchbranch=`echo $nsgoodbranches | sed 's/ .*//'`
+
+    $nsverbose Checking out $patchbranch
+    $nsecho git checkout $patchbranch
+
+    $nsverbose applying the patch "$nspatchargs"
+    $nsecho patch $nspatchargs
+    $nsecho git diff | cat
+    
+    echo ""
+    echo -n "commit the results to $patchbranch? [y/n]"
+    read ans
+
+    if [ $ans = 'y' -o $ans = 'Y' ] ; then
+	$nsecho git commit -a
     fi
 }
