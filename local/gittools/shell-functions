@@ -160,7 +160,7 @@ nsrollup() {
     fi
 
     $nsverbose Pulling all upstream branches
-    $nsecho git pull --all
+    $nsecho git fetch --all
     
     nslastbranch=""
 
@@ -185,6 +185,9 @@ nsrollup() {
 		    continue
 		fi
 	    fi
+
+	    $nsverbose rebasing our local changes on $branch
+	    git rebase origin/$branch
 
 	    $nsverbose merging $nslastbranch into $branch
 	    $nsecho git merge $nslastbranch
