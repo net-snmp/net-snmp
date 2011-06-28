@@ -190,7 +190,7 @@ nsrollup() {
 	    git rebase origin/$branch
 
 	    $nsverbose merging $nslastbranch into $branch
-	    $nsecho git merge $nslastbranch
+	    $nsecho git merge --log $nslastbranch
 	    if [ $? != 0 ] ; then
 		echo ""
 		echo "---------------------------------------------"
