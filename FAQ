@@ -459,8 +459,8 @@ How do I submit a patch or bug report?
   doesn't contain a decent description field.
 
   The best way to submit patch (diff) information is by checking out
-  the current code from the development SVN trunk, making your changes
-  and then running "svn diff" after you're done.
+  the current code from the development git trunk, making your changes
+  and then running "git diff" or "git format-patch" after you're done.
 
   If you're working from a source code distribution, and comparing old
   and new versions of a code file, use "diff -u OLDFILE NEWFILE" 
