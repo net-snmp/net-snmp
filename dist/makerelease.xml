@@ -349,7 +349,7 @@
 	  <!-- XXX: git2cl needs to be truncated quite a bit rather than searching the whole history -->
 	  <!-- XXX: following branches properly may prove to be interesting -->
 	  <commands>
-	    <command>git2cl | head -10000 > ChangeLog.add</command>
+	    <command>git2cl | head -10000 &gt; ChangeLog.add</command>
 	    <command>perl dist/changelogfix  &lt; ChangeLog.add &gt; ChangeLog.reallyadd</command>
 	  </commands>
 	</step>
