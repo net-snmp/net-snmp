@@ -38,9 +38,8 @@
 	  <perl>
 	    <code>
 	      # version number with dashes instead of dots
-	      $self->{'parameters'}{'VERSIONDASHES'} =
-    	          $self->{'parameters'}{'VERSION'};
-	      $self->{'parameters'}{'VERSIONDASHES'} =~ s/\./-/g;
+	      $self->{'parameters'}{'VERSIONTAGNAME'} =
+    	          "V" . $self->{'parameters'}{'VERSION'};
 
 	      # target version number (without preN/rcN)
 	      $self->{'parameters'}{'VERSIONTARGET'} =
@@ -55,7 +54,7 @@
 	      $self->{'parameters'}{'VERSIONFLOAT'} = 
                   $major + $minor/100 + $patch/10000 + $opps/100000;
 
-	      # find out the svn path we're in.
+	      # find out the git branch we're on.
 	      open(GITINFO,"git info|");
 	      while(&lt;GITINFO&gt;) {
 		  if (/^\*\s+(.*)/) {
@@ -75,7 +74,7 @@
 
 	    VERSION:                 {VERSION}
 
-	    VERSION with dashes:     {VERSIONDASHES}
+	    VERSION tag name:        {VERSIONTAGNAME}
 
 	    Floating point VERSION:  {VERSIONFLOAT}
 
@@ -95,7 +94,7 @@
 	  this step finds outstanding modified files you need to check
 	  them in or revert them before continuing!</text>
 	  <commands>
-	    <command>svn -u status | egrep '^[^\?]'</command>
+	    <command>git status --porcelain | egrep '^[^\?]'</command>
 	  </commands>
 	</step>
       </steps>
@@ -131,7 +130,7 @@
 	      <text>We'll now commit the Makefile.top file if you've
 		modified it.</text>
 	      <commands>
-		<command>svn commit -m "version update" Makefile.top</command>
+		<command>git commit -m "version update for {VERSION}" Makefile.top</command>
 	      </commands>
 	    </step>
 	  </steps>
@@ -227,16 +226,16 @@
 	      <text>Check the following changes for proper version number
 		differences before we commit the chances.</text>
 	      <commands>
-		<command>svn diff</command>
+		<command>git diff</command>
 	      </commands>
 	    </step>
 	    <step type="system" stepname="release:versioncommit" pause="true"
-	      title="Running svn commit to commit the changes">
+	      title="Running git commit to commit the changes">
 
 	      <text>Check the changes in the above diff and then we'll
 		commit the results here if they look ok.</text>
 	      <commands>
-		<command>svn commit -m "Version number update"</command>
+		<command>git commit -a -m "Version number update: {VERSION}"</command>
 	      </commands>
 	    </step>
 	  </steps>
@@ -250,7 +249,7 @@
 	  </commands>
 	</step>
 	<step type="system" stepname="docs:update" title="docs:update">
-	  <text>This will run svn status to figure out what files have
+	  <text>This will run git status to figure out what files have
 	  changed since the previous man page generation steps were
 	  done.  After this step, we'll commit all the modified files.
 
@@ -263,20 +262,20 @@
 	  doxygen generates by default.  Only important ones should be
 	  added.</text>
 	  <commands>
-	    <command>svn -u status man</command>
+	    <command>git status --porcelain man</command>
 	  </commands>
 	</step>
 	<step type="informational" pause="true" stepname="docs:manualaddnewman" title="docs:manualaddnewman">
 	  <text>
 	    Update man/Makefile.in with details of any new man pages,
-	    and run 'svn add' on them.
+	    and run 'git add' on them.
 
 	    I'll commit these changes for you after you're done.
 	  </text>
 	</step>
 	<step prompt="true" type="system" stepname="docs:commit" title="docs:commit">
 	  <commands>
-	    <command>svn commit -m "documentation update" man</command>
+	    <command>git commit -m "documentation update for {VERSION}" man</command>
 	  </commands>
 	</step>
       </steps>
@@ -344,7 +343,7 @@
           <text>This step commits the dependency changes done in the
           previous step.</text>
 	  <commands>
-	    <command>svn commit -m "make depend" `find . -name Makefile.depend`</command>
+	    <command>git commit -m "make depend for {VERSION}" `find . -name Makefile.depend`</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="changelog:svn2cl" title="changelog:svn2cl">
@@ -370,7 +369,7 @@
 	</step>
 	<step prompt="true" type="system" stepname="changelog:commit" title="changelog:commit">
 	  <commands>
-	    <command>svn commit -m "version update" ChangeLog</command>
+	    <command>git commit -m "version update for {VERSION}" ChangeLog</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="docs:newnews" title="docs:newnews">
@@ -394,14 +393,15 @@
 	</step>
 	<step prompt="true" type="system" stepname="docs:commit" title="docs:commit">
 	  <commands>
-	    <command>svn commit -m "version update" README NEWS CHANGES</command>
+	    <command>git commit -m "version update for {VERSION}" README NEWS CHANGES</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:update" title="release:update">
-	  <text>One more svn update and status to make sure nothing
+	  <text>One more git pull and status to make sure nothing
 	  odd exists in your source tree.  Please check the results!</text>
 	  <commands>
-	    <command>svn -u status</command>
+	    <command>git pull --rebase</command>
+	    <command>git status --porcelain</command>
 	  </commands>
 	</step>
       </steps>
@@ -410,7 +410,7 @@
     <step type="section" title="Make the Release" prompt="yes">
       <text>This is it!  After this point it's much harder to turn
       back.  If everything is ok until this point and you're ready to
-      actually stamp the release in SVN and make release files, these
+      actually tag the release in git and make release files, these
       steps will do that for you.
       </text>
       <steps>
@@ -419,16 +419,15 @@
 	    This will actually svn copy the current checked out branch
 	    to the new tag name.  Specifically:
 
-               svn copy {BRANCHPATH} .../tags/Ext-{VERSIONDASHES}/net-snmp
-
+               git tag -u A77C5329 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"
 	  </text>
 	  <commands>
-	    <command>svn copy -m "{VERSION} release" {BRANCHPATH} https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDASHES}</command>
+	    <command>git tag -u A77C5329 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"</command>
 	  </commands>
 	</step>
 	<step prompt="true" type="system" stepname="release:makedist" title="release:makedist">
 	  <commands>
-	    <command>svn export https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDASHES}/net-snmp net-snmp-{VERSION}</command>
+	    <command>git archive --prefix=net-snmp-{VERSION}/ {BRANCHPATH} | tar xf -</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:removefiles" title="release:removefiles">
@@ -458,12 +457,12 @@
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg -u 317F8F64 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
+	    <command>gpg -u A77C5329 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg -u 317F8F64 -a --detach-sign net-snmp-{VERSION}.zip</command>
+	    <command>gpg -u A77C5329 -a --detach-sign net-snmp-{VERSION}.zip</command>
 	  </commands>
 	</step>
 	<step type="section" title="Release File Test">
