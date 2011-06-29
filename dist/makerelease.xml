@@ -56,16 +56,14 @@
                   $major + $minor/100 + $patch/10000 + $opps/100000;
 
 	      # find out the svn path we're in.
-	      open(SVNINFO,"svn info|");
-	      while(&lt;SVNINFO&gt;) {
-		  if (/^URL: *(.*)/) {
+	      open(GITINFO,"git info|");
+	      while(&lt;GITINFO&gt;) {
+		  if (/^\*\s+(.*)/) {
 		     $self->{'parameters'}{'BRANCHPATH'} = $1;
-	             # strip off trailing module name
-	             $self->{'parameters'}{'BRANCHPATH'} =~ s/.net-snmp$//;
                      last;
                   }
               }
-              close(SVNINFO);
+              close(GITINFO);
 
 	      return 0;
 	    </code>
