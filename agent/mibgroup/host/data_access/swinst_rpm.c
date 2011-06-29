@@ -33,7 +33,8 @@
 #ifdef HAVE_RPMGETPATH		/* HAVE_RPM_RPMMACRO_H */
 #include <rpm/rpmmacro.h>
 #endif
-#ifdef HAVE_RPM_RPMDB_H
+#ifdef HAVE_RPM_RPMTS_H
+#include <rpm/rpmts.h>
 #include <rpm/rpmdb.h>
 #endif
 
@@ -67,18 +68,10 @@ netsnmp_swinst_arch_init(void)
     rpmdbpath = rpmGetPath( "%{_dbpath}", NULL );
     dbpath = rpmdbpath;
 #else
-#ifdef RPMVAR_DBPATH
-    rpmReadConfigFiles( NULL, NULL, NULL, 0 );
-    rpmdbpath = rpmGetVar( RPMVAR_DBPATH );
-    dbpath = rpmdbpath;
-#else
     dbpath = "/var/lib/rpm";   /* Most likely */
-#endif
 #endif
 
     snprintf( pkg_directory, SNMP_MAXPATH, "%s/Packages", dbpath );
-    if (-1 == stat( pkg_directory, &stat_buf ))
-        snprintf( pkg_directory, SNMP_MAXPATH, "%s/packages.rpm", dbpath );
     SNMP_FREE(rpmdbpath);
     dbpath = NULL;
     if (-1 == stat( pkg_directory, &stat_buf )) {
@@ -99,13 +92,9 @@ netsnmp_swinst_arch_shutdown(void)
 int
 netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 {
-    rpmdb                 db;
+    rpmts                 ts;
 
-#if defined(RPMDBI_PACKAGES)
     rpmdbMatchIterator    mi;
-#else
-    int                   offset;
-#endif
     Header                h;
     char                 *n, *v, *r, *g;
     int32_t              *t;
@@ -114,17 +103,14 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     int                   rc, i = 1;
     netsnmp_swinst_entry *entry;
 
-    if (rpmdbOpen("", &db, O_RDONLY, 0644))
+    ts = rpmtsCreate();
+    rpmtsSetVSFlags( ts, (_RPMVSF_NOSIGNATURES|_RPMVSF_NODIGESTS));
+
+    mi = rpmtsInitIterator( ts, RPMDBI_PACKAGES, NULL, 0);
+    if (mi == NULL)
 	NETSNMP_LOGONCE((LOG_ERR, "rpmdbOpen() failed\n"));
 
-#if defined(RPMDBI_PACKAGES)
-    mi = rpmdbInitIterator( db, RPMDBI_PACKAGES, NULL, 0);
     while (NULL != (h = rpmdbNextIterator( mi )))
-#else
-    for (offset  = rpmdbFirstRecNum( db );
-         offset != 0;
-         offset  = rpmdbNextRecNum(  db, offset ))
-#endif
     {
 
         entry = netsnmp_swinst_entry_create( i++ );
@@ -132,11 +118,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
             continue;   /* error already logged by function */
         rc = CONTAINER_INSERT(container, entry);
 
-#if defined(RPMDBI_PACKAGES)
         h = headerLink( h );
-#else
-        h = rpmdbGetRecord( db, offset );
-#endif
         headerGetEntry( h, RPMTAG_NAME,        NULL, (void**)&n, NULL);
         headerGetEntry( h, RPMTAG_VERSION,     NULL, (void**)&v, NULL);
         headerGetEntry( h, RPMTAG_RELEASE,     NULL, (void**)&r, NULL);
@@ -157,10 +139,8 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 
         headerFree( h );
     }
-#if defined(RPMDBI_PACKAGES)
     rpmdbFreeIterator( mi );
-#endif
-    rpmdbClose( db );
+    rpmtsFree( ts );
 
     DEBUGMSGTL(("swinst:load:arch", "loaded %d entries\n",
                 (int)CONTAINER_SIZE(container)));
