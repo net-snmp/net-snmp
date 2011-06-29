@@ -79,14 +79,14 @@
 
 	    Floating point VERSION:  {VERSIONFLOAT}
 
-            SVN Branch URL:          {BRANCHPATH}
+            Git Branch Name:         {BRANCHPATH}
 	  </text>
 	</step>
 	<step type="system" stepname="update" title="update">
 	  <text>We need to make sure your code is up to date and
 	  matches the latest sources in this branch.</text>
 	  <commands>
-	    <command>svn update</command>
+	    <command>git pull --rebase</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="update" title="Check for changes">
