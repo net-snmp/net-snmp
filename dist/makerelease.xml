@@ -211,13 +211,10 @@
 	    <step type="system" stepname="release:versionautoconf"
 	      title="Running autoconf to rebuild configure">
 	      <text>We modified configure.in, so we now need to run
-		autoconf to rebuild configure.
-
-		XXX: in the future we should verify the correct autoconf
-		version number</text>
+		autoconf to rebuild configure.</text>
 	      <commands>
 		<command>rm -f configure</command>
-		<command>autoconf</command>
+		<command>dist/run-autoconf</command>
 	      </commands>
 	    </step>
 	    <step type="system" stepname="release:versiondiff"
