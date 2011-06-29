@@ -90,7 +90,8 @@ AC_CHECK_HEADERS([openssl/des.h  openssl/hmac.h ] dnl
 
 # RPM subdirectory path                   (Agent)
 if test "x$with_rpm" != "xno"; then
-  AC_CHECK_HEADERS(rpm/rpmdb.h   rpm/rpmfileutil.h)
+  AC_CHECK_HEADERS([rpm/rpmts.h   rpm/rpmfileutil.h], [], [],
+		   [[#include <rpm/rpmlib.h>]])
 fi
 
 
