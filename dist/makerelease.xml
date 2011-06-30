@@ -490,9 +490,6 @@
 	  <commands>
 	    <command>git push</command>
 	    <command>git push tag {VERSIONTAGNAME}</command>
-
-	    
-	    <!-- <comand>...</command> ; use mr-command1 -->
 	  </commands>
 	</step>
 
