@@ -39,7 +39,7 @@
 	    <code>
 	      # version number with dashes instead of dots
 	      $self->{'parameters'}{'VERSIONTAGNAME'} =
-    	          "V" . $self->{'parameters'}{'VERSION'};
+    	          "v" . $self->{'parameters'}{'VERSION'};
 
 	      # target version number (without preN/rcN)
 	      $self->{'parameters'}{'VERSIONTARGET'} =
@@ -55,7 +55,7 @@
                   $major + $minor/100 + $patch/10000 + $opps/100000;
 
 	      # find out the git branch we're on.
-	      open(GITINFO,"git info|");
+	      open(GITINFO,"git branch|");
 	      while(&lt;GITINFO&gt;) {
 		  if (/^\*\s+(.*)/) {
 		     $self->{'parameters'}{'BRANCHPATH'} = $1;
@@ -464,6 +464,20 @@
 	    <command>gpg -u A77C5329 -a --detach-sign net-snmp-{VERSION}.zip</command>
 	  </commands>
 	</step>
+	<step type="command" name="release:push" title="Push the code modifications"
+	      pause="0" mandatory="0">
+	  <text>
+	    Push the code modifications to the upstream branch
+	  </text>
+	  <commands>
+	    <command>git push</command>
+	    <command>git push tag {VERSIONTAGNAME}</command>
+
+	    
+	    <!-- <comand>...</command> ; use mr-command1 -->
+	  </commands>
+	</step>
+
 	<step type="section" title="Release File Test">
 	  <text>We'll also re-build the source and retest a few things to
 	    ensure the packaged file can actually be built.
