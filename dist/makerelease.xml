@@ -471,10 +471,7 @@
 	  </text>
 	  <commands>
 	    <command>git push</command>
-	    <command>git push tag {VERSIONTAGNAME}</command>
-
-	    
-	    <!-- <comand>...</command> ; use mr-command1 -->
+	    <command>git push --tags origin {VERSIONTAGNAME}</command>
 	  </commands>
 	</step>
 
