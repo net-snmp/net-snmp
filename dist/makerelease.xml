@@ -489,7 +489,7 @@
 	  </text>
 	  <commands>
 	    <command>git push</command>
-	    <command>git push tag {VERSIONTAGNAME}</command>
+	    <command>git push --tags origin {VERSIONTAGNAME}</command>
 	  </commands>
 	</step>
 
