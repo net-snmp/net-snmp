@@ -629,14 +629,14 @@
 /* Define to 1 if you have the <rpm/header.h> header file. */
 #undef HAVE_RPM_HEADER_H
 
-/* Define to 1 if you have the <rpm/rpmdb.h> header file. */
-#undef HAVE_RPM_RPMDB_H
-
 /* Define to 1 if you have the <rpm/rpmfileutil.h> header file. */
 #undef HAVE_RPM_RPMFILEUTIL_H
 
 /* Define to 1 if you have the <rpm/rpmlib.h> header file. */
 #undef HAVE_RPM_RPMLIB_H
+
+/* Define to 1 if you have the <rpm/rpmts.h> header file. */
+#undef HAVE_RPM_RPMTS_H
 
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
@@ -1575,6 +1575,9 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t
 
 /* Define to the type of an unsigned integer type of width exactly 16 bits if
    such a type exists and the standard includes do not define it. */
