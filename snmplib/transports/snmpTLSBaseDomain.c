@@ -846,6 +846,48 @@ void netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase) {
     SNMP_FREE(tlsbase);
 }
 
+netsnmp_indexed_addr_pair *
+netsnmp_tlsbase_extract_addr_pair(netsnmp_transport *t, void *opaque, int olen)
+{
+    netsnmp_indexed_addr_pair *addr_pair = NULL;
+
+    if (opaque && olen == sizeof(netsnmp_tmStateReference)) {
+        netsnmp_tmStateReference *tmStateRef =
+            tmStateRef = (netsnmp_tmStateReference *) opaque;
+
+        if (tmStateRef->have_addresses)
+            addr_pair = &(tmStateRef->addresses);
+    }
+    if ((NULL == addr_pair) && (NULL != t)) {
+        if (t->data != NULL &&
+            t->data_length == sizeof(netsnmp_indexed_addr_pair))
+            addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
+        else if (t->data != NULL &&
+                 t->data_length == sizeof(_netsnmpTLSBaseData)) {
+            _netsnmpTLSBaseData *tlsdata = (_netsnmpTLSBaseData *) t->data;
+            addr_pair = (netsnmp_indexed_addr_pair *) (tlsdata->addr);
+        }
+    }
+
+    return addr_pair;
+}
+
+struct sockaddr *
+netsnmp_tlsbase_find_remote_sockaddr(netsnmp_transport *t, void *opaque,
+                                    int olen, int *socklen)
+{
+    netsnmp_indexed_addr_pair *addr_pair =
+        netsnmp_tlsbase_extract_addr_pair(t, opaque, olen);
+    struct sockaddr *sa = NULL;
+
+    if (NULL == addr_pair)
+        return NULL;
+
+    sa = &addr_pair->remote_addr.sa;
+    *socklen = netsnmp_sockaddr_size(sa);
+    return sa;
+}
+
 int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                                 _netsnmpTLSBaseData *tlsdata,
                                 void **opaque, int *olength) {

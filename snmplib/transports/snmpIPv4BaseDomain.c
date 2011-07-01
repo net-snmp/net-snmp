@@ -186,24 +186,30 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
                      void *data, int len)
 {
     netsnmp_indexed_addr_pair *addr_pair = NULL;
+    struct sockaddr_in *to = NULL, *from = NULL;
     struct hostent *host;
     char tmp[64];
 
     if (data != NULL && len == sizeof(netsnmp_indexed_addr_pair)) {
 	addr_pair = (netsnmp_indexed_addr_pair *) data;
-    } else if (t != NULL && t->data != NULL) {
+    } else if (data != NULL && len == sizeof(struct sockaddr)) {
+	to = (struct sockaddr_in *) data;
+    } else if (t != NULL && t->data != NULL &&
+               t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
 	addr_pair = (netsnmp_indexed_addr_pair *) t->data;
     }
 
-    if (addr_pair == NULL) {
+    if (addr_pair) {
+        to = (struct sockaddr_in *) &(addr_pair->remote_addr);
+        from = (struct sockaddr_in *) &(addr_pair->local_addr);
+    }
+
+    if (to == NULL && from == NULL) {
         snprintf(tmp, sizeof(tmp), "%s: unknown", prefix);
     } else {
-        struct sockaddr_in *to = NULL;
-        to = (struct sockaddr_in *) &(addr_pair->remote_addr);
         if (to == NULL) {
             snprintf(tmp, sizeof(tmp), "%s: unknown->[%s]:%hu", prefix,
-                     inet_ntoa(addr_pair->local_addr.sin.sin_addr),
-                     ntohs(addr_pair->local_addr.sin.sin_port));
+                     inet_ntoa(from->sin_addr), ntohs(from->sin_port));
         } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
             /* XXX: hmm...  why isn't this prefixed */
             /* assuming intentional */
@@ -213,8 +219,7 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
             snprintf(tmp, sizeof(tmp), "%s: [%s]:%hu->", prefix,
                      inet_ntoa(to->sin_addr), ntohs(to->sin_port));
             snprintf(tmp + strlen(tmp), sizeof(tmp)-strlen(tmp), "[%s]:%hu",
-                     inet_ntoa(addr_pair->local_addr.sin.sin_addr),
-                     ntohs(addr_pair->local_addr.sin.sin_port));
+                     inet_ntoa(from->sin_addr), ntohs(from->sin_port));
         }
     }
     tmp[sizeof(tmp)-1] = '\0';

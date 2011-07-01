@@ -25,6 +25,7 @@ netsnmp_feature_require(sockaddr_size)
 
 #include <net-snmp/library/snmpDTLSUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
+/*#include <net-snmp/library/snmpTLSBaseDomain.h>*/
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -420,46 +421,6 @@ find_or_create_bio_cache(netsnmp_transport *t,
     return cachep;
 }
 
-static netsnmp_indexed_addr_pair *
-_extract_addr_pair(netsnmp_transport *t, void *opaque, int olen)
-{
-    netsnmp_indexed_addr_pair *addr_pair = NULL;
-
-    if (opaque && olen == sizeof(netsnmp_tmStateReference)) {
-        netsnmp_tmStateReference *tmStateRef =
-            tmStateRef = (netsnmp_tmStateReference *) opaque;
-
-        if (tmStateRef->have_addresses)
-            addr_pair = &(tmStateRef->addresses);
-    }
-    if ((NULL == addr_pair) && (NULL != t)) {
-        if (t->data != NULL &&
-            t->data_length == sizeof(netsnmp_indexed_addr_pair))
-            addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
-        else if (t->data != NULL &&
-                 t->data_length == sizeof(_netsnmpTLSBaseData)) {
-            _netsnmpTLSBaseData *tlsdata = (_netsnmpTLSBaseData *) t->data;
-            addr_pair = (netsnmp_indexed_addr_pair *) (tlsdata->addr);
-        }
-    }
-
-    return addr_pair;
-}
-
-static struct sockaddr *
-_find_remote_sockaddr(netsnmp_transport *t, void *opaque, int olen, int *socklen)
-{
-    netsnmp_indexed_addr_pair *addr_pair = _extract_addr_pair(t, opaque, olen);
-    struct sockaddr *sa = NULL;
-
-    if (NULL == addr_pair)
-        return NULL;
-
-    sa = &addr_pair->remote_addr.sa;
-    *socklen = netsnmp_sockaddr_size(sa);
-    return sa;
-}
-
 
 /*
  * Reads data from our internal openssl outgoing BIO and sends any
@@ -483,7 +444,7 @@ _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep) {
         /* should always be true. */
         int socksize;
         struct sockaddr *sa;
-        sa = _find_remote_sockaddr(t, NULL, 0, &socksize);
+        sa = netsnmp_tlsbase_find_remote_sockaddr(t, NULL, 0, &socksize);
         if (NULL == sa)
             sa = &cachep->sas.sa;
         socksize = netsnmp_sockaddr_size(sa);
@@ -1031,8 +992,8 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     }
 
     /* determine remote addresses */
-    addr_pair = _extract_addr_pair(t, opaque ? *opaque : NULL,
-                                   olength ? *olength : 0);
+    addr_pair = netsnmp_tlsbase_extract_addr_pair(t, opaque ? *opaque : NULL,
+                                                  olength ? *olength : 0);
     if (NULL == addr_pair) {
       /* RFC5953: section 5.2, step 1:
        1)  If tmStateReference does not refer to a cache containing values
@@ -1339,11 +1300,11 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
 char *
 netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
-    int              sa_len;
-    struct sockaddr *sa = _find_remote_sockaddr(t, data, len, &sa_len);
-    if (sa) {
-        data = sa;
-        len = sa_len;
+    netsnmp_indexed_addr_pair *addr_pair =
+        netsnmp_tlsbase_extract_addr_pair(t, data, len);
+    if (addr_pair) {
+        data = addr_pair;
+        len = sizeof(*addr_pair);
     }
 
     return netsnmp_ipv4_fmtaddr("DTLSUDP", t, data, len);
@@ -1434,11 +1395,11 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 char *
 netsnmp_dtlsudp6_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
-    int              sa_len;
-    struct sockaddr *sa = _find_remote_sockaddr(t, data, len, &sa_len);
-    if (sa) {
-        data = sa;
-        len = sa_len;
+    netsnmp_indexed_addr_pair *addr_pair =
+        netsnmp_tlsbase_extract_addr_pair(t, data, len);
+    if (addr_pair) {
+        data = addr_pair;
+        len = sizeof(*addr_pair);
     }
 
     return netsnmp_ipv6_fmtaddr("DTLSUDP6", t, data, len);

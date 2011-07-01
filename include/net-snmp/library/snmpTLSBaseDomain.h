@@ -77,6 +77,15 @@ extern          "C" {
     int tls_get_verify_info_index(void);
 
     void netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase);
+
+    netsnmp_indexed_addr_pair *netsnmp_tlsbase_extract_addr_pair(netsnmp_transport *t,
+                                                                 void *opaque,
+                                                                 int olen);
+    struct sockaddr *netsnmp_tlsbase_find_remote_sockaddr(netsnmp_transport *t,
+                                                          void *opaque,
+                                                          int olen,
+                                                          int *socklen);
+
 #ifdef __cplusplus
 }
 #endif
