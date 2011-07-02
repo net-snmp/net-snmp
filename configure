@@ -19934,17 +19934,22 @@ new_with_mib_modules=`echo $with_mib_modules | $SED 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | $SED 's/,/ /g;'`
 
 # set up initial module list
-new_module_list="$new_with_mib_modules default_modules"
+new_module_list="$new_with_mib_modules"
 
-# minor modifications
-if test "x$enable_agent" = "xno"; then
-   # minimum mib module list for snmptrapd
-   new_module_list="mibII/vacm_vars mibII/vacm_conf utilities/execute $new_with_mib_modules"
-   default_mibs=SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB
-   default_mibs_install=" "
-elif test "x$mini_agent" = "xyes"; then
-   # define the mini agent flag to reduce our load list from default_mibs.h
-   MODULECPP="$MODULECPP -DNETSNMP_MINI_AGENT"
+if test "x$enable_agent" != "xno" ; then
+  # If the agent should be built then use default_modules
+  new_module_list="$new_module_list default_modules"
+
+  if test "x$mini_agent" = "xyes"; then
+    # define the mini agent flag to reduce our load list from default_mibs.h
+    MODULECPP="$MODULECPP -DNETSNMP_MINI_AGENT"
+  fi
+elif test "x$enable_applications" != "xno" ; then
+    # otherwise, if snmptrapd should be built then add SNMPv3 and
+    # snmptrapd-specific parts
+    new_module_list="$new_module_list mibII/vacm_conf utilities/execute"
+    default_mibs=SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB
+    default_mibs_install=" "
 fi
 
 test_modules="$new_module_list"
