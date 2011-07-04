@@ -65,8 +65,8 @@ GRONK
 }
 
 CAN_USLEEP() {
-   if [ "$SNMP_CAN_USLEEP" = 0 -o "$SNMP_CAN_USLEEP" = 0 ] ; then
-     return $SNMP_CAN_USLEEP
+   if [ "$SNMP_CAN_USLEEP" = 0 -o "$SNMP_CAN_USLEEP" = 1 ] ; then
+     return 0
    fi
    sleep .1 > /dev/null 2>&1
    if [ $? = 0 ] ; then
