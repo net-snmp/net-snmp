@@ -47,7 +47,12 @@ SNMP_ORIGDIR=`pwd`	        ## this script may be invoked with relative path
 export SNMP_ORIGDIR
 
 SNMP_UPDIR=${builddir}          ## build directory
-SNMP_SLEEP=${SNMP_SLEEP:=1} 	## default seconds to sleep
+if [ "x$DYNAMIC_ANALYZER" = "x" ]; then
+    SNMP_SLEEP_DEFAULT=1
+else
+    SNMP_SLEEP_DEFAULT=10
+fi
+SNMP_SLEEP=${SNMP_SLEEP:=$SNMP_SLEEP_DEFAULT} 	## default seconds to sleep
 export SNMP_SLEEP
 
 # Find executables in source first, then build, then existing PATH.
