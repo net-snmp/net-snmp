@@ -353,6 +353,13 @@ CHECKAGENTCOUNT() {
     CHECKFILECOUNT $SNMP_SNMPD_LOG_FILE $count $@
 }
 
+# Return 0 (true) if a process with pid $1 exists and 1 (false) if no process
+# with pid $1 exists.
+ISRUNNING() {
+    #ps -e 2>/dev/null | egrep "^[	 ]*$1[	 ]+" >/dev/null 2>&1
+    kill -0 "$pid" 2>/dev/null
+}
+
 WAITFORAGENTSHUTTINGDOWN() {
     if [ "x$OSTYPE" != "xmsys" ]; then
         WAITFORAGENT "shutting down"
@@ -364,7 +371,7 @@ WAITFORAGENTSHUTTINGDOWN() {
 	  sleeptime=`expr $SNMP_SLEEP '*' 5`
 	fi
         snmpd_pid=`cat $SNMP_SNMPD_PID_FILE`
-        while [ $sleeptime -gt 0 ] && kill -0 "$snmpd_pid" 2>/dev/null; do
+        while [ $sleeptime -gt 0 ] && ISRUNNING "$snmpd_pid"; do
             if [ $SNMP_CAN_USLEEP = 1 ]; then
                 sleep .1
             else
@@ -624,6 +631,21 @@ STOPPROG() {
         fi
 	echo $COMMAND >> $SNMP_TMPDIR/invoked
 	$COMMAND > /dev/null 2>&1
+
+	CAN_USLEEP
+	if [ $SNMP_CAN_USLEEP = 1 ] ; then
+	  sleeptime=`expr $SNMP_SLEEP '*' 50`
+	else 
+	  sleeptime=`expr $SNMP_SLEEP '*' 5`
+	fi
+        while [ $sleeptime -gt 0 ] && ISRUNNING $1; do
+            if [ $SNMP_CAN_USLEEP = 1 ]; then
+                sleep .1
+            else
+                sleep 1
+            fi
+            sleeptime=`expr $sleeptime - 1`
+        done
     fi
 }
 
@@ -675,17 +697,12 @@ FINISHED() {
       STOPTRAPD
     fi
     for pfile in $SNMP_TMPDIR/*pid* ; do
-        if [ "x$pfile" = "x$SNMP_TMPDIR/*pid*" ]; then
-            BAD "(no pid file(s) found) "
-            break
-        fi
-        if [ ! -f $pfile ]; then
-            BAD "('$pfile' disappeared) "
-            continue
-        fi
-	pid=`cat $pfile`
+	pid=`cat $pfile 2>/dev/null`
+	if [ "x$pid" = "x" ]; then
+	    continue
+	fi
         # When not running on MinGW, check whether snmpd is still running.
-        if [ "x$OSTYPE" = "xmsys" ] || { ps -e 2>/dev/null | egrep "^[	 ]*$pid[	 ]+" > /dev/null 2>&1; }; then
+        if [ "x$OSTYPE" = "xmsys" ] || ISRUNNING $pid; then
             if [ "x$OSTYPE" != "xmsys" ]; then
                 SNMP_SAVE_TMPDIR=yes
             fi
