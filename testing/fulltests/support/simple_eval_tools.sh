@@ -283,7 +283,7 @@ CHECKFILECOUNT() {	# <pattern_to_match>
     shift
     shift
     if [ $SNMP_VERBOSE -gt 0 ]; then
-	echo -n "checking output for \"$*\"..."
+	echo -n "checking $chkfile for $ckfcount \"$*\"..."
     fi
 
     if [ -f $chkfile ]; then
@@ -617,6 +617,7 @@ HUPPROG() {
           COMMAND="kill -HUP `cat $1`"
         fi
 	echo $COMMAND >> $SNMP_TMPDIR/invoked
+	VERBOSE_OUT 0 $COMMAND
 	$COMMAND > /dev/null 2>&1
     fi
 }
@@ -644,7 +645,8 @@ STOPPROG() {
     pid="`cat $1 2>/dev/null`"
     if [ "x$pid" != "x" ]; then
 	COMMAND="`ECHOSENDSIGTERM $pid`"
-	echo "$COMMAND" >> $SNMP_TMPDIR/invoked
+	echo "$COMMAND ($1)" >> $SNMP_TMPDIR/invoked
+	VERBOSE_OUT 0 "$COMMAND ($1)"
 	$COMMAND > /dev/null 2>&1
 
 	CAN_USLEEP
@@ -659,6 +661,7 @@ STOPPROG() {
             else
                 sleep 1
             fi
+            $COMMAND > /dev/null 2>&1
             sleeptime=`expr $sleeptime - 1`
         done
     fi
@@ -722,6 +725,7 @@ FINISHED() {
             fi
 	    COMMAND="`ECHOSENDSIGKILL $pid`"
 	    echo "$COMMAND ($pfile)" >> $SNMP_TMPDIR/invoked
+	    VERBOSE_OUT 0 "$COMMAND ($pfile)"
 	    $COMMAND > /dev/null 2>&1
 	    return_value=1
 	fi
@@ -752,7 +756,7 @@ FINISHED() {
 #------------------------------------ -o-
 #
 VERBOSE_OUT() {
-    if [ $SNMP_VERBOSE > $1 ]; then
+    if [ $SNMP_VERBOSE -gt $1 ]; then
 	shift
 	echo "$*"
     fi
