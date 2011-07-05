@@ -360,6 +360,24 @@ ISRUNNING() {
     kill -0 "$pid" 2>/dev/null
 }
 
+# Echo a command that asks the process with pid $1 to stop.
+ECHOSENDSIGTERM() {
+    if [ "x$OSTYPE" = "xmsys" ]; then
+        echo kill.exe $1
+    else
+        echo kill -TERM $1
+    fi
+}
+
+# Echo a command that stops the process with pid $1 forcibly.
+ECHOSENDSIGKILL() {
+    if [ "x$OSTYPE" = "xmsys" ]; then
+        echo kill.exe $1
+    else
+        echo kill -KILL $1
+    fi
+}
+
 WAITFORAGENTSHUTTINGDOWN() {
     if [ "x$OSTYPE" != "xmsys" ]; then
         WAITFORAGENT "shutting down"
@@ -623,13 +641,10 @@ HUPTRAPD() {
 #    this is especially important for interaction between
 #    master agent and sub agent.
 STOPPROG() {
-    if [ -f $1 ]; then
-        if [ "x$OSTYPE" = "xmsys" ]; then
-          COMMAND="kill.exe `cat $1`"
-        else
-          COMMAND="kill -TERM `cat $1`"
-        fi
-	echo $COMMAND >> $SNMP_TMPDIR/invoked
+    pid="`cat $1 2>/dev/null`"
+    if [ "x$pid" != "x" ]; then
+	COMMAND="`ECHOSENDSIGTERM $pid`"
+	echo "$COMMAND" >> $SNMP_TMPDIR/invoked
 	$COMMAND > /dev/null 2>&1
 
 	CAN_USLEEP
@@ -638,7 +653,7 @@ STOPPROG() {
 	else 
 	  sleeptime=`expr $SNMP_SLEEP '*' 5`
 	fi
-        while [ $sleeptime -gt 0 ] && ISRUNNING `cat $1`; do
+        while [ $sleeptime -gt 0 ] && ISRUNNING $pid; do
             if [ $SNMP_CAN_USLEEP = 1 ]; then
                 sleep .1
             else
@@ -701,17 +716,12 @@ FINISHED() {
 	if [ "x$pid" = "x" ]; then
 	    continue
 	fi
-        # When not running on MinGW, check whether snmpd is still running.
-        if [ "x$OSTYPE" = "xmsys" ] || ISRUNNING $pid; then
+        if ISRUNNING $pid; then
             if [ "x$OSTYPE" != "xmsys" ]; then
                 SNMP_SAVE_TMPDIR=yes
             fi
-            if [ "x$OSTYPE" = "xmsys" ]; then
-              COMMAND="kill.exe $pid"
-            else
-              COMMAND="kill -9 $pid"
-            fi
-	    echo $COMMAND "($pfile)" >> $SNMP_TMPDIR/invoked
+	    COMMAND="`ECHOSENDSIGKILL $pid`"
+	    echo "$COMMAND ($pfile)" >> $SNMP_TMPDIR/invoked
 	    $COMMAND > /dev/null 2>&1
 	    return_value=1
 	fi
