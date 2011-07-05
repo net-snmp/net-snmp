@@ -638,7 +638,7 @@ STOPPROG() {
 	else 
 	  sleeptime=`expr $SNMP_SLEEP '*' 5`
 	fi
-        while [ $sleeptime -gt 0 ] && ISRUNNING $1; do
+        while [ $sleeptime -gt 0 ] && ISRUNNING `cat $1`; do
             if [ $SNMP_CAN_USLEEP = 1 ]; then
                 sleep .1
             else
