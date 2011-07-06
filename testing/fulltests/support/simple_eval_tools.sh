@@ -651,9 +651,7 @@ STOPPROG() {
 	COMMAND="`ECHOSENDSIGTERM $pid`"
 	echo "$COMMAND ($1)" >> $SNMP_TMPDIR/invoked
 	VERBOSE_OUT 0 "$COMMAND ($1)"
-	$COMMAND > /dev/null 2>&1
-
-	WAITFORNOTCOND "$COMMAND >/dev/null 2>&1"
+        WAITFORNOTCOND "$COMMAND >/dev/null 2>&1"
     fi
 }
 
