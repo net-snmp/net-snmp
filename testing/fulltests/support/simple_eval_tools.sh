@@ -378,25 +378,29 @@ ECHOSENDSIGKILL() {
     fi
 }
 
+# Wait until the shell statement "$@" evaluates to false.
+WAITFORNOTCOND() {
+    CAN_USLEEP
+    if [ $SNMP_CAN_USLEEP = 1 ] ; then
+        sleeptime=`expr $SNMP_SLEEP '*' 50`
+    else 
+        sleeptime=`expr $SNMP_SLEEP '*' 5`
+    fi
+    while [ $sleeptime -gt 0 ] && eval "$@"; do
+        if [ $SNMP_CAN_USLEEP = 1 ]; then
+            sleep .1
+        else
+            sleep 1
+        fi
+        sleeptime=`expr $sleeptime - 1`
+    done
+}
+
 WAITFORAGENTSHUTTINGDOWN() {
     if [ "x$OSTYPE" != "xmsys" ]; then
         WAITFORAGENT "shutting down"
     else
-	CAN_USLEEP
-	if [ $SNMP_CAN_USLEEP = 1 ] ; then
-	  sleeptime=`expr $SNMP_SLEEP '*' 50`
-	else 
-	  sleeptime=`expr $SNMP_SLEEP '*' 5`
-	fi
-        snmpd_pid=`cat $SNMP_SNMPD_PID_FILE`
-        while [ $sleeptime -gt 0 ] && ISRUNNING "$snmpd_pid"; do
-            if [ $SNMP_CAN_USLEEP = 1 ]; then
-                sleep .1
-            else
-                sleep 1
-            fi
-            sleeptime=`expr $sleeptime - 1`
-        done
+        WAITFORNOTCOND "ISRUNNING $snmpd_pid"
     fi
 }
 
@@ -649,21 +653,7 @@ STOPPROG() {
 	VERBOSE_OUT 0 "$COMMAND ($1)"
 	$COMMAND > /dev/null 2>&1
 
-	CAN_USLEEP
-	if [ $SNMP_CAN_USLEEP = 1 ] ; then
-	  sleeptime=`expr $SNMP_SLEEP '*' 50`
-	else 
-	  sleeptime=`expr $SNMP_SLEEP '*' 5`
-	fi
-        while [ $sleeptime -gt 0 ] && ISRUNNING $pid; do
-            if [ $SNMP_CAN_USLEEP = 1 ]; then
-                sleep .1
-            else
-                sleep 1
-            fi
-            $COMMAND > /dev/null 2>&1
-            sleeptime=`expr $sleeptime - 1`
-        done
+	WAITFORNOTCOND "$COMMAND >/dev/null 2>&1"
     fi
 }
 
