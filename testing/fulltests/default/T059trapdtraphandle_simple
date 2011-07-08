@@ -19,6 +19,7 @@ HEADER snmptrapd traphandle: launching external shell script
 
 SKIPIF NETSNMP_DISABLE_SNMPV2C
 SKIPIFNOT USING_UTILITIES_EXECUTE_MODULE
+SKIPIFNOT HAVE_SIGHUP
 
 #
 # Begin test
