@@ -440,16 +440,6 @@ COMMENT() {
     echo "# $@" >> $SNMP_TMPDIR/invoked
 }
 
-# WAITFORORDIE "grep string" ["file"]
-WAITFORORDIE() {
-    WAITFOR "$1" "$2"
-    if [ "$snmp_last_test_result" != 0 ] ; then
-        BAD
-        FINISHED
-    fi
-    GOOD
-}
-
 # CHECKORDIE "grep string" ["file"] .. FAIL if "grep string" is *not* found
 CHECKORDIE() {
     if [ "x$2" = "x" ]; then
