@@ -696,17 +696,14 @@ FINISHED() {
     ## no more changes to test result.
     OK_TO_SAVE_RESULT=0
 
+    pids="`cat $SNMP_TMPDIR/*pid* 2>/dev/null`"
     if [ "$SNMPDSTARTED" = "1" ] ; then
       STOPAGENT
     fi
     if [ "$TRAPDSTARTED" = "1" ] ; then
       STOPTRAPD
     fi
-    for pfile in $SNMP_TMPDIR/*pid* ; do
-	pid=`cat $pfile 2>/dev/null`
-	if [ "x$pid" = "x" ]; then
-	    continue
-	fi
+    for pid in $pids; do
         if ISRUNNING $pid; then
             if [ "x$OSTYPE" != "xmsys" ]; then
                 SNMP_SAVE_TMPDIR=yes
