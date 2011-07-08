@@ -401,14 +401,6 @@ WAITFORCOND() {
     WAITFORNOTCOND if "$@;" then false ";" else true ";" fi
 }
 
-WAITFORAGENTSHUTTINGDOWN() {
-    if [ "x$OSTYPE" != "xmsys" ]; then
-        WAITFORAGENT "shutting down"
-    else
-        WAITFORNOTCOND "ISRUNNING $snmpd_pid"
-    fi
-}
-
 WAITFORAGENT() {
     WAITFOR "$@" $SNMP_SNMPD_LOG_FILE
 }
@@ -610,7 +602,6 @@ STOPPROG() {
 STOPAGENT() {
     SAVE_RESULTS
     STOPPROG $SNMP_SNMPD_PID_FILE
-    WAITFORAGENTSHUTTINGDOWN
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "Agent Output:"
 	echo "$separator [stdout]"
@@ -626,9 +617,6 @@ STOPAGENT() {
 STOPTRAPD() {
     SAVE_RESULTS
     STOPPROG $SNMP_SNMPTRAPD_PID_FILE
-    if [ "x$OSTYPE" != "xmsys" ]; then
-        WAITFORTRAPD "Stopped"
-    fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "snmptrapd Output:"
 	echo "$separator [stdout]"
