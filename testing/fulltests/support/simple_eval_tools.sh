@@ -396,6 +396,11 @@ WAITFORNOTCOND() {
     done
 }
 
+# Wait until the shell statement "$@" evaluates to true.
+WAITFORCOND() {
+    WAITFORNOTCOND if "$@;" then false ";" else true ";" fi
+}
+
 WAITFORAGENTSHUTTINGDOWN() {
     if [ "x$OSTYPE" != "xmsys" ]; then
         WAITFORAGENT "shutting down"
@@ -412,55 +417,9 @@ WAITFORTRAPD() {
     WAITFOR "$@" $SNMP_SNMPTRAPD_LOG_FILE
 }
 
+# Wait until pattern "$1" appears in file "$2".
 WAITFOR() {
-  ## save the previous save state and test result
-    save_state=$OK_TO_SAVE_RESULT
-    save_test=$snmp_last_test_result
-    OK_TO_SAVE_RESULT=0
-
-    sleeptime=$SNMP_SLEEP
-    oldsleeptime=$SNMP_SLEEP
-    if [ "$1" != "" ] ; then
-	CAN_USLEEP
-	if [ $SNMP_CAN_USLEEP = 1 ] ; then
-	  sleeptime=`expr $SNMP_SLEEP '*' 50`
-          SNMP_SLEEP=.1
-	else 
-	  sleeptime=`expr $SNMP_SLEEP '*' 5`
-	  SNMP_SLEEP=1
-	fi
-        while [ $sleeptime -gt 0 ] ; do
-	  if [ "$2" = "" ] ; then
-            CHECKCOUNT noerror "$@"
-          else
-	    CHECKFILECOUNT "$2" noerror "$1"
-	  fi
-          if [ "$snmp_last_test_result" != "" ] ; then
-              if [ "$snmp_last_test_result" -gt 0 ] ; then
-	         break;
-              fi
-	  fi
-          DELAY
-          sleeptime=`expr $sleeptime - 1`
-        done
-
-	# the above multi-check/sleep doesn't report errors out of TAP
-        # this final check will report only 1 
-	if [ "$2" = "" ] ; then
-          CHECKCOUNT atleastone "$@"
-        else
-	  CHECKFILECOUNT "$2" atleastone "$1"
-	fi
-        SNMP_SLEEP=$oldsleeptime
-    else
-        if [ $SNMP_SLEEP -ne 0 ] ; then
-	    sleep $SNMP_SLEEP
-        fi
-    fi
-
-  ## restore the previous save state and test result
-    OK_TO_SAVE_RESULT=$save_state
-    snmp_last_test_result=$save_test
+    WAITFORCOND grep -q "$1" "$2" "2>/dev/null"
 }
 
 GOOD() {
