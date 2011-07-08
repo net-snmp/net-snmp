@@ -238,13 +238,28 @@ static int      convert_to_windows_varbind_list(SnmpVarBindList *
 static int      convert_win_snmp_err(const int win_snmp_err);
 static winextdll_view *lookup_view_by_oid(oid * const name,
                                           const size_t name_len);
+static int      snmp_oid_compare_n_w(const oid * name1, size_t len1,
+                                     const UINT * name2, UINT len2);
+static int      snmp_oid_compare_w_n(const UINT * name1, UINT len1,
+                                     const oid * name2, size_t len2);
+static int      netsnmp_oid_is_subtree_n_w(const oid * name1, size_t len1,
+                                           const UINT * name2, UINT len2);
 static void     copy_oid(oid * const to_name, size_t * const to_name_len,
                          const oid * const from_name,
                          const size_t from_name_len);
+static void     copy_oid_n_w(oid * const to_name, size_t * const to_name_len,
+                             const UINT * const from_name,
+                             const UINT from_name_len);
 static UINT    *copy_oid_to_new_windows_oid(AsnObjectIdentifier *
                                             const windows_oid,
                                             const oid * const name,
                                             const size_t name_len);
+static int      snmp_set_var_objid_w(netsnmp_variable_list * var,
+                                     const UINT * name, UINT name_length);
+static netsnmp_variable_list *
+snmp_varlist_add_variable_w(netsnmp_variable_list ** varlist,
+                            const UINT * name, UINT name_length,
+                            u_char type, const void * value, size_t len);
 static void     send_trap(const AsnObjectIdentifier * const,
                           const AsnInteger, const AsnInteger,
                           const AsnTimeticks,
@@ -399,8 +414,8 @@ init_winExtDLL(void)
 
         memset(&ext_dll_view_info, 0, sizeof(ext_dll_view_info));
         ext_dll_view_info.winextdll_info = ext_dll_info;
-        copy_oid(ext_dll_view_info.name, &ext_dll_view_info.name_length,
-                 view.ids, view.idLength);
+        copy_oid_n_w(ext_dll_view_info.name, &ext_dll_view_info.name_length,
+                     view.ids, view.idLength);
         xarray_push_back(&s_winextdll_view, &ext_dll_view_info);
 
         /*
@@ -410,9 +425,9 @@ init_winExtDLL(void)
                && ext_dll_info->pfSnmpExtensionInitEx(&view)) {
             memset(&ext_dll_view_info, 0, sizeof(ext_dll_view_info));
             ext_dll_view_info.winextdll_info = ext_dll_info;
-            copy_oid(ext_dll_view_info.name,
-                     &ext_dll_view_info.name_length, view.ids,
-                     view.idLength);
+            copy_oid_n_w(ext_dll_view_info.name,
+                         &ext_dll_view_info.name_length, view.ids,
+                         view.idLength);
             xarray_push_back(&s_winextdll_view, &ext_dll_view_info);
         }
     }
@@ -771,15 +786,17 @@ var_winExtDLL(netsnmp_mib_handler *handler,
          * before the root OID of this handler, replace it by the root OID.
          */
         if (reqinfo->mode == MODE_GETNEXT
-            && snmp_oid_compare(win_varbinds.list[0].name.ids,
-                                win_varbinds.list[0].name.idLength,
-                                reginfo->rootoid,
-                                reginfo->rootoid_len) < 0) {
-            AsnObjectIdentifier Root =
-                { reginfo->rootoid_len, reginfo->rootoid };
+            && snmp_oid_compare_w_n(win_varbinds.list[0].name.ids,
+                                    win_varbinds.list[0].name.idLength,
+                                    reginfo->rootoid,
+                                    reginfo->rootoid_len) < 0) {
 
             SnmpUtilOidFree(&win_varbinds.list[0].name);
-            SnmpUtilOidCpy(&win_varbinds.list[0].name, &Root);
+            memset(&win_varbinds.list[0].name, 0,
+                   sizeof(win_varbinds.list[0].name));
+            copy_oid_to_new_windows_oid(&win_varbinds.list[0].name,
+                                        reginfo->rootoid,
+                                        reginfo->rootoid_len);
         }
 
         if (ext_dll_info->pfSnmpExtensionQueryEx) {
@@ -846,20 +863,20 @@ var_winExtDLL(netsnmp_mib_handler *handler,
              * win_varbind by an SNMP extension DLL that has not been
              * instrumented by BoundsChecker.
              */
-            if (netsnmp_oid_is_subtree(ext_dll_view_info->name,
-                                       ext_dll_view_info->name_length,
-                                       win_varbind->name.ids,
-                                       win_varbind->name.idLength) == 0
-                && snmp_oid_compare(varbind->name, varbind->name_length,
-                                    win_varbind->name.ids,
-                                    win_varbind->name.idLength) < 0) {
+            if (netsnmp_oid_is_subtree_n_w(ext_dll_view_info->name,
+                                           ext_dll_view_info->name_length,
+                                           win_varbind->name.ids,
+                                           win_varbind->name.idLength) == 0
+                && snmp_oid_compare_n_w(varbind->name, varbind->name_length,
+                                        win_varbind->name.ids,
+                                        win_varbind->name.idLength) < 0) {
                 /*
                  * Copy the OID returned by the extension DLL to the
                  * Net-SNMP varbind.
                  */
-                snmp_set_var_objid(varbind,
-                                   win_varbind->name.ids,
-                                   win_varbind->name.idLength);
+                snmp_set_var_objid_w(varbind,
+                                     win_varbind->name.ids,
+                                     win_varbind->name.idLength);
                 copy_value = TRUE;
             }
         }
@@ -1138,8 +1155,8 @@ send_trap(const AsnObjectIdentifier * const pEnterprise,
          * Enterprise specific trap: compute the OID
          * *pEnterprise + ".0." + SpecificTrap.
          */
-        copy_oid(vb2_oid, &vb2_oid_len,
-                 pEnterprise->ids, pEnterprise->idLength);
+        copy_oid_n_w(vb2_oid, &vb2_oid_len,
+                     pEnterprise->ids, pEnterprise->idLength);
         vb2_oid[vb2_oid_len++] = 0;
         vb2_oid[vb2_oid_len++] = SpecificTrap;
     } else {
@@ -1210,43 +1227,42 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
 {
     switch (win_varbind->value.asnType) {
     case MS_ASN_INTEGER:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_INTEGER,
-                                  (const u_char *) &win_varbind->value.
-                                  asnValue.number,
-                                  sizeof(win_varbind->value.asnValue.
-                                         number));
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_INTEGER,
+                                    &win_varbind->value.asnValue.number,
+                                    sizeof(win_varbind->value.asnValue.
+                                           number));
         break;
     case MS_ASN_BITS:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_BIT_STR,
-                                  win_varbind->value.asnValue.bits.stream,
-                                  win_varbind->value.asnValue.bits.length);
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_BIT_STR,
+                                    win_varbind->value.asnValue.bits.stream,
+                                    win_varbind->value.asnValue.bits.length);
         break;
     case MS_ASN_OCTETSTRING:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_OCTET_STR,
-                                  win_varbind->value.asnValue.string.
-                                  stream,
-                                  win_varbind->value.asnValue.string.
-                                  length);
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_OCTET_STR,
+                                    win_varbind->value.asnValue.string.
+                                    stream,
+                                    win_varbind->value.asnValue.string.
+                                    length);
         break;
     case MS_ASN_NULL:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_NULL, 0, 0);
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_NULL, 0, 0);
         break;
     case MS_ASN_OBJECTIDENTIFIER:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_OBJECT_ID,
-                                  (u_char *) win_varbind->value.asnValue.
-                                  object.ids,
-                                  win_varbind->value.asnValue.object.
-                                  idLength * sizeof(oid));
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_OBJECT_ID,
+                                    win_varbind->value.asnValue.
+                                    object.ids,
+                                    win_varbind->value.asnValue.object.
+                                    idLength * sizeof(oid));
         break;
 
         /*
@@ -1254,82 +1270,95 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
          */
 
     case MS_ASN_SEQUENCE:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_SEQUENCE,
-                                  win_varbind->value.asnValue.sequence.
-                                  stream,
-                                  win_varbind->value.asnValue.sequence.
-                                  length);
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_SEQUENCE,
+                                    win_varbind->value.asnValue.sequence.
+                                    stream,
+                                    win_varbind->value.asnValue.sequence.
+                                    length);
         break;
     case MS_ASN_IPADDRESS:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_IPADDRESS,
-                                  win_varbind->value.asnValue.address.
-                                  stream,
-                                  win_varbind->value.asnValue.address.
-                                  length);
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_IPADDRESS,
+                                    win_varbind->value.asnValue.address.
+                                    stream,
+                                    win_varbind->value.asnValue.address.
+                                    length);
         break;
     case MS_ASN_COUNTER32:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_COUNTER,
-                                  (const u_char *) &win_varbind->value.
-                                  asnValue.counter,
-                                  sizeof(win_varbind->value.asnValue.
-                                         counter));
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_COUNTER,
+                                    &win_varbind->value.asnValue.counter,
+                                    sizeof(win_varbind->value.asnValue.
+                                           counter));
         break;
     case MS_ASN_GAUGE32:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_GAUGE,
-                                  (const u_char *) &win_varbind->value.
-                                  asnValue.gauge,
-                                  sizeof(win_varbind->value.asnValue.
-                                         gauge));
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_GAUGE,
+                                    &win_varbind->value.asnValue.gauge,
+                                    sizeof(win_varbind->value.asnValue.
+                                           gauge));
         break;
     case MS_ASN_TIMETICKS:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_TIMETICKS,
-                                  (const u_char *) &win_varbind->value.
-                                  asnValue.ticks,
-                                  sizeof(win_varbind->value.asnValue.
-                                         ticks));
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_TIMETICKS,
+                                    &win_varbind->value.asnValue.ticks,
+                                    sizeof(win_varbind->value.asnValue.
+                                           ticks));
         break;
     case MS_ASN_OPAQUE:        // AsnOctetString
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_OPAQUE,
-                                  win_varbind->value.asnValue.arbitrary.
-                                  stream,
-                                  win_varbind->value.asnValue.arbitrary.
-                                  length);
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_OPAQUE,
+                                    win_varbind->value.asnValue.arbitrary.
+                                    stream,
+                                    win_varbind->value.asnValue.arbitrary.
+                                    length);
         break;
     case MS_ASN_COUNTER64:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_COUNTER64,
-                                  (const u_char *) &win_varbind->value.
-                                  asnValue.counter64,
-                                  sizeof(win_varbind->value.asnValue.
-                                         counter64));
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_COUNTER64,
+                                    &win_varbind->value.asnValue.counter64,
+                                    sizeof(win_varbind->value.asnValue.
+                                           counter64));
         break;
     case MS_ASN_UINTEGER32:
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_UNSIGNED,
-                                  (const u_char *) &win_varbind->value.
-                                  asnValue.unsigned32,
-                                  sizeof(win_varbind->value.asnValue.
-                                         unsigned32));
+        snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
+                                    win_varbind->name.idLength,
+                                    ASN_UNSIGNED,
+                                    &win_varbind->value.asnValue.unsigned32,
+                                    sizeof(win_varbind->value.asnValue.
+                                           unsigned32));
         break;
     default:
         return SNMP_ERR_GENERR;
     }
 
     return SNMP_ERR_NOERROR;
+}
+
+static int
+snmp_set_var_objid_w(netsnmp_variable_list * var, const UINT * name,
+                     UINT name_length)
+{
+    netsnmp_static_assert(sizeof(oid) == sizeof(UINT));
+    return snmp_set_var_objid(var, (const oid *) name, name_length);
+}
+
+static netsnmp_variable_list *
+snmp_varlist_add_variable_w(netsnmp_variable_list ** varlist, const UINT * name,
+                            UINT name_length, u_char type, const void * value,
+                            size_t len)
+{
+    netsnmp_static_assert(sizeof(oid) == sizeof(UINT));
+    return snmp_varlist_add_variable(varlist, (const oid *) name, name_length, type,
+                                     value, len);
 }
 
 /**
@@ -1545,6 +1574,30 @@ lookup_view_by_oid(oid * const name, const size_t name_len)
     return NULL;
 }
 
+static int
+snmp_oid_compare_n_w(const oid * name1, size_t len1, const UINT * name2,
+                     UINT len2)
+{
+    netsnmp_static_assert(sizeof(oid) == sizeof(UINT));
+    return snmp_oid_compare(name1, len1, (const oid *) name2, len2);
+}
+
+static int
+snmp_oid_compare_w_n(const UINT * name1, UINT len1, const oid * name2,
+                     size_t len2)
+{
+    netsnmp_static_assert(sizeof(oid) == sizeof(UINT));
+    return snmp_oid_compare((const oid *) name1, len1, name2, len2);
+}
+
+static int
+netsnmp_oid_is_subtree_n_w(const oid * name1, size_t len1, const UINT * name2,
+                           UINT len2)
+{
+    netsnmp_static_assert(sizeof(oid) == sizeof(UINT));
+    return netsnmp_oid_is_subtree(name1, len1, (const oid *) name2, len2);
+}
+
 /**
  * Copy an OID.
  *
@@ -1568,6 +1621,23 @@ copy_oid(oid * const to_name, size_t * const to_name_len,
         to_name[j] = from_name[j];
 
     *to_name_len = j;
+}
+
+/**
+ * Copy an OID.
+ *
+ * @param[out] to_name       Number of elements written to destination OID.
+ * @param[out] to_name_len   Length of destination OID. Must have at least
+ *                           min(from_name_len, MAX_OID_LEN) elements.
+ * @param[in]  from_name     Original OID.
+ * @param[in]  from_name_len Length of original OID.
+ */
+static void
+copy_oid_n_w(oid * const to_name, size_t * const to_name_len,
+             const UINT * const from_name, const UINT from_name_len)
+{
+    netsnmp_static_assert(sizeof(oid) == sizeof(UINT));
+    copy_oid(to_name, to_name_len, (const oid *) from_name, from_name_len);
 }
 
 /**
