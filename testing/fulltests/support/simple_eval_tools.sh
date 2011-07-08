@@ -354,7 +354,9 @@ CHECKAGENTCOUNT() {
 }
 
 # Return 0 (true) if a process with pid $1 exists and 1 (false) if no process
-# with pid $1 exists.
+# with pid $1 exists. Do not use this function on MinGW: the PIDs written by
+# snmpd and snmptrapd to their pid files are not visible in the MinGW/MSYS
+# process table.
 ISRUNNING() {
     #ps -e 2>/dev/null | egrep "^[	 ]*$1[	 ]+" >/dev/null 2>&1
     kill -0 "$pid" 2>/dev/null
@@ -593,7 +595,9 @@ STOPPROG() {
 	echo "$COMMAND ($1)" >> $SNMP_TMPDIR/invoked
 	VERBOSE_OUT 0 "$COMMAND ($1)"
         $COMMAND >/dev/null 2>&1
-        WAITFORNOTCOND "ISRUNNING $pid"
+        if [ "x$OSTYPE" != "xmsys" ]; then
+            WAITFORNOTCOND "ISRUNNING $pid"
+        fi
     fi
 }
 
@@ -642,7 +646,7 @@ FINISHED() {
       STOPTRAPD
     fi
     for pid in $pids; do
-        if ISRUNNING $pid; then
+        if [ "x$OSTYPE" = "xmsys" ] || ISRUNNING $pid; then
             if [ "x$OSTYPE" != "xmsys" ]; then
                 SNMP_SAVE_TMPDIR=yes
             fi
