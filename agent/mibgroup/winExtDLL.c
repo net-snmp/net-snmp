@@ -780,6 +780,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                                 reginfo->rootoid_len) < 0) {
             AsnObjectIdentifier Root =
                 { reginfo->rootoid_len, reginfo->rootoid };
+
+            SnmpUtilOidFree(&win_varbinds.list[0].name);
             SnmpUtilOidCpy(&win_varbinds.list[0].name, &Root);
         }
 
