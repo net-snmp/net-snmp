@@ -1,0 +1,243 @@
+# -*- shell-script -*-
+# These functions are useful functions when working with a bash shell
+# within a Net-SNMP git checkout.
+
+nsbuildroot=${nsbuildroot:=$HOME/ns-build-root}
+nsecho=${nsecho:=}
+nsbranches=${nsbranches:="V5-4-patches V5-5-patches V5-6-patches master"}
+
+# set nsverbose to ':' if you don't want verbose output of what's going on
+nsverbose=${nsverbose:="echo ::: Net-SNMP: "}
+
+_ns_maybemkdir () {
+    dir=$1
+    if [ ! -d $dir ] ; then
+	$nsverbose making directory $dir
+	mkdir -p $dir
+    fi
+}
+
+_ns_switchtobuilddir () {
+    dir=$1
+    _ns_maybemkdir $dir
+    $nsverbose cd $dir
+    cd $dir
+}
+
+_ns_getbuilddir() {
+    nssuffix=${1:-$nssuffix}
+    nsbranch=`git branch | egrep '^\*' | sed 's/^..//'`
+    NSBUILDDIR="$nsbuildroot/$nsbranch"
+    NSSRCDIR="$PWD"
+
+    # add on the suffix if created
+    if [ "$nssuffix" != "" ]; then
+	NSBUILDDIR="$nsbuildroot/$nsbranch-$nssuffix"
+    fi
+}
+
+_ns_setbuilddir() {
+    _ns_getbuilddir "$1"
+    _ns_switchtobuilddir $NSBUILDDIR
+}
+
+_ns_cleanup() {
+    $nsverbose cd $NSSRCDIR
+    cd $NSSRCDIR
+}
+
+_ns_checkclean() {
+    if [ `git status --porcelain --untracked-files=no | wc -l` -gt 0 ] ; then
+	echo "Your directory has outstanding changes!"
+	echo "  Please either commit the changes, discard them or stash them"
+	NSCLEAN=0
+    else
+	NSCLEAN=1
+    fi
+}
+
+#
+# nsmake [-s suffix]
+#   runs 'make' in $nsbuildroot/branch[-suffix]
+nsmake () {
+    if [ "$1" = "-s" ]; then
+	shift
+        _ns_setbuilddir "$1"
+	shift
+    else
+        _ns_setbuilddir
+    fi
+
+    $nsverbose make "$@"
+    $nsecho make "$@"
+
+    _ns_cleanup
+}
+
+#
+# nsconfigure [-s suffix] [configure arguments]
+#   runs 'configure' in $nsbuildroot/branch[-suffix] with passed arguments
+nsconfigure () {
+    if [ "$1" = "-s" ]; then
+	shift
+        _ns_setbuilddir "$1"
+	shift
+    else
+        _ns_setbuilddir
+    fi
+    
+    $nsverbose running $NSSRCDIR/configure "$@"
+    $nsecho $NSSRCDIR/configure "$@"
+    
+    _ns_cleanup
+}
+
+nspatchtry() {
+    _ns_checkclean
+    if [ $NSCLEAN != 1 ]; then
+	return
+    fi
+
+    # remember these branches
+    nsgoodbranches=""
+    nsbadbranches=""
+
+    # remember the patch args for later use
+    nspatchargs="$@"
+
+    for branch in $nsbranches ; do
+	$nsverbose checking out and applying patch in $branch
+	$nsecho git checkout $branch
+
+	$nsverbose Appling patch
+	$nsecho patch --batch "$@"
+	if [ $? = 0 ] ; then
+	    $nsverbose Patch succeeded on $branch
+	    nsgoodbranches="$nsgoodbranches $branch"
+	else
+	    $nsverbose Patch failed on $branch
+	    nsbadbranches="$nsbadbranches $branch"
+	fi
+
+	$nsverbose cleaning source tree
+	git checkout .
+    done
+
+    echo ""
+    echo "Patch application results:"
+    echo "  Success: $nsgoodbranches"
+    echo "     Fail: $nsbadbranches"
+}
+
+nspatchapply() {
+    _ns_checkclean
+    if [ $NSCLEAN != 1 ]; then
+	return
+    fi
+
+    patchbranch=`echo $nsgoodbranches | sed 's/ .*//'`
+
+    $nsverbose Checking out $patchbranch
+    $nsecho git checkout $patchbranch
+
+    $nsverbose applying the patch "$nspatchargs"
+    $nsecho patch $nspatchargs
+    $nsecho git diff | cat
+    
+    echo ""
+    echo -n "commit the results to $patchbranch? [y/n]"
+    read ans
+
+    if [ $ans = 'y' -o $ans = 'Y' ] ; then
+	$nsecho git commit -a "$@"
+    fi
+}
+
+nsrollup() {
+    _ns_checkclean
+    if [ $NSCLEAN != 1 ]; then
+	return
+    fi
+
+    $nsverbose Pulling all upstream branches
+    $nsecho git fetch --all
+    
+    nslastbranch=""
+
+    nsbranchesdone=""
+    nsbranchesnotdone=""
+
+    for branch in $nsbranches ; do
+	if [ "$nslastbranch" != "" ] ; then
+	    $nsverbose checking out $branch
+	    $nsecho git checkout $branch
+
+	    if [ -f dist/release ] ; then
+		if [ "`egrep ^$branch dist/release`" = "$branch rc" ] ; then
+		    $nsverbose Skipping: branch is in rc phase of release
+		    nsbranchesnotdone="$nsbranchesnotdone $branch"
+
+		    # comment this out if you want nsrollup to skip the
+		    # branch and roll the changes in the lower branch up
+		    # to the super-parent when the parent is in release status
+		    nslastbranch=$branch
+
+		    continue
+		fi
+	    fi
+
+	    $nsverbose rebasing our local changes on $branch
+	    git rebase origin/$branch
+
+	    $nsverbose merging $nslastbranch into $branch
+	    $nsecho git merge --log $nslastbranch
+	    if [ $? != 0 ] ; then
+		echo ""
+		echo "---------------------------------------------"
+		echo "Merge of $nslastbranch into $branch failed!!!"
+		echo ""
+		echo "Hints for fixing this:"
+		echo "  You're on: $branch"
+		echo "  Steps:"
+		echo "    1) fix all files marked as problematic"
+		echo "    2) run 'git add' on each file"
+		echo "    3) run 'git commit' to commit the changes"
+		echo "    4) once done, re-run nsrollup"
+		echo "  Aborting:"
+		echo "    If instead you want to give up, run"
+		echo "    1) git merge --abort"
+		echo ""
+		echo "Updated the following branches:"
+		echo "  $nsbranchesdone"
+		if [ "$nsbranchesnotdone" != "" ] ; then
+		    echo "Did NOT update the following branches:"
+		    echo "  $nsbranchesnotdone"
+		fi
+		echo "Failed to update this branch:"
+		echo "   $branch"
+		return
+	    fi
+
+	    _ns_checkclean
+	    if [ $NSCLEAN != 1 ] ; then
+		# we really shouldn't git here.  merge will either autocommit
+		# or it will fail
+		$nsverbose committing merge results
+		$nsecho git commit -m "nsrollup: merging $nslastbranch into $branch" -a
+	    fi
+
+	    nsbranchesdone="$nsbranchesdone $branch"
+	fi
+
+	nslastbranch=$branch
+    done
+
+    echo ""
+    echo "-------------------------------"
+    echo "Updated the following branches:"
+    echo "  $nsbranchesdone"
+    if [ "$nsbranchesnotdone" != "" ] ; then
+	echo "Did NOT update the following branches:"
+	echo "  $nsbranchesnotdone"
+    fi
+}
