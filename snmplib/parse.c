@@ -3917,10 +3917,9 @@ read_module_internal(const char *name)
             File = oldFile;
             mibLine = oldLine;
             current_module = oldModule;
-            if (np != NULL)
-                return MODULE_LOADED_OK;
-            else if (gMibError == MODULE_SYNTAX_ERROR) 
+            if ((np == NULL) && (gMibError == MODULE_SYNTAX_ERROR) )
                 return MODULE_SYNTAX_ERROR;
+            return MODULE_LOADED_OK;
         }
 
     return MODULE_NOT_FOUND;
