@@ -1671,7 +1671,7 @@ enum {
 /* MSVC OpenSSL linker settings. */
 #if defined(WIN32) && !defined(mingw32)
 #  if defined(NETSNMP_USE_OPENSSL)
-#    ifdef NETSNMP_USE_DLL
+#    ifdef _DLL
 #      ifdef _DEBUG
 #        pragma comment(lib, "libeay32MDd.lib")
 #      else
