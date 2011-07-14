@@ -181,7 +181,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         }
 
         /*
-         * See if it is an IPv6 address, which covered with square brankets
+         * See if it is an IPv6 address, which covered with square brackets
          * with an appended :port.  
          */
         if (*peername == '[') {
@@ -227,7 +227,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                         (AF_INET6, peername + 1,
                          (void *) &(addr->sin6_addr))) {
                         DEBUGMSGTL(("netsnmp_sockaddr_in6",
-                                    "IPv6 address with square brankets\n"));
+                                    "IPv6 address with square brackets\n"));
                         portno = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 				                    NETSNMP_DS_LIB_DEFAULT_PORT);
                         if (portno <= 0)
