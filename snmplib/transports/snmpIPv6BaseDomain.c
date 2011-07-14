@@ -47,6 +47,11 @@
 #include "inet_pton.h"
 
 
+#if defined(WIN32) && !defined(IF_NAMESIZE)
+#define IF_NAMESIZE 12
+#endif
+
+
 #if defined(HAVE_WINSOCK_H) && !defined(mingw32)
 static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
@@ -61,6 +66,19 @@ netsnmp_if_nametoindex(const char *ifname)
     return if_nametoindex(ifname);
 #else
     return 0;
+#endif
+}
+
+static char *
+netsnmp_if_indextoname(unsigned ifindex, char *ifname)
+{
+#if defined(WIN32)
+    snprintf(ifname, IF_NAMESIZE, "%u", ifindex);
+    return ifname;
+#elif defined(HAVE_IF_NAMETOINDEX)
+    return if_indextoname(ifindex, ifname);
+#else
+    return NULL;
 #endif
 }
 
@@ -82,9 +100,17 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
     if (to == NULL) {
         snprintf(tmp, sizeof(tmp), "%s: unknown", prefix);
     } else {
-        snprintf(tmp, sizeof(tmp), "%s: [%s]:%hu", prefix,
+        char scope_id[IF_NAMESIZE + 1] = "";
+
+#if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
+	if (to->sin6_scope_id
+            && netsnmp_if_indextoname(to->sin6_scope_id, &scope_id[1])) {
+            scope_id[0] = '%';
+        }
+#endif
+        snprintf(tmp, sizeof(tmp), "%s: [%s%s]:%hu", prefix,
                  inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr,
-                           INET6_ADDRSTRLEN), ntohs(to->sin6_port));
+                           INET6_ADDRSTRLEN), scope_id, ntohs(to->sin6_port));
     }
     tmp[sizeof(tmp)-1] = '\0';
     return strdup(tmp);
