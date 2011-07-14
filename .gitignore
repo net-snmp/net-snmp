@@ -35,6 +35,7 @@ apps/snmptrapd
 apps/snmpusm
 apps/snmpvacm
 apps/snmpwalk
+autom4te.cache/
 confdefs.h
 config.log
 config.status
@@ -72,5 +73,6 @@ sedscript
 snmplib/snmpsm_init.h
 snmplib/snmpsm_shutdown.h
 snmplib/transports/snmp_transport_inits.h
+stamp-h
 testing/failed_tests
 testing/testing/
