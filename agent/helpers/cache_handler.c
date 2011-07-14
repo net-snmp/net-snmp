@@ -36,7 +36,7 @@ void            release_cached_resources(unsigned int regNo,
  *  expired caches, and will call the free_cache function for any expired
  *  cache.
  *
- *  The load_cache route should return a negative number if the cache
+ *  The load_cache routine should return a negative number if the cache
  *  was not successfully loaded. 0 or any positive number indicates successs.
  *
  *
