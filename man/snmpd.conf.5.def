@@ -1673,10 +1673,13 @@ spit out some useful debugging information.  First off, please read
 the snmpd manual page on the -D flag.  Then the following
 configuration snmpd.conf token, combined with the -D flag, can produce
 useful output:
-.IP "injectHandler HANDLER modulename"
+.IP "injectHandler HANDLER modulename [beforeThis]"
 This will insert new handlers into the section of the mib tree
-referenced by "modulename".  The types of handlers available for
-insertion are:
+referenced by "modulename".  If "beforeThis" is specified then the
+module will be injected before the named module.  This is useful for
+getting a handler into the exact right position in the chain.
+.IP
+The types of handlers available for insertion are:
 .RS
 .IP stash_cache
 Caches information returned from the lower level.  This
@@ -1690,7 +1693,7 @@ support, which is only a few mib tables.  To use it,
 you need to make sure to install it before the
 table_iterator point in the chain, so to do this:
 
-                  \fCinjectHandler stash_cache NAME table_iterator\fR
+  \fCinjectHandler stash_cache NAME table_iterator\fR
 
 If you want a table to play with, try walking the
 \fCnsModuleTable\fR with and without this injected.
