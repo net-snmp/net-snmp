@@ -227,6 +227,9 @@
 /* Define to 1 if you have the `if_freenameindex' function. */
 #undef HAVE_IF_FREENAMEINDEX
 
+/* Define to 1 if you have the `if_indextoname' function. */
+#undef HAVE_IF_INDEXTONAME
+
 /* Define to 1 if you have the `if_nameindex' function. */
 #undef HAVE_IF_NAMEINDEX
 

@@ -50,10 +50,40 @@
 #include "inet_pton.h"
 
 
+#if defined(WIN32) && !defined(IF_NAMESIZE)
+#define IF_NAMESIZE 12
+#endif
+
+
 #if defined(HAVE_WINSOCK_H) && !defined(mingw32)
 static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 
+
+static unsigned
+netsnmp_if_nametoindex(const char *ifname)
+{
+#if defined(WIN32)
+    return atoi(ifname);
+#elif defined(HAVE_IF_NAMETOINDEX)
+    return if_nametoindex(ifname);
+#else
+    return 0;
+#endif
+}
+
+static char *
+netsnmp_if_indextoname(unsigned ifindex, char *ifname)
+{
+#if defined(WIN32)
+    snprintf(ifname, IF_NAMESIZE, "%u", ifindex);
+    return ifname;
+#elif defined(HAVE_IF_NAMETOINDEX)
+    return if_indextoname(ifindex, ifname);
+#else
+    return NULL;
+#endif
+}
 
 char *
 netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
@@ -73,9 +103,17 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
     if (to == NULL) {
         snprintf(tmp, sizeof(tmp), "%s: unknown", prefix);
     } else {
-        snprintf(tmp, sizeof(tmp), "%s: [%s]:%hu", prefix,
+        char scope_id[IF_NAMESIZE + 1] = "";
+
+#if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
+	if (to->sin6_scope_id
+            && netsnmp_if_indextoname(to->sin6_scope_id, &scope_id[1])) {
+            scope_id[0] = '%';
+        }
+#endif
+        snprintf(tmp, sizeof(tmp), "%s: [%s%s]:%hu", prefix,
                  inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr,
-                           INET6_ADDRSTRLEN), ntohs(to->sin6_port));
+                           INET6_ADDRSTRLEN), scope_id, ntohs(to->sin6_port));
     }
     tmp[sizeof(tmp)-1] = '\0';
     return strdup(tmp);
@@ -146,7 +184,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         }
 
         /*
-         * See if it is an IPv6 address, which covered with square brankets
+         * See if it is an IPv6 address, which covered with square brackets
          * with an appended :port.  
          */
         if (*peername == '[') {
@@ -160,16 +198,12 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
 	       *
 	       */
 	        char *scope_id;
-#ifdef HAVE_IF_NAMETOINDEX
 	        unsigned int if_index = 0;
-#endif
                 *cp = '\0';
 		scope_id = strchr(peername + 1, '%');
 		if (scope_id != NULL) {
 		    *scope_id = '\0';
-#ifdef HAVE_IF_NAMETOINDEX
-		    if_index = if_nametoindex(scope_id + 1);
-#endif
+		    if_index = netsnmp_if_nametoindex(scope_id + 1);
 		}
                 if (*(cp + 1) == ':') {
                     portno = atoi(cp+2);
@@ -186,7 +220,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                             return 0;
                         }
 
-#if defined(HAVE_IF_NAMETOINDEX) && defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
+#if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
                         addr->sin6_scope_id = if_index;
 #endif
                         goto resolved;
@@ -196,13 +230,13 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                         (AF_INET6, peername + 1,
                          (void *) &(addr->sin6_addr))) {
                         DEBUGMSGTL(("netsnmp_sockaddr_in6",
-                                    "IPv6 address with square brankets\n"));
+                                    "IPv6 address with square brackets\n"));
                         portno = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 				                    NETSNMP_DS_LIB_DEFAULT_PORT);
                         if (portno <= 0)
                             portno = SNMP_PORT;
                         addr->sin6_port = htons((u_short)portno);
-#if defined(HAVE_IF_NAMETOINDEX) && defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
+#if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
                         addr->sin6_scope_id = if_index;
 #endif
                         goto resolved;
@@ -218,16 +252,12 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         cp = strrchr(peername, ':');
         if (cp != NULL) {
 	    char *scope_id;
-#ifdef HAVE_IF_NAMETOINDEX
 	    unsigned int if_index = 0;
-#endif
 	    *cp = '\0';
 	    scope_id = strchr(peername + 1, '%');
 	    if (scope_id != NULL) {
 	        *scope_id = '\0';
-#ifdef HAVE_IF_NAMETOINDEX
-	        if_index = if_nametoindex(scope_id + 1);
-#endif
+	        if_index = netsnmp_if_nametoindex(scope_id + 1);
 	    }
             portno = atoi(cp + 1);
             if (portno != 0 &&
@@ -243,7 +273,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                     return 0;
                 }
 
-#if defined(HAVE_IF_NAMETOINDEX) && defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
+#if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
                 addr->sin6_scope_id = if_index;
 #endif
                 goto resolved;
