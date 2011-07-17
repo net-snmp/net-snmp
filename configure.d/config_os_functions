@@ -86,8 +86,8 @@ AC_CHECK_FUNCS([cgetnext        chown          execv           ] dnl
                [gethostname     getloadavg                     ] dnl
                [getpid          getpwnam                       ] dnl
                [hasmntopt       initgroups                     ] dnl
-               [if_nameindex    if_nametoindex localtime_r     ] dnl
-               [mkstemp         mktime                         ] dnl
+               [if_nameindex    if_indextoname if_nametoindex  ] dnl
+               [localtime_r     mkstemp        mktime          ] dnl
                [poll            regcomp                        ] dnl
                [setgid          setgroups                      ] dnl
                [setmntent       setuid                         ] dnl
