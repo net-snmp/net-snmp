@@ -33,7 +33,7 @@
 	 *
 	 *********************/
 
-extern int      snmp_enableauthentraps;
+extern long     snmp_enableauthentraps;
 extern int      snmp_enableauthentrapsset;
 int             old_snmp_enableauthentraps;
 
