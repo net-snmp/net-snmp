@@ -8,7 +8,7 @@
 
 static const oid snmp_oid[] = { 1, 3, 6, 1, 2, 1, 11 };
 
-extern int snmp_enableauthentraps;
+extern long snmp_enableauthentraps;
 extern int snmp_enableauthentrapsset;
 
 static int
