@@ -767,6 +767,7 @@ agentx_unregister_callbacks(netsnmp_session * ss)
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_UNREG_SYSOR,
                              agentx_sysOR_callback, ss->myvoid, 1);
+    SNMP_FREE(ss->myvoid);
 }
 
 /*
