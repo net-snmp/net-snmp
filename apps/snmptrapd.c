@@ -1457,6 +1457,9 @@ main(int argc, char *argv[])
     }
     snmp_log(LOG_INFO, "Stopping snmptrapd");
     
+#ifdef NETSNMP_EMBEDDED_PERL
+    shutdown_perl();
+#endif
     snmptrapd_close_sessions(sess_list);
     snmp_shutdown("snmptrapd");
 #ifdef WIN32SERVICE
