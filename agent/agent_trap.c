@@ -117,7 +117,7 @@ char           *snmp_trapcommunity = NULL;
 #define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
 #define SNMP_AUTHENTICATED_TRAPS_DISABLED	2
 
-int             snmp_enableauthentraps = SNMP_AUTHENTICATED_TRAPS_DISABLED;
+long            snmp_enableauthentraps = SNMP_AUTHENTICATED_TRAPS_DISABLED;
 int             snmp_enableauthentrapsset = 0;
 
 /*
