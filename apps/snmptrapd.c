@@ -315,10 +315,6 @@ term_handler(int sig)
 #endif
     netsnmp_running = 0;
 
-#ifdef NETSNMP_EMBEDDED_PERL
-    shutdown_perl();
-#endif
-
 #ifdef WIN32SERVICE
     /*
      * In case of windows, select() in receive() function will not return 
@@ -1296,6 +1292,9 @@ main(int argc, char *argv[])
     }
     snmp_log(LOG_INFO, "Stopping snmptrapd\n");
     
+#ifdef NETSNMP_EMBEDDED_PERL
+    shutdown_perl();
+#endif
     snmptrapd_close_sessions(sess_list);
     snmp_shutdown("snmptrapd");
 #ifdef WIN32SERVICE
