@@ -2,6 +2,12 @@
 *.la
 *.lo
 *.made
+*.bak
+*.old
+CHANGES.new*
+NEWS.new*
+ChangeLog.reallyadd
+ChangeLog.add*
 *.o
 .libs/
 agent/mibgroup/agent_module_dot_conf.h
@@ -23,6 +29,7 @@ apps/snmpget
 apps/snmpgetnext
 apps/snmpnetstat/snmpnetstat
 apps/snmpset
+apps/snmptls
 apps/snmpstatus
 apps/snmptable
 apps/snmptest
@@ -73,3 +80,9 @@ snmplib/transports/snmp_transport_inits.h
 stamp-h
 testing/failed_tests
 testing/testing/
+docs/html
+docs/latex
+net-snmp-5*
+net-snmp-6*
+TAGS
+config.cache
