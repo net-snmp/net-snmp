@@ -214,26 +214,12 @@ my_test_table_handler(netsnmp_mib_handler *handler,
 {
 
     netsnmp_table_registration_info
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         *handler_reg_info =
         (netsnmp_table_registration_info *) handler->prev->myvoid;
+
     netsnmp_table_request_info *table_info;
     u_long          result;
     int             x, y;
-
 
     while (requests) {
         netsnmp_variable_list *var = requests->requestvb;
