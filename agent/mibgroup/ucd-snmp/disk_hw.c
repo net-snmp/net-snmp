@@ -245,6 +245,9 @@ disk_parse_config_all(const char *token, char *cptr)
 
 
 static int _percent( int value, int total ) {
+    /* avoid division by zero */
+    if (total == 0)
+        return 0;
     return (int)( value * 100 ) / total;
 }
 
