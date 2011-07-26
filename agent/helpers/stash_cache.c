@@ -17,7 +17,7 @@ extern NetsnmpCacheFree _netsnmp_stash_cache_free;
  
 /** @defgroup stash_cache stash_cache
  *  Automatically caches data for certain handlers.
- *  This handler caches data in an optimized way which may aleviate
+ *  This handler caches data in an optimized way which may alleviate
  *  the need for the lower level handlers to perform as much
  *  optimization.  Specifically, somewhere in the lower level handlers
  *  must be a handler that supports the MODE_GET_STASH operation.
