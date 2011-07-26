@@ -175,11 +175,11 @@ The basic theory goes something like this: In the past, with the original mib mo
 .ti -1c
 .RI "int \fBnetsnmp_inject_handler_before\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_mib_handler\fP *handler, const char *before_what)"
 .br
-.RI "\fIinject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. \fP"
+.RI "\fIinject a new handler into the calling chain of the handlers defined by the netsnmp_handler_registration pointer. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_inject_handler\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_mib_handler\fP *handler)"
 .br
-.RI "\fIinject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. \fP"
+.RI "\fIinject a new handler into the calling chain of the handlers defined by the netsnmp_handler_registration pointer. \fP"
 .ti -1c
 .RI "NETSNMP_INLINE int \fBnetsnmp_call_handler\fP (\fBnetsnmp_mib_handler\fP *next_handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
@@ -477,12 +477,12 @@ free the resources associated with a handler registration object
 Definition at line 626 of file agent_handler.c.
 .SS "int netsnmp_inject_handler (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_mib_handler\fP *handler)"
 .PP
-inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. The new handler is injected at the top of the list and hence will be the new handler to be called first. 
+inject a new handler into the calling chain of the handlers defined by the netsnmp_handler_registration pointer. The new handler is injected at the top of the list and hence will be the new handler to be called first. 
 .PP
 Definition at line 391 of file agent_handler.c.
 .SS "int netsnmp_inject_handler_before (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_mib_handler\fP *handler, const char *before_what)"
 .PP
-inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. The new handler is injected after the before_what handler, or if NULL at the top of the list and hence will be the new handler to be called first. 
+inject a new handler into the calling chain of the handlers defined by the netsnmp_handler_registration pointer. The new handler is injected after the before_what handler, or if NULL at the top of the list and hence will be the new handler to be called first. 
 .PP
 Definition at line 334 of file agent_handler.c.
 .SS "int netsnmp_register_handler (\fBnetsnmp_handler_registration\fP *reginfo)"

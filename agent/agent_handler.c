@@ -326,7 +326,7 @@ netsnmp_register_handler_nocallback(netsnmp_handler_registration *reginfo)
 }
 
 /** inject a new handler into the calling chain of the handlers
-   definedy by the netsnmp_handler_registration pointer.  The new
+   defined by the netsnmp_handler_registration pointer.  The new
    handler is injected after the before_what handler, or if NULL at
    the top of the list and hence will be the new handler to be called
    first.*/
@@ -384,7 +384,7 @@ netsnmp_inject_handler_before(netsnmp_handler_registration *reginfo,
 }
 
 /** inject a new handler into the calling chain of the handlers
-   definedy by the netsnmp_handler_registration pointer.  The new handler is
+   defined by the netsnmp_handler_registration pointer.  The new handler is
    injected at the top of the list and hence will be the new handler
    to be called first.*/
 int
