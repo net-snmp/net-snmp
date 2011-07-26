@@ -373,11 +373,11 @@ tcp_handler(netsnmp_mib_handler          *handler,
 #ifdef NETSNMP_FEATURE_CHECKING
         netsnmp_feature_want(tcp_count_connections)
 #endif
-#ifdef NETSNMP_FEATURE_HAS_TCP_COUNT_CONNECTIONS
+#ifdef NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS
         ret_value = TCP_Count_Connections();
-#else /*  NETSNMP_FEATURE_HAS_TCP_COUNT_CONNECTIONS */
+#else
         ret_value = 0;
-#endif /*  NETSNMP_FEATURE_HAS_TCP_COUNT_CONNECTIONS */
+#endif /* NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS */
         type = ASN_GAUGE;
         break;
     case TCPINSEGS:

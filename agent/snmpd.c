@@ -640,7 +640,7 @@ main(int argc, char *argv[])
             }
             break;
 
-#ifdef NETSNMP_FEATURE_HAS_LOGGING_FILE
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_FILE
         case 'l':
             printf("Warning: -l option is deprecated, use -Lf <file> instead\n");
             if (optarg != NULL) {
@@ -658,7 +658,7 @@ main(int argc, char *argv[])
                 usage(argv[0]);
             }
             break;
-#endif /* NETSNMP_FEATURE_HAS_LOGGING_FILE */
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_FILE */
 
         case 'L':
 	    if  (snmp_log_options( optarg, argc, argv ) < 0 ) {
@@ -889,12 +889,12 @@ main(int argc, char *argv[])
     }
 
 #ifdef NETSNMP_LOGFILE
-#ifdef NETSNMP_FEATURE_HAS_LOGGING_FILE
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_FILE
     if (0 == log_set)
         snmp_enable_filelog(NETSNMP_LOGFILE,
                             netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                                    NETSNMP_DS_LIB_APPEND_LOGFILES));
-#endif /* NETSNMP_FEATURE_HAS_LOGGING_FILE */
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_FILE */
 #endif
 
 #ifdef USING_UTIL_FUNCS_RESTART_MODULE
@@ -962,11 +962,11 @@ main(int argc, char *argv[])
         int quit = ! netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                             NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
         ret = netsnmp_daemonize(quit,
-#ifdef NETSNMP_FEATURE_HAS_LOGGING_STDIO
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
                                 snmp_stderrlog_status()
-#else /* NETSNMP_FEATURE_HAS_LOGGING_STDIO */
+#else /* NETSNMP_FEATURE_REMOVE_LOGGING_STDIO */
                                 0
-#endif /* NETSNMP_FEATURE_HAS_LOGGING_STDIO */
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_STDIO */
             );
         /*
          * xxx-rks: do we care if fork fails? I think we should...
