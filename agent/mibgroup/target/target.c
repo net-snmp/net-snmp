@@ -227,10 +227,10 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                     t->f_config(t, "peerCert",
                                                 cert->fingerprint);
                                 }
-#ifdef NETSNMP_FEATURE_HAS_TLSTMADDR_GET_SERVERID
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMADDR_GET_SERVERID
                                 server_id = netsnmp_tlstmAddr_get_serverId(
                                     targaddrs->name);
-#endif /* NETSNMP_FEATURE_HAS_TLSTMADDR_GET_SERVERID */
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMADDR_GET_SERVERID */
                                 if (server_id) {
                                     DEBUGMSGTL(("target_sessions",
                                             "  found serverId: %s\n", 

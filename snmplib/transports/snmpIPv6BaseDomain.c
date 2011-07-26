@@ -184,8 +184,8 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         }
 
         /*
-         * See if it is an IPv6 address, which covered with square brackets
-         * with an appended :port.  
+         * See if it is an IPv6 address covered with square brackets. Also check
+         * for an appended :port.  
          */
         if (*peername == '[') {
             cp = strchr(peername, ']');
