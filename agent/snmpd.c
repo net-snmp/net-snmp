@@ -1148,13 +1148,6 @@ receive(void)
 #endif
         }
 
-        for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
-            if (external_signal_scheduled[i]) {
-                external_signal_scheduled[i]--;
-                external_signal_handler[i](i);
-            }
-        }
-
         /*
          * default to sleeping for a really long time. INT_MAX
          * should be sufficient (eg we don't care if time_t is
@@ -1194,6 +1187,13 @@ receive(void)
         netsnmp_external_event_info(&numfds, &readfds, &writefds, &exceptfds);
 
     reselect:
+        for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
+            if (external_signal_scheduled[i]) {
+                external_signal_scheduled[i]--;
+                external_signal_handler[i](i);
+            }
+        }
+
         DEBUGMSGTL(("snmpd/select", "select( numfds=%d, ..., tvp=%p)\n",
                     numfds, tvp));
         if(tvp)
