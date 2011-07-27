@@ -52,6 +52,7 @@ static void     close_persist_pipe(int iindex);
 static int      open_persist_pipe(int iindex, char *command);
 static void     destruct_persist_pipes(void);
 static int      write_persist_pipe(int iindex, const char *data);
+static void     sigchld_handler(int sig);
 
 /*
  * These are defined in pass.c 
@@ -80,6 +81,13 @@ init_pass_persist(void)
                                   pass_persist_parse_config,
                                   pass_persist_free_config,
                                   "miboid program");
+    register_signal(SIGCHLD, sigchld_handler);
+}
+
+void
+deinit_pass_persist(void)
+{
+    unregister_signal(SIGCHLD);
 }
 
 void
@@ -814,3 +822,24 @@ close_persist_pipe(int iindex)
     }
 
 }
+
+static void sigchld_handler(int sig) {
+    int i;
+ 
+    if (!persist_pipes)
+        return;
+
+#if HAVE_SYS_WAIT_H
+    for (i = 1; i <= numpersistpassthrus; i++) {
+        if (persist_pipes[i].pid > 0) {
+            if (waitpid(persist_pipes[i].pid, 0, WNOHANG)) {
+                DEBUGMSGTL(("ucd-snmp/pass_persist",
+                            "sigchld_handler: closing persist_pipe %d\n",
+                            i));
+                close_persist_pipe(i);
+            }
+        }
+    }
+#endif
+}
+
