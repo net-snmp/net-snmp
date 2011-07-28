@@ -22,7 +22,6 @@ else
 fi
 
 AC_TYPE_SIGNAL
-AC_FUNC_GETMNTENT
 
 ##
 #   Stand-alone function checks:
