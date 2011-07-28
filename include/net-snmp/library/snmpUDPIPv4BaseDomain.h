@@ -21,15 +21,6 @@ extern          "C" {
 #endif
 
 /*
- * Definitions
- */
-#ifdef  MSG_DONTWAIT
-#define NETSNMP_DONTWAIT MSG_DONTWAIT
-#else
-#define NETSNMP_DONTWAIT 0
-#endif
-
-/*
  * Prototypes
  */
 
