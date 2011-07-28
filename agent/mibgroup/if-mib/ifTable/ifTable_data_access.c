@@ -639,19 +639,21 @@ ifTable_container_load(netsnmp_container *container)
                        _check_interface_entry_for_updates, &cdc);
 
     /*
+     * now remove any missing interfaces
+     */
+    if (NULL != cdc.deleted) {
+       CONTAINER_FOR_EACH(cdc.deleted,
+                          (netsnmp_container_obj_func *) _delete_missing_interface,
+                          container);
+       CONTAINER_FREE(cdc.deleted);
+    }
+
+    /*
      * now add any new interfaces
      */
     CONTAINER_FOR_EACH(cdc.current,
                        (netsnmp_container_obj_func *) _add_new_interface,
                        container);
-
-    /*
-     * now remove any missing interfaces
-     */
-    if (NULL != cdc.deleted)
-       CONTAINER_FOR_EACH(cdc.deleted,
-                          (netsnmp_container_obj_func *) _delete_missing_interface,
-                          container);
 
     /*
      * free the container. we've either claimed each ifentry, or released it,
