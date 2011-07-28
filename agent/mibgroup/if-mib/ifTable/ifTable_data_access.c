@@ -321,7 +321,8 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
             rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
             rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
             oper_changed = 1;
-        } else {
+        }
+        if (rowreq_ctx->known_missing) {
             time_t now = netsnmp_get_agent_uptime();
             u_long diff = (now - rowreq_ctx->data.ifLastChange) / 100;
             DEBUGMSGTL(("verbose:ifTable:access", "missing entry for %ld seconds\n", diff));
