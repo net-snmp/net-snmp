@@ -59,6 +59,7 @@ fi
 AC_SEARCH_LIBS(getfsstat, [nbutil])
 AC_CHECK_FUNCS(getfsstat)
 AC_CHECK_FUNCS(getvfsstat)
+AC_FUNC_GETMNTENT
 
 #
 # kinfo_get_cpus
