@@ -151,7 +151,7 @@ main(int argc, char **argv) {
         m.msg_flags             = 0;
         
         DEBUG("sending to sock");
-        rc = sendmsg(sock, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+        rc = sendmsg(sock, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
         if (rc < 0) {
             fprintf(stderr, "failed to send startup message\n");
             DEBUG("failed to send startup message\n");
