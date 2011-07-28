@@ -38,6 +38,19 @@ typedef struct cd_container_s {
  */
 static int      _first_load = 1;
 
+/*
+ * Value of interface_fadeout config option
+ */
+static int fadeout = IFTABLE_REMOVE_MISSING_AFTER;
+/*
+ * Value of interface_replace_old config option
+ */
+static int replace_old = 0;
+
+static void
+_delete_missing_interface(ifTable_rowreq_ctx *rowreq_ctx,
+                          netsnmp_container *container);
+
 /** @ingroup interface 
  * @defgroup data_access data_access: Routines to access data
  *
@@ -59,6 +72,32 @@ static int      _first_load = 1;
  * OID: .1.3.6.1.2.1.2.2, length: 8
  */
 
+static void
+parse_interface_fadeout(const char *token, char *line)
+{
+    fadeout = atoi(line);
+}
+static void
+parse_interface_replace_old(const char *token, char *line)
+{
+    if (strcmp(line, "yes") == 0
+            || strcmp(line, "y") == 0
+            || strcmp(line, "true") == 0
+            || strcmp(line, "1") == 0) {
+        replace_old = 1;
+        return;
+    }
+    if (strcmp(line, "no") == 0
+            || strcmp(line, "n") == 0
+            || strcmp(line, "false") == 0
+            || strcmp(line, "0") == 0) {
+        replace_old = 0;
+        return;
+    }
+    snmp_log(LOG_ERR, "Invalid value of interface_replace_old parameter: '%s'\n",
+            line);
+}
+
 /**
  * initialization for ifTable data access
  *
@@ -79,6 +118,10 @@ ifTable_init_data(ifTable_registration * ifTable_reg)
     /*
      * TODO:303:o: Initialize ifTable data.
      */
+    snmpd_register_config_handler("interface_fadeout", parse_interface_fadeout, NULL,
+            "interface_fadeout seconds");
+    snmpd_register_config_handler("interface_replace_old",
+            parse_interface_replace_old, NULL, "interface_replace_old yes|no");
 
     return MFD_SUCCESS;
 }                               /* ifTable_init_data */
@@ -306,14 +349,15 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
             rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
             rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
             oper_changed = 1;
-        } else {
+        }
+        if (rowreq_ctx->known_missing) {
             time_t now = netsnmp_get_agent_uptime();
             u_long diff = (now - rowreq_ctx->data.ifLastChange) / 100;
             DEBUGMSGTL(("verbose:ifTable:access", "missing entry for %ld seconds\n", diff));
-            if (diff > IFTABLE_REMOVE_MISSING_AFTER) {
+            if (diff >= fadeout) {
                 DEBUGMSGTL(("ifTable:access", "marking missing entry %s for "
                             "removal after %d seconds\n", rowreq_ctx->data.ifName,
-                            IFTABLE_REMOVE_MISSING_AFTER));
+                            fadeout));
                 if (NULL == cdc->deleted)
                    cdc->deleted = netsnmp_container_find("ifTable_deleted:linked_list");
                 if (NULL == cdc->deleted)
@@ -398,6 +442,40 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
 }
 
 /**
+ * Remove all old interfaces with the same name as the newly added one.
+ */
+static void
+_check_and_replace_old(netsnmp_interface_entry *ifentry,
+                   netsnmp_container *container)
+{
+    netsnmp_iterator *it;
+    ifTable_rowreq_ctx * rowreq_ctx;
+    netsnmp_container *to_delete;
+
+    to_delete = netsnmp_container_find("ifTable_deleted:linked_list");
+    if (NULL == to_delete) {
+       snmp_log(LOG_ERR, "couldn't create container for deleted interface\n");
+       return;
+    }
+
+    it = CONTAINER_ITERATOR(container);
+    for (rowreq_ctx = ITERATOR_FIRST(it); rowreq_ctx; rowreq_ctx = ITERATOR_NEXT(it)) {
+        if (strcmp(ifentry->name, rowreq_ctx->data.ifentry->name) == 0) {
+            DEBUGMSGTL(("ifTable:access",
+                    "removing interface %ld due to new %s\n",
+                    (long) rowreq_ctx->data.ifentry->index, ifentry->name));
+            CONTAINER_INSERT(to_delete, rowreq_ctx);
+        }
+    }
+    ITERATOR_RELEASE(it);
+
+    CONTAINER_FOR_EACH(to_delete,
+                       (netsnmp_container_obj_func *) _delete_missing_interface,
+                       container);
+    CONTAINER_FREE(to_delete);
+}
+
+/**
  * add new entry
  */
 static void
@@ -415,6 +493,9 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
     rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
+        if (replace_old)
+                _check_and_replace_old(ifentry, container);
+
         CONTAINER_INSERT(container, rowreq_ctx);
         /*
          * fix this when we hit an arch that reports its own last change
