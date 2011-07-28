@@ -41,6 +41,11 @@ typedef struct cd_container_s {
  */
 static int      _first_load = 1;
 
+/*
+ * Value of interface_fadeout config option
+ */
+static int fadeout = IFTABLE_REMOVE_MISSING_AFTER;
+
 /** @ingroup interface 
  * @defgroup data_access data_access: Routines to access data
  *
@@ -62,6 +67,12 @@ static int      _first_load = 1;
  * OID: .1.3.6.1.2.1.2.2, length: 8
  */
 
+static void
+parse_interface_fadeout(const char *token, char *line)
+{
+    fadeout = atoi(line);
+}
+
 /**
  * initialization for ifTable data access
  *
@@ -82,7 +93,8 @@ ifTable_init_data(ifTable_registration * ifTable_reg)
     /*
      * TODO:303:o: Initialize ifTable data.
      */
-
+    snmpd_register_config_handler("interface_fadeout", parse_interface_fadeout, NULL,
+            "interface_fadeout seconds");
     return MFD_SUCCESS;
 }                               /* ifTable_init_data */
 
@@ -313,10 +325,10 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
             time_t now = netsnmp_get_agent_uptime();
             u_long diff = (now - rowreq_ctx->data.ifLastChange) / 100;
             DEBUGMSGTL(("verbose:ifTable:access", "missing entry for %ld seconds\n", diff));
-            if (diff > IFTABLE_REMOVE_MISSING_AFTER) {
+            if (diff >= fadeout) {
                 DEBUGMSGTL(("ifTable:access", "marking missing entry %s for "
                             "removal after %d seconds\n", rowreq_ctx->data.ifName,
-                            IFTABLE_REMOVE_MISSING_AFTER));
+                            fadeout));
                 if (NULL == cdc->deleted)
                    cdc->deleted = netsnmp_container_find("ifTable_deleted:linked_list");
                 if (NULL == cdc->deleted)
