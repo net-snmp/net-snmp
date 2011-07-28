@@ -533,6 +533,18 @@ can be used to provide appropriate type and speed settings for
 interfaces where the agent fails to determine this information correctly.
 TYPE is a type value as given in the IANAifType-MIB,
 and can be specified numerically or by name (assuming this MIB is loaded).
+.IP "interface_fadeout TIMEOUT"
+specifies, for how long the agent keeps entries in \fCifTable\fR after
+appropriate interfaces have been removed from system (typically various ppp,
+tap or tun interfaces). Timeout value is in seconds. Default value is 300
+(=5 minutes).
+.IP "interface_replace_old yes"
+can be used to remove already existing entries in \fCifTable\fR when an
+interface with the same name appears on the system. E.g. when ppp0 interface
+is removed, it is still listed in the table for \fIinterface_fadeout\fR
+seconds. This option ensures, that the old ppp0 interface is removed even
+before the \fIinterface_fadeout\fR timeour when new ppp0 (with different
+\fCifIndex\fR) shows up.
 .SS Host Resources Group
 This requires that the agent was built with support for the
 \fIhost\fR module (which is now included as part of the default build 
