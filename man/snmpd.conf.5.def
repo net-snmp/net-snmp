@@ -533,6 +533,10 @@ can be used to provide appropriate type and speed settings for
 interfaces where the agent fails to determine this information correctly.
 TYPE is a type value as given in the IANAifType-MIB,
 and can be specified numerically or by name (assuming this MIB is loaded).
+.IP "interface_fadeout TIMEOUT"
+specifies, for how long the agent keeps entries in ifTable after appropriate
+interfaces have been removed from system (typically various ppp, tap or tun
+interfaces). Timeout value is in seconds. Default value is 300 (=5 minutes).
 .SS Host Resources Group
 This requires that the agent was built with support for the
 \fIhost\fR module (which is now included as part of the default build 
