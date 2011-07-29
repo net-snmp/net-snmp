@@ -21,6 +21,7 @@ agent/mibgroup/mib_module_shutdown.h
 agent/snmpd
 apps/agentxtrap
 apps/encode_keychange
+apps/sshtosnmp
 apps/snmpbulkget
 apps/snmpbulkwalk
 apps/snmpdelta
