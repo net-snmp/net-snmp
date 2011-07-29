@@ -1,5 +1,5 @@
 /*
- *  Host Resources MIB - storage group implementation - hr_storage.c
+ *  Host Resources MIB - storage group implementation - hrh_storage.c
  *
  */
 
