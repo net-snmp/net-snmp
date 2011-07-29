@@ -27,6 +27,7 @@ NSB_BUILD_DIR=${NSB_BUILD_DIR:=""}
 NSB_BUILD_SUFFIX=${NSB_BUILD_SUFFIX:=""}
 NSB_SRC_DIR=${NSB_SRC_DIR:=""}
 NSB_INSTALL_DIR=${NSB_INSTALL_DIR:=""}
+NSB_INSTALL_DIR_DEFAULT=${NSB_INSTALL_DIR_DEFAULT:="$NSB_BUILD_DIR/usr"}
 NSB_PLATFORM=${NSB_PLATFORM:=`nsb_sysname`}
 # sun doesn't support hostname -s
 NSB_HOST=${NSB_HOST:=`hostname | cut -f1 -d.`}
@@ -134,7 +135,7 @@ nsb_config_dist()
       nsb_abort "agent/mibgroup directory in $ngc_src does not exist!"
    fi
    ngc_dest=$2
-   if [ ! -d $ngc_dest ]; then
+   if [ "X$ngc_dest" != "X" -a ! -d $ngc_dest ]; then
       nsb_abort "$ngc_dest does not exist!"
    fi
 
@@ -186,7 +187,7 @@ nsb_config_all()
       nsb_abort "agent/mibgroup directory in $ngc_src does not exist!"
    fi
    ngc_dest=$2
-   if [ ! -d $ngc_dest ]; then
+   if [ "X$ngc_dest" != "X" -a ! -d $ngc_dest ]; then
       nsb_abort "$ngc_dest does not exist!"
    fi
 
@@ -312,7 +313,7 @@ nsb_dir_link()
     $NSB_DIRLINK $link_src_dir $link_dst_dir
     rc=$?
     if [ $rc -ne 0 ];then
-      nsb_abort "Error during nsb_link-dir (rc=$rc)"
+      nsb_abort "Error during nsb_dir_link (rc=$rc)"
     fi
   else
     nsb_info "Skipping $link_src_dir"
@@ -363,10 +364,10 @@ nsb_make()
    # checking $? would only get us the rc from tee, which is useless
 
    nsb_info "Checking for errors..."
-   egrep -i "error|fail|warn|no such|exists|t find |ermission denied|\*\*\*" $nsb_make_OUTPUT \
+   egrep -i "error|fail|warn|no such|exists|t find |ermission denied" $nsb_make_OUTPUT \
          > nsb_make-$target-allerrs.$NSB_DATE
    # allow for a few exceptions
-   egrep -v -i "testing .*failure|[a-z&_](fail|error)|warn|error(mib|\.3)|(LOG|SNMP)_ERR|In function|= FAILURE|DEBUGMSG|/\*" nsb_make-$target-allerrs.$NSB_DATE \
+   egrep -v -i "testing .*failure|[a-z&_](fail|error)|warn|error(mib|\.3)|(LOG|SNMP)_ERR|In function|= FAILURE|DEBUGMSG|/\*|static library .* is not portable" nsb_make-$target-allerrs.$NSB_DATE \
          > nsb_make-$target-errs.$NSB_DATE
    if [ -s nsb_make-$target-errs.$NSB_DATE ]; then
       nsb_prompt "press enter to view errors"
@@ -396,7 +397,7 @@ nsb_default_paths()
       fi
    fi
    if [ "x$NSB_INSTALL_DIR" = "x" ]; then
-      NSB_INSTALL_DIR=$NSB_BUILD_DIR/usr/local
+      NSB_INSTALL_DIR="$NSB_INSTALL_DIR_DEFAULT"
    fi
 }
 
@@ -435,14 +436,16 @@ nsb_build()
    if [ $NSB_CLEAN -gt 0 ]; then
       nsb_info "Cleaning up..."
       if [ $NSB_CLEAN -eq 2 ];then
-        if [ "x$PWD" = "/" ]; then
+        if [ "x$PWD" = "x/" ]; then
            nsb_abort "Not running rm -fR from /"
         fi
         nsb_info "rm -fR * .[a-zA-Z]* > /dev/null 2>&1"
         rm -fR * .[a-zA-Z]* > /dev/null 2>&1
       else
-        nsb_info "rm -fR nsb_* $dest_dir > /dev/null 2>&1"
-        rm -fR nsb_* $dest_dir > /dev/null 2>&1
+        if [ "x$dest_dir" != "x" -a "x$dest_dir" != "x/" ]; then
+          nsb_info "rm -fR nsb_* $dest_dir > /dev/null 2>&1"
+          #rm -fR nsb_* $dest_dir > /dev/null 2>&1
+        fi
         if [ -f Makefile ]; then
             nsb_make NOAUTODEPS=y distclean
             nsb_build_rc=$?
@@ -453,7 +456,7 @@ nsb_build()
       fi
    fi
 
-   if [ ! -d $dest_dir ]; then
+   if [ "X$dest_dir" != "X" -a ! -d $dest_dir ]; then
       mkdir -p $dest_dir
       if [ ! -d $dest_dir ]; then
          nsb_abort "$dest_dir directory does not exist!"
@@ -471,9 +474,9 @@ nsb_build()
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
       nsb_info "Configuring... (log is nsb_config.$NSB_DATE)"
       if [ "x$nsb_config_all_flag" = "x0" ]; then
-          nsb_config_dist $src_dir $dest_dir
+          nsb_config_dist $src_dir "$dest_dir"
       else
-          nsb_config_all $src_dir $dest_dir
+          nsb_config_all $src_dir "$dest_dir"
       fi
       nsb_prompt "press enter to continue"
    fi
@@ -498,7 +501,7 @@ nsb_build()
    else
       nsb_prompt "No errors found, press enter to install"
       # DESTDIR makes sure the perl stuff goes into $dest_dir, too
-      nsb_make install DESTDIR=$dest_dir $NSB_EXTRA_INSTALL
+      nsb_make install DESTDIR="$dest_dir" $NSB_EXTRA_INSTALL
    fi
 
    return 0
