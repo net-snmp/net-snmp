@@ -83,13 +83,17 @@ init_pass_persist(void)
                                   pass_persist_parse_config,
                                   pass_persist_free_config,
                                   "miboid program");
+#ifndef WIN32
     register_signal(SIGCHLD, sigchld_handler);
+#endif
 }
 
 void
 deinit_pass_persist(void)
 {
+#ifndef WIN32
     unregister_signal(SIGCHLD);
+#endif
 }
 
 void
@@ -815,6 +819,7 @@ close_persist_pipe(int iindex)
 
 }
 
+#ifndef WIN32
 static void sigchld_handler(int sig) {
     int i;
  
@@ -834,4 +839,5 @@ static void sigchld_handler(int sig) {
     }
 #endif
 }
+#endif
 
