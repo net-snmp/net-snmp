@@ -1,5 +1,5 @@
 /*
- *  Host Resources MIB - storage group interface - hr_system.h
+ *  Host Resources MIB - storage group interface - hr_storage.h
  *
  */
 #ifndef _MIBGROUP_HRSTORAGE_H
