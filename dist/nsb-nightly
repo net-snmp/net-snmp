@@ -16,7 +16,7 @@ usage()
    echo " -s SRCDIR  : soure directory [$HOME/src/net-snmp-VERSION]"
    echo " -b BUILDD  : build directory [$HOME/build/]"
    echo "              NOTE-platform will be appended to build directory"
-   echo " -i INSTALLD: install directory [$HOME/build/\$PLATFORM/usr/local]"
+   echo " -i INSTALLD: install directory [$HOME/build/\$PLATFORM/usr]"
    echo ""
    echo " -x : configure extra features for pre-release testing"
    echo " -C : don't source $HOME/.snmp/nsb-nightly"
