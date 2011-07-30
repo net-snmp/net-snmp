@@ -869,6 +869,9 @@
 /* Define to 1 if `m_mbufs' is a member of `struct mbstat'. */
 #undef HAVE_STRUCT_MBSTAT_M_MBUFS
 
+/* Define to 1 if `msg_control' is a member of `struct msghdr'. */
+#undef HAVE_STRUCT_MSGHDR_MSG_CONTROL
+
 /* Define to 1 if `n_value' is a member of `struct nlist64'. */
 #undef HAVE_STRUCT_NLIST64_N_VALUE
 
