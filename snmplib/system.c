@@ -202,6 +202,10 @@ netsnmp_feature_child_of(calculate_sectime_diff, system_all)
 # define LOOPBACK    0x7f000001
 #endif
 
+#ifndef EAI_FAIL
+# define EAI_FAIL    -4    /* Non-recoverable failure in name res.  */
+#endif
+
 #if defined(HAVE_FORK)
 static void
 _daemon_prep(int stderr_log)
