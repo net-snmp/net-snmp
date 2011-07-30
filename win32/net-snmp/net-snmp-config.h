@@ -1037,6 +1037,9 @@
 /* Does struct in6_addr have a s6_un.sa6_ladd field? */
 /* #undef HAVE_STRUCT_IN6_ADDR_S6_UN_SA6_LADDR */
 
+/* mshhdr.msg_control */
+/* #undef HAVE_STRUCT_MSGHDR_MSG_CONTROL */
+
 /* rtentry structure tests */
 /* #undef RTENTRY_RT_NEXT */
 /* #undef HAVE_STRUCT_RTENTRY_RT_DST */
