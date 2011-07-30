@@ -191,7 +191,7 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
 }
 
 #if (defined(linux) && defined(IP_PKTINFO)) \
-    || defined(IP_RECVDSTADDR) && !defined(_MSC_VER)
+    || defined(IP_RECVDSTADDR) && !defined(_MSC_VER) && HAVE_STRUCT_MSGHDR_MSG_CONTROL
 #if  defined(linux) && defined(IP_PKTINFO)
 # define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
 #elif defined(IP_RECVDSTADDR)
