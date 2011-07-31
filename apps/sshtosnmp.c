@@ -131,7 +131,7 @@ main(int argc, char **argv) {
         } cmsg;
         struct iovec iov = { buf, buf_len };
 
-        /* do what all ANSI compilers should  */
+        /* Make sure that even padding fields get initialized.*/
         memset(&cmsg, 0, sizeof(cmsg));
         memset(&m, 0, sizeof(m));
 
