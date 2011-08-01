@@ -1353,7 +1353,7 @@ smux_snmp_process(int exact,
                   size_t * return_len, u_char * return_type, int sd)
 {
     u_char          packet[SMUXMAXPKTSIZE], *ptr, result[SMUXMAXPKTSIZE];
-    size_t          length = SMUXMAXPKTSIZE;
+    ssize_t         length = SMUXMAXPKTSIZE;
     int             tmp_length;
     u_char          type;
     size_t          packet_len;
