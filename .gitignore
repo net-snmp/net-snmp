@@ -4,7 +4,10 @@
 *.lo
 *.made
 *.o
+*.obj
 *.old
+*.out
+*.pdb
 .libs/
 agent/mibgroup/agent_module_dot_conf.h
 agent/mibgroup/agent_module_includes.h
@@ -68,6 +71,7 @@ net-snmp-config
 net-snmp-config-x
 net-snmp-create-v3-user
 NEWS.new*
+perl/*/*.def
 perl/agent/agent.c
 perl/agent/default_store/default_store.c
 perl/ASN/ASN.c
@@ -89,3 +93,7 @@ stamp-h
 TAGS
 testing/failed_tests
 testing/testing/
+win32/*/debug
+win32/*/release
+win32/bin
+win32/lib
