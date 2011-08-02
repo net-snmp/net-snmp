@@ -4,7 +4,10 @@
 *.lo
 *.made
 *.o
+*.obj
 *.old
+*.out
+*.pdb
 .libs/
 agent/*.exe
 agent/mibgroup/agent_module_dot_conf.h
@@ -71,6 +74,7 @@ net-snmp-config
 net-snmp-config-x
 net-snmp-create-v3-user
 NEWS.new*
+perl/*/*.def
 perl/agent/agent.c
 perl/agent/default_store/default_store.c
 perl/ASN/ASN.c
@@ -80,6 +84,8 @@ perl/NetSNMP.c
 perl/OID/OID.c
 perl/SNMP/SNMP.c
 perl/SNMP/t/snmptest.cmd
+perl/TrapReceiver/const-c.inc
+perl/TrapReceiver/const-xs.inc
 perl/TrapReceiver/TrapReceiver.c
 pm_to_blib
 sedscript
@@ -90,3 +96,7 @@ stamp-h
 TAGS
 testing/failed_tests
 testing/testing/
+win32/*/debug
+win32/*/release
+win32/bin
+win32/lib

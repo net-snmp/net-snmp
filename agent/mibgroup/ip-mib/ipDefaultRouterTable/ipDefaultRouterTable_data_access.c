@@ -363,7 +363,7 @@ ipDefaultRouterTable_container_load(netsnmp_container * container)
     }
 
     DEBUGMSGT(("verbose:ipDefaultRouterTable:ipDefaultRouterTable_container_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%" NETSNMP_PRIz "d records\n", CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }

@@ -1372,7 +1372,7 @@ smux_snmp_process(int exact,
         type = SMUX_GETNEXT;
 
     if (smux_build(type, smux_reqid, objid, len, 0, NULL,
-                   *len, packet, &length) < 0) {
+                   *len, packet, (size_t *) &length) < 0) {
         snmp_log(LOG_ERR, "[smux_snmp_process]: smux_build failed\n");
         return NULL;
     }
@@ -1449,8 +1449,8 @@ smux_snmp_process(int exact,
         if (result[0] == SMUX_TRAP) {
             DEBUGMSGTL(("smux", "[smux_snmp_process] Received trap\n"));
             snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", sd);
-            ptr = asn_parse_header(result, &length, &type);
-            smux_trap_process(ptr, &length);
+            ptr = asn_parse_header(result, (size_t *) &length, &type);
+            smux_trap_process(ptr, (size_t *) &length);
 
             /*
              * go and peek at received data again 
