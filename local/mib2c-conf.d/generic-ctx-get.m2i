@@ -72,7 +72,7 @@
         ($m2c_ctx_lhs <
          ($m2c_ctx_rhs$m2c_ctx_lm))) {
 @   if $m2c_node_realloc == 0@
-        snmp_log(LOG_ERR,"not enough space for value\n");
+        snmp_log(LOG_ERR,"not enough space for value ($m2c_ctx_rh)\n");
         return MFD_ERROR;
 @   else@
         /*
@@ -84,7 +84,7 @@
         $m2c_ctx_lh = malloc($m2c_ctx_rhs$m2c_ctx_cm);
 @      end@
         if(NULL == $m2c_ctx_lh) {
-            snmp_log(LOG_ERR,"could not allocate memory\n");
+            snmp_log(LOG_ERR,"could not allocate memory ($m2c_ctx_rh)\n");
             return MFD_ERROR;
         }
 @   end@
