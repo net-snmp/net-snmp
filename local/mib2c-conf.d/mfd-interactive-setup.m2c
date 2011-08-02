@@ -113,7 +113,9 @@ code for dynamic row creation?
 ## ---------------------------------------------------
 Do you want to use an existing data structure for the USER context?
 This would be a structure used to track data for the entire table,
-(similar to a global variable) not individual rows.
+(similar to a global variable) not individual rows.  (Many
+implementations won't need this, in which case the default is fine).
+
 
   1) No, use $m2c_temp_context_reg [DEFAULT]
   2) Yes, use my own structure
@@ -126,8 +128,9 @@ This would be a structure used to track data for the entire table,
 
 ## ---------------------------------------------------
 Do you want to use an existing data structure for the DATA context?
-The DATA context holds the data for each MIB column. By default, a new
-data structure will be created with an element for each column.
+The DATA context holds the data for each MIB column in a given row. By
+default, a new data structure will be created with an element for each
+column.  If you already have a structure that holds your data, select 2.
 
   1) No, use $m2c_temp_data_context [DEFAULT]
   2) Yes, use my own structure
