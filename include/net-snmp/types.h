@@ -29,7 +29,7 @@
 #include <inttypes.h>
 #endif
 #include <sys/types.h>
-#if ! defined(_WINSOCKAPI_) && ! defined(_WINSOCK_H)
+#if 1
 /*
  * If neither the Microsoft winsock header file nor the MinGW winsock header
  * file has already been included, do this now.
@@ -48,7 +48,7 @@
 #  else
 #   include <winsock2.h>
 #  endif
-#   include <ws2tcpip.h>
+#  include <ws2tcpip.h>
 # elif defined(HAVE_WINSOCK_H)
 #  include <winsock.h>
 # endif

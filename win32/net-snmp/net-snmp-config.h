@@ -38,8 +38,20 @@
 /* Only use Windows API functions available on Windows 2000 SP4 or later.  
  * We need at least SP1 for some IPv6 defines in ws2ipdef.h
  */
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x500 /*_WIN32_WINNT_WIN2K*/
+#else
+#if _WIN32_WINNT < 0x500
+#error _WIN32_WINNT is too low - it should be set to at least 0x500.
+#endif
+#endif
+#ifndef NTDDI_VERSION
 #define NTDDI_VERSION 0x05000400 /* NTDDI_WIN2KSP4 */
+#else
+#if NTDDI_VERSION < 0x05000400
+#error NTDDI_VERSION is too low - it should be set to at least 0x05000400.
+#endif
+#endif
 
 #define INSTALL_BASE "c:/usr"
 
