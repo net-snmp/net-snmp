@@ -48,7 +48,7 @@
 #  else
 #   include <winsock2.h>
 #  endif
-#   include <ws2tcpip.h>
+#  include <ws2tcpip.h>
 # elif defined(HAVE_WINSOCK_H)
 #  include <winsock.h>
 # endif
