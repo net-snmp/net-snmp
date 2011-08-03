@@ -129,7 +129,7 @@ nspatchtry() {
     echo "     Fail: $nsbadbranches"
 }
 
-nspatchapply() {
+_nspatchapplybase() {
     _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
 	return
@@ -143,6 +143,10 @@ nspatchapply() {
     $nsverbose applying the patch "$nspatchargs"
     $nsecho patch $nspatchargs
     $nsecho git diff | cat
+}
+
+nspatchapply() {
+    _nspatchapplybase
     
     echo ""
     echo -n "commit the results to $patchbranch? [y/n]"
@@ -152,6 +156,45 @@ nspatchapply() {
 	$nsecho git commit -a "$@"
     fi
 }
+
+nssfpatchapply() {
+    patch="$1"
+
+    _nspatchapplybase
+
+    #
+    # get the patch's html
+    #
+    tmpfile="/tmp/nspatch.$patch"
+    if [ ! -f "$tmpfile" ]; then
+	wget -O $tmpfile "https://sourceforge.net/tracker/?func=detail&aid="${patch}"&group_id=12694&atid=312694"
+    fi
+
+    echo "---------------------------------"
+
+    username=`grep /users/ $tmpfile | head -1 | sed 's/.*.users.//;s/.".*//;'`
+    echo "username:   $username"
+
+    fullname=`grep /users/ $tmpfile | head -1 | sed 's/.*title=.//;s/".*//;'`
+    echo "fullname:   $fullname"
+
+    title=`grep "Detail: $patch" $tmpfile | head -1 | sed "s/.*$patch - //;s/<.*//" | sed 's/"//g;' | sed "s/'//g;"`
+    echo commit msg: $title
+
+    cmd="git -a commit -s --author='$fullname <$username@users.sourceforge.net>' -m '$title'"
+
+    echo "Command: $cmd"
+    echo ""
+    echo -n "commit the results to $patchbranch? [y/n]"
+    read ans
+
+    if [ $ans = 'y' -o $ans = 'Y' ] ; then
+	$nsecho git commit -a -s --author="$fullname <$username@users.sourceforge.net>" -m "$title"
+    else
+	echo "if you don't wish to keep the changes, use 'git reset --hard'"
+    fi
+}
+    
 
 nsrollup() {
     _ns_checkclean
