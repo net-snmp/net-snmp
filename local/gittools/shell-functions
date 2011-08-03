@@ -283,6 +283,9 @@ nsrollup() {
 	echo "Did NOT update the following branches:"
 	echo "  $nsbranchesnotdone"
     fi
+
+    echo ""
+    echo "Now would be a good time to run 'nssync'"
 }
 
 nssync() {
