@@ -826,9 +826,6 @@ int    best_guess;
    oid newname[MAX_OID_LEN], *op;
    size_t newname_len = 0;
 
-   char str_buf[STR_BUF_SIZE];
-   str_buf[0] = '\0';
-
    if (type) *type = TYPE_UNKNOWN;
    if (oid_arr_len) *oid_arr_len = 0;
    if (!tag) goto done;
@@ -1616,7 +1613,6 @@ _bulkwalk_async_cb(int		op,
 {
    walk_context *context;
    int	done = 0;
-   int	npushed;
    SV **err_str_svp;
    SV **err_num_svp;
 
@@ -1700,7 +1696,7 @@ _bulkwalk_async_cb(int		op,
 	 /* Timeout means something bad has happened.  Return a not-okay
 	 ** result to the async callback.
 	 */
-	 npushed = _bulkwalk_finish(context, 0 /* NOT OKAY */);
+	 _bulkwalk_finish(context, 0 /* NOT OKAY */);
 	 return 1;
       }
 
@@ -1709,7 +1705,7 @@ _bulkwalk_async_cb(int		op,
 	 DBPRT(1,(DBOUT "unexpected callback op %d\n", op));
          sv_setpv(*err_str_svp, (char*)snmp_api_errstring(SNMPERR_GENERR));
          sv_setiv(*err_num_svp, SNMPERR_GENERR);
-	 npushed = _bulkwalk_finish(context, 0 /* NOT OKAY */);
+	 _bulkwalk_finish(context, 0 /* NOT OKAY */);
 	 return 1;
       }
    }
@@ -1734,7 +1730,7 @@ _bulkwalk_async_cb(int		op,
    }
 
    /* Call the perl callback with the return values and we're done. */
-   npushed = _bulkwalk_finish(context, 1 /* OKAY */);
+   _bulkwalk_finish(context, 1 /* OKAY */);
 
    return 1;
 }

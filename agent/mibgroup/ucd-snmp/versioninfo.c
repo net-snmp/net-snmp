@@ -202,13 +202,10 @@ save_persistent(int action,
                size_t var_val_len,
                u_char * statP, oid * name, size_t name_len)
 {
-    long            tmp = 0;
-
     if (var_val_type != ASN_INTEGER) {
         DEBUGMSGTL(("versioninfo", "Wrong type != int\n"));
         return SNMP_ERR_WRONGTYPE;
     }
-    tmp = *((long *) var_val);
     if (action == COMMIT) {
         snmp_store(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                          NETSNMP_DS_LIB_APPTYPE));

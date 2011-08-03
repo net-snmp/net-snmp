@@ -141,8 +141,6 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
                     void **opaque, int *olength)
 {
     int             rc = -1;
-    netsnmp_indexed_addr_pair *addr_pair = NULL;
-    struct sockaddr *from;
     netsnmp_tmStateReference *tmStateRef = NULL;
     _netsnmpTLSBaseData *tlsdata;
 
@@ -233,9 +231,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     tmStateRef->transportDomainLen = netsnmpTLSTCPDomain_len;
 
     /* Set the tmTransportAddress */
-    addr_pair = &tmStateRef->addresses;
     tmStateRef->have_addresses = 1;
-    from = (struct sockaddr *) &(addr_pair->remote_addr);
 
     /* RFC5953 Section 5.1.2 step 1:
      * 3)  The incomingMessage and incomingMessageLength are assigned values

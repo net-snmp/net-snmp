@@ -137,7 +137,6 @@ main(int argc, char *argv[])
     netsnmp_variable_list *vars;
     int             arg;
     int             count;
-    int             running;
     int             status;
     int             exitval = 0;
 
@@ -214,7 +213,6 @@ main(int argc, char *argv[])
             /*
              * error in response, print it 
              */
-            running = 0;
             if (response->errstat == SNMP_ERR_NOSUCHNAME) {
                 printf("End of MIB.\n");
             } else {
@@ -237,11 +235,9 @@ main(int argc, char *argv[])
     } else if (status == STAT_TIMEOUT) {
         fprintf(stderr, "Timeout: No Response from %s\n",
                 session.peername);
-        running = 0;
         exitval = 1;
     } else {                    /* status == STAT_ERROR */
         snmp_sess_perror("snmpbulkget", ss);
-        running = 0;
         exitval = 1;
     }
 

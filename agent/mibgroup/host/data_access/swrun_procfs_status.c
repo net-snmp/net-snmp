@@ -50,7 +50,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     DIR                 *procdir = NULL;
     struct dirent       *procentry_p;
     FILE                *fp;
-    int                  pid, rc, i;
+    int                  pid, i;
     char                 buf[BUFSIZ], buf2[BUFSIZ], *cp;
     netsnmp_swrun_entry *entry;
     
@@ -207,7 +207,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         }
         entry->hrSWRunPerfMem  = atoi( cp );   /*  rss */
         entry->hrSWRunPerfMem *= (getpagesize()/1024);  /* in kB */
-        rc = CONTAINER_INSERT(container, entry);
+        CONTAINER_INSERT(container, entry);
     }
     closedir( procdir );
 

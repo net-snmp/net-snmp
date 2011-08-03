@@ -454,7 +454,6 @@ netsnmp_pdu*
 convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
 {
     netsnmp_pdu           *template_v2pdu;
-    netsnmp_variable_list *first_vb;
     netsnmp_variable_list *var;
     oid                    enterprise[MAX_OID_LEN];
     size_t                 enterprise_len;
@@ -471,7 +470,6 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
         return NULL;
     }
     template_v2pdu->command = SNMP_MSG_TRAP2;
-    first_vb = template_v2pdu->variables;
 
     /*
      * Insert an snmpTrapOID varbind before the original v1 varbind list

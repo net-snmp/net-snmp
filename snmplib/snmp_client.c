@@ -466,8 +466,11 @@ _copy_pdu_vars(netsnmp_pdu *pdu,        /* source PDU */
                int skip_count,  /* !=0 number of variables to skip */
                int copy_count)
 {                               /* !=0 number of variables to copy */
-    netsnmp_variable_list *var, *oldvar;
-    int             ii, copied, drop_idx;
+    netsnmp_variable_list *var;
+#if TEMPORARILY_DISABLED
+    int             copied;
+#endif
+    int             drop_idx;
 
     if (!newpdu)
         return NULL;            /* where is PDU to copy to ? */
@@ -481,15 +484,17 @@ _copy_pdu_vars(netsnmp_pdu *pdu,        /* source PDU */
     while (var && (skip_count-- > 0))   /* skip over pdu variables */
         var = var->next_variable;
 
-    oldvar = NULL;
-    ii = 0;
+#if TEMPORARILY_DISABLED
     copied = 0;
     if (pdu->flags & UCD_MSG_FLAG_FORCE_PDU_COPY)
         copied = 1;             /* We're interested in 'empty' responses too */
+#endif
 
     newpdu->variables = _copy_varlist(var, drop_idx, copy_count);
+#if TEMPORARILY_DISABLED
     if (newpdu->variables)
         copied = 1;
+#endif
 
 #if ALSO_TEMPORARILY_DISABLED
     /*

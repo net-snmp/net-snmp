@@ -61,7 +61,7 @@ netsnmp_directory_container_read_some(netsnmp_container *user_container,
                                       void *filter_ctx, u_int flags)
 {
     DIR               *dir;
-    netsnmp_container *container = user_container, *tmp_c;
+    netsnmp_container *container = user_container;
     struct dirent     *file;
     char               path[SNMP_MAXPATH];
     size_t             dirname_len;
@@ -168,7 +168,7 @@ netsnmp_directory_container_read_some(netsnmp_container *user_container,
 #endif
             ) {
             /** xxx add the dir as well? not for now.. maybe another flag? */
-            tmp_c = netsnmp_directory_container_read(container, path, flags);
+            netsnmp_directory_container_read(container, path, flags);
         }
         else if (flags & NETSNMP_DIR_NSFILE) {
             if (_insert_nsfile( container, file->d_name,

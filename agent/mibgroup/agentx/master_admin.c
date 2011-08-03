@@ -404,7 +404,6 @@ agentx_notify(netsnmp_session * session, netsnmp_pdu *pdu)
 {
     netsnmp_session       *sp;
     netsnmp_variable_list *var;
-    int                    got_sysuptime = 0;
     extern const oid       sysuptime_oid[], snmptrap_oid[];
     extern const size_t    sysuptime_oid_len, snmptrap_oid_len;
 
@@ -418,7 +417,6 @@ agentx_notify(netsnmp_session * session, netsnmp_pdu *pdu)
 
     if (snmp_oid_compare(var->name, var->name_length,
                          sysuptime_oid, sysuptime_oid_len) == 0) {
-        got_sysuptime = 1;
         var = var->next_variable;
     }
 

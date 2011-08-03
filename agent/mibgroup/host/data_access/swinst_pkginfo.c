@@ -91,7 +91,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     char                  buf[ BUFSIZ ], *cp;
     time_t                install_time;
     size_t                date_len;
-    int                   rc, i = 1;
+    int                   i = 1;
     netsnmp_swinst_entry *entry;
 
     if ( !pkg_directory[0] ) {
@@ -105,7 +105,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
         entry = netsnmp_swinst_entry_create( i++ );
         if (NULL == entry)
             continue;   /* error already logged by function */
-        rc = CONTAINER_INSERT(container, entry);
+        CONTAINER_INSERT(container, entry);
 
 #ifdef HAVE_PKGINFO
         v = pkgparam( dp->d_name, "VERSION" );

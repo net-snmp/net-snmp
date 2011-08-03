@@ -389,7 +389,7 @@ linux_read_icmp6_parse(struct icmp6_mib *icmp6stat,
     char            line[1024];
     char            name[255];
     unsigned long   stats;
-    char           *endp ,*token, *vals;
+    char           *endp, *vals;
     int             match;
 #endif
 
@@ -420,12 +420,12 @@ linux_read_icmp6_parse(struct icmp6_mib *icmp6stat,
         vals = name;
         if (NULL != icmp6msgstat) {
             if (0 == strncmp(name, "Icmp6OutType", 12)) {
-                token = strsep(&vals, "e");
+                strsep(&vals, "e");
                 icmp6msgstat->vals[atoi(vals)].OutType = stats;
                 *support = 1;
                 continue;
             } else if (0 == strncmp(name, "Icmp6InType", 11)) {
-                token = strsep(&vals, "e");
+                strsep(&vals, "e");
                 icmp6msgstat->vals[atoi(vals)].InType = stats;
                 *support = 1;
                 continue;

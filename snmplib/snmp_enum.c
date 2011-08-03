@@ -312,12 +312,11 @@ se_add_pair(unsigned int major, unsigned int minor, char *label, int value)
 static struct snmp_enum_list **
 se_find_slist_ptr(const char *listname)
 {
-    struct snmp_enum_list_str *sptr, *lastp = NULL;
+    struct snmp_enum_list_str *sptr;
     if (!listname)
         return NULL;
 
-    for (sptr = sliststorage;
-         sptr != NULL; lastp = sptr, sptr = sptr->next)
+    for (sptr = sliststorage; sptr != NULL; sptr = sptr->next)
         if (sptr->name && strcmp(sptr->name, listname) == 0)
             return &sptr->list;
 
