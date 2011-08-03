@@ -288,6 +288,9 @@ nsrollup() {
     echo "Now would be a good time to run 'nssync'"
 }
 
+#
+# pull/pushes all the known active branches using pull --rebase
+#
 nssync() {
     for branch in $nsbranches ; do
 	git checkout $branch
