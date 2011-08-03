@@ -233,7 +233,6 @@ event_input(netsnmp_variable_list * vp)
 {
     int             eventid = 0;
     oid             variable[MAX_OID_LEN];
-    int             variablelen = 0;
     u_long          destip = 0;
     int             sampletype = 0;
     int             value = 0;
@@ -273,7 +272,6 @@ event_input(netsnmp_variable_list * vp)
       
       vp = vp->next_variable;
       memmove(variable, vp->val.objid, vp->val_len * sizeof(oid));
-      variablelen = vp->val_len;
       op = vp->name + 22;
       destip = 0;
       destip |= (*op++) << 24;

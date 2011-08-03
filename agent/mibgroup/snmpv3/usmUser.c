@@ -286,7 +286,7 @@ var_usmUser(struct variable * vp,
             size_t * length,
             int exact, size_t * var_len, WriteMethod ** write_method)
 {
-    struct usmUser *uptr = NULL, *nptr, *pptr;
+    struct usmUser *uptr = NULL, *nptr;
     int             i, rtest, result;
     oid            *indexOid;
     size_t          len;
@@ -328,8 +328,8 @@ var_usmUser(struct variable * vp,
             uptr = usm_get_userList();
 
         } else {
-            for (nptr = usm_get_userList(), pptr = NULL, uptr = NULL;
-                 nptr != NULL; pptr = nptr, nptr = nptr->next) {
+            for (nptr = usm_get_userList(), uptr = NULL;
+                 nptr != NULL; nptr = nptr->next) {
                 indexOid =
                     usm_generate_OID(vp->name, vp->namelen, nptr, &len);
                 result = snmp_oid_compare(name, *length, indexOid, len);
