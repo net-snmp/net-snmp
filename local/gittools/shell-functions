@@ -284,3 +284,22 @@ nsrollup() {
 	echo "  $nsbranchesnotdone"
     fi
 }
+
+nssync() {
+    for branch in $nsbranches ; do
+	git checkout $branch
+	git pull --rebase
+	if [ $? != 0 ] ; then
+	    echo "git pull --rebase failed; please fix first"
+	    return
+	fi
+    done
+    for branch in $nsbranches ; do
+	git checkout $branch
+	git push
+	if [ $? != 0 ] ; then
+	    echo "git push failed; help?"
+	    return
+	fi
+    done
+}
