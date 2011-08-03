@@ -1,7 +1,13 @@
+#ifdef _WIN32
+#define _WIN32_WINNT 0x500 /*_WIN32_WINNT_WIN2K*/
+#define NTDDI_VERSION 0x05000400 /* NTDDI_WIN2KSP4 */
+#endif
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
+#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/default_store.h>
 
 

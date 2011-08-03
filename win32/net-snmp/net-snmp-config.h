@@ -28,9 +28,19 @@
  * because there is a bug in the MSVC 6 header <winsock.h> that causes
  * inclusion of <winsock2.h>.
  */
-#if defined(HAVE_WIN32_PLATFORM_SDK) || !defined(_MSC_VER) || _MSC_VER > 1200
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x500 /*_WIN32_WINNT_WIN2K*/
+#else
+#if _WIN32_WINNT < 0x500
+#error _WIN32_WINNT is too low - it should be set to at least 0x500.
+#endif
+#endif
+#ifndef NTDDI_VERSION
 #define NTDDI_VERSION 0x05000400 /* NTDDI_WIN2KSP4 */
+#else
+#if NTDDI_VERSION < 0x05000400
+#error NTDDI_VERSION is too low - it should be set to at least 0x05000400.
+#endif
 #endif
 
 #define INSTALL_BASE "c:/usr"
