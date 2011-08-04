@@ -25873,6 +25873,9 @@ fi
 ac_fn_c_check_member "$LINENO" "struct mbstat" "m_clusters" "ac_cv_member_struct_mbstat_m_clusters" "
     $ac_includes_default
 
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
@@ -25889,6 +25892,9 @@ fi
 ac_fn_c_check_member "$LINENO" "struct mbstat" "m_clfree" "ac_cv_member_struct_mbstat_m_clfree" "
     $ac_includes_default
 
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
@@ -25905,6 +25911,9 @@ fi
 ac_fn_c_check_member "$LINENO" "struct mbstat" "m_mbufs" "ac_cv_member_struct_mbstat_m_mbufs" "
     $ac_includes_default
 
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
@@ -27845,10 +27854,10 @@ fi
 #   Agent:
 #
 ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_dst" "ac_cv_member_struct_rtentry_rt_dst" "
-#include<sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -27874,10 +27883,10 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_hash" "ac_cv_member_struct_rtentry_rt_hash" "
-#include<sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -27903,10 +27912,10 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_next" "ac_cv_member_struct_rtentry_rt_next" "
-#include<sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -27932,10 +27941,10 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_refcnt" "ac_cv_member_struct_rtentry_rt_refcnt" "
-#include<sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -27961,10 +27970,10 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_unit" "ac_cv_member_struct_rtentry_rt_unit" "
-#include<sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -27990,10 +27999,10 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_use" "ac_cv_member_struct_rtentry_rt_use" "
-#include<sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
