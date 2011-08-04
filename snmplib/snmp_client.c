@@ -402,19 +402,6 @@ _clone_pdu_header(netsnmp_pdu *pdu)
             return 0;
         }
     }
-
-    if (pdu != NULL && pdu->securityStateRef &&
-        pdu->command == SNMP_MSG_TRAP2) {
-
-        ret = usm_clone_usmStateReference((struct usmStateReference *) pdu->securityStateRef,
-                (struct usmStateReference **) &newpdu->securityStateRef );
-
-        if (ret)
-        {
-            snmp_free_pdu(newpdu);
-            return 0;
-        }
-    }
     if ((sptr = find_sec_mod(newpdu->securityModel)) != NULL &&
         sptr->pdu_clone != NULL) {
         /*
