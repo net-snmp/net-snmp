@@ -93,6 +93,7 @@ SOFTWARE.
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_client.h>
 #include <net-snmp/library/snmp_secmod.h>
+#include <net-snmp/library/snmpusm.h>
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/snmp_logging.h>
 #include <net-snmp/library/snmp_assert.h>
