@@ -8,6 +8,8 @@
 *.old
 *.out
 *.pdb
+*.rej
+*.orig
 .libs/
 agent/*.exe
 agent/mibgroup/agent_module_dot_conf.h
