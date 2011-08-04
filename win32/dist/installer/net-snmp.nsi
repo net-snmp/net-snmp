@@ -5,15 +5,15 @@ SetCompressor /SOLID lzma
 !include "Sections.nsh"
 
 ; Building a x86 or x64 binary
-!define INSTALLER_PLATFORM "x64"		
+!define INSTALLER_PLATFORM "x86"
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Net-SNMP"
 !define PRODUCT_MAJ_VERSION "5"
-!define PRODUCT_MIN_VERSION "5"
-!define PRODUCT_REVISION "pre2"
+!define PRODUCT_MIN_VERSION "7"
+!define PRODUCT_REVISION "0"
 !define PRODUCT_EXE_VERSION "1"
-!define PRODUCT_EXE_SUFFIX ".x64.exe"
+!define PRODUCT_EXE_SUFFIX ".${INSTALLER_PLATFORM}.exe"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.org"
 !define PRODUCT_DIR_REGKEY "Software\Net-SNMP"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -839,6 +839,8 @@ Section Uninstall
   Delete "$INSTDIR\docs\COPYING"
   Delete "$INSTDIR\docs\Net-SNMP.chm"
   Delete "$INSTDIR\bin\net-snmp-perl-test.pl"
+  ; ideally we should check whether this file has changed
+  Delete "$INSTDIR\etc\snmp\snmp.conf"
 
   Delete "$INSTDIR\bin\msvcm90.dll"
   Delete "$INSTDIR\bin\msvcp90.dll"
@@ -893,6 +895,7 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\logging"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\runtime"
   Delete "$INSTDIR\share\snmp\mibs\AGENTX-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\BRIDGE-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-EVENT-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-EXPRESSION-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-NSLOOKUP-MIB.txt"
@@ -907,7 +910,7 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\IANA-ADDRESS-FAMILY-NUMBERS-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\IANAifType-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\IANA-LANGUAGE-MIB.txt"
-  Delete "$INSTDIR\share\snmp\mibs\IANA-PROTO-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\IANA-RTPROTO-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\IF-INVERTED-STACK-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\IF-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\INET-ADDRESS-MIB.txt"
@@ -927,6 +930,7 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-MONITOR-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-PASS-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-PERIODIC-NOTIFY-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-SYSTEM-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-TC.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-VACM-MIB.txt"
@@ -944,6 +948,8 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\SNMP-NOTIFICATION-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-PROXY-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-TARGET-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\SNMP-TLS-TM-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\SNMP-TSM-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-USER-BASED-SM-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-USM-AES-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-USM-DH-OBJECTS-MIB.txt"
@@ -965,8 +971,8 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\UCD-SNMP-MIB-OLD.txt"
   Delete "$INSTDIR\share\snmp\mibs\UDP-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\.index"
+  Delete "$INSTDIR\snmp\persist\mib_indexes\0"
 
-  SetOutPath "$INSTDIR\share\snmp"
   Delete "$INSTDIR\share\snmp\mib2c.access_functions.conf"
   Delete "$INSTDIR\share\snmp\mib2c.array-user.conf"
   Delete "$INSTDIR\share\snmp\mib2c.check_values.conf"
@@ -991,7 +997,6 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mib2c.scalar.conf"
   Delete "$INSTDIR\share\snmp\mib2c.table_data.conf"
 
-  SetOutPath "$INSTDIR\share\snmp\mib2c-data"
   Delete "$INSTDIR\share\snmp\mib2c-data\default-mfd-top.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\details-enums.m2i"
   Delete "$INSTDIR\share\snmp\mib2c-data\details-node.m2i"
@@ -1034,7 +1039,7 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-interactive-setup.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-interface.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-makefile.m2m"
-  Delete "$INSTDIR\share\snmp\mib2c-data\mfd-persistence.m2m"
+  Delete "$INSTDIR\share\snmp\mib2c-data\mfd-persistence.m2i"
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-readme.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-top.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\node-get.m2i"
@@ -1058,7 +1063,6 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mib2c-data\syntax-RowStatus-varbind-validate.m2i"
   Delete "$INSTDIR\share\snmp\mib2c-data\syntax-StorageType-dependencies.m2i"
   Delete "$INSTDIR\share\snmp\mib2c-data\syntax-TestAndIncr-get.m2i"
-  Delete "$INSTDIR\share\snmp\mib2c-data\"
 
   Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
@@ -1270,8 +1274,6 @@ Section Uninstall
   Delete "$INSTDIR\lib\netsnmpmibs.lib"
   Delete "$INSTDIR\lib\netsnmp.exp"
   
-  RMDir "$SMPROGRAMS\$ICONS_GROUP\Service"
-  RMDir "$SMPROGRAMS\$ICONS_GROUP"
   RMDir "$INSTDIR\perl\x86"
   RMDir "$INSTDIR\perl"
   RMDir "$INSTDIR\lib"
@@ -1295,6 +1297,7 @@ Section Uninstall
   RMDir "$INSTDIR\share"
 
   RMDir "$INSTDIR\temp"
+  RMDir "$INSTDIR\snmp\persist\mib_indexes"
   RMDir "$INSTDIR\snmp\persist"
   RMDir "$INSTDIR\snmp"
   RMDir "$INSTDIR\etc\snmp"
@@ -1304,6 +1307,31 @@ Section Uninstall
   RMDir "$INSTDIR\include"
   RMDir "$INSTDIR\log"
   RMDir "$INSTDIR"
+  
+  ; Start Menu entries may have been installed for the current user only,
+  ; or for All Users.  So let's delete both sets....
+  SetShellVarContext current
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\README.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Trap Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Trap Service.lnk"
+  RMDir "$SMPROGRAMS\$ICONS_GROUP\Service"
+  RMDir "$SMPROGRAMS\$ICONS_GROUP"
+
+  SetShellVarContext all
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\README.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Trap Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Trap Service.lnk"
+  RMDir "$SMPROGRAMS\$ICONS_GROUP\Service"
+  RMDir "$SMPROGRAMS\$ICONS_GROUP"
+  
   ; Delete the environment variables
   ;Push "SNMPCONFPATH"
   ;Call un.DeleteEnvStr
