@@ -1,6 +1,7 @@
 #include "netbsd.h"
 
 #define netbsd1 netbsd1         /* we're really close to this */
+#define openbsd openbsd
 #define UVM
 
 #undef MBPOOL_SYMBOL
