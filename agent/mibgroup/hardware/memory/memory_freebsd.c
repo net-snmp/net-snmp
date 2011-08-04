@@ -36,7 +36,6 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     long           pagesize;
     int            nswap;
 
-    struct vmmeter vmem;
     struct vmtotal total;
     size_t         total_size  = sizeof(total);
     int            total_mib[] = { CTL_VM, VM_METER };
