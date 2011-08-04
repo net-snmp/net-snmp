@@ -875,7 +875,7 @@ var_ipAddrEntry(struct variable *vp,
     oid             current[14], *op;
     u_char         *cp;
     int             lowinterface = -1;
-    int             i, interface;
+    int             i;
     static in_addr_t	addr_ret;
     
     /*
