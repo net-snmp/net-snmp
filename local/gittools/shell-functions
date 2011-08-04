@@ -159,6 +159,26 @@ nspatchapply() {
 
 nssfpatchapply() {
     patch="$1"
+    area="$2"
+
+    if [ "$patch" = "" ] ; then
+	echo "Enter patch number: "
+	echo -n "> "
+	read patch
+    fi
+    if [ "$patch" = "" ] ; then
+	echo "Error: A patch number is required"
+	return
+    fi
+
+    if [ "$area" = "" ] ; then
+	echo "Which area does this patch affect?  (agent, libnetsnmp, apps, ...)?"
+	echo -n "> "
+	read area
+    fi
+    if [ "$area" = "" ] ; then
+	area="unknown"
+    fi
 
     _nspatchapplybase
 
@@ -181,7 +201,10 @@ nssfpatchapply() {
     title=`grep "Detail: $patch" $tmpfile | head -1 | sed "s/.*$patch - //;s/<.*//" | sed 's/"//g;' | sed "s/'//g;"`
     echo commit msg: $title
 
-    cmd="git -a commit -s --author='$fullname <$username@users.sourceforge.net>' -m '$title'"
+    commitmsg="CHANGES: $area: PATCH $patch: from $username: $title"
+
+    cmd="git -a commit -s --author='$fullname <$username@users.sourceforge.net>' -m '$commitmsg'"
+
 
     echo "Command: $cmd"
     echo ""
@@ -189,7 +212,7 @@ nssfpatchapply() {
     read ans
 
     if [ $ans = 'y' -o $ans = 'Y' ] ; then
-	$nsecho git commit -a -s --author="$fullname <$username@users.sourceforge.net>" -m "$title"
+	$nsecho git commit -a -s --author="$fullname <$username@users.sourceforge.net>" -m "$commitmsg"
     else
 	echo "if you don't wish to keep the changes, use 'git reset --hard'"
     fi
