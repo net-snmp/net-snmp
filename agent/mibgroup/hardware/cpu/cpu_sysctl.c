@@ -145,7 +145,9 @@ void init_cpu_sysctl( void ) {
      * Load the latest CPU usage statistics
      */
 int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
+#ifdef NETSNMP_KERN_MCPU
     int                     i;
+#endif
 
     /*
      * Strictly speaking, BSDi ought to use
@@ -155,7 +157,9 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
      * Don't fight it, Dave - go with the flow....
      */
     NETSNMP_CPU_STATS cpu_stats[CPUSTATES];
+#if !defined(__FreeBSD__) && !defined(__NetBSD__)
     int            cpu_mib[] = { CTL_KERN, NETSNMP_KERN_CPU };
+#endif
     size_t         cpu_size  = sizeof(cpu_stats);
 #ifdef NETSNMP_KERN_MCPU 
     NETSNMP_KERN_MCPU_TYPE *mcpu_stats;

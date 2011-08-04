@@ -108,7 +108,8 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 {
     int             rval = SNMPERR_SUCCESS,
         nbytes = USM_LENGTH_EXPANDED_PASSPHRASE;
-#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#if !defined(NETSNMP_USE_OPENSSL) && \
+    defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
     int             ret;
 #endif
 

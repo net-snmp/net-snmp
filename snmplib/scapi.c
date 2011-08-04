@@ -220,7 +220,7 @@ sc_random(u_char * buf, size_t * buflen)
 #if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS;
-#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#if !defined(NETSNMP_USE_OPENSSL) && !defined(NETSNMP_USE_PKCS11)
     int             i;
     int             rndval;
     u_char         *ucp = buf;
