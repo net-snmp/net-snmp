@@ -342,6 +342,7 @@ _clone_pdu_header(netsnmp_pdu *pdu)
 {
     netsnmp_pdu    *newpdu;
     struct snmp_secmod_def *sptr;
+    int ret;
 
     newpdu = (netsnmp_pdu *) malloc(sizeof(netsnmp_pdu));
     if (!newpdu)
@@ -380,6 +381,19 @@ _clone_pdu_header(netsnmp_pdu *pdu)
                           pdu->transport_data_length)) {
         snmp_free_pdu(newpdu);
         return NULL;
+    }
+
+    if (pdu != NULL && pdu->securityStateRef &&
+        pdu->command == SNMP_MSG_TRAP2) {
+
+        ret = usm_clone_usmStateReference((struct usmStateReference *) pdu->securityStateRef,
+                (struct usmStateReference **) &newpdu->securityStateRef );
+
+        if (ret)
+        {
+            snmp_free_pdu(newpdu);
+            return 0;
+        }
     }
     if ((sptr = find_sec_mod(newpdu->securityModel)) != NULL &&
         sptr->pdu_clone != NULL) {
