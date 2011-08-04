@@ -318,12 +318,18 @@ nsrollup() {
 }
 
 nssync() {
+    if [ "$1" = "--merge" ] ; then
+	mergeop="merge"
+    else
+	mergeop="rebase"
+    fi
+
     git fetch --all
     for branch in $nsbranches ; do
 	git checkout $branch
-	git rebase origin/$branch
+	git $mergeop origin/$branch
 	if [ $? != 0 ] ; then
-	    echo "git pull --rebase failed; please fix first"
+	    echo "git $mergop failed; please fix first"
 	    return
 	fi
     done
