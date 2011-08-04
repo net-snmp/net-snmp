@@ -292,9 +292,10 @@ nsrollup() {
 # pull/pushes all the known active branches using pull --rebase
 #
 nssync() {
+    git fetch --all
     for branch in $nsbranches ; do
 	git checkout $branch
-	git pull --rebase
+	git rebase origin/$branch
 	if [ $? != 0 ] ; then
 	    echo "git pull --rebase failed; please fix first"
 	    return
