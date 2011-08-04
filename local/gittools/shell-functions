@@ -161,6 +161,11 @@ nssfpatchapply() {
     patch="$1"
     area="$2"
 
+    _nspatchapplybase
+    nssfpatchcommit "$@"
+}
+
+nssfpatchcommit() {
     if [ "$patch" = "" ] ; then
 	echo "Enter patch number: "
 	echo -n "> "
@@ -179,8 +184,6 @@ nssfpatchapply() {
     if [ "$area" = "" ] ; then
 	area="unknown"
     fi
-
-    _nspatchapplybase
 
     #
     # get the patch's html
