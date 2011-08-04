@@ -88,7 +88,8 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 #ifdef HAVE_PKGINFO
     char                 *v, *c;
 #endif
-    char                  buf[ BUFSIZ ], *cp;
+    char                  buf[ BUFSIZ ];
+    unsigned char        *cp;
     time_t                install_time;
     size_t                date_len;
     int                   i = 1;
