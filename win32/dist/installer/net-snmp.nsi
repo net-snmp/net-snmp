@@ -3,6 +3,10 @@ SetCompressor /SOLID lzma
 
 !include x64.nsh
 !include "Sections.nsh"
+!include FileFunc.nsh
+!insertmacro GetParameters
+!insertmacro GetOptions
+var cmdLineParameters
 
 ; Building a x86 or x64 binary
 !define INSTALLER_PLATFORM "x86"
@@ -233,6 +237,8 @@ SectionGroup /e "Net-SNMP Agent Service"
     File "unregisteragent.bat"
     Call CreateAgentBats
 
+	ClearErrors
+	StrCmp $ICONS_GROUP "" SEC02_NoService
     CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Service"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk" "$INSTDIR\registeragent.bat"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk" "$INSTDIR\unregisteragent.bat"
@@ -273,6 +279,8 @@ SectionGroup /e "Net-SNMP Agent Service"
     File "unregisteragent.bat"
     Call CreateAgentBats
 
+	ClearErrors
+	StrCmp $ICONS_GROUP "" SEC03_NoService
     CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Service"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk" "$INSTDIR\registeragent.bat"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk" "$INSTDIR\unregisteragent.bat"
@@ -317,6 +325,8 @@ Section "Net-SNMP Trap Service" SEC04
   File "unregistertrapd.bat"
   Call CreateTrapdBats
   
+  ClearErrors
+  StrCmp $ICONS_GROUP "" NoTrapService
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Trap Service.lnk" "$INSTDIR\registertrapd.bat"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Trap Service.lnk" "$INSTDIR\unregistertrapd.bat"
   
@@ -378,10 +388,14 @@ Section "Encryption support (OpenSSL)" SEC07
 SectionEnd
 
 Section -AdditionalIcons
+  ClearErrors
+  StrCmp $ICONS_GROUP "" noAdditionalItems
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\uninst.exe"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk" "$INSTDIR\docs\Net-SNMP.chm"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\README.lnk" "$INSTDIR\README.txt"
+  
+  noAdditionalItems:
 SectionEnd
 
 Section -Post
@@ -689,6 +703,16 @@ Function .onInit
 SetRegView 64		; Prevent the installer from using the Wow6432Node HKLM subkey on 64-bit systems
 Push $0
 Push $R0
+Push $R1
+
+; Check for /? command line usage option
+${GetParameters} $R1
+StrCpy $cmdLineParameters $R1
+ClearErrors
+${GetOptions} $cmdLineParameters '/?' $R0
+IfErrors +3 0
+MessageBox MB_OK "Options:$\n  \StartMenu={GroupName}$\n  \Agent=standard|extDLL|none   (default standard)$\n  \noTrapd$\t(default \Trapd)$\n  \noPerl$\t$\t(default \Perl)$\n  \Dev$\t$\t(default \noDev)$\n  \OpenSSL$\t(default \noOpenSSL)"
+Abort
 
 ; Make sure we're running Windows 2000 (5.0) or higher
 ClearErrors
@@ -746,8 +770,119 @@ SectionSetFlags ${SEC03} $0
 ; Store current status of SEC07 (SSL).  Used for checking if OpenSSL is installed.
 SectionGetFlags ${SEC07} $R9
 
+; process other command line parameters
+Call parseParameters
+
 Pop $R0
 Pop $0
+FunctionEnd
+
+Function parseParameters
+  Push $R0
+  Push $0
+
+  ; /StartMenu=
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/StartMenu="  $R0
+  IfErrors +2 0
+  StrCpy $ICONS_GROUP $R0
+
+  ; /{no,}Trapd  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/Trapd"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC04} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC04} $0
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/noTrapd"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC04} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC04} $0
+
+  ; /{no,}Perl  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/Perl"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC05} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC05} $0
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/noPerl"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC05} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC05} $0
+
+  ; /{no,}Dev  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/Dev"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC06} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC06} $0
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/noDev"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC06} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC06} $0
+
+  ; /{no,}OpenSSL  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/OpenSSL"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC07} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC07} $0
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/noOpenSSL"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC07} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC07} $0
+
+  ; /Agent=  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/Agent="  $R0
+  IfErrors endOfAgent 0
+  ; /Agent=none
+  ClearErrors
+  StrCmp $R0 "none" 0 standardAgent
+  SectionGetFlags ${SEC02} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC02} $0
+  SectionGetFlags ${SEC03} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC03} $0
+  Goto endOfAgent
+  
+  standardAgent:
+  ; /Agent=standard
+  ClearErrors
+  StrCmp $R0 "standard" 0 winExtDLLAgent
+  SectionGetFlags ${SEC02} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC02} $0
+  SectionGetFlags ${SEC03} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC03} $0
+  Goto endOfAgent
+  
+  winExtDLLAgent:
+  ; /Agent=extDLL
+  ClearErrors
+  StrCmp $R0 "extDLL" 0 endOfAgent
+  SectionGetFlags ${SEC02} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC02} $0
+  SectionGetFlags ${SEC03} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC03} $0
+  endOfAgent:
+  
+  Pop $R0  
 FunctionEnd
 
 Function .onSelChange
