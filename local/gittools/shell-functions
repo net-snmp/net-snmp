@@ -110,7 +110,7 @@ nspatchtry() {
 	$nsecho git checkout $branch
 
 	$nsverbose Appling patch
-	$nsecho patch --batch "$@"
+	$nsecho patch -N --batch "$@"
 	if [ $? = 0 ] ; then
 	    $nsverbose Patch succeeded on $branch
 	    nsgoodbranches="$nsgoodbranches $branch"
