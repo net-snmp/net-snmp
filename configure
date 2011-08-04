@@ -40051,11 +40051,19 @@ cat >>conftest.$ac_ext <<_ACEOF
 
     $ac_includes_default
 
+<<<<<<< HEAD
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+=======
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_MBUF_H
+#include <sys/mbuf.h>
+>>>>>>> V5-5-patches
 #endif
 
 
@@ -40101,11 +40109,19 @@ cat >>conftest.$ac_ext <<_ACEOF
 
     $ac_includes_default
 
+<<<<<<< HEAD
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+=======
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_MBUF_H
+#include <sys/mbuf.h>
+>>>>>>> V5-5-patches
 #endif
 
 
@@ -40177,11 +40193,19 @@ cat >>conftest.$ac_ext <<_ACEOF
 
     $ac_includes_default
 
+<<<<<<< HEAD
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+=======
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_MBUF_H
+#include <sys/mbuf.h>
+>>>>>>> V5-5-patches
 #endif
 
 
@@ -40227,11 +40251,19 @@ cat >>conftest.$ac_ext <<_ACEOF
 
     $ac_includes_default
 
+<<<<<<< HEAD
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+=======
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_MBUF_H
+#include <sys/mbuf.h>
+>>>>>>> V5-5-patches
 #endif
 
 
@@ -40300,11 +40332,19 @@ cat >>conftest.$ac_ext <<_ACEOF
 
     $ac_includes_default
 
+<<<<<<< HEAD
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+=======
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_MBUF_H
+#include <sys/mbuf.h>
+>>>>>>> V5-5-patches
 #endif
 
 
@@ -40350,11 +40390,19 @@ cat >>conftest.$ac_ext <<_ACEOF
 
     $ac_includes_default
 
+<<<<<<< HEAD
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+=======
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_MBUF_H
+#include <sys/mbuf.h>
+>>>>>>> V5-5-patches
 #endif
 
 
@@ -49084,6 +49132,151 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+<<<<<<< HEAD
+=======
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+
+
+int
+main ()
+{
+static struct rtentry ac_aggr;
+if (ac_aggr.rt_refcnt)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_member_struct_rtentry_rt_refcnt=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+
+
+int
+main ()
+{
+static struct rtentry ac_aggr;
+if (sizeof ac_aggr.rt_refcnt)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_member_struct_rtentry_rt_refcnt=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_member_struct_rtentry_rt_refcnt=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_member_struct_rtentry_rt_refcnt" >&5
+$as_echo "$ac_cv_member_struct_rtentry_rt_refcnt" >&6; }
+if test "x$ac_cv_member_struct_rtentry_rt_refcnt" = x""yes; then
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_RTENTRY_RT_REFCNT 1
+_ACEOF
+
+
+fi
+{ $as_echo "$as_me:$LINENO: checking for struct rtentry.rt_unit" >&5
+$as_echo_n "checking for struct rtentry.rt_unit... " >&6; }
+if test "${ac_cv_member_struct_rtentry_rt_unit+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -49144,10 +49337,74 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+>>>>>>> V5-5-patches
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+<<<<<<< HEAD
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+
+
+int
+main ()
+{
+static struct rtentry ac_aggr;
+if (ac_aggr.rt_unit)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_member_struct_rtentry_rt_unit=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+=======
+>>>>>>> V5-5-patches
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
