@@ -5,7 +5,11 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#else
 #include <sys/types.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

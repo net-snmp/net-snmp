@@ -306,6 +306,9 @@ AC_CHECK_HEADERS([net/if_arp.h       net/if_mib.h         net/if_var.h     ] dnl
                  [netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h] dnl
                  [net/route.h        netinet/icmp6.h                       ],,,
     [[
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -332,6 +335,9 @@ AC_CHECK_HEADERS([net/if_arp.h       net/if_mib.h         net/if_var.h     ] dnl
 #endif
 #if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+#if HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
@@ -363,11 +369,17 @@ AC_CHECK_HEADERS([netinet/ip6.h                               ] dnl
                  [netinet6/tcp6.h       netinet6/tcp6_fsm.h   ] dnl
                  [netinet6/tcp6_timer.h netinet6/tcp6_var.h],,,
     [[
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -388,6 +400,9 @@ AC_CHECK_HEADERS([netinet/ip6.h                               ] dnl
 #
 AC_CHECK_HEADERS(netinet/in_pcb.h,,,
     [[
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
