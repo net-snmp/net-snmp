@@ -1708,6 +1708,26 @@ typedef unsigned int     uintptr_t;
 
 #endif /* defined(NETSNMP_USE_DLL) && !defined(NETSNMP_TOOLS_C) && !defined(MSVC_PERL) */
 
+/* MSVC OpenSSL linker settings. */
+#if defined(WIN32) && !defined(mingw32)
+#  if defined(NETSNMP_USE_OPENSSL)
+#    ifdef NETSNMP_USE_DLL
+#      ifdef _DEBUG
+#        pragma comment(lib, "libeay32MDd.lib")
+#      else
+#        pragma comment(lib, "libeay32MD.lib")
+#      endif
+#    else
+#      ifdef _DEBUG
+#        pragma comment(lib, "libeay32MTd.lib")
+#      else
+#        pragma comment(lib, "libeay32MT.lib")
+#      endif
+#    endif
+#    pragma comment(lib, "gdi32.lib")
+#  endif
+#endif
+
 #endif       /* WIN32 */
 
 #ifndef NETSNMP_IMPORT
