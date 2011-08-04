@@ -402,6 +402,7 @@ _clone_pdu_header(netsnmp_pdu *pdu)
             return 0;
         }
     }
+
     if ((sptr = find_sec_mod(newpdu->securityModel)) != NULL &&
         sptr->pdu_clone != NULL) {
         /*
