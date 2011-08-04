@@ -112,6 +112,9 @@ AC_CHECK_MEMBERS([struct mbstat.m_clusters,
                   struct mbstat.m_mbufs],,,[
     AC_INCLUDES_DEFAULT()
     [
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
@@ -542,10 +545,10 @@ AC_CHECK_MEMBERS([struct rtentry.rt_dst,
                   struct rtentry.rt_unit,
                   struct rtentry.rt_use],,,
     [
-#include<sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
