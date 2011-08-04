@@ -276,11 +276,15 @@ nsrollup() {
 		echo "  Steps:"
 		echo "    1) fix all files marked as problematic"
 		echo "    2) run 'git add' on each file"
-		echo "    3) run 'git commit' to commit the changes"
+		if [ $mergeop = "rebase" ] ; then
+		    echo "    3) run 'git rebase --continue' to commit the changes"
+		else
+		    echo "    3) run 'git commit' to commit the changes"
+		fi
 		echo "    4) once done, re-run nsrollup"
 		echo "  Aborting:"
 		echo "    If instead you want to give up, run"
-		echo "    1) git merge --abort"
+		echo "    1) git $mergeop --abort"
 		echo ""
 		echo "Updated the following branches:"
 		echo "  $nsbranchesdone"
