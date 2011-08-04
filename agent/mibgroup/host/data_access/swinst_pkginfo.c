@@ -103,7 +103,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
                          if there isn't a list of them! */
     }
     d = opendir( pkg_directory );
-    while (NULL != (dp = readdir( d ))) {
+    while (d != NULL && (dp = readdir(d)) != NULL) {
         if ( '.' == dp->d_name[0] )
             continue;
         entry = netsnmp_swinst_entry_create( i++ );
