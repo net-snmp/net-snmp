@@ -265,7 +265,6 @@ usm_set_usmStateReference_sec_level(struct usmStateReference *ref,
 int
 usm_clone_usmStateReference(struct usmStateReference *from, struct usmStateReference **to)
 {
-    int ret;
     struct usmStateReference *cloned_usmStateRef;
 
     if (from == NULL || to == NULL)
