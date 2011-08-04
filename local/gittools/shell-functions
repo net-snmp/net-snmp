@@ -220,6 +220,12 @@ nssfpatchapply() {
     
 
 nsrollup() {
+    if [ "$1" = "--merge" ] ; then
+	mergeop="merge"
+    else
+	mergeop="rebase"
+    fi
+
     _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
 	return
@@ -253,7 +259,7 @@ nsrollup() {
 	    fi
 
 	    $nsverbose rebasing our local changes on $branch
-	    git rebase origin/$branch
+	    git $mergeop origin/$branch
 
 	    $nsverbose merging $nslastbranch into $branch
 	    $nsecho git merge --log $nslastbranch
