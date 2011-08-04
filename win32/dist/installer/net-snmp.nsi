@@ -1484,13 +1484,35 @@ SectionEnd
 
 Function IsSSLInstalled
   Push $R0
+  Push $R1
   ReadEnvStr $R0 "OPENSSL_CONF"
+    
   IfFileExists "$R0" 0 noSSL
-    Goto continueInstall
+    Goto checkVersion
   noSSL:
     MessageBox MB_YESNO|MB_ICONQUESTION "OpenSSL does not appear to be installed.  OpenSSL is required for this installation of Net-SNMP.  Please install OpenSSL from http://www.slproweb.com/products/Win32OpenSSL.html and try again.  Would you like to continue installing anyways?" IDYES continueInstall
   Quit
+  
+  checkVersion:
+  ; OpenSSL 1.0.0 (32-bit version)
+  ReadRegStr "$R0" HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenSSL (32-bit)_is1" "DisplayName"
+  StrCpy $R1 $R0 13  ;  Truncate to "OpenSSL 1.0.0" or "OpenSSL 0.9.8" - strlen("OpenSSL x.y.z") = 13
+  ClearErrors
+  StrCmp $R1 "OpenSSL 1.0.0" 0 checkVersion2
+  MessageBox MB_OK "This package is known not to work with OpenSSL 1.0.0.  Please install the latest version of 0.9.8 from http://www.slproweb.com/products/Win32OpenSSL.html and try again."
+  Quit
+
+  checkVersion2:
+  ; OpenSSL 1.0.0 (64-bit version)   [Probably!]
+  ReadRegStr "$R0" HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenSSL (64-bit)_is1" "DisplayName"
+  StrCpy $R1 $R0 13  ;  Truncate to "OpenSSL 1.0.0" or "OpenSSL 0.9.8" - strlen("OpenSSL x.y.z") = 13
+  ClearErrors
+  StrCmp $R1 "OpenSSL 1.0.0" 0 continueInstall
+  MessageBox MB_OK "This package is known not to work with OpenSSL 1.0.0.  Please install the latest version of 0.9.8 from http://www.slproweb.com/products/Win32OpenSSL.html and try again."
+  Quit
+  
   continueInstall:
+  Pop $R1
   Pop $R0
 FunctionEnd
 
