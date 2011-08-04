@@ -35,8 +35,8 @@ To avoid loading any host-specific config files set
 "dontLoadHostConfig true" in your snmp.conf file.
 .SH COMMAND-LINE OPTIONS
 All of the tokens described in this file can be used on the command
-line of Net-SNMP applications as well by prefixing them with "--".
-EG, specifying \fI--dontLoadHostConfig=true\fR on the command line will
+line of Net-SNMP applications as well by prefixing them with "\-\-".
+EG, specifying \fI\-\-dontLoadHostConfig=true\fR on the command line will
 turn of loading of the host specific configuration files.
 .SH IMPORTANT NOTE
 Several of these directives may contain sensitive information
@@ -82,10 +82,10 @@ the \fIfoo\fR hostname (e.g. \fIsnmpget\fR) to actually connect via
 TCP to \fIfoo.exmaple.com\fR on port 9876.
 .IP "defVersion (1|2c|3)"
 defines the default version of SNMP to use.
-This can be overridden using the \fB-v\fR option.
+This can be overridden using the \fB\-v\fR option.
 .IP "defCommunity STRING"
 defines the default community to use for SNMPv1 and SNMPv2c requests.
-This can be overridden using the \fB-c\fR option.
+This can be overridden using the \fB\-c\fR option.
 .\".IP "dumpPacket (1|yes|true|0|no|false)"
 .IP "alias NAME DEFINITION"
 Creates an aliased tied to NAME for a given transport definition.  The
@@ -97,7 +97,7 @@ etc.
 .IP "dumpPacket yes"
 defines whether to display a hexadecimal dump of the raw SNMP requests
 sent and received by the application.
-This is equivalent to the \fB-d\fR option.
+This is equivalent to the \fB\-d\fR option.
 .IP "doDebugging (1|0)"
 turns on debugging for all applications run if set to 1.
 .\"
@@ -107,7 +107,7 @@ turns on debugging for all applications run if set to 1.
 .IP "debugTokens TOKEN[,TOKEN...]"
 defines the debugging tokens that should be turned on when
 \fIdoDebugging\fR is set.
-This is equivalent to the \fB-D\fR option.
+This is equivalent to the \fB\-D\fR option.
 .\".IP "16bitIDs (1|yes|true|0|no|false)"
 .IP "16bitIDs yes"
 restricts requestIDs, etc to 16-bit values.
@@ -143,7 +143,7 @@ of the buffer used when sending SNMP requests.
 .IP "noRangeCheck yes"
 disables the validation of varbind values against the MIB definition
 for the relevant OID.
-This is equivalent to the \fB-Ir\fR option.
+This is equivalent to the \fB\-Ir\fR option.
 .IP
 This directive is primarily relevant to the \fBsnmpset\fR command,
 but will also apply to any application that calls \fIsnmp_add_var()\fR
@@ -180,10 +180,10 @@ Specifies the timeout in seconds between retries.
 .SH SNMPv3 SETTINGS
 .IP "defSecurityName STRING"
 defines the default security name to use for SNMPv3 requests.
-This can be overridden using the \fB-u\fR option.
+This can be overridden using the \fB\-u\fR option.
 .IP "defSecurityLevel noAuthNoPriv|authNoPriv|authPriv"
 defines the default security level to use for SNMPv3 requests.
-This can be overridden using the \fB-l\fR option.
+This can be overridden using the \fB\-l\fR option.
 .IP
 If not specified, the default value for this token is \fInoAuthNoPriv\fR.
 .\"
@@ -199,7 +199,7 @@ to use the OpenSSL libraries.
 .IP "defPrivPassphrase STRING"
 define the default authentication and privacy pass phrases to use
 for SNMPv3 requests.
-These can be overridden using the \fB-A\fR and \fB-X\fR options respectively.
+These can be overridden using the \fB\-A\fR and \fB\-X\fR options respectively.
 .IP
 The 
 .B defPassphrase
@@ -209,7 +209,7 @@ if either of the other directives are not specified.
 .IP "defPrivType DES|AES"
 define the default authentication and privacy protocols to use for
 SNMPv3 requests.
-These can be overridden using the \fB-a\fR and \fB-x\fR options respectively.
+These can be overridden using the \fB\-a\fR and \fB\-x\fR options respectively.
 .IP
 If not specified, SNMPv3 requests will default to MD5 authentication
 and DES encryption.
@@ -221,7 +221,7 @@ Neither SHA authentication nor any form of encryption will be available.
 .RE
 .IP "defContext STRING"
 defines the default context to use for SNMPv3 requests.
-This can be overridden using the \fB-n\fR option.
+This can be overridden using the \fB\-n\fR option.
 .IP
 If not specified, the default value for this token is the default context
 (i.e. the empty string "").
@@ -240,7 +240,7 @@ truely random key can be generated and used instead (which would
 normally has better entropy than a password unless it is
 amazingly long).
 The directives are equivalent to the short-form
-command line options \fB-3m\fR, \fB-3M\fR, \fB-3k\fR, and \fB-3K\fR.
+command line options \fB\-3m\fR, \fB\-3M\fR, \fB\-3k\fR, and \fB\-3K\fR.
 .IP
 Localized keys are
 master keys which have been converted to a unique key which is only
@@ -306,18 +306,18 @@ of the buffer used when sending SNMP responses.
 .SH MIB HANDLING
 .IP "mibdirs DIRLIST"
 specifies a list of directories to search for MIB files.
-This operates in the same way as the \fB-M\fR option -
+This operates in the same way as the \fB\-M\fR option -
 see \fIsnmpcmd(1)\fR for details.
 Note that this value can be overridden by the
 .B MIBDIRS
-environment variable, and the \fB-M\fR option.
+environment variable, and the \fB\-M\fR option.
 .IP "mibs MIBLIST"
 specifies a list of MIB modules (not files) that should be loaded.
-This operates in the same way as the \fB-m\fR option -
+This operates in the same way as the \fB\-m\fR option -
 see \fIsnmpcmd(1)\fR for details.
 Note that this list can be overridden by the
 .B MIBS
-environment variable, and the \fB-m\fR option.
+environment variable, and the \fB\-m\fR option.
 .IP "mibfile FILE"
 specifies a (single) MIB file to load, in addition to the
 list read from the \fImibs\fR token (or equivalent configuration).
@@ -329,7 +329,7 @@ whether to display MIB parsing errors.
 .IP "commentToEOL (1|yes|true|0|no|false)"
 whether MIB parsing should be strict about comment termination.
 Many MIB writers assume that ASN.1 comments extend to the end of
-the text line, rather than being terminated by the next "--" token.
+the text line, rather than being terminated by the next "\-\-" token.
 This token can be used to accept such (strictly incorrect) MIBs.
 .br
 Note that this directive was previous (mis-)named \fIstrictCommentTerm\fR,
@@ -350,49 +350,49 @@ incremental logging of messages that are not line buffered before
 being passed to the logging routines.  This option is only used when file logging is active. 
 .IP "printNumericEnums (1|yes|true|0|no|false)"
 Equivalent to
-.BR -Oe .
+.BR \-Oe .
 .IP "printNumericOids (1|yes|true|0|no|false)"
 Equivalent to
-.BR -On .
+.BR \-On .
 .IP "dontBreakdownOids (1|yes|true|0|no|false)"
 Equivalent to
-.BR -Ob .
+.BR \-Ob .
 .IP "escapeQuotes (1|yes|true|0|no|false)"
 Equivalent to
-.BR -OE .
+.BR \-OE .
 .IP "quickPrinting (1|yes|true|0|no|false)"
 Equivalent to
-.BR -Oq .
+.BR \-Oq .
 .IP "printValueOnly (1|yes|true|0|no|false)"
 Equivalent to
-.BR -Ov .
+.BR \-Ov .
 .IP "dontPrintUnits (1|yes|true|0|no|false)"
 Equivalent to
-.BR -OU .
+.BR \-OU .
 .IP "numericTimeticks (1|yes|true|0|no|false)"
 Equivalent to
-.BR -Ot .
+.BR \-Ot .
 .IP "printHexText (1|yes|true|0|no|false)"
 Equivalent to
-.BR -OT .
+.BR \-OT .
 .IP "hexOutputLength integer"
 Specifies where to break up the output of hexadecimal strings.  
 Set to 0 to disable line breaks.  Defaults to 16.
 .IP "suffixPrinting (0|1|2)"
 The value 1 is equivalent to
-.B -Os
+.B \-Os
 and the value 2 is equivalent to
-.BR -OS .
+.BR \-OS .
 .IP "oidOutputFormat (1|2|3|4|5|6)"
-Maps -O options as follow: -Os=1, -OS=2, -Of=3, -On=4, -Ou=5.
-The value 6 has no matching -O option. It suppresses output.
+Maps \-O options as follow: \-Os=1, \-OS=2, \-Of=3, \-On=4, \-Ou=5.
+The value 6 has no matching \-O option. It suppresses output.
 .IP "extendedIndex (1|yes|true|0|no|false)"
 Equivalent to
-.BR -OX .
+.BR \-OX .
 .IP "noDisplayHint (1|yes|true|0|no|false)"
 Disables the use of DISPLAY-HINT information when parsing indices and
 values to set. Equivalent to
-.BR -Ih .
+.BR \-Ih .
 .SH FILES
 .IP "System-wide configuration files:"
 SYSCONFDIR/snmp/snmp.conf

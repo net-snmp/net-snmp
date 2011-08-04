@@ -28,7 +28,7 @@
 snmpgetnext - communicates with a network entity using SNMP GETNEXT requests
 .SH SYNOPSIS
 .B snmpgetnext
-[COMMON OPTIONS] [-Cf] OID [OID]...
+[COMMON OPTIONS] [\-Cf] OID [OID]...
 .SH DESCRIPTION
 .B snmpget
 is an SNMP application that uses the SNMP GETNEXT request to query for
@@ -41,7 +41,7 @@ remote entity's MIB will be returned.
 .PP
 For example:
 .PP
-snmpgetnext -c public zeus interfaces.ifTable.ifEntry.ifType.1
+snmpgetnext \-c public zeus interfaces.ifTable.ifEntry.ifType.1
 .PP
 will retrieve the variable interfaces.ifTable.ifEntry.ifType.2:
 .PP
@@ -52,9 +52,9 @@ error message will be shown, helping to pinpoint in what way the
 request was malformed.
 .SH "OPTIONS"
 .TP 8
-.B -Cf
+.B \-Cf
 If
-.B -Cf
+.B \-Cf
 is
 .I not
 specified, some applications

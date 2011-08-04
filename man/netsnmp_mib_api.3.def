@@ -21,7 +21,7 @@ print_description,
 fprint_description,
 snprint_description - netsnmp_mib_api functions
 .SH SYNOPSIS
-.B #include <net-snmp/mib_api.h>
+.B #include <net\-snmp/mib_api.h>
 .PP
 .SS Initialisation and Shutdown
 .BI "int add_mibdir(const char *" "dirname" );
@@ -104,7 +104,7 @@ Note that this does not actually load the MIB modules located
 in that directory, but is simply an initialisation step to make
 them available to
 .BR netsnmp_read_module .
-This function returns a count of files found in the directory, or a -1
+This function returns a count of files found in the directory, or a \-1
 if there is an error.  
 It should be called \fIbefore\fP invoking \fBnetsnmp_init_mib\fP.
 .PP
@@ -180,7 +180,7 @@ It can also be used to handle errors in the module identifiers used
 in MIB IMPORTS clauses (such as referring to
 .I RFC1213
 instead of
-.IR RFC1213-MIB ).
+.IR RFC1213\-MIB ).
 .SS Searching the MIB Tree
 .PP
 .B read_objid
@@ -234,7 +234,7 @@ prints the same information into the buffer pointed to by
 .I buf
 which is of length
 .IR len .
-It returns the number of characters printed, or -1 if the
+It returns the number of characters printed, or \-1 if the
 buffer was not large enough.  In the latter case,
 .I buf
 will typically contain a truncated version of the information (but
@@ -277,7 +277,7 @@ A colon separated list of MIB modules to load.
 .br
 The default list of modules will depend on how the Net-SNMP software
 was originally compiled, but is typically:
-IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB: UCD-SNMP-MIB:HOST-RESOURCES-MIB
+IP\-MIB:IF\-MIB:TCP\-MIB:UDP\-MIB:SNMPv2\-MIB:RFC1213\-MIB: UCD\-SNMP\-MIB:HOST\-RESOURCES\-MIB
 .IP
 If the value of the
 .B MIBS

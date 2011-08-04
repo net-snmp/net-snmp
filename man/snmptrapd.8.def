@@ -39,87 +39,87 @@ Since 162 is a privileged port,
 must typically be run as root.
 .SH OPTIONS
 .TP 8
-.B -a
+.B \-a
 Ignore authenticationFailure traps.
 .TP
-.B -A
+.B \-A
 Append to the log file rather than truncating it.
 
-Note that this needs to come \fIbefore\fP any -Lf options
+Note that this needs to come \fIbefore\fP any \-Lf options
 that it should apply to.
 .TP
-.BI "-c" " FILE"
+.BI "\-c" " FILE"
 Read 
 .I FILE
 as a configuration file.
 .TP
-.B -C
+.B \-C
 Do not read any configuration files except the one optionally specified by the 
-.B -c 
+.B \-c 
 option.
 .TP
-.B -d
+.B \-d
 Dump (in hexadecimal) the sent and received SNMP packets.
 .TP
-.BI -D[TOKEN[,...]]
+.BI \-D[TOKEN[,...]]
 Turn on debugging output for the given
 .IR "TOKEN" "(s)."
 Try
 .IR ALL
 for extremely verbose output.
 .TP
-.B -f
+.B \-f
 Do not fork() from the calling shell.
 .TP
-.BI -F " FORMAT"
+.BI \-F " FORMAT"
 When logging to standard output, use the format in the string
 .IR FORMAT .
 See the section
 .B FORMAT SPECIFICATIONS
 below for more details.
 .TP
-.B -h, --help
+.B \-h, \-\-help
 Display a brief usage message and then exit.
 .TP
-.B -H
+.B \-H
 Display a list of configuration file directives understood by the
 trap daemon and then exit.
 .TP
-.B -I \fI[-]INITLIST
+.B \-I \fI[\-]INITLIST
 Specifies which modules should (or should not) be initialized
 when snmptrapd starts up.  If the comma-separated
 .I INITLIST
 is preceded
-with a '-', it is the list of modules that should \fInot\fR be started.
+with a '\-', it is the list of modules that should \fInot\fR be started.
 Otherwise this is the list of the \fIonly\fR modules that should be started.
 
 To get a list of compiled modules, run snmptrapd with the arguments
-.I "-Dmib_init -H"
+.I "\-Dmib_init \-H"
 (assuming debugging support has been compiled in).
 .TP
-.B -L[efos]
+.B \-L[efos]
 Specify where logging output should be directed (standard error or output,
 to a file or via syslog).  See LOGGING OPTIONS in \fIsnmpcmd(1)\fR for details.
 .TP
-.BR -m " \fIMIBLIST"
+.BR \-m " \fIMIBLIST"
 Specifies a colon separated list of MIB modules to load for this
 application.  This overrides the environment variable MIBS.
 See \fIsnmpcmd(1)\fR for details.
 .TP
-.BR -M " \fIDIRLIST"
+.BR \-M " \fIDIRLIST"
 Specifies a colon separated list of directories to search for MIBs.
 This overrides the environment variable MIBDIRS.
 See \fIsnmpcmd(1)\fR for details.
 .TP
-.BR -n
+.BR \-n
 Do not attempt to translate source addresses of incoming packets into
 hostnames.
 .TP
-.BI -p " FILE"
+.BI \-p " FILE"
 Save the process ID of the trap daemon in
 .IR FILE "."
 .TP
-.BI -O " [abeEfnqQsStTuUvxX]"
+.BI \-O " [abeEfnqQsStTuUvxX]"
 Specifies how MIB objects and other output should be displayed.
 See the section
 .B OUTPUT OPTIONS
@@ -127,22 +127,22 @@ in the
 .I snmpcmd(1)
 manual page for details.
 .TP
-.BI -t
+.BI \-t
 Do not log traps to syslog.  This disables logging to syslog.  This is
 useful if you want the snmptrapd application to
 .B only
 run traphandle hooks and not to log any traps to any location.
 .TP
-.B -v, --version
+.B \-v, \-\-version
 Print version information for the trap daemon and then exit.
 .TP
-.B -x \fIADDRESS
+.B \-x \fIADDRESS
 Connect to the AgentX master agent on the specified address,
 rather than the default AGENTX_SOCKET.
 See \fIsnmpd(8)\fR for details of the format of such addresses.
 .TP
-.BI -- "name"="value"
-Allows to specify any token ("name") supported in the
+.BI \-\- "name"="value"
+Allows one to specify any token ("name") supported in the
 .I snmptrapd.conf
 file and sets its value to "value". Overrides the corresponding token in the
 .I snmptrapd.conf
@@ -161,11 +161,11 @@ It understands the following formatting sequences:
 a literal %
 .TP
 .B %a
-the contents of the agent-addr field of the PDU (v1 TRAPs only)
+the contents of the agent\-addr field of the PDU (v1 TRAPs only)
 .TP
 .B %A
-the hostname corresponding to the contents of the agent-addr field of
-the PDU, if available, otherwise the contents of the agent-addr field
+the hostname corresponding to the contents of the agent\-addr field of
+the PDU, if available, otherwise the contents of the agent\-addr field
 of the PDU (v1 TRAPs only).
 .TP
 .B %b
@@ -253,7 +253,7 @@ width and precision may also be specified , just as in
 and a flag value. The following flags are supported:
 .RS 4 
 .TP 4
-.B -
+.B \-
 left justify
 .TP
 .B 0
@@ -278,7 +278,7 @@ could use something like this:
 .PP
 .RS
 .nf
-snmptrapd -P -F "%02.2h:%02.2j TRAP%w.%q from %A\en"
+snmptrapd \-P \-F "%02.2h:%02.2j TRAP%w.%q from %A\en"
 .fi
 .RE
 .PP
@@ -286,7 +286,7 @@ If you want the same thing but in GMT rather than local time, use
 .PP
 .RS
 .nf
-snmptrapd -P -F "%#02.2h:%#02.2j TRAP%w.%q from %A\en"
+snmptrapd \-P \-F "%#02.2h:%#02.2j TRAP%w.%q from %A\en"
 .fi
 .RE
 .SH LISTENING ADDRESSES
@@ -300,16 +300,16 @@ See the
 .I snmpd(8)
 manual page for more information about the format of listening
 addresses.
-.SH NOTIFICATION-LOG-MIB SUPPORT
+.SH NOTIFICATION\-LOG\-MIB SUPPORT
 As of net-snmp 5.0, the snmptrapd application supports the
-NOTIFICATION-LOG-MIB.  It does this by opening an AgentX subagent
+NOTIFICATION\-LOG\-MIB.  It does this by opening an AgentX subagent
 connection to the master snmpd agent and registering the notification
 log tables.  As long as the snmpd application is started first, it
 will attach itself to it and thus you should be able to view the last
 recorded notifications via the nlmLogTable and nlmLogVariableTable.
 See the snmptrapd.conf file and the "doNotRetainNotificationLogs" token
 for turning
-off this support.  See the NOTIFICATION-LOG-MIB for more details about
+off this support.  See the NOTIFICATION\-LOG\-MIB for more details about
 the MIB itself.
 .SH EXTENSIBILITY AND CONFIGURATION
 See the

@@ -28,7 +28,7 @@
 snmpget - communicates with a network entity using SNMP GET requests
 .SH SYNOPSIS
 .B snmpget
-[COMMON OPTIONS] [-Cf] OID [OID]...
+[COMMON OPTIONS] [\-Cf] OID [OID]...
 .SH DESCRIPTION
 .B snmpget
 is an SNMP application that uses the SNMP GET request to query for
@@ -38,9 +38,9 @@ name is given in the format specified in
 .IR variables(5) .
 .SH "OPTIONS"
 .TP 8
-.B -Cf
+.B \-Cf
 If
-.B -Cf
+.B \-Cf
 is
 .I not
 specified, some applications
@@ -64,7 +64,7 @@ manual page.
 .SH "EXAMPLES"
 The command:
 .PP
-    snmpget -c public zeus system.sysDescr.0
+    snmpget \-c public zeus system.sysDescr.0
 .PP
 will retrieve the variable system.sysDescr.0 from the host 
 .B zeus 
@@ -80,13 +80,13 @@ pinpoint in what way the request was malformed.  If there were other
 variables in the request, the request will be resent without the bad
 variable.
 .PP
-Here is another example. The -c and -v options are defined in the 
+Here is another example. The \-c and \-v options are defined in the 
 .I snmpcmd(1)
 manual page. (Note that system.sysUpTime is an incomplete
 OID, as it needs the .0 index appended to it):
 .PP
 .nf
-    snmpget -v1 -Cf -c public localhost system.sysUpTime system.sysContact.0
+    snmpget \-v1 \-Cf \-c public localhost system.sysUpTime system.sysContact.0
 .fi
 .PP
 This example will return the following:
@@ -99,7 +99,7 @@ This example will return the following:
 .PP
 Similarly, the command:
 .nf
-    snmpget -v1 -c public localhost system.sysUpTime system.sysContact.0
+    snmpget \-v1 \-c public localhost system.sysUpTime system.sysContact.0
 .fi
 .PP
 Will return:
@@ -114,7 +114,7 @@ Will return:
 .PP
 With the
 .B
--Cf
+\-Cf
 flag specified the application will not try to fix the PDU for you.
 .SH "SEE ALSO"
 snmpcmd(1), snmpwalk(1), variables(5).
