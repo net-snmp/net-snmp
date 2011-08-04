@@ -2397,11 +2397,7 @@ snmpv3_scopedPDU_header_build(netsnmp_pdu *pdu,
                               u_char * packet, size_t * out_length,
                               u_char ** spdu_e)
 {
-    size_t          init_length;
     u_char         *scopedPdu, *pb;
-
-
-    init_length = *out_length;
 
     pb = scopedPdu = packet;
     pb = asn_build_sequence(pb, out_length,
@@ -2718,7 +2714,6 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     int             rc = 0;
 #endif /* support for community based SNMP */
     
-    u_char         *h0, *h1;
     u_char         *cp;
     size_t          length;
 
@@ -2850,7 +2845,6 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
      * upto the PDU sequence
      * (note that actual length of message will be inserted later) 
      */
-    h0 = *pkt;
     switch (pdu->version) {
 #ifndef NETSNMP_DISABLE_SNMPV1
     case SNMP_VERSION_1:
@@ -3027,7 +3021,6 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         return -1;
     }
 
-    h1 = cp;
     DEBUGPRINTPDUTYPE("send", pdu->command);
     cp = snmp_pdu_build(pdu, cp, pkt_len);
     DEBUGINDENTADD(-4);         /* return from entire v1/v2c message */

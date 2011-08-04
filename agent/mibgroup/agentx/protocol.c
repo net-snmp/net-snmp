@@ -671,7 +671,7 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
                       int allow_realloc,
                       netsnmp_session * session, netsnmp_pdu *pdu)
 {
-    size_t          ilen = *out_len, prefix_offset = 0;
+    size_t          ilen = *out_len;
     netsnmp_variable_list *vp;
     int             inc, i = 0;
     const int       network_order =
@@ -824,7 +824,6 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
         DEBUGINDENTLESS();
 
         vp = pdu->variables;
-        prefix_offset = *out_len + 1;
         DEBUGDUMPHEADER("send", "(Un)Register Prefix");
         if (!agentx_realloc_build_oid
             (buf, buf_len, out_len, allow_realloc, 0, vp->name,
@@ -1547,7 +1546,6 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
 {
     register u_char *bufp = data;
     u_char          buffer[SNMP_MAX_MSG_SIZE];
-    u_char         *prefix_ptr;
     oid             oid_buffer[MAX_OID_LEN], end_oid_buf[MAX_OID_LEN];
     size_t          buf_len = sizeof(buffer);
     size_t          oid_buf_len = MAX_OID_LEN;
@@ -1688,7 +1686,6 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         *length -= 4;
         DEBUGINDENTLESS();
 
-        prefix_ptr = bufp + 1;
         DEBUGDUMPHEADER("recv", "Registration OID");
         bufp = agentx_parse_oid(bufp, length, NULL,
                                 oid_buffer, &oid_buf_len,

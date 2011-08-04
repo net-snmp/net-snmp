@@ -367,7 +367,6 @@ static size_t
 _iterator_size(iterator_info *ii)
 {
     size_t count = 0;
-    int rc = SNMP_ERR_NOERROR;
     netsnmp_ref_void loop_ctx = { NULL };
     netsnmp_ref_void tmp = { NULL };
 
@@ -385,9 +384,9 @@ _iterator_size(iterator_info *ii)
     if(ii->init_loop_ctx)
         ii->init_loop_ctx(ii->user_ctx, &loop_ctx);
     
-    for( rc = ii->get_first(ii->user_ctx, &loop_ctx, &tmp);
+    for( ii->get_first(ii->user_ctx, &loop_ctx, &tmp);
          NULL != tmp.val;
-         rc = ii->get_next(ii->user_ctx, &loop_ctx, &tmp) )
+         ii->get_next(ii->user_ctx, &loop_ctx, &tmp) )
         ++count;
 
     if(ii->cleanup_loop_ctx)
@@ -400,7 +399,6 @@ static void
 _iterator_for_each(iterator_info *ii, netsnmp_container_obj_func *f,
                    void *ctx)
 {
-    int rc = SNMP_ERR_NOERROR;
     netsnmp_ref_void loop_ctx = { NULL };
     netsnmp_ref_void tmp = { NULL };
 
@@ -412,9 +410,9 @@ _iterator_for_each(iterator_info *ii, netsnmp_container_obj_func *f,
     if(ii->init_loop_ctx)
         ii->init_loop_ctx(ii->user_ctx, &loop_ctx);
     
-    for( rc = ii->get_first(ii->user_ctx, &loop_ctx, &tmp);
+    for( ii->get_first(ii->user_ctx, &loop_ctx, &tmp);
          NULL != tmp.val;
-         rc = ii->get_next(ii->user_ctx, &loop_ctx, &tmp) )
+         ii->get_next(ii->user_ctx, &loop_ctx, &tmp) )
         (*f) (tmp.val, ctx);
 
     if(ii->cleanup_loop_ctx)

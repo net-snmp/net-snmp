@@ -258,10 +258,6 @@ etherStatsTable_container_load(netsnmp_container * container)
      */
 
     for (p = list_head; p; p = p->ifn_next) {
-        u_int           flags;
-    
-        flags = 0;
-
         DEBUGMSGTL(("access:etherStatsTable", "processing '%s'\n", p->name));
 
         /*

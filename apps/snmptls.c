@@ -74,7 +74,7 @@ cert_row_create(uint32_t priority, int hash_type, const char *fp,
 {
     oid                    name[] = { SNMP_TLS_TM_CERT_TABLE, 1, -1, -1 };
     int                    name_len = OID_LENGTH(name), col_pos = name_len - 2;
-    int                    rc, rs_index = 4;
+    int                    rs_index = 4;
     u_char                 bin_fp[SNMP_MAXBUF_SMALL], *bin_fp_ptr = bin_fp;
     u_int                  rs;
     size_t                 bin_fp_len;
@@ -86,8 +86,7 @@ cert_row_create(uint32_t priority, int hash_type, const char *fp,
                fp));
 
     bin_fp_len = sizeof(bin_fp);
-    rc = netsnmp_tls_fingerprint_build(hash_type, fp, &bin_fp_ptr, &bin_fp_len,
-                                       0);
+    netsnmp_tls_fingerprint_build(hash_type, fp, &bin_fp_ptr, &bin_fp_len, 0);
 
     name[name_len-1] = priority;
     name[col_pos] = COL_SNMPTLSTMCERTTOTSN_FINGERPRINT;
@@ -156,7 +155,7 @@ params_row_create(const char *param_name, int hash_type, const char *fp,
                   uint32_t st, int *row_status_index)
 {
     oid                    name[MAX_OID_LEN];
-    int                    name_len, col_pos, rc, rs_index = 2;
+    int                    name_len, col_pos, rs_index = 2;
     u_char                 bin_fp[SNMP_MAXBUF_SMALL], *bin_fp_ptr = bin_fp;
     u_int                  rs;
     size_t                 bin_fp_len;
@@ -179,8 +178,7 @@ params_row_create(const char *param_name, int hash_type, const char *fp,
         name[name_len++] = *param_name++;
 
     bin_fp_len = sizeof(bin_fp);
-    rc = netsnmp_tls_fingerprint_build(hash_type, fp, &bin_fp_ptr, &bin_fp_len,
-                                       0);
+    netsnmp_tls_fingerprint_build(hash_type, fp, &bin_fp_ptr, &bin_fp_len, 0);
 
     name[col_pos] = COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT;
     vl = snmp_varlist_add_variable(&vl, name, name_len, ASN_OCTET_STR,
@@ -224,7 +222,7 @@ addr_row_create(const char *target_name, int hash_type, const char *fp,
                 const char *identity, uint32_t st, int *row_status_index)
 {
     oid                    name[MAX_OID_LEN];
-    int                    name_len, col_pos, rc, rs_index = 3;
+    int                    name_len, col_pos, rs_index = 3;
     u_char                 bin_fp[SNMP_MAXBUF_SMALL], *bin_fp_ptr = bin_fp;
     u_int                  rs;
     size_t                 bin_fp_len;
@@ -247,7 +245,7 @@ addr_row_create(const char *target_name, int hash_type, const char *fp,
 
     if (fp) {
         bin_fp_len = sizeof(bin_fp);
-        rc = netsnmp_tls_fingerprint_build(hash_type, fp, &bin_fp_ptr,
+        netsnmp_tls_fingerprint_build(hash_type, fp, &bin_fp_ptr,
                                            &bin_fp_len, 0);
 
         name[col_pos] = COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT;
@@ -434,7 +432,7 @@ main(int argc, char **argv)
 {
     netsnmp_session        session, *ss;
     netsnmp_variable_list *var_list = NULL;
-    int                    arg, rc, rs_idx;
+    int                    arg, rs_idx;
     u_int                  hash_type;
     char                  *fingerprint, *tmp;
 
@@ -554,7 +552,7 @@ main(int argc, char **argv)
         usage();
     }
 
-    rc = netsnmp_row_create(ss, var_list, rs_idx);
+    netsnmp_row_create(ss, var_list, rs_idx);
 
     SOCK_CLEANUP;
     return 0;

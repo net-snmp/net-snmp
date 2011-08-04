@@ -1382,7 +1382,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
     u_int           thePrivProtocolLength = 0;
     int             theSecLevel = 0;    /* No defined const for bad
                                          * value (other then err). */
-    size_t          salt_length = 0, save_salt_length = 0, save_salt_offset = 0;
+    size_t          salt_length = 0, save_salt_length = 0;
     u_char          salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
     u_char          authParams[USM_MAX_AUTHSIZE];
     u_char          iv[BYTESIZE(USM_MAX_SALT_LENGTH)];
@@ -1529,7 +1529,6 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
         if (ISTRANSFORM(thePrivProtocol, AESPriv)) {
             salt_length = BYTESIZE(USM_AES_SALT_LENGTH);
             save_salt_length = BYTESIZE(USM_AES_SALT_LENGTH)/2;
-            save_salt_offset = 0;
             if (!thePrivKey ||
                 usm_set_aes_iv(salt, &salt_length,
                                htonl(boots_uint), htonl(time_uint),
@@ -1545,7 +1544,6 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
         if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
             salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
             save_salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
-            save_salt_offset = 0;
             if (!thePrivKey || (usm_set_salt(salt, &salt_length,
                                              thePrivKey + 8,
                                              thePrivKeyLength - 8,

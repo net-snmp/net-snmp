@@ -589,7 +589,6 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
     FILE           *devin;
     char           line[1024];
     char           *start = line;
-    int            rc;
     char           *scan_str;
     uintmax_t       scan_val;
     netsnmp_systemstats_entry *entry = NULL;
@@ -607,7 +606,6 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
     /*
      * Read each per interface statistics proc file
      */
-    rc = 0;
     while ((dev_snmp6_entry = readdir(dev_snmp6_dir)) != NULL) {
         if (dev_snmp6_entry->d_name[0] == '.')
             continue;
