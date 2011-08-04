@@ -158,14 +158,14 @@ nspatchapply() {
 }
 
 nssfpatchapply() {
-    patch="$1"
-    area="$2"
-
     _nspatchapplybase
     nssfpatchcommit "$@"
 }
 
 nssfpatchcommit() {
+    patch="$1"
+    area="$2"
+
     if [ "$patch" = "" ] ; then
 	echo "Enter patch number: "
 	echo -n "> "
