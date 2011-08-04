@@ -1,11 +1,11 @@
 .TH NETSNMP_AGENT_API 3 "13 Aug 2010" VVERSIONINFO "Net-SNMP"
 .SH NAME
-netsnmp_agent_api \- embedding an agent into a external application
+netsnmp_agent_api - embedding an agent into a external application
 .SH SYNOPSIS
 .nf
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net\-snmp/net\-snmp\-config.h>
+#include <net\-snmp/net\-snmp\-includes.h>
+#include <net\-snmp/agent/net\-snmp\-agent\-includes.h>
 
 int
 main (int argc, char *argv[])
@@ -45,7 +45,7 @@ main (int argc, char *argv[])
 }
 
 Then:
-$(CC) ... `net-snmp-config --agent-libs`
+$(CC) ... `net\-snmp\-config \-\-agent\-libs`
 
 .fi
 .SH DESCRIPTION
@@ -76,8 +76,8 @@ If you intend to operate as an AgentX sub-agent, you will have to
 configured the Net-SNMP package with agentx support (which is turned
 on by default, so just don't turn it off)
 .PP
-Additionally, you will need to link against the net-snmp libraries
-(use the output of "net-snmp-config --agent-libs" to get a library
+Additionally, you will need to link against the Net-SNMP libraries
+(use the output of "net\-snmp\-config \-\-agent\-libs" to get a library
 list) and call subagent_pre_init() as indicated above.
 .SH COMPILING
 .PP
@@ -86,7 +86,7 @@ against at least the four libraries listed above.
 .SH FUNCTIONS
 .PP This is a brief description of the functions called above and
 where to find out more information on them.  It is certainly not a
-complete list of what is available within all the net-snmp libraries. 
+complete list of what is available within all the Net-SNMP libraries. 
 .IP "snmp_enable_stderrlog()"
 Logs error output from the SNMP agent to the standard error stream.
 .IP "netsnmp_ds_set_boolean()"
@@ -123,10 +123,10 @@ is non-zero, the function call will block until a packet arrives or an
 alarm must be run (see
 .IR snmp_alarm(3) ).
 The return value from this function is a positive integer if packets
-were processed, zero if an alarm occurred and -1 if an error occured.
+were processed, zero if an alarm occurred and \-1 if an error occured.
 .IP "snmp_shutdown(char *name);"
 This shuts down the agent, saving any needed persistent storage, etc.
 .SH "SEE ALSO"
-http://www.net-snmp.org/tutorial-5/toolkit/ select(2), snmp_api(3),
+http://www.net\-snmp.org/tutorial\-5/toolkit/ select(2), snmp_api(3),
 default_store(3), snmp_alarm(3), netsnmp_config_api(3), snmp_config(5),
 snmpd.conf(5)

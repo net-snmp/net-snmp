@@ -12,14 +12,14 @@
 snmpdf - display disk space usage on a network entity via SNMP
 .SH SYNOPSIS
 .B snmpdf
-[COMMON OPTIONS] [-Cu] AGENT
+[COMMON OPTIONS] [\-Cu] AGENT
 .SH DESCRIPTION
 .B snmpdf
-is simply a networked verison of the typical df command.  It
+is simply a networked version of the typical df command.  It
 checks the disk space on the remote machine by examining the
-HOST-RESOURCES-MIB's hrStorageTable or the UCD-SNMP-MIB's dskTable.
+HOST\-RESOURCES\-MIB's hrStorageTable or the UCD\-SNMP\-MIB's dskTable.
 By default, the hrStorageTable is preferred as it typically contains
-more information.  However, the -Cu argument can be passed to snmpdf
+more information.  However, the \-Cu argument can be passed to snmpdf
 to force the usage of the dskTable.
 .PP
 AGENT identifies a target SNMP agent, which is instrumented
@@ -44,16 +44,16 @@ Please see
 for a list of possible values for COMMON OPTIONS
 as well as their descriptions.
 .TP
-.B -Cu
+.B \-Cu
 Forces the command to use dskTable in mib
-UCD-SNMP-MIB instead of the default to determine
+UCD\-SNMP\-MIB instead of the default to determine
 the storage information. Generally, the default
-use of hrStorageTable in mib HOST-RESOURCES-MIB
+use of hrStorageTable in mib HOST\-RESOURCES\-MIB
 is preferred because it typically contains
 more information.
 .SH "EXAMPLES"
 .PP
-% snmpdf -v 2c -c public localhost
+% snmpdf \-v 2c \-c public localhost
 .PP
 .nf
 Description       size (kB)         Used    Available Used%

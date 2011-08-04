@@ -63,16 +63,16 @@
 snmpnetstat \- display networking status and configuration information from a network entity via SNMP
 .SH SYNOPSIS
 .B snmpnetstat
-[common options] [-Ca] [-Cn] AGENT
+[common options] [\-Ca] [\-Cn] AGENT
 .br
 .B snmpnetstat
-[common options] [-Ci] [-Co] [-Cr] [-Cn] [-Cs] AGENT
+[common options] [\-Ci] [\-Co] [\-Cr] [\-Cn] [\-Cs] AGENT
 .br
 .B snmpnetstat
-[common options] [-Ci] [-Cn] [-CI interface] AGENT [interval]
+[common options] [\-Ci] [\-Cn] [\-CI interface] AGENT [interval]
 .br
 .B snmpnetstat
-[common options] [-Ca] [-Cn] [-Cs] [-Cp protocol] AGENT
+[common options] [\-Ca] [\-Cn] [\-Cs] [\-Cp protocol] AGENT
 .SH DESCRIPTION
 The
 .B snmpnetstat 
@@ -254,7 +254,7 @@ display is limited to the given protocol.
 .SH EXAMPLES
 Example of using snmpnetstat to display active sockets (default):
 .PP
-% snmpnetstat -v 2c -c public -Ca testhost
+% snmpnetstat \-v 2c \-c public \-Ca testhost
 .PP
 .nf
 Active Internet (tcp) Connections (including servers)
@@ -278,7 +278,7 @@ udp    *.time
 \&...
 .fi
 .PP
-% snmpnetstat -v 2c -c public -Ci testhost
+% snmpnetstat \-v 2c \-c public \-Ci testhost
 .PP
 .nf
 Name     Mtu Network    Address          Ipkts   Ierrs    Opkts Oerrs Queue
@@ -289,7 +289,7 @@ lo0     8232 127        localhost      7530982       0  7530982     0    0
 Example of using snmpnetstat to show statistics about a specific protocol:
 .PP
 .nf
-% snmpnetstat -v 2c -c public -Cp tcp testhost
+% snmpnetstat \-v 2c \-c public \-Cp tcp testhost
 
 Active Internet (tcp) Connections
 Proto Local Address                Foreign Address                 (state)
