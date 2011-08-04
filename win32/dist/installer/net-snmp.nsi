@@ -3,17 +3,21 @@ SetCompressor /SOLID lzma
 
 !include x64.nsh
 !include "Sections.nsh"
+!include FileFunc.nsh
+!insertmacro GetParameters
+!insertmacro GetOptions
+var cmdLineParameters
 
 ; Building a x86 or x64 binary
-!define INSTALLER_PLATFORM "x64"		
+!define INSTALLER_PLATFORM "x86"
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Net-SNMP"
 !define PRODUCT_MAJ_VERSION "5"
-!define PRODUCT_MIN_VERSION "5"
-!define PRODUCT_REVISION "pre2"
+!define PRODUCT_MIN_VERSION "7"
+!define PRODUCT_REVISION "0"
 !define PRODUCT_EXE_VERSION "1"
-!define PRODUCT_EXE_SUFFIX ".x64.exe"
+!define PRODUCT_EXE_SUFFIX ".${INSTALLER_PLATFORM}.exe"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.org"
 !define PRODUCT_DIR_REGKEY "Software\Net-SNMP"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -233,6 +237,8 @@ SectionGroup /e "Net-SNMP Agent Service"
     File "unregisteragent.bat"
     Call CreateAgentBats
 
+	ClearErrors
+	StrCmp $ICONS_GROUP "" SEC02_NoService
     CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Service"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk" "$INSTDIR\registeragent.bat"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk" "$INSTDIR\unregisteragent.bat"
@@ -273,6 +279,8 @@ SectionGroup /e "Net-SNMP Agent Service"
     File "unregisteragent.bat"
     Call CreateAgentBats
 
+	ClearErrors
+	StrCmp $ICONS_GROUP "" SEC03_NoService
     CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Service"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk" "$INSTDIR\registeragent.bat"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk" "$INSTDIR\unregisteragent.bat"
@@ -317,6 +325,8 @@ Section "Net-SNMP Trap Service" SEC04
   File "unregistertrapd.bat"
   Call CreateTrapdBats
   
+  ClearErrors
+  StrCmp $ICONS_GROUP "" NoTrapService
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Trap Service.lnk" "$INSTDIR\registertrapd.bat"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Trap Service.lnk" "$INSTDIR\unregistertrapd.bat"
   
@@ -378,10 +388,14 @@ Section "Encryption support (OpenSSL)" SEC07
 SectionEnd
 
 Section -AdditionalIcons
+  ClearErrors
+  StrCmp $ICONS_GROUP "" noAdditionalItems
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\uninst.exe"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk" "$INSTDIR\docs\Net-SNMP.chm"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\README.lnk" "$INSTDIR\README.txt"
+  
+  noAdditionalItems:
 SectionEnd
 
 Section -Post
@@ -689,6 +703,16 @@ Function .onInit
 SetRegView 64		; Prevent the installer from using the Wow6432Node HKLM subkey on 64-bit systems
 Push $0
 Push $R0
+Push $R1
+
+; Check for /? command line usage option
+${GetParameters} $R1
+StrCpy $cmdLineParameters $R1
+ClearErrors
+${GetOptions} $cmdLineParameters '/?' $R0
+IfErrors +3 0
+MessageBox MB_OK "Options:$\n  \StartMenu={GroupName}$\n  \Agent=standard|extDLL|none   (default standard)$\n  \noTrapd$\t(default \Trapd)$\n  \noPerl$\t$\t(default \Perl)$\n  \Dev$\t$\t(default \noDev)$\n  \OpenSSL$\t(default \noOpenSSL)"
+Abort
 
 ; Make sure we're running Windows 2000 (5.0) or higher
 ClearErrors
@@ -746,8 +770,119 @@ SectionSetFlags ${SEC03} $0
 ; Store current status of SEC07 (SSL).  Used for checking if OpenSSL is installed.
 SectionGetFlags ${SEC07} $R9
 
+; process other command line parameters
+Call parseParameters
+
 Pop $R0
 Pop $0
+FunctionEnd
+
+Function parseParameters
+  Push $R0
+  Push $0
+
+  ; /StartMenu=
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/StartMenu="  $R0
+  IfErrors +2 0
+  StrCpy $ICONS_GROUP $R0
+
+  ; /{no,}Trapd  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/Trapd"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC04} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC04} $0
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/noTrapd"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC04} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC04} $0
+
+  ; /{no,}Perl  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/Perl"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC05} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC05} $0
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/noPerl"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC05} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC05} $0
+
+  ; /{no,}Dev  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/Dev"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC06} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC06} $0
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/noDev"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC06} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC06} $0
+
+  ; /{no,}OpenSSL  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/OpenSSL"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC07} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC07} $0
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/noOpenSSL"  $R0
+  IfErrors +4 0
+  SectionGetFlags ${SEC07} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC07} $0
+
+  ; /Agent=  
+  ClearErrors
+  ${GetOptions} $cmdLineParameters "/Agent="  $R0
+  IfErrors endOfAgent 0
+  ; /Agent=none
+  ClearErrors
+  StrCmp $R0 "none" 0 standardAgent
+  SectionGetFlags ${SEC02} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC02} $0
+  SectionGetFlags ${SEC03} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC03} $0
+  Goto endOfAgent
+  
+  standardAgent:
+  ; /Agent=standard
+  ClearErrors
+  StrCmp $R0 "standard" 0 winExtDLLAgent
+  SectionGetFlags ${SEC02} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC02} $0
+  SectionGetFlags ${SEC03} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC03} $0
+  Goto endOfAgent
+  
+  winExtDLLAgent:
+  ; /Agent=extDLL
+  ClearErrors
+  StrCmp $R0 "extDLL" 0 endOfAgent
+  SectionGetFlags ${SEC02} $0
+  IntOp $0 $0 & ${SECTION_OFF}
+  SectionSetFlags ${SEC02} $0
+  SectionGetFlags ${SEC03} $0
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${SEC03} $0
+  endOfAgent:
+  
+  Pop $R0  
 FunctionEnd
 
 Function .onSelChange
@@ -839,6 +974,8 @@ Section Uninstall
   Delete "$INSTDIR\docs\COPYING"
   Delete "$INSTDIR\docs\Net-SNMP.chm"
   Delete "$INSTDIR\bin\net-snmp-perl-test.pl"
+  ; ideally we should check whether this file has changed
+  Delete "$INSTDIR\etc\snmp\snmp.conf"
 
   Delete "$INSTDIR\bin\msvcm90.dll"
   Delete "$INSTDIR\bin\msvcp90.dll"
@@ -893,6 +1030,7 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\logging"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\runtime"
   Delete "$INSTDIR\share\snmp\mibs\AGENTX-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\BRIDGE-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-EVENT-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-EXPRESSION-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-NSLOOKUP-MIB.txt"
@@ -907,7 +1045,7 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\IANA-ADDRESS-FAMILY-NUMBERS-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\IANAifType-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\IANA-LANGUAGE-MIB.txt"
-  Delete "$INSTDIR\share\snmp\mibs\IANA-PROTO-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\IANA-RTPROTO-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\IF-INVERTED-STACK-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\IF-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\INET-ADDRESS-MIB.txt"
@@ -927,6 +1065,7 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-MONITOR-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-PASS-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-PERIODIC-NOTIFY-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-SYSTEM-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-TC.txt"
   Delete "$INSTDIR\share\snmp\mibs\NET-SNMP-VACM-MIB.txt"
@@ -944,6 +1083,8 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\SNMP-NOTIFICATION-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-PROXY-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-TARGET-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\SNMP-TLS-TM-MIB.txt"
+  Delete "$INSTDIR\share\snmp\mibs\SNMP-TSM-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-USER-BASED-SM-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-USM-AES-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\SNMP-USM-DH-OBJECTS-MIB.txt"
@@ -965,8 +1106,8 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\UCD-SNMP-MIB-OLD.txt"
   Delete "$INSTDIR\share\snmp\mibs\UDP-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\.index"
+  Delete "$INSTDIR\snmp\persist\mib_indexes\0"
 
-  SetOutPath "$INSTDIR\share\snmp"
   Delete "$INSTDIR\share\snmp\mib2c.access_functions.conf"
   Delete "$INSTDIR\share\snmp\mib2c.array-user.conf"
   Delete "$INSTDIR\share\snmp\mib2c.check_values.conf"
@@ -991,7 +1132,6 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mib2c.scalar.conf"
   Delete "$INSTDIR\share\snmp\mib2c.table_data.conf"
 
-  SetOutPath "$INSTDIR\share\snmp\mib2c-data"
   Delete "$INSTDIR\share\snmp\mib2c-data\default-mfd-top.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\details-enums.m2i"
   Delete "$INSTDIR\share\snmp\mib2c-data\details-node.m2i"
@@ -1034,7 +1174,7 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-interactive-setup.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-interface.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-makefile.m2m"
-  Delete "$INSTDIR\share\snmp\mib2c-data\mfd-persistence.m2m"
+  Delete "$INSTDIR\share\snmp\mib2c-data\mfd-persistence.m2i"
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-readme.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\mfd-top.m2c"
   Delete "$INSTDIR\share\snmp\mib2c-data\node-get.m2i"
@@ -1058,7 +1198,6 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mib2c-data\syntax-RowStatus-varbind-validate.m2i"
   Delete "$INSTDIR\share\snmp\mib2c-data\syntax-StorageType-dependencies.m2i"
   Delete "$INSTDIR\share\snmp\mib2c-data\syntax-TestAndIncr-get.m2i"
-  Delete "$INSTDIR\share\snmp\mib2c-data\"
 
   Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
@@ -1270,8 +1409,6 @@ Section Uninstall
   Delete "$INSTDIR\lib\netsnmpmibs.lib"
   Delete "$INSTDIR\lib\netsnmp.exp"
   
-  RMDir "$SMPROGRAMS\$ICONS_GROUP\Service"
-  RMDir "$SMPROGRAMS\$ICONS_GROUP"
   RMDir "$INSTDIR\perl\x86"
   RMDir "$INSTDIR\perl"
   RMDir "$INSTDIR\lib"
@@ -1295,6 +1432,7 @@ Section Uninstall
   RMDir "$INSTDIR\share"
 
   RMDir "$INSTDIR\temp"
+  RMDir "$INSTDIR\snmp\persist\mib_indexes"
   RMDir "$INSTDIR\snmp\persist"
   RMDir "$INSTDIR\snmp"
   RMDir "$INSTDIR\etc\snmp"
@@ -1304,6 +1442,31 @@ Section Uninstall
   RMDir "$INSTDIR\include"
   RMDir "$INSTDIR\log"
   RMDir "$INSTDIR"
+  
+  ; Start Menu entries may have been installed for the current user only,
+  ; or for All Users.  So let's delete both sets....
+  SetShellVarContext current
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\README.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Trap Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Trap Service.lnk"
+  RMDir "$SMPROGRAMS\$ICONS_GROUP\Service"
+  RMDir "$SMPROGRAMS\$ICONS_GROUP"
+
+  SetShellVarContext all
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\README.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Trap Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Trap Service.lnk"
+  RMDir "$SMPROGRAMS\$ICONS_GROUP\Service"
+  RMDir "$SMPROGRAMS\$ICONS_GROUP"
+  
   ; Delete the environment variables
   ;Push "SNMPCONFPATH"
   ;Call un.DeleteEnvStr
@@ -1321,13 +1484,35 @@ SectionEnd
 
 Function IsSSLInstalled
   Push $R0
+  Push $R1
   ReadEnvStr $R0 "OPENSSL_CONF"
+    
   IfFileExists "$R0" 0 noSSL
-    Goto continueInstall
+    Goto checkVersion
   noSSL:
     MessageBox MB_YESNO|MB_ICONQUESTION "OpenSSL does not appear to be installed.  OpenSSL is required for this installation of Net-SNMP.  Please install OpenSSL from http://www.slproweb.com/products/Win32OpenSSL.html and try again.  Would you like to continue installing anyways?" IDYES continueInstall
   Quit
+  
+  checkVersion:
+  ; OpenSSL 1.0.0 (32-bit version)
+  ReadRegStr "$R0" HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenSSL (32-bit)_is1" "DisplayName"
+  StrCpy $R1 $R0 13  ;  Truncate to "OpenSSL 1.0.0" or "OpenSSL 0.9.8" - strlen("OpenSSL x.y.z") = 13
+  ClearErrors
+  StrCmp $R1 "OpenSSL 1.0.0" 0 checkVersion2
+  MessageBox MB_OK "This package is known not to work with OpenSSL 1.0.0.  Please install the latest version of 0.9.8 from http://www.slproweb.com/products/Win32OpenSSL.html and try again."
+  Quit
+
+  checkVersion2:
+  ; OpenSSL 1.0.0 (64-bit version)   [Probably!]
+  ReadRegStr "$R0" HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenSSL (64-bit)_is1" "DisplayName"
+  StrCpy $R1 $R0 13  ;  Truncate to "OpenSSL 1.0.0" or "OpenSSL 0.9.8" - strlen("OpenSSL x.y.z") = 13
+  ClearErrors
+  StrCmp $R1 "OpenSSL 1.0.0" 0 continueInstall
+  MessageBox MB_OK "This package is known not to work with OpenSSL 1.0.0.  Please install the latest version of 0.9.8 from http://www.slproweb.com/products/Win32OpenSSL.html and try again."
+  Quit
+  
   continueInstall:
+  Pop $R1
   Pop $R0
 FunctionEnd
 
