@@ -135,7 +135,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(INTDIR)\netsnmpmibssdk.bsc" 
 BSC32_SBRS= \
-	
+
 LIB32=link.exe -lib
 LIB32_FLAGS=iphlpapi.lib /nologo /out:"..\lib\$(OUTDIR)\netsnmpmibs.lib" 
 LIB32_OBJS= \
@@ -345,7 +345,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(INTDIR)\netsnmpmibssdk.bsc" 
 BSC32_SBRS= \
-	
+
 LIB32=link.exe -lib
 LIB32_FLAGS=iphlpapi.lib /nologo /out:"..\lib\$(OUTDIR)\netsnmpmibs.lib" 
 LIB32_OBJS= \

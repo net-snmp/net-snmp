@@ -69,7 +69,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(INTDIR)\libagent.bsc" 
 BSC32_SBRS= \
-	
+
 LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\netsnmpagent.lib" 
 LIB32_OBJS= \
@@ -147,7 +147,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(INTDIR)\libagent.bsc" 
 BSC32_SBRS= \
-	
+
 LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\netsnmpagent.lib" 
 LIB32_OBJS= \
