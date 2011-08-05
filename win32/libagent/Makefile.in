@@ -33,7 +33,7 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\libagent.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MD /W3 /GX /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\libagent.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -69,7 +69,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(INTDIR)\libagent.bsc" 
 BSC32_SBRS= \
-	
+
 LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\netsnmpagent.lib" 
 LIB32_OBJS= \
@@ -111,7 +111,7 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\libagent.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\libagent.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -147,7 +147,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(INTDIR)\libagent.bsc" 
 BSC32_SBRS= \
-	
+
 LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\netsnmpagent.lib" 
 LIB32_OBJS= \

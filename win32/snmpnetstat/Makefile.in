@@ -38,7 +38,7 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\$(PROGNAME).pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MD /W3 /GX /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\$(PROGNAME).pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
 
 !IF "$(LINKTYPE)" == "dynamic"
 CPP_PROJ=$(CPP_PROJ) /D "NMAKE_NETSNMP_USE_DLL"
@@ -78,9 +78,9 @@ RSC=rc.exe
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(INTDIR)\$(PROGNAME).bsc" 
 BSC32_SBRS= \
-	
+
 LINK32=link.exe
-LINK32_FLAGS=netsnmp.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\bin\$(OUTDIR)/$(PROGNAME).exe" /libpath:"../lib/release" 
+LINK32_FLAGS=netsnmp.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /pdb:"../bin/$(OUTDIR)/$(PROGNAME).pdb" /debug /machine:I386 /out:"../bin/$(OUTDIR)/$(PROGNAME).exe" /libpath:"../lib/release" 
 LINK32_OBJS= \
 	"$(INTDIR)\if.obj" \
 	"$(INTDIR)\inet.obj" \
@@ -135,7 +135,7 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\$(PROGNAME).pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\$(PROGNAME).pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
 
 !IF "$(LINKTYPE)" == "dynamic"
 CPP_PROJ=$(CPP_PROJ) /D "NMAKE_NETSNMP_USE_DLL"
@@ -189,7 +189,7 @@ BSC32_SBRS= \
 <<
 
 LINK32=link.exe
-LINK32_FLAGS=netsnmp.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /incremental:no /pdb:"$(INTDIR)\$(PROGNAME).pdb" /debug /machine:I386 /out:"..\bin\$(OUTDIR)/$(PROGNAME).exe" /pdbtype:sept /libpath:"../lib/debug" 
+LINK32_FLAGS=netsnmp.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /incremental:no /pdb:"../bin/$(OUTDIR)/$(PROGNAME).pdb" /debug /machine:I386 /out:"../bin/$(OUTDIR)/$(PROGNAME).exe" /pdbtype:sept /libpath:"../lib/debug" 
 LINK32_OBJS= \
 	"$(INTDIR)\if.obj" \
 	"$(INTDIR)\inet.obj" \
