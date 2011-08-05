@@ -105,17 +105,17 @@ libagent ::
 	cd libagent
 	$(NMAKE) all
 	cd ..
-       
+
 libsnmp_ ::
 	cd libsnmp
 	$(NMAKE) all
 	cd ..
-	
+
 libsnmp_dll_ ::
 	cd libsnmp_dll
 	$(NMAKE) all
 	cd ..
-	
+
 libnetsnmptrapd ::
 	cd libnetsnmptrapd
 	$(NMAKE) all
@@ -244,7 +244,7 @@ libagent_clean ::
 	cd libagent
 	$(NMAKE) clean
 	cd ..
-       
+
 libsnmp_clean_ ::
 	cd libsnmp
 	$(NMAKE) clean
