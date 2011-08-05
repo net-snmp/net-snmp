@@ -225,8 +225,10 @@ nssfpatchcommit() {
 nsrollup() {
     if [ "$1" = "--merge" ] ; then
 	mergeop="merge"
-    else
+    elif [ "$1" = "--rebase" ] ; then
 	mergeop="rebase"
+    else
+	mergeop="merge"
     fi
 
     _ns_checkclean
@@ -330,8 +332,10 @@ nsrollup() {
 nssync() {
     if [ "$1" = "--merge" ] ; then
 	mergeop="merge"
-    else
+    elif [ "$1" = "--rebase" ] ; then
 	mergeop="rebase"
+    else
+	mergeop="merge"
     fi
 
     git fetch --all
