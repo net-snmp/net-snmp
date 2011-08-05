@@ -39,7 +39,7 @@ extern int      snmp_outgetnexts;       /* 26 - obsolete */
 extern int      snmp_outsetrequests;    /* 27 - obsolete */
 extern int      snmp_outgetresponses;   /* 28 - obsolete */
 extern int      snmp_outtraps;  /* 29 - obsolete */
-extern int      snmp_enableauthentraps; /* 30 - current */
+extern long     snmp_enableauthentraps; /* 30 - current */
 extern int      snmp_silentdrops;       /* 31 - current */
 extern int      snmp_proxydrops;        /* 32 - current */
 
