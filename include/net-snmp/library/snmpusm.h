@@ -7,6 +7,8 @@
 #ifndef SNMPUSM_H
 #define SNMPUSM_H
 
+#include <net-snmp/library/callback.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
