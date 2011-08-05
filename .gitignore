@@ -6,10 +6,10 @@
 *.o
 *.obj
 *.old
+*.orig
 *.out
 *.pdb
 *.rej
-*.orig
 .libs/
 agent/mibgroup/agent_module_dot_conf.h
 agent/mibgroup/agent_module_includes.h
@@ -76,12 +76,14 @@ NEWS.new*
 perl/*/*.def
 perl/agent/agent.c
 perl/agent/default_store/default_store.c
+perl/agent/default_store/default_store.def
 perl/ASN/ASN.c
 perl/blib/
 perl/default_store/default_store.c
 perl/NetSNMP.c
 perl/OID/OID.c
 perl/SNMP/SNMP.c
+perl/SNMP/t
 perl/SNMP/t/snmptest.cmd
 perl/TrapReceiver/const-c.inc
 perl/TrapReceiver/const-xs.inc
