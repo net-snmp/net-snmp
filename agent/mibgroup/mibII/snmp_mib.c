@@ -17,7 +17,7 @@ snmp_enableauthentraps_store(int a, int b, void *c, void *d)
     char            line[SNMP_MAXBUF_SMALL];
 
     if (snmp_enableauthentrapsset > 0) {
-        snprintf(line, SNMP_MAXBUF_SMALL, "pauthtrapenable %d",
+        snprintf(line, SNMP_MAXBUF_SMALL, "pauthtrapenable %ld",
                  snmp_enableauthentraps);
         snmpd_store_config(line);
     }

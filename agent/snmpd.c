@@ -957,7 +957,11 @@ main(int argc, char *argv[])
                 fprintf(PID, "%d\n", (int) getpid());
                 fclose(PID);
             }
+#ifndef _MSC_VER
+            // The sequence open()/fdopen()/fclose()/close() makes MSVC crash,
+            // hence skip the close() call when using the MSVC runtime.
             close(fd);
+#endif
         }
     }
 #endif
