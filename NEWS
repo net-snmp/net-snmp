@@ -7,7 +7,7 @@ listing of all changes made to the code.
 
   snmpd:
       - Delivery of data via regularily scheduled notifications.
-        (see "Data Delivery via Notfiications" in snmpd.conf)
+        (see "Data Delivery via Notfications" in snmpd.conf)
       - Many time-based config options can take (m)ins, (h)ours, ... arguments
         (see the snmpd.conf manual page)
       - The PING and TRACEROUTE MIBs now compile and work-ish on linux
@@ -16,17 +16,17 @@ listing of all changes made to the code.
         cloning the myvoid structure variable to avoid dangling pointers
       - Fixed persistent storage of VACM MIB configuration
       - Multi-homed agents send UDP responses from the proper IP address
-      - the hrStorageTable implementation now supports large filesystems better
+      - The hrStorageTable implementation now supports large filesystems better
       - optimizations for large route tables
       - Added a deliveryByNotify config token for regular data delivery
         (see the snmpd.conf manual page and the NET-SNMP-PERIODIC-NOTIFY-MIB)
-      - Patch 3141462: fix agentx subagent issues with multiple-object requests
+      - [PATCH 3141462]: fix agentx subagent issues with multiple-object requests
       - [PATCH 3057093]: linux uses libpci for creating useful ifDescr strings
-      - patch 3131397: from takevos: huge speedups of the TCP/UDP Tables
+      - [PATCH 3131397]: huge speedups of the TCP/UDP Tables
 
   libnetsnmp:
       - Removed the older CMU compatibility support
-      - the SSH transport is now configurable
+      - The SSH transport is now configurable
 
   TLS/DTLS support:
       - The SNMP over DTLS transport now properly supports IPv6
@@ -34,11 +34,11 @@ listing of all changes made to the code.
         (deprecating serverCert, clientCert, defX509ServerPub, defX509ClientPub)
       - Various fixes for the TLS/DTLS transports
 
-  apss:
+  apps:
       - Added a per-variable timed output support to snmpwalk using -CT
       - snmpinform now correctly uses the local engineID for informs
       - A number of mib2c bug fixes
-      - new snmp.conf tokens for timeouts and retries
+      - New snmp.conf tokens for timeouts and retries
 
   building:
       - New flags to reduce the amount of compiled code to bare minimums.
@@ -65,13 +65,13 @@ listing of all changes made to the code.
       - Support for updating the routing table via SNMP
 
   win32:
-      - the testing suite works better under win32 environments
+      - The testing suite works better under win32 environments
       - Many building fixes for the win32 environment(s)
 
   solaris:
       - Net-SNMP now supports the SCTP-MIB
 
-  DragonFlyBSD, FreeBSD8
+  DragonFlyBSD, FreeBSD8:
       - Net-SNMP should now work on DragonFlyBSD and FreeBSD8
 
   And of course:
