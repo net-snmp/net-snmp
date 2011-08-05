@@ -10,7 +10,7 @@ netsnmp_feature_require(container_fifo)
 #include "deliverByNotify.h"
 
 /* we should never split beyond this */
-#define MAX_MESSAGE_COUNT 32
+#define MAX_MESSAGE_COUNT 128
 #define BASE_PACKET_SIZE 100 /* should be enough to store SNMPv3 msg headers */
 
 /* if v is !NULL, then estimate it's likely size */
