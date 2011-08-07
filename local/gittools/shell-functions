@@ -225,8 +225,10 @@ nssfpatchcommit() {
 nsrollup() {
     if [ "$1" = "--merge" ] ; then
 	mergeop="merge"
-    else
+    elif [ "$1" = "--rebase" ] ; then
 	mergeop="rebase"
+    else
+	mergeop="merge"
     fi
 
     _ns_checkclean
@@ -327,8 +329,10 @@ nsrollup() {
 nssync() {
     if [ "$1" = "--merge" ] ; then
 	mergeop="merge"
-    else
+    elif [ "$1" = "--rebase" ] ; then
 	mergeop="rebase"
+    else
+	mergeop="merge"
     fi
 
     git fetch --all
@@ -340,12 +344,10 @@ nssync() {
 	    return
 	fi
     done
-    for branch in $nsbranches ; do
-	git checkout $branch
-	git push
-	if [ $? != 0 ] ; then
-	    echo "git push failed; help?"
-	    return
-	fi
-    done
+
+    git push origin $nsbranches
+    if [ $? != 0 ] ; then
+	echo "git push failed; help?"
+	return
+    fi
 }
