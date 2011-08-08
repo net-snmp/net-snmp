@@ -116,6 +116,7 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
     case MODE_SET_COMMIT:
     case MODE_SET_UNDO:
     case MODE_SET_FREE:
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         if (cmp != 0 ||
             requests->requestvb->name_length <= reginfo->rootoid_len) {
 	    /*
@@ -151,7 +152,6 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
             return ret;
         }
         break;
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     case MODE_GETNEXT:
 	/*
