@@ -342,7 +342,7 @@ nsrollup() {
 # pull/pushes all the known active branches using pull --rebase
 #
 nspull() {
-    __ns_checkclean
+    _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
 	return
     fi
@@ -366,7 +366,7 @@ nspull() {
     done
 }
 nspush() {
-    __ns_checkclean
+    _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
 	return
     fi
