@@ -50,7 +50,7 @@ extern          "C" {
 
 /** @def SNMP_FREE(s)
     Frees a pointer only if it is !NULL and sets its value to NULL */
-#define SNMP_FREE(s)    do { if (s) { netsnmp_free(s); (s) = NULL; } } while(0)
+#define SNMP_FREE(s)    do { if (s) { free((void *)s); s=NULL; } } while(0)
 
 /** @def SNMP_SWIPE_MEM(n, s)
     Frees pointer n only if it is !NULL, sets n to s and sets s to NULL */
