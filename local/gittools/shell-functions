@@ -218,10 +218,10 @@ nssfpatchcommit() {
 
     commitmsg="CHANGES: $area: PATCH $patch: from $username: $title"
 
-    cmd="git -a commit -s --author='$fullname <$username@users.sourceforge.net>' -m '$commitmsg'"
-
-
-    echo "Command: $cmd"
+    echo "Command: "
+    echo "  git -a commit -s"
+    echo "  --author='$fullname <$username@users.sourceforge.net>'"
+    echo "  -m '$commitmsg'"
     echo ""
     echo -n "commit the results to $patchbranch? [y/n]"
     read ans
