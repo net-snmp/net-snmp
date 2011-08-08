@@ -17,7 +17,7 @@ while($current_line <= $#faqfile) {
     $_ = $faqfile[$current_line];
     $current_line++;
 
-    if (/net-snmp Version: (.*)/) {
+    if (/Net-SNMP Version: (.*)/) {
       $version = $1;
     }
 
