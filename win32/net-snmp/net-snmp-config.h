@@ -1697,6 +1697,8 @@ enum {
 #define DMALLOC_FUNC_CHECK
 #endif
 
+#define NETSNMP_NO_SYSTEMD
+
 /* #undef NETSNMP_ENABLE_LOCAL_SMUX */
 
 /* define if agentx transport is to use domain sockets only */
