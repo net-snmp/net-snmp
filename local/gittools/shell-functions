@@ -74,6 +74,18 @@ nsmake () {
     _ns_cleanup
 }
 
+nsmakeall () {
+    __ns_checkclean
+    if [ $NSCLEAN != 1 ]; then
+	return
+    fi
+
+    for branch in $nsbranches ; do
+	git checkout $branch
+	nsmake "$@"
+    done
+}
+
 #
 # nsconfigure [-s suffix] [configure arguments]
 #   runs 'configure' in $nsbuildroot/branch[-suffix] with passed arguments
