@@ -3,6 +3,57 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.7.1*
+
+    snmplib:
+      - Fix a crash that could be
+      - tweak patch 3044888 to restore
+
+    snmpd:
+      - [PATCH 3386633]: fix integer overflow in disk percent calculations
+      - Make
+      - Restore storage tables on Linux
+      - run signal handlers when select()
+
+    snmptrapd:
+      - Add missing newline
+      - Invoke shutdown_perl() when
+
+    building:
+      - [PATCH 3383951]: Fix -Wunused compile warnings with FreeBSD/NetBSD
+	Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+      - build fix
+      - build fix for systems lacking
+
+    libnetsnmp:
+      - [PATCH 3387139]: from
+
+    man:
+      - [PATCH 3312861]: Man pages
+
+    testing:
+      - Changed
+      - Check PID file existence after having read it instead of before.
+	This fixes the race condition where the PID file disappeared after
+	the existence check and before it was read.
+      - Make the SNMP_VERBOSE=1 output even more verbose.
+
+    unspecified:
+      - minor NEWS polish
+
+    Perl:
+      - Remove file perl/NetSNMP.xs
+
+    Win32:
+      - Add support for
+      - Document how to build 64-bit
+      - Documented how to use build.bat with
+      - winExtDLL: Invoke
+
+    Windows:
+      - Avoid that if
+      - Remove outdated instructions about
+
 *5.7*
     snmplib:
       - Added function netsnmp_delete_table_data_set().
