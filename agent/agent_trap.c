@@ -1224,6 +1224,10 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
                              NETSNMP_PARSE_ARGS_NOZERO);
 
     transport = netsnmp_transport_open_client("snmptrap", session.peername);
+    if (transport == NULL) {
+        config_perror("snmpd: failed to parse this line.");
+        return;
+    }
     if ((rc = netsnmp_sess_config_and_open_transport(&session, transport))
         != SNMPERR_SUCCESS) {
         session.s_snmp_errno = rc;
