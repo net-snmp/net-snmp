@@ -59,18 +59,6 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
 Part 1
 ------
 
-0.  Modify all win32\ Makefiles by adding: 
-
-    /D "_BIND_TO_CURRENT_VCLIBS_VERSION" 
-
-    after /D "WIN32"
-
-    This will ensure that the binary is compiled against the lastest runtime as 
-    MSVC uses the original runtimes by default.  
-    See http://msdn.microsoft.com/en-us/library/cc664727.aspx 
-
-    This step will be removed after it's added to SVN.
-
 1.  Install pre-requisites:
 
     MSVC 2008:
