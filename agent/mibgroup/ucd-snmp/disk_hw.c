@@ -244,7 +244,7 @@ disk_parse_config_all(const char *token, char *cptr)
 }
 
 
-static int _percent( int value, int total ) {
+static int _percent( unsigned long long value, unsigned long long total ) {
     /* avoid division by zero */
     if (total == 0)
         return 0;
