@@ -950,6 +950,8 @@ with_kmem_usage
 enable_kmem_usage
 with_dummy_values
 enable_dummy_values
+with_systemd
+enable_systemd
 enable_set_support
 with_set_support
 with_sys_contact
@@ -1865,6 +1867,8 @@ Configuring the agent:
                                   This is technically not compliant with the
                                   SNMP specifications, but was how the agent
                                   operated for versions < 4.0.
+  --with-systemd                 Provide systemd support. See README.systemd
+                                  for details.
   --with-sys-contact="who@where"  Default system contact.
                                     (Default: LOGIN@DOMAINNAME)
   --with-sys-location="location"  Default system location.
@@ -4372,6 +4376,24 @@ fi
 if test "x$with_dummy_values" != "xyes"; then
 
 $as_echo "#define NETSNMP_NO_DUMMY_VALUES 1" >>confdefs.h
+
+fi
+
+
+# Check whether --with-systemd was given.
+if test "${with_systemd+set}" = set; then :
+  withval=$with_systemd;
+fi
+
+   # Check whether --enable-systemd was given.
+if test "${enable_systemd+set}" = set; then :
+  enableval=$enable_systemd; as_fn_error $? "Invalid option. Use --with-systemd/--without-systemd instead" "$LINENO" 5
+fi
+
+# Define unless specifically suppressed (i.e., option defaults to false).
+if test "x$with_systemd" != "xyes"; then
+
+$as_echo "#define NETSNMP_NO_SYSTEMD 1" >>confdefs.h
 
 fi
 
@@ -18174,6 +18196,14 @@ if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"
   other_objs_list="$other_objs_list winpipe.o"
   other_lobjs_list="$other_lobjs_list winpipe.lo"
   other_ftobjs_list="$other_ftobjs_list winpipe.ft"
+fi
+
+# Linux systemd
+if test "x$with_systemd" == "xyes"; then
+  other_src_list="$other_src_list sd-daemon.c"
+  other_objs_list="$other_objs_list sd-daemon.o"
+  other_lobjs_list="$other_lobjs_list sd-daemon.lo"
+  other_ftobjs_list="$other_ftobjs_list sd-daemon.ft"
 fi
 
 
