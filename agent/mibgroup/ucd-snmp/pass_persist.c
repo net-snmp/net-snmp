@@ -55,7 +55,9 @@ static void     close_persist_pipe(int iindex);
 static int      open_persist_pipe(int iindex, char *command);
 static void     destruct_persist_pipes(void);
 static int      write_persist_pipe(int iindex, const char *data);
+#ifndef WIN32
 static void     sigchld_handler(int sig);
+#endif
 
 /*
  * These are defined in pass.c 
