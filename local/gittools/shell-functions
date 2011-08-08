@@ -218,6 +218,8 @@ nssfpatchcommit() {
 
     commitmsg="CHANGES: $area: PATCH $patch: from $username: $title"
 
+    patchbranch=`echo $nsgoodbranches | sed 's/ .*//'`
+    echo "Branch:     $patchbranch"
     echo "Command: "
     echo "  git -a commit -s"
     echo "  --author='$fullname <$username@users.sourceforge.net>'"
