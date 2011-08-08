@@ -672,6 +672,15 @@ if test "x$with_dummy_values" != "xyes"; then
      data for])
 fi
 
+NETSNMP_ARG_WITH(systemd,
+[  --with-systemd                 Provide systemd support. See README.systemd
+                                  for details.])
+# Define unless specifically suppressed (i.e., option defaults to false).
+if test "x$with_systemd" != "xyes"; then
+  AC_DEFINE(NETSNMP_NO_SYSTEMD, 1,
+    [If you don't want to integrate with systemd.])
+fi
+
 NETSNMP_ARG_ENABLE(set-support,
 [  --disable-set-support           Do not allow SNMP set requests.])
 if test "x$enable_set_support" = "xno"; then
