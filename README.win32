@@ -537,16 +537,22 @@ steps to build using build.bat:
 
 1.  Open a command prompt
 
-2.  Initialize the Visual Studio build environment by running vcvarsall.bat
+2.  When building with OpenSSL, set the environment variables INCLUDE and LIB
+    such that these point at the proper OpenSSL directories. An example:
+
+    set INCLUDE=C:\OpenSSL-Win32\include
+    set LIB=C:\OpenSSL-Win32\lib\VC\static
+
+3.  Initialize the Visual Studio build environment by running vcvarsall.bat
     which can be found in the bin folder of your Visual Studio install folder.
     If you want to generate 64-bit binaries instead of 32-bit binaries, run
     vcvarsall.bat with the amd64 argument. See also "How to: Enable a 64-Bit
     Visual C++ Toolset at the Command Line" for more information
     (http://msdn.microsoft.com/en-us/library/x4d2c09s%28v=vs.80%29.aspx).
 
-3.  Run win32\build.bat
+4.  Run win32\build.bat
 
-4.  The following screen will appear:
+5.  The following screen will appear:
 
     Net-SNMP build and install options
     ==================================
@@ -575,7 +581,7 @@ steps to build using build.bat:
 
     Select option to set / toggle:  
 
-5.  Toggle the options on and off as desired by typing the line number 
+6.  Toggle the options on and off as desired by typing the line number 
     followed by <enter>.  
 
     To compile with OpenSSL, the OpenSSL library and header files must 
@@ -595,7 +601,7 @@ steps to build using build.bat:
 
     When you are ready to build, type f <enter>
 
-6.  Building will begin.  Following is a sample screen shot of a quiet build:
+7.  Building will begin.  Following is a sample screen shot of a quiet build:
 
     Building...
     
@@ -617,7 +623,7 @@ steps to build using build.bat:
     
     Done!
 
-7.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+8.  If the folder that Net-SNMP was installed to is ever changed, modify the 
     system environment variables or registry keys as explained in the 
     'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 

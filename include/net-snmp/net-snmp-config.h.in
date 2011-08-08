@@ -1347,6 +1347,9 @@
 /* If you don't have root access don't exit upon kmem errors */
 #undef NETSNMP_NO_ROOT_ACCESS
 
+/* If you don't want to integrate with systemd. */
+#undef NETSNMP_NO_SYSTEMD
+
 /* Define if you want to remove all SET/write access from the code */
 #undef NETSNMP_NO_WRITE_SUPPORT
 

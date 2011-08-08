@@ -1,0 +1,8 @@
+[Unit]
+Description=Socket listening for SNMP trap messages
+
+[Socket]
+ListenDatagram=0.0.0.0:162
+
+[Install]
+WantedBy=multi-user.target

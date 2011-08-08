@@ -40,6 +40,10 @@
 
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 
+#ifndef NETSNMP_NO_SYSTEMD
+#include <net-snmp/library/sd-daemon.h>
+#endif
+
 #if (defined(linux) && defined(IP_PKTINFO)) \
     || defined(IP_RECVDSTADDR) && !defined(_MSC_VER) && HAVE_STRUCT_MSGHDR_MSG_CONTROL
 
@@ -67,6 +71,7 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
     char           *client_socket = NULL;
     netsnmp_indexed_addr_pair addr_pair;
     socklen_t       local_addr_len;
+    int             socket_initialized = 0;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     if (local)
@@ -89,7 +94,19 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
                 str));
     free(str);
 
-    t->sock = socket(PF_INET, SOCK_DGRAM, 0);
+#ifndef NETSNMP_NO_SYSTEMD
+    /*
+     * Maybe the socket was already provided by systemd...
+     */
+    if (local) {
+        t->sock = netsnmp_sd_find_inet_socket(PF_INET, SOCK_DGRAM, -1,
+                ntohs(addr->sin_port));
+        if (t->sock)
+            socket_initialized = 1;
+    }
+#endif
+    if (!socket_initialized)
+        t->sock = socket(PF_INET, SOCK_DGRAM, 0);
     DEBUGMSGTL(("UDPBase", "openned socket %d as local=%d\n", t->sock, local)); 
     if (t->sock < 0) {
         netsnmp_transport_free(t);
@@ -128,12 +145,14 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
             DEBUGMSGTL(("netsnmp_udpbase", "set IP_PKTINFO\n"));
         }
 #endif
-        rc = bind(t->sock, (struct sockaddr *) addr,
-                  sizeof(struct sockaddr));
-        if (rc != 0) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
+        if (!socket_initialized) {
+            rc = bind(t->sock, (struct sockaddr *) addr,
+                    sizeof(struct sockaddr));
+            if (rc != 0) {
+                netsnmp_socketbase_close(t);
+                netsnmp_transport_free(t);
+                return NULL;
+            }
         }
         t->data = NULL;
         t->data_length = 0;

@@ -42,6 +42,10 @@
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/snmpTCPBaseDomain.h>
 
+#ifndef NETSNMP_NO_SYSTEMD
+#include <net-snmp/library/sd-daemon.h>
+#endif
+
 /*
  * needs to be in sync with the definitions in snmplib/snmpUDPDomain.c
  * and perl/agent/agent.xs
@@ -147,6 +151,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
     netsnmp_transport *t = NULL;
     netsnmp_udp_addr_pair *addr_pair = NULL;
     int rc = 0;
+    int socket_initialized = 0;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     if (local)
@@ -177,7 +182,19 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
     t->domain_length =
         sizeof(netsnmp_snmpTCPDomain) / sizeof(netsnmp_snmpTCPDomain[0]);
 
-    t->sock = socket(PF_INET, SOCK_STREAM, 0);
+#ifndef NETSNMP_NO_SYSTEMD
+    /*
+     * Maybe the socket was already provided by systemd...
+     */
+    if (local) {
+        t->sock = netsnmp_sd_find_inet_socket(PF_INET, SOCK_STREAM, 1,
+                ntohs(addr->sin_port));
+        if (t->sock)
+            socket_initialized = 1;
+    }
+#endif
+    if (!socket_initialized)
+        t->sock = socket(PF_INET, SOCK_STREAM, 0);
     if (t->sock < 0) {
         netsnmp_transport_free(t);
         return NULL;
@@ -214,11 +231,13 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
         setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt,
 		   sizeof(opt));
 
-        rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
-        if (rc != 0) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
+        if (!socket_initialized) {
+            rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
+            if (rc != 0) {
+                netsnmp_socketbase_close(t);
+                netsnmp_transport_free(t);
+                return NULL;
+            }
         }
 
         /*
@@ -234,12 +253,13 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
         /*
          * Now sit here and wait for connections to arrive.  
          */
-
-        rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
-        if (rc != 0) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
+        if (!socket_initialized) {
+            rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
+            if (rc != 0) {
+                netsnmp_socketbase_close(t);
+                netsnmp_transport_free(t);
+                return NULL;
+            }
         }
         
         /*

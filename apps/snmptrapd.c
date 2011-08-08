@@ -125,6 +125,10 @@ SOFTWARE.
 
 #include <net-snmp/net-snmp-features.h>
 
+#ifndef NETSNMP_NO_SYSTEMD
+#include <net-snmp/library/sd-daemon.h>
+#endif
+
 #ifndef BSD4_3
 #define BSD4_2
 #endif
@@ -587,15 +591,22 @@ main(int argc, char *argv[])
     int             agentx_subagent = 1;
 #endif
     netsnmp_trapd_handler *traph;
+    int             prepared_sockets = 0;
 
 
 #ifndef WIN32
+#ifndef NETSNMP_NO_SYSTEMD
+    /* check if systemd has sockets for us and don't close them */
+    prepared_sockets = netsnmp_sd_listen_fds(0);
+#endif
     /*
      * close all non-standard file descriptors we may have
      * inherited from the shell.
      */
-    for (i = getdtablesize() - 1; i > 2; --i) {
-        (void) close(i);
+    if (!prepared_sockets) {
+        for (i = getdtablesize() - 1; i > 2; --i) {
+            (void) close(i);
+        }
     }
 #endif /* #WIN32 */
     
@@ -1242,6 +1253,19 @@ main(int argc, char *argv[])
         }
     }
 #endif
+#endif
+
+    /*
+     * Let systemd know we're up.
+     */
+#ifndef NETSNMP_NO_SYSTEMD
+    netsnmp_sd_notify(1, "READY=1\n");
+    if (prepared_sockets)
+        /*
+         * Clear the environment variable, we already processed all the sockets
+         * by now.
+         */
+        netsnmp_sd_listen_fds(1);
 #endif
 
 #ifdef WIN32SERVICE

@@ -53,6 +53,14 @@ if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"
   other_ftobjs_list="$other_ftobjs_list winpipe.ft"
 fi
 
+# Linux systemd
+if test "x$with_systemd" == "xyes"; then
+  other_src_list="$other_src_list sd-daemon.c"
+  other_objs_list="$other_objs_list sd-daemon.o"
+  other_lobjs_list="$other_lobjs_list sd-daemon.lo"
+  other_ftobjs_list="$other_ftobjs_list sd-daemon.ft"
+fi
+
 AC_SUBST(other_src_list)
 AC_SUBST(other_objs_list)
 AC_SUBST(other_lobjs_list)
