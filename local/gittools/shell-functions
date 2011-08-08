@@ -74,6 +74,18 @@ nsmake () {
     _ns_cleanup
 }
 
+nsmakeall () {
+    __ns_checkclean
+    if [ $NSCLEAN != 1 ]; then
+	return
+    fi
+
+    for branch in $nsbranches ; do
+	git checkout $branch
+	nsmake "$@"
+    done
+}
+
 #
 # nsconfigure [-s suffix] [configure arguments]
 #   runs 'configure' in $nsbuildroot/branch[-suffix] with passed arguments
@@ -326,10 +338,12 @@ nsrollup() {
     echo "Now would be a good time to run 'nssync'"
 }
 
-#
-# pull/pushes all the known active branches using pull --rebase
-#
-nssync() {
+nspull() {
+    __ns_checkclean
+    if [ $NSCLEAN != 1 ]; then
+	return
+    fi
+
     if [ "$1" = "--merge" ] ; then
 	mergeop="merge"
     elif [ "$1" = "--rebase" ] ; then
@@ -347,10 +361,24 @@ nssync() {
 	    return
 	fi
     done
+}
+nspush() {
+    __ns_checkclean
+    if [ $NSCLEAN != 1 ]; then
+	return
+    fi
 
     git push origin $nsbranches
     if [ $? != 0 ] ; then
 	echo "git push failed; help?"
 	return
     fi
+}
+
+#
+# pull/pushes all the known active branches
+#
+nssync() {
+    nspull "$@"
+    nspush "$@"
 }
