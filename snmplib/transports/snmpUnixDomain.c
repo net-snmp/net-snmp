@@ -36,6 +36,10 @@
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/system.h> /* mkdirhier */
 
+#ifndef NETSNMP_NO_SYSTEMD
+#include <net-snmp/library/sd-daemon.h>
+#endif
+
 netsnmp_feature_child_of(transport_unix_socket_all, transport_all)
 netsnmp_feature_child_of(unix_socket_paths, transport_unix_socket_all)
 
@@ -295,6 +299,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     sockaddr_un_pair *sup = NULL;
     int             rc = 0;
     char           *string = NULL;
+    int             socket_initialized = 0;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     /* SPECIAL CIRCUMSTANCE: We still want AgentX to be able to operate,
@@ -333,7 +338,18 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     t->data_length = sizeof(sockaddr_un_pair);
     sup = (sockaddr_un_pair *) t->data;
 
-    t->sock = socket(PF_UNIX, SOCK_STREAM, 0);
+#ifndef NETSNMP_NO_SYSTEMD
+    /*
+     * Maybe the socket was already provided by systemd...
+     */
+    if (local) {
+        t->sock = netsnmp_sd_find_unix_socket(SOCK_STREAM, 1, addr->sun_path);
+        if (t->sock)
+            socket_initialized = 1;
+    }
+#endif
+    if (!socket_initialized)
+        t->sock = socket(PF_UNIX, SOCK_STREAM, 0);
     if (t->sock < 0) {
         netsnmp_transport_free(t);
         return NULL;
@@ -357,25 +373,26 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
 
-        unlink(addr->sun_path);
-        rc = bind(t->sock, (struct sockaddr *) addr, SUN_LEN(addr));
-
-        if (rc != 0 && errno == ENOENT && create_path) {
-            rc = mkdirhier(addr->sun_path, create_mode, 1);
+        if (!socket_initialized) {
+            unlink(addr->sun_path);
+            rc = bind(t->sock, (struct sockaddr *) addr, SUN_LEN(addr));
+            if (rc != 0 && errno == ENOENT && create_path) {
+                rc = mkdirhier(addr->sun_path, create_mode, 1);
+                if (rc != 0) {
+                    netsnmp_unix_close(t);
+                    netsnmp_transport_free(t);
+                    return NULL;
+                }
+                rc = bind(t->sock, (struct sockaddr *) addr, SUN_LEN(addr));
+            }
             if (rc != 0) {
+                DEBUGMSGTL(("netsnmp_unix_transport",
+                        "couldn't bind \"%s\", errno %d (%s)\n",
+                        addr->sun_path, errno, strerror(errno)));
                 netsnmp_unix_close(t);
                 netsnmp_transport_free(t);
                 return NULL;
             }
-            rc = bind(t->sock, (struct sockaddr *) addr, SUN_LEN(addr));
-        }
-        if (rc != 0) {
-            DEBUGMSGTL(("netsnmp_unix_transport",
-                        "couldn't bind \"%s\", errno %d (%s)\n",
-                        addr->sun_path, errno, strerror(errno)));
-            netsnmp_unix_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
         }
 
         /*
@@ -391,16 +408,17 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
          * Now sit here and listen for connections to arrive.
          */
 
-        rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
-        if (rc != 0) {
-            DEBUGMSGTL(("netsnmp_unix_transport",
-                        "couldn't listen to \"%s\", errno %d (%s)\n",
-                        addr->sun_path, errno, strerror(errno)));
-            netsnmp_unix_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
+        if (!socket_initialized) {
+            rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
+            if (rc != 0) {
+                DEBUGMSGTL(("netsnmp_unix_transport",
+                            "couldn't listen to \"%s\", errno %d (%s)\n",
+                            addr->sun_path, errno, strerror(errno)));
+                netsnmp_unix_close(t);
+                netsnmp_transport_free(t);
+                return NULL;
+            }
         }
-
     } else {
         t->remote = (u_char *)malloc(strlen(addr->sun_path));
         if (t->remote == NULL) {

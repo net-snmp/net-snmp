@@ -66,6 +66,10 @@ static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 
+#ifndef NETSNMP_NO_SYSTEMD
+#include <net-snmp/library/sd-daemon.h>
+#endif
+
 #include "inet_ntop.h"
 #include "inet_pton.h"
 
@@ -185,6 +189,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
     netsnmp_transport *t = NULL;
     int             rc = 0;
     char           *str = NULL;
+    int             socket_initialized = 0;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     if (local)
@@ -212,7 +217,19 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
     t->domain_length =
         sizeof(netsnmp_UDPIPv6Domain) / sizeof(netsnmp_UDPIPv6Domain[0]);
 
-    t->sock = socket(PF_INET6, SOCK_DGRAM, 0);
+#ifndef NETSNMP_NO_SYSTEMD
+    /*
+     * Maybe the socket was already provided by systemd...
+     */
+    if (local) {
+        t->sock = netsnmp_sd_find_inet_socket(PF_INET6, SOCK_DGRAM, -1,
+                ntohs(addr->sin6_port));
+        if (t->sock)
+            socket_initialized = 1;
+    }
+#endif
+    if (!socket_initialized)
+        t->sock = socket(PF_INET6, SOCK_DGRAM, 0);
     if (t->sock < 0) {
         netsnmp_transport_free(t);
         return NULL;
@@ -237,13 +254,14 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 	  } 
 	}
 #endif
-
-        rc = bind(t->sock, (struct sockaddr *) addr,
-		  sizeof(struct sockaddr_in6));
-        if (rc != 0) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
+        if (!socket_initialized) {
+            rc = bind(t->sock, (struct sockaddr *) addr,
+                    sizeof(struct sockaddr_in6));
+            if (rc != 0) {
+                netsnmp_socketbase_close(t);
+                netsnmp_transport_free(t);
+                return NULL;
+            }
         }
         t->local = (unsigned char*)malloc(18);
         if (t->local == NULL) {
