@@ -75,7 +75,7 @@ nsmake () {
 }
 
 nsmakeall () {
-    __ns_checkclean
+    _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
 	return
     fi
@@ -338,9 +338,6 @@ nsrollup() {
     echo "Now would be a good time to run 'nssync'"
 }
 
-#
-# pull/pushes all the known active branches using pull --rebase
-#
 nspull() {
     _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
@@ -378,6 +375,9 @@ nspush() {
     fi
 }
 
+#
+# pull/pushes all the known active branches
+#
 nssync() {
     nspull "$@"
     nspush "$@"
