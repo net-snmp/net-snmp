@@ -1,0 +1,15 @@
+#
+# SNMP trap-processing service file for systemd
+#
+# Socket activation is used, see snmptrapd.socket
+
+[Unit]
+Description=Simple Network Management Protocol (SNMP) Trap daemon.
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/snmptrapd -f
+
+[Install]
+WantedBy=multi-user.target

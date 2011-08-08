@@ -1,0 +1,17 @@
+#
+# SNMP agent service file for systemd
+#
+# Socket activation is not used, see README.systemd.
+# You must manually enable it if you really want it. See
+# snmptrapd.{socket,service} for an example.
+
+[Unit]
+Description=Simple Network Management Protocol (SNMP) daemon.
+After=syslog.target network.target
+
+[Service]
+Type=notify
+ExecStart=/usr/sbin/snmpd -f
+
+[Install]
+WantedBy=multi-user.target
