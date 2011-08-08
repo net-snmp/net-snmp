@@ -262,6 +262,23 @@ int netsnmp_sd_notifyf(int unset_environment, const char *format, ...) _sd_print
 */
 int netsnmp_sd_booted(void);
 
+/**
+ * Find an socket with given parameters. See man sd_is_socket_inet for
+ * description of the arguments.
+ *
+ * Returns the file descriptor if it is found, 0 otherwise.
+ */
+int netsnmp_sd_find_inet_socket(int family, int type, int listening, int port);
+
+/**
+ * Find an unix socket with given parameters. See man sd_is_socket_unix for
+ * description of the arguments.
+ *
+ * Returns the file descriptor if it is found, 0 otherwise.
+ */
+int
+netsnmp_sd_find_unix_socket(int type, int listening, const char *path);
+
 #ifdef __cplusplus
 }
 #endif

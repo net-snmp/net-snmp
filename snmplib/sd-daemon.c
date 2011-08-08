@@ -11,6 +11,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
+#include <net-snmp/types.h>
+#include <net-snmp/library/snmp_debug.h>
 
 #ifndef NETSNMP_NO_SYSTEMD
 
@@ -467,6 +469,64 @@ int netsnmp_sd_booted(void) {
                 return 0;
 
         return a.st_dev != b.st_dev;
+}
+
+/* End of original sd-daemon.c from systemd sources */
+
+int
+netsnmp_sd_find_inet_socket(int family, int type, int listening, int port)
+{
+    int count, fd;
+
+    count = netsnmp_sd_listen_fds(0);
+    if (count <= 0) {
+        DEBUGMSGTL(("systemd:find_inet_socket", "No LISTEN_FDS found.\n"));
+        return 0;
+    }
+    DEBUGMSGTL(("systemd:find_inet_socket", "LISTEN_FDS reports %d sockets.\n",
+            count));
+
+    for (fd = 3; fd < 3+count; fd++) {
+        int rc = netsnmp_sd_is_socket_inet(fd, family, type, listening, port);
+        if (rc < 0)
+            DEBUGMSGTL(("systemd:find_inet_socket",
+                    "sd_is_socket_inet error: %d\n", rc));
+        if (rc > 0) {
+            DEBUGMSGTL(("systemd:find_inet_socket",
+                    "Found the socket in LISTEN_FDS\n"));
+            return fd;
+        }
+    }
+    DEBUGMSGTL(("systemd:find_inet_socket", "Socket not found in LISTEN_FDS\n"));
+    return 0;
+}
+
+int
+netsnmp_sd_find_unix_socket(int type, int listening, const char *path)
+{
+    int count, fd;
+
+    count = netsnmp_sd_listen_fds(0);
+    if (count <= 0) {
+        DEBUGMSGTL(("systemd:find_unix_socket", "No LISTEN_FDS found.\n"));
+        return 0;
+    }
+    DEBUGMSGTL(("systemd:find_unix_socket", "LISTEN_FDS reports %d sockets.\n",
+            count));
+
+    for (fd = 3; fd < 3+count; fd++) {
+        int rc = netsnmp_sd_is_socket_unix(fd, type, listening, path, 0);
+        if (rc < 0)
+            DEBUGMSGTL(("systemd:find_unix_socket",
+                    "netsnmp_sd_is_socket_unix error: %d\n", rc));
+        if (rc > 0) {
+            DEBUGMSGTL(("systemd:find_unix_socket",
+                    "Found the socket in LISTEN_FDS\n"));
+            return fd;
+        }
+    }
+    DEBUGMSGTL(("systemd:find_unix_socket", "Socket not found in LISTEN_FDS\n"));
+    return 0;
 }
 
 #endif /* ! NETSNMP_NO_SYSTEMD */
