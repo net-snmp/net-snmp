@@ -75,7 +75,7 @@ nsmake () {
 }
 
 nsmakeall () {
-    __ns_checkclean
+    _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
 	return
     fi
