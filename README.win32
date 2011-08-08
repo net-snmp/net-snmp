@@ -4,12 +4,11 @@
 *
 ***************************************************************************
 
-This guide describes building with Microsoft Visual C++ 6.0 and higher, with
-the gcc compiler from MinGW / MSYS, and with the gcc compiler from Cygwin.
-As developers build with other Win32 environments, their notes will be 
-included here.
+This guide describes how to build Net-SNMP with Microsoft Visual C++, the
+MinGW gcc compiler or the Cygwin gcc compiler.  As developers build with other
+Win32 environments, their notes will be included here.
 
-The remainder of this guide has the following sections :
+The sections in this guide are:
 
 Current Status for Win32 platforms
 Interactions with Other Vendor's Products
@@ -39,13 +38,14 @@ Acknowledgements
 
 ***************************************************************************
 *
-* Status as of 21-Sep-2010 for Win32 platforms
+* Net-SNMP status for Win32 platforms
 *
 ***************************************************************************
 
 All applications build with Microsoft Visual C++ 6.0, Microsoft Development
 Environment 2003 (MSVC 7.0/7.1), Microsoft Visual Studio 2005, Microsoft
-Visual Studio 2008, gcc under Cygwin and gcc under MinGW.  
+Visual Studio 2008, Microsoft Visual Studio 2010, gcc under Cygwin and gcc
+under MinGW.
 
   -  All of the applications work (snmpwalk, snmpget, snmpset, snmptrap, ...).
   -  The system, snmp, ip, tcp, udp and icmp MIB-groups work (requires the
@@ -79,6 +79,11 @@ The next subsection relates to items that are built using Visual Studio
 
   -  Both building via the interactive development environment and via the
      command line (nmake) is supported.
+
+  -  With Visual Studio 2005 and later, the Net-SNMP source code can be
+     compiled into either 32-bit or 64-bit executables (the amd64/x64
+     architecture). Previous Visual Studio versions support 32-bit executables
+     only.
 
 
 ***************************************************************************
@@ -473,8 +478,8 @@ There is a Debug version and Release version for each subproject.  This is so
 the Debug and Release versions of an application can be built and tested
 separately.
 
-VC++ 6.0, 7.1, 8.0 (2005) and 9.0 (2008) have been tested.  Building with
-earlier Microsoft compiler versions is no longer supported.
+VC++ 6.0, 7.1, 8.0 (2005), 9.0 (2008) and 10.0 (2010) have been tested.
+Building with earlier Microsoft compiler versions is no longer supported.
 
 Note: if you want to distribute the generated executable, you will also need
 to distribute the Microsoft Visual Studio Redistributable Package. Check the
@@ -532,12 +537,22 @@ steps to build using build.bat:
 
 1.  Open a command prompt
 
-2.  Initialize the Visual Studio build environment by running VCVARS32.bat
+2.  When building with OpenSSL, set the environment variables INCLUDE and LIB
+    such that these point at the proper OpenSSL directories. An example:
+
+    set INCLUDE=C:\OpenSSL-Win32\include
+    set LIB=C:\OpenSSL-Win32\lib\VC\static
+
+3.  Initialize the Visual Studio build environment by running vcvarsall.bat
     which can be found in the bin folder of your Visual Studio install folder.
+    If you want to generate 64-bit binaries instead of 32-bit binaries, run
+    vcvarsall.bat with the amd64 argument. See also "How to: Enable a 64-Bit
+    Visual C++ Toolset at the Command Line" for more information
+    (http://msdn.microsoft.com/en-us/library/x4d2c09s%28v=vs.80%29.aspx).
 
-3.  Run win32\build.bat
+4.  Run win32\build.bat
 
-4.  The following screen will appear:
+5.  The following screen will appear:
 
     Net-SNMP build and install options
     ==================================
@@ -566,7 +581,7 @@ steps to build using build.bat:
 
     Select option to set / toggle:  
 
-5.  Toggle the options on and off as desired by typing the line number 
+6.  Toggle the options on and off as desired by typing the line number 
     followed by <enter>.  
 
     To compile with OpenSSL, the OpenSSL library and header files must 
@@ -586,7 +601,7 @@ steps to build using build.bat:
 
     When you are ready to build, type f <enter>
 
-6.  Building will begin.  Following is a sample screen shot of a quiet build:
+7.  Building will begin.  Following is a sample screen shot of a quiet build:
 
     Building...
     
@@ -608,7 +623,7 @@ steps to build using build.bat:
     
     Done!
 
-7.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+8.  If the folder that Net-SNMP was installed to is ever changed, modify the 
     system environment variables or registry keys as explained in the 
     'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 
@@ -728,10 +743,12 @@ applications. Proceed as follows:
 5. Build the agent and the applications
 
    a. Open win32.dsw (static build) or win32dll.dsw (dynamic build).
-   b. Click "Build->Batch Build..."  
-   c. Select the projects and configurations you want to build.
-   d. Click "ReBuild All".
-   e. When building is done, View the Output window, clip and
+   b. If you want to generate 64-bit binaries instead of 32-bit binaries,
+      select "Build/Configuration Manager" and add the "x64" platform.
+   c. Select "Build/Batch Build..."  
+   d. Select the projects and configurations you want to build.
+   e. Click "ReBuild All".
+   f. When building is done, View the Output window, clip and
       save to a text file if there is some information to share.
 
 6.  If the Perl modules are required, continue with the next section:
@@ -918,16 +935,10 @@ Project changes
 ***************************************************************************
 
 The default build configuration supports SNMP over IPv4-based transports.
-However, Windows XP and Windows 2000 include an IPv6-capable stack, which
+However Windows 2000 and later include an IPv6-capable stack which
 can be used to provide SNMP over IPv6.  To enable IPv6, the Microsoft PSDK 
-is required and the following changes to the Net-SNMP win32 Visual C++ 
-configuration are needed:
-
-Project changes
-===============
-
- 1. Edit the win32\net-snmp\net-snmp-config.h header file.  Change
-    the single INET6 line from:
+is required and NETSNMP_ENABLE_IPV6 has to be enabled in
+win32\net-snmp\net-snmp-config.h. Change the following single line from:
 
         /* #undef NETSNMP_ENABLE_IPV6 */
 
@@ -935,20 +946,7 @@ Project changes
 
        	#define NETSNMP_ENABLE_IPV6 1
 
- 2. Edit the win32\libsnmp_dll\libsnmp.def file.  All the IPv6 functions will
-    be commented out and will need to be enabled by removing ';IPv6' from the
-    beginning of each line.  
-
-    For example, change:
-
-
-        ;IPv6        netsnmp_udp6_parse_security
-
-    to:
-
-                netsnmp_udp6_parse_security
-
- 3. Continue with the section 'Microsoft Visual C++ - Building"
+Next, continue with the section 'Microsoft Visual C++ - Building"
 
 
 ***************************************************************************
