@@ -11,6 +11,7 @@
 *.pdb
 *.rej
 .libs/
+agent/*.exe
 agent/mibgroup/agent_module_dot_conf.h
 agent/mibgroup/agent_module_includes.h
 agent/mibgroup/agent_module_inits.h
@@ -20,6 +21,7 @@ agent/mibgroup/mib_module_includes.h
 agent/mibgroup/mib_module_inits.h
 agent/mibgroup/mib_module_shutdown.h
 agent/snmpd
+apps/*.exe
 apps/agentxtrap
 apps/encode_keychange
 apps/snmpbulkget
@@ -28,6 +30,7 @@ apps/snmpdelta
 apps/snmpdf
 apps/snmpget
 apps/snmpgetnext
+apps/snmpnetstat/*.exe
 apps/snmpnetstat/snmpnetstat
 apps/snmpset
 apps/snmpstatus
