@@ -1,16 +1,17 @@
 #
 # SNMP agent service file for systemd
 #
-# Socket activation is not used, see README.systemd.
-# You must manually enable it if you really want it. See
-# snmptrapd.{socket,service} for an example.
+#
+# The service should be enabled, i.e. snmpd should start during machine boot.
+# Socket activation shall not be used. See README.systemd for details.
 
 [Unit]
 Description=Simple Network Management Protocol (SNMP) daemon.
 After=syslog.target network.target
 
 [Service]
-Type=notify
+# Type=notify is also supported. It should be set when snmpd.socket is not used.
+Type=simple
 ExecStart=/usr/sbin/snmpd -f
 
 [Install]
