@@ -446,7 +446,9 @@ main(int argc, char *argv[])
     int             agent_mode = -1;
     char           *pid_file = NULL;
     char            option_compatability[] = "-Le";
+#ifndef WIN32
     int             prepared_sockets = 0;
+#endif
 #if HAVE_GETPID
     int fd;
     FILE           *PID;

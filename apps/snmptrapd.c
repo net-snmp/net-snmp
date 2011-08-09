@@ -591,7 +591,9 @@ main(int argc, char *argv[])
     int             agentx_subagent = 1;
 #endif
     netsnmp_trapd_handler *traph;
+#ifndef WIN32
     int             prepared_sockets = 0;
+#endif
 
 
 #ifndef WIN32
