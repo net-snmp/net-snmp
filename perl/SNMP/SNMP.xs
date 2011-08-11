@@ -2404,140 +2404,45 @@ char *s;
     return -1;
 }
 
-static double
-constant(name, arg)
-char *name;
-int arg;
+#define TEST_CONSTANT(value, name, C)           \
+    if (strEQ(name, #C)) {                      \
+        *value = C;                             \
+        return 0;                               \
+    }
+#define TEST_CONSTANT2(value, name, C, V)       \
+    if (strEQ(name, #C)) {                      \
+        *value = V;                             \
+        return 0;                               \
+    }
+
+static int constant(double *value, const char * const name, const int arg)
 {
-    errno = 0;
     switch (*name) {
-    case 'R':
-	if (strEQ(name, "NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE"))
-#ifdef NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE
-	    return NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE;
-#else
-	    goto not_there;
-#endif
+    case 'N':
+	TEST_CONSTANT(value, name, NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE);
+	TEST_CONSTANT(value, name, NETSNMP_CALLBACK_OP_TIMED_OUT);
 	break;
     case 'S':
-	if (strEQ(name, "SNMPERR_BAD_ADDRESS"))
-#ifdef SNMPERR_BAD_ADDRESS
-	    return SNMPERR_BAD_ADDRESS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMPERR_BAD_LOCPORT"))
-#ifdef SNMPERR_BAD_LOCPORT
-	    return SNMPERR_BAD_LOCPORT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMPERR_BAD_SESSION"))
-#ifdef SNMPERR_BAD_SESSION
-	    return SNMPERR_BAD_SESSION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMPERR_GENERR"))
-#ifdef SNMPERR_GENERR
-	    return SNMPERR_GENERR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMPERR_TOO_LONG"))
-#ifdef SNMPERR_TOO_LONG
-	    return SNMPERR_TOO_LONG;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_ADDRESS"))
-#ifdef SNMP_DEFAULT_ADDRESS
-	    return SNMP_DEFAULT_ADDRESS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_COMMUNITY_LEN"))
-#ifdef SNMP_DEFAULT_COMMUNITY_LEN
-	    return SNMP_DEFAULT_COMMUNITY_LEN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_ENTERPRISE_LENGTH"))
-#ifdef SNMP_DEFAULT_ENTERPRISE_LENGTH
-	    return SNMP_DEFAULT_ENTERPRISE_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_ERRINDEX"))
-#ifdef SNMP_DEFAULT_ERRINDEX
-	    return SNMP_DEFAULT_ERRINDEX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_ERRSTAT"))
-#ifdef SNMP_DEFAULT_ERRSTAT
-	    return SNMP_DEFAULT_ERRSTAT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_PEERNAME"))
-#ifdef SNMP_DEFAULT_PEERNAME
-	    return 0;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_REMPORT"))
-#ifdef SNMP_DEFAULT_REMPORT
-	    return SNMP_DEFAULT_REMPORT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_REQID"))
-#ifdef SNMP_DEFAULT_REQID
-	    return SNMP_DEFAULT_REQID;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_RETRIES"))
-#ifdef SNMP_DEFAULT_RETRIES
-	    return SNMP_DEFAULT_RETRIES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_TIME"))
-#ifdef SNMP_DEFAULT_TIME
-	    return SNMP_DEFAULT_TIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_TIMEOUT"))
-#ifdef SNMP_DEFAULT_TIMEOUT
-	    return SNMP_DEFAULT_TIMEOUT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SNMP_DEFAULT_VERSION"))
-#ifdef NETSNMP_DEFAULT_SNMP_VERSION
-	    return NETSNMP_DEFAULT_SNMP_VERSION;
-#else
-#ifdef SNMP_DEFAULT_VERSION
-	    return SNMP_DEFAULT_VERSION;
-#else
-	    goto not_there;
-#endif
-#endif
-	if (strEQ(name, "SNMP_API_SINGLE"))
-		return SNMP_API_SINGLE;
-	if (strEQ(name, "SNMP_API_TRADITIONAL"))
-		return SNMP_API_TRADITIONAL;
-	break;
-    case 'T':
-	if (strEQ(name, "NETSNMP_CALLBACK_OP_TIMED_OUT"))
-#ifdef NETSNMP_CALLBACK_OP_TIMED_OUT
-	    return NETSNMP_CALLBACK_OP_TIMED_OUT;
-#else
-	    goto not_there;
-#endif
+	TEST_CONSTANT(value, name, SNMPERR_BAD_ADDRESS);
+	TEST_CONSTANT(value, name, SNMPERR_BAD_LOCPORT);
+	TEST_CONSTANT(value, name, SNMPERR_BAD_SESSION);
+	TEST_CONSTANT(value, name, SNMPERR_GENERR);
+	TEST_CONSTANT(value, name, SNMPERR_TOO_LONG);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_ADDRESS);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_COMMUNITY_LEN);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_ENTERPRISE_LENGTH);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_ERRINDEX);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_ERRSTAT);
+	TEST_CONSTANT2(value, name, SNMP_DEFAULT_PEERNAME, 0);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_REMPORT);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_REQID);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_RETRIES);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_TIME);
+	TEST_CONSTANT(value, name, SNMP_DEFAULT_TIMEOUT);
+	TEST_CONSTANT2(value, name, SNMP_DEFAULT_VERSION,
+                       NETSNMP_DEFAULT_SNMP_VERSION);
+	TEST_CONSTANT(value, name, SNMP_API_SINGLE);
+	TEST_CONSTANT(value, name, SNMP_API_TRADITIONAL);
 	break;
     case 'X':
             goto not_there;
@@ -2545,13 +2450,11 @@ int arg;
     default:
 	break;
     }
-    errno = EINVAL;
-    return 0;
+    return EINVAL;
 
 not_there:
     not_here(name);
-    errno = ENOENT;
-    return 0;
+    return ENOENT;
 }
 
 /* 
@@ -2600,10 +2503,18 @@ int snmp_api_mode( int mode )
 
 MODULE = SNMP		PACKAGE = SNMP		PREFIX = snmp
 
-double
+void
 constant(name,arg)
 	char *		name
 	int		arg
+    INIT:
+        int status;
+        double value;
+    PPCODE:
+        value = 0;
+        status = constant(&value, name, arg);
+        XPUSHs(sv_2mortal(newSVuv(status)));
+        XPUSHs(sv_2mortal(newSVnv(value)));
 
 long
 snmp_sys_uptime()
