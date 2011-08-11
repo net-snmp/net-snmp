@@ -30,356 +30,130 @@ typedef struct netsnmp_oid_s {
     oid                  namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 
-static int have_done_agent = 0;
-static int have_done_lib = 0;
-
-static int
-not_here(char *s)
-{
-    croak("%s not implemented on this architecture", s);
-    return -1;
-}
-
-static double
-constant_MODE_G(char *name, int len, int arg)
-{
-    if (6 + 2 > len ) {
-	errno = EINVAL;
-	return 0;
+#define TEST_CONSTANT(value, name, C)           \
+    if (strEQ(name, #C)) {                      \
+        *value = C;                             \
+        return 0;                               \
     }
-    switch (name[6 + 2]) {
+
+static int constant_MODE_G(double *value, const char *name, const int len)
+{
+    switch (len >= 8 ? name[8] : -1) {
     case '\0':
-	if (strEQ(name + 6, "ET")) {	/* MODE_G removed */
-#ifdef MODE_GET
-	    return MODE_GET;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, MODE_GET);
+        break;
     case 'B':
-	if (strEQ(name + 6, "ETBULK")) {	/* MODE_G removed */
-#ifdef MODE_GETBULK
-	    return MODE_GETBULK;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, MODE_GETBULK);
+        break;
     case 'N':
-	if (strEQ(name + 6, "ETNEXT")) {	/* MODE_G removed */
-#ifdef MODE_GETNEXT
-	    return MODE_GETNEXT;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, MODE_GETNEXT);
+        break;
     }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
+    return EINVAL;
 }
 
-static double
-constant_MODE_SET_R(char *name, int len, int arg)
+static int constant_MODE_SET_R(double *value, const char *name, const int len)
 {
-    if (10 + 6 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[10 + 6]) {
+    switch (len >= 16 ? name[16] : -1) {
     case '1':
-	if (strEQ(name + 10, "ESERVE1")) {	/* MODE_SET_R removed */
-#ifdef MODE_SET_RESERVE1
-	    return MODE_SET_RESERVE1;
-#else
-	    goto not_there;
-#endif
-	}
+	TEST_CONSTANT(value, name, MODE_SET_RESERVE1);
+        break;
     case '2':
-	if (strEQ(name + 10, "ESERVE2")) {	/* MODE_SET_R removed */
-#ifdef MODE_SET_RESERVE2
-	    return MODE_SET_RESERVE2;
-#else
-	    goto not_there;
-#endif
-	}
+	TEST_CONSTANT(value, name, MODE_SET_RESERVE2);
+        break;
     }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
+    return EINVAL;
 }
 
-static double
-constant_SNMP_ERR(char *name, int len, int arg)
+static int constant_SNMP_ERR(double *value, char *name, int len)
 {
-    if (9 + 1 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[9]) {
-
+    switch (len >= 9 ? name[9] : -1) {
     case 'A':
-	if (strEQ(name + 10, "UTHORIZATIONERROR")) {	/* SNMP_ERR_A removed */
-#ifdef SNMP_ERR_AUTHORIZATIONERROR
-	    return SNMP_ERR_AUTHORIZATIONERROR;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, SNMP_ERR_AUTHORIZATIONERROR);
         break;
-
     case 'B':
-	if (strEQ(name + 10, "ADVALUE")) {	/* SNMP_ERR_B removed */
-#ifdef SNMP_ERR_BADVALUE
-	    return SNMP_ERR_BADVALUE;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, SNMP_ERR_BADVALUE);
         break;
-
     case 'C':
-	if (strEQ(name + 10, "OMMITFAILED")) {	/* SNMP_ERR_C removed */
-#ifdef SNMP_ERR_COMMITFAILED
-	    return SNMP_ERR_COMMITFAILED;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, SNMP_ERR_COMMITFAILED);
         break;
-
     case 'G':
-	if (strEQ(name + 10, "ENERR")) {	/* SNMP_ERR_G removed */
-#ifdef SNMP_ERR_GENERR
-	    return SNMP_ERR_GENERR;
-#else
-	    goto not_there;
-#endif
-	}
+	TEST_CONSTANT(value, name, SNMP_ERR_GENERR);
         break;
-
     case 'I':
-	if (strEQ(name + 10, "NCONSISTENTVALUE")) {	/* SNMP_ERR_I removed */
-#ifdef SNMP_ERR_INCONSISTENTVALUE
-	    return SNMP_ERR_INCONSISTENTVALUE;
-#else
-	    goto not_there;
-#endif
-	}
+	TEST_CONSTANT(value, name, SNMP_ERR_INCONSISTENTVALUE);
         break;
-
     case 'N':
-	if (strEQ(name + 10, "OACCESS")) {	/* SNMP_ERR_N removed */
-#ifdef SNMP_ERR_NOACCESS
-	    return SNMP_ERR_NOACCESS;
-#else
-	    goto not_there;
-#endif
-	}
-
-	if (strEQ(name + 10, "OCREATION")) {	/* SNMP_ERR_N removed */
-#ifdef SNMP_ERR_NOCREATION
-	    return SNMP_ERR_NOCREATION;
-#else
-	    goto not_there;
-#endif
-	}
-
-	if (strEQ(name + 10, "OERROR")) {	/* SNMP_ERR_N removed */
-#ifdef SNMP_ERR_NOERROR
-	    return SNMP_ERR_NOERROR;
-#else
-	    goto not_there;
-#endif
-	}
-
-	if (strEQ(name + 10, "OSUCHNAME")) {	/* SNMP_ERR_N removed */
-#ifdef SNMP_ERR_NOSUCHNAME
-	    return SNMP_ERR_NOSUCHNAME;
-#else
-	    goto not_there;
-#endif
-	}
-
-	if (strEQ(name + 10, "OTWRITABLE")) {	/* SNMP_ERR_N removed */
-#ifdef SNMP_ERR_NOTWRITABLE
-	    return SNMP_ERR_NOTWRITABLE;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, SNMP_ERR_NOACCESS);
+        TEST_CONSTANT(value, name, SNMP_ERR_NOCREATION);
+        TEST_CONSTANT(value, name, SNMP_ERR_NOERROR);
+        TEST_CONSTANT(value, name, SNMP_ERR_NOSUCHNAME);
+        TEST_CONSTANT(value, name, SNMP_ERR_NOTWRITABLE);
         break;
-
     case 'R':
-	if (strEQ(name + 10, "EADONLY")) {	/* SNMP_ERR_R removed */
-#ifdef SNMP_ERR_READONLY
-	    return SNMP_ERR_READONLY;
-#else
-	    goto not_there;
-#endif
-	}
-
-	if (strEQ(name + 10, "ESOURCEUNAVAILABLE")) {	/* SNMP_ERR_R removed */
-#ifdef SNMP_ERR_RESOURCEUNAVAILABLE
-	    return SNMP_ERR_RESOURCEUNAVAILABLE;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, SNMP_ERR_READONLY);
+        TEST_CONSTANT(value, name, SNMP_ERR_RESOURCEUNAVAILABLE);
         break;
-
     case 'T':
-	if (strEQ(name + 10, "OOBIG")) {	/* SNMP_ERR_T removed */
-#ifdef SNMP_ERR_TOOBIG
-	    return SNMP_ERR_TOOBIG;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, SNMP_ERR_TOOBIG);
         break;
-
     case 'U':
-	if (strEQ(name + 10, "NDOFAILED")) {	/* SNMP_ERR_U removed */
-#ifdef SNMP_ERR_UNDOFAILED
-	    return SNMP_ERR_UNDOFAILED;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, SNMP_ERR_UNDOFAILED);
         break;
-
     case 'W':
-	if (strEQ(name + 10, "RONGENCODING")) {	/* SNMP_ERR_W removed */
-#ifdef SNMP_ERR_WRONGENCODING
-	    return SNMP_ERR_WRONGENCODING;
-#else
-	    goto not_there;
-#endif
-	}
-
-	if (strEQ(name + 10, "RONGLENGTH")) {	/* SNMP_ERR_W removed */
-#ifdef SNMP_ERR_WRONGLENGTH
-	    return SNMP_ERR_WRONGLENGTH;
-#else
-	    goto not_there;
-#endif
-	}
-
-	if (strEQ(name + 10, "RONGTYPE")) {	/* SNMP_ERR_W removed */
-#ifdef SNMP_ERR_WRONGTYPE
-	    return SNMP_ERR_WRONGTYPE;
-#else
-	    goto not_there;
-#endif
-	}
-
-	if (strEQ(name + 10, "RONGVALUE")) {	/* SNMP_ERR_W removed */
-#ifdef SNMP_ERR_WRONGVALUE
-	    return SNMP_ERR_WRONGVALUE;
-#else
-	    goto not_there;
-#endif
-	}
+        TEST_CONSTANT(value, name, SNMP_ERR_WRONGENCODING);
+        TEST_CONSTANT(value, name, SNMP_ERR_WRONGLENGTH);
+        TEST_CONSTANT(value, name, SNMP_ERR_WRONGTYPE);
+        TEST_CONSTANT(value, name, SNMP_ERR_WRONGVALUE);
+        break;
     }
-not_there:
-    errno = ENOENT;
-    return 0;
+    return EINVAL;
 }
     
-static double
-constant_MODE_S(char *name, int len, int arg)
+static int constant_MODE_S(double *value, char *name, int len)
 {
-    if (6 + 3 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[6 + 3]) {
-    case 'A':
-	if (strEQ(name + 6, "ET_ACTION")) {	/* MODE_S removed */
-#ifdef MODE_SET_ACTION
-	    return MODE_SET_ACTION;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'B':
-	if (strEQ(name + 6, "ET_BEGIN")) {	/* MODE_S removed */
-#ifdef MODE_SET_BEGIN
-	    return MODE_SET_BEGIN;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'C':
-	if (strEQ(name + 6, "ET_COMMIT")) {	/* MODE_S removed */
-#ifdef MODE_SET_COMMIT
-	    return MODE_SET_COMMIT;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'F':
-	if (strEQ(name + 6, "ET_FREE")) {	/* MODE_S removed */
-#ifdef MODE_SET_FREE
-	    return MODE_SET_FREE;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'R':
-	if (!strnEQ(name + 6,"ET_", 3))
-	    break;
-	return constant_MODE_SET_R(name, len, arg);
-    case 'U':
-	if (strEQ(name + 6, "ET_UNDO")) {	/* MODE_S removed */
-#ifdef MODE_SET_UNDO
-	    return MODE_SET_UNDO;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
+    if (!strnEQ(name + 6, "ET_", 3))
+        return EINVAL;
 
-not_there:
-    errno = ENOENT;
-    return 0;
+    switch (len >= 9 ? name[9] : -1) {
+    case 'A':
+        TEST_CONSTANT(value, name, MODE_SET_ACTION);
+        break;
+    case 'B':
+        TEST_CONSTANT(value, name, MODE_SET_BEGIN);
+        break;
+    case 'C':
+        TEST_CONSTANT(value, name, MODE_SET_COMMIT);
+        break;
+    case 'F':
+        TEST_CONSTANT(value, name, MODE_SET_FREE);
+        break;
+    case 'R':
+        return constant_MODE_SET_R(value, name, len);
+    case 'U':
+        TEST_CONSTANT(value, name, MODE_SET_UNDO);
+        break;
+    }
+    return EINVAL;
 }
 
-static double
-constant(char *name, int len, int arg)
+static int constant(double *value, char *name, int len)
 {
-    errno = 0;
-    if (0 + 5 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[0 + 5]) {
+    switch (len >= 5 ? name[5] : -1) {
     case 'G':
-	if (!strnEQ(name + 0,"MODE_", 5))
-	    break;
-	return constant_MODE_G(name, len, arg);
+	if (strnEQ(name + 0,"MODE_", 5))
+            return constant_MODE_G(value, name, len);
+        break;
     case 'S':
-	if (!strnEQ(name + 0,"MODE_", 5))
-	    break;
-	return constant_MODE_S(name, len, arg);
+	if (strnEQ(name + 0,"MODE_", 5))
+            return constant_MODE_S(value, name, len);
+        break;
     case 'E':
-	if (!strnEQ(name + 0,"SNMP_ERR_", 9))
-	    break;
-	return constant_SNMP_ERR(name, len, arg);
+	if (strnEQ(name + 0,"SNMP_ERR_", 9))
+            return constant_SNMP_ERR(value, name, len);
+        break;
     }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
+    return EINVAL;
 }
 
 int
@@ -432,7 +206,7 @@ handler_wrapper(netsnmp_mib_handler          *handler,
 
 MODULE = NetSNMP::agent		PACKAGE = NetSNMP::agent		
 
-double
+void
 constant(sv,arg)
     PREINIT:
 	STRLEN		len;
@@ -440,10 +214,14 @@ constant(sv,arg)
 	SV *		sv
 	char *		s = SvPV(sv, len);
 	int		arg
-    CODE:
-	RETVAL = constant(s,len,arg);
-    OUTPUT:
-	RETVAL
+    INIT:
+        int status;
+        double value;
+    PPCODE:
+        value = 0;
+        status = constant(&value, s, len);
+        XPUSHs(sv_2mortal(newSVuv(status)));
+        XPUSHs(sv_2mortal(newSVnv(value)));
 
 int
 __agent_check_and_process(block = 1)
