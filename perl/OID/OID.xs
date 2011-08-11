@@ -1,7 +1,6 @@
 /* -*- C -*- */
-#ifdef _WIN32
-#define _WIN32_WINNT 0x500 /*_WIN32_WINNT_WIN2K*/
-#define NTDDI_VERSION 0x05000400 /* NTDDI_WIN2KSP4 */
+#if defined(_WIN32) && !defined(_WIN32_WINNT)
+#define _WIN32_WINNT 0x501
 #endif
 
 #include "EXTERN.h"
