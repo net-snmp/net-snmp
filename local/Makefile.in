@@ -1,8 +1,6 @@
 #
 # local (scripts) directory Makefile
 #
-top_builddir=..
-
 VPATH		= @srcdir@
 
 #

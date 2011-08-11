@@ -12,7 +12,6 @@
 # Makefile for snmplib
 #
 
-top_builddir=..
 mysubdir=snmplib
 
 # use GNU vpath, if available, to only set a path for source and headers

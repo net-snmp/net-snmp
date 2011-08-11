@@ -3,7 +3,6 @@
 # Makefile.in (at the root of net-snmp)
 #
 
-top_builddir	= .
 VPATH		= @srcdir@
 
 SUBDIRS		= snmplib @MAINSUBS@

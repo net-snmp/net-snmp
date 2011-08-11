@@ -1,7 +1,6 @@
 #
 # Makefile for the man page directory
 #
-top_builddir=..
 VPATH		= @srcdir@
 
 #

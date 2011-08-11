@@ -2,8 +2,6 @@
 # Makefile to install mib files.
 #
 
-top_builddir=..
-
 VPATH		= @srcdir@
 
 #
