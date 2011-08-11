@@ -44,17 +44,10 @@
  * inclusion of <winsock2.h>.
  */
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x500 /*_WIN32_WINNT_WIN2K*/
+#define _WIN32_WINNT 0x501 /*_WIN32_WINNT_WIN2K*/
 #else
-#if _WIN32_WINNT < 0x500
-#error _WIN32_WINNT is too low - it should be set to at least 0x500.
-#endif
-#endif
-#ifndef NTDDI_VERSION
-#define NTDDI_VERSION 0x05000400 /* NTDDI_WIN2KSP4 */
-#else
-#if NTDDI_VERSION < 0x05000400
-#error NTDDI_VERSION is too low - it should be set to at least 0x05000400.
+#if _WIN32_WINNT < 0x501
+#error _WIN32_WINNT is too low - it should be set to at least 0x501.
 #endif
 #endif
 
