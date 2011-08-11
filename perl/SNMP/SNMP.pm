@@ -59,7 +59,7 @@ sub AUTOLOAD {
     my $constname;
     ($constname = $AUTOLOAD) =~ s/.*:://;
     # croak "&$module::constant not defined" if $constname eq 'constant';
-    $val = constant($constname, @_ ? $_[0] : 0);
+    ($!, $val) = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
 	if ($! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
