@@ -7,7 +7,7 @@
 config_require(util_funcs)
 
 void            init_pass_persist(void);
-void            deinit_pass_persist(void);
+void            shutdown_pass_persist(void);
 extern FindVarMethod var_extensible_pass_persist;
 extern WriteMethod setPassPersist;
 
