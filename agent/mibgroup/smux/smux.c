@@ -1289,10 +1289,13 @@ smux_replace_active(smux_reg * actptr, smux_reg * pasptr)
             HANDLER_CAN_RWRITE);
     if (reg == NULL) {
         snmp_log(LOG_ERR, "SMUX: cannot create new smux peer registration\n");
+        free(pasptr);
         return;
     }
     if (netsnmp_register_handler(reg) != MIB_REGISTERED_OK) {
         snmp_log(LOG_ERR, "SMUX: cannot register new smux peer\n");
+        free(pasptr);
+        free(reg);
         return;
     }
     pasptr->reginfo = reg;
