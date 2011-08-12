@@ -57,8 +57,6 @@ init_swrun(void)
 {
     DEBUGMSGTL(("swrun:access", "init\n"));
 
-    netsnmp_assert(0 == _swrun_init); /* who is calling twice? */
-
     if (1 == _swrun_init)
         return;
 
