@@ -113,7 +113,7 @@ authorise notifications in the specified GROUP
 (configured using the \fIgroup\fR directive)
 to trigger the types of processing listed.
 See \fIsnmpd.conf(5)\fR for more details.
-.IP "createUser username (MD5|SHA) authpassphrase [DES|AES]"
+.IP "createUser [-e  ENGINEID] username (MD5|SHA) authpassphrase [DES|AES]"
 See the 
 .I snmpd.conf(5)
 manual page for a description of how to create SNMPv3 users.  This
