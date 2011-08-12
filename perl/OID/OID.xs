@@ -1,7 +1,6 @@
 /* -*- C -*- */
-#ifdef _WIN32
-#define _WIN32_WINNT 0x500 /*_WIN32_WINNT_WIN2K*/
-#define NTDDI_VERSION 0x05000400 /* NTDDI_WIN2KSP4 */
+#if defined(_WIN32) && !defined(_WIN32_WINNT)
+#define _WIN32_WINNT 0x501
 #endif
 
 #include "EXTERN.h"
@@ -20,11 +19,9 @@ typedef struct netsnmp_oid_s {
     oid                  namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 
-static double
-constant(char *name, int len, int arg)
+static int constant(double *value, const char *name, const int len)
 {
-    errno = EINVAL;
-    return 0;
+    return EINVAL;
 }
 
 netsnmp_oid *
@@ -175,7 +172,7 @@ nso_newptr(initstring)
     OUTPUT:
         RETVAL
 
-double
+void
 constant(sv,arg)
     PREINIT:
 	STRLEN		len;
@@ -183,10 +180,14 @@ constant(sv,arg)
 	SV *		sv
 	char *		s = SvPV(sv, len);
 	int		arg
-    CODE:
-	RETVAL = constant(s,len,arg);
-    OUTPUT:
-	RETVAL
+    INIT:
+        int status;
+        double value;
+    PPCODE:
+        value = 0;
+        status = constant(&value, s, len);
+        XPUSHs(sv_2mortal(newSVuv(status)));
+        XPUSHs(sv_2mortal(newSVnv(value)));
 
 int
 _snmp_oid_compare(oid1, oid2)
