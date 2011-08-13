@@ -86,7 +86,9 @@ perl/default_store/default_store.c
 perl/NetSNMP.c
 perl/OID/OID.c
 perl/SNMP/SNMP.c
-perl/SNMP/t
+perl/SNMP/t/*.log
+perl/SNMP/t/*.pid
+perl/SNMP/t/*.stderr
 perl/SNMP/t/snmptest.cmd
 perl/TrapReceiver/const-c.inc
 perl/TrapReceiver/const-xs.inc
