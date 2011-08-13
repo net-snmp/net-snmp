@@ -230,6 +230,22 @@ if ($logging eq "enabled") {
   print "Building main package...\n";
   system("nmake /nologo > make.out 2>&1") == 0 || die "Build error (see make.out)";
 
+  if ($install eq "enabled") {
+    print "Installing main package...\n";
+    system("nmake /nologo install > install.out 2>&1") == 0 || die "Build error (see install.out)";
+  }
+  else {
+    print "Type nmake install to install the package to $install_base\n";
+  }
+
+  if ($install_devel eq "enabled") {
+    print "Installing development files...\n";
+    system("nmake /nologo install_devel > install_devel.out 2>&1") == 0 || die "Build error (see install_devel.out)";
+  }
+  else {
+    print "Type nmake install_devel to install the development files to $install_base\n";
+  }
+  
   if ($perl eq "enabled") {
     if ($linktype eq "static") {
       print "Running Configure for DLL...\n";
@@ -254,30 +270,11 @@ if ($logging eq "enabled") {
     if ($perl_install eq "enabled") {
       print "Installing Perl modules...\n";
       system("nmake /nologo perl_install > perlinstall.out 2>&1") == 0 || die "Build error (see perlinstall.out)";
+    } else {
+        print "Type nmake perl_install to install the Perl modules\n";
     }
       
     print "\nSee perltest.out for Perl test results\n";
-  }
-
-  print "\n";
-  if ($install eq "enabled") {
-    print "Installing main package...\n";
-    system("nmake /nologo install > install.out 2>&1") == 0 || die "Build error (see install.out)";
-  }
-  else {
-    print "Type nmake install to install the package to $install_base\n";
-  }
-
-  if ($install_devel eq "enabled") {
-    print "Installing development files...\n";
-    system("nmake /nologo install_devel > install_devel.out 2>&1") == 0 || die "Build error (see install_devel.out)";
-  }
-  else {
-    print "Type nmake install_devel to install the development files to $install_base\n";
-  }
-  
-  if ($perl_install eq "disabled" && $perl eq "enabled") {
-    print "Type nmake perl_install to install the Perl modules\n";
   }
 }
 else {
