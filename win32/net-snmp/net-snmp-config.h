@@ -1698,10 +1698,6 @@ typedef unsigned short   uint16_t;
 #undef HAVE_INET_PTON
 
 #if NETSNMP_ENABLE_IPV6
-  #ifndef IPPROTO_IPV6
-    /* Only defined in Windows XP or higher, so we need it here */
-    #define IPPROTO_IPV6 41
-  #endif
   #define NETSNMP_TRANSPORT_TCPIPV6_DOMAIN 1
   #define NETSNMP_TRANSPORT_UDPIPV6_DOMAIN 1
 #else
