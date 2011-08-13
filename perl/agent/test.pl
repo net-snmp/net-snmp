@@ -75,7 +75,7 @@ print it($agent, 3);
 $regitem = $agent->register("test_reg", ".1.3.6.1.8888", \&testsub);
 print it($regitem, 4);
 #print STDERR $regitem,":",ref($regitem),"\n";
-print it(ref($regitem) eq "netsnmp_handler_registrationPtr", 5);
+print it(ref($regitem) eq "NetSNMP::agent::netsnmp_handler_registration", 5);
 exit;
 
 while(1) {

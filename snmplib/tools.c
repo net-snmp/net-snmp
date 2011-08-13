@@ -1058,6 +1058,21 @@ char *netsnmp_getenv(const char *name)
 #endif
 }
 
+/**
+ * Set an environment variable.
+ *
+ * This function is only necessary on Windows for the MSVC and MinGW
+ * environments. If the process that uses the Net-SNMP DLL (e.g. a Perl
+ * interpreter) and the Net-SNMP have been built with a different compiler
+ * version then each will have a separate set of environment variables.
+ * This function allows to set an environment variable such that it gets
+ * noticed by the Net-SNMP DLL.
+ */
+int netsnmp_setenv(const char *envname, const char *envval, int overwrite)
+{
+    return setenv(envname, envval, overwrite);
+}
+
 /*
  * swap the order of an inet addr string
  */

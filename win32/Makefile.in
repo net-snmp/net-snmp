@@ -494,6 +494,9 @@ install_devel ::
         @-mkdir $(PREFIX_DOS)\include > NUL:
         @-mkdir $(PREFIX_DOS)\include\net-snmp > NUL:
 
+	@-echo Copying PDB files to $(PREFIX_DOS)\bin
+	@-Copy win32\bin\$(CFG)\*.pdb $(PREFIX_DOS)\bin > NUL:
+
 	@-echo Copying library files to $(PREFIX_DOS)\lib
         @-copy win32\lib\$(CFG)\*.lib $(PREFIX_DOS)\lib > NUL:
 
@@ -504,5 +507,9 @@ install_devel ::
         @-copy win32\net-snmp\library\*.h $(PREFIX_DOS)\include\net-snmp\library > NUL:
 
         @-echo Done copying files to $(PREFIX_DOS)
+
+	@-echo Copying PDB files to %SYSTEMROOT%\System32
+	@-Copy win32\bin\$(CFG)\*.pdb %SYSTEMROOT%\System32 > NUL:
+
         cd win32
 
