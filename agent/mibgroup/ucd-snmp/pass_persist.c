@@ -749,7 +749,7 @@ write_persist_pipe(int iindex, const char *data)
     /*
      * Don't write to a non-existant process 
      */
-    if (persist_pipes[iindex].pid == -1) {
+    if (persist_pipes[iindex].pid == NETSNMP_NO_SUCH_PROCESS) {
         return 0;
     }
 
