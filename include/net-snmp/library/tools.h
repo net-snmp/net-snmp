@@ -288,7 +288,11 @@ extern          "C" {
 
     int             marker_tticks(const_marker_t pm);
     int             timeval_tticks(const struct timeval *tv);
+    NETSNMP_IMPORT
     char            *netsnmp_getenv(const char *name);
+    NETSNMP_IMPORT
+    int             netsnmp_setenv(const char *envname, const char *envval,
+                                   int overwrite);
 
     int             netsnmp_addrstr_hton(char *ptr, size_t len);
 

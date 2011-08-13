@@ -2952,6 +2952,24 @@ snmp_init_mib_internals()
         }
 
 
+char *
+snmp_getenv(name)
+     char *name;
+CODE:
+     RETVAL = netsnmp_getenv(name);
+OUTPUT:
+     RETVAL
+
+int
+snmp_setenv(envname, envval, overwrite)
+     char *envname;
+     char *envval;
+     int overwrite;
+CODE:
+     RETVAL = netsnmp_setenv(envname, envval, overwrite);
+OUTPUT:
+     RETVAL
+
 int
 snmp_read_mib(mib_file, force=0)
 	char *		mib_file

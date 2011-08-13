@@ -10,6 +10,7 @@ BEGIN {
     eval "use Cwd qw(abs_path)";
     $ENV{'SNMPCONFPATH'} = 'nopath';
     $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
+    $ENV{'MIBS'} = 'ALL';
 }
 
 # to print the description...
@@ -24,8 +25,6 @@ $SNMP::best_guess = 2;
 
 use vars qw($bad_oid);
 require "t/startagent.pl";
-my $mib_file = 't/mib.txt';
-my $bad_mib_file = 'mib.txt';
 
 #############################  1  ######################################
 #check if
