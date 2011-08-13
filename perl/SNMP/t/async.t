@@ -51,6 +51,10 @@ ok($result);
 
 SNMP::MainLoop();
 
+snmptest_cleanup();
+
+exit 0;
+
 sub cb1{
     my $sess = shift;
     my $vlist = shift;
@@ -156,9 +160,7 @@ sub cb7{
 
     ok(@{$vlist} == 23);
 
-    snmptest_cleanup();
-
-    exit(0);
+    SNMP::finish();
 } # end of cb7
 
 sub cbDummy {
