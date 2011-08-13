@@ -47,14 +47,13 @@ struct persist_pipe_type {
     int             fdIn, fdOut;
     int             pid;
 }              *persist_pipes = (struct persist_pipe_type *) NULL;
+static unsigned pipe_check_alarm_id;
 static int      init_persist_pipes(void);
 static void     close_persist_pipe(int iindex);
 static int      open_persist_pipe(int iindex, char *command);
+static void     check_persist_pipes(unsigned clientreg, void *clientarg);
 static void     destruct_persist_pipes(void);
 static int      write_persist_pipe(int iindex, const char *data);
-#ifndef WIN32
-static void     sigchld_handler(int sig);
-#endif
 
 /*
  * These are defined in pass.c 
@@ -83,17 +82,19 @@ init_pass_persist(void)
                                   pass_persist_parse_config,
                                   pass_persist_free_config,
                                   "miboid program");
-#ifndef WIN32
-    register_signal(SIGCHLD, sigchld_handler);
-#endif
+    pipe_check_alarm_id = snmp_alarm_register(10, SA_REPEAT, check_persist_pipes, NULL);
 }
 
 void
-deinit_pass_persist(void)
+shutdown_pass_persist(void)
 {
-#ifndef WIN32
-    unregister_signal(SIGCHLD);
-#endif
+    if (pipe_check_alarm_id) {
+        snmp_alarm_unregister(pipe_check_alarm_id);
+        pipe_check_alarm_id = 0;
+    }
+
+    /* Close any open pipes. */
+    destruct_persist_pipes();
 }
 
 void
@@ -205,11 +206,6 @@ void
 pass_persist_free_config(void)
 {
     struct extensible *etmp, *etmp2;
-
-    /*
-     * Close any open pipes to any programs 
-     */
-    destruct_persist_pipes();
 
     for (etmp = persistpassthrus; etmp != NULL;) {
         etmp2 = etmp;
@@ -580,6 +576,44 @@ init_persist_pipes(void)
     return persist_pipes ? 1 : 0;
 }
 
+/**
+ * Return true if and only if the process associated with the persistent
+ * pipe has stopped.
+ *
+ * @param[in] idx Persistent pipe index.
+ */
+static int process_stopped(int idx)
+{
+    if (persist_pipes[idx].pid != -1) {
+#if HAVE_SYS_WAIT_H
+        return waitpid(persist_pipes[idx].pid, NULL, WNOHANG) > 0;
+#endif
+#if defined(WIN32) && !defined (mingw32) && !defined(HAVE_SIGNAL)
+        return WaitForSingleObject(persist_pipes[idx].pid, 0) == WAIT_OBJECT_0;
+#endif
+    }
+    return 0;
+}
+
+/**
+ * Iterate over all persistent pipes and close those pipes of which the
+ * associated process has stopped.
+ */
+static void check_persist_pipes(unsigned clientreg, void *clientarg)
+{
+    int             i;
+
+    if (!persist_pipes)
+        return;
+
+    for (i = 0; i <= numpersistpassthrus; i++) {
+        if (process_stopped(i)) {
+            snmp_log(LOG_INFO, "pass_persist[%d]: child process stopped - closing pipe\n", i);
+            close_persist_pipe(i);
+        }
+    }
+}
+
 /*
  * Destruct our persistent pipes
  *
@@ -796,7 +830,14 @@ close_persist_pipe(int iindex)
         persist_pipes[iindex].fOut = (FILE *) 0;
     }
     if (persist_pipes[iindex].fdOut != -1) {
+#ifndef WIN32
+        /*
+         * The sequence open()/fdopen()/fclose()/close() triggers an access
+         * violation with the MSVC runtime. Hence skip the close() call when
+         * using the MSVC runtime.
+         */
         close(persist_pipes[iindex].fdOut);
+#endif
         persist_pipes[iindex].fdOut = -1;
     }
     if (persist_pipes[iindex].fIn) {
@@ -804,16 +845,17 @@ close_persist_pipe(int iindex)
         persist_pipes[iindex].fIn = (FILE *) 0;
     }
     if (persist_pipes[iindex].fdIn != -1) {
+#ifndef WIN32
+        /*
+         * The sequence open()/fdopen()/fclose()/close() triggers an access
+         * violation with the MSVC runtime. Hence skip the close() call when
+         * using the MSVC runtime.
+         */
         close(persist_pipes[iindex].fdIn);
+#endif
         persist_pipes[iindex].fdIn = -1;
     }
 
-#if defined(WIN32) && !defined (mingw32) && !defined (HAVE_SIGNAL)
-    if (!CloseHandle((HANDLE)persist_pipes[iindex].pid)) {
-          DEBUGMSGTL(("ucd-snmp/pass_persist","close_persist_pipe pid: close error\n"));
-        } 
-#endif
-    
 #ifdef __uClinux__
 	/*remove the pipes*/
 	unlink(fifo_in_path);
@@ -824,30 +866,12 @@ close_persist_pipe(int iindex)
 #if HAVE_SYS_WAIT_H
         waitpid(persist_pipes[iindex].pid, NULL, 0);
 #endif
+#if defined(WIN32) && !defined (mingw32) && !defined (HAVE_SIGNAL)
+        if (!CloseHandle((HANDLE)persist_pipes[iindex].pid)) {
+            DEBUGMSGTL(("ucd-snmp/pass_persist","close_persist_pipe pid: close error\n"));
+        }
+#endif
         persist_pipes[iindex].pid = -1;
     }
 
 }
-
-#ifndef WIN32
-static void sigchld_handler(int sig) {
-    int i;
- 
-    if (!persist_pipes)
-        return;
-
-#if HAVE_SYS_WAIT_H
-    for (i = 1; i <= numpersistpassthrus; i++) {
-        if (persist_pipes[i].pid > 0) {
-            if (waitpid(persist_pipes[i].pid, 0, WNOHANG)) {
-                DEBUGMSGTL(("ucd-snmp/pass_persist",
-                            "sigchld_handler: closing persist_pipe %d\n",
-                            i));
-                close_persist_pipe(i);
-            }
-        }
-    }
-#endif
-}
-#endif
-

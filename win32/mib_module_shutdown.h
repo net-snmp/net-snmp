@@ -2,6 +2,10 @@
   if (should_init("proxy")) shutdown_proxy();
   if (should_init("snmpNotifyFilterTable")) shutdown_snmpNotifyFilterTable();
  
+#ifdef USING_UCD_SNMP_MODULE
+  if (should_init("pass_persist")) shutdown_pass_persist();
+#endif
+
 #ifdef USING_WINEXTDLL_MODULE
    if (should_init("winExtDLL")) shutdown_winExtDLL();
 #endif
