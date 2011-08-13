@@ -133,6 +133,20 @@ $replace_newer = 0; # determine whether or not to tell the parser to replace
                     # older MIB modules with newer ones when loading MIBs.
                     # WARNING: This can cause an incorrect hierarchy.
 
+sub getenv {
+    my $name = shift;
+
+    return SNMP::_getenv($name);
+}
+
+sub setenv {
+    my $envname = shift;
+    my $envval = shift;
+    my $overwrite = shift;
+
+    return SNMP::_setenv($envname, $envval, $overwrite);
+}
+
 sub setMib {
 # loads mib from file name provided
 # setting second arg to true causes currently loaded mib to be replaced
