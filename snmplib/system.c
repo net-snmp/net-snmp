@@ -972,7 +972,7 @@ netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
     }
     return hp;
 #else
-    NETSNMP_LOGONCE((LOG_ERR, "gethostbyname not available"));
+    NETSNMP_LOGONCE((LOG_ERR, "gethostbyaddr not available"));
     return NULL;
 #endif
 }
