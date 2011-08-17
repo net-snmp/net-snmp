@@ -102,7 +102,11 @@ sub LocalGetOptions {
     if (eval {require Getopt::GUI::Long;}) {
         import Getopt::GUI::Long;
         # optional configure call
-        Getopt::GUI::Long::Configure(qw(display_help no_ignore_case capture_output no_gui allow_zero));
+	my @gopts = qw(no_ignore_case no_gui allow_zero);
+	if ($Getopt::GUI::Long::VERSION > 0.2) {
+	    push @gopts, qw(display_help capture_output);
+	}
+        Getopt::GUI::Long::Configure(@gopts);
         return GetOptions(@_);
     }
     require Getopt::Long;
