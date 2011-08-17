@@ -54,7 +54,7 @@ extern          "C" {
 
 /** @def SNMP_FREE(s)
     Frees a pointer only if it is !NULL and sets its value to NULL */
-#define SNMP_FREE(s)    do { if (s) { netsnmp_free((void *)(s)); (s) = NULL; } } while(0)
+#define SNMP_FREE(s)    do { if (s) { free((void *)s); s=NULL; } } while(0)
 
 /** @def SNMP_SWIPE_MEM(n, s)
     Frees pointer n only if it is !NULL, sets n to s and sets s to NULL */
@@ -291,7 +291,11 @@ extern          "C" {
 
     int             marker_tticks(const_marker_t pm);
     int             timeval_tticks(const struct timeval *tv);
+    NETSNMP_IMPORT
     char            *netsnmp_getenv(const char *name);
+    NETSNMP_IMPORT
+    int             netsnmp_setenv(const char *envname, const char *envval,
+                                   int overwrite);
 
     int             netsnmp_addrstr_hton(char *ptr, size_t len);
 
