@@ -248,7 +248,7 @@ static int _percent( unsigned long long value, unsigned long long total ) {
     /* avoid division by zero */
     if (total == 0)
         return 0;
-    return (int)( value * 100 ) / total;
+    return (int)( value * 100 / total );
 }
 
 static netsnmp_fsys_info **
