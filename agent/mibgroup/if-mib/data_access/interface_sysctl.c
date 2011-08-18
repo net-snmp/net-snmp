@@ -328,7 +328,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     int flags;
 
     DEBUGMSGTL(("access:interface:container:sysctl",
-                "load (flags %p)\n", load_flags));
+                "load (flags %u)\n", load_flags));
 
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for interface\n");
@@ -344,11 +344,11 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     if_list = (u_char*)malloc(if_list_size);
     if (if_list == NULL) {
         snmp_log(LOG_ERR, "could not allocate memory for interface info "
-                 "(%lu bytes)\n", if_list_size);
+                 "(%zu bytes)\n", if_list_size);
         return -3;
     } else {
         DEBUGMSGTL(("access:interface:container:sysctl",
-                    "allocated %lu bytes for if_list\n", if_list_size));
+                    "allocated %zu bytes for if_list\n", if_list_size));
     }
 
     if (sysctl(sysctl_oid, sizeof(sysctl_oid)/sizeof(int), if_list,
@@ -502,7 +502,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
         CONTAINER_INSERT(container, entry);
         DEBUGMSGTL(("access:interface:container:sysctl",
-                    "created entry %u for %s\n", entry->index, entry->name));
+                    "created entry %d for %s\n", entry->index, entry->name));
     } /* for (each interface entry) */
 
     /* pass 2: walk addresses */
