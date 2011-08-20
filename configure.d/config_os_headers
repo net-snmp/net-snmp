@@ -473,7 +473,12 @@ case $target_os in
 *** To monitor CPU/memory values in AIX you need to install
 *** libperfstat which can be found in bos.perf
 ]),,
-                LMIBLIBS))
+                LMIBLIBS),,
+    [[
+#if HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
+    ]])
         ;;
     hpux*)
         #       HP-UX agent needs open_mib       (XXX - not a header check!)
