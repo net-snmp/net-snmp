@@ -16990,7 +16990,12 @@ case $target_os in
         #
         for ac_header in libperfstat.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "libperfstat.h" "ac_cv_header_libperfstat_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "libperfstat.h" "ac_cv_header_libperfstat_h" "
+#if HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
+
+"
 if test "x$ac_cv_header_libperfstat_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LIBPERFSTAT_H 1
