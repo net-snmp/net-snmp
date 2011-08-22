@@ -193,7 +193,8 @@ AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id],,,[
 #       struct msghdr
 #   Library:
 #
-AC_CHECK_MEMBERS([struct msghdr.msg_control],,,[
+AC_CHECK_MEMBERS([struct msghdr.msg_control,
+                  struct msghdr.msg_flags],,,[
     AC_INCLUDES_DEFAULT()
     [
 #ifdef HAVE_SYS_PARAM_H
