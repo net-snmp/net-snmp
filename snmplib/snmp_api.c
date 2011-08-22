@@ -176,17 +176,6 @@ static int      _snmp_store_needed = 0;
 #define BSD4_2
 #endif
 
-#ifndef FD_SET
-
-typedef long    fd_mask;
-#define NFDBITS	(sizeof(fd_mask) * NBBY)        /* bits per mask */
-
-#define	FD_SET(n, p)	((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
-#define	FD_CLR(n, p)	((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))
-#define	FD_ISSET(n, p)	((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))
-#define FD_ZERO(p)	memset((p), 0, sizeof(*(p)))
-#endif
-
 static oid      default_enterprise[] = { 1, 3, 6, 1, 4, 1, 3, 1, 1 };
 /*
  * enterprises.cmu.systems.cmuSNMP 
