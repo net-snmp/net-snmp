@@ -45,7 +45,8 @@
 #endif
 
 #if (defined(linux) && defined(IP_PKTINFO)) \
-    || defined(IP_RECVDSTADDR) && !defined(_MSC_VER) && HAVE_STRUCT_MSGHDR_MSG_CONTROL
+    || defined(IP_RECVDSTADDR) && HAVE_STRUCT_MSGHDR_MSG_CONTROL \
+                               && HAVE_STRUCT_MSGHDR_MSG_FLAGS
 
 int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                              socklen_t *fromlen, struct sockaddr *dstip,

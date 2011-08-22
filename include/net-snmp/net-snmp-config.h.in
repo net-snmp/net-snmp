@@ -872,6 +872,9 @@
 /* Define to 1 if `msg_control' is a member of `struct msghdr'. */
 #undef HAVE_STRUCT_MSGHDR_MSG_CONTROL
 
+/* Define to 1 if `msg_flags' is a member of `struct msghdr'. */
+#undef HAVE_STRUCT_MSGHDR_MSG_FLAGS
+
 /* Define to 1 if `n_value' is a member of `struct nlist64'. */
 #undef HAVE_STRUCT_NLIST64_N_VALUE
 
