@@ -1280,7 +1280,6 @@ smux_replace_active(smux_reg * actptr, smux_reg * pasptr)
     smux_list_detach(&ActiveRegs, &actptr);
     if (actptr->reginfo) {
         netsnmp_unregister_handler(actptr->reginfo);
-        netsnmp_handler_registration_free(actptr->reginfo);
         actptr->reginfo = NULL;
     }
 
@@ -1865,7 +1864,6 @@ smux_peer_cleanup(int sd)
             smux_list_detach(&ActiveRegs, &rptr);
             if (rptr->reginfo) {
                 netsnmp_unregister_handler(rptr->reginfo);
-                netsnmp_handler_registration_free(rptr->reginfo);
                 rptr->reginfo = NULL;
             }
             if ((nrptr = smux_find_replacement(rptr->sr_name,
