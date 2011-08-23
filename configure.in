@@ -3850,7 +3850,7 @@ AC_CHECK_STRUCT_FOR([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -3864,7 +3864,7 @@ AC_CHECK_STRUCT_FOR([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -3902,7 +3902,7 @@ AC_CHECK_STRUCT_FOR([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -3924,7 +3924,7 @@ AC_TRY_COMPILE([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -3952,7 +3952,7 @@ AC_TRY_COMPILE([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -4013,7 +4013,7 @@ AC_TRY_COMPILE([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -4055,7 +4055,7 @@ AC_CHECK_STRUCT_FOR([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -4072,7 +4072,7 @@ AC_CHECK_STRUCT_FOR([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -4089,7 +4089,7 @@ AC_CHECK_STRUCT_FOR([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -4106,7 +4106,7 @@ AC_CHECK_STRUCT_FOR([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -4139,7 +4139,7 @@ AC_CHECK_STRUCT_FOR([
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_PARAM_H
