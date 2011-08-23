@@ -71,6 +71,7 @@ for i in `grep NETSNMP_FEATURE_PROVIDE_ $featureheaderin | sed 's/.*FEATURE_PROV
        	   echo " Feature '$i' was asked to be removed but something required it"
        	   echo " See the $featureheaderglobal file for dependency details"
 	   echo ""
+           rm -f $featureheader
        	   exit 1
        	fi
 
