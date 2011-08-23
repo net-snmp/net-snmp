@@ -41989,7 +41989,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 
@@ -42056,7 +42056,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 
@@ -42151,7 +42151,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -42249,7 +42249,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -42370,7 +42370,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -42468,7 +42468,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -42589,7 +42589,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -42687,7 +42687,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -42808,7 +42808,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -42906,7 +42906,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -43027,7 +43027,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -43125,7 +43125,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -43246,7 +43246,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -43344,7 +43344,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -43465,7 +43465,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -43563,7 +43563,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -43684,7 +43684,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -43782,7 +43782,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -43903,7 +43903,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44001,7 +44001,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44122,7 +44122,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44220,7 +44220,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44341,7 +44341,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44439,7 +44439,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44560,7 +44560,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44658,7 +44658,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44779,7 +44779,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44877,7 +44877,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -44998,7 +44998,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -45096,7 +45096,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -45217,7 +45217,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -45315,7 +45315,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -45436,7 +45436,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -45534,7 +45534,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -45670,7 +45670,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -45730,7 +45730,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -45813,7 +45813,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -45873,7 +45873,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -45956,7 +45956,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -46016,7 +46016,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -46099,7 +46099,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -46159,7 +46159,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -46242,7 +46242,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -46302,7 +46302,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -46385,7 +46385,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -46445,7 +46445,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -46536,7 +46536,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
@@ -46607,7 +46607,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
-#define _KERNEL
+#define _KERNEL 1
 #endif
 #endif
 #include <sys/socket.h>
