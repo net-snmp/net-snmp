@@ -67,10 +67,11 @@ for i in `grep NETSNMP_FEATURE_PROVIDE_ $featureheaderin | sed 's/.*FEATURE_PROV
 	# if so, make sure we weren't asked to remove it
        	if echo  " $removethese "| grep " $i " > /dev/null ; then
        	   # Uh oh; they specifically wanted it removed but it was required
-	   echo "Feature Erorr:"
+	   echo "Feature Error:"
        	   echo " Feature '$i' was asked to be removed but something required it"
        	   echo " See the $featureheaderglobal file for dependency details"
 	   echo ""
+           rm -f $featureheader
        	   exit 1
        	fi
 
