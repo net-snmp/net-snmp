@@ -2,6 +2,7 @@ import client_intf
 import string
 import re
 import types
+from sys import stderr
 
 # control verbosity of error output
 verbose = 1
