@@ -2,6 +2,7 @@ import client_intf
 import string
 import re
 import types
+from sys import stderr
 
 # control verbosity of error output
 verbose = 1
@@ -35,7 +36,7 @@ def _parse_session_args(kargs):
         if sessArgs.has_key(key):
             sessArgs[key] = kargs[key]
         else:
-            print stderr, "ERROR: unknown key", key
+            print >>stderr, "ERROR: unknown key", key
     return sessArgs
 
 def STR(obj):
