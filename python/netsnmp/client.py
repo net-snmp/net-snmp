@@ -40,7 +40,7 @@ def _parse_session_args(kargs):
         if sessArgs.has_key(key):
             sessArgs[key] = kargs[key]
         else:
-            print stderr, "ERROR: unknown key", key
+            print >>stderr, "ERROR: unknown key", key
     return sessArgs
 
 def STR(obj):
