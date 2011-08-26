@@ -2,6 +2,8 @@
 *.bs
 *.la
 *.lo
+*.ft
+*.ft.1
 *.made
 *.o
 *.obj
