@@ -60,12 +60,14 @@ static int constant_MODE_G(double *value, const char *name, const int len)
 static int constant_MODE_SET_R(double *value, const char *name, const int len)
 {
     switch (len >= 16 ? name[16] : -1) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case '1':
 	TEST_CONSTANT(value, name, MODE_SET_RESERVE1);
         break;
     case '2':
 	TEST_CONSTANT(value, name, MODE_SET_RESERVE2);
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
     }
     return EINVAL;
 }
@@ -121,6 +123,7 @@ static int constant_MODE_S(double *value, char *name, int len)
         return EINVAL;
 
     switch (len >= 9 ? name[9] : -1) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case 'A':
         TEST_CONSTANT(value, name, MODE_SET_ACTION);
         break;
@@ -133,11 +136,12 @@ static int constant_MODE_S(double *value, char *name, int len)
     case 'F':
         TEST_CONSTANT(value, name, MODE_SET_FREE);
         break;
-    case 'R':
-        return constant_MODE_SET_R(value, name, len);
     case 'U':
         TEST_CONSTANT(value, name, MODE_SET_UNDO);
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+    case 'R':
+        return constant_MODE_SET_R(value, name, len);
     }
     return EINVAL;
 }
