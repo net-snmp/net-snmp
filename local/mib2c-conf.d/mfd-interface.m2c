@@ -118,6 +118,10 @@ void ${context}_valid_columns_set(netsnmp_column_info *vc);
 
 #include "${name}_interface.h"
 
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(check_all_requests_error)
+
 #include <ctype.h>
 
 @eval $m2c_processing_type = 'i'@
