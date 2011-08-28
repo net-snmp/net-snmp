@@ -26204,6 +26204,51 @@ _ACEOF
 fi
 
 
+#       struct sockaddr_un
+#   Library:
+#
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of sockaddr_un.sun_path" >&5
+$as_echo_n "checking size of sockaddr_un.sun_path... " >&6; }
+if ${ac_cv_sizeof_sockaddr_un_sun_path+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (sockaddr_un.sun_path))" "ac_cv_sizeof_sockaddr_un_sun_path"        "
+    $ac_includes_default
+
+#if HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
+struct sockaddr_un sockaddr_un;
+
+"; then :
+
+else
+  if test "$ac_cv_type_sockaddr_un_sun_path" = yes; then
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (sockaddr_un.sun_path)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_sockaddr_un_sun_path=0
+   fi
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_sockaddr_un_sun_path" >&5
+$as_echo "$ac_cv_sizeof_sockaddr_un_sun_path" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_SOCKADDR_UN_SUN_PATH $ac_cv_sizeof_sockaddr_un_sun_path
+_ACEOF
+
+
+
 #       struct statfs
 #   Agent:
 #
