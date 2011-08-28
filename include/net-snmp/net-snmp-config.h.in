@@ -851,6 +851,9 @@
 /* Define to 1 if `msg_control' is member of `struct msghdr'. */
 #undef HAVE_STRUCT_MSGHDR_MSG_CONTROL
 
+/* Define to 1 if `msg_flags' is member of `struct msghdr'. */
+#undef HAVE_STRUCT_MSGHDR_MSG_FLAGS
+
 /* Define to 1 if `n_value' is member of `struct nlist64'. */
 #undef HAVE_STRUCT_NLIST64_N_VALUE
 
@@ -1404,9 +1407,6 @@
 
 /* The size of `short', as computed by sizeof. */
 #undef SIZEOF_SHORT
-
-/* The size of `sockaddr_un.sun_path', as computed by sizeof. */
-#undef SIZEOF_SOCKADDR_UN_SUN_PATH
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
