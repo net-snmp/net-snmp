@@ -135,7 +135,7 @@ FTOBJS=$(LIBTRAPD_FTS) \
        snmpgetnext.ft \
        $(EKCFEATUREPROG) \
        snmpdf.ft \
-       $(SSHINSTALLBINPROG)
+       $(SSHFEATUREPROG)
 
 all: standardall
 
