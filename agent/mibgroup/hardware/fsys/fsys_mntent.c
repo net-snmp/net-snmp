@@ -226,7 +226,12 @@ netsnmp_fsys_arch_load( void )
                                    NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES))
             continue;
 
-        if ( NSFS_STATFS( entry->path, &stat_buf ) < 0 ) {
+#ifdef irix6
+        if ( NSFS_STATFS( entry->path, &stat_buf, sizeof(struct statfs), 0) < 0 )
+#else
+        if ( NSFS_STATFS( entry->path, &stat_buf ) < 0 )
+#endif
+        {
             snprintf( tmpbuf, sizeof(tmpbuf), "Cannot statfs %s\n", entry->path );
             snmp_log_perror( tmpbuf );
             continue;
