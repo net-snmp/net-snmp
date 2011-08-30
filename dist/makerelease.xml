@@ -569,6 +569,24 @@
 	Binaries: build rpms, .tar.gzs, etc.
       </text>
     </step>
+    <step type="Informational" name="cleanup:nsrollup" title="Run nsrollup"
+	  pause="1" mandatory="1">
+      <text>
+	You need to run nsrollup now to sync all the changes we've
+	made into any upstream branches.  This will likely cause merge
+	conflicts because of the version number clashes and will need
+	to be resolved.
+
+	Run (in bash):
+
+ 	  . local/gittools/shell-functions
+	  nsrollup
+	  nssync
+
+	XXX: For conflicts, we can probably pick -s ours but needs to
+     	     be checked and documented.
+      </text>
+    </step>
     <step type="section" title="Advertise it!">
       <steps>
 	<step type="system" pause="1" title="Add note to the news system">

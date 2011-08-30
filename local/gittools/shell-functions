@@ -117,12 +117,31 @@ nspatchtry() {
     # remember the patch args for later use
     nspatchargs="$@"
 
+    # attempt to add any missing patch arguments
+
+    echo "x $nspatchargs x" | grep -- -p > /dev/null
+    if [ $? != "0" ] ; then
+	# they didn't specify a -p option.  Try to guess at one...
+	nspatchfile=`echo $nspatchargs | sed 's/.* \([^ ]+\)$/\1/'`
+	# attempt to count the slashes before any agent/snmplib/apps/etc
+	patchcount=$((`grep diff $nspatchfile | head -1 | awk '{print $NF}' | sed 's/\(agent\|snmplib\|apps\|local\|perl\|python\).*//;s#[^/]##g' | wc -c` - 1))
+	nspatchargs="-p $patchcount $nspatchargs"
+    fi
+
+    echo "x $nspatchargs x" | grep -- "-i " > /dev/null
+    if [ $? != "0" ] ; then
+	# they didn't specify a -i option.  Try to add one...
+	nspatchargs=`echo $nspatchargs | sed 's/\(.*\) \(..*\)$/\1 -i \2/'`
+    fi
+
+    echo "Using patch args: $nspatchargs"
+
     for branch in $nsbranches ; do
 	$nsverbose checking out and applying patch in $branch
 	$nsecho git checkout $branch
 
 	$nsverbose Appling patch
-	$nsecho patch -N --batch "$@"
+	$nsecho patch -N --batch $nspatchargs
 	if [ $? = 0 ] ; then
 	    $nsverbose Patch succeeded on $branch
 	    nsgoodbranches="$nsgoodbranches $branch"
@@ -221,8 +240,8 @@ nssfpatchcommit() {
     patchbranch=`echo $nsgoodbranches | sed 's/ .*//'`
     echo "Branch:     $patchbranch"
     echo "Command: "
-    echo "  git -a commit -s"
-    echo "  --author='$fullname <$username@users.sourceforge.net>'"
+    echo "  git commit -a -s \\"
+    echo "  --author='$fullname <$username@users.sourceforge.net>'\\"
     echo "  -m '$commitmsg'"
     echo ""
     echo -n "commit the results to $patchbranch? [y/n]"

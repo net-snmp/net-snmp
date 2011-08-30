@@ -20,7 +20,6 @@
 #include <dmalloc.h>
 #endif
 
-netsnmp_feature_provide(table_tdata)
 netsnmp_feature_child_of(table_tdata_all, mib_helpers)
 netsnmp_feature_child_of(table_tdata, table_tdata_all)
 netsnmp_feature_child_of(table_tdata_delete_table, table_tdata_all)
