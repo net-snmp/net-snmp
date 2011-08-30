@@ -20827,14 +20827,26 @@ $as_echo_n "checking default mib files to read... " >&6; }
 if test "x$NETSNMP_DEFAULT_MIBS" = "x"; then
   NETSNMP_DEFAULT_MIBS="$default_mibs"
 fi
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
-  # mingw32 and cygwin use ';' as the environment variable separator char
+if test "x$ENV_SEPARATOR" != "x"; then
+  :
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+  # mingw32 and cygwin use ';' as the default environment variable separator
   ENV_SEPARATOR=";"
   NETSNMP_DEFAULT_MIBS=`echo "$NETSNMP_DEFAULT_MIBS" | $SED 's/:/;/g'`
   default_mibs=`echo "$default_mibs" | $SED 's/:/;/g'`
 else
   ENV_SEPARATOR=":"
 fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define ENV_SEPARATOR "$ENV_SEPARATOR"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define ENV_SEPARATOR_CHAR '$ENV_SEPARATOR'
+_ACEOF
 
 cat >>confdefs.h <<_ACEOF
 #define NETSNMP_DEFAULT_MIBS "$NETSNMP_DEFAULT_MIBS"
@@ -28925,6 +28937,8 @@ ac_config_files="$ac_config_files net-snmp-create-v3-user:net-snmp-create-v3-use
 
 ac_config_files="$ac_config_files dist/generation-scripts/gen-variables:dist/generation-scripts/gen-variables.in"
 
+ac_config_files="$ac_config_files local/snmpconf"
+
 
 ac_config_commands="$ac_config_commands default"
 
@@ -29945,6 +29959,7 @@ do
     "net-snmp-config") CONFIG_FILES="$CONFIG_FILES net-snmp-config:net-snmp-config.in" ;;
     "net-snmp-create-v3-user") CONFIG_FILES="$CONFIG_FILES net-snmp-create-v3-user:net-snmp-create-v3-user.in" ;;
     "dist/generation-scripts/gen-variables") CONFIG_FILES="$CONFIG_FILES dist/generation-scripts/gen-variables:dist/generation-scripts/gen-variables.in" ;;
+    "local/snmpconf") CONFIG_FILES="$CONFIG_FILES local/snmpconf" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

@@ -776,8 +776,10 @@ AC_MSG_CHECKING([default mib files to read])
 if test "x$NETSNMP_DEFAULT_MIBS" = "x"; then
   NETSNMP_DEFAULT_MIBS="$default_mibs"
 fi
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
-  # mingw32 and cygwin use ';' as the environment variable separator char
+if test "x$ENV_SEPARATOR" != "x"; then
+  :
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+  # mingw32 and cygwin use ';' as the default environment variable separator
   ENV_SEPARATOR=";"
   NETSNMP_DEFAULT_MIBS=`echo "$NETSNMP_DEFAULT_MIBS" | $SED 's/:/;/g'`
   default_mibs=`echo "$default_mibs" | $SED 's/:/;/g'`
@@ -785,6 +787,10 @@ else
   ENV_SEPARATOR=":"
 fi
 AC_SUBST(ENV_SEPARATOR)
+AC_DEFINE_UNQUOTED([ENV_SEPARATOR], ["$ENV_SEPARATOR"],
+         [Environment separator character surrounded by double quotes.])
+AC_DEFINE_UNQUOTED([ENV_SEPARATOR_CHAR], ['$ENV_SEPARATOR'],
+          [Environment separator character surrounded by single quotes.])
 AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBS,"$NETSNMP_DEFAULT_MIBS")
 AC_SUBST(NETSNMP_DEFAULT_MIBS)
 AC_MSG_RESULT($NETSNMP_DEFAULT_MIBS)
