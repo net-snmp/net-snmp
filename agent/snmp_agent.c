@@ -80,6 +80,7 @@ SOFTWARE.
 #define SNMP_NEED_REQUEST_LIST
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/large_fd_set.h>
 #include <net-snmp/library/snmp_assert.h>
 
 #if HAVE_SYSLOG_H
@@ -634,15 +635,16 @@ _fix_endofmibview(netsnmp_agent_session *asp)
 int
 agent_check_and_process(int block)
 {
-    int             numfds;
-    fd_set          fdset;
-    struct timeval  timeout = { LONG_MAX, 0 }, *tvp = &timeout;
-    int             count;
-    int             fakeblock = 0;
+    int                  numfds;
+    netsnmp_large_fd_set fdset;
+    struct timeval       timeout = { LONG_MAX, 0 }, *tvp = &timeout;
+    int                  count;
+    int                  fakeblock = 0;
 
     numfds = 0;
-    FD_ZERO(&fdset);
-    snmp_select_info(&numfds, &fdset, tvp, &fakeblock);
+    netsnmp_large_fd_set_init(&fdset, FD_SETSIZE);
+    NETSNMP_LARGE_FD_ZERO(&fdset);
+    snmp_select_info2(&numfds, &fdset, tvp, &fakeblock);
     if (block != 0 && fakeblock != 0) {
         /*
          * There are no alarms registered, and the caller asked for blocking, so
@@ -666,13 +668,13 @@ agent_check_and_process(int block)
         tvp->tv_usec = 0;
     }
 
-    count = select(numfds, &fdset, NULL, NULL, tvp);
+    count = netsnmp_large_fd_set_select(numfds, &fdset, NULL, NULL, tvp);
 
     if (count > 0) {
         /*
          * packets found, process them 
          */
-        snmp_read(&fdset);
+        snmp_read2(&fdset);
     } else
         switch (count) {
         case 0:
@@ -682,10 +684,12 @@ agent_check_and_process(int block)
             if (errno != EINTR) {
                 snmp_log_perror("select");
             }
-            return -1;
+            count = -1;
+            goto exit;
         default:
             snmp_log(LOG_ERR, "select returned %d\n", count);
-            return -1;
+            count = -1;
+            goto exit;
         }                       /* endif -- count>0 */
 
     /*
@@ -700,6 +704,8 @@ agent_check_and_process(int block)
 
     netsnmp_check_outstanding_agent_requests();
 
+ exit:
+    netsnmp_large_fd_set_cleanup(&fdset);
     return count;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_AGENT_CHECK_AND_PROCESS */
