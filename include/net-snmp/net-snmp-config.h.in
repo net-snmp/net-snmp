@@ -28,15 +28,6 @@
  */
 #ifndef NETSNMP_NO_AUTOCONF_DEFINITIONS
 
-
-#if defined (WIN32) || defined (mingw32) || defined (cygwin)
-#define ENV_SEPARATOR ";"
-#define ENV_SEPARATOR_CHAR ';'
-#else
-#define ENV_SEPARATOR ":"
-#define ENV_SEPARATOR_CHAR ':'
-#endif
-
 /* definitions added by configure on-the-fly */
 
 #define config_belongs_in(x)
@@ -73,6 +64,12 @@
 
 /* Define if you want local DNSSEC validation support */
 #undef DNSSEC_LOCAL_VALIDATION
+
+/* Environment separator character surrounded by double quotes. */
+#undef ENV_SEPARATOR
+
+/* Environment separator character surrounded by single quotes. */
+#undef ENV_SEPARATOR_CHAR
 
 /* location of mount table list */
 #undef ETC_MNTTAB

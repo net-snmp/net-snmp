@@ -95,6 +95,7 @@ AC_CONFIG_FILES([net-snmp-config:net-snmp-config.in],
 AC_CONFIG_FILES([net-snmp-create-v3-user:net-snmp-create-v3-user.in],
 		[chmod +x net-snmp-create-v3-user])
 AC_CONFIG_FILES([dist/generation-scripts/gen-variables:dist/generation-scripts/gen-variables.in])
+AC_CONFIG_FILES([local/snmpconf])
 
 AC_CONFIG_COMMANDS([default], echo timestamp > stamp-h)
 

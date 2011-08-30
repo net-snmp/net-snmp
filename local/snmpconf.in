@@ -92,13 +92,9 @@ if ($opts{'G'}) {
 }
 
 #
-# Expand the search path in case it contains multiple directories
-# separated by : (Unix) or ; (Win32)
+# Expand the search path in case it contains multiple directories.
 #
-my $ENV_SEPARATOR = ':';
-if ($^O eq 'MSWin32') {
-  $ENV_SEPARATOR = ';';
-}
+my $ENV_SEPARATOR = '@ENV_SEPARATOR@';
 my @searchpath = split(/$ENV_SEPARATOR/, $confpath);
 push @searchpath, "/usr/local/etc/snmp";
 push @searchpath, ".";

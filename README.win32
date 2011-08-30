@@ -1057,6 +1057,7 @@ Cygwin allows you to compile almost the complete agent and applications.
 As an example, the following configure options create a working set of
 programs:
 
+ENV_SEPARATOR=":" \
 ./configure \
 	--with-mib-modules="host agentx disman/event-mib examples/example" \
 	--with-out-mib-modules=host/hr_network \
