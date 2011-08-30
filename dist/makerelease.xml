@@ -94,7 +94,7 @@
 	  this step finds outstanding modified files you need to check
 	  them in or revert them before continuing!</text>
 	  <commands>
-	    <command>git status --porcelain | egrep '^[^\?]'</command>
+	    <command expectfailure="1">git status --porcelain | egrep '^[^\?]'</command>
 	  </commands>
 	</step>
       </steps>
@@ -130,7 +130,7 @@
 	      <text>We'll now commit the Makefile.top file if you've
 		modified it.</text>
 	      <commands>
-		<command>git commit -m "version update for {VERSION}" Makefile.top</command>
+		<command ignoreerror="1">git commit -m "version update for {VERSION}" Makefile.top</command>
 	      </commands>
 	    </step>
 	  </steps>
@@ -272,7 +272,7 @@
 	</step>
 	<step prompt="true" type="system" stepname="docs:commit" title="docs:commit">
 	  <commands>
-	    <command>git commit -m "documentation update for {VERSION}" man</command>
+	    <command ignoreerror="1">git commit -m "documentation update for {VERSION}" man</command>
 	  </commands>
 	</step>
       </steps>
