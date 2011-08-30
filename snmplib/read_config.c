@@ -733,6 +733,9 @@ read_config(const char *filename,
     int             i, ret;
     struct config_line *lptr;
 
+    // reset file counter when recursion depth is 0
+    if (depth == 0) files = 0;
+
     linecount = 0;
     curfilename = filename;
 
@@ -763,12 +766,14 @@ read_config(const char *filename,
     if (files > CONFIG_MAX_FILES) {
         netsnmp_config_error("maximum conf file count (%d) exceeded\n",
                              CONFIG_MAX_FILES);
+	fclose(ifile);
         return SNMPERR_GENERR;
     }
 #define CONFIG_MAX_RECURSE_DEPTH 16
     if (depth > CONFIG_MAX_RECURSE_DEPTH) {
         netsnmp_config_error("nested include depth > %d\n",
                              CONFIG_MAX_RECURSE_DEPTH);
+	fclose(ifile);
         return SNMPERR_GENERR;
     }
     ++files;
