@@ -360,6 +360,32 @@ while (<MAKE_IN>)
 
 ###############################################
 #
+# Create ..\local\snmpconf from ..\local\snmpconf.in
+#
+###############################################
+
+my $snmpconf_out = "..\\local\\snmpconf";
+my $snmpconf_in = "..\\local\\snmpconf.in";
+
+my $outdir = $config;
+
+open (SNMPCONF_OUT, ">$snmpconf_out") || die "Can't Open $snmpconf_out\n";
+open (SNMPCONF_IN, "<$snmpconf_in") || die "Can't Open $snmpconf_in\n";
+
+print "creating $snmpconf_out\n";
+
+while (<SNMPCONF_IN>)
+{
+  chomp;
+  
+  s/\@ENV_SEPARATOR\@/;/;
+  
+  print SNMPCONF_OUT $_ . "\n";
+}
+
+
+###############################################
+#
 # Create net-snmp-config.h
 #
 ###############################################
