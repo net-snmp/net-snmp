@@ -185,6 +185,13 @@ foreach my $progName ("libagent", "libnetsnmptrapd", "local",
 }
 
 my %subs = (
+    "env" => [ "\@ENV_SEPARATOR\@", ";" ]
+);
+
+substitute("../local/snmpconf", "../local/snmpconf.in", \%subs);
+
+
+my %subs = (
     "ver" => [ "^#define PACKAGE_VERSION.*",
                "#define PACKAGE_VERSION \"$version\"" ]
     );
