@@ -93,7 +93,12 @@ NETSNMP_ARG_WITH(openssl,
     elif test "x$withval" = "xno"; then
       tryopenssl=no
     elif test -d "$withval"; then
-      AC_ADD_SEARCH_PATH($withval)
+      if test -d "$withval/lib/MinGW"; then
+        LDFLAGS="-L$withval/lib/MinGW $LDFLAGS"
+        CPPFLAGS="-I$withval/include $CPPFLAGS"
+      else
+        AC_ADD_SEARCH_PATH($withval)
+      fi
       tryopenssl=yes
       askedopenssl=yes
     fi,

@@ -3434,6 +3434,10 @@ if test "${with_openssl+set}" = set; then :
     elif test "x$withval" = "xno"; then
       tryopenssl=no
     elif test -d "$withval"; then
+      if test -d "$withval/lib/MinGW"; then
+        LDFLAGS="-L$withval/lib/MinGW $LDFLAGS"
+        CPPFLAGS="-I$withval/include $CPPFLAGS"
+      else
 
   if test "x$withval" != x -a -d $withval; then
      if test -d $withval/lib; then
@@ -3444,6 +3448,7 @@ if test "${with_openssl+set}" = set; then :
      fi
   fi
 
+      fi
       tryopenssl=yes
       askedopenssl=yes
     fi
