@@ -489,7 +489,6 @@ CONFIGAPP() {
 #
 # common to STARTAGENT and STARTTRAPD
 # log command to "invoked" file
-# delay after command to allow for settle
 #
 STARTPROG() {
     if [ "x$DYNAMIC_ANALYZER" != "x" ]; then
