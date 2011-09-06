@@ -7,6 +7,28 @@
 #  *SNMP_PERSISTENT_FILE: where to store the agent's persistent information
 #                         (XXX: this should be specific to just the agent)
 
+# MinGW/MSYS only: translate an MSYS path back into a DOS path such that snmpd
+# and the Net-SNMP applications can understand it. One of the features of MSYS
+# is that if a POSIX-style path is passed as a command-line argument to an
+# executable that MSYS translates that path to a DOS-style path before
+# starting the executable. This is a key feature of MSYS that makes it
+# possible to run shell scripts unmodified and at the same time to use
+# executables that accept DOS-style paths. There is no support however for
+# automatical translation of environment variables that contain paths. Hence
+# this function that translates paths explicitly.
+translate_path() {
+  if [ $OSTYPE = msys ]; then
+    local t=`set \
+             | sed -n -e "s/^$1='\(.*\)'$/${SNMP_ENV_SEPARATOR}\1/p" \
+                      -e "s/^$1=\(.*\)$/${SNMP_ENV_SEPARATOR}\1/p" \
+             | sed -e "s|${SNMP_ENV_SEPARATOR}/c/|${SNMP_ENV_SEPARATOR}c:/|g" \
+                   -e "s|${SNMP_ENV_SEPARATOR}/tmp/|${SNMP_ENV_SEPARATOR}c:/windows/temp/|g" \
+             | sed -e "s/^${SNMP_ENV_SEPARATOR}//" \
+            `
+    eval "$1='$t'"
+  fi
+}
+
 #
 # Only allow ourselves to be eval'ed once
 #
@@ -47,6 +69,8 @@ if [ "x$SNMP_VERBOSE" = "x" ]; then
     SNMP_VERBOSE=0
     export SNMP_VERBOSE
 fi
+
+SNMP_ENV_SEPARATOR="`${builddir}/net-snmp-config --env-separator`"
 
 if [ "x$MIBDIRS" = "x" ]; then
   if [ "x$SNMP_PREFER_NEAR_MIBS" = "x1" ]; then
@@ -103,6 +127,7 @@ if [ "x$SNMP_HEADERONLY" != "xyes" ]; then
         testnum=0
     fi
     SNMP_TMPDIR="/tmp/snmp-test-$testnum-$$"
+    translate_path SNMP_TMPDIR
     export SNMP_TMPDIR
     if [ -d $SNMP_TMPDIR ]; then
 	echo "$0: ERROR: $SNMP_TMPDIR already existed."
@@ -110,7 +135,7 @@ if [ "x$SNMP_HEADERONLY" != "xyes" ]; then
     fi
   fi
   if [ ! -d $SNMP_TMPDIR ]; then
-    mkdir $SNMP_TMPDIR
+    mkdir -p $SNMP_TMPDIR
     chmod 0700 $SNMP_TMPDIR
   fi
   if [ "x$SNMP_TMP_PERSISTENTDIR" = "x" ]; then
@@ -130,7 +155,6 @@ fi
 
 SNMP_IGNORE_WINDOWS_REGISTRY="true"
 export SNMP_IGNORE_WINDOWS_REGISTRY
-SNMP_ENV_SEPARATOR="`${builddir}/net-snmp-config --env-separator`"
 SNMP_PERLPROG="`${builddir}/net-snmp-config --perlprog`"
 SNMP_TESTDIR="$SNMP_BASEDIR/tests"
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/snmpd.conf"
@@ -144,8 +168,10 @@ SNMP_SNMPD_LOG_FILE="$SNMP_TMPDIR/snmpd.log"
 SNMP_AGENTX_PID_FILE="$SNMP_TMPDIR/agentx.pid"
 SNMP_AGENTX_LOG_FILE="$SNMP_TMPDIR/agentx.log"
 SNMPCONFPATH="${SNMP_TMPDIR}${SNMP_ENV_SEPARATOR}${SNMP_TMP_PERSISTENTDIR}"
+translate_path SNMPCONFPATH
 export SNMPCONFPATH
 SNMP_PERSISTENT_DIR=$SNMP_TMP_PERSISTENTDIR
+translate_path SNMP_PERSISTENT_DIR
 export SNMP_PERSISTENT_DIR
 #SNMP_PERSISTENT_FILE="$SNMP_TMP_PERSISTENTDIR/persistent-store.conf"
 #export SNMP_PERSISTENT_FILE
