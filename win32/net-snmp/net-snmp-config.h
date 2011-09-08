@@ -1685,6 +1685,7 @@ enum {
 #      endif
 #    endif
 #    pragma comment(lib, "gdi32.lib")
+#    pragma comment(lib, "user32.lib")
 #  endif
 #endif
 
