@@ -1576,15 +1576,14 @@ typedef unsigned short mode_t;
 #ifndef HAVE_STDINT_H
 typedef unsigned char uint8_t;
 typedef char int8_t;
-typedef unsigned short uint16_t;
-typedef short int16_t;
+typedef unsigned __int16 uint16_t;
+typedef __int16 int16_t;
 typedef unsigned __int32 uint32_t;
-typedef long int32_t;
+typedef __int32 int32_t;
 typedef unsigned __int64 uint64_t;
 typedef __int64 int64_t;
 typedef unsigned __int64 uintmax_t;
 typedef __int64 intmax_t;
-typedef unsigned short   uint16_t;
 #else /* HAVE_STDINT_H */
 #include <stdint.h>
 #endif /* HAVE_STDINT_H */
