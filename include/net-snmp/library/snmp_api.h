@@ -418,7 +418,6 @@ typedef struct request_list {
 #endif
 
     int             create_user_from_session(netsnmp_session * session);
-    int snmp_get_fd_for_session(struct snmp_session *sessp);
     int snmpv3_probe_contextEngineID_rfc5343(void *slp,
                                              netsnmp_session *session);
 
