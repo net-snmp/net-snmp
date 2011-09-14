@@ -250,7 +250,7 @@ else
 	            echo "You must specify the extra cflags"
 	            exit 1
 	        fi
-	        cflags=$1
+	        cflags="$1"
 	        echo "setting extra cflags: $cflags"
 	        shift
 		;;
@@ -260,7 +260,7 @@ else
 	            echo "You must specify the extra ldflags"
 	            exit 1
 	        fi
-	        ldflags=$1
+	        ldflags="$1"
 	        echo "setting extra ldflags: $ldflags"
 	        shift
 		;;
