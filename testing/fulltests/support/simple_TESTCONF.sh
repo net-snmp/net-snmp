@@ -201,8 +201,12 @@ else
 fi
 
 if [ "x$OSTYPE" = "xmsys" ]; then
-    # To do: make configure find out the path of MSYS' sh.exe.
-    MSYS_SH="c:/msys/1.0/bin/sh.exe"
+    # Obtain the MSYS installation path from the !C: environment variable,
+    # remove surrounding single quotes and convert backslashes into forward
+    # slashes.
+    MSYS_PATH="$(set \
+                 | sed -n 's|^\!C:='"'"'\(.*\)'"'"'$|\1|p' | sed 's|\\|/|g')"
+    MSYS_SH="$MSYS_PATH/sh.exe"
 fi
 
 PROBE_FOR_PORT() {
