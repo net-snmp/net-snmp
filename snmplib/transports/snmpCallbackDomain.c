@@ -353,7 +353,7 @@ netsnmp_callback_accept(netsnmp_transport *t)
 {
     DEBUGMSGTL(("transport_callback", "hook_accept enter\n"));
     DEBUGMSGTL(("transport_callback", "hook_accept exit\n"));
-    return 0;
+    return -1;
 }
 
 
