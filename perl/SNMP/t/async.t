@@ -17,7 +17,7 @@ use SNMP;
 use vars qw($agent_port $comm $agent_host);
 
 if ($^O =~ /win32/i) {
-  warn "Win32 detected - skipping async calls\n";
+  warn "Win32/Win64 detected - skipping async calls\n";
   exit;
 }
 
