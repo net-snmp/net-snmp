@@ -87,7 +87,7 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
     }
 
     if (t != NULL && t->sock >= 0) {
-        newsock = accept(t->sock, (struct sockaddr *) farend, &farendlen);
+        newsock = (int) accept(t->sock, (struct sockaddr *) farend, &farendlen);
 
         if (newsock < 0) {
             DEBUGMSGTL(("netsnmp_tcp6","accept failed rc %d errno %d \"%s\"\n",
@@ -191,7 +191,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     }
 #endif
     if (!socket_initialized)
-        t->sock = socket(PF_INET6, SOCK_STREAM, 0);
+        t->sock = (int) socket(PF_INET6, SOCK_STREAM, 0);
     if (t->sock < 0) {
         netsnmp_transport_free(t);
         return NULL;

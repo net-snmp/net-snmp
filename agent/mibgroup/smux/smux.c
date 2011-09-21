@@ -236,7 +236,7 @@ real_init_smux(void)
 #endif
     netsnmp_sockaddr_in( &lo_socket, smux_socket, SMUXPORT );
 
-    if ((smux_listen_sd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((smux_listen_sd = (int) socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         snmp_log_perror("[init_smux] socket failed");
         return;
     }
@@ -639,7 +639,7 @@ smux_accept(int sd)
      */
     DEBUGMSGTL(("smux", "[smux_accept] Calling accept()\n"));
     errno = 0;
-    if ((fd = accept(sd, (struct sockaddr *) &in_socket, &alen)) < 0) {
+    if ((fd = (int) accept(sd, (struct sockaddr *) &in_socket, &alen)) < 0) {
         snmp_log_perror("[smux_accept] accept failed");
         return -1;
     } else {

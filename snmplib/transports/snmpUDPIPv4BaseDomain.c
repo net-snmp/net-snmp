@@ -107,7 +107,7 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
     }
 #endif
     if (!socket_initialized)
-        t->sock = socket(PF_INET, SOCK_DGRAM, 0);
+        t->sock = (int) socket(PF_INET, SOCK_DGRAM, 0);
     DEBUGMSGTL(("UDPBase", "openned socket %d as local=%d\n", t->sock, local)); 
     if (t->sock < 0) {
         netsnmp_transport_free(t);

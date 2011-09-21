@@ -229,7 +229,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
     }
 #endif
     if (!socket_initialized)
-        t->sock = socket(PF_INET6, SOCK_DGRAM, 0);
+        t->sock = (int) socket(PF_INET6, SOCK_DGRAM, 0);
     if (t->sock < 0) {
         netsnmp_transport_free(t);
         return NULL;

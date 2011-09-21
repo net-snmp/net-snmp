@@ -95,7 +95,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
     farend = &addr_pair->remote_addr.sa;
 
     if (t != NULL && t->sock >= 0) {
-        newsock = accept(t->sock, farend, &farendlen);
+        newsock = (int) accept(t->sock, farend, &farendlen);
 
         if (newsock < 0) {
             DEBUGMSGTL(("netsnmp_tcp", "accept failed rc %d errno %d \"%s\"\n",
@@ -194,7 +194,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
     }
 #endif
     if (!socket_initialized)
-        t->sock = socket(PF_INET, SOCK_STREAM, 0);
+        t->sock = (int) socket(PF_INET, SOCK_STREAM, 0);
     if (t->sock < 0) {
         netsnmp_transport_free(t);
         return NULL;
