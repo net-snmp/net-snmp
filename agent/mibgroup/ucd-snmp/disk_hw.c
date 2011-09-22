@@ -245,10 +245,16 @@ disk_parse_config_all(const char *token, char *cptr)
 
 
 static int _percent( unsigned long long value, unsigned long long total ) {
+    float v=value, t=total, pct;
+
     /* avoid division by zero */
     if (total == 0)
         return 0;
-    return (int)( value * 100 / total );
+
+    pct  = (v*100)/t;   /* Calculate percentage using floating point
+                           arithmetic, to avoid overflow errors */
+    pct += 0.5;         /* rounding */
+    return (int)pct;
 }
 
 static netsnmp_fsys_info **
