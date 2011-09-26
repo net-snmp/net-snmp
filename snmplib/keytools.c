@@ -107,7 +107,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     u_char          buf[USM_LENGTH_KU_HASHBLOCK], *bufp;
 
 #ifdef NETSNMP_USE_OPENSSL
-    EVP_MD_CTX     *ctx = (EVP_MD_CTX *)malloc(sizeof(EVP_MD_CTX));
+    EVP_MD_CTX     *ctx = NULL;
     unsigned int    tmp_len;
 #else
     MDstruct        MD;
@@ -133,6 +133,12 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
      */
 #ifdef NETSNMP_USE_OPENSSL
 
+#ifdef HAVE_EVP_MD_CTX_CREATE
+    ctx = EVP_MD_CTX_create();
+#else
+    ctx = malloc(sizeof(*ctx));
+    EVP_MD_CTX_init(ctx);
+#endif
 #ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth))
         EVP_DigestInit(ctx, EVP_md5());
@@ -140,10 +146,8 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 #endif
         if (ISTRANSFORM(hashtype, HMACSHA1Auth))
         EVP_DigestInit(ctx, EVP_sha1());
-    else {
-        free(ctx);
-        return (SNMPERR_GENERR);
-    }
+    else
+        QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
 #else
     MDbegin(&MD);
 #endif                          /* NETSNMP_USE_OPENSSL */
@@ -195,7 +199,14 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
   generate_Ku_quit:
     memset(buf, 0, sizeof(buf));
 #ifdef NETSNMP_USE_OPENSSL
-    free(ctx);
+    if (ctx) {
+#ifdef HAVE_EVP_MD_CTX_DESTROY
+        EVP_MD_CTX_destroy(ctx);
+#else
+        EVP_MD_CTX_cleanup(ctx);
+        free(ctx);
+#endif
+    }
 #endif
     return rval;
 

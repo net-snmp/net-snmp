@@ -2729,6 +2729,11 @@ if test "x$tryopenssl" != "xno"; then
               LIBCRYPTO="-lcrypto")
       AC_CHECK_LIB(crypto, AES_cfb128_encrypt, 
               AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1, [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
+      AC_CHECK_LIB(${CRYPTO}, EVP_MD_CTX_create,
+          AC_DEFINE([HAVE_EVP_MD_CTX_CREATE], [],
+              [Define to 1 if you have the `EVP_MD_CTX_create' function.])
+          AC_DEFINE([HAVE_EVP_MD_CTX_DESTROY], [],
+              [Define to 1 if you have the `EVP_MD_CTX_destroy' function.]))
     fi
 elif test "x$askedpkcs" = "xyes"; then
     AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11)

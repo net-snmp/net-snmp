@@ -1392,6 +1392,12 @@
 /* Define to 1 if you have the <openssl/aes.h> header file. */
 #define HAVE_OPENSSL_AES_H 1
 
+/* Define to 1 if you have the `EVP_MD_CTX_create' function. */
+#define HAVE_EVP_MD_CTX_CREATE 1
+
+/* Define to 1 if you have the `EVP_MD_CTX_destroy' function. */
+#define HAVE_EVP_MD_CTX_DESTROY 1
+
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #define HAVE_AES_CFB128_ENCRYPT 1
 

@@ -413,7 +413,7 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 
 #ifdef NETSNMP_USE_OPENSSL
     const EVP_MD   *hashfn;
-    EVP_MD_CTX     ctx, *cptr;
+    EVP_MD_CTX     *cptr;
 #endif
 
     DEBUGTRACE;
@@ -441,42 +441,32 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     }
 
 /** initialize the pointer */
-    memset(&ctx, 0, sizeof(ctx));
-    cptr = &ctx;
+#ifdef HAVE_EVP_MD_CTX_CREATE
+    cptr = EVP_MD_CTX_create();
+#else
+    cptr = malloc(sizeof(*cptr));
 #if defined(OLD_DES)
-    EVP_DigestInit(cptr, hashfn);
-#else /* !OLD_DES */
-    /* this is needed if the runtime library is different than the compiled
-       library since the openssl versions are very different. */
-    if (SSLeay() < 0x907000) {
-        /* the old version of the struct was bigger and thus more
-           memory is needed. should be 152, but we use 256 for safety. */
-        cptr = (EVP_MD_CTX *)malloc(256);
-        EVP_DigestInit(cptr, hashfn);
-    } else {
-        EVP_MD_CTX_init(cptr);
-        EVP_DigestInit(cptr, hashfn);
-    }
+    memset(cptr, 0, sizeof(*cptr));
+#else
+    EVP_MD_CTX_init(cptr);
 #endif
+#endif
+    EVP_DigestInit(cptr, hashfn);
 
 /** pass the data */
     EVP_DigestUpdate(cptr, buf, buf_len);
 
 /** do the final pass */
-#if defined(OLD_DES)
     EVP_DigestFinal(cptr, MAC, &tmp_len);
     *MAC_len = tmp_len;
-#else /* !OLD_DES */
-    if (SSLeay() < 0x907000) {
-        EVP_DigestFinal(cptr, MAC, &tmp_len);
-        *MAC_len = tmp_len;
-        free(cptr);
-    } else {
-        EVP_DigestFinal_ex(cptr, MAC, &tmp_len);
-        *MAC_len = tmp_len;
-        EVP_MD_CTX_cleanup(cptr);
-    }
-#endif                          /* OLD_DES */
+#ifdef HAVE_EVP_MD_CTX_DESTROY
+    EVP_MD_CTX_destroy(cptr);
+#else
+#if !defined(OLD_DES)
+    EVP_MD_CTX_cleanup(cptr);
+#endif
+    free(cptr);
+#endif
     return (rval);
 #elif NETSNMP_USE_PKCS11                  /* NETSNMP_USE_PKCS11 */
 
