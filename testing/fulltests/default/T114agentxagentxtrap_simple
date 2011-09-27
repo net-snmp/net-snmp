@@ -5,14 +5,13 @@
 HEADER AgentX trap sending support using agentxtrap
 
 SKIPIFNOT USING_AGENTX_MASTER_MODULE
-SKIPIFNOT NETSNMP_SECMOD_USM
 
 #
 # Begin test
 #
 
 # start the trap demon
-CONFIGTRAPD authcommunity log public
+CONFIGTRAPD disableAuthorization yes
 STARTTRAPD
 
 # standard V3 configuration for initial user
