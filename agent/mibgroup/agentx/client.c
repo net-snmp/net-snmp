@@ -51,7 +51,7 @@ netsnmp_feature_require(set_agent_uptime)
          *   the SNMP equivalents
          */
 
-int
+static int
 agentx_synch_input(int op,
                    netsnmp_session * session,
                    int reqid, netsnmp_pdu *pdu, void *magic)
@@ -88,7 +88,7 @@ agentx_synch_input(int op,
 
 
 
-int
+static int
 agentx_synch_response(netsnmp_session * ss, netsnmp_pdu *pdu,
                       netsnmp_pdu **response)
 {
