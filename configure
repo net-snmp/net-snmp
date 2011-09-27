@@ -20092,7 +20092,8 @@ _ACEOF
     module_type=mib_module
     if test -f $srcdir/$mibdir/$i.h; then
 
-      module_type=`$MODULECPP module_tmp_header.h | $GREP config_belongs_in | $SED 's@.*config_belongs_in(\([^)]*\)).*@\1@'`
+      module_type=`$MODULECPP module_tmp_header.h | \
+                   $SED -n 's@.*config_belongs_in(\([^)]*\)).*@\1@p'`
 
     fi
     if test "x$module_type" = "x" ; then
@@ -20193,7 +20194,8 @@ _ACEOF
         # check if $i has any conflicts
         #
 
-	new_list_excl=`$MODULECPP module_tmp_header.h | $GREP config_exclude | $SED 's/.*config_exclude(\(.*\)).*/\1/'`
+        new_list_excl=`$MODULECPP module_tmp_header.h | \
+                       $SED -n 's/.*config_exclude(\(.*\)).*/\1/p'`
 	if test "x$new_list_excl" != "x"; then
 
   if test $module_debug = 1; then
@@ -20238,7 +20240,8 @@ EOF
         #
 
 
-        new_list_arch=`$MODULECPP module_tmp_header.h | $GREP config_arch_require | $SED 's/.*config_arch_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xarchx-\2/'`
+        new_list_arch=`$MODULECPP module_tmp_header.h | \
+                       $SED -n 's/.*config_arch_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xarchx-\2/p'`
 
 	if test "x$new_list_arch" != "x"; then
           for j in $new_list_arch
@@ -20269,10 +20272,6 @@ EOF
         #
 
         new_list_alt3=`$MODULECPP module_tmp_header.h | \
-            $GREP config_version_require | \
-            $SED -e 's/  */ /g' \
-                 -e 's/.*config_version_require(( *\([^)]*\) *)).*/\1/' \
-                 -e 's/ *, */,/g' | \
             awk '
                 BEGIN {
                     if("'"$enable_new_features"'" == "yes")
@@ -20285,7 +20284,10 @@ EOF
                     split("'"$with_features_of"'", a);
                     version=sprintf("%03d%03d%03d%03d", a[1], a[2], a[3], a[4]);
                 }
-                {
+                /config_version_require/ {
+                    gsub("^.*config_version_require *\\\\(\\\\(", "");
+                    gsub("\\\\)\\\\).*$", "");
+                    gsub(", *", ",");
                     FS = ",";
                     n = split($0, a);
                     FS = ".";
@@ -20316,7 +20318,8 @@ EOF
         # check if $i has any other required modules
         #
 
-	new_list="$new_list `$MODULECPP module_tmp_header.h | $GREP config_require | $SED 's/.*config_require(\(.*\)).*/\1/'`"
+        new_list="$new_list `$MODULECPP module_tmp_header.h | \
+                  $SED -n 's/.*config_require(\(.*\)).*/\1/p'`"
 
   if test $module_debug = 1; then
     echo " $i will test: $new_list"
@@ -20374,7 +20377,8 @@ EOF
         # check if $i has any mibs to add
         #
 
-	new_mibs=`$MODULECPP module_tmp_header.h | $GREP config_add_mib | $SED 's/.*config_add_mib(\(.*\)).*/\1/'`
+        new_mibs=`$MODULECPP module_tmp_header.h | \
+                  $SED -n 's/.*config_add_mib(\(.*\)).*/\1/p'`
 	if test "x$new_mibs" != "x"; then
 	    for j in $new_mibs
 		do
@@ -20415,7 +20419,7 @@ EOF
         #-------------------
         # check for unsupported config_load_mib
         #
-        if $MODULECPP module_tmp_header.h | $GREP config_load_mib > /dev/null 2>&1; then
+        if $MODULECPP module_tmp_header.h | $GREP -q config_load_mib; then
           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: mib module error" >&5
 $as_echo "$as_me: WARNING: mib module error" >&2;}
       	  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: mib module \"$i\" uses the \"config_load_mib\" directive, which is no longer supported.  It probably won't work." >&5
@@ -20428,7 +20432,8 @@ $as_echo "$as_me: WARNING: mib module \"$i\" uses the \"config_load_mib\" direct
         #
 
 
-        $MODULECPP module_tmp_header.h | $GREP config_parse_dot_conf | $SED 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
+        $MODULECPP module_tmp_header.h | \
+        $SED -n 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@p' >> $mibdir/mib_module_dot_conf.h
 
 
         #---------------------
@@ -20438,7 +20443,8 @@ $as_echo "$as_me: WARNING: mib module \"$i\" uses the \"config_load_mib\" direct
         # check if $i has any errors, or warnings
         #
 
-	error=`$MODULECPP module_tmp_header.h | $GREP config_error | $SED 's/.*config_error(\(.*\)).*/\1/'`
+        error=`$MODULECPP module_tmp_header.h | \
+               $SED -n 's/.*config_error(\(.*\)).*/\1/p'`
 	if test "x$error" != "x"; then
           echo
           echo
@@ -20450,7 +20456,8 @@ $as_echo "$as_me: WARNING: mib module \"$i\" uses the \"config_load_mib\" direct
       	#  - used to signal a configuration "warning" to be printed to the user
         #
 
-	warning=`$MODULECPP module_tmp_header.h | $GREP config_warning | $SED 's/.*config_warning(\(.*\)).*/\1/'`
+        warning=`$MODULECPP module_tmp_header.h | \
+                 $SED -n 's/.*config_warning(\(.*\)).*/\1/p'`
 	if test "x$warning" != "x"; then
           all_warnings="$all_warnings $warning
 "
