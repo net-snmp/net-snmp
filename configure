@@ -22482,6 +22482,54 @@ $as_echo "#define HAVE_AES_CFB128_ENCRYPT 1" >>confdefs.h
 
 fi
 
+
+            as_ac_Lib=`$as_echo "ac_cv_lib_${CRYPTO}''_EVP_MD_CTX_create" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_create in -l${CRYPTO}" >&5
+$as_echo_n "checking for EVP_MD_CTX_create in -l${CRYPTO}... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l${CRYPTO}  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char EVP_MD_CTX_create ();
+int
+main ()
+{
+return EVP_MD_CTX_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+
+$as_echo "#define HAVE_EVP_MD_CTX_CREATE /**/" >>confdefs.h
+
+
+$as_echo "#define HAVE_EVP_MD_CTX_DESTROY /**/" >>confdefs.h
+
+fi
+
         fi
         if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for DTLSv1_method in -lssl" >&5
