@@ -114,7 +114,7 @@ SKIP() {
 }
 
 ISDEFINED() {
-	grep "^#define $1" ${builddir}/include/net-snmp/net-snmp-config.h ${builddir}/include/net-snmp/agent/mib_module_config.h ${builddir}/include/net-snmp/agent/agent_module_config.h > /dev/null
+	grep -wq "^#define $1" ${builddir}/include/net-snmp/net-snmp-config.h ${builddir}/include/net-snmp/agent/mib_module_config.h ${builddir}/include/net-snmp/agent/agent_module_config.h
 }
 
 SKIPIFNOT() {
@@ -489,7 +489,6 @@ CONFIGAPP() {
 #
 # common to STARTAGENT and STARTTRAPD
 # log command to "invoked" file
-# delay after command to allow for settle
 #
 STARTPROG() {
     if [ "x$DYNAMIC_ANALYZER" != "x" ]; then
@@ -537,6 +536,7 @@ STARTAGENT() {
         PORT_SPEC="${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${PORT_SPEC}"
     fi
     STARTPROG
+    WAITFORCOND test -e $SNMP_SNMPD_PID_FILE
     WAITFORAGENT "NET-SNMP version"
 }
 
@@ -551,6 +551,7 @@ STARTTRAPD() {
         PORT_SPEC="${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${PORT_SPEC}"
     fi
     STARTPROG
+    WAITFORCOND test -e $SNMP_SNMPTRAPD_PID_FILE
     WAITFORTRAPD "NET-SNMP version"
 }
 

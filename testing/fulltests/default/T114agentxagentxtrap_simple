@@ -37,7 +37,7 @@ STOPAGENT
 STOPTRAPD
 
 # Check that the trap was received
-CHECKTRAPD "mostly_harmless"
+CHECKTRAPD "= STRING: \"*mostly_harmless\"*"
 
 # all done (whew)
 FINISHED
