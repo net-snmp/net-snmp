@@ -8,7 +8,16 @@ listing of all changes made to the code.
   libnetsnmp:
       - Fixed the mib-parsing-bug introduced shortly before 5.7
 
-  Many other miscellaneous bug fixes
+  agent:
+      - fixed rounding errors for disk percentage calculations
+
+  openbsd:
+      - better support for recent openbsd releases
+
+  features:
+      - bug fixes with minimalist support after additional user feedback
+
+  Many other miscellaneous minor bug fixes
 
 *5.7*
 
