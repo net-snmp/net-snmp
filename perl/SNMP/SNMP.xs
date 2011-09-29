@@ -4437,7 +4437,7 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
 	   
            New (0, oid_arr, MAX_OID_LEN, oid);
 
-           if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
+           if (oid_arr && SvROK(sess_ref)) {
 
               sess_ptr_sv = hv_fetch((HV*)SvRV(sess_ref), "SessPtr", 7, 1);
 	      ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
@@ -4451,8 +4451,13 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
 	      
               pdu = snmp_pdu_create(SNMP_MSG_TRAP2);
 
-              varlist = (AV*) SvRV(varlist_ref);
-              varlist_len = av_len(varlist);
+              if (SvROK(varlist_ref)) {
+                  varlist = (AV*) SvRV(varlist_ref);
+                  varlist_len = av_len(varlist);
+              } else {
+                  varlist = NULL;
+                  varlist_len = -1;
+              }
 	      /************************************************/
               res = __add_var_val_str(pdu, sysUpTime, SYS_UPTIME_OID_LEN,
 				uptime, strlen(uptime), TYPE_TIMETICKS);
