@@ -127,7 +127,7 @@ netsnmp_register_old_api(const char *moduleName,
          */
         if (netsnmp_register_handler(reginfo) != MIB_REGISTERED_OK) {
             /** netsnmp_handler_registration_free(reginfo); already freed */
-            SNMP_FREE(vp);
+            /* SNMP_FREE(vp); already freed */
         }
     }
     return SNMPERR_SUCCESS;

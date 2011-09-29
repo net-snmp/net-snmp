@@ -33,10 +33,10 @@ se_read_conf("enum",
 OK(se_find_list(2, 3), "list (2, 3) should be present");
 if (se_find_list(2, 3)) {
   OK(se_find_value(2, 3, "kiwifruit") == 3,
-     "lookup by string should return the proper value")
+     "lookup by string should return the proper value");
   se_find_result = se_find_label(2, 3, 2);
   OK(se_find_result && strcmp(se_find_result, "pear") == 0,
-     "lookup by label should return the proper string")
+     "lookup by label should return the proper string");
 }
 
 se_read_conf("enum",

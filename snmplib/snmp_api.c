@@ -6021,8 +6021,9 @@ snmp_sess_select_info2_flags(void *sessp,
              */
             requests++;
             for (rp = slp->internal->requests; rp; rp = rp->next_request) {
-                if ((!timerisset(&earliest)
-                     || (timercmp(&rp->expire, &earliest, <)))) {
+                if (!timerisset(&earliest)
+                    || (timerisset(&rp->expire)
+                        && timercmp(&rp->expire, &earliest, <))) {
                     earliest = rp->expire;
                     DEBUGMSG(("verbose:sess_select","(to in %d.%06d sec) ",
                                (int)earliest.tv_sec, (int)earliest.tv_usec));
