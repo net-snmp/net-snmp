@@ -243,7 +243,3 @@ libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    $(TOBJS)
 parse:  mib.o parse.c
 	$(CC) $(CFLAGS) -DTEST parse.c -o $@ \
 		`$(top_srcdir)/net-snmp-config --libs`
-
-test_binary_array: test_binary_array.c
-	$(CC) $(CFLAGS) test_binary_array.c -o $@ \
-		`$(top_srcdir)/net-snmp-config --libs`
