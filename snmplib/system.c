@@ -611,25 +611,19 @@ get_boottime(void)
 }
 #endif
 
-/*
- * Returns uptime in centiseconds(!).
+/**
+ * Returns the system uptime in centiseconds.
+ *
+ * @note The value returned by this function is not identical to sysUpTime
+ *   defined in RFC 1213. get_uptime() returns the system uptime while
+ *   sysUpTime represents the time that has elapsed since the most recent
+ *   restart of the network manager (snmpd).
+ *
+ * @see See also netsnmp_get_agent_uptime().
  */
 long
 get_uptime(void)
 {
-#if !defined(solaris2) && !defined(linux) && !defined(cygwin) && !defined(aix4) && !defined(aix5) && !defined(aix6) && !defined(aix7)
-    struct timeval  now;
-    long            boottime_csecs, nowtime_csecs;
-
-    boottime_csecs = get_boottime();
-    if (boottime_csecs == 0)
-        return 0;
-    gettimeofday(&now, (struct timezone *) 0);
-    nowtime_csecs = (now.tv_sec * 100) + (now.tv_usec / 10000);
-
-    return (nowtime_csecs - boottime_csecs);
-#endif
-
 #if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     struct nlist nl;
     int kmem;
@@ -642,9 +636,7 @@ get_uptime(void)
     read(kmem, &lbolt, sizeof(lbolt));
     close(kmem);
     return(lbolt);
-#endif
-
-#ifdef solaris2
+#elif defined(solaris2)
     kstat_ctl_t    *ksc = kstat_open();
     kstat_t        *ks;
     kid_t           kid;
@@ -669,9 +661,7 @@ get_uptime(void)
         kstat_close(ksc);
     }
     return lbolt;
-#endif                          /* solaris2 */
-
-#ifdef linux
+#elif defined(linux) || defined(cygwin)
     FILE           *in = fopen("/proc/uptime", "r");
     long            uptim = 0, a, b;
     if (in) {
@@ -680,10 +670,17 @@ get_uptime(void)
         fclose(in);
     }
     return uptim;
-#endif                          /* linux */
+#else
+    struct timeval  now;
+    long            boottime_csecs, nowtime_csecs;
 
-#ifdef cygwin
-    return (0);                 /* not implemented */
+    boottime_csecs = get_boottime();
+    if (boottime_csecs == 0)
+        return 0;
+    gettimeofday(&now, (struct timezone *) 0);
+    nowtime_csecs = (now.tv_sec * 100) + (now.tv_usec / 10000);
+
+    return (nowtime_csecs - boottime_csecs);
 #endif
 }
 
