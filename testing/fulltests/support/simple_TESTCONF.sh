@@ -17,7 +17,7 @@
 # automatical translation of environment variables that contain paths. Hence
 # this function that translates paths explicitly.
 translate_path() {
-  if [ $OSTYPE = msys ]; then
+  if [ "$OSTYPE" = msys ]; then
     local t=`set \
              | sed -n -e "s/^$1='\(.*\)'$/${SNMP_ENV_SEPARATOR}\1/p" \
                       -e "s/^$1=\(.*\)$/${SNMP_ENV_SEPARATOR}\1/p" \
