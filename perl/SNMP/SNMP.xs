@@ -1,4 +1,4 @@
-/* -*- C -*-
+/* -*- mode: C; c-basic-offset: 4; indent-tabs-mode: nil -*-
      SNMP.xs -- Perl 5 interface to the Net-SNMP toolkit
 
      written by G. S. Marzot (marz@users.sourceforge.net)
