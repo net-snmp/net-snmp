@@ -26,9 +26,18 @@ AC_CHECK_HEADERS([getopt.h   pthread.h  regex.h      ] dnl
                  [sys/time.h         ] dnl
                  [sys/un.h           ])
 
+#  Library and Agent:
+AC_CHECK_HEADERS([nlist.h],,,[
+AC_INCLUDES_DEFAULT
+[
+#ifndef LIBBSD_DISABLE_DEPRECATED
+#define LIBBSD_DISABLE_DEPRECATED 1
+#endif
+]])
+
 #  Library:
 AC_CHECK_HEADERS([fcntl.h    io.h       kstat.h                 ] dnl
-                 [limits.h   locale.h   nlist.h                 ] dnl
+                 [limits.h   locale.h                  ] dnl
                  [sys/file.h       sys/ioctl.h         ] dnl
                  [sys/sockio.h     sys/stat.h          ] dnl
                  [sys/systemcfg.h  sys/systeminfo.h    ] dnl
@@ -41,7 +50,7 @@ AC_CHECK_HEADERS([dlfcn.h    err.h      fcntl.h    fstab.h      ] dnl
                  [           grp.h      io.h                    ] dnl
                  [ioctls.h   kstat.h    kvm.h      limits.h     ] dnl
                  [           mntent.h   mtab.h                  ] dnl
-                 [nlist.h    pkglocs.h             pwd.h        ] dnl
+                 [           pkglocs.h             pwd.h        ] dnl
                  [           utmpx.h    utsname.h               ])
 
 AC_CHECK_HEADERS([sys/diskio.h  sys/dkio.h                                 ] dnl
