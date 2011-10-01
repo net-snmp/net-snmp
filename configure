@@ -16207,8 +16207,29 @@ fi
 done
 
 
+#  Library and Agent:
+for ac_header in nlist.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "nlist.h" "ac_cv_header_nlist_h" "
+$ac_includes_default
+
+#ifndef LIBBSD_DISABLE_DEPRECATED
+#define LIBBSD_DISABLE_DEPRECATED 1
+#endif
+
+"
+if test "x$ac_cv_header_nlist_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NLIST_H 1
+_ACEOF
+
+fi
+
+done
+
+
 #  Library:
-for ac_header in fcntl.h    io.h       kstat.h                                   limits.h   locale.h   nlist.h                                   sys/file.h       sys/ioctl.h                           sys/sockio.h     sys/stat.h                            sys/systemcfg.h  sys/systeminfo.h                      sys/times.h      sys/uio.h                             sys/utsname.h                        netipx/ipx.h
+for ac_header in fcntl.h    io.h       kstat.h                                   limits.h   locale.h                                    sys/file.h       sys/ioctl.h                           sys/sockio.h     sys/stat.h                            sys/systemcfg.h  sys/systeminfo.h                      sys/times.h      sys/uio.h                             sys/utsname.h                        netipx/ipx.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -16223,7 +16244,7 @@ done
 
 
 #  Agent:
-for ac_header in dlfcn.h    err.h      fcntl.h    fstab.h                                   grp.h      io.h                                      ioctls.h   kstat.h    kvm.h      limits.h                                  mntent.h   mtab.h                                    nlist.h    pkglocs.h             pwd.h                                     utmpx.h    utsname.h
+for ac_header in dlfcn.h    err.h      fcntl.h    fstab.h                                   grp.h      io.h                                      ioctls.h   kstat.h    kvm.h      limits.h                                  mntent.h   mtab.h                                               pkglocs.h             pwd.h                                     utmpx.h    utsname.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
