@@ -82,7 +82,6 @@ HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 AGENTLIB	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 MIBLIB		= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
-LOCAL_LIBS	= -L../snmplib/.libs -L../snmplib -L./.libs -L./helpers/.libs -L./helpers
 LAGENTLIBS	= @LAGENTLIBS@
 LMIBLIBS	= @LMIBLIBS@
 PERLLDOPTS_FOR_APPS = @PERLLDOPTS_FOR_APPS@
@@ -130,19 +129,19 @@ all: agentlib subdirs miblib $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
 # build stuff targets
 #
 getkstat: getkstat.o
-	$(CC) $(CFLAGS) -o $@ $? $(LOCAL_LIBS) $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
 
 getkstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETKSTAT_TEST -DDODEBUG -c $? 
 
 getmibstat: getmibstat.o
-	$(CC) $(CFLAGS) -o $@ $? $(LOCAL_LIBS) $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
 
 getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
 snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(AGENTLIB) $(HELPERLIB) $(MIBLIB) $(LIBTARG) 
-	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${OUR_AGENT_LIBS}
+	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} ${LDFLAGS} ${OUR_AGENT_LIBS}
 
 
 libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS} $(USELIBS)
@@ -157,7 +156,7 @@ agentlib: $(AGENTLIB)
 
 miblib: $(MIBLIB)
 
-libs: $(INSTALLLIBS)
+libs: $(AGENTLIB) $(MIBLIB)
 
 embedperlinstall:
 	  @$(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(snmplibdir)
