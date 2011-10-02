@@ -94,13 +94,14 @@ agent:
 
 apps:
 	@(cd snmplib; $(MAKE) )
+	@(cd agent; $(MAKE) libs)
 	@(cd apps; $(MAKE) )
 
 snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext encode_keychange snmpdf snmptrap snmptls:
 	@(cd snmplib; $(MAKE) )
 	@(cd apps; $(MAKE) $@ )
 
-snmptrapd:
+agentxtrap snmptrapd:
 	@(cd snmplib; $(MAKE) )
 	@(cd agent; $(MAKE) libs)
 	@(cd apps; $(MAKE) $@ )
