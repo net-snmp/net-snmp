@@ -84,22 +84,23 @@ libtool:	$(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
 
-snmplib:
+snmplib: @FEATURETARGS@
 	@(cd snmplib; $(MAKE) )
 
-agent:
+agent: @FEATURETARGS@
 	@(cd snmplib; $(MAKE) )
 	@(cd agent; $(MAKE) )
 
-apps:
+apps: @FEATURETARGS@
 	@(cd snmplib; $(MAKE) )
+	@(cd agent; $(MAKE) libs)
 	@(cd apps; $(MAKE) )
 
-snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext encode_keychange snmpdf snmptrap snmptls:
+snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext encode_keychange snmpdf snmptrap snmptls: @FEATURETARGS@
 	@(cd snmplib; $(MAKE) )
 	@(cd apps; $(MAKE) $@ )
 
-snmptrapd:
+agentxtrap snmptrapd: @FEATURETARGS@
 	@(cd snmplib; $(MAKE) )
 	@(cd agent; $(MAKE) libs)
 	@(cd apps; $(MAKE) $@ )
