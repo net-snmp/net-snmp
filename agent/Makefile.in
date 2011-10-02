@@ -154,7 +154,7 @@ agentlib: $(AGENTLIB)
 
 miblib: $(MIBLIB)
 
-libs: $(INSTALLLIBS)
+libs: $(AGENTLIB) $(MIBLIB)
 
 embedperlinstall:
 	  @$(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(snmplibdir)
