@@ -87,7 +87,7 @@ snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus snmpdelta snm
 	@(cd snmplib; $(MAKE) )
 	@(cd apps; $(MAKE) $@ )
 
-snmptrapd:
+agentxtrap snmptrapd:
 	@(cd snmplib; $(MAKE) )
 	@(cd agent; $(MAKE) libs)
 	@(cd apps; $(MAKE) $@ )
