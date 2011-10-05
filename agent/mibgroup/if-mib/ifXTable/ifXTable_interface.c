@@ -1982,7 +1982,7 @@ _ifXTable_container_row_restore(const char *token, char *buf)
     }
     rowreq_ctx = CONTAINER_FIND(container, &index);
     if (NULL == rowreq_ctx) {
-        snmp_log(LOG_ERR, "error finding row index in "
+        snmp_log(LOG_DEBUG, "error finding row index in "
                  "_ifXTable_container_row_restore\n");
         return;
     }
