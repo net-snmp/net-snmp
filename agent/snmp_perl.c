@@ -36,6 +36,7 @@ maybe_source_perl_startup(void)
     const char     *perl_init_file = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
 							   NETSNMP_DS_AGENT_PERL_INIT_FILE);
     char            init_file[SNMP_MAXBUF];
+    int             res;
 
     static int      have_done_init = 0;
 
@@ -57,8 +58,11 @@ maybe_source_perl_startup(void)
     env = NULL;
     PERL_SYS_INIT3(&argc, &argv, &env);
     my_perl = perl_alloc();
-    if (!my_perl)
+    if (!my_perl) {
+        snmp_log(LOG_ERR,
+                 "embedded perl support failed to initialize (perl_alloc())\n");
         goto bail_out;
+    }
 
     perl_construct(my_perl);
 
@@ -66,11 +70,21 @@ maybe_source_perl_startup(void)
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 #endif
 
-    if (perl_parse(my_perl, xs_init, 2, embedargs, NULL))
+    res = perl_parse(my_perl, xs_init, 2, embedargs, NULL);
+    if (res) {
+        snmp_log(LOG_ERR,
+                 "embedded perl support failed to initialize (perl_parse(%s)"
+                 " returned %d)\n", embedargs[1], res);
         goto bail_out;
+    }
 
-    if (perl_run(my_perl))
+    res = perl_run(my_perl);
+    if (res) {
+        snmp_log(LOG_ERR,
+                 "embedded perl support failed to initialize (perl_run()"
+                 " returned %d)\n", res);
         goto bail_out;
+    }
 
     free(embedargs[0]);
     free(embedargs[1]);
@@ -82,7 +96,6 @@ maybe_source_perl_startup(void)
   bail_out:
     free(embedargs[0]);
     free(embedargs[1]);
-    snmp_log(LOG_ERR, "embedded perl support failed to initialize\n");
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
 			   NETSNMP_DS_AGENT_DISABLE_PERL, 1);
     return;
