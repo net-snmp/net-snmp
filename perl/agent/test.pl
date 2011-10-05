@@ -9,7 +9,7 @@
 BEGIN { $| = 1; 
         $ENV{'SNMPCONFPATH'} = 'nopath';
         $ENV{'MIBS'} = '';
-        print "1..5\n";
+        print "1..6\n";
       }
 END {print "not ok 1\n" unless $loaded;}
 use NetSNMP::agent (':all');
@@ -76,6 +76,12 @@ $regitem = $agent->register("test_reg", ".1.3.6.1.8888", \&testsub);
 print it($regitem, 4);
 #print STDERR $regitem,":",ref($regitem),"\n";
 print it(ref($regitem) eq "NetSNMP::agent::netsnmp_handler_registration", 5);
+
+my $uptime1 = $agent->uptime();
+my $uptime2 = $agent->uptime(666);
+my $uptime3 = $agent->uptime(555, 444);
+print it($uptime1 <= $uptime2 && $uptime2 <= $uptime3, 6);
+
 exit;
 
 while(1) {

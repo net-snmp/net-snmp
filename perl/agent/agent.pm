@@ -199,6 +199,12 @@ sub agent_check_and_process {
     __agent_check_and_process($blocking || 0);
 }
 
+sub uptime {
+    my $self = shift;
+    $self->maybe_init_lib();
+    return _uptime();
+}
+
 bootstrap NetSNMP::agent $VERSION;
 
 # Preloaded methods go here.

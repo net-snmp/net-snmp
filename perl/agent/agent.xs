@@ -239,6 +239,13 @@ __agent_check_and_process(block = 1)
     OUTPUT:
 	RETVAL
 
+int
+_uptime()
+    CODE:
+        RETVAL = netsnmp_get_agent_uptime();
+    OUTPUT:
+	RETVAL
+
 void
 init_mib()
     CODE:
