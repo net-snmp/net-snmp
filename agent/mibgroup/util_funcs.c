@@ -1146,7 +1146,7 @@ int net_snmp_delete_prefix_info(prefix_cbx **head,
     }
     return 0;
 }
-#endif
+#endif /* NETSNMP_FEATURE_REMOVE_DELETE_PREFIX_INFO */
 
 #endif /* HAVE_LINUX_RTNETLINK_H */
          
