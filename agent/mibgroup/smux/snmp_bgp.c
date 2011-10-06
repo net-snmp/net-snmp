@@ -109,8 +109,6 @@ init_snmp_bdp(void)
                  bgp_variables_oid);
 }
 
-
-#endif
 static oid      max_bgp_mib[] =
     { 1, 3, 6, 1, 2, 1, 15, 5, 1, 6, 255, 255, 255, 255 };
 static oid      min_bgp_mib[] = { 1, 3, 6, 1, 2, 1, 15, 1, 0 };
