@@ -58,4 +58,4 @@ netsnmp_register_statistic_handler(netsnmp_handler_registration *reginfo,
 }
 #else /* !NETSNMP_FEATURE_REMOVE_HELPER_GET_STATISTICS */
 netsnmp_feature_unused(helper_statistics);
-#endif
+#endif /* !NETSNMP_FEATURE_REMOVE_HELPER_GET_STATISTICS */

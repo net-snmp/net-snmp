@@ -26,7 +26,7 @@ netsnmp_init_helpers(void)
     netsnmp_init_bulk_to_next_helper();
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET
     netsnmp_init_table_dataset();
-#endif
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATASET */
 
 #ifndef NETSNMP_FEATURE_REMOVE_ROW_MERGE
     netsnmp_init_row_merge();
