@@ -321,19 +321,23 @@ netsnmp_fsys_avail( netsnmp_fsys_info *f) {
 
 /* recalculate f->size_32, used_32, avail_32 and units_32 from f->size & comp.*/
 void
-netsnmp_fsys_calculate32( netsnmp_fsys_info *f)
+netsnmp_fsys_calculate32(netsnmp_fsys_info *f)
 {
     unsigned long long s = f->size;
-    unsigned long long u = f->units;
-    int factor = 0;
+    unsigned shift = 0;
+
     while (s > INT32_MAX) {
         s = s >> 1;
-        u = u << 1;
-        factor++;
+        shift++;
     }
 
     f->size_32 = s;
-    f->units_32 = u;
-    f->avail_32 = f->avail << factor;
-    f->used_32 = f->used << factor;
+    f->units_32 = f->units << shift;
+    f->avail_32 = f->avail >> shift;
+    f->used_32 = f->used >> shift;
+
+    DEBUGMSGTL(("fsys", "Results of 32-bit conversion: size %llu -> %lu;"
+		" units %llu -> %lu; avail %llu -> %lu; used %llu -> %lu\n",
+		f->size, f->size_32, f->units, f->units_32,
+		f->avail, f->avail_32, f->used, f->used_32));
 }
