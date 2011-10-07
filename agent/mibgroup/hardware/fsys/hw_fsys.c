@@ -242,7 +242,7 @@ _fsys_create_entry( void )
         sp->idx.oids[0] = ++_fsys_idx;
     }
 
-    DEBUGMSGTL(("fsys:new", "Create filesystem entry (index = %d\n", _fsys_idx));
+    DEBUGMSGTL(("fsys:new", "Create filesystem entry (index = %d)\n", _fsys_idx));
     CONTAINER_INSERT( _fsys_container, sp );
     return sp;
 }
