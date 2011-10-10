@@ -97,7 +97,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     int32_t              *t;
     time_t                install_time;
     size_t                date_len;
-    int                   rc, i = 1;
+    int                   i = 1;
     netsnmp_swinst_entry *entry;
 
     ts = rpmtsCreate();
@@ -113,7 +113,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
         entry = netsnmp_swinst_entry_create( i++ );
         if (NULL == entry)
             continue;   /* error already logged by function */
-        rc = CONTAINER_INSERT(container, entry);
+        CONTAINER_INSERT(container, entry);
 
         h = headerLink( h );
         headerGetEntry( h, RPMTAG_NAME,        NULL, (void**)&n, NULL);
