@@ -434,7 +434,11 @@ netsnmp_mysql_init(void)
         return -1;
     }
 
+#ifdef HAVE_BROKEN_LIBMYSQLCLIENT
+    my_init();
+#else
     MY_INIT("snmptrapd");
+#endif
 
     /** load .my.cnf values */
     load_defaults ("my", _sql.groups, &not_argc, &not_argv);
