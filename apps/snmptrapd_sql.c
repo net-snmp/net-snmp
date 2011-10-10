@@ -701,7 +701,7 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
     struct tm   *cur_time;
     size_t       tmp_size;
     size_t       buf_host_len_t, buf_oid_len_t, buf_user_len_t;
-    int          oid_overflow, rc, trap_oid_len;
+    int          oid_overflow, trap_oid_len;
     netsnmp_variable_list *vars;
 
     if ((NULL == sqlb) || (NULL == pdu) || (NULL == transport))
@@ -724,8 +724,8 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
     /** host name */
     buf_host_len_t = 0;
     tmp_size = sizeof(sqlb->host);
-    rc = realloc_format_trap((u_char**)&sqlb->host, &tmp_size,
-                             &buf_host_len_t, 1, "%B", pdu, transport);
+    realloc_format_trap((u_char**)&sqlb->host, &tmp_size,
+                        &buf_host_len_t, 1, "%B", pdu, transport);
     sqlb->host_len = buf_host_len_t;
 
     /* snmpTrapOID */
@@ -779,8 +779,8 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
     /** community string/user name */
     tmp_size = 0;
     buf_user_len_t = 0;
-    rc = realloc_format_trap((u_char**)&sqlb->user, &tmp_size,
-                             &buf_user_len_t, 1, "%u", pdu, transport);
+    realloc_format_trap((u_char**)&sqlb->user, &tmp_size,
+                        &buf_user_len_t, 1, "%u", pdu, transport);
     sqlb->user_len = buf_user_len_t;
 
     /** transport */
