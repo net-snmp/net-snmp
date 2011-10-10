@@ -194,7 +194,7 @@ else
       echo $NSC_LIBDIR $NSC_BASE_SNMP_LIBS
       ;;
     --external-libs)
-      echo $NSC_LDFLAGS $NSC_LNETSNMPLIBS $NSC_LIBS
+      echo $NSC_LDFLAGS $NSC_LNETSNMPLIBS $NSC_LIBS @PERLLDOPTS_FOR_APPS@
       ;;
     #################################################### agent lib
     --base-agent-libs)
