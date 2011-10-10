@@ -3,6 +3,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/fsys.h>
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 
 netsnmp_feature_child_of(hw_fsys_get_container, netsnmp_unused)
 
@@ -336,8 +339,9 @@ netsnmp_fsys_calculate32(netsnmp_fsys_info *f)
     f->avail_32 = f->avail >> shift;
     f->used_32 = f->used >> shift;
 
-    DEBUGMSGTL(("fsys", "Results of 32-bit conversion: size %llu -> %lu;"
-		" units %llu -> %lu; avail %llu -> %lu; used %llu -> %lu\n",
+    DEBUGMSGTL(("fsys", "Results of 32-bit conversion: size %" PRIu64 " -> %lu;"
+		" units %" PRIu64 " -> %lu; avail %" PRIu64 " -> %lu;"
+                " used %" PRIu64 " -> %lu\n",
 		f->size, f->size_32, f->units, f->units_32,
 		f->avail, f->avail_32, f->used, f->used_32));
 }
