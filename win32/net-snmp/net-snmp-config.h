@@ -22,7 +22,9 @@
  * When compiling with the MSVC workspace, this must be set manually.
  * See the PACKAGE_VERSION variable in Unix /configure script
 */
+#ifndef PACKAGE_VERSION
 #define PACKAGE_VERSION "unknown"
+#endif
 
 /* Define HAVE_WIN32_PLATFORM_SDK if you have:
  * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
@@ -950,13 +952,17 @@
 /* #undef PACKAGE_BUGREPORT */
 
 /* Define to the full name of this package. */
+#ifndef PACKAGE_NAME
 #define PACKAGE_NAME "Net-SNMP"
+#endif
 
 /* Define to the full name and version of this package. */
 /* #undef PACKAGE_STRING */
 
 /* Define to the one symbol short name of this package. */
+#ifndef PACKAGE_TARNAME
 #define PACKAGE_TARNAME "net-snmp"
+#endif
 
 /* Define to the version of this package. */
 /* #undef PACKAGE_VERSION */
