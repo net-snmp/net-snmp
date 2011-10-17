@@ -1685,7 +1685,7 @@ typedef unsigned int     uintptr_t;
 #endif     /* NETSNMP_USE_DLL */
 
 /* MSVC OpenSSL linker settings. */
-#if defined(WIN32) && !defined(mingw32)
+#if defined(_MSC_VER)
 #  if defined(NETSNMP_USE_OPENSSL)
 #    ifdef NETSNMP_USE_DLL
 #      ifdef _DEBUG
