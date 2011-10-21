@@ -175,4 +175,6 @@ netsnmp_fsys_arch_load( void )
         }
         netsnmp_fsys_calculate32(entry);
     }
+
+    free(stats);
 }
