@@ -18344,7 +18344,7 @@ while test "x$new_transport_list" != "x"; do
 /* end confdefs.h.  */
 
 #include NETSNMP_SYSTEM_INCLUDE_FILE
-#define NETSNMP_FEATURE_CHECKING
+#undef NETSNMP_MINIMAL_CODE
 #define NET_SNMP_CONFIG_H
 #undef config_require
 #define config_require(foo) config_checkit_require(foo)
