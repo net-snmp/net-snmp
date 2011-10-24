@@ -156,5 +156,14 @@
 #ifndef MNTTYPE_RPCPIPE
 #define MNTTYPE_RPCPIPE  "rpc_pipefs"
 #endif
+#ifndef MNTTYPE_XFS
+#define MNTTYPE_XFS      "xfs"
+#endif
+#ifndef MNTTYPE_JFS
+#define MNTTYPE_JFS      "jfs"
+#endif
+#ifndef MNTTYPE_VXFS
+#define MNTTYPE_VXFS      "vxfs"
+#endif
 
 #endif /* _NETSNMP_FSYS_MNTTYPES_H */
