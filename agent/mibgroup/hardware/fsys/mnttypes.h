@@ -162,6 +162,8 @@
 #ifndef MNTTYPE_JFS
 #define MNTTYPE_JFS      "jfs"
 #endif
-
+#ifndef MNTTYPE_VXFS
+#define MNTTYPE_VXFS      "vxfs"
+#endif
 
 #endif /* _NETSNMP_FSYS_MNTTYPES_H */
