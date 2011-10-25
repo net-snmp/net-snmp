@@ -336,13 +336,27 @@ nsahr_register(me)
         SV *me;
         PREINIT:
         netsnmp_handler_registration *reginfo;
+        handler_cb_data *cb_data = NULL;
         CODE:
             {
                 reginfo = (netsnmp_handler_registration *) SvIV(SvRV(me));
+                if (reginfo && reginfo->handler && reginfo->handler->myvoid)
+                    cb_data = (handler_cb_data *) (reginfo->handler->myvoid);
                 RETVAL = netsnmp_register_handler(reginfo);
                 if (!RETVAL) {
                     /* the agent now has a "reference" to this reg pointer */
                     SvREFCNT_inc(me);
+                } else {
+                    /*
+                     * The reginfo was freed by netsnmp_register_handler,
+                     * don't touch it in nsahr_DESTROY!
+                     */
+                    sv_setiv(SvRV(me), 0);
+                    if (cb_data) {
+                        /* And just free the callback. */
+                        SvREFCNT_dec(cb_data->perl_cb);
+                        free(cb_data);
+                    }
                 }
             }
     OUTPUT:
