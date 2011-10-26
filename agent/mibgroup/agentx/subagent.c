@@ -470,6 +470,26 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     return 1;
 }
 
+static int
+_invalid_op_and_magic(int op, ns_subagent_magic *smagic)
+{
+    int invalid = 0;
+
+    if (smagic && (snmp_sess_pointer(smagic->session) == NULL ||
+        op == NETSNMP_CALLBACK_OP_TIMED_OUT)) {
+        if (smagic->ovars != NULL) {
+            snmp_free_varbind(smagic->ovars);
+        }
+        free(smagic);
+        invalid = 1;
+    }
+
+    if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE || smagic == NULL)
+        invalid = 1;
+
+    return invalid;
+}
+
 int
 handle_subagent_response(int op, netsnmp_session * session, int reqid,
                          netsnmp_pdu *pdu, void *magic)
@@ -478,13 +498,7 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
     netsnmp_variable_list *u = NULL, *v = NULL;
     int             rc = 0;
 
-    if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
-        if (op == NETSNMP_CALLBACK_OP_TIMED_OUT && magic != NULL) {
-            if (smagic->ovars != NULL) {
-                snmp_free_varbind(smagic->ovars);
-            }
-            free(smagic);
-        }
+    if (_invalid_op_and_magic(op, magic)) {
         return 1;
     }
 
