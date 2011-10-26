@@ -925,22 +925,33 @@ netsnmp_gethostbyname(const char *name)
 #endif /* HAVE_GETHOSTBYNAME */
 }
 
+/**
+ * Look up the host name via DNS.
+ *
+ * @param[in] addr Pointer to the address to resolve. This argument points e.g.
+ *   to a struct in_addr for AF_INET or to a struct in6_addr for AF_INET6.
+ * @param[in] len  Length in bytes of *addr.
+ * @param[in] type Address family, e.g. AF_INET or AF_INET6.
+ *
+ * @return Pointer to a hostent structure if address lookup succeeded or NULL
+ *   if the lookup failed.
+ *
+ * @see See also the gethostbyaddr() man page.
+ */
 struct hostent *
 netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
 {
 #if HAVE_GETHOSTBYADDR
     struct hostent *hp = NULL;
-    struct sockaddr_in *saddr_in =
-        NETSNMP_REMOVE_CONST(struct sockaddr_in *,addr);
+    char buf[64];
 
-    DEBUGMSGTL(("dns:gethostbyaddr", "resolving { AF_INET, %s:%hu }\n",
-                inet_ntoa(saddr_in->sin_addr), ntohs(saddr_in->sin_port)));
+    DEBUGMSGTL(("dns:gethostbyaddr", "resolving %s\n",
+                inet_ntop(type, addr, buf, sizeof(buf))));
 
 #ifdef DNSSEC_LOCAL_VALIDATION
     val_status_t val_status;
-    hp = val_gethostbyaddr(netsnmp_validator_context(),
-                           (const void*)&saddr_in->sin_addr,
-                           sizeof(struct in_addr), AF_INET, &val_status);
+    hp = val_gethostbyaddr(netsnmp_validator_context(), addr, len, type,
+                           &val_status);
     DEBUGMSGTL(("dns:sec:val", "val_status %d / %s; trusted: %d\n",
                 val_status, p_val_status(val_status),
                 val_istrusted(val_status)));
@@ -956,8 +967,7 @@ netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
     else if (val_does_not_exist(val_status) && hp)
         hp = NULL;
 #else
-    hp = gethostbyaddr((const void*) &saddr_in->sin_addr,
-                       sizeof(struct in_addr), AF_INET);
+    hp = gethostbyaddr(addr, len, type);
 #endif
     if (hp == NULL) {
         DEBUGMSGTL(("dns:gethostbyaddr", "couldn't resolve addr\n"));
