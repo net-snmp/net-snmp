@@ -98,7 +98,7 @@ void CRYPTO_cfb128_encrypt(const unsigned char *in, unsigned char *out,
 			(*block)(ivec, ivec, key);
 			for (n=0; n<16; n+=sizeof(size_t)) {
 				*(size_t*)(out+n) =
-				*(size_t*)(ivec+n) ^= *(size_t*)(in+n);
+				*(size_t*)(ivec+n) ^= *(const size_t*)(in+n);
 			}
 			len -= 16;
 			out += 16;
@@ -142,8 +142,8 @@ void CRYPTO_cfb128_encrypt(const unsigned char *in, unsigned char *out,
 		while (len>=16) {
 			(*block)(ivec, ivec, key);
 			for (n=0; n<16; n+=sizeof(size_t)) {
-				size_t t = *(size_t*)(in+n);
-				*(size_t*)(out+n) = *(size_t*)(ivec+n) ^ t;
+				size_t t = *(const size_t*)(in+n);
+				*(size_t*)(out+n) = *(const size_t*)(ivec+n) ^ t;
 				*(size_t*)(ivec+n) = t;
 			}
 			len -= 16;
