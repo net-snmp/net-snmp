@@ -109,12 +109,12 @@
 
 #ifdef NETSNMP_USE_INTERNAL_CRYPTO
 static
-int SHA1_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
-              u_char * secret, size_t secretlen);
+int SHA1_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
+              const u_char * secret, size_t secretlen);
 
 static
-int MD5_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
-             u_char * secret, size_t secretlen);
+int MD5_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
+             const u_char * secret, size_t secretlen);
 #endif
 
 /*
@@ -1151,8 +1151,8 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
  * of data, and prepended with a secret in the standard fashion 
  */
 static int
-MD5_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
-         u_char * secret, size_t secretlen)
+MD5_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
+         const u_char * secret, size_t secretlen)
 {
 #define MD5_HASHKEYLEN 64
 #define MD5_SECRETKEYLEN 16
@@ -1163,7 +1163,8 @@ MD5_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
     u_char          extendedAuthKey[MD5_HASHKEYLEN];
     u_char          buf[MD5_HASHKEYLEN];
     size_t          i;
-    u_char         *cp, *newdata = NULL;
+    const u_char   *cp;
+    u_char         *newdata = NULL;
     int             rc = 0;
 
     /*
@@ -1248,8 +1249,8 @@ MD5_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
 }
 
 static int
-SHA1_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
-         u_char * secret, size_t secretlen)
+SHA1_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
+          const u_char * secret, size_t secretlen)
 {
 #define SHA1_HASHKEYLEN   64
 #define SHA1_SECRETKEYLEN 20
@@ -1260,7 +1261,8 @@ SHA1_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
     u_char          extendedAuthKey[SHA1_HASHKEYLEN];
     u_char          buf[SHA1_HASHKEYLEN];
     size_t          i;
-    u_char         *cp, *newdata = NULL;
+    const u_char   *cp;
+    u_char         *newdata = NULL;
     int             rc = 0;
 
     /*
