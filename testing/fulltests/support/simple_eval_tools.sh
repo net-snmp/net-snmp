@@ -365,7 +365,7 @@ ISRUNNING() {
 # Echo a command that asks the process with pid $1 to stop.
 ECHOSENDSIGTERM() {
     if [ "x$OSTYPE" = "xmsys" ]; then
-        echo kill.exe $1
+        echo pskill.exe $1
     else
         echo kill -TERM $1
     fi
@@ -374,7 +374,7 @@ ECHOSENDSIGTERM() {
 # Echo a command that stops the process with pid $1 forcibly.
 ECHOSENDSIGKILL() {
     if [ "x$OSTYPE" = "xmsys" ]; then
-        echo kill.exe $1
+        echo pskill.exe $1
     else
         echo kill -KILL $1
     fi
@@ -560,7 +560,7 @@ STARTTRAPD() {
 HUPPROG() {
     if [ -f $1 ]; then
         if [ "x$OSTYPE" = "xmsys" ]; then
-          COMMAND='echo "Skipping SIGHUP (not supported by kill.exe on MinGW)"'
+          COMMAND='echo "Skipping SIGHUP (not possible with MinGW)"'
         else
           COMMAND="kill -HUP `cat $1`"
         fi
