@@ -418,6 +418,20 @@ if test "x$with_mysql" = "xyes" ; then
   fi
   MYSQL_LIBS=`$MYSQLCONFIG --libs`
   MYSQL_INCLUDES=`$MYSQLCONFIG --cflags`
+  AC_MSG_CHECKING([whether MY_INIT() works])
+  _libs="${LIBS}"
+  _cppflags="${CPPFLAGS}"
+  LIBS="${LIBS} ${MYSQL_LIBS}"
+  CPPFLAGS="${CPPFLAGS} ${MYSQL_INCLUDES}"
+  AC_TRY_LINK([#include <mysql/my_global.h>
+               #include <mysql/my_sys.h>],
+	      [MY_INIT("my_init_test")],
+              [AC_MSG_RESULT(yes)],
+              [AC_MSG_RESULT(no)
+               AC_DEFINE([HAVE_BROKEN_LIBMYSQLCLIENT], 1,
+	                 [Define if using MY_INIT() causes a linker error])])
+  CPPFLAGS="${_cppflags}"
+  LIBS="${_libs}"
   AC_MSG_CACHE_ADD(MYSQL Trap Logging:         enabled)
 else
   AC_MSG_CACHE_ADD(MYSQL Trap Logging:         unavailable)
