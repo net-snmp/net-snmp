@@ -438,7 +438,6 @@ main(int argc, char *argv[])
     int             arg, i, ret;
     int             dont_fork = 0, do_help = 0;
     int             log_set = 0;
-    int             uid = 0, gid = 0;
     int             agent_mode = -1;
     char           *pid_file = NULL;
     char            option_compatability[] = "-Le";
@@ -448,9 +447,6 @@ main(int argc, char *argv[])
 #endif
 #if HAVE_GETPWNAM && HAVE_PWD_H
     struct passwd  *info;
-#endif
-#if HAVE_UNISTD_H
-    const char     *persistent_dir;
 #endif
 
 #ifndef WIN32
@@ -1009,7 +1005,11 @@ main(int argc, char *argv[])
     }
 #endif
 
-#if HAVE_UNISTD_H
+#if defined(HAVE_UNISTD_H) && (defined(HAVE_CHOWN) || defined(HAVE_SETGID) || defined(HAVE_SETUID))
+    {
+    const char     *persistent_dir;
+    int             uid, gid;
+
     persistent_dir = get_persistent_directory();
     mkdirhier( persistent_dir, NETSNMP_AGENT_DIRECTORY_MODE, 0 );
    
@@ -1070,6 +1070,7 @@ main(int argc, char *argv[])
         }
     }
 #endif
+    }
 #endif
 
     /*
