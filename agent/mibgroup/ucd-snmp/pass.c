@@ -416,7 +416,8 @@ var_extensible_pass(struct variable *vp,
                     *var_len = strlen(buf2);
                     vp->type = ASN_OCTET_STR;
                     return ((unsigned char *) buf2);
-                } 
+                }
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
                 else if (!strncasecmp(buf, "integer64", 9)) {
                     static struct counter64 c64;
                     uint64_t v64 = strtoull(buf2, NULL, 10);
@@ -425,7 +426,8 @@ var_extensible_pass(struct variable *vp,
                     *var_len = sizeof(c64);
                     vp->type = ASN_INTEGER64;
                     return ((unsigned char *) &c64);
-                } 
+                }
+#endif
                 else if (!strncasecmp(buf, "integer", 7)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtol(buf2, NULL, 10);
