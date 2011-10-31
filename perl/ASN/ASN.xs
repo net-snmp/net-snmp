@@ -78,9 +78,11 @@ static int constant_ASN_U(double *value, const char *name, const int len)
     case '\0':
 	TEST_CONSTANT(value, name, ASN_UNSIGNED);
         break;
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case '6':
 	TEST_CONSTANT(value, name, ASN_UNSIGNED64);
         break;
+#endif
     }
     return EINVAL;
 }
@@ -91,9 +93,11 @@ static int constant_ASN_IN(double *value, const char *name, const int len)
     case '\0':
         TEST_CONSTANT(value, name, ASN_INTEGER);
         break;
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case '6':
         TEST_CONSTANT(value, name, ASN_INTEGER64);
         break;
+#endif
     }
     return EINVAL;
 }
@@ -123,12 +127,14 @@ static int constant(double *value, const char *const name, const int len)
 	return constant_ASN_B(value, name, len);
     case 'C':
 	return constant_ASN_C(value, name, len);
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case 'D':
         TEST_CONSTANT(value, name, ASN_DOUBLE);
         break;
     case 'F':
         TEST_CONSTANT(value, name, ASN_FLOAT);
         break;
+#endif
     case 'G':
         TEST_CONSTANT(value, name, ASN_GAUGE);
         break;
