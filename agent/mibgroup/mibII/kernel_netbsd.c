@@ -32,8 +32,8 @@
 int
 netbsd_read_icmp_stat(struct icmp_mib *mib)
 {
-    size_t   size;
     uint64_t icmpstat[ICMP_NSTATS];
+    size_t   size = sizeof(icmpstat);
     int      i;
 
     (void)memset(mib, 0, sizeof(*mib));
@@ -89,8 +89,8 @@ netbsd_read_icmp_stat(struct icmp_mib *mib)
 int
 netbsd_read_ip_stat(struct ip_mib *mib)
 {
-    size_t   size;
     uint64_t ipstat[IP_NSTATS];
+    size_t   size = sizeof(ipstat);
     int      i;
     static   int sname[4] = { 4, 2, 0, 0 }; /* CTL_NET, PF_INET, IPPROTO_IP, 0 */
     size_t   len;
@@ -141,8 +141,8 @@ netbsd_read_ip_stat(struct ip_mib *mib)
 int
 netbsd_read_tcp_stat(struct tcp_mib *mib)
 {
-    size_t   size;
     uint64_t tcpstat[TCP_NSTATS];
+    size_t   size = sizeof(tcpstat);
 
     (void)memset(mib, 0, sizeof(*mib));
 
@@ -177,8 +177,8 @@ netbsd_read_tcp_stat(struct tcp_mib *mib)
 int
 netbsd_read_udp_stat(struct udp_mib *mib)
 {
-    size_t   size;
     uint64_t udpstat[UDP_NSTATS];
+    size_t   size = sizeof(udpstat);
 
     (void)memset(mib, 0, sizeof(*mib));
 
