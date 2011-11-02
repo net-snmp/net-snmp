@@ -1,5 +1,5 @@
 /*
- * disk.c
+ * disk_hw.c
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -321,7 +321,7 @@ tryAgain:
 
     switch (vp->magic) {
     case MIBINDEX:
-        long_ret = disknum;
+        long_ret = disknum + 1;
         return ((u_char *) (&long_ret));
     case ERRORNAME:            /* DISKPATH */
         *var_len = strlen(entry->path);
