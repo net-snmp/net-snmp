@@ -3,18 +3,18 @@ extern int cpu_num;
 
                  /* For rolling averages */
 struct netsnmp_cpu_history {
-     long user_hist;
-     long sys_hist;
-     long idle_hist;
-     long nice_hist;
-     long total_hist;
+     unsigned long long user_hist;
+     unsigned long long sys_hist;
+     unsigned long long idle_hist;
+     unsigned long long nice_hist;
+     unsigned long long total_hist;
 
-     long ctx_hist;
-     long intr_hist;
-     long swpi_hist;
-     long swpo_hist;
-     long pagei_hist;
-     long pageo_hist;
+     unsigned long long ctx_hist;
+     unsigned long long intr_hist;
+     unsigned long long swpi_hist;
+     unsigned long long swpo_hist;
+     unsigned long long pagei_hist;
+     unsigned long long pageo_hist;
 };
 
 struct netsnmp_cpu_info_s {
@@ -25,27 +25,27 @@ struct netsnmp_cpu_info_s {
      int  status;
 
                  /* For UCD cpu stats */
-     long user_ticks;
-     long nice_ticks;
-     long sys_ticks;
-     long idle_ticks;
-     long wait_ticks;
-     long kern_ticks;
-     long intrpt_ticks;
-     long sirq_ticks;
+     unsigned long long user_ticks;
+     unsigned long long nice_ticks;
+     unsigned long long sys_ticks;
+     unsigned long long idle_ticks;
+     unsigned long long wait_ticks;
+     unsigned long long kern_ticks;
+     unsigned long long intrpt_ticks;
+     unsigned long long sirq_ticks;
 
-     long total_ticks;
-     long sys2_ticks;  /* For non-atomic system counts */
+     unsigned long long total_ticks;
+     unsigned long long sys2_ticks;  /* For non-atomic system counts */
 
                  /* For paging-related UCD stats */
               /* XXX - Do these belong elsewhere ?? */
               /* XXX - Do Not Use - Subject to Change */
-     long pageIn;
-     long pageOut;
-     long swapIn;
-     long swapOut;
-     long nInterrupts;
-     long nCtxSwitches;
+     unsigned long long pageIn;
+     unsigned long long pageOut;
+     unsigned long long swapIn;
+     unsigned long long swapOut;
+     unsigned long long nInterrupts;
+     unsigned long long nCtxSwitches;
 
      struct netsnmp_cpu_history *history;
 

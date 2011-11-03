@@ -153,13 +153,13 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
        exit(1);
     }
 
-    cpu->wait_ticks   = (unsigned long)resp->vset[CPUWAIT]->vlist[0].value.lval / 10;
-    cpu->intrpt_ticks = (unsigned long)resp->vset[CPUINTR]->vlist[0].value.lval / 10;
+    cpu->wait_ticks   = (unsigned long long)resp->vset[CPUWAIT]->vlist[0].value.lval / 10;
+    cpu->intrpt_ticks = (unsigned long long)resp->vset[CPUINTR]->vlist[0].value.lval / 10;
     /*cpu->sirq_ticks   = (unsigned long)csoftll / 10;*/
-    cpu->user_ticks = (unsigned long)resp->vset[CPUUSER]->vlist[0].value.lval / 10;
+    cpu->user_ticks = (unsigned long long)resp->vset[CPUUSER]->vlist[0].value.lval / 10;
     /*cpu->nice_ticks = (unsigned long)cicell / 10;*/
-    cpu->sys_ticks  = (unsigned long)resp->vset[CPUSYS]->vlist[0].value.lval / 10;
-    cpu->idle_ticks = (unsigned long)resp->vset[CPUIDLE]->vlist[0].value.lval / 10;
+    cpu->sys_ticks  = (unsigned long long)resp->vset[CPUSYS]->vlist[0].value.lval / 10;
+    cpu->idle_ticks = (unsigned long long)resp->vset[CPUIDLE]->vlist[0].value.lval / 10;
 
 
         /*
@@ -168,12 +168,12 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          */
     /*cpu = netsnmp_cpu_get_byIdx( -1, 0 );*/
     /*_cpu_load_swap_etc( buff, cpu );*/
-    cpu->pageIn  = (unsigned long)resp->vset[PAGESIN]->vlist[0].value.lval;
-    cpu->pageOut = (unsigned long)resp->vset[PAGESOUT]->vlist[0].value.lval;
-    cpu->swapIn  = (unsigned long)resp->vset[SWAPIN]->vlist[0].value.lval;
-    cpu->swapOut = (unsigned long)resp->vset[SWAPOUT]->vlist[0].value.lval;
-    cpu->nInterrupts = (unsigned long)resp->vset[INTR]->vlist[0].value.lval;
-    cpu->nCtxSwitches = (unsigned long)resp->vset[CTXT]->vlist[0].value.lval;
+    cpu->pageIn  = (unsigned long long)resp->vset[PAGESIN]->vlist[0].value.lval;
+    cpu->pageOut = (unsigned long long)resp->vset[PAGESOUT]->vlist[0].value.lval;
+    cpu->swapIn  = (unsigned long long)resp->vset[SWAPIN]->vlist[0].value.lval;
+    cpu->swapOut = (unsigned long long)resp->vset[SWAPOUT]->vlist[0].value.lval;
+    cpu->nInterrupts = (unsigned long long)resp->vset[INTR]->vlist[0].value.lval;
+    cpu->nCtxSwitches = (unsigned long long)resp->vset[CTXT]->vlist[0].value.lval;
 
     /*
      * XXX - TODO: extract per-CPU statistics
