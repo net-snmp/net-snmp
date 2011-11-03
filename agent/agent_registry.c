@@ -1654,7 +1654,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
                        int range_subid, oid range_ubound,
                        const char *context)
 {
-    netsnmp_subtree *list, *myptr;
+    netsnmp_subtree *list, *myptr = NULL;
     netsnmp_subtree *prev, *child, *next; /* loop through children */
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
