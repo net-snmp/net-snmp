@@ -185,7 +185,7 @@ main(int argc, char *argv[])
     size_t          end_len = 0;
     int             count;
     int             running;
-    int             status;
+    int             status = STAT_ERROR;
     int             check;
     int             exitval = 0;
     struct timeval  tv1, tv2, tv_a, tv_b;

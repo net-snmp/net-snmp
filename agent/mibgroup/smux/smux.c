@@ -1159,7 +1159,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
                 snmp_oid_compare(oid_name, oid_name_len, rptr->sr_name,
                                  rptr->sr_name_len);
             if (result == 0) {
-                if ((oid_name_len == rptr->sr_name_len)) {
+                if (oid_name_len == rptr->sr_name_len) {
                     if ((nrptr->sr_priority == -1)) {
                         nrptr->sr_priority = rptr->sr_priority;
                         do {

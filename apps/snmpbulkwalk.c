@@ -184,7 +184,7 @@ main(int argc, char *argv[])
     size_t          rootlen;
     int             count;
     int             running;
-    int             status;
+    int             status = STAT_ERROR;
     int             check;
     int             exitval = 0;
 
