@@ -31,7 +31,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
                netsnmp_request_info         *requests)
 {
     oid  obj;
-    long value = 0;
+    unsigned long long value = 0;
     char cp[300];
     netsnmp_cpu_info *info = netsnmp_cpu_get_byIdx( -1, 0 );
 
@@ -147,7 +147,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
                  else
                      value = 0;    /* or skip this entry */
                  snmp_set_var_typed_integer(requests->requestvb,
-                                            ASN_INTEGER, value);
+                                            ASN_INTEGER, value & 0x7fffffff);
              }
              break;
         case CPUSYSTEM:
@@ -159,7 +159,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
                  else
                      value = 0;    /* or skip this entry */
                  snmp_set_var_typed_integer(requests->requestvb,
-                                            ASN_INTEGER, value);
+                                            ASN_INTEGER, value & 0x7fffffff);
              }
              break;
         case CPUIDLE:
@@ -170,7 +170,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
                  else
                      value = 0;    /* or skip this entry */
                  snmp_set_var_typed_integer(requests->requestvb,
-                                            ASN_INTEGER, value);
+                                            ASN_INTEGER, value & 0x7fffffff);
              }
              break;
 		
@@ -190,14 +190,14 @@ vmstat_handler(netsnmp_mib_handler          *handler,
              if ( info->history && info->history[0].total_hist ) {
                  value  = (info->nInterrupts - info->history[0].intr_hist)/60;
                  snmp_set_var_typed_integer(requests->requestvb,
-                                            ASN_INTEGER, value);
+                                            ASN_INTEGER, value & 0x7fffffff);
              }
              break;
         case SYSCONTEXT:
              if ( info->history && info->history[0].total_hist ) {
                  value  = (info->nCtxSwitches - info->history[0].ctx_hist)/60;
                  snmp_set_var_typed_integer(requests->requestvb,
-                                            ASN_INTEGER, value);
+                                            ASN_INTEGER, value & 0x7fffffff);
              }
              break;
 
@@ -217,7 +217,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
                  value  = (info->swapIn - info->history[0].swpi_hist)/60;
                  /* ??? value *= PAGE_SIZE;  */
                  snmp_set_var_typed_integer(requests->requestvb,
-                                            ASN_INTEGER, value);
+                                            ASN_INTEGER, value & 0x7fffffff);
              }
              break;
         case SWAPOUT:
@@ -225,7 +225,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
                  value  = (info->swapOut - info->history[0].swpo_hist)/60;
                  /* ??? value *= PAGE_SIZE;  */
                  snmp_set_var_typed_integer(requests->requestvb,
-                                            ASN_INTEGER, value);
+                                            ASN_INTEGER, value & 0x7fffffff);
              }
              break;
 
@@ -244,14 +244,14 @@ vmstat_handler(netsnmp_mib_handler          *handler,
              if ( info->history && info->history[0].total_hist ) {
                  value  = (info->pageOut - info->history[0].pageo_hist)/60;
                  snmp_set_var_typed_integer(requests->requestvb,
-                                            ASN_INTEGER, value);
+                                            ASN_INTEGER, value & 0x7fffffff);
              }
              break;
         case IORECEIVE:
              if ( info->history && info->history[0].total_hist ) {
                  value  = (info->pageIn - info->history[0].pagei_hist)/60;
                  snmp_set_var_typed_integer(requests->requestvb,
-                                            ASN_INTEGER, value);
+                                            ASN_INTEGER, value & 0x7fffffff);
              }
              break;
 

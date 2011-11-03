@@ -91,20 +91,20 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic )
     }
 
     DEBUGMSGTL(("cpu_sysinfo", "total cpu kernel: %lu\n", sinfo_gen->cpu[CPU_KERNEL]));
-    cpu->sys2_ticks  = (unsigned long) sinfo_gen->cpu[CPU_KERNEL] + (unsigned long) sinfo_gen->cpu[CPU_SXBRK] + (unsigned long) sinfo_gen->cpu[CPU_INTR];
-    cpu->kern_ticks  = (unsigned long) sinfo_gen->cpu[CPU_KERNEL];
-    cpu->intrpt_ticks = (unsigned long) sinfo_gen->cpu[CPU_INTR];
-    cpu->user_ticks = (unsigned long) sinfo_gen->cpu[CPU_USER];
-    cpu->wait_ticks   = (unsigned long) sinfo_gen->cpu[CPU_WAIT];
-    cpu->idle_ticks = (unsigned long) sinfo_gen->cpu[CPU_IDLE];
+    cpu->sys2_ticks  = (unsigned long long) sinfo_gen->cpu[CPU_KERNEL] + (unsigned long long) sinfo_gen->cpu[CPU_SXBRK] + (unsigned long long) sinfo_gen->cpu[CPU_INTR];
+    cpu->kern_ticks  = (unsigned long long) sinfo_gen->cpu[CPU_KERNEL];
+    cpu->intrpt_ticks = (unsigned long long) sinfo_gen->cpu[CPU_INTR];
+    cpu->user_ticks = (unsigned long long) sinfo_gen->cpu[CPU_USER];
+    cpu->wait_ticks   = (unsigned long long) sinfo_gen->cpu[CPU_WAIT];
+    cpu->idle_ticks = (unsigned long long) sinfo_gen->cpu[CPU_IDLE];
 
     /* XXX - Do these really belong here ? */
-    cpu->pageIn  = (unsigned long)0;
-    cpu->pageOut = (unsigned long)0;
-    cpu->swapIn  = (unsigned long)sinfo_gen->swapin;
-    cpu->swapOut = (unsigned long)sinfo_gen->swapout;
-    cpu->nInterrupts = (unsigned long)sinfo_gen->intr_svcd;
-    cpu->nCtxSwitches = (unsigned long)sinfo_gen->pswitch;
+    cpu->pageIn  = (unsigned long long)0;
+    cpu->pageOut = (unsigned long long)0;
+    cpu->swapIn  = (unsigned long long)sinfo_gen->swapin;
+    cpu->swapOut = (unsigned long long)sinfo_gen->swapout;
+    cpu->nInterrupts = (unsigned long long)sinfo_gen->intr_svcd;
+    cpu->nCtxSwitches = (unsigned long long)sinfo_gen->pswitch;
 
     /* fetch individual cpu stats */
 
@@ -120,11 +120,11 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic )
         cpu = netsnmp_cpu_get_byIdx(i, 0);
 
         DEBUGMSGTL(("cpu_sysinfo", "cpu %u kernel: %lu\n", i, sinfo_cpus[i].cpu[CPU_KERNEL]));
-        cpu->sys2_ticks  = (unsigned long)sinfo_cpus[i].cpu[CPU_KERNEL] + (unsigned long) sinfo_cpus[i].cpu[CPU_SXBRK] + (unsigned long)sinfo_cpus[i].cpu[CPU_INTR];
-        cpu->intrpt_ticks = (unsigned long)sinfo_cpus[i].cpu[CPU_INTR];
-        cpu->user_ticks = (unsigned long)sinfo_cpus[i].cpu[CPU_USER];
-        cpu->wait_ticks   = (unsigned long)sinfo_cpus[i].cpu[CPU_WAIT];
-        cpu->idle_ticks = (unsigned long)sinfo_cpus[i].cpu[CPU_IDLE];
+        cpu->sys2_ticks  = (unsigned long long)sinfo_cpus[i].cpu[CPU_KERNEL] + (unsigned long long) sinfo_cpus[i].cpu[CPU_SXBRK] + (unsigned long long)sinfo_cpus[i].cpu[CPU_INTR];
+        cpu->intrpt_ticks = (unsigned long long)sinfo_cpus[i].cpu[CPU_INTR];
+        cpu->user_ticks = (unsigned long long)sinfo_cpus[i].cpu[CPU_USER];
+        cpu->wait_ticks   = (unsigned long long)sinfo_cpus[i].cpu[CPU_WAIT];
+        cpu->idle_ticks = (unsigned long long)sinfo_cpus[i].cpu[CPU_IDLE];
     }
 
     return 0;
