@@ -56,27 +56,27 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
                      sizeof(perfstat_cpu_total_t), 1) > 0) {
 
         /* Returns 'u_longlong_t' statistics */
-        cpu->user_ticks = (unsigned long)cs.user / cs.ncpus;
-        cpu->sys_ticks  = ((unsigned long)cs.sys + (unsigned long)cs.wait) / cs.ncpus;
-        cpu->kern_ticks = (unsigned long)cs.sys / cs.ncpus;
-        cpu->wait_ticks = (unsigned long)cs.wait / cs.ncpus;
-        cpu->idle_ticks = (unsigned long)cs.idle / cs.ncpus;
+        cpu->user_ticks = (unsigned long long)cs.user / cs.ncpus;
+        cpu->sys_ticks  = ((unsigned long long)cs.sys + (unsigned long long)cs.wait) / cs.ncpus;
+        cpu->kern_ticks = (unsigned long long)cs.sys / cs.ncpus;
+        cpu->wait_ticks = (unsigned long long)cs.wait / cs.ncpus;
+        cpu->idle_ticks = (unsigned long long)cs.idle / cs.ncpus;
         /* intrpt_ticks, sirq_ticks, nice_ticks unused */
     
         /*
          * Interrupt/Context Switch statistics
          *   XXX - Do these really belong here ?
          */
-        cpu->pageIn       = (unsigned long)cs.sysread;
-        cpu->pageOut      = (unsigned long)cs.syswrite;
-        cpu->nInterrupts  = (unsigned long)cs.devintrs + cs.softintrs;
-        cpu->nCtxSwitches = (unsigned long)cs.pswitch;
+        cpu->pageIn       = (unsigned long long)cs.sysread;
+        cpu->pageOut      = (unsigned long long)cs.syswrite;
+        cpu->nInterrupts  = (unsigned long long)cs.devintrs + cs.softintrs;
+        cpu->nCtxSwitches = (unsigned long long)cs.pswitch;
     }
 
     if (perfstat_memory_total((perfstat_id_t *)NULL, &ms,
                      sizeof(perfstat_memory_total_t), 1) > 0) {
-        cpu->swapIn  = (unsigned long)ms.pgspins;
-        cpu->swapOut = (unsigned long)ms.pgspouts;
+        cpu->swapIn  = (unsigned long long)ms.pgspins;
+        cpu->swapOut = (unsigned long long)ms.pgspouts;
     }
 
 
@@ -89,14 +89,14 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), n) > 0) {
         for ( i = 0; i < n; i++ ) {
             cpu = netsnmp_cpu_get_byIdx( i, 0 );
-            cpu->user_ticks = (unsigned long)cs2[i].user;
-            cpu->sys_ticks  = (unsigned long)cs2[i].sys + (unsigned long)cs2[i].wait;
-            cpu->kern_ticks = (unsigned long)cs2[i].sys;
-            cpu->wait_ticks = (unsigned long)cs2[i].wait;
-            cpu->idle_ticks = (unsigned long)cs2[i].idle;
-            cpu->pageIn     = (unsigned long)cs2[i].sysread;
-            cpu->pageOut    = (unsigned long)cs2[i].syswrite;
-            cpu->nCtxSwitches = (unsigned long)cs2[i].pswitch;
+            cpu->user_ticks = (unsigned long long)cs2[i].user;
+            cpu->sys_ticks  = (unsigned long long)cs2[i].sys + (unsigned long long)cs2[i].wait;
+            cpu->kern_ticks = (unsigned long long)cs2[i].sys;
+            cpu->wait_ticks = (unsigned long long)cs2[i].wait;
+            cpu->idle_ticks = (unsigned long long)cs2[i].idle;
+            cpu->pageIn     = (unsigned long long)cs2[i].sysread;
+            cpu->pageOut    = (unsigned long long)cs2[i].syswrite;
+            cpu->nCtxSwitches = (unsigned long long)cs2[i].pswitch;
             /* Interrupt stats only apply overall, not per-CPU */
         }
     } else {

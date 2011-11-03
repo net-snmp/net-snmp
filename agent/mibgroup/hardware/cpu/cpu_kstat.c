@@ -112,30 +112,30 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
                 break;   /* or continue ? */
             }
 
-            cpu2->user_ticks = (unsigned long)cs.cpu_sysinfo.cpu[CPU_USER];
-            cpu2->idle_ticks = (unsigned long)cs.cpu_sysinfo.cpu[CPU_IDLE];
-            cpu2->kern_ticks = (unsigned long)cs.cpu_sysinfo.cpu[CPU_KERNEL];
-            cpu2->wait_ticks = (unsigned long)cs.cpu_sysinfo.cpu[CPU_WAIT];
+            cpu2->user_ticks = (unsigned long long)cs.cpu_sysinfo.cpu[CPU_USER];
+            cpu2->idle_ticks = (unsigned long long)cs.cpu_sysinfo.cpu[CPU_IDLE];
+            cpu2->kern_ticks = (unsigned long long)cs.cpu_sysinfo.cpu[CPU_KERNEL];
+            cpu2->wait_ticks = (unsigned long long)cs.cpu_sysinfo.cpu[CPU_WAIT];
               /* or cs.cpu_sysinfo.wait[W_IO]+cs.cpu_sysinfo.wait[W_PIO] */
-            cpu2->sys2_ticks = (unsigned long)cpu2->kern_ticks+cpu2->wait_ticks;
+            cpu2->sys2_ticks = (unsigned long long)cpu2->kern_ticks+cpu2->wait_ticks;
                 /* nice_ticks, intrpt_ticks, sirq_ticks unused */
 
                 /* sum these for the overall stats */
-            cpu->user_ticks += (unsigned long)cs.cpu_sysinfo.cpu[CPU_USER];
-            cpu->idle_ticks += (unsigned long)cs.cpu_sysinfo.cpu[CPU_IDLE];
-            cpu->kern_ticks += (unsigned long)cs.cpu_sysinfo.cpu[CPU_KERNEL];
-            cpu->wait_ticks += (unsigned long)cs.cpu_sysinfo.cpu[CPU_WAIT];
+            cpu->user_ticks += (unsigned long long)cs.cpu_sysinfo.cpu[CPU_USER];
+            cpu->idle_ticks += (unsigned long long)cs.cpu_sysinfo.cpu[CPU_IDLE];
+            cpu->kern_ticks += (unsigned long long)cs.cpu_sysinfo.cpu[CPU_KERNEL];
+            cpu->wait_ticks += (unsigned long long)cs.cpu_sysinfo.cpu[CPU_WAIT];
               /* or cs.cpu_sysinfo.wait[W_IO]+cs.cpu_sysinfo.wait[W_PIO] */
-            cpu->sys2_ticks += (unsigned long)cpu2->kern_ticks+cpu2->wait_ticks;
+            cpu->sys2_ticks += (unsigned long long)cpu2->kern_ticks+cpu2->wait_ticks;
 
                 /*
                  * Interrupt/Context Switch statistics
                  *   XXX - Do these really belong here ?
                  */
-            cpu->swapIn       += (unsigned long)cs.cpu_vminfo.swapin;
-            cpu->swapOut      += (unsigned long)cs.cpu_vminfo.swapout;
-            cpu->nInterrupts  += (unsigned long)cs.cpu_sysinfo.intr;
-            cpu->nCtxSwitches += (unsigned long)cs.cpu_sysinfo.pswitch;
+            cpu->swapIn       += (unsigned long long)cs.cpu_vminfo.swapin;
+            cpu->swapOut      += (unsigned long long)cs.cpu_vminfo.swapout;
+            cpu->nInterrupts  += (unsigned long long)cs.cpu_sysinfo.intr;
+            cpu->nCtxSwitches += (unsigned long long)cs.cpu_sysinfo.pswitch;
         }
     }
     return 0;

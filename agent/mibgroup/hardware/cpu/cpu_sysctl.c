@@ -173,12 +173,12 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #else
     sysctl(cpu_mib, 2,  cpu_stats, &cpu_size, NULL, 0);
 #endif
-    cpu->user_ticks = (unsigned long)cpu_stats[CP_USER];
-    cpu->nice_ticks = (unsigned long)cpu_stats[CP_NICE];
-    cpu->sys2_ticks = (unsigned long)cpu_stats[CP_SYS]+cpu_stats[CP_INTR];
-    cpu->kern_ticks = (unsigned long)cpu_stats[CP_SYS];
-    cpu->idle_ticks = (unsigned long)cpu_stats[CP_IDLE];
-    cpu->intrpt_ticks = (unsigned long)cpu_stats[CP_INTR];
+    cpu->user_ticks = (unsigned long long)cpu_stats[CP_USER];
+    cpu->nice_ticks = (unsigned long long)cpu_stats[CP_NICE];
+    cpu->sys2_ticks = (unsigned long long)cpu_stats[CP_SYS]+cpu_stats[CP_INTR];
+    cpu->kern_ticks = (unsigned long long)cpu_stats[CP_SYS];
+    cpu->idle_ticks = (unsigned long long)cpu_stats[CP_IDLE];
+    cpu->intrpt_ticks = (unsigned long long)cpu_stats[CP_INTR];
         /* wait_ticks, sirq_ticks unused */
     
         /*
@@ -186,15 +186,15 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          *   XXX - Do these really belong here ?
          */
     sysctl(mem_mib, 2, &mem_stats, &mem_size, NULL, 0);
-    cpu->nInterrupts  = (unsigned long)mem_stats.NS_VM_INTR;
-    cpu->nCtxSwitches = (unsigned long)mem_stats.NS_VM_SWTCH;
-    cpu->swapIn       = (unsigned long)mem_stats.NS_VM_SWAPIN;
-    cpu->swapOut      = (unsigned long)mem_stats.NS_VM_SWAPOUT;
+    cpu->nInterrupts  = (unsigned long long)mem_stats.NS_VM_INTR;
+    cpu->nCtxSwitches = (unsigned long long)mem_stats.NS_VM_SWTCH;
+    cpu->swapIn       = (unsigned long long)mem_stats.NS_VM_SWAPIN;
+    cpu->swapOut      = (unsigned long long)mem_stats.NS_VM_SWAPOUT;
 #ifdef NS_VM_PAGEIN
-    cpu->pageIn       = (unsigned long)mem_stats.NS_VM_PAGEIN;
+    cpu->pageIn       = (unsigned long long)mem_stats.NS_VM_PAGEIN;
 #endif
 #ifdef NS_VM_PAGEOUT
-    cpu->pageOut      = (unsigned long)mem_stats.NS_VM_PAGEOUT;
+    cpu->pageOut      = (unsigned long long)mem_stats.NS_VM_PAGEOUT;
 #endif
 
 #ifdef NETSNMP_KERN_MCPU

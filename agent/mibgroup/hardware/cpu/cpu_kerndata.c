@@ -64,32 +64,32 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     for ( i=0; i < cpu_num; i++ ) {
         cpu2 = netsnmp_cpu_get_byIdx( i, 0 );
 
-        cpu2->user_ticks = (unsigned long)vminfo[i].v_time[V_CPU_USER];
-        cpu2->idle_ticks = (unsigned long)vminfo[i].v_time[V_CPU_IDLE];
-        cpu2->kern_ticks = (unsigned long)vminfo[i].v_time[V_CPU_KERNEL];
-        cpu2->wait_ticks = (unsigned long)vminfo[i].v_time[V_CPU_STREAM];
-        cpu2->sys2_ticks = (unsigned long)vminfo[i].v_time[V_CPU_KERNEL]+
+        cpu2->user_ticks = (unsigned long long)vminfo[i].v_time[V_CPU_USER];
+        cpu2->idle_ticks = (unsigned long long)vminfo[i].v_time[V_CPU_IDLE];
+        cpu2->kern_ticks = (unsigned long long)vminfo[i].v_time[V_CPU_KERNEL];
+        cpu2->wait_ticks = (unsigned long long)vminfo[i].v_time[V_CPU_STREAM];
+        cpu2->sys2_ticks = (unsigned long long)vminfo[i].v_time[V_CPU_KERNEL]+
                                           vminfo[i].v_time[V_CPU_STREAM];
             /* nice_ticks, intrpt_ticks, sirq_ticks unused */
 
             /* sum these for the overall stats */
-        cpu->user_ticks += (unsigned long)vminfo[i].v_time[V_CPU_USER];
-        cpu->idle_ticks += (unsigned long)vminfo[i].v_time[V_CPU_IDLE];
-        cpu->kern_ticks += (unsigned long)vminfo[i].v_time[V_CPU_KERNEL];
-        cpu->wait_ticks += (unsigned long)vminfo[i].v_time[V_CPU_STREAM];
-        cpu->sys2_ticks += (unsigned long)vminfo[i].v_time[V_CPU_KERNEL]+
+        cpu->user_ticks += (unsigned long long)vminfo[i].v_time[V_CPU_USER];
+        cpu->idle_ticks += (unsigned long long)vminfo[i].v_time[V_CPU_IDLE];
+        cpu->kern_ticks += (unsigned long long)vminfo[i].v_time[V_CPU_KERNEL];
+        cpu->wait_ticks += (unsigned long long)vminfo[i].v_time[V_CPU_STREAM];
+        cpu->sys2_ticks += (unsigned long long)vminfo[i].v_time[V_CPU_KERNEL]+
                                           vminfo[i].v_time[V_CPU_STREAM];
 
             /*
              * Interrupt/Context Switch statistics
              *   XXX - Do these really belong here ?
              */
-        cpu->swapIn       += (unsigned long)vminfo[i].v_swpin;
-        cpu->swapOut      += (unsigned long)vminfo[i].v_swpout;
-        cpu->pageIn       += (unsigned long)vminfo[i].v_phread;
-        cpu->pageOut      += (unsigned long)vminfo[i].v_phwrite;
-        cpu->nInterrupts  += (unsigned long)vminfo[i].v_intr;
-        cpu->nCtxSwitches += (unsigned long)vminfo[i].v_swtch;
+        cpu->swapIn       += (unsigned long long)vminfo[i].v_swpin;
+        cpu->swapOut      += (unsigned long long)vminfo[i].v_swpout;
+        cpu->pageIn       += (unsigned long long)vminfo[i].v_phread;
+        cpu->pageOut      += (unsigned long long)vminfo[i].v_phwrite;
+        cpu->nInterrupts  += (unsigned long long)vminfo[i].v_intr;
+        cpu->nCtxSwitches += (unsigned long long)vminfo[i].v_swtch;
     }
     return 0;
 }
