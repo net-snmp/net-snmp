@@ -14,7 +14,7 @@ SOCK_STARTUP;
     sin_addr.sin_addr = v4loop;
     s = socket(AF_INET, SOCK_DGRAM, 0);
     if (s >= 0) {
-        if (bind(s, &sin_addr, sizeof(sin_addr)) >= 0) {
+        if (bind(s, (struct sockaddr *)&sin_addr, sizeof(sin_addr)) >= 0) {
             h = netsnmp_gethostbyaddr(&v4loop, sizeof(v4loop), AF_INET);
             OKF(h && strcmp(h->h_name, "localhost") == 0,
                 ("127.0.0.1 lookup (%s)", h ? h->h_name : "(failed)"));
@@ -37,7 +37,7 @@ SOCK_STARTUP;
     sin6_addr.sin6_addr = v6loop;
     s = socket(AF_INET6, SOCK_DGRAM, 0);
     if (s >= 0) {
-        if (bind(s, &sin6_addr, sizeof(sin6_addr)) >= 0) {
+        if (bind(s, (struct sockaddr*)&sin6_addr, sizeof(sin6_addr)) >= 0) {
             h = netsnmp_gethostbyaddr(&v6loop, sizeof(v6loop), AF_INET6);
             OKF(h && strcmp(h->h_name, "localhost") == 0,
                 ("::1 lookup (%s)", h ? h->h_name : "(failed)"));
