@@ -395,6 +395,7 @@ schedTable_handler(netsnmp_mib_handler *handler,
          * All these assignments are "unfailable", so it's
          *  (reasonably) safe to apply them in the Commit phase
          */
+        entry = NULL;
         for (request = requests; request; request = request->next) {
             entry = (struct schedTable_entry *)
                     netsnmp_tdata_extract_entry(request);
@@ -492,8 +493,10 @@ schedTable_handler(netsnmp_mib_handler *handler,
                 break;
             }
         }
-        if (recalculate)
+        if (recalculate) {
+            netsnmp_assert(entry);
             sched_nextTime(entry);
+        }
         break;
     }
     return SNMP_ERR_NOERROR;
