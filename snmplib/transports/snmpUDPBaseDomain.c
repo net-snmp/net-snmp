@@ -263,15 +263,13 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
     struct sockaddr *from;
 
     if (t != NULL && t->sock >= 0) {
-        addr_pair = (netsnmp_indexed_addr_pair *) malloc(sizeof(netsnmp_indexed_addr_pair));
+        addr_pair = SNMP_MALLOC_TYPEDEF(netsnmp_indexed_addr_pair);
         if (addr_pair == NULL) {
             *opaque = NULL;
             *olength = 0;
             return -1;
-        } else {
-            memset(addr_pair, 0, sizeof(netsnmp_indexed_addr_pair));
+        } else
             from = &addr_pair->remote_addr.sa;
-        }
 
 	while (rc < 0) {
 #ifdef netsnmp_udpbase_recvfrom_sendto_defined
