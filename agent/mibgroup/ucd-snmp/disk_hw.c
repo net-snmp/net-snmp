@@ -137,6 +137,7 @@ disk_free_config(void)
   if (disks) {
      free( disks );
      disks = NULL;
+     maxdisks = numdisks = 0;
   }
   allDisksIncluded = 0;
 }
