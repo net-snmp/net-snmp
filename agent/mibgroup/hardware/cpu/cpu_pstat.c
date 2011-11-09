@@ -72,13 +72,13 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 
     pstat_getdynamic(&psd, sizeof(psd), 1, 0);
     /* XXX - Compare cpu_num against psd.psd_proc_cnt */
-    cpu->user_ticks = (unsigned long)psd.psd_cpu_time[CP_USER];
-    cpu->nice_ticks = (unsigned long)psd.psd_cpu_time[CP_NICE];
-    cpu->sys2_ticks = (unsigned long)psd.psd_cpu_time[CP_SYS]+
+    cpu->user_ticks = (unsigned long long)psd.psd_cpu_time[CP_USER];
+    cpu->nice_ticks = (unsigned long long)psd.psd_cpu_time[CP_NICE];
+    cpu->sys2_ticks = (unsigned long long)psd.psd_cpu_time[CP_SYS]+
                                      psd.psd_cpu_time[CP_WAIT];
-    cpu->idle_ticks = (unsigned long)psd.psd_cpu_time[CP_IDLE];
-    cpu->wait_ticks = (unsigned long)psd.psd_cpu_time[CP_WAIT];
-    cpu->kern_ticks = (unsigned long)psd.psd_cpu_time[CP_SYS];
+    cpu->idle_ticks = (unsigned long long)psd.psd_cpu_time[CP_IDLE];
+    cpu->wait_ticks = (unsigned long long)psd.psd_cpu_time[CP_WAIT];
+    cpu->kern_ticks = (unsigned long long)psd.psd_cpu_time[CP_SYS];
         /* XXX - record (sum of) "all other ticks" */
         /* intrpt_ticks, sirq_ticks unused */
 
@@ -87,21 +87,21 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          *   XXX - Do these really belong here ?
          */
     pstat_getvminfo(&psv, sizeof(psv), 1, 0);
-    cpu->swapIn  = (unsigned long)psv.psv_sswpin;
-    cpu->swapOut = (unsigned long)psv.psv_sswpout;
-    cpu->nInterrupts  = (unsigned long)psv.psv_sintr;
-    cpu->nCtxSwitches = (unsigned long)psv.psv_sswtch;
+    cpu->swapIn  = (unsigned long long)psv.psv_sswpin;
+    cpu->swapOut = (unsigned long long)psv.psv_sswpout;
+    cpu->nInterrupts  = (unsigned long long)psv.psv_sintr;
+    cpu->nCtxSwitches = (unsigned long long)psv.psv_sswtch;
 
 
     for ( i = 0; i < psd.psd_proc_cnt; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 0 );
-        cpu->user_ticks = (unsigned long)psd.psd_mp_cpu_time[i][CP_USER];
-        cpu->nice_ticks = (unsigned long)psd.psd_mp_cpu_time[i][CP_NICE];
-        cpu->sys2_ticks = (unsigned long)psd.psd_mp_cpu_time[i][CP_SYS]+
+        cpu->user_ticks = (unsigned long long)psd.psd_mp_cpu_time[i][CP_USER];
+        cpu->nice_ticks = (unsigned long long)psd.psd_mp_cpu_time[i][CP_NICE];
+        cpu->sys2_ticks = (unsigned long long)psd.psd_mp_cpu_time[i][CP_SYS]+
                                          psd.psd_mp_cpu_time[i][CP_WAIT];
-        cpu->idle_ticks = (unsigned long)psd.psd_mp_cpu_time[i][CP_IDLE];
-        cpu->wait_ticks = (unsigned long)psd.psd_mp_cpu_time[i][CP_WAIT];
-        cpu->kern_ticks = (unsigned long)psd.psd_mp_cpu_time[i][CP_SYS];
+        cpu->idle_ticks = (unsigned long long)psd.psd_mp_cpu_time[i][CP_IDLE];
+        cpu->wait_ticks = (unsigned long long)psd.psd_mp_cpu_time[i][CP_WAIT];
+        cpu->kern_ticks = (unsigned long long)psd.psd_mp_cpu_time[i][CP_SYS];
         /* XXX - record (sum of) "all other ticks" */
     }
 

@@ -528,7 +528,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                 netsnmp_handler_mark_requests_as_delegated(requests,
                                                            REQUEST_IS_NOT_DELEGATED);
             }
-	    else if ((cache->reqinfo->mode == MODE_SET_ACTION)) {
+	    else if (cache->reqinfo->mode == MODE_SET_ACTION) {
 		/*
 		 * In order for netsnmp_wrap_up_request to consider the
 		 * SET request complete,
