@@ -109,7 +109,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 
     while (NULL != (h = rpmdbNextIterator( mi )))
     {
-
+        const u_char *dt;
         entry = netsnmp_swinst_entry_create( i++ );
         if (NULL == entry)
             continue;   /* error already logged by function */
@@ -131,8 +131,15 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
                         : 4;     /*  application    */
 
         install_time = *t;
-        entry->swDate_len = snprintf( entry->swDate, sizeof(entry->swDate),
-                                      "%s", date_n_time( &install_time, &date_len ));
+        dt = date_n_time( &install_time, &date_len );
+        if (date_len != 8 && date_len != 11) {
+            snmp_log(LOG_ERR, "Bogus length from date_n_time for %s", entry->swName);
+            entry->swDate_len = 0;
+        }
+        else {
+            entry->swDate_len = date_len;
+            memcpy(entry->swDate, dt, entry->swDate_len);
+        }
 
         headerFree( h );
     }
