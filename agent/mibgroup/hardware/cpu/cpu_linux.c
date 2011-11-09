@@ -160,14 +160,14 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
                    &cidell);
 
 	} else {
-            cpu->wait_ticks   = (unsigned long)ciowll;
-            cpu->intrpt_ticks = (unsigned long)cirqll;
-            cpu->sirq_ticks   = (unsigned long)csoftll;
+            cpu->wait_ticks   = (unsigned long long)ciowll;
+            cpu->intrpt_ticks = (unsigned long long)cirqll;
+            cpu->sirq_ticks   = (unsigned long long)csoftll;
  	}
-        cpu->user_ticks = (unsigned long)cusell;
-        cpu->nice_ticks = (unsigned long)cicell;
-        cpu->sys_ticks  = (unsigned long)csysll;
-        cpu->idle_ticks = (unsigned long)cidell;
+        cpu->user_ticks = (unsigned long long)cusell;
+        cpu->nice_ticks = (unsigned long long)cicell;
+        cpu->sys_ticks  = (unsigned long long)csysll;
+        cpu->idle_ticks = (unsigned long long)cidell;
     }
     if ( b1 == buff ) {
 	if (first)
@@ -234,7 +234,7 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	b = strstr(vmbuff, "pgpgin ");
 	if (b) {
 	    sscanf(b, "pgpgin %llu", &pin);
-            cpu->pageIn  = (unsigned long)pin*2;  /* ??? */
+            cpu->pageIn  = (unsigned long long)pin*2;  /* ??? */
 	} else {
 	    if (first)
 		snmp_log(LOG_ERR, "No pgpgin line in %s\n", VMSTAT_FILE);
@@ -243,7 +243,7 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	b = strstr(vmbuff, "pgpgout ");
 	if (b) {
 	    sscanf(b, "pgpgout %llu", &pout);
-            cpu->pageOut = (unsigned long)pout*2;  /* ??? */
+            cpu->pageOut = (unsigned long long)pout*2;  /* ??? */
 	} else {
 	    if (first)
 		snmp_log(LOG_ERR, "No pgpgout line in %s\n", VMSTAT_FILE);
@@ -252,7 +252,7 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	b = strstr(vmbuff, "pswpin ");
 	if (b) {
 	    sscanf(b, "pswpin %llu", &swpin);
-            cpu->swapIn  = (unsigned long)swpin;
+            cpu->swapIn  = (unsigned long long)swpin;
 	} else {
 	    if (first)
 		snmp_log(LOG_ERR, "No pswpin line in %s\n", VMSTAT_FILE);
@@ -261,7 +261,7 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	b = strstr(vmbuff, "pswpout ");
 	if (b) {
 	    sscanf(b, "pswpout %llu", &swpout);
-            cpu->swapOut = (unsigned long)swpout;
+            cpu->swapOut = (unsigned long long)swpout;
 	} else {
 	    if (first)
 		snmp_log(LOG_ERR, "No pswpout line in %s\n", VMSTAT_FILE);
@@ -272,8 +272,8 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	b = strstr(buff, "page ");
 	if (b) {
 	    sscanf(b, "page %llu %llu", &pin, &pout);
-            cpu->pageIn  = (unsigned long)pin;
-            cpu->pageOut = (unsigned long)pout;
+            cpu->pageIn  = (unsigned long long)pin;
+            cpu->pageOut = (unsigned long long)pout;
 	} else {
 	    if (first)
 		snmp_log(LOG_ERR, "No page line in %s\n", STAT_FILE);
@@ -282,8 +282,8 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	b = strstr(buff, "swap ");
 	if (b) {
 	    sscanf(b, "swap %llu %llu", &swpin, &swpout);
-            cpu->swapIn  = (unsigned long)swpin;
-            cpu->swapOut = (unsigned long)swpout;
+            cpu->swapIn  = (unsigned long long)swpin;
+            cpu->swapOut = (unsigned long long)swpout;
 	} else {
 	    if (first)
 		snmp_log(LOG_ERR, "No swap line in %s\n", STAT_FILE);
@@ -294,7 +294,7 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
     b = strstr(buff, "intr ");
     if (b) {
 	sscanf(b, "intr %llu %llu", &itot, &iticks);
-        cpu->nInterrupts = (unsigned long)itot;
+        cpu->nInterrupts = (unsigned long long)itot;
         /* iticks not used? */
     } else {
 	if (first)
@@ -303,7 +303,7 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
     b = strstr(buff, "ctxt ");
     if (b) {
 	sscanf(b, "ctxt %llu", &ctx);
-        cpu->nCtxSwitches = (unsigned long)ctx;
+        cpu->nCtxSwitches = (unsigned long long)ctx;
     } else {
 	if (first)
 	    snmp_log(LOG_ERR, "No ctxt line in %s\n", STAT_FILE);

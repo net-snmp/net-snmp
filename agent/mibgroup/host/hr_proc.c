@@ -164,6 +164,7 @@ var_hrproc(struct variable * vp,
            int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             proc_idx;
+    unsigned long long value;
     netsnmp_cpu_info *cpu;
 
     proc_idx =
@@ -181,9 +182,9 @@ var_hrproc(struct variable * vp,
            ( cpu->history[0].total_hist == cpu->total_ticks ))
             return NULL;
 
-        long_return  = (cpu->idle_ticks  - cpu->history[0].idle_hist)*100;
-        long_return /= (cpu->total_ticks - cpu->history[0].total_hist);
-        long_return  = 100 - long_return;
+        value = (cpu->idle_ticks  - cpu->history[0].idle_hist)*100;
+        value /= (cpu->total_ticks - cpu->history[0].total_hist);
+        long_return = 100 - value;
         if (long_return < 0)
             long_return = 0;
         return (u_char *) & long_return;
