@@ -414,12 +414,11 @@ if test "$with_libwrap" != "no"; then
   LIBS="$LIBS -lwrap"
   AC_MSG_CHECKING([for TCP wrappers library -lwrap])
   # XXX: should check for hosts_ctl
-  AC_TRY_LINK(
-    [#include <sys/types.h>
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
      #include <tcpd.h>
      int allow_severity = 0;
-     int deny_severity  = 0;],
-    [hosts_access((void *)0)],
+     int deny_severity  = 0;]],
+    [[hosts_access((void *)0)]])],
     [AC_MSG_RESULT([yes])
      AC_DEFINE(NETSNMP_USE_LIBWRAP)
      test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
@@ -429,12 +428,11 @@ if test "$with_libwrap" != "no"; then
      AC_CHECK_FUNC(yp_get_default_domain, ,
        AC_CHECK_LIB(nsl, yp_get_default_domain))
      AC_MSG_CHECKING([for TCP wrappers library -lwrap linked with -lnsl])
-     AC_TRY_LINK(
-       [#include <sys/types.h>
+     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 	#include <tcpd.h>
 	int allow_severity = 0;
-	int deny_severity  = 0;],
-       [hosts_access((void *)0)],
+	int deny_severity  = 0;]],
+       [[hosts_access((void *)0)]])],
        [AC_MSG_RESULT(yes)
 	AC_DEFINE(NETSNMP_USE_LIBWRAP)
 	test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
@@ -465,11 +463,8 @@ if test "x$with_mysql" = "xyes" ; then
   _cppflags="${CPPFLAGS}"
   LIBS="${LIBS} ${MYSQL_LIBS}"
   CPPFLAGS="${CPPFLAGS} ${MYSQL_INCLUDES}"
-  AC_TRY_LINK([#include <mysql/my_global.h>
-               #include <mysql/my_sys.h>],
-	      [MY_INIT("my_init_test")],
-              [AC_MSG_RESULT(yes)],
-              [AC_MSG_RESULT(no)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mysql/my_global.h>
+               #include <mysql/my_sys.h>]], [[MY_INIT("my_init_test")]])],[AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)
                AC_DEFINE([HAVE_BROKEN_LIBMYSQLCLIENT], 1,
 	                 [Define if using MY_INIT() causes a linker error])])
   CPPFLAGS="${_cppflags}"
