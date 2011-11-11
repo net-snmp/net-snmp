@@ -127,7 +127,7 @@ fi
 AC_MSG_CHECKING([[for two-argument statfs with struct fs_data (Ultrix)]])
 AC_CACHE_VAL(
     fu_cv_sys_stat_fs_data,
-    [AC_TRY_RUN([
+    [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -144,10 +144,10 @@ struct fs_data fsd;
 /* Ultrix's statfs returns 1 for success,
    0 for not mounted, -1 for failure.  */
 exit (statfs (".", &fsd) != 1);
-}],
-    fu_cv_sys_stat_fs_data=yes,
-    fu_cv_sys_stat_fs_data=no,
-    fu_cv_sys_stat_fs_data=no)])
+}]])],
+    [fu_cv_sys_stat_fs_data=yes],
+    [fu_cv_sys_stat_fs_data=no],
+    [fu_cv_sys_stat_fs_data=no])])
 AC_MSG_RESULT($fu_cv_sys_stat_fs_data)
 if test $fu_cv_sys_stat_fs_data = yes; then
     AC_DEFINE(STAT_STATFS_FS_DATA, 1,
@@ -303,10 +303,11 @@ if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
        [
         oldLIBS="$LIBS"
         LIBS="$LIBS -lcrypto"
-        AC_TRY_LINK(
-         [#include <openssl/bio.h>],
-         [BIO_dgram_get_peer(NULL, NULL);],,
-         AC_MSG_ERROR([DTLS support requires a newer version of OpenSSL]))
+        AC_LINK_IFELSE(
+          [AC_LANG_PROGRAM(
+            [[#include <openssl/bio.h>]],
+            [[BIO_dgram_get_peer(NULL, NULL);]])], [],
+          [AC_MSG_ERROR(DTLS support requires a newer version of OpenSSL)])
 
         LIBS="$oldLIBS"
        ]

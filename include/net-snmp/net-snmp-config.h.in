@@ -1154,6 +1154,9 @@
 /* Define to 1 if you have the `times' function. */
 #undef HAVE_TIMES
 
+/* Define if a timezone variable is declared in <sys/time.h> */
+#undef HAVE_TIMEZONE_VARIABLE
+
 /* Define to 1 if you have the <ufs/ffs/fs.h> header file. */
 #undef HAVE_UFS_FFS_FS_H
 
