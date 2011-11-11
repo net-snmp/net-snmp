@@ -326,6 +326,11 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     int amask;
     char *if_name;
     int flags;
+#ifdef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_NSEC
+    struct timespec startspec;
+
+    TIMEVAL_TO_TIMESPEC(&starttime, &startspec);
+#endif
 
     DEBUGMSGTL(("access:interface:container:sysctl",
                 "load (flags %u)\n", load_flags));
@@ -477,7 +482,11 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                             NETSNMP_INTERFACE_FLAGS_HAS_DROPS |
                             NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
 
+#ifdef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_NSEC
+        if (timespeccmp(&ifp->ifm_data.ifi_lastchange, &startspec, >)) {
+#else
         if (timercmp(&ifp->ifm_data.ifi_lastchange, &starttime, >)) {
+#endif
             entry->lastchange = (ifp->ifm_data.ifi_lastchange.tv_sec -
                                  starttime.tv_sec) * 100;
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE;
@@ -502,7 +511,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
         CONTAINER_INSERT(container, entry);
         DEBUGMSGTL(("access:interface:container:sysctl",
-                    "created entry %d for %s\n", entry->index, entry->name));
+                    "created entry %d for %s\n", (int)entry->index, entry->name));
     } /* for (each interface entry) */
 
     /* pass 2: walk addresses */
