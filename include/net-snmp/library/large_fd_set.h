@@ -74,7 +74,7 @@ int    netsnmp_large_fd_is_set(SOCKET fd, netsnmp_large_fd_set *fdset);
  * According to SUSv2, this array must have the name fds_bits. See also
  * <a href="http://www.opengroup.org/onlinepubs/007908775/xsh/systime.h.html">The Single UNIX Specification, Version 2, &lt;sys/time.h&gt;</a>.
  */
-#define NETSNMP_FD_MASK_SIZE sizeof(((fd_set*)0)->fds_bits)
+#define NETSNMP_FD_MASK_SIZE sizeof(((fd_set*)0)->fds_bits[0])
 
 /** Number of bits in one element of the fd_set::fds_bits array. */
 #define NETSNMP_BITS_PER_FD_MASK (8 * NETSNMP_FD_MASK_SIZE)
