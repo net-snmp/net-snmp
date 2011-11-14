@@ -13,10 +13,10 @@ fi
 # Make sure MinGW / MSYS users have the pskill.exe program to stop the agent and
 # snmptrapd
 if [ "x$OSTYPE" = "xmsys" -a "x`type -p pskill.exe`" = "x" ]; then
-    echo Could not find pskill.exe. Aborting tests.
-    echo pskill.exe can be installed as follows:
-    echo - Download pskill.exe from http://technet.microsoft.com/en-us/sysinternals/default.aspx.
-    echo - Copy pskill.exe to C:\MinGW\msys\1.0\bin.
+    echo "Could not find pskill.exe. Aborting tests."
+    echo "pskill.exe can be installed as follows:"
+    echo "- Download pskill.exe from http://technet.microsoft.com/en-us/sysinternals/default.aspx."
+    echo "- Copy pskill.exe to C:\\MinGW\\msys\\1.0\\bin."
     exit 1
 fi 
 
