@@ -1231,7 +1231,6 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
          unsigned long *minrtt, unsigned long *maxrtt,
          unsigned long *averagertt, pid_t pid)
 {
-    int             size;
     char            recvbuf[BUFSIZE];
     char            sendbuf[BUFSIZE];
     int             nsent = 1;
@@ -1256,8 +1255,6 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
 	return;
     }
     setuid(getuid());           /* don't need special permissions any more */
-
-    size = 60 * 1024;           /* OK if setsockopt fails */
 
     tv.tv_sec = 5;
     tv.tv_usec = 0;
@@ -1599,7 +1596,6 @@ send_v4(int datalen, pid_t pid, int nsent, int sockfd, char *sendbuf)
 {
     int             len;
     struct icmp    *icmp = NULL;
-    struct timeval *temp = NULL;
 
     icmp = (struct icmp *) sendbuf;
     icmp->icmp_type = ICMP_ECHO;
@@ -1607,7 +1603,6 @@ send_v4(int datalen, pid_t pid, int nsent, int sockfd, char *sendbuf)
     icmp->icmp_id = pid;
     icmp->icmp_seq = nsent;
     gettimeofday((struct timeval *) icmp->icmp_data, NULL);
-    temp = (struct timeval *) icmp->icmp_data;
 
     len = 8 + datalen;          /* checksum ICMP header and data */
     icmp->icmp_cksum = 0;
