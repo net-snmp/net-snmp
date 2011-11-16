@@ -4926,6 +4926,8 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
         }
 
+        close(sndsock);
+
         if (flag == 1) {
             DEBUGMSGTL(("traceRouteProbeHistoryTable", "path changed!\n"));
             send_traceRoute_trap(item, traceRoutePathChange,
@@ -5557,6 +5559,8 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
             }
 
         }
+
+        close(sndsock);
 
         if (flag == 1) {
             printf("path changed!\n");
