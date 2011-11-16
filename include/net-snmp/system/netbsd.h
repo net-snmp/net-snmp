@@ -34,8 +34,36 @@
 
 #define UDP_ADDRESSES_IN_HOST_ORDER 1
 
+#ifdef netbsdelf6
+#define netbsd6
+#define netbsdelf5
+#endif
+#ifdef netbsdelf5
+#define netbsd5
+#define netbsdelf4
+#endif
+#ifdef netbsdelf4
+#define netbsd4
+#define netbsdelf3
+#endif
+#ifdef netbsdelf3
+#define netbsd3
+#endif
+
+#if defined(netbsd6) && !defined(netbsd5)
+#define netbsd5 netbsd5
+#endif
+#if defined(netbsd5) && !defined(netbsd4)
+#define netbsd4 netbsd4
+#endif
+#if defined(netbsd4) && !defined(netbsd3)
+#define netbsd3 netbsd3
+#endif
+#if defined(netbsd3) && !defined(netbsd2)
+#define netbsd2 netbsd2
+#endif
 #ifndef netbsd1
-# define netbsd1 netbsd1
+#define netbsd1 netbsd1
 #endif
 
 #if __NetBSD_Version__ >= 499005800
