@@ -40,23 +40,25 @@ void _cpu_copy_stats( netsnmp_cpu_info *cpu );
      *   (including descriptions)
      */
 void init_cpu_sysctl( void ) {
-    int               n;
-    size_t            i;
+    int               i, n;
+    size_t            siz;
     int               ncpu_mib[]  = { CTL_HW, HW_NCPU };
+#if !(defined(__NetBSD__) && ( defined(__i386__) || defined(__x86_64__) ) )
     int               model_mib[] = { CTL_HW, HW_MODEL };
+#endif
     char              descr[ SNMP_MAXBUF ];
     netsnmp_cpu_info  *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
 
-    i = sizeof(n);
-    sysctl(ncpu_mib, 2, &n, &i, NULL, 0);
+    siz = sizeof(n);
+    sysctl(ncpu_mib, 2, &n, &siz, NULL, 0);
     if ( n <= 0 )
         n = 1;   /* Single CPU system */
-    i = sizeof(descr);
+    siz = sizeof(descr);
 #if defined(__NetBSD__) && ( defined(__i386__) || defined(__x86_64__) )
-    sysctlbyname("machdep.cpu_brand", descr, (void *)&i, NULL, 0);
+    sysctlbyname("machdep.cpu_brand", descr, &siz, NULL, 0);
 #else
-    sysctl(model_mib, 2, descr, &i, NULL, 0);
+    sysctl(model_mib, 2, descr, &siz, NULL, 0);
 #endif
     for ( i = 0; i < n; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );

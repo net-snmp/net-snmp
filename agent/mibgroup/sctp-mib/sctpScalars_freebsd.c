@@ -60,9 +60,7 @@ netsnmp_access_sctp_params_arch_init()
 int
 netsnmp_access_sctp_params_arch_load(netsnmp_sctp_params * sctp_params)
 {
-    int             ret;
 	size_t len = sizeof(uint32_t);
-	unsigned int cnt = 0;
 
     sctp_params->rto_algorithm = NETSNMP_SCTP_ALGORITHM_VANJ;
     sctp_params->max_assocs =  SCTP_MAX_NUM_OF_ASOC; 

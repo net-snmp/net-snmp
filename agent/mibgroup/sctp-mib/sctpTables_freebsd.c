@@ -58,8 +58,6 @@ parse_assoc_local_addresses(sctpTables_containers * containers,
 static int
 parse_assoc_xstcb(sctpTables_containers * containers, struct xsctp_tcb *xstcb)
 {
-  long            inode;
-  char           *token;
   int             ret;
   sctpAssocTable_entry *entry;
 
@@ -124,7 +122,6 @@ static int
 parse_remaddr_xraddr(sctpTables_containers * containers,
 					 struct xsctp_raddr *xraddr)
 {
-  char           *token;
   int             ret;
   sctpAssocRemAddrTable_entry *entry;
 
@@ -184,8 +181,6 @@ sctpTables_arch_load(sctpTables_containers * containers, u_long * flags)
   struct xsctp_tcb *xstcb;
   struct xsctp_laddr *xladdr;
   struct xsctp_raddr *xraddr;
-  sa_family_t family;
-  void *addr;
 
 
   *flags |= SCTP_TABLES_LOAD_FLAG_DELETE_INVALID;
