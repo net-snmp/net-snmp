@@ -186,7 +186,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
 
         entry->ns_ia_index = ++idx_offset;
 
-        DEBUGMSGTL(("access:ipaddress:container", "insert if %d, addrlen %d\n", 
+        DEBUGMSGTL(("access:ipaddress:container", "insert if %" NETSNMP_PRIo "u, addrlen %d\n", 
                     entry->if_index, entry->ia_address_len));
 
         if (CONTAINER_INSERT(container, entry) < 0) {
@@ -271,7 +271,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
 
         entry->ns_ia_index = ++idx_offset;
         
-        DEBUGMSGTL(("access:ipaddress:container", "insert if %d, addrlen %d\n", 
+        DEBUGMSGTL(("access:ipaddress:container", "insert if %" NETSNMP_PRIo "u, addrlen %d\n", 
                     entry->if_index, entry->ia_address_len));
 
         if (CONTAINER_INSERT(container, entry) < 0) {
