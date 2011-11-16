@@ -46,6 +46,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         buff = malloc(bsize+1);
         if (NULL == buff) {
             snmp_log(LOG_ERR, "malloc failed\n");
+            close(statfd);
             return -1;
         }
     }
@@ -53,6 +54,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         b = realloc(buff, bsize + MEMINFO_STEP_SIZE + 1);
         if (NULL == b) {
             snmp_log(LOG_ERR, "malloc failed\n");
+            close(statfd);
             return -1;
         }
         buff = b;
