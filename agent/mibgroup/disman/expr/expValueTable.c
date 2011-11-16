@@ -124,7 +124,7 @@ NEXT_EXP:
         }
         if ( vp->val.objid[0] != 0 ) {
             DEBUGMSGTL(( "disman:expr:val",
-                         "non-zero instance (%d)\n", vp->val.objid[0]));
+                         "non-zero instance (%" NETSNMP_PRIo "d)\n", vp->val.objid[0]));
             return NULL;  /* Invalid instance */
         }
 
@@ -158,7 +158,7 @@ NEXT_EXP:
          */
         if ( vp->val_len > 0 && vp->val.objid[0] != 0 ) {
             DEBUGMSGTL(( "disman:expr:val",
-                         "non-zero next instance (%d)\n", vp->val.objid[0]));
+                         "non-zero next instance (%" NETSNMP_PRIo "d)\n", vp->val.objid[0]));
             return NULL;        /* All valid instances start with .0 */
         }
         plen = exp->expPrefix_len;
