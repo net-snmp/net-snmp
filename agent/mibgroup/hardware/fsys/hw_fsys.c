@@ -322,6 +322,10 @@ netsnmp_fsys_avail( netsnmp_fsys_info *f) {
 #define INT32_MAX 0x7fffffff
 #endif
 
+#ifndef PRIu64
+#define PRIu64 "llu"
+#endif
+
 /* recalculate f->size_32, used_32, avail_32 and units_32 from f->size & comp.*/
 void
 netsnmp_fsys_calculate32(netsnmp_fsys_info *f)
