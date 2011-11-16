@@ -236,7 +236,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                              : 4  /*  application     */
                              ;
 
-#ifdef netbsdelf5
+#ifdef netbsd5
         switch (proc_table[i].SWRUN_K_STAT) {
 	case LSONPROC:
         case LSRUN:   entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
