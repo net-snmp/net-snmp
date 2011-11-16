@@ -91,13 +91,19 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (first)
             snmp_log(LOG_ERR, "No MemFree line in /proc/meminfo\n");
     }
-    b = strstr(buff, "MemShared: ");
-    if (b)
-        sscanf(b, "MemShared: %lu", &memshared);
+    if (0 == netsnmp_os_prematch("Linux","2.4")) {
+        b = strstr(buff, "MemShared: ");
+        if (b)
+            sscanf(b, "MemShared: %lu", &memshared);
+        else if (first)
+            snmp_log(LOG_ERR, "No MemShared line in /proc/meminfo\n");
+    }
     else {
-        if (first)
-            if (0 == netsnmp_os_prematch("Linux","2.4"))
-                snmp_log(LOG_ERR, "No MemShared line in /proc/meminfo\n");
+        b = strstr(buff, "Shmem: ");
+        if (b)
+            sscanf(b, "Shmem: %lu", &memshared);
+        else if (first)
+            snmp_log(LOG_ERR, "No Shmem line in /proc/meminfo\n");
     }
     b = strstr(buff, "Buffers: ");
     if (b)
@@ -157,8 +163,6 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->other = -1;
     }
 
-   /* Shared memory is not reported by Linux 2.6 kernel */
-   if (0 != netsnmp_os_prematch("Linux","2.6")) {
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SHARED, 1 );
     if (!mem) {
         snmp_log_perror("No Shared Memory info entry");
@@ -167,10 +171,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
              mem->descr = strdup("Shared memory");
         mem->units = 1024;
         mem->size  = memshared;
-        mem->free  = -1;
+        mem->free  = 0;    /* All in use */
         mem->other = -1;
     }
-   }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_CACHED, 1 );
     if (!mem) {
