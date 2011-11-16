@@ -462,7 +462,8 @@ getstats(void)
 {
     time_t          now;
     char           *t, *tp;
-    int             size, dkn_size, i;
+    size_t          size, dkn_size;
+    int             i;
 
     now = time(NULL);
     if (cache_time + CACHE_TIMEOUT > now) {
@@ -486,6 +487,7 @@ getstats(void)
         if (ndisk == 0)
             return 0;
         dkname = malloc(ndisk * sizeof(char *));
+        dkn_size = 0;
         if (sysctl(nmib, 2, NULL, &dkn_size, NULL, 0) < 0) {
             perror("Can't get size of HW_DISKNAMES mib");
             return 0;
