@@ -329,7 +329,7 @@ optProc(int argc, char *const *argv, int opt)
 
 	    case 's':
                 if (optind < argc) {
-                    if (isdigit(argv[optind][0]))
+                    if (isdigit(0xFF & argv[optind][0]))
                         _storage_type = atoi(argv[optind++]);
                     else
                         _storage_type_str = argv[optind++];
@@ -342,7 +342,7 @@ optProc(int argc, char *const *argv, int opt)
                 
 	    case 'h':
                 if (optind < argc) {
-                    if (isdigit(argv[optind][0]))
+                    if (isdigit(0xFF & argv[optind][0]))
                         _hash_type = atoi(argv[optind++]);
                 }
                 else {

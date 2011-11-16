@@ -724,7 +724,7 @@ _cert_get_san_type(X509 *ocert, int mapType)
     if (lower)
         for ( ; *lower; ++lower )
             if (isascii(*lower))
-                *lower = tolower(*lower);
+                *lower = tolower(0xFF & *lower);
     DEBUGMSGT(("openssl:cert:extension:san", "#%d type %d: %s\n", i,
                oname ? oname->type : -1, buf ? buf : "NULL"));
 

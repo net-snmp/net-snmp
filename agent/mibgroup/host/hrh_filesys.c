@@ -347,13 +347,13 @@ when_dumped(char *filesys, int level, size_t * length)
                 continue;
 
             ++cp2;
-            while (isspace(*cp2))
+            while (isspace(0xFF & *cp2))
                 ++cp2;          /* Now find the dump level */
 
             if (level == FULL_DUMP) {
                 if (*(cp2++) != '0')
                     continue;   /* Not interested in partial dumps */
-                while (isspace(*cp2))
+                while (isspace(0xFF & *cp2))
                     ++cp2;
 
                 dumpdate = ctime_to_timet(cp2);
@@ -362,7 +362,7 @@ when_dumped(char *filesys, int level, size_t * length)
             } else {            /* Partial Dump */
                 if (*(cp2++) == '0')
                     continue;   /* Not interested in full dumps */
-                while (isspace(*cp2))
+                while (isspace(0xFF & *cp2))
                     ++cp2;
 
                 tmp = ctime_to_timet(cp2);
