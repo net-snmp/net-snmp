@@ -1266,6 +1266,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
     for (current_probe_temp = 1;
          current_probe_temp <= item->pingCtlProbeCount;
          current_probe_temp++) {
+        time_t          timep;
         (*pr->fsend) (datalen, pid, nsent, sockfd, sendbuf);
         nsent++;
         len = pr->salen;
@@ -1282,18 +1283,17 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
 
         gettimeofday(&tval, NULL);
 
-        time_t          timep;
         time(&timep);
 
         (*pr->fproc) (recvbuf, n, &tval, timep, item, ai, datalen, minrtt,
                       maxrtt, sumrtt, averagertt, current_probe_temp,
                       success_probe, fail_probe, flag, &current_var, pid);
-        printf("receiver success!\n");
         if (current_probe_temp >= item->pingCtlProbeCount) {
             SNMP_FREE(sumrtt);
             return;
         }
     }
+    close(sockfd);
 }
 
 unsigned long
@@ -1936,6 +1936,7 @@ run_ping(unsigned int clientreg, void *clientarg)
                   (char *) outpack, &ident, &start_time, &screen_width,
                   &deadline);
 
+        close(icmp_sock);
     }
     return;
 }
