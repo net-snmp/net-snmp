@@ -989,7 +989,7 @@ netsnmp_tlstcp_create_tstring(const char *str, int local,
         for(cp = str; *cp != '\0'; cp++) {
             /* if ALL numbers, it must be just a port */
             /* if it contains anything else, assume a host or ip address */
-            if (!isdigit(*cp)) {
+            if (!isdigit(0xFF & *cp)) {
                 isport = 0;
                 break;
             }

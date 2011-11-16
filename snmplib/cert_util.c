@@ -791,7 +791,7 @@ _certindexes_load( void )
      * Create a list of which directory each file refers to
      */
     while ((file = readdir( dir ))) {
-        if ( !isdigit(file->d_name[0]))
+        if ( !isdigit(0xFF & file->d_name[0]))
             continue;
         i = atoi( file->d_name );
 
@@ -1714,7 +1714,7 @@ netsnmp_fp_lowercase_and_strip_colon(char *fp)
             break;
         }
         else
-            *pos = isalpha(*pos) ? tolower(*pos) : *pos;
+            *pos = isalpha(0xFF & *pos) ? tolower(0xFF & *pos) : *pos;
     }
     if (!*pos)
         return;
@@ -1723,7 +1723,7 @@ netsnmp_fp_lowercase_and_strip_colon(char *fp)
     for (++pos; *pos; ++pos) {
         if (':' == *pos)
             continue;
-        *dest++ = isalpha(*pos) ? tolower(*pos) : *pos;
+        *dest++ = isalpha(0xFF & *pos) ? tolower(0xFF & *pos) : *pos;
     }
     *dest = *pos; /* nul termination */
 }
@@ -2690,7 +2690,7 @@ netsnmp_certToTSN_parse_common(char **line)
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
-    if (!isdigit(tmp[0])) {
+    if (!isdigit(0xFF & tmp[0])) {
         netsnmp_config_error("could not parse priority");
         return NULL;
     }
