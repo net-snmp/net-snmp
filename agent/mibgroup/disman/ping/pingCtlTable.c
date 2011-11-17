@@ -1231,7 +1231,6 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
          unsigned long *minrtt, unsigned long *maxrtt,
          unsigned long *averagertt, pid_t pid)
 {
-    int             size;
     char            recvbuf[BUFSIZE];
     char            sendbuf[BUFSIZE];
     int             nsent = 1;
@@ -1257,8 +1256,6 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
     }
     setuid(getuid());           /* don't need special permissions any more */
 
-    size = 60 * 1024;           /* OK if setsockopt fails */
-
     tv.tv_sec = 5;
     tv.tv_usec = 0;
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
@@ -1266,6 +1263,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
     for (current_probe_temp = 1;
          current_probe_temp <= item->pingCtlProbeCount;
          current_probe_temp++) {
+        time_t          timep;
         (*pr->fsend) (datalen, pid, nsent, sockfd, sendbuf);
         nsent++;
         len = pr->salen;
@@ -1282,18 +1280,17 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
 
         gettimeofday(&tval, NULL);
 
-        time_t          timep;
         time(&timep);
 
         (*pr->fproc) (recvbuf, n, &tval, timep, item, ai, datalen, minrtt,
                       maxrtt, sumrtt, averagertt, current_probe_temp,
                       success_probe, fail_probe, flag, &current_var, pid);
-        printf("receiver success!\n");
         if (current_probe_temp >= item->pingCtlProbeCount) {
             SNMP_FREE(sumrtt);
             return;
         }
     }
+    close(sockfd);
 }
 
 unsigned long
@@ -1599,7 +1596,6 @@ send_v4(int datalen, pid_t pid, int nsent, int sockfd, char *sendbuf)
 {
     int             len;
     struct icmp    *icmp = NULL;
-    struct timeval *temp = NULL;
 
     icmp = (struct icmp *) sendbuf;
     icmp->icmp_type = ICMP_ECHO;
@@ -1607,7 +1603,6 @@ send_v4(int datalen, pid_t pid, int nsent, int sockfd, char *sendbuf)
     icmp->icmp_id = pid;
     icmp->icmp_seq = nsent;
     gettimeofday((struct timeval *) icmp->icmp_data, NULL);
-    temp = (struct timeval *) icmp->icmp_data;
 
     len = 8 + datalen;          /* checksum ICMP header and data */
     icmp->icmp_cksum = 0;
@@ -1936,6 +1931,7 @@ run_ping(unsigned int clientreg, void *clientarg)
                   (char *) outpack, &ident, &start_time, &screen_width,
                   &deadline);
 
+        close(icmp_sock);
     }
     return;
 }

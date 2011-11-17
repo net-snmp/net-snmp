@@ -328,7 +328,7 @@ while test "x$new_module_list" != "x"; do
         #
         AH_TOP([#define config_version_require(x)])
         [new_list_alt3=`$MODULECPP module_tmp_header.h | \
-            awk '
+            $AWK '
                 BEGIN {
                     if("'"$enable_new_features"'" == "yes")
                         method="max";

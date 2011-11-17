@@ -164,7 +164,7 @@ netsnmp_fsys_arch_load( void )
         entry->type = _fs_type( stats[i].f_fstypename );
         entry->flags |= NETSNMP_FS_FLAG_ACTIVE;
 
-        if (! stats[i].NSFS_FLAGS & MNT_LOCAL ) {
+        if (! (stats[i].NSFS_FLAGS & MNT_LOCAL )) {
             entry->flags |= NETSNMP_FS_FLAG_REMOTE;
         }
         if (  stats[i].NSFS_FLAGS & MNT_RDONLY ) {
@@ -175,4 +175,6 @@ netsnmp_fsys_arch_load( void )
         }
         netsnmp_fsys_calculate32(entry);
     }
+
+    free(stats);
 }

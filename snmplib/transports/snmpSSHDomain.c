@@ -728,7 +728,6 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
         char *username;
-        size_t username_len;
         char *keyfilepub;
         char *keyfilepriv;
         
@@ -740,7 +739,6 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
             snmp_log(LOG_ERR, "You must specify a ssh username to use.  See the snmp.conf manual page\n");
             return NULL;
         }
-        username_len = strlen(username);
 
         /* use the requested public key file */
         keyfilepub = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,

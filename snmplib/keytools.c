@@ -119,12 +119,10 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 
 #ifdef NETSNMP_USE_OPENSSL
     EVP_MD_CTX     *ctx = NULL;
-    unsigned int    tmp_len;
 #elif NETSNMP_USE_INTERNAL_CRYPTO
     SHA_CTX csha1;
     MD5_CTX cmd5;
     char    cryptotype = 0;
-    unsigned int    tmp_len;
 #define TYPE_MD5  1
 #define TYPE_SHA1 2
 #else
@@ -209,14 +207,17 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     }
 
 #ifdef NETSNMP_USE_OPENSSL
+    {
+    unsigned int    tmp_len;
+
     tmp_len = *kulen;
     EVP_DigestFinal(ctx, (unsigned char *) Ku, &tmp_len);
     *kulen = tmp_len;
     /*
      * what about free() 
      */
+    }
 #elif NETSNMP_USE_INTERNAL_CRYPTO
-    tmp_len = *kulen;
     if (TYPE_SHA1 == cryptotype) {
         SHA1_Final(Ku, &csha1);
     } else {

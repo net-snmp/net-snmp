@@ -78,6 +78,8 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
     }
 }
 
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
+
 #define TOINT64(c) ((long long)(long)(c).high << 32 | (c).low)
 
 {
@@ -127,6 +129,8 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
 	     decoded_type, ASN_OPAQUE_I64, TOINT64(decoded_value)));
     }
 }
+
+#endif
 
 #define TOUINT64(c) ((unsigned long long)(c).high << 32 | (c).low)
 

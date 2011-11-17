@@ -5,7 +5,7 @@ IMPORTS
     TEXTUAL-CONVENTION               FROM SNMPv2-TC;
 
 ianaRtProtoMIB  MODULE-IDENTITY
-    LAST-UPDATED "200009260000Z" -- September 26, 2000
+    LAST-UPDATED "201107220000Z" -- July 22, 2011
     ORGANIZATION "IANA"
     CONTACT-INFO
             " Internet Assigned Numbers Authority
@@ -27,6 +27,9 @@ ianaRtProtoMIB  MODULE-IDENTITY
             IANA Considerations Section in RFCs.  The Designated Expert 
             will be selected by the IESG Area Director(s) of the Routing
             Area."
+
+    REVISION     "201107220000Z"  -- July 22, 2011 
+    DESCRIPTION  "Added rpl(18) ."
 
     REVISION     "200009260000Z"  -- September 26, 2000 
     DESCRIPTION  "Original version, published in coordination
@@ -60,7 +63,8 @@ IANAipRouteProtocol ::= TEXTUAL-CONVENTION
                 bgp        (14), -- Border Gateway Protocol
                 idpr       (15), -- InterDomain Policy Routing
                 ciscoEigrp (16), -- Cisco EIGRP
-                dvmrp      (17)  -- DVMRP
+                dvmrp      (17), -- DVMRP
+                rpl        (18)  -- RPL [RFC-ietf-roll-rpl-19]
                }
 
 IANAipMRouteProtocol ::= TEXTUAL-CONVENTION

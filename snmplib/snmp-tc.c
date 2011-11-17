@@ -163,7 +163,7 @@ date_n_time(const time_t * when, size_t * length)
     string[7] = 0;
     *length = 8;
 
-#ifndef cygwin
+#if defined(HAVE_STRUCT_TM_TM_GMTOFF) || defined(HAVE_TIMEZONE_VARIABLE)
     /*
      * Timezone offset
      */

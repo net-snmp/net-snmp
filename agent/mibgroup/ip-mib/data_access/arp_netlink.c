@@ -43,7 +43,7 @@ netsnmp_access_arp_create(u_int init_flags,
     if (cache_timeout != NULL)
         *cache_timeout = 5;
     if (cache_flags != NULL)
-        *cache_flags |= NETSNMP_CACHE_RESET_TIMER_ON_USE;
+        *cache_flags |= NETSNMP_CACHE_RESET_TIMER_ON_USE | NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD;
     access->cache_expired = cache_expired;
 
     DEBUGMSGTL(("access:netlink:arp", "create arp cache\n"));
@@ -131,6 +131,7 @@ int netsnmp_access_arp_unload(netsnmp_arp_access *access)
          unregister_readfd(fd);
          close(fd);
          access->arch_magic = NULL;
+	 access->synchronized = 0;
     }
     return 0;
 }

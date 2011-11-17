@@ -76,12 +76,12 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     auto_nlist( CPU_SYMBOL, (char *) cpu_stats, sizeof(cpu_stats));
     auto_nlist( MEM_SYMBOL, (char *)&mem_stats, sizeof(mem_stats));
 
-    cpu->user_ticks = (unsigned long)cpu_stats[CP_USER];
-    cpu->nice_ticks = (unsigned long)cpu_stats[CP_NICE];
-    cpu->sys2_ticks = (unsigned long)cpu_stats[CP_SYS]+cpu_stats[CP_INTR];
-    cpu->idle_ticks = (unsigned long)cpu_stats[CP_IDLE];
-    cpu->kern_ticks = (unsigned long)cpu_stats[CP_SYS];
-    cpu->intrpt_ticks = (unsigned long)cpu_stats[CP_INTR];
+    cpu->user_ticks = (unsigned long long)cpu_stats[CP_USER];
+    cpu->nice_ticks = (unsigned long long)cpu_stats[CP_NICE];
+    cpu->sys2_ticks = (unsigned long long)cpu_stats[CP_SYS]+cpu_stats[CP_INTR];
+    cpu->idle_ticks = (unsigned long long)cpu_stats[CP_IDLE];
+    cpu->kern_ticks = (unsigned long long)cpu_stats[CP_SYS];
+    cpu->intrpt_ticks = (unsigned long long)cpu_stats[CP_INTR];
         /* wait_ticks, sirq_ticks unused */
 
         /*
@@ -89,14 +89,14 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          *   XXX - Do these really belong here ?
          */
 #if defined(openbsd2) || defined(darwin)
-    cpu->swapIn  = (unsigned long)mem_stats.v_swpin;
-    cpu->swapOut = (unsigned long)mem_stats.v_swpout;
+    cpu->swapIn  = (unsigned long long)mem_stats.v_swpin;
+    cpu->swapOut = (unsigned long long)mem_stats.v_swpout;
 #else
-    cpu->swapIn  = (unsigned long)mem_stats.v_swappgsin+mem_stats.v_vnodepgsin;
-    cpu->swapOut = (unsigned long)mem_stats.v_swappgsout+mem_stats.v_vnodepgsout;
+    cpu->swapIn  = (unsigned long long)mem_stats.v_swappgsin+mem_stats.v_vnodepgsin;
+    cpu->swapOut = (unsigned long long)mem_stats.v_swappgsout+mem_stats.v_vnodepgsout;
 #endif
-    cpu->nInterrupts  = (unsigned long)mem_stats.v_intr;
-    cpu->nCtxSwitches = (unsigned long)mem_stats.v_swtch;
+    cpu->nInterrupts  = (unsigned long long)mem_stats.v_intr;
+    cpu->nCtxSwitches = (unsigned long long)mem_stats.v_swtch;
 
 #ifdef PER_CPU_INFO
     for ( i = 0; i < n; i++ ) {

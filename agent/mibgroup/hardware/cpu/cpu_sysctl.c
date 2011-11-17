@@ -40,23 +40,25 @@ void _cpu_copy_stats( netsnmp_cpu_info *cpu );
      *   (including descriptions)
      */
 void init_cpu_sysctl( void ) {
-    int               n;
-    size_t            i;
+    int               i, n;
+    size_t            siz;
     int               ncpu_mib[]  = { CTL_HW, HW_NCPU };
+#if !(defined(__NetBSD__) && ( defined(__i386__) || defined(__x86_64__) ) )
     int               model_mib[] = { CTL_HW, HW_MODEL };
+#endif
     char              descr[ SNMP_MAXBUF ];
     netsnmp_cpu_info  *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
 
-    i = sizeof(n);
-    sysctl(ncpu_mib, 2, &n, &i, NULL, 0);
+    siz = sizeof(n);
+    sysctl(ncpu_mib, 2, &n, &siz, NULL, 0);
     if ( n <= 0 )
         n = 1;   /* Single CPU system */
-    i = sizeof(descr);
+    siz = sizeof(descr);
 #if defined(__NetBSD__) && ( defined(__i386__) || defined(__x86_64__) )
-    sysctlbyname("machdep.cpu_brand", descr, (void *)&i, NULL, 0);
+    sysctlbyname("machdep.cpu_brand", descr, &siz, NULL, 0);
 #else
-    sysctl(model_mib, 2, descr, &i, NULL, 0);
+    sysctl(model_mib, 2, descr, &siz, NULL, 0);
 #endif
     for ( i = 0; i < n; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
@@ -176,12 +178,12 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #else
     sysctl(cpu_mib, 2,  cpu_stats, &cpu_size, NULL, 0);
 #endif
-    cpu->user_ticks = (unsigned long)cpu_stats[CP_USER];
-    cpu->nice_ticks = (unsigned long)cpu_stats[CP_NICE];
-    cpu->sys2_ticks = (unsigned long)cpu_stats[CP_SYS]+cpu_stats[CP_INTR];
-    cpu->kern_ticks = (unsigned long)cpu_stats[CP_SYS];
-    cpu->idle_ticks = (unsigned long)cpu_stats[CP_IDLE];
-    cpu->intrpt_ticks = (unsigned long)cpu_stats[CP_INTR];
+    cpu->user_ticks = (unsigned long long)cpu_stats[CP_USER];
+    cpu->nice_ticks = (unsigned long long)cpu_stats[CP_NICE];
+    cpu->sys2_ticks = (unsigned long long)cpu_stats[CP_SYS]+cpu_stats[CP_INTR];
+    cpu->kern_ticks = (unsigned long long)cpu_stats[CP_SYS];
+    cpu->idle_ticks = (unsigned long long)cpu_stats[CP_IDLE];
+    cpu->intrpt_ticks = (unsigned long long)cpu_stats[CP_INTR];
         /* wait_ticks, sirq_ticks unused */
     
         /*
@@ -189,15 +191,15 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          *   XXX - Do these really belong here ?
          */
     sysctl(mem_mib, 2, &mem_stats, &mem_size, NULL, 0);
-    cpu->nInterrupts  = (unsigned long)mem_stats.NS_VM_INTR;
-    cpu->nCtxSwitches = (unsigned long)mem_stats.NS_VM_SWTCH;
-    cpu->swapIn       = (unsigned long)mem_stats.NS_VM_SWAPIN;
-    cpu->swapOut      = (unsigned long)mem_stats.NS_VM_SWAPOUT;
+    cpu->nInterrupts  = (unsigned long long)mem_stats.NS_VM_INTR;
+    cpu->nCtxSwitches = (unsigned long long)mem_stats.NS_VM_SWTCH;
+    cpu->swapIn       = (unsigned long long)mem_stats.NS_VM_SWAPIN;
+    cpu->swapOut      = (unsigned long long)mem_stats.NS_VM_SWAPOUT;
 #ifdef NS_VM_PAGEIN
-    cpu->pageIn       = (unsigned long)mem_stats.NS_VM_PAGEIN;
+    cpu->pageIn       = (unsigned long long)mem_stats.NS_VM_PAGEIN;
 #endif
 #ifdef NS_VM_PAGEOUT
-    cpu->pageOut      = (unsigned long)mem_stats.NS_VM_PAGEOUT;
+    cpu->pageOut      = (unsigned long long)mem_stats.NS_VM_PAGEOUT;
 #endif
 
 #ifdef NETSNMP_KERN_MCPU

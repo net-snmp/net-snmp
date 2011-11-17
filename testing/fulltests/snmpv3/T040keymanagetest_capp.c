@@ -360,7 +360,6 @@ test_genkul(void)
     char           *s = NULL;
     const char *testname = "Using HMACMD5 to create master key.";
     const char *hashname_Ku = "usmHMACMD5AuthProtocol";
-    const char *hashname_kul = NULL;
 
     u_char          Ku[LOCAL_MAXBUF], kul[LOCAL_MAXBUF];
 
@@ -413,7 +412,6 @@ test_genkul(void)
   test_genkul_again_master:
     memset(Ku, 0, LOCAL_MAXBUF);
     kulen = LOCAL_MAXBUF;
-    hashname_kul = "usmHMACMD5AuthProtocol";
     hashtype_kul = usmHMACMD5AuthProtocol;
     properlength = BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5);
 
@@ -461,7 +459,6 @@ test_genkul(void)
      */
     if (hashtype_kul == usmHMACMD5AuthProtocol) {
         hashtype_kul = usmHMACSHA1AuthProtocol;
-        hashname_kul = "usmHMACSHA1AuthProtocol";
         properlength = BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1);
         goto test_genkul_again_local;
     }

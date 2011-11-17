@@ -322,6 +322,10 @@ netsnmp_fsys_avail( netsnmp_fsys_info *f) {
 #define INT32_MAX 0x7fffffff
 #endif
 
+#ifndef PRIu64
+#define PRIu64 "llu"
+#endif
+
 /* recalculate f->size_32, used_32, avail_32 and units_32 from f->size & comp.*/
 void
 netsnmp_fsys_calculate32(netsnmp_fsys_info *f)
@@ -342,6 +346,6 @@ netsnmp_fsys_calculate32(netsnmp_fsys_info *f)
     DEBUGMSGTL(("fsys", "Results of 32-bit conversion: size %" PRIu64 " -> %lu;"
 		" units %" PRIu64 " -> %lu; avail %" PRIu64 " -> %lu;"
                 " used %" PRIu64 " -> %lu\n",
-		f->size, f->size_32, f->units, f->units_32,
-		f->avail, f->avail_32, f->used, f->used_32));
+		(uint64_t)f->size, f->size_32, (uint64_t)f->units, f->units_32,
+		(uint64_t)f->avail, f->avail_32, (uint64_t)f->used, f->used_32));
 }

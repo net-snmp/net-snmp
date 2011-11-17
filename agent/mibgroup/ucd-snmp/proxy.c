@@ -561,7 +561,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                                                            REQUEST_IS_NOT_DELEGATED);
             }
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-	    else if ((cache->reqinfo->mode == MODE_SET_ACTION)) {
+	    else if (cache->reqinfo->mode == MODE_SET_ACTION) {
 		/*
 		 * In order for netsnmp_wrap_up_request to consider the
 		 * SET request complete,
