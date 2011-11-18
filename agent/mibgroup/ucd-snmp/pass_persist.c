@@ -63,8 +63,6 @@ static int      write_persist_pipe(int iindex, const char *data);
  */
 extern int      asc2bin(char *p);
 extern int      bin2asc(char *p, size_t n);
-extern int      snmp_oid_min_compare(const oid *, size_t, const oid *,
-                                     size_t);
 
 /*
  * the relocatable extensible commands variables 
@@ -243,7 +241,7 @@ var_extensible_pass_persist(struct variable *vp,
     long_ret = *length;
     for (i = 1; i <= numpersistpassthrus; i++) {
         persistpassthru = get_exten_instance(persistpassthrus, i);
-        rtest = snmp_oid_min_compare(name, *length,
+        rtest = snmp_oidtree_compare(name, *length,
                                      persistpassthru->miboid,
                                      persistpassthru->miblen);
         if ((exact && rtest == 0) || (!exact && rtest <= 0)) {
@@ -417,7 +415,7 @@ setPassPersist(int action,
 
     for (i = 1; i <= numpersistpassthrus; i++) {
         persistpassthru = get_exten_instance(persistpassthrus, i);
-        rtest = snmp_oid_min_compare(name, name_len,
+        rtest = snmp_oidtree_compare(name, name_len,
                                      persistpassthru->miboid,
                                      persistpassthru->miblen);
         if (rtest <= 0) {

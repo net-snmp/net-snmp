@@ -54,53 +54,6 @@ struct variable2 extensible_passthru_variables[] = {
 
 
 /*
- * lexicographical compare two object identifiers.
- * * Returns -1 if name1 < name2,
- * *          0 if name1 = name2,
- * *          1 if name1 > name2
- * *
- * * This method differs from snmp_oid_compare
- * * in that the comparison stops at the length
- * * of the smallest object identifier.
- */
-int
-snmp_oid_min_compare(const oid * in_name1,
-                     size_t len1, const oid * in_name2, size_t len2)
-{
-    register int    len;
-    register const oid *name1 = in_name1;
-    register const oid *name2 = in_name2;
-
-    /*
-     * len = minimum of len1 and len2 
-     */
-    if (len1 < len2)
-        len = len1;
-    else
-        len = len2;
-    /*
-     * find first non-matching OID 
-     */
-    while (len-- > 0) {
-        /*
-         * these must be done in seperate comparisons, since
-         * subtracting them and using that result has problems with
-         * subids > 2^31. 
-         */
-        if (*(name1) < *(name2))
-            return -1;
-        if (*(name1++) > *(name2++))
-            return 1;
-    }
-    /*
-     * both OIDs equal up to length of shorter OID 
-     */
-
-    return 0;
-}
-
-
-/*
  * This is also called from pass_persist.c 
  */
 int
@@ -297,7 +250,7 @@ var_extensible_pass(struct variable *vp,
     long_ret = *length;
     for (i = 1; i <= numpassthrus; i++) {
         passthru = get_exten_instance(passthrus, i);
-        rtest = snmp_oid_min_compare(name, *length,
+        rtest = snmp_oidtree_compare(name, *length,
                                      passthru->miboid, passthru->miblen);
         if ((exact && rtest == 0) || (!exact && rtest <= 0)) {
             /*
@@ -447,7 +400,7 @@ setPass(int action,
 
     for (i = 1; i <= numpassthrus; i++) {
         passthru = get_exten_instance(passthrus, i);
-        rtest = snmp_oid_min_compare(name, name_len,
+        rtest = snmp_oidtree_compare(name, name_len,
                                      passthru->miboid, passthru->miblen);
         if (rtest <= 0) {
             if (action != ACTION)
