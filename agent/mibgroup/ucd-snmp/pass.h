@@ -8,6 +8,7 @@ void            init_pass(void);
 
 config_require(ucd-snmp/pass_common)
 config_require(util_funcs)
+config_require(utilities/execute)
 config_add_mib(NET-SNMP-PASS-MIB)
 
 extern FindVarMethod var_extensible_pass;
