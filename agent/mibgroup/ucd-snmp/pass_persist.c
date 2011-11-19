@@ -60,11 +60,6 @@ static void     destruct_persist_pipes(void);
 static int      write_persist_pipe(int iindex, const char *data);
 
 /*
- * These are defined in pass.c 
- */
-extern int      netsnmp_pass_str_to_errno(const char *buf);
-
-/*
  * the relocatable extensible commands variables 
  */
 struct variable2 extensible_persist_passthru_variables[] = {
@@ -525,7 +520,7 @@ setPassPersist(int action,
                 return SNMP_ERR_NOTWRITABLE;
             }
 
-            return netsnmp_pass_str_to_errno(buf);
+            return netsnmp_internal_pass_str_to_errno(buf);
         }
     }
     if (snmp_get_do_debugging()) {

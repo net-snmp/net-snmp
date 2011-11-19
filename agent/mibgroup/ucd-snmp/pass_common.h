@@ -8,5 +8,6 @@
 
 int netsnmp_internal_asc2bin(char *p);
 int netsnmp_internal_bin2asc(char *p, size_t n);
+int netsnmp_internal_pass_str_to_errno(const char *buf);
 
 #endif /* !NETSNMP_AGENT_MIBGROUP_PASS_COMMON_H */
