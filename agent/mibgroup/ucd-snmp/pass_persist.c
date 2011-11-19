@@ -40,6 +40,7 @@
 
 #include "struct.h"
 #include "pass_persist.h"
+#include "pass_common.h"
 #include "extensible.h"
 #include "util_funcs.h"
 
@@ -61,11 +62,7 @@ static int      write_persist_pipe(int iindex, const char *data);
 /*
  * These are defined in pass.c 
  */
-extern int      asc2bin(char *p);
-extern int      bin2asc(char *p, size_t n);
 extern int      netsnmp_pass_str_to_errno(const char *buf);
-extern int      snmp_oid_min_compare(const oid *, size_t, const oid *,
-                                     size_t);
 
 /*
  * the relocatable extensible commands variables 
@@ -245,7 +242,7 @@ var_extensible_pass_persist(struct variable *vp,
     long_ret = *length;
     for (i = 1; i <= numpersistpassthrus; i++) {
         persistpassthru = get_exten_instance(persistpassthrus, i);
-        rtest = snmp_oid_min_compare(name, *length,
+        rtest = snmp_oidtree_compare(name, *length,
                                      persistpassthru->miboid,
                                      persistpassthru->miblen);
         if ((exact && rtest == 0) || (!exact && rtest <= 0)) {
@@ -370,11 +367,11 @@ var_extensible_pass_persist(struct variable *vp,
                     vp->type = ASN_COUNTER;
                     return ((unsigned char *) &long_ret);
                 } else if (!strncasecmp(buf, "octet", 5)) {
-                    *var_len = asc2bin(buf2);
+                    *var_len = netsnmp_internal_asc2bin(buf2);
                     vp->type = ASN_OCTET_STR;
                     return ((unsigned char *) buf2);
                 } else if (!strncasecmp(buf, "opaque", 6)) {
-                    *var_len = asc2bin(buf2);
+                    *var_len = netsnmp_internal_asc2bin(buf2);
                     vp->type = ASN_OPAQUE;
                     return ((unsigned char *) buf2);
                 } else if (!strncasecmp(buf, "gauge", 5)) {
@@ -441,7 +438,7 @@ setPassPersist(int action,
 
     for (i = 1; i <= numpersistpassthrus; i++) {
         persistpassthru = get_exten_instance(persistpassthrus, i);
-        rtest = snmp_oid_min_compare(name, name_len,
+        rtest = snmp_oidtree_compare(name, name_len,
                                      persistpassthru->miboid,
                                      persistpassthru->miblen);
         if (rtest <= 0) {
@@ -492,7 +489,8 @@ setPassPersist(int action,
                 memcpy(buf2, var_val, var_val_len);
                 if (var_val_len == 0)
                     sprintf(buf, "string \"\"\n");
-                else if (bin2asc(buf2, var_val_len) == (int) var_val_len)
+                else if (netsnmp_internal_bin2asc(buf2, var_val_len) ==
+                         (int) var_val_len)
                     snprintf(buf, sizeof(buf), "string \"%s\"\n", buf2);
                 else
                     snprintf(buf, sizeof(buf), "octet \"%s\"\n", buf2);
