@@ -35,6 +35,7 @@
 
 #include "struct.h"
 #include "pass.h"
+#include "pass_common.h"
 #include "extensible.h"
 #include "util_funcs.h"
 
@@ -52,57 +53,6 @@ struct variable2 extensible_passthru_variables[] = {
 };
 
 
-
-/*
- * This is also called from pass_persist.c 
- */
-int
-asc2bin(char *p)
-{
-    char           *r, *q = p;
-    char            c;
-    int             n = 0;
-
-    for (;;) {
-        c = (char) strtol(q, &r, 16);
-        if (r == q)
-            break;
-        *p++ = c;
-        q = r;
-        n++;
-    }
-    return n;
-}
-
-/*
- * This is also called from pass_persist.c 
- */
-int
-bin2asc(char *p, size_t n)
-{
-    int             i, flag = 0;
-    char            buffer[SNMP_MAXBUF];
-
-    /* prevent buffer overflow */
-    if ((int)n > (sizeof(buffer) - 1))
-        n = sizeof(buffer) - 1;
-
-    for (i = 0; i < (int) n; i++) {
-        buffer[i] = p[i];
-        if (!isprint(p[i]))
-            flag = 1;
-    }
-    if (flag == 0) {
-        p[n] = 0;
-        return n;
-    }
-    for (i = 0; i < (int) n; i++) {
-        sprintf(p, "%02x ", (unsigned char) (buffer[i] & 0xff));
-        p += 3;
-    }
-    *--p = 0;
-    return 3 * n - 1;
-}
 
 void
 init_pass(void)
@@ -335,11 +285,11 @@ var_extensible_pass(struct variable *vp,
                     vp->type = ASN_COUNTER;
                     return ((unsigned char *) &long_ret);
                 } else if (!strncasecmp(buf, "octet", 5)) {
-                    *var_len = asc2bin(buf2);
+                    *var_len = netsnmp_internal_asc2bin(buf2);
                     vp->type = ASN_OCTET_STR;
                     return ((unsigned char *) buf2);
                 } else if (!strncasecmp(buf, "opaque", 6)) {
-                    *var_len = asc2bin(buf2);
+                    *var_len = netsnmp_internal_asc2bin(buf2);
                     vp->type = ASN_OPAQUE;
                     return ((unsigned char *) buf2);
                 } else if (!strncasecmp(buf, "gauge", 5)) {
@@ -449,7 +399,8 @@ setPass(int action,
                 memcpy(buf2, var_val, var_val_len);
                 if (var_val_len == 0)
                     sprintf(buf, "string \"\"\n");
-                else if (bin2asc(buf2, var_val_len) == (int) var_val_len)
+                else if (netsnmp_internal_bin2asc(buf2, var_val_len) ==
+                         (int) var_val_len)
                     snprintf(buf, sizeof(buf), "string \"%s\"\n", buf2);
                 else
                     snprintf(buf, sizeof(buf), "octet \"%s\"\n", buf2);

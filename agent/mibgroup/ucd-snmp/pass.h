@@ -6,6 +6,7 @@
 
 void            init_pass(void);
 
+config_require(ucd-snmp/pass_common)
 config_require(util_funcs)
 config_add_mib(NET-SNMP-PASS-MIB)
 
