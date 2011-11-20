@@ -204,6 +204,14 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
 # endif
 #endif
 
+enum {
+#if  defined(linux) && defined(IP_PKTINFO)
+    cmsg_data_size = sizeof(struct in_pktinfo)
+#elif defined(IP_RECVDSTADDR)
+    cmsg_data_size = sizeof(struct in_addr)
+#endif
+};
+
 int
 netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                          socklen_t *fromlen, struct sockaddr *dstip,
@@ -211,11 +219,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 {
     int r;
     struct iovec iov;
-#if  defined(linux) && defined(IP_PKTINFO)
-    char cmsg[CMSG_SPACE(sizeof(struct in_pktinfo))];
-#elif defined(IP_RECVDSTADDR)
-    char cmsg[CMSG_SPACE(sizeof(struct in_addr))];
-#endif
+    char cmsg[CMSG_SPACE(cmsg_data_size)];
     struct cmsghdr *cm;
     struct msghdr msg;
 
@@ -274,13 +278,6 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 {
     struct iovec iov;
     struct msghdr m = { 0 };
-
-#if  defined(linux) && defined(IP_PKTINFO)
-    enum { cmsg_data_size = sizeof(struct in_pktinfo) };
-#elif defined(IP_RECVDSTADDR)
-    enum { cmsg_data_size = sizeof(struct in_addr) };
-#endif
-
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
 
     iov.iov_base = data;
