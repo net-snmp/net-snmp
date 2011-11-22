@@ -16,7 +16,7 @@
 #include <sys/select.h>
 #endif
 
-#if defined(HAVE_WINSOCK_H) && ! defined(_WINSOCKAPI_)
+#if defined(HAVE_WINSOCK_H) && !defined(_WINSOCKAPI_) && !defined(_WINSOCK_H)
 #error <winsock.h> or <winsock2.h> must have been included before this file.
 #endif
 
@@ -44,15 +44,19 @@ extern "C" {
 
 /**
  * Test whether set *fdset contains socket fd.
- * Do nothing if fd >= fdset->lfs_setsize.
+ * Evaluates to zero (false) if fd >= fdset->lfs_setsize.
  */
 #define NETSNMP_LARGE_FD_ISSET(fd, fdset) \
                     netsnmp_large_fd_is_set(fd, fdset)
 
-#if ! defined(cygwin) && defined(HAVE_WINSOCK_H)
+#if !defined(cygwin) && defined(HAVE_WINSOCK_H)
 
-/** Number of bytes needed to store setsize file descriptors. */
-#define NETSNMP_FD_SET_BYTES(setsize) (sizeof(fd_set) + sizeof(SOCKET) * (setsize - FD_SETSIZE))
+/**
+ * Number of bytes needed to store a number of file descriptors as a
+ * struct fd_set.
+ */
+#define NETSNMP_FD_SET_BYTES(setsize)                           \
+    (sizeof(fd_set) + ((setsize) - FD_SETSIZE) * sizeof(SOCKET))
 
 /** Remove all sockets from the set *fdset. */
 #define NETSNMP_LARGE_FD_ZERO(fdset) \
@@ -73,26 +77,27 @@ int    netsnmp_large_fd_is_set(SOCKET fd, netsnmp_large_fd_set *fdset);
  */
 #define NETSNMP_FD_MASK_SIZE sizeof(((fd_set*)0)->fds_bits[0])
 
-/** Number of bits in one element of the fd_set::fds_bits array. */
+/** Number of bits in one element of the fd_set.fds_bits array. */
 #define NETSNMP_BITS_PER_FD_MASK (8 * NETSNMP_FD_MASK_SIZE)
 
 /** Number of elements needed for the fds_bits array. */
 #define NETSNMP_FD_SET_ELEM_COUNT(setsize) \
     (setsize + NETSNMP_BITS_PER_FD_MASK - 1) / NETSNMP_BITS_PER_FD_MASK
 
-/** Number of bytes needed to store setsize file descriptors. */
-#define NETSNMP_FD_SET_BYTES(setsize) \
-    (NETSNMP_FD_SET_ELEM_COUNT(setsize) * NETSNMP_FD_MASK_SIZE)
+/**
+ * Number of bytes needed to store a number of file descriptors as a
+ * struct fd_set.
+ */
+#define NETSNMP_FD_SET_BYTES(setsize)                                   \
+    (sizeof(fd_set) + NETSNMP_FD_SET_ELEM_COUNT((setsize) - FD_SETSIZE) \
+     * NETSNMP_FD_MASK_SIZE)
 
 /** Remove all file descriptors from the set *fdset. */
-#define NETSNMP_LARGE_FD_ZERO(fdset)                       \
-  do {                                                     \
-    int __i;                                               \
-    fd_set *__arr = &(fdset)->lfs_set;                     \
-    __i = NETSNMP_FD_SET_ELEM_COUNT((fdset)->lfs_setsize); \
-    for ( ; __i > 0; __i--)                                \
-      __arr->fds_bits[__i - 1] = 0;                        \
-  } while (0)
+#define NETSNMP_LARGE_FD_ZERO(fdset)                            \
+    do {                                                        \
+        memset((fdset)->lfs_setptr, 0,                          \
+               NETSNMP_FD_SET_BYTES((fdset)->lfs_setsize));     \
+    } while (0)
 
 
 void   netsnmp_large_fd_setfd( int fd, netsnmp_large_fd_set *fdset);
@@ -114,8 +119,10 @@ void   netsnmp_large_fd_set_init(   netsnmp_large_fd_set *fdset, int setsize);
 /**
  * Modify the size of a file descriptor set and preserve the first
  * min(fdset->lfs_setsize, setsize) file descriptors.
+ *
+ * Returns 1 upon success or 0 if memory allocation failed.
  */
-void   netsnmp_large_fd_set_resize( netsnmp_large_fd_set *fdset, int setsize);
+int    netsnmp_large_fd_set_resize( netsnmp_large_fd_set *fdset, int setsize);
 
 /**
  * Synchronous I/O multiplexing for large file descriptor sets.
