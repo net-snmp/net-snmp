@@ -2,7 +2,8 @@
 
 netsnmp_large_fd_set fds;
 netsnmp_large_fd_set_init(&fds, 2000);
-netsnmp_large_fd_set_resize(&fds, 2000);
+OKF(fds.lfs_setsize == 2000, ("initialization"));
+OKF(netsnmp_large_fd_set_resize(&fds, 2000) == 1, ("resizing to 2000"));
 NETSNMP_LARGE_FD_ZERO(&fds);
 
 {
@@ -16,7 +17,7 @@ NETSNMP_LARGE_FD_ZERO(&fds);
     }
 }
 
-netsnmp_large_fd_set_resize(&fds, 3000);
+OKF(netsnmp_large_fd_set_resize(&fds, 3000) == 1, ("resizing to 3000"));
 
 {
     int i;
@@ -29,7 +30,7 @@ netsnmp_large_fd_set_resize(&fds, 3000);
     }
 }
 
-netsnmp_large_fd_set_resize(&fds, 1000);
+OKF(netsnmp_large_fd_set_resize(&fds, 1000) == 1, ("resizing to 1000"));
 
 {
     int i;
