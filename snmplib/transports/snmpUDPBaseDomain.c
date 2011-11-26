@@ -269,78 +269,81 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     return r;
 }
 
-#if  defined(linux) && defined(IP_PKTINFO)
 int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
                            struct sockaddr *remote, void *data, int len)
 {
     struct iovec iov;
-    struct {
-        struct cmsghdr cm;
-        struct in_pktinfo ipi;
-    } cmsg;
-    struct msghdr m;
-    int ret;
+    struct msghdr m = { 0 };
+
+#if  defined(linux) && defined(IP_PKTINFO)
+    enum { cmsg_data_size = sizeof(struct in_pktinfo) };
+#elif defined(IP_RECVDSTADDR)
+    enum { cmsg_data_size = sizeof(struct in_addr) };
+#endif
+
+    char          cmsg[CMSG_SPACE(cmsg_data_size)];
 
     iov.iov_base = data;
     iov.iov_len  = len;
-    memset(&cmsg, 0, sizeof(cmsg));
-    cmsg.cm.cmsg_len = sizeof(struct cmsghdr) + sizeof(struct in_pktinfo);
-    cmsg.cm.cmsg_level = SOL_IP;
-    cmsg.cm.cmsg_type = IP_PKTINFO;
-    cmsg.ipi.ipi_ifindex = 0;
-    cmsg.ipi.ipi_spec_dst.s_addr = (srcip ? srcip->s_addr : INADDR_ANY);
 
     m.msg_name		= remote;
     m.msg_namelen	= sizeof(struct sockaddr_in);
     m.msg_iov		= &iov;
     m.msg_iovlen	= 1;
-    m.msg_control	= &cmsg;
-    m.msg_controllen	= sizeof(cmsg);
     m.msg_flags		= 0;
 
-    DEBUGMSGTL(("udpbase:sendto", "sending from %s iface %d\n",
-                (srcip ? inet_ntoa(*srcip) : "NULL"), if_index));
-    errno = 0;
-    ret = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
-    if (ret < 0 && errno == EINVAL && srcip) {
-        /* The error might be caused by broadcast srcip (i.e. we're responding
-         * to broadcast request) - sendmsg does not like it. Try to resend it
-         * with global address and using the interface on whicg it was
-         * received */
-        cmsg.ipi.ipi_ifindex = if_index;
-        cmsg.ipi.ipi_spec_dst.s_addr = INADDR_ANY;
-        DEBUGMSGTL(("udpbase:sendto", "re-sending the message\n"));
-        ret = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
-    }
-    return ret;
-}
+    if (srcip) {
+        struct cmsghdr *cm;
+
+        DEBUGMSGTL(("udpbase:sendto", "sending from %s\n", inet_ntoa(*srcip)));
+
+        m.msg_control    = &cmsg;
+        m.msg_controllen = sizeof(cmsg);
+
+        cm = CMSG_FIRSTHDR(&m);
+        cm->cmsg_len = CMSG_LEN(cmsg_data_size);
+
+#if  defined(linux) && defined(IP_PKTINFO)
+        cm->cmsg_level = SOL_IP;
+        cm->cmsg_type = IP_PKTINFO;
+
+        {
+            struct in_pktinfo ipi = { 0 };
+            ipi.ipi_ifindex = 0;
+            ipi.ipi_spec_dst.s_addr = srcip->s_addr;
+            memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
+        }
+
+        {
+            errno = 0;
+            const int rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+
+            if (rc >= 0 || errno != EINVAL)
+                return rc;
+        }
+
+        /*
+         * The error might be caused by broadcast srcip (i.e. we're responding
+         * to a broadcast request) - sendmsg does not like it. Try to resend it
+         * using the interface on which it was received
+         */
+
+        DEBUGMSGTL(("udpbase:sendto", "re-sending on iface %d\n", if_index));
+
+        {
+            struct in_pktinfo ipi = { 0 };
+            ipi.ipi_ifindex = if_index;
+            ipi.ipi_spec_dst.s_addr = INADDR_ANY;
+            memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
+        }
 #elif defined(IP_SENDSRCADDR)
-int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
-			struct sockaddr *remote, void *data, int len)
-{
-    struct iovec iov = { data, len };
-    struct cmsghdr *cm;
-    struct msghdr m;
-    char   cmbuf[CMSG_SPACE(sizeof(struct in_addr))];
-
-    memset(&m, 0, sizeof(struct msghdr));
-    m.msg_name         = remote;
-    m.msg_namelen      = sizeof(struct sockaddr_in);
-    m.msg_iov          = &iov;
-    m.msg_iovlen       = 1;
-    m.msg_control      = cmbuf;
-    m.msg_controllen   = sizeof(cmbuf);
-    m.msg_flags                = 0;
-
-    cm = CMSG_FIRSTHDR(&m);
-    cm->cmsg_len = CMSG_LEN(sizeof(struct in_addr));
-    cm->cmsg_level = IPPROTO_IP;
-    cm->cmsg_type = IP_SENDSRCADDR;
-
-    memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
+        cm->cmsg_level = IPPROTO_IP;
+        cm->cmsg_type = IP_SENDSRCADDR;
+        memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
+#endif
+    }
 
     return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
 }
-#endif
 #endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 
