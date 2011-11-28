@@ -154,11 +154,10 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
 {
     netsnmp_transport *t;
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
-    memset(t, 0, sizeof(netsnmp_transport));
 
     t->domain = netsnmp_snmpSTDDomain;
     t->domain_length =

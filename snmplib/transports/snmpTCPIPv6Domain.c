@@ -47,6 +47,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/snmpTCPBaseDomain.h>
+#include <net-snmp/library/tools.h>
 
 #ifndef NETSNMP_NO_SYSTEMD
 #include <net-snmp/library/sd-daemon.h>
@@ -154,19 +155,16 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
         return NULL;
     }
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
-    memset(t, 0, sizeof(netsnmp_transport));
 
     str = netsnmp_tcp6_fmtaddr(NULL, (void *)addr,
 				  sizeof(struct sockaddr_in6));
     DEBUGMSGTL(("netsnmp_tcp6", "open %s %s\n", local ? "local" : "remote",
                 str));
     free(str);
-
-    memset(t, 0, sizeof(netsnmp_transport));
 
     t->data = malloc(sizeof(netsnmp_indexed_addr_pair));
     if (t->data == NULL) {

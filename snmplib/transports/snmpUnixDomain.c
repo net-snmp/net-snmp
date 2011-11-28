@@ -35,6 +35,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/system.h> /* mkdirhier */
+#include <net-snmp/library/tools.h>
 
 #ifndef NETSNMP_NO_SYSTEMD
 #include <net-snmp/library/sd-daemon.h>
@@ -312,7 +313,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         return NULL;
     }
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
@@ -322,8 +323,6 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
                 string));
     free(string);
-
-    memset(t, 0, sizeof(netsnmp_transport));
 
     t->domain = netsnmp_UnixDomain;
     t->domain_length =

@@ -599,7 +599,6 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
     if (t == NULL) {
         return NULL;
     }
-    memset(t, 0, sizeof(netsnmp_transport));
 
     t->domain = netsnmp_snmpSSHDomain;
     t->domain_length = netsnmp_snmpSSHDomain_len;

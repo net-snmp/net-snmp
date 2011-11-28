@@ -34,6 +34,7 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/tools.h>
 
 #define SNMP_IPX_DEFAULT_PORT	36879   /*  Specified in RFC 1420.  */
 static netsnmp_tdomain ipxDomain;
@@ -187,7 +188,7 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
         return NULL;
     }
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
@@ -197,8 +198,6 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
     DEBUGMSGTL(("netsnmp_ipx", "open %s %s\n", local ? "local" : "remote",
                 str));
     free(str);
-
-    memset(t, 0, sizeof(netsnmp_transport));
 
     t->domain = netsnmpIPXDomain;
     t->domain_length = netsnmpIPXDomain_len;

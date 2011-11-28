@@ -127,11 +127,10 @@ netsnmp_transport_copy(netsnmp_transport *t)
         return NULL;
     }
 
-    n = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    n = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (n == NULL) {
         return NULL;
     }
-    memset(n, 0, sizeof(netsnmp_transport));
 
     if (t->domain != NULL) {
         n->domain = t->domain;
