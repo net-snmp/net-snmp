@@ -32,6 +32,7 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/tools.h>
 
 
 oid netsnmp_AAL5PVCDomain[10] = { NETSNMP_ENTERPRISE_MIB, 3, 3, 3 };
@@ -178,7 +179,7 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
         return NULL;
     }
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
@@ -188,8 +189,6 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
     DEBUGMSGTL(("netsnmp_aal5pvc", "open %s %s\n", local ? "local" : "remote",
                 str));
     free(str);
-
-    memset(t, 0, sizeof(netsnmp_transport));
 
     t->domain = netsnmp_AAL5PVCDomain;
     t->domain_length =

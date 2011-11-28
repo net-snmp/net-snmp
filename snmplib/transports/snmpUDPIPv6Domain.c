@@ -65,6 +65,7 @@ static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
+#include <net-snmp/library/tools.h>
 
 #include "inet_ntop.h"
 #include "inet_pton.h"
@@ -195,7 +196,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         return NULL;
     }
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
@@ -205,8 +206,6 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
     DEBUGMSGTL(("netsnmp_udp6", "open %s %s\n", local ? "local" : "remote",
                 str));
     free(str);
-
-    memset(t, 0, sizeof(netsnmp_transport));
 
     t->domain = netsnmp_UDPIPv6Domain;
     t->domain_length =

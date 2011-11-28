@@ -921,7 +921,6 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     if (NULL == t) {
         return NULL;
     }
-    memset(t, 0, sizeof(netsnmp_transport));
 
     /* allocate our TLS specific data */
     if (NULL == (tlsdata = netsnmp_tlsbase_allocate_tlsdata(t, isserver)))

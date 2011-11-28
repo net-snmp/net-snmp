@@ -41,6 +41,7 @@
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/snmpTCPBaseDomain.h>
+#include <net-snmp/library/tools.h>
 
 /*
  * needs to be in sync with the definitions in snmplib/snmpUDPDomain.c
@@ -157,11 +158,10 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
         return NULL;
     }
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
-    memset(t, 0, sizeof(netsnmp_transport));
 
     addr_pair = (netsnmp_udp_addr_pair *)malloc(sizeof(netsnmp_udp_addr_pair));
     if (addr_pair == NULL) {
