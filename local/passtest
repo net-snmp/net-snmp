@@ -20,34 +20,34 @@ fi
 #
 if [ "$1" = "-n" ]; then
   case "$REQ" in
-    $PLACE|
-    $PLACE.0|
-    $PLACE.0.*|
+    $PLACE|		\
+    $PLACE.0|		\
+    $PLACE.0.*|		\
     $PLACE.1)       RET=$PLACE.1.0 ;;     # netSnmpPassString.0
 
-    $PLACE.1.*|
-    $PLACE.2|
-    $PLACE.2.0|
-    $PLACE.2.0.*|
-    $PLACE.2.1|
-    $PLACE.2.1.0|
-    $PLACE.2.1.0.*|
-    $PLACE.2.1.1|
-    $PLACE.2.1.1.*|
-    $PLACE.2.1.2|
+    $PLACE.1.*|		\
+    $PLACE.2|		\
+    $PLACE.2.0|		\
+    $PLACE.2.0.*|	\
+    $PLACE.2.1|		\
+    $PLACE.2.1.0|	\
+    $PLACE.2.1.0.*|	\
+    $PLACE.2.1.1|	\
+    $PLACE.2.1.1.*|	\
+    $PLACE.2.1.2|	\
     $PLACE.2.1.2.0) RET=$PLACE.2.1.2.1 ;; # netSnmpPassInteger.1
 
-    $PLACE.2.1.2.*|
-    $PLACE.2.1.3|
+    $PLACE.2.1.2.*|	\
+    $PLACE.2.1.3|	\
     $PLACE.2.1.3.0) RET=$PLACE.2.1.3.1 ;; # netSnmpPassOID.1
 
-    $PLACE.2.*|
+    $PLACE.2.*|		\
     $PLACE.3)       RET=$PLACE.3.0 ;;     # netSnmpPassTimeTicks.0
-    $PLACE.3.*|
+    $PLACE.3.*|		\
     $PLACE.4)       RET=$PLACE.4.0 ;;     # netSnmpPassIpAddress.0
-    $PLACE.4.*|
+    $PLACE.4.*|		\
     $PLACE.5)       RET=$PLACE.5.0 ;;     # netSnmpPassCounter.0
-    $PLACE.5.*|
+    $PLACE.5.*|		\
     $PLACE.6)       RET=$PLACE.6.0 ;;     # netSnmpPassGauge.0
 
     *)         	    exit 0 ;;
@@ -57,12 +57,12 @@ else
 #  GET requests - check for valid instance
 #
   case "$REQ" in
-    $PLACE.1.0|
-    $PLACE.2.1.2.1|
-    $PLACE.2.1.3.1|
-    $PLACE.3.0|
-    $PLACE.4.0|
-    $PLACE.5.0|
+    $PLACE.1.0|		\
+    $PLACE.2.1.2.1|	\
+    $PLACE.2.1.3.1|	\
+    $PLACE.3.0|		\
+    $PLACE.4.0|		\
+    $PLACE.5.0|		\
     $PLACE.6.0)     RET=$REQ ;;
     *)         	    exit 0 ;;
   esac
