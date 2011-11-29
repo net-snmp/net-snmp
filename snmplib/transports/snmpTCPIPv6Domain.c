@@ -71,7 +71,6 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
     struct sockaddr_in6 *farend = NULL;
     int             newsock = -1;
     socklen_t       farendlen = sizeof(struct sockaddr_in6);
-    char           *str = NULL;
 
     farend = (struct sockaddr_in6 *) malloc(sizeof(struct sockaddr_in6));
 
@@ -99,9 +98,11 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
 
         t->data = farend;
         t->data_length = farendlen;
-        str = netsnmp_tcp6_fmtaddr(NULL, farend, farendlen);
-        DEBUGMSGTL(("netsnmp_tcp6", "accept succeeded (from %s)\n", str));
-        free(str);
+        DEBUGIF("netsnmp_tcp6") {
+            char *str = netsnmp_tcp6_fmtaddr(NULL, farend, farendlen);
+            DEBUGMSGTL(("netsnmp_tcp6", "accept succeeded (from %s)\n", str));
+            free(str);
+        }
 
         /*
          * Try to make the new socket blocking.  
@@ -139,7 +140,6 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0;
-    char           *str = NULL;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     if (local)
@@ -155,11 +155,13 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
         return NULL;
     }
 
-    str = netsnmp_tcp6_fmtaddr(NULL, (void *)addr,
-				  sizeof(struct sockaddr_in6));
-    DEBUGMSGTL(("netsnmp_tcp6", "open %s %s\n", local ? "local" : "remote",
-                str));
-    free(str);
+    DEBUGIF("netsnmp_tcp6") {
+        char *str = netsnmp_tcp6_fmtaddr(NULL, (void *)addr,
+                                   sizeof(struct sockaddr_in6));
+        DEBUGMSGTL(("netsnmp_tcp6", "open %s %s\n", local ? "local" : "remote",
+                    str));
+        free(str);
+    }
 
     t->data = malloc(sizeof(netsnmp_indexed_addr_pair));
     if (t->data == NULL) {

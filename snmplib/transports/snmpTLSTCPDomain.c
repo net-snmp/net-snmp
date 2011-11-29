@@ -274,7 +274,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     }
 
     /* log the packet */
-    {
+    DEBUGIF("tlstcp") {
         char *str = netsnmp_tlstcp_fmtaddr(t, NULL, 0);
         DEBUGMSGTL(("tlstcp",
                     "recvfrom fd %d got %d bytes (from %s)\n",

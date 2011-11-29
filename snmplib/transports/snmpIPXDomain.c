@@ -100,10 +100,13 @@ netsnmp_ipx_recv(netsnmp_transport *t, void *buf, int size,
 	}
 
         if (rc >= 0) {
-            char *str = netsnmp_ipx_fmtaddr(NULL, from, fromlen);
-            DEBUGMSGTL(("netsnmp_ipx","recvfrom fd %d got %d bytes(from %s)\n",
-			t->sock, rc, str));
-            free(str);
+            DEBUGIF("netsnmp_ipx") {
+                char *str = netsnmp_ipx_fmtaddr(NULL, from, fromlen);
+                DEBUGMSGTL(("netsnmp_ipx",
+                            "recvfrom fd %d got %d bytes(from %s)\n",
+                            t->sock, rc, str));
+                free(str);
+            }
         } else {
             DEBUGMSGTL(("netsnmp_ipx", "recvfrom fd %d err %d (\"%s\")\n",
                         t->sock, errno, strerror(errno)));
@@ -132,11 +135,13 @@ netsnmp_ipx_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char *str = netsnmp_ipx_fmtaddr(NULL, (void *)to,
-					sizeof(struct sockaddr_ipx));
-        DEBUGMSGTL(("netsnmp_ipx", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, str, t->sock));
-        free(str);
+        DEBUGIF("netsnmp_ipx") {
+            char *str = netsnmp_ipx_fmtaddr(NULL, (void *)to,
+                                            sizeof(struct sockaddr_ipx));
+            DEBUGMSGTL(("netsnmp_ipx", "send %d bytes from %p to %s on fd %d\n",
+                        size, buf, str, t->sock));
+            free(str);
+        }
 	while (rc < 0) {
 	    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
 	    if (rc < 0 && errno != EINTR) {
@@ -177,7 +182,6 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0;
-    char           *str = NULL;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     if (local)
@@ -193,11 +197,13 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
         return NULL;
     }
 
-    str = netsnmp_ipx_fmtaddr(NULL, (void *)addr, 
-				 sizeof(struct sockaddr_ipx));
-    DEBUGMSGTL(("netsnmp_ipx", "open %s %s\n", local ? "local" : "remote",
-                str));
-    free(str);
+    DEBUGIF("netsnmp_ipx") {
+        char *str = netsnmp_ipx_fmtaddr(NULL, (void *)addr,
+                                  sizeof(struct sockaddr_ipx));
+        DEBUGMSGTL(("netsnmp_ipx", "open %s %s\n", local ? "local" : "remote",
+                    str));
+        free(str);
+    }
 
     t->domain = netsnmpIPXDomain;
     t->domain_length = netsnmpIPXDomain_len;
