@@ -1004,7 +1004,7 @@ sub readindexes()
 		next if  $if eq "..";
 
 		my $port=hex(readfile($brifdir.$if."/port_no", 0));
-		my $index=readfile($netdir.$if."/ifindex", STP_PROP_HEX);
+		my $index=readfile($netdir.$if."/ifindex", 0);
 
 		$indexes{$bridge}{$port}=$index;
 		$interfaces{$bridge}{$port}=$if;
@@ -1063,17 +1063,16 @@ sub tracevlan{
 			my $pif=$1;
 			$brifdir=$netdir.$pif."/brport/bridge/brif/";
 			$port=hex(readfile($brifdir.$pif."/port_no", 0));
-			$index=readfile($netdir.$pif."/ifindex", STP_PROP_HEX);
+			$index=readfile($netdir.$pif."/ifindex", 0);
 			#$indexes{$bridge}{$port}=$index;
 			#$interfaces{$bridge}{$port}=$if;
 			$tagged{$vlan}{$port}=1;
 		}else{
-			my $brid=readfile($netdir.$if."/brport/bridge/ifindex",
-						STP_PROP_HEX);
+			my $brid=readfile($netdir.$if."/brport/bridge/ifindex",	0);
 			$brifdir=$netdir.$if."/brport/bridge/brif/";
 			$port=hex(readfile($brifdir.$if."/port_no", 0));
 			$port=$brid*1000+$port; #create a unique port number
-			$index=readfile($netdir.$if."/ifindex", STP_PROP_HEX);
+			$index=readfile($netdir.$if."/ifindex", 0);
 			$indexes{$bridge}{$port}=$index;
 			$interfaces{$bridge}{$port}=$if;
 			$tagged{$vlan}{$port}=0;
@@ -1083,8 +1082,7 @@ sub tracevlan{
 	}
 	close(DIR);
 
-	my $brid=readfile($netdir.$interface."/brport/bridge/ifindex",
-					 STP_PROP_HEX);
+	my $brid=readfile($netdir.$interface."/brport/bridge/ifindex", 0);
 	my $fdb=$netdir.$interface."/brport/bridge/brforward";
 
 	my $vbridge=$bridge."_vlan".$vlan;
