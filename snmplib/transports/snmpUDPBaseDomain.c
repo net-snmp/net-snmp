@@ -116,14 +116,14 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
         }
 
 	while (rc < 0) {
-#if defined(linux) && defined(IP_PKTINFO)
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
             socklen_t local_addr_len = sizeof(addr_pair->local_addr);
             rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
                                       (struct sockaddr*)&(addr_pair->local_addr),
                                       &local_addr_len, &(addr_pair->if_index));
 #else
             rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
-#endif /* linux && IP_PKTINFO */
+#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
@@ -173,13 +173,13 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
                     size, buf, str, t->sock));
         free(str);
 	while (rc < 0) {
-#if defined(linux) && defined(IP_PKTINFO)
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
             rc = netsnmp_udp_sendto(t->sock,
                     addr_pair ? &(addr_pair->local_addr.sin.sin_addr) : NULL,
                     addr_pair ? addr_pair->if_index : 0, to, buf, size);
 #else
             rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
-#endif /* linux && IP_PKTINFO */
+#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 	    if (rc < 0 && errno != EINTR) {
                 DEBUGMSGTL(("netsnmp_udp", "sendto error, rc %d (errno %d)\n",
                             rc, errno));
@@ -255,7 +255,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 #elif defined(IP_RECVDSTADDR)
     for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
         if (cmsgptr->cmsg_level == IPPROTO_IP && cmsgptr->cmsg_type == IP_RECVDSTADDR) {
-            memcpy((void *) dstip, CMSG_DATA(cmsgptr), sizeof(struct in_addr));
+            memcpy(&(((struct sockaddr_in*)dstip)->sin_addr), CMSG_DATA(cmsg), sizeof(struct in_addr));
             DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
                     inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr)));
         }
