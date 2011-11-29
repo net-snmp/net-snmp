@@ -88,11 +88,13 @@ netsnmp_aal5pvc_recv(netsnmp_transport *t, void *buf, int size,
 	}
 
         if (rc >= 0) {
-            char *str = netsnmp_aal5pvc_fmtaddr(t, NULL, 0);
-            DEBUGMSGTL(("netsnmp_aal5pvc",
-			"recv on fd %d got %d bytes (from %s)\n", t->sock,
-                        rc, str));
-            free(str);
+            DEBUGIF("netsnmp_aal5pvc") {
+                char *str = netsnmp_aal5pvc_fmtaddr(t, NULL, 0);
+                DEBUGMSGTL(("netsnmp_aal5pvc",
+                            "recv on fd %d got %d bytes (from %s)\n", t->sock,
+                            rc, str));
+                free(str);
+            }
         } else {
             DEBUGMSGTL(("netsnmp_aal5pvc", "recv on fd %d err %d (\"%s\")\n", 
 			t->sock, errno, strerror(errno)));
@@ -121,11 +123,14 @@ netsnmp_aal5pvc_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char *str = netsnmp_aal5pvc_fmtaddr(NULL, (void *)to,
-					    sizeof(struct sockaddr_atmpvc));
-        DEBUGMSGTL(("netsnmp_aal5pvc","send %d bytes from %p to %s on fd %d\n",
-		    size, buf, str, t->sock));
-        free(str);
+        DEBUGIF("netsnmp_aal5pvc") {
+            char *str = netsnmp_aal5pvc_fmtaddr(NULL, (void *)to,
+                                                sizeof(struct sockaddr_atmpvc));
+            DEBUGMSGTL(("netsnmp_aal5pvc",
+                        "send %d bytes from %p to %s on fd %d\n",
+                        size, buf, str, t->sock));
+            free(str);
+        }
 	while (rc < 0) {
 	    rc = sendto(t->sock, buf, size, 0, NULL, 0);
 	    if (rc < 0 && errno != EINTR) {
@@ -166,7 +171,6 @@ netsnmp_aal5pvc_close(netsnmp_transport *t)
 netsnmp_transport *
 netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
 {
-    char           *str = NULL;
     struct atm_qos  qos;
     netsnmp_transport *t = NULL;
 
@@ -184,11 +188,13 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
         return NULL;
     }
 
-    str = netsnmp_aal5pvc_fmtaddr(NULL, (void *) addr,
-                                  sizeof(struct sockaddr_atmpvc));
-    DEBUGMSGTL(("netsnmp_aal5pvc", "open %s %s\n", local ? "local" : "remote",
-                str));
-    free(str);
+    DEBUGIF("netsnmp_aal5pvc") {
+        char *str = netsnmp_aal5pvc_fmtaddr(NULL, (void *) addr,
+                                            sizeof(struct sockaddr_atmpvc));
+        DEBUGMSGTL(("netsnmp_aal5pvc", "open %s %s\n",
+                    local ? "local" : "remote", str));
+        free(str);
+    }
 
     t->domain = netsnmp_AAL5PVCDomain;
     t->domain_length =

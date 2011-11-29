@@ -82,7 +82,6 @@ netsnmp_tcp_accept(netsnmp_transport *t)
     netsnmp_udp_addr_pair *addr_pair = NULL;
     int             newsock = -1;
     socklen_t       farendlen = sizeof(netsnmp_udp_addr_pair);
-    char           *str = NULL;
 
     addr_pair = (netsnmp_udp_addr_pair *)malloc(farendlen);
     if (addr_pair == NULL) {
@@ -111,9 +110,11 @@ netsnmp_tcp_accept(netsnmp_transport *t)
 
         t->data = addr_pair;
         t->data_length = sizeof(netsnmp_udp_addr_pair);
-        str = netsnmp_tcp_fmtaddr(NULL, farend, farendlen);
-        DEBUGMSGTL(("netsnmp_tcp", "accept succeeded (from %s)\n", str));
-        free(str);
+        DEBUGIF("netsnmp_tcp") {
+            char *str = netsnmp_tcp_fmtaddr(NULL, farend, farendlen);
+            DEBUGMSGTL(("netsnmp_tcp", "accept succeeded (from %s)\n", str));
+            free(str);
+        }
 
         /*
          * Try to make the new socket blocking.  

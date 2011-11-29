@@ -128,11 +128,13 @@ netsnmp_udp6_recv(netsnmp_transport *t, void *buf, int size,
 	}
 
         if (rc >= 0) {
-	    char *str = netsnmp_udp6_fmtaddr(NULL, from, fromlen);
-            DEBUGMSGTL(("netsnmp_udp6",
-			"recvfrom fd %d got %d bytes (from %s)\n", t->sock,
-                        rc, str));
-            free(str);
+            DEBUGIF("netsnmp_udp6") {
+                char *str = netsnmp_udp6_fmtaddr(NULL, from, fromlen);
+                DEBUGMSGTL(("netsnmp_udp6",
+                            "recvfrom fd %d got %d bytes (from %s)\n", t->sock,
+                            rc, str));
+                free(str);
+            }
         } else {
             DEBUGMSGTL(("netsnmp_udp6", "recvfrom fd %d err %d (\"%s\")\n",
 			t->sock, errno, strerror(errno)));
@@ -162,11 +164,14 @@ netsnmp_udp6_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char *str = netsnmp_udp6_fmtaddr(NULL, (void *)to,
-					    sizeof(struct sockaddr_in6));
-        DEBUGMSGTL(("netsnmp_udp6", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, str, t->sock));
-        free(str);
+        DEBUGIF("netsnmp_udp6") {
+            char *str = netsnmp_udp6_fmtaddr(NULL, (void *)to,
+                                             sizeof(struct sockaddr_in6));
+            DEBUGMSGTL(("netsnmp_udp6",
+                        "send %d bytes from %p to %s on fd %d\n",
+                        size, buf, str, t->sock));
+            free(str);
+        }
 	while (rc < 0) {
 	    rc = sendto(t->sock, buf, size, 0, to,sizeof(struct sockaddr_in6));
 	    if (rc < 0 && errno != EINTR) {
@@ -189,7 +194,6 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0;
-    char           *str = NULL;
     int             socket_initialized = 0;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
@@ -206,11 +210,13 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         return NULL;
     }
 
-    str = netsnmp_udp6_fmtaddr(NULL, (void *) addr,
-				  sizeof(struct sockaddr_in6));
-    DEBUGMSGTL(("netsnmp_udp6", "open %s %s\n", local ? "local" : "remote",
-                str));
-    free(str);
+    DEBUGIF("netsnmp_udp6") {
+        char *str = netsnmp_udp6_fmtaddr(NULL, (void *) addr,
+                                         sizeof(struct sockaddr_in6));
+        DEBUGMSGTL(("netsnmp_udp6", "open %s %s\n", local ? "local" : "remote",
+                    str));
+        free(str);
+    }
 
     t->domain = netsnmp_UDPIPv6Domain;
     t->domain_length =
