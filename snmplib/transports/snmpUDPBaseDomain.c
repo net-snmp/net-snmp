@@ -130,11 +130,14 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
 	}
 
         if (rc >= 0) {
-            char *str = netsnmp_udp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
-            DEBUGMSGTL(("netsnmp_udp",
-			"recvfrom fd %d got %d bytes (from %s)\n",
-			t->sock, rc, str));
-            free(str);
+            DEBUGIF("netsnmp_udp") {
+                char *str = netsnmp_udp_fmtaddr(
+                    NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
+                DEBUGMSGTL(("netsnmp_udp",
+                            "recvfrom fd %d got %d bytes (from %s)\n",
+                            t->sock, rc, str));
+                free(str);
+            }
         } else {
             DEBUGMSGTL(("netsnmp_udp", "recvfrom fd %d err %d (\"%s\")\n",
                         t->sock, errno, strerror(errno)));
@@ -166,11 +169,13 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
     to = (struct sockaddr *) &(addr_pair->remote_addr);
 
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char *str = netsnmp_udp_fmtaddr(NULL, (void *) addr_pair,
-                                        sizeof(netsnmp_indexed_addr_pair));
-        DEBUGMSGTL(("netsnmp_udp", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, str, t->sock));
-        free(str);
+        DEBUGIF("netsnmp_udp") {
+            char *str = netsnmp_udp_fmtaddr(NULL, (void *) addr_pair,
+                                            sizeof(netsnmp_indexed_addr_pair));
+            DEBUGMSGTL(("netsnmp_udp", "send %d bytes from %p to %s on fd %d\n",
+                        size, buf, str, t->sock));
+            free(str);
+        }
 	while (rc < 0) {
 #if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
             rc = netsnmp_udp_sendto(t->sock,

@@ -289,7 +289,6 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     netsnmp_transport *t = NULL;
     sockaddr_un_pair *sup = NULL;
     int             rc = 0;
-    char           *string = NULL;
 
     if (addr == NULL || addr->sun_family != AF_UNIX) {
         return NULL;
@@ -300,11 +299,13 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         return NULL;
     }
 
-    string = netsnmp_unix_fmtaddr(NULL, (void *)addr,
-                                  sizeof(struct sockaddr_un));
-    DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
-                string));
-    free(string);
+    DEBUGIF("netsnmp_unix") {
+        char *str = netsnmp_unix_fmtaddr(NULL, (void *)addr,
+                                         sizeof(struct sockaddr_un));
+        DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
+                    str));
+        free(str);
+    }
 
     memset(t, 0, sizeof(netsnmp_transport));
 
