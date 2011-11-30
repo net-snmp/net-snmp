@@ -159,10 +159,10 @@ sub setMib {
 }
 
 sub initMib {
-# eqivalent to calling the snmp library init_mib if Mib is NULL
+# equivalent to calling the snmp library init_mib if Mib is NULL
 # if Mib is already loaded this function does nothing
-# Pass a zero valued argument to get minimal mib tree initialzation
-# If non zero agrgument or no argument then full mib initialization
+# Pass a zero valued argument to get minimal mib tree initialization
+# If non zero argument or no argument then full mib initialization
 
   SNMP::init_snmp("perl");
   return;
@@ -1476,7 +1476,7 @@ init_snmp properly, which means it will read configuration files and
 use those defaults where appropriate automatically parse MIB files,
 etc.  This will likely affect your perl applications if you have, for
 instance, default values set up in your snmp.conf file (as the perl
-module will now make use of those defaults).  The docmuentation,
+module will now make use of those defaults).  The documentation,
 however, has sadly not been updated yet (aside from this note), nor is
 the read_config default usage implementation fully complete.
 
@@ -1487,7 +1487,7 @@ aspects of a connection between the management application and the
 managed agent. Internally the class is implemented as a blessed hash
 reference. This class supplies 'get', 'getnext', 'set', 'fget', and
 'fgetnext' method calls. The methods take a variety of input argument
-formats and support both syncronous and asyncronous operation through
+formats and support both synchronous and asynchronous operation through
 a polymorphic API (i.e., method behaviour varies dependent on args
 passed - see below).
 
@@ -1692,7 +1692,7 @@ do SNMP GET, multiple <vars> formats accepted.
 for syncronous operation <vars> will be updated
 with value(s) and type(s) and will also return
 retrieved value(s). If <callback> supplied method
-will operate asyncronously
+will operate asynchronously
 
 =item $sess->fget(E<lt>varsE<gt> [,E<lt>callbackE<gt>])
 
@@ -1709,7 +1709,7 @@ and <type>
 
 Note: simple string <vars>,(e.g., 'sysDescr.0')
 form is not updated. If <callback> supplied method
-will operate asyncronously
+will operate asynchronously
 
 =item $sess->fgetnext(E<lt>varsE<gt> [,E<lt>callbackE<gt>])
 
@@ -1725,7 +1725,7 @@ format (i.e., well known format) to ensure unambiguous
 translation to SNMP MIB data value (see discussion of
 canonical value format <vars> description section),
 returns snmp_errno. If <callback> supplied method
-will operate asyncronously
+will operate asynchronously
 
 =item $sess->getbulk(E<lt>non-repeatersE<gt>, E<lt>max-repeatersE<gt>, E<lt>varsE<gt>)
 
@@ -1842,7 +1842,7 @@ collect all the columns defined in the MIB table.
 Specifies a GETBULK repeat I<COUNT>.  IE, it will request this many
 varbinds back per column when using the GETBULK operation.  Shortening
 this will mean smaller packets which may help going through some
-systems.  By default, this value is calculated and attepmts to guess
+systems.  By default, this value is calculated and attempts to guess
 at what will fit all the results into 1000 bytes.  This calculation is
 fairly safe, hopefully, but you can either raise or lower the number
 using this option if desired.  In lossy networks, you want to make
@@ -1854,7 +1854,7 @@ one way to help that.
 Force the use of GETNEXT rather than GETBULK.  (always true for
 SNMPv1, as it doesn't have GETBULK anyway).  Some agents are great
 implementers of GETBULK and this allows you to force the use of
-GETNEXT oprations instead.
+GETNEXT operations instead.
 
 =item callback => \&subroutine
 
@@ -1880,7 +1880,7 @@ versions prior to 5.04 and and 5.04 and up, the following should work:
       $no_mainloop = 1;
   }
 
-Deciding on whether to use SNMP::MainLoop is left as an excersize to
+Deciding on whether to use SNMP::MainLoop is left as an exercise to
 the reader since it depends on whether your code uses other callbacks
 as well.
 
@@ -2095,9 +2095,9 @@ will be undef.
 to be used with async SNMP::Session
 calls. MainLoop must be called after initial async calls
 so return packets from the agent will not be processed.
-If no args suplied this function enters an infinite loop
+If no args supplied this function enters an infinite loop
 so program must be exited in a callback or externally
-interupted. If <timeout(sic)
+interrupted. If <timeout(sic)
 
 =item &SNMP::finish()
 
@@ -2179,7 +2179,7 @@ initialization
 
 =item $SNMP::debugging
 
-default '0', controlls debugging output level
+default '0', controls debugging output level
 within SNMP module and libsnmp
 
 =over
@@ -2308,7 +2308,7 @@ returns the REFERENCE clause
 =item &SNMP::setMib(<file>)
 
 allows dynamic parsing of the mib and explicit
-specification of mib file independent of enviroment
+specification of mib file independent of environment
 variables. called with no args acts like initMib,
 loading MIBs indicated by environment variables (see
 Net-SNMP mib_api docs). passing non-zero second arg
