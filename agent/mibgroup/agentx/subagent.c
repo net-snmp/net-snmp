@@ -777,6 +777,7 @@ subagent_open_master_session(void)
 {
     netsnmp_transport *t;
     netsnmp_session sess;
+    const char *agentx_socket;
 
     DEBUGMSGTL(("agentx/subagent", "opening session...\n"));
 
@@ -794,9 +795,9 @@ subagent_open_master_session(void)
     sess.callback = handle_agentx_packet;
     sess.authenticator = NULL;
 
-    t = netsnmp_transport_open_client(
-            "agentx", netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
-                                            NETSNMP_DS_AGENT_X_SOCKET));
+    agentx_socket = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                          NETSNMP_DS_AGENT_X_SOCKET);
+    t = netsnmp_transport_open_client("agentx", agentx_socket);
     if (t == NULL) {
         /*
          * Diagnose snmp_open errors with the input
@@ -805,12 +806,9 @@ subagent_open_master_session(void)
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                     NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS)) {
             char buf[1024];
-            const char *socket =
-                netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
-                                      NETSNMP_DS_AGENT_X_SOCKET);
             snprintf(buf, sizeof(buf), "Warning: "
                      "Failed to connect to the agentx master agent (%s)",
-                     socket ? socket : "[NIL]");
+                     agentx_socket ? agentx_socket : "[NIL]");
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                         NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
                 netsnmp_sess_log_error(LOG_WARNING, buf, &sess);
@@ -831,8 +829,7 @@ subagent_open_master_session(void)
             char buf[1024];
             snprintf(buf, sizeof(buf), "Error: "
                      "Failed to create the agentx master agent session (%s)",
-                     netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
-                                           NETSNMP_DS_AGENT_X_SOCKET));
+                     agentx_socket);
             snmp_sess_perror(buf, &sess);
         }
         netsnmp_transport_free(t);

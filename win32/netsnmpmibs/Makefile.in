@@ -83,6 +83,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\file.obj" \
 	"$(INTDIR)\loadave.obj" \
 	"$(INTDIR)\pass.obj" \
+	"$(INTDIR)\pass_common.obj" \
 	"$(INTDIR)\pass_persist.obj" \
 	"$(INTDIR)\proc.obj" \
 	"$(INTDIR)\proxy.obj" \
@@ -300,6 +301,12 @@ SOURCE="..\..\agent\mibgroup\ucd-snmp\loadave.c"
 SOURCE="..\..\agent\mibgroup\ucd-snmp\pass.c"
 
 "$(INTDIR)\pass.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE="..\..\agent\mibgroup\ucd-snmp\pass_common.c"
+
+"$(INTDIR)\pass_common.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
