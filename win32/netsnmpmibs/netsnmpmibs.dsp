@@ -189,6 +189,10 @@ SOURCE="..\..\agent\mibgroup\ucd-snmp\pass.c"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\agent\mibgroup\ucd-snmp\pass_common.c"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\agent\mibgroup\ucd-snmp\pass_persist.c"
 # End Source File
 # Begin Source File
