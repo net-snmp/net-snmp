@@ -133,6 +133,12 @@ $replace_newer = 0; # determine whether or not to tell the parser to replace
                     # older MIB modules with newer ones when loading MIBs.
                     # WARNING: This can cause an incorrect hierarchy.
 
+sub register_debug_tokens {
+    my $tokens = shift;
+
+    SNMP::_register_debug_tokens($tokens);
+}
+
 sub getenv {
     my $name = shift;
 
@@ -2202,6 +2208,12 @@ level 2 plus snmp_set_dump_packet(1)
 
 default '0', set [non-]zero to independently set
 snmp_set_dump_packet()
+
+=item SNMP::register_debug_tokens()
+
+Allows to register one or more debug tokens, just like the -D option of snmpd.
+Each debug token enables a group of debug statements. An example:
+SNMP::register_debug_tokens("tdomain,netsnmp_unix");
 
 =back
 
