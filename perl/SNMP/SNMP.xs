@@ -4895,6 +4895,15 @@ snmp_set_debugging(val)
 	}
 
 void
+snmp_register_debug_tokens(tokens)
+	char *tokens
+	CODE:
+	{
+            debug_register_tokens(tokens);
+            snmp_set_do_debugging(1);
+	}
+
+void
 snmp_debug_internals(val)
 	int     val
 	CODE:
