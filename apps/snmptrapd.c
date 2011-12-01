@@ -550,6 +550,75 @@ parse_config_outputOption(const char *token, char *cptr)
   }
 }
 
+static void
+snmptrapd_main_loop(void)
+{
+    int             count, numfds, block;
+    fd_set          readfds,writefds,exceptfds;
+    struct timeval  timeout, *tvp;
+
+    while (netsnmp_running) {
+        if (reconfig) {
+                /*
+                 * If we are logging to a file, receipt of SIGHUP also
+                 * indicates that the log file should be closed and
+                 * re-opened.  This is useful for users that want to
+                 * rotate logs in a more predictable manner.
+                 */
+                netsnmp_logging_restart();
+                snmp_log(LOG_INFO, "NET-SNMP version %s restarted\n",
+                         netsnmp_get_version());
+            trapd_update_config();
+            if (trap1_fmt_str_remember) {
+                parse_format( NULL, trap1_fmt_str_remember );
+            }
+            reconfig = 0;
+        }
+        numfds = 0;
+        FD_ZERO(&readfds);
+        FD_ZERO(&writefds);
+        FD_ZERO(&exceptfds);
+        block = 0;
+        tvp = &timeout;
+        timerclear(tvp);
+        tvp->tv_sec = 5;
+        snmp_select_info(&numfds, &readfds, tvp, &block);
+        if (block == 1)
+            tvp = NULL;         /* block without timeout */
+#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
+        netsnmp_external_event_info(&numfds, &readfds, &writefds, &exceptfds);
+#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
+        count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
+        gettimeofday(&Now, NULL);
+        if (count > 0) {
+#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
+            netsnmp_dispatch_external_events(&count, &readfds, &writefds,
+                                             &exceptfds);
+#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
+            /* If there are any more events after external events, then
+             * try SNMP events. */
+            if (count > 0) {
+                snmp_read(&readfds);
+            }
+        } else {
+            switch (count) {
+            case 0:
+                snmp_timeout();
+                break;
+            case -1:
+                if (errno == EINTR)
+                    continue;
+                snmp_log_perror("select");
+                netsnmp_running = 0;
+                break;
+            default:
+                fprintf(stderr, "select returned %d\n", count);
+                netsnmp_running = 0;
+            }
+	}
+	run_alarms();
+    }
+}
 
 /*******************************************************************-o-******
  * main - Non Windows
@@ -579,9 +648,6 @@ main(int argc, char *argv[])
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
     int             uid = 0, gid = 0;
-    int             count, numfds, block;
-    fd_set          readfds,writefds,exceptfds;
-    struct timeval  timeout, *tvp;
     char           *cp, *listen_ports = NULL;
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
     int             agentx_subagent = 1;
@@ -1246,66 +1312,8 @@ main(int argc, char *argv[])
 #ifdef WIN32SERVICE
     trapd_status = SNMPTRAPD_RUNNING;
 #endif
-    while (netsnmp_running) {
-        if (reconfig) {
-                /*
-                 * If we are logging to a file, receipt of SIGHUP also
-                 * indicates the the log file should be closed and
-                 * re-opened.  This is useful for users that want to
-                 * rotate logs in a more predictable manner.
-                 */
-                netsnmp_logging_restart();
-                snmp_log(LOG_INFO, "NET-SNMP version %s restarted\n",
-                         netsnmp_get_version());
-            trapd_update_config();
-            if (trap1_fmt_str_remember) {
-                parse_format( NULL, trap1_fmt_str_remember );
-            }
-            reconfig = 0;
-        }
-        numfds = 0;
-        FD_ZERO(&readfds);
-        FD_ZERO(&writefds);
-        FD_ZERO(&exceptfds);
-        block = 0;
-        tvp = &timeout;
-        timerclear(tvp);
-        tvp->tv_sec = 5;
-        snmp_select_info(&numfds, &readfds, tvp, &block);
-        if (block == 1)
-            tvp = NULL;         /* block without timeout */
-#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
-        netsnmp_external_event_info(&numfds, &readfds, &writefds, &exceptfds);
-#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
-        count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
-        gettimeofday(&Now, NULL);
-        if (count > 0) {
-#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
-            netsnmp_dispatch_external_events(&count, &readfds, &writefds,
-                                             &exceptfds);
-#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
-            /* If there are any more events after external events, then
-             * try SNMP events. */
-            if (count > 0) {
-                snmp_read(&readfds);
-            }
-        } else
-            switch (count) {
-            case 0:
-                snmp_timeout();
-                break;
-            case -1:
-                if (errno == EINTR)
-                    continue;
-                snmp_log_perror("select");
-                netsnmp_running = 0;
-                break;
-            default:
-                fprintf(stderr, "select returned %d\n", count);
-                netsnmp_running = 0;
-            }
-	run_alarms();
-    }
+
+    snmptrapd_main_loop();
 
     if (snmp_get_do_logging()) {
         struct tm      *tm;
