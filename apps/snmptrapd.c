@@ -469,13 +469,10 @@ parse_config_pidFile(const char *token, char *cptr)
 void
 parse_config_agentuser(const char *token, char *cptr)
 {
-#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
-    struct passwd  *info;
-#endif
-
     if (cptr[0] == '#') {
         char           *ecp;
         int             uid;
+
         uid = strtoul(cptr + 1, &ecp, 10);
         if (*ecp != 0) {
             config_perror("Bad number");
@@ -483,44 +480,47 @@ parse_config_agentuser(const char *token, char *cptr)
 	    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_USERID, uid);
 	}
-    }
 #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
-    else if ((info = getpwnam(cptr)) != NULL) {
-        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-			   NETSNMP_DS_AGENT_USERID, info->pw_uid);
     } else {
-        config_perror("User not found in passwd database");
-    }
-    endpwent();
+        struct passwd *info;
+
+        info = getpwnam(cptr);
+        if (info)
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+                               NETSNMP_DS_AGENT_USERID, info->pw_uid);
+        else
+            config_perror("User not found in passwd database");
+        endpwent();
 #endif
+    }
 }
 
 void
 parse_config_agentgroup(const char *token, char *cptr)
 {
-#if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
-    struct group   *info;
-#endif
-
     if (cptr[0] == '#') {
         char           *ecp;
         int             gid = strtoul(cptr + 1, &ecp, 10);
+
         if (*ecp != 0) {
             config_perror("Bad number");
 	} else {
             netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_GROUPID, gid);
 	}
-    }
 #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
-    else if ((info = getgrnam(cptr)) != NULL) {
-        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-			   NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
     } else {
-        config_perror("Group not found in group database");
-    }
-    endpwent();
+        struct group   *info;
+
+        info = getgrnam(cptr);
+        if (info)
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+                               NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
+        else
+            config_perror("Group not found in group database");
+        endgrent();
 #endif
+    }
 }
 #endif
 
@@ -863,19 +863,18 @@ main(int argc, char *argv[])
                 char           *ecp;
 
                 uid = strtoul(optarg, &ecp, 10);
+#if HAVE_GETPWNAM && HAVE_PWD_H
                 if (*ecp) {
-#if HAVE_GETPWNAM && HAVE_PWD_H
                     struct passwd  *info;
+
                     info = getpwnam(optarg);
-                    if (info) {
-                        uid = info->pw_uid;
-                    } else {
+                    uid = info ? info->pw_uid : -1;
+                    endpwent();
+                }
 #endif
-                        fprintf(stderr, "Bad user id: %s\n", optarg);
-                        exit(1);
-#if HAVE_GETPWNAM && HAVE_PWD_H
-                    }
-#endif
+                if (uid < 0) {
+                    fprintf(stderr, "Bad user id: %s\n", optarg);
+                    exit(1);
                 }
                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 				   NETSNMP_DS_AGENT_USERID, uid);

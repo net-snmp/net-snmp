@@ -445,9 +445,6 @@ main(int argc, char *argv[])
     int fd;
     FILE           *PID;
 #endif
-#if HAVE_GETPWNAM && HAVE_PWD_H
-    struct passwd  *info;
-#endif
 
 #ifndef WIN32
     /*
@@ -598,19 +595,18 @@ main(int argc, char *argv[])
                 int             gid;
 
                 gid = strtoul(optarg, &ecp, 10);
+#if HAVE_GETGRNAM && HAVE_PWD_H
                 if (*ecp) {
-#if HAVE_GETPWNAM && HAVE_PWD_H
                     struct group  *info;
+
                     info = getgrnam(optarg);
-                    if (info) {
-                        gid = info->gr_gid;
-                    } else {
+                    gid = info ? info->gr_gid : -1;
+                    endgrent();
+                }
 #endif
-                        fprintf(stderr, "Bad group id: %s\n", optarg);
-                        exit(1);
-#if HAVE_GETPWNAM && HAVE_PWD_H
-                    }
-#endif
+                if (gid < 0) {
+                    fprintf(stderr, "Bad group id: %s\n", optarg);
+                    exit(1);
                 }
                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 				   NETSNMP_DS_AGENT_GROUPID, gid);
@@ -777,18 +773,18 @@ main(int argc, char *argv[])
                 int             uid;
 
                 uid = strtoul(optarg, &ecp, 10);
+#if HAVE_GETPWNAM && HAVE_PWD_H
                 if (*ecp) {
-#if HAVE_GETPWNAM && HAVE_PWD_H
+                    struct passwd  *info;
+
                     info = getpwnam(optarg);
-                    if (info) {
-                        uid = info->pw_uid;
-                    } else {
+                    uid = info ? info->pw_uid : -1;
+                    endpwent();
+                }
 #endif
-                        fprintf(stderr, "Bad user id: %s\n", optarg);
-                        exit(1);
-#if HAVE_GETPWNAM && HAVE_PWD_H
-                    }
-#endif
+                if (uid < 0) {
+                    fprintf(stderr, "Bad user id: %s\n", optarg);
+                    exit(1);
                 }
                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 				   NETSNMP_DS_AGENT_USERID, uid);
@@ -1044,6 +1040,8 @@ main(int argc, char *argv[])
     if ((uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 				  NETSNMP_DS_AGENT_USERID)) != 0) {
 #if HAVE_GETPWNAM && HAVE_PWD_H && HAVE_INITGROUPS
+        struct passwd *info;
+
         /*
          * Set supplementary groups before changing UID
          *   (which probably involves giving up privileges)
@@ -1059,6 +1057,7 @@ main(int argc, char *argv[])
                 }
             }
         }
+        endpwent();
 #endif
         DEBUGMSGTL(("snmpd/main", "Changing uid to %d.\n", uid));
         if (setuid(uid) == -1) {
