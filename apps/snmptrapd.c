@@ -217,8 +217,6 @@ LPCTSTR         app_name_long = _T("Net-SNMP Trap Handler");     /* Application 
 
 const char     *app_name = "snmptrapd";
 
-struct timeval  Now;
-
 void            trapd_update_config(void);
 
 #ifdef WIN32SERVICE
@@ -589,7 +587,6 @@ snmptrapd_main_loop(void)
         netsnmp_external_event_info(&numfds, &readfds, &writefds, &exceptfds);
 #endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
         count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
-        gettimeofday(&Now, NULL);
         if (count > 0) {
 #ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
             netsnmp_dispatch_external_events(&count, &readfds, &writefds,
