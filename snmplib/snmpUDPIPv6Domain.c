@@ -343,7 +343,6 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
     char            debug_addr[INET6_ADDRSTRLEN];
 #if HAVE_GETADDRINFO
     struct addrinfo *addrs = NULL;
-    struct addrinfo hint;
     int             err;
 #elif HAVE_GETIPNODEBYNAME
     struct hostent *hp = NULL;
@@ -557,13 +556,15 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         }
 
 #if HAVE_GETADDRINFO
-        memset(&hint, 0, sizeof hint);
-        hint.ai_flags = 0;
-        hint.ai_family = PF_INET6;
-        hint.ai_socktype = SOCK_DGRAM;
-        hint.ai_protocol = 0;
+        {
+            struct addrinfo hint = { 0 };
+            hint.ai_flags = 0;
+            hint.ai_family = PF_INET6;
+            hint.ai_socktype = SOCK_DGRAM;
+            hint.ai_protocol = 0;
 
-        err = getaddrinfo(peername, NULL, &hint, &addrs);
+            err = getaddrinfo(peername, NULL, &hint, &addrs);
+        }
         if (err != 0) {
 #if HAVE_GAI_STRERROR
             snmp_log(LOG_ERR, "getaddrinfo(\"%s\", NULL, ...): %s\n", peername,
