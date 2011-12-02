@@ -171,7 +171,6 @@ netsnmp_aal5pvc_close(netsnmp_transport *t)
 netsnmp_transport *
 netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
 {
-    struct atm_qos  qos;
     netsnmp_transport *t = NULL;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
@@ -208,22 +207,24 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
     }
     DEBUGMSGTL(("netsnmp_aal5pvc", "fd %d opened\n", t->sock));
 
-    /*
-     * Set up the QOS parameters.  
-     */
+    {
+        /*
+         * Set up the QOS parameters.
+         */
 
-    memset(&qos, 0, sizeof(struct atm_qos));
-    qos.aal = ATM_AAL5;
-    qos.rxtp.traffic_class = ATM_UBR;
-    qos.rxtp.max_sdu = SNMP_MAX_LEN;    /*  Hmm -- this is a bit small?  */
-    qos.txtp = qos.rxtp;
+        struct atm_qos qos = { 0 };
+        qos.aal = ATM_AAL5;
+        qos.rxtp.traffic_class = ATM_UBR;
+        qos.rxtp.max_sdu = SNMP_MAX_LEN;    /*  Hmm -- this is a bit small?  */
+        qos.txtp = qos.rxtp;
 
-    if (setsockopt(t->sock, SOL_ATM, SO_ATMQOS, &qos, sizeof(qos)) < 0) {
-        DEBUGMSGTL(("netsnmp_aal5pvc", "setsockopt failed (%s)\n",
-                    strerror(errno)));
-        netsnmp_aal5pvc_close(t);
-        netsnmp_transport_free(t);
-        return NULL;
+        if (setsockopt(t->sock, SOL_ATM, SO_ATMQOS, &qos, sizeof(qos)) < 0) {
+            DEBUGMSGTL(("netsnmp_aal5pvc", "setsockopt failed (%s)\n",
+                        strerror(errno)));
+            netsnmp_aal5pvc_close(t);
+            netsnmp_transport_free(t);
+            return NULL;
+        }
     }
 
     if (local) {
