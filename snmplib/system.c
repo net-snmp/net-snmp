@@ -1360,6 +1360,15 @@ netsnmp_os_kernel_width(void)
 
 netsnmp_feature_child_of(str_to_uid, user_information)
 #ifndef NETSNMP_FEATURE_REMOVE_STR_TO_UID
+/**
+ * Convert a user name or number into numeric form.
+ *
+ * @param[in] useroruid Either a Unix user name or the ASCII representation
+ *   of a user number.
+ *
+ * @return Either a user number > 0 or 0 if useroruid is not a valid user
+ *   name, not a valid user number or the name of the root user.
+ */
 int netsnmp_str_to_uid(const char *useroruid) {
     int uid;
 #if HAVE_GETPWNAM && HAVE_PWD_H
@@ -1368,13 +1377,13 @@ int netsnmp_str_to_uid(const char *useroruid) {
 
     uid = atoi(useroruid);
 
-    if ( uid == 0 ) {
+    if (uid == 0) {
 #if HAVE_GETPWNAM && HAVE_PWD_H
-        pwd = getpwnam( useroruid );
-        if (pwd)
-            uid = pwd->pw_uid;
-        else
+        pwd = getpwnam(useroruid);
+        uid = pwd ? pwd->pw_uid : 0;
+        endpwent();
 #endif
+        if (uid == 0)
             snmp_log(LOG_WARNING, "Can't identify user (%s).\n", useroruid);
     }
     return uid;
@@ -1384,23 +1393,31 @@ int netsnmp_str_to_uid(const char *useroruid) {
 
 netsnmp_feature_child_of(str_to_gid, user_information)
 #ifndef NETSNMP_FEATURE_REMOVE_STR_TO_GID
-int netsnmp_str_to_gid(const char *grouporgid) {
+/**
+ * Convert a group name or number into numeric form.
+ *
+ * @param[in] grouporgid Either a Unix group name or the ASCII representation
+ *   of a group number.
+ *
+ * @return Either a group number > 0 or 0 if grouporgid is not a valid group
+ *   name, not a valid group number or the root group.
+ */
+int netsnmp_str_to_gid(const char *grouporgid)
+{
     int gid;
-#if HAVE_GETGRNAM && HAVE_GRP_H
-    struct group  *grp;
-#endif
 
     gid = atoi(grouporgid);
 
-    if ( gid == 0 ) {
+    if (gid == 0) {
 #if HAVE_GETGRNAM && HAVE_GRP_H
-        grp = getgrnam( grouporgid );
-        if (grp)
-            gid = grp->gr_gid;
-        else
+        struct group  *grp;
+
+        grp = getgrnam(grouporgid);
+        gid = grp ? grp->gr_gid : 0;
+        endgrent();
 #endif
-            snmp_log(LOG_WARNING, "Can't identify group (%s).\n",
-                     grouporgid);
+        if (gid == 0)
+            snmp_log(LOG_WARNING, "Can't identify group (%s).\n", grouporgid);
     }
 
     return gid;

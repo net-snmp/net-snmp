@@ -45,7 +45,7 @@ netsnmp_internal_bin2asc(char *p, size_t n)
 
     for (i = 0; i < (int) n; i++) {
         buffer[i] = p[i];
-        if (!isprint(p[i]))
+        if (!isprint((unsigned char) (p[i])))
             flag = 1;
     }
     if (flag == 0) {
