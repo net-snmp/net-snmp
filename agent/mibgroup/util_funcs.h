@@ -39,7 +39,7 @@ WriteMethod     clear_cache;
 RETSIGTYPE      restart_doit(int);
 WriteMethod     restart_hook;
 void            print_mib_oid(oid *, size_t);
-void            sprint_mib_oid(char *, oid *, size_t);
+void            sprint_mib_oid(char *, const oid *, size_t);
 int             checkmib(struct variable *, oid *, size_t *, int, size_t *,
                          WriteMethod ** write_method, int);
 char           *find_field(char *, int);
