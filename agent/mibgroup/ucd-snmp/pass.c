@@ -189,15 +189,11 @@ var_extensible_pass(struct variable *vp,
 {
     oid             newname[MAX_OID_LEN];
     int             i, rtest, fd, newlen;
-    static long     long_ret;
-    static in_addr_t addr_ret;
     char            buf[SNMP_MAXBUF];
     static char     buf2[SNMP_MAXBUF];
-    static oid      objid[MAX_OID_LEN];
     struct extensible *passthru;
     FILE           *file;
 
-    long_ret = *length;
     for (i = 1; i <= numpassthrus; i++) {
         passthru = get_exten_instance(passthrus, i);
         rtest = snmp_oidtree_compare(name, *length,
@@ -261,69 +257,7 @@ var_extensible_pass(struct variable *vp,
                 fclose(file);
                 wait_on_exec(passthru);
 
-                /*
-                 * buf contains the return type, and buf2 contains the data 
-                 */
-                if (!strncasecmp(buf, "string", 6)) {
-                    buf2[strlen(buf2) - 1] = 0; /* zap the linefeed */
-                    *var_len = strlen(buf2);
-                    vp->type = ASN_OCTET_STR;
-                    return ((unsigned char *) buf2);
-                } else if (!strncasecmp(buf, "integer", 7)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtol(buf2, NULL, 10);
-                    vp->type = ASN_INTEGER;
-                    return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "unsigned", 8)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtoul(buf2, NULL, 10);
-                    vp->type = ASN_UNSIGNED;
-                    return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "counter", 7)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtoul(buf2, NULL, 10);
-                    vp->type = ASN_COUNTER;
-                    return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "octet", 5)) {
-                    *var_len = netsnmp_internal_asc2bin(buf2);
-                    vp->type = ASN_OCTET_STR;
-                    return ((unsigned char *) buf2);
-                } else if (!strncasecmp(buf, "opaque", 6)) {
-                    *var_len = netsnmp_internal_asc2bin(buf2);
-                    vp->type = ASN_OPAQUE;
-                    return ((unsigned char *) buf2);
-                } else if (!strncasecmp(buf, "gauge", 5)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtoul(buf2, NULL, 10);
-                    vp->type = ASN_GAUGE;
-                    return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "objectid", 8)) {
-                    newlen = parse_miboid(buf2, objid);
-                    *var_len = newlen * sizeof(oid);
-                    vp->type = ASN_OBJECT_ID;
-                    return ((unsigned char *) objid);
-                } else if (!strncasecmp(buf, "timetick", 8)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtoul(buf2, NULL, 10);
-                    vp->type = ASN_TIMETICKS;
-                    return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "ipaddress", 9)) {
-                    newlen = parse_miboid(buf2, objid);
-                    if (newlen != 4) {
-                        snmp_log(LOG_ERR,
-                                 "invalid ipaddress returned:  %s\n",
-                                 buf2);
-                        *var_len = 0;
-                        return (NULL);
-                    }
-                    addr_ret =
-                        (objid[0] << (8 * 3)) + (objid[1] << (8 * 2)) +
-                        (objid[2] << 8) + objid[3];
-                    addr_ret = htonl(addr_ret);
-                    *var_len = sizeof(addr_ret);
-                    vp->type = ASN_IPADDRESS;
-                    return ((unsigned char *) &addr_ret);
-                }
+                return netsnmp_internal_pass_parse(buf, buf2, var_len, vp);
             }
             *var_len = 0;
             return (NULL);
@@ -365,53 +299,7 @@ setPass(int action,
             snprintf(passthru->command, sizeof(passthru->command),
                      "%s -s %s ", passthru->name, buf);
             passthru->command[ sizeof(passthru->command)-1 ] = 0;
-            switch (var_val_type) {
-            case ASN_INTEGER:
-            case ASN_COUNTER:
-            case ASN_GAUGE:
-            case ASN_TIMETICKS:
-                tmp = *((long *) var_val);
-                switch (var_val_type) {
-                case ASN_INTEGER:
-                    sprintf(buf, "integer %d\n", (int) tmp);
-                    break;
-                case ASN_COUNTER:
-                    sprintf(buf, "counter %d\n", (int) tmp);
-                    break;
-                case ASN_GAUGE:
-                    sprintf(buf, "gauge %d\n", (int) tmp);
-                    break;
-                case ASN_TIMETICKS:
-                    sprintf(buf, "timeticks %d\n", (int) tmp);
-                    break;
-                }
-                break;
-            case ASN_IPADDRESS:
-                utmp = *((u_long *) var_val);
-                utmp = ntohl(utmp);
-                sprintf(buf, "ipaddress %d.%d.%d.%d\n",
-                        (int) ((utmp & 0xff000000) >> (8 * 3)),
-                        (int) ((utmp & 0xff0000) >> (8 * 2)),
-                        (int) ((utmp & 0xff00) >> (8)),
-                        (int) ((utmp & 0xff)));
-                break;
-            case ASN_OCTET_STR:
-                memcpy(buf2, var_val, var_val_len);
-                if (var_val_len == 0)
-                    sprintf(buf, "string \"\"\n");
-                else if (netsnmp_internal_bin2asc(buf2, var_val_len) ==
-                         (int) var_val_len)
-                    snprintf(buf, sizeof(buf), "string \"%s\"\n", buf2);
-                else
-                    snprintf(buf, sizeof(buf), "octet \"%s\"\n", buf2);
-                buf[ sizeof(buf)-1 ] = 0;
-                break;
-            case ASN_OBJECT_ID:
-                sprint_mib_oid(buf2, (oid *) var_val, var_val_len/sizeof(oid));
-                snprintf(buf, sizeof(buf), "objectid \"%s\"\n", buf2);
-                buf[ sizeof(buf)-1 ] = 0;
-                break;
-            }
+            netsnmp_internal_pass_set_format(buf, var_val, var_val_type, var_val_len);
             strncat(passthru->command, buf, sizeof(passthru->command)-strlen(passthru->command)-1);
             passthru->command[ sizeof(passthru->command)-1 ] = 0;
             DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s",
