@@ -13,7 +13,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-
+#include "mibgroup/util_funcs.h"
 #include "pass_common.h"
 
 static int
@@ -152,7 +152,7 @@ netsnmp_internal_pass_set_format(char *buf,
     case ASN_COUNTER:
     case ASN_GAUGE:
     case ASN_TIMETICKS:
-        tmp = *((long *) var_val);
+        tmp = *((const long *) var_val);
         switch (var_val_type) {
         case ASN_INTEGER:
             sprintf(buf, "integer %d\n", (int) tmp);
@@ -169,7 +169,7 @@ netsnmp_internal_pass_set_format(char *buf,
         }
         break;
     case ASN_IPADDRESS:
-        utmp = *((u_long *) var_val);
+        utmp = *((const u_long *) var_val);
         utmp = ntohl(utmp);
         sprintf(buf, "ipaddress %d.%d.%d.%d\n",
                 (int) ((utmp & 0xff000000) >> (8 * 3)),
@@ -189,7 +189,7 @@ netsnmp_internal_pass_set_format(char *buf,
         buf[ sizeof(buf)-1 ] = 0;
         break;
     case ASN_OBJECT_ID:
-        sprint_mib_oid(buf2, (oid *) var_val, var_val_len/sizeof(oid));
+        sprint_mib_oid(buf2, (const oid *) var_val, var_val_len/sizeof(oid));
         snprintf(buf, sizeof(buf), "objectid \"%s\"\n", buf2);
         buf[ sizeof(buf)-1 ] = 0;
         break;
