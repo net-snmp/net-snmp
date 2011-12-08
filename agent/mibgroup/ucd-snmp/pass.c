@@ -270,17 +270,12 @@ var_extensible_pass(struct variable *vp,
 }
 
 int
-setPass(int action,
-        u_char * var_val,
-        u_char var_val_type,
+setPass(int action, u_char * var_val, u_char var_val_type,
         size_t var_val_len, u_char * statP, oid * name, size_t name_len)
 {
     int             i, rtest;
     struct extensible *passthru;
-
     char            buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
-    long            tmp;
-    unsigned long   utmp;
 
     for (i = 1; i <= numpassthrus; i++) {
         passthru = get_exten_instance(passthrus, i);
