@@ -240,6 +240,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                 inet_ntoa(((struct sockaddr_in *)from)->sin_addr)));
 
     {
+        /* Get the local port number for use in diagnostic messages */
         int r2 = getsockname(s, dstip, dstlen);
         netsnmp_assert(r2 == 0);
     }
