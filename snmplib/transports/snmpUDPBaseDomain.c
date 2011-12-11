@@ -209,7 +209,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                          socklen_t *fromlen, struct sockaddr *dstip,
                          socklen_t *dstlen, int *if_index)
 {
-    int r, r2;
+    int r;
     struct iovec iov[1];
 #if  defined(linux) && defined(IP_PKTINFO)
     char cmsg[CMSG_SPACE(sizeof(struct in_pktinfo))];
@@ -236,11 +236,13 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
         return -1;
     }
 
-    r2 = getsockname(s, dstip, dstlen);
-    netsnmp_assert(r2 == 0);
-
     DEBUGMSGTL(("udpbase:recv", "got source addr: %s\n",
                 inet_ntoa(((struct sockaddr_in *)from)->sin_addr)));
+
+    {
+        int r2 = getsockname(s, dstip, dstlen);
+        netsnmp_assert(r2 == 0);
+    }
 
     for (cm = CMSG_FIRSTHDR(&msg); cm != NULL; cm = CMSG_NXTHDR(&msg, cm)) {
 #if  defined(linux) && defined(IP_PKTINFO)
