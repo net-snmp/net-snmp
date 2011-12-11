@@ -198,9 +198,7 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
     || defined(IP_RECVDSTADDR) && HAVE_STRUCT_MSGHDR_MSG_CONTROL \
                                && HAVE_STRUCT_MSGHDR_MSG_FLAGS
 #if  defined(linux) && defined(IP_PKTINFO)
-# define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
 #elif defined(IP_RECVDSTADDR)
-# define netsnmp_dstaddr(x) (&(struct cmsghr *)(CMSG_DATA(x)))
 # ifndef IP_SENDSRCADDR
 #  define IP_SENDSRCADDR IP_RECVDSTADDR /* DragonFly BSD */
 # endif
@@ -247,9 +245,10 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     for (cm = CMSG_FIRSTHDR(&msg); cm != NULL; cm = CMSG_NXTHDR(&msg, cm)) {
 #if  defined(linux) && defined(IP_PKTINFO)
         if (cm->cmsg_level == SOL_IP && cm->cmsg_type == IP_PKTINFO) {
+            struct in_pktinfo* src = (struct in_pktinfo *)CMSG_DATA(cm);
             netsnmp_assert(dstip->sa_family == AF_INET);
-            ((struct sockaddr_in*)dstip)->sin_addr = *netsnmp_dstaddr(cm);
-            *if_index = (((struct in_pktinfo *)(CMSG_DATA(cm)))->ipi_ifindex);
+            ((struct sockaddr_in*)dstip)->sin_addr = src->ipi_addr;
+            *if_index = src->ipi_ifindex;
             DEBUGMSGTL(("udpbase:recv",
                         "got destination (local) addr %s, iface %d\n",
                         inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr),
@@ -257,9 +256,10 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
         }
 #elif defined(IP_RECVDSTADDR)
         if (cm->cmsg_level == IPPROTO_IP && cm->cmsg_type == IP_RECVDSTADDR) {
-            memcpy(&(((struct sockaddr_in*)dstip)->sin_addr), CMSG_DATA(cm), sizeof(struct in_addr));
+            struct in_addr* src = (struct in_addr *)CMSG_DATA(cm);
+            ((struct sockaddr_in*)dstip)->sin_addr = *src;
             DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
-                    inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr)));
+                        inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr)));
         }
 #endif
     }
