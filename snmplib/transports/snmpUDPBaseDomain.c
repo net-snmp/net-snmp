@@ -218,7 +218,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 #elif defined(IP_RECVDSTADDR)
     char cmsg[CMSG_SPACE(sizeof(struct in_addr))];
 #endif
-    struct cmsghdr *cmsgptr;
+    struct cmsghdr *cm;
     struct msghdr msg;
 
     iov[0].iov_base = buf;
@@ -244,20 +244,20 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     DEBUGMSGTL(("udpbase:recv", "got source addr: %s\n",
                 inet_ntoa(((struct sockaddr_in *)from)->sin_addr)));
 
-    for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
+    for (cm = CMSG_FIRSTHDR(&msg); cm != NULL; cm = CMSG_NXTHDR(&msg, cm)) {
 #if  defined(linux) && defined(IP_PKTINFO)
-        if (cmsgptr->cmsg_level == SOL_IP && cmsgptr->cmsg_type == IP_PKTINFO) {
+        if (cm->cmsg_level == SOL_IP && cm->cmsg_type == IP_PKTINFO) {
             netsnmp_assert(dstip->sa_family == AF_INET);
-            ((struct sockaddr_in*)dstip)->sin_addr = *netsnmp_dstaddr(cmsgptr);
-            *if_index = (((struct in_pktinfo *)(CMSG_DATA(cmsgptr)))->ipi_ifindex);
+            ((struct sockaddr_in*)dstip)->sin_addr = *netsnmp_dstaddr(cm);
+            *if_index = (((struct in_pktinfo *)(CMSG_DATA(cm)))->ipi_ifindex);
             DEBUGMSGTL(("udpbase:recv",
                         "got destination (local) addr %s, iface %d\n",
                         inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr),
                         *if_index));
         }
 #elif defined(IP_RECVDSTADDR)
-        if (cmsgptr->cmsg_level == IPPROTO_IP && cmsgptr->cmsg_type == IP_RECVDSTADDR) {
-            memcpy(&(((struct sockaddr_in*)dstip)->sin_addr), CMSG_DATA(cmsgptr), sizeof(struct in_addr));
+        if (cm->cmsg_level == IPPROTO_IP && cm->cmsg_type == IP_RECVDSTADDR) {
+            memcpy(&(((struct sockaddr_in*)dstip)->sin_addr), CMSG_DATA(cm), sizeof(struct in_addr));
             DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
                     inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr)));
         }
