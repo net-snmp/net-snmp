@@ -210,7 +210,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                          socklen_t *dstlen, int *if_index)
 {
     int r;
-    struct iovec iov[1];
+    struct iovec iov;
 #if  defined(linux) && defined(IP_PKTINFO)
     char cmsg[CMSG_SPACE(sizeof(struct in_pktinfo))];
 #elif defined(IP_RECVDSTADDR)
@@ -219,13 +219,13 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     struct cmsghdr *cm;
     struct msghdr msg;
 
-    iov[0].iov_base = buf;
-    iov[0].iov_len = len;
+    iov.iov_base = buf;
+    iov.iov_len = len;
 
     memset(&msg, 0, sizeof msg);
     msg.msg_name = from;
     msg.msg_namelen = *fromlen;
-    msg.msg_iov = iov;
+    msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
     msg.msg_control = &cmsg;
     msg.msg_controllen = sizeof(cmsg);
