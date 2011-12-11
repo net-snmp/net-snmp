@@ -259,7 +259,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 #elif defined(IP_RECVDSTADDR)
     for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
         if (cmsgptr->cmsg_level == IPPROTO_IP && cmsgptr->cmsg_type == IP_RECVDSTADDR) {
-            memcpy(&(((struct sockaddr_in*)dstip)->sin_addr), CMSG_DATA(cmsg), sizeof(struct in_addr));
+            memcpy(&(((struct sockaddr_in*)dstip)->sin_addr), CMSG_DATA(cmsgptr), sizeof(struct in_addr));
             DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
                     inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr)));
         }
