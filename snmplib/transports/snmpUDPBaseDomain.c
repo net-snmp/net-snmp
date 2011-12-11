@@ -243,8 +243,9 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 
     DEBUGMSGTL(("udpbase:recv", "got source addr: %s\n",
                 inet_ntoa(((struct sockaddr_in *)from)->sin_addr)));
-#if  defined(linux) && defined(IP_PKTINFO)
+
     for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
+#if  defined(linux) && defined(IP_PKTINFO)
         if (cmsgptr->cmsg_level == SOL_IP && cmsgptr->cmsg_type == IP_PKTINFO) {
             netsnmp_assert(dstip->sa_family == AF_INET);
             ((struct sockaddr_in*)dstip)->sin_addr = *netsnmp_dstaddr(cmsgptr);
@@ -254,16 +255,14 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                         inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr),
                         *if_index));
         }
-    }
 #elif defined(IP_RECVDSTADDR)
-    for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
         if (cmsgptr->cmsg_level == IPPROTO_IP && cmsgptr->cmsg_type == IP_RECVDSTADDR) {
             memcpy(&(((struct sockaddr_in*)dstip)->sin_addr), CMSG_DATA(cmsgptr), sizeof(struct in_addr));
             DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
                     inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr)));
         }
-    }
 #endif
+    }
     return r;
 }
 
