@@ -99,6 +99,8 @@ _netsnmp_udp_sockopt_set(int fd, int local)
 # endif
 #endif
 
+#define netsnmp_udpbase_recvfrom_sendto_defined
+
 enum {
 #if  defined(linux) && defined(IP_PKTINFO)
     cmsg_data_size = sizeof(struct in_pktinfo)
@@ -266,14 +268,14 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
         }
 
 	while (rc < 0) {
-#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
+#ifdef netsnmp_udpbase_recvfrom_sendto_defined
             socklen_t local_addr_len = sizeof(addr_pair->local_addr);
             rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
                                       (struct sockaddr*)&(addr_pair->local_addr),
                                       &local_addr_len, &(addr_pair->if_index));
 #else
             rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
-#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
+#endif /* netsnmp_udpbase_recvfrom_sendto_defined */
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
@@ -327,13 +329,13 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
             free(str);
         }
 	while (rc < 0) {
-#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)
+#ifdef netsnmp_udpbase_recvfrom_sendto_defined
             rc = netsnmp_udp_sendto(t->sock,
                     addr_pair ? &(addr_pair->local_addr.sin_addr) : NULL,
                     addr_pair ? addr_pair->if_index : 0, to, buf, size);
 #else
             rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
-#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
+#endif /* netsnmp_udpbase_recvfrom_sendto_defined */
 	    if (rc < 0 && errno != EINTR) {
                 DEBUGMSGTL(("netsnmp_udp", "sendto error, rc %d (errno %d)\n",
                             rc, errno));
