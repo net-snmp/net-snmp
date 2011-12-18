@@ -131,7 +131,7 @@ VERIFY() {	# <path_to_file(s)>
 	local	missingfiles=
 
 	for f in $*; do
-		[ -e "$f" ] && continue
+		[ -f "$f" ] && continue
 		echo "FAILED: Cannot find file \"$f\"."
 		missingfiles=true
 	done
@@ -148,7 +148,7 @@ NEWOUTPUTFILE() {
 #
 STARTTEST() {
         NEWOUTPUTFILE
-	[ ! -e "$junkoutputfile" ] && {
+	[ ! -f "$junkoutputfile" ] && {
 		touch $junkoutputfile
 		return
 	}
@@ -536,7 +536,7 @@ STARTAGENT() {
         PORT_SPEC="${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${PORT_SPEC}"
     fi
     STARTPROG
-    WAITFORCOND test -e $SNMP_SNMPD_PID_FILE
+    WAITFORCOND test -f $SNMP_SNMPD_PID_FILE
     WAITFORAGENT "NET-SNMP version"
 }
 
@@ -551,7 +551,7 @@ STARTTRAPD() {
         PORT_SPEC="${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${PORT_SPEC}"
     fi
     STARTPROG
-    WAITFORCOND test -e $SNMP_SNMPTRAPD_PID_FILE
+    WAITFORCOND test -f $SNMP_SNMPTRAPD_PID_FILE
     WAITFORTRAPD "NET-SNMP version"
 }
 
