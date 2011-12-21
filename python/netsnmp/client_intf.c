@@ -1707,7 +1707,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   size_t out_len = 0;
   int buf_over = 0;
   char *tag;
-  char *iid;
+  char *iid = NULL;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
   int verbose = py_netsnmp_verbose();
@@ -1922,7 +1922,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   size_t out_len = 0;
   int buf_over = 0;
   char *tag;
-  char *iid;
+  char *iid = NULL;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
   int verbose = py_netsnmp_verbose();
