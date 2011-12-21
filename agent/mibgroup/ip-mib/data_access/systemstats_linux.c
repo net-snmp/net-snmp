@@ -223,7 +223,6 @@ _systemstats_v6(netsnmp_container* container, u_int load_flags)
     FILE           *devin;
     char            line[1024];
     netsnmp_systemstats_entry *entry = NULL;
-    int             scan_count = 0;
     char           *stats, *start = line;
     int             len, rc;
     uintmax_t       scan_val;
@@ -365,8 +364,6 @@ _systemstats_v6(netsnmp_container* container, u_int load_flags)
         
         if (rc)
             DEBUGMSGTL(("access:systemstats", "unknown stat %s\n", line));
-        else
-            ++scan_count;
     }
 
     fclose(devin);
