@@ -1133,7 +1133,7 @@ write_vacmAccessStatus(int action,
 {
     static long     long_ret;
     int             model, level;
-    char           *newGroupName, *newContextPrefix;
+    char           *newGroupName = NULL, *newContextPrefix = NULL;
     size_t          groupNameLen, contextPrefixLen;
     struct vacm_accessEntry *aptr = NULL;
 

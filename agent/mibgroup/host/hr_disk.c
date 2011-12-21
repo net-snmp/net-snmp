@@ -351,7 +351,7 @@ parse_disk_config(const char *token, char *cptr)
             di_curr->item_details = (void *) 0;
             name++;
         } else if (*name == '[') {
-            d_set = (details_set *) malloc(sizeof(details_set));
+            d_set = (details_set *) calloc(sizeof(details_set), 1);
             if (!d_set) {
                 config_perror("Out of memory");
                 SNMP_FREE(d_new);
@@ -360,8 +360,6 @@ parse_disk_config(const char *token, char *cptr)
                 SNMP_FREE(d_str);
                 return;
             }
-            for (i = 0; i < sizeof(details_set); i++)
-                (*d_set)[i] = (unsigned char) 0;
             name++;
             if (*name == '^' || *name == '!') {
                 neg = 1;
