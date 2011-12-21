@@ -1985,9 +1985,9 @@ netsnmp_walk(PyObject *self, PyObject *args)
   struct tree *tp;
   int len;
   oid **oid_arr;
-  int *oid_arr_len;
+  int *oid_arr_len = NULL;
   oid **oid_arr_broken_check;
-  int *oid_arr_broken_check_len;
+  int *oid_arr_broken_check_len = NULL;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
   int status;
