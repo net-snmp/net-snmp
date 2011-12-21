@@ -1027,7 +1027,7 @@ char *err_str;
 int *err_num;
 int *err_ind;
 {
-   int status;
+   int status = 0;
    long command = pdu->command;
    char *tmp_err_str;
 
