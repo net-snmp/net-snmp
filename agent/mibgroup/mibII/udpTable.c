@@ -494,6 +494,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         if (state != 7)         /* fix me:  UDP_LISTEN ??? */
             continue;
 
+        memset(&pcb, 0, sizeof(pcb));
         /* store in network byte order */
         pcb.inp_laddr.s_addr = htonl(pcb.inp_laddr.s_addr);
         pcb.inp_lport = htons((unsigned short) (lport));
