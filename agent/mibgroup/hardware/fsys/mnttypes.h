@@ -90,9 +90,6 @@
 #ifndef MNTTYPE_PC
 #define MNTTYPE_PC       "pc"
 #endif
-#ifndef MNTTYPE_REISERFS
-#define MNTTYPE_REISERFS "reiserfs"
-#endif
 #ifndef MNTTYPE_SMBFS
 #define MNTTYPE_SMBFS    "smbfs"
 #endif
@@ -108,30 +105,45 @@
 #ifndef MNTTYPE_VFAT
 #define MNTTYPE_VFAT     "vfat"
 #endif
+
+/*
+ *  File systems to monitor, but not covered by HR-TYPES enumerations
+ */
+#ifndef MNTTYPE_MVFS
+#define MNTTYPE_MVFS     "mvfs"
+#endif
+#ifndef MNTTYPE_TMPFS
+#define MNTTYPE_TMPFS    "tmpfs"
+#endif
 #ifndef MNTTYPE_GFS
 #define MNTTYPE_GFS      "gfs"
 #endif
 #ifndef MNTTYPE_GFS2
 #define MNTTYPE_GFS2     "gfs2"
 #endif
-
-/*
- *  File systems to monitor, but not covered by HR-TYPES enumerations
- */
+#ifndef MNTTYPE_XFS
+#define MNTTYPE_XFS      "xfs"
+#endif
+#ifndef MNTTYPE_JFS
+#define MNTTYPE_JFS      "jfs"
+#endif
+#ifndef MNTTYPE_VXFS
+#define MNTTYPE_VXFS      "vxfs"
+#endif
+#ifndef MNTTYPE_REISERFS
+#define MNTTYPE_REISERFS "reiserfs"
+#endif
 #ifndef MNTTYPE_LOFS
 #define MNTTYPE_LOFS     "lofs"
-#endif
-#ifndef MNTTYPE_APP
-#define MNTTYPE_APP      "app"
-#endif
-#ifndef MNTTYPE_MVFS
-#define MNTTYPE_MVFS     "mvfs"
 #endif
 
 /*
  *  File systems to skip
  *    (Probably not strictly needed)
  */
+#ifndef MNTTYPE_APP
+#define MNTTYPE_APP      "app"
+#endif
 #ifndef MNTTYPE_DEVPTS
 #define MNTTYPE_DEVPTS   "devpts"
 #endif
@@ -144,9 +156,6 @@
 #ifndef MNTTYPE_SYSFS
 #define MNTTYPE_SYSFS    "sysfs"
 #endif
-#ifndef MNTTYPE_TMPFS
-#define MNTTYPE_TMPFS    "tmpfs"
-#endif
 #ifndef MNTTYPE_USBFS
 #define MNTTYPE_USBFS    "usbfs"
 #endif
@@ -155,15 +164,6 @@
 #endif
 #ifndef MNTTYPE_RPCPIPE
 #define MNTTYPE_RPCPIPE  "rpc_pipefs"
-#endif
-#ifndef MNTTYPE_XFS
-#define MNTTYPE_XFS      "xfs"
-#endif
-#ifndef MNTTYPE_JFS
-#define MNTTYPE_JFS      "jfs"
-#endif
-#ifndef MNTTYPE_VXFS
-#define MNTTYPE_VXFS      "vxfs"
 #endif
 
 #endif /* _NETSNMP_FSYS_MNTTYPES_H */
