@@ -251,7 +251,7 @@ tcpprotopr_bulkget(const char *name, oid *root, size_t root_len)
 	/*
      * setup initial object name
      */
-	memmove(tcpConnState_oid, root, sizeof(root) * root_len);
+	memmove(tcpConnState_oid, root, sizeof(oid) * root_len);
 	tcpConnState_len = root_len;
 
     /*
