@@ -131,7 +131,7 @@ netsnmp_directory_container_read_some(netsnmp_container *user_container,
             return NULL;
         }
         path[dirname_len] = '/';
-        path[++dirname_len] = 0;
+        path[++dirname_len] = '\0';
     }
 
     /** iterate over dir */

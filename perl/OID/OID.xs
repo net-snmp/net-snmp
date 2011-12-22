@@ -125,7 +125,7 @@ int flag;
           break;
 
         case ASN_BIT_STR:
-            snprint_bitstring(buf, sizeof(buf), var, NULL, NULL, NULL);
+            snprint_bitstring(buf, buf_len, var, NULL, NULL, NULL);
             len = strlen(buf);
             break;
 
