@@ -463,8 +463,10 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
 char *
 snmp_log_syslogname(const char *pstr)
 {
-  if (pstr)
+  if (pstr) {
     strncpy (syslogname, pstr, sizeof(syslogname));
+    syslogname[sizeof(syslogname)-1] = '\0';
+  }
 
   return syslogname;
 }
