@@ -220,6 +220,7 @@ dlmod_parse_config(const char *token, char *cptr)
         return;
     }
     strncpy(dlm->name, dlm_name, sizeof(dlm->name));
+    dlm->name[sizeof(dlm->name)-1] = '\0';
 
     /*
      * dynamic module path
@@ -229,6 +230,7 @@ dlmod_parse_config(const char *token, char *cptr)
         strncpy(dlm->path, dlm_path, sizeof(dlm->path));
     else
         strncpy(dlm->path, dlm_name, sizeof(dlm->path));
+    dlm->path[sizeof(dlm->path)-1] = '\0';
 
     dlmod_load_module(dlm);
 

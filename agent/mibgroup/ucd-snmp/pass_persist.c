@@ -38,6 +38,7 @@
 
 #include "struct.h"
 #include "pass_persist.h"
+#include "pass_common.h"
 #include "extensible.h"
 #include "util_funcs.h"
 
@@ -58,15 +59,6 @@ static int      open_persist_pipe(int iindex, char *command);
 static void     check_persist_pipes(unsigned clientreg, void *clientarg);
 static void     destruct_persist_pipes(void);
 static int      write_persist_pipe(int iindex, const char *data);
-
-/*
- * These are defined in pass.c 
- */
-extern int      asc2bin(char *p);
-extern int      bin2asc(char *p, size_t n);
-extern int      netsnmp_pass_str_to_errno(const char *buf);
-extern int      snmp_oid_min_compare(const oid *, size_t, const oid *,
-                                     size_t);
 
 /*
  * the relocatable extensible commands variables 
@@ -230,11 +222,8 @@ var_extensible_pass_persist(struct variable *vp,
 {
     oid             newname[MAX_OID_LEN];
     int             i, rtest, newlen;
-    static long     long_ret;
-    static in_addr_t addr_ret;
     char            buf[SNMP_MAXBUF];
     static char     buf2[SNMP_MAXBUF];
-    static oid      objid[MAX_OID_LEN];
     struct extensible *persistpassthru;
     FILE           *file;
 
@@ -243,10 +232,9 @@ var_extensible_pass_persist(struct variable *vp,
      */
     init_persist_pipes();
 
-    long_ret = *length;
     for (i = 1; i <= numpersistpassthrus; i++) {
         persistpassthru = get_exten_instance(persistpassthrus, i);
-        rtest = snmp_oid_min_compare(name, *length,
+        rtest = snmp_oidtree_compare(name, *length,
                                      persistpassthru->miboid,
                                      persistpassthru->miblen);
         if ((exact && rtest == 0) || (!exact && rtest <= 0)) {
@@ -325,91 +313,7 @@ var_extensible_pass_persist(struct variable *vp,
                     close_persist_pipe(i);
                     return (NULL);
                 }
-                /*
-                 * buf contains the return type, and buf2 contains the data 
-                 */
-                if (!strncasecmp(buf, "string", 6)) {
-                    buf2[strlen(buf2) - 1] = 0; /* zap the linefeed */
-                    *var_len = strlen(buf2);
-                    vp->type = ASN_OCTET_STR;
-                    return ((unsigned char *) buf2);
-                }
-#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
-                else if (!strncasecmp(buf, "integer64", 9)) {
-                    static struct counter64 c64;
-                    uint64_t v64 = strtoull(buf2, NULL, 10);
-                    c64.high = (unsigned long)(v64 >> 32);
-                    c64.low  = (unsigned long)(v64 & 0xffffffff);
-                    *var_len = sizeof(c64);
-                    vp->type = ASN_INTEGER64;
-                    return ((unsigned char *) &c64);
-                }
-#endif
-                else if (!strncasecmp(buf, "integer", 7)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtol(buf2, NULL, 10);
-                    vp->type = ASN_INTEGER;
-                    return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "unsigned", 8)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtoul(buf2, NULL, 10);
-                    vp->type = ASN_UNSIGNED;
-                    return ((unsigned char *) &long_ret);
-                } 
-                else if (!strncasecmp(buf, "counter64", 9)) {
-                    static struct counter64 c64;
-                    uint64_t v64 = strtoull(buf2, NULL, 10);
-                    c64.high = (unsigned long)(v64 >> 32);
-                    c64.low  = (unsigned long)(v64 & 0xffffffff);
-                    *var_len = sizeof(c64);
-                    vp->type = ASN_COUNTER64;
-                    return ((unsigned char *) &c64);
-                } 
-                else if (!strncasecmp(buf, "counter", 7)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtoul(buf2, NULL, 10);
-                    vp->type = ASN_COUNTER;
-                    return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "octet", 5)) {
-                    *var_len = asc2bin(buf2);
-                    vp->type = ASN_OCTET_STR;
-                    return ((unsigned char *) buf2);
-                } else if (!strncasecmp(buf, "opaque", 6)) {
-                    *var_len = asc2bin(buf2);
-                    vp->type = ASN_OPAQUE;
-                    return ((unsigned char *) buf2);
-                } else if (!strncasecmp(buf, "gauge", 5)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtoul(buf2, NULL, 10);
-                    vp->type = ASN_GAUGE;
-                    return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "objectid", 8)) {
-                    newlen = parse_miboid(buf2, objid);
-                    *var_len = newlen * sizeof(oid);
-                    vp->type = ASN_OBJECT_ID;
-                    return ((unsigned char *) objid);
-                } else if (!strncasecmp(buf, "timetick", 8)) {
-                    *var_len = sizeof(long_ret);
-                    long_ret = strtoul(buf2, NULL, 10);
-                    vp->type = ASN_TIMETICKS;
-                    return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "ipaddress", 9)) {
-                    newlen = parse_miboid(buf2, objid);
-                    if (newlen != 4) {
-                        snmp_log(LOG_ERR,
-                                 "invalid ipaddress returned:  %s\n",
-                                 buf2);
-                        *var_len = 0;
-                        return (NULL);
-                    }
-                    addr_ret =
-                        (objid[0] << (8 * 3)) + (objid[1] << (8 * 2)) +
-                        (objid[2] << 8) + objid[3];
-                    addr_ret = htonl(addr_ret);
-                    *var_len = sizeof(addr_ret);
-                    vp->type = ASN_IPADDRESS;
-                    return ((unsigned char *) &addr_ret);
-                }
+                return netsnmp_internal_pass_parse(buf, buf2, var_len, vp);
             }
             *var_len = 0;
             return (NULL);
@@ -432,8 +336,6 @@ setPassPersist(int action,
     struct extensible *persistpassthru;
 
     char            buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
-    long            tmp;
-    unsigned long   utmp;
 
     /*
      * Make sure that our basic pipe structure is malloced 
@@ -442,7 +344,7 @@ setPassPersist(int action,
 
     for (i = 1; i <= numpersistpassthrus; i++) {
         persistpassthru = get_exten_instance(persistpassthrus, i);
-        rtest = snmp_oid_min_compare(name, name_len,
+        rtest = snmp_oidtree_compare(name, name_len,
                                      persistpassthru->miboid,
                                      persistpassthru->miblen);
         if (rtest <= 0) {
@@ -459,52 +361,7 @@ setPassPersist(int action,
             snprintf(persistpassthru->command,
                      sizeof(persistpassthru->command), "set\n%s\n", buf);
             persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
-            switch (var_val_type) {
-            case ASN_INTEGER:
-            case ASN_COUNTER:
-            case ASN_GAUGE:
-            case ASN_TIMETICKS:
-                tmp = *((long *) var_val);
-                switch (var_val_type) {
-                case ASN_INTEGER:
-                    sprintf(buf, "integer %d\n", (int) tmp);
-                    break;
-                case ASN_COUNTER:
-                    sprintf(buf, "counter %d\n", (int) tmp);
-                    break;
-                case ASN_GAUGE:
-                    sprintf(buf, "gauge %d\n", (int) tmp);
-                    break;
-                case ASN_TIMETICKS:
-                    sprintf(buf, "timeticks %d\n", (int) tmp);
-                    break;
-                }
-                break;
-            case ASN_IPADDRESS:
-                utmp = *((u_long *) var_val);
-                utmp = ntohl(utmp);
-                sprintf(buf, "ipaddress %d.%d.%d.%d\n",
-                        (int) ((utmp & 0xff000000) >> (8 * 3)),
-                        (int) ((utmp & 0xff0000) >> (8 * 2)),
-                        (int) ((utmp & 0xff00) >> (8)),
-                        (int) ((utmp & 0xff)));
-                break;
-            case ASN_OCTET_STR:
-                memcpy(buf2, var_val, var_val_len);
-                if (var_val_len == 0)
-                    sprintf(buf, "string \"\"\n");
-                else if (bin2asc(buf2, var_val_len) == (int) var_val_len)
-                    snprintf(buf, sizeof(buf), "string \"%s\"\n", buf2);
-                else
-                    snprintf(buf, sizeof(buf), "octet \"%s\"\n", buf2);
-                buf[ sizeof(buf)-1 ] = 0;
-                break;
-            case ASN_OBJECT_ID:
-                sprint_mib_oid(buf2, (oid *) var_val, var_val_len/sizeof(oid));
-                snprintf(buf, sizeof(buf), "objectid \"%s\"\n", buf2);
-                buf[ sizeof(buf)-1 ] = 0;
-                break;
-            }
+            netsnmp_internal_pass_set_format(buf, var_val, var_val_type, var_val_len);
             strncat(persistpassthru->command, buf,
                     sizeof(persistpassthru->command) -
                     strlen(persistpassthru->command) - 2);
@@ -528,7 +385,7 @@ setPassPersist(int action,
                 return SNMP_ERR_NOTWRITABLE;
             }
 
-            return netsnmp_pass_str_to_errno(buf);
+            return netsnmp_internal_pass_str_to_errno(buf);
         }
     }
     if (snmp_get_do_debugging()) {

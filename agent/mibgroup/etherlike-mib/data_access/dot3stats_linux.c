@@ -49,6 +49,7 @@ dot3stats_interface_name_list_get (struct ifname *list_head, int *retval)
             }
             memset (list_head, 0, sizeof (struct ifname));
             strncpy (list_head->name, p->ifa_name, IF_NAMESIZE);
+            list_head->name[IF_NAMESIZE-1] = '\0';
             continue;
         }
 
@@ -71,6 +72,7 @@ dot3stats_interface_name_list_get (struct ifname *list_head, int *retval)
         nameptr2 = nameptr2->ifn_next;
         memset (nameptr2, 0, sizeof (struct ifname));
         strncpy (nameptr2->name, p->ifa_name, IF_NAMESIZE);
+        nameptr2->name[IF_NAMESIZE-1] = '\0';
         continue;
 
     }
@@ -732,6 +734,7 @@ interface_ioctl_dot3stats_get (dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, co
 
         strncpy(s, (const char *) &eth_strings->data[i * ETH_GSTRING_LEN],
             ETH_GSTRING_LEN);
+        s[ETH_GSTRING_LEN-1] = '\0';
     
         if (DOT3STATSALIGNMENTERRORS(s)) {
             data->dot3StatsAlignmentErrors = (u_long)eth_stats->data[i];

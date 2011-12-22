@@ -718,14 +718,12 @@ print_mib_oid(oid name[], size_t len)
 }
 
 void
-sprint_mib_oid(char *buf, oid name[], size_t len)
+sprint_mib_oid(char *buf, const oid *name, size_t len)
 {
     int             i;
-    for (i = 0; i < (int) len; i++) {
-        sprintf(buf, ".%d", (int) name[i]);
-        while (*buf != 0)
-            buf++;
-    }
+
+    for (i = 0; i < (int) len; i++)
+        buf += sprintf(buf, ".%" NETSNMP_PRIo "u", name[i]);
 }
 
 /*

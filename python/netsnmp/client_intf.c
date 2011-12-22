@@ -1004,7 +1004,7 @@ char *err_str;
 int *err_num;
 int *err_ind;
 {
-   int status;
+   int status = 0;
    long command = pdu->command;
    char *tmp_err_str;
 
@@ -1778,7 +1778,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   size_t out_len = 0;
   int buf_over = 0;
   char *tag;
-  char *iid;
+  char *iid = NULL;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
   int verbose = py_netsnmp_verbose();
@@ -1985,9 +1985,9 @@ netsnmp_walk(PyObject *self, PyObject *args)
   struct tree *tp;
   int len;
   oid **oid_arr;
-  int *oid_arr_len;
+  int *oid_arr_len = NULL;
   oid **oid_arr_broken_check;
-  int *oid_arr_broken_check_len;
+  int *oid_arr_broken_check_len = NULL;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
   int status;
@@ -1996,7 +1996,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   size_t out_len = 0;
   int buf_over = 0;
   char *tag;
-  char *iid;
+  char *iid = NULL;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
   int verbose = py_netsnmp_verbose();

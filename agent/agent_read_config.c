@@ -115,13 +115,10 @@ netsnmp_feature_child_of(snmpd_unregister_config_handler, agent_read_config_all)
 void
 snmpd_set_agent_user(const char *token, char *cptr)
 {
-#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
-    struct passwd  *info;
-#endif
-
     if (cptr[0] == '#') {
         char           *ecp;
         int             uid;
+
         uid = strtoul(cptr + 1, &ecp, 10);
         if (*ecp != 0) {
             config_perror("Bad number");
@@ -129,44 +126,47 @@ snmpd_set_agent_user(const char *token, char *cptr)
 	    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_USERID, uid);
 	}
-    }
 #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
-    else if ((info = getpwnam(cptr)) != NULL) {
-        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-			   NETSNMP_DS_AGENT_USERID, info->pw_uid);
     } else {
-        config_perror("User not found in passwd database");
-    }
-    endpwent();
+        struct passwd  *info;
+
+        info = getpwnam(cptr);
+        if (info)
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+                               NETSNMP_DS_AGENT_USERID, info->pw_uid);
+        else
+            config_perror("User not found in passwd database");
+        endpwent();
 #endif
+    }
 }
 
 void
 snmpd_set_agent_group(const char *token, char *cptr)
 {
-#if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
-    struct group   *info;
-#endif
-
     if (cptr[0] == '#') {
         char           *ecp;
         int             gid = strtoul(cptr + 1, &ecp, 10);
+
         if (*ecp != 0) {
             config_perror("Bad number");
 	} else {
             netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_GROUPID, gid);
 	}
-    }
 #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
-    else if ((info = getgrnam(cptr)) != NULL) {
-        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-			   NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
     } else {
-        config_perror("Group not found in group database");
-    }
-    endpwent();
+        struct group   *info;
+
+        info = getgrnam(cptr);
+        if (info)
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+                               NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
+        else
+            config_perror("Group not found in group database");
+        endgrent();
 #endif
+    }
 }
 #endif
 
@@ -190,6 +190,7 @@ snmpd_set_agent_address(const char *token, char *cptr)
         snprintf(buf, SPRINT_MAX_LEN, "%s,%s", ptr, cptr);
     } else {
         strncpy(buf, cptr, SPRINT_MAX_LEN);
+	buf[SPRINT_MAX_LEN-1] = '\0';
     }
 
     DEBUGMSGTL(("snmpd_ports", "port spec: %s\n", buf));

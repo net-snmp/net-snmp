@@ -356,7 +356,6 @@ _systemstats_v6_load_file(netsnmp_systemstats_entry *entry, FILE *devin)
     char            line[1024];
     char           *stats, *start = line;
     int             len, rc;
-    int             scan_count;
     uintmax_t       scan_val;
 
     /*
@@ -516,8 +515,6 @@ _systemstats_v6_load_file(netsnmp_systemstats_entry *entry, FILE *devin)
         
         if (rc)
             DEBUGMSGTL(("access:systemstats", "unknown stat %s\n", line));
-        else
-            ++scan_count;
     }
     /*
      * Let DiscontinuityTime and RefreshRate active

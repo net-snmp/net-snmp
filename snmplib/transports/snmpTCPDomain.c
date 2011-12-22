@@ -41,6 +41,7 @@
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/snmpTCPBaseDomain.h>
+#include <net-snmp/library/tools.h>
 
 #ifndef NETSNMP_NO_SYSTEMD
 #include <net-snmp/library/sd-daemon.h>
@@ -81,7 +82,6 @@ netsnmp_tcp_accept(netsnmp_transport *t)
     netsnmp_udp_addr_pair *addr_pair = NULL;
     int             newsock = -1;
     socklen_t       farendlen = sizeof(netsnmp_udp_addr_pair);
-    char           *str = NULL;
 
     addr_pair = (netsnmp_udp_addr_pair *)malloc(farendlen);
     if (addr_pair == NULL) {
@@ -110,9 +110,11 @@ netsnmp_tcp_accept(netsnmp_transport *t)
 
         t->data = addr_pair;
         t->data_length = sizeof(netsnmp_udp_addr_pair);
-        str = netsnmp_tcp_fmtaddr(NULL, farend, farendlen);
-        DEBUGMSGTL(("netsnmp_tcp", "accept succeeded (from %s)\n", str));
-        free(str);
+        DEBUGIF("netsnmp_tcp") {
+            char *str = netsnmp_tcp_fmtaddr(NULL, farend, farendlen);
+            DEBUGMSGTL(("netsnmp_tcp", "accept succeeded (from %s)\n", str));
+            free(str);
+        }
 
         /*
          * Try to make the new socket blocking.  
@@ -162,11 +164,10 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
         return NULL;
     }
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
-    memset(t, 0, sizeof(netsnmp_transport));
 
     addr_pair = (netsnmp_udp_addr_pair *)malloc(sizeof(netsnmp_udp_addr_pair));
     if (addr_pair == NULL) {

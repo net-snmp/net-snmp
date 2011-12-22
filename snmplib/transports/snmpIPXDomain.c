@@ -34,6 +34,7 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/tools.h>
 
 #define SNMP_IPX_DEFAULT_PORT	36879   /*  Specified in RFC 1420.  */
 static netsnmp_tdomain ipxDomain;
@@ -99,10 +100,13 @@ netsnmp_ipx_recv(netsnmp_transport *t, void *buf, int size,
 	}
 
         if (rc >= 0) {
-            char *str = netsnmp_ipx_fmtaddr(NULL, from, fromlen);
-            DEBUGMSGTL(("netsnmp_ipx","recvfrom fd %d got %d bytes(from %s)\n",
-			t->sock, rc, str));
-            free(str);
+            DEBUGIF("netsnmp_ipx") {
+                char *str = netsnmp_ipx_fmtaddr(NULL, from, fromlen);
+                DEBUGMSGTL(("netsnmp_ipx",
+                            "recvfrom fd %d got %d bytes(from %s)\n",
+                            t->sock, rc, str));
+                free(str);
+            }
         } else {
             DEBUGMSGTL(("netsnmp_ipx", "recvfrom fd %d err %d (\"%s\")\n",
                         t->sock, errno, strerror(errno)));
@@ -131,11 +135,13 @@ netsnmp_ipx_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char *str = netsnmp_ipx_fmtaddr(NULL, (void *)to,
-					sizeof(struct sockaddr_ipx));
-        DEBUGMSGTL(("netsnmp_ipx", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, str, t->sock));
-        free(str);
+        DEBUGIF("netsnmp_ipx") {
+            char *str = netsnmp_ipx_fmtaddr(NULL, (void *)to,
+                                            sizeof(struct sockaddr_ipx));
+            DEBUGMSGTL(("netsnmp_ipx", "send %d bytes from %p to %s on fd %d\n",
+                        size, buf, str, t->sock));
+            free(str);
+        }
 	while (rc < 0) {
 	    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
 	    if (rc < 0 && errno != EINTR) {
@@ -176,7 +182,6 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0;
-    char           *str = NULL;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     if (local)
@@ -187,18 +192,18 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
         return NULL;
     }
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
 
-    str = netsnmp_ipx_fmtaddr(NULL, (void *)addr, 
-				 sizeof(struct sockaddr_ipx));
-    DEBUGMSGTL(("netsnmp_ipx", "open %s %s\n", local ? "local" : "remote",
-                str));
-    free(str);
-
-    memset(t, 0, sizeof(netsnmp_transport));
+    DEBUGIF("netsnmp_ipx") {
+        char *str = netsnmp_ipx_fmtaddr(NULL, (void *)addr,
+                                  sizeof(struct sockaddr_ipx));
+        DEBUGMSGTL(("netsnmp_ipx", "open %s %s\n", local ? "local" : "remote",
+                    str));
+        free(str);
+    }
 
     t->domain = netsnmpIPXDomain;
     t->domain_length = netsnmpIPXDomain_len;
@@ -358,9 +363,7 @@ netsnmp_sockaddr_ipx2(struct sockaddr_ipx *addr, const char *peername,
         node = "000000000000";
 
     if (port == NULL || *port == '\0')
-#define val(x) __STRING(x)
-        port = val(SNMP_IPX_DEFAULT_PORT);
-#undef val
+        port = __STRING(SNMP_IPX_DEFAULT_PORT);
 
     DEBUGMSGTL(("netsnmp_sockaddr_ipx", "Address: %s:%s/%s\n",
                 network ? network : "[NIL]", node ? node : "[NIL]",

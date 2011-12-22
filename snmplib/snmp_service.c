@@ -227,6 +227,15 @@ struct netsnmp_lookup_target {
 
 static struct netsnmp_lookup_target* targets = NULL;
 
+/**
+ * Add an (application, domain, target) triplet to the targets list if target
+ * != NULL. Remove an entry if target == NULL and the userTarget pointer for
+ * the entry found is also NULL. Keep at most one target per (application,
+ * domain) pair.
+ *
+ * @return 1 if an entry for (application, domain) was already present in the
+ *   targets list or 0 if such an entry was not yet present in the targets list.
+ */
 int
 netsnmp_register_default_target(const char* application, const char* domain,
 				const char* target)
@@ -271,6 +280,9 @@ netsnmp_register_default_target(const char* application, const char* domain,
     return res;
 }
 
+/**
+ * Clear the targets list.
+ */
 void
 netsnmp_clear_default_target(void)
 {

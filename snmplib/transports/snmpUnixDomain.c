@@ -35,6 +35,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/system.h> /* mkdirhier */
+#include <net-snmp/library/tools.h>
 
 #ifndef NETSNMP_NO_SYSTEMD
 #include <net-snmp/library/sd-daemon.h>
@@ -298,7 +299,6 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     netsnmp_transport *t = NULL;
     sockaddr_un_pair *sup = NULL;
     int             rc = 0;
-    char           *string = NULL;
     int             socket_initialized = 0;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
@@ -312,18 +312,18 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         return NULL;
     }
 
-    t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (t == NULL) {
         return NULL;
     }
 
-    string = netsnmp_unix_fmtaddr(NULL, (void *)addr,
-                                  sizeof(struct sockaddr_un));
-    DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
-                string));
-    free(string);
-
-    memset(t, 0, sizeof(netsnmp_transport));
+    DEBUGIF("netsnmp_unix") {
+        char *str = netsnmp_unix_fmtaddr(NULL, (void *)addr,
+                                         sizeof(struct sockaddr_un));
+        DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
+                    str));
+        free(str);
+    }
 
     t->domain = netsnmp_UnixDomain;
     t->domain_length =

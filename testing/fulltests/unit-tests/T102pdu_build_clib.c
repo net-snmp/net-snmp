@@ -1,4 +1,7 @@
 /* HEADER PDU building */
+
+SOCK_STARTUP;
+
 netsnmp_pdu *pdu;
 u_char *packet;
 size_t packet_len, offset = 0;
@@ -60,3 +63,5 @@ rc = snmp_build(&packet, &packet_len, &offset, ss, pdu);
 
 OKF((rc == SNMPERR_SUCCESS),
     ("Building an INFORM PDU/packet should have succeed: %d", rc));
+
+SOCK_CLEANUP;

@@ -3542,10 +3542,12 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 
                     /* If the varbind includes the module prefix, capture it for use later */
                     strncpy(tmp_buf_prefix, __av_elem_pv(varbind, VARBIND_TAG_F, ".0"), STR_BUF_SIZE);
+                    tmp_buf_prefix[STR_BUF_SIZE-1] = '\0';
                     tmp_prefix_ptr = strstr(tmp_buf_prefix,"::");
                     if (tmp_prefix_ptr) {
                       tmp_prefix_ptr = strtok_r(tmp_buf_prefix, "::", &st);
                       strncpy(str_buf_prefix, tmp_prefix_ptr, STR_BUF_SIZE);
+                      tmp_prefix_ptr[STR_BUF_SIZE-1] = '\0';
                     }
                     else {
                       *str_buf_prefix = '\0';
@@ -4904,6 +4906,15 @@ snmp_set_debugging(val)
 	CODE:
 	{
 	   snmp_set_do_debugging(val);
+	}
+
+void
+snmp_register_debug_tokens(tokens)
+	char *tokens
+	CODE:
+	{
+            debug_register_tokens(tokens);
+            snmp_set_do_debugging(1);
 	}
 
 void

@@ -3,10 +3,12 @@
 SOCK_STARTUP;
 
 {
+    int ran_test = 0;
+#ifdef HAVE_GETHOSTBYADDR
     struct hostent *h;
     struct in_addr v4loop;
     struct sockaddr_in sin_addr;
-    int s, ran_test = 0;
+    int s;
 
     v4loop.s_addr = htonl(INADDR_LOOPBACK);
     memset(&sin_addr, 0, sizeof(sin_addr));
@@ -22,6 +24,7 @@ SOCK_STARTUP;
         }
         close(s);
     }
+#endif
     if (!ran_test)
         OKF(1, ("Skipped IPv4 test"));
 }

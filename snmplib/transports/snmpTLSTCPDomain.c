@@ -274,7 +274,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     }
 
     /* log the packet */
-    {
+    DEBUGIF("tlstcp") {
         char *str = netsnmp_tlstcp_fmtaddr(t, NULL, 0);
         DEBUGMSGTL(("tlstcp",
                     "recvfrom fd %d got %d bytes (from %s)\n",
@@ -921,7 +921,6 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     if (NULL == t) {
         return NULL;
     }
-    memset(t, 0, sizeof(netsnmp_transport));
 
     /* allocate our TLS specific data */
     if (NULL == (tlsdata = netsnmp_tlsbase_allocate_tlsdata(t, isserver)))
