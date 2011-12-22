@@ -190,6 +190,7 @@ snmpd_set_agent_address(const char *token, char *cptr)
         snprintf(buf, SPRINT_MAX_LEN, "%s,%s", ptr, cptr);
     } else {
         strncpy(buf, cptr, SPRINT_MAX_LEN);
+	buf[SPRINT_MAX_LEN-1] = '\0';
     }
 
     DEBUGMSGTL(("snmpd_ports", "port spec: %s\n", buf));
