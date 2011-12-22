@@ -62,7 +62,9 @@ decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
      * its expensive.
      */
     strncpy(line_cpy, line, sizeof(line_cpy));
+    line_cpy[sizeof(line_cpy)-1] = '\0';
     strncpy(data_cpy, data, sizeof(data_cpy));
+    data_cpy[sizeof(data_cpy)-1] = '\0';
 
     lineptr = line_cpy;
     dataptr = data_cpy;

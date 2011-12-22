@@ -48,6 +48,7 @@ etherstats_interface_name_list_get (struct ifname *list_head, int *retval)
             }
             memset (list_head, 0, sizeof (struct ifname));
             strncpy (list_head->name, p->ifa_name, IF_NAMESIZE);
+            list_head->name[IF_NAMESIZE-1] = '\0';
             continue;
         }
          for (nameptr1 = list_head; nameptr1; nameptr2 = nameptr1, nameptr1 = nameptr1->ifn_next)
@@ -69,6 +70,7 @@ etherstats_interface_name_list_get (struct ifname *list_head, int *retval)
         nameptr2 = nameptr2->ifn_next;
         memset (nameptr2, 0, sizeof (struct ifname));
         strncpy (nameptr2->name, p->ifa_name, IF_NAMESIZE);
+        nameptr2->name[IF_NAMESIZE-1] = '\0';
         continue;
 
     }
@@ -241,6 +243,7 @@ interface_ioctl_etherstats_get (etherStatsTable_rowreq_ctx *rowreq_ctx , int fd,
 
         strncpy(s, (const char *) &eth_strings->data[i * ETH_GSTRING_LEN],
             ETH_GSTRING_LEN);
+        s[ETH_GSTRING_LEN-1] = '\0';
         
         if (ETHERSTATSJABBERS(s)) {
             data->etherStatsJabbers = (u_long)eth_stats->data[i];

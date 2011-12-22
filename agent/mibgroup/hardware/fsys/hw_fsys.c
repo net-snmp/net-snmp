@@ -170,6 +170,7 @@ netsnmp_fsys_by_path( char *path, int create_type )
     sp = _fsys_create_entry();
     if ( sp ) {
         strncpy( sp->path, path, sizeof(sp->path) );
+        sp->path[sizeof(sp->path)-1] = '\0';
     }
     return sp;
 }
@@ -213,6 +214,7 @@ netsnmp_fsys_by_device( char *device, int create_type )
     sp = _fsys_create_entry();
     if ( sp ) {
         strncpy( sp->device, device, sizeof(sp->device) );
+        sp->device[sizeof(sp->device)-1] = '\0';
     }
     return sp;
 }
