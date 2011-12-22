@@ -241,7 +241,6 @@ void
 updateLogmatch(int iindex)
 {
 
-    regmatch_t      myMatch;
     int             matchResultCode;
     char            inbuf[1024];
     char            perfilename[1024];
@@ -393,7 +392,7 @@ updateLogmatch(int iindex)
 
                 matchResultCode =
                     regexec(&(logmatchTable[iindex].regexBuffer),
-                            inbuf, 0, &myMatch, REG_NOTEOL);
+                            inbuf, 0, NULL, REG_NOTEOL);
 
                 if (matchResultCode == 0) {
                     logmatchTable[iindex].globalMatchCounter++;
