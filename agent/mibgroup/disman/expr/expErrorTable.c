@@ -77,6 +77,9 @@ expErrorTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_GET:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct expExpression *)
                     netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info(request);
