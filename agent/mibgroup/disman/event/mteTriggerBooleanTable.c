@@ -108,8 +108,10 @@ mteTriggerBooleanTable_handler(netsnmp_mib_handler *handler,
              *   rows where the mteTriggerTest 'boolean(1)' bit is set.
              * So skip entries where this isn't the case.
              */
-            if (!entry || !(entry->mteTriggerTest & MTE_TRIGGER_BOOLEAN ))
+            if (!entry || !(entry->mteTriggerTest & MTE_TRIGGER_BOOLEAN )) {
+                netsnmp_request_set_error(request, SNMP_NOSUCHINSTANCE);
                 continue;
+            }
 
             switch (tinfo->colnum) {
             case COLUMN_MTETRIGGERBOOLEANCOMPARISON:

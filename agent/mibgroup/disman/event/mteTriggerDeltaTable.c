@@ -100,8 +100,10 @@ mteTriggerDeltaTable_handler(netsnmp_mib_handler *handler,
              *   rows where the mteTriggerSampleType is 'deltaValue(2)'
              * So skip entries where this isn't the case.
              */
-            if (!entry || !(entry->flags & MTE_TRIGGER_FLAG_DELTA ))
+            if (!entry || !(entry->flags & MTE_TRIGGER_FLAG_DELTA )) {
+                netsnmp_request_set_error(request, SNMP_NOSUCHINSTANCE);
                 continue;
+            }
 
             switch (tinfo->colnum) {
             case COLUMN_MTETRIGGERDELTADISCONTINUITYID:
