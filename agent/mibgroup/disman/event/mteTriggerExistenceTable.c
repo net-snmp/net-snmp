@@ -85,8 +85,10 @@ mteTriggerExistenceTable_handler(netsnmp_mib_handler *handler,
              *   rows where the mteTriggerTest 'existence(0)' bit is set.
              * So skip entries where this isn't the case.
              */
-            if (!entry || !(entry->mteTriggerTest & MTE_TRIGGER_EXISTENCE ))
+            if (!entry || !(entry->mteTriggerTest & MTE_TRIGGER_EXISTENCE )) {
+                netsnmp_request_set_error(request, SNMP_NOSUCHINSTANCE);
                 continue;
+            }
 
             switch (tinfo->colnum) {
             case COLUMN_MTETRIGGEREXISTENCETEST:
