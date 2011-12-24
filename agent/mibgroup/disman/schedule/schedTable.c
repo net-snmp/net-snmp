@@ -98,6 +98,9 @@ schedTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_GET:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct schedTable_entry *)
                     netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info( request);
@@ -210,6 +213,9 @@ schedTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_SET_RESERVE1:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct schedTable_entry *)
                     netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info( request);
@@ -340,6 +346,9 @@ schedTable_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_RESERVE2:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             tinfo = netsnmp_extract_table_info(request);
 
             switch (tinfo->colnum) {
@@ -370,6 +379,9 @@ schedTable_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_FREE:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             tinfo = netsnmp_extract_table_info(request);
 
             switch (tinfo->colnum) {
@@ -419,6 +431,9 @@ schedTable_handler(netsnmp_mib_handler *handler,
          */
         entry = NULL;
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct schedTable_entry *)
                     netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info( request);
