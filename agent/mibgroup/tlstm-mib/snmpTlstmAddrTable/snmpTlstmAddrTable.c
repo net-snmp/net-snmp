@@ -1403,8 +1403,7 @@ _tlstmAddrTable_row_restore_mib(const char *token, char *buf)
         addr->hashType = hashType;
         addr->flags = TLSTM_ADDR_FROM_MIB | TLSTM_ADDR_NONVOLATILE;
 
-        if (netsnmp_tlstmAddr_add(addr) != 0)
-            netsnmp_tlstmAddr_free(addr);
+        netsnmp_tlstmAddr_add(addr);
     }
     else {
         netsnmp_tdata_row     *row;

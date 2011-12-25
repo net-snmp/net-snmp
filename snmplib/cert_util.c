@@ -3252,10 +3252,7 @@ _parse_addr(const char *token, char *line)
     if (id_len)
         entry->identity = strdup(id);
 
-    if (netsnmp_tlstmAddr_add(entry) != 0)
-        netsnmp_tlstmAddr_free(entry);
-
-    return;
+    netsnmp_tlstmAddr_add(entry);
 }
 
 static char *
