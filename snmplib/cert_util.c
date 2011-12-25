@@ -3052,8 +3052,8 @@ netsnmp_tlstmParams_add(snmpTlstmParams *stp)
                 stp->name));
 
     if (CONTAINER_INSERT(_tlstmParams, stp) != 0) {
-        netsnmp_tlstmParams_free(stp);
         snmp_log(LOG_ERR, "error inserting tlstmParams %s", stp->name);
+        netsnmp_tlstmParams_free(stp);
         return -1;
     }
 
@@ -3262,8 +3262,8 @@ netsnmp_tlstmAddr_add(snmpTlstmAddr *entry)
     DEBUGMSGTL(("tlstmAddr:add", "adding entry 0x%lx %s %s\n",
                 (u_long)entry, entry->name, entry->fingerprint));
     if (CONTAINER_INSERT(_tlstmAddr, entry) != 0) {
-        netsnmp_tlstmAddr_free(entry);
         snmp_log(LOG_ERR, "could not insert addr %s", entry->name);
+        netsnmp_tlstmAddr_free(entry);
         return -1;
     }
 
@@ -3316,10 +3316,7 @@ _parse_addr(const char *token, char *line)
     if (id_len)
         entry->identity = strdup(id);
 
-    if (netsnmp_tlstmAddr_add(entry) != 0)
-        netsnmp_tlstmAddr_free(entry);
-
-    return;
+    netsnmp_tlstmAddr_add(entry);
 }
 
 static char *
