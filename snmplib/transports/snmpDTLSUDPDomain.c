@@ -427,7 +427,7 @@ _extract_addr_pair(netsnmp_transport *t, void *opaque, int olen)
 
     if (opaque && olen == sizeof(netsnmp_tmStateReference)) {
         netsnmp_tmStateReference *tmStateRef =
-            tmStateRef = (netsnmp_tmStateReference *) opaque;
+            (netsnmp_tmStateReference *) opaque;
 
         if (tmStateRef->have_addresses)
             addr_pair = &(tmStateRef->addresses);
