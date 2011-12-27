@@ -30,21 +30,33 @@ while (<>){
   chomp($req);
 
   if ( $cmd eq "getnext" ) {
-    if ($req eq $place) {
-      $ret = "$place.1.0";
-    } elsif ($req eq "$place.1.0") {
-      $ret = "$place.2.1.2.1";
-    } elsif ($req eq "$place.2.1.2.1") {
-      $ret = "$place.2.1.3.1";
-    } elsif ($req eq "$place.2.1.3.1") {
-      $ret = "$place.3.0";
-    } elsif ($req eq "$place.3.0") {
-      $ret = "$place.4.0";
-    } elsif ($req eq "$place.4.0") {
-      $ret = "$place.5.0";
-    } elsif ($req eq "$place.5.0") {
-      $ret = "$place.6.0";
-    } else {
+     if (($req eq  "$place")         ||
+         ($req eq  "$place.0")       ||
+         ($req =~ m/$place\.0\..*/)  ||
+         ($req eq  "$place.1"))       { $ret = "$place.1.0";}       # netSnmpPassString.0
+  elsif (($req =~ m/$place\.1\..*/)  ||
+         ($req eq  "$place.2")       ||
+         ($req eq  "$place.2.0")     ||
+         ($req =~ m/$place\.2\.0\..*/)    ||
+         ($req eq  "$place.2.1")          ||
+         ($req eq  "$place.2.1.0")        ||
+         ($req =~ m/$place\.2\.1\.0\..*/) ||
+         ($req eq  "$place.2.1.1")        ||
+         ($req =~ m/$place\.2\.1\.1\..*/) ||
+         ($req eq  "$place.2.1.2")        ||
+         ($req eq  "$place.2.1.2.0")) { $ret = "$place.2.1.2.1";}   # netSnmpPassInteger.1
+  elsif (($req =~ m/$place\.2\.1\.2\..*/) ||
+         ($req eq  "$place.2.1.3")   ||
+         ($req eq  "$place.2.1.3.0")) { $ret = "$place.2.1.3.1";}   # netSnmpPassOID.1
+  elsif (($req =~ m/$place\.2\..*/)  ||
+         ($req eq  "$place.3"))       { $ret = "$place.3.0";}       # netSnmpPassTimeTicks.0
+  elsif (($req =~ m/$place\.3\..*/)  ||
+         ($req eq  "$place.4"))       { $ret = "$place.4.0";}       # netSnmpPassIpAddress.0
+  elsif (($req =~ m/$place\.4\..*/)  ||
+         ($req eq  "$place.5"))       { $ret = "$place.5.0";}       # netSnmpPassCounter.0
+  elsif (($req =~ m/$place\.5\..*/)  ||
+         ($req eq  "$place.6"))       { $ret = "$place.6.0";}       # netSnmpPassGauge.0
+  else   {
       print "NONE\n";
       next;
     }
