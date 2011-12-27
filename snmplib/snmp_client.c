@@ -808,6 +808,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     case ASN_UNSIGNED:
     case ASN_TIMETICKS:
     case ASN_COUNTER:
+    case ASN_UINTEGER:
         if (value) {
             if (vars->val_len == sizeof(int)) {
                 if (ASN_INTEGER == vars->type) {
