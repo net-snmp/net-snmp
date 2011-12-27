@@ -214,6 +214,8 @@ netsnmp_parse_override(const char *token, char *line)
     case ASN_OBJECT_ID:
         read_config_read_objid(buf, (oid **) & thedata->value,
                                &thedata->value_len);
+        /* We need the size of the value in bytes, not in oids */
+        thedata->value_len *= sizeof(oid);
         break;
 
     case ASN_NULL:
