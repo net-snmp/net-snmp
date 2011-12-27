@@ -453,6 +453,7 @@ agentx_realloc_build_varbind(u_char ** buf, size_t * buf_len,
     case ASN_COUNTER:
     case ASN_GAUGE:
     case ASN_TIMETICKS:
+    case ASN_UINTEGER:
         if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
                                       *(vp->val.integer), network_order)) {
             DEBUGINDENTLESS();
@@ -1372,6 +1373,7 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
     case ASN_COUNTER:
     case ASN_GAUGE:
     case ASN_TIMETICKS:
+    case ASN_UINTEGER:
         int_val = agentx_parse_int(bufp, network_byte_order);
         memmove(data_buf, &int_val, 4);
         *data_len = 4;
@@ -1429,6 +1431,7 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
         break;
 
     default:
+        DEBUGMSG(("recv", "Can not parse type %x", *type));
         DEBUGINDENTLESS();
         return NULL;
     }
