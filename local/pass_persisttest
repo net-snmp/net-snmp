@@ -5,9 +5,9 @@
 # put the following in your snmpd.conf file to call this script:
 #
 # Unix systems and Cygwin:
-# pass_persist .1.3.6.1.4.1.2021.255 /path/to/pass_persisttest
+# pass_persist .1.3.6.1.4.1.8072.2.255 /path/to/pass_persisttest
 # Windows systems except Cygwin:
-# pass_persist .1.3.6.1.4.1.2021.255 perl /path/to/pass_persisttest
+# pass_persist .1.3.6.1.4.1.8072.2.255 perl /path/to/pass_persisttest
 
 # Forces a buffer flush after every print
 $|=1;
@@ -15,7 +15,7 @@ $|=1;
 use strict;
 
 my $counter = 0;
-my $place = ".1.3.6.1.4.1.2021.255";
+my $place = ".1.3.6.1.4.1.8072.2.255";
 
 while (<>){
   if (m!^PING!){
@@ -30,21 +30,33 @@ while (<>){
   chomp($req);
 
   if ( $cmd eq "getnext" ) {
-    if ($req eq $place) {
-      $ret = "$place.1";
-    } elsif ($req eq "$place.1") {
-      $ret = "$place.2.1";
-    } elsif ($req eq "$place.2.1") {
-      $ret = "$place.2.2";
-    } elsif ($req eq "$place.2.2") {
-      $ret = "$place.3";
-    } elsif ($req eq "$place.3") {
-      $ret = "$place.4";
-    } elsif ($req eq "$place.4") {
-      $ret = "$place.5";
-    } elsif ($req eq "$place.5") {
-      $ret = "$place.6";
-    } else {
+     if (($req eq  "$place")         ||
+         ($req eq  "$place.0")       ||
+         ($req =~ m/$place\.0\..*/)  ||
+         ($req eq  "$place.1"))       { $ret = "$place.1.0";}       # netSnmpPassString.0
+  elsif (($req =~ m/$place\.1\..*/)  ||
+         ($req eq  "$place.2")       ||
+         ($req eq  "$place.2.0")     ||
+         ($req =~ m/$place\.2\.0\..*/)    ||
+         ($req eq  "$place.2.1")          ||
+         ($req eq  "$place.2.1.0")        ||
+         ($req =~ m/$place\.2\.1\.0\..*/) ||
+         ($req eq  "$place.2.1.1")        ||
+         ($req =~ m/$place\.2\.1\.1\..*/) ||
+         ($req eq  "$place.2.1.2")        ||
+         ($req eq  "$place.2.1.2.0")) { $ret = "$place.2.1.2.1";}   # netSnmpPassInteger.1
+  elsif (($req =~ m/$place\.2\.1\.2\..*/) ||
+         ($req eq  "$place.2.1.3")   ||
+         ($req eq  "$place.2.1.3.0")) { $ret = "$place.2.1.3.1";}   # netSnmpPassOID.1
+  elsif (($req =~ m/$place\.2\..*/)  ||
+         ($req eq  "$place.3"))       { $ret = "$place.3.0";}       # netSnmpPassTimeTicks.0
+  elsif (($req =~ m/$place\.3\..*/)  ||
+         ($req eq  "$place.4"))       { $ret = "$place.4.0";}       # netSnmpPassIpAddress.0
+  elsif (($req =~ m/$place\.4\..*/)  ||
+         ($req eq  "$place.5"))       { $ret = "$place.5.0";}       # netSnmpPassCounter.0
+  elsif (($req =~ m/$place\.5\..*/)  ||
+         ($req eq  "$place.6"))       { $ret = "$place.6.0";}       # netSnmpPassGauge.0
+  else   {
       print "NONE\n";
       next;
     }
@@ -59,20 +71,20 @@ while (<>){
 
   print "$ret\n";
 
-  if ($ret eq "$place.1") {
-    print "string\nlife the universe and everything\n";
-  } elsif ($ret eq "$place.2.1") {
-    print "integer\n423\n";
-  } elsif ($ret eq "$place.2.2") {
+  if ($ret eq "$place.1.0") {
+    print "string\nLife, the Universe, and Everything\n";
+  } elsif ($ret eq "$place.2.1.2.1") {
+    print "integer\n42\n";
+  } elsif ($ret eq "$place.2.1.3.1") {
     print "objectid\n.1.3.6.1.4.42.42.42\n";
-  } elsif ($ret eq "$place.3") {
+  } elsif ($ret eq "$place.3.0") {
     print "timeticks\n363136200\n";
-  } elsif ($ret eq "$place.4") {
+  } elsif ($ret eq "$place.4.0") {
     print "ipaddress\n127.0.0.1\n";
-  } elsif ($ret eq "$place.5") {
+  } elsif ($ret eq "$place.5.0") {
     $counter++;
     print "counter\n$counter\n";
-  } elsif ($ret eq "$place.6") {
+  } elsif ($ret eq "$place.6.0") {
     print "gauge\n42\n";
   } else {
     print  "string\nack... $ret $req\n";
