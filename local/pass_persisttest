@@ -12,6 +12,12 @@
 # Forces a buffer flush after every print
 $|=1;
 
+# Save my PID, to help kill this instance.
+$PIDFILE=$ENV{'PASS_PERSIST_PIDFILE'} || "/tmp/pass_persist.pid";
+open(PIDFILE, ">$PIDFILE");
+print PIDFILE "$$\n";
+close(PIDFILE);
+
 use strict;
 
 my $counter = 0;
@@ -76,7 +82,7 @@ while (<>){
   } elsif ($ret eq "$place.2.1.2.1") {
     print "integer\n42\n";
   } elsif ($ret eq "$place.2.1.3.1") {
-    print "objectid\n.1.3.6.1.4.42.42.42\n";
+    print "objectid\n$place.99\n";
   } elsif ($ret eq "$place.3.0") {
     print "timeticks\n363136200\n";
   } elsif ($ret eq "$place.4.0") {
