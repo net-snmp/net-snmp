@@ -66,7 +66,7 @@ else {
 print "$ret\n";
    if ($ret eq "$place.1.0")     { print "string\nLife, the Universe, and Everything\n"; exit 0;}
 elsif ($ret eq "$place.2.1.2.1") { print "integer\n42\n";                                exit 0;}
-elsif ($ret eq "$place.2.1.3.1") { print "objectid\n.1.3.6.1.4.42.42.42\n";              exit 0;}
+elsif ($ret eq "$place.2.1.3.1") { print "objectid\n$place.99\n";                        exit 0;}
 elsif ($ret eq "$place.3.0")     { print "timeticks\n363136200\n";                       exit 0;}
 elsif ($ret eq "$place.4.0")     { print "ipaddress\n127.0.0.1\n";                       exit 0;}
 elsif ($ret eq "$place.5.0")     { print "counter\n42\n";                                exit 0;}
