@@ -458,6 +458,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         if (asi == NULL) {
             SNMP_FREE(smagic);
             snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
+            send_agentx_error(session, pdu, AGENTX_ERR_PROCESSING_ERROR, 0);
             return 1;
         }
         asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_UNDO;

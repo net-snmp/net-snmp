@@ -624,7 +624,7 @@ write_persist_pipe(int iindex, const char *data)
     sigaction(SIGPIPE, &osa, (struct sigaction *) 0);
 
     if (wret < 0) {
-        if (werrno != EINTR) {
+        if (werrno != EPIPE) {
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "write_persist_pipe: write returned unknown error %d (%s)\n",
                         werrno, strerror(werrno)));
