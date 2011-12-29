@@ -827,7 +827,10 @@ parse_miboid(const char *buf, oid * oidout)
     if (*buf == '.')
         buf++;
     for (i = 0; isdigit(*buf); i++) {
-        oidout[i] = atoi(buf);
+        /* Subidentifiers are unsigned values, up to 2^32-1
+         * so we need to use 'strtoul' rather than 'atoi'
+         */
+        oidout[i] = strtoul(buf, NULL, 10) & 0xffffffff;
         while (isdigit(*buf++));
         if (*buf == '.')
             buf++;
