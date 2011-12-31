@@ -6,6 +6,10 @@
 #ifndef MIBGROUP_DLMOD_H
 #define MIBGROUP_DLMOD_H
 
+#if !defined(HAVE_DLFCN_H) || !defined(HAVE_DLOPEN)
+config_error(Dynamic modules not supported on this platform)
+#endif
+
 config_add_mib(UCD-DLMOD-MIB)
 
 void init_dlmod(void);
