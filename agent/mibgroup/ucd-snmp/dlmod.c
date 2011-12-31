@@ -28,8 +28,6 @@
 #include "struct.h"
 #include "util_funcs.h"
 
-#if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
-
 #include <dlfcn.h>
 #include "dlmod.h"
 
@@ -593,14 +591,3 @@ write_dlmodStatus(int action,
     }
     return SNMP_ERR_NOERROR;
 }
-
-#else                           /* no dlopen support */
-
-void
-init_dlmod(void)
-{
-    DEBUGMSGTL(("dlmod",
-                "Dynamic modules not support on this platform\n"));
-}
-
-#endif

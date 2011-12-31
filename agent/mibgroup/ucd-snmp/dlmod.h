@@ -7,8 +7,11 @@
 #define _MIBGROUP_DLMOD_H
 
 /*
- * TODO #include "mibdefs.h" 
+ * TODO #include "mibdefs.h"
  */
+#if !defined(HAVE_DLFCN_H) || !defined(HAVE_DLOPEN)
+config_error(Dynamic modules not supported on this platform)
+#endif
 
 config_add_mib(UCD-DLMOD-MIB)
 #ifndef SNMPDLMODPATH
