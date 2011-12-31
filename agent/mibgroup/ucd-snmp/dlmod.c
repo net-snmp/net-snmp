@@ -18,8 +18,6 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
-
 #include <dlfcn.h>
 #include "dlmod.h"
 
@@ -575,9 +573,6 @@ static oid dlmod_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 13, 14 };
 void
 init_dlmod(void)
 {
-    char           *p;
-    int             len;
-
     REGISTER_MIB("dlmod", dlmod_variables, variable4, dlmod_variables_oid);
 
     /*
@@ -590,20 +585,23 @@ init_dlmod(void)
                                   dlmod_free_config,
                                   "module-name module-path");
 
-    p = getenv("SNMPDLMODPATH");
-    strncpy(dlmod_path, SNMPDLMODPATH, sizeof(dlmod_path));
-    dlmod_path[ sizeof(dlmod_path)-1 ] = 0;
-    if (p) {
-        if (p[0] == ':') {
-            len = strlen(dlmod_path);
-            if (dlmod_path[len - 1] != ':') {
-                strncat(dlmod_path, ":", sizeof(dlmod_path) - len -1);
-                len++;
-            }
-            strncat(dlmod_path, p + 1,   sizeof(dlmod_path) - len);
-        } else
-            strncpy(dlmod_path, p, sizeof(dlmod_path));
+    {
+        const char * const p = getenv("SNMPDLMODPATH");
+        strncpy(dlmod_path, SNMPDLMODPATH, sizeof(dlmod_path));
+        dlmod_path[ sizeof(dlmod_path) - 1 ] = 0;
+        if (p) {
+            if (p[0] == ':') {
+                int len = strlen(dlmod_path);
+                if (dlmod_path[len - 1] != ':') {
+                    strncat(dlmod_path, ":", sizeof(dlmod_path) - len - 1);
+                    len++;
+                }
+                strncat(dlmod_path, p + 1,   sizeof(dlmod_path) - len);
+            } else
+                strncpy(dlmod_path, p, sizeof(dlmod_path));
+        }
     }
+
     dlmod_path[ sizeof(dlmod_path)-1 ] = 0;
     DEBUGMSGTL(("dlmod", "dlmod_path: %s\n", dlmod_path));
 }
@@ -616,19 +614,3 @@ shutdown_dlmod(void)
     snmpd_unregister_config_handler("dlmod");
     unregister_mib(dlmod_variables_oid, OID_LENGTH(dlmod_variables_oid));
 }
-
-#else                           /* no dlopen support */
-
-void
-init_dlmod(void)
-{
-    DEBUGMSGTL(("dlmod",
-                "Dynamic modules not support on this platform\n"));
-}
-
-void
-shutdown_dlmod(void)
-{
-}
-
-#endif
