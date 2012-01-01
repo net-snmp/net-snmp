@@ -19917,7 +19917,7 @@ done
 
 LIBS="$netsnmp_save_LIBS"
 
-
+#
 #   dynamic module support
 #
 
@@ -19928,7 +19928,7 @@ if ${netsnmp_cv_func_dlopen_LMIBLIBS+:} false; then :
 else
   netsnmp_func_search_save_LIBS="$LIBS"
      netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LAGENTLIBS $LSNMPLIBS ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -19996,7 +19996,7 @@ $as_echo "$netsnmp_cv_func_dlopen_LMIBLIBS" >&6; }
  fi
 
 netsnmp_save_LIBS="$LIBS"
-LIBS="$LMIBLIBS $LIBS"
+LIBS="$LMIBLIBS $LAGENTLIBS $LSNMPLIBS $LIBS"
 for ac_func in dlopen
 do :
   ac_fn_c_check_func "$LINENO" "dlopen" "ac_cv_func_dlopen"
