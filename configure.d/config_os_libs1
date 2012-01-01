@@ -85,11 +85,11 @@ LIBS="$LAGENTLIBS $LMIBLIBS $LIBS"
 AC_CHECK_FUNCS([kvm_openfiles kvm_getprocs kvm_getproc2 kvm_getswapinfo])
 LIBS="$netsnmp_save_LIBS"
 
-
+#
 #   dynamic module support
 #
-NETSNMP_SEARCH_LIBS(dlopen, dl,,,,LMIBLIBS)
+NETSNMP_SEARCH_LIBS([dlopen], [dl],,, [$LAGENTLIBS $LSNMPLIBS], [LMIBLIBS])
 netsnmp_save_LIBS="$LIBS"
-LIBS="$LMIBLIBS $LIBS"
+LIBS="$LMIBLIBS $LAGENTLIBS $LSNMPLIBS $LIBS"
 AC_CHECK_FUNCS([dlopen])
 LIBS="$netsnmp_save_LIBS"
