@@ -112,7 +112,7 @@ int             _getch(void);
 int
 main(int argc, char **argv)
 {
-    int             rval = SNMPERR_SUCCESS;
+    int             rval = 1;
     size_t          oldKu_len = SNMP_MAXBUF_SMALL,
         newKu_len = SNMP_MAXBUF_SMALL,
         oldkul_len = SNMP_MAXBUF_SMALL,
@@ -174,6 +174,7 @@ main(int argc, char **argv)
             break;
         case 'h':
             rval = 0;
+	    /* fallthrough */
         default:
             usage_to_file(stdout);
             exit(rval);
