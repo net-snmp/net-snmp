@@ -3640,7 +3640,8 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_GETMNTENT
-AC_CHECK_FUNCS(setmntent hasmntopt gethostname uname gettimeofday select socket strtol strtoul strlcpy)
+AC_CHECK_FUNCS(setmntent hasmntopt gethostname uname gettimeofday select socket)
+AC_CHECK_FUNCS(strlcat strlcpy strtol strtoul)
 AC_CHECK_FUNCS(strchr strtok_r strdup memcpy memmove index bcopy strcasestr regcomp)
 AC_CHECK_FUNCS(signal setsid sigset sigblock sighold strerror setenv vsnprintf snprintf)
 AC_CHECK_FUNCS(sigaction)
