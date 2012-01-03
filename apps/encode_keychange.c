@@ -108,7 +108,7 @@ int             _getch(void);
 int
 main(int argc, char **argv)
 {
-    int             rval = SNMPERR_SUCCESS;
+    int             rval = 1;
     size_t          oldKu_len = SNMP_MAXBUF_SMALL,
         newKu_len = SNMP_MAXBUF_SMALL,
         oldkul_len = SNMP_MAXBUF_SMALL,
@@ -170,6 +170,7 @@ main(int argc, char **argv)
             break;
         case 'h':
             rval = 0;
+	    /* fallthrough */
         default:
             usage_to_file(stdout);
             exit(rval);
@@ -201,7 +202,7 @@ main(int argc, char **argv)
                 "Unrecognized hash transform: \"%s\".\n",
                 transform_type_input);
         usage_synopsis(stderr);
-        QUITFUN(rval = SNMPERR_GENERR, main_quit);
+        QUITFUN(SNMPERR_GENERR, main_quit);
     }
 
     if (verbose) {
@@ -254,12 +255,12 @@ main(int argc, char **argv)
     if (strlen(oldpass) < USM_LENGTH_P_MIN) {
         fprintf(stderr, "Old passphrase must be greater than %d "
                 "characters in length.\n", USM_LENGTH_P_MIN);
-        QUITFUN(rval = SNMPERR_GENERR, main_quit);
+        QUITFUN(SNMPERR_GENERR, main_quit);
 
     } else if (strlen(newpass) < USM_LENGTH_P_MIN) {
         fprintf(stderr, "New passphrase must be greater than %d "
                 "characters in length.\n", USM_LENGTH_P_MIN);
-        QUITFUN(rval = SNMPERR_GENERR, main_quit);
+        QUITFUN(SNMPERR_GENERR, main_quit);
     }
 
     if (verbose) {
@@ -503,13 +504,13 @@ get_user_passphrases(void)
      */
     if (stat(path, &statbuf) < 0) {
         fprintf(stderr, "Cannot access directory \"%s\".\n", path);
-        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+        QUITFUN(SNMPERR_GENERR, get_user_passphrases_quit);
 #ifndef WIN32
     } else if (statbuf.st_mode & (S_IRWXG | S_IRWXO)) {
         fprintf(stderr,
                 "Directory \"%s\" is accessible by group or world.\n",
                 path);
-        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+        QUITFUN(SNMPERR_GENERR, get_user_passphrases_quit);
 #endif                          /* !WIN32 */
     }
 
@@ -520,12 +521,12 @@ get_user_passphrases(void)
     path[ sizeof(path)-1 ] = 0;
     if (stat(path, &statbuf) < 0) {
         fprintf(stderr, "Cannot access file \"%s\".\n", path);
-        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+        QUITFUN(SNMPERR_GENERR, get_user_passphrases_quit);
 #ifndef WIN32
     } else if (statbuf.st_mode & (S_IRWXG | S_IRWXO)) {
         fprintf(stderr,
                 "File \"%s\" is accessible by group or world.\n", path);
-        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+        QUITFUN(SNMPERR_GENERR, get_user_passphrases_quit);
 #endif                          /* !WIN32 */
     }
 
@@ -534,7 +535,7 @@ get_user_passphrases(void)
      */
     if ((fp = fopen(path, "r")) == NULL) {
         fprintf(stderr, "Cannot open \"%s\".", path);
-        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+        QUITFUN(SNMPERR_GENERR, get_user_passphrases_quit);
     }
 
     /*

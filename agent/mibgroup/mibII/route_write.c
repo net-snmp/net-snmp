@@ -519,6 +519,7 @@ write_rte(int action,
         } else if (action == COMMIT) {
             rp->rt_nextIR = rp->xx_nextIR;
         }
+	break;
 
 
     case IPROUTETYPE:

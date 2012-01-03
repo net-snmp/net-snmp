@@ -1021,7 +1021,7 @@ main(int argc, char *argv[])
 
 #ifdef HAVE_SETGID
     if ((gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
-				  NETSNMP_DS_AGENT_GROUPID)) != 0) {
+				  NETSNMP_DS_AGENT_GROUPID)) > 0) {
         DEBUGMSGTL(("snmpd/main", "Changing gid to %d.\n", gid));
         if (setgid(gid) == -1
 #ifdef HAVE_SETGROUPS
@@ -1038,7 +1038,7 @@ main(int argc, char *argv[])
 #endif
 #ifdef HAVE_SETUID
     if ((uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
-				  NETSNMP_DS_AGENT_USERID)) != 0) {
+				  NETSNMP_DS_AGENT_USERID)) > 0) {
 #if HAVE_GETPWNAM && HAVE_PWD_H && HAVE_INITGROUPS
         struct passwd *info;
 
