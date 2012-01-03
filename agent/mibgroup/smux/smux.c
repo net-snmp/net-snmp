@@ -1156,9 +1156,17 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
         if (nrptr->sr_priority == -1)
             nrptr->sr_priority = 0;
         smux_list_add(&ActiveRegs, nrptr);
-        register_mib("smux", (struct variable *)
-                     smux_variables, sizeof(struct variable2),
-                     1, nrptr->sr_name, nrptr->sr_name_len);
+        if (register_mib("smux", (struct variable *)
+                             smux_variables, sizeof(struct variable2),
+                             1, nrptr->sr_name, nrptr->sr_name_len)
+                     != SNMPERR_SUCCESS) {
+		DEBUGMSGTL(("smux", "[smux_rreq_process] Failed to register subtree\n"));
+		smux_list_detach(&ActiveRegs, nrptr);
+		free(nptr);
+		smux_send_rrsp(sd, -1);
+		return NULL;
+	}
+
       done:
         smux_send_rrsp(sd, nrptr->sr_priority);
         return ptr;

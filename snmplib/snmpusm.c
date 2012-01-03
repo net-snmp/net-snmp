@@ -2740,6 +2740,7 @@ usm_handle_report(void *sessp,
         }
         session->s_snmp_errno = res;
     }  
+    /* fallthrough */
     case SNMPERR_USM_UNKNOWNENGINEID:
     case SNMPERR_USM_UNKNOWNSECURITYNAME:
     case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
