@@ -3150,6 +3150,7 @@ int usm_discover_engineid(void *slpv, netsnmp_session *session) {
         break;
     case STAT_TIMEOUT:
         session->s_snmp_errno = SNMPERR_TIMEOUT;
+        break;
     default:
         DEBUGMSGTL(("snmp_sess_open",
                     "unable to connect with remote engine: %s (%d)\n",
