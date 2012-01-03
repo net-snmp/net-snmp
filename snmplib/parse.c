@@ -4728,7 +4728,10 @@ add_mibfile(const char* tmpstr, const char* d_name, FILE *ip )
                 tmpstr));
     mibLine = 1;
     File = tmpstr;
-    get_token(fp, token, MAXTOKEN);
+    if (get_token(fp, token, MAXTOKEN) != LABEL) {
+	    fclose(fp);
+	    return 1;
+    }
     /*
      * simple test for this being a MIB 
      */
@@ -4873,7 +4876,11 @@ read_mib(const char *filename)
     mibLine = 1;
     File = filename;
     DEBUGMSGTL(("parse-mibs", "Parsing file: %s...\n", filename));
-    get_token(fp, token, MAXTOKEN);
+    if (get_token(fp, token, MAXTOKEN) != LABEL) {
+	    snmp_log(LOG_ERR, "Failed to parse MIB file %s\n", filename);
+	    fclose(fp);
+	    return NULL;
+    }
     fclose(fp);
     new_module(token, filename);
     (void) netsnmp_read_module(token);
