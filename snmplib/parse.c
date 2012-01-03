@@ -4655,6 +4655,7 @@ get_token(FILE * fp, char *token, int maxtlen)
             return get_token(fp, token, maxtlen);
         }
         ungetc(ch_next, fp);
+	/* fallthrough */
     default:
         /*
          * Accumulate characters until end of token is found.  Then attempt to
