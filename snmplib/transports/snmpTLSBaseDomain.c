@@ -1080,6 +1080,7 @@ const char * _x509_get_error(int x509failvalue, const char *location) {
 #endif
     case X509_V_ERR_APPLICATION_VERIFICATION:
         reason = "X509_V_ERR_APPLICATION_VERIFICATION";
+        break;
     default:
         reason = "unknown failure code";
     }

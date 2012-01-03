@@ -1042,6 +1042,10 @@ int netsnmp_prefix_listen()
     unsigned           groups = 0;
 
     int fd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+    if (fd < 0) {
+        snmp_log(LOG_ERR, "netsnmp_prefix_listen: Cannot create socket.\n");
+        return -1;
+    }
 
     memset(&localaddrinfo, 0, sizeof(struct sockaddr_nl));
 
@@ -1052,6 +1056,7 @@ int netsnmp_prefix_listen()
 
     if (bind(fd, (struct sockaddr*)&localaddrinfo, sizeof(localaddrinfo)) < 0) {
         snmp_log(LOG_ERR,"netsnmp_prefix_listen: Bind failed.\n");
+        close(fd);
         return -1;
     }
 
@@ -1066,11 +1071,13 @@ int netsnmp_prefix_listen()
     status = send(fd, &req, req.n.nlmsg_len, 0);
     if (status < 0) {
         snmp_log(LOG_ERR,"netsnmp_prefix_listen: send failed\n");
+        close(fd);
         return -1;
     }
 
     if (register_readfd(fd, netsnmp_prefix_process, NULL) != 0) {
         snmp_log(LOG_ERR,"netsnmp_prefix_listen: error registering netlink socket\n");
+        close(fd);
         return -1;
     }
     return 0;
