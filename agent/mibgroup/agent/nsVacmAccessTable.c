@@ -166,7 +166,7 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
             viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
             DEBUGMSGTL(("nsVacm", "GET %s (%d)\n", idx->val.string, viewIdx));
 
-            if (!entry)
+            if (!entry || viewIdx < 0)
                 continue;
 
             switch (table_info->colnum) {
@@ -311,6 +311,8 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
             memset(atype, 0, sizeof(atype));
             strncpy(atype, (char *)idx->val.string, idx->val_len);
             viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
+            if (viewIdx < 0)
+                    continue;
 
             switch (table_info->colnum) {
             case COLUMN_NSVACMCONTEXTMATCH:
