@@ -120,6 +120,10 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
         DEBUGMSGTL(("cpu", "/proc/stat buffer increased to %d\n", bsize));
         close(statfd);
         statfd = open(STAT_FILE, O_RDONLY, 0);
+        if (statfd == -1) {
+            snmp_log_perror(STAT_FILE);
+            return -1;
+	}
     }
     close(statfd);
 
@@ -220,6 +224,10 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	    vmbuff = realloc(vmbuff, vmbsize+1);
 	    close(vmstatfd);
 	    vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0);
+	    if (vmstatfd == -1) {
+                snmp_log_perror("cannot open " VMSTAT_FILE);
+                return;
+	    }
         }
         close(vmstatfd);
 
