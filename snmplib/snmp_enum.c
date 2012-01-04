@@ -167,7 +167,7 @@ se_store_enum_list(struct snmp_enum_list *new_list,
 	if ((int)strlen(buf) > len) {
 	    read_config_store(type, line);
             snprintf(line, sizeof(line), "enum %s", token);
-	    len = sizeof(line);
+	    len = sizeof(line) - strlen(line);
 	}
 
 	strncat(line, buf, len);
