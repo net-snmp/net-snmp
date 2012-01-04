@@ -319,7 +319,7 @@ notifyTable_register_notifications(int major, int minor,
      * address 
      */
     t = snmp_sess_transport(snmp_sess_pointer(ss));
-    f (!t) {
+    if (!t) {
         snmp_log(LOG_ERR,
                 "Cannot add new trap destination, transport is closed.");
         snmp_sess_close(ss);
