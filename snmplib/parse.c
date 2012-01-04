@@ -3840,7 +3840,6 @@ read_module_internal(const char *name)
 {
     struct module  *mp;
     FILE           *fp;
-    struct node    *np;
 
     netsnmp_init_mib_internals();
 
@@ -3866,7 +3865,7 @@ read_module_internal(const char *name)
             /*
              * Parse the file
              */
-            np = parse(fp, NULL);
+            parse(fp, NULL);
             fclose(fp);
             File = oldFile;
             mibLine = oldLine;

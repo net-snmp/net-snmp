@@ -382,12 +382,10 @@ build_new_oid(netsnmp_handler_registration *reginfo,
               netsnmp_index *row, netsnmp_request_info *current)
 {
     oid             coloid[MAX_OID_LEN];
-    int             coloid_len;
 
     if (!tblreq_info || !reginfo || !row || !current)
         return;
 
-    coloid_len = reginfo->rootoid_len + 2;
     memcpy(coloid, reginfo->rootoid, reginfo->rootoid_len * sizeof(oid));
 
     /** table.entry */
@@ -525,16 +523,12 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
                netsnmp_container *request_group, table_container_data * tad)
 {
     netsnmp_table_request_info *tblreq_info;
-    netsnmp_variable_list *var;
     netsnmp_index *row, *tmp, index;
     netsnmp_request_info *current;
     netsnmp_request_group *g;
     netsnmp_request_group_item *i;
 
     for (current = requests; current; current = current->next) {
-
-        var = current->requestvb;
-
         /*
          * skip anything that doesn't need processing.
          */
