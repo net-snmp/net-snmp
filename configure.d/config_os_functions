@@ -38,8 +38,8 @@ AC_CHECK_FUNCS([fork            gai_strerror                   ] dnl
                [readdir                                        ] dnl
                [setenv          setitimer     setlocale        ] dnl
                [setsid          snprintf                       ] dnl
-               [strcasestr                    strdup           ] dnl
-               [strerror        strlcpy       strncasecmp      ] dnl
+               [strcasestr      strdup        strerror         ] dnl
+               [strlcat         strlcpy       strncasecmp      ] dnl
                [strtok_r        strtol        strtoul          ] dnl
                [strtoull        sysconf       times            ] dnl
                [vsnprintf                                      ] )

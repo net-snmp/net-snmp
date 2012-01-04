@@ -2785,9 +2785,9 @@ netsnmp_check_outstanding_agent_requests(void)
 int
 netsnmp_check_transaction_id(int transaction_id)
 {
-    netsnmp_agent_session *asp, *prev_asp = NULL;
+    netsnmp_agent_session *asp;
 
-    for (asp = agent_delegated_list; asp; prev_asp = asp, asp = asp->next) {
+    for (asp = agent_delegated_list; asp; asp = asp->next) {
         if (asp->pdu->transid == transaction_id)
             return SNMPERR_SUCCESS;
     }
