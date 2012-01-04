@@ -650,7 +650,7 @@ interface_ioctl_dot3stats_get (dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, co
     struct ethtool_gstrings *eth_strings;
     struct ethtool_stats *eth_stats;
     struct ifreq ifr; 
-    unsigned int nstats, size_str, size_stats, i;
+    unsigned int nstats, size_str, i;
     int err;
 
     DEBUGMSGTL(("access:dot3StatsTable:interface_ioctl_dot3Stats_get",
@@ -678,7 +678,6 @@ interface_ioctl_dot3stats_get (dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, co
     }
 
     size_str = nstats * ETH_GSTRING_LEN;
-    size_stats = nstats * sizeof(u64);
 
     eth_strings = malloc(size_str + sizeof (struct ethtool_gstrings));
     if (!eth_strings) {

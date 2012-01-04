@@ -353,14 +353,13 @@ var_smux_write(int action,
     size_t          var_len, datalen, name_length, packet_len;
     ssize_t         len, tmp_len;
     long            reqid, errsts, erridx;
-    u_char          var_type, *dataptr;
+    u_char          *dataptr;
 
     DEBUGMSGTL(("smux", "[var_smux_write] entering var_smux_write\n"));
 
     len = SMUXMAXPKTSIZE;
     reterr = SNMP_ERR_NOERROR;
     var_len = var_val_len;
-    var_type = var_val_type;
     name_length = name_len;
 
     /*
@@ -1754,9 +1753,7 @@ static void
 smux_peer_cleanup(int sd)
 {
     smux_reg       *nrptr, *rptr, *rptr2;
-    int             nfound, i;
-
-    nfound = 0;
+    int             i;
 
     /*
      * close the descriptor 

@@ -647,10 +647,10 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                 {0, NULL}                  /* end of list */
             };
 
-            int             ii, len;
+            int             len;
             register pmatch_if pm;
             
-            for (ii = 0, pm = lmatch_if; pm->mi_name; pm++) {
+            for (pm = lmatch_if; pm->mi_name; pm++) {
                 len = strlen(pm->mi_name);
                 if (0 == strncmp(entry->name, pm->mi_name, len)) {
                     entry->type = pm->mi_type;
