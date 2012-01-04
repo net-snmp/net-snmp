@@ -2771,6 +2771,8 @@ netsnmp_mibindex_load( void )
               get_persistent_directory(), i );
         tmpbuf[sizeof(tmpbuf)-1] = 0;
         fp = fopen( tmpbuf, "r" );
+        if (!fp)
+            continue;
         cp = fgets( tmpbuf2, sizeof(tmpbuf2), fp );
         if ( !cp ) {
             DEBUGMSGTL(("mibindex", "Empty MIB index (%d)\n", i));
