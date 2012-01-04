@@ -91,7 +91,7 @@ static u_char  *smux_parse(u_char *, oid *, size_t *, size_t *, u_char *);
 static u_char  *smux_parse_var(u_char *, size_t *, oid *, size_t *,
                                size_t *, u_char *);
 static void     smux_send_close(int, int);
-static void     smux_list_detach(smux_reg **, smux_reg **);
+static void     smux_list_detach(smux_reg **, smux_reg *);
 static void     smux_replace_active(smux_reg *, smux_reg *);
 static void     smux_peer_cleanup(int);
 static int      smux_auth_peer(oid *, size_t, char *, int);
@@ -1104,7 +1104,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
                 /*
                  * no replacement found 
                  */
-                smux_list_detach(&ActiveRegs, &rptr);
+                smux_list_detach(&ActiveRegs, rptr);
                 free(rptr);
             }
             smux_send_rrsp(sd, rpriority);
@@ -1118,7 +1118,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
                             priority);
         if (rptr) {
             rpriority = rptr->sr_priority;
-            smux_list_detach(&PassiveRegs, &rptr);
+            smux_list_detach(&PassiveRegs, rptr);
             free(rptr);
             smux_send_rrsp(sd, rpriority);
             return ptr;
@@ -1277,13 +1277,13 @@ smux_replace_active(smux_reg * actptr, smux_reg * pasptr)
 {
     netsnmp_handler_registration *reg;
 
-    smux_list_detach(&ActiveRegs, &actptr);
+    smux_list_detach(&ActiveRegs, actptr);
     if (actptr->reginfo) {
         netsnmp_unregister_handler(actptr->reginfo);
         actptr->reginfo = NULL;
     }
 
-    smux_list_detach(&PassiveRegs, &pasptr);
+    smux_list_detach(&PassiveRegs, pasptr);
 
     (void) smux_list_add(&ActiveRegs, pasptr);
     free(actptr);
@@ -1307,7 +1307,7 @@ smux_replace_active(smux_reg * actptr, smux_reg * pasptr)
 }
 
 static void
-smux_list_detach(smux_reg ** head, smux_reg ** m_remove)
+smux_list_detach(smux_reg ** head, smux_reg * m_remove)
 {
     smux_reg       *rptr, *rptr2;
 
@@ -1315,15 +1315,13 @@ smux_list_detach(smux_reg ** head, smux_reg ** m_remove)
         DEBUGMSGTL(("smux", "[smux_list_detach] Ouch!"));
         return;
     }
-    if (*head == *m_remove) {
-        *m_remove = *head;
+    if (*head == m_remove) {
         *head = (*head)->sr_next;
         return;
     }
     for (rptr = *head, rptr2 = rptr->sr_next; rptr2;
          rptr2 = rptr2->sr_next, rptr = rptr->sr_next) {
-        if (rptr2 == *m_remove) {
-            *m_remove = rptr2;
+        if (rptr2 == m_remove) {
             rptr->sr_next = rptr2->sr_next;
             return;
         }
@@ -1850,7 +1848,7 @@ smux_peer_cleanup(int sd)
     for (rptr = PassiveRegs; rptr; rptr = nrptr) {
         nrptr = rptr->sr_next;
         if (rptr->sr_fd == sd) {
-            smux_list_detach(&PassiveRegs, &rptr);
+            smux_list_detach(&PassiveRegs, rptr);
             free(rptr);
         }
         rptr = nrptr;
@@ -1861,7 +1859,7 @@ smux_peer_cleanup(int sd)
     for (rptr = ActiveRegs; rptr; rptr = rptr2) {
         rptr2 = rptr->sr_next;
         if (rptr->sr_fd == sd) {
-            smux_list_detach(&ActiveRegs, &rptr);
+            smux_list_detach(&ActiveRegs, rptr);
             if (rptr->reginfo) {
                 netsnmp_unregister_handler(rptr->reginfo);
                 rptr->reginfo = NULL;
@@ -1869,7 +1867,7 @@ smux_peer_cleanup(int sd)
             if ((nrptr = smux_find_replacement(rptr->sr_name,
                                                rptr->sr_name_len)) !=
                                                        NULL) {
-                smux_list_detach(&PassiveRegs, &nrptr);
+                smux_list_detach(&PassiveRegs, nrptr);
                 reg = netsnmp_create_handler_registration("smux",
                         smux_handler,
                         nrptr->sr_name,
