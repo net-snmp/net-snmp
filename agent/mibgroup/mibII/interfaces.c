@@ -438,10 +438,8 @@ Interface_Scan_By_Index(int iindex,
                     a = get_address(ifp + 1, ifp->ifm_addrs, RTA_IFP);
                     if (a == NULL)
                         return 0;
-                    strncpy(if_name,
-                            ((const struct sockaddr_in *) a)->sin_zero,
-                            ((const u_char *) a)[5]);
-                    if_name[((const u_char *) a)[5]] = 0;
+                    sprintf(if_name, "%.*s", ((const u_char *) a)[5],
+                            ((const struct sockaddr_in *) a)->sin_zero);
                     *if_msg = *ifp;
                     ++have_ifinfo;
                 }
@@ -1578,8 +1576,7 @@ Interface_Scan_Init(void)
         }
 
         *stats   = 0;
-        strncpy(ifname_buf, ifstart, sizeof(ifname_buf));
-        ifname_buf[ sizeof(ifname_buf)-1 ] = 0;
+        strlcpy(ifname_buf, ifstart, sizeof(ifname_buf));
         *stats++ = ':';
         while (*stats == ' ')
             stats++;
@@ -1646,31 +1643,27 @@ Interface_Scan_Init(void)
         nnew->if_unit = strdup(*ptr ? ptr : "");
         *ptr = 0;
 
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+        strlcpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
         if (ioctl(fd, SIOCGIFADDR, &ifrq) < 0)
             memset((char *) &nnew->if_addr, 0, sizeof(nnew->if_addr));
         else
             nnew->if_addr = ifrq.ifr_addr;
 
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+        strlcpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
         if (ioctl(fd, SIOCGIFBRDADDR, &ifrq) < 0)
             memset((char *) &nnew->ifu_broadaddr, 0,
                    sizeof(nnew->ifu_broadaddr));
         else
             nnew->ifu_broadaddr = ifrq.ifr_broadaddr;
 
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+        strlcpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
         if (ioctl(fd, SIOCGIFNETMASK, &ifrq) < 0)
             memset((char *) &nnew->ia_subnetmask, 0,
                    sizeof(nnew->ia_subnetmask));
         else
             nnew->ia_subnetmask = ifrq.ifr_netmask;
 
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+        strlcpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
         nnew->if_flags = ioctl(fd, SIOCGIFFLAGS, &ifrq) < 0
             ? 0 : ifrq.ifr_flags;
 
@@ -1682,8 +1675,7 @@ Interface_Scan_Init(void)
          * 4 bytes of sa_data.
          */
         memset(ifrq.ifr_hwaddr.sa_data, (0), IFHWADDRLEN);
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+        strlcpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
         if (ioctl(fd, SIOCGIFHWADDR, &ifrq) < 0)
             memset(nnew->if_hwaddr, (0), IFHWADDRLEN);
         else {
@@ -1740,14 +1732,12 @@ Interface_Scan_Init(void)
 #endif
         }
 
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+        strlcpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
         nnew->if_metric = ioctl(fd, SIOCGIFMETRIC, &ifrq) < 0
             ? 0 : ifrq.ifr_metric;
 
 #ifdef SIOCGIFMTU
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+        strlcpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
         nnew->if_mtu = (ioctl(fd, SIOCGIFMTU, &ifrq) < 0)
             ? 0 : ifrq.ifr_mtu;
 #else
@@ -1857,14 +1847,13 @@ Interface_Scan_Next(short *Index,
         }
 #else
         ifnet = *ifnetaddr;
-        strncpy(saveName, ifnet.if_name, sizeof(saveName));
+        strlcpy(saveName, ifnet.if_name, sizeof(saveName));
 #endif
 
         saveName[sizeof(saveName) - 1] = '\0';
         cp = (char *) strchr(saveName, '\0');
 #ifdef linux
-        strncat(cp, ifnet.if_unit, sizeof(saveName)-strlen(saveName)-1);
-        saveName[sizeof(saveName) - 1] = '\0';
+        strlcat(saveName, ifnet.if_unit, sizeof(saveName));
 #else
         string_append_int(cp, ifnet.if_unit);
 #endif
@@ -1968,7 +1957,7 @@ Interface_Scan_Next(short *Index,
         }
 #if STRUCT_IFNET_HAS_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
-        strncpy(saveName, ifnet.if_xname, sizeof saveName);
+        strlcpy(saveName, ifnet.if_xname, sizeof(saveName));
 #else
         if (!NETSNMP_KLOOKUP(ifnet.if_xname, (char *) saveName, sizeof saveName)) {
             DEBUGMSGTL(("mibII/interfaces:Interface_Scan_Next", "klookup failed\n"));

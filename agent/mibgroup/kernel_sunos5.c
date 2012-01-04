@@ -442,8 +442,7 @@ getKstat(const char *statname, const char *varname, void *value)
 	    case KSTAT_DATA_CHAR:
 		DEBUGMSGTL(("kernel_sunos5", "value: %s\n", d->value.c));
 		*(char **)v = buf;
-		buf[sizeof(buf)-1] = 0;
-		strncpy(buf, d->value.c, sizeof(buf)-1);
+		strlcpy(buf, d->value.c, sizeof(buf));
 		break;
 #ifdef KSTAT_DATA_INT32         /* Solaris 2.6 and up */
 	    case KSTAT_DATA_INT32:
@@ -596,8 +595,7 @@ getKstatString(const char *statname, const char *varname,
         if (strcmp(d->name, varname) == 0) {
             switch (d->data_type) {
             case KSTAT_DATA_CHAR:
-                value[value_len-1] = '\0';
-                strncpy(value, d->value.c, value_len-1); 
+                strlcpy(value, d->value.c, value_len);
                 DEBUGMSGTL(("kernel_sunos5", "value: %s\n", d->value.c));
                 break;
             default:

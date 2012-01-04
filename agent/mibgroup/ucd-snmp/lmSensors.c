@@ -326,7 +326,7 @@ var_lmSensorsTable(struct variable *vp,
     case LMFANSENSORSDEVICE:
     case LMVOLTSENSORSDEVICE:
     case LMMISCSENSORSDEVICE:
-        strncpy(string, s.name, SPRINT_MAX_LEN - 1);
+        strlcpy(string, s.name, sizeof(string));
         *var_len = strlen(string);
         ret = (unsigned char *) string;
         goto leaving;
@@ -886,32 +886,32 @@ else{
                    DEBUGMSG(("ucd-snmp/lmSensors", "front panel value %d\n",enc_info->value));
                    typ = 3; /* misc */
                    sensor_array[typ].sensor[other].value = enc_info->value;
-                   strncpy(sensor_array[typ].sensor[other].name,"FSP",MAX_NAME-1);
-                   sensor_array[typ].sensor[other].name[MAX_NAME-1]='\0'; /* null terminate */
+                   strlcpy(sensor_array[typ].sensor[other].name, "FSP",
+                           MAX_NAME);
                    other++;
                    break;
                case ENVCTRL_ENCL_AMBTEMPR:
                    DEBUGMSG(("ucd-snmp/lmSensors", "ambient temp mC %d\n",enc_info->value*1000));
                    typ = 0; /* temperature sensor */
                    sensor_array[typ].sensor[temp].value = enc_info->value*1000;
-                   strncpy(sensor_array[typ].sensor[temp].name,"Ambient",MAX_NAME-1);
-                   sensor_array[typ].sensor[temp].name[MAX_NAME-1]='\0'; /* null terminate */
+                   strlcpy(sensor_array[typ].sensor[temp].name, "Ambient",
+                           MAX_NAME);
                    temp++;
                    break;
                case ENVCTRL_ENCL_BACKPLANE4:
                    DEBUGMSG(("ucd-snmp/lmSensors", "There is a backplane4\n"));
                    typ = 3; /* misc */
                    sensor_array[typ].sensor[other].value = enc_info->value;
-                   strncpy(sensor_array[typ].sensor[other].name,"Backplane4",MAX_NAME-1);
-                   sensor_array[typ].sensor[other].name[MAX_NAME-1]='\0'; /* null terminate */
+                   strlcpy(sensor_array[typ].sensor[other].name, "Backplane4",
+                           MAX_NAME);
                    other++;
                    break;
                case ENVCTRL_ENCL_BACKPLANE8:
                    DEBUGMSG(("ucd-snmp/lmSensors", "There is a backplane8\n"));
                    typ = 3; /* misc */
                    sensor_array[typ].sensor[other].value = enc_info->value;
-                   strncpy(sensor_array[typ].sensor[other].name,"Backplane8",MAX_NAME-1);
-                   sensor_array[typ].sensor[other].name[MAX_NAME-1]='\0'; /* null terminate */
+                   strlcpy(sensor_array[typ].sensor[other].name, "Backplane8",
+                           MAX_NAME);
                    other++;
                    break;
                case ENVCTRL_ENCL_CPUTEMPR:
@@ -1021,7 +1021,7 @@ else{
                     array->current_len = new_size / sizeof(_sensor);
                     DEBUGMSG(("ucd-snmp/lmSensors", "type #%d increased to %d elements\n", type, array->current_len));
                 } /* end if array->current */
-                strncpy(array->sensor[array->n].name, label, MAX_NAME);
+                strlcpy(array->sensor[array->n].name, label, MAX_NAME);
                 array->sensor[array->n].value = (int) (val * mul);
                 DEBUGMSGTL(("sensors","sensor %d, value %d\n",
                             array->sensor[array->n].name,

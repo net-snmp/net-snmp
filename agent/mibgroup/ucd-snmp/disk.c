@@ -252,7 +252,7 @@ disk_parse_config(const char *token, char *cptr)
           disks = malloc(maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
-              sprintf(tmpbuf, "\tignoring:  %s", cptr);
+              snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", cptr);
               tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
               config_perror(tmpbuf);
               return;
@@ -263,7 +263,7 @@ disk_parse_config(const char *token, char *cptr)
           disks = realloc(disks, maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
-              sprintf(tmpbuf, "\tignoring:  %s", cptr);
+              snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", cptr);
               tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
               config_perror(tmpbuf);
               return;
@@ -317,7 +317,7 @@ disk_parse_config_all(const char *token, char *cptr)
           disks = malloc(maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
-              sprintf(tmpbuf, "\tignoring:  %s", cptr);
+              snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", cptr);
               config_perror(tmpbuf);
               return;
           }
@@ -327,7 +327,7 @@ disk_parse_config_all(const char *token, char *cptr)
           disks = realloc(disks, maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
-              sprintf(tmpbuf, "\tignoring:  %s", cptr);
+              snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", cptr);
               config_perror(tmpbuf);
               return;
           }
@@ -350,7 +350,7 @@ disk_parse_config_all(const char *token, char *cptr)
    */
   if(allDisksIncluded) {
       config_perror("includeAllDisks already specified.");
-      sprintf(tmpbuf, "\tignoring: includeAllDisks %s", cptr);
+      snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring: includeAllDisks %s", cptr);
       config_perror(tmpbuf);
   }
   else {
@@ -405,9 +405,8 @@ add_device(char *path, char *device, int minspace, int minpercent, int override)
     /* add if and only if the device was found */
     if(device[0] != 0) {
       /* The following buffers are cleared above, no need to add '\0' */
-      strncpy(disks[numdisks].path, path, sizeof(disks[numdisks].path) - 1);
-      strncpy(disks[numdisks].device, device,
-              sizeof(disks[numdisks].device) - 1);
+      strlcpy(disks[numdisks].path, path, sizeof(disks[numdisks].path));
+      strlcpy(disks[numdisks].device, device, sizeof(disks[numdisks].device));
       disks[numdisks].minimumspace = minspace;
       disks[numdisks].minpercent   = minpercent;
       numdisks++;  
@@ -596,8 +595,7 @@ find_device(char *path)
   }
   while (mntfp && NULL != (mntent = getmntent(mntfp)))
     if (strcmp(path, mntent->mnt_dir) == 0) {
-      strncpy(device, mntent->mnt_fsname, sizeof(device));
-      device[sizeof(device) - 1] = '\0';
+      strlcpy(device, mntent->mnt_fsname, sizeof(device));
       DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",
 		  mntent->mnt_fsname));
       break;
@@ -622,18 +620,14 @@ find_device(char *path)
 		  path, mnttab.mnt_mountp));
     }
   fclose(mntfp);
-  if (i == 0) {
-    strncpy(device, mnttab.mnt_special, sizeof(device));
-    device[sizeof(device) - 1] = '\0';
-  }
+  if (i == 0)
+    strlcpy(device, mnttab.mnt_special, sizeof(device));
 #endif /* HAVE_SETMNTENT */
 #elif HAVE_FSTAB_H
   stat(path, &stat1);
   setfsent();
-  if ((fstab = getfsfile(path))) {
-    strncpy(device, fstab->fs_spec, sizeof(device));
-    device[sizeof(device) - 1] = '\0';
-  }
+  if ((fstab = getfsfile(path)))
+    strlcpy(device, fstab->fs_spec, sizeof(device));
   endfsent();
   if (device[0] != '\0') {
      /*
@@ -643,14 +637,13 @@ find_device(char *path)
 
 #elif HAVE_STATFS
   if (statfs(path, &statf) == 0) {
-    strncpy(device, statf.f_mntfromname, sizeof(device) - 1);
-    device[sizeof(device) - 1] = '\0';
+    strlcpy(device, statf.f_mntfromname, sizeof(device));
     DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",
 		statf.f_mntfromname));
   }
 #endif
   else {
-    sprintf(tmpbuf, "Couldn't find device for disk %s",
+    snprintf(tmpbuf, sizeof(tmpbuf), "Couldn't find device for disk %s",
 	    path);
     config_pwarn(tmpbuf);
   }

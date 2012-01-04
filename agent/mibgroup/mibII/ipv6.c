@@ -780,8 +780,7 @@ var_ifv6Entry(register struct variable * vp,
 
             memset(&ifr, 0, sizeof(ifr));
             ifr.ifr_addr.sa_family = AF_INET6;
-            strncpy(ifr.ifr_name, if_getname(interface),
-                    sizeof(ifr.ifr_name) - 1);
+            strlcpy(ifr.ifr_name, if_getname(interface), sizeof(ifr.ifr_name));
             if ((s = socket(ifr.ifr_addr.sa_family, SOCK_DGRAM, 0)) < 0)
                 break;
             if (ioctl(s, SIOCGIFMTU, (caddr_t) & ifr) < 0) {
@@ -982,8 +981,7 @@ var_ifv6Entry(register struct variable * vp,
             int             s;
 
             memset(&ifr, 0, sizeof(ifr));
-            strncpy(ifr.ifr_name, if_getname(interface),
-                    sizeof(ifr.ifr_name) - 1);
+            strlcpy(ifr.ifr_name, if_getname(interface), sizeof(ifr.ifr_name));
             if ((s = socket(AF_INET6, SOCK_DGRAM, 0)) < 0)
                 break;
             if (ioctl(s, SIOCGIFSTAT_IN6, (caddr_t) & ifr) < 0) {
@@ -1139,8 +1137,7 @@ var_icmpv6Entry(register struct variable * vp,
             int             s;
 
             memset(&ifr, 0, sizeof(ifr));
-            strncpy(ifr.ifr_name, if_getname(interface),
-                    sizeof(ifr.ifr_name) - 1);
+            strlcpy(ifr.ifr_name, if_getname(interface), sizeof(ifr.ifr_name));
             if ((s = socket(AF_INET6, SOCK_DGRAM, 0)) < 0)
                 break;
             if (ioctl(s, SIOCGIFSTAT_ICMP6, (caddr_t) & ifr) < 0) {
@@ -2013,7 +2010,7 @@ var_ifv6Entry(register struct variable * vp,
                 break;
             memset(&ifr, 0, sizeof(ifr));
             ifr.ifr_addr.sa_family = AF_INET6;
-            strncpy(ifr.ifr_name, p, sizeof(ifr.ifr_name) - 1);
+            strlcpy(ifr.ifr_name, p, sizeof(ifr.ifr_name));
             if ((s = socket(ifr.ifr_addr.sa_family, SOCK_DGRAM, 0)) < 0)
                 break;
             if (ioctl(s, SIOCGIFMTU, (caddr_t) & ifr) < 0) {
@@ -2033,7 +2030,7 @@ var_ifv6Entry(register struct variable * vp,
                 break;
             memset(&ifr, 0, sizeof(ifr));
             ifr.ifr_addr.sa_family = AF_INET6;
-            strncpy(ifr.ifr_name, p, sizeof(ifr.ifr_name) - 1);
+            strlcpy(ifr.ifr_name, p, sizeof(ifr.ifr_name));
             if ((s = socket(ifr.ifr_addr.sa_family, SOCK_DGRAM, 0)) < 0)
                 break;
             if (ioctl(s, SIOCGIFHWADDR, &ifr) < 0) {
@@ -2062,7 +2059,7 @@ var_ifv6Entry(register struct variable * vp,
                 break;
             memset(&ifr, 0, sizeof(ifr));
             ifr.ifr_addr.sa_family = AF_INET6;
-            strncpy(ifr.ifr_name, p, sizeof(ifr.ifr_name) - 1);
+            strlcpy(ifr.ifr_name, p, sizeof(ifr.ifr_name));
             if ((s = socket(ifr.ifr_addr.sa_family, SOCK_DGRAM, 0)) < 0)
                 break;
             if (ioctl(s, SIOCGIFFLAGS, &ifr) < 0) {

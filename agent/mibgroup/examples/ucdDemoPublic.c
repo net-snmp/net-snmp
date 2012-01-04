@@ -218,16 +218,9 @@ write_ucdDemoPublicString(int action,
         return SNMP_ERR_WRONGLENGTH;
     }
     if (action == COMMIT) {
-        if (var_val_len != 0) {
-            strncpy(publicString, var_val, sizeof(publicString)-1);
-            /* some sanity checks */
-            if (strlen(var_val) > sizeof(publicString)-1 ||
-                    strlen(var_val) != var_val_len)
-                publicString[sizeof(publicString)-1] = '\0';
-            else
-                publicString[var_val_len] = '\0';
-        } else
-            publicString[0] = '\0';
+        sprintf((char*) publicString, "%.*s",
+                (int) min(sizeof(publicString) - 1, var_val_len),
+                (const char*) var_val);
     }
     return SNMP_ERR_NOERROR;
 }

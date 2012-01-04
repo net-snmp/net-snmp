@@ -1646,7 +1646,7 @@ getHwAddress(const char *networkDevice, /* e.g. "eth0", "eth1" */
     /*
      * copy the name of the net device we want to find the HW address for 
      */
-    strncpy(request.ifr_name, networkDevice, IFNAMSIZ - 1);
+    strlcpy(request.ifr_name, networkDevice, IFNAMSIZ);
     /*
      * Get the HW address 
      */

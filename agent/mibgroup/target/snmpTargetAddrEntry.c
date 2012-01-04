@@ -358,9 +358,7 @@ snmpTargetAddr_addName(struct targetAddrTable_struct *entry, char *cptr)
                         "ERROR snmpTargetAddrEntry: name out of range in config string\n"));
             return (0);
         }
-        entry->name = (char *) malloc(len + 1);
-        strncpy(entry->name, cptr, len);
-        entry->name[len] = '\0';
+        entry->name = strdup(cptr);
     }
     return (1);
 }                               /* addName */
@@ -495,9 +493,7 @@ snmpTargetAddr_addTagList(struct targetAddrTable_struct *entry, char *cptr)
             return (0);
         }
         SNMP_FREE(entry->tagList);
-        entry->tagList = (char *) malloc(len + 1);
-        strncpy(entry->tagList, cptr, len);
-        entry->tagList[len] = '\0';
+        entry->tagList = strdup(cptr);
     }
     return (1);
 }                               /* snmpTargetAddr_addTagList */
@@ -521,9 +517,7 @@ snmpTargetAddr_addParams(struct targetAddrTable_struct *entry, char *cptr)
                         "ERROR snmpTargetAddrEntry: params out of range in config string\n"));
             return (0);
         }
-        entry->params = (char *) malloc(len + 1);
-        strncpy(entry->params, cptr, len);
-        entry->params[len] = '\0';
+        entry->params = strdup(cptr);
     }
     return (1);
 }                               /* snmpTargetAddr_addParams */
@@ -714,10 +708,7 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
                             (int) curr_struct->tDomain[i]);
                     line[ sizeof(line)-1 ] = 0;
                 }
-                if ( strlen(line)+2 < sizeof(line) ) {
-                    line[ strlen(line)+1 ] = 0;
-                    line[ strlen(line)   ] = ' ';
-                }
+                strlcat(line, " ", sizeof(line));
                 read_config_save_octet_string(&line[strlen(line)],
                                               curr_struct->tAddress,
                                               curr_struct->tAddressLen);
