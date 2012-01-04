@@ -893,6 +893,8 @@ read_config(const char *filename,
                         strncpy(fname, filename, SNMP_MAXPATH);
                         fname[SNMP_MAXPATH-1]='\0';
                         cp = strrchr(fname, '/');
+                        if (!cp)
+                            fname[0] = '\0';
                         *(++cp) = '\0';
                         strncat(fname, cptr, SNMP_MAXPATH-strlen(fname));
                         fname[SNMP_MAXPATH-1]='\0';

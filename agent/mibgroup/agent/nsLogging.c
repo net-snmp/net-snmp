@@ -363,7 +363,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
 		switch ( *request->requestvb->val.integer ) {
                 case RS_ACTIVE:
                 case RS_CREATEANDGO:
-                    if ( !logh->type ) {
+                    if ( !logh || !logh->type ) {
                         netsnmp_set_request_error(reqinfo, request,
                                                   SNMP_ERR_INCONSISTENTVALUE);
                         return SNMP_ERR_INCONSISTENTVALUE;
