@@ -826,7 +826,7 @@ smux_open_process(int fd, u_char * ptr, size_t * len, int *fail)
         return ((ptr += *len));
     }
     DEBUGMSGTL(("smux",
-                "[smux_open_process] version %d, len %" NETSNMP_PRIz
+                "[smux_open_process] version %ld, len %" NETSNMP_PRIz
                 "u, type %d\n", version, *len, (int) type));
 
     oid_name_len = MAX_OID_LEN;
@@ -980,7 +980,7 @@ smux_close_process(int fd, u_char * ptr, size_t * len)
     }
 
     DEBUGMSGTL(("smux",
-                "[smux_close_process] close from peer on fd %d reason %d\n",
+                "[smux_close_process] close from peer on fd %d reason %ld\n",
                 fd, down));
     smux_peer_cleanup(fd);
 
@@ -1012,7 +1012,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
         smux_send_rrsp(sd, -1);
         return NULL;
     }
-    DEBUGMSGTL(("smux", "[smux_rreq_process] priority %d\n", priority));
+    DEBUGMSGTL(("smux", "[smux_rreq_process] priority %ld\n", priority));
 
     if ((ptr = asn_parse_int(ptr, len, &type, &operation,
                              sizeof(operation))) == NULL) {
@@ -1021,7 +1021,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
         smux_send_rrsp(sd, -1);
         return NULL;
     }
-    DEBUGMSGTL(("smux", "[smux_rreq_process] operation %d\n", operation));
+    DEBUGMSGTL(("smux", "[smux_rreq_process] operation %ld\n", operation));
 
     if (operation == SMUX_REGOP_DELETE) {
         /*
@@ -1522,7 +1522,7 @@ smux_parse(u_char * rsp,
      * XXX How to send something intelligent back in case of an error 
      */
     DEBUGMSGTL(("smux",
-                "[smux_parse] Message type %d, reqid %d, errstat %d, \n\terrindex %d\n",
+                "[smux_parse] Message type %d, reqid %ld, errstat %ld, \n\terrindex %ld\n",
                 (int) type, reqid, errstat, errindex));
     if (ptr == NULL || errstat != SNMP_ERR_NOERROR)
         return NULL;

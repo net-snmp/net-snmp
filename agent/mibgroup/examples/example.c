@@ -457,7 +457,7 @@ write_exampleint(int action,
 
         intval = *((long *) var_val);
         if (intval > MAX_EXAMPLE_INT) {
-            DEBUGMSGTL(("example", "wrong value %x", intval));
+            DEBUGMSGTL(("example", "wrong value %lx", intval));
             return SNMP_ERR_WRONGVALUE;
         }
         break;
@@ -543,7 +543,7 @@ write_exampletrap(int action,
 
         intval = *((long *) var_val);
         if (intval != 1) {
-            DEBUGMSGTL(("example", "wrong value %x", intval));
+            DEBUGMSGTL(("example", "wrong value %lx", intval));
             return SNMP_ERR_WRONGVALUE;
         }
         break;
@@ -654,7 +654,7 @@ write_exampletrap2(int action,
 
         intval = *((long *) var_val);
         if (intval != 1) {
-            DEBUGMSGTL(("example", "wrong value %x", intval));
+            DEBUGMSGTL(("example", "wrong value %lx", intval));
             return SNMP_ERR_WRONGVALUE;
         }
         break;
