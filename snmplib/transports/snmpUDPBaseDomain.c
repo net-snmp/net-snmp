@@ -191,6 +191,8 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 
         DEBUGMSGTL(("udpbase:sendto", "sending from %s\n", inet_ntoa(*srcip)));
 
+        memset(cmsg, 0, sizeof(cmsg));
+
         m.msg_control    = &cmsg;
         m.msg_controllen = sizeof(cmsg);
 
