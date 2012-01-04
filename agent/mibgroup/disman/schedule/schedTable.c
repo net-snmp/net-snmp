@@ -454,7 +454,7 @@ schedTable_handler(netsnmp_mib_handler *handler,
                 recalculate = 1;
                 break;
             case COLUMN_SCHEDCONTEXTNAME:
-                memset(entry->schedContextName, 0, SCHED_STR1_LEN+1);
+                memset(entry->schedContextName, 0, sizeof(entry->schedContextName));
                 memcpy(entry->schedContextName,
                                            request->requestvb->val.string,
                                            request->requestvb->val_len);
