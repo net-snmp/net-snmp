@@ -180,6 +180,9 @@ SOFTWARE.
     NETSNMP_IMPORT
     size_t            strlcpy(char *, const char *, size_t);
 #endif
+#ifndef HAVE_STRLCAT
+    size_t            strlcat(char *, const char *, size_t);
+#endif
 
     int             netsnmp_os_prematch(const char *ospmname,
                                         const char *ospmrelprefix);
