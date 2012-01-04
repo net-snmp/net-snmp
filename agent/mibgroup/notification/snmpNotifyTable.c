@@ -320,9 +320,15 @@ notifyTable_register_notifications(int major, int minor,
     /*
      * address 
      */
+    t = snmp_sess_transport(snmp_sess_pointer(ss));
+    f (!t) {
+        snmp_log(LOG_ERR,
+                "Cannot add new trap destination, transport is closed.");
+        snmp_sess_close(ss);
+        return 0;
+    }
     ptr = snmpTargetAddrTable_create();
     ptr->name = strdup(buf);
-    t = snmp_sess_transport(snmp_sess_pointer(ss));
     memcpy(ptr->tDomain, t->domain, t->domain_length * sizeof(oid));
     ptr->tDomainLen = t->domain_length;
     ptr->tAddressLen = t->remote_length;

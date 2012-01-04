@@ -416,8 +416,9 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 		 */
                 debug_entry = (netsnmp_token_descr*)
                                netsnmp_extract_iterator_context(request);
-                debug_entry->enabled =
-                    (*request->requestvb->val.integer == RS_ACTIVE);
+                if (debug_entry)
+                    debug_entry->enabled =
+                        (*request->requestvb->val.integer == RS_ACTIVE);
 		break;
 
             case RS_CREATEANDWAIT:
