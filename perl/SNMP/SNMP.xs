@@ -221,7 +221,15 @@ __snprint_oid(const oid *objid, size_t objidlen) {
 #else	/* DEBUGGING */
 #define DBDCL(x) 
 #define DBOUT
-#define	DBPRT(severity, otherargs)	/* Ignore */
+/* Do nothing but in such a way that the compiler sees "otherargs". */
+#define	DBPRT(severity, otherargs) \
+    do { if (0) printf otherargs; } while(0)
+
+static char *
+__snprint_oid(const oid *objid, size_t objidlen)
+{
+    return "(debugging is disabled)";
+}
 
 #endif	/* DEBUGGING */
 
@@ -1584,7 +1592,7 @@ _bulkwalk_done(walk_context *context)
  	** walks still in progress.
  	*/
  	DBPRT(1, (DBOUT "Ignoring %s request oid %s\n",
- 	      bt_entry->norepeat? "nonrepeater" : "completed",
+ 	      bt_entry->norepeat ? "nonrepeater" : "completed",
  	      __snprint_oid(bt_entry->req_oid, bt_entry->req_len)));
 
  	/* Ignore this OID in any further packets. */
@@ -1894,7 +1902,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    int		i;
    AV		*varbind;
    SV		*rv;
-   DBDCL(SV**sess_ptr_sv=hv_fetch((HV*)SvRV(context->sess_ref),"SessPtr",7,1);)
+   SV **sess_ptr_sv = hv_fetch((HV*)SvRV(context->sess_ref), "SessPtr", 7, 1);
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
    SV **err_ind_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorInd", 8, 1);
@@ -2930,6 +2938,8 @@ snmp_add_mib_dir(mib_dir,force=0)
 	int result = 0;      /* Avoid use of uninitialized variable below. */
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
+        DBPRT(999, (DBOUT "force=%d\n", force));
+
         if (mib_dir && *mib_dir) {
 	   result = add_mibdir(mib_dir);
         }
@@ -2978,6 +2988,8 @@ snmp_read_mib(mib_file, force=0)
 	CODE:
         {
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+
+        DBPRT(999, (DBOUT "force=%d\n", force));
 
         if ((mib_file == NULL) || (*mib_file == '\0')) {
            if (get_tree_head() == NULL) {
