@@ -244,7 +244,7 @@ snmpNotifyFilterTable_container_load(netsnmp_container *container)
     }
 
     DEBUGMSGT(("verbose:snmpNotifyFilterTable:snmpNotifyFilterTable_container_load",
-               "inserted %lu records\n", (long)count));
+               "inserted %" NETSNMP_PRIz "u records\n", count));
 
     return MFD_SUCCESS;
 }                               /* snmpNotifyFilterTable_container_load */
