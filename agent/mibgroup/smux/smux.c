@@ -1144,7 +1144,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
                      != SNMPERR_SUCCESS) {
 		DEBUGMSGTL(("smux", "[smux_rreq_process] Failed to register subtree\n"));
 		smux_list_detach(&ActiveRegs, nrptr);
-		free(nptr);
+		free(nrptr);
 		smux_send_rrsp(sd, -1);
 		return NULL;
 	}
