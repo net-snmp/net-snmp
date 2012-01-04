@@ -245,13 +245,10 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_watcher_cache *old_data;
 
     DEBUGMSGTL(("helper:watcher", "Got request:  %d\n", reqinfo->mode));
-
     DEBUGMSGTL(( "helper:watcher", "  oid:"));
     DEBUGMSGOID(("helper:watcher", requests->requestvb->name,
                                    requests->requestvb->name_length));
     DEBUGMSG((   "helper:watcher", "\n"));
-
-
 
     switch (reqinfo->mode) {
         /*
@@ -392,13 +389,10 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
 
     DEBUGMSGTL(("helper:watcher:timestamp",
                                "Got request:  %d\n", reqinfo->mode));
-
     DEBUGMSGTL(( "helper:watcher:timestamp", "  oid:"));
     DEBUGMSGOID(("helper:watcher:timestamp", requests->requestvb->name,
                                    requests->requestvb->name_length));
     DEBUGMSG((   "helper:watcher:timestamp", "\n"));
-
-
 
     switch (reqinfo->mode) {
         /*
@@ -481,13 +475,10 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
 
     DEBUGMSGTL(("helper:watcher:spinlock",
                                "Got request:  %d\n", reqinfo->mode));
-
     DEBUGMSGTL(( "helper:watcher:spinlock", "  oid:"));
     DEBUGMSGOID(("helper:watcher:spinlock", requests->requestvb->name,
                                    requests->requestvb->name_length));
     DEBUGMSG((   "helper:watcher:spinlock", "\n"));
-
-
 
     switch (reqinfo->mode) {
         /*
