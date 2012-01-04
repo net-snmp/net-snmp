@@ -169,7 +169,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
         return NULL;
     }
     t->data_length = sizeof(netsnmp_indexed_addr_pair);
-    memcpy(t->data, addr, sizeof(netsnmp_indexed_addr_pair));
+    memcpy(t->data, addr, sizeof(struct sockaddr_in6));
 
     t->domain = netsnmp_TCPIPv6Domain;
     t->domain_length = sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);
