@@ -169,10 +169,8 @@ smux_parse_peer_auth(const char *token, char *cptr)
         /*
          * password 
          */
-        if (*password_cptr) {
-            strncpy(aptr->sa_passwd, password_cptr, SMUXMAXSTRLEN-1);
-            aptr->sa_passwd[SMUXMAXSTRLEN-1] = '\0';
-        }
+        if (*password_cptr)
+            strlcpy(aptr->sa_passwd, password_cptr, sizeof(aptr->sa_passwd));
     } else {
         /*
          * null passwords OK 

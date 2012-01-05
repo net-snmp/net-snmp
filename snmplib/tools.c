@@ -613,7 +613,7 @@ void
 dump_chunk(const char *debugtoken, const char *title, const u_char * buf,
            int size)
 {
-    u_int           printunit = 64;     /* XXX  Make global. */
+    int             printunit = 64;     /* XXX  Make global. */
     char            chunk[SNMP_MAXBUF], *s, *sp;
 
     if (title && (*title != '\0')) {
@@ -626,8 +626,8 @@ dump_chunk(const char *debugtoken, const char *title, const u_char * buf,
     sp = s;
 
     while (size > 0) {
-        if (size > (int) printunit) {
-            strncpy(chunk, sp, printunit);
+        if (size > printunit) {
+            memcpy(chunk, sp, printunit);
             chunk[printunit] = '\0';
             DEBUGMSGTL((debugtoken, "\t%s\n", chunk));
         } else {
@@ -803,15 +803,10 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 
     case 4:                    /* Text. */
 
-        /*
-         * Doesn't exist on all (many) architectures 
-         */
-        /*
-         * s += snprintf(s, remaining_len+3, "\"%s\"", esp); 
-         */
-        s += sprintf(s, "\"%.*s\"", sizeof(buf)-strlen(buf)-3, esp);
+        s += sprintf(s, "\"%.*s\"", (int) (sizeof(buf)-strlen(buf)-3), esp);
         goto dump_snmpEngineID_quit;
         break;
+
      /*NOTREACHED*/ case 5:    /* Octets. */
 
         snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
@@ -820,6 +815,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         s -= 1;
         goto dump_snmpEngineID_quit;
         break;
+
        /*NOTREACHED*/ dump_snmpEngineID_violation:
     case 0:                    /* Violation of RESERVED, 
                                  * *   -OR- of expected length.

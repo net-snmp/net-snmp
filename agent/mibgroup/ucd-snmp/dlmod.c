@@ -122,7 +122,7 @@ dlmod_load_module(struct dlmod *dlm)
                 dlm->status = DLMOD_ERROR;
             }
         }
-        strncpy(dlm->path, tmp_path, sizeof(dlm->path));
+        strlcpy(dlm->path, tmp_path, sizeof(dlm->path));
         if (dlm->status == DLMOD_ERROR)
             return;
     }
@@ -217,18 +217,16 @@ dlmod_parse_config(const char *token, char *cptr)
         dlmod_delete_module(dlm);
         return;
     }
-    strncpy(dlm->name, dlm_name, sizeof(dlm->name));
-    dlm->name[sizeof(dlm->name)-1] = '\0';
+    strlcpy(dlm->name, dlm_name, sizeof(dlm->name));
 
     /*
      * dynamic module path
      */
     dlm_path = strtok_r(NULL, "\t ", &st);
     if (dlm_path)
-        strncpy(dlm->path, dlm_path, sizeof(dlm->path));
+        strlcpy(dlm->path, dlm_path, sizeof(dlm->path));
     else
-        strncpy(dlm->path, dlm_name, sizeof(dlm->path));
-    dlm->path[sizeof(dlm->path)-1] = '\0';
+        strlcpy(dlm->path, dlm_name, sizeof(dlm->path));
 
     dlmod_load_module(dlm);
 

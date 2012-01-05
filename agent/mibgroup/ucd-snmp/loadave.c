@@ -481,10 +481,12 @@ var_extensible_loadave(struct variable * vp,
         if (maxload[name[*length - 1] - 1] != 0 &&
             avenrun[name[*length - 1] - 1] >=
             maxload[name[*length - 1] - 1]) {
-            sprintf(errmsg, "%d min Load Average too high (= %.2f)",
+            snprintf(errmsg, sizeof(errmsg),
+                     "%d min Load Average too high (= %.2f)",
                     (name[*length - 1] ==
                      1) ? 1 : ((name[*length - 1] == 2) ? 5 : 15),
                     avenrun[name[*length - 1] - 1]);
+            errmsg[sizeof(errmsg) - 1] = '\0';
         } else {
             errmsg[0] = 0;
         }
