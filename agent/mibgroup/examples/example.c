@@ -163,7 +163,7 @@ init_example(void)
      *  Also set a default value for the string object.  Note that the
      *   example integer variable was initialised above.
      */
-    strncpy(example_str, EXAMPLE_STR_DEFAULT, EXAMPLE_STR_LEN);
+    strlcpy(example_str, EXAMPLE_STR_DEFAULT, sizeof(example_str));
 
     snmpd_register_config_handler("exampleint",
                                   example_parse_config_exampleint,
@@ -209,7 +209,7 @@ example_parse_config_examplestr(const char *token, char *cptr)
     /*
      * Make sure the string fits in the space allocated for it.
      */
-    if (strlen(cptr) < EXAMPLE_STR_LEN)
+    if (strlen(cptr) < sizeof(example_str))
         strcpy(example_str, cptr);
     else {
         /*
@@ -217,10 +217,8 @@ example_parse_config_examplestr(const char *token, char *cptr)
          * An alternative approach would be to log an error,
          *  and discard this value altogether.
          */
-        strncpy(example_str, cptr, EXAMPLE_STR_LEN - 4);
-        example_str[EXAMPLE_STR_LEN - 4] = 0;
-        strcat(example_str, "...");
-        example_str[EXAMPLE_STR_LEN - 1] = 0;
+        sprintf(example_str, "%.*s...", (int) (sizeof(example_str) - 4), cptr);
+        netsnmp_assert(strlen(example_str) < sizeof(example_str));
     }
 }
 

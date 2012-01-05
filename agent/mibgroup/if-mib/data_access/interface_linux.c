@@ -808,7 +808,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
     edata.cmd = ETHTOOL_GSET;
     edata.speed = 0;
     
-    strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name)-1);
+    strlcpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
     ifr.ifr_data = (char *) &edata;
     
     if (ioctl(fd, SIOCETHTOOL, &ifr) == -1) {
@@ -860,8 +860,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
     const unsigned long long media_speeds[] = {10000000, 10000000, 100000000, 100000000, 10000000, 0};
     /* It corresponds to "10baseT", "10baseT-FD", "100baseTx", "100baseTx-FD", "100baseT4", "Flow-control", 0, */
 
-    strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
-    ifr.ifr_name[ sizeof(ifr.ifr_name)-1 ] = 0;
+    strlcpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
     data[0] = 0;
     
     /*

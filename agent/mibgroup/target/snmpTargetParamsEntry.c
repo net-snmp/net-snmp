@@ -315,9 +315,7 @@ snmpTargetParams_addParamName(struct targetParamTable_struct *entry,
                         "ERROR snmpTargetParamsEntry: param name out of range in config string\n"));
             return (0);
         }
-        entry->paramName = (char *) malloc(len + 1);
-        strncpy(entry->paramName, cptr, len);
-        entry->paramName[len] = '\0';
+        entry->paramName = strdup(cptr);
     }
     return (1);
 }
@@ -378,16 +376,12 @@ int
 snmpTargetParams_addSecName(struct targetParamTable_struct *entry,
                             char *cptr)
 {
-    size_t          len;
     if (cptr == NULL) {
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargetParamsEntry: no security name in config string\n"));
         return (0);
     } else {
-        len = strlen(cptr);
-        entry->secName = (char *) malloc(len + 1);
-        strncpy(entry->secName, cptr, len);
-        entry->secName[len] = '\0';
+        entry->secName = strdup(cptr);
     }
     return (1);
 }                               /* snmpTargetParams_addSecName  */

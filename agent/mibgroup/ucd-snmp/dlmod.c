@@ -75,22 +75,18 @@ init_dlmod(void)
 
     {
         const char * const p = getenv("SNMPDLMODPATH");
-        strncpy(dlmod_path, SNMPDLMODPATH, sizeof(dlmod_path));
-        dlmod_path[ sizeof(dlmod_path) - 1 ] = 0;
+        strlcpy(dlmod_path, SNMPDLMODPATH, sizeof(dlmod_path));
         if (p) {
             if (p[0] == ':') {
                 int len = strlen(dlmod_path);
-                if (dlmod_path[len - 1] != ':') {
-                    strncat(dlmod_path, ":", sizeof(dlmod_path) - len - 1);
-                    len++;
-                }
-                strncat(dlmod_path, p + 1,   sizeof(dlmod_path) - len);
+                if (len >= 1 && dlmod_path[len - 1] != ':')
+                    strlcat(dlmod_path, ":", sizeof(dlmod_path));
+                strlcat(dlmod_path, p + 1, sizeof(dlmod_path));
             } else
-                strncpy(dlmod_path, p, sizeof(dlmod_path));
+                strlcpy(dlmod_path, p, sizeof(dlmod_path));
         }
     }
 
-    dlmod_path[ sizeof(dlmod_path) - 1 ] = 0;
     DEBUGMSGTL(("dlmod", "dlmod_path: %s\n", dlmod_path));
 }
 
@@ -179,7 +175,7 @@ dlmod_load_module(struct dlmod *dlm)
                 dlm->status = DLMOD_ERROR;
             }
         }
-        strncpy(dlm->path, tmp_path, sizeof(dlm->path));
+        strlcpy(dlm->path, tmp_path, sizeof(dlm->path));
         if (dlm->status == DLMOD_ERROR)
             return;
     }
@@ -268,18 +264,16 @@ dlmod_parse_config(const char *token, char *cptr)
         dlmod_delete_module(dlm);
         return;
     }
-    strncpy(dlm->name, dlm_name, sizeof(dlm->name));
-    dlm->name[sizeof(dlm->name)-1] = '\0';
+    strlcpy(dlm->name, dlm_name, sizeof(dlm->name));
 
     /*
      * dynamic module path 
      */
     dlm_path = strtok_r(NULL, "\t ", &st);
     if (dlm_path)
-        strncpy(dlm->path, dlm_path, sizeof(dlm->path));
+        strlcpy(dlm->path, dlm_path, sizeof(dlm->path));
     else
-        strncpy(dlm->path, dlm_name, sizeof(dlm->path));
-    dlm->path[sizeof(dlm->path)-1] = '\0';
+        strlcpy(dlm->path, dlm_name, sizeof(dlm->path));
 
     dlmod_load_module(dlm);
 
@@ -502,7 +496,7 @@ write_dlmodName(int action,
         dlm = dlmod_get_by_index(name[12]);
         if (!dlm || dlm->status == DLMOD_LOADED)
             return SNMP_ERR_RESOURCEUNAVAILABLE;
-        strncpy(dlm->name, (const char *) var_val, var_val_len);
+        memcpy(dlm->name, (const char *) var_val, var_val_len);
         dlm->name[var_val_len] = 0;
     }
     return SNMP_ERR_NOERROR;
@@ -529,7 +523,7 @@ write_dlmodPath(int action,
         dlm = dlmod_get_by_index(name[12]);
         if (!dlm || dlm->status == DLMOD_LOADED)
             return SNMP_ERR_RESOURCEUNAVAILABLE;
-        strncpy(dlm->path, (const char *) var_val, var_val_len);
+        memcpy(dlm->path, (const char *) var_val, var_val_len);
         dlm->path[var_val_len] = 0;
     }
     return SNMP_ERR_NOERROR;

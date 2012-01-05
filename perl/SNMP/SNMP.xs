@@ -458,8 +458,7 @@ int flag;
            if (flag == USE_ENUMS) {
               for(ep = tp->enums; ep; ep = ep->next) {
                  if (ep->value == *var->val.integer) {
-                    strncpy(buf, ep->label, buf_len);
-                    buf[buf_len-1] = '\0';
+                    strlcpy(buf, ep->label, buf_len);
                     len = strlen(buf);
                     break;
                  }
@@ -3458,13 +3457,11 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     varbind = (AV*) SvRV(*varbind_ref);
 
                     /* If the varbind includes the module prefix, capture it for use later */
-                    strncpy(tmp_buf_prefix, __av_elem_pv(varbind, VARBIND_TAG_F, ".0"), STR_BUF_SIZE);
-                    tmp_buf_prefix[STR_BUF_SIZE-1] = '\0';
+                    strlcpy(tmp_buf_prefix, __av_elem_pv(varbind, VARBIND_TAG_F, ".0"), STR_BUF_SIZE);
                     tmp_prefix_ptr = strstr(tmp_buf_prefix,"::");
                     if (tmp_prefix_ptr) {
                       tmp_prefix_ptr = strtok_r(tmp_buf_prefix, "::", &st);
-                      strncpy(str_buf_prefix, tmp_prefix_ptr, STR_BUF_SIZE);
-                      tmp_prefix_ptr[STR_BUF_SIZE-1] = '\0';
+                      strlcpy(str_buf_prefix, tmp_prefix_ptr, STR_BUF_SIZE);
                     }
                     else {
                       *str_buf_prefix = '\0';
@@ -3576,9 +3573,9 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 
                     /* Prepend the module prefix to the next OID if needed */
                     if (*str_buf_prefix) {
-                      strncat(str_buf_prefix, "::", STR_BUF_SIZE - strlen(str_buf_prefix) - 2);
-                      strncat(str_buf_prefix, str_buf, STR_BUF_SIZE - strlen(str_buf_prefix));
-                      strncpy(str_buf, str_buf_prefix, STR_BUF_SIZE);
+                      strlcat(str_buf_prefix, "::", STR_BUF_SIZE);
+                      strlcat(str_buf_prefix, str_buf, STR_BUF_SIZE);
+                      strlcpy(str_buf, str_buf_prefix, STR_BUF_SIZE);
                     }
                     
                     if (__is_leaf(tp)) {

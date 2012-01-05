@@ -657,14 +657,12 @@ var_hrswrun(struct variable * vp,
         return (u_char *) & long_return;
     case HRSWRUN_NAME:
 #ifdef HAVE_SYS_PSTAT_H
-        snprintf(string, sizeof(string), "%s", proc_buf.pst_cmd);
-        string[ sizeof(string)-1 ] = 0;
+        strlcpy(string, proc_buf.pst_cmd, sizeof(string));
         cp = strchr(string, ' ');
         if (cp != NULL)
             *cp = '\0';
 #elif defined(dynix)
-        snprintf(string, sizeof(string), "%s", lowpsinfo.pr_fname);
-        string[ sizeof(string)-1 ] = 0;
+        strlcpy(string, lowpsinfo.pr_fname, sizeof(string));
         cp = strchr(string, ' ');
         if (cp != NULL)
             *cp = '\0';
@@ -673,19 +671,16 @@ var_hrswrun(struct variable * vp,
         if (proc_buf) { 
             char *pos=strchr(proc_buf->pr_psargs,' ');
             if (pos != NULL) *pos = '\0';
-            strlcpy(string, basename(proc_buf->pr_psargs),sizeof(string));
+            strlcpy(string, basename(proc_buf->pr_psargs), sizeof(string));
             if (pos != NULL) *pos=' ';
         } else {
-            strcpy(string, "<exited>");
+            strlcpy(string, "<exited>", sizeof(string));
         }
-        string[ sizeof(string)-1 ] = 0;
 #else
-        strncpy(string, proc_buf->p_user.u_comm, sizeof(string));
-        string[ sizeof(string)-1 ] = 0;
+        strlcpy(string, proc_buf->p_user.u_comm, sizeof(string));
 #endif
 #elif defined(aix4) || defined(aix5) || defined(aix6)
-        strncpy(string, proc_table[LowProcIndex].pi_comm, sizeof(string));
-        string[ sizeof(string)-1 ] = 0;
+        strlcpy(string, proc_table[LowProcIndex].pi_comm, sizeof(string));
         cp = strchr(string, ' ');
         if (cp != NULL)
             *cp = '\0';
@@ -806,8 +801,7 @@ var_hrswrun(struct variable * vp,
         *cp1 = 0;
 #endif
 #elif defined(aix4) || defined(aix5) || defined(aix6)
-        strncpy(string, proc_table[LowProcIndex].pi_comm, sizeof(string));
-        string[ sizeof(string)-1 ] = 0;
+        strlcpy(string, proc_table[LowProcIndex].pi_comm, sizeof(string));
         cp = strchr(string, ' ');
         if (cp != NULL)
             *cp = '\0';

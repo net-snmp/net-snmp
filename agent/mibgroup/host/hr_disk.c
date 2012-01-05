@@ -978,22 +978,18 @@ static void
 Save_HR_Disk_General(void)
 {
 #ifdef DIOC_DESCRIBE
-    strncpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel)-1);
-    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
+    strlcpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel));
 #endif
 #ifdef DKIOCINFO
-    strncpy(HRD_savedModel, HRD_info.dki_dname, sizeof(HRD_savedModel)-1);
-    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
+    strlcpy(HRD_savedModel, HRD_info.dki_dname, sizeof(HRD_savedModel));
 #endif
 #ifdef HAVE_LINUX_HDREG_H
-    strncpy(HRD_savedModel, (const char *) HRD_info.model,
-                    sizeof(HRD_savedModel)-1);
-    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
+    strlcpy(HRD_savedModel, (const char *) HRD_info.model,
+            sizeof(HRD_savedModel));
 #endif
 #ifdef DIOCGDINFO
-    strncpy(HRD_savedModel, dktypenames[HRD_info.d_type],
-                    sizeof(HRD_savedModel)-1);
-    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
+    strlcpy(HRD_savedModel, dktypenames[HRD_info.d_type],
+            sizeof(HRD_savedModel));
 #endif
 #ifdef darwin
     strncpy(HRD_savedModel, HRD_model,

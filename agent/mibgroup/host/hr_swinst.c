@@ -403,10 +403,8 @@ var_hrswinst(struct variable * vp,
     case HRSWINST_UPDATE:
         string[0] = '\0';
 
-        if (swi->swi_directory != NULL) {
-            strncpy(string, swi->swi_directory, sizeof(string));
-            string[ sizeof(string)-1 ] = 0;
-        }
+        if (swi->swi_directory != NULL)
+            strlcpy(string, swi->swi_directory, sizeof(string));
 
         if (*string && (stat(string, &stat_buf) != -1)) {
             if (stat_buf.st_mtime > starttime.tv_sec)
@@ -434,7 +432,7 @@ var_hrswinst(struct variable * vp,
 #ifdef HAVE_PKGINFO
             char *pver;
 # endif
-            strncpy(string, swi->swi_name, sizeof(string) - 1);
+            strlcpy(string, swi->swi_name, sizeof(string));
 
 /* If we are on a solaris machine, the package names do not include versioning info,
  * so we must add it manually

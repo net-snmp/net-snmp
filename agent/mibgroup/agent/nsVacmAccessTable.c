@@ -160,7 +160,7 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
             /* Extract the authType token from the list of indexes */
             idx = table_info->indexes->next_variable->next_variable->next_variable->next_variable;
             memset(atype, 0, sizeof(atype));
-            strncpy(atype, (char *)idx->val.string, idx->val_len);
+            memcpy(atype, (char *)idx->val.string, idx->val_len);
             viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
             DEBUGMSGTL(("nsVacm", "GET %s (%d)\n", idx->val.string, viewIdx));
 
@@ -233,7 +233,7 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
                  */
                 idx = table_info->indexes->next_variable->next_variable->next_variable->next_variable;
                 memset(atype, 0, sizeof(atype));
-                strncpy(atype, (char *)idx->val.string, idx->val_len);
+                memcpy(atype, (char *)idx->val.string, idx->val_len);
                 viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
                 if ( viewIdx < 0 ) {
                     ret = SNMP_ERR_NOCREATION;
@@ -307,7 +307,7 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
             /* Extract the authType token from the list of indexes */
             idx = table_info->indexes->next_variable->next_variable->next_variable->next_variable;
             memset(atype, 0, sizeof(atype));
-            strncpy(atype, (char *)idx->val.string, idx->val_len);
+            memcpy(atype, (char *)idx->val.string, idx->val_len);
             viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
             if (viewIdx < 0)
                     continue;

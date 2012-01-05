@@ -201,8 +201,7 @@ vacm_parse_group(const char *token, char *param)
         config_perror("failed to create group entry");
         return;
     }
-    strncpy(gp->groupName, group, sizeof(gp->groupName));
-    gp->groupName[ sizeof(gp->groupName)-1 ] = 0;
+    strlcpy(gp->groupName, group, sizeof(gp->groupName));
     gp->storageType = SNMP_STORAGE_PERMANENT;
     gp->status = SNMP_ROW_ACTIVE;
     free(gp->reserved);
@@ -988,11 +987,9 @@ vacm_create_simple(const char *token, char *confline,
             sprintf(viewname,"viewUSM%d",commcount);
         }
         if ( strcmp( token, "authgroup" ) == 0 ) {
-            strncpy(grpname, community, sizeof(grpname));
-            grpname[ sizeof(grpname)-1 ] = 0;
+            strlcpy(grpname, community, sizeof(grpname));
         } else {
-            strncpy(secname, community, sizeof(secname));
-            secname[ sizeof(secname)-1 ] = 0;
+            strlcpy(secname, community, sizeof(secname));
 
             /*
              * sec->group mapping 
@@ -1412,7 +1409,7 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
      * NULL termination of the pdu field is ugly here.  Do in PDU parsing? 
      */
     if (pdu->contextName)
-        strncpy(contextNameIndex, pdu->contextName, pdu->contextNameLen);
+        memcpy(contextNameIndex, pdu->contextName, pdu->contextNameLen);
     else
         contextNameIndex[0] = '\0';
 
