@@ -153,7 +153,7 @@ se_store_enum_list(struct snmp_enum_list *new_list,
     struct snmp_enum_list *listp = new_list;
     char line[2048];
     char buf[512];
-    int  len = 0;
+    int  len;
 
     snprintf(line, sizeof(line), "enum %s", token);
     while (listp) {
@@ -174,14 +174,7 @@ se_store_enum_list(struct snmp_enum_list *new_list,
         listp = listp->next;
     }
 
-    /*
-     * If there's anything left, then save that.
-     * But don't bother saving an empty 'overflow' line.
-     */
-    if (len != sizeof(line))
-	read_config_store(type, line);
-
-    return;
+    read_config_store(type, line);
 }
 
 void
