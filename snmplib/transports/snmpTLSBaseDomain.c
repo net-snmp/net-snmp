@@ -51,6 +51,7 @@ netsnmp_feature_require(cert_util)
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/read_config.h>
+#include <net-snmp/library/system.h>
 
 #define LOGANDDIE(msg) do { snmp_log(LOG_ERR, "%s\n", msg); return 0; } while(0)
 
@@ -914,9 +915,8 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
     /* RFC5953 Section 5.1.2 step 2: tmSecurityName */
     /* XXX: detect and throw out overflow secname sizes rather
        than truncating. */
-    strncpy(tmStateRef->securityName, tlsdata->securityName,
-            sizeof(tmStateRef->securityName)-1);
-    tmStateRef->securityName[sizeof(tmStateRef->securityName)-1] = '\0';
+    strlcpy(tmStateRef->securityName, tlsdata->securityName,
+            sizeof(tmStateRef->securityName));
     tmStateRef->securityNameLen = strlen(tmStateRef->securityName);
 
     /* RFC5953 Section 5.1.2 step 2: tmSessionID */

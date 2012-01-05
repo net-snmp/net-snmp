@@ -935,12 +935,12 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     if (!isserver && tlsdata && addr_string) {
         /* search for a : */
         if (NULL != (cp = strrchr(addr_string, ':'))) {
-            strncpy(buf, addr_string, sizeof(buf)-1);
+            sprintf(buf, "%.*s", SNMP_MIN(cp - addr_string, sizeof(buf) - 1),
+                    addr_string);
         } else {
             /* else the entire spec is a host name only */
-            strncpy(buf, addr_string, sizeof(buf)-1);
+            strlcpy(buf, addr_string, sizeof(buf));
         }
-        buf[sizeof(buf)-1] = '\0';
         tlsdata->their_hostname = strdup(buf);
     }
 
