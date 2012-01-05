@@ -250,8 +250,7 @@ really_try_next:
     case HRDEV_DESCR:
         if ((device_descr[type] != NULL) &&
             (NULL!=(tmp_str=((*device_descr[type])(dev_idx))))) {
-            strncpy(string, tmp_str, sizeof(string)-1);
-            string[ sizeof(string)-1] = 0;
+            strlcpy(string, tmp_str, sizeof(string));
         } else
 #if NETSNMP_NO_DUMMY_VALUES
             goto try_next;

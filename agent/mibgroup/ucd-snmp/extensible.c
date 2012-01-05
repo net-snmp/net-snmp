@@ -262,8 +262,7 @@ extensible_parse_config(const char *token, char *cptr)
         for (tcptr = cptr; *tcptr != 0 && *tcptr != '#'; tcptr++)
             if (*tcptr == ';' && ptmp->type == EXECPROC)
                 break;
-        strncpy(ptmp->command, cptr, tcptr - cptr);
-        ptmp->command[tcptr - cptr] = 0;
+        sprintf(ptmp->command, "%.*s", (int) (tcptr - cptr), cptr);
     }
 #ifdef NETSNMP_EXECFIXCMD
     sprintf(ptmp->fixcmd, NETSNMP_EXECFIXCMD, ptmp->name);
@@ -419,8 +418,7 @@ execfix_parse_config(const char *token, char *cptr)
         return;
     }
 
-    strncpy(execp->fixcmd, cptr, sizeof(execp->fixcmd));
-    execp->fixcmd[ sizeof(execp->fixcmd)-1 ] = 0;
+    strlcpy(execp->fixcmd, cptr, sizeof(execp->fixcmd));
 }
 
 u_char         *
@@ -623,8 +621,7 @@ var_extensible_relocatable(struct variable *vp,
         cp = strchr(cp1, '\n');
         if (cp)
             *cp = 0;
-        strncpy(errmsg, cp1, sizeof(errmsg));
-        errmsg[ sizeof(errmsg)-1 ] = 0;
+        strlcpy(errmsg, cp1, sizeof(errmsg));
         *var_len = strlen(errmsg);
         if (errmsg[*var_len - 1] == '\n')
             errmsg[--(*var_len)] = '\0';

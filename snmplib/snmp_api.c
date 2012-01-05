@@ -495,8 +495,7 @@ void
 snmp_set_detail(const char *detail_string)
 {
     if (detail_string != NULL) {
-        strncpy((char *) snmp_detail, detail_string, sizeof(snmp_detail));
-        snmp_detail[sizeof(snmp_detail) - 1] = '\0';
+        strlcpy((char *) snmp_detail, detail_string, sizeof(snmp_detail));
         snmp_detail_f = 1;
     }
 }
@@ -512,20 +511,22 @@ snmp_api_errstring(int snmp_errnumber)
 {
     const char     *msg = "";
     static char     msg_buf[SPRINT_MAX_LEN];
+
     if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR) {
         msg = api_errors[-snmp_errnumber];
     } else if (snmp_errnumber != SNMPERR_SUCCESS) {
         msg = NULL;
     }
-    if (!msg)
+    if (!msg) {
 	snprintf(msg_buf, sizeof(msg_buf), "Unknown error: %d", snmp_errnumber);
-    else if (snmp_detail_f) {
+        msg_buf[sizeof(msg_buf)-1] = '\0';
+    } else if (snmp_detail_f) {
         snprintf(msg_buf, sizeof(msg_buf), "%s (%s)", msg, snmp_detail);
+        msg_buf[sizeof(msg_buf)-1] = '\0';
         snmp_detail_f = 0;
     } else {
-        strncpy(msg_buf, msg, sizeof(msg_buf));
+        strlcpy(msg_buf, msg, sizeof(msg_buf));
     }
-    msg_buf[sizeof(msg_buf)-1] = '\0';
 
     return (msg_buf);
 }
@@ -555,15 +556,17 @@ snmp_error(netsnmp_session * psess,
 	if (snmp_detail_f) {
             snprintf(buf, sizeof(buf), "%s (%s)", api_errors[-snmp_errnumber],
 		    snmp_detail);
+            buf[sizeof(buf)-1] = '\0';
 	    snmp_detail_f = 0;
 	}
 	else
-	    strncpy(buf, api_errors[-snmp_errnumber], sizeof(buf));
+	    strlcpy(buf, api_errors[-snmp_errnumber], sizeof(buf));
     } else {
-        if (snmp_errnumber)
+        if (snmp_errnumber) {
             snprintf(buf, sizeof(buf), "Unknown Error %d", snmp_errnumber);
+            buf[sizeof(buf)-1] = '\0';
+        }
     }
-    buf[sizeof(buf)-1] = '\0';
 
     /*
      * append a useful system errno interpretation. 

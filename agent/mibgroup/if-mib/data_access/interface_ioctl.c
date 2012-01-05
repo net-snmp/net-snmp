@@ -70,8 +70,7 @@ _ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
         }
     }
 
-    strncpy(ifrq->ifr_name, name, sizeof(ifrq->ifr_name));
-    ifrq->ifr_name[ sizeof(ifrq->ifr_name)-1 ] = 0;
+    strlcpy(ifrq->ifr_name, name, sizeof(ifrq->ifr_name));
     rc = ioctl(fd, which, ifrq);
     if (rc < 0) {
         snmp_log(LOG_ERR,"ioctl %d returned %d\n", which, rc);
@@ -323,8 +322,7 @@ netsnmp_access_interface_ioctl_flags_set(int fd,
         }
     }
 
-    strncpy(ifrq.ifr_name, ifentry->name, sizeof(ifrq.ifr_name));
-    ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+    strlcpy(ifrq.ifr_name, ifentry->name, sizeof(ifrq.ifr_name));
     rc = ioctl(fd, SIOCGIFFLAGS, &ifrq);
     if(rc < 0) {
         snmp_log(LOG_ERR,"error getting flags\n");

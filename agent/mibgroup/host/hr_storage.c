@@ -595,8 +595,7 @@ really_try_next:
         return (u_char *) storage_type_id;
     case HRSTORE_DESCR:
         if (store_idx > NETSNMP_MEM_TYPE_MAX) {
-            strncpy(string, HRFS_entry->HRFS_mount, sizeof(string)-1);
-            string[ sizeof(string)-1 ] = 0;
+            strlcpy(string, HRFS_entry->HRFS_mount, sizeof(string));
             *var_len = strlen(string);
             return (u_char *) string;
         } else {

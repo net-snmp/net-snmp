@@ -252,8 +252,8 @@ netsnmp_sysctl_get_if_speed(char *name, u_int *speed,
         return 0;
     }
 
-    (void) memset(&ifmr, 0, sizeof(ifmr));
-    (void) strncpy(ifmr.ifm_name, name, sizeof(ifmr.ifm_name));
+    memset(&ifmr, 0, sizeof(ifmr));
+    strlcpy(ifmr.ifm_name, name, sizeof(ifmr.ifm_name));
 
     DEBUGMSGTL(("access:interface:container:sysctl"," speed in\n"));
     if (ioctl(s, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0 ||

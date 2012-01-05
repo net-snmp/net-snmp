@@ -481,7 +481,7 @@ netsnmp_unix_create_tstring(const char *string, int local,
 	(strlen(string) < sizeof(addr.sun_path))) {
         addr.sun_family = AF_UNIX;
         memset(addr.sun_path, 0, sizeof(addr.sun_path));
-        strncpy(addr.sun_path, string, sizeof(addr.sun_path) - 1);
+        strlcpy(addr.sun_path, string, sizeof(addr.sun_path));
         return netsnmp_unix_transport(&addr, local);
     } else {
         if (string != NULL && *string != '\0') {
@@ -501,7 +501,7 @@ netsnmp_unix_create_ostring(const u_char * o, size_t o_len, int local)
     if (o_len > 0 && o_len < (sizeof(addr.sun_path) - 1)) {
         addr.sun_family = AF_UNIX;
         memset(addr.sun_path, 0, sizeof(addr.sun_path));
-        strncpy(addr.sun_path, (const char *)o, o_len);
+        strlcpy(addr.sun_path, (const char *)o, sizeof(addr.sun_path));
         return netsnmp_unix_transport(&addr, local);
     } else {
         if (o_len > 0) {

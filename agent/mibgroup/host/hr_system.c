@@ -469,9 +469,7 @@ static int set_solaris_eeprom_parameter(const char *key, const char *value,
     } 
 
     
-    sprintf(pbuffer,"eeprom %s=\"",key);
-    strncat(pbuffer,value,var_val_len);
-    strcat(pbuffer,"\"\n");
+    sprintf(pbuffer, "eeprom %s=\"%.*s\"\n", key, var_val_len, value);
 
     status=system(pbuffer);
 
