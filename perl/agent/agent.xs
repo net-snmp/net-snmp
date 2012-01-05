@@ -205,13 +205,12 @@ handler_wrapper(netsnmp_mib_handler          *handler,
 MODULE = NetSNMP::agent		PACKAGE = NetSNMP::agent		
 
 void
-constant(sv,arg)
+constant(sv)
     PREINIT:
 	STRLEN		len;
     INPUT:
 	SV *		sv
 	char *		s = SvPV(sv, len);
-	int		arg
     INIT:
         int status;
         double value;
@@ -257,6 +256,8 @@ na_shutdown(me)
     SV *me;
     CODE:
     {
+        if (0)
+            printf("me = %p\n", me);
         snmp_shutdown("perl");
     }
 
@@ -269,6 +270,8 @@ na_errlog(me,value)
         char * stringptr;
     CODE:
     {
+        if (0)
+            printf("me = %p\n", me);
         stringptr = SvPV(value, stringlen);
         snmp_log(LOG_ERR, stringptr );
     }
@@ -817,8 +820,6 @@ nari_setError(me, rinfo, ecode)
         SV *rinfo;
         int ecode;
     PREINIT:
-	oid myoid[MAX_OID_LEN];
-	size_t myoid_len = MAX_OID_LEN;
         netsnmp_request_info *request;
         netsnmp_agent_request_info *reqinfo;
     CODE:

@@ -172,13 +172,12 @@ nso_newptr(initstring)
         RETVAL
 
 void
-constant(sv,arg)
+constant(sv)
     PREINIT:
 	STRLEN		len;
     INPUT:
 	SV *		sv
 	char *		s = SvPV(sv, len);
-	int		arg
     INIT:
         int status;
         double value;
