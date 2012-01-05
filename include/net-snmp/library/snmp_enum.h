@@ -94,10 +94,11 @@ extern          "C" {
      * Persistent enumeration lists
      */
     void            se_store_enum_list(struct snmp_enum_list *new_list,
-                                       const char *token, char *type);
-    void            se_store_list(unsigned int major, unsigned int minor, char *type);
+                                       const char *token, const char *type);
+    void            se_store_list(unsigned int major, unsigned int minor,
+                                  const char *type);
     void            se_clear_slist(const char *listname);
-    void            se_store_slist(const char *listname, char *type);
+    void            se_store_slist(const char *listname, const char *type);
     int             se_store_slist_callback(int majorID, int minorID,
                                            void *serverargs, void *clientargs);
     void            se_read_conf(const char *word, char *cptr);
