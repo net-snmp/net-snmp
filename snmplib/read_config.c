@@ -879,7 +879,8 @@ read_config(const char *filename,
                         cp = strrchr(fname, '/');
                         if (!cp)
                             fname[0] = '\0';
-                        *(++cp) = '\0';
+                        else
+                            *(++cp) = '\0';
                         strlcat(fname, cptr, SNMP_MAXPATH);
                     }
                     prev_filename  = curfilename;
