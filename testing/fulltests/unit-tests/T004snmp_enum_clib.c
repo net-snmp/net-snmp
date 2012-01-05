@@ -1,14 +1,68 @@
 /* HEADER Testing snmp_enum */
 
+#define CONFIG_TYPE "snmp-enum-unit-test"
 #define STRING1 "life, and everything"
 #define STRING2 "restaurant at the end of the universe"
 #define STRING3 "label3"
+#define LONG_STRING "a-string-of-255-characters-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
+#define STORE_AND_COMPARE(maj, min, s)                                  \
+    {                                                                   \
+        FILE *fp;                                                       \
+        int read = 0;                                                   \
+        char *p, contents[4096];                                        \
+                                                                        \
+        se_store_list(maj, min, CONFIG_TYPE);                           \
+        fp = fopen(tmp_persist_file, "r");                              \
+        if (fp) {                                                       \
+            read = fread(contents, 1, sizeof(contents) - 1, fp);        \
+            fclose(fp);                                                 \
+        }                                                               \
+        contents[read > 0 ? read : 0] = '\0';                           \
+        for (p = contents; *p; ++p)                                     \
+            if (*p == '\n')                                             \
+                *p = '|';                                               \
+        OKF(strcmp(contents, (s)) == 0,                                 \
+            ("stored list %s <> %s", (s), contents));                   \
+        remove(tmp_persist_file);                                       \
+    }
+
+char tmp_persist_file[256];
 char *se_find_result;
 
+sprintf(tmp_persist_file, "/tmp/snmp-enum-unit-test-%d", getpid());
+netsnmp_setenv("SNMP_PERSISTENT_FILE", tmp_persist_file, 1);
+
 init_snmp_enum("snmp");
+
+STORE_AND_COMPARE(1, 1, "enum 1:1|");
+
 se_add_pair(1, 1, strdup("hi"), 1);
+
+STORE_AND_COMPARE(1, 1, "enum 1:1 1:hi|");
+
 se_add_pair(1, 1, strdup("there"), 2);
+
+STORE_AND_COMPARE(1, 1, "enum 1:1 1:hi 2:there|");
+
+se_add_pair(1, 1, strdup(LONG_STRING), 3);
+se_add_pair(1, 1, strdup(LONG_STRING), 4);
+se_add_pair(1, 1, strdup(LONG_STRING), 5);
+se_add_pair(1, 1, strdup(LONG_STRING), 6);
+se_add_pair(1, 1, strdup(LONG_STRING), 7);
+se_add_pair(1, 1, strdup(LONG_STRING), 8);
+se_add_pair(1, 1, strdup(LONG_STRING), 9);
+
+STORE_AND_COMPARE(1, 1, "enum 1:1 1:hi 2:there 3:" LONG_STRING " 4:" LONG_STRING
+                 " 5:" LONG_STRING " 6:" LONG_STRING " 7:" LONG_STRING
+                 " 8:" LONG_STRING " 9:" LONG_STRING "|");
+
+se_add_pair(1, 1, strdup(LONG_STRING), 10);
+
+STORE_AND_COMPARE(1, 1, "enum 1:1 1:hi 2:there 3:" LONG_STRING " 4:" LONG_STRING
+                 " 5:" LONG_STRING " 6:" LONG_STRING " 7:" LONG_STRING
+                 " 8:" LONG_STRING " 9:" LONG_STRING "|"
+                 "enum 1:1 10:" LONG_STRING "|");
 
 OK(se_find_value(1, 1, "hi") == 1,
    "lookup by number #1 should be the proper string");
