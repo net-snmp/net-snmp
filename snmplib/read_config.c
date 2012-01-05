@@ -886,17 +886,15 @@ read_config(const char *filename,
                         continue;
                     }
                     if ( cptr[0] == '/' ) {
-                        strncpy(fname, cptr, SNMP_MAXPATH);
-                        fname[SNMP_MAXPATH-1]='\0';
+                        strlcpy(fname, cptr, SNMP_MAXPATH);
                     } else {
-                        strncpy(fname, filename, SNMP_MAXPATH);
-                        fname[SNMP_MAXPATH-1]='\0';
+                        strlcpy(fname, filename, SNMP_MAXPATH);
                         cp = strrchr(fname, '/');
                         if (!cp)
                             fname[0] = '\0';
-                        *(++cp) = '\0';
-                        strncat(fname, cptr, SNMP_MAXPATH-strlen(fname));
-                        fname[SNMP_MAXPATH-1]='\0';
+                        else
+                            *(++cp) = '\0';
+                        strlcat(fname, cptr, SNMP_MAXPATH);
                     }
                     prev_filename  = curfilename;
                     prev_linecount = linecount;
