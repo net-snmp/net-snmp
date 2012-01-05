@@ -88,7 +88,7 @@ handle_usmDHParameters(netsnmp_mib_handler *handler,
 
     case MODE_SET_RESERVE2:
         cp = requests->requestvb->val.string;
-        dh_tmpp = d2i_DHparams(NULL, (const unsigned char **) &cp,
+        dh_tmpp = d2i_DHparams(NULL, (const unsigned char **) (void *)&cp,
                                requests->requestvb->val_len);
         if ( !dh_tmpp) {
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGVALUE);
