@@ -1506,7 +1506,8 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
         tlsdata = (_netsnmpTLSBaseData *) t->data;
         /* search for a : */
         if (NULL != (cp = strrchr(str, ':'))) {
-            sprintf(buf, "%.*s", SNMP_MIN(cp - str, sizeof(buf) - 1), str);
+            sprintf(buf, "%.*s", (int) SNMP_MIN(cp - str, sizeof(buf) - 1),
+                    str);
         } else {
             /* else the entire spec is a host name only */
             strlcpy(buf, str, sizeof(buf));

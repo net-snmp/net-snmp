@@ -935,7 +935,8 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     if (!isserver && tlsdata && addr_string) {
         /* search for a : */
         if (NULL != (cp = strrchr(addr_string, ':'))) {
-            sprintf(buf, "%.*s", SNMP_MIN(cp - addr_string, sizeof(buf) - 1),
+            sprintf(buf, "%.*s",
+                    (int) SNMP_MIN(cp - addr_string, sizeof(buf) - 1),
                     addr_string);
         } else {
             /* else the entire spec is a host name only */
