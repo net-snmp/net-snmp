@@ -127,11 +127,9 @@ pass_parse_config(const char *token, char *cptr)
     } else {
         for (tcptr = cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
              tcptr++);
-        strncpy((*ppass)->command, cptr, tcptr - cptr);
-        (*ppass)->command[tcptr - cptr] = 0;
+        sprintf((*ppass)->command, "%.*s", (int) (tcptr - cptr), cptr);
     }
-    strncpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
-    (*ppass)->name[ sizeof((*ppass)->name)-1 ] = 0;
+    strlcpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
     (*ppass)->next = NULL;
 
     register_mib_priority("pass", (struct variable *) extensible_passthru_variables,
@@ -294,8 +292,7 @@ setPass(int action, u_char * var_val, u_char var_val_type,
                      "%s -s %s ", passthru->name, buf);
             passthru->command[ sizeof(passthru->command)-1 ] = 0;
             netsnmp_internal_pass_set_format(buf, var_val, var_val_type, var_val_len);
-            strncat(passthru->command, buf, sizeof(passthru->command)-strlen(passthru->command)-1);
-            passthru->command[ sizeof(passthru->command)-1 ] = 0;
+            strlcat(passthru->command, buf, sizeof(passthru->command));
             DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s",
                         passthru->command));
             exec_command(passthru);

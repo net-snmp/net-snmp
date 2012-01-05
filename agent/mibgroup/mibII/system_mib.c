@@ -261,9 +261,9 @@ init_system_mib(void)
     extmp.type = EXECPROC;
     extmp.next = NULL;
     exec_command(&extmp);
-    strncpy(version_descr, extmp.output, sizeof(version_descr));
-    version_descr[sizeof(version_descr) - 1] = 0;
-    version_descr[strlen(version_descr) - 1] = 0;       /* chomp new line */
+    strlcpy(version_descr, extmp.output, sizeof(version_descr));
+    if (strlen(version_descr) >= 1)
+        version_descr[strlen(version_descr) - 1] = 0; /* chomp new line */
 #else
 #if (defined (WIN32) && defined (HAVE_WIN32_PLATFORM_SDK)) || defined (mingw32)
     windowsOSVersionString(version_descr, sizeof(version_descr));
@@ -277,7 +277,7 @@ init_system_mib(void)
     gethostname(sysName, sizeof(sysName));
 #else
 #ifdef HAVE_UNAME
-    strncpy(sysName, utsName.nodename, sizeof(sysName));
+    strlcpy(sysName, utsName.nodename, sizeof(sysName));
 #else
 #if defined (HAVE_EXECV) && !defined (mingw32)
     sprintf(extmp.command, "%s -n", UNAMEPROG);
@@ -287,8 +287,9 @@ init_system_mib(void)
     extmp.type = EXECPROC;
     extmp.next = NULL;
     exec_command(&extmp);
-    strncpy(sysName, extmp.output, sizeof(sysName));
-    sysName[strlen(sysName) - 1] = 0;   /* chomp new line */
+    strlcpy(sysName, extmp.output, sizeof(sysName));
+    if (strlen(sysName) >= 1)
+        sysName[strlen(sysName) - 1] = 0; /* chomp new line */
 #else
     strcpy(sysName, "unknown");
 #endif                          /* HAVE_EXECV */

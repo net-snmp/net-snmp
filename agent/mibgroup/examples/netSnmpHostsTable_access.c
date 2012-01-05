@@ -177,10 +177,11 @@ void           *
 netSnmpHostsTable_create_data_context(netsnmp_variable_list * index_data)
 {
     my_data_info *datactx = SNMP_MALLOC_TYPEDEF(my_data_info);
+
     if (!datactx)
         return NULL;
-    strncpy(datactx->hostname, index_data->val.string,
-            strlen(index_data->val.string));
+    strlcpy(datactx->hostname, index_data->val.string,
+            sizeof(datactx->hostname));
     return datactx;
 }
 

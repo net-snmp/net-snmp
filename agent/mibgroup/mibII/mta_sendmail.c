@@ -853,8 +853,7 @@ read_sendmailcf(BOOL config)
                 }
 
                 if (strncasecmp(line + 2, "StatusFile", 10) == 0) {
-                    strncpy(sendmailst_fn, filename, sizeof(sendmailst_fn));
-                    sendmailst_fn[ sizeof(sendmailst_fn)-1 ] = 0;
+                    strlcpy(sendmailst_fn, filename, sizeof(sendmailst_fn));
                     found_sendmailst = TRUE;
                     DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf",
                                 "found statatistics file \"%s\"\n",

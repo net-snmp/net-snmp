@@ -48,16 +48,13 @@ void init_cpu_kstat( void ) {
             memset(state, 0, sizeof(state));
             for (i=0, ks_data = ksp->ks_data; i < ksp->ks_ndata; i++, ks_data++) {
                 if ( strcmp( ks_data->name, "state" ) == 0 ) {
-                    strncpy( state, ks_data->value.c, sizeof(state));
-                    state[sizeof(state)-1] = '\0';
+                    strlcpy(state, ks_data->value.c, sizeof(state));
                 } else if ( strcmp( ks_data->name, "state_begin" ) == 0 ) {
                     state_begin = ks_data->value.i32;
                 } else if ( strcmp( ks_data->name, "cpu_type" ) == 0 ) {
-                    strncpy( ctype, ks_data->value.c, sizeof(ctype));
-                    ctype[sizeof(ctype)-1] = '\0';
+                    strlcpy(ctype, ks_data->value.c, sizeof(ctype));
                 } else if ( strcmp( ks_data->name, "fpu_type" ) == 0 ) {
-                    strncpy( ftype, ks_data->value.c, sizeof(ftype));
-                    ftype[sizeof(ftype)-1] = '\0';
+                    strlcpy(ftype, ks_data->value.c, sizeof(ftype));
                 } else if ( strcmp( ks_data->name, "clock_MHz" ) == 0 ) {
                     clock = ks_data->value.i32;
                 }

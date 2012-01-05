@@ -914,7 +914,7 @@ load_rtentries(struct radix_node *pt)
             }
 #if HAVE_STRUCT_IFNET_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
-            strncpy(name, ifnet.if_xname, sizeof name);
+            strlcpy(name, ifnet.if_xname, sizeof(name));
 #else
             if (!NETSNMP_KLOOKUP(ifnet.if_xname, name, sizeof name)) {
                 DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
@@ -1347,8 +1347,7 @@ Route_Scan_Reload(void)
                         &(((struct sockaddr_in *) &(rtent.rt_genmask))->sin_addr.s_addr)))
             continue;
 
-        strncpy(name, rt->rt_dev, sizeof(name));
-        name[ sizeof(name)-1 ] = 0;
+        strlcpy(name, rt->rt_dev, sizeof(name));
 
         rt->rt_flags = flags, rt->rt_refcnt = refcnt;
         rt->rt_use = use, rt->rt_metric = metric;

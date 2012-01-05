@@ -435,8 +435,7 @@ sh_count_procs(char *procname)
     count = 0;
 
     while(getprocs(&pinfo, sizeof(pinfo), NULL, 0, &index, 1) == 1) {
-        strncpy(pinfo_name, pinfo.pi_comm, 256);
-        pinfo_name[255] = 0;
+        strlcpy(pinfo_name, pinfo.pi_comm, sizeof(pinfo_name));
         sep = strchr(pinfo_name, ' ');
         if(sep != NULL) *sep = 0;
         if(strcmp(procname, pinfo_name) == 0) count++;

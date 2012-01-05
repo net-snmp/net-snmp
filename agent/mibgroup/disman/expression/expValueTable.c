@@ -273,8 +273,7 @@ Evaluate_Expression(struct expValueTable_data *vtable_data)
                     break;
                 }
             }
-            strncpy(temp, expression + 1, j - 1);
-            *(temp + j - 1) = '\0';
+            sprintf(temp, "%.*s", j - 1, expression + 1);
             l = atoi(temp);
             expression = expression + j;
             /*
@@ -481,8 +480,7 @@ build_valuetable()
                             break;
                         }
                     }
-                    strncpy(temp, expression + 1, j - 1);
-                    *(temp + j - 1) = '\0';
+                    sprintf(temp, "%.*s", j - 1, expression + 1);
                     l = atoi(temp);
                     for (object_hcindex = expObjectTableStorage;
                          object_hcindex != NULL;

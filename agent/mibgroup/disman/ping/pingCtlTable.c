@@ -1773,7 +1773,7 @@ run_ping(unsigned int clientreg, void *clientarg)
             if (device) {
                 struct ifreq    ifr;
                 memset(&ifr, 0, sizeof(ifr));
-                strncpy(ifr.ifr_name, device, IFNAMSIZ - 1);
+                strlcpy(ifr.ifr_name, device, IFNAMSIZ);
                 if (setsockopt
                     (probe_fd, SOL_SOCKET, SO_BINDTODEVICE, device,
                      strlen(device) + 1) == -1) {

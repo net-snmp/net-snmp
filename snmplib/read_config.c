@@ -173,8 +173,8 @@ internal_register_config_handler(const char *type_param,
         struct config_line *ltmp2 = NULL;
         char                buf[STRINGMAX];
         char               *cptr = buf;
-        strncpy(buf, type, STRINGMAX - 1);
-        buf[STRINGMAX - 1] = '\0';
+
+        strlcpy(buf, type, STRINGMAX);
         while (cptr) {
             char* c = cptr;
             cptr = strchr(cptr, ':');
@@ -355,8 +355,8 @@ unregister_config_handler(const char *type_param, const char *token)
     if (strchr(type, ':')) {
         char                buf[STRINGMAX];
         char               *cptr = buf;
-        strncpy(buf, type, STRINGMAX - 1);
-        buf[STRINGMAX - 1] = '\0';
+
+        strlcpy(buf, type, STRINGMAX);
         while (cptr) {
             char* c = cptr;
             cptr = strchr(cptr, ':');
@@ -569,8 +569,7 @@ snmp_config_when(char *line, int when)
         return SNMPERR_GENERR;
     }
 
-    strncpy(buf, line, STRINGMAX);
-    buf[STRINGMAX - 1] = '\0';
+    strlcpy(buf, line, STRINGMAX);
     cptr = strtok_r(buf, SNMP_CONFIG_DELIMETERS, &st);
     if (cptr && cptr[0] == '[') {
         if (cptr[strlen(cptr) - 1] != ']') {
