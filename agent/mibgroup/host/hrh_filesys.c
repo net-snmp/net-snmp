@@ -387,17 +387,14 @@ cook_device(char *dev)
     static char     cooked_dev[SNMP_MAXPATH+1];
 
     if (!strncmp(dev, RAW_DEVICE_PREFIX, strlen(RAW_DEVICE_PREFIX))) {
-        strncpy(cooked_dev, COOKED_DEVICE_PREFIX, sizeof(cooked_dev)-1);
-        cooked_dev[ sizeof(cooked_dev)-1 ] = 0;
-        strncat(cooked_dev, dev + strlen(RAW_DEVICE_PREFIX),
-                sizeof(cooked_dev)-strlen(cooked_dev)-1);
-        cooked_dev[ sizeof(cooked_dev)-1 ] = 0;
+        strlcpy(cooked_dev, COOKED_DEVICE_PREFIX, sizeof(cooked_dev));
+        strlcat(cooked_dev, dev + strlen(RAW_DEVICE_PREFIX),
+                sizeof(cooked_dev));
     } else {
-        strncpy(cooked_dev, dev, sizeof(cooked_dev)-1);
-        cooked_dev[ sizeof(cooked_dev)-1 ] = 0;
+        strlcpy(cooked_dev, dev, sizeof(cooked_dev));
     }
 
-    return (cooked_dev);
+    return cooked_dev;
 }
 
 

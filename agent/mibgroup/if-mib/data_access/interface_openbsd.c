@@ -340,12 +340,10 @@ netsnmp_openbsd_interface_get_if_speed(char *name, u_int *speed, u_int *speed_hi
         return 0;
     }
 
-    (void) memset(&ifmr, 0, sizeof(ifmr));
-    (void) strncpy(ifmr.ifm_name, name, sizeof(ifmr.ifm_name));
+    memset(&ifmr, 0, sizeof(ifmr));
+    strlcpy(ifmr.ifm_name, name, sizeof(ifmr.ifm_name));
 
-    if (ioctl(s, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0 ||
-        ifmr.ifm_count == 0) {
-
+    if (ioctl(s, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0 || ifmr.ifm_count == 0) {
         close(s);
         return 0;
     }

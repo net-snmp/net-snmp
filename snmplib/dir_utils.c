@@ -114,7 +114,7 @@ netsnmp_directory_container_read_some(netsnmp_container *user_container,
         dirname_len = 0;
     else {
         dirname_len = strlen(dirname);
-        strncpy(path, dirname, sizeof(path));
+        strlcpy(path, dirname, sizeof(path));
         if ((dirname_len + 2) > sizeof(path)) {
             /** not enough room for files */
             closedir(dir);
@@ -138,7 +138,7 @@ netsnmp_directory_container_read_some(netsnmp_container *user_container,
              ((file->d_name[1] == '.') && ((file->d_name[2] == 0)))))
             continue;
 
-        strncpy(&path[dirname_len], file->d_name, sizeof(path) - dirname_len);
+        strlcpy(&path[dirname_len], file->d_name, sizeof(path) - dirname_len);
         if (NULL != filter) {
             if (flags & NETSNMP_DIR_NSFILE_STATS) {
                 /** use local vars for now */

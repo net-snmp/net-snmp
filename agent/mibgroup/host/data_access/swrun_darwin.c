@@ -289,8 +289,7 @@ _set_command_name_jaguar(netsnmp_swrun_entry *entry)
     exec_path = (char *)ip;
     DEBUGMSGTL(("swrun:load:arch:_cn"," exec_path %s\n", exec_path));
     len = strlen(exec_path);
-    strncpy(entry->hrSWRunPath, exec_path, sizeof(entry->hrSWRunPath)-1);
-    entry->hrSWRunPath[sizeof(entry->hrSWRunPath)-1] = 0;
+    strlcpy(entry->hrSWRunPath, exec_path, sizeof(entry->hrSWRunPath));
     if (len > sizeof(entry->hrSWRunPath)-1) {
         DEBUGMSGTL(("swrun:load:arch:_cn"," truncating long run path\n"));
         entry->hrSWRunPath[sizeof(entry->hrSWRunPath)-2] = '$';
@@ -326,8 +325,7 @@ _set_command_name_jaguar(netsnmp_swrun_entry *entry)
     DEBUGMSGTL(("swrun:load:arch:_cn",
                 SWRUNINDENT "kernel name %s\n", command));
     if (strncmp(command, entry->hrSWRunName, sizeof(entry->hrSWRunName)-1)) {
-        strncpy(entry->hrSWRunName, command, sizeof(entry->hrSWRunName)-1);
-        entry->hrSWRunName[sizeof(entry->hrSWRunName)-1] = 0;
+        strlcpy(entry->hrSWRunName, command, sizeof(entry->hrSWRunName));
         entry->hrSWRunName_len = strlen(entry->hrSWRunName);
         DEBUGMSGTL(("swrun:load:arch:_cn", "**"
                     SWRUNINDENT "updated name to %s\n", entry->hrSWRunName));
@@ -369,8 +367,7 @@ _set_command_name(netsnmp_swrun_entry *entry)
 
     exec_path = arg_buf + sizeof(nargs);
     len = strlen(exec_path);
-    strncpy(entry->hrSWRunPath, exec_path, sizeof(entry->hrSWRunPath)-1);
-    entry->hrSWRunPath[sizeof(entry->hrSWRunPath)-1] = 0;
+    strlcpy(entry->hrSWRunPath, exec_path, sizeof(entry->hrSWRunPath));
     if (len > sizeof(entry->hrSWRunPath)-1) {
         DEBUGMSGTL(("swrun:load:arch:_cn"," truncating long run path\n"));
         entry->hrSWRunPath[sizeof(entry->hrSWRunPath)-2] = '$';
@@ -459,8 +456,8 @@ _set_command_name(netsnmp_swrun_entry *entry)
          * save arg
          */
         if(entry->hrSWRunParameters_len < sizeof(entry->hrSWRunParameters)-1) {
-            strncat(&entry->hrSWRunParameters[entry->hrSWRunParameters_len], argN,
-                    sizeof(entry->hrSWRunParameters) - entry->hrSWRunParameters_len - 2);
+            strlcat(&entry->hrSWRunParameters[entry->hrSWRunParameters_len],
+                    argN, sizeof(entry->hrSWRunParameters));
             entry->hrSWRunParameters_len = strlen(entry->hrSWRunParameters);
             if ((entry->hrSWRunParameters_len+2 < sizeof(entry->hrSWRunParameters)-1) && (0 != nargs)) {
                 /* add space between params */
@@ -486,8 +483,7 @@ _set_command_name(netsnmp_swrun_entry *entry)
     
     /* Allocate space for the command and copy. */
     if (strncmp(command, entry->hrSWRunName, sizeof(entry->hrSWRunName)-1)) {
-        strncpy(entry->hrSWRunName, command, sizeof(entry->hrSWRunName)-1);
-        entry->hrSWRunName[sizeof(entry->hrSWRunName)-1] = 0;
+        strlcpy(entry->hrSWRunName, command, sizeof(entry->hrSWRunName));
         entry->hrSWRunName_len = strlen(entry->hrSWRunName);
         DEBUGMSGTL(("swrun:load:arch:_cn",
                     " **updated name to %s\n", entry->hrSWRunName));
