@@ -161,13 +161,12 @@ MODULE = NetSNMP::ASN		PACKAGE = NetSNMP::ASN
 
 
 void
-constant(sv,arg)
+constant(sv)
     PREINIT:
 	STRLEN		len;
     INPUT:
 	SV *		sv
 	char *		s = SvPV(sv, len);
-	int		arg
     INIT:
         int status;
         double value;
