@@ -148,7 +148,7 @@ se_read_conf(const char *word, char *cptr)
 
 void
 se_store_enum_list(struct snmp_enum_list *new_list,
-                   const char *token, char *type)
+                   const char *token, const char *type)
 {
     struct snmp_enum_list *listp = new_list;
     char line[2048];
@@ -185,7 +185,7 @@ se_store_enum_list(struct snmp_enum_list *new_list,
 }
 
 void
-se_store_list(unsigned int major, unsigned int minor, char *type)
+se_store_list(unsigned int major, unsigned int minor, const char *type)
 {
     char token[32];
 
@@ -437,7 +437,7 @@ se_clear_slist(const char *listname)
 }
 
 void
-se_store_slist(const char *listname, char *type)
+se_store_slist(const char *listname, const char *type)
 {
     struct snmp_enum_list *list = se_find_slist(listname);
     se_store_enum_list(list, listname, type);
