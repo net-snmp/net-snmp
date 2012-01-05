@@ -2091,8 +2091,7 @@ _cert_find_fp(const char *fingerprint)
     if (NULL == fingerprint)
         return NULL;
 
-    strncpy(fp, fingerprint, sizeof(fp));
-    fp[sizeof(fp)-1] = '\0';
+    strlcpy(fp, fingerprint, sizeof(fp));
     netsnmp_fp_lowercase_and_strip_colon(fp);
 
     /** clear search key */
@@ -2182,8 +2181,7 @@ _reduce_subset_dir(netsnmp_void_array *matching, const char *directory)
      *
      * so we want to backup up on directory for compares..
      */
-    strncpy(dir,directory,sizeof(dir));
-    dir[sizeof(dir)-1] = '\0';
+    strlcpy(dir, directory, sizeof(dir));
     pos = strrchr(dir, '/');
     if (NULL == pos) {
         DEBUGMSGTL(("cert:subset:dir", "no '/' in directory %s\n", directory));

@@ -393,8 +393,7 @@ write_laConfig(int action,
             double val;
             char *endp;
 
-            strncpy(buf, (char *)var_val, var_val_len);
-            buf[var_val_len] = '\0';
+            sprintf(buf, "%.*s", var_val_len, (char *)var_val);
             val = strtod(buf, &endp);
 
             if (errno == ERANGE || *endp != '\0' || val < 0 || val > 65536.00) {

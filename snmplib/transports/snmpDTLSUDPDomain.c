@@ -1388,13 +1388,10 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
         tlsdata = (_netsnmpTLSBaseData *) t->data;
         /* search for a : */
         if (NULL != (cp = strrchr(str, ':'))) {
-            strncpy(buf, str, SNMP_MIN(cp-str, sizeof(buf)-1));
-            buf[SNMP_MIN(cp-str, sizeof(buf)-1)] = '\0';
+            sprintf(buf, "%.*s", SNMP_MIN(cp - str, sizeof(buf) - 1), str);
         } else {
             /* else the entire spec is a host name only */
-            strncpy(buf, str,
-                    SNMP_MIN(strlen(str), sizeof(buf)-1));
-            buf[SNMP_MIN(strlen(str), sizeof(buf)-1)] = '\0';
+            strlcpy(buf, str, sizeof(buf));
         }
         tlsdata->their_hostname = strdup(buf);
     }

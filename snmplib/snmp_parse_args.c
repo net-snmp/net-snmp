@@ -364,10 +364,8 @@ netsnmp_parse_args(int argc,
             }
 
             /* set the config */
-            strncpy(leftside, tmpopt, sizeof(leftside));
-            leftside[sizeof(leftside)-1] = '\0';
-            strncpy(rightside, tmpcp, sizeof(rightside));
-            rightside[sizeof(rightside)-1] = '\0';
+            strlcpy(leftside, tmpopt, sizeof(leftside));
+            strlcpy(rightside, tmpcp, sizeof(rightside));
 
             CONTAINER_INSERT(session->transport_configuration,
                              netsnmp_transport_create_config(leftside,
