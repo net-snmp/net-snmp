@@ -82,7 +82,7 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
 
     /** copy dirname into path */
     dirname_len = strlen(dirname);
-    strncpy(path, dirname, sizeof(path));
+    strlcpy(path, dirname, sizeof(path));
     if ((dirname_len + 2) > sizeof(path)) {
         /** not enough room for files */
         closedir(dir);
@@ -103,7 +103,7 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
              ((file->d_name[1] == '.') && ((file->d_name[2] == 0)))))
             continue;
 
-        strncpy(&path[dirname_len], file->d_name, sizeof(path) - dirname_len);
+        strlcpy(&path[dirname_len], file->d_name, sizeof(path) - dirname_len);
         DEBUGMSGTL(("9:directory:container", "  found %s\n", path));
 #if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DT_DIR)
         if ((file->d_type == DT_DIR) && (flags & NETSNMP_DIR_RECURSE)) {

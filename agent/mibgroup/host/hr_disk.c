@@ -898,16 +898,14 @@ Get_HR_Disk_Label(char *string, size_t str_len, const char *devfull)
 
     sess_ref = DASessionCreate( NULL );
     if (NULL == sess_ref) {
-        strncpy(string, devfull, str_len);
-        string[str_len-1] = 0;
+        strlcpy(string, devfull, str_len);
         return -1;
     }
 
     disk = DADiskCreateFromBSDName( NULL, sess_ref, devfull );
     if (NULL == disk) {
         CFRelease(sess_ref);
-        strncpy(string, devfull, str_len);
-        string[str_len-1] = 0;
+        strlcpy(string, devfull, str_len);
         return -1;
     }
 
@@ -918,7 +916,7 @@ Get_HR_Disk_Label(char *string, size_t str_len, const char *devfull)
                  devfull);
         CFRelease(disk);
         CFRelease(sess_ref);
-        strncpy(string, devfull, str_len);
+        strlcpy(string, devfull, str_len);
         return -1;
     }
 
@@ -926,14 +924,12 @@ Get_HR_Disk_Label(char *string, size_t str_len, const char *devfull)
     str_ref = (CFStringRef)
         CFDictionaryGetValue(desc, kDADiskDescriptionMediaNameKey);
     if (str_ref) {
-        strncpy(string, CFStringGetCStringPtr(str_ref, sys_encoding),
+        strlcpy(string, CFStringGetCStringPtr(str_ref, sys_encoding),
                 str_len);
-        string[str_len-1] = 0;
         DEBUGMSGTL(("verbose:diskmgr:darwin", " name %s\n", string));
     }
     else {
-        strncpy(string, devfull, str_len);
-        string[str_len-1] = 0;
+        strlcpy(string, devfull, str_len);
     }
     
     CFRelease(disk);
@@ -992,9 +988,7 @@ Save_HR_Disk_General(void)
             sizeof(HRD_savedModel));
 #endif
 #ifdef darwin
-    strncpy(HRD_savedModel, HRD_model,
-                    sizeof(HRD_savedModel)-1);
-    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
+    strlcpy(HRD_savedModel, HRD_model, sizeof(HRD_savedModel));
 #endif
 }
 
@@ -1139,9 +1133,8 @@ Query_Disk(int fd, const char *devfull)
     str_ref = (CFStringRef)
         CFDictionaryGetValue(desc, kDADiskDescriptionDeviceModelKey);
     if (str_ref) {
-        strncpy(HRD_model, CFStringGetCStringPtr(str_ref, sys_encoding),
+        strlcpy(HRD_model, CFStringGetCStringPtr(str_ref, sys_encoding),
                 sizeof(HRD_model));
-        HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
         DEBUGMSGTL(("verbose:diskmgr:darwin", " model %s\n", HRD_model));
     }
     else

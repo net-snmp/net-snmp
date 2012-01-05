@@ -687,8 +687,8 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
             /* XXX: detect and throw out overflow secname sizes rather
                than truncating. */
-            strncpy(tmStateRef->securityName, cachep->securityName,
-                    sizeof(tmStateRef->securityName)-1);
+            strlcpy(tmStateRef->securityName, cachep->securityName,
+                    sizeof(tmStateRef->securityName));
             tmStateRef->securityName[sizeof(tmStateRef->securityName)-1] = '\0';
             tmStateRef->securityNameLen = strlen(tmStateRef->securityName);
 
