@@ -128,9 +128,9 @@ netsnmp_fsys_arch_load( void )
             continue;
         }
 
-        strncpy( entry->path,   path,    sizeof( entry->path   ));
-        strncpy( entry->device, vmt2dataptr( aixcurr, VMT_STUB),
-                                         sizeof( entry->device ));
+        strlcpy(entry->path, path, sizeof(entry->path));
+        strlcpy(entry->device, vmt2dataptr(aixcurr, VMT_STUB),
+                sizeof(entry->device));
         entry->type   = _fsys_type( aixcurr->vmt_gfstype );
 
         if (!(entry->type & _NETSNMP_FS_TYPE_SKIP_BIT))
