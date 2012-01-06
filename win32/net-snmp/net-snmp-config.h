@@ -1611,7 +1611,7 @@ typedef unsigned short   uint16_t;
 #endif
 
 /* Define NETSNMP_USE_DLL when building or using netsnmp.DLL */
-#define NETSNMP_USE_DLL 1
+/* #undef NETSNMP_USE_DLL */
 
 #ifdef NETSNMP_USE_DLL
   #ifdef NETSNMP_DLL
