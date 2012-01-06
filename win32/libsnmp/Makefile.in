@@ -66,6 +66,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmp_version.obj" \
 	"$(INTDIR)\snmpusm.obj" \
 	"$(INTDIR)\snmpv3.obj" \
+	"$(INTDIR)\strlcat.obj" \
 	"$(INTDIR)\strlcpy.obj" \
 	"$(INTDIR)\strtok_r.obj" \
 	"$(INTDIR)\strtoull.obj" \
@@ -465,6 +466,12 @@ SOURCE=..\..\snmplib\snmpusm.c
 SOURCE=..\..\snmplib\snmpv3.c
 
 "$(INTDIR)\snmpv3.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\strlcat.c
+
+"$(INTDIR)\strlcat.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

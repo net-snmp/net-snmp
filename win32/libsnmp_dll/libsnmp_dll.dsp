@@ -320,6 +320,10 @@ SOURCE=..\..\snmplib\snmpv3.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\strlcat.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\strlcpy.c
 # End Source File
 # Begin Source File
