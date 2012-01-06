@@ -182,7 +182,8 @@ SOFTWARE.
 #endif
 #ifndef HAVE_STRLCAT
     NETSNMP_IMPORT
-    size_t            strlcat(char *, const char *, size_t);
+    size_t            strlcat(char * __restrict, const char * __restrict,
+                              size_t);
 #endif
 
     int             netsnmp_os_prematch(const char *ospmname,
