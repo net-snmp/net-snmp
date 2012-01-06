@@ -747,40 +747,38 @@ unsigned long long
 netsnmp_linux_interface_get_if_speed(int fd, const char *name,
             unsigned long long defaultspeed)
 {
+    int ret;
     struct ifreq ifr;
     struct ethtool_cmd edata;
+    uint16_t speed_hi;
+    uint32_t speed;
 
     memset(&ifr, 0, sizeof(ifr));
+    memset(&edata, 0, sizeof(edata));
     edata.cmd = ETHTOOL_GSET;
-    edata.speed = 0;
     
     strlcpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
     ifr.ifr_data = (char *) &edata;
     
-    if (ioctl(fd, SIOCETHTOOL, &ifr) == -1) {
-        DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed\n",
-                    ifr.ifr_name));
-        return netsnmp_linux_interface_get_if_speed_mii(fd,name,defaultspeed);
-    }
-    
-    if (edata.speed != SPEED_10 && edata.speed != SPEED_100
-#ifdef SPEED_10000
-        && edata.speed != SPEED_10000
-#endif
-#ifdef SPEED_2500
-        && edata.speed != SPEED_2500
-#endif
-        && edata.speed != SPEED_1000 ) {
-        DEBUGMSGTL(("mibII/interfaces", "fallback to mii for %s\n",
-                    ifr.ifr_name));
-        /* try MII */
+    ret = ioctl(fd, SIOCETHTOOL, &ifr);
+    if (ret == -1 || edata.speed == 0) {
+        DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed (%d / %d)\n",
+                    ifr.ifr_name, ret, edata.speed));
         return netsnmp_linux_interface_get_if_speed_mii(fd,name,defaultspeed);
     }
 
+#ifdef HAVE_STRUCT_ETHTOOL_CMD_SPEED_HI
+    speed_hi = edata.speed_hi;
+#else
+    speed_hi = 0;
+#endif
+    speed = speed_hi << 16 | edata.speed;
+    if (speed == 0xffff || speed == 0xffffffffUL /*SPEED_UNKNOWN*/)
+        speed = defaultspeed;
     /* return in bps */
-    DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %d\n",
-                ifr.ifr_name, edata.speed));
-    return edata.speed*1000LL*1000LL;
+    DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %#x -> %d\n",
+                ifr.ifr_name, speed_hi << 16 | edata.speed, speed));
+    return speed * 1000LL * 1000LL;
 }
 #endif
  

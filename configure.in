@@ -4388,6 +4388,15 @@ AC_CHECK_STRUCT_FOR([
 #endif
 ],nlist64, n_value)
 
+# struct ethtool_cmd
+AC_CHECK_MEMBERS([struct ethtool_cmd.speed_hi],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#ifdef HAVE_LINUX_ETHTOOL_H
+#include <linux/ethtool.h>
+#endif
+    ]])
+
 # check struct ipstat for various things
 AC_CHECK_STRUCT_FOR([
 #include <sys/types.h>
