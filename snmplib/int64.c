@@ -1,9 +1,10 @@
-/** file: test.c - test of 64-bit integer stuff
-*
-*
-* 21-jan-1998: David Perkins <dperkins@dsperkins.com>
-*
-*/
+/**
+ * @file int64.c
+ *
+ * @brief Functions for 64-bit integer computations.
+ *
+ * 21-jan-1998: David Perkins <dperkins@dsperkins.com>
+ */
 
 #include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
@@ -25,24 +26,19 @@
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/snmp_logging.h>
 
-#define TRUE 1
-#define FALSE 0
-
-/** divBy10 - divide an unsigned 64-bit integer by 10
-*
-* call with:
-*   u64 - number to be divided
-*   pu64Q - location to store quotient
-*   puR - location to store remainder
-*
-*/
+/**
+ * Divide an unsigned 64-bit integer by 10.
+ *
+ * @param[in]  u64   Number to be divided.
+ * @param[out] pu64Q Quotient.
+ * @param[out] puR   Remainder.
+ */
 void
 divBy10(U64 u64, U64 * pu64Q, unsigned int *puR)
 {
     unsigned long   ulT;
     unsigned long   ulQ;
     unsigned long   ulR;
-
 
     /*
      * top 16 bits 
@@ -79,25 +75,20 @@ divBy10(U64 u64, U64 * pu64Q, unsigned int *puR)
     pu64Q->low = pu64Q->low | ulQ;
 
     *puR = (unsigned int) (ulR);
+}
 
-
-}                               /* divBy10 */
-
-
-/** multBy10 - multiply an unsigned 64-bit integer by 10
-*
-* call with:
-*   u64 - number to be multiplied
-*   pu64P - location to store product
-*
-*/
+/**
+ * Multiply an unsigned 64-bit integer by 10.
+ *
+ * @param[in]  u64   Number to be multiplied.
+ * @param[out] pu64P Product.
+ */
 void
 multBy10(U64 u64, U64 * pu64P)
 {
     unsigned long   ulT;
     unsigned long   ulP;
     unsigned long   ulK;
-
 
     /*
      * lower 16 bits 
@@ -130,156 +121,119 @@ multBy10(U64 u64, U64 * pu64P)
     ulP = (ulT * 10) + ulK;
     ulK = ulP >> 16;
     pu64P->high = (ulP & 0x0ffff) << 16 | pu64P->high;
-
-
-}                               /* multBy10 */
-
-
-/** incrByU16 - add an unsigned 16-bit int to an unsigned 64-bit integer
-*
-* call with:
-*   pu64 - number to be incremented
-*   u16 - amount to add
-*
-*/
-void
-incrByU16(U64 * pu64, unsigned int u16)
-{
-    unsigned long   ulT1;
-    unsigned long   ulT2;
-    unsigned long   ulR;
-    unsigned long   ulK;
-
-
-    /*
-     * lower 16 bits 
-     */
-    ulT1 = pu64->low;
-    ulT2 = ulT1 & 0x0ffff;
-    ulR = ulT2 + u16;
-    ulK = ulR >> 16;
-    if (ulK == 0) {
-        pu64->low = ulT1 + u16;
-        return;
-    }
-
-    /*
-     * next 16 bits 
-     */
-    ulT2 = (ulT1 >> 16) & 0x0ffff;
-    ulR = ulT2 + 1;
-    ulK = ulR >> 16;
-    if (ulK == 0) {
-        pu64->low = ulT1 + u16;
-        return;
-    }
-
-    /*
-     * next 32 - ignore any overflow 
-     */
-    pu64->low = (ulT1 + u16) & 0x0FFFFFFFFL;
-    pu64->high++;
-#if SIZEOF_LONG != 4
-    pu64->high &= 0xffffffff;
-#endif
-}                               /* incrByV16 */
-
-void
-incrByU32(U64 * pu64, unsigned int u32)
-{
-    unsigned int    tmp;
-    tmp = pu64->low;
-    pu64->low += u32;
-#if SIZEOF_LONG != 4
-    pu64->low &= 0xffffffff;
-#endif
-    if (pu64->low < tmp) {
-        pu64->high++;
-#if SIZEOF_LONG != 4
-        pu64->high &= 0xffffffff;
-#endif
-    }
 }
 
 /**
- * pu64out = pu64one - pu64two 
+ * Add an unsigned 16-bit int to an unsigned 64-bit integer.
+ *
+ * @param[in,out] pu64 Number to be incremented.
+ * @param[in]     u16  Amount to add.
+ *
+ */
+void
+incrByU16(U64 * pu64, unsigned int u16)
+{
+    incrByU32(pu64, u16);
+}
+
+/**
+ * Add an unsigned 32-bit int to an unsigned 64-bit integer.
+ *
+ * @param[in,out] pu64 Number to be incremented.
+ * @param[in]     u32  Amount to add.
+ *
+ */
+void
+incrByU32(U64 * pu64, unsigned int u32)
+{
+    uint32_t tmp;
+
+    tmp = pu64->low;
+    pu64->low = (uint32_t)(tmp + u32);
+    if (pu64->low < tmp)
+        pu64->high = (uint32_t)(pu64->high + 1);
+}
+
+/**
+ * Subtract two 64-bit numbers.
+ *
+ * @param[in] pu64one Number to start from.
+ * @param[in] pu64two Amount to subtract.
+ * @param[out] pu64out pu64one - pu64two.
  */
 void
 u64Subtract(const U64 * pu64one, const U64 * pu64two, U64 * pu64out)
 {
-    if (pu64one->low < pu64two->low) {
-        pu64out->low = 0xffffffff - pu64two->low + pu64one->low + 1;
-        pu64out->high = pu64one->high - pu64two->high - 1;
-    } else {
-        pu64out->low = pu64one->low - pu64two->low;
-        pu64out->high = pu64one->high - pu64two->high;
-    }
+    int carry;
+
+    carry = pu64one->low < pu64two->low;
+    pu64out->low = (uint32_t)(pu64one->low - pu64two->low);
+    pu64out->high = (uint32_t)(pu64one->high - pu64two->high - carry);
 }
 
 /**
- * pu64out += pu64one
+ * Add two 64-bit numbers.
+ *
+ * @param[in] pu64one Amount to add.
+ * @param[in,out] pu64out pu64out += pu64one.
  */
 void
 u64Incr(U64 * pu64out, const U64 * pu64one)
 {
-    pu64out->high += pu64one->high;
-#if SIZEOF_LONG != 4
-    pu64out->high &= 0xffffffff;
-#endif
+    pu64out->high = (uint32_t)(pu64out->high + pu64one->high);
     incrByU32(pu64out, pu64one->low);
 }
 
 /**
- * pu64out += (pu64one - pu64two)
+ * Add the difference of two 64-bit numbers to a 64-bit counter.
+ *
+ * @param[in] pu64one
+ * @param[in] pu64two
+ * @param[out] pu64out pu64out += (pu64one - pu64two)
  */
 void
 u64UpdateCounter(U64 * pu64out, const U64 * pu64one, const U64 * pu64two)
 {
     U64 tmp;
+
     u64Subtract(pu64one, pu64two, &tmp);
     u64Incr(pu64out, &tmp);
 }
 
 /**
- * pu64one = pu64two 
+ * Copy a 64-bit number.
+ *
+ * @param[in] pu64two Number to be copied.
+ * @param[out] pu64one Where to store the copy - *pu64one = *pu64two.
  */
 void
 u64Copy(U64 * pu64one, const U64 * pu64two)
 {
-    pu64one->high = pu64two->high;
-    pu64one->low =  pu64two->low;
+    *pu64one = *pu64two;
 }
 
-/** zeroU64 - set an unsigned 64-bit number to zero
-*
-* call with:
-*   pu64 - number to be zero'ed
-*
-*/
+/**
+ * Set an unsigned 64-bit number to zero.
+ *
+ * @param[in] pu64 Number to be zeroed.
+ */
 void
 zeroU64(U64 * pu64)
 {
     pu64->low = 0;
     pu64->high = 0;
-}                               /* zeroU64 */
+}
 
-
-/** isZeroU64 - check if an unsigned 64-bit number is
-*
-* call with:
-*   pu64 - number to be zero'ed
-*
-*/
+/**
+ * Check if an unsigned 64-bit number is zero.
+ *
+ * @param[in] pu64 Number to be checked.
+ */
 int
 isZeroU64(const U64 * pu64)
 {
-
-    if ((pu64->low == 0) && (pu64->high == 0))
-        return (TRUE);
-    else
-        return (FALSE);
-
-}                               /* isZeroU64 */
+    return pu64->low == 0 && pu64->high == 0;
+}
 
 /**
  * check the old and new values of a counter64 for 32bit wrapping
@@ -290,7 +244,7 @@ isZeroU64(const U64 * pu64)
  * @param old_val
  * @param new_val
  *
- *@Note:
+ * @note
  * The old and new values must be be from within a time period
  * which would only allow the 32bit portion of the counter to
  * wrap once. i.e. if the 32bit portion of the counter could
@@ -329,16 +283,11 @@ netsnmp_c64_check_for_32bit_wrap(struct counter64 *old_val,
      */
     if (new_val->high == old_val->high) {
         DEBUGMSGTL(("c64:check_wrap", "32 bit wrap\n"));
-        if (adjust) {
-            ++new_val->high;
-#if SIZEOF_LONG != 4
-            new_val->high &= 0xffffffff;
-#endif
-        }
+        if (adjust)
+            new_val->high = (uint32_t)(new_val->high + 1);
         return 32;
     }
-    else if ((new_val->high == (old_val->high + 1)) ||
-             ((0 == new_val->high) && (0xffffffff == old_val->high))) {
+    else if (new_val->high == (uint32_t)(old_val->high + 1)) {
         DEBUGMSGTL(("c64:check_wrap", "64 bit wrap\n"));
         return 64;
     }
@@ -355,7 +304,7 @@ netsnmp_c64_check_for_32bit_wrap(struct counter64 *old_val,
  * @param need_wrap_check: pointer to integer indicating if wrap check is needed
  *                         flag may be cleared if 64 bit counter is detected
  *
- *@Note:
+ * @note
  * The old_prev_val and new_val values must be be from within a time
  * period which would only allow the 32bit portion of the counter to
  * wrap once. i.e. if the 32bit portion of the counter could
@@ -436,9 +385,11 @@ netsnmp_c64_check32_and_update(struct counter64 *prev_val, struct counter64 *new
     return 0;
 }
 
+/** Convert an unsigned 64-bit number to ASCII. */
 void
-printU64(char *buf,     /* char [I64CHARSZ+1]; */
-                         const U64 * pu64) {
+printU64(char *buf, /* char [I64CHARSZ+1]; */
+         const U64 * pu64)
+{
     U64             u64a;
     U64             u64b;
 
@@ -446,57 +397,37 @@ printU64(char *buf,     /* char [I64CHARSZ+1]; */
     unsigned int    u;
     int             j;
 
-    u64a.high = pu64->high;
-    u64a.low = pu64->low;
+    u64a = *pu64;
     aRes[I64CHARSZ] = 0;
     for (j = 0; j < I64CHARSZ; j++) {
         divBy10(u64a, &u64b, &u);
         aRes[(I64CHARSZ - 1) - j] = (char) ('0' + u);
-        u64a.high = u64b.high;
-        u64a.low = u64b.low;
+        u64a = u64b;
         if (isZeroU64(&u64a))
             break;
     }
     strcpy(buf, &aRes[(I64CHARSZ - 1) - j]);
 }
 
+/** Convert a signed 64-bit number to ASCII. */
 void
-printI64(char *buf,     /* char [I64CHARSZ+1]; */
-                         const U64 * pu64) {
+printI64(char *buf, /* char [I64CHARSZ+1]; */
+         const U64 * pu64)
+{
     U64             u64a;
-    U64             u64b;
-
-    char            aRes[I64CHARSZ + 1];
-    unsigned int    u;
-    int             j, sign = 0;
 
     if (pu64->high & 0x80000000) {
-        u64a.high = ~pu64->high;
-        u64a.low = ~pu64->low;
-        sign = 1;
+        u64a.high = (uint32_t) ~pu64->high;
+        u64a.low = (uint32_t) ~pu64->low;
         incrByU32(&u64a, 1);    /* bit invert and incr by 1 to print 2s complement */
+        buf[0] = '-';
+        printU64(buf + 1, &u64a);
     } else {
-        u64a.high = pu64->high;
-        u64a.low = pu64->low;
+        printU64(buf, pu64);
     }
-
-    aRes[I64CHARSZ] = 0;
-    for (j = 0; j < I64CHARSZ; j++) {
-        divBy10(u64a, &u64b, &u);
-        aRes[(I64CHARSZ - 1) - j] = (char) ('0' + u);
-        u64a.high = u64b.high;
-        u64a.low = u64b.low;
-        if (isZeroU64(&u64a))
-            break;
-    }
-    if (sign == 1) {
-        aRes[(I64CHARSZ - 1) - j - 1] = '-';
-        strcpy(buf, &aRes[(I64CHARSZ - 1) - j - 1]);
-        return;
-    }
-    strcpy(buf, &aRes[(I64CHARSZ - 1) - j]);
 }
 
+/** Convert a signed 64-bit integer from ASCII to U64. */
 int
 read64(U64 * i64, const char *str)
 {
@@ -515,75 +446,14 @@ read64(U64 * i64, const char *str)
         ok = 1;
         u = *str - '0';
         multBy10(*i64, &i64p);
-        memcpy(i64, &i64p, sizeof(i64p));
+        *i64 = i64p;
         incrByU16(i64, u);
         str++;
     }
     if (sign) {
-        i64->high = ~i64->high;
-        i64->low = ~i64->low;
+        i64->high = (uint32_t) ~i64->high;
+        i64->low = (uint32_t) ~i64->low;
         incrByU16(i64, 1);
     }
     return ok;
 }
-
-
-
-
-#ifdef TESTING
-void
-main(int argc, char *argv[])
-{
-    int             i;
-    int             j;
-    int             l;
-    unsigned int    u;
-    U64             u64a;
-    U64             u64b;
-#define MXSZ 20
-    char            aRes[MXSZ + 1];
-
-
-    if (argc < 2) {
-        printf("This program takes numbers from the command line\n"
-               "and prints them out.\n" "Usage: test <unsignedInt>...\n");
-        exit(1);
-    }
-
-    aRes[MXSZ] = 0;
-
-    for (i = 1; i < argc; i++) {
-        l = strlen(argv[i]);
-        zeroU64(&u64a);
-        for (j = 0; j < l; j++) {
-            if (!isdigit(argv[i][j])) {
-                printf("Argument is not a number \"%s\"\n", argv[i]);
-                exit(1);
-            }
-            u = argv[i][j] - '0';
-            multBy10(u64a, &u64b);
-            u64a = u64b;
-            incrByU16(&u64a, u);
-        }
-
-        printf("number \"%s\" in hex is '%08x%08x'h\n",
-               argv[i], u64a.high, u64a.low);
-
-        printf("number is \"%s\"\n", printU64(&u64a));
-        for (j = 0; j < MXSZ; j++) {
-            divBy10(u64a, &u64b, &u);
-            aRes[(MXSZ - 1) - j] = (char) ('0' + u);
-            u64a = u64b;
-            if (isZeroU64(&u64a))
-                break;
-        }
-
-        printf("number is \"%s\"\n", &aRes[(MXSZ - 1) - j]);
-    }
-    exit(0);
-}                               /* main */
-#endif                          /* TESTING */
-
-/*
- * file: test.c 
- */
