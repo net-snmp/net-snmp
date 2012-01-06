@@ -69,7 +69,7 @@ extern "C" {
 #ifndef MAX_SUBID               /* temporary - duplicate definition protection */
 #ifndef EIGHTBIT_SUBIDS
 typedef u_long  oid;
-#define MAX_SUBID   0xFFFFFFFF
+#define MAX_SUBID   0xFFFFFFFFUL
 #else
 typedef u_char  oid;
 #define MAX_SUBID   0xFF
