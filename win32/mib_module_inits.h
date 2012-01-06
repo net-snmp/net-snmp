@@ -34,7 +34,6 @@
   if (should_init("extend")) init_extend();
   if (should_init("errormib")) init_errormib();
   if (should_init("file")) init_file();
-  if (should_init("dlmod")) init_dlmod();
   if (should_init("proxy")) init_proxy();
 #endif
   if (should_init("snmpEngine")) init_snmpEngine();

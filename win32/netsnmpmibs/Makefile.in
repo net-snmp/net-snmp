@@ -17,7 +17,6 @@ ALL : "..\lib\$(OUTDIR)\$(PROGNAME).lib"
 CLEAN :
 	-@erase "$(INTDIR)\agentx_config.obj"
 	-@erase "$(INTDIR)\client.obj"
-	-@erase "$(INTDIR)\dlmod.obj"
 	-@erase "$(INTDIR)\errormib.obj"
 	-@erase "$(INTDIR)\example.obj"
 	-@erase "$(INTDIR)\execute.obj"
@@ -143,7 +142,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\mteTriggerThresholdTable.obj" \
 	"$(INTDIR)\example.obj" \
 	"$(INTDIR)\ucdDemoPublic.obj" \
-	"$(INTDIR)\dlmod.obj" \
 	"$(INTDIR)\errormib.obj" \
 	"$(INTDIR)\extensible.obj" \
 	"$(INTDIR)\file.obj" \
@@ -201,7 +199,6 @@ ALL : "..\lib\$(OUTDIR)\$(PROGNAME).lib"
 CLEAN :
 	-@erase "$(INTDIR)\agentx_config.obj"
 	-@erase "$(INTDIR)\client.obj"
-	-@erase "$(INTDIR)\dlmod.obj"
 	-@erase "$(INTDIR)\errormib.obj"
 	-@erase "$(INTDIR)\example.obj"
 	-@erase "$(INTDIR)\execute.obj"
@@ -328,7 +325,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\mteTriggerThresholdTable.obj" \
 	"$(INTDIR)\example.obj" \
 	"$(INTDIR)\ucdDemoPublic.obj" \
-	"$(INTDIR)\dlmod.obj" \
 	"$(INTDIR)\errormib.obj" \
 	"$(INTDIR)\extensible.obj" \
 	"$(INTDIR)\file.obj" \
@@ -489,12 +485,6 @@ SOURCE=..\..\agent\mibgroup\examples\example.c
 SOURCE=..\..\agent\mibgroup\examples\ucdDemoPublic.c
 
 "$(INTDIR)\ucdDemoPublic.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE="..\..\agent\mibgroup\ucd-snmp\dlmod.c"
-
-"$(INTDIR)\dlmod.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

@@ -73,7 +73,6 @@
 #include "mibgroup/agent/extend.h"
 #include "mibgroup/ucd-snmp/errormib.h"
 #include "mibgroup/ucd-snmp/file.h"
-#include "mibgroup/ucd-snmp/dlmod.h"
 #include "mibgroup/ucd-snmp/proxy.h"
 #endif
 
