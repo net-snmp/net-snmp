@@ -181,6 +181,7 @@ SOFTWARE.
     size_t            strlcpy(char *, const char *, size_t);
 #endif
 #ifndef HAVE_STRLCAT
+    NETSNMP_IMPORT
     size_t            strlcat(char *, const char *, size_t);
 #endif
 

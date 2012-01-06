@@ -8,6 +8,10 @@ SKIPIF NETSNMP_DISABLE_SNMPV2C
 SKIPIFNOT USING_UCD_SNMP_PASS_MODULE
 SKIPIFNOT USING_UTILITIES_EXECUTE_MODULE
 
+# Don't run this test on MinGW - local/passtest is a shell script and
+# hence passing it to the MSVCRT popen() doesn't work.
+[ "x$OSTYPE" = "xmsys" ] && SKIP "MinGW"
+
 # make sure snmpget and snmpwalk can be executed
 SNMPGET="${builddir}/apps/snmpget"
 [ -x "$SNMPGET" ] || SKIP
