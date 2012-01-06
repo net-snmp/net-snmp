@@ -184,6 +184,8 @@ SOFTWARE.
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/read_config.h> /* for get_temp_file_pattern() */
 
+#include "inet_ntop.h"
+
 /* NetSNMP and DNSSEC-Tools both define FREE. We'll not use either here. */
 #undef FREE
 
