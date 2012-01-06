@@ -358,6 +358,7 @@ EXPORTS
 	netsnmp_udp_parse_security
 	netsnmp_udp_getSecName
 	find_sec_mod
+	strlcat
 	strlcpy
 	getopt
 	optarg                  DATA
