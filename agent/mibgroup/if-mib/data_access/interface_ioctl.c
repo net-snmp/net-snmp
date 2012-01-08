@@ -153,6 +153,11 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
                 ifentry->type = IANAIFTYPE_TUNNEL;
                 break;          /* tunnel */
 #endif
+#ifdef ARPHRD_INFINIBAND
+            case ARPHRD_INFINIBAND:
+                ifentry->type = IANAIFTYPE_INFINIBAND;
+                break;
+#endif
 #ifdef ARPHRD_SLIP
             case ARPHRD_SLIP:
             case ARPHRD_CSLIP:
