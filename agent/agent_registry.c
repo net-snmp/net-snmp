@@ -555,6 +555,8 @@ netsnmp_subtree_change_prev(netsnmp_subtree *ptr, netsnmp_subtree *theprev)
                                &ptr->oid_off);
 }
 
+netsnmp_feature_child_of(netsnmp_subtree_compare,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_SUBTREE_COMPARE
 /** Compares OIDs of given subtrees.
  *
  *  @param ap,bp Pointers to the subtrees to be compared.
@@ -563,8 +565,6 @@ netsnmp_subtree_change_prev(netsnmp_subtree *ptr, netsnmp_subtree *theprev)
  *
  *  @see snmp_oid_compare()
  */
-netsnmp_feature_child_of(netsnmp_subtree_compare,netsnmp_unused)
-#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_SUBTREE_COMPARE
 int
 netsnmp_subtree_compare(const netsnmp_subtree *ap, const netsnmp_subtree *bp)
 {
@@ -742,7 +742,7 @@ netsnmp_subtree_split(netsnmp_subtree *current, oid name[], int name_len)
 
 /** Loads the subtree under given context name.
  *
- *  @param root The subtree to be loaded into current subtree.
+ *  @param new_sub The subtree to be loaded into current subtree.
  *
  *  @param context_name Text name of the context we're searching for.
  *
@@ -1085,8 +1085,22 @@ netsnmp_subtree_find(const oid *name, size_t len, netsnmp_subtree *subtree,
 
 /** Registers a MIB handler.
  *
+ *  @param moduleName
+ *  @param var
+ *  @param varsize
+ *  @param numvars
+ *  @param  mibloc
+ *  @param mibloclen
+ *  @param priority
+ *  @param range_subid
+ *  @param range_ubound
+ *  @param  ss
+ *  @param context
+ *  @param timeout
+ *  @param flags
  *  @param reginfo Registration handler structure.
  *                 In a case of failure, it will be freed.
+ *  @param perform_callback
  *
  *  @return gives MIB_REGISTERED_OK or MIB_* error code.
  *
@@ -1389,6 +1403,7 @@ register_mib_detach(void)
  *                     If range_subid is zero, then this parameter is ignored.
  *
  *  @param ss 
+ *  @param context
  *  @param timeout 
  *  @param flags 
  *

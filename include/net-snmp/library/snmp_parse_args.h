@@ -1,8 +1,5 @@
 #ifndef SNMP_PARSE_ARGS_H
 #define SNMP_PARSE_ARGS_H
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * @file snmp_parse_args.h
@@ -10,6 +7,10 @@ extern "C" {
  * Support for initializing variables of type netsnmp_session from command
  * line arguments
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** Don't enable any logging even if there is no -L argument */
 #define NETSNMP_PARSE_ARGS_NOLOGGING    0x0001
@@ -47,11 +48,12 @@ extern "C" {
  *  from it.
  *  @param argc Number of elements in argv
  *  @param argv string array of at least argc elements
+ *  @param session
  *  @param localOpts Additional option characters to accept
  *  @param proc function pointer used to process any unhandled arguments
  *  @param flags flags directing how to handle the string
  *
- *  @reval 0 (= #NETSNMP_PARSE_ARGS_SUCCESS) on success
+ *  @retval 0 (= #NETSNMP_PARSE_ARGS_SUCCESS) on success
  *  @retval #NETSNMP_PARSE_ARGS_SUCCESS_EXIT when the application is expected
  *  to exit with zero exit code (e.g. '-V' option was found)
  *  @retval #NETSNMP_PARSE_ARGS_ERROR_USAGE when the function failed to parse
