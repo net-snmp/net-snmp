@@ -249,7 +249,7 @@ snmp_register_callback(int major, int minor, SNMPCallback * new_callback,
  * @param minor        Minor callback event type.
  * @param new_callback Callback function being registered.
  * @param arg          Argument that will be passed to the callback function.
- * @priority           Handler invocation priority. When multiple handlers have
+ * @param priority     Handler invocation priority. When multiple handlers have
  *   been registered for the same (major, minor) callback event type, handlers
  *   with the numerically lowest priority will be invoked first. Handlers with
  *   identical priority are invoked in the order they have been registered.

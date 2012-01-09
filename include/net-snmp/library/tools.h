@@ -113,7 +113,7 @@ extern          "C" {
  *  Expands to string with value of the s. 
  *  If s is macro, the resulting string is value of the macro.
  *  Example: 
- *   #define TEST 1234
+ *   \#define TEST 1234
  *   SNMP_MACRO_VAL_TO_STR(TEST) expands to "1234"
  *   SNMP_MACRO_VAL_TO_STR(TEST+1) expands to "1234+1"
  */
