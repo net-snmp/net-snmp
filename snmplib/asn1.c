@@ -1371,7 +1371,7 @@ asn_parse_objid(u_char * data,
             }
         }
 #if defined(EIGHTBIT_SUBIDS) || (SIZEOF_LONG != 4)
-        if (subidentifier > (u_long) MAX_SUBID) {
+        if (subidentifier > MAX_SUBID) {
             ERROR_MSG("subidentifier too large");
             return NULL;
         }
