@@ -7,7 +7,7 @@
 
 #ifndef EIGHTBIT_SUBIDS
 typedef u_long oid;
-#define MAX_SUBID   0xFFFFFFFF
+#define MAX_SUBID   0xFFFFFFFFUL
 #define NETSNMP_PRIo "l"
 #else
 typedef uint8_t oid;
