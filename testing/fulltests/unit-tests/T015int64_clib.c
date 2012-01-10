@@ -17,7 +17,7 @@ static const int64_t intval[] = {
 for (i = 0; i < sizeof(intval)/sizeof(intval[0]); ++i) {
     U64 a, b;
     a.low = (uint32_t)intval[i];
-    a.high = intval[i] >> 32;
+    a.high = (uint32_t)(intval[i] >> 32);
     printI64(buf, &a);
     read64(&b, buf);
     OKF(memcmp(&a, &b, sizeof(a)) == 0,
@@ -30,9 +30,9 @@ for (i = 0; i < sizeof(intval)/sizeof(intval[0]); ++i) {
         U64 a, b;
         uint64_t d;
         a.low = (uint32_t)intval[i];
-        a.high = intval[i] >> 32;
+        a.high = (uint32_t)(intval[i] >> 32);
         b.low = (uint32_t)intval[j];
-        b.high = intval[j] >> 32;
+        b.high = (uint32_t)(intval[j] >> 32);
         u64Incr(&a, &b);
         d = (uint64_t)a.high << 32 | a.low;
         OKF(intval[i] + intval[j] == d,
@@ -46,9 +46,9 @@ for (i = 0; i < sizeof(intval)/sizeof(intval[0]); ++i) {
         U64 a, b, c;
         uint64_t d;
         a.low = (uint32_t)intval[i];
-        a.high = intval[i] >> 32;
+        a.high = (uint32_t)(intval[i] >> 32);
         b.low = (uint32_t)intval[j];
-        b.high = intval[j] >> 32;
+        b.high = (uint32_t)(intval[j] >> 32);
         u64Subtract(&a, &b, &c);
         d = (uint64_t)c.high << 32 | c.low;
         OKF(intval[i] - intval[j] == d,
