@@ -1022,8 +1022,12 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     struct stat     sbuf;
     char           *ourcopy = strdup(pathname);
     char           *entry;
-    char            buf[SNMP_MAXPATH];
+    char           *buf;
     char           *st = NULL;
+
+    buf = malloc(strlen(pathname));
+    if (!buf)
+        return SNMPERR_GENERR;
 
 #if defined (WIN32) || defined (cygwin)
     /* convert backslash to forward slash */
@@ -1069,6 +1073,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
 #endif
             {
                 free(ourcopy);
+                free(buf);
                 return SNMPERR_GENERR;
             }
         } else {
@@ -1080,11 +1085,13 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
                  * ack! can't make a directory on top of a file 
                  */
                 free(ourcopy);
+                free(buf);
                 return SNMPERR_GENERR;
             }
         }
     }
     free(ourcopy);
+    free(buf);
     return SNMPERR_SUCCESS;
 }
 
