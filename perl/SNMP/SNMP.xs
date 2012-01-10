@@ -935,19 +935,22 @@ oid *doid_arr;
 size_t *doid_arr_len;
 char * soid_str;
 {
-   char soid_buf[STR_BUF_SIZE];
+   char *soid_buf;
    char *cp;
    char *st;
 
    if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
    if (*soid_str == '.') soid_str++;
-   strcpy(soid_buf, soid_str);
+   soid_buf = strdup(soid_str);
+   if (!soid_buf)
+       return FAILURE;
    cp = strtok_r(soid_buf,".",&st);
    while (cp) {
      sscanf(cp, "%" NETSNMP_PRIo "u", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
      cp = strtok_r(NULL,".",&st);
    }
+   free(soid_buf);
    return(SUCCESS);
 }
 
@@ -1046,7 +1049,7 @@ OCT:
         vars->type = ASN_IPADDRESS;
         vars->val.integer = netsnmp_malloc(sizeof(in_addr_t));
         if (val)
-            *(vars->val.integer) = inet_addr(val);
+            *((in_addr_t *)vars->val.integer) = inet_addr(val);
         else {
             ret = FAILURE;
             *(vars->val.integer) = 0;
@@ -4843,10 +4846,11 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 		  if (((status=__get_label_iid(str_buf_temp,
 		       &label, &iid, NO_FLAGS)) == SUCCESS)
 		      && label) {
-		     strcpy(str_buf_temp, label);
+		     strncpy(str_buf_temp, label, sizeof(str_buf_temp));
+                     str_buf_temp[sizeof(str_buf_temp)-1] = '\0';
 		     if (iid && *iid) {
-		       strcat(str_buf_temp, ".");
-		       strcat(str_buf_temp, iid);
+		       strncat(str_buf_temp, ".", sizeof(str_buf_temp)-strlen(str_buf_temp)-1);
+		       strncat(str_buf_temp, iid, sizeof(str_buf_temp)-strlen(str_buf_temp)-1);
 		     }
  	          }
 	        }

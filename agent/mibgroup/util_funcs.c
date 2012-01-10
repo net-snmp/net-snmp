@@ -109,10 +109,14 @@ make_tempfile(void)
 {
     static char     name[32];
     int             fd = -1;
+    mode_t          oldmask;
 
-    strcpy(name, get_temp_file_pattern());
+    strncpy(name, get_temp_file_pattern(), sizeof(name));
+    name[sizeof(name)-1] = '\0';
 #ifdef HAVE_MKSTEMP
+    oldmask = umask(S_IRUSR | S_IWUSR);
     fd = mkstemp(name);
+    umask(oldmask);
 #else
     if (mktemp(name)) {
 # ifndef WIN32        

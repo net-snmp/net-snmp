@@ -952,8 +952,12 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     struct stat     sbuf;
     char           *ourcopy = strdup(pathname);
     char           *entry;
-    char            buf[SNMP_MAXPATH];
+    char           *buf;
     char           *st = NULL;
+
+    buf = malloc(strlen(pathname));
+    if (!buf)
+        return SNMPERR_GENERR;
 
 #if defined (WIN32) || defined (cygwin)
     /* convert backslash to forward slash */
@@ -998,6 +1002,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
 #endif
             {
                 free(ourcopy);
+                free(buf);
                 return SNMPERR_GENERR;
             } else {
                 snmp_log(LOG_INFO, "Created directory: %s\n", buf);
@@ -1011,11 +1016,13 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
                  * ack! can't make a directory on top of a file 
                  */
                 free(ourcopy);
+                free(buf);
                 return SNMPERR_GENERR;
             }
         }
     }
     free(ourcopy);
+    free(buf);
     return SNMPERR_SUCCESS;
 }
 
@@ -1034,10 +1041,14 @@ netsnmp_mktemp(void)
     static char     name[256];
 #endif
     int             fd = -1;
+    mode_t          oldmask;
 
-    strcpy(name, get_temp_file_pattern());
+    strncpy(name, get_temp_file_pattern(), sizeof(name));
+    name[sizeof(name)-1] = '\0';
 #ifdef HAVE_MKSTEMP
+    oldmask = umask(S_IRUSR | S_IWUSR);
     fd = mkstemp(name);
+    umask(oldmask);
 #else
     if (mktemp(name)) {
 # ifndef WIN32

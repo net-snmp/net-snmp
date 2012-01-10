@@ -134,6 +134,12 @@ netsnmp_cpu_info *netsnmp_cpu_get_byName( char *name, int create ) {
     cpu = SNMP_MALLOC_TYPEDEF( netsnmp_cpu_info );
     if (!cpu)
         return NULL;
+    if (strlen(name) >= sizeof(cpu->name)) {
+        free(cpu);
+        snmp_log(LOG_ERR, "Name of CPU is too large: %s\n", name);
+        return NULL;
+    }
+
     strcpy(cpu->name, name);
     if ( _cpu_tail ) {
         cpu->idx = _cpu_tail->idx+1;
