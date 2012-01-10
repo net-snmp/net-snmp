@@ -1,9 +1,9 @@
 *.bak
 *.bs
-*.la
-*.lo
 *.ft
 *.ft.1
+*.la
+*.lo
 *.made
 *.o
 *.obj
@@ -78,7 +78,10 @@ net-snmp-config
 net-snmp-config-x
 net-snmp-create-v3-user
 NEWS.new*
+perl/*.yml
 perl/*/*.def
+perl/*/*.yml
+perl/*/*/*.yml
 perl/agent/agent.c
 perl/agent/default_store/default_store.c
 perl/agent/default_store/default_store.def
