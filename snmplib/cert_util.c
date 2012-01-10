@@ -1160,6 +1160,11 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         }
         DEBUGMSGT(("9:cert:partner", "%s looking for partner near %s\n",
                    key->info.filename, key->info.dir));
+        snprintf(filename, sizeof(filename), "%s", key->info.filename);
+        pos = strrchr(filename, '.');
+        if (NULL == pos)
+            return;
+        *pos = 0;
 
         matching = _cert_find_subset_fn( filename, key->info.dir );
         if (!matching)
@@ -1188,6 +1193,11 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         }
         DEBUGMSGT(("9:cert:partner", "%s looking for partner\n",
                    cert->info.filename));
+        snprintf(filename, sizeof(filename), "%s", cert->info.filename);
+        pos = strrchr(filename, '.');
+        if (NULL == pos)
+            return;
+        *pos = 0;
 
         matching = _key_find_subset(filename);
         if (!matching)
