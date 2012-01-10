@@ -108,7 +108,8 @@ var_extensible_version(struct variable *vp,
         long_ret = name[8];
         return ((u_char *) (&long_ret));
     case VERTAG:
-        strcpy(errmsg, netsnmp_get_version());
+        strncpy(errmsg, netsnmp_get_version(), sizeof(errmsg));
+        errmsg[sizeof(errmsg)-1] = '\0';
         *var_len = strlen(errmsg);
         return ((u_char *) errmsg);
     case VERDATE:
@@ -118,7 +119,8 @@ var_extensible_version(struct variable *vp,
     case VERCDATE:
         curtime = time(NULL);
         cptr = ctime(&curtime);
-        strcpy(errmsg, cptr);
+        strncpy(errmsg, cptr, sizeof(errmsg));
+        errmsg[sizeof(errmsg)-1] = '\0';
         *var_len = strlen(errmsg) - 1;
         return ((u_char *) errmsg);
     case VERIDENT:

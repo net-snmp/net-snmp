@@ -163,6 +163,11 @@ sensor_by_name( const char *name, int create_type )
      */
     sp = SNMP_MALLOC_TYPEDEF( netsnmp_sensor_info );
     if ( sp ) {
+        if (strlen(name) >= sizeof(sp->name)) {
+            snmp_log(LOG_ERR, "Sensor name is too large: %s\n", name);
+            free(sp);
+            return NULL;
+        }
         strcpy( sp->name, name );
         sp->type = create_type;
         /*
