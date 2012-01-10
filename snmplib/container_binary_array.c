@@ -496,7 +496,7 @@ binary_search_for_start(netsnmp_index *val, netsnmp_container *c)
 void          **
 netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
 {
-    binary_array_table *t = (binary_array_table*)c->container_data;
+    binary_array_table *t;
     void          **subset;
     int             start, end;
     size_t          i;
