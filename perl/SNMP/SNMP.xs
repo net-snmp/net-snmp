@@ -1067,7 +1067,7 @@ OCT:
         vars->type = ASN_IPADDRESS;
         vars->val.integer = (long *)malloc(sizeof(in_addr_t));
         if (val)
-            *(vars->val.integer) = inet_addr(val);
+            *((in_addr_t *)vars->val.integer) = inet_addr(val);
         else {
             ret = FAILURE;
             *(vars->val.integer) = 0;
