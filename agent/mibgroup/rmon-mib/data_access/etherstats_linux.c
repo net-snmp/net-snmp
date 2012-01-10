@@ -161,7 +161,8 @@ interface_ioctl_etherstats_get (etherStatsTable_rowreq_ctx *rowreq_ctx , int fd,
                 "called\n"));
 
     memset(&ifr, 0, sizeof(ifr));
-    strcpy(ifr.ifr_name, name);
+    strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+    ifr.ifr_name[sizeof(ifr.ifr_name)-1] = '\0';
 
     memset(&driver_info, 0, sizeof(driver_info));
     driver_info.cmd = ETHTOOL_GDRVINFO;
