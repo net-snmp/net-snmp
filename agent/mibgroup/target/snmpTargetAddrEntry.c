@@ -851,8 +851,8 @@ var_snmpTargetAddrEntry(struct variable * vp,
 
     case SNMPTARGETADDRTAGLIST:
         if (temp_struct->tagList != NULL) {
-            strcpy(string, temp_struct->tagList);
-            *var_len = strlen(string);
+            strncpy(string, temp_struct->tagList, sizeof(string));
+            *var_len = SNMP_MIN(strlen(temp_struct->tagList), sizeof(string));
             return (unsigned char *) string;
         } else {
             return NULL;
@@ -861,8 +861,8 @@ var_snmpTargetAddrEntry(struct variable * vp,
     case SNMPTARGETADDRPARAMS:
         if (temp_struct->params == NULL)
             return NULL;
-        strcpy(string, temp_struct->params);
-        *var_len = strlen(string);
+        strncpy(string, temp_struct->params, sizeof(string));
+        *var_len = SNMP_MIN(strlen(temp_struct->params), sizeof(string));
         return (unsigned char *) string;
 
     case SNMPTARGETADDRSTORAGETYPE:
