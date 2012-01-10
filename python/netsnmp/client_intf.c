@@ -874,19 +874,22 @@ oid *doid_arr;
 int *doid_arr_len;
 char * soid_str;
 {
-   char soid_buf[STR_BUF_SIZE];
+   char *soid_buf;
    char *cp;
    char *st;
 
    if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
    if (*soid_str == '.') soid_str++;
-   strcpy(soid_buf, soid_str);
+   soid_buf = strdup(soid_str);
+   if (!soid_buf)
+       return FAILURE;
    cp = strtok_r(soid_buf,".",&st);
    while (cp) {
      sscanf(cp, "%lu", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
      cp = strtok_r(NULL,".",&st);
    }
+   free(soid_buf);
    return(SUCCESS);
 }
 
