@@ -57,6 +57,18 @@ AC_CHECK_MEMBERS([struct dirent.d_type],,,[
 #endif
     ]])
 
+#       struct ethtool_cmd
+#
+if test "x$ac_cv_header_linux_ethtool_h" = "xyes" ; then
+AC_CHECK_MEMBERS([struct ethtool_cmd.speed_hi],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#ifdef HAVE_LINUX_ETHTOOL_H
+#include <linux/ethtool.h>
+#endif
+    ]])
+fi
+
 #       struct ipstat
 #   Agent:
 #
