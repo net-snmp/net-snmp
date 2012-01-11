@@ -120,7 +120,7 @@ var_extensible_version(struct variable *vp,
         curtime = time(NULL);
         cptr = ctime(&curtime);
         strlcpy(errmsg, cptr, sizeof(errmsg));
-        *var_len = strlen(errmsg) - 1;
+        *var_len = strlen(errmsg) - 1; /* - 1 to strip trailing newline */
         return ((u_char *) errmsg);
     case VERIDENT:
         strlcpy(errmsg, "$Id$", sizeof(errmsg));
