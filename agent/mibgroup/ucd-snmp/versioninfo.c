@@ -109,24 +109,21 @@ var_extensible_version(struct variable *vp,
         long_ret = name[8];
         return ((u_char *) (&long_ret));
     case VERTAG:
-        strncpy(errmsg, netsnmp_get_version(), sizeof(errmsg));
-        errmsg[sizeof(errmsg)-1] = '\0';
+        strlcpy(errmsg, netsnmp_get_version(), sizeof(errmsg));
         *var_len = strlen(errmsg);
         return ((u_char *) errmsg);
     case VERDATE:
-        sprintf(errmsg, "$Date$");
+        strlcpy(errmsg, "$Date$", sizeof(errmsg));
         *var_len = strlen(errmsg);
         return ((u_char *) errmsg);
     case VERCDATE:
         curtime = time(NULL);
         cptr = ctime(&curtime);
-        strncpy(errmsg, cptr, sizeof(errmsg));
-        errmsg[sizeof(errmsg)-1] = '\0';
+        strlcpy(errmsg, cptr, sizeof(errmsg));
         *var_len = strlen(errmsg) - 1;
         return ((u_char *) errmsg);
     case VERIDENT:
-        sprintf(errmsg,
-                "$Id$");
+        strlcpy(errmsg, "$Id$", sizeof(errmsg));
         *var_len = strlen(errmsg);
         return ((u_char *) errmsg);
     case VERCONFIG:
@@ -136,7 +133,7 @@ var_extensible_version(struct variable *vp,
             *var_len = 1024;    /* mib imposed restriction */
         return (u_char *) config_opts;
 #else
-        sprintf(errmsg, "");
+        strlcpy(errmsg, "", sizeof(errmsg)));
         *var_len = strlen(errmsg);
         return ((u_char *) errmsg);
 #endif
