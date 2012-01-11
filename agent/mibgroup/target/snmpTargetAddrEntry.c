@@ -833,8 +833,8 @@ var_snmpTargetAddrEntry(struct variable * vp,
 
     case SNMPTARGETADDRTAGLIST:
         if (temp_struct->tagList != NULL) {
-            strncpy(string, temp_struct->tagList, sizeof(string));
-            *var_len = SNMP_MIN(strlen(temp_struct->tagList), sizeof(string));
+            strlcpy(string, temp_struct->tagList, sizeof(string));
+            *var_len = strlen(string);
             return (unsigned char *) string;
         } else {
             return NULL;
@@ -843,8 +843,8 @@ var_snmpTargetAddrEntry(struct variable * vp,
     case SNMPTARGETADDRPARAMS:
         if (temp_struct->params == NULL)
             return NULL;
-        strncpy(string, temp_struct->params, sizeof(string));
-        *var_len = SNMP_MIN(strlen(temp_struct->params), sizeof(string));
+        strlcpy(string, temp_struct->params, sizeof(string));
+        *var_len = strlen(string);
         return (unsigned char *) string;
 
     case SNMPTARGETADDRSTORAGETYPE:
@@ -1313,7 +1313,7 @@ write_snmpTargetAddrParams(int action,
             }
 
             old_params = target->params;
-            target->params = (char*)malloc(var_val_len + 1);
+            target->params = malloc(var_val_len + 1);
             if (target->params == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
