@@ -1179,12 +1179,6 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         return;
     }
 
-    snprintf(filename, sizeof(filename), "%s", key->info.filename);
-    pos = strrchr(filename, '.');
-    if (NULL == pos)
-        return;
-    *pos = 0;
-
     if(key) {
         if (key->cert) {
             DEBUGMSGT(("cert:partner", "key already has partner\n"));
