@@ -13,6 +13,7 @@ cat >>"$2.c" <<EOF
 #include <net-snmp/library/testing.h>
 
 /* standard headers */
+#include <errno.h>
 #include <stdio.h>
 #include <sys/types.h>
 #ifdef HAVE_STDLIB_H
