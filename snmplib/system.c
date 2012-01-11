@@ -1022,12 +1022,17 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     struct stat     sbuf;
     char           *ourcopy = strdup(pathname);
     char           *entry;
-    char           *buf;
+    char           *buf = NULL;
     char           *st = NULL;
+    int             res;
 
-    buf = malloc(strlen(pathname));
+    res = SNMPERR_GENERR;
+    if (!ourcopy)
+        goto out;
+
+    buf = malloc(strlen(pathname) + 2);
     if (!buf)
-        return SNMPERR_GENERR;
+        goto out;
 
 #if defined (WIN32) || defined (cygwin)
     /* convert backslash to forward slash */
@@ -1071,11 +1076,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
 #else
             if (mkdir(buf, mode) == -1)
 #endif
-            {
-                free(ourcopy);
-                free(buf);
-                return SNMPERR_GENERR;
-            }
+                goto out;
         } else {
             /*
              * exists, is it a file? 
@@ -1084,15 +1085,15 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
                 /*
                  * ack! can't make a directory on top of a file 
                  */
-                free(ourcopy);
-                free(buf);
-                return SNMPERR_GENERR;
+                goto out;
             }
         }
     }
-    free(ourcopy);
+    res = SNMPERR_SUCCESS;
+out:
     free(buf);
-    return SNMPERR_SUCCESS;
+    free(ourcopy);
+    return res;
 }
 
 /**
