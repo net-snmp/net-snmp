@@ -376,7 +376,7 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
     /*
      * Insert the new entry into the data array
      */
-    t->data[t->count++] = (void *)entry;
+    t->data[t->count++] = NETSNMP_REMOVE_CONST(void *, entry);
     t->dirty = 1;
     return 0;
 }

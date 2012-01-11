@@ -362,7 +362,7 @@ netsnmp_tdomain_transport_full(const char *application,
     const char         *addr = NULL;
     const char * const *spec = NULL;
     int                 any_found = 0;
-    extern const char *curfilename;		/* from read_config.c */
+    extern char *curfilename;		/* from read_config.c */
     char         *prev_curfilename;
 
     DEBUGMSGTL(("tdomain",

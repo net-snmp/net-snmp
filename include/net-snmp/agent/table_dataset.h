@@ -164,7 +164,7 @@ extern          "C" {
     int  netsnmp_mark_row_column_writable(  netsnmp_table_row *row,
                                             int column, int writable);
     int  netsnmp_set_row_column(            netsnmp_table_row *,
-                                            unsigned int, int, const char *,
+                                            unsigned int, int, const void *,
                                             size_t);
 
 /* ============================

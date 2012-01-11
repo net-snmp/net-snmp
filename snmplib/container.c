@@ -43,7 +43,7 @@ _factory_free(void *dat, void *context)
     if (data->name != NULL) {
         DEBUGMSGTL(("container", "  _factory_free_list() called for %s\n",
                     data->name));
-	free((void *)data->name); /* SNMP_FREE wasted on object about to be freed */
+	free(NETSNMP_REMOVE_CONST(void *, data->name)); /* SNMP_FREE wasted on object about to be freed */
     }
     free(data); /* SNMP_FREE wasted on param */
 }
@@ -121,7 +121,7 @@ netsnmp_container_register_with_compare(const char* name, netsnmp_factory *f,
     if (NULL==containers)
         return -1;
 
-    tmp.name = (char *)name;
+    tmp.name = NETSNMP_REMOVE_CONST(char *, name);
     ct = (container_type *)CONTAINER_FIND(containers, &tmp);
     if (NULL!=ct) {
         DEBUGMSGT(("container_registry",

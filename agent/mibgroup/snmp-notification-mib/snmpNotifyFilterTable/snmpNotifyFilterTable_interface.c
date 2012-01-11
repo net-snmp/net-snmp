@@ -2290,7 +2290,7 @@ _snmpNotifyFilterTable_container_col_save(snmpNotifyFilterTable_rowreq_ctx
     case COLUMN_SNMPNOTIFYFILTERMASK:   /** OCTETSTR = ASN_OCTET_STR */
         buf =
             read_config_save_octet_string(buf,
-                                          rowreq_ctx->data.
+                                          (u_char *) rowreq_ctx->data.
                                           snmpNotifyFilterMask,
                                           rowreq_ctx->data.
                                           snmpNotifyFilterMask_len);

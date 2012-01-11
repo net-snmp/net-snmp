@@ -165,11 +165,11 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == inetCidrRouteTable_indexes_set
          (rowreq_ctx, route_entry->rt_dest_type,
-          route_entry->rt_dest, route_entry->rt_dest_len,
+          (char *) route_entry->rt_dest, route_entry->rt_dest_len,
           route_entry->rt_pfx_len,
           route_entry->rt_policy, route_entry->rt_policy_len,
           route_entry->rt_nexthop_type,
-          route_entry->rt_nexthop, route_entry->rt_nexthop_len))) {
+          (char *) route_entry->rt_nexthop, route_entry->rt_nexthop_len))) {
         CONTAINER_INSERT(container, rowreq_ctx);
         rowreq_ctx->row_status = ROWSTATUS_ACTIVE;
     } else {

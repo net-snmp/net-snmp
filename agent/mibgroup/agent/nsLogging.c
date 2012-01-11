@@ -283,7 +283,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                     }
                     idx = idx->next_variable;
 	            logh->type  = 0;
-	            logh->token = strdup(idx->val.string);
+	            logh->token = strdup((char *) idx->val.string);
                     netsnmp_insert_iterator_context(request, (void*)logh);
 	            break;
 
