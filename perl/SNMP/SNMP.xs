@@ -4857,11 +4857,10 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 		  if (((status=__get_label_iid(str_buf_temp,
 		       &label, &iid, NO_FLAGS)) == SUCCESS)
 		      && label) {
-		     strncpy(str_buf_temp, label, sizeof(str_buf_temp));
-                     str_buf_temp[sizeof(str_buf_temp)-1] = '\0';
+		     strlcpy(str_buf_temp, label, sizeof(str_buf_temp));
 		     if (iid && *iid) {
-		       strncat(str_buf_temp, ".", sizeof(str_buf_temp)-strlen(str_buf_temp)-1);
-		       strncat(str_buf_temp, iid, sizeof(str_buf_temp)-strlen(str_buf_temp)-1);
+		       strlcat(str_buf_temp, ".", sizeof(str_buf_temp));
+		       strlcat(str_buf_temp, iid, sizeof(str_buf_temp));
 		     }
  	          }
 	        }

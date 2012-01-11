@@ -655,8 +655,7 @@ interface_ioctl_dot3stats_get (dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, co
                 "called\n"));
 
     memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
-    ifr.ifr_name[sizeof(ifr.ifr_name)-1] = '\0';
+    strlcpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
 
     memset(&driver_info, 0, sizeof (driver_info));
     driver_info.cmd = ETHTOOL_GDRVINFO;
