@@ -952,12 +952,17 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     struct stat     sbuf;
     char           *ourcopy = strdup(pathname);
     char           *entry;
-    char           *buf;
+    char           *buf = NULL;
     char           *st = NULL;
+    int             res;
 
-    buf = malloc(strlen(pathname));
+    res = SNMPERR_GENERR;
+    if (!ourcopy)
+        goto out;
+
+    buf = malloc(strlen(pathname) + 2);
     if (!buf)
-        return SNMPERR_GENERR;
+        goto out;
 
 #if defined (WIN32) || defined (cygwin)
     /* convert backslash to forward slash */
@@ -1000,13 +1005,9 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
 #else
             if (mkdir(buf, mode) == -1)
 #endif
-            {
-                free(ourcopy);
-                free(buf);
-                return SNMPERR_GENERR;
-            } else {
+                goto out;
+            else
                 snmp_log(LOG_INFO, "Created directory: %s\n", buf);
-            }
         } else {
             /*
              * exists, is it a file? 
@@ -1015,15 +1016,15 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
                 /*
                  * ack! can't make a directory on top of a file 
                  */
-                free(ourcopy);
-                free(buf);
-                return SNMPERR_GENERR;
+                goto out;
             }
         }
     }
-    free(ourcopy);
+    res = SNMPERR_SUCCESS;
+out:
     free(buf);
-    return SNMPERR_SUCCESS;
+    free(ourcopy);
+    return res;
 }
 
 /**
@@ -1042,11 +1043,11 @@ netsnmp_mktemp(void)
 #endif
     int             fd = -1;
 
-    strncpy(name, get_temp_file_pattern(), sizeof(name));
-    name[sizeof(name)-1] = '\0';
+    strlcpy(name, get_temp_file_pattern(), sizeof(name));
 #ifdef HAVE_MKSTEMP
     {
-        mode_t oldmask = umask(S_IRUSR | S_IWUSR);
+        mode_t oldmask = umask(~(S_IRUSR | S_IWUSR));
+        netsnmp_assert(oldmask != -1);
         fd = mkstemp(name);
         umask(oldmask);
     }
