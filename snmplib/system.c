@@ -1112,11 +1112,11 @@ netsnmp_mktemp(void)
 #endif
     int             fd = -1;
 
-    strncpy(name, get_temp_file_pattern(), sizeof(name));
-    name[sizeof(name)-1] = '\0';
+    strlcpy(name, get_temp_file_pattern(), sizeof(name));
 #ifdef HAVE_MKSTEMP
     {
-        mode_t oldmask = umask(S_IRUSR | S_IWUSR);
+        mode_t oldmask = umask(~(S_IRUSR | S_IWUSR));
+        netsnmp_assert(oldmask != -1);
         fd = mkstemp(name);
         umask(oldmask);
     }
