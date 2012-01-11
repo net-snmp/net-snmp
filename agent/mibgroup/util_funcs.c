@@ -120,36 +120,7 @@ Exit(int var)
 const char *
 make_tempfile(void)
 {
-    static char     name[32];
-    int             fd = -1;
-
-    strncpy(name, get_temp_file_pattern(), sizeof(name));
-    name[sizeof(name)-1] = '\0';
-#ifdef HAVE_MKSTEMP
-    {
-        mode_t oldmask = umask(S_IRUSR | S_IWUSR);
-        fd = mkstemp(name);
-        umask(oldmask);
-    }
-#else
-    if (mktemp(name)) {
-# ifndef WIN32        
-        fd = open(name, O_CREAT | O_EXCL | O_WRONLY, S_IRUSR | S_IWUSR);
-# else
-        /*
-          Win32 needs _S_IREAD | _S_IWRITE to set permissions on file after closing
-        */
-        fd = _open(name, _O_CREAT | _O_EXCL | _O_WRONLY, _S_IREAD | _S_IWRITE);
-# endif
-    }
-#endif
-    if (fd >= 0) {
-        close(fd);
-        DEBUGMSGTL(("make_tempfile", "temp file created: %s\n", name));
-        return name;
-    }
-    snmp_log(LOG_ERR,"make_tempfile: error creating file %s\n", name);
-    return NULL;
+    return netsnmp_mktemp();
 }
 
 int
