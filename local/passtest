@@ -1,7 +1,5 @@
 #!/bin/sh -f
 
-PATH=$path:/bin:/usr/bin:/usr/ucb
-
 PLACE=".1.3.6.1.4.1.8072.2.255"  # NET-SNMP-PASS-MIB::netSnmpPassExamples
 REQ="$2"                         # Requested OID
 
