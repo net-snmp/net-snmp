@@ -123,32 +123,26 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         }
         fclose(fp);
 
-        if ( cp ) {
-            /*
-             *     argv[0]   is hrSWRunPath
-             */ 
-            entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
-                                       sizeof(entry->hrSWRunPath)-1, "%s", buf);
-            /*
-             * Stitch together argv[1..] to construct hrSWRunParameters
-             */
-            cp = buf + entry->hrSWRunPath_len+1;
-            while ( 1 ) {
-                while (*cp)
-                    cp++;
-                if ( '\0' == *(cp+1))
-                    break;      /* '\0''\0' => End of command line */
-                *cp = ' ';
-            }
-            entry->hrSWRunParameters_len
-                = sprintf(entry->hrSWRunParameters, "%.*s",
-                          (int)sizeof(entry->hrSWRunParameters) - 1,
-                          buf + entry->hrSWRunPath_len + 1);
-        } else {
-            memcpy(entry->hrSWRunPath, entry->hrSWRunName, entry->hrSWRunName_len);
-            entry->hrSWRunPath_len       = entry->hrSWRunName_len;
-            entry->hrSWRunParameters_len = 0;
+        /*
+         *     argv[0]   is hrSWRunPath
+         */ 
+        entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
+                                   sizeof(entry->hrSWRunPath)-1, "%s", buf);
+        /*
+         * Stitch together argv[1..] to construct hrSWRunParameters
+         */
+        cp = buf + entry->hrSWRunPath_len+1;
+        while ( 1 ) {
+            while (*cp)
+                cp++;
+            if ( '\0' == *(cp+1))
+                break;      /* '\0''\0' => End of command line */
+            *cp = ' ';
         }
+        entry->hrSWRunParameters_len
+            = sprintf(entry->hrSWRunParameters, "%.*s",
+                      (int)sizeof(entry->hrSWRunParameters) - 1,
+                      buf + entry->hrSWRunPath_len + 1);
  
         /*
          * XXX - No information regarding system processes vs applications

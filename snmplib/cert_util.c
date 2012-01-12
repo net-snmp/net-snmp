@@ -751,7 +751,6 @@ _certindex_add( const char *dirname, int i )
     if (SE_OK != rc) {
         snmp_log(LOG_ERR, "adding certindex dirname failed; "
                  "%d (%s) not added\n", i, dirname);
-        free(dirname_copy);
         return -1;
     }
 
