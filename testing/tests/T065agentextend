@@ -4,6 +4,7 @@
 
 HEADER "extending agent functionality with extend"
 
+[ "x$OSTYPE" = xmsys -a "x$MSYS_SH" = x ] && SKIP "\$MSYS_SH has not been set"
 SKIPIF NETSNMP_DISABLE_SNMPV2C
 SKIPIFNOT USING_AGENT_EXTEND_MODULE
 
