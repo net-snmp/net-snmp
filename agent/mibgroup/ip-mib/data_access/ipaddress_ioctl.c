@@ -237,7 +237,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         addr_info = netsnmp_access_other_info_get(entry->if_index, AF_INET);
         if(addr_info.bcastflg) {
            bcastentry = netsnmp_access_ipaddress_entry_create();
-           if(NULL == entry) {
+           if(NULL == bcastentry) {
               rc = -3;
               break;
            }
