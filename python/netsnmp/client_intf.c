@@ -308,8 +308,8 @@ int type;
             return(TYPE_COUNTER64);
 	    break;
 	default:
-            return(TYPE_OTHER);
             fprintf(stderr, "translate_asn_type: unhandled asn type (%d)\n",type);
+            return(TYPE_OTHER);
             break;
         }
 }
