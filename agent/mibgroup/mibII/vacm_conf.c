@@ -560,10 +560,6 @@ vacm_parse_setaccess(const char *token, char *param)
         config_perror("failed to create access entry");
         return;
     }
-    if (!ap) {
-        config_perror("failed to create access entry");
-        return;
-    }
 
     strcpy(ap->views[viewnum], viewval);
     ap->contextMatch = iprefix;
