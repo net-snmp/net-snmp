@@ -438,11 +438,6 @@ write_rte(int action,
 
             memcpy(buf, var_val, (var_val_len > 8) ? 8 : var_val_len);
 
-            if (var_val_type != ASN_IPADDRESS) {
-                snmp_log(LOG_ERR, "not IP address 2");
-                return SNMP_ERR_WRONGTYPE;
-            }
-
             rp->xx_dst = *((u_long *) buf);
 
 
