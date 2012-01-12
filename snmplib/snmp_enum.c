@@ -280,8 +280,10 @@ se_add_pair_to_list(struct snmp_enum_list **list, char *label, int value)
         (*list) = SNMP_MALLOC_STRUCT(snmp_enum_list);
         lastnode = (*list);
     }
-    if (!lastnode)
+    if (!lastnode) {
+        free(label);
         return (SE_NOMEM);
+    }
     lastnode->label = label;
     lastnode->value = value;
     lastnode->next = NULL;
