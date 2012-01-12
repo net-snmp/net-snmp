@@ -974,11 +974,7 @@ read_sendmailcf(BOOL config)
         linenr++;
     }
 
-    for (i = 0; i < 10 && fclose(sendmailcf_fp) != 0; i++) {
-        /*
-         * nothing to do 
-         */
-    }
+    fclose(sendmailcf_fp);
 
     for (i = mailers; i < MAXMAILERS; i++) {
         mailernames[i][0] = '\0';

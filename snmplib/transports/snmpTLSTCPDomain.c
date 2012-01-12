@@ -248,8 +248,8 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     */
 
     /* read the packet from openssl */
-    rc = SSL_read(tlsdata->ssl, buf, size);
-    while (rc <= 0) {
+    do {
+        rc = SSL_read(tlsdata->ssl, buf, size);
         if (rc == 0) {
             /* XXX closed connection */
             DEBUGMSGTL(("tlstcp", "remote side closed connection\n"));
@@ -257,21 +257,19 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
             SNMP_FREE(tmStateRef);
             return -1;
         }
-        rc = SSL_read(tlsdata->ssl, buf, size);
-    }
+        if (rc == -1) {
+            int err = SSL_get_error(tlsdata->ssl, rc);
+            if (err != SSL_ERROR_WANT_READ && err != SSL_ERROR_WANT_WRITE) {
+                /* error detected */
+                _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
+                SNMP_FREE(tmStateRef);
+                return rc;
+            }
+        }
+        /* retry read for SSL_ERROR_WANT_READ || SSL_ERROR_WANT_WRITE */
+    } while (rc <= 0); 
 
     DEBUGMSGTL(("tlstcp", "received %d decoded bytes from tls\n", rc));
-
-    /* Check for errors */
-    if (rc == -1) {
-        if (SSL_get_error(tlsdata->ssl, rc) == SSL_ERROR_WANT_READ)
-            return -1; /* XXX: it's ok, but what's the right return? */
-
-        _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
-        SNMP_FREE(tmStateRef);
-
-        return rc;
-    }
 
     /* log the packet */
     DEBUGIF("tlstcp") {
