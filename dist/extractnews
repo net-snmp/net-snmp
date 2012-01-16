@@ -110,9 +110,9 @@ foreach my $argv (@ARGV) {
 	
 	$component = "unspecified" if (!$component);
 	if ($patbug) {
-	    $text = wrap("      - ","        ","[$patbug $nums]: $text") . "\n";
+	    $lasttext .= " [$patbug $nums]: $text";
 	} else {
-	    $text = wrap("      - ","        ","$text") . "\n";
+	    $lasttext .= " $text";
 	}
 	$lasttext =~ s/^ //;                   # get rid of leading spaces
 	$lasttext =~ s/^([a-z])/uc($1)/e;      # capitalize the first letter 
@@ -132,6 +132,9 @@ foreach my $argv (@ARGV) {
 	print STDERR "  t:$file, $component, $patbug, $nums, $text\n" if ($opts{'d'} && /$opts{'d'}/o);
 	push @{$output{$opts{'c'}}{$component}}, $text;
 	push @{$output{$opts{'n'}}{$component}}, $text if ($file eq 'NEWS');
+	$lastfile = $file;
+	$lastcomponent = $component;
+	$maybecontinue = 1;
     }
 }
 
