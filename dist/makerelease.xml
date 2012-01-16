@@ -33,6 +33,15 @@
 	    should be labeled ".rcN" like 5.4.1.rc1.
 	  </text>
 	</step>
+	<step type="prompt" prompt="Enter the last version number:"
+	  title="Enter the last version number"
+	  parameter="LASTVERSION">
+	  <text>
+	    Please enter the last version number that the changelog should be
+            generated from.  This should be easy for a new release on a branch,
+            but may be more tricky for a main release.
+	  </text>
+	</step>
 	<step type="perl" title="Defining a second internal version string"
 	  mandatory="1">
 	  <perl>
@@ -40,6 +49,9 @@
 	      # version number with dashes instead of dots
 	      $self->{'parameters'}{'VERSIONTAGNAME'} =
     	          "v" . $self->{'parameters'}{'VERSION'};
+
+	      $self->{'parameters'}{'LASTVERSIONTAGNAME'} =
+    	          "v" . $self->{'parameters'}{'LASTVERSION'};
 
 	      # target version number (without preN/rcN)
 	      $self->{'parameters'}{'VERSIONTARGET'} =
@@ -361,22 +373,19 @@
 	    <command>git commit -m "make depend for {VERSION}" `find . -name Makefile.depend`</command>
 	  </commands>
 	</step>
-	<step type="system" stepname="changelog:svn2cl" title="changelog:svn2cl">
+	<step type="system" stepname="changelog:create" title="Creating a changelog update">
           <text>We need to extract the portions of the change logs
           committed to the repository.</text>
-	  <!-- XXX: git2cl needs to be truncated quite a bit rather than searching the whole history -->
-	  <!-- XXX: following branches properly may prove to be interesting -->
 	  <commands>
-	    <command>git2cl | head -10000 &gt; ChangeLog.add</command>
-	    <command>perl dist/changelogfix  &lt; ChangeLog.add &gt; ChangeLog.reallyadd</command>
+	    <command>git log --no-merges {LASTVERSIONTAGNAME}..HEAD &gt; ChangeLog.add</command>
 	  </commands>
 	</step>
 	<step type="informational" pause="true" stepname="changelog:manualedit" title="changelog:manualedit">
 	  <text>
 	    You need to manually insert the *relevent* portions of
-	    'ChangeLog.reallyadd' into the ChangeLog file.
+	    'ChangeLog.add' into the ChangeLog file.
 
-            I also suggest truncating ChangeLog.reallyadd to only contain
+            I also suggest truncating ChangeLog.add to only contain
             the *relevent* portions for this release, as this will make
             CHANGES.new2 and NEWS.new2 more accurate later on.
 
@@ -396,7 +405,7 @@
 	</step>
 	<step type="system" stepname="docs:newnews" title="docs:newnews">
 	  <commands>
-	    <command>perl dist/extractnews -c CHANGES.new2 -n NEWS.new2 ChangeLog.reallyadd</command>
+	    <command>perl dist/extractnews -c CHANGES.new2 -n NEWS.new2 ChangeLog.add</command>
 	  </commands>
 	</step>
 	<step type="informational" pause="true" stepname="docs:README-and-NEWS" title="docs:README">
