@@ -351,8 +351,8 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
       if ( tcpudpaddr != 0 ) {
 	char sbuf[64];
 	char *xp;
-	strncpy(sbuf, tcpudpaddr + 1, sizeof(sbuf));
-        sbuf[sizeof(sbuf)-1] = '\0';
+
+	strlcpy(sbuf, tcpudpaddr + 1, sizeof(sbuf));
         xp = strstr(sbuf, "]");
         if (xp)
             *xp = '\0';
@@ -414,15 +414,20 @@ void
 parse_trapd_address(const char *token, char *cptr)
 {
     char buf[BUFSIZ];
+    char *p;
     cptr = copy_nword(cptr, buf, sizeof(buf));
 
     if (default_port == ddefault_port) {
         default_port = strdup(buf);
     } else {
-        strcat( buf, "," );
-        strcat( buf, default_port );
+        p = malloc(strlen(buf) + 1 + strlen(default_port) + 1);
+        if (p) {
+            strcat(p, buf);
+            strcat(p, ",");
+            strcat(p, default_port );
+        }
         free(default_port);
-        default_port = strdup(buf);
+        default_port = p;
     }
 }
 

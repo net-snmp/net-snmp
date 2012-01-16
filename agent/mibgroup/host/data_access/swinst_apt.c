@@ -37,11 +37,10 @@ static char apt_fmt[SNMP_MAXBUF];
 void
 netsnmp_swinst_arch_init(void)
 {
-    strncpy( pkg_directory, "/var/lib/dpkg/info", SNMP_MAXBUF );
+    strlcpy(pkg_directory, "/var/lib/dpkg/info", sizeof(pkg_directory));
     snprintf(apt_fmt, SNMP_MAXBUF, "%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%ds",
 	SNMP_MAXBUF, SNMP_MAXBUF, SNMP_MAXBUF,
 	SNMP_MAXBUF, SNMP_MAXBUF, SNMP_MAXBUF);
-    return;
 }
 
 void

@@ -1179,12 +1179,6 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         return;
     }
 
-    snprintf(filename, sizeof(filename), "%s", key->info.filename);
-    pos = strrchr(filename, '.');
-    if (NULL == pos)
-        return;
-    *pos = 0;
-
     if(key) {
         if (key->cert) {
             DEBUGMSGT(("cert:partner", "key already has partner\n"));
@@ -1192,6 +1186,11 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         }
         DEBUGMSGT(("9:cert:partner", "%s looking for partner near %s\n",
                    key->info.filename, key->info.dir));
+        snprintf(filename, sizeof(filename), "%s", key->info.filename);
+        pos = strrchr(filename, '.');
+        if (NULL == pos)
+            return;
+        *pos = 0;
 
         matching = _cert_find_subset_fn( filename, key->info.dir );
         if (!matching)
@@ -1220,6 +1219,11 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         }
         DEBUGMSGT(("9:cert:partner", "%s looking for partner\n",
                    cert->info.filename));
+        snprintf(filename, sizeof(filename), "%s", cert->info.filename);
+        pos = strrchr(filename, '.');
+        if (NULL == pos)
+            return;
+        *pos = 0;
 
         matching = _key_find_subset(filename);
         if (!matching)
@@ -2132,8 +2136,7 @@ _cert_find_fp(const char *fingerprint)
     if (NULL == fingerprint)
         return NULL;
 
-    strncpy(fp, fingerprint, sizeof(fp));
-    fp[sizeof(fp)-1] = '\0';
+    strlcpy(fp, fingerprint, sizeof(fp));
     netsnmp_fp_lowercase_and_strip_colon(fp);
 
     /** clear search key */
@@ -2223,8 +2226,7 @@ _reduce_subset_dir(netsnmp_void_array *matching, const char *directory)
      *
      * so we want to backup up on directory for compares..
      */
-    strncpy(dir,directory,sizeof(dir));
-    dir[sizeof(dir)-1] = '\0';
+    strlcpy(dir, directory, sizeof(dir));
     pos = strrchr(dir, '/');
     if (NULL == pos) {
         DEBUGMSGTL(("cert:subset:dir", "no '/' in directory %s\n", directory));
@@ -3052,8 +3054,8 @@ netsnmp_tlstmParams_add(snmpTlstmParams *stp)
                 stp->name));
 
     if (CONTAINER_INSERT(_tlstmParams, stp) != 0) {
-        netsnmp_tlstmParams_free(stp);
         snmp_log(LOG_ERR, "error inserting tlstmParams %s", stp->name);
+        netsnmp_tlstmParams_free(stp);
         return -1;
     }
 
@@ -3262,8 +3264,8 @@ netsnmp_tlstmAddr_add(snmpTlstmAddr *entry)
     DEBUGMSGTL(("tlstmAddr:add", "adding entry 0x%lx %s %s\n",
                 (u_long)entry, entry->name, entry->fingerprint));
     if (CONTAINER_INSERT(_tlstmAddr, entry) != 0) {
-        netsnmp_tlstmAddr_free(entry);
         snmp_log(LOG_ERR, "could not insert addr %s", entry->name);
+        netsnmp_tlstmAddr_free(entry);
         return -1;
     }
 
@@ -3316,10 +3318,7 @@ _parse_addr(const char *token, char *line)
     if (id_len)
         entry->identity = strdup(id);
 
-    if (netsnmp_tlstmAddr_add(entry) != 0)
-        netsnmp_tlstmAddr_free(entry);
-
-    return;
+    netsnmp_tlstmAddr_add(entry);
 }
 
 static char *

@@ -209,8 +209,13 @@ netsnmp_parse_args(int argc,
      */
     snmp_sess_init(session);
     strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:-:3:s:S:L:");
-    if (localOpts)
+    if (localOpts) {
+        if (strlen(localOpts) + strlen(Opts) >= sizeof(Opts)) {
+            snmp_log(LOG_ERR, "Too many localOpts in snmp_parse_args()\n");
+            return -1;
+        }
         strcat(Opts, localOpts);
+    }
 
     /*
      * get the options 
@@ -364,10 +369,8 @@ netsnmp_parse_args(int argc,
             }
 
             /* set the config */
-            strncpy(leftside, tmpopt, sizeof(leftside));
-            leftside[sizeof(leftside)-1] = '\0';
-            strncpy(rightside, tmpcp, sizeof(rightside));
-            rightside[sizeof(rightside)-1] = '\0';
+            strlcpy(leftside, tmpopt, sizeof(leftside));
+            strlcpy(rightside, tmpcp, sizeof(rightside));
 
             CONTAINER_INSERT(session->transport_configuration,
                              netsnmp_transport_create_config(leftside,

@@ -727,6 +727,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                 {IANAIFTYPE_ISO88025TOKENRING, "tr"},
                 {IANAIFTYPE_FASTETHER, "feth"},
                 {IANAIFTYPE_GIGABITETHERNET,"gig"},
+                {IANAIFTYPE_INFINIBAND,"ib"},
                 {IANAIFTYPE_PPP, "ppp"},
                 {IANAIFTYPE_SLIP, "sl"},
                 {IANAIFTYPE_TUNNEL, "sit"},
@@ -891,40 +892,38 @@ unsigned long long
 netsnmp_linux_interface_get_if_speed(int fd, const char *name,
             unsigned long long defaultspeed)
 {
+    int ret;
     struct ifreq ifr;
     struct ethtool_cmd edata;
+    uint16_t speed_hi;
+    uint32_t speed;
 
     memset(&ifr, 0, sizeof(ifr));
+    memset(&edata, 0, sizeof(edata));
     edata.cmd = ETHTOOL_GSET;
-    edata.speed = 0;
     
-    strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name)-1);
+    strlcpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
     ifr.ifr_data = (char *) &edata;
     
-    if (ioctl(fd, SIOCETHTOOL, &ifr) == -1) {
-        DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed\n",
-                    ifr.ifr_name));
-        return netsnmp_linux_interface_get_if_speed_mii(fd,name,defaultspeed);
-    }
-    
-    if (edata.speed != SPEED_10 && edata.speed != SPEED_100
-#ifdef SPEED_10000
-        && edata.speed != SPEED_10000
-#endif
-#ifdef SPEED_2500
-        && edata.speed != SPEED_2500
-#endif
-        && edata.speed != SPEED_1000 ) {
-        DEBUGMSGTL(("mibII/interfaces", "fallback to mii for %s\n",
-                    ifr.ifr_name));
-        /* try MII */
+    ret = ioctl(fd, SIOCETHTOOL, &ifr);
+    if (ret == -1 || edata.speed == 0) {
+        DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed (%d / %d)\n",
+                    ifr.ifr_name, ret, edata.speed));
         return netsnmp_linux_interface_get_if_speed_mii(fd,name,defaultspeed);
     }
 
+#ifdef HAVE_STRUCT_ETHTOOL_CMD_SPEED_HI
+    speed_hi = edata.speed_hi;
+#else
+    speed_hi = 0;
+#endif
+    speed = speed_hi << 16 | edata.speed;
+    if (speed == 0xffff || speed == 0xffffffffUL /*SPEED_UNKNOWN*/)
+        speed = defaultspeed;
     /* return in bps */
-    DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %d\n",
-                ifr.ifr_name, edata.speed));
-    return edata.speed*1000LL*1000LL;
+    DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %#x -> %d\n",
+                ifr.ifr_name, speed_hi << 16 | edata.speed, speed));
+    return speed * 1000LL * 1000LL;
 }
 #endif
  
@@ -954,8 +953,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
     const unsigned long long media_speeds[] = {10000000, 10000000, 100000000, 100000000, 10000000, 0};
     /* It corresponds to "10baseT", "10baseT-FD", "100baseTx", "100baseTx-FD", "100baseT4", "Flow-control", 0, */
 
-    strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
-    ifr.ifr_name[ sizeof(ifr.ifr_name)-1 ] = 0;
+    strlcpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
     data[0] = 0;
     
     /*
@@ -1042,6 +1040,10 @@ int netsnmp_prefix_listen()
     unsigned           groups = 0;
 
     int fd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+    if (fd < 0) {
+        snmp_log(LOG_ERR, "netsnmp_prefix_listen: Cannot create socket.\n");
+        return -1;
+    }
 
     memset(&localaddrinfo, 0, sizeof(struct sockaddr_nl));
 
@@ -1052,6 +1054,7 @@ int netsnmp_prefix_listen()
 
     if (bind(fd, (struct sockaddr*)&localaddrinfo, sizeof(localaddrinfo)) < 0) {
         snmp_log(LOG_ERR,"netsnmp_prefix_listen: Bind failed.\n");
+        close(fd);
         return -1;
     }
 
@@ -1066,11 +1069,13 @@ int netsnmp_prefix_listen()
     status = send(fd, &req, req.n.nlmsg_len, 0);
     if (status < 0) {
         snmp_log(LOG_ERR,"netsnmp_prefix_listen: send failed\n");
+        close(fd);
         return -1;
     }
 
     if (register_readfd(fd, netsnmp_prefix_process, NULL) != 0) {
         snmp_log(LOG_ERR,"netsnmp_prefix_listen: error registering netlink socket\n");
+        close(fd);
         return -1;
     }
     return 0;

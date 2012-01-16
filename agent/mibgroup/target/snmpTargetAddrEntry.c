@@ -372,9 +372,7 @@ snmpTargetAddr_addName(struct targetAddrTable_struct *entry, char *cptr)
                         "ERROR snmpTargetAddrEntry: name out of range in config string\n"));
             return (0);
         }
-        entry->name = (char *) malloc(len + 1);
-        strncpy(entry->name, cptr, len);
-        entry->name[len] = '\0';
+        entry->name = strdup(cptr);
     }
     return (1);
 }                               /* addName */
@@ -508,9 +506,7 @@ snmpTargetAddr_addTagList(struct targetAddrTable_struct *entry, char *cptr)
             return (0);
         }
         SNMP_FREE(entry->tagList);
-        entry->tagList = (char *) malloc(len + 1);
-        strncpy(entry->tagList, cptr, len);
-        entry->tagList[len] = '\0';
+        entry->tagList = strdup(cptr);
     }
     return (1);
 }                               /* snmpTargetAddr_addTagList */
@@ -534,9 +530,7 @@ snmpTargetAddr_addParams(struct targetAddrTable_struct *entry, char *cptr)
                         "ERROR snmpTargetAddrEntry: params out of range in config string\n"));
             return (0);
         }
-        entry->params = (char *) malloc(len + 1);
-        strncpy(entry->params, cptr, len);
-        entry->params[len] = '\0';
+        entry->params = strdup(cptr);
     }
     return (1);
 }                               /* snmpTargetAddr_addParams */
@@ -725,10 +719,7 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
                             (int) curr_struct->tDomain[i]);
                     line[ sizeof(line)-1 ] = 0;
                 }
-                if ( strlen(line)+2 < sizeof(line) ) {
-                    line[ strlen(line)+1 ] = 0;
-                    line[ strlen(line)   ] = ' ';
-                }
+                strlcat(line, " ", sizeof(line));
                 read_config_save_octet_string(&line[strlen(line)],
                                               curr_struct->tAddress,
                                               curr_struct->tAddressLen);
@@ -860,7 +851,7 @@ var_snmpTargetAddrEntry(struct variable * vp,
 
     case SNMPTARGETADDRTAGLIST:
         if (temp_struct->tagList != NULL) {
-            strcpy(string, temp_struct->tagList);
+            strlcpy(string, temp_struct->tagList, sizeof(string));
             *var_len = strlen(string);
             return (unsigned char *) string;
         } else {
@@ -870,7 +861,7 @@ var_snmpTargetAddrEntry(struct variable * vp,
     case SNMPTARGETADDRPARAMS:
         if (temp_struct->params == NULL)
             return NULL;
-        strcpy(string, temp_struct->params);
+        strlcpy(string, temp_struct->params, sizeof(string));
         *var_len = strlen(string);
         return (unsigned char *) string;
 
@@ -1342,7 +1333,7 @@ write_snmpTargetAddrParams(int action,
             }
 
             old_params = target->params;
-            target->params = (char*)malloc(var_val_len + 1);
+            target->params = malloc(var_val_len + 1);
             if (target->params == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }

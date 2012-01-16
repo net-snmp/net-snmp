@@ -622,7 +622,7 @@ constant(sv)
 #endif
 	STRLEN		len;
         int		type;
-	IV		iv;
+	IV		iv = 0;
 	/* NV		nv;	Uncomment this if you need to return NVs */
 	/* const char	*pv;	Uncomment this if you need to return PVs */
     INPUT:

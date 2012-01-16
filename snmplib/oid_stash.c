@@ -305,6 +305,8 @@ netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_OID_STASH_GET_DATA */
 
+netsnmp_feature_child_of(oid_stash_store_all, oid_stash_all)
+#ifndef NETSNMP_FEATURE_REMOVE_OID_STASH_STORE_ALL
 /** a wrapper around netsnmp_oid_stash_store for use with a snmp_alarm.
  * when calling snmp_alarm, you can list this as a callback.  The
  * clientarg should be a pointer to a netsnmp_oid_stash_save_info
@@ -316,8 +318,6 @@ netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
  * @param serverarg
  * @param clientarg A pointer to a netsnmp_oid_stash_save_info structure.
  */
-netsnmp_feature_child_of(oid_stash_store_all, oid_stash_all)
-#ifndef NETSNMP_FEATURE_REMOVE_OID_STASH_STORE_ALL
 int
 netsnmp_oid_stash_store_all(int majorID, int minorID,
                             void *serverarg, void *clientarg) {

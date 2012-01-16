@@ -161,11 +161,9 @@ pass_persist_parse_config(const char *token, char *cptr)
     } else {
         for (tcptr = cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
              tcptr++);
-        strncpy((*ppass)->command, cptr, tcptr - cptr);
-        (*ppass)->command[tcptr - cptr] = 0;
+        sprintf((*ppass)->command, "%.*s", (int) (tcptr - cptr), cptr);
     }
-    strncpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
-    (*ppass)->name[ sizeof((*ppass)->name)-1 ] = 0;
+    strlcpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
     (*ppass)->next = NULL;
 
     register_mib_priority("pass_persist",
@@ -362,9 +360,8 @@ setPassPersist(int action,
                      sizeof(persistpassthru->command), "set\n%s\n", buf);
             persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
             netsnmp_internal_pass_set_format(buf, var_val, var_val_type, var_val_len);
-            strncat(persistpassthru->command, buf,
-                    sizeof(persistpassthru->command) -
-                    strlen(persistpassthru->command) - 2);
+            strlcat(persistpassthru->command, buf,
+                    sizeof(persistpassthru->command));
             persistpassthru->command[ sizeof(persistpassthru->command)-2 ] = '\n';
             persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
 
@@ -509,8 +506,8 @@ open_persist_pipe(int iindex, char *command)
 {
     static int      recurse = 0;        /* used to allow one level of recursion */
 
-    DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe(%d,'%s')\n",
-                iindex, command));
+    DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe(%d,'%s') recurse=%d\n",
+                iindex, command, recurse));
     /*
      * Open if it's not already open 
      */
@@ -542,6 +539,7 @@ open_persist_pipe(int iindex, char *command)
          * Setup our -non-buffered-io- 
          */
         setbuf(persist_pipes[iindex].fOut, (char *) 0);
+        DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: opened the pipes\n"));
     }
 
     /*
@@ -561,6 +559,7 @@ open_persist_pipe(int iindex, char *command)
              * Recurse one time if we get a SIGPIPE 
              */
             if (!recurse) {
+                DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: recursing to reopen\n"));
                 recurse = 1;
                 return open_persist_pipe(iindex, command);
             }
@@ -576,7 +575,7 @@ open_persist_pipe(int iindex, char *command)
         }
         if (strncmp(buf, "PONG", 4)) {
             DEBUGMSGTL(("ucd-snmp/pass_persist",
-                        "open_persist_pipe: PONG not received!\n"));
+                        "open_persist_pipe: Got %s instead of PONG!\n", buf));
             close_persist_pipe(iindex);
             recurse = 0;
             return 0;
@@ -586,17 +585,6 @@ open_persist_pipe(int iindex, char *command)
     recurse = 0;
     return 1;
 }
-
-#if HAVE_STRUCT_SIGACTION_SA_SIGACTION
-/*
- * Generic handler 
- */
-void
-sigpipe_handler(int sig, siginfo_t * sip, void *uap)
-{
-    return;
-}
-#endif
 
 static int
 write_persist_pipe(int iindex, const char *data)
@@ -609,16 +597,16 @@ write_persist_pipe(int iindex, const char *data)
      * Don't write to a non-existant process 
      */
     if (persist_pipes[iindex].pid == NETSNMP_NO_SUCH_PROCESS) {
+        DEBUGMSGTL(("ucd-snmp/pass_persist",
+                    "write_persist_pipe: not writing %s, process is non-existent",
+                    data));
         return 0;
     }
 
     /*
-     * Setup our signal action to catch SIGPIPEs 
+     * Setup our signal action to ignore SIGPIPEs 
      */
-    sa.sa_handler = NULL;
-#if HAVE_STRUCT_SIGACTION_SA_SIGACTION
-    sa.sa_sigaction = &sigpipe_handler;
-#endif
+    sa.sa_handler = SIG_IGN;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     if (sigaction(SIGPIPE, &sa, &osa)) {
@@ -638,10 +626,10 @@ write_persist_pipe(int iindex, const char *data)
     sigaction(SIGPIPE, &osa, (struct sigaction *) 0);
 
     if (wret < 0) {
-        if (werrno != EINTR) {
+        if (werrno != EPIPE) {
             DEBUGMSGTL(("ucd-snmp/pass_persist",
-                        "write_persist_pipe: write returned unknown error %d\n",
-                        errno));
+                        "write_persist_pipe: write returned unknown error %d (%s)\n",
+                        werrno, strerror(werrno)));
         }
         close_persist_pipe(iindex);
         return 0;

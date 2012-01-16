@@ -89,6 +89,9 @@ mteTriggerDeltaTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_GET:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info(request);
 
@@ -97,8 +100,10 @@ mteTriggerDeltaTable_handler(netsnmp_mib_handler *handler,
              *   rows where the mteTriggerSampleType is 'deltaValue(2)'
              * So skip entries where this isn't the case.
              */
-            if (!entry || !(entry->flags & MTE_TRIGGER_FLAG_DELTA ))
+            if (!entry || !(entry->flags & MTE_TRIGGER_FLAG_DELTA )) {
+                netsnmp_request_set_error(request, SNMP_NOSUCHINSTANCE);
                 continue;
+            }
 
             switch (tinfo->colnum) {
             case COLUMN_MTETRIGGERDELTADISCONTINUITYID:
@@ -125,6 +130,9 @@ mteTriggerDeltaTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_SET_RESERVE1:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info(request);
 
@@ -199,6 +207,9 @@ mteTriggerDeltaTable_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_ACTION:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
             if (!entry) {
                 /*
@@ -219,6 +230,9 @@ mteTriggerDeltaTable_handler(netsnmp_mib_handler *handler,
          *  (reasonably) safe to apply them in the Commit phase
          */
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info(request);
 

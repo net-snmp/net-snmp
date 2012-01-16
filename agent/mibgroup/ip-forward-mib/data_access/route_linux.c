@@ -103,8 +103,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
         /*
          * temporary null terminated name
          */
-        strncpy(name, rtent_name, sizeof(name));
-        name[ sizeof(name)-1 ] = 0;
+        strlcpy(name, rtent_name, sizeof(name));
 
         /*
          * don't bother to try and get the ifindex for routes with

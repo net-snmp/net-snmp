@@ -471,7 +471,7 @@ main(int argc, char *argv[])
                 printf("\t%s", vip->descriptor);
         } else {
             vip->oidlen = 0;
-            strcpy(vip->descriptor, SumFile);
+            strlcpy(vip->descriptor, SumFile, sizeof(vip->descriptor));
         }
         vip->value = 0;
         zeroU64(&vip->c64value);

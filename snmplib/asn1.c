@@ -1371,7 +1371,7 @@ asn_parse_objid(u_char * data,
             }
         }
 #if defined(EIGHTBIT_SUBIDS) || (SIZEOF_LONG != 4)
-        if (subidentifier > (u_long) MAX_SUBID) {
+        if (subidentifier > MAX_SUBID) {
             ERROR_MSG("subidentifier too large");
             return NULL;
         }
@@ -1540,13 +1540,8 @@ asn_build_objid(u_char * data,
      */
     for (i = 1, objid_val = first_objid_val, op = objid + 2;
          i < (int) objidlength; i++) {
-        if (i != 1) {
-            objid_val = *op++;
-#if SIZEOF_LONG != 4
-            if (objid_val > 0xffffffff) /* already logged warning above */
-                objid_val &= 0xffffffff;
-#endif
-        }
+        if (i != 1)
+            objid_val = (uint32_t)(*op++); /* already logged warning above */
         switch (objid_size[i]) {
         case 1:
             *data++ = (u_char) objid_val;

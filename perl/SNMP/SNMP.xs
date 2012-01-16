@@ -221,7 +221,15 @@ __snprint_oid(const oid *objid, size_t objidlen) {
 #else	/* DEBUGGING */
 #define DBDCL(x) 
 #define DBOUT
-#define	DBPRT(severity, otherargs)	/* Ignore */
+/* Do nothing but in such a way that the compiler sees "otherargs". */
+#define	DBPRT(severity, otherargs) \
+    do { if (0) printf otherargs; } while(0)
+
+static char *
+__snprint_oid(const oid *objid, size_t objidlen)
+{
+    return "(debugging is disabled)";
+}
 
 #endif	/* DEBUGGING */
 
@@ -451,8 +459,7 @@ int flag;
            if (flag == USE_ENUMS) {
               for(ep = tp->enums; ep; ep = ep->next) {
                  if (ep->value == *var->val.integer) {
-                    strncpy(buf, ep->label, buf_len);
-                    buf[buf_len-1] = '\0';
+                    strlcpy(buf, ep->label, buf_len);
                     len = strlen(buf);
                     break;
                  }
@@ -929,19 +936,22 @@ oid *doid_arr;
 size_t *doid_arr_len;
 char * soid_str;
 {
-   char soid_buf[STR_BUF_SIZE];
+   char *soid_buf;
    char *cp;
    char *st;
 
    if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
    if (*soid_str == '.') soid_str++;
-   strcpy(soid_buf, soid_str);
+   soid_buf = strdup(soid_str);
+   if (!soid_buf)
+       return FAILURE;
    cp = strtok_r(soid_buf,".",&st);
    while (cp) {
      sscanf(cp, "%" NETSNMP_PRIo "u", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
      cp = strtok_r(NULL,".",&st);
    }
+   free(soid_buf);
    return(SUCCESS);
 }
 
@@ -1040,7 +1050,7 @@ OCT:
         vars->type = ASN_IPADDRESS;
         vars->val.integer = netsnmp_malloc(sizeof(in_addr_t));
         if (val)
-            *(vars->val.integer) = inet_addr(val);
+            *((in_addr_t *)vars->val.integer) = inet_addr(val);
         else {
             ret = FAILURE;
             *(vars->val.integer) = 0;
@@ -1584,7 +1594,7 @@ _bulkwalk_done(walk_context *context)
  	** walks still in progress.
  	*/
  	DBPRT(1, (DBOUT "Ignoring %s request oid %s\n",
- 	      bt_entry->norepeat? "nonrepeater" : "completed",
+ 	      bt_entry->norepeat ? "nonrepeater" : "completed",
  	      __snprint_oid(bt_entry->req_oid, bt_entry->req_len)));
 
  	/* Ignore this OID in any further packets. */
@@ -1894,7 +1904,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    int		i;
    AV		*varbind;
    SV		*rv;
-   DBDCL(SV**sess_ptr_sv=hv_fetch((HV*)SvRV(context->sess_ref),"SessPtr",7,1);)
+   SV **sess_ptr_sv = hv_fetch((HV*)SvRV(context->sess_ref), "SessPtr", 7, 1);
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
    SV **err_ind_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorInd", 8, 1);
@@ -2930,6 +2940,8 @@ snmp_add_mib_dir(mib_dir,force=0)
 	int result = 0;      /* Avoid use of uninitialized variable below. */
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
+        DBPRT(999, (DBOUT "force=%d\n", force));
+
         if (mib_dir && *mib_dir) {
 	   result = add_mibdir(mib_dir);
         }
@@ -2978,6 +2990,8 @@ snmp_read_mib(mib_file, force=0)
 	CODE:
         {
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+
+        DBPRT(999, (DBOUT "force=%d\n", force));
 
         if ((mib_file == NULL) || (*mib_file == '\0')) {
            if (get_tree_head() == NULL) {
@@ -3541,13 +3555,11 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     varbind = (AV*) SvRV(*varbind_ref);
 
                     /* If the varbind includes the module prefix, capture it for use later */
-                    strncpy(tmp_buf_prefix, __av_elem_pv(varbind, VARBIND_TAG_F, ".0"), STR_BUF_SIZE);
-                    tmp_buf_prefix[STR_BUF_SIZE-1] = '\0';
+                    strlcpy(tmp_buf_prefix, __av_elem_pv(varbind, VARBIND_TAG_F, ".0"), STR_BUF_SIZE);
                     tmp_prefix_ptr = strstr(tmp_buf_prefix,"::");
                     if (tmp_prefix_ptr) {
                       tmp_prefix_ptr = strtok_r(tmp_buf_prefix, "::", &st);
-                      strncpy(str_buf_prefix, tmp_prefix_ptr, STR_BUF_SIZE);
-                      tmp_prefix_ptr[STR_BUF_SIZE-1] = '\0';
+                      strlcpy(str_buf_prefix, tmp_prefix_ptr, STR_BUF_SIZE);
                     }
                     else {
                       *str_buf_prefix = '\0';
@@ -3659,9 +3671,9 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 
                     /* Prepend the module prefix to the next OID if needed */
                     if (*str_buf_prefix) {
-                      strncat(str_buf_prefix, "::", STR_BUF_SIZE - strlen(str_buf_prefix) - 2);
-                      strncat(str_buf_prefix, str_buf, STR_BUF_SIZE - strlen(str_buf_prefix));
-                      strncpy(str_buf, str_buf_prefix, STR_BUF_SIZE);
+                      strlcat(str_buf_prefix, "::", STR_BUF_SIZE);
+                      strlcat(str_buf_prefix, str_buf, STR_BUF_SIZE);
+                      strlcpy(str_buf, str_buf_prefix, STR_BUF_SIZE);
                     }
                     
                     if (__is_leaf(tp)) {
@@ -4845,10 +4857,10 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 		  if (((status=__get_label_iid(str_buf_temp,
 		       &label, &iid, NO_FLAGS)) == SUCCESS)
 		      && label) {
-		     strcpy(str_buf_temp, label);
+		     strlcpy(str_buf_temp, label, sizeof(str_buf_temp));
 		     if (iid && *iid) {
-		       strcat(str_buf_temp, ".");
-		       strcat(str_buf_temp, iid);
+		       strlcat(str_buf_temp, ".", sizeof(str_buf_temp));
+		       strlcat(str_buf_temp, iid, sizeof(str_buf_temp));
 		     }
  	          }
 	        }

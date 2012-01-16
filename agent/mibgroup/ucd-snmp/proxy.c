@@ -285,14 +285,13 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
                 return 0;
             }
 
-            *configured = malloc(strlen("-c") + 1);
-            strcpy((char*)*configured, "-c");
+            *configured = strdup("-c");
             DEBUGMSGTL(("proxy", "pdu has community string\n"));
             session->community_len = reqinfo->asp->pdu->community_len;
-            session->community = (u_char*)malloc(session->community_len + 1);
-            strncpy((char *)session->community,
-                    (const char *)reqinfo->asp->pdu->community,
-                    session->community_len);
+            session->community = malloc(session->community_len + 1);
+            sprintf((char *)session->community, "%.*s",
+                    (int) session->community_len,
+                    (const char *)reqinfo->asp->pdu->community);
         }
     }
 #endif

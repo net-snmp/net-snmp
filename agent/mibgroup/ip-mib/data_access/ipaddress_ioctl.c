@@ -230,7 +230,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         /* restore the interface name if we modifed it due to unaliasing
          * above
          */
-        if (entry->flags | NETSNMP_ACCESS_IPADDRESS_ISALIAS) {
+        if (entry->flags & NETSNMP_ACCESS_IPADDRESS_ISALIAS) {
             memcpy(ifrp->ifr_name, extras->name, sizeof(extras->name));
         }
 
@@ -492,11 +492,10 @@ _netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry)
         alias_idx = _next_alias(name);
         snprintf(ifrq.ifr_name,sizeof(ifrq.ifr_name), "%s:%d",
                  name, alias_idx);
+        ifrq.ifr_name[sizeof(ifrq.ifr_name) - 1] = 0;
     }
     else
-        strncpy(ifrq.ifr_name, (char *) extras->name, sizeof(ifrq.ifr_name));
-
-    ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+        strlcpy(ifrq.ifr_name, (char *) extras->name, sizeof(ifrq.ifr_name));
 
     sin = (struct sockaddr_in*)&ifrq.ifr_addr;
     sin->sin_family = AF_INET;
@@ -544,8 +543,7 @@ _netsnmp_ioctl_ipaddress_delete_v4(netsnmp_ipaddress_entry * entry)
 
     memset(&ifrq, 0, sizeof(ifrq));
 
-    strncpy(ifrq.ifr_name, (char *) extras->name, sizeof(ifrq.ifr_name));
-    ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+    strlcpy(ifrq.ifr_name, (char *) extras->name, sizeof(ifrq.ifr_name));
 
     ifrq.ifr_flags = 0;
 

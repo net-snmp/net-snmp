@@ -2694,29 +2694,12 @@ parse_objecttype(FILE * fp, char *name)
                         break;
                     else if (type == LEFTBRACKET)
                         level++;
-                    if (type == QUOTESTRING) {
-                        if (strlen(defbuf)+2 < sizeof(defbuf)) {
-                            defbuf[ strlen(defbuf)+2 ] = 0;
-                            defbuf[ strlen(defbuf)+1 ] = '"';
-                            defbuf[ strlen(defbuf)   ] = '\\';
-                        }
-                        defbuf[ sizeof(defbuf)-1 ] = 0;
-                    }
-                    strncat(defbuf, quoted_string_buffer,
-                            sizeof(defbuf)-strlen(defbuf)-1);
-                    defbuf[ sizeof(defbuf)-1 ] = 0;
-                    if (type == QUOTESTRING) {
-                        if (strlen(defbuf)+2 < sizeof(defbuf)) {
-                            defbuf[ strlen(defbuf)+2 ] = 0;
-                            defbuf[ strlen(defbuf)+1 ] = '"';
-                            defbuf[ strlen(defbuf)   ] = '\\';
-                        }
-                        defbuf[ sizeof(defbuf)-1 ] = 0;
-                    }
-                    if (strlen(defbuf)+1 < sizeof(defbuf)) {
-                        defbuf[ strlen(defbuf)+1 ] = 0;
-                        defbuf[ strlen(defbuf)   ] = ' ';
-                    }
+                    if (type == QUOTESTRING)
+                        strlcat(defbuf, "\\\"", sizeof(defbuf));
+                    strlcat(defbuf, quoted_string_buffer, sizeof(defbuf));
+                    if (type == QUOTESTRING)
+                        strlcat(defbuf, "\\\"", sizeof(defbuf));
+                    strlcat(defbuf, " ", sizeof(defbuf));
                 }
 
                 if (type != RIGHTBRACKET) {
@@ -4406,8 +4389,7 @@ parse(FILE * fp, struct node *root)
         case ENDOFFILE:
             continue;
         default:
-            strncpy(name, token, sizeof(name));
-            name[sizeof(name)-1] = '\0';
+            strlcpy(name, token, sizeof(name));
             type = get_token(fp, token, MAXTOKEN);
             nnp = NULL;
             if (type == MACRO) {
@@ -4425,8 +4407,7 @@ parse(FILE * fp, struct node *root)
                 print_error(name, "is a reserved word", lasttype);
             continue;           /* see if we can parse the rest of the file */
         }
-        strncpy(name, token, sizeof(name));
-        name[sizeof(name)-1] = '\0';
+        strlcpy(name, token, sizeof(name));
         type = get_token(fp, token, MAXTOKEN);
         nnp = NULL;
 
@@ -4791,6 +4772,7 @@ get_token(FILE * fp, char *token, int maxtlen)
             return get_token(fp, token, maxtlen);
         }
         ungetc(ch_next, fp);
+	/* fallthrough */
     default:
         /*
          * Accumulate characters until end of token is found.  Then attempt to
@@ -4867,7 +4849,10 @@ add_mibfile(const char* tmpstr, const char* d_name, FILE *ip )
                 tmpstr));
     mibLine = 1;
     File = tmpstr;
-    get_token(fp, token, MAXTOKEN);
+    if (get_token(fp, token, MAXTOKEN) != LABEL) {
+	    fclose(fp);
+	    return 1;
+    }
     /*
      * simple test for this being a MIB 
      */
@@ -5005,7 +4990,11 @@ read_mib(const char *filename)
     mibLine = 1;
     File = filename;
     DEBUGMSGTL(("parse-mibs", "Parsing file: %s...\n", filename));
-    get_token(fp, token, MAXTOKEN);
+    if (get_token(fp, token, MAXTOKEN) != LABEL) {
+	    snmp_log(LOG_ERR, "Failed to parse MIB file %s\n", filename);
+	    fclose(fp);
+	    return NULL;
+    }
     fclose(fp);
     new_module(token, filename);
     (void) netsnmp_read_module(token);

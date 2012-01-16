@@ -1275,7 +1275,7 @@ _tlstmParamsTable_row_restore_mib(const char *token, char *buf)
         entry = row->data;
         
         entry->hashType = params->hashType;
-        strncpy(entry->snmpTlstmParamsClientFingerprint,params->fingerprint,
+        strlcpy(entry->snmpTlstmParamsClientFingerprint, params->fingerprint,
                 sizeof(entry->snmpTlstmParamsClientFingerprint));
         entry->snmpTlstmParamsClientFingerprint_len =
             strlen(entry->snmpTlstmParamsClientFingerprint);

@@ -184,6 +184,8 @@ SOFTWARE.
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/read_config.h> /* for get_temp_file_pattern() */
 
+#include "inet_ntop.h"
+
 /* NetSNMP and DNSSEC-Tools both define FREE. We'll not use either here. */
 #undef FREE
 
@@ -1178,8 +1180,17 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     struct stat     sbuf;
     char           *ourcopy = strdup(pathname);
     char           *entry;
-    char            buf[SNMP_MAXPATH];
+    char           *buf = NULL;
     char           *st = NULL;
+    int             res;
+
+    res = SNMPERR_GENERR;
+    if (!ourcopy)
+        goto out;
+
+    buf = malloc(strlen(pathname) + 2);
+    if (!buf)
+        goto out;
 
 #if defined (WIN32) || defined (cygwin)
     /* convert backslash to forward slash */
@@ -1222,12 +1233,9 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
 #else
             if (mkdir(buf, mode) == -1)
 #endif
-            {
-                free(ourcopy);
-                return SNMPERR_GENERR;
-            } else {
+                goto out;
+            else
                 snmp_log(LOG_INFO, "Created directory: %s\n", buf);
-            }
         } else {
             /*
              * exists, is it a file? 
@@ -1236,13 +1244,15 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
                 /*
                  * ack! can't make a directory on top of a file 
                  */
-                free(ourcopy);
-                return SNMPERR_GENERR;
+                goto out;
             }
         }
     }
+    res = SNMPERR_SUCCESS;
+out:
+    free(buf);
     free(ourcopy);
-    return SNMPERR_SUCCESS;
+    return res;
 }
 
 /**
@@ -1261,9 +1271,14 @@ netsnmp_mktemp(void)
 #endif
     int             fd = -1;
 
-    strcpy(name, get_temp_file_pattern());
+    strlcpy(name, get_temp_file_pattern(), sizeof(name));
 #ifdef HAVE_MKSTEMP
-    fd = mkstemp(name);
+    {
+        mode_t oldmask = umask(~(S_IRUSR | S_IWUSR));
+        netsnmp_assert(oldmask != -1);
+        fd = mkstemp(name);
+        umask(oldmask);
+    }
 #else
     if (mktemp(name)) {
 # ifndef WIN32

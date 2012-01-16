@@ -416,7 +416,7 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
     /* If the first packet and we have no secname, then copy the
        important securityName data into the longer-lived session
        reference information. */
-    if ((tlsdata->flags | NETSNMP_TLSBASE_IS_CLIENT) &&
+    if ((tlsdata->flags & NETSNMP_TLSBASE_IS_CLIENT) &&
         !tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
         tlsdata->securityName = strdup(tmStateRef->securityName);
         
@@ -935,12 +935,13 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     if (!isserver && tlsdata && addr_string) {
         /* search for a : */
         if (NULL != (cp = strrchr(addr_string, ':'))) {
-            strncpy(buf, addr_string, sizeof(buf)-1);
+            sprintf(buf, "%.*s",
+                    (int) SNMP_MIN(cp - addr_string, sizeof(buf) - 1),
+                    addr_string);
         } else {
             /* else the entire spec is a host name only */
-            strncpy(buf, addr_string, sizeof(buf)-1);
+            strlcpy(buf, addr_string, sizeof(buf));
         }
-        buf[sizeof(buf)-1] = '\0';
         tlsdata->their_hostname = strdup(buf);
     }
 

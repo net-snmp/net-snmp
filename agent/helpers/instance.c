@@ -536,6 +536,8 @@ netsnmp_register_num_file_instance(const char *name,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_REGISTER_NUM_FILE_INSTANCE */
 
+netsnmp_feature_child_of(register_int_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_INT_INSTANCE
 /**
  * This function registers an int helper handler to a specified OID.
  *
@@ -554,8 +556,6 @@ netsnmp_register_num_file_instance(const char *name,
  *      MIB_REGISTERED_OK is returned if the registration was a success.
  *	Failures are MIB_REGISTRATION_FAILED and MIB_DUPLICATE_REGISTRATION.
  */
-netsnmp_feature_child_of(register_int_instance,instance)
-#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_INT_INSTANCE
 int
 netsnmp_register_int_instance(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,

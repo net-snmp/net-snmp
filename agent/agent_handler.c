@@ -774,7 +774,7 @@ netsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
 /** Duplicates handler registration object and all subsequent handlers.
  *  Creates a copy of the handler registration object and all its data.
  *
- *  @param handler is the handler registration object to be duplicated
+ *  @param reginfo is the handler registration object to be duplicated
  *
  *  @return Returns a pointer to the complete copy,
  *         or NULL if any problem occured.
@@ -922,7 +922,8 @@ netsnmp_free_delegated_cache(netsnmp_delegated_cache *dcache)
  *  Sweeps through given chain of requests and sets 'delegated'
  *  flag accordingly to the isdelegaded parameter.
  *
- *  @param isdelegaded New value of the 'delegated' flag.
+ *  @param requests Request list.
+ *  @param isdelegated New value of the 'delegated' flag.
  */
 void
 netsnmp_handler_mark_requests_as_delegated(netsnmp_request_info *requests,

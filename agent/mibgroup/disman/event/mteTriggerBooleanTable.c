@@ -97,6 +97,9 @@ mteTriggerBooleanTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_GET:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info(request);
 
@@ -105,8 +108,10 @@ mteTriggerBooleanTable_handler(netsnmp_mib_handler *handler,
              *   rows where the mteTriggerTest 'boolean(1)' bit is set.
              * So skip entries where this isn't the case.
              */
-            if (!entry || !(entry->mteTriggerTest & MTE_TRIGGER_BOOLEAN ))
+            if (!entry || !(entry->mteTriggerTest & MTE_TRIGGER_BOOLEAN )) {
+                netsnmp_request_set_error(request, SNMP_NOSUCHINSTANCE);
                 continue;
+            }
 
             switch (tinfo->colnum) {
             case COLUMN_MTETRIGGERBOOLEANCOMPARISON:
@@ -152,6 +157,9 @@ mteTriggerBooleanTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_SET_RESERVE1:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info(request);
 
@@ -236,6 +244,9 @@ mteTriggerBooleanTable_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_ACTION:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
             if (!entry) {
                 /*
@@ -256,6 +267,9 @@ mteTriggerBooleanTable_handler(netsnmp_mib_handler *handler,
          *  (reasonably) safe to apply them in the Commit phase
          */
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info(request);
 

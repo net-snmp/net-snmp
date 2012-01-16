@@ -126,31 +126,7 @@ extern int      numprocs, numextens;
 const char *
 make_tempfile(void)
 {
-    static char     name[32];
-    int             fd = -1;
-
-    strcpy(name, get_temp_file_pattern());
-#ifdef HAVE_MKSTEMP
-    fd = mkstemp(name);
-#else
-    if (mktemp(name)) {
-# ifndef WIN32        
-        fd = open(name, O_CREAT | O_EXCL | O_WRONLY, S_IRUSR | S_IWUSR);
-# else
-        /*
-          Win32 needs _S_IREAD | _S_IWRITE to set permissions on file after closing
-        */
-        fd = _open(name, _O_CREAT | _O_EXCL | _O_WRONLY, _S_IREAD | _S_IWRITE);
-# endif
-    }
-#endif
-    if (fd >= 0) {
-        close(fd);
-        DEBUGMSGTL(("make_tempfile", "temp file created: %s\n", name));
-        return name;
-    }
-    snmp_log(LOG_ERR,"make_tempfile: error creating file %s\n", name);
-    return NULL;
+    return netsnmp_mktemp();
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_SHELL_COMMAND
@@ -796,7 +772,10 @@ parse_miboid(const char *buf, oid * oidout)
     if (*buf == '.')
         buf++;
     for (i = 0; isdigit((unsigned char)(*buf)); i++) {
-        oidout[i] = atoi(buf);
+        /* Subidentifiers are unsigned values, up to 2^32-1
+         * so we need to use 'strtoul' rather than 'atoi'
+         */
+        oidout[i] = strtoul(buf, NULL, 10) & 0xffffffff;
         while (isdigit((unsigned char)(*buf++)));
         if (*buf == '.')
             buf++;

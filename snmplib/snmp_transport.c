@@ -550,7 +550,7 @@ netsnmp_tdomain_transport_full(const char *application,
         if (NULL !=
             (newhost = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                              NETSNMP_DS_LIB_HOSTNAME))) {
-            strncpy(buf, newhost, sizeof(buf)-1);
+            strlcpy(buf, newhost, sizeof(buf));
             str = buf;
         }
 

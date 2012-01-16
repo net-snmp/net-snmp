@@ -19917,6 +19917,99 @@ done
 
 LIBS="$netsnmp_save_LIBS"
 
+#
+#   dynamic module support
+#
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlopen" >&5
+$as_echo_n "checking for library containing dlopen... " >&6; }
+if ${netsnmp_cv_func_dlopen_LMIBLIBS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LMIBLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LAGENTLIBS $LSNMPLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in dl ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_dlopen_LMIBLIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_dlopen_LMIBLIBS" >&5
+$as_echo "$netsnmp_cv_func_dlopen_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_dlopen_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_dlopen_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+netsnmp_save_LIBS="$LIBS"
+LIBS="$LMIBLIBS $LAGENTLIBS $LSNMPLIBS $LIBS"
+for ac_func in dlopen
+do :
+  ac_fn_c_check_func "$LINENO" "dlopen" "ac_cv_func_dlopen"
+if test "x$ac_cv_func_dlopen" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DLOPEN 1
+_ACEOF
+
+fi
+done
+
+LIBS="$netsnmp_save_LIBS"
+
 # -*- autoconf -*-
 #
 # generate empty files
@@ -21730,99 +21823,6 @@ $as_echo "#define HAVE_LIBKSTAT 1" >>confdefs.h
 
  fi
 
-
-
-#   dynamic module support
-#
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlopen" >&5
-$as_echo_n "checking for library containing dlopen... " >&6; }
-if ${netsnmp_cv_func_dlopen_LMIBLIBS+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dlopen ();
-int
-main ()
-{
-return dlopen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in dl ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dlopen ();
-int
-main ()
-{
-return dlopen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_dlopen_LMIBLIBS="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_dlopen_LMIBLIBS" >&5
-$as_echo "$netsnmp_cv_func_dlopen_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_dlopen_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_dlopen_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-netsnmp_save_LIBS="$LIBS"
-LIBS="$LMIBLIBS $LIBS"
-for ac_func in dlopen
-do :
-  ac_fn_c_check_func "$LINENO" "dlopen" "ac_cv_func_dlopen"
-if test "x$ac_cv_func_dlopen" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_DLOPEN 1
-_ACEOF
-
-fi
-done
-
-LIBS="$netsnmp_save_LIBS"
 
 
 ##
@@ -25100,6 +25100,19 @@ esac
 
 fi
 
+ac_fn_c_check_func "$LINENO" "strlcat" "ac_cv_func_strlcat"
+if test "x$ac_cv_func_strlcat" = xyes; then :
+  $as_echo "#define HAVE_STRLCAT 1" >>confdefs.h
+
+else
+  case " $LIBOBJS " in
+  *" strlcat.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS strlcat.$ac_objext"
+ ;;
+esac
+
+fi
+
 ac_fn_c_check_func "$LINENO" "strlcpy" "ac_cv_func_strlcpy"
 if test "x$ac_cv_func_strlcpy" = xyes; then :
   $as_echo "#define HAVE_STRLCPY 1" >>confdefs.h
@@ -25809,6 +25822,28 @@ _ACEOF
 
 fi
 
+
+#       struct ethtool_cmd
+#
+if test "x$ac_cv_header_linux_ethtool_h" = "xyes" ; then
+ac_fn_c_check_member "$LINENO" "struct ethtool_cmd" "speed_hi" "ac_cv_member_struct_ethtool_cmd_speed_hi" "
+    $ac_includes_default
+
+#ifdef HAVE_LINUX_ETHTOOL_H
+#include <linux/ethtool.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_ethtool_cmd_speed_hi" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_ETHTOOL_CMD_SPEED_HI 1
+_ACEOF
+
+
+fi
+
+fi
 
 #       struct ipstat
 #   Agent:

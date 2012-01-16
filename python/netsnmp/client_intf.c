@@ -1,5 +1,11 @@
 #include <Python.h>
 
+#if PY_VERSION_HEX < 0x02050000
+typedef int Py_ssize_t;
+#define PY_SSIZE_T_MAX INT_MAX
+#define PY_SSIZE_T_MIN INT_MIN
+#endif
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <sys/types.h>
@@ -335,8 +341,7 @@ int flag;
            if (flag == USE_ENUMS) {
               for(ep = tp->enums; ep; ep = ep->next) {
                  if (ep->value == *var->val.integer) {
-                    strncpy(buf, ep->label, buf_len);
-                    buf[buf_len -1] = 0;
+                    strlcpy(buf, ep->label, buf_len);
                     len = STRLEN(buf);
                     break;
                  }
@@ -848,19 +853,22 @@ oid *doid_arr;
 int *doid_arr_len;
 char * soid_str;
 {
-   char soid_buf[STR_BUF_SIZE];
+   char *soid_buf;
    char *cp;
    char *st;
 
    if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
    if (*soid_str == '.') soid_str++;
-   strcpy(soid_buf, soid_str);
+   soid_buf = strdup(soid_str);
+   if (!soid_buf)
+       return FAILURE;
    cp = strtok_r(soid_buf,".",&st);
    while (cp) {
      sscanf(cp, "%lu", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
      cp = strtok_r(NULL,".",&st);
    }
+   free(soid_buf);
    return(SUCCESS);
 }
 
@@ -1017,7 +1025,7 @@ int *err_ind;
    if (ss == NULL) {
        *err_num = 0;
        *err_ind = SNMPERR_BAD_SESSION;
-       strncpy(err_str, snmp_api_errstring(*err_ind), STR_BUF_SIZE - 1);
+       strlcpy(err_str, snmp_api_errstring(*err_ind), STR_BUF_SIZE);
        goto done;
    }
 
@@ -1025,7 +1033,7 @@ int *err_ind;
    if (tmp_err_str == NULL) {
        *err_num = errno;
        *err_ind = SNMPERR_MALLOC;
-       strncpy(err_str, snmp_api_errstring(*err_ind), STR_BUF_SIZE - 1);
+       strlcpy(err_str, snmp_api_errstring(*err_ind), STR_BUF_SIZE);
        goto done;
    }
 
@@ -1070,8 +1078,8 @@ retry:
             /* in SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
             case SNMP_ERR_INCONSISTENTNAME:
             default:
-               strncpy(err_str, (char*)snmp_errstring((*response)->errstat),
-		       STR_BUF_SIZE - 1);
+               strlcpy(err_str, (char*)snmp_errstring((*response)->errstat),
+		       STR_BUF_SIZE);
                *err_num = (int)(*response)->errstat;
 	       *err_ind = (*response)->errindex;
                status = (*response)->errstat;
@@ -1082,8 +1090,7 @@ retry:
       case STAT_TIMEOUT:
       case STAT_ERROR:
 	  snmp_sess_error(ss, err_num, err_ind, &tmp_err_str);
-	  strncpy(err_str, tmp_err_str, STR_BUF_SIZE - 1);
-	  err_str[STR_BUF_SIZE - 1] = '\0';
+	  strlcpy(err_str, tmp_err_str, STR_BUF_SIZE);
          break;
 
       default:

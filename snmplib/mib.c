@@ -2793,6 +2793,8 @@ netsnmp_mibindex_load( void )
               get_persistent_directory(), i );
         tmpbuf[sizeof(tmpbuf)-1] = 0;
         fp = fopen( tmpbuf, "r" );
+        if (!fp)
+            continue;
         cp = fgets( tmpbuf2, sizeof(tmpbuf2), fp );
         if ( !cp ) {
             DEBUGMSGTL(("mibindex", "Empty MIB index (%d)\n", i));
@@ -3050,14 +3052,11 @@ read_objid(const char *input, oid * output, size_t * out_len)
          * get past leading '.', append '.' to Prefix. 
          */
         if (*Prefix == '.')
-            strncpy(buf, Prefix + 1, sizeof(buf)-1);
+            strlcpy(buf, Prefix + 1, sizeof(buf));
         else
-            strncpy(buf, Prefix, sizeof(buf)-1);
-        buf[ sizeof(buf)-1 ] = 0;
-        strcat(buf, ".");
-        buf[ sizeof(buf)-1 ] = 0;
-        strncat(buf, input, sizeof(buf)-strlen(buf));
-        buf[ sizeof(buf)-1 ] = 0;
+            strlcpy(buf, Prefix, sizeof(buf));
+        strlcat(buf, ".", sizeof(buf));
+        strlcat(buf, input, sizeof(buf));
         input = buf;
     }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
@@ -5099,8 +5098,7 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 else
                     if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ", "))
                         return 0;
-                snprintf(str, sizeof(str), "%s", vp->vblabel);
-                str[ sizeof(str)-1 ] = 0;
+                strlcpy(str, vp->vblabel, sizeof(str));
                 len = strlen(str);
                 if (pos + len + 2 > width) {
                     if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
@@ -5713,8 +5711,7 @@ get_node(const char *name, oid * objid, size_t * objidlen)
         module = (char *) malloc((size_t) (cp - name + 1));
         if (!module)
             return SNMPERR_GENERR;
-        memcpy(module, name, (size_t) (cp - name));
-        module[cp - name] = 0;
+        sprintf(module, "%.*s", (int) (cp - name), name);
         cp++;                   /* cp now point to the subidentifier */
         if (*cp == ':')
             cp++;

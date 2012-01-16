@@ -136,6 +136,7 @@ _fsys_type( char *typename )
               !strcmp(typename, MNTTYPE_XFS) ||
               !strcmp(typename, MNTTYPE_JFS) ||
               !strcmp(typename, MNTTYPE_VXFS) ||
+              !strcmp(typename, MNTTYPE_REISERFS) ||
               !strcmp(typename, MNTTYPE_LOFS))
        return NETSNMP_FS_TYPE_OTHER;
 
@@ -191,11 +192,9 @@ netsnmp_fsys_arch_load( void )
             continue;
         }
 
-        strncpy( entry->path,   m->NSFS_PATH,    sizeof( entry->path   ));
-        entry->path[sizeof(entry->path)-1] = '\0';
-        strncpy( entry->device, m->NSFS_DEV,     sizeof( entry->device ));
-        entry->device[sizeof(entry->device)-1] = '\0';
-        entry->type   = _fsys_type(  m->NSFS_TYPE );
+        strlcpy(entry->path, m->NSFS_PATH, sizeof(entry->path));
+        strlcpy(entry->device, m->NSFS_DEV, sizeof(entry->device));
+        entry->type = _fsys_type(m->NSFS_TYPE);
         if (!(entry->type & _NETSNMP_FS_TYPE_SKIP_BIT))
             entry->flags |= NETSNMP_FS_FLAG_ACTIVE;
 

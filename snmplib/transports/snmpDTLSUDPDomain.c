@@ -427,7 +427,7 @@ _extract_addr_pair(netsnmp_transport *t, void *opaque, int olen)
 
     if (opaque && olen == sizeof(netsnmp_tmStateReference)) {
         netsnmp_tmStateReference *tmStateRef =
-            tmStateRef = (netsnmp_tmStateReference *) opaque;
+            (netsnmp_tmStateReference *) opaque;
 
         if (tmStateRef->have_addresses)
             addr_pair = &(tmStateRef->addresses);
@@ -1506,13 +1506,11 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
         tlsdata = (_netsnmpTLSBaseData *) t->data;
         /* search for a : */
         if (NULL != (cp = strrchr(str, ':'))) {
-            strncpy(buf, str, SNMP_MIN(cp-str, sizeof(buf)-1));
-            buf[SNMP_MIN(cp-str, sizeof(buf)-1)] = '\0';
+            sprintf(buf, "%.*s", (int) SNMP_MIN(cp - str, sizeof(buf) - 1),
+                    str);
         } else {
             /* else the entire spec is a host name only */
-            strncpy(buf, str,
-                    SNMP_MIN(strlen(str), sizeof(buf)-1));
-            buf[SNMP_MIN(strlen(str), sizeof(buf)-1)] = '\0';
+            strlcpy(buf, str, sizeof(buf));
         }
         tlsdata->their_hostname = strdup(buf);
     }

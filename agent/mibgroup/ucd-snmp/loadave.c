@@ -393,8 +393,7 @@ write_laConfig(int action,
             double val;
             char *endp;
 
-            strncpy(buf, (char *)var_val, var_val_len);
-            buf[var_val_len] = '\0';
+            sprintf(buf, "%.*s", (int) var_val_len, (char *)var_val);
             val = strtod(buf, &endp);
 
             if (errno == ERANGE || *endp != '\0' || val < 0 || val > 65536.00) {
@@ -481,10 +480,12 @@ var_extensible_loadave(struct variable * vp,
         if (maxload[name[*length - 1] - 1] != 0 &&
             avenrun[name[*length - 1] - 1] >=
             maxload[name[*length - 1] - 1]) {
-            sprintf(errmsg, "%d min Load Average too high (= %.2f)",
+            snprintf(errmsg, sizeof(errmsg),
+                     "%d min Load Average too high (= %.2f)",
                     (name[*length - 1] ==
                      1) ? 1 : ((name[*length - 1] == 2) ? 5 : 15),
                     avenrun[name[*length - 1] - 1]);
+            errmsg[sizeof(errmsg) - 1] = '\0';
         } else {
             errmsg[0] = 0;
         }
