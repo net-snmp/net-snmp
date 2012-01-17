@@ -327,9 +327,9 @@ _free_extension( netsnmp_extend *extension, extend_registration_block *ereg )
             eprev->next = eptr->next;
         else
             ereg->ehead = eptr->next;
+        netsnmp_table_data_remove_and_delete_row( ereg->dinfo, extension->row);
     }
 
-    netsnmp_table_data_remove_and_delete_row( ereg->dinfo, extension->row);
     SNMP_FREE( extension->token );
     SNMP_FREE( extension->cache );
     SNMP_FREE( extension->command );
