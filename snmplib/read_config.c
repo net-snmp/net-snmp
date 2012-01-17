@@ -544,7 +544,13 @@ snmp_config_when(char *line, int when)
 
     strlcpy(buf, line, STRINGMAX);
     cptr = strtok_r(buf, SNMP_CONFIG_DELIMETERS, &st);
-    if (cptr && cptr[0] == '[') {
+    if (!cptr) {
+        snprintf(tmpbuf, sizeof(tmpbuf), "Wrong format: %s", line);
+        tmpbuf[ sizeof(tmpbuf)-1 ] = '\0';
+        config_perror(tmpbuf);
+        return SNMPERR_GENERR;
+    }
+    if (cptr[0] == '[') {
         if (cptr[strlen(cptr) - 1] != ']') {
             snprintf(tmpbuf, sizeof(tmpbuf),
                     "no matching ']' for type %s.",
