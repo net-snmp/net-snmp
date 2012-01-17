@@ -1061,7 +1061,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
          specs) then we create one automatically here.
     */
     if (opaque != NULL && *opaque != NULL &&
-        *olength == sizeof(netsnmp_tmStateReference))
+        olength != NULL && *olength == sizeof(netsnmp_tmStateReference))
         tmStateRef = (netsnmp_tmStateReference *) *opaque;
 
 
