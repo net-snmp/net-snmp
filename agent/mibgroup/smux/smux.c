@@ -1313,7 +1313,7 @@ smux_find_replacement(oid * name, size_t name_len)
         if (!snmp_oidtree_compare(rptr->sr_name, rptr->sr_name_len,
                                   name, name_len)) {
             if ((difflen = rptr->sr_name_len - name_len)
-                < bestlen) {
+                < bestlen || !bestptr) {
                 bestlen = difflen;
                 bestptr = rptr;
             } else if ((difflen == bestlen) &&
