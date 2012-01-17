@@ -790,6 +790,7 @@ netsnmp_send_traps(int trap, int specific,
 
     }
 
+    if (template_v2pdu) {
 	/* A context name was provided, so copy it and its length to the v2 pdu
 	 * template. */
 	if (context != NULL)
@@ -797,6 +798,7 @@ netsnmp_send_traps(int trap, int specific,
 		template_v2pdu->contextName    = strdup(context);
 		template_v2pdu->contextNameLen = strlen(context);
 	}
+    }
 
     /*
      *  Now loop through the list of trap sinks

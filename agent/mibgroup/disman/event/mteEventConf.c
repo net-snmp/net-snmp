@@ -294,6 +294,11 @@ parse_setEvent( const char *token, char *line )
     if (cp && *cp == '=') {
         cp = skip_token( cp );   /* skip the '=' assignment character */
     }
+    if (!cp) {
+        config_perror("syntax error: missing set value");
+        return;
+    }
+
     value = strtol( cp, NULL, 0);
 
     /*
