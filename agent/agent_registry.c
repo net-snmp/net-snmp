@@ -1574,6 +1574,7 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
         DEBUGMSGOID(("register_mib", sub->start_a, sub->start_len));
     } else {
         DEBUGMSG(("register_mib", "[NIL]"));
+        return;
     }
     DEBUGMSG(("register_mib", ", "));
     if (prev != NULL) {

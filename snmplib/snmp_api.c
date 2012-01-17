@@ -5650,8 +5650,8 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	    if (sp->securityEngineID == NULL) {
 	      /*
 	       * TODO FIX: recover after message callback *?
-	       * return -1;
-	       */
+               */
+	      return -1;
 	    }
 	    memcpy(sp->securityEngineID, pdu->securityEngineID,
 		   pdu->securityEngineIDLen);
@@ -5663,8 +5663,8 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	      if (sp->contextEngineID == NULL) {
 		/*
 		 * TODO FIX: recover after message callback *?
-		 * return -1;
 		 */
+                return -1;
 	      }
 	      memcpy(sp->contextEngineID,
 		     pdu->securityEngineID,

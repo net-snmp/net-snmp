@@ -789,6 +789,11 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     vars->val.string = NULL;
     vars->val_len = 0;
 
+    if (value == NULL && len > 0) {
+        snmp_log(LOG_ERR, "bad size for NULL value\n");
+        return 1;
+    }
+
     /*
      * use built-in storage for smaller values 
      */
