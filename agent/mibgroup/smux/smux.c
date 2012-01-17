@@ -369,6 +369,11 @@ var_smux_write(int action,
             break;
     }
 
+    if (!rptr) {
+        DEBUGMSGTL(("smux", "[var_smux_write] unknown registration\n"));
+        return SNMP_ERR_GENERR;
+    }
+
     switch (action) {
     case RESERVE1:
         DEBUGMSGTL(("smux", "[var_smux_write] entering RESERVE1\n"));
