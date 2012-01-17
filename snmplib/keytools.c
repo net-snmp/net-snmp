@@ -650,7 +650,8 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
 
   decode_keychange_quit:
     if (rval != SNMPERR_SUCCESS) {
-        memset(newkey, 0, properlength);
+        if (newkey)
+            memset(newkey, 0, properlength);
     }
     memset(tmp_buf, 0, SNMP_MAXBUF);
     SNMP_FREE(tmpbuf);

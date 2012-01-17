@@ -800,7 +800,6 @@ _certindexes_load( void )
         fp = fopen( filename, "r" );
         if ( !fp ) {
             DEBUGMSGT(("cert:index:load", "error opening index (%d)\n", i));
-            fclose(fp);
             continue;
         }
         cp = fgets( line, sizeof(line), fp );

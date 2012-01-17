@@ -884,7 +884,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
 {
     char           *addr_string = NULL;
 #ifdef  NETSNMP_USE_LIBWRAP
-    char *tcpudpaddr, *name;
+    char *tcpudpaddr = NULL, *name;
     short not_log_connection;
 
     name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
@@ -918,7 +918,8 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     }
 #ifdef  NETSNMP_USE_LIBWRAP
     /* Catch udp,udp6,tcp,tcp6 transports using "[" */
-    tcpudpaddr = strstr(addr_string, "[");
+    if (addr_string)
+        tcpudpaddr = strstr(addr_string, "[");
     if ( tcpudpaddr != 0 ) {
         char sbuf[64];
         char *xp;

@@ -801,7 +801,8 @@ int    best_guess;
       }
    }
  done:
-   if (iid && *iid) __concat_oid_str(oid_arr, oid_arr_len, iid);
+   if (iid && *iid && oid_arr_len)
+       __concat_oid_str(oid_arr, oid_arr_len, iid);
    return(rtp);
 }
 /* searches down the mib tree for the given oid
@@ -2109,7 +2110,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
       varlist_ind++;
     }
 
-    Py_DECREF(varlist_iter);
+    if (varlist_iter)
+        Py_DECREF(varlist_iter);
 
     if (PyErr_Occurred()) {
       /* propagate error */
@@ -2563,7 +2565,8 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
       /* propagate error */
       if (verbose)
 	printf("error: getbulk response processing: unknown python error");
-      Py_DECREF(val_tuple);
+      if (val_tuple)
+          Py_DECREF(val_tuple);
       val_tuple = NULL;
     }
   }
