@@ -4087,15 +4087,16 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 
 	/* Handle error cases and clean up after ourselves. */
         err:
-	   if (context->req_oids && context->nreq_oids) {
-	      bt_entry = context->req_oids;
-	      for (i = 0; i < context->nreq_oids; i++, bt_entry++)
-		 av_clear(bt_entry->vars);
-	   }
-	   if (context->req_oids)
-	      Safefree(context->req_oids);
-	   if (context)
+	   if (context) {
+	      if (context->req_oids && context->nreq_oids) {
+	         bt_entry = context->req_oids;
+	         for (i = 0; i < context->nreq_oids; i++, bt_entry++)
+		    av_clear(bt_entry->vars);
+	      }
+	      if (context->req_oids)
+	         Safefree(context->req_oids);
 	      Safefree(context);
+	   }
 	   if (pdu)
 	      snmp_free_pdu(pdu);
 
