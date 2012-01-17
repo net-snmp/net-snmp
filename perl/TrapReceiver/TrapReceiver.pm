@@ -248,19 +248,51 @@ code gets executed:
     ifOperStatus.1                 type=2  value=1
     ifDescr                        type=4  value="eth0"
 
+=head2 Passing Arguments
+
+If you need to pass arguments in to the script, you'll need to do it
+by one of two methods:
+
+=head3 Using Subroutines
+
+You can either define a subroutine in the file rather than have
+the file itself do something.  IE, in the file if you put:
+
+  sub foo {
+     print "$_[0]\n";
+  }
+
+and then put these lines in the snmptrapd.conf file:
+
+  perl do /path/to/script
+  perl foo("hello world");
+  perl foo("now I am passing something different");
+
+It'd call the foo function twice, and print the results to the console
+where snmptrapd was started.
+
+=head3 Using Variables
+
+Or you could always set a variable ahead of time:
+
+  perl $myVariable = 42;
+  perl do /path/to/script
+
+And have the script look for and use the $myVariable value in the script
+
 =head1 EXPORT
 
 None by default.
 
-# =head2 Exportable constants
+=head2 Exportable constants
 
-#   NETSNMPTRAPD_AUTH_HANDLER
-#   NETSNMPTRAPD_HANDLER_BREAK
-#   NETSNMPTRAPD_HANDLER_FAIL
-#   NETSNMPTRAPD_HANDLER_FINISH
-#   NETSNMPTRAPD_HANDLER_OK
-#   NETSNMPTRAPD_POST_HANDLER
-#   NETSNMPTRAPD_PRE_HANDLER
+  NETSNMPTRAPD_AUTH_HANDLER
+  NETSNMPTRAPD_HANDLER_BREAK
+  NETSNMPTRAPD_HANDLER_FAIL
+  NETSNMPTRAPD_HANDLER_FINISH
+  NETSNMPTRAPD_HANDLER_OK
+  NETSNMPTRAPD_POST_HANDLER
+  NETSNMPTRAPD_PRE_HANDLER
 
 =head1 SEE ALSO
 
