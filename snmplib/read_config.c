@@ -542,9 +542,7 @@ snmp_config_when(char *line, int when)
     strlcpy(buf, line, STRINGMAX);
     cptr = strtok_r(buf, SNMP_CONFIG_DELIMETERS, &st);
     if (!cptr) {
-        snprintf(tmpbuf, sizeof(tmpbuf), "Wrong format: %s", line);
-        tmpbuf[ sizeof(tmpbuf)-1 ] = '\0';
-        config_perror(tmpbuf);
+        netsnmp_config_warn("Wrong format: %s", line);
         return SNMPERR_GENERR;
     }
     if (cptr[0] == '[') {
