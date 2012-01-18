@@ -582,8 +582,11 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         DEBUGMSG(("table_array:group", "\n"));
         g = SNMP_MALLOC_TYPEDEF(netsnmp_request_group);
         i = SNMP_MALLOC_TYPEDEF(netsnmp_request_group_item);
-        if (i == NULL || g == NULL)
+        if (i == NULL || g == NULL) {
+            SNMP_FREE(i);
+            SNMP_FREE(g);
             return;
+        }
         g->list = i;
         g->table = tad->table;
         i->ri = current;
