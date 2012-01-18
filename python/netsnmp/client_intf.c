@@ -2353,7 +2353,8 @@ netsnmp_set(PyObject *self, PyObject *args)
 	if (type==TYPE_INTEGER && use_enums && tp && tp->enums) {
 	  for(ep = tp->enums; ep; ep = ep->next) {
 	    if (val && !strcmp(ep->label, val)) {
-	      strcpy(tmp_val_str, ep->value);
+              snprintf((char *) tmp_val_str, sizeof(tmp_val_str), "%d",
+                      ep->value);
 	      break;
 	    }
 	  }
