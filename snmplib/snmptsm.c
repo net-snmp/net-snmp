@@ -167,6 +167,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     size_t         *wholeMsgLen = parms->wholeMsgLen;
     netsnmp_tsmSecurityReference *tsmSecRef;
     netsnmp_tmStateReference *tmStateRef;
+    int             tmStateRefLocal = 0;
     
     DEBUGMSGTL(("tsm", "Starting TSM processing\n"));
 
@@ -195,6 +196,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         if (tmStateRef == NULL) {
             return SNMPERR_GENERR;
         }
+        tmStateRef_local = 1;
         
         tmStateRef->requestedSecurityLevel = parms->secLevel;
         tmStateRef->sameSecurity = NETSNMP_TM_SAME_SECURITY_NOT_REQUIRED;
@@ -208,13 +210,16 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                 prefix = "ssh:";
             else if (strncmp("dtls:",parms->session->peername,4) == 0)
                 prefix = "dtls:";
-            else
+            else {
+                SNMP_FREE(tmStateRef);
                 return SNMPERR_GENERR;
+            }
 
             /* a: - lookup the prefix */
             /*    - if DNE, snmpTsmUnknownPrefixes++ and bail */
             if (!prefix) {
                 /* snmpTsmUnknownPrefixes++ */
+                SNMP_FREE(tmStateRef);
                 return SNMPERR_GENERR;
             }
 
@@ -225,6 +230,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                 strncmp(parms->secName, prefix, strlen(prefix)) != 0 ||
                 parms->secName[strlen(prefix)] != ':') {
 
+                SNMP_FREE(tmStateRef);
                 /* snmpTsmInvalidPrefixes++ */
                 return SNMPERR_GENERR;
             }
@@ -257,6 +263,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     DEBUGINDENTLESS();
     if (rc == 0) {
         DEBUGMSGTL(("tsm", "building msgSecurityParameters failed.\n"));
+        if (tmStateRefLocal)
+            SNMP_FREE(tmStateRef);
         return SNMPERR_TOO_LONG;
     }
     
@@ -270,6 +278,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     while ((*wholeMsgLen - *offset) < parms->globalDataLen) {
         if (!asn_realloc(wholeMsg, wholeMsgLen)) {
             DEBUGMSGTL(("tsm", "building global data failed.\n"));
+            if (tmStateRefLocal)
+                SNMP_FREE(tmStateRef);
             return SNMPERR_TOO_LONG;
         }
     }
@@ -286,6 +296,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                                                ASN_CONSTRUCTOR), *offset);
     if (rc == 0) {
         DEBUGMSGTL(("tsm", "building master packet sequence failed.\n"));
+        if (tmStateRefLocal)
+            SNMP_FREE(tmStateRef);
         return SNMPERR_TOO_LONG;
     }
 
@@ -304,6 +316,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     }
     parms->pdu->transport_data_length = sizeof(*tmStateRef);
 
+    if (tmStateRefLocal)
+        SNMP_FREE(tmStateRef);
     DEBUGMSGTL(("tsm", "TSM processing completed.\n"));
     return SNMPERR_SUCCESS;
 }
