@@ -759,6 +759,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         DEBUGMSGTL(("dtlsudp", "peer disconnected\n"));
         cachep->flags |= NETSNMP_BIO_DISCONNECTED;
         remove_and_free_bio_cache(cachep);
+        SNMP_FREE(tmStateRef);
         return rc;
     }
     cachep->flags |= NETSNMP_BIO_CONNECTED;
@@ -855,6 +856,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                     /* XXX: probably need to check for whether we should
                        send stuff from our end to continue the transaction
                     */
+                    SNMP_FREE(tmStateRef);
                     return -1;
                 } else {
                     /* XXX: free needed memory */
@@ -864,6 +866,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 		    /* Step 5 says these are always incremented */
 		    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDSERVERCERTIFICATES);
 		    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
+                    SNMP_FREE(tmStateRef);
                     return -1;
                 }
             }
@@ -880,12 +883,14 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                     /* XXX: probably need to check for whether we should
                        send stuff from our end to continue the transaction
                     */
+                    SNMP_FREE(tmStateRef);
                     return -1;
                 } else {
                     /* XXX: free needed memory */
                     snmp_log(LOG_ERR,
                              "DTLSUDP: failed to verify ssl certificate (of the client)\n");
                     snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
+                    SNMP_FREE(tmStateRef);
                     return -1;
                 }
             }
