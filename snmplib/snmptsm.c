@@ -220,7 +220,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
            tmStateReference cache. */
         tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
         netsnmp_assert_or_return(NULL != tmStateRef, SNMPERR_GENERR);
-        tmStateRef_local = 1;
+        tmStateRefLocal = 1;
 
         /* XXX: we don't actually use this really in our implementation */
         /* 4.2, step 2: Set tmTransportDomain to the value of
