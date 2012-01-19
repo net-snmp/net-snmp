@@ -212,8 +212,10 @@ start_new_cached_connection(netsnmp_transport *t,
         return NULL;
     
     /* allocate our TLS specific data */
-    if (NULL == (tlsdata = netsnmp_tlsbase_allocate_tlsdata(t, !we_are_client)))
+    if (NULL == (tlsdata = netsnmp_tlsbase_allocate_tlsdata(t, !we_are_client))) {
+        SNMP_FREE(cachep);
         return NULL;
+    }
     cachep->tlsdata = tlsdata;
 
     /* RFC5953: section 5.3.1, step 1:
