@@ -35,6 +35,7 @@ load_uint_file(const char *filename, u_int * value)
     if (ret != 1) {
         DEBUGMSGTL(("sctp:scalars:arch:load", "Malformed file %s\n",
                     filename));
+        fclose(f);
         return -2;
     }
 
@@ -71,6 +72,7 @@ netsnmp_access_sctp_stats_arch_load(netsnmp_sctp_stats * sctp_stats)
         if (delimiter == NULL) {
             DEBUGMSGTL(("sctp:scalars:stats:arch_load",
                         "Malformed line, cannot find '\\t'!\n"));
+            fclose(f);
             return -1;
         }
         errno = 0;
@@ -78,6 +80,7 @@ netsnmp_access_sctp_stats_arch_load(netsnmp_sctp_stats * sctp_stats)
         if (errno != 0) {
             DEBUGMSGTL(("sctp:scalars:stats:arch_load",
                         "Malformed value!'\n"));
+            fclose(f);
             return -1;
         }
 
@@ -136,11 +139,13 @@ netsnmp_access_sctp_stats_arch_load(netsnmp_sctp_stats * sctp_stats)
         if (ret < 0) {
             DEBUGMSGTL(("sctp:scalars:stats:arch_load",
                         "Unknown entry!'\n"));
+            fclose(f);
             return ret;
         }
     }
 
     sctp_stats->discontinuity_time = 0;
+    fclose(f);
     return 0;
 }
 
