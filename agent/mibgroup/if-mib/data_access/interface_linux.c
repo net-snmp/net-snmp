@@ -589,6 +589,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if(fd < 0) {
         snmp_log(LOG_ERR, "could not create socket\n");
+        fclose(devin);
         return -2;
     }
 
