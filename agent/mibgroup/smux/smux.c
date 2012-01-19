@@ -148,6 +148,7 @@ smux_parse_peer_auth(const char *token, char *cptr)
     }
     if (nauths == SMUX_MAX_PEERS) {
 	config_perror("Too many smuxpeers");
+	free(aptr);
 	return;
     }
 
