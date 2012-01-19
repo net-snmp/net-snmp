@@ -1972,7 +1972,8 @@ netsnmp_cert_trust(SSL_CTX *ctx, netsnmp_cert *thiscert)
 {
     X509_STORE     *certstore;
     X509           *cert;
-    
+    char           *fingerprint;
+
     /* ensure all needed pieces are present */
     netsnmp_assert_or_msgreturn(NULL != thiscert, "NULL certificate passed in",
                                 SNMPERR_GENERR);
@@ -1994,10 +1995,11 @@ netsnmp_cert_trust(SSL_CTX *ctx, netsnmp_cert *thiscert)
                                 SNMPERR_GENERR);
 
     /* Put the certificate into the store */
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(cert, -1);
     DEBUGMSGTL(("cert:trust",
                 "putting trusted cert %p = %s in certstore %p\n", cert,
-                netsnmp_openssl_cert_get_fingerprint(cert, -1),
-                certstore));
+                fingerprint, certstore));
+    SNMP_FREE(fingerprint);
     X509_STORE_add_cert(certstore, cert);
 
     return SNMPERR_SUCCESS;
