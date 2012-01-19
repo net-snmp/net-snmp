@@ -648,6 +648,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                          */
                         if (free_this_index_search)
                             snmp_free_varbind(free_this_index_search);
+                        netsnmp_free_request_data_sets(reqtmp);
+                        SNMP_FREE(reqtmp);
                         return SNMP_ERR_GENERR;
                     }
                     coloid[reginfo->rootoid_len + 1] = table_info->colnum;
@@ -681,6 +683,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                 if (free_this_index_search)
                                     snmp_free_varbind
                                         (free_this_index_search);
+                                netsnmp_free_request_data_sets(reqtmp);
+                                SNMP_FREE(reqtmp);
                                 return SNMP_ERR_GENERR;
                             }
                             request_count--;   /* One less to look for */

@@ -400,6 +400,8 @@ proxy_handler(netsnmp_mib_handler *handler,
 
     if (!pdu || !sp) {
         netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+        if (pdu)
+            snmp_free_pdu(pdu);
         return SNMP_ERR_NOERROR;
     }
 

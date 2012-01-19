@@ -1285,6 +1285,7 @@ snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
     if (memdup(&pdu->contextEngineID, probeEngineID, probeEngineID_len) !=
         SNMPERR_SUCCESS) {
         snmp_log(LOG_ERR, "failed to clone memory for rfc5343 probe\n");
+        snmp_free_pdu(pdu);
         return SNMP_ERR_GENERR;
     }
     pdu->contextEngineIDLen = probeEngineID_len;
