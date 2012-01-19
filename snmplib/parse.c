@@ -2015,11 +2015,19 @@ parse_objectid(FILE * fp, char *name)
                  * The name for this node is the label for this entry 
                  */
                 np->label = strdup(name);
+                if (np->label == NULL) {
+                    SNMP_FREE(np->parent);
+                    SNMP_FREE(np);
+                    return (NULL);
+                }
             } else {
                 if (!nop->label) {
                     nop->label = (char *) malloc(20 + ANON_LEN);
-                    if (nop->label == NULL)
+                    if (nop->label == NULL) {
+                        SNMP_FREE(np->parent);
+                        SNMP_FREE(np);
                         return (NULL);
+                    }
                     sprintf(nop->label, "%s%d", ANON, anonymous++);
                 }
                 np->label = strdup(nop->label);

@@ -247,6 +247,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
         DEBUGMSGTL(( "disman:event:trigger:monitor", "Trigger query (%s) failed: %d\n",
                            (( entry->flags & MTE_TRIGGER_FLAG_VWILD ) ? "walk" : "get"), n));
         _mteTrigger_failure( "failed to run mteTrigger query" );
+        snmp_free_varbind(var);
         return;
     }
 
@@ -291,6 +292,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 if (!vtmp) {
                     _mteTrigger_failure(
                           "failed to create mteTrigger temp varbind");
+                    snmp_free_varbind(var);
                     return;
                 }
                 vtmp->type = ASN_NULL;
@@ -328,6 +330,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                     if (!vtmp) {
                         _mteTrigger_failure(
                                  "failed to create mteTrigger temp varbind");
+                        snmp_free_varbind(var);
                         return;
                     }
                     vtmp->type = ASN_NULL;
@@ -369,6 +372,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 if (!vtmp) {
                     _mteTrigger_failure(
                              "failed to create mteTrigger temp varbind");
+                    snmp_free_varbind(var);
                     return;
                 }
                 vtmp->type = ASN_NULL;
@@ -704,6 +708,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                         if (!vtmp) {
                             _mteTrigger_failure(
                                   "failed to create mteTrigger discontinuity varbind");
+                            snmp_free_varbind(dvar);
                             return;
                         }
                         snmp_set_var_objid(vtmp, entry->mteDeltaDiscontID,

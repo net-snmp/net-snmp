@@ -229,7 +229,11 @@ netsnmp_register_save_list(netsnmp_data_list **datalist,
                            const char *type, const char *token,
                            Netsnmp_Save_List_Data *data_list_save_ptr,
                            Netsnmp_Read_List_Data *data_list_read_ptr,
-                           Netsnmp_Free_List_Data *data_list_free_ptr) {
+                           Netsnmp_Free_List_Data *data_list_free_ptr)
+{
+    if (!data_list_save_ptr && !data_list_read_ptr)
+        return;
+
     netsnmp_data_list_saveinfo *info =
         SNMP_MALLOC_TYPEDEF(netsnmp_data_list_saveinfo);
 

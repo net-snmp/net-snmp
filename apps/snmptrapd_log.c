@@ -1022,6 +1022,8 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
             while ((*out_len + pdu->community_len + 1) >= *buf_len) {
                 if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+                    if (temp_buf)
+                        free(temp_buf);
                     return 0;
                 }
             }

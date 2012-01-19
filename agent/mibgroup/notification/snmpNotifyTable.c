@@ -550,6 +550,7 @@ parse_snmpNotifyTable(const char *token, char *line)
                               &StorageTmp->snmpNotifyNameLen);
     if (StorageTmp->snmpNotifyName == NULL) {
         config_perror("invalid specification for snmpNotifyName");
+        SNMP_FREE(StorageTmp);
         return;
     }
 
@@ -559,6 +560,7 @@ parse_snmpNotifyTable(const char *token, char *line)
                               &StorageTmp->snmpNotifyTagLen);
     if (StorageTmp->snmpNotifyTag == NULL) {
         config_perror("invalid specification for snmpNotifyTag");
+        SNMP_FREE(StorageTmp);
         return;
     }
 
