@@ -196,7 +196,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         if (tmStateRef == NULL) {
             return SNMPERR_GENERR;
         }
-        tmStateRef_local = 1;
+        tmStateRefLocal = 1;
         
         tmStateRef->requestedSecurityLevel = parms->secLevel;
         tmStateRef->sameSecurity = NETSNMP_TM_SAME_SECURITY_NOT_REQUIRED;
