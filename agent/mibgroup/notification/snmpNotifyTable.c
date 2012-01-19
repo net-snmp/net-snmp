@@ -352,8 +352,10 @@ notifyTable_register_notifications(int major, int minor,
         pptr->secModel = ss->securityModel;
         pptr->secLevel = ss->securityLevel;
         pptr->secName = (char *) malloc(ss->securityNameLen + 1);
-        if (pptr->secName == NULL)
+        if (pptr->secName == NULL) {
+            snmpTargetAddrTable_dispose(pptr);
             return 0;
+        }
         memcpy((void *) pptr->secName, (void *) ss->securityName,
                ss->securityNameLen);
         pptr->secName[ss->securityNameLen] = 0;
@@ -369,8 +371,10 @@ notifyTable_register_notifications(int major, int minor,
         pptr->secName = NULL;
         if (ss->community && (ss->community_len > 0)) {
             pptr->secName = (char *) malloc(ss->community_len + 1);
-            if (pptr->secName == NULL)
+            if (pptr->secName == NULL) {
+                snmpTargetAddrTable_dispose(pptr);
                 return 0;
+            }
             memcpy((void *) pptr->secName, (void *) ss->community,
                    ss->community_len);
             pptr->secName[ss->community_len] = 0;
@@ -543,6 +547,7 @@ parse_snmpNotifyTable(const char *token, char *line)
                               &StorageTmp->snmpNotifyNameLen);
     if (StorageTmp->snmpNotifyName == NULL) {
         config_perror("invalid specification for snmpNotifyName");
+        SNMP_FREE(StorageTmp);
         return;
     }
 
@@ -552,6 +557,7 @@ parse_snmpNotifyTable(const char *token, char *line)
                               &StorageTmp->snmpNotifyTagLen);
     if (StorageTmp->snmpNotifyTag == NULL) {
         config_perror("invalid specification for snmpNotifyTag");
+        SNMP_FREE(StorageTmp);
         return;
     }
 

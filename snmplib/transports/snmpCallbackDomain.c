@@ -391,8 +391,10 @@ netsnmp_callback_transport(int to)
      * our stuff 
      */
     mydata = SNMP_MALLOC_TYPEDEF(netsnmp_callback_info);
-    if (!mydata)
+    if (!mydata) {
+        SNMP_FREE(t);
         return NULL;
+    }
     mydata->linkedto = to;
     mydata->callback_num = ++callback_count;
     mydata->data = NULL;
