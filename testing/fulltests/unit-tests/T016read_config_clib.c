@@ -58,8 +58,8 @@ for (i = 0; i < sizeof(test_input) / sizeof(test_input[0]); i++) {
          i, p->expected_offset, offset));
     if (offset == p->expected_offset) {
         OKF(len == p->expected_len,
-            ("test %d: expected length %d, got length %d", i, p->expected_len,
-             len));
+            ("test %d: expected length %" NETSNMP_PRIz "d, got length %"
+             NETSNMP_PRIz "d", i, p->expected_len, len));
         if (len == p->expected_len) {
             ok = len < 0 || !p->expected_output
                 || memcmp(str, p->expected_output, len) == 0
