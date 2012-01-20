@@ -467,7 +467,7 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
                            netsnmp_get_table_data_set_handler(data_set));
     ret = netsnmp_register_table_data(reginfo, data_set->table,
                                        table_info);
-    if (reginfo->handler)
+    if (ret == SNMPERR_SUCCESS && reginfo->handler)
         netsnmp_handler_owns_table_info(reginfo->handler->next);
     return ret;
 }
