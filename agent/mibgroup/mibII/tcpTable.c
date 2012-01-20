@@ -141,6 +141,7 @@ init_tcpTable(void)
     netsnmp_table_registration_info *table_info;
     netsnmp_iterator_info           *iinfo;
     netsnmp_handler_registration    *reginfo;
+    int rc;
 
     DEBUGMSGTL(("mibII/tcpTable", "Initialising TCP Table\n"));
     /*
@@ -180,7 +181,9 @@ init_tcpTable(void)
             tcpTable_handler,
             tcpTable_oid, OID_LENGTH(tcpTable_oid),
             HANDLER_CAN_RONLY),
-    netsnmp_register_table_iterator(reginfo, iinfo);
+    rc = netsnmp_register_table_iterator(reginfo, iinfo);
+    if (rc != SNMPERR_SUCCESS)
+        return;
 
     /*
      * .... with a local cache
