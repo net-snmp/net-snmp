@@ -356,7 +356,7 @@ notifyTable_register_notifications(int major, int minor,
         pptr->secLevel = ss->securityLevel;
         pptr->secName = (char *) malloc(ss->securityNameLen + 1);
         if (pptr->secName == NULL) {
-            snmpTargetAddrTable_dispose(pptr);
+            snmpTargetParamTable_dispose(pptr);
             return 0;
         }
         memcpy((void *) pptr->secName, (void *) ss->securityName,
@@ -375,7 +375,7 @@ notifyTable_register_notifications(int major, int minor,
         if (ss->community && (ss->community_len > 0)) {
             pptr->secName = (char *) malloc(ss->community_len + 1);
             if (pptr->secName == NULL) {
-                snmpTargetAddrTable_dispose(pptr);
+                snmpTargetParamTable_dispose(pptr);
                 return 0;
             }
             memcpy((void *) pptr->secName, (void *) ss->community,
