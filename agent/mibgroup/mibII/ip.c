@@ -148,6 +148,7 @@ void
 init_ip(void)
 {
     netsnmp_handler_registration *reginfo;
+    int rc;
 
     /*
      * register ourselves with the agent as a group of scalars...
@@ -155,7 +156,9 @@ init_ip(void)
     DEBUGMSGTL(("mibII/ip", "Initialising IP group\n"));
     reginfo = netsnmp_create_handler_registration("ip", ip_handler,
                             ip_oid, OID_LENGTH(ip_oid), HANDLER_CAN_RONLY);
-    netsnmp_register_scalar_group(reginfo, IPFORWARDING, IPROUTEDISCARDS);
+    rc = netsnmp_register_scalar_group(reginfo, IPFORWARDING, IPROUTEDISCARDS);
+    if (rc != SNMPERR_SUCCESS)
+        return;
 
     /*
      * .... with a local cache
