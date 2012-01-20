@@ -98,6 +98,7 @@ initialize_table_sctpLookupRemIPAddrTable(void)
     if (SNMPERR_SUCCESS != netsnmp_register_table(reg, table_info)) {
         snmp_log(LOG_ERR,
                  "error registering table handler for sctpLookupRemIPAddrTable\n");
+        reg = NULL; /* it was freed inside netsnmp_register_table */
         goto bail;
     }
 

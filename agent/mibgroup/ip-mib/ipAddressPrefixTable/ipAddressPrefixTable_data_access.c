@@ -287,6 +287,7 @@ ipAddressPrefixTable_container_load(netsnmp_container *container)
                      "error setting index while loading "
                      "ipAddressPrefixTable data.\n");
             ipAddressPrefixTable_release_rowreq_ctx(rowreq_ctx);
+            rowreq_ctx = NULL;
             continue;
         }
 

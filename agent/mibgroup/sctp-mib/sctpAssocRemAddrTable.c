@@ -101,6 +101,7 @@ initialize_table_sctpAssocRemAddrTable(void)
     if (SNMPERR_SUCCESS != netsnmp_register_table(reg, table_info)) {
         snmp_log(LOG_ERR,
                  "error registering table handler for sctpAssocRemAddrTable\n");
+        reg = NULL; /* it was freed inside netsnmp_register_table */
         goto bail;
     }
 
