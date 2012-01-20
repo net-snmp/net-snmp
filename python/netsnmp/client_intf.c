@@ -1313,7 +1313,6 @@ netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
   int  timeout;
   char *  sec_name;
   int     sec_level;
-  char *  sec_eng_id;
   char *  context_eng_id;
   char *  context;
   char *  our_identity;
@@ -1390,7 +1389,11 @@ netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
 
   if (!ss)
       return NULL;
-  return Py_BuildValue("i", (int)ss);
+  /*
+   * Note: on a 64-bit system the statement below discards the upper 32 bits of
+   * "ss", which is most likely a bug.
+   */
+  return Py_BuildValue("i", (int)(uintptr_t)ss);
 }
 
 static PyObject *
@@ -1848,7 +1851,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   int len;
   oid **oid_arr = NULL;
   int *oid_arr_len = NULL;
-  oid **oid_arr_broken_check;
+  oid **oid_arr_broken_check = NULL;
   int *oid_arr_broken_check_len = NULL;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
