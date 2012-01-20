@@ -456,9 +456,11 @@ icmp_msg_stats_first_entry(void **loop_context,
 void
 init_icmp(void)
 {
-    netsnmp_handler_registration *reginfo;
+    netsnmp_handler_registration *scalar_reginfo = NULL;
+    int rc;
 #ifdef linux
-    netsnmp_handler_registration *msg_stats_reginfo;
+    netsnmp_handler_registration *msg_stats_reginfo = NULL;
+    netsnmp_handler_registration *table_reginfo = NULL;
     netsnmp_iterator_info *iinfo;
     netsnmp_iterator_info *msg_stats_iinfo;
     netsnmp_table_registration_info *table_info;
@@ -469,15 +471,17 @@ init_icmp(void)
      * register ourselves with the agent as a group of scalars...
      */
     DEBUGMSGTL(("mibII/icmp", "Initialising ICMP group\n"));
-    reginfo = netsnmp_create_handler_registration("icmp", icmp_handler,
+    scalar_reginfo = netsnmp_create_handler_registration("icmp", icmp_handler,
 		    icmp_oid, OID_LENGTH(icmp_oid), HANDLER_CAN_RONLY);
-    netsnmp_register_scalar_group(reginfo, ICMPINMSGS, ICMPOUTADDRMASKREPS);
+    rc = netsnmp_register_scalar_group(scalar_reginfo, ICMPINMSGS, ICMPOUTADDRMASKREPS);
+    if (rc != SNMPERR_SUCCESS)
+        return;
     /*
      * .... with a local cache
      *    (except for HP-UX 11, which extracts objects individually)
      */
 #ifndef hpux11
-    netsnmp_inject_handler( reginfo,
+    netsnmp_inject_handler( scalar_reginfo,
 		    netsnmp_get_cache_handler(ICMP_STATS_CACHE_TIMEOUT,
 			   		icmp_load, icmp_free,
 					icmp_oid, OID_LENGTH(icmp_oid)));
@@ -485,63 +489,64 @@ init_icmp(void)
 #ifdef linux
 
     /* register icmpStatsTable */
-    reginfo = netsnmp_create_handler_registration("icmpStatsTable",
-		icmp_stats_table_handler, icmp_stats_tbl_oid,
-		OID_LENGTH(icmp_stats_tbl_oid), HANDLER_CAN_RONLY);
-
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-    if (!table_info) {
-        return;
-    }
-
+    if (!table_info)
+        goto bail;
     netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, 0);
     table_info->min_column = ICMP_STAT_INMSG;
     table_info->max_column = ICMP_STAT_OUTERR;
 
 
     iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
-    if (!iinfo) {
-        return;
-    }
+    if (!iinfo)
+        goto bail;
     iinfo->get_first_data_point = icmp_stats_first_entry;
     iinfo->get_next_data_point  = icmp_stats_next_entry;
     iinfo->table_reginfo        = table_info;
 
-    netsnmp_register_table_iterator2(reginfo, iinfo);
+    table_reginfo = netsnmp_create_handler_registration("icmpStatsTable",
+		icmp_stats_table_handler, icmp_stats_tbl_oid,
+		OID_LENGTH(icmp_stats_tbl_oid), HANDLER_CAN_RONLY);
+
+    rc = netsnmp_register_table_iterator2(table_reginfo, iinfo);
+    if (rc != SNMPERR_SUCCESS) {
+        table_reginfo = NULL;
+        goto bail;
+    }
+    netsnmp_inject_handler( table_reginfo,
+		    netsnmp_get_cache_handler(ICMP_STATS_CACHE_TIMEOUT,
+			   		icmp_load, icmp_free,
+					icmp_stats_tbl_oid, OID_LENGTH(icmp_stats_tbl_oid)));
 
     /* register icmpMsgStatsTable */
-    msg_stats_reginfo = netsnmp_create_handler_registration("icmpMsgStatsTable",
-            icmp_msg_stats_table_handler, icmp_msg_stats_tbl_oid,
-            OID_LENGTH(icmp_msg_stats_tbl_oid), HANDLER_CAN_RONLY);
-
     msg_stats_table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-    if (!msg_stats_table_info) {
-        return;
-    }
-
+    if (!msg_stats_table_info)
+        goto bail;
     netsnmp_table_helper_add_indexes(msg_stats_table_info, ASN_INTEGER, ASN_INTEGER, 0);
     msg_stats_table_info->min_column = ICMP_MSG_STAT_IN_PKTS;
     msg_stats_table_info->max_column = ICMP_MSG_STAT_OUT_PKTS;
 
     msg_stats_iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
-    if (!msg_stats_iinfo) {
-        return;
-    }
+    if (!msg_stats_iinfo)
+        goto bail;
     msg_stats_iinfo->get_first_data_point = icmp_msg_stats_first_entry;
     msg_stats_iinfo->get_next_data_point  = icmp_msg_stats_next_entry;
     msg_stats_iinfo->table_reginfo        = msg_stats_table_info;
 
-    netsnmp_register_table_iterator2(msg_stats_reginfo, msg_stats_iinfo);
+    msg_stats_reginfo = netsnmp_create_handler_registration("icmpMsgStatsTable",
+            icmp_msg_stats_table_handler, icmp_msg_stats_tbl_oid,
+            OID_LENGTH(icmp_msg_stats_tbl_oid), HANDLER_CAN_RONLY);
+
+    rc = netsnmp_register_table_iterator2(msg_stats_reginfo, msg_stats_iinfo);
+    if (rc != SNMPERR_SUCCESS) {
+        msg_stats_reginfo = NULL;
+        goto bail;
+    }
+
     netsnmp_inject_handler( msg_stats_reginfo,
             netsnmp_get_cache_handler(ICMP_STATS_CACHE_TIMEOUT,
                 icmp_load, icmp_free,
                 icmp_msg_stats_tbl_oid, OID_LENGTH(icmp_msg_stats_tbl_oid)));
-#ifndef hpux11
-    netsnmp_inject_handler( reginfo,
-		    netsnmp_get_cache_handler(ICMP_STATS_CACHE_TIMEOUT,
-			   		icmp_load, icmp_free,
-					icmp_stats_tbl_oid, OID_LENGTH(icmp_stats_tbl_oid)));
-#endif /* ! hpux11 */
 #endif /* linux */
 
 #ifdef USING_MIBII_IP_MODULE
@@ -558,6 +563,15 @@ init_icmp(void)
     init_kernel_sunos5();
 #endif
 #endif
+    return;
+
+bail:
+    if (scalar_reginfo)
+        netsnmp_unregister_handler(scalar_reginfo);
+    if (table_reginfo)
+        netsnmp_unregister_handler(table_reginfo);
+    if (msg_stats_reginfo)
+        netsnmp_unregister_handler(msg_stats_reginfo);
 }
 
 

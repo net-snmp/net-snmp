@@ -120,7 +120,8 @@ _register_extend( oid *base, size_t len )
     netsnmp_table_data                *dinfo;
     netsnmp_table_registration_info   *tinfo;
     netsnmp_watcher_info              *winfo;
-    netsnmp_handler_registration      *reg;
+    netsnmp_handler_registration      *reg = NULL;
+    int                                rc;
 
     for ( eptr=ereg_head; eptr; eptr=eptr->next ) {
         if (!snmp_oid_compare( base, len, eptr->root_oid, eptr->oid_len))
@@ -128,6 +129,8 @@ _register_extend( oid *base, size_t len )
     }
     if (!eptr) {
         eptr = SNMP_MALLOC_TYPEDEF( extend_registration_block );
+        if (!eptr)
+            return NULL;
         eptr->root_oid = snmp_duplicate_objid( base, len );
         eptr->oid_len  = len;
         eptr->num_entries = 0;
@@ -157,7 +160,10 @@ _register_extend( oid *base, size_t len )
                 "nsExtendConfigTable", handle_nsExtendConfigTable, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
-    netsnmp_register_table_data( reg, dinfo, tinfo );
+    rc = netsnmp_register_table_data( reg, dinfo, tinfo );
+    if (rc != SNMPERR_SUCCESS) {
+        goto bail;
+    }
     netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[0] = reg;
 
@@ -175,7 +181,9 @@ _register_extend( oid *base, size_t len )
     reg   = netsnmp_create_handler_registration(
                 "nsExtendOut1Table", handle_nsExtendOutput1Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
-    netsnmp_register_table_data( reg, dinfo, tinfo );
+    rc = netsnmp_register_table_data( reg, dinfo, tinfo );
+    if (rc != SNMPERR_SUCCESS)
+        goto bail;
     netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[1] = reg;
 
@@ -195,7 +203,9 @@ _register_extend( oid *base, size_t len )
     reg   = netsnmp_create_handler_registration(
                 "nsExtendOut2Table", handle_nsExtendOutput2Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
-    netsnmp_register_table( reg, tinfo );
+    rc = netsnmp_register_table( reg, tinfo );
+    if (rc != SNMPERR_SUCCESS)
+        goto bail;
     netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[2] = reg;
 
@@ -209,9 +219,20 @@ _register_extend( oid *base, size_t len )
     winfo = netsnmp_create_watcher_info(
                 &(eptr->num_entries), sizeof(eptr->num_entries),
                 ASN_INTEGER, WATCHER_FIXED_SIZE);
-    netsnmp_register_watched_scalar2( reg, winfo );
+    rc = netsnmp_register_watched_scalar2( reg, winfo );
+    if (rc != SNMPERR_SUCCESS)
+        goto bail;
 
     return eptr;
+
+bail:
+    if (eptr->reg[2])
+        netsnmp_unregister_handler(eptr->reg[2]);
+    if (eptr->reg[1])
+        netsnmp_unregister_handler(eptr->reg[1]);
+    if (eptr->reg[0])
+        netsnmp_unregister_handler(eptr->reg[0]);
+    return NULL;
 }
 
 static void

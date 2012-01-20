@@ -129,6 +129,7 @@ init_udpTable(void)
     netsnmp_table_registration_info *table_info;
     netsnmp_iterator_info           *iinfo;
     netsnmp_handler_registration    *reginfo;
+    int                              rc;
 
     DEBUGMSGTL(("mibII/udpTable", "Initialising UDP Table\n"));
     /*
@@ -166,7 +167,9 @@ init_udpTable(void)
             udpTable_handler,
             udpTable_oid, OID_LENGTH(udpTable_oid),
             HANDLER_CAN_RONLY),
-    netsnmp_register_table_iterator2(reginfo, iinfo);
+    rc = netsnmp_register_table_iterator2(reginfo, iinfo);
+    if (rc != SNMPERR_SUCCESS)
+        return;
 
     /*
      * .... with a local cache

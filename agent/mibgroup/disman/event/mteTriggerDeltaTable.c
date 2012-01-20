@@ -27,6 +27,7 @@ init_mteTriggerDeltaTable(void)
     size_t      mteTDeltaTable_oid_len = OID_LENGTH(mteTDeltaTable_oid);
     netsnmp_handler_registration    *reg;
     netsnmp_table_registration_info *table_info;
+    int         rc;
 
     /*
      * Ensure the (combined) table container is available...
@@ -61,7 +62,9 @@ init_mteTriggerDeltaTable(void)
     table_info->max_column = COLUMN_MTETRIGGERDELTADISCONTINUITYIDTYPE;
 
     /* Register this using the (common) trigger_table_data container */
-    netsnmp_tdata_register(reg, trigger_table_data, table_info);
+    rc = netsnmp_tdata_register(reg, trigger_table_data, table_info);
+    if (rc != SNMPERR_SUCCESS)
+        return;
     netsnmp_handler_owns_table_info(reg->handler->next);
     DEBUGMSGTL(("disman:event:init", "Trigger Delta Table\n"));
 }
