@@ -107,6 +107,7 @@ void
 init_tcp(void)
 {
     netsnmp_handler_registration *reginfo;
+    int rc;
 
     /*
      * register ourselves with the agent as a group of scalars...
@@ -114,7 +115,9 @@ init_tcp(void)
     DEBUGMSGTL(("mibII/tcpScalar", "Initialising TCP scalar group\n"));
     reginfo = netsnmp_create_handler_registration("tcp", tcp_handler,
 		    tcp_oid, OID_LENGTH(tcp_oid), HANDLER_CAN_RONLY);
-    netsnmp_register_scalar_group(reginfo, TCPRTOALGORITHM, TCPOUTRSTS);
+    rc = netsnmp_register_scalar_group(reginfo, TCPRTOALGORITHM, TCPOUTRSTS);
+    if (rc != SNMPERR_SUCCESS)
+        return;
 
     /*
      * .... with a local cache
