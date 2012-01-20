@@ -74,6 +74,7 @@ void
 init_udp(void)
 {
     netsnmp_handler_registration *reginfo;
+    int rc;
 
     /*
      * register ourselves with the agent as a group of scalars...
@@ -81,7 +82,9 @@ init_udp(void)
     DEBUGMSGTL(("mibII/udpScalar", "Initialising UDP scalar group\n"));
     reginfo = netsnmp_create_handler_registration("udp", udp_handler,
 		    udp_oid, OID_LENGTH(udp_oid), HANDLER_CAN_RONLY);
-    netsnmp_register_scalar_group(reginfo, UDPINDATAGRAMS, UDPOUTDATAGRAMS);
+    rc = netsnmp_register_scalar_group(reginfo, UDPINDATAGRAMS, UDPOUTDATAGRAMS);
+    if (rc != SNMPERR_SUCCESS)
+        return;
 
     /*
      * .... with a local cache
