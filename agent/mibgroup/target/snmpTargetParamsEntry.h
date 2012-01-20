@@ -47,6 +47,7 @@
                                                 targetParamTable_struct
                                                 *newEntry);
        struct targetParamTable_struct *snmpTargetParamTable_create(void);
+       void snmpTargetParamTable_dispose(struct targetParamTable_struct *);
  
   /*
    * function definitions 
