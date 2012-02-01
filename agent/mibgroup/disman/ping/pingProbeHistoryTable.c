@@ -70,12 +70,10 @@ void
 pingProbeHistoryTable_cleaner(struct header_complex_index *thestuff)
 {
     struct header_complex_index *hciptr = NULL;
-    struct pingProbeHistoryTable_data *StorageDel = NULL;
+
     DEBUGMSGTL(("pingProbeHistoryTable", "cleanerout  "));
     for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
-        StorageDel =
-            header_complex_extract_entry(&pingProbeHistoryTableStorage,
-                                         hciptr);
+        header_complex_extract_entry(&pingProbeHistoryTableStorage, hciptr);
         DEBUGMSGTL(("pingProbeHistoryTable", "cleaner  "));
     }
 

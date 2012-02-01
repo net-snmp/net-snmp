@@ -231,6 +231,8 @@ NEXT_EXP:
                 len = vp2->name_length - exp->expPrefix_len;
                 snmp_set_var_typed_value( vp, ASN_PRIV_IMPLIED_OBJECT_ID,
                       (u_char*)(vp2->name+exp->expPrefix_len), len);
+            } else {
+                len = 1;
             }
             res = expValue_evaluateExpression( exp, vp->val.objid+1, len-1);
             DEBUGMSGTL(( "disman:expr:val", "w/card next returned (%x)\n", res));

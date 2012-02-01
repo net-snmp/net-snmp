@@ -682,7 +682,6 @@ traceRouteProbeHistoryTable_delLast(struct traceRouteCtlTable_data
 {
     struct header_complex_index *hciptr2 = NULL;
     struct header_complex_index *hcilast = NULL;
-    struct traceRouteProbeHistoryTable_data *StorageDel = NULL;
     struct traceRouteProbeHistoryTable_data *StorageTmp = NULL;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
@@ -714,9 +713,7 @@ traceRouteProbeHistoryTable_delLast(struct traceRouteCtlTable_data
 
         }
     }
-    StorageDel =
-        header_complex_extract_entry(&traceRouteProbeHistoryTableStorage,
-                                     hcilast);
+    header_complex_extract_entry(&traceRouteProbeHistoryTableStorage, hcilast);
     DEBUGMSGTL(("traceRouteProbeHistoryTable",
                 "delete the last one success!\n"));
     vars = NULL;
@@ -1322,7 +1319,6 @@ int
 traceRouteResultsTable_del(struct traceRouteCtlTable_data *thedata)
 {
     struct header_complex_index *hciptr2 = NULL;
-    struct traceRouteResultsTable_data *StorageDel = NULL;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len = 0;
@@ -1337,9 +1333,8 @@ traceRouteResultsTable_del(struct traceRouteCtlTable_data *thedata)
          hciptr2 = hciptr2->next) {
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
-            StorageDel =
-                header_complex_extract_entry
-                (&traceRouteResultsTableStorage, hciptr2);
+            header_complex_extract_entry(&traceRouteResultsTableStorage,
+                                         hciptr2);
             DEBUGMSGTL(("traceRouteResultsTable", "delete  success!\n"));
 
         }
@@ -1355,7 +1350,6 @@ int
 traceRouteProbeHistoryTable_del(struct traceRouteCtlTable_data *thedata)
 {
     struct header_complex_index *hciptr2 = NULL;
-    struct traceRouteProbeHistoryTable_data *StorageDel = NULL;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len = 0;
@@ -1371,9 +1365,8 @@ traceRouteProbeHistoryTable_del(struct traceRouteCtlTable_data *thedata)
          hciptr2 = hciptr2->next) {
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
-            StorageDel =
-                header_complex_extract_entry
-                (&traceRouteProbeHistoryTableStorage, hciptr2);
+            header_complex_extract_entry(&traceRouteProbeHistoryTableStorage,
+                                         hciptr2);
             DEBUGMSGTL(("traceRouteProbeHistoryTable",
                         "delete  success!\n"));
 
@@ -1388,7 +1381,6 @@ int
 traceRouteHopsTable_del(struct traceRouteCtlTable_data *thedata)
 {
     struct header_complex_index *hciptr2 = NULL;
-    struct traceRouteHopsTable_data *StorageDel = NULL;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len = 0;
@@ -1404,9 +1396,7 @@ traceRouteHopsTable_del(struct traceRouteCtlTable_data *thedata)
          hciptr2 = hciptr2->next) {
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
-            StorageDel =
-                header_complex_extract_entry(&traceRouteHopsTableStorage,
-                                             hciptr2);
+            header_complex_extract_entry(&traceRouteHopsTableStorage, hciptr2);
             DEBUGMSGTL(("traceRouteHopsTable", "delete  success!\n"));
 
         }
@@ -6071,7 +6061,7 @@ ifaddrlist(register struct ifaddrlist **ipaddrp, register char *errbuf)
 #ifdef HAVE_SOCKADDR_SA_LEN
     register int    n;
 #endif
-    register struct ifreq *ifrp, *ifend, *ifnext, *mp;
+    register struct ifreq *ifrp, *ifend, *ifnext;
     register struct sockaddr_in *sin;
     register struct ifaddrlist *al;
     struct ifconf   ifc;
@@ -6103,7 +6093,6 @@ ifaddrlist(register struct ifaddrlist **ipaddrp, register char *errbuf)
     ifend = (struct ifreq *) ((char *) ibuf + ifc.ifc_len);
 
     al = ifaddrlist;
-    mp = NULL;
     nipaddr = 0;
     for (; ifrp < ifend; ifrp = ifnext) {
 #ifdef HAVE_SOCKADDR_SA_LEN
