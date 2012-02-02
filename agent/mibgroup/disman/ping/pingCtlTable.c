@@ -340,12 +340,11 @@ pingProbeHistoryTable_addall(struct pingCtlTable_data *thedata)
 void
 pingCtlTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr = NULL;
-    struct pingCtlTable_data *StorageDel = NULL;
+    struct header_complex_index *hciptr;
+
     DEBUGMSGTL(("pingProbeHistoryTable", "cleanerout  "));
     for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
-        StorageDel =
-            header_complex_extract_entry(&pingCtlTableStorage, hciptr);
+        header_complex_extract_entry(&pingCtlTableStorage, hciptr);
         DEBUGMSGTL(("pingProbeHistoryTable", "cleaner  "));
     }
 }
@@ -864,7 +863,6 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
 {
     struct header_complex_index *hciptr2 = NULL;
     struct header_complex_index *hcilast = NULL;
-    struct pingProbeHistoryTable_data *StorageDel = NULL;
     struct pingProbeHistoryTable_data *StorageTmp = NULL;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
@@ -895,9 +893,7 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
 
         }
     }
-    StorageDel =
-        header_complex_extract_entry(&pingProbeHistoryTableStorage,
-                                     hcilast);
+    header_complex_extract_entry(&pingProbeHistoryTableStorage, hcilast);
     DEBUGMSGTL(("pingProbeHistoryTable",
                 "delete the last one success!\n"));
 }
@@ -1269,6 +1265,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
         len = pr->salen;
         if (readable_timeo(sockfd, item->pingCtlTimeOut) == 0) {
             /* printf("socket timeout!\n"); */
+            n = -1;
             fail_probe = fail_probe + 1;
             flag = 1;
         } else {
@@ -4447,7 +4444,9 @@ int
 __schedule_exit(int next, long *nreceived, long *tmax)
 {
     unsigned long   waittime;
+#if 0
     struct itimerval it;
+#endif
 
     if (*nreceived) {
         waittime = 2 * (*tmax);
@@ -4459,11 +4458,13 @@ __schedule_exit(int next, long *nreceived, long *tmax)
     if (next < 0 || next < waittime / 1000)
         next = waittime / 1000;
 
+#if 0
     it.it_interval.tv_sec = 0;
     it.it_interval.tv_usec = 0;
     it.it_value.tv_sec = waittime / 1000000;
     it.it_value.tv_usec = waittime % 1000000;
-    /* setitimer(ITIMER_REAL, &it, NULL); */
+    setitimer(ITIMER_REAL, &it, NULL);
+#endif
     return next;
 }
 
@@ -4737,6 +4738,7 @@ setup(int icmp_sock, int options, int uid, int timeout, int preload,
 
     gettimeofday(start_time, NULL);
 
+#if 0
     if (*deadline) {
         struct itimerval it;
 
@@ -4745,6 +4747,7 @@ setup(int icmp_sock, int options, int uid, int timeout, int preload,
         it.it_value.tv_sec = (*deadline);
         it.it_value.tv_usec = 0;
     }
+#endif
 
     if (isatty(STDOUT_FILENO)) {
         struct winsize  w;

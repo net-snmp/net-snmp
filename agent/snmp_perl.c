@@ -181,5 +181,6 @@ shutdown_perl(void)
     }
     DEBUGMSGTL(("perl", "shutting down perl\n"));
     perl_destruct(my_perl);
+    my_perl = NULL;
     DEBUGMSGTL(("perl", "finished shutting down perl\n"));
 }
