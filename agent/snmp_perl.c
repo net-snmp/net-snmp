@@ -144,10 +144,12 @@ void
 shutdown_perl(void)
 {
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-			       NETSNMP_DS_AGENT_DISABLE_PERL)) {
+			       NETSNMP_DS_AGENT_DISABLE_PERL) ||
+        my_perl == NULL) {
         return;
     }
     DEBUGMSGTL(("perl", "shutting down perl\n"));
     perl_destruct(my_perl);
+    my_perl = NULL;
     DEBUGMSGTL(("perl", "finished shutting down perl\n"));
 }
