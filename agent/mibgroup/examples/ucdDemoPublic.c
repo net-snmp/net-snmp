@@ -33,6 +33,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/tools.h>
 
 #include "util_funcs.h"
 #include "ucdDemoPublic.h"
@@ -219,7 +220,7 @@ write_ucdDemoPublicString(int action,
     }
     if (action == COMMIT) {
         sprintf((char*) publicString, "%.*s",
-                (int) min(sizeof(publicString) - 1, var_val_len),
+                (int) SNMP_MIN(sizeof(publicString) - 1, var_val_len),
                 (const char*) var_val);
     }
     return SNMP_ERR_NOERROR;
