@@ -133,7 +133,7 @@ init_expValueTable(void)
      * Initialize a "session" that defines who we're going to talk to
      */
     snmp_sess_init(&session);   /* set up defaults */
-    session.peername = "localhost";
+    session.peername = strdup("localhost");
 
     DEBUGMSGTL(("expValueTable", "done.\n"));
 }
@@ -435,7 +435,7 @@ expValueTable_clean(void *data)
 void
 build_valuetable()
 {
-    struct expExpressionTable_data *expstorage, *expfound;
+    struct expExpressionTable_data *expstorage;
     struct expObjectTable_data *objstorage, *objfound = NULL;
     struct header_complex_index *hcindex, *object_hcindex;
     char           *owner;
@@ -443,20 +443,8 @@ build_valuetable()
     char           *name;
     size_t          name_len;
     char           *expression;
-    size_t          expression_len;
     oid            *index;
-
-
-    char           *result, *resultbak;
-    char           *temp, *tempbak;
-    int             i = 0, j, k, l;
-    temp = malloc(100);
-    result = malloc(100);
-    tempbak = temp;
-    memset(result, 0, 100);
-    *result = '\0';
-    resultbak = result;
-
+    int             i = 0, j, l;
 
     DEBUGMSGTL(("expValueTable", "building valuetable...  \n"));
 
@@ -465,7 +453,6 @@ build_valuetable()
         expstorage = (struct expExpressionTable_data *) hcindex->data;
         if (expstorage->expExpressionEntryStatus == RS_ACTIVE) {
             expression = expstorage->expExpression;
-            expression_len = expstorage->expExpressionLen;
             while (*expression != '\0') {
                 if (*expression == '$') {
                     i++;
@@ -480,8 +467,12 @@ build_valuetable()
                             break;
                         }
                     }
-                    sprintf(temp, "%.*s", j - 1, expression + 1);
-                    l = atoi(temp);
+                    {
+                        char temp[100];
+
+                        sprintf(temp, "%.*s", j - 1, expression + 1);
+                        l = atoi(temp);
+                    }
                     for (object_hcindex = expObjectTableStorage;
                          object_hcindex != NULL;
                          object_hcindex = object_hcindex->next) {
@@ -499,7 +490,6 @@ build_valuetable()
                                 expstorage->expExpressionNameLen)
                             && (l == objstorage->expObjectIndex)) {
                             if (objfound == NULL) {
-                                expfound = expstorage;
                                 objfound = objstorage;
                             }
                             if (objstorage->expObjectIDWildcard ==

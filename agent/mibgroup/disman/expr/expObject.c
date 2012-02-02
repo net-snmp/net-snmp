@@ -240,7 +240,6 @@ void
 expObject_getData( struct expExpression  *expr, struct expObject  *obj )
 {
     netsnmp_variable_list *var;
-    int res;
 
     /*
      * Retrieve and store the basic object value(s)
@@ -279,7 +278,7 @@ expObject_getData( struct expExpression  *expr, struct expObject  *obj )
                                        expr->expPrefix_len,
                                        expr->pvars );
         }
-        res = netsnmp_query_get( var, expr->session );
+        netsnmp_query_get( var, expr->session );
     }
     
     if ( obj->expObjectSampleType != EXPSAMPLETYPE_ABSOLUTE ) {
@@ -312,7 +311,7 @@ expObject_getData( struct expExpression  *expr, struct expObject  *obj )
         else
             var = _expObject_buildList( obj->expObjDeltaD,
                                         obj->expObjDeltaD_len, 0, NULL );
-        res = netsnmp_query_get( var, expr->session );
+        netsnmp_query_get( var, expr->session );
         if ( obj->old_dvars )
             snmp_free_varbind( obj->old_dvars );
         obj->old_dvars = obj->dvars;
@@ -338,7 +337,7 @@ expObject_getData( struct expExpression  *expr, struct expObject  *obj )
          *
          *    (The MIB description seems bogus?)
          */
-        res = netsnmp_query_get( var, expr->session );
+        netsnmp_query_get( var, expr->session );
         if ( obj->cvars )
             snmp_free_varbind( obj->cvars );
         obj->cvars = var;
