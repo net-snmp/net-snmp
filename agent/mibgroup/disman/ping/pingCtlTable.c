@@ -2677,8 +2677,7 @@ write_pingCtlAdminStatus(int action,
                     snmp_alarm_register(StorageTmp->pingCtlFrequency,
                                         SA_REPEAT, run_ping, StorageTmp);
             else
-                StorageTmp->timer_id = snmp_alarm_register(1, (int) NULL,
-                                                           run_ping,
+                StorageTmp->timer_id = snmp_alarm_register(1, 0, run_ping,
                                                            StorageTmp);
 
         } else if (StorageTmp->pingCtlAdminStatus == 2
@@ -4324,8 +4323,7 @@ write_pingCtlRowStatus(int action,
                                             StorageTmp);
                 else
                     StorageTmp->timer_id =
-                        snmp_alarm_register(1, (int) NULL, run_ping,
-                                            StorageTmp);
+                        snmp_alarm_register(1, 0, run_ping, StorageTmp);
 
             }
 
