@@ -2238,6 +2238,7 @@ write_pingCtlTargetAddressType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2335,6 +2336,7 @@ write_pingCtlTargetAddress(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2424,6 +2426,7 @@ write_pingCtlDataSize(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2514,6 +2517,7 @@ write_pingCtlTimeOut(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2606,6 +2610,7 @@ write_pingCtlProbeCount(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2709,6 +2714,7 @@ write_pingCtlAdminStatus(int action,
             modify_ResultsOper(StorageTmp, 2);
         }
 
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2805,6 +2811,7 @@ write_pingCtlDataFill(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2890,6 +2897,7 @@ write_pingCtlFrequency(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2975,6 +2983,7 @@ write_pingCtlMaxRows(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3062,6 +3071,7 @@ write_pingCtlStorageType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3160,6 +3170,7 @@ write_pingCtlTrapGeneration(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3251,6 +3262,7 @@ write_pingCtlTrapProbeFailureFilter(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3342,6 +3354,7 @@ write_pingCtlTrapTestFailureFilter(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3439,6 +3452,7 @@ write_pingCtlType(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3535,6 +3549,7 @@ write_pingCtlDescr(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3621,6 +3636,7 @@ write_pingCtlSourceAddressType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3719,6 +3735,7 @@ write_pingCtlSourceAddress(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3804,6 +3821,7 @@ write_pingCtlIfIndex(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3892,6 +3910,7 @@ write_pingCtlByPassRouteTable(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3980,6 +3999,7 @@ write_pingCtlDSField(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -4351,6 +4371,7 @@ write_pingCtlRowStatus(int action,
             }
 
         }
+        snmp_store_needed(NULL);
 
         break;
     }
