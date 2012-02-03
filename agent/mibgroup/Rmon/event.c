@@ -128,6 +128,7 @@ typedef struct {
 
 static TABLE_DEFINTION_T EventCtrlTable;
 static TABLE_DEFINTION_T *table_ptr = &EventCtrlTable;
+static unsigned char zero_octet_string[1];
 
 /*
  * Control Table RowApi Callbacks 
@@ -262,7 +263,6 @@ write_eventControl(int action, u_char * var_val, u_char var_val_type,
     static int      prev_action = COMMIT;
     RMON_ENTRY_T   *hdr;
     CRTL_ENTRY_T   *cloned_body;
-    CRTL_ENTRY_T   *body;
 
     switch (action) {
     case RESERVE1:
@@ -283,7 +283,6 @@ write_eventControl(int action, u_char * var_val, u_char var_val_type,
         leaf_id = (int) name[eventEntryFirstIndexBegin - 1];
         hdr = ROWAPI_find(table_ptr, long_temp);        /* it MUST be OK */
         cloned_body = (CRTL_ENTRY_T *) hdr->tmp;
-        body = (CRTL_ENTRY_T *) hdr->body;
         switch (leaf_id) {
         case Leaf_event_description:
             char_temp = AGMALLOC(1 + MAX_event_description);
@@ -406,7 +405,7 @@ var_eventTable(struct variable *vp,
             return (unsigned char *) theEntry.event_description;
         } else {
             *var_len = 0;
-            return NETSNMP_REMOVE_CONST(unsigned char *, "");
+            return zero_octet_string;
         }
     case EVENTTYPE:
         long_ret = theEntry.event_type;
@@ -417,7 +416,7 @@ var_eventTable(struct variable *vp,
             return (unsigned char *) theEntry.event_community;
         } else {
             *var_len = 0;
-            return NETSNMP_REMOVE_CONST(unsigned char *, "");
+            return zero_octet_string;
         }
     case EVENTLASTTIMESENT:
         long_ret = theEntry.event_last_time_sent;
@@ -428,7 +427,7 @@ var_eventTable(struct variable *vp,
             return (unsigned char *) hdr->owner;
         } else {
             *var_len = 0;
-            return NETSNMP_REMOVE_CONST(unsigned char *, "");
+            return zero_octet_string;
         }
     case EVENTSTATUS:
         long_ret = hdr->status;
@@ -457,7 +456,6 @@ var_logTable(struct variable *vp,
     static long     long_ret;
     static DATA_ENTRY_T theEntry;
     RMON_ENTRY_T   *hdr;
-    CRTL_ENTRY_T   *ctrl;
 
     *write_method = NULL;
     hdr = ROWDATAAPI_header_DataEntry(vp, name, length, exact, var_len,
@@ -466,8 +464,6 @@ var_logTable(struct variable *vp,
                                       sizeof(DATA_ENTRY_T), &theEntry);
     if (!hdr)
         return NULL;
-
-    ctrl = (CRTL_ENTRY_T *) hdr->body;
 
     *var_len = sizeof(long);    /* default */
 
@@ -487,7 +483,7 @@ var_logTable(struct variable *vp,
             return (unsigned char *) theEntry.log_description;
         } else {
             *var_len = 0;
-            return NETSNMP_REMOVE_CONST(unsigned char *, "");
+            return zero_octet_string;
         }
     default:
         ERROR_MSG("");
