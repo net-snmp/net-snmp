@@ -3,8 +3,8 @@
  *        : : mib2c.check_values_local.conf,v 5.1 2003/05/30 23:53:15 hardaker Exp $
  * 
  */
-#ifndef NETSNMPHOSTSTABLE_CHECKFNS_H
-#define NETSNMPHOSTSTABLE_CHECKFNS_H
+#ifndef NETSNMPHOSTSTABLE_CHECKFNS_LOCAL_H
+#define NETSNMPHOSTSTABLE_CHECKFNS_LOCAL_H
 
 /*
  * these functions are designed to check incoming values for 
@@ -18,19 +18,32 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#if 0
+}
+#endif
 
-int             check_(int type, long *val, size_t val_len, long *old_val,
-                       size_t old_val_len);
-int             check_(int type, char *val, size_t val_len, char *old_val,
-                       size_t old_val_len);
-int             check_(int type, long *val, size_t val_len, long *old_val,
-                       size_t old_val_len);
-int             check_(int type, long *val, size_t val_len, long *old_val,
-                       size_t old_val_len);
+int             check_netSnmpHostAddressType_local(int type, long *val,
+                                                   size_t val_len,
+                                                   long *old_val,
+                                                   size_t old_val_len);
+int             check_netSnmpHostAddress_local(int type, char *val,
+                                               size_t val_len,
+                                               char *old_val,
+                                               size_t old_val_len);
+int             check_netSnmpHostStorage_local(int type, long *val,
+                                               size_t val_len,
+                                               long *old_val,
+                                               size_t old_val_len);
+int             check_netSnmpHostRowStatus_local(int type, long *val,
+                                                 size_t val_len,
+                                                 long *old_val,
+                                                 size_t old_val_len);
 
-
+#if 0
+{
+#endif
 #ifdef __cplusplus
 }
 #endif
 
-#endif                          /* NETSNMPHOSTSTABLE_CHECKFNS_H */
+#endif                          /* NETSNMPHOSTSTABLE_CHECKFNS_LOCAL_H */
