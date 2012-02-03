@@ -3200,8 +3200,7 @@ write_traceRouteCtlAdminStatus(int action,
                                         SA_REPEAT, run_traceRoute,
                                         StorageTmp);
             else
-                StorageTmp->timer_id = snmp_alarm_register(1, (int) NULL,
-                                                           run_traceRoute,
+                StorageTmp->timer_id = snmp_alarm_register(1, 0, run_traceRoute,
                                                            StorageTmp);
 
         } else if (StorageTmp->traceRouteCtlAdminStatus == 2
@@ -4031,8 +4030,7 @@ write_traceRouteCtlRowStatus(int action,
                                             StorageTmp);
                 else
                     StorageTmp->timer_id =
-                        snmp_alarm_register(1, (int) NULL, run_traceRoute,
-                                            StorageTmp);
+                        snmp_alarm_register(1, 0, run_traceRoute, StorageTmp);
 
             }
 
