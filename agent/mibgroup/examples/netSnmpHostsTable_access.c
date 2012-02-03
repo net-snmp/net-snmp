@@ -180,7 +180,7 @@ netSnmpHostsTable_create_data_context(netsnmp_variable_list * index_data)
 
     if (!datactx)
         return NULL;
-    strlcpy(datactx->hostname, index_data->val.string,
+    strlcpy(datactx->hostname, (const char *) index_data->val.string,
             sizeof(datactx->hostname));
     return datactx;
 }
