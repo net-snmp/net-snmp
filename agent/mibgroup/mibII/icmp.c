@@ -565,6 +565,7 @@ init_icmp(void)
 #endif
     return;
 
+#ifdef linux
 bail:
     if (scalar_reginfo)
         netsnmp_unregister_handler(scalar_reginfo);
@@ -572,6 +573,7 @@ bail:
         netsnmp_unregister_handler(table_reginfo);
     if (msg_stats_reginfo)
         netsnmp_unregister_handler(msg_stats_reginfo);
+#endif
 }
 
 
