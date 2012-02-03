@@ -583,6 +583,7 @@ init_icmp(void)
 #endif
     return;
 
+#ifdef linux
 bail:
     if (msg_stats_reginfo)
         netsnmp_handler_registration_free(msg_stats_reginfo);
@@ -590,6 +591,7 @@ bail:
         netsnmp_handler_registration_free(table_reginfo);
     if (scalar_reginfo)
         netsnmp_handler_registration_free(scalar_reginfo);
+#endif
 }
 
 

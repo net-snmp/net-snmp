@@ -181,7 +181,7 @@ write_historyControl(int action, u_char * var_val, u_char var_val_type,
                                                var_val_len,
                                                MIN_historyControlBucketsRequested,
                                                MAX_historyControlBucketsRequested,
-                                               &cloned_body->scrlr.
+                                               (long *) &cloned_body->scrlr.
                                                data_requested);
             if (SNMP_ERR_NOERROR != snmp_status) {
                 return snmp_status;
@@ -198,7 +198,7 @@ write_historyControl(int action, u_char * var_val, u_char var_val_type,
                                                var_val_len,
                                                MIN_historyControlInterval,
                                                MAX_historyControlInterval,
-                                               &cloned_body->interval);
+                                               (long *) &cloned_body->interval);
             if (SNMP_ERR_NOERROR != snmp_status) {
                 return snmp_status;
             }
@@ -257,6 +257,7 @@ var_historyControlTable(struct variable *vp,
                         int exact,
                         size_t * var_len, WriteMethod ** write_method)
 {
+    static unsigned char zero_octet_string[1];
     static long     long_ret;
     static CRTL_ENTRY_T theEntry;
     RMON_ENTRY_T   *hdr;
@@ -298,7 +299,7 @@ var_historyControlTable(struct variable *vp,
             return (unsigned char *) hdr->owner;
         } else {
             *var_len = 0;
-            return (unsigned char *) "";
+            return zero_octet_string;
         }
 
     case CTRL_STATUS:
@@ -530,7 +531,6 @@ var_etherHistoryTable(struct variable *vp,
     static long     long_ret;
     static DATA_ENTRY_T theBucket;
     RMON_ENTRY_T   *hdr;
-    CRTL_ENTRY_T   *ctrl;
 
     *write_method = NULL;
     hdr = ROWDATAAPI_header_DataEntry(vp, name, length, exact, var_len,
@@ -541,8 +541,6 @@ var_etherHistoryTable(struct variable *vp,
         return NULL;
 
     *var_len = sizeof(long);    /* default */
-
-    ctrl = (CRTL_ENTRY_T *) hdr->body;
 
     switch (vp->magic) {
     case DATA_INDEX:

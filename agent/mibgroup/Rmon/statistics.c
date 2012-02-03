@@ -317,6 +317,7 @@ var_etherStatsEntry(struct variable * vp, oid * name, size_t * length,
                     int exact, size_t * var_len,
                     WriteMethod ** write_method)
 {
+    static unsigned char zero_octet_string[1];
     static long     long_return;
     static CRTL_ENTRY_T theEntry;
     RMON_ENTRY_T   *hdr;
@@ -397,7 +398,7 @@ var_etherStatsEntry(struct variable * vp, oid * name, size_t * length,
             return (unsigned char *) hdr->owner;
         } else {
             *var_len = 0;
-            return (unsigned char *) "";
+            return zero_octet_string;
         }
     case IDetherStatsStatus:
         long_return = hdr->status;
