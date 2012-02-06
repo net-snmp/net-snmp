@@ -958,11 +958,11 @@ atime_ready(const_marker_t pm, int delta_ms)
     return 1;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_UATIME_READY
 /**
  * Test: Has (marked time plus delta) exceeded current time ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
-#ifndef NETSNMP_FEATURE_REMOVE_UATIME_READY
 int
 uatime_ready(const_marker_t pm, unsigned int delta_ms)
 {
