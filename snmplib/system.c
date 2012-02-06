@@ -1078,44 +1078,30 @@ setenv(const char *name, const char *value, int overwrite)
 }
 #endif                          /* HAVE_SETENV */
 
-/* returns centiseconds */
 netsnmp_feature_child_of(calculate_time_diff, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_CALCULATE_TIME_DIFF
+/**
+ * Compute (*now - *then) in centiseconds.
+ */
 int
 calculate_time_diff(const struct timeval *now, const struct timeval *then)
 {
-    struct timeval  tmp, diff;
-    memcpy(&tmp, now, sizeof(struct timeval));
-    tmp.tv_sec--;
-    tmp.tv_usec += 1000000L;
-    diff.tv_sec = tmp.tv_sec - then->tv_sec;
-    diff.tv_usec = tmp.tv_usec - then->tv_usec;
-    if (diff.tv_usec > 1000000L) {
-        diff.tv_usec -= 1000000L;
-        diff.tv_sec++;
-    }
+    struct timeval  diff;
+
+    NETSNMP_TIMERSUB(now, then, &diff);
     return (int)(diff.tv_sec * 100 + diff.tv_usec / 10000);
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_TIME_DIFF */
 
 #ifndef NETSNMP_FEATURE_REMOVE_CALCULATE_SECTIME_DIFF
-/* returns diff in rounded seconds */
+/** Compute rounded (*now - *then) in seconds. */
 u_int
 calculate_sectime_diff(const struct timeval *now, const struct timeval *then)
 {
-    struct timeval  tmp, diff;
-    memcpy(&tmp, now, sizeof(struct timeval));
-    tmp.tv_sec--;
-    tmp.tv_usec += 1000000L;
-    diff.tv_sec = tmp.tv_sec - then->tv_sec;
-    diff.tv_usec = tmp.tv_usec - then->tv_usec;
-    if (diff.tv_usec >= 1000000L) {
-        diff.tv_usec -= 1000000L;
-        diff.tv_sec++;
-    }
-    if (diff.tv_usec >= 500000L)
-        return (u_int)(diff.tv_sec + 1);
-    return (u_int)(diff.tv_sec);
+    struct timeval  diff;
+
+    NETSNMP_TIMERSUB(now, then, &diff);
+    return diff.tv_sec + (diff.tv_usec >= 500000L);
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_SECTIME_DIFF */
 
