@@ -263,6 +263,7 @@ extern          "C" {
     u_long          netsnmp_marker_uptime(marker_t pm);
     u_long          netsnmp_timeval_uptime(struct timeval *tv);
     const_marker_t  netsnmp_get_agent_starttime(void);
+    uint64_t        netsnmp_get_agent_runtime(void);
     void            netsnmp_set_agent_starttime(marker_t s);
     u_long          netsnmp_get_agent_uptime(void);
     void            netsnmp_set_agent_uptime(u_long hsec);
