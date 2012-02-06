@@ -646,8 +646,7 @@ agent_check_and_process(int block)
          * The caller does not want us to block at all.  
          */
 
-        tvp->tv_sec = 0;
-        tvp->tv_usec = 0;
+        timerclear(tvp);
     }
 
     count = select(numfds, &fdset, NULL, NULL, tvp);
@@ -762,7 +761,7 @@ netsnmp_addrcache_add(const char *addr)
                 /*
                  * found a match
                  */
-                memcpy(&addrCache[i].lastHit, &now, sizeof(struct timeval));
+                addrCache[i].lastHit = now;
                 if (timercmp(&addrCache[i].lastHit, &aged, <))
 		    rc = 1; /* should have expired, so is new */
 		else
@@ -809,7 +808,7 @@ netsnmp_addrcache_add(const char *addr)
              */
             addrCache[unused].addr = strdup(addr);
             addrCache[unused].status = SNMP_ADDRCACHE_USED;
-            memcpy(&addrCache[unused].lastHit, &now, sizeof(struct timeval));
+            addrCache[unused].lastHit = now;
         }
         else { /* Otherwise, replace oldest entry */
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
@@ -819,7 +818,7 @@ netsnmp_addrcache_add(const char *addr)
             
             free(addrCache[oldest].addr);
             addrCache[oldest].addr = strdup(addr);
-            memcpy(&addrCache[oldest].lastHit, &now, sizeof(struct timeval));
+            addrCache[oldest].lastHit = now;
         }
         rc = 1;
     }
