@@ -200,12 +200,7 @@ AGUTIL_get_oid_value(u_char * var_val, u_char var_val_type,
 u_long
 AGUTIL_sys_up_time(void)
 {
-    struct timeval  current, delta;
-    const struct timeval* const starttime_ptr = netsnmp_get_agent_starttime();
-
-    gettimeofday(&current, NULL);
-    NETSNMP_TIMERSUB(&current, starttime_ptr, &delta);
-    return delta.tv_sec * 100 + delta.tv_usec / 10000;
+    return netsnmp_get_agent_runtime();
 }
 
 /*

@@ -286,8 +286,8 @@ extern          "C" {
     NETSNMP_IMPORT
     u_long          uatime_hdiff(const_marker_t first, const_marker_t second);      /* 1/100th sec */
     NETSNMP_IMPORT
-    int             atime_ready(const_marker_t pm, int deltaT);
-    int             uatime_ready(const_marker_t pm, unsigned int deltaT);
+    int             atime_ready(const_marker_t pm, int delta_ms);
+    int             uatime_ready(const_marker_t pm, unsigned int delta_ms);
 
     int             marker_tticks(const_marker_t pm);
     int             timeval_tticks(const struct timeval *tv);

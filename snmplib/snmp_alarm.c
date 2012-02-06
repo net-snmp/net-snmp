@@ -82,23 +82,22 @@ init_snmp_alarm(void)
 void
 sa_update_entry(struct snmp_alarm *a)
 {
-    if (a->t_last.tv_sec == 0 && a->t_last.tv_usec == 0) {
+    if (!timerisset(&a->t_last)) {
         struct timeval  t_now;
         /*
          * Never been called yet, call time `t' from now.  
          */
         gettimeofday(&t_now, NULL);
 
-        a->t_last.tv_sec = t_now.tv_sec;
-        a->t_last.tv_usec = t_now.tv_usec;
+        a->t_last = t_now;
 
         NETSNMP_TIMERADD(&t_now, &a->t, &a->t_next);
-    } else if (a->t_next.tv_sec == 0 && a->t_next.tv_usec == 0) {
+    } else if (!timerisset(&a->t_next)) {
         /*
          * We've been called but not reset for the next call.  
          */
         if (a->flags & SA_REPEAT) {
-            if (a->t.tv_sec == 0 && a->t.tv_usec == 0) {
+            if (!timerisset(&a->t)) {
                 DEBUGMSGTL(("snmp_alarm",
                             "update_entry: illegal interval specified\n"));
                 snmp_alarm_unregister(a->clientreg);
@@ -144,7 +143,7 @@ snmp_alarm_unregister(unsigned int clientreg)
         DEBUGMSGTL(("snmp_alarm", "unregistered alarm %d\n", 
 		    sa_ptr->clientreg));
         /*
-         * Note:  do not free the clientarg, its the clients responsibility 
+         * Note: do not free the clientarg, it's the client's responsibility 
          */
         free(sa_ptr);
     } else {
@@ -185,22 +184,13 @@ sa_find_next(void)
     for (a = thealarms; a != NULL; a = a->next) {
         if (!(a->flags & SA_FIRED)) {
             /* check for time delta skew */
-            if ((a->t_next.tv_sec - t_now.tv_sec) > a->t.tv_sec)
-            {
+            if ((a->t_next.tv_sec - t_now.tv_sec) > a->t.tv_sec) {
                 DEBUGMSGTL(("time_skew", "Time delta too big (%ld seconds), should be %ld seconds - fixing\n",
 		    (long)(a->t_next.tv_sec - t_now.tv_sec), (long)a->t.tv_sec));
-                a->t_next.tv_sec = t_now.tv_sec + a->t.tv_sec;
-                a->t_next.tv_usec = t_now.tv_usec + a->t.tv_usec;
-           }
-            if (lowest == NULL) {
-               lowest = a;
-            } else if (a->t_next.tv_sec == lowest->t_next.tv_sec) {
-                if (a->t_next.tv_usec < lowest->t_next.tv_usec) {
-                    lowest = a;
-                }
-            } else if (a->t_next.tv_sec < lowest->t_next.tv_sec) {
-               lowest = a;
-           }
+                NETSNMP_TIMERADD(&t_now, &a->t, &a->t_next);
+            }
+            if (lowest == NULL || timercmp(&a->t_next, &lowest->t_next, <))
+                lowest = a;
        }
     }
     return lowest;
@@ -247,10 +237,8 @@ run_alarms(void)
             DEBUGMSGTL(("snmp_alarm", "alarm %d completed\n", clientreg));
 
             if ((a = sa_find_specific(clientreg)) != NULL) {
-                a->t_last.tv_sec = t_now.tv_sec;
-                a->t_last.tv_usec = t_now.tv_usec;
-                a->t_next.tv_sec = 0;
-                a->t_next.tv_usec = 0;
+                a->t_last = t_now;
+                timerclear(&a->t_next);
                 a->flags &= ~SA_FIRED;
                 sa_update_entry(a);
             } else {
@@ -274,39 +262,56 @@ alarm_handler(int a)
 
 
 
+/**
+ * Look up the time at which the next alarm will fire.
+ *
+ * @param[out] alarm_tm Time at which the next alarm will fire.
+ * @param[in] now Earliest time that should be written into *alarm_tm.
+ *
+ * @return Zero if no alarms are scheduled; non-zero 'clientreg' value
+ *   identifying the first alarm that will fire if one or more alarms are
+ *   scheduled.
+ */
 int
-get_next_alarm_delay_time(struct timeval *delta)
+netsnmp_get_next_alarm_time(struct timeval *alarm_tm, const struct timeval *now)
 {
     struct snmp_alarm *sa_ptr;
-    struct timeval  t_now;
 
     sa_ptr = sa_find_next();
 
     if (sa_ptr) {
-        gettimeofday(&t_now, NULL);
-
-        if (timercmp(&t_now, &sa_ptr->t_next, >)) {
-            /*
-             * Time has already passed.  Return the smallest possible amount of
-             * time.  
-             */
-            delta->tv_sec = 0;
-            delta->tv_usec = 1;
-            return sa_ptr->clientreg;
-        } else {
-            /*
-             * Time is still in the future.  
-             */
-            NETSNMP_TIMERSUB(&sa_ptr->t_next, &t_now, delta);
-
-            return sa_ptr->clientreg;
-        }
+        netsnmp_assert(alarm_tm);
+        netsnmp_assert(timerisset(&sa_ptr->t_next));
+        if (timercmp(&sa_ptr->t_next, now, >))
+            *alarm_tm = sa_ptr->t_next;
+        else
+            *alarm_tm = *now;
+        return sa_ptr->clientreg;
+    } else {
+        return 0;
     }
+}
 
-    /*
-     * Nothing Left.  
-     */
-    return 0;
+/**
+ * Get the time until the next alarm will fire.
+ *
+ * @param[out] delta Time until the next alarm.
+ *
+ * @return Zero if no alarms are scheduled; non-zero 'clientreg' value
+ *   identifying the first alarm that will fire if one or more alarms are
+ *   scheduled.
+ */
+int
+get_next_alarm_delay_time(struct timeval *delta)
+{
+    struct timeval t_now, alarm_tm;
+    int res;
+
+    gettimeofday(&t_now, NULL);
+    res = netsnmp_get_next_alarm_time(&alarm_tm, &t_now);
+    if (res)
+        NETSNMP_TIMERSUB(&alarm_tm, &t_now, delta);
+    return res;
 }
 
 
@@ -328,10 +333,8 @@ set_an_alarm(void)
 # ifdef HAVE_SETITIMER
         struct itimerval it;
 
-        it.it_value.tv_sec = delta.tv_sec;
-        it.it_value.tv_usec = delta.tv_usec;
-        it.it_interval.tv_sec = 0;
-        it.it_interval.tv_usec = 0;
+        it.it_value = delta;
+        timerclear(&it.it_interval);
 
         signal(SIGALRM, alarm_handler);
         setitimer(ITIMER_REAL, &it, NULL);
@@ -452,8 +455,7 @@ snmp_alarm_register_hr(struct timeval t, unsigned int flags,
         return 0;
     }
 
-    (*s)->t.tv_sec = t.tv_sec;
-    (*s)->t.tv_usec = t.tv_usec;
+    (*s)->t = t;
     (*s)->flags = flags;
     (*s)->clientarg = cd;
     (*s)->thecallback = cb;

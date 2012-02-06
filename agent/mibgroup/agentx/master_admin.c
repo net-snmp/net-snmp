@@ -64,7 +64,6 @@ int
 open_agentx_session(netsnmp_session * session, netsnmp_pdu *pdu)
 {
     netsnmp_session *sp;
-    struct timeval  now;
 
     DEBUGMSGTL(("agentx/master", "open %8p\n", session));
     sp = (netsnmp_session *) malloc(sizeof(netsnmp_session));
@@ -104,8 +103,7 @@ open_agentx_session(netsnmp_session * session, netsnmp_pdu *pdu)
                                                  name_length);
     sp->securityAuthProtoLen = pdu->variables->name_length;
     sp->securityName = strdup((char *) pdu->variables->val.string);
-    gettimeofday(&now, NULL);
-    sp->engineTime = calculate_sectime_diff(&now, netsnmp_get_agent_starttime());
+    sp->engineTime = (netsnmp_get_agent_runtime() + 50) / 100;
 
     sp->subsession = session;   /* link back to head */
     sp->flags |= SNMP_FLAGS_SUBSESSION;
