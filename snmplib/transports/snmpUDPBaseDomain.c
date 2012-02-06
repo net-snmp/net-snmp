@@ -186,7 +186,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     m.msg_iovlen	= 1;
     m.msg_flags		= 0;
 
-    if (srcip) {
+    if (srcip && srcip->s_addr != INADDR_ANY) {
         struct cmsghdr *cm;
 
         DEBUGMSGTL(("udpbase:sendto", "sending from %s\n", inet_ntoa(*srcip)));
