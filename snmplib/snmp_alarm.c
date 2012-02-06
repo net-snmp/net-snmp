@@ -163,7 +163,7 @@ snmp_alarm_unregister(unsigned int clientreg)
         DEBUGMSGTL(("snmp_alarm", "unregistered alarm %d\n", 
 		    sa_ptr->clientreg));
         /*
-         * Note:  do not free the clientarg, its the clients responsibility 
+         * Note: do not free the clientarg, it's the client's responsibility 
          */
         free(sa_ptr);
     } else {
