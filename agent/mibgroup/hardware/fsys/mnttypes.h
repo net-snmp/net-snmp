@@ -136,6 +136,9 @@
 #ifndef MNTTYPE_LOFS
 #define MNTTYPE_LOFS     "lofs"
 #endif
+#ifndef MNTTYPE_OCFS2
+#define MNTTYPE_OCFS2    "ocfs2"
+#endif
 
 /*
  *  File systems to skip
