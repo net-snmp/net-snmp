@@ -303,9 +303,9 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
                     continue;
 		}
 		status = (cache_entry->enabled ?
-	                   (cache_entry->timestamp ?
-                             (!atime_ready(cache_entry->timestamp,
-                                          1000*cache_entry->timeout) ?
+	                   (cache_entry->timestampM ?
+                             (!netsnmp_ready_monotonic(cache_entry->timestampM,
+                                                       1000*cache_entry->timeout) ?
 	                        NSCACHE_STATUS_ACTIVE:
 	                        NSCACHE_STATUS_EXPIRED) :
 	                      NSCACHE_STATUS_EMPTY) :
@@ -413,8 +413,8 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
                         break;
 		    case NSCACHE_STATUS_EMPTY:
                         cache_entry->free_cache(cache_entry, cache_entry->magic);
-                        free(cache_entry->timestamp);
-                        cache_entry->timestamp = NULL;
+                        free(cache_entry->timestampM);
+                        cache_entry->timestampM = NULL;
                         break;
 		}
 	        break;

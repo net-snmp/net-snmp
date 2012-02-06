@@ -42,7 +42,7 @@ extern          "C" {
         int      valid;
         char     expired;
         int      timeout;	/* Length of time the cache is valid (in s) */
-        marker_t timestamp;	/* When the cache was last loaded */
+        marker_t timestampM;	/* When the cache was last loaded */
         u_long   timer_id;      /* periodic timer id */
 
         NetsnmpCacheLoad *load_cache;

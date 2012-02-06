@@ -78,8 +78,8 @@ typedef struct request_list {
     void           *cb_data;        /* user callback data per request (NULL if unused) */
     int             retries;        /* Number of retries */
     u_long          timeout;        /* length to wait for timeout */
-    struct timeval  time;   /* Time this request was made */
-    struct timeval  expire; /* time this request is due to expire */
+    struct timeval  timeM;   /* Time this request was made [monotonic clock] */
+    struct timeval  expireM; /* Time this request is due to expire [monotonic clock]. */
     struct snmp_session *session;
     netsnmp_pdu    *pdu;    /* The pdu for this request
 			     * (saved so it can be retransmitted */

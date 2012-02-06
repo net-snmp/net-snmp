@@ -82,29 +82,24 @@ init_snmp_alarm(void)
 void
 sa_update_entry(struct snmp_alarm *a)
 {
-    if (!timerisset(&a->t_last)) {
-        struct timeval  t_now;
+    if (!timerisset(&a->t_lastM)) {
         /*
-         * Never been called yet, call time `t' from now.  
+         * First call of sa_update_entry() for alarm a: set t_lastM and t_nextM.
          */
-        gettimeofday(&t_now, NULL);
-
-        a->t_last = t_now;
-
-        NETSNMP_TIMERADD(&t_now, &a->t, &a->t_next);
-    } else if (!timerisset(&a->t_next)) {
+        netsnmp_get_monotonic_clock(&a->t_lastM);
+        NETSNMP_TIMERADD(&a->t_lastM, &a->t, &a->t_nextM);
+    } else if (!timerisset(&a->t_nextM)) {
         /*
          * We've been called but not reset for the next call.  
          */
         if (a->flags & SA_REPEAT) {
-            if (!timerisset(&a->t)) {
+            if (timerisset(&a->t)) {
+                NETSNMP_TIMERADD(&a->t_lastM, &a->t, &a->t_nextM);
+            } else {
                 DEBUGMSGTL(("snmp_alarm",
                             "update_entry: illegal interval specified\n"));
                 snmp_alarm_unregister(a->clientreg);
-                return;
             }
-
-            NETSNMP_TIMERADD(&a->t_last, &a->t, &a->t_next);
         } else {
             /*
              * Single time call, remove it.  
@@ -177,22 +172,12 @@ struct snmp_alarm *
 sa_find_next(void)
 {
     struct snmp_alarm *a, *lowest = NULL;
-    struct timeval  t_now;
 
-    gettimeofday(&t_now, NULL);
+    for (a = thealarms; a != NULL; a = a->next)
+        if (!(a->flags & SA_FIRED)
+            && (lowest == NULL || timercmp(&a->t_nextM, &lowest->t_nextM, <)))
+            lowest = a;
 
-    for (a = thealarms; a != NULL; a = a->next) {
-        if (!(a->flags & SA_FIRED)) {
-            /* check for time delta skew */
-            if ((a->t_next.tv_sec - t_now.tv_sec) > a->t.tv_sec) {
-                DEBUGMSGTL(("time_skew", "Time delta too big (%ld seconds), should be %ld seconds - fixing\n",
-		    (long)(a->t_next.tv_sec - t_now.tv_sec), (long)a->t.tv_sec));
-                NETSNMP_TIMERADD(&t_now, &a->t, &a->t_next);
-            }
-            if (lowest == NULL || timercmp(&a->t_next, &lowest->t_next, <))
-                lowest = a;
-       }
-    }
     return lowest;
 }
 
@@ -212,8 +197,7 @@ sa_find_specific(unsigned int clientreg)
 void
 run_alarms(void)
 {
-    int             done = 0;
-    struct snmp_alarm *a = NULL;
+    struct snmp_alarm *a;
     unsigned int    clientreg;
     struct timeval  t_now;
 
@@ -222,31 +206,27 @@ run_alarms(void)
      * call until all events are finally in the future again.  
      */
 
-    while (!done) {
-        if ((a = sa_find_next()) == NULL) {
+    while ((a = sa_find_next()) != NULL) {
+        netsnmp_get_monotonic_clock(&t_now);
+
+        if (timercmp(&a->t_nextM, &t_now, >))
             return;
-        }
 
-        gettimeofday(&t_now, NULL);
+        clientreg = a->clientreg;
+        a->flags |= SA_FIRED;
+        DEBUGMSGTL(("snmp_alarm", "run alarm %d\n", clientreg));
+        (*(a->thecallback)) (clientreg, a->clientarg);
+        DEBUGMSGTL(("snmp_alarm", "alarm %d completed\n", clientreg));
 
-        if (timercmp(&a->t_next, &t_now, <)) {
-            clientreg = a->clientreg;
-            a->flags |= SA_FIRED;
-            DEBUGMSGTL(("snmp_alarm", "run alarm %d\n", clientreg));
-            (*(a->thecallback)) (clientreg, a->clientarg);
-            DEBUGMSGTL(("snmp_alarm", "alarm %d completed\n", clientreg));
-
-            if ((a = sa_find_specific(clientreg)) != NULL) {
-                a->t_last = t_now;
-                timerclear(&a->t_next);
-                a->flags &= ~SA_FIRED;
-                sa_update_entry(a);
-            } else {
-                DEBUGMSGTL(("snmp_alarm", "alarm %d deleted itself\n",
-                            clientreg));
-            }
+        a = sa_find_specific(clientreg);
+        if (a) {
+            a->t_lastM = t_now;
+            timerclear(&a->t_nextM);
+            a->flags &= ~SA_FIRED;
+            sa_update_entry(a);
         } else {
-            done = 1;
+            DEBUGMSGTL(("snmp_alarm", "alarm %d deleted itself\n",
+                        clientreg));
         }
     }
 }
@@ -281,9 +261,9 @@ netsnmp_get_next_alarm_time(struct timeval *alarm_tm, const struct timeval *now)
 
     if (sa_ptr) {
         netsnmp_assert(alarm_tm);
-        netsnmp_assert(timerisset(&sa_ptr->t_next));
-        if (timercmp(&sa_ptr->t_next, now, >))
-            *alarm_tm = sa_ptr->t_next;
+        netsnmp_assert(timerisset(&sa_ptr->t_nextM));
+        if (timercmp(&sa_ptr->t_nextM, now, >))
+            *alarm_tm = sa_ptr->t_nextM;
         else
             *alarm_tm = *now;
         return sa_ptr->clientreg;
@@ -307,7 +287,7 @@ get_next_alarm_delay_time(struct timeval *delta)
     struct timeval t_now, alarm_tm;
     int res;
 
-    gettimeofday(&t_now, NULL);
+    netsnmp_get_monotonic_clock(&t_now);
     res = netsnmp_get_next_alarm_time(&alarm_tm, &t_now);
     if (res)
         NETSNMP_TIMERSUB(&alarm_tm, &t_now, delta);

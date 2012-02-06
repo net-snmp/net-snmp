@@ -4962,7 +4962,7 @@ _sess_async_send(void *sessp,
             return 0;
         }
 
-        gettimeofday(&tv, (struct timezone *) 0);
+        netsnmp_get_monotonic_clock(&tv);
         rp->pdu = pdu;
         rp->request_id = pdu->reqid;
         rp->message_id = pdu->msgid;
@@ -4974,11 +4974,11 @@ _sess_async_send(void *sessp,
         } else {
             rp->timeout = session->timeout;
         }
-        rp->time = tv;
+        rp->timeM = tv;
         tv.tv_usec += rp->timeout;
         tv.tv_sec += tv.tv_usec / 1000000L;
         tv.tv_usec %= 1000000L;
-        rp->expire = tv;
+        rp->expireM = tv;
 
         /*
          * XX lock should be per session ! 
@@ -6048,9 +6048,9 @@ snmp_sess_select_info2_flags(void *sessp, int *numfds,
             requests++;
             for (rp = slp->internal->requests; rp; rp = rp->next_request) {
                 if (!timerisset(&earliest)
-                    || (timerisset(&rp->expire)
-                        && timercmp(&rp->expire, &earliest, <))) {
-                    earliest = rp->expire;
+                    || (timerisset(&rp->expireM)
+                        && timercmp(&rp->expireM, &earliest, <))) {
+                    earliest = rp->expireM;
                     DEBUGMSG(("verbose:sess_select","(to in %d.%06d sec) ",
                                (int)earliest.tv_sec, (int)earliest.tv_usec));
                 }
@@ -6067,7 +6067,7 @@ snmp_sess_select_info2_flags(void *sessp, int *numfds,
     }
     DEBUGMSG(("sess_select", "\n"));
 
-    gettimeofday(&now, NULL);
+    netsnmp_get_monotonic_clock(&now);
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_ALARM_DONT_USE_SIG) &&
@@ -6231,13 +6231,13 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         snmp_set_detail(strerror(errno));
         return -1;
     } else {
-        gettimeofday(&now, (struct timezone *) 0);
+        netsnmp_get_monotonic_clock(&now);
         tv = now;
-        rp->time = tv;
+        rp->timeM = tv;
         tv.tv_usec += rp->timeout;
         tv.tv_sec += tv.tv_usec / 1000000L;
         tv.tv_usec %= 1000000L;
-        rp->expire = tv;
+        rp->expireM = tv;
     }
     return 0;
 }
@@ -6263,7 +6263,7 @@ snmp_sess_timeout(void *sessp)
         return;
     }
 
-    gettimeofday(&now, (struct timezone *) 0);
+    netsnmp_get_monotonic_clock(&now);
 
     /*
      * For each request outstanding, check to see if it has expired.
@@ -6277,7 +6277,7 @@ snmp_sess_timeout(void *sessp)
             freeme = NULL;
         }
 
-        if ((timercmp(&rp->expire, &now, <))) {
+        if ((timercmp(&rp->expireM, &now, <))) {
             if ((sptr = find_sec_mod(rp->pdu->securityModel)) != NULL &&
                 sptr->pdu_timeout != NULL) {
                 /*

@@ -1050,7 +1050,7 @@ Route_Scan_Reload(void)
     static time_t   Time_Of_Last_Reload;
     struct timeval  now;
 
-    gettimeofday(&now, (struct timezone *) 0);
+    netsnmp_get_monotonic_clock(&now);
     if (Time_Of_Last_Reload + CACHE_TIME > now.tv_sec)
         return;
     Time_Of_Last_Reload = now.tv_sec;
@@ -1197,7 +1197,7 @@ Route_Scan_Reload(void)
     struct timeval  now;
     int             hashsize;
 
-    gettimeofday(&now, (struct timezone *) 0);
+    netsnmp_get_monotonic_clock(&now);
     if (Time_Of_Last_Reload + CACHE_TIME > now.tv_sec)
         return;
     Time_Of_Last_Reload = now.tv_sec;
@@ -1312,7 +1312,7 @@ Route_Scan_Reload(void)
     static time_t   Time_Of_Last_Reload;
     struct timeval  now;
 
-    gettimeofday(&now, (struct timezone *) 0);
+    netsnmp_get_monotonic_clock(&now);
     if (Time_Of_Last_Reload + CACHE_TIME > now.tv_sec)
         return;
     Time_Of_Last_Reload = now.tv_sec;
@@ -1513,7 +1513,7 @@ var_ipRouteEntry(struct variable *vp,
          */
         route_row = (PMIB_IPFORWARDROW) malloc(sizeof(MIB_IPFORWARDROW));
     }
-    gettimeofday(&now, (struct timezone *) 0);
+    netsnmp_get_monotonic_clock(&now);
     if ((rtsize <= 1) || (Time_Of_Last_Reload + 5 <= now.tv_sec))
         Save_Valid = 0;
     else

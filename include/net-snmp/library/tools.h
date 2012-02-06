@@ -281,12 +281,18 @@ extern          "C" {
     NETSNMP_IMPORT
     void            atime_setMarker(marker_t pm);
     NETSNMP_IMPORT
+    void            netsnmp_get_monotonic_clock(struct timeval* tv);
+    NETSNMP_IMPORT
+    void            netsnmp_set_monotonic_marker(marker_t *pm);
+    NETSNMP_IMPORT
     long            atime_diff(const_marker_t first, const_marker_t second);
     u_long          uatime_diff(const_marker_t first, const_marker_t second);       /* 1/1000th sec */
     NETSNMP_IMPORT
     u_long          uatime_hdiff(const_marker_t first, const_marker_t second);      /* 1/100th sec */
     NETSNMP_IMPORT
     int             atime_ready(const_marker_t pm, int delta_ms);
+    NETSNMP_IMPORT
+    int             netsnmp_ready_monotonic(const_marker_t pm, int delta_ms);
     int             uatime_ready(const_marker_t pm, unsigned int delta_ms);
 
     int             marker_tticks(const_marker_t pm);

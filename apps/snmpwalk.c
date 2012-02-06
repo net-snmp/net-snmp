@@ -298,7 +298,7 @@ main(int argc, char *argv[])
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_WALK_TIME_RESULTS))
-        gettimeofday(&tv1, NULL);
+        netsnmp_get_monotonic_clock(&tv1);
     while (running) {
         /*
          * create PDU for GETNEXT request and add object name to request 
@@ -310,11 +310,11 @@ main(int argc, char *argv[])
          * do the request 
          */
         if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_WALK_TIME_RESULTS_SINGLE))
-            gettimeofday(&tv_a, NULL);
+            netsnmp_get_monotonic_clock(&tv_a);
         status = snmp_synch_response(ss, pdu, &response);
         if (status == STAT_SUCCESS) {
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_WALK_TIME_RESULTS_SINGLE))
-                gettimeofday(&tv_b, NULL);
+                netsnmp_get_monotonic_clock(&tv_b);
             if (response->errstat == SNMP_ERR_NOERROR) {
                 /*
                  * check resulting variables 
@@ -402,7 +402,7 @@ main(int argc, char *argv[])
     }
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_WALK_TIME_RESULTS))
-        gettimeofday(&tv2, NULL);
+        netsnmp_get_monotonic_clock(&tv2);
 
     if (numprinted == 0 && status == STAT_SUCCESS) {
         /*

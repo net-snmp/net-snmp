@@ -873,8 +873,11 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 
 
 /**
- * create a new time marker.
- * NOTE: Caller must free time marker when no longer needed.
+ * Create a new real-time marker.
+ *
+ * \deprecated Use netsnmp_set_monotonic_marker() instead.
+ *
+ * @note Caller must free time marker when no longer needed.
  */
 marker_t
 atime_newMarker(void)
@@ -885,7 +888,8 @@ atime_newMarker(void)
 }
 
 /**
- * set a time marker.
+ * Set a time marker to the current value of the real-time clock.
+ * \deprecated Use netsnmp_set_monotonic_marker() instead.
  */
 void
 atime_setMarker(marker_t pm)
@@ -896,9 +900,88 @@ atime_setMarker(marker_t pm)
     gettimeofday((struct timeval *) pm, NULL);
 }
 
+/**
+ * Query the current value of the monotonic clock.
+ *
+ * Returns the current value of a monotonic clock if such a clock is provided by
+ * the operating system or the wall clock time if no such clock is provided by
+ * the operating system. A monotonic clock is a clock that is never adjusted
+ * backwards and that proceeds at the same rate as wall clock time.
+ *
+ * @param[out] tv Pointer to monotonic clock time.
+ */
+void netsnmp_get_monotonic_clock(struct timeval* tv)
+{
+#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+    struct timespec ts;
+    int res;
+
+    res = clock_gettime(CLOCK_MONOTONIC, &ts);
+    if (res >= 0) {
+        tv->tv_sec = ts.tv_sec;
+        tv->tv_usec = ts.tv_nsec / 1000;
+    } else {
+        netsnmp_assert(FALSE);
+        memset(tv, 0, sizeof(*tv));
+    }
+#elif defined(WIN32)
+    /*
+     * Windows: return tick count. Note: the rate at which the tick count
+     * increases is not adjusted by the time synchronization algorithm, so
+     * expect an error of <= 100 ppm for the rate at which this clock
+     * increases.
+     */
+    typedef ULONGLONG (WINAPI * pfGetTickCount64)(void);
+    static int s_initialized;
+    static pfGetTickCount64 s_pfGetTickCount64;
+    uint64_t now64;
+
+    if (!s_initialized) {
+        HMODULE hKernel32 = GetModuleHandle("kernel32");
+        s_pfGetTickCount64 =
+            (pfGetTickCount64) GetProcAddress(hKernel32, "GetTickCount64");
+        s_initialized = TRUE;
+    }
+
+    if (s_pfGetTickCount64) {
+        /* Windows Vista, Windows 2008 or any later Windows version */
+        now64 = (*s_pfGetTickCount64)();
+    } else {
+        /* Windows XP, Windows 2003 or any earlier Windows version */
+        static uint32_t s_wraps, s_last;
+        uint32_t now;
+
+        now = GetTickCount();
+        if (now < s_last)
+            s_wraps++;
+        s_last = now;
+        now64 = ((uint64_t)s_wraps << 32) | now;
+    }
+    tv->tv_sec = now64 / 1000;
+    tv->tv_usec = (now64 % 1000) * 1000;
+#else
+#error Not sure how to query a monotonically increasing clock on your system. \
+Please report this to net-snmp-coders@lists.sourceforge.net.
+    gettimeofday(tv, NULL);
+#endif
+}
+
+/**
+ * Set a time marker to the current value of the monotonic clock.
+ */
+void
+netsnmp_set_monotonic_marker(marker_t *pm)
+{
+    if (!*pm)
+        *pm = malloc(sizeof(struct timeval));
+    if (*pm)
+        netsnmp_get_monotonic_clock(*pm);
+}
 
 /**
  * Returns the difference (in msec) between the two markers
+ *
+ * \deprecated Don't use in new code.
  */
 long
 atime_diff(const_marker_t first, const_marker_t second)
@@ -912,6 +995,8 @@ atime_diff(const_marker_t first, const_marker_t second)
 
 /**
  * Returns the difference (in u_long msec) between the two markers
+ *
+ * \deprecated Don't use in new code.
  */
 u_long
 uatime_diff(const_marker_t first, const_marker_t second)
@@ -926,6 +1011,8 @@ uatime_diff(const_marker_t first, const_marker_t second)
 /**
  * Returns the difference (in u_long 1/100th secs) between the two markers
  * (functionally this is what sysUpTime needs)
+ *
+ * \deprecated Don't use in new code.
  */
 u_long
 uatime_hdiff(const_marker_t first, const_marker_t second)
@@ -939,6 +1026,8 @@ uatime_hdiff(const_marker_t first, const_marker_t second)
 /**
  * Test: Has (marked time plus delta) exceeded current time ?
  * Returns 0 if test fails or cannot be tested (no marker).
+ *
+ * \deprecated Use netsnmp_ready_monotonic() instead.
  */
 int
 atime_ready(const_marker_t pm, int delta_ms)
@@ -962,6 +1051,8 @@ atime_ready(const_marker_t pm, int delta_ms)
 /**
  * Test: Has (marked time plus delta) exceeded current time ?
  * Returns 0 if test fails or cannot be tested (no marker).
+ *
+ * \deprecated Use netsnmp_ready_monotonic() instead.
  */
 int
 uatime_ready(const_marker_t pm, unsigned int delta_ms)
@@ -982,13 +1073,41 @@ uatime_ready(const_marker_t pm, unsigned int delta_ms)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_UATIME_READY */
 
+/**
+ * Is the current time past (marked time plus delta) ?
+ *
+ * @param[in] pm Pointer to marked time as obtained via
+ *   netsnmp_set_monotonic_marker().
+ * @param[in] delta_ms Time delta in milliseconds.
+ *
+ * @return pm != NULL && now >= (*pm + delta_ms)
+ */
+int
+netsnmp_ready_monotonic(const_marker_t pm, int delta_ms)
+{
+    struct timeval  now, diff, delta;
+
+    netsnmp_assert(delta_ms >= 0);
+    if (pm) {
+        netsnmp_get_monotonic_clock(&now);
+        NETSNMP_TIMERSUB(&now, (const struct timeval *) pm, &diff);
+        delta.tv_sec = delta_ms / 1000;
+        delta.tv_usec = (delta_ms % 1000) * 1000UL;
+        return timercmp(&diff, &delta, >=) ? TRUE : FALSE;
+    } else {
+        return FALSE;
+    }
+}
+
 
         /*
          * Time-related utility functions
          */
 
 /**
- * Return the number of timeTicks since the given marker 
+ * Return the number of timeTicks since the given marker
+ *
+ * \deprecated Don't use in new code.
  */
 int
 marker_tticks(const_marker_t pm)
@@ -1002,6 +1121,9 @@ marker_tticks(const_marker_t pm)
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_TIMEVAL_TTICKS
+/**
+ * \deprecated Don't use in new code.
+ */
 int
 timeval_tticks(const struct timeval *tv)
 {
