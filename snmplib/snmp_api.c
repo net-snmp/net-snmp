@@ -6294,7 +6294,7 @@ snmp_sess_select_info2_flags(void *sessp,
     struct session_list *slptest = (struct session_list *) sessp;
     struct session_list *slp, *next = NULL;
     netsnmp_request_list *rp;
-    struct timeval  now, earliest, delta;
+    struct timeval  now, earliest, alarm_tm;
     int             active = 0, requests = 0;
     int             next_alarm = 0;
 
@@ -6372,12 +6372,15 @@ snmp_sess_select_info2_flags(void *sessp,
     }
     DEBUGMSG(("sess_select", "\n"));
 
+    gettimeofday(&now, NULL);
+
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_ALARM_DONT_USE_SIG) &&
         !(flags & NETSNMP_SELECT_NOALARMS)) {
-        next_alarm = get_next_alarm_delay_time(&delta);
-        DEBUGMSGT(("sess_select","next alarm %d.%06d sec\n",
-                   (int)delta.tv_sec, (int)delta.tv_usec));
+        next_alarm = netsnmp_get_next_alarm_time(&alarm_tm, &now);
+        if (next_alarm)
+            DEBUGMSGT(("sess_select","next alarm at %ld.%06ld sec\n",
+                       (long)alarm_tm.tv_sec, (long)alarm_tm.tv_usec));
     }
     if (next_alarm == 0 && requests == 0) {
         /*
@@ -6388,51 +6391,18 @@ snmp_sess_select_info2_flags(void *sessp,
         return active;
     }
 
-    /*
-     * * Now find out how much time until the earliest timeout.  This
-     * * transforms earliest from an absolute time into a delta time, the
-     * * time left until the select should timeout.
-     */
-    gettimeofday(&now, (struct timezone *) 0);
-    /*
-     * Now = now;
-     */
+    if (next_alarm &&
+        (!timerisset(&earliest) || timercmp(&alarm_tm, &earliest, <)))
+        earliest = alarm_tm;
 
-    if (next_alarm) {
-        delta.tv_sec += now.tv_sec;
-        delta.tv_usec += now.tv_usec;
-        while (delta.tv_usec >= 1000000) {
-            delta.tv_usec -= 1000000;
-            delta.tv_sec += 1;
-        }
-        if (!timerisset(&earliest) ||
-            ((earliest.tv_sec > delta.tv_sec) ||
-             ((earliest.tv_sec == delta.tv_sec) &&
-              (earliest.tv_usec > delta.tv_usec)))) {
-            earliest.tv_sec = delta.tv_sec;
-            earliest.tv_usec = delta.tv_usec;
-        }
-    }
-
-    if (earliest.tv_sec < now.tv_sec) {
-        DEBUGMSGT(("verbose:sess_select","timer overdue\n"));
-        earliest.tv_sec = 0;
-        earliest.tv_usec = 0;
-    } else if (earliest.tv_sec == now.tv_sec) {
-        earliest.tv_sec = 0;
-        earliest.tv_usec = (earliest.tv_usec - now.tv_usec);
-        if (earliest.tv_usec < 0) {
-            earliest.tv_usec = 100;
-        }
-        DEBUGMSGT(("verbose:sess_select","timer due *real* soon. %d usec\n",
-                   (int)earliest.tv_usec));
+    NETSNMP_TIMERSUB(&earliest, &now, &earliest);
+    if (earliest.tv_sec < 0) {
+        time_t overdue_ms = -(earliest.tv_sec * 1000 + earliest.tv_usec / 1000);
+        if (overdue_ms >= 10)
+            DEBUGMSGT(("verbose:sess_select","timer overdue by %ld ms\n",
+                       overdue_ms));
+        timerclear(&earliest);
     } else {
-        earliest.tv_sec = (earliest.tv_sec - now.tv_sec);
-        earliest.tv_usec = (earliest.tv_usec - now.tv_usec);
-        if (earliest.tv_usec < 0) {
-            earliest.tv_sec--;
-            earliest.tv_usec = (1000000L + earliest.tv_usec);
-        }
         DEBUGMSGT(("verbose:sess_select","timer due in %d.%06d sec\n",
                    (int)earliest.tv_sec, (int)earliest.tv_usec));
     }
