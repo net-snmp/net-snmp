@@ -55,6 +55,8 @@ extern          "C" {
     NETSNMP_IMPORT void run_alarms(void);
     RETSIGTYPE      alarm_handler(int a);
     void            set_an_alarm(void);
+    int             netsnmp_get_next_alarm_time(struct timeval *alarm_tm,
+                                                const struct timeval *now);
     int             get_next_alarm_delay_time(struct timeval *delta);
 
 

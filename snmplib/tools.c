@@ -937,11 +937,11 @@ uatime_hdiff(const_marker_t first, const_marker_t second)
 }
 
 /**
- * Test: Has (marked time plus delta) exceeded current time (in msec) ?
+ * Test: Has (marked time plus delta) exceeded current time ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
 int
-atime_ready(const_marker_t pm, int deltaT)
+atime_ready(const_marker_t pm, int delta_ms)
 {
     marker_t        now;
     long            diff;
@@ -952,19 +952,19 @@ atime_ready(const_marker_t pm, int deltaT)
 
     diff = atime_diff(pm, now);
     free(now);
-    if (diff < deltaT)
+    if (diff < delta_ms)
         return 0;
 
     return 1;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_UATIME_READY
 /**
- * Test: Has (marked time plus delta) exceeded current time (in msec) ?
+ * Test: Has (marked time plus delta) exceeded current time ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
-#ifndef NETSNMP_FEATURE_REMOVE_UATIME_READY
 int
-uatime_ready(const_marker_t pm, unsigned int deltaT)
+uatime_ready(const_marker_t pm, unsigned int delta_ms)
 {
     marker_t        now;
     u_long          diff;
@@ -975,7 +975,7 @@ uatime_ready(const_marker_t pm, unsigned int deltaT)
 
     diff = uatime_diff(pm, now);
     free(now);
-    if (diff < deltaT)
+    if (diff < delta_ms)
         return 0;
 
     return 1;

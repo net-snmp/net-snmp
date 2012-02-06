@@ -664,8 +664,7 @@ agent_check_and_process(int block)
          * The caller does not want us to block at all.  
          */
 
-        tvp->tv_sec = 0;
-        tvp->tv_usec = 0;
+        timerclear(tvp);
     }
 
     count = netsnmp_large_fd_set_select(numfds, &fdset, NULL, NULL, tvp);
@@ -784,7 +783,7 @@ netsnmp_addrcache_add(const char *addr)
                 /*
                  * found a match
                  */
-                memcpy(&addrCache[i].lastHit, &now, sizeof(struct timeval));
+                addrCache[i].lastHit = now;
                 if (timercmp(&addrCache[i].lastHit, &aged, <))
 		    rc = 1; /* should have expired, so is new */
 		else
@@ -831,7 +830,7 @@ netsnmp_addrcache_add(const char *addr)
              */
             addrCache[unused].addr = strdup(addr);
             addrCache[unused].status = SNMP_ADDRCACHE_USED;
-            memcpy(&addrCache[unused].lastHit, &now, sizeof(struct timeval));
+            addrCache[unused].lastHit = now;
         }
         else { /* Otherwise, replace oldest entry */
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
@@ -841,7 +840,7 @@ netsnmp_addrcache_add(const char *addr)
             
             free(addrCache[oldest].addr);
             addrCache[oldest].addr = strdup(addr);
-            memcpy(&addrCache[oldest].lastHit, &now, sizeof(struct timeval));
+            addrCache[oldest].lastHit = now;
         }
         rc = 1;
     }
@@ -3658,9 +3657,13 @@ netsnmp_request_set_error_all( netsnmp_request_info *requests, int error)
     return result;
 }
 
-                /*
-                 * Return the value of 'sysUpTime' at the given marker 
-                 */
+/**
+ * Return the value of 'sysUpTime' at the given marker
+ *
+ * @note Use netsnmp_get_agent_runtime() instead of this function if you need
+ *   to know how much time elapsed since netsnmp_set_agent_starttime() has been
+ *   called.
+ */
 u_long
 netsnmp_marker_uptime(marker_t pm)
 {
@@ -3691,6 +3694,22 @@ const_marker_t
 netsnmp_get_agent_starttime(void)
 {
     return &starttime;
+}
+
+/**
+ * Report the time that elapsed since the agent start time in hundredths of a
+ * second.
+ *
+ * @see See also netsnmp_set_agent_starttime().
+ */
+uint64_t
+netsnmp_get_agent_runtime(void)
+{
+    struct timeval now, delta;
+
+    gettimeofday(&now, NULL);
+    NETSNMP_TIMERSUB(&now, &starttime, &delta);
+    return delta.tv_sec * (uint64_t)100 + delta.tv_usec / 10000;
 }
 
 /**
