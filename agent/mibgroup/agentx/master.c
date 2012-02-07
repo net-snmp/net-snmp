@@ -219,6 +219,9 @@ agentx_got_response(int operation,
     if (!cache) {
         DEBUGMSGTL(("agentx/master", "response too late on session %8p\n",
                     session));
+        /* response is too late, free the cache */
+        if (magic)
+            netsnmp_free_delegated_cache((netsnmp_delegated_cache*) magic);
         return 0;
     }
     requests = cache->requests;
@@ -606,6 +609,8 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     result = snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
     if (result == 0) {
         snmp_free_pdu(pdu);
+        if (cb_data)
+            netsnmp_free_delegated_cache((netsnmp_delegated_cache*) cb_data);
     }
 
     return SNMP_ERR_NOERROR;
