@@ -1519,7 +1519,7 @@ Interface_Scan_Init(void)
 
 #ifdef linux
     /*  disallow reloading of structures too often */
-    gettimeofday ( &et, ( struct timezone * ) 0 );  /*  get time-of-day */
+    netsnmp_get_monotonic_clock(&et);
     if ( et.tv_sec < LastLoad + MINLOADFREQ ) {     /*  only reload so often */
       ifnetaddr = ifnetaddr_list;                   /*  initialize pointer */
       return;

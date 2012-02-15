@@ -811,7 +811,7 @@ struct internal_mib_table {
     int             next_index; /* Index of the next free entry */
     int             current_index;      /* Index of the 'current' entry */
     int             cache_timeout;
-    marker_t        cache_marker;
+    marker_t        cache_markerM;
     RELOAD         *reload;     /* Routine to read in the data */
     COMPARE        *compare;    /* Routine to compare two entries */
     int             data_size;  /* Size of an individual entry */
@@ -832,7 +832,7 @@ Initialise_Table(int size, int timeout, RELOAD *reload, COMPARE *compare)
     t->next_index = 1;          /* Don't use index 0 */
     t->current_index = 1;
     t->cache_timeout = timeout;
-    t->cache_marker = NULL;
+    t->cache_markerM = NULL;
     t->reload = reload;
     t->compare = compare;
     t->data_size = size;
@@ -854,8 +854,9 @@ check_and_reload_table(struct internal_mib_table *table)
      * If the saved data is fairly recent,
      *    we don't need to reload it
      */
-    if (table->cache_marker &&
-        !(atime_ready(table->cache_marker, table->cache_timeout * 1000)))
+    if (table->cache_markerM &&
+        !(netsnmp_ready_monotonic(table->cache_markerM,
+                                  table->cache_timeout * 1000)))
         return 1;
 
 
@@ -865,15 +866,12 @@ check_and_reload_table(struct internal_mib_table *table)
      * N.B:  Update the cache marker *before* calling
      *   this routine, to avoid problems with recursion
      */
-    if (!table->cache_marker)
-        table->cache_marker = atime_newMarker();
-    else
-        atime_setMarker(table->cache_marker);
+    netsnmp_set_monotonic_marker(&table->cache_markerM);
 
     table->next_index = 1;
     if (table->reload((mib_table_t) table) < 0) {
-        free(table->cache_marker);
-        table->cache_marker = NULL;
+        free(table->cache_markerM);
+        table->cache_markerM = NULL;
         return 0;
     }
     table->current_index = 1;

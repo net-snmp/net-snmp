@@ -259,8 +259,8 @@ netsnmp_cache_free(netsnmp_cache *cache)
     if (cache->valid)
         _cache_free(cache);
 
-    if (cache->timestamp)
-	free(cache->timestamp);
+    if (cache->timestampM)
+	free(cache->timestampM);
 
     if (cache->rootoid)
         free(cache->rootoid);
@@ -521,10 +521,11 @@ netsnmp_cache_check_expired(netsnmp_cache *cache)
         return 0;
     if (cache->expired)
         return 1;
-    if(!cache->valid || (NULL == cache->timestamp) || (-1 == cache->timeout))
+    if(!cache->valid || (NULL == cache->timestampM) || (-1 == cache->timeout))
         cache->expired = 1;
     else
-        cache->expired = atime_ready(cache->timestamp, 1000 * cache->timeout);
+        cache->expired = netsnmp_ready_monotonic(cache->timestampM,
+                                                 1000 * cache->timeout);
     
     return cache->expired;
 }
@@ -670,7 +671,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         return SNMP_ERR_GENERR;
     }
     if (cache->flags & NETSNMP_CACHE_RESET_TIMER_ON_USE)
-        atime_setMarker(cache->timestamp);
+        netsnmp_set_monotonic_marker(&cache->timestampM);
     return SNMP_ERR_NOERROR;
 }
 
@@ -715,10 +716,7 @@ _cache_load( netsnmp_cache *cache )
                             0, release_cached_resources, NULL);
         cache_outstanding_valid = 1;
     }
-    if (cache->timestamp)
-        atime_setMarker(cache->timestamp);
-    else
-        cache->timestamp = atime_newMarker();
+    netsnmp_set_monotonic_marker(&cache->timestampM);
     DEBUGMSGT(("helper:cache_handler", " loaded (%d)\n", cache->timeout));
 
     return ret;

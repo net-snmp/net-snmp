@@ -7,6 +7,12 @@
 #########################################
 
 
+#
+# clock_gettime()
+#
+AC_SEARCH_LIBS([clock_gettime],[rt posix4])
+
+
 ##
 #   RPM checks
 #

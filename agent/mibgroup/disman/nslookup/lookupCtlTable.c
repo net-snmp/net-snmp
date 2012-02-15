@@ -537,9 +537,9 @@ run_lookup(struct lookupTable_data *item)
             return;
         }
 
-        gettimeofday(&tpstart, NULL);
+        netsnmp_get_monotonic_clock(&tpstart);
         lookup = netsnmp_gethostbyaddr(&addr_in, sizeof(addr_in), AF_INET);
-        gettimeofday(&tpend, NULL);
+        netsnmp_get_monotonic_clock(&tpend);
         timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
         timeuse /= 1000;
@@ -587,9 +587,9 @@ run_lookup(struct lookupTable_data *item)
         struct addrinfo hints = { 0, AF_INET6, SOCK_DGRAM };
 #endif
 
-        gettimeofday(&tpstart, NULL);
+        netsnmp_get_monotonic_clock(&tpstart);
         lookup = netsnmp_gethostbyname(address);
-        gettimeofday(&tpend, NULL);
+        netsnmp_get_monotonic_clock(&tpend);
         timeuse4 = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
         if (lookup == NULL) {
@@ -629,9 +629,9 @@ run_lookup(struct lookupTable_data *item)
         }
 
 #if HAVE_GETADDRINFO
-        gettimeofday(&tpstart, NULL);
+        netsnmp_get_monotonic_clock(&tpstart);
         res = netsnmp_getaddrinfo(address, NULL, &hints, &ais);
-        gettimeofday(&tpend, NULL);
+        netsnmp_get_monotonic_clock(&tpend);
         timeuse6 = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
 
@@ -679,9 +679,9 @@ run_lookup(struct lookupTable_data *item)
             freeaddrinfo(ais);
         }
 #elif HAVE_GETHOSTBYNAME2
-        gettimeofday(&tpstart, NULL);
+        netsnmp_get_monotonic_clock(&tpstart);
         lookup = gethostbyname2(address, AF_INET6);
-        gettimeofday(&tpend, NULL);
+        netsnmp_get_monotonic_clock(&tpend);
         timeuse6 = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
 
@@ -748,9 +748,9 @@ run_lookup(struct lookupTable_data *item)
         else
             DEBUGMSGTL(("lookupCtlTable", "error! \n"));
 
-        gettimeofday(&tpstart, NULL);
+        netsnmp_get_monotonic_clock(&tpstart);
         lookup = netsnmp_gethostbyaddr(&addr_in6, sizeof(addr_in6), AF_INET6);
-        gettimeofday(&tpend, NULL);
+        netsnmp_get_monotonic_clock(&tpend);
         timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
         timeuse /= 1000;

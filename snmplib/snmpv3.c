@@ -87,18 +87,6 @@ static unsigned char *oldEngineID = NULL;
 static size_t   oldEngineIDLength = 0;
 static struct timeval snmpv3starttime;
 
-/* this is probably an over-kill ifdef, but why not */
-#if defined(HAVE_SYS_TIMES_H) && defined(HAVE_UNISTD_H) && defined(HAVE_TIMES) && defined(_SC_CLK_TCK) && defined(HAVE_SYSCONF) && defined(UINT_MAX)
-
-#define SNMP_USE_TIMES 1
-
-static clock_t snmpv3startClock;
-static long clockticks = 0;
-static unsigned int lastcalltime = 0;
-static unsigned int wrapcounter = 0;
-
-#endif /* times() tests */
-
 #if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
 static int      getHwAddress(const char *networkDevice, char *addressOut);
 #endif
@@ -884,19 +872,7 @@ get_enginetime_alarm(unsigned int regnum, void *clientargs)
 void
 init_snmpv3(const char *type)
 {
-#if SNMP_USE_TIMES
-  struct tms dummy;
-
-  /* fixme: -1 is fault code... */
-  snmpv3startClock = times(&dummy);
-
-  /* remember how many ticks per second there are, since times() returns this */
-
-  clockticks = sysconf(_SC_CLK_TCK);
-
-#endif /* SNMP_USE_TIMES */
-
-    gettimeofday(&snmpv3starttime, NULL);
+    netsnmp_get_monotonic_clock(&snmpv3starttime);
 
     if (!type)
         type = "__snmpapp__";
@@ -1183,41 +1159,33 @@ snmpv3_generate_engineID(size_t * length)
 
 }                               /* end snmpv3_generate_engineID() */
 
-/*
- * snmpv3_local_snmpEngineTime(): return the number of seconds since the
- * snmpv3 engine last incremented engine_boots 
+/**
+ * Return the value of snmpEngineTime. According to RFC 3414 snmpEngineTime
+ * is a 31-bit counter. engineBoots must be incremented every time that
+ * counter wraps around.
+ *
+ * @see See also <a href="http://tools.ietf.org/html/rfc3414">RFC 3414</a>.
+ *
+ * @note It is assumed that this function is called at least once every
+ *   2**31 seconds.
  */
 u_long
 snmpv3_local_snmpEngineTime(void)
 {
-#ifdef SNMP_USE_TIMES
-  struct tms dummy;
-  clock_t now = times(&dummy);
-  /* fixme: -1 is fault code... */
-  unsigned int result;
-
-  if (now < snmpv3startClock) {
-      result = UINT_MAX - (snmpv3startClock - now);
-  } else {
-      result = now - snmpv3startClock;
-  }
-  if (result < lastcalltime) {
-      /* wrapped */
-      wrapcounter++;
-  }
-  lastcalltime = result;
-  result =  (UINT_MAX/clockticks)*wrapcounter + result/clockticks;
-
-  return result;
-#else /* !SNMP_USE_TIMES */
 #ifdef NETSNMP_FEATURE_CHECKING
-  netsnmp_feature_require(calculate_sectime_diff)
+    netsnmp_feature_require(calculate_sectime_diff)
 #endif /* NETSNMP_FEATURE_CHECKING */
-    struct timeval  now;
 
-    gettimeofday(&now, NULL);
-    return calculate_sectime_diff(&now, &snmpv3starttime);
-#endif /* HAVE_SYS_TIMES_H */
+    static uint32_t last_engineTime;
+    struct timeval  now;
+    uint32_t engineTime;
+
+    netsnmp_get_monotonic_clock(&now);
+    engineTime = calculate_sectime_diff(&now, &snmpv3starttime) & 0x7fffffffL;
+    if (engineTime < last_engineTime)
+        engineBoots++;
+    last_engineTime = engineTime;
+    return engineTime;
 }
 
 
@@ -1289,18 +1257,17 @@ getHwAddress(const char *networkDevice, /* e.g. "eth0", "eth1" */
 #endif
 
 #ifdef NETSNMP_ENABLE_TESTING_CODE
-/*
- * snmpv3_set_engineBootsAndTime(): this function does not exist.  Go away. 
- */
-/*
- * It certainly should never be used, unless in a testing scenero,
- * which is why it was created 
+/**
+ * Set SNMPv3 engineBoots and start time.
+ *
+ * @note This function does not exist. Go away. It certainly should never be
+ *   used, unless in a testing scenario, which is why it was created
  */
 void
 snmpv3_set_engineBootsAndTime(int boots, int ttime)
 {
     engineBoots = boots;
-    gettimeofday(&snmpv3starttime, NULL);
+    netsnmp_get_monotonic_clock(&snmpv3starttime);
     snmpv3starttime.tv_sec -= ttime;
 }
 #endif

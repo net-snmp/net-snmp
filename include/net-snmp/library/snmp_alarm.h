@@ -15,11 +15,14 @@ extern          "C" {
 #define SA_FIRED 0x10          /* Being processed in run_alarms */
 
     struct snmp_alarm {
+        /** Alarm interval. Zero if single-shot. */
         struct timeval  t;
         unsigned int    flags;
         unsigned int    clientreg;
-        struct timeval  t_last;
-        struct timeval  t_next;
+        /** Last time the alarm fired [monotonic clock]. */
+        struct timeval  t_lastM;
+        /** Next time the alarm will fire [monotonic clock]. */
+        struct timeval  t_nextM;
         void           *clientarg;
         SNMPAlarmCallback *thecallback;
         struct snmp_alarm *next;
