@@ -1211,7 +1211,7 @@ snmpv3_local_snmpEngineTime(void)
   return result;
 #else /* !SNMP_USE_TIMES */
 #ifdef NETSNMP_FEATURE_CHECKING
-  netsnmp_feature_require(calculate_sectime_diff)
+    netsnmp_feature_require(calculate_sectime_diff)
 #endif /* NETSNMP_FEATURE_CHECKING */
     struct timeval  now;
 
