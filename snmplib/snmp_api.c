@@ -6094,8 +6094,8 @@ snmp_sess_select_info2_flags(void *sessp, int *numfds,
     if (earliest.tv_sec < 0) {
         time_t overdue_ms = -(earliest.tv_sec * 1000 + earliest.tv_usec / 1000);
         if (overdue_ms >= 10)
-            DEBUGMSGT(("verbose:sess_select","timer overdue by %ld ms\n",
-                       overdue_ms));
+            DEBUGMSGT(("verbose:sess_select","timer overdue by %lld ms\n",
+                       (long long) overdue_ms));
         timerclear(&earliest);
     } else {
         DEBUGMSGT(("verbose:sess_select","timer due in %d.%06d sec\n",
