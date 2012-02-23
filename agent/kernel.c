@@ -174,9 +174,6 @@ klookup(unsigned long off, char *target, int siz)
     if ((retsiz = klseek((off_t) off)) != off) {
         snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
         snmp_log_perror("klseek");
-#ifdef NETSNMP_EXIT_ON_BAD_KLREAD
-        exit(1);
-#endif
         return (0);
     }
     if ((retsiz = klread(target, siz)) != siz) {
@@ -188,9 +185,6 @@ klookup(unsigned long off, char *target, int siz)
             snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
             snmp_log_perror("klread");
         }
-#ifdef NETSNMP_EXIT_ON_BAD_KLREAD
-        exit(1);
-#endif
         return (0);
     }
     DEBUGMSGTL(("verbose:kernel:klookup", "klookup(%lx, %p, %d) succeeded", off, target, siz));
