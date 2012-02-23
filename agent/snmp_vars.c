@@ -74,6 +74,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/types.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
@@ -297,7 +298,7 @@ init_agent(const char *app)
 			   NETSNMP_DS_LIB_ALARM_DONT_USE_SIG, 1);
 
 #ifdef NETSNMP_CAN_USE_NLIST
-    init_kmem("/dev/kmem");
+    r = init_kmem("/dev/kmem") ? 0 : -EACCES;
 #endif
 
     setup_tree();
