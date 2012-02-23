@@ -301,6 +301,12 @@ netsnmp_sysctl_get_if_speed(char *name, u_int *speed,
     return *speed;
 }
 
+static void set_counter(struct counter64 *c, uint64_t v)
+{
+    c->low = (uint32_t)(v);
+    c->high = (v) >> 32;
+}
+
 /*
  *
  * @retval  0 success
@@ -458,22 +464,16 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX;
 
         /* get counters */
-        entry->stats.ibytes.low  = ifp->ifm_data.ifi_ibytes   & 0xffffffff;
-        entry->stats.ibytes.high = ifp->ifm_data.ifi_ibytes   >> 32;
-        entry->stats.iucast.low  = ifp->ifm_data.ifi_ipackets & 0xffffffff;
-        entry->stats.iucast.high = ifp->ifm_data.ifi_ipackets >> 32;
-        entry->stats.imcast.low  = ifp->ifm_data.ifi_imcasts  & 0xffffffff;
-        entry->stats.imcast.high = ifp->ifm_data.ifi_imcasts  >> 32;
+        set_counter(&entry->stats.ibytes, ifp->ifm_data.ifi_ibytes);
+        set_counter(&entry->stats.iucast, ifp->ifm_data.ifi_ipackets);
+        set_counter(&entry->stats.imcast, ifp->ifm_data.ifi_imcasts);
         entry->stats.ierrors = ifp->ifm_data.ifi_ierrors;
         entry->stats.idiscards = ifp->ifm_data.ifi_iqdrops;
         entry->stats.iunknown_protos = ifp->ifm_data.ifi_noproto;
 
-        entry->stats.obytes.low  = ifp->ifm_data.ifi_obytes   & 0xffffffff;
-        entry->stats.obytes.high = ifp->ifm_data.ifi_obytes   >> 32;
-        entry->stats.oucast.low  = ifp->ifm_data.ifi_opackets & 0xffffffff;
-        entry->stats.oucast.high = ifp->ifm_data.ifi_opackets >> 32;
-        entry->stats.omcast.low  = ifp->ifm_data.ifi_omcasts  & 0xffffffff;
-        entry->stats.omcast.high = ifp->ifm_data.ifi_omcasts  >> 32;
+        set_counter(&entry->stats.obytes, ifp->ifm_data.ifi_obytes);
+        set_counter(&entry->stats.oucast, ifp->ifm_data.ifi_opackets);
+        set_counter(&entry->stats.omcast, ifp->ifm_data.ifi_omcasts);
         entry->stats.oerrors = ifp->ifm_data.ifi_oerrors;
         entry->ns_flags |=  NETSNMP_INTERFACE_FLAGS_HAS_BYTES |
                             NETSNMP_INTERFACE_FLAGS_HAS_DROPS |
