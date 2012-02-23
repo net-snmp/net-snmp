@@ -916,7 +916,10 @@ main(int argc, char *argv[])
     }
 
     SOCK_STARTUP;
-    init_agent(app_name);        /* do what we need to do first. */
+    if (init_agent(app_name) != 0) {
+        snmp_log(LOG_ERR, "Agent initialization failed\n");
+        exit(1);
+    }
     init_mib_modules();
 
     /*
