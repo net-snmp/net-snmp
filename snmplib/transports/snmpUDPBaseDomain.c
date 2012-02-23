@@ -176,6 +176,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     struct iovec iov;
     struct msghdr m = { 0 };
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
+    int           rc;
 
     iov.iov_base = data;
     iov.iov_len  = len;
@@ -210,13 +211,9 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
 
-        {
-            errno = 0;
-            const int rc = sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
-
-            if (rc >= 0 || errno != EINVAL)
-                return rc;
-        }
+        rc = sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
+        if (rc >= 0 || errno != EINVAL)
+            return rc;
 
         /*
          * The error might be caused by broadcast srcip (i.e. we're responding
@@ -237,6 +234,13 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
         cm->cmsg_type = IP_SENDSRCADDR;
         memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
 #endif
+        rc = sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
+        if (rc >= 0 || errno != EINVAL)
+            return rc;
+
+        DEBUGMSGTL(("udpbase:sendto", "re-sending without source address\n"));
+        m.msg_control = NULL;
+        m.msg_controllen = 0;
     }
 
     return sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
