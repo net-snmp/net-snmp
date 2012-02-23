@@ -1,4 +1,7 @@
-/* UDP base transport support functions
+/**
+ * @file  snmpSocketBaseDomain.c
+ *
+ * @brief Socket support functions.
  */
 
 #include <net-snmp/net-snmp-config.h>
