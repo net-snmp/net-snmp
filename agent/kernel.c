@@ -54,18 +54,24 @@
 #if HAVE_KVM_H
 kvm_t *kd = NULL;
 
-/** Initialize the kernel memory support.
+/**
+ * Initialize the support for accessing kernel virtual memory.
+ *
+ * @return TRUE upon success; FALSE upon failure.
  */
-void
+int
 init_kmem(const char *file)
 {
+    int res = TRUE;
+
 #if HAVE_KVM_OPENFILES
     char            err[4096];
+
     kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, err);
-    if (kd == NULL && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					   NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+    if (!kd && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                       NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
         snmp_log(LOG_CRIT, "init_kmem: kvm_openfiles failed: %s\n", err);
-        exit(1);
+        res = FALSE;
     }
 #else
     kd = kvm_open(NULL, NULL, NULL, O_RDONLY, NULL);
@@ -73,9 +79,10 @@ init_kmem(const char *file)
 				       NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
         snmp_log(LOG_CRIT, "init_kmem: kvm_open failed: %s\n",
                  strerror(errno));
-        exit(1);
+        res = FALSE;
     }
 #endif                          /* HAVE_KVM_OPENFILES */
+    return res;
 }
 
 /** Reads kernel memory.
@@ -127,36 +134,40 @@ free_kmem(void)
 
 static off_t    klseek(off_t);
 static int      klread(char *, int);
-int             swap=0, mem=0, kmem=0;
+int             swap = -1, mem = -1, kmem = -1;
 
-/** Initialize the kernel memory support.
+/**
+ * Initialize the support for accessing kernel virtual memory.
+ *
+ * @return TRUE upon success; FALSE upon failure.
  */
-void
+int
 init_kmem(const char *file)
 {
     kmem = open(file, O_RDONLY);
     if (kmem < 0 && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					    NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
         snmp_log_perror(file);
-        exit(1);
     }
-    fcntl(kmem, F_SETFD, 1);
+    if (kmem >= 0)
+        fcntl(kmem, F_SETFD, 1/*FD_CLOEXEC*/);
     mem = open("/dev/mem", O_RDONLY);
     if (mem < 0 && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					   NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
         snmp_log_perror("/dev/mem");
-        exit(1);
     }
-    fcntl(mem, F_SETFD, 1);
+    if (mem >= 0)
+        fcntl(mem, F_SETFD, 1/*FD_CLOEXEC*/);
 #ifdef DMEM_LOC
     swap = open(DMEM_LOC, O_RDONLY);
     if (swap < 0 && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					    NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
         snmp_log_perror(DMEM_LOC);
-        exit(1);
     }
-    fcntl(swap, F_SETFD, 1);
+    if (swap >= 0)
+        fcntl(swap, F_SETFD, 1/*FD_CLOEXEC*/);
 #endif
+    return kmem >= 0 && mem >= 0 && swap >= 0;
 }
 
 /** @private
@@ -200,9 +211,6 @@ klookup(unsigned long off, char *target, int siz)
     if ((retsiz = klseek((off_t) off)) != off) {
         snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
         snmp_log_perror("klseek");
-#ifdef NETSNMP_EXIT_ON_BAD_KLREAD
-        exit(1);
-#endif
         return (0);
     }
     if ((retsiz = klread(target, siz)) != siz) {
@@ -214,9 +222,6 @@ klookup(unsigned long off, char *target, int siz)
             snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
             snmp_log_perror("klread");
         }
-#ifdef NETSNMP_EXIT_ON_BAD_KLREAD
-        exit(1);
-#endif
         return (0);
     }
     DEBUGMSGTL(("verbose:kernel:klookup", "klookup(%lx, %p, %d) succeeded", off, target, siz));
@@ -228,17 +233,17 @@ klookup(unsigned long off, char *target, int siz)
 void
 free_kmem(void)
 {
-    if (swap) {
-      close(swap);
-      swap = 0;
+    if (swap >= 0) {
+        close(swap);
+        swap = -1;
     }
-    if (mem) {
-      close(mem);
-      mem = 0;
+    if (mem >= 0) {
+        close(mem);
+        mem = -1;
     }
-    if (kmem) {
-      close(kmem);
-      kmem = 0;
+    if (kmem >= 0) {
+        close(kmem);
+        kmem = -1;
     }
 }
 
