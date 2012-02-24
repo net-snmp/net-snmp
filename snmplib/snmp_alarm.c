@@ -318,9 +318,8 @@ set_an_alarm(void)
 
         signal(SIGALRM, alarm_handler);
         setitimer(ITIMER_REAL, &it, NULL);
-        DEBUGMSGTL(("snmp_alarm", "schedule alarm %d in %lld.%03ld seconds\n",
-                    nextalarm, (long long) delta.tv_sec,
-                   (delta.tv_usec / 1000)));
+        DEBUGMSGTL(("snmp_alarm", "schedule alarm %d in %ld.%03ld seconds\n",
+                    nextalarm, (long) delta.tv_sec, (delta.tv_usec / 1000)));
 # else  /* HAVE_SETITIMER */
 #  ifdef SIGALRM
         signal(SIGALRM, alarm_handler);
@@ -446,9 +445,9 @@ snmp_alarm_register_hr(struct timeval t, unsigned int flags,
     sa_update_entry(*s);
 
     DEBUGMSGTL(("snmp_alarm",
-                "registered alarm %d, t = %lld.%03ld, flags=0x%02x\n",
-                (*s)->clientreg, (long long) (*s)->t.tv_sec,
-                ((*s)->t.tv_usec / 1000), (*s)->flags));
+                "registered alarm %d, t = %ld.%03ld, flags=0x%02x\n",
+                (*s)->clientreg, (long) (*s)->t.tv_sec, ((*s)->t.tv_usec / 1000),
+                (*s)->flags));
 
     if (start_alarms) {
         set_an_alarm();
