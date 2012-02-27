@@ -171,6 +171,7 @@ static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_pre_request;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_post_request;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_get_values;
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_check_objects;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_set_values;
@@ -180,6 +181,17 @@ static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_check_dependencies;
+
+NETSNMP_STATIC_INLINE int
+                _snmpNotifyFilterTable_undo_column(snmpNotifyFilterTable_rowreq_ctx *
+                                                   rowreq_ctx,
+                                                   netsnmp_variable_list *
+                                                   var, int column);
+#endif
+
+NETSNMP_STATIC_INLINE int
+                _snmpNotifyFilterTable_check_indexes(snmpNotifyFilterTable_rowreq_ctx *
+                                                     rowreq_ctx);
 
 snmpNotifyFilterTable_data *snmpNotifyFilterTable_allocate_data(void);
 
@@ -273,7 +285,7 @@ void
         _mfd_snmpNotifyFilterTable_post_request;
 
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -299,7 +311,7 @@ void
      */
     access_multiplexer->consistency_checks =
         _mfd_snmpNotifyFilterTable_check_dependencies;
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     /*************************************************
      *
@@ -315,10 +327,10 @@ void
                                             snmpNotifyFilterTable_oid,
                                             snmpNotifyFilterTable_oid_size,
                                             HANDLER_CAN_BABY_STEP
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
                                             | HANDLER_CAN_RWRITE
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
-            );
+#endif
+                                          );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR,
                  "error registering table snmpNotifyFilterTable\n");
@@ -332,21 +344,19 @@ void
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+    if (access_multiplexer->pre_request)
+        mfd_modes |= BABY_STEP_PRE_REQUEST;
+    if (access_multiplexer->post_request)
+        mfd_modes |= BABY_STEP_POST_REQUEST;
+
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if (access_multiplexer->object_syntax_checks)
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
-    if (access_multiplexer->pre_request)
-        mfd_modes |= BABY_STEP_PRE_REQUEST;
-    if (access_multiplexer->post_request)
-        mfd_modes |= BABY_STEP_POST_REQUEST;
-
-#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (access_multiplexer->undo_setup)
         mfd_modes |= BABY_STEP_UNDO_SETUP;
     if (access_multiplexer->undo_cleanup)
@@ -362,7 +372,7 @@ void
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -788,45 +798,6 @@ _mfd_snmpNotifyFilterTable_post_request(netsnmp_mib_handler *handler, netsnmp_ha
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_snmpNotifyFilterTable_post_request */
 
-NETSNMP_STATIC_INLINE int
-_snmpNotifyFilterTable_check_indexes(snmpNotifyFilterTable_rowreq_ctx *
-                                     rowreq_ctx)
-{
-    int             rc = SNMPERR_SUCCESS;
-
-    DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_check_indexes", "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-    /*
-     * check that the corresponding EXTERNAL row exists
-     */
-
-    /*
-     * (INDEX) snmpNotifyFilterProfileName(1)/SnmpAdminString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H
-     */
-    rc = snmpNotifyFilterTable_snmpNotifyFilterProfileName_check_index
-        (rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-
-    /*
-     * (INDEX) snmpNotifyFilterSubtree(1)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h
-     */
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = snmpNotifyFilterSubtree_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * if individual parts look ok, check them as a whole
-     */
-    return
-        snmpNotifyFilterTable_validate_index(snmpNotifyFilterTable_if_ctx.
-                                             user_ctx, rowreq_ctx);
-}                               /* _snmpNotifyFilterTable_check_indexes */
 
 /**
  * @internal
@@ -1096,7 +1067,47 @@ _mfd_snmpNotifyFilterTable_get_values(netsnmp_mib_handler *handler, netsnmp_hand
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_snmpNotifyFilterTable_get_values */
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+NETSNMP_STATIC_INLINE int
+_snmpNotifyFilterTable_check_indexes(snmpNotifyFilterTable_rowreq_ctx *
+                                     rowreq_ctx)
+{
+    int             rc = SNMPERR_SUCCESS;
+
+    DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_check_indexes", "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+    /*
+     * check that the corresponding EXTERNAL row exists
+     */
+
+    /*
+     * (INDEX) snmpNotifyFilterProfileName(1)/SnmpAdminString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H 
+     */
+    rc = snmpNotifyFilterTable_snmpNotifyFilterProfileName_check_index
+        (rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+
+    /*
+     * (INDEX) snmpNotifyFilterSubtree(1)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h 
+     */
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = snmpNotifyFilterSubtree_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * if individual parts look ok, check them as a whole
+     */
+    return
+        snmpNotifyFilterTable_validate_index(snmpNotifyFilterTable_if_ctx.
+                                             user_ctx, rowreq_ctx);
+}                               /* _snmpNotifyFilterTable_check_indexes */
+
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 /***********************************************************************
  *
  * SET processing
@@ -1852,7 +1863,7 @@ _mfd_snmpNotifyFilterTable_irreversible_commit(netsnmp_mib_handler
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_snmpNotifyFilterTable_irreversible_commit */
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
 /***********************************************************************
  *

@@ -235,13 +235,13 @@ _ipSystemStatsTable_initialize_interface(ipSystemStatsTable_registration *
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
-
     if (access_multiplexer->pre_request)
         mfd_modes |= BABY_STEP_PRE_REQUEST;
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
+    /* XXX - are these actually necessary? */
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
@@ -264,7 +264,7 @@ _ipSystemStatsTable_initialize_interface(ipSystemStatsTable_registration *
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -1196,6 +1196,7 @@ _mfd_ipSystemStatsTable_get_values(netsnmp_mib_handler *handler,
 }                               /* _mfd_ipSystemStatsTable_get_values */
 
 
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 /***********************************************************************
  *
  * SET processing
@@ -1205,6 +1206,8 @@ _mfd_ipSystemStatsTable_get_values(netsnmp_mib_handler *handler,
 /*
  * SET PROCESSING NOT APPLICABLE (per MIB or user setting)
  */
+#endif
+
 /***********************************************************************
  *
  * DATA ACCESS
