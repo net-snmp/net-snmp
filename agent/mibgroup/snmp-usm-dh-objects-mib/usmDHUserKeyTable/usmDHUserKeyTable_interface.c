@@ -132,6 +132,7 @@ static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_pre_request;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_post_request;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_get_values;
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_check_objects;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_set_values;
@@ -146,6 +147,7 @@ NETSNMP_STATIC_INLINE int
 _usmDHUserKeyTable_undo_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
                                                netsnmp_variable_list * var,
                                                int column);
+#endif
 
 /**
  * @internal
@@ -221,6 +223,7 @@ _usmDHUserKeyTable_initialize_interface(usmDHUserKeyTable_registration *
     access_multiplexer->post_request = _mfd_usmDHUserKeyTable_post_request;
 
 
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -244,6 +247,7 @@ _usmDHUserKeyTable_initialize_interface(usmDHUserKeyTable_registration *
      */
     access_multiplexer->consistency_checks =
         _mfd_usmDHUserKeyTable_check_dependencies;
+#endif
 
     /*************************************************
      *
@@ -257,8 +261,11 @@ _usmDHUserKeyTable_initialize_interface(usmDHUserKeyTable_registration *
         netsnmp_handler_registration_create("usmDHUserKeyTable", handler,
                                             usmDHUserKeyTable_oid,
                                             usmDHUserKeyTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP |
-                                            HANDLER_CAN_RWRITE);
+                                            HANDLER_CAN_BABY_STEP
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
+                                          | HANDLER_CAN_RWRITE
+#endif
+                                          );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering table usmDHUserKeyTable\n");
         return;
@@ -271,17 +278,18 @@ _usmDHUserKeyTable_initialize_interface(usmDHUserKeyTable_registration *
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
+    if (access_multiplexer->pre_request)
+        mfd_modes |= BABY_STEP_PRE_REQUEST;
+    if (access_multiplexer->post_request)
+        mfd_modes |= BABY_STEP_POST_REQUEST;
+
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if (access_multiplexer->object_syntax_checks)
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
-
-    if (access_multiplexer->pre_request)
-        mfd_modes |= BABY_STEP_PRE_REQUEST;
-    if (access_multiplexer->post_request)
-        mfd_modes |= BABY_STEP_POST_REQUEST;
 
     if (access_multiplexer->undo_setup)
         mfd_modes |= BABY_STEP_UNDO_SETUP;
@@ -298,6 +306,7 @@ _usmDHUserKeyTable_initialize_interface(usmDHUserKeyTable_registration *
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
+#endif
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -873,6 +882,7 @@ _mfd_usmDHUserKeyTable_get_values(netsnmp_mib_handler *handler,
 }                               /* _mfd_usmDHUserKeyTable_get_values */
 
 
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
 /***********************************************************************
  *
  * SET processing
@@ -1592,6 +1602,7 @@ _mfd_usmDHUserKeyTable_irreversible_commit(netsnmp_mib_handler *handler, netsnmp
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_usmDHUserKeyTable_irreversible_commit */
+#endif
 
 /***********************************************************************
  *
