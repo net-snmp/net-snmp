@@ -158,6 +158,14 @@ NETSNMP_SEARCH_LIBS(kstat_lookup, kstat,
         LNETSNMPLIBS)
 
 
+#
+#   librt
+#
+
+NETSNMP_SEARCH_LIBS(clock_gettime, rt, [AC_DEFINE([HAVE_CLOCK_GETTIME])],,,
+                    LNETSNMPLIBS)
+
+
 ##
 #   MIB-module-specific checks
 ##
