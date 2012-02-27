@@ -297,10 +297,10 @@ nsrollup() {
 	    fi
 
 	    $nsverbose rebasing our local changes on $branch
-	    git $mergeop origin/$branch
+	    MERGE_AUTOEDIT=no git $mergeop origin/$branch
 
 	    $nsverbose merging $nslastbranch into $branch
-	    $nsecho git merge --log $nslastbranch
+	    MERGE_AUTOEDIT=no $nsecho git merge --log $nslastbranch
 	    if [ $? != 0 ] ; then
 		echo ""
 		echo "---------------------------------------------"
@@ -376,7 +376,7 @@ nspull() {
     git fetch --all
     for branch in $nsbranches ; do
 	git checkout $branch
-	git $mergeop origin/$branch
+	MERGE_AUTOEDIT=no git $mergeop origin/$branch
 	if [ $? != 0 ] ; then
 	    echo "git $mergop failed; please fix first"
 	    return
