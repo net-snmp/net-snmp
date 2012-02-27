@@ -150,7 +150,7 @@ static Netsnmp_Node_Handler _mfd_ipAddressTable_pre_request;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_post_request;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_get_values;
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 static Netsnmp_Node_Handler _mfd_ipAddressTable_check_objects;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_set_values;
@@ -160,7 +160,15 @@ static Netsnmp_Node_Handler _mfd_ipAddressTable_commit;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_check_dependencies;
-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
+NETSNMP_STATIC_INLINE int
+                _ipAddressTable_undo_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
+                                            netsnmp_variable_list * var,
+                                            int column);
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
+
+NETSNMP_STATIC_INLINE int
+                _ipAddressTable_check_indexes(ipAddressTable_rowreq_ctx * rowreq_ctx);
 
 /**
  * @internal
@@ -235,7 +243,7 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
     access_multiplexer->post_request = _mfd_ipAddressTable_post_request;
 
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -259,7 +267,7 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
      */
     access_multiplexer->consistency_checks =
         _mfd_ipAddressTable_check_dependencies;
-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     /*************************************************
      *
@@ -273,8 +281,11 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
         netsnmp_handler_registration_create("ipAddressTable", handler,
                                             ipAddressTable_oid,
                                             ipAddressTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP |
-                                            HANDLER_CAN_RWRITE);
+                                            HANDLER_CAN_BABY_STEP
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
+                                          | HANDLER_CAN_RWRITE
+#endif
+                                          );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering table ipAddressTable\n");
         return;
@@ -287,13 +298,12 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
-
     if (access_multiplexer->pre_request)
         mfd_modes |= BABY_STEP_PRE_REQUEST;
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
@@ -316,7 +326,7 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -697,64 +707,6 @@ _mfd_ipAddressTable_post_request(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipAddressTable_post_request */
 
-NETSNMP_STATIC_INLINE int
-_ipAddressTable_check_indexes(ipAddressTable_rowreq_ctx * rowreq_ctx)
-{
-    int             rc = SNMPERR_SUCCESS;
-
-    DEBUGMSGTL(("internal:ipAddressTable:_ipAddressTable_check_indexes",
-                "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-
-    /*
-     * (INDEX) ipAddressAddrType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h
-     */
-    /*
-     * check that the value is one of defined enums
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType !=
-            INETADDRESSTYPE_UNKNOWN)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV4)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV6)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV4Z)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV6Z)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_DNS)
-        ) {
-        rc = SNMP_ERR_WRONGVALUE;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = ipAddressAddrType_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) ipAddressAddr(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
-     */
-    /*
-     * check defined range(s).
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && ((rowreq_ctx->tbl_idx.ipAddressAddr_len < 0)
-            || (rowreq_ctx->tbl_idx.ipAddressAddr_len > 255))
-        ) {
-        rc = SNMP_ERR_WRONGLENGTH;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = ipAddressAddr_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * if individual parts look ok, check them as a whole
-     */
-    return ipAddressTable_validate_index(ipAddressTable_if_ctx.user_ctx,
-                                         rowreq_ctx);
-}                               /* _ipAddressTable_check_indexes */
 
 /**
  * @internal
@@ -1071,6 +1023,66 @@ _mfd_ipAddressTable_get_values(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipAddressTable_get_values */
 
+NETSNMP_STATIC_INLINE int
+_ipAddressTable_check_indexes(ipAddressTable_rowreq_ctx * rowreq_ctx)
+{
+    int             rc = SNMPERR_SUCCESS;
+
+    DEBUGMSGTL(("internal:ipAddressTable:_ipAddressTable_check_indexes",
+                "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+
+    /*
+     * (INDEX) ipAddressAddrType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
+     */
+    /*
+     * check that the value is one of defined enums 
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType !=
+            INETADDRESSTYPE_UNKNOWN)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV4)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV6)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV4Z)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV6Z)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_DNS)
+        ) {
+        rc = SNMP_ERR_WRONGVALUE;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = ipAddressAddrType_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) ipAddressAddr(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
+     */
+    /*
+     * check defined range(s). 
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && ((rowreq_ctx->tbl_idx.ipAddressAddr_len < 0)
+            || (rowreq_ctx->tbl_idx.ipAddressAddr_len > 255))
+        ) {
+        rc = SNMP_ERR_WRONGLENGTH;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = ipAddressAddr_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * if individual parts look ok, check them as a whole
+     */
+    return ipAddressTable_validate_index(ipAddressTable_if_ctx.user_ctx,
+                                         rowreq_ctx);
+}                               /* _ipAddressTable_check_indexes */
+
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 /***********************************************************************
  *
  * SET processing
@@ -1295,7 +1307,6 @@ _ipAddressTable_check_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
     return rc;
 }                               /* _ipAddressTable_check_column */
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 _mfd_ipAddressTable_check_objects(netsnmp_mib_handler *handler,
                                   netsnmp_handler_registration *reginfo,
@@ -1903,7 +1914,7 @@ _mfd_ipAddressTable_irreversible_commit(netsnmp_mib_handler *handler, netsnmp_ha
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipAddressTable_irreversible_commit */
-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
 /***********************************************************************
  *

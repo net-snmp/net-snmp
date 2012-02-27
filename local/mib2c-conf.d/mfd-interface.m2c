@@ -291,6 +291,7 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
     access_multiplexer->pre_request = _mfd_${context}_pre_request;
     access_multiplexer->post_request = _mfd_${context}_post_request;
 
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
 ##
 @   if $m2c_table_settable@
 
@@ -318,6 +319,7 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
     access_multiplexer->consistency_checks = _mfd_${context}_check_dependencies;
 @      end@
 @   end@ # writable
+#endif
 
     /*************************************************
      *
@@ -330,11 +332,15 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
                                                   ${context}_oid,
                                                   ${context}_oid_size,
                                                   HANDLER_CAN_BABY_STEP |
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
+                                                  HANDLER_CAN_RONLY
+#else
 @if $m2c_table_settable == 1@
                                                   HANDLER_CAN_RWRITE
 @else@
                                                   HANDLER_CAN_RONLY
 @end@
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
                                                   );
     if(NULL == reginfo) {
         snmp_log(LOG_ERR,"error registering table ${context}\n");
@@ -348,21 +354,19 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
      */
     if( access_multiplexer->object_lookup )
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+    if( access_multiplexer->pre_request )
+        mfd_modes |= BABY_STEP_PRE_REQUEST;
+    if( access_multiplexer->post_request )
+        mfd_modes |= BABY_STEP_POST_REQUEST;
+    
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     if( access_multiplexer->set_values )
         mfd_modes |= BABY_STEP_SET_VALUES;
     if( access_multiplexer->irreversible_commit )
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if( access_multiplexer->object_syntax_checks )
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
-    if( access_multiplexer->pre_request )
-        mfd_modes |= BABY_STEP_PRE_REQUEST;
-    if( access_multiplexer->post_request )
-        mfd_modes |= BABY_STEP_POST_REQUEST;
-    
-#ifndef NETSNMP_NO_WRITE_SUPPORT
     if( access_multiplexer->undo_setup )
         mfd_modes |= BABY_STEP_UNDO_SETUP;
     if( access_multiplexer->undo_cleanup )
@@ -378,7 +382,7 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
         mfd_modes |= BABY_STEP_COMMIT;
     if( access_multiplexer->undo_commit )
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
     
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
