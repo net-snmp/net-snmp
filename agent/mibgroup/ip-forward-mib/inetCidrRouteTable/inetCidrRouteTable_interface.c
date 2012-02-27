@@ -140,6 +140,7 @@ static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_pre_request;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_post_request;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_get_values;
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_check_objects;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_set_values;
@@ -149,6 +150,7 @@ static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_commit;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_check_dependencies;
+#endif
 
 NETSNMP_STATIC_INLINE int
                 _inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
@@ -237,6 +239,7 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
         _mfd_inetCidrRouteTable_post_request;
 
 
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -261,6 +264,7 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
      */
     access_multiplexer->consistency_checks =
         _mfd_inetCidrRouteTable_check_dependencies;
+#endif
 
     /*************************************************
      *
@@ -274,8 +278,11 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
         netsnmp_handler_registration_create("inetCidrRouteTable", handler,
                                             inetCidrRouteTable_oid,
                                             inetCidrRouteTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP |
-                                            HANDLER_CAN_RWRITE);
+                                            HANDLER_CAN_BABY_STEP
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
+                                          | HANDLER_CAN_RWRITE
+#endif
+                                          );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering table inetCidrRouteTable\n");
         return;
@@ -288,17 +295,18 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
+    if (access_multiplexer->pre_request)
+        mfd_modes |= BABY_STEP_PRE_REQUEST;
+    if (access_multiplexer->post_request)
+        mfd_modes |= BABY_STEP_POST_REQUEST;
+
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if (access_multiplexer->object_syntax_checks)
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
-
-    if (access_multiplexer->pre_request)
-        mfd_modes |= BABY_STEP_PRE_REQUEST;
-    if (access_multiplexer->post_request)
-        mfd_modes |= BABY_STEP_POST_REQUEST;
 
     if (access_multiplexer->undo_setup)
         mfd_modes |= BABY_STEP_UNDO_SETUP;
@@ -315,6 +323,7 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
+#endif
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -1301,6 +1310,7 @@ _inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
                                              user_ctx, rowreq_ctx);
 }                               /* _inetCidrRouteTable_check_indexes */
 
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
 /***********************************************************************
  *
  * SET processing
@@ -2184,6 +2194,7 @@ _mfd_inetCidrRouteTable_irreversible_commit(netsnmp_mib_handler *handler, netsnm
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_inetCidrRouteTable_irreversible_commit */
+#endif
 
 /***********************************************************************
  *

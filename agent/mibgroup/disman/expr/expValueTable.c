@@ -124,7 +124,7 @@ NEXT_EXP:
         }
         if ( vp->val.objid[0] != 0 ) {
             DEBUGMSGTL(( "disman:expr:val",
-                         "non-zero instance (%" NETSNMP_PRIo "d)\n", vp->val.objid[0]));
+                         "non-zero instance (%d)\n", vp->val.objid[0]));
             return NULL;  /* Invalid instance */
         }
 
@@ -158,7 +158,7 @@ NEXT_EXP:
          */
         if ( vp->val_len > 0 && vp->val.objid[0] != 0 ) {
             DEBUGMSGTL(( "disman:expr:val",
-                         "non-zero next instance (%" NETSNMP_PRIo "d)\n", vp->val.objid[0]));
+                         "non-zero next instance (%d)\n", vp->val.objid[0]));
             return NULL;        /* All valid instances start with .0 */
         }
         plen = exp->expPrefix_len;
@@ -231,6 +231,8 @@ NEXT_EXP:
                 len = vp2->name_length - exp->expPrefix_len;
                 snmp_set_var_typed_value( vp, ASN_PRIV_IMPLIED_OBJECT_ID,
                       (u_char*)(vp2->name+exp->expPrefix_len), len);
+            } else {
+                len = 1;
             }
             res = expValue_evaluateExpression( exp, vp->val.objid+1, len-1);
             DEBUGMSGTL(( "disman:expr:val", "w/card next returned (%x)\n", res));

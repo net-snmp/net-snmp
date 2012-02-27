@@ -129,11 +129,9 @@ check_log_size(unsigned int clientreg, void *clientarg)
     netsnmp_table_row *row;
     netsnmp_table_data_set_storage *data;
     u_long          count = 0;
-    struct timeval  now;
     u_long          uptime;
 
-    gettimeofday(&now, NULL);
-    uptime = netsnmp_timeval_uptime(&now);
+    uptime = netsnmp_get_agent_uptime();
 
     if (!nlmLogTable || !nlmLogTable->table )  {
         DEBUGMSGTL(("notification_log", "missing log table\n"));
@@ -571,7 +569,6 @@ void
 log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
 {
     long            tmpl;
-    struct timeval  now;
     netsnmp_table_row *row;
 
     static u_long   default_num = 0;
@@ -611,8 +608,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
     /*
      * add the data 
      */
-    gettimeofday(&now, NULL);
-    tmpl = netsnmp_timeval_uptime(&now);
+    tmpl = netsnmp_get_agent_uptime();
     netsnmp_set_row_column(row, COLUMN_NLMLOGTIME, ASN_TIMETICKS,
                            &tmpl, sizeof(tmpl));
     time(&timetnow);

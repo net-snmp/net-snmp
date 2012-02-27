@@ -148,6 +148,7 @@ smux_parse_peer_auth(const char *token, char *cptr)
     }
     if (nauths == SMUX_MAX_PEERS) {
 	config_perror("Too many smuxpeers");
+	free(aptr);
 	return;
     }
 
@@ -367,6 +368,11 @@ var_smux_write(int action,
         if (!snmp_oidtree_compare(name, name_len, rptr->sr_name,
                                   rptr->sr_name_len))
             break;
+    }
+
+    if (!rptr) {
+        DEBUGMSGTL(("smux", "[var_smux_write] unknown registration\n"));
+        return SNMP_ERR_GENERR;
     }
 
     switch (action) {
@@ -1313,7 +1319,7 @@ smux_find_replacement(oid * name, size_t name_len)
         if (!snmp_oidtree_compare(rptr->sr_name, rptr->sr_name_len,
                                   name, name_len)) {
             if ((difflen = rptr->sr_name_len - name_len)
-                < bestlen) {
+                < bestlen || !bestptr) {
                 bestlen = difflen;
                 bestptr = rptr;
             } else if ((difflen == bestlen) &&

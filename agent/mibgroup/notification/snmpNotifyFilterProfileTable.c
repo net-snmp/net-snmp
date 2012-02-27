@@ -189,6 +189,7 @@ parse_snmpNotifyFilterProfileTable(const char *token, char *line)
                               &StorageTmp->snmpNotifyFilterProfileNameLen);
     if (StorageTmp->snmpNotifyFilterProfileName == NULL) {
         config_perror("invalid specification for snmpNotifyFilterProfileName");
+        SNMP_FREE(StorageTmp);
         return;
     }
 

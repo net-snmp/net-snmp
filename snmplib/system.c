@@ -1116,7 +1116,7 @@ netsnmp_mktemp(void)
 #ifdef HAVE_MKSTEMP
     {
         mode_t oldmask = umask(~(S_IRUSR | S_IWUSR));
-        netsnmp_assert(oldmask != -1);
+        netsnmp_assert(oldmask != (mode_t)(-1));
         fd = mkstemp(name);
         umask(oldmask);
     }

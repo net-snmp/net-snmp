@@ -239,7 +239,7 @@ udpEndpointTable_container_load(netsnmp_container *container)
     if (NULL == ep_c)
         return MFD_RESOURCE_UNAVAILABLE;
     ep_it = CONTAINER_ITERATOR(ep_c);
-    if (NULL == ep_c) {
+    if (NULL == ep_it) {
         netsnmp_access_udp_endpoint_container_free(ep_c, 0);
         return MFD_RESOURCE_UNAVAILABLE;
     }

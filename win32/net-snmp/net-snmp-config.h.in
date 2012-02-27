@@ -1322,9 +1322,6 @@
 /* UNdefine to allow specifying zero-length community string */
 /* #define NETSNMP_NO_ZEROLENGTH_COMMUNITY 1 */
 
-/* #define NETSNMP_EXIT_ON_BAD_KLREAD  */
-/* define to exit the agent on a bad kernel read */
-
 #define NETSNMP_LASTFIELD -1      /* internal define */
 
 /* configure options specified */

@@ -76,12 +76,11 @@ pingResultsTable_inadd(struct pingResultsTable_data *thedata);
 void
 pingResultsTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr = NULL;
-    struct pingResultsTable_data *StorageDel = NULL;
+    struct header_complex_index *hciptr;
+
     DEBUGMSGTL(("pingResultsTable", "cleanerout  "));
     for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
-        StorageDel =
-            header_complex_extract_entry(&pingResultsTableStorage, hciptr);
+        header_complex_extract_entry(&pingResultsTableStorage, hciptr);
         DEBUGMSGTL(("pingResultsTable", "cleaner  "));
     }
 

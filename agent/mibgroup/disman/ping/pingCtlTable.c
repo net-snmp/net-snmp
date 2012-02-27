@@ -75,48 +75,27 @@ struct variable2 pingCtlTable_variables[] = {
     /*
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
-    {COLUMN_PINGCTLTARGETADDRESSTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 3}},
-    {COLUMN_PINGCTLTARGETADDRESS,   ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 4}},
-    {COLUMN_PINGCTLDATASIZE,         ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
-     var_pingCtlTable, 2, {1, 5}},
-    {COLUMN_PINGCTLTIMEOUT,          ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
-     var_pingCtlTable, 2, {1, 6}},
-    {COLUMN_PINGCTLPROBECOUNT,       ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
-     var_pingCtlTable, 2, {1, 7}},
-    {COLUMN_PINGCTLADMINSTATUS,       ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 8}},
-    {COLUMN_PINGCTLDATAFILL,        ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 9}},
-    {COLUMN_PINGCTLFREQUENCY,        ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 10}},
-    {COLUMN_PINGCTLMAXROWS,          ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 11}},
-    {COLUMN_PINGCTLSTORAGETYPE,       ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 12}},
-    {COLUMN_PINGCTLTRAPGENERATION,  ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 13}},
-    {COLUMN_PINGCTLTRAPPROBEFAILUREFILTER, ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 14}},
-    {COLUMN_PINGCTLTRAPTESTFAILUREFILTER,  ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 15}},
-    {COLUMN_PINGCTLTYPE,            ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 16}},
-    {COLUMN_PINGCTLDESCR,           ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 17}},
-    {COLUMN_PINGCTLSOURCEADDRESSTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 18}},
-    {COLUMN_PINGCTLSOURCEADDRESS,   ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 19}},
-    {COLUMN_PINGCTLIFINDEX,           ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 20}},
-    {COLUMN_PINGCTLBYPASSROUTETABLE,  ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 21}},
-    {COLUMN_PINGCTLDSFIELD,          ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 22}},
-    {COLUMN_PINGCTLROWSTATUS,         ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
-     var_pingCtlTable, 2, {1, 23}}
+    {COLUMN_PINGCTLTARGETADDRESSTYPE, ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 3}},
+    {COLUMN_PINGCTLTARGETADDRESS,   ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 4}},
+    {COLUMN_PINGCTLDATASIZE,         ASN_UNSIGNED, RONLY, var_pingCtlTable, 2, {1, 5}},
+    {COLUMN_PINGCTLTIMEOUT,          ASN_UNSIGNED, RONLY, var_pingCtlTable, 2, {1, 6}},
+    {COLUMN_PINGCTLPROBECOUNT,       ASN_UNSIGNED, RONLY, var_pingCtlTable, 2, {1, 7}},
+    {COLUMN_PINGCTLADMINSTATUS,       ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 8}},
+    {COLUMN_PINGCTLDATAFILL,        ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 9}},
+    {COLUMN_PINGCTLFREQUENCY,        ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 10}},
+    {COLUMN_PINGCTLMAXROWS,          ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 11}},
+    {COLUMN_PINGCTLSTORAGETYPE,       ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 12}},
+    {COLUMN_PINGCTLTRAPGENERATION,  ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 13}},
+    {COLUMN_PINGCTLTRAPPROBEFAILUREFILTER, ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 14}},
+    {COLUMN_PINGCTLTRAPTESTFAILUREFILTER,  ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 15}},
+    {COLUMN_PINGCTLTYPE,            ASN_OBJECT_ID, RWRITE, var_pingCtlTable, 2, {1, 16}},
+    {COLUMN_PINGCTLDESCR,           ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 17}},
+    {COLUMN_PINGCTLSOURCEADDRESSTYPE, ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 18}},
+    {COLUMN_PINGCTLSOURCEADDRESS,   ASN_OCTET_STR, RWRITE, var_pingCtlTable, 2, {1, 19}},
+    {COLUMN_PINGCTLIFINDEX,           ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 20}},
+    {COLUMN_PINGCTLBYPASSROUTETABLE,  ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 21}},
+    {COLUMN_PINGCTLDSFIELD,          ASN_UNSIGNED, RWRITE, var_pingCtlTable, 2, {1, 22}},
+    {COLUMN_PINGCTLROWSTATUS,         ASN_INTEGER, RWRITE, var_pingCtlTable, 2, {1, 23}}
 };
 
 
@@ -340,12 +319,11 @@ pingProbeHistoryTable_addall(struct pingCtlTable_data *thedata)
 void
 pingCtlTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr = NULL;
-    struct pingCtlTable_data *StorageDel = NULL;
+    struct header_complex_index *hciptr;
+
     DEBUGMSGTL(("pingProbeHistoryTable", "cleanerout  "));
     for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
-        StorageDel =
-            header_complex_extract_entry(&pingCtlTableStorage, hciptr);
+        header_complex_extract_entry(&pingCtlTableStorage, hciptr);
         DEBUGMSGTL(("pingProbeHistoryTable", "cleaner  "));
     }
 }
@@ -864,7 +842,6 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
 {
     struct header_complex_index *hciptr2 = NULL;
     struct header_complex_index *hcilast = NULL;
-    struct pingProbeHistoryTable_data *StorageDel = NULL;
     struct pingProbeHistoryTable_data *StorageTmp = NULL;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
@@ -895,9 +872,7 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
 
         }
     }
-    StorageDel =
-        header_complex_extract_entry(&pingProbeHistoryTableStorage,
-                                     hcilast);
+    header_complex_extract_entry(&pingProbeHistoryTableStorage, hcilast);
     DEBUGMSGTL(("pingProbeHistoryTable",
                 "delete the last one success!\n"));
 }
@@ -1231,7 +1206,6 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
          unsigned long *minrtt, unsigned long *maxrtt,
          unsigned long *averagertt, pid_t pid)
 {
-    int             size;
     char            recvbuf[BUFSIZE];
     char            sendbuf[BUFSIZE];
     int             nsent = 1;
@@ -1257,8 +1231,6 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
     }
     setuid(getuid());           /* don't need special permissions any more */
 
-    size = 60 * 1024;           /* OK if setsockopt fails */
-
     tv.tv_sec = 5;
     tv.tv_usec = 0;
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
@@ -1272,6 +1244,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
         len = pr->salen;
         if (readable_timeo(sockfd, item->pingCtlTimeOut) == 0) {
             /* printf("socket timeout!\n"); */
+            n = -1;
             fail_probe = fail_probe + 1;
             flag = 1;
         } else {
@@ -1599,7 +1572,6 @@ send_v4(int datalen, pid_t pid, int nsent, int sockfd, char *sendbuf)
 {
     int             len;
     struct icmp    *icmp = NULL;
-    struct timeval *temp = NULL;
 
     icmp = (struct icmp *) sendbuf;
     icmp->icmp_type = ICMP_ECHO;
@@ -1607,7 +1579,6 @@ send_v4(int datalen, pid_t pid, int nsent, int sockfd, char *sendbuf)
     icmp->icmp_id = pid;
     icmp->icmp_seq = nsent;
     gettimeofday((struct timeval *) icmp->icmp_data, NULL);
-    temp = (struct timeval *) icmp->icmp_data;
 
     len = 8 + datalen;          /* checksum ICMP header and data */
     icmp->icmp_cksum = 0;
@@ -2241,7 +2212,6 @@ write_pingCtlTargetAddressType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2339,7 +2309,6 @@ write_pingCtlTargetAddress(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2429,7 +2398,6 @@ write_pingCtlDataSize(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2520,7 +2488,6 @@ write_pingCtlTimeOut(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2613,7 +2580,6 @@ write_pingCtlProbeCount(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2706,8 +2672,7 @@ write_pingCtlAdminStatus(int action,
                     snmp_alarm_register(StorageTmp->pingCtlFrequency,
                                         SA_REPEAT, run_ping, StorageTmp);
             else
-                StorageTmp->timer_id = snmp_alarm_register(1, (int) NULL,
-                                                           run_ping,
+                StorageTmp->timer_id = snmp_alarm_register(1, 0, run_ping,
                                                            StorageTmp);
 
         } else if (StorageTmp->pingCtlAdminStatus == 2
@@ -2717,7 +2682,6 @@ write_pingCtlAdminStatus(int action,
             modify_ResultsOper(StorageTmp, 2);
         }
 
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2814,7 +2778,6 @@ write_pingCtlDataFill(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2900,7 +2863,6 @@ write_pingCtlFrequency(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2986,7 +2948,6 @@ write_pingCtlMaxRows(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3074,7 +3035,6 @@ write_pingCtlStorageType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3173,7 +3133,6 @@ write_pingCtlTrapGeneration(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3265,7 +3224,6 @@ write_pingCtlTrapProbeFailureFilter(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3357,7 +3315,6 @@ write_pingCtlTrapTestFailureFilter(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3455,7 +3412,6 @@ write_pingCtlType(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3552,7 +3508,6 @@ write_pingCtlDescr(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3639,7 +3594,6 @@ write_pingCtlSourceAddressType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3738,7 +3692,6 @@ write_pingCtlSourceAddress(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3824,7 +3777,6 @@ write_pingCtlIfIndex(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -3913,7 +3865,6 @@ write_pingCtlByPassRouteTable(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -4002,7 +3953,6 @@ write_pingCtlDSField(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -4368,13 +4318,11 @@ write_pingCtlRowStatus(int action,
                                             StorageTmp);
                 else
                     StorageTmp->timer_id =
-                        snmp_alarm_register(1, (int) NULL, run_ping,
-                                            StorageTmp);
+                        snmp_alarm_register(1, 0, run_ping, StorageTmp);
 
             }
 
         }
-        snmp_store_needed(NULL);
 
         break;
     }
@@ -4452,7 +4400,9 @@ int
 __schedule_exit(int next, long *nreceived, long *tmax)
 {
     unsigned long   waittime;
+#if 0
     struct itimerval it;
+#endif
 
     if (*nreceived) {
         waittime = 2 * (*tmax);
@@ -4464,11 +4414,13 @@ __schedule_exit(int next, long *nreceived, long *tmax)
     if (next < 0 || next < waittime / 1000)
         next = waittime / 1000;
 
+#if 0
     it.it_interval.tv_sec = 0;
     it.it_interval.tv_usec = 0;
     it.it_value.tv_sec = waittime / 1000000;
     it.it_value.tv_usec = waittime % 1000000;
-    /* setitimer(ITIMER_REAL, &it, NULL); */
+    setitimer(ITIMER_REAL, &it, NULL);
+#endif
     return next;
 }
 
@@ -4742,6 +4694,7 @@ setup(int icmp_sock, int options, int uid, int timeout, int preload,
 
     gettimeofday(start_time, NULL);
 
+#if 0
     if (*deadline) {
         struct itimerval it;
 
@@ -4750,6 +4703,7 @@ setup(int icmp_sock, int options, int uid, int timeout, int preload,
         it.it_value.tv_sec = (*deadline);
         it.it_value.tv_usec = 0;
     }
+#endif
 
     if (isatty(STDOUT_FILENO)) {
         struct winsize  w;
