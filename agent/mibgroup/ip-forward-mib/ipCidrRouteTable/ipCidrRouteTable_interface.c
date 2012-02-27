@@ -130,6 +130,7 @@ static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_pre_request;
 static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_post_request;
 static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_get_values;
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
 static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_check_objects;
 static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_set_values;
@@ -138,6 +139,15 @@ static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_undo_values;
 static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_commit;
 static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_ipCidrRouteTable_irreversible_commit;
+
+NETSNMP_STATIC_INLINE int
+                _ipCidrRouteTable_undo_column(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
+                                              netsnmp_variable_list * var,
+                                              int column);
+#endif
+
+NETSNMP_STATIC_INLINE int
+                _ipCidrRouteTable_check_indexes(ipCidrRouteTable_rowreq_ctx * rowreq_ctx);
 
 /**
  * @internal
@@ -217,6 +227,7 @@ _ipCidrRouteTable_initialize_interface(ipCidrRouteTable_registration *
     access_multiplexer->post_request = _mfd_ipCidrRouteTable_post_request;
 
 
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -234,6 +245,7 @@ _ipCidrRouteTable_initialize_interface(ipCidrRouteTable_registration *
     access_multiplexer->undo_commit = _mfd_ipCidrRouteTable_undo_commit;
     access_multiplexer->irreversible_commit =
         _mfd_ipCidrRouteTable_irreversible_commit;
+#endif
 
     /*************************************************
      *
@@ -261,17 +273,18 @@ _ipCidrRouteTable_initialize_interface(ipCidrRouteTable_registration *
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
+    if (access_multiplexer->pre_request)
+        mfd_modes |= BABY_STEP_PRE_REQUEST;
+    if (access_multiplexer->post_request)
+        mfd_modes |= BABY_STEP_POST_REQUEST;
+
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if (access_multiplexer->object_syntax_checks)
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
-
-    if (access_multiplexer->pre_request)
-        mfd_modes |= BABY_STEP_PRE_REQUEST;
-    if (access_multiplexer->post_request)
-        mfd_modes |= BABY_STEP_POST_REQUEST;
 
     if (access_multiplexer->undo_setup)
         mfd_modes |= BABY_STEP_UNDO_SETUP;
@@ -288,6 +301,7 @@ _ipCidrRouteTable_initialize_interface(ipCidrRouteTable_registration *
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
+#endif
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -703,68 +717,6 @@ _mfd_ipCidrRouteTable_post_request(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipCidrRouteTable_post_request */
 
-NETSNMP_STATIC_INLINE int
-_ipCidrRouteTable_check_indexes(ipCidrRouteTable_rowreq_ctx * rowreq_ctx)
-{
-    int             rc = SNMPERR_SUCCESS;
-
-    DEBUGMSGTL(("internal:ipCidrRouteTable:_ipCidrRouteTable_check_indexes", "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-
-    /*
-     * (INDEX) ipCidrRouteDest(1)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h
-     */
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = ipCidrRouteDest_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) ipCidrRouteMask(2)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h
-     */
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = ipCidrRouteMask_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) ipCidrRouteTos(3)/INTEGER32/ASN_INTEGER/long(long)//l/A/w/e/R/d/h
-     */
-    /*
-     * check defined range(s).
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && ((rowreq_ctx->tbl_idx.ipCidrRouteTos < 0)
-            || (rowreq_ctx->tbl_idx.ipCidrRouteTos > 2147483647))
-        ) {
-        rc = SNMP_ERR_WRONGVALUE;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = ipCidrRouteTos_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) ipCidrRouteNextHop(4)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h
-     */
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = ipCidrRouteNextHop_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * if individual parts look ok, check them as a whole
-     */
-    return ipCidrRouteTable_validate_index(ipCidrRouteTable_if_ctx.
-                                           user_ctx, rowreq_ctx);
-}                               /* _ipCidrRouteTable_check_indexes */
-
 /**
  * @internal
  * wrapper
@@ -1137,6 +1089,69 @@ _mfd_ipCidrRouteTable_get_values(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipCidrRouteTable_get_values */
 
+NETSNMP_STATIC_INLINE int
+_ipCidrRouteTable_check_indexes(ipCidrRouteTable_rowreq_ctx * rowreq_ctx)
+{
+    int             rc = SNMPERR_SUCCESS;
+
+    DEBUGMSGTL(("internal:ipCidrRouteTable:_ipCidrRouteTable_check_indexes", "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+
+    /*
+     * (INDEX) ipCidrRouteDest(1)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h 
+     */
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = ipCidrRouteDest_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) ipCidrRouteMask(2)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h 
+     */
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = ipCidrRouteMask_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) ipCidrRouteTos(3)/INTEGER32/ASN_INTEGER/long(long)//l/A/w/e/R/d/h 
+     */
+    /*
+     * check defined range(s). 
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && ((rowreq_ctx->tbl_idx.ipCidrRouteTos < 0)
+            || (rowreq_ctx->tbl_idx.ipCidrRouteTos > 2147483647))
+        ) {
+        rc = SNMP_ERR_WRONGVALUE;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = ipCidrRouteTos_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) ipCidrRouteNextHop(4)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h 
+     */
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = ipCidrRouteNextHop_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * if individual parts look ok, check them as a whole
+     */
+    return ipCidrRouteTable_validate_index(ipCidrRouteTable_if_ctx.
+                                           user_ctx, rowreq_ctx);
+}                               /* _ipCidrRouteTable_check_indexes */
+
+#ifndef NETSNMP_DISABLE_SET_SUPPORT
 /***********************************************************************
  *
  * SET processing
@@ -2130,6 +2145,7 @@ _mfd_ipCidrRouteTable_irreversible_commit(netsnmp_mib_handler *handler, netsnmp_
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipCidrRouteTable_irreversible_commit */
+#endif
 
 /***********************************************************************
  *
