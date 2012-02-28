@@ -190,7 +190,7 @@ disk_parse_config(const char *token, char *cptr)
   if ( entry ) {
       entry->minspace   = minspace;
       entry->minpercent = minpercent;
-      entry->flags     |= ~NETSNMP_FS_FLAG_UCD;
+      entry->flags     |= NETSNMP_FS_FLAG_UCD;
       disks[numdisks++] = entry;
   }
 }
@@ -230,7 +230,7 @@ disk_parse_config_all(const char *token, char *cptr)
               continue;
           entry->minspace   = -1;
           entry->minpercent = minpercent;
-          entry->flags     &= NETSNMP_FS_FLAG_UCD;
+          entry->flags     |= NETSNMP_FS_FLAG_UCD;
           /*
            * Ensure there is space for the new entry
            */
