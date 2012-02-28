@@ -389,8 +389,9 @@ tryAgain:
 
     case ERRORFLAG:
         long_ret = 0;
+        val = netsnmp_fsys_avail_ull(entry);
         if (( entry->minspace >= 0 ) &&
-            ( entry->avail < entry->minspace ))
+            ( val < entry->minspace ))
             long_ret = 1;
         else if (( entry->minpercent >= 0 ) &&
                  (_percent( entry->avail, entry->size ) < entry->minpercent ))
@@ -399,12 +400,13 @@ tryAgain:
 
     case ERRORMSG:
         errmsg[0] = 0;
+        val = netsnmp_fsys_avail_ull(entry);
         if (( entry->minspace >= 0 ) &&
-            ( entry->avail < entry->minspace ))
+            ( val < entry->minspace ))
                 snprintf(errmsg, sizeof(errmsg),
                         "%s: less than %d free (= %d)",
                         entry->path, entry->minspace,
-                        (int) entry->avail);
+                        (int) val);
         else if (( entry->minpercent >= 0 ) &&
                  (_percent( entry->avail, entry->size ) < entry->minpercent ))
                 snprintf(errmsg, sizeof(errmsg),
