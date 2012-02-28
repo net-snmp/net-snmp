@@ -108,6 +108,12 @@ characters.  If
 is less than the length of the contents of
 a single column, then that single column will still be printed.
 .PP
+Note that
+.B snmptable
+REQUIRES  an argument specifying the agent to query
+and exactly one OID argument, as described in the 
+.I snmpcmd(1)
+manual page.  This OID \fBmust\fP be that of a MIB table object.
 .SH EXAMPLES
 $ snmptable -v 2c -c public localhost at.atTable
 

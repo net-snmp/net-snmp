@@ -3,32 +3,32 @@
 snmpusm - creates and maintains SNMPv3 users on a network entity
 .SH SYNOPSIS
 .B snmpusm
-[COMMON OPTIONS]
+[COMMON OPTIONS] AGENT
 .B create
 USER [CLONEFROM-USER]
 .br
 .B snmpusm
-[COMMON OPTIONS]
+[COMMON OPTIONS] AGENT
 .B delete
 USER
 .br
 .B snmpusm
-[COMMON OPTIONS]
+[COMMON OPTIONS] AGENT
 .B cloneFrom
 USER CLONEFROM-USER
 .br
 .B snmpusm
-[COMMON OPTIONS] [-Ca] [-Cx]
+[COMMON OPTIONS] [-Ca] [-Cx] AGENT
 .B passwd
 OLD-PASSPHRASE NEW-PASSPHRASE [USER]
 .br
 .B snmpusm
-[COMMON OPTIONS] <-Ca | -Cx> -Ck
+[COMMON OPTIONS] <-Ca | -Cx> -Ck AGENT
 .B passwd
 OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]
 .br
 .B snmpusm
-[COMMON OPTIONS] [-Ca] [-Cx]
+[COMMON OPTIONS] [-Ca] [-Cx] AGENT
 .B changekey
 [USER]
 
@@ -76,7 +76,7 @@ be used.
 An unauthenticated SNMPv3 user can be created using the command
 .IP
 .B snmpusm
-[OPTIONS] create USER
+[OPTIONS] AGENT create USER
 .PP
 This constructs an (inactive) entry in the usmUserTable,
 with no authentication or privacy settings.
@@ -89,7 +89,7 @@ In order to activate this entry, it is necessary to "clone" an existing
 user, using the command
 .IP
 .B snmpusm
-[OPTIONS] cloneFrom USER CLONEFROM-USER
+[OPTIONS] AGENT cloneFrom USER CLONEFROM-USER
 .PP
 The USER entry then inherits the same authentication and privacy
 settings (including pass phrases) as the CLONEFROM user.
@@ -98,7 +98,7 @@ settings (including pass phrases) as the CLONEFROM user.
 These two steps can be combined into one, by using the command
 .IP
 .B snmpusm
-[OPTIONS] create USER CLONEFROM-USER
+[OPTIONS] AGENT create USER CLONEFROM-USER
 
 .PP
 The two forms of the
@@ -134,7 +134,7 @@ configuration directive.
 A user can be deleted from the usmUserTable using the command
 .IP
 .B snmpusm
-[OPTIONS] delete USER
+[OPTIONS] AGENT delete USER
 
 .SH CHANGING PASS PHRASES
 User profiles contain private keys that are never
@@ -145,7 +145,7 @@ user's old passphrase as well as the new one.
 This uses the command
 .IP
 .B snmpusm
-[OPTIONS] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]
+[OPTIONS] [-Ca] [-Cx] AGENT passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]
 
 .PP
 After cloning a new user entry from the appropriate template,
@@ -160,7 +160,7 @@ are changed.
 
 .IP
 .B snmpusm
-[OPTIONS] [-Ca] [-Cx] changekey [USER]
+[OPTIONS] [-Ca] [-Cx] AGENT changekey [USER]
 
 .PP
 This command changes the key in a perfect-forward-secrecy compliant
@@ -184,7 +184,7 @@ sub-command is used:
 
 .IP
 .B snmpusm
-[OPTIONS] <-Ca | -Cx> -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]
+[OPTIONS] <-Ca | -Cx> -Ck AGENT passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]
 
 .PP
 Either the -Ca or the -Cx option must be specified.  The OLD-KEY-OR-PASSPHRASE
@@ -193,6 +193,11 @@ localized key starting with "0x", e.g. as printed out by the
 .B changekey
 sub-command.
 
+.PP
+Note that
+.B snmpusm
+REQUIRES  an argument specifying the agent to query
+as described in the .I snmpcmd(1) manual page.
 .SH EXAMPLES
 .PP
 Let's assume for our examples that the following VACM and USM

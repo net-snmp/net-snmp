@@ -63,16 +63,16 @@
 snmpnetstat \- display networking status and configuration information from a network entity via SNMP
 .SH SYNOPSIS
 .B snmpnetstat
-[common options] [-Ca] [-Cn] AGENT
+[COMMON OPTIONS] [-Ca] [-Cn] AGENT
 .br
 .B snmpnetstat
-[common options] [-Ci] [-Co] [-Cr] [-Cn] [-Cs] AGENT
+[COMMON OPTIONS] [-Ci] [-Co] [-Cr] [-Cn] [-Cs] AGENT
 .br
 .B snmpnetstat
-[common options] [-Ci] [-Cn] [-CI interface] AGENT [interval]
+[COMMON OPTIONS] [-Ci] [-Cn] [-CI interface] AGENT [interval]
 .br
 .B snmpnetstat
-[common options] [-Ca] [-Cn] [-Cs] [-Cp protocol] AGENT
+[COMMON OPTIONS] [-Ca] [-Cn] [-Cs] [-Cp protocol] AGENT
 .SH DESCRIPTION
 The
 .B snmpnetstat 
@@ -109,7 +109,7 @@ the possible formats for AGENT.
 .SH OPTIONS
 The options have the following meaning:
 .PP
-.B common options
+.B COMMON OPTIONS
  Please see
 .I snmpcmd(1)
 for a list of possible values for common options
