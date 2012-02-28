@@ -12,7 +12,7 @@
 snmpdelta \- Monitor delta differences in SNMP Counter values
 .SH SYNOPSIS
 .B snmpdelta
-[ common options ] [-Cf] [ -Ct ] [ -Cs ] [ -CS ] [ -Cm ] [ -CF configfile ] [ -Cl ] [ -Cp period ] [ -CP Peaks ] [ -Ck ] [ -CT ] AGENT OID [ OID ... ]
+[ COMMON OPTIONS ] [-Cf] [ -Ct ] [ -Cs ] [ -CS ] [ -Cm ] [ -CF configfile ] [ -Cl ] [ -Cp period ] [ -CP Peaks ] [ -Ck ] [ -CT ] AGENT OID [ OID ... ]
 .SH "DESCRIPTION"
 .B snmpdelta
 will monitor the specified integer valued OIDs, and report changes
@@ -109,6 +109,13 @@ in a single PDU. Multiple PDUs can be created in a single
 request. The default value of variables per packet is 60.
 This option is useful if a request response results in an
 error becaues the packet is too big.
+.PP
+Note that
+.B snmpdelta
+REQUIRES  an argument specifying the agent to query
+and at least one OID argument, as described in the 
+.I snmpcmd(1)
+manual page.
 .SH EXAMPLES
 .nf
 $ snmpdelta -c public -v 1 -Cs localhost IF-MIB::ifInUcastPkts.3 IF-MIB::ifOutUcastPkts.3

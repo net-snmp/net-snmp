@@ -28,7 +28,7 @@
 snmpbulkwalk - retrieve a subtree of management values using SNMP GETBULK requests
 .SH SYNOPSIS
 .B snmpbulkwalk
-[APPLICATION OPTIONS] [COMMON OPTIONS] [OID]
+[APPLICATION OPTIONS] [COMMON OPTIONS] AGENT [OID]
 .SH DESCRIPTION
 .B snmpbulkwalk
 is an SNMP application that uses SNMP GETBULK requests to query a
@@ -94,6 +94,10 @@ In addition to these options,
 takes the common options described in the 
 .I snmpcmd(1)
 manual page.
+Note that
+.B snmpbulkget
+REQUIRES an argument specifying the agent to query
+and at most one OID argument, as described above.
 .SH EXAMPLE
 The command:
 .PP
