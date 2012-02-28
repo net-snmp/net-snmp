@@ -232,7 +232,7 @@ _ipDefaultRouterTable_initialize_interface
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     /* XXX - are these actually necessary? */
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
@@ -256,7 +256,7 @@ _ipDefaultRouterTable_initialize_interface
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
