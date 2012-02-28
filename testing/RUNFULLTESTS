@@ -166,7 +166,7 @@ sub decide_exec {
 
     # 1) Parse the $testfile argument.
     my ($dirname, $groupname, $basename, $app_extension, $file_extension) = 
-      ($testfile =~ /([^\/]+)\/([^\/]+)\/([^\/]+)_([^_]+)\.*([^\.]*)$/);
+      ($testfile =~ /([^\/]+)\/([^\/]+)\/([^\/]+)_([^\/_]+)\.*([^\/\.]*)$/);
     $app_extension =~ s/$opts{'exeext'}\$//;
 
     # 2) we have a RUN_TYPE file in the same directory
@@ -328,7 +328,7 @@ sub build_test {
     my ($testfile) = @_;
 
     my ($dirname, $groupname, $basename, $app_extension, $file_extension) = 
-      ($testfile =~ /([^\/]+)\/([^\/]+)\/([^\/]+)_([^_]+)\.([^\.]+)$/);
+      ($testfile =~ /([^\/]+)\/([^\/]+)\/([^\/]+)_([^\/_]+)\.([^\/\.]+)$/);
 
     # is this even a buildable type recipe?
     if (!$dirname || !$basename || !$app_extension || !$file_extension) {
