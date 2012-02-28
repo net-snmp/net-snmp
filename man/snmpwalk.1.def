@@ -28,7 +28,7 @@
 snmpwalk - retrieve a subtree of management values using SNMP GETNEXT requests
 .SH SYNOPSIS
 .B snmpwalk
-[APPLICATION OPTIONS] [COMMON OPTIONS] [OID]
+[APPLICATION OPTIONS] [COMMON OPTIONS] AGENT [OID]
 .SH DESCRIPTION
 .B snmpwalk
 is an SNMP application that uses SNMP GETNEXT requests to query a
@@ -106,6 +106,11 @@ takes the common options described in the
 .I snmpcmd(1)
 manual page.
 .SH EXAMPLES
+.br
+Note that
+.B snmpbulkget
+REQUIRES  an argument specifying the agent to query
+and at most one OID argument, as described there.
 The command:
 .PP
 snmpwalk \-Os \-c public \-v 1 zeus system
