@@ -66,7 +66,6 @@
 #include <net-snmp/library/tools.h>
 
 #include "smux.h"
-#include "mibdefs.h"
 #include "snmpd.h"
 
 netsnmp_feature_require(snprint_objid)
