@@ -1000,7 +1000,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                                       parms->wholeMsgOffset, 1,
                                       (u_char) (ASN_UNIVERSAL |
                                                 ASN_PRIMITIVE |
-                                                ASN_OCTET_STR),
+                                                ASN_INTEGER),
                                       &tmp, sizeof(tmp));
 
     if (rc == 0) {
