@@ -4,6 +4,14 @@ that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
 
+* 5.5.2 *
+
+    snmpd:
+      - [PATCH 3198781]: Fix compilation of disman/{ping,traceroute} modules
+
+    building:
+      - [PATCH 2091156]: Fix parallel builds (using 'make -j <N>')
+
 * 5.5.1 *
 
     snmpd:
