@@ -76,7 +76,8 @@ INSTALLBUILTSUBDIR=agent
 
 INCLUDEMIBGROUPDIR=agent/mibgroup
 INCLUDEMIBGROUPDIRHEADERS=struct.h util_funcs.h util_funcs/header_generic.h \
-	util_funcs/header_simple_table.h util_funcs/MIB_STATS_CACHE_TIMEOUT.h
+	util_funcs/header_simple_table.h util_funcs/MIB_STATS_CACHE_TIMEOUT.h \
+	util_funcs/Exit.h util_funcs/restart.h
 
 OTHERINSTALL=installmibgroupheaders @EMBEDPERLINSTALL@
 OTHERUNINSTALL=@EMBEDPERLUNINSTALL@
