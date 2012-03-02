@@ -28,13 +28,13 @@
 snmptrap, snmpinform - sends an SNMP notification to a manager
 .SH SYNOPSIS
 .B snmptrap -v 1
-[COMMON OPTIONS] [-Ci] enterprise-oid agent generic-trap specific-trap uptime [OID TYPE VALUE]...
+[COMMON OPTIONS] AGENT enterprise-oid agent generic-trap specific-trap uptime [OID TYPE VALUE]...
 .PP
 .B snmptrap -v [2c|3]
-[COMMON OPTIONS] [-Ci] uptime trap-oid [OID TYPE VALUE]...
+[COMMON OPTIONS] [-Ci] AGENT uptime trap-oid [OID TYPE VALUE]...
 .PP
 .B snmpinform -v [2c|3]
-[COMMON OPTIONS] uptime trap-oid [OID TYPE VALUE]...
+[COMMON OPTIONS] AGENT uptime trap-oid [OID TYPE VALUE]...
 .SH DESCRIPTION
 .B snmptrap
 is an SNMP application that uses the SNMP TRAP operation to send
@@ -122,5 +122,9 @@ manual page in
 addition to the 
 .B -Ci
 option described above.
+Note that
+.B snmptrap
+REQUIRES  an argument specifying the agent to query
+as described there.
 .SH SEE ALSO
 snmpcmd(1), snmpset(1), variables(5).

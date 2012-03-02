@@ -28,7 +28,7 @@
 snmpset - communicates with a network entity using SNMP SET requests
 .SH SYNOPSIS
 .B snmpset
-[COMMON OPTIONS] OID TYPE VALUE [OID TYPE VALUE]...
+[COMMON OPTIONS] AGENT OID TYPE VALUE [OID TYPE VALUE]...
 .SH DESCRIPTION
 .B snmpset
 is an SNMP application that uses the SNMP SET request to set
@@ -102,5 +102,9 @@ pinpoint in what way the request was malformed.
 takes the common options described in the
 .I snmpcmd(1)
 manual page.
+Note that
+.B snmpset
+REQUIRES  an argument specifying the agent to query
+and at least one set of OID/type/value arguments, as described in there.
 .SH "SEE ALSO"
 snmpcmd(1), variables(5).
