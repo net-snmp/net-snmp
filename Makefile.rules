@@ -41,9 +41,9 @@ ftsubdirs:
 
 .PHONY: cleanfeatures cleanfeaturessubdirs
 cleanfeatures: cleanfeaturessubdirs
-	       $(RM) $(FTOBJS)
-	       $(RM) $(FEATUREFILE)
-	       $(RM) $(top_builddir)/include/net-snmp/feature-details.h
+	       rm -f $(FTOBJS)
+	       rm -f $(FEATUREFILE)
+	       rm -f $(top_builddir)/include/net-snmp/feature-details.h
 
 cleanfeaturessubdirs:
 	@if test "$(FTSUBDIRS)" != ""; then \
