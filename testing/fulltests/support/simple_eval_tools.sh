@@ -38,6 +38,9 @@ OK_TO_SAVE_RESULT=1
 export OK_TO_SAVE_RESULT
 fi
 
+if [ `uname -s` = SunOS ]
+then PATH=/usr/xpg4/bin:$PATH
+fi
 
 #
 # HEADER: returns a single line when SNMP_HEADERONLY mode and exits.
@@ -114,7 +117,7 @@ SKIP() {
 }
 
 ISDEFINED() {
-	grep -wq "^#define $1" ${builddir}/include/net-snmp/net-snmp-config.h ${builddir}/include/net-snmp/agent/mib_module_config.h ${builddir}/include/net-snmp/agent/agent_module_config.h
+	grep -q "^#define $1" ${builddir}/include/net-snmp/net-snmp-config.h ${builddir}/include/net-snmp/agent/mib_module_config.h ${builddir}/include/net-snmp/agent/agent_module_config.h
 }
 
 SKIPIFNOT() {
