@@ -11,6 +11,8 @@ SKIPIFNOT USING_UCD_SNMP_PASS_PERSIST_MODULE
 # hence passing it to the MSVCRT popen() doesn't work.
 [ "x$OSTYPE" = "xmsys" ] && SKIP "MinGW"
 
+[ -x /usr/bin/perl ] || SKIP "/usr/bin/perl not found"
+
 # make sure snmpget and snmpwalk can be executed
 SNMPGET="${builddir}/apps/snmpget"
 [ -x "$SNMPGET" ] || SKIP
