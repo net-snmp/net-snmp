@@ -458,7 +458,6 @@ init_icmp(void)
 {
 #ifdef linux
     netsnmp_handler_registration *table_reginfo = NULL;
-#ifdef linux
     netsnmp_handler_registration *msg_stats_reginfo = NULL;
     netsnmp_iterator_info *iinfo = NULL;
     netsnmp_iterator_info *msg_stats_iinfo = NULL;
@@ -467,7 +466,6 @@ init_icmp(void)
 #endif
     netsnmp_handler_registration *scalar_reginfo = NULL;
     int                    rc;
-#endif
 
     /*
      * register ourselves with the agent as a group of scalars...
