@@ -451,13 +451,15 @@ icmp_msg_stats_first_entry(void **loop_context,
 void
 init_icmp(void)
 {
+#ifdef linux
     netsnmp_handler_registration *table_reginfo = NULL;
     netsnmp_handler_registration *msg_stats_reginfo = NULL;
-    netsnmp_handler_registration *scalar_reginfo = NULL;
     netsnmp_iterator_info *iinfo = NULL;
     netsnmp_iterator_info *msg_stats_iinfo = NULL;
     netsnmp_table_registration_info *table_info = NULL;
     netsnmp_table_registration_info *msg_stats_table_info = NULL;
+#endif
+    netsnmp_handler_registration *scalar_reginfo = NULL;
     int                    rc;
 
     /*
@@ -576,15 +578,17 @@ init_icmp(void)
 #endif
     return;
 
-#ifdef linux
+#ifndef hpux11
 bail:
+#endif
+#ifdef linux
     if (msg_stats_reginfo)
         netsnmp_handler_registration_free(msg_stats_reginfo);
     if (table_reginfo)
         netsnmp_handler_registration_free(table_reginfo);
+#endif
     if (scalar_reginfo)
         netsnmp_handler_registration_free(scalar_reginfo);
-#endif
 }
 
 
