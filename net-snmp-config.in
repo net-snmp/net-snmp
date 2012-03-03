@@ -291,6 +291,12 @@ else
 #ifdef HAVE_SIGNAL
 #include <signal.h>
 #endif /* HAVE_SIGNAL */
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif /*  HAVE_SYS_STAT_H */
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif /* HAVE_FCNTL_H */
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 EOF
@@ -380,6 +386,8 @@ usage(const char *prog)
             "everything)\n"
             "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
 #endif /* DISABLE_MIB_LOADING */
+    fprintf(stderr,
+            "  -p FILE\t\tstore process id in FILE\n");
 #ifndef DISABLE_MIB_LOADING
     fprintf(stderr,
             "  -P MIBOPTS\t\tToggle various defaults controlling mib "
@@ -405,12 +413,13 @@ main (int argc, char **argv)
   int arg;
   char* cp = NULL;
   int dont_fork = 0, do_help = 0;
+  char* pid_file = NULL;
 
   while ((arg = getopt(argc, argv, "c:CdD:fhHL:"
 #ifndef DISABLE_MIB_LOADING
                        "m:M:"
 #endif /* DISABLE_MIB_LOADING */
-                       "n:"
+                       "n:p:"
 #ifndef DISABLE_MIB_LOADING
                        "P:"
 #endif /* DISABLE_MIB_LOADING */
@@ -486,6 +495,14 @@ main (int argc, char **argv)
       }
       break;
 
+    case 'p':
+      if (optarg != NULL) {
+        pid_file = optarg;
+      } else {
+        usage(argv[0]);
+      }
+      break;
+
 #ifndef DISABLE_MIB_LOADING
     case 'P':
       cp = snmp_mib_toggle_options(optarg);
@@ -528,6 +545,31 @@ main (int argc, char **argv)
       if (netsnmp_daemonize(1, snmp_stderrlog_status()) != 0)
         exit(1);
     }
+
++#if HAVE_GETPID
+    if (pid_file != NULL) {
+      /*
+       * unlink the pid_file, if it exists, prior to open.  Without
+       * doing this the open will fail if the user specified pid_file
+       * already exists.
+       */
+      int fd;
+      unlink(pid_file);
+      fd = open(pid_file, O_CREAT | O_EXCL | O_WRONLY, 0600);
+      if (fd == -1) {
+        snmp_log_perror(pid_file);
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                    NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+          exit(1);
+        }
+      } else {
+        char buf[3 + sizeof(long) * 3];
+        int len = snprintf(buf, sizeof(buf), "%ld\n", (long int)getpid());
+        write(fd, buf, len);
+        close(fd);
+      }
+    }
+#endif
 
     /* initialize tcpip, if necessary */
     SOCK_STARTUP;
@@ -606,6 +648,11 @@ EOF
 
   /* shutdown the agent library */
   shutdown_agent();
+
+  if (pid_file != NULL) {
+    unlink(pid_file);
+  }
+
   SOCK_CLEANUP;
   exit(0);
 }
