@@ -1110,7 +1110,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
                                  rptr->sr_name_len);
             if (result == 0) {
                 if (oid_name_len == rptr->sr_name_len) {
-                    if ((nrptr->sr_priority == -1)) {
+                    if (nrptr->sr_priority == -1) {
                         nrptr->sr_priority = rptr->sr_priority;
                         do {
                             nrptr->sr_priority++;
