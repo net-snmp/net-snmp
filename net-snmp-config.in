@@ -363,6 +363,8 @@ usage(const char *prog)
             "OPTIONS:\n", prog);
 
     fprintf(stderr,
+            "  -c FILE[,...]\t\tread FILE(s) as configuration file(s)\n"
+            "  -C\t\t\tdo not read the default configuration files\n"
             "  -d\t\t\tdump all traffic\n"
             "  -D TOKEN[,...]\tturn on debugging output for the specified "
             "TOKENs\n"
@@ -404,7 +406,7 @@ main (int argc, char **argv)
   char* cp = NULL;
   int dont_fork = 0, do_help = 0;
 
-  while ((arg = getopt(argc, argv, "dD:fhHL:"
+  while ((arg = getopt(argc, argv, "c:CdD:fhHL:"
 #ifndef DISABLE_MIB_LOADING
                        "m:M:"
 #endif /* DISABLE_MIB_LOADING */
@@ -414,6 +416,20 @@ main (int argc, char **argv)
 #endif /* DISABLE_MIB_LOADING */
                        "vx:")) != EOF) {
     switch (arg) {
+      case 'c':
+        if (optarg != NULL) {
+          netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                                NETSNMP_DS_LIB_OPTIONALCONFIG, optarg);
+        } else {
+          usage(argv[0]);
+        }
+        break;
+
+      case 'C':
+        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DONT_READ_CONFIGS, 1);
+        break;
+
     case 'd':
       netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
                              NETSNMP_DS_LIB_DUMP_PACKET, 1);
