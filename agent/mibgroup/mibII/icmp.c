@@ -466,7 +466,6 @@ init_icmp(void)
 #endif
     netsnmp_handler_registration *scalar_reginfo = NULL;
     int                    rc;
-#endif
 
     /*
      * register ourselves with the agent as a group of scalars...
