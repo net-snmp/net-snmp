@@ -116,7 +116,9 @@ ISDEFINED() {
 }
 
 SKIPIFNOT() {
-	if ! ISDEFINED "$1"; then
+	if ISDEFINED "$1"; then
+	    :
+	else
 	    SKIP
 	fi
 }
@@ -134,7 +136,7 @@ VERIFY() {	# <path_to_file(s)>
 	local	missingfiles=
 
 	for f in $*; do
-		[ -e "$f" ] && continue
+		[ -f "$f" ] && continue
 		echo "FAILED: Cannot find file \"$f\"."
 		missingfiles=true
 	done
@@ -146,7 +148,7 @@ VERIFY() {	# <path_to_file(s)>
 #------------------------------------ -o-
 #
 STARTTEST() {	
-	[ ! -e "$junkoutputfile" ] && {
+	[ ! -f "$junkoutputfile" ] && {
 		touch $junkoutputfile
 		return
 	}
