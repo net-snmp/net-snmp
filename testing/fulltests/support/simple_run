@@ -17,8 +17,10 @@ if [ "x$builddir" = "x" ]; then
 fi
 
 if [ "x$srcdir" = "x" ]; then
-    cd ..
-    srcdir=`pwd`
+    srcdir=`dirname $0`
+    srcdir=`cd $srcdir; cd ../..; pwd`
+    srcdir=`dirname $srcdir`
+    cd $srcdir
     if cd testing 2>/dev/null; then
        :
     else

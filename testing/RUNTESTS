@@ -34,7 +34,7 @@ for i in "${srcdir}"/testing/fulltests/default/T*$1*; do
     fi
 done
 
-if [ -e failed_tests ]; then
+if [ -f failed_tests ]; then
     echo
     echo Failed tests:
     cat failed_tests
