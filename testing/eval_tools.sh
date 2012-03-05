@@ -112,7 +112,7 @@ SKIP() {
 }
 
 ISDEFINED() {
-	grep -q "^#define $1" $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h $SNMP_UPDIR/include/net-snmp/agent/agent_module_config.h
+	grep "^#define $1 " $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h $SNMP_UPDIR/include/net-snmp/agent/agent_module_config.h >/dev/null
 }
 
 SKIPIFNOT() {
@@ -348,7 +348,7 @@ CHECKANDDIE() {
 # Returns: Count of matched lines.
 #
 CHECKEXACT() {	# <pattern_to_match_exactly>
-	rval=`grep -wc "$*" "$junkoutputfile" 2>/dev/null`
+	rval=`egrep -c "^$*\$|^$*[^a-zA-Z0-9_]|[^a-zA-Z0-9_]$*\$|[^a-zA-Z0-9_]$*[^a-zA-Z0-9_]" "$junkoutputfile" 2>/dev/null`
 	snmp_last_test_result=$rval
 	EXPECTRESULT 1  # default
 	return $rval
