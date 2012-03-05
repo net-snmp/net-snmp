@@ -2414,8 +2414,7 @@ __av_elem_pv(AV *av, I32 key, char *dflt)
 }
 
 static int
-not_here(s)
-char *s;
+not_here(const char *s)
 {
     warn("%s not implemented on this architecture", s);
     return -1;
