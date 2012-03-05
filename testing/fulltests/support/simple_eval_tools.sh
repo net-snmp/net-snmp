@@ -113,7 +113,7 @@ SKIP() {
 }
 
 ISDEFINED() {
-	grep "^#define $1 " ${builddir}/include/net-snmp/net-snmp-config.h ${builddir}/include/net-snmp/agent/mib_module_config.h ${builddir}/include/net-snmp/agent/agent_module_config.h >/dev/null
+	grep "^#define $1 " ${builddir}/include/net-snmp/net-snmp-config.h ${builddir}/include/net-snmp/agent/mib_module_config.h ${builddir}/include/net-snmp/agent/agent_module_config.h > /dev/null
 }
 
 SKIPIFNOT() {
