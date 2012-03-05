@@ -38,10 +38,6 @@ OK_TO_SAVE_RESULT=1
 export OK_TO_SAVE_RESULT
 fi
 
-if [ `uname -s` = SunOS ]
-then PATH=/usr/xpg4/bin:$PATH
-fi
-
 #
 # HEADER: returns a single line when SNMP_HEADERONLY mode and exits.
 #
@@ -117,7 +113,7 @@ SKIP() {
 }
 
 ISDEFINED() {
-	grep -q "^#define $1" ${builddir}/include/net-snmp/net-snmp-config.h ${builddir}/include/net-snmp/agent/mib_module_config.h ${builddir}/include/net-snmp/agent/agent_module_config.h
+	grep "^#define $1 " ${builddir}/include/net-snmp/net-snmp-config.h ${builddir}/include/net-snmp/agent/mib_module_config.h ${builddir}/include/net-snmp/agent/agent_module_config.h >/dev/null
 }
 
 SKIPIFNOT() {
@@ -416,7 +412,7 @@ WAITFORTRAPD() {
 
 # Wait until pattern "$1" appears in file "$2".
 WAITFOR() {
-    WAITFORCOND grep -q "$1" "$2" "2>/dev/null"
+    WAITFORCOND grep "$1" "$2" ">/dev/null" "2>&1"
 }
 
 GOOD() {
@@ -459,7 +455,7 @@ CHECKANDDIE() {
 # Returns: Count of matched lines.
 #
 CHECKEXACT() {	# <pattern_to_match_exactly>
-	rval=`grep -wc "$*" "$junkoutputfile" 2>/dev/null`
+	rval=`egrep -c "^$*\$|^$*[^a-zA-Z0-9_]|[^a-zA-Z0-9_]$*\$|[^a-zA-Z0-9_]$*[^a-zA-Z0-9_]" "$junkoutputfile" 2>/dev/null`
 	snmp_last_test_result=$rval
 	EXPECTRESULT 1  # default
 	return $rval
