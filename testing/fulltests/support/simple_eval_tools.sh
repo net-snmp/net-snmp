@@ -38,10 +38,6 @@ OK_TO_SAVE_RESULT=1
 export OK_TO_SAVE_RESULT
 fi
 
-if [ `uname -s` = SunOS ]
-then PATH=/usr/xpg4/bin:$PATH
-fi
-
 #
 # HEADER: returns a single line when SNMP_HEADERONLY mode and exits.
 #
@@ -416,7 +412,7 @@ WAITFORTRAPD() {
 
 # Wait until pattern "$1" appears in file "$2".
 WAITFOR() {
-    WAITFORCOND grep -q "$1" "$2" "2>/dev/null"
+    WAITFORCOND grep "$1" "$2" ">/dev/null" "2>&1"
 }
 
 GOOD() {
