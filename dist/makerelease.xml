@@ -71,6 +71,10 @@
 	      while(&lt;GITINFO&gt;) {
 		  if (/^\*\s+(.*)/) {
 		     $self->{'parameters'}{'BRANCHPATH'} = $1;
+		     my ($nextBranch);
+		     $nextBranch = &lt;GITINFO&gt;;
+		     $nextBranch =~ s/^\s+//;
+		     $self->{'parameters'}{'NEXTBRANCH'} = $nextBranch;
                      last;
                   }
               }
@@ -499,6 +503,17 @@
 	  <commands>
 	    <command>git push</command>
 	    <command>git push --tags origin {VERSIONTAGNAME}</command>
+	  </commands>
+	</step>
+	<step type="command" name="release:nextbranch" title="Don't propagate code modifications"
+	      pause="0" mandatory="0">
+	  <text>
+	    Mark these code modifications as specific to this particular branch
+	  </text>
+	  <commands>
+	    <command>git checkout {NEXTBRANCH}</command>
+	    <command>git merge -s ours -m "Release {VERSION} specific changes" {BRANCHPATH}</command>
+	    <command>git checkout {BRANCHPATH}</command>
 	  </commands>
 	</step>
 
