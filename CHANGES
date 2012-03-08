@@ -3,6 +3,102 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.6.2*
+
+    snmplib:
+      - [PATCH 2835577]: Replace SNMP_ZERO of arrays with a memset.
+      - [BUG 3134323]: Fix crash when comparing invalid OIDs
+      - Avoid unnecessary casts when using netsnmp_set_row_column()
+      - Eliminate assorted dead variables
+
+    snmpd:
+      - [PATCH 2941811]: Handle successful requests with reqID 0
+      - [PATCH 3096725]: sysORTable registation for notification log mib
+      - [PATCH 3487919]: Fix compilation when caching is disabled
+      - Added OCFS2 (Oracle Cluster FS) to hrStorageTable and hrFSTable
+      - Eliminate assorted dead variables
+      - UDP-MIB: Report proper udpLocalAddress (instead of 0.0.0.0)
+
+    snmpdx:
+      - [PATCH 3445437]: Log AgentX disconnections (in line with connections)
+
+    snmptrapd:
+      - [BUG 3151254]: Fix crash with invalid traphandle directive
+      - Avoid crash during shutdown due to invoking perl_destruct(NULL)
+      - Don't invoke shutdown_perl() from SIGTERM handler
+      - Handle changes to libmysqlclient API (affects Fedora 15/16)
+      - Remove superfluous casts
+
+    apps:
+      - [PATCH 2835577]: Replace SNMP_ZERO of arrays with a memset.
+
+    build/install:
+      - [BUG 3152841]: Install util_funcs subheaders
+      - OpenBSD: Fix order of headers when checking <netinet/in_pcb.h>
+      - Add target to build agentxtrap from the toplevel
+      - Build fix for systems lacking field msg_control in struct msghdr
+      - Fix static builds using net-snmp-config and -*libs flags
+
+    man:
+      - [BUG 3190725]: Document snmp{,_sess}synch_response and snmp_async_send
+
+    mib2c:
+      - Make the mib2c foreach ranges work as advertised in the comments.
+
+    perl:
+      - Fix spelling in the documentation of the SNMP module
+      - Fixed segmentation fault when handler registration fails.
+      - Don't open stderr unnecessarily (affects embedded agent)
+
+    python:
+      - [PATCH 3185085]: Fix segfault on 64-bit systems
+
+    testing:
+      - [BUG 3474590]: Don't match underscores within the source root filename
+      - Add a test for se_store_list()
+      - Fix Perl regression test failures
+      - Don't fail skipped Perl tests.
+      - Remove unused variables
+
+    AIX:
+      - Eliminate configure warning regarding libperfstat.h (AIX 6.1ff)
+
+    Cygwin:
+      - Make date_n_time() produce time zone information
+      - Fix get_uptime() / hrSystemUptime implementation
+
+    FreeBSD:
+      - Restore IP_RECVDSTADDR functionality.
+
+    Linux:
+      - [PATCH 3205811]: Option to skip fd/loop/ram devices in diskIOTable
+
+    MinGW:
+      - Avoid "pragma comment" warnings in <net-snmp/net-snmp-config.h>
+      - Made regression test output independent of Windows registry settings
+
+    NetBSD:
+      - Update memory and CPU statistics handling
+
+    OpenBSD:
+      - Support updating the routing table
+
+    Windows:
+      - Avoid problems if Net-SNMP Perl modules are built with a different
+	version of Microsoft Visual Studio than that used for ActivePerl
+      - Avoid problems with PACKAGE_* macros when using GNU autotools.
+      - Now builds correctly with a 64-bit compiler.
+      - build.bat: Generate PDB files in release mode.
+      - build.bat: Install netsnmp.dll before running Perl regression tests
+      - Deprecated libsnmp.def - use NETSNMP_IMPORT instead
+      - Fix winExtDLL compiler warnings (following u_long oid typedef)
+      - Make linking with recent OpenSSL binaries succeed.
+      - Make netsnmp_large_fd_set_resize() robust against memalloc failures.
+      - Perl modules build now with IPv6 enabled.
+      - Snmpd: Remove dlmod
+      - Snmptrapd: Make the IP address to hostname conversion work
+
+
 *5.6.1*
 
     general:
