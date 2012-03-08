@@ -41,6 +41,7 @@
 ./agent_handler.lo: ../include/net-snmp/library/snmp_impl.h
 ./agent_handler.lo: ../include/net-snmp/library/snmp.h
 ./agent_handler.lo: ../include/net-snmp/library/snmp-tc.h
+./agent_handler.lo: ../include/net-snmp/library/getopt.h
 ./agent_handler.lo: ../include/net-snmp/utilities.h
 ./agent_handler.lo: ../include/net-snmp/library/system.h
 ./agent_handler.lo: ../include/net-snmp/library/tools.h
@@ -148,6 +149,7 @@
 ./agent_index.lo: ../include/net-snmp/library/snmp_impl.h
 ./agent_index.lo: ../include/net-snmp/library/snmp.h
 ./agent_index.lo: ../include/net-snmp/library/snmp-tc.h
+./agent_index.lo: ../include/net-snmp/library/getopt.h
 ./agent_index.lo: ../include/net-snmp/utilities.h
 ./agent_index.lo: ../include/net-snmp/library/system.h
 ./agent_index.lo: ../include/net-snmp/library/tools.h
@@ -320,6 +322,19 @@
 ./agent_index.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_interface.h
 ./agent_index.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable.h
 ./agent_index.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_data_access.h
+./agent_index.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./agent_index.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_constants.h
+./agent_index.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_interface.h
+./agent_index.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./agent_index.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access.h
+./agent_index.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./agent_index.lo: ../include/net-snmp/data_access/defaultrouter.h
+./agent_index.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_oids.h
+./agent_index.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_enums.h
+./agent_index.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_interface.h
+./agent_index.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./agent_index.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_access.h
+./agent_index.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_get.h
 ./agent_index.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable.h
 ./agent_index.lo: ../include/net-snmp/data_access/arp.h
 ./agent_index.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_constants.h
@@ -415,6 +430,7 @@
 ./agent_read_config.lo: ../include/net-snmp/library/snmp_impl.h
 ./agent_read_config.lo: ../include/net-snmp/library/snmp.h
 ./agent_read_config.lo: ../include/net-snmp/library/snmp-tc.h
+./agent_read_config.lo: ../include/net-snmp/library/getopt.h
 ./agent_read_config.lo: ../include/net-snmp/utilities.h
 ./agent_read_config.lo: ../include/net-snmp/library/system.h
 ./agent_read_config.lo: ../include/net-snmp/library/tools.h
@@ -599,6 +615,19 @@
 ./agent_read_config.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_interface.h
 ./agent_read_config.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable.h
 ./agent_read_config.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_data_access.h
+./agent_read_config.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./agent_read_config.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_constants.h
+./agent_read_config.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_interface.h
+./agent_read_config.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./agent_read_config.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access.h
+./agent_read_config.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./agent_read_config.lo: ../include/net-snmp/data_access/defaultrouter.h
+./agent_read_config.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_oids.h
+./agent_read_config.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_enums.h
+./agent_read_config.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_interface.h
+./agent_read_config.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./agent_read_config.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_access.h
+./agent_read_config.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_get.h
 ./agent_read_config.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable.h
 ./agent_read_config.lo: ../include/net-snmp/data_access/arp.h
 ./agent_read_config.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_constants.h
@@ -694,6 +723,7 @@
 ./agent_registry.lo: ../include/net-snmp/library/snmp_impl.h
 ./agent_registry.lo: ../include/net-snmp/library/snmp.h
 ./agent_registry.lo: ../include/net-snmp/library/snmp-tc.h
+./agent_registry.lo: ../include/net-snmp/library/getopt.h
 ./agent_registry.lo: ../include/net-snmp/utilities.h
 ./agent_registry.lo: ../include/net-snmp/library/system.h
 ./agent_registry.lo: ../include/net-snmp/library/tools.h
@@ -868,6 +898,19 @@
 ./agent_registry.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_interface.h
 ./agent_registry.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable.h
 ./agent_registry.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_data_access.h
+./agent_registry.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./agent_registry.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_constants.h
+./agent_registry.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_interface.h
+./agent_registry.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./agent_registry.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access.h
+./agent_registry.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./agent_registry.lo: ../include/net-snmp/data_access/defaultrouter.h
+./agent_registry.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_oids.h
+./agent_registry.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_enums.h
+./agent_registry.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_interface.h
+./agent_registry.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./agent_registry.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_access.h
+./agent_registry.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_get.h
 ./agent_registry.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable.h
 ./agent_registry.lo: ../include/net-snmp/data_access/arp.h
 ./agent_registry.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_constants.h
@@ -963,6 +1006,7 @@
 ./agent_sysORTable.lo: ../include/net-snmp/library/snmp_impl.h
 ./agent_sysORTable.lo: ../include/net-snmp/library/snmp.h
 ./agent_sysORTable.lo: ../include/net-snmp/library/snmp-tc.h
+./agent_sysORTable.lo: ../include/net-snmp/library/getopt.h
 ./agent_sysORTable.lo: ../include/net-snmp/utilities.h
 ./agent_sysORTable.lo: ../include/net-snmp/library/system.h
 ./agent_sysORTable.lo: ../include/net-snmp/library/tools.h
@@ -1087,6 +1131,7 @@
 ./agent_trap.lo: ../include/net-snmp/library/snmp_assert.h
 ./agent_trap.lo: ../include/net-snmp/version.h
 ./agent_trap.lo: ../include/net-snmp/net-snmp-includes.h
+./agent_trap.lo: ../include/net-snmp/library/getopt.h
 ./agent_trap.lo: ../include/net-snmp/config_api.h
 ./agent_trap.lo: ../include/net-snmp/library/read_config.h
 ./agent_trap.lo: ../include/net-snmp/library/default_store.h
@@ -1183,6 +1228,7 @@
 ./mib_modules.lo: ../include/net-snmp/library/snmp_impl.h
 ./mib_modules.lo: ../include/net-snmp/library/snmp.h
 ./mib_modules.lo: ../include/net-snmp/library/snmp-tc.h
+./mib_modules.lo: ../include/net-snmp/library/getopt.h
 ./mib_modules.lo: ../include/net-snmp/utilities.h
 ./mib_modules.lo: ../include/net-snmp/library/system.h
 ./mib_modules.lo: ../include/net-snmp/library/tools.h
@@ -1353,6 +1399,19 @@
 ./mib_modules.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_interface.h
 ./mib_modules.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable.h
 ./mib_modules.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_data_access.h
+./mib_modules.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./mib_modules.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_constants.h
+./mib_modules.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_interface.h
+./mib_modules.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./mib_modules.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access.h
+./mib_modules.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./mib_modules.lo: ../include/net-snmp/data_access/defaultrouter.h
+./mib_modules.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_oids.h
+./mib_modules.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_enums.h
+./mib_modules.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_interface.h
+./mib_modules.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./mib_modules.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_access.h
+./mib_modules.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_get.h
 ./mib_modules.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable.h
 ./mib_modules.lo: ../include/net-snmp/data_access/arp.h
 ./mib_modules.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_constants.h
@@ -1448,6 +1507,7 @@
 ./object_monitor.lo: ../include/net-snmp/library/snmp_impl.h
 ./object_monitor.lo: ../include/net-snmp/library/snmp.h
 ./object_monitor.lo: ../include/net-snmp/library/snmp-tc.h
+./object_monitor.lo: ../include/net-snmp/library/getopt.h
 ./object_monitor.lo: ../include/net-snmp/utilities.h
 ./object_monitor.lo: ../include/net-snmp/library/system.h
 ./object_monitor.lo: ../include/net-snmp/library/tools.h
@@ -1555,6 +1615,7 @@
 ./snmp_agent.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_agent.lo: ../include/net-snmp/library/snmp.h
 ./snmp_agent.lo: ../include/net-snmp/library/snmp-tc.h
+./snmp_agent.lo: ../include/net-snmp/library/getopt.h
 ./snmp_agent.lo: ../include/net-snmp/utilities.h
 ./snmp_agent.lo: ../include/net-snmp/library/system.h
 ./snmp_agent.lo: ../include/net-snmp/library/tools.h
@@ -1662,6 +1723,7 @@
 ./snmpd.lo: ../include/net-snmp/library/snmp.h
 ./snmpd.lo: ../include/net-snmp/library/snmp-tc.h 
 ./snmpd.lo: ../include/net-snmp/net-snmp-includes.h 
+./snmpd.lo: ../include/net-snmp/library/getopt.h
 ./snmpd.lo: ../include/net-snmp/utilities.h
 ./snmpd.lo: ../include/net-snmp/library/system.h
 ./snmpd.lo: ../include/net-snmp/library/tools.h
@@ -1833,6 +1895,19 @@
 ./snmpd.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_interface.h
 ./snmpd.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable.h
 ./snmpd.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_data_access.h
+./snmpd.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./snmpd.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_constants.h
+./snmpd.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_interface.h
+./snmpd.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./snmpd.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access.h
+./snmpd.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./snmpd.lo: ../include/net-snmp/data_access/defaultrouter.h
+./snmpd.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_oids.h
+./snmpd.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_enums.h
+./snmpd.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_interface.h
+./snmpd.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./snmpd.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_access.h
+./snmpd.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_get.h
 ./snmpd.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable.h
 ./snmpd.lo: ../include/net-snmp/data_access/arp.h
 ./snmpd.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_constants.h
@@ -1926,6 +2001,7 @@
 ./snmp_perl.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_perl.lo: ../include/net-snmp/library/snmp.h
 ./snmp_perl.lo: ../include/net-snmp/library/snmp-tc.h
+./snmp_perl.lo: ../include/net-snmp/library/getopt.h
 ./snmp_perl.lo: ../include/net-snmp/utilities.h
 ./snmp_perl.lo: ../include/net-snmp/library/system.h
 ./snmp_perl.lo: ../include/net-snmp/library/tools.h
@@ -2031,6 +2107,7 @@
 ./snmp_vars.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_vars.lo: ../include/net-snmp/library/snmp.h
 ./snmp_vars.lo: ../include/net-snmp/library/snmp-tc.h
+./snmp_vars.lo: ../include/net-snmp/library/getopt.h
 ./snmp_vars.lo: ../include/net-snmp/utilities.h
 ./snmp_vars.lo: ../include/net-snmp/library/system.h
 ./snmp_vars.lo: ../include/net-snmp/library/tools.h
@@ -2206,6 +2283,19 @@
 ./snmp_vars.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_interface.h
 ./snmp_vars.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable.h
 ./snmp_vars.lo: mibgroup/ip-mib/ipAddressTable/ipAddressTable_data_access.h
+./snmp_vars.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./snmp_vars.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_constants.h
+./snmp_vars.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_interface.h
+./snmp_vars.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.h
+./snmp_vars.lo: mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access.h
+./snmp_vars.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./snmp_vars.lo: ../include/net-snmp/data_access/defaultrouter.h
+./snmp_vars.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_oids.h
+./snmp_vars.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_enums.h
+./snmp_vars.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_interface.h
+./snmp_vars.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h
+./snmp_vars.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_access.h
+./snmp_vars.lo: mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_get.h
 ./snmp_vars.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable.h
 ./snmp_vars.lo: ../include/net-snmp/data_access/arp.h
 ./snmp_vars.lo: mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_constants.h
@@ -2300,6 +2390,7 @@
 ./helpers/all_helpers.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/all_helpers.lo: ../include/net-snmp/library/snmp.h
 ./helpers/all_helpers.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/all_helpers.lo: ../include/net-snmp/library/getopt.h
 ./helpers/all_helpers.lo: ../include/net-snmp/utilities.h
 ./helpers/all_helpers.lo: ../include/net-snmp/library/system.h
 ./helpers/all_helpers.lo: ../include/net-snmp/library/tools.h
@@ -2407,6 +2498,7 @@
 ./helpers/baby_steps.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/baby_steps.lo: ../include/net-snmp/library/snmp.h
 ./helpers/baby_steps.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/baby_steps.lo: ../include/net-snmp/library/getopt.h
 ./helpers/baby_steps.lo: ../include/net-snmp/utilities.h
 ./helpers/baby_steps.lo: ../include/net-snmp/library/system.h
 ./helpers/baby_steps.lo: ../include/net-snmp/library/tools.h
@@ -2513,6 +2605,7 @@
 ./helpers/bulk_to_next.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/bulk_to_next.lo: ../include/net-snmp/library/snmp.h
 ./helpers/bulk_to_next.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/bulk_to_next.lo: ../include/net-snmp/library/getopt.h
 ./helpers/bulk_to_next.lo: ../include/net-snmp/utilities.h
 ./helpers/bulk_to_next.lo: ../include/net-snmp/library/system.h
 ./helpers/bulk_to_next.lo: ../include/net-snmp/library/tools.h
@@ -2619,6 +2712,7 @@
 ./helpers/cache_handler.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/cache_handler.lo: ../include/net-snmp/library/snmp.h
 ./helpers/cache_handler.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/cache_handler.lo: ../include/net-snmp/library/getopt.h
 ./helpers/cache_handler.lo: ../include/net-snmp/utilities.h
 ./helpers/cache_handler.lo: ../include/net-snmp/library/system.h
 ./helpers/cache_handler.lo: ../include/net-snmp/library/tools.h
@@ -2725,6 +2819,7 @@
 ./helpers/debug_handler.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/debug_handler.lo: ../include/net-snmp/library/snmp.h
 ./helpers/debug_handler.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/debug_handler.lo: ../include/net-snmp/library/getopt.h
 ./helpers/debug_handler.lo: ../include/net-snmp/utilities.h
 ./helpers/debug_handler.lo: ../include/net-snmp/library/system.h
 ./helpers/debug_handler.lo: ../include/net-snmp/library/tools.h
@@ -2831,6 +2926,7 @@
 ./helpers/instance.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/instance.lo: ../include/net-snmp/library/snmp.h
 ./helpers/instance.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/instance.lo: ../include/net-snmp/library/getopt.h
 ./helpers/instance.lo: ../include/net-snmp/utilities.h
 ./helpers/instance.lo: ../include/net-snmp/library/system.h
 ./helpers/instance.lo: ../include/net-snmp/library/tools.h
@@ -2937,6 +3033,7 @@
 ./helpers/mode_end_call.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/mode_end_call.lo: ../include/net-snmp/library/snmp.h
 ./helpers/mode_end_call.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/mode_end_call.lo: ../include/net-snmp/library/getopt.h
 ./helpers/mode_end_call.lo: ../include/net-snmp/utilities.h
 ./helpers/mode_end_call.lo: ../include/net-snmp/library/system.h
 ./helpers/mode_end_call.lo: ../include/net-snmp/library/tools.h
@@ -3043,6 +3140,7 @@
 ./helpers/multiplexer.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/multiplexer.lo: ../include/net-snmp/library/snmp.h
 ./helpers/multiplexer.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/multiplexer.lo: ../include/net-snmp/library/getopt.h
 ./helpers/multiplexer.lo: ../include/net-snmp/utilities.h
 ./helpers/multiplexer.lo: ../include/net-snmp/library/system.h
 ./helpers/multiplexer.lo: ../include/net-snmp/library/tools.h
@@ -3149,6 +3247,7 @@
 ./helpers/null.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/null.lo: ../include/net-snmp/library/snmp.h
 ./helpers/null.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/null.lo: ../include/net-snmp/library/getopt.h
 ./helpers/null.lo: ../include/net-snmp/utilities.h
 ./helpers/null.lo: ../include/net-snmp/library/system.h
 ./helpers/null.lo: ../include/net-snmp/library/tools.h
@@ -3255,6 +3354,7 @@
 ./helpers/old_api.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/old_api.lo: ../include/net-snmp/library/snmp.h
 ./helpers/old_api.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/old_api.lo: ../include/net-snmp/library/getopt.h
 ./helpers/old_api.lo: ../include/net-snmp/utilities.h
 ./helpers/old_api.lo: ../include/net-snmp/library/system.h
 ./helpers/old_api.lo: ../include/net-snmp/library/tools.h
@@ -3362,6 +3462,7 @@
 ./helpers/read_only.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/read_only.lo: ../include/net-snmp/library/snmp.h
 ./helpers/read_only.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/read_only.lo: ../include/net-snmp/library/getopt.h
 ./helpers/read_only.lo: ../include/net-snmp/utilities.h
 ./helpers/read_only.lo: ../include/net-snmp/library/system.h
 ./helpers/read_only.lo: ../include/net-snmp/library/tools.h
@@ -3468,6 +3569,7 @@
 ./helpers/row_merge.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/row_merge.lo: ../include/net-snmp/library/snmp.h
 ./helpers/row_merge.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/row_merge.lo: ../include/net-snmp/library/getopt.h
 ./helpers/row_merge.lo: ../include/net-snmp/utilities.h
 ./helpers/row_merge.lo: ../include/net-snmp/library/system.h
 ./helpers/row_merge.lo: ../include/net-snmp/library/tools.h
@@ -3574,6 +3676,7 @@
 ./helpers/scalar.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/scalar.lo: ../include/net-snmp/library/snmp.h
 ./helpers/scalar.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/scalar.lo: ../include/net-snmp/library/getopt.h
 ./helpers/scalar.lo: ../include/net-snmp/utilities.h
 ./helpers/scalar.lo: ../include/net-snmp/library/system.h
 ./helpers/scalar.lo: ../include/net-snmp/library/tools.h
@@ -3680,6 +3783,7 @@
 ./helpers/scalar_group.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/scalar_group.lo: ../include/net-snmp/library/snmp.h
 ./helpers/scalar_group.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/scalar_group.lo: ../include/net-snmp/library/getopt.h
 ./helpers/scalar_group.lo: ../include/net-snmp/utilities.h
 ./helpers/scalar_group.lo: ../include/net-snmp/library/system.h
 ./helpers/scalar_group.lo: ../include/net-snmp/library/tools.h
@@ -3786,6 +3890,7 @@
 ./helpers/serialize.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/serialize.lo: ../include/net-snmp/library/snmp.h
 ./helpers/serialize.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/serialize.lo: ../include/net-snmp/library/getopt.h
 ./helpers/serialize.lo: ../include/net-snmp/utilities.h
 ./helpers/serialize.lo: ../include/net-snmp/library/system.h
 ./helpers/serialize.lo: ../include/net-snmp/library/tools.h
@@ -3892,6 +3997,7 @@
 ./helpers/snmp_get_statistic.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/snmp_get_statistic.lo: ../include/net-snmp/library/snmp.h
 ./helpers/snmp_get_statistic.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/snmp_get_statistic.lo: ../include/net-snmp/library/getopt.h
 ./helpers/snmp_get_statistic.lo: ../include/net-snmp/utilities.h
 ./helpers/snmp_get_statistic.lo: ../include/net-snmp/library/system.h
 ./helpers/snmp_get_statistic.lo: ../include/net-snmp/library/tools.h
@@ -3998,6 +4104,7 @@
 ./helpers/stash_cache.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/stash_cache.lo: ../include/net-snmp/library/snmp.h
 ./helpers/stash_cache.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/stash_cache.lo: ../include/net-snmp/library/getopt.h
 ./helpers/stash_cache.lo: ../include/net-snmp/utilities.h
 ./helpers/stash_cache.lo: ../include/net-snmp/library/system.h
 ./helpers/stash_cache.lo: ../include/net-snmp/library/tools.h
@@ -4106,6 +4213,7 @@
 ./helpers/stash_to_next.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/stash_to_next.lo: ../include/net-snmp/library/snmp.h
 ./helpers/stash_to_next.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/stash_to_next.lo: ../include/net-snmp/library/getopt.h
 ./helpers/stash_to_next.lo: ../include/net-snmp/utilities.h
 ./helpers/stash_to_next.lo: ../include/net-snmp/library/system.h
 ./helpers/stash_to_next.lo: ../include/net-snmp/library/tools.h
@@ -4214,6 +4322,7 @@
 ./helpers/table_array.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/table_array.lo: ../include/net-snmp/library/snmp.h
 ./helpers/table_array.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/table_array.lo: ../include/net-snmp/library/getopt.h
 ./helpers/table_array.lo: ../include/net-snmp/utilities.h
 ./helpers/table_array.lo: ../include/net-snmp/library/system.h
 ./helpers/table_array.lo: ../include/net-snmp/library/tools.h
@@ -4320,6 +4429,7 @@
 ./helpers/table.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/table.lo: ../include/net-snmp/library/snmp.h
 ./helpers/table.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/table.lo: ../include/net-snmp/library/getopt.h
 ./helpers/table.lo: ../include/net-snmp/utilities.h
 ./helpers/table.lo: ../include/net-snmp/library/system.h
 ./helpers/table.lo: ../include/net-snmp/library/tools.h
@@ -4426,6 +4536,7 @@
 ./helpers/table_container.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/table_container.lo: ../include/net-snmp/library/snmp.h
 ./helpers/table_container.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/table_container.lo: ../include/net-snmp/library/getopt.h
 ./helpers/table_container.lo: ../include/net-snmp/utilities.h
 ./helpers/table_container.lo: ../include/net-snmp/library/system.h
 ./helpers/table_container.lo: ../include/net-snmp/library/tools.h
@@ -4532,6 +4643,7 @@
 ./helpers/table_data.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/table_data.lo: ../include/net-snmp/library/snmp.h
 ./helpers/table_data.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/table_data.lo: ../include/net-snmp/library/getopt.h
 ./helpers/table_data.lo: ../include/net-snmp/utilities.h
 ./helpers/table_data.lo: ../include/net-snmp/library/system.h
 ./helpers/table_data.lo: ../include/net-snmp/library/tools.h
@@ -4638,6 +4750,7 @@
 ./helpers/table_dataset.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/table_dataset.lo: ../include/net-snmp/library/snmp.h
 ./helpers/table_dataset.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/table_dataset.lo: ../include/net-snmp/library/getopt.h
 ./helpers/table_dataset.lo: ../include/net-snmp/utilities.h
 ./helpers/table_dataset.lo: ../include/net-snmp/library/system.h
 ./helpers/table_dataset.lo: ../include/net-snmp/library/tools.h
@@ -4744,6 +4857,7 @@
 ./helpers/table_iterator.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/table_iterator.lo: ../include/net-snmp/library/snmp.h
 ./helpers/table_iterator.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/table_iterator.lo: ../include/net-snmp/library/getopt.h
 ./helpers/table_iterator.lo: ../include/net-snmp/utilities.h
 ./helpers/table_iterator.lo: ../include/net-snmp/library/system.h
 ./helpers/table_iterator.lo: ../include/net-snmp/library/tools.h
@@ -4851,6 +4965,7 @@
 ./helpers/table_row.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/table_row.lo: ../include/net-snmp/library/snmp.h
 ./helpers/table_row.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/table_row.lo: ../include/net-snmp/library/getopt.h
 ./helpers/table_row.lo: ../include/net-snmp/utilities.h
 ./helpers/table_row.lo: ../include/net-snmp/library/system.h
 ./helpers/table_row.lo: ../include/net-snmp/library/tools.h
@@ -4957,6 +5072,7 @@
 ./helpers/table_tdata.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/table_tdata.lo: ../include/net-snmp/library/snmp.h
 ./helpers/table_tdata.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/table_tdata.lo: ../include/net-snmp/library/getopt.h
 ./helpers/table_tdata.lo: ../include/net-snmp/utilities.h
 ./helpers/table_tdata.lo: ../include/net-snmp/library/system.h
 ./helpers/table_tdata.lo: ../include/net-snmp/library/tools.h
@@ -5063,6 +5179,7 @@
 ./helpers/watcher.lo: ../include/net-snmp/library/snmp_impl.h
 ./helpers/watcher.lo: ../include/net-snmp/library/snmp.h
 ./helpers/watcher.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/watcher.lo: ../include/net-snmp/library/getopt.h
 ./helpers/watcher.lo: ../include/net-snmp/utilities.h
 ./helpers/watcher.lo: ../include/net-snmp/library/system.h
 ./helpers/watcher.lo: ../include/net-snmp/library/tools.h
@@ -5169,6 +5286,7 @@
 ./mibgroup/header_complex.lo: ../include/net-snmp/library/snmp_impl.h
 ./mibgroup/header_complex.lo: ../include/net-snmp/library/snmp.h
 ./mibgroup/header_complex.lo: ../include/net-snmp/library/snmp-tc.h
+./mibgroup/header_complex.lo: ../include/net-snmp/library/getopt.h
 ./mibgroup/header_complex.lo: ../include/net-snmp/utilities.h
 ./mibgroup/header_complex.lo: ../include/net-snmp/library/system.h
 ./mibgroup/header_complex.lo: ../include/net-snmp/library/tools.h
@@ -5277,6 +5395,7 @@
 ./mibgroup/testhandler.lo: ../include/net-snmp/library/snmp_impl.h
 ./mibgroup/testhandler.lo: ../include/net-snmp/library/snmp.h
 ./mibgroup/testhandler.lo: ../include/net-snmp/library/snmp-tc.h
+./mibgroup/testhandler.lo: ../include/net-snmp/library/getopt.h
 ./mibgroup/testhandler.lo: ../include/net-snmp/utilities.h
 ./mibgroup/testhandler.lo: ../include/net-snmp/library/system.h
 ./mibgroup/testhandler.lo: ../include/net-snmp/library/tools.h
@@ -5384,6 +5503,7 @@
 ./mibgroup/util_funcs.lo: ../include/net-snmp/library/snmp_impl.h
 ./mibgroup/util_funcs.lo: ../include/net-snmp/library/snmp.h
 ./mibgroup/util_funcs.lo: ../include/net-snmp/library/snmp-tc.h
+./mibgroup/util_funcs.lo: ../include/net-snmp/library/getopt.h
 ./mibgroup/util_funcs.lo: ../include/net-snmp/utilities.h
 ./mibgroup/util_funcs.lo: ../include/net-snmp/library/system.h
 ./mibgroup/util_funcs.lo: ../include/net-snmp/library/tools.h
