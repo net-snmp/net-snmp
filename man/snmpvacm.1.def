@@ -3,42 +3,42 @@
 snmpvacm - creates and maintains SNMPv3 View-based Access Control entries on a network entity
 .SH SYNOPSIS
 .B snmpvacm
-[COMMON OPTIONS]
+[COMMON OPTIONS] AGENT
 .B createSec2Group
 MODEL SECURITYNAME  GROUPNAME
 .br
 .B snmpvacm
-[COMMON OPTIONS]
+[COMMON OPTIONS] AGENT
 .B deleteSec2Group
 MODEL SECURITYNAME
 .br
 .B snmpvacm
-[COMMON OPTIONS]
+[COMMON OPTIONS] AGENT
 .B createView
 [\-Ce] NAME SUBTREE MASK
 .br
 .B snmpvacm
-[COMMON OPTIONS]
+[COMMON OPTIONS] AGENT
 .B deleteView
 NAME SUBTREE
 .br
 .B snmpvacm
-[COMMON OPTIONS] 
+[COMMON OPTIONS]  AGENT
 .B createAccess
 GROUPNAME [CONTEXTPREFIX] MODEL LEVEL CONTEXTMATCH READVIEW WRITEVIEW NOTIFYVIEW
 .br
 .B snmpvacm
-[COMMON OPTIONS] 
+[COMMON OPTIONS]  AGENT
 .B deleteAccess
 GROUPNAME [CONTEXTPREFIX] MODEL LEVEL
 .br
 .B snmpvacm
-[COMMON OPTIONS] 
+[COMMON OPTIONS]  AGENT
 .B createAuth
 GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE CONTEXTMATCH VIEW 
 .br
 .B snmpvacm
-[COMMON OPTIONS] 
+[COMMON OPTIONS]  AGENT
 .B deleteAuth
 GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE
 
@@ -282,6 +282,12 @@ security model, security level and authtype values,
 which should match those used in the corresponding
 .B createAuth
 command (or equivalent).
+
+.PP
+Note that
+.B snmpget
+REQUIRES  an argument specifying the agent to query
+as described in the .I snmpcmd(1) manual page.
 
 .SH EXAMPLES
 .PP

@@ -456,8 +456,6 @@ icmp_msg_stats_first_entry(void **loop_context,
 void
 init_icmp(void)
 {
-    netsnmp_handler_registration *scalar_reginfo = NULL;
-    int rc;
 #ifdef linux
     netsnmp_handler_registration *msg_stats_reginfo = NULL;
     netsnmp_handler_registration *table_reginfo = NULL;
@@ -466,6 +464,8 @@ init_icmp(void)
     netsnmp_table_registration_info *table_info;
     netsnmp_table_registration_info *msg_stats_table_info;
 #endif
+    netsnmp_handler_registration *scalar_reginfo = NULL;
+    int                    rc;
 
     /*
      * register ourselves with the agent as a group of scalars...
@@ -481,10 +481,12 @@ init_icmp(void)
      *    (except for HP-UX 11, which extracts objects individually)
      */
 #ifndef hpux11
-    netsnmp_inject_handler( scalar_reginfo,
+    rc = netsnmp_inject_handler( scalar_reginfo,
 		    netsnmp_get_cache_handler(ICMP_STATS_CACHE_TIMEOUT,
 			   		icmp_load, icmp_free,
 					icmp_oid, OID_LENGTH(icmp_oid)));
+    if (rc != SNMPERR_SUCCESS)
+	goto bail;
 #endif
 #ifdef linux
 
@@ -565,15 +567,17 @@ init_icmp(void)
 #endif
     return;
 
-#ifdef linux
+#ifndef hpux11
 bail:
-    if (scalar_reginfo)
-        netsnmp_unregister_handler(scalar_reginfo);
-    if (table_reginfo)
-        netsnmp_unregister_handler(table_reginfo);
-    if (msg_stats_reginfo)
-        netsnmp_unregister_handler(msg_stats_reginfo);
 #endif
+#ifdef linux
+    if (msg_stats_reginfo)
+        netsnmp_handler_registration_free(msg_stats_reginfo);
+    if (table_reginfo)
+        netsnmp_handler_registration_free(table_reginfo);
+#endif
+    if (scalar_reginfo)
+        netsnmp_handler_registration_free(scalar_reginfo);
 }
 
 

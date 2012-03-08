@@ -283,7 +283,7 @@ else
 	echo "Ack.  Can't create $tmpfile: already exists"
 	exit 1
       fi
-      echo "generating the tmporary code file: $tmpfile"
+      echo "generating the temporary code file: $tmpfile"
       rm -f $tmpfile
       cat > $tmpfile <<EOF
 /* generated from net-snmp-config */
@@ -593,7 +593,6 @@ EOF
   SOCK_CLEANUP;
   exit(0);
 }
-
 EOF
       if test "$?" != 0 -o ! -f "$tmpfile" ; then
         echo "Ack.  Can't create $tmpfile."
@@ -603,10 +602,10 @@ EOF
       echo "running: $cmd"
       `$cmd`
       if test "x$norm" != "x1" ; then
-        echo "removing the tmporary code file: $tmpfile"
+        echo "removing the temporary code file: $tmpfile"
         rm -f $tmpfile
       else
-        echo "leaving the tmporary code file: $tmpfile"
+        echo "leaving the temporary code file: $tmpfile"
       fi
       if test -f $outname ; then
         echo "subagent program $outname created"

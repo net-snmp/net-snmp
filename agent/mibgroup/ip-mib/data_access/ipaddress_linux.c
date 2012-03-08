@@ -224,7 +224,6 @@ _load_v6(netsnmp_container *container, int idx_offset)
     u_char          *buf;
     int             if_index, pfx_len, scope, flags, rc = 0;
     size_t          in_len, out_len;
-    prefix_cbx      prefix_val;
     netsnmp_ipaddress_entry *entry;
     _ioctl_extras           *extras;
     static int      log_open_err = 1;
@@ -387,6 +386,8 @@ _load_v6(netsnmp_container *container, int idx_offset)
         entry->ia_valid_lifetime = 0;
 #endif
 #ifdef SUPPORT_PREFIX_FLAGS
+        {
+        prefix_cbx      prefix_val;
         memset(&prefix_val, 0, sizeof(prefix_cbx));
         if(net_snmp_find_prefix_info(&prefix_head_list, addr, &prefix_val) < 0) {
            DEBUGMSGTL(("access:ipaddress:container", "unable to find info\n"));
@@ -396,7 +397,8 @@ _load_v6(netsnmp_container *container, int idx_offset)
         } else {
            entry->ia_onlink_flag = prefix_val.ipAddressPrefixOnLinkFlag; 
            entry->ia_autonomous_flag = prefix_val.ipAddressPrefixAutonomousFlag;
-        }  
+        }
+        }
 #else
         entry->ia_onlink_flag = 1;  /*Set by default as true*/
         entry->ia_autonomous_flag = 2; /*Set by default as false*/
