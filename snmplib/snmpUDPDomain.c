@@ -692,7 +692,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
          * be INADDR_ANY, but certainly includes a port number.
          */
 
-      t->local = (u_char *) malloc(6);
+        t->local = (u_char *) malloc(6);
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
