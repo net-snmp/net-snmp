@@ -960,8 +960,9 @@ void netsnmp_get_monotonic_clock(struct timeval* tv)
     tv->tv_sec = now64 / 1000;
     tv->tv_usec = (now64 % 1000) * 1000;
 #else
-#error Not sure how to query a monotonically increasing clock on your system. \
-Please report this to net-snmp-coders@lists.sourceforge.net.
+    /* At least FreeBSD 4 doesn't provide monotonic clock support. */
+#warning Not sure how to query a monotonically increasing clock on your system. \
+Timers will not work correctly if the system clock is adjusted by e.g. ntpd.
     gettimeofday(tv, NULL);
 #endif
 }

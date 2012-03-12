@@ -574,8 +574,8 @@ main(int argc, char *argv[])
             break;
 
         case 'd':
-            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
-                                   NETSNMP_DS_LIB_QUICK_PRINT,
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_DUMP_PACKET,
                                    ++snmp_dump_packet);
             break;
 
