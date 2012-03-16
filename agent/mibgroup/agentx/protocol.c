@@ -1282,6 +1282,7 @@ agentx_parse_opaque(u_char * data, size_t * length, int *type,
                     u_char * opaque_buf, size_t * opaque_len,
                     u_int network_byte_order)
 {
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     union {
         float           floatVal;
         double          doubleVal;
@@ -1290,17 +1291,18 @@ agentx_parse_opaque(u_char * data, size_t * length, int *type,
     } fu;
     int             tmp;
     u_char         *buf;
-    u_char         *cp;
+#endif
+    u_char         *const cp =
+        agentx_parse_string(data, length,
+                            opaque_buf, opaque_len, network_byte_order);
 
-    cp = agentx_parse_string(data, length,
-                             opaque_buf, opaque_len, network_byte_order);
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     if (cp == NULL)
         return NULL;
 
     buf = opaque_buf;
 
-#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
-    if ((buf[0] != ASN_OPAQUE_TAG1) || (*opaque_len <= 3))
+    if ((*opaque_len <= 3) || (buf[0] != ASN_OPAQUE_TAG1))
         return cp;              /* Unrecognised opaque type */
 
     switch (buf[1]) {
