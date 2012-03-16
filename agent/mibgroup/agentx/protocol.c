@@ -1291,7 +1291,7 @@ agentx_parse_opaque(u_char * data, size_t * length, int *type,
     buf = opaque_buf;
 
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
-    if ((buf[0] != ASN_OPAQUE_TAG1) || (*opaque_len <= 3))
+    if ((*opaque_len <= 3) || (buf[0] != ASN_OPAQUE_TAG1))
         return cp;              /* Unrecognised opaque type */
 
     switch (buf[1]) {
