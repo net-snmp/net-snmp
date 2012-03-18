@@ -3608,6 +3608,12 @@ fi
 
 #
 #   Subsystems to build:
+#       Library
+#
+FEATUREHEADERS="library/features.h"
+FTMAINSUBS=""
+
+#
 #       Agent
 #
 # Check whether --enable-agent was given.
@@ -3624,6 +3630,7 @@ fi
 if test "x$enable_agent" != "xno"; then
    SNMPD='snmpd$(EXEEXT)'
    MAINSUBS="$MAINSUBS agent"
+   FEATUREHEADERS="$FEATUREHEADERS agent/features-mibgroups.h agent/features.h"
    FTMAINSUBS="agent $FTMAINSUBS"
    TRAPLIBS='$(TRAPDWITHAGENT)'
    USETRAPLIBS='$(USEAGENTLIBS)'
@@ -3636,7 +3643,11 @@ else
    #USETRAPLIBS='$(USELIBS)'
    TRAPLIBS='$(TRAPDWITHAGENT)'
    USETRAPLIBS='$(USEAGENTLIBS)'
+
+$as_echo "#define NETSNMP_DISABLE_AGENT 1" >>confdefs.h
+
 fi
+
 
 
 
@@ -3656,7 +3667,12 @@ fi
 
 if test "x$enable_applications" != "xno"; then
    MAINSUBS="$MAINSUBS apps"
+   FEATUREHEADERS="$FEATUREHEADERS features-snmpnetstat.h features-apps.h"
    FTMAINSUBS="apps $FTMAINSUBS"
+else
+
+$as_echo "#define NETSNMP_DISABLE_APPS 1" >>confdefs.h
+
 fi
 
 #       Manual pages
@@ -4593,7 +4609,6 @@ fi
 
 
 FEATURETARGS=""
-FEATUREHEADERS=""
 # Check whether --enable-minimalist was given.
 if test "${enable_minimalist+set}" = set; then :
   enableval=$enable_minimalist;
@@ -4609,13 +4624,14 @@ if test "x$enable_minimalist" = "xyes"; then
    # we'll assume the mini agent is desired here as well
    mini_agent="yes"
    FEATURETARGS="features"
-   FEATUREHEADERS="library/features.h agent/features.h agent/features-mibgroups.h features-snmpnetstat.h features-apps.h"
 
    # needed to bootstrap later checks
    echo "" > include/net-snmp/feature-details.h
 
 $as_echo "#define NETSNMP_MINIMAL_CODE 1" >>confdefs.h
 
+else
+   FEATUREHEADERS=""
 fi
 
 # Check whether --with-minimalist was given.
@@ -21900,7 +21916,8 @@ $as_echo "$netsnmp_cv_func_clock_gettime_LNETSNMPLIBS" >&6; }
     if test "${netsnmp_cv_func_clock_gettime_LNETSNMPLIBS}" != "none required" ; then
        LNETSNMPLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
-    $as_echo "#define HAVE_CLOCK_GETTIME 1" >>confdefs.h
+
+$as_echo "#define HAVE_CLOCK_GETTIME 1" >>confdefs.h
 
 
  fi

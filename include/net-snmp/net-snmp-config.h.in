@@ -102,7 +102,7 @@
 /* Define to 1 if you have the `chown' function. */
 #undef HAVE_CHOWN
 
-/* Define to 1 if you have the `clock_gettime' function. */
+/* Define to 1 if you have the `clock_gettime' library */
 #undef HAVE_CLOCK_GETTIME
 
 /* Define to 1 if you have the `closedir' function. */
@@ -1311,6 +1311,12 @@
 
 /* default mib files to load, specified by path. */
 #undef NETSNMP_DEFAULT_MIBFILES
+
+/* Define if no agent is built */
+#undef NETSNMP_DISABLE_AGENT
+
+/* Define if no apps are built */
+#undef NETSNMP_DISABLE_APPS
 
 /* Define if DES encryption should not be supported */
 #undef NETSNMP_DISABLE_DES
