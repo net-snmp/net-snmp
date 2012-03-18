@@ -180,8 +180,14 @@ fi
 AC_SUBST(INSTALL_PREFIX)
 
 
-#   
+#
 #   Subsystems to build:
+#       Library
+#
+FEATUREHEADERS="library/features.h"
+FTMAINSUBS=""
+
+#
 #       Agent
 #
 NETSNMP_ARG_ENABLE(agent,
@@ -189,6 +195,7 @@ NETSNMP_ARG_ENABLE(agent,
 if test "x$enable_agent" != "xno"; then
    SNMPD='snmpd$(EXEEXT)'
    MAINSUBS="$MAINSUBS agent"
+   FEATUREHEADERS="$FEATUREHEADERS agent/features-mibgroups.h agent/features.h"
    FTMAINSUBS="agent $FTMAINSUBS"
    TRAPLIBS='$(TRAPDWITHAGENT)'
    USETRAPLIBS='$(USEAGENTLIBS)'
@@ -201,7 +208,9 @@ else
    #USETRAPLIBS='$(USELIBS)'
    TRAPLIBS='$(TRAPDWITHAGENT)'
    USETRAPLIBS='$(USEAGENTLIBS)'
+   AC_DEFINE([NETSNMP_DISABLE_AGENT], 1, [Define if no agent is built])
 fi
+
 AC_SUBST(SNMPD)
 AC_SUBST(TRAPLIBS)
 AC_SUBST(USETRAPLIBS)
@@ -212,7 +221,10 @@ NETSNMP_ARG_ENABLE(applications,
 [  --disable-applications          Do not build the apps (snmpget, ...).])
 if test "x$enable_applications" != "xno"; then
    MAINSUBS="$MAINSUBS apps"
+   FEATUREHEADERS="$FEATUREHEADERS features-snmpnetstat.h features-apps.h"
    FTMAINSUBS="apps $FTMAINSUBS"
+else
+   AC_DEFINE([NETSNMP_DISABLE_APPS], 1, [Define if no apps are built])
 fi
 
 #       Manual pages
@@ -781,19 +793,19 @@ AC_ARG_WITH(feature,, NETSNMP_INVALID_WITH([features]))
 AC_ARG_WITH(out-feature,, NETSNMP_INVALID_WITH([out-features]))
 
 FEATURETARGS=""
-FEATUREHEADERS=""
 NETSNMP_ARG_ENABLE(minimalist,
 [  --enable-minimalist             Remove all non-essential code features.])
 if test "x$enable_minimalist" = "xyes"; then
    # we'll assume the mini agent is desired here as well
    mini_agent="yes"
    FEATURETARGS="features"
-   FEATUREHEADERS="library/features.h agent/features.h agent/features-mibgroups.h features-snmpnetstat.h features-apps.h"
 
    # needed to bootstrap later checks
    echo "" > include/net-snmp/feature-details.h
    AC_DEFINE(NETSNMP_MINIMAL_CODE, 1,
      [Define if you want to remove all non-essential code features.])
+else
+   FEATUREHEADERS=""
 fi
 AC_ARG_WITH([minimalist],,NETSNMP_INVALID_ENABLE([minimalist]))
 AC_SUBST(FEATURETARGS)

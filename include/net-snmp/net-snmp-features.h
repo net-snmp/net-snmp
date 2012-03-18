@@ -7,10 +7,14 @@
 #include <net-snmp/feature-details.h>
 #else /* ! NETSNMP_FEATURE_CHECKING */
 #include <net-snmp/library/features.h>
+#ifndef NETSNMP_DISABLE_AGENT
 #include <net-snmp/agent/features.h>
 #include <net-snmp/agent/features-mibgroups.h>
+#endif
+#ifndef NETSNMP_DISABLE_APPS
 #include <net-snmp/features-snmpnetstat.h>
 #include <net-snmp/features-apps.h>
+#endif
 #endif /* ! NETSNMP_FEATURE_CHECKING */
 #endif /* NETSNMP_MINIMAL_CODE */
 
