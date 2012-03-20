@@ -1652,31 +1652,35 @@ run_ping(unsigned int clientreg, void *clientarg)
 
         ai = host_serv(host, NULL, 0, 0);
 
-        DEBUGMSGTL(("pingCtlTable", "PING %s (%s): %d data bytes\n",
-                    ai->ai_canonname,
-                    sock_ntop_host(ai->ai_addr, ai->ai_addrlen), datalen));
+        if (ai) {
+            DEBUGMSGTL(("pingCtlTable", "PING %s (%s): %d data bytes\n",
+                        ai->ai_canonname,
+                        sock_ntop_host(ai->ai_addr, ai->ai_addrlen), datalen));
 
-        /*
-         * 4initialize according to protocol 
-         */
-        if (ai->ai_family == AF_INET) {
-            pr = &proto_v4;
+            /*
+             * 4initialize according to protocol 
+             */
+            if (ai->ai_family == AF_INET) {
+                pr = &proto_v4;
 #ifdef	IPV6
-        } else if (ai->ai_family == AF_INET6) {
-            pr = &proto_v6;
+            } else if (ai->ai_family == AF_INET6) {
+                pr = &proto_v6;
 
-            if (IN6_IS_ADDR_V4MAPPED(&(((struct sockaddr_in6 *)
-                                        ai->ai_addr)->sin6_addr)))
-                snmp_log(LOG_ERR, "cannot ping IPv4-mapped IPv6 address");
+                if (IN6_IS_ADDR_V4MAPPED(&(((struct sockaddr_in6 *)
+                                            ai->ai_addr)->sin6_addr)))
+                    snmp_log(LOG_ERR, "cannot ping IPv4-mapped IPv6 address");
 #endif
-        } else {
-            snmp_log(LOG_ERR, "unknown address family %d", ai->ai_family);
-        }
+            } else {
+                snmp_log(LOG_ERR, "unknown address family %d", ai->ai_family);
+            }
 
-        pr->sasend = ai->ai_addr;
-        pr->sarecv = calloc(1, ai->ai_addrlen);
-        pr->salen = ai->ai_addrlen;
-        readloop(item, ai, datalen, minrtt, maxrtt, averagertt, pid);
+            pr->sasend = ai->ai_addr;
+            pr->sarecv = calloc(1, ai->ai_addrlen);
+            pr->salen = ai->ai_addrlen;
+            readloop(item, ai, datalen, minrtt, maxrtt, averagertt, pid);
+        } else {
+            snmp_log(LOG_ERR, "PING: name resolution for %s failed.\n", host);
+        }
 
         SNMP_FREE(minrtt);
         SNMP_FREE(maxrtt);
