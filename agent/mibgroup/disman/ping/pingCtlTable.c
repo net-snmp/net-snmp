@@ -1326,9 +1326,11 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
     static int      probeFailed = 0;
     static int      testFailed = 0;
     static int      series = 0;
-
     netsnmp_variable_list *vars = NULL;
     struct pingResultsTable_data *StorageNew = NULL;
+
+    DEBUGMSGTL(("pingCtlTable", "proc_v4(flag = %d)\n", flag));
+
     if (flag == 0) {
         series = 0;
         ip = (struct ip *) ptr; /* start of IP header */
@@ -1338,12 +1340,18 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
         if ((icmplen = len - hlen1) < 8)
             DEBUGMSGTL(("pingCtlTable", "icmplen (%d) < 8", icmplen));
 
+        DEBUGMSGTL(("pingCtlTable", "ICMP type = %d (%sa reply)\n",
+                    icmp->icmp_type,
+                    icmp->icmp_type == ICMP_ECHOREPLY ? "" : "not a "));
+
         if (icmp->icmp_type == ICMP_ECHOREPLY) {
-            if (icmp->icmp_id != pid)
-                return SNMP_ERR_NOERROR;         /* not a response to our ECHO_REQUEST */
+            if (icmp->icmp_id != pid) {
+                DEBUGMSGTL(("pingCtlTable", "not a response to our ECHO_REQUEST\n"));
+                return SNMP_ERR_NOERROR;
+            }
+
             if (icmplen < 16)
                 DEBUGMSGTL(("pingCtlTable", "icmplen (%d) < 16", icmplen));
-
 
             tvsend = (struct timeval *) icmp->icmp_data;
 
@@ -1356,8 +1364,10 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
 
             StorageNew = header_complex_get(pingResultsTableStorage, vars);
             snmp_free_varbind(vars);
-            if (!StorageNew)
+            if (!StorageNew) {
+                DEBUGMSGTL(("pingCtlTable", "StorageNew == NULL\n"));
                 return SNMP_ERR_NOSUCHNAME;
+            }
 
             if (current_probe == 1) {
                 *averagertt = rtt;
@@ -1457,12 +1467,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                 }
 	    }
         }
-    }
-
-    else if (flag == 1)
-    {
-
-
+    } else if (flag == 1) {
         if (series == 0)
             probeFailed = 1;
         else
