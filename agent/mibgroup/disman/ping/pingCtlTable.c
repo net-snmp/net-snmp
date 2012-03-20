@@ -1246,6 +1246,8 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
     unsigned long  *sumrtt;
     struct timeval  tv;
 
+    memset(sendbuf, 0, sizeof(sendbuf));
+
     sumrtt = (unsigned long *) malloc(sizeof(unsigned long));
     sockfd = socket(pr->sasend->sa_family, SOCK_RAW, pr->icmpproto);
     if (sockfd < 0) {
