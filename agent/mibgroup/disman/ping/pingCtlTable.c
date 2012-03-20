@@ -1241,6 +1241,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
     /* struct pingProbeHistoryTable_data * current=NULL; */
     struct pingProbeHistoryTable_data current_var;
     int             sockfd;
+    int             select_result;
     int             current_probe_temp;
     int             success_probe = 0;
     int             fail_probe = 0;
@@ -1268,25 +1269,29 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
         (*pr->fsend) (datalen, pid, nsent, sockfd, sendbuf);
         nsent++;
         len = pr->salen;
-        if (readable_timeo(sockfd, item->pingCtlTimeOut) == 0) {
-            DEBUGMSGTL(("pingCtlTable", "socket timeout\n"));
-            n = -1;
-            fail_probe = fail_probe + 1;
-            flag = 1;
-        } else {
-            n = recvfrom(sockfd, recvbuf, sizeof(recvbuf), 0, pr->sarecv,
-                         &len);
-            success_probe = success_probe + 1;
-            flag = 0;
-        }
+        select_result = readable_timeo(sockfd, item->pingCtlTimeOut);
+        do {
+            if (select_result == 0) {
+                DEBUGMSGTL(("pingCtlTable", "socket timeout\n"));
+                n = -1;
+                fail_probe = fail_probe + 1;
+                flag = 1;
+            } else {
+                n = recvfrom(sockfd, recvbuf, sizeof(recvbuf), 0, pr->sarecv,
+                             &len);
+                success_probe = success_probe + 1;
+                flag = 0;
+            }
 
-        gettimeofday(&tval, NULL);
+            gettimeofday(&tval, NULL);
 
-        time(&timep);
+            time(&timep);
 
-        (*pr->fproc) (recvbuf, n, &tval, timep, item, ai, datalen, minrtt,
-                      maxrtt, &sumrtt, averagertt, current_probe_temp,
-                      success_probe, fail_probe, flag, &current_var, pid);
+            (*pr->fproc) (recvbuf, n, &tval, timep, item, ai, datalen, minrtt,
+                          maxrtt, &sumrtt, averagertt, current_probe_temp,
+                          success_probe, fail_probe, flag, &current_var, pid);
+            select_result = readable_timeo(sockfd, 0);
+        } while (select_result > 0);
     }
     close(sockfd);
 }
