@@ -845,6 +845,7 @@ pingProbeHistoryTable_count(struct pingCtlTable_data *thedata)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlOperationName */
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
+    snmp_free_varbind(vars);
 
     for (hciptr2 = pingProbeHistoryTableStorage; hciptr2 != NULL;
          hciptr2 = hciptr2->next) {
@@ -873,6 +874,8 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlOperationName */
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
+
+    snmp_free_varbind(vars);
 
     for (hcilast = hciptr2 = pingProbeHistoryTableStorage; hciptr2 != NULL;
          hciptr2 = hciptr2->next) {
@@ -1109,11 +1112,10 @@ send_ping_trap(struct pingCtlTable_data *item,
 
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /* pingCtlOwnerIndex */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /* pingCtlOperationName */
-    StorageTmp = SNMP_MALLOC_STRUCT(pingResultsTable_data);
-    if ((StorageTmp =
-         (struct pingResultsTable_data *)
-         header_complex_get(pingResultsTableStorage, vars)) == NULL)
-        return ;
+    StorageTmp = header_complex_get(pingResultsTableStorage, vars);
+    snmp_free_varbind(vars);
+    if (!StorageTmp)
+        return;
 
     /*
      * snmpTrap oid 
@@ -1352,10 +1354,9 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /* pingCtlOwnerIndex */
             snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /* pingCtlTestName */
 
-
-            if ((StorageNew =
-                 header_complex_get(pingResultsTableStorage,
-                                    vars)) == NULL)
+            StorageNew = header_complex_get(pingResultsTableStorage, vars);
+            snmp_free_varbind(vars);
+            if (!StorageNew)
                 return SNMP_ERR_NOSUCHNAME;
 
             if (current_probe == 1) {
@@ -1471,9 +1472,9 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
         snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen); /*  pingCtlOwnerIndex */
         snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen);     /* pingCtlTestName */
 
-
-        if ((StorageNew =
-             header_complex_get(pingResultsTableStorage, vars)) == NULL)
+        StorageNew = header_complex_get(pingResultsTableStorage, vars);
+        snmp_free_varbind(vars);
+        if (!StorageNew)
             return SNMP_ERR_NOSUCHNAME;
 
         if (current_probe == 1) {
@@ -1623,9 +1624,9 @@ run_ping(unsigned int clientreg, void *clientarg)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /* pingCtlOwnerIndex  */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /* pingCtlTestName  */
 
-
-    if ((StorageNew =
-         header_complex_get(pingResultsTableStorage, vars)) == NULL)
+    StorageNew = header_complex_get(pingResultsTableStorage, vars);
+    snmp_free_varbind(vars);
+    if (!StorageNew)
         return;
 
     StorageNew->pingResultsSendProbes = 0;
@@ -1679,6 +1680,7 @@ run_ping(unsigned int clientreg, void *clientarg)
             pr->sarecv = calloc(1, ai->ai_addrlen);
             pr->salen = ai->ai_addrlen;
             readloop(item, ai, datalen, minrtt, maxrtt, averagertt, pid);
+            free(pr->sarecv);
         } else {
             snmp_log(LOG_ERR, "PING: name resolution for %s failed.\n", host);
         }
@@ -1686,7 +1688,7 @@ run_ping(unsigned int clientreg, void *clientarg)
         SNMP_FREE(minrtt);
         SNMP_FREE(maxrtt);
         SNMP_FREE(averagertt);
-        SNMP_FREE(ai);
+        freeaddrinfo(ai);
     }
 
     else if (item->pingCtlTargetAddressType == 2) {
@@ -1956,15 +1958,14 @@ init_resultsTable(struct pingCtlTable_data *item)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /* pingCtlOwnerIndex  */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /* pingCtlTestName  */
 
-
-    if ((StorageNew =
-         header_complex_get(pingResultsTableStorage, vars)) != NULL) {
+    StorageNew = header_complex_get(pingResultsTableStorage, vars);
+    snmp_free_varbind(vars);
+    if (StorageNew) {
         StorageNew->pingResultsSendProbes = 0;
         StorageNew->pingResultsProbeResponses = 0;
         return;
-
     }
-    ai = malloc(sizeof(struct addrinfo));
+
     host = item->pingCtlTargetAddress;
     ai = host_serv(host, NULL, 0, 0);
     StorageTmp = SNMP_MALLOC_STRUCT(pingResultsTable_data);
@@ -1987,26 +1988,14 @@ init_resultsTable(struct pingCtlTable_data *item)
 
     if (item->pingCtlTargetAddressType == 1
         || item->pingCtlTargetAddressType == 16) {
-        if (ai == NULL) {
-            StorageTmp->pingResultsIpTargetAddressType = 0;
-            StorageTmp->pingResultsIpTargetAddress = strdup("");
-            StorageTmp->pingResultsIpTargetAddressLen = 0;
-        } else {
-            StorageTmp->pingResultsIpTargetAddressType = 1;
-            StorageTmp->pingResultsIpTargetAddress =
-                (char *)
-                malloc(strlen(sock_ntop_host(ai->ai_addr, ai->ai_addrlen))
-                       + 1);
-            StorageTmp->pingResultsIpTargetAddress =
-                strdup(sock_ntop_host(ai->ai_addr, ai->ai_addrlen));
-            StorageTmp->
-                pingResultsIpTargetAddress[strlen
-                                           (sock_ntop_host
-                                            (ai->ai_addr,
-                                             ai->ai_addrlen))] = '\0';
-            StorageTmp->pingResultsIpTargetAddressLen =
-                strlen(sock_ntop_host(ai->ai_addr, ai->ai_addrlen));
-        }
+        const char* str;
+
+        StorageTmp->pingResultsIpTargetAddressType = ai ? 1 : 0;
+        str = ai ? sock_ntop_host(ai->ai_addr, ai->ai_addrlen) : NULL;
+        if (!str)
+            str = "";
+        StorageTmp->pingResultsIpTargetAddress = strdup(str);
+        StorageTmp->pingResultsIpTargetAddressLen = strlen(str);
     }
     if (item->pingCtlTargetAddressType == 2) {
 
@@ -2021,10 +2010,7 @@ init_resultsTable(struct pingCtlTable_data *item)
 
         if (inet_pton(AF_INET6, host, &to->sin6_addr) > 0) {
             StorageTmp->pingResultsIpTargetAddressType = 2;
-            StorageTmp->pingResultsIpTargetAddress =
-                (char *) malloc(strlen(host) + 1);
             StorageTmp->pingResultsIpTargetAddress = strdup(host);
-            StorageTmp->pingResultsIpTargetAddress[strlen(host)] = '\0';
             StorageTmp->pingResultsIpTargetAddressLen = strlen(host);
         } else {
             hp = gethostbyname2(host, AF_INET6);
@@ -2033,13 +2019,8 @@ init_resultsTable(struct pingCtlTable_data *item)
                 memmove((caddr_t) & to->sin6_addr, hp->h_addr, 16);
                 hostname = inet_ntop(AF_INET6, &to->sin6_addr, pa, 64);
                 StorageTmp->pingResultsIpTargetAddressType = 2;
-                StorageTmp->pingResultsIpTargetAddress =
-                    (char *) malloc(strlen(hostname) + 1);
                 StorageTmp->pingResultsIpTargetAddress = strdup(hostname);
-                StorageTmp->pingResultsIpTargetAddress[strlen(hostname)] =
-                    '\0';
-                StorageTmp->pingResultsIpTargetAddressLen =
-                    strlen(hostname);
+                StorageTmp->pingResultsIpTargetAddressLen = strlen(hostname);
             } else {
                 (void) fprintf(stderr,
                                "traceroute: unknown host %s\n", host);
@@ -2068,8 +2049,7 @@ init_resultsTable(struct pingCtlTable_data *item)
             }
         }
     }
-    SNMP_FREE(ai);
-
+    freeaddrinfo(ai);
 }
 
 
@@ -2082,9 +2062,9 @@ modify_ResultsOper(struct pingCtlTable_data *thedata, long val)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlOwnerIndex, thedata->pingCtlOwnerIndexLen);       /* pingCtlOwnerIndex */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlTestName */
 
-
-    if ((StorageTmp =
-         header_complex_get(pingResultsTableStorage, vars)) == NULL)
+    StorageTmp = header_complex_get(pingResultsTableStorage, vars);
+    snmp_free_varbind(vars);
+    if (!StorageTmp)
         return SNMP_ERR_NOSUCHNAME;
     StorageTmp->pingResultsOperStatus = val;
 
@@ -4951,8 +4931,6 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                     struct pingProbeHistoryTable_data *temp = NULL;
                     netsnmp_variable_list *vars = NULL;
 
-
-
                     if (series == 0)
                         probeFailed = 1;
                     else
@@ -4963,10 +4941,10 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /*  pingCtlOwnerIndex  */
                     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /*  pingCtlTestName  */
 
-
-                    if ((StorageNew =
-                         header_complex_get(pingResultsTableStorage,
-                                            vars)) == NULL)
+                    StorageNew = header_complex_get(pingResultsTableStorage,
+                                                    vars);
+                    snmp_free_varbind(vars);
+                    if (!StorageNew)
                         return;
 
                     StorageNew->pingResultsSendProbes =
@@ -5282,9 +5260,9 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /*  pingCtlOwnerIndex  */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /*  pingCtlTestName  */
 
-
-    if ((StorageNew =
-         header_complex_get(pingResultsTableStorage, vars)) == NULL)
+    StorageNew = header_complex_get(pingResultsTableStorage, vars);
+    snmp_free_varbind(vars);
+    if (!StorageNew)
         return SNMP_ERR_NOSUCHNAME;
 
 
