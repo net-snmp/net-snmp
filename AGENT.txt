@@ -1166,4 +1166,6 @@ above all feedback, would be most appreciated :-)
 
   ------------------------------------------------------------------------
 Copyright 1999, 2000 - D.T.Shield.
-Not to be distributed without the explicit permission of the author.
+This file may be distributed as part of a source or binary packaging
+of the Net-SNMP software suite.  It may not be distributed independently
+without the explicit permission of the author.
