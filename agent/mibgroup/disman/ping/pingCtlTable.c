@@ -1287,8 +1287,6 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
         (*pr->fproc) (recvbuf, n, &tval, timep, item, ai, datalen, minrtt,
                       maxrtt, &sumrtt, averagertt, current_probe_temp,
                       success_probe, fail_probe, flag, &current_var, pid);
-        if (current_probe_temp >= item->pingCtlProbeCount)
-            return;
     }
     close(sockfd);
 }
