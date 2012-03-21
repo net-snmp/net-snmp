@@ -257,8 +257,13 @@
 	  <text>This step will create manual pages from doxygen
 	  instrumented code files.</text>
 	  <commands>
-	    <command>make docs</command>
-	    <command>make mancp</command>
+	    <command>
+	       if [ -f Makefile ]
+	       then
+	         make docs
+	         make mancp
+	       fi
+	    </command>
 	  </commands>
 	</step>
 	<step type="system" stepname="docs:update" title="docs:update">
