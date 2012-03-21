@@ -213,6 +213,12 @@ dot3StatsTable_container_load(netsnmp_container * container)
 {
     dot3StatsTable_rowreq_ctx *rowreq_ctx;
     size_t          count = 0;
+    int             fd;
+#if defined(linux)
+    long            dot3StatsIndex;
+    int             rc = 0, retval = 0;
+    struct ifname *list_head = NULL, *p = NULL;
+#endif
     
     DEBUGMSGTL(("verbose:dot3StatsTable:dot3StatsTable_container_load",
                 "called\n"));
@@ -231,13 +237,7 @@ dot3StatsTable_container_load(netsnmp_container * container)
      * dot3StatsIndex(1)/InterfaceIndex/ASN_INTEGER/long(long)//l/A/w/e/R/d/H
      */
 
-    long            dot3StatsIndex;
-    int             fd;
-    int             rc = 0, retval = 0;
 
-#if defined(linux)
-    struct ifname *list_head = NULL, *p = NULL;
-#endif
 
     /*
      * create socket for ioctls
