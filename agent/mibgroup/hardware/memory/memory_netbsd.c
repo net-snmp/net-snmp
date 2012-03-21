@@ -35,20 +35,23 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 
     struct uvmexp  uvmexp;
     size_t         uvmexp_size  = sizeof(uvmexp);
-    int            uvmexp_mib[] = { CTL_VM, VM_UVMEXP };
 
     struct vmtotal total;
     size_t         total_size  = sizeof(total);
-    int            total_mib[] = { CTL_VM, VM_METER };
 
     quad_t          phys_mem;
     quad_t          user_mem;
-    unsigned int    bufspace;
-    unsigned int    maxbufspace;
     size_t          mem_size  = sizeof(phys_mem);
-    size_t          buf_size  = sizeof(bufspace);
+#if defined(openbsd)
     int             phys_mem_mib[] = { CTL_HW, HW_PHYSMEM64 };
     int             user_mem_mib[] = { CTL_HW, HW_USERMEM64 };
+    int             uvmexp_mib[] = { CTL_VM, VM_UVMEXP };
+    int             total_mib[] = { CTL_VM, VM_METER };
+#else
+    unsigned int    bufspace;
+    unsigned int    maxbufspace;
+    size_t          buf_size  = sizeof(bufspace);
+#endif
 
     /*
      * Retrieve the memory information from the underlying O/S...
@@ -59,12 +62,31 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     sysctl(phys_mem_mib, 2, &phys_mem, &mem_size,      NULL, 0);
     sysctl(user_mem_mib, 2, &user_mem, &mem_size,      NULL, 0);
 #else
-    sysctlbyname("vm.uvmexp",              &uvmexp, &uvmexp_size, NULL, 0);
-    sysctlbyname("vm.vmmeter",              &total,  &total_size, NULL, 0);
-    sysctlbyname("hw.physmem64",         &phys_mem,    &mem_size, NULL, 0);
-    sysctlbyname("hw.usermem64",         &user_mem,    &mem_size, NULL, 0);
-    sysctlbyname("vm.bufmem",            &bufspace,    &buf_size, NULL, 0);
-    sysctlbyname("vm.bufmem_hiwater", &maxbufspace,    &buf_size, NULL, 0);
+    if (sysctlbyname("vm.uvmexp", &uvmexp, &uvmexp_size, NULL, 0) == -1) {
+        snmp_log(LOG_ERR, "sysctl vm.uvmexp failed (errno %d)\n", errno);
+        return -1;
+    }
+    if (sysctlbyname("vm.vmmeter", &total,  &total_size, NULL, 0) == -1) {
+        snmp_log(LOG_ERR, "sysctl vm.vmmeter failed (errno %d)\n", errno);
+        return -1;
+    }
+    if (sysctlbyname("hw.physmem64", &phys_mem, &mem_size, NULL, 0) == -1) {
+        snmp_log(LOG_ERR, "sysctl hw.physmem64 failed (errno %d)\n", errno);
+        return -1;
+    }
+    if (sysctlbyname("hw.usermem64", &user_mem, &mem_size, NULL, 0) == -1) {
+        snmp_log(LOG_ERR, "sysctl hw.usermem64 failed (errno %d)\n", errno);
+        return -1;
+    }
+    if (sysctlbyname("vm.bufmem", &bufspace, &buf_size, NULL, 0) == -1) {
+        snmp_log(LOG_ERR, "sysctl vm.bufmem failed (errno %d)\n", errno);
+        return -1;
+    }
+    if (sysctlbyname("vm.bufmem_hiwater", &maxbufspace, &buf_size, NULL, 0) == -1) {
+        snmp_log(LOG_ERR, "sysctl vm.bufmem_hiwater failed (errno %d)\n", errno);
+        return -1;
+    }
+
 #endif
     pagesize = sysconf(_SC_PAGESIZE);
 
@@ -93,7 +115,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->free  = uvmexp.free;
     }
 
-#if defined(__NetBSD__)
+#if 1
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_VIRTMEM, 1 );
     if (!mem) {
         snmp_log_perror("No Virtual Memory info entry");
