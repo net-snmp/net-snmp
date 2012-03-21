@@ -161,10 +161,10 @@ struct pingCtlTable_data *
 create_pingCtlTable_data(void)
 {
     struct pingCtlTable_data *StorageNew = NULL;
+
     StorageNew = SNMP_MALLOC_STRUCT(pingCtlTable_data);
-    if (StorageNew == NULL) {
-        exit(1);
-    }
+    if (StorageNew == NULL)
+        return NULL;
     StorageNew->pingCtlTargetAddressType = 1;
     StorageNew->pingCtlTargetAddress = strdup("");
     StorageNew->pingCtlTargetAddressLen = 0;
@@ -172,12 +172,11 @@ create_pingCtlTable_data(void)
     StorageNew->pingCtlTimeOut = 3;
     StorageNew->pingCtlProbeCount = 1;
     StorageNew->pingCtlAdminStatus = 2;
-    StorageNew->pingCtlDataFill = (char *) malloc(strlen("00") + 1);
+    StorageNew->pingCtlDataFill = strdup("00");
     if (StorageNew->pingCtlDataFill == NULL) {
-        exit(1);
+        free(StorageNew);
+        return NULL;
     }
-    memcpy(StorageNew->pingCtlDataFill, "00", strlen("00") + 1);
-    StorageNew->pingCtlDataFill[strlen("00")] = '\0';
     StorageNew->pingCtlDataFillLen = strlen(StorageNew->pingCtlDataFill);
     StorageNew->pingCtlFrequency = 0;
     StorageNew->pingCtlMaxRows = 50;
@@ -4151,6 +4150,8 @@ write_pingCtlRowStatus(int action,
             vp = vars;
 
             StorageNew = create_pingCtlTable_data();
+            if (!StorageNew)
+                return SNMP_ERR_GENERR;
             if (vp->val_len <= 32) {
                 StorageNew->pingCtlOwnerIndex = malloc(vp->val_len + 1);
                 memcpy(StorageNew->pingCtlOwnerIndex, vp->val.string,
