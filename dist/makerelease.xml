@@ -13,6 +13,17 @@
 	information.
       </text>
       <steps>
+	<step type="system" title="Old Code">
+	  <text>
+	    This checks for old tarballs (and particularly unpacked
+	    distributions) which might confuse the later processing.
+	    If this step finds outstanding files you need to remove
+	    them before continuing!
+	  </text>
+	  <commands>
+	    <command expectfailure="1">find . -name 'net-snmp-5*' | egrep '^[^\?]'</command>
+	  </commands>
+	</step>
 	<step type="system" title="Setup Check">
 	  <text>
 	    This should show the last version number published in this
