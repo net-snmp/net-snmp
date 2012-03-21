@@ -158,6 +158,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     }
 #if HAVE_KVM_GETPROC2
     proc_table = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &nprocs );
+#elif defined(KERN_PROC_PROC)
+    proc_table = kvm_getprocs(kd, KERN_PROC_PROC, 0, &nprocs );
 #else
     proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nprocs );
 #endif
@@ -252,19 +254,11 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         }
         
 #if defined(freebsd5) && __FreeBSD_version >= 500014
-# ifdef NOT_DEFINED
-   Apparently following these pointers triggers a SIG10 error
-
-        entry->hrSWRunPerfCPU  = proc_table[i].ki_paddr->p_uticks;
-        entry->hrSWRunPerfCPU += proc_table[i].ki_paddr->p_sticks;
-        entry->hrSWRunPerfCPU += proc_table[i].ki_paddr->p_iticks;
-        entry->hrSWRunPerfMem  = proc_table[i].ki_vmspace->vm_tsize;
-        entry->hrSWRunPerfMem += proc_table[i].ki_vmspace->vm_ssize;
-        entry->hrSWRunPerfMem += proc_table[i].ki_vmspace->vm_dsize;
-        entry->hrSWRunPerfMem *= (getpagesize()/1024);  /* in kB */
-# endif
-        entry->hrSWRunPerfCPU  = proc_table[i].ki_runtime / 100000;
-        entry->hrSWRunPerfMem  = proc_table[i].ki_size / 1024;;
+         entry->hrSWRunPerfCPU  = (proc_table[i].ki_rusage.ru_utime.tv_sec*1000000 + proc_table[i].ki_rusage.ru_utime.tv_usec) / 10000;
+	 entry->hrSWRunPerfCPU += (proc_table[i].ki_rusage.ru_stime.tv_sec*1000000 + proc_table[i].ki_rusage.ru_stime.tv_usec) / 10000;
+	 entry->hrSWRunPerfCPU += (proc_table[i].ki_rusage_ch.ru_utime.tv_sec*1000000 + proc_table[i].ki_rusage_ch.ru_utime.tv_usec) / 10000;
+	 entry->hrSWRunPerfCPU += (proc_table[i].ki_rusage_ch.ru_stime.tv_sec*1000000 + proc_table[i].ki_rusage_ch.ru_stime.tv_usec) / 10000;
+	 entry->hrSWRunPerfMem  = proc_table[i].ki_size * (getpagesize()/1024);  /* in kB */
 #elif defined(HAVE_KVM_GETPROC2)
         /*
          * newer NetBSD, OpenBSD
@@ -305,7 +299,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
      *   so shouldn't be freed here.
      */
 
-    DEBUGMSGTL(("swrun:load:arch"," loaded %d entries\n",
+    DEBUGMSGTL(("swrun:load:arch","loaded %d entries\n",
                 (int)CONTAINER_SIZE(container)));
 
     return 0;
