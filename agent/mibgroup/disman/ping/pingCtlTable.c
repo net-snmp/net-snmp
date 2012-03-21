@@ -969,8 +969,10 @@ Sock_ntop_host(const struct sockaddr *sa, socklen_t salen)
 {
     char           *ptr;
 
-    if ((ptr = sock_ntop_host(sa, salen)) == NULL)
-        printf("sock_ntop_host error"); /* inet_ntop() sets errno */
+    if ((ptr = sock_ntop_host(sa, salen)) == NULL) {
+        /* inet_ntop() sets errno */
+        snmp_log_perror("pingCtlTable: sock_ntop_host()");
+    }
     return (ptr);
 }
 
@@ -1051,17 +1053,18 @@ Host_serv(const char *host, const char *serv, int family, int socktype)
     hints.ai_family = family;   /* 0, AF_INET, AF_INET6, etc. */
     hints.ai_socktype = socktype;       /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
 
-    if ((n = netsnmp_getaddrinfo(host, serv, &hints, &res)) != 0)
+    if ((n = netsnmp_getaddrinfo(host, serv, &hints, &res)) != 0) {
 #if HAVE_GAI_STRERROR
-        printf("host_serv error for %s, %s: %s",
-               (host == NULL) ? "(no hostname)" : host,
-               (serv == NULL) ? "(no service name)" : serv,
-               gai_strerror(n));
+        snmp_log(LOG_ERR, "host_serv error for %s, %s: %s",
+                 (host == NULL) ? "(no hostname)" : host,
+                 (serv == NULL) ? "(no service name)" : serv,
+                 gai_strerror(n));
 #else
-        printf("host_serv error for %s, %s",
-               (host == NULL) ? "(no hostname)" : host,
-               (serv == NULL) ? "(no service name)" : serv);
+        snmp_log(LOG_ERR, "host_serv error for %s, %s",
+                 (host == NULL) ? "(no hostname)" : host,
+                 (serv == NULL) ? "(no service name)" : serv);
 #endif
+    }
 
     return (res);               /* return pointer to first on linked list */
 }
@@ -1264,7 +1267,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
         nsent++;
         len = pr->salen;
         if (readable_timeo(sockfd, item->pingCtlTimeOut) == 0) {
-            /* printf("socket timeout!\n"); */
+            DEBUGMSGTL(("pingCtlTable", "socket timeout\n"));
             n = -1;
             fail_probe = fail_probe + 1;
             flag = 1;
@@ -1330,13 +1333,13 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
 
         icmp = (struct icmp *) (ptr + hlen1);   /* start of ICMP header */
         if ((icmplen = len - hlen1) < 8)
-            printf("icmplen (%d) < 8", icmplen);
+            DEBUGMSGTL(("pingCtlTable", "icmplen (%d) < 8", icmplen));
 
         if (icmp->icmp_type == ICMP_ECHOREPLY) {
             if (icmp->icmp_id != pid)
                 return SNMP_ERR_NOERROR;         /* not a response to our ECHO_REQUEST */
             if (icmplen < 16)
-                printf("icmplen (%d) < 16", icmplen);
+                DEBUGMSGTL(("pingCtlTable", "icmplen (%d) < 16", icmplen));
 
 
             tvsend = (struct timeval *) icmp->icmp_data;
@@ -1360,7 +1363,6 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                 *maxrtt = rtt;
                 *sumrtt = rtt;
             } else {
-                printf("else\n");
                 if (rtt < *minrtt)
                     *minrtt = rtt;
                 if (rtt > *maxrtt)
@@ -1650,8 +1652,9 @@ run_ping(unsigned int clientreg, void *clientarg)
 
         ai = host_serv(host, NULL, 0, 0);
 
-        printf("PING %s (%s): %d data bytes\n", ai->ai_canonname,
-               sock_ntop_host(ai->ai_addr, ai->ai_addrlen), datalen);
+        DEBUGMSGTL(("pingCtlTable", "PING %s (%s): %d data bytes\n",
+                    ai->ai_canonname,
+                    sock_ntop_host(ai->ai_addr, ai->ai_addrlen), datalen));
 
         /*
          * 4initialize according to protocol 
@@ -1664,10 +1667,11 @@ run_ping(unsigned int clientreg, void *clientarg)
 
             if (IN6_IS_ADDR_V4MAPPED(&(((struct sockaddr_in6 *)
                                         ai->ai_addr)->sin6_addr)))
-                printf("cannot ping IPv4-mapped IPv6 address");
+                snmp_log(LOG_ERR, "cannot ping IPv4-mapped IPv6 address");
 #endif
-        } else
-            printf("unknown address family %d", ai->ai_family);
+        } else {
+            snmp_log(LOG_ERR, "unknown address family %d", ai->ai_family);
+        }
 
         pr->sasend = ai->ai_addr;
         pr->sarecv = calloc(1, ai->ai_addrlen);
@@ -1758,8 +1762,7 @@ run_ping(unsigned int clientreg, void *clientarg)
             int             probe_fd = socket(AF_INET6, SOCK_DGRAM, 0);
 
             if (probe_fd < 0) {
-                printf("error!\n");
-                perror("socket");
+                snmp_log_perror("pingCtlTable: IPv6 datagram socket creation");
                 return;
             }
             if (device) {
@@ -1908,15 +1911,16 @@ run_ping(unsigned int clientreg, void *clientarg)
             }
         }
 
-        printf("PING %s(%s) ", hostname,
-               pr_addr(&whereto.sin6_addr, options));
+        DEBUGMSGTL(("pingCtlTable", "PING %s(%s) ", hostname,
+                    pr_addr(&whereto.sin6_addr, options)));
         if (flowlabel)
-            printf(", flow 0x%05x, ", (unsigned) ntohl(flowlabel));
+            DEBUGMSGTL(("pingCtlTable", ", flow 0x%05x, ",
+                        (unsigned) ntohl(flowlabel)));
         if (device || (options & F_NUMERIC)) {
-            printf("from %s %s: ",
-                   pr_addr_n(&source.sin6_addr), device ? : "");
+            DEBUGMSGTL(("from %s %s: ",
+                        pr_addr_n(&source.sin6_addr), device ? : ""));
         }
-        printf("%d data bytes\n", datalen);
+        DEBUGMSGTL(("pingCtlTable", "%d data bytes\n", datalen));
 
         setup(icmp_sock, options, uid, timeout, preload, interval, datalen,
               (char *) outpack, &ident, &start_time, &screen_width,
@@ -4818,11 +4822,11 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
             break;
         }
         if (npackets && nreceived >= npackets) {
-            printf("npackets,nreceived=%ld\n", nreceived);
+            DEBUGMSGTL(("pingCtlTable", "npackets,nreceived=%ld\n", nreceived));
             break;
         }
         if (deadline && nerrors) {
-            printf("deadline\n");
+            DEBUGMSGTL(("pingCtlTable", "deadline\n"));
             break;
         }
 
@@ -4837,7 +4841,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
          * Send probes scheduled to this time. 
          */
         do {
-            printf("pinger\n");
+            DEBUGMSGTL(("pingCtlTable", "pinger\n"));
             next =
                 pinger(icmp_sock, preload, cmsglen, cmsgbuf, whereto,
                        &rtt_addend, uid, options, interval, datalen,
@@ -4845,11 +4849,11 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                        deadline, &acked, &npackets, &nreceived,
                        &ntransmitted, &nerrors, &confirm_flag, &confirm,
                        &pipesize, &cur_time);
-            printf("1:next=%d\n", next);
+            DEBUGMSGTL(("pingCtlTable", "1:next=%d\n", next));
             next =
                 schedule_exit(next, deadline, &npackets, &nreceived,
                               &ntransmitted, &tmax);
-            printf("2:next=%d\n", next);
+            DEBUGMSGTL(("pingCtlTable", "2:next=%d\n", next));
         } while (next <= 0);
 
         /*
@@ -5046,7 +5050,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                     not_ours = 1;
                 }
             } else {
-                printf("cc>=0,else\n");
+                DEBUGMSGTL(("pingCtlTable", "cc>=0,else\n"));
 #ifdef SO_TIMESTAMP
                 for (c = CMSG_FIRSTHDR(&msg); c; c = CMSG_NXTHDR(&msg, c)) {
                     if (c->cmsg_level != SOL_SOCKET ||
@@ -5165,9 +5169,9 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
         tvsub(tv, &tmp_tv);
         triptime = tv->tv_sec * 1000000 + tv->tv_usec;
         if (triptime < 0) {
-            fprintf(stderr,
-                    "Warning: time of day goes back (%ldus), taking countermeasures.\n",
-                    triptime);
+            snmp_log(LOG_INFO, "Warning: time of day goes back (%ldus), taking"
+                     " countermeasures.\n",
+                     triptime);
             triptime = 0;
             if (!(options & F_LATENCY)) {
                 gettimeofday(tv, NULL);
@@ -5215,32 +5219,34 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
     } else {
         int             i;
         __u8           *cp, *dp;
-        printf("%d bytes from %s: icmp_seq=%u", cc, from, seq);
+
+        DEBUGMSGTL(("pingCtlTable", "%d bytes from %s: icmp_seq=%u", cc, from,
+                    seq));
 
         if (hops >= 0)
-            printf(" ttl=%d", hops);
+            DEBUGMSGTL(("pingCtlTable", " ttl=%d", hops));
 
         if (cc < datalen + 8) {
-            printf(" (truncated)\n");
+            DEBUGMSGTL(("pingCtlTable", " (truncated)\n"));
             return 1;
         }
         if (timing) {
             if (triptime >= 100000)
-                printf(" time=%ld ms", triptime / 1000);
+                DEBUGMSGTL(("pingCtlTable", " time=%ld ms", triptime / 1000));
             else if (triptime >= 10000)
-                printf(" time=%ld.%01ld ms", triptime / 1000,
-                       (triptime % 1000) / 100);
+                DEBUGMSGTL(("pingCtlTable", " time=%ld.%01ld ms",
+                            triptime / 1000, (triptime % 1000) / 100));
             else if (triptime >= 1000)
-                printf(" time=%ld.%02ld ms", triptime / 1000,
-                       (triptime % 1000) / 10);
+                DEBUGMSGTL(("pingCtlTable", " time=%ld.%02ld ms",
+                            triptime / 1000, (triptime % 1000) / 10));
             else
-                printf(" time=%ld.%03ld ms", triptime / 1000,
-                       triptime % 1000);
+                DEBUGMSGTL(("pingCtlTable", " time=%ld.%03ld ms",
+                            triptime / 1000, triptime % 1000));
         }
         if (dupflag)
-            printf(" (DUP!)");
+            DEBUGMSGTL(("pingCtlTable", " (DUP!)"));
         if (csfailed)
-            printf(" (BAD CHECKSUM!)");
+            DEBUGMSGTL(("pingCtlTable", " (BAD CHECKSUM!)"));
 
         /*
          * check the data 
@@ -5249,13 +5255,14 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
         dp = (u_char *)&outpack[8 + sizeof(struct timeval)];
         for (i = sizeof(struct timeval); i < datalen; ++i, ++cp, ++dp) {
             if (*cp != *dp) {
-                printf("\nwrong data byte #%d should be 0x%x but was 0x%x",
-                       i, *dp, *cp);
+                DEBUGMSGTL(("pingCtlTable",
+                            "\nwrong data byte #%d should be 0x%x but was 0x%x",
+                            i, *dp, *cp));
                 cp = (u_char *) ptr + sizeof(struct timeval);
                 for (i = sizeof(struct timeval); i < datalen; ++i, ++cp) {
                     if ((i % 32) == sizeof(struct timeval))
-                        printf("\n#%d\t", i);
-                    printf("%x ", *cp);
+                        DEBUGMSGTL(("pingCtlTable", "\n#%d\t", i));
+                    DEBUGMSGTL(("pingCtlTable", "%x ", *cp));
                 }
                 break;
             }
@@ -5390,20 +5397,21 @@ finish(int options, char *hostname, int interval, int timing, int *rtt,
 
     putchar('\n');
     fflush(stdout);
-    printf("--- %s ping statistics ---\n", hostname);
+    DEBUGMSGTL(("pingCtlTable", "--- %s ping statistics ---\n", hostname));
 
     if (*nrepeats)
-        printf(", +%ld duplicates", *nrepeats);
+        DEBUGMSGTL(("pingCtlTable", ", +%ld duplicates", *nrepeats));
     if (*nchecksum)
-        printf(", +%ld corrupted", *nchecksum);
+        DEBUGMSGTL(("pingCtlTable", ", +%ld corrupted", *nchecksum));
     if (*nerrors)
-        printf(", +%ld errors", *nerrors);
+        DEBUGMSGTL(("pingCtlTable", ", +%ld errors", *nerrors));
     if (*ntransmitted) {
-        printf(", %d%% loss",
-               (int) ((((long long) ((*ntransmitted) -
-                                     (*nreceived))) * 100) /
-                      (*ntransmitted)));
-        printf(", time %ldms", 1000 * tv.tv_sec + tv.tv_usec / 1000);
+        DEBUGMSGTL(("pingCtlTable", ", %d%% loss",
+                    (int) ((((long long) ((*ntransmitted) -
+                                          (*nreceived))) * 100) /
+                           (*ntransmitted))));
+        DEBUGMSGTL(("pingCtlTable", ", time %ldms",
+                    1000 * tv.tv_sec + tv.tv_usec / 1000));
     }
     putchar('\n');
 
@@ -5414,21 +5422,23 @@ finish(int options, char *hostname, int interval, int timing, int *rtt,
         (*tsum2) /= (*nreceived) + (*nrepeats);
         tmdev = llsqrt((*tsum2) - (*tsum) * (*tsum));
 
-        printf
-            ("rtt min/avg/max/mdev = %ld.%03ld/%lu.%03ld/%ld.%03ld/%ld.%03ld ms",
-             (*tmin) / 1000, (*tmin) % 1000,
-             (unsigned long) ((*tsum) / 1000), (long) ((*tsum) % 1000),
-             (*tmax) / 1000, (*tmax) % 1000, tmdev / 1000, tmdev % 1000);
+        DEBUGMSGTL(("pingCtlTable", "rtt min/avg/max/mdev = %ld.%03ld/%lu.%03ld"
+                    "/%ld.%03ld/%ld.%03ld ms",
+                    (*tmin) / 1000, (*tmin) % 1000,
+                    (unsigned long) ((*tsum) / 1000), (long) ((*tsum) % 1000),
+                    (*tmax) / 1000, (*tmax) % 1000, tmdev / 1000,
+                    tmdev % 1000));
     }
     if ((*pipesize) > 1)
-        printf(", pipe %d", *pipesize);
+        DEBUGMSGTL(("pingCtlTable", ", pipe %d", *pipesize));
     if ((*ntransmitted) > 1
         && (!interval || (options & (F_FLOOD | F_ADAPTIVE)))) {
         int             ipg =
             (1000000 * (long long) tv.tv_sec +
              tv.tv_usec) / ((*ntransmitted) - 1);
-        printf(", ipg/ewma %d.%03d/%d.%03d ms", ipg / 1000, ipg % 1000,
-               (*rtt) / 8000, ((*rtt) / 8) % 1000);
+        DEBUGMSGTL(("pingCtlTable", ", ipg/ewma %d.%03d/%d.%03d ms",
+                    ipg / 1000, ipg % 1000,
+                    (*rtt) / 8000, ((*rtt) / 8) % 1000));
     }
     putchar('\n');
     return;
@@ -5451,19 +5461,19 @@ status(int timing, int *rtt, long *nreceived, long *nrepeats,
             (((long long) ((*ntransmitted) -
                            (*nreceived))) * 100) / (*ntransmitted);
 
-    fprintf(stderr, "\r%ld/%ld packets, %d%% loss", *ntransmitted,
-            *nreceived, loss);
+    DEBUGMSGTL(("pingCtlTable", "\n%ld/%ld packets, %d%% loss", *ntransmitted,
+                *nreceived, loss));
 
     if ((*nreceived) && timing) {
         tavg = (*tsum) / ((*nreceived) + (*nrepeats));
 
-        fprintf(stderr,
-                ", min/avg/ewma/max = %ld.%03ld/%lu.%03ld/%d.%03d/%ld.%03ld ms",
-                (*tmin) / 1000, (*tmin) % 1000, tavg / 1000, tavg % 1000,
-                (*rtt) / 8000, ((*rtt) / 8) % 1000, (*tmax) / 1000,
-                (*tmax) % 1000);
+        DEBUGMSGTL(("pingCtlTable", ", min/avg/ewma/max = %ld.%03ld/%lu.%03ld"
+                    "/%d.%03d/%ld.%03ld ms",
+                    (*tmin) / 1000, (*tmin) % 1000, tavg / 1000, tavg % 1000,
+                    (*rtt) / 8000, ((*rtt) / 8) % 1000, (*tmax) / 1000,
+                    (*tmax) % 1000));
     }
-    fprintf(stderr, "\n");
+    DEBUGMSGTL(("pingCtlTable", "\n"));
 }
 
 
@@ -5521,12 +5531,10 @@ receive_error_msg(int icmp_sock, struct sockaddr_in6 *whereto, int options,
         if (options & F_FLOOD)
             write(STDOUT_FILENO, "E", 1);
         else if (e->ee_errno != EMSGSIZE)
-            fprintf(stderr, "ping: local error: %s\n",
-                    strerror(e->ee_errno));
+            snmp_log(LOG_ERR, "ping: local error: %s\n", strerror(e->ee_errno));
         else
-            fprintf(stderr,
-                    "ping: local error: Message too long, mtu=%u\n",
-                    e->ee_info);
+            snmp_log(LOG_ERR, "ping: local error: Message too long, mtu=%u\n",
+                     e->ee_info);
         (*nerrors)++;
     } else if (e->ee_origin == SO_EE_ORIGIN_ICMP6) {
         if (res < sizeof(icmph) ||
@@ -5648,7 +5656,7 @@ parse_reply(int *series, struct pingCtlTable_data *item,
     icmph = (struct icmp6_hdr *) buf;
     if (cc < 8) {
         if (options & F_VERBOSE)
-            fprintf(stderr, "ping: packet too short (%d bytes)\n", cc);
+            snmp_log(LOG_ERR, "ping: packet too short (%d bytes)\n", cc);
         return 1;
     }
     if (icmph->icmp6_type == ICMP6_ECHO_REPLY) {
@@ -5701,16 +5709,17 @@ parse_reply(int *series, struct pingCtlTable_data *item,
                 write(STDOUT_FILENO, "\bE", 2);
                 return 0;
             }
-            printf("From %s: icmp_seq=%u ",
-                   pr_addr(&from->sin6_addr, options),
-                   icmph1->icmp6_seq);
+            DEBUGMSGTL(("pingCtlTable", "From %s: icmp_seq=%u ",
+                        pr_addr(&from->sin6_addr, options),
+                        icmph1->icmp6_seq));
         } else {
             /*
              * We've got something other than an ECHOREPLY 
              */
             if (!(options & F_VERBOSE) || uid)
                 return 1;
-            printf("From %s: ", pr_addr(&from->sin6_addr, options));
+            DEBUGMSGTL(("pingCtlTable", "From %s: ",
+                        pr_addr(&from->sin6_addr, options)));
         }
         /* pr_icmph(icmph->icmp6_type, icmph->icmp6_code, ntohl(icmph->icmp6_mtu)); */
     }
