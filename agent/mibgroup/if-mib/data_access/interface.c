@@ -514,7 +514,7 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
         if (NULL == prev_vals->old_stats) {
             return -2;
         }
-        memcpy(prev_vals->old_stats, &prev_vals->stats, sizeof(new_vals->stats));
+        memcpy(prev_vals->old_stats, &prev_vals->stats, sizeof(prev_vals->stats));
     }
 
         netsnmp_c64_check32_and_update(&prev_vals->stats.ibytes,
