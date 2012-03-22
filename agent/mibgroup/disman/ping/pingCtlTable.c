@@ -1245,12 +1245,11 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
     int             success_probe = 0;
     int             fail_probe = 0;
     int             flag;
-    unsigned long  *sumrtt;
+    unsigned long   sumrtt;
     struct timeval  tv;
 
     memset(sendbuf, 0, sizeof(sendbuf));
 
-    sumrtt = (unsigned long *) malloc(sizeof(unsigned long));
     sockfd = socket(pr->sasend->sa_family, SOCK_RAW, pr->icmpproto);
     if (sockfd < 0) {
 	snmp_log_perror("pingCtlTable: failed to create socket");
@@ -1286,12 +1285,10 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
         time(&timep);
 
         (*pr->fproc) (recvbuf, n, &tval, timep, item, ai, datalen, minrtt,
-                      maxrtt, sumrtt, averagertt, current_probe_temp,
+                      maxrtt, &sumrtt, averagertt, current_probe_temp,
                       success_probe, fail_probe, flag, &current_var, pid);
-        if (current_probe_temp >= item->pingCtlProbeCount) {
-            SNMP_FREE(sumrtt);
+        if (current_probe_temp >= item->pingCtlProbeCount)
             return;
-        }
     }
     close(sockfd);
 }
