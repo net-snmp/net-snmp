@@ -220,9 +220,12 @@ pingCtlTable_add(struct pingCtlTable_data *thedata)
      */
 
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlOwnerIndex, thedata->pingCtlOwnerIndexLen);       /* pingCtlOwnerIndex */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlOperationName */
-
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlOwnerIndex,
+                              thedata->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlTestName,
+                              thedata->pingCtlTestNameLen);
 
     header_complex_add_data(&pingCtlTableStorage, vars, thedata);
 
@@ -240,8 +243,11 @@ pingResultsTable_add(struct pingCtlTable_data *thedata)
     p = thedata->pingResults;
     if (thedata->pingResults != NULL) {
 
-        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) p->pingCtlOwnerIndex, p->pingCtlOwnerIndexLen);  /* pingCtlOwnerIndex */
-        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) p->pingCtlTestName, p->pingCtlTestNameLen);      /* pingCtlOperationName */
+        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+                                  p->pingCtlOwnerIndex,
+                                  p->pingCtlOwnerIndexLen);
+        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+                                  p->pingCtlTestName, p->pingCtlTestNameLen);
 
         /*
          * XXX: fill in default row values here into StorageNew 
@@ -273,9 +279,15 @@ pingProbeHistoryTable_add(struct pingProbeHistoryTable_data *thedata)
     netsnmp_variable_list *vars_list;
     vars_list = NULL;
     if (thedata != NULL) {
-        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlOwnerIndex, thedata->pingCtlOwnerIndexLen);      /* pingCtlOwnerIndex */
-        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);  /* pingCtlTestName */
-        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED, (char *) &thedata->pingProbeHistoryIndex, sizeof(thedata->pingProbeHistoryIndex)); /* pingProbeHistoryIndex */
+        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+                                  thedata->pingCtlOwnerIndex,
+                                  thedata->pingCtlOwnerIndexLen);
+        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+                                  thedata->pingCtlTestName,
+                                  thedata->pingCtlTestNameLen);
+        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED,
+                                  &thedata->pingProbeHistoryIndex,
+                                  sizeof(thedata->pingProbeHistoryIndex));
 
         /*
          * XXX: fill in default row values here into StorageNew 
@@ -307,15 +319,20 @@ pingProbeHistoryTable_addall(struct pingCtlTable_data *thedata)
     p = thedata->pingProbeHis;
     if (thedata->pingProbeHis != NULL)
         do {
-            snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) p->pingCtlOwnerIndex, p->pingCtlOwnerIndexLen);      /* pingCtlOwnerIndex */
-            snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) p->pingCtlTestName, p->pingCtlTestNameLen);  /* pingCtlTestName */
-            snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED, (char *) &p->pingProbeHistoryIndex, sizeof(p->pingProbeHistoryIndex)); /* pingProbeHistoryIndex */
+            snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+                                      p->pingCtlOwnerIndex,
+                                      p->pingCtlOwnerIndexLen);
+            snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+                                      p->pingCtlTestName,
+                                      p->pingCtlTestNameLen);
+            snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED,
+                                      &p->pingProbeHistoryIndex,
+                                      sizeof(p->pingProbeHistoryIndex));
 
             /*
              * XXX: fill in default row values here into StorageNew 
              * 
              */
-
 
             DEBUGMSGTL(("pingProbeHistoryTable", "adding data...  "));
             /*
@@ -841,8 +858,12 @@ pingProbeHistoryTable_count(struct pingCtlTable_data *thedata)
     size_t          newoid_len;
     unsigned long   count = 0;
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlOwnerIndex, thedata->pingCtlOwnerIndexLen);       /* pingCtlOwnerIndex */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlOperationName */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlOwnerIndex,
+                              thedata->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlTestName,
+                              thedata->pingCtlTestNameLen);
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
     snmp_free_varbind(vars);
@@ -870,8 +891,12 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
     time_t          last_time = 2147483647;
     time_t          tp;
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlOwnerIndex, thedata->pingCtlOwnerIndexLen);       /* pingCtlOwnerIndex */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlOperationName */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlOwnerIndex,
+                              thedata->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlTestName,
+                              thedata->pingCtlTestNameLen);
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
@@ -1110,8 +1135,12 @@ send_ping_trap(struct pingCtlTable_data *item,
     oid             pingResultsSendProbes[] =
         { 1, 3, 6, 1, 2, 1, 80, 1, 3, 1, 8 };
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /* pingCtlOwnerIndex */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /* pingCtlOperationName */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              item->pingCtlOwnerIndex,
+                              item->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              item->pingCtlTestName,
+                              item->pingCtlTestNameLen);
     StorageTmp = header_complex_get(pingResultsTableStorage, vars);
     snmp_free_varbind(vars);
     if (!StorageTmp)
@@ -1359,8 +1388,12 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                 round_double((1000000 * (tvrecv->tv_sec - tvsend->tv_sec) +
                               tvrecv->tv_usec - tvsend->tv_usec) / 1000);
 
-            snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /* pingCtlOwnerIndex */
-            snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /* pingCtlTestName */
+            snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                                      item->pingCtlOwnerIndex,
+                                      item->pingCtlOwnerIndexLen);
+            snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                                      item->pingCtlTestName,
+                                      item->pingCtlTestNameLen);
 
             StorageNew = header_complex_get(pingResultsTableStorage, vars);
             snmp_free_varbind(vars);
@@ -1474,8 +1507,12 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             probeFailed = probeFailed + 1;
         series = 1;
         testFailed = testFailed + 1;
-        snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen); /*  pingCtlOwnerIndex */
-        snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen);     /* pingCtlTestName */
+        snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                                  item->pingCtlOwnerIndex,
+                                  item->pingCtlOwnerIndexLen);
+        snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                                  item->pingCtlTestName,
+                                  item->pingCtlTestNameLen);
 
         StorageNew = header_complex_get(pingResultsTableStorage, vars);
         snmp_free_varbind(vars);
@@ -1626,8 +1663,11 @@ run_ping(unsigned int clientreg, void *clientarg)
     netsnmp_variable_list *vars = NULL;
     struct pingResultsTable_data *StorageNew = NULL;
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /* pingCtlOwnerIndex  */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /* pingCtlTestName  */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              item->pingCtlOwnerIndex,
+                              item->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              item->pingCtlTestName, item->pingCtlTestNameLen);
 
     StorageNew = header_complex_get(pingResultsTableStorage, vars);
     snmp_free_varbind(vars);
@@ -1960,8 +2000,11 @@ init_resultsTable(struct pingCtlTable_data *item)
     char           *host = NULL;
     netsnmp_variable_list *vars = NULL;
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /* pingCtlOwnerIndex  */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /* pingCtlTestName  */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              item->pingCtlOwnerIndex,
+                              item->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              item->pingCtlTestName, item->pingCtlTestNameLen);
 
     StorageNew = header_complex_get(pingResultsTableStorage, vars);
     snmp_free_varbind(vars);
@@ -2064,8 +2107,12 @@ modify_ResultsOper(struct pingCtlTable_data *thedata, long val)
     netsnmp_variable_list *vars = NULL;
     struct pingResultsTable_data *StorageTmp = NULL;
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlOwnerIndex, thedata->pingCtlOwnerIndexLen);       /* pingCtlOwnerIndex */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlTestName */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlOwnerIndex,
+                              thedata->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlTestName,
+                              thedata->pingCtlTestNameLen);
 
     StorageTmp = header_complex_get(pingResultsTableStorage, vars);
     snmp_free_varbind(vars);
@@ -2087,8 +2134,12 @@ pingResultsTable_del(struct pingCtlTable_data *thedata)
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len;
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlOwnerIndex, thedata->pingCtlOwnerIndexLen);       /* pingCtlOwnerIndex */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlOperationName */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlOwnerIndex,
+                              thedata->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlTestName,
+                              thedata->pingCtlTestNameLen);
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
@@ -2123,8 +2174,12 @@ pingProbeHistoryTable_del(struct pingCtlTable_data *thedata)
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len;
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlOwnerIndex, thedata->pingCtlOwnerIndexLen);       /* pingCtlOwnerIndex */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->pingCtlTestName, thedata->pingCtlTestNameLen);   /* pingCtlOperationName */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlOwnerIndex,
+                              thedata->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              thedata->pingCtlTestName,
+                              thedata->pingCtlTestNameLen);
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
@@ -4942,8 +4997,12 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                     series = 1;
                     testFailed = testFailed + 1;
 
-                    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /*  pingCtlOwnerIndex  */
-                    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /*  pingCtlTestName  */
+                    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                                              item->pingCtlOwnerIndex,
+                                              item->pingCtlOwnerIndexLen);
+                    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                                              item->pingCtlTestName,
+                                              item->pingCtlTestNameLen);
 
                     StorageNew = header_complex_get(pingResultsTableStorage,
                                                     vars);
@@ -5256,8 +5315,12 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
     }
 
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlOwnerIndex, item->pingCtlOwnerIndexLen);     /*  pingCtlOwnerIndex  */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->pingCtlTestName, item->pingCtlTestNameLen); /*  pingCtlTestName  */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              item->pingCtlOwnerIndex,
+                              item->pingCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                              item->pingCtlTestName,
+                              item->pingCtlTestNameLen);
 
     StorageNew = header_complex_get(pingResultsTableStorage, vars);
     snmp_free_varbind(vars);
