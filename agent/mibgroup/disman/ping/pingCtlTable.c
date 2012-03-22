@@ -1283,7 +1283,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
                 flag = 0;
             }
 
-            gettimeofday(&tval, NULL);
+            netsnmp_get_monotonic_clock(&tval);
 
             time(&timep);
 
@@ -1608,7 +1608,7 @@ send_v4(int datalen, pid_t pid, int nsent, int sockfd, char *sendbuf)
     icmp->icmp_code = 0;
     icmp->icmp_id = pid;
     icmp->icmp_seq = nsent;
-    gettimeofday((struct timeval *) icmp->icmp_data, NULL);
+    netsnmp_get_monotonic_clock((struct timeval *) icmp->icmp_data);
 
     len = 8 + datalen;          /* checksum ICMP header and data */
     icmp->icmp_cksum = 0;
@@ -4500,14 +4500,13 @@ pinger(int icmp_sock, int preload, int cmsglen, char *cmsgbuf,
      * Check that packets < rate*time + preload 
      */
     if ((*cur_time).tv_sec == 0) {
-
-        gettimeofday(cur_time, NULL);
+        netsnmp_get_monotonic_clock(cur_time);
         tokens = interval * (preload - 1);
     } else {
         long            ntokens;
         struct timeval  tv;
 
-        gettimeofday(&tv, NULL);
+        netsnmp_get_monotonic_clock(&tv);
         ntokens = (tv.tv_sec - (*cur_time).tv_sec) * 1000 +
             (tv.tv_usec - (*cur_time).tv_usec) / 1000;
         if (!interval) {
@@ -4732,7 +4731,7 @@ setup(int icmp_sock, int options, int uid, int timeout, int preload,
 
     *ident = getpid() & 0xFFFF;
 
-    gettimeofday(start_time, NULL);
+    netsnmp_get_monotonic_clock(start_time);
 
 #if 0
     if (*deadline) {
@@ -5057,7 +5056,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                 if ((options & F_LATENCY) || recv_timep == NULL) {
                     if ((options & F_LATENCY) ||
                         ioctl(icmp_sock, SIOCGSTAMP, &recv_time))
-                        gettimeofday(&recv_time, NULL);
+                        netsnmp_get_monotonic_clock(&recv_time);
                     recv_timep = &recv_time;
                 }
 
@@ -5157,19 +5156,14 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
         struct timeval  tmp_tv;
         memcpy(&tmp_tv, ptr, sizeof(tmp_tv));
 
-      restamp:
         tvsub(tv, &tmp_tv);
         triptime = tv->tv_sec * 1000000 + tv->tv_usec;
         if (triptime < 0) {
-            snmp_log(LOG_INFO, "Warning: time of day goes back (%ldus), taking"
-                     " countermeasures.\n",
-                     triptime);
+            snmp_log(LOG_INFO,
+                     "Warning: invalid timestamp in ICMP response.\n");
             triptime = 0;
-            if (!(options & F_LATENCY)) {
-                gettimeofday(tv, NULL);
+            if (!(options & F_LATENCY))
                 options |= F_LATENCY;
-                goto restamp;
-            }
         }
         if (!csfailed) {
             (*tsum) += triptime;
