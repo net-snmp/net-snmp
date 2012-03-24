@@ -843,11 +843,12 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     char     *tcpcb_buf = NULL;
 #if defined(dragonfly)
     struct xinpcb  *xig = NULL;
+    int      StateMap[] = { 1, 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
 #else
     struct xinpgen *xig = NULL;
+    int      StateMap[] = { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
 #endif
     netsnmp_inpcb  *nnew;
-    int      StateMap[] = { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
 
     tcpTable_free(NULL, NULL);
 
