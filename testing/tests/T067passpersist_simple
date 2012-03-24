@@ -6,6 +6,7 @@ HEADER "extending agent functionality with pass_persist"
 
 SKIPIF NETSNMP_DISABLE_SNMPV2C
 SKIPIFNOT USING_UCD_SNMP_PASS_PERSIST_MODULE
+[ -x /usr/bin/perl ] || SKIP /usr/bin/perl
 
 # Don't run this test on MinGW - local/pass_persisttest is a shell script and
 # hence passing it to the MSVCRT popen() doesn't work.
@@ -25,7 +26,7 @@ TESTCOMMUNITY=testcommunity
 # Begin test
 #
 oid=.1.3.6.1.4.1.8072.2.255  # NET-SNMP-PASS-MIB::netSnmpPassExamples
-CONFIGAGENT pass_persist $oid ${SNMP_UPDIR}/local/pass_persisttest
+CONFIGAGENT pass_persist $oid ${SNMP_BASEDIR}/../local/pass_persisttest
 
 ORIG_AGENT_FLAGS="$AGENT_FLAGS"
 AGENT_FLAGS="$ORIG_AGENT_FLAGS -Ducd-snmp/pass_persist"

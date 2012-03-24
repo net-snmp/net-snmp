@@ -26,7 +26,7 @@ TESTCOMMUNITY=testcommunity
 # Begin test
 #
 oid=.1.3.6.1.4.1.8072.2.255  # NET-SNMP-PASS-MIB::netSnmpPassExamples
-CONFIGAGENT pass $oid ${SNMP_UPDIR}/local/passtest
+CONFIGAGENT pass $oid ${SNMP_BASEDIR}/../local/passtest
 
 ORIG_AGENT_FLAGS="$AGENT_FLAGS"
 AGENT_FLAGS="$ORIG_AGENT_FLAGS -Ducd-snmp/pass"
