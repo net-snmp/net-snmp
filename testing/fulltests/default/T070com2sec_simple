@@ -65,6 +65,12 @@ CONFIGAGENT 'com2sec t405g 10.0.0.0/512.0.0.0 c405g'
 CONFIGAGENT 'com2sec t405h 10.0.0.0/hh c405h'
 # 405i Test address with 1 bits not covered by the mask
 CONFIGAGENT 'com2sec t405i 10.0.0.0/3.192.0.0 c405i'
+# 405j Test that 0.0.0.0 works (alias for default)
+CONFIGAGENT 'com2sec t405j 0.0.0.0 c405j'
+# 405k Test that 0.0.0.0/0 works (alias for default)
+CONFIGAGENT 'com2sec t405k 0.0.0.0/0 c405k'
+# 405l Test that 0.0.0.0/0.0.0.0 works (alias for default)
+CONFIGAGENT 'com2sec t405l 0.0.0.0/0.0.0.0 c405l'
 
 # 406a Test maximally long address/mask
 CONFIGAGENT 'com2sec t406a 255.255.255.255/255.255.255.255 c406a'
@@ -121,13 +127,16 @@ SAVECHECKAGENT '<"c405f", 10.0.0.0/255.0.0.0> => "t405f"'
 SAVECHECKAGENT 'line 23: Error: bad mask'
 SAVECHECKAGENT 'line 24: Error: bad mask'
 SAVECHECKAGENT 'line 25: Error: source/mask mismatch'
+SAVECHECKAGENT '<"c405j", 0.0.0.0/255.255.255.255> => "t405j"'
+SAVECHECKAGENT '<"c405k", 0.0.0.0/0.0.0.0> => "t405k"'
+SAVECHECKAGENT '<"c405l", 0.0.0.0/0.0.0.0> => "t405l"'
 SAVECHECKAGENT '<"c406a", 255.255.255.255/255.255.255.255> => "t406a"'
-SAVECHECKAGENT 'line 27: Error:' # msg from h_strerror so it varies
-SAVECHECKAGENT 'line 28: Error:' # msg from h_strerror so it varies
+SAVECHECKAGENT 'line 30: Error:' # msg from h_strerror so it varies
+SAVECHECKAGENT 'line 31: Error:' # msg from h_strerror so it varies
 
 CHECKAGENT '<"c408a"'
 if [ "$snmp_last_test_result" -eq 0 ] ; then
-  CHECKAGENT 'line 29: Error:'
+  CHECKAGENT 'line 32: Error:'
   if [ "$snmp_last_test_result" -ne 1 ] ; then
     return_value=1
     FINISHED
@@ -139,7 +148,7 @@ fi
 
 CHECKAGENT '<"c408b"'
 if [ "$snmp_last_test_result" -eq 0 ] ; then
-  CHECKAGENT 'line 30: Error:'
+  CHECKAGENT 'line 33: Error:'
   if [ "$snmp_last_test_result" -ne 1 ] ; then
     return_value=1
   fi
