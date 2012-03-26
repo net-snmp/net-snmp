@@ -356,10 +356,11 @@ pingProbeHistoryTable_addall(struct pingCtlTable_data *thedata)
 void
 pingCtlTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr;
+    struct header_complex_index *hciptr, *next;
 
     DEBUGMSGTL(("pingProbeHistoryTable", "cleanerout  "));
-    for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
+    for (hciptr = thestuff; hciptr; hciptr = next) {
+        next = hciptr->next;
         header_complex_extract_entry(&pingCtlTableStorage, hciptr);
         DEBUGMSGTL(("pingProbeHistoryTable", "cleaner  "));
     }
@@ -2128,7 +2129,7 @@ modify_ResultsOper(struct pingCtlTable_data *thedata, long val)
 int
 pingResultsTable_del(struct pingCtlTable_data *thedata)
 {
-    struct header_complex_index *hciptr2 = NULL;
+    struct header_complex_index *hciptr2, *next;
     struct pingResultsTable_data *StorageDel = NULL;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
@@ -2143,8 +2144,8 @@ pingResultsTable_del(struct pingCtlTable_data *thedata)
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
-    for (hciptr2 = pingResultsTableStorage; hciptr2 != NULL;
-         hciptr2 = hciptr2->next) {
+    for (hciptr2 = pingResultsTableStorage; hciptr2; hciptr2 = next) {
+        next = hciptr2->next;
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
             StorageDel =
@@ -2168,7 +2169,7 @@ pingResultsTable_del(struct pingCtlTable_data *thedata)
 int
 pingProbeHistoryTable_del(struct pingCtlTable_data *thedata)
 {
-    struct header_complex_index *hciptr2 = NULL;
+    struct header_complex_index *hciptr2, *next;
     struct pingProbeHistoryTable_data *StorageDel = NULL;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
@@ -2183,8 +2184,8 @@ pingProbeHistoryTable_del(struct pingCtlTable_data *thedata)
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
-    for (hciptr2 = pingProbeHistoryTableStorage; hciptr2 != NULL;
-         hciptr2 = hciptr2->next) {
+    for (hciptr2 = pingProbeHistoryTableStorage; hciptr2; hciptr2 = next) {
+        next = hciptr2->next;
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
             StorageDel =
