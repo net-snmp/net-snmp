@@ -313,37 +313,18 @@ pingProbeHistoryTable_addall(struct pingCtlTable_data *thedata)
     netsnmp_variable_list *vars_list;
     struct pingProbeHistoryTable_data *p;
 
-    p = thedata->pingProbeHis;
-    if (thedata->pingProbeHis != NULL) {
-        do {
-            vars_list = NULL;
-            snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
-                                      p->pingCtlOwnerIndex,
-                                      p->pingCtlOwnerIndexLen);
-            snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
-                                      p->pingCtlTestName,
-                                      p->pingCtlTestNameLen);
-            snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED,
-                                      &p->pingProbeHistoryIndex,
-                                      sizeof(p->pingProbeHistoryIndex));
-
-            /*
-             * XXX: fill in default row values here into StorageNew 
-             * 
-             */
-
-            DEBUGMSGTL(("pingProbeHistoryTable", "adding data...  "));
-            /*
-             * add the index variables to the varbind list, which is 
-             * used by header_complex to index the data 
-             */
-
-            header_complex_add_data(&pingProbeHistoryTableStorage,
-                                    vars_list, p);
-
-            DEBUGMSGTL(("pingProbeHistoryTable", "out finished\n"));
-            p = p->next;
-        } while (p != NULL);
+    for (p = thedata->pingProbeHis; p; p = p->next) {
+        vars_list = NULL;
+        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+                                  p->pingCtlOwnerIndex,
+                                  p->pingCtlOwnerIndexLen);
+        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+                                  p->pingCtlTestName,
+                                  p->pingCtlTestNameLen);
+        snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED,
+                                  &p->pingProbeHistoryIndex,
+                                  sizeof(p->pingProbeHistoryIndex));
+        header_complex_add_data(&pingProbeHistoryTableStorage, vars_list, p);
     }
 
     return SNMPERR_SUCCESS;
