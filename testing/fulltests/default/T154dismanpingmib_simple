@@ -29,7 +29,8 @@ pingResultsProbeResponses=${pingResultsEntry}.7
 pingResultsSentProbes=${pingResultsEntry}.8
 # Test configuration
 TARGET_ADDRESS=127.0.0.1
-IDX=8.78.101.116.45.83.78.77.80.4.84.49.53.52 # "Net-SNMP"."T154"
+IDXPFX=8.78.101.116.45.83.78.77.80.6.84.49.53.52 # "Net-SNMP"."T154"
+IDXS="${IDXPFX}.95.49 ${IDXPFX}.95.50 ${IDXPFX}.95.51"
 PROBE_COUNT=5
 
 
@@ -42,6 +43,8 @@ snmp_write_access='all'
 . ./Sv1config
 
 STARTAGENT
+
+for IDX in $IDXS; do
 
 CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v1          \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT   \
@@ -72,8 +75,12 @@ CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v1          \
 
 CHECK "^$pingCtlRowStatus.$IDX = INTEGER: $active"
 
+done
+
 sleep ${PROBE_COUNT}
 sleep 2
+
+for IDX in $IDXS; do
 
 CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v1           \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT   \
@@ -86,6 +93,22 @@ CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v1           \
          $pingResultsProbeResponses.$IDX"
 
 CHECK "^$pingResultsProbeResponses.$IDX = Gauge32: ${PROBE_COUNT}"
+
+done
+
+# Delete first row and leave the remaining rows in the table.
+
+for IDX in $IDXS; do
+
+CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v1          \
+         $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT   \
+         $pingCtlRowStatus.$IDX i $destroy"
+
+CHECK "^$pingCtlRowStatus.$IDX = INTEGER: $destroy"
+
+break
+
+done
 
 STOPAGENT
 
