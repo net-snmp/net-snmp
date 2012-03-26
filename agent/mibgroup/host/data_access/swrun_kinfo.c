@@ -44,7 +44,8 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/data_access/swrun.h>
-#include "kernel.h"
+
+static kvm_t *kd;
 
 
 #if defined(freebsd5) && __FreeBSD_version >= 500014
