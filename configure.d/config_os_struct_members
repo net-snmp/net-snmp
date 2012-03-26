@@ -444,12 +444,63 @@ if test "x$ac_cv_IFNET_NEEDS_KERNEL" = "xyes"; then
         [ifnet needs to have _KERNEL defined])
 fi
 
+#       Does "struct ifnet" need _KERNEL_STRUCTURES defined?       (DragonFly 3)
+#
+AC_CACHE_CHECK([if _KERNEL_STRUCTURES needs to be defined for if_mtu],
+        [ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES],
+        [ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES=unknown
+         AC_COMPILE_IFELSE(
+             [AC_LANG_PROGRAM([
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+             ], [[struct ifnet test; test.if_mtu = 0;]])],
+             [ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES=no])
+         if test "$ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES" = unknown ; then
+         AC_COMPILE_IFELSE(
+             [AC_LANG_PROGRAM([
+#define _KERNEL_STRUCTURES 1
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+             ], [[struct ifnet test; test.if_mtu = 0;]])],
+             [ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES=yes])
+         fi])
+
+if test "x$ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES" = "xyes"; then
+    AC_DEFINE(NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES, 1,
+        [ifnet needs to have _KERNEL_STRUCTURES defined])
+fi
+
 
 #       struct ifaddr
 #   Not-Used:
 #
 AC_CHECK_MEMBERS([struct ifaddr.ifa_next],,,[
     [
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -496,6 +547,9 @@ AC_CHECK_MEMBERS([struct ifnet.if_addrlist,
                   struct ifnet.if_speed,
                   struct ifnet.if_type,
                   struct ifnet.if_xname],,,[[
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -573,6 +627,9 @@ AC_CHECK_MEMBERS([struct rtentry.rt_dst,
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -603,6 +660,9 @@ AC_CACHE_CHECK([type of rtentry structure],
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -633,6 +693,9 @@ AC_CACHE_CHECK([type of rtentry structure],
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
