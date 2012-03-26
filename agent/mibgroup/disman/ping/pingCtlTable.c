@@ -226,12 +226,10 @@ pingCtlTable_add(struct pingCtlTable_data *thedata)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
                               thedata->pingCtlTestName,
                               thedata->pingCtlTestNameLen);
-
     header_complex_add_data(&pingCtlTableStorage, vars, thedata);
 
     DEBUGMSGTL(("pingCtlTable", "registered an entry\n"));
-    vars = NULL;
-    DEBUGMSGTL(("pingCtlTable", "done.\n"));
+
     return SNMPERR_SUCCESS;
 }
 
@@ -239,7 +237,8 @@ int
 pingResultsTable_add(struct pingCtlTable_data *thedata)
 {
     netsnmp_variable_list *vars_list = NULL;
-    struct pingResultsTable_data *p = NULL;
+    struct pingResultsTable_data *p;
+
     p = thedata->pingResults;
     if (thedata->pingResults != NULL) {
 
@@ -267,8 +266,6 @@ pingResultsTable_add(struct pingCtlTable_data *thedata)
 
     }
 
-    DEBUGMSGTL(("pingResultsTable", "done.\n"));
-    vars_list = NULL;
     return SNMPERR_SUCCESS;
 }
 
@@ -277,6 +274,7 @@ int
 pingProbeHistoryTable_add(struct pingProbeHistoryTable_data *thedata)
 {
     netsnmp_variable_list *vars_list;
+
     vars_list = NULL;
     if (thedata != NULL) {
         snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
@@ -306,19 +304,19 @@ pingProbeHistoryTable_add(struct pingProbeHistoryTable_data *thedata)
         DEBUGMSGTL(("pingProbeHistoryTable", "out finished\n"));
     }
     
-    vars_list = NULL;
-    DEBUGMSGTL(("pingProbeHistoryTable", "done.\n"));
     return SNMPERR_SUCCESS;
 }
 
 int
 pingProbeHistoryTable_addall(struct pingCtlTable_data *thedata)
 {
-    netsnmp_variable_list *vars_list = NULL;
-    struct pingProbeHistoryTable_data *p = NULL;
+    netsnmp_variable_list *vars_list;
+    struct pingProbeHistoryTable_data *p;
+
     p = thedata->pingProbeHis;
-    if (thedata->pingProbeHis != NULL)
+    if (thedata->pingProbeHis != NULL) {
         do {
+            vars_list = NULL;
             snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
                                       p->pingCtlOwnerIndex,
                                       p->pingCtlOwnerIndexLen);
@@ -343,13 +341,11 @@ pingProbeHistoryTable_addall(struct pingCtlTable_data *thedata)
             header_complex_add_data(&pingProbeHistoryTableStorage,
                                     vars_list, p);
 
-
             DEBUGMSGTL(("pingProbeHistoryTable", "out finished\n"));
-            vars_list = NULL;
             p = p->next;
         } while (p != NULL);
+    }
 
-    DEBUGMSGTL(("pingProbeHistoryTable", "done.\n"));
     return SNMPERR_SUCCESS;
 }
 
@@ -1432,6 +1428,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                 StorageNew->pingResultsRttSumOfSquares + rtt * rtt;
 
 	    StorageNew->pingResultsLastGoodProbe_time = timep;
+            free(StorageNew->pingResultsLastGoodProbe);
             memdup(&StorageNew->pingResultsLastGoodProbe,
 		date_n_time(&timep,
 		    &StorageNew->pingResultsLastGoodProbeLen), 11);
@@ -2141,8 +2138,8 @@ pingResultsTable_del(struct pingCtlTable_data *thedata)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
                               thedata->pingCtlTestName,
                               thedata->pingCtlTestNameLen);
-
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
+    snmp_free_varbind(vars);
 
     for (hciptr2 = pingResultsTableStorage; hciptr2; hciptr2 = next) {
         next = hciptr2->next;
@@ -2181,8 +2178,8 @@ pingProbeHistoryTable_del(struct pingCtlTable_data *thedata)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
                               thedata->pingCtlTestName,
                               thedata->pingCtlTestNameLen);
-
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
+    snmp_free_varbind(vars);
 
     for (hciptr2 = pingProbeHistoryTableStorage; hciptr2; hciptr2 = next) {
         next = hciptr2->next;
@@ -4066,7 +4063,6 @@ write_pingCtlRowStatus(int action,
                     3 - 1);
     static int      old_value;
     int             set_value;
-    static netsnmp_variable_list *vars, *vp;
     struct header_complex_index *hciptr = NULL;
 
     DEBUGMSGTL(("pingCtlTable",
@@ -4165,6 +4161,8 @@ write_pingCtlRowStatus(int action,
          * memory reseveration, final preparation... 
          */
         if (StorageTmp == NULL) {
+            netsnmp_variable_list *vars, *vp;
+
             if (set_value == RS_DESTROY) {
                 return SNMP_ERR_NOERROR;
             }
@@ -4184,10 +4182,7 @@ write_pingCtlRowStatus(int action,
                  (name
                   [sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
-                /*
-                 * XXX: free, zero vars 
-                 */
-                /* snmp_free_varbind(vars); */
+                snmp_free_varbind(vars);
                 return SNMP_ERR_INCONSISTENTNAME;
             }
             vp = vars;
@@ -4231,10 +4226,7 @@ write_pingCtlRowStatus(int action,
             StorageNew->pingCtlRowStatus = set_value;
 
 
-            /*
-             * XXX: free, zero vars, no longer needed? 
-             */
-            /* snmp_free_varbind(vars); */
+            snmp_free_varbind(vars);
         }
 
 
@@ -4244,10 +4236,6 @@ write_pingCtlRowStatus(int action,
 
 
     case FREE:
-        /*
-         * XXX: free, zero vars 
-         */
-
         /*
          * Release any resources that have been allocated 
          */
@@ -5340,6 +5328,7 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
     StorageNew->pingResultsRttSumOfSquares = *tsum2;
 
     StorageNew->pingResultsLastGoodProbe_time = timep;
+    free(StorageNew->pingResultsLastGoodProbe);
     memdup(&StorageNew->pingResultsLastGoodProbe,
 	date_n_time(&timep, &StorageNew->pingResultsLastGoodProbeLen), 11);
 
