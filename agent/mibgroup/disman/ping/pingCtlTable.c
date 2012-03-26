@@ -1451,32 +1451,20 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
 
             if (StorageNew->pingResultsSendProbes == 1)
                 item->pingProbeHis = temp;
-            else {
+            else
                 (current_temp)->next = temp;
-            }
 
             current_temp = temp;
 
-            if (StorageNew->pingResultsSendProbes >=
-                item->pingCtlProbeCount) {
+            if (StorageNew->pingResultsSendProbes >= item->pingCtlProbeCount)
                 current_temp->next = NULL;
-            }
 
             if (item->pingProbeHis != NULL) {
-                if (pingProbeHistoryTable_count(item) <
-                    item->pingCtlMaxRows) {
-                    if (pingProbeHistoryTable_add(current_temp) !=
-                        SNMPERR_SUCCESS)
-                        DEBUGMSGTL(("pingProbeHistoryTable",
-                                    "registered an entry error\n"));
-                } else {
+                if (pingProbeHistoryTable_count(item) >= item->pingCtlMaxRows)
                     pingProbeHistoryTable_delLast(item);
-                    if (pingProbeHistoryTable_add(current_temp) !=
-                        SNMPERR_SUCCESS)
-                        DEBUGMSGTL(("pingProbeHistoryTable",
-                                    "registered an entry error\n"));
-
-                }
+                if (pingProbeHistoryTable_add(current_temp) != SNMPERR_SUCCESS)
+                    DEBUGMSGTL(("pingProbeHistoryTable",
+                                "failed to add a row\n"));
 	    }
         }
     } else if (flag == 1) {
