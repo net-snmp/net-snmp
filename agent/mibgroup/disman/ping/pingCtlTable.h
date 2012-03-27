@@ -206,6 +206,7 @@ struct pingProbeHistoryTable_data {
  * function declarations 
  */
 void            init_pingCtlTable(void);
+void            shutdown_pingCtlTable(void);
 FindVarMethod   var_pingCtlTable;
 void            parse_pingCtlTable(const char *, char *);
 SNMPCallback    store_pingCtlTable;
