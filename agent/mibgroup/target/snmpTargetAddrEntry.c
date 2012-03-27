@@ -1626,6 +1626,7 @@ write_snmpTargetAddrRowStatus(int action,
                 }
             }
         }
+        snmp_store_needed(NULL);
     } else if (action == UNDO || action == FREE) {
         snmpTargetAddrOID[snmpTargetAddrOIDLen - 1] =
             SNMPTARGETADDRROWSTATUSCOLUMN;
