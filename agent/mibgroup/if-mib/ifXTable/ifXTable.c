@@ -1386,13 +1386,6 @@ ifConnectorPresent_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
-    if (0 == rowreq_ctx->data.ifConnectorPresent)
-        return MFD_SKIP;
-
-    /*
-     * TODO:231:o: |-> Extract the current value of the ifConnectorPresent data.
-     * copy (* ifConnectorPresent_val_ptr ) from rowreq_ctx->data
-     */
     (*ifConnectorPresent_val_ptr) = rowreq_ctx->data.ifConnectorPresent ?
         TV_TRUE : TV_FALSE;
 
