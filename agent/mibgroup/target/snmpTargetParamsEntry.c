@@ -1366,6 +1366,7 @@ write_snmpTargetParamsRowStatus(int action,
                 update_timestamp(params);
             }
         }
+        snmp_store_needed(NULL);
     } else if (action == UNDO || action == FREE) {
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSROWSTATUSCOLUMN;
