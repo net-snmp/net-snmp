@@ -290,6 +290,8 @@ netsnmp_udp_parse_security(const char *token, char *param)
             if (*cp == '\0') {
                 if (0 < maskLen && maskLen <= 32)
                     mask.s_addr = htonl((in_addr_t)(~0UL << (32 - maskLen)));
+                else if (maskLen == 0)
+                    mask.s_addr = 0;
                 else {
                     config_perror("bad mask length");
                     return;
