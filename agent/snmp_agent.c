@@ -3239,57 +3239,6 @@ netsnmp_handle_request(netsnmp_agent_session *asp, int status)
     return 1;
 }
 
-/**
- * This function calls into netsnmp_set_mode_request_error,  sets 
- * error_value given a reqinfo->mode value.  It's used to send specific
- * errors back to the agent to process accordingly.
- * 
- * If error_value is set to SNMP_NOSUCHOBJECT, SNMP_NOSUCHINSTANCE,
- * or SNMP_ENDOFMIBVIEW the following is applicable:
- * Sets the error_value to request->requestvb->type if 
- * reqinfo->mode value is set to MODE_GET.  If the reqinfo->mode 
- * value is set to MODE_GETNEXT or MODE_GETBULK the code calls 
- * snmp_log logging an error message.
- *
- * Otherwise, the request->status value is checked, if it's < 0
- * snmp_log is called with an error message and SNMP_ERR_GENERR is 
- * assigned to request->status. If the request->status value is >= 0 the
- * error_value is set to request->status.
- *
- * @param reqinfo  is a pointer to the netsnmp_agent_request_info struct.  It
- *	contains the reqinfo->mode which is required to set error_value or
- *	log error messages.
- *
- * @param request is a pointer to the netsnmp_request_info struct.  The 
- *	error_value is set to request->requestvb->type
- *
- * @param error_value is the exception value you want to set, below are
- *        possible values.
- *      - SNMP_NOSUCHOBJECT
- *      - SNMP_NOSUCHINSTANCE
- *      - SNMP_ENDOFMIBVIEW
- *      - SNMP_ERR_NOERROR
- *      - SNMP_ERR_TOOBIG
- *      - SNMP_ERR_NOSUCHNAME
- *      - SNMP_ERR_BADVALUE
- *      - SNMP_ERR_READONLY
- *      - SNMP_ERR_GENERR
- *      - SNMP_ERR_NOACCESS
- *      - SNMP_ERR_WRONGTYPE
- *      - SNMP_ERR_WRONGLENGTH
- *      - SNMP_ERR_WRONGENCODING
- *      - SNMP_ERR_WRONGVALUE
- *      - SNMP_ERR_NOCREATION
- *      - SNMP_ERR_INCONSISTENTVALUE
- *      - SNMP_ERR_RESOURCEUNAVAILABLE
- *      - SNMP_ERR_COMMITFAILED
- *      - SNMP_ERR_UNDOFAILED
- *      - SNMP_ERR_AUTHORIZATIONERROR
- *      - SNMP_ERR_NOTWRITABLE
- *      - SNMP_ERR_INCONSISTENTNAME
- *
- * @return Returns error_value under all conditions.
- */
 int
 handle_pdu(netsnmp_agent_session *asp)
 {
