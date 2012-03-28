@@ -733,7 +733,7 @@ netsnmp_subtree_split(netsnmp_subtree *current, oid name[], int name_len)
 
 /** Loads the subtree under given context name.
  *
- *  @param root The subtree to be loaded into current subtree.
+ *  @param new_sub The subtree to be loaded into current subtree.
  *
  *  @param context_name Text name of the context we're searching for.
  *
@@ -1076,8 +1076,22 @@ netsnmp_subtree_find(oid *name, size_t len, netsnmp_subtree *subtree,
 
 /** Registers a MIB handler.
  *
+ *  @param moduleName
+ *  @param var
+ *  @param varsize
+ *  @param numvars
+ *  @param  mibloc
+ *  @param mibloclen
+ *  @param priority
+ *  @param range_subid
+ *  @param range_ubound
+ *  @param  ss
+ *  @param context
+ *  @param timeout
+ *  @param flags
  *  @param reginfo Registration handler structure.
  *                 In a case of failure, it will be freed.
+ *  @param perform_callback
  *
  *  @return gives MIB_REGISTERED_OK or MIB_* error code.
  *
@@ -1379,6 +1393,7 @@ register_mib_detach(void)
  *                     If range_subid is zero, then this parameter is ignored.
  *
  *  @param ss 
+ *  @param context 
  *  @param timeout 
  *  @param flags 
  *

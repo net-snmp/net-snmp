@@ -47,11 +47,12 @@ extern "C" {
  *  from it.
  *  @param argc Number of elements in argv
  *  @param argv string array of at least argc elements
+ *  @param session
  *  @param localOpts Additional option characters to accept
  *  @param proc function pointer used to process any unhandled arguments
  *  @param flags flags directing how to handle the string
  *
- *  @reval 0 (= #NETSNMP_PARSE_ARGS_SUCCESS) on success
+ *  @retval 0 (= #NETSNMP_PARSE_ARGS_SUCCESS) on success
  *  @retval #NETSNMP_PARSE_ARGS_SUCCESS_EXIT when the application is expected
  *  to exit with zero exit code (e.g. '-V' option was found)
  *  @retval #NETSNMP_PARSE_ARGS_ERROR_USAGE when the function failed to parse
