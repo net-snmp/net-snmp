@@ -37,7 +37,8 @@ extern          "C" {
      * begin storage definitions 
      */
 /**
- * @def NETSNMP_DS_LIBRARY_ID These definitions correspond with the "storid" argument to the API 
+ * @def NETSNMP_DS_LIBRARY_ID
+ * These definitions correspond with the "storid" argument to the API 
  */
 #define NETSNMP_DS_LIBRARY_ID     0
 #define NETSNMP_DS_APPLICATION_ID 1
