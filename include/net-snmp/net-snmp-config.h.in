@@ -1313,6 +1313,9 @@
 /* ifnet needs to have _KERNEL defined */
 #undef NETSNMP_IFNET_NEEDS_KERNEL
 
+/* ifnet needs to have _KERNEL_STRUCTURES defined */
+#undef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+
 /* Define to suppress inclusion of deprecated functions */
 #undef NETSNMP_NO_DEPRECATED_FUNCTIONS
 
