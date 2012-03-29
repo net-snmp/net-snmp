@@ -1361,6 +1361,9 @@
 /* ifnet needs to have _KERNEL defined */
 #undef NETSNMP_IFNET_NEEDS_KERNEL
 
+/* ifnet needs to have _KERNEL_STRUCTURES defined */
+#undef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+
 /* Define if you want to remove all non-essential code features. */
 #undef NETSNMP_MINIMAL_CODE
 
