@@ -42335,6 +42335,141 @@ _ACEOF
 
 fi
 
+#       Does "struct ifnet" need _KERNEL_STRUCTURES defined?       (DragonFly 3)
+#
+{ $as_echo "$as_me:$LINENO: checking if _KERNEL_STRUCTURES needs to be defined for if_mtu" >&5
+$as_echo_n "checking if _KERNEL_STRUCTURES needs to be defined for if_mtu... " >&6; }
+if test "${ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES=unknown
+         cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+
+int
+main ()
+{
+struct ifnet test; test.if_mtu = 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES=no
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+         if test "$ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES" = unknown ; then
+         cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#define _KERNEL_STRUCTURES 1
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+
+int
+main ()
+{
+struct ifnet test; test.if_mtu = 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+         fi
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES" >&5
+$as_echo "$ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES" >&6; }
+
+if test "x$ac_cv_IFNET_NEEDS_KERNEL_STRUCTURES" = "xyes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES 1
+_ACEOF
+
+fi
+
 
 #       struct ifaddr
 #   Not-Used:
@@ -42352,6 +42487,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -42419,6 +42557,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -42514,6 +42655,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -42612,6 +42756,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -42733,6 +42880,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -42831,6 +42981,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -42952,6 +43105,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -43050,6 +43206,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -43171,6 +43330,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -43269,6 +43431,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -43390,6 +43555,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -43488,6 +43656,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -43609,6 +43780,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -43707,6 +43881,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -43828,6 +44005,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -43926,6 +44106,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -44047,6 +44230,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -44145,6 +44331,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -44266,6 +44455,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -44364,6 +44556,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -44485,6 +44680,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -44583,6 +44781,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -44704,6 +44905,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -44802,6 +45006,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -44923,6 +45130,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -45021,6 +45231,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -45142,6 +45355,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -45240,6 +45456,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -45361,6 +45580,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -45459,6 +45681,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -45580,6 +45805,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -45678,6 +45906,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -45799,6 +46030,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -45897,6 +46131,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -46032,6 +46269,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46092,6 +46332,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46175,6 +46418,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46235,6 +46481,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46318,6 +46567,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46378,6 +46630,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46461,6 +46716,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46521,6 +46779,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46604,6 +46865,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46664,6 +46928,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46747,6 +47014,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46807,6 +47077,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
@@ -46899,6 +47172,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
@@ -46970,6 +47246,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #if !defined(__DragonFly__)
