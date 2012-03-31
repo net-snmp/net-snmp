@@ -195,7 +195,6 @@ create_pingCtlTable_data(void)
     StorageNew->pingCtlStorageType = 1;
     StorageNew->pingCtlTrapGeneration = strdup("");
     StorageNew->pingCtlTrapGenerationLen = 0;
-    StorageNew->pingCtlTrapGenerationLen = 0;
     StorageNew->pingCtlTrapProbeFailureFilter = 1;
     StorageNew->pingCtlTrapTestFailureFilter = 1;
     StorageNew->pingCtlType = calloc(1, sizeof(oid) * sizeof(2));       /* 0.0 */
@@ -926,6 +925,17 @@ pingProbeHistoryTable_delLast(struct pingCtlTable_data *thedata)
     }
     StorageDel =
         header_complex_extract_entry(&pingProbeHistoryTableStorage, hcilast);
+    for (hciptr2 = pingCtlTableStorage; hciptr2; hciptr2 = hciptr2->next) {
+        struct pingCtlTable_data *tmp;
+
+        tmp = hciptr2->data;
+        if (tmp->pingProbeHis == StorageDel) {
+            tmp->pingProbeHis = tmp->pingProbeHis->next;
+            DEBUGMSGTL(("pingProbeHistoryTable",
+                        "deleting the last one succeeded!\n"));
+            break;
+    	}
+    }
     if (StorageDel) {
         free(StorageDel->pingProbeHistoryTime);
         free(StorageDel->pingCtlTestName);
