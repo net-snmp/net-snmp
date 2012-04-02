@@ -30,6 +30,9 @@
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#if HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
 #include <errno.h>
 
 #include <net-snmp/types.h>
@@ -212,7 +215,11 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 
         {
             errno = 0;
+#ifdef MSG_NOSIGNAL
             const int rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+#else
+            const int rc = sendmsg(fd, &m, MSG_DONTWAIT);
+#endif
 
             if (rc >= 0 || errno != EINVAL)
                 return rc;
@@ -239,7 +246,11 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 #endif
     }
 
+#ifdef MSG_NOSIGNAL
     return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+#else
+    return sendmsg(fd, &m, MSG_DONTWAIT);
+#endif
 }
 #endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 
