@@ -41,9 +41,11 @@ SOFTWARE.
 #ifndef EIGHTBIT_SUBIDS
     typedef u_long  oid;
 #define MAX_SUBID   0xFFFFFFFF
+#define NETSNMP_PRIo "l"
 #else
     typedef u_char  oid;
 #define MAX_SUBID   0xFF
+#define NETSNMP_PRIo ""
 #endif
 #endif
 
