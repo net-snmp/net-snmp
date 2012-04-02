@@ -62,6 +62,9 @@ PERFORMANCE OF THIS SOFTWARE.
  */
 
 #include <net-snmp/net-snmp-config.h>
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_STRING_H
 #include <string.h>
 #endif
