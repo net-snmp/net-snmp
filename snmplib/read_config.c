@@ -473,8 +473,8 @@ print_config_handlers(void)
 }
 #endif
 
-int             linecount,    prev_linecount;
-const char     *curfilename, *prev_filename;
+static unsigned int  linecount;
+static const char   *curfilename;
 
 struct config_line *
 read_config_get_handlers(const char *type)
@@ -743,6 +743,10 @@ read_config(const char *filename,
 {
     static int      depth = 0;
     static int      files = 0;
+
+    const char * const prev_filename = curfilename;
+    const unsigned int prev_linecount = linecount;
+
     FILE           *ifile;
     char            line[STRINGMAX], token[STRINGMAX];
     char           *cptr;
@@ -750,10 +754,8 @@ read_config(const char *filename,
     struct config_line *lptr;
 
     /* reset file counter when recursion depth is 0 */
-    if (depth == 0) files = 0;
-
-    linecount = 0;
-    curfilename = filename;
+    if (depth == 0)
+        files = 0;
 
     if ((ifile = fopen(filename, "r")) == NULL) {
 #ifdef ENOENT
@@ -788,6 +790,10 @@ read_config(const char *filename,
 	fclose(ifile);
         return SNMPERR_GENERR;
     }
+
+    linecount = 0;
+    curfilename = filename;
+
     ++files;
     ++depth;
 
@@ -861,8 +867,6 @@ read_config(const char *filename,
                             netsnmp_config_error("Can't open include dir '%s'.", cptr);
                         continue;
                     }
-                    prev_filename  = curfilename;
-                    prev_linecount = linecount;
                     while ((entry = readdir( d )) != NULL ) {
                         if ( entry->d_name && entry->d_name[0] != '.') {
                             len = NAMLEN(entry);
@@ -874,8 +878,6 @@ read_config(const char *filename,
                         }
                     }
                     closedir(d);
-                    curfilename = prev_filename;
-                    linecount   = prev_linecount;
                     continue;
                 } else if ( strcasecmp( token, "includefile" )==0) {
                     char  fname[SNMP_MAXPATH], *cp;
@@ -896,11 +898,7 @@ read_config(const char *filename,
                             *(++cp) = '\0';
                         strlcat(fname, cptr, SNMP_MAXPATH);
                     }
-                    prev_filename  = curfilename;
-                    prev_linecount = linecount;
                     ret = read_config(fname, line_handler, when);
-                    curfilename = prev_filename;
-                    linecount   = prev_linecount;
                     if ((ret != SNMPERR_SUCCESS) && (when != PREMIB_CONFIG))
                         netsnmp_config_error("Included file '%s' not found.", fname);
                     continue;
@@ -919,11 +917,7 @@ read_config(const char *filename,
                     ctmp.next = NULL;
                     if ((len > 5) && (strcmp(&cptr[len-5],".conf") == 0))
                        cptr[len-5] = 0; /* chop off .conf */
-                    prev_filename  = curfilename;
-                    prev_linecount = linecount;
                     ret = read_config_files_of_type(when,&ctmp);
-                    curfilename = prev_filename;
-                    linecount   = prev_linecount;
                     if ((len > 5) && (cptr[len-5] == 0))
                        cptr[len-5] = '.'; /* restore .conf */
                     if (( ret != SNMPERR_SUCCESS ) && (when != PREMIB_CONFIG))
@@ -945,6 +939,8 @@ read_config(const char *filename,
         }
     }
     fclose(ifile);
+    linecount = prev_linecount;
+    curfilename = prev_filename;
     --depth;
     return SNMPERR_SUCCESS;
 
