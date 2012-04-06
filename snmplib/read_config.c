@@ -768,13 +768,9 @@ read_config(const char *filename,
                         strerror(errno)));
         } else
 #endif                          /* EACCES */
-#if defined(ENOENT) || defined(EACCES)
         {
             snmp_log_perror(filename);
         }
-#else                           /* defined(ENOENT) || defined(EACCES) */
-            snmp_log_perror(filename);
-#endif                          /* ENOENT */
         return SNMPERR_GENERR;
     }
 
