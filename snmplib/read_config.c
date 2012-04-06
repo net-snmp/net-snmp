@@ -748,10 +748,7 @@ read_config(const char *filename,
     const unsigned int prev_linecount = linecount;
 
     FILE           *ifile;
-    char            line[STRINGMAX], token[STRINGMAX];
-    char           *cptr;
-    int             i, ret;
-    struct config_line *lptr;
+    char            line[STRINGMAX];
 
     /* reset file counter when recursion depth is 0 */
     if (depth == 0)
@@ -801,18 +798,22 @@ read_config(const char *filename,
                 filename, when));
     
     while (fgets(line, sizeof(line), ifile) != NULL) {
-        lptr = line_handler;
+        char               *cptr;
+        struct config_line *lptr = line_handler;
         linecount++;
-        cptr = line;
-        i = strlen(line) - 1;
-        if (line[i] == '\n')
-            line[i] = 0;
+        {
+            int i = strlen(line) - 1;
+            if (line[i] == '\n')
+                line[i] = 0;
+        }
         DEBUGMSGTL(("9:read_config:line", "%s:%d examining: %s\n",
                     filename, linecount, line));
         /*
          * check blank line or # comment 
          */
-        if ((cptr = skip_white(cptr))) {
+        if ((cptr = skip_white(line))) {
+            char token[STRINGMAX];
+
             cptr = copy_nword(cptr, token, sizeof(token));
             if (token[0] == '[') {
                 if (token[strlen(token) - 1] != ']') {
@@ -898,13 +899,14 @@ read_config(const char *filename,
                             *(++cp) = '\0';
                         strlcat(fname, cptr, SNMP_MAXPATH);
                     }
-                    ret = read_config(fname, line_handler, when);
-                    if ((ret != SNMPERR_SUCCESS) && (when != PREMIB_CONFIG))
-                        netsnmp_config_error("Included file '%s' not found.", fname);
+                    if (read_config(fname, line_handler, when) !=
+                        SNMPERR_SUCCESS && when != PREMIB_CONFIG)
+                        netsnmp_config_error("Included file '%s' not found.",
+                                             fname);
                     continue;
                 } else if ( strcasecmp( token, "includesearch" )==0) {
                     struct config_files ctmp;
-                    int len;
+                    int len, ret;
 
                     if (cptr == NULL) {
                         if (when != PREMIB_CONFIG)
