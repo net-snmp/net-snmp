@@ -748,7 +748,8 @@ read_config(const char *filename,
     const unsigned int prev_linecount = linecount;
 
     FILE           *ifile;
-    char            line[STRINGMAX];
+    char           *line = NULL;  /* current line buffer */
+    size_t          linesize = 0; /* allocated size of line */
 
     /* reset file counter when recursion depth is 0 */
     if (depth == 0)
@@ -796,16 +797,41 @@ read_config(const char *filename,
 
     DEBUGMSGTL(("read_config:file", "Reading configuration %s (%d)\n",
                 filename, when));
-    
-    while (fgets(line, sizeof(line), ifile) != NULL) {
+
+    while (ifile) {
+        size_t              linelen = 0; /* strlen of the current line */
         char               *cptr;
         struct config_line *lptr = line_handler;
-        linecount++;
-        {
-            int i = strlen(line) - 1;
-            if (line[i] == '\n')
-                line[i] = 0;
+
+        for (;;) {
+            if (linesize <= linelen + 1) {
+                char *tmp = realloc(line, linesize + 256);
+                if (tmp) {
+                    line = tmp;
+                    linesize += 256;
+                } else {
+                    netsnmp_config_error("Failed to allocate memory\n");
+                    free(line);
+                    fclose(ifile);
+                    return SNMPERR_GENERR;
+                }
+            }
+            if (fgets(line + linelen, linesize - linelen, ifile) == NULL) {
+                line[linelen] = '\0';
+                fclose (ifile);
+                ifile = NULL;
+                break;
+            }
+
+            linelen += strlen(line + linelen);
+
+            if (line[linelen - 1] == '\n') {
+              line[linelen - 1] = '\0';
+              break;
+            }
         }
+
+        ++linecount;
         DEBUGMSGTL(("9:read_config:line", "%s:%d examining: %s\n",
                     filename, linecount, line));
         /*
@@ -940,7 +966,7 @@ read_config(const char *filename,
             }
         }
     }
-    fclose(ifile);
+    free(line);
     linecount = prev_linecount;
     curfilename = prev_filename;
     --depth;
