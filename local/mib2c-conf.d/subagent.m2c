@@ -72,8 +72,14 @@ main (int argc, char **argv) {
   int dont_fork = 0, use_syslog = 0;
   char *agentx_socket = NULL;
 
-  while ((ch = getopt(argc, argv, "D:fHLMx:")) != EOF)
+  while ((ch = getopt(argc, argv, "D:fHLM-:x:")) != EOF)
     switch(ch) {
+    case '-':
+        if (strcasecmp(optarg, "help") == 0) {
+            usage();
+        }
+        handle_long_opt(optarg);
+        break;
     case 'D':
       debug_register_tokens(optarg);
       snmp_set_do_debugging(1);
