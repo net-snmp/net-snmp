@@ -473,8 +473,8 @@ print_config_handlers(void)
 }
 #endif
 
-int             linecount,    prev_linecount;
-const char     *curfilename, *prev_filename;
+static unsigned int  linecount;
+static const char   *curfilename;
 
 struct config_line *
 read_config_get_handlers(const char *type)
@@ -743,17 +743,17 @@ read_config(const char *filename,
 {
     static int      depth = 0;
     static int      files = 0;
+
+    const char * const prev_filename = curfilename;
+    const unsigned int prev_linecount = linecount;
+
     FILE           *ifile;
-    char            line[STRINGMAX], token[STRINGMAX];
-    char           *cptr;
-    int             i, ret;
-    struct config_line *lptr;
+    char           *line = NULL;  /* current line buffer */
+    size_t          linesize = 0; /* allocated size of line */
 
     /* reset file counter when recursion depth is 0 */
-    if (depth == 0) files = 0;
-
-    linecount = 0;
-    curfilename = filename;
+    if (depth == 0)
+        files = 0;
 
     if ((ifile = fopen(filename, "r")) == NULL) {
 #ifdef ENOENT
@@ -768,13 +768,9 @@ read_config(const char *filename,
                         strerror(errno)));
         } else
 #endif                          /* EACCES */
-#if defined(ENOENT) || defined(EACCES)
         {
             snmp_log_perror(filename);
         }
-#else                           /* defined(ENOENT) || defined(EACCES) */
-            snmp_log_perror(filename);
-#endif                          /* ENOENT */
         return SNMPERR_GENERR;
     }
 
@@ -792,25 +788,58 @@ read_config(const char *filename,
 	fclose(ifile);
         return SNMPERR_GENERR;
     }
+
+    linecount = 0;
+    curfilename = filename;
+
     ++files;
     ++depth;
 
     DEBUGMSGTL(("read_config:file", "Reading configuration %s (%d)\n",
                 filename, when));
-    
-    while (fgets(line, sizeof(line), ifile) != NULL) {
-        lptr = line_handler;
-        linecount++;
-        cptr = line;
-        i = strlen(line) - 1;
-        if (line[i] == '\n')
-            line[i] = 0;
+
+    while (ifile) {
+        size_t              linelen = 0; /* strlen of the current line */
+        char               *cptr;
+        struct config_line *lptr = line_handler;
+
+        for (;;) {
+            if (linesize <= linelen + 1) {
+                char *tmp = realloc(line, linesize + 256);
+                if (tmp) {
+                    line = tmp;
+                    linesize += 256;
+                } else {
+                    netsnmp_config_error("Failed to allocate memory\n");
+                    free(line);
+                    fclose(ifile);
+                    return SNMPERR_GENERR;
+                }
+            }
+            if (fgets(line + linelen, linesize - linelen, ifile) == NULL) {
+                line[linelen] = '\0';
+                fclose (ifile);
+                ifile = NULL;
+                break;
+            }
+
+            linelen += strlen(line + linelen);
+
+            if (line[linelen - 1] == '\n') {
+              line[linelen - 1] = '\0';
+              break;
+            }
+        }
+
+        ++linecount;
         DEBUGMSGTL(("9:read_config:line", "%s:%d examining: %s\n",
                     filename, linecount, line));
         /*
          * check blank line or # comment 
          */
-        if ((cptr = skip_white(cptr))) {
+        if ((cptr = skip_white(line))) {
+            char token[STRINGMAX];
+
             cptr = copy_nword(cptr, token, sizeof(token));
             if (token[0] == '[') {
                 if (token[strlen(token) - 1] != ']') {
@@ -865,8 +894,6 @@ read_config(const char *filename,
                             netsnmp_config_error("Can't open include dir '%s'.", cptr);
                         continue;
                     }
-                    prev_filename  = curfilename;
-                    prev_linecount = linecount;
                     while ((entry = readdir( d )) != NULL ) {
                         if ( entry->d_name && entry->d_name[0] != '.') {
                             len = NAMLEN(entry);
@@ -878,8 +905,6 @@ read_config(const char *filename,
                         }
                     }
                     closedir(d);
-                    curfilename = prev_filename;
-                    linecount   = prev_linecount;
                     continue;
                 } else if ( strcasecmp( token, "includefile" )==0) {
                     char  fname[SNMP_MAXPATH], *cp;
@@ -900,17 +925,14 @@ read_config(const char *filename,
                             *(++cp) = '\0';
                         strlcat(fname, cptr, SNMP_MAXPATH);
                     }
-                    prev_filename  = curfilename;
-                    prev_linecount = linecount;
-                    ret = read_config(fname, line_handler, when);
-                    curfilename = prev_filename;
-                    linecount   = prev_linecount;
-                    if ((ret != SNMPERR_SUCCESS) && (when != PREMIB_CONFIG))
-                        netsnmp_config_error("Included file '%s' not found.", fname);
+                    if (read_config(fname, line_handler, when) !=
+                        SNMPERR_SUCCESS && when != PREMIB_CONFIG)
+                        netsnmp_config_error("Included file '%s' not found.",
+                                             fname);
                     continue;
                 } else if ( strcasecmp( token, "includesearch" )==0) {
                     struct config_files ctmp;
-                    int len;
+                    int len, ret;
 
                     if (cptr == NULL) {
                         if (when != PREMIB_CONFIG)
@@ -923,11 +945,7 @@ read_config(const char *filename,
                     ctmp.next = NULL;
                     if ((len > 5) && (strcmp(&cptr[len-5],".conf") == 0))
                        cptr[len-5] = 0; /* chop off .conf */
-                    prev_filename  = curfilename;
-                    prev_linecount = linecount;
                     ret = read_config_files_of_type(when,&ctmp);
-                    curfilename = prev_filename;
-                    linecount   = prev_linecount;
                     if ((len > 5) && (cptr[len-5] == 0))
                        cptr[len-5] = '.'; /* restore .conf */
                     if (( ret != SNMPERR_SUCCESS ) && (when != PREMIB_CONFIG))
@@ -948,7 +966,9 @@ read_config(const char *filename,
             }
         }
     }
-    fclose(ifile);
+    free(line);
+    linecount = prev_linecount;
+    curfilename = prev_filename;
     --depth;
     return SNMPERR_SUCCESS;
 

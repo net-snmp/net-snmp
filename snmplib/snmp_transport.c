@@ -498,10 +498,6 @@ netsnmp_tdomain_transport_full(const char *application,
     const char * const *spec = NULL;
     int                 any_found = 0;
     char buf[SNMP_MAXPATH];
-    extern const char *curfilename;		/* from read_config.c */
-    const char        *prev_curfilename;
-
-    prev_curfilename = curfilename;
 
     DEBUGMSGTL(("tdomain",
                 "tdomain_transport_full(\"%s\", \"%s\", %d, \"%s\", \"%s\")\n",
@@ -640,7 +636,6 @@ netsnmp_tdomain_transport_full(const char *application,
             else
                 t = match->f_create_from_tstring_new(addr, local, addr2);
             if (t) {
-                curfilename = prev_curfilename;
                 return t;
             }
         }
@@ -652,7 +647,6 @@ netsnmp_tdomain_transport_full(const char *application,
     }
     if (!any_found)
         snmp_log(LOG_ERR, "No support for any checked transport domain\n");
-    curfilename = prev_curfilename;
     return NULL;
 }
 
