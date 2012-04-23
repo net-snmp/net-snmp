@@ -378,7 +378,7 @@ nspull() {
 	git checkout $branch
 	MERGE_AUTOEDIT=no git $mergeop origin/$branch
 	if [ $? != 0 ] ; then
-	    echo "git $mergop failed; please fix first"
+	    echo "git $mergeop failed; please fix first"
 	    return
 	fi
     done
