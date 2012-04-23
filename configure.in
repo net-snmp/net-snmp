@@ -2671,7 +2671,8 @@ fi
 
 # Checks for libraries.
 # AC_CHECK_LIB(des, main)
-# AC_CHECK_LIB(m, asin)
+AC_CHECK_LIB(m, round)
+AC_CHECK_LIB(m, exp)
 
 AC_ARG_WITH(elf,
 	[AS_HELP_STRING(--without-elf,[use elf libraries])],,
