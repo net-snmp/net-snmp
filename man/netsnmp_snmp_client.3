@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -139,17 +139,17 @@ various PDU processing routines \-
 .PP
 Return a pointer to the default internal query session and log a warning message once if this session does not exist. 
 .PP
-Definition at line 1218 of file snmp_client.c.
+Definition at line 1242 of file snmp_client.c.
 .SS "\fBnetsnmp_session\fP* netsnmp_query_get_default_session_unchecked (void)"
 .PP
 Return a pointer to the default internal query session. 
 .PP
-Definition at line 1208 of file snmp_client.c.
+Definition at line 1232 of file snmp_client.c.
 .SS "\fBnetsnmp_pdu\fP* snmp_pdu_create (intcommand)"
 .PP
 Library API routines concerned with SNMP PDUs. 
 .PP
-Definition at line 130 of file snmp_client.c.
+Definition at line 131 of file snmp_client.c.
 .SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP *newvar, u_chartype, const void *val_str, size_tval_len)"
 .PP
 snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
@@ -176,12 +176,12 @@ returns 0 on success and 1 on a malloc error
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 698 of file snmp_client.c.
+Definition at line 719 of file snmp_client.c.
 .SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP *vars, const void *value, size_tlen)"
 .PP
 FALL THROUGH 
 .PP
-Definition at line 763 of file snmp_client.c.
+Definition at line 784 of file snmp_client.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

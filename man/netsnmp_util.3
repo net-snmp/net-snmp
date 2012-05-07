@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -62,6 +62,10 @@ Memory Utility Routines \-
 .RI "#define \fBSNMP_ZERO\fP(s, l)   do { if (s) memset(s, 0, l); } while(0)"
 .br
 .RI "\fIZeros l bytes of memory starting at s. \fP"
+.ti -1c
+.RI "#define \fBNETSNMP_REMOVE_CONST\fP(t, e)   ((t)(uintptr_t)(e))"
+.br
+.RI "\fICast away constness without that gcc -Wcast-qual prints a compiler warning, similar to const_cast<> in C++. \fP"
 .ti -1c
 .RI "#define \fBTOUPPER\fP(c)   (c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c)"
 .br
@@ -214,9 +218,13 @@ Memory Utility Routines \-
 .RI "int \fBtimeval_tticks\fP (struct timeval *tv)"
 .br
 .ti -1c
-.RI "char * \fBnetsnmp_getenv\fP (const char *name)"
+.RI "NETSNMP_IMPORT char * \fBnetsnmp_getenv\fP (const char *name)"
 .br
 .RI "\fINon Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. \fP"
+.ti -1c
+.RI "NETSNMP_IMPORT int \fBnetsnmp_setenv\fP (const char *envname, const char *envval, int overwrite)"
+.br
+.RI "\fISet an environment variable. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_addrstr_hton\fP (char *ptr, size_t len)"
 .br
@@ -226,7 +234,7 @@ Memory Utility Routines \-
 .SS "#define DIFFTIMEVAL(now, then, diff)"\fBValue:\fP
 .PP
 .nf
-{                                                    \
+{                                                      \
         now.tv_sec--;                                   \
         now.tv_usec += 1000000L;                        \
         diff.tv_sec  = now.tv_sec  - then.tv_sec;       \
@@ -238,7 +246,7 @@ Memory Utility Routines \-
 }
 .fi
 .PP
-Definition at line 131 of file tools.h.
+Definition at line 152 of file tools.h.
 .SS "#define ISTRANSFORM(ttype, toid)"\fBValue:\fP
 .PP
 .nf
@@ -246,79 +254,91 @@ Definition at line 131 of file tools.h.
                 usm ## toid ## Protocol, USM_LENGTH_OID_TRANSFORM)
 .fi
 .PP
-Definition at line 150 of file tools.h.
+Definition at line 171 of file tools.h.
+.SS "#define NETSNMP_REMOVE_CONST(t, e)   ((t)(uintptr_t)(e))"
+.PP
+Cast away constness without that gcc -Wcast-qual prints a compiler warning, similar to const_cast<> in C++. \fBParameters:\fP
+.RS 4
+\fIt\fP A pointer type. 
+.br
+\fIe\fP An expression of a type that can be assigned to the type (const t). 
+.RE
+.PP
+
+.PP
+Definition at line 92 of file tools.h.
 .SS "#define QUITFUN(e, l)"\fBValue:\fP
 .PP
 .nf
-if ( (e) != SNMPERR_SUCCESS) {   \
+if ( (e) != SNMPERR_SUCCESS) {     \
                 rval = SNMPERR_GENERR;  \
                 goto l ;                \
         }
 .fi
 .PP
-Definition at line 118 of file tools.h.
+Definition at line 139 of file tools.h.
 .SS "#define SNMP_FREE(s)   do { if (s) { free((void *)s); s=NULL; } } while(0)"
 .PP
 Frees a pointer only if it is !NULL and sets its value to NULL. 
 .PP
-Definition at line 53 of file tools.h.
+Definition at line 57 of file tools.h.
 .SS "#define SNMP_MACRO_VAL_TO_STR(s)   SNMP_MACRO_VAL_TO_STR_PRIV(s)"
 .PP
 Expands to string with value of the s. If s is macro, the resulting string is value of the macro. Example: #define TEST 1234 \fBSNMP_MACRO_VAL_TO_STR(TEST)\fP expands to '1234' SNMP_MACRO_VAL_TO_STR(TEST+1) expands to '1234+1' 
 .PP
-Definition at line 99 of file tools.h.
+Definition at line 120 of file tools.h.
 .SS "#define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))"
 .PP
 Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. 
 .PP
-Definition at line 64 of file tools.h.
+Definition at line 68 of file tools.h.
 .SS "#define SNMP_MALLOC_TYPEDEF(td)   (td *) calloc(1, sizeof(td))"
 .PP
 Mallocs memory of sizeof(t), zeros it and returns a pointer to it. 
 .PP
-Definition at line 68 of file tools.h.
+Definition at line 72 of file tools.h.
 .SS "#define SNMP_MAX(a, b)   ((a) > (b) ? (a) : (b))"
 .PP
 Computers the maximum of a and b. 
 .PP
-Definition at line 85 of file tools.h.
+Definition at line 106 of file tools.h.
 .SS "#define SNMP_MIN(a, b)   ((a) > (b) ? (b) : (a))"
 .PP
 Computers the minimum of a and b. 
 .PP
-Definition at line 89 of file tools.h.
+Definition at line 110 of file tools.h.
 .SS "#define SNMP_SWIPE_MEM(n, s)   do { if (n) free((void *)n); n = s; s=NULL; } while(0)"
 .PP
 Frees pointer n only if it is !NULL, sets n to s and sets s to NULL. 
 .PP
-Definition at line 57 of file tools.h.
+Definition at line 61 of file tools.h.
 .SS "#define SNMP_ZERO(s, l)   do { if (s) memset(s, 0, l); } while(0)"
 .PP
 Zeros l bytes of memory starting at s. 
 .PP
-Definition at line 72 of file tools.h.
+Definition at line 76 of file tools.h.
 .SH "Function Documentation"
 .PP 
 .SS "long atime_diff (marker_tfirst, marker_tsecond)"
 .PP
 Returns the difference (in msec) between the two markers. 
 .PP
-Definition at line 807 of file tools.c.
+Definition at line 803 of file tools.c.
 .SS "marker_t atime_newMarker (void)"
 .PP
 create a new time marker. NOTE: Caller must free time marker when no longer needed. 
 .PP
-Definition at line 783 of file tools.c.
+Definition at line 779 of file tools.c.
 .SS "int atime_ready (marker_tpm, intdeltaT)"
 .PP
 Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). 
 .PP
-Definition at line 862 of file tools.c.
+Definition at line 858 of file tools.c.
 .SS "void atime_setMarker (marker_tpm)"
 .PP
 set a time marker. 
 .PP
-Definition at line 794 of file tools.c.
+Definition at line 790 of file tools.c.
 .SS "u_int binary_to_hex (const u_char *input, size_tlen, char **output)"
 .PP
 converts binary to hexidecimal \fBParameters:\fP
@@ -392,7 +412,7 @@ Definition at line 217 of file tools.c.
 .PP
 Return the number of timeTicks since the given marker. 
 .PP
-Definition at line 910 of file tools.c.
+Definition at line 906 of file tools.c.
 .SS "int memdup (u_char **to, const void *from, size_tsize)"
 .PP
 Duplicates a memory block. Copies a existing memory location from a pointer to another, newly malloced, pointer.
@@ -414,11 +434,11 @@ SNMPERR_SUCCESS on success, SNMPERR_GENERR on failure.
 
 .PP
 Definition at line 248 of file tools.c.
-.SS "char* netsnmp_getenv (const char *name)"
+.SS "NETSNMP_IMPORT char* netsnmp_getenv (const char *name)"
 .PP
 Non Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. Windows: Returns a pointer to the desired environment variable if it exists. If it does not, the variable is looked up in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP (whichever it finds first) and stores the result in the environment variable. It then returns a pointer to environment variable. 
 .PP
-Definition at line 938 of file tools.c.
+Definition at line 934 of file tools.c.
 .SS "int netsnmp_hex_to_binary (u_char **buf, size_t *buf_len, size_t *offset, intallow_realloc, const char *hex, const char *delim)"
 .PP
 convert an ASCII hex string (with specified delimiters) to binary \fBParameters:\fP
@@ -446,6 +466,11 @@ convert an ASCII hex string (with specified delimiters) to binary \fBParameters:
 
 .PP
 Definition at line 437 of file tools.c.
+.SS "NETSNMP_IMPORT int netsnmp_setenv (const char *envname, const char *envval, intoverwrite)"
+.PP
+Set an environment variable. This function is only necessary on Windows for the MSVC and MinGW environments. If the process that uses the Net-SNMP DLL (e.g. a Perl interpreter) and the Net-SNMP have been built with a different compiler version then each will have a separate set of environment variables. This function allows to set an environment variable such that it gets noticed by the Net-SNMP DLL. 
+.PP
+Definition at line 1067 of file tools.c.
 .SS "char* netsnmp_strdup_and_null (const u_char *from, size_tfrom_len)"
 .PP
 copies a (possible) unterminated string of a given length into a new buffer and null terminates it as well (new buffer MAY be one byte longer to account for this 
@@ -493,17 +518,17 @@ Definition at line 133 of file tools.c.
 .PP
 Returns the difference (in u_long msec) between the two markers. 
 .PP
-Definition at line 824 of file tools.c.
+Definition at line 820 of file tools.c.
 .SS "u_long uatime_hdiff (marker_tfirst, marker_tsecond)"
 .PP
 Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs) 
 .PP
-Definition at line 842 of file tools.c.
+Definition at line 838 of file tools.c.
 .SS "int uatime_ready (marker_tpm, unsigned intdeltaT)"
 .PP
 Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). 
 .PP
-Definition at line 884 of file tools.c.
+Definition at line 880 of file tools.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

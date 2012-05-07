@@ -1,4 +1,4 @@
-.TH "Trap generation routines for mib modules to use" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "Trap generation routines for mib modules to use" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -189,7 +189,7 @@ Trap generation routines for mib modules to use \-
 .RI "char * \fBsnmp_trapcommunity\fP = NULL"
 .br
 .ti -1c
-.RI "int \fBsnmp_enableauthentraps\fP = SNMP_AUTHENTICATED_TRAPS_DISABLED"
+.RI "long \fBsnmp_enableauthentraps\fP = SNMP_AUTHENTICATED_TRAPS_DISABLED"
 .br
 .ti -1c
 .RI "int \fBsnmp_enableauthentrapsset\fP = 0"
@@ -252,7 +252,7 @@ void
 .PP
 
 .PP
-Definition at line 634 of file agent_trap.c.
+Definition at line 632 of file agent_trap.c.
 .SS "void send_easy_trap (inttrap, intspecific)"
 .PP
 Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of configured trap destinations (or 'sinks'), using the provided values for the generic trap type and specific trap value. This function eventually calls send_enterprise_trap_vars. If the trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length paramater is set to the pre defined NETSNMP_SYSTEM_MIB oid and length respectively. If the trap type is set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length parameters are set to the pre-defined NETSNMP_NOTIFICATION_MIB oid and length respectively.

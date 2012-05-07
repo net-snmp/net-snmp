@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -476,7 +476,7 @@ XXX-rks: why no SNMP_FREE(isp->packet); ??
 .PP
 XXX-rks: why no SNMP_FREE(isp->packet); ?? 
 .PP
-Definition at line 5685 of file snmp_api.c.
+Definition at line 5712 of file snmp_api.c.
 .SS "int init_agent (const char *app)"
 .PP
 Initialize the agent. Calls into init_agent_read_config to set tha app's configuration file in the appropriate default storage space, NETSNMP_DS_LIB_APPTYPE. Need to call init_agent before calling init_snmp.
@@ -498,7 +498,7 @@ Returns non-zero on failure and zero on success.
 .PP
 
 .PP
-Definition at line 273 of file snmp_vars.c.
+Definition at line 277 of file snmp_vars.c.
 .SS "void init_snmp (const char *type)"
 .PP
 Calls the functions to do config file loading and mib module parsing in the correct order. \fBParameters:\fP
@@ -518,7 +518,7 @@ void
 .PP
 
 .PP
-Definition at line 793 of file snmp_api.c.
+Definition at line 796 of file snmp_api.c.
 .SS "int netsnmp_oid_compare_ll (const oid *in_name1, size_tlen1, const oid *in_name2, size_tlen2, size_t *offpt)"
 .PP
 lexicographical compare two object identifiers and return the point where they differ Caution: this method is called often by command responder applications (ie, agent).
@@ -530,7 +530,7 @@ lexicographical compare two object identifiers and return the point where they d
 .PP
 
 .PP
-Definition at line 6686 of file snmp_api.c.
+Definition at line 6713 of file snmp_api.c.
 .SS "int netsnmp_oid_equals (const oid *in_name1, size_tlen1, const oid *in_name2, size_tlen2)"
 .PP
 Compares 2 OIDs to determine if they are exactly equal. This should be faster than doing a snmp_oid_compare for different length OIDs, since the length is checked first and if != returns immediately. Might be very slighly faster if lengths are ==. 
@@ -553,7 +553,7 @@ Compares 2 OIDs to determine if they are exactly equal. This should be faster th
 .PP
 
 .PP
-Definition at line 6767 of file snmp_api.c.
+Definition at line 6794 of file snmp_api.c.
 .SS "int netsnmp_oid_find_prefix (const oid *in_name1, size_tlen1, const oid *in_name2, size_tlen2)"
 .PP
 Given two OIDs, determine the common prefix to them both. \fBParameters:\fP
@@ -569,12 +569,12 @@ Given two OIDs, determine the common prefix to them both. \fBParameters:\fP
 .PP
 \fBReturns:\fP
 .RS 4
-length of largest common index of commonality. 1 = first, 0 if none * or -1 on error. 
+length of common prefix 0 if no common prefix, -1 on error. 
 .RE
 .PP
 
 .PP
-Definition at line 6830 of file snmp_api.c.
+Definition at line 6858 of file snmp_api.c.
 .SS "int netsnmp_oid_is_subtree (const oid *in_name1, size_tlen1, const oid *in_name2, size_tlen2)"
 .PP
 Identical to netsnmp_oid_equals, except only the length up to len1 is compared. Functionally, this determines if in_name2 is equal or a subtree of in_name1 
@@ -597,7 +597,7 @@ Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
 .PP
 
 .PP
-Definition at line 6810 of file snmp_api.c.
+Definition at line 6837 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid *in_name1, size_tlen1, const oid *in_name2, size_tlen2)"
 .PP
 lexicographical compare two object identifiers. Caution: this method is called often by command responder applications (ie, agent).
@@ -609,7 +609,7 @@ lexicographical compare two object identifiers. Caution: this method is called o
 .PP
 
 .PP
-Definition at line 6637 of file snmp_api.c.
+Definition at line 6664 of file snmp_api.c.
 .SS "int snmp_oidtree_compare (const oid *in_name1, size_tlen1, const oid *in_name2, size_tlen2)"
 .PP
 Compares 2 OIDs to determine if they are equal up until the shortest length. \fBParameters:\fP
@@ -630,17 +630,17 @@ Compares 2 OIDs to determine if they are equal up until the shortest length. \fB
 .PP
 
 .PP
-Definition at line 6739 of file snmp_api.c.
+Definition at line 6766 of file snmp_api.c.
 .SS "\fBnetsnmp_variable_list\fP* snmp_pdu_add_variable (\fBnetsnmp_pdu\fP *pdu, const oid *name, size_tname_length, u_chartype, const void *value, size_tlen)"
 .PP
 Library API routines concerned with variable bindings and values. 
 .PP
-Definition at line 6898 of file snmp_api.c.
+Definition at line 6929 of file snmp_api.c.
 .SS "void snmp_sess_init (\fBnetsnmp_session\fP *session)"
 .PP
 Library API routines concerned with specifying and using SNMP 'sessions' including sending and receiving requests. 
 .PP
-Definition at line 715 of file snmp_api.c.
+Definition at line 718 of file snmp_api.c.
 .SS "\fBnetsnmp_session\fP* snmp_sess_session_lookup (void *sessp)"
 .PP
 Look up a session that already may have been closed. \fBParameters:\fP
@@ -660,7 +660,7 @@ snmp_sess_session()
 .PP
 
 .PP
-Definition at line 7491 of file snmp_api.c.
+Definition at line 7522 of file snmp_api.c.
 .SS "void snmp_shutdown (const char *type)"
 .PP
 Shuts down the application, saving any needed persistent storage, and appropriate clean up. \fBParameters:\fP
@@ -675,7 +675,7 @@ void
 .PP
 
 .PP
-Definition at line 859 of file snmp_api.c.
+Definition at line 862 of file snmp_api.c.
 .SS "int snmpv3_engineID_probe (struct \fBsession_list\fP *slp, \fBnetsnmp_session\fP *in_session)"
 .PP
 probe for peer engineID \fBParameters:\fP
@@ -705,12 +705,12 @@ the first session in slp should the internal allocated copy of in_session
 .PP
 
 .PP
-Definition at line 1372 of file snmp_api.c.
+Definition at line 1377 of file snmp_api.c.
 .SS "int snmpv3_probe_contextEngineID_rfc5343 (void *slp, \fBnetsnmp_session\fP *session)"
 .PP
 probe for engineID using RFC 5343 probing mechanisms Designed to be a callback for within a security model's probe_engineid hook. Since it's likely multiple security models won't have engineIDs to probe for then this function is a callback likely to be used by multiple future security models. E.G. both SSH and DTLS. 
 .PP
-Definition at line 1275 of file snmp_api.c.
+Definition at line 1279 of file snmp_api.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

@@ -1,4 +1,4 @@
-.TH "cache_handler" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "cache_handler" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -99,7 +99,7 @@ A timeout value of -1 will cause \fBnetsnmp_cache_check_expired()\fP to always r
 .PP
 To minimze resource use by the agent, a periodic callback checks for expired caches, and will call the free_cache function for any expired cache.
 .PP
-The load_cache route should return a negative number if the cache was not successfully loaded. 0 or any positive number indicates successs.
+The load_cache routine should return a negative number if the cache was not successfully loaded. 0 or any positive number indicates successs.
 .PP
 Several flags can be set to affect the operations on the cache.
 .PP

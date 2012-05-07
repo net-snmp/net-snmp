@@ -1,4 +1,4 @@
-.TH "agent_handler.h" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "agent_handler.h" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -127,11 +127,11 @@ agent_handler.h \-
 .ti -1c
 .RI "int \fBnetsnmp_inject_handler\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_mib_handler\fP *handler)"
 .br
-.RI "\fIinject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. \fP"
+.RI "\fIinject a new handler into the calling chain of the handlers defined by the netsnmp_handler_registration pointer. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_inject_handler_before\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_mib_handler\fP *handler, const char *before_what)"
 .br
-.RI "\fIinject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. \fP"
+.RI "\fIinject a new handler into the calling chain of the handlers defined by the netsnmp_handler_registration pointer. \fP"
 .ti -1c
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_find_handler_by_name\fP (\fBnetsnmp_handler_registration\fP *reginfo, const char *name)"
 .br

@@ -1,4 +1,4 @@
-.TH "net-snmp agent related processing" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "net-snmp agent related processing" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -79,7 +79,6 @@ net-snmp agent related processing \-
 .ti -1c
 .RI "int \fBhandle_pdu\fP (\fBnetsnmp_agent_session\fP *asp)"
 .br
-.RI "\fIThis function calls into netsnmp_set_mode_request_error, sets error_value given a reqinfo->mode value. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_handle_request\fP (\fBnetsnmp_agent_session\fP *asp, int status)"
 .br
@@ -316,7 +315,7 @@ net-snmp agent related processing \-
 .PP
 set error for a request 
 .PP
-Definition at line 3482 of file snmp_agent.c.
+Definition at line 3431 of file snmp_agent.c.
 .SS "int agent_check_and_process (intblock)"
 .PP
 This function checks for packets arriving on the SNMP port and processes them(snmp_read) if some are found, using the select(). If block is non zero, the function call blocks until a packet arrives
@@ -344,76 +343,6 @@ Definition at line 2883 of file snmp_agent.c.
 repeatedly calls getnext handlers looking for an answer till all requests are satisified. It's expected that one pass has been made before entering this function 
 .PP
 Definition at line 3000 of file snmp_agent.c.
-.SS "int handle_pdu (\fBnetsnmp_agent_session\fP *asp)"
-.PP
-This function calls into netsnmp_set_mode_request_error, sets error_value given a reqinfo->mode value. It's used to send specific errors back to the agent to process accordingly.
-.PP
-If error_value is set to SNMP_NOSUCHOBJECT, SNMP_NOSUCHINSTANCE, or SNMP_ENDOFMIBVIEW the following is applicable: Sets the error_value to request->requestvb->type if reqinfo->mode value is set to MODE_GET. If the reqinfo->mode value is set to MODE_GETNEXT or MODE_GETBULK the code calls snmp_log logging an error message.
-.PP
-Otherwise, the request->status value is checked, if it's < 0 snmp_log is called with an error message and SNMP_ERR_GENERR is assigned to request->status. If the request->status value is >= 0 the error_value is set to request->status.
-.PP
-\fBParameters:\fP
-.RS 4
-\fIreqinfo\fP is a pointer to the netsnmp_agent_request_info struct. It contains the reqinfo->mode which is required to set error_value or log error messages.
-.br
-\fIrequest\fP is a pointer to the netsnmp_request_info struct. The error_value is set to request->requestvb->type
-.br
-\fIerror_value\fP is the exception value you want to set, below are possible values.
-.IP "\(bu" 2
-SNMP_NOSUCHOBJECT
-.IP "\(bu" 2
-SNMP_NOSUCHINSTANCE
-.IP "\(bu" 2
-SNMP_ENDOFMIBVIEW
-.IP "\(bu" 2
-SNMP_ERR_NOERROR
-.IP "\(bu" 2
-SNMP_ERR_TOOBIG
-.IP "\(bu" 2
-SNMP_ERR_NOSUCHNAME
-.IP "\(bu" 2
-SNMP_ERR_BADVALUE
-.IP "\(bu" 2
-SNMP_ERR_READONLY
-.IP "\(bu" 2
-SNMP_ERR_GENERR
-.IP "\(bu" 2
-SNMP_ERR_NOACCESS
-.IP "\(bu" 2
-SNMP_ERR_WRONGTYPE
-.IP "\(bu" 2
-SNMP_ERR_WRONGLENGTH
-.IP "\(bu" 2
-SNMP_ERR_WRONGENCODING
-.IP "\(bu" 2
-SNMP_ERR_WRONGVALUE
-.IP "\(bu" 2
-SNMP_ERR_NOCREATION
-.IP "\(bu" 2
-SNMP_ERR_INCONSISTENTVALUE
-.IP "\(bu" 2
-SNMP_ERR_RESOURCEUNAVAILABLE
-.IP "\(bu" 2
-SNMP_ERR_COMMITFAILED
-.IP "\(bu" 2
-SNMP_ERR_UNDOFAILED
-.IP "\(bu" 2
-SNMP_ERR_AUTHORIZATIONERROR
-.IP "\(bu" 2
-SNMP_ERR_NOTWRITABLE
-.IP "\(bu" 2
-SNMP_ERR_INCONSISTENTNAME
-.PP
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-Returns error_value under all conditions. 
-.RE
-.PP
-
-.PP
-Definition at line 3294 of file snmp_agent.c.
 .SS "int handle_snmp_packet (intop, \fBnetsnmp_session\fP *session, intreqid, \fBnetsnmp_pdu\fP *pdu, void *magic)"
 .PP
 handles an incoming SNMP packet into the agent 
@@ -447,7 +376,7 @@ set error for a request \fBParameters:\fP
 .PP
 
 .PP
-Definition at line 3550 of file snmp_agent.c.
+Definition at line 3499 of file snmp_agent.c.
 .SS "NETSNMP_INLINE int netsnmp_request_set_error_all (\fBnetsnmp_request_info\fP *requests, interror)"
 .PP
 set error for all requests \fBParameters:\fP
@@ -466,7 +395,7 @@ SNMPERR_SUCCESS, or an error code
 .PP
 paranoid sanity checks 
 .PP
-Definition at line 3593 of file snmp_agent.c.
+Definition at line 3542 of file snmp_agent.c.
 .SS "int netsnmp_request_set_error_idx (\fBnetsnmp_request_info\fP *request, interror_value, intidx)"
 .PP
 set error for a request within a request list \fBParameters:\fP
@@ -480,7 +409,7 @@ set error for a request within a request list \fBParameters:\fP
 .PP
 
 .PP
-Definition at line 3565 of file snmp_agent.c.
+Definition at line 3514 of file snmp_agent.c.
 .SS "int netsnmp_set_all_requests_error (\fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests, interror_value)"
 .PP
 set error for all request \fBDeprecated\fP
@@ -504,7 +433,7 @@ error_value
 .PP
 
 .PP
-Definition at line 3706 of file snmp_agent.c.
+Definition at line 3655 of file snmp_agent.c.
 .SS "int netsnmp_set_mode_request_error (intmode, \fBnetsnmp_request_info\fP *request, interror_value)"
 .PP
 set error for a request deprecated, use netsnmp_request_set_error instead
@@ -530,7 +459,7 @@ error_value
 .PP
 
 .PP
-Definition at line 3690 of file snmp_agent.c.
+Definition at line 3639 of file snmp_agent.c.
 .SS "int netsnmp_set_request_error (\fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *request, interror_value)"
 .PP
 set error for a request deprecated, use netsnmp_request_set_error instead
@@ -560,7 +489,7 @@ error_value
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 3671 of file snmp_agent.c.
+Definition at line 3620 of file snmp_agent.c.
 .SS "int netsnmp_wrap_up_request (\fBnetsnmp_agent_session\fP *asp, intstatus)"
 .PP
 if asp->pdu 

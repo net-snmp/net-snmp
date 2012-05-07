@@ -1,4 +1,4 @@
-.TH "tools.h" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "tools.h" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -65,6 +65,10 @@ tools.h \-
 .RI "#define \fBSNMP_ZERO\fP(s, l)   do { if (s) memset(s, 0, l); } while(0)"
 .br
 .RI "\fIZeros l bytes of memory starting at s. \fP"
+.ti -1c
+.RI "#define \fBNETSNMP_REMOVE_CONST\fP(t, e)   ((t)(uintptr_t)(e))"
+.br
+.RI "\fICast away constness without that gcc -Wcast-qual prints a compiler warning, similar to const_cast<> in C++. \fP"
 .ti -1c
 .RI "#define \fBTOUPPER\fP(c)   (c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c)"
 .br
@@ -217,9 +221,13 @@ tools.h \-
 .RI "int \fBtimeval_tticks\fP (struct timeval *tv)"
 .br
 .ti -1c
-.RI "char * \fBnetsnmp_getenv\fP (const char *name)"
+.RI "NETSNMP_IMPORT char * \fBnetsnmp_getenv\fP (const char *name)"
 .br
 .RI "\fINon Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. \fP"
+.ti -1c
+.RI "NETSNMP_IMPORT int \fBnetsnmp_setenv\fP (const char *envname, const char *envval, int overwrite)"
+.br
+.RI "\fISet an environment variable. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_addrstr_hton\fP (char *ptr, size_t len)"
 .br

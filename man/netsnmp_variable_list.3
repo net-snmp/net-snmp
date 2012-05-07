@@ -1,4 +1,4 @@
-.TH "variable_list" 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "variable_list" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -67,44 +67,44 @@ The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_
 .PP
 \fBnotification.c\fP.
 .PP
-Definition at line 112 of file types.h.
+Definition at line 139 of file types.h.
 .SH "Field Documentation"
 .PP 
 .SS "u_char \fBvariable_list::buf\fP[40]"
 .PP
 90 percentile < 40. 
 .PP
-Definition at line 128 of file types.h.
+Definition at line 155 of file types.h.
 .SS "void* \fBvariable_list::data\fP"
 .PP
 (Opaque) hook for additional data 
 .PP
-Definition at line 130 of file types.h.
+Definition at line 157 of file types.h.
 .SS "void(* \fBvariable_list::dataFreeHook\fP)(void *)"
 .PP
 callback to free above 
 .PP
-Definition at line 132 of file types.h.
+Definition at line 159 of file types.h.
 .SS "oid* \fBvariable_list::name\fP"
 .PP
 Object identifier of variable. 
 .PP
-Definition at line 116 of file types.h.
+Definition at line 143 of file types.h.
 .SS "size_t \fBvariable_list::name_length\fP"
 .PP
 number of subid's in name 
 .PP
-Definition at line 118 of file types.h.
+Definition at line 145 of file types.h.
 .SS "oid \fBvariable_list::name_loc\fP[MAX_OID_LEN]"
 .PP
 buffer to hold the OID 
 .PP
-Definition at line 126 of file types.h.
+Definition at line 153 of file types.h.
 .SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP"
 .PP
 NULL for last variable. 
 .PP
-Definition at line 114 of file types.h.
+Definition at line 141 of file types.h.
 .SS "u_char \fBvariable_list::type\fP"
 .PP
 ASN type of variable. 
@@ -113,7 +113,7 @@ ASN type of variable.
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 120 of file types.h.
+Definition at line 147 of file types.h.
 .SS "\fBnetsnmp_vardata\fP \fBvariable_list::val\fP"
 .PP
 value of variable 
@@ -122,12 +122,12 @@ value of variable
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 122 of file types.h.
+Definition at line 149 of file types.h.
 .SS "size_t \fBvariable_list::val_len\fP"
 .PP
 the length of the value to be copied into buf 
 .PP
-Definition at line 124 of file types.h.
+Definition at line 151 of file types.h.
 
 .SH "Author"
 .PP 

@@ -1,4 +1,4 @@
-.TH "generic linked-list data handling with a string as a key." 3 "Fri Mar 18 2011" "Version 5.5.1" "net-snmp" \" -*- nroff -*-
+.TH "generic linked-list data handling with a string as a key." 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -205,7 +205,7 @@ make netsnmp_read_data_callback deal with a free routine
 .PP
 
 .PP
-Definition at line 330 of file data_list.c.
+Definition at line 335 of file data_list.c.
 .SS "void netsnmp_register_save_list (\fBnetsnmp_data_list\fP **datalist, const char *type, const char *token, Netsnmp_Save_List_Data *data_list_save_ptr, Netsnmp_Read_List_Data *data_list_read_ptr, Netsnmp_Free_List_Data *data_list_free_ptr)"
 .PP
 registers to store a data_list set of data at persistent storage time \fBParameters:\fP
@@ -254,7 +254,7 @@ Definition at line 195 of file data_list.c.
 .PP
 intended to be called as a callback during persistent save operations. See the netsnmp_save_all_data_callback for where this is typically used. 
 .PP
-Definition at line 294 of file data_list.c.
+Definition at line 299 of file data_list.c.
 .SS "int netsnmp_save_all_data_callback (intmajor, intminor, void *serverarg, void *clientarg)"
 .PP
 intended to be registerd as a callback operation. It should be registered using:
@@ -263,7 +263,7 @@ snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA, netsnmp_
 .PP
 where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object containing apporpriate registration information 
 .PP
-Definition at line 277 of file data_list.c.
+Definition at line 282 of file data_list.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.
