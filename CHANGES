@@ -30,9 +30,12 @@ listing of all changes made to the code.
       - [PATCH 3447671]: Fix override handling of OID values
       - [PATCH 3453868]: Factor common code into pass_common
       - [PATCH 3487919]: Fix compilation when caching is disabled
+      - [PATCH 3487867]: Don't skip missing ifXTable entries (ifConnectorPresent FALSE)
+      - [PATCH 3495697]: Store persistent snmpTarget table changes
       - Added OCFS2 (Oracle Cluster FS) to hrStorageTable and hrFSTable
       - DISMAN-SCHEDULER-MIB: Handle 32-char contextName values correctly.
       - IF-MIB::ifType: Report InfiniBand interfaces correctly
+      - UDP-MIB: Report proper address in udpLocalAddress instead of 0.0.0.0.
       - Eliminate various dead variables
       - Return error instead of exiting on init problems
       - Make the configuration of the dlmod module fail rather than
@@ -77,6 +80,9 @@ listing of all changes made to the code.
 
     BSD:
       - PATCH 3383965: Fix if-mib agent compile warnings on *BSD
+
+    FreeBSD:
+      - [PATCH 3489387]: Install FreeBSD 10 header file (plus other missing versions)
 
     MinGW:
       - Avoid "pragma comment" warnings in <net-snmp/net-snmp-config.h>
