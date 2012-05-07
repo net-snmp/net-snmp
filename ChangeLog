@@ -1,7 +1,333 @@
 
 ----------------------------------------------------------------------
 
-Changes: V5.5.1 -> V5.5.2.pre1
+Changes: V5.5.1 -> V5.5.2.rc1
+
+commit 07e268bfb64b0ec645b3f7e87266984f9217cf12
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 7 17:44:37 2012 +0100
+
+    make depend for 5.5.2.rc1
+
+commit 16eaaf6c3ba14596ca9efaf4b114f1b709f42b68
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 7 17:29:03 2012 +0100
+
+    documentation update for 5.5.2.rc1
+
+commit c729469ef12154930cf9d15967e16186fb445f30
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 7 17:27:20 2012 +0100
+
+    Version number update: 5.5.2.rc1
+
+commit 142571d3cea08f0c072d24c1d39a43c7446f8ce7
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 7 17:01:03 2012 +0100
+
+    When building a new release, the installed version of the perl
+    modules may well be different to the version being built.
+    That should not break the build.
+
+commit 5c0f64d6db2b593f7cc0ed2d4f55b7c592b774a8
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 23 22:25:15 2012 +0200
+
+    Only output cpu warnings once.
+
+commit ee58e4827b9fa16e6635ca003e8a4f11dcb5fb7a
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 23 22:17:42 2012 +0200
+
+    Fix speling in errormessage.
+
+commit 03f485df22f20e149cfae94c57cb82feecb5d74b
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 23 22:12:11 2012 +0200
+
+    Not all Linuxes use rpm (debian/ubuntu comes to mind)
+
+commit 930838224f781696bd35225f22569347416f1b16
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 23 22:10:15 2012 +0200
+
+    Check need for -lm to use round/exp
+
+commit 137fe582d6cc5611430dab46ef144efd84cfc803
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Apr 6 20:46:56 2012 +0100
+
+    Revert commit 1f4a829b18275e4956ca91e5ec370df015f06133
+    (snmp_store_needed() API is not available in 5.[45].x)
+
+commit 2b7e64288c01a8a062026c521ca31a5e885f30cc
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 16:12:12 2012 +0100
+
+    FreeBSD-9: Fix for 'const'ifyed nlist arguments
+    Backport of ed65eca6e7f9cfa7380a78d56c01ed314745b169 from V5-6-patches
+
+commit 7e95d80b698051259645c074a53ffd264a6fa916
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 16:06:56 2012 +0100
+
+    FreeBSD-9: Fix for 'const'ifyed nlist arguments
+    Backport of ed65eca6e7f9cfa7380a78d56c01ed314745b169 from V5-6-patches
+
+commit 1a9b7b7c02e2deefe994d595a7cc1dd2ffbeee1d
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 15:51:20 2012 +0100
+
+    Fix compilation on FreeBSD 9.x with 'recent' header shuffling
+    Backport of c53d8c3525f590f2213d35b0da94123862f3e366 from V5-5-patches
+    (Patch #3363308 - omitting tweaks to configure)
+
+commit 3d9ddb41e263bc1a78f9f9440b8d4ad4f86c82e1
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 10:36:18 2012 +0100
+
+    Fix typo
+    Backport of 5b702b024b60176d7f5699b92e55da50a8deae71 from V5-6-patches
+
+commit 0d35c609564b66a1ffe81556d37adf0503c389ce
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 10:15:08 2012 +0100
+
+    Provide missing definition of NETSNMP_PRIo
+    (used in agent/mibgroup/ip-mib/data_access/ipaddress_solaris2.c)
+
+commit adf74bf753d3970357afd633803256241d9c7b87
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 08:20:46 2012 +0100
+
+    Fix IPv6 TCP & UDP tables, *BSD support (including OpenBSD)
+    Backport of commits 5cd1573625471c0583e9087aec6802b77157d5a2
+      and 50d73f0d56fe22c590530b3e305d41dcdac3ce00 from V5-6-patches
+
+commit cecd4869deb68f3d4c71e768d5b40dd576446925
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Mar 29 22:29:31 2012 +0200
+
+    Running autoheader / autoconf
+
+commit 9bdbcca122c37da304fc6aa6939729475f90f5fd
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Mar 28 09:30:49 2012 +0100
+
+    Doxygen-style documentation fixes (back-port of GIT commit c09903a42e9d97331fd9e48ee831a85afdf9c70a)
+
+commit 1f4a829b18275e4956ca91e5ec370df015f06133
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Mar 27 21:41:24 2012 +0100
+
+    CHANGES: snmpd: PATCHES: 3495697: Store persistent snmpTarget table changes
+
+commit 1f75f377d0db01754c0c161dc44373081beef520
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Mar 27 21:14:06 2012 +0100
+
+    CHANGES: FreeBSD: PATCHES: 3489387: Install FreeBSD 10 header file (plus other missing versions)
+
+commit 3d72c9e78f2ad817c9d1d82977327bbb20d63ab9
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Mar 27 21:06:31 2012 +0100
+
+    CHANGES: snmpd: PATCH: 3487867: Don't skip missing ifXTable entries (ifConnectorPresent FALSE)
+
+commit 8a9b57291453cb8aec28e766c594701ed19c4fc6
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Mar 26 21:03:41 2012 +0200
+
+    Fix for DragonFly 3
+
+commit e5c9a32f79eac2e85527c9cf05087cdae9b35a6c
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Mar 26 20:59:53 2012 +0200
+
+    DragonFly needs _KERNEL_STRUCTURES to compile ipv6 code
+
+commit e2fc15f9e5a6e3e36be5f489601cbf6bf731917f
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sat Mar 24 15:21:38 2012 +0100
+
+    Fix TCP state values for DragonFly
+
+commit 432fe3ddf54f2c98f936959469cb9b014d599f06
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sat Mar 24 15:10:52 2012 +0100
+
+    Require perl to do pass_persist test
+
+commit 37d2770cf50c98023eeba90e25d372bff7316ada
+Author: Niels Baggesen <nba@user.sourceforge.net>
+Date:   Sat Mar 24 15:06:40 2012 +0100
+
+    Fix TCP state values for DragonFly
+
+commit 86a948d8691e881d55591dcabddc2739ce72b30e
+Author: Niels Baggesen <nba@nba-linux.sb.statsbiblioteket.dk>
+Date:   Sat Mar 24 15:01:37 2012 +0100
+
+    Properly find pass helpers for testing.
+
+commit 5b38f062b99b6ef36708e2c7de4965a3192612e9
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Mar 21 18:34:48 2012 +0100
+
+    For safety, sizeof the right variable in memcpy
+
+commit e5f82782da05efa7c0e6dc2bf5a41ee11868f469
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Mar 21 18:33:21 2012 +0100
+
+    Fix for hrSWRun data for FreeBSD
+
+commit 8327565e823270d10a4504568edbe5b5ae323a55
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Mar 21 18:31:54 2012 +0100
+
+    Clean up variables for OpenBSD/NetBSD
+
+commit 170f6f027bf4f9174b7073530da4d07f400bba58
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Mar 21 18:28:58 2012 +0100
+
+    Move declarations in front of statements
+
+commit dbb4573b69fae85cdc931b2892b5ce4e5b16b321
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Mar 21 18:23:36 2012 +0100
+
+    Require kernel_netbsd for NetBSD6
+
+commit f11681f15aad7d9a52fa29812ecbb507f1b7fe24
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Mar 21 12:36:38 2012 +0000
+
+    Check for old tarballs (and unpacked distributions) before starting.
+    These can confuse steps such as "make dependcheck", that do a 'find'
+    on the current tree, and would descend into such unpacked source trees.
+
+commit 470dcd4b6c3ff11ff0a3532a7340a56cffd69098
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Mar 21 12:32:13 2012 +0000
+
+    Don't run "make docs; make mancp" if there's no Makefile present
+
+commit c9ac420343e16df2b7065f5bf2790df44e247fba
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Mar 20 10:26:10 2012 +0000
+
+    Allow distribution as part of normal Net-SNMP packages.
+
+commit bdccc875710295aacf50f71eb1c1d2ee97f336fe
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Fri Mar 16 20:10:58 2012 +0100
+
+    Do not declare the local variables for opaque_special_types unless that option is set.
+
+commit b80a67da052adca1b5a644db83a782e15c2237c3
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Fri Mar 16 19:50:03 2012 +0100
+
+    Check that the data exist before trying to read it
+
+commit aaedd59cc2da701527dc2d261d4e9f85f16e7504
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Mar 11 20:57:38 2012 +0100
+
+    Allow make test where the source path contains the string Net-SNMP to succeed.
+
+commit ce85832932ccd916c42319114c40885a466a9d0e
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Mar 5 20:56:40 2012 +0100
+
+    More fixes for Solaris sh
+
+commit 0dd1e54557d1ba498b55d017b0a93e8ccf9bd522
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Mar 5 15:08:26 2012 +0100
+
+    CHANGES: snmpd: UDP-MIB: Report the proper address in udpLocalAddress instead of 0.0.0.0. Makes test T160snmpnetstat pass again. Fixes a bug introduced in commit c76fb96f65e33ba2fd212a921e8c386155ee5c7a.
+
+commit 518917e9f39f7a9d3c3bf3a865e8ac0e3026d600
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Mar 5 14:04:54 2012 +0100
+
+    snmplib/snmpUDPDomain.c: Fix source code indentation
+
+commit 2651909ccceabfcfadaf942c02450e28fe837dc9
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Tue Nov 9 12:04:04 2010 +0000
+
+    Passes now on MinGW too.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@19653 06827809-a52a-0410-b366-d66718629ded
+
+commit 5116d48378ecf03e722f3010ad47bf22a3fbcb8c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Mar 5 10:47:20 2012 +0100
+
+    agent/mibgroup/ip-mib/data_access/ipaddress_linux.c: Reduce scope of prefix_val such that the compiler doesn't warn about an unsed variable if it isn't needed.
+
+commit 6e74d64f85a59d50e461db4c34ac76f9de468bfb
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Mar 5 09:22:31 2012 +0100
+
+    testing/eval_tools.sh: Avoid using grep options -q and -w because grep in Solaris' default path doesn't understand these options.
+
+commit 10f566f4d4cbb3e205023c23669289e4bfd089cb
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Mar 5 10:47:39 2012 +0100
+
+    perl/SNMP/SNMP.xs: Fix a compiler warning
+
+commit dae4e16be86117861f63d1a2f981ad361418f5c6
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Mar 5 09:06:52 2012 +0000
+
+    Mark the changes make as part of the release process as specific to
+    the particular branch being released.  Version tags, changelog entries
+    and the like shouldn't propagate to later branches.
+
+commit 28f6226f2e228b8ca248489735f86502b2cce0a1
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Mar 5 09:06:52 2012 +0000
+
+    Mark the changes make as part of the release process as specific to
+    the particular branch being released.  Version tags, changelog entries
+    and the like shouldn't propagate to later branches.
+
+commit ee71049c3e21c1d0e3424297136652bbe0e39d85
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sat Mar 3 16:49:41 2012 +0100
+
+    mibgroup/icmp.c: adjust ifdefs to make it compile on BSD's
+
+commit 44acd6c285fb5614b4c9611b1abdeca9dd28e4bb
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Fri Mar 2 21:12:47 2012 +0100
+
+    Fix spelling of mib module fsys_getfsstats
+
+commit 1fa1fee3693f67b820223806b3d73afd4c50ec18
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Fri Mar 2 01:37:20 2012 +0100
+
+    Silence a clang warning.
+
+commit 93263b98a5db344cf2c4d489c43971e7b29cdb03
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Mar 1 13:37:20 2012 +0000
+
+    version update for 5.5.2.pre1
+
+commit 5a175428b973d2ea8553e29fecf94cf1566aa858
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Mar 1 11:48:18 2012 +0000
+
+    version update for 5.5.2.pre1
+
 
 commit 364276a1c5aa66caa23eb5b7f111fdeb5af71fa7
 Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
