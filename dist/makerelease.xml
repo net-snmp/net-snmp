@@ -331,7 +331,7 @@
 	<step type="system" stepname="build:make" title="build:make">
 	  <text>Then we need to build the code</text>
 	  <commands>
-	    <command>make</command>
+	    <command>NETSNMP_DONT_CHECK_VERSION=1 make</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="build:test" title="testing: default tests">
