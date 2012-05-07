@@ -493,16 +493,6 @@
 	    <command>gpg -u A77C5329 -a --detach-sign net-snmp-{VERSION}.zip</command>
 	  </commands>
 	</step>
-	<step type="command" name="release:push" title="Push the code modifications"
-	      pause="0" mandatory="0">
-	  <text>
-	    Push the code modifications to the upstream branch
-	  </text>
-	  <commands>
-	    <command>git push</command>
-	    <command>git push --tags origin {VERSIONTAGNAME}</command>
-	  </commands>
-	</step>
 	<step type="command" name="release:nextbranch" title="Don't propagate code modifications"
 	      pause="0" mandatory="0">
 	  <text>
@@ -512,6 +502,16 @@
 	    <command>git checkout {NEXTBRANCH}</command>
 	    <command>git merge -s ours -m "Release {VERSION} specific changes" {BRANCHPATH}</command>
 	    <command>git checkout {BRANCHPATH}</command>
+	  </commands>
+	</step>
+	<step type="command" name="release:push" title="Push the code modifications"
+	      pause="0" mandatory="0">
+	  <text>
+	    Push the code modifications to the upstream branch
+	  </text>
+	  <commands>
+	    <command>git push</command>
+	    <command>git push --tags origin {VERSIONTAGNAME}</command>
 	  </commands>
 	</step>
 
