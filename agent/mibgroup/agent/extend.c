@@ -1138,7 +1138,7 @@ _extend_find_entry( netsnmp_request_info       *request,
              * ...and check the line requested is valid
              */
             line_idx = *table_info->indexes->next_variable->val.integer;
-            if (eptr->numlines < line_idx)
+            if (line_idx < 1 || line_idx > eptr->numlines)
                 return NULL;
         }
     }
@@ -1309,6 +1309,10 @@ handle_nsExtendOutput2Table(netsnmp_mib_handler          *handler,
                  * Determine which line we've been asked for....
                  */
                 line_idx = *table_info->indexes->next_variable->val.integer;
+                if (line_idx < 1 || line_idx > extension->numlines) {
+                    netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHINSTANCE);
+                    continue;
+                }
                 cp  = extension->lines[line_idx-1];
 
                 /* 
