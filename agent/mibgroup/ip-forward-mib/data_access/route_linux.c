@@ -202,7 +202,6 @@ _load_ipv6(netsnmp_container* container, u_long *index )
     FILE           *in;
     char            line[256];
     netsnmp_route_entry *entry = NULL;
-    char            name[16];
     static int      log_open_err = 1;
 
     DEBUGMSGTL(("access:route:container",
@@ -271,7 +270,7 @@ _load_ipv6(netsnmp_container* container, u_long *index )
         entry->if_index = se_find_value_in_slist("interfaces", c_name);
         if(SE_DNE == entry->if_index) {
             snmp_log(LOG_ERR,"unknown interface in /proc/net/ipv6_route "
-                     "('%s')\n", name);
+                     "('%s')\n", c_name);
             netsnmp_access_route_entry_free(entry);
             continue;
         }
