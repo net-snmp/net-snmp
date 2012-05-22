@@ -67,8 +67,15 @@
 	      # target version number (without preN/rcN)
 	      $self->{'parameters'}{'VERSIONTARGET'} =
     	          $self->{'parameters'}{'VERSION'};
-	      $self->{'parameters'}{'VERSIONTARGET'} =~ s/\.pre.*//;
-	      $self->{'parameters'}{'VERSIONTARGET'} =~ s/\.rc.*//;
+    	      if ( $self->{'parameters'}{'VERSIONTARGET'} =~ /\.pre.*/ ) {
+    	          $self->{'parameters'}{'VERSIONTARGET'} =~ s/\.pre.*//;
+    	          $self->{'parameters'}{'RELEASETYPE'} = "pre";
+    	      } elsif ( $self->{'parameters'}{'VERSIONTARGET'} =~ /\.rc.*/ ) {
+    	          $self->{'parameters'}{'VERSIONTARGET'} =~ s/\.rc.*//;
+    	          $self->{'parameters'}{'RELEASETYPE'} = "rc";
+    	      } else {
+    	          $self->{'parameters'}{'RELEASETYPE'} = "full";
+    	      }
 
 	      # version in floating point form for perl modules
               my ($major, $minor, $patch, $opps) =
@@ -142,6 +149,7 @@
 	  </text>
 	  <steps>
 	    <step type="informational" pause="true"
+	      skipunless="'{RELEASETYPE}' eq 'pre'"
 	      stepname="version:manualedit" title="version:libtoolmanualedit">
 	      <text>
 		You may need to edit Makefile.top to update the library
@@ -264,6 +272,35 @@
 	    </step>
 	  </steps>
 	</step>
+        <step type="section" title="Handle dist/release">
+          <steps>
+	    <step type="system" skipunless="'{RELEASETYPE}' eq 'rc'">
+	      <text>Note in 'dist/release' that this branch is in release candidate mode
+	      </text>
+	      <commands>
+	        <command>git checkout V5-4-patches</command>
+	        <command>echo {BRANCHPATH} >> dist/release </command>
+	        <command ignoreerror="1">git commit -m "Release Candidate for {BRANCHPATH}" dist/release</command>
+	        <command>git checkout {BRANCHPATH} </command>
+	        <command>git merge V5-4-patches dist/release</command>
+	        <command>git commit             dist/release</command>
+	      </commands>
+	    </step>
+	    <step type="system" skipif="'{RELEASETYPE}' eq 'rc'">
+	      <text>Ensure that 'dist/release' doesn't reference this branch
+	      </text>
+	      <commands>
+	        <command>git checkout V5-4-patches</command>
+	        <command>grep -v {BRANCHPATH} dist/release > dist/release.new </command>
+	        <command>mv dist/release.new dist/release </command>
+	        <command ignoreerror="1">git commit -m "{BRANCHPATH} out of Release Candidate" dist/release</command>
+	        <command>git checkout {BRANCHPATH} </command>
+	        <command>git merge V5-4-patches dist/release</command>
+	        <command>git commit             dist/release</command>
+	      </commands>
+	    </step>
+          </steps>
+        </step>
 	<step type="system" stepname="docs:make" title="docs:make">
 	  <text>This step will create manual pages from doxygen
 	  instrumented code files.</text>
@@ -592,7 +629,8 @@
  -->
 	</step>
 	<step type="system" stepname="publish:editpatches"
-	title="Update the SF Official Patch tracker">
+	      skipunless="'{RELEASETYPE}' eq 'full'"
+	      title="Update the SF Official Patch tracker">
 	  <text>
 	    If this the final version of this release, then:
 	    Any official patches for the previous release should be re-prioritised to level 5.
@@ -635,7 +673,7 @@
 	    http://sourceforge.net/news/submit.php?group_id=12694
 	  </text>
 	  <commands>
-	    <command>firefox 'http://sourceforge.net/news/submit.php?group_id=12694'</command>
+	    <command>echo firefox 'http://sourceforge.net/news/submit.php?group_id=12694'</command>
 	  </commands>
 	</step>
 	<step type="informational" pause="1">
@@ -650,23 +688,23 @@
                        (one week after the source tarball is made available)
 	  </text>
 	</step>
-	<step type="informational" pause="1">
+	<step type="informational" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
 	  <text>Update the topic on the #Net-SNMP channel if this is a
 	    trunk based release.
 	  </text>
 	</step>
-	<step type="system" pause="1">
+	<step type="system" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
 	  <text>Update the freshmeat listing (Wes needs to do this):
 
 	    http://freshmeat.net/projects/net-snmp/
 	  </text>
 	  <commands>
-	    <command>firefox http://freshmeat.net/projects/net-snmp/</command>
+	    <command>echo firefox http://freshmeat.net/projects/net-snmp/</command>
 	  </commands>
 	</step>
       </steps>
     </step>
-    <step type="informational">
+    <step type="informational" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
       <text>
 	Advertise: NEWS upload to sf, publish on -announce, freshmeat,
 	and the GNU FSF directory
