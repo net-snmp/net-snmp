@@ -3,9 +3,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#include <net-snmp/types.h>
-#include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
-
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -39,10 +36,16 @@
 #include <net-snmp/library/default_store.h>
 
 #include <net-snmp/library/snmpSocketBaseDomain.h>
+#include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
+#include <net-snmp/library/snmpUDPBaseDomain.h>
 
-#if (defined(linux) && defined(IP_PKTINFO)) \
-    || defined(IP_RECVDSTADDR) && HAVE_STRUCT_MSGHDR_MSG_CONTROL \
-                               && HAVE_STRUCT_MSGHDR_MSG_FLAGS
+#if defined(IP_RECVDSTADDR) && defined(__DragonFly__)
+# ifndef IP_SENDSRCADDR
+#  define IP_SENDSRCADDR IP_RECVDSTADDR /* DragonFly BSD */
+# endif
+#endif
+
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_SENDSRCADDR)
 
 int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                              socklen_t *fromlen, struct sockaddr *dstip,
@@ -57,7 +60,7 @@ int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
 {
     return netsnmp_udpbase_sendto(fd, srcip, if_index, remote, data, len);
 }
-#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
+#endif /* (linux && IP_PKTINFO) || IP_SENDSRCADDR */
 
 netsnmp_transport *
 netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)

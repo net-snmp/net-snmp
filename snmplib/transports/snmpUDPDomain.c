@@ -11,10 +11,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#include <net-snmp/types.h>
-#include <net-snmp/library/snmpUDPDomain.h>
-#include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
-
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -57,6 +53,8 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpUDPDomain.h>
+#include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
@@ -70,6 +68,12 @@
 
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN 16
+#endif
+
+#if defined(IP_RECVDSTADDR) && defined(__DragonFly__)
+# ifndef IP_SENDSRCADDR
+#  define IP_SENDSRCADDR IP_RECVDSTADDR /* DragonFly BSD */
+# endif
 #endif
 
 static netsnmp_tdomain udpDomain;
@@ -101,10 +105,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 }
 
 
-
-#if (defined(linux) && defined(IP_PKTINFO)) \
-    || defined(IP_RECVDSTADDR) && HAVE_STRUCT_MSGHDR_MSG_CONTROL \
-                               && HAVE_STRUCT_MSGHDR_MSG_FLAGS
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_SENDSRCADDR)
 
 int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct sockaddr *dstip, socklen_t *dstlen, int *if_index)
 {

@@ -3,9 +3,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#include <net-snmp/types.h>
-#include <net-snmp/library/snmpUDPBaseDomain.h>
-
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -37,12 +34,19 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
+#include <net-snmp/library/snmpUDPBaseDomain.h>
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/default_store.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/snmp_assert.h>
+
+#if defined(IP_RECVDSTADDR) && defined(__DragonFly__)
+# ifndef IP_SENDSRCADDR
+#  define IP_SENDSRCADDR IP_RECVDSTADDR /* DragonFly BSD */
+# endif
+#endif
 
 void
 _netsnmp_udp_sockopt_set(int fd, int local)
@@ -92,15 +96,7 @@ _netsnmp_udp_sockopt_set(int fd, int local)
     netsnmp_sock_buffer_set(fd, SO_RCVBUF, local, 0);
 }
 
-#if (defined(linux) && defined(IP_PKTINFO)) \
-    || defined(IP_RECVDSTADDR) && HAVE_STRUCT_MSGHDR_MSG_CONTROL \
-                               && HAVE_STRUCT_MSGHDR_MSG_FLAGS
-#if  defined(linux) && defined(IP_PKTINFO)
-#elif defined(IP_RECVDSTADDR)
-# ifndef IP_SENDSRCADDR
-#  define IP_SENDSRCADDR IP_RECVDSTADDR /* DragonFly BSD */
-# endif
-#endif
+#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_SENDSRCADDR)
 
 #define netsnmp_udpbase_recvfrom_sendto_defined
 
@@ -179,6 +175,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     struct iovec iov;
     struct msghdr m = { 0 };
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
+    int           rc;
 
     iov.iov_base = data;
     iov.iov_len  = len;
@@ -213,17 +210,9 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
 
-        {
-            errno = 0;
-#ifdef MSG_NOSIGNAL
-            const int rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
-#else
-            const int rc = sendmsg(fd, &m, MSG_DONTWAIT);
-#endif
-
-            if (rc >= 0 || errno != EINVAL)
-                return rc;
-        }
+        rc = sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
+        if (rc >= 0 || errno != EINVAL)
+            return rc;
 
         /*
          * The error might be caused by broadcast srcip (i.e. we're responding
@@ -244,11 +233,18 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
         cm->cmsg_type = IP_SENDSRCADDR;
         memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
 #endif
+        rc = sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
+        if (rc >= 0 || errno != EINVAL)
+            return rc;
+
+        DEBUGMSGTL(("udpbase:sendto", "re-sending without source address\n"));
+        m.msg_control = NULL;
+        m.msg_controllen = 0;
     }
 
     return sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
 }
-#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
+#endif /* (linux && IP_PKTINFO) || IP_SENDSRCADDR */
 
 /*
  * You can write something into opaque that will subsequently get passed back 
