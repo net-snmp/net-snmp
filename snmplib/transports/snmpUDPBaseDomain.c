@@ -246,11 +246,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 #endif
     }
 
-#ifdef MSG_NOSIGNAL
-    return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
-#else
-    return sendmsg(fd, &m, MSG_DONTWAIT);
-#endif
+    return sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
 }
 #endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
 

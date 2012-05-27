@@ -9,6 +9,18 @@ config_require(SocketBase)
 extern          "C" {
 #endif
 
+#ifdef  MSG_DONTWAIT
+#define NETSNMP_DONTWAIT MSG_DONTWAIT
+#else
+#define NETSNMP_DONTWAIT 0
+#endif
+
+#ifdef  MSG_NOSIGNAL
+#define NETSNMP_NOSIGNAL MSG_NOSIGNAL
+#else
+#define NETSNMP_NOSIGNAL 0
+#endif
+
 /*
  * Prototypes
  */
