@@ -20,6 +20,7 @@
 #include <net-snmp/data_access/swrun.h>
 #include <net-snmp/agent/cache_handler.h>
 #include "hrSWRunTable.h"
+#include "data_access/swrun.h"
 
 #include <signal.h>
 
