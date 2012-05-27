@@ -1981,7 +1981,7 @@ run_ping(unsigned int clientreg, void *clientarg)
             DEBUGMSGTL(("pingCtlTable", ", flow 0x%05x, ",
                         (unsigned) ntohl(flowlabel)));
         if (device || (options & F_NUMERIC)) {
-            DEBUGMSGTL(("from %s %s: ",
+            DEBUGMSGTL(("pingCtlTable", "from %s %s: ",
                         pr_addr_n(&source.sin6_addr), device ? : ""));
         }
         DEBUGMSGTL(("pingCtlTable", "%d data bytes\n", datalen));
