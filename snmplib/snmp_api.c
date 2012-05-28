@@ -5635,6 +5635,9 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	    if (rp->retries <= sp->retries) {
 	      snmp_resend_request(slp, rp, TRUE);
 	      break;
+	    } else {
+	      /* We're done with retries, so no longer waiting for a response */
+	      ((struct synch_state*)magic)->waiting = 0;
 	    }
 	  } else {
 	    if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
