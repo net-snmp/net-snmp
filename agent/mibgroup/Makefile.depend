@@ -5007,6 +5007,7 @@
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/agent/mfd.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/data_access/swrun.h
 ./host/hrSWRunPerfTable.lo: ./host/hrSWRunPerfTable.h
+./host/hrSWRunPerfTable.lo: ./host/data_access/swrun.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/net-snmp-config.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/system/linux.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/system/sysv.h
@@ -5112,7 +5113,7 @@
 ./host/hrSWRunTable.lo: ../../include/net-snmp/agent/table_array.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/agent/mfd.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/data_access/swrun.h
-./host/hrSWRunTable.lo: ./host/hrSWRunTable.h 
+./host/hrSWRunTable.lo: ./host/hrSWRunTable.h ./host/data_access/swrun.h
 ./host/hr_system.lo: ../../include/net-snmp/net-snmp-config.h
 ./host/hr_system.lo: ../../include/net-snmp/system/linux.h
 ./host/hr_system.lo: ../../include/net-snmp/system/sysv.h
@@ -13850,7 +13851,7 @@
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_array.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/mfd.h
 ./ucd-snmp/lmSensors.lo: util_funcs/header_simple_table.h
-./ucd-snmp/lmSensors.lo: ./ucd-snmp/lmSensors.h
+./ucd-snmp/lmSensors.lo:  ./ucd-snmp/lmSensors.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/net-snmp-config.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/system/linux.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/system/sysv.h
