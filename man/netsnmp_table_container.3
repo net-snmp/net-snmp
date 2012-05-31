@@ -1,4 +1,4 @@
-.TH "table_container" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
+.TH "table_container" 3 "31 May 2012" "Version 5.5.2.rc2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -39,14 +39,6 @@ Helps you implement a table when data can be found via a netsnmp_container.
 .br
 .RI "\fIretrieve the container used by the table_container helper \fP"
 .ti -1c
-.RI "void * \fBnetsnmp_container_table_row_extract\fP (\fBnetsnmp_request_info\fP *request)"
-.br
-.RI "\fIfind the context data used by the table_container helper \fP"
-.ti -1c
-.RI "void * \fBnetsnmp_container_table_extract_context\fP (\fBnetsnmp_request_info\fP *request)"
-.br
-.RI "\fIfind the context data used by the table_container helper \fP"
-.ti -1c
 .RI "void \fBnetsnmp_container_table_row_insert\fP (\fBnetsnmp_request_info\fP *request, \fBnetsnmp_index\fP *row)"
 .br
 .RI "\fIinserts a newly created table_container entry into a request list \fP"
@@ -69,7 +61,7 @@ The current key types are:
 .PP
 TABLE_CONTAINER_KEY_NETSNMP_INDEX The container should do comparisons based on a key that may be cast to a netsnmp index (netsnmp_index *). This index contains only the index portion of the OID, not the entire OID.
 .PP
-TABLE_CONTAINER_KEY_VARBIND_INDEX The container should do comparisons based on a key that may be cast to a netsnmp variable list (netsnmp_variable_list *). This variable list will contain one varbind for each index component.
+TABLE_CONTAINER_KEY_VARBIND_INDEX The container should do comparisons based on a key that may be cast to a netsnmp \fBvariable\fP list (netsnmp_variable_list *). This \fBvariable\fP list will contain one varbind for each index component.
 .PP
 TABLE_CONTAINER_KEY_VARBIND_RAW (NOTE: unimplemented) While not yet implemented, future plans include passing the request varbind with the full OID to a container.
 .PP
@@ -94,32 +86,22 @@ If a row is found, it will be inserted into the request's data list. The sub-han
 This helper and it's API are still being tested and are subject to change. 
 .SH "Function Documentation"
 .PP 
-.SS "\fBnetsnmp_container\fP* netsnmp_container_table_container_extract (\fBnetsnmp_request_info\fP *request)"
+.SS "\fBnetsnmp_container\fP* netsnmp_container_table_container_extract (\fBnetsnmp_request_info\fP * request)"
 .PP
 retrieve the container used by the table_container helper 
 .PP
 Definition at line 339 of file table_container.c.
-.SS "void* netsnmp_container_table_extract_context (\fBnetsnmp_request_info\fP *request)"
-.PP
-find the context data used by the table_container helper 
-.PP
-Definition at line 358 of file table_container.c.
-.SS "\fBnetsnmp_mib_handler\fP* netsnmp_container_table_handler_get (\fBnetsnmp_table_registration_info\fP *tabreg, \fBnetsnmp_container\fP *container, charkey_type)"
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_container_table_handler_get (\fBnetsnmp_table_registration_info\fP * tabreg, \fBnetsnmp_container\fP * container, char key_type)"
 .PP
 returns a netsnmp_mib_handler object for the table_container helper 
 .PP
 Definition at line 255 of file table_container.c.
-.SS "void* netsnmp_container_table_row_extract (\fBnetsnmp_request_info\fP *request)"
-.PP
-find the context data used by the table_container helper 
-.PP
-Definition at line 348 of file table_container.c.
-.SS "void netsnmp_container_table_row_insert (\fBnetsnmp_request_info\fP *request, \fBnetsnmp_index\fP *row)"
+.SS "void netsnmp_container_table_row_insert (\fBnetsnmp_request_info\fP * request, \fBnetsnmp_index\fP * row)"
 .PP
 inserts a newly created table_container entry into a request list 
 .PP
 Definition at line 370 of file table_container.c.
-.SS "\fBnetsnmp_index\fP* netsnmp_table_index_find_next_row (\fBnetsnmp_container\fP *c, \fBnetsnmp_table_request_info\fP *tblreq)"
+.SS "\fBnetsnmp_index\fP* netsnmp_table_index_find_next_row (\fBnetsnmp_container\fP * c, \fBnetsnmp_table_request_info\fP * tblreq)"
 .PP
 deprecated, backwards compatability only expected impact to remove: none
 .IP "\(bu" 2

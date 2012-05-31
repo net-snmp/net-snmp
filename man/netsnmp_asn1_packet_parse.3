@@ -1,4 +1,4 @@
-.TH "asn1 parsing and datatype manipulation routines." 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
+.TH "asn1 parsing and datatype manipulation routines." 3 "31 May 2012" "Version 5.5.2.rc2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -93,6 +93,36 @@ Note on.
 .br
 .ti -1c
 .RI "int \fBasn_realloc\fP (u_char **pkt, size_t *pkt_len)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_length\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, size_t length)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_header\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, size_t length)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_int\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const long *intp, size_t intsize)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_string\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const u_char *str, size_t strlength)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_unsigned_int\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const u_long *intp, size_t intsize)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_sequence\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, size_t length)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_objid\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const oid *objid, size_t objidlength)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_null\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_bitstring\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const u_char *str, size_t strlength)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_unsigned_int64\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const struct \fBcounter64\fP *cp, size_t countersize)"
 .br
 .in -1c
 .SH "Detailed Description"

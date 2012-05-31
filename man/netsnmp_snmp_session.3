@@ -1,4 +1,4 @@
-.TH "snmp_session" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "31 May 2012" "Version 5.5.2.rc2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -198,7 +198,7 @@ The snmp session structure.
 .ti -1c
 .RI "void * \fBsecurityInfo\fP"
 .br
-.RI "\fIsecurity module specific \fP"
+.RI "\fIsecurity \fBmodule\fP specific \fP"
 .ti -1c
 .RI "void * \fBmyvoid\fP"
 .br
@@ -214,8 +214,6 @@ Definition at line 287 of file types.h.
 .SS "u_char*(* \fBsnmp_session::authenticator\fP)(u_char *, size_t *, u_char *, size_t)"
 .PP
 Authentication function or NULL if null authentication is used. 
-.PP
-Definition at line 312 of file types.h.
 .SS "netsnmp_callback \fBsnmp_session::callback\fP"
 .PP
 Function to interpret incoming data. 
@@ -363,7 +361,7 @@ Length of contextEngineID.
 Definition at line 358 of file types.h.
 .SS "void* \fBsnmp_session::securityInfo\fP"
 .PP
-security module specific 
+security \fBmodule\fP specific 
 .PP
 Definition at line 400 of file types.h.
 .SS "int \fBsnmp_session::securityLevel\fP"

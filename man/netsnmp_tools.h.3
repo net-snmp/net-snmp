@@ -1,4 +1,4 @@
-.TH "tools.h" 3 "Mon May 7 2012" "Version 5.5.2.rc1" "net-snmp" \" -*- nroff -*-
+.TH "tools.h" 3 "31 May 2012" "Version 5.5.2.rc2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -6,11 +6,14 @@ tools.h \-
 .SH SYNOPSIS
 .br
 .PP
+\fC#include <inttypes.h>\fP
+.br
+
 .SS "Defines"
 
 .in +1c
 .ti -1c
-.RI "#define \fBSNMP_MAXPATH\fP   1024"
+.RI "#define \fBSNMP_MAXPATH\fP   PATH_MAX"
 .br
 .ti -1c
 .RI "#define \fBSNMP_MAXBUF\fP   (1024 * 4)"
@@ -95,12 +98,6 @@ tools.h \-
 .RI "\fIExpands to string with value of the s. \fP"
 .ti -1c
 .RI "#define \fBSNMP_MACRO_VAL_TO_STR_PRIV\fP(s)   #s"
-.br
-.ti -1c
-.RI "#define \fBFALSE\fP   0"
-.br
-.ti -1c
-.RI "#define \fBTRUE\fP   1"
 .br
 .ti -1c
 .RI "#define \fBQUITFUN\fP(e, l)"
@@ -204,7 +201,7 @@ tools.h \-
 .ti -1c
 .RI "u_long \fBuatime_hdiff\fP (marker_t first, marker_t second)"
 .br
-.RI "\fIReturns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs) \fP"
+.RI "\fIReturns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs). \fP"
 .ti -1c
 .RI "int \fBatime_ready\fP (marker_t pm, int deltaT)"
 .br
@@ -223,11 +220,11 @@ tools.h \-
 .ti -1c
 .RI "NETSNMP_IMPORT char * \fBnetsnmp_getenv\fP (const char *name)"
 .br
-.RI "\fINon Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. \fP"
+.RI "\fINon Windows: Returns a pointer to the desired environment \fBvariable\fP or NULL if the environment \fBvariable\fP does not exist. \fP"
 .ti -1c
 .RI "NETSNMP_IMPORT int \fBnetsnmp_setenv\fP (const char *envname, const char *envval, int overwrite)"
 .br
-.RI "\fISet an environment variable. \fP"
+.RI "\fISet an environment \fBvariable\fP. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_addrstr_hton\fP (char *ptr, size_t len)"
 .br
