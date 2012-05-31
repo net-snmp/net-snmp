@@ -9,6 +9,7 @@ listing of all changes made to the code.
     snmplib:
       - [PATCH 2835577]: Replace SNMP_ZERO of arrays with a memset.
       - [PATCH 3510454]: Allow the use of 0.0.0.0/0 as alias for default
+      - [PATCH 3526599]: Don't hang on retried failing SNMPv3 responses
       - [BUG 3134323]: Fix crash when comparing invalid OIDs
       - Avoid unnecessary casts when using netsnmp_set_row_column()
       - Eliminate assorted dead variables
@@ -19,6 +20,7 @@ listing of all changes made to the code.
       - [PATCH 3487867]: Don't skip missing ifXTable entries (ifConnectorPresent FALSE)
       - [PATCH 3487919]: Fix compilation when caching is disabled
       - [PATCH 3495697]: Store persistent snmpTarget table changes
+      - [BUG 3526549]: CVE-2012-2141 Array index error leading to crash
       - Added OCFS2 (Oracle Cluster FS) to hrStorageTable and hrFSTable
       - Eliminate assorted dead variables
       - UDP-MIB: Report proper udpLocalAddress (instead of 0.0.0.0)
@@ -77,6 +79,7 @@ listing of all changes made to the code.
 
     Linux:
       - [PATCH 3205811]: Option to skip fd/loop/ram devices in diskIOTable
+      - [PATCH 3525998]: Don't use an uninitialised value in error message
 
     MinGW:
       - Avoid "pragma comment" warnings in <net-snmp/net-snmp-config.h>
