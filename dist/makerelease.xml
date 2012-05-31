@@ -356,7 +356,7 @@
 	  <text>First we need to clean the existing build tree and
 	  start from scratch.</text>
 	  <commands>
-	    <command>make distclean</command>
+	    <command>NETSNMP_DONT_CHECK_VERSION=1 make distclean</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="build:configure" title="build:configure">
