@@ -9,6 +9,7 @@ listing of all changes made to the code.
     snmplib:
       - [PATCH 2835577]: Replace SNMP_ZERO of arrays with a memset.
       - [PATCH 3183000]: Fix calculation of common OID prefix length
+      - [PATCH 3526599]: Don't hang on retried failing SNMPv3 responses
       - Avoid unnecessary casts when using netsnmp_set_row_column()
       - Declare "type" argument of se_store_xxx() as const
       - Make it explicit that MAX_SUBID is an unsigned constant
@@ -21,6 +22,7 @@ listing of all changes made to the code.
       - [BUG 3439234]: Move netsnmp_pass_str_to_errno to pass_common
       - [BUG 3440752]: Report speed correctly for unusual E'net interfaces
       - [BUG 3463767]: Handle parsing subidentifiers > 2^31
+      - [BUG 3526549]: CVE-2012-2141 Array index error leading to crash
       - [PATCH 3175640]: Use IP_RECVDSTADDR sockopt where available (*BSD)
       - [PATCH 3198781]: Fix compilation of disman/{ping,traceroute} modules
       - [PATCH 3402376]: Recognise ReiserFS systems
@@ -79,10 +81,12 @@ listing of all changes made to the code.
       - Don't fail skipped Perl tests.
 
     BSD:
-      - PATCH 3383965: Fix if-mib agent compile warnings on *BSD
+      - [PATCH 3383965]: Fix if-mib agent compile warnings on *BSD
 
     FreeBSD:
       - [PATCH 3489387]: Install FreeBSD 10 header file (plus other missing versions)
+    Linux:
+      - [PATCH 3525998]: Don't use an uninitialised value in error message
 
     MinGW:
       - Avoid "pragma comment" warnings in <net-snmp/net-snmp-config.h>

@@ -8,6 +8,7 @@ listing of all changes made to the code.
 
     snmpd:
       - [PATCH 3198781]: Fix compilation of disman/{ping,traceroute} modules
+      - [BUG 3526549]: CVE-2012-2141 Array index error leading to crash
 
     building:
       - [PATCH 2091156]: Fix parallel builds (using 'make -j <N>')
