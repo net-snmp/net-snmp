@@ -279,7 +279,7 @@
 	      </text>
 	      <commands>
 	        <command>git checkout V5-4-patches</command>
-	        <command>echo {BRANCHPATH} >> dist/release </command>
+	        <command>echo {BRANCHPATH} rc >> dist/release </command>
 	        <command ignoreerror="1">git commit -m "Release Candidate for {BRANCHPATH}" dist/release</command>
 	        <command>git checkout {BRANCHPATH} </command>
 	        <command>git merge V5-4-patches    </command>
