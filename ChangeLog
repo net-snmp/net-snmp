@@ -1,7 +1,80 @@
-
 ----------------------------------------------------------------------
 
-Changes: V5.5.1 -> V5.5.2.rc1
+Changes: V5.5.1 -> V5.5.2.rc2
+
+commit 2670ba6a5b0027d11ec3a5e18fe87db385f5e0e4
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 11:05:39 2012 +0100
+
+    make depend for 5.5.2.rc2
+
+commit e79e387b3e18b487ef4172c9d24eb9523404d0ad
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 10:54:27 2012 +0100
+
+    documentation update for 5.5.2.rc2
+
+commit 3f2111de6733a04e12d910d306a34d671e008762
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 10:46:11 2012 +0100
+
+    Release Candidate for V5-5-patches
+
+commit cefc6f7bd4fee0f5057e49300a6b1d15d2fd4f58
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 10:45:59 2012 +0100
+
+    Version number update: 5.5.2.rc2
+
+commit ccf8ff2c4db60122d41302e4aeb700e0b868105f
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 28 10:18:43 2012 +0100
+
+    CHANGES: snmplib: PATCHES: 3526599: Don't hang on retried failing SNMPv3 responses
+
+commit c575216850185b56454dad0253e3164979e13513
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sun May 27 13:56:01 2012 +0200
+
+    Fix missing include. Fixes SIGSEGV on FreeBSD9 x64
+
+commit 1fbf33711a19eac9739ad23f6f6251eacc41f1c4
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue May 22 14:54:45 2012 +0100
+
+    CHANGES: Linux: PATCH: 3525998: Don't use an uninitialised value in error message
+
+commit 32c1686b67dc85c4a189576363065609dfed5e61
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue May 22 14:52:56 2012 +0100
+
+    Attempt to mark release-candidate branches as such.
+    Omit final-release-only steps when preparing preN/rcN releases
+    (Relies on a tweak to the Makerelease perl modules)
+
+commit 4c5633f1603e4bd03ed05c37d782ec8911759c47
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Mon May 14 11:40:06 2012 -0400
+
+    NEWS: snmp: BUG: 3526549: CVE-2012-2141 Array index error leading to crash
+
+commit 91350092c46e66d06d74143f4816473db4d25160
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 7 19:56:33 2012 +0100
+
+    Mark version-specific changes _before_ pushing to central repository
+
+commit 7241accd70b82d0fcd44d5a5238b2ee9445900db
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 7 17:53:17 2012 +0100
+
+    version update for 5.5.2.rc1
+
+commit 7c796a15a1d1bb85feea940bd4e3516877920919
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 7 17:50:49 2012 +0100
+
+    version update for 5.5.2.rc1
 
 commit 07e268bfb64b0ec645b3f7e87266984f9217cf12
 Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
