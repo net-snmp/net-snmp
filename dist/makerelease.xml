@@ -282,8 +282,8 @@
 	        <command>echo {BRANCHPATH} >> dist/release </command>
 	        <command ignoreerror="1">git commit -m "Release Candidate for {BRANCHPATH}" dist/release</command>
 	        <command>git checkout {BRANCHPATH} </command>
-	        <command>git merge V5-4-patches dist/release</command>
-	        <command>git commit             dist/release</command>
+	        <command>git merge V5-4-patches    </command>
+	        <command>git commit                </command>
 	      </commands>
 	    </step>
 	    <step type="system" skipif="'{RELEASETYPE}' eq 'rc'">
@@ -295,8 +295,8 @@
 	        <command>mv dist/release.new dist/release </command>
 	        <command ignoreerror="1">git commit -m "{BRANCHPATH} out of Release Candidate" dist/release</command>
 	        <command>git checkout {BRANCHPATH} </command>
-	        <command>git merge V5-4-patches dist/release</command>
-	        <command>git commit             dist/release</command>
+	        <command>git merge V5-4-patches    </command>
+	        <command>git commit                </command>
 	      </commands>
 	    </step>
           </steps>
