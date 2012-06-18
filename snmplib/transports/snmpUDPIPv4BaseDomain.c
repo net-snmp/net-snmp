@@ -183,10 +183,15 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
         if (client_socket) {
             struct sockaddr_in client_addr;
             netsnmp_sockaddr_in2(&client_addr, client_socket, NULL);
-            client_addr.sin_port = 0;
             DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d\n", t->sock));
             rc = bind(t->sock, (struct sockaddr *)&client_addr,
                   sizeof(struct sockaddr));
+            if ( rc != 0 && client_addr.sin_port != 0 ) {
+                /* Retry with port = 0 */
+                client_addr.sin_port = 0;
+                rc = bind(t->sock, (struct sockaddr *)&client_addr,
+                                  sizeof(struct sockaddr));
+            }
             if ( rc != 0 ) {
                 DEBUGMSGTL(("netsnmp_udpbase", "failed to bind for clientaddr: %d %s\n",
                             errno, strerror(errno)));
