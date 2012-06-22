@@ -7,8 +7,12 @@ listing of all changes made to the code.
 
     snmpd:
       - [PATCH 3198781]: Fix compilation of disman/{ping,traceroute} modules
-      - [BUG 3166568]:   Fix missing hrSystemProcesses values
+      - [BUG 3166568]: Fix missing hrSystemProcesses values
       - [BUG 3526549]: CVE-2012-2141 Array index error leading to crash
+      - [BUG 3532090]: Fix high ifIndex values crashing hrDeviceDescr
+              Note that this will affect the indexing of *all* entries in
+              the hrDeviceTable.  Assumptions as to what index a given device
+              will use, are no longer valid.
 
     building:
       - [PATCH 2091156]: Fix parallel builds (using 'make -j <N>')
