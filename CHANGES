@@ -23,6 +23,7 @@ listing of all changes made to the code.
       - [BUG 3440752]: Report speed correctly for unusual E'net interfaces
       - [BUG 3463767]: Handle parsing subidentifiers > 2^31
       - [BUG 3526549]: CVE-2012-2141 Array index error leading to crash
+      - [BUG 3532090]: Fix high ifIndex values crashing hrDeviceDescr
       - [PATCH 3175640]: Use IP_RECVDSTADDR sockopt where available (*BSD)
       - [PATCH 3198781]: Fix compilation of disman/{ping,traceroute} modules
       - [PATCH 3402376]: Recognise ReiserFS systems
@@ -31,6 +32,7 @@ listing of all changes made to the code.
       - [PATCH 3447444]: Fix SIG_PIPE handling
       - [PATCH 3447671]: Fix override handling of OID values
       - [PATCH 3453868]: Factor common code into pass_common
+      - [PATCH 3479740]: Fix hrSWRunPerf statistics
       - [PATCH 3487919]: Fix compilation when caching is disabled
       - [PATCH 3487867]: Don't skip missing ifXTable entries (ifConnectorPresent FALSE)
       - [PATCH 3495697]: Store persistent snmpTarget table changes
