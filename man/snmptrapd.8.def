@@ -51,7 +51,8 @@ that it should apply to.
 .BI "\-c" " FILE"
 Read 
 .I FILE
-as a configuration file.
+as a configuration file
+(or a comma-separated list of configuration files).
 .TP
 .B \-C
 Do not read any configuration files except the one optionally specified by the 

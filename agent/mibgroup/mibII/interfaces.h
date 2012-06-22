@@ -47,8 +47,11 @@ config_require(mibII/var_route)
 #endif
 #if defined(hpux11)
      int             Interface_Scan_Next(short *, char *, nmapi_phystat *);
+     int             Interface_Scan_NextInt(int *, char *, nmapi_phystat *);
 #else
      int             Interface_Scan_Next(short *, char *, struct ifnet *,
+                                         struct in_ifaddr *);
+     int             Interface_Scan_NextInt(int *, char *, struct ifnet *,
                                          struct in_ifaddr *);
 #endif
 
