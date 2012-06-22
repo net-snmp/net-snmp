@@ -30,6 +30,9 @@
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/data_access/swrun.h>
 
+static long pagesize;
+static long sc_clk_tck;
+
 /* ---------------------------------------------------------------------
  */
 void
@@ -39,6 +42,8 @@ netsnmp_arch_swrun_init(void)
     extern int _swrun_max = NR_TASKS;   /* from <linux/tasks.h> */
 #endif
     
+    pagesize = getpagesize();
+    sc_clk_tck = sysconf(_SC_CLK_TCK);
     return;
 }
 
@@ -51,6 +56,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     struct dirent       *procentry_p;
     FILE                *fp;
     int                  pid, rc, i;
+    unsigned long long   cpu;
     char                 buf[BUFSIZ], buf2[BUFSIZ], *cp;
     netsnmp_swrun_entry *entry;
     
@@ -166,24 +172,24 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         default:   entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
                    break;
         }
-        for (i=10; i; i--) {   /* Skip STATUS + 10 fields */
-            while (' ' != *(cp++))
+        for (i=11; i; i--) {   /* Skip STATUS + 10 fields */
+            while (' ' != *(++cp))
                 ;
             cp++;
         }
-        entry->hrSWRunPerfCPU  = atoi( cp );   /*  utime */
-        while ( ' ' != *(cp++))
+        cpu  = atol( cp );                     /*  utime */
+        while ( ' ' != *(++cp))
             ;
-        cp++;				   /* Skip utime */
-        entry->hrSWRunPerfCPU += atoi( cp );   /* +stime */
+        cpu += atol( cp );                     /* +stime */
+        entry->hrSWRunPerfCPU  = cpu * 100 / sc_clk_tck;
 
-        for (i=8; i; i--) {   /* Skip stime + 8 fields */
-            while (' ' != *(cp++))
+        for (i=9; i; i--) {   /* Skip stime + 8 fields */
+            while (' ' != *(++cp))
                 ;
             cp++;
         }
-        entry->hrSWRunPerfMem  = atoi( cp );   /*  rss */
-        entry->hrSWRunPerfMem *= (getpagesize()/1024);  /* in kB */
+        entry->hrSWRunPerfMem  = atol( cp );       /* rss   */
+        entry->hrSWRunPerfMem *= (pagesize/1024);  /* in kB */
     }
     closedir( procdir );
 
