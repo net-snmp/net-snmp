@@ -1,6 +1,95 @@
 ----------------------------------------------------------------------
 
-Changes: V5.5.1 -> V5.5.2.rc2
+Changes: V5.5.1 -> V5.5.2.rc3
+
+commit fe107794e7400d239e8af3da8b4a3fbef06b5da9
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 13:28:37 2012 +0100
+
+    Release Candidate for V5-5-patches
+
+commit b6953b52c4ec426491146e1cc0f560b2173695b0
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 13:28:26 2012 +0100
+
+    Version number update: 5.5.2.rc3
+
+commit 0f84fbcf71995bddafab500d87c9c5a6f461a734
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 12:29:34 2012 +0100
+
+    CHANGES: snmpd: PATCHES: 3479740: Fix hrSWRunPerf statistics
+
+commit 1e3bb6060be6156d3ff316c5a7e4fd7f05e37cff
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 12:11:56 2012 +0100
+
+    NEWS: snmpd: BUG: 3532090: Fix high ifIndex values crashing hrDeviceDescr
+
+commit e8663fac8b88663282669726a08f16db16b5f4db
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Mon Jun 18 13:30:25 2012 +0200
+
+    Revert "CHNAGES: snmpd: fixed snmpd exiting shortly after start due to incoming signal."
+    
+    This reverts commit b11a4e93f50d8a544f835f376c3a4b8c0641a31a,
+    we're in RC-phase and code is frozen
+    
+    (sorry for noise)
+
+commit b11a4e93f50d8a544f835f376c3a4b8c0641a31a
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Mon Jun 11 16:26:09 2012 +0200
+
+    CHNAGES: snmpd: fixed snmpd exiting shortly after start due to incoming signal.
+
+commit a570238d58eb5a996b56f01a27a18df6f37d0f60
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Mon Jun 11 14:20:25 2012 +0200
+
+    More precisely describe -c option.
+
+commit e3bcd87c72fcea7706e868b5ace75296093f7497
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 14:09:42 2012 +0100
+
+    Fix dist/release format
+
+commit d813ce2eeefc68229cfcaf20603244cdd6d09d3c
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 14:07:52 2012 +0100
+
+    Fix dist/release format
+
+commit 131429e7062fbaa65b82affed1fb92df2c0cc813
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 13:38:38 2012 +0100
+
+    Release Candidate for V5-6-patches
+
+commit 1c8110b33b8105ca6190945a35fe7ae903252d68
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 13:21:38 2012 +0100
+
+    Avoid perl versioning problems when setting up the build environment
+
+commit 508ece16e6f6f49562da204792ae0644269994d1
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 13:20:58 2012 +0100
+
+    Fix handling of dist/release merge
+
+commit 5b8a8547b1a47d2f5b207f48f2496e4241d902c6
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 11:10:48 2012 +0100
+
+    version update for 5.5.2.rc2
+
+commit 6c32914bf28d695df349dca269e488b501700316
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 11:07:22 2012 +0100
+
+    version update for 5.5.2.rc2
 
 commit 2670ba6a5b0027d11ec3a5e18fe87db385f5e0e4
 Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
