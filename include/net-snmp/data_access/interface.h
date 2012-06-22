@@ -273,6 +273,8 @@ Interface_Scan_Init(void);
 int
 Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
                     void *dc);
+Interface_Scan_NextInt(int *index, char *name, netsnmp_interface_entry **entry,
+                    void *dc);
 #endif
 
 /**---------------------------------------------------------------------*/

@@ -188,21 +188,21 @@ var_hrnet(struct variable * vp,
 #if defined( USING_IF_MIB_IFTABLE_IFTABLE_DATA_ACCESS_MODULE )
 static char     HRN_name[16];
 static netsnmp_interface_entry *HRN_ifnet;
-#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c, d)
+#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_NextInt(a, b, c, d)
 #elif defined(hpux11)
 static char     HRN_name[MAX_PHYSADDR_LEN];
 static nmapi_phystat HRN_ifnet;
-#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c)
+#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_NextInt(a, b, c)
 #elif defined darwin
 static char     HRN_name[IFNAMSIZ];
 static struct if_msghdr HRN_ifnet;
-#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c, d)
+#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_NextInt(a, b, c, d)
 #else                           /* hpux11 */
 static char     HRN_name[16];
 #ifndef WIN32
 static struct ifnet HRN_ifnet;
 #endif /* WIN32 */
-#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c, d)
+#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_NextInt(a, b, c, d)
 #endif
 
 #ifdef hpux11
@@ -225,7 +225,7 @@ Init_HR_Network(void)
 int
 Get_Next_HR_Network(void)
 {
-short    HRN_index;
+int      HRN_index;
 #if !(defined(solaris2) || defined(darwin) || defined(WIN32))
     if (M_Interface_Scan_Next(&HRN_index, HRN_name, &HRN_ifnet, NULL) == 0)
         HRN_index = -1;
@@ -234,6 +234,17 @@ short    HRN_index;
 #endif
     if (-1 == HRN_index)
         return HRN_index;
+
+    /*
+     * If the index is greater than the shift registry space,
+     * this will overrun into the next device type block,
+     * potentially resulting in duplicate index values
+     * which may cause the agent to crash.
+     *   To avoid this, we silently drop interfaces greater
+     * than the shift registry size can handle.
+     */
+    if (HRN_index > (1 << HRDEV_TYPE_SHIFT ))
+        return -1;
 
     return (HRDEV_NETWORK << HRDEV_TYPE_SHIFT) + HRN_index;
 }

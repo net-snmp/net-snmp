@@ -379,6 +379,21 @@ int
 Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
                     void *dc)
 {
+    int returnIndex = 0;
+    int ret;
+    if (index)
+        returnIndex = *index;
+
+    ret = Interface_Scan_NextInt( &returnIndex, name, entry, dc );
+    if (index)
+        *index = (returnIndex & 0x8fff);
+    return ret;
+}
+
+int
+Interface_Scan_NextInt(int *index, char *name, netsnmp_interface_entry **entry,
+                    void *dc)
+{
     if (NULL == e)
         return 0;
 

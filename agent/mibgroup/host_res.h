@@ -67,8 +67,8 @@
 #define	HRDEV_NVMEM	21
 
 #define	HRDEV_TYPE_MAX	22      /* one greater than largest device type */
-#define	HRDEV_TYPE_SHIFT  8
-#define	HRDEV_TYPE_MASK 0xff
+#define	HRDEV_TYPE_SHIFT  16
+#define	HRDEV_TYPE_MASK 0xffff
 
 typedef void    (*PFV) (void);
 typedef int     (*PFI) (int);
