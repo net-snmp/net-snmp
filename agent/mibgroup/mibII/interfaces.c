@@ -716,6 +716,14 @@ Interface_Scan_Next(short *Index,
     return 0;
 }
 
+int
+Interface_Scan_NextInt(int *Index,
+                    char *Name,
+                    struct ifnet *Retifnet, struct in_ifaddr *Retin_ifaddr)
+{
+    return 0;
+}
+
 #else                           /* not USE_SYSCTL_IFLIST */
 
         /*********************
@@ -1833,6 +1841,22 @@ Interface_Scan_Next(short *Index,
                     char *Name,
                     struct ifnet *Retifnet, struct in_ifaddr *dummy)
 {
+    int returnIndex = 0;
+    int ret;
+    if (Index)
+        returnIndex = *Index;
+
+    ret = Interface_Scan_NextInt( &returnIndex, Name, Retifnet, dummy );
+    if (Index)
+        *Index = (returnIndex & 0x8fff);
+    return ret;
+}
+
+int
+Interface_Scan_NextInt(int *Index,
+                    char *Name,
+                    struct ifnet *Retifnet, struct in_ifaddr *dummy)
+{
     struct ifnet    ifnet;
     register char  *cp;
 
@@ -1897,11 +1921,11 @@ Interface_Scan_Next(short *Index,
 int
 Interface_Index_By_Name(char *Name, int Len)
 {
-    short           ifIndex = 0;
+    int             ifIndex = 0;
     char            ifName[20];
 
     Interface_Scan_Init();
-    while (Interface_Scan_Next(&ifIndex, ifName, NULL, NULL)
+    while (Interface_Scan_NextInt(&ifIndex, ifName, NULL, NULL)
            && strcmp(Name, ifName));
     return ifIndex;
 }
@@ -1916,9 +1940,23 @@ Interface_Index_By_Name(char *Name, int Len)
 #endif
 
 #if defined(hpux11)
-
 int
 Interface_Scan_Next(short *Index, char *Name, nmapi_phystat * Retifnet)
+{
+    int returnIndex = 0;
+    int ret;
+    if (Index)
+        returnIndex = *Index;
+
+    ret = Interface_Scan_NextInt( &returnIndex, Name, Retifnet );
+    if (Index)
+        *Index = (returnIndex & 0x8fff);
+    return ret;
+}
+
+
+int
+Interface_Scan_NextInt(int *Index, char *Name, nmapi_phystat * Retifnet)
 {
     static nmapi_phystat *if_ptr = (nmapi_phystat *) 0;
     int             count = Interface_Scan_Get_Count();
@@ -1954,9 +1992,27 @@ Interface_Scan_Next(short *Index, char *Name, nmapi_phystat * Retifnet)
 }
 
 #else                           /* hpux11 */
-
 int
 Interface_Scan_Next(short *Index,
+                    char *Name,
+                    struct ifnet *Retifnet, struct in_ifaddr *Retin_ifaddr)
+{
+    int returnIndex = 0;
+    int ret;
+    if (Index)
+        returnIndex = *Index;
+
+    ret = Interface_Scan_NextInt( &returnIndex, Name, Retifnet, Retin_ifaddr );
+    if (Index)
+        *Index = (returnIndex & 0x8fff);
+    return ret;
+}
+
+
+int
+
+int
+Interface_Scan_NextInt(int *Index,
                     char *Name,
                     struct ifnet *Retifnet, struct in_ifaddr *Retin_ifaddr)
 {
@@ -2073,10 +2129,10 @@ Interface_Scan_Next(short *Index,
 static int
 Interface_Scan_By_Index(int Index, char *Name, nmapi_phystat * Retifnet)
 {
-    short           i;
+    int           i;
 
     Interface_Scan_Init();
-    while (Interface_Scan_Next(&i, Name, Retifnet)) {
+    while (Interface_Scan_NextInt(&i, Name, Retifnet)) {
         if (i == Index)
             break;
     }
@@ -2093,10 +2149,10 @@ Interface_Scan_By_Index(int Index,
                         struct ifnet *Retifnet,
                         struct in_ifaddr *Retin_ifaddr)
 {
-    short           i;
+    int           i;
 
     Interface_Scan_Init();
-    while (Interface_Scan_Next(&i, Name, Retifnet, Retin_ifaddr)) {
+    while (Interface_Scan_NextInt(&i, Name, Retifnet, Retin_ifaddr)) {
         if (i == Index)
             break;
     }
@@ -2146,7 +2202,7 @@ Interface_Scan_Get_Count(void)
         scan_time = time_now;
         Interface_Scan_Init();
         Interface_Count = 0;
-        while (Interface_Scan_Next(NULL, NULL, NULL, NULL) != 0) {
+        while (Interface_Scan_NextInt(NULL, NULL, NULL, NULL) != 0) {
             Interface_Count++;
         }
     }
@@ -2157,7 +2213,7 @@ Interface_Scan_Get_Count(void)
 static int
 Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
 {
-    short           i;
+    int             i;
 #if !(defined(linux) || defined(netbsd1) || defined(bsdi2) || defined(openbsd2))
     struct arpcom   arpcom;
 #else                           /* is linux or netbsd1 */
@@ -2182,7 +2238,7 @@ Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
 
         Interface_Scan_Init();
 
-        while (Interface_Scan_Next((short *) &i, NULL, NULL, NULL) != 0) {
+        while (Interface_Scan_NextIn(&i, NULL, NULL, NULL) != 0) {
             if (i == Index)
                 break;
         }
