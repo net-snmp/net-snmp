@@ -55,12 +55,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     DIR                 *procdir = NULL;
     struct dirent       *procentry_p;
     FILE                *fp;
-<<<<<<< HEAD
     int                  pid, i;
-=======
-    int                  pid, rc, i;
     unsigned long long   cpu;
->>>>>>> V5-5-patches
     char                 buf[BUFSIZ], buf2[BUFSIZ], *cp;
     netsnmp_swrun_entry *entry;
     
