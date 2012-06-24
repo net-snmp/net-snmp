@@ -83,7 +83,7 @@ netsnmp_tdata_create_table(const char *name, long flags)
         table->container = netsnmp_container_find( name );
         if (!table->container)
             table->container = netsnmp_container_find( "table_container" );
-        if (table->container)
+        if (table->container && name)
             table->container->container_name = strdup(name);
     }
     return table;
