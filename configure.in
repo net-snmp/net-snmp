@@ -205,7 +205,7 @@ SNMP_VERSIONS="$SNMP_VERSIONS 3"
 AC_MSG_CACHE_ADD(SNMP Versions Supported:   $SNMP_VERSIONS)
 
 AC_ARG_ENABLE(set-support,
-[  --disable-set-support           Do not allow SNMP set requests.])
+[  --disable-set-support           Do not allow SNMP set requests to the agent.])
 if test "x$enable_set_support" = "xno"; then
   AC_DEFINE([NETSNMP_DISABLE_SET_SUPPORT], 1, 
             [Define if SNMP SET support should be disabled])

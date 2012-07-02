@@ -1039,7 +1039,7 @@ Optional Features:
                                   manipulates the mib files.
   --disable-snmpv1                Do not include code that implements SNMPv1.
   --disable-snmpv2c               Do not include code that implements SNMPv2c.
-  --disable-set-support           Do not allow SNMP set requests.
+  --disable-set-support           Do not allow SNMP set requests to the agent.
   --disable-des                   Do not support DES encryption.
   --disable-privacy               Don't compile in support for privacy (encryption).
   --disable-md5                   Do not support MD5 authentication.
