@@ -360,6 +360,7 @@ nsrollup() {
 }
 
 nspull() {
+    nscurrentbranch=`git branch | egrep '^\*' | sed 's/^..//'`
     _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
 	return
@@ -382,7 +383,9 @@ nspull() {
 	    return
 	fi
     done
+    git checkout $nscurrentbranch
 }
+
 nspush() {
     _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
