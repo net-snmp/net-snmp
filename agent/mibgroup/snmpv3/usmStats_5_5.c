@@ -34,7 +34,8 @@ init_usmStats_5_5(void)
     if (s &&
 	NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, USM) == MIB_REGISTERED_OK) {
         REGISTER_SYSOR_ENTRY(usmMIBCompliance,
-                             "The MIB for Message Processing and Dispatching.");
+                             "The management information definitions for the "
+                             "SNMP User-based Security Model.");
         usmStats_reg = s;
     }
 }
