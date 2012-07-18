@@ -119,7 +119,7 @@
 	  <text>We need to make sure your code is up to date and
 	  matches the latest sources in this branch.</text>
 	  <commands>
-	    <command>git pull --rebase</command>
+	    <command>git pull</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="update" title="Check for changes">
@@ -465,7 +465,7 @@
 	  <text>One more git pull and status to make sure nothing
 	  odd exists in your source tree.  Please check the results!</text>
 	  <commands>
-	    <command>git pull --rebase</command>
+	    <command>git pull</command>
 	    <command>git status --porcelain</command>
 	  </commands>
 	</step>
