@@ -1,6 +1,78 @@
 ----------------------------------------------------------------------
 
-Changes: V5.5.1 -> V5.5.2.rc3
+Changes: V5.5.1 -> V5.5.2
+
+commit 42b5afb3cd6d06adb426f1dbaa98358f2b2e8a53
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Jul 18 10:46:47 2012 +0100
+
+    V5-5-patches out of Release Candidate
+
+commit 8bd440c43e365a0b77d47f582cade9f97c7bfce7
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Jul 18 10:46:28 2012 +0100
+
+    Version number update: 5.5.2
+
+commit 6e0855a3157198499411ac52b46d5f32aad5b9fa
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Jul 18 09:51:32 2012 +0100
+
+    Add missing return type in function declaration
+
+commit 07d825e8bb35eea9ac6b1cb82cbb234fe66b1ab6
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Jul 18 09:51:32 2012 +0100
+
+    Add missing return type in function declaration
+
+commit 5db70036ef675635647e5b7c7253456838836647
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jul 11 14:55:38 2012 -0700
+
+    don't use --rebase
+
+commit 17277689b629f4586d5d714d87ce6bc11f887668
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jul 11 14:55:38 2012 -0700
+
+    don't use --rebase
+
+commit 5206d25d4cb94d4b0dd331a5a4113d4d87782c42
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 2 12:14:39 2012 -0700
+
+    better description of --disable-set-support
+
+commit f92853281477ee724a51a9967f37d3f1dd1b0f7e
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 2 12:09:50 2012 -0700
+
+    remove duplicate definitions causing a problem
+
+commit 5be27368751691fc1ab55fe62b4106d8d99b8704
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 2 12:06:58 2012 -0700
+
+    after pulling all the branches, switch back to the initial one
+
+commit e72e205fdcef787ef840c8c928ed27351a69544b
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 13:58:07 2012 +0100
+
+    Release Candidate for V5-6-patches
+
+commit f79a54f2472508b167d977f367c3864b5621e89d
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 13:42:53 2012 +0100
+
+    version update for 5.5.2.rc3
+
+commit 56ef5f0db51cfd55226f82f94f3f3d2450e4feb5
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 13:39:32 2012 +0100
+
+    version update for 5.5.2.rc3
 
 commit fe107794e7400d239e8af3da8b4a3fbef06b5da9
 Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
