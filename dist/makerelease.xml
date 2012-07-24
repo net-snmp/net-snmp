@@ -409,7 +409,7 @@
           <text>This step commits the dependency changes done in the
           previous step.</text>
 	  <commands>
-	    <command>git commit -m "make depend for {VERSION}" `find . -name Makefile.depend`</command>
+	    <command ignoreerror="1">git commit -m "make depend for {VERSION}" `find . -name Makefile.depend`</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="changelog:create" title="Creating a changelog update">
@@ -458,7 +458,7 @@
 	</step>
 	<step prompt="true" type="system" stepname="docs:commit" title="docs:commit">
 	  <commands>
-	    <command>git commit -m "version update for {VERSION}" README NEWS CHANGES</command>
+	    <command ignoreerror="1">git commit -m "version update for {VERSION}" README NEWS CHANGES</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:update" title="release:update">
