@@ -1017,6 +1017,8 @@ void netsnmp_prefix_process(int fd, void *data)
 
     status = recv(fd, buf, sizeof(buf), 0);
     if (status < 0) {
+        if (errno == EINTR)
+            continue;
         snmp_log(LOG_ERR,"netsnmp_prefix_listen: Receive failed.\n");
         return;
     }
