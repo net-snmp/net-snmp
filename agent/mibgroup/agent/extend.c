@@ -578,10 +578,21 @@ extend_parse_config(const char *token, char *cptr)
             
     } else if (!strcmp( token, "sh"   ) ||
                !strcmp( token, "exec" )) {
-        if ( num_compatability_entries == max_compatability_entries )
+        if ( num_compatability_entries == max_compatability_entries ) {
             /* XXX - should really use dynamic allocation */
-            config_perror("No further UCD-compatible entries" );
-        else
+            netsnmp_old_extend *new_compatability_entries;
+            new_compatability_entries = realloc(compatability_entries,
+                             max_compatability_entries*2*sizeof(netsnmp_old_extend));
+            if (!new_compatability_entries)
+                config_perror("No further UCD-compatible entries" );
+            else {
+                memset(new_compatability_entries+num_compatability_entries, 0,
+                        sizeof(netsnmp_old_extend)*max_compatability_entries);
+                max_compatability_entries *= 2;
+                compatability_entries = new_compatability_entries;
+            }
+        }
+        if (num_compatability_entries != max_compatability_entries)
             compatability_entries[
                 num_compatability_entries++ ].exec_entry = extension;
     }
