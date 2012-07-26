@@ -2017,8 +2017,6 @@ Interface_Scan_Next(short *Index,
 
 
 int
-
-int
 Interface_Scan_NextInt(int *Index,
                     char *Name,
                     struct ifnet *Retifnet, struct in_ifaddr *Retin_ifaddr)
@@ -2245,7 +2243,7 @@ Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
 
         Interface_Scan_Init();
 
-        while (Interface_Scan_NextIn(&i, NULL, NULL, NULL) != 0) {
+        while (Interface_Scan_NextInt(&i, NULL, NULL, NULL) != 0) {
             if (i == Index)
                 break;
         }
