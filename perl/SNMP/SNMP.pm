@@ -775,6 +775,10 @@ sub gettable {
 	# varbinds.
 	$state->{'repeatcount'} = int(1000 / 36 / ($#{$state->{'varbinds'}} + 1));
     }
+    # Make sure we run at least once
+    if ($state->{'repeatcount'} < 1) {
+	$state->{'repeatcount'} = 1;
+    }
 
     #
     # if we've been configured with a callback, then call the
