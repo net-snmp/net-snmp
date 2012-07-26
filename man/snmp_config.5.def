@@ -30,21 +30,21 @@ in the following order of preference:
 file in 
 .B SNMP_PERSISTENT_FILE
 environment variable
-.PP
+.br
 directories in 
 .B SNMPCONFPATH
 environment variable
-.PP
+.br
 directory defined by 
 .B
 persistentDir 
 snmp.conf variable
-.PP
+.br
 directory in 
 .B
 SNMP_PERSISTENT_DIR 
 environment variable
-.PP
+.br
 default 
 .B
 PERSISTENT_DIRECTORY 
@@ -58,17 +58,17 @@ in the following order of preference:
 file in 
 .B SNMP_PERSISTENT_FILE
 environment variable
-.PP
+.br
 directory defined by 
 .B
 persistentDir 
 snmp.conf variable
-.PP
+.br
 directory in 
 .B
 SNMP_PERSISTENT_DIR 
 environment variable
-.PP
+.br
 default 
 .B
 PERSISTENT_DIRECTORY 
@@ -137,7 +137,36 @@ logTimestamp true
 # return to our original snmpd.conf tokens:
 [snmpd]
 rocommunity mypublic
+.fi
 .RE
+.PP
+The same approach can be used to set configuration directives for a
+particular client application (or group of applications).  For example,
+any program that uses the 'snmp_parse_args()' call to handle command-line
+arguments (including the standard command-line tools shipped as part of the
+Net-SNMP distributions) will automatically read the config file 'snmpapp.conf'.
+To set library-level settings for these applications (but not other
+more-specific tools), use configuration such as the following:
+.PP
+.RS
+[snmp] defCommunity myCommunity
+.RE
+.PP
+for a single directive, or
+.PP
+.RS
+.nf
+# make this file handle snmp.conf tokens:
+[snmp]
+defCommunity myCommunity
+defVersion   2c
+# return to our original snmpapp.conf tokens:
+[snmpapp]
+.fi
+.RE
+.PP
+for multiple settings.
+Similarly for any other application token (as passed to init_snmp()).
 .SH COMMENTS
 .PP
 Any lines beginning with the character '#' in the configuration files
