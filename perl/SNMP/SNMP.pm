@@ -731,7 +731,7 @@ sub gettable {
 		# least one column.  We pick the last.
 		push @{$state->{'columns'}}, $root_oid . ".1." .
 		  $children->[$#$children]{'subID'}
-		  if ref($state) eq 'HASH' and ref($children) eq 'HASH';
+		  if ref($state) eq 'HASH' and ref($children) eq 'ARRAY';
 	    }
 	}
     } else {
