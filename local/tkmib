@@ -667,7 +667,7 @@ sub showInfo {
 	$full = SNMP::translateObj("$oid");
     }
 
-    $tag =~ s/[.0-9]+$//;
+    $tag =~ s/\.[.0-9]+$//;
     $oid = SNMP::translateObj($tag);
 	
     if (!defined($last) || "$last" ne $oid) {
