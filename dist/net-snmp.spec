@@ -106,6 +106,10 @@ Requires: net-snmp = %{epoch}:%{version}, perl
 %if 0%{?fedora}%{?rhel}
 Provides: net-snmp-perl
 Provides: perl(SNMP) perl(NetSNMP::OID)
+Provides: perl(NetSNMP::ASN)
+Provides: perl(NetSNMP::AnyData::Format::SNMP) perl(NetSNMP::AnyData::Storage::SNMP)
+Provides: perl(NetSNMP::agent)
+Provides: perl(NetSNMP::manager) perl(NetSNMP::TrapReceiver)
 Provides: perl(NetSNMP::default_store) perl(NetSNMP::agent::default_store)
 Obsoletes: net-snmp-perl
 %endif
@@ -233,6 +237,10 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Thu Jul 26 2012 Dave Shield <D.T.Shield@liverpool.ac.uk>
+- Additional "Provides:" to complete the list of perl modules
+  Triggered by Bug ID #3540621
+
 * Thu Oct  7 2010 Peter Green <peter.green@az-tek.co.uk>
 - Modified RHEL detection to include CentOS.
 - Added extra "Provides:" to the perlmods package definition;
