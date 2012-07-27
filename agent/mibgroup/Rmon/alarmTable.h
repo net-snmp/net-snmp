@@ -11,6 +11,11 @@
 #ifndef ALARMTABLE_H
 #define ALARMTABLE_H
 
+config_require(utilities/iquery)
+config_require(Rmon/agutil)
+config_require(Rmon/rows)
+config_require(Rmon/event)
+
 /*
  * function declarations 
  */
