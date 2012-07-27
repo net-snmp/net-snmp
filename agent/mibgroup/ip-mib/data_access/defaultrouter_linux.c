@@ -93,9 +93,17 @@ _load(netsnmp_container *container)
     netsnmp_defaultrouter_entry *entry;
     int nlsk;
     struct sockaddr_nl addr;
-    unsigned char rcvbuf[RCVBUF_SIZE];
     int rcvbuf_size = RCVBUF_SIZE;
-    unsigned char sndbuf[SNDBUF_SIZE];
+    unsigned char rcvbufmem[RCVBUF_SIZE + sizeof(intmax_t)];
+    unsigned char sndbufmem[SNDBUF_SIZE + sizeof(intmax_t)];
+    /*
+     * Buffers must be memory aligned.
+     * Message structure internal alignment is maintained by the netlink API.
+     */
+    unsigned char *rcvbuf = rcvbufmem +
+          sizeof(intmax_t) - (((intptr_t)rcvbufmem) % sizeof(intmax_t));
+    unsigned char *sndbuf = sndbufmem +
+          sizeof(intmax_t) - (((intptr_t)sndbufmem) % sizeof(intmax_t));
     struct nlmsghdr *hdr;
     struct rtmsg *rthdr;
     int count;
