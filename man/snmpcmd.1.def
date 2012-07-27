@@ -622,6 +622,17 @@ Displays the OID numerically:
 .br
 \fC    .1.3.6.1.2.1.1.3.0 = Timeticks: (14096763) 1 day, 15:09:27.63\fR
 .TP
+.B -Op PRECISION
+Uses the PRECISION string to allow modification of the value output format.
+This is used with OPAQUE float/double at the moment, but might be usabe for
+other types in the future. Allowed PRECISION strings are compatible to the
+flag/field with/precision part of the printf(3) function:
+.br
+\fC    $ snmpget localhost outputVoltage.1
+    WIENER-CRATE-MIB::outputVoltage.u0 = Opaque: Float: 0.000000 V
+    $ snmpget -Op +020.12 localhost outputVoltage.1
+    WIENER-CRATE-MIB::outputVoltage.u0 = Opaque: Float: +000000.000000000000 V\fR
+.TP
 .B \-Oq
 Removes the equal sign and type information when displaying varbind values:
 .br

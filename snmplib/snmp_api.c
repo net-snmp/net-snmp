@@ -778,6 +778,9 @@ register_default_handlers(void)
 		               NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_TIMEOUT);
     netsnmp_ds_register_config(ASN_INTEGER, "snmp", "retries",
 		               NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_RETRIES);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "outputPrecision",
+                               NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OUTPUT_PRECISION);
+
 
     netsnmp_register_service_handlers();
 }

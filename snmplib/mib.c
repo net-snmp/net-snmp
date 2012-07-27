@@ -742,6 +742,8 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
                      const struct enum_list *enums,
                      const char *hint, const char *units)
 {
+    char *printf_format_string = NULL;
+
     if ((var->type != ASN_OPAQUE_FLOAT) &&
         (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
         if (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, 
@@ -772,7 +774,12 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
         }
     }
 
-    sprintf((char *) (*buf + *out_len), "%f", *var->val.floatVal);
+    printf_format_string = make_printf_format_string("%f");
+    if (!printf_format_string) {
+        return 0;
+    }
+    snprintf((char *)(*buf + *out_len), 128, printf_format_string, *var->val.floatVal);
+    free(printf_format_string);
     *out_len += strlen((char *) (*buf + *out_len));
 
     if (units) {
@@ -812,6 +819,8 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
                       const struct enum_list *enums,
                       const char *hint, const char *units)
 {
+    char *printf_format_string = NULL;
+
     if ((var->type != ASN_OPAQUE_DOUBLE) && 
         (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
         if (snmp_cstrcat
@@ -842,7 +851,12 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
         }
     }
 
-    sprintf((char *) (*buf + *out_len), "%f", *var->val.doubleVal);
+    printf_format_string = make_printf_format_string("%f");
+    if (!printf_format_string) {
+        return 0;
+    }
+    snprintf((char *)(*buf + *out_len), 128, printf_format_string, *var->val.doubleVal);
+    free(printf_format_string);
     *out_len += strlen((char *) (*buf + *out_len));
 
     if (units) {
@@ -2042,6 +2056,74 @@ sprint_realloc_by_type(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 }
 
+/**
+ * Generates a prinf format string.
+ *
+ * The original format string is combined with the optional
+ * NETSNMP_DS_LIB_OUTPUT_PRECISION string (the -Op parameter).
+ *
+ * Example:
+ * If the original format string is "%f", and the NETSNMP_DS_LIB_OUTPUT_PRECISION
+ * is "5.2", the returned format string will be "%5.2f".
+ * 
+ * The PRECISION string is inserted after the '%' of the original format string.
+ * To prevent buffer overflow if NETSNMP_DS_LIB_OUTPUT_PRECISION is set to an
+ * illegal size (e.g. with -Op 10000) snprintf should be used to prevent buffer
+ * overflow.
+ * 
+ * @param printf_format_default  The format string used by the original printf.
+ * 
+ * @return The address of of the new allocated format string (which must be freed
+ *         if no longer used), or NULL if any error (malloc).
+ */
+char *
+make_printf_format_string(const char *printf_format_default)
+{
+    const char *cp_printf_format_default;
+    char       *printf_precision;
+    char       *cp_printf_precision;
+    char       *printf_format_string;
+    char       *cp_out;
+    char       c;
+
+    printf_precision = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OUTPUT_PRECISION);
+    if (!printf_precision) {
+        printf_precision = "";
+    }
+
+    /* reserve new format string buffer */
+    printf_format_string = (char *) malloc(strlen(printf_format_default)+strlen(printf_precision)+1);
+    if (!printf_format_string)
+    {
+        DEBUGMSGTL(("make_printf_format_string", "malloc failed\n"));
+        return NULL;
+    }
+
+    /* copy default format string, including the '%' */
+    cp_out = printf_format_string;
+    cp_printf_format_default = printf_format_default;
+    while((c = *cp_printf_format_default) != '\0')
+    {
+        *cp_out++ = c;
+        cp_printf_format_default++;
+        if (c == '%') break;
+    }
+
+    /* insert the precision string */
+    cp_printf_precision = printf_precision;
+    while ((c = *cp_printf_precision++) != '\0')
+    {
+        *cp_out++ = c;
+    }
+
+    /* copy the remaining default format string, including the terminating '\0' */
+    strcpy(cp_out, cp_printf_format_default);
+
+    DEBUGMSGTL(("make_printf_format_string", "\"%s\"+\"%s\"->\"%s\"\n",
+                printf_format_default, printf_precision, printf_format_string));
+    return printf_format_string;
+}
+
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
 /**
@@ -2155,8 +2237,8 @@ handle_print_numeric(const char *token, char *line)
     }
 }
 
-char           *
-snmp_out_toggle_options(char *options)
+char *
+snmp_out_options(char *options, int argc, char *const *argv)
 {
     while (*options) {
         switch (*options++) {
@@ -2185,6 +2267,15 @@ snmp_out_toggle_options(char *options)
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_NUMERIC);
             break;
+        case 'p':
+            /* What if argc/argv are null ? */
+            if (!*(options)) {
+                options = argv[optind++];
+            }
+            netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                                  NETSNMP_DS_LIB_OUTPUT_PRECISION,
+                                  options);
+            return NULL;  /* -Op... is a standalone option, so we're done here */
         case 'q':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
             break;
@@ -2230,6 +2321,12 @@ snmp_out_toggle_options(char *options)
     return NULL;
 }
 
+char           *
+snmp_out_toggle_options(char *options)
+{
+    return snmp_out_options( options, 0, NULL );
+}
+
 void
 snmp_out_toggle_options_usage(const char *lead, FILE * outf)
 {
@@ -2240,6 +2337,7 @@ snmp_out_toggle_options_usage(const char *lead, FILE * outf)
     fprintf(outf, "%sE:  escape quotes in string indices\n", lead);
     fprintf(outf, "%sf:  print full OIDs on output\n", lead);
     fprintf(outf, "%sn:  print OIDs numerically\n", lead);
+    fprintf(outf, "%sp PRECISION:  display floating point values with specified PRECISION (printf format string)\n", lead);
     fprintf(outf, "%sq:  quick print for easier parsing\n", lead);
     fprintf(outf, "%sQ:  quick print with equal-signs\n", lead);    /* @@JDW */
     fprintf(outf, "%ss:  print only last symbolic element of OID\n", lead);
@@ -2286,7 +2384,7 @@ snmp_in_options(char *optarg, int argc, char *const *argv)
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                                   NETSNMP_DS_LIB_OIDSUFFIX,
                                   cp);
-            return NULL;
+            return NULL;  /* -Is... is a standalone option, so we're done here */
 
         case 'S':
             /* What if argc/argv are null ? */
@@ -2295,7 +2393,7 @@ snmp_in_options(char *optarg, int argc, char *const *argv)
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                                   NETSNMP_DS_LIB_OIDPREFIX,
                                   cp);
-            return NULL;
+            return NULL;  /* -IS... is a standalone option, so we're done here */
 
         default:
            /*

@@ -203,6 +203,7 @@ netsnmp_parse_args(int argc,
     char           *Cpsz = NULL;
     char            Opts[BUF_SIZE];
     int             zero_sensitive = !( flags & NETSNMP_PARSE_ARGS_NOZERO );
+    char           *backup_NETSNMP_DS_LIB_OUTPUT_PRECISION = NULL;
 
     /*
      * initialize session to default values 
@@ -271,7 +272,7 @@ netsnmp_parse_args(int argc,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 
         case 'O':
-            cp = snmp_out_toggle_options(optarg);
+            cp = snmp_out_options(optarg, argc, argv);
             if (cp != NULL) {
                 fprintf(stderr, "Unknown output option passed to -O: %c.\n", 
 			*cp);
@@ -638,9 +639,26 @@ netsnmp_parse_args(int argc,
     DEBUGMSGTL(("snmp_parse_args", "finished: %d/%d\n", optind, argc));
     
     /*
-     * read in MIB database and initialize the snmp library
+     * save command line parameters which should have precedence above config file settings
+     *    (There ought to be a more scalable approach than this....)
+     */
+    if (netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OUTPUT_PRECISION)) {
+        backup_NETSNMP_DS_LIB_OUTPUT_PRECISION = 
+            strdup(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OUTPUT_PRECISION));
+    }
+
+    /*
+     * read in MIB database and initialize the snmp library, read the config file
      */
     init_snmp("snmpapp");
+
+    /*
+     * restore command line parameters which should have precedence above config file settings
+     */
+    if(backup_NETSNMP_DS_LIB_OUTPUT_PRECISION) {
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OUTPUT_PRECISION, backup_NETSNMP_DS_LIB_OUTPUT_PRECISION);
+        free(backup_NETSNMP_DS_LIB_OUTPUT_PRECISION);
+    }
 
     /*
      * session default version 

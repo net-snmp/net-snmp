@@ -169,6 +169,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_SSH_USERNAME      32
 #define NETSNMP_DS_LIB_SSH_PUBKEY        33
 #define NETSNMP_DS_LIB_SSH_PRIVKEY       34
+#define NETSNMP_DS_LIB_OUTPUT_PRECISION  35
 #define NETSNMP_DS_LIB_MAX_STR_ID        48 /* match NETSNMP_DS_MAX_SUBIDS */
 
     /*

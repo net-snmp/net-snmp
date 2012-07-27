@@ -393,6 +393,12 @@ Equivalent to
 Disables the use of DISPLAY-HINT information when parsing indices and
 values to set. Equivalent to
 .BR \-Ih .
+.IP "outputPrecision PRECISION"
+Uses the PRECISION string to allow modification of the value output
+format. See snmpcmd(1) for details.
+Equivalent to
+.BR \-Op
+(which takes precedence over the config file).
 .SH FILES
 .IP "System-wide configuration files:"
 SYSCONFDIR/snmp/snmp.conf
