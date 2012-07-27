@@ -233,10 +233,11 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                                 ? 3  /* device driver    */
                                 : 2  /* operating system */
                                )
+                             : 4  /*  application     */
 #else
                              ? 2  /* operating system */
-#endif
                              : 4  /*  application     */
+#endif
                              ;
 
 #ifdef netbsd5
@@ -269,8 +270,10 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         case SLOCK:   entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
                       break;
         case SIDL:
-        case SZOMB:
-        default:      entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
+        case SZOMB:   entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;   /* i.e. "not loaded" */
+                      break;
+
+        default:      entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;   /* Actually invalid  */
 		      snmp_log(LOG_ERR, "Bad process status %c (0x%x)\n", proc_table[i].SWRUN_K_STAT, proc_table[i].SWRUN_K_STAT);
                       break;
         }
