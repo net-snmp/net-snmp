@@ -66,6 +66,7 @@
 #define EVENTOWNER            8
 #define EVENTSTATUS           9
 
+#define Leaf_event_index        1
 #define Leaf_event_description  2
 #define MIN_event_description   0
 #define MAX_event_description   127
@@ -281,6 +282,8 @@ write_eventControl(int action, u_char * var_val, u_char var_val_type,
         hdr = ROWAPI_find(table_ptr, long_temp);        /* it MUST be OK */
         cloned_body = (CRTL_ENTRY_T *) hdr->tmp;
         switch (leaf_id) {
+        case Leaf_event_index:
+            return SNMP_ERR_NOTWRITABLE;
         case Leaf_event_description:
             char_temp = AGMALLOC(1 + MAX_event_description);
             if (!char_temp)
@@ -315,6 +318,8 @@ write_eventControl(int action, u_char * var_val, u_char var_val_type,
             }
             cloned_body->event_type = long_temp;
             break;
+        case Leaf_event_last_time_sent:
+            return SNMP_ERR_NOTWRITABLE;
         case Leaf_event_community:
             char_temp = AGMALLOC(1 + MAX_event_community);
             if (!char_temp)
@@ -559,10 +564,10 @@ oa_bind_var(netsnmp_variable_list * prev,
         exit(-1);               /* Sorry :( */
     }
     memset(var, 0, sizeof(netsnmp_variable_list));
-    var->next_variable = prev;
+    if (prev)
+        prev->next_variable = var;
     snmp_set_var_objid(var, oid, sz_oid);
-    snmp_set_var_value(var, (u_char *) value, sz_val);
-    var->type = type;
+    snmp_set_var_typed_value(var, type, (u_char *) value, sz_val);
 
     return var;
 }
@@ -576,14 +581,15 @@ event_send_trap(CRTL_ENTRY_T * evptr, u_char is_rising,
 {
     static oid      rmon1_trap_oid[] = { 1, 3, 6, 1, 2, 1, 16, 0, 0 };
     static oid      alarm_index_oid[] =
-        { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 1 };
+        { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 1, 0 };
     static oid      alarmed_var_oid[] =
-        { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 3 };
+        { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 3, 0 };
     static oid      sample_type_oid[] =
-        { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 4 };
-    static oid      value_oid[] = { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 5 };
-    static oid      threshold_oid[] = { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 7 };     /* rising case */
+        { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 4, 0 };
+    static oid      value_oid[] = { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 5, 0 };
+    static oid      threshold_oid[] = { 1, 3, 6, 1, 2, 1, 16, 3, 1, 1, 7, 0 };     /* rising case */
     netsnmp_variable_list *top = NULL;
+    netsnmp_variable_list *start = NULL;
     register int    iii;
 
     /*
@@ -593,19 +599,27 @@ event_send_trap(CRTL_ENTRY_T * evptr, u_char is_rising,
         iii = OID_LENGTH(rmon1_trap_oid);
         rmon1_trap_oid[iii - 1] = 1;
         iii = OID_LENGTH(threshold_oid);
-        threshold_oid[iii - 1] = 7;
+        threshold_oid[iii - 2] = 7;
+        iii = 1;
     } else {
         iii = OID_LENGTH(rmon1_trap_oid);
-        rmon1_trap_oid[iii - 1] = 0;
+        rmon1_trap_oid[iii - 1] = 2;
         iii = OID_LENGTH(threshold_oid);
-        threshold_oid[iii - 1] = 8;
+        threshold_oid[iii - 2] = 8;
+        iii = 2;
     }
+    alarm_index_oid[11] = alarm_index;
+    alarmed_var_oid[11] = alarm_index;
+    sample_type_oid[11] = alarm_index;
+    value_oid[11]       = alarm_index;
+    threshold_oid[11]   = alarm_index;
 
     /*
      * build the var list 
      */
     top = oa_bind_var(top, &alarm_index, ASN_INTEGER, sizeof(u_int),
                       alarm_index_oid, OID_LENGTH(alarm_index_oid));
+    start = top;
 
     top =
         oa_bind_var(top, alarmed_var, ASN_OBJECT_ID,
@@ -622,9 +636,9 @@ event_send_trap(CRTL_ENTRY_T * evptr, u_char is_rising,
                       threshold_oid, OID_LENGTH(threshold_oid));
 
 
-    send_enterprise_trap_vars(SNMP_TRAP_ENTERPRISESPECIFIC, 0,
+    send_enterprise_trap_vars(SNMP_TRAP_ENTERPRISESPECIFIC, iii,
                               rmon1_trap_oid,
-                              OID_LENGTH(rmon1_trap_oid), top);
+                              OID_LENGTH(rmon1_trap_oid) - 2, start);
     ag_trace("rmon trap has been sent");
     snmp_free_varbind(top);
 
@@ -666,7 +680,7 @@ event_api_send_alarm(u_char is_rising,
     CRTL_ENTRY_T   *evptr;
 
     if (!event_index)
-        return SNMP_ERR_NOSUCHNAME;
+        return SNMP_ERR_NOERROR;
 
 #if 0
     ag_trace("event_api_send_alarm(%d,%d,%d,'%s')",
