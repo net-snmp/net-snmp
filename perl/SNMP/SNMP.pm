@@ -267,8 +267,8 @@ sub mapEnum {
   my $var = shift;
   my ($tag, $val, $update);
   if (ref($var) =~ /ARRAY/ or ref($var) =~ /Varbind/) {
-      $tag = $var->[$SNMP::Varbind::tag_f];
-      $val = $var->[$SNMP::Varbind::val_f];
+      $tag = SNMP::Varbind::tag($var);
+      $val = SNMP::Varbind::val($var);
       $update = 1;
   } else {
       $tag = $var;
@@ -276,7 +276,7 @@ sub mapEnum {
   }
   my $iflag = $val =~ /^\d+$/;
   my $res = SNMP::_map_enum($tag, $val, $iflag, $SNMP::best_guess);
-  if ($update and defined $res) { $var->[$SNMP::Varbind::val_f] = $res; }
+  if ($update and defined $res) { SNMP::Varbind::val($var) = $res; }
   return($res);
 }
 
@@ -1020,10 +1020,10 @@ sub fget {
    SNMP::_get($this, $this->{RetryNoSuch}, $varbind_list_ref, $cb);
 
    foreach my $varbind (@$varbind_list_ref) {
-     my $sub = $this->{VarFormats}{$varbind->[$SNMP::Varbind::tag_f]} ||
-	 $this->{TypeFormats}{$varbind->[$SNMP::Varbind::type_f]};
+     my $sub = $this->{VarFormats}{SNMP::Varbind::tag($varbind)} ||
+	      $this->{TypeFormats}{SNMP::Varbind::type($varbind)};
      &$sub($varbind) if defined $sub;
-     push(@res, $varbind->[$SNMP::Varbind::val_f]);
+     push(@res, SNMP::Varbind::val($varbind));
    }
 
    return(wantarray() ? @res : $res[0]);
@@ -1073,10 +1073,10 @@ sub fgetnext {
    SNMP::_getnext($this, $varbind_list_ref, $cb);
 
    foreach my $varbind (@$varbind_list_ref) {
-     my $sub = $this->{VarFormats}{$varbind->[$SNMP::Varbind::tag_f]} ||
-	 $this->{TypeFormats}{$varbind->[$SNMP::Varbind::type_f]};
+     my $sub = $this->{VarFormats}{SNMP::Varbind::tag($varbind)} ||
+	      $this->{TypeFormats}{SNMP::Varbind::type($varbind)};
      &$sub($varbind) if defined $sub;
-     push(@res, $varbind->[$SNMP::Varbind::val_f]);
+     push(@res, SNMP::Varbind::val($varbind));
    }
 
    return(wantarray() ? @res : $res[0]);
