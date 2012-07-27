@@ -246,10 +246,10 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         case SSLEEP:
         case SWAIT:   entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNABLE;
                       break;
+        case SIDL:
         case SSTOP:
         case SLOCK:   entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
                       break;
-        case SIDL:
         case SZOMB:
         default:      entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;   /* i.e. "not loaded" */
                       break;
