@@ -173,6 +173,7 @@ alarmTable_run( unsigned int reg, void *clientarg)
     rc = netsnmp_query_get(  var, entry->session );
     if ( rc != SNMP_ERR_NOERROR ) {
         DEBUGMSGTL(( "rmon:alarmTable", "alarmVariable query failed (%d)\n", rc));
+        snmp_free_varbind(var);
         return;
     }
 
@@ -186,6 +187,7 @@ alarmTable_run( unsigned int reg, void *clientarg)
         break;
     default:
         DEBUGMSGTL(("rmon:alarmTable", "invalid type (%d)\n", var->type));
+        snmp_free_varbind(var);
         return ;
     }
 
@@ -225,7 +227,9 @@ alarmTable_run( unsigned int reg, void *clientarg)
             snmp_log(LOG_ERR,"failed to send falling alarm\n");
     }
     else
-        snmp_log(LOG_ERR,"no alarm sent\n");
+        DEBUGMSGTL(("rmon:alarmTable", "no alarm sent\n"));
+
+    snmp_free_varbind(var);
 }
 
 void
