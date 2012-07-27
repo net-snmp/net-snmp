@@ -233,10 +233,11 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                                 ? 3  /* device driver    */
                                 : 2  /* operating system */
                                )
+                             : 4  /*  application     */
 #else
                              ? 2  /* operating system */
-#endif
                              : 4  /*  application     */
+#endif
                              ;
 
         switch (proc_table[i].SWRUN_K_STAT) {
@@ -250,7 +251,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                       break;
         case SIDL:
         case SZOMB:
-        default:      entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
+        default:      entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;   /* i.e. "not loaded" */
                       break;
         }
         
