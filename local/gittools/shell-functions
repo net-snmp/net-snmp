@@ -256,6 +256,13 @@ nssfpatchcommit() {
     
 
 nsrollup() {
+    fetch=1;
+
+    if [ "$1" = "--no-fetch" ] ; then
+	fetch=0
+        shift
+    fi
+
     if [ "$1" = "--merge" ] ; then
 	mergeop="merge"
     elif [ "$1" = "--rebase" ] ; then
@@ -269,8 +276,10 @@ nsrollup() {
 	return
     fi
 
-    $nsverbose Pulling all upstream branches
-    $nsecho git fetch --all
+    if [ $fetch == 1 ]; then
+      $nsverbose Pulling all upstream branches
+      $nsecho git fetch --all
+    fi
     
     nslastbranch=""
 

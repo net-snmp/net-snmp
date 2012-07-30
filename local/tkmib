@@ -346,7 +346,7 @@ sub insertvar {
     my $var = shift;
     my $name = get_oid($var);
 
-    insertresult($name,"$var->[$SNMP::Varbind::val_f]");
+    insertresult($name,SNMP::Varbind::val($var));
 }
 
 sub snmpsetup {
@@ -531,7 +531,7 @@ sub snmptable {
 		 $sess->{ErrorStr} ||
 		 $val eq "ENDOFMIBVIEW" ||
 	         !is_in_subtree($oid, $var->tag . "." . $var->iid));
-	$newoid = "$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]";
+	$newoid = SNMP::Varbind::tag($var).".".SNMP::Varbind::iid($var);
 	insertvar($var);
 	$top->update();
 	$newoid =~ /([^\.]+)\.([0-9\.]+)$/;
@@ -598,7 +598,7 @@ sub updateGraph() {
 	    SNMP::translateObj($var->tag) !~ /^$oid/) {
 	    last;
 	}
-	my $newoid = SNMP::translateObj("$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]");
+	my $newoid = SNMP::translateObj(SNMP::Varbind::tag($var).".".SNMP::Varbind::iid($var));
 	$top->update();
 	$newoid =~ /$oid\.([0-9\.]+)$/;
 	if (defined($1)) {
@@ -667,7 +667,7 @@ sub showInfo {
 	$full = SNMP::translateObj("$oid");
     }
 
-    $tag =~ s/[.0-9]+$//;
+    $tag =~ s/\.[.0-9]+$//;
     $oid = SNMP::translateObj($tag);
 	
     if (!defined($last) || "$last" ne $oid) {

@@ -26,4 +26,8 @@
      */
      void            init_event(void);
 
+config_require(util_funcs)
+
+config_require(Rmon/agutil)
+config_require(Rmon/rows)
 #endif                          /* _MIBGROUP_EVENT_H */
