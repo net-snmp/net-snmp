@@ -887,14 +887,6 @@ int *err_ind;
        goto done;
    }
 
-   tmp_err_str = calloc(1, STR_BUF_SIZE);
-   if (tmp_err_str == NULL) {
-       *err_num = errno;
-       *err_ind = SNMPERR_MALLOC;
-       strlcpy(err_str, snmp_api_errstring(*err_ind), STR_BUF_SIZE);
-       goto done;
-   }
-
 retry:
 
    status = snmp_synch_response(ss, pdu, response);
