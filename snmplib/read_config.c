@@ -270,10 +270,11 @@ register_app_prenetsnmp_mib_handler(const char *token,
  *                 token and the rest of the line to do whatever is required
  *                 Should be non-NULL in order to make use of this API.
  *
- * @param releaser if non-NULL, the function specified is called if
- *                 and when the configuration files are re-read.  This function
- *                 should free any resources allocated by the token handler
- *                 function.
+ * @param releaser if non-NULL, the function specified is called when
+ *                 unregistering config handler or when configuration
+ *                 files are re-read.
+ *                 This function should free any resources allocated by
+ *                 the token handler function.
  *
  * @param help     if non-NULL, used to display help information on the
  *                 expected arguments after the token.
@@ -369,6 +370,8 @@ unregister_config_handler(const char *type_param, const char *token)
          * found it at the top of the list 
          */
         struct config_line *ltmp2 = (*ltmp)->next;
+        if ((*ltmp)->free_func)
+            (*ltmp)->free_func();
         SNMP_FREE((*ltmp)->config_token);
         SNMP_FREE((*ltmp)->help);
         SNMP_FREE(*ltmp);
@@ -381,6 +384,8 @@ unregister_config_handler(const char *type_param, const char *token)
     }
     if ((*ltmp)->next != NULL) {
         struct config_line *ltmp2 = (*ltmp)->next->next;
+        if ((*ltmp)->next->free_func)
+            (*ltmp)->next->free_func();
         SNMP_FREE((*ltmp)->next->config_token);
         SNMP_FREE((*ltmp)->next->help);
         SNMP_FREE((*ltmp)->next);
@@ -399,8 +404,6 @@ unregister_all_config_handlers(void)
 {
     struct config_files *ctmp, *save;
     struct config_line *ltmp;
-
-    free_config();
 
     /*
      * Keep using config_files until there are no more! 
