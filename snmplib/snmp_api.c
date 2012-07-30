@@ -5338,6 +5338,8 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	  } else {
 	    if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
 	      break;
+	    } else { /* Set the state to no longer be waiting, since we're done with retries */
+	      ((struct synch_state*)magic)->waiting = 0;
 	    }
 	  }
 
