@@ -117,6 +117,7 @@ pass_parse_config(const char *token, char *cptr)
     if (*ppass == NULL)
         return;
     (*ppass)->type = PASSTHRU;
+    (*ppass)->mibpriority = priority;
 
     (*ppass)->miblen = parse_miboid(cptr, (*ppass)->miboid);
     while (isdigit((unsigned char)(*cptr)) || *cptr == '.')
@@ -136,9 +137,10 @@ pass_parse_config(const char *token, char *cptr)
     strlcpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
     (*ppass)->next = NULL;
 
-    register_mib_priority("pass", (struct variable *) extensible_passthru_variables,
-			  sizeof(struct variable2),
-			  1, (*ppass)->miboid, (*ppass)->miblen, priority);
+    register_mib_priority("pass",
+                 (struct variable *) extensible_passthru_variables,
+                 sizeof(struct variable2), 1, (*ppass)->miboid,
+                 (*ppass)->miblen, (*ppass)->mibpriority);
 
     /*
      * argggg -- pasthrus must be sorted 
@@ -174,7 +176,7 @@ pass_free_config(void)
     for (etmp = passthrus; etmp != NULL;) {
         etmp2 = etmp;
         etmp = etmp->next;
-        unregister_mib(etmp2->miboid, etmp2->miblen);
+        unregister_mib_priority(etmp2->miboid, etmp2->miblen, etmp2->mibpriority);
         free(etmp2);
     }
     passthrus = NULL;
