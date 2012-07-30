@@ -552,9 +552,6 @@ create_explanaition(CRTL_ENTRY_T * evptr, u_char is_rising,
     return descr;
 }
 
-extern void     send_enterprise_trap_vars(int, int, oid *, int,
-                                          netsnmp_variable_list *);
-
 static void
 event_send_trap(CRTL_ENTRY_T * evptr, u_char is_rising,
                 u_int alarm_index,
