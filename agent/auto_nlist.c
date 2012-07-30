@@ -68,6 +68,8 @@ auto_nlist_value(const char *string)
 #if defined(aix4) || defined(aix5) || defined(aix6)
         strcpy(it->nl[0].n_name, string);
         it->nl[0].n_name[strlen(string)+1] = '\0';
+#elif defined(freebsd9)
+        sprintf(__DECONST(char*, it->nl[0].n_name), "_%s", string);
 #else
 
         if (n_name != NULL)
@@ -86,6 +88,10 @@ auto_nlist_value(const char *string)
 #if !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7) || \
                     defined(netbsd1) || defined(dragonfly))
         if (it->nl[0].n_type == 0) {
+#if defined(freebsd9)
+            strcpy(__DECONST(char*, it->nl[0].n_name), string);
+            __DECONST(char*, it->nl[0].n_name)[strlen(string)+1] = '\0';
+#else
             static char *n_name2 = NULL;
 
             if (n_name2 != NULL)
@@ -98,6 +104,7 @@ auto_nlist_value(const char *string)
             }
             strcpy(n_name2, string);
             it->nl[0].n_name = (const char*)n_name2;
+#endif
             init_nlist(it->nl);
         }
 #endif
@@ -109,7 +116,8 @@ auto_nlist_value(const char *string)
 	    }
             return (-1);
         } else {
-            DEBUGMSGTL(("auto_nlist:auto_nlist_value", "found symbol %s at %x.\n",
+            DEBUGMSGTL(("auto_nlist:auto_nlist_value",
+			"found symbol %s at %lx.\n",
                         it->symbol, it->nl[0].n_value));
             return (it->nl[0].n_value);
         }
@@ -118,7 +126,7 @@ auto_nlist_value(const char *string)
 }
 
 int
-auto_nlist(const char *string, char *var, int size)
+auto_nlist(const char *string, char *var, size_t size)
 {
     long            result;
     int             ret;
@@ -217,7 +225,7 @@ init_nlist(struct nlist nl[])
 }
 
 int
-KNLookup(struct nlist nl[], int nl_which, char *buf, int s)
+KNLookup(struct nlist nl[], int nl_which, char *buf, size_t s)
 {
     struct nlist   *nlp = &nl[nl_which];
 
