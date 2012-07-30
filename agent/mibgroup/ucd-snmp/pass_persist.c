@@ -147,6 +147,7 @@ pass_persist_parse_config(const char *token, char *cptr)
     if (*ppass == NULL)
         return;
     (*ppass)->type = PASSTHRU_PERSIST;
+    (*ppass)->mibpriority = priority;
 
     (*ppass)->miblen = parse_miboid(cptr, (*ppass)->miboid);
     while (isdigit((unsigned char)(*cptr)) || *cptr == '.')
@@ -169,7 +170,7 @@ pass_persist_parse_config(const char *token, char *cptr)
     register_mib_priority("pass_persist",
                  (struct variable *) extensible_persist_passthru_variables,
                  sizeof(struct variable2), 1, (*ppass)->miboid,
-                 (*ppass)->miblen, priority);
+                 (*ppass)->miblen, (*ppass)->mibpriority);
 
     /*
      * argggg -- pasthrus must be sorted 
@@ -204,7 +205,7 @@ pass_persist_free_config(void)
     for (etmp = persistpassthrus; etmp != NULL;) {
         etmp2 = etmp;
         etmp = etmp->next;
-        unregister_mib(etmp2->miboid, etmp2->miblen);
+        unregister_mib_priority(etmp2->miboid, etmp2->miblen, etmp2->mibpriority);
         free(etmp2);
     }
     persistpassthrus = NULL;
