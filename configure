@@ -870,6 +870,8 @@ with_dnssec
 enable_dnssec
 with_rpm
 enable_rpm
+with_pcre
+enable_pcre
 with_install_prefix
 enable_agent
 with_agent
@@ -1767,6 +1769,8 @@ Compiler Options:
   --without-rpm                   Don't include support for the RPM package
                                   management system when building the host MIB
                                   module.
+  --without-prce                  Don't include pcre process searching
+                                  support in the agent.
   --with-install-prefix=PATH      Just for installing, prefix all
                                   directories with PATH.  This is known not
                                   to work on some systems with shared
@@ -3582,6 +3586,20 @@ if test "${enable_rpm+set}" = set; then :
   enableval=$enable_rpm; as_fn_error $? "Invalid option. Use --with-rpm/--without-rpm instead" "$LINENO" 5
 fi
 
+
+
+
+# Check whether --with-pcre was given.
+if test "${with_pcre+set}" = set; then :
+  withval=$with_pcre; with_pcre="$withval"
+else
+  with_pcre="yes"
+fi
+
+   # Check whether --enable-pcre was given.
+if test "${enable_pcre+set}" = set; then :
+  enableval=$enable_pcre; as_fn_error $? "Invalid option. Use --with-pcre/--without-pcre instead" "$LINENO" 5
+fi
 
 
 ##

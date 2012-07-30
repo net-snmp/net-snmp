@@ -158,6 +158,11 @@ NETSNMP_ARG_WITH(rpm,
                                   module.])
 
 
+NETSNMP_ARG_WITH(pcre,
+[  --without-prce                  Don't include pcre process searching
+                                  support in the agent.],
+      with_pcre="$withval", with_pcre="yes")
+
 ##
 #   Project: Build configuration settings
 ##
