@@ -93,3 +93,35 @@ netsnmp_save_LIBS="$LIBS"
 LIBS="$LMIBLIBS $LAGENTLIBS $LSNMPLIBS $LIBS"
 AC_CHECK_FUNCS([dlopen])
 LIBS="$netsnmp_save_LIBS"
+
+#
+#   regex in process table
+#
+AC_CHECK_HEADER([pcre.h], 
+  [
+    AC_DEFINE([HAVE_PCRE_H], [1], [Define to 1 if you have <pcre.h>.])
+    pcre_h=yes
+  ],
+  [
+    pcre_h=no
+  ]
+)
+if test "x$pcreheader_h" = "xno" -o "x$pcre_h" = "xno" ; then
+  if test "x$with_pcre" = "xyes" ; then
+    AC_MSG_ERROR([Could not find the pcre header file needed and was specifically asked to use pcre support])
+  else
+    with_pcre=no
+  fi
+fi
+
+#
+# pcre libraries only needed for the ucd process agent mib software
+#
+if test "x$with_pcre" != "xno"; then
+  _pcrelibs=""
+  NETSNMP_SEARCH_LIBS([pcre_exec], [pcre],,,, _pcrelibs)
+  if test "x$_pcrelibs" != "x"; then
+    LAGENTLIBS="$LAGENTLIBS $_pcrelibs"
+    LMIBLIBS="$LMIBLIBS $_pcrelibs"
+  fi
+fi

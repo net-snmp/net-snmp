@@ -593,6 +593,9 @@
 /* Define to 1 if you have the <pci/pci.h> header file. */
 #undef HAVE_PCI_PCI_H
 
+/* Define to 1 if you have <pcre.h>. */
+#undef HAVE_PCRE_H
+
 /* on aix, if you have perfstat */
 #undef HAVE_PERFSTAT
 
@@ -1623,9 +1626,6 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
-
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-#undef size_t
 
 /* Define to the type of an unsigned integer type of width exactly 16 bits if
    such a type exists and the standard includes do not define it. */
