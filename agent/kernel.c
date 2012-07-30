@@ -98,7 +98,7 @@ init_kmem(const char *file)
  * @return gives 1 on success and 0 on failure.
  */
 int
-klookup(unsigned long off, char *target, int siz)
+klookup(unsigned long off, void *target, size_t siz)
 {
     int             result;
     if (kd == NULL)
@@ -106,7 +106,7 @@ klookup(unsigned long off, char *target, int siz)
     result = kvm_read(kd, off, target, siz);
     if (result != siz) {
 #if HAVE_KVM_OPENFILES
-        snmp_log(LOG_ERR, "kvm_read(*, %lx, %p, %d) = %d: %s\n", off,
+        snmp_log(LOG_ERR, "kvm_read(*, %lx, %p, %zx) = %d: %s\n", off,
                  target, siz, result, kvm_geterr(kd));
 #else
         snmp_log(LOG_ERR, "kvm_read(*, %lx, %p, %d) = %d: ", off, target,
@@ -201,7 +201,7 @@ klread(char *buf, int buflen)
  * @return gives 1 on success and 0 on failure.
  */
 int
-klookup(unsigned long off, char *target, int siz)
+klookup(unsigned long off, char *target, size_t siz)
 {
     long            retsiz;
 
