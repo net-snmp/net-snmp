@@ -52,6 +52,7 @@ BEGIN { $| = 1;
                   "NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD" => 35,
                   "NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE" => 36,
                   "NETSNMP_DS_LIB_APPEND_LOGFILES"         => 37,
+                  "NETSNMP_DS_LIB_CLIENT_ADDR_USES_PORT"   => 42,
                   "NETSNMP_DS_LIB_MIB_WARNINGS"            => 0,
                   "NETSNMP_DS_LIB_SECLEVEL"                => 1,
                   "NETSNMP_DS_LIB_SNMPVERSION"             => 2,

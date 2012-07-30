@@ -182,7 +182,29 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
                                               NETSNMP_DS_LIB_CLIENT_ADDR);
         if (client_socket) {
             struct sockaddr_in client_addr;
-            netsnmp_sockaddr_in2(&client_addr, client_socket, NULL);
+
+            char *client_address = client_socket;
+            int uses_port = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                                   NETSNMP_DS_LIB_CLIENT_ADDR_USES_PORT);
+            if ((uses_port == 1) && (strchr(client_socket, ':') == NULL)) {
+                client_address = malloc(strlen(client_socket) + 3);
+                if (client_address == NULL) {
+                    netsnmp_socketbase_close(t);
+                    netsnmp_transport_free(t);
+                    return NULL;
+                }                                      /* if NETSNMP_DS_LIB_CLIENT_ADDR */
+                strcpy(client_address, client_socket); /* expects a port but there is none */
+                strcat(client_address, ":0");          /* specified then provide ephemeral one */
+            }
+
+            netsnmp_sockaddr_in2(&client_addr, client_address, NULL);
+            if (uses_port == 0) {
+                client_addr.sin_port = 0;
+            }
+            if (client_address != client_socket) {
+                free(client_address);
+            }
+
             DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d\n", t->sock));
             rc = bind(t->sock, (struct sockaddr *)&client_addr,
                   sizeof(struct sockaddr));

@@ -758,6 +758,8 @@ register_default_handlers(void)
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS);
     netsnmp_ds_register_premib(ASN_OCTET_STR, "snmp", "clientaddr",
                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENT_ADDR);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "clientaddrUsesPort",
+                      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENT_ADDR_USES_PORT);
     netsnmp_ds_register_config(ASN_INTEGER, "snmp", "serverSendBuf",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SERVERSENDBUF);
     netsnmp_ds_register_config(ASN_INTEGER, "snmp", "serverRecvBuf",
