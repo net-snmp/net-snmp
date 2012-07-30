@@ -11,6 +11,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
+#include <sys/types.h>
 #if HAVE_IO_H
 #include <io.h>
 #endif
@@ -21,7 +22,6 @@
 #if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
-#include <sys/types.h>
 #ifdef __alpha
 #ifndef _BSD
 #define _BSD
@@ -243,7 +243,7 @@ get_exec_output(struct extensible *ex)
 #if HAVE_EXECV
     char            cachefile[STRMAX];
     char            cache[NETSNMP_MAXCACHESIZE];
-    int             cachebytes;
+    size_t          cachebytes;
     int             cfd;
 #ifdef NETSNMP_EXCACHETIME
     long            curtime;
