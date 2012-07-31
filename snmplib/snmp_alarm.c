@@ -455,4 +455,35 @@ snmp_alarm_register_hr(struct timeval t, unsigned int flags,
 
     return (*s)->clientreg;
 }
+
+/**
+ * This function resets an existing alarm.
+ *
+ * @param clientreg is a unique unsigned integer representing a registered
+ *	alarm which the client wants to unregister.
+ *
+ * @return 0 on success, -1 if the alarm was not found
+ *
+ * @see snmp_alarm_register
+ * @see snmp_alarm_register_hr
+ * @see snmp_alarm_unregister
+ */
+int
+snmp_alarm_reset(unsigned int clientreg)
+{
+    struct snmp_alarm *a;
+    struct timeval  t_now;
+    if ((a = sa_find_specific(clientreg)) != NULL) {
+        gettimeofday(&t_now, NULL);
+        a->t_last.tv_sec = t_now.tv_sec;
+        a->t_last.tv_usec = t_now.tv_usec;
+        a->t_next.tv_sec = 0;
+        a->t_next.tv_usec = 0;
+        NETSNMP_TIMERADD(&t_now, &a->t, &a->t_next);
+        return 0;
+    }
+    DEBUGMSGTL(("snmp_alarm_reset", "alarm %d not found\n",
+                clientreg));
+    return -1;
+}
 /**  @} */
