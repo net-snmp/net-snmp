@@ -738,6 +738,11 @@ interface_ioctl_dot3stats_get (dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, co
             rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSALIGNMENTERRORS_FLAG;
         }
 
+        if (DOT3STATSFCSERRORS(s)) {
+            data->dot3StatsFCSErrors = (u_long)eth_stats->data[i];
+            rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSFCSERRORS_FLAG;
+        }
+
         if (DOT3STATSMULTIPLECOLLISIONFRAMES(s)) {
             data->dot3StatsMultipleCollisionFrames = (u_long)eth_stats->data[i];
             rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSMULTIPLECOLLISIONFRAMES_FLAG;
@@ -756,6 +761,10 @@ interface_ioctl_dot3stats_get (dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, co
         if (DOT3STATSEXCESSIVECOLLISIONS(s)) {
             data->dot3StatsExcessiveCollisions = (u_long)eth_stats->data[i];
             rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSEXCESSIVECOLLISIONS_FLAG;
+        }
+        if (DOT3STATSDEFERREDTRANSMISSIONS(s)) {
+            data->dot3StatsDeferredTransmissions = (u_long)eth_stats->data[i];
+            rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSDEFERREDTRANSMISSIONS_FLAG;
         }
     }
 

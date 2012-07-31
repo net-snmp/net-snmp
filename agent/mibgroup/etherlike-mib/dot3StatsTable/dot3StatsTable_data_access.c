@@ -307,6 +307,11 @@ dot3StatsTable_container_load(netsnmp_container * container)
          */
 
         memset (&rowreq_ctx->data, 0, sizeof (rowreq_ctx->data));
+
+	interface_sysclassnet_dot3stats_get(rowreq_ctx, p->name);
+
+	interface_dot3stats_get_errorcounters(rowreq_ctx, p->name);
+
         rc = interface_ioctl_dot3stats_get (rowreq_ctx, fd, p->name);
 
         if (rc < 0) {
@@ -323,10 +328,6 @@ dot3StatsTable_container_load(netsnmp_container * container)
             dot3StatsTable_release_rowreq_ctx(rowreq_ctx);
             continue;
         }
-
-	interface_sysclassnet_dot3stats_get(rowreq_ctx, p->name);
-
-	interface_dot3stats_get_errorcounters(rowreq_ctx, p->name);
 
         /*
          * insert into table container
