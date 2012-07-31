@@ -428,7 +428,7 @@ warningcheck:
 
 assertcheck:
 	@echo "Checking for non-snmp asserts..."
-	@if grep -n -w "assert" `$(FIND) $(top_srcdir) -name \*.\[ch\] | grep -v snmp_assert.h`; then false; fi
+	@if grep -n -w "assert" `$(FIND) $(top_srcdir) -name \*.\[ch\] | grep -v snmp_assert.h | egrep -v 'perl/.*c' | grep -v openssl`; then false; fi
 
 commentcheck:
 	@echo "Checking for C++ style comments..."
