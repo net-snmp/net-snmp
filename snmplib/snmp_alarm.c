@@ -475,11 +475,11 @@ snmp_alarm_reset(unsigned int clientreg)
     struct timeval  t_now;
     if ((a = sa_find_specific(clientreg)) != NULL) {
         gettimeofday(&t_now, NULL);
-        a->t_last.tv_sec = t_now.tv_sec;
-        a->t_last.tv_usec = t_now.tv_usec;
-        a->t_next.tv_sec = 0;
-        a->t_next.tv_usec = 0;
-        NETSNMP_TIMERADD(&t_now, &a->t, &a->t_next);
+        a->t_lastM.tv_sec = t_now.tv_sec;
+        a->t_lastM.tv_usec = t_now.tv_usec;
+        a->t_nextM.tv_sec = 0;
+        a->t_nextM.tv_usec = 0;
+        NETSNMP_TIMERADD(&t_now, &a->t, &a->t_nextM);
         return 0;
     }
     DEBUGMSGTL(("snmp_alarm_reset", "alarm %d not found\n",
