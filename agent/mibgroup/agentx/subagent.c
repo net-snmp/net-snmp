@@ -336,6 +336,11 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     pdu->version = AGENTX_VERSION_1;
     pdu->flags |= UCD_MSG_FLAG_ALWAYS_IN_VIEW;
 
+    /* Master agent is alive, no need to ping */
+    if (session->securityModel != SNMP_DEFAULT_SECMODEL) {
+        snmp_alarm_reset(session->securityModel);
+    }
+
     if (pdu->command == AGENTX_MSG_GET
         || pdu->command == AGENTX_MSG_GETNEXT
         || pdu->command == AGENTX_MSG_GETBULK) {
