@@ -287,6 +287,8 @@ load_assoc(sctpTables_containers * containers)
         return SNMP_ERR_GENERR;
     }
 
+    netsnmp_get_pid_from_inode_init();
+
     /*
      * ignore the header. 
      */
