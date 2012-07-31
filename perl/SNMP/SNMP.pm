@@ -1221,11 +1221,11 @@ sub new {
 
 package SNMP::Varbind;
 
-my $tag_f = 0;
-my $iid_f = 1;
-my $val_f = 2;
-my $type_f = 3;
-my $time_f = 4;
+$SNMP::Varbind::tag_f = 0;
+$SNMP::Varbind::iid_f = 1;
+$SNMP::Varbind::val_f = 2;
+$SNMP::Varbind::type_f = 3;
+$SNMP::Varbind::time_f = 4;
 
 sub new {
    my $type = shift;
@@ -1235,27 +1235,27 @@ sub new {
 }
 
 sub tag {
-  $_[0]->[$tag_f];
+  $_[0]->[$SNMP::Varbind::tag_f];
 }
 
 sub iid {
-  $_[0]->[$iid_f];
+  $_[0]->[$SNMP::Varbind::iid_f];
 }
 
 sub val {
-  $_[0]->[$val_f];
+  $_[0]->[$SNMP::Varbind::val_f];
 }
 
 sub type {
-  $_[0]->[$type_f];
+  $_[0]->[$SNMP::Varbind::type_f];
 }
 
 sub name {
-   if (defined($_[0]->[$iid_f]) && ($_[0]->[$iid_f] =~ m/^[0-9]+$/)) {
-      return $_[0]->[$tag_f] . "." . $_[0]->[$iid_f];
+   if (defined($_[0]->[$SNMP::Varbind::iid_f]) && ($_[0]->[$SNMP::Varbind::iid_f] =~ m/^[0-9]+$/)) {
+      return $_[0]->[$SNMP::Varbind::tag_f] . "." . $_[0]->[$SNMP::Varbind::iid_f];
    }
 
-   return $_[0]->[$tag_f];
+   return $_[0]->[$SNMP::Varbind::tag_f];
 }
 
 sub fmt {
