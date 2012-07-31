@@ -35,6 +35,7 @@ typedef __u8 u8;           /* ditto */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <linux/sockios.h>
 #include <linux/if_ether.h>
@@ -1018,7 +1019,7 @@ void netsnmp_prefix_process(int fd, void *data)
     status = recv(fd, buf, sizeof(buf), 0);
     if (status < 0) {
         if (errno == EINTR)
-            continue;
+            return;
         snmp_log(LOG_ERR,"netsnmp_prefix_listen: Receive failed.\n");
         return;
     }
