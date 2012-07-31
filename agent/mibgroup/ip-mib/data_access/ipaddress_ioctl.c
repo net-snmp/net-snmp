@@ -333,6 +333,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
 
         if (CONTAINER_INSERT(container, entry) < 0) {
             DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert into container failed.\n"));
+            NETSNMP_LOGONCE((LOG_ERR, "Duplicate IPv4 address detected, some interfaces may not be visible in IP-MIB\n"));
             netsnmp_access_ipaddress_entry_free(entry);
             continue;
         }
