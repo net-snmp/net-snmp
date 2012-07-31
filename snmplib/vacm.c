@@ -436,7 +436,7 @@ netsnmp_view_get(struct vacm_viewEntry *head, const char *viewName,
     int count=0;
 
     glen = (int) strlen(viewName);
-    if (glen < 0 || glen >= VACM_MAX_STRING)
+    if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
     view[0] = glen;
     strcpy(view + 1, viewName);
@@ -519,7 +519,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
     int             found, glen;
 
     glen = (int) strlen(viewName);
-    if (glen < 0 || glen >= VACM_MAX_STRING)
+    if (glen < 0 || glen > VACM_MAX_STRING)
         return VACM_NOTINVIEW;
     view[0] = glen;
     strcpy(view + 1, viewName);
@@ -675,7 +675,7 @@ netsnmp_view_create(struct vacm_viewEntry **head, const char *viewName,
     int             cmp, cmp2, glen;
 
     glen = (int) strlen(viewName);
-    if (glen < 0 || glen >= VACM_MAX_STRING)
+    if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
     vp = (struct vacm_viewEntry *) calloc(1,
                                           sizeof(struct vacm_viewEntry));
@@ -765,7 +765,7 @@ vacm_getGroupEntry(int securityModel, const char *securityName)
     int             glen;
 
     glen = (int) strlen(securityName);
-    if (glen < 0 || glen >= VACM_MAX_STRING)
+    if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
     secname[0] = glen;
     strcpy(secname + 1, securityName);
@@ -801,7 +801,7 @@ vacm_createGroupEntry(int securityModel, const char *securityName)
     int             cmp, glen;
 
     glen = (int) strlen(securityName);
-    if (glen < 0 || glen >= VACM_MAX_STRING)
+    if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
     gp = (struct vacm_groupEntry *) calloc(1,
                                            sizeof(struct vacm_groupEntry));
@@ -932,10 +932,10 @@ vacm_getAccessEntry(const char *groupName,
     int             glen, clen;
 
     glen = (int) strlen(groupName);
-    if (glen < 0 || glen >= VACM_MAX_STRING)
+    if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
     clen = (int) strlen(contextPrefix);
-    if (clen < 0 || clen >= VACM_MAX_STRING)
+    if (clen < 0 || clen > VACM_MAX_STRING)
         return NULL;
 
     group[0] = glen;
@@ -984,10 +984,10 @@ vacm_createAccessEntry(const char *groupName,
     int             cmp, glen, clen;
 
     glen = (int) strlen(groupName);
-    if (glen < 0 || glen >= VACM_MAX_STRING)
+    if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
     clen = (int) strlen(contextPrefix);
-    if (clen < 0 || clen >= VACM_MAX_STRING)
+    if (clen < 0 || clen > VACM_MAX_STRING)
         return NULL;
     vp = (struct vacm_accessEntry *) calloc(1,
                                             sizeof(struct
