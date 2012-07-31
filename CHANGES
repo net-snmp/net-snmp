@@ -85,6 +85,10 @@ listing of all changes made to the code.
 	.c apps/snmptls.c apps/snmptrapd_log.c snmplib/dir_utils.c
 	snmplib/snmp_client.c snmplib/snmp_openssl.c
 	snmplib/transports/snmpTLSTCPDomain.c
+      - BUG: 3517030: Ensure large tables are walked properly
+      - BUG: 3541012: Fix handling of gettable columns
+      - [PATCH 3529541]: Don't refer to internal 'my' variables from
+	external scripts Fix provided by Lezz Giles
 
     snmp:
       - Bridge-mib: Fix index interpretation. This patch corrects a wrong
@@ -192,6 +196,16 @@ listing of all changes made to the code.
       - [PATCH 3479740]: Fix hrSWRunPerf statistics
       - [PATCH 3487919]: Fix compilation when caching is disabled
       - [PATCH 3495697]: Store persistent snmpTarget table changes
+      - BUG 3542188: Correct sysORDescr for snmpUsmMIB. Thanks to Dave
+	Vucich for reporting this.
+      - BUG 3542307: Correct sysORID for snmpMPDStats. Thanks to Dave
+	Vucich for reporting this.
+      - BUG: 3543864: Remove extraneous function type (and fix a related
+	typo)
+      - Removed limit of 'exec' and 'sh' entries in snmpd.conf Use dynamic
+	(re)allocation instead.
+      - [PATCH 3543000]: Various fixes to Rmon code Supplied by Patrick
+	Ritter
 
     snmpdx:
       - [PATCH 3445437]: Log AgentX disconnections (in line with
@@ -214,17 +228,23 @@ listing of all changes made to the code.
     aix:
       - Eliminate configure warning regarding libperfstat.h on AIX 6.1 and
 	up
+      - PATCH 3403433: from blentz: Issues with hrSWRunName and Parameters
+	on AIX	 Signed-off-by: Wes Hardaker
+	<hardaker@users.sourceforge.net>
 
     apps, snmplib:
       - PATCH: 2835577: identified by "Bart Van Assche": Replace SNMP_ZERO
 	of arrays with a memset. git-svn-id:
 	file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@1
 	7797 06827809-a52a-0410-b366-d66718629ded
+      - BUG: 3529768: Be more careful when stripping off numeric suffixes
 
     build:
       - Do not generate an output file on failure make supposes that no
 	output is generated if the command failed. Change feature-remove to
 	follow that presumption.
+      - BUG: 3532234: Fix typo in libtool script (addressed properly in
+	libtool 2.4.2)
 
     building:
       - Add dependencies on @FEATURETARGS@ to make the subtarget work as
@@ -263,6 +283,7 @@ listing of all changes made to the code.
 
     man:
       - [BUG 3490708]: Clarify use of common command-line options
+      - BUG: 3535269: Document use of [snmp] for client-side tools.
 
     pass:
 
@@ -290,6 +311,8 @@ listing of all changes made to the code.
       - Avoid that an SNMP set with UseEnums enabled causes a segmentation
 	fault
       - [PATCH 3433846]: Fix for use with python 2.4
+      - BUG: 3535967: Fix memory leak - snmp_{sess_}error allocates the
+	output buffer
 
     testing:
       - Add a test for se_store_list()
@@ -325,6 +348,8 @@ listing of all changes made to the code.
       - [BUG 3454168]: configure: Fix building with --enable-read-only
       - [PATCH 3418649]: HOST-RESOURCES-MIB: Use pclose() instead of
 	fclose() to close a pipe.
+      - [BUG 3540621]: dist: Add missing Provides: to net-snmp-perlmods RPM
+	spec
 
     BSD:
 
@@ -348,6 +373,8 @@ listing of all changes made to the code.
 
     Linux:
       - PATCH: 3525998: Don't use an uninitialised value in error message
+      - [PATCH 3536420]: Ensure snd/rcv memory buffers are suitably aligned
+	Patch provided by Tyler Olmstead
 
     MinGW:
       - Net-SNMP Perl modules build again.
@@ -2272,6 +2299,7 @@ listing of all changes made to the code.
       - [PATCH 1600453]: OS X compile-time endian determination
       - [PATCH 1600522]: CPU HAL implementation for mach/darwin
       - Improve memory reporting (patch from Apple)
+      - Patch: 3514049 from twobits-github: fix compilation on darwin11
 
     Solaris:
       - [BUG 1626153]: No hrSWRun informations on Solaris zones
