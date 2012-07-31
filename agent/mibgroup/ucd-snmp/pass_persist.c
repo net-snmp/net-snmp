@@ -93,6 +93,41 @@ shutdown_pass_persist(void)
     destruct_persist_pipes();
 }
 
+
+#ifdef USING_SINGLE_COMMON_PASSPERSIST_INSTANCE
+void
+pass_persist_group(struct extensible *persistpassthrus)
+{
+   struct extensible *ptmp, *ptmp1;
+
+   /*
+    * reset groupping
+    */
+   for (ptmp = persistpassthrus; ptmp != NULL; ptmp = ptmp->next) {
+      ptmp->passpersist_inst = NULL;
+   }
+
+   /*
+    * group
+    */
+   for (ptmp = persistpassthrus; ptmp != NULL; ptmp = ptmp->next) {
+      /* skip already groupped items */
+      if (ptmp->passpersist_inst != NULL) {
+         continue;
+      }
+      for (ptmp1 = persistpassthrus; ptmp1 != NULL; ptmp1 = ptmp1->next) {
+         if (ptmp1 == ptmp) {
+            continue;
+         }
+
+         if (strcmp(ptmp->command, ptmp1->command) == 0) {
+            ptmp1->passpersist_inst = ptmp;
+         }
+      }
+   }
+}
+#endif /* USING_SINGLE_COMMON_PASSPERSIST_INSTANCE */
+
 void
 pass_persist_parse_config(const char *token, char *cptr)
 {
@@ -195,6 +230,10 @@ pass_persist_parse_config(const char *token, char *cptr)
         ptmp->next = NULL;
         free(etmp);
     }
+
+#ifdef USING_SINGLE_COMMON_PASSPERSIST_INSTANCE
+    pass_persist_group(persistpassthrus);
+#endif /* USING_SINGLE_COMMON_PASSPERSIST_INSTANCE */
 }
 
 void
@@ -212,6 +251,28 @@ pass_persist_free_config(void)
     numpersistpassthrus = 0;
 }
 
+#ifdef USING_SINGLE_COMMON_PASSPERSIST_INSTANCE
+int get_exten_group_id(struct extensible *persistpassthru,
+                       int                current_id)
+{
+   struct extensible *ptmp;
+   int                idx;
+
+   if (persistpassthru == NULL)
+      return current_id;
+
+   for (idx = 1, ptmp = persistpassthrus;
+         ptmp != NULL; ptmp = ptmp->next, idx++) {
+      if (ptmp == persistpassthru) {
+         return idx;
+      }
+   }
+
+   /* should never really come here, but safety doesn't hurt */
+   return current_id;
+}
+#endif /* USING_SINGLE_COMMON_PASSPERSIST_INSTANCE */
+
 u_char         *
 var_extensible_pass_persist(struct variable *vp,
                             oid * name,
@@ -225,6 +286,7 @@ var_extensible_pass_persist(struct variable *vp,
     static char     buf2[SNMP_MAXBUF];
     struct extensible *persistpassthru;
     FILE           *file;
+    int             pipe_idx;
 
     /*
      * Make sure that our basic pipe structure is malloced 
@@ -246,10 +308,19 @@ var_extensible_pass_persist(struct variable *vp,
             else
                 sprint_mib_oid(buf, name, *length);
 
+            pipe_idx = i;
+#ifdef USING_SINGLE_COMMON_PASSPERSIST_INSTANCE
+            pipe_idx = 
+               get_exten_group_id(persistpassthru->passpersist_inst, i);
+
+            if (pipe_idx != i) {
+                  persistpassthru = persistpassthru->passpersist_inst;
+            }
+#endif /* USING_SINGLE_COMMON_PASSPERSIST_INSTANCE */
             /*
              * Open our pipe if necessary 
              */
-            if (!open_persist_pipe(i, persistpassthru->name)) {
+            if (!open_persist_pipe(pipe_idx, persistpassthru->name)) {
                 return (NULL);
             }
 
@@ -264,7 +335,7 @@ var_extensible_pass_persist(struct variable *vp,
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "persistpass-sending:\n%s",
                         persistpassthru->command));
-            if (!write_persist_pipe(i, persistpassthru->command)) {
+            if (!write_persist_pipe(pipe_idx, persistpassthru->command)) {
                 *var_len = 0;
                 /*
                  * close_persist_pipes is called in write_persist_pipe 
@@ -276,10 +347,10 @@ var_extensible_pass_persist(struct variable *vp,
              * valid call.  Exec and get output 
              */
 		
-            if ((file = persist_pipes[i].fIn)) {
+            if ((file = persist_pipes[pipe_idx].fIn)) {
                 if (fgets(buf, sizeof(buf), file) == NULL) {
                     *var_len = 0;
-                    close_persist_pipe(i);
+                    close_persist_pipe(pipe_idx);
                     return (NULL);
                 }
                 /*
@@ -309,7 +380,7 @@ var_extensible_pass_persist(struct variable *vp,
                 if (newlen == 0 || fgets(buf, sizeof(buf), file) == NULL
                     || fgets(buf2, sizeof(buf2), file) == NULL) {
                     *var_len = 0;
-                    close_persist_pipe(i);
+                    close_persist_pipe(pipe_idx);
                     return (NULL);
                 }
                 return netsnmp_internal_pass_parse(buf, buf2, var_len, vp);
@@ -335,6 +406,7 @@ setPassPersist(int action,
     struct extensible *persistpassthru;
 
     char            buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
+    int             pipe_idx;
 
     /*
      * Make sure that our basic pipe structure is malloced 
@@ -346,6 +418,15 @@ setPassPersist(int action,
         rtest = snmp_oidtree_compare(name, name_len,
                                      persistpassthru->miboid,
                                      persistpassthru->miblen);
+        pipe_idx = i;
+#ifdef USING_SINGLE_COMMON_PASSPERSIST_INSTANCE
+        pipe_idx = 
+           get_exten_group_id(persistpassthru->passpersist_inst, i);
+
+        if (pipe_idx != i) {
+           persistpassthru = persistpassthru->passpersist_inst;
+        }
+#endif /* USING_SINGLE_COMMON_PASSPERSIST_INSTANCE */
         if (rtest <= 0) {
             if (action != ACTION)
                 return SNMP_ERR_NOERROR;
@@ -366,20 +447,20 @@ setPassPersist(int action,
             persistpassthru->command[ sizeof(persistpassthru->command)-2 ] = '\n';
             persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
 
-            if (!open_persist_pipe(i, persistpassthru->name)) {
+            if (!open_persist_pipe(pipe_idx, persistpassthru->name)) {
                 return SNMP_ERR_NOTWRITABLE;
             }
 
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "persistpass-writing:  %s\n",
                         persistpassthru->command));
-            if (!write_persist_pipe(i, persistpassthru->command)) {
-                close_persist_pipe(i);
+            if (!write_persist_pipe(pipe_idx, persistpassthru->command)) {
+                close_persist_pipe(pipe_idx);
                 return SNMP_ERR_NOTWRITABLE;
             }
 
-            if (fgets(buf, sizeof(buf), persist_pipes[i].fIn) == NULL) {
-                close_persist_pipe(i);
+            if (fgets(buf, sizeof(buf), persist_pipes[pipe_idx].fIn) == NULL) {
+                close_persist_pipe(pipe_idx);
                 return SNMP_ERR_NOTWRITABLE;
             }
 
@@ -574,6 +655,7 @@ open_persist_pipe(int iindex, char *command)
             recurse = 0;
             return 0;
         }
+
         if (strncmp(buf, "PONG", 4)) {
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "open_persist_pipe: Got %s instead of PONG!\n", buf));

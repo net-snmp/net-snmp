@@ -23,6 +23,9 @@ struct extensible {
 #if defined(WIN32)
     HANDLE          tid;                /* WIN32 thread */
 #endif
+#ifdef USING_SINGLE_COMMON_PASSPERSIST_INSTANCE
+    struct extensible *passpersist_inst;
+#endif /* USING_SINGLE_COMMON_PASSPERSIST_INSTANCE */
 };
 
 #if HAVE_PCRE_H
