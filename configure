@@ -1769,7 +1769,7 @@ Compiler Options:
   --without-rpm                   Don't include support for the RPM package
                                   management system when building the host MIB
                                   module.
-  --without-prce                  Don't include pcre process searching
+  --without-pcre                  Don't include pcre process searching
                                   support in the agent.
   --with-install-prefix=PATH      Just for installing, prefix all
                                   directories with PATH.  This is known not

@@ -159,7 +159,7 @@ NETSNMP_ARG_WITH(rpm,
 
 
 NETSNMP_ARG_WITH(pcre,
-[  --without-prce                  Don't include pcre process searching
+[  --without-pcre                  Don't include pcre process searching
                                   support in the agent.],
       with_pcre="$withval", with_pcre="yes")
 
