@@ -44,6 +44,7 @@ extern          "C" {
                                            unsigned int flags,
                                            SNMPAlarmCallback * cb,
                                            void *cd);
+    int             snmp_alarm_reset(unsigned int clientreg);
 
 
     /*
