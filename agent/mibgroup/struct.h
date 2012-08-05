@@ -31,13 +31,14 @@ struct extensible {
 #if HAVE_PCRE_H
 /* Pointer to pcre struct. Abstract pcre native pointer so all *.c files */
 /* do not have to include pcre.h */
-typedef void * netsnmp_regex_ptr;
+struct real_pcre;
+typedef struct real_pcre *netsnmp_regex_ptr;
 #endif
 
 struct myproc {
     char            name[STRMAX];
 #if HAVE_PCRE_H
-    netsnmp_regex_ptr *regexp;
+    netsnmp_regex_ptr regexp;
 #endif
     char            fixcmd[STRMAX];
     int             min;
