@@ -4664,8 +4664,7 @@ sock_setbufs(int icmp_sock, int alloc, int preload)
     socklen_t       tmplen = sizeof(hold);
     int             sndbuf;
 
-    if (!sndbuf)
-        sndbuf = alloc;
+    sndbuf = alloc;
     setsockopt(icmp_sock, SOL_SOCKET, SO_SNDBUF, (char *) &sndbuf,
                sizeof(sndbuf));
 
