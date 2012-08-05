@@ -392,7 +392,7 @@ int
 sh_count_myprocs(struct myproc *proc)
 {
     if (proc == NULL)
-        return (NULL);
+        return 0;
 
 #if HAVE_PCRE_H
     if (proc->regexp != NULL)
