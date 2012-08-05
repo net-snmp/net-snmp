@@ -89,6 +89,11 @@ extern "C" {
     int  swrun_max_processes(   void );
     int  swrun_count_processes_by_name( char *name );
 
+#ifndef NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_REGEX
+    struct real_pcre;
+    int  swrun_count_processes_by_regex(char *name, struct real_pcre *regexp);
+#endif
+
 #define NETSNMP_SWRUN_NOFLAGS            0x00000000
 #define NETSNMP_SWRUN_ALL_OR_NONE        0x00000001
 #define NETSNMP_SWRUN_DONT_FREE_ITEMS    0x00000002
