@@ -108,9 +108,14 @@ init_proc(void)
     REGISTER_MIB("ucd-snmp/proc", extensible_proc_variables, variable2,
                  proc_variables_oid);
 
+#ifdef HAVE_PCRE_H
+#define proc_parse_usage "process-name [max-num] [min-num] [regexp]"
+#else
+#define proc_parse_usage "process-name [max-num] [min-num]"
+#endif
+
     snmpd_register_config_handler("proc", proc_parse_config,
-                                  proc_free_config,
-                                  "process-name [max-num] [min-num]");
+                                  proc_free_config, proc_parse_usage);
     snmpd_register_config_handler("procfix", procfix_parse_config, NULL,
                                   "process-name program [arguments...]");
 }
