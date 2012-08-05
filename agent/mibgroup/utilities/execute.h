@@ -5,8 +5,8 @@ config_require(util_funcs)
 config_belongs_in(agent_module)
 
 int run_shell_command(char *command, char *input,
-                      char *output,  size_t  *out_len);
+                      char *output,  int  *out_len);
 int run_exec_command( char *command, char *input,
-                      char *output,  size_t  *out_len);
+                      char *output,  int  *out_len);
 
 #endif /* _MIBGROUP_EXECUTE_H */

@@ -244,7 +244,7 @@ get_exec_output(struct extensible *ex)
 #if HAVE_EXECV
     char            cachefile[STRMAX];
     char            cache[NETSNMP_MAXCACHESIZE];
-    size_t          cachebytes;
+    int             cachebytes;
     int             cfd;
 #ifdef NETSNMP_EXCACHETIME
     long            curtime;
