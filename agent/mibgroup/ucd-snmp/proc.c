@@ -190,10 +190,6 @@ proc_parse_config(const char *token, char *cptr)
 {
     char            tmpname[STRMAX];
     struct myproc **procp = &procwatch;
-#if HAVE_PCRE_H
-    const char *pcre_error;
-    int pcre_error_offset;
-#endif
 
     /*
      * don't allow two entries with the same name 
@@ -230,6 +226,9 @@ proc_parse_config(const char *token, char *cptr)
 #if HAVE_PCRE_H
             cptr = skip_not_white(cptr);
             if ((cptr = skip_white(cptr))) {
+                const char *pcre_error;
+                int pcre_error_offset;
+
                 DEBUGMSGTL(("ucd-snmp/regexp_proc", "Loading regex %s\n", cptr));
                 (*procp)->regexp = pcre_compile(cptr, 0,  &pcre_error, &pcre_error_offset, NULL);
                 if ((*procp)->regexp == NULL) {
