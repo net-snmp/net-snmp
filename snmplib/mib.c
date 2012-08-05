@@ -2080,8 +2080,8 @@ char *
 make_printf_format_string(const char *printf_format_default)
 {
     const char *cp_printf_format_default;
-    char       *printf_precision;
-    char       *cp_printf_precision;
+    const char *printf_precision;
+    const char *cp_printf_precision;
     char       *printf_format_string;
     char       *cp_out;
     char       c;
