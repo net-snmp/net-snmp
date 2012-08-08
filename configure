@@ -3593,7 +3593,7 @@ fi
 if test "${with_pcre+set}" = set; then :
   withval=$with_pcre; with_pcre="$withval"
 else
-  with_pcre="yes"
+  with_pcre="maybe"
 fi
 
    # Check whether --enable-pcre was given.
