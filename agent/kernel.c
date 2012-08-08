@@ -201,7 +201,7 @@ klread(char *buf, int buflen)
  * @return gives 1 on success and 0 on failure.
  */
 int
-klookup(unsigned long off, char *target, size_t siz)
+klookup(unsigned long off, void *target, size_t siz)
 {
     long            retsiz;
 
