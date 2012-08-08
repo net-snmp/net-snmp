@@ -17,7 +17,7 @@
                       USA
 
           Tel:    +1  310-823-9358
-          E-Mail: iana&iana.org"
+          E-Mail: iana@iana.org"
       DESCRIPTION
           "The MIB module defines the AddressFamilyNumbers
           textual convention."
@@ -90,7 +90,7 @@
           reserved(65535)
 
           Requests for new values should be made to IANA via
-          email (iana&iana.org)."
+          email (iana@iana.org)."
       SYNTAX  INTEGER {
                   other(0),
                   ipV4(1),
