@@ -36,6 +36,7 @@
 #include <ucd-snmp/errormib.h>
 
 #include "util_funcs.h"
+#include "execute.h"
 
 #define setPerrorstatus(x) snmp_log_perror(x)
 
