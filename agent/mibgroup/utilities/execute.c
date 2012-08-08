@@ -35,6 +35,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <ucd-snmp/errormib.h>
 
+#include "execute.h"
 #include "struct.h"
 
 #define setPerrorstatus(x) snmp_log_perror(x)
