@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "201110260000Z"  -- October 26, 2011
+       LAST-UPDATED "201205170000Z"  -- May 17, 2012
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,15 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "201205170000Z"  -- May 17, 2012
+       DESCRIPTION  "Registration of new IANAifType 272."
+
+       REVISION     "201201110000Z"  -- January 11, 2012
+       DESCRIPTION  "Registration of new IANAifTypes 266-271."
+
+       REVISION     "201112180000Z"  -- December 18, 2011
+       DESCRIPTION  "Registration of new IANAifTypes 263-265."
 
        REVISION     "201110260000Z"  -- October 26, 2011
        DESCRIPTION  "Registration of new IANAifType 262."
@@ -567,7 +576,17 @@
                    ieee802154 (259), -- IEEE 802.15.4 WPAN interface
                    otnOdu (260), -- OTN Optical Data Unit
                    otnOtu (261), -- OTN Optical channel Transport Unit
-                   ifVfiType (262) -- VPLS Forwarding Instance Interface Type
+                   ifVfiType (262), -- VPLS Forwarding Instance Interface Type
+                   g9981 (263), -- G.998.1 bonded interface
+                   g9982 (264), -- G.998.2 bonded interface
+                   g9983 (265), -- G.998.3 bonded interface
+                   aluEpon (266), -- Ethernet Passive Optical Networks (E-PON)
+                   aluEponOnu (267), -- EPON Optical Network Unit
+                   aluEponPhysicalUni (268), -- EPON physical User to Network interface
+                   aluEponLogicalLink (269), -- The emulation of a point-to-point link over the EPON layer
+                   aluGponOnu (270), -- GPON Optical Network Unit
+                   aluGponPhysicalUni (271), -- GPON physical User to Network interface
+                   vmwareNicTeam (272) -- VMware NIC Team
                    }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
