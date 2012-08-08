@@ -11,7 +11,12 @@ SKIPIFNOT SIZEOF_SOCKADDR_UN_SUN_PATH
 #
 # Prepare test
 #
-sun_path_sized=`awk '/^#define SIZEOF_SOCKADDR_UN_SUN_PATH/ { res = "a"; for(n = 2; n < $3; ++n) { res = res substr("1234567890", n % 10, 1); } print res; }' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h`
+if [ `uname -s` = SunOS ]
+then AWK=nawk
+else AWK=awk
+fi
+
+sun_path_sized=`$AWK '/^#define SIZEOF_SOCKADDR_UN_SUN_PATH/ { res = "a"; for(n = 2; n < $3; ++n) { res = res substr("1234567890", n % 10, 1); } print res; }' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h`
 
 #
 # Begin test
