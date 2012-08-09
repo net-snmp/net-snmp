@@ -213,15 +213,10 @@ _load_ipv6(netsnmp_container* container, u_long *index )
      * fetch routes from the proc file-system:
      */
     if (!(in = fopen("/proc/net/ipv6_route", "r"))) {
-        DEBUGMSGTL(("9:access:route:container", "cannot open /proc/net/ipv6_route\n");
+        DEBUGMSGTL(("9:access:route:container", "cannot open /proc/net/ipv6_route\n"));
         return -2;
     }
-    /*
-     * if we turned off logging of open errors, turn it back on now that
-     * we have been able to open the file.
-     */
-    if (0 == log_open_err)
-        log_open_err = 1;
+    
     fgets(line,sizeof(line),in); /* skip header */
     while (fgets(line, sizeof(line), in)) {
         char            c_name[IFNAMSIZ+1];
