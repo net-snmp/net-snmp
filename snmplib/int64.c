@@ -347,7 +347,7 @@ netsnmp_c64_check32_and_update(struct counter64 *prev_val, struct counter64 *new
     if ((NULL == need_wrap_check) || (0 != *need_wrap_check)) {
         rc = netsnmp_c64_check_for_32bit_wrap(old_prev_val,new_val, 1);
         if (rc < 0) {
-            snmp_log(LOG_ERR,"c64 32 bit check failed\n");
+            DEBUGMSGTL(("c64","32 bit check failed\n"));
             return -1;
         }
     }
@@ -377,7 +377,7 @@ netsnmp_c64_check32_and_update(struct counter64 *prev_val, struct counter64 *new
          */
         if ((prev_val->low != new_val->low) ||
             (prev_val->high != new_val->high)) {
-            snmp_log(LOG_ERR, "looks like a 64bit wrap, but prev!=new\n");
+            DEBUGMSGTL(("c64", "looks like a 64bit wrap, but prev!=new\n"));
             return -2;
         }
         else if (NULL != need_wrap_check)
