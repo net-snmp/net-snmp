@@ -139,6 +139,9 @@
 #ifndef MNTTYPE_OCFS2
 #define MNTTYPE_OCFS2    "ocfs2"
 #endif
+#ifndef MNTTYPE_CVFS
+#define MNTTYPE_CVFS     "cvfs"
+#endif
 
 /*
  *  File systems to skip
