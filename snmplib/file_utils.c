@@ -195,7 +195,7 @@ netsnmp_file_open(netsnmp_file * filei)
         filei->fd = open(filei->name, filei->fs_flags, filei->mode);
 
     if (filei->fd < 0) {
-        snmp_log(LOG_ERR, "error opening %s (%d)\n", filei->name, errno);
+        DEBUGMSGTL(("netsnmp_file", "error opening %s (%d)\n", filei->name, errno));
     }
 
     /*
@@ -235,7 +235,7 @@ netsnmp_file_close(netsnmp_file * filei)
      */
     rc = close(filei->fd);
     if (rc < 0) {
-        snmp_log(LOG_ERR, "error closing %s (%d)\n", filei->name, errno);
+        DEBUGMSGTL(("netsnmp_file", "error closing %s (%d)\n", filei->name, errno));
     }
     else
         filei->fd = -1;
