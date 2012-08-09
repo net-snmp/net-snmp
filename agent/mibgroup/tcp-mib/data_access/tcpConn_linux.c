@@ -265,13 +265,7 @@ _load6(netsnmp_container *container, u_int load_flags)
         DEBUGMSGTL(("access:tcpconn:container","could not open " PROCFILE "\n"));
         return -2;
     }
-    /*
-     * if we turned off logging of open errors, turn it back on now that
-     * we have been able to open the file.
-     */
-    if (0 == log_open_err)
-        log_open_err = 1;
-    
+
     fgets(line, sizeof(line), in); /* skip header */
 
     /*
