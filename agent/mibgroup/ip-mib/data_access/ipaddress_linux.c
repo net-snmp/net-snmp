@@ -219,12 +219,6 @@ _load_v6(netsnmp_container *container, int idx_offset)
         DEBUGMSGTL(("access:ipaddress:container","could not open " PROCFILE "\n"));
         return -2;
     }
-    /*
-     * if we hadn't been able to open file and turned of err logging,
-     * turn it back on now that we opened the file.
-     */
-    if (0 == log_open_err)
-        log_open_err = 1;
 
     /*
      * address index prefix_len scope status if_name
