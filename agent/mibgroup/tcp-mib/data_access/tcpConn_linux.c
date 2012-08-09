@@ -256,18 +256,13 @@ _load6(netsnmp_container *container, u_int load_flags)
     int             rc = 0;
     FILE           *in;
     char            line[180];
-    static int      log_open_err = 1;
 
     netsnmp_assert(NULL != container);
 
 #undef PROCFILE
 #define PROCFILE "/proc/net/tcp6"
     if (!(in = fopen(PROCFILE, "r"))) {
-        snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
-        if (1 == log_open_err) {
-            snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
-            log_open_err = 0;
-        }
+        DEBUGMSGTL(("access:tcpconn:container","could not open " PROCFILE "\n"));
         return -2;
     }
     /*

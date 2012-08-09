@@ -203,7 +203,6 @@ _load_ipv6(netsnmp_container* container, u_long *index )
     FILE           *in;
     char            line[256];
     netsnmp_route_entry *entry = NULL;
-    static int      log_open_err = 1;
 
     DEBUGMSGTL(("access:route:container",
                 "route_container_arch_load ipv6\n"));
@@ -214,10 +213,7 @@ _load_ipv6(netsnmp_container* container, u_long *index )
      * fetch routes from the proc file-system:
      */
     if (!(in = fopen("/proc/net/ipv6_route", "r"))) {
-        if (1 == log_open_err) {
-            NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/ipv6_route\n"));
-            log_open_err = 0;
-        }
+        DEBUGMSGTL(("9:access:route:container", "cannot open /proc/net/ipv6_route\n");
         return -2;
     }
     /*
