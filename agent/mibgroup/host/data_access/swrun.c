@@ -95,6 +95,7 @@ swrun_max_processes( void )
 #endif /* NETSNMP_FEATURE_REMOVE_SWRUN_MAX_PROCESSES */
 
 #ifndef NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_REGEX
+#if HAVE_PCRE_H
 int
 swrun_count_processes_by_regex( char *name, pcre *regexp )
 {
@@ -122,6 +123,7 @@ swrun_count_processes_by_regex( char *name, pcre *regexp )
 
     return i;
 }
+#endif /* HAVE_PCRE_H */
 #endif /* NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_REGEX */
 
 #ifndef NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_NAME

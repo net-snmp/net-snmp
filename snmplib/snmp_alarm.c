@@ -474,7 +474,7 @@ snmp_alarm_reset(unsigned int clientreg)
     struct snmp_alarm *a;
     struct timeval  t_now;
     if ((a = sa_find_specific(clientreg)) != NULL) {
-        gettimeofday(&t_now, NULL);
+        netsnmp_get_monotonic_clock(&t_now);
         a->t_lastM.tv_sec = t_now.tv_sec;
         a->t_lastM.tv_usec = t_now.tv_usec;
         a->t_nextM.tv_sec = 0;
