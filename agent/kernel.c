@@ -179,7 +179,7 @@ klread(char *buf, int buflen)
 
 
 int
-klookup(unsigned long off, char *target, size_t siz)
+klookup(unsigned long off, void *target, size_t siz)
 {
     long            retsiz;
 

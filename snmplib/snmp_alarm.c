@@ -546,7 +546,7 @@ snmp_alarm_reset(unsigned int clientreg)
         a->t_last.tv_usec = t_now.tv_usec;
         a->t_next.tv_sec = 0;
         a->t_next.tv_usec = 0;
-        NETSNMP_TIMERADD(&t_now, &a->t, &a->t_next);
+        timeradd(&t_now, &a->t, &a->t_next);
         return 0;
     }
     DEBUGMSGTL(("snmp_alarm_reset", "alarm %d not found\n",

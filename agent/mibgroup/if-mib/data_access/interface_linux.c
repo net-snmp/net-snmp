@@ -34,6 +34,7 @@ typedef __u8 u8;           /* ditto */
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <unistd.h>
 #include <errno.h>
 
