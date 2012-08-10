@@ -76,7 +76,7 @@ SNMP-USM-AES-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 3826
 
 SNMP-TLS-TM-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 5953
+	./mibfetch $(RFCHOST) $(RFCDIR) 6353
 
 SNMP-USM-DH-OBJECTS-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2786

@@ -547,9 +547,8 @@ _systemstats_v6_load_systemstats(netsnmp_container* container, u_int load_flags)
      */
     if (!(devin = fopen(filename, "r"))) {
         DEBUGMSGTL(("access:systemstats",
-                    "Failed to load Systemstats Table (linux1)\n"));
-        NETSNMP_LOGONCE((LOG_ERR, "cannot open %s ...\n", filename));
-        free(entry);
+                "Failed to load Systemstats Table (linux1), cannot open %s\n",
+                filename));
         return 0;
     }
     

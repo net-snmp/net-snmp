@@ -62,25 +62,15 @@ _scopezone_v6(netsnmp_container* container, int idx_offset)
     int             if_index, pfx_len, scope, flags, rc = 0;
     int             last_if_index = -1;
     netsnmp_v6scopezone_entry *entry;
-    static int      log_open_err = 1;
     
     netsnmp_assert(NULL != container);
 
 #define PROCFILE "/proc/net/if_inet6"
     if (!(in = fopen(PROCFILE, "r"))) {
-        if (1 == log_open_err) {
-            snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
-            log_open_err = 0;
-        }
+        DEBUGMSGTL(("access:scopezone:container","could not open " PROCFILE "\n"));
         return -2;
     }
-    /*
-     * if we hadn't been able to open file and turned of err logging,
-     * turn it back on now that we opened the file.
-     */
-    if (0 == log_open_err)
-        log_open_err = 1;
-
+    
     /*
      * address index prefix_len scope status if_name
      */
