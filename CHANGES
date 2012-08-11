@@ -103,6 +103,8 @@ listing of all changes made to the code.
 	<safradin@linux.vnet.ibm.com>
 
     snmpd:
+      - Lowered severity of 'Error expanding XXX to 64bits' messages.
+      - Removed error log messages when IPv6 is disabled.
       - Add missing debug tag
       - Add netsnmp_get_next_alarm_time()
       - Avoid that system clock changes (e.g. by ntpd) affect code that
@@ -336,6 +338,11 @@ listing of all changes made to the code.
 	filename
 
     unspecified:
+      - Added CVFS (CentraVision File System) to hrStorageTable and
+	hrFSTable.
+      - Removed counter-64 error messages.   These messages do not say
+	enything useful, caller should check their return value and report
+	it.
       - Added OCFS2 (Oracle Cluster FS) to hrStorageTable and hrFSTable
       - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
 	sprint_realloc_octet_string() embeds unprintable control characters
