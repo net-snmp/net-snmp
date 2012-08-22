@@ -18,7 +18,6 @@ my $perl_install = "disabled";
 my $logging = "enabled";
 my $debug = "disabled";
 my $configOpts = "";
-my $cTmp = "";
 my $linktype = "static";
 my $option;
 
@@ -178,16 +177,15 @@ while (1) {
   }
 }
 
-$cTmp = ($openssl eq "enabled" ? "--with-ssl" : "" );
-$configOpts = "$cTmp";
-$cTmp = ($sdk eq "enabled" ? "--with-sdk" : "" );
-$configOpts = "$configOpts $cTmp";
-$cTmp = ($b_ipv6 eq "enabled" ? "--with-ipv6" : "" );
-$configOpts = "$configOpts $cTmp";
-$cTmp = ($b_winextdll eq "enabled" ? "--with-winextdll" : "" );
-$configOpts = "$configOpts $cTmp";
-$cTmp = ($debug eq "enabled" ? "--config=debug" : "--config=release" );
-$configOpts = "$configOpts $cTmp";
+$configOpts .= $openssl eq "enabled" ? "--with-ssl" : "";
+$configOpts .= " ";
+$configOpts .= $sdk eq "enabled" ? "--with-sdk" : "";
+$configOpts .= " ";
+$configOpts .= $b_ipv6 eq "enabled" ? "--with-ipv6" : "";
+$configOpts .= " ";
+$configOpts .= $b_winextdll eq "enabled" ? "--with-winextdll" : "";
+$configOpts .= " ";
+$configOpts .= $debug eq "enabled" ? "--config=debug" : "--config=release";
 
 # Set environment variables
 
