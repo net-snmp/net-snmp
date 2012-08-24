@@ -61,7 +61,6 @@
 #endif
 #include "util_funcs.h"
 #include "kernel.h"
-#include <unistd.h>
 
 static struct myproc *get_proc_instance(struct myproc *, oid);
 struct myproc  *procwatch = NULL;
