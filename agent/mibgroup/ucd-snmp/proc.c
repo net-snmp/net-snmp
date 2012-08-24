@@ -393,7 +393,7 @@ sh_count_myprocs(struct myproc *proc)
     if (proc == NULL)
         return 0;
 
-#if HAVE_PCRE_H
+#if defined(USING_HOST_DATA_ACCESS_SWRUN_MODULE) && defined(HAVE_PCRE_H)
     if (proc->regexp != NULL)
       return sh_count_procs_by_regex(proc->name, proc->regexp);
 #endif
