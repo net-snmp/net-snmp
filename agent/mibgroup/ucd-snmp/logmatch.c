@@ -648,4 +648,11 @@ init_logmatch(void)
 
 }
 
+#else /* HAVE_REGEX_H */
+
+void
+init_logmatch(void)
+{
+}
+
 #endif /* HAVE_REGEX_H */
