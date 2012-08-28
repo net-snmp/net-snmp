@@ -260,7 +260,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 	 entry->hrSWRunPerfCPU += (proc_table[i].ki_rusage.ru_stime.tv_sec*1000000 + proc_table[i].ki_rusage.ru_stime.tv_usec) / 10000;
 	 entry->hrSWRunPerfCPU += (proc_table[i].ki_rusage_ch.ru_utime.tv_sec*1000000 + proc_table[i].ki_rusage_ch.ru_utime.tv_usec) / 10000;
 	 entry->hrSWRunPerfCPU += (proc_table[i].ki_rusage_ch.ru_stime.tv_sec*1000000 + proc_table[i].ki_rusage_ch.ru_stime.tv_usec) / 10000;
-	 entry->hrSWRunPerfMem  = proc_table[i].ki_size * (getpagesize()/1024);  /* in kB */
+	 entry->hrSWRunPerfMem  = proc_table[i].ki_rssize * (getpagesize()/1024);  /* in kB */
 #elif defined(HAVE_KVM_GETPROC2)
         /*
          * newer NetBSD, OpenBSD
@@ -268,9 +268,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         entry->hrSWRunPerfCPU  = proc_table[i].p_uticks;
         entry->hrSWRunPerfCPU += proc_table[i].p_sticks;
         entry->hrSWRunPerfCPU += proc_table[i].p_iticks;
-        entry->hrSWRunPerfMem  = proc_table[i].p_vm_tsize;
-        entry->hrSWRunPerfMem += proc_table[i].p_vm_ssize;
-        entry->hrSWRunPerfMem += proc_table[i].p_vm_dsize;
+        entry->hrSWRunPerfMem  = proc_table[i].p_vm_rssize;
         entry->hrSWRunPerfMem *= (getpagesize() / 1024);
 #elif defined(dragonfly) && __DragonFly_version >= 190000
 	entry->hrSWRunPerfCPU  = proc_table[i].kp_lwp.kl_uticks;
@@ -290,9 +288,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         entry->hrSWRunPerfCPU  = proc_table[i].kp_proc.p_uticks;
         entry->hrSWRunPerfCPU += proc_table[i].kp_proc.p_sticks;
         entry->hrSWRunPerfCPU += proc_table[i].kp_proc.p_iticks;
-        entry->hrSWRunPerfMem  = proc_table[i].kp_eproc.e_vm.vm_tsize;
-        entry->hrSWRunPerfMem += proc_table[i].kp_eproc.e_vm.vm_ssize;
-        entry->hrSWRunPerfMem += proc_table[i].kp_eproc.e_vm.vm_dsize;
+        entry->hrSWRunPerfMem  = proc_table[i].kp_eproc.e_vm.vm_rssize;
         entry->hrSWRunPerfMem *= (getpagesize() / 1024);
 #endif
     }
