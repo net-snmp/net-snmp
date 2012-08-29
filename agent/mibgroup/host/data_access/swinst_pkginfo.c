@@ -59,7 +59,7 @@ netsnmp_swinst_arch_init(void)
     snprintf( pkg_directory, SNMP_MAXPATH, "/system" );
 #elif defined(hpux10) ||  defined(hpux11) 
     snprintf( pkg_directory, SNMP_MAXPATH, "/var/adm/sw/products" );
-#elif defined(freebsd2)
+#elif defined(freebsd2) || defined(openbsd)
     snprintf( pkg_directory, SNMP_MAXPATH, "/var/db/pkg" );
 #elif defined(linux)
     snprintf( pkg_directory, SNMP_MAXPATH, "/var/cache/hrmib" );
