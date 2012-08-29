@@ -260,7 +260,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                       break;
         }
 #else
-        switch (proc_table[i].SWRUN_K_STAT) {
+        switch (proc_table[i].SWRUN_K_STAT & 0xFF) {
+        case SONPROC:
         case SRUN:    entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
                       break;
         case SSLEEP:
@@ -271,6 +272,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         case SLOCK:   entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
                       break;
 
+        case SDEAD:
         case SZOMB:   entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;   /* i.e. "not loaded" */
                       break;
 
