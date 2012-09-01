@@ -67,6 +67,8 @@ listing of all changes made to the code.
 	separate call to memset.
       - [PATCH 3414773]: Encode integer value using ASN_INTEGER
       - [PATCH 3526599]: Don't hang on retried failing SNMPv3 responses
+      - PATCH 3560473: from fenner: Handle TimeTicks when pretty-printing
+	OID   Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
 
     snmplib + snmpd + snmpwalk:
       - Avoid that system clock changes (e.g. by ntpd) affect code that
