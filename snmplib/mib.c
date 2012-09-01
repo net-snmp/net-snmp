@@ -4571,6 +4571,23 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
             objidlen--;
             break;
 
+        case TYPE_TIMETICKS:
+            /* In an index, this is probably a timefilter */
+            if (extended_index) {
+                uptimeString( *objid, intbuf, sizeof( intbuf ) );
+            } else {
+                sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
+            }   
+            if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+                                               allow_realloc,
+                                               (const u_char *)
+                                               intbuf)) {
+                *buf_overflow = 1;
+            }
+            objid++;
+            objidlen--;
+            break;
+
         case TYPE_OBJID:
             if (in_dices->isimplied) {
                 numids = objidlen;
