@@ -8,6 +8,10 @@
 #define _XPG4_2
 #endif
 
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
+#define _LINUX_SOURCE_COMPAT
+#endif
+
 #include <sys/socket.h>
 
 #ifdef solaris2
