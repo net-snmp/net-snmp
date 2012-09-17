@@ -157,7 +157,14 @@ netsnmp_fsys_arch_load( void )
         entry->units = stats[i].f_bsize;    /* or f_frsize */
         entry->size  = stats[i].f_blocks;
         entry->used  = (stats[i].f_blocks - stats[i].f_bfree);
-        entry->avail = stats[i].f_bavail;
+        /* entry->avail is currently unsigned, so protect against negative
+         * values!
+         * This should be changed to a signed field.
+         */
+        if (stats[i].f_bavail < 0)
+            entry->avail = 0;
+        else
+            entry->avail = stats[i].f_bavail;
         entry->inums_total = stats[i].f_files;
         entry->inums_avail = stats[i].f_ffree;
 
