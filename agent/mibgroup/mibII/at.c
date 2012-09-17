@@ -559,11 +559,14 @@ ARP_Scan_Init(void)
         if (arptab_size > 0) {
             ulen = (unsigned) arptab_size *sizeof(mib_ipNetToMediaEnt);
             at = (mib_ipNetToMediaEnt *) malloc(ulen);
+            memset(at, 0, ulen);
             p.objid = ID_ipNetToMediaTable;
             p.buffer = (void *) at;
             p.len = &ulen;
             if ((ret = get_mib_info(fd, &p)) < 0)
                 arptab_size = 0;
+            else
+                arptab_size = *p.len / sizeof(mib_ipNetToMediaEnt);
         }
 
         close_mib(fd);
