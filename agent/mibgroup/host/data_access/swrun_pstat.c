@@ -20,6 +20,7 @@
 #include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_PSTAT_H
+#define _PSTAT64
 #include <sys/pstat.h>
 #endif
 
