@@ -28,7 +28,7 @@ create_word_array(const char* cptr)
 {
     size_t tmplen = strlen(cptr);
     char* tmp = (char*)malloc(tmplen + 1);
-    char** res = create_word_array_helper(cptr, 0, tmp, tmplen);
+    char** res = create_word_array_helper(cptr, 0, tmp, tmplen + 1);
     free(tmp);
     return res;
 }
