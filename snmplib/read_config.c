@@ -501,6 +501,14 @@ run_config_handler(struct config_line *lptr,
                         "Found a parser.  Calling it: %s / %s\n", token,
                         cptr));
             /*
+             * Make sure cptr is non-null
+             */
+            if (!cptr) {
+                tmpbuf[0] = '\0';
+                cptr = tmpbuf;
+            }
+
+            /*
              * Stomp on any trailing whitespace
              */
             cp = &(cptr[strlen(cptr)-1]);
