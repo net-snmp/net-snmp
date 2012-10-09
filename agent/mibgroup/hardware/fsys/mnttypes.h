@@ -142,6 +142,9 @@
 #ifndef MNTTYPE_CVFS
 #define MNTTYPE_CVFS     "cvfs"
 #endif
+#ifndef MNTTYPE_SIMFS
+#define MNTTYPE_SIMFS     "simfs"
+#endif
 
 /*
  *  File systems to skip

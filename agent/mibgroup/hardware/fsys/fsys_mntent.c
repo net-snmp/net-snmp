@@ -139,6 +139,7 @@ _fsys_type( char *typename )
               !strcmp(typename, MNTTYPE_REISERFS) ||
               !strcmp(typename, MNTTYPE_OCFS2) ||
               !strcmp(typename, MNTTYPE_CVFS) ||
+              !strcmp(typename, MNTTYPE_SIMFS) ||
               !strcmp(typename, MNTTYPE_LOFS))
        return NETSNMP_FS_TYPE_OTHER;
 
