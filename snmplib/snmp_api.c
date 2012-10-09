@@ -3829,6 +3829,26 @@ snmpv3_parse(netsnmp_pdu *pdu,
     return SNMPERR_SUCCESS;
 }                               /* end snmpv3_parse() */
 
+static void
+free_securityStateRef(netsnmp_pdu* pdu)
+{
+    struct snmp_secmod_def *sptr = find_sec_mod(pdu->securityModel);
+    if (sptr) {
+        if (sptr->pdu_free_state_ref) {
+            (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
+        } else {
+            snmp_log(LOG_ERR,
+                     "Security Model %d can't free state references\n",
+                     pdu->securityModel);
+	}
+    } else {
+	snmp_log(LOG_ERR,
+		 "Can't find security model to free ptr: %d\n",
+		 pdu->securityModel);
+    }
+    pdu->securityStateRef = NULL;
+}
+
 #define ERROR_STAT_LENGTH 11
 
 int
@@ -3850,7 +3870,6 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
     oid            *err_var;
     int             err_var_len;
     int             stat_ind;
-    struct snmp_secmod_def *sptr;
 
     switch (error) {
     case SNMPERR_USM_UNKNOWNENGINEID:
@@ -3911,21 +3930,7 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
      * which cached values to use 
      */
     if (pdu->securityStateRef) {
-        sptr = find_sec_mod(pdu->securityModel);
-        if (sptr) {
-            if (sptr->pdu_free_state_ref) {
-                (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
-            } else {
-                snmp_log(LOG_ERR,
-                         "Security Model %d can't free state references\n",
-                         pdu->securityModel);
-            }
-        } else {
-            snmp_log(LOG_ERR,
-                     "Can't find security model to free ptr: %d\n",
-                     pdu->securityModel);
-        }
-        pdu->securityStateRef = NULL;
+        free_securityStateRef(pdu);
     }
 
     if (error == SNMPERR_USM_NOTINTIMEWINDOW) {
@@ -5157,7 +5162,6 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   struct session_list *slp = (struct session_list *) sessp;
   netsnmp_pdu    *pdu;
   netsnmp_request_list *rp, *orp = NULL;
-  struct snmp_secmod_def *sptr;
   int             ret = 0, handled = 0;
 
   DEBUGMSGTL(("sess_process_packet",
@@ -5190,16 +5194,16 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     pdu = snmp_create_sess_pdu(transport, opaque, olength);
   }
 
-  /* if the transport was a magic tunnel, mark the PDU as having come
-     through one. */
-  if (transport->flags & NETSNMP_TRANSPORT_FLAG_TUNNELED) {
-      pdu->flags |= UCD_MSG_FLAG_TUNNELED;
-  }
-
   if (pdu == NULL) {
     snmp_log(LOG_ERR, "pdu failed to be created\n");
     SNMP_FREE(opaque);
     return -1;
+  }
+
+  /* if the transport was a magic tunnel, mark the PDU as having come
+     through one. */
+  if (transport->flags & NETSNMP_TRANSPORT_FLAG_TUNNELED) {
+      pdu->flags |= UCD_MSG_FLAG_TUNNELED;
   }
 
   if (isp->hook_parse) {
@@ -5227,21 +5231,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
      * Call the security model to free any securityStateRef supplied w/ msg.  
      */
     if (pdu->securityStateRef != NULL) {
-      sptr = find_sec_mod(pdu->securityModel);
-      if (sptr != NULL) {
-	if (sptr->pdu_free_state_ref != NULL) {
-	  (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
-	} else {
-	  snmp_log(LOG_ERR,
-		   "Security Model %d can't free state references\n",
-		   pdu->securityModel);
-	}
-      } else {
-	snmp_log(LOG_ERR,
-		 "Can't find security model to free ptr: %d\n",
-		 pdu->securityModel);
-      }
-      pdu->securityStateRef = NULL;
+      free_securityStateRef(pdu);
     }
     snmp_free_pdu(pdu);
     return -1;
@@ -5252,21 +5242,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
      * Call USM to free any securityStateRef supplied with the message.  
      */
     if (pdu->securityStateRef) {
-      sptr = find_sec_mod(pdu->securityModel);
-      if (sptr) {
-	if (sptr->pdu_free_state_ref) {
-	  (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
-	} else {
-	  snmp_log(LOG_ERR,
-		   "Security Model %d can't free state references\n",
-		   pdu->securityModel);
-	}
-      } else {
-	snmp_log(LOG_ERR,
-		 "Can't find security model to free ptr: %d\n",
-		 pdu->securityModel);
-      }
-      pdu->securityStateRef = NULL;
+      free_securityStateRef(pdu);
     }
 
     for (rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
@@ -5415,21 +5391,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
    */
   if (pdu != NULL && pdu->securityStateRef &&
       pdu->command == SNMP_MSG_TRAP2) {
-    sptr = find_sec_mod(pdu->securityModel);
-    if (sptr) {
-      if (sptr->pdu_free_state_ref) {
-	(*sptr->pdu_free_state_ref) (pdu->securityStateRef);
-      } else {
-	snmp_log(LOG_ERR,
-		 "Security Model %d can't free state references\n",
-		 pdu->securityModel);
-      }
-    } else {
-      snmp_log(LOG_ERR,
-	       "Can't find security model to free ptr: %d\n",
-	       pdu->securityModel);
-    }
-    pdu->securityStateRef = NULL;
+    free_securityStateRef(pdu);
   }
 
   if (!handled) {
