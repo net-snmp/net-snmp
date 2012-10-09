@@ -78,18 +78,16 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 		}
 		snprintf(fullpath, sizeof(fullpath)-1, "%.*s", (int)(strchr(pentry, ' ')-pentry), pentry);
 
+		entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
+			sizeof(entry->hrSWRunPath), "%s", fullpath);
 		ppentry = strrchr(fullpath, '/');
 		if(ppentry == NULL) {
-			entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
-				sizeof(entry->hrSWRunPath), "%.*s", 1, "");
 			entry->hrSWRunName_len = snprintf(entry->hrSWRunName,
-				sizeof(entry->hrSWRunName), "%.*s", (int)(strlen(fullpath)), fullpath);
+				sizeof(entry->hrSWRunName), "%s", fullpath);
 		}
 		else {
-			entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
-				sizeof(entry->hrSWRunPath), "%.*s", (int)(ppentry - fullpath), fullpath);
 			entry->hrSWRunName_len = snprintf(entry->hrSWRunName,
-				sizeof(entry->hrSWRunName), "%.*s", (int)(strlen(ppentry)), ppentry + 1);
+				sizeof(entry->hrSWRunName), "%s", ppentry + 1);
 		}
 
 		ppentry = strchr(pentry, ' ');
