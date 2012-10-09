@@ -11,7 +11,7 @@ create_word_array_helper(const char* cptr, size_t idx, char* tmp, size_t tmplen)
 {
     char* item;
     char** res;
-    cptr = copy_nword(NETSNMP_REMOVE_CONST(char *, cptr), tmp, tmplen);
+    cptr = copy_nword_const(cptr, tmp, tmplen);
     item = strdup(tmp);
     if (cptr)
         res = create_word_array_helper(cptr, idx + 1, tmp, tmplen);
@@ -28,7 +28,7 @@ create_word_array(const char* cptr)
 {
     size_t tmplen = strlen(cptr);
     char* tmp = (char*)malloc(tmplen + 1);
-    char** res = create_word_array_helper(cptr, 0, tmp, tmplen);
+    char** res = create_word_array_helper(cptr, 0, tmp, tmplen + 1);
     free(tmp);
     return res;
 }
@@ -119,6 +119,12 @@ netsnmp_register_user_domain(const char* token, char* cptr)
 
     {
         char* cp = copy_nword(cptr, application, len);
+        if (cp == NULL) {
+            netsnmp_config_error("No domain(s) in registration of "
+                                 "defDomain \"%s\"", application);
+            free(application);
+            return;
+        }
         domain = create_word_array(cp);
     }
 
@@ -309,7 +315,18 @@ netsnmp_register_user_target(const char* token, char* cptr)
 
     {
 	char* cp = copy_nword(cptr, application, len);
+        if (cp == NULL) {
+            netsnmp_config_error("No domain and target in registration of "
+                                 "defTarget \"%s\"", application);
+            goto done;
+        }
 	cp = copy_nword(cp, domain, len);
+        if (cp == NULL) {
+            netsnmp_config_error("No target in registration of "
+                                 "defTarget \"%s\" \"%s\"",
+                                 application, domain);
+            goto done;
+        }
 	cp = copy_nword(cp, target, len);
 	if (cp)
 	    config_pwarn("Trailing junk found");
