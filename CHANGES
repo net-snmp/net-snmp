@@ -69,6 +69,12 @@ listing of all changes made to the code.
       - [PATCH 3526599]: Don't hang on retried failing SNMPv3 responses
       - PATCH 3560473: from fenner: Handle TimeTicks when pretty-printing
 	OID   Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+      - Add the symbol NETSNMP_PRIo to help in printing oid values.
+      - Do not crash from empty values in --token=value arguments
+      - Do not crash on incomplete configuration tokens.
+      - Do not truncate single default transport domains
+      - Move the check that the pdu variable is non-NULL to before the
+	first dereference of it.
 
     snmplib + snmpd + snmpwalk:
       - Avoid that system clock changes (e.g. by ntpd) affect code that
@@ -338,6 +344,7 @@ listing of all changes made to the code.
 	visible in the output of "make test".
       - [BUG 3474590]: Don't match underscores within the source root
 	filename
+      - Add test cases for snmp_service
 
     unspecified:
       - Added CVFS (CentraVision File System) to hrStorageTable and
