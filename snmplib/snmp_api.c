@@ -5425,18 +5425,18 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     pdu = snmp_create_sess_pdu(transport, opaque, olength);
   }
 
-  /* if the transport was a magic tunnel, mark the PDU as having come
-     through one. */
-  if (transport->flags & NETSNMP_TRANSPORT_FLAG_TUNNELED) {
-      pdu->flags |= UCD_MSG_FLAG_TUNNELED;
-  }
-
   if (pdu == NULL) {
     snmp_log(LOG_ERR, "pdu failed to be created\n");
     if (opaque != NULL) {
       SNMP_FREE(opaque);
     }
     return -1;
+  }
+
+  /* if the transport was a magic tunnel, mark the PDU as having come
+     through one. */
+  if (transport->flags & NETSNMP_TRANSPORT_FLAG_TUNNELED) {
+      pdu->flags |= UCD_MSG_FLAG_TUNNELED;
   }
 
   if (isp->hook_parse) {
