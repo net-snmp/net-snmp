@@ -7334,5 +7334,5 @@ snmp_init_statistics(void)
 {
     memset(statistics, 0, sizeof(statistics));
 }
-/**  @} */
 #endif /* NETSNMP_FEATURE_REMOVE_STATISTICS */
+/**  @} */
