@@ -61,13 +61,13 @@ static char *rcsid = "$OpenBSD: main.c,v 1.52 2005/02/10 14:25:08 itojun Exp $";
 #include "winstub.h"
 #endif
 
-int	Aflag;		/* show addresses of protocol control block */
 int	aflag;		/* show all sockets (including servers) */
 int	bflag;		/* show bytes instead of packets */
 int	dflag;		/* show i/f dropped packets */
 int	gflag;		/* show group (multicast) routing or stats */
 int	iflag;		/* show interfaces */
 int	lflag;		/* show routing table with use and ref */
+int	Lflag;		/* Legacy mibs */
 int	mflag;		/* show memory stats */
 int	nflag;		/* show addresses numerically */
 int	oflag;		/* Open/Net-BSD style octet output */
@@ -99,7 +99,9 @@ struct protox {
 	stringfun	*pr_cblocks;	/* control blocks printing routine */
 	stringfun	*pr_stats;	/* statistics printing routine */
 	const char	*pr_name;	/* well-known name */
-} protox[] = {
+};
+
+struct protox protox[] = {
 	{ 1,	tcpprotopr,	tcp_stats,	"tcp" },	
 	{ 1,	udpprotopr,	udp_stats,	"udp" },	
 
@@ -116,6 +118,14 @@ struct protox ip6protox[] = {
 	{ 1,	(stringfun*)0,	ip6_stats,	"ip6" },/* ip6protopr Omitted */
 	{ 1,	(stringfun*)0,	icmp6_stats,	"icmp6" },
 	/* pim6/rip6 - Omitted */
+	{ 0,	(stringfun*)0,	(stringfun*)0,	NULL }
+};
+
+struct protox ip0protox[] = {
+	{ 1,	tcpxprotopr,	tcp_stats,	"tcp" },	
+	{ 1,	udpxprotopr,	udp_stats,	"udp" },	
+	{ 1,	(stringfun*)0,	ipx_stats,	"ip" },/* ip6protopr Omitted */
+	{ 1,	(stringfun*)0,	icmpx_stats,	"icmp" },
 	{ 0,	(stringfun*)0,	(stringfun*)0,	NULL }
 };
 
@@ -140,11 +150,6 @@ optProc( int argc, char *const *argv, int opt )
     case 'C':
         while (*optarg) {
             switch (*optarg++) {
-	    /*	case 'A':		*BSD:  display PCB addresses
-					Linux: protocol family
-			Aflag = 1;
-			break;
-	     */
 		case 'a':
 			aflag = 1;
 			break;
@@ -193,6 +198,9 @@ optProc( int argc, char *const *argv, int opt )
 			return;
 		case 'i':
 			iflag = 1;
+			break;
+		case 'L':
+			Lflag = 1;
 			break;
 	    /*  case 'L':		FreeBSD: Display listen queue lengths
 					NetBSD:  Suppress link-level routes */
@@ -385,7 +393,7 @@ main(int argc, char *argv[])
 			rt_stats();
 		else
               */
-			routepr();
+			if (Lflag || routexpr(af) == 0) routepr();
 		exit(0);
 	}
      /*
@@ -416,21 +424,25 @@ main(int argc, char *argv[])
 		exit(0);
 	}
      */
-	if (af == AF_INET || af == AF_UNSPEC) {
+	setservent(1);
+	if (af == AF_UNSPEC && Lflag) {
 		setprotoent(1);
-		setservent(1);
 		/* ugh, this is O(MN) ... why do we do this? */
 		while ((p = getprotoent())) {
 			for (tp = protox; tp->pr_name; tp++)
 				if (strcmp(tp->pr_name, p->p_name) == 0)
-					break;
-			if (tp->pr_name == NULL || tp->pr_wanted == 0)
-				continue;
-			printproto(tp, p->p_name);
+					if (tp->pr_name && tp->pr_wanted)
+					    printproto(tp, p->p_name);
 		}
 		endprotoent();
 	}
-	if (af == AF_INET6 || af == AF_UNSPEC)
+	if (af == AF_UNSPEC && !Lflag)
+		for (tp = ipxprotox; tp->pr_name; tp++)
+			printproto(tp, tp->pr_name);
+	if (af == AF_INET)
+		for (tp = protox; tp->pr_name; tp++)
+			printproto(tp, tp->pr_name);
+	if (af == AF_INET6)
 		for (tp = ip6protox; tp->pr_name; tp++)
 			printproto(tp, tp->pr_name);
     /*
