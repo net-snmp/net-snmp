@@ -69,6 +69,7 @@ static void timerPause(void);
 
     struct _if_info {
         char            name[128];
+        char            descr[128];
         char            ip[128], route[128];
         int             mtu;
         int             drops;
@@ -174,6 +175,8 @@ intpr(int interval)
 {
     oid    ifcol_oid[]  = { 1,3,6,1,2,1,2,2,1,0 };
     size_t ifcol_len    = OID_LENGTH( ifcol_oid );
+    oid    ifxcol_oid[] = { 1,3,6,1,2,1,31,1,1,1,0 };
+    size_t ifxcol_len   = OID_LENGTH( ifxcol_oid );
 
     struct _if_info *if_head, *if_tail, *cur_if;
     netsnmp_variable_list *var, *vp;
@@ -254,6 +257,10 @@ intpr(int interval)
         ADD_IFVAR( 19 );            /* ifOutDiscards  */
     }
 #undef ADD_IFVAR
+#define ADD_IFXVAR( x ) ifxcol_oid[ ifxcol_len-1 ] = x; \
+    snmp_varlist_add_variable( &var, ifxcol_oid, ifxcol_len, ASN_NULL, NULL,  0)
+    ADD_IFXVAR(1);                  /* ifName */
+#undef ADD_IFXVAR
 
         /*
 	 * Now walk the ifTable, creating a list of interfaces
@@ -287,8 +294,8 @@ intpr(int interval)
                     vp->val_len  = sizeof(cur_if->name)-1;
                 memmove( cur_if->name, vp->val.string, vp->val_len );
                 cur_if->name[vp->val_len] = 0;
-                if ((i = strlen(cur_if->name) + 1) > max_name)
-                    max_name = i;
+                memmove( cur_if->descr, vp->val.string, vp->val_len );
+                cur_if->descr[vp->val_len] = 0;
                 break;
             case 4:     /* ifMtu   */
                 cur_if->mtu = *vp->val.integer;
@@ -358,6 +365,14 @@ intpr(int interval)
                 if (i > max_outq)
                     max_outq = i;
                 break;
+            case 1:     /* ifName */
+                if (vp->val_len >= sizeof(cur_if->name))
+                    vp->val_len  = sizeof(cur_if->name)-1;
+                memmove( cur_if->name, vp->val.string, vp->val_len );
+                cur_if->name[vp->val_len] = 0;
+                if ((i = strlen(cur_if->name) + 1) > max_name)
+                    max_name = i;
+                break;
             }
         }
 
@@ -373,7 +388,7 @@ intpr(int interval)
          *   the varbind list).  But performing this test here
          *   means we can recognise ifXTable names as well)
          */
-        if ( intrface && strcmp( cur_if->name, intrface ) != 0) {
+        if ( intrface && strcmp( cur_if->name, intrface) != 0 && strcmp( cur_if->descr, intrface) != 0) {
             SNMP_FREE( cur_if );
             cur_if = NULL;
         }
@@ -383,6 +398,8 @@ intpr(int interval)
          *   add the new _if_stat structure to the list.
          */
         if ( cur_if ) {
+            if ((i = strlen(cur_if->name) + 1) > max_name)
+                max_name = i;
             _set_address( cur_if );
             i = strlen(cur_if->ip);
             if (i > max_ip)
