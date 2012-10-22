@@ -272,7 +272,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
     FILE           *devin;
     char            line[1024];
     int             scan_count;
-    unsigned long long scan_vals[6];
+    unsigned long long scan_vals[12];
     int             retval = 0;
 
     DEBUGMSGTL(("access:systemstats:container:arch",
@@ -303,9 +303,11 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
             memset(scan_vals, 0x0, sizeof(scan_vals));
             scan_count = sscanf(line,
                                 "%*s"   /* ignore `IpExt:' */
-                                "%llu %llu %llu %llu %llu %llu",
+                                "%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
                                 &scan_vals[0], &scan_vals[1], &scan_vals[2],
-                                &scan_vals[3], &scan_vals[4], &scan_vals[5]);
+                                &scan_vals[3], &scan_vals[4], &scan_vals[5],
+                                &scan_vals[6], &scan_vals[7], &scan_vals[8],
+                                &scan_vals[9], &scan_vals[10], &scan_vals[11]);
             if (scan_count < 6) {
                 snmp_log(LOG_ERR,
                         "error scanning addtional systemstats data"
@@ -333,6 +335,21 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
             entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTMCASTPKTS] = 1;
             entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINBCASTPKTS] = 1;
             entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTBCASTPKTS] = 1;
+	    if (scan_count >= 12) {
+		entry->stats.HCInOctets.low        = scan_vals[6] & 0xffffffff;
+		entry->stats.HCInOctets.high       = scan_vals[6] >> 32;
+		entry->stats.HCOutOctets.low       = scan_vals[7] & 0xffffffff;
+		entry->stats.HCOutOctets.high      = scan_vals[7] >> 32;
+		entry->stats.HCInMcastOctets.low   = scan_vals[8] & 0xffffffff;
+		entry->stats.HCInMcastOctets.high  = scan_vals[8] >> 32;
+		entry->stats.HCOutMcastOctets.low  = scan_vals[9] & 0xffffffff;
+		entry->stats.HCOutMcastOctets.high = scan_vals[9] >> 32;
+		/* 10 and 11 are In/OutBcastOctets */
+		entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINOCTETS] = 1;
+		entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTOCTETS] = 1;
+		entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINMCASTOCTETS] = 1;
+		entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTMCASTOCTETS] = 1;
+	    }
         }
     }
 
