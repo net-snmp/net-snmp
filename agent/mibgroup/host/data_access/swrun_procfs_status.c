@@ -122,11 +122,11 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
             continue; /* file (process) probably went away */
 	}
         memset(buf, 0, sizeof(buf));
-        if ((cp = fgets( buf, BUFSIZ-1, fp )) == NULL) {
-            fclose(fp);
-            netsnmp_swrun_entry_free(entry);
-            continue;
-        }
+	entry->hrSWRunType = HRSWRUNTYPE_APPLICATION;
+	if ((cp = fgets( buf, sizeof(buf)-1, fp )) == NULL) {
+	    entry->hrSWRunType = HRSWRUNTYPE_OPERATINGSYSTEM;
+	    buf[0] = '\0';
+	}
         fclose(fp);
 
         /*
@@ -150,11 +150,6 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                       (int)sizeof(entry->hrSWRunParameters) - 1,
                       buf + entry->hrSWRunPath_len + 1);
  
-        /*
-         * XXX - No information regarding system processes vs applications
-         */
-        entry->hrSWRunType = HRSWRUNTYPE_APPLICATION;
-
         /*
          *   {xxx} {xxx} STATUS  {xxx}*10  UTIME STIME  {xxx}*8 RSS
          */
