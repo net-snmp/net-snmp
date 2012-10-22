@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# 
+#
 # Build script for Net-SNMP and MSVC
 # Written by Alex Burger - alex_b@users.sourceforge.net
 # March 12th, 2004
@@ -204,8 +204,8 @@ $ENV{MIBDIRS}=$temp_mibdir;
 
 # Set SNMPCONFPATH environment variable so Perl conf.t test can locate
 # the configuration files.
-# See the note about environment variables in the Win32 section of 
-# perl/SNMP/README for details on why this is needed. 
+# See the note about environment variables in the Win32 section of
+# perl/SNMP/README for details on why this is needed.
 $ENV{SNMPCONFPATH}="t";$ENV{SNMPCONFPATH};
 
 print "\nBuilding...\n";
@@ -220,7 +220,7 @@ if ($logging eq "enabled") {
 
   # Delete net-snmp-config.h from main include folder just in case it was created by a Cygwin or MinGW build
   system("del ..\\include\\net-snmp\\net-snmp-config.h > NUL: 2>&1");
-  
+
   print "Running Configure...\n";
   system("perl Configure $configOpts --linktype=$linktype --prefix=\"$install_base\" > configure.out 2>&1") == 0 || die "Build error (see configure.out)";
 
@@ -234,14 +234,14 @@ if ($logging eq "enabled") {
     if ($linktype eq "static") {
       print "Running Configure for DLL...\n";
       system("perl Configure $configOpts --linktype=dynamic --prefix=\"$install_base\" > perlconfigure.out 2>&1") == 0 || die "Build error (see perlconfigure.out)";
-      
+
       print "Cleaning libraries...\n";
       system("nmake /nologo libs_clean >> clean.out 2>&1") == 0 || die "Build error (see clean.out)";
-      
+
       print "Building DLL libraries...\n";
       system("nmake /nologo libs > dll.out 2>&1") == 0 || die "Build error (see dll.out)";
     }
-   
+
     print "Cleaning Perl....\n";
     system("nmake /nologo perl_clean >> clean.out 2>&1"); # If already cleaned, Makefile is gone so don't worry about errors!
 
@@ -250,12 +250,12 @@ if ($logging eq "enabled") {
 
     print "Testing Perl modules...\n";
     system("nmake /nologo perl_test > perltest.out 2>&1"); # Don't die if all the tests don't pass..
-    
+
     if ($perl_install eq "enabled") {
       print "Installing Perl modules...\n";
       system("nmake /nologo perl_install > perlinstall.out 2>&1") == 0 || die "Build error (see perlinstall.out)";
     }
-      
+
     print "\nSee perltest.out for Perl test results\n";
   }
 
@@ -275,7 +275,7 @@ if ($logging eq "enabled") {
   else {
     print "Type nmake install_devel to install the development files to $install_base\n";
   }
-  
+
   if ($perl_install eq "disabled" && $perl eq "enabled") {
     print "Type nmake perl_install to install the Perl modules\n";
   }
@@ -289,14 +289,14 @@ else {
   system("perl Configure $configOpts --linktype=$linktype --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
   system("nmake /nologo clean") == 0 || die "Build error (see above)";
   system("nmake /nologo") == 0 || die "Build error (see above)";
-  
+
   if ($perl eq "enabled") {
-    if ($linktype eq "static") {      
+    if ($linktype eq "static") {
       system("perl Configure $configOpts --linktype=dynamic --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
       system("nmake /nologo libs_clean") == 0 || die "Build error (see above)";
       system("nmake /nologo libs") == 0 || die "Build error (see above)";
     }
-      
+
     system("nmake /nologo perl_clean"); # If already cleaned, Makefile is gone so don't worry about errors!
     system("nmake /nologo perl") == 0 || die "Build error (see above)";
 
@@ -304,8 +304,8 @@ else {
     $ENV{PATH} = "$current_pwd\\bin\\" . ($debug eq "enabled" ? "debug" : "release" ) . ";$ENV{PATH}";
     system("nmake /nologo perl_test"); # Don't die if all the tests don't pass..
     $ENV{PATH} = $path_old;
-    
-    if ($perl_install eq "enabled") {      
+
+    if ($perl_install eq "enabled") {
       print "Installing Perl modules...\n";
       system("nmake /nologo perl_install") == 0 || die "Build error (see above)";
     }
