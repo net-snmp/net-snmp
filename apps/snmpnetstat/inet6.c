@@ -124,7 +124,7 @@ tcp6protopr(const char *name)
                                      ASN_NULL, NULL,  0);
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
         return;
-    if (var->type == ASN_NULL)    /* No entries */
+    if (var->type == ASN_NULL)	/* No entries */
         return;
 
     for (vp = var; vp ; vp=vp->next_variable) {
@@ -137,7 +137,7 @@ tcp6protopr(const char *name)
             if (aflag)
                 printf(" (including servers)");
             putchar('\n');
-            printf("%-5.5s %-28.28s %-28.28s %4s %s\n",
+            printf("%-5.5s %-27.27s %-27.27s %4s %s\n",
                    "Proto", "Local Address", "Remote Address", "I/F", "(state)");
             first = 0;
         }
@@ -184,11 +184,11 @@ udp6protopr(const char *name)
                                      ASN_NULL, NULL,  0);
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
         return;
-    if (var->type == ASN_NULL)    /* No entries */
+    if (var->type == ASN_NULL)	/* No entries */
         return;
 
     printf("Active Internet Connections\n");
-    printf("%-5.5s %-28.28s %4s\n", "Proto", "Local Address", "I/F");
+    printf("%-5.5s %-27.27s %4s\n", "Proto", "Local Address", "I/F");
     for (vp = var; vp ; vp=vp->next_variable) {
         printf("%-5.5s", name);
         /*
@@ -414,10 +414,9 @@ inet6print(unsigned char *in6, int port, const char *proto, int local)
 
 	struct servent *sp = NULL;
 	char line[80], *cp;
-	unsigned width;
+	unsigned width = 27-9;
 	int len = sizeof line;
 
-	width = Aflag ? 12 : 16;
 	if (vflag && width < strlen(inet6name(in6)))
 		width = strlen(inet6name(in6));
 	snprintf(line, len, "%.*s.", width, inet6name(in6));
@@ -427,12 +426,12 @@ inet6print(unsigned char *in6, int port, const char *proto, int local)
 
 	cp = strchr(line, '\0');
 	if (!nflag && port && local)
-		GETSERVBYPORT6(port, proto, sp);
+		GETSERVBYPORT6(htons(port), proto, sp);
 	if (sp || port == 0)
-		snprintf(cp, len, "%.8s", sp ? sp->s_name : "*");
+		snprintf(cp, len, vflag ? "%s" : "%.8s", sp ? sp->s_name : "*");
 	else
-		snprintf(cp, len, "%d", ntohs((u_short)port));
-	width = Aflag ? 18 : 22;
+		snprintf(cp, len, "%d", port);
+	width = 27;
 	if (vflag && width < strlen(line))
 		width = strlen(line);
 bail:

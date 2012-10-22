@@ -58,7 +58,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPNETSTAT 1 "20 Jan 2010" VVERSIONINFO "Net-SNMP"
+.TH SNMPNETSTAT 1 "20 Oct 2012" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmpnetstat \- display networking status and configuration information from a network entity via SNMP
 .SH SYNOPSIS
@@ -114,6 +114,11 @@ The options have the following meaning:
 .I snmpcmd(1)
 for a list of possible values for common options
 as well as their descriptions.
+.PP
+.B \-CL
+use the legacy SNMP MIB elements, not the modern IP version agnostic
+tables. It will automatically fall back to the legacy tables if the
+modern ones are not available.
 .PP
 .B \-Ca
 With the default display,

@@ -126,7 +126,7 @@ tcpprotoprint_line(const char *name, netsnmp_variable_list *vp, int *first)
 		if (aflag)
 			printf(" (including servers)");
 		putchar('\n');
-		width = Aflag ? 18 : 22;
+		width = 27;
 		printf("%-5.5s %*.*s %*.*s %s\n",
 			   "Proto", -width, width, "Local Address",
 						-width, width, "Remote Address", "(state)");
@@ -140,22 +140,22 @@ tcpprotoprint_line(const char *name, netsnmp_variable_list *vp, int *first)
 	cp[2] = vp->name[ 12 ] & 0xff;
 	cp[3] = vp->name[ 13 ] & 0xff;
 	localAddr.s_addr = tmpAddr.addr.s_addr;
-	localPort        = ntohs(vp->name[ 14 ]);
+	localPort        = vp->name[ 14 ];
 	cp = tmpAddr.data;
 	cp[0] = vp->name[ 15 ] & 0xff;
 	cp[1] = vp->name[ 16 ] & 0xff;
 	cp[2] = vp->name[ 17 ] & 0xff;
 	cp[3] = vp->name[ 18 ] & 0xff;
 	remoteAddr.s_addr = tmpAddr.addr.s_addr;
-	remotePort        = ntohs(vp->name[ 19 ]);
+	remotePort        = vp->name[ 19 ];
 
 	printf("%-5.5s", name);
 	inetprint(&localAddr,  localPort,  name, 1);
 	inetprint(&remoteAddr, remotePort, name, 0);
 	if (state < 1 || state > TCP_NSTATES) {
-		printf("%d\n", state );
+		printf(" %d\n", state );
 	} else {
-		printf("%s\n", tcpstates[state]);
+		printf(" %s\n", tcpstates[state]);
 	}
 }
 
@@ -176,6 +176,8 @@ tcpprotopr_get(const char *name, oid *root, size_t root_len)
         return;
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
         return;
+    if (var->type == ASN_NULL)
+	return;
 
     for (vp = var; vp ; vp=vp->next_variable) {
         tcpprotoprint_line(name, vp, &first);
@@ -212,9 +214,11 @@ udpprotopr(const char *name)
         return;
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
         return;
+    if (var->type == ASN_NULL)
+	return;
 
     printf("Active Internet (%s) Connections\n", name);
-    printf("%-5.5s %-28.28s\n", "Proto", "Local Address");
+    printf("%-5.5s %-27.27s\n", "Proto", "Local Address");
     for (vp = var; vp ; vp=vp->next_variable) {
         printf("%-5.5s", name);
         /*
@@ -228,7 +232,7 @@ udpprotopr(const char *name)
         cp[2] = vp->name[ 12 ] & 0xff;
         cp[3] = vp->name[ 13 ] & 0xff;
         localAddr.s_addr = tmpAddr.addr.s_addr;
-        localPort        = ntohs( (u_short)(vp->name[ 14 ]));
+        localPort        = vp->name[ 14 ];
         inetprint(&localAddr, localPort, name, 1);
         putchar('\n');
     }
@@ -281,11 +285,12 @@ tcpprotopr_bulkget(const char *name, oid *root, size_t root_len)
                         continue;
                     }
 
-					tcpprotoprint_line(name, vp, &first);
-
                     if ((vp->type != SNMP_ENDOFMIBVIEW) &&
                         (vp->type != SNMP_NOSUCHOBJECT) &&
                         (vp->type != SNMP_NOSUCHINSTANCE)) {
+
+			tcpprotoprint_line(name, vp, &first);
+
                         /*
                          * Check if last variable, and if so, save for next request.
                          */
@@ -324,19 +329,19 @@ tcpprotopr(const char *name)
 {
     oid    tcpConnState_oid[] = { 1,3,6,1,2,1,6,13,1,1 };
     size_t tcpConnState_len   = OID_LENGTH( tcpConnState_oid );
-	int    use_getbulk = 1;
+    int    use_getbulk = 1;
 
 #ifndef NETSNMP_DISABLE_SNMPV1
     if (ss->version == SNMP_VERSION_1) {
         use_getbulk = 0;
-	}
+    }
 #endif
 
-	if (use_getbulk) {
-		tcpprotopr_bulkget(name, tcpConnState_oid, tcpConnState_len);
-	} else {
-		tcpprotopr_get(name, tcpConnState_oid, tcpConnState_len);
-	}
+    if (use_getbulk) {
+	    tcpprotopr_bulkget(name, tcpConnState_oid, tcpConnState_len);
+    } else {
+	    tcpprotopr_get(name, tcpConnState_oid, tcpConnState_len);
+    }
 }
 
 
@@ -560,22 +565,25 @@ inetprint(struct in_addr *in, int port, const char *proto, int local)
 {
 	struct servent *sp = NULL;
 	char line[80], *cp;
-	int width;
+	int width = 27;
 
-	snprintf(line, sizeof line, "%.*s.", (Aflag && !nflag) ? 12 : 16,
-	    inetname(in));
+	if (vflag)
+	    snprintf(line, sizeof line, "%s.", inetname(in));
+	else
+	    snprintf(line, sizeof line, "%.*s.", width-9, inetname(in));
 	cp = strchr(line, '\0');
 	if (!nflag && port)
-		sp = getservbyport((int)port, proto);
+		sp = getservbyport((int)htons(port), proto);
 	if (sp || port == 0)
-		snprintf(cp, line + sizeof line - cp, "%.8s",
+		snprintf(cp, line + sizeof line - cp, vflag ? "%s" : "%.8s",
 		    sp ? sp->s_name : "*");
      /*
       * Translation of RPC service names - Omitted
       */
 	else
-		snprintf(cp, line + sizeof line - cp, "%d", ntohs(port));
-	width = Aflag ? 18 : 22;
+		snprintf(cp, line + sizeof line - cp, "%d", port);
+	if (vflag && width < strlen(line))
+	    width = strlen(line);
 	printf(" %-*.*s", width, width, line);
 }
 

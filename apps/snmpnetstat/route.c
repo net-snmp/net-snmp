@@ -80,7 +80,6 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 #define SET_ALL  0x1f
 
 struct route_entry {
-    oid             instance[4];
     in_addr_t       destination;
     in_addr_t       mask;
     in_addr_t       gateway;
@@ -132,6 +131,10 @@ routepr(void)
         if ( snmp_oid_compare( rtcol_oid, rtcol_len,
                                var->name, rtcol_len) != 0 )
             break;    /* End of Table */
+	if (var->type == SNMP_NOSUCHOBJECT ||
+                var->type == SNMP_NOSUCHINSTANCE ||
+                var->type == SNMP_ENDOFMIBVIEW)
+	    break;
         memset( &route, 0, sizeof( struct route_entry ));
         /* Extract ipRouteDest index value */
         cp = tmpAddr.data;
@@ -186,6 +189,8 @@ get_ifname(char *name, int ifIndex)
 {
     oid    ifdescr_oid[]  = { 1,3,6,1,2,1,2,2,1,2,0 };
     size_t ifdescr_len    = OID_LENGTH( ifdescr_oid );
+    oid    ifxcol_oid[] = { 1,3,6,1,2,1,31,1,1,1,1,0 };
+    size_t ifxcol_len   = OID_LENGTH( ifxcol_oid );
     netsnmp_variable_list *var = NULL;
     struct iflist         *ip;
 
@@ -203,6 +208,18 @@ get_ifname(char *name, int ifIndex)
     ip->next = Iflist;
     Iflist = ip;
     ip->index = ifIndex;
+
+    ifxcol_oid[ ifxcol_len-1 ] = ifIndex;
+    snmp_varlist_add_variable( &var, ifxcol_oid, ifxcol_len,
+                               ASN_NULL, NULL,  0);
+    if (netsnmp_query_get( var, ss ) == SNMP_ERR_NOERROR) {
+        if (var->val_len >= sizeof(ip->name))
+            var->val_len  = sizeof(ip->name) - 1;
+        memmove(ip->name, var->val.string, var->val_len);
+        ip->name[var->val_len] = '\0';
+	strcpy(name, ip->name);
+	return;
+    }
 
     ifdescr_oid[ ifdescr_len-1 ] = ifIndex;
     snmp_varlist_add_variable( &var, ifdescr_oid, ifdescr_len,
@@ -455,7 +472,6 @@ s_rtflags( struct route_entry *rp )
     static char flag_buf[10];
     char  *cp = flag_buf;
 
-    memset( flag_buf, 0, sizeof(flag_buf));
     *cp++ = '<';
     *cp++ = 'U';   /* route is in use */
     if (rp->mask  == 0xffffffff)
@@ -465,6 +481,7 @@ s_rtflags( struct route_entry *rp )
     if (rp->type  == 4)
         *cp++ = 'G';   /* remote destination/net */
     *cp++ = '>';
+    *cp = 0;
     return flag_buf;
 }
 
