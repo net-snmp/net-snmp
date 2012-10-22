@@ -96,14 +96,14 @@ struct route_entry {
 };
 
 
-static void pr_rt0hdr(int af);
-static void p_rtnode0( struct route_entry *rp );
+static void pr_rtxhdr(int af);
+static void p_rtnodex( struct route_entry *rp );
 
 /*
  * Print routing tables.
  */
 int
-route0pr(int af)
+routexpr(int af)
 {
     struct route_entry  route, *rp = &route;
     oid    rtcol_oid[]  = { 1,3,6,1,2,1,4,24,7,1,0 }; /* inetCidrRoiuteEntry */
@@ -225,9 +225,9 @@ route0pr(int af)
             if (hdr_af != AF_UNSPEC)
                 printf("\n");
             hdr_af = rp->af;
-            pr_rt0hdr(hdr_af);
+            pr_rtxhdr(hdr_af);
         }
-        p_rtnode0( rp );
+        p_rtnodex( rp );
         printed++;
     }
     return printed;
@@ -249,7 +249,7 @@ route0pr(int af)
  * Print header for routing table columns.
  */
 static void
-pr_rt0hdr(int af)
+pr_rtxhdr(int af)
 {
     switch (af) {
     case AF_INET:
@@ -271,7 +271,7 @@ pr_rt0hdr(int af)
  * The address is assumed to be that of a net or subnet, not a host.
  */
 static char *
-net0name(struct sockaddr_storage *in, int mask)
+netxname(struct sockaddr_storage *in, int mask)
 {
     static char host[MAXHOSTNAMELEN];
     static char line[MAXHOSTNAMELEN];
@@ -294,7 +294,7 @@ net0name(struct sockaddr_storage *in, int mask)
 }
 
 static char *
-route0name(struct sockaddr_storage *in)
+routexname(struct sockaddr_storage *in)
 {
     char *cp;
     static char line[MAXHOSTNAMELEN];
@@ -347,7 +347,7 @@ route0name(struct sockaddr_storage *in)
 
 
 static char *
-s_rtflags0( struct route_entry *rp )
+s_rtflagsx( struct route_entry *rp )
 {
     static char flag_buf[10];
     char  *cp = flag_buf;
@@ -367,7 +367,7 @@ s_rtflags0( struct route_entry *rp )
 }
 
 static void
-p_rtnode0( struct route_entry *rp )
+p_rtnodex( struct route_entry *rp )
 {
     get_ifname(rp->ifname, rp->ifNumber);
     if (rp->af == AF_INET) {
@@ -376,8 +376,8 @@ p_rtnode0( struct route_entry *rp )
             WID_DST(AF_INET),
                 (sin->sin_addr.s_addr == INADDR_ANY) ? "default" :
                 (rp->mask == 32 ?
-                    route0name(&rp->dst) :
-                    net0name(&rp->dst, rp->mask)));
+                    routexname(&rp->dst) :
+                    netxname(&rp->dst, rp->mask)));
     }
     else if (rp->af == AF_INET6) {
         struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&rp->dst;
@@ -386,11 +386,11 @@ p_rtnode0( struct route_entry *rp )
             WID_DST(AF_INET6),
                 memcmp(&sin6->sin6_addr, &in6_addr_any, sizeof(in6_addr_any)) == 0 ? "default" :
                 (rp->mask == 128 ?
-                    route0name(&rp->dst) :
-                    net0name(&rp->dst, rp->mask)));
+                    routexname(&rp->dst) :
+                    netxname(&rp->dst, rp->mask)));
     }
     printf("%-*s %-6.6s  %s\n",
         WID_GW(rp->af),
-        1 ? route0name(&rp->hop) : "*",
-        s_rtflags0(rp), rp->ifname);
+        1 ? routexname(&rp->hop) : "*",
+        s_rtflagsx(rp), rp->ifname);
 }

@@ -79,14 +79,14 @@ struct stat_table {
     char            description[80];
 };
 
-void	inet0print(int, struct sockaddr_in6 , int, const char *, int);
+void	inetxprint(int, struct sockaddr_in6 , int, const char *, int);
 
 /*
  * Print a summary of TCP connections
  * Listening processes are suppressed unless the
  *   -a (all) flag is specified.
  */
-const char     *tcp0states[] = {
+const char     *tcpxstates[] = {
     "",
     "CLOSED",
     "LISTEN",
@@ -206,7 +206,7 @@ codelist_t icmp6codes[] = {
 
 
 void
-tcp0protopr(const char *name)
+tcpxprotopr(const char *name)
 {
     netsnmp_variable_list *var, *vp, *pvar;
     oid    tcpConnectionState_oid[] = { 1,3,6,1,2,1,6,19,1,7 };
@@ -278,24 +278,24 @@ tcp0protopr(const char *name)
 	else lname[3] = '4';
 	lname[4] = 0;
         printf("%-5.5s", lname);
-        inet0print(localType, localAddr,  localPort, name, 1);
-        inet0print(remoteType, remoteAddr, remotePort, name, 0);
+        inetxprint(localType, localAddr,  localPort, name, 1);
+        inetxprint(remoteType, remoteAddr, remotePort, name, 0);
         if ( state < 1 || state > TCP_NSTATES )
             printf(" %11d 5%d\n", pid, state );
         else
-            printf(" %11s %5d\n", tcp0states[ state ], pid);
+            printf(" %11s %5d\n", tcpxstates[ state ], pid);
     }
     snmp_free_varbind( var );
 
     if (aflag)
-	listen0protopr(name);
+	listenxprotopr(name);
 }
 
 /*
  * Print a summary of listening "connections"
  */
 void
-listen0protopr(const char *name)
+listenxprotopr(const char *name)
 {
     netsnmp_variable_list *var, *vp;
     oid    tcpListenerProcess_oid[] = { 1,3,6,1,2,1,6,20,1,4 };
@@ -341,7 +341,7 @@ listen0protopr(const char *name)
 	else lname[3] = '4';
 	lname[4] = 0;
         printf("%-5.5s", lname);
-        inet0print(localType, localAddr, localPort, name, 1);
+        inetxprint(localType, localAddr, localPort, name, 1);
         printf(" %5d\n", pid);
     }
     snmp_free_varbind( var );
@@ -352,7 +352,7 @@ listen0protopr(const char *name)
  *    XXX - what about "listening" services ??
  */
 void
-udp0protopr(const char *name)
+udpxprotopr(const char *name)
 {
     netsnmp_variable_list *var, *vp;
     oid    udpEndpointProcess_oid[] = { 1,3,6,1,2,1,7,7,1,8 };
@@ -406,8 +406,8 @@ udp0protopr(const char *name)
 	else lname[3] = '4';
 	lname[4] = 0;
         printf("%-5.5s", lname);
-        inet0print(localType, localAddr, localPort, name, 1);
-        inet0print(remoteType, remoteAddr, remotePort, name, 1);
+        inetxprint(localType, localAddr, localPort, name, 1);
+        inetxprint(remoteType, remoteAddr, remotePort, name, 1);
         printf(" %5d\n", pid);
     }
     snmp_free_varbind( var );
@@ -493,7 +493,7 @@ prhisto(const char *name, const oid *var, size_t len, int ver, codelist_t *cs)
 }
 
 void
-ip0_stats(const char *name)
+ipx_stats(const char *name)
 {
     oid ipsysstat_oid[] = { 1, 3, 6, 1, 2, 1, 4, 31, 1, 1 };
     size_t ipsysstat_len = sizeof(ipsysstat_oid) / sizeof(ipsysstat_oid[0]);
@@ -502,7 +502,7 @@ ip0_stats(const char *name)
 }
 
 void
-icmp0_stats(const char *name)
+icmpx_stats(const char *name)
 {
     oid icmpstat_oid[] = { 1, 3, 6, 1, 2, 1, 5, 29, 1 };
     size_t icmpstat_len = sizeof(icmpstat_oid) / sizeof(icmpstat_oid[0]);
@@ -538,7 +538,7 @@ unknownprint(void)
  */
 
 void
-inet0print(int proto, struct sockaddr_in6 in6, int port, const char *name, int local)
+inetxprint(int proto, struct sockaddr_in6 in6, int port, const char *name, int local)
 {
 
 	if (proto == 2)

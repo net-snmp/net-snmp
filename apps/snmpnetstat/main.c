@@ -121,7 +121,7 @@ struct protox ip6protox[] = {
 	{ 0,	(stringfun*)0,	(stringfun*)0,	NULL }
 };
 
-struct protox ip0protox[] = {
+struct protox ipxprotox[] = {
 	{ 1,	tcpxprotopr,	tcp_stats,	"tcp" },	
 	{ 1,	udpxprotopr,	udp_stats,	"udp" },	
 	{ 1,	(stringfun*)0,	ipx_stats,	"ip" },/* ip6protopr Omitted */
