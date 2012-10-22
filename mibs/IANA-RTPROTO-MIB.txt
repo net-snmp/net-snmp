@@ -5,15 +5,15 @@ IMPORTS
     TEXTUAL-CONVENTION               FROM SNMPv2-TC;
 
 ianaRtProtoMIB  MODULE-IDENTITY
-    LAST-UPDATED "201107220000Z" -- July 22, 2011
+    LAST-UPDATED "201208300000Z" -- August 30, 2012
     ORGANIZATION "IANA"
     CONTACT-INFO
             " Internet Assigned Numbers Authority
               Internet Corporation for Assigned Names and Numbers
-              4676 Admiralty Way, Suite 330
-              Marina del Rey, CA 90292-6601
+              12025 Waterfront Drive, Suite 300
+              Los Angeles, CA 90094-2536
 
-              Phone: +1 310 823 9358
+              Phone: +1 310 301 5800
               EMail: iana&iana.org"
     DESCRIPTION
             "This MIB module defines the IANAipRouteProtocol and
@@ -27,6 +27,9 @@ ianaRtProtoMIB  MODULE-IDENTITY
             IANA Considerations Section in RFCs.  The Designated Expert 
             will be selected by the IESG Area Director(s) of the Routing
             Area."
+
+    REVISION     "201208300000Z"  -- August 30, 2012 
+    DESCRIPTION  "Added dhcp(19)."
 
     REVISION     "201107220000Z"  -- July 22, 2011 
     DESCRIPTION  "Added rpl(18) ."
@@ -64,7 +67,8 @@ IANAipRouteProtocol ::= TEXTUAL-CONVENTION
                 idpr       (15), -- InterDomain Policy Routing
                 ciscoEigrp (16), -- Cisco EIGRP
                 dvmrp      (17), -- DVMRP
-                rpl        (18)  -- RPL [RFC-ietf-roll-rpl-19]
+                rpl        (18), -- RPL [RFC-ietf-roll-rpl-19]
+                dhcp       (19)  -- DHCP [RFC2132]
                }
 
 IANAipMRouteProtocol ::= TEXTUAL-CONVENTION
