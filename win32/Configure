@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# 
+#
 # Configure script for Net-SNMP and MSVC
 # Written by Alex Burger
 # March 5th, 2004
@@ -31,8 +31,8 @@ if ($help == 1)
 {
 my $USAGE = qq/
 Usage:
-    perl Configure [<options>] 
-    
+    perl Configure [<options>]
+
 Options:
 
     --config=[release | debug]       Compile as release or with debug symbols
@@ -51,13 +51,13 @@ Options:
   exit(0);
 
 }
-               
-$config = lc($config);  
+
+$config = lc($config);
 if (($config ne "debug") && ($config ne "release")) {
   $config = "release";
 }
 
-$linktype = lc($linktype);              
+$linktype = lc($linktype);
 if (($linktype ne "static") && ($linktype ne "dynamic")) {
   $linktype = "static";
 }
@@ -88,7 +88,7 @@ print "\n\n";
 # Create main Makefile
 #
 ###############################################
-{  
+{
   my $makefile_out = "Makefile";
   my $makefile_in  = "Makefile.in";
 
@@ -96,7 +96,7 @@ print "\n\n";
   open (MAKE_IN, "<$makefile_in") || die "Can't Open $makefile_in\n";
 
   print "creating $makefile_out\n";
-  
+
   while (<MAKE_IN>)
   {
     chomp;
@@ -106,11 +106,11 @@ print "\n\n";
     else {
       s/^SDK=/SDK=false/;
     }
-    
+
     s/^LINKTYPE=/LINKTYPE=$linktype/;
     s/^CFG=/CFG=$config/;
-    s/^PREFIX=/PREFIX=$prefix/;    
-    s/^PREFIX_DOS=/PREFIX_DOS=$prefixdos/;    
+    s/^PREFIX=/PREFIX=$prefix/;
+    s/^PREFIX_DOS=/PREFIX_DOS=$prefixdos/;
     s/^SSL=.*/SSL=$openssl/;
 
     print MAKE_OUT $_ . "\n";
@@ -119,12 +119,12 @@ print "\n\n";
 
 ###############################################
 #
-# Create Makefiles for applications from 
+# Create Makefiles for applications from
 # Makefile-apps.in
 # (except for snmpnetstat)
 #
 ###############################################
-my @programs = qw 
+my @programs = qw
 /encode_keychange
 snmpbulkget
 snmpbulkwalk
@@ -144,22 +144,22 @@ snmpwalk
 /;
 
 foreach my $progName (@programs) {
-  
+
   my $makefile_out = "$progName\\Makefile";
   my $makefile_in = "Makefile-apps.in";
 
   my $outdir = $config;
   my $intdir = $config;
-  
+
   open (MAKE_OUT, ">$makefile_out") || die "Can't Open $makefile_out\n";
   open (MAKE_IN, "<$makefile_in") || die "Can't Open $makefile_in\n";
 
   print "creating $makefile_out\n";
-  
+
   while (<MAKE_IN>)
   {
     chomp;
-    
+
     s/^LINKTYPE=/LINKTYPE=$linktype/;
     s/^PROGNAME=/PROGNAME=$progName/;
     s/^CFG=/CFG=$config/;
@@ -177,28 +177,28 @@ foreach my $progName (@programs) {
 # snmpnetstat\Makefile.in
 #
 ###############################################
-my @programs = qw 
+my @programs = qw
 /snmpnetstat
 /;
 
 foreach my $progName (@programs) {
-  
+
   my $makefile_out = "$progName\\Makefile";
   my $makefile_in = "$progName\\Makefile.in";
 
   my $outdir = $config;
   my $intdir = $config;
-  
+
   open (MAKE_OUT, ">$makefile_out") || die "Can't Open $makefile_out\n";
   open (MAKE_IN, "<$makefile_in") || die "Can't Open $makefile_in\n";
 
   print "creating $makefile_out\n";
-  
+
   while (<MAKE_IN>)
   {
     chomp;
 
-    s/^LINKTYPE=/LINKTYPE=$linktype/;    
+    s/^LINKTYPE=/LINKTYPE=$linktype/;
     s/^PROGNAME=/PROGNAME=$progName/;
     s/^CFG=/CFG=$config/;
     s/^OUTDIR=/OUTDIR=.\\$outdir/;
@@ -212,11 +212,11 @@ foreach my $progName (@programs) {
 
 ###############################################
 #
-# Create Makefiles for libraries  
+# Create Makefiles for libraries
 # from name\Makefile.in
 #
 ###############################################
-my @programs = qw 
+my @programs = qw
 /libagent
 libhelpers
 libnetsnmptrapd
@@ -237,22 +237,22 @@ else {
 }
 
 foreach my $progName (@programs) {
-  
+
   my $makefile_out = "$progName\\Makefile";
   my $makefile_in = "$progName\\Makefile.in";
-  
+
   my $outdir = $config;
   my $intdir = $config;
-  
+
   open (MAKE_OUT, ">$makefile_out") || die "Can't Open $makefile_out\n";
   open (MAKE_IN, "<$makefile_in") || die "Can't Open $makefile_in\n";
 
   print "creating $makefile_out\n";
-  
+
   while (<MAKE_IN>)
   {
     chomp;
-    
+
     s/^PROGNAME=/PROGNAME=$progName/;
     s/^CFG=/CFG=$config/;
     s/^OUTDIR=/OUTDIR=.\\$outdir/;
@@ -272,7 +272,7 @@ foreach my $progName (@programs) {
 # from name\Makefile.in
 #
 ###############################################
-my @programs = qw 
+my @programs = qw
 /snmptrapd
 /;
 
@@ -284,22 +284,22 @@ else {
 }
 
 foreach my $progName (@programs) {
-  
+
   my $makefile_out = "$progName\\Makefile";
   my $makefile_in = "$progName\\Makefile.in";
-  
+
   my $outdir = $config;
   my $intdir = $config;
-  
+
   open (MAKE_OUT, ">$makefile_out") || die "Can't Open $makefile_out\n";
   open (MAKE_IN, "<$makefile_in") || die "Can't Open $makefile_in\n";
 
   print "creating $makefile_out\n";
-  
+
   while (<MAKE_IN>)
   {
     chomp;
-    
+
     s/^LINKTYPE=/LINKTYPE=$linktype/;
     s/^PROGNAME=/PROGNAME=$progName/;
     s/^CFG=/CFG=$config/;
@@ -317,7 +317,7 @@ foreach my $progName (@programs) {
 # from local\Makefile.in
 #
 ###############################################
-  
+
 my $makefile_out = "local\\Makefile";
 my $makefile_in = "local\\Makefile.in";
 
@@ -331,11 +331,11 @@ print "creating $makefile_out\n";
 while (<MAKE_IN>)
 {
   chomp;
-  
+
   s/^OUTDIR=/OUTDIR=.\\$outdir/;
-  s/^PREFIX=/PREFIX=$prefix/;   
-  s/^PREFIX_DOS=/PREFIX_DOS=$prefixdos/;    
-  
+  s/^PREFIX=/PREFIX=$prefix/;
+  s/^PREFIX_DOS=/PREFIX_DOS=$prefixdos/;
+
   print MAKE_OUT $_ . "\n";
 }
 
@@ -351,7 +351,7 @@ while (<MAKE_IN>)
 
   open (FILE_OUT, ">$file_out") || die "Can't Open $file_out\n";
   open (FILE_IN, "<$file_in") || die "Can't Open $file_in\n";
-  
+
   print "creating $file_out\n";
 
   while (<FILE_IN>)
@@ -393,7 +393,7 @@ if ($linktype eq "dynamic")
 
   open (FILE_OUT, ">$file_out") || die "Can't Open $file_out\n";
   open (FILE_IN, "<$file_in") || die "Can't Open $file_in\n";
-  
+
   print "creating $file_out\n";
 
   while (<FILE_IN>)
