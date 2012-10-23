@@ -358,7 +358,7 @@ udpxprotopr(const char *name)
     oid    udpEndpointProcess_oid[] = { 1,3,6,1,2,1,7,7,1,8 };
     size_t udpEndpointProcess_len   = OID_LENGTH( udpEndpointProcess_oid );
     struct sockaddr_in6 localAddr, remoteAddr;
-    int    localType, remoteType, localPort, remotePort, instance, pid;
+    int    localType, remoteType, localPort, remotePort, pid;
     int    i, inx;
     static int done = 0;
 
@@ -399,7 +399,6 @@ udpxprotopr(const char *name)
 	    remoteAddr.sin6_addr.s6_addr[i] = vp->name[inx+i+1];
 	inx += vp->name[inx]+1;
         remotePort = vp->name[ inx++ ];
-        instance   = vp->name[ inx++ ];
         pid   = *vp->val.integer;
 	strcpy(lname, name);
 	if (localType == 2) lname[3] = '6';
