@@ -536,13 +536,13 @@ run_config_handler(struct config_line *lptr,
     lptr = read_config_find_handler(lptr, token);
     if (lptr != NULL) {
         if (when == EITHER_CONFIG || lptr->config_time == when) {
+            char tmpbuf[1];
             DEBUGMSGTL(("read_config:parser",
                         "Found a parser.  Calling it: %s / %s\n", token,
                         cptr));
             /*
              * Make sure cptr is non-null
              */
-            char tmpbuf[1];
             if (!cptr) {
                 tmpbuf[0] = '\0';
                 cptr = tmpbuf;
