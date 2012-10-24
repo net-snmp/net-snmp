@@ -4147,6 +4147,8 @@ unload_all_mibs(void)
         free(ptc->descriptor);
         if (ptc->hint)
             free(ptc->hint);
+        if (ptc->description)
+            free(ptc->description);
     }
     memset(tclist, 0, MAXTC * sizeof(struct tc));
 
