@@ -29,6 +29,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/agent_callbacks.h>
 
 #include "util_funcs/header_simple_table.h"
 
@@ -117,8 +118,8 @@ void		devla_getstats(unsigned int regno, void *dummy);
 
 FILE           *file;
 
-#if 0
-static void	diskio_free_config(void);
+#ifdef linux
+static int	diskio_free_config(int, int, void *, void *);
 #endif
 
          /*********************
@@ -245,20 +246,29 @@ init_diskio(void)
                                NETSNMP_DS_AGENT_DISKIO_NO_RAM);
 
         /* or possible an exclusion pattern? */
+
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+	                   SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+	                   diskio_free_config, NULL);
+
 #endif
 }
 
-#if 0
+#ifdef linux
 /* to do: make sure diskio_free_config() gets invoked upon SIGHUP. */
-static void
-diskio_free_config(void)
+static int
+diskio_free_config(int major, int minor, void *serverarg, void *clientarg)
 {
+    DEBUGMSGTL(("diskio", "free config %d\n",
+		netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+				       NETSNMP_DS_AGENT_DISKIO_NO_RAM)));
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
 			   NETSNMP_DS_AGENT_DISKIO_NO_FD,   0);
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
 			   NETSNMP_DS_AGENT_DISKIO_NO_LOOP, 0);
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
 			   NETSNMP_DS_AGENT_DISKIO_NO_RAM,  0);
+    return 0;
 }
 #endif
 
