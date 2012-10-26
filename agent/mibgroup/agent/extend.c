@@ -34,7 +34,7 @@ typedef struct extend_registration_block_s {
     size_t              oid_len;
     long                num_entries;
     netsnmp_extend     *ehead;
-    netsnmp_handler_registration       *reg[3];
+    netsnmp_handler_registration       *reg[4];
     struct extend_registration_block_s *next;
 } extend_registration_block;
 extend_registration_block *ereg_head = NULL;
@@ -222,10 +222,13 @@ _register_extend( oid *base, size_t len )
     rc = netsnmp_register_watched_scalar2( reg, winfo );
     if (rc != SNMPERR_SUCCESS)
         goto bail;
+    eptr->reg[3] = reg;
 
     return eptr;
 
 bail:
+    if (eptr->reg[3])
+        netsnmp_unregister_handler(eptr->reg[3]);
     if (eptr->reg[2])
         netsnmp_unregister_handler(eptr->reg[2]);
     if (eptr->reg[1])
@@ -267,6 +270,7 @@ extend_clear_callback(int majorID, int minorID,
         netsnmp_unregister_handler( eptr->reg[0] );
         netsnmp_unregister_handler( eptr->reg[1] );
         netsnmp_unregister_handler( eptr->reg[2] );
+        netsnmp_unregister_handler( eptr->reg[3] );
         SNMP_FREE(eptr);
     }
     ereg_head = NULL;
@@ -550,6 +554,10 @@ extend_parse_config(const char *token, char *cptr)
     }
 
     eptr      = _register_extend( oid_buf, oid_len );
+    if (!eptr) {
+        snmp_log(LOG_ERR, "Failed to register extend entry '%s' - possibly duplicate name.\n", exec_name );
+        return;
+    }
     extension = _new_extension( exec_name, flags, eptr );
     if (extension) {
         extension->command  = strdup( exec_command );
