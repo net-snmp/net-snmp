@@ -6,6 +6,10 @@
 #
 use strict;
 my $openssl = "disabled";
+my $default_opensslincdir = "C:\\OpenSSL-Win64\\include";
+my $opensslincdir = $default_opensslincdir;
+my $default_openssllibdir = "C:\\OpenSSL-Win64\\lib\\VC";
+my $openssllibdir = $default_openssllibdir;
 my $b_ipv6 = "disabled";
 my $b_winextdll = "disabled";
 my $sdk = "disabled";
@@ -30,7 +34,7 @@ if (! ($current_pwd =~ /\\win32$/)) {
   chomp $current_pwd;
 }
 
-if ( -d $ENV{MSVCDir} || -d $ENV{VCINSTALLDIR}) {
+if ( -d $ENV{MSVCDir} || -d $ENV{VCINSTALLDIR} || defined($ENV{TARGET_CPU}) ) {
 }
 else {
   print "\nPlease run VCVARS32.BAT first to set up the Visual Studio build\n" .
@@ -43,23 +47,25 @@ while (1) {
   print "\n\nNet-SNMP build and install options\n";
   print "==================================\n\n";
   print "1.  OpenSSL support:                " . $openssl. "\n";
-  print "2.  Platform SDK support:           " . $sdk . "\n";
+  print "2.  OpenSSL include directory:      " . $opensslincdir. "\n";
+  print "3.  OpenSSL library director:       " . $openssllibdir. "\n";
+  print "4.  Platform SDK support:           " . $sdk . "\n";
   print "\n";
-  print "3.  Install path:                   " . $install_base . "\n";
-  print "4.  Install after build:            " . $install . "\n";
+  print "5.  Install path:                   " . $install_base . "\n";
+  print "6.  Install after build:            " . $install . "\n";
   print "\n";
-  print "5.  Perl modules:                   " . $perl . "\n";
-  print "6.  Install perl modules:           " . $perl_install . "\n";
+  print "7.  Perl modules:                   " . $perl . "\n";
+  print "8.  Install perl modules:           " . $perl_install . "\n";
   print "\n";
-  print "7.  Quiet build (logged):           " . $logging . "\n";
-  print "8.  Debug mode:                     " . $debug . "\n";
+  print "9.  Quiet build (logged):           " . $logging . "\n";
+  print "10. Debug mode:                     " . $debug . "\n";
   print "\n";
-  print "9.  IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
-  print "10. winExtDLL agent (requires SDK): " . $b_winextdll . "\n";
+  print "11. IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
+  print "12. winExtDLL agent (requires SDK): " . $b_winextdll . "\n";
   print "\n";
-  print "11. Link type:                      " . $linktype . "\n";
+  print "13. Link type:                      " . $linktype . "\n";
   print "\n";
-  print "12. Install development files       " . $install_devel . "\n";
+  print "14. Install development files       " . $install_devel . "\n";
   print "\nF.  Finished - start build\n";
   print "Q.  Quit - abort build\n\n";
   print "Select option to set / toggle: ";
@@ -74,6 +80,18 @@ while (1) {
     }
   }
   elsif ($option eq "2") {
+    print "Please enter the OpenSSL include directory [$opensslincdir]: ";
+    chomp ($opensslincdir = <>);
+    $opensslincdir =~ s/\\/\//g;
+    $opensslincdir = $default_opensslincdir if ($opensslincdir eq "");
+  }
+  elsif ($option eq "3") {
+    print "Please enter the OpenSSL library directory [$openssllibdir]: ";
+    chomp ($openssllibdir = <>);
+    $openssllibdir =~ s/\\/\//g;
+    $openssllibdir = $default_openssllibdir if ($openssllibdir eq "");
+  }
+  elsif ($option eq "4") {
     if ($sdk eq "enabled") {
       $sdk = "disabled";
     }
@@ -81,7 +99,7 @@ while (1) {
       $sdk = "enabled";
     }
   }
-  elsif ($option eq "9") {
+  elsif ($option eq "11") {
     if ($b_ipv6 eq "enabled") {
       $b_ipv6 = "disabled";
     }
@@ -93,7 +111,7 @@ while (1) {
       }
     }
   }
-  elsif ($option eq "10") {
+  elsif ($option eq "12") {
     if ($b_winextdll eq "enabled") {
       $b_winextdll = "disabled";
     }
@@ -105,7 +123,7 @@ while (1) {
       }
     }
   }
-  elsif ($option eq "3") {
+  elsif ($option eq "5") {
     print "Please enter the new install path [$default_install_base]: ";
     chomp ($install_base = <>);
     if ($install_base eq "") {
@@ -113,7 +131,7 @@ while (1) {
     }
     $install_base =~ s/\\/\//g;
   }
-  elsif ($option eq "4") {
+  elsif ($option eq "6") {
     if ($install eq "enabled") {
       $install = "disabled";
     }
@@ -121,7 +139,7 @@ while (1) {
       $install = "enabled";
     }
   }
-  elsif ($option eq "12") {
+  elsif ($option eq "14") {
     if ($install_devel eq "enabled") {
       $install_devel = "disabled";
     }
@@ -129,7 +147,7 @@ while (1) {
       $install_devel = "enabled";
     }
   }
-  elsif ($option eq "5") {
+  elsif ($option eq "7") {
     if ($perl eq "enabled") {
       $perl = "disabled";
     }
@@ -137,7 +155,7 @@ while (1) {
       $perl = "enabled";
     }
   }
-  elsif ($option eq "6") {
+  elsif ($option eq "8") {
     if ($perl_install eq "enabled") {
       $perl_install = "disabled";
     }
@@ -145,7 +163,7 @@ while (1) {
       $perl_install = "enabled";
     }
   }
-  elsif ($option eq "7") {
+  elsif ($option eq "9") {
     if ($logging eq "enabled") {
       $logging = "disabled";
     }
@@ -153,7 +171,7 @@ while (1) {
       $logging = "enabled";
     }
   }
-  elsif ($option eq "8") {
+  elsif ($option eq "10") {
     if ($debug eq "enabled") {
       $debug = "disabled";
     }
@@ -161,7 +179,7 @@ while (1) {
       $debug = "enabled";
     }
   }
-  elsif ($option eq "11") {
+  elsif ($option eq "13") {
     if ($linktype eq "static") {
       $linktype = "dynamic";
     }
@@ -194,6 +212,9 @@ $ENV{NO_EXTERNAL_DEPS}="1";
 
 # Set PATH environment variable so Perl make tests can locate the DLL
 $ENV{PATH} = "$current_pwd\\bin\\" . ($debug eq "enabled" ? "debug" : "release" ) . ";$ENV{PATH}";
+
+$ENV{INCLUDE} .= ";$opensslincdir";
+$ENV{LIB}     .= ";$openssllibdir";
 
 # Set MIBDIRS environment variable so Perl make tests can locate the mibs
 my $temp_mibdir = "$current_pwd/../mibs";
