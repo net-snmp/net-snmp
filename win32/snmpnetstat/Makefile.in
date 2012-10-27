@@ -23,8 +23,10 @@ CLEAN :
 	-@erase "$(INTDIR)\if.obj"
 	-@erase "$(INTDIR)\inet.obj"
 	-@erase "$(INTDIR)\inet6.obj"
+	-@erase "$(INTDIR)\inetx.obj"
 	-@erase "$(INTDIR)\main.obj"
 	-@erase "$(INTDIR)\route.obj"
+	-@erase "$(INTDIR)\routex.obj"
 	-@erase "$(INTDIR)\ffs.obj"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\winstub.obj"
@@ -86,8 +88,10 @@ LINK32_OBJS= \
 	"$(INTDIR)\if.obj" \
 	"$(INTDIR)\inet.obj" \
 	"$(INTDIR)\inet6.obj" \
+	"$(INTDIR)\inetx.obj" \
 	"$(INTDIR)\main.obj" \
 	"$(INTDIR)\route.obj" \
+	"$(INTDIR)\routex.obj" \
 	"$(INTDIR)\ffs.obj" \
 	"$(INTDIR)\winstub.obj"
 
@@ -116,10 +120,14 @@ CLEAN :
 	-@erase "$(INTDIR)\inet.sbr"
 	-@erase "$(INTDIR)\inet6.obj"
 	-@erase "$(INTDIR)\inet6.sbr"
+	-@erase "$(INTDIR)\inetx.obj"
+	-@erase "$(INTDIR)\inetx.sbr"
 	-@erase "$(INTDIR)\main.obj"
 	-@erase "$(INTDIR)\main.sbr"
 	-@erase "$(INTDIR)\route.obj"
 	-@erase "$(INTDIR)\route.sbr"
+	-@erase "$(INTDIR)\routex.obj"
+	-@erase "$(INTDIR)\routex.sbr"
 	-@erase "$(INTDIR)\ffs.obj"
 	-@erase "$(INTDIR)\ffs.sbr"
 	-@erase "$(INTDIR)\vc??.idb"
@@ -182,8 +190,10 @@ BSC32_SBRS= \
 	"$(INTDIR)\if.sbr" \
 	"$(INTDIR)\inet.sbr" \
 	"$(INTDIR)\inet6.sbr" \
+	"$(INTDIR)\inetx.sbr" \
 	"$(INTDIR)\main.sbr" \
 	"$(INTDIR)\route.sbr" \
+	"$(INTDIR)\routex.sbr" \
 	"$(INTDIR)\ffs.sbr" \
 	"$(INTDIR)\winstub.sbr"
 
@@ -198,8 +208,10 @@ LINK32_OBJS= \
 	"$(INTDIR)\if.obj" \
 	"$(INTDIR)\inet.obj" \
 	"$(INTDIR)\inet6.obj" \
+	"$(INTDIR)\inetx.obj" \
 	"$(INTDIR)\main.obj" \
 	"$(INTDIR)\route.obj" \
+	"$(INTDIR)\routex.obj" \
 	"$(INTDIR)\ffs.obj" \
 	"$(INTDIR)\winstub.obj"
 
@@ -283,6 +295,11 @@ SOURCE=..\..\apps\$(PROGNAME)\inet6.c
 
 !ENDIF 
 
+SOURCE=..\..\apps\$(PROGNAME)\inetx.c
+
+"$(INTDIR)\inetx.obj"	"$(INTDIR)\inetx.sbr" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
 SOURCE=..\..\apps\$(PROGNAME)\main.c
 
 !IF  "$(CFG)" == "release"
@@ -318,6 +335,11 @@ SOURCE=..\..\apps\$(PROGNAME)\route.c
 
 
 !ENDIF 
+
+SOURCE=..\..\apps\$(PROGNAME)\routex.c
+
+"$(INTDIR)\routex.obj"	"$(INTDIR)\routex.sbr" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 SOURCE=..\..\apps\$(PROGNAME)\ffs.c
 
