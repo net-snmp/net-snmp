@@ -2,7 +2,6 @@ PROGNAME=
 CFG=
 OUTDIR=
 INTDIR=
-SSL=
 SDK=
 
 !IF "$(OS)" == "Windows_NT"

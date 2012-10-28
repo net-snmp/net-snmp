@@ -266,6 +266,43 @@ pr_rtxhdr(int af)
 	"Flags", "Interface");
 }
 
+#ifndef HAVE_INET_NTOP
+/* MSVC and MinGW */
+static const char *
+inet_ntop(int af, const void *src, char *dst, size_t size)
+{
+    DWORD out_len = size;
+
+    switch (af) {
+    case AF_INET:
+	{
+	    struct sockaddr_in in;
+
+	    memset(&in, 0, sizeof(in));
+	    in.sin_family = af;
+	    memcpy(&in.sin_addr, src, 4);
+	    if (WSAAddressToString((struct sockaddr *)&in, sizeof(in), NULL, dst,
+				   &out_len) == 0)
+		return dst;
+	}
+	break;
+    case AF_INET6:
+	{
+	    struct sockaddr_in6 in6;
+
+	    memset(&in6, 0, sizeof(in6));
+	    in6.sin6_family = af;
+	    memcpy(&in6.sin6_addr, src, 16);
+	    if (WSAAddressToString((struct sockaddr *)&in6, sizeof(in6), NULL, dst,
+				   &out_len) == 0)
+		return dst;
+	}
+	break;
+    }
+    return NULL;
+}
+#endif
+
 /*
  * Return the name of the network whose address is given.
  * The address is assumed to be that of a net or subnet, not a host.
