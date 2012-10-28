@@ -151,16 +151,16 @@ _set_address( struct _if_info *cur_if )
          *   displaying the local network information
          */
         cp = tmpAddr.data;
-        cp[0] = vp2->name[ 10 ] & 0xff;
-        cp[1] = vp2->name[ 11 ] & 0xff;
-        cp[2] = vp2->name[ 12 ] & 0xff;
-        cp[3] = vp2->name[ 13 ] & 0xff;
+        cp[0] = (uint8_t) vp2->name[10];
+        cp[1] = (uint8_t) vp2->name[11];
+        cp[2] = (uint8_t) vp2->name[12];
+        cp[3] = (uint8_t) vp2->name[13];
         ifAddr = tmpAddr.addr;
         cp = tmpAddr.data;
-        cp[0] = vp2->val.string[ 0 ] & 0xff;
-        cp[1] = vp2->val.string[ 1 ] & 0xff;
-        cp[2] = vp2->val.string[ 2 ] & 0xff;
-        cp[3] = vp2->val.string[ 3 ] & 0xff;
+        cp[0] = (uint8_t) vp2->val.string[0];
+        cp[1] = (uint8_t) vp2->val.string[1];
+        cp[2] = (uint8_t) vp2->val.string[2];
+        cp[3] = (uint8_t) vp2->val.string[3];
         mask = tmpAddr.addr;
         snprintf( cur_if->route, 128, "%s", netname(ifAddr, mask));
     }

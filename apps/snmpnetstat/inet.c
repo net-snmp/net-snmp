@@ -135,17 +135,17 @@ tcpprotoprint_line(const char *name, netsnmp_variable_list *vp, int *first)
 	
 	/* Extract the local/remote information from the index values */
 	cp = tmpAddr.data;
-	cp[0] = vp->name[ 10 ] & 0xff;
-	cp[1] = vp->name[ 11 ] & 0xff;
-	cp[2] = vp->name[ 12 ] & 0xff;
-	cp[3] = vp->name[ 13 ] & 0xff;
+	cp[0] = (uint8_t) vp->name[10];
+	cp[1] = (uint8_t) vp->name[11];
+	cp[2] = (uint8_t) vp->name[12];
+	cp[3] = (uint8_t) vp->name[13];
 	localAddr.s_addr = tmpAddr.addr.s_addr;
 	localPort        = vp->name[ 14 ];
 	cp = tmpAddr.data;
-	cp[0] = vp->name[ 15 ] & 0xff;
-	cp[1] = vp->name[ 16 ] & 0xff;
-	cp[2] = vp->name[ 17 ] & 0xff;
-	cp[3] = vp->name[ 18 ] & 0xff;
+	cp[0] = (uint8_t) vp->name[15];
+	cp[1] = (uint8_t) vp->name[16];
+	cp[2] = (uint8_t) vp->name[17];
+	cp[3] = (uint8_t) vp->name[18];
 	remoteAddr.s_addr = tmpAddr.addr.s_addr;
 	remotePort        = vp->name[ 19 ];
 
@@ -227,10 +227,10 @@ udpprotopr(const char *name)
          *   we walked udpLocalAddress rather than udpLocalPort)
          */
         cp = tmpAddr.data;
-        cp[0] = vp->name[ 10 ] & 0xff;
-        cp[1] = vp->name[ 11 ] & 0xff;
-        cp[2] = vp->name[ 12 ] & 0xff;
-        cp[3] = vp->name[ 13 ] & 0xff;
+        cp[0] = (uint8_t) vp->name[10];
+        cp[1] = (uint8_t) vp->name[11];
+        cp[2] = (uint8_t) vp->name[12];
+        cp[3] = (uint8_t) vp->name[13];
         localAddr.s_addr = tmpAddr.addr.s_addr;
         localPort        = vp->name[ 14 ];
         inetprint(&localAddr, localPort, name, 1);
@@ -573,7 +573,7 @@ inetprint(struct in_addr *in, int port, const char *proto, int local)
 	    snprintf(line, sizeof line, "%.*s.", width-9, inetname(in));
 	cp = strchr(line, '\0');
 	if (!nflag && port)
-		sp = getservbyport((int)htons(port), proto);
+		sp = getservbyport(htons((uint16_t) port), proto);
 	if (sp || port == 0)
 		snprintf(cp, line + sizeof line - cp, vflag ? "%s" : "%.8s",
 		    sp ? sp->s_name : "*");
