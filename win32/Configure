@@ -148,7 +148,6 @@ my %subs = (
     "pfx" => [ "^PREFIX=",     "PREFIX=$prefix"                     ],
     "dos" => [ "^PREFIX_DOS=", "PREFIX_DOS=$prefixdos"              ],
     "sdk" => [ "^SDK=",        $sdk == 1 ? "SDK=true" : "SDK=false" ],
-    "ssl" => [ "^SSL=.*",      "SSL=$openssl"                       ]
     );
 
 substitute("Makefile", "Makefile.in", \%subs);

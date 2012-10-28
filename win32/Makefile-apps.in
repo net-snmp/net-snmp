@@ -3,7 +3,6 @@ CFG=
 OUTDIR=
 INTDIR=
 LINKTYPE=
-SSL=
 
 # Set to 1 to allow the building using the DLL version of SNMPLIB.
 ALLOW_DLL=1
