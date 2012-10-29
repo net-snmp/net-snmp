@@ -1025,9 +1025,7 @@ The Cygwin compiler and toolkit provides a Unix style shell and environment
 for Windows based systems. The cygwin1.dll provides a POSIX emulation layer 
 that simplifies porting Unix / Linux applications to Windows. The Cygwin dlls
 are required if an application is to be distributed. The dependency on the 
-Cygwin dlls can be eliminated with the --mno-cygwin compiler flag, which uses
-MinGW to compile a native Windows binary, but the benefit of the POSIX emulation
-is lost. The Cygwin tool chain and documentation can be found at:
+The Cygwin tool chain and documentation can be found at:
 
 http://sources.redhat.com/cygwin/
 
