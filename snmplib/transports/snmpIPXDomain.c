@@ -363,7 +363,9 @@ netsnmp_sockaddr_ipx2(struct sockaddr_ipx *addr, const char *peername,
         node = "000000000000";
 
     if (port == NULL || *port == '\0')
-        port = __STRING(SNMP_IPX_DEFAULT_PORT);
+#define val(x) __STRING(x)
+        port = val(SNMP_IPX_DEFAULT_PORT);
+#undef val
 
     DEBUGMSGTL(("netsnmp_sockaddr_ipx", "Address: %s:%s/%s\n",
                 network ? network : "[NIL]", node ? node : "[NIL]",
