@@ -3,7 +3,7 @@
  *     hrSWRunTable data access:
  *     kvm_getprocs() interface - FreeBSD, NetBSD, OpenBSD
  *
- * NB: later FreeBSD uses a different kinfo_proc structure
+ * NB: later FreeBSD and OpenBSD use different kinfo_proc structures
  */
 #include <net-snmp/net-snmp-config.h>
 
@@ -59,11 +59,15 @@ extern kvm_t *kd;
 #define SWRUN_K_FLAG	ki_flag
 #define SWRUN_K_CLASS	ki_pri.pri_class
 
-#elif HAVE_KVM_GETPROC2
+#elif HAVE_KVM_GETPROC2 || defined(openbsd5)
     /*
      * newer NetBSD, OpenBSD kinfo_proc2 field names
      */
+#if defined(openbsd5)
+#define SWRUN_TABLE	kinfo_proc
+#else
 #define SWRUN_TABLE	kinfo_proc2
+#endif
 #define SWRUN_K_STAT	p_stat
 #define SWRUN_K_PID	p_pid
 #define SWRUN_K_COMM	p_comm
@@ -157,7 +161,9 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         DEBUGMSGTL(("swrun:load:arch"," Can't query kvm info\n"));
         return 1;     /* No handle for retrieving process table */
     }
-#if HAVE_KVM_GETPROC2
+#if defined(openbsd5)
+    proc_table = kvm_getprocs(kd, KERN_PROC_KTHREAD, 0, sizeof(struct kinfo_proc), &nprocs );
+#elif defined(HAVE_KVM_GETPROC2)
     proc_table = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &nprocs );
 #elif defined(KERN_PROC_PROC)
     proc_table = kvm_getprocs(kd, KERN_PROC_PROC, 0, &nprocs );
@@ -265,6 +271,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         case SRUN:    entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
                       break;
         case SSLEEP:
+	case SACTIVE:
         case SWAIT:   entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNABLE;
                       break;
         case SIDL:
@@ -288,7 +295,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 	 entry->hrSWRunPerfCPU += (proc_table[i].ki_rusage_ch.ru_utime.tv_sec*1000000 + proc_table[i].ki_rusage_ch.ru_utime.tv_usec) / 10000;
 	 entry->hrSWRunPerfCPU += (proc_table[i].ki_rusage_ch.ru_stime.tv_sec*1000000 + proc_table[i].ki_rusage_ch.ru_stime.tv_usec) / 10000;
 	 entry->hrSWRunPerfMem  = proc_table[i].ki_rssize * (getpagesize()/1024);  /* in kB */
-#elif defined(HAVE_KVM_GETPROC2)
+#elif defined(HAVE_KVM_GETPROC2) || defined(openbsd5)
         /*
          * newer NetBSD, OpenBSD
          */
