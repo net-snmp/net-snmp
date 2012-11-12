@@ -283,7 +283,8 @@ configclean: makefileclean
 		agent/mibgroup/mib_module_includes.h 	\
 		agent/mibgroup/mib_module_inits.h 	\
 		agent/mibgroup/mib_module_shutdown.h 	\
-		agent/mibgroup/mib_module_dot_conf.h
+		agent/mibgroup/mib_module_dot_conf.h    \
+		local/snmpconf
 	rm -rf mk
 	rm -f *.core
 
