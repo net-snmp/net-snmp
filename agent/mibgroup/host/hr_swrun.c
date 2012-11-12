@@ -677,6 +677,8 @@ var_hrswrun(struct variable * vp,
         strcpy(string, proc_table[LowProcIndex].ki_comm);
     #elif defined(dragonfly) && __DragonFly_version >= 190000
         strcpy(string, proc_table[LowProcIndex].kp_comm);
+    #elif defined(openbsd5)
+        strcpy(string, proc_table[LowProcIndex].p_comm);
     #else
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
     #endif
@@ -792,6 +794,8 @@ var_hrswrun(struct variable * vp,
         strcpy(string, proc_table[LowProcIndex].ki_comm);
     #elif defined(dragonfly) && __DragonFly_version >= 190000
         strcpy(string, proc_table[LowProcIndex].kp_comm);
+    #elif defined(openbsd5)
+        strcpy(string, proc_table[LowProcIndex].p_comm);
     #else
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
     #endif
@@ -962,6 +966,11 @@ var_hrswrun(struct variable * vp,
 		long_return = 2;/* operatingSystem */
 	} else
 	    long_return = 4;	/* application */
+    #elif defined(openbsd5)
+        if (proc_table[LowProcIndex].p_flag & P_SYSTEM)
+	    long_return = 2;	/* operatingSystem */
+	else
+	    long_return = 4;	/* application */
     #else
       #if defined(dragonfly) && __DragonFly_version >= 190000
         if (proc_table[LowProcIndex].kp_flags & P_SYSTEM)
@@ -1010,6 +1019,8 @@ var_hrswrun(struct variable * vp,
         switch (proc_table[LowProcIndex].ki_stat) {
     #elif defined(dragonfly) && __DragonFly_version >= 190000
         switch (proc_table[LowProcIndex].kp_stat) {
+    #elif defined(openbsd5)
+        switch (proc_table[LowProcIndex].p_stat) {
     #else
         switch (proc_table[LowProcIndex].kp_proc.p_stat) {
     #endif
@@ -1111,6 +1122,10 @@ var_hrswrun(struct variable * vp,
         long_return = proc_table[LowProcIndex].kp_lwp.kl_uticks +
             proc_table[LowProcIndex].kp_lwp.kl_sticks +
             proc_table[LowProcIndex].kp_lwp.kl_iticks;
+    #elif defined(openbsd5)
+        long_return = proc_table[LowProcIndex].p_uticks +
+            proc_table[LowProcIndex].p_sticks +
+            proc_table[LowProcIndex].p_iticks;
     #elif defined(dragonfly)
         long_return = proc_table[LowProcIndex].kp_eproc.e_uticks +
             proc_table[LowProcIndex].kp_eproc.e_sticks +
@@ -1227,6 +1242,11 @@ var_hrswrun(struct variable * vp,
     #else
             proc_table[LowProcIndex].kp_eproc.e_vm.vm_map.size / 1024;
     #endif
+  #elif defined(openbsd5)
+        long_return = proc_table[LowProcIndex].p_vm_tsize +
+            proc_table[LowProcIndex].p_vm_ssize +
+            proc_table[LowProcIndex].p_vm_dsize;
+        long_return = long_return * (getpagesize() / 1024);
   #else
         long_return = proc_table[LowProcIndex].kp_eproc.e_vm.vm_tsize +
             proc_table[LowProcIndex].kp_eproc.e_vm.vm_ssize +
@@ -1481,7 +1501,11 @@ Init_HR_SWRun(void)
             nproc = 0;
             return;
         }
+  #if defined(openbsd5)
+        proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof (struct kinfo_proc), &nproc);
+  #else
         proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nproc);
+  #endif
     }
 #else
 
@@ -1538,6 +1562,9 @@ Get_Next_HR_SWRun(void)
     #elif defined(dragonfly) && __DragonFly_version >= 190000
         if (proc_table[current_proc_entry].kp_stat != 0)
             return proc_table[current_proc_entry++].kp_pid;
+    #elif defined(openbsd5)
+        if (proc_table[current_proc_entry].p_stat != 0)
+            return proc_table[current_proc_entry++].p_pid;
     #else
         if (proc_table[current_proc_entry].kp_proc.p_stat != 0)
             return proc_table[current_proc_entry++].kp_proc.p_pid;
