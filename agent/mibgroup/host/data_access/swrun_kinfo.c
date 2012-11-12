@@ -55,6 +55,8 @@ extern kvm_t *kd;
 #define SWRUN_TABLE	kinfo_proc
 #define SWRUN_K_STAT	ki_stat
 #define SWRUN_K_PID	ki_pid
+#define SWRUN_K_PPID	ki_ppid
+#define SWRUN_K_TID	ki_tid
 #define SWRUN_K_COMM	ki_comm
 #define SWRUN_K_FLAG	ki_flag
 #define SWRUN_K_CLASS	ki_pri.pri_class
@@ -101,6 +103,22 @@ extern kvm_t *kd;
  *  Define dummy values if not already provided by the system
  */
 
+#ifdef dragonfly
+
+/*
+ * DragonFly is special. p_stat is an enum!
+ */
+
+#define SRUN	200
+#define SSLEEP	202
+#define SWAIT	203
+#define SLOCK	205
+#define SDEAD	208
+#define SONPROC	209
+
+
+#else
+
 #ifndef SRUN
 #define SRUN	200	/* Defined by FreeBSD/OpenBSD, missing in  NetBSD */
 #endif
@@ -130,6 +148,8 @@ extern kvm_t *kd;
 #endif
 #ifndef SONPROC
 #define SONPROC	209	/* Defined by OpenBSD, missing in FreeBSD/NetBSD */
+#endif
+
 #endif
 
 /* ---------------------------------------------------------------------
@@ -165,14 +185,18 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     proc_table = kvm_getprocs(kd, KERN_PROC_KTHREAD, 0, sizeof(struct kinfo_proc), &nprocs );
 #elif defined(HAVE_KVM_GETPROC2)
     proc_table = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &nprocs );
-#elif defined(KERN_PROC_PROC)
-    proc_table = kvm_getprocs(kd, KERN_PROC_PROC, 0, &nprocs );
 #else
     proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nprocs );
 #endif
     for ( i=0 ; i<nprocs; i++ ) {
         if ( 0 == proc_table[i].SWRUN_K_STAT )
             continue;
+        if ( -1 == proc_table[i].SWRUN_K_PID )
+            continue;
+#ifdef SWRUN_K_TID
+	if ( 0 == proc_table[i].SWRUN_K_PPID )
+	    proc_table[i].SWRUN_K_PID = proc_table[i].SWRUN_K_TID;
+#endif
         entry = netsnmp_swrun_entry_create(proc_table[i].SWRUN_K_PID);
         if (NULL == entry)
             continue;   /* error already logged by function */
@@ -272,20 +296,23 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         /*
          * newer NetBSD, OpenBSD
          */
-        entry->hrSWRunPerfCPU  = proc_table[i].p_uticks;
-        entry->hrSWRunPerfCPU += proc_table[i].p_sticks;
-        entry->hrSWRunPerfCPU += proc_table[i].p_iticks;
+	entry->hrSWRunPerfCPU = proc_table[i].p_rtime_sec*100;
+	entry->hrSWRunPerfCPU += proc_table[i].p_rtime_usec / 10000;
+
         entry->hrSWRunPerfMem  = proc_table[i].p_vm_rssize;
         entry->hrSWRunPerfMem *= (getpagesize() / 1024);
 #elif defined(dragonfly) && __DragonFly_version >= 190000
 	entry->hrSWRunPerfCPU  = proc_table[i].kp_lwp.kl_uticks;
 	entry->hrSWRunPerfCPU += proc_table[i].kp_lwp.kl_sticks;
 	entry->hrSWRunPerfCPU += proc_table[i].kp_lwp.kl_iticks;
+	entry->hrSWRunPerfCPU = entry->hrSWRunPerfCPU / 10000;
+
 	entry->hrSWRunPerfMem  = proc_table[i].kp_vm_map_size / 1024;
 #elif defined(dragonfly)
 	entry->hrSWRunPerfCPU  = proc_table[i].kp_eproc.e_uticks;
 	entry->hrSWRunPerfCPU += proc_table[i].kp_eproc.e_sticks;
 	entry->hrSWRunPerfCPU += proc_table[i].kp_eproc.e_iticks;
+
 	entry->hrSWRunPerfMem  = proc_table[i].kp_vm_map_size / 1024;
 
 #else
