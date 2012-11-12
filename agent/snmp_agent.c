@@ -3077,6 +3077,9 @@ handle_getnext_loop(netsnmp_agent_session *asp)
             return status;      /* should never really happen */
         }
     }
+    if (!netsnmp_running) {
+        return SNMP_ERR_GENERR;
+    }
     return SNMP_ERR_NOERROR;
 }
 
