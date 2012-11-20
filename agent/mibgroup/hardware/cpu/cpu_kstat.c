@@ -131,6 +131,8 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
                  */
             cpu->swapIn       += (unsigned long long)cs.cpu_vminfo.swapin;
             cpu->swapOut      += (unsigned long long)cs.cpu_vminfo.swapout;
+            cpu->pageIn       += (unsigned long long)cs.cpu_sysinfo.bread;
+            cpu->pageOut      += (unsigned long long)cs.cpu_sysinfo.bwrite;
             cpu->nInterrupts  += (unsigned long long)cs.cpu_sysinfo.intr;
             cpu->nCtxSwitches += (unsigned long long)cs.cpu_sysinfo.pswitch;
         }
