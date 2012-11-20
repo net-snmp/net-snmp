@@ -64,6 +64,9 @@ nsmake () {
 	shift
         _ns_setbuilddir "$1"
 	shift
+    elif [ "$1" != "" ]; then
+    	echo "Unknown argument: $1"
+	exit 1
     else
         _ns_setbuilddir
     fi
@@ -94,6 +97,9 @@ nsconfigure () {
 	shift
         _ns_setbuilddir "$1"
 	shift
+    elif [ "$1" != "" ]; then
+    	echo "Unknown argument: $1"
+	exit 1
     else
         _ns_setbuilddir
     fi
@@ -267,6 +273,9 @@ nsrollup() {
 	mergeop="merge"
     elif [ "$1" = "--rebase" ] ; then
 	mergeop="rebase"
+    elif [ "$1" != "" ]; then
+    	echo "Unknown argument: $1"
+	exit 1
     else
 	mergeop="merge"
     fi
@@ -379,6 +388,9 @@ nspull() {
 	mergeop="merge"
     elif [ "$1" = "--rebase" ] ; then
 	mergeop="rebase"
+    elif [ "$1" != "" ]; then
+    	echo "Unknown argument: $1"
+	exit 1
     else
 	mergeop="merge"
     fi
