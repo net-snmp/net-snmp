@@ -18595,16 +18595,18 @@ EOF
 # Handle the special case of KSM to see which crypto API we support
 #
 
-ac_cv_NETSNMP_USE_KERBEROS_MIT=no
 rebuilt_new_with_security=
 already_checked_krb5=no
 
 for sec in $new_with_security
 do
-  if test "x$sec" = "xksm" -a "xyes" = "x$already_checked_krb5"; then
-    continue
+  if test "x$sec" = "xksm"; then
+    if test "xyes" = "x$already_checked_krb5"; then
+      continue
+    else
+      already_checked_krb5=yes
+    fi
   fi
-  already_checked_krb5=yes
 
   if test x$sec != xksm; then
     rebuilt_new_with_security="$rebuilt_new_with_security $sec"
@@ -18790,9 +18792,6 @@ $as_echo "#define NETSNMP_USE_KERBEROS_HEIMDAL 1" >>confdefs.h
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking to see which crypto API we need to use" >&5
 $as_echo_n "checking to see which crypto API we need to use... " >&6; }
-    ac_fn_c_check_func "$LINENO" "krb5_c_encrypt" "ac_cv_func_krb5_c_encrypt"
-if test "x$ac_cv_func_krb5_c_encrypt" = xyes; then :
-
     if ${ac_cv_NETSNMP_USE_KERBEROS_MIT+:} false; then :
   $as_echo_n "(cached) " >&6
 else
@@ -18835,7 +18834,7 @@ $as_echo "$ac_cv_lib_k5crypto_krb5_init_context" >&6; }
 if test "x$ac_cv_lib_k5crypto_krb5_init_context" = xyes; then :
   ac_cv_NETSNMP_USE_KERBEROS_MIT=yes
 else
-  ac_cv_MIT_NEW_CRYPTo=no
+  ac_cv_NETSNMP_USE_KERBEROS_MIT=no
 
 fi
 
@@ -18855,8 +18854,6 @@ $as_echo "#define NETSNMP_USE_KERBEROS_MIT 1" >>confdefs.h
     else
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: old MIT crypto API" >&5
 $as_echo "old MIT crypto API" >&6; }
-fi
-
     fi
   fi
 done
