@@ -84,6 +84,12 @@ perfstat_id_t ps_name;
 #ifdef solaris2
 #define ICMP_STAT_STRUCTURE	mib2_icmp_t
 #define USES_SNMP_DESIGNED_ICMPSTAT
+#undef NETSNMP_ENABLE_IPV6
+#include "kernel_mib.h"
+static int
+solaris_read_icmp_stat(ICMP_STAT_STRUCTURE *);
+static int
+solaris_read_icmp_msg_stat(ICMP_STAT_STRUCTURE *, struct icmp4_msg_mib *, int *);
 #endif
 
 #ifdef NETBSD_STATS_VIA_SYSCTL
@@ -97,7 +103,11 @@ perfstat_id_t ps_name;
 #define ICMP_STAT_STRUCTURE MIB_ICMP
 #endif
 
-/* ?? #if (defined(NETSNMP_CAN_USE_SYSCTL) && defined(ICMPCTL_STATS)) ?? */
+#if (defined(NETSNMP_CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
+#define ICMP_STAT_STRUCTURE	struct icmp_mib
+#define USES_SNMP_DESIGNED_ICMPSTAT
+#undef ICMPSTAT_SYMBOL
+#endif
 
 #ifdef HAVE_SYS_ICMPIPSTATS_H
 /* or #ifdef		HAVE_SYS_TCPIPSTATS_H  ??? */
@@ -112,6 +122,35 @@ perfstat_id_t ps_name;
 
 ICMP_STAT_STRUCTURE icmpstat;
 
+/* If they just all agreed ... */
+
+#ifndef ICMP_DEST_UNREACH
+#define ICMP_DEST_UNREACH ICMP_UNREACH
+#endif
+#ifndef ICMP_SOURCE_QUENCH
+#define ICMP_SOURCE_QUENCH ICMP_SOURCEQUENCH
+#endif
+#ifndef ICMP_TIME_EXCEEDED
+#define ICMP_TIME_EXCEEDED ICMP_TIMXCEED
+#endif
+#ifndef ICMP_PARAMETERPROB
+#define ICMP_PARAMETERPROB ICMP_PARAMPROB
+#endif
+#ifndef ICMP_TIMESTAMP
+#define ICMP_TIMESTAMP ICMP_TSTAMP
+#endif
+#ifndef ICMP_TIMESTAMPREPLY
+#define ICMP_TIMESTAMPREPLY ICMP_TSTAMPREPLY
+#endif
+#ifndef ICMP_ADDRESS
+#define ICMP_ADDRESS ICMP_MASKREQ
+#endif
+#ifndef ICMP_ADDRESSREPLY
+#define ICMP_ADDRESSREPLY ICMP_MASKREPLY
+#endif
+#ifndef MLD_LISTENER_REDUCTION
+#define MLD_LISTENER_REDUCTION MLD_LISTENER_DONE
+#endif
 
 /*
  * Define the OID pointer to the top of the mib tree that we're
@@ -126,7 +165,7 @@ extern int      ip_module_oid_len;
 extern int      ip_module_count;
 #endif
 
-#ifdef linux
+#ifdef USES_SNMP_DESIGNED_ICMPSTAT
 struct icmp_stats_table_entry {
 	uint32_t ipVer;
         uint32_t icmpStatsInMsgs;
@@ -171,21 +210,45 @@ icmp_stats_load(netsnmp_cache *cache, void *vmagic)
      */
 
     int i;
-    struct icmp_mib v4icmp;
+    ICMP_STAT_STRUCTURE v4icmp;
+#ifdef NETSNMP_ENABLE_IPV6
     struct icmp6_mib v6icmp;
+#endif
     for(i = 0; i < 2; i++) {
         switch(i) {
         case 0:
+#ifdef linux
             linux_read_icmp_stat(&v4icmp);
+#elif defined(NETBSD_STATS_VIA_SYSCTL)
+	    netbsd_read_icmp_stat(&v4icmp);
+#elif (defined(NETSNMP_CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
+	    sysctl_read_icmp_stat(&v4icmp);
+#elif defined(solaris2)
+	    solaris_read_icmp_stat(&v4icmp);
+#else
+	    return -1;
+#endif
             icmp_stats_table[i].icmpStatsInMsgs = v4icmp.icmpInMsgs;
             icmp_stats_table[i].icmpStatsInErrors = v4icmp.icmpInErrors;
             icmp_stats_table[i].icmpStatsOutMsgs = v4icmp.icmpOutMsgs;
             icmp_stats_table[i].icmpStatsOutErrors = v4icmp.icmpOutErrors;
             break;
         case 1:
+#ifdef NETSNMP_ENABLE_IPV6
             memset(&icmp_stats_table[i],0,
                     sizeof(struct icmp_stats_table_entry));
+#ifdef linux
             linux_read_icmp6_stat(&v6icmp);
+#elif defined(NETBSD_STATS_VIA_SYSCTL)
+	    netbsd_read_icmp6_stat(&v6icmp);
+#elif (defined(NETSNMP_CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
+	    sysctl_read_icmp6_stat(&v6icmp);
+#elif defined(solaris2)
+	    /* solaris_read_icmp6_stat(&v6icmp)*/
+	    return -1;
+#else
+	    return -1;
+#endif
             icmp_stats_table[i].icmpStatsInMsgs = v6icmp.icmp6InMsgs;
             icmp_stats_table[i].icmpStatsInErrors = v6icmp.icmp6InErrors;
             icmp_stats_table[i].icmpStatsOutMsgs = v6icmp.icmp6OutMsgs;
@@ -193,6 +256,7 @@ icmp_stats_load(netsnmp_cache *cache, void *vmagic)
                         v6icmp.icmp6OutDestUnreachs +
                         v6icmp.icmp6OutPktTooBigs +  v6icmp.icmp6OutTimeExcds +
                         v6icmp.icmp6OutParmProblems;
+#endif	/* NETSNMP_ENABLE_IPV6 */
             break;
         }
         icmp_stats_table[i].ipVer = i + 1;
@@ -218,7 +282,17 @@ icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
     flag = 0;
     k = 0;
     inc = 0;
+#ifdef linux
     linux_read_icmp_msg_stat(&v4icmp, &v4icmpmsg, &flag);
+#elif defined(NETBSD_STATS_VIA_SYSCTL)
+    netbsd_read_icmp_msg_stat(&v4icmp, &v4icmpmsg, &flag);
+#elif (defined(NETSNMP_CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
+    sysctl_read_icmp_msg_stat(&v4icmp, &v4icmpmsg, &flag);
+#elif defined(solaris2)
+    solaris_read_icmp_msg_stat(&v4icmp, &v4icmpmsg, &flag);
+#else
+    return -1;
+#endif
     if (flag) {
         while (254 != k) {
             if (v4icmpmsg.vals[k].InType) {
@@ -324,7 +398,18 @@ icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
     flag = 0;
     k = 0;
     inc = 0;
+#ifdef linux
     linux_read_icmp6_msg_stat(&v6icmp, &v6icmpmsg, &flag);
+#elif defined(NETBSD_STATS_VIA_SYSCTL)
+    netbsd_read_icmp6_msg_stat(&v6icmp, &v6icmpmsg, &flag);
+#elif (defined(NETSNMP_CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
+    sysctl_read_icmp6_msg_stat(&v6icmp, &v6icmpmsg, &flag);
+#elif defined(solaris2)
+    /* solaris_read_icmp6_msg_stat(&v6icmp, &v6icmpmsg, &flag); */
+    return -1;
+#else
+    return -1;
+#endif
     if (flag) {
         while (254 != k) {
             if (v6icmpmsg.vals[k].InType) {
@@ -535,7 +620,7 @@ icmp_msg_stats_first_entry(void **loop_context,
 void
 init_icmp(void)
 {
-#ifdef linux
+#ifdef USES_SNMP_DESIGNED_ICMPSTAT
     netsnmp_handler_registration *msg_stats_reginfo = NULL;
     netsnmp_handler_registration *table_reginfo = NULL;
     netsnmp_iterator_info *iinfo;
@@ -567,7 +652,7 @@ init_icmp(void)
     if (rc != SNMPERR_SUCCESS)
 	goto bail;
 #endif
-#ifdef linux
+#ifdef USES_SNMP_DESIGNED_ICMPSTAT
 
     /* register icmpStatsTable */
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
@@ -628,7 +713,7 @@ init_icmp(void)
             netsnmp_get_cache_handler(ICMP_STATS_CACHE_TIMEOUT,
                 icmp_load, icmp_free,
                 icmp_msg_stats_tbl_oid, OID_LENGTH(icmp_msg_stats_tbl_oid)));
-#endif /* linux */
+#endif /* USES_SNMP_DESIGNED_ICMPSTAT */
 
 #ifdef USING_MIBII_IP_MODULE
     if (++ip_module_count == 2)
@@ -649,7 +734,7 @@ init_icmp(void)
 #ifndef hpux11
 bail:
 #endif
-#ifdef linux
+#ifdef USES_SNMP_DESIGNED_ICMPSTAT
     if (msg_stats_reginfo)
         netsnmp_handler_registration_free(msg_stats_reginfo);
     if (table_reginfo)
@@ -1065,7 +1150,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
 }
 
 
-#ifdef linux
+#ifdef USES_SNMP_DESIGNED_ICMPSTAT
 int
 icmp_stats_table_handler(netsnmp_mib_handler  *handler,
                  netsnmp_handler_registration *reginfo,
@@ -1199,7 +1284,7 @@ icmp_msg_stats_table_handler(netsnmp_mib_handler          *handler,
 
     return SNMP_ERR_NOERROR;
 }
-#endif		/* linux */
+#endif		/* USES_SNMP_DESIGNED_ICMPSTAT */
 
         /*********************
 	 *
@@ -1349,7 +1434,23 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     } else {
         DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (solaris)\n"));
     }
+    icmp_stats_load(cache, vmagic);
+    icmp_msg_stats_load(cache, vmagic);
     return ret_value;
+}
+
+static int
+solaris_read_icmp_stat(ICMP_STAT_STRUCTURE *mib)
+{
+    *mib = icmpstat;
+    return 0;
+}
+static int
+solaris_read_icmp_msg_stat(ICMP_STAT_STRUCTURE *mib, struct icmp4_msg_mib *msg_mib, int *flag)
+{
+    *mib = icmpstat;
+    *flag = 0;
+    return 0;
 }
 #elif defined(NETBSD_STATS_VIA_SYSCTL)
 int
@@ -1364,6 +1465,8 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     } else {
 	DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (netbsd)\n"));
     }
+    icmp_stats_load(cache, vmagic);
+    icmp_msg_stats_load(cache, vmagic);
     return ret_value;
 }
 #elif defined (WIN32) || defined (cygwin)
@@ -1403,18 +1506,16 @@ int
 icmp_load(netsnmp_cache *cache, void *vmagic)
 {
     long            ret_value = -1;
-    static int      sname[4] =
-        { CTL_NET, PF_INET, IPPROTO_ICMP, ICMPCTL_STATS };
-    size_t          len = sizeof(icmpstat);
 
-    ret_value = sysctl(sname, 4, &icmpstat, &len, 0, 0);
+    ret_value = sysctl_read_icmp_stat(&icmpstat);
 
     if ( ret_value < 0 ) {
-        DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (sysctl)\n"));
+	DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (netbsd)\n"));
     } else {
-	ret_value = 0;
-        DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (sysctl)\n"));
+	DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (netbsd)\n"));
     }
+    icmp_stats_load(cache, vmagic);
+    icmp_msg_stats_load(cache, vmagic);
     return ret_value;
 }
 #elif defined(HAVE_SYS_TCPIPSTATS_H)
