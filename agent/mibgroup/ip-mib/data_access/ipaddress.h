@@ -22,6 +22,8 @@ config_require(ip-mib/data_access/ipaddress_common)
 config_require(ip-mib/data_access/ipaddress_linux)
 #elif defined( solaris2 )
 config_require(ip-mib/data_access/ipaddress_solaris2)
+#elif defined( freebsd7 ) || defined( netbsd5 ) || defined( openbsd4 ) || defined( dragonfly )
+config_require(ip-mib/data_access/ipaddress_sysctl)
 #else
 config_error(the ipaddress data access library is not available in this environment.)
 #endif
