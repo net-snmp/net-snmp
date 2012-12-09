@@ -27,9 +27,11 @@ config_require(if-mib)
  * these new module re-rewrites have only been implemented for
  * Linux and *BSD.
  */
-#if defined(linux) || defined(dragonfly) || defined(freebsd7) || \
-    defined(netbsd5) || defined(openbsd4)
+#if defined(linux)
 config_require(ip-mib ip-forward-mib tcp-mib udp-mib)
+#elif defined(dragonfly) || defined(freebsd7) || \
+    defined(netbsd5) || defined(openbsd4)
+config_require(ip-mib tcp-mib udp-mib)
 #elif defined(solaris2)
 config_require(tcp-mib udp-mib)
 #elif defined(freebsd4)
