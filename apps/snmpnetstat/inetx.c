@@ -163,6 +163,8 @@ codelist_t icmpcodes[] = {
     {  14, "Timestamp reply" },
     {  15, "Information request" },
     {  16, "Information reply" },
+    {  17, "Address mask request" },
+    {  18, "Address mask reply" },
     { 0 }
 };
 
@@ -171,8 +173,8 @@ codelist_t icmp6codes[] = {
     {   2,   "Packet Too Big" },
     {   3,   "Time Exceeded" },
     {   4,   "Parameter Problem" },
-    { 100,   "Private experimentation" },
-    { 101,   "Private experimentation" },
+    { 100,   "Private experimentation 100" },
+    { 101,   "Private experimentation 101" },
     { 127,   "Reserved for expansion of ICMPv6 error messages" },
     { 128,   "Echo Request" },
     { 129,   "Echo Reply" },
