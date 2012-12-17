@@ -2438,6 +2438,63 @@ $as_echo "$ac_res" >&6; }
 
 } # ac_fn_c_check_func
 
+# ac_fn_c_check_member LINENO AGGR MEMBER VAR INCLUDES
+# ----------------------------------------------------
+# Tries to find if the field MEMBER exists in type AGGR, after including
+# INCLUDES, setting cache variable VAR accordingly.
+ac_fn_c_check_member ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2.$3" >&5
+$as_echo_n "checking for $2.$3... " >&6; }
+if eval \${$4+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$5
+int
+main ()
+{
+static $2 ac_aggr;
+if (ac_aggr.$3)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$4=yes"
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$5
+int
+main ()
+{
+static $2 ac_aggr;
+if (sizeof ac_aggr.$3)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$4=yes"
+else
+  eval "$4=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$4
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_member
+
 # ac_fn_c_compute_int LINENO EXPR VAR INCLUDES
 # --------------------------------------------
 # Tries to find the compile-time value of EXPR in a program that includes
@@ -2796,63 +2853,6 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_find_uintX_t
-
-# ac_fn_c_check_member LINENO AGGR MEMBER VAR INCLUDES
-# ----------------------------------------------------
-# Tries to find if the field MEMBER exists in type AGGR, after including
-# INCLUDES, setting cache variable VAR accordingly.
-ac_fn_c_check_member ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2.$3" >&5
-$as_echo_n "checking for $2.$3... " >&6; }
-if eval \${$4+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$5
-int
-main ()
-{
-static $2 ac_aggr;
-if (ac_aggr.$3)
-return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$4=yes"
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$5
-int
-main ()
-{
-static $2 ac_aggr;
-if (sizeof ac_aggr.$3)
-return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$4=yes"
-else
-  eval "$4=no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-eval ac_res=\$$4
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-
-} # ac_fn_c_check_member
 
 # ac_fn_c_check_decl LINENO SYMBOL VAR INCLUDES
 # ---------------------------------------------
@@ -16830,17 +16830,20 @@ ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#if HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#if HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#if HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
-#endif
-#if HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#if HAVE_NET_ROUTE_H
-#include <net/route.h>
 #endif
 
 "
@@ -17271,6 +17274,210 @@ _ACEOF
 fi
 
 done
+
+
+##  This is here to avoid loads of redefinition warnings during
+##  module configuration
+
+##
+#   rtentry structure checks:
+##
+
+# Check struct rtentry for common fields
+#   Agent:
+#
+ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_dst" "ac_cv_member_struct_rtentry_rt_dst" "
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL 1
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_rtentry_rt_dst" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_RTENTRY_RT_DST 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_hash" "ac_cv_member_struct_rtentry_rt_hash" "
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL 1
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_rtentry_rt_hash" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_RTENTRY_RT_HASH 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_next" "ac_cv_member_struct_rtentry_rt_next" "
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL 1
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_rtentry_rt_next" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_RTENTRY_RT_NEXT 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_refcnt" "ac_cv_member_struct_rtentry_rt_refcnt" "
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL 1
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_rtentry_rt_refcnt" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_RTENTRY_RT_REFCNT 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_unit" "ac_cv_member_struct_rtentry_rt_unit" "
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL 1
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_rtentry_rt_unit" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_RTENTRY_RT_UNIT 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_use" "ac_cv_member_struct_rtentry_rt_use" "
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL 1
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_rtentry_rt_use" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_RTENTRY_RT_USE 1
+_ACEOF
+
+
+fi
 
 
 fi # NETSNMP_QUICK_CHECK
@@ -26102,6 +26309,30 @@ _ACEOF
 
 fi
 
+#       struct ip6stat
+#   Agent:
+#
+ac_fn_c_check_member "$LINENO" "struct ip6stat" "ip6s_exthdrtoolong " "ac_cv_member_struct_ip6stat_ip6s_exthdrtoolong_" "
+    $ac_includes_default
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET6_IP6_VAR_H
+#include <netinet6/ip6_var.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_ip6stat_ip6s_exthdrtoolong_" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_IP6STAT_IP6S_EXTHDRTOOLONG_ 1
+_ACEOF
+
+
+fi
+
+
 #
 #   Not-Used:
 ac_fn_c_check_member "$LINENO" "struct ipstat" "ips_cantforward" "ac_cv_member_struct_ipstat_ips_cantforward" "
@@ -26957,6 +27188,31 @@ if test "x$ac_cv_member_struct_udpstat_udps_noportbcast" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_UDPSTAT_UDPS_NOPORTBCAST 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct udpstat" "udps_ipackets" "ac_cv_member_struct_udpstat_udps_ipackets" "
+    $ac_includes_default
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+#if HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
+#if HAVE_NETINET_UDP_VAR_H
+#include <netinet/udp_var.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_udpstat_udps_ipackets" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_UDPSTAT_UDPS_IPACKETS 1
 _ACEOF
 
 
@@ -28317,208 +28573,6 @@ if test "x$ac_cv_member_struct_ifnet_if_xname" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_IFNET_IF_XNAME 1
-_ACEOF
-
-
-fi
-
-
-
-##
-#   rtentry structure checks:
-##
-
-# Check struct rtentry for common fields
-#   Agent:
-#
-ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_dst" "ac_cv_member_struct_rtentry_rt_dst" "
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <sys/types.h>
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
-#define _KERNEL_STRUCTURES 1
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#if !defined(__DragonFly__)
-#define _KERNEL 1
-#endif
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#endif
-#ifdef HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-
-"
-if test "x$ac_cv_member_struct_rtentry_rt_dst" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_RTENTRY_RT_DST 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_hash" "ac_cv_member_struct_rtentry_rt_hash" "
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <sys/types.h>
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
-#define _KERNEL_STRUCTURES 1
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#if !defined(__DragonFly__)
-#define _KERNEL 1
-#endif
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#endif
-#ifdef HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-
-"
-if test "x$ac_cv_member_struct_rtentry_rt_hash" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_RTENTRY_RT_HASH 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_next" "ac_cv_member_struct_rtentry_rt_next" "
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <sys/types.h>
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
-#define _KERNEL_STRUCTURES 1
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#if !defined(__DragonFly__)
-#define _KERNEL 1
-#endif
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#endif
-#ifdef HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-
-"
-if test "x$ac_cv_member_struct_rtentry_rt_next" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_RTENTRY_RT_NEXT 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_refcnt" "ac_cv_member_struct_rtentry_rt_refcnt" "
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <sys/types.h>
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
-#define _KERNEL_STRUCTURES 1
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#if !defined(__DragonFly__)
-#define _KERNEL 1
-#endif
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#endif
-#ifdef HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-
-"
-if test "x$ac_cv_member_struct_rtentry_rt_refcnt" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_RTENTRY_RT_REFCNT 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_unit" "ac_cv_member_struct_rtentry_rt_unit" "
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <sys/types.h>
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
-#define _KERNEL_STRUCTURES 1
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#if !defined(__DragonFly__)
-#define _KERNEL 1
-#endif
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#endif
-#ifdef HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-
-"
-if test "x$ac_cv_member_struct_rtentry_rt_unit" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_RTENTRY_RT_UNIT 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_use" "ac_cv_member_struct_rtentry_rt_use" "
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <sys/types.h>
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
-#define _KERNEL_STRUCTURES 1
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#if !defined(__DragonFly__)
-#define _KERNEL 1
-#endif
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#endif
-#ifdef HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-
-"
-if test "x$ac_cv_member_struct_rtentry_rt_use" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_RTENTRY_RT_USE 1
 _ACEOF
 
 
