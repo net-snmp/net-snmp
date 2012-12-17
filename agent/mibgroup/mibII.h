@@ -31,7 +31,7 @@ config_require(if-mib)
 config_require(ip-mib ip-forward-mib tcp-mib udp-mib)
 #elif defined(dragonfly) || defined(freebsd7) || \
     defined(netbsd5) || defined(openbsd4)
-config_require(ip-mib tcp-mib udp-mib)
+config_require(ip-mib ip-forward-mib tcp-mib udp-mib)
 #elif defined(solaris2)
 config_require(tcp-mib udp-mib)
 #elif defined(freebsd4)
