@@ -22,6 +22,8 @@ config_require(ip-forward-mib/data_access/route_common)
 #if defined( linux )
 config_require(ip-forward-mib/data_access/route_linux)
 config_require(ip-forward-mib/data_access/route_ioctl)
+#elif defined( freebsd7 ) || defined( netbsd5 ) || defined( openbsd4 ) || defined( dragonfly )
+config_require(ip-forward-mib/data_access/route_sysctl)
 #else
 config_error(the route data access library is not available in this environment.)
 #endif
