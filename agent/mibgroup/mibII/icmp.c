@@ -268,7 +268,7 @@ icmp_stats_load(netsnmp_cache *cache, void *vmagic)
 int
 icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
 {
-    struct icmp_mib v4icmp;
+    ICMP_STAT_STRUCTURE v4icmp;
     struct icmp4_msg_mib v4icmpmsg;
 #ifdef NETSNMP_ENABLE_IPV6
     struct icmp6_mib v6icmp;
