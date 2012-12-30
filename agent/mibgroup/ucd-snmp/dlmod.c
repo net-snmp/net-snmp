@@ -33,7 +33,7 @@
 #include <dlfcn.h>
 #include "dlmod.h"
 
-static struct dlmod *dlmods = NULL;
+static struct dlmod *dlmods;
 static int      dlmod_next_index = 1;
 static char     dlmod_path[1024];
 
