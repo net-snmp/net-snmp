@@ -85,6 +85,7 @@ LIB32_OBJS1= \
 	"$(INTDIR)\mteTriggerThresholdTable.obj" \
 	"$(INTDIR)\example.obj" \
 	"$(INTDIR)\ucdDemoPublic.obj" \
+	"$(INTDIR)\dlmod.obj" \
 	"$(INTDIR)\errormib.obj" \
 	"$(INTDIR)\extensible.obj" \
 	"$(INTDIR)\file.obj"
@@ -311,6 +312,12 @@ SOURCE=..\..\agent\mibgroup\examples\example.c
 SOURCE=..\..\agent\mibgroup\examples\ucdDemoPublic.c
 
 "$(INTDIR)\ucdDemoPublic.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE="..\..\agent\mibgroup\ucd-snmp\dlmod.c"
+
+"$(INTDIR)\dlmod.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
