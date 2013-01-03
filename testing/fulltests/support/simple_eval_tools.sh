@@ -353,12 +353,22 @@ CHECKAGENTCOUNT() {
 }
 
 # Return 0 (true) if a process with pid $1 exists and 1 (false) if no process
-# with pid $1 exists. Do not use this function on MinGW: the PIDs written by
-# snmpd and snmptrapd to their pid files are not visible in the MinGW/MSYS
-# process table.
+# with pid $1 exists.
 ISRUNNING() {
-    #ps -e 2>/dev/null | egrep "^[	 ]*$1[	 ]+" >/dev/null 2>&1
-    kill -0 "$pid" 2>/dev/null
+    local name
+    local pid
+    local rest
+
+    if [ "x$OSTYPE" = "xmsys" ]; then
+	pslist.exe "$1" 2>&1 | while read name pid rest; do
+	    if [ "$1" = "$pid" ]; then
+		return 0
+	    fi
+	done
+	return 1
+    else
+        kill -0 "$1" 2>/dev/null
+    fi
 }
 
 # Echo a command that asks the process with pid $1 to stop.
@@ -595,12 +605,7 @@ STOPPROG() {
 	echo "$COMMAND ($1)" >> $SNMP_TMPDIR/invoked
 	VERBOSE_OUT 0 "$COMMAND ($1)"
         $COMMAND >/dev/null 2>&1
-        if [ "x$OSTYPE" = "xmsys" ]; then
-            # Wait until $pid and its parent have stopped.
-            sleep 1
-        else
-            WAITFORNOTCOND "ISRUNNING $pid"
-        fi
+        WAITFORNOTCOND "ISRUNNING $pid"
     fi
 }
 
@@ -649,10 +654,8 @@ FINISHED() {
       STOPTRAPD
     fi
     for pid in $pids; do
-        if [ "x$OSTYPE" = "xmsys" ] || ISRUNNING $pid; then
-            if [ "x$OSTYPE" != "xmsys" ]; then
-                SNMP_SAVE_TMPDIR=yes
-            fi
+        if ISRUNNING $pid; then
+	    SNMP_SAVE_TMPDIR=yes
 	    COMMAND="`ECHOSENDSIGKILL $pid`"
 	    echo "$COMMAND ($pfile)" >> $SNMP_TMPDIR/invoked
 	    VERBOSE_OUT 0 "$COMMAND ($pfile)"
