@@ -590,7 +590,7 @@ STARTTRAPD() {
 HUPPROG() {
     if [ -f $1 ]; then
         if [ "x$OSTYPE" = "xmsys" ]; then
-          COMMAND='echo "Skipping SIGHUP (not supported by pskill.exe on MinGW)"'
+          COMMAND='echo "Skipping SIGHUP (not possible with MinGW)"'
         else
           COMMAND="kill -HUP `cat $1`"
         fi
