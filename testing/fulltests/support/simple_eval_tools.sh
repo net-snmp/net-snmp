@@ -590,7 +590,7 @@ STARTTRAPD() {
 HUPPROG() {
     if [ -f $1 ]; then
         if [ "x$OSTYPE" = "xmsys" ]; then
-          COMMAND='echo "Skipping SIGHUP (not supported by kill.exe on MinGW)"'
+          COMMAND='echo "Skipping SIGHUP (not supported by pskill.exe on MinGW)"'
         else
           COMMAND="kill -HUP `cat $1`"
         fi
@@ -621,7 +621,7 @@ HUPTRAPD() {
 STOPPROG() {
     if [ -f $1 ]; then
         if [ "x$OSTYPE" = "xmsys" ]; then
-          COMMAND="kill.exe `cat $1`"
+          COMMAND="pskill.exe `cat $1`"
         else
           COMMAND="kill -TERM `cat $1`"
         fi
@@ -693,7 +693,7 @@ FINISHED() {
                 SNMP_SAVE_TMPDIR=yes
             fi
             if [ "x$OSTYPE" = "xmsys" ]; then
-              COMMAND="kill.exe $pid"
+              COMMAND="pskill.exe $pid"
             else
               COMMAND="kill -9 $pid"
             fi

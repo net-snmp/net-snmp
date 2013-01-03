@@ -142,25 +142,6 @@ extern          "C" {
 		goto l ;		\
 	}
 
-    /*
-     * DIFFTIMEVAL
-     *      Set <diff> to the difference between <now> (current) and <then> (past).
-     *
-     * ASSUMES that all inputs are (struct timeval)'s.
-     * Cf. system.c:calculate_time_diff().
-     */
-#define DIFFTIMEVAL(now, then, diff) 			\
-{							\
-	now.tv_sec--;					\
-	now.tv_usec += 1000000L;			\
-	diff.tv_sec  = now.tv_sec  - then.tv_sec;	\
-	diff.tv_usec = now.tv_usec - then.tv_usec;	\
-	if (diff.tv_usec > 1000000L){			\
-		diff.tv_usec -= 1000000L;		\
-		diff.tv_sec++;				\
-	}						\
-}
-
 /**
  * Compute res = a + b.
  *

@@ -374,9 +374,9 @@ usage(const char *prog)
     snmp_log_options_usage("\t\t\t  ", stderr);
 #ifndef DISABLE_MIB_LOADING
     fprintf(stderr,
-            "  -m MIB[:...]\t\tload given list of MIBs (ALL loads "
+            "  -m MIB[" ENV_SEPARATOR "...]\t\tload given list of MIBs (ALL loads "
             "everything)\n"
-            "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
+            "  -M DIR[" ENV_SEPARATOR "...]\t\tlook in given list of directories for MIBs\n");
 #endif /* DISABLE_MIB_LOADING */
 #ifndef DISABLE_MIB_LOADING
     fprintf(stderr,
