@@ -142,23 +142,40 @@ extern          "C" {
 		goto l ;		\
 	}
 
-    /*
-     * DIFFTIMEVAL
-     *      Set <diff> to the difference between <now> (current) and <then> (past).
-     *
-     * ASSUMES that all inputs are (struct timeval)'s.
-     * Cf. system.c:calculate_time_diff().
-     */
-#define DIFFTIMEVAL(now, then, diff) 			\
-{							\
-	now.tv_sec--;					\
-	now.tv_usec += 1000000L;			\
-	diff.tv_sec  = now.tv_sec  - then.tv_sec;	\
-	diff.tv_usec = now.tv_usec - then.tv_usec;	\
-	if (diff.tv_usec > 1000000L){			\
-		diff.tv_usec -= 1000000L;		\
-		diff.tv_sec++;				\
-	}						\
+/**
+ * Compute res = a + b.
+ *
+ * @pre a and b must be normalized 'struct timeval' values.
+ *
+ * @note res may be the same variable as one of the operands. In other
+ *   words, &a == &res || &b == &res may hold.
+ */
+#define NETSNMP_TIMERADD(a, b, res)                  \
+{                                                    \
+    (res)->tv_sec  = (a)->tv_sec  + (b)->tv_sec;     \
+    (res)->tv_usec = (a)->tv_usec + (b)->tv_usec;    \
+    if ((res)->tv_usec >= 1000000L) {                \
+        (res)->tv_usec -= 1000000L;                  \
+        (res)->tv_sec++;                             \
+    }                                                \
+}
+
+/**
+ * Compute res = a - b.
+ *
+ * @pre a and b must be normalized 'struct timeval' values.
+ *
+ * @note res may be the same variable as one of the operands. In other
+ *   words, &a == &res || &b == &res may hold.
+ */
+#define NETSNMP_TIMERSUB(a, b, res)                             \
+{                                                               \
+    (res)->tv_sec  = (a)->tv_sec  - (b)->tv_sec - 1;            \
+    (res)->tv_usec = (a)->tv_usec - (b)->tv_usec + 1000000L;    \
+    if ((res)->tv_usec >= 1000000L) {                           \
+        (res)->tv_usec -= 1000000L;                             \
+        (res)->tv_sec++;                                        \
+    }                                                           \
 }
 
 
