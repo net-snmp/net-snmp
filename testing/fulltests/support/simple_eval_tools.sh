@@ -596,8 +596,7 @@ STOPPROG() {
 	VERBOSE_OUT 0 "$COMMAND ($1)"
         $COMMAND >/dev/null 2>&1
         if [ "x$OSTYPE" = "xmsys" ]; then
-            # Wait until $pid and its parent have stopped.
-            sleep 1
+          COMMAND="pskill.exe `cat $1`"
         else
             WAITFORNOTCOND "ISRUNNING $pid"
         fi

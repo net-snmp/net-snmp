@@ -70,9 +70,9 @@ usage(void)
     fprintf(stderr, "  -h\t\t\tdisplay this help message\n");
     fprintf(stderr, "  -V\t\t\tdisplay package version number\n");
     fprintf(stderr,
-            "  -m MIB[:...]\t\tload given list of MIBs (ALL loads everything)\n");
+            "  -m MIB[" ENV_SEPARATOR "...]\t\tload given list of MIBs (ALL loads everything)\n");
     fprintf(stderr,
-            "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
+            "  -M DIR[" ENV_SEPARATOR "...]\t\tlook in given list of directories for MIBs\n");
     fprintf(stderr,
             "  -D[TOKEN[,...]]\tturn on debugging output for the specified TOKENs\n\t\t\t   (ALL gives extremely verbose debugging output)\n");
     fprintf(stderr, "  -w WIDTH\t\tset width of tree and detail output\n");
