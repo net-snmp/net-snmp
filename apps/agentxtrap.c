@@ -40,9 +40,9 @@ usage(const char* progname)
     fprintf(stderr,
             "  -h\t\t\tdisplay this help message\n"
             "  -V\t\t\tdisplay package version number\n"
-            "  -m MIB[:...]\t\tload given list of MIBs (ALL loads "
+            "  -m MIB[" ENV_SEPARATOR "...]\t\tload given list of MIBs (ALL loads "
             "everything)\n"
-            "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n"
+            "  -M DIR[" ENV_SEPARATOR "...]\t\tlook in given list of directories for MIBs\n"
             "  -D[TOKEN[,...]]\tturn on debugging output for the specified "
             "TOKENs\n"
             "\t\t\t   (ALL gives extremely verbose debugging output)\n"
