@@ -175,6 +175,7 @@ typedef struct {
     HANDLE          dll_handle;                      /**< DLL handle. */
     PFNSNMPEXTENSIONINIT pfSnmpExtensionInit;
     PFNSNMPEXTENSIONINITEX pfSnmpExtensionInitEx;
+    PFNSNMPEXTENSIONCLOSE pfSnmpExtensionClose;
     PFNSNMPEXTENSIONQUERY pfSnmpExtensionQuery;
     PFNSNMPEXTENSIONQUERYEX pfSnmpExtensionQueryEx;
     PFNSNMPEXTENSIONTRAP pfSnmpExtensionTrap;
@@ -363,6 +364,8 @@ init_winExtDLL(void)
         ext_dll_info->pfSnmpExtensionInitEx = (PFNSNMPEXTENSIONINITEX)
             GetProcAddress(ext_dll_info->dll_handle,
                            "SnmpExtensionInitEx");
+        ext_dll_info->pfSnmpExtensionClose = (PFNSNMPEXTENSIONCLOSE)
+            GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionClose");
         ext_dll_info->pfSnmpExtensionQuery = (PFNSNMPEXTENSIONQUERY)
             GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionQuery");
         ext_dll_info->pfSnmpExtensionQueryEx = (PFNSNMPEXTENSIONQUERYEX)
@@ -481,16 +484,22 @@ shutdown_winExtDLL(void)
 
     for (i = s_winextdll.size - 1; i >= 0; i--) {
         winextdll      *const ext_dll_info = &WINEXTDLL(i);
-        /*
-         * Freeing the Broadcom SNMP extension libraries triggers a deadlock,
-         * so skip bcmif.dll and baspmgnt.dll. 
-         */
-        if (ext_dll_info->dll_handle != 0
-            && !basename_equals(ext_dll_info->dll_name, "bcmif.dll")
-            && !basename_equals(ext_dll_info->dll_name, "baspmgnt.dll")) {
-            DEBUGMSG(("winExtDLL", "unloading %s.\n",
-                      ext_dll_info->dll_name));
-            FreeLibrary(ext_dll_info->dll_handle);
+        if (ext_dll_info->dll_handle) {
+            if (ext_dll_info->pfSnmpExtensionClose) {
+                DEBUGMSG(("winExtDLL", "closing %s.\n",
+                          ext_dll_info->dll_name));
+                ext_dll_info->pfSnmpExtensionClose();
+            }
+            /*
+             * Freeing the Broadcom SNMP extension libraries triggers
+             * a deadlock, so skip bcmif.dll and baspmgnt.dll.
+             */
+            if (!basename_equals(ext_dll_info->dll_name, "bcmif.dll")
+                && !basename_equals(ext_dll_info->dll_name, "baspmgnt.dll")) {
+                DEBUGMSG(("winExtDLL", "unloading %s.\n",
+                          ext_dll_info->dll_name));
+                FreeLibrary(ext_dll_info->dll_handle);
+            }
         }
         free(ext_dll_info->dll_name);
     }
