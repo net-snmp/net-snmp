@@ -38,6 +38,16 @@ OK_TO_SAVE_RESULT=1
 export OK_TO_SAVE_RESULT
 fi
 
+if [ `uname -s` = SunOS ]
+then PATH=/usr/xpg4/bin:$PATH
+fi
+
+if [ `uname -s` = SunOS ]; then
+    local() {
+	:
+    }
+fi
+
 #
 # HEADER: returns a single line when SNMP_HEADERONLY mode and exits.
 #
