@@ -152,6 +152,9 @@ typedef         BOOL(WINAPI * PFNSNMPEXTENSIONTRAP) (AsnObjectIdentifier *
 
 typedef         VOID(WINAPI * PFNSNMPEXTENSIONCLOSE) (void);
 
+typedef BOOL (WINAPI *pfIsWow64Process)(HANDLE hProcess, BOOL *Wow64Process);
+
+
 /**
  * Extensible array, a data structure similar to the C++ STL class
  * std::vector<>.
@@ -283,6 +286,8 @@ static void    *xarray_reserve(xarray * a, int reserved);
 #define WINEXTDLL_VIEW(i)       ((winextdll_view*)s_winextdll_view.p)[i]
 #define TRAPEVENT(i)            ((HANDLE*)s_trapevent.p)[i]
 #define TRAPEVENT_TO_DLLINFO(i) ((winextdll**)s_trapevent_to_dllinfo.p)[i]
+static const oid mibii_system_mib[] = { 1, 3, 6, 1, 2, 1, 1 };
+static OSVERSIONINFO s_versioninfo = { sizeof(s_versioninfo) };
 static xarray   s_winextdll = { 0, sizeof(winextdll) };
 static xarray   s_winextdll_view = { 0, sizeof(winextdll_view) };
 static xarray   s_trapevent = { 0, sizeof(HANDLE) };
@@ -298,10 +303,20 @@ static context_info *context_info_head;
 void
 init_winExtDLL(void)
 {
-    BOOL            result;
+    BOOL            result, is_wow64_process = FALSE;
     int             i;
+    uint32_t        uptime_reference;
+    pfIsWow64Process IsWow64Process;
 
     DEBUGMSG(("winExtDLL", "init_winExtDLL started.\n"));
+
+    GetVersionEx(&s_versioninfo);
+
+    IsWow64Process =
+      (pfIsWow64Process)GetProcAddress(GetModuleHandle("kernel32"),
+                                       "IsWow64Process");
+    if (IsWow64Process)
+        (*IsWow64Process)(GetCurrentProcess(), &is_wow64_process);
 
     SnmpSvcInitUptime();
 
@@ -383,29 +398,60 @@ init_winExtDLL(void)
         }
 
         /*
+         * At least on a 64-bit Windows 7 system invoking SnmpExtensionInit()
+         * in the 32-bit version of evntagnt.dll hangs. Also, all queries in
+         * lmmib2.dll fail with "generic error" on a 64-bit Windows 7 system.
+         * So skip these two DLLs.
+         */
+        if (s_versioninfo.dwMajorVersion >= 6
+            && ((is_wow64_process
+                 && basename_equals(ext_dll_info->dll_name, "evntagnt.dll"))
+                || basename_equals(ext_dll_info->dll_name, "lmmib2.dll"))) {
+            DEBUGMSG(("winExtDLL", "init_winExtDLL: skipped DLL %s.\n",
+                      ext_dll_info->dll_name));
+            continue;
+        }
+
+        /*
          * Init and get first supported view from Windows SNMP extension DLL.
          * Note: although according to the documentation of SnmpExtensionInit()
          * the first argument of this function should be ignored by extension
-         * DLLs, passing the value GetTickCount() / 10 is necessary to make
-         * inetmib1.dll work correctly. Passing zero as the first argument
-         * causes inetmib1.dll to report an incorrect value for sysUpTime.0
-         * and also causes the same DLL not to send linkUp or linkDown traps.
+         * DLLs, passing a correct value for this first argument is necessary
+         * to make inetmib1.dll work correctly. Passing zero as the first
+         * argument causes inetmib1.dll to report an incorrect value for
+         * sysUpTime.0 and also causes the same DLL not to send linkUp or
+         * linkDown traps.
          */
         ext_dll_info->subagentTrapEvent = NULL;
         view.idLength = 0;
-        view.ids = 0;
+        view.ids = NULL;
+        if (!is_wow64_process && s_versioninfo.dwMajorVersion >= 6)
+            uptime_reference = GetTickCount() - 10 * SnmpSvcGetUptime();
+        else
+            uptime_reference = GetTickCount() / 10;
         result =
-            ext_dll_info->pfSnmpExtensionInit(GetTickCount() / 10,
+            ext_dll_info->pfSnmpExtensionInit(uptime_reference,
                                               &ext_dll_info->
                                               subagentTrapEvent, &view);
 
         if (!result) {
-            snmp_log(LOG_ERR,
-                     "init_winExtDLL: initialization of DLL %s failed.\n",
-                     ext_dll_info->dll_name);
-            FreeLibrary(ext_dll_info->dll_handle);
-            ext_dll_info->dll_handle = 0;
-            continue;
+            DEBUGMSG(("winExtDLL",
+                      "init_winExtDLL: initialization of DLL %s failed.\n",
+                      ext_dll_info->dll_name));
+            /*
+             * At least on Windows 7 SnmpExtensionInit() in some extension
+             * agent DLLs returns "FALSE" although initialization
+             * succeeded. Hence ignore the SnmpExtensionInit() return value on
+             * Windows Vista and later.
+             */
+            if (s_versioninfo.dwMajorVersion < 6) {
+                snmp_log(LOG_ERR,
+                         "init_winExtDLL: initialization of DLL %s failed.\n",
+                         ext_dll_info->dll_name);
+                FreeLibrary(ext_dll_info->dll_handle);
+                ext_dll_info->dll_handle = 0;
+                continue;
+            }
         }
 
         if (ext_dll_info->subagentTrapEvent != NULL) {
@@ -416,6 +462,26 @@ init_winExtDLL(void)
 
         memset(&ext_dll_view_info, 0, sizeof(ext_dll_view_info));
         ext_dll_view_info.winextdll_info = ext_dll_info;
+        if (view.idLength == 0) {
+            DEBUGMSG(("winExtDLL",
+                      "init_winExtDLL: DLL %s did not register an OID range.\n",
+                      ext_dll_info->dll_name));
+            continue;
+        }
+        /*
+         * Skip the mib-2 system section on Windows Vista and later because
+         * at least on a 64-bit Windows 7 system all queries in that section
+         * fail with status "generic error".
+         */
+        if (s_versioninfo.dwMajorVersion >= 6
+            && snmp_oid_compare_w_n(view.ids, view.idLength, mibii_system_mib,
+                                    sizeof(mibii_system_mib) /
+                                    sizeof(mibii_system_mib[0])) == 0) {
+            DEBUGMSG(("winExtDLL",
+                      "init_winExtDLL: skipping system section of DLL %s.\n",
+                      ext_dll_info->dll_name));
+            continue;
+        }
         copy_oid_n_w(ext_dll_view_info.name, &ext_dll_view_info.name_length,
                      view.ids, view.idLength);
         xarray_push_back(&s_winextdll_view, &ext_dll_view_info);
