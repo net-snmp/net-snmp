@@ -602,10 +602,10 @@ write_exampletrap(int action,
  * second since the netwok management portion of system was last
  * reinitialized.  - snmpTrapOID.0 which is part of the trap group SNMPv2
  * MIB whose value is the object-id of the specific trap you have defined
- * in your own MIB.  Other variables can be added to caracterize the
+ * in your own MIB.  Other variables can be added to characterize the
  * trap.
  * 
- * The function send_v2trap adds automaticallys the two objects but the
+ * The function send_v2trap adds automatically the two objects but the
  * value of snmpTrapOID.0 is 0.0 by default. If you want to add your trap
  * name, you have to reconstruct this object and to add your own
  * variable.
