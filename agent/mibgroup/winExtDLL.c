@@ -798,6 +798,30 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                                     win_varbinds.list[0].name.idLength,
                                     reginfo->rootoid,
                                     reginfo->rootoid_len) < 0) {
+            DEBUGIF("winExtDLL") {
+                size_t          oid1_namelen = 0, oid2_namelen = 0, outlen1 = 0,
+                                outlen2 = 0;
+                char           *oid1_name = NULL, *oid2_name = NULL;
+                int             overflow1 = 0, overflow2 = 0;
+
+                netsnmp_static_assert(sizeof(oid) == sizeof(UINT));
+                netsnmp_sprint_realloc_objid((u_char **) & oid1_name,
+                                             &oid1_namelen, &outlen1, 1,
+                                             &overflow1, (const oid *)
+                                             win_varbinds.list[0].name.ids,
+                                             win_varbinds.list[0].name.idLength);
+                netsnmp_sprint_realloc_objid((u_char **) & oid2_name,
+                                             &oid2_namelen, &outlen2, 1,
+                                             &overflow2, reginfo->rootoid,
+                                             reginfo->rootoid_len);
+                DEBUGMSG(("winExtDLL",
+                          "extension DLL %s: replacing OID %s%s by OID %s%s.\n",
+                          ext_dll_info->dll_name,
+                          oid1_name, overflow1 ? " [TRUNCATED]" : "",
+                          oid2_name, overflow2 ? " [TRUNCATED]" : ""));
+                free(oid2_name);
+                free(oid1_name);
+            }
 
             SnmpUtilOidFree(&win_varbinds.list[0].name);
             memset(&win_varbinds.list[0].name, 0,
@@ -837,9 +861,26 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 
         rc = convert_win_snmp_err(ErrorStatus);
         if (rc != SNMP_ERR_NOERROR) {
-            DEBUGMSG(("winExtDLL",
-                      "extension DLL %s: SNMP query function returned error code %lu (Windows) / %d (Net-SNMP).\n",
-                      ext_dll_info->dll_name, ErrorStatus, rc));
+            DEBUGIF("winExtDLL") {
+                size_t          oid_namelen = 0, outlen = 0;
+                char           *oid_name = NULL;
+                int             overflow = 0;
+
+                netsnmp_sprint_realloc_objid((u_char **) & oid_name,
+                                             &oid_namelen,
+                                             &outlen, 1, &overflow,
+                                             ext_dll_view_info->name,
+                                             ext_dll_view_info->name_length);
+                DEBUGMSG(("winExtDLL", "extension DLL %s: SNMP query function"
+                          " returned error code %lu (Windows) / %d (Net-SNMP)"
+                          " for request type %d, OID %s%s, ASN type %d and"
+                          " value %ld.\n",
+                          ext_dll_info->dll_name, ErrorStatus, rc, nRequestType,
+                          oid_name, overflow ? " [TRUNCATED]" : "",
+                          win_varbinds.list[0].value.asnType,
+                          win_varbinds.list[0].value.asnValue.number));
+                free(oid_name);
+            }
             netsnmp_assert(ErrorIndex == 1);
             netsnmp_request_set_error(requests, rc);
             if (rc == SNMP_NOSUCHOBJECT || rc == SNMP_NOSUCHINSTANCE
