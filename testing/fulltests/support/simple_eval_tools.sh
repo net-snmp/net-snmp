@@ -42,12 +42,6 @@ if [ `uname -s` = SunOS ]
 then PATH=/usr/xpg4/bin:$PATH
 fi
 
-if [ `uname -s` = SunOS ]; then
-    local() {
-	:
-    }
-fi
-
 #
 # HEADER: returns a single line when SNMP_HEADERONLY mode and exits.
 #
@@ -137,7 +131,7 @@ SKIPIF() {
 #------------------------------------ -o-
 #
 VERIFY() {	# <path_to_file(s)>
-	local	missingfiles=
+	missingfiles=""
 
 	for f in $*; do
 		[ -e "$f" ] && continue
