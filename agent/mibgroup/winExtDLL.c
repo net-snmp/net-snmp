@@ -94,7 +94,6 @@
 #include <time.h>
 #include <windows.h>
 #include "../../win32/Snmp-winExtDLL.h"
-#include "../../win32/MgmtApi-winExtDLL.h"
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmp_assert.h>
