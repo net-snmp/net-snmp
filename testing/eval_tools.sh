@@ -133,7 +133,7 @@ SKIPIF() {
 #------------------------------------ -o-
 #
 VERIFY() {	# <path_to_file(s)>
-	local	missingfiles=
+	missingfiles=""
 
 	for f in $*; do
 		[ -f "$f" ] && continue
