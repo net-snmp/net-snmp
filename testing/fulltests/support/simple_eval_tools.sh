@@ -42,12 +42,6 @@ if [ `uname -s` = SunOS ]
 then PATH=/usr/xpg4/bin:$PATH
 fi
 
-if [ `uname -s` = SunOS ]; then
-    local() {
-	:
-    }
-fi
-
 #
 # HEADER: returns a single line when SNMP_HEADERONLY mode and exits.
 #
@@ -137,7 +131,7 @@ SKIPIF() {
 #------------------------------------ -o-
 #
 VERIFY() {	# <path_to_file(s)>
-	local	missingfiles=
+	missingfiles=""
 
 	for f in $*; do
 		[ -f "$f" ] && continue
@@ -365,13 +359,9 @@ CHECKAGENTCOUNT() {
 # Return 0 (true) if a process with pid $1 exists and 1 (false) if no process
 # with pid $1 exists.
 ISRUNNING() {
-    local name
-    local pid
-    local rest
-
     if [ "x$OSTYPE" = "xmsys" ]; then
-	pslist.exe "$1" 2>&1 | while read name pid rest; do
-	    if [ "$1" = "$pid" ]; then
+	pslist.exe "$1" 2>&1 | while read name pspid rest; do
+	    if [ "$1" = "$pspid" ]; then
 		return 0
 	    fi
 	done
