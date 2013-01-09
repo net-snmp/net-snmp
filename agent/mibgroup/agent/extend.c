@@ -1360,15 +1360,18 @@ handle_nsExtendOutput2Table(netsnmp_mib_handler          *handler,
 char * _get_cmdline(netsnmp_extend *extend)
 {
     size_t          size;
-    
+    char           *newbuf;
     size = strlen(extend->command) + strlen(extend->args) + 2;
     if (size > cmdlinesize) {
-        cmdlinebuf = realloc(cmdlinebuf, size);
-	if (!cmdlinebuf) {
+        newbuf = realloc(cmdlinebuf, size);
+        if (!newbuf) {
+            free(cmdlinebuf);
+            cmdlinebuf = NULL;
             cmdlinesize = 0;
             return NULL;
-	}
-	cmdlinesize = size;
+        }
+        cmdlinebuf = newbuf;
+        cmdlinesize = size;
     }
     sprintf(cmdlinebuf, "%s %s", extend->command, extend->args);
     return cmdlinebuf;
