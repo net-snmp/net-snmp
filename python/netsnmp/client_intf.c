@@ -822,14 +822,14 @@ OCT:
 
       case TYPE_IPADDR:
         vars->type = ASN_IPADDRESS;
-        vars->val.integer = (long *)malloc(sizeof(long));
+        vars->val.integer = (in_addr_t *)malloc(sizeof(in_addr_t));
         if (val)
             *(vars->val.integer) = inet_addr(val);
         else {
             ret = FAILURE;
             *(vars->val.integer) = 0;
         }
-        vars->val_len = sizeof(long);
+        vars->val_len = sizeof(in_addr_t);
         break;
 
       case TYPE_OBJID:
