@@ -1488,6 +1488,7 @@ netsnmp_get(PyObject *self, PyObject *args)
 	    printf("error: get: unknown object ID (%s)",
 		   (tag ? tag : "<null>"));
 	  snmp_free_pdu(pdu);
+	  Py_DECREF(varbind); 
 	  goto done;
 	}
 	/* release reference when done */
@@ -1596,6 +1597,7 @@ netsnmp_get(PyObject *self, PyObject *args)
 	Py_DECREF(varbind);
       } else {
 	printf("netsnmp_get: bad varbind (%d)\n", varlist_ind);
+	Py_XDECREF(varbind); 
       }	
     }
 
@@ -1702,6 +1704,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 	    printf("error: get: unknown object ID (%s)",
 		   (tag ? tag : "<null>"));
 	  snmp_free_pdu(pdu);
+	  Py_DECREF(varbind); 
 	  goto done;
 	}
 	/* release reference when done */
@@ -1808,6 +1811,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 	Py_DECREF(varbind);
       } else {
 	printf("netsnmp_getnext: bad varbind (%d)\n", varlist_ind);
+	Py_XDECREF(varbind); 
       }
     }
 
@@ -1952,6 +1956,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
           printf("error: walk: unknown object ID (%s)",
       	   (tag ? tag : "<null>"));
         snmp_free_pdu(pdu);
+        Py_DECREF(varbind); 
         goto done;
       }
       /* release reference when done */
@@ -2276,6 +2281,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	    printf("error: get: unknown object ID (%s)",
 		   (tag ? tag : "<null>"));
 	  snmp_free_pdu(pdu);
+	  Py_DECREF(varbind); 
 	  goto done;
 	}
 	/* release reference when done */
@@ -2395,6 +2401,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	    PyList_Append(varbinds, none); /* increments ref */
 	    /* Return None for this variable. */
 	    PyTuple_SetItem(val_tuple, varbind_ind, none); /* steals ref */
+	    Py_XDECREF(varbind); 
 	  }	
 	}
       }
@@ -2562,6 +2569,7 @@ netsnmp_set(PyObject *self, PyObject *args)
       ret = Py_BuildValue("i",0); /* fail, return False */
   } 
  done:
+  Py_XDECREF(varbind); 
   SAFE_FREE(oid_arr);
   return (ret ? ret : Py_BuildValue(""));
 }
