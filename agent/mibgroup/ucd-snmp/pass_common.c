@@ -250,15 +250,15 @@ netsnmp_internal_pass_set_format(char *buf,
             sprintf(buf, "string \"\"\n");
         else if (netsnmp_internal_bin2asc(buf2, var_val_len) ==
                  (int) var_val_len)
-            snprintf(buf, sizeof(buf), "string \"%s\"\n", buf2);
+            snprintf(buf, SNMP_MAXBUF, "string \"%s\"\n", buf2);
         else
-            snprintf(buf, sizeof(buf), "octet \"%s\"\n", buf2);
-        buf[ sizeof(buf)-1 ] = 0;
+            snprintf(buf, SNMP_MAXBUF, "octet \"%s\"\n", buf2);
+        buf[ SNMP_MAXBUF-1 ] = 0;
         break;
     case ASN_OBJECT_ID:
         sprint_mib_oid(buf2, (const oid *) var_val, var_val_len/sizeof(oid));
-        snprintf(buf, sizeof(buf), "objectid \"%s\"\n", buf2);
-        buf[ sizeof(buf)-1 ] = 0;
+        snprintf(buf, SNMP_MAXBUF, "objectid \"%s\"\n", buf2);
+        buf[ SNMP_MAXBUF-1 ] = 0;
         break;
     }
 }
