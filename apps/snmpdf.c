@@ -87,9 +87,12 @@ usage(void)
             "\t-Cu\tUse UCD-SNMP dskTable to do the calculations.\n");
     fprintf(stderr,
             "\t\t[Normally the HOST-RESOURCES-MIB is consulted first.]\n");
+    fprintf(stderr,
+            "\t-Ch\tPrint using human readable format (MB, GB, TB)\n");
 }
 
 int             ucd_mib = 0;
+int             human_units = 0;
 
 static void
 optProc(int argc, char *const *argv, int opt)
@@ -100,6 +103,9 @@ optProc(int argc, char *const *argv, int opt)
             switch (*optarg++) {
             case 'u':
                 ucd_mib = 1;
+                break;
+            case 'h':
+                human_units = 1;
                 break;
             default:
                 fprintf(stderr,
@@ -166,14 +172,14 @@ collect(netsnmp_session * ss, netsnmp_pdu *pdu,
             exit(1);
         }
         if (response->errstat != SNMP_ERR_NOERROR) {
-	    fprintf(stderr, "snmpdf: Error in packet: %s\n",
+            fprintf(stderr, "snmpdf: Error in packet: %s\n",
                     snmp_errstring(response->errstat));
             exit(1);
         }
         if (snmp_oid_compare(response->variables->name,
-			     SNMP_MIN(base_length,
-				      response->variables->name_length),
-			     base, base_length) != 0)
+                             SNMP_MIN(base_length,
+                                      response->variables->name_length),
+                             base, base_length) != 0)
             running = 0;
         else if (response->variables->type == SNMP_NOSUCHINSTANCE ||
                  response->variables->type == SNMP_NOSUCHOBJECT ||
@@ -201,6 +207,23 @@ collect(netsnmp_session * ss, netsnmp_pdu *pdu,
         snmp_free_pdu(response);
     }
     return saved;
+}
+
+
+
+char *format_human(char *buf, size_t len, unsigned long mem)
+{
+    if (mem >= 1000UL*1000*1000*1000)
+        snprintf(buf, len, "%4.2fPB", (float)mem/(1000UL*1000*1000*1000));
+    else if (mem >= 1000UL*1000*1000)
+        snprintf(buf, len, "%4.2fTB", (float)mem/(1000UL*1000*1000));
+    else if (mem >= 1000*1000)
+        snprintf(buf, len, "%4.2fGB", (float)mem/(1000*1000));
+    else if (mem >= 1000)
+        snprintf(buf, len, "%4.2fMB", (float)mem/1000);
+    else
+        snprintf(buf, len, "%4.2fkB", (float)mem);
+    return buf;
 }
 
 /* Computes value*units/divisor in an overflow-proof way.
@@ -260,8 +283,14 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    printf("%-18s %15s %15s %15s %5s\n", "Description", "size (kB)",
+    if (human_units) {
+        printf("%-18s %10s %10s %10s %5s\n", "Description", "Size",
            "Used", "Available", "Used%");
+    }
+    else {
+        printf("%-18s %15s %15s %15s %5s\n", "Description", "Size (kB)",
+           "Used", "Available", "Used%");
+    }
     if (ucd_mib == 0) {
         /*
          * * Begin by finding all the storage pieces that are of
@@ -316,12 +345,26 @@ main(int argc, char *argv[])
             if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
             hsused = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
-            printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
-                   units ? convert_units(hssize, units, 1024) : hssize,
-                   units ? convert_units(hsused, units, 1024) : hsused,
-                   units ? convert_units(hssize-hsused, units, 1024) : hssize -
-                   hsused, hssize ? convert_units(hsused, 100, hssize) :
-                   hsused);
+            if (human_units) {
+                char size[10], used[10], avail[10];
+                printf("%-18s %10s %10s %10s %4lu%%\n", descr,
+                    format_human(size, sizeof size,
+                        units ? convert_units(hssize, units, 1024) : hssize),
+                    format_human(used, sizeof used,
+                        units ? convert_units(hsused, units, 1024) : hsused),
+                    format_human(avail, sizeof avail,
+                        units ? convert_units(hssize-hsused, units, 1024) : hssize -
+                    hsused),
+                    hssize ? convert_units(hsused, 100, hssize) : hsused);
+            }
+            else {
+                printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
+                    units ? convert_units(hssize, units, 1024) : hssize,
+                    units ? convert_units(hsused, units, 1024) : hsused,
+                    units ? convert_units(hssize-hsused, units, 1024) : hssize -
+                    hsused,
+                    hssize ? convert_units(hsused, 100, hssize) : hsused);
+            }
 
         next:
             vlp = vlp->next_variable;
@@ -331,7 +374,6 @@ main(int argc, char *argv[])
     }
 
     if (count == 0) {
-        size_t          units = 0;
         /*
          * the host resources mib must not be supported.  Lets try the
          * UCD-SNMP-MIB and its dskTable 
@@ -378,12 +420,19 @@ main(int argc, char *argv[])
             if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next2;
             hsused = *(vlp2->val.integer);
 
-            printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
-                   units ? convert_units(hssize, units, 1024) : hssize,
-                   units ? convert_units(hsused, units, 1024) : hsused,
-                   units ? convert_units(hssize-hsused, units, 1024) : hssize -
-                   hsused, hssize ? convert_units(hsused, 100, hssize) :
-                   hsused);
+            if (human_units) {
+                char size[10], used[10], avail[10];
+                printf("%-18s %10s %10s %10s %4lu%%\n", descr,
+                    format_human(size, sizeof size, hssize),
+                    format_human(used, sizeof used, hsused),
+                    format_human(avail, sizeof avail, hssize - hsused),
+                    hssize ? convert_units(hsused, 100, hssize) : hsused);
+            }
+            else {
+                printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
+                     hssize, hsused, hssize - hsused,
+                     hssize ? convert_units(hsused, 100, hssize) : hsused);
+            }
 
         next2:
             vlp = vlp->next_variable;
