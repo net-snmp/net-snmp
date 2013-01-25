@@ -177,11 +177,14 @@ collect(netsnmp_session * ss, netsnmp_pdu *pdu,
                     snmp_errstring(response->errstat));
             exit(1);
         }
-        if (response && snmp_oid_compare(response->variables->name,
-                                         SNMP_MIN(base_length,
-                                                  response->variables->
-                                                  name_length), base,
-                                         base_length) != 0)
+        if (snmp_oid_compare(response->variables->name,
+			     SNMP_MIN(base_length,
+				      response->variables->name_length),
+			     base, base_length) != 0)
+            running = 0;
+        else if (response->variables->type == SNMP_NOSUCHINSTANCE ||
+                 response->variables->type == SNMP_NOSUCHOBJECT ||
+                 response->variables->type == SNMP_ENDOFMIBVIEW)
             running = 0;
         else {
             /*
@@ -280,7 +283,7 @@ main(int argc, char *argv[])
             size_t          units;
             unsigned long   hssize, hsused;
             char            descr[SPRINT_MAX_LEN];
-	    int             len;
+            int             len;
 
             pdu = snmp_pdu_create(SNMP_MSG_GET);
 
@@ -300,18 +303,22 @@ main(int argc, char *argv[])
             }
 
             vlp2 = response->variables;
-	    len = vlp2->val_len;
-	    if (len >= SPRINT_MAX_LEN) len = SPRINT_MAX_LEN-1;
+            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
+            len = vlp2->val_len;
+            if (len >= SPRINT_MAX_LEN) len = SPRINT_MAX_LEN-1;
             memcpy(descr, vlp2->val.string, len);
             descr[len] = '\0';
 
             vlp2 = vlp2->next_variable;
+            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
             units = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             vlp2 = vlp2->next_variable;
+            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
             hssize = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             vlp2 = vlp2->next_variable;
+            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
             hsused = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
@@ -321,6 +328,7 @@ main(int argc, char *argv[])
                    hsused, hssize ? convert_units(hsused, 100, hssize) :
                    hsused);
 
+        next:
             vlp = vlp->next_variable;
             snmp_free_pdu(response);
             count++;
@@ -343,6 +351,7 @@ main(int argc, char *argv[])
         while (vlp) {
             unsigned long   hssize, hsused;
             char            descr[SPRINT_MAX_LEN];
+            int             len;
 
             pdu = snmp_pdu_create(SNMP_MSG_GET);
 
@@ -360,13 +369,18 @@ main(int argc, char *argv[])
             }
 
             vlp2 = response->variables;
-            memcpy(descr, vlp2->val.string, vlp2->val_len);
-            descr[vlp2->val_len] = '\0';
+            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next2;
+            len = vlp2->val_len;
+            if (len >= SPRINT_MAX_LEN) len = SPRINT_MAX_LEN-1;
+            memcpy(descr, vlp2->val.string, len);
+            descr[len] = '\0';
 
             vlp2 = vlp2->next_variable;
+            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next2;
             hssize = *(vlp2->val.integer);
 
             vlp2 = vlp2->next_variable;
+            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next2;
             hsused = *(vlp2->val.integer);
 
             printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
@@ -376,6 +390,7 @@ main(int argc, char *argv[])
                    hsused, hssize ? convert_units(hsused, 100, hssize) :
                    hsused);
 
+        next2:
             vlp = vlp->next_variable;
             snmp_free_pdu(response);
             count++;
