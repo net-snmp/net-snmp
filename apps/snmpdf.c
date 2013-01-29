@@ -88,7 +88,9 @@ usage(void)
     fprintf(stderr,
             "\t\t[Normally the HOST-RESOURCES-MIB is consulted first.]\n");
     fprintf(stderr,
-            "\t-Ch\tPrint using human readable format (MB, GB, TB)\n");
+            "\t-Ch\tPrint using human readable format (MiB, GiB, TiB)\n");
+    fprintf(stderr,
+            "\t-CH\tPrint using human readable SI format (MB, GB, TB)\n");
 }
 
 int             ucd_mib = 0;
@@ -105,7 +107,10 @@ optProc(int argc, char *const *argv, int opt)
                 ucd_mib = 1;
                 break;
             case 'h':
-                human_units = 1;
+                human_units = 1024;
+                break;
+            case 'H':
+                human_units = 1000;
                 break;
             default:
                 fprintf(stderr,
@@ -211,16 +216,20 @@ collect(netsnmp_session * ss, netsnmp_pdu *pdu,
 
 
 
-char *format_human(char *buf, size_t len, unsigned long mem)
+char *format_human(char *buf, size_t len, unsigned long mem, unsigned long scale)
 {
-    if (mem >= 1000UL*1000*1000*1000)
-        snprintf(buf, len, "%4.2fPB", (float)mem/(1000UL*1000*1000*1000));
-    else if (mem >= 1000UL*1000*1000)
-        snprintf(buf, len, "%4.2fTB", (float)mem/(1000UL*1000*1000));
-    else if (mem >= 1000*1000)
-        snprintf(buf, len, "%4.2fGB", (float)mem/(1000*1000));
-    else if (mem >= 1000)
-        snprintf(buf, len, "%4.2fMB", (float)mem/1000);
+    if (mem >= scale*scale*scale*scale)
+        snprintf(buf, len, "%4.2fP%sB", (float)mem/(scale*scale*scale*scale),
+		scale == 1024 ? "i" : "");
+    else if (mem >= scale*scale*scale)
+        snprintf(buf, len, "%4.2fT%sB", (float)mem/(scale*scale*scale),
+		scale == 1024 ? "i" : "");
+    else if (mem >= scale*scale)
+        snprintf(buf, len, "%4.2fG%sB", (float)mem/(scale*scale),
+		scale == 1024 ? "i" : "");
+    else if (mem >= scale)
+        snprintf(buf, len, "%4.2fM%sB", (float)mem/scale,
+		scale == 1024 ? "i" : "");
     else
         snprintf(buf, len, "%4.2fkB", (float)mem);
     return buf;
@@ -349,12 +358,12 @@ main(int argc, char *argv[])
                 char size[10], used[10], avail[10];
                 printf("%-18s %10s %10s %10s %4lu%%\n", descr,
                     format_human(size, sizeof size,
-                        units ? convert_units(hssize, units, 1024) : hssize),
+                        units ? convert_units(hssize, units, 1024) : hssize, human_units),
                     format_human(used, sizeof used,
-                        units ? convert_units(hsused, units, 1024) : hsused),
+                        units ? convert_units(hsused, units, 1024) : hsused, human_units),
                     format_human(avail, sizeof avail,
                         units ? convert_units(hssize-hsused, units, 1024) : hssize -
-                    hsused),
+                    hsused, human_units),
                     hssize ? convert_units(hsused, 100, hssize) : hsused);
             }
             else {
@@ -423,9 +432,9 @@ main(int argc, char *argv[])
             if (human_units) {
                 char size[10], used[10], avail[10];
                 printf("%-18s %10s %10s %10s %4lu%%\n", descr,
-                    format_human(size, sizeof size, hssize),
-                    format_human(used, sizeof used, hsused),
-                    format_human(avail, sizeof avail, hssize - hsused),
+                    format_human(size, sizeof size, hssize, human_units),
+                    format_human(used, sizeof used, hsused, human_units),
+                    format_human(avail, sizeof avail, hssize - hsused, human_units),
                     hssize ? convert_units(hsused, 100, hssize) : hsused);
             }
             else {

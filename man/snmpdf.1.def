@@ -7,7 +7,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPDF 1 "25 Jan 2013" VVERSIONINFO "Net-SNMP"
+.TH SNMPDF 1 "28 Jan 2013" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmpdf - display disk space usage on a network entity via SNMP
 .SH SYNOPSIS
@@ -52,7 +52,9 @@ use of hrStorageTable in mib HOST\-RESOURCES\-MIB
 is preferred because it typically contains
 more information.
 .B \-Ch
-Print sizes in human readable format (i.e. kB, GB, TB)
+Print sizes in human readable format (i.e. MiB, GiB, TiB)
+.B \-CH
+Print sizes in human readable SI format (i.e. MB, GB, TB)
 .SH "EXAMPLES"
 .PP
 % snmpdf \-v 2c \-c public localhost
