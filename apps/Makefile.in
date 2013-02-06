@@ -58,6 +58,7 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmpdelta$(EXEEXT) 			\
 		snmptest$(EXEEXT)			\
 		snmpdf$(EXEEXT) 			\
+		snmpps$(EXEEXT) 			\
 		$(AGENTXTRAP)				\
 		$(SNMPVACMINSTALLBINPROG)	        \
                 $(SSHINSTALLBINPROG) $(TLSINSTALLBINPROG) \
@@ -131,12 +132,13 @@ FTOBJS=$(LIBTRAPD_FTS) \
        snmpgetnext.ft \
        $(EKCFEATUREPROG) \
        snmpdf.ft \
+       snmpps.ft \
        $(SSHFEATUREPROG)
 
 all: standardall
 
-OTHERINSTALL=snmpinforminstall snmptrapdperlinstall
-OTHERUNINSTALL=snmpinformuninstall snmptrapdperluninstall
+OTHERINSTALL=snmpinforminstall snmptopinstall snmptrapdperlinstall
+OTHERUNINSTALL=snmpinformuninstall snmptopuninstall snmptrapdperluninstall
 
 #
 # build rules
@@ -178,6 +180,10 @@ snmpinform$(EXEEXT): snmptrap$(EXEEXT)
 	rm -f snmpinform
 	$(LN_S) snmptrap$(EXEEXT) snmpinform$(EXEEXT)
 
+snmptop$(EXEEXT): snmpps$(EXEEXT)
+	rm -f snmptop
+	$(LN_S) snmpps$(EXEEXT) snmptop$(EXEEXT)
+
 snmpset$(EXEEXT):    snmpset.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpset.$(OSUFFIX) ${LDFLAGS} ${LIBS}
 
@@ -202,6 +208,9 @@ encode_keychange$(EXEEXT):    encode_keychange.$(OSUFFIX) $(USELIBS)
 snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpdf.$(OSUFFIX) ${LDFLAGS} ${LIBS}
 
+snmpps$(EXEEXT):    snmpps.$(OSUFFIX) $(USELIBS)
+	$(LINK) ${CFLAGS} -o $@ snmpps.$(OSUFFIX) ${LDFLAGS} -lcurses ${LIBS}
+
 libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION): $(LLIBTRAPD_OBJS)
 	$(LIB_LD_CMD) $@ ${LLIBTRAPD_OBJS} $(MIBLIB) $(USELIBS) $(PERLLDOPTS_FOR_LIBS) $(LIB_LD_LIBS)
 	$(RANLIB) $@
@@ -212,6 +221,13 @@ snmpinforminstall:
 
 snmpinformuninstall:
 	rm -f $(INSTALL_PREFIX)$(bindir)/snmpinform$(EXEEXT)
+
+snmptopinstall:
+	rm -f $(INSTALL_PREFIX)$(bindir)/snmptop$(EXEEXT)
+	$(LN_S) snmpps$(EXEEXT) $(INSTALL_PREFIX)$(bindir)/snmptop$(EXEEXT)
+
+snmptopuninstall:
+	rm -f $(INSTALL_PREFIX)$(bindir)/snmptop$(EXEEXT)
 
 snmptrapdperlinstall: installdirs
 	  @$(INSTALL_DATA) $(srcdir)/snmp_perl_trapd.pl $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl_trapd.pl

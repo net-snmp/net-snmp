@@ -485,3 +485,7 @@ AC_SUBST(MYSQL_INCLUDES)
 # nlist
 AC_CHECK_FUNCS(nlist nlist64 knlist)
 
+AC_CHECK_HEADERS(curses.h)
+AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncurses], 
+    [TERMCAP=$ac_cv_search_tgetent], [TERMCAP=""]) 
+AC_SUBST(TERMCAP)
