@@ -10,23 +10,6 @@ exec_prefix=@exec_prefix@
 includedir=@includedir@
 libdir=@libdir@
 datarootdir=@datarootdir@
-NSC_LDFLAGS="@LDFLAGS@"
-NSC_INCLUDEDIR=${includedir}
-NSC_LIBDIR=-L${libdir}
-NSC_LIBS="@LIBS@"
-NSC_AGENTLIBS="@AGENTLIBS@ @PERLLDOPTS_FOR_APPS@"
-NSC_PREFIX=$prefix
-NSC_EXEC_PREFIX=$exec_prefix
-NSC_SRCDIR=@srcdir@
-NSC_INCDIR=${NSC_PREFIX}/include
-NSC_BASE_SUBAGENT_LIBS="-lnetsnmpagent -lnetsnmp"
-NSC_BASE_AGENT_LIBS="-lnetsnmpagent -lnetsnmpmibs -lnetsnmp"
-NSC_SRC_LIBDIRS="agent/.libs snmplib/.libs"
-NSC_SRC_LIBDEPS="agent/.libs/libnetsnmpmibs.a agent/.libs/libnetsnmpagent.a snmplib/.libs/libnetsnmp.a"
-
-if test "x$NSC_SRCDIR" = "x." ; then
-   NSC_SRCDIR="NET-SNMP-SOURCE-DIR"
-fi
 
 if @PSCMD@ | egrep ' snmpd *$' > /dev/null 2>&1 ; then
     echo "Apparently at least one snmpd demon is already running."
