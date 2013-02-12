@@ -1002,27 +1002,31 @@ getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
 	    rc = getmsg(sd, NULL, &strbuf, &flags);
 	    switch (rc) {
 	    case -1:
-		rc = -ENOSR;
+		ret = -ENOSR;
+		snmp_perror("getmsg");
 		goto Return;
 
 	    default:
-		rc = -ENODATA;
+		snmp_log(LOG_ERR, "kernel_sunos5/getmib: getmsg returned %d\n", rc);
+		ret = -ENODATA;
 		goto Return;
 
 	    case MOREDATA:
-		oldsize = ( ((void *)strbuf.buf) - *statbuf) + strbuf.len;
-		strbuf.buf = (void *)realloc(*statbuf,oldsize+4096);
+		DEBUGMSGTL(("kernel_sunos5", "...... getmib increased buffer size\n"));
+		oldsize = ( strbuf.buf - (char *)*statbuf) + strbuf.len;
+		strbuf.buf = (char *)realloc(*statbuf, oldsize+4096);
 		if(strbuf.buf != NULL) {
 		    *statbuf = strbuf.buf;
 		    *size = oldsize + 4096;
-		    strbuf.buf = *statbuf + oldsize;
+		    strbuf.buf = (char *)*statbuf + oldsize;
 		    strbuf.maxlen = 4096;
+		    result = NOT_FOUND;
 		    break;
 		}
-		strbuf.buf = *statbuf + (oldsize - strbuf.len);
+		strbuf.buf = (char *)*statbuf + (oldsize - strbuf.len);
 	    case 0:
 		/* fix buffer to real size & position */
-		strbuf.len += ((void *)strbuf.buf) - *statbuf;
+		strbuf.len += strbuf.buf - (char*)*statbuf;
 		strbuf.buf = *statbuf;
 		strbuf.maxlen = *size;
 
