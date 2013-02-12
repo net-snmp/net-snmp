@@ -216,7 +216,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 #if HAVE_KVM_GETPROC2
         argv = kvm_getargv2( kd, &(proc_table[i]), 0);
 #else
-        argv = kvm_getargv(  kd, &(proc_table[i]), 0);
+        argv = kvm_getargv(  kd, &(proc_table[i]), BUFSIZ);
 #endif
 
         entry->hrSWRunName_len = snprintf(entry->hrSWRunName,
