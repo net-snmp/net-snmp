@@ -209,7 +209,7 @@ snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpdf.$(OSUFFIX) ${LDFLAGS} ${LIBS}
 
 snmpps$(EXEEXT):    snmpps.$(OSUFFIX) $(USELIBS)
-	$(LINK) ${CFLAGS} -o $@ snmpps.$(OSUFFIX) ${LDFLAGS} -lcurses ${LIBS}
+	$(LINK) ${CFLAGS} -o $@ snmpps.$(OSUFFIX) ${LDFLAGS} @LIBCURSES@ ${LIBS}
 
 libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION): $(LLIBTRAPD_OBJS)
 	$(LIB_LD_CMD) $@ ${LLIBTRAPD_OBJS} $(MIBLIB) $(USELIBS) $(PERLLDOPTS_FOR_LIBS) $(LIB_LD_LIBS)

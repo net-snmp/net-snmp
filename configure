@@ -645,7 +645,7 @@ PERLLDOPTS_FOR_APPS
 PERLLDOPTS_FOR_LIBS
 EMBEDPERLUNINSTALL
 EMBEDPERLINSTALL
-TERMCAP
+LIBCURSES
 MYSQL_INCLUDES
 MYSQL_LIBS
 MYSQLCONFIG
@@ -23625,9 +23625,9 @@ fi
 
 done
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing tgetent" >&5
-$as_echo_n "checking for library containing tgetent... " >&6; }
-if ${ac_cv_search_tgetent+:} false; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing endwin" >&5
+$as_echo_n "checking for library containing endwin... " >&6; }
+if ${ac_cv_search_endwin+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_func_search_save_LIBS=$LIBS
@@ -23640,16 +23640,16 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char tgetent ();
+char endwin ();
 int
 main ()
 {
-return tgetent ();
+return endwin ();
   ;
   return 0;
 }
 _ACEOF
-for ac_lib in '' termcap tinfo curses ncurses; do
+for ac_lib in '' curses ncurses; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else
@@ -23657,30 +23657,30 @@ for ac_lib in '' termcap tinfo curses ncurses; do
     LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
   fi
   if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_tgetent=$ac_res
+  ac_cv_search_endwin=$ac_res
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext
-  if ${ac_cv_search_tgetent+:} false; then :
+  if ${ac_cv_search_endwin+:} false; then :
   break
 fi
 done
-if ${ac_cv_search_tgetent+:} false; then :
+if ${ac_cv_search_endwin+:} false; then :
 
 else
-  ac_cv_search_tgetent=no
+  ac_cv_search_endwin=no
 fi
 rm conftest.$ac_ext
 LIBS=$ac_func_search_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_tgetent" >&5
-$as_echo "$ac_cv_search_tgetent" >&6; }
-ac_res=$ac_cv_search_tgetent
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_endwin" >&5
+$as_echo "$ac_cv_search_endwin" >&6; }
+ac_res=$ac_cv_search_endwin
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  TERMCAP=$ac_cv_search_tgetent
+  LIBCURSES=$ac_cv_search_endwin
 else
-  TERMCAP=""
+  LIBCURSES=""
 fi
 
 
