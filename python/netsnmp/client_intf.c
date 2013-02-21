@@ -831,7 +831,7 @@ OCT:
                 ret = FAILURE;
                 addr = 0;
             }
-            memdup(&vars->val.integer, &addr, sizeof(addr));
+            memdup((u_char **)&vars->val.integer, &addr, sizeof(addr));
             vars->val_len = sizeof(addr);
         }
         break;
