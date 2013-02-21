@@ -18,7 +18,8 @@ SOCK_STARTUP;
     if (s >= 0) {
         if (bind(s, (struct sockaddr *)&sin_addr, sizeof(sin_addr)) >= 0) {
             h = netsnmp_gethostbyaddr(&v4loop, sizeof(v4loop), AF_INET);
-            OKF(h && strcmp(h->h_name, "localhost") == 0,
+            OKF(h && (strcmp(h->h_name, "localhost") == 0
+                      || strcmp(h->h_name, "localhost.localdomain") == 0),
                 ("127.0.0.1 lookup (%s)", h ? h->h_name : "(failed)"));
             ran_test = 1;
         }
@@ -42,7 +43,9 @@ SOCK_STARTUP;
     if (s >= 0) {
         if (bind(s, (struct sockaddr*)&sin6_addr, sizeof(sin6_addr)) >= 0) {
             h = netsnmp_gethostbyaddr(&v6loop, sizeof(v6loop), AF_INET6);
-            OKF(h && strcmp(h->h_name, "localhost") == 0,
+            OKF(h && (strcmp(h->h_name, "localhost") == 0
+                      || strcmp(h->h_name, "localhost.localdomain") == 0
+                      || strcmp(h->h_name, "ip6-localhost") == 0),
                 ("::1 lookup (%s)", h ? h->h_name : "(failed)"));
             ran_test = 1;
         }
