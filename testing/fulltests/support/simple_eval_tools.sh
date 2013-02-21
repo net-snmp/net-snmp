@@ -414,10 +414,20 @@ WAITFORCOND() {
 
 WAITFORAGENT() {
     WAITFOR "$@" $SNMP_SNMPD_LOG_FILE
+    if [ $SNMP_CAN_USLEEP = 1 ]; then
+        sleep .1
+    else
+        sleep 1
+    fi
 }
 
 WAITFORTRAPD() {
     WAITFOR "$@" $SNMP_SNMPTRAPD_LOG_FILE
+    if [ $SNMP_CAN_USLEEP = 1 ]; then
+        sleep .1
+    else
+        sleep 1
+    fi
 }
 
 # Wait until pattern "$1" appears in file "$2".
@@ -546,7 +556,7 @@ STARTAGENT() {
     fi
     STARTPROG
     WAITFORCOND test -f $SNMP_SNMPD_PID_FILE
-    WAITFORAGENT "NET-SNMP version"
+    WAITFORAGENT "NET-SNMP.version"
 }
 
 #------------------------------------ -o-
@@ -561,7 +571,7 @@ STARTTRAPD() {
     fi
     STARTPROG
     WAITFORCOND test -f $SNMP_SNMPTRAPD_PID_FILE
-    WAITFORTRAPD "NET-SNMP version"
+    WAITFORTRAPD "NET-SNMP.version"
 }
 
 ## sending SIGHUP for reconfiguration
