@@ -822,14 +822,18 @@ OCT:
 
       case TYPE_IPADDR:
         vars->type = ASN_IPADDRESS;
-        vars->val.integer = (in_addr_t *)malloc(sizeof(in_addr_t));
-        if (val)
-            *(vars->val.integer) = inet_addr(val);
-        else {
-            ret = FAILURE;
-            *(vars->val.integer) = 0;
+        {
+            in_addr_t addr;
+
+            if (val)
+                addr = inet_addr(val);
+            else {
+                ret = FAILURE;
+                addr = 0;
+            }
+            memdup(&vars->val.integer, &addr, sizeof(addr));
+            vars->val_len = sizeof(addr);
         }
-        vars->val_len = sizeof(in_addr_t);
         break;
 
       case TYPE_OBJID:
