@@ -864,15 +864,8 @@ OCT:
 /* takes ss and pdu as input and updates the 'response' argument */
 /* the input 'pdu' argument will be freed */
 static int
-__send_sync_pdu(ss, pdu, response, retry_nosuch,
-	        err_str, err_num, err_ind)
-netsnmp_session *ss;
-netsnmp_pdu *pdu;
-netsnmp_pdu **response;
-int retry_nosuch;
-char *err_str;
-int *err_num;
-int *err_ind;
+__send_sync_pdu(netsnmp_session *ss, netsnmp_pdu *pdu, netsnmp_pdu **response,
+                int retry_nosuch, char *err_str, int *err_num, int *err_ind)
 {
    int status = 0;
    long command = pdu->command;
