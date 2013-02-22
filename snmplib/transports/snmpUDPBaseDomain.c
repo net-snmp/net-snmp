@@ -96,14 +96,17 @@ _netsnmp_udp_sockopt_set(int fd, int local)
     netsnmp_sock_buffer_set(fd, SO_RCVBUF, local, 0);
 }
 
-#if (defined(linux) && defined(IP_PKTINFO)) || defined(IP_SENDSRCADDR)
+#if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
+# if defined(IP_RECVDSTADDR) && !defined(IP_SENDSRCADDR)
+#  define IP_SENDSRCADDR IP_RECVDSTADDR /* DragonFly BSD */
+# endif
 
 #define netsnmp_udpbase_recvfrom_sendto_defined
 
 enum {
-#if  defined(linux) && defined(IP_PKTINFO)
+#if defined(HAVE_IP_PKTINFO)
     cmsg_data_size = sizeof(struct in_pktinfo)
-#elif defined(IP_RECVDSTADDR)
+#elif defined(HAVE_IP_RECVDSTADDR)
     cmsg_data_size = sizeof(struct in_addr)
 #endif
 };
@@ -146,7 +149,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     }
 
     for (cm = CMSG_FIRSTHDR(&msg); cm != NULL; cm = CMSG_NXTHDR(&msg, cm)) {
-#if  defined(linux) && defined(IP_PKTINFO)
+#if defined(HAVE_IP_PKTINFO)
         if (cm->cmsg_level == SOL_IP && cm->cmsg_type == IP_PKTINFO) {
             struct in_pktinfo* src = (struct in_pktinfo *)CMSG_DATA(cm);
             netsnmp_assert(dstip->sa_family == AF_INET);
@@ -154,15 +157,14 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
             *if_index = src->ipi_ifindex;
             DEBUGMSGTL(("udpbase:recv",
                         "got destination (local) addr %s, iface %d\n",
-                        inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr),
-                        *if_index));
+                        inet_ntoa(src->ipi_addr), *if_index));
         }
-#elif defined(IP_RECVDSTADDR)
+#elif defined(HAVE_IP_RECVDSTADDR)
         if (cm->cmsg_level == IPPROTO_IP && cm->cmsg_type == IP_RECVDSTADDR) {
             struct in_addr* src = (struct in_addr *)CMSG_DATA(cm);
             ((struct sockaddr_in*)dstip)->sin_addr = *src;
             DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
-                        inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr)));
+                        inet_ntoa(*src)));
         }
 #endif
     }
@@ -199,14 +201,20 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
         cm = CMSG_FIRSTHDR(&m);
         cm->cmsg_len = CMSG_LEN(cmsg_data_size);
 
-#if  defined(linux) && defined(IP_PKTINFO)
+#if defined(HAVE_IP_PKTINFO)
         cm->cmsg_level = SOL_IP;
         cm->cmsg_type = IP_PKTINFO;
 
         {
-            struct in_pktinfo ipi = { 0 };
-            ipi.ipi_ifindex = 0;
+            struct in_pktinfo ipi;
+
+            memset(&ipi, 0, sizeof(ipi));
+            ipi.ipi_ifindex = if_index;
+#if defined(cygwin)
+            ipi.ipi_addr.s_addr = srcip->s_addr;
+#else
             ipi.ipi_spec_dst.s_addr = srcip->s_addr;
+#endif
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
 
@@ -223,9 +231,15 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
         DEBUGMSGTL(("udpbase:sendto", "re-sending on iface %d\n", if_index));
 
         {
-            struct in_pktinfo ipi = { 0 };
+            struct in_pktinfo ipi;
+
+            memset(&ipi, 0, sizeof(ipi));
             ipi.ipi_ifindex = if_index;
+#if defined(cygwin)
+            ipi.ipi_addr.s_addr = INADDR_ANY;
+#else
             ipi.ipi_spec_dst.s_addr = INADDR_ANY;
+#endif
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
 #elif defined(IP_SENDSRCADDR)
@@ -244,7 +258,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 
     return sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
 }
-#endif /* (linux && IP_PKTINFO) || IP_SENDSRCADDR */
+#endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */
 
 /*
  * You can write something into opaque that will subsequently get passed back 
