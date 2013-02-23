@@ -268,8 +268,9 @@ pr_rtxhdr(int af)
 
 #ifndef HAVE_INET_NTOP
 /* MSVC and MinGW */
+#define inet_ntop netsnmp_inet_ntop
 static const char *
-inet_ntop(int af, const void *src, char *dst, size_t size)
+netsnmp_inet_ntop(int af, const void *src, char *dst, size_t size)
 {
     DWORD out_len = size;
 
