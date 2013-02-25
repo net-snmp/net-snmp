@@ -139,6 +139,17 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
             DEBUGMSGTL(("netsnmp_udp", "set IP_RECVDSTADDR\n"));
         }
 #endif
+#else /* !defined(WIN32) */
+        { 
+            int sockopt = 1;
+            if (setsockopt(t->sock, IPPROTO_IP, IP_PKTINFO, (void *)&sockopt,
+			   sizeof(sockopt)) == -1) {
+                DEBUGMSGTL(("netsnmp_udpbase", "couldn't set IP_PKTINFO: %d\n",
+                            WSAGetLastError()));
+            } else {
+                DEBUGMSGTL(("netsnmp_udpbase", "set IP_PKTINFO\n"));
+            }
+        }
 #endif /* !defined(WIN32) */
         rc = bind(t->sock, (struct sockaddr *) addr,
                   sizeof(struct sockaddr));
