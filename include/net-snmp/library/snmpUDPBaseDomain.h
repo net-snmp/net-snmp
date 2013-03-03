@@ -18,8 +18,7 @@ extern          "C" {
     int netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
                              void **opaque, int *olength);
 
-#if defined(linux) && defined(IP_PKTINFO) \
-    || defined(IP_RECVDSTADDR) && !defined(_MSC_VER)
+#if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
     int netsnmp_udpbase_recvfrom(int s, void *buf, int len,
                                  struct sockaddr *from, socklen_t *fromlen,
                                  struct sockaddr *dstip, socklen_t *dstlen,
