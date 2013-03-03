@@ -1,4 +1,5 @@
 #ifdef NETSNMP_TRANSPORT_UDP_DOMAIN
+netsnmp_udp_base_ctor();
 netsnmp_udp_ctor();
 #endif
 #ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
