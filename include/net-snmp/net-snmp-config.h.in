@@ -293,6 +293,12 @@
 /* Define to 1 if you have the <iphlpapi.h> header file. */
 #undef HAVE_IPHLPAPI_H
 
+/* Set if IP_PKTINFO is usable */
+#undef HAVE_IP_PKTINFO
+
+/* Set if IP_RECVDSTADDR is usable */
+#undef HAVE_IP_RECVDSTADDR
+
 /* Define to 1 if you have the `kinfo_get_cpus' function. */
 #undef HAVE_KINFO_GET_CPUS
 
@@ -895,12 +901,6 @@
 
 /* Define to 1 if `m_mbufs' is a member of `struct mbstat'. */
 #undef HAVE_STRUCT_MBSTAT_M_MBUFS
-
-/* Define to 1 if `msg_control' is a member of `struct msghdr'. */
-#undef HAVE_STRUCT_MSGHDR_MSG_CONTROL
-
-/* Define to 1 if `msg_flags' is a member of `struct msghdr'. */
-#undef HAVE_STRUCT_MSGHDR_MSG_FLAGS
 
 /* Define to 1 if `n_value' is a member of `struct nlist64'. */
 #undef HAVE_STRUCT_NLIST64_N_VALUE
