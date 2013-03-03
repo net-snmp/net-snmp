@@ -150,6 +150,7 @@ init_udpTable(void)
      */
     iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
     if (!iinfo) {
+        netsnmp_table_registration_info_free(table_info);
         return;
     }
     iinfo->get_first_data_point = udpTable_first_entry;
