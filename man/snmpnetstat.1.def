@@ -164,6 +164,8 @@ is unknown or if there is no statistics routine for it.
 .PP
 .B \-Cs
 Show per-protocol statistics.
+If this is duplicated (-Css) statistics entries which are zero will
+be suppressed.
 .PP
 .B \-Cr
 Show the routing tables.
