@@ -271,7 +271,6 @@ _dump_v6stats( const char *name, oid *oid_buf, size_t buf_len,
          *   then only display non-zero stats.
          */
         if ( stats[sp->entry] > 0 || sflag == 1 ) {
-            putchar('\t');
             printf(sp->description, stats[sp->entry],
                              plural(stats[sp->entry]));
             putchar('\n');
@@ -291,27 +290,27 @@ ip6_stats(const char *name)
     oid               ip6stats_oid[] = { 1, 3, 6, 1, 2, 1, 55, 1, 6, 1, 0 };
     size_t            ip6stats_len   = OID_LENGTH( ip6stats_oid );
     struct stat_table ip6stats_tbl[] = {
-        {1, "%d total datagram%s received"},
-        {2, "%d datagram%s with header errors"},
-        {3, "%d oversized datagram%s"},
-        {4, "%d datagram%s with no route"},
-        {5, "%d datagram%s with an invalid destination address"},
-        {6, "%d datagram%s with unknown protocol"},
-        {7, "%d short datagram%s discarded"},
-        {8, "%d datagram%s discarded"},
-        {9, "%d datagram%s delivered"},
-        {10, "%d datagram%s forwarded"},
-        {11, "%d output datagram request%s"},
-        {12, "%d output datagram%s discarded"},
-        {13, "%d datagram%s fragmented"},
-        {14, "%d fragmentation failure%s"},
-        {15, "%d fragment%s created"},
-        {16, "%d fragment%s received"},
-        {17, "%d datagram%s reassembled"},
-        {18, "%d reassembly failure%s"},
-        {19, "%d multicast datagram%s received"},
-        {20, "%d multicast datagram%s transmitted"},
-        {0, ""}
+        { 1, "%14d total datagram%s received"},
+        { 2, "%14d datagram%s with header errors"},
+        { 3, "%14d oversized datagram%s"},
+        { 4, "%14d datagram%s with no route"},
+        { 5, "%14d datagram%s with an invalid destination address"},
+        { 6, "%14d datagram%s with unknown protocol"},
+        { 7, "%14d short datagram%s discarded"},
+        { 8, "%14d datagram%s discarded"},
+        { 9, "%14d datagram%s delivered"},
+        {10, "%14d datagram%s forwarded"},
+        {11, "%14d output datagram request%s"},
+        {12, "%14d output datagram%s discarded"},
+        {13, "%14d datagram%s fragmented"},
+        {14, "%14d fragmentation failure%s"},
+        {15, "%14d fragment%s created"},
+        {16, "%14d fragment%s received"},
+        {17, "%14d datagram%s reassembled"},
+        {18, "%14d reassembly failure%s"},
+        {19, "%14d multicast datagram%s received"},
+        {20, "%14d multicast datagram%s transmitted"},
+        { 0, ""}
     };
 
     _dump_v6stats( name, ip6stats_oid, ip6stats_len, ip6stats_tbl );
@@ -331,20 +330,20 @@ icmp6_stats(const char *name)
     oid               icmp6stats_oid[] = { 1, 3, 6, 1, 2, 1, 56, 1, 1, 1, 0 };
     size_t            icmp6stats_len   = OID_LENGTH( icmp6stats_oid );
     struct stat_table icmp6stats_tbl[] = {
-        {1, "%d total message%s received"},
-        {2, "%d message%s dropped due to errors"},
-        {18, "%d ouput message request%s"},
-        {19, "%d output message%s discarded"},
-        {0, ""}
+        { 1, "%14d total message%s received"},
+        { 2, "%14d message%s dropped due to errors"},
+        {18, "%14d ouput message request%s"},
+        {19, "%14d output message%s discarded"},
+        { 0, ""}
     };
     struct stat_table icmp6_inhistogram[] = {
-        {3, "Destination unreachable: %d"},
-        {4, "Admin Prohibit: %d"},
-        {5, "Time Exceeded: %d"},
-        {6, "Parameter Problem: %d"},
-        {7, "Too Big: %d"},
-        {8, "Echo Request: %d"},
-        {9, "Echo Reply: %d"},
+        { 3, "Destination unreachable: %d"},
+        { 4, "Admin Prohibit: %d"},
+        { 5, "Time Exceeded: %d"},
+        { 6, "Parameter Problem: %d"},
+        { 7, "Too Big: %d"},
+        { 8, "Echo Request: %d"},
+        { 9, "Echo Reply: %d"},
         {10, "Router Solicit: %d"},
         {11, "Router Advert: %d"},
         {12, "Neighbor Solicit: %d"},
@@ -353,7 +352,7 @@ icmp6_stats(const char *name)
         {15, "Group Member Request: %d"},
         {16, "Group Member Reply:%d"},
         {17, "Group Member Reduce:%d"},
-        {0, ""}
+        { 0, ""}
     };
     struct stat_table icmp6_outhistogram[] = {
         {20, "Destination unreachable: %d"},
