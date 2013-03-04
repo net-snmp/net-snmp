@@ -106,7 +106,7 @@ int
 routexpr(int af)
 {
     struct route_entry  route, *rp = &route;
-    oid    rtcol_oid[]  = { 1,3,6,1,2,1,4,24,7,1,0 }; /* inetCidrRoiuteEntry */
+    oid    rtcol_oid[]  = { 1,3,6,1,2,1,4,24,7,1,0 }; /* inetCidrRouteEntry */
     size_t rtcol_len    = OID_LENGTH( rtcol_oid );
     netsnmp_variable_list *var = NULL, *vp;
     int hdr_af = AF_UNSPEC;
@@ -253,10 +253,10 @@ pr_rtxhdr(int af)
 {
     switch (af) {
     case AF_INET:
-	printf("IPv4 Routing tables\n");
+	printf("IPv4 Routing tables (inetCidrRouteTable)\n");
 	break;
     case AF_INET6:
-	printf("IPv6 Routing tables\n");
+	printf("IPv6 Routing tables (inetCidrRouteTable)\n");
 	break;
     }
     printf("%-*.*s ",
