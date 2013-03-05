@@ -7,7 +7,7 @@ SOCK_STARTUP;
 {
     int             ran_test = 0;
 #ifdef HAVE_GETHOSTBYADDR
-    struct hostent *h, *h2;
+    struct hostent *h, *h2 = NULL;
     struct in_addr  v4loop;
     struct sockaddr_in sin_addr;
     int             s;
@@ -39,7 +39,11 @@ SOCK_STARTUP;
 
 {
     struct hostent *h;
+#ifdef cygwin
+    static const struct in6_addr v6loop = { { IN6ADDR_LOOPBACK_INIT } };
+#else
     static const struct in6_addr v6loop = IN6ADDR_LOOPBACK_INIT;
+#endif
     struct sockaddr_in6 sin6_addr;
     struct addrinfo hints, *addr = NULL, *ap;
     char            buf[64];
