@@ -442,15 +442,18 @@ statsprint(const char *name, const systemstats_t *st, int proto,
 		abort();
 	}
 	if (vb) {
-	    if (vb->type == ASN_COUNTER)
-		printf("%10lu %s\n", *vb->val.integer, st->str);
+	    if (vb->type == ASN_COUNTER) {
+		if (*vb->val.integer > 0 || sflag == 1)
+		    printf("%14lu %s\n", *vb->val.integer, st->str);
+	    }
 	    else if (vb->type == ASN_COUNTER64) {
 		char a64buf[I64CHARSZ + 1];
 		printU64(a64buf, vb->val.counter64);
-		printf("%10s %s\n", a64buf, st->str);
+		if (strcmp(a64buf, "0") != 0 || sflag == 1)
+		    printf("%14s %s\n", a64buf, st->str);
 	    }
 	    else
-		printf("%10s %s\n", "-", st->str);
+		printf("%14s %s\n", "-", st->str);
 	    snmp_free_varbind(vb);
 	}
 	st++;

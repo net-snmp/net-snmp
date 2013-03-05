@@ -58,7 +58,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPNETSTAT 1 "20 Oct 2012" VVERSIONINFO "Net-SNMP"
+.TH SNMPNETSTAT 1 "04 Mar 2013" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmpnetstat \- display networking status and configuration information from a network entity via SNMP
 .SH SYNOPSIS
@@ -163,16 +163,12 @@ The program will complain if
 is unknown or if there is no statistics routine for it.
 .PP
 .B \-Cs
-Show per-protocol statistics.  When used with the
-.B \-Cr
-option, show routing statistics instead.
+Show per-protocol statistics.
+If this is duplicated (-Css) statistics entries which are zero will
+be suppressed.
 .PP
 .B \-Cr
 Show the routing tables.
-When
-.B \-Cs
-is also present, show per-protocol routing statistics instead of 
-the routing tables.
 .PP
 .BI \-CR " repeaters"
 For GETBULK requests,
