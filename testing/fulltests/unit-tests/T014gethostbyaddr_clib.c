@@ -39,7 +39,11 @@ SOCK_STARTUP;
 
 {
     struct hostent *h;
+#ifdef cygwin
+    static const struct in6_addr v6loop = { { IN6ADDR_LOOPBACK_INIT } };
+#else
     static const struct in6_addr v6loop = IN6ADDR_LOOPBACK_INIT;
+#endif
     struct sockaddr_in6 sin6_addr;
     struct addrinfo hints, *addr = NULL, *ap;
     char            buf[64];
