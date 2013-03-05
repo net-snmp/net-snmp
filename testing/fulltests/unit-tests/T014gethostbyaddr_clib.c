@@ -7,7 +7,7 @@ SOCK_STARTUP;
 {
     int             ran_test = 0;
 #ifdef HAVE_GETHOSTBYADDR
-    struct hostent *h, *h2;
+    struct hostent *h, *h2 = NULL;
     struct in_addr  v4loop;
     struct sockaddr_in sin_addr;
     int             s;
