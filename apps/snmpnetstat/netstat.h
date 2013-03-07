@@ -97,6 +97,7 @@ char	*netname(in_addr_t, in_addr_t);
 char	*ns_print(struct sockaddr *);
 void	routepr(void);
 int     route4pr(int);
+int     route6pr(int);
 int     routexpr(int);
 
 void	intpr(int);
