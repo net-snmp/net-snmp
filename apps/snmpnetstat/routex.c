@@ -82,7 +82,7 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 #define SET_ALL  0x3f
 
 /* ip6RouteTable */
-#define	SET_HOP     0x40
+#define SET_HOP     0x40
 #define SET_INVALID 0x80
 #define SET_ALL6    0x67
 /* not invalid, and only the columns that we fetch */
@@ -275,7 +275,7 @@ route6pr(int af)
     while ( 1 ) {
         oid *op;
         unsigned char *cp, *cp1;
-	struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&route.dst;
+        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&route.dst;
 
         if (netsnmp_query_getnext( var, ss ) != SNMP_ERR_NOERROR)
             break;
@@ -288,54 +288,54 @@ route6pr(int af)
                 var->type == SNMP_ENDOFMIBVIEW)
             break;
         memset( &route, 0, sizeof( struct route_entry ));
-	rp->af = AF_INET6;
-	sin6->sin6_family = AF_INET6;
-	op = var->name+rtcol_len;
+        rp->af = AF_INET6;
+        sin6->sin6_family = AF_INET6;
+        op = var->name+rtcol_len;
         cp = (unsigned char *)&sin6->sin6_addr;
-	for (i = 0; i < 16; i++) *cp++ = *op++;
-	route.mask = *op++;
+        for (i = 0; i < 16; i++) *cp++ = *op++;
+        route.mask = *op++;
 
         for ( vp=var; vp; vp=vp->next_variable ) {
             switch ( vp->name[ rtcol_len - 1 ] ) {
             case 4:     /* ipv6RouteIfIndex  */
                 rp->ifNumber  = *vp->val.integer;
-		/*
-		 * This is, technically, an Ipv6IfIndex, which
-		 * could maybe be different than the IfIndex
-		 * for the same interface.  We ignore this
-		 * possibility for now, in the hopes that
-		 * nobody actually allocates these numbers
-		 * differently.
-		 */
+                /*
+                 * This is, technically, an Ipv6IfIndex, which
+                 * could maybe be different than the IfIndex
+                 * for the same interface.  We ignore this
+                 * possibility for now, in the hopes that
+                 * nobody actually allocates these numbers
+                 * differently.
+                 */
                 rp->set_bits |= SET_IFNO;
                 break;
-	    case 5:	/* ipv6RouteNextHop  */
-		cp1 = (unsigned char *)vp->val.string;
-		sin6 = (struct sockaddr_in6 *)&rp->hop;
-		sin6->sin6_family = AF_INET6;
-		cp = (unsigned char *)&sin6->sin6_addr;
-		for (i = 0; i < 16; i++) *cp++ = *cp1++;
-		rp->set_bits |= SET_HOP;
+            case 5:     /* ipv6RouteNextHop  */
+                cp1 = (unsigned char *)vp->val.string;
+                sin6 = (struct sockaddr_in6 *)&rp->hop;
+                sin6->sin6_family = AF_INET6;
+                cp = (unsigned char *)&sin6->sin6_addr;
+                for (i = 0; i < 16; i++) *cp++ = *cp1++;
+                rp->set_bits |= SET_HOP;
             case 6:     /* ipv6RouteType     */
                 rp->type      = *vp->val.integer;
-		/* This enum maps to similar values in inetCidrRouteType */
+                /* This enum maps to similar values in inetCidrRouteType */
                 rp->set_bits |= SET_TYPE;
                 break;
             case 7:     /* ipv6RouteProtocol */
                 rp->proto     = *vp->val.integer;
-		/* TODO: this does not map directly to the
-		 * inetCidrRouteProtocol values.  If we use
-		 * rp->proto more, we will have to manage this. */
+                /* TODO: this does not map directly to the
+                 * inetCidrRouteProtocol values.  If we use
+                 * rp->proto more, we will have to manage this. */
                 rp->set_bits |= SET_PRTO;
                 break;
-	    case 11:	/* ipv6RouteMetric   */
-		rp->metric1   = *vp->val.integer;
-		rp->set_bits |= SET_MET1;
-		break;
-	    case 14:	/* ipv6RouteValid    */
-		if (*vp->val.integer == 2)
-		    rp->set_bits |= SET_INVALID;
-		break;
+            case 11:    /* ipv6RouteMetric   */
+                rp->metric1   = *vp->val.integer;
+                rp->set_bits |= SET_MET1;
+                break;
+            case 14:    /* ipv6RouteValid    */
+                if (*vp->val.integer == 2)
+                    rp->set_bits |= SET_INVALID;
+                break;
             }
         }
         if (rp->set_bits != SET_ALL6) {
