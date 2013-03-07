@@ -192,6 +192,9 @@ route4pr(int af)
     int printed = 0;
     int hdr_af = AF_UNSPEC;
 
+    if (af != AF_UNSPEC && af != AF_INET)
+        return 0;
+
 #define ADD_RTVAR( x ) rtcol_oid[ rtcol_len-1 ] = x; \
     snmp_varlist_add_variable( &var, rtcol_oid, rtcol_len, ASN_NULL, NULL,  0)
     ADD_RTVAR( 5 );                 /* ipCidrRouteIfIndex */
@@ -259,9 +262,6 @@ route4pr(int af)
         if (rp->set_bits != SET_ALL) {
             continue;   /* Incomplete query */
         }
-    
-        if (af != AF_UNSPEC && rp->af != af)
-            continue;
 
         if (hdr_af != rp->af) {
             if (hdr_af != AF_UNSPEC)
