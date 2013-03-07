@@ -123,7 +123,7 @@ routexpr(int af)
 #undef ADD_RTVAR
 
     /*
-     * Now walk the ipRouteTable, reporting the various route entries
+     * Now walk the inetCidrRouteTable, reporting the various route entries
      */
     while ( 1 ) {
         oid *op;
@@ -141,6 +141,8 @@ routexpr(int af)
                 var->type == SNMP_ENDOFMIBVIEW)
             break;
         memset( &route, 0, sizeof( struct route_entry ));
+        /* Extract inetCidrRouteDest, inetCidrRoutePfxLen,
+         * inetCidrRouteNextHop from index */
         switch (var->name[rtcol_len]) {
         case 1:
             {   struct sockaddr_in *sin = (struct sockaddr_in *)&route.dst;
@@ -427,8 +429,11 @@ p_rtnodex( struct route_entry *rp )
                     routexname(&rp->dst) :
                     netxname(&rp->dst, rp->mask)));
     }
-    printf("%-*s %-6.6s  %s\n",
+    printf("%-*s %-6.6s  %s",
         WID_GW(rp->af),
         1 ? routexname(&rp->hop) : "*",
         s_rtflagsx(rp), rp->ifname);
+    if ((rp->set_bits & SET_AS) && rp->as != 0)
+        printf(" (AS %d)", rp->as);
+    printf("\n");
 }
