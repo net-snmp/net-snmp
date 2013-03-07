@@ -160,7 +160,7 @@ netsnmp_fsys_arch_load( void )
             continue;
 
         if ( statfs( entry->path, &stat_buf ) < 0 ) {
-            snprintf( tmpbuf, sizeof(tmpbuf), "Cannot statfs %s\n", entry->path );
+            snprintf( tmpbuf, sizeof(tmpbuf), "Cannot statfs %s", entry->path );
             snmp_log_perror( tmpbuf );
             continue;
         }

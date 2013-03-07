@@ -175,7 +175,7 @@ netsnmp_fsys_arch_load( void )
      */
     fp = fopen( ETC_MNTTAB, "r" );   /* OR setmntent()?? */
     if ( !fp ) {
-        snprintf( tmpbuf, sizeof(tmpbuf), "Cannot open %s\n", ETC_MNTTAB );
+        snprintf( tmpbuf, sizeof(tmpbuf), "Cannot open %s", ETC_MNTTAB );
         snmp_log_perror( tmpbuf );
         return;
     }
@@ -235,7 +235,7 @@ netsnmp_fsys_arch_load( void )
         if ( NSFS_STATFS( entry->path, &stat_buf ) < 0 )
 #endif
         {
-            snprintf( tmpbuf, sizeof(tmpbuf), "Cannot statfs %s\n", entry->path );
+            snprintf( tmpbuf, sizeof(tmpbuf), "Cannot statfs %s", entry->path );
             snmp_log_perror( tmpbuf );
             continue;
         }
