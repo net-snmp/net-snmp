@@ -32,6 +32,9 @@
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
+#ifdef HAVE_SYS_PROC_H
+#include <sys/proc.h>
+#endif
 #ifdef HAVE_SYS_USER_H
 #include <sys/user.h>
 #endif
