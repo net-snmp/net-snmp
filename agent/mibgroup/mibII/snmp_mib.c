@@ -48,7 +48,11 @@ handle_truthvalue(netsnmp_mib_handler *handler,
 static netsnmp_mib_handler*
 netsnmp_get_truthvalue(void)
 {
-    return netsnmp_create_handler("truthvalue", handle_truthvalue);
+    netsnmp_mib_handler* hnd =
+        netsnmp_create_handler("truthvalue", handle_truthvalue);
+    if (hnd)
+        hnd->flags |= MIB_HANDLER_AUTO_NEXT;
+    return hnd;
 }
 
 static int
