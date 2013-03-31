@@ -28,6 +28,7 @@ netsnmp_create_update_handler_registration(
     if (hnd == NULL)
         return NULL;
 
+    hnd->flags |= MIB_HANDLER_AUTO_NEXT;
     hnd->myvoid = set;
 
     res = netsnmp_handler_registration_create(name, hnd, id, idlen, mode);
