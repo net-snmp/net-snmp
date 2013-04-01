@@ -12,8 +12,10 @@ handle_updates(netsnmp_mib_handler *handler,
 
     if (reqinfo->mode == MODE_SET_RESERVE1 && *set < 0)
         netsnmp_request_set_error(requests, SNMP_ERR_NOTWRITABLE);
-    else if (reqinfo->mode == MODE_SET_COMMIT)
+    else if (reqinfo->mode == MODE_SET_COMMIT) {
         *set = 1;
+        snmp_store_needed(reginfo->handlerName);
+    }
     return SNMP_ERR_NOERROR;
 }
 
