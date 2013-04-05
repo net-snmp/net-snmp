@@ -86,6 +86,12 @@ usage(void)
             "\t-Cp\tShow hrSWRunPath insteadof hrSWRunName\n");
     fprintf(stderr,
             "\t-Ca\tShow hrSWRunParameters in addition to hrSWRunName/Path\n");
+    fprintf(stderr,
+            "\t-Ct\tSort processes according to CPU time used\n");
+    fprintf(stderr,
+            "\t-Cm\tSort processes according to memory usage\n");
+    fprintf(stderr,
+            "\t-Cn\tSort processes by PID number (default)\n");
 }
 
 int   command_args = 0,
