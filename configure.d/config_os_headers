@@ -55,6 +55,7 @@ AC_CHECK_HEADERS([dlfcn.h    err.h      fcntl.h    fstab.h      ] dnl
                  [ioctls.h   kstat.h    kvm.h      limits.h     ] dnl
                  [           mntent.h   mtab.h                  ] dnl
                  [           pkglocs.h             pwd.h        ] dnl
+                 [           com_err.h             et/com_err.h ] dnl
                  [           utmpx.h    utsname.h               ])
 
 AC_CHECK_HEADERS([sys/diskio.h  sys/dkio.h                                 ] dnl
