@@ -66,6 +66,12 @@
 #define TICKET_CLIENT(x)	(x)->enc_part2->client
 #endif				/* NETSNMP_USE_KERBEROS_HEIMDAL */
 
+#if HAVE_ET_COM_ERR_H
+#include <et/com_err.h>
+#elif HAVE_COM_ERR_H
+#include <com_err.h>
+#endif
+
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>

@@ -108,6 +108,9 @@
 /* Define to 1 if you have the `closedir' function. */
 #undef HAVE_CLOSEDIR
 
+/* Define to 1 if you have the <com_err.h> header file. */
+#undef HAVE_COM_ERR_H
+
 /* Define to 1 if the system has the type `Counter64'. */
 #undef HAVE_COUNTER64
 
@@ -142,6 +145,9 @@
 
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
+
+/* Define to 1 if you have the <et/com_err.h> header file. */
+#undef HAVE_ET_COM_ERR_H
 
 /* Define to 1 if you have the `eval_pv' function. */
 #undef HAVE_EVAL_PV
