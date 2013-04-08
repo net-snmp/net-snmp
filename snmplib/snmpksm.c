@@ -107,6 +107,24 @@ static void     ksm_decrement_ref_count(long);
 static void     ksm_increment_ref_count(long);
 static struct ksm_cache_entry *ksm_get_cache(long);
 
+#if !defined(HAVE_KRB5_AUTH_CON_GETSENDSUBKEY) /* Heimdal */
+
+krb5_error_code krb5_auth_con_getsendsubkey(krb5_context context,
+				krb5_auth_context auth_context, 
+				krb5_keyblock **keyblock)
+{
+    return krb5_auth_con_getlocalsubkey(context, auth_context, keyblock);
+}
+
+krb5_error_code krb5_auth_con_getrecvsubkey(krb5_context context,
+				krb5_auth_context auth_context, 
+				krb5_keyblock **keyblock)
+{
+    return krb5_auth_con_getremotesubkey(context, auth_context, keyblock);
+}
+
+#endif
+
 #define HASHSIZE	64
 
 /*
@@ -592,15 +610,15 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
          */
 
         if (ksm_state)
-            retcode = krb5_auth_con_getremotesubkey(kcontext, auth_context,
+            retcode = krb5_auth_con_getrecvsubkey(kcontext, auth_context,
                                                     &subkey);
         else
-            retcode = krb5_auth_con_getlocalsubkey(kcontext, auth_context,
+            retcode = krb5_auth_con_getsendsubkey(kcontext, auth_context,
                                                    &subkey);
 
         if (retcode) {
             DEBUGMSGTL(("ksm",
-                        "KSM: krb5_auth_con_getlocalsubkey failed: %s\n",
+                        "KSM: krb5_auth_con_getsendsubkey failed: %s\n",
                         error_message(retcode)));
             snmp_set_detail(error_message(retcode));
             retval = SNMPERR_KRB5;
@@ -829,13 +847,13 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
     if (!subkey) {
         if (ksm_state)
-            retcode = krb5_auth_con_getremotesubkey(kcontext, auth_context,
+            retcode = krb5_auth_con_getrecvsubkey(kcontext, auth_context,
                                                     &subkey);
         else
-            retcode = krb5_auth_con_getlocalsubkey(kcontext, auth_context,
+            retcode = krb5_auth_con_getsendsubkey(kcontext, auth_context,
                                                    &subkey);
         if (retcode) {
-            DEBUGMSGTL(("ksm", "krb5_auth_con_getlocalsubkey failed: %s\n",
+            DEBUGMSGTL(("ksm", "krb5_auth_con_getsendsubkey failed: %s\n",
                         error_message(retcode)));
             snmp_set_detail(error_message(retcode));
             retval = SNMPERR_KRB5;
@@ -1508,7 +1526,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         }
 
         retcode =
-            krb5_auth_con_getremotesubkey(kcontext, auth_context, &subkey);
+            krb5_auth_con_getrecvsubkey(kcontext, auth_context, &subkey);
 
         if (retcode) {
             DEBUGMSGTL(("ksm", "KSM remote subkey retrieval failed: %s\n",
@@ -1565,7 +1583,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         DEBUGMSGTL(("ksm", "KSM: krb5_rd_rep() decoded successfully.\n"));
 
         retcode =
-            krb5_auth_con_getlocalsubkey(kcontext, auth_context, &subkey);
+            krb5_auth_con_getsendsubkey(kcontext, auth_context, &subkey);
 
         if (retcode) {
             DEBUGMSGTL(("ksm", "Unable to retrieve local subkey: %s\n",
