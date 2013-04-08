@@ -91,7 +91,9 @@ static krb5_context kcontext = NULL;
 static krb5_rcache rcache = NULL;
 static krb5_keytab keytab = NULL;
 static int keytab_setup = 0;
-static const char *service_name = NULL;
+static char *service_name = NULL;
+static char service_host[] = "host";
+static u_char null_id[] = {0};
 
 static int      ksm_session_init(netsnmp_session *);
 static void     ksm_free_state_ref(void *);
@@ -159,7 +161,7 @@ init_snmpksm_post_config(int majorid, int minorid, void *serverarg,
 		service_name = c;
 	}
 	else {
-		service_name = "host";
+		service_name = service_host;
 	}
     }
 
@@ -527,7 +529,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         retcode =
             krb5_mk_req(kcontext, &auth_context,
                         AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY,
-                        (char *) service_name, parms->session->peername, NULL,
+                        service_name, parms->session->peername, NULL,
                         cc, &outdata);
 
         if (colon != NULL)
@@ -1450,7 +1452,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
         if (!rcache) {
             krb5_data       server;
-            server.data = "host";
+            server.data = service_host;
             server.length = strlen(server.data);
 
             retcode = krb5_get_server_rcache(kcontext, &server, &rcache);
@@ -1855,7 +1857,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
      * Just in case
      */
 
-    parms->secEngineID = (u_char *) "";
+    parms->secEngineID = null_id;
     *parms->secEngineIDLen = 0;
 
     auth_context = NULL;        /* So we don't try to free it on success */
