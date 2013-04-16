@@ -1366,7 +1366,13 @@ char * _get_cmdline(netsnmp_extend *extend)
 {
     size_t          size;
     char           *newbuf;
-    size = strlen(extend->command) + strlen(extend->args) + 2;
+    char           *args = extend->args;
+
+    if (args == NULL)
+        /* Use empty string for processes without arguments. */
+        args = ""
+
+    size = strlen(extend->command) + strlen(args) + 2;
     if (size > cmdlinesize) {
         newbuf = realloc(cmdlinebuf, size);
         if (!newbuf) {
@@ -1378,7 +1384,7 @@ char * _get_cmdline(netsnmp_extend *extend)
         cmdlinebuf = newbuf;
         cmdlinesize = size;
     }
-    sprintf(cmdlinebuf, "%s %s", extend->command, extend->args);
+    sprintf(cmdlinebuf, "%s %s", extend->command, args);
     return cmdlinebuf;
 }
 
