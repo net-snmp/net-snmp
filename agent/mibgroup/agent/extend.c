@@ -1361,11 +1361,11 @@ char * _get_cmdline(netsnmp_extend *extend)
 {
     size_t          size;
     char           *newbuf;
-    char           *args = extend->args;
+    const char     *args = extend->args;
 
     if (args == NULL)
         /* Use empty string for processes without arguments. */
-        args = ""
+        args = "";
 
     size = strlen(extend->command) + strlen(args) + 2;
     if (size > cmdlinesize) {
