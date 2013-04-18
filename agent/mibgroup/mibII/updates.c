@@ -23,11 +23,21 @@ netsnmp_handler_registration*
 netsnmp_create_update_handler_registration(
     const char* name, const oid* id, size_t idlen, int mode, int* set)
 {
-    netsnmp_handler_registration *res = NULL;
-    netsnmp_mib_handler *hnd = netsnmp_create_handler("update", handle_updates);
-    if (hnd) {
-        hnd->myvoid = set;
-        res = netsnmp_handler_registration_create(name, hnd, id, idlen, mode);
+    netsnmp_handler_registration *res;
+    netsnmp_mib_handler *hnd;
+
+    hnd = netsnmp_create_handler("update", handle_updates);
+    if (hnd == NULL)
+        return NULL;
+
+    hnd->flags |= MIB_HANDLER_AUTO_NEXT;
+    hnd->myvoid = set;
+
+    res = netsnmp_handler_registration_create(name, hnd, id, idlen, mode);
+    if (res == NULL) {
+        netsnmp_handler_free(hnd);
+        return NULL;
     }
+
     return res;
 }
