@@ -199,7 +199,10 @@ var_hrprint(struct variable * vp,
 
 static int      HRP_index;
 static char   **HRP_name;
-static int      HRP_nbrnames, HRP_maxnames;
+static int      HRP_nbrnames;
+#if HAVE_LPSTAT || HAVE_CGETNEXT || HAVE_PRINTCAP
+static int      HRP_maxnames;
+#endif
 
 #define HRP_MAX_INCR 10
 
