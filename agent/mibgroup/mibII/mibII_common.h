@@ -88,7 +88,6 @@
 #include <dmalloc.h>
 #endif
 
-
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -100,6 +99,10 @@
 #ifdef NETBSD_STATS_VIA_SYSCTL
 #include "kernel_netbsd.h"
 #endif
+#if defined(NETSNMP_CAN_USE_SYSCTL) /* && defined(ICMPCTL_STATS) */
+#include "kernel_sysctl.h"
+#endif
+
 	/* or MIB_xxxCOUNTER_SYMBOL || hpux11 */
 #ifdef hpux
 #include <sys/mib.h>

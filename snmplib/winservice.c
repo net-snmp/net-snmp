@@ -39,6 +39,8 @@ labelFIN: \
 
 #if defined(WIN32) && defined(HAVE_WIN32_PLATFORM_SDK) && !defined(mingw32)
 #pragma comment(lib, "iphlpapi.lib")
+#endif
+#if defined(WIN32) && !defined(mingw32)
 #ifdef USING_WINEXTDLL_MODULE
 #pragma comment(lib, "snmpapi.lib")
 #pragma comment(lib, "mgmtapi.lib")

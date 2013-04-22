@@ -91,6 +91,20 @@ AC_CHECK_MEMBERS([struct ipstat.ips_cantfrag,
 #include <netinet/ip_var.h>
 #endif
     ]])
+#       struct ip6stat
+#   Agent:
+#
+AC_CHECK_MEMBERS([struct ip6stat.ip6s_exthdrtoolong ],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET6_IP6_VAR_H
+#include <netinet6/ip6_var.h>
+#endif
+    ]])
+
 #
 #   Not-Used:
 AC_CHECK_MEMBERS([struct ipstat.ips_cantforward,
@@ -172,30 +186,6 @@ AC_CHECK_MEMBERS([struct sockaddr.sa_len,
 #   Library:
 #
 AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id],,,[
-    AC_INCLUDES_DEFAULT()
-    [
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
-    ]])
-
-#       struct msghdr
-#   Library:
-#
-AC_CHECK_MEMBERS([struct msghdr.msg_control,
-                  struct msghdr.msg_flags],,,[
     AC_INCLUDES_DEFAULT()
     [
 #ifdef HAVE_SYS_PARAM_H
@@ -372,6 +362,7 @@ AC_CHECK_MEMBERS([struct udpstat.udps_discard,
                   struct udpstat.udps_fullsock,
                   struct udpstat.udps_noport,
                   struct udpstat.udps_noportbcast,
+                  struct udpstat.udps_ipackets,
                   struct udpstat.udps_opackets],,,[
     AC_INCLUDES_DEFAULT()
     [
@@ -606,44 +597,6 @@ struct ifnet {
 };
 #endif
     ]])
-
-
-##
-#   rtentry structure checks:
-##
-
-# Check struct rtentry for common fields
-#   Agent:
-#
-AC_CHECK_MEMBERS([struct rtentry.rt_dst,
-                  struct rtentry.rt_hash,
-                  struct rtentry.rt_next,
-                  struct rtentry.rt_refcnt,
-                  struct rtentry.rt_unit,
-                  struct rtentry.rt_use],,,
-    [
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <sys/types.h>
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
-#define _KERNEL_STRUCTURES 1
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#if !defined(__DragonFly__)
-#define _KERNEL 1
-#endif
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#endif
-#ifdef HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-    ])
 
 
 # Check for BSD 4.3 vs 4.4 struct rtentry

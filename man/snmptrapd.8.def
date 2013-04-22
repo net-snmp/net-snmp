@@ -23,7 +23,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "30 Mar 2011" VVERSIONINFO "Net-SNMP"
+.TH SNMPTRAPD 8 "05 Feb 2013" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmptrapd - Receive and log SNMP trap messages.
 .SH SYNOPSIS
@@ -141,6 +141,9 @@ Print version information for the trap daemon and then exit.
 Connect to the AgentX master agent on the specified address,
 rather than the default AGENTX_SOCKET.
 See \fIsnmpd(8)\fR for details of the format of such addresses.
+.TP
+.B \-X
+Do not connect to a AgentX master agent
 .TP
 .BI \-\- "name"="value"
 Allows one to specify any token ("name") supported in the

@@ -507,7 +507,7 @@ asn_parse_int(u_char * data,
         (errpre, bufp, data, asn_length, *datalength))
         return NULL;
 
-    if ((size_t) asn_length > intsize) {
+    if ((size_t) asn_length > intsize || (int) asn_length == 0) {
         _asn_length_err(errpre, (size_t) asn_length, intsize);
         return NULL;
     }
@@ -579,7 +579,7 @@ asn_parse_unsigned_int(u_char * data,
         (errpre, bufp, data, asn_length, *datalength))
         return NULL;
 
-    if ((asn_length > (intsize + 1)) ||
+    if ((asn_length > (intsize + 1)) || ((int) asn_length == 0) ||
         ((asn_length == intsize + 1) && *bufp != 0x00)) {
         _asn_length_err(errpre, (size_t) asn_length, intsize);
         return NULL;

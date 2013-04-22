@@ -108,6 +108,9 @@
 /* Define to 1 if you have the `closedir' function. */
 #undef HAVE_CLOSEDIR
 
+/* Define to 1 if you have the <com_err.h> header file. */
+#undef HAVE_COM_ERR_H
+
 /* Define to 1 if the system has the type `Counter64'. */
 #undef HAVE_COUNTER64
 
@@ -139,6 +142,9 @@
 
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
+
+/* Define to 1 if you have the <et/com_err.h> header file. */
+#undef HAVE_ET_COM_ERR_H
 
 /* Define to 1 if you have the `eval_pv' function. */
 #undef HAVE_EVAL_PV
@@ -293,6 +299,12 @@
 /* Define to 1 if you have the <iphlpapi.h> header file. */
 #undef HAVE_IPHLPAPI_H
 
+/* Set if IP_PKTINFO is usable */
+#undef HAVE_IP_PKTINFO
+
+/* Set if IP_RECVDSTADDR is usable */
+#undef HAVE_IP_RECVDSTADDR
+
 /* Define to 1 if you have the `kinfo_get_cpus' function. */
 #undef HAVE_KINFO_GET_CPUS
 
@@ -301,6 +313,9 @@
 
 /* Define to 1 if you have the `knlist' function. */
 #undef HAVE_KNLIST
+
+/* Define to 1 if you have the `krb5_auth_con_getsendsubkey' function. */
+#undef HAVE_KRB5_AUTH_CON_GETSENDSUBKEY
 
 /* Define to 1 if you have the <kstat.h> header file. */
 #undef HAVE_KSTAT_H
@@ -848,6 +863,9 @@
 /* Define to 1 if `if_xname' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_XNAME
 
+/* Define to 1 if `ip6s_exthdrtoolong ' is a member of `struct ip6stat'. */
+#undef HAVE_STRUCT_IP6STAT_IP6S_EXTHDRTOOLONG_
+
 /* Define to 1 if `ips_cantforward' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_CANTFORWARD
 
@@ -892,12 +910,6 @@
 
 /* Define to 1 if `m_mbufs' is a member of `struct mbstat'. */
 #undef HAVE_STRUCT_MBSTAT_M_MBUFS
-
-/* Define to 1 if `msg_control' is a member of `struct msghdr'. */
-#undef HAVE_STRUCT_MSGHDR_MSG_CONTROL
-
-/* Define to 1 if `msg_flags' is a member of `struct msghdr'. */
-#undef HAVE_STRUCT_MSGHDR_MSG_FLAGS
 
 /* Define to 1 if `n_value' is a member of `struct nlist64'. */
 #undef HAVE_STRUCT_NLIST64_N_VALUE
@@ -983,6 +995,9 @@
 
 /* Define to 1 if `udps_fullsock' is a member of `struct udpstat'. */
 #undef HAVE_STRUCT_UDPSTAT_UDPS_FULLSOCK
+
+/* Define to 1 if `udps_ipackets' is a member of `struct udpstat'. */
+#undef HAVE_STRUCT_UDPSTAT_UDPS_IPACKETS
 
 /* Define to 1 if `udps_noport' is a member of `struct udpstat'. */
 #undef HAVE_STRUCT_UDPSTAT_UDPS_NOPORT

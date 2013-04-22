@@ -393,7 +393,10 @@ main(int argc, char *argv[])
 			rt_stats();
 		else
               */
-			if (Lflag || routexpr(af) == 0) routepr();
+		if (Lflag || routexpr(af) == 0) {
+		    if (route4pr(af) == 0 && af == AF_INET) routepr();
+		    route6pr(af);
+		}
 		exit(0);
 	}
      /*

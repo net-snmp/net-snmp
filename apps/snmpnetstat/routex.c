@@ -72,6 +72,7 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 #include "winstub.h"
 #endif
 
+/* inetCidrRouteTable */
 #define SET_IFNO 0x01
 #define SET_TYPE 0x02
 #define SET_PRTO 0x04
@@ -79,6 +80,12 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 #define SET_AS   0x10
 #define SET_MET1 0x20
 #define SET_ALL  0x3f
+
+/* ip6RouteTable */
+#define SET_HOP     0x40
+#define SET_INVALID 0x80
+#define SET_ALL6    0x67
+/* not invalid, and only the columns that we fetch */
 
 struct route_entry {
     int             af;
@@ -96,7 +103,7 @@ struct route_entry {
 };
 
 
-static void pr_rtxhdr(int af);
+static void pr_rtxhdr(int af, const char *table);
 static void p_rtnodex( struct route_entry *rp );
 
 /*
@@ -106,7 +113,7 @@ int
 routexpr(int af)
 {
     struct route_entry  route, *rp = &route;
-    oid    rtcol_oid[]  = { 1,3,6,1,2,1,4,24,7,1,0 }; /* inetCidrRoiuteEntry */
+    oid    rtcol_oid[]  = { 1,3,6,1,2,1,4,24,7,1,0 }; /* inetCidrRouteEntry */
     size_t rtcol_len    = OID_LENGTH( rtcol_oid );
     netsnmp_variable_list *var = NULL, *vp;
     int hdr_af = AF_UNSPEC;
@@ -123,7 +130,7 @@ routexpr(int af)
 #undef ADD_RTVAR
 
     /*
-     * Now walk the ipRouteTable, reporting the various route entries
+     * Now walk the inetCidrRouteTable, reporting the various route entries
      */
     while ( 1 ) {
         oid *op;
@@ -141,6 +148,8 @@ routexpr(int af)
                 var->type == SNMP_ENDOFMIBVIEW)
             break;
         memset( &route, 0, sizeof( struct route_entry ));
+        /* Extract inetCidrRouteDest, inetCidrRoutePfxLen,
+         * inetCidrRouteNextHop from index */
         switch (var->name[rtcol_len]) {
         case 1:
             {   struct sockaddr_in *sin = (struct sockaddr_in *)&route.dst;
@@ -225,7 +234,119 @@ routexpr(int af)
             if (hdr_af != AF_UNSPEC)
                 printf("\n");
             hdr_af = rp->af;
-            pr_rtxhdr(hdr_af);
+            pr_rtxhdr(hdr_af, "inetCidrRouteTable");
+        }
+        p_rtnodex( rp );
+        printed++;
+    }
+    return printed;
+}
+
+/*
+ * Backwards-compatibility for the IPV6-MIB
+ */
+int
+route6pr(int af)
+{
+    struct route_entry  route, *rp = &route;
+    oid    rtcol_oid[]  = { 1,3,6,1,2,1,55,1,11,1,0 }; /* ipv6RouteEntry */
+    size_t rtcol_len    = OID_LENGTH( rtcol_oid );
+    netsnmp_variable_list *var = NULL, *vp;
+    int printed = 0;
+    int hdr_af = AF_UNSPEC;
+    int i;
+
+    if (af != AF_UNSPEC && af != AF_INET6)
+        return 0;
+
+#define ADD_RTVAR( x ) rtcol_oid[ rtcol_len-1 ] = x; \
+    snmp_varlist_add_variable( &var, rtcol_oid, rtcol_len, ASN_NULL, NULL,  0)
+    ADD_RTVAR( 4 );                 /* ipv6RouteIfIndex */
+    ADD_RTVAR( 5 );                 /* ipv6RouteNextHop */
+    ADD_RTVAR( 6 );                 /* ipv6RouteType    */
+    ADD_RTVAR( 7 );                 /* ipv6RouteProto   */
+    ADD_RTVAR( 11 );                /* ipv6RouteMetric  */
+    ADD_RTVAR( 14 );                /* ipv6RouteValid   */
+#undef ADD_RTVAR
+
+    /*
+     * Now walk the ipv6RouteTable, reporting the various route entries
+     */
+    while ( 1 ) {
+        oid *op;
+        unsigned char *cp, *cp1;
+        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&route.dst;
+
+        if (netsnmp_query_getnext( var, ss ) != SNMP_ERR_NOERROR)
+            break;
+        rtcol_oid[ rtcol_len-1 ] = 4;        /* ipv6RouteIfIndex */
+        if ( snmp_oid_compare( rtcol_oid, rtcol_len,
+                               var->name, rtcol_len) != 0 )
+            break;    /* End of Table */
+        if (var->type == SNMP_NOSUCHOBJECT ||
+                var->type == SNMP_NOSUCHINSTANCE ||
+                var->type == SNMP_ENDOFMIBVIEW)
+            break;
+        memset( &route, 0, sizeof( struct route_entry ));
+        rp->af = AF_INET6;
+        sin6->sin6_family = AF_INET6;
+        op = var->name+rtcol_len;
+        cp = (unsigned char *)&sin6->sin6_addr;
+        for (i = 0; i < 16; i++) *cp++ = *op++;
+        route.mask = *op++;
+
+        for ( vp=var; vp; vp=vp->next_variable ) {
+            switch ( vp->name[ rtcol_len - 1 ] ) {
+            case 4:     /* ipv6RouteIfIndex  */
+                rp->ifNumber  = *vp->val.integer;
+                /*
+                 * This is, technically, an Ipv6IfIndex, which
+                 * could maybe be different than the IfIndex
+                 * for the same interface.  We ignore this
+                 * possibility for now, in the hopes that
+                 * nobody actually allocates these numbers
+                 * differently.
+                 */
+                rp->set_bits |= SET_IFNO;
+                break;
+            case 5:     /* ipv6RouteNextHop  */
+                cp1 = (unsigned char *)vp->val.string;
+                sin6 = (struct sockaddr_in6 *)&rp->hop;
+                sin6->sin6_family = AF_INET6;
+                cp = (unsigned char *)&sin6->sin6_addr;
+                for (i = 0; i < 16; i++) *cp++ = *cp1++;
+                rp->set_bits |= SET_HOP;
+            case 6:     /* ipv6RouteType     */
+                rp->type      = *vp->val.integer;
+                /* This enum maps to similar values in inetCidrRouteType */
+                rp->set_bits |= SET_TYPE;
+                break;
+            case 7:     /* ipv6RouteProtocol */
+                rp->proto     = *vp->val.integer;
+                /* TODO: this does not map directly to the
+                 * inetCidrRouteProtocol values.  If we use
+                 * rp->proto more, we will have to manage this. */
+                rp->set_bits |= SET_PRTO;
+                break;
+            case 11:    /* ipv6RouteMetric   */
+                rp->metric1   = *vp->val.integer;
+                rp->set_bits |= SET_MET1;
+                break;
+            case 14:    /* ipv6RouteValid    */
+                if (*vp->val.integer == 2)
+                    rp->set_bits |= SET_INVALID;
+                break;
+            }
+        }
+        if (rp->set_bits != SET_ALL6) {
+            continue;   /* Incomplete query */
+        }
+    
+        if (hdr_af != rp->af) {
+            if (hdr_af != AF_UNSPEC)
+                printf("\n");
+            hdr_af = rp->af;
+            pr_rtxhdr(AF_INET6, "ip6RouteTable");
         }
         p_rtnodex( rp );
         printed++;
@@ -249,14 +370,14 @@ routexpr(int af)
  * Print header for routing table columns.
  */
 static void
-pr_rtxhdr(int af)
+pr_rtxhdr(int af, const char *table)
 {
     switch (af) {
     case AF_INET:
-	printf("IPv4 Routing tables\n");
+	printf("IPv4 Routing tables (inetCidrRouteTable)\n");
 	break;
     case AF_INET6:
-	printf("IPv6 Routing tables\n");
+	printf("IPv6 Routing tables (%s)\n", table);
 	break;
     }
     printf("%-*.*s ",
@@ -268,8 +389,9 @@ pr_rtxhdr(int af)
 
 #ifndef HAVE_INET_NTOP
 /* MSVC and MinGW */
+#define inet_ntop netsnmp_inet_ntop
 static const char *
-inet_ntop(int af, const void *src, char *dst, size_t size)
+netsnmp_inet_ntop(int af, const void *src, char *dst, size_t size)
 {
     DWORD out_len = size;
 
@@ -426,8 +548,11 @@ p_rtnodex( struct route_entry *rp )
                     routexname(&rp->dst) :
                     netxname(&rp->dst, rp->mask)));
     }
-    printf("%-*s %-6.6s  %s\n",
+    printf("%-*s %-6.6s  %s",
         WID_GW(rp->af),
         1 ? routexname(&rp->hop) : "*",
         s_rtflagsx(rp), rp->ifname);
+    if ((rp->set_bits & SET_AS) && rp->as != 0)
+        printf(" (AS %d)", rp->as);
+    printf("\n");
 }

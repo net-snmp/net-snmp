@@ -30,6 +30,9 @@
 #if HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
+#ifdef WIN32
+#include <mswsock.h>
+#endif
 #include <errno.h>
 
 #include <net-snmp/types.h>
@@ -89,25 +92,25 @@ _netsnmp_udp_sockopt_set(int fd, int local)
     netsnmp_sock_buffer_set(fd, SO_RCVBUF, local, 0);
 }
 
-#if (defined(linux) && defined(IP_PKTINFO)) \
-    || defined(IP_RECVDSTADDR) && HAVE_STRUCT_MSGHDR_MSG_CONTROL \
-                               && HAVE_STRUCT_MSGHDR_MSG_FLAGS
-#if  defined(linux) && defined(IP_PKTINFO)
-#elif defined(IP_RECVDSTADDR)
-# ifndef IP_SENDSRCADDR
+#if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
+# if defined(IP_RECVDSTADDR) && !defined(IP_SENDSRCADDR)
 #  define IP_SENDSRCADDR IP_RECVDSTADDR /* DragonFly BSD */
 # endif
-#endif
 
 #define netsnmp_udpbase_recvfrom_sendto_defined
 
 enum {
-#if  defined(linux) && defined(IP_PKTINFO)
+#if defined(HAVE_IP_PKTINFO)
     cmsg_data_size = sizeof(struct in_pktinfo)
-#elif defined(IP_RECVDSTADDR)
+#elif defined(HAVE_IP_RECVDSTADDR)
     cmsg_data_size = sizeof(struct in_addr)
 #endif
 };
+
+#ifdef WIN32
+static LPFN_WSARECVMSG pfWSARecvMsg;
+static LPFN_WSASENDMSG pfWSASendMsg;
+#endif
 
 int
 netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
@@ -115,6 +118,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                          socklen_t *dstlen, int *if_index)
 {
     int r;
+#if !defined(WIN32)
     struct iovec iov;
     char cmsg[CMSG_SPACE(cmsg_data_size)];
     struct cmsghdr *cm;
@@ -132,6 +136,32 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     msg.msg_controllen = sizeof(cmsg);
 
     r = recvmsg(s, &msg, NETSNMP_DONTWAIT);
+#else /* !defined(WIN32) */
+    WSABUF wsabuf;
+    char cmsg[WSA_CMSG_SPACE(sizeof(struct in_pktinfo))];
+    WSACMSGHDR *cm;
+    WSAMSG msg;
+    DWORD bytes_received;
+
+    wsabuf.buf = buf;
+    wsabuf.len = len;
+
+    msg.name = from;
+    msg.namelen = *fromlen;
+    msg.lpBuffers = &wsabuf;
+    msg.dwBufferCount = 1;
+    msg.Control.len = sizeof(cmsg);
+    msg.Control.buf = cmsg;
+    msg.dwFlags = 0;
+
+    if (pfWSARecvMsg) {
+        r = pfWSARecvMsg(s, &msg, &bytes_received, NULL, NULL) == 0 ?
+            bytes_received : -1;
+        *fromlen = msg.namelen;
+    } else {
+        r = recvfrom(s, buf, len, MSG_DONTWAIT, from, fromlen);
+    }
+#endif /* !defined(WIN32) */
 
     if (r == -1) {
         return -1;
@@ -146,8 +176,9 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
         netsnmp_assert(r2 == 0);
     }
 
+#if !defined(WIN32)
     for (cm = CMSG_FIRSTHDR(&msg); cm != NULL; cm = CMSG_NXTHDR(&msg, cm)) {
-#if  defined(linux) && defined(IP_PKTINFO)
+#if defined(HAVE_IP_PKTINFO)
         if (cm->cmsg_level == SOL_IP && cm->cmsg_type == IP_PKTINFO) {
             struct in_pktinfo* src = (struct in_pktinfo *)CMSG_DATA(cm);
             netsnmp_assert(dstip->sa_family == AF_INET);
@@ -155,24 +186,37 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
             *if_index = src->ipi_ifindex;
             DEBUGMSGTL(("udpbase:recv",
                         "got destination (local) addr %s, iface %d\n",
-                        inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr),
-                        *if_index));
+                        inet_ntoa(src->ipi_addr), *if_index));
         }
-#elif defined(IP_RECVDSTADDR)
+#elif defined(HAVE_IP_RECVDSTADDR)
         if (cm->cmsg_level == IPPROTO_IP && cm->cmsg_type == IP_RECVDSTADDR) {
             struct in_addr* src = (struct in_addr *)CMSG_DATA(cm);
             ((struct sockaddr_in*)dstip)->sin_addr = *src;
             DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
-                        inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr)));
+                        inet_ntoa(*src)));
         }
 #endif
     }
+#else /* !defined(WIN32) */
+    for (cm = WSA_CMSG_FIRSTHDR(&msg); cm; cm = WSA_CMSG_NXTHDR(&msg, cm)) {
+        if (cm->cmsg_level == IPPROTO_IP && cm->cmsg_type == IP_PKTINFO) {
+            struct in_pktinfo* src = (struct in_pktinfo *)WSA_CMSG_DATA(cm);
+            netsnmp_assert(dstip->sa_family == AF_INET);
+            ((struct sockaddr_in*)dstip)->sin_addr = src->ipi_addr;
+            *if_index = src->ipi_ifindex;
+            DEBUGMSGTL(("udpbase:recv",
+                        "got destination (local) addr %s, iface %d\n",
+                        inet_ntoa(src->ipi_addr), *if_index));
+        }
+    }
+#endif /* !defined(WIN32) */
     return r;
 }
 
 int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
                            struct sockaddr *remote, void *data, int len)
 {
+#if !defined(WIN32)
     struct iovec iov;
     struct msghdr m = { 0 };
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
@@ -200,14 +244,20 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
         cm = CMSG_FIRSTHDR(&m);
         cm->cmsg_len = CMSG_LEN(cmsg_data_size);
 
-#if  defined(linux) && defined(IP_PKTINFO)
+#if defined(HAVE_IP_PKTINFO)
         cm->cmsg_level = SOL_IP;
         cm->cmsg_type = IP_PKTINFO;
 
         {
-            struct in_pktinfo ipi = { 0 };
-            ipi.ipi_ifindex = 0;
+            struct in_pktinfo ipi;
+
+            memset(&ipi, 0, sizeof(ipi));
+            ipi.ipi_ifindex = if_index;
+#if defined(cygwin)
+            ipi.ipi_addr.s_addr = srcip->s_addr;
+#else
             ipi.ipi_spec_dst.s_addr = srcip->s_addr;
+#endif
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
 
@@ -224,9 +274,15 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
         DEBUGMSGTL(("udpbase:sendto", "re-sending on iface %d\n", if_index));
 
         {
-            struct in_pktinfo ipi = { 0 };
+            struct in_pktinfo ipi;
+
+            memset(&ipi, 0, sizeof(ipi));
             ipi.ipi_ifindex = if_index;
+#if defined(cygwin)
+            ipi.ipi_addr.s_addr = INADDR_ANY;
+#else
             ipi.ipi_spec_dst.s_addr = INADDR_ANY;
+#endif
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
 #elif defined(IP_SENDSRCADDR)
@@ -244,8 +300,56 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     }
 
     return sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
+#else /* !defined(WIN32) */
+    WSABUF        wsabuf;
+    WSAMSG        m;
+    char          cmsg[WSA_CMSG_SPACE(sizeof(struct in_pktinfo))];
+    DWORD         bytes_sent;
+    int           rc;
+
+    wsabuf.buf = data;
+    wsabuf.len = len;
+
+    memset(&m, 0, sizeof(m));
+    m.name          = remote;
+    m.namelen       = sizeof(struct sockaddr_in);
+    m.lpBuffers     = &wsabuf;
+    m.dwBufferCount = 1;
+
+    if (pfWSASendMsg && srcip && srcip->s_addr != INADDR_ANY) {
+        WSACMSGHDR *cm;
+
+        DEBUGMSGTL(("udpbase:sendto", "sending from [%d] %s\n", if_index,
+                    inet_ntoa(*srcip)));
+
+        memset(cmsg, 0, sizeof(cmsg));
+
+        m.Control.buf = cmsg;
+        m.Control.len = sizeof(cmsg);
+
+        cm = WSA_CMSG_FIRSTHDR(&m);
+        cm->cmsg_len = WSA_CMSG_LEN(cmsg_data_size);
+        cm->cmsg_level = IPPROTO_IP;
+        cm->cmsg_type = IP_PKTINFO;
+
+        {
+            struct in_pktinfo ipi = { 0 };
+            ipi.ipi_ifindex = if_index;
+            ipi.ipi_addr.s_addr = srcip->s_addr;
+            memcpy(WSA_CMSG_DATA(cm), &ipi, sizeof(ipi));
+        }
+
+        rc = pfWSASendMsg(fd, &m, 0, &bytes_sent, NULL, NULL);
+        if (rc == 0)
+            return bytes_sent;
+        DEBUGMSGTL(("udpbase:sendto", "sending from [%d] %s failed: %d\n",
+                    if_index, inet_ntoa(*srcip), WSAGetLastError()));
+    }
+    rc = sendto(fd, data, len, 0, remote, sizeof(struct sockaddr));
+    return rc;
+#endif /* !defined(WIN32) */
 }
-#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
+#endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -351,4 +455,35 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
 	}
     }
     return rc;
+}
+
+void
+netsnmp_udp_base_ctor(void)
+{
+#if defined(WIN32) && defined(HAVE_IP_PKTINFO)
+    SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
+    GUID WSARecvMsgGuid = WSAID_WSARECVMSG;
+    GUID WSASendMsgGuid = WSAID_WSASENDMSG;
+    DWORD nbytes;
+    int result;
+
+    netsnmp_assert(s != SOCKET_ERROR);
+    /* WSARecvMsg(): Windows XP / Windows Server 2003 and later */
+    result = WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER,
+                      &WSARecvMsgGuid, sizeof(WSARecvMsgGuid),
+                      &pfWSARecvMsg, sizeof(pfWSARecvMsg), &nbytes, NULL, NULL);
+    if (result == SOCKET_ERROR)
+        DEBUGMSGTL(("netsnmp_udp", "WSARecvMsg() not found (errno %ld)\n",
+                    WSAGetLastError()));
+
+    /* WSASendMsg(): Windows Vista / Windows Server 2008 and later */
+    result = WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER,
+                      &WSASendMsgGuid, sizeof(WSASendMsgGuid),
+                      &pfWSASendMsg, sizeof(pfWSASendMsg), &nbytes, NULL, NULL);
+    if (result == SOCKET_ERROR)
+        DEBUGMSGTL(("netsnmp_udp", "WSASendMsg() not found (errno %ld)\n",
+                    WSAGetLastError()));
+
+    closesocket(s);
+#endif
 }

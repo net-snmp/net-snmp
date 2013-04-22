@@ -131,16 +131,18 @@ AC_MSG_CACHE_ADD(SNMPv3 Security Modules:    $new_with_security)
 # Handle the special case of KSM to see which crypto API we support
 #
 
-ac_cv_NETSNMP_USE_KERBEROS_MIT=no
 rebuilt_new_with_security=
 already_checked_krb5=no
 
 for sec in $new_with_security
 do
-  if test "x$sec" = "xksm" -a "xyes" = "x$already_checked_krb5"; then
-    continue
+  if test "x$sec" = "xksm"; then
+    if test "xyes" = "x$already_checked_krb5"; then
+      continue
+    else
+      already_checked_krb5=yes
+    fi
   fi
-  already_checked_krb5=yes
 
   if test x$sec != xksm; then
     rebuilt_new_with_security="$rebuilt_new_with_security $sec"
@@ -199,10 +201,9 @@ do
     fi
 
     AC_MSG_CHECKING([to see which crypto API we need to use])
-    AC_CHECK_FUNC(krb5_c_encrypt,[
     AC_CACHE_VAL(ac_cv_NETSNMP_USE_KERBEROS_MIT,
       AC_CHECK_LIB(k5crypto, krb5_init_context,
-	ac_cv_NETSNMP_USE_KERBEROS_MIT=yes, ac_cv_MIT_NEW_CRYPTo=no
+	ac_cv_NETSNMP_USE_KERBEROS_MIT=yes, ac_cv_NETSNMP_USE_KERBEROS_MIT=no
       )
     )
 
@@ -214,8 +215,9 @@ do
 	LIBS="$LIBS -lk5crypto"
       fi
     else
-      AC_MSG_RESULT(old MIT crypto API)])
+      AC_MSG_RESULT(old MIT crypto API)
     fi
+    AC_CHECK_FUNCS([krb5_auth_con_getsendsubkey])
   fi
 done
 

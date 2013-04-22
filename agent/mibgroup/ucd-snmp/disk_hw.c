@@ -305,8 +305,11 @@ var_extensible_disk(struct variable *vp,
     unsigned long long val;
     static long     long_ret;
     static char     errmsg[300];
+    netsnmp_cache  *cache;
 
-    netsnmp_fsys_load( NULL, NULL );  /* Update the fsys H/W module */
+    /* Update the fsys H/W module */
+    cache = netsnmp_fsys_get_cache();
+    netsnmp_cache_check_and_reload(cache);
 
 tryAgain:
     if (header_simple_table

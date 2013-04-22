@@ -1412,6 +1412,11 @@ int netsnmp_query_walk(netsnmp_variable_list *list,
         snmp_oidtree_compare( list->name, list->name_length,
                                 vb->name,   vb->name_length ) == 0) {
 
+	if (vb->type == SNMP_ENDOFMIBVIEW ||
+	    vb->type == SNMP_NOSUCHOBJECT ||
+	    vb->type == SNMP_NOSUCHINSTANCE)
+	    break;
+
         /*
          * Copy each response varbind to the end of the result list
          * and then re-use this to ask for the next entry.

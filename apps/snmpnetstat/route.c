@@ -86,6 +86,7 @@ struct route_entry {
     int             ifNumber;
     int             type;
     int             proto;
+    int             af;
     int             set_bits;
     char            ifname[64];
 };
@@ -109,7 +110,7 @@ routepr(void)
     netsnmp_variable_list *var=NULL, *vp;
     char  *cp;
     
-    printf("Routing tables\n");
+    printf("Routing tables (ipRouteTable)\n");
     pr_rthdr(AF_INET);
 
 #define ADD_RTVAR( x ) rtcol_oid[ rtcol_len-1 ] = x; \
@@ -176,6 +177,104 @@ routepr(void)
     }
 }
 
+
+int
+route4pr(int af)
+{
+    struct route_entry  route, *rp = &route;
+    oid    rtcol_oid[]  = { 1,3,6,1,2,1,4,24,4,1,0 }; /* ipCidrRouteEntry */
+    size_t rtcol_len    = OID_LENGTH( rtcol_oid );
+    netsnmp_variable_list *var = NULL, *vp;
+    union {
+        in_addr_t addr;
+        unsigned char data[4];
+    } tmpAddr;
+    int printed = 0;
+    int hdr_af = AF_UNSPEC;
+
+    if (af != AF_UNSPEC && af != AF_INET)
+        return 0;
+
+#define ADD_RTVAR( x ) rtcol_oid[ rtcol_len-1 ] = x; \
+    snmp_varlist_add_variable( &var, rtcol_oid, rtcol_len, ASN_NULL, NULL,  0)
+    ADD_RTVAR( 5 );                 /* ipCidrRouteIfIndex */
+    ADD_RTVAR( 6 );                 /* ipCidrRouteType    */
+    ADD_RTVAR( 7 );                 /* ipCidrRouteProto   */
+#undef ADD_RTVAR
+
+    /*
+     * Now walk the ipCidrRouteTable, reporting the various route entries
+     */
+    while ( 1 ) {
+        oid *op;
+        unsigned char *cp;
+
+        if (netsnmp_query_getnext( var, ss ) != SNMP_ERR_NOERROR)
+            break;
+        rtcol_oid[ rtcol_len-1 ] = 5;        /* ipRouteIfIndex */
+        if ( snmp_oid_compare( rtcol_oid, rtcol_len,
+                               var->name, rtcol_len) != 0 )
+            break;    /* End of Table */
+        if (var->type == SNMP_NOSUCHOBJECT ||
+                var->type == SNMP_NOSUCHINSTANCE ||
+                var->type == SNMP_ENDOFMIBVIEW)
+            break;
+        memset( &route, 0, sizeof( struct route_entry ));
+	rp->af = AF_INET;
+	op = var->name+rtcol_len;
+        cp = tmpAddr.data;
+        cp[0] = *op++ & 0xff;
+        cp[1] = *op++ & 0xff;
+        cp[2] = *op++ & 0xff;
+        cp[3] = *op++ & 0xff;
+        rp->destination = tmpAddr.addr;
+        cp = tmpAddr.data;
+        cp[0] = *op++ & 0xff;
+        cp[1] = *op++ & 0xff;
+        cp[2] = *op++ & 0xff;
+        cp[3] = *op++ & 0xff;
+        rp->mask = tmpAddr.addr;
+	op++; /* ipCidrRouteTos */
+        cp = tmpAddr.data;
+        cp[0] = *op++ & 0xff;
+        cp[1] = *op++ & 0xff;
+        cp[2] = *op++ & 0xff;
+        cp[3] = *op++ & 0xff;
+        rp->gateway = tmpAddr.addr;
+	rp->set_bits = SET_MASK | SET_GWAY;
+
+        for ( vp=var; vp; vp=vp->next_variable ) {
+            switch ( vp->name[ rtcol_len - 1 ] ) {
+            case 5:     /* ipCidrRouteIfIndex */
+                rp->ifNumber  = *vp->val.integer;
+                rp->set_bits |= SET_IFNO;
+                break;
+            case 6:     /* ipCidrRouteType    */
+                rp->type      = *vp->val.integer;
+                rp->set_bits |= SET_TYPE;
+                break;
+            case 7:     /* ipCidrRouteProto   */
+                rp->proto     = *vp->val.integer;
+                rp->set_bits |= SET_PRTO;
+                break;
+            }
+        }
+        if (rp->set_bits != SET_ALL) {
+            continue;   /* Incomplete query */
+        }
+
+        if (hdr_af != rp->af) {
+            if (hdr_af != AF_UNSPEC)
+                printf("\n");
+            hdr_af = rp->af;
+	    printf("Routing tables (ipCidrRouteTable)\n");
+            pr_rthdr(hdr_af);
+        }
+        p_rtnode( rp );
+        printed++;
+    }
+    return printed;
+}
 
 
 struct iflist {

@@ -438,6 +438,24 @@ netsnmp_ipaddress_ipv4_prefix_len(in_addr_t mask)
     return len;
 }
 
+int
+netsnmp_ipaddress_ipv6_prefix_len(struct in6_addr mask)
+{
+    int i, len = 0;
+    unsigned char *mp = (unsigned char *)&mask.s6_addr;
+
+    for (i = 0; i < 16; i++)
+	if (mp[i] == 0xFF) len += 8;
+	else break;
+
+    while(0x80 & mp[i]) {
+        ++len;
+        mp[i] <<= 1;
+    }
+
+    return len;
+}
+
 
 /**
  */

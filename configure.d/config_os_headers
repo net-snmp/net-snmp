@@ -55,6 +55,7 @@ AC_CHECK_HEADERS([dlfcn.h    err.h      fcntl.h    fstab.h      ] dnl
                  [ioctls.h   kstat.h    kvm.h      limits.h     ] dnl
                  [           mntent.h   mtab.h                  ] dnl
                  [           pkglocs.h             pwd.h        ] dnl
+                 [           com_err.h             et/com_err.h ] dnl
                  [           utmpx.h    utsname.h               ])
 
 AC_CHECK_HEADERS([sys/diskio.h  sys/dkio.h                                 ] dnl
@@ -390,17 +391,20 @@ AC_CHECK_HEADERS([netinet/ip6.h                               ] dnl
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#if HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#if HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#if HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
-#endif
-#if HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#if HAVE_NET_ROUTE_H
-#include <net/route.h>
 #endif
     ]])
 
@@ -519,5 +523,45 @@ fi
 # for ucd-snmp/lmsensorsMib
 #
 AC_CHECK_HEADERS([sensors/sensors.h picl.h])
+
+##  This is here to avoid loads of redefinition warnings during
+##  module configuration
+
+##
+#   rtentry structure checks:
+##
+
+# Check struct rtentry for common fields
+#   Agent:
+#
+AC_CHECK_MEMBERS([struct rtentry.rt_dst,
+                  struct rtentry.rt_hash,
+                  struct rtentry.rt_next,
+                  struct rtentry.rt_refcnt,
+                  struct rtentry.rt_unit,
+                  struct rtentry.rt_use],,,
+    [
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES 1
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL 1
+#endif
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+    ])
 
 fi # NETSNMP_QUICK_CHECK

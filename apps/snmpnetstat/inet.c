@@ -396,7 +396,6 @@ _dump_stats( const char *name, oid *oid_buf, size_t buf_len,
          *   then only display non-zero stats.
          */
         if ( *vp->val.integer > 0 || sflag == 1 ) {
-            putchar('\t');
             printf(sp->description, *vp->val.integer,
                              plural(*vp->val.integer));
             putchar('\n');
@@ -415,24 +414,24 @@ ip_stats(const char *name)
     oid               ipstats_oid[] = { 1, 3, 6, 1, 2, 1, 4, 0, 0 };
     size_t            ipstats_len   = OID_LENGTH( ipstats_oid );
     struct stat_table ipstats_tbl[] = {
-        {3, "%d total datagram%s received"},
-        {4, "%d datagram%s with header errors"},
-        {5, "%d datagram%s with an invalid destination address"},
-        {6, "%d datagram%s forwarded"},
-        {7, "%d datagram%s with unknown protocol"},
-        {8, "%d datagram%s discarded"},
-        {9, "%d datagram%s delivered"},
-        {10, "%d output datagram request%s"},
-        {11, "%d output datagram%s discarded"},
-        {12, "%d datagram%s with no route"},
-        {14, "%d fragment%s received"},
-        {15, "%d datagram%s reassembled"},
-        {16, "%d reassembly failure%s"},
-        {17, "%d datagram%s fragmented"},
-        {18, "%d fragmentation failure%s"},
-        {19, "%d fragment%s created"},
-        {23, "%d route%s discarded"},
-        {0, ""}
+        { 3, "%14d total datagram%s received"},
+        { 4, "%14d datagram%s with header errors"},
+        { 5, "%14d datagram%s with an invalid destination address"},
+        { 6, "%14d datagram%s forwarded"},
+        { 7, "%14d datagram%s with unknown protocol"},
+        { 8, "%14d datagram%s discarded"},
+        { 9, "%14d datagram%s delivered"},
+        {10, "%14d output datagram request%s"},
+        {11, "%14d output datagram%s discarded"},
+        {12, "%14d datagram%s with no route"},
+        {14, "%14d fragment%s received"},
+        {15, "%14d datagram%s reassembled"},
+        {16, "%14d reassembly failure%s"},
+        {17, "%14d datagram%s fragmented"},
+        {18, "%14d fragmentation failure%s"},
+        {19, "%14d fragment%s created"},
+        {23, "%14d route%s discarded"},
+        { 0, ""}
     };
 
     _dump_stats( name, ipstats_oid, ipstats_len, ipstats_tbl );
@@ -448,25 +447,25 @@ icmp_stats(const char *name)
     oid               icmpstats_oid[] = { 1, 3, 6, 1, 2, 1, 5, 0, 0 };
     size_t            icmpstats_len   = OID_LENGTH( icmpstats_oid );
     struct stat_table icmpstats_tbl[] = {
-        {1, "%d total message%s received"},
-        {2, "%d message%s dropped due to errors"},
-        {14, "%d ouput message request%s"},
-        {15, "%d output message%s discarded"},
-        {0, ""}
+        { 1, "%14d total message%s received"},
+        { 2, "%14d message%s dropped due to errors"},
+        {14, "%14d ouput message request%s"},
+        {15, "%14d output message%s discarded"},
+        { 0, ""}
     };
     struct stat_table icmp_inhistogram[] = {
-        {3, "Destination unreachable: %d"},
-        {4, "Time Exceeded: %d"},
-        {5, "Parameter Problem: %d"},
-        {6, "Source Quench: %d"},
-        {7, "Redirect: %d"},
-        {8, "Echo Request: %d"},
-        {9, "Echo Reply: %d"},
+        { 3, "Destination unreachable: %d"},
+        { 4, "Time Exceeded: %d"},
+        { 5, "Parameter Problem: %d"},
+        { 6, "Source Quench: %d"},
+        { 7, "Redirect: %d"},
+        { 8, "Echo Request: %d"},
+        { 9, "Echo Reply: %d"},
         {10, "Timestamp Request: %d"},
         {11, "Timestamp Reply: %d"},
         {12, "Address Mask Request: %d"},
         {13, "Address Mask Reply: %d"},
-        {0, ""}
+        { 0, ""}
     };
     struct stat_table icmp_outhistogram[] = {
         {16, "Destination unreachable: %d"},
@@ -500,17 +499,17 @@ tcp_stats(const char *name)
     oid               tcpstats_oid[] = { 1, 3, 6, 1, 2, 1, 6, 0, 0 };
     size_t            tcpstats_len   = OID_LENGTH( tcpstats_oid );
     struct stat_table tcpstats_tbl[] = {
-        {5, "%d active open%s"},
-        {6, "%d passive open%s"},
-        {7, "%d failed attempt%s"},
-        {8, "%d reset%s of established connections"},
-        {9, "%d current established connection%s"},
-        {10, "%d segment%s received"},
-        {11, "%d segment%s sent"},
-        {12, "%d segment%s retransmitted"},
-        {14, "%d invalid segment%s received"},
-        {15, "%d reset%s sent"},
-        {0, ""}
+        { 5, "%14d active open%s"},
+        { 6, "%14d passive open%s"},
+        { 7, "%14d failed attempt%s"},
+        { 8, "%14d reset%s of established connections"},
+        { 9, "%14d current established connection%s"},
+        {10, "%14d segment%s received"},
+        {11, "%14d segment%s sent"},
+        {12, "%14d segment%s retransmitted"},
+        {14, "%14d invalid segment%s received"},
+        {15, "%14d reset%s sent"},
+        { 0, ""}
     };
     _dump_stats( name, tcpstats_oid, tcpstats_len, tcpstats_tbl );
 }
@@ -525,10 +524,10 @@ udp_stats(const char *name)
     oid               udpstats_oid[] = { 1, 3, 6, 1, 2, 1, 7, 0, 0 };
     size_t            udpstats_len   = OID_LENGTH( udpstats_oid );
     struct stat_table udpstats_tbl[] = {
-        {1, "%d total datagram%s received"},
-        {2, "%d datagram%s to invalid port"},
-        {3, "%d datagram%s dropped due to errors"},
-        {4, "%d output datagram request%s"},
+        {1, "%14d total datagram%s received"},
+        {2, "%14d datagram%s to invalid port"},
+        {3, "%14d datagram%s dropped due to errors"},
+        {4, "%14d output datagram request%s"},
         {0, ""}
     };
     _dump_stats( name, udpstats_oid, udpstats_len, udpstats_tbl );

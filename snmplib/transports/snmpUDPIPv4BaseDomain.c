@@ -40,10 +40,7 @@
 
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 
-#if (defined(linux) && defined(IP_PKTINFO)) \
-    || defined(IP_RECVDSTADDR) && HAVE_STRUCT_MSGHDR_MSG_CONTROL \
-                               && HAVE_STRUCT_MSGHDR_MSG_FLAGS
-
+#if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
 int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                              socklen_t *fromlen, struct sockaddr *dstip,
                              socklen_t *dstlen, int *if_index)
@@ -57,7 +54,7 @@ int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
 {
     return netsnmp_udpbase_sendto(fd, srcip, if_index, remote, data, len);
 }
-#endif /* (linux && IP_PKTINFO) || IP_RECVDSTADDR */
+#endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */
 
 netsnmp_transport *
 netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
@@ -118,7 +115,8 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
         t->local[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
         t->local_length = 6;
 
-#if defined(linux) && defined(IP_PKTINFO)
+#ifndef WIN32
+#if defined(HAVE_IP_PKTINFO)
         { 
             int sockopt = 1;
             if (setsockopt(t->sock, SOL_IP, IP_PKTINFO, &sockopt, sizeof sockopt) == -1) {
@@ -129,7 +127,7 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
             }
             DEBUGMSGTL(("netsnmp_udpbase", "set IP_PKTINFO\n"));
         }
-#elif defined(IP_RECVDSTADDR)
+#elif defined(HAVE_IP_RECVDSTADDR)
         {
             int sockopt = 1;
             if (setsockopt(t->sock, IPPROTO_IP, IP_RECVDSTADDR, &sockopt, sizeof sockopt) == -1) {
@@ -141,6 +139,18 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
             DEBUGMSGTL(("netsnmp_udp", "set IP_RECVDSTADDR\n"));
         }
 #endif
+#else /* !defined(WIN32) */
+        { 
+            int sockopt = 1;
+            if (setsockopt(t->sock, IPPROTO_IP, IP_PKTINFO, (void *)&sockopt,
+			   sizeof(sockopt)) == -1) {
+                DEBUGMSGTL(("netsnmp_udpbase", "couldn't set IP_PKTINFO: %d\n",
+                            WSAGetLastError()));
+            } else {
+                DEBUGMSGTL(("netsnmp_udpbase", "set IP_PKTINFO\n"));
+            }
+        }
+#endif /* !defined(WIN32) */
         rc = bind(t->sock, (struct sockaddr *) addr,
                   sizeof(struct sockaddr));
         if (rc != 0) {

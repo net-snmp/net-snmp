@@ -50,7 +50,7 @@ netsnmp_feature_child_of(linux_ip6_stat_all, libnetsnmpmibs)
 
 netsnmp_feature_child_of(linux_read_ip6_stat, linux_ip6_stat_all)
 
-int
+static int
 decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
 {
     char *token, *saveptr, *lineptr, *saveptr1, *dataptr, *delim = NULL;
@@ -108,7 +108,7 @@ decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
     return 0;
 }
 
-int
+static int
 linux_read_mibII_stats(void)
 {
     FILE           *in = fopen("/proc/net/snmp", "r");
@@ -386,7 +386,7 @@ linux_read_icmp_stat(struct icmp_mib *icmpstat)
     return 0;
 }
 
-int
+static int
 linux_read_icmp6_parse(struct icmp6_mib *icmp6stat,
                        struct icmp6_msg_mib *icmp6msgstat,
                        int *support)
