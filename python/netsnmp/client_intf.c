@@ -765,7 +765,7 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
       case TYPE_INTEGER:
       case TYPE_INTEGER32:
         vars->type = ASN_INTEGER;
-        vars->val.integer = (long *)malloc(sizeof(long));
+        vars->val.integer = malloc(sizeof(long));
         if (val)
             *(vars->val.integer) = strtol(val,NULL,0);
         else {
@@ -788,7 +788,7 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
       case TYPE_UINTEGER:
         vars->type = ASN_UINTEGER;
 UINT:
-        vars->val.integer = (long *)malloc(sizeof(long));
+        vars->val.integer = malloc(sizeof(long));
         if (val)
             sscanf(val,"%lu",vars->val.integer);
         else {
@@ -809,7 +809,7 @@ UINT:
       case TYPE_OPAQUE:
         vars->type = ASN_OCTET_STR;
 OCT:
-        vars->val.string = (u_char *)malloc(len);
+        vars->val.string = malloc(len);
         vars->val_len = len;
         if (val && len)
             memcpy((char *)vars->val.string, val, len);
@@ -822,14 +822,18 @@ OCT:
 
       case TYPE_IPADDR:
         vars->type = ASN_IPADDRESS;
-        vars->val.integer = (long *)malloc(sizeof(long));
-        if (val)
-            *(vars->val.integer) = inet_addr(val);
-        else {
-            ret = FAILURE;
-            *(vars->val.integer) = 0;
+        {
+            in_addr_t addr;
+
+            if (val)
+                addr = inet_addr(val);
+            else {
+                ret = FAILURE;
+                addr = 0;
+            }
+            memdup((u_char **)&vars->val.integer, &addr, sizeof(addr));
+            vars->val_len = sizeof(addr);
         }
-        vars->val_len = sizeof(long);
         break;
 
       case TYPE_OBJID:
@@ -860,15 +864,8 @@ OCT:
 /* takes ss and pdu as input and updates the 'response' argument */
 /* the input 'pdu' argument will be freed */
 static int
-__send_sync_pdu(ss, pdu, response, retry_nosuch,
-	        err_str, err_num, err_ind)
-netsnmp_session *ss;
-netsnmp_pdu *pdu;
-netsnmp_pdu **response;
-int retry_nosuch;
-char *err_str;
-int *err_num;
-int *err_ind;
+__send_sync_pdu(netsnmp_session *ss, netsnmp_pdu *pdu, netsnmp_pdu **response,
+                int retry_nosuch, char *err_str, int *err_num, int *err_ind)
 {
    int status = 0;
    long command = pdu->command;
@@ -1393,6 +1390,7 @@ netsnmp_get(PyObject *self, PyObject *args)
 	    printf("error: get: unknown object ID (%s)",
 		   (tag ? tag : "<null>"));
 	  snmp_free_pdu(pdu);
+	  Py_DECREF(varbind); 
 	  goto done;
 	}
 	/* release reference when done */
@@ -1501,6 +1499,7 @@ netsnmp_get(PyObject *self, PyObject *args)
 	Py_DECREF(varbind);
       } else {
 	printf("netsnmp_get: bad varbind (%d)\n", varlist_ind);
+	Py_XDECREF(varbind); 
       }	
     }
 
@@ -1607,6 +1606,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 	    printf("error: get: unknown object ID (%s)",
 		   (tag ? tag : "<null>"));
 	  snmp_free_pdu(pdu);
+	  Py_DECREF(varbind); 
 	  goto done;
 	}
 	/* release reference when done */
@@ -1713,6 +1713,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 	Py_DECREF(varbind);
       } else {
 	printf("netsnmp_getnext: bad varbind (%d)\n", varlist_ind);
+	Py_XDECREF(varbind); 
       }
     }
 
@@ -1831,6 +1832,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
           printf("error: walk: unknown object ID (%s)",
       	   (tag ? tag : "<null>"));
         snmp_free_pdu(pdu);
+        Py_DECREF(varbind); 
         goto done;
       }
       /* release reference when done */
@@ -2103,6 +2105,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	    printf("error: get: unknown object ID (%s)",
 		   (tag ? tag : "<null>"));
 	  snmp_free_pdu(pdu);
+	  Py_DECREF(varbind); 
 	  goto done;
 	}
 	/* release reference when done */
@@ -2222,6 +2225,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	    PyList_Append(varbinds, none); /* increments ref */
 	    /* Return None for this variable. */
 	    PyTuple_SetItem(val_tuple, varbind_ind, none); /* steals ref */
+	    Py_XDECREF(varbind); 
 	  }	
 	}
       }
@@ -2385,6 +2389,7 @@ netsnmp_set(PyObject *self, PyObject *args)
       ret = Py_BuildValue("i",0); /* fail, return False */
   } 
  done:
+  Py_XDECREF(varbind); 
   SAFE_FREE(oid_arr);
   return (ret ? ret : Py_BuildValue(""));
 }

@@ -49,20 +49,21 @@
 #ifndef NETSNMP_USE_KERBEROS_MIT
 #define OLD_HEIMDAL
 #endif 				/* ! NETSNMP_USE_KERBEROS_MIT */
+#else
+#define KRB5_DEPRECATED 1
 #endif 				/* NETSNMP_USE_KERBEROS_HEIMDAL */
 
 #ifdef NETSNMP_USE_KERBEROS_HEIMDAL
 #define oid heimdal_oid_renamed
 #endif				/* NETSNMP_USE_KERBEROS_HEIMDAL */
 #include <krb5.h>
-#include <com_err.h>
 #ifdef NETSNMP_USE_KERBEROS_HEIMDAL
 #undef oid
 #endif				/* NETSNMP_USE_KERBEROS_HEIMDAL */
 
 #ifdef NETSNMP_USE_KERBEROS_HEIMDAL
 #define CHECKSUM_TYPE(x)	(x)->cksumtype
-#define CHECKSUM_CONTENTS(x)	((char *)((x)->checksum.data))
+#define CHECKSUM_CONTENTS(x)	(x)->checksum.data
 #define CHECKSUM_LENGTH(x)	(x)->checksum.length
 #define TICKET_CLIENT(x)	(x)->client
 #else				/* NETSNMP_USE_KERBEROS_HEIMDAL */
@@ -91,7 +92,9 @@ static krb5_context kcontext = NULL;
 static krb5_rcache rcache = NULL;
 static krb5_keytab keytab = NULL;
 static int keytab_setup = 0;
-static const char *service_name = NULL;
+static char *service_name = NULL;
+static char service_host[] = "host";
+static u_char null_id[] = {0};
 
 static int      ksm_session_init(netsnmp_session *);
 static void     ksm_free_state_ref(void *);
@@ -159,7 +162,7 @@ init_snmpksm_post_config(int majorid, int minorid, void *serverarg,
 		service_name = c;
 	}
 	else {
-		service_name = "host";
+		service_name = service_host;
 	}
     }
 
@@ -178,7 +181,7 @@ init_snmpksm_post_config(int majorid, int minorid, void *serverarg,
 	    }
 	}
 	else {
-	    DEBUGMSGTL(("ksm", "Using default keytab\n", c));
+	    DEBUGMSGTL(("ksm", "Using default keytab\n"));
 	}
 	keytab_setup = 1;
     }
@@ -463,7 +466,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     unsigned char  *encrypted_data = NULL;
     long            zero = 0, tmp;
     int             i;
-    u_char         *cksum_pointer, *endp = *parms->wholeMsg;
+    u_char         *cksum_pointer;
     krb5_cksumtype  cksumtype;
     krb5_checksum   pdu_checksum;
     u_char         **wholeMsg = parms->wholeMsg;
@@ -490,7 +493,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
          * suppress this (temporarily) while we build the credential info.
          *   XXX - what about "udp:host" style addresses?
          */
-        colon = strrchr(params->session->peername, ':');
+        colon = strrchr(parms->session->peername, ':');
         if (colon != NULL) {
             *colon='\0';
         }
@@ -523,7 +526,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         retcode =
             krb5_mk_req(kcontext, &auth_context,
                         AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY,
-                        (char *) service_name, parms->session->peername, NULL,
+                        service_name, parms->session->peername, NULL,
                         cc, &outdata);
 
         if (colon != NULL)
@@ -657,7 +660,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         if (!encrypted_data) {
             DEBUGMSGTL(("ksm",
                         "KSM: Unable to malloc %d bytes for encrypt "
-                        "buffer: %s\n", parms->scopedPduLen,
+                        "buffer: %s\n", (int)parms->scopedPduLen,
                         strerror(errno)));
             retval = SNMPERR_MALLOC;
 #ifndef NETSNMP_USE_KERBEROS_MIT
@@ -699,7 +702,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
         if (!ivector.data) {
             DEBUGMSGTL(("ksm", "Unable to allocate %d bytes for ivector\n",
-                        blocksize));
+                        (int)blocksize));
             retval = SNMPERR_MALLOC;
             goto error;
         }
@@ -1119,13 +1122,14 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     memcpy(cksum_pointer, CHECKSUM_CONTENTS(&pdu_checksum), CHECKSUM_LENGTH(&pdu_checksum));
 
     DEBUGMSGTL(("ksm", "KSM: Writing checksum of %d bytes at offset %d\n",
-                CHECKSUM_LENGTH(&pdu_checksum), cksum_pointer - (*wholeMsg + 1)));
+                (int)CHECKSUM_LENGTH(&pdu_checksum),
+		(int)(cksum_pointer - (*wholeMsg + 1))));
 
     DEBUGMSGTL(("ksm", "KSM: Checksum:"));
 
     for (i = 0; i < CHECKSUM_LENGTH(&pdu_checksum); i++)
         DEBUGMSG(("ksm", " %02x",
-                  (unsigned int) CHECKSUM_CONTENTS(&pdu_checksum)[i]));
+                  (unsigned int) ((unsigned char *)CHECKSUM_CONTENTS(&pdu_checksum))[i]));
 
     DEBUGMSG(("ksm", "\n"));
 
@@ -1351,7 +1355,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     CHECKSUM_CONTENTS(&checksum) = malloc(cksumlength);
     if (!CHECKSUM_CONTENTS(&checksum)) {
         DEBUGMSGTL(("ksm", "Unable to malloc %d bytes for checksum.\n",
-                    cksumlength));
+                    (int)cksumlength));
         retval = SNMPERR_MALLOC;
         goto error;
     }
@@ -1386,7 +1390,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     if (!ap_req.data) {
         DEBUGMSGTL(("ksm",
                     "KSM unable to malloc %d bytes for AP_REQ/REP.\n",
-                    length));
+                    (int)length));
         retval = SNMPERR_MALLOC;
         goto error;
     }
@@ -1445,7 +1449,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
         if (!rcache) {
             krb5_data       server;
-            server.data = "host";
+            server.data = service_host;
             server.length = strlen(server.data);
 
             retcode = krb5_get_server_rcache(kcontext, &server, &rcache);
@@ -1690,7 +1694,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
         if (!ivector.data) {
             DEBUGMSGTL(("ksm", "Unable to allocate %d bytes for ivector\n",
-                        blocksize));
+                        (int)blocksize));
             retval = SNMPERR_MALLOC;
             goto error;
         }
@@ -1717,8 +1721,8 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
         if (length > *parms->scopedPduLen) {
             DEBUGMSGTL(("ksm", "KSM not enough room - have %d bytes to "
-                        "decrypt but only %d bytes available\n", length,
-                        *parms->scopedPduLen));
+                        "decrypt but only %d bytes available\n", (int)length,
+                        (int)*parms->scopedPduLen));
             retval = SNMPERR_TOO_LONG;
 #ifndef NETSNMP_USE_KERBEROS_MIT
 #ifndef OLD_HEIMDAL
@@ -1804,7 +1808,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         if (strlen(cname) > *parms->secNameLen + 1) {
             DEBUGMSGTL(("ksm",
                         "KSM: Principal length (%d) is too long (%d)\n",
-                        strlen(cname), parms->secNameLen));
+                        (int)strlen(cname), (int)*parms->secNameLen));
             retval = SNMPERR_TOO_LONG;
             free(cname);
             goto error;
@@ -1850,7 +1854,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
      * Just in case
      */
 
-    parms->secEngineID = (u_char *) "";
+    parms->secEngineID = null_id;
     *parms->secEngineIDLen = 0;
 
     auth_context = NULL;        /* So we don't try to free it on success */
