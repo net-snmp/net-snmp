@@ -386,8 +386,12 @@ var_example(struct variable *vp,
         /*
          * we're returning 127.0.0.1 
          */
-        long_ret = ntohl(INADDR_LOOPBACK);
-        return (u_char *) & long_ret;
+        {
+            in_addr_t addr = ntohl(INADDR_LOOPBACK);
+            memcpy(string, &addr, sizeof(addr));
+            *var_len = sizeof(addr);
+        }
+        return (u_char *) string;
 
     case EXAMPLECOUNTER:
         long_ret = 42;
