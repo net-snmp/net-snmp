@@ -112,7 +112,7 @@ swrun_count_processes_by_regex( char *name, pcre *regexp )
 
     it = CONTAINER_ITERATOR( swrun_container );
     while ((entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) != NULL) {
-        // need to assemble full command back so regexps can get full picture
+        /* need to assemble full command back so regexps can get full picture */
         sprintf(fullCommand, "%s %s", entry->hrSWRunPath, entry->hrSWRunParameters);
         found = pcre_exec(regexp, NULL, fullCommand, strlen(fullCommand), 0, 0, found_ndx, 30);
         if (found > 0) {
