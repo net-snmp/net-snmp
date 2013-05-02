@@ -561,6 +561,16 @@ tcpTable_load_netlink()
 {
 	/*  TODO: perhaps use permanent nl handle? */
 	struct nl_handle *nl = nl_handle_alloc();
+	struct inet_diag_req req = {
+		.idiag_family = AF_INET,
+		.idiag_states = TCP_ALL,
+	};
+
+	struct nl_msg *nm = nlmsg_alloc_simple(TCPDIAG_GETSOCK, NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST);
+
+	struct sockaddr_nl peer;
+	unsigned char *buf = NULL;
+	int running = 1, len;
 
 	if (nl == NULL) {
 		DEBUGMSGTL(("mibII/tcpTable", "Failed to allocate netlink handle\n"));
@@ -575,12 +585,6 @@ tcpTable_load_netlink()
 		return -1;
 	}
 
-	struct inet_diag_req req = {
-		.idiag_family = AF_INET,
-		.idiag_states = TCP_ALL,
-	};
-
-	struct nl_msg *nm = nlmsg_alloc_simple(TCPDIAG_GETSOCK, NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST);
 	nlmsg_append(nm, &req, sizeof(struct inet_diag_req), 0);
 
 	if (nl_send_auto_complete(nl, nm) < 0) {
@@ -591,11 +595,8 @@ tcpTable_load_netlink()
 	}
 	nlmsg_free(nm);
 
-	struct sockaddr_nl peer;
-	unsigned char *buf = NULL;
-	int running = 1, len;
-
 	while (running) {
+		struct nlmsghdr *h = (struct nlmsghdr*)buf;
 		if ((len = nl_recv(nl, &peer, &buf, NULL)) <= 0) {
 			DEBUGMSGTL(("mibII/tcpTable", "nl_recv(): %s\n", nl_geterror()));
 			snmp_log(LOG_ERR, "snmpd: nl_recv(): %s\n", nl_geterror());
@@ -603,23 +604,21 @@ tcpTable_load_netlink()
 			return -1;
 		}
 
-		struct nlmsghdr *h = (struct nlmsghdr*)buf;
 		while (nlmsg_ok(h, len)) {
+			struct inet_diag_msg *r = nlmsg_data(h);
+			struct inpcb    pcb, *nnew;
+			static int      linux_states[12] =
+				{ 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
+
 			if (h->nlmsg_type == NLMSG_DONE) {
 				running = 0;
 				break;
 			}
 
-			struct inet_diag_msg *r = nlmsg_data(h);
-
 			if (r->idiag_family != AF_INET) {
 				h = nlmsg_next(h, &len);
 				continue;
 			}
-
-			struct inpcb    pcb, *nnew;
-			static int      linux_states[12] =
-				{ 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
 			memcpy(&pcb.inp_laddr.s_addr, r->id.idiag_src, r->idiag_family == AF_INET ? 4 : 6);
 			memcpy(&pcb.inp_faddr.s_addr, r->id.idiag_dst, r->idiag_family == AF_INET ? 4 : 6);
