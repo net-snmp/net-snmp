@@ -15656,13 +15656,13 @@ $as_echo "none" >&6; }
 	fi
 	;;
 
-    darwin8*|darwin9*|darwin10*)
+    darwin8*|darwin9*|darwin10*|darwin11*|darwin12*)
         #   Flat Namespace linking                      (Mac OS/X)
         #
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether darwin ld might need -flat_namespace" >&5
 $as_echo_n "checking whether darwin ld might need -flat_namespace... " >&6; }
 	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
-		LDFLAGS="-flat_namespace $LDFLAGS"
+		LDFLAGS="-flat_namespace -framework CoreFoundation -framework DiskArbitration -framework IOKit $LDFLAGS"
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	else
