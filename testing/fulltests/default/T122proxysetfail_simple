@@ -10,7 +10,7 @@ SKIPIF    NETSNMP_DISABLE_SNMPV2C
 SKIPIF    NETSNMP_DISABLE_SET_SUPPORT
 
 # XXX: ucd-snmp/proxy doesn't properly support TCP -- remove this once it does
-[ "x$SNMP_TRANSPORT_SPEC" = "xtcp" ] && SKIP
+[ "x$SNMP_TRANSPORT_SPEC" = "xtcp" ] && SKIP Test does not support TCP
 
 #
 # Begin test
