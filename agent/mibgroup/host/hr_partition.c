@@ -47,6 +47,10 @@ static char     HRP_savedName[1024];
 #ifdef NETSNMP_CAN_GET_DISK_LABEL
 static char     HRP_savedLabel[1024];
 #endif
+#ifdef darwin
+extern int
+Get_HR_Disk_Label(char *string, size_t str_len, const char *devfull);
+#endif
 
 static int      HRP_DiskIndex;
 
