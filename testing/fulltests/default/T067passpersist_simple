@@ -15,9 +15,9 @@ SKIPIFNOT USING_UCD_SNMP_PASS_PERSIST_MODULE
 
 # make sure snmpget and snmpwalk can be executed
 SNMPGET="${builddir}/apps/snmpget"
-[ -x "$SNMPGET" ] || SKIP
+[ -x "$SNMPGET" ] || SKIP snmpget not compiled
 SNMPWALK="${builddir}/apps/snmpwalk"
-[ -x "$SNMPWALK" ] || SKIP
+[ -x "$SNMPWALK" ] || SKIP snmpwalk not compiled
 
 snmp_version=v2c
 TESTCOMMUNITY=testcommunity
