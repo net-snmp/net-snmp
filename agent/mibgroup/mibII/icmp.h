@@ -19,6 +19,9 @@ config_arch_require(openbsd4,  mibII/kernel_sysctl)
 config_arch_require(openbsd5,  mibII/kernel_sysctl)
 config_arch_require(dragonfly2, mibII/kernel_sysctl)
 config_arch_require(dragonfly3, mibII/kernel_sysctl)
+config_arch_require(darwin10,  mibII/kernel_sysctl)
+config_arch_require(darwin11,  mibII/kernel_sysctl)
+config_arch_require(darwin12,  mibII/kernel_sysctl)
 
 #include <net-snmp/agent/cache_handler.h>
 

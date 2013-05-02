@@ -22,7 +22,7 @@ config_require(ip-mib/data_access/arp_common)
 config_require(ip-mib/data_access/arp_netlink)
 #elif defined( linux )
 config_require(ip-mib/data_access/arp_linux)
-#elif defined( freebsd7 ) || defined ( netbsd5 ) || defined( openbsd4 ) || defined( dragonfly )
+#elif defined( freebsd7 ) || defined ( netbsd5 ) || defined( openbsd4 ) || defined( dragonfly ) || defined( darwin )
 config_require(ip-mib/data_access/arp_sysctl)
 #else
 /*

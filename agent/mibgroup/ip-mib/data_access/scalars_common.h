@@ -19,7 +19,7 @@
  */
 #if defined( linux )
 config_require(ip-mib/data_access/scalars_linux)
-#elif defined( freebsd4 ) || defined( netbsd5 ) || defined( openbsd4 ) || defined( dragonfly )
+#elif defined( freebsd4 ) || defined( netbsd5 ) || defined( openbsd4 ) || defined( dragonfly ) || defined( darwin )
 config_require(ip-mib/data_access/scalars_sysctl)
 #else
 /*

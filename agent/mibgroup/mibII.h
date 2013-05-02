@@ -30,7 +30,7 @@ config_require(if-mib)
 #if defined(linux)
 config_require(ip-mib ip-forward-mib tcp-mib udp-mib)
 #elif defined(dragonfly) || defined(freebsd7) || \
-    defined(netbsd5) || defined(openbsd4)
+    defined(netbsd5) || defined(openbsd4) || defined( darwin )
 config_require(ip-mib ip-forward-mib tcp-mib udp-mib)
 #elif defined(solaris2)
 config_require(tcp-mib udp-mib)

@@ -138,7 +138,7 @@ netsnmp_arch_route_delete(netsnmp_route_entry *entry)
     return (err == 0 ? 0 : -2);
 }
 
-#if defined(freebsd4) || defined(netbsd4) || defined(openbsd)
+#if defined(freebsd4) || defined(netbsd4) || defined(openbsd) || defined(darwin)
 static int
 _type_from_flags(int flags)
 {
@@ -294,7 +294,7 @@ _load_routing_table_from_sysctl(netsnmp_container* container, int *index,
 
         entry->rt_nexthop_type = dest_type;
         entry->rt_nexthop_len = dest_len;
-        if (rtm->rtm_flags & RTF_GATEWAY) {
+        if (rtm->rtm_addrs & RTA_GATEWAY) {
             if (family == AF_INET)
                 memcpy(entry->rt_nexthop,
                     &((struct sockaddr_in*)gateway_sa)->sin_addr, dest_len);
