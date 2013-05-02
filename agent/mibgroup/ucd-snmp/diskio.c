@@ -1215,7 +1215,11 @@ var_diskio(struct variable * vp,
 #define kIDXBytesWritten	1
 #define kIDXNumReads		2
 #define kIDXNumWrites		3
-#define kIDXLast		3
+#define kIDXBytesReadXhi	4
+#define kIDXBytesReadXlo	5
+#define kIDXBytesWrittenXhi	6
+#define kIDXBytesWrittenXlo	7
+#define kIDXLast		7
 
 struct drivestats {
     char name[MAXDRIVENAME + 1];
@@ -1236,6 +1240,7 @@ collect_drive_stats(io_registry_entry_t driver, long *stats)
     CFDictionaryRef properties;
     CFDictionaryRef statistics;
     long            value;
+    SInt64          value64;
     kern_return_t   status;
     int             i;
 
@@ -1284,6 +1289,21 @@ collect_drive_stats(io_registry_entry_t driver, long *stats)
 						 CFSTR(kIOBlockStorageDriverStatisticsWritesKey)))) {
 	    CFNumberGetValue(number, kCFNumberSInt32Type, &value);
 	    stats[kIDXNumWrites] = value;
+	}
+	/* grab the 64 bit versions of the bytes read */
+	if ((number = (CFNumberRef)CFDictionaryGetValue(statistics,
+						 CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey)))) {
+	    CFNumberGetValue(number, kCFNumberSInt64Type, &value64);
+	    stats[kIDXBytesReadXhi] = (long)(value64 >> 32);
+	    stats[kIDXBytesReadXlo] = (long)(value64 & 0xffffffff);	
+	}
+		
+	/* grab the 64 bit versions of the bytes written */
+	if ((number = (CFNumberRef)CFDictionaryGetValue(statistics,
+						 CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey)))) {
+	    CFNumberGetValue(number, kCFNumberSInt64Type, &value64);
+	    stats[kIDXBytesWrittenXhi] = (long)(value64 >> 32);
+	    stats[kIDXBytesWrittenXlo] = (long)(value64 & 0xffffffff);	
 	}
     }
     /* we're done with the properties, release them */
@@ -1368,7 +1388,7 @@ getstats(void)
     if (status != KERN_SUCCESS) {
 	snmp_log(LOG_ERR, "diskio: couldn't match whole IOMedia devices\n");
 /*	fprintf(stderr,"Couldn't match whole IOMedia devices\n"); */
-	return(1);
+	return -1;
     }
 
     num_drives = 0;  /* NB: Incremented by handle_drive */
@@ -1379,7 +1399,7 @@ getstats(void)
     IOObjectRelease(drivelist);
 
     cache_time = now;
-    return (0);
+    return 0;
 }
 
 u_char         *
@@ -1389,6 +1409,7 @@ var_diskio(struct variable * vp,
            int exact, size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
+    static struct   counter64 c64_ret;
     unsigned int    indx;
 
     if (getstats() == 1) {
@@ -1425,7 +1446,16 @@ var_diskio(struct variable * vp,
 	case DISKIO_WRITES:
 	    long_ret = (signed long) drivestat[indx].stats[kIDXNumWrites];
 	    return (u_char *) & long_ret;
-
+	case DISKIO_NREADX:
+	    *var_len = 8;
+	    c64_ret.low = (signed long) drivestat[indx].stats[kIDXBytesReadXlo];
+	    c64_ret.high = (signed long) drivestat[indx].stats[kIDXBytesReadXhi];
+	    return (u_char *) & c64_ret;
+	case DISKIO_NWRITTENX:
+	    *var_len = 8;
+	    c64_ret.low = (signed long) drivestat[indx].stats[kIDXBytesWrittenXlo];
+	    c64_ret.high = (signed long) drivestat[indx].stats[kIDXBytesWrittenXhi];
+	    return (u_char *) & c64_ret;
 	default:
 	    ERROR_MSG("diskio.c: don't know how to handle this request.");
     }
