@@ -566,7 +566,7 @@ tcpTable_load_netlink()
 		.idiag_states = TCP_ALL,
 	};
 
-	struct nl_msg *nm = nlmsg_alloc_simple(TCPDIAG_GETSOCK, NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST);
+	struct nl_msg *nm;
 
 	struct sockaddr_nl peer;
 	unsigned char *buf = NULL;
@@ -585,6 +585,7 @@ tcpTable_load_netlink()
 		return -1;
 	}
 
+	nm = nlmsg_alloc_simple(TCPDIAG_GETSOCK, NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST);
 	nlmsg_append(nm, &req, sizeof(struct inet_diag_req), 0);
 
 	if (nl_send_auto_complete(nl, nm) < 0) {
@@ -596,13 +597,15 @@ tcpTable_load_netlink()
 	nlmsg_free(nm);
 
 	while (running) {
-		struct nlmsghdr *h = (struct nlmsghdr*)buf;
+		struct nlmsghdr *h;
 		if ((len = nl_recv(nl, &peer, &buf, NULL)) <= 0) {
 			DEBUGMSGTL(("mibII/tcpTable", "nl_recv(): %s\n", nl_geterror()));
 			snmp_log(LOG_ERR, "snmpd: nl_recv(): %s\n", nl_geterror());
 			nl_handle_destroy(nl);
 			return -1;
 		}
+
+		h = (struct nlmsghdr*)buf;
 
 		while (nlmsg_ok(h, len)) {
 			struct inet_diag_msg *r = nlmsg_data(h);
@@ -614,6 +617,8 @@ tcpTable_load_netlink()
 				running = 0;
 				break;
 			}
+
+			r = nlmsg_data(h);
 
 			if (r->idiag_family != AF_INET) {
 				h = nlmsg_next(h, &len);
