@@ -555,6 +555,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 /*  see <netinet/tcp.h> */
 #define TCP_ALL ((1 << (TCP_CLOSING + 1)) - 1)
 
+const static int linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
+
 #if HAVE_NETLINK_NETLINK_H
 static int
 tcpTable_load_netlink()
@@ -610,8 +612,6 @@ tcpTable_load_netlink()
 		while (nlmsg_ok(h, len)) {
 			struct inet_diag_msg *r = nlmsg_data(h);
 			struct inpcb    pcb, *nnew;
-			static int      linux_states[12] =
-				{ 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
 			if (h->nlmsg_type == NLMSG_DONE) {
 				running = 0;
@@ -690,8 +690,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
      */
     while (line == fgets(line, sizeof(line), in)) {
         struct inpcb    pcb, *nnew;
-        static int      linux_states[12] =
-            { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
         int             state, lp, fp, uid;
 
         if (6 != sscanf(line,
