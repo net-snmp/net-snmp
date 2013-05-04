@@ -556,6 +556,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 /*  see <netinet/tcp.h> */
 #define TCP_ALL ((1 << (TCP_CLOSING + 1)) - 1)
 
+const static int linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
+
 #if HAVE_NETLINK_NETLINK_H
 static int
 tcpTable_load_netlink(void)
@@ -567,7 +569,7 @@ tcpTable_load_netlink(void)
 		.idiag_states = TCP_ALL,
 	};
 
-	struct nl_msg *nm = nlmsg_alloc_simple(TCPDIAG_GETSOCK, NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST);
+	struct nl_msg *nm;
 
 	struct sockaddr_nl peer;
 	unsigned char *buf = NULL;
@@ -586,6 +588,7 @@ tcpTable_load_netlink(void)
 		return -1;
 	}
 
+	nm = nlmsg_alloc_simple(TCPDIAG_GETSOCK, NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST);
 	nlmsg_append(nm, &req, sizeof(struct inet_diag_req), 0);
 
 	if (nl_send_auto_complete(nl, nm) < 0) {
@@ -597,7 +600,7 @@ tcpTable_load_netlink(void)
 	nlmsg_free(nm);
 
 	while (running) {
-		struct nlmsghdr *h = (struct nlmsghdr*)buf;
+		struct nlmsghdr *h;
 		if ((len = nl_recv(nl, &peer, &buf, NULL)) <= 0) {
 			DEBUGMSGTL(("mibII/tcpTable", "nl_recv(): %s\n", nl_geterror()));
 			snmp_log(LOG_ERR, "snmpd: nl_recv(): %s\n", nl_geterror());
@@ -605,16 +608,18 @@ tcpTable_load_netlink(void)
 			return -1;
 		}
 
+		h = (struct nlmsghdr*)buf;
+
 		while (nlmsg_ok(h, len)) {
 			struct inet_diag_msg *r = nlmsg_data(h);
 			struct inpcb    pcb, *nnew;
-			static int      linux_states[12] =
-				{ 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
 			if (h->nlmsg_type == NLMSG_DONE) {
 				running = 0;
 				break;
 			}
+
+			r = nlmsg_data(h);
 
 			if (r->idiag_family != AF_INET) {
 				h = nlmsg_next(h, &len);
@@ -686,8 +691,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
      */
     while (line == fgets(line, sizeof(line), in)) {
         struct inpcb    pcb, *nnew;
-        static int      linux_states[12] =
-            { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
         unsigned int    lp, fp;
         int             state, uid;
 
