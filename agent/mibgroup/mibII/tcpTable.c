@@ -559,7 +559,7 @@ const static int linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
 #if HAVE_NETLINK_NETLINK_H
 static int
-tcpTable_load_netlink()
+tcpTable_load_netlink(void)
 {
 	/*  TODO: perhaps use permanent nl handle? */
 	struct nl_handle *nl = nl_handle_alloc();
