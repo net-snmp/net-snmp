@@ -107,7 +107,7 @@ netsnmp_init_table_dataset(void) {
 /** deletes a single dataset table data.
  *  returns the (possibly still good) next pointer of the deleted data object.
  */
-static NETSNMP_INLINE netsnmp_table_data_set_storage *
+NETSNMP_STATIC_INLINE netsnmp_table_data_set_storage *
 netsnmp_table_dataset_delete_data(netsnmp_table_data_set_storage *data)
 {
     netsnmp_table_data_set_storage *nextPtr = NULL;
