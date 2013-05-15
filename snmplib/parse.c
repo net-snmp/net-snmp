@@ -3409,8 +3409,8 @@ parse_capabilities(FILE * fp, char *name)
                         level++;
                     else if (type == RIGHTBRACKET)
                         level--;
-                } while (type != RIGHTBRACKET && type != ENDOFFILE
-                         && level != 0);
+                } while ((type != RIGHTBRACKET || level != 0)
+                         && type != ENDOFFILE);
                 if (type != RIGHTBRACKET) {
                     print_error("Missing \"}\" after DEFVAL", token, type);
                     goto skip;
