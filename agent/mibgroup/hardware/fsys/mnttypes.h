@@ -145,6 +145,9 @@
 #ifndef MNTTYPE_SIMFS
 #define MNTTYPE_SIMFS     "simfs"
 #endif
+#ifndef MNTTYPE_BTRFS
+#define MNTTYPE_BTRFS     "btrfs"
+#endif
 
 /*
  *  File systems to skip
