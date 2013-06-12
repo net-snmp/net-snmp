@@ -750,13 +750,6 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 
     err = netsnmp_getaddrinfo(name, NULL, &hint, &addrs);
     if (err != 0) {
-#if HAVE_GAI_STRERROR
-        snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", name,
-                 gai_strerror(err));
-#else
-        snmp_log(LOG_ERR, "getaddrinfo: %s (error %d)\n", name,
-                 err);
-#endif
         return -1;
     }
 
