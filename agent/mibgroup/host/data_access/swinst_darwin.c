@@ -129,7 +129,8 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags )
     return 0;
 }
 
-void  _dump_flags(u_long flags)
+static void
+_dump_flags(u_long flags)
 {
     static struct {
         const char*name;
@@ -255,6 +256,8 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
             rc = -1;
             SNMP_CFRelease(prodName);
             SNMP_CFRelease(version);
+            CFRelease(currentPath);
+            CFRelease(currentURL);
             break;
         }
 
@@ -285,7 +288,7 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
     return rc;
 }
 
-int
+static int
 _check_bundled_app(CFURLRef currentURL, CFStringRef *prodName,
                    CFStringRef *version, const char* file)
 {

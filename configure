@@ -15703,7 +15703,7 @@ $as_echo "none" >&6; }
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether darwin ld might need -flat_namespace" >&5
 $as_echo_n "checking whether darwin ld might need -flat_namespace... " >&6; }
 	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
-		LDFLAGS="-flat_namespace -framework CoreFoundation -framework DiskArbitration -framework IOKit $LDFLAGS"
+		LDFLAGS="-flat_namespace -framework CoreFoundation -framework CoreServices -framework DiskArbitration -framework IOKit $LDFLAGS"
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	else
