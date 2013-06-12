@@ -1545,12 +1545,12 @@ _sess_open(netsnmp_session * in_session)
         if (in_session->flags & SNMP_FLAGS_STREAM_SOCKET) {
             transport =
                 netsnmp_tdomain_transport_full("snmp", in_session->peername,
-                                               in_session->local_port, "tcp",
+                                               in_session->local_port, "tcp,tcp6",
                                                NULL);
         } else {
             transport =
                 netsnmp_tdomain_transport_full("snmp", in_session->peername,
-                                               in_session->local_port, "udp",
+                                               in_session->local_port, "udp,udp6",
                                                NULL);
         }
 
