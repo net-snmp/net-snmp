@@ -435,6 +435,11 @@ main(int argc, char *argv[])
 
     putenv(strdup("POSIXLY_CORRECT=1"));
 
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+			   NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD, 1);
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+			   NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE, 1);
+
     while ((arg = getopt(argc, argv, ":Vhm:M:D:dP:L:U:c:x:")) != -1) {
         switch (arg) {
         case 'h':
