@@ -444,6 +444,7 @@ free_trapd_address(void)
 {
     if (default_port != ddefault_port) {
         free(default_port);
+        default_port = ddefault_port;
     }
 }
 
