@@ -38,7 +38,8 @@ etherstats_interface_name_list_get (struct ifname *list_head, int *retval)
     for (p = addrs; p; p = p->ifa_next) {
 
         if (!list_head) {
-            if ( (list_head = (struct ifname *) malloc (sizeof(struct ifname))) < 0) {
+            list_head = malloc(sizeof(struct ifname));
+            if (!list_head) {
                 DEBUGMSGTL(("access:etherStatsTable:interface_name_list_get",
                             "memory allocation failed\n"));
                 snmp_log (LOG_ERR, "access:etherStatsTable,interface_name_list_get, memory allocation failed\n");
@@ -57,7 +58,8 @@ etherstats_interface_name_list_get (struct ifname *list_head, int *retval)
         if (nameptr1)
             continue;
 
-        if ( (nameptr2->ifn_next = (struct ifname *) malloc (sizeof(struct ifname))) < 0) {
+        nameptr2->ifn_next = malloc(sizeof(struct ifname));
+        if (!nameptr2->ifn_next) {
             DEBUGMSGTL(("access:etherStatsTable:interface_name_list_get",
                         "memory allocation failed\n"));
             snmp_log (LOG_ERR, "access:etherStatsTable,interface_name_list_get, memory allocation failed\n");
