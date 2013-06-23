@@ -201,6 +201,9 @@ snmp_strcat(u_char ** buf, size_t * buf_len, size_t * out_len,
         return 1;
     }
 
+    if (!*buf)
+        return 0;
+
     while ((*out_len + strlen((const char *) s) + 1) >= *buf_len) {
         if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
             return 0;
@@ -437,11 +440,14 @@ int
 hex_to_binary2(const u_char * input, size_t len, char **output)
 {
     u_int           olen = (len / 2) + (len % 2);
-    char           *s = (char *) calloc(1, (olen) ? olen : 1), *op = s;
+    char           *s = calloc(1, olen ? olen : 1), *op = s;
     const u_char   *ip = input;
 
 
     *output = NULL;
+    if (!s)
+        goto hex_to_binary2_quit;
+
     *op = 0;
     if (len % 2) {
         if (!isxdigit(*ip))
@@ -450,7 +456,7 @@ hex_to_binary2(const u_char * input, size_t len, char **output)
         ip++;
     }
 
-    while (ip - input < (int) len) {
+    while (ip < input + len) {
         if (!isxdigit(*ip))
             goto hex_to_binary2_quit;
         *op = HEX2VAL(*ip) << 4;

@@ -5371,19 +5371,14 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	/*
 	 * Successful, so delete request.  
 	 */
-	if (isp->requests == rp) {
-	  isp->requests = rp->next_request;
-	  if (isp->requestsEnd == rp) {
-	    isp->requestsEnd = NULL;
-	  }
-	} else {
+	if (orp)
 	  orp->next_request = rp->next_request;
-	  if (isp->requestsEnd == rp) {
-	    isp->requestsEnd = orp;
-	  }
-	}
+        else
+	  isp->requests = rp->next_request;
+        if (isp->requestsEnd == rp)
+	  isp->requestsEnd = orp;
 	snmp_free_pdu(rp->pdu);
-	free((char *) rp);
+	free(rp);
 	/*
 	 * There shouldn't be any more requests with the same reqid.  
 	 */
@@ -6287,18 +6282,13 @@ snmp_sess_timeout(void *sessp)
                     callback(NETSNMP_CALLBACK_OP_TIMED_OUT, sp,
                              rp->pdu->reqid, rp->pdu, magic);
                 }
-                if (isp->requests == rp) {
-                    isp->requests = rp->next_request;
-                    if (isp->requestsEnd == rp) {
-                        isp->requestsEnd = NULL;
-                    }
-                } else {
+                if (orp)
                     orp->next_request = rp->next_request;
-                    if (isp->requestsEnd == rp) {
-                        isp->requestsEnd = orp;
-                    }
-                }
-                snmp_free_pdu(rp->pdu); /* FIX  rp is already free'd! */
+                else
+                    isp->requests = rp->next_request;
+                if (isp->requestsEnd == rp)
+                    isp->requestsEnd = orp;
+                snmp_free_pdu(rp->pdu);
                 freeme = rp;
                 continue;       /* don't update orp below */
             } else {

@@ -108,6 +108,9 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     while ((dp = readdir(d)) != NULL) {
         if ( '.' == dp->d_name[0] )
             continue;
+        snprintf( buf, BUFSIZ, "%s/%s", pkg_directory, dp->d_name );
+        if (stat( buf, &stat_buf ) < 0)
+            continue;
         entry = netsnmp_swinst_entry_create( i++ );
         if (NULL == entry)
             continue;   /* error already logged by function */
@@ -135,8 +138,6 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
         /* no information about O/S vs application packages ??? */
 #endif
 
-        snprintf( buf, BUFSIZ, "%s/%s", pkg_directory, dp->d_name );
-        stat( buf, &stat_buf );
         install_time = stat_buf.st_mtime;
         cp = date_n_time( &install_time, &date_len );
         memcpy( entry->swDate, cp, date_len );
