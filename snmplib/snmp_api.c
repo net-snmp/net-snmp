@@ -1395,7 +1395,10 @@ snmpv3_engineID_probe(struct session_list *slp,
         }
     }
 
-    /* see if there was any hooks to call after the engineID probing */
+    /*
+     * see if there is a hook to call now that we're done probing for an
+     * engineID
+     */
     if (sptr && sptr->post_probe_engineid) {
         status = (*sptr->post_probe_engineid)(slp, in_session);
         if (status != SNMPERR_SUCCESS)
