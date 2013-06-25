@@ -201,14 +201,14 @@ snmp_strcat(u_char ** buf, size_t * buf_len, size_t * out_len,
         return 1;
     }
 
-    if (!*buf)
-        return 0;
-
     while ((*out_len + strlen((const char *) s) + 1) >= *buf_len) {
         if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
             return 0;
         }
     }
+
+    if (!*buf)
+        return 0;
 
     strcpy((char *) (*buf + *out_len), (const char *) s);
     *out_len += strlen((char *) (*buf + *out_len));
