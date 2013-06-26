@@ -1389,7 +1389,10 @@ snmpv3_engineID_probe(struct session_list *slp,
         }
     }
 
-    /* see if there was any hooks to call after the engineID probing */
+    /*
+     * see if there is a hook to call now that we're done probing for an
+     * engineID
+     */
     if (sptr && sptr->post_probe_engineid) {
         status = (*sptr->post_probe_engineid)(slp, in_session);
         if (status != SNMPERR_SUCCESS)
@@ -1545,12 +1548,12 @@ _sess_open(netsnmp_session * in_session)
         if (in_session->flags & SNMP_FLAGS_STREAM_SOCKET) {
             transport =
                 netsnmp_tdomain_transport_full("snmp", in_session->peername,
-                                               in_session->local_port, "tcp",
+                                               in_session->local_port, "tcp,tcp6",
                                                NULL);
         } else {
             transport =
                 netsnmp_tdomain_transport_full("snmp", in_session->peername,
-                                               in_session->local_port, "udp",
+                                               in_session->local_port, "udp,udp6",
                                                NULL);
         }
 
@@ -5371,19 +5374,14 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	/*
 	 * Successful, so delete request.  
 	 */
-	if (isp->requests == rp) {
-	  isp->requests = rp->next_request;
-	  if (isp->requestsEnd == rp) {
-	    isp->requestsEnd = NULL;
-	  }
-	} else {
+	if (orp)
 	  orp->next_request = rp->next_request;
-	  if (isp->requestsEnd == rp) {
-	    isp->requestsEnd = orp;
-	  }
-	}
+        else
+	  isp->requests = rp->next_request;
+        if (isp->requestsEnd == rp)
+	  isp->requestsEnd = orp;
 	snmp_free_pdu(rp->pdu);
-	free((char *) rp);
+	free(rp);
 	/*
 	 * There shouldn't be any more requests with the same reqid.  
 	 */
@@ -6287,18 +6285,13 @@ snmp_sess_timeout(void *sessp)
                     callback(NETSNMP_CALLBACK_OP_TIMED_OUT, sp,
                              rp->pdu->reqid, rp->pdu, magic);
                 }
-                if (isp->requests == rp) {
-                    isp->requests = rp->next_request;
-                    if (isp->requestsEnd == rp) {
-                        isp->requestsEnd = NULL;
-                    }
-                } else {
+                if (orp)
                     orp->next_request = rp->next_request;
-                    if (isp->requestsEnd == rp) {
-                        isp->requestsEnd = orp;
-                    }
-                }
-                snmp_free_pdu(rp->pdu); /* FIX  rp is already free'd! */
+                else
+                    isp->requests = rp->next_request;
+                if (isp->requestsEnd == rp)
+                    isp->requestsEnd = orp;
+                snmp_free_pdu(rp->pdu);
                 freeme = rp;
                 continue;       /* don't update orp below */
             } else {

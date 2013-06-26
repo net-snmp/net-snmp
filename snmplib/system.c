@@ -750,13 +750,6 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 
     err = netsnmp_getaddrinfo(name, NULL, &hint, &addrs);
     if (err != 0) {
-#if HAVE_GAI_STRERROR
-        snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", name,
-                 gai_strerror(err));
-#else
-        snmp_log(LOG_ERR, "getaddrinfo: %s (error %d)\n", name,
-                 err);
-#endif
         return -1;
     }
 
@@ -822,7 +815,21 @@ netsnmp_getaddrinfo(const char *name, const char *service,
     val_status_t    val_status;
 #endif
 
-    DEBUGMSGTL(("dns:getaddrinfo", "looking up %s:%s\n", name, service));
+    DEBUGMSGTL(("dns:getaddrinfo", "looking up "));
+    if (name)
+        DEBUGMSG(("dns:getaddrinfo", "\"%s\"", name));
+    else
+        DEBUGMSG(("dns:getaddrinfo", "<NULL>"));
+
+    if (service)
+	DEBUGMSG(("dns:getaddrinfo", ":\"%s\"", service));
+
+    if (hints)
+	DEBUGMSG(("dns:getaddrinfo", " with hint ({ ... })"));
+    else
+	DEBUGMSG(("dns:getaddrinfo", " with no hint"));
+
+    DEBUGMSG(("dns:getaddrinfo", "\n"));
 
     if (NULL == hints) {
         memset(&hint, 0, sizeof hint);

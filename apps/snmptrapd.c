@@ -437,6 +437,7 @@ free_trapd_address(void)
 {
     if (default_port != ddefault_port) {
         free(default_port);
+        default_port = ddefault_port;
     }
 }
 
@@ -1202,7 +1203,6 @@ main(int argc, char *argv[])
                  * successfully so what could have gone wrong?  
                  */
                 snmptrapd_close_sessions(sess_list);
-                netsnmp_transport_free(transport);
                 snmp_log(LOG_ERR, "couldn't open snmp - %s", strerror(errno));
                 SOCK_CLEANUP;
                 exit(1);

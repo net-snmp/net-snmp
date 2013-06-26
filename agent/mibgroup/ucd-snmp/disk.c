@@ -568,7 +568,6 @@ find_device(char *path)
   FILE           *mntfp;
 #elif HAVE_FSTAB_H
   struct fstab   *fstab;
-  struct stat     stat1;
 #elif HAVE_STATFS
   struct statfs   statf;
 #endif
@@ -622,7 +621,6 @@ find_device(char *path)
     strlcpy(device, mnttab.mnt_special, sizeof(device));
 #endif /* HAVE_SETMNTENT */
 #elif HAVE_FSTAB_H
-  stat(path, &stat1);
   setfsent();
   if ((fstab = getfsfile(path)))
     strlcpy(device, fstab->fs_spec, sizeof(device));

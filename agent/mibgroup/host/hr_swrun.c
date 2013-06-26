@@ -524,6 +524,12 @@ get_proc_stat_field(int pid,
     if ((cp = get_proc_file_line("/proc/%d/stat", pid, buf, buflen)) == NULL )
 	return NULL;
     for (i = 0; *cp && i < skip; ++i) {
+        /*
+         * The second field is 'comm' and can contain spaces. Hence skip to
+         * the closing parenthesis.
+         */
+        if (i == 1 && *cp == '(')
+            cp = strrchr(cp, ')');
 	cp = skip_to_next_field(cp);
     }
     return cp;

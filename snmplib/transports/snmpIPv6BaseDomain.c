@@ -342,13 +342,6 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
             err = netsnmp_getaddrinfo(peername, NULL, &hint, &addrs);
         }
         if (err != 0) {
-#if HAVE_GAI_STRERROR
-            snmp_log(LOG_ERR, "getaddrinfo(\"%s\", NULL, ...): %s\n", peername,
-                     gai_strerror(err));
-#else
-            snmp_log(LOG_ERR, "getaddrinfo(\"%s\", NULL, ...): (error %d)\n",
-                     peername, err);
-#endif
             free(peername);
             return 0;
         }

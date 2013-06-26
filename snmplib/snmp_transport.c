@@ -498,6 +498,7 @@ netsnmp_tdomain_transport_full(const char *application,
     const char * const *spec = NULL;
     int                 any_found = 0;
     char buf[SNMP_MAXPATH];
+    char **lspec = 0;
 
     DEBUGMSGTL(("tdomain",
                 "tdomain_transport_full(\"%s\", \"%s\", %d, \"%s\", \"%s\")\n",
@@ -587,7 +588,21 @@ netsnmp_tdomain_transport_full(const char *application,
             DEBUGMSGTL(("tdomain",
                         "Use user specified default domain \"%s\"\n",
                         default_domain));
-            match = find_tdomain(default_domain);
+            if (!strchr(default_domain, ','))
+                match = find_tdomain(default_domain);
+            else {
+                int commas = 0;
+                const char *cp = default_domain;
+                char *dup = strdup(default_domain);
+
+                while (*++cp) if (*cp == ',') commas++;
+                lspec = calloc(commas+2, sizeof(char *));
+                commas = 1;
+                lspec[0] = strtok(dup, ",");
+                while ((lspec[commas++] = strtok(NULL, ",")))
+                    ;
+                spec = (const char * const *)lspec;
+            }
         } else {
             spec = netsnmp_lookup_default_domains(application);
             if (spec == NULL) {
@@ -636,6 +651,10 @@ netsnmp_tdomain_transport_full(const char *application,
             else
                 t = match->f_create_from_tstring_new(addr, local, addr2);
             if (t) {
+                if (lspec) {
+                    free(lspec[0]);
+                    free(lspec);
+                }
                 return t;
             }
         }
@@ -647,6 +666,10 @@ netsnmp_tdomain_transport_full(const char *application,
     }
     if (!any_found)
         snmp_log(LOG_ERR, "No support for any checked transport domain\n");
+    if (lspec) {
+        free(lspec[0]);
+        free(lspec);
+    }
     return NULL;
 }
 

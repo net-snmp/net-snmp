@@ -515,9 +515,12 @@ var_hrswinst(struct variable * vp,
                 snprintf(string, sizeof(string), "%s/%s",
                          swi->swi_directory, swi->swi_name);
                 string[ sizeof(string)-1 ] = 0;
-                stat(string, &stat_buf);
-                ret = date_n_time(&stat_buf.st_mtime, var_len);
+                if (stat(string, &stat_buf) >= 0)
+                    ret = date_n_time(&stat_buf.st_mtime, var_len);
+                else
+                    goto err;
             } else {
+err:
 #if NETSNMP_NO_DUMMY_VALUES
                 ret = NULL;
 #else
