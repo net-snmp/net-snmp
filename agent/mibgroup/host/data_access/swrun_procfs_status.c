@@ -120,36 +120,38 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         if (!fp) {
             netsnmp_swrun_entry_free(entry);
             continue; /* file (process) probably went away */
-	}
-        memset(buf, 0, sizeof(buf));
-	entry->hrSWRunType = HRSWRUNTYPE_APPLICATION;
-	if ((cp = fgets( buf, sizeof(buf)-1, fp )) == NULL) {
-	    entry->hrSWRunType = HRSWRUNTYPE_OPERATINGSYSTEM;
-	    buf[0] = '\0';
-	}
-        fclose(fp);
-
-        /*
-         *     argv[0]   is hrSWRunPath
-         */ 
-        entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
-                                   sizeof(entry->hrSWRunPath)-1, "%s", buf);
-        /*
-         * Stitch together argv[1..] to construct hrSWRunParameters
-         */
-        cp = buf + entry->hrSWRunPath_len+1;
-        while ( 1 ) {
-            while (*cp)
-                cp++;
-            if ( '\0' == *(cp+1))
-                break;      /* '\0''\0' => End of command line */
-            *cp = ' ';
         }
-        entry->hrSWRunParameters_len
-            = sprintf(entry->hrSWRunParameters, "%.*s",
-                      (int)sizeof(entry->hrSWRunParameters) - 1,
-                      buf + entry->hrSWRunPath_len + 1);
- 
+        entry->hrSWRunType = HRSWRUNTYPE_APPLICATION;
+        memset(buf, 0, sizeof(buf));
+        cp = fgets( buf, BUFSIZ-1, fp );
+        fclose(fp);
+        if (cp != NULL) {
+            /*
+             *     argv[0]   is hrSWRunPath
+             */ 
+            entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
+                                       sizeof(entry->hrSWRunPath)-1, "%s", buf);
+            /*
+             * Stitch together argv[1..] to construct hrSWRunParameters
+             */
+            cp = buf + entry->hrSWRunPath_len+1;
+            while ( 1 ) {
+                while (*cp)
+                    cp++;
+                if ( '\0' == *(cp+1))
+                    break;      /* '\0''\0' => End of command line */
+                *cp = ' ';
+            }
+            entry->hrSWRunParameters_len
+                = sprintf(entry->hrSWRunParameters, "%.*s",
+                          (int)sizeof(entry->hrSWRunParameters) - 1,
+                          buf + entry->hrSWRunPath_len + 1);
+        } else {
+            /* empty /proc/PID/cmdline, it's probably a kernel thread */
+            entry->hrSWRunPath_len = 0;
+            entry->hrSWRunParameters_len = 0;
+        }
+
         /*
          *   {xxx} {xxx} STATUS  {xxx}*10  UTIME STIME  {xxx}*8 RSS
          */
