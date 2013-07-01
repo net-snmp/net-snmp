@@ -658,6 +658,9 @@ int    best_guess;
 	newname_len = MAX_OID_LEN;
 	if (read_objid(tag, newname, &newname_len)) {	/* long name */
 	  rtp = tp = get_tree(newname, newname_len, get_tree_head());
+	} else {
+	  /* failed to parse the OID */
+	  newname_len = 0;
 	}
       }
       else {
