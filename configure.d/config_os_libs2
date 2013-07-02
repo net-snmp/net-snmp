@@ -346,7 +346,6 @@ fi
 ##
 if test "x$with_mysql" = "xyes" ; then
   AC_PATH_PROGS(MYSQLCONFIG,mysql_config)
-  AC_CHECK_HEADERS(mysql/mysql.h)
   AC_CHECK_HEADER(mysql/mysql.h,mysql_h=yes,mysql_h=no)
   if test "x$MYSQLCONFIG" = "x" -a "x$mysql_h" = "xno"; then
      AC_MSG_ERROR([Could not find mysql_config or mysql.h and was specifically asked to use MySQL support])
