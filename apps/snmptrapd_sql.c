@@ -50,10 +50,10 @@
 #undef PACKAGE_STRING
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
-#include <mysql/my_global.h>
-#include <mysql/my_sys.h>
-#include <mysql/mysql.h>
-#include <mysql/errmsg.h>
+#include <my_global.h>
+#include <my_sys.h>
+#include <mysql.h>
+#include <errmsg.h>
 
 netsnmp_feature_require(container_fifo)
 
