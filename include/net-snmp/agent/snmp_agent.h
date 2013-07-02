@@ -32,6 +32,9 @@ extern          "C" {
 #define SNMP_MAX_PDU_SIZE 64000 /* local constraint on PDU size sent by agent
                                  * (see also SNMP_MAX_MSG_SIZE in snmp_api.h) */
 
+#define SNMP_AGENT_FLAGS_NONE                   0x0
+#define SNMP_AGENT_FLAGS_CANCEL_IN_PROGRESS     0x1
+
     /*
      * If non-zero, causes the addresses of peers to be logged when receptions
      * occur.  
@@ -205,6 +208,7 @@ extern          "C" {
         int             treecache_num;  /* number of current cache entries */
         netsnmp_cachemap *cache_store;
         int             vbcount;
+        int             flags;
     } netsnmp_agent_session;
 
     /*
@@ -240,6 +244,7 @@ extern          "C" {
     int             init_master_agent(void);
     void            shutdown_master_agent(void);
     int             agent_check_and_process(int block);
+    void            netsnmp_check_delegated_requests(void);
     void            netsnmp_check_outstanding_agent_requests(void);
 
     int             netsnmp_request_set_error(netsnmp_request_info *request,
