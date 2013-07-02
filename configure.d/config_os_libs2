@@ -346,19 +346,19 @@ fi
 ##
 if test "x$with_mysql" = "xyes" ; then
   AC_PATH_PROGS(MYSQLCONFIG,mysql_config)
-  AC_CHECK_HEADER(mysql/mysql.h,mysql_h=yes,mysql_h=no)
-  if test "x$MYSQLCONFIG" = "x" -a "x$mysql_h" = "xno"; then
-     AC_MSG_ERROR([Could not find mysql_config or mysql.h and was specifically asked to use MySQL support])
-  fi
+  test -x "$MYSQLCONFIG" \
+	|| AC_MSG_ERROR([Could not find mysql_config and was specifically asked to use MySQL support])
   MYSQL_LIBS=`$MYSQLCONFIG --libs`
   MYSQL_INCLUDES=`$MYSQLCONFIG --include`
-  AC_MSG_CHECKING([whether MY_INIT() works])
   _libs="${LIBS}"
   _cppflags="${CPPFLAGS}"
   LIBS="${LIBS} ${MYSQL_LIBS}"
   CPPFLAGS="${CPPFLAGS} ${MYSQL_INCLUDES}"
-  AC_TRY_LINK([#include <mysql/my_global.h>
-               #include <mysql/my_sys.h>],
+  AC_CHECK_HEADER(mysql.h,,
+     [AC_MSG_ERROR([Could not find mysql.h and was specifically asked to use MySQL support])])
+  AC_MSG_CHECKING([whether MY_INIT() works])
+  AC_TRY_LINK([#include <my_global.h>
+               #include <my_sys.h>],
 	      [MY_INIT("my_init_test")],
               [AC_MSG_RESULT(yes)],
               [AC_MSG_RESULT(no)
