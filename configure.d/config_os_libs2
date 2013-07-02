@@ -351,7 +351,7 @@ if test "x$with_mysql" = "xyes" ; then
      AC_MSG_ERROR([Could not find mysql_config or mysql.h and was specifically asked to use MySQL support])
   fi
   MYSQL_LIBS=`$MYSQLCONFIG --libs`
-  MYSQL_INCLUDES=`$MYSQLCONFIG --cflags`
+  MYSQL_INCLUDES=`$MYSQLCONFIG --include`
   AC_MSG_CHECKING([whether MY_INIT() works])
   _libs="${LIBS}"
   _cppflags="${CPPFLAGS}"
