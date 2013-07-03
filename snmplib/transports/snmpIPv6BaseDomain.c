@@ -212,7 +212,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                         DEBUGMSGTL(("netsnmp_sockaddr_in6",
                                     "IPv6 address with port suffix :%d\n",
                                     portno));
-                        if (portno > 0 && portno < 0xffff) {
+                        if (portno > 0 && portno <= 0xffff) {
                             addr->sin6_port = htons((u_short)portno);
                         } else {
                             DEBUGMSGTL(("netsnmp_sockaddr_in6", "invalid port number: %d", portno));
@@ -265,7 +265,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                 DEBUGMSGTL(("netsnmp_sockaddr_in6",
                             "IPv6 address with port suffix :%d\n",
                             atoi(cp + 1)));
-                if (portno > 0 && portno < 0xffff) {
+                if (portno > 0 && portno <= 0xffff) {
                     addr->sin6_port = htons((u_short)portno);
                 } else {
                     DEBUGMSGTL(("netsnmp_sockaddr_in6", "invalid port number: %d", portno));
@@ -304,7 +304,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                 DEBUGMSGTL(("netsnmp_sockaddr_in6",
                             "hostname(?) with port suffix :%d\n",
                             portno));
-                if (portno > 0 && portno < 0xffff) {
+                if (portno > 0 && portno <= 0xffff) {
                     addr->sin6_port = htons((u_short)portno);
                 } else {
                     DEBUGMSGTL(("netsnmp_sockaddr_in6", "invalid port number: %d", portno));
