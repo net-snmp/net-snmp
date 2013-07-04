@@ -179,7 +179,7 @@ during normal configuration file processing.:
 .RS
 .nf
 # include site specific config
-include site.conf
+includeFile site.conf
 .RE
 .PP
 This will search every directory in the configuration path for files
@@ -187,6 +187,20 @@ named site.conf, and will process those files before returning to the
 processing of the original file. Note that if '.conf' is omitted,
 it will be appended. That is, all configuration files must end
 in '.conf'.
+.PP
+.RS
+.nf
+# include a all *.conf files in a directory
+includeDir /etc/snmp/config.d
+.RE
+.PP
+This will search specified directory for all files with '.conf'
+suffix and process them as if they were included using includeFile
+directive. The configuration files are not processed in any particular
+order.
+.PP
+The specified directory is relative to currently processed configuration
+file path. Use absolute path to be sure the correct directory is used.
 .SH "API INTERFACE"
 .PP
 Information about writing C code that makes use of this system in
