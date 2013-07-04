@@ -199,8 +199,7 @@ suffix and process them as if they were included using includeFile
 directive. The configuration files are not processed in any particular
 order.
 .PP
-The specified directory is relative to currently processed configuration
-file path. Use absolute path to be sure the correct directory is used.
+The specified directory must be absolute directory path.
 .SH "API INTERFACE"
 .PP
 Information about writing C code that makes use of this system in
