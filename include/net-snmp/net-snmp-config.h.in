@@ -449,9 +449,6 @@
 /* Define to 1 if you have the <mtab.h> header file. */
 #undef HAVE_MTAB_H
 
-/* Define to 1 if you have the <mysql/mysql.h> header file. */
-#undef HAVE_MYSQL_MYSQL_H
-
 /* Define to 1 if you have the <nbutil.h> header file. */
 #undef HAVE_NBUTIL_H
 

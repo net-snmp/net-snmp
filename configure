@@ -23367,41 +23367,29 @@ fi
   test -n "$MYSQLCONFIG" && break
 done
 
-  for ac_header in mysql/mysql.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "mysql/mysql.h" "ac_cv_header_mysql_mysql_h" "$ac_includes_default"
-if test "x$ac_cv_header_mysql_mysql_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_MYSQL_MYSQL_H 1
-_ACEOF
-
-fi
-
-done
-
-  ac_fn_c_check_header_mongrel "$LINENO" "mysql/mysql.h" "ac_cv_header_mysql_mysql_h" "$ac_includes_default"
-if test "x$ac_cv_header_mysql_mysql_h" = xyes; then :
-  mysql_h=yes
-else
-  mysql_h=no
-fi
-
-
-  if test "x$MYSQLCONFIG" = "x" -o "x$mysql_h" = "xno"; then
-     as_fn_error $? "Could not find mysql_config or mysql.h and was specifically asked to use MySQL support" "$LINENO" 5
-  fi
+  test -x "$MYSQLCONFIG" \
+	|| as_fn_error $? "Could not find mysql_config and was specifically asked to use MySQL support" "$LINENO" 5
   MYSQL_LIBS=`$MYSQLCONFIG --libs`
-  MYSQL_INCLUDES=`$MYSQLCONFIG --cflags`
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether MY_INIT() works" >&5
-$as_echo_n "checking whether MY_INIT() works... " >&6; }
+  MYSQL_INCLUDES=`$MYSQLCONFIG --include`
   _libs="${LIBS}"
   _cppflags="${CPPFLAGS}"
   LIBS="${LIBS} ${MYSQL_LIBS}"
   CPPFLAGS="${CPPFLAGS} ${MYSQL_INCLUDES}"
+  ac_fn_c_check_header_mongrel "$LINENO" "mysql.h" "ac_cv_header_mysql_h" "$ac_includes_default"
+if test "x$ac_cv_header_mysql_h" = xyes; then :
+
+else
+  as_fn_error $? "Could not find mysql.h and was specifically asked to use MySQL support" "$LINENO" 5
+fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether MY_INIT() works" >&5
+$as_echo_n "checking whether MY_INIT() works... " >&6; }
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <mysql/my_global.h>
-               #include <mysql/my_sys.h>
+
+    #include <my_global.h>
+        #include <my_sys.h>
 int
 main ()
 {
