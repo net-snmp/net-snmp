@@ -652,6 +652,8 @@ This requires that the agent was built with support for the
 default build configuration).
 .IP "disk PATH [ MINSPACE | MINPERCENT% ]"
 monitors the disk mounted at PATH for available disk space.
+Disks mounted after the agent has started will not be monitored,
+unless \fIincludeAllDisks\fR option is specified.
 .IP
 The minimum threshold can either be specified in kB (MINSPACE) or
 as a percentage of the total disk (MINPERCENT% with a '%' character),
@@ -668,6 +670,9 @@ the problem - see the DisMan Event MIB section later.
 .IP "includeAllDisks MINPERCENT%"
 configures monitoring of all disks found on the system,
 using the specified (percentage) threshold.
+The \fCdskTable\fR is dynamically updated, unmounted disks
+disappear from the table and newly mounted disks are
+added to the table.
 The threshold for individual disks can be adjusted using suitable
 \fIdisk\fR directives (which can come either before or after the
 \fIincludeAllDisks\fR directive).
@@ -680,12 +685,8 @@ may affect the indexing of the \fCdskTable\fR.
 Only one \fIincludeAllDisks\fR directive should be specified - any
 subsequent copies will be ignored.
 .IP
-The list of mounted disks will be determined when the agent starts using the
-setmntent(3) and getmntent(3), or fopen(3) and getmntent(3),  or
-setfsent(3)  and  getfsent(3) system calls. If none of the above
-system calls are available then the root partition  "/"
-(which  is  assumed to exist on any UNIX based system) will be monitored.
-Disks mounted after the agent has started will not be monitored.
+The list of mounted disks will be determined from
+HOST-RESOURCES-MIB::hrFSTable.
 .\"
 .\" XXX - unless the config is re-read ??
 .\"
