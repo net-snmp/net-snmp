@@ -971,7 +971,7 @@ int netsnmp_prefix_listen()
     }
 
     memset(&req, 0, sizeof(req));
-    req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct ifinfomsg));
+    req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct rtgenmsg));
     req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
     req.n.nlmsg_type = RTM_GETLINK;
     req.r.ifi_family = AF_INET6;
