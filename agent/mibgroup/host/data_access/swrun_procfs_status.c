@@ -150,6 +150,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
             /* empty /proc/PID/cmdline, it's probably a kernel thread */
             entry->hrSWRunPath_len = 0;
             entry->hrSWRunParameters_len = 0;
+            entry->hrSWRunType = HRSWRUNTYPE_OPERATINGSYSTEM;
         }
 
         /*
