@@ -448,6 +448,9 @@ netsnmp_ipaddress_ipv6_prefix_len(struct in6_addr mask)
 	if (mp[i] == 0xFF) len += 8;
 	else break;
 
+    if (i == 16)
+	return len;
+
     while(0x80 & mp[i]) {
         ++len;
         mp[i] <<= 1;
