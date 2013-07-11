@@ -18,6 +18,7 @@
 
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <arpa/inet.h>
 
 netsnmp_feature_require(prefix_info)
 netsnmp_feature_require(find_prefix_info)
@@ -32,7 +33,9 @@ netsnmp_feature_require(ipaddress_ioctl_entry_copy)
 #ifdef SUPPORT_PREFIX_FLAGS
 extern prefix_cbx *prefix_head_list;
 #endif
-int _load_v6(netsnmp_container *container, int idx_offset);
+
+#define ROUNDUP(a) \
+  ((a) > 0 ? (1 + (((a) - 1) | (sizeof(long) - 1))) : sizeof(long))
 
 /*
  * initialize arch specific storage
@@ -149,54 +152,121 @@ int
 netsnmp_arch_ipaddress_container_load(netsnmp_container *container,
                                       u_int load_flags)
 {
-    int rc = 0, idx_offset = 0;
+    netsnmp_ipaddress_entry *entry = NULL;
+    u_char *if_list = NULL, *cp;
+    size_t if_list_size = 0;
+    int sysctl_oid[] = { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, 0 };
+    struct ifa_msghdr *ifa;
+    struct sockaddr *a;
+    int amask;
+    int rc = 0;
+    int idx_offset = 0;
 
-    if (0 == (load_flags & NETSNMP_ACCESS_IPADDRESS_LOAD_IPV6_ONLY)) {
-        rc = -1;
-        if (rc < 0) {
-            u_int flags = NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER;
-            netsnmp_access_ipaddress_container_free(container, flags);
+    DEBUGMSGTL(("access:ipaddress:container:sysctl",
+                "load (flags %u)\n", load_flags));
+
+    if (NULL == container) {
+        snmp_log(LOG_ERR, "no container specified/found for interface\n");
+        return -1;
+    }
+
+    if (sysctl(sysctl_oid, sizeof(sysctl_oid)/sizeof(int), 0,
+               &if_list_size, 0, 0) == -1) {
+        snmp_log(LOG_ERR, "could not get interface info (size)\n");
+        return -2;
+    }
+
+    if_list = (u_char*)malloc(if_list_size);
+    if (if_list == NULL) {
+        snmp_log(LOG_ERR, "could not allocate memory for interface info "
+                 "(%zu bytes)\n", if_list_size);
+        return -3;
+    } else {
+        DEBUGMSGTL(("access:ipaddress:container:sysctl",
+                    "allocated %zu bytes for if_list\n", if_list_size));
+    }
+
+    if (sysctl(sysctl_oid, sizeof(sysctl_oid)/sizeof(int), if_list,
+               &if_list_size, 0, 0) == -1) {
+        snmp_log(LOG_ERR, "could not get interface info\n");
+        free(if_list);
+        return -2;
+    }
+
+    /* pass 2: walk addresses */
+    for (cp = if_list; cp < if_list + if_list_size; cp += ifa->ifam_msglen) {
+        ifa = (struct ifa_msghdr *) cp;
+        int rtax;
+
+        if (ifa->ifam_type != RTM_NEWADDR)
+            continue;
+
+        DEBUGMSGTL(("access:ipaddress:container:sysctl",
+                    "received 0x%x in RTM_NEWADDR for ifindex %u\n",
+                    ifa->ifam_addrs, ifa->ifam_index));
+
+        entry = netsnmp_access_ipaddress_entry_create();
+        if (entry == NULL) {
+            rc = -3;
+            break;
+        }
+
+        a = (struct sockaddr *) (ifa + 1);
+        entry->ia_status = IPADDRESSSTATUSTC_UNKNOWN;
+        entry->ia_origin = IPADDRESSORIGINTC_OTHER;
+	entry->ia_address_len = 0;
+        for (amask = ifa->ifam_addrs, rtax = 0; amask != 0; amask >>= 1, rtax++) {
+            if ((amask & 1) != 0) {
+                entry->ns_ia_index = ++idx_offset;
+                entry->if_index = ifa->ifam_index;
+                DEBUGMSGTL(("access:ipaddress:container:sysctl",
+                            "%d: a=%p, sa_len=%d, sa_family=0x%x\n",
+                            (int)entry->if_index, a, a->sa_len, a->sa_family));
+
+                if (a->sa_family == AF_INET || a->sa_family == 0) {
+                    struct sockaddr_in *a4 = (struct sockaddr_in *)a;
+		    char str[128];
+		    DEBUGMSGTL(("access:ipaddress:container:sysctl",
+		                "IPv4 addr %s\n", inet_ntop(AF_INET, &a4->sin_addr.s_addr, str, 128)));
+                    if (rtax == RTAX_IFA) {
+			entry->ia_address_len = 4;
+                        memcpy(entry->ia_address, &a4->sin_addr.s_addr, entry->ia_address_len);
+		    }
+                    else if (rtax == RTAX_NETMASK)
+                        entry->ia_prefix_len = netsnmp_ipaddress_ipv4_prefix_len(ntohl(a4->sin_addr.s_addr));
+                }
+                else if (a->sa_family == AF_INET6) {
+                    struct sockaddr_in6 *a6 = (struct sockaddr_in6 *)a;
+		    char str[128];
+		    DEBUGMSGTL(("access:ipaddress:container:sysctl",
+		                "IPv6 addr %s\n", inet_ntop(AF_INET6, &a6->sin6_addr.s6_addr, str, 128)));
+                    if (rtax == RTAX_IFA) {
+			entry->ia_address_len = 16;
+                        memcpy(entry->ia_address, &a6->sin6_addr, entry->ia_address_len);
+		    }
+                    else if (rtax == RTAX_NETMASK) {
+                        entry->ia_prefix_len = netsnmp_ipaddress_ipv6_prefix_len(a6->sin6_addr);
+			DEBUGMSGTL(("access:ipaddress:container:sysctl",
+			            "prefix_len=%d\n", entry->ia_prefix_len));
+		    }
+                }
+                a = (struct sockaddr *) ( ((char *) a) + ROUNDUP(a->sa_len) );
+            }
+        }
+	if (entry->ia_address_len == 0) {
+	    DEBUGMSGTL(("access:ipaddress:container:sysctl",
+	                "entry skipped\n"));
+	    netsnmp_access_ipaddress_entry_free(entry);
+	}
+	else if (CONTAINER_INSERT(container, entry) < 0) {
+            DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert into container failed.\n"));
+            netsnmp_access_ipaddress_entry_free(entry);
+            continue;
         }
     }
 
-#if defined (NETSNMP_ENABLE_IPV6)
+    if (if_list != NULL)
+        free(if_list);
 
-    if (0 == (load_flags & NETSNMP_ACCESS_IPADDRESS_LOAD_IPV4_ONLY)) {
-        if (rc < 0)
-            rc = 0;
-
-        idx_offset = rc;
-
-        /*
-         * load ipv6, ignoring errors if file not found
-         */
-        rc = _load_v6(container, idx_offset);
-        if (-2 == rc)
-            rc = 0;
-        else if (rc < 0) {
-            u_int flags = NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER;
-            netsnmp_access_ipaddress_container_free(container, flags);
-        }
-    }
-#endif
-
-    /*
-     * return no errors (0) if we found any interfaces
-     */
-    if (rc > 0)
-        rc = 0;
-
-    return rc;
+    return 0;
 }
-
-#if defined (NETSNMP_ENABLE_IPV6)
-/**
- */
-int
-_load_v6(netsnmp_container *container, int idx_offset)
-{
-
-    return idx_offset;
-}
-#endif
-
