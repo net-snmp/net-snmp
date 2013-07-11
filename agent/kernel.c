@@ -68,6 +68,12 @@ init_kmem(const char *file)
     char            err[4096];
 
     kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, err);
+    if (!kd)
+#ifdef KVM_NO_FILES
+	kd = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, err);
+#else
+	kd = kvm_openfiles(NULL, "/dev/null", NULL, O_RDONLY, err);
+#endif
     if (!kd && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                        NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
         snmp_log(LOG_CRIT, "init_kmem: kvm_openfiles failed: %s\n", err);
