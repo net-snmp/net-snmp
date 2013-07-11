@@ -3067,7 +3067,7 @@ snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     rc = _snmp_build(pkt, pkt_len, offset, pss, pdu);
     if (rc) {
         if (!pss->s_snmp_errno) {
-            snmp_log(LOG_ERR, "snmp_build: unknown failure");
+            snmp_log(LOG_ERR, "snmp_build: unknown failure\n");
             pss->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
         }
         SET_SNMP_ERROR(pss->s_snmp_errno);
