@@ -139,6 +139,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
             memcpy(entry->hrSWRunPath, entry->hrSWRunName, entry->hrSWRunName_len);
             entry->hrSWRunPath_len       = entry->hrSWRunName_len;
             entry->hrSWRunParameters_len = 0;
+            entry->hrSWRunType = HRSWRUNTYPE_OPERATINGSYSTEM;
         }
  
         /*
