@@ -306,6 +306,4 @@ Used by
 .B init_mib
 only.
 .SH "SEE ALSO"
-.BR netsnmp_session_api "(3),"
-.BR netsnmp_psu_api "(3),"
-.BR netsnmp_varbind_api "(3)"
+netsnmp_session_api(3), netsnmp_pdu_api(3), netsnmp_varbind_api(3)
