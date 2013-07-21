@@ -122,16 +122,19 @@ init_kmem(const char *file)
 {
     const int no_root_access = netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                               NETSNMP_DS_AGENT_NO_ROOT_ACCESS);
+    int res = TRUE;
 
     kmem = open(file, O_RDONLY);
     if (kmem < 0 && !no_root_access) {
         snmp_log_perror(file);
+        res = FALSE;
     }
     if (kmem >= 0)
         fcntl(kmem, F_SETFD, 1/*FD_CLOEXEC*/);
     mem = open("/dev/mem", O_RDONLY);
     if (mem < 0 && !no_root_access) {
         snmp_log_perror("/dev/mem");
+        res = FALSE;
     }
     if (mem >= 0)
         fcntl(mem, F_SETFD, 1/*FD_CLOEXEC*/);
@@ -139,11 +142,12 @@ init_kmem(const char *file)
     swap = open(DMEM_LOC, O_RDONLY);
     if (swap < 0 && !no_root_access) {
         snmp_log_perror(DMEM_LOC);
+        res = FALSE;
     }
     if (swap >= 0)
         fcntl(swap, F_SETFD, 1/*FD_CLOEXEC*/);
 #endif
-    return kmem >= 0 && mem >= 0 && swap >= 0;
+    return res;
 }
 
 
