@@ -84,7 +84,7 @@ extern          "C" {
     int             read_config_with_type(const char *, const char *);
     NETSNMP_IMPORT
     char           *read_config_save_octet_string(char *saveto,
-                                                  u_char * str,
+                                                  const u_char * str,
                                                   size_t len);
     NETSNMP_IMPORT
     char           *read_config_read_octet_string(const char *readfrom,
