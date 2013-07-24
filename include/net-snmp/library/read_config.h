@@ -66,7 +66,7 @@ extern          "C" {
     char           *copy_word(char *, char *);  /* do not use */
     void            read_config_with_type(const char *, const char *);
     char           *read_config_save_octet_string(char *saveto,
-                                                  u_char * str,
+                                                  const u_char * str,
                                                   size_t len);
     char           *read_config_read_octet_string(char *readfrom,
                                                   u_char ** str,
