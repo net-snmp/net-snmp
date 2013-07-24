@@ -285,7 +285,7 @@ notifyTable_register_notifications(int major, int minor,
     struct targetAddrTable_struct *ptr;
     struct targetParamTable_struct *pptr;
     struct snmpNotifyTable_data *nptr;
-    int             confirm, i;
+    int             confirm, i, bufLen;
     char            buf[SNMP_MAXBUF_SMALL];
     netsnmp_transport *t = NULL;
     struct agent_add_trap_args *args =
@@ -302,8 +302,9 @@ notifyTable_register_notifications(int major, int minor,
      * XXX: START move target creation to target code 
      */
     for (i = 0; i < MAX_ENTRIES; i++) {
-        sprintf(buf, "internal%d", i);
-        if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
+        bufLen = sprintf(buf, "internal%d", i);
+        if (get_addrForName2(buf, bufLen) == NULL &&
+            get_paramEntry(buf) == NULL)
             break;
     }
     if (i == MAX_ENTRIES) {
@@ -325,7 +326,8 @@ notifyTable_register_notifications(int major, int minor,
         return 0;
     }
     ptr = snmpTargetAddrTable_create();
-    ptr->name = strdup(buf);
+    memdup((u_char**)&ptr->nameData, buf, bufLen);
+    ptr->nameLen = bufLen;
     memcpy(ptr->tDomain, t->domain, t->domain_length * sizeof(oid));
     ptr->tDomainLen = t->domain_length;
     ptr->tAddressLen = t->remote_length;
@@ -334,8 +336,8 @@ notifyTable_register_notifications(int major, int minor,
     ptr->timeout = ss->timeout / 1000;
     ptr->retryCount = ss->retries;
     SNMP_FREE(ptr->tagList);
-    ptr->tagList = strdup(ptr->name);
-    ptr->params = strdup(ptr->name);
+    ptr->tagList = strdup(buf); /* strdup ok since buf contains 'internal%d' */
+    ptr->params = strdup(buf);
     ptr->storageType = ST_READONLY;
     ptr->rowStatus = RS_ACTIVE;
     ptr->sess = ss;
