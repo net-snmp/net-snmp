@@ -71,7 +71,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
             (targaddrs->tDomain, targaddrs->tDomainLen, NULL, NULL) == 0) {
             snmp_log(LOG_ERR,
                      "unsupported domain for target address table entry %s\n",
-                     targaddrs->name);
+                     targaddrs->nameData);
         }
 
         /*
@@ -197,6 +197,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                             if (!tls) {
                                 netsnmp_cert *cert;
                                 char         *server_id = NULL;
+                                char	      buf[33];
 
                                 DEBUGMSGTL(("target_sessions",
                                             "  looking up our id: %s\n",
@@ -213,13 +214,16 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                     t->f_config(t, "localCert",
                                                 cert->fingerprint);
                                 }
+                                memcpy(buf, targaddrs->nameData,
+                                       targaddrs->nameLen);
+                                buf[targaddrs->nameLen] = '\0';
                                 DEBUGMSGTL(("target_sessions",
                                             "  looking up their id: %s\n",
-                                            targaddrs->name));
+                                            buf));
                                 cert =
                                     netsnmp_cert_find(NS_CERT_REMOTE_PEER,
                                                       NS_CERTKEY_TARGET_ADDR,
-                                                      targaddrs->name);
+                                                      buf);
                                 if (cert) {
                                     DEBUGMSGTL(("target_sessions",
                                             "  found fingerprint: %s\n", 
@@ -228,8 +232,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                                 cert->fingerprint);
                                 }
 #ifndef NETSNMP_FEATURE_REMOVE_TLSTMADDR_GET_SERVERID
-                                server_id = netsnmp_tlstmAddr_get_serverId(
-                                    targaddrs->name);
+                                server_id = netsnmp_tlstmAddr_get_serverId(buf);
 #endif /* NETSNMP_FEATURE_REMOVE_TLSTMADDR_GET_SERVERID */
                                 if (server_id) {
                                     DEBUGMSGTL(("target_sessions",
@@ -253,7 +256,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                 snmp_log(LOG_ERR,
                                          "unsupported mpModel/secModel combo %d/%d for target %s\n",
                                          param->mpModel, param->secModel,
-                                         targaddrs->name);
+                                         targaddrs->nameData);
                                 /*
                                  * XXX: memleak 
                                  */

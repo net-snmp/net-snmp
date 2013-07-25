@@ -46,7 +46,8 @@ config_add_mib(SNMPv2-TM)
      * structure definitions 
      */
      struct targetAddrTable_struct {
-         char           *name;
+         char           *nameData;
+         unsigned char   nameLen;
          oid             tDomain[MAX_OID_LEN];
          int             tDomainLen;
          unsigned char  *tAddress;
@@ -68,13 +69,11 @@ config_add_mib(SNMPv2-TM)
 
      void            init_snmpTargetAddrEntry(void);
      void            shutdown_snmpTargetAddrEntry(void);
-     int             store_snmpTargetAddrEntry(int majorID, int minorID,
-                                               void *serverarg,
-                                               void *clientarg);
      FindVarMethod   var_snmpTargetAddrEntry;
 
      struct targetAddrTable_struct *get_addrTable(void);
-     struct targetAddrTable_struct *get_addrForName(char *name);
+     struct targetAddrTable_struct *get_addrForName2(const char *name,
+                                                     unsigned char nameLen);
      struct targetAddrTable_struct *snmpTargetAddrTable_create(void);
      void            snmpTargetAddrTable_add(struct targetAddrTable_struct
                                              *newEntry);
