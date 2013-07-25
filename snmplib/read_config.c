@@ -1629,23 +1629,32 @@ copy_word(char *from, char *to)
     return copy_nword(from, to, SPRINT_MAX_LEN);
 }                               /* copy_word */
 
-/*
- * read_config_save_octet_string(): saves an octet string as a length
- * followed by a string of hex 
+/**
+ * Stores an quoted version of the first len bytes from str into saveto.
+ *
+ * If all octets in str are in the set [[:alnum:] ] then the quotation
+ * is to enclose the string in quotation marks ("str") otherwise the
+ * quotation is to prepend the string 0x and then add the hex representation
+ * of all characters from str (0x737472)
+ *
+ * @param[in] saveto pointer to output stream, is assumed to be big enough.
+ * @param[in] str pointer of the data that is to be stored.
+ * @param[in] len length of the data that is to be stored.
+ * @return A pointer to saveto after str is added to it.
  */
 char           *
-read_config_save_octet_string(char *saveto, u_char * str, size_t len)
+read_config_save_octet_string(char *saveto, const u_char * str, size_t len)
 {
-    int             i;
-    u_char         *cp;
+    size_t          i;
+    const u_char   *cp;
 
     /*
-     * is everything easily printable 
+     * is everything easily printable
      */
-    for (i = 0, cp = str; i < (int) len && cp &&
+    for (i = 0, cp = str; i < len && cp &&
          (isalpha(*cp) || isdigit(*cp) || *cp == ' '); cp++, i++);
 
-    if (len != 0 && i == (int) len) {
+    if (len != 0 && i == len) {
         *saveto++ = '"';
         memcpy(saveto, str, len);
         saveto += len;
@@ -1655,7 +1664,7 @@ read_config_save_octet_string(char *saveto, u_char * str, size_t len)
         if (str != NULL) {
             sprintf(saveto, "0x");
             saveto += 2;
-            for (i = 0; i < (int) len; i++) {
+            for (i = 0; i < len; i++) {
                 sprintf(saveto, "%02x", str[i]);
                 saveto = saveto + 2;
             }
