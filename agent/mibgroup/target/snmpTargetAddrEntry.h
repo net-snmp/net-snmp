@@ -51,7 +51,7 @@ config_add_mib(SNMPv2-TM)
          int             tDomainLen;
          unsigned char  *tAddress;
          size_t          tAddressLen;
-         int             timeout;
+         int             timeout;	/* Timeout in centiseconds */
          int             retryCount;
          char           *tagList;
          char           *params;
