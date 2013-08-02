@@ -75,7 +75,7 @@ snmpTargetAddrTable_create(void)
         newEntry->tDomainLen = 0;
         newEntry->tAddress = NULL;
 
-        newEntry->timeout = 15000;
+        newEntry->timeout = 1500;
         newEntry->retryCount = 3;
 
         newEntry->tagList = strdup("");
@@ -828,8 +828,7 @@ var_snmpTargetAddrEntry(struct variable * vp,
         return (unsigned char *) temp_struct->tAddress;
 
     case SNMPTARGETADDRTIMEOUT:
-        /* ours is in ms; mib is in .01 secs */
-        long_ret = temp_struct->timeout / 10; 
+        long_ret = temp_struct->timeout;
         return (unsigned char *) &long_ret;
 
     case SNMPTARGETADDRRETRYCOUNT:
@@ -1113,7 +1112,7 @@ write_snmpTargetAddrTimeout(int action,
              search_snmpTargetAddrTable(snmpTargetAddrOID,
                                         snmpTargetAddrOIDLen, name, &name_len,
                                         1)) != NULL) {
-            temp_struct->timeout = long_ret * 10;
+            temp_struct->timeout = long_ret;
         }
     }
 
