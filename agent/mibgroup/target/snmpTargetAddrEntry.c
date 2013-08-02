@@ -1083,6 +1083,9 @@ write_snmpTargetAddrTimeout(int action,
             return SNMP_ERR_WRONGLENGTH;
         }
         long_ret = *((long *) var_val);
+        if (long_ret < 0 || long_ret > 2147483647) {
+            return SNMP_ERR_WRONGVALUE;
+        }
     } else if (action == RESERVE2) {
 
         /*
