@@ -4352,6 +4352,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
     size_t          four;
     netsnmp_variable_list *vp = NULL;
     oid             objid[MAX_OID_LEN];
+    u_char         *p;
 
     /*
      * Get the PDU type 
@@ -4528,10 +4529,10 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
         case ASN_INTEGER:
             vp->val.integer = (long *) vp->buf;
             vp->val_len = sizeof(long);
-            data = asn_parse_int(var_val, &len, &vp->type,
+            p = asn_parse_int(var_val, &len, &vp->type,
                           (long *) vp->val.integer,
                           sizeof(*vp->val.integer));
-            if (!data)
+            if (!p)
                 return -1;
             break;
         case ASN_COUNTER:
@@ -4540,10 +4541,10 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
         case ASN_UINTEGER:
             vp->val.integer = (long *) vp->buf;
             vp->val_len = sizeof(u_long);
-            data = asn_parse_unsigned_int(var_val, &len, &vp->type,
+            p = asn_parse_unsigned_int(var_val, &len, &vp->type,
                                    (u_long *) vp->val.integer,
                                    vp->val_len);
-            if (!data)
+            if (!p)
                 return -1;
             break;
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
@@ -4553,37 +4554,37 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
         case ASN_COUNTER64:
             vp->val.counter64 = (struct counter64 *) vp->buf;
             vp->val_len = sizeof(struct counter64);
-            data = asn_parse_unsigned_int64(var_val, &len, &vp->type,
+            p = asn_parse_unsigned_int64(var_val, &len, &vp->type,
                                      (struct counter64 *) vp->val.
                                      counter64, vp->val_len);
-            if (!data)
+            if (!p)
                 return -1;
             break;
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_FLOAT:
             vp->val.floatVal = (float *) vp->buf;
             vp->val_len = sizeof(float);
-            data = asn_parse_float(var_val, &len, &vp->type,
+            p = asn_parse_float(var_val, &len, &vp->type,
                             vp->val.floatVal, vp->val_len);
-            if (!data)
+            if (!p)
                 return -1;
             break;
         case ASN_OPAQUE_DOUBLE:
             vp->val.doubleVal = (double *) vp->buf;
             vp->val_len = sizeof(double);
-            data = asn_parse_double(var_val, &len, &vp->type,
+            p = asn_parse_double(var_val, &len, &vp->type,
                              vp->val.doubleVal, vp->val_len);
-            if (!data)
+            if (!p)
                 return -1;
             break;
         case ASN_OPAQUE_I64:
             vp->val.counter64 = (struct counter64 *) vp->buf;
             vp->val_len = sizeof(struct counter64);
-            data = asn_parse_signed_int64(var_val, &len, &vp->type,
+            p = asn_parse_signed_int64(var_val, &len, &vp->type,
                                    (struct counter64 *) vp->val.counter64,
                                    sizeof(*vp->val.counter64));
 
-            if (!data)
+            if (!p)
                 return -1;
             break;
 #endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
@@ -4602,15 +4603,15 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
             if (vp->val.string == NULL) {
                 return -1;
             }
-            data = asn_parse_string(var_val, &len, &vp->type, vp->val.string,
+            p = asn_parse_string(var_val, &len, &vp->type, vp->val.string,
                              &vp->val_len);
-            if (!data)
+            if (!p)
                 return -1;
             break;
         case ASN_OBJECT_ID:
             vp->val_len = MAX_OID_LEN;
-            data = asn_parse_objid(var_val, &len, &vp->type, objid, &vp->val_len);
-            if (!data)
+            p = asn_parse_objid(var_val, &len, &vp->type, objid, &vp->val_len);
+            if (!p)
                 return -1;
             vp->val_len *= sizeof(oid);
             vp->val.objid = (oid *) malloc(vp->val_len);
@@ -4629,9 +4630,9 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
             if (vp->val.bitstring == NULL) {
                 return -1;
             }
-            data = asn_parse_bitstring(var_val, &len, &vp->type,
+            p = asn_parse_bitstring(var_val, &len, &vp->type,
                                 vp->val.bitstring, &vp->val_len);
-            if (!data)
+            if (!p)
                 return -1;
             break;
         default:
