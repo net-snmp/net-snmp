@@ -927,8 +927,7 @@ void netsnmp_get_monotonic_clock(struct timeval* tv)
         tv->tv_sec = ts.tv_sec;
         tv->tv_usec = ts.tv_nsec / 1000;
     } else {
-        netsnmp_assert(FALSE);
-        memset(tv, 0, sizeof(*tv));
+        gettimeofday(tv, NULL);
     }
 #elif defined(WIN32)
     /*
