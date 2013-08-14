@@ -907,7 +907,7 @@ read_config(const char *filename,
                         continue;
                     }
                     while ((entry = readdir( d )) != NULL ) {
-                        if ( entry->d_name && entry->d_name[0] != '.') {
+                        if ( entry->d_name[0] != '.') {
                             len = NAMLEN(entry);
                             if ((len > 5) && (strcmp(&(entry->d_name[len-5]),".conf") == 0)) {
                                 snprintf(fname, SNMP_MAXPATH, "%s/%s",

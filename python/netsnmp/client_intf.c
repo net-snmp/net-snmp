@@ -881,6 +881,7 @@ __send_sync_pdu(netsnmp_session *ss, netsnmp_pdu *pdu, netsnmp_pdu **response,
    if (ss == NULL) {
        *err_num = 0;
        *err_ind = SNMPERR_BAD_SESSION;
+       status = SNMPERR_BAD_SESSION;
        strlcpy(err_str, snmp_api_errstring(*err_ind), STR_BUF_SIZE);
        goto done;
    }
