@@ -24,5 +24,5 @@ config_require(util_funcs/get_pid_from_inode)
 #elif defined( solaris2 )
 config_require(udp-mib/data_access/udp_endpoint_solaris2)
 #else
-#   define NETSNMP_UDP_ENDPOINT_COMMON_ONLY
+config_require(udp-mib/data_access/udp_endpoint_unsup)
 #endif
