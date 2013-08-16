@@ -120,24 +120,24 @@ int             swap = -1, mem = -1, kmem = -1;
 int
 init_kmem(const char *file)
 {
+    const int no_root_access = netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                              NETSNMP_DS_AGENT_NO_ROOT_ACCESS);
+
     kmem = open(file, O_RDONLY);
-    if (kmem < 0 && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					    NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+    if (kmem < 0 && !no_root_access) {
         snmp_log_perror(file);
     }
     if (kmem >= 0)
         fcntl(kmem, F_SETFD, 1/*FD_CLOEXEC*/);
     mem = open("/dev/mem", O_RDONLY);
-    if (mem < 0 && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					   NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+    if (mem < 0 && !no_root_access) {
         snmp_log_perror("/dev/mem");
     }
     if (mem >= 0)
         fcntl(mem, F_SETFD, 1/*FD_CLOEXEC*/);
 #ifdef DMEM_LOC
     swap = open(DMEM_LOC, O_RDONLY);
-    if (swap < 0 && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					    NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+    if (swap < 0 && !no_root_access) {
         snmp_log_perror(DMEM_LOC);
     }
     if (swap >= 0)
