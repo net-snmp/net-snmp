@@ -304,7 +304,8 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
 		}
 		status = (cache_entry->enabled ?
 	                   (cache_entry->timestampM ?
-                             (!netsnmp_ready_monotonic(cache_entry->timestampM,
+                             (cache_entry->timeout >= 0 &&
+                              !netsnmp_ready_monotonic(cache_entry->timestampM,
                                                        1000*cache_entry->timeout) ?
 	                        NSCACHE_STATUS_ACTIVE:
 	                        NSCACHE_STATUS_EXPIRED) :
