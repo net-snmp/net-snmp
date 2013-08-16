@@ -30,5 +30,5 @@ config_require(udp-mib/data_access/udp_endpoint_openbsd)
 #elif defined(netbsd1)
 config_require(udp-mib/data_access/udp_endpoint_netbsd)
 #else
-#   define NETSNMP_UDP_ENDPOINT_COMMON_ONLY
+config_require(udp-mib/data_access/udp_endpoint_unsup)
 #endif
