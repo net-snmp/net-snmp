@@ -66,9 +66,11 @@ extern          "C" {
 
     NETSNMP_IMPORT
     char           *skip_white(char *);
+    NETSNMP_IMPORT
     const char     *skip_white_const(const char *);
     NETSNMP_IMPORT
     char           *skip_not_white(char *);
+    NETSNMP_IMPORT
     const char     *skip_not_white_const(const char *);
     NETSNMP_IMPORT
     char           *skip_token(char *);
@@ -90,6 +92,7 @@ extern          "C" {
     char           *read_config_read_octet_string(const char *readfrom,
                                                   u_char ** str,
                                                   size_t * len);
+    NETSNMP_IMPORT
     const char     *read_config_read_octet_string_const(const char *readfrom,
                                                         u_char ** str,
                                                         size_t * len);
