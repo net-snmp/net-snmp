@@ -94,6 +94,9 @@ Either:
 ";
 	exit 1;
     }
+    DIE("Test::Harness must be of version 1.21 or newer\n" .
+	"Install the TAP::Harness module or use the RUNTESTS script\n")
+      if $Test::Harness::VERSION < 1.21;
 }
 
 
