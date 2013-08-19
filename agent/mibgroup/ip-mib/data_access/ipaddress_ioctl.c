@@ -267,7 +267,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         netsnmp_assert(AF_INET == ifrp->ifr_addr.sa_family);
         si = (struct sockaddr_in *) &ifrp->ifr_addr;
         entry->ia_prefix_len =
-            netsnmp_ipaddress_ipv4_prefix_len(ntohl(si->sin_addr.s_addr));
+            netsnmp_ipaddress_ipv4_prefix_len(si->sin_addr.s_addr);
         if(bcastentry)
            bcastentry->ia_prefix_len = entry->ia_prefix_len;
 
