@@ -233,7 +233,7 @@ netsnmp_arch_ipaddress_container_load(netsnmp_container *container,
                         memcpy(entry->ia_address, &a4->sin_addr.s_addr, entry->ia_address_len);
 		    }
                     else if (rtax == RTAX_NETMASK)
-                        entry->ia_prefix_len = netsnmp_ipaddress_ipv4_prefix_len(ntohl(a4->sin_addr.s_addr));
+                        entry->ia_prefix_len = netsnmp_ipaddress_ipv4_prefix_len(a4->sin_addr.s_addr);
                 }
                 else if (a->sa_family == AF_INET6) {
                     struct sockaddr_in6 *a6 = (struct sockaddr_in6 *)a;

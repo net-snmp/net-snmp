@@ -416,23 +416,26 @@ netsnmp_ipaddress_prefix_copy(u_char *dst, u_char *src, int addr_len, int pfx_le
 /**
  * copy the prefix portion of an ip address
  *
- * @param  mask  network byte order make
+ * @param  mask  network byte order mask
  *
  * @returns number of prefix bits
  */
 int
 netsnmp_ipaddress_ipv4_prefix_len(in_addr_t mask)
 {
-    int len = 0;
+    int i, len = 0;
+    unsigned char *mp = (unsigned char *)&mask;
 
-    while((0xff000000 & mask) == 0xff000000) {
-        len += 8;
-        mask = mask << 8;
-    }
+    for (i = 0; i < 4; i++)
+	if (mp[i] == 0xFF) len += 8;
+	else break;
 
-    while(0x80000000 & mask) {
+    if (i == 4)
+	return len;
+
+    while(0x80 & mp[i]) {
         ++len;
-        mask = mask << 1;
+        mp[i] <<= 1;
     }
 
     return len;

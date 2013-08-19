@@ -319,7 +319,7 @@ _load_routing_table_from_sysctl(netsnmp_container* container, int *index,
 	    if (netmask_sa) {
             /* count bits in mask */
 		entry->rt_pfx_len = netsnmp_ipaddress_ipv4_prefix_len(
-			htonl(((struct sockaddr_in *)netmask_sa)->sin_addr.s_addr));
+			((struct sockaddr_in *)netmask_sa)->sin_addr.s_addr);
 		memcpy(&entry->rt_mask, &((struct sockaddr_in *)netmask_sa)->sin_addr, 4);
 	    }
 	    else {
