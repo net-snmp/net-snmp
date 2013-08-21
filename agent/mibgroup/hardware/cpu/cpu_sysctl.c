@@ -75,13 +75,23 @@ void init_cpu_sysctl( void ) {
 
 #if defined(__NetBSD__)
 #define NETSNMP_KERN_CPU  KERN_CP_TIME
+#define NETSNMP_KERN_MCPU
+#define NETSNMP_KERN_MCPU_TYPE NETSNMP_CPU_STATS
 #elif defined(KERN_CPUSTATS)              /* BSDi */
 #define NETSNMP_KERN_CPU  KERN_CPUSTATS
+#elif defined(KERN_CPTIME2)                /* OpenBSD */
+#define NETSNMP_KERN_CPU  KERN_CPTIME
+#define NETSNMP_KERN_MCPU
+#define NETSNMP_KERN_MCPU_TYPE u_int64_t
 #elif defined(KERN_CPTIME)                /* OpenBSD */
 #define NETSNMP_KERN_CPU  KERN_CPTIME
 
 #elif defined(__FreeBSD__)
 #define NETSNMP_KERN_CPU  0    /* dummy value - sysctlnametomib(2) should be used */
+#if defined(HAVE_KERN_CP_TIMES)
+#define NETSNMP_KERN_MCPU 1    /* Enable support for multi-cpu stats. Valid for FreeBSD >=6.4, >=7.1, >=8.0 and beyond */
+#define NETSNMP_KERN_MCPU_TYPE NETSNMP_CPU_STATS
+#endif
 
 #else
 #error "No CPU statistics sysctl token"
@@ -159,10 +169,12 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #if !defined(__FreeBSD__) && !defined(__NetBSD__)
     int            cpu_mib[] = { CTL_KERN, NETSNMP_KERN_CPU };
 #endif
+#ifdef KERN_CPTIME2
+    int            mcpu_mib[] = { CTL_KERN, KERN_CPTIME2, 0 };
+#endif
     size_t         cpu_size  = sizeof(cpu_stats);
 #ifdef NETSNMP_KERN_MCPU 
     NETSNMP_KERN_MCPU_TYPE *mcpu_stats;
-    int            mcpu_mib[] = { CTL_KERN, NETSNMP_KERN_MCPU };
     size_t         mcpu_size;
 #endif
     NETSNMP_VM_STATS_TYPE mem_stats;
@@ -175,12 +187,12 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #else
     sysctl(cpu_mib, 2,  cpu_stats, &cpu_size, NULL, 0);
 #endif
-    cpu->user_ticks = (unsigned long long)cpu_stats[CP_USER];
-    cpu->nice_ticks = (unsigned long long)cpu_stats[CP_NICE];
-    cpu->sys2_ticks = (unsigned long long)cpu_stats[CP_SYS]+cpu_stats[CP_INTR];
-    cpu->kern_ticks = (unsigned long long)cpu_stats[CP_SYS];
-    cpu->idle_ticks = (unsigned long long)cpu_stats[CP_IDLE];
-    cpu->intrpt_ticks = (unsigned long long)cpu_stats[CP_INTR];
+    cpu->user_ticks = cpu_stats[CP_USER];
+    cpu->nice_ticks = cpu_stats[CP_NICE];
+    cpu->sys2_ticks = cpu_stats[CP_SYS]+cpu_stats[CP_INTR];
+    cpu->kern_ticks = cpu_stats[CP_SYS];
+    cpu->idle_ticks = cpu_stats[CP_IDLE];
+    cpu->intrpt_ticks = cpu_stats[CP_INTR];
         /* wait_ticks, sirq_ticks unused */
     
         /*
@@ -188,24 +200,65 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          *   XXX - Do these really belong here ?
          */
     sysctl(mem_mib, 2, &mem_stats, &mem_size, NULL, 0);
-    cpu->nInterrupts  = (unsigned long long)mem_stats.NS_VM_INTR;
-    cpu->nCtxSwitches = (unsigned long long)mem_stats.NS_VM_SWTCH;
-    cpu->swapIn       = (unsigned long long)mem_stats.NS_VM_SWAPIN;
-    cpu->swapOut      = (unsigned long long)mem_stats.NS_VM_SWAPOUT;
+    cpu->nInterrupts  = mem_stats.NS_VM_INTR;
+    cpu->nCtxSwitches = mem_stats.NS_VM_SWTCH;
+    cpu->swapIn       = mem_stats.NS_VM_SWAPIN;
+    cpu->swapOut      = mem_stats.NS_VM_SWAPOUT;
 #ifdef NS_VM_PAGEIN
-    cpu->pageIn       = (unsigned long long)mem_stats.NS_VM_PAGEIN;
+    cpu->pageIn       = mem_stats.NS_VM_PAGEIN;
 #endif
 #ifdef NS_VM_PAGEOUT
-    cpu->pageOut      = (unsigned long long)mem_stats.NS_VM_PAGEOUT;
+    cpu->pageOut      = mem_stats.NS_VM_PAGEOUT;
 #endif
 
 #ifdef NETSNMP_KERN_MCPU
-    mcpu_size  = cpu_num*sizeof(NETSNMP_KERN_MCPU_TYPE);
+#if defined(HAVE_KERN_CP_TIMES)
+    sysctlbyname("kern.cp_times", NULL, &mcpu_size, NULL, 0);
     mcpu_stats = malloc(mcpu_size);
-    sysctl(mcpu_mib, 2, mcpu_stats, &mcpu_size, NULL, 0);
+    sysctlbyname("kern.cp_times", mcpu_stats, &mcpu_size, NULL, 0);
+#elif defined(KERN_CPTIME2)
+    mcpu_size  = sizeof(cpu_stats);
+    mcpu_stats = malloc(mcpu_size);
+#else
+    mcpu_size  = cpu_num*sizeof(cpu_stats);
+    mcpu_stats = malloc(mcpu_size);
+    sysctlbyname("kern.cp_time", mcpu_stats, &mcpu_size, NULL, 0);
+#endif
     for ( i = 0; i < cpu_num; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 0 );
         /* XXX - per-CPU statistics - mcpu_mib[i].??? */
+#ifdef KERN_CPTIME2
+	mcpu_mib[2] = i;
+	sysctl(mcpu_mib, 3, mcpu_stats, &mcpu_size, NULL, 0);
+#endif
+	/* Almost copy & paste of previous cpu stats stuff :) */
+	cpu->user_ticks = mcpu_stats[(i*CPUSTATES)+CP_USER];
+	cpu->nice_ticks = mcpu_stats[(i*CPUSTATES)+CP_NICE];
+	cpu->sys2_ticks = mcpu_stats[(i*CPUSTATES)+CP_SYS]+mcpu_stats[(i*CPUSTATES)+CP_INTR];
+	cpu->kern_ticks = mcpu_stats[(i*CPUSTATES)+CP_SYS];
+	cpu->idle_ticks = mcpu_stats[(i*CPUSTATES)+CP_IDLE];
+	cpu->intrpt_ticks = mcpu_stats[(i*CPUSTATES)+CP_INTR];
+	    /* wait_ticks, sirq_ticks unused */
+
+	    /*
+	     * Interrupt/Context Switch statistics
+	     *   XXX - Do these really belong here ?
+	     */
+
+	/* There's no really need to execute another sysctl()
+	 *
+	 * sysctl(mem_mib, 2, &mem_stats, &mem_size, NULL, 0);
+	 */
+	cpu->nInterrupts  = mem_stats.NS_VM_INTR;
+	cpu->nCtxSwitches = mem_stats.NS_VM_SWTCH;
+	cpu->swapIn       = mem_stats.NS_VM_SWAPIN;
+	cpu->swapOut      = mem_stats.NS_VM_SWAPOUT;
+#ifdef NS_VM_PAGEIN
+	cpu->pageIn       = mem_stats.NS_VM_PAGEIN;
+#endif
+#ifdef NS_VM_PAGEOUT
+	cpu->pageOut      = mem_stats.NS_VM_PAGEOUT;
+#endif
     }
     free(mcpu_stats);
 #else
