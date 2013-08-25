@@ -649,8 +649,8 @@ write_snmpNotifyFilterProfileRowStatus(int action,
 
             StorageNew =
                 SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
-            memdup((u_char **) & (StorageNew->snmpTargetParamsName),
-                   vars->val.string, vars->val_len);
+            StorageNew->snmpTargetParamsName =
+                netsnmp_memdup(vars->val.string, vars->val_len);
             StorageNew->snmpTargetParamsNameLen = vars->val_len;
             StorageNew->snmpNotifyFilterProfileStorType = ST_NONVOLATILE;
 

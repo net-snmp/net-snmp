@@ -505,7 +505,7 @@ netsnmp_instance_ulong_handler(netsnmp_mib_handler *handler,
         /*
          * store old info for undo later 
          */
-        memdup((u_char **) & it_save, (u_char *) it, sizeof(u_long));
+        it_save = netsnmp_memdup(it, sizeof(u_long));
         if (it_save == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);
@@ -618,7 +618,7 @@ netsnmp_instance_long_handler(netsnmp_mib_handler *handler,
         /*
          * store old info for undo later 
          */
-        memdup((u_char **) & it_save, (u_char *) it, sizeof(long));
+        it_save = netsnmp_memdup(it, sizeof(long));
         if (it_save == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);
@@ -698,7 +698,7 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
         /*
          * store old info for undo later 
          */
-        memdup((u_char **) & it_save, (u_char *) it, sizeof(int));
+        it_save = netsnmp_memdup(it, sizeof(int));
         if (it_save == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);
@@ -812,7 +812,7 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
             return SNMP_ERR_NOERROR;
         }
 
-        memdup((u_char **) & it_save, (u_char *)&it, sizeof(u_long));
+        it_save = netsnmp_memdup(&it, sizeof(u_long));
         if (it_save == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);
@@ -907,7 +907,7 @@ netsnmp_instance_uint_handler(netsnmp_mib_handler *handler,
         /*
          * store old info for undo later 
          */
-        memdup((u_char **) & it_save, (u_char *) it, sizeof(u_int));
+        it_save = netsnmp_memdup(it, sizeof(u_int));
         if (it_save == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);

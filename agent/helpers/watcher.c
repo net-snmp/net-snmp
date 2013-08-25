@@ -127,7 +127,7 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
         /*
          * store old info for undo later 
          */
-        memdup(&old_data, (u_char *) winfo->data, winfo->data_size);
+        old_data = netsnmp_memdup(winfo->data, winfo->data_size);
         if (old_data == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);

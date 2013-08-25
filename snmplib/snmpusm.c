@@ -2762,6 +2762,7 @@ usm_handle_report(void *sessp,
         break;
     }       
 }
+
 void
 init_usm(void)
 {

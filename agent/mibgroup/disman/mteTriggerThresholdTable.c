@@ -750,8 +750,8 @@ write_mteTriggerThresholdObjectsOwner(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdObjectsOwner;
         tmplen = StorageTmp->mteTriggerThresholdObjectsOwnerLen;
-        memdup((u_char **) & StorageTmp->mteTriggerThresholdObjectsOwner,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerThresholdObjectsOwner =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdObjectsOwnerLen = var_val_len;
         break;
 
@@ -842,8 +842,8 @@ write_mteTriggerThresholdObjects(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdObjects;
         tmplen = StorageTmp->mteTriggerThresholdObjectsLen;
-        memdup((u_char **) & StorageTmp->mteTriggerThresholdObjects,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerThresholdObjects =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdObjectsLen = var_val_len;
         break;
 
@@ -934,8 +934,8 @@ write_mteTriggerThresholdRisingEventOwner(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdRisingEventOwner;
         tmplen = StorageTmp->mteTriggerThresholdRisingEventOwnerLen;
-        memdup((u_char **) & StorageTmp->
-               mteTriggerThresholdRisingEventOwner, var_val, var_val_len);
+        StorageTmp->mteTriggerThresholdRisingEventOwner =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdRisingEventOwnerLen = var_val_len;
         break;
 
@@ -1026,8 +1026,8 @@ write_mteTriggerThresholdRisingEvent(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdRisingEvent;
         tmplen = StorageTmp->mteTriggerThresholdRisingEventLen;
-        memdup((u_char **) & StorageTmp->mteTriggerThresholdRisingEvent,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerThresholdRisingEvent =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdRisingEventLen = var_val_len;
         break;
 
@@ -1118,8 +1118,8 @@ write_mteTriggerThresholdFallingEventOwner(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdFallingEventOwner;
         tmplen = StorageTmp->mteTriggerThresholdFallingEventOwnerLen;
-        memdup((u_char **) & StorageTmp->
-               mteTriggerThresholdFallingEventOwner, var_val, var_val_len);
+        StorageTmp->mteTriggerThresholdFallingEventOwner =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdFallingEventOwnerLen = var_val_len;
         break;
 
@@ -1210,8 +1210,8 @@ write_mteTriggerThresholdFallingEvent(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdFallingEvent;
         tmplen = StorageTmp->mteTriggerThresholdFallingEventLen;
-        memdup((u_char **) & StorageTmp->mteTriggerThresholdFallingEvent,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerThresholdFallingEvent =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdFallingEventLen = var_val_len;
         break;
 
@@ -1302,9 +1302,8 @@ write_mteTriggerThresholdDeltaRisingEventOwner(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaRisingEventOwner;
         tmplen = StorageTmp->mteTriggerThresholdDeltaRisingEventOwnerLen;
-        memdup((u_char **) & StorageTmp->
-               mteTriggerThresholdDeltaRisingEventOwner, var_val,
-               var_val_len);
+        StorageTmp->mteTriggerThresholdDeltaRisingEventOwner =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdDeltaRisingEventOwnerLen =
             var_val_len;
         break;
@@ -1396,8 +1395,8 @@ write_mteTriggerThresholdDeltaRisingEvent(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaRisingEvent;
         tmplen = StorageTmp->mteTriggerThresholdDeltaRisingEventLen;
-        memdup((u_char **) & StorageTmp->
-               mteTriggerThresholdDeltaRisingEvent, var_val, var_val_len);
+        StorageTmp->mteTriggerThresholdDeltaRisingEvent =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdDeltaRisingEventLen = var_val_len;
         break;
 
@@ -1489,9 +1488,8 @@ write_mteTriggerThresholdDeltaFallingEventOwner(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaFallingEventOwner;
         tmplen = StorageTmp->mteTriggerThresholdDeltaFallingEventOwnerLen;
-        memdup((u_char **) & StorageTmp->
-               mteTriggerThresholdDeltaFallingEventOwner, var_val,
-               var_val_len);
+        StorageTmp->mteTriggerThresholdDeltaFallingEventOwner =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdDeltaFallingEventOwnerLen =
             var_val_len;
         break;
@@ -1583,8 +1581,8 @@ write_mteTriggerThresholdDeltaFallingEvent(int action,
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaFallingEvent;
         tmplen = StorageTmp->mteTriggerThresholdDeltaFallingEventLen;
-        memdup((u_char **) & StorageTmp->
-               mteTriggerThresholdDeltaFallingEvent, var_val, var_val_len);
+        StorageTmp->mteTriggerThresholdDeltaFallingEvent =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerThresholdDeltaFallingEventLen = var_val_len;
         break;
 

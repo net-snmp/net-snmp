@@ -418,8 +418,8 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
                              snmptrapenterprise_oid,
                              snmptrapenterprise_oid_len);
         if (var) {
-            memdup((u_char**)&template_v1pdu->enterprise,
-                   (const u_char*)var->val.objid, var->val_len);
+            template_v1pdu->enterprise =
+                netsnmp_memdup(var->val.objid, var->val_len);
             template_v1pdu->enterprise_length = var->val_len/sizeof(oid);
         } else {
             template_v1pdu->enterprise        = NULL;
@@ -443,8 +443,8 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
         if (vblist->val.objid[len-1] == 0)
             len--;
         SNMP_FREE(template_v1pdu->enterprise);
-        memdup((u_char**)&template_v1pdu->enterprise,
-               (u_char *)vblist->val.objid, len*sizeof(oid));
+        template_v1pdu->enterprise =
+            netsnmp_memdup(vblist->val.objid, len*sizeof(oid));
         template_v1pdu->enterprise_length = len;
     }
     var = find_varbind_in_list( vblist, agentaddr_oid,
@@ -922,7 +922,7 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
                 (pdu->command == SNMP_MSG_TRAP2) &&
                 (sess->securityEngineIDLen == 0)) {
             len = snmpv3_get_engineID(tmp, sizeof(tmp));
-            memdup(&pdu->securityEngineID, tmp, len);
+            pdu->securityEngineID = netsnmp_memdup(tmp, len);
             pdu->securityEngineIDLen = len;
         }
 
@@ -1212,7 +1212,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
         traptype != SNMP_MSG_INFORM   &&
         ss->securityEngineIDLen == 0) {
             len = snmpv3_get_engineID( tmp, sizeof(tmp));
-            memdup(&ss->securityEngineID, tmp, len);
+            ss->securityEngineID = netsnmp_memdup(tmp, len);
             ss->securityEngineIDLen = len;
     }
 

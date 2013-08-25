@@ -4442,7 +4442,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                             if (old_HopsAddress[k] == NULL) {
                                 exit(1);
                             }
-                            memdup((u_char **) & old_HopsAddress[k],
+                            old_HopsAddress[k] = netsnmp_memdup(
                                    StorageTmp->traceRouteHopsIpTgtAddress,
                                    StorageTmp->
                                    traceRouteHopsIpTgtAddressLen + 1);
@@ -4729,9 +4729,10 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     temp_his->traceRouteProbeHistoryLastRC = 0;
 
 		    temp_his->traceRouteProbeHistoryTime_time = timep;
-                    memdup(&temp_his->traceRouteProbeHistoryTime,
-                        date_n_time(&timep,
-			    &temp_his->traceRouteProbeHistoryTimeLen), 11);
+                    temp_his->traceRouteProbeHistoryTime =
+                        netsnmp_memdup(date_n_time(&timep,
+                                      &temp_his->traceRouteProbeHistoryTimeLen),
+                                       11);
                     if (probe == 0)
                         item->traceRouteProbeHis = temp_his;
                     else {
@@ -4805,9 +4806,10 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     current->traceRouteHopsSentProbes = probe + 1;
                     current->traceRouteHopsProbeResponses = responseProbe;
 		    current->traceRouteHopsLastGoodProbe_time = timep;
-                    memdup(&current->traceRouteHopsLastGoodProbe,
-                        date_n_time(&timep,
-			    &current->traceRouteHopsLastGoodProbeLen), 11);
+                    current->traceRouteHopsLastGoodProbe =
+                        netsnmp_memdup(date_n_time(&timep,
+                                      &current->traceRouteHopsLastGoodProbeLen),
+                                       11);
                 }
 
                 (void) fflush(stdout);
@@ -4826,9 +4828,11 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                         StorageResults->traceRouteResultsTestSuccesses + 1;
 
 		    StorageResults->traceRouteResultsLastGoodPath_time = timep;
-                    memdup(&StorageResults->traceRouteResultsLastGoodPath,
-                        date_n_time(&timep,
-			    &StorageResults->traceRouteResultsLastGoodPathLen), 11);
+                    StorageResults->traceRouteResultsLastGoodPath =
+                        netsnmp_memdup(date_n_time(&timep,
+                                              &StorageResults->
+                                              traceRouteResultsLastGoodPathLen),
+                                       11);
                     if ((item->
                          traceRouteCtlTrapGeneration[0] &
                          TRACEROUTETRAPGENERATION_TESTCOMPLETED) != 0) {
@@ -5126,7 +5130,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                             if (old_HopsAddress[k] == NULL) {
                                 exit(1);
                             }
-                            memdup((u_char **) & old_HopsAddress[k],
+                            old_HopsAddress[k] = netsnmp_memdup(
                                    StorageTmp->traceRouteHopsIpTgtAddress,
                                    StorageTmp->
                                    traceRouteHopsIpTgtAddressLen + 1);
@@ -5363,7 +5367,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     temp_his->traceRouteProbeHistoryLastRC = 0;
 
 		    temp_his->traceRouteProbeHistoryTime_time = timep;
-                    memdup(&temp_his->traceRouteProbeHistoryTime,
+                    temp_his->traceRouteProbeHistoryTime = netsnmp_memdup(
                         date_n_time(&timep,
 			    &temp_his->traceRouteProbeHistoryTimeLen), 11);
 
@@ -5439,8 +5443,8 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     current->traceRouteHopsSentProbes = probe + 1;
                     current->traceRouteHopsProbeResponses = responseProbe;
 		    current->traceRouteHopsLastGoodProbe_time = timep;
-                    memdup(&current->traceRouteHopsLastGoodProbe,
-                        date_n_time(&timep,
+                    current->traceRouteHopsLastGoodProbe = 
+                        netsnmp_memdup(date_n_time(&timep,
 			    &current->traceRouteHopsLastGoodProbeLen), 11);
 
                     snmp_free_varbind(vars_hops);
@@ -5463,9 +5467,11 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     StorageResults->traceRouteResultsTestSuccesses =
                         StorageResults->traceRouteResultsTestSuccesses + 1;
 		    StorageResults->traceRouteResultsLastGoodPath_time = timep;
-                    memdup(&StorageResults->traceRouteResultsLastGoodPath,
-                        date_n_time(&timep,
-			    &StorageResults->traceRouteResultsLastGoodPathLen), 11);
+                    StorageResults->traceRouteResultsLastGoodPath =
+                        netsnmp_memdup(date_n_time(&timep,
+                                                   &StorageResults->
+                                              traceRouteResultsLastGoodPathLen),
+                                       11);
                     if ((item->
                          traceRouteCtlTrapGeneration[0] &
                          TRACEROUTETRAPGENERATION_TESTCOMPLETED) != 0) {

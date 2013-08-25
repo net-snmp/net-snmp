@@ -205,7 +205,8 @@ extern          "C" {
 
     u_char         *malloc_random(size_t * size);
     u_char         *malloc_zero(size_t size);
-    int             memdup(u_char ** to, const u_char * from, size_t size);
+    NETSNMP_IMPORT
+    void           *netsnmp_memdup(const void * from, size_t size);
 
     u_int           binary_to_hex(const u_char * input, size_t len,
                                   char **output);

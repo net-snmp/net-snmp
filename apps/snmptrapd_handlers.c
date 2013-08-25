@@ -399,8 +399,7 @@ netsnmp_add_traphandler(Netsnmp_Trap_Handler* handler,
     traph->authtypes   = TRAP_AUTH_ALL; /* callers will likely change this */
     traph->handler     = handler;
     traph->trapoid_len = trapOidLen;
-    memdup((u_char **)&(traph->trapoid), (u_char *)trapOid,
-		    sizeof(oid) * trapOidLen);
+    traph->trapoid = netsnmp_memdup(trapOid, sizeof(oid) * trapOidLen);
 
     /*
      * Now try to find the appropriate place in the trap-specific

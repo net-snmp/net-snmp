@@ -178,7 +178,7 @@ EXPORTS
 	debug_register_tokens
 	generate_Ku
 	uptime_string
-	memdup
+	netsnmp_memdup
 	dump_chunk
 	init_callbacks
 	snmp_register_callback

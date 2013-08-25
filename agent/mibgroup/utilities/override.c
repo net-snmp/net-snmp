@@ -58,9 +58,9 @@ override_handler(netsnmp_mib_handler *handler,
         break;
 
     case MODE_SET_RESERVE2:
-        if (memdup((u_char **) &data->set_space,
-                   requests->requestvb->val.string,
-                   requests->requestvb->val_len) == SNMPERR_GENERR)
+        data->set_space = netsnmp_memdup(requests->requestvb->val.string,
+                                         requests->requestvb->val_len);
+        if (!data->set_space)
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);
         break;
@@ -249,8 +249,7 @@ netsnmp_parse_override(const char *token, char *line)
     the_reg->modes = (readwrite) ? HANDLER_CAN_RWRITE : HANDLER_CAN_RONLY;
     the_reg->handler =
         netsnmp_create_handler("override", override_handler);
-    memdup((u_char **) & the_reg->rootoid, (const u_char *) oidbuf,
-           oidbuf_len * sizeof(oid));
+    the_reg->rootoid = netsnmp_memdup(oidbuf, oidbuf_len * sizeof(oid));
     the_reg->rootoid_len = oidbuf_len;
     if (!the_reg->rootoid || !the_reg->handler || !the_reg->handlerName) {
         if (the_reg->handler)

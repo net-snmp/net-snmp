@@ -68,9 +68,9 @@ netsnmp_register_old_api(const char *moduleName,
         netsnmp_handler_registration *reginfo =
             SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
 
-        memdup((void *) &vp,
-               (void *) (struct variable *) ((char *) var + varsize * i),
-               varsize);
+        vp = netsnmp_memdup((const struct variable *)
+                            ((const char *) var + varsize * i),
+                            varsize);
 
         reginfo->handler = get_old_api_handler();
         reginfo->handlerName = strdup(moduleName);

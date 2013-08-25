@@ -124,7 +124,7 @@ netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
              (netsnmp_table_data_set_storage **) &(newrow->data); data;
              newrowdata = &((*newrowdata)->next), data = data->next) {
 
-            memdup((u_char **) newrowdata, (u_char *) data,
+            *newrowdata = netsnmp_memdup(data,
                    sizeof(netsnmp_table_data_set_storage));
             if (!*newrowdata) {
                 netsnmp_table_dataset_delete_row(newrow);
@@ -132,8 +132,8 @@ netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
             }
 
             if (data->data.voidp) {
-                memdup((u_char **) & ((*newrowdata)->data.voidp),
-                       (u_char *) data->data.voidp, data->data_len);
+                (*newrowdata)->data.voidp = netsnmp_memdup(data->data.voidp,
+                                                           data->data_len);
                 if (!(*newrowdata)->data.voidp) {
                     netsnmp_table_dataset_delete_row(newrow);
                     return NULL;
@@ -292,8 +292,7 @@ netsnmp_table_set_add_default_row(netsnmp_table_data_set *table_set,
     new_col->writable = writable;
     new_col->column = column;
     if (default_value) {
-        memdup((u_char **) & (new_col->data.voidp),
-               (u_char *) default_value, default_value_len);
+        new_col->data.voidp = netsnmp_memdup(default_value, default_value_len);
         new_col->data_len = default_value_len;
     }
     if (table_set->default_row == NULL)
@@ -1281,8 +1280,8 @@ netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
 
         SNMP_FREE(data->data.voidp);
         if (value_len) {
-            if (memdup(&data->data.string, value, (value_len)) !=
-                SNMPERR_SUCCESS) {
+            data->data.string = netsnmp_memdup(value, (value_len));
+            if (!data->data.string) {
                 snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
                 return SNMPERR_MALLOC;
             }
