@@ -333,7 +333,7 @@ notifyTable_register_notifications(int major, int minor,
     ptr->tAddressLen = t->remote_length;
     ptr->tAddress = t->remote;
 
-    ptr->timeout = ss->timeout / 1000;
+    ptr->timeout = ss->timeout / 10000;
     ptr->retryCount = ss->retries;
     SNMP_FREE(ptr->tagList);
     ptr->tagList = strdup(buf); /* strdup ok since buf contains 'internal%d' */
