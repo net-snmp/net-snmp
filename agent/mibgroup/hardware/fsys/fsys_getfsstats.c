@@ -34,29 +34,6 @@
 #define NSFS_FLAGS      f_flags
 #endif
 
-/*
-#if defined(HAVE_STATVFS)
-#define NSFS_STATFS     statvfs
-#define NSFS_FLAGS      f_flag
-#else
-#define NSFS_STATFS     statfs
-#define NSFS_FLAGS      f_flags
-#endif
-*/
-
-/*
-#if defined(HAVE_STATVFS) && defined(__NetBSD__)
-#define NSFS_NAMELEN    _VFS_NAMELEN
-#define NSFS_GETFSSTAT  getvfsstat
-#define NSFS_STATFS     statvfs
-#else
-#define NSFS_FLAGS      f_flags
-#define NSFS_NAMELEN    _VFS_NAMELEN
-#define NSFS_GETFSSTAT  getvfsstat
-#define NSFS_STATFS     statvfs
-#endif
-*/
-
 int
 _fs_type( char *typename )
 {
