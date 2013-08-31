@@ -25,7 +25,7 @@
 #define snmpTargetAddrOIDLen 11 /*This is base+column, 
                                  * i.e. everything but index */
 
-oid             snmpTargetAddrOID[snmpTargetAddrOIDLen] =
+static oid      snmpTargetAddrOID[snmpTargetAddrOIDLen] =
     { 1, 3, 6, 1, 6, 3, 12, 1, 2, 1, 0 };
 
 static unsigned long snmpTargetSpinLock = 0;
@@ -278,7 +278,7 @@ snmpTargetAddr_rowStatusCheck(struct targetAddrTable_struct *entry)
  * for the snmpTargetAddrEntry mib 
  */
 
-struct variable2 snmpTargetAddrEntry_variables[] = {
+static const struct variable2 snmpTargetAddrEntry_variables[] = {
     {SNMPTARGETADDRTDOMAIN, ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
      var_snmpTargetAddrEntry, 1, {SNMPTARGETADDRTDOMAINCOLUMN}},
     {SNMPTARGETADDRTADDRESS, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
@@ -298,17 +298,17 @@ struct variable2 snmpTargetAddrEntry_variables[] = {
 
 };
 
-struct variable2 snmpTargetSpinLock_var[] = {
+static const struct variable2 snmpTargetSpinLock_var[] = {
     {SNMPTARGETSPINLOCK, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_targetSpinLock, 1, {1}}
 };
 
-static oid      snmpTargetSpinLock_oid[] = { 1, 3, 6, 1, 6, 3, 12, 1 };
+static const oid snmpTargetSpinLock_oid[] = { 1, 3, 6, 1, 6, 3, 12, 1 };
 
 /*
  * now load this mib into the agents mib table 
  */
-oid             snmpTargetAddrEntry_variables_oid[] =
+static const oid snmpTargetAddrEntry_variables_oid[] =
     { 1, 3, 6, 1, 6, 3, 12, 1, 2, 1 };
 
 
