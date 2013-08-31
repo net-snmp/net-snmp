@@ -395,7 +395,7 @@ netsnmp_ipaddress_prefix_copy(u_char *dst, u_char *src, int addr_len, int pfx_le
 
 
 /**
- * copy the prefix portion of an ip address
+ * Compute the prefix length of a network mask
  *
  * @param  mask  network byte order mask
  *
