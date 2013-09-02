@@ -2810,7 +2810,7 @@ netsnmp_mibindex_lookup( const char *dirname )
 int
 _mibindex_add( const char *dirname, int i )
 {
-    const int old_mibindex = _mibindex;
+    const int old_mibindex_max = _mibindex_max;
 
     DEBUGMSGTL(("mibindex", "add: %s (%d)\n", dirname, i ));
     if ( i == -1 )
@@ -2824,15 +2824,15 @@ _mibindex_add( const char *dirname, int i )
         _mibindexes = realloc(_mibindexes,
                               _mibindex_max * sizeof(_mibindexes[0]));
         netsnmp_assert(_mibindexes);
-        memset(_mibindexes + old_mibindex, 0,
-               (i - old_mibindex) * sizeof(_mibindexes[0]));
+        memset(_mibindexes + old_mibindex_max, 0,
+               (_mibindex_max - old_mibindex_max) * sizeof(_mibindexes[0]));
     }
-    DEBUGMSGTL(("mibindex", "add: %d/%d/%d\n", i, _mibindex, _mibindex_max ));
 
     _mibindexes[ i ] = strdup( dirname );
     if ( i >= _mibindex )
         _mibindex = i+1;
 
+    DEBUGMSGTL(("mibindex", "add: %d/%d/%d\n", i, _mibindex, _mibindex_max ));
     return i;
 }
     
