@@ -124,7 +124,7 @@ tcp6protopr(const char *name)
                                      ASN_NULL, NULL,  0);
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
         return;
-    if (var->type == ASN_NULL)	/* No entries */
+    if ((var->type & 0xF0) == 0x80)		/* exception */
         return;
 
     for (vp = var; vp ; vp=vp->next_variable) {
@@ -184,7 +184,7 @@ udp6protopr(const char *name)
                                      ASN_NULL, NULL,  0);
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
         return;
-    if (var->type == ASN_NULL)	/* No entries */
+    if ((var->type & 0xF0) == 0x80)		/* exception */
         return;
 
     printf("Active Internet Connections\n");
@@ -244,6 +244,8 @@ _dump_v6stats( const char *name, oid *oid_buf, size_t buf_len,
      */
     while (1) {
         if (netsnmp_query_getnext( var, ss ) != SNMP_ERR_NOERROR)
+            break;
+        if ((var->type & 0xF0) == 0x80)		/* exception */
             break;
         if ( snmp_oid_compare( oid_buf,   buf_len,
                                var->name, buf_len) != 0 )
