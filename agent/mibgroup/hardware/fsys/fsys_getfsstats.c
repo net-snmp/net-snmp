@@ -88,6 +88,8 @@ _fs_type( char *typename )
        return NETSNMP_FS_TYPE_EXT2;
     else if ( !strcmp(typename, MOUNT_NTFS) )
        return NETSNMP_FS_TYPE_NTFS;
+    else if ( !strcmp(typename, MOUNT_ZFS) )
+       return NETSNMP_FS_TYPE_OTHER;
 
        /*
         * NetBSD also recognises the following filesystem types:
