@@ -415,7 +415,7 @@ inet6print(unsigned char *in6, int port, const char *proto, int local)
 
 	struct servent *sp = NULL;
 	char line[80], *cp;
-	unsigned width = 27-9;
+	int width = 27-9;
 	int len = sizeof line;
 
 	if (vflag && width < strlen(inet6name(in6)))
