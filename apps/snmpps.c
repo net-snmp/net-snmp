@@ -191,6 +191,9 @@ add(netsnmp_pdu *pdu, const char *mibnodename,
         snmp_perror(mibnodename);
         fprintf(stderr, "couldn't find mib node %s, giving up\n",
                 mibnodename);
+#if HAVE_CURSES_H
+        endwin();
+#endif
         exit(1);
     }
 
@@ -222,11 +225,17 @@ collect_procs(netsnmp_session *ss, netsnmp_pdu *pdu,
         status = snmp_synch_response(ss, pdu, &response);
         if (status != STAT_SUCCESS || !response) {
             snmp_sess_perror(progname, ss);
+#if HAVE_CURSES_H
+            endwin();
+#endif
             exit(1);
         }
         if (response->errstat != SNMP_ERR_NOERROR) {
             fprintf(stderr, "%s: Error in packet: %s\n", progname,
                     snmp_errstring(response->errstat));
+#if HAVE_CURSES_H
+            endwin();
+#endif
             exit(1);
         }
         if (snmp_oid_compare(response->variables->name,
@@ -309,6 +318,9 @@ collect_perf(netsnmp_session *ss, struct hrSWRunTable **fproc)
         status = snmp_synch_response(ss, pdu, &response);
         if (status != STAT_SUCCESS || !response) {
             snmp_sess_perror(progname, ss);
+#if HAVE_CURSES_H
+            endwin();
+#endif
             exit(1);
         }
         if (response->errstat != SNMP_ERR_NOERROR) {
@@ -883,7 +895,7 @@ int snmptop(int argc, char **argv)
         move(0, COLS-strlen(timestr)-1);
         printw("%s", timestr);
         if (has_cpu) {
-            printw("\nCPU%: %4.1fUs %4.1fSy %4.1fId %3.1fWa %3.1fNi %3.1fKe %3.1fHi %3.1fSi %3.1fSt %3.1fGu %3.1fGN",
+            printw("\nCPU%%: %4.1fUs %4.1fSy %4.1fId %3.1fWa %3.1fNi %3.1fKe %3.1fHi %3.1fSi %3.1fSt %3.1fGu %3.1fGN",
                 (float)deltaCpu.user*100/sumCpu,
                 (float)deltaCpu.system*100/sumCpu,
                 (float)deltaCpu.idle*100/sumCpu,
