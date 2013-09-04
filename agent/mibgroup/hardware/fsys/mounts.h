@@ -56,6 +56,9 @@
 #ifndef MOUNT_UFS
 #define MOUNT_UFS    "ufs"
 #endif
+#ifndef MOUNT_ZFS
+#define MOUNT_ZFS    "zfs"
+#endif
 
 /*
 #ifndef MNTTYPE_AFS

@@ -148,6 +148,9 @@
 #ifndef MNTTYPE_BTRFS
 #define MNTTYPE_BTRFS     "btrfs"
 #endif
+#ifndef MNTTYPE_ZFS
+#define MNTTYPE_ZFS       "zfs"
+#endif
 
 /*
  *  File systems to skip
