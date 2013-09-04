@@ -454,31 +454,31 @@ icmp_stats(const char *name)
         { 0, ""}
     };
     struct stat_table icmp_inhistogram[] = {
-        { 3, "Destination unreachable: %d"},
-        { 4, "Time Exceeded: %d"},
-        { 5, "Parameter Problem: %d"},
-        { 6, "Source Quench: %d"},
-        { 7, "Redirect: %d"},
-        { 8, "Echo Request: %d"},
-        { 9, "Echo Reply: %d"},
-        {10, "Timestamp Request: %d"},
-        {11, "Timestamp Reply: %d"},
-        {12, "Address Mask Request: %d"},
-        {13, "Address Mask Reply: %d"},
+        { 3, "        Destination unreachable: %d"},
+        { 4, "        Time Exceeded: %d"},
+        { 5, "        Parameter Problem: %d"},
+        { 6, "        Source Quench: %d"},
+        { 7, "        Redirect: %d"},
+        { 8, "        Echo Request: %d"},
+        { 9, "        Echo Reply: %d"},
+        {10, "        Timestamp Request: %d"},
+        {11, "        Timestamp Reply: %d"},
+        {12, "        Address Mask Request: %d"},
+        {13, "        Address Mask Reply: %d"},
         { 0, ""}
     };
     struct stat_table icmp_outhistogram[] = {
-        {16, "Destination unreachable: %d"},
-        {17, "Time Exceeded: %d"},
-        {18, "Parameter Problem: %d"},
-        {19, "Source Quench: %d"},
-        {20, "Redirect: %d"},
-        {21, "Echo Request: %d"},
-        {22, "Echo Reply: %d"},
-        {23, "Timestamp Request: %d"},
-        {24, "Timestamp Reply: %d"},
-        {25, "Address Mask Request: %d"},
-        {26, "Address Mask Reply: %d"},
+        {16, "        Destination unreachable: %d"},
+        {17, "        Time Exceeded: %d"},
+        {18, "        Parameter Problem: %d"},
+        {19, "        Source Quench: %d"},
+        {20, "        Redirect: %d"},
+        {21, "        Echo Request: %d"},
+        {22, "        Echo Reply: %d"},
+        {23, "        Timestamp Request: %d"},
+        {24, "        Timestamp Reply: %d"},
+        {25, "        Address Mask Request: %d"},
+        {26, "        Address Mask Reply: %d"},
         {0, ""}
     };
 
