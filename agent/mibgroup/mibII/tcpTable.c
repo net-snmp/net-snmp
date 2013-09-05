@@ -559,11 +559,35 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 const static int linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
 #if HAVE_NETLINK_NETLINK_H
+
+#if !defined(HAVE_LIBNL3)
+/* libnl3 API implemented on top of the libnl1 API */
+
+#define nl_sock nl_handle
+
+static const char *nl_geterror_compat(int e)
+{
+    return nl_geterror();
+}
+
+#define nl_geterror(e) nl_geterror_compat(e)
+
+static struct nl_socket *nl_socket_alloc(void)
+{
+    return nl_handle_alloc();
+}
+
+static void nl_socket_free(struct nl_socket *ns)
+{
+    nl_handle_destroy(ns);
+}
+#endif /* HAVE_LIBNL3 */
+
 static int
 tcpTable_load_netlink(void)
 {
-	/*  TODO: perhaps use permanent nl handle? */
-	struct nl_handle *nl = nl_handle_alloc();
+	/* TODO: perhaps use permanent nl socket ? */
+	struct nl_sock *nl = nl_socket_alloc();
 	struct inet_diag_req req = {
 		.idiag_family = AF_INET,
 		.idiag_states = TCP_ALL,
@@ -573,7 +597,7 @@ tcpTable_load_netlink(void)
 
 	struct sockaddr_nl peer;
 	unsigned char *buf = NULL;
-	int running = 1, len;
+	int running = 1, len, err;
 
 	if (nl == NULL) {
 		DEBUGMSGTL(("mibII/tcpTable", "Failed to allocate netlink handle\n"));
@@ -581,20 +605,22 @@ tcpTable_load_netlink(void)
 		return -1;
 	}
 
-	if (nl_connect(nl, NETLINK_INET_DIAG) < 0) {
-		DEBUGMSGTL(("mibII/tcpTable", "Failed to connect to netlink: %s\n", nl_geterror()));
-		snmp_log(LOG_ERR, "snmpd: Couldn't connect to netlink: %s\n", nl_geterror());
-		nl_handle_destroy(nl);
+	err = nl_connect(nl, NETLINK_INET_DIAG);
+	if (err < 0) {
+		DEBUGMSGTL(("mibII/tcpTable", "Failed to connect to netlink: %s\n", nl_geterror(err)));
+		snmp_log(LOG_ERR, "snmpd: Couldn't connect to netlink: %s\n", nl_geterror(err));
+		nl_socket_free(nl);
 		return -1;
 	}
 
 	nm = nlmsg_alloc_simple(TCPDIAG_GETSOCK, NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST);
 	nlmsg_append(nm, &req, sizeof(struct inet_diag_req), 0);
 
-	if (nl_send_auto_complete(nl, nm) < 0) {
-		DEBUGMSGTL(("mibII/tcpTable", "nl_send_autocomplete(): %s\n", nl_geterror()));
-		snmp_log(LOG_ERR, "snmpd: nl_send_autocomplete(): %s\n", nl_geterror());
-		nl_handle_destroy(nl);
+	err = nl_send_auto_complete(nl, nm);
+	if (err < 0) {
+		DEBUGMSGTL(("mibII/tcpTable", "nl_send_autocomplete(): %s\n", nl_geterror(err)));
+		snmp_log(LOG_ERR, "snmpd: nl_send_autocomplete(): %s\n", nl_geterror(err));
+		nl_socket_free(nl);
 		return -1;
 	}
 	nlmsg_free(nm);
@@ -602,9 +628,9 @@ tcpTable_load_netlink(void)
 	while (running) {
 		struct nlmsghdr *h;
 		if ((len = nl_recv(nl, &peer, &buf, NULL)) <= 0) {
-			DEBUGMSGTL(("mibII/tcpTable", "nl_recv(): %s\n", nl_geterror()));
-			snmp_log(LOG_ERR, "snmpd: nl_recv(): %s\n", nl_geterror());
-			nl_handle_destroy(nl);
+			DEBUGMSGTL(("mibII/tcpTable", "nl_recv(): %s\n", nl_geterror(len)));
+			snmp_log(LOG_ERR, "snmpd: nl_recv(): %s\n", nl_geterror(len));
+			nl_socket_free(nl);
 			return -1;
 		}
 
@@ -653,7 +679,7 @@ tcpTable_load_netlink(void)
 		free(buf);
 	}
 
-	nl_handle_destroy(nl);
+	nl_socket_free(nl);
 
 	if (tcp_head) {
 		DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table using netlink\n"));
