@@ -172,9 +172,10 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          * check for system processes
          */
         if (P_SYSTEM & processes[i].kp_proc.p_flag) {
-            entry->hrSWRunType = 2; /* operatingSystem */
+            entry->hrSWRunType = HRSWRUNTYPE_OPERATINGSYSTEM;
             DEBUGMSGTL(("swrun:load:arch", SWRUNINDENT "SYSTEM\n"));
         }
+        else entry->hrSWRunType = HRSWRUNTYPE_APPLICATION;
 
         /*
          * get mem size, run time
@@ -457,7 +458,7 @@ _set_command_name(netsnmp_swrun_entry *entry)
          */
         if(entry->hrSWRunParameters_len < sizeof(entry->hrSWRunParameters)-1) {
             strlcat(&entry->hrSWRunParameters[entry->hrSWRunParameters_len],
-                    argN, sizeof(entry->hrSWRunParameters));
+                    argN, sizeof(entry->hrSWRunParameters)-entry->hrSWRunParameters_len-1);
             entry->hrSWRunParameters_len = strlen(entry->hrSWRunParameters);
             if ((entry->hrSWRunParameters_len+2 < sizeof(entry->hrSWRunParameters)-1) && (0 != nargs)) {
                 /* add space between params */
