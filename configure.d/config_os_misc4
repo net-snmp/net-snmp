@@ -228,6 +228,39 @@ if test "x$ac_cv_NETSNMP_CAN_USE_SYSCTL" = "xyes"; then
   AC_DEFINE(NETSNMP_CAN_USE_SYSCTL, 1, [sysctl works to get boottime, etc...])
 fi
 
+#   Check FreeBSD's kernel OID kern.cp_times existance
+#
+#         used in agent only 
+#
+if test $cross_compiling = yes; then
+    AC_MSG_WARN([Can't check either sysctl kern.cp_times, manually define HAVE_KERN_CP_TIMES if platform support available])
+else
+    AC_CACHE_CHECK([if sysctl provides kern.cp_times kernel information],
+        ac_cv_HAVE_KERN_CP_TIMES,
+       [AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <stdlib.h>
+
+main () {
+
+  size_t              cp_times_size;
+  size_t              ncpu_size;
+
+  if (sysctlbyname("kern.cp_times", NULL, &cp_times_size, NULL, 0))
+    exit(1);
+  else
+    exit(0);
+}
+        ],
+        ac_cv_HAVE_KERN_CP_TIMES=yes,
+        ac_cv_HAVE_KERN_CP_TIMES=no,
+        ac_cv_HAVE_KERN_CP_TIMES=no)])
+fi
+
+if test "x$ac_cv_HAVE_KERN_CP_TIMES" = "xyes"; then
+  AC_DEFINE(HAVE_KERN_CP_TIMES, 1, [kern.cp_times displays multi cpu load on FreeBSD...])
+fi
 
 #   Check whether TCP timer constants are indeed constant
 #       or depend on the kernel clock tick 'hz'.        (FreeBSD 4.x)
