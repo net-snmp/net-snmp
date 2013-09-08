@@ -1416,7 +1416,7 @@ register_mib_detach(void)
  */
 int
 register_mib_context(const char *moduleName,
-                     struct variable *var,
+                     const struct variable *var,
                      size_t varsize,
                      size_t numvars,
                      const oid * mibloc,
@@ -1481,7 +1481,7 @@ register_mib_context(const char *moduleName,
  */
 int
 register_mib_range(const char *moduleName,
-                   struct variable *var,
+                   const struct variable *var,
                    size_t varsize,
                    size_t numvars,
                    const oid * mibloc,
@@ -1530,7 +1530,7 @@ register_mib_range(const char *moduleName,
  */
 int
 register_mib_priority(const char *moduleName,
-                      struct variable *var,
+                      const struct variable *var,
                       size_t varsize,
                       size_t numvars,
                       const oid * mibloc, size_t mibloclen, int priority)
@@ -1570,7 +1570,7 @@ register_mib_priority(const char *moduleName,
  */
 int
 register_mib(const char *moduleName,
-             struct variable *var,
+             const struct variable *var,
              size_t varsize,
              size_t numvars, const oid * mibloc, size_t mibloclen)
 {
