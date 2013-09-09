@@ -458,6 +458,8 @@ netsnmp_mysql_init(void)
             _sql.port_num = atoi(&not_argv[i][7]);
         else if (strncmp(not_argv[i],"--socket=",9) == 0)
             _sql.socket_name = &not_argv[i][9];
+        else if (strncmp(not_argv[i],"--database=",11) == 0)
+            _sql.db_name = &not_argv[i][11];
         else
             snmp_log(LOG_WARNING, "unknown argument[%d] %s\n", i, not_argv[i]);
     }
@@ -730,7 +732,7 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
 
     /** host name */
     buf_host_len_t = 0;
-    tmp_size = sizeof(sqlb->host);
+    tmp_size = 0;
     realloc_format_trap((u_char**)&sqlb->host, &tmp_size,
                         &buf_host_len_t, 1, "%B", pdu, transport);
     sqlb->host_len = buf_host_len_t;
