@@ -455,6 +455,8 @@ netsnmp_mysql_init(void)
             _sql.port_num = atoi(&not_argv[i][7]);
         else if (strncmp(not_argv[i],"--socket=",9) == 0)
             _sql.socket_name = &not_argv[i][9];
+        else if (strncmp(not_argv[i],"--database=",11) == 0)
+            _sql.db_name = &not_argv[i][11];
         else
             snmp_log(LOG_WARNING, "unknown argument[%d] %s\n", i, not_argv[i]);
     }
