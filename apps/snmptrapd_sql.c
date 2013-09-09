@@ -727,7 +727,7 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
 
     /** host name */
     buf_host_len_t = 0;
-    tmp_size = sizeof(sqlb->host);
+    tmp_size = 0;
     realloc_format_trap((u_char**)&sqlb->host, &tmp_size,
                         &buf_host_len_t, 1, "%B", pdu, transport);
     sqlb->host_len = buf_host_len_t;
