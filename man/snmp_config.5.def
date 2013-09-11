@@ -182,11 +182,12 @@ during normal configuration file processing.:
 includeFile site.conf
 .RE
 .PP
-This will search every directory in the configuration path for files
-named site.conf, and will process those files before returning to the
-processing of the original file. Note that if '.conf' is omitted,
-it will be appended. That is, all configuration files must end
-in '.conf'.
+This will load the specified configuration file. The
+path to file must be either absolute, starting with '/',
+or relative. The relative path is then relative to the directory
+where the parent file with 'includeFile' directive resides.
+.PP
+The included file name does not need to have '.conf' suffix.
 .PP
 .RS
 .nf
