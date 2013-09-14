@@ -62,14 +62,11 @@ get_addrForName2(const char *name, unsigned char nameLen)
  * TargetAddrTable_create creates and returns a pointer
  * to a targetAddrTable_struct with default values set 
  */
-struct targetAddrTable_struct
-               *
-snmpTargetAddrTable_create(void)
+struct targetAddrTable_struct *snmpTargetAddrTable_create(void)
 {
     struct targetAddrTable_struct *newEntry;
 
-    newEntry = (struct targetAddrTable_struct *)
-        malloc(sizeof(struct targetAddrTable_struct));
+    newEntry = malloc(sizeof(*newEntry));
 
     if (newEntry) {
         newEntry->nameData = NULL;
@@ -86,7 +83,7 @@ snmpTargetAddrTable_create(void)
 
         newEntry->storageType = SNMP_STORAGE_NONVOLATILE;
         newEntry->rowStatus = SNMP_ROW_NONEXISTENT;
-        newEntry->sess = (netsnmp_session *) NULL;
+        newEntry->sess = NULL;
         newEntry->next = NULL;
     }
 
