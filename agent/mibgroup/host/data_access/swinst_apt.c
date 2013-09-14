@@ -65,7 +65,6 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     char buf[BUFSIZ];
     netsnmp_swinst_entry *entry;
     int i = 0;
-    int rc;
 
     if (p == NULL) {
 	snmp_perror("dpkg-list");
@@ -77,7 +76,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
         entry = netsnmp_swinst_entry_create( i++ );
         if (NULL == entry)
             continue;   /* error already logged by function */
-        rc = CONTAINER_INSERT(container, entry);
+        CONTAINER_INSERT(container, entry);
 
 	sscanf(buf, apt_fmt, package, version, section, priority, essential, status);
 	if (strstr(status, "not-installed"))
@@ -95,7 +94,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 	memcpy(entry->swDate, "\0\0\1\1\0\0\0\0", 8);
     }
     pclose(p);
-    DEBUGMSGTL(("swinst:load:arch"," loaded %d entries\n",
+    DEBUGMSGTL(("swinst:load:arch"," loaded %zd entries\n",
                 CONTAINER_SIZE(container)));
 
     return 0;
