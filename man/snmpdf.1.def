@@ -51,8 +51,10 @@ the storage information. Generally, the default
 use of hrStorageTable in mib HOST\-RESOURCES\-MIB
 is preferred because it typically contains
 more information.
+.TP
 .B \-Ch
 Print sizes in human readable format (i.e. MiB, GiB, TiB)
+.TP
 .B \-CH
 Print sizes in human readable SI format (i.e. MB, GB, TB)
 .SH "EXAMPLES"
