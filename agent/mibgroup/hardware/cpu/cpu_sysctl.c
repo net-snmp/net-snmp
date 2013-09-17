@@ -90,11 +90,8 @@ void init_cpu_sysctl( void ) {
 #define NETSNMP_KERN_CPU  KERN_CPTIME
 
 #elif defined(__FreeBSD__)
-#define NETSNMP_KERN_CPU  0    /* dummy value - sysctlnametomib(2) should be used */
-#if defined(HAVE_KERN_CP_TIMES)
 #define NETSNMP_KERN_MCPU 1    /* Enable support for multi-cpu stats. Valid for FreeBSD >=6.4, >=7.1, >=8.0 and beyond */
 #define NETSNMP_KERN_MCPU_TYPE NETSNMP_CPU_STATS
-#endif
 
 #else
 #error "No CPU statistics sysctl token"
@@ -157,9 +154,6 @@ void init_cpu_sysctl( void ) {
      * Load the latest CPU usage statistics
      */
 int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
-#ifdef NETSNMP_KERN_MCPU
-    int                     i;
-#endif
 
     /*
      * Strictly speaking, BSDi ought to use
@@ -169,14 +163,19 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
      * Don't fight it, Dave - go with the flow....
      */
     NETSNMP_CPU_STATS cpu_stats[CPUSTATES];
+    size_t         cpu_size  = sizeof(cpu_stats);
 #if !defined(__FreeBSD__) && !defined(__NetBSD__)
     int            cpu_mib[] = { CTL_KERN, NETSNMP_KERN_CPU };
+#endif
+#ifdef __FreeBSD__
+    static int     cp_times = -1;
 #endif
 #ifdef KERN_CPTIME2
     int            mcpu_mib[] = { CTL_KERN, KERN_CPTIME2, 0 };
 #endif
-    size_t         cpu_size  = sizeof(cpu_stats);
 #ifdef NETSNMP_KERN_MCPU 
+    int            i;
+    int            act_cpu = cpu_num;
     NETSNMP_KERN_MCPU_TYPE *mcpu_stats;
     size_t         mcpu_size;
 #endif
@@ -185,7 +184,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     size_t         mem_size  = sizeof(NETSNMP_VM_STATS_TYPE);
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
 
-#if (defined(__FreeBSD__) || defined(__NetBSD__))
+#if defined(__FreeBSD__) || defined(__NetBSD__)
     sysctlbyname("kern.cp_time", cpu_stats, &cpu_size, NULL, 0);
 #else
     sysctl(cpu_mib, 2,  cpu_stats, &cpu_size, NULL, 0);
@@ -215,24 +214,36 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #endif
 
 #ifdef NETSNMP_KERN_MCPU
-#if defined(HAVE_KERN_CP_TIMES)
-    sysctlbyname("kern.cp_times", NULL, &mcpu_size, NULL, 0);
+#if defined(KERN_CPTIME2)
+    mcpu_size  = cpu_num*sizeof(cpu_stats);
     mcpu_stats = malloc(mcpu_size);
-    sysctlbyname("kern.cp_times", mcpu_stats, &mcpu_size, NULL, 0);
-#elif defined(KERN_CPTIME2)
-    mcpu_size  = sizeof(cpu_stats);
-    mcpu_stats = malloc(mcpu_size);
-#else
+#elif defined(__NetBSD__)
     mcpu_size  = cpu_num*sizeof(cpu_stats);
     mcpu_stats = malloc(mcpu_size);
     sysctlbyname("kern.cp_time", mcpu_stats, &mcpu_size, NULL, 0);
+#elif defined(__FreeBSD__)
+    if (cp_times == -1) {
+	int ret = sysctlbyname("kern.cp_times", NULL, &mcpu_size, NULL, 0);
+	cp_times = ret == -1 ? 0 : 1;
+    }
+    if (cp_times) {
+	sysctlbyname("kern.cp_times", NULL, &mcpu_size, NULL, 0);
+	mcpu_stats = malloc(mcpu_size);
+	sysctlbyname("kern.cp_times", mcpu_stats, &mcpu_size, NULL, 0);
+    }
+    else {
+	mcpu_size  = sizeof(cpu_stats);
+	mcpu_stats = malloc(mcpu_size);
+	sysctlbyname("kern.cp_time", mcpu_stats, &mcpu_size, NULL, 0);
+	act_cpu = 1;
+    }
 #endif
-    for ( i = 0; i < cpu_num; i++ ) {
+    for ( i = 0; i < act_cpu; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 0 );
         /* XXX - per-CPU statistics - mcpu_mib[i].??? */
 #ifdef KERN_CPTIME2
 	mcpu_mib[2] = i;
-	sysctl(mcpu_mib, 3, mcpu_stats, &mcpu_size, NULL, 0);
+	sysctl(mcpu_mib, 3, mcpu_stats+i*CPUSTATES, &mcpu_size, NULL, 0);
 #endif
 	/* Almost copy & paste of previous cpu stats stuff :) */
 	cpu->user_ticks = mcpu_stats[(i*CPUSTATES)+CP_USER];
@@ -248,7 +259,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 	     *   XXX - Do these really belong here ?
 	     */
 
-	/* There's no really need to execute another sysctl()
+	/* There's no real need to execute another sysctl()
 	 *
 	 * sysctl(mem_mib, 2, &mem_stats, &mem_size, NULL, 0);
 	 */
@@ -264,10 +275,10 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #endif
     }
     free(mcpu_stats);
-#else
+#else	/* NETSNMP_KERN_MCPU */
         /* Copy "overall" figures to cpu0 entry */
     _cpu_copy_stats( cpu );
-#endif
+#endif  /* NETSNMP_KERN_MCPU */
 
     return 0;
 }

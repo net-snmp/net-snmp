@@ -29042,60 +29042,6 @@ $as_echo "#define NETSNMP_CAN_USE_SYSCTL 1" >>confdefs.h
 
 fi
 
-#   Check FreeBSD's kernel OID kern.cp_times existance
-#
-#         used in agent only
-#
-if test $cross_compiling = yes; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Can't check either sysctl kern.cp_times, manually define HAVE_KERN_CP_TIMES if platform support available" >&5
-$as_echo "$as_me: WARNING: Can't check either sysctl kern.cp_times, manually define HAVE_KERN_CP_TIMES if platform support available" >&2;}
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if sysctl provides kern.cp_times kernel information" >&5
-$as_echo_n "checking if sysctl provides kern.cp_times kernel information... " >&6; }
-if ${ac_cv_HAVE_KERN_CP_TIMES+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  ac_cv_HAVE_KERN_CP_TIMES=no
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <stdlib.h>
-
-main () {
-
-  size_t              cp_times_size;
-  size_t              ncpu_size;
-
-  if (sysctlbyname("kern.cp_times", NULL, &cp_times_size, NULL, 0))
-    exit(1);
-  else
-    exit(0);
-}
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  ac_cv_HAVE_KERN_CP_TIMES=yes
-else
-  ac_cv_HAVE_KERN_CP_TIMES=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_HAVE_KERN_CP_TIMES" >&5
-$as_echo "$ac_cv_HAVE_KERN_CP_TIMES" >&6; }
-fi
-
-if test "x$ac_cv_HAVE_KERN_CP_TIMES" = "xyes"; then
-
-$as_echo "#define HAVE_KERN_CP_TIMES 1" >>confdefs.h
-
-fi
 
 #   Check whether TCP timer constants are indeed constant
 #       or depend on the kernel clock tick 'hz'.        (FreeBSD 4.x)
