@@ -308,9 +308,6 @@
 /* Set if IP_RECVDSTADDR is usable */
 #undef HAVE_IP_RECVDSTADDR
 
-/* kern.cp_times displays multi cpu load on FreeBSD... */
-#undef HAVE_KERN_CP_TIMES
-
 /* Define to 1 if you have the `kinfo_get_cpus' function. */
 #undef HAVE_KINFO_GET_CPUS
 
