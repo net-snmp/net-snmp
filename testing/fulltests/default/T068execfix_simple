@@ -24,20 +24,13 @@ TESTCOMMUNITY=testcommunity
 # Begin test
 #
 if [ "x$OSTYPE" = xmsys ]; then
-    cmd1="echo null"
+    cmd1="true"
     cmd2="false"
-    output1="null"
     echo="echo"
 else
-    if which /bin/true >/dev/null; then
-	cmd1="/bin/true"
-	cmd2="/bin/false"
-    else
-	cmd1="/usr/bin/true"
-	cmd2="/usr/bin/false"
-    fi
-    output1=""
-    echo=/bin/echo
+    cmd1="$(which true)"
+    cmd2="$(which false)"
+    echo="$(which echo)"
 fi
 CONFIGAGENT exec    true-command    $cmd1
 CONFIGAGENT execfix true-command    $cmd1
@@ -53,7 +46,7 @@ CAPTURE "$SNMPWALK $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_
 CHECK 'UCD-SNMP-MIB::extNames.1 = STRING: true-command$'
 CHECK 'UCD-SNMP-MIB::extCommand.1 = STRING: '"$cmd1"
 CHECK 'UCD-SNMP-MIB::extResult.1 = INTEGER: 0$'
-CHECK 'UCD-SNMP-MIB::extOutput.1 = STRING: '"$output1"'$'
+CHECK 'UCD-SNMP-MIB::extOutput.1 = STRING: $'
 CHECK 'UCD-SNMP-MIB::extErrFix.1 = INTEGER: noError(0)$'
 CHECK 'UCD-SNMP-MIB::extErrFixCmd.1 = STRING: '"$cmd1"
 CHECK 'UCD-SNMP-MIB::extNames.2 = STRING: false-command$'
