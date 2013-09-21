@@ -941,7 +941,7 @@ char * soid_str;
 
    if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
    if (*soid_str == '.') soid_str++;
-   soid_buf = netsnmp_strdup(soid_str);
+   soid_buf = strdup(soid_str);
    if (!soid_buf)
        return FAILURE;
    cp = strtok_r(soid_buf,".",&st);
@@ -950,7 +950,7 @@ char * soid_str;
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
      cp = strtok_r(NULL,".",&st);
    }
-   netsnmp_free(soid_buf);
+   free(soid_buf);
    return(SUCCESS);
 }
 
