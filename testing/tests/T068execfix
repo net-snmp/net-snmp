@@ -21,43 +21,57 @@ TESTCOMMUNITY=testcommunity
 #
 # Begin test
 #
-CONFIGAGENT exec    true-command  /bin/true
-CONFIGAGENT execfix true-command  /bin/true
-CONFIGAGENT exec    false-command /bin/false
-CONFIGAGENT execfix false-command /bin/false
-CONFIGAGENT exec    echo-%s-command  /bin/echo %s
-CONFIGAGENT execfix echo-%s-command  /bin/echo fix-%s
+if [ "x$OSTYPE" = xmsys ]; then
+    cmd1="echo null"
+    cmd2="false"
+    output1="null"
+    echo="echo"
+else
+    if which /bin/true >/dev/null; then
+	cmd1="/bin/true"
+	cmd2="/bin/false"
+    else
+	cmd1="/usr/bin/true"
+	cmd2="/usr/bin/false"
+    fi
+    output1=""
+    echo=/bin/echo
+fi
+CONFIGAGENT exec    true-command    $cmd1
+CONFIGAGENT execfix true-command    $cmd1
+CONFIGAGENT exec    false-command   $cmd2
+CONFIGAGENT execfix false-command   $cmd2
+CONFIGAGENT exec    echo-%s-command ${echo} %s
+CONFIGAGENT execfix echo-%s-command ${echo} fix-%s
 
 STARTAGENT
-
-val=2f62696e2f6563686f2025732573 # echo /bin/echo %s%s | od -tx1
 
 # Check a full walk of UCD-SNMP-MIB::extTable
 CAPTURE "$SNMPWALK $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT UCD-SNMP-MIB::extEntry"
 CHECK 'UCD-SNMP-MIB::extNames.1 = STRING: true-command$'
-CHECK 'UCD-SNMP-MIB::extCommand.1 = STRING: /bin/true$'
+CHECK 'UCD-SNMP-MIB::extCommand.1 = STRING: '"$cmd1"
 CHECK 'UCD-SNMP-MIB::extResult.1 = INTEGER: 0$'
-CHECK 'UCD-SNMP-MIB::extOutput.1 = STRING: $'
+CHECK 'UCD-SNMP-MIB::extOutput.1 = STRING: '"$output1"'$'
 CHECK 'UCD-SNMP-MIB::extErrFix.1 = INTEGER: noError(0)$'
-CHECK 'UCD-SNMP-MIB::extErrFixCmd.1 = STRING: /bin/true$'
+CHECK 'UCD-SNMP-MIB::extErrFixCmd.1 = STRING: '"$cmd1"
 CHECK 'UCD-SNMP-MIB::extNames.2 = STRING: false-command$'
-CHECK 'UCD-SNMP-MIB::extCommand.2 = STRING: /bin/false$'
+CHECK 'UCD-SNMP-MIB::extCommand.2 = STRING: '"$cmd2"'$'
 CHECK 'UCD-SNMP-MIB::extResult.2 = INTEGER: 1$'
 CHECK 'UCD-SNMP-MIB::extOutput.2 = STRING: $'
 CHECK 'UCD-SNMP-MIB::extErrFix.2 = INTEGER: noError(0)$'
-CHECK 'UCD-SNMP-MIB::extErrFixCmd.2 = STRING: /bin/false$'
+CHECK 'UCD-SNMP-MIB::extErrFixCmd.2 = STRING: '"$cmd2"'$'
 CHECK 'UCD-SNMP-MIB::extNames.3 = STRING: echo-%s-command$'
-CHECK 'UCD-SNMP-MIB::extCommand.3 = STRING: /bin/echo %s$'
+CHECK 'UCD-SNMP-MIB::extCommand.3 = STRING: '"${echo}"' %s$'
 CHECK 'UCD-SNMP-MIB::extResult.3 = INTEGER: 0$'
 CHECK 'UCD-SNMP-MIB::extOutput.3 = STRING: %s$'
 CHECK 'UCD-SNMP-MIB::extErrFix.3 = INTEGER: noError(0)$'
-CHECK 'UCD-SNMP-MIB::extErrFixCmd.3 = STRING: /bin/echo fix-%s$'
+CHECK 'UCD-SNMP-MIB::extErrFixCmd.3 = STRING: '"${echo}"' fix-%s$'
 
 CAPTURE "$SNMPSET $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY -r0 $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT UCD-SNMP-MIB::extErrFix.3 i 1"
 CHECK 'UCD-SNMP-MIB::extErrFix.3 = INTEGER: runFix(1)'
 
 CAPTURE "$SNMPWALK $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT UCD-SNMP-MIB::extEntry"
-CHECK 'UCD-SNMP-MIB::extErrFixCmd.3 = STRING: /bin/echo fix-%s'
+CHECK 'UCD-SNMP-MIB::extErrFixCmd.3 = STRING: '"${echo}"' fix-%s'
 
 STOPAGENT
 FINISHED
