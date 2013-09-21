@@ -254,18 +254,14 @@ search_snmpTargetAddrTable(oid * baseName,
 
 
 /*
- * snmpTargetAddr_rowStatusCheck is boolean funciton that  checks 
+ * snmpTargetAddr_rowStatusCheck is boolean function that checks
  * the status of a row's values in order to determine whether
- * the row should be notReady or notInService  
+ * the row should be notReady or notInService.
  */
-int
-snmpTargetAddr_rowStatusCheck(struct targetAddrTable_struct *entry)
+static int
+snmpTargetAddr_rowStatusCheck(const struct targetAddrTable_struct *entry)
 {
-    if ((entry->tDomainLen == 0) || (entry->tAddress == NULL) ||
-        (entry->params == NULL))
-        return 0;
-    else
-        return 1;
+    return entry->tDomainLen && entry->tAddress && entry->params;
 }                               /* snmtpTargetAddrTable_rowStatusCheck */
 
 
