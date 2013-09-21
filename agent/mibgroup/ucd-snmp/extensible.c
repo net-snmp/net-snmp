@@ -211,7 +211,7 @@ extensible_parse_config(const char *token, char *cptr)
 
     if (*cptr == '.')
         cptr++;
-    if (isdigit(*cptr)) {
+    if (isdigit((unsigned char) *cptr)) {
         /*
          * its a relocatable extensible mib 
          */
@@ -236,9 +236,9 @@ extensible_parse_config(const char *token, char *cptr)
         ptmp->type = SHPROC;
     else
         ptmp->type = EXECPROC;
-    if (isdigit(*cptr)) {
+    if (isdigit((unsigned char) *cptr)) {
         ptmp->miblen = parse_miboid(cptr, ptmp->miboid);
-        while (isdigit(*cptr) || *cptr == '.')
+        while (isdigit((unsigned char) *cptr) || *cptr == '.')
             cptr++;
     }
 
