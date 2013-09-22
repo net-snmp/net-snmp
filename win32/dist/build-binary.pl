@@ -69,9 +69,7 @@ else {
   exit;
 }
 
-if ( -d $ENV{MSVCDir} || -d $ENV{VCINSTALLDIR}) {
-}
-else {
+if (!(-d $ENV{MSVCDir}) && !(-d $ENV{VCINSTALLDIR}) && !defined($ENV{TARGET_CPU})) {
   print "\nPlease run VCVARS32.BAT first to set up the Visual Studio build\n" .
         "environment.\n\n";
   exit;
