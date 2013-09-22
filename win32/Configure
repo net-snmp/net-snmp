@@ -206,6 +206,8 @@ if ($sdk == 1) {
 }
 if ($openssl == 1) {
     $subs{"ssl"} = [ "^.*#undef NETSNMP_USE_OPENSSL.*", "#define NETSNMP_USE_OPENSSL 1" ];
+} else {
+    $subs{"ssl"} = [ "^.*#undef NETSNMP_USE_INTERNAL_MD5.*", "#define NETSNMP_USE_INTERNAL_MD5 1" ];
 }
 if ($b_ipv6 == 1) {
     $subs{"ipv6"} = [ "^.*#undef NETSNMP_ENABLE_IPV6.*", "#define NETSNMP_ENABLE_IPV6 1" ];
