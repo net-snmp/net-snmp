@@ -5,7 +5,9 @@
 # May 10th, 2009
 #
 use strict;
+use File::Basename;
 use File::Copy;
+use File::Spec;
 use Cwd 'abs_path';
 
 print "------------------------------------------------------\n";
@@ -49,33 +51,10 @@ my $cTmp = "";
 my $linktype = "static";
 my $option;
 
-# Prepend win32\ if running from main directory
-my $current_pwd = `%COMSPEC% /c cd`;
-chomp $current_pwd;
-my $top_dir;
-my $win32_dir;
-my $perl_dir;
-
-if ($current_pwd =~ /\\win32\\dist$/) {
-  $win32_dir = "$current_pwd/../";
-  $top_dir = "$current_pwd/../../";
-  $perl_dir = "$current_pwd/../../perl/";
-}
-elsif ($current_pwd =~ /\\win32$/) {
-  $win32_dir = $current_pwd;
-  $top_dir = "$current_pwd/../";
-  $perl_dir = "$current_pwd/../perl/";
-}
-else {  # Assume top level folder
-  $win32_dir = "$current_pwd/win32/";
-  $top_dir = $current_pwd;
-  $perl_dir = "$current_pwd/perl/";
-}
-
-$top_dir = abs_path($top_dir);
-$win32_dir = abs_path($win32_dir);
-$perl_dir = abs_path($perl_dir);
-
+my $scriptdir = dirname(abs_path($0));
+my $win32_dir = dirname($scriptdir);
+my $top_dir = dirname($win32_dir);
+my $perl_dir = File::Spec->catdir($top_dir, "perl");
 
 print "\ntop_dir:      $top_dir\n";
 print "win32_dir:    $win32_dir\n";
@@ -189,27 +168,6 @@ $perl = "enabled";
 $install = "enabled";
 $install_devel = "enabled";
 
-print "\n\nBuilding with options:\n";
-print "======================\n\n";
-print "1.  OpenSSL support:                " . $openssl. "\n";
-print "2.  Platform SDK support:           " . $sdk . "\n";
-print "\n";
-print "3.  Install path:                   " . $install_base . "\n";
-print "4.  Install after build:            " . $install . "\n";
-print "\n";
-print "5.  Perl modules:                   " . $perl . "\n";
-print "6.  Install perl modules:           " . $perl_install . "\n";
-print "\n";
-print "7.  Quiet build (logged):           " . $logging . "\n";
-print "8.  Debug mode:                     " . $debug . "\n";
-print "\n";
-print "9.  IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
-print "10. winExtDLL agent (requires SDK): " . $b_winextdll . "\n";
-print "\n";
-print "11. Link type:                      " . $linktype . "\n";
-print "\n";
-print "12. Install development files       " . $install_devel . "\n";
-
 chdir $win32_dir;
 &build();
 &create_perl_package();
@@ -227,27 +185,6 @@ $b_winextdll = "enabled";
 $perl = "disabled";
 $install = "disabled";
 $install_devel = "disabled";
-
-print "\n\nBuilding with options:\n";
-print "======================\n\n";
-print "1.  OpenSSL support:                " . $openssl. "\n";
-print "2.  Platform SDK support:           " . $sdk . "\n";
-print "\n";
-print "3.  Install path:                   " . $install_base . "\n";
-print "4.  Install after build:            " . $install . "\n";
-print "\n";
-print "5.  Perl modules:                   " . $perl . "\n";
-print "6.  Install perl modules:           " . $perl_install . "\n";
-print "\n";
-print "7.  Quiet build (logged):           " . $logging . "\n";
-print "8.  Debug mode:                     " . $debug . "\n";
-print "\n";
-print "9.  IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
-print "10. winExtDLL agent (requires SDK): " . $b_winextdll . "\n";
-print "\n";
-print "11. Link type:                      " . $linktype . "\n";
-print "\n";
-print "12. Install development files       " . $install_devel . "\n";
 
 chdir $win32_dir;
 &build();
@@ -280,27 +217,6 @@ $perl = "enabled";
 $install = "enabled";
 $install_devel = "enabled";
 
-print "\n\nBuilding with options:\n";
-print "======================\n\n";
-print "1.  OpenSSL support:                " . $openssl. "\n";
-print "2.  Platform SDK support:           " . $sdk . "\n";
-print "\n";
-print "3.  Install path:                   " . $install_base . "\n";
-print "4.  Install after build:            " . $install . "\n";
-print "\n";
-print "5.  Perl modules:                   " . $perl . "\n";
-print "6.  Install perl modules:           " . $perl_install . "\n";
-print "\n";
-print "7.  Quiet build (logged):           " . $logging . "\n";
-print "8.  Debug mode:                     " . $debug . "\n";
-print "\n";
-print "9.  IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
-print "10. winExtDLL agent (requires SDK): " . $b_winextdll . "\n";
-print "\n";
-print "11. Link type:                      " . $linktype . "\n";
-print "\n";
-print "12. Install development files       " . $install_devel . "\n";
-
 chdir $win32_dir;
 &build();
 &create_perl_package();
@@ -318,27 +234,6 @@ $b_winextdll = "enabled";
 $perl = "disabled";
 $install = "disabled";
 $install_devel = "disabled";
-
-print "\n\nBuilding with options:\n";
-print "======================\n\n";
-print "1.  OpenSSL support:                " . $openssl. "\n";
-print "2.  Platform SDK support:           " . $sdk . "\n";
-print "\n";
-print "3.  Install path:                   " . $install_base . "\n";
-print "4.  Install after build:            " . $install . "\n";
-print "\n";
-print "5.  Perl modules:                   " . $perl . "\n";
-print "6.  Install perl modules:           " . $perl_install . "\n";
-print "\n";
-print "7.  Quiet build (logged):           " . $logging . "\n";
-print "8.  Debug mode:                     " . $debug . "\n";
-print "\n";
-print "9.  IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
-print "10. winExtDLL agent (requires SDK): " . $b_winextdll . "\n";
-print "\n";
-print "11. Link type:                      " . $linktype . "\n";
-print "\n";
-print "12. Install development files       " . $install_devel . "\n";
 
 chdir $win32_dir;
 &build();
@@ -457,6 +352,26 @@ exit;
 
 #***************************************************************
 sub build {
+  print "\n\nBuilding with options:\n";
+  print "======================\n\n";
+  print "1.  OpenSSL support:                " . $openssl. "\n";
+  print "2.  Platform SDK support:           " . $sdk . "\n";
+  print "\n";
+  print "3.  Install path:                   " . $install_base . "\n";
+  print "4.  Install after build:            " . $install . "\n";
+  print "\n";
+  print "5.  Perl modules:                   " . $perl . "\n";
+  print "6.  Install perl modules:           " . $perl_install . "\n";
+  print "\n";
+  print "7.  Quiet build (logged):           " . $logging . "\n";
+  print "8.  Debug mode:                     " . $debug . "\n";
+  print "\n";
+  print "9.  IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
+  print "10. winExtDLL agent (requires SDK): " . $b_winextdll . "\n";
+  print "\n";
+  print "11. Link type:                      " . $linktype . "\n";
+  print "\n";
+  print "12. Install development files       " . $install_devel . "\n";
 
   $cTmp = ($openssl eq "enabled" ? "--with-ssl" : "" );
   $configOpts = "$cTmp";
@@ -475,10 +390,10 @@ sub build {
   $ENV{NO_EXTERNAL_DEPS}="1";
   
   # Set PATH environment variable so Perl make tests can locate the DLL
-  $ENV{PATH} = "$current_pwd\\bin\\" . ($debug eq "enabled" ? "debug" : "release" ) . ";$ENV{PATH}";
+  $ENV{PATH} = File::Spec->catdir($top_dir, "bin", $debug eq "enabled" ? "debug" : "release") . ";$ENV{PATH}";
   
   # Set MIBDIRS environment variable so Perl make tests can locate the mibs
-  my $temp_mibdir = "$current_pwd/../mibs";
+  my $temp_mibdir = File::Spec->catdir($top_dir, "mibs");
   $temp_mibdir =~ s/\\/\//g;
   $ENV{MIBDIRS}=$temp_mibdir;
   
