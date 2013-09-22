@@ -105,11 +105,6 @@ Section "Base Components" SEC01
   File "README.txt"
   SetOutPath "$INSTDIR\bin"
 
-  File "bin\msvcm90.dll"
-  File "bin\msvcp90.dll"
-  File "bin\msvcr90.dll"
-  File "bin\Microsoft.VC90.CRT.manifest"
-
   File "bin\netsnmp.dll"
   File "bin\encode_keychange.exe"
   File "bin\snmpvacm.exe"
@@ -135,11 +130,6 @@ Section "Base Components" SEC01
   SetOverwrite ifnewer
   File "README.txt"
   SetOutPath "$INSTDIR\bin"
-
-  File "bin\msvcm90.dll"
-  File "bin\msvcp90.dll"
-  File "bin\msvcr90.dll"
-  File "bin\Microsoft.VC90.CRT.manifest"
 
   File "bin.ssl\netsnmp.dll"
   File "bin.ssl\encode_keychange.exe"
@@ -212,11 +202,6 @@ SectionGroup /e "Net-SNMP Agent Service"
     ; Delete agent otherwise re-installing a different agent may not work because of date stamps
     Delete "$INSTDIR\bin\snmpd.exe"  
 
-    File "bin\msvcm90.dll"
-    File "bin\msvcp90.dll"
-    File "bin\msvcr90.dll"
-    File "bin\Microsoft.VC90.CRT.manifest"
-
     StrCmp $openSSL "false" SEC02_noOpenSSL SEC02_OpenSSL
     SEC02_noOpenSSL:
       File "bin\snmpd.exe"
@@ -253,11 +238,6 @@ SectionGroup /e "Net-SNMP Agent Service"
 
     ; Delete agent otherwise re-installing a different agent may not work because of date stamps
     Delete "$INSTDIR\bin\snmpd.exe"  
-
-    File "bin\msvcm90.dll"
-    File "bin\msvcp90.dll"
-    File "bin\msvcr90.dll"
-    File "bin\Microsoft.VC90.CRT.manifest"
 
     StrCmp $openSSL "false" SEC03_noOpenSSL SEC03_OpenSSL
     SEC03_noOpenSSL:
@@ -296,11 +276,6 @@ Section "Net-SNMP Trap Service" SEC04
   SetOutPath "$INSTDIR\bin"
 
   StrCmp $openSSL "false" SEC04_noOpenSSL SEC04_OpenSSL
-
-  File "bin\msvcm90.dll"
-  File "bin\msvcp90.dll"
-  File "bin\msvcr90.dll"
-  File "bin\Microsoft.VC90.CRT.manifest"
 
   SEC04_noOpenSSL:
   File "bin\snmptrapd.exe"
@@ -976,11 +951,6 @@ Section Uninstall
   Delete "$INSTDIR\bin\net-snmp-perl-test.pl"
   ; ideally we should check whether this file has changed
   Delete "$INSTDIR\etc\snmp\snmp.conf"
-
-  Delete "$INSTDIR\bin\msvcm90.dll"
-  Delete "$INSTDIR\bin\msvcp90.dll"
-  Delete "$INSTDIR\bin\msvcr90.dll"
-  Delete "$INSTDIR\bin\Microsoft.VC90.CRT.manifest"
 
   Delete "$INSTDIR\bin\snmptrapd.exe"
   Delete "$INSTDIR\bin\snmpd.exe"
