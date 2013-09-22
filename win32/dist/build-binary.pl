@@ -299,6 +299,7 @@ close TEMP;
   {
     my $file_out = "$install_base/net-snmp.nsi";
     my $file_in = "$install_base/net-snmp.nsi.in";
+    my $suffix = $ENV{LIB} =~ /\\x64|\\amd64/ ? "x64" : "x86";
   
     open (FILE_OUT, ">$file_out") || die "Can't Open $file_out\n";
     open (FILE_IN, "<$file_in") || die "Can't Open $file_in\n";
@@ -312,17 +313,9 @@ close TEMP;
       s/!define PRODUCT_MIN_VERSION.*/!define PRODUCT_MIN_VERSION \"$version_min\"/;
       s/!define PRODUCT_REVISION.*/!define PRODUCT_REVISION \"$version_rev\"/;
       s/!define PRODUCT_EXE_VERSION.*/!define PRODUCT_EXE_VERSION \"$installer_exe_version\"/;
-	  if ($ENV{LIB} =~ /\\x64/) {
-            s/!define INSTALLER_PLATFORM.*/!define INSTALLER_PLATFORM \"x64\"/;
-            s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".x64.exe\"/;
-            s/!define WIN32_PLATFORM.*/!define PRODUCT_EXE_SUFFIX \"x64\"/;
-	  }
-	  else {
-            s/!define INSTALLER_PLATFORM.*/!define INSTALLER_PLATFORM \"x86\"/;
-            s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".x86.exe"/;
-            s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".x86.exe"/;
-            s/!define WIN32_PLATFORM.*/!define PRODUCT_EXE_SUFFIX \"x86\"/;
-	  }
+      s/!define INSTALLER_PLATFORM.*/!define INSTALLER_PLATFORM \"$suffix\"/;
+      s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".$suffix.exe\"/;
+      s/!define WIN32_PLATFORM.*/!define PRODUCT_EXE_SUFFIX \"$suffix\"/;
   
       print FILE_OUT $_ . "\n";
     }
