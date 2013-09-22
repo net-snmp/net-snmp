@@ -12,17 +12,22 @@ use Cwd 'abs_path';
 
 print "------------------------------------------------------\n";
 
-my $tar_command = 'C:\msys\1.0\bin\tar.exe';
-my $gzip_command = 'C:\msys\1.0\bin\gzip.exe';
+my $tar_command;
+my $gzip_command;
+for my $msysbindir (("C:\\msys\\1.0\\bin", "C:\\mingw\\msys\\1.0\\bin")) {
+    $tar_command = File::Spec->catfile($msysbindir, "tar.exe");
+    $gzip_command = File::Spec->catfile($msysbindir, "gzip.exe");
+    last if (-f $tar_command);
+}
 
 if (! (-f $tar_command)) {
-  die ("Could not find tar command ($tar_command)");
+  die ("Could not find tar command");
 }
 else {
   print "tar command:  $tar_command\n";
 }
 if (! (-f $gzip_command)) {
-  die ("Could not find gzip command ($gzip_command)");
+  die ("Could not find gzip command");
 }
 else {
   print "gzip command: $gzip_command\n";
