@@ -1,5 +1,3 @@
 @echo off
 
-cd win32 > NUL: 2>&1
-perl build-binary.pl
-
+perl %~dp0\build-binary.pl
