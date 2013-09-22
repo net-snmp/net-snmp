@@ -33,6 +33,13 @@ else {
   print "gzip command: $gzip_command\n";
 }
 
+my $makensis;
+for my $nsisdir (("C:\\Program Files\\NSIS", "C:\\Program Files (x86)\\NSIS")) {
+    $makensis = File::Spec->catfile($nsisdir, "makensis.exe");
+    last if (-f $makensis);
+}
+die("makensis.exe not found") if (!(-f $makensis));
+
 my $openssldir = $ENV{TARGET_CPU} eq "x64" ? "C:\\OpenSSL-Win64" : "C:\\OpenSSL-Win32";
 my $opensslincdir = $openssldir . "\\include";
 my $openssllibdir = $openssldir . "\\lib\\VC";
@@ -278,7 +285,7 @@ print "=============================\n\n";
 
 chdir $top_dir;
 copy('win32\dist\installer\SetEnVar.nsi',"$install_base/") || die ("Could not copy file: $?");
-copy('win32\dist\installer\net-snmp.nsi',"$install_base/net-snmp.nsi.in") || die ("Could not copy file: $?");
+copy('win32\dist\installer\net-snmp.nsi',"$install_base/net-snmp.nsi") || die ("Could not copy file: $?");
 copy('win32\dist\installer\Add2Path.nsi',"$install_base/") || die ("Could not copy file: $?");
 copy('win32\dist\installer\net-snmp-header1.bmp',"$install_base/") || die ("Could not copy file: $?");
 
@@ -293,35 +300,20 @@ close TEMP;
 open (TEMP, ">$install_base/etc/snmp/snmp.conf") || die ("Could not create file: $?");
 close TEMP;
 
-#
-# Build net-snmp.nsi file
-#
-  {
-    my $file_out = "$install_base/net-snmp.nsi";
-    my $file_in = "$install_base/net-snmp.nsi.in";
-    my $suffix = $ENV{LIB} =~ /\\x64|\\amd64/ ? "x64" : "x86";
-  
-    open (FILE_OUT, ">$file_out") || die "Can't Open $file_out\n";
-    open (FILE_IN, "<$file_in") || die "Can't Open $file_in\n";
-    
-    print "creating $file_out\n";
-	  
-    while (<FILE_IN>)
-    {
-      chomp;
-      s/!define PRODUCT_MAJ_VERSION.*/!define PRODUCT_MAJ_VERSION \"$version_maj\"/;
-      s/!define PRODUCT_MIN_VERSION.*/!define PRODUCT_MIN_VERSION \"$version_min\"/;
-      s/!define PRODUCT_REVISION.*/!define PRODUCT_REVISION \"$version_rev\"/;
-      s/!define PRODUCT_EXE_VERSION.*/!define PRODUCT_EXE_VERSION \"$installer_exe_version\"/;
-      s/!define INSTALLER_PLATFORM.*/!define INSTALLER_PLATFORM \"$suffix\"/;
-      s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".$suffix.exe\"/;
-      s/!define WIN32_PLATFORM.*/!define PRODUCT_EXE_SUFFIX \"$suffix\"/;
-  
-      print FILE_OUT $_ . "\n";
-    }
-    close FILE_IN;
-    close FILE_OUT;
-  }
+print "\n\nCopying documentation:\n";
+print "=============================\n\n";
+
+# To do: replace the two lines below with commands that build the .chm file.
+open out, ">$install_base/docs/net-snmp.chm";
+close out;
+
+print "\n\nBuilding installer:\n";
+print "=============================\n\n";
+
+my $suffix = $ENV{LIB} =~ /\\x64|\\amd64/ ? "x64" : "x86";
+if (system("\"$makensis\" /DPRODUCT_MAJ_VERSION=\"$version_maj\" /DPRODUCT_MIN_VERSION=\"$version_min\" /DPRODUCT_REVISION=\"$version_rev\" /DPRODUCT_EXE_VERSION=\"$installer_exe_version\" /DINSTALLER_PLATFORM=\"$suffix\" \"$install_base/net-snmp.nsi\"") != 0) {
+    die("Building installer failed");
+}
 
 print "\n=======\n";
 print "Done!!!\n";

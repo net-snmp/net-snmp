@@ -8,15 +8,8 @@ SetCompressor /SOLID lzma
 !insertmacro GetOptions
 var cmdLineParameters
 
-; Building a x86 or x64 binary
-!define INSTALLER_PLATFORM "x86"
-
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Net-SNMP"
-!define PRODUCT_MAJ_VERSION "5"
-!define PRODUCT_MIN_VERSION "7"
-!define PRODUCT_REVISION "0"
-!define PRODUCT_EXE_VERSION "1"
 !define PRODUCT_EXE_SUFFIX ".${INSTALLER_PLATFORM}.exe"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.org"
 !define PRODUCT_DIR_REGKEY "Software\Net-SNMP"
