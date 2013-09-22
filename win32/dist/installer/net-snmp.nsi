@@ -79,7 +79,7 @@ var ICONS_GROUP
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_MAJ_VERSION}.${PRODUCT_MIN_VERSION}.${PRODUCT_REVISION}"
-OutFile "..\\net-snmp-${PRODUCT_MAJ_VERSION}.\
+OutFile "net-snmp-${PRODUCT_MAJ_VERSION}.\
                   ${PRODUCT_MIN_VERSION}.\
                   ${PRODUCT_REVISION}\
                   -${PRODUCT_EXE_VERSION}\
