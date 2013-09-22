@@ -28,6 +28,10 @@ else {
   print "gzip command: $gzip_command\n";
 }
 
+my $openssldir = $ENV{TARGET_CPU} eq "x64" ? "C:\\OpenSSL-Win64" : "C:\\OpenSSL-Win32";
+my $opensslincdir = $openssldir . "\\include";
+my $openssllibdir = $openssldir . "\\lib\\VC";
+
 my $version = "unknown";
 my $version_for_perl = "unknown";
 my $version_maj;
@@ -386,7 +390,10 @@ sub build {
   
   # Set to not search for non-existent ".dep" files
   $ENV{NO_EXTERNAL_DEPS}="1";
-  
+
+  $ENV{INCLUDE} .= ";$opensslincdir";
+  $ENV{LIB}     .= ";$openssllibdir";
+
   # Set PATH environment variable so Perl make tests can locate the DLL
   $ENV{PATH} = File::Spec->catdir($top_dir, "bin", $debug eq "enabled" ? "debug" : "release") . ";$ENV{PATH}";
   
