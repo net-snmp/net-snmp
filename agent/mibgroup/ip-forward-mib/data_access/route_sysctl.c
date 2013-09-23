@@ -166,7 +166,7 @@ _load_routing_table_from_sysctl(netsnmp_container* container, int *index,
     int mib[6];
     size_t needed;
     int err;
-    u_char dest_len, dest_type, wildcard_address;
+    u_char dest_len, dest_type;
     struct rt_msghdr *rtm;
 
     buf = NULL;
@@ -253,25 +253,6 @@ _load_routing_table_from_sysctl(netsnmp_container* container, int *index,
 	    if_addr = (struct sockaddr *)addr_ptr;
 	    addr_ptr += SA_SIZE(if_addr);
 	}
-        /*
-         * From route(4)..
-         *
-         *     wildcard routing entry is specified with a zero destination
-         *     address value, and a mask of all zeroes.
-         */
-        wildcard_address = 0;
-        if ((rtm->rtm_addrs & (RTA_DST|RTA_NETMASK)) == (RTA_DST|RTA_NETMASK))
-            switch (family) {
-            case AF_INET:
-                if (((struct sockaddr_in*)dest_sa)->sin_addr.s_addr == INADDR_ANY &&
-                    ((struct sockaddr_in*)netmask_sa)->sin_addr.s_addr == INADDR_ANY)
-                    wildcard_address = 1;
-                break;
-            case AF_INET6:
-                if (!dest_sa && !netmask_sa)
-                    wildcard_address = 1;
-                break;
-            }
 
         entry->if_index = rtm->rtm_index;
 
@@ -353,11 +334,9 @@ _load_routing_table_from_sysctl(netsnmp_container* container, int *index,
                 the same destination.  The value { 0 0 } shall be used 
                 as the default value for this object."
         */
-        if (wildcard_address) {
-            entry->rt_policy = calloc(3, sizeof(oid));
-            entry->rt_policy[2] = entry->if_index;
-            entry->rt_policy_len = sizeof(oid)*3;
-        }
+	entry->rt_policy = calloc(3, sizeof(oid));
+	entry->rt_policy[2] = entry->if_index;
+	entry->rt_policy_len = sizeof(oid)*3;
 #endif
 
         entry->rt_type = _type_from_flags(rtm->rtm_flags);
