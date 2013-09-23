@@ -44,6 +44,14 @@
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/snmp_assert.h>
 
+#ifndef  MSG_DONTWAIT
+#define MSG_DONTWAIT 0
+#endif
+
+#ifndef  MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 void
 _netsnmp_udp_sockopt_set(int fd, int local)
 {

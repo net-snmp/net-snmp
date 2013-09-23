@@ -8,15 +8,8 @@ SetCompressor /SOLID lzma
 !insertmacro GetOptions
 var cmdLineParameters
 
-; Building a x86 or x64 binary
-!define INSTALLER_PLATFORM "x86"
-
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Net-SNMP"
-!define PRODUCT_MAJ_VERSION "5"
-!define PRODUCT_MIN_VERSION "7"
-!define PRODUCT_REVISION "0"
-!define PRODUCT_EXE_VERSION "1"
 !define PRODUCT_EXE_SUFFIX ".${INSTALLER_PLATFORM}.exe"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.org"
 !define PRODUCT_DIR_REGKEY "Software\Net-SNMP"
@@ -79,7 +72,7 @@ var ICONS_GROUP
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_MAJ_VERSION}.${PRODUCT_MIN_VERSION}.${PRODUCT_REVISION}"
-OutFile "..\\net-snmp-${PRODUCT_MAJ_VERSION}.\
+OutFile "net-snmp-${PRODUCT_MAJ_VERSION}.\
                   ${PRODUCT_MIN_VERSION}.\
                   ${PRODUCT_REVISION}\
                   -${PRODUCT_EXE_VERSION}\
@@ -104,11 +97,6 @@ Section "Base Components" SEC01
   SetOverwrite ifnewer
   File "README.txt"
   SetOutPath "$INSTDIR\bin"
-
-  File "bin\msvcm90.dll"
-  File "bin\msvcp90.dll"
-  File "bin\msvcr90.dll"
-  File "bin\Microsoft.VC90.CRT.manifest"
 
   File "bin\netsnmp.dll"
   File "bin\encode_keychange.exe"
@@ -135,11 +123,6 @@ Section "Base Components" SEC01
   SetOverwrite ifnewer
   File "README.txt"
   SetOutPath "$INSTDIR\bin"
-
-  File "bin\msvcm90.dll"
-  File "bin\msvcp90.dll"
-  File "bin\msvcr90.dll"
-  File "bin\Microsoft.VC90.CRT.manifest"
 
   File "bin.ssl\netsnmp.dll"
   File "bin.ssl\encode_keychange.exe"
@@ -212,11 +195,6 @@ SectionGroup /e "Net-SNMP Agent Service"
     ; Delete agent otherwise re-installing a different agent may not work because of date stamps
     Delete "$INSTDIR\bin\snmpd.exe"  
 
-    File "bin\msvcm90.dll"
-    File "bin\msvcp90.dll"
-    File "bin\msvcr90.dll"
-    File "bin\Microsoft.VC90.CRT.manifest"
-
     StrCmp $openSSL "false" SEC02_noOpenSSL SEC02_OpenSSL
     SEC02_noOpenSSL:
       File "bin\snmpd.exe"
@@ -253,11 +231,6 @@ SectionGroup /e "Net-SNMP Agent Service"
 
     ; Delete agent otherwise re-installing a different agent may not work because of date stamps
     Delete "$INSTDIR\bin\snmpd.exe"  
-
-    File "bin\msvcm90.dll"
-    File "bin\msvcp90.dll"
-    File "bin\msvcr90.dll"
-    File "bin\Microsoft.VC90.CRT.manifest"
 
     StrCmp $openSSL "false" SEC03_noOpenSSL SEC03_OpenSSL
     SEC03_noOpenSSL:
@@ -296,11 +269,6 @@ Section "Net-SNMP Trap Service" SEC04
   SetOutPath "$INSTDIR\bin"
 
   StrCmp $openSSL "false" SEC04_noOpenSSL SEC04_OpenSSL
-
-  File "bin\msvcm90.dll"
-  File "bin\msvcp90.dll"
-  File "bin\msvcr90.dll"
-  File "bin\Microsoft.VC90.CRT.manifest"
 
   SEC04_noOpenSSL:
   File "bin\snmptrapd.exe"
@@ -977,11 +945,6 @@ Section Uninstall
   ; ideally we should check whether this file has changed
   Delete "$INSTDIR\etc\snmp\snmp.conf"
 
-  Delete "$INSTDIR\bin\msvcm90.dll"
-  Delete "$INSTDIR\bin\msvcp90.dll"
-  Delete "$INSTDIR\bin\msvcr90.dll"
-  Delete "$INSTDIR\bin\Microsoft.VC90.CRT.manifest"
-
   Delete "$INSTDIR\bin\snmptrapd.exe"
   Delete "$INSTDIR\bin\snmpd.exe"
   Delete "$INSTDIR\bin\snmpwalk.exe"
@@ -1485,30 +1448,18 @@ SectionEnd
 Function IsSSLInstalled
   Push $R0
   Push $R1
-  ReadEnvStr $R0 "OPENSSL_CONF"
-    
-  IfFileExists "$R0" 0 noSSL
-    Goto checkVersion
-  noSSL:
-    MessageBox MB_YESNO|MB_ICONQUESTION "OpenSSL does not appear to be installed.  OpenSSL is required for this installation of Net-SNMP.  Please install OpenSSL from http://www.slproweb.com/products/Win32OpenSSL.html and try again.  Would you like to continue installing anyways?" IDYES continueInstall
-  Quit
-  
-  checkVersion:
-  ; OpenSSL 1.0.0 (32-bit version)
-  ReadRegStr "$R0" HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenSSL (32-bit)_is1" "DisplayName"
-  StrCpy $R1 $R0 13  ;  Truncate to "OpenSSL 1.0.0" or "OpenSSL 0.9.8" - strlen("OpenSSL x.y.z") = 13
-  ClearErrors
-  StrCmp $R1 "OpenSSL 1.0.0" 0 checkVersion2
-  MessageBox MB_OK "This package is known not to work with OpenSSL 1.0.0.  Please install the latest version of 0.9.8 from http://www.slproweb.com/products/Win32OpenSSL.html and try again."
+
+  GetDLLVersion libeay32.dll $R0 $R1
+  IfErrors noSSL
+
+  ; Continue installing if the DLL version is >= 1.0.0.0
+  IntCmpU 65536 $R0 continueInstall continueInstall
+
+  MessageBox MB_OK "This package is known not to work with OpenSSL versions before 1.0.0.  Please install the latest OpenSSL version from http://www.slproweb.com/products/Win32OpenSSL.html and try again."
   Quit
 
-  checkVersion2:
-  ; OpenSSL 1.0.0 (64-bit version)   [Probably!]
-  ReadRegStr "$R0" HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenSSL (64-bit)_is1" "DisplayName"
-  StrCpy $R1 $R0 13  ;  Truncate to "OpenSSL 1.0.0" or "OpenSSL 0.9.8" - strlen("OpenSSL x.y.z") = 13
-  ClearErrors
-  StrCmp $R1 "OpenSSL 1.0.0" 0 continueInstall
-  MessageBox MB_OK "This package is known not to work with OpenSSL 1.0.0.  Please install the latest version of 0.9.8 from http://www.slproweb.com/products/Win32OpenSSL.html and try again."
+  noSSL:
+    MessageBox MB_YESNO|MB_ICONQUESTION "OpenSSL does not appear to be installed.  OpenSSL is required for this installation of Net-SNMP.  Please install OpenSSL from http://www.slproweb.com/products/Win32OpenSSL.html and try again.  Would you like to continue installing anyways?" IDYES continueInstall
   Quit
   
   continueInstall:
