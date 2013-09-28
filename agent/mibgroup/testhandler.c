@@ -346,8 +346,7 @@ my_test_instance_handler(netsnmp_mib_handler *handler,
         /*
          * store old info for undo later 
          */
-        memdup((u_char **) & accesses_cache,
-               (u_char *) & accesses, sizeof(accesses));
+        accesses_cache = netsnmp_memdup(&accesses, sizeof(accesses));
         if (accesses_cache == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);

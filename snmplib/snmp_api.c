@@ -1276,8 +1276,8 @@ snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
     }
     pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
     pdu->securityModel = session->securityModel;
-    if (memdup(&pdu->contextEngineID, probeEngineID, probeEngineID_len) !=
-        SNMPERR_SUCCESS) {
+    pdu->contextEngineID = netsnmp_memdup(probeEngineID, probeEngineID_len);
+    if (!pdu->contextEngineID) {
         snmp_log(LOG_ERR, "failed to clone memory for rfc5343 probe\n");
         snmp_free_pdu(pdu);
         return SNMP_ERR_GENERR;
@@ -1304,18 +1304,20 @@ snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
         ASN_OCTET_STR == response->variables->type  &&
         NULL != response->variables->val.string &&
         response->variables->val_len > 0) {
-        if (memdup(&session->contextEngineID,
-                   response->variables->val.string,
-                   response->variables->val_len) != SNMPERR_SUCCESS) {
+        session->contextEngineID =
+            netsnmp_memdup(response->variables->val.string,
+                           response->variables->val_len);
+        if (!session->contextEngineID) {
             snmp_log(LOG_ERR, "failed rfc5343 contextEngineID probing: memory allocation failed\n");
             return SNMP_ERR_GENERR;
         }
         
         /* technically there likely isn't a securityEngineID but just
            in case anyone goes looking we might as well have one */
-        if (memdup(&session->securityEngineID,
-                   response->variables->val.string,
-                   response->variables->val_len) != SNMPERR_SUCCESS) {
+        session->securityEngineID =
+            netsnmp_memdup(response->variables->val.string,
+                           response->variables->val_len);
+        if (!session->securityEngineID) {
             snmp_log(LOG_ERR, "failed rfc5343 securityEngineID probing: memory allocation failed\n");
             return SNMP_ERR_GENERR;
         }

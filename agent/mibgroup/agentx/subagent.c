@@ -768,7 +768,7 @@ agentx_register_callbacks(netsnmp_session * s)
 
     DEBUGMSGTL(("agentx/subagent",
                 "registering callbacks for session %p\n", s));
-    memdup((u_char **)&sess_p, &s, sizeof(s));
+    sess_p = netsnmp_memdup(&s, sizeof(s));
     netsnmp_assert(sess_p);
     s->myvoid = sess_p;
     if (!sess_p)

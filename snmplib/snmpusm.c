@@ -2922,8 +2922,9 @@ usm_create_user_from_session(netsnmp_session * session)
         /*
          * copy in the engineID 
          */
-        if (memdup(&user->engineID, session->securityEngineID,
-                   session->securityEngineIDLen) != SNMPERR_SUCCESS) {
+        user->engineID = netsnmp_memdup(session->securityEngineID,
+                                        session->securityEngineIDLen);
+        if (session->securityEngineID && !user->engineID) {
             usm_free_user(user);
             return SNMPERR_GENERR;
         }
@@ -2970,8 +2971,9 @@ usm_create_user_from_session(netsnmp_session * session)
             && session->securityAuthLocalKeyLen != 0) {
             /* already localized key passed in.  use it */
             SNMP_FREE(user->authKey);
-            if (memdup(&user->authKey, session->securityAuthLocalKey,
-                       session->securityAuthLocalKeyLen) != SNMPERR_SUCCESS) {
+            user->authKey = netsnmp_memdup(session->securityAuthLocalKey,
+                                           session->securityAuthLocalKeyLen);
+            if (!user->authKey) {
                 usm_free_user(user);
                 return SNMPERR_GENERR;
             }
@@ -3017,8 +3019,9 @@ usm_create_user_from_session(netsnmp_session * session)
             && session->securityPrivLocalKeyLen != 0) {
             /* already localized key passed in.  use it */
             SNMP_FREE(user->privKey);
-            if (memdup(&user->privKey, session->securityPrivLocalKey,
-                       session->securityPrivLocalKeyLen) != SNMPERR_SUCCESS) {
+            user->privKey = netsnmp_memdup(session->securityPrivLocalKey,
+                                           session->securityPrivLocalKeyLen);
+            if (!user->privKey) {
                 usm_free_user(user);
                 return SNMPERR_GENERR;
             }
@@ -4512,7 +4515,8 @@ usm_parse_create_usmUser(const char *token, char *line)
         /*
          * assume the same as the authentication key 
          */
-        memdup(&newuser->privKey, newuser->authKey, newuser->authKeyLen);
+        newuser->privKey = netsnmp_memdup(newuser->authKey,
+                                          newuser->authKeyLen);
         newuser->privKeyLen = newuser->authKeyLen;
     } else {
         cp = copy_nword(cp, buf, sizeof(buf));

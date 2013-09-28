@@ -156,9 +156,8 @@ create_expObjectTable_data(void)
 
     StorageNew->expObjectIDWildcard = EXPOBJCETIDWILDCARD_FALSE;
     StorageNew->expObjectSampleType = EXPOBJCETSAMPLETYPE_ABSOLUTEVALUE;
-    memdup((unsigned char **)
-           &(StorageNew->expObjectDeltaDiscontinuityID),
-           (unsigned char *) TimeInstance, sizeof(TimeInstance));
+    StorageNew->expObjectDeltaDiscontinuityID =
+        netsnmp_memdup(TimeInstance, sizeof(TimeInstance));
     StorageNew->expObjectDeltaDiscontinuityIDLen =
         sizeof(TimeInstance) / sizeof(oid);
 
@@ -552,8 +551,7 @@ write_expObjectID(int action,
          */
         tmpvar = StorageTmp->expObjectID;
         tmplen = StorageTmp->expObjectIDLen;
-        memdup((u_char **) & StorageTmp->expObjectID, var_val,
-               var_val_len);
+        StorageTmp->expObjectID = netsnmp_memdup(var_val, var_val_len);
         StorageTmp->expObjectIDLen = var_val_len / sizeof(oid);
         break;
 
@@ -811,8 +809,8 @@ write_expObjectDeltaDiscontinuityID(int action,
          */
         tmpvar = StorageTmp->expObjectDeltaDiscontinuityID;
         tmplen = StorageTmp->expObjectDeltaDiscontinuityIDLen;
-        memdup((u_char **) & StorageTmp->expObjectDeltaDiscontinuityID,
-               var_val, var_val_len);
+        StorageTmp->expObjectDeltaDiscontinuityID =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->expObjectDeltaDiscontinuityIDLen =
             var_val_len / sizeof(oid);
         break;
@@ -1075,8 +1073,7 @@ write_expObjectConditional(int action,
          */
         tmpvar = StorageTmp->expObjectConditional;
         tmplen = StorageTmp->expObjectConditionalLen;
-        memdup((u_char **) & StorageTmp->expObjectConditional, var_val,
-               var_val_len);
+        StorageTmp->expObjectConditional = netsnmp_memdup(var_val, var_val_len);
         StorageTmp->expObjectConditionalLen = var_val_len / sizeof(oid);
         break;
 

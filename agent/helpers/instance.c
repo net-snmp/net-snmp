@@ -656,7 +656,7 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
             return SNMP_ERR_NOERROR;
         }
 
-        memdup((u_char **) & it_save, (u_char *)&it, sizeof(u_long));
+        it_save = netsnmp_memdup(&it, sizeof(u_long));
         if (it_save == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);

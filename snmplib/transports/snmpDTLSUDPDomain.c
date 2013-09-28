@@ -588,8 +588,8 @@ _netsnmp_add_buffered_data(bio_cache *cachep, char *buf, size_t size) {
                buf, size);
         cachep->write_cache_len = newsize;
     } else {
-        if (SNMPERR_SUCCESS !=
-            memdup((u_char **) &cachep->write_cache, buf, size)) {
+        cachep->write_cache = netsnmp_memdup(buf, size);
+        if (!cachep->write_cache) {
             /* ack! malloc failure */
             /* XXX: free and close */
             return SNMPERR_GENERR;

@@ -901,7 +901,7 @@ write_usmUserAuthKeyChange(int action,
         resetOnFail = 1;
         oldkey = uptr->authKey;
         oldkeylen = uptr->authKeyLen;
-        memdup(&uptr->authKey, buf, buflen);
+        uptr->authKey = netsnmp_memdup(buf, buflen);
         if (uptr->authKey == NULL) {
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         }
@@ -1149,7 +1149,7 @@ write_usmUserPrivKeyChange(int action,
         resetOnFail = 1;
         oldkey = uptr->privKey;
         oldkeylen = uptr->privKeyLen;
-        memdup(&uptr->privKey, buf, buflen);
+        uptr->privKey = netsnmp_memdup(buf, buflen);
         if (uptr->privKey == NULL) {
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         }

@@ -437,8 +437,7 @@ write_mteObjectsID(int action,
          */
         tmpvar = StorageTmp->mteObjectsID;
         tmplen = StorageTmp->mteObjectsIDLen;
-        memdup((u_char **) & StorageTmp->mteObjectsID, var_val,
-               var_val_len);
+        StorageTmp->mteObjectsID = netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteObjectsIDLen = var_val_len / sizeof(oid);
         break;
 

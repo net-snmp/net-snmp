@@ -293,8 +293,8 @@ write_mteTriggerExistenceTest(int action,
          */
         tmpvar = StorageTmp->mteTriggerExistenceTest;
         tmplen = StorageTmp->mteTriggerExistenceTestLen;
-        memdup((u_char **) & StorageTmp->mteTriggerExistenceTest, var_val,
-               var_val_len);
+        StorageTmp->mteTriggerExistenceTest =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerExistenceTestLen = var_val_len;
         break;
 
@@ -385,8 +385,8 @@ write_mteTriggerExistenceStartup(int action,
          */
         tmpvar = StorageTmp->mteTriggerExistenceStartup;
         tmplen = StorageTmp->mteTriggerExistenceStartupLen;
-        memdup((u_char **) & StorageTmp->mteTriggerExistenceStartup,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerExistenceStartup =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerExistenceStartupLen = var_val_len;
         break;
 
@@ -477,8 +477,8 @@ write_mteTriggerExistenceObjectsOwner(int action,
          */
         tmpvar = StorageTmp->mteTriggerExistenceObjectsOwner;
         tmplen = StorageTmp->mteTriggerExistenceObjectsOwnerLen;
-        memdup((u_char **) & StorageTmp->mteTriggerExistenceObjectsOwner,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerExistenceObjectsOwner =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerExistenceObjectsOwnerLen = var_val_len;
         break;
 
@@ -569,8 +569,8 @@ write_mteTriggerExistenceObjects(int action,
          */
         tmpvar = StorageTmp->mteTriggerExistenceObjects;
         tmplen = StorageTmp->mteTriggerExistenceObjectsLen;
-        memdup((u_char **) & StorageTmp->mteTriggerExistenceObjects,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerExistenceObjects =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerExistenceObjectsLen = var_val_len;
         break;
 
@@ -661,8 +661,8 @@ write_mteTriggerExistenceEventOwner(int action,
          */
         tmpvar = StorageTmp->mteTriggerExistenceEventOwner;
         tmplen = StorageTmp->mteTriggerExistenceEventOwnerLen;
-        memdup((u_char **) & StorageTmp->mteTriggerExistenceEventOwner,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerExistenceEventOwner =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerExistenceEventOwnerLen = var_val_len;
         break;
 
@@ -752,8 +752,8 @@ write_mteTriggerExistenceEvent(int action,
          */
         tmpvar = StorageTmp->mteTriggerExistenceEvent;
         tmplen = StorageTmp->mteTriggerExistenceEventLen;
-        memdup((u_char **) & StorageTmp->mteTriggerExistenceEvent, var_val,
-               var_val_len);
+        StorageTmp->mteTriggerExistenceEvent =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerExistenceEventLen = var_val_len;
         break;
 

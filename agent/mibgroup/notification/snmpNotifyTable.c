@@ -326,7 +326,7 @@ notifyTable_register_notifications(int major, int minor,
         return 0;
     }
     ptr = snmpTargetAddrTable_create();
-    memdup((u_char**)&ptr->nameData, buf, bufLen);
+    ptr->nameData = netsnmp_memdup(buf, bufLen);
     ptr->nameLen = bufLen;
     memcpy(ptr->tDomain, t->domain, t->domain_length * sizeof(oid));
     ptr->tDomainLen = t->domain_length;

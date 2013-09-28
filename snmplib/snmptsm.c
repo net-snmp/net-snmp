@@ -151,8 +151,8 @@ tsm_clone_pdu(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
        which was already copied by snmp_clone_pdu before handing it to
        us. */
 
-    memdup((u_char **) &newref->tmStateRef, oldref->tmStateRef,
-           sizeof(*oldref->tmStateRef));
+    newref->tmStateRef = netsnmp_memdup(oldref->tmStateRef,
+                                        sizeof(*oldref->tmStateRef));
     return SNMPERR_SUCCESS;
 }
 
@@ -367,11 +367,9 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     }
 
     /* put the transport state reference into the PDU for the transport */
-    if (SNMPERR_SUCCESS !=
-        memdup((u_char **) &parms->pdu->transport_data,
-               tmStateRef, sizeof(*tmStateRef))) {
+    parms->pdu->transport_data = netsnmp_memdup(tmStateRef, sizeof(*tmStateRef));
+    if (!parms->pdu->transport_data)
         snmp_log(LOG_ERR, "tsm: malloc failure\n");
-    }
     parms->pdu->transport_data_length = sizeof(*tmStateRef);
 
     if (tmStateRefLocal)

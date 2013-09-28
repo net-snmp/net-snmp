@@ -243,8 +243,8 @@ write_mteTriggerDeltaDiscontinuityID(int action,
          */
         tmpvar = StorageTmp->mteTriggerDeltaDiscontinuityID;
         tmplen = StorageTmp->mteTriggerDeltaDiscontinuityIDLen;
-        memdup((u_char **) & StorageTmp->mteTriggerDeltaDiscontinuityID,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerDeltaDiscontinuityID =
+            netsnmp_memdup(var_val, var_val_len);
         StorageTmp->mteTriggerDeltaDiscontinuityIDLen =
             var_val_len / sizeof(oid);
         break;
