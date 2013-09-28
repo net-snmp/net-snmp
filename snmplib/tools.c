@@ -231,31 +231,26 @@ malloc_random(size_t * size)
 
 }                               /* end malloc_random() */
 
-/** Duplicates a memory block.
- *  Copies a existing memory location from a pointer to another, newly
-    malloced, pointer.
-
- *	@param to       Pointer to allocate and copy memory to.
- *      @param from     Pointer to copy memory from.
- *      @param size     Size of the data to be copied.
+/**
+ * Duplicates a memory block.
+ *
+ * @param[in] from Pointer to copy memory from.
+ * @param[in] size Size of the data to be copied.
  *      
- *	@return SNMPERR_SUCCESS	on success, SNMPERR_GENERR on failure.
+ * @return Pointer to the duplicated memory block, or NULL if memory allocation
+ * failed.
  */
-int
-memdup(u_char ** to, const void * from, size_t size)
+void *netsnmp_memdup(const void *from, size_t size)
 {
-    if (to == NULL)
-        return SNMPERR_GENERR;
-    if (from == NULL) {
-        *to = NULL;
-        return SNMPERR_SUCCESS;
-    }
-    if ((*to = (u_char *) malloc(size)) == NULL)
-        return SNMPERR_GENERR;
-    memcpy(*to, from, size);
-    return SNMPERR_SUCCESS;
+    void *to = NULL;
 
-}                               /* end memdup() */
+    if (from) {
+        to = malloc(size);
+        if (to)
+            memcpy(to, from, size);
+    }
+    return to;
+}                               /* end netsnmp_memdup() */
 
 /** copies a (possible) unterminated string of a given length into a
  *  new buffer and null terminates it as well (new buffer MAY be one

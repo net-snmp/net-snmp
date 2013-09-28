@@ -269,22 +269,18 @@ ksm_insert_cache(long msgid, krb5_auth_context auth_context,
 {
     struct ksm_cache_entry *entry;
     int             bucket;
-    int             retval;
 
     entry = SNMP_MALLOC_STRUCT(ksm_cache_entry);
-
     if (!entry)
         return SNMPERR_MALLOC;
 
     entry->msgid = msgid;
     entry->auth_context = auth_context;
     entry->refcount = 1;
-
-    retval = memdup(&entry->secName, secName, secNameLen);
-
-    if (retval != SNMPERR_SUCCESS) {
+    entry->secName = netsnmp_memdup(secName, secNameLen);
+    if (secName && !entry->secName) {
         free(entry);
-        return retval;
+        return SNMPERR_GENERR;
     }
 
     entry->secNameLen = secNameLen;

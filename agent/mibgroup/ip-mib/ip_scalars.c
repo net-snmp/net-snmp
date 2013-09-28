@@ -141,8 +141,7 @@ handle_ipForwarding(netsnmp_mib_handler *handler,
                                           SNMP_ERR_NOCREATION);
             } else {
                 u_long *value_save;
-                memdup((u_char **) & value_save, (u_char *) &value,
-                       sizeof(value));
+                value_save = netsnmp_memdup(&value, sizeof(value));
                 if ( NULL == value_save )
                     netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
                 else
@@ -244,8 +243,8 @@ handle_ipv6IpForwarding(netsnmp_mib_handler *handler,
         }
         else {
             u_long *value_save;
-            memdup((u_char **) & value_save, (u_char *) &value,
-                   sizeof(value));
+
+            value_save = netsnmp_memdup(&value, sizeof(value));
             if ( NULL == value_save ) {
                 netsnmp_set_request_error(reqinfo, requests,
                                           SNMP_ERR_RESOURCEUNAVAILABLE);

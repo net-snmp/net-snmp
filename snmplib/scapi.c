@@ -1205,7 +1205,7 @@ MD5_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
          * this relies on the ability to use integer math and thus we
          * must rely on data that aligns on 32-bit-word-boundries 
          */
-        memdup(&newdata, data, len);
+        newdata = netsnmp_memdup(data, len);
         cp = newdata;
     } else {
         cp = data;
@@ -1303,7 +1303,7 @@ SHA1_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
          * this relies on the ability to use integer math and thus we
          * must rely on data that aligns on 32-bit-word-boundries 
          */
-        memdup(&newdata, data, len);
+        newdata = netsnmp_memdup(data, len);
         cp = newdata;
     } else {
         cp = data;

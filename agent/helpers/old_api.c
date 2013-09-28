@@ -80,9 +80,9 @@ netsnmp_register_old_api(const char *moduleName,
         if (reginfo == NULL)
             return SNMP_ERR_GENERR;
 
-        memdup((u_char **) &vp,
-               (void *) (struct variable *) ((char *) var + varsize * i),
-               varsize);
+        vp = netsnmp_memdup((const struct variable *)
+                            ((const char *) var + varsize * i),
+                            varsize);
 
         reginfo->handler = get_old_api_handler();
         reginfo->handlerName = strdup(moduleName);
