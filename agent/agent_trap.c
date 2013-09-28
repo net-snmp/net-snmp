@@ -949,7 +949,7 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
                 (pdu->command == SNMP_MSG_TRAP2) &&
                 (sess->securityEngineIDLen == 0)) {
             len = snmpv3_get_engineID(tmp, sizeof(tmp));
-            memdup(&pdu->securityEngineID, tmp, len);
+            pdu->securityEngineID = netsnmp_memdup(tmp, len);
             pdu->securityEngineIDLen = len;
         }
 
@@ -1262,7 +1262,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
         traptype != SNMP_MSG_INFORM   &&
         ss->securityEngineIDLen == 0) {
             len = snmpv3_get_engineID( tmp, sizeof(tmp));
-            memdup(&ss->securityEngineID, tmp, len);
+            ss->securityEngineID = netsnmp_memdup(tmp, len);
             ss->securityEngineIDLen = len;
     }
 

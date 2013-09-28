@@ -954,7 +954,8 @@ usm_parse_create_usmUser(const char *token, char *line)
         /*
          * assume the same as the authentication key 
          */
-        memdup(&newuser->privKey, newuser->authKey, newuser->authKeyLen);
+        newuser->privKey = netsnmp_memdup(newuser->authKey,
+                                          newuser->authKeyLen);
         newuser->privKeyLen = newuser->authKeyLen;
     } else {
         cp = copy_nword(cp, buf, sizeof(buf));

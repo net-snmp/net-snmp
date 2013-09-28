@@ -168,9 +168,6 @@ EXPORTS
 	snmp_get_do_debugging
 	debug_indent
 	debug_indent_add
-        debug_indent_get
-        debug_config_register_tokens
-        debug_config_turn_on_debugging
 	debug_is_token_registered
 	debugmsg
 	debugmsg_hex
@@ -308,7 +305,6 @@ EXPORTS
 	snmp_realloc
       netsnmp_config
       netsnmp_config_remember
-      netsnmp_config_error
       snmp_hex_to_binary
       snmpv3_options
       netsnmp_get_version
@@ -397,7 +393,6 @@ EXPORTS
 	netsnmp_daemonize
 	snmp_log_options_usage
 	netsnmp_container_free_list
-	netsnmp_container_simple_free
 	netsnmp_oid_stash_getnext_node
 	netsnmp_oid_stash_free
 	netsnmp_get_list_node
@@ -417,7 +412,6 @@ EXPORTS
 	netsnmp_udp6_agent_config_tokens_register
 	init_usm_conf
 	strtok_r
-        strtoull
         snmp_reset_var_buffers
         netsnmp_container_add_index
         netsnmp_container_find
@@ -432,7 +426,6 @@ EXPORTS
         skip_token
         parse_secLevel_conf
         netsnmp_query_get_default_session
-        netsnmp_query_get_default_session_unchecked
         netsnmp_query_set_default_session
         netsnmp_ds_parse_boolean
         netsnmp_register_default_target
@@ -457,21 +450,10 @@ EXPORTS
         netsnmp_query_walk
         netsnmp_query_getnext
         netsnmp_query_get
-        netsnmp_gethostbyname_v4
-        netsnmp_str_to_gid
-        netsnmp_mktemp
-        netsnmp_str_to_uid
-        netsnmp_check_vb_truthvalue
-        snmp_set_var_typed_integer
-        netsnmp_large_fd_set_cleanup
-        netsnmp_large_fd_set_init
-        netsnmp_large_fd_is_set
-        netsnmp_large_fd_setfd
-        netsnmp_large_fd_clr
-        snmp_read2
-        netsnmp_dispatch_external_events2
-        netsnmp_external_event_info2
-        snmp_select_info2
-        sprint_realloc_hexstring
-        netsnmp_set_line_buffering
+	netsnmp_mktemp
         debugmsg_suboid
+;IPv6        netsnmp_udp6_parse_security
+;IPv6        netsnmp_udp6_getSecName
+;IPv6        netsnmp_TCPIPv6Domain
+;IPv6        netsnmp_UDPIPv6Domain
+
