@@ -700,6 +700,7 @@ target_cpu
 target
 NON_GNU_VPATH
 GNU_vpath
+EXTERNAL_MIBGROUP_INCLUDES
 MIBGROUP_INCLUDES
 HELPER_INCLUDES
 AGENT_INCLUDES
@@ -15328,6 +15329,7 @@ fi
 
 
 
+
 ##
 #   System-related compilation checks:
 ##
@@ -22647,6 +22649,97 @@ fi
 if test "x$with_nl" != "xno"; then
     case $target_os in
     linux*) # Check for libnl (linux)
+        netsnmp_save_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="-I/usr/include/libnl3 $CPPFLAGS"
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing nl_connect" >&5
+$as_echo_n "checking for library containing nl_connect... " >&6; }
+if ${netsnmp_cv_func_nl_connect_LIBS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LIBS"
+          netsnmp_temp_LIBS=" ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char nl_connect ();
+int
+main ()
+{
+return nl_connect ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in nl-3 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char nl_connect ();
+int
+main ()
+{
+return nl_connect ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_nl_connect_LIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_nl_connect_LIBS" >&5
+$as_echo "$netsnmp_cv_func_nl_connect_LIBS" >&6; }
+ if test "${netsnmp_cv_func_nl_connect_LIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_nl_connect_LIBS}" != "none required" ; then
+       LIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+    for ac_header in netlink/netlink.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "netlink/netlink.h" "ac_cv_header_netlink_netlink_h" "$ac_includes_default"
+if test "x$ac_cv_header_netlink_netlink_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NETLINK_NETLINK_H 1
+_ACEOF
+
+fi
+
+done
+
+            EXTERNAL_MIBGROUP_INCLUDES="$EXTERNAL_MIBGROUP_INCLUDES -I/usr/include/libnl3"
+ else
+    CPPFLAGS="$netsnmp_save_CPPFLAGS"
+ fi
+
+        if test "x$ac_cv_header_netlink_netlink_h" != xyes; then
 
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing nl_connect" >&5
 $as_echo_n "checking for library containing nl_connect... " >&6; }
@@ -22718,7 +22811,8 @@ $as_echo "$netsnmp_cv_func_nl_connect_LMIBLIBS" >&6; }
     if test "${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "none required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
-    for ac_header in netlink/netlink.h
+
+                for ac_header in netlink/netlink.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "netlink/netlink.h" "ac_cv_header_netlink_netlink_h" "$ac_includes_default"
 if test "x$ac_cv_header_netlink_netlink_h" = xyes; then :
@@ -22733,6 +22827,22 @@ done
 
  fi
 
+        fi
+        if test "x$ac_cv_header_netlink_netlink_h" = xyes; then
+            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <netlink/socket.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "nl_socket_free" >/dev/null 2>&1; then :
+
+$as_echo "#define HAVE_LIBNL3 1" >>confdefs.h
+
+fi
+rm -f conftest*
+
+        fi
     ;;
     esac
 fi

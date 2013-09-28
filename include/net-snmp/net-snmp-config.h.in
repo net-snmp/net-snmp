@@ -350,6 +350,9 @@
 /* Define to 1 if you have the `mld' library (-lmld). */
 #undef HAVE_LIBMLD
 
+/* Define to 1 if <netlink/netlink.h> provides the libnl3 API */
+#undef HAVE_LIBNL3
+
 /* define if you have libnm */
 #undef HAVE_LIBNM
 
