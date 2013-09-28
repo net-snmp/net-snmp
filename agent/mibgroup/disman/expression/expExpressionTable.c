@@ -563,8 +563,7 @@ write_expExpression(int action,
          */
         tmpvar = StorageTmp->expExpression;
         tmplen = StorageTmp->expExpressionLen;
-        memdup((u_char **) & StorageTmp->expExpression, var_val,
-               var_val_len);
+        StorageTmp->expExpression = netsnmp_memdup(var_val, var_val_len);
         StorageTmp->expExpressionLen = var_val_len;
         break;
 
@@ -738,8 +737,7 @@ write_expExpressionComment(int action,
          */
         tmpvar = StorageTmp->expExpressionComment;
         tmplen = StorageTmp->expExpressionCommentLen;
-        memdup((u_char **) & StorageTmp->expExpressionComment, var_val,
-               var_val_len);
+        StorageTmp->expExpressionComment = netsnmp_memdup(var_val, var_val_len);
         StorageTmp->expExpressionCommentLen = var_val_len;
         break;
 

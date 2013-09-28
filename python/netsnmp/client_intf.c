@@ -833,7 +833,7 @@ OCT:
                 ret = FAILURE;
                 addr = 0;
             }
-            memdup((u_char **)&vars->val.integer, &addr, sizeof(addr));
+            vars->val.integer = netsnmp_memdup(&addr, sizeof(addr));
             vars->val_len = sizeof(addr);
         }
         break;

@@ -96,8 +96,7 @@ netsnmp_table_data_clone_row(netsnmp_table_row *row)
     if (!row)
         return NULL;
 
-    memdup((u_char **) & newrow, (u_char *) row,
-           sizeof(netsnmp_table_row));
+    newrow = netsnmp_memdup(row, sizeof(netsnmp_table_row));
     if (!newrow)
         return NULL;
 

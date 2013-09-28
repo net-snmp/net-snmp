@@ -2689,9 +2689,9 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
            }
            if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHNOPRIV) {
                if (auth_localized_key_len) {
-                   memdup(&session.securityAuthLocalKey,
-                          (u_char*)auth_localized_key,
-                          auth_localized_key_len);
+                   session.securityAuthLocalKey =
+                       netsnmp_memdup(auth_localized_key,
+                                      auth_localized_key_len);
                    session.securityAuthLocalKeyLen = auth_localized_key_len;
                } else if (auth_master_key_len) {
                    session.securityAuthKeyLen =
@@ -2739,9 +2739,9 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
            }
            if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHPRIV) {
                if (priv_localized_key_len) {
-                   memdup(&session.securityPrivLocalKey,
-                          (u_char*)priv_localized_key,
-                          priv_localized_key_len);
+                   session.securityPrivLocalKey =
+                       netsnmp_memdup(priv_localized_key,
+                                      priv_localized_key_len);
                    session.securityPrivLocalKeyLen = priv_localized_key_len;
                } else if (priv_master_key_len) {
                    session.securityPrivKeyLen =

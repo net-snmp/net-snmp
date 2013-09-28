@@ -1453,9 +1453,10 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
 
 	    StorageNew->pingResultsLastGoodProbe_time = timep;
             free(StorageNew->pingResultsLastGoodProbe);
-            memdup(&StorageNew->pingResultsLastGoodProbe,
-		date_n_time(&timep,
-		    &StorageNew->pingResultsLastGoodProbeLen), 11);
+            StorageNew->pingResultsLastGoodProbe =
+                netsnmp_memdup(date_n_time(&timep,
+                                      &StorageNew->pingResultsLastGoodProbeLen),
+                               11);
 
             temp = SNMP_MALLOC_STRUCT(pingProbeHistoryTable_data);
 
@@ -1489,8 +1490,10 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             temp->pingProbeHistoryLastRC = 0;
 
 	    temp->pingProbeHistoryTime_time = timep;
-	    memdup(&temp->pingProbeHistoryTime,
-		date_n_time(&timep, &temp->pingProbeHistoryTimeLen), 11);
+            temp->pingProbeHistoryTime = 
+                netsnmp_memdup(date_n_time(&timep,
+                                           &temp->pingProbeHistoryTimeLen),
+                               11);
 
             if (StorageNew->pingResultsSendProbes == 1)
                 item->pingProbeHis = temp;
@@ -1568,8 +1571,9 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
         temp->pingProbeHistoryLastRC = 1;
 
 	temp->pingProbeHistoryTime_time = timep;
-	memdup(&temp->pingProbeHistoryTime,
-	    date_n_time(&timep, &temp->pingProbeHistoryTimeLen), 11);
+	temp->pingProbeHistoryTime =
+            netsnmp_memdup(date_n_time(&timep, &temp->pingProbeHistoryTimeLen),
+                           11);
 
         if (StorageNew->pingResultsSendProbes == 1)
             item->pingProbeHis = temp;
@@ -5027,8 +5031,10 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                     temp->pingProbeHistoryLastRC = 1;
 
 		    temp->pingProbeHistoryTime_time = timep;
-		    memdup(&temp->pingProbeHistoryTime,
-			date_n_time(&timep, &temp->pingProbeHistoryTimeLen), 11);
+                    temp->pingProbeHistoryTime =
+                        netsnmp_memdup(date_n_time(&timep,
+                                               &temp->pingProbeHistoryTimeLen),
+                                       11);
 
                     if (StorageNew->pingResultsSendProbes == 1)
                         item->pingProbeHis = temp;
@@ -5320,8 +5326,10 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
 
     StorageNew->pingResultsLastGoodProbe_time = timep;
     free(StorageNew->pingResultsLastGoodProbe);
-    memdup(&StorageNew->pingResultsLastGoodProbe,
-	date_n_time(&timep, &StorageNew->pingResultsLastGoodProbeLen), 11);
+    StorageNew->pingResultsLastGoodProbe =
+        netsnmp_memdup(date_n_time(&timep,
+                                   &StorageNew->pingResultsLastGoodProbeLen),
+                       11);
 
     /* ProbeHistory               */
     if (item->pingCtlMaxRows != 0) {
@@ -5356,8 +5364,9 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
         temp->pingProbeHistoryLastRC = 0;
 
 	temp->pingProbeHistoryTime_time = timep;
-	memdup(&temp->pingProbeHistoryTime,
-	    date_n_time(&timep, &temp->pingProbeHistoryTimeLen), 11);
+	temp->pingProbeHistoryTime =
+            netsnmp_memdup(date_n_time(&timep, &temp->pingProbeHistoryTimeLen),
+                           11);
 
         if (StorageNew->pingResultsSendProbes == 1)
             item->pingProbeHis = temp;

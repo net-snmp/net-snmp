@@ -1828,7 +1828,7 @@ ifXTable_container_init_persistence(netsnmp_container *container)
     register_config_handler(NULL, row_token,
                             _ifXTable_container_row_restore, NULL, NULL);
     netsnmp_assert(container);
-    memdup((u_char **)&container_p, &container, sizeof(container));
+    container_p = netsnmp_memdup(&container, sizeof(container));
     netsnmp_assert(container_p);
     rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                                 SNMP_CALLBACK_STORE_DATA,

@@ -882,7 +882,7 @@ _sql_save_varbind_info(sql_buf *sqlb, netsnmp_pdu  *pdu)
                                &buf_val_len_t, 1, var, 0, 0, 0);
         sqlvb->val_len = buf_val_len_t;
 #else
-        memdup(&sqlvb->val, var->val.string, var->val_len);
+        sqlvb->val = netsnmp_memdup(var->val.string, var->val_len);
         sqlvb->val_len = var->val_len;
 #endif
 

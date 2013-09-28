@@ -85,7 +85,7 @@ _tweak_default_iquery_session( int majorID, int minorID,
 
     if ( s && s->securityEngineIDLen == 0 ) {
         elen = snmpv3_get_engineID(eID, sizeof(eID));
-        memdup( &(s->securityEngineID), eID, elen );
+        s->securityEngineID = netsnmp_memdup(eID, elen);
         s->securityEngineIDLen = elen;
     }
     return SNMPERR_SUCCESS;
@@ -189,13 +189,13 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
         ss->version       = version;
         ss->securityModel = secModel;
         ss->securityLevel = secLevel;
-        memdup( &(ss->securityEngineID), engineID, engIDLen );
+        ss->securityEngineID = netsnmp_memdup(engineID, engIDLen);
         ss->securityEngineIDLen = engIDLen;
         if ( version == SNMP_VERSION_3 ) {
             ss->securityNameLen = strlen(secName);
-            memdup((u_char**)&(ss->securityName), (u_char*)secName, ss->securityNameLen);
+            ss->securityName = netsnmp_memdup(secName, ss->securityNameLen);
         } else {
-            memdup( &(ss->community), secName, strlen(secName));
+            ss->community = netsnmp_memdup(secName, strlen(secName));
             ss->community_len = strlen(secName);
         }
         ss->myvoid = netsnmp_check_outstanding_agent_requests;

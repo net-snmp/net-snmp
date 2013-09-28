@@ -57,9 +57,9 @@ override_handler(netsnmp_mib_handler *handler,
         break;
 
     case MODE_SET_RESERVE2:
-        if (memdup((u_char **) &data->set_space,
-                   requests->requestvb->val.string,
-                   requests->requestvb->val_len) == SNMPERR_GENERR)
+        data->set_space = netsnmp_memdup(requests->requestvb->val.string,
+                                         requests->requestvb->val_len);
+        if (!data->set_space)
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);
         break;
