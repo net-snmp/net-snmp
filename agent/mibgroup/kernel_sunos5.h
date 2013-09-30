@@ -77,6 +77,7 @@ typedef enum {
     MIB_IP6,
     MIB_IP6_ADDR,
     MIB_IP6_ROUTE,
+    MIB_ICMP6,
     MIB_TCP6_CONN,
     MIB_UDP6_ENDPOINT,
 #endif
