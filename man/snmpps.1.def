@@ -1,26 +1,20 @@
-.\" Portions of this file are subject to the following copyright.  See
-.\" the Net-SNMP's COPYING file for more details and other copyrights
-.\" that may apply:
-.\" /***********************************************************
-.\" Portions of this file are copyrighted by:
-.\" Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
-.\" Use is subject to license terms specified in the COPYING file
-.\" distributed with the Net-SNMP package.
+.\" See the Net-SNMP's COPYING file for details and copyrights
+.\" that may apply.
 .\" ******************************************************************/
-.TH SNMPPS 1 "08 Nov 2012" VVERSIONINFO "Net-SNMP"
+.TH SNMPPS 1 "07 Feb 2013" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmpps - display process table on a network entity via SNMP
 .SH SYNOPSIS
 .B snmpps
-[COMMON OPTIONS] [\-Cp] [\-Ca] AGENT
+[COMMON OPTIONS] [\-Cp] [\-Ca] [\C n | m | t ] AGENT
 .PP
 .B snmptop
 [COMMON OPTIONS] [\-Cp] [\-Ca] [\-C n | m | c | t ] AGENT
 .SH DESCRIPTION
 .B snmpps
-is simply a networked version of a simple ps command. It
+is a networked version of a simple \fIps\fR command. It
 checks the processes on the remote machine by examining the
-HOST\-RESOURCES\-MIB's hrSWRunTable and the hrSWRunPerfTableTable.
+HOST\-RESOURCES\-MIB's \fIhrSWRunTable\fR and the \fIhrSWRunPerfTableTable\fR.
 .PP
 AGENT identifies a target SNMP agent, which is instrumented
 to monitor the given objects.  At its simplest, the AGENT
@@ -32,7 +26,7 @@ of the given target host. See the
 manual page for a full list of the possible formats for AGENT.
 
 .B snmptop
-emulates the \fItop\fR command using SNMP. While running the keyboard
+emulates the \fItop\fR command using SNMP. While running, the keyboard
 inputs of 'c', 'n', 'm', 't' emulates the -C options. Typing 'i' toggles
 hiding idle processes, while 'o' toggles hiding Os processes.
 
@@ -51,7 +45,7 @@ Show hrSWRunPath in addition to hrSWRunName
 Show hrSWRunParameters in addition to hrSWRunName
 .TP
 .B \-Cc
-Sort display by current CPU usage
+Sort display by current CPU usage (only applicable to \fIsnmptop\fR)
 .TP
 .B \-Ct
 Sort display by total CPU usage
@@ -78,4 +72,4 @@ Index Type Status     Memory         CPU Command
  2185 Appl   Wait   556.00kB        0.00 sleep 
 .fi
 .SH "SEE ALSO"
-snmpd.conf(5), snmp.conf(5)
+snmpcmd(1), snmp.conf(5)
