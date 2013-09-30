@@ -1185,7 +1185,7 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
  * @param allow_realloc if not zero reallocate the buffer to fit the 
  *                      needed size.
  * @param val      The variable to encode.
- * @param decimaltype The enumeration ff this variable is enumerated. may be NULL.
+ * @param decimaltype 'd' or 'u' depending on integer type
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may _NOT_ be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
@@ -1220,7 +1220,18 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
         fmt[2] = hint[0];
     }
 
-    sprintf(tmp, fmt, val);
+    if (hint[0] == 'b') {
+	unsigned long int bit = 0x80000000LU;
+	char *bp = tmp;
+	while (bit) {
+	    *bp++ = val & bit ? '1' : '0';
+	    bit >>= 1;
+	}
+	*bp = 0;
+    }
+    else
+	sprintf(tmp, fmt, val);
+
     if (shift != 0) {
         len = strlen(tmp);
         if (shift <= len) {
