@@ -138,6 +138,7 @@ netbsd_read_icmp6_stat(struct icmp6_mib *mib)
     mib->icmp6OutPktTooBigs =  icmpstat[ICMP6_STAT_OUTHIST + ICMP6_PACKET_TOO_BIG];
     mib->icmp6OutTimeExcds = icmpstat[ICMP6_STAT_OUTHIST + ICMP6_TIME_EXCEEDED];
     mib->icmp6OutParmProblems = icmpstat[ICMP6_STAT_OUTHIST + ICMP6_PARAM_PROB];
+    mib->icmp6OutEchos = icmpstat[ICMP6_STAT_OUTHIST + ICMP6_ECHO_REQUEST];
     mib->icmp6OutEchoReplies = icmpstat[ICMP6_STAT_OUTHIST + ICMP6_ECHO_REPLY];
     mib->icmp6OutRouterSolicits =  icmpstat[ICMP6_STAT_OUTHIST + ND_ROUTER_SOLICIT];
     mib->icmp6OutNeighborSolicits =  icmpstat[ICMP6_STAT_OUTHIST + ND_NEIGHBOR_SOLICIT];
