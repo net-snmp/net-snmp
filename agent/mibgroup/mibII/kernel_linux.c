@@ -479,6 +479,8 @@ linux_read_icmp6_parse(struct icmp6_mib *icmp6stat,
         } else if (0 == strncmp(line + 5, "Out", 3)) {  /* Out */
             if (0 == strcmp(line + 8, "DestUnreachs")) {
                 cached_icmp6_mib.icmp6OutDestUnreachs = stats;
+            } else if (0 == strcmp(line + 8, "Echos")) {
+                cached_icmp6_mib.icmp6OutEchos = stats;
             } else if (0 == strcmp(line + 8, "EchoReplies")) {
                 cached_icmp6_mib.icmp6OutEchoReplies = stats;
             } else if (0 == strcmp(line + 8, "GroupMembReductions")) {

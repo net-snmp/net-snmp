@@ -465,9 +465,9 @@ icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
 
         icmp_msg_stats_table[i].icmpMsgStatsType = ICMP6_ECHO_REQUEST;
         icmp_msg_stats_table[i].icmpMsgStatsInPkts = v6icmp.icmp6InEchos;
-        icmp_msg_stats_table[i].icmpMsgStatsOutPkts = 0;
+        icmp_msg_stats_table[i].icmpMsgStatsOutPkts = v6icmp.icmp6OutEchos;
         icmp_msg_stats_table[i].ipVer = 2;
-        icmp_msg_stats_table[i].flags = ICMP_MSG_STATS_HAS_IN;
+        icmp_msg_stats_table[i].flags = ICMP_MSG_STATS_HAS_IN | ICMP_MSG_STATS_HAS_OUT;
         i++;
 
         icmp_msg_stats_table[i].icmpMsgStatsType = ICMP6_ECHO_REPLY;
@@ -1461,7 +1461,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
 	icmp6stat.icmp6InTimeExcds += ifstat.ipv6IfIcmpInTimeExcds;
 	icmp6stat.icmp6OutParmProblems += ifstat.ipv6IfIcmpOutParmProblems;
 	icmp6stat.icmp6InParmProblems += ifstat.ipv6IfIcmpInParmProblems;
-	//icmp6stat.icmp6OutEchos += ifstat.ipv6IfIcmpOutEchos;
+	icmp6stat.icmp6OutEchos += ifstat.ipv6IfIcmpOutEchos;
 	icmp6stat.icmp6InEchos += ifstat.ipv6IfIcmpInEchos;
 	icmp6stat.icmp6OutEchoReplies += ifstat.ipv6IfIcmpOutEchoReplies;
 	icmp6stat.icmp6InEchoReplies += ifstat.ipv6IfIcmpInEchoReplies;

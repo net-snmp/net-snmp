@@ -121,6 +121,7 @@ sysctl_read_icmp6_stat(struct icmp6_mib *mib)
     mib->icmp6OutPktTooBigs =  icmpstat.icp6s_outhist[ICMP6_PACKET_TOO_BIG];
     mib->icmp6OutTimeExcds = icmpstat.icp6s_outhist[ICMP6_TIME_EXCEEDED];
     mib->icmp6OutParmProblems = icmpstat.icp6s_outhist[ICMP6_PARAM_PROB];
+    mib->icmp6OutEchos = icmpstat.icp6s_outhist[ICMP6_ECHO_REQUEST];
     mib->icmp6OutEchoReplies = icmpstat.icp6s_outhist[ICMP6_ECHO_REPLY];
     mib->icmp6OutRouterSolicits =  icmpstat.icp6s_outhist[ND_ROUTER_SOLICIT];
     mib->icmp6OutNeighborSolicits =  icmpstat.icp6s_outhist[ND_NEIGHBOR_SOLICIT];
