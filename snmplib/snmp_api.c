@@ -5618,8 +5618,8 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
              * We have no saved packet.  Allocate one.  
              */
             if ((isp->packet = (u_char *) malloc(rxbuf_len)) == NULL) {
-                DEBUGMSGTL(("sess_read", "can't malloc %lu bytes for rxbuf\n",
-                            (unsigned long)rxbuf_len));
+                DEBUGMSGTL(("sess_read", "can't malloc %" NETSNMP_PRIz
+                            "u bytes for rxbuf\n", rxbuf_len));
                 return 0;
             } else {
                 rxbuf = isp->packet;
@@ -5639,8 +5639,9 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                                        isp->packet_len + rxbuf_len);
                 if (newbuf == NULL) {
                     DEBUGMSGTL(("sess_read",
-                                "can't malloc %lu more for rxbuf (%lu tot)\n",
-                                (unsigned long)rxbuf_len, (unsigned long)(isp->packet_len + rxbuf_len)));
+                                "can't malloc %" NETSNMP_PRIz
+                                "u more for rxbuf (%" NETSNMP_PRIz "u tot)\n",
+                                rxbuf_len, isp->packet_len + rxbuf_len));
                     return 0;
                 } else {
                     isp->packet = newbuf;
@@ -5654,8 +5655,8 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
         }
     } else {
         if ((rxbuf = (u_char *) malloc(rxbuf_len)) == NULL) {
-            DEBUGMSGTL(("sess_read", "can't malloc %lu bytes for rxbuf\n",
-                        (unsigned long)rxbuf_len));
+            DEBUGMSGTL(("sess_read", "can't malloc %" NETSNMP_PRIz
+                        "u bytes for rxbuf\n", rxbuf_len));
             return 0;
         }
     }
@@ -5724,9 +5725,10 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                 pdulen = asn_check_packet(pptr, isp->packet_len);
             }
 
-            DEBUGMSGTL(("sess_read", "  loop packet_len %lu, PDU length %lu\n",
-                        (unsigned long)isp->packet_len, (unsigned long)pdulen));
-             
+            DEBUGMSGTL(("sess_read",
+                        "  loop packet_len %" NETSNMP_PRIz "u, PDU length %"
+                        NETSNMP_PRIz "u\n", isp->packet_len, pdulen));
+
             if (pdulen > MAX_PACKET_LENGTH) {
                 /*
                  * Illegal length, drop the connection.  
@@ -5754,8 +5756,9 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                  * start, simply return and wait for more data to arrive.
                  */
                 DEBUGMSGTL(("sess_read",
-                            "pkt not complete (need %lu got %lu so far)\n",
-                            (unsigned long)pdulen, (unsigned long)isp->packet_len));
+                            "pkt not complete (need %" NETSNMP_PRIz "u got %"
+                            NETSNMP_PRIz "u so far)\n", pdulen,
+                            isp->packet_len));
 
                 if (pptr != isp->packet)
                     break; /* opaque freed for us outside of loop. */
@@ -5816,8 +5819,9 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
              * Obviously this should never happen!  
              */
             snmp_log(LOG_ERR,
-                     "too large packet_len = %lu, dropping connection %d\n",
-                     (unsigned long)(isp->packet_len), transport->sock);
+                     "too large packet_len = %" NETSNMP_PRIz
+                     "u, dropping connection %d\n",
+                     isp->packet_len, transport->sock);
             transport->f_close(transport);
             /** XXX-rks: why no SNMP_FREE(isp->packet); ?? */
             return -1;
@@ -5842,9 +5846,11 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
          */
 
         memmove(isp->packet, pptr, isp->packet_len);
-        DEBUGMSGTL(("sess_read", "end: memmove(%p, %p, %lu); realloc(%p, %lu)\n",
-                    isp->packet, pptr, (unsigned long)isp->packet_len,
-		    isp->packet, (unsigned long)isp->packet_len));
+        DEBUGMSGTL(("sess_read",
+                    "end: memmove(%p, %p, %" NETSNMP_PRIz "u); realloc(%p, %"
+                    NETSNMP_PRIz "u)\n",
+                    isp->packet, pptr, isp->packet_len,
+		    isp->packet, isp->packet_len));
 
         if ((rxbuf = (u_char *)realloc(isp->packet, isp->packet_len)) == NULL) {
             /*
