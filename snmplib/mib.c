@@ -1208,19 +1208,19 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
                               const char *hint, const char *units)
 {
     char            fmt[10] = "%l@", tmp[256];
-    int             shift, len;
-
-    if (hint[1] == '-') {
-        shift = atoi(hint + 2);
-    } else {
-        shift = 0;
-    }
+    int             shift = 0, len, negative = 0;
 
     if (hint[0] == 'd') {
         /*
          * We might *actually* want a 'u' here.  
          */
+        if (hint[1] == '-')
+            shift = atoi(hint + 2);
         fmt[2] = decimaltype;
+        if (val < 0) {
+            negative = 1;
+            val = -val;
+        }
     } else {
         /*
          * DISPLAY-HINT character is 'b', 'o', or 'x'.  
@@ -1261,6 +1261,14 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
             }
             tmp[0] = '.';
         }
+    }
+    if (negative) {
+        len = strlen(tmp)+1;
+        while (len) {
+            tmp[len] = tmp[len-1];
+            len--;
+        }
+        tmp[0] = '-';
     }
     return snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tmp);
 }
