@@ -151,12 +151,12 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
     addr->sin6_port = htons((u_short)SNMP_PORT);
 
     {
-      int port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
-				    NETSNMP_DS_LIB_DEFAULT_PORT);
-      if (port != 0)
-        addr->sin6_port = htons((u_short)port);
-      else if (default_target != NULL)
-	netsnmp_sockaddr_in6_2(addr, default_target, NULL);
+        int port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                      NETSNMP_DS_LIB_DEFAULT_PORT);
+        if (port != 0)
+            addr->sin6_port = htons((u_short)port);
+        else if (default_target != NULL)
+            netsnmp_sockaddr_in6_2(addr, default_target, NULL);
     }
 
     if (inpeername != NULL) {
@@ -346,15 +346,15 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
             return 0;
         }
         if (addrs != NULL) {
-        DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
-        memcpy(&addr->sin6_addr,
-               &((struct sockaddr_in6 *) addrs->ai_addr)->sin6_addr,
-               sizeof(struct in6_addr));
-		freeaddrinfo(addrs);
+            DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
+            memcpy(&addr->sin6_addr,
+                   &((struct sockaddr_in6 *) addrs->ai_addr)->sin6_addr,
+                   sizeof(struct in6_addr));
+            freeaddrinfo(addrs);
         }
-		else {
-        DEBUGMSGTL(("netsnmp_sockaddr_in6", "Failed to resolve IPv6 hostname\n"));
-		}
+        else {
+            DEBUGMSGTL(("netsnmp_sockaddr_in6", "Failed to resolve IPv6 hostname\n"));
+        }
 #elif HAVE_GETIPNODEBYNAME
         hp = getipnodebyname(peername, AF_INET6, 0, &err);
         if (hp == NULL) {
