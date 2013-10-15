@@ -176,7 +176,7 @@ tcpprotopr_get(const char *name, oid *root, size_t root_len)
         return;
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
         return;
-    if (var->type == ASN_NULL)
+    if ((var->type & 0xF0) == 0x80)	/* Exception */
 	return;
 
     for (vp = var; vp ; vp=vp->next_variable) {
@@ -214,7 +214,7 @@ udpprotopr(const char *name)
         return;
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
         return;
-    if (var->type == ASN_NULL)
+    if ((var->type & 0xF0) == 0x80)	/* Exception */
 	return;
 
     printf("Active Internet (%s) Connections\n", name);
