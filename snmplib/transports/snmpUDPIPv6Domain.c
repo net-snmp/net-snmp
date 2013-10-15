@@ -229,11 +229,11 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 #ifdef IPV6_V6ONLY
         /* Try to restrict PF_INET6 socket to IPv6 communications only. */
         {
-	  int one=1;
-	  if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
-	    DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
-	  } 
-	}
+            int one=1;
+            if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
+                DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
+            } 
+        }
 #endif
 
         rc = bind(t->sock, (struct sockaddr *) addr,
@@ -250,8 +250,8 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
             return NULL;
         }
         memcpy(t->local, addr->sin6_addr.s6_addr, 16);
-        t->local[16] = (addr->sin6_port & 0xff00) >> 8;
-        t->local[17] = (addr->sin6_port & 0x00ff) >> 0;
+        t->local[16] = (ntohs(addr->sin6_port) & 0xff00) >> 8;
+        t->local[17] = (ntohs(addr->sin6_port) & 0x00ff) >> 0;
         t->local_length = 18;
         t->data = NULL;
         t->data_length = 0;
@@ -276,8 +276,8 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
             return NULL;
         }
         memcpy(t->remote, addr->sin6_addr.s6_addr, 16);
-        t->remote[16] = (addr->sin6_port & 0xff00) >> 8;
-        t->remote[17] = (addr->sin6_port & 0x00ff) >> 0;
+        t->remote[16] = (ntohs(addr->sin6_port) & 0xff00) >> 8;
+        t->remote[17] = (ntohs(addr->sin6_port) & 0x00ff) >> 0;
         t->remote_length = 18;
     }
 
@@ -741,7 +741,7 @@ netsnmp_udp6_create_ostring(const u_char * o, size_t o_len, int local)
         memset((u_char *) & addr, 0, sizeof(struct sockaddr_in6));
         addr.sin6_family = AF_INET6;
         memcpy((u_char *) & (addr.sin6_addr.s6_addr), o, 16);
-        addr.sin6_port = (o[16] << 8) + o[17];
+        addr.sin6_port = htons((o[16] << 8) + o[17]);
         return netsnmp_udp6_transport(&addr, local);
     }
     return NULL;
