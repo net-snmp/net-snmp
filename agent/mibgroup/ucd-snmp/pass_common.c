@@ -77,6 +77,8 @@ netsnmp_internal_pass_parse(char * buf,
      */
     if (!strncasecmp(buf, "string", 6)) {
         buf2[strlen(buf2) - 1] = 0; /* zap the linefeed */
+        if (buf2[strlen(buf2) - 1] == '\r')
+            buf2[strlen(buf2) - 1] = 0; /* zap the carriage-return */
         *var_len = strlen(buf2);
         vp->type = ASN_OCTET_STR;
         return ((unsigned char *) buf2);
