@@ -4123,79 +4123,95 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
                                 size_t * out_len, int allow_realloc, 
                                 char quotechar)
 {
-    if (buf) {
-        int             i, len;
-        char            intbuf[64], * p;
-        unsigned char  *zc;
-        unsigned long   zone;
+    int             i, len;
+    char            intbuf[64], *p;
+    char *const     end = intbuf + sizeof(intbuf);
+    unsigned char  *zc;
+    unsigned long   zone;
 
-        memset(intbuf, 0, 64);
+    if (!buf)
+        return 1;
 
-        p = intbuf;
-        *p = quotechar;
-        p++;
-        switch (addr_type) {
-            case IPV4:
-            case IPV4Z:
-                if ((addr_type == IPV4  && objidlen != 4) ||
-                    (addr_type == IPV4Z && objidlen != 8))
-                    return 2;
+    for (i = 0; i < objidlen; i++)
+        if (objid[i] < 0 || objid[i] > 255)
+            return 2;
 
-                len = sprintf(p, "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
-                              "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u",
-                              objid[0], objid[1], objid[2], objid[3]);
-                p += len;
-                if (addr_type == IPV4Z) {
-                    zc = (unsigned char*)&zone;
-                    zc[0] = (u_char)(objid[4]);
-                    zc[1] = (u_char)(objid[5]);
-                    zc[2] = (u_char)(objid[6]);
-                    zc[3] = (u_char)(objid[7]);
-                    zone = ntohl(zone);
-                    len = sprintf(p, "%%%lu", zone);
-                    p += len;
-                }
+    p = intbuf;
+    *p++ = quotechar;
 
-                break;
+    switch (addr_type) {
+    case IPV4:
+    case IPV4Z:
+        if ((addr_type == IPV4  && objidlen != 4) ||
+            (addr_type == IPV4Z && objidlen != 8))
+            return 2;
 
-            case IPV6:
-            case IPV6Z:
-                if ((addr_type == IPV6 && objidlen != 16) ||
-                    (addr_type == IPV6Z && objidlen != 20))
-                    return 2;
-
-                len = 0;
-                for (i = 0; i < 16; i ++) {
-                    len = snprintf(p, 4, "%02" NETSNMP_PRIo "x:", objid[i]);
-                    p += len;
-                }
-                p-- ; /* do not include the last ':' */
-
-                if (addr_type == IPV6Z) {
-                    zc = (unsigned char*)&zone;
-                    zc[0] = (u_char)(objid[16]);
-                    zc[1] = (u_char)(objid[17]);
-                    zc[2] = (u_char)(objid[18]);
-                    zc[3] = (u_char)(objid[19]);
-                    zone = ntohl(zone);
-                    len = sprintf(p, "%%%lu", zone);
-                    p += len;
-                }
-
-                break;
-
-            case DNS:
-            default: 
-                /* DNS can just be handled by dump_realloc_oid_to_string() */
+        len = snprintf(p, end - p, "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
+                      "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u",
+                      objid[0], objid[1], objid[2], objid[3]);
+        p += len;
+        if (p >= end)
+            return 2;
+        if (addr_type == IPV4Z) {
+            zc = (unsigned char*)&zone;
+            zc[0] = objid[4];
+            zc[1] = objid[5];
+            zc[2] = objid[6];
+            zc[3] = objid[7];
+            zone = ntohl(zone);
+            len = snprintf(p, end - p, "%%%lu", zone);
+            p += len;
+            if (p >= end)
                 return 2;
         }
 
-        *p = quotechar;
+        break;
 
-        return snmp_strcat(buf, buf_len, out_len, allow_realloc, 
-                                               (const u_char *) intbuf);
+    case IPV6:
+    case IPV6Z:
+        if ((addr_type == IPV6 && objidlen != 16) ||
+            (addr_type == IPV6Z && objidlen != 20))
+            return 2;
+
+        len = 0;
+        for (i = 0; i < 16; i ++) {
+            len = snprintf(p, end - p, "%s%02" NETSNMP_PRIo "x", i ? ":" : "",
+                           objid[i]);
+            p += len;
+            if (p >= end)
+                return 2;
+        }
+
+        if (addr_type == IPV6Z) {
+            zc = (unsigned char*)&zone;
+            zc[0] = objid[16];
+            zc[1] = objid[17];
+            zc[2] = objid[18];
+            zc[3] = objid[19];
+            zone = ntohl(zone);
+            len = snprintf(p, end - p, "%%%lu", zone);
+            p += len;
+            if (p >= end)
+                return 2;
+        }
+
+        break;
+
+    case DNS:
+    default: 
+        /* DNS can just be handled by dump_realloc_oid_to_string() */
+        return 2;
     }
-    return 1;
+
+    *p++ = quotechar;
+    if (p >= end)
+        return 2;
+
+    *p++ = '\0';
+    if (p >= end)
+        return 2;
+
+    return snmp_cstrcat(buf, buf_len, out_len, allow_realloc, intbuf);
 }
 
 int
