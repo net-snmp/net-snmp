@@ -497,7 +497,7 @@ prhisto(const char *name, const oid *var, size_t len, int ver, codelist_t *cs)
 	    while (cp->name && cp->code != code) cp++;
 	    if (inp || out || sflag == 1) {
 		if (!cp->code)
-		    sprintf(nocode, "type %d", code);
+		    snprintf(nocode, sizeof nocode, "type %d", code);
 		printf("     %10lu %10lu %s\n", inp, out, cp->name ? cp->name : nocode);
 	    }
 	}
