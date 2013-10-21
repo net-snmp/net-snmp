@@ -581,12 +581,12 @@ static const char *nl_geterror_compat(int e)
 
 #define nl_geterror(e) nl_geterror_compat(e)
 
-static struct nl_socket *nl_socket_alloc(void)
+static struct nl_handle *nl_socket_alloc(void)
 {
     return nl_handle_alloc();
 }
 
-static void nl_socket_free(struct nl_socket *ns)
+static void nl_socket_free(struct nl_handle *ns)
 {
     nl_handle_destroy(ns);
 }
