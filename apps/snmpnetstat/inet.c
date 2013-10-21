@@ -503,7 +503,7 @@ tcp_stats(const char *name)
         { 6, "%14d passive open%s"},
         { 7, "%14d failed attempt%s"},
         { 8, "%14d reset%s of established connections"},
-        { 9, "%14d current established connection%s"},
+        { 9, "%14d currently established connection%s"},
         {10, "%14d segment%s received"},
         {11, "%14d segment%s sent"},
         {12, "%14d segment%s retransmitted"},
