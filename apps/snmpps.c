@@ -807,8 +807,7 @@ int snmptop(int argc, char **argv)
         char uptime[40];
         char timestr[40];
         char b1[15], b2[15], b3[15], b4[15];
-        struct cpuStats newCpu, deltaCpu;
-        u_long sumCpu = 0;
+        struct cpuStats newCpu;
 
         if (ch == 'c' || ch == 'm' || ch == 'n' || ch == 't') topsort = ch;
         if (ch == 'i') show_idle = !show_idle;
@@ -849,26 +848,6 @@ int snmptop(int argc, char **argv)
         }
 
         has_cpu = collect_cpu(ss, &newCpu);
-        if (has_cpu) {
-            deltaCpu.user = newCpu.user - oldCpu.user;
-            deltaCpu.nice = newCpu.nice - oldCpu.nice;
-            deltaCpu.system = newCpu.system - oldCpu.system;
-            deltaCpu.idle = newCpu.idle - oldCpu.idle;
-            deltaCpu.wait = newCpu.wait - oldCpu.wait;
-            deltaCpu.kernel = newCpu.kernel - oldCpu.kernel;
-            deltaCpu.intr = newCpu.intr - oldCpu.intr;
-            deltaCpu.softintr = newCpu.softintr - oldCpu.softintr;
-            deltaCpu.steal = newCpu.steal - oldCpu.steal;
-            deltaCpu.guest = newCpu.guest - oldCpu.guest;
-            deltaCpu.guestnice = newCpu.guestnice - oldCpu.guestnice;
-            oldCpu = newCpu;
-            sumCpu = deltaCpu.user + deltaCpu.nice
-                + deltaCpu.system + deltaCpu.idle
-                + deltaCpu.wait + deltaCpu.kernel + deltaCpu.steal
-                + deltaCpu.intr + deltaCpu.softintr
-                + deltaCpu.guest + deltaCpu.guestnice;
-        }
-
         has_mem = collect_mem(ss, &mem);
 
         pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -895,6 +874,27 @@ int snmptop(int argc, char **argv)
         move(0, COLS-strlen(timestr)-1);
         printw("%s", timestr);
         if (has_cpu) {
+            struct cpuStats deltaCpu;
+            u_long sumCpu;
+
+            deltaCpu.user = newCpu.user - oldCpu.user;
+            deltaCpu.nice = newCpu.nice - oldCpu.nice;
+            deltaCpu.system = newCpu.system - oldCpu.system;
+            deltaCpu.idle = newCpu.idle - oldCpu.idle;
+            deltaCpu.wait = newCpu.wait - oldCpu.wait;
+            deltaCpu.kernel = newCpu.kernel - oldCpu.kernel;
+            deltaCpu.intr = newCpu.intr - oldCpu.intr;
+            deltaCpu.softintr = newCpu.softintr - oldCpu.softintr;
+            deltaCpu.steal = newCpu.steal - oldCpu.steal;
+            deltaCpu.guest = newCpu.guest - oldCpu.guest;
+            deltaCpu.guestnice = newCpu.guestnice - oldCpu.guestnice;
+            oldCpu = newCpu;
+            sumCpu = deltaCpu.user + deltaCpu.nice
+                + deltaCpu.system + deltaCpu.idle
+                + deltaCpu.wait + deltaCpu.kernel + deltaCpu.steal
+                + deltaCpu.intr + deltaCpu.softintr
+                + deltaCpu.guest + deltaCpu.guestnice;
+
             printw("\nCPU%%: %4.1fUs %4.1fSy %4.1fId %3.1fWa %3.1fNi %3.1fKe %3.1fHi %3.1fSi %3.1fSt %3.1fGu %3.1fGN",
                 (float)deltaCpu.user*100/sumCpu,
                 (float)deltaCpu.system*100/sumCpu,
