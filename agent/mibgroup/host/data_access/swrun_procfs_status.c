@@ -57,7 +57,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     FILE                *fp;
     int                  pid, rc, i;
     unsigned long long   cpu;
-    char                 buf[BUFSIZ], buf2[BUFSIZ], *cp;
+    char                 buf[BUFSIZ], buf2[BUFSIZ], *cp, *cp1;
     netsnmp_swrun_entry *entry;
     
     procdir = opendir("/proc");
@@ -158,8 +158,12 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         cp = buf;
         while ( ' ' != *(cp++))    /* Skip first field */
             ;
-        while ( ' ' != *(cp++))    /* Skip second field */
-            ;
+        cp1 = cp;                  /* Skip second field */
+        while (*cp1) {
+            if (*cp1 == ')') cp = cp1;
+            cp1++;
+        }
+        cp += 2;
         
         switch (*cp) {
         case 'R':  entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
