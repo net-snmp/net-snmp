@@ -103,8 +103,13 @@ void init_cpu_sysctl( void ) {
     #define NS_VM_SWTCH		swtch
     #define NS_VM_PAGEIN	pageins
     #define NS_VM_PAGEOUT	pdpageouts
+#ifdef HAVE_STRUCT_UVMEXP_PGSWAPIN
+    #define NS_VM_SWAPIN	pgswapin
+    #define NS_VM_SWAPOUT	pgswapout
+#else
     #define NS_VM_SWAPIN	swapins
     #define NS_VM_SWAPOUT	swapouts
+#endif
 
 #if defined(VM_UVMEXP2)                   /* NetBSD 1.6+ */
 #define NETSNMP_VM_STATS       VM_UVMEXP2

@@ -38879,6 +38879,24 @@ _ACEOF
 fi
 
 
+#	struct uvmexp
+#
+ac_fn_c_check_member "$LINENO" "struct uvmexp" "pgswapin" "ac_cv_member_struct_uvmexp_pgswapin" "
+    $ac_includes_default
+
+#include <uvm/uvm_extern.h>
+
+"
+if test "x$ac_cv_member_struct_uvmexp_pgswapin" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_UVMEXP_PGSWAPIN 1
+_ACEOF
+
+
+fi
+
+
 #       struct nlist
 #
 { $as_echo "$as_me:$LINENO: checking for struct nlist.n_value" >&5
