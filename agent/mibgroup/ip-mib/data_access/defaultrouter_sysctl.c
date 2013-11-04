@@ -101,7 +101,7 @@ _load_defaultrouter_from_sysctl(netsnmp_container *container, int family)
     struct rt_msghdr *rtm;
     struct sockaddr *dst_sa, *gw_sa;
     char *buf, *lim, *newbuf, *next;
-    char address[NETSNMP_ACCESS_DEFAULTROUTER_BUF_SIZE + 1];
+    char address[NETSNMP_ACCESS_DEFAULTROUTER_BUF_SIZE];
     int mib[6];
     size_t address_len, needed;
     int address_type, err, preference, st;
