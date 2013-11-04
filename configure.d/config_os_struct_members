@@ -135,6 +135,14 @@ AC_CHECK_MEMBERS([struct mbstat.m_clusters,
 #endif
     ]])
 
+#	struct uvmexp
+#
+AC_CHECK_MEMBERS([struct uvmexp.pgswapin],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#include <uvm/uvm_extern.h>
+    ]])
+
 #       struct nlist
 #
 AC_CHECK_MEMBERS([struct nlist.n_value,
