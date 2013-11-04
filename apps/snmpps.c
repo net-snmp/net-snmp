@@ -77,7 +77,7 @@ SOFTWARE.
 void
 usage(void)
 {
-    fprintf(stderr, "Usage: snmpps [-Cu] ");
+    fprintf(stderr, "Usage: snmpps [-Cp] [-Ca] [-C m | n | t] AGENT");
     snmp_parse_args_usage(stderr);
     fprintf(stderr, "\n\n");
     snmp_parse_args_descriptions(stderr);
@@ -111,9 +111,6 @@ optProc(int argc, char *const *argv, int opt)
                 break;
             case 'p':
                 command_path = 1;
-                break;
-            case 'c':
-                topsort = 'c';
                 break;
             case 'm':
                 topsort = 'm';

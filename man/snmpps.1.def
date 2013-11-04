@@ -1,20 +1,20 @@
 .\" See the Net-SNMP's COPYING file for details and copyrights
 .\" that may apply.
 .\" ******************************************************************/
-.TH SNMPPS 1 "07 Feb 2013" VVERSIONINFO "Net-SNMP"
+.TH SNMPPS 1 "04 Nov 2013" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmpps - display process table on a network entity via SNMP
 .SH SYNOPSIS
 .B snmpps
-[COMMON OPTIONS] [\-Cp] [\-Ca] [\C n | m | t ] AGENT
+[COMMON OPTIONS] [\-Cp] [\-Ca] [\-C n | m | t ] AGENT
 .PP
 .B snmptop
-[COMMON OPTIONS] [\-Cp] [\-Ca] [\-C n | m | c | t ] AGENT
+[COMMON OPTIONS] [\-Cp] [\-Ca] [\-C n | m | t ] AGENT
 .SH DESCRIPTION
 .B snmpps
 is a networked version of a simple \fIps\fR command. It
 checks the processes on the remote machine by examining the
-HOST\-RESOURCES\-MIB's \fIhrSWRunTable\fR and the \fIhrSWRunPerfTableTable\fR.
+HOST\-RESOURCES\-MIB's \fIhrSWRunTable\fR and the \fIhrSWRunPerfTable\fR.
 .PP
 AGENT identifies a target SNMP agent, which is instrumented
 to monitor the given objects.  At its simplest, the AGENT
@@ -27,8 +27,11 @@ manual page for a full list of the possible formats for AGENT.
 
 .B snmptop
 emulates the \fItop\fR command using SNMP. While running, the keyboard
-inputs of 'c', 'n', 'm', 't' emulates the -C options. Typing 'i' toggles
-hiding idle processes, while 'o' toggles hiding Os processes.
+inputs of 'c', 'n', 'm', 't' switches sorting between cpu, pid, memory,
+or total runtime.
+Typing 'i' toggles hiding idle processes, while 'o' toggles hiding Os processes.
+Typing 'a' toggles diplay of hrSWRunParameters, 'p' toggles diplay
+of hrSWRunPath.
 
 .SH "OPTIONS"
 .TP 8
@@ -43,9 +46,6 @@ Show hrSWRunPath in addition to hrSWRunName
 .TP
 .B \-Ca
 Show hrSWRunParameters in addition to hrSWRunName
-.TP
-.B \-Cc
-Sort display by current CPU usage (only applicable to \fIsnmptop\fR)
 .TP
 .B \-Ct
 Sort display by total CPU usage
