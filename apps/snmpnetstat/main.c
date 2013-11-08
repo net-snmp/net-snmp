@@ -86,7 +86,7 @@ int	af;		/* address family */
 int     max_getbulk = 32;  /* specifies the max-repeaters value to use with GETBULK requests */
 
 char    *progname = NULL;
-
+const char *pname;
     /*
      * struct nlist nl[] - Omitted
      */
@@ -123,9 +123,13 @@ struct protox ip6protox[] = {
 
 struct protox ipxprotox[] = {
 	{ 1,	tcpxprotopr,	tcp_stats,	"tcp" },	
+	{ 1,	tcpxprotopr,	tcp_stats,	"tcp6" },	
 	{ 1,	udpxprotopr,	udp_stats,	"udp" },	
+	{ 1,	udpxprotopr,	udp_stats,	"udp6" },	
 	{ 1,	(stringfun*)0,	ipx_stats,	"ip" },/* ip6protopr Omitted */
+	{ 1,	(stringfun*)0,	ipx_stats,	"ip6" },/* ip6protopr Omitted */
 	{ 1,	(stringfun*)0,	icmpx_stats,	"icmp" },
+	{ 1,	(stringfun*)0,	icmpx_stats,	"icmp6" },
 	{ 0,	(stringfun*)0,	(stringfun*)0,	NULL }
 };
 
@@ -238,6 +242,7 @@ optProc( int argc, char *const *argv, int opt )
 				exit(1);
 			}
 			pflag = 1;
+			pname = tp->pr_name;
 			return;
 	    /*	case 'q':		NetBSD:  IRQ information
 					OpenBSD: Suppress inactive I/Fs
@@ -366,6 +371,7 @@ main(int argc, char *argv[])
 	 *     Kernel namelis handling
 	 */
 
+#if 0
 	if (mflag) {
             /*
 		mbpr(nl[N_MBSTAT].n_value, nl[N_MBPOOL].n_value,
@@ -377,6 +383,7 @@ main(int argc, char *argv[])
 		printproto(tp, tp->pr_name);
 		exit(0);
 	}
+#endif
 	/*
 	 * Keep file descriptors open to avoid overhead
 	 * of open/close on each call to get* routines.
@@ -428,7 +435,9 @@ main(int argc, char *argv[])
 	}
      */
 	setservent(1);
-	if (af == AF_UNSPEC && Lflag) {
+        if (Lflag) {
+            switch (af) {
+            case AF_UNSPEC:
 		setprotoent(1);
 		/* ugh, this is O(MN) ... why do we do this? */
 		while ((p = getprotoent())) {
@@ -438,16 +447,20 @@ main(int argc, char *argv[])
 					    printproto(tp, p->p_name);
 		}
 		endprotoent();
+                break;
+            case AF_INET:
+                    for (tp = protox; tp->pr_name; tp++)
+                            printproto(tp, tp->pr_name);
+            case AF_INET6:
+                    for (tp = ip6protox; tp->pr_name; tp++)
+                            printproto(tp, tp->pr_name);
+            }
 	}
-	if (af == AF_UNSPEC && !Lflag)
-		for (tp = ipxprotox; tp->pr_name; tp++)
-			printproto(tp, tp->pr_name);
-	if (af == AF_INET)
-		for (tp = protox; tp->pr_name; tp++)
-			printproto(tp, tp->pr_name);
-	if (af == AF_INET6)
-		for (tp = ip6protox; tp->pr_name; tp++)
-			printproto(tp, tp->pr_name);
+        else {
+	    for (tp = ipxprotox; tp->pr_name; tp++)
+		if (!pname || strcmp(pname,tp->pr_name) == 0)
+		    printproto(tp, tp->pr_name);
+	}
     /*
 	if (af == AF_IPX || af == AF_UNSPEC)
 		for (tp = ipxprotox; tp->pr_name; tp++)
@@ -543,12 +556,10 @@ usage(void)
 	(void)fprintf(stderr,
 "usage: %s [snmp_opts] [-Can] [-Cf address_family]\n", progname);
 	(void)fprintf(stderr,
-"       %s [snmp_opts] [-CbdgimnrSs] [-Cf address_family]\n", progname);
+"       %s [snmp_opts] [-Cibodn] [-CI interface] [-Cw wait]\n", progname);
 	(void)fprintf(stderr,
-"       %s [snmp_opts] [-Cbdn] [-CI interface] [-Cw wait]\n", progname);
+"       %s [snmp_opts] [-Cs[s]] [-Cp protocol]\n", progname);
 	(void)fprintf(stderr,
-"       %s [snmp_opts] [-Cs] [-Cp protocol]\n", progname);
-	(void)fprintf(stderr,
-"       %s [snmp_opts] [-Ca] [-Cf address_family] [-Ci | -CI interface]\n", progname);
+"       %s [snmp_opts] [-Crn] [-Cf address_family]\n", progname);
 	exit(1);
 }
