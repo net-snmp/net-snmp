@@ -30,7 +30,7 @@ emulates the \fItop\fR command using SNMP. While running, the keyboard
 inputs of 'c', 'n', 'm', 't' switches sorting between cpu, pid, memory,
 or total runtime.
 Typing 'i' toggles hiding idle processes, while 'o' toggles hiding Os processes.
-Typing 'a' toggles diplay of hrSWRunParameters, 'p' toggles diplay
+Typing 'a' toggles display of hrSWRunParameters, 'p' toggles display
 of hrSWRunPath.
 
 .SH "OPTIONS"
