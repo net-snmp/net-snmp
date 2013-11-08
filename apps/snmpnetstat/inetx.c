@@ -510,8 +510,15 @@ ipx_stats(const char *name)
 {
     oid ipsysstat_oid[] = { 1, 3, 6, 1, 2, 1, 4, 31, 1, 1 };
     size_t ipsysstat_len = sizeof(ipsysstat_oid) / sizeof(ipsysstat_oid[0]);
-    statsprint("ip4", systemstats, 1, ipsysstat_oid, ipsysstat_len);
-    statsprint("ip6", systemstats, 2, ipsysstat_oid, ipsysstat_len);
+    static int first = 1;
+
+    if (!first) return;
+    first = 0;
+
+    if (!name || strcmp(name, "ip") == 0)
+	statsprint("ip", systemstats, 1, ipsysstat_oid, ipsysstat_len);
+    if (!name || strcmp(name, "ip6") == 0)
+	statsprint("ip6", systemstats, 2, ipsysstat_oid, ipsysstat_len);
 }
 
 void
@@ -521,10 +528,20 @@ icmpx_stats(const char *name)
     size_t icmpstat_len = sizeof(icmpstat_oid) / sizeof(icmpstat_oid[0]);
     oid icmpmsg_oid[] = { 1, 3, 6, 1, 2, 1, 5, 30, 1 };
     size_t icmpmsg_len = sizeof(icmpmsg_oid) / sizeof(icmpmsg_oid[0]);
-    statsprint("icmp4", icmpstats, 1, icmpstat_oid, icmpstat_len);
-    prhisto("icmp4", icmpmsg_oid, icmpmsg_len, 1, icmpcodes);
-    statsprint("icmp6", icmpstats, 2, icmpstat_oid, icmpstat_len);
-    prhisto("icmp6", icmpmsg_oid, icmpmsg_len, 2, icmp6codes);
+    static int first = 1;
+
+    if (!first)
+	return;
+    first = 0;
+
+    if (!name || strcmp(name, "icmp") == 0) {
+	statsprint("icmp", icmpstats, 1, icmpstat_oid, icmpstat_len);
+	prhisto("icmp", icmpmsg_oid, icmpmsg_len, 1, icmpcodes);
+    }
+    if (!name || strcmp(name, "icmp6") == 0) {
+	statsprint("icmp6", icmpstats, 2, icmpstat_oid, icmpstat_len);
+	prhisto("icmp6", icmpmsg_oid, icmpmsg_len, 2, icmp6codes);
+    }
 }
 
 
