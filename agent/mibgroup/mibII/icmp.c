@@ -124,7 +124,9 @@ solaris_read_icmp6_msg_stat(struct icmp6_mib *, struct icmp6_msg_mib *, int *);
 #endif
 
 ICMP_STAT_STRUCTURE icmpstat;
-struct icmp6_mib icmp6stat;
+#if defined(solaris2) && defined(NETSNMP_ENABLE_IPV6)
+static struct icmp6_mib icmp6stat;
+#endif
 
 /* If they just all agreed ... */
 
