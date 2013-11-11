@@ -242,6 +242,8 @@ __libraries_init(char *appname)
             return;
         have_inited = 1;
 
+        SOCK_STARTUP;
+
         snmp_set_quick_print(1);
         init_snmp(appname);
     
@@ -249,8 +251,6 @@ __libraries_init(char *appname)
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
 	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                               NETSNMP_OID_OUTPUT_SUFFIX);
-        SOCK_STARTUP;
-    
     }
 
 static void
