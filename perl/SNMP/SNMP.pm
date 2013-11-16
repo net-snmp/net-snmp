@@ -2021,7 +2021,7 @@ If a callback is specified, gettable will return quickly without
 returning results.  When the results are finally retrieved the
 callback subroutine will be called (see the other sections defining
 callback behaviour and how to make use of SNMP::MainLoop which is
-required fro this to work).  An additional argument of the normal hash
+required for this to work).  An additional argument of the normal hash
 result will be added to the callback subroutine arguments.
 
 Note 1: internally, the gettable function uses it's own callbacks
@@ -2251,7 +2251,7 @@ will be undef.
 
 to be used with async SNMP::Session
 calls. MainLoop must be called after initial async calls
-so return packets from the agent will not be processed.
+so return packets from the agent will be processed.
 If no args supplied this function enters an infinite loop
 so program must be exited in a callback or externally
 interrupted. If <timeout(sic)
