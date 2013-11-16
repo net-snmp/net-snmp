@@ -1719,11 +1719,15 @@ the keys instead of deriving them from a password as above).
 
 =head2 SNMPv1 and SNMPv2c Options
 
+=over
+
 =item Community
 
 For SNMPv1 and SNMPv2c, the clear-text community name to use.
 
 The default is 'public'.
+
+=back
 
 =head2 Other Configuration Options
 
