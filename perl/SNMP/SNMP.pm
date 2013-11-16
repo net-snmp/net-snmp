@@ -1634,10 +1634,10 @@ avoid man-in-the-middle attacks).
 
 =item TrustCert
 
-A trusted certificate to use a trust anchor (like a CA certificate)
+A trusted certificate to use as trust anchor (like a CA certificate)
 for verifying a remote server's certificate.  If a CA certificate is
 used to validate a certificate then the TheirHostname parameter must
-also be specified to ensure their presente hostname in the certificate
+also be specified to ensure their presented hostname in the certificate
 matches.
 
 =back
