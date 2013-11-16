@@ -223,10 +223,10 @@ sub translateObj {
 # Translate object identifier(tag or numeric) into alternate representation
 # (i.e., sysDescr => '.1.3.6.1.2.1.1.1' and '.1.3.6.1.2.1.1.1' => sysDescr)
 # when $SNMP::use_long_names or second arg is non-zero the translation will
-# return longer textual identifiers (e.g., system.sysDescr).  An optional 
+# return longer textual identifiers (e.g., system.sysDescr).  An optional
 # third argument of non-zero will cause the module name to be prepended
-# to the text name (e.g. 'SNMPv2-MIB::sysDescr').  If no Mib is loaded 
-# when called and $SNMP::auto_init_mib is enabled then the Mib will be 
+# to the text name (e.g. 'SNMPv2-MIB::sysDescr').  If no Mib is loaded
+# when called and $SNMP::auto_init_mib is enabled then the Mib will be
 # loaded. Will return 'undef' upon failure.
    SNMP::init_snmp("perl");
    my $obj = shift;
@@ -350,17 +350,17 @@ sub snmp_trap {
     $sess->trap(@_);
 }
 
-#--------------------------------------------------------------------- 
-# Preserves the ability to call MainLoop() with no args so we don't 
+#---------------------------------------------------------------------
+# Preserves the ability to call MainLoop() with no args so we don't
 # break old code
 #
-# Alternately, MainLoop() could be called as an object method, 
-# ( $sess->MainLoop() ) , so that $self winds up in @_.  Then it would 
+# Alternately, MainLoop() could be called as an object method,
+# ( $sess->MainLoop() ) , so that $self winds up in @_.  Then it would
 # be more like :
 # my $self = shift;
-# .... 
+# ....
 # SNMP::_main_loop(......, $self->{SessPtr});
-#--------------------------------------------------------------------- 
+#---------------------------------------------------------------------
 sub MainLoop {
     my $ss = shift if(&SNMP::_api_mode() == SNMP::SNMP_API_SINGLE());
     my $time = shift;
@@ -427,16 +427,16 @@ sub _tie {
 }
 
 sub split_vars {
-    # This sub holds the regex that is used throughout this module  
+    # This sub holds the regex that is used throughout this module
     #  to parse the base part of an OID from the IID.
-    #  eg: portName.9.30 -> ['portName','9.30'] 
+    #  eg: portName.9.30 -> ['portName','9.30']
     my $vars = shift;
 
     # The regex was changed to this simple form by patch 722075 for some reason.
-    # Testing shows now (2/05) that it is not needed, and that the long expression 
+    # Testing shows now (2/05) that it is not needed, and that the long expression
     # works fine.  AB
     # my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-    
+
     # These following two are the same.  Broken down for easier maintenance
     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
     my ($tag, $iid) =
@@ -471,8 +471,8 @@ sub new {
    $this->{ErrorStr} = ''; # if methods return undef check for expln.
    $this->{ErrorNum} = 0;  # contains SNMP error return
 
-   $this->{Version} ||= 
-     NetSNMP::default_store::netsnmp_ds_get_int(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID, 
+   $this->{Version} ||=
+     NetSNMP::default_store::netsnmp_ds_get_int(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID,
 				      NetSNMP::default_store::NETSNMP_DS_LIB_SNMPVERSION) ||
 					SNMP::SNMP_DEFAULT_VERSION();
 
@@ -488,7 +488,7 @@ sub new {
    $this->{DestHost} ||= 'localhost';
 
    # community defaults to public
-   $this->{Community} ||= NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+   $this->{Community} ||= NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(),
 				        NetSNMP::default_store::NETSNMP_DS_LIB_COMMUNITY()) || 'public';
 
    # number of retries before giving up, defaults to SNMP_DEFAULT_RETRIES
@@ -519,22 +519,22 @@ sub new {
 					     $this->{Timeout},
 					     );
    } elsif ($this->{Version} eq '3' ) {
-       $this->{SecName} ||= 
-	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
-		         NetSNMP::default_store::NETSNMP_DS_LIB_SECNAME()) || 
+       $this->{SecName} ||=
+	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(),
+		         NetSNMP::default_store::NETSNMP_DS_LIB_SECNAME()) ||
 			   'initial';
        if (!$this->{SecLevel}) {
-	   $this->{SecLevel} = 
-	       NetSNMP::default_store::netsnmp_ds_get_int(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
-			  NetSNMP::default_store::NETSNMP_DS_LIB_SECLEVEL()) || 
+	   $this->{SecLevel} =
+	       NetSNMP::default_store::netsnmp_ds_get_int(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(),
+			  NetSNMP::default_store::NETSNMP_DS_LIB_SECLEVEL()) ||
 			      $SNMP::V3_SEC_LEVEL_MAP{'noAuthNoPriv'};
        } elsif ($this->{SecLevel} !~ /^\d+$/) {
 	   $this->{SecLevel} = $SNMP::V3_SEC_LEVEL_MAP{$this->{SecLevel}};
        }
        $this->{SecEngineId} ||= '';
        $this->{ContextEngineId} ||= $this->{SecEngineId};
-       $this->{Context} ||= 
-	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+       $this->{Context} ||=
+	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(),
 		         NetSNMP::default_store::NETSNMP_DS_LIB_CONTEXT()) || '';
 
        if ($this->{DestHost} =~ /^(dtls|tls|ssh)/) {
@@ -569,9 +569,9 @@ sub new {
 	   # USM specific parameters:
 	   $this->{AuthProto} ||= 'DEFAULT'; # use the library's default
 	   $this->{AuthPass} ||=
-	     NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+	     NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(),
 							   NetSNMP::default_store::NETSNMP_DS_LIB_AUTHPASSPHRASE()) ||
-							       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+							       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(),
 													     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
 
 	   $this->{AuthMasterKey} ||= '';
@@ -581,9 +581,9 @@ sub new {
 
 	   $this->{PrivProto} ||= 'DEFAULT'; # use the library's default
 	   $this->{PrivPass} ||=
-	     NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+	     NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(),
 							   NetSNMP::default_store::NETSNMP_DS_LIB_PRIVPASSPHRASE()) ||
-							       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+							       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(),
 													     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
 	   $this->{EngineBoots} = 0 if not defined $this->{EngineBoots};
 	   $this->{EngineTime} = 0 if not defined $this->{EngineTime};
@@ -622,9 +622,9 @@ sub new {
 
    SNMP::initMib($SNMP::auto_init_mib); # ensures that *some* mib is loaded
 
-   $this->{UseLongNames} = $SNMP::use_long_names 
+   $this->{UseLongNames} = $SNMP::use_long_names
        unless exists $this->{UseLongNames};
-   $this->{UseSprintValue} = $SNMP::use_sprint_value 
+   $this->{UseSprintValue} = $SNMP::use_sprint_value
        unless exists $this->{UseSprintValue};
    $this->{BestGuess} = $SNMP::best_guess unless exists $this->{BestGuess};
    $this->{NonIncreasing} ||= $SNMP::non_increasing;
@@ -651,9 +651,9 @@ sub update {
 
    @$this{keys %new_fields} = values %new_fields;
 
-   $this->{UseLongNames} = $SNMP::use_long_names 
+   $this->{UseLongNames} = $SNMP::use_long_names
        unless exists $this->{UseLongNames};
-   $this->{UseSprintValue} = $SNMP::use_sprint_value 
+   $this->{UseSprintValue} = $SNMP::use_sprint_value
        unless exists $this->{UseSprintValue};
    $this->{BestGuess} = $SNMP::best_guess unless exists $this->{BestGuess};
    $this->{NonIncreasing} ||= $SNMP::non_increasing;
@@ -754,7 +754,7 @@ sub gettable {
     return if (!$root_oid);
 
     # deficed if we're going to parse indexes
-    my $parse_indexes = (defined($state->{'options'}{'noindexes'})) ? 
+    my $parse_indexes = (defined($state->{'options'}{'noindexes'})) ?
       0 : $have_netsnmp_oid;
 
     # get the list of columns we should look at.
@@ -811,7 +811,7 @@ sub gettable {
     }
 
     $vbl = $state->{'varbinds'};
-	
+
     my $repeatcount;
     if ($this->{Version} eq '1' || $state->{'options'}{nogetbulk}) {
 	$state->{'repeatcount'} = 1;
@@ -890,7 +890,7 @@ sub _gettable_do_it() {
 	    my $row_value = $vbl->[$i][2];
 	    my $row_type = $vbl->[$i][3];
 
-	    if ($row_oid =~ 
+	    if ($row_oid =~
 		/^$state->{'stopconds'}[$i % ($#{$state->{'stopconds'}}+1)]/ &&
 		$row_value ne 'ENDOFMIBVIEW' ){
 
@@ -1788,8 +1788,8 @@ set so that the full OID is returned to the caller.
 
 defaults to the value of SNMP::best_guess at time of session
 creation. this setting controls how <tags> are parsed.  setting to
-0 causes a regular lookup.  setting to 1 causes a regular expression 
-match (defined as -Ib in snmpcmd) and setting to 2 causes a random 
+0 causes a regular lookup.  setting to 1 causes a regular expression
+match (defined as -Ib in snmpcmd) and setting to 2 causes a random
 access lookup (defined as -IR in snmpcmd).
 
 =item NonIncreasing
@@ -2321,11 +2321,11 @@ returned.  Set on a per-session basis (see UseNumeric).
 
 =item $SNMP::best_guess
 
-default '0'.  This setting controls how <tags> are 
-parsed.  Setting to 0 causes a regular lookup.  Setting 
-to 1 causes a regular expression match (defined as -Ib 
-in snmpcmd) and setting to 2 causes a random access 
-lookup (defined as -IR in snmpcmd).  Can also be set 
+default '0'.  This setting controls how <tags> are
+parsed.  Setting to 0 causes a regular lookup.  Setting
+to 1 causes a regular expression match (defined as -Ib
+in snmpcmd) and setting to 2 causes a random access
+lookup (defined as -IR in snmpcmd).  Can also be set
 on a per session basis (see BestGuess)
 
 =item $SNMP::save_descriptions
@@ -2526,16 +2526,16 @@ B<*Not Implemented*>
 will convert a text obj tag to an OID and vice-versa.
 Any iid suffix is retained numerically.  Default
 behaviour when converting a numeric OID to text
-form is to return leaf identifier only 
-(e.g.,'sysDescr') but when $SNMP::use_long_names 
-is non-zero or a non-zero second arg is supplied it 
-will return a longer textual identifier.  An optional 
-third argument of non-zero will cause the module name 
-to be prepended to the text name (e.g. 
-'SNMPv2-MIB::sysDescr').  When converting a text obj, 
-the $SNMP::best_guess option is used.  If no Mib is 
-loaded when called and $SNMP::auto_init_mib is enabled 
-then the Mib will be loaded. Will return 'undef' upon 
+form is to return leaf identifier only
+(e.g.,'sysDescr') but when $SNMP::use_long_names
+is non-zero or a non-zero second arg is supplied it
+will return a longer textual identifier.  An optional
+third argument of non-zero will cause the module name
+to be prepended to the text name (e.g.
+'SNMPv2-MIB::sysDescr').  When converting a text obj,
+the $SNMP::best_guess option is used.  If no Mib is
+loaded when called and $SNMP::auto_init_mib is enabled
+then the Mib will be loaded. Will return 'undef' upon
 failure.
 
 =item &SNMP::getType(<var>)
