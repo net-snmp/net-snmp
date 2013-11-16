@@ -1621,7 +1621,7 @@ filename that holds the certificate.
 
 =item TheirIdentity
 
-The remote server's identity to connect to, specified as eihter a
+The remote server's identity to connect to, specified as either a
 fingerprint or a file name.  Either this must be specified, or the
 hostname below along with a trust anchor.
 
