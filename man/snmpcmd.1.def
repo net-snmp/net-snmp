@@ -60,7 +60,7 @@ single-dash arguments aren't working because you have settings in the
 the longer-form double-dash arguments to successfully trump the
 \fIsnmp.conf\fR file settings.
 .SH Generic Options
-Thes options control how the Net-SNMP commands behave regardless of
+These options control how the Net-SNMP commands behave regardless of
 what version of SNMP you are using.  See further below for options
 that control specific versions or sub-modules of the SNMP protocol. 
 .TP
