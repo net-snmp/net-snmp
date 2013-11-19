@@ -2320,6 +2320,9 @@ dump_registry(void)
 /* End of MIB registration code */
 
 
+netsnmp_feature_child_of(register_signal, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_SIGNAL
+
 /** @defgroup agent_signals POSIX signals support for agents.
  *     Registering and unregistering signal handlers.
  *   @ingroup agent_registry
@@ -2416,6 +2419,8 @@ unregister_signal(int sig)
 
 /**  @} */
 /* End of signals support code */
+
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_SIGNAL */
 
 /**  @} */
 
