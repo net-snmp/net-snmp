@@ -1284,12 +1284,14 @@ receive(void)
 #endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
 
     reselect:
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_SIGNAL
         for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
             if (external_signal_scheduled[i]) {
                 external_signal_scheduled[i]--;
                 external_signal_handler[i](i);
             }
         }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_SIGNAL */
 
         DEBUGMSGTL(("snmpd/select", "select( numfds=%d, ..., tvp=%p)\n",
                     numfds, tvp));
