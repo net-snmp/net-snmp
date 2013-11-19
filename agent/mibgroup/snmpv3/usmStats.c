@@ -10,7 +10,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/sysORTable.h>
 
-#include "usmStats_5_5.h"
+#include "usmStats.h"
 
 #include <net-snmp/agent/snmp_get_statistic.h>
 
@@ -25,7 +25,7 @@ static oid usmMIBCompliance[] = { usmMIBCompliances, 1 };
 netsnmp_feature_require(helper_statistics)
 
 void
-init_usmStats_5_5(void)
+init_usmStats(void)
 {
     netsnmp_handler_registration* s =
         netsnmp_create_handler_registration(
@@ -41,7 +41,7 @@ init_usmStats_5_5(void)
 }
 
 void
-shutdown_usmStats_5_5(void)
+shutdown_usmStats(void)
 {
     UNREGISTER_SYSOR_ENTRY(usmMIBCompliance);
     if (usmStats_reg) {
