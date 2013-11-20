@@ -76,7 +76,7 @@ SNMP-FRAMEWORK-MIB
 
 ------------------------------------------------------------------------------
 SNMP-MPD-MIB
- snmpMPDStats.*.0             A         ~4.0?   G snmpv3/snmpMPDStats_5_5.c
+ snmpMPDStats.*.0             A         ~4.0?   G snmpv3/snmpMPDStats.c
 
 ------------------------------------------------------------------------------
 SNMP-TARGET-MIB

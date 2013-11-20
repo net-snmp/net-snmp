@@ -3,7 +3,7 @@
 
 config_add_mib(SNMP-MPD-MIB)
 
-void init_snmpMPDStats_5_5(void);
-void shutdown_snmpMPDStats_5_5(void);
+void init_snmpMPDStats(void);
+void shutdown_snmpMPDStats(void);
 
 #endif /* _MIBGROUP_SNMPMPDSTATS_H */
