@@ -249,7 +249,7 @@
 ./agent_index.lo: mibgroup/disman/event/mteObjectsTable.h
 ./agent_index.lo: mibgroup/disman/event/mteObjectsConf.h
 ./agent_index.lo: mibgroup/snmpv3/usmStats.h mibgroup/snmpv3/snmpEngine.h
-./agent_index.lo: mibgroup/snmpv3/usmUser.h mibgroup/mibII/snmp_mib_5_5.h
+./agent_index.lo: mibgroup/snmpv3/usmUser.h mibgroup/mibII/snmp_mib.h
 ./agent_index.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./agent_index.lo: mibgroup/mibII/at.h mibgroup/mibII/ip.h
 ./agent_index.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
@@ -535,7 +535,7 @@
 ./agent_read_config.lo: mibgroup/snmpv3/usmStats.h
 ./agent_read_config.lo: mibgroup/snmpv3/snmpEngine.h
 ./agent_read_config.lo: mibgroup/snmpv3/usmUser.h
-./agent_read_config.lo: mibgroup/mibII/snmp_mib_5_5.h
+./agent_read_config.lo: mibgroup/mibII/snmp_mib.h
 ./agent_read_config.lo: mibgroup/mibII/system_mib.h
 ./agent_read_config.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./agent_read_config.lo: mibgroup/mibII/ip.h mibgroup/mibII/var_route.h
@@ -818,7 +818,7 @@
 ./agent_registry.lo: mibgroup/disman/event/mteObjectsConf.h
 ./agent_registry.lo: mibgroup/snmpv3/usmStats.h
 ./agent_registry.lo: mibgroup/snmpv3/snmpEngine.h mibgroup/snmpv3/usmUser.h
-./agent_registry.lo: mibgroup/mibII/snmp_mib_5_5.h
+./agent_registry.lo: mibgroup/mibII/snmp_mib.h
 ./agent_registry.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./agent_registry.lo: mibgroup/mibII/at.h mibgroup/mibII/ip.h
 ./agent_registry.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
@@ -1307,7 +1307,7 @@
 ./mib_modules.lo: mibgroup/disman/event/mteObjectsTable.h
 ./mib_modules.lo: mibgroup/disman/event/mteObjectsConf.h
 ./mib_modules.lo: mibgroup/snmpv3/usmStats.h mibgroup/snmpv3/snmpEngine.h
-./mib_modules.lo: mibgroup/snmpv3/usmUser.h mibgroup/mibII/snmp_mib_5_5.h
+./mib_modules.lo: mibgroup/snmpv3/usmUser.h mibgroup/mibII/snmp_mib.h
 ./mib_modules.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./mib_modules.lo: mibgroup/mibII/at.h mibgroup/mibII/ip.h
 ./mib_modules.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
@@ -2005,7 +2005,7 @@
 ./snmp_vars.lo: mibgroup/disman/event/mteObjectsTable.h
 ./snmp_vars.lo: mibgroup/disman/event/mteObjectsConf.h
 ./snmp_vars.lo: mibgroup/snmpv3/usmStats.h mibgroup/snmpv3/snmpEngine.h
-./snmp_vars.lo: mibgroup/snmpv3/usmUser.h mibgroup/mibII/snmp_mib_5_5.h
+./snmp_vars.lo: mibgroup/snmpv3/usmUser.h mibgroup/mibII/snmp_mib.h
 ./snmp_vars.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./snmp_vars.lo: mibgroup/mibII/at.h mibgroup/mibII/ip.h
 ./snmp_vars.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h

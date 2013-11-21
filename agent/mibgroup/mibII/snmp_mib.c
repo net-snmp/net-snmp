@@ -6,7 +6,7 @@
 
 #include <net-snmp/agent/snmp_get_statistic.h>
 
-#include "snmp_mib_5_5.h"
+#include "snmp_mib.h"
 #include "updates.h"
 
 netsnmp_feature_require(helper_statistics)
@@ -86,7 +86,7 @@ extern int      system_module_count;
 
 /** Initializes the snmp module */
 void
-init_snmp_mib_5_5(void)
+init_snmp_mib(void)
 {
     DEBUGMSGTL(("snmp", "Initializing\n"));
 

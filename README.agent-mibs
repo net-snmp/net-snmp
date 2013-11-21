@@ -67,7 +67,7 @@ SNMPv2-MIB
  system.?.0                   A         5.5     W mibII/system_mib.c
  .sysORLastChange.0           A         5.5     W mibII/sysORTable.c
  sysORTable                   A         5.5     C mibII/sysORTable.c
- snmp.*.0                     A         5.5     G mibII/snmp_mib_5_5.c
+ snmp.*.0                     A         5.5     G mibII/snmp_mib.c
  setSerialNo.0                A         5.0     W mibII/setSerialNo.c
 
 ------------------------------------------------------------------------------
