@@ -11,14 +11,14 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "target_counters_5_5.h"
+#include "target_counters.h"
 
 #include <net-snmp/agent/snmp_get_statistic.h>
 
 netsnmp_feature_require(helper_statistics)
 
 void
-init_target_counters_5_5(void)
+init_target_counters(void)
 {
     oid target_oid[] = { 1, 3, 6, 1, 6, 3, 12, 1 };
 

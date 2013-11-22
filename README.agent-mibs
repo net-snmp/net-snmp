@@ -83,8 +83,8 @@ SNMP-TARGET-MIB
  snmpTargetSpinLock.0         A         3.6     O target/snmpTargetAddrEntry.c
  snmpTargetAddrTable          A         3.6     O target/snmpTargetAddrEntry.c
  snmpTargetParamsTable        A         3.6     O target/snmpTargetParamsEntry.c
- snmpUnavailableContexts.0    A         5.5     G target/target_counters_5_5.c
- snmpUnknownContexts.0        A         5.5     G target/target_counters_5_5.c
+ snmpUnavailableContexts.0    A         5.5     G target/target_counters.c
+ snmpUnknownContexts.0        A         5.5     G target/target_counters.c
 
 ------------------------------------------------------------------------------
 SNMP-NOTIFICATION-MIB

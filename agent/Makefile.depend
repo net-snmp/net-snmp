@@ -268,7 +268,7 @@
 ./agent_index.lo: mibgroup/notification/snmpNotifyTable.h
 ./agent_index.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./agent_index.lo: mibgroup/notification-log-mib/notification_log.h
-./agent_index.lo: mibgroup/target/target_counters_5_5.h
+./agent_index.lo: mibgroup/target/target_counters.h
 ./agent_index.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./agent_index.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./agent_index.lo: mibgroup/agent/nsTransactionTable.h
@@ -556,7 +556,7 @@
 ./agent_read_config.lo: mibgroup/notification/snmpNotifyTable.h
 ./agent_read_config.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./agent_read_config.lo: mibgroup/notification-log-mib/notification_log.h
-./agent_read_config.lo: mibgroup/target/target_counters_5_5.h
+./agent_read_config.lo: mibgroup/target/target_counters.h
 ./agent_read_config.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./agent_read_config.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./agent_read_config.lo: mibgroup/agent/nsTransactionTable.h
@@ -837,7 +837,7 @@
 ./agent_registry.lo: mibgroup/notification/snmpNotifyTable.h
 ./agent_registry.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./agent_registry.lo: mibgroup/notification-log-mib/notification_log.h
-./agent_registry.lo: mibgroup/target/target_counters_5_5.h
+./agent_registry.lo: mibgroup/target/target_counters.h
 ./agent_registry.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./agent_registry.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./agent_registry.lo: mibgroup/agent/nsTransactionTable.h
@@ -1326,7 +1326,7 @@
 ./mib_modules.lo: mibgroup/notification/snmpNotifyTable.h
 ./mib_modules.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./mib_modules.lo: mibgroup/notification-log-mib/notification_log.h
-./mib_modules.lo: mibgroup/target/target_counters_5_5.h
+./mib_modules.lo: mibgroup/target/target_counters.h
 ./mib_modules.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./mib_modules.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./mib_modules.lo: mibgroup/agent/nsTransactionTable.h
@@ -2023,7 +2023,7 @@
 ./snmp_vars.lo: mibgroup/notification/snmpNotifyTable.h
 ./snmp_vars.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./snmp_vars.lo: mibgroup/notification-log-mib/notification_log.h
-./snmp_vars.lo: mibgroup/target/target_counters_5_5.h
+./snmp_vars.lo: mibgroup/target/target_counters.h
 ./snmp_vars.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./snmp_vars.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./snmp_vars.lo: mibgroup/agent/nsTransactionTable.h
