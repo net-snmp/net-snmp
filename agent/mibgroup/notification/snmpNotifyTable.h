@@ -57,6 +57,7 @@ config_add_mib(SNMP-NOTIFICATION-MIB)
 
 
      void            init_snmpNotifyTable(void);
+     void            shutdown_snmpNotifyTable(void);
      FindVarMethod   var_snmpNotifyTable;
      void            parse_snmpNotifyTable(const char *, char *);
 
