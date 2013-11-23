@@ -145,7 +145,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "agentx/subagent.h"
 #include "net-snmp/agent/all_helpers.h"
 #include "agent_module_includes.h"
-#include "mib_module_includes.h"
 #include "net-snmp/library/container.h"
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
