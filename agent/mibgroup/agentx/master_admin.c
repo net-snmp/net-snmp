@@ -229,7 +229,7 @@ register_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
      * register mib. Note that for failure cases, the registration info
      * (reg) will be freed, and thus is no longer a valid pointer.
      */
-    switch (netsnmp_register_mib(buf, NULL, 0, 1,
+    switch (netsnmp_register_mib(buf, NULL, 0, 0,
                                  pdu->variables->name,
                                  pdu->variables->name_length,
                                  pdu->priority, pdu->range_subid, ubound,
