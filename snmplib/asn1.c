@@ -3466,9 +3466,10 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
      */
-    register long low = cp->low, high = cp->high;
-    size_t          intsize, start_offset = *offset;
-    int             count, testvalue = (high & 0x80000000) ? -1 : 0;
+    register int32_t low = cp->low, high = cp->high;
+    size_t           intsize, start_offset = *offset;
+    int              count;
+    int32_t          testvalue = (high & 0x80000000) ? -1 : 0;
 
     if (countersize != sizeof(struct counter64)) {
         _asn_size_err("build uint64", countersize,
