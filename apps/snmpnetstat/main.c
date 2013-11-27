@@ -123,9 +123,7 @@ struct protox ip6protox[] = {
 
 struct protox ipxprotox[] = {
 	{ 1,	tcpxprotopr,	tcp_stats,	"tcp" },	
-	{ 1,	tcpxprotopr,	tcp_stats,	"tcp6" },	
 	{ 1,	udpxprotopr,	udp_stats,	"udp" },	
-	{ 1,	udpxprotopr,	udp_stats,	"udp6" },	
 	{ 1,	(stringfun*)0,	ipx_stats,	"ip" },/* ip6protopr Omitted */
 	{ 1,	(stringfun*)0,	ipx_stats,	"ip6" },/* ip6protopr Omitted */
 	{ 1,	(stringfun*)0,	icmpx_stats,	"icmp" },
@@ -459,7 +457,7 @@ main(int argc, char *argv[])
         else {
 	    for (tp = ipxprotox; tp->pr_name; tp++)
 		if (!pname || strcmp(pname,tp->pr_name) == 0)
-		    printproto(tp, tp->pr_name);
+		    printproto(tp, pname);
 	}
     /*
 	if (af == AF_IPX || af == AF_UNSPEC)

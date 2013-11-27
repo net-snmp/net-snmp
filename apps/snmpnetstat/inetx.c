@@ -443,7 +443,7 @@ statsprint(const char *name, const systemstats_t *st, int proto,
 	    snmp_varlist_add_variable( &vb, var, len, ASN_NULL, NULL, 0);
 	    if (netsnmp_query_get( vb, ss ) != SNMP_ERR_NOERROR) {
 		snmp_free_var( vb );
-		return;
+		vb = NULL;
 	    }
 	}
 	if (vb) {
@@ -460,6 +460,9 @@ statsprint(const char *name, const systemstats_t *st, int proto,
 	    else
 		printf("%14s %s\n", "-", st->str);
 	    snmp_free_varbind(vb);
+	}
+	else {
+	    printf("%14s %s\n", "-", st->str);
 	}
 	st++;
     }

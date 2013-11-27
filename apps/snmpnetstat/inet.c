@@ -511,7 +511,7 @@ tcp_stats(const char *name)
         {15, "%14d reset%s sent"},
         { 0, ""}
     };
-    _dump_stats( name, tcpstats_oid, tcpstats_len, tcpstats_tbl );
+    _dump_stats( "tcp", tcpstats_oid, tcpstats_len, tcpstats_tbl );
 }
 
 
@@ -530,7 +530,7 @@ udp_stats(const char *name)
         {4, "%14d output datagram request%s"},
         {0, ""}
     };
-    _dump_stats( name, udpstats_oid, udpstats_len, udpstats_tbl );
+    _dump_stats( "udp", udpstats_oid, udpstats_len, udpstats_tbl );
 }
 
 
