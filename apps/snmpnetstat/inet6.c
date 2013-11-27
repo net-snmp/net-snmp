@@ -130,7 +130,7 @@ tcp6protopr(const char *name)
         return;
 
     for (vp = var; vp ; vp=vp->next_variable) {
-        state = *var->val.integer;
+        state = *vp->val.integer;
         if (!aflag && state == MIB_TCPCONNSTATE_LISTEN)
             continue;
 
@@ -146,12 +146,12 @@ tcp6protopr(const char *name)
         
         /* Extract the local/remote information from the index values */
         for (i=0; i<16; i++)
-            localAddr[i]  = var->name[ 10+i ];
-        localPort    = var->name[ 26 ];
+            localAddr[i]  = vp->name[ 10+i ];
+        localPort    = vp->name[ 26 ];
         for (i=0; i<16; i++)
-            remoteAddr[i] = var->name[ 27+i ];
-        remotePort   = var->name[ 43 ];
-        ifIndex      = var->name[ 44 ];
+            remoteAddr[i] = vp->name[ 27+i ];
+        remotePort   = vp->name[ 43 ];
+        ifIndex      = vp->name[ 44 ];
 
         printf("%-5.5s", name);
         inet6print(localAddr,  localPort,  name, 1);
@@ -198,9 +198,9 @@ udp6protopr(const char *name)
          *   the IP address from the varbind value, (which is why
          *   we walked udpLocalAddress rather than udpLocalPort)
          */
-        localPort = var->name[ var->name_length-2 ];
-        ifIndex   = var->name[ var->name_length-1 ];
-        inet6print(var->val.string, localPort, name, 1);
+        localPort = vp->name[ vp->name_length-2 ];
+        ifIndex   = vp->name[ vp->name_length-1 ];
+        inet6print(vp->val.string, localPort, name, 1);
         printf(" %4d\n", ifIndex );
     }
     snmp_free_varbind( var );
@@ -246,12 +246,12 @@ _dump_v6stats( const char *name, oid *oid_buf, size_t buf_len,
     while (1) {
         if (netsnmp_query_getnext( var, ss ) != SNMP_ERR_NOERROR)
             break;
-        if ( snmp_oid_compare( oid_buf,   buf_len-1,
-                               var->name, buf_len-1) != 0 )
+        if ( snmp_oid_compare( oid_buf,   buf_len,
+                               var->name, buf_len) != 0 )
             break;    /* End of Table */
             
         for ( vp=var; vp; vp=vp->next_variable ) {
-            stat = var->name[ buf_len-1 ];
+            stat = vp->name[ buf_len-1 ];
             stats[stat] += *vp->val.integer;
         }
         active=1;
