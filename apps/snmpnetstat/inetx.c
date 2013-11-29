@@ -269,20 +269,20 @@ tcpxprotopr(const char *name)
 	if (af == AF_INET6 && localType != 2) continue;
 
         if (first) {
-            printf("Active Internet (%s) Connections", name);
+            printf("Active Internet (%s) Connections", "tcp");
             putchar('\n');
             printf("%-5.5s %-27.27s %-27.27s %11.11s %5.5s\n",
                    "Proto", "Local Address", "Remote Address", "State", "PID");
             first = 0;
         }
 
-	strcpy(lname, name);
+	strcpy(lname, "tcp");
 	if (localType == 2) lname[3] = '6';
 	else lname[3] = '4';
 	lname[4] = 0;
         printf("%-5.5s", lname);
-        inetxprint(localType, localAddr,  localPort, name, 1);
-        inetxprint(remoteType, remoteAddr, remotePort, name, 0);
+        inetxprint(localType, localAddr,  localPort, "tcp", 1);
+        inetxprint(remoteType, remoteAddr, remotePort, "tcp", 0);
         if ( state < 1 || state > TCP_NSTATES )
             printf(" %11d %5d\n", state, pid);
         else
@@ -320,7 +320,7 @@ listenxprotopr(const char *name)
     if ((var->type & 0xF0) == 0x80)	/* Exception */
         return;
 
-    printf("Listening Internet (%s) Connections\n", name);
+    printf("Listening Internet (%s) Connections\n", "tcp");
     printf("%-5.5s %-27.27s %5s\n", "Proto", "Local Address", "PID");
     for (vp = var; vp ; vp=vp->next_variable) {
 	char lname[5];
@@ -339,12 +339,12 @@ listenxprotopr(const char *name)
 	inx += vp->name[inx]+1;
         localPort = vp->name[ inx++ ];
         pid   = *vp->val.integer;
-	strcpy(lname, name);
+	strcpy(lname, "tcp");
 	if (localType == 2) lname[3] = '6';
 	else lname[3] = '4';
 	lname[4] = 0;
         printf("%-5.5s", lname);
-        inetxprint(localType, localAddr, localPort, name, 1);
+        inetxprint(localType, localAddr, localPort, "tcp", 1);
         printf(" %5d\n", pid);
     }
     snmp_free_varbind( var );
@@ -380,7 +380,7 @@ udpxprotopr(const char *name)
     if ((var->type & 0xF0) == 0x80)	/* Exception */
         return;
 
-    printf("Active Internet (%s) Connections\n", name);
+    printf("Active Internet (%s) Connections\n", "udp");
     printf("%-5.5s %-27.27s %-27.27s %5s\n", "Proto", "Local Address", "Remote Address", "PID");
     for (vp = var; vp ; vp=vp->next_variable) {
         char lname[5];
@@ -403,13 +403,13 @@ udpxprotopr(const char *name)
 	inx += vp->name[inx]+1;
         remotePort = vp->name[ inx++ ];
         pid   = *vp->val.integer;
-	strcpy(lname, name);
+	strcpy(lname, "udp");
 	if (localType == 2) lname[3] = '6';
 	else lname[3] = '4';
 	lname[4] = 0;
         printf("%-5.5s", lname);
-        inetxprint(localType, localAddr, localPort, name, 1);
-        inetxprint(remoteType, remoteAddr, remotePort, name, 1);
+        inetxprint(localType, localAddr, localPort, "udp", 1);
+        inetxprint(remoteType, remoteAddr, remotePort, "udp", 1);
         printf(" %5d\n", pid);
     }
     snmp_free_varbind( var );
