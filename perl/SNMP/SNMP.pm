@@ -1939,7 +1939,7 @@ agent to include one additional (unrelated) variable that signals
 the end of the sub-tree, allowing bulkwalk() to determine that
 the request is complete.
 
-=item $results = $sess->gettable(E<lt>TABLE OIDE<gt>, E<lt>OPTIONS<gt>)
+=item $results = $sess->gettable(E<lt>TABLE OIDE<gt>, E<lt>OPTIONSE<gt>)
 
 This will retrieve an entire table of data and return a hash reference
 to that data.  The returned hash reference will have indexes of the
