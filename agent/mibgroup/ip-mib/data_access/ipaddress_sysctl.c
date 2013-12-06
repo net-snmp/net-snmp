@@ -49,8 +49,8 @@ netsnmp_arch_ipaddress_entry_init(netsnmp_ipaddress_entry *entry)
     /*
      * init ipv4 stuff
      */
-    //if (NULL == netsnmp_ioctl_ipaddress_entry_init(entry))
-    //    return -1;
+    /* if (NULL == netsnmp_ioctl_ipaddress_entry_init(entry)) */
+    /*     return -1; */
 
     /*
      * init ipv6 stuff
@@ -69,7 +69,7 @@ netsnmp_arch_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry)
     /*
      * cleanup ipv4 stuff
      */
-    //netsnmp_ioctl_ipaddress_entry_cleanup(entry);
+    /*netsnmp_ioctl_ipaddress_entry_cleanup(entry); */
 
     /*
      * cleanup ipv6 stuff
@@ -92,7 +92,7 @@ netsnmp_arch_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
     /*
      * copy ipv4 stuff
      */
-    //rc = netsnmp_ioctl_ipaddress_entry_copy(lhs, rhs);
+    /*rc = netsnmp_ioctl_ipaddress_entry_copy(lhs, rhs); */
     if (rc)
         return rc;
 
