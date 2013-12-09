@@ -106,6 +106,67 @@ usage(void)
     exit(1);
 }
 
+/**
+ * For every line on stdin, assume that it is either a plain OID
+ * or snmpwalk/snmpget output:
+ * mib-2.1.2.3.4
+ * -or-
+ * mib-2.1.2.3.4 = INTEGER: 5
+ *
+ * Replace the OID with its translation.
+ * If translation fails, just output the original string.
+ */
+#define MAX_LINE_TEMP   10240
+void
+process_stdin(void)
+{
+    char        buf[MAX_LINE_TEMP];
+    oid         name[MAX_OID_LEN];
+    size_t      name_length;
+
+    while ( NULL != fgets( buf, sizeof( buf ), stdin ) ) {
+        char delim = ' ';
+        char *nl = index( buf, '\n' );
+        char *rest = index( buf, delim );
+
+        if (nl != NULL) {
+            *nl = '\0';
+        } /* else too-long line: output will look weird.  Too bad. */
+        if (rest == NULL) {
+            delim = '\t';
+            rest = index( buf, delim );
+        }
+        if (rest != NULL) {
+            *rest++ = '\0';
+        }
+        name_length = MAX_OID_LEN;
+        /*
+         * If it's not the whole line, only try to process buffer
+         * longer than 5 characters.
+         * The idea is to avoid false positives including, e.g.,
+         * a hex dump.
+         */
+        if ( !(rest && strlen( buf ) <= 5) &&
+              read_objid( buf, name, &name_length )) {
+            char objbuf[MAX_LINE_TEMP];
+            snprint_objid( objbuf, MAX_LINE_TEMP, name, name_length );
+            fputs( objbuf, stdout );
+        } else {
+            fputs( buf, stdout );
+        }
+        /*
+         * For future improvement: if delim == ' ' && rest && *rest == '='
+         * see if rest looks like snmpget/snmpwalk output
+         * and handle it in the context of the given node
+         */
+        if (rest) {
+            fputc( delim, stdout );
+            fputs( rest, stdout );
+        }
+        fputc( '\n', stdout );
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -261,6 +322,12 @@ main(int argc, char *argv[])
     }
 
     do {
+        if ( strcmp( current_name, "-" ) == 0  && ( print == 0 ) ) {
+            process_stdin();
+            current_name = argv[++optind];
+            continue;
+        }
+
         name_length = MAX_OID_LEN;
         if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				  NETSNMP_DS_LIB_RANDOM_ACCESS)) {
