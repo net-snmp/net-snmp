@@ -11,7 +11,8 @@ use File::Basename;
 use constant false => 0;
 use constant true => 1;
 my $openssl = false;
-my $default_openssldir = $ENV{TARGET_CPU} eq "x64" ? "C:\\OpenSSL-Win64" : "C:\\OpenSSL-Win32";
+my $default_openssldir = $ENV{TARGET_CPU} eq "x64" || $ENV{Platform} eq "x64" ?
+    "C:\\OpenSSL-Win64" : "C:\\OpenSSL-Win32";
 my $default_opensslincdir = $default_openssldir . "\\include";
 my $opensslincdir = $default_opensslincdir;
 my $default_openssllibdir = $default_openssldir . "\\lib\\VC";
