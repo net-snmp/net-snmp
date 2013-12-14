@@ -758,7 +758,7 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
             return -3;
         }
         
-        // _systemstats_v6_load_file(entry, devin);
+        /* _systemstats_v6_load_file(entry, devin); */
         CONTAINER_INSERT(container, entry);
         fclose(devin);
     }
