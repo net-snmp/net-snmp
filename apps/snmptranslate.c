@@ -126,15 +126,15 @@ process_stdin(void)
 
     while ( NULL != fgets( buf, sizeof( buf ), stdin ) ) {
         char delim = ' ';
-        char *nl = index( buf, '\n' );
-        char *rest = index( buf, delim );
+        char *nl = strchr(buf, '\n');
+        char *rest = strchr(buf, delim);
 
         if (nl != NULL) {
             *nl = '\0';
         } /* else too-long line: output will look weird.  Too bad. */
         if (rest == NULL) {
             delim = '\t';
-            rest = index( buf, delim );
+            rest = strchr(buf, delim);
         }
         if (rest != NULL) {
             *rest++ = '\0';
