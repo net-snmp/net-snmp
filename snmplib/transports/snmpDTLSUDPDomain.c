@@ -80,6 +80,10 @@
 #define INADDR_NONE	-1
 #endif
 
+#ifndef MSG_DONTWAIT
+#define MSG_DONTWAIT 0
+#endif
+
 #define WE_ARE_SERVER 0
 #define WE_ARE_CLIENT 1
 
@@ -579,7 +583,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                                   (struct sockaddr*)&(addr_pair->local_addr),
                                   &local_addr_len, &(addr_pair->if_index));
 #else
-        rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
+        rc = recvfrom(t->sock, buf, size, MSG_DONTWAIT, from, &fromlen);
 #endif /* linux && IP_PKTINFO */
         if (rc < 0 && errno != EINTR) {
             break;
