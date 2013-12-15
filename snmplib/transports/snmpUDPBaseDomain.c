@@ -151,7 +151,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     msg.msg_control = &cmsg;
     msg.msg_controllen = sizeof(cmsg);
 
-    r = recvmsg(s, &msg, NETSNMP_DONTWAIT);
+    r = recvmsg(s, &msg, MSG_DONTWAIT);
 #else /* !defined(WIN32) */
     WSABUF wsabuf;
     char cmsg[WSA_CMSG_SPACE(sizeof(struct in_pktinfo))];
@@ -285,7 +285,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
 
-        rc = sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
+        rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
         if (rc >= 0 || errno != EINVAL)
             return rc;
 
@@ -314,7 +314,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
         cm->cmsg_type = IP_SENDSRCADDR;
         memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
 #endif
-        rc = sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
+        rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
         if (rc >= 0 || errno != EINVAL)
             return rc;
 
@@ -323,7 +323,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
         m.msg_controllen = 0;
     }
 
-    return sendmsg(fd, &m, NETSNMP_NOSIGNAL|NETSNMP_DONTWAIT);
+    return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
 #else /* !defined(WIN32) */
     WSABUF        wsabuf;
     WSAMSG        m;
@@ -408,7 +408,7 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
                                       (struct sockaddr*)&(addr_pair->local_addr),
                                       &local_addr_len, &(addr_pair->if_index));
 #else
-            rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
+            rc = recvfrom(t->sock, buf, size, MSG_DONTWAIT, from, &fromlen);
 #endif /* netsnmp_udpbase_recvfrom_sendto_defined */
 	    if (rc < 0 && errno != EINTR) {
 		break;
