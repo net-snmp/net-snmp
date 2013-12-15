@@ -6,12 +6,24 @@
 #
 use strict;
 use warnings;
+use Config;
 use Cwd 'abs_path';
 use File::Basename;
 use constant false => 0;
 use constant true => 1;
+my $target_arch = $ENV{TARGET_CPU} ? $ENV{TARGET_CPU} : $ENV{Platform} ?
+                  $ENV{Platform} : "x86";
+if ($target_arch ne "x86" && $target_arch ne "x64") {
+    print "Error: unsupported target architecture $target_arch\n";
+    die;
+}
+my @perl_arch = split(/-/, $Config{archname});
+if ($perl_arch[1] ne $target_arch) {
+    print "perl_arch = $perl_arch[1] does not match target_arch = $target_arch\n";
+    die;
+}
 my $openssl = false;
-my $default_openssldir = $ENV{TARGET_CPU} eq "x64" || $ENV{Platform} eq "x64" ?
+my $default_openssldir = $target_arch eq "x64" ?
     "C:\\OpenSSL-Win64" : "C:\\OpenSSL-Win32";
 my $default_opensslincdir = $default_openssldir . "\\include";
 my $opensslincdir = $default_opensslincdir;
