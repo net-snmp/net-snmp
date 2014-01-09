@@ -35,8 +35,8 @@
  * file has already been included, do this now.
  */
 # if defined(HAVE_WINSOCK2_H) && defined(HAVE_WS2TCPIP_H)
-#  if !defined(HAVE_WIN32_PLATFORM_SDK) && _MSC_VER -0 <= 1200 \
-    && _WIN32_WINNT -0 >= 0x0400
+#  if !defined(__MINGW32__) && !defined(HAVE_WIN32_PLATFORM_SDK) && \
+    _MSC_VER -0 <= 1200 && _WIN32_WINNT -0 >= 0x0400
     /*
      * When using the MSVC 6 header files, including <winsock2.h> when
      * _WIN32_WINNT >= 0x0400 results in a compilation error. Hence include

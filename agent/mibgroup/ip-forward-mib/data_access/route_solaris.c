@@ -76,7 +76,7 @@ netsnmp_arch_route_create(netsnmp_route_entry *entry)
         return -2;
     }
 
-    // return _netsnmp_ioctl_route_set_v4(entry);
+    /* return _netsnmp_ioctl_route_set_v4(entry); */
     return -2;
 }
 
@@ -94,7 +94,7 @@ netsnmp_arch_route_delete(netsnmp_route_entry *entry)
         return -2;
     }
 
-    // return _netsnmp_ioctl_route_delete_v4(entry);
+    /* return _netsnmp_ioctl_route_delete_v4(entry); */
     return -2;
 }
 

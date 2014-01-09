@@ -35,6 +35,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\scalar_group.obj" \
 	"$(INTDIR)\serialize.obj" \
 	"$(INTDIR)\snmp_agent.obj" \
+	"$(INTDIR)\snmp_get_statistic.obj" \
 	"$(INTDIR)\snmp_vars.obj" \
 	"$(INTDIR)\stash_cache.obj" \
 	"$(INTDIR)\stash_to_next.obj" \
@@ -233,6 +234,12 @@ SOURCE=..\..\agent\helpers\scalar_group.c
 SOURCE=..\..\agent\helpers\serialize.c
 
 "$(INTDIR)\serialize.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\helpers\snmp_get_statistic.c
+
+"$(INTDIR)\snmp_get_statistic.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
