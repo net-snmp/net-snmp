@@ -541,6 +541,13 @@ mteTrigger_run( unsigned int reg, void *clientarg)
         } /* !old_results - end of else block */
     } /* MTE_TRIGGER_EXISTENCE */
 
+    /*
+     * We'll need sysUpTime.0 regardless...
+     */
+    DEBUGMSGTL(("disman:event:delta", "retrieve sysUpTime.0\n"));
+    memset( &sysUT_var, 0, sizeof( netsnmp_variable_list ));
+    snmp_set_var_objid( &sysUT_var, _sysUpTime_instance, _sysUpTime_inst_len );
+    netsnmp_query_get(  &sysUT_var, entry->session );
 
     if (( entry->mteTriggerTest & MTE_TRIGGER_BOOLEAN   ) ||
         ( entry->mteTriggerTest & MTE_TRIGGER_THRESHOLD )) {
@@ -590,14 +597,6 @@ mteTrigger_run( unsigned int reg, void *clientarg)
          * (including sysUpTime.0 if not specified explicitly).
          */
         if ( entry->flags & MTE_TRIGGER_FLAG_DELTA ) {
-            /*
-             * We'll need sysUpTime.0 regardless...
-             */
-            DEBUGMSGTL(("disman:event:delta", "retrieve sysUpTime.0\n"));
-            memset( &sysUT_var, 0, sizeof( netsnmp_variable_list ));
-            snmp_set_var_objid( &sysUT_var, _sysUpTime_instance,
-                                            _sysUpTime_inst_len );
-            netsnmp_query_get(  &sysUT_var, entry->session );
 
             if (!(entry->flags & MTE_TRIGGER_FLAG_SYSUPT)) {
                 /*
