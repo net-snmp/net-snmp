@@ -63,13 +63,13 @@
 snmpnetstat \- display networking status and configuration information from a network entity via SNMP
 .SH SYNOPSIS
 .B snmpnetstat
-[COMMON OPTIONS] [\-Ca] [\-Cn] [\-Cf address_family] AGENT
+[COMMON OPTIONS] [\-Ca] [\-Cn] [\-Cv] [\-Cf address_family] AGENT
 .br
 .B snmpnetstat
-[COMMON OPTIONS] [\-Cr] [\-Cn] [\-Cf address_family] AGENT
+[COMMON OPTIONS] [\-Cr] [\-Cn] [\-Cv] [\-Cf address_family] AGENT
 .br
 .B snmpnetstat
-[COMMON OPTIONS] [\-Ci] [\-C o | b | d] [\-Cn] [\-CI interface] [\-Cw interval] AGENT
+[COMMON OPTIONS] [\-Ci] [\-C o | b | d] [\-Cn] [\-Cv] [\-CI interface] [\-Cw interval] AGENT
 .br
 .B snmpnetstat
 [COMMON OPTIONS] [\-Cs[s]] [\-Cp protocol] AGENT
@@ -157,6 +157,10 @@ Show network addresses as numbers (normally
 .I snmpnetstat
 interprets addresses and attempts to display them
 symbolically).
+This option may be used with any of the display formats.
+.PP
+.B \-Cv
+Allow long host or service names to break the columnar output.
 This option may be used with any of the display formats.
 .PP
 .BI \-Cp " protocol"
