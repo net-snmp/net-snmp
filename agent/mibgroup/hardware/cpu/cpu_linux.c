@@ -153,7 +153,9 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
                 snmp_log_perror("Missing CPU info entry");
                 break;
             }
-            b1 = b2+5; /* Skip "cpuN " */
+            b1 = b2; /* Skip "cpuN " */
+            while(*b1 != ' ') b1++;
+            b1++;
         }
 
 	if (!has_cpu_26 ||
