@@ -556,6 +556,36 @@ sidewaysintpr(unsigned int interval)
          * XXX - Might be worth searching ifName/ifAlias as well
          */
         if (!vp) {
+            oid    ifname_oid[]  = { 1,3,6,1,2,1,31,1,1,1,1,0 };
+            size_t ifname_len    = OID_LENGTH( ifname_oid );
+            snmp_free_var( var );
+            var = NULL;
+            snmp_varlist_add_variable( &var, ifname_oid, ifname_len-1,
+                                       ASN_NULL, NULL,  0);
+            i = strlen(intrface);
+            netsnmp_query_walk( var, ss );
+            for (vp=var; vp; vp=vp->next_variable) {
+                if (strncmp(intrface, (char *)vp->val.string, i) == 0 &&
+                    i == vp->val_len)
+                    break;  /* found requested interface */
+            }
+        }
+        if (!vp) {
+            oid    ifalias_oid[]  = { 1,3,6,1,2,1,31,1,1,1,18,0 };
+            size_t ifalias_len    = OID_LENGTH( ifalias_oid );
+            snmp_free_var( var );
+            var = NULL;
+            snmp_varlist_add_variable( &var, ifalias_oid, ifalias_len-1,
+                                       ASN_NULL, NULL,  0);
+            i = strlen(intrface);
+            netsnmp_query_walk( var, ss );
+            for (vp=var; vp; vp=vp->next_variable) {
+                if (strncmp(intrface, (char *)vp->val.string, i) == 0 &&
+                    i == vp->val_len)
+                    break;  /* found requested interface */
+            }
+        }
+        if (!vp) {
             fprintf(stderr, "%s: unknown interface\n", intrface );
             exit(1);
         }
