@@ -89,10 +89,12 @@ static int
 solaris_read_icmp_stat(ICMP_STAT_STRUCTURE *);
 static int
 solaris_read_icmp_msg_stat(ICMP_STAT_STRUCTURE *, struct icmp4_msg_mib *, int *);
+#ifdef NETSNMP_ENABLE_IPV6
 static int
 solaris_read_icmp6_stat(struct icmp6_mib *);
 static int
 solaris_read_icmp6_msg_stat(struct icmp6_mib *, struct icmp6_msg_mib *, int *);
+#endif
 #endif
 
 #ifdef NETBSD_STATS_VIA_SYSCTL
@@ -1504,6 +1506,7 @@ solaris_read_icmp_msg_stat(ICMP_STAT_STRUCTURE *mib, struct icmp4_msg_mib *msg_m
     return 0;
 }
 
+#ifdef NETSNMP_ENABLE_IPV6
 static int
 solaris_read_icmp6_stat(struct icmp6_mib *mib)
 {
@@ -1518,6 +1521,8 @@ solaris_read_icmp6_msg_stat(struct icmp6_mib *mib, struct icmp6_msg_mib *msg_mib
     *flag = 0;
     return 0;
 }
+#endif
+
 #elif defined(NETBSD_STATS_VIA_SYSCTL)
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
