@@ -56,6 +56,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/data_access/ipaddress.h>
 #include <net-snmp/data_access/route.h>
 
 #include "ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable.h"
@@ -97,7 +98,7 @@ int _netsnmp_ioctl_route_set_v4(netsnmp_route_entry * entry)
 
     s = socket(AF_INET, SOCK_RAW, NETSNMP_ROUTE_WRITE_PROTOCOL);
     if (s < 0) {
-        snmp_log_perror("socket");
+        snmp_log_perror("netsnmp_ioctl_route_set_v4: socket");
         return -3;
     }
 
@@ -114,7 +115,10 @@ int _netsnmp_ioctl_route_set_v4(netsnmp_route_entry * entry)
     DEBUGMSGTL(("access:route","    via %s\n", DEBUGSTR));
 
     mask.sin_family = AF_INET;
-    mask.sin_addr.s_addr = htonl(0);
+    if (entry->rt_pfx_len != 0)
+	mask.sin_addr.s_addr = netsnmp_ipaddress_ipv4_mask(entry->rt_pfx_len);
+    else
+	mask.sin_addr.s_addr = entry->rt_mask;
     DEBUGSTR = inet_ntoa(mask.sin_addr);
     DEBUGMSGTL(("access:route","    mask %s\n", DEBUGSTR));
 
@@ -135,7 +139,7 @@ int _netsnmp_ioctl_route_set_v4(netsnmp_route_entry * entry)
     rc = ioctl(s, SIOCADDRT, (caddr_t) & route);
     close(s);
     if (rc < 0) {
-        snmp_log_perror("ioctl");
+        snmp_log_perror("netsnmp_ioctl_route_set_v4: ioctl");
         return -4;
     }
 
@@ -156,7 +160,7 @@ int _netsnmp_ioctl_route_delete_v4(netsnmp_route_entry * entry)
 
     s = socket(AF_INET, SOCK_RAW, NETSNMP_ROUTE_WRITE_PROTOCOL);
     if (s < 0) {
-        snmp_log_perror("socket");
+        snmp_log_perror("netsnmp_ioctl_route_delete_v4: socket");
         return -3;
     }
 
@@ -184,7 +188,7 @@ int _netsnmp_ioctl_route_delete_v4(netsnmp_route_entry * entry)
     rc = ioctl(s, SIOCDELRT, (caddr_t) & route);
     close(s);
     if (rc < 0) {
-        snmp_log_perror("ioctl");
+        snmp_log_perror("netsnmp_ioctl_route_delete_v4: ioctl");
         rc = -4;
     }
 
