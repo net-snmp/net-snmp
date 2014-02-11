@@ -476,14 +476,13 @@ var_logmatch_table(struct variable *vp,
             (vp, name, length, exact, var_len, write_method,
              logmatchCount))
             return (NULL);
+
+        iindex = name[*length - 1] - 1;
+        logmatch = &logmatchTable[iindex];
+
+        if (logmatch->myRegexError == 0)
+            updateLogmatch(iindex);
     }
-
-
-    iindex = name[*length - 1] - 1;
-    logmatch = &logmatchTable[iindex];
-
-    if (logmatch->myRegexError == 0)
-        updateLogmatch(iindex);
 
     switch (vp->magic) {
     case LOGMATCH_INFO:
