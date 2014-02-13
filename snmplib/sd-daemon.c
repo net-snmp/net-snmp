@@ -486,7 +486,7 @@ netsnmp_sd_find_inet_socket(int family, int type, int listening, int port)
     DEBUGMSGTL(("systemd:find_inet_socket", "LISTEN_FDS reports %d sockets.\n",
             count));
 
-    for (fd = 3; fd < 3+count; fd++) {
+    for (fd = SD_LISTEN_FDS_START; fd < SD_LISTEN_FDS_START + count; fd++) {
         int rc = netsnmp_sd_is_socket_inet(fd, family, type, listening, port);
         if (rc < 0)
             DEBUGMSGTL(("systemd:find_inet_socket",
@@ -514,7 +514,7 @@ netsnmp_sd_find_unix_socket(int type, int listening, const char *path)
     DEBUGMSGTL(("systemd:find_unix_socket", "LISTEN_FDS reports %d sockets.\n",
             count));
 
-    for (fd = 3; fd < 3+count; fd++) {
+    for (fd = SD_LISTEN_FDS_START; fd < SD_LISTEN_FDS_START + count; fd++) {
         int rc = netsnmp_sd_is_socket_unix(fd, type, listening, path, 0);
         if (rc < 0)
             DEBUGMSGTL(("systemd:find_unix_socket",
