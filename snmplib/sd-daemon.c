@@ -7,6 +7,8 @@
  * - includes were  changed to match Net-SNMP style.
  * - removed gcc export macros
  * - removed POSIX message queues
+ * - removed log level macros
+ * - removed unused functions
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -138,75 +140,6 @@ finish:
         return r;
 }
 
-int netsnmp_sd_is_fifo(int fd, const char *path) {
-        struct stat st_fd;
-
-        if (fd < 0)
-                return -EINVAL;
-
-        memset(&st_fd, 0, sizeof(st_fd));
-        if (fstat(fd, &st_fd) < 0)
-                return -errno;
-
-        if (!S_ISFIFO(st_fd.st_mode))
-                return 0;
-
-        if (path) {
-                struct stat st_path;
-
-                memset(&st_path, 0, sizeof(st_path));
-                if (stat(path, &st_path) < 0) {
-
-                        if (errno == ENOENT || errno == ENOTDIR)
-                                return 0;
-
-                        return -errno;
-                }
-
-                return
-                        st_path.st_dev == st_fd.st_dev &&
-                        st_path.st_ino == st_fd.st_ino;
-        }
-
-        return 1;
-}
-
-int netsnmp_sd_is_special(int fd, const char *path) {
-        struct stat st_fd;
-
-        if (fd < 0)
-                return -EINVAL;
-
-        if (fstat(fd, &st_fd) < 0)
-                return -errno;
-
-        if (!S_ISREG(st_fd.st_mode) && !S_ISCHR(st_fd.st_mode))
-                return 0;
-
-        if (path) {
-                struct stat st_path;
-
-                if (stat(path, &st_path) < 0) {
-
-                        if (errno == ENOENT || errno == ENOTDIR)
-                                return 0;
-
-                        return -errno;
-                }
-
-                if (S_ISREG(st_fd.st_mode) && S_ISREG(st_path.st_mode))
-                        return
-                                st_path.st_dev == st_fd.st_dev &&
-                                st_path.st_ino == st_fd.st_ino;
-                else if (S_ISCHR(st_fd.st_mode) && S_ISCHR(st_path.st_mode))
-                        return st_path.st_rdev == st_fd.st_rdev;
-                else
-                        return 0;
-        }
-
-        return 1;
-}
-
 static int sd_is_socket_internal(int fd, int type, int listening) {
         struct stat st_fd;
 
@@ -257,34 +190,6 @@ union sockaddr_union {
         struct sockaddr_un un;
         struct sockaddr_storage storage;
 };
-
-int netsnmp_sd_is_socket(int fd, int family, int type, int listening) {
-        int r;
-
-        if (family < 0)
-                return -EINVAL;
-
-        if ((r = sd_is_socket_internal(fd, type, listening)) <= 0)
-                return r;
-
-        if (family > 0) {
-                union sockaddr_union sockaddr;
-                socklen_t l;
-
-                memset(&sockaddr, 0, sizeof(sockaddr));
-                l = sizeof(sockaddr);
-
-                if (getsockname(fd, &sockaddr.sa, &l) < 0)
-                        return -errno;
-
-                if (l < sizeof(sa_family_t))
-                        return -EINVAL;
-
-                return sockaddr.sa.sa_family == family;
-        }
-
-        return 1;
-}
 
 int netsnmp_sd_is_socket_inet(int fd, int family, int type, int listening, uint16_t port) {
         union sockaddr_union sockaddr;
@@ -436,39 +341,6 @@ finish:
                 close(fd);
 
         return r;
-}
-
-int netsnmp_sd_notifyf(int unset_environment, const char *format, ...) {
-        va_list ap;
-        char *p = NULL;
-        int r;
-
-        va_start(ap, format);
-        r = vasprintf(&p, format, ap);
-        va_end(ap);
-
-        if (r < 0 || !p)
-                return -ENOMEM;
-
-        r = netsnmp_sd_notify(unset_environment, p);
-        free(p);
-
-        return r;
-}
-
-int netsnmp_sd_booted(void) {
-        struct stat a, b;
-
-        /* We simply test whether the systemd cgroup hierarchy is
-         * mounted */
-
-        if (lstat("/sys/fs/cgroup", &a) < 0)
-                return 0;
-
-        if (lstat("/sys/fs/cgroup/systemd", &b) < 0)
-                return 0;
-
-        return a.st_dev != b.st_dev;
 }
 
 /* End of original sd-daemon.c from systemd sources */

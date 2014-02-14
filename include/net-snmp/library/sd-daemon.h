@@ -71,30 +71,6 @@ extern "C" {
   See sd-daemon(7) for more information.
 */
 
-#ifndef _sd_printf_attr_
-#if __GNUC__ >= 4
-#define _sd_printf_attr_(a,b) __attribute__ ((format (printf, a, b)))
-#else
-#define _sd_printf_attr_(a,b)
-#endif
-#endif
-
-/*
-  Log levels for usage on stderr:
-
-          fprintf(stderr, SD_NOTICE "Hello World!\n");
-
-  This is similar to printk() usage in the kernel.
-*/
-#define SD_EMERG   "<0>"  /* system is unusable */
-#define SD_ALERT   "<1>"  /* action must be taken immediately */
-#define SD_CRIT    "<2>"  /* critical conditions */
-#define SD_ERR     "<3>"  /* error conditions */
-#define SD_WARNING "<4>"  /* warning conditions */
-#define SD_NOTICE  "<5>"  /* normal but significant condition */
-#define SD_INFO    "<6>"  /* informational */
-#define SD_DEBUG   "<7>"  /* debug-level messages */
-
 /* The first passed file descriptor is fd 3 */
 #define SD_LISTEN_FDS_START 3
 
@@ -114,46 +90,6 @@ extern "C" {
   See sd_listen_fds(3) for more information.
 */
 int netsnmp_sd_listen_fds(int unset_environment);
-
-/*
-  Helper call for identifying a passed file descriptor. Returns 1 if
-  the file descriptor is a FIFO in the file system stored under the
-  specified path, 0 otherwise. If path is NULL a path name check will
-  not be done and the call only verifies if the file descriptor
-  refers to a FIFO. Returns a negative errno style error code on
-  failure.
-
-  See sd_is_fifo(3) for more information.
-*/
-int netsnmp_sd_is_fifo(int fd, const char *path);
-
-/*
-  Helper call for identifying a passed file descriptor. Returns 1 if
-  the file descriptor is a special character device on the file
-  system stored under the specified path, 0 otherwise.
-  If path is NULL a path name check will not be done and the call
-  only verifies if the file descriptor refers to a special character.
-  Returns a negative errno style error code on failure.
-
-  See sd_is_special(3) for more information.
-*/
-int netsnmp_sd_is_special(int fd, const char *path);
-
-/*
-  Helper call for identifying a passed file descriptor. Returns 1 if
-  the file descriptor is a socket of the specified family (AF_INET,
-  ...) and type (SOCK_DGRAM, SOCK_STREAM, ...), 0 otherwise. If
-  family is 0 a socket family check will not be done. If type is 0 a
-  socket type check will not be done and the call only verifies if
-  the file descriptor refers to a socket. If listening is > 0 it is
-  verified that the socket is in listening mode. (i.e. listen() has
-  been called) If listening is == 0 it is verified that the socket is
-  not in listening mode. If listening is < 0 no listening mode check
-  is done. Returns a negative errno style error code on failure.
-
-  See sd_is_socket(3) for more information.
-*/
-int netsnmp_sd_is_socket(int fd, int family, int type, int listening);
 
 /*
   Helper call for identifying a passed file descriptor. Returns 1 if
@@ -230,41 +166,6 @@ int netsnmp_sd_is_socket_unix(int fd, int type, int listening, const char *path,
   See sd_notify(3) for more information.
 */
 int netsnmp_sd_notify(int unset_environment, const char *state);
-
-/*
-  Similar to sd_notify() but takes a format string.
-
-  Example 1: A daemon could send the following after initialization:
-
-     sd_notifyf(0, "READY=1\n"
-                   "STATUS=Processing requests...\n"
-                   "MAINPID=%lu",
-                   (unsigned long) getpid());
-
-  Example 2: A daemon could send the following shortly before
-  exiting, on failure:
-
-     sd_notifyf(0, "STATUS=Failed to start up: %s\n"
-                   "ERRNO=%i",
-                   strerror(errno),
-                   errno);
-
-  See sd_notifyf(3) for more information.
-*/
-int netsnmp_sd_notifyf(int unset_environment, const char *format, ...) _sd_printf_attr_(2,3);
-
-/*
-  Returns > 0 if the system was booted with systemd. Returns < 0 on
-  error. Returns 0 if the system was not booted with systemd. Note
-  that all of the functions above handle non-systemd boots just
-  fine. You should NOT protect them with a call to this function. Also
-  note that this function checks whether the system, not the user
-  session is controlled by systemd. However the functions above work
-  for both user and system services.
-
-  See sd_booted(3) for more information.
-*/
-int netsnmp_sd_booted(void);
 
 /**
  * Find an socket with given parameters. See man sd_is_socket_inet for
