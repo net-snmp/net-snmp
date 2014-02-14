@@ -92,36 +92,6 @@ extern "C" {
 int netsnmp_sd_listen_fds(int unset_environment);
 
 /*
-  Helper call for identifying a passed file descriptor. Returns 1 if
-  the file descriptor is an Internet socket, of the specified family
-  (either AF_INET or AF_INET6) and the specified type (SOCK_DGRAM,
-  SOCK_STREAM, ...), 0 otherwise. If version is 0 a protocol version
-  check is not done. If type is 0 a socket type check will not be
-  done. If port is 0 a socket port check will not be done. The
-  listening flag is used the same way as in sd_is_socket(). Returns a
-  negative errno style error code on failure.
-
-  See sd_is_socket_inet(3) for more information.
-*/
-int netsnmp_sd_is_socket_inet(int fd, int family, int type, int listening, uint16_t port);
-
-/*
-  Helper call for identifying a passed file descriptor. Returns 1 if
-  the file descriptor is an AF_UNIX socket of the specified type
-  (SOCK_DGRAM, SOCK_STREAM, ...) and path, 0 otherwise. If type is 0
-  a socket type check will not be done. If path is NULL a socket path
-  check will not be done. For normal AF_UNIX sockets set length to
-  0. For abstract namespace sockets set length to the length of the
-  socket name (including the initial 0 byte), and pass the full
-  socket path in path (including the initial 0 byte). The listening
-  flag is used the same way as in sd_is_socket(). Returns a negative
-  errno style error code on failure.
-
-  See sd_is_socket_unix(3) for more information.
-*/
-int netsnmp_sd_is_socket_unix(int fd, int type, int listening, const char *path, size_t length);
-
-/*
   Informs systemd about changed daemon state. This takes a number of
   newline separated environment-style variable assignments in a
   string. The following variables are known:

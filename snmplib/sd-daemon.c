@@ -3,7 +3,8 @@
  *
  * Most of this file is directly copied from systemd sources.
  * Changes:
- * - all functions were renamed to have netsnmp_ prefix
+ * - all exported functions were renamed to have a netsnmp_ prefix
+ * - all nonexported functions were made static
  * - includes were  changed to match Net-SNMP style.
  * - removed gcc export macros
  * - removed POSIX message queues
@@ -191,7 +192,7 @@ union sockaddr_union {
         struct sockaddr_storage storage;
 };
 
-int netsnmp_sd_is_socket_inet(int fd, int family, int type, int listening, uint16_t port) {
+static int sd_is_socket_inet(int fd, int family, int type, int listening, uint16_t port) {
         union sockaddr_union sockaddr;
         socklen_t l;
         int r;
@@ -236,7 +237,7 @@ int netsnmp_sd_is_socket_inet(int fd, int family, int type, int listening, uint1
         return 1;
 }
 
-int netsnmp_sd_is_socket_unix(int fd, int type, int listening, const char *path, size_t length) {
+static int sd_is_socket_unix(int fd, int type, int listening, const char *path, size_t length) {
         union sockaddr_union sockaddr;
         socklen_t l;
         int r;
@@ -359,7 +360,7 @@ netsnmp_sd_find_inet_socket(int family, int type, int listening, int port)
             count));
 
     for (fd = SD_LISTEN_FDS_START; fd < SD_LISTEN_FDS_START + count; fd++) {
-        int rc = netsnmp_sd_is_socket_inet(fd, family, type, listening, port);
+        int rc = sd_is_socket_inet(fd, family, type, listening, port);
         if (rc < 0)
             DEBUGMSGTL(("systemd:find_inet_socket",
                     "sd_is_socket_inet error: %d\n", rc));
@@ -387,10 +388,10 @@ netsnmp_sd_find_unix_socket(int type, int listening, const char *path)
             count));
 
     for (fd = SD_LISTEN_FDS_START; fd < SD_LISTEN_FDS_START + count; fd++) {
-        int rc = netsnmp_sd_is_socket_unix(fd, type, listening, path, 0);
+        int rc = sd_is_socket_unix(fd, type, listening, path, 0);
         if (rc < 0)
             DEBUGMSGTL(("systemd:find_unix_socket",
-                    "netsnmp_sd_is_socket_unix error: %d\n", rc));
+                    "sd_is_socket_unix error: %d\n", rc));
         if (rc > 0) {
             DEBUGMSGTL(("systemd:find_unix_socket",
                     "Found the socket in LISTEN_FDS\n"));
