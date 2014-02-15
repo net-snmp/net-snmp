@@ -10,6 +10,7 @@
  * - removed POSIX message queues
  * - removed log level macros
  * - removed unused functions
+ * - made SD_LISTEN_FDS_START as it is only used internally
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -63,6 +64,9 @@
 #include <limits.h>
 
 #include <net-snmp/library/sd-daemon.h>
+
+/* The first passed file descriptor is fd 3 */
+#define SD_LISTEN_FDS_START 3
 
 int netsnmp_sd_listen_fds(int unset_environment) {
 

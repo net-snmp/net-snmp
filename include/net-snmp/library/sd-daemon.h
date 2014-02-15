@@ -71,9 +71,6 @@ extern "C" {
   See sd-daemon(7) for more information.
 */
 
-/* The first passed file descriptor is fd 3 */
-#define SD_LISTEN_FDS_START 3
-
 /*
   Returns how many file descriptors have been passed, or a negative
   errno code on failure. Optionally, removes the $LISTEN_FDS and
