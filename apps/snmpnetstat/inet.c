@@ -605,9 +605,10 @@ inetname(struct in_addr *inp)
 #endif
 
 	if (first && !nflag) {
+		char tmp[MAXHOSTNAMELEN];
 		first = 0;
-		if (gethostname(domain, sizeof(domain)) == 0 &&
-		    (cp = strchr(domain, '.')))
+		if (gethostname(tmp, sizeof(tmp)) == 0 &&
+		    (cp = strchr(tmp, '.')))
 			(void) strlcpy(domain, cp + 1, sizeof domain);
 		else
 			domain[0] = '\0';
