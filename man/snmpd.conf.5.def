@@ -73,7 +73,7 @@ specifying "\-U" on the command line.
 .IP "maxGetbulkRepeats NUM"
 Sets the maximum number of responses allowed for a single variable in
 a getbulk request.  Set to 0 to enable the default and set it to \-1 to
-enable unlimited.  Because memory is allocated ahead of time, sitting
+enable unlimited.  Because memory is allocated ahead of time, setting
 this to unlimited is not considered safe if your user population can
 not be trusted.  A repeat number greater than this will be truncated
 to this value.
@@ -83,7 +83,7 @@ This is set by default to -1.
 Sets the maximum number of responses allowed for a getbulk request.
 This is set by default to 100.  Set to 0 to enable the default and set
 it to \-1 to enable unlimited.  Because memory is allocated ahead of
-time, sitting this to unlimited is not considered safe if your user
+time, setting this to unlimited is not considered safe if your user
 population can not be trusted.
 .IP
 In general, the total number of responses will not be allowed to
@@ -181,7 +181,7 @@ HIGH:!AES128\-SHA
 .RE
 .IP
 The default value is whatever openssl itself was configured with.
-.IP "[snmp] x059CRLFile"
+.IP "[snmp] x509CRLFile"
 If you are using a Certificate Authority (CA) that publishes a
 Certificate Revocation List (CRL) then this token can be used to
 specify the location in the filesystem of a copy of the CRL file.
