@@ -107,7 +107,7 @@ int _netsnmp_ioctl_route_set_v4(netsnmp_route_entry * entry)
     dst.sin_family = AF_INET;
     memcpy(&dst.sin_addr.s_addr, entry->rt_dest, 4);
     DEBUGSTR = inet_ntoa(dst.sin_addr);
-    DEBUGMSGTL(("access:route","*** route to %s\n", DEBUGSTR));
+    DEBUGMSGTL(("access:route","add route to %s\n", DEBUGSTR));
 
     gateway.sin_family = AF_INET;
     memcpy(&gateway.sin_addr.s_addr, entry->rt_nexthop, 4);
@@ -137,23 +137,24 @@ int _netsnmp_ioctl_route_set_v4(netsnmp_route_entry * entry)
 #endif
 
     rc = ioctl(s, SIOCADDRT, (caddr_t) & route);
-    close(s);
     if (rc < 0) {
         snmp_log_perror("netsnmp_ioctl_route_set_v4: ioctl");
-        return -4;
+        rc = -4;
     }
+    close(s);
 
-    return 0;
+    return rc;
 }
 #endif
 
 #if defined SIOCDELRT && !defined(irix6)
 int _netsnmp_ioctl_route_delete_v4(netsnmp_route_entry * entry)
 {
-    struct sockaddr_in dst;
+    struct sockaddr_in dst, mask;
     struct sockaddr_in gateway;
     int             s, rc;
     RTENTRY         route;
+    char           *DEBUGSTR;
 
     netsnmp_assert(NULL != entry); /* checked in netsnmp_arch_route_delete */
     netsnmp_assert((4 == entry->rt_dest_len) && (4 == entry->rt_nexthop_len));
@@ -168,11 +169,20 @@ int _netsnmp_ioctl_route_delete_v4(netsnmp_route_entry * entry)
 
     dst.sin_family = AF_INET;
     memcpy(&dst.sin_addr.s_addr, entry->rt_dest, 4);
+    DEBUGSTR = inet_ntoa(dst.sin_addr);
+    DEBUGMSGTL(("access:route","del route to %s\n", DEBUGSTR));
+
+    mask.sin_family = AF_INET;
+    if (entry->rt_pfx_len != 0)
+	mask.sin_addr.s_addr = netsnmp_ipaddress_ipv4_mask(entry->rt_pfx_len);
+    else
+	mask.sin_addr.s_addr = entry->rt_mask;
 
     gateway.sin_family = AF_INET;
     memcpy(&gateway.sin_addr.s_addr, entry->rt_nexthop, 4);
 
     memcpy(&route.rt_dst, &dst, sizeof(struct sockaddr_in));
+    memcpy(&route.rt_genmask, &mask, sizeof(struct sockaddr_in));
     memcpy(&route.rt_gateway, &gateway, sizeof(struct sockaddr_in));
 
     if (32 == entry->rt_pfx_len)
@@ -186,11 +196,11 @@ int _netsnmp_ioctl_route_delete_v4(netsnmp_route_entry * entry)
 #endif
 
     rc = ioctl(s, SIOCDELRT, (caddr_t) & route);
-    close(s);
     if (rc < 0) {
         snmp_log_perror("netsnmp_ioctl_route_delete_v4: ioctl");
         rc = -4;
     }
+    close(s);
 
     return rc;
 }
