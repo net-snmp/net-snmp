@@ -143,7 +143,7 @@ pass_parse_config(const char *token, char *cptr)
                  (*ppass)->miblen, (*ppass)->mibpriority);
 
     /*
-     * argggg -- pasthrus must be sorted 
+     * argggg -- passthrus must be sorted 
      */
     if (numpassthrus > 1) {
         etmp = (struct extensible **)
