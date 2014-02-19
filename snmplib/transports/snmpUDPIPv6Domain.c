@@ -707,10 +707,13 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
                     *secName = c->secName;
                     *contextName = c->contextName;
                 }
+                break;
             }
         }
+        else {
+            DEBUGMSG(("netsnmp_udp6_getSecName", "... nope\n"));
+        }
     }
-    DEBUGMSG(("netsnmp_udp6_getSecName", "... nope\n"));
 
     if (ztcommunity != NULL) {
         free(ztcommunity);
