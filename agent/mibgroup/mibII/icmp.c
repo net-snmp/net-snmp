@@ -106,10 +106,20 @@ struct icmp_msg_stats_table_entry {
         int flags;
 };
 
+#ifdef linux
+/* Linux keeps track of all possible message types */
+#define ICMP_MSG_STATS_IPV4_COUNT 256
+#else
 #define ICMP_MSG_STATS_IPV4_COUNT 11
+#endif
 
 #ifdef NETSNMP_ENABLE_IPV6
+#ifdef linux
+/* Linux keeps track of all possible message types */
+#define ICMP_MSG_STATS_IPV6_COUNT 256
+#else
 #define ICMP_MSG_STATS_IPV6_COUNT 14
+#endif
 #else
 #define ICMP_MSG_STATS_IPV6_COUNT 0
 #endif /* NETSNMP_ENABLE_IPV6 */
@@ -177,7 +187,7 @@ icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
     inc = 0;
     linux_read_icmp_msg_stat(&v4icmp, &v4icmpmsg, &flag);
     if (flag) {
-        while (254 != k) {
+        while (255 >= k) {
             if (v4icmpmsg.vals[k].InType) {
                 icmp_msg_stats_table[i].ipVer = 1;
                 icmp_msg_stats_table[i].icmpMsgStatsType = k;
@@ -267,7 +277,7 @@ icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
     inc = 0;
     linux_read_icmp6_msg_stat(&v6icmp, &v6icmpmsg, &flag);
     if (flag) {
-        while (254 != k) {
+        while (255 >= k) {
             if (v6icmpmsg.vals[k].InType) {
                 icmp_msg_stats_table[i].ipVer = 2;
                 icmp_msg_stats_table[i].icmpMsgStatsType = k;
@@ -1050,6 +1060,12 @@ icmp_stats_table_handler(netsnmp_mib_handler  *handler,
 					continue;
 				table_info = netsnmp_extract_table_info(request);
 				subid      = table_info->colnum;
+				DEBUGMSGTL(( "mibII/icmpStatsTable", "oid: " ));
+				DEBUGMSGOID(( "mibII/icmpStatsTable", request->requestvb->name,
+						 request->requestvb->name_length ));
+				DEBUGMSG(( "mibII/icmpStatsTable", " In %d InErr %d Out %d OutErr %d\n",
+					      entry->icmpStatsInMsgs, entry->icmpStatsInErrors,
+					      entry->icmpStatsOutMsgs, entry->icmpStatsOutErrors ));
 
 				switch (subid) {
 					case ICMP_STAT_INMSG:
@@ -1117,6 +1133,11 @@ icmp_msg_stats_table_handler(netsnmp_mib_handler          *handler,
                     continue;
                 table_info = netsnmp_extract_table_info(request);
                 subid = table_info->colnum;
+                DEBUGMSGTL(( "mibII/icmpMsgStatsTable", "oid: " ));
+                DEBUGMSGOID(( "mibII/icmpMsgStatsTable", request->requestvb->name,
+                                 request->requestvb->name_length ));
+                DEBUGMSG(( "mibII/icmpMsgStatsTable", " In %d Out %d Flags 0x%x\n",
+                                 entry->icmpMsgStatsInPkts, entry->icmpMsgStatsOutPkts, entry->flags ));
 
                 switch (subid) {
                     case ICMP_MSG_STAT_IN_PKTS:
