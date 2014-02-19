@@ -154,7 +154,9 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
                 snmp_log_perror("Missing CPU info entry");
                 break;
             }
-            b1 = b2+5; /* Skip "cpuN " */
+            b1 = b2; /* Skip "cpuN " */
+            while(*b1 != ' ') b1++;
+            b1++;
         }
 
         num_cpuline_elem = sscanf(b1, "%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
@@ -163,27 +165,27 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 
         /* kernel 2.6.33 and above */
         if (num_cpuline_elem == 10) {
-            cpu->guestnice_ticks = (unsigned long long)cguest_nicell;
+            cpu->guestnice_ticks = cguest_nicell;
         }
         /* kernel 2.6.24 and above */
         if (num_cpuline_elem >= 9) {
-            cpu->guest_ticks = (unsigned long long)cguestll;
+            cpu->guest_ticks = cguestll;
         }
         /* kernel 2.6.11 and above */
         if (num_cpuline_elem >= 8) {
-            cpu->steal_ticks = (unsigned long long)cstealll;
+            cpu->steal_ticks = cstealll;
         }
         /* kernel 2.6 */
         if (num_cpuline_elem >= 5) {
-            cpu->wait_ticks   = (unsigned long long)ciowll;
-            cpu->intrpt_ticks = (unsigned long long)cirqll;
-            cpu->sirq_ticks   = (unsigned long long)csoftll;
+            cpu->wait_ticks   = ciowll;
+            cpu->intrpt_ticks = cirqll;
+            cpu->sirq_ticks   = csoftll;
         }
         /* rest */
-        cpu->user_ticks = (unsigned long long)cusell;
-        cpu->nice_ticks = (unsigned long long)cicell;
-        cpu->sys_ticks  = (unsigned long long)csysll;
-        cpu->idle_ticks = (unsigned long long)cidell;
+        cpu->user_ticks = cusell;
+        cpu->nice_ticks = cicell;
+        cpu->sys_ticks  = csysll;
+        cpu->idle_ticks = cidell;
     }
     if ( b1 == buff ) {
 	if (first)

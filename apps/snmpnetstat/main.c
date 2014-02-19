@@ -552,12 +552,12 @@ static void
 usage(void)
 {
 	(void)fprintf(stderr,
-"usage: %s [snmp_opts] [-Can] [-Cf address_family]\n", progname);
+"usage: %s [snmp_opts] [-Canv] [-Cf address_family]\n", progname);
 	(void)fprintf(stderr,
-"       %s [snmp_opts] [-Cibodn] [-CI interface] [-Cw wait]\n", progname);
+"       %s [snmp_opts] [-Cibodnv] [-CI interface] [-Cw wait]\n", progname);
 	(void)fprintf(stderr,
 "       %s [snmp_opts] [-Cs[s]] [-Cp protocol]\n", progname);
 	(void)fprintf(stderr,
-"       %s [snmp_opts] [-Crn] [-Cf address_family]\n", progname);
+"       %s [snmp_opts] [-Crnv] [-Cf address_family]\n", progname);
 	exit(1);
 }

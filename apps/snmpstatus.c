@@ -301,6 +301,10 @@ main(int argc, char *argv[])
                 pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
                 for (vars = response->variables; vars;
                      vars = vars->next_variable) {
+                    if ((vars->type & 0xF0) == 0x80) {
+			print_variable(vars->name, vars->name_length, vars);
+                        continue;
+                    }
                     if (vars->name_length >= length_ifOperStatus
                         && !memcmp(objid_ifOperStatus, vars->name,
                                    sizeof(objid_ifOperStatus))) {

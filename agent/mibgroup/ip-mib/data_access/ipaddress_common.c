@@ -441,6 +441,29 @@ netsnmp_ipaddress_ipv4_prefix_len(in_addr_t mask)
     return len;
 }
 
+in_addr_t netsnmp_ipaddress_ipv4_mask(int len)
+{
+    int i = 0, m = 0x80;
+    in_addr_t mask;
+    unsigned char *mp = (unsigned char *)&mask;
+
+    if (len < 0 || len > 32) abort();
+
+    memset(mp, 0, sizeof(mask));
+
+    while (len >= 8) {
+        mp[i] = 0xFF;
+	len -= 8;
+	i++;
+    }
+    while (len) {
+        mp[i] |= m;
+	m >>= 1;
+	len--;
+    }
+    return mask;
+}
+
 int
 netsnmp_ipaddress_ipv6_prefix_len(struct in6_addr mask)
 {

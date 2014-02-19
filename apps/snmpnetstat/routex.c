@@ -465,8 +465,8 @@ routexname(struct sockaddr_storage *in)
 
     if (first) {
         first = 0;
-        if (gethostname(domain, sizeof domain) == 0 &&
-            (cp = strchr(domain, '.')))
+        if (gethostname(line, sizeof line) == 0 &&
+            (cp = strchr(line, '.')))
             (void) strlcpy(domain, cp + 1, sizeof domain);
         else
             domain[0] = '\0';

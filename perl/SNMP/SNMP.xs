@@ -1004,16 +1004,16 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
       case TYPE_GAUGE:
       case TYPE_UNSIGNED32:
         vars->type = ASN_GAUGE;
-        goto UINT;
+        goto as_uint;
       case TYPE_COUNTER:
         vars->type = ASN_COUNTER;
-        goto UINT;
+        goto as_uint;
       case TYPE_TIMETICKS:
         vars->type = ASN_TIMETICKS;
-        goto UINT;
+        goto as_uint;
       case TYPE_UINTEGER:
         vars->type = ASN_UINTEGER;
-UINT:
+as_uint:
         vars->val.integer = netsnmp_malloc(sizeof(long));
         if (val)
             sscanf(val,"%lu",vars->val.integer);
@@ -1026,15 +1026,15 @@ UINT:
 
       case TYPE_OCTETSTR:
 	vars->type = ASN_OCTET_STR;
-	goto OCT;
+	goto as_oct;
 
       case TYPE_BITSTRING:
 	vars->type = ASN_OCTET_STR;
-	goto OCT;
+	goto as_oct;
 
       case TYPE_OPAQUE:
         vars->type = ASN_OCTET_STR;
-OCT:
+as_oct:
         vars->val.string = netsnmp_malloc(len);
         vars->val_len = len;
         if (val && len)
