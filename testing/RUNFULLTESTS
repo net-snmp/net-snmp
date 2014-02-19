@@ -267,7 +267,7 @@ sub rename_tests {
     return @newtests;
 }
 
-# called to possibly manipluate the list of tests to run by building some
+# called to possibly manipulate the list of tests to run by building some
 sub build_tests {
     my (@tests) = @_;
     my @newtests;
