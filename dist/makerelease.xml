@@ -115,13 +115,6 @@
             Git Branch Name:         {BRANCHPATH}
 	  </text>
 	</step>
-	<step type="system" stepname="update" title="update">
-	  <text>We need to make sure your code is up to date and
-	  matches the latest sources in this branch.</text>
-	  <commands>
-	    <command>git pull</command>
-	  </commands>
-	</step>
 	<step type="system" stepname="update" title="Check for changes">
 	  <text>This steps looks for outstanding files that have been
 	  modified.  There should be no outstanding modifications!  If
@@ -271,48 +264,6 @@
 	      </commands>
 	    </step>
 	  </steps>
-	</step>
-        <step type="section" title="Handle dist/release">
-          <steps>
-	    <step type="system" skipunless="'{RELEASETYPE}' eq 'rc'">
-	      <text>Note in 'dist/release' that this branch is in release candidate mode
-	      </text>
-	      <commands>
-	        <command>git checkout V5-4-patches</command>
-	        <command>echo {BRANCHPATH} rc >> dist/release </command>
-	        <command ignoreerror="1">git commit -m "Release Candidate for {BRANCHPATH}" dist/release</command>
-	        <command>git checkout {BRANCHPATH} </command>
-	        <command>git merge V5-4-patches    </command>
-	        <command>git commit                </command>
-	      </commands>
-	    </step>
-	    <step type="system" skipif="'{RELEASETYPE}' eq 'rc'">
-	      <text>Ensure that 'dist/release' doesn't reference this branch
-	      </text>
-	      <commands>
-	        <command>git checkout V5-4-patches</command>
-	        <command>grep -v {BRANCHPATH} dist/release > dist/release.new </command>
-	        <command>mv dist/release.new dist/release </command>
-	        <command ignoreerror="1">git commit -m "{BRANCHPATH} out of Release Candidate" dist/release</command>
-	        <command>git checkout {BRANCHPATH} </command>
-	        <command>git merge V5-4-patches    </command>
-	        <command>git commit                </command>
-	      </commands>
-	    </step>
-          </steps>
-        </step>
-	<step type="system" stepname="docs:make" title="docs:make">
-	  <text>This step will create manual pages from doxygen
-	  instrumented code files.</text>
-	  <commands>
-	    <command>
-	       if [ -f Makefile ]
-	       then
-	         make docs
-	         make mancp
-	       fi
-	    </command>
-	  </commands>
 	</step>
 	<step type="system" stepname="docs:update" title="docs:update">
 	  <text>This will run git status to figure out what files have
@@ -465,7 +416,6 @@
 	  <text>One more git pull and status to make sure nothing
 	  odd exists in your source tree.  Please check the results!</text>
 	  <commands>
-	    <command>git pull</command>
 	    <command>git status --porcelain</command>
 	  </commands>
 	</step>
@@ -530,27 +480,6 @@
 	    <command>gpg -u A77C5329 -a --detach-sign net-snmp-{VERSION}.zip</command>
 	  </commands>
 	</step>
-	<step type="command" name="release:nextbranch" title="Don't propagate code modifications"
-	      pause="0" mandatory="0">
-	  <text>
-	    Mark these code modifications as specific to this particular branch
-	  </text>
-	  <commands>
-	    <command>git checkout {NEXTBRANCH}</command>
-	    <command>git merge -s ours -m "Release {VERSION} specific changes" {BRANCHPATH}</command>
-	    <command>git checkout {BRANCHPATH}</command>
-	  </commands>
-	</step>
-	<step type="command" name="release:push" title="Push the code modifications"
-	      pause="0" mandatory="0">
-	  <text>
-	    Push the code modifications to the upstream branch
-	  </text>
-	  <commands>
-	    <command>git push</command>
-	    <command>git push --tags origin {VERSIONTAGNAME}</command>
-	  </commands>
-	</step>
 
 	<step type="section" title="Release File Test">
 	  <text>We'll also re-build the source and retest a few things to
@@ -585,114 +514,6 @@
 	  </steps>
 	</step>
       </steps>
-    </step>
-    <step type="section" title="Release the results">
-      <text>Now we'll publish the results to the SF server</text>
-      <steps>
-	<step pause="true" type="system" stepname="publish:rsync"
-	  title="rsync the new files">
-	  <text>This will copy the results to the SF uploads directory
-	    in your account on frs.sourceforge.net.  The following command
-	    is just as an example - this script does *not* upload the
-	    files automatically.  You must do something like:</text>
-	  <commands>
-	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc hardaker,net-snmp@frs.sourceforge.net:/home/frs/project/n/ne/net-snmp/net-snmp/{VERSIONTARGET}-pre-releases/</command>
-	  </commands>
-	</step>
-	<step type="informational" stepname="publish:editrelease"
-	title="Update the SF release web page">
-	  <text>
-	    Update the project download web page (http://www.net-snmp.org/download.html) to mention this new release
-	  </text>
-<!-- Doesn't work
-	  <commands>
-	    <command>firefox 'http://sourceforge.net/project/admin/editpackages.php?group_id=12694'</command>
-	  </commands>
- -->
-	</step>
-	<step type="system" stepname="publish:editpatches"
-	      skipunless="'{RELEASETYPE}' eq 'full'"
-	      title="Update the SF Official Patch tracker">
-	  <text>
-	    If this the final version of this release, then:
-	    Any official patches for the previous release should be re-prioritised to level 5.
-	    Any official patches for the earlier releases should be re-prioritised to level 1 and closed.
-	  </text>
-	  <commands>
-	    <command>firefox 'http://www.net-snmp.org/official_patches/'</command>
-	  </commands>
-	</step>
-      </steps>
-    </step>
-    <step type="informational">
-      <text>
-	Binaries: build rpms, .tar.gzs, etc.
-      </text>
-    </step>
-    <step type="Informational" name="cleanup:nsrollup" title="Run nsrollup"
-	  pause="1" mandatory="1">
-      <text>
-	You need to run nsrollup now to sync all the changes we've
-	made into any upstream branches.  This will likely cause merge
-	conflicts because of the version number clashes and will need
-	to be resolved.
-
-	Run (in bash):
-
- 	  . local/gittools/shell-functions
-	  nsrollup
-	  nssync
-
-	XXX: For conflicts, we can probably pick -s ours but needs to
-     	     be checked and documented.
-      </text>
-    </step>
-    <step type="section" title="Advertise it!">
-      <steps>
-	<step type="system" pause="1" title="Add note to the news system">
-	  <text>Add a note to the source forge news system:
-
-	    http://sourceforge.net/news/submit.php?group_id=12694
-	  </text>
-	  <commands>
-	    <command>echo firefox 'http://sourceforge.net/news/submit.php?group_id=12694'</command>
-	  </commands>
-	</step>
-	<step type="informational" pause="1">
-	  <text>Send an announcement message to one of the following
-	  mailing lists based on its type:
-
-          pre:    net-snmp-coders@lists.sourceforge.net
-
-          rc:     net-snmp-users@lists.sourceforge.net
-
-          final:  net-snmp-announce@lists.sourceforge.net
-                       (one week after the source tarball is made available)
-	  </text>
-	</step>
-	<step type="informational" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
-	  <text>Update the topic on the #Net-SNMP channel if this is a
-	    trunk based release.
-	  </text>
-	</step>
-	<step type="system" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
-	  <text>Update the freshmeat listing (Wes needs to do this):
-
-	    http://freshmeat.net/projects/net-snmp/
-	  </text>
-	  <commands>
-	    <command>echo firefox http://freshmeat.net/projects/net-snmp/</command>
-	  </commands>
-	</step>
-      </steps>
-    </step>
-    <step type="informational" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
-      <text>
-	Advertise: NEWS upload to sf, publish on -announce, freshmeat,
-	and the GNU FSF directory
-	(http://directory.fsf.org/project/net-snmp/)...
-        (send mail to bug-directory@gnu.org)
-      </text>
     </step>
   </steps>
 </makerelease>
