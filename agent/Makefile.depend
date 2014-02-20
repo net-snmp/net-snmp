@@ -1727,7 +1727,7 @@
 ./snmpd.lo: ../include/net-snmp/library/snmp.h
 ./snmpd.lo: ../include/net-snmp/library/snmp-tc.h 
 ./snmpd.lo: ../include/net-snmp/net-snmp-includes.h 
-./snmpd.lo: ../include/net-snmp/library/getopt.h
+./snmpd.lo:  ../include/net-snmp/library/getopt.h
 ./snmpd.lo: ../include/net-snmp/utilities.h
 ./snmpd.lo: ../include/net-snmp/library/system.h
 ./snmpd.lo: ../include/net-snmp/library/tools.h
@@ -1800,9 +1800,8 @@
 ./snmpd.lo: ../include/net-snmp/agent/mib_modules.h mibgroup/smux/smux.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-includes.h 
-./snmp_perl.lo:  ../include/net-snmp/definitions.h
-./snmp_perl.lo: ../include/net-snmp/types.h 
-./snmp_perl.lo: ../include/net-snmp/library/oid.h
+./snmp_perl.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
+./snmp_perl.lo:  ../include/net-snmp/library/oid.h
 ./snmp_perl.lo: ../include/net-snmp/library/types.h
 ./snmp_perl.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_perl.lo: ../include/net-snmp/varbind_api.h
@@ -1907,8 +1906,9 @@
 ./snmp_perl.lo: ../include/net-snmp/agent/snmp_get_statistic.h snmp_perl.h
 ./snmp_vars.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_vars.lo: ../include/net-snmp/net-snmp-includes.h 
-./snmp_vars.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
-./snmp_vars.lo:  ../include/net-snmp/library/oid.h
+./snmp_vars.lo:  ../include/net-snmp/definitions.h
+./snmp_vars.lo: ../include/net-snmp/types.h 
+./snmp_vars.lo: ../include/net-snmp/library/oid.h
 ./snmp_vars.lo: ../include/net-snmp/library/types.h
 ./snmp_vars.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_vars.lo: ../include/net-snmp/varbind_api.h

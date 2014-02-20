@@ -543,7 +543,7 @@
 ./instance.lo: ../../include/net-snmp/net-snmp-config.h
 ./instance.lo: ../../include/net-snmp/net-snmp-features.h
 ./instance.lo: ../../include/net-snmp/net-snmp-includes.h
-./instance.lo:  ../../include/net-snmp/definitions.h
+./instance.lo: ../../include/net-snmp/definitions.h
 ./instance.lo: ../../include/net-snmp/types.h 
 ./instance.lo: ../../include/net-snmp/library/oid.h
 ./instance.lo: ../../include/net-snmp/library/types.h
@@ -970,7 +970,7 @@
 ./null.lo: ../../include/net-snmp/agent/snmp_get_statistic.h
 ./old_api.lo: ../../include/net-snmp/net-snmp-config.h
 ./old_api.lo: ../../include/net-snmp/net-snmp-includes.h 
-./old_api.lo: ../../include/net-snmp/definitions.h
+./old_api.lo:  ../../include/net-snmp/definitions.h
 ./old_api.lo: ../../include/net-snmp/types.h 
 ./old_api.lo: ../../include/net-snmp/library/oid.h
 ./old_api.lo: ../../include/net-snmp/library/types.h
@@ -1078,7 +1078,7 @@
 ./old_api.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./read_only.lo: ../../include/net-snmp/net-snmp-config.h
 ./read_only.lo: ../../include/net-snmp/net-snmp-includes.h
-./read_only.lo:  ../../include/net-snmp/definitions.h
+./read_only.lo: ../../include/net-snmp/definitions.h
 ./read_only.lo: ../../include/net-snmp/types.h 
 ./read_only.lo: ../../include/net-snmp/library/oid.h
 ./read_only.lo: ../../include/net-snmp/library/types.h
@@ -1186,7 +1186,7 @@
 ./row_merge.lo: ../../include/net-snmp/net-snmp-config.h
 ./row_merge.lo: ../../include/net-snmp/net-snmp-features.h
 ./row_merge.lo: ../../include/net-snmp/net-snmp-includes.h
-./row_merge.lo:  ../../include/net-snmp/definitions.h
+./row_merge.lo: ../../include/net-snmp/definitions.h
 ./row_merge.lo: ../../include/net-snmp/types.h 
 ./row_merge.lo: ../../include/net-snmp/library/oid.h
 ./row_merge.lo: ../../include/net-snmp/library/types.h
@@ -1292,7 +1292,7 @@
 ./row_merge.lo: ../../include/net-snmp/agent/snmp_get_statistic.h
 ./scalar.lo: ../../include/net-snmp/net-snmp-config.h
 ./scalar.lo: ../../include/net-snmp/net-snmp-includes.h 
-./scalar.lo: ../../include/net-snmp/definitions.h
+./scalar.lo:  ../../include/net-snmp/definitions.h
 ./scalar.lo: ../../include/net-snmp/types.h 
 ./scalar.lo: ../../include/net-snmp/library/oid.h
 ./scalar.lo: ../../include/net-snmp/library/types.h
@@ -1506,7 +1506,7 @@
 ./scalar_group.lo: ../../include/net-snmp/agent/snmp_get_statistic.h
 ./serialize.lo: ../../include/net-snmp/net-snmp-config.h
 ./serialize.lo: ../../include/net-snmp/net-snmp-includes.h
-./serialize.lo:  ../../include/net-snmp/definitions.h
+./serialize.lo: ../../include/net-snmp/definitions.h
 ./serialize.lo: ../../include/net-snmp/types.h 
 ./serialize.lo: ../../include/net-snmp/library/oid.h
 ./serialize.lo: ../../include/net-snmp/library/types.h
@@ -2046,7 +2046,7 @@
 ./table.lo: ../../include/net-snmp/net-snmp-config.h
 ./table.lo: ../../include/net-snmp/net-snmp-features.h
 ./table.lo: ../../include/net-snmp/net-snmp-includes.h 
-./table.lo: ../../include/net-snmp/definitions.h
+./table.lo:  ../../include/net-snmp/definitions.h
 ./table.lo: ../../include/net-snmp/types.h 
 ./table.lo: ../../include/net-snmp/library/oid.h
 ./table.lo: ../../include/net-snmp/library/types.h
@@ -2582,7 +2582,7 @@
 ./table_row.lo: ../../include/net-snmp/net-snmp-config.h
 ./table_row.lo: ../../include/net-snmp/net-snmp-features.h
 ./table_row.lo: ../../include/net-snmp/net-snmp-includes.h
-./table_row.lo:  ../../include/net-snmp/definitions.h
+./table_row.lo: ../../include/net-snmp/definitions.h
 ./table_row.lo: ../../include/net-snmp/types.h 
 ./table_row.lo: ../../include/net-snmp/library/oid.h
 ./table_row.lo: ../../include/net-snmp/library/types.h
@@ -2796,7 +2796,7 @@
 ./watcher.lo: ../../include/net-snmp/net-snmp-config.h
 ./watcher.lo: ../../include/net-snmp/net-snmp-features.h
 ./watcher.lo: ../../include/net-snmp/net-snmp-includes.h 
-./watcher.lo: ../../include/net-snmp/definitions.h
+./watcher.lo:  ../../include/net-snmp/definitions.h
 ./watcher.lo: ../../include/net-snmp/types.h 
 ./watcher.lo: ../../include/net-snmp/library/oid.h
 ./watcher.lo: ../../include/net-snmp/library/types.h
