@@ -26,7 +26,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 @ISA       = qw(Exporter getLeaf);
 @EXPORT    = qw(registerAgent getOidElement setOidElement);
 @EXPORT_OK = qw();
-$VERSION = '5.0602';
+$VERSION = '5.06021';
 
 use strict;
 use warnings;
