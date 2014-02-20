@@ -1,5 +1,39 @@
 ----------------------------------------------------------------------
 
+Changes: V5.5.2 -> V5.5.2.1
+
+commit d8f9d815aeffae7894d44e6a8861acfbd1f999ce
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Feb 19 16:34:54 2014 -0800
+
+    make depend for 5.7.2.1
+
+commit f518e7d10ceeaf2db028ecba5c81a8675d6122e2
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Feb 19 15:46:09 2014 -0800
+
+    Version number update: 5.7.2.1
+
+commit d2cb34e64bfd007fab44ad0c209ab102822470f0
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Feb 19 15:43:22 2014 -0800
+
+    a shortened makerelease script for this release
+
+commit 236c474e9a185fa58e3b2bf805c6f8063e158702
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Feb 19 15:26:53 2014 -0800
+
+    announcement information about 5.7.2.1
+
+commit 8407b6ce46ca7159b3c816d1024e20a53f9a1c6c
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Feb 19 15:21:57 2014 -0800
+
+    bug fix from fenner: fix ICMP mib table handling on linux
+
+----------------------------------------------------------------------
+
 Changes: V5.5.1 -> V5.5.2
 
 commit 42b5afb3cd6d06adb426f1dbaa98358f2b2e8a53
