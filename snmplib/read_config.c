@@ -736,7 +736,7 @@ read_config(const char *filename,
     int             i, ret;
     struct config_line *lptr;
 
-    // reset file counter when recursion depth is 0
+    /* reset file counter when recursion depth is 0 */
     if (depth == 0) files = 0;
 
     linecount = 0;
