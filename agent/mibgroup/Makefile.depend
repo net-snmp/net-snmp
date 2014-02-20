@@ -5481,7 +5481,7 @@
 ./ip-mib/ip_scalars.lo: ./ip-mib/ip_scalars.h
 ./mibII/at.lo: ../../include/net-snmp/net-snmp-config.h
 ./mibII/at.lo: ./mibII/mibII_common.h 
-./mibII/at.lo:  ../../agent/kernel.h
+./mibII/at.lo: ../../agent/kernel.h
 ./mibII/at.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/at.lo: ../../include/net-snmp/definitions.h
 ./mibII/at.lo: ../../include/net-snmp/types.h 
@@ -5932,7 +5932,7 @@
 ./mibII/ipAddr.lo: ./mibII/at.h ./mibII/interfaces.h
 ./mibII/ip.lo: ../../include/net-snmp/net-snmp-config.h
 ./mibII/ip.lo: ./mibII/mibII_common.h 
-./mibII/ip.lo:  ../../agent/kernel.h
+./mibII/ip.lo: ../../agent/kernel.h
 ./mibII/ip.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/ip.lo: ../../include/net-snmp/definitions.h
 ./mibII/ip.lo: ../../include/net-snmp/types.h 
@@ -7439,9 +7439,9 @@
 ./mibII/system_mib.lo: ./mibII/system_mib.h ./mibII/updates.h
 ./mibII/tcp.lo: ../../include/net-snmp/net-snmp-config.h
 ./mibII/tcp.lo: ./mibII/mibII_common.h 
-./mibII/tcp.lo:  ../../agent/kernel.h
+./mibII/tcp.lo: ../../agent/kernel.h
 ./mibII/tcp.lo: ../../include/net-snmp/net-snmp-includes.h
-./mibII/tcp.lo:  ../../include/net-snmp/definitions.h
+./mibII/tcp.lo: ../../include/net-snmp/definitions.h
 ./mibII/tcp.lo: ../../include/net-snmp/types.h 
 ./mibII/tcp.lo: ../../include/net-snmp/library/oid.h
 ./mibII/tcp.lo: ../../include/net-snmp/library/types.h
@@ -7664,9 +7664,9 @@
 ./mibII/tcpTable.lo: ./mibII/tcpTable.h
 ./mibII/udp.lo: ../../include/net-snmp/net-snmp-config.h
 ./mibII/udp.lo: ./mibII/mibII_common.h 
-./mibII/udp.lo:  ../../agent/kernel.h
+./mibII/udp.lo: ../../agent/kernel.h
 ./mibII/udp.lo: ../../include/net-snmp/net-snmp-includes.h
-./mibII/udp.lo:  ../../include/net-snmp/definitions.h
+./mibII/udp.lo: ../../include/net-snmp/definitions.h
 ./mibII/udp.lo: ../../include/net-snmp/types.h 
 ./mibII/udp.lo: ../../include/net-snmp/library/oid.h
 ./mibII/udp.lo: ../../include/net-snmp/library/types.h
@@ -9424,7 +9424,7 @@
 ./Rmon/history.lo: ./Rmon/history.h ./Rmon/agutil_api.h ./Rmon/row_api.h
 ./Rmon/rows.lo: ../../include/net-snmp/net-snmp-config.h
 ./Rmon/rows.lo: ../../include/net-snmp/net-snmp-includes.h
-./Rmon/rows.lo:  ../../include/net-snmp/definitions.h
+./Rmon/rows.lo: ../../include/net-snmp/definitions.h
 ./Rmon/rows.lo: ../../include/net-snmp/types.h 
 ./Rmon/rows.lo: ../../include/net-snmp/library/oid.h
 ./Rmon/rows.lo: ../../include/net-snmp/library/types.h
@@ -11516,7 +11516,7 @@
 ./sctp-mib/sctpTables_solaris2.lo: kernel_sunos5.h
 ./smux/smux.lo: ../../include/net-snmp/net-snmp-config.h
 ./smux/smux.lo: ../../include/net-snmp/net-snmp-includes.h
-./smux/smux.lo:  ../../include/net-snmp/definitions.h
+./smux/smux.lo: ../../include/net-snmp/definitions.h
 ./smux/smux.lo: ../../include/net-snmp/types.h 
 ./smux/smux.lo: ../../include/net-snmp/library/oid.h
 ./smux/smux.lo: ../../include/net-snmp/library/types.h

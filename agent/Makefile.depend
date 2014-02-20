@@ -1186,7 +1186,6 @@
 ./agent_trap.lo: ../include/net-snmp/agent/mfd.h
 ./agent_trap.lo: ../include/net-snmp/agent/snmp_get_statistic.h
 ./agent_trap.lo: ../include/net-snmp/agent/agent_callbacks.h
-./agent_trap.lo: ../agent/mibgroup/agentx/protocol.h
 ./auto_nlist.lo: ../include/net-snmp/net-snmp-config.h
 ./auto_nlist.lo: ../include/net-snmp/agent/auto_nlist.h
 ./kernel.lo: ../include/net-snmp/net-snmp-config.h
@@ -1297,7 +1296,6 @@
 ./mib_modules.lo: ../include/net-snmp/agent/table_array.h
 ./mib_modules.lo: ../include/net-snmp/agent/mfd.h
 ./mib_modules.lo: ../include/net-snmp/agent/snmp_get_statistic.h m2m.h
-./mib_modules.lo: ../include/net-snmp/data_access/interface.h
 ./mib_modules.lo: mibgroup/struct.h ../include/net-snmp/agent/mib_modules.h
 ./mib_modules.lo: ../agent/mibgroup/mib_module_includes.h
 ./mib_modules.lo: mibgroup/examples/example.h mibgroup/testhandler.h
@@ -1383,6 +1381,7 @@
 ./mib_modules.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h
 ./mib_modules.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.h
 ./mib_modules.lo: mibgroup/if-mib/ifTable/ifTable.h
+./mib_modules.lo: ../include/net-snmp/data_access/interface.h
 ./mib_modules.lo: mibgroup/if-mib/ifTable/ifTable_constants.h
 ./mib_modules.lo: mibgroup/if-mib/ifTable/ifTable_interface.h
 ./mib_modules.lo: mibgroup/if-mib/ifTable/ifTable.h
@@ -1686,11 +1685,10 @@
 ./snmp_agent.lo: ../include/net-snmp/agent/mfd.h
 ./snmp_agent.lo: ../include/net-snmp/agent/snmp_get_statistic.h snmpd.h
 ./snmp_agent.lo: ../include/net-snmp/agent/mib_modules.h
-./snmp_agent.lo: ../agent/mibgroup/agentx/protocol.h
 ./snmp_agent.lo: ../agent/mibgroup/agentx/master.h
 ./snmp_agent.lo: ../agent/mibgroup/smux/smux.h
 ./snmpd.lo: ../include/net-snmp/net-snmp-config.h ../include/net-snmp/types.h
-./snmpd.lo:  ../include/net-snmp/library/oid.h
+./snmpd.lo: ../include/net-snmp/library/oid.h
 ./snmpd.lo: ../include/net-snmp/library/types.h
 ./snmpd.lo: ../include/net-snmp/definitions.h
 ./snmpd.lo: ../include/net-snmp/library/snmp_api.h
@@ -1723,7 +1721,7 @@
 ./snmpd.lo: ../include/net-snmp/library/snmp.h
 ./snmpd.lo: ../include/net-snmp/library/snmp-tc.h 
 ./snmpd.lo: ../include/net-snmp/net-snmp-includes.h 
-./snmpd.lo: ../include/net-snmp/library/getopt.h
+./snmpd.lo:  ../include/net-snmp/library/getopt.h
 ./snmpd.lo: ../include/net-snmp/utilities.h
 ./snmpd.lo: ../include/net-snmp/library/system.h
 ./snmpd.lo: ../include/net-snmp/library/tools.h
@@ -1966,9 +1964,8 @@
 ./snmpd.lo: mibgroup/if-mib/data_access/interface.h mibgroup/smux/smux.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-includes.h 
-./snmp_perl.lo:  ../include/net-snmp/definitions.h
-./snmp_perl.lo: ../include/net-snmp/types.h 
-./snmp_perl.lo: ../include/net-snmp/library/oid.h
+./snmp_perl.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
+./snmp_perl.lo:  ../include/net-snmp/library/oid.h
 ./snmp_perl.lo: ../include/net-snmp/library/types.h
 ./snmp_perl.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_perl.lo: ../include/net-snmp/varbind_api.h
