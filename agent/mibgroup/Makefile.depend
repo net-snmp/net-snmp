@@ -1,9 +1,6 @@
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 ./header_complex.lo: ../../include/net-snmp/net-snmp-config.h
-./header_complex.lo: ../../include/net-snmp/system/linux.h
-./header_complex.lo: ../../include/net-snmp/system/sysv.h
-./header_complex.lo: ../../include/net-snmp/system/generic.h
 ./header_complex.lo: ../../include/net-snmp/machine/generic.h
 ./header_complex.lo: ../../include/net-snmp/net-snmp-includes.h
 ./header_complex.lo: ../../include/net-snmp/definitions.h
@@ -105,14 +102,8 @@
 ./header_complex.lo: ../../include/net-snmp/agent/table_array.h
 ./header_complex.lo: ../../include/net-snmp/agent/mfd.h header_complex.h
 ./kernel_sunos5.lo: ../../include/net-snmp/net-snmp-config.h
-./kernel_sunos5.lo: ../../include/net-snmp/system/linux.h
-./kernel_sunos5.lo: ../../include/net-snmp/system/sysv.h
-./kernel_sunos5.lo: ../../include/net-snmp/system/generic.h
 ./kernel_sunos5.lo: ../../include/net-snmp/machine/generic.h
 ./testhandler.lo: ../../include/net-snmp/net-snmp-config.h
-./testhandler.lo: ../../include/net-snmp/system/linux.h
-./testhandler.lo: ../../include/net-snmp/system/sysv.h
-./testhandler.lo: ../../include/net-snmp/system/generic.h
 ./testhandler.lo: ../../include/net-snmp/machine/generic.h
 ./testhandler.lo: ../../include/net-snmp/net-snmp-includes.h
 ./testhandler.lo: ../../include/net-snmp/definitions.h
@@ -214,9 +205,6 @@
 ./testhandler.lo: ../../include/net-snmp/agent/table_array.h
 ./testhandler.lo: ../../include/net-snmp/agent/mfd.h testhandler.h
 ./util_funcs.lo: ../../include/net-snmp/net-snmp-config.h
-./util_funcs.lo: ../../include/net-snmp/system/linux.h
-./util_funcs.lo: ../../include/net-snmp/system/sysv.h
-./util_funcs.lo: ../../include/net-snmp/system/generic.h
 ./util_funcs.lo: ../../include/net-snmp/machine/generic.h
 ./util_funcs.lo: ../../include/net-snmp/net-snmp-includes.h
 ./util_funcs.lo: ../../include/net-snmp/definitions.h
@@ -319,17 +307,10 @@
 ./util_funcs.lo: ../../include/net-snmp/agent/mfd.h struct.h util_funcs.h
 ./util_funcs.lo: util_funcs/header_generic.h util_funcs/header_simple_table.h
 ./util_funcs.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h utilities/execute.h
-./util_funcs.lo: ucd-snmp/errormib.h mibdefs.h
 ./winExtDLL.lo: ../../include/net-snmp/net-snmp-config.h
-./winExtDLL.lo: ../../include/net-snmp/system/linux.h
-./winExtDLL.lo: ../../include/net-snmp/system/sysv.h
-./winExtDLL.lo: ../../include/net-snmp/system/generic.h
 ./winExtDLL.lo: ../../include/net-snmp/machine/generic.h
 ./winExtDLL.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./agent/extend.lo: ../../include/net-snmp/net-snmp-config.h
-./agent/extend.lo: ../../include/net-snmp/system/linux.h
-./agent/extend.lo: ../../include/net-snmp/system/sysv.h
-./agent/extend.lo: ../../include/net-snmp/system/generic.h
 ./agent/extend.lo: ../../include/net-snmp/machine/generic.h
 ./agent/extend.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agent/extend.lo: ../../include/net-snmp/definitions.h
@@ -434,9 +415,6 @@
 ./agent/extend.lo: agent/extend.h utilities/execute.h struct.h
 ./agent/extend.lo: util_funcs/header_simple_table.h mibdefs.h
 ./agent/nsCache.lo: ../../include/net-snmp/net-snmp-config.h
-./agent/nsCache.lo: ../../include/net-snmp/system/linux.h
-./agent/nsCache.lo: ../../include/net-snmp/system/sysv.h
-./agent/nsCache.lo: ../../include/net-snmp/system/generic.h
 ./agent/nsCache.lo: ../../include/net-snmp/machine/generic.h
 ./agent/nsCache.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agent/nsCache.lo: ../../include/net-snmp/definitions.h
@@ -538,9 +516,6 @@
 ./agent/nsCache.lo: ../../include/net-snmp/agent/table_array.h
 ./agent/nsCache.lo: ../../include/net-snmp/agent/mfd.h agent/nsCache.h
 ./agent/nsDebug.lo: ../../include/net-snmp/net-snmp-config.h
-./agent/nsDebug.lo: ../../include/net-snmp/system/linux.h
-./agent/nsDebug.lo: ../../include/net-snmp/system/sysv.h
-./agent/nsDebug.lo: ../../include/net-snmp/system/generic.h
 ./agent/nsDebug.lo: ../../include/net-snmp/machine/generic.h
 ./agent/nsDebug.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agent/nsDebug.lo: ../../include/net-snmp/definitions.h
@@ -642,9 +617,6 @@
 ./agent/nsDebug.lo: ../../include/net-snmp/agent/table_array.h
 ./agent/nsDebug.lo: ../../include/net-snmp/agent/mfd.h agent/nsDebug.h
 ./agent/nsLogging.lo: ../../include/net-snmp/net-snmp-config.h
-./agent/nsLogging.lo: ../../include/net-snmp/system/linux.h
-./agent/nsLogging.lo: ../../include/net-snmp/system/sysv.h
-./agent/nsLogging.lo: ../../include/net-snmp/system/generic.h
 ./agent/nsLogging.lo: ../../include/net-snmp/machine/generic.h
 ./agent/nsLogging.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agent/nsLogging.lo: ../../include/net-snmp/definitions.h
@@ -746,9 +718,6 @@
 ./agent/nsLogging.lo: ../../include/net-snmp/agent/table_array.h
 ./agent/nsLogging.lo: ../../include/net-snmp/agent/mfd.h agent/nsLogging.h
 ./agent/nsModuleTable.lo: ../../include/net-snmp/net-snmp-config.h
-./agent/nsModuleTable.lo: ../../include/net-snmp/system/linux.h
-./agent/nsModuleTable.lo: ../../include/net-snmp/system/sysv.h
-./agent/nsModuleTable.lo: ../../include/net-snmp/system/generic.h
 ./agent/nsModuleTable.lo: ../../include/net-snmp/machine/generic.h
 ./agent/nsModuleTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agent/nsModuleTable.lo: ../../include/net-snmp/definitions.h
@@ -851,9 +820,6 @@
 ./agent/nsModuleTable.lo: ../../include/net-snmp/agent/mfd.h
 ./agent/nsModuleTable.lo: ./agent/nsModuleTable.h
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/net-snmp-config.h
-./agent/nsTransactionTable.lo: ../../include/net-snmp/system/linux.h
-./agent/nsTransactionTable.lo: ../../include/net-snmp/system/sysv.h
-./agent/nsTransactionTable.lo: ../../include/net-snmp/system/generic.h
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/machine/generic.h
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/definitions.h
@@ -956,9 +922,6 @@
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/agent/mfd.h
 ./agent/nsTransactionTable.lo: ./agent/nsTransactionTable.h
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/net-snmp-config.h
-./agent/nsVacmAccessTable.lo: ../../include/net-snmp/system/linux.h
-./agent/nsVacmAccessTable.lo: ../../include/net-snmp/system/sysv.h
-./agent/nsVacmAccessTable.lo: ../../include/net-snmp/system/generic.h
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/machine/generic.h
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/definitions.h
@@ -1061,9 +1024,6 @@
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/agent/mfd.h
 ./agent/nsVacmAccessTable.lo: ./agent/nsVacmAccessTable.h
 ./agentx/agentx_config.lo: ../../include/net-snmp/net-snmp-config.h
-./agentx/agentx_config.lo: ../../include/net-snmp/system/linux.h
-./agentx/agentx_config.lo: ../../include/net-snmp/system/sysv.h
-./agentx/agentx_config.lo: ../../include/net-snmp/system/generic.h
 ./agentx/agentx_config.lo: ../../include/net-snmp/machine/generic.h
 ./agentx/agentx_config.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agentx/agentx_config.lo: ../../include/net-snmp/definitions.h
@@ -1167,9 +1127,6 @@
 ./agentx/agentx_config.lo: ../../agent/snmpd.h agentx/agentx_config.h
 ./agentx/agentx_config.lo: agentx/protocol.h
 ./agentx/client.lo: ../../include/net-snmp/net-snmp-config.h
-./agentx/client.lo: ../../include/net-snmp/system/linux.h
-./agentx/client.lo: ../../include/net-snmp/system/sysv.h
-./agentx/client.lo: ../../include/net-snmp/system/generic.h
 ./agentx/client.lo: ../../include/net-snmp/machine/generic.h
 ./agentx/client.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agentx/client.lo: ../../include/net-snmp/definitions.h
@@ -1273,9 +1230,6 @@
 ./agentx/client.lo: ../../include/net-snmp/agent/agent_index.h
 ./agentx/client.lo: agentx/protocol.h agentx/client.h agentx/subagent.h
 ./agentx/master_admin.lo: ../../include/net-snmp/net-snmp-config.h
-./agentx/master_admin.lo: ../../include/net-snmp/system/linux.h
-./agentx/master_admin.lo: ../../include/net-snmp/system/sysv.h
-./agentx/master_admin.lo: ../../include/net-snmp/system/generic.h
 ./agentx/master_admin.lo: ../../include/net-snmp/machine/generic.h
 ./agentx/master_admin.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agentx/master_admin.lo: ../../include/net-snmp/definitions.h
@@ -1382,9 +1336,6 @@
 ./agentx/master_admin.lo: ../../include/net-snmp/agent/agent_sysORTable.h
 ./agentx/master_admin.lo: ./agentx/master.h
 ./agentx/master.lo: ../../include/net-snmp/net-snmp-config.h
-./agentx/master.lo: ../../include/net-snmp/system/linux.h
-./agentx/master.lo: ../../include/net-snmp/system/sysv.h
-./agentx/master.lo: ../../include/net-snmp/system/generic.h
 ./agentx/master.lo: ../../include/net-snmp/machine/generic.h
 ./agentx/master.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agentx/master.lo: ../../include/net-snmp/definitions.h
@@ -1487,9 +1438,6 @@
 ./agentx/master.lo: ../../include/net-snmp/agent/mfd.h ../../agent/snmpd.h
 ./agentx/master.lo: agentx/protocol.h agentx/master_admin.h
 ./agentx/protocol.lo: ../../include/net-snmp/net-snmp-config.h
-./agentx/protocol.lo: ../../include/net-snmp/system/linux.h
-./agentx/protocol.lo: ../../include/net-snmp/system/sysv.h
-./agentx/protocol.lo: ../../include/net-snmp/system/generic.h
 ./agentx/protocol.lo: ../../include/net-snmp/machine/generic.h
 ./agentx/protocol.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agentx/protocol.lo: ../../include/net-snmp/definitions.h
@@ -1556,9 +1504,6 @@
 ./agentx/protocol.lo: ../../include/net-snmp/library/snmpusm.h
 ./agentx/protocol.lo: agentx/protocol.h
 ./agentx/subagent.lo: ../../include/net-snmp/net-snmp-config.h
-./agentx/subagent.lo: ../../include/net-snmp/system/linux.h
-./agentx/subagent.lo: ../../include/net-snmp/system/sysv.h
-./agentx/subagent.lo: ../../include/net-snmp/system/generic.h
 ./agentx/subagent.lo: ../../include/net-snmp/machine/generic.h
 ./agentx/subagent.lo: ../../include/net-snmp/net-snmp-includes.h
 ./agentx/subagent.lo: ../../include/net-snmp/definitions.h
@@ -1666,9 +1611,6 @@
 ./agentx/subagent.lo: ../../include/net-snmp/agent/agent_sysORTable.h
 ./agentx/subagent.lo: ./agentx/subagent.h
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/net-snmp-config.h
-./disman/mteEventNotificationTable.lo: ../../include/net-snmp/system/linux.h
-./disman/mteEventNotificationTable.lo: ../../include/net-snmp/system/sysv.h
-./disman/mteEventNotificationTable.lo: ../../include/net-snmp/system/generic.h
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/machine/generic.h
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/definitions.h
@@ -1771,9 +1713,6 @@
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/agent/mfd.h
 ./disman/mteEventNotificationTable.lo: ./disman/mteEventNotificationTable.h
 ./disman/mteEventTable.lo: ../../include/net-snmp/net-snmp-config.h
-./disman/mteEventTable.lo: ../../include/net-snmp/system/linux.h
-./disman/mteEventTable.lo: ../../include/net-snmp/system/sysv.h
-./disman/mteEventTable.lo: ../../include/net-snmp/system/generic.h
 ./disman/mteEventTable.lo: ../../include/net-snmp/machine/generic.h
 ./disman/mteEventTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./disman/mteEventTable.lo: ../../include/net-snmp/definitions.h
@@ -1879,9 +1818,6 @@
 ./disman/mteEventTable.lo: ./disman/mteEventNotificationTable.h
 ./disman/mteEventTable.lo: ./disman/mteObjectsTable.h
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/net-snmp-config.h
-./disman/mteObjectsTable.lo: ../../include/net-snmp/system/linux.h
-./disman/mteObjectsTable.lo: ../../include/net-snmp/system/sysv.h
-./disman/mteObjectsTable.lo: ../../include/net-snmp/system/generic.h
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/machine/generic.h
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/definitions.h
@@ -1985,9 +1921,6 @@
 ./disman/mteObjectsTable.lo: header_complex.h ./disman/mteTriggerTable.h
 ./disman/mteObjectsTable.lo: ./disman/mteObjectsTable.h
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/net-snmp-config.h
-./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/system/linux.h
-./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/system/sysv.h
-./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/system/generic.h
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/machine/generic.h
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/definitions.h
@@ -2092,9 +2025,6 @@
 ./disman/mteTriggerBooleanTable.lo: ./disman/mteTriggerBooleanTable.h
 ./disman/mteTriggerBooleanTable.lo: ./disman/mteTriggerTable.h
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/net-snmp-config.h
-./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/system/linux.h
-./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/system/sysv.h
-./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/system/generic.h
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/machine/generic.h
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/definitions.h
@@ -2199,9 +2129,6 @@
 ./disman/mteTriggerDeltaTable.lo: ./disman/mteTriggerDeltaTable.h
 ./disman/mteTriggerDeltaTable.lo: ./disman/mteTriggerTable.h
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/net-snmp-config.h
-./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/system/linux.h
-./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/system/sysv.h
-./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/system/generic.h
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/machine/generic.h
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/definitions.h
@@ -2306,9 +2233,6 @@
 ./disman/mteTriggerExistenceTable.lo: ./disman/mteTriggerExistenceTable.h
 ./disman/mteTriggerExistenceTable.lo: ./disman/mteTriggerTable.h
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/net-snmp-config.h
-./disman/mteTriggerTable.lo: ../../include/net-snmp/system/linux.h
-./disman/mteTriggerTable.lo: ../../include/net-snmp/system/sysv.h
-./disman/mteTriggerTable.lo: ../../include/net-snmp/system/generic.h
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/machine/generic.h
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/definitions.h
@@ -2417,9 +2341,6 @@
 ./disman/mteTriggerTable.lo: ./disman/mteEventTable.h
 ./disman/mteTriggerTable.lo: ./disman/mteObjectsTable.h
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/net-snmp-config.h
-./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/system/linux.h
-./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/system/sysv.h
-./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/system/generic.h
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/machine/generic.h
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/definitions.h
@@ -2524,9 +2445,6 @@
 ./disman/mteTriggerThresholdTable.lo: ./disman/mteTriggerThresholdTable.h
 ./disman/mteTriggerThresholdTable.lo: ./disman/mteTriggerTable.h
 ./examples/data_set.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/data_set.lo: ../../include/net-snmp/system/linux.h
-./examples/data_set.lo: ../../include/net-snmp/system/sysv.h
-./examples/data_set.lo: ../../include/net-snmp/system/generic.h
 ./examples/data_set.lo: ../../include/net-snmp/machine/generic.h
 ./examples/data_set.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/data_set.lo: ../../include/net-snmp/definitions.h
@@ -2628,9 +2546,6 @@
 ./examples/data_set.lo: ../../include/net-snmp/agent/table_array.h
 ./examples/data_set.lo: ../../include/net-snmp/agent/mfd.h
 ./examples/delayed_instance.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/delayed_instance.lo: ../../include/net-snmp/system/linux.h
-./examples/delayed_instance.lo: ../../include/net-snmp/system/sysv.h
-./examples/delayed_instance.lo: ../../include/net-snmp/system/generic.h
 ./examples/delayed_instance.lo: ../../include/net-snmp/machine/generic.h
 ./examples/delayed_instance.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/delayed_instance.lo: ../../include/net-snmp/definitions.h
@@ -2733,9 +2648,6 @@
 ./examples/delayed_instance.lo: ../../include/net-snmp/agent/mfd.h
 ./examples/delayed_instance.lo: ./examples/delayed_instance.h
 ./examples/example.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/example.lo: ../../include/net-snmp/system/linux.h
-./examples/example.lo: ../../include/net-snmp/system/sysv.h
-./examples/example.lo: ../../include/net-snmp/system/generic.h
 ./examples/example.lo: ../../include/net-snmp/machine/generic.h
 ./examples/example.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/example.lo: ../../include/net-snmp/definitions.h
@@ -2838,9 +2750,6 @@
 ./examples/example.lo: ../../include/net-snmp/agent/mfd.h
 ./examples/example.lo: util_funcs/header_generic.h ./examples/example.h
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/system/linux.h
-./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/system/sysv.h
-./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/system/generic.h
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/machine/generic.h
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/definitions.h
@@ -2944,9 +2853,6 @@
 ./examples/netSnmpHostsTable_access.lo: ./examples/netSnmpHostsTable_access.h
 ./examples/netSnmpHostsTable_access.lo: ./examples/netSnmpHostsTable_enums.h
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/netSnmpHostsTable.lo: ../../include/net-snmp/system/linux.h
-./examples/netSnmpHostsTable.lo: ../../include/net-snmp/system/sysv.h
-./examples/netSnmpHostsTable.lo: ../../include/net-snmp/system/generic.h
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/machine/generic.h
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/definitions.h
@@ -3053,9 +2959,6 @@
 ./examples/netSnmpHostsTable.lo: ./examples/netSnmpHostsTable_checkfns.h
 ./examples/netSnmpHostsTable.lo: ./examples/netSnmpHostsTable_access.h
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/system/linux.h
-./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/system/sysv.h
-./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/system/generic.h
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/machine/generic.h
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/definitions.h
@@ -3124,9 +3027,6 @@
 ./examples/netSnmpHostsTable_checkfns.lo: ./examples/netSnmpHostsTable_checkfns_local.h
 ./examples/netSnmpHostsTable_checkfns.lo: ./examples/netSnmpHostsTable_enums.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/system/linux.h
-./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/system/sysv.h
-./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/system/generic.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/machine/generic.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/definitions.h
@@ -3194,9 +3094,6 @@
 ./examples/netSnmpHostsTable_checkfns_local.lo: ./examples/netSnmpHostsTable_checkfns.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ./examples/netSnmpHostsTable_enums.h
 ./examples/notification.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/notification.lo: ../../include/net-snmp/system/linux.h
-./examples/notification.lo: ../../include/net-snmp/system/sysv.h
-./examples/notification.lo: ../../include/net-snmp/system/generic.h
 ./examples/notification.lo: ../../include/net-snmp/machine/generic.h
 ./examples/notification.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/notification.lo: ../../include/net-snmp/definitions.h
@@ -3298,9 +3195,6 @@
 ./examples/notification.lo: ../../include/net-snmp/agent/table_array.h
 ./examples/notification.lo: ../../include/net-snmp/agent/mfd.h notification.h
 ./examples/scalar_int.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/scalar_int.lo: ../../include/net-snmp/system/linux.h
-./examples/scalar_int.lo: ../../include/net-snmp/system/sysv.h
-./examples/scalar_int.lo: ../../include/net-snmp/system/generic.h
 ./examples/scalar_int.lo: ../../include/net-snmp/machine/generic.h
 ./examples/scalar_int.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/scalar_int.lo: ../../include/net-snmp/definitions.h
@@ -3402,9 +3296,6 @@
 ./examples/scalar_int.lo: ../../include/net-snmp/agent/table_array.h
 ./examples/scalar_int.lo: ../../include/net-snmp/agent/mfd.h
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/ucdDemoPublic.lo: ../../include/net-snmp/system/linux.h
-./examples/ucdDemoPublic.lo: ../../include/net-snmp/system/sysv.h
-./examples/ucdDemoPublic.lo: ../../include/net-snmp/system/generic.h
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/machine/generic.h
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/definitions.h
@@ -3508,9 +3399,6 @@
 ./examples/ucdDemoPublic.lo: util_funcs/header_generic.h
 ./examples/ucdDemoPublic.lo: ./examples/ucdDemoPublic.h
 ./examples/watched.lo: ../../include/net-snmp/net-snmp-config.h
-./examples/watched.lo: ../../include/net-snmp/system/linux.h
-./examples/watched.lo: ../../include/net-snmp/system/sysv.h
-./examples/watched.lo: ../../include/net-snmp/system/generic.h
 ./examples/watched.lo: ../../include/net-snmp/machine/generic.h
 ./examples/watched.lo: ../../include/net-snmp/net-snmp-includes.h
 ./examples/watched.lo: ../../include/net-snmp/definitions.h
@@ -3612,9 +3500,6 @@
 ./examples/watched.lo: ../../include/net-snmp/agent/table_array.h
 ./examples/watched.lo: ../../include/net-snmp/agent/mfd.h
 ./host/hr_device.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_device.lo: ../../include/net-snmp/system/linux.h
-./host/hr_device.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_device.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_device.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_device.lo:  host_res.h 
 ./host/hr_device.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -3686,11 +3571,8 @@
 ./host/hr_device.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_device.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_device.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_device.lo:  ./host/hr_device.h
+./host/hr_device.lo: ./host/hr_device.h
 ./host/hr_disk.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_disk.lo: ../../include/net-snmp/system/linux.h
-./host/hr_disk.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_disk.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_disk.lo: ../../include/net-snmp/machine/generic.h host_res.h
 ./host/hr_disk.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_disk.lo: ../../include/net-snmp/definitions.h
@@ -3761,12 +3643,9 @@
 ./host/hr_disk.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_disk.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_disk.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_disk.lo:  ./host/hr_disk.h
+./host/hr_disk.lo: ./host/hr_disk.h 
 ./host/hr_disk.lo: ../../include/net-snmp/agent/agent_read_config.h
 ./host/hr_filesys.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_filesys.lo: ../../include/net-snmp/system/linux.h
-./host/hr_filesys.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_filesys.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_filesys.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_filesys.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_filesys.lo: ../../include/net-snmp/definitions.h
@@ -3868,12 +3747,9 @@
 ./host/hr_filesys.lo: ../../include/net-snmp/agent/table_array.h
 ./host/hr_filesys.lo: ../../include/net-snmp/agent/mfd.h
 ./host/hr_filesys.lo: ../../include/net-snmp/agent/hardware/memory.h
-./host/hr_filesys.lo: host_res.h  ./host/hr_filesys.h
-./host/hr_filesys.lo: ./host/hr_storage.h ./host/hr_disk.h
+./host/hr_filesys.lo: host_res.h ./host/hr_filesys.h ./host/hr_storage.h
+./host/hr_filesys.lo: ./host/hr_disk.h 
 ./host/hrh_filesys.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hrh_filesys.lo: ../../include/net-snmp/system/linux.h
-./host/hrh_filesys.lo: ../../include/net-snmp/system/sysv.h
-./host/hrh_filesys.lo: ../../include/net-snmp/system/generic.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/machine/generic.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/definitions.h
@@ -3976,12 +3852,9 @@
 ./host/hrh_filesys.lo: ../../include/net-snmp/agent/mfd.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/agent/hardware/memory.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/agent/hardware/fsys.h
-./host/hrh_filesys.lo: host_res.h  ./host/hrh_filesys.h
-./host/hrh_filesys.lo: ./host/hrh_storage.h ./host/hr_disk.h
+./host/hrh_filesys.lo: host_res.h ./host/hrh_filesys.h ./host/hrh_storage.h
+./host/hrh_filesys.lo: ./host/hr_disk.h 
 ./host/hrh_storage.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hrh_storage.lo: ../../include/net-snmp/system/linux.h
-./host/hrh_storage.lo: ../../include/net-snmp/system/sysv.h
-./host/hrh_storage.lo: ../../include/net-snmp/system/generic.h
 ./host/hrh_storage.lo: ../../include/net-snmp/machine/generic.h
 ./host/hrh_storage.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hrh_storage.lo: ../../include/net-snmp/definitions.h
@@ -4084,12 +3957,9 @@
 ./host/hrh_storage.lo: ../../include/net-snmp/agent/mfd.h
 ./host/hrh_storage.lo: ../../include/net-snmp/agent/hardware/memory.h
 ./host/hrh_storage.lo: ../../include/net-snmp/agent/hardware/fsys.h
-./host/hrh_storage.lo: host_res.h  ./host/hrh_filesys.h
-./host/hrh_storage.lo: ./host/hrh_storage.h ./host/hr_disk.h
+./host/hrh_storage.lo: host_res.h ./host/hrh_filesys.h ./host/hrh_storage.h
+./host/hrh_storage.lo: ./host/hr_disk.h 
 ./host/hr_network.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_network.lo: ../../include/net-snmp/system/linux.h
-./host/hr_network.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_network.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_network.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_network.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_network.lo: ../../include/net-snmp/definitions.h
@@ -4191,12 +4061,8 @@
 ./host/hr_network.lo: ../../include/net-snmp/agent/table_array.h
 ./host/hr_network.lo: ../../include/net-snmp/agent/mfd.h
 ./host/hr_network.lo: ../../include/net-snmp/data_access/interface.h
-./host/hr_network.lo: host_res.h  mibII/interfaces.h
-./host/hr_network.lo: ./host/hr_network.h
+./host/hr_network.lo: host_res.h mibII/interfaces.h ./host/hr_network.h
 ./host/hr_other.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_other.lo: ../../include/net-snmp/system/linux.h
-./host/hr_other.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_other.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_other.lo: ../../include/net-snmp/machine/generic.h host_res.h
 ./host/hr_other.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_other.lo: ../../include/net-snmp/definitions.h
@@ -4267,11 +4133,8 @@
 ./host/hr_other.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_other.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_other.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_other.lo:  ./host/hr_other.h
+./host/hr_other.lo: ./host/hr_other.h
 ./host/hr_partition.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_partition.lo: ../../include/net-snmp/system/linux.h
-./host/hr_partition.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_partition.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_partition.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_partition.lo:  host_res.h
 ./host/hr_partition.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -4343,12 +4206,9 @@
 ./host/hr_partition.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_partition.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_partition.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_partition.lo:  ./host/hr_partition.h
-./host/hr_partition.lo: ./host/hr_filesys.h ./host/hr_disk.h
+./host/hr_partition.lo: ./host/hr_partition.h ./host/hr_filesys.h
+./host/hr_partition.lo: ./host/hr_disk.h 
 ./host/hr_print.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_print.lo: ../../include/net-snmp/system/linux.h
-./host/hr_print.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_print.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_print.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_print.lo: host_res.h 
 ./host/hr_print.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -4420,14 +4280,11 @@
 ./host/hr_print.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_print.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_print.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_print.lo:  ./host/hr_print.h struct.h
-./host/hr_print.lo: util_funcs.h util_funcs/header_generic.h
+./host/hr_print.lo: ./host/hr_print.h struct.h util_funcs.h
+./host/hr_print.lo: util_funcs/header_generic.h
 ./host/hr_print.lo: util_funcs/header_simple_table.h
 ./host/hr_print.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./host/hr_proc.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_proc.lo: ../../include/net-snmp/system/linux.h
-./host/hr_proc.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_proc.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_proc.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_proc.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_proc.lo: ../../include/net-snmp/definitions.h
@@ -4528,14 +4385,11 @@
 ./host/hr_proc.lo: ../../include/net-snmp/agent/table_container.h
 ./host/hr_proc.lo: ../../include/net-snmp/agent/table_array.h
 ./host/hr_proc.lo: ../../include/net-snmp/agent/mfd.h 
-./host/hr_proc.lo: host_res.h  ./host/hr_proc.h
+./host/hr_proc.lo: host_res.h ./host/hr_proc.h
 ./host/hr_proc.lo: ../../include/net-snmp/agent/auto_nlist.h
 ./host/hr_proc.lo: ../../include/net-snmp/agent/hardware/cpu.h
 ./host/hr_proc.lo: ucd-snmp/loadave.h mibdefs.h
 ./host/hr_storage.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_storage.lo: ../../include/net-snmp/system/linux.h
-./host/hr_storage.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_storage.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_storage.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_storage.lo:  host_res.h
 ./host/hr_storage.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -4607,8 +4461,7 @@
 ./host/hr_storage.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_storage.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_storage.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_storage.lo:  ./host/hr_storage.h
-./host/hr_storage.lo: ./host/hr_filesys.h
+./host/hr_storage.lo: ./host/hr_storage.h ./host/hr_filesys.h
 ./host/hr_storage.lo: ../../include/net-snmp/agent/auto_nlist.h
 ./host/hr_storage.lo: ../../include/net-snmp/agent/net-snmp-agent-includes.h
 ./host/hr_storage.lo: ../../include/net-snmp/agent/mib_module_config.h
@@ -4642,9 +4495,6 @@
 ./host/hr_storage.lo: ../../include/net-snmp/agent/mfd.h
 ./host/hr_storage.lo: ../../include/net-snmp/agent/hardware/memory.h
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hrSWInstalledTable.lo: ../../include/net-snmp/system/linux.h
-./host/hrSWInstalledTable.lo: ../../include/net-snmp/system/sysv.h
-./host/hrSWInstalledTable.lo: ../../include/net-snmp/system/generic.h
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/machine/generic.h
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/definitions.h
@@ -4748,11 +4598,8 @@
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/data_access/swinst.h
 ./host/hrSWInstalledTable.lo: ./host/hrSWInstalledTable.h
 ./host/hr_swinst.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_swinst.lo: ../../include/net-snmp/system/linux.h
-./host/hr_swinst.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_swinst.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_swinst.lo: ../../include/net-snmp/machine/generic.h
-./host/hr_swinst.lo: host_res.h 
+./host/hr_swinst.lo:  host_res.h
 ./host/hr_swinst.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_swinst.lo: ../../include/net-snmp/definitions.h
 ./host/hr_swinst.lo: ../../include/net-snmp/types.h 
@@ -4822,11 +4669,8 @@
 ./host/hr_swinst.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_swinst.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_swinst.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_swinst.lo:  ./host/hr_swinst.h
+./host/hr_swinst.lo: ./host/hr_swinst.h
 ./host/hr_swrun.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_swrun.lo: ../../include/net-snmp/system/linux.h
-./host/hr_swrun.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_swrun.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_swrun.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_swrun.lo: ../../include/net-snmp/output_api.h
 ./host/hr_swrun.lo: ../../include/net-snmp/types.h 
@@ -4898,13 +4742,10 @@
 ./host/hr_swrun.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_swrun.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_swrun.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_swrun.lo:  ./host/hr_swrun.h
+./host/hr_swrun.lo: ./host/hr_swrun.h
 ./host/hr_swrun.lo: ../../include/net-snmp/agent/auto_nlist.h
 ./host/hr_swrun.lo: ../../agent/kernel.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hrSWRunPerfTable.lo: ../../include/net-snmp/system/linux.h
-./host/hrSWRunPerfTable.lo: ../../include/net-snmp/system/sysv.h
-./host/hrSWRunPerfTable.lo: ../../include/net-snmp/system/generic.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/machine/generic.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/definitions.h
@@ -5009,9 +4850,6 @@
 ./host/hrSWRunPerfTable.lo: ./host/hrSWRunPerfTable.h
 ./host/hrSWRunPerfTable.lo: ./host/data_access/swrun.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hrSWRunTable.lo: ../../include/net-snmp/system/linux.h
-./host/hrSWRunTable.lo: ../../include/net-snmp/system/sysv.h
-./host/hrSWRunTable.lo: ../../include/net-snmp/system/generic.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/machine/generic.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/definitions.h
@@ -5115,9 +4953,6 @@
 ./host/hrSWRunTable.lo: ../../include/net-snmp/data_access/swrun.h
 ./host/hrSWRunTable.lo: ./host/hrSWRunTable.h ./host/data_access/swrun.h
 ./host/hr_system.lo: ../../include/net-snmp/net-snmp-config.h
-./host/hr_system.lo: ../../include/net-snmp/system/linux.h
-./host/hr_system.lo: ../../include/net-snmp/system/sysv.h
-./host/hr_system.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_system.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_system.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_system.lo: ../../include/net-snmp/definitions.h
@@ -5218,12 +5053,9 @@
 ./host/hr_system.lo: ../../include/net-snmp/agent/table_container.h
 ./host/hr_system.lo: ../../include/net-snmp/agent/table_array.h
 ./host/hr_system.lo: ../../include/net-snmp/agent/mfd.h host.h host_res.h
-./host/hr_system.lo:  ./host/hr_system.h
+./host/hr_system.lo: ./host/hr_system.h
 ./host/hr_system.lo: ../../include/net-snmp/agent/auto_nlist.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/net-snmp-config.h
-./ip-mib/ip_scalars.lo: ../../include/net-snmp/system/linux.h
-./ip-mib/ip_scalars.lo: ../../include/net-snmp/system/sysv.h
-./ip-mib/ip_scalars.lo: ../../include/net-snmp/system/generic.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/machine/generic.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/definitions.h
@@ -5327,14 +5159,11 @@
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/data_access/ip_scalars.h
 ./ip-mib/ip_scalars.lo: ./ip-mib/ip_scalars.h
 ./mibII/at.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/at.lo: ../../include/net-snmp/system/linux.h
-./mibII/at.lo: ../../include/net-snmp/system/sysv.h
-./mibII/at.lo: ../../include/net-snmp/system/generic.h
 ./mibII/at.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/at.lo: ./mibII/mibII_common.h 
 ./mibII/at.lo: ../../agent/kernel.h 
 ./mibII/at.lo: ../../include/net-snmp/net-snmp-includes.h
-./mibII/at.lo: ../../include/net-snmp/definitions.h
+./mibII/at.lo:  ../../include/net-snmp/definitions.h
 ./mibII/at.lo: ../../include/net-snmp/types.h 
 ./mibII/at.lo: ../../include/net-snmp/library/types.h
 ./mibII/at.lo: ../../include/net-snmp/library/snmp_api.h
@@ -5436,9 +5265,6 @@
 ./mibII/at.lo: ./mibII/interfaces.h
 ./mibII/at.lo: ../../include/net-snmp/data_access/interface.h
 ./mibII/icmp.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/icmp.lo: ../../include/net-snmp/system/linux.h
-./mibII/icmp.lo: ../../include/net-snmp/system/sysv.h
-./mibII/icmp.lo: ../../include/net-snmp/system/generic.h
 ./mibII/icmp.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/icmp.lo: ./mibII/mibII_common.h 
 ./mibII/icmp.lo: ../../agent/kernel.h 
@@ -5546,9 +5372,6 @@
 ./mibII/icmp.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./mibII/icmp.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h ./mibII/icmp.h
 ./mibII/interfaces.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/interfaces.lo: ../../include/net-snmp/system/linux.h
-./mibII/interfaces.lo: ../../include/net-snmp/system/sysv.h
-./mibII/interfaces.lo: ../../include/net-snmp/system/generic.h
 ./mibII/interfaces.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/interfaces.lo: ../../agent/kernel.h 
 ./mibII/interfaces.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -5657,9 +5480,6 @@
 ./mibII/interfaces.lo: ./mibII/interfaces.h struct.h
 ./mibII/interfaces.lo: util_funcs/header_generic.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/ipAddr.lo: ../../include/net-snmp/system/linux.h
-./mibII/ipAddr.lo: ../../include/net-snmp/system/sysv.h
-./mibII/ipAddr.lo: ../../include/net-snmp/system/generic.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/ipAddr.lo:  ../../agent/kernel.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -5766,14 +5586,11 @@
 ./mibII/ipAddr.lo: ./mibII/ip.h ./mibII/var_route.h ./mibII/route_write.h
 ./mibII/ipAddr.lo: ./mibII/at.h ./mibII/interfaces.h
 ./mibII/ip.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/ip.lo: ../../include/net-snmp/system/linux.h
-./mibII/ip.lo: ../../include/net-snmp/system/sysv.h
-./mibII/ip.lo: ../../include/net-snmp/system/generic.h
 ./mibII/ip.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/ip.lo: ./mibII/mibII_common.h 
 ./mibII/ip.lo: ../../agent/kernel.h 
 ./mibII/ip.lo: ../../include/net-snmp/net-snmp-includes.h
-./mibII/ip.lo: ../../include/net-snmp/definitions.h
+./mibII/ip.lo:  ../../include/net-snmp/definitions.h
 ./mibII/ip.lo: ../../include/net-snmp/types.h 
 ./mibII/ip.lo: ../../include/net-snmp/library/types.h
 ./mibII/ip.lo: ../../include/net-snmp/library/snmp_api.h
@@ -5878,9 +5695,6 @@
 ./mibII/ip.lo: ./mibII/var_route.h ./mibII/route_write.h ./mibII/at.h
 ./mibII/ip.lo: ./mibII/ipAddr.h ./mibII/interfaces.h
 ./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/system/linux.h
-./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/system/sysv.h
-./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/system/generic.h
 ./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/ipCidrRouteTable_access.lo: ./mibII/route_headers.h
 ./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -5985,9 +5799,6 @@
 ./mibII/ipCidrRouteTable_access.lo: ./mibII/ipCidrRouteTable_access.h
 ./mibII/ipCidrRouteTable_access.lo: ./mibII/ipCidrRouteTable_enums.h
 ./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/system/linux.h
-./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/system/sysv.h
-./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/system/generic.h
 ./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/ipCidrRouteTable.lo: ./mibII/route_headers.h 
 ./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -6096,9 +5907,6 @@
 ./mibII/ipCidrRouteTable.lo: ./mibII/ipCidrRouteTable_access.h
 ./mibII/ipCidrRouteTable.lo: ./mibII/var_route.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/system/linux.h
-./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/system/sysv.h
-./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/system/generic.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/definitions.h
@@ -6166,9 +5974,6 @@
 ./mibII/ipCidrRouteTable_checkfns.lo: ./mibII/ipCidrRouteTable_checkfns.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ./mibII/ipCidrRouteTable_enums.h
 ./mibII/ipv6.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/ipv6.lo: ../../include/net-snmp/system/linux.h
-./mibII/ipv6.lo: ../../include/net-snmp/system/sysv.h
-./mibII/ipv6.lo: ../../include/net-snmp/system/generic.h
 ./mibII/ipv6.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/ipv6.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/ipv6.lo: ../../include/net-snmp/definitions.h
@@ -6273,9 +6078,6 @@
 ./mibII/ipv6.lo: ../../agent/kernel.h ./mibII/ipv6.h ./mibII/var_route.h
 ./mibII/ipv6.lo: ./mibII/route_write.h ./mibII/at.h ./mibII/interfaces.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/kernel_linux.lo: ../../include/net-snmp/system/linux.h
-./mibII/kernel_linux.lo: ../../include/net-snmp/system/sysv.h
-./mibII/kernel_linux.lo: ../../include/net-snmp/system/generic.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/definitions.h
@@ -6378,9 +6180,6 @@
 ./mibII/kernel_linux.lo: ../../include/net-snmp/agent/mfd.h
 ./mibII/kernel_linux.lo: ./mibII/kernel_linux.h
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/kernel_netbsd.lo: ../../include/net-snmp/system/linux.h
-./mibII/kernel_netbsd.lo: ../../include/net-snmp/system/sysv.h
-./mibII/kernel_netbsd.lo: ../../include/net-snmp/system/generic.h
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/definitions.h
@@ -6483,9 +6282,6 @@
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/agent/mfd.h
 ./mibII/kernel_netbsd.lo: ./mibII/kernel_netbsd.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/mta_sendmail.lo: ../../include/net-snmp/system/linux.h
-./mibII/mta_sendmail.lo: ../../include/net-snmp/system/sysv.h
-./mibII/mta_sendmail.lo: ../../include/net-snmp/system/generic.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/definitions.h
@@ -6588,9 +6384,6 @@
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/agent/mfd.h
 ./mibII/mta_sendmail.lo: ./mibII/mta_sendmail.h 
 ./mibII/route_write.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/route_write.lo: ../../include/net-snmp/system/linux.h
-./mibII/route_write.lo: ../../include/net-snmp/system/sysv.h
-./mibII/route_write.lo: ../../include/net-snmp/system/generic.h
 ./mibII/route_write.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/route_write.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/route_write.lo: ../../include/net-snmp/definitions.h
@@ -6694,9 +6487,6 @@
 ./mibII/route_write.lo: ./mibII/var_route.h ./mibII/route_write.h
 ./mibII/route_write.lo: ./mibII/at.h
 ./mibII/setSerialNo.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/setSerialNo.lo: ../../include/net-snmp/system/linux.h
-./mibII/setSerialNo.lo: ../../include/net-snmp/system/sysv.h
-./mibII/setSerialNo.lo: ../../include/net-snmp/system/generic.h
 ./mibII/setSerialNo.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/setSerialNo.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/setSerialNo.lo: ../../include/net-snmp/definitions.h
@@ -6799,9 +6589,6 @@
 ./mibII/setSerialNo.lo: ../../include/net-snmp/agent/mfd.h
 ./mibII/setSerialNo.lo: ./mibII/setSerialNo.h
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/system/linux.h
-./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/system/sysv.h
-./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/system/generic.h
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/definitions.h
@@ -6907,9 +6694,6 @@
 ./mibII/snmp_mib_5_5.lo: ./utilities/snmp_get_statistic.h
 ./mibII/snmp_mib_5_5.lo: ./mibII/snmp_mib_5_5.h ./mibII/updates.h
 ./mibII/snmp_mib.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/snmp_mib.lo: ../../include/net-snmp/system/linux.h
-./mibII/snmp_mib.lo: ../../include/net-snmp/system/sysv.h
-./mibII/snmp_mib.lo: ../../include/net-snmp/system/generic.h
 ./mibII/snmp_mib.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/snmp_mib.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/snmp_mib.lo: ../../include/net-snmp/definitions.h
@@ -7014,9 +6798,6 @@
 ./mibII/snmp_mib.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./mibII/snmp_mib.lo: ./mibII/snmp_mib.h ./mibII/updates.h
 ./mibII/sysORTable.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/sysORTable.lo: ../../include/net-snmp/system/linux.h
-./mibII/sysORTable.lo: ../../include/net-snmp/system/sysv.h
-./mibII/sysORTable.lo: ../../include/net-snmp/system/generic.h
 ./mibII/sysORTable.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/sysORTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/sysORTable.lo: ../../include/net-snmp/definitions.h
@@ -7122,9 +6903,6 @@
 ./mibII/sysORTable.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./mibII/sysORTable.lo: ./mibII/sysORTable.h
 ./mibII/system_mib.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/system_mib.lo: ../../include/net-snmp/system/linux.h
-./mibII/system_mib.lo: ../../include/net-snmp/system/sysv.h
-./mibII/system_mib.lo: ../../include/net-snmp/system/generic.h
 ./mibII/system_mib.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/system_mib.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/system_mib.lo: ../../include/net-snmp/definitions.h
@@ -7232,14 +7010,11 @@
 ./mibII/system_mib.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./mibII/system_mib.lo: ./mibII/system_mib.h ./mibII/updates.h
 ./mibII/tcp.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/tcp.lo: ../../include/net-snmp/system/linux.h
-./mibII/tcp.lo: ../../include/net-snmp/system/sysv.h
-./mibII/tcp.lo: ../../include/net-snmp/system/generic.h
 ./mibII/tcp.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/tcp.lo: ./mibII/mibII_common.h 
 ./mibII/tcp.lo: ../../agent/kernel.h 
 ./mibII/tcp.lo: ../../include/net-snmp/net-snmp-includes.h
-./mibII/tcp.lo: ../../include/net-snmp/definitions.h
+./mibII/tcp.lo:  ../../include/net-snmp/definitions.h
 ./mibII/tcp.lo: ../../include/net-snmp/types.h 
 ./mibII/tcp.lo: ../../include/net-snmp/library/types.h
 ./mibII/tcp.lo: ../../include/net-snmp/library/snmp_api.h
@@ -7343,9 +7118,6 @@
 ./mibII/tcp.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h ./mibII/tcp.h
 ./mibII/tcp.lo: ./mibII/tcpTable.h
 ./mibII/tcpTable.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/tcpTable.lo: ../../include/net-snmp/system/linux.h
-./mibII/tcpTable.lo: ../../include/net-snmp/system/sysv.h
-./mibII/tcpTable.lo: ../../include/net-snmp/system/generic.h
 ./mibII/tcpTable.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/tcpTable.lo: ./mibII/mibII_common.h 
 ./mibII/tcpTable.lo:  ../../agent/kernel.h
@@ -7451,14 +7223,11 @@
 ./mibII/tcpTable.lo: ../../include/net-snmp/agent/auto_nlist.h ./mibII/tcp.h
 ./mibII/tcpTable.lo: ./mibII/tcpTable.h
 ./mibII/udp.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/udp.lo: ../../include/net-snmp/system/linux.h
-./mibII/udp.lo: ../../include/net-snmp/system/sysv.h
-./mibII/udp.lo: ../../include/net-snmp/system/generic.h
 ./mibII/udp.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/udp.lo: ./mibII/mibII_common.h 
 ./mibII/udp.lo: ../../agent/kernel.h 
 ./mibII/udp.lo: ../../include/net-snmp/net-snmp-includes.h
-./mibII/udp.lo: ../../include/net-snmp/definitions.h
+./mibII/udp.lo:  ../../include/net-snmp/definitions.h
 ./mibII/udp.lo: ../../include/net-snmp/types.h 
 ./mibII/udp.lo: ../../include/net-snmp/library/types.h
 ./mibII/udp.lo: ../../include/net-snmp/library/snmp_api.h
@@ -7562,9 +7331,6 @@
 ./mibII/udp.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h ./mibII/udp.h
 ./mibII/udp.lo: ./mibII/udpTable.h
 ./mibII/udpTable.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/udpTable.lo: ../../include/net-snmp/system/linux.h
-./mibII/udpTable.lo: ../../include/net-snmp/system/sysv.h
-./mibII/udpTable.lo: ../../include/net-snmp/system/generic.h
 ./mibII/udpTable.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/udpTable.lo: ./mibII/mibII_common.h 
 ./mibII/udpTable.lo:  ../../agent/kernel.h
@@ -7670,9 +7436,6 @@
 ./mibII/udpTable.lo: ../../include/net-snmp/agent/auto_nlist.h ./mibII/udp.h
 ./mibII/udpTable.lo: ./mibII/udpTable.h
 ./mibII/updates.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/updates.lo: ../../include/net-snmp/system/linux.h
-./mibII/updates.lo: ../../include/net-snmp/system/sysv.h
-./mibII/updates.lo: ../../include/net-snmp/system/generic.h
 ./mibII/updates.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/updates.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/updates.lo: ../../include/net-snmp/definitions.h
@@ -7774,9 +7537,6 @@
 ./mibII/updates.lo: ../../include/net-snmp/agent/table_array.h
 ./mibII/updates.lo: ../../include/net-snmp/agent/mfd.h
 ./mibII/vacm_conf.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/vacm_conf.lo: ../../include/net-snmp/system/linux.h
-./mibII/vacm_conf.lo: ../../include/net-snmp/system/sysv.h
-./mibII/vacm_conf.lo: ../../include/net-snmp/system/generic.h
 ./mibII/vacm_conf.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/vacm_conf.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/vacm_conf.lo: ../../include/net-snmp/definitions.h
@@ -7880,9 +7640,6 @@
 ./mibII/vacm_conf.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./mibII/vacm_conf.lo: ./mibII/vacm_conf.h ../../agent/snmpd.h
 ./mibII/vacm_context.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/vacm_context.lo: ../../include/net-snmp/system/linux.h
-./mibII/vacm_context.lo: ../../include/net-snmp/system/sysv.h
-./mibII/vacm_context.lo: ../../include/net-snmp/system/generic.h
 ./mibII/vacm_context.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/vacm_context.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/vacm_context.lo: ../../include/net-snmp/definitions.h
@@ -7985,9 +7742,6 @@
 ./mibII/vacm_context.lo: ../../include/net-snmp/agent/mfd.h
 ./mibII/vacm_context.lo: ./mibII/vacm_context.h
 ./mibII/vacm_vars.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/vacm_vars.lo: ../../include/net-snmp/system/linux.h
-./mibII/vacm_vars.lo: ../../include/net-snmp/system/sysv.h
-./mibII/vacm_vars.lo: ../../include/net-snmp/system/generic.h
 ./mibII/vacm_vars.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/vacm_vars.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/vacm_vars.lo: ../../include/net-snmp/definitions.h
@@ -8092,9 +7846,6 @@
 ./mibII/vacm_vars.lo: ../../include/net-snmp/agent/sysORTable.h
 ./mibII/vacm_vars.lo: ./mibII/vacm_vars.h util_funcs/header_generic.h
 ./mibII/var_route.lo: ../../include/net-snmp/net-snmp-config.h
-./mibII/var_route.lo: ../../include/net-snmp/system/linux.h
-./mibII/var_route.lo: ../../include/net-snmp/system/sysv.h
-./mibII/var_route.lo: ../../include/net-snmp/system/generic.h
 ./mibII/var_route.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/var_route.lo: ./mibII/route_headers.h 
 ./mibII/var_route.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -8202,9 +7953,6 @@
 ./mibII/var_route.lo: ./mibII/at.h ../../agent/kernel.h ./mibII/interfaces.h
 ./mibII/var_route.lo: struct.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/net-snmp-config.h
-./misc/ipfwacc.lo: ../../include/net-snmp/system/linux.h
-./misc/ipfwacc.lo: ../../include/net-snmp/system/sysv.h
-./misc/ipfwacc.lo: ../../include/net-snmp/system/generic.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/machine/generic.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/net-snmp-includes.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/definitions.h
@@ -8307,9 +8055,6 @@
 ./misc/ipfwacc.lo: ../../include/net-snmp/agent/mfd.h
 ./misc/ipfwacc.lo: util_funcs/header_simple_table.h ./misc/ipfwacc.h
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/net-snmp-config.h
-./notification-log-mib/notification_log.lo: ../../include/net-snmp/system/linux.h
-./notification-log-mib/notification_log.lo: ../../include/net-snmp/system/sysv.h
-./notification-log-mib/notification_log.lo: ../../include/net-snmp/system/generic.h
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/machine/generic.h
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/net-snmp-includes.h
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/definitions.h
@@ -8414,9 +8159,6 @@
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./notification-log-mib/notification_log.lo: ./notification-log-mib/notification_log.h
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/net-snmp-config.h
-./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/system/linux.h
-./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/system/sysv.h
-./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/system/generic.h
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/machine/generic.h
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/definitions.h
@@ -8520,9 +8262,6 @@
 ./notification/snmpNotifyFilterProfileTable.lo: header_complex.h
 ./notification/snmpNotifyFilterProfileTable.lo: ./notification/snmpNotifyFilterProfileTable.h
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/net-snmp-config.h
-./notification/snmpNotifyTable.lo: ../../include/net-snmp/system/linux.h
-./notification/snmpNotifyTable.lo: ../../include/net-snmp/system/sysv.h
-./notification/snmpNotifyTable.lo: ../../include/net-snmp/system/generic.h
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/machine/generic.h
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/definitions.h
@@ -8638,9 +8377,6 @@
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/agent/sysORTable.h
 ./notification/snmpNotifyTable.lo: notification-log-mib/notification_log.h
 ./Rmon/agutil.lo: ../../include/net-snmp/net-snmp-config.h
-./Rmon/agutil.lo: ../../include/net-snmp/system/linux.h
-./Rmon/agutil.lo: ../../include/net-snmp/system/sysv.h
-./Rmon/agutil.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/agutil.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/agutil.lo: ../../include/net-snmp/net-snmp-includes.h
 ./Rmon/agutil.lo: ../../include/net-snmp/definitions.h
@@ -8743,9 +8479,6 @@
 ./Rmon/agutil.lo: ../../include/net-snmp/agent/mfd.h ./Rmon/agutil.h
 ./Rmon/agutil.lo: ./Rmon/agutil_api.h
 ./Rmon/alarm.lo: ../../include/net-snmp/net-snmp-config.h
-./Rmon/alarm.lo: ../../include/net-snmp/system/linux.h
-./Rmon/alarm.lo: ../../include/net-snmp/system/sysv.h
-./Rmon/alarm.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/alarm.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/alarm.lo: ../../include/net-snmp/net-snmp-includes.h
 ./Rmon/alarm.lo: ../../include/net-snmp/definitions.h
@@ -8848,9 +8581,6 @@
 ./Rmon/alarm.lo: ../../include/net-snmp/agent/mfd.h ./Rmon/alarm.h
 ./Rmon/alarm.lo: ./Rmon/agutil_api.h ./Rmon/row_api.h
 ./Rmon/alarmTable.lo: ../../include/net-snmp/net-snmp-config.h
-./Rmon/alarmTable.lo: ../../include/net-snmp/system/linux.h
-./Rmon/alarmTable.lo: ../../include/net-snmp/system/sysv.h
-./Rmon/alarmTable.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/alarmTable.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/alarmTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./Rmon/alarmTable.lo: ../../include/net-snmp/definitions.h
@@ -8953,9 +8683,6 @@
 ./Rmon/alarmTable.lo: ../../include/net-snmp/agent/mfd.h utilities/iquery.h
 ./Rmon/alarmTable.lo: ./Rmon/alarmTable.h
 ./Rmon/event.lo: ../../include/net-snmp/net-snmp-config.h
-./Rmon/event.lo: ../../include/net-snmp/system/linux.h
-./Rmon/event.lo: ../../include/net-snmp/system/sysv.h
-./Rmon/event.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/event.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/event.lo: ../../include/net-snmp/net-snmp-includes.h
 ./Rmon/event.lo: ../../include/net-snmp/definitions.h
@@ -9058,9 +8785,6 @@
 ./Rmon/event.lo: ../../include/net-snmp/agent/mfd.h ./Rmon/event.h
 ./Rmon/event.lo: ./Rmon/agutil_api.h ./Rmon/row_api.h
 ./Rmon/history.lo: ../../include/net-snmp/net-snmp-config.h
-./Rmon/history.lo: ../../include/net-snmp/system/linux.h
-./Rmon/history.lo: ../../include/net-snmp/system/sysv.h
-./Rmon/history.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/history.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/history.lo: ../../include/net-snmp/net-snmp-includes.h
 ./Rmon/history.lo: ../../include/net-snmp/definitions.h
@@ -9163,12 +8887,9 @@
 ./Rmon/history.lo: ../../include/net-snmp/agent/mfd.h ./Rmon/history.h
 ./Rmon/history.lo: ./Rmon/agutil_api.h ./Rmon/row_api.h
 ./Rmon/rows.lo: ../../include/net-snmp/net-snmp-config.h
-./Rmon/rows.lo: ../../include/net-snmp/system/linux.h
-./Rmon/rows.lo: ../../include/net-snmp/system/sysv.h
-./Rmon/rows.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/rows.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/rows.lo: ../../include/net-snmp/net-snmp-includes.h
-./Rmon/rows.lo:  ../../include/net-snmp/definitions.h
+./Rmon/rows.lo: ../../include/net-snmp/definitions.h
 ./Rmon/rows.lo: ../../include/net-snmp/types.h 
 ./Rmon/rows.lo: ../../include/net-snmp/library/types.h
 ./Rmon/rows.lo: ../../include/net-snmp/library/snmp_api.h
@@ -9268,9 +8989,6 @@
 ./Rmon/rows.lo: ../../include/net-snmp/agent/mfd.h ./Rmon/agutil_api.h
 ./Rmon/rows.lo: ./Rmon/rows.h ./Rmon/row_api.h
 ./Rmon/statistics.lo: ../../include/net-snmp/net-snmp-config.h
-./Rmon/statistics.lo: ../../include/net-snmp/system/linux.h
-./Rmon/statistics.lo: ../../include/net-snmp/system/sysv.h
-./Rmon/statistics.lo: ../../include/net-snmp/system/generic.h
 ./Rmon/statistics.lo: ../../include/net-snmp/machine/generic.h
 ./Rmon/statistics.lo: ../../include/net-snmp/net-snmp-includes.h
 ./Rmon/statistics.lo: ../../include/net-snmp/definitions.h
@@ -9373,9 +9091,6 @@
 ./Rmon/statistics.lo: ../../include/net-snmp/agent/mfd.h ./Rmon/statistics.h
 ./Rmon/statistics.lo: ./Rmon/agutil_api.h ./Rmon/row_api.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/definitions.h
@@ -9479,9 +9194,6 @@
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ./sctp-mib/sctpAssocLocalAddrTable.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ./sctp-mib/sctpTables_common.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/definitions.h
@@ -9585,9 +9297,6 @@
 ./sctp-mib/sctpAssocRemAddrTable.lo: ./sctp-mib/sctpAssocRemAddrTable.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ./sctp-mib/sctpTables_common.h
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/definitions.h
@@ -9691,9 +9400,6 @@
 ./sctp-mib/sctpAssocTable.lo: ./sctp-mib/sctpAssocTable.h
 ./sctp-mib/sctpAssocTable.lo: ./sctp-mib/sctpTables_common.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/definitions.h
@@ -9797,9 +9503,6 @@
 ./sctp-mib/sctpLookupLocalPortTable.lo: ./sctp-mib/sctpLookupLocalPortTable.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ./sctp-mib/sctpTables_common.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/definitions.h
@@ -9903,9 +9606,6 @@
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ./sctp-mib/sctpLookupRemHostNameTable.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ./sctp-mib/sctpTables_common.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/definitions.h
@@ -10009,9 +9709,6 @@
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ./sctp-mib/sctpLookupRemIPAddrTable.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ./sctp-mib/sctpTables_common.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/definitions.h
@@ -10115,9 +9812,6 @@
 ./sctp-mib/sctpLookupRemPortTable.lo: ./sctp-mib/sctpLookupRemPortTable.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ./sctp-mib/sctpTables_common.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/definitions.h
@@ -10221,9 +9915,6 @@
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ./sctp-mib/sctpLookupRemPrimIPAddrTable.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ./sctp-mib/sctpTables_common.h
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpScalars.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpScalars.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpScalars.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/definitions.h
@@ -10327,9 +10018,6 @@
 ./sctp-mib/sctpScalars.lo: ./sctp-mib/sctpScalars.h
 ./sctp-mib/sctpScalars.lo: ./sctp-mib/sctpScalars_common.h
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/definitions.h
@@ -10432,9 +10120,6 @@
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/agent/mfd.h
 ./sctp-mib/sctpScalars_common.lo: ./sctp-mib/sctpScalars_common.h
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/definitions.h
@@ -10537,9 +10222,6 @@
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/agent/mfd.h
 ./sctp-mib/sctpScalars_freebsd.lo: ./sctp-mib/sctpScalars_common.h
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/definitions.h
@@ -10642,9 +10324,6 @@
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/agent/mfd.h
 ./sctp-mib/sctpScalars_linux.lo: ./sctp-mib/sctpScalars_common.h
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/definitions.h
@@ -10748,9 +10427,6 @@
 ./sctp-mib/sctpScalars_solaris2.lo: ./sctp-mib/sctpScalars_common.h
 ./sctp-mib/sctpScalars_solaris2.lo: kernel_sunos5.h
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/definitions.h
@@ -10861,9 +10537,6 @@
 ./sctp-mib/sctpTables_common.lo: ./sctp-mib/sctpLookupRemPrimIPAddrTable.h
 ./sctp-mib/sctpTables_common.lo: ./sctp-mib/sctpLookupRemIPAddrTable.h
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/definitions.h
@@ -10972,9 +10645,6 @@
 ./sctp-mib/sctpTables_freebsd.lo: util_funcs/header_simple_table.h struct.h
 ./sctp-mib/sctpTables_freebsd.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/definitions.h
@@ -11081,9 +10751,6 @@
 ./sctp-mib/sctpTables_linux.lo: ./sctp-mib/sctpAssocRemAddrTable.h
 ./sctp-mib/sctpTables_linux.lo: ../../agent/mibgroup/util_funcs/get_pid_from_inode.h
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/net-snmp-config.h
-./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/system/linux.h
-./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/system/sysv.h
-./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/system/generic.h
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/machine/generic.h
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/net-snmp-includes.h
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/definitions.h
@@ -11193,9 +10860,6 @@
 ./sctp-mib/sctpTables_solaris2.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./sctp-mib/sctpTables_solaris2.lo: kernel_sunos5.h
 ./smux/smux.lo: ../../include/net-snmp/net-snmp-config.h
-./smux/smux.lo: ../../include/net-snmp/system/linux.h
-./smux/smux.lo: ../../include/net-snmp/system/sysv.h
-./smux/smux.lo: ../../include/net-snmp/system/generic.h
 ./smux/smux.lo: ../../include/net-snmp/machine/generic.h
 ./smux/smux.lo: ../../include/net-snmp/net-snmp-includes.h
 ./smux/smux.lo: ../../include/net-snmp/definitions.h
@@ -11298,9 +10962,6 @@
 ./smux/smux.lo: ../../include/net-snmp/agent/mfd.h smux.h mibdefs.h
 ./smux/smux.lo: ../../agent/snmpd.h
 ./smux/snmp_bgp.lo: ../../include/net-snmp/net-snmp-config.h
-./smux/snmp_bgp.lo: ../../include/net-snmp/system/linux.h
-./smux/snmp_bgp.lo: ../../include/net-snmp/system/sysv.h
-./smux/snmp_bgp.lo: ../../include/net-snmp/system/generic.h
 ./smux/snmp_bgp.lo: ../../include/net-snmp/machine/generic.h
 ./smux/snmp_bgp.lo: ../../include/net-snmp/net-snmp-includes.h
 ./smux/snmp_bgp.lo: ../../include/net-snmp/definitions.h
@@ -11403,9 +11064,6 @@
 ./smux/snmp_bgp.lo: ../../include/net-snmp/agent/mfd.h smux.h
 ./smux/snmp_bgp.lo: ./smux/snmp_bgp.h
 ./smux/snmp_ospf.lo: ../../include/net-snmp/net-snmp-config.h
-./smux/snmp_ospf.lo: ../../include/net-snmp/system/linux.h
-./smux/snmp_ospf.lo: ../../include/net-snmp/system/sysv.h
-./smux/snmp_ospf.lo: ../../include/net-snmp/system/generic.h
 ./smux/snmp_ospf.lo: ../../include/net-snmp/machine/generic.h
 ./smux/snmp_ospf.lo: ../../include/net-snmp/net-snmp-includes.h
 ./smux/snmp_ospf.lo: ../../include/net-snmp/definitions.h
@@ -11508,9 +11166,6 @@
 ./smux/snmp_ospf.lo: ../../include/net-snmp/agent/mfd.h smux.h
 ./smux/snmp_ospf.lo: ./smux/snmp_ospf.h
 ./smux/snmp_rip2.lo: ../../include/net-snmp/net-snmp-config.h
-./smux/snmp_rip2.lo: ../../include/net-snmp/system/linux.h
-./smux/snmp_rip2.lo: ../../include/net-snmp/system/sysv.h
-./smux/snmp_rip2.lo: ../../include/net-snmp/system/generic.h
 ./smux/snmp_rip2.lo: ../../include/net-snmp/machine/generic.h
 ./smux/snmp_rip2.lo: ../../include/net-snmp/net-snmp-includes.h
 ./smux/snmp_rip2.lo: ../../include/net-snmp/definitions.h
@@ -11613,9 +11268,6 @@
 ./smux/snmp_rip2.lo: ../../include/net-snmp/agent/mfd.h smux.h
 ./smux/snmp_rip2.lo: ./smux/snmp_rip2.h
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/net-snmp-config.h
-./snmpv3/snmpEngine.lo: ../../include/net-snmp/system/linux.h
-./snmpv3/snmpEngine.lo: ../../include/net-snmp/system/sysv.h
-./snmpv3/snmpEngine.lo: ../../include/net-snmp/system/generic.h
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/machine/generic.h
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/net-snmp-includes.h
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/definitions.h
@@ -11720,9 +11372,6 @@
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./snmpv3/snmpEngine.lo: util_funcs/header_generic.h ./snmpv3/snmpEngine.h
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/net-snmp-config.h
-./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/system/linux.h
-./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/system/sysv.h
-./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/system/generic.h
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/machine/generic.h
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/net-snmp-includes.h
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/definitions.h
@@ -11828,9 +11477,6 @@
 ./snmpv3/snmpMPDStats_5_5.lo: ./snmpv3/snmpMPDStats_5_5.h
 ./snmpv3/snmpMPDStats_5_5.lo: ./utilities/snmp_get_statistic.h
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/net-snmp-config.h
-./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/system/linux.h
-./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/system/sysv.h
-./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/system/generic.h
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/machine/generic.h
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/net-snmp-includes.h
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/definitions.h
@@ -11935,9 +11581,6 @@
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./snmpv3/snmpMPDStats.lo: ./snmpv3/snmpMPDStats.h util_funcs/header_generic.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/net-snmp-config.h
-./snmpv3/usmConf.lo: ../../include/net-snmp/system/linux.h
-./snmpv3/usmConf.lo: ../../include/net-snmp/system/sysv.h
-./snmpv3/usmConf.lo: ../../include/net-snmp/system/generic.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/machine/generic.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/net-snmp-includes.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/definitions.h
@@ -12039,9 +11682,6 @@
 ./snmpv3/usmConf.lo: ../../include/net-snmp/agent/table_array.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/agent/mfd.h
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/net-snmp-config.h
-./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/system/linux.h
-./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/system/sysv.h
-./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/system/generic.h
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/machine/generic.h
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/net-snmp-includes.h
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/definitions.h
@@ -12147,9 +11787,6 @@
 ./snmpv3/usmStats_5_5.lo: ./snmpv3/usmStats_5_5.h
 ./snmpv3/usmStats_5_5.lo: ./utilities/snmp_get_statistic.h
 ./snmpv3/usmStats.lo: ../../include/net-snmp/net-snmp-config.h
-./snmpv3/usmStats.lo: ../../include/net-snmp/system/linux.h
-./snmpv3/usmStats.lo: ../../include/net-snmp/system/sysv.h
-./snmpv3/usmStats.lo: ../../include/net-snmp/system/generic.h
 ./snmpv3/usmStats.lo: ../../include/net-snmp/machine/generic.h
 ./snmpv3/usmStats.lo: ../../include/net-snmp/net-snmp-includes.h
 ./snmpv3/usmStats.lo: ../../include/net-snmp/definitions.h
@@ -12254,9 +11891,6 @@
 ./snmpv3/usmStats.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./snmpv3/usmStats.lo: util_funcs/header_generic.h ./snmpv3/usmStats.h
 ./snmpv3/usmUser.lo: ../../include/net-snmp/net-snmp-config.h
-./snmpv3/usmUser.lo: ../../include/net-snmp/system/linux.h
-./snmpv3/usmUser.lo: ../../include/net-snmp/system/sysv.h
-./snmpv3/usmUser.lo: ../../include/net-snmp/system/generic.h
 ./snmpv3/usmUser.lo: ../../include/net-snmp/machine/generic.h
 ./snmpv3/usmUser.lo: ../../include/net-snmp/net-snmp-includes.h
 ./snmpv3/usmUser.lo: ../../include/net-snmp/definitions.h
@@ -12359,9 +11993,6 @@
 ./snmpv3/usmUser.lo: ../../include/net-snmp/agent/mfd.h
 ./snmpv3/usmUser.lo: util_funcs/header_generic.h ./snmpv3/usmUser.h
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/net-snmp-config.h
-./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/system/linux.h
-./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/system/sysv.h
-./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/system/generic.h
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/machine/generic.h
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/net-snmp-includes.h
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/definitions.h
@@ -12465,9 +12096,6 @@
 ./target/snmpTargetAddrEntry.lo: ./target/snmpTargetAddrEntry.h
 ./target/snmpTargetAddrEntry.lo: util_funcs/header_generic.h
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/net-snmp-config.h
-./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/system/linux.h
-./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/system/sysv.h
-./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/system/generic.h
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/machine/generic.h
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/net-snmp-includes.h
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/definitions.h
@@ -12570,9 +12198,6 @@
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/agent/mfd.h
 ./target/snmpTargetParamsEntry.lo: ./target/snmpTargetParamsEntry.h
 ./target/target.lo: ../../include/net-snmp/net-snmp-config.h
-./target/target.lo: ../../include/net-snmp/system/linux.h
-./target/target.lo: ../../include/net-snmp/system/sysv.h
-./target/target.lo: ../../include/net-snmp/system/generic.h
 ./target/target.lo: ../../include/net-snmp/machine/generic.h
 ./target/target.lo: ../../include/net-snmp/net-snmp-includes.h
 ./target/target.lo: ../../include/net-snmp/definitions.h
@@ -12676,9 +12301,6 @@
 ./target/target.lo: ./target/snmpTargetAddrEntry.h
 ./target/target.lo: ./target/snmpTargetParamsEntry.h target.h
 ./target/target_counters_5_5.lo: ../../include/net-snmp/net-snmp-config.h
-./target/target_counters_5_5.lo: ../../include/net-snmp/system/linux.h
-./target/target_counters_5_5.lo: ../../include/net-snmp/system/sysv.h
-./target/target_counters_5_5.lo: ../../include/net-snmp/system/generic.h
 ./target/target_counters_5_5.lo: ../../include/net-snmp/machine/generic.h
 ./target/target_counters_5_5.lo: ../../include/net-snmp/net-snmp-includes.h
 ./target/target_counters_5_5.lo: ../../include/net-snmp/definitions.h
@@ -12782,9 +12404,6 @@
 ./target/target_counters_5_5.lo: ./target/target_counters_5_5.h
 ./target/target_counters_5_5.lo: ./utilities/snmp_get_statistic.h
 ./target/target_counters.lo: ../../include/net-snmp/net-snmp-config.h
-./target/target_counters.lo: ../../include/net-snmp/system/linux.h
-./target/target_counters.lo: ../../include/net-snmp/system/sysv.h
-./target/target_counters.lo: ../../include/net-snmp/system/generic.h
 ./target/target_counters.lo: ../../include/net-snmp/machine/generic.h
 ./target/target_counters.lo: ../../include/net-snmp/net-snmp-includes.h
 ./target/target_counters.lo: ../../include/net-snmp/definitions.h
@@ -12887,9 +12506,6 @@
 ./target/target_counters.lo: ../../include/net-snmp/agent/mfd.h
 ./target/target_counters.lo: ./target/target_counters.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/net-snmp-config.h
-./tunnel/tunnel.lo: ../../include/net-snmp/system/linux.h
-./tunnel/tunnel.lo: ../../include/net-snmp/system/sysv.h
-./tunnel/tunnel.lo: ../../include/net-snmp/system/generic.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/machine/generic.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/net-snmp-includes.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/definitions.h
@@ -12992,17 +12608,7 @@
 ./tunnel/tunnel.lo: ../../include/net-snmp/agent/mfd.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/agent/sysORTable.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/agent/agent_callbacks.h tunnel.h
-./tunnel/tunnel.lo: if-mib/ifTable/ifTable.h
-./tunnel/tunnel.lo: ../../include/net-snmp/data_access/interface.h
-./tunnel/tunnel.lo: if-mib/ifTable/ifTable_constants.h
-./tunnel/tunnel.lo: if-mib/ifTable/ifTable_interface.h
-./tunnel/tunnel.lo: if-mib/ifTable/ifTable.h
-./tunnel/tunnel.lo: if-mib/ifTable/ifTable_data_access.h
-./tunnel/tunnel.lo: if-mib/ifTable/ifTable_defs.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/disk.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/disk.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/disk.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/definitions.h
@@ -13105,11 +12711,8 @@
 ./ucd-snmp/disk.lo: ../../include/net-snmp/agent/mfd.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/agent/auto_nlist.h struct.h
 ./ucd-snmp/disk.lo: ./ucd-snmp/disk.h mibdefs.h
-./ucd-snmp/disk.lo: util_funcs/header_simple_table.h ./ucd-snmp/errormib.h
+./ucd-snmp/disk.lo: util_funcs/header_simple_table.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/diskio.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/diskio.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/diskio.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/definitions.h
@@ -13212,9 +12815,6 @@
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/agent/mfd.h
 ./ucd-snmp/diskio.lo: util_funcs/header_simple_table.h ./ucd-snmp/diskio.h
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/dlmod.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/dlmod.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/dlmod.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/definitions.h
@@ -13320,9 +12920,6 @@
 ./ucd-snmp/dlmod.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./ucd-snmp/dlmod.lo: ./ucd-snmp/dlmod.h
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/errormib.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/errormib.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/errormib.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/definitions.h
@@ -13427,9 +13024,6 @@
 ./ucd-snmp/errormib.lo: ./ucd-snmp/errormib.h mibdefs.h
 ./ucd-snmp/errormib.lo: util_funcs/header_generic.h
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/extensible.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/extensible.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/extensible.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/definitions.h
@@ -13536,9 +13130,6 @@
 ./ucd-snmp/extensible.lo: utilities/execute.h
 ./ucd-snmp/extensible.lo: util_funcs/header_simple_table.h
 ./ucd-snmp/file.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/file.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/file.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/file.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/file.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/file.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/file.lo: ../../include/net-snmp/definitions.h
@@ -13642,9 +13233,6 @@
 ./ucd-snmp/file.lo: ./ucd-snmp/file.h mibdefs.h
 ./ucd-snmp/file.lo: util_funcs/header_simple_table.h
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/hpux.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/hpux.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/hpux.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/definitions.h
@@ -13747,9 +13335,6 @@
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/agent/mfd.h ./ucd-snmp/hpux.h
 ./ucd-snmp/hpux.lo: mibdefs.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/lmSensors.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/lmSensors.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/lmSensors.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/definitions.h
@@ -13851,11 +13436,8 @@
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_array.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/mfd.h
 ./ucd-snmp/lmSensors.lo: util_funcs/header_simple_table.h
-./ucd-snmp/lmSensors.lo:  ./ucd-snmp/lmSensors.h
+./ucd-snmp/lmSensors.lo: ./ucd-snmp/lmSensors.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/definitions.h
@@ -13959,9 +13541,6 @@
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/agent/hardware/sensors.h
 ./ucd-snmp/lmsensorsMib.lo: ucd-snmp/lmsensorsMib.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/loadave.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/loadave.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/loadave.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/definitions.h
@@ -14066,9 +13645,6 @@
 ./ucd-snmp/loadave.lo: ./ucd-snmp/loadave.h mibdefs.h
 ./ucd-snmp/loadave.lo: util_funcs/header_simple_table.h ../../agent/kernel.h
 ./ucd-snmp/logmatch.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/logmatch.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/logmatch.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/logmatch.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/logmatch.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/logmatch.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/logmatch.lo: ../../include/net-snmp/definitions.h
@@ -14173,9 +13749,6 @@
 ./ucd-snmp/logmatch.lo: util_funcs/header_generic.h
 ./ucd-snmp/logmatch.lo: util_funcs/header_simple_table.h
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/definitions.h
@@ -14280,9 +13853,6 @@
 ./ucd-snmp/memory_aix4.lo: util_funcs/header_generic.h ./ucd-snmp/memory.h
 ./ucd-snmp/memory_aix4.lo: ./ucd-snmp/memory_aix4.h mibdefs.h
 ./ucd-snmp/memory.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/memory.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/memory.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/memory.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/memory.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/memory.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/memory.lo: ../../include/net-snmp/definitions.h
@@ -14386,9 +13956,6 @@
 ./ucd-snmp/memory.lo: ../../include/net-snmp/agent/hardware/memory.h
 ./ucd-snmp/memory.lo: ./ucd-snmp/memory.h
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/definitions.h
@@ -14493,9 +14060,6 @@
 ./ucd-snmp/memory_darwin7.lo: util_funcs/header_generic.h ./ucd-snmp/memory.h
 ./ucd-snmp/memory_darwin7.lo: ./ucd-snmp/memory_darwin7.h mibdefs.h
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/definitions.h
@@ -14600,9 +14164,6 @@
 ./ucd-snmp/memory_dynix.lo: util_funcs/header_generic.h ./ucd-snmp/memory.h
 ./ucd-snmp/memory_dynix.lo: ./ucd-snmp/memory_dynix.h mibdefs.h
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/definitions.h
@@ -14710,9 +14271,6 @@
 ./ucd-snmp/memory_freebsd2.lo: ./ucd-snmp/memory.h
 ./ucd-snmp/memory_freebsd2.lo: ./ucd-snmp/memory_freebsd2.h mibdefs.h
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/definitions.h
@@ -14817,9 +14375,6 @@
 ./ucd-snmp/memory_hpux.lo: ./ucd-snmp/memory.h ./ucd-snmp/memory_hpux.h
 ./ucd-snmp/memory_hpux.lo: mibdefs.h
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/definitions.h
@@ -14924,9 +14479,6 @@
 ./ucd-snmp/memory_netbsd1.lo: util_funcs/header_generic.h ./ucd-snmp/memory.h
 ./ucd-snmp/memory_netbsd1.lo: ./ucd-snmp/memory_netbsd1.h mibdefs.h
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/definitions.h
@@ -15032,9 +14584,6 @@
 ./ucd-snmp/memory_solaris2.lo: ./ucd-snmp/memory.h
 ./ucd-snmp/memory_solaris2.lo: ./ucd-snmp/memory_solaris2.h mibdefs.h
 ./ucd-snmp/pass.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/pass.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/pass.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/pass.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/pass.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/pass.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/pass.lo: ../../include/net-snmp/definitions.h
@@ -15141,9 +14690,6 @@
 ./ucd-snmp/pass.lo: util_funcs/header_simple_table.h
 ./ucd-snmp/pass.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/pass_common.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/pass_common.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/pass_common.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/definitions.h
@@ -15250,9 +14796,6 @@
 ./ucd-snmp/pass_common.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./ucd-snmp/pass_common.lo: ./ucd-snmp/pass_common.h
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/pass_persist.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/pass_persist.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/pass_persist.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/definitions.h
@@ -15359,9 +14902,6 @@
 ./ucd-snmp/pass_persist.lo: util_funcs/header_simple_table.h
 ./ucd-snmp/pass_persist.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/proc.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/proc.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/proc.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/definitions.h
@@ -15462,14 +15002,11 @@
 ./ucd-snmp/proc.lo: ../../include/net-snmp/agent/table_container.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/agent/table_array.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/agent/mfd.h struct.h
-./ucd-snmp/proc.lo: ./ucd-snmp/proc.h mibdefs.h ./ucd-snmp/errormib.h
-./ucd-snmp/proc.lo: util_funcs.h util_funcs/header_generic.h
+./ucd-snmp/proc.lo: ./ucd-snmp/proc.h mibdefs.h util_funcs.h
+./ucd-snmp/proc.lo: util_funcs/header_generic.h
 ./ucd-snmp/proc.lo: util_funcs/header_simple_table.h
 ./ucd-snmp/proc.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h ../../agent/kernel.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/proxy.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/proxy.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/proxy.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/definitions.h
@@ -15571,9 +15108,6 @@
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/agent/table_array.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/agent/mfd.h ./ucd-snmp/proxy.h
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/versioninfo.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/versioninfo.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/versioninfo.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/definitions.h
@@ -15679,9 +15213,6 @@
 ./ucd-snmp/versioninfo.lo: util_funcs/header_simple_table.h
 ./ucd-snmp/versioninfo.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/definitions.h
@@ -15785,9 +15316,6 @@
 ./ucd-snmp/vmstat_aix4.lo: util_funcs/header_generic.h ./ucd-snmp/vmstat.h
 ./ucd-snmp/vmstat_aix4.lo: ./ucd-snmp/vmstat_aix4.h
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/definitions.h
@@ -15892,9 +15420,6 @@
 ./ucd-snmp/vmstat_bsdi4.lo: util_funcs/header_generic.h ./ucd-snmp/vmstat.h
 ./ucd-snmp/vmstat_bsdi4.lo: mibdefs.h
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/definitions.h
@@ -15999,9 +15524,6 @@
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/agent/hardware/cpu.h
 ./ucd-snmp/vmstat.lo: ./ucd-snmp/vmstat.h mibdefs.h
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/definitions.h
@@ -16106,9 +15628,6 @@
 ./ucd-snmp/vmstat_darwin7.lo: util_funcs/header_generic.h ./ucd-snmp/vmstat.h
 ./ucd-snmp/vmstat_darwin7.lo: mibdefs.h ./ucd-snmp/vmstat_darwin7.h
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/definitions.h
@@ -16212,9 +15731,6 @@
 ./ucd-snmp/vmstat_dynix.lo: util_funcs/header_generic.h ./ucd-snmp/vmstat.h
 ./ucd-snmp/vmstat_dynix.lo: ./ucd-snmp/vmstat_dynix.h
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/definitions.h
@@ -16320,9 +15836,6 @@
 ./ucd-snmp/vmstat_freebsd2.lo: ./ucd-snmp/vmstat.h mibdefs.h
 ./ucd-snmp/vmstat_freebsd2.lo: ./ucd-snmp/vmstat_freebsd2.h
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/definitions.h
@@ -16426,9 +15939,6 @@
 ./ucd-snmp/vmstat_hpux.lo: util_funcs/header_generic.h ./ucd-snmp/vmstat.h
 ./ucd-snmp/vmstat_hpux.lo: ./ucd-snmp/vmstat_hpux.h
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/definitions.h
@@ -16534,9 +16044,6 @@
 ./ucd-snmp/vmstat_linux.lo: mibdefs.h struct.h util_funcs/header_generic.h
 ./ucd-snmp/vmstat_linux.lo: ./ucd-snmp/vmstat.h
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/definitions.h
@@ -16641,9 +16148,6 @@
 ./ucd-snmp/vmstat_netbsd1.lo: util_funcs/header_generic.h ./ucd-snmp/vmstat.h
 ./ucd-snmp/vmstat_netbsd1.lo: mibdefs.h
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/net-snmp-config.h
-./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/system/linux.h
-./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/system/sysv.h
-./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/system/generic.h
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/machine/generic.h
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/definitions.h
@@ -16748,9 +16252,6 @@
 ./ucd-snmp/vmstat_solaris2.lo: ./ucd-snmp/vmstat.h
 ./ucd-snmp/vmstat_solaris2.lo: ./ucd-snmp/vmstat_solaris2.h
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/net-snmp-config.h
-./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/system/linux.h
-./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/system/sysv.h
-./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/system/generic.h
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/machine/generic.h
 ./util_funcs/get_pid_from_inode.lo: ./util_funcs/get_pid_from_inode.h
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/output_api.h
@@ -16784,9 +16285,6 @@
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/library/snmp_debug.h
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/library/snmp_logging.h
 ./util_funcs/header_generic.lo: ../../include/net-snmp/net-snmp-config.h
-./util_funcs/header_generic.lo: ../../include/net-snmp/system/linux.h
-./util_funcs/header_generic.lo: ../../include/net-snmp/system/sysv.h
-./util_funcs/header_generic.lo: ../../include/net-snmp/system/generic.h
 ./util_funcs/header_generic.lo: ../../include/net-snmp/machine/generic.h
 ./util_funcs/header_generic.lo: ../../include/net-snmp/net-snmp-includes.h
 ./util_funcs/header_generic.lo: ../../include/net-snmp/definitions.h
@@ -16889,9 +16387,6 @@
 ./util_funcs/header_generic.lo: ../../include/net-snmp/agent/mfd.h
 ./util_funcs/header_generic.lo: ./util_funcs/header_generic.h
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/net-snmp-config.h
-./util_funcs/header_simple_table.lo: ../../include/net-snmp/system/linux.h
-./util_funcs/header_simple_table.lo: ../../include/net-snmp/system/sysv.h
-./util_funcs/header_simple_table.lo: ../../include/net-snmp/system/generic.h
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/machine/generic.h
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/net-snmp-includes.h
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/definitions.h
@@ -16994,9 +16489,6 @@
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/agent/mfd.h
 ./util_funcs/header_simple_table.lo: ./util_funcs/header_simple_table.h
 ./utilities/execute.lo: ../../include/net-snmp/net-snmp-config.h
-./utilities/execute.lo: ../../include/net-snmp/system/linux.h
-./utilities/execute.lo: ../../include/net-snmp/system/sysv.h
-./utilities/execute.lo: ../../include/net-snmp/system/generic.h
 ./utilities/execute.lo: ../../include/net-snmp/machine/generic.h
 ./utilities/execute.lo: ../../include/net-snmp/net-snmp-includes.h
 ./utilities/execute.lo: ../../include/net-snmp/definitions.h
@@ -17097,14 +16589,11 @@
 ./utilities/execute.lo: ../../include/net-snmp/agent/table_container.h
 ./utilities/execute.lo: ../../include/net-snmp/agent/table_array.h
 ./utilities/execute.lo: ../../include/net-snmp/agent/mfd.h
-./utilities/execute.lo: ucd-snmp/errormib.h mibdefs.h util_funcs.h
+./utilities/execute.lo: ./ucd-snmp/errormib.h mibdefs.h util_funcs.h
 ./utilities/execute.lo: util_funcs/header_generic.h
 ./utilities/execute.lo: util_funcs/header_simple_table.h struct.h
 ./utilities/execute.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./utilities/iquery.lo: ../../include/net-snmp/net-snmp-config.h
-./utilities/iquery.lo: ../../include/net-snmp/system/linux.h
-./utilities/iquery.lo: ../../include/net-snmp/system/sysv.h
-./utilities/iquery.lo: ../../include/net-snmp/system/generic.h
 ./utilities/iquery.lo: ../../include/net-snmp/machine/generic.h
 ./utilities/iquery.lo: ../../include/net-snmp/net-snmp-includes.h
 ./utilities/iquery.lo: ../../include/net-snmp/definitions.h
@@ -17206,9 +16695,6 @@
 ./utilities/iquery.lo: ../../include/net-snmp/agent/table_array.h
 ./utilities/iquery.lo: ../../include/net-snmp/agent/mfd.h utilities/iquery.h
 ./utilities/override.lo: ../../include/net-snmp/net-snmp-config.h
-./utilities/override.lo: ../../include/net-snmp/system/linux.h
-./utilities/override.lo: ../../include/net-snmp/system/sysv.h
-./utilities/override.lo: ../../include/net-snmp/system/generic.h
 ./utilities/override.lo: ../../include/net-snmp/machine/generic.h
 ./utilities/override.lo: ../../include/net-snmp/net-snmp-includes.h
 ./utilities/override.lo: ../../include/net-snmp/definitions.h
@@ -17310,9 +16796,6 @@
 ./utilities/override.lo: ../../include/net-snmp/agent/table_array.h
 ./utilities/override.lo: ../../include/net-snmp/agent/mfd.h
 ./utilities/snmp_get_statistic.lo: ../../include/net-snmp/net-snmp-config.h
-./utilities/snmp_get_statistic.lo: ../../include/net-snmp/system/linux.h
-./utilities/snmp_get_statistic.lo: ../../include/net-snmp/system/sysv.h
-./utilities/snmp_get_statistic.lo: ../../include/net-snmp/system/generic.h
 ./utilities/snmp_get_statistic.lo: ../../include/net-snmp/machine/generic.h
 ./utilities/snmp_get_statistic.lo: ../../include/net-snmp/net-snmp-includes.h
 ./utilities/snmp_get_statistic.lo: ../../include/net-snmp/definitions.h

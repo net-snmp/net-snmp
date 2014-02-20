@@ -1,9 +1,6 @@
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 ./agent_handler.lo: ../include/net-snmp/net-snmp-config.h
-./agent_handler.lo: ../include/net-snmp/system/linux.h
-./agent_handler.lo: ../include/net-snmp/system/sysv.h
-./agent_handler.lo: ../include/net-snmp/system/generic.h
 ./agent_handler.lo: ../include/net-snmp/machine/generic.h
 ./agent_handler.lo: ../include/net-snmp/net-snmp-includes.h
 ./agent_handler.lo:  ../include/net-snmp/definitions.h
@@ -105,9 +102,6 @@
 ./agent_handler.lo: ../include/net-snmp/agent/table_array.h
 ./agent_handler.lo: ../include/net-snmp/agent/mfd.h
 ./agent_index.lo: ../include/net-snmp/net-snmp-config.h
-./agent_index.lo: ../include/net-snmp/system/linux.h
-./agent_index.lo: ../include/net-snmp/system/sysv.h
-./agent_index.lo: ../include/net-snmp/system/generic.h
 ./agent_index.lo: ../include/net-snmp/machine/generic.h 
 ./agent_index.lo: ../include/net-snmp/net-snmp-includes.h
 ./agent_index.lo: ../include/net-snmp/definitions.h
@@ -246,10 +240,10 @@
 ./agent_index.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./agent_index.lo: mibgroup/mibII/at.h mibgroup/mibII/ip.h
 ./agent_index.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./agent_index.lo: mibgroup/mibII/at.h mibgroup/mibII/tcp.h
-./agent_index.lo: mibgroup/mibII/icmp.h mibgroup/mibII/udp.h
-./agent_index.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
-./agent_index.lo: mibgroup/mibII/ipv6.h mibgroup/ucd-snmp/proc.h
+./agent_index.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
+./agent_index.lo: mibgroup/mibII/udp.h mibgroup/mibII/vacm_vars.h
+./agent_index.lo: mibgroup/mibII/setSerialNo.h mibgroup/mibII/ipv6.h
+./agent_index.lo: mibgroup/mibII/at.h mibgroup/ucd-snmp/proc.h
 ./agent_index.lo: ../agent/mibgroup/mibdefs.h mibgroup/ucd-snmp/versioninfo.h
 ./agent_index.lo: mibgroup/ucd-snmp/pass.h mibgroup/ucd-snmp/pass_persist.h
 ./agent_index.lo: mibgroup/ucd-snmp/disk.h mibgroup/ucd-snmp/loadave.h
@@ -357,12 +351,7 @@
 ./agent_index.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable.h
 ./agent_index.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable_data_access.h
 ./agent_index.lo: mibgroup/if-mib/data_access/interface.h
-./agent_index.lo: ../agent/mibgroup/agentx/subagent.h
-./agent_index.lo: ../agent/mibgroup/agentx/client.h
 ./agent_read_config.lo: ../include/net-snmp/net-snmp-config.h
-./agent_read_config.lo: ../include/net-snmp/system/linux.h
-./agent_read_config.lo: ../include/net-snmp/system/sysv.h
-./agent_read_config.lo: ../include/net-snmp/system/generic.h
 ./agent_read_config.lo: ../include/net-snmp/machine/generic.h
 ./agent_read_config.lo: ../include/net-snmp/net-snmp-includes.h
 ./agent_read_config.lo: ../include/net-snmp/definitions.h
@@ -508,11 +497,12 @@
 ./agent_read_config.lo: mibgroup/mibII/system_mib.h
 ./agent_read_config.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./agent_read_config.lo: mibgroup/mibII/ip.h mibgroup/mibII/var_route.h
-./agent_read_config.lo: mibgroup/mibII/route_write.h mibgroup/mibII/at.h
-./agent_read_config.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
-./agent_read_config.lo: mibgroup/mibII/udp.h mibgroup/mibII/vacm_vars.h
+./agent_read_config.lo: mibgroup/mibII/route_write.h mibgroup/mibII/tcp.h
+./agent_read_config.lo: mibgroup/mibII/icmp.h mibgroup/mibII/udp.h
+./agent_read_config.lo: mibgroup/mibII/vacm_vars.h
 ./agent_read_config.lo: mibgroup/mibII/setSerialNo.h mibgroup/mibII/ipv6.h
-./agent_read_config.lo: mibgroup/ucd-snmp/proc.h ../agent/mibgroup/mibdefs.h
+./agent_read_config.lo: mibgroup/mibII/at.h mibgroup/ucd-snmp/proc.h
+./agent_read_config.lo: ../agent/mibgroup/mibdefs.h
 ./agent_read_config.lo: mibgroup/ucd-snmp/versioninfo.h
 ./agent_read_config.lo: mibgroup/ucd-snmp/pass.h
 ./agent_read_config.lo: mibgroup/ucd-snmp/pass_persist.h
@@ -626,9 +616,6 @@
 ./agent_read_config.lo: ../agent/mibgroup/agent_module_dot_conf.h
 ./agent_read_config.lo: ../agent/mibgroup/mib_module_dot_conf.h
 ./agent_registry.lo: ../include/net-snmp/net-snmp-config.h
-./agent_registry.lo: ../include/net-snmp/system/linux.h
-./agent_registry.lo: ../include/net-snmp/system/sysv.h
-./agent_registry.lo: ../include/net-snmp/system/generic.h
 ./agent_registry.lo: ../include/net-snmp/machine/generic.h
 ./agent_registry.lo: ../include/net-snmp/net-snmp-includes.h
 ./agent_registry.lo: ../include/net-snmp/definitions.h
@@ -769,10 +756,10 @@
 ./agent_registry.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./agent_registry.lo: mibgroup/mibII/at.h mibgroup/mibII/ip.h
 ./agent_registry.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./agent_registry.lo: mibgroup/mibII/at.h mibgroup/mibII/tcp.h
-./agent_registry.lo: mibgroup/mibII/icmp.h mibgroup/mibII/udp.h
-./agent_registry.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
-./agent_registry.lo: mibgroup/mibII/ipv6.h mibgroup/ucd-snmp/proc.h
+./agent_registry.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
+./agent_registry.lo: mibgroup/mibII/udp.h mibgroup/mibII/vacm_vars.h
+./agent_registry.lo: mibgroup/mibII/setSerialNo.h mibgroup/mibII/ipv6.h
+./agent_registry.lo: mibgroup/mibII/at.h mibgroup/ucd-snmp/proc.h
 ./agent_registry.lo: ../agent/mibgroup/mibdefs.h
 ./agent_registry.lo: mibgroup/ucd-snmp/versioninfo.h mibgroup/ucd-snmp/pass.h
 ./agent_registry.lo: mibgroup/ucd-snmp/pass_persist.h
@@ -881,12 +868,7 @@
 ./agent_registry.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable.h
 ./agent_registry.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable_data_access.h
 ./agent_registry.lo: mibgroup/if-mib/data_access/interface.h
-./agent_registry.lo: ../agent/mibgroup/agentx/subagent.h
-./agent_registry.lo: ../agent/mibgroup/agentx/client.h
 ./agent_sysORTable.lo: ../include/net-snmp/net-snmp-config.h
-./agent_sysORTable.lo: ../include/net-snmp/system/linux.h
-./agent_sysORTable.lo: ../include/net-snmp/system/sysv.h
-./agent_sysORTable.lo: ../include/net-snmp/system/generic.h
 ./agent_sysORTable.lo: ../include/net-snmp/machine/generic.h
 ./agent_sysORTable.lo: ../include/net-snmp/net-snmp-includes.h
 ./agent_sysORTable.lo: ../include/net-snmp/definitions.h
@@ -991,12 +973,10 @@
 ./agent_sysORTable.lo: ../include/net-snmp/agent/agent_sysORTable.h
 ./agent_sysORTable.lo: ../include/net-snmp/agent/sysORTable.h
 ./agent_trap.lo: ../include/net-snmp/net-snmp-config.h
-./agent_trap.lo: ../include/net-snmp/system/linux.h
-./agent_trap.lo: ../include/net-snmp/system/sysv.h
-./agent_trap.lo: ../include/net-snmp/system/generic.h
 ./agent_trap.lo: ../include/net-snmp/machine/generic.h 
-./agent_trap.lo: ../include/net-snmp/utilities.h ../include/net-snmp/types.h
-./agent_trap.lo: ../include/net-snmp/library/types.h
+./agent_trap.lo:  ../include/net-snmp/utilities.h
+./agent_trap.lo: ../include/net-snmp/types.h 
+./agent_trap.lo:  ../include/net-snmp/library/types.h
 ./agent_trap.lo: ../include/net-snmp/definitions.h
 ./agent_trap.lo: ../include/net-snmp/library/snmp_api.h
 ./agent_trap.lo: ../include/net-snmp/varbind_api.h
@@ -1096,21 +1076,12 @@
 ./agent_trap.lo: ../include/net-snmp/agent/agent_callbacks.h
 ./agent_trap.lo: ../agent/mibgroup/agentx/protocol.h
 ./auto_nlist.lo: ../include/net-snmp/net-snmp-config.h
-./auto_nlist.lo: ../include/net-snmp/system/linux.h
-./auto_nlist.lo: ../include/net-snmp/system/sysv.h
-./auto_nlist.lo: ../include/net-snmp/system/generic.h
 ./auto_nlist.lo: ../include/net-snmp/machine/generic.h
 ./auto_nlist.lo: ../include/net-snmp/agent/auto_nlist.h
 ./kernel.lo: ../include/net-snmp/net-snmp-config.h
-./kernel.lo: ../include/net-snmp/system/linux.h
-./kernel.lo: ../include/net-snmp/system/sysv.h
-./kernel.lo: ../include/net-snmp/system/generic.h
 ./kernel.lo: ../include/net-snmp/machine/generic.h
 ./mib_modules.lo: ../include/net-snmp/agent/mib_module_config.h
 ./mib_modules.lo: ../include/net-snmp/net-snmp-config.h
-./mib_modules.lo: ../include/net-snmp/system/linux.h
-./mib_modules.lo: ../include/net-snmp/system/sysv.h
-./mib_modules.lo: ../include/net-snmp/system/generic.h
 ./mib_modules.lo: ../include/net-snmp/machine/generic.h 
 ./mib_modules.lo: ../include/net-snmp/net-snmp-includes.h
 ./mib_modules.lo: ../include/net-snmp/definitions.h
@@ -1248,10 +1219,10 @@
 ./mib_modules.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./mib_modules.lo: mibgroup/mibII/at.h mibgroup/mibII/ip.h
 ./mib_modules.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./mib_modules.lo: mibgroup/mibII/at.h mibgroup/mibII/tcp.h
-./mib_modules.lo: mibgroup/mibII/icmp.h mibgroup/mibII/udp.h
-./mib_modules.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
-./mib_modules.lo: mibgroup/mibII/ipv6.h mibgroup/ucd-snmp/proc.h
+./mib_modules.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
+./mib_modules.lo: mibgroup/mibII/udp.h mibgroup/mibII/vacm_vars.h
+./mib_modules.lo: mibgroup/mibII/setSerialNo.h mibgroup/mibII/ipv6.h
+./mib_modules.lo: mibgroup/mibII/at.h mibgroup/ucd-snmp/proc.h
 ./mib_modules.lo: ../agent/mibgroup/mibdefs.h mibgroup/ucd-snmp/versioninfo.h
 ./mib_modules.lo: mibgroup/ucd-snmp/pass.h mibgroup/ucd-snmp/pass_persist.h
 ./mib_modules.lo: mibgroup/ucd-snmp/disk.h mibgroup/ucd-snmp/loadave.h
@@ -1361,9 +1332,6 @@
 ./mib_modules.lo: ../agent/mibgroup/mib_module_shutdown.h
 ./mib_modules.lo: ../agent/mibgroup/mib_module_inits.h
 ./object_monitor.lo: ../include/net-snmp/net-snmp-config.h
-./object_monitor.lo: ../include/net-snmp/system/linux.h
-./object_monitor.lo: ../include/net-snmp/system/sysv.h
-./object_monitor.lo: ../include/net-snmp/system/generic.h
 ./object_monitor.lo: ../include/net-snmp/machine/generic.h
 ./object_monitor.lo: ../include/net-snmp/net-snmp-includes.h
 ./object_monitor.lo: ../include/net-snmp/definitions.h
@@ -1466,12 +1434,9 @@
 ./object_monitor.lo: ../include/net-snmp/agent/mfd.h
 ./object_monitor.lo: ../include/net-snmp/agent/object_monitor.h
 ./snmp_agent.lo: ../include/net-snmp/net-snmp-config.h
-./snmp_agent.lo: ../include/net-snmp/system/linux.h
-./snmp_agent.lo: ../include/net-snmp/system/sysv.h
-./snmp_agent.lo: ../include/net-snmp/system/generic.h
 ./snmp_agent.lo: ../include/net-snmp/machine/generic.h
 ./snmp_agent.lo: ../include/net-snmp/net-snmp-includes.h 
-./snmp_agent.lo: ../include/net-snmp/definitions.h
+./snmp_agent.lo:  ../include/net-snmp/definitions.h
 ./snmp_agent.lo: ../include/net-snmp/types.h 
 ./snmp_agent.lo: ../include/net-snmp/library/types.h
 ./snmp_agent.lo: ../include/net-snmp/library/snmp_api.h
@@ -1574,11 +1539,8 @@
 ./snmp_agent.lo: ../agent/mibgroup/agentx/master.h
 ./snmp_agent.lo: ../agent/mibgroup/smux/smux.h
 ./snmpd.lo: ../include/net-snmp/net-snmp-config.h
-./snmpd.lo: ../include/net-snmp/system/linux.h
-./snmpd.lo: ../include/net-snmp/system/sysv.h
-./snmpd.lo: ../include/net-snmp/system/generic.h
 ./snmpd.lo: ../include/net-snmp/machine/generic.h 
-./snmpd.lo:  ../include/net-snmp/net-snmp-includes.h
+./snmpd.lo: ../include/net-snmp/net-snmp-includes.h
 ./snmpd.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
 ./snmpd.lo:  ../include/net-snmp/library/types.h
 ./snmpd.lo: ../include/net-snmp/library/snmp_api.h
@@ -1714,18 +1676,18 @@
 ./snmpd.lo: mibgroup/mibII/snmp_mib_5_5.h mibgroup/mibII/system_mib.h
 ./snmpd.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./snmpd.lo: mibgroup/mibII/ip.h mibgroup/mibII/var_route.h
-./snmpd.lo: mibgroup/mibII/route_write.h mibgroup/mibII/at.h
-./snmpd.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h mibgroup/mibII/udp.h
+./snmpd.lo: mibgroup/mibII/route_write.h mibgroup/mibII/tcp.h
+./snmpd.lo: mibgroup/mibII/icmp.h mibgroup/mibII/udp.h
 ./snmpd.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
-./snmpd.lo: mibgroup/mibII/ipv6.h mibgroup/ucd-snmp/proc.h
-./snmpd.lo: ../agent/mibgroup/mibdefs.h mibgroup/ucd-snmp/versioninfo.h
-./snmpd.lo: mibgroup/ucd-snmp/pass.h mibgroup/ucd-snmp/pass_persist.h
-./snmpd.lo: mibgroup/ucd-snmp/disk.h mibgroup/ucd-snmp/loadave.h
-./snmpd.lo: mibgroup/agent/extend.h mibgroup/ucd-snmp/errormib.h
-./snmpd.lo: mibgroup/ucd-snmp/file.h mibgroup/ucd-snmp/dlmod.h
-./snmpd.lo: mibgroup/ucd-snmp/proxy.h mibgroup/ucd-snmp/logmatch.h
-./snmpd.lo:  mibgroup/ucd-snmp/memory.h
-./snmpd.lo: mibgroup/ucd-snmp/vmstat.h
+./snmpd.lo: mibgroup/mibII/ipv6.h mibgroup/mibII/at.h
+./snmpd.lo: mibgroup/ucd-snmp/proc.h ../agent/mibgroup/mibdefs.h
+./snmpd.lo: mibgroup/ucd-snmp/versioninfo.h mibgroup/ucd-snmp/pass.h
+./snmpd.lo: mibgroup/ucd-snmp/pass_persist.h mibgroup/ucd-snmp/disk.h
+./snmpd.lo: mibgroup/ucd-snmp/loadave.h mibgroup/agent/extend.h
+./snmpd.lo: mibgroup/ucd-snmp/errormib.h mibgroup/ucd-snmp/file.h
+./snmpd.lo: mibgroup/ucd-snmp/dlmod.h mibgroup/ucd-snmp/proxy.h
+./snmpd.lo: mibgroup/ucd-snmp/logmatch.h 
+./snmpd.lo: mibgroup/ucd-snmp/memory.h mibgroup/ucd-snmp/vmstat.h
 ./snmpd.lo: mibgroup/notification/snmpNotifyTable.h
 ./snmpd.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./snmpd.lo: mibgroup/notification-log-mib/notification_log.h
@@ -1825,9 +1787,8 @@
 ./snmpd.lo: mibgroup/if-mib/data_access/interface.h mibgroup/smux/smux.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-includes.h 
-./snmp_perl.lo:  ../include/net-snmp/definitions.h
-./snmp_perl.lo: ../include/net-snmp/types.h 
-./snmp_perl.lo: ../include/net-snmp/library/types.h
+./snmp_perl.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
+./snmp_perl.lo:  ../include/net-snmp/library/types.h
 ./snmp_perl.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_perl.lo: ../include/net-snmp/varbind_api.h
 ./snmp_perl.lo: ../include/net-snmp/library/snmp_client.h
@@ -1925,8 +1886,9 @@
 ./snmp_perl.lo: ../include/net-snmp/agent/mfd.h snmp_perl.h
 ./snmp_vars.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_vars.lo: ../include/net-snmp/net-snmp-includes.h 
-./snmp_vars.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
-./snmp_vars.lo:  ../include/net-snmp/library/types.h
+./snmp_vars.lo:  ../include/net-snmp/definitions.h
+./snmp_vars.lo: ../include/net-snmp/types.h 
+./snmp_vars.lo: ../include/net-snmp/library/types.h
 ./snmp_vars.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_vars.lo: ../include/net-snmp/varbind_api.h
 ./snmp_vars.lo: ../include/net-snmp/library/snmp_client.h
@@ -2066,10 +2028,10 @@
 ./snmp_vars.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./snmp_vars.lo: mibgroup/mibII/at.h mibgroup/mibII/ip.h
 ./snmp_vars.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./snmp_vars.lo: mibgroup/mibII/at.h mibgroup/mibII/tcp.h
-./snmp_vars.lo: mibgroup/mibII/icmp.h mibgroup/mibII/udp.h
-./snmp_vars.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
-./snmp_vars.lo: mibgroup/mibII/ipv6.h mibgroup/ucd-snmp/proc.h
+./snmp_vars.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
+./snmp_vars.lo: mibgroup/mibII/udp.h mibgroup/mibII/vacm_vars.h
+./snmp_vars.lo: mibgroup/mibII/setSerialNo.h mibgroup/mibII/ipv6.h
+./snmp_vars.lo: mibgroup/mibII/at.h mibgroup/ucd-snmp/proc.h
 ./snmp_vars.lo: ../agent/mibgroup/mibdefs.h mibgroup/ucd-snmp/versioninfo.h
 ./snmp_vars.lo: mibgroup/ucd-snmp/pass.h mibgroup/ucd-snmp/pass_persist.h
 ./snmp_vars.lo: mibgroup/ucd-snmp/disk.h mibgroup/ucd-snmp/loadave.h
@@ -5091,7 +5053,5 @@
 ./mibgroup/util_funcs.lo: mibgroup/util_funcs/header_simple_table.h
 ./mibgroup/util_funcs.lo: mibgroup/util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./mibgroup/util_funcs.lo: ./mibgroup/utilities/execute.h
-./mibgroup/util_funcs.lo: ./mibgroup/ucd-snmp/errormib.h
-./mibgroup/util_funcs.lo: ../agent/mibgroup/mibdefs.h
 ./mibgroup/winExtDLL.lo: ../include/net-snmp/net-snmp-config.h
 ./mibgroup/winExtDLL.lo: ../include/net-snmp/agent/mib_module_config.h
