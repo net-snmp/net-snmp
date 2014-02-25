@@ -10,6 +10,10 @@ listing of all changes made to the code.
       - Patch 2525: from Ryan Steinmetz: Fix argument length parsing of the
 	host resources mib
       - Make ENV_SEPARATOR_CHAR configurable
+      - SECURITY: a denial of service attack vector was discovered on
+        the linux implementation of the ICMP-MIB.  This release fixes
+        this bug and all users are encouraged to update their SNMP
+        agent if they make use of the ICMP-MIB table objects.
 
     perl:
       - BUG: 2402: Add support for SNMPv3 traps
