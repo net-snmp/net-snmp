@@ -16,6 +16,14 @@ listing of all changes made to the code.
 	caching. However, strictly negative values trigger the assert
 	statement in netsnmp_ready_monotonic(). Avoid triggering that
 	assert statement.
+      - Fixed monitoring based on non-delta trigger.   snmpd crashed wit
+	following snmpd.conf: monitor -s -D -r 10 -e LOGMATCH -o
+	logMatchCurrentCount "Log Match" != logMatchCurrentCount logmatch
+	LoginFailure1 /var/log/secure 10 su: .*fail.* The reason was
+	unitialized variable sysUT_var in mteTrigger_run(), it was filled
+	only if the trigger was delta-valued, while its value was used for
+	all triggers. With this patch, sysUT_var is filled for all code
+	branches where it is needed.
 
     snmpd:
       - Add a missing function declaration
@@ -52,6 +60,7 @@ listing of all changes made to the code.
 
     building:
       - Make the -without options to rpmbuild work
+      - Avoid duplicate and trailing spaces in the dependency files.
 
     documentation:
       - From "Eric S. Raymond": Correct man page markup problem Ambiguous

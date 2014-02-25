@@ -7,6 +7,8 @@ listing of all changes made to the code.
     Many many bug fixes and minor improvements
 
     snmpd, snmptrapd and apps:
+      - Patch 2525: from Ryan Steinmetz: Fix argument length parsing of the
+	host resources mib
       - Make ENV_SEPARATOR_CHAR configurable
 
     perl:
