@@ -121,11 +121,11 @@ struct icmp_msg_mib {
 
 /* Lets use wrapper structures for future expansion */
 struct icmp4_msg_mib {
-    struct icmp_msg_mib vals[255];
+    struct icmp_msg_mib vals[256];
 };
 
 struct icmp6_msg_mib {
-    struct icmp_msg_mib vals[255];
+    struct icmp_msg_mib vals[256];
 };
 
 struct udp_mib {

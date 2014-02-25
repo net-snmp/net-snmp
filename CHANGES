@@ -3,6 +3,565 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.7.3*
+    snmplib:
+      - Fixed crash when MD5 hash is not supported by OpenSSL.
+      - Fixed parsing of sequences. Don't overwrite 'data' variable, it's
+	used when parsing bulk responses.
+
+    snmp:
+      - Usm-dh-objects-mib: Avoid triggering an assert statement in
+	netsnmp_ready_monotonic() The cache timeout for
+	snmp-usm-dh-objects-mib is -1. Any cache timeout value < 0 disables
+	caching. However, strictly negative values trigger the assert
+	statement in netsnmp_ready_monotonic(). Avoid triggering that
+	assert statement.
+      - Fixed monitoring based on non-delta trigger.   snmpd crashed wit
+	following snmpd.conf: monitor -s -D -r 10 -e LOGMATCH -o
+	logMatchCurrentCount "Log Match" != logMatchCurrentCount logmatch
+	LoginFailure1 /var/log/secure 10 su: .*fail.* The reason was
+	unitialized variable sysUT_var in mteTrigger_run(), it was filled
+	only if the trigger was delta-valued, while its value was used for
+	all triggers. With this patch, sysUT_var is filled for all code
+	branches where it is needed.
+
+    snmpd:
+      - Add a missing function declaration
+      - Added btrfs support to hrFSTable
+      - Correct the size of of the EXAMPLEIPADDRESS value on L64 hosts
+      - Fixed crash in UCD-SNMP-MIB::extTable snmpd crashed when the
+	command to execute had no arguments, i.e. extend->args was NULL.
+      - Fixed value of UCD-SNMP-MIB::extCommand to contain full command
+	line. MIB description of UCD-SNMP-MIB::extCommand suggests it
+	should contail full command line. Also in Net-SNMP 5.3.2.2, whole
+	command line was shown.
+      - Make it possible to use NUL characters in the indices for
+	snmpTargetAddrTable
+      - PATCH 2472: from Sunil: don't use HBKT as heartbeat interval in
+	SCTP-MIB::sctpAssocTable.
+      - Remove some unused includes
+      - Show Linux kernel threads in hrSWRunTable.
+      - Use 0 for the ignored numvars argument to netsnmp_register_mib The
+	numvars argument of netsnmp_register_mib is ignored if the var
+	argument is NULL. In order to unify this use of it with all other
+	ones, change it from 1 to 0
+
+    snmpd, snmptrapd and apps:
+      - Make ENV_SEPARATOR_CHAR configurable
+
+    snmptrapd:
+
+    apps:
+      - Stop agentxtrap from accessing the persistent configuration This is
+	needed to prevent moaning about not beeing allowed to write those
+	files due to bad permissions.
+      - Stop using snmp_perror when logging after functions that don't set
+	snmp_errno.
+
+    building:
+      - Make the -without options to rpmbuild work
+      - Avoid duplicate and trailing spaces in the dependency files.
+
+    documentation:
+      - From "Eric S. Raymond": Correct man page markup problem Ambiguous
+	or invalid backslash.  This doesn't cause groff a problem. but it
+	confuses doclifter and may confuse older troff implementations.
+
+    perl:
+      - BUG: 2402: Add support for SNMPv3 traps
+
+    python:
+      - Fixed IPADDRESS size on 64bit systems.
+      - Fixed returning of empty strings. Varbind type (SNMP_NOSUCHOBJECT
+	etc.) should be used to detect errors instead of length of the
+	variable - it can be empty string.
+      - [PATCH 1239]: Fix memory leak
+
+    testing:
+      - Make sure Test::Harness is of at least version 1.21 Test::Harness
+	1.21 is the first version that implements TAP v12 which allows
+	putting the header (1..N) after the tests and since our tests
+	utilize that we should make sure that the test runner supports it.
+
+    unspecified:
+      - Added simfs (OpenVZ filesystem) to hrStorageTable and hrFSTable.
+      - Upport new MIB structures and MFD rewrites under Darwin
+      - [BUG 2470]: Accept 65535 as a valid IPv6 port number
+      - [BUG 2476]: snmpd fails to start on AIX On an AIX system there is
+	no <kvm.h> header file nor do the /dev/dmem or /dev/drum devices
+	exist and hence DMEM_LOC is not defined. Avoid that init_kmem()
+	fails in that case.
+
+    AIX:
+      - Make tcp-mib build
+      - Make udp-mib build
+
+    Linux:
+      - BUG: 2238: Add libnl3 support
+      - RESOURCES-MIB, hrSWRun table: Parse /proc/<pid>/stat correctly on
+	Linux This issue was reported by Vincent Bernat
+	<vincent.bernat@dailymotion.com>. See also
+	http://sourceforge.net/p/net-snmp/patches/1257/.
+
+    Win32:
+      - Perl: BUG: 2488: Avoid "Free to wrong pool" error
+      - Perl: BUG: 2488: Avoid "Free to wrong pool" error" This reverts
+	commit b2725964bde921b6285e3a59a512552cae0a0ca5.
+
+    Windows:
+      - Add multihoming support On Windows Vista / Windows Server 2008 and
+	later it is possible to add multihoming support by using the
+	IP_PKTINFO socket option. Conflicts:
+	snmplib/transports/snmpUDPBaseDomain.c
+      - Make winExtDLL work on 64-bit Windows systems
+      - Port batch build infrastructure to Visual Studio 2010 and later
+	From Visual Studio 2010 on it is no longer possible to specify
+	include or library directories globally - these have to be
+	specified per project. Hence two additional menu entries in
+	build.bat that allow to specify these directories.
+      - Ported ucd-snmp/dlmod to MinGW / MSVC
+
+*5.7.2*
+
+    snmplib:
+      - Add Doxygen-style function header for
+	netsnmp_register_default_target() and
+	netsnmp_clear_default_target().
+      - Add netsnmp_setenv().
+      - Avoid that system clock changes (e.g. by ntpd) affect code that
+	needs relative time Make sure that the range of the SNMPv3 variable
+	snmpEngineTime is 0..2147483647 on all supported systems instead of
+	0..42949672 on some systems (i.e. wraparound after 497 days) Add
+	netsnmp_get_monotonic_clock(), netsnmp_set_monotonic_marker(),
+	netsnmp_ready_monotonic(), netsnmp_get_agent_runtime()
+      - Avoid that system clock changes (e.g. by ntpd) affect code that
+	needs relative time Make sure that the range of the SNMPv3 variable
+	snmpEngineTime is 0..2147483647 on all supported systems instead of
+	0..42949672 on some systems (i.e. wraparound after 497 days) Add
+	netsnmp_get_monotonic_clock(), netsnmp_set_monotonic_marker(),
+	netsnmp_ready_monotonic(), netsnmp_get_agent_runtime() Deprecate
+	atime_diff(), atime_newMarker(), atime_ready(), atime_setMarker(),
+	marker_tticks(), netsnmp_marker_uptime(), netsnmp_timeval_uptime(),
+	timeval_tticks(), uatime_diff(), uatime_hdiff() and uatime_ready().
+      - Avoid waiting indefinitely if a session has timeout zero
+      - Declare "type" argument of se_store_list() / se_store_slist() /
+	se_store_enum_list() const
+      - Make it explicit that MAX_SUBID is an unsigned constant
+      - Make netsnmp_callback_accept() return -1 (failure) instead of 0
+	(STDIN_FILENO)
+      - Make netsnmp_large_fd_set_resize() robust against memory allocation
+	failures. Make NETSNMP_LARGE_FD_ZERO() use memset() on Unix systems
+	instead of an explicit loop.
+      - Make netsnmp_large_fd_set_resize() robust against memory allocation
+	failures. Make NETSNMP_LARGE_FD_ZERO() use memset() on Unix systems
+	instead of an explicit loop. Make sure that on Unix systems
+	netsnmp_large_fd_clr() doesn't try to read memory it isn't allowed
+	to read if the first argument equals -1 (a value that shouldn't be
+	passed by the caller).
+      - Merge together the Linux and *BSD version of src port sending.
+      - Only transform the address to printable form when needed.
+      - PATCH 3510454: Allow the use of 0.0.0.0/0 as alias for default
+      - Prevent gcc ped-warning for NETSNMP_REMOVE_CONST git-svn-id:
+	file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@1
+	8052 06827809-a52a-0410-b366-d66718629ded
+      - Reduce overhead of config file parsing
+      - Remove obsolete snmp_get_fd_for_session() declaration
+      - Separate out the cmesg buffer size
+      - Set the rpath for libperl.so in libnetsnmpmibs.so such that the
+	dynamic linker can find libperl.so without requiring the user to
+	modify the dynamic linker settings. This change in
+	agent/Makefile.in is necessary on the 5.5 branch and later but not
+	on the 5.4 branch. That is because the 5.4 branch uses an older
+	version of libtool that propagates the rpath of dependent
+	libraries. This is called inter-library dependency tracking in the
+	libtool manual. This functionality is present in libtool version 1
+	but not in libtool version 2. For more background information about
+	dynamic libraries and rpaths, see also the document with the title
+	"RpathIssue" on the Debian wiki
+	(http://wiki.debian.org/RpathIssue).
+      - Simplify implementation of functions manipulating 64-bit numbers.
+      - Simplify the se_store_enum_list() implementation
+      - Use SNMP_ALLOC_TYPEDEF to allocate transports in order to avoid the
+	separate call to memset.
+      - [PATCH 3414773]: Encode integer value using ASN_INTEGER
+      - [PATCH 3526599]: Don't hang on retried failing SNMPv3 responses
+      - PATCH 3560473: from fenner: Handle TimeTicks when pretty-printing
+	OID   Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+      - Add the symbol NETSNMP_PRIo to help in printing oid values.
+      - Do not crash from empty values in --token=value arguments
+      - Do not crash on incomplete configuration tokens.
+      - Do not truncate single default transport domains
+      - Move the check that the pdu variable is non-NULL to before the
+	first dereference of it.
+
+    snmplib + snmpd + snmpwalk:
+      - Avoid that system clock changes (e.g. by ntpd) affect code that
+	needs relative time
+
+    snmplib, snmpd, perl:
+      - Eliminate dead variables agent/mibgroup/agentx/master_admin.c
+	agent/mibgroup/etherlike-mib/data_access/dot3stats_linux.c
+	agent/mibgroup/etherlike-mib/dot3StatsTable/dot3StatsTable_data_acc
+	ess.c agent/mibgroup/host/data_access/swinst_pkginfo.c
+	agent/mibgroup/host/data_access/swrun_procfs_status.c
+	agent/mibgroup/ip-mib/data_access/systemstats_linux.c
+	agent/mibgroup/mibII/kernel_linux.c
+	agent/mibgroup/rmon-mib/data_access/etherstats_linux.c
+	agent/mibgroup/rmon-mib/etherStatsTable/etherStatsTable_data_access
+	.c apps/snmptls.c apps/snmptrapd_log.c snmplib/dir_utils.c
+	snmplib/snmp_client.c snmplib/snmp_openssl.c
+	snmplib/transports/snmpTLSTCPDomain.c
+      - BUG: 3517030: Ensure large tables are walked properly
+      - BUG: 3541012: Fix handling of gettable columns
+      - [PATCH 3529541]: Don't refer to internal 'my' variables from
+	external scripts Fix provided by Lezz Giles
+
+    snmp:
+      - Bridge-mib: Fix index interpretation. This patch corrects a wrong
+	data interpretation. snmp-bridge-mib obtains the ifindex value from
+	the sysfs attribute 'ifindex' The value given by the sysfs
+	attribute is an integer, which is handled as hex and leads to
+	incorrect data displayed to the user. e.g. $ > snmpwalk localhost
+	BRIDGE-MIB::dot1dBasePortIfIndex.2
+	BRIDGE-MIB::dot1dBasePortIfIndex.2 = INTEGER: 54 according to the
+	sysfs attribute the value is 36 $ > cat
+	/sys/class/net/<device>/ifindex 36 Signed-off-by: Mijo Safradin
+	<safradin@linux.vnet.ibm.com>
+
+    snmpd:
+      - Lowered severity of 'Error expanding XXX to 64bits' messages.
+      - Removed error log messages when IPv6 is disabled.
+      - Add missing debug tag
+      - Add netsnmp_get_next_alarm_time()
+      - Avoid that system clock changes (e.g. by ntpd) affect code that
+	needs relative time Make sure that the range of the SNMPv3 variable
+	snmpEngineTime is 0..2147483647 on all supported systems instead of
+	0..42949672 on some systems (i.e. wraparound after 497 days)
+      - BUG 3542188: Correct sysORDescr for snmpUsmMIB. Thanks to Dave
+	Vucich for reporting this.
+      - BUG 3542307: Correct sysORID for snmpMPDStats. Thanks to Dave
+	Vucich for reporting this.
+      - BUG: 3439234: Correct the dependencies of ucd-snmp/pass and
+	ucd-snmp/pass_persist
+      - BUG: 3439234: Move netsnmp_pass_str_to_errno to pass_common and
+	rename it to netsnmp_internal_pass_str_to_errno
+      - BUG: 3463767: Handle parsing subidentifiers > 2^31
+      - BUG: 3532090: Fix high ifIndex values crashing hrDeviceDescr
+      - Call snmp_oidtree_compare instead of snmp_oid_min_compare
+      - DISMAN-PING-MIB: Avoid dangling pointers (based on patch 3503259)
+      - DISMAN-PING-MIB: Avoid reading freed memory when deleting a row
+	from a table
+      - DISMAN-PING-MIB: Do not send the contents of the stack over the
+	network
+      - DISMAN-PING-MIB: Don't call exit() upon memory allocation failure
+      - DISMAN-PING-MIB: Fix IPv6 socket leak in error paths
+      - DISMAN-PING-MIB: Fix a socket leak triggered by pinging a remote
+	host
+      - DISMAN-PING-MIB: Fix more memory leaks
+      - DISMAN-PING-MIB: Fix several memory leaks
+      - DISMAN-PING-MIB: Make ping implementation independent of ntpd clock
+	jumps
+      - DISMAN-PING-MIB: Make pinging local interface addresses work
+      - DISMAN-SCHEDULER-MIB: Handle 32-character schedContextName values
+	correctly. See also commit
+	b3c4982542e0ab151fb3884754cdfbcb472da52d.
+      - Disable the support for integer64 in pass scripts if compiling
+	without opaque-special-types.
+      - Factor out asc2bin and bin2asc. Add a netsnmp_internal_ prefix to
+	them
+      - Fixed UCD-SNMP-MIB::systemStats after 30 days of uptime. After 30
+	days, values from /proc/stat (on Linux) can get bigger than 32bits
+	and snmpd calculations might render counters like ssCpuUser
+	negative or zero, while the real value is higher. Therefore the
+	counters should be tracked as the largest integer available.
+      - Fixed snmpd '-d' option. Now it dumps packets again.
+      - IF-MIB::ifType: Report type "infiniband (199)" for InfiniBand
+	interfaces instead of type "other (1)".
+      - Init_agent() + init_kmem(): Return an error value instead of
+	invoking exit() if access to kernel virtual memory is denied
+      - Make the configuration of the dlmod module fail rather than
+	generate a dummy module if the dlopen function isn't available.
+      - Match each getpwnam()/getpwuid() call with an endpwent() call and
+	each getgrent() call with an endgrent() call.
+      - PATCH 3402376: from Leonardo Chiquitto: Recognise ReiserFS Also
+	move various FSType definitions to the appropriate blocks
+      - PATCH 3453868: from "Bill Fenner <fenner@gmail.com>": Factor common
+	code into pass_common Move the code for pormatting and printing
+	values from pass and pass_persist into pass_common.
+      - PATCH: 3487867: Don't skip missing ifXTable entries
+	(ifConnectorPresent FALSE)
+      - Pass_persist:  Fixes a race condition introduced in commit
+	31fa07cd9ffde46d41d2b5838c3fc4d01548bfb5. The following race
+	condition could happen: - A system call fails and errno is set
+	accordingly by the C library. - SIGCHLD handler invokes a system
+	call that fails and hence overwrites errno. - SIGCHLD handler
+	leaves. - original context checks errno and finds the value from
+	the system call invoked by the SIGCHLD handler instead of the
+	system call that failed originally. Other fixes included in this
+	patch: - Renamed deinit_pass_persist() into shutdown_pass_persist()
+	such that this function gets called during agent shutdown. - Made
+	sure that shutdown_pass_persist() is called by the Windows
+	snmpd.exe too. - Windows: avoid calling
+	CloseHandle(INVALID_HANDLE_VALUE). - Windows: avoid that closing a
+	pass_persist pipe triggers a crash. - Windows: pass_persist: close
+	handles of finished processes.
+	agent/mibgroup/ucd-snmp/pass_persist.c win32/mib_module_shutdown.h
+      - Smux: simplify smux_list_detach()
+      - UDP-MIB: Report the proper address in udpLocalAddress instead of
+	0.0.0.0. Makes test T160snmpnetstat pass again. Fixes a bug
+	introduced in commit c76fb96f65e33ba2fd212a921e8c386155ee5c7a.
+      - [BUG 3460364]: Fix use of block factor when detecting error
+	conditions
+      - [BUG 3489631]: Fix incorrect handling of UCD monitoring flag
+      - [PATCH 3410050]: Skip already-'processed' varbinds Based on mib2c
+	patch provided by Stephen Turner
+      - [PATCH 3410059]: Fix sparsely augmenting trigger tables Patch
+	provided by Stephen Turner
+      - [PATCH 3447444]: Fix SIG_PIPE handling Patch provided by Bill
+	Fenner
+      - [PATCH 3447671]: Fix override handling of OID values Patch supplied
+	by Phillip O'Donnell
+      - [PATCH 3479740]: Fix hrSWRunPerf statistics
+      - [PATCH 3487919]: Fix compilation when caching is disabled
+      - [PATCH 3495697]: Store persistent snmpTarget table changes
+      - BUG 3542188: Correct sysORDescr for snmpUsmMIB. Thanks to Dave
+	Vucich for reporting this.
+      - BUG 3542307: Correct sysORID for snmpMPDStats. Thanks to Dave
+	Vucich for reporting this.
+      - BUG: 3543864: Remove extraneous function type (and fix a related
+	typo)
+      - Removed limit of 'exec' and 'sh' entries in snmpd.conf Use dynamic
+	(re)allocation instead.
+      - [PATCH 3543000]: Various fixes to Rmon code Supplied by Patrick
+	Ritter
+
+    snmpdx:
+      - [PATCH 3445437]: Log AgentX disconnections (in line with
+	connections) Patch provided by Bill Fenner
+
+    snmptrapd:
+      - Avoid crash during shutdown due to invoking perl_destruct(NULL)
+      - Do not invoke shutdown_perl() from inside the SIGTERM handler since
+	that fails if SIGTERM is received while a Perl handler is active.
+	Based on a patch posted by Joel Avni <javni@arubanetworks.com>
+      - Eliminate an unused variable (Now)
+      - Move the main loop code into a new function
+      - Remove superfluous casts
+
+    snmptrapd_sql:
+      - Avoid that a linker error is triggered on systems where my_progname
+	is missing in libmysqlclient (e.g. Fedora 15 and 16). This is a
+	backport of commit 9f653f7.
+
+    aix:
+      - Eliminate configure warning regarding libperfstat.h on AIX 6.1 and
+	up
+      - PATCH 3403433: from blentz: Issues with hrSWRunName and Parameters
+	on AIX	 Signed-off-by: Wes Hardaker
+	<hardaker@users.sourceforge.net>
+
+    apps, snmplib:
+      - PATCH: 2835577: identified by "Bart Van Assche": Replace SNMP_ZERO
+	of arrays with a memset. git-svn-id:
+	file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@1
+	7797 06827809-a52a-0410-b366-d66718629ded
+      - BUG: 3529768: Be more careful when stripping off numeric suffixes
+
+    build:
+      - Do not generate an output file on failure make supposes that no
+	output is generated if the command failed. Change feature-remove to
+	follow that presumption.
+      - BUG: 3532234: Fix typo in libtool script (addressed properly in
+	libtool 2.4.2)
+
+    building:
+      - Add dependencies on @FEATURETARGS@ to make the subtarget work as
+	well.
+      - Add missing end comments to feature ifndefs.
+      - Add target to build agentxtrap from the toplevel
+      - Build fix for systems lacking field msg_flags in struct msghdr
+	(e.g. IRIX)
+      - Build fix for systems lacking fields msg_control/msg_flags in
+	struct msghdr (backport)
+      - Correct dependencies - since
+	bf74fea69f24dc6e85f908f3f41d1426b2e09688 snmpconf is located in
+	builddir, not srcdir
+      - Correct dependencies - since
+	bf74fea69f24dc6e85f908f3f41d1426b2e09688 snmpconf is located in
+	builddir, not srcdir" This reverts commit
+	9efa467a972bb6e1c7fbdaf2e27429d29f4ab89e.
+      - Make the transport configuration code work again Previously the
+	transport inheritance processing code ran with
+	NETSNMP_FEATURE_CHECKING set. In this mode the file
+	net-snmp/feature-details.h is requiered. That file is created
+	during the first make run, and that happens after configure is run.
+	Change this to undefine NETSNMP_MINIMAL_CODE, effectively turning
+	off feature support during transport configuration in order to make
+	it work at all.
+      - Run libtool --mode=finish on the right directory
+
+    libnetsnmp:
+      - PATCH 3394586: from rwa-co: file descriptor leak in read_config
+	(+fix) Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+    libsnmp:
+      - Changed the type of the fourth argument of netsnmp_set_row_column()
+	from const char* to const void* such that no cast is necessary when
+	passing another datatype then char* or const char*.
+
+    man:
+      - [BUG 3490708]: Clarify use of common command-line options
+      - BUG: 3535269: Document use of [snmp] for client-side tools.
+
+    pass:
+
+    perl:
+      - Add agent::uptime()
+      - Enable sending SNMPv2 traps with an empty varbind list
+      - Fix spelling in the documentation of the SNMP module
+      - Fixed segmentation fault when handler registration fails. When
+	netsnmp_register_handler fails, it frees its reginfo ->
+	nsahr_DESTROY (and any other function) must not dereference it.
+      - Perl: Make sure that the constant SNMP_DEFAULT_RETRIES is
+	recognized. SNMP module: Add constants
+	NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE and
+	NETSNMP_CALLBACK_OP_TIMED_OUT. When the Net-SNMP Perl modules are
+	built on Windows with MSVC or MinGW it is possible that each these
+	are linked with another version of the MSVC runtime library than
+	the Perl interpreter itself. In that case the "errno" variable used
+	inside .xs source files is another variable than the $! variable in
+	.pm files. Or: assignments to "errno" in a .xs file do not modify
+	the "$!" Perl variable This patch avoids using "errno" by modifying
+	the different constant() functions such that these return a
+	two-element array instead of returning a scalar and setting errno.
+
+    python:
+      - Avoid that an SNMP set with UseEnums enabled causes a segmentation
+	fault
+      - [PATCH 3433846]: Fix for use with python 2.4
+      - BUG: 3535967: Fix memory leak - snmp_{sess_}error allocates the
+	output buffer
+
+    testing:
+      - Add a test for se_store_list()
+      - Add testing/fulltests/default/T154dismanpingmib_simple
+      - Avoid false negative for T114agentxagentxtrap_simple caused by the
+	test result being present in the hex dump ("mostly_harmless")
+      - Convert snmplib/test_binary_array.c into two unit tests
+      - Fix Perl regression test failures All Perl regression tests pass
+	now on Linux and on Windows (MSVC).
+      - Make the asn1 test pass even if support for opaque types are
+	removed.
+      - Perl regression tests: Don't fail skipped tests.
+      - Protect the use of $OSTYPE to ensure that 'test' get enough
+	parameters.
+      - Remove an incorrect comment from simple_eval_tools.sh
+      - Remove unused variable
+      - Require a semicolon after OK(), OKF() and PLAN() Also, let OKF()
+	emit a single line of output such that all output it produces is
+	visible in the output of "make test".
+      - [BUG 3474590]: Don't match underscores within the source root
+	filename
+      - Add test cases for snmp_service
+
+    unspecified:
+      - Added CVFS (CentraVision File System) to hrStorageTable and
+	hrFSTable.
+      - Removed counter-64 error messages.   These messages do not say
+	enything useful, caller should check their return value and report
+	it.
+      - Added OCFS2 (Oracle Cluster FS) to hrStorageTable and hrFSTable
+      - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
+	sprint_realloc_octet_string() embeds unprintable control characters
+	or binary zeroes in its output. This behavior could cause truncated
+	output in snmptrapd.
+      - [BUG 3452069]: Fix snmptrap_oid declaration in mib2c generated code
+	This bug was introduced considerable time ago. It did already exist
+	at the time the 5.6 branch was created (see also commit
+	0ec088afa27cfda4e6ea78aae7cfc5507564edde).
+      - [BUG 3454168]: configure: Fix building with --enable-read-only
+      - [PATCH 3418649]: HOST-RESOURCES-MIB: Use pclose() instead of
+	fclose() to close a pipe.
+      - [BUG 3540621]: dist: Add missing Provides: to net-snmp-perlmods RPM
+	spec
+
+    BSD:
+
+    Bug 3152841:
+      - Do not install the util_funcs subheaders that were removed in 5.7
+      - Install util_funcs subheaders
+      - Install util_funcs subheaders introduced in 5.6
+
+    Cygwin:
+      - Make date_n_time() produce time zone information
+
+    Cywin:
+      - Agent: Implement get_uptime() such that querying
+	HOST-RESOURCES-MIB::hrSystemUptime returns a non-zero value.
+
+    FreeBSD:
+      - Restore IP_RECVDSTADDR functionality.
+      - Snmpd + apps: Sending UDP packets works again for non-root users
+      - [PATCH 3489387]: Install FreeBSD 10 header file (plus other missing
+	versions)
+
+    Linux:
+      - PATCH: 3525998: Don't use an uninitialised value in error message
+      - [PATCH 3536420]: Ensure snd/rcv memory buffers are suitably aligned
+	Patch provided by Tyler Olmstead
+
+    MinGW:
+      - Net-SNMP Perl modules build again.
+      - Support the directory structure of recent Shining Light OpenSSL
+	binary distributions
+      - Testing: Fix a race condition in the test framework
+      - Testing: Fix a race condition in the test runner
+      - Testing: Make test T130snmpv1vacmget_simple pass
+      - Testing: Make those regression tests pass for which SNMPCONFPATH
+	and/or SNMP_PERSISTENT_DIR matter
+      - Testing: Make unit-tests/T014gethostbyaddr_clib pass
+      - Testing: Make unit-tests/T102pdu_build_clib pass.
+      - Testing: Obtain the MSYS path from the environment
+
+    Win32:
+      - Avoid that compiling the header file <net-snmp/net-snmp-config.h>
+	with the MinGW gcc compiler triggers warnings about "pragma
+	comment".
+      - Avoid that the PACKAGE_* macros defined in
+	<net-snmp/net-snmp-config.h> cause trouble when including this
+	header in a package that uses the GNU autotools.
+      - Building: Builds now correctly with a 64-bit compiler. git-svn-id:
+	file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@1
+	9458 06827809-a52a-0410-b366-d66718629ded
+      - Snmpd: Remove dlmod
+
+    Windows:
+      - Building (build.bat): Install netsnmp.dll before running the Perl
+	regression tests such that the regression tests are run with the
+	correct version of netsnmp.dll.
+      - MSVC: Avoid that the typedefs in <net-snmp/net-snmp-config.h>
+	conflict with those in <stdint.h> from the msinttypes project
+      - MSVC: Link with proper libeay32 library
+      - MSVC: When linking with OpenSSL, link with user32.lib too
+      - Make netsnmp_large_fd_set_resize() robust against memory allocation
+	failures. Make NETSNMP_LARGE_FD_ZERO() use memset() on Unix systems
+	instead of an explicit loop. Make sure that on Unix systems
+	netsnmp_large_fd_clr() doesn't try to read memory it isn't allowed
+	to read if the first argument equals -1 (a value that shouldn't be
+	passed by the caller). Make netsnmp_large_fd_is_set() return false
+	on Unix systems if the first argument equals -1 (a value that
+	shouldn't be passed by the caller). Make
+	netsnmp_large_fd_set_resize() shrink behavior correct.
+      - Perl (build.bat): When installing development files, install the
+	PDB files too.
+      - Remove superfluous link libraries from project files (*.dsp)
+      - Snmptrapd: Make the IP address to hostname conversion work
+      - Testing: perl: Fix an incorrect message printed while running the
+	Perl module regression tests
+
+
+
+
 *5.7.1*
 
     snmplib:

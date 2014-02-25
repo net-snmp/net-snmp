@@ -81,9 +81,9 @@ decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
             index = strtol(token, &delim, 0);
             if (ERANGE == errno) {
                 continue;
-            } else if (index > LONG_MAX) {
+            } else if (index > 255) {
                 continue;
-            } else if (index < LONG_MIN) {
+            } else if (index < 0) {
                 continue;
             }
             if (NULL == (token = strtok_r(dataptr, " ", &saveptr1)))
@@ -94,9 +94,9 @@ decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
             index = strtol(token, &delim, 0);
             if (ERANGE == errno) {
                 continue;
-            } else if (index > LONG_MAX) {
+            } else if (index > 255) {
                 continue;
-            } else if (index < LONG_MIN) {
+            } else if (index < 0) {
                 continue;
             }
             if(NULL == (token = strtok_r(dataptr, " ", &saveptr1)))
@@ -426,14 +426,21 @@ linux_read_icmp6_parse(struct icmp6_mib *icmp6stat,
 
         vals = name;
         if (NULL != icmp6msgstat) {
+            int type;
             if (0 == strncmp(name, "Icmp6OutType", 12)) {
                 strsep(&vals, "e");
-                icmp6msgstat->vals[atoi(vals)].OutType = stats;
+                type = atoi(vals);
+                if ( type < 0 || type > 255 )
+                    continue;
+                icmp6msgstat->vals[type].OutType = stats;
                 *support = 1;
                 continue;
             } else if (0 == strncmp(name, "Icmp6InType", 11)) {
                 strsep(&vals, "e");
-                icmp6msgstat->vals[atoi(vals)].InType = stats;
+                type = atoi(vals);
+                if ( type < 0 || type > 255 )
+                    continue;
+                icmp6msgstat->vals[type].InType = stats;
                 *support = 1;
                 continue;
             }
