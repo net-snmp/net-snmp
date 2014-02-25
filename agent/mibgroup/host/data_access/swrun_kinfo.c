@@ -252,8 +252,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         if (argv)
             argv++;    /* Skip argv[0] */
         while ( argv && *argv ) {
-            strcat(buf, " ");
-            strcat(buf, *argv);
+	    strncat(buf, " ", sizeof(buf) - strlen(buf) - 1);
+	    strncat(buf, *argv, sizeof(buf) - strlen(buf) - 1);
             argv++;
         }
         entry->hrSWRunParameters_len = snprintf(entry->hrSWRunParameters,
