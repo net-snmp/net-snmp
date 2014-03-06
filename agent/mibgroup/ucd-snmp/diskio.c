@@ -27,12 +27,19 @@
 
 #include <math.h>
 
+#if defined (linux)
+/* for stat() */
+#include <ctype.h>
+#include <sys/stat.h>
+#endif
+
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/agent_callbacks.h>
 
 #include "util_funcs/header_simple_table.h"
 
+#include "struct.h"
 /*
  * include our .h file 
  */
@@ -100,6 +107,54 @@ static int ps_numdisks;			/* number of disks in system, may change while running
 #if defined (linux)
 #define DISKIO_SAMPLE_INTERVAL 5
 void devla_getstats(unsigned int regno, void * dummy);
+static void diskio_parse_config_disks(const char *token, char *cptr);
+static int diskio_pre_update_config(int, int, void *, void *);
+static void diskio_free_config(void);
+
+#define DISK_INCR 2
+
+typedef struct linux_diskio
+{
+    int major;
+    int  minor;
+    unsigned long  blocks;
+    char name[256];
+    unsigned long  rio;
+    unsigned long  rmerge;
+    unsigned long  rsect;
+    unsigned long  ruse;
+    unsigned long  wio;
+    unsigned long  wmerge;
+    unsigned long  wsect;
+    unsigned long  wuse;
+    unsigned long  running;
+    unsigned long  use;
+    unsigned long  aveq;
+} linux_diskio;
+
+/* disk load averages */
+typedef struct linux_diskio_la
+{
+    unsigned long use_prev;
+    double la1, la5, la15;
+} linux_diskio_la;
+
+typedef struct linux_diskio_header
+{
+    linux_diskio* indices;
+    int length;
+    int alloc;
+} linux_diskio_header;
+
+typedef struct linux_diskio_la_header
+{
+    linux_diskio_la * indices;
+    int length;
+} linux_diskio_la_header;
+
+static linux_diskio_header head;
+static linux_diskio_la_header la_head;
+
 #endif /* linux */
 
 #if defined (darwin)
@@ -122,9 +177,17 @@ void		devla_getstats(unsigned int regno, void *dummy);
 
 FILE           *file;
 
-#ifdef linux
-static int	diskio_free_config(int, int, void *, void *);
-#endif
+struct diskiopart {
+    char            syspath[STRMAX];	/* full stat path */
+    char            name[STRMAX];	/* name as provided */
+    char            shortname[STRMAX];	/* short name for output */
+    int             major;
+    int             minor;
+};
+
+static int             numdisks;
+static int             maxdisks = 0;
+static struct diskiopart *disks;
 
          /*********************
 	 *
@@ -249,11 +312,13 @@ init_diskio(void)
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_DISKIO_NO_RAM);
 
-        /* or possible an exclusion pattern? */
+    snmpd_register_config_handler("diskio", diskio_parse_config_disks,
+        diskio_free_config, "path | device");
+    
 
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
 	                   SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
-	                   diskio_free_config, NULL);
+	                   diskio_pre_update_config, NULL);
 
 #endif
 }
@@ -261,8 +326,17 @@ init_diskio(void)
 #ifdef linux
 /* to do: make sure diskio_free_config() gets invoked upon SIGHUP. */
 static int
-diskio_free_config(int major, int minor, void *serverarg, void *clientarg)
+diskio_pre_update_config(int major, int minor, void *serverarg, void *clientarg)
 {
+    diskio_free_config();
+    return 0;
+}
+
+static void
+diskio_free_config()
+{
+    int i;
+
     DEBUGMSGTL(("diskio", "free config %d\n",
 		netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
 				       NETSNMP_DS_AGENT_DISKIO_NO_RAM)));
@@ -272,9 +346,134 @@ diskio_free_config(int major, int minor, void *serverarg, void *clientarg)
 			   NETSNMP_DS_AGENT_DISKIO_NO_LOOP, 0);
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
 			   NETSNMP_DS_AGENT_DISKIO_NO_RAM,  0);
-    return 0;
+
+    if (la_head.length) {
+        /* reset any usage stats, we may get different list of devices from config */
+        free(la_head.indices);
+        la_head.length = 0;
+        la_head.indices = NULL;
+    }
+    if (numdisks > 0) {
+        head.length = 0;
+        numdisks = 0;
+        for (i = 0; i < maxdisks; i++) {    /* init/erase disk db */
+            disks[i].syspath[0] = 0;
+            disks[i].name[0] = 0;
+            disks[i].shortname[0] = 0;
+            disks[i].major = -1;
+            disks[i].minor = -1;
+        }
+    }
 }
-#endif
+
+static int
+disk_exists(char *path) 
+{
+    int index;
+    for(index = 0; index < numdisks; index++) {
+        DEBUGMSGTL(("ucd-snmp/disk", "Checking for %s. Found %s at %d\n", path, disks[index].syspath, index));
+        if(strcmp(path, disks[index].syspath) == 0) {
+            return index;
+        }
+    }
+    return -1;
+}
+
+static void
+add_device(char *path, int addNewDisks ) 
+{
+    int index;
+    char device[STRMAX];
+    char syspath[STRMAX];
+    char *basename;
+    struct stat stbuf;
+
+    if (!path || !strcmp(path, "none")) {
+        DEBUGMSGTL(("ucd-snmp/diskio", "Skipping null path device (%s)\n", path));
+        return;
+    }
+    if (numdisks == maxdisks) {
+        if (maxdisks == 0) {
+            maxdisks = 50;
+            disks = malloc(maxdisks * sizeof(struct diskiopart));
+            if (!disks) {
+                config_perror("malloc failed for new disko allocation.");
+	            netsnmp_config_error("\tignoring:  %s", path);
+                return;
+            }
+            memset(disks, 0, maxdisks * sizeof(struct diskiopart));
+        } else {
+            maxdisks *= 2;
+            disks = realloc(disks, maxdisks * sizeof(struct diskiopart));
+            if (!disks) {
+                config_perror("malloc failed for new disko allocation.");
+	            netsnmp_config_error("\tignoring:  %s", path);
+                return;
+            }
+            memset(disks + maxdisks/2, 0, maxdisks/2 * sizeof(struct diskiopart));
+        }
+    }
+
+    /* first find the path for this device */
+    device[0]='\0';
+    if ( *path != '/' ) {
+        strlcpy(device, "/dev/", STRMAX - 1 );
+    }
+    strncat(device, path, STRMAX - 1 );
+
+    /* check for /dev existence */
+    if ( stat(device,&stbuf)!=0 ) { /* ENOENT */
+        config_perror("diskio path does not exist.");
+        netsnmp_config_error("\tignoring:  %s", path);
+        return;
+    }
+    else if ( ! S_ISBLK(stbuf.st_mode) ) { /* ENODEV */
+        config_perror("diskio path is not a device.");
+        netsnmp_config_error("\tignoring:  %s", path);
+        return;
+    }
+
+    /* either came with a slash or we just put one there, so the following always works */
+    basename = strrchr(device, '/' )+1;
+    /* construct a sys path using the device numbers to avoid having to disambiguate the various text forms */
+    snprintf( syspath, STRMAX - 1, "/sys/dev/block/%d:%d/stat", major(stbuf.st_rdev), minor(stbuf.st_rdev) );
+    DEBUGMSGTL(("ucd-snmp/diskio", " monitoring sys path (%s)\n", syspath));
+
+    index = disk_exists(syspath);
+
+    if(index == -1 && addNewDisks){
+        /* The following buffers are cleared above, no need to add '\0' */
+        strlcpy(disks[numdisks].syspath, syspath, sizeof(disks[numdisks].syspath) - 1);
+        strlcpy(disks[numdisks].name, path, sizeof(disks[numdisks].name) - 1);
+        strlcpy(disks[numdisks].shortname, basename, sizeof(disks[numdisks].shortname) - 1);
+        disks[numdisks].major = major(stbuf.st_rdev);
+        disks[numdisks].minor = minor(stbuf.st_rdev);
+        numdisks++;  
+    }
+}
+
+static void 
+diskio_parse_config_disks(const char *token, char *cptr)
+{
+#if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
+    char path[STRMAX];
+
+
+    /*
+     * read disk path (eg, /1 or /usr) 
+     */
+    copy_nword(cptr, path, sizeof(path));
+
+    /* TODO: we may include regular expressions in future */
+    /*
+     * check if the disk already exists, if so then modify its
+     * parameters. if it does not exist then add it
+     */
+    add_device(path, 1);
+#endif /* HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS */
+}
+
+#endif /* linux */
 
 
 #ifdef solaris2
@@ -1010,49 +1209,6 @@ var_diskio(struct variable * vp,
 
 #ifdef linux
 
-#define DISK_INCR 2
-
-typedef struct linux_diskio
-{
-    int major;
-    int  minor;
-    unsigned long  blocks;
-    char name[256];
-    unsigned long  rio;
-    unsigned long  rmerge;
-    unsigned long  rsect;
-    unsigned long  ruse;
-    unsigned long  wio;
-    unsigned long  wmerge;
-    unsigned long  wsect;
-    unsigned long  wuse;
-    unsigned long  running;
-    unsigned long  use;
-    unsigned long  aveq;
-} linux_diskio;
-
-/* disk load averages */
-typedef struct linux_diskio_la
-{
-    unsigned long use_prev;
-    double la1, la5, la15;
-} linux_diskio_la;
-
-typedef struct linux_diskio_header
-{
-    linux_diskio* indices;
-    int length;
-    int alloc;
-} linux_diskio_header;
-
-typedef struct linux_diskio_la_header
-{
-    linux_diskio_la * indices;   
-    int length;
-} linux_diskio_la_header;
-
-static linux_diskio_header head;
-static linux_diskio_la_header la_head;
 
 void devla_getstats(unsigned int regno, void * dummy) {
 
@@ -1116,6 +1272,47 @@ int is_excluded(const char *name)
     return 0;
 }
 
+static int get_sysfs_stats(void)
+{
+    int i;
+    char buffer[1024];
+
+    head.length  = 0;
+
+    for(i = 0; i < numdisks; i++) {
+        FILE *f = fopen(disks[i].syspath, "r");
+        if ( f == NULL ) {
+            DEBUGMSGTL(("ucd-snmp/diskio", "Can't open %s, skipping", disks[i].syspath));
+            continue;
+        }
+
+        if (fgets(buffer, sizeof(buffer), f) == NULL) {
+            DEBUGMSGTL(("ucd-snmp/diskio", "Can't read %s, skipping", disks[i].syspath));
+            continue;
+        }
+
+        linux_diskio* pTemp;
+        if (head.length == head.alloc) {
+            head.alloc += DISK_INCR;
+            head.indices = (linux_diskio *) realloc(head.indices, head.alloc*sizeof(linux_diskio));
+        }
+        pTemp = &head.indices[head.length];
+        pTemp->major = disks[i].major;
+        pTemp->minor = disks[i].minor;
+        strlcpy( pTemp->name, disks[i].shortname, sizeof(pTemp->name) - 1 );
+        if (sscanf (buffer, "%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu\n",
+                &pTemp->rio, &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse,
+                &pTemp->wio, &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
+                &pTemp->running, &pTemp->use, &pTemp->aveq) != 11)
+            sscanf (buffer, "%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu%*[ \n\t]%lu\n",
+                &pTemp->rio, &pTemp->rsect,
+                &pTemp->wio, &pTemp->wsect);
+        head.length++;
+        fclose(f);
+    }
+    return 0;
+}
+
 static int
 getstats(void)
 {
@@ -1135,6 +1332,13 @@ getstats(void)
 
     memset(head.indices, 0, head.alloc*sizeof(linux_diskio));
 
+    if (numdisks>0) {
+        /* 'diskio' configuration is used - go through the whitelist only and
+         * read /sys/dev/block/xxx */
+        cache_time = now;
+        return get_sysfs_stats();
+    }
+    /* 'diskio' configuration is not used - report all devices */
     /* Is this a 2.6 kernel? */
     parts = fopen("/proc/diskstats", "r");
     if (parts) {
@@ -1251,13 +1455,22 @@ var_diskio(struct variable * vp,
       long_ret = head.indices[indx].wio & 0xffffffff;
       return (u_char *) & long_ret;
     case DISKIO_LA1:
-      long_ret = la_head.indices[indx].la1;
+      if (la_head.length > indx)
+          long_ret = la_head.indices[indx].la1;
+      else
+          long_ret = 0; /* we don't have the load yet */
       return (u_char *) & long_ret;
     case DISKIO_LA5:
-      long_ret = la_head.indices[indx].la5;
+      if (la_head.length > indx)
+          long_ret = la_head.indices[indx].la5;
+      else
+          long_ret = 0; /* we don't have the load yet */
       return (u_char *) & long_ret;
     case DISKIO_LA15:
-      long_ret = la_head.indices[indx].la15;
+      if (la_head.length > indx)
+          long_ret = la_head.indices[indx].la15;
+      else
+          long_ret = 0;
       return (u_char *) & long_ret;
     case DISKIO_NREADX:
       *var_len = sizeof(struct counter64);
