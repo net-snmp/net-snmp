@@ -45,6 +45,10 @@ listing of all changes made to the code.
 	numvars argument of netsnmp_register_mib is ignored if the var
 	argument is NULL. In order to unify this use of it with all other
 	ones, change it from 1 to 0
+      - SECURITY: a denial of service attack vector was discovered on
+        the linux implementation of the ICMP-MIB.  This release fixes
+        this bug and all users are encouraged to update their SNMP
+        agent if they make use of the ICMP-MIB table objects.
 
     snmpd, snmptrapd and apps:
       - Make ENV_SEPARATOR_CHAR configurable
