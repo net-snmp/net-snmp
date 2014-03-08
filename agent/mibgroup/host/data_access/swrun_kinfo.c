@@ -177,7 +177,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 {
     struct SWRUN_TABLE  *proc_table;
     int                  nprocs, i, rc;
-    char                 buf[BUFSIZ], **argv;
+    char                 buf[BUFSIZ+1], **argv;
     netsnmp_swrun_entry *entry;
 
     if ( 0 == kd ) {
@@ -225,11 +225,16 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         entry->hrSWRunName_len = snprintf(entry->hrSWRunName,
                                    sizeof(entry->hrSWRunName)-1,
                                           "%s", proc_table[i].SWRUN_K_COMM);
+        if (entry->hrSWRunName_len >= sizeof(entry->hrSWRunName))
+            entry->hrSWRunName_len = sizeof(entry->hrSWRunName)-1;
 
-        if ( argv && *argv)
+        if ( argv && *argv) {
             entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
                                        sizeof(entry->hrSWRunPath)-1,
                                               "%s", argv[0]);
+            if (entry->hrSWRunPath_len >= sizeof(entry->hrSWRunPath))
+                entry->hrSWRunPath_len = sizeof(entry->hrSWRunPath)-1;
+        }
         else {
             memcpy( entry->hrSWRunPath, entry->hrSWRunName,
                                         entry->hrSWRunName_len );
@@ -252,13 +257,17 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         if (argv)
             argv++;    /* Skip argv[0] */
         while ( argv && *argv ) {
-	    strncat(buf, " ", sizeof(buf) - strlen(buf) - 1);
-	    strncat(buf, *argv, sizeof(buf) - strlen(buf) - 1);
+            strcat(buf, " ");
+            strcat(buf, *argv);
             argv++;
         }
+        if (strlen(buf) >= BUFSIZ-10)
+            snmp_log(LOG_ERR, "params %lu/%d %s\n", strlen(buf), BUFSIZ, buf);
         entry->hrSWRunParameters_len = snprintf(entry->hrSWRunParameters,
-                                         sizeof(entry->hrSWRunParameters)-1,
+                                         sizeof(entry->hrSWRunParameters),
                                           "%s", buf+1);
+        if (entry->hrSWRunParameters_len >= sizeof(entry->hrSWRunParameters))
+            entry->hrSWRunParameters_len = sizeof(entry->hrSWRunParameters)-1;
 
         entry->hrSWRunType = (P_SYSTEM & proc_table[i].SWRUN_K_FLAG) 
 #ifdef SWRUN_K_CLASS
