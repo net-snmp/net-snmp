@@ -754,7 +754,7 @@ read_sendmailcf(BOOL config)
 
             if (mailers < MAXMAILERS) {
                 for (i = 1;
-                     line[i] != ',' && !isspace(line[i]) && line[i] != '\0'
+                     line[i] != ',' && !isspace(line[i] & 0xFF) && line[i] != '\0'
                      && i <= MNAMELEN; i++) {
                     mailernames[mailers][i - 1] = line[i];
                 }
@@ -1025,7 +1025,7 @@ mta_sendmail_parse_config(const char *token, char *line)
     }
 
     if (strcasecmp(token, "sendmail_stats") == 0) {
-        while (isspace(*line)) {
+        while (isspace(*line & 0xFF)) {
             line++;
         }
         copy_nword(line, sendmailst_fn, sizeof(sendmailst_fn));
@@ -1041,7 +1041,7 @@ mta_sendmail_parse_config(const char *token, char *line)
                     "opened statistics file \"%s\"\n", sendmailst_fn));
         return;
     } else if (strcasecmp(token, "sendmail_config") == 0) {
-        while (isspace(*line)) {
+        while (isspace(*line & 0xFF)) {
             line++;
         }
         copy_nword(line, sendmailcf_fn, sizeof(sendmailcf_fn));
@@ -1052,14 +1052,14 @@ mta_sendmail_parse_config(const char *token, char *line)
                     "read config file \"%s\"\n", sendmailcf_fn));
         return;
     } else if (strcasecmp(token, "sendmail_queue") == 0) {
-        while (isspace(*line)) {
+        while (isspace(*line & 0xFF)) {
             line++;
         }
         add_queuegroup("mqueue", line);
 
         return;
     } else if (strcasecmp(token, "sendmail_index") == 0) {
-        while (isspace(*line)) {
+        while (isspace(*line & 0xFF)) {
             line++;
         }
         applindex = atol(line);
@@ -1068,7 +1068,7 @@ mta_sendmail_parse_config(const char *token, char *line)
             applindex = 1;
         }
     } else if (strcasecmp(token, "sendmail_stats_t") == 0) {
-        while (isspace(*line)) {
+        while (isspace(*line & 0xFF)) {
             line++;
         }
         stat_cache_time = atol(line);
@@ -1077,7 +1077,7 @@ mta_sendmail_parse_config(const char *token, char *line)
             applindex = 5;
         }
     } else if (strcasecmp(token, "sendmail_queue_t") == 0) {
-        while (isspace(*line)) {
+        while (isspace(*line & 0xFF)) {
             line++;
         }
         dir_cache_time = atol(line);
