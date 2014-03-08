@@ -222,6 +222,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                 }
             }
         }
+        if (entry->hrSWRunPath_len >= sizeof(entry->hrSWRunPath))
+            entry->hrSWRunPath_len = sizeof(entry->hrSWRunPath)-1;
         /*
          * Set hrSWRunName to be the last component of hrSWRunPath,
          *    but without any file extension
@@ -241,6 +243,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 
             if ( cp1 )
                 *cp1 = '.';     /* Restore the file extension */
+            if (entry->hrSWRunName_len >= sizeof(entry->hrSWRunName))
+                entry->hrSWRunName_len = sizeof(entry->hrSWRunName)-1;
         }
 
         /*
