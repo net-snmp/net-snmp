@@ -230,7 +230,7 @@ _expParse_integer( char *start, char **end ) {
 
     n = atoi(start);
     for (cp=start; *cp; cp++)
-        if (!isdigit(*cp))
+        if (!isdigit(*cp & 0xFF))
             break;
     *end = cp;
     return n;
@@ -565,7 +565,7 @@ DIGIT:
             break;
 
         default:
-            if (isalpha( *cp1 )) {
+            if (isalpha( *cp1 & 0xFF )) {
                 /*
                  * Unrecognised function call ?
                  */
@@ -576,7 +576,7 @@ DIGIT:
                 var->data = (void *)(cp1 - exprRaw);
                 return var;
             }
-            else if (!isspace( *cp1 )) {
+            else if (!isspace( *cp1 & 0xFF )) {
                 /*
                  * Unrecognised operator ?
                  */
