@@ -778,7 +778,7 @@ parse_miboid(const char *buf, oid * oidout)
          * so we need to use 'strtoul' rather than 'atoi'
          */
         oidout[i] = strtoul(buf, NULL, 10) & 0xffffffff;
-        while (isdigit((unsigned char)(*buf++)));
+        while (isdigit((unsigned char)(*buf))) buf++;
         if (*buf == '.')
             buf++;
     }
