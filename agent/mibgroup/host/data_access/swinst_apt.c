@@ -39,8 +39,8 @@ netsnmp_swinst_arch_init(void)
 {
     strlcpy(pkg_directory, "/var/lib/dpkg/info", sizeof(pkg_directory));
     snprintf(apt_fmt, SNMP_MAXBUF, "%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%ds",
-	SNMP_MAXBUF, SNMP_MAXBUF, SNMP_MAXBUF,
-	SNMP_MAXBUF, SNMP_MAXBUF, SNMP_MAXBUF);
+	SNMP_MAXBUF-1, SNMP_MAXBUF-1, SNMP_MAXBUF-1,
+	SNMP_MAXBUF-1, SNMP_MAXBUF-1, SNMP_MAXBUF-1);
 }
 
 void
