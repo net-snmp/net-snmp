@@ -257,8 +257,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         if (argv)
             argv++;    /* Skip argv[0] */
         while ( argv && *argv ) {
-            strcat(buf, " ");
-            strcat(buf, *argv);
+            strlcat(buf, " ", sizeof(buf));
+            strlcat(buf, *argv, sizeof(buf));
             argv++;
         }
         if (strlen(buf) >= BUFSIZ-10)
