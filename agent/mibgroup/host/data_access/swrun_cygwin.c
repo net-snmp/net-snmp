@@ -205,9 +205,10 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         h = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, n);
 
         if (curproc.ppid) {
-            entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
-                                       sizeof(entry->hrSWRunPath)-1, "%s",
-                    cygwin_conv_to_posix_path(curproc.progname));
+            entry->hrSWRunPath_len =
+                sprintf(entry->hrSWRunPath, "%.*s",
+                        (int)sizeof(entry->hrSWRunPath) - 1,
+                        cygwin_conv_to_posix_path(curproc.progname));
         } else if (query == CW_GETPINFO_FULL) {
 
             if (h) {
@@ -216,14 +217,12 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                     n = 0;
                 if (n && myGetModuleFileNameEx(h, hm[0], string,
                                                   sizeof string)) {
-                   entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
-                                              sizeof(entry->hrSWRunPath)-1,
-                                                    "%s", string );
+                   entry->hrSWRunPath_len =
+                       sprintf(entry->hrSWRunPath, "%.*s",
+                               (int)sizeof(entry->hrSWRunPath) - 1, string);
                 }
             }
         }
-        if (entry->hrSWRunPath_len >= sizeof(entry->hrSWRunPath))
-            entry->hrSWRunPath_len = sizeof(entry->hrSWRunPath)-1;
         /*
          * Set hrSWRunName to be the last component of hrSWRunPath,
          *    but without any file extension
@@ -238,13 +237,12 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                 cp2++;           /* Find the final component ... */
             else
                 cp2 = entry->hrSWRunPath;          /* ... if any */
-            entry->hrSWRunName_len = snprintf(entry->hrSWRunName,
-                                       sizeof(entry->hrSWRunName)-1, "%s", cp2);
+            entry->hrSWRunName_len =
+                sprintf(entry->hrSWRunName, "%.*s",
+                        (int)sizeof(entry->hrSWRunName) - 1, cp2);
 
             if ( cp1 )
                 *cp1 = '.';     /* Restore the file extension */
-            if (entry->hrSWRunName_len >= sizeof(entry->hrSWRunName))
-                entry->hrSWRunName_len = sizeof(entry->hrSWRunName)-1;
         }
 
         /*
