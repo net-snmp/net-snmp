@@ -23,7 +23,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "05 Feb 2013" VVERSIONINFO "Net-SNMP"
+.TH SNMPTRAPD 8 "13 Mar 2014" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmptrapd - Receive and log SNMP trap messages.
 .SH SYNOPSIS
@@ -173,8 +173,10 @@ the PDU, if available, otherwise the contents of the agent\-addr field
 of the PDU (v1 TRAPs only).
 .TP
 .B %b
-PDU source address (Note: this is not necessarily an IPv4
-address)
+PDU transport address (Note: this is not necessarily an IPv4
+address).
+.br
+Something like "[UDP: [172.16.10.12]:23456->[10.150.0.8]]"
 .TP
 .B %B
 PDU source hostname if available, otherwise PDU source address (see
@@ -320,4 +322,4 @@ See the
 .I snmptrapd.conf(5)
 manual page.
 .SH "SEE ALSO"
-snmpcmd(1), snmpd(8), printf(3), snmptrapd.conf(5), syslog(8), variables(5)
+snmpcmd(1), snmpd(8), printf(3), snmptrapd.conf(5), syslog(8), traptoemail(1), variables(5)
