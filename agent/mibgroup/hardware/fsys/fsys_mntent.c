@@ -57,7 +57,7 @@
 
 #endif
 
-int
+static int
 _fsys_remote( char *device, int type )
 {
     if (( type == NETSNMP_FS_TYPE_NFS) ||
@@ -67,7 +67,7 @@ _fsys_remote( char *device, int type )
         return 0;
 }
 
-int
+static int
 _fsys_type( char *typename )
 {
     DEBUGMSGTL(("fsys:type", "Classifying %s\n", typename));
