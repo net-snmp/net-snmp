@@ -207,7 +207,7 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
         } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
             /* XXX: hmm...  why isn't this prefixed */
             /* assuming intentional */
-            host = netsnmp_gethostbyaddr((char *)&to->sin_addr, 4, AF_INET);
+            host = netsnmp_gethostbyaddr((char *)&to->sin_addr, sizeof(struct in_addr), AF_INET);
             return (host ? strdup(host->h_name) : NULL); 
         } else {
             snprintf(tmp, sizeof(tmp), "%s: [%s]:%hu->", prefix,
