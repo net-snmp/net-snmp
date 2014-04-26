@@ -530,7 +530,7 @@ run_lookup(struct lookupTable_data *item)
         struct in_addr addr_in;
         struct hostent *lookup;
 
-        if (!inet_aton(address, &addr_in)) {
+        if (inet_pton(AF_INET, address, &addr_in) != 1) {
             DEBUGMSGTL(("lookupResultsTable", "Invalid argument: %s\n",
                         address));
             modify_lookupCtlRc(item, 99);
