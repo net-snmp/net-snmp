@@ -386,7 +386,7 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
                      void **opaque, int *olength)
 {
     int             rc = -1;
-    socklen_t       fromlen = sizeof(struct sockaddr);
+    socklen_t       fromlen = sizeof(netsnmp_sockaddr_storage);
     netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *from;
 
