@@ -1616,10 +1616,17 @@ typedef unsigned int     uintptr_t;
 #endif
 
 #ifndef __cplusplus
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4804) // '-' : unsafe use of type 'bool' in operation
+#endif
 enum {
     netsnmp_compile_time_uintptr_t_size_check
         = sizeof(struct netsnmp_compile_time_uintptr_t_size_check_s { int:-!(sizeof(uintptr_t) == sizeof(void*)); })
 };
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #endif
 
 /* Define if you have the closesocket function.  */
