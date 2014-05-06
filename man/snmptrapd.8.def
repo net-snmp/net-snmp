@@ -23,7 +23,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "13 Mar 2014" VVERSIONINFO "Net-SNMP"
+.TH SNMPTRAPD 8 "27 Apr 2014" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmptrapd - Receive and log SNMP trap messages.
 .SH SYNOPSIS
@@ -182,6 +182,9 @@ Something like "[UDP: [172.16.10.12]:23456->[10.150.0.8]]"
 PDU source hostname if available, otherwise PDU source address (see
 note above) 
 .TP
+.B %E
+SNMPv3 context engine id
+.TP
 .B %h
 current hour on the local system
 .TP
@@ -215,12 +218,18 @@ the numeric month field from the \fCsysUpTime.0\fR varbind
 .B %N
 enterprise string
 .TP
-.B %q
-trap sub-type (numeric, in decimal)
-.TP
 .B %P
 security information from the PDU (community name for v1/v2c,
 user and context for v3)
+.TP
+.B %q
+trap sub-type (numeric, in decimal)
+.TP
+.B %s
+SNMP version number (0: v1, 1: v2c, 2: v3)
+.TP
+.B %S
+SNMPv3 security model version number
 .TP
 .B %t
 decimal number of seconds since the operating system epoch (as
@@ -229,6 +238,9 @@ returned by
 .TP
 .B %T
 the value of the \fCsysUpTime.0\fR varbind in seconds
+.TP
+.B %u
+SNMPv3 security name, or v1/v2c community name
 .TP
 .B %v
 list of variable-bindings from the notification payload.

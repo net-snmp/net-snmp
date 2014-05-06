@@ -276,9 +276,11 @@ usage(char *prog)
            "  -C\t\t\tdo not read the default configuration files\n",
            get_configuration_directory(),
            "  -d\t\t\tdump sent and received SNMP packets\n"
+#ifndef NETSNMP_DISABLE_DEBUGGING
            "  -D[TOKEN[,...]]\tturn on debugging output for the given TOKEN(s)\n"
 	   "\t\t\t  (try ALL for extremely verbose output)\n"
 	   "\t\t\t  Don't put space(s) between -D and TOKEN(s).\n"
+#endif
            "  -f\t\t\tdo not fork from the shell\n",
 #if HAVE_UNISTD_H
            "  -g GID\t\tchange to this numeric gid after opening\n"
@@ -585,8 +587,13 @@ main(int argc, char *argv[])
             break;
 
         case 'D':
+#ifdef NETSNMP_DISABLE_DEBUGGING
+            fprintf(stderr, "Debugging not configured\n");
+            exit(1);
+#else
             debug_register_tokens(optarg);
             snmp_set_do_debugging(1);
+#endif
             break;
 
         case 'f':

@@ -432,17 +432,24 @@ logmatch_parse_config(const char *token, char *cptr)
          */
 
         logmatchTable[logmatchCount].myRegexError =
-            regcomp(&(logmatchTable[logmatchCount].regexBuffer),
+            regcomp(&logmatchTable[logmatchCount].regexBuffer,
                     logmatchTable[logmatchCount].regEx,
                     REG_EXTENDED | REG_NOSUB);
 
-        if (logmatchTable[logmatchCount].frequency > 0) {
+        if (logmatchTable[logmatchCount].myRegexError) {
+            char regexErrorString[100];
+            regerror(logmatchTable[logmatchCount].myRegexError,
+                     &logmatchTable[logmatchCount].regexBuffer,
+                     regexErrorString, 100);
+            snmp_log(LOG_ERR, "Could not process the logmatch regex - %s," \
+                     "\n since regcomp() failed with - %s\n",
+                     logmatchTable[logmatchCount].regEx, regexErrorString);
+        }
+        else if (logmatchTable[logmatchCount].frequency > 0) {
             snmp_alarm_register(logmatchTable[logmatchCount].frequency,
                                 SA_REPEAT,
-                                (SNMPAlarmCallback *)
-                                updateLogmatch_Scheduled,
-                                &(logmatchTable[logmatchCount])
-                );
+                                (SNMPAlarmCallback *) updateLogmatch_Scheduled,
+                                &logmatchTable[logmatchCount]);
         }
 
         logmatchCount++;
@@ -469,8 +476,8 @@ logmatch_free_config(void)
      */
 
     for (i = 0; i < logmatchCount; i++) {
-
-        regfree(&(logmatchTable[i].regexBuffer));
+        if (logmatchTable[i].myRegexError == 0)
+            regfree(&logmatchTable[i].regexBuffer);
     }
     logmatchCount = 0;
 }
