@@ -40,7 +40,10 @@ for my $nsisdir (("C:\\Program Files\\NSIS", "C:\\Program Files (x86)\\NSIS")) {
 }
 die("makensis.exe not found") if (!(-f $makensis));
 
-my $openssldir = $ENV{TARGET_CPU} eq "x64" ? "C:\\OpenSSL-Win64" : "C:\\OpenSSL-Win32";
+my $target_arch = $ENV{TARGET_CPU} ? $ENV{TARGET_CPU} : $ENV{Platform} ?
+                  $ENV{Platform} : "x86";
+my $openssldir = $target_arch eq "x64" ? "C:\\OpenSSL-Win64" :
+                 "C:\\OpenSSL-Win32";
 my $opensslincdir = $openssldir . "\\include";
 my $openssllibdir = $openssldir . "\\lib\\VC";
 
