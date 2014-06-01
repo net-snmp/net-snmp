@@ -83,7 +83,7 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
      * Register the table using the filtered container
      * Include an indicator of any scaling to be applied to the sensor value
      */
-    reg->my_reg_void = (void *)mult;
+    reg->my_reg_void = (void *)(uintptr_t)mult;
     table_info = SNMP_MALLOC_TYPEDEF( netsnmp_table_registration_info );
     netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, 0);
     table_info->min_column = COLUMN_LMSENSORS_INDEX;
@@ -154,7 +154,7 @@ lmSensorsTables_handler(
     netsnmp_request_info       *request;
     netsnmp_table_request_info *table_info;
     netsnmp_sensor_info        *sensor_info;
-    int mult  = (int)reginfo->my_reg_void;
+    int mult  = (uintptr_t)reginfo->my_reg_void;
 
     DEBUGMSGTL(( "ucd-snmp/lmsensorsMib","lmSensorsTables_handler - root: "));
     DEBUGMSGOID(("ucd-snmp/lmsensorsMib", reginfo->rootoid, reginfo->rootoid_len));
