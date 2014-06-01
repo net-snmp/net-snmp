@@ -124,7 +124,8 @@ netsnmp_register_old_api(const char *moduleName,
         reginfo->range_ubound = range_ubound;
         reginfo->timeout = timeout;
         reginfo->contextName = (context) ? strdup(context) : NULL;
-        reginfo->modes = HANDLER_CAN_RWRITE;
+        reginfo->modes = vp->acl == NETSNMP_OLDAPI_RONLY ? HANDLER_CAN_RONLY :
+                         HANDLER_CAN_RWRITE;
 
         /*
          * register ourselves in the mib tree 
