@@ -94,16 +94,16 @@ _load(netsnmp_container *container)
     int nlsk;
     struct sockaddr_nl addr;
     int rcvbuf_size = RCVBUF_SIZE;
-    unsigned char rcvbufmem[RCVBUF_SIZE + sizeof(intmax_t)];
-    unsigned char sndbufmem[SNDBUF_SIZE + sizeof(intmax_t)];
-    /*
-     * Buffers must be memory aligned.
-     * Message structure internal alignment is maintained by the netlink API.
-     */
-    unsigned char *rcvbuf = rcvbufmem +
-          sizeof(intmax_t) - (((intptr_t)rcvbufmem) % sizeof(intmax_t));
-    unsigned char *sndbuf = sndbufmem +
-          sizeof(intmax_t) - (((intptr_t)sndbufmem) % sizeof(intmax_t));
+    union {
+        struct nlmsghdr hdr;
+        unsigned char rcvbuf[RCVBUF_SIZE];
+    } rcvbuf_union;
+    union {
+        struct nlmsghdr hdr;
+        unsigned char sndbuf[SNDBUF_SIZE];
+    } sndbuf_union;
+    unsigned char *const rcvbuf = rcvbuf_union.rcvbuf;
+    unsigned char *const sndbuf = sndbuf_union.sndbuf;
     struct nlmsghdr *hdr;
     struct rtmsg *rthdr;
     int count;
@@ -134,7 +134,7 @@ _load(netsnmp_container *container)
     addr.nl_family = AF_NETLINK;
 
     memset(sndbuf, '\0', SNDBUF_SIZE);
-    hdr = (struct nlmsghdr *)sndbuf;
+    hdr = &sndbuf_union.hdr;
     hdr->nlmsg_type = RTM_GETROUTE;
     hdr->nlmsg_pid = getpid();
     hdr->nlmsg_seq = 0;
@@ -184,7 +184,7 @@ _load(netsnmp_container *container)
         /*
          * Walk all of the returned messages
          */
-        nlmhp = (struct nlmsghdr *)rcvbuf;
+        nlmhp = &rcvbuf_union.hdr;
         while (NLMSG_OK(nlmhp, count)) {
             u_char addresstype;
             char   address[NETSNMP_ACCESS_DEFAULTROUTER_BUF_SIZE + 1];
