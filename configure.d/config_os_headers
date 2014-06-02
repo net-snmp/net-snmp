@@ -473,6 +473,27 @@ AC_CHECK_HEADERS(pkginfo.h,
     NETSNMP_SEARCH_LIBS(pkginfo, adm,
         AC_DEFINE(HAVE_PKGINFO, 1, [define if you have pkginfo]),,,LMIBLIBS))
 
+AC_CHECK_HEADERS(pkg.h,
+    NETSNMP_SEARCH_LIBS(pkg_init, pkg,
+        AC_DEFINE(HAVE_LIBPKG, 1, [define if you have BSD pkg-ng])))
+
+if test $ac_cv_header_pkg_h = no
+then
+    unset ac_cv_header_pkg_h
+    netsnmp_save_CPPFLAGS="$CPPFLAGS"
+    netsnmp_save_LD_FLAGS="$LDFLAGS"
+    CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+    LDFLAGS="$LDFLAGS -L/usr/local/lib"
+    AC_CHECK_HEADERS(pkg.h,
+        NETSNMP_SEARCH_LIBS(pkg_init, pkg,
+	    AC_DEFINE(HAVE_LIBPKG, 1, [define if you have BSD pkg-ng])))
+    if test $ac_cv_header_pkg_h = no
+    then
+        CPPFLAGS="$netsnmp_save_CPPFLAGS"
+        LDFLAGS="$netsnmp_save_LDFLAGS"
+    fi
+fi
+
 case $target_os in
     aix*)
         #       for CPU/memory statistics               (AIX)
