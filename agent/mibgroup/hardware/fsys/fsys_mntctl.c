@@ -59,6 +59,9 @@ _fsys_type( int type)
 #ifdef MNT_PROCFS
         case MNT_PROCFS:
 #endif
+#ifdef MNT_ACFS
+        case MNT_ACFS:
+#endif
         case MNT_SFS:
         case MNT_CACHEFS:
             return NETSNMP_FS_TYPE_OTHER;

@@ -151,6 +151,9 @@
 #ifndef MNTTYPE_ZFS
 #define MNTTYPE_ZFS       "zfs"
 #endif
+#ifndef MNTTYPE_ACFS
+#define MNTTYPE_ACFS      "acfs"
+#endif
 
 /*
  *  File systems to skip
