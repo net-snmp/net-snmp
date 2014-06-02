@@ -362,6 +362,9 @@
 /* Define to 1 if you have the `pkcs11' library (-lpkcs11). */
 #undef HAVE_LIBPKCS11
 
+/* define if you have BSD pkg-ng */
+#undef HAVE_LIBPKG
+
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
 
@@ -628,6 +631,9 @@
 
 /* Define to 1 if you have the <pkglocs.h> header file. */
 #undef HAVE_PKGLOCS_H
+
+/* Define to 1 if you have the <pkg.h> header file. */
+#undef HAVE_PKG_H
 
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
