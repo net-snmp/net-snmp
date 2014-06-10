@@ -17165,7 +17165,7 @@ if test $ac_cv_header_pkg_h = no
 then
     unset ac_cv_header_pkg_h
     netsnmp_save_CPPFLAGS="$CPPFLAGS"
-    netsnmp_save_LD_FLAGS="$LDFLAGS"
+    netsnmp_save_LDFLAGS="$LDFLAGS"
     CPPFLAGS="$CPPFLAGS -I/usr/local/include"
     LDFLAGS="$LDFLAGS -L/usr/local/lib"
     for ac_header in pkg.h
