@@ -231,6 +231,10 @@ PROBE_FOR_PORT() {
                 exit 255
             fi
         done
+    else
+	echo "ERROR: Cannot probe for port - netstat not found." >&2
+	echo "NOPORT"
+	exit 255
     fi
 }
 
