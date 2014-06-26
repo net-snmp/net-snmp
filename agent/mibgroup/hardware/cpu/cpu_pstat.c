@@ -31,20 +31,28 @@ void init_cpu_pstat( void ) {
     switch (cpuversion) {
     case CPU_HP_MC68020:
         snprintf(descr, SNMP_MAXBUF, " Motorola MC68020 ");
+        break;
     case CPU_HP_MC68030:
         snprintf(descr, SNMP_MAXBUF, " Motorola MC68030 ");
+        break;
     case CPU_HP_MC68040:
         snprintf(descr, SNMP_MAXBUF, " Motorola MC68040 ");
+        break;
     case CPU_PA_RISC1_0:
         snprintf(descr, SNMP_MAXBUF, " HP PA-RISC 1.0 ");
+        break;
     case CPU_PA_RISC1_1:
         snprintf(descr, SNMP_MAXBUF, " HP PA-RISC 1.1 ");
+        break;
     case CPU_PA_RISC1_2:
         snprintf(descr, SNMP_MAXBUF, " HP PA-RISC 1.2 ");
+        break;
     case CPU_PA_RISC2_0:
         snprintf(descr, SNMP_MAXBUF, " HP PA-RISC 2.0 ");
+        break;
     default:
         snprintf(descr, SNMP_MAXBUF, "An electronic chip with an HP label");
+        break;
     }
 #else
     snprintf(descr, SNMP_MAXBUF, "An electronic chip without(?) an HP label");
