@@ -76,9 +76,9 @@ CONFIGAGENT 'com2sec6 t607b a234567890123456789012345678901234567890123456789012
 
 # 608 Lookup tests, require network access
 # 608a Test lookup returning a single host
-CONFIGAGENT 'com2sec6 t608a www.ietf.org c608a'
+CONFIGAGENT 'com2sec6 t608a oneaaaa.net-snmp.org c608a'
 # 608b Test lookup returning multiple hosts
-CONFIGAGENT 'com2sec6 t608b ipv6.google.com c608b'
+CONFIGAGENT 'com2sec6 t608b twoaaaa.net-snmp.org c608b'
 
 # Default agent setup
 CONFIGAGENT "[snmp] persistentdir $SNMP_TMP_PERSISTENTDIR"
