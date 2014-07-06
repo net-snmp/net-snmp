@@ -74,8 +74,8 @@ void init_cpu_pstat( void ) {
                 }
             }
         }
+        free(psp);
     }
-    free(psp);
     cpu_num = psd.psd_proc_cnt;
 }
 
