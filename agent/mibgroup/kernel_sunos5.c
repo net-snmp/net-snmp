@@ -1604,6 +1604,8 @@ set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,
          * this is good 
          */
 	havespeed = B_TRUE;
+    } else if (getKstatInt("link", name, "ifspeed", &ifp->ifSpeed) == 0) {
+	havespeed = B_TRUE;
     }
 
     /* make ifOperStatus depend on link status if available */
