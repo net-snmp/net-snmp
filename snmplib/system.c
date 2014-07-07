@@ -779,7 +779,7 @@ get_uptime(void)
     struct nlist nl;
     int kmem;
     time_t lbolt;
-    nl.n_name = "lbolt";
+    nl.n_name = (char *) "lbolt";
     if(knlist(&nl, 1, sizeof(struct nlist)) != 0) return(0);
     if(nl.n_type == 0 || nl.n_value == 0) return(0);
     if((kmem = open("/dev/mem", 0)) < 0) return 0;
