@@ -219,7 +219,7 @@ klookup(unsigned long off, void *target, size_t siz)
         return 0;
 
     if ((retsiz = klseek((off_t) off)) != off) {
-        snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
+        snmp_log(LOG_ERR, "klookup(%lx, %p, %zd): ", off, target, siz);
         snmp_log_perror("klseek");
         return (0);
     }
@@ -229,12 +229,12 @@ klookup(unsigned long off, void *target, size_t siz)
              * these happen too often on too many architectures to print them
              * unless we're in debugging mode. People get very full log files. 
              */
-            snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
+            snmp_log(LOG_ERR, "klookup(%lx, %p, %zd): ", off, target, siz);
             snmp_log_perror("klread");
         }
         return (0);
     }
-    DEBUGMSGTL(("verbose:kernel:klookup", "klookup(%lx, %p, %d) succeeded", off, target, siz));
+    DEBUGMSGTL(("verbose:kernel:klookup", "klookup(%lx, %p, %zd) succeeded", off, target, siz));
     return (1);
 }
 
