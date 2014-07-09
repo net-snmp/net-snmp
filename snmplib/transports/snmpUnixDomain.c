@@ -248,7 +248,7 @@ netsnmp_unix_accept(netsnmp_transport *t)
         }
 
         DEBUGMSGTL(("netsnmp_unix", "accept succeeded (farend %p len %d)\n",
-                    farend, farendlen));
+                    farend, (int) farendlen));
         t->data = farend;
         t->data_length = sizeof(struct sockaddr_un);
        netsnmp_sock_buffer_set(newsock, SO_SNDBUF, 1, 0);
