@@ -82,7 +82,7 @@ for i in $test_modules
   fi
 done
 
-new_module_list=`echo $ECHO_N $new_module_list$ECHO_C | tr ' ' '\n' | sort | tr '\n' ' '`
+new_module_list=`echo $new_module_list | tr ' ' '\n' | sort | tr '\n' ' ' | $SED 's/ $//'`
 
 AC_MSG_RESULT([$new_module_list.])
 

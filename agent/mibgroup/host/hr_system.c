@@ -257,9 +257,6 @@ var_hrsys(struct variable * vp,
     char bootparam[8192];
 #endif
     time_t          now;
-#if !(defined(NR_TASKS) || defined(solaris2) || defined(hpux10) || defined(hpux11))
-    int             nproc = 0;
-#endif
 #ifdef linux
     FILE           *fp;
 #endif
@@ -334,19 +331,28 @@ var_hrsys(struct variable * vp,
 #if defined(NR_TASKS)
         long_return = NR_TASKS; /* <linux/tasks.h> */
 #elif NETSNMP_CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
-        buf_size = sizeof(nproc);
-        if (sysctl(maxproc_mib, 2, &nproc, &buf_size, NULL, 0) < 0)
-            return NULL;
-        long_return = nproc;
+	{
+	    int nproc = 0;
+
+	    buf_size = sizeof(nproc);
+	    if (sysctl(maxproc_mib, 2, &nproc, &buf_size, NULL, 0) < 0)
+		return NULL;
+	    long_return = nproc;
+	}
 #elif defined(hpux10) || defined(hpux11)
         pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0);
         long_return = pst_buf.max_proc;
 #elif defined(solaris2)
-    long_return=get_max_solaris_processes();
-    if(long_return == -1) return NULL;
+        long_return = get_max_solaris_processes();
+        if (long_return == -1)
+            return NULL;
 #elif defined(NPROC_SYMBOL)
-        auto_nlist(NPROC_SYMBOL, (char *) &nproc, sizeof(int));
-        long_return = nproc;
+	{
+	    int nproc = 0;
+
+	    auto_nlist(NPROC_SYMBOL, (char *) &nproc, sizeof(nproc));
+	    long_return = nproc;
+	}
 #else
 #if NETSNMP_NO_DUMMY_VALUES
         return NULL;
