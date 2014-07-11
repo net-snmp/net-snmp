@@ -5,19 +5,25 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "201205170000Z"  -- May 17, 2012
+       LAST-UPDATED "201407030000Z" -- July 3, 2014
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
                      Postal: ICANN
-                             4676 Admiralty Way, Suite 330
-                             Marina del Rey, CA 90292
+                             12025 Waterfront Drive, Suite 300
+                             Los Angeles, CA 90094-2536
 
-                     Tel:    +1 310 823 9358
+                     Tel:    +1 310-301-5800
                      E-Mail: iana&iana.org"
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "201407030000Z"  -- July 3, 2014
+	   DESCRIPTION  "Registration of new IANAifTypes 277-278."
+
+       REVISION     "201405220000Z" -- May 22, 2014
+       DESCRIPTION  "Updated contact info."
 
        REVISION     "201205170000Z"  -- May 17, 2012
        DESCRIPTION  "Registration of new IANAifType 272."
@@ -586,7 +592,9 @@
                    aluEponLogicalLink (269), -- The emulation of a point-to-point link over the EPON layer
                    aluGponOnu (270), -- GPON Optical Network Unit
                    aluGponPhysicalUni (271), -- GPON physical User to Network interface
-                   vmwareNicTeam (272) -- VMware NIC Team
+                   vmwareNicTeam (272), -- VMware NIC Team
+                   docsOfdmDownstream (277), -- CATV Downstream OFDM interface
+                   docsOfdmaUpstream (278) -- CATV Upstream OFDMA interface
                    }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
