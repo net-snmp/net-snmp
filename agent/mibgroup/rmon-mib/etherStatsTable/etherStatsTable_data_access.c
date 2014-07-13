@@ -200,7 +200,6 @@ etherStatsTable_container_shutdown(netsnmp_container * container_ptr)
 int
 etherStatsTable_container_load(netsnmp_container * container)
 {
-    etherStatsTable_rowreq_ctx *rowreq_ctx;
     size_t          count = 0;
 
     DEBUGMSGTL(("verbose:etherStatsTable:etherStatsTable_container_load",
@@ -220,9 +219,7 @@ etherStatsTable_container_load(netsnmp_container * container)
      * etherStatsIndex(1)/INTEGER32/ASN_INTEGER/long(long)//l/A/w/e/R/d/h
      */
 
-    long            etherStatsIndex;
     int             fd;
-    int             rc = 0, retval = 0;
 
 #if defined(linux)
     struct ifname *list_head = NULL, *p = NULL;
@@ -244,7 +241,11 @@ etherStatsTable_container_load(netsnmp_container * container)
      */
 
 #if defined(linux)
-    list_head = etherstats_interface_name_list_get (list_head, &retval);
+    {
+        int retval;
+
+        list_head = etherstats_interface_name_list_get(list_head, &retval);
+    }
 
     if (!list_head) {
         snmp_log (LOG_ERR, "access:etherStatsTable, error getting the interface names present in the system\n");
@@ -258,6 +259,9 @@ etherStatsTable_container_load(netsnmp_container * container)
      */
 
     for (p = list_head; p; p = p->ifn_next) {
+        long            etherStatsIndex;
+        etherStatsTable_rowreq_ctx *rowreq_ctx;
+
         DEBUGMSGTL(("access:etherStatsTable", "processing '%s'\n", p->name));
 
         /*
@@ -296,23 +300,27 @@ etherStatsTable_container_load(netsnmp_container * container)
          */
 
         memset (&rowreq_ctx->data, 0, sizeof (rowreq_ctx->data));
-        rc = interface_ioctl_etherstats_get (rowreq_ctx, fd, p->name);
+        {
+            int rc;
 
-        if (rc < 0) {
-            DEBUGMSGTL(("access:etherStatsTable", "error getting the statistics for interface |%s| "
-                        "etherStatsTable data, operation might not be supported\n", p->name));
-            etherStatsTable_release_rowreq_ctx(rowreq_ctx);
-            continue;
-        }
+            rc = interface_ioctl_etherstats_get (rowreq_ctx, fd, p->name);
 
-        /*
-         * insert into table container
-         */
-        rc = CONTAINER_INSERT(container, rowreq_ctx);
-        if (rc < 0) {
-            DEBUGMSGTL(("access:etherStatsTable", "error inserting |%s| ", p->name));
-            etherStatsTable_release_rowreq_ctx(rowreq_ctx);
-            continue;
+            if (rc < 0) {
+                DEBUGMSGTL(("access:etherStatsTable", "error getting the statistics for interface |%s| "
+                            "etherStatsTable data, operation might not be supported\n", p->name));
+                etherStatsTable_release_rowreq_ctx(rowreq_ctx);
+                continue;
+            }
+
+            /*
+             * insert into table container
+             */
+            rc = CONTAINER_INSERT(container, rowreq_ctx);
+            if (rc < 0) {
+                DEBUGMSGTL(("access:etherStatsTable", "error inserting |%s| ", p->name));
+                etherStatsTable_release_rowreq_ctx(rowreq_ctx);
+                continue;
+            }
         }
 
         ++count;

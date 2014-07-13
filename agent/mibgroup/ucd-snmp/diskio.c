@@ -167,7 +167,7 @@ static linux_diskio_la_header la_head;
 static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
 #endif                          /* darwin */
 
-#ifndef solaris2
+#if !defined(solaris2) && !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
 static int      getstats(void);
 #endif
 
@@ -177,6 +177,7 @@ void		devla_getstats(unsigned int regno, void *dummy);
 
 FILE           *file;
 
+#ifdef linux
 struct diskiopart {
     char            syspath[STRMAX];	/* full stat path */
     char            name[STRMAX];	/* name as provided */
@@ -188,6 +189,7 @@ struct diskiopart {
 static int             numdisks;
 static int             maxdisks = 0;
 static struct diskiopart *disks;
+#endif
 
          /*********************
 	 *

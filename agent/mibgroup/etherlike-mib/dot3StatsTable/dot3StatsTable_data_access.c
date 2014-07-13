@@ -211,7 +211,6 @@ dot3StatsTable_container_shutdown(netsnmp_container * container_ptr)
 int
 dot3StatsTable_container_load(netsnmp_container * container)
 {
-    dot3StatsTable_rowreq_ctx *rowreq_ctx;
     size_t          count = 0;
     int             fd;
 #if defined(linux)
@@ -269,6 +268,8 @@ dot3StatsTable_container_load(netsnmp_container * container)
      */
 
     for (p = list_head; p; p = p->ifn_next) {
+        dot3StatsTable_rowreq_ctx *rowreq_ctx;
+
         DEBUGMSGTL(("access:dot3StatsTable", "processing '%s'\n", p->name));
 
         /*

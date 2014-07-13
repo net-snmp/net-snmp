@@ -63,6 +63,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "kernel.h"
 #include "interfaces.h"
 #include "struct.h"
+#include "util_funcs.h"
 
 netsnmp_feature_child_of(get_routes, libnetsnmpmibs)
 

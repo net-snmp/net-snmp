@@ -525,7 +525,6 @@ static mib_ipNetToMediaEnt *at = (mib_ipNetToMediaEnt *) 0;
  */
 #define ARP_CACHE_INCR 1024
 static struct arptab *at = NULL;
-static int      arptab_curr_max_size = 0;
 
 #endif
 #endif                          /* NETSNMP_CAN_USE_SYSCTL */
@@ -631,8 +630,10 @@ ARP_Scan_Init(void)
 
     i = 0;
     while (fgets(line, sizeof(line), in)) {
+        static int      arptab_curr_max_size;
         u_long          tmp_a;
         unsigned int    tmp_flags;
+
         if (i >= arptab_curr_max_size) {
             struct arptab  *newtab = (struct arptab *)
                 realloc(at, (sizeof(struct arptab) *

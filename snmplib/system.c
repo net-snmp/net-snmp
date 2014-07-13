@@ -592,14 +592,16 @@ get_boottime(void)
     size_t          len;
 #elif defined(NETSNMP_CAN_USE_NLIST)
     int             kmem;
-    static struct nlist nl[] = {
 #if !defined(hpux)
-        {(char *) "_boottime"},
+    static char boottime_name[] = "_boottime";
 #else
-        {(char *) "boottime"},
+    static char boottime_name[] = "boottime";
 #endif
-        {(char *) ""}
-    };
+    static char empty_name[] = "";
+    struct nlist nl[2] = { };
+
+    nl[0].n_name = boottime_name;
+    nl[1].n_name = empty_name;
 #endif                          /* NETSNMP_CAN_USE_SYSCTL */
 #endif                          /* hpux10 || hpux 11 */
 
@@ -653,10 +655,11 @@ long
 get_uptime(void)
 {
 #if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
+    static char lbolt_name[] = "lbolt";
     struct nlist nl;
     int kmem;
     time_t lbolt;
-    nl.n_name = (char *) "lbolt";
+    nl.n_name = lbolt_name;
     if(knlist(&nl, 1, sizeof(struct nlist)) != 0) return(0);
     if(nl.n_type == 0 || nl.n_value == 0) return(0);
     if((kmem = open("/dev/mem", 0)) < 0) return 0;

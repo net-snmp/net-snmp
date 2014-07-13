@@ -96,7 +96,7 @@ netsnmp_fsys_arch_load( void )
     /*
      * Retrieve information about the currently mounted filesystems...
      */
-    ret = mntctl(MCTL_QUERY, sizeof(uint), &size);
+    ret = mntctl(MCTL_QUERY, sizeof(uint), (void *) &size);
     if ( ret != 0 || size<=0 ) {
         snmp_log_perror( "initial mntctl failed" );
         return;
@@ -108,7 +108,7 @@ netsnmp_fsys_arch_load( void )
         return;
     }
 
-    ret = mntctl(MCTL_QUERY, size, aixmnt );
+    ret = mntctl(MCTL_QUERY, size, (void *) aixmnt);
     if ( ret <= 0 ) {
         free(aixmnt);
         snmp_log_perror( "main mntctl failed" );
