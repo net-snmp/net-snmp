@@ -123,8 +123,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     }
     free(proc_table);
 
-    DEBUGMSGTL(("swrun:load:arch"," loaded %zd entries\n",
-                CONTAINER_SIZE(container)));
+    DEBUGMSGTL(("swrun:load:arch"," loaded %d entries\n",
+                (int) CONTAINER_SIZE(container)));
 
     return 0;
 }
