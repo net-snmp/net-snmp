@@ -89,16 +89,17 @@ int
 klookup(unsigned long off, void *target, size_t siz)
 {
     int             result;
+
     if (kd == NULL)
         return 0;
     result = kvm_read(kd, off, target, siz);
     if (result != siz) {
 #if HAVE_KVM_OPENFILES
-        snmp_log(LOG_ERR, "kvm_read(*, %lx, %p, %zx) = %d: %s\n", off,
-                 target, siz, result, kvm_geterr(kd));
+        snmp_log(LOG_ERR, "kvm_read(*, %lx, %p, %x) = %d: %s\n", off,
+                 target, (unsigned) siz, result, kvm_geterr(kd));
 #else
         snmp_log(LOG_ERR, "kvm_read(*, %lx, %p, %d) = %d: ", off, target,
-                 siz, result);
+                 (unsigned) siz, result);
         snmp_log_perror("klookup");
 #endif
         return 0;
@@ -191,7 +192,7 @@ klookup(unsigned long off, void *target, size_t siz)
         return 0;
 
     if ((retsiz = klseek((off_t) off)) != off) {
-        snmp_log(LOG_ERR, "klookup(%lx, %p, %zd): ", off, target, siz);
+        snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, (int) siz);
         snmp_log_perror("klseek");
         return (0);
     }
@@ -201,12 +202,13 @@ klookup(unsigned long off, void *target, size_t siz)
              * these happen too often on too many architectures to print them
              * unless we're in debugging mode. People get very full log files. 
              */
-            snmp_log(LOG_ERR, "klookup(%lx, %p, %zd): ", off, target, siz);
+            snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, (int) siz);
             snmp_log_perror("klread");
         }
         return (0);
     }
-    DEBUGMSGTL(("verbose:kernel:klookup", "klookup(%lx, %p, %zd) succeeded", off, target, siz));
+    DEBUGMSGTL(("verbose:kernel:klookup", "klookup(%lx, %p, %d) succeeded",
+                off, target, (int) siz));
     return (1);
 }
 
