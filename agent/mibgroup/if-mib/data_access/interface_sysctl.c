@@ -355,11 +355,12 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     if_list = (u_char*)malloc(if_list_size);
     if (if_list == NULL) {
         snmp_log(LOG_ERR, "could not allocate memory for interface info "
-                 "(%zu bytes)\n", if_list_size);
+                 "(%u bytes)\n", (unsigned) if_list_size);
         return -3;
     } else {
         DEBUGMSGTL(("access:interface:container:sysctl",
-                    "allocated %zu bytes for if_list\n", if_list_size));
+                    "allocated %u bytes for if_list\n",
+                    (unsigned) if_list_size));
     }
 
     if (sysctl(sysctl_oid, sizeof(sysctl_oid)/sizeof(int), if_list,
