@@ -112,7 +112,7 @@ void devla_getstats(unsigned int regno, void * dummy);
 static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
 #endif                          /* darwin */
 
-#ifndef solaris2
+#if !defined(solaris2) && !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
 static int      getstats(void);
 #endif
 

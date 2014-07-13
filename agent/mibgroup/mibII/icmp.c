@@ -784,9 +784,6 @@ icmp_handler(netsnmp_mib_handler          *handler,
     netsnmp_variable_list *requestvb;
     long     ret_value;
     oid      subid;
-#ifdef USES_TRADITIONAL_ICMPSTAT
-    int      i;
-#endif
 
     /*
      * The cached data should already have been loaded by the
@@ -894,13 +891,16 @@ icmp_handler(netsnmp_mib_handler          *handler,
         ret_value = icmpstat.icmpOutAddrMaskReps;
         break;
 #elif defined(USES_TRADITIONAL_ICMPSTAT) && !defined(_USE_PERFSTAT_PROTOCOL)
-    case ICMPINMSGS:
+    case ICMPINMSGS: {
+        int i;
+
         ret_value = icmpstat.icps_badcode +
             icmpstat.icps_tooshort +
             icmpstat.icps_checksum + icmpstat.icps_badlen;
         for (i = 0; i <= ICMP_MAXTYPE; i++)
             ret_value += icmpstat.icps_inhist[i];
         break;
+    }
     case ICMPINERRORS:
         ret_value = icmpstat.icps_badcode +
             icmpstat.icps_tooshort +
@@ -939,11 +939,14 @@ icmp_handler(netsnmp_mib_handler          *handler,
     case ICMPINADDRMASKREPS:
         ret_value = icmpstat.icps_inhist[ICMP_MASKREPLY];
         break;
-    case ICMPOUTMSGS:
+    case ICMPOUTMSGS: {
+        int i;
+
         ret_value = icmpstat.icps_oldshort + icmpstat.icps_oldicmp;
         for (i = 0; i <= ICMP_MAXTYPE; i++)
             ret_value += icmpstat.icps_outhist[i];
         break;
+    }
     case ICMPOUTERRORS:
         ret_value = icmpstat.icps_oldshort + icmpstat.icps_oldicmp;
         break;

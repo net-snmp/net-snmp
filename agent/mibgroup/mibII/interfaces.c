@@ -198,6 +198,7 @@ netsnmp_feature_provide(interface_legacy)
 
 #include "interfaces.h"
 #include "struct.h"
+#include "util_funcs.h"
 #include "util_funcs/header_generic.h"
 
 /* if you want caching enabled for speed retrieval purposes, set this to 5?*/
@@ -777,9 +778,6 @@ var_ifEntry(struct variable *vp,
     static char     Name[16];
     char           *cp;
     conf_if_list   *if_ptr;
-#if HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC
-    struct timeval  now;
-#endif
 
     interface =
         header_ifEntry(vp, name, length, exact, var_len, write_method);

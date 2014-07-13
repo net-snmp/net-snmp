@@ -472,6 +472,7 @@ _access_interface_entry_compare_name(const void *lhs, const void *rhs)
                   ((const netsnmp_interface_entry *) rhs)->name);
 }
 
+#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 /**
  */
 static void
@@ -479,6 +480,7 @@ _access_interface_entry_release(netsnmp_interface_entry * entry, void *context)
 {
     netsnmp_access_interface_entry_free(entry);
 }
+#endif
 
 /**
  */
