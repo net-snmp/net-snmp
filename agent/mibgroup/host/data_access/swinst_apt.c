@@ -94,8 +94,8 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 	memcpy(entry->swDate, "\0\0\1\1\0\0\0\0", 8);
     }
     pclose(p);
-    DEBUGMSGTL(("swinst:load:arch"," loaded %zd entries\n",
-                CONTAINER_SIZE(container)));
+    DEBUGMSGTL(("swinst:load:arch"," loaded %d entries\n",
+                (int) CONTAINER_SIZE(container)));
 
     return 0;
 }
