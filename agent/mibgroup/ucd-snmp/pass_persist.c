@@ -240,12 +240,18 @@ void
 pass_persist_free_config(void)
 {
     struct extensible *etmp, *etmp2;
+    int i;
 
     for (etmp = persistpassthrus; etmp != NULL;) {
         etmp2 = etmp;
         etmp = etmp->next;
         unregister_mib_priority(etmp2->miboid, etmp2->miblen, etmp2->mibpriority);
         free(etmp2);
+    }
+    if (persist_pipes) {
+        for (i = 0; i <= numpersistpassthrus; i++) {
+            close_persist_pipe(i);
+        }
     }
     persistpassthrus = NULL;
     numpersistpassthrus = 0;
@@ -798,6 +804,11 @@ close_persist_pipe(int iindex)
 #endif
 
     if (persist_pipes[iindex].pid != NETSNMP_NO_SUCH_PROCESS) {
+        /*
+         * kill the child, in case we got an error and the child is not
+         * cooperating.  Ignore the return code.
+         */
+        (void)kill(persist_pipes[iindex].pid, SIGKILL);
 #if HAVE_SYS_WAIT_H
         waitpid(persist_pipes[iindex].pid, NULL, 0);
 #endif
