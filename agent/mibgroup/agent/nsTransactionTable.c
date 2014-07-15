@@ -191,6 +191,7 @@ nsTransactionTable_handler(netsnmp_mib_handler *handler,
         if (asp == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_NOSUCHINSTANCE);
+            continue;
         }
 
         /*
