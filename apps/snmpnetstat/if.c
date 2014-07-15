@@ -268,15 +268,21 @@ intpr(int interval)
     while ( 1 ) {
         if (netsnmp_query_getnext( var, ss ) != SNMP_ERR_NOERROR)
             break;
+        if ((var->type & 0xF0) == 0x80)     /* Exception */
+            break;
         ifcol_oid[ ifcol_len-1 ] = 2;	/* ifDescr */
         if ( snmp_oid_compare( ifcol_oid, ifcol_len,
                                var->name, ifcol_len) != 0 )
             break;    /* End of Table */
+        if ((var->type & 0xF0) == 0x80)     /* Exception */
+            return;
         cur_if = SNMP_MALLOC_TYPEDEF( struct _if_info );
         if (!cur_if)
             break;
         cur_if->ifindex = var->name[ var->name_length-1 ];
         for ( vp=var; vp; vp=vp->next_variable ) {
+            if ((vp->type & 0xF0) == 0x80)     /* Exception */
+                continue;
             if ( ! vp->val.integer )
                 continue;
             if ( var->name[ var->name_length-1 ] != cur_if->ifindex ) {
@@ -660,6 +666,8 @@ loop:
         cur_if->ift_dr = 0;
         cur_if->ifIndex = var->name[ ifcol_len-1 ];
         for (vp=var; vp; vp=vp->next_variable) {
+            if ((var->type & 0xF0) == 0x80)     /* Exception */
+                continue;
             if ( ! vp->val.integer )
                 continue;
             switch (vp->name[ifcol_len-2]) {
@@ -752,11 +760,15 @@ loop:
         while ( 1 ) {
             if (netsnmp_query_getnext( var, ss ) != SNMP_ERR_NOERROR)
                 break;
+            if ((var->type & 0xF0) == 0x80)     /* Exception */
+                break;
             if ( snmp_oid_compare( ifcol_oid, ifcol_len-2,
                                    var->name, ifcol_len-2) != 0 )
                 break;    /* End of Table */
             
             for ( vp=var; vp; vp=vp->next_variable ) {
+                if ((vp->type & 0xF0) == 0x80)     /* Exception */
+                    continue;
                 if ( ! vp->val.integer )
                     continue;
                 switch ( vp->name[ ifcol_len-2 ] ) {
