@@ -46,6 +46,7 @@ AUTOHEADER	= @AUTOHEADER@
 PERL            = @PERLPROG@
 PYTHON          = @PYTHONPROG@
 FIND            = @FIND@
+EGREP           = @EGREP@
 
 #
 # Compiler arguments
