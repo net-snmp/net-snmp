@@ -87,12 +87,14 @@ manaliases: Makefile $(MAN3_API)
 	touch manaliases
 	@result=0 ; \
         for i in $(MAN3_API) ; do				  \
-            for j in `sed -n '/^.SH NAME/,/^.SH SYNOPSIS/p' $$i  | sed -e 's/.- .*//' | sed 's/,.*//'  | /bin/grep -E -v '^.SH ' `; do \
+            for j in `$(SED) -n '/^.SH NAME/,/^.SH SYNOPSIS/p' $$i  | $(SED) -e 's/.- .*//' | $(SED) 's/,.*//'  | $(EGREP) -v '^.SH ' `; do \
 		echo "making man page alias $$j -> $$i APIs" ;    \
 		echo ".so man3/$$i" > $$j.3 ; 		  \
-		if ! expr match "$(MANALIASES)" ".*$$j\\.3" > /dev/null ; \
+		if expr match "$(MANALIASES)" ".*$$j\\.3" > /dev/null ; \
 		then \
-		    var=`echo $$i | sed -e 's/^netsnmp_//' -e 's/_api.3//' | tr '[a-z]' '[A-Z]'` ; \
+		  : ; \
+		else \
+		    var=`echo $$i | $(SED) -e 's/^netsnmp_//' -e 's/_api.3//' | tr '[a-z]' '[A-Z]'` ; \
 		    echo "You must add $$j.3 to the $${var}_ALIASES variable in the Makefile.in" ; \
 		    result=1 ; \
 	        fi; \
