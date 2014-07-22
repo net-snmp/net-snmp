@@ -174,13 +174,16 @@ netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
     }
 
 #if defined(cygwin) || !defined(HAVE_WINSOCK_H)
-    {
+    /*
+     * Unix: when enlarging, clear the file descriptors defined in the
+     * resized *fdset but that were not defined in the original *fdset.
+     */
+    if ( fdset->lfs_setsize == 0 && setsize == FD_SETSIZE ) {
+        /* In this case we can use the OS's FD_ZERO */
+        FD_ZERO( fdset->lfs_setptr );
+    } else {
         int             i;
 
-        /*
-         * Unix: when enlarging, clear the file descriptors defined in the
-         * resized *fdset but that were not defined in the original *fdset.
-         */
         for (i = fdset->lfs_setsize; i < setsize; i++)
             FD_CLR(i, fdset->lfs_setptr);
     }
