@@ -31,7 +31,6 @@
 ./header_complex.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./header_complex.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./header_complex.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./header_complex.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./header_complex.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./header_complex.lo: ../../include/net-snmp/library/ucd_compat.h
 ./header_complex.lo: ../../include/net-snmp/library/mib.h
@@ -143,7 +142,6 @@
 ./testhandler.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./testhandler.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./testhandler.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./testhandler.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./testhandler.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./testhandler.lo: ../../include/net-snmp/library/ucd_compat.h
 ./testhandler.lo: ../../include/net-snmp/library/mib.h
@@ -252,7 +250,6 @@
 ./util_funcs.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./util_funcs.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./util_funcs.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./util_funcs.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./util_funcs.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./util_funcs.lo: ../../include/net-snmp/library/ucd_compat.h
 ./util_funcs.lo: ../../include/net-snmp/library/mib.h
@@ -335,6 +332,7 @@
 ./util_funcs.lo: util_funcs.h util_funcs/header_generic.h
 ./util_funcs.lo: util_funcs/header_simple_table.h
 ./util_funcs.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h utilities/execute.h
+./util_funcs.lo: ucd-snmp/errormib.h mibdefs.h
 ./winExtDLL.lo: ../../include/net-snmp/net-snmp-config.h
 ./winExtDLL.lo: ../../include/net-snmp/net-snmp-features.h
 ./winExtDLL.lo: ../../include/net-snmp/agent/mib_module_config.h
@@ -366,7 +364,6 @@
 ./agent/extend.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agent/extend.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agent/extend.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agent/extend.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agent/extend.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agent/extend.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agent/extend.lo: ../../include/net-snmp/library/mib.h
@@ -477,7 +474,6 @@
 ./agent/nsCache.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agent/nsCache.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agent/nsCache.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agent/nsCache.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agent/nsCache.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agent/nsCache.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agent/nsCache.lo: ../../include/net-snmp/library/mib.h
@@ -585,7 +581,6 @@
 ./agent/nsDebug.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agent/nsDebug.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agent/nsDebug.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agent/nsDebug.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agent/nsDebug.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agent/nsDebug.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agent/nsDebug.lo: ../../include/net-snmp/library/mib.h
@@ -695,7 +690,6 @@
 ./agent/nsLogging.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agent/nsLogging.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agent/nsLogging.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agent/nsLogging.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agent/nsLogging.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agent/nsLogging.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agent/nsLogging.lo: ../../include/net-snmp/library/mib.h
@@ -804,7 +798,6 @@
 ./agent/nsModuleTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agent/nsModuleTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agent/nsModuleTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agent/nsModuleTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agent/nsModuleTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agent/nsModuleTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agent/nsModuleTable.lo: ../../include/net-snmp/library/mib.h
@@ -913,7 +906,6 @@
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agent/nsTransactionTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agent/nsTransactionTable.lo: ../../include/net-snmp/library/mib.h
@@ -1022,7 +1014,6 @@
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agent/nsVacmAccessTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agent/nsVacmAccessTable.lo: ../../include/net-snmp/library/mib.h
@@ -1131,7 +1122,6 @@
 ./agentx/agentx_config.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agentx/agentx_config.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agentx/agentx_config.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agentx/agentx_config.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agentx/agentx_config.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agentx/agentx_config.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agentx/agentx_config.lo: ../../include/net-snmp/library/mib.h
@@ -1241,7 +1231,6 @@
 ./agentx/client.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agentx/client.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agentx/client.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agentx/client.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agentx/client.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agentx/client.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agentx/client.lo: ../../include/net-snmp/library/mib.h
@@ -1351,7 +1340,6 @@
 ./agentx/master_admin.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agentx/master_admin.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agentx/master_admin.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agentx/master_admin.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agentx/master_admin.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agentx/master_admin.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agentx/master_admin.lo: ../../include/net-snmp/library/mib.h
@@ -1464,7 +1452,6 @@
 ./agentx/master.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agentx/master.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agentx/master.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agentx/master.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agentx/master.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agentx/master.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agentx/master.lo: ../../include/net-snmp/library/mib.h
@@ -1573,7 +1560,6 @@
 ./agentx/protocol.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agentx/protocol.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agentx/protocol.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agentx/protocol.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agentx/protocol.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agentx/protocol.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agentx/protocol.lo: ../../include/net-snmp/library/mib.h
@@ -1646,7 +1632,6 @@
 ./agentx/subagent.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./agentx/subagent.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./agentx/subagent.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./agentx/subagent.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./agentx/subagent.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./agentx/subagent.lo: ../../include/net-snmp/library/ucd_compat.h
 ./agentx/subagent.lo: ../../include/net-snmp/library/mib.h
@@ -1760,7 +1745,6 @@
 ./deliver/deliverByNotify.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./deliver/deliverByNotify.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./deliver/deliverByNotify.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./deliver/deliverByNotify.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./deliver/deliverByNotify.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./deliver/deliverByNotify.lo: ../../include/net-snmp/library/ucd_compat.h
 ./deliver/deliverByNotify.lo: ../../include/net-snmp/library/mib.h
@@ -1869,7 +1853,6 @@
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./disman/mteEventNotificationTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./disman/mteEventNotificationTable.lo: ../../include/net-snmp/library/mib.h
@@ -1978,7 +1961,6 @@
 ./disman/mteEventTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./disman/mteEventTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./disman/mteEventTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./disman/mteEventTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./disman/mteEventTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./disman/mteEventTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./disman/mteEventTable.lo: ../../include/net-snmp/library/mib.h
@@ -2090,7 +2072,6 @@
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./disman/mteObjectsTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./disman/mteObjectsTable.lo: ../../include/net-snmp/library/mib.h
@@ -2199,7 +2180,6 @@
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./disman/mteTriggerBooleanTable.lo: ../../include/net-snmp/library/mib.h
@@ -2310,7 +2290,6 @@
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./disman/mteTriggerDeltaTable.lo: ../../include/net-snmp/library/mib.h
@@ -2421,7 +2400,6 @@
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./disman/mteTriggerExistenceTable.lo: ../../include/net-snmp/library/mib.h
@@ -2533,7 +2511,6 @@
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./disman/mteTriggerTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./disman/mteTriggerTable.lo: ../../include/net-snmp/library/mib.h
@@ -2647,7 +2624,6 @@
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./disman/mteTriggerThresholdTable.lo: ../../include/net-snmp/library/mib.h
@@ -2758,7 +2734,6 @@
 ./examples/data_set.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/data_set.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/data_set.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/data_set.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/data_set.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/data_set.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/data_set.lo: ../../include/net-snmp/library/mib.h
@@ -2866,7 +2841,6 @@
 ./examples/delayed_instance.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/delayed_instance.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/delayed_instance.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/delayed_instance.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/delayed_instance.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/delayed_instance.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/delayed_instance.lo: ../../include/net-snmp/library/mib.h
@@ -2975,7 +2949,6 @@
 ./examples/example.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/example.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/example.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/example.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/example.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/example.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/example.lo: ../../include/net-snmp/library/mib.h
@@ -3084,7 +3057,6 @@
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/netSnmpHostsTable_access.lo: ../../include/net-snmp/library/mib.h
@@ -3195,7 +3167,6 @@
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/netSnmpHostsTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/netSnmpHostsTable.lo: ../../include/net-snmp/library/mib.h
@@ -3308,7 +3279,6 @@
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/netSnmpHostsTable_checkfns.lo: ../../include/net-snmp/library/mib.h
@@ -3381,7 +3351,6 @@
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/netSnmpHostsTable_checkfns_local.lo: ../../include/net-snmp/library/mib.h
@@ -3454,7 +3423,6 @@
 ./examples/notification.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/notification.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/notification.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/notification.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/notification.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/notification.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/notification.lo: ../../include/net-snmp/library/mib.h
@@ -3564,7 +3532,6 @@
 ./examples/scalar_int.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/scalar_int.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/scalar_int.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/scalar_int.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/scalar_int.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/scalar_int.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/scalar_int.lo: ../../include/net-snmp/library/mib.h
@@ -3671,7 +3638,6 @@
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/ucdDemoPublic.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/ucdDemoPublic.lo: ../../include/net-snmp/library/mib.h
@@ -3781,7 +3747,6 @@
 ./examples/watched.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./examples/watched.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./examples/watched.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./examples/watched.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./examples/watched.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./examples/watched.lo: ../../include/net-snmp/library/ucd_compat.h
 ./examples/watched.lo: ../../include/net-snmp/library/mib.h
@@ -3890,7 +3855,6 @@
 ./host/hr_device.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_device.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_device.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_device.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_device.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_device.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_device.lo: ../../include/net-snmp/library/mib.h
@@ -3968,7 +3932,6 @@
 ./host/hr_disk.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_disk.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_disk.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_disk.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_disk.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_disk.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_disk.lo: ../../include/net-snmp/library/mib.h
@@ -4048,7 +4011,6 @@
 ./host/hr_filesys.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_filesys.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_filesys.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_filesys.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_filesys.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_filesys.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_filesys.lo: ../../include/net-snmp/library/mib.h
@@ -4159,7 +4121,6 @@
 ./host/hrh_filesys.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hrh_filesys.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/library/mib.h
@@ -4270,7 +4231,6 @@
 ./host/hrh_storage.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hrh_storage.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hrh_storage.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hrh_storage.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hrh_storage.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hrh_storage.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hrh_storage.lo: ../../include/net-snmp/library/mib.h
@@ -4383,7 +4343,6 @@
 ./host/hr_network.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_network.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_network.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_network.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_network.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_network.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_network.lo: ../../include/net-snmp/library/mib.h
@@ -4493,7 +4452,6 @@
 ./host/hr_other.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_other.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_other.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_other.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_other.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_other.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_other.lo: ../../include/net-snmp/library/mib.h
@@ -4572,7 +4530,6 @@
 ./host/hr_partition.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_partition.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_partition.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_partition.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_partition.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_partition.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_partition.lo: ../../include/net-snmp/library/mib.h
@@ -4652,7 +4609,6 @@
 ./host/hr_print.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_print.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_print.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_print.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_print.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_print.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_print.lo: ../../include/net-snmp/library/mib.h
@@ -4733,7 +4689,6 @@
 ./host/hr_proc.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_proc.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_proc.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_proc.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_proc.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_proc.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_proc.lo: ../../include/net-snmp/library/mib.h
@@ -4846,7 +4801,6 @@
 ./host/hr_storage.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_storage.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_storage.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_storage.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_storage.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_storage.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_storage.lo: ../../include/net-snmp/library/mib.h
@@ -4957,7 +4911,6 @@
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hrSWInstalledTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hrSWInstalledTable.lo: ../../include/net-snmp/library/mib.h
@@ -5069,7 +5022,6 @@
 ./host/hr_swinst.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_swinst.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_swinst.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_swinst.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_swinst.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_swinst.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_swinst.lo: ../../include/net-snmp/library/mib.h
@@ -5143,7 +5095,6 @@
 ./host/hr_swrun.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_swrun.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_swrun.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_swrun.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_swrun.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_swrun.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_swrun.lo: ../../include/net-snmp/library/mib.h
@@ -5227,7 +5178,6 @@
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hrSWRunPerfTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hrSWRunPerfTable.lo: ../../include/net-snmp/library/mib.h
@@ -5338,7 +5288,6 @@
 ./host/hrSWRunTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hrSWRunTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hrSWRunTable.lo: ../../include/net-snmp/library/mib.h
@@ -5449,7 +5398,6 @@
 ./host/hr_system.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./host/hr_system.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./host/hr_system.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./host/hr_system.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./host/hr_system.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./host/hr_system.lo: ../../include/net-snmp/library/ucd_compat.h
 ./host/hr_system.lo: ../../include/net-snmp/library/mib.h
@@ -5559,7 +5507,6 @@
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ip-mib/ip_scalars.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/library/mib.h
@@ -5670,7 +5617,6 @@
 ./mibII/at.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/at.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/at.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/at.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/at.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/at.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/at.lo: ../../include/net-snmp/library/mib.h
@@ -5783,7 +5729,6 @@
 ./mibII/icmp.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/icmp.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/icmp.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/icmp.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/icmp.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/icmp.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/icmp.lo: ../../include/net-snmp/library/mib.h
@@ -5897,7 +5842,6 @@
 ./mibII/interfaces.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/interfaces.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/interfaces.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/interfaces.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/interfaces.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/interfaces.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/interfaces.lo: ../../include/net-snmp/library/mib.h
@@ -5981,8 +5925,10 @@
 ./mibII/interfaces.lo: ../../include/net-snmp/agent/sysORTable.h
 ./mibII/interfaces.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./mibII/interfaces.lo: ../../include/net-snmp/data_access/interface.h
-./mibII/interfaces.lo: ./mibII/interfaces.h struct.h
+./mibII/interfaces.lo: ./mibII/interfaces.h struct.h util_funcs.h
 ./mibII/interfaces.lo: util_funcs/header_generic.h
+./mibII/interfaces.lo: util_funcs/header_simple_table.h
+./mibII/interfaces.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/net-snmp-config.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/net-snmp-features.h
 ./mibII/ipAddr.lo: ../../agent/kernel.h
@@ -6012,7 +5958,6 @@
 ./mibII/ipAddr.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/ipAddr.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/ipAddr.lo: ../../include/net-snmp/library/mib.h
@@ -6125,7 +6070,6 @@
 ./mibII/ip.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/ip.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/ip.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/ip.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/ip.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/ip.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/ip.lo: ../../include/net-snmp/library/mib.h
@@ -6240,7 +6184,6 @@
 ./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/ipCidrRouteTable_access.lo: ../../include/net-snmp/library/mib.h
@@ -6352,7 +6295,6 @@
 ./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/ipCidrRouteTable.lo: ../../include/net-snmp/library/mib.h
@@ -6465,7 +6407,6 @@
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/ipCidrRouteTable_checkfns.lo: ../../include/net-snmp/library/mib.h
@@ -6539,7 +6480,6 @@
 ./mibII/ipv6.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/ipv6.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/ipv6.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/ipv6.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/ipv6.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/ipv6.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/ipv6.lo: ../../include/net-snmp/library/mib.h
@@ -6650,7 +6590,6 @@
 ./mibII/kernel_linux.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/kernel_linux.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/library/mib.h
@@ -6758,7 +6697,6 @@
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/kernel_netbsd.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/kernel_netbsd.lo: ../../include/net-snmp/library/mib.h
@@ -6867,7 +6805,6 @@
 ./mibII/kernel_sysctl.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/kernel_sysctl.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/kernel_sysctl.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/kernel_sysctl.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/kernel_sysctl.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/kernel_sysctl.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/kernel_sysctl.lo: ../../include/net-snmp/library/mib.h
@@ -6976,7 +6913,6 @@
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/mta_sendmail.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/library/mib.h
@@ -7085,7 +7021,6 @@
 ./mibII/route_write.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/route_write.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/route_write.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/route_write.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/route_write.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/route_write.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/route_write.lo: ../../include/net-snmp/library/mib.h
@@ -7196,7 +7131,6 @@
 ./mibII/setSerialNo.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/setSerialNo.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/setSerialNo.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/setSerialNo.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/setSerialNo.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/setSerialNo.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/setSerialNo.lo: ../../include/net-snmp/library/mib.h
@@ -7305,7 +7239,6 @@
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/snmp_mib_5_5.lo: ../../include/net-snmp/library/mib.h
@@ -7416,7 +7349,6 @@
 ./mibII/snmp_mib.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/snmp_mib.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/snmp_mib.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/snmp_mib.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/snmp_mib.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/snmp_mib.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/snmp_mib.lo: ../../include/net-snmp/library/mib.h
@@ -7526,7 +7458,6 @@
 ./mibII/sysORTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/sysORTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/sysORTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/sysORTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/sysORTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/sysORTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/sysORTable.lo: ../../include/net-snmp/library/mib.h
@@ -7639,7 +7570,6 @@
 ./mibII/system_mib.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/system_mib.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/system_mib.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/system_mib.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/system_mib.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/system_mib.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/system_mib.lo: ../../include/net-snmp/library/mib.h
@@ -7755,7 +7685,6 @@
 ./mibII/tcp.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/tcp.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/tcp.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/tcp.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/tcp.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/tcp.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/tcp.lo: ../../include/net-snmp/library/mib.h
@@ -7870,7 +7799,6 @@
 ./mibII/tcpTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/tcpTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/tcpTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/tcpTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/tcpTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/tcpTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/tcpTable.lo: ../../include/net-snmp/library/mib.h
@@ -7981,7 +7909,6 @@
 ./mibII/udp.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/udp.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/udp.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/udp.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/udp.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/udp.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/udp.lo: ../../include/net-snmp/library/mib.h
@@ -8096,7 +8023,6 @@
 ./mibII/udpTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/udpTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/udpTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/udpTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/udpTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/udpTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/udpTable.lo: ../../include/net-snmp/library/mib.h
@@ -8206,7 +8132,6 @@
 ./mibII/updates.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/updates.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/updates.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/updates.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/updates.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/updates.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/updates.lo: ../../include/net-snmp/library/mib.h
@@ -8314,7 +8239,6 @@
 ./mibII/vacm_conf.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/vacm_conf.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/vacm_conf.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/vacm_conf.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/vacm_conf.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/vacm_conf.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/vacm_conf.lo: ../../include/net-snmp/library/mib.h
@@ -8424,7 +8348,6 @@
 ./mibII/vacm_context.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/vacm_context.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/vacm_context.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/vacm_context.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/vacm_context.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/vacm_context.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/vacm_context.lo: ../../include/net-snmp/library/mib.h
@@ -8533,7 +8456,6 @@
 ./mibII/vacm_vars.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/vacm_vars.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/vacm_vars.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/vacm_vars.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/vacm_vars.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/vacm_vars.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/vacm_vars.lo: ../../include/net-snmp/library/mib.h
@@ -8646,7 +8568,6 @@
 ./mibII/var_route.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./mibII/var_route.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./mibII/var_route.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./mibII/var_route.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./mibII/var_route.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./mibII/var_route.lo: ../../include/net-snmp/library/ucd_compat.h
 ./mibII/var_route.lo: ../../include/net-snmp/library/mib.h
@@ -8730,7 +8651,9 @@
 ./mibII/var_route.lo: ../../include/net-snmp/data_access/interface.h
 ./mibII/var_route.lo: ./mibII/ip.h ./mibII/var_route.h ./mibII/route_write.h
 ./mibII/var_route.lo: ./mibII/at.h ../../agent/kernel.h ./mibII/interfaces.h
-./mibII/var_route.lo: struct.h
+./mibII/var_route.lo: struct.h util_funcs.h util_funcs/header_generic.h
+./mibII/var_route.lo: util_funcs/header_simple_table.h
+./mibII/var_route.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/net-snmp-config.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/net-snmp-includes.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/definitions.h
@@ -8758,7 +8681,6 @@
 ./misc/ipfwacc.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./misc/ipfwacc.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/library/ucd_compat.h
 ./misc/ipfwacc.lo: ../../include/net-snmp/library/mib.h
@@ -8868,7 +8790,6 @@
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./notification-log-mib/notification_log.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/library/ucd_compat.h
 ./notification-log-mib/notification_log.lo: ../../include/net-snmp/library/mib.h
@@ -8979,7 +8900,6 @@
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./notification/snmpNotifyFilterProfileTable.lo: ../../include/net-snmp/library/mib.h
@@ -9089,7 +9009,6 @@
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./notification/snmpNotifyTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./notification/snmpNotifyTable.lo: ../../include/net-snmp/library/mib.h
@@ -9210,7 +9129,6 @@
 ./Rmon/agutil.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./Rmon/agutil.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./Rmon/agutil.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./Rmon/agutil.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./Rmon/agutil.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./Rmon/agutil.lo: ../../include/net-snmp/library/ucd_compat.h
 ./Rmon/agutil.lo: ../../include/net-snmp/library/mib.h
@@ -9319,7 +9237,6 @@
 ./Rmon/alarm.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./Rmon/alarm.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./Rmon/alarm.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./Rmon/alarm.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./Rmon/alarm.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./Rmon/alarm.lo: ../../include/net-snmp/library/ucd_compat.h
 ./Rmon/alarm.lo: ../../include/net-snmp/library/mib.h
@@ -9429,7 +9346,6 @@
 ./Rmon/alarmTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./Rmon/alarmTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./Rmon/alarmTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./Rmon/alarmTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./Rmon/alarmTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./Rmon/alarmTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./Rmon/alarmTable.lo: ../../include/net-snmp/library/mib.h
@@ -9538,7 +9454,6 @@
 ./Rmon/event.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./Rmon/event.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./Rmon/event.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./Rmon/event.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./Rmon/event.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./Rmon/event.lo: ../../include/net-snmp/library/ucd_compat.h
 ./Rmon/event.lo: ../../include/net-snmp/library/mib.h
@@ -9646,7 +9561,6 @@
 ./Rmon/history.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./Rmon/history.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./Rmon/history.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./Rmon/history.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./Rmon/history.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./Rmon/history.lo: ../../include/net-snmp/library/ucd_compat.h
 ./Rmon/history.lo: ../../include/net-snmp/library/mib.h
@@ -9755,7 +9669,6 @@
 ./Rmon/rows.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./Rmon/rows.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./Rmon/rows.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./Rmon/rows.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./Rmon/rows.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./Rmon/rows.lo: ../../include/net-snmp/library/ucd_compat.h
 ./Rmon/rows.lo: ../../include/net-snmp/library/mib.h
@@ -9864,7 +9777,6 @@
 ./Rmon/statistics.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./Rmon/statistics.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./Rmon/statistics.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./Rmon/statistics.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./Rmon/statistics.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./Rmon/statistics.lo: ../../include/net-snmp/library/ucd_compat.h
 ./Rmon/statistics.lo: ../../include/net-snmp/library/mib.h
@@ -9974,7 +9886,6 @@
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpAssocLocalAddrTable.lo: ../../include/net-snmp/library/mib.h
@@ -10084,7 +9995,6 @@
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpAssocRemAddrTable.lo: ../../include/net-snmp/library/mib.h
@@ -10194,7 +10104,6 @@
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpAssocTable.lo: ../../include/net-snmp/library/mib.h
@@ -10304,7 +10213,6 @@
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpLookupLocalPortTable.lo: ../../include/net-snmp/library/mib.h
@@ -10414,7 +10322,6 @@
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpLookupRemHostNameTable.lo: ../../include/net-snmp/library/mib.h
@@ -10524,7 +10431,6 @@
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpLookupRemIPAddrTable.lo: ../../include/net-snmp/library/mib.h
@@ -10634,7 +10540,6 @@
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpLookupRemPortTable.lo: ../../include/net-snmp/library/mib.h
@@ -10744,7 +10649,6 @@
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpLookupRemPrimIPAddrTable.lo: ../../include/net-snmp/library/mib.h
@@ -10854,7 +10758,6 @@
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpScalars.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpScalars.lo: ../../include/net-snmp/library/mib.h
@@ -10964,7 +10867,6 @@
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpScalars_common.lo: ../../include/net-snmp/library/mib.h
@@ -11073,7 +10975,6 @@
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpScalars_freebsd.lo: ../../include/net-snmp/library/mib.h
@@ -11182,7 +11083,6 @@
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpScalars_linux.lo: ../../include/net-snmp/library/mib.h
@@ -11291,7 +11191,6 @@
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpScalars_solaris2.lo: ../../include/net-snmp/library/mib.h
@@ -11402,7 +11301,6 @@
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpTables_common.lo: ../../include/net-snmp/library/mib.h
@@ -11518,7 +11416,6 @@
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpTables_freebsd.lo: ../../include/net-snmp/library/mib.h
@@ -11633,7 +11530,6 @@
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpTables_linux.lo: ../../include/net-snmp/library/mib.h
@@ -11746,7 +11642,6 @@
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/library/ucd_compat.h
 ./sctp-mib/sctpTables_solaris2.lo: ../../include/net-snmp/library/mib.h
@@ -11863,7 +11758,6 @@
 ./smux/smux.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./smux/smux.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./smux/smux.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./smux/smux.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./smux/smux.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./smux/smux.lo: ../../include/net-snmp/library/ucd_compat.h
 ./smux/smux.lo: ../../include/net-snmp/library/mib.h
@@ -11971,7 +11865,6 @@
 ./smux/snmp_bgp.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./smux/snmp_bgp.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./smux/snmp_bgp.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./smux/snmp_bgp.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./smux/snmp_bgp.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./smux/snmp_bgp.lo: ../../include/net-snmp/library/ucd_compat.h
 ./smux/snmp_bgp.lo: ../../include/net-snmp/library/mib.h
@@ -12080,7 +11973,6 @@
 ./smux/snmp_ospf.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./smux/snmp_ospf.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./smux/snmp_ospf.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./smux/snmp_ospf.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./smux/snmp_ospf.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./smux/snmp_ospf.lo: ../../include/net-snmp/library/ucd_compat.h
 ./smux/snmp_ospf.lo: ../../include/net-snmp/library/mib.h
@@ -12189,7 +12081,6 @@
 ./smux/snmp_rip2.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./smux/snmp_rip2.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./smux/snmp_rip2.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./smux/snmp_rip2.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./smux/snmp_rip2.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./smux/snmp_rip2.lo: ../../include/net-snmp/library/ucd_compat.h
 ./smux/snmp_rip2.lo: ../../include/net-snmp/library/mib.h
@@ -12299,7 +12190,6 @@
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./snmpv3/snmpEngine.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/library/ucd_compat.h
 ./snmpv3/snmpEngine.lo: ../../include/net-snmp/library/mib.h
@@ -12410,7 +12300,6 @@
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/library/ucd_compat.h
 ./snmpv3/snmpMPDStats_5_5.lo: ../../include/net-snmp/library/mib.h
@@ -12520,7 +12409,6 @@
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/library/ucd_compat.h
 ./snmpv3/snmpMPDStats.lo: ../../include/net-snmp/library/mib.h
@@ -12631,7 +12519,6 @@
 ./snmpv3/usmConf.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./snmpv3/usmConf.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/library/ucd_compat.h
 ./snmpv3/usmConf.lo: ../../include/net-snmp/library/mib.h
@@ -12740,7 +12627,6 @@
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/library/ucd_compat.h
 ./snmpv3/usmStats_5_5.lo: ../../include/net-snmp/library/mib.h
@@ -12850,7 +12736,6 @@
 ./snmpv3/usmStats.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./snmpv3/usmStats.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./snmpv3/usmStats.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./snmpv3/usmStats.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./snmpv3/usmStats.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./snmpv3/usmStats.lo: ../../include/net-snmp/library/ucd_compat.h
 ./snmpv3/usmStats.lo: ../../include/net-snmp/library/mib.h
@@ -12962,7 +12847,6 @@
 ./snmpv3/usmUser.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./snmpv3/usmUser.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./snmpv3/usmUser.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./snmpv3/usmUser.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./snmpv3/usmUser.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./snmpv3/usmUser.lo: ../../include/net-snmp/library/ucd_compat.h
 ./snmpv3/usmUser.lo: ../../include/net-snmp/library/mib.h
@@ -13070,7 +12954,6 @@
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/library/ucd_compat.h
 ./target/snmpTargetAddrEntry.lo: ../../include/net-snmp/library/mib.h
@@ -13180,7 +13063,6 @@
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/library/ucd_compat.h
 ./target/snmpTargetParamsEntry.lo: ../../include/net-snmp/library/mib.h
@@ -13290,7 +13172,6 @@
 ./target/target.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./target/target.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./target/target.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./target/target.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./target/target.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./target/target.lo: ../../include/net-snmp/library/ucd_compat.h
 ./target/target.lo: ../../include/net-snmp/library/mib.h
@@ -13400,7 +13281,6 @@
 ./target/target_counters_5_5.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./target/target_counters_5_5.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./target/target_counters_5_5.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./target/target_counters_5_5.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./target/target_counters_5_5.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./target/target_counters_5_5.lo: ../../include/net-snmp/library/ucd_compat.h
 ./target/target_counters_5_5.lo: ../../include/net-snmp/library/mib.h
@@ -13508,7 +13388,6 @@
 ./target/target_counters.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./target/target_counters.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./target/target_counters.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./target/target_counters.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./target/target_counters.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./target/target_counters.lo: ../../include/net-snmp/library/ucd_compat.h
 ./target/target_counters.lo: ../../include/net-snmp/library/mib.h
@@ -13617,7 +13496,6 @@
 ./tsm-mib/snmpTsmConfigurationUsePrefix.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./tsm-mib/snmpTsmConfigurationUsePrefix.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./tsm-mib/snmpTsmConfigurationUsePrefix.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./tsm-mib/snmpTsmConfigurationUsePrefix.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./tsm-mib/snmpTsmConfigurationUsePrefix.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./tsm-mib/snmpTsmConfigurationUsePrefix.lo: ../../include/net-snmp/library/ucd_compat.h
 ./tsm-mib/snmpTsmConfigurationUsePrefix.lo: ../../include/net-snmp/library/mib.h
@@ -13726,7 +13604,6 @@
 ./tunnel/tunnel.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./tunnel/tunnel.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/library/ucd_compat.h
 ./tunnel/tunnel.lo: ../../include/net-snmp/library/mib.h
@@ -13843,7 +13720,6 @@
 ./ucd-snmp/disk.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/disk.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/library/mib.h
@@ -13926,7 +13802,7 @@
 ./ucd-snmp/disk.lo: ../../include/net-snmp/agent/snmp_get_statistic.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/agent/auto_nlist.h struct.h
 ./ucd-snmp/disk.lo: ./ucd-snmp/disk.h mibdefs.h
-./ucd-snmp/disk.lo: util_funcs/header_simple_table.h
+./ucd-snmp/disk.lo: util_funcs/header_simple_table.h ./ucd-snmp/errormib.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/net-snmp-config.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/definitions.h
@@ -13954,7 +13830,6 @@
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/disk_hw.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/library/mib.h
@@ -14037,7 +13912,7 @@
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/agent/snmp_get_statistic.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/agent/hardware/fsys.h struct.h
 ./ucd-snmp/disk_hw.lo: ./ucd-snmp/disk.h mibdefs.h
-./ucd-snmp/disk_hw.lo: util_funcs/header_simple_table.h
+./ucd-snmp/disk_hw.lo: util_funcs/header_simple_table.h ./ucd-snmp/errormib.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/net-snmp-config.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/net-snmp-includes.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/definitions.h
@@ -14065,7 +13940,6 @@
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/diskio.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/library/mib.h
@@ -14176,7 +14050,6 @@
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/dlmod.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/dlmod.lo: ../../include/net-snmp/library/mib.h
@@ -14284,7 +14157,6 @@
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/errormib.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/errormib.lo: ../../include/net-snmp/library/mib.h
@@ -14396,7 +14268,6 @@
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/extensible.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/extensible.lo: ../../include/net-snmp/library/mib.h
@@ -14511,7 +14382,6 @@
 ./ucd-snmp/file.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/file.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/file.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/file.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/file.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/file.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/file.lo: ../../include/net-snmp/library/mib.h
@@ -14621,7 +14491,6 @@
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/hpux.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/hpux.lo: ../../include/net-snmp/library/mib.h
@@ -14731,7 +14600,6 @@
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/lmSensors.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/library/mib.h
@@ -14840,7 +14708,6 @@
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/lmsensorsMib.lo: ../../include/net-snmp/library/mib.h
@@ -14951,7 +14818,6 @@
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/loadave.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/library/mib.h
@@ -15064,7 +14930,6 @@
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/memory_aix4.lo: ../../include/net-snmp/library/mib.h
@@ -15175,7 +15040,6 @@
 ./ucd-snmp/memory.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/memory.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/memory.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/memory.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/memory.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/memory.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/memory.lo: ../../include/net-snmp/library/mib.h
@@ -15285,7 +15149,6 @@
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/memory_darwin7.lo: ../../include/net-snmp/library/mib.h
@@ -15396,7 +15259,6 @@
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/memory_dynix.lo: ../../include/net-snmp/library/mib.h
@@ -15507,7 +15369,6 @@
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/memory_freebsd2.lo: ../../include/net-snmp/library/mib.h
@@ -15621,7 +15482,6 @@
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/memory_hpux.lo: ../../include/net-snmp/library/mib.h
@@ -15732,7 +15592,6 @@
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/memory_netbsd1.lo: ../../include/net-snmp/library/mib.h
@@ -15843,7 +15702,6 @@
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/memory_solaris2.lo: ../../include/net-snmp/library/mib.h
@@ -15956,7 +15814,6 @@
 ./ucd-snmp/pass.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/pass.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/pass.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/pass.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/pass.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/pass.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/pass.lo: ../../include/net-snmp/library/mib.h
@@ -16068,7 +15925,6 @@
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/pass_common.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/pass_common.lo: ../../include/net-snmp/library/mib.h
@@ -16182,7 +16038,6 @@
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/pass_persist.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/pass_persist.lo: ../../include/net-snmp/library/mib.h
@@ -16295,7 +16150,6 @@
 ./ucd-snmp/proc.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/proc.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/library/mib.h
@@ -16375,7 +16229,9 @@
 ./ucd-snmp/proc.lo: ../../include/net-snmp/agent/table_array.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/agent/mfd.h
 ./ucd-snmp/proc.lo: ../../include/net-snmp/agent/snmp_get_statistic.h
-./ucd-snmp/proc.lo: struct.h ./ucd-snmp/proc.h mibdefs.h util_funcs.h
+./ucd-snmp/proc.lo: struct.h ./ucd-snmp/proc.h mibdefs.h
+./ucd-snmp/proc.lo: ../../include/net-snmp/data_access/swrun.h
+./ucd-snmp/proc.lo: ./ucd-snmp/errormib.h util_funcs.h
 ./ucd-snmp/proc.lo: util_funcs/header_generic.h
 ./ucd-snmp/proc.lo: util_funcs/header_simple_table.h
 ./ucd-snmp/proc.lo: util_funcs/MIB_STATS_CACHE_TIMEOUT.h ../../agent/kernel.h
@@ -16407,7 +16263,6 @@
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/proxy.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/proxy.lo: ../../include/net-snmp/library/mib.h
@@ -16516,7 +16371,6 @@
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/versioninfo.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/versioninfo.lo: ../../include/net-snmp/library/mib.h
@@ -16627,7 +16481,6 @@
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat_aix4.lo: ../../include/net-snmp/library/mib.h
@@ -16737,7 +16590,6 @@
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat_bsdi4.lo: ../../include/net-snmp/library/mib.h
@@ -16848,7 +16700,6 @@
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat.lo: ../../include/net-snmp/library/mib.h
@@ -16959,7 +16810,6 @@
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat_darwin7.lo: ../../include/net-snmp/library/mib.h
@@ -17070,7 +16920,6 @@
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat_dynix.lo: ../../include/net-snmp/library/mib.h
@@ -17180,7 +17029,6 @@
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat_freebsd2.lo: ../../include/net-snmp/library/mib.h
@@ -17292,7 +17140,6 @@
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat_hpux.lo: ../../include/net-snmp/library/mib.h
@@ -17403,7 +17250,6 @@
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat_linux.lo: ../../include/net-snmp/library/mib.h
@@ -17514,7 +17360,6 @@
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat_netbsd1.lo: ../../include/net-snmp/library/mib.h
@@ -17625,7 +17470,6 @@
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/library/ucd_compat.h
 ./ucd-snmp/vmstat_solaris2.lo: ../../include/net-snmp/library/mib.h
@@ -17735,7 +17579,6 @@
 ./util_funcs/Exit.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./util_funcs/Exit.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./util_funcs/Exit.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./util_funcs/Exit.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./util_funcs/Exit.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./util_funcs/Exit.lo: ../../include/net-snmp/library/ucd_compat.h
 ./util_funcs/Exit.lo: ../../include/net-snmp/library/mib.h
@@ -17772,7 +17615,6 @@
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/library/ucd_compat.h
 ./util_funcs/get_pid_from_inode.lo: ../../include/net-snmp/library/mib.h
@@ -17812,7 +17654,6 @@
 ./util_funcs/header_generic.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./util_funcs/header_generic.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./util_funcs/header_generic.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./util_funcs/header_generic.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./util_funcs/header_generic.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./util_funcs/header_generic.lo: ../../include/net-snmp/library/ucd_compat.h
 ./util_funcs/header_generic.lo: ../../include/net-snmp/library/mib.h
@@ -17921,7 +17762,6 @@
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./util_funcs/header_simple_table.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/library/ucd_compat.h
 ./util_funcs/header_simple_table.lo: ../../include/net-snmp/library/mib.h
@@ -18030,7 +17870,6 @@
 ./util_funcs/restart.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./util_funcs/restart.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./util_funcs/restart.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./util_funcs/restart.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./util_funcs/restart.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./util_funcs/restart.lo: ../../include/net-snmp/library/ucd_compat.h
 ./util_funcs/restart.lo: ../../include/net-snmp/library/mib.h
@@ -18101,7 +17940,6 @@
 ./utilities/execute.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./utilities/execute.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./utilities/execute.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./utilities/execute.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./utilities/execute.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./utilities/execute.lo: ../../include/net-snmp/library/ucd_compat.h
 ./utilities/execute.lo: ../../include/net-snmp/library/mib.h
@@ -18182,7 +18020,7 @@
 ./utilities/execute.lo: ../../include/net-snmp/agent/table_array.h
 ./utilities/execute.lo: ../../include/net-snmp/agent/mfd.h
 ./utilities/execute.lo: ../../include/net-snmp/agent/snmp_get_statistic.h
-./utilities/execute.lo: ./ucd-snmp/errormib.h mibdefs.h ./utilities/execute.h
+./utilities/execute.lo: ucd-snmp/errormib.h mibdefs.h ./utilities/execute.h
 ./utilities/execute.lo: struct.h
 ./utilities/iquery.lo: ../../include/net-snmp/net-snmp-config.h
 ./utilities/iquery.lo: ../../include/net-snmp/net-snmp-features.h
@@ -18212,7 +18050,6 @@
 ./utilities/iquery.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./utilities/iquery.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./utilities/iquery.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./utilities/iquery.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./utilities/iquery.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./utilities/iquery.lo: ../../include/net-snmp/library/ucd_compat.h
 ./utilities/iquery.lo: ../../include/net-snmp/library/mib.h
@@ -18320,7 +18157,6 @@
 ./utilities/override.lo: ../../include/net-snmp/library/snmpTCPDomain.h
 ./utilities/override.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
 ./utilities/override.lo: ../../include/net-snmp/library/snmpIPv6BaseDomain.h
-./utilities/override.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./utilities/override.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./utilities/override.lo: ../../include/net-snmp/library/ucd_compat.h
 ./utilities/override.lo: ../../include/net-snmp/library/mib.h
