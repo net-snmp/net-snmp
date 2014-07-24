@@ -8,6 +8,9 @@ listing of all changes made to the code.
       - Fixed crash when MD5 hash is not supported by OpenSSL.
       - Fixed parsing of sequences. Don't overwrite 'data' variable, it's
 	used when parsing bulk responses.
+      - [BUG 1267 ]: snmplib: register_mib_context() fix for read-only
+	variables   This is a slightly modified version of a patch from
+	Harsha Shivanna.
 
     snmp:
       - Usm-dh-objects-mib: Avoid triggering an assert statement in
@@ -49,6 +52,8 @@ listing of all changes made to the code.
         the linux implementation of the ICMP-MIB.  This release fixes
         this bug and all users are encouraged to update their SNMP
         agent if they make use of the ICMP-MIB table objects.
+      - PATCH: 1275: from Viliam Púčik: fixed Perl trap handler when
+	processing trap with empty community string.
 
     snmpd, snmptrapd and apps:
       - Make ENV_SEPARATOR_CHAR configurable

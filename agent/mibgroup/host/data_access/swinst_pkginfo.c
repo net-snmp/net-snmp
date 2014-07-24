@@ -126,7 +126,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 	snmp_log( LOG_INFO, "SWInst: not a pkgng system\n" );
     }
 
-    // if we are using FreeBSD's pkgng
+    /* if we are using FreeBSD's pkgng */
     if (pkgng) {
         if ((it = pkgdb_query(db, NULL, MATCH_ALL)) == NULL) {
             snmp_log( LOG_ERR, "SWInst: error querying pkgng db\n" );
