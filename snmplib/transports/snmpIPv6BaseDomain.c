@@ -167,8 +167,10 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
             return 0;
         }
 
-        for (cp = peername; *cp && isdigit((unsigned char) *cp); cp++);
-        portno = atoi(peername);
+        cp = peername;
+        if (*cp == ':') cp++;
+        portno = atoi(cp);
+        while (*cp && isdigit((unsigned char) *cp)) cp++;
         if (!*cp &&  portno != 0) {
             /*
              * Okay, it looks like JUST a port number.  
@@ -227,8 +229,10 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                          (void *) &(addr->sin6_addr))) {
                         DEBUGMSGTL(("netsnmp_sockaddr_in6_2",
                                     "IPv6 address with square brackets\n"));
-                        portno = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
-				                    NETSNMP_DS_LIB_DEFAULT_PORT);
+                        portno = ntohs(addr->sin6_port);
+                        if (portno == 0)
+                            portno = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+                                                    NETSNMP_DS_LIB_DEFAULT_PORT);
                         if (portno <= 0)
                             portno = SNMP_PORT;
                         addr->sin6_port = htons((u_short)portno);
