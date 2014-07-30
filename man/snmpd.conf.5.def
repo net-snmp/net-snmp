@@ -1284,7 +1284,7 @@ Attempting to define an unaccompanied \fIexecfix\fR directive will fail.
 .PP
 \fIexec\fR and \fIsh\fR extensions can only be configured via the
 snmpd.conf file.  They cannot be set up via SNMP SET requests.
-.IP "extend [MIBOID] NAME PROG ARGS"
+.IP "extend [-cacheTime TIME] [-execType TYPE] [MIBOID] NAME PROG ARGS"
 works in a similar manner to the \fIexec\fR directive, but with a number
 of improvements.  The MIB tables (\fInsExtendConfigTable\fR
 etc) are indexed by the NAME token, so are unaffected by the order in
@@ -1293,6 +1293,14 @@ There are \fItwo\fR result tables - one (\fInsExtendOutput1Table\fR)
 containing the exit status, the first line and full output (as a single string)
 for each \fIextend\fR entry, and the other (\fInsExtendOutput2Table\fR)
 containing the complete output as a series of separate lines.
+.IP
+If -cacheTime is specified, then its argument is used as the cache timeout
+(in whole seconds) for this \fIextend\fR entry. This mechanism provides a
+non-volatile way to specify the cache timeout.
+.IP
+If -execType is specified and has a value of \fIsh\fR, then this \fIextend\fR
+entry will be run in a shell. Otherwise it will be run in the default \fIexec\fR
+fashion. This mechanism provides a non-volatile way to specify the exec type.
 .IP
 If MIBOID is specified, then the configuration and result tables will be rooted
 at this point in the OID tree, but are otherwise structured in exactly

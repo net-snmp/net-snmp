@@ -522,8 +522,28 @@ extend_parse_config(const char *token, char *cptr)
     size_t oid_len;
     extend_registration_block *eptr;
     int  flags;
+    int cache_timeout = 0;
+    int exec_type = NS_EXTEND_ETYPE_EXEC;
 
-    cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
+    cptr = copy_nword(cptr, exec_name, sizeof(exec_name));
+    if (strcmp(exec_name, "-cacheTime") == 0) {
+        char cache_timeout_str[32];
+
+        cptr = copy_nword(cptr, cache_timeout_str, sizeof(cache_timeout_str));
+        /* If atoi can't do the conversion, it returns 0 */
+        cache_timeout = atoi(cache_timeout_str);
+        cptr = copy_nword(cptr, exec_name, sizeof(exec_name));
+    }
+    if (strcmp(exec_name, "-execType") == 0) {
+        char exec_type_str[16];
+
+        cptr = copy_nword(cptr, exec_type_str, sizeof(exec_type_str));
+        if (strcmp(exec_type_str, "sh") == 0)
+            exec_type = NS_EXTEND_ETYPE_SHELL;
+        else
+            exec_type = NS_EXTEND_ETYPE_EXEC;
+        cptr = copy_nword(cptr, exec_name, sizeof(exec_name));
+    }
     if ( *exec_name == '.' ) {
         oid_len = MAX_OID_LEN - 2;
         if (0 == read_objid( exec_name, oid_buf, &oid_len )) {
@@ -545,7 +565,8 @@ extend_parse_config(const char *token, char *cptr)
     flags = (NS_EXTEND_FLAGS_ACTIVE | NS_EXTEND_FLAGS_CONFIG);
     if (!strcmp( token, "sh"        ) ||
         !strcmp( token, "extend-sh" ) ||
-        !strcmp( token, "sh2" ))
+        !strcmp( token, "sh2") ||
+        exec_type == NS_EXTEND_ETYPE_SHELL)
         flags |= NS_EXTEND_FLAGS_SHELL;
     if (!strcmp( token, "execFix"   ) ||
         !strcmp( token, "extendfix" ) ||
@@ -566,6 +587,8 @@ extend_parse_config(const char *token, char *cptr)
         extension->command  = strdup( exec_command );
         if (cptr)
             extension->args = strdup( cptr );
+        if (cache_timeout != 0)
+            extension->cache->timeout = cache_timeout;
     } else {
         snmp_log(LOG_ERR, "Failed to register extend entry '%s' - possibly duplicate name.\n", exec_name );
         return;
