@@ -37,7 +37,7 @@ IMPORTS
 	FROM SNMPv2-TC;
 
 ucdavis MODULE-IDENTITY
-    LAST-UPDATED "200901190000Z"
+    LAST-UPDATED "201407310000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
 	"This mib is no longer being maintained by the University of
@@ -55,6 +55,9 @@ ucdavis MODULE-IDENTITY
     DESCRIPTION
 	"This file defines the private UCD SNMP MIB extensions."
 
+    REVISION     "201407310000Z"
+    DESCRIPTION
+	"New object for number of CPUs as counted by the agent"
     REVISION	 "201105140000Z"
     DESCRIPTION
 	"New objects for monitoring CPU Steal, Guest and Nice values"
@@ -1487,6 +1490,23 @@ ssCpuRawGuestNice OBJECT-TYPE
          counters are cumulative over all CPUs, so their
          sum will typically be N*100 (for N processors)."
     ::= { systemStats 66 }
+
+ssCpuNumCpus OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The number of processors, as counted by the agent.
+         This object's value may be useful in the management
+         of certain operating systems where notions such as
+         load average do not take into account the number of
+         processors in the system.
+
+         For other objects in the systemStats group whose
+         descriptions refer to 'N processors', this object's
+         value is N."
+    ::= { systemStats 67 }
+
 
 -- possibly used in the future:
 --
