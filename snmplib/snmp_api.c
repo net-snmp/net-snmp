@@ -4871,7 +4871,7 @@ _sess_async_send(void *sessp,
      * specified in the received PDU.  
      */
 
-    if (session->sndMsgMaxSize != 0 && length > session->sndMsgMaxSize) {
+    if (pdu->version == SNMP_VERSION_3 && session->sndMsgMaxSize != 0 && length > session->sndMsgMaxSize) {
         DEBUGMSGTL(("sess_async_send",
                     "length of packet (%lu) exceeds session maximum (%lu)\n",
                     length, session->sndMsgMaxSize));
