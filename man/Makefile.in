@@ -90,7 +90,7 @@ manaliases: Makefile $(MAN3_API)
             for j in `$(SED) -n '/^.SH NAME/,/^.SH SYNOPSIS/p' $$i  | $(SED) -e 's/.- .*//' | $(SED) 's/,.*//'  | $(EGREP) -v '^.SH ' `; do \
 		echo "making man page alias $$j -> $$i APIs" ;    \
 		echo ".so man3/$$i" > $$j.3 ; 		  \
-		if expr match "$(MANALIASES)" ".*$$j\\.3" > /dev/null ; \
+		if expr "$(MANALIASES)" : ".*$$j\\.3" > /dev/null ; \
 		then \
 		  : ; \
 		else \

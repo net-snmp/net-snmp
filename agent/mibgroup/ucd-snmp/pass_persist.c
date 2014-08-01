@@ -808,7 +808,9 @@ close_persist_pipe(int iindex)
          * kill the child, in case we got an error and the child is not
          * cooperating.  Ignore the return code.
          */
+#ifdef HAVE_SIGNAL
         (void)kill(persist_pipes[iindex].pid, SIGKILL);
+#endif
 #if HAVE_SYS_WAIT_H
         waitpid(persist_pipes[iindex].pid, NULL, 0);
 #endif
