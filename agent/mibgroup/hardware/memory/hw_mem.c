@@ -14,9 +14,16 @@ extern NetsnmpCacheLoad netsnmp_mem_arch_load;
 netsnmp_memory_info *_mem_head  = NULL;
 netsnmp_cache       *_mem_cache = NULL;
 
+#ifdef darwin
+/* the code in memory_darwin.c is *very* expensive */
+#define	MEMORY_CACHE_SECONDS	300
+#else
+#define	MEMORY_CACHE_SECONDS	5
+#endif
+
 void init_hw_mem( void ) {
     oid nsMemory[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 31 };
-    _mem_cache = netsnmp_cache_create( 5, netsnmp_mem_arch_load, NULL,
+    _mem_cache = netsnmp_cache_create( MEMORY_CACHE_SECONDS, netsnmp_mem_arch_load, NULL,
                                           nsMemory, OID_LENGTH(nsMemory));
 }
 

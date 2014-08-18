@@ -190,7 +190,8 @@ _load_arp_table_from_sysctl(netsnmp_arp_access *access)
 
         /* HW Address */
         entry->arp_physaddress_len = 6;
-        if (0 < sdl->sdl_alen) {
+        if (0 < sdl->sdl_alen &&
+            sdl->sdl_alen <= NETSNMP_ACCESS_ARP_PHYSADDR_BUF_SIZE) {
             memcpy(entry->arp_physaddress, LLADDR(sdl), sdl->sdl_alen);
             /* Process status */
             /* XXX: setting this value for all states is wrong. */
@@ -298,7 +299,8 @@ _load_ndp_table_from_sysctl(netsnmp_arp_access *access)
 
         /* HW Address */
         entry->arp_physaddress_len = sdl->sdl_alen;
-        if (0 < sdl->sdl_alen) {
+        if (0 < sdl->sdl_alen &&
+            sdl->sdl_alen <= NETSNMP_ACCESS_ARP_PHYSADDR_BUF_SIZE) {
             memcpy(entry->arp_physaddress, LLADDR(sdl), sdl->sdl_alen);
             /* Process status */
             /* XXX: setting this value for all states is wrong. */

@@ -20662,7 +20662,7 @@ EOF
   fi
 done
 
-new_module_list=`echo $new_module_list | tr ' ' '\n' | sort | tr '\n' ' ' | $SED 's/ $//'`
+new_module_list=`(echo $new_module_list | tr ' ' '\n' | sort | tr '\n' ' '; echo '') | $SED 's/ $//'`
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $new_module_list." >&5
 $as_echo "$new_module_list." >&6; }
