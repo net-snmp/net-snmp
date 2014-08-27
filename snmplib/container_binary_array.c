@@ -284,6 +284,22 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
     if (key) {
         if ((index = binary_search(key, c, exact)) == -1)
             return NULL;
+        if (!exact &&
+            c->flags & CONTAINER_KEY_ALLOW_DUPLICATES) {
+            int result;
+
+            /*
+             * If duplicates are allowed, we have to be extra
+             * sure that we didn't just increment to a duplicate,
+             * thus causing a getnext loop.
+             */
+            result = c->compare(t->data[index], key);
+            while (result == 0) {
+                if (++index == t->count)
+                   return NULL;
+                result = c->compare(t->data[index], key);
+            }
+        }
     }
 
     return t->data[index];
