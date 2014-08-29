@@ -598,8 +598,9 @@ get_boottime(void)
     static char boottime_name[] = "boottime";
 #endif
     static char empty_name[] = "";
-    struct nlist nl[2] = { };
+    struct nlist nl[2];
 
+    memset(nl, 0, sizeof(nl));
     nl[0].n_name = boottime_name;
     nl[1].n_name = empty_name;
 #endif                          /* NETSNMP_CAN_USE_SYSCTL */
