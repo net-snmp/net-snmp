@@ -295,6 +295,8 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
              */
             result = c->compare(t->data[index], key);
             while (result == 0) {
+		DEBUGMSGTL(("container","skipping duplicate key in %s\n",
+					    c->container_name));
                 if (++index == t->count)
                    return NULL;
                 result = c->compare(t->data[index], key);
