@@ -21,6 +21,10 @@
 
 #if !defined(cygwin) && defined(HAVE_WINSOCK_H)
 
+#define LFD_SET(n, p)    FD_SET(n, p)
+#define LFD_CLR(n, p)    FD_CLR(n, p)
+#define LFD_ISSET(n, p)  FD_ISSET(n, p)
+
 void
 netsnmp_large_fd_setfd(SOCKET fd, netsnmp_large_fd_set * fdset)
 {
@@ -79,6 +83,14 @@ netsnmp_large_fd_is_set(SOCKET fd, netsnmp_large_fd_set * fdset)
 
 #else
 
+/*
+ * Recent versions of glibc trigger abort() if FD_SET(), FD_CLR() or
+ * FD_ISSET() is invoked with n >= FD_SETSIZE. Hence these replacement macros.
+ */
+#define LFD_SET(n, p)    ((p)->fds_bits[(n)/NFDBITS] |=  (1ULL << ((n) % NFDBITS)))
+#define LFD_CLR(n, p)    ((p)->fds_bits[(n)/NFDBITS] &= ~(1ULL << ((n) % NFDBITS)))
+#define LFD_ISSET(n, p)  ((p)->fds_bits[(n)/NFDBITS] &   (1ULL << ((n) % NFDBITS)))
+
 void
 netsnmp_large_fd_setfd(int fd, netsnmp_large_fd_set * fdset)
 {
@@ -87,7 +99,7 @@ netsnmp_large_fd_setfd(int fd, netsnmp_large_fd_set * fdset)
     while (fd >= (int)fdset->lfs_setsize)
         netsnmp_large_fd_set_resize(fdset, 2 * (fdset->lfs_setsize + 1));
 
-    FD_SET(fd, fdset->lfs_setptr);
+    LFD_SET(fd, fdset->lfs_setptr);
 }
 
 void
@@ -96,7 +108,7 @@ netsnmp_large_fd_clr(int fd, netsnmp_large_fd_set * fdset)
     netsnmp_assert(fd >= 0);
 
     if ((unsigned)fd < fdset->lfs_setsize)
-        FD_CLR(fd, fdset->lfs_setptr);
+        LFD_CLR(fd, fdset->lfs_setptr);
 }
 
 int
@@ -104,7 +116,8 @@ netsnmp_large_fd_is_set(int fd, netsnmp_large_fd_set * fdset)
 {
     netsnmp_assert(fd >= 0);
 
-    return (unsigned)fd < fdset->lfs_setsize && FD_ISSET(fd, fdset->lfs_setptr);
+    return ((unsigned)fd < fdset->lfs_setsize &&
+            LFD_ISSET(fd, fdset->lfs_setptr));
 }
 
 #endif
@@ -174,15 +187,18 @@ netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
     }
 
 #if defined(cygwin) || !defined(HAVE_WINSOCK_H)
-    {
+    /*
+     * Unix: when enlarging, clear the file descriptors defined in the
+     * resized *fdset but that were not defined in the original *fdset.
+     */
+    if ( fdset->lfs_setsize == 0 && setsize == FD_SETSIZE ) {
+        /* In this case we can use the OS's FD_ZERO */
+        FD_ZERO(fdset->lfs_setptr);
+    } else {
         int             i;
 
-        /*
-         * Unix: when enlarging, clear the file descriptors defined in the
-         * resized *fdset but that were not defined in the original *fdset.
-         */
         for (i = fdset->lfs_setsize; i < setsize; i++)
-            FD_CLR(i, fdset->lfs_setptr);
+            LFD_CLR(i, fdset->lfs_setptr);
     }
 #endif
 
