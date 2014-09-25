@@ -278,11 +278,6 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
         CONTAINER_INSERT(container, rowreq_ctx);
-        /*
-         * fix this when we hit an arch that reports its own last change
-         */
-        netsnmp_assert(0 == (ifentry->ns_flags &
-                             NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE));
         if (0 == _first_load) {
             rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
             ifTable_lastChange_set(rowreq_ctx->data.ifLastChange);
