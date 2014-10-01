@@ -92,15 +92,6 @@ listing of all changes made to the code.
 	putting the header (1..N) after the tests and since our tests
 	utilize that we should make sure that the test runner supports it.
 
-    unspecified:
-      - Added simfs (OpenVZ filesystem) to hrStorageTable and hrFSTable.
-      - Upport new MIB structures and MFD rewrites under Darwin
-      - [BUG 2470]: Accept 65535 as a valid IPv6 port number
-      - [BUG 2476]: snmpd fails to start on AIX On an AIX system there is
-	no <kvm.h> header file nor do the /dev/dmem or /dev/drum devices
-	exist and hence DMEM_LOC is not defined. Avoid that init_kmem()
-	fails in that case.
-
     AIX:
       - Make tcp-mib build
       - Make udp-mib build
@@ -129,6 +120,20 @@ listing of all changes made to the code.
 	specified per project. Hence two additional menu entries in
 	build.bat that allow to specify these directories.
       - Ported ucd-snmp/dlmod to MinGW / MSVC
+
+    MinGW:
+      - Port T005table_dataset_cagentlib.c to MinGW
+
+    unspecified:
+      - Added simfs (OpenVZ filesystem) to hrStorageTable and hrFSTable.
+      - Upport new MIB structures and MFD rewrites under Darwin
+      - [BUG 2470]: Accept 65535 as a valid IPv6 port number
+      - [BUG 2476]: snmpd fails to start on AIX On an AIX system there is
+	no <kvm.h> header file nor do the /dev/dmem or /dev/drum devices
+	exist and hence DMEM_LOC is not defined. Avoid that init_kmem()
+	fails in that case.
+      - [BUG 2568]: Avoid that file descriptors above FD_SETSIZE trigger
+	abort()
 
 *5.7.2*
 
