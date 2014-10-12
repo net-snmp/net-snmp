@@ -502,10 +502,10 @@
 	    This will actually svn copy the current checked out branch
 	    to the new tag name.  Specifically:
 
-               git tag -u A77C5329 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"
+               git tag -u E0F81533 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"
 	  </text>
 	  <commands>
-	    <command>git tag -u A77C5329 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"</command>
+	    <command>git tag -u E0F81533 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"</command>
 	  </commands>
 	</step>
 	<step prompt="true" type="system" stepname="release:makedist" title="release:makedist">
@@ -540,12 +540,12 @@
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg -u A77C5329 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
+	    <command>gpg -u E0F81533 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg -u A77C5329 -a --detach-sign net-snmp-{VERSION}.zip</command>
+	    <command>gpg -u E0F81533 -a --detach-sign net-snmp-{VERSION}.zip</command>
 	  </commands>
 	</step>
 	<step type="command" name="release:nextbranch" title="Don't propagate code modifications"
