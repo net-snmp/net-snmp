@@ -2011,7 +2011,8 @@
 ./snmp_enum.lo: ../include/net-snmp/library/tools.h
 ./snmp_enum.lo: ../include/net-snmp/library/snmp_assert.h
 ./snmpksm.lo: ../include/net-snmp/net-snmp-config.h
-./snmpksm.lo: ../include/net-snmp/output_api.h ../include/net-snmp/types.h
+./snmpksm.lo: ../include/net-snmp/output_api.h
+./snmpksm.lo: ../include/net-snmp/types.h
 ./snmpksm.lo: ../include/net-snmp/library/oid.h
 ./snmpksm.lo: ../include/net-snmp/library/types.h
 ./snmpksm.lo: ../include/net-snmp/definitions.h
