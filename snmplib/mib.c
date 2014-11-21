@@ -5356,7 +5356,7 @@ _add_strings_to_oid(void *tp, char *cp,
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     struct tree    *tp2 = NULL;
     struct index_list *in_dices = NULL;
-    int             pos = -1
+    int             pos = -1;
     int             check =
         !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     int             do_hint = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);

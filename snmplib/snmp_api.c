@@ -6660,6 +6660,7 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
                            Return its length. */
 }
 
+#ifndef NETSNMP_DISABLE_MIB_LOADING
 static int _check_range(struct tree *tp, long ltmp, int *resptr,
 	                const char *errmsg)
 {
@@ -6702,7 +6703,7 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
     free(temp);
     return 1;
 }
-        
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 /*
  * Add a variable with the requested name to the end of the list of
@@ -6791,6 +6792,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 					     NETSNMP_DS_LIB_NO_DISPLAY_HINT);
     u_char         *hintptr;
     struct tree    *tp;
+    struct enum_list *ep;
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
     u_char         *buf = NULL;
     const u_char   *buf_ptr = NULL;
@@ -6798,7 +6800,6 @@ snmp_add_var(netsnmp_pdu *pdu,
     in_addr_t       atmp;
     long            ltmp;
     int             itmp;
-    struct enum_list *ep;
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     double          dtmp;
     float           ftmp;

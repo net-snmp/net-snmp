@@ -242,7 +242,9 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
                                netsnmp_request_info *requests)
 {
     netsnmp_watcher_info  *winfo = (netsnmp_watcher_info *) handler->myvoid;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     netsnmp_watcher_cache *old_data;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     DEBUGMSGTL(("helper:watcher", "Got request:  %d\n", reqinfo->mode));
     DEBUGMSGTL(( "helper:watcher", "  oid:"));

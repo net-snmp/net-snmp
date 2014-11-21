@@ -245,11 +245,11 @@ int             netsnmp_add_queued(netsnmp_agent_session *asp);
 int             netsnmp_remove_from_delegated(netsnmp_agent_session *asp);
 
 
-static int      current_globalid = 0;
-
 int      netsnmp_running = 1;
 
 #ifndef NETSNMP_FEATURE_REMOVE_ALLOCATE_GLOBALCACHEID
+static int      current_globalid = 0;
+
 int
 netsnmp_allocate_globalcacheid(void)
 {

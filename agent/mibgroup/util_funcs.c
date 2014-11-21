@@ -117,7 +117,7 @@ netsnmp_feature_child_of(find_prefix_info, prefix_info_all)
 netsnmp_feature_child_of(create_prefix_info, prefix_info_all)
 #endif /* HAVE_LINUX_RTNETLINK_H */
 
-#ifdef NETSNMP_EXCACHETIME
+#if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE)
 static long     cachetime;
 #endif
 

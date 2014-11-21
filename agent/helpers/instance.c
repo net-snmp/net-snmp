@@ -38,6 +38,7 @@ typedef struct netsnmp_num_file_instance_s {
     int   flags;
 } netsnmp_num_file_instance;
 
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_NUM_FILE_INSTANCE
 /** @defgroup instance instance
  *  Process individual MIB instances easily.
  *  @ingroup leaf
@@ -59,6 +60,7 @@ netsnmp_num_file_instance_deref(netsnmp_num_file_instance *nfi)
 	free(nfi);
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_NUM_FILE_INSTANCE */
 
 /**
  * Creates an instance helper handler, calls netsnmp_create_handler, which
@@ -127,6 +129,7 @@ netsnmp_register_read_only_instance(netsnmp_handler_registration *reginfo)
     return netsnmp_register_serialize(reginfo);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_NUM_FILE_INSTANCE
 static
 netsnmp_handler_registration *
 get_reg(const char *name,
@@ -167,6 +170,7 @@ get_reg(const char *name,
         myreg->contextName = strdup(contextName);
     return myreg;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_NUM_FILE_INSTANCE */
 
 /* Watched 'long' instances are writable on both 32-bit and 64-bit systems  */
 netsnmp_feature_child_of(read_only_ulong_instance,instance)

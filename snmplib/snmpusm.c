@@ -2340,6 +2340,9 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 #ifdef HAVE_AES
     u_int           net_boots, net_time;
 #endif
+#ifndef NETSNMP_DISABLE_DES
+    int             i;
+#endif
     u_char          signature[BYTESIZE(USM_MAX_KEYEDHASH_LENGTH)];
     size_t          signature_length = BYTESIZE(USM_MAX_KEYEDHASH_LENGTH);
     u_char          salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
@@ -2351,7 +2354,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
     u_char          type_value;
     u_char         *end_of_overhead = NULL;
     int             error;
-    int             i, rc = 0;
+    int             rc = 0;
     struct usmStateReference **secStateRef =
         (struct usmStateReference **) secStateRf;
 

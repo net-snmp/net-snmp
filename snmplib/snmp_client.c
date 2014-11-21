@@ -1291,7 +1291,9 @@ static int _query(netsnmp_variable_list *list,
      * Clone the varbind list into the request PDU...
      */
     pdu->variables = snmp_clone_varbind( list );
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 retry:
+#endif
     if ( session )
         ret = snmp_synch_response(            session, pdu, &response );
     else if (_def_query_session)

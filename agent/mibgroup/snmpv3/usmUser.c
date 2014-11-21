@@ -61,7 +61,9 @@ oid             usmUser_variables_oid[] = { 1, 3, 6, 1, 6, 3, 15, 1, 2 };
  */
 #define USM_MIB_LENGTH 12
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static unsigned int usmUserSpinLock = 0;
+#endif
 
 void
 init_usmUser(void)
@@ -305,8 +307,10 @@ var_usmUser(struct variable * vp,
      * variables we may use later 
      */
     static long     long_ret;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     static u_char   string[1];
     static oid      objid[2];   /* for .0.0 */
+#endif
 
     if (!vp || !name || !length || !var_len)
         return NULL;
