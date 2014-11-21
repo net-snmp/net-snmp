@@ -3048,8 +3048,8 @@ read_objid(const char *input, oid * output, size_t * out_len)
 {                               /* number of subid's in "output" */
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     struct tree    *root = tree_top;
-#endif /* NETSNMP_DISABLE_MIB_LOADING */
     char            buf[SPRINT_MAX_LEN];
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     int             ret, max_out_len;
     char           *name, ch;
     const char     *cp;
@@ -5346,18 +5346,17 @@ _add_strings_to_oid(void *tp, char *cp,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 {
     oid             subid;
-    int             len_index = 1000000;
+    char           *fcp, *ecp, *cp2 = NULL;
+    char            doingquote;
+    int             len = -1;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     struct tree    *tp2 = NULL;
     struct index_list *in_dices = NULL;
-#endif /* NETSNMP_DISABLE_MIB_LOADING */
-    char           *fcp, *ecp, *cp2 = NULL;
-    char            doingquote;
-    int             len = -1, pos = -1;
-#ifndef NETSNMP_DISABLE_MIB_LOADING
+    int             pos = -1
     int             check =
         !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     int             do_hint = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
+    int             len_index = 1000000;
 
     while (cp && tp && tp->child_list) {
         fcp = cp;
@@ -6092,7 +6091,9 @@ uptime_string_n(u_long timeticks, char *buf, size_t buflen)
 oid            *
 snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
 {
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     size_t          savlen = *rootlen;
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     static size_t   tmpbuf_len = 0;
     static char    *tmpbuf = NULL;
     const char     *suffix, *prefix;
