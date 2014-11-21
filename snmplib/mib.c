@@ -126,6 +126,7 @@ netsnmp_feature_child_of(mib_to_asn_type, mib_api)
 
 static char    *uptimeString(u_long, char *, size_t);
 
+#ifndef NETSNMP_DISABLE_MIB_LOADING
 static struct tree *_get_realloc_symbol(const oid * objid, size_t objidlen,
                                         struct tree *subtree,
                                         u_char ** buf, size_t * buf_len,
@@ -141,6 +142,7 @@ static int      print_tree_node(u_char ** buf, size_t * buf_len,
 static void     handle_mibdirs_conf(const char *token, char *line);
 static void     handle_mibs_conf(const char *token, char *line);
 static void     handle_mibfile_conf(const char *token, char *line);
+#endif /*NETSNMP_DISABLE_MIB_LOADING */
 
 static void     _oid_finish_printing(const oid * objid, size_t objidlen,
                                      u_char ** buf, size_t * buf_len,
@@ -150,8 +152,8 @@ static void     _oid_finish_printing(const oid * objid, size_t objidlen,
 /*
  * helper functions for get_module_node 
  */
-static int      node_to_oid(struct tree *, oid *, size_t *);
 #ifndef NETSNMP_DISABLE_MIB_LOADING
+static int      node_to_oid(struct tree *, oid *, size_t *);
 static int      _add_strings_to_oid(struct tree *, char *,
                                     oid *, size_t *, size_t);
 #else
@@ -173,7 +175,9 @@ static char     Standard_Prefix[] = ".1.3.6.1.2.1";
 /*
  * Set default here as some uses of read_objid require valid pointer. 
  */
+#ifndef NETSNMP_DISABLE_MIB_LOADING
 static char    *Prefix = &Standard_Prefix[0];
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 typedef struct _PrefixList {
     const char     *str;
     int             len;
@@ -5301,7 +5305,6 @@ node_to_oid(struct tree *tp, oid * objid, size_t * objidlen)
 
     return (numids);
 }
-#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 /*
  * Replace \x with x stop at eos_marker
@@ -5335,6 +5338,7 @@ static char *_apply_escapes(char *src, char eos_marker)
 	return src;
     }
 }
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 static int
 #ifndef NETSNMP_DISABLE_MIB_LOADING
