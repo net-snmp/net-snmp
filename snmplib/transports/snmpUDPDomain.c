@@ -119,17 +119,12 @@ int netsnmp_udp_sendto(int fd, struct in_addr *srcip, int if_index, struct socka
 #endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */
 
 /*
- * Open a UDP-based transport for SNMP.  Local is TRUE if addr is the local
- * address to bind to (i.e. this is a server-type session); otherwise addr is 
- * the remote address to send things to.  
+ * Common initialization of udp transport.
  */
 
-netsnmp_transport *
-netsnmp_udp_transport(struct sockaddr_in *addr, int local)
+static netsnmp_transport *
+netsnmp_udp_transport_base(netsnmp_transport *t)
 {
-    netsnmp_transport *t = NULL;
-
-    t = netsnmp_udpipv4base_transport(addr, local);
     if (NULL == t) {
         return NULL;
     }
@@ -155,6 +150,42 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
     return t;
 }
 
+/*
+ * Open a UDP-based transport for SNMP.  Local is TRUE if addr is the local
+ * address to bind to (i.e. this is a server-type session); otherwise addr is
+ * the remote address to send things to.
+ */
+netsnmp_transport *
+netsnmp_udp_transport(struct sockaddr_in *addr, int local)
+{
+    netsnmp_transport *t = NULL;
+
+    t = netsnmp_udpipv4base_transport(addr, local);
+    if (NULL != t) {
+        netsnmp_udp_transport_base(t);
+    }
+    return t;
+}
+
+/*
+ * Open a UDP-based transport for SNMP.  Local is TRUE if addr is the local
+ * address to bind to (i.e. this is a server-type session); otherwise addr is
+ * the remote address to send things to and src_addr is the optional addr
+ * to send from.
+ */
+netsnmp_transport *
+netsnmp_udp_transport_with_source(struct sockaddr_in *addr, int local,
+                                  struct sockaddr_in *src_addr)
+
+{
+    netsnmp_transport *t = NULL;
+
+    t = netsnmp_udpipv4base_transport_with_source(addr, local, src_addr);
+    if (NULL != t) {
+        netsnmp_udp_transport_base(t);
+    }
+    return t;
+}
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /*
  * The following functions provide the "com2sec" configuration token
@@ -484,6 +515,25 @@ netsnmp_udp_create_tstring(const char *str, int local,
     }
 }
 
+netsnmp_transport *
+netsnmp_udp_create_tspec(netsnmp_tdomain_spec *tspec)
+{
+    struct sockaddr_in addr, src_addr;
+
+    if (NULL == tspec)
+        return NULL;
+
+    if (netsnmp_sockaddr_in2(&addr, tspec->target, tspec->default_target)) {
+        if (NULL != tspec->source)
+            netsnmp_sockaddr_in2(&src_addr, tspec->source, NULL);
+        else
+            memset(&src_addr, 0x00, sizeof(src_addr));
+        return netsnmp_udp_transport_with_source(&addr, tspec->local,
+                                                 &src_addr);
+    } else {
+        return NULL;
+    }
+}
 
 netsnmp_transport *
 netsnmp_udp_create_ostring(const u_char * o, size_t o_len, int local)
@@ -511,6 +561,7 @@ netsnmp_udp_ctor(void)
 
     udpDomain.f_create_from_tstring     = NULL;
     udpDomain.f_create_from_tstring_new = netsnmp_udp_create_tstring;
+    udpDomain.f_create_from_tspec       = netsnmp_udp_create_tspec;
     udpDomain.f_create_from_ostring     = netsnmp_udp_create_ostring;
 
     netsnmp_tdomain_register(&udpDomain);

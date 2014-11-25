@@ -488,11 +488,10 @@ netsnmp_is_fqdn(const char *thename)
  * it.
  */
 netsnmp_transport *
-netsnmp_tdomain_transport_full(const char *application,
-                               const char *str, int local,
-                               const char *default_domain,
-                               const char *default_target)
+netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
 {
+    const char *application, *str, *default_domain, *default_target, *source;
+    int local;
     netsnmp_tdomain    *match = NULL;
     const char         *addr = NULL;
     const char * const *spec = NULL;
@@ -501,11 +500,20 @@ netsnmp_tdomain_transport_full(const char *application,
     char **lspec = 0;
     char *tokenized_domain = 0;
 
+    application = tspec->application;
+    str = tspec->target;
+    local = tspec->local;
+    default_domain = tspec->default_domain;
+    default_target = tspec->default_target;
+    source = tspec->source;
+    /** transport_config = tspec->transport_config; not used yet */
+
     DEBUGMSGTL(("tdomain",
-                "tdomain_transport_full(\"%s\", \"%s\", %d, \"%s\", \"%s\")\n",
+                "tdomain_transport_spec(\"%s\", \"%s\", %d, \"%s\", \"%s\", \"%s\")\n",
                 application, str ? str : "[NIL]", local,
                 default_domain ? default_domain : "[NIL]",
-                default_target ? default_target : "[NIL]"));
+                default_target ? default_target : "[NIL]",
+                source ? source : "[NIL]"));
 
     /* see if we can load a host-name specific set of conf files */
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
@@ -644,14 +652,27 @@ netsnmp_tdomain_transport_full(const char *application,
                         "default address \"%s\"\n",
                         match->prefix[0], addr ? addr : "[NIL]",
                         addr2 ? addr2 : "[NIL]"));
-            if (match->f_create_from_tstring) {
-                NETSNMP_LOGONCE((LOG_WARNING,
-                                 "transport domain %s uses deprecated f_create_from_tstring\n",
-                                 match->prefix[0]));
-                t = match->f_create_from_tstring(addr, local);
+            if (match->f_create_from_tspec) {
+                netsnmp_tdomain_spec tspec_tmp;
+                memcpy(&tspec_tmp, tspec, sizeof(tspec_tmp));
+                /** if we didn't have a default target but looked one up,
+                 *  copy the spec and use the found default. */
+                if ((default_target == NULL) && (addr2 != NULL))
+                    tspec_tmp.default_target = addr2;
+                if (addr != tspec_tmp.target)
+                    tspec_tmp.target = addr;
+                t = match->f_create_from_tspec(&tspec_tmp);
             }
-            else
-                t = match->f_create_from_tstring_new(addr, local, addr2);
+            else {
+                NETSNMP_LOGONCE((LOG_WARNING,
+                                 "transport domain %s uses deprecated f_create function\n",
+                                 match->prefix[0]));
+                if (match->f_create_from_tstring) {
+                    t = match->f_create_from_tstring(addr, local);
+                }
+                else
+                    t = match->f_create_from_tstring_new(addr, local, addr2);
+            }
             if (t) {
                 if (lspec) {
                     free(tokenized_domain);
@@ -675,15 +696,39 @@ netsnmp_tdomain_transport_full(const char *application,
     return NULL;
 }
 
+netsnmp_transport *
+netsnmp_tdomain_transport_full(const char *application,
+                               const char *str, int local,
+                               const char *default_domain,
+                               const char *default_target)
+{
+    netsnmp_tdomain_spec tspec;
+    memset(&tspec, 0x0, sizeof(tspec));
+    tspec.application = application;
+    tspec.target = str;
+    tspec.local = local;
+    tspec.default_domain = default_domain;
+    tspec.default_target = default_target;
+    tspec.source = NULL;
+    tspec.transport_config = NULL;
+    return netsnmp_tdomain_transport_tspec(&tspec);
+}
 
 netsnmp_transport *
 netsnmp_tdomain_transport(const char *str, int local,
 			  const char *default_domain)
 {
-    return netsnmp_tdomain_transport_full("snmp", str, local, default_domain,
-					  NULL);
+    netsnmp_tdomain_spec tspec;
+    memset(&tspec, 0x0, sizeof(tspec));
+    tspec.application = "snmp";
+    tspec.target = str;
+    tspec.local = local;
+    tspec.default_domain = default_domain;
+    tspec.default_target = NULL;
+    tspec.source = NULL;
+    tspec.transport_config = NULL;
+    return netsnmp_tdomain_transport_tspec(&tspec);
 }
-
 
 #ifndef NETSNMP_FEATURE_REMOVE_TDOMAIN_TRANSPORT_OID
 netsnmp_transport *

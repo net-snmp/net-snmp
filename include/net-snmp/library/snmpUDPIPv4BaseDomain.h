@@ -27,6 +27,11 @@ extern          "C" {
     netsnmp_transport *netsnmp_udpipv4base_transport(struct sockaddr_in *addr,
                                                      int local);
 
+    netsnmp_transport *
+    netsnmp_udpipv4base_transport_with_source(struct sockaddr_in *addr,
+                                              int local,
+                                              struct sockaddr_in *src_addr);
+
 #if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
     int netsnmp_udpipv4_recvfrom(int s, void *buf, int len,
                                  struct sockaddr *from, socklen_t *fromlen,

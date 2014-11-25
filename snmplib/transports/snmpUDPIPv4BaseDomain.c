@@ -70,7 +70,8 @@ int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
 #endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */
 
 netsnmp_transport *
-netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
+netsnmp_udpipv4base_transport_with_source(struct sockaddr_in *addr, int local,
+                                          struct sockaddr_in *src_addr)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0, rc2;
@@ -199,31 +200,48 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
          */
         client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                               NETSNMP_DS_LIB_CLIENT_ADDR);
-        if (client_socket) {
+        if (client_socket || src_addr) {
             struct sockaddr_in client_addr;
+            if (NULL == src_addr) {
+                char *client_address = client_socket;
+                int uses_port = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                                       NETSNMP_DS_LIB_CLIENT_ADDR_USES_PORT);
+                if ((uses_port == 1) && (strchr(client_socket, ':') == NULL)) {
+                    client_address = malloc(strlen(client_socket) + 3);
+                    if (client_address == NULL) {
+                        netsnmp_socketbase_close(t);
+                        netsnmp_transport_free(t);
+                        return NULL;
+                    }
+                    /*
+                     * if NETSNMP_DS_LIB_CLIENT_ADDR expects a port but there
+                     *  is none specified then provide ephemeral one/
+                     */
+                    strcpy(client_address, client_socket);
+                    strcat(client_address, ":0");
+                }
 
-            char *client_address = client_socket;
-            int uses_port = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                                                   NETSNMP_DS_LIB_CLIENT_ADDR_USES_PORT);
-            if ((uses_port == 1) && (strchr(client_socket, ':') == NULL)) {
-                client_address = malloc(strlen(client_socket) + 3);
-                if (client_address == NULL) {
-                    netsnmp_socketbase_close(t);
-                    netsnmp_transport_free(t);
-                    return NULL;
-                }                                      /* if NETSNMP_DS_LIB_CLIENT_ADDR */
-                strcpy(client_address, client_socket); /* expects a port but there is none */
-                strcat(client_address, ":0");          /* specified then provide ephemeral one */
+                netsnmp_sockaddr_in2(&client_addr, client_address, NULL);
+                if (uses_port == 0) {
+                    client_addr.sin_port = 0;
+                }
+                if (client_address != client_socket) {
+                    free(client_address);
+                }
+            } else {
+                memcpy(&client_addr, src_addr, sizeof(client_addr));
             }
 
-            netsnmp_sockaddr_in2(&client_addr, client_address, NULL);
-            if (uses_port == 0) {
-                client_addr.sin_port = 0;
+            DEBUGIF("netsnmp_udpbase") {
+                char *str;
+                memcpy(&(addr_pair.local_addr), &client_addr,
+                       sizeof(struct sockaddr_in));
+                str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,
+                                          sizeof(netsnmp_indexed_addr_pair));
+                DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d to %s\n",
+                            t->sock, str));
+                free(str);
             }
-            if (client_address != client_socket) {
-                free(client_address);
-            }
-
             DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d\n", t->sock));
             rc = bind(t->sock, (struct sockaddr *)&client_addr,
                   sizeof(struct sockaddr));
@@ -268,4 +286,10 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
     }
 
     return t;
+}
+
+netsnmp_transport *
+netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
+{
+    return netsnmp_udpipv4base_transport_with_source(addr, local, NULL);
 }

@@ -106,6 +106,17 @@ typedef struct netsnmp_tmStateReference_s {
    void *otherTransportOpaque; /* XXX: May have mem leak issues */
 } netsnmp_tmStateReference;
 
+struct netsnmp_container; /* forward decl */
+typedef struct netsnmp_tdomain_spec_s {
+    const char *application;             /* application name */
+    const char *target;                  /* target as string */
+    int         local;                   /* 1=local/server, 0=remote/client */
+    const char *default_domain;          /* default domain */
+    const char *default_target;          /* default target */
+    const char *source;                  /* source as string iff remote */
+    struct netsnmp_container *transport_config; /* extra config */
+} netsnmp_tdomain_spec;
+
 /*  Structure which defines the transport-independent API.  */
 
 struct snmp_session;
@@ -203,8 +214,9 @@ typedef struct netsnmp_tdomain_s {
     const char    **prefix;
 
     /*
-     * The f_create_from_tstring field is deprecated, please do not use it
-     * for new code and try to migrate old code away from using it.
+     * The f_create_from_tstring and f_create_from_tstring_new fields are
+     * deprecated, please do not use them for new code and try to migrate
+     * old code away from using them.
      */
     netsnmp_transport *(*f_create_from_tstring) (const char *, int);
 
@@ -212,8 +224,10 @@ typedef struct netsnmp_tdomain_s {
 
     struct netsnmp_tdomain_s *next;
 
+    /** deprecated, please do not use it */
     netsnmp_transport *(*f_create_from_tstring_new) (const char *, int,
 						     const char*);
+    netsnmp_transport *(*f_create_from_tspec) (netsnmp_tdomain_spec *);
 
 } netsnmp_tdomain;
 
@@ -288,6 +302,9 @@ netsnmp_transport *netsnmp_tdomain_transport_oid(const oid * dom,
 						 const u_char * o,
 						 size_t o_len,
 						 int local);
+
+NETSNMP_IMPORT
+netsnmp_transport *netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec);
 
 NETSNMP_IMPORT
 netsnmp_transport*
