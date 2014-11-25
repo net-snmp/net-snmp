@@ -231,6 +231,8 @@ create_trap_session2(const char *sink, const char* sinkport,
 {
     netsnmp_transport *t;
     netsnmp_session session, *sesp;
+    netsnmp_tdomain_spec tspec;
+    char                 tmp[SPRINT_MAX_LEN];
 
     memset(&session, 0, sizeof(netsnmp_session));
     session.version = version;
@@ -255,7 +257,18 @@ create_trap_session2(const char *sink, const char* sinkport,
         ((0 == strcmp("localhost",sink)) || (0 == strcmp("127.0.0.1",sink))))
         session.localname = strdup("localhost");
 
-    t = netsnmp_tdomain_transport_full("snmptrap", sink, 0, NULL, sinkport);
+    memset(&tspec, 0, sizeof(netsnmp_tdomain_spec));
+    tspec.application = "snmptrap";
+    if (NULL == sinkport)
+        tspec.target = sink;
+    else {
+        snprintf(tmp, sizeof(tmp)-1,"%s:%s", sink, sinkport);
+        tspec.target = tmp;
+    }
+    tspec.local = 0;
+    tspec.default_domain = NULL;
+    tspec.default_target = sinkport;
+    t = netsnmp_tdomain_transport_tspec(&tspec);
     if (t != NULL) {
 	sesp = snmp_add(&session, t, NULL, NULL);
 
