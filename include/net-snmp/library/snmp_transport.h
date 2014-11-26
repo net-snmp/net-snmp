@@ -359,13 +359,16 @@ netsnmp_transport_config *netsnmp_transport_create_config(char *key,
 
 #ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
 NETSNMP_IMPORT
+void netsnmp_transport_parse_filterType(const char *word, char *cptr);
+
+NETSNMP_IMPORT
 int netsnmp_transport_filter_add(const char *addrtxt);
 
 NETSNMP_IMPORT
 int netsnmp_transport_filter_remove(const char *addrtxt);
 
 NETSNMP_IMPORT
-int netsnmp_transport_filter_should_drop(const char *addrtxt);
+int netsnmp_transport_filter_check(const char *addrtxt);
 
 NETSNMP_IMPORT
 void netsnmp_transport_filter_cleanup(void);

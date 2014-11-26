@@ -5441,12 +5441,15 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
   dump = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                 NETSNMP_DS_LIB_DUMP_PACKET);
 #ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
-  filter = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                                  NETSNMP_DS_LIB_FILTER_SOURCE);
+  filter = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                  NETSNMP_DS_LIB_FILTER_TYPE);
 #endif
   if (dump || filter) {
-      int drop = 0;
+      int filtered = 0;
       char *addrtxt = netsnmp_transport_peer_string(transport, opaque, olength);
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+      char *sourceaddr;
+#endif
       snmp_log(LOG_DEBUG, "\nReceived %d byte packet from %s\n",
                length, addrtxt);
 
@@ -5454,28 +5457,35 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
           xdump(packetptr, length, "");
 #ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
       if (filter) {
-          char *txt, *c = strchr(addrtxt, '[');
+          char *c = strchr(addrtxt, '[');
           if (c) {
-              txt = ++c;
-              c = strchr(txt, ']');
+              sourceaddr = ++c;
+              c = strchr(sourceaddr, ']');
               if (c)
                   *c = 0;
-              drop = netsnmp_transport_filter_should_drop(txt);
-              if (drop)
-                  DEBUGMSGTL(("sess_process_packet:drop",
-                              "dropping packet from %s\n", txt));
+              filtered = netsnmp_transport_filter_check(sourceaddr);
+          }
+      }
+#endif
+
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+      if (filter) {
+          const char *dropstr = NULL;
+          if ((filter == -1) && filtered)
+              dropstr = "matched blacklist";
+          else if ((filter == 1) && !filtered)
+              dropstr = "didn't match whitelist";
+          if (dropstr) {
+              DEBUGMSGTL(("sess_process_packet:filter",
+                          "packet from %s %s\n", sourceaddr, dropstr));
+              SNMP_FREE(opaque);
+              SNMP_FREE(addrtxt);
+              return NULL;
           }
       }
 #endif
 
       SNMP_FREE(addrtxt);
-
-#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
-      if (drop) {
-          SNMP_FREE(opaque);
-          return NULL;
-      }
-#endif
   }
 
   /*

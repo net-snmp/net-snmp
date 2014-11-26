@@ -254,7 +254,7 @@ netsnmp_transport_peer_string(netsnmp_transport *t, void *data, int len)
     return str;
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+#if !defined(NETSNMP_FEATURE_REMOVE_FILTER_SOURCE)
 static netsnmp_container * filtered = NULL;
 
 void netsnmp_transport_parse_filter(const char *word, char *cptr);
@@ -272,14 +272,6 @@ static int _transport_filter_init(void)
         return -1;
     }
     filtered->container_name = strdup("transport_filter list");
-    netsnmp_ds_register_config(ASN_BOOLEAN,
-                               "snmp", "enableSourceFiltering",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_FILTER_SOURCE);
-    register_app_config_handler("filtersource",
-                                netsnmp_transport_parse_filter,
-                                netsnmp_transport_filter_cleanup,
-                                "host");
 
     return 0;
 }
@@ -317,18 +309,38 @@ netsnmp_transport_filter_remove(const char *addrtxt)
 }
 
 /*
- * netsnmp_transport_filter_should_drop
+ * netsnmp_transport_filter_check
  *
- * returns 1 if packets from the specified address string should be dropped
+ * returns 1 if the specified address string is in the filter list
  */
 int
-netsnmp_transport_filter_should_drop(const char *addrtxt)
+netsnmp_transport_filter_check(const char *addrtxt)
 {
     char *addr;
     if (NULL == filtered)
         return 0;
     addr = CONTAINER_FIND(filtered, addrtxt);
     return addr ? 1 : 0;
+}
+
+void
+netsnmp_transport_parse_filterType(const char *word, char *cptr)
+{
+    int type = 42;
+    if (strcmp(cptr,"whitelist") == 0)
+        type = 1;
+    else if (strcmp(cptr,"blacklist") == 0)
+        type = -1;
+    else if (strcmp(cptr,"none") == 0)
+        type = 0;
+    else
+        netsnmp_config_error("unknown source filter type: %s", cptr);
+
+    if (type != 42) {
+        DEBUGMSGTL(("transport:filterType", "set to %d\n", type));
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                           NETSNMP_DS_LIB_FILTER_TYPE, type);
+    }
 }
 
 void
@@ -473,11 +485,10 @@ netsnmp_tdomain_init(void)
     netsnmp_tdomain_dump();
 
 #ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
-    netsnmp_ds_register_config(ASN_BOOLEAN,
-                               "snmp", "enableSourceFiltering",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_FILTER_SOURCE);
-    register_app_config_handler("filtersource",
+    register_app_config_handler("sourceFilterType",
+                                netsnmp_transport_parse_filterType,
+                                NULL, "none|whitelist|blacklist");
+    register_app_config_handler("sourceFilterAddress",
                                 netsnmp_transport_parse_filter,
                                 netsnmp_transport_filter_cleanup,
                                 "host");
