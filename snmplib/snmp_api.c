@@ -5430,6 +5430,7 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
 {
   netsnmp_pdu    *pdu;
   int             ret = 0;
+  int             dump = 0, filter = 0;
 
   debug_indent_reset();
 
@@ -5437,12 +5438,44 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
 	      "session %p fd %d pkt %p length %d\n", sessp,
 	      transport->sock, packetptr, length));
 
-  if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,NETSNMP_DS_LIB_DUMP_PACKET)) {
+  dump = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                NETSNMP_DS_LIB_DUMP_PACKET);
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+  filter = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                  NETSNMP_DS_LIB_FILTER_SOURCE);
+#endif
+  if (dump || filter) {
+      int drop = 0;
       char *addrtxt = netsnmp_transport_peer_string(transport, opaque, olength);
       snmp_log(LOG_DEBUG, "\nReceived %d byte packet from %s\n",
                length, addrtxt);
+
+      if (dump)
+          xdump(packetptr, length, "");
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+      if (filter) {
+          char *txt, *c = strchr(addrtxt, '[');
+          if (c) {
+              txt = ++c;
+              c = strchr(txt, ']');
+              if (c)
+                  *c = 0;
+              drop = netsnmp_transport_filter_should_drop(txt);
+              if (drop)
+                  DEBUGMSGTL(("sess_process_packet:drop",
+                              "dropping packet from %s\n", txt));
+          }
+      }
+#endif
+
       SNMP_FREE(addrtxt);
-      xdump(packetptr, length, "");
+
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+      if (drop) {
+          SNMP_FREE(opaque);
+          return NULL;
+      }
+#endif
   }
 
   /*

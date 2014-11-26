@@ -356,6 +356,22 @@ int netsnmp_transport_config_compare(netsnmp_transport_config *left,
 NETSNMP_IMPORT
 netsnmp_transport_config *netsnmp_transport_create_config(char *key,
                                                           char *value);
+
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+NETSNMP_IMPORT
+int netsnmp_transport_filter_add(const char *addrtxt);
+
+NETSNMP_IMPORT
+int netsnmp_transport_filter_remove(const char *addrtxt);
+
+NETSNMP_IMPORT
+int netsnmp_transport_filter_should_drop(const char *addrtxt);
+
+NETSNMP_IMPORT
+void netsnmp_transport_filter_cleanup(void);
+
+#endif /* NETSNMP_FEATURE_REMOVE_FILTER_SOURCE */
+
 #ifdef __cplusplus
 }
 #endif

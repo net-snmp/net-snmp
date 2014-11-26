@@ -254,6 +254,102 @@ netsnmp_transport_peer_string(netsnmp_transport *t, void *data, int len)
     return str;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+static netsnmp_container * filtered = NULL;
+
+void netsnmp_transport_parse_filter(const char *word, char *cptr);
+void netsnmp_transport_filter_cleanup(void);
+
+static int _transport_filter_init(void)
+{
+    if (filtered)
+        return 0;
+
+    filtered = netsnmp_container_find("transport_filter:cstring");
+    if (NULL == filtered) {
+        NETSNMP_LOGONCE((LOG_WARNING,
+                         "couldn't allocate container for transport_filter list\n"));
+        return -1;
+    }
+    filtered->container_name = strdup("transport_filter list");
+    netsnmp_ds_register_config(ASN_BOOLEAN,
+                               "snmp", "enableSourceFiltering",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_FILTER_SOURCE);
+    register_app_config_handler("filtersource",
+                                netsnmp_transport_parse_filter,
+                                netsnmp_transport_filter_cleanup,
+                                "host");
+
+    return 0;
+}
+
+int
+netsnmp_transport_filter_add(const char *addrtxt)
+{
+    char *tmp;
+
+    /*
+     * create the container, if needed
+     */
+    if (_transport_filter_init()) {
+        snmp_log(LOG_ERR,"netsnmp_transport_filter_add %s failed\n",
+                 addrtxt);
+        return (-1);
+    }
+    tmp = strdup(addrtxt);
+    if (NULL == tmp) {
+        snmp_log(LOG_ERR,"netsnmp_transport_filter_add strdup failed\n");
+        return(-1);
+    }
+    return CONTAINER_INSERT(filtered, tmp);
+}
+
+int
+netsnmp_transport_filter_remove(const char *addrtxt)
+{
+    /*
+     * create the container, if needed
+     */
+    if (NULL == filtered)
+        return -1;
+    return CONTAINER_REMOVE(filtered, addrtxt);
+}
+
+/*
+ * netsnmp_transport_filter_should_drop
+ *
+ * returns 1 if packets from the specified address string should be dropped
+ */
+int
+netsnmp_transport_filter_should_drop(const char *addrtxt)
+{
+    char *addr;
+    if (NULL == filtered)
+        return 0;
+    addr = CONTAINER_FIND(filtered, addrtxt);
+    return addr ? 1 : 0;
+}
+
+void
+netsnmp_transport_parse_filter(const char *word, char *cptr)
+{
+    if (netsnmp_transport_filter_add(cptr))
+        netsnmp_config_error("cannot create source filter: %s", cptr);
+}
+
+void
+netsnmp_transport_filter_cleanup(void)
+{
+    if (NULL == filtered)
+        return;
+    CONTAINER_CLEAR(filtered, filtered->free_item, NULL);
+    CONTAINER_FREE(filtered);
+    filtered = NULL;
+}
+#endif /* NETSNMP_FEATURE_REMOVE_FILTER_SOURCE */
+
+
 #ifndef NETSNMP_FEATURE_REMOVE_SOCKADDR_SIZE
 int
 netsnmp_sockaddr_size(struct sockaddr *sa)
@@ -375,6 +471,18 @@ netsnmp_tdomain_init(void)
 #include "transports/snmp_transport_inits.h"
 
     netsnmp_tdomain_dump();
+
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+    netsnmp_ds_register_config(ASN_BOOLEAN,
+                               "snmp", "enableSourceFiltering",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_FILTER_SOURCE);
+    register_app_config_handler("filtersource",
+                                netsnmp_transport_parse_filter,
+                                netsnmp_transport_filter_cleanup,
+                                "host");
+#endif /* NETSNMP_FEATURE_REMOVE_FILTER_SOURCE */
+
 }
 
 void
