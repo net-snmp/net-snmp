@@ -95,7 +95,10 @@ extern          "C" {
 #define NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES 40 /* don't read host.conf files */
 #define NETSNMP_DS_LIB_DNSSEC_WARN_ONLY     41 /* tread DNSSEC errors as warnings */
 #define NETSNMP_DS_LIB_CLIENT_ADDR_USES_PORT 42 /* NETSNMP_DS_LIB_CLIENT_ADDR includes address and also port */
-#define NETSNMP_DS_LIB_MAX_BOOL_ID          48 /* match NETSNMP_DS_MAX_SUBIDS */
+#define NETSNMP_DS_LIB_DISABLE_V1          43 /* disable SNMPv1 */
+#define NETSNMP_DS_LIB_DISABLE_V2c         44 /* disable SNMPv2c */
+#define NETSNMP_DS_LIB_DISABLE_V3          45 /* disable SNMPv3 */
+#define NETSNMP_DS_LIB_MAX_BOOL_ID         48 /* match NETSNMP_DS_MAX_SUBIDS */
 
     /*
      * library integers 

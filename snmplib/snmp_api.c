@@ -758,10 +758,24 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE);
     netsnmp_ds_register_config(ASN_INTEGER, "snmp", "defaultPort",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DEFAULT_PORT);
+#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "disableSNMPv3",
+                      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_V3);
+#endif /* NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION */
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
+#if !defined(NETSNMP_DISABLE_SNMPV1)
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "disableSNMPv1",
+                      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_V1);
+#endif
+#if !defined(NETSNMP_DISABLE_SNMPV2C)
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "disableSNMPv2c",
+                      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_V2c);
+#endif
+#endif /* NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION */
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defCommunity",
                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_COMMUNITY);
-#endif
+#endif /* !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C) */
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "noTokenWarnings",
                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_TOKEN_WARNINGS);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noRangeCheck",
@@ -4106,6 +4120,15 @@ _snmp_parse(void *sessp,
     case SNMP_VERSION_2c:
 #endif
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
+        if (((pdu->version == SNMP_VERSION_1) &&
+             netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_DISABLE_V1)) ||
+            ((pdu->version == SNMP_VERSION_2c) &&
+             netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_DISABLE_V2c)))
+            goto unsupported_version;
+#endif
         DEBUGMSGTL(("snmp_api", "Parsing SNMPv%ld message...\n",
                     (1 + pdu->version)));
 
@@ -4176,6 +4199,11 @@ _snmp_parse(void *sessp,
 #endif /* support for community based SNMP */
 
     case SNMP_VERSION_3:
+#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_DISABLE_V3))
+            goto unsupported_version;
+#endif
         result = snmpv3_parse(pdu, data, &length, NULL, session);
         DEBUGMSGTL(("snmp_parse",
                     "Parsed SNMPv3 message (secName:%s, secLevel:%s): %s\n",
@@ -4325,6 +4353,8 @@ _snmp_parse(void *sessp,
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         session->s_snmp_errno = SNMPERR_BAD_VERSION;
         break;
+
+        unsupported_version:  /* goto label */
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
     case SNMP_VERSION_2star:
