@@ -454,6 +454,13 @@ NETSNMP_ARG_ENABLE(usmUser-uses-default-auth-priv,
         [if defined always use default auth/priv protocol when creating usmUsers])
     fi])
 
+NETSNMP_ARG_ENABLE(daemons-syslog-as-default,
+[  --enable-daemons-syslog-as-default Use syslog when no other log destination defined.],
+    [if test "x$enable_daemons_syslog_as_default" = "xyes"; then
+      AC_DEFINE(NETSNMP_DAEMONS_DEFAULT_LOG_SYSLOG, 1,
+        [if defined daemons will use syslog when no log destination is defined])
+    fi])
+
 NETSNMP_ARG_WITH(persistent-directory,
 [  --with-persistent-directory="directory"
                                   Default directory for persistent data storage.],ac_cv_user_prompt_NETSNMP_PERSISTENT_DIRECTORY="$with_persistent_directory")

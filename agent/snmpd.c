@@ -893,6 +893,10 @@ main(int argc, char *argv[])
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     }
 
+#if defined(NETSNMP_DAEMONS_DEFAULT_LOG_SYSLOG)
+    if (0 == log_set)
+        snmp_enable_syslog();
+#else
 #ifdef NETSNMP_LOGFILE
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_FILE
     if (0 == log_set)
@@ -900,7 +904,8 @@ main(int argc, char *argv[])
                             netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                                    NETSNMP_DS_LIB_APPEND_LOGFILES));
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_FILE */
-#endif
+#endif /* NETSNMP_LOGFILE */
+#endif /* ! NETSNMP_DEFAULT_LOG_SYSLOG */
 
 #ifdef USING_UTIL_FUNCS_RESTART_MODULE
     {

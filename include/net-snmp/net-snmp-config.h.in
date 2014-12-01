@@ -1813,6 +1813,9 @@
    out/err's place.  (stdin is closed so that sh scripts won't wait for it) */
 #undef NETSNMP_LOGFILE
 
+/* if defined daemons will use syslog when no log destination is defined */
+#undef NETSNMP_DAEMONS_DEFAULT_LOG_SYSLOG
+
 /* default system contact */
 #undef NETSNMP_SYS_CONTACT
 
