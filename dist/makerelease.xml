@@ -540,12 +540,12 @@
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg -u E0F81533 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
+	    <command>gpg --use-agent -u E0F81533 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg -u E0F81533 -a --detach-sign net-snmp-{VERSION}.zip</command>
+	    <command>gpg --use-agent -u E0F81533 -a --detach-sign net-snmp-{VERSION}.zip</command>
 	  </commands>
 	</step>
 	<step type="command" name="release:nextbranch" title="Don't propagate code modifications"
