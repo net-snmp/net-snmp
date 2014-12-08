@@ -4,7 +4,6 @@
 ./header_complex.lo: ../../include/net-snmp/system/linux.h
 ./header_complex.lo: ../../include/net-snmp/system/sysv.h
 ./header_complex.lo: ../../include/net-snmp/system/generic.h
-./header_complex.lo: ../../include/net-snmp/machine/generic.h
 ./header_complex.lo: ../../include/net-snmp/net-snmp-includes.h
 ./header_complex.lo: ../../include/net-snmp/definitions.h
 ./header_complex.lo: ../../include/net-snmp/types.h

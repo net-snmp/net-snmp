@@ -4,7 +4,6 @@
 ./all_helpers.lo: ../../include/net-snmp/system/linux.h
 ./all_helpers.lo: ../../include/net-snmp/system/sysv.h
 ./all_helpers.lo: ../../include/net-snmp/system/generic.h
-./all_helpers.lo: ../../include/net-snmp/machine/generic.h
 ./all_helpers.lo: ../../include/net-snmp/net-snmp-features.h
 ./all_helpers.lo: ../../include/net-snmp/net-snmp-includes.h
 ./all_helpers.lo: ../../include/net-snmp/definitions.h
