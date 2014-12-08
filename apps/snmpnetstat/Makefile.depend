@@ -4,7 +4,6 @@
 ./if.lo: ../../include/net-snmp/system/linux.h
 ./if.lo: ../../include/net-snmp/system/sysv.h
 ./if.lo: ../../include/net-snmp/system/generic.h
-./if.lo: ../../include/net-snmp/machine/generic.h
 ./if.lo: ../../include/net-snmp/net-snmp-includes.h
 ./if.lo: ../../include/net-snmp/definitions.h ../../include/net-snmp/types.h
 ./if.lo: ../../include/net-snmp/library/oid.h

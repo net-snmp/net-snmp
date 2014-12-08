@@ -598,7 +598,7 @@ basename_equals(const char *path, const char *basename)
 
     return path_len >= basename_len + 1
         && path[path_len - basename_len - 1] == '\\'
-        && stricmp(path + path_len - basename_len, basename) == 0;
+        && strcasecmp(path + path_len - basename_len, basename) == 0;
 }
 
 /**

@@ -1,0 +1,41 @@
+{
+   "abstract" : "Embedded perl trap handling for Net-SNMP's snmptrapd",
+   "author" : [
+      "W. Hardaker <hardaker@users.sourceforge.net>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "ExtUtils::MakeMaker version 6.72, CPAN::Meta::Converter version 2.132140",
+   "license" : [
+      "unknown"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "NetSNMP-TrapReceiver",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "0"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "0"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "NetSNMP::OID" : "5.02"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "5.0703"
+}

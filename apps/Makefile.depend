@@ -4,7 +4,6 @@
 ./agentxtrap.lo: ../include/net-snmp/system/linux.h
 ./agentxtrap.lo: ../include/net-snmp/system/sysv.h
 ./agentxtrap.lo: ../include/net-snmp/system/generic.h
-./agentxtrap.lo: ../include/net-snmp/machine/generic.h
 ./agentxtrap.lo: ../include/net-snmp/net-snmp-features.h
 ./agentxtrap.lo: ../include/net-snmp/net-snmp-includes.h
 ./agentxtrap.lo: ../include/net-snmp/definitions.h

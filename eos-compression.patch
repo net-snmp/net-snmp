@@ -1,0 +1,728 @@
+Experimental implementation of two OID compression techniques.
+Patch based upon Net-SNMP 5.0.1 codebase
+
+Dave Shield
+June 2002
+
+
+--- include/net-snmp/library/asn1.h	2002/06/26 13:54:37	1.1
++++ include/net-snmp/library/asn1.h	2002/06/26 14:02:03
+@@ -128,6 +128,12 @@
+ #define ASN_APP_U64 (ASN_APPLICATION | 11)
+ #define ASN_APP_UNION (ASN_PRIVATE | 1) /* or ASN_PRIV_UNION ? */
+ 
++    /* See draft-ietf-eos-oidcompression-00.txt */
++#define ASN_APP_OPC_UNCOMPRESSED_OID (ASN_APPLICATION | 14)
++#define ASN_APP_OPC_COMPRESSED_OID   (ASN_APPLICATION | 15)
++    /* See draft-irtf-nmrg-snmp-compression-01.txt */
++#define ASN_ODC_COMPRESSED_OID       (42)	/* i.e.  (ASN_CONSTRUCTOR | 10 ) */
++
+     /*
+      * value for Counter64 
+      */
+--- include/net-snmp/library/snmp_api.h	2002/06/26 16:24:34	1.1
++++ include/net-snmp/library/snmp_api.h	2002/06/26 16:24:56
+@@ -394,6 +394,7 @@
+         struct variable_list *next_variable;    /* NULL for last variable */
+         oid            *name;   /* Object identifier of variable */
+         size_t          name_length;    /* number of subid's in name */
++        int             flags;
+         u_char          type;   /* ASN type of variable */
+         union {                 /* value of variable */
+             long           *integer;
+--- include/net-snmp/library/snmp.h	2002/06/26 14:52:52	1.1
++++ include/net-snmp/library/snmp.h	2002/06/29 11:55:32
+@@ -264,6 +264,12 @@
+ #define UCD_MSG_FLAG_ALWAYS_IN_VIEW          0x800
+ #define UCD_MSG_FLAG_PDU_TIMEOUT            0x1000
+ #define UCD_MSG_FLAG_ONE_PASS_ONLY          0x2000
++#define UCD_MSG_FLAG_OPC_COMPRESSED         0x4000
++#define UCD_MSG_FLAG_ODC_COMPRESSED         0x8000
++
++#define UCD_VARBIND_FLAG_OPC_ENCODED		0x1
++#define UCD_VARBIND_FLAG_OPC_COMPRESSED		0x2
++#define UCD_VARBIND_FLAG_ODC_COMPRESSED		0x4
+ 
+     /*
+      * view status 
+@@ -288,9 +294,9 @@
+ 
+     char           *uptime_string(u_long, char *);
+     void            xdump(const u_char *, size_t, const char *);
+-    u_char         *snmp_parse_var_op(u_char *, oid *, size_t *, u_char *,
++    u_char         *snmp_parse_var_op(u_char *, oid *, size_t *, int *, u_char *,
+                                       size_t *, u_char **, size_t *);
+-    u_char         *snmp_build_var_op(u_char *, oid *, size_t *, u_char,
++    u_char         *snmp_build_var_op(u_char *, oid *, size_t *, int, u_char,
+                                       size_t, u_char *, size_t *);
+ 
+ 
+@@ -301,6 +307,7 @@
+                                                int allow_realloc,
+                                                const oid * name,
+                                                size_t * name_len,
++                                               int    flags,
+                                                u_char value_type,
+                                                u_char * value,
+                                                size_t value_length);
+--- snmplib/asn1.c	2002/06/26 14:02:30	1.1
++++ snmplib/asn1.c	2002/06/29 20:51:55
+@@ -942,6 +942,290 @@
+ 
+ }
+ 
++	/**************************************
++	 *
++	 *   Experimental EOS implementation code
++	 *
++	 **************************************/
++static oid    eos_delta_oid[ MAX_OID_LEN ];
++static size_t eos_delta_oid_len;
++
++void
++eos_clear_delta_oid( void )
++{
++    memset( eos_delta_oid, 0, MAX_OID_LEN*sizeof(oid));
++    eos_delta_oid_len = 0;
++}
++void
++eos_set_delta_oid( oid *objid, size_t objidlength )
++{
++    memset( eos_delta_oid, 0, MAX_OID_LEN*sizeof(oid));
++    memcpy( eos_delta_oid, objid, objidlength*sizeof(oid));
++    eos_delta_oid_len = objidlength;
++}
++
++/*
++ *   Handle OID Prefix Compression
++ */
++
++static int
++opc_expand_oid( oid *objid, size_t *objidlength, size_t max_len )
++{
++    oid    new_oid[ MAX_OID_LEN ];
++    size_t prefix_len = (objid[0]*40 + objid[1]) -1;
++    size_t suffix_len = *objidlength - 2;
++
++    if (( prefix_len + suffix_len > max_len ) ||
++        ( prefix_len + suffix_len > MAX_OID_LEN )) {
++        return -1;
++    }
++    /* Construct the expanded OID.... */
++    memset( new_oid, 0, MAX_OID_LEN*sizeof(oid));
++    memcpy( new_oid, eos_delta_oid, prefix_len*sizeof(oid));
++    memcpy( &(new_oid[prefix_len]), &(objid[2]),  suffix_len*sizeof(oid));
++
++    /* .... and copy it back into the buffer */
++    *objidlength = prefix_len + suffix_len;
++    memcpy( objid, new_oid, (*objidlength)*sizeof(oid));
++    return 0;
++}
++
++void
++opc_compress_oid( oid *objid, size_t *objidlength, int *flags)
++{
++    oid    new_oid[ MAX_OID_LEN ];
++    size_t new_len;
++    size_t max_len = SNMP_MIN( *objidlength, eos_delta_oid_len );
++    size_t i;
++
++    *flags |= UCD_VARBIND_FLAG_OPC_ENCODED;
++    for ( i=0; i<max_len; i++ ) {
++        if ( objid[i] != eos_delta_oid[i] ) {
++            break;
++        }
++    }
++    if ( i>119 ) { i = 119; }
++    if ( i == 0 ) {
++        return;
++    }
++
++    /* Compress the OID..... */
++    new_len = *objidlength - i;
++    memcpy( &(new_oid[2]), &(objid[i]), new_len*sizeof(oid) );
++    i++;
++    new_oid[0] = i / 40;
++    new_oid[1] = i % 40;
++
++    /*  .... and copy it back */
++    new_len += 2;
++    memcpy( objid, new_oid, new_len*sizeof(oid) );
++    *objidlength = new_len;
++
++    *flags |= UCD_VARBIND_FLAG_OPC_COMPRESSED;
++    return;
++   
++}
++
++/*
++ *   Handle OID Delta Compression
++ */
++
++u_char *
++odc_parse_objid(u_char * data,
++                size_t * datalength,
++                oid * objid, size_t * objidlength)
++{
++    oid    new_objid[ MAX_OID_LEN ];
++    size_t new_objid_len = eos_delta_oid_len;
++    u_char offset, len2;
++    int i;
++
++    register u_char *bufp = data;
++    register u_long subidentifier;
++    register long   length;
++    u_long          asn_length;
++
++    memset( new_objid, 0, MAX_OID_LEN*sizeof(oid));
++    memcpy( new_objid, eos_delta_oid, MAX_OID_LEN*sizeof(oid));
++
++    bufp = asn_parse_length(data, &asn_length);
++    if (_asn_parse_length_check("parse objid", bufp, data,
++                                asn_length, *datalength))
++        return NULL;
++
++
++    length = asn_length;
++
++    /*
++     * Loop through the various substitutions
++     */
++    while (length > 1 ) {
++
++        offset = (*(u_char *) bufp++);
++        length--;
++
++        /*
++         * Sub-identifier range substitution
++         */
++        if (offset & ASN_BIT8) {
++            offset &= ~ASN_BIT8;
++            len2 = (*(u_char *) bufp++);
++            length--;
++
++            /*
++             * Extract and replace the next 'len2' subidentifiers
++             */
++            for ( i=0; i<len2; i++ ) {
++                subidentifier = 0;
++                do {                    /* shift and add in low order 7 bits */
++                    subidentifier =
++                        (subidentifier << 7) + (*(u_char *) bufp & ~ASN_BIT8);
++                    length--;
++                } while (*(u_char *) bufp++ & ASN_BIT8);        /* last byte has high bit clear */
++                new_objid[ offset+i ] = subidentifier;
++            }
++            if ( offset+len2 > new_objid_len ) {
++                new_objid_len = offset+len2;
++            }
++        } else {
++
++           /*
++            * Single Sub-identifier substitution
++            */
++           subidentifier = 0;
++            do {                    /* shift and add in low order 7 bits */
++                subidentifier =
++                    (subidentifier << 7) + (*(u_char *) bufp & ~ASN_BIT8);
++                length--;
++            } while (*(u_char *) bufp++ & ASN_BIT8);        /* last byte has high bit clear */
++            new_objid[ offset ] = subidentifier;
++            if ( offset+1 > new_objid_len ) {
++                new_objid_len = offset+1;
++            }
++        }
++    }
++
++    /*
++     * Handle the final (optional) truncation
++     */
++    if (length == 1 ) {
++        new_objid_len = (*(u_char *) bufp++);
++    }
++
++    
++    memcpy( objid, new_objid, new_objid_len*sizeof(oid));
++    *objidlength = new_objid_len;
++
++    return bufp;
++}
++
++
++
++void
++odc_compress_oid( oid *objid, size_t *objidlength, int *flags)
++{
++    oid    new_oid[ MAX_OID_LEN ];
++    size_t new_oid_len = 1;
++    size_t i, j, k;
++
++    memset( new_oid, 0, MAX_OID_LEN*sizeof(oid));
++
++    /*
++     * Find the first location where the new OID
++     *  differs from the last one
++     */
++    for (i = 0; i<*objidlength; i++ ) {
++        if  (( i == eos_delta_oid_len ) ||
++             ( eos_delta_oid[i] != objid[i] ))
++            break;
++    }
++
++    if  ( i == 0 ) {
++        return;
++    } else if  ( i == *objidlength ) {
++        /*
++         * Simple truncation.
++         * Note that this implementation does not try to
++         *   detect or indicate "extension truncations".
++         */
++        new_oid[ new_oid_len++ ] = *objidlength;
++    } else {
++
++        /*
++         * Is the rest of the OID the same?
++         *   (working backwards from the end,
++         *    so we find the last non-matching subid)
++         */
++        for ( j=*objidlength-1; j>i; j-- ) {
++            if  (( j >= eos_delta_oid_len ) ||
++                 ( eos_delta_oid[j] != objid[j] ))
++                break;
++        }
++    
++        /*
++         * If so, then this is a single subid substitution
++         *   (possibly plus truncation)
++         */
++        if  ( j == i ) {
++            new_oid[ new_oid_len++ ] = i;
++            new_oid[ new_oid_len++ ] = objid[i];
++        } else {
++            /*
++             * Simplified range substitution algorithm.
++             *
++             * The subidentifiers indexed by i and j are
++             *   different, so replace this whole range.
++             * Don't bother trying to analyse the intermediate values.
++             */
++            j++;
++            new_oid[ new_oid_len++ ] = (i << 7) + (j-i);
++            while (i < j) {
++                new_oid[ new_oid_len++ ] = objid[i++];
++            }
++        }
++
++        /*
++         * Truncate the previous OID if appropriate.
++         * Note that this implementation does not try to
++         *   detect or indicate "extension truncations".
++         */
++        if ( *objidlength < eos_delta_oid_len ) {
++            new_oid[ new_oid_len++ ] = *objidlength;
++        }            
++    }
++
++    /*
++     * Finally, extend the first value over the first two
++     *  sub-identifiers - so that it BER encodes correctly.
++     */
++    i = new_oid[ 1 ]; 
++    if ( i > 80 ) {
++        new_oid[0]  = 2;
++        new_oid[1] -= 80;
++    } else if ( i > 40 ) {
++        new_oid[0]  = 1;
++        new_oid[1] -= 40;
++    }
++
++    /*
++     * We can now save the full OID, and return the compressed version
++     */
++    if ( *objidlength > new_oid_len ) {
++        memcpy( objid, new_oid, new_oid_len*sizeof(oid));
++        *objidlength = new_oid_len;
++        *flags |= UCD_VARBIND_FLAG_ODC_COMPRESSED;
++    }
++}
++
++
++
++	/**************************************
++	 *
++	 *   End of EOS implementation code
++	 *
++	 **************************************/
++
++
+ /*
+  * asn_parse_objid - pulls an object indentifier out of an ASN object identifier type.
+  *  On entry, datalength is input as the number of valid bytes following
+@@ -977,8 +1261,21 @@
+     register u_long subidentifier;
+     register long   length;
+     u_long          asn_length;
++    size_t          saved_len = *objidlength;
+ 
+     *type = *bufp++;
++
++    /*
++     * Delta Compressed OIDs use a very different form of encoding
++     *   to "normal" OIDs, so need to be parsed separately.
++     * Prefix Compressed OIDs are a modified interpretation
++     *   of "normal" OIDs, so can use the same parsing code.
++     */
++    if ( *type == ASN_ODC_COMPRESSED_OID ) {
++        (*datalength)--;
++        return odc_parse_objid( bufp, datalength, objid, objidlength);
++    }
++ 
+     bufp = asn_parse_length(bufp, &asn_length);
+     if (_asn_parse_length_check("parse objid", bufp, data,
+                                 asn_length, *datalength))
+@@ -1032,17 +1329,25 @@
+         } else if (subidentifier < 80) {
+             objid[0] = 1;
+             objid[1] = subidentifier - 40;
+-        } else if (subidentifier < 120) {
++        } else {
+             objid[0] = 2;
+             objid[1] = subidentifier - 80;
+-        } else {
+-            objid[1] = (subidentifier % 40);
+-            objid[0] = ((subidentifier - objid[1]) / 40);
+         }
+     }
+ 
+     *objidlength = (int) (oidp - objid);
+ 
++    /*
++     *  Now expand Prefix Compressed OIDs appropriately
++     */
++    if ( *type == ASN_APP_OPC_UNCOMPRESSED_OID ) {
++        eos_set_delta_oid( objid, *objidlength );
++    }
++    if ( *type == ASN_APP_OPC_COMPRESSED_OID ) {
++        opc_expand_oid( objid, objidlength, saved_len );
++        eos_set_delta_oid( objid, *objidlength );
++    }
++
+     DEBUGMSG(("dumpv_recv", "  ObjID: "));
+     DEBUGMSGOID(("dumpv_recv", objid, *objidlength));
+     DEBUGMSG(("dumpv_recv", "\n"));
+@@ -1097,6 +1402,9 @@
+          */
+         objid_val = 0;
+         objidlength = 2;
++    } else if (objid[0] > 2) {
++        ERROR_MSG("build objid: bad first subidentifier");
++        return NULL;
+     } else if (objidlength == 1) {
+         /*
+          * encode the first value 
+@@ -1108,7 +1416,8 @@
+         /*
+          * combine the first two values 
+          */
+-        if (op[1] > 40) {
++        if ((op[1] > 40) &&
++            (op[0] < 2)) {
+             ERROR_MSG("build objid: bad second subidentifier");
+             return NULL;
+         }
+@@ -1146,7 +1455,7 @@
+         i++;
+         if (i >= (int) objidlength)
+             break;
+-        objid_val = *op++;
++        objid_val = *op++;	/* XXX - Doesn't handle 2.X (X > 40) */
+     }
+ 
+     /*
+@@ -2435,6 +2744,9 @@
+ 
+         *(*pkt + *pkt_len - (++*offset)) = 0;
+         *(*pkt + *pkt_len - (++*offset)) = 0;
++    } else if (objid[0] > 2) {
++            ERROR_MSG("build objid: bad first subidentifier");
++            return 0;
+     } else if (objidlength == 1) {
+         /*
+          * Encode the first value.  
+@@ -2469,15 +2781,28 @@
+         /*
+          * Combine the first two values.  
+          */
+-        if (op[1] > 40) {
++        if ((objid[1] > 40) &&
++            (objid[0] < 2)) {
+             ERROR_MSG("build objid: bad second subidentifier");
+             return 0;
+         }
++        tmpint = ((objid[0] * 40) + objid[1]);
+         if (((*pkt_len - *offset) < 1)
+             && !(r && asn_realloc(pkt, pkt_len))) {
+             return 0;
+         }
+-        *(*pkt + *pkt_len - (++*offset)) = (u_char) ((op[0] * 40) + op[1]);
++        *(*pkt + *pkt_len - (++*offset)) = (u_char) tmpint & 0x7f;
++        tmpint >>= 7;
++
++        while (tmpint > 0) {
++            if (((*pkt_len - *offset) < 1)
++                && !(r && asn_realloc(pkt, pkt_len))) {
++                return 0;
++            }
++            *(*pkt + *pkt_len - (++*offset)) =
++                (u_char) ((tmpint & 0x7f) | 0x80);
++            tmpint >>= 7;
++        }
+     }
+ 
+     tmpint = *offset - start_offset;
+--- snmplib/snmp_api.c	2002/06/26 14:55:50	1.1
++++ snmplib/snmp_api.c	2002/06/29 15:27:32
+@@ -2549,6 +2549,13 @@
+     session->s_snmp_errno = 0;
+     session->s_errno = 0;
+ 
++    if (session->flags & UCD_MSG_FLAG_OPC_COMPRESSED) {
++        pdu->flags |= UCD_MSG_FLAG_OPC_COMPRESSED;
++    }
++    if (session->flags & UCD_MSG_FLAG_ODC_COMPRESSED) {
++        pdu->flags |= UCD_MSG_FLAG_ODC_COMPRESSED;
++    }
++
+     if (pdu->version == SNMP_VERSION_3) {
+         return snmpv3_build(pkt, pkt_len, offset, session, pdu);
+     }
+@@ -3019,9 +3026,17 @@
+      * Store variable-bindings 
+      */
+     DEBUGDUMPSECTION("send", "VarBindList");
++    eos_clear_delta_oid();
+     for (vp = pdu->variables; vp; vp = vp->next_variable) {
+         DEBUGDUMPSECTION("send", "VarBind");
+-        cp = snmp_build_var_op(cp, vp->name, &vp->name_length, vp->type,
++        if (pdu->flags & UCD_MSG_FLAG_OPC_COMPRESSED ) {
++            opc_compress_oid( vp->name, &vp->name_length, &vp->flags );
++        }
++        if (pdu->flags & UCD_MSG_FLAG_ODC_COMPRESSED ) {
++            odc_compress_oid( vp->name, &vp->name_length, &vp->flags );
++        }
++        eos_set_delta_oid( vp->name, vp->name_length );
++        cp = snmp_build_var_op(cp, vp->name, &vp->name_length, vp->flags, vp->type,
+                                vp->val_len, (u_char *) vp->val.string,
+                                out_length);
+         DEBUGINDENTLESS();
+@@ -3062,8 +3077,17 @@
+     int             i, wrapped = 0, notdone, final, rc = 0;
+ 
+     DEBUGMSGTL(("snmp_pdu_realloc_rbuild", "starting\n"));
++    eos_clear_delta_oid();
+     for (vp = pdu->variables, i = VPCACHE_SIZE - 1; vp;
+          vp = vp->next_variable, i--) {
++        if (pdu->flags & UCD_MSG_FLAG_OPC_COMPRESSED ) {
++            opc_compress_oid( vp->name, &vp->name_length, &vp->flags );
++        }
++        if (pdu->flags & UCD_MSG_FLAG_ODC_COMPRESSED ) {
++            odc_compress_oid( vp->name, &vp->name_length, &vp->flags );
++        }
++        eos_set_delta_oid(vp->name, vp->name_length);
++
+         if (i < 0) {
+             wrapped = notdone = 1;
+             i = VPCACHE_SIZE - 1;
+@@ -3079,7 +3103,7 @@
+             DEBUGDUMPSECTION("send", "VarBind");
+             rc = snmp_realloc_rbuild_var_op(pkt, pkt_len, offset, 1,
+                                             vp->name, &vp->name_length,
+-                                            vp->type,
++                                            vp->flags, vp->type,
+                                             (u_char *) vp->val.string,
+                                             vp->val_len);
+             DEBUGINDENTLESS();
+@@ -3096,7 +3120,7 @@
+                 DEBUGDUMPSECTION("send", "VarBind");
+                 rc = snmp_realloc_rbuild_var_op(pkt, pkt_len, offset, 1,
+                                                 vp->name, &vp->name_length,
+-                                                vp->type,
++                                                vp->flags, vp->type,
+                                                 (u_char *) vp->val.string,
+                                                 vp->val_len);
+                 DEBUGINDENTLESS();
+@@ -4138,6 +4162,7 @@
+     /*
+      * get each varBind sequence 
+      */
++    eos_clear_delta_oid();
+     while ((int) *length > 0) {
+         netsnmp_variable_list *vptemp;
+         vptemp = (netsnmp_variable_list *) malloc(sizeof(*vptemp));
+@@ -4156,15 +4181,23 @@
+         vp->name_length = MAX_OID_LEN;
+         vp->name = 0;
+         vp->index = 0;
++        vp->flags = 0;
+         vp->data = 0;
+         vp->dataFreeHook = 0;
+         DEBUGDUMPSECTION("recv", "VarBind");
+-        data = snmp_parse_var_op(data, objid, &vp->name_length, &vp->type,
++        data = snmp_parse_var_op(data, objid, &vp->name_length, &vp->flags, &vp->type,
+                                  &vp->val_len, &var_val, length);
++        if (vp->flags & UCD_VARBIND_FLAG_OPC_ENCODED) {
++            pdu->flags |= UCD_MSG_FLAG_OPC_COMPRESSED;
++        }
++        if (vp->flags & UCD_VARBIND_FLAG_ODC_COMPRESSED) {
++            pdu->flags |= UCD_MSG_FLAG_ODC_COMPRESSED;
++        }
+         if (data == NULL)
+             return -1;
+         if (snmp_set_var_objid(vp, objid, vp->name_length))
+             return -1;
++        eos_set_delta_oid( vp->name, vp->name_length );
+ 
+         len = MAX_PACKET_LENGTH;
+         DEBUGDUMPHEADER("recv", "Value");
+--- snmplib/snmp.c	2002/06/26 16:24:03	1.1
++++ snmplib/snmp.c	2002/06/29 15:19:05
+@@ -132,6 +132,7 @@
+ snmp_parse_var_op(u_char * data,
+                   oid * var_name,
+                   size_t * var_name_len,
++                  int    * flags,
+                   u_char * var_val_type,
+                   size_t * var_val_len,
+                   u_char ** var_val, size_t * listlength)
+@@ -157,9 +158,22 @@
+         ERROR_MSG("No OID for variable");
+         return NULL;
+     }
+-    if (var_op_type !=
+-        (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID))
+-        return NULL;
++    switch (var_op_type) {
++        case (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID):
++            break;
++        case ASN_APP_OPC_UNCOMPRESSED_OID:
++            *flags |= UCD_VARBIND_FLAG_OPC_ENCODED;
++            break;
++        case ASN_APP_OPC_COMPRESSED_OID:
++            *flags |= UCD_VARBIND_FLAG_OPC_ENCODED;
++            *flags |= UCD_VARBIND_FLAG_OPC_COMPRESSED;
++            break;
++        case ASN_ODC_COMPRESSED_OID:
++            *flags |= UCD_VARBIND_FLAG_ODC_COMPRESSED;
++            break;
++        default:
++            return NULL;
++    }
+     *var_val = data;            /* save pointer to this object */
+     /*
+      * find out what type of object this is 
+@@ -183,6 +197,7 @@
+  * u_char *data      IN - pointer to the beginning of the output buffer
+  * oid *var_name        IN - object id of variable 
+  * int *var_name_len    IN - length of object id 
++ * int flags            IN - varbind flags
+  * u_char var_val_type  IN - type of variable 
+  * int    var_val_len   IN - length of variable 
+  * u_char *var_val      IN - value of variable 
+@@ -194,12 +209,14 @@
+ snmp_build_var_op(u_char * data,
+                   oid * var_name,
+                   size_t * var_name_len,
++                  int    flags,
+                   u_char var_val_type,
+                   size_t var_val_len,
+                   u_char * var_val, size_t * listlength)
+ {
+     size_t          dummyLen, headerLen;
+     u_char         *dataPtr;
++    u_char          oid_type;
+ 
+     dummyLen = *listlength;
+     dataPtr = data;
+@@ -219,9 +236,17 @@
+     headerLen = data - dataPtr;
+     *listlength -= headerLen;
+     DEBUGDUMPHEADER("send", "Name");
++    if ( flags & UCD_VARBIND_FLAG_OPC_ENCODED )
++        oid_type = ( flags & UCD_VARBIND_FLAG_OPC_COMPRESSED ?
++                     ASN_APP_OPC_COMPRESSED_OID :
++                     ASN_APP_OPC_UNCOMPRESSED_OID );
++    else if ( flags & UCD_VARBIND_FLAG_ODC_COMPRESSED )
++        oid_type =   ASN_ODC_COMPRESSED_OID;
++    else
++        oid_type =  (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID);
++        
+     data = asn_build_objid(data, listlength,
+-                           (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+-                                     ASN_OBJECT_ID), var_name,
++                                     oid_type, var_name,
+                            *var_name_len);
+     DEBUGINDENTLESS();
+     if (data == NULL) {
+@@ -310,11 +335,12 @@
+ snmp_realloc_rbuild_var_op(u_char ** pkt, size_t * pkt_len,
+                            size_t * offset, int allow_realloc,
+                            const oid * var_name, size_t * var_name_len,
+-                           u_char var_val_type,
++                           int flags, u_char var_val_type,
+                            u_char * var_val, size_t var_val_len)
+ {
+     size_t          start_offset = *offset;
+     int             rc = 0;
++    u_char          oid_type;
+ 
+     /*
+      * Encode the value.  
+@@ -417,10 +443,16 @@
+      */
+ 
+     DEBUGDUMPHEADER("send", "Name");
++    if ( flags & UCD_VARBIND_FLAG_OPC_ENCODED )
++        oid_type = ( flags & UCD_VARBIND_FLAG_OPC_COMPRESSED ?
++                     ASN_APP_OPC_COMPRESSED_OID :
++                     ASN_APP_OPC_UNCOMPRESSED_OID );
++    else if ( flags & UCD_VARBIND_FLAG_ODC_COMPRESSED )
++        oid_type =   ASN_ODC_COMPRESSED_OID;
++    else
++        oid_type =  (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID);
+     rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset, allow_realloc,
+-                                  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+-                                            ASN_OBJECT_ID), var_name,
+-                                  *var_name_len);
++                                  oid_type, var_name, *var_name_len);
+     DEBUGINDENTLESS();
+     if (rc == 0) {
+         ERROR_MSG("Can't build OID for variable");
+--- snmplib/snmp_parse_args.c	2002/06/26 17:02:30	1.1
++++ snmplib/snmp_parse_args.c	2002/06/29 10:29:11
+@@ -284,6 +284,26 @@
+                 session->version = SNMP_VERSION_2c;
+             } else if (!strcasecmp(optarg, "3")) {
+                 session->version = SNMP_VERSION_3;
++
++            } else if (!strcmp(optarg, "1+p")) {
++                session->version = SNMP_VERSION_1;
++                session->flags |= UCD_MSG_FLAG_OPC_COMPRESSED;
++            } else if (!strcasecmp(optarg, "2c+p")) {
++                session->version = SNMP_VERSION_2c;
++                session->flags |= UCD_MSG_FLAG_OPC_COMPRESSED;
++            } else if (!strcasecmp(optarg, "3+p")) {
++                session->version = SNMP_VERSION_3;
++                session->flags |= UCD_MSG_FLAG_OPC_COMPRESSED;
++
++            } else if (!strcmp(optarg, "1+d")) {
++                session->version = SNMP_VERSION_1;
++                session->flags |= UCD_MSG_FLAG_ODC_COMPRESSED;
++            } else if (!strcasecmp(optarg, "2c+d")) {
++                session->version = SNMP_VERSION_2c;
++                session->flags |= UCD_MSG_FLAG_ODC_COMPRESSED;
++            } else if (!strcasecmp(optarg, "3+d")) {
++                session->version = SNMP_VERSION_3;
++                session->flags |= UCD_MSG_FLAG_ODC_COMPRESSED;
+             } else {
+                 fprintf(stderr,
+                         "Invalid version specified after -v flag: %s\n",

@@ -1,0 +1,8 @@
+
+/* features provided by apps/snmptrapd_handlers.c */
+#define NETSNMP_FEATURE_ADD_DEFAULT_TRAPHANDLER_CHILD_OF_SNMPTRAPD 1
+#define NETSNMP_FEATURE_PROVIDE_ADD_DEFAULT_TRAPHANDLER 1
+
+/* required by apps/agentxtrap.c */
+#define NETSNMP_FEATURE_REQUIRE_SNMP_SPLIT_PDU 1
+#define NETSNMP_FEATURE_REQUIRE_SNMP_RESET_VAR_TYPES 1
