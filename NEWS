@@ -24,6 +24,7 @@ listing of all changes made to the code.
 	include or library directories globally - these have to be
 	specified per project. Hence two additional menu entries in
 	build.bat that allow to specify these directories.
+      - Patch from Bart Van Assche to improve cygwin building
 
 *5.7.2*
     snmp:

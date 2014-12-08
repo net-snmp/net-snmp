@@ -104,6 +104,7 @@ listing of all changes made to the code.
 	http://sourceforge.net/p/net-snmp/patches/1257/.
 
     Win32:
+      - Modified patch from Bart Van Assche to improve cygwin building
       - Perl: BUG: 2488: Avoid "Free to wrong pool" error
       - Perl: BUG: 2488: Avoid "Free to wrong pool" error" This reverts
 	commit b2725964bde921b6285e3a59a512552cae0a0ca5.
