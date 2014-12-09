@@ -362,7 +362,7 @@
 	<step type="system" stepname="build:configure" title="build:configure">
 	  <text>We need to run configure to set up the build tree.</text>
 	  <commands>
-	    <command>./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example testhandler smux Rmon disman/event-mib' --with-transports=IPX --enable-ipv6 --enable-embedded-perl --enable-shared</command>
+	    <command>./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example testhandler tlstm-mib tsm-mib smux Rmon disman/event-mib' --with-transports="IPX TLSTCP DTLSUDP" --with-security-modules="tsm" --enable-ipv6 --enable-embedded-perl --enable-shared</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="build:make" title="build:make">
@@ -371,12 +371,30 @@
 	    <command>NETSNMP_DONT_CHECK_VERSION=1 make</command>
 	  </commands>
 	</step>
-	<step type="system" stepname="build:test" title="build:test">
+	<step type="system" stepname="build:test" title="testing: default tests">
 	  <text>Now we run "make test" which should produce a perfect
 	  set up test results.  If not, this needs to be fixed or at
 	  least understood and accepted as is for some other reason.</text>
 	  <commands>
-	    <command>make test TESTOPTS=-n</command>
+	    <command>make test</command>
+	  </commands>
+	</step>
+	<step type="system" stepname="build:test:unit" title="testing: unit-tests">
+	  <text>Now we run the unit-tests which should also produce a perfect
+	  set up test results.  If not, this needs to be fixed or at
+	  least understood and accepted as is for some other reason.</text>
+	  <commands>
+	    <command>cd testing &amp;&amp; ./RUNFULLTESTS -g unit-tests</command>
+	  </commands>
+	</step>
+	<step type="system" stepname="build:test:transports" title="testing: transports">
+	  <text>Now we run the transport tests which should also
+	  produce a perfect set up test results, if your machine
+	  supports all the transports.  If not, this needs to be fixed
+	  or at least understood and accepted as is for some other
+	  reason (like you can't do IPv6 on your system).</text>
+	  <commands>
+	    <command>cd testing &amp;&amp; ./RUNFULLTESTS -g transports</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="code:checkcomments" title="code:checkcomments">
@@ -522,12 +540,12 @@
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg -u E0F81533 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
+	    <command>gpg --use-agent -u E0F81533 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg -u E0F81533 -a --detach-sign net-snmp-{VERSION}.zip</command>
+	    <command>gpg --use-agent -u E0F81533 -a --detach-sign net-snmp-{VERSION}.zip</command>
 	  </commands>
 	</step>
 	<step type="command" name="release:nextbranch" title="Don't propagate code modifications"
@@ -659,15 +677,6 @@
     </step>
     <step type="section" title="Advertise it!">
       <steps>
-	<step type="system" pause="1" title="Add note to the news system">
-	  <text>Add a note to the source forge news system:
-
-	    http://sourceforge.net/news/submit.php?group_id=12694
-	  </text>
-	  <commands>
-	    <command>echo firefox 'http://sourceforge.net/news/submit.php?group_id=12694'</command>
-	  </commands>
-	</step>
 	<step type="informational" pause="1">
 	  <text>Send an announcement message to one of the following
 	  mailing lists based on its type:
@@ -682,17 +691,8 @@
 	</step>
 	<step type="informational" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
 	  <text>Update the topic on the #Net-SNMP channel if this is a
-	    trunk based release.
+	    trunk based release (or the latest on the top most patch tree).
 	  </text>
-	</step>
-	<step type="system" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
-	  <text>Update the freshmeat listing (Wes needs to do this):
-
-	    http://freshmeat.net/projects/net-snmp/
-	  </text>
-	  <commands>
-	    <command>echo firefox http://freshmeat.net/projects/net-snmp/</command>
-	  </commands>
 	</step>
       </steps>
     </step>
