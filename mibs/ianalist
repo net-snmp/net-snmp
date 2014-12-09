@@ -1,4 +1,4 @@
-# updated 2014-08-14
+# updated 2014-10-12
 ianaaddressfamilynumbers-mib	IANA-ADDRESS-FAMILY-NUMBERS-MIB
 ianabfdtcstd-mib		IANA-BFD-TC-STD-MIB
 ianacharset-mib			IANA-CHARSET-MIB
@@ -14,4 +14,5 @@ ianamalloc-mib			IANA-MALLOC-MIB
 ianamau-mib			IANA-MAU-MIB
 ianaolsrv2linkmetrictype-mib	IANA-OLSRv2-LINK-METRIC-TYPE-MIB
 ianaprinter-mib			IANA-PRINTER-MIB
+ianasmf-mib			IANA-SMF-MIB
 ianatn3270etc-mib		IANATn3270eTC-MIB
