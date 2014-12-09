@@ -240,6 +240,13 @@ netsnmp_fsys_arch_load( void )
         {
             snprintf( tmpbuf, sizeof(tmpbuf), "Cannot statfs %s", entry->path );
             snmp_log_perror( tmpbuf );
+            entry->units = stat_buf.NSFS_SIZE;
+            entry->size  = 0;
+            entry->used  = 0;
+            entry->avail = 0;
+            entry->inums_total = stat_buf.f_files;
+            entry->inums_avail = stat_buf.f_ffree;
+            netsnmp_fsys_calculate32(entry);
             continue;
         }
         entry->units =  stat_buf.NSFS_SIZE;
@@ -259,4 +266,3 @@ netsnmp_fsys_arch_load( void )
     }
     fclose( fp );
 }
-
