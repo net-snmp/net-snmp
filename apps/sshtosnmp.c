@@ -28,7 +28,7 @@
 #include <stdio.h>
 
 #ifndef MAXPATHLEN
-#warn no system max path length detected
+#warning no system max path length detected
 #define MAXPATHLEN 2048
 #endif
 
