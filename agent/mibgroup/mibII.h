@@ -4,7 +4,7 @@
 
 config_require(mibII/system_mib)
 config_require(mibII/sysORTable)
-config_version_require((mibII/snmp_mib, 5.5, mibII/snmp_mib_5_5))
+config_require(mibII/snmp_mib)
 config_require(mibII/vacm_vars)
 config_require(mibII/setSerialNo)
 #if !defined(cygwin) || defined(HAVE_IPHLPAPI_H)
