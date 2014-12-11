@@ -243,7 +243,6 @@ netsnmp_fsys_arch_load( void )
             entry->avail = 0;
             entry->inums_total = stat_buf.f_files;
             entry->inums_avail = stat_buf.f_ffree;
-            netsnmp_fsys_calculate32(entry);
             continue;
         }
         entry->units =  stat_buf.NSFS_SIZE;
