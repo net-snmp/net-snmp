@@ -6793,13 +6793,13 @@ snmp_add_var(netsnmp_pdu *pdu,
     u_char         *hintptr;
     struct tree    *tp;
     struct enum_list *ep;
+    int             itmp;
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
     u_char         *buf = NULL;
     const u_char   *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;
     in_addr_t       atmp;
     long            ltmp;
-    int             itmp;
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     double          dtmp;
     float           ftmp;
@@ -7045,8 +7045,6 @@ snmp_add_var(netsnmp_pdu *pdu,
                 snmp_set_detail(value);
                 break;
             }
-            /* initialize itmp value so that range check below works */
-            itmp = value_len;
             buf_ptr = buf;
         } else if (type == 's') {
             buf_ptr = (const u_char *)value;
