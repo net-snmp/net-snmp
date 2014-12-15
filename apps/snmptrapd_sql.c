@@ -15,6 +15,20 @@
 
 #ifdef NETSNMP_USE_MYSQL
 
+/*
+ * SQL includes
+ */
+#undef PACKAGE_BUGREPORT
+#undef PACKAGE_NAME
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
+#undef PACKAGE_VERSION
+#include <my_config.h>
+#include <my_global.h>
+#include <my_sys.h>
+#include <mysql.h>
+#include <errmsg.h>
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -41,19 +55,6 @@
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_auth.h"
 #include "snmptrapd_log.h"
-
-/*
- * SQL includes
- */
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#include <my_global.h>
-#include <my_sys.h>
-#include <mysql.h>
-#include <errmsg.h>
 
 netsnmp_feature_require(container_fifo)
 
