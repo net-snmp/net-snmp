@@ -372,11 +372,12 @@ var_vacm_access(struct variable * vp,
             if (len > VACM_MAX_STRING)
                 return NULL;
             cp = groupName;
-            for (i = 0; i <= len; i++) {
+            for (i = 0; i <= len && op < name + *length; i++) {
                 if (*op > 255) {
-                    return NULL;   /* illegal value */
-                }
-                *cp++ = (char) *op++;
+                    *cp++ = 255;
+                    ++op;
+                } else
+                    *cp++ = (char) *op++;
             }
             *cp = 0;
         }
@@ -386,11 +387,12 @@ var_vacm_access(struct variable * vp,
             if (len > VACM_MAX_STRING)
                 return NULL;
             cp = contextPrefix;
-            for (i = 0; i <= len; i++) {
+            for (i = 0; i <= len && op < name + *length; i++) {
                 if (*op > 255) {
-                    return NULL;   /* illegal value */
-                }
-                *cp++ = (char) *op++;
+                    *cp++ = 255;
+                    ++op;
+                } else
+                    *cp++ = (char) *op++;
             }
             *cp = 0;
         }
@@ -583,9 +585,10 @@ var_vacm_view(struct variable * vp,
                 cp = viewName;
                 for (i = 0; i <= len && op < name + *length; i++) {
                     if (*op > 255) {
-                        return NULL;
-                    }
-                    *cp++ = (char) *op++;
+                        *cp++ = 255;
+                        ++op;
+                    } else
+                        *cp++ = (char) *op++;
                 }
                 *cp = 0;
             }
