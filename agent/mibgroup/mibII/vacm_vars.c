@@ -145,7 +145,7 @@ var_vacm_sec2group(struct variable * vp,
     struct vacm_groupEntry *gp;
     oid            *groupSubtree;
     ssize_t         groupSubtreeLen;
-    int             secmodel;
+    oid             secmodel;
     char            secname[VACMSTRINGLEN], *cp;
 
     /*
@@ -267,7 +267,7 @@ var_vacm_access(struct variable * vp,
                 int exact, size_t * var_len, WriteMethod ** write_method)
 {
     struct vacm_accessEntry *gp;
-    int             secmodel, seclevel;
+    oid             secmodel, seclevel;
     char            groupName[VACMSTRINGLEN] = { 0 };
     char            contextPrefix[VACMSTRINGLEN] = { 0 };
     oid            *op;
