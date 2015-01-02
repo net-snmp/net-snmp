@@ -1695,6 +1695,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                     break;
             }
         }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         /*
          * Similarly we may need to "dumb down" v2 exception
          *  types to throw an error for a v1 query.
@@ -1720,7 +1721,6 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                 ++i;
             }
         }
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
 #endif /* snmpv1 support */
     } /** if asp->pdu */
 
