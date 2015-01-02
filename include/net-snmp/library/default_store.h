@@ -180,6 +180,64 @@ extern          "C" {
      * end storage definitions 
      */
 
+    /*
+     * macros for dynamic protocol switches
+     */
+#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
+
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) \
+    ((pc_ver == SNMP_VERSION_1) &&                                     \
+     netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,                      \
+                            NETSNMP_DS_LIB_DISABLE_V1))
+
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver) \
+    ((pc_ver == SNMP_VERSION_2c) &&                                     \
+     netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,                      \
+                            NETSNMP_DS_LIB_DISABLE_V2c))
+
+#define NETSNMP_RUNTIME_PROTOCOL_CHECK_V1V2(pc_ver, pc_target) do {    \
+        if (NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) ||                \
+            NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver))                  \
+            goto pc_target;                                            \
+    } while(0)
+#else
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) (0)
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver) (0)
+#define NETSNMP_RUNTIME_PROTOCOL_CHECK_V1V2(ver, gt) do { ; } while(0)
+#endif
+
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V3(pc_ver) \
+    ((pc_ver == SNMP_VERSION_3) &&                                   \
+     netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,                     \
+                            NETSNMP_DS_LIB_DISABLE_V3))
+
+#define NETSNMP_RUNTIME_PROTOCOL_CHECK_V3(pc_ver, pc_target) do {      \
+        if (NETSNMP_RUNTIME_PROTOCOL_SKIP_V3(pc_ver))                  \
+            goto pc_target;                                            \
+    } while(0)
+
+#define NETSNMP_RUNTIME_PROTOCOL_CHECK(pc_ver, pc_target) do {         \
+        NETSNMP_RUNTIME_PROTOCOL_CHECK_V1V2(pc_ver, pc_target);            \
+        NETSNMP_RUNTIME_PROTOCOL_CHECK_V3(pc_ver, pc_target);            \
+    } while(0)
+
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP(pc_ver) \
+    (NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) ||        \
+     NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver) ||        \
+     NETSNMP_RUNTIME_PROTOCOL_SKIP_V3(pc_ver))
+
+#else /* NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION */
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) (0)
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver) (0)
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V3(pc_ver) (0)
+#define NETSNMP_RUNTIME_PROTOCOL_CHECK(ver, gt) do { ; } while(0)
+#define NETSNMP_RUNTIME_PROTOCOL_CHECK_V1V2(ver, gt) do { ; } while(0)
+#define NETSNMP_RUNTIME_PROTOCOL_CHECK_V3(ver, gt) do { ; } while(0)
+#endif /* NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION */
+
+
     NETSNMP_IMPORT
     int             netsnmp_ds_set_boolean(int storeid, int which, int value);
     NETSNMP_IMPORT

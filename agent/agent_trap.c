@@ -1035,10 +1035,14 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 
 #ifndef NETSNMP_DISABLE_SNMPV1
     if (sess->version == SNMP_VERSION_1 &&
-        (template_pdu->command != SNMP_MSG_TRAP))
+        ((template_pdu->command != SNMP_MSG_TRAP) ||
+         netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                NETSNMP_DS_LIB_DISABLE_V1)))
         return;                 /* Skip v1 sinks for v2 only traps */
     if (sess->version != SNMP_VERSION_1 &&
-        (template_pdu->command == SNMP_MSG_TRAP))
+        ((template_pdu->command == SNMP_MSG_TRAP) ||
+         netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                NETSNMP_DS_LIB_DISABLE_V1)))
         return;                 /* Skip v2+ sinks for v1 only traps */
 #endif
     template_pdu->version = sess->version;
@@ -1274,6 +1278,11 @@ _parse_config_sink(const char *token, char *cptr, int version, int type)
     char           *st, *name = NULL, *tag = NULL, *profile = NULL;
     int            done = 0;
 
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_V1)) {
+        netsnmp_config_error("SNMPv1 disabled, cannot create trapsinks");
+        return;
+    }
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
     sp = strtok_r(cptr, " \t\n", &st);
@@ -1323,6 +1332,11 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
 void
 snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_V1)) {
+        netsnmp_config_error("SNMPv2c disabled, cannot create trap2sinks");
+        return;
+    }
     _parse_config_sink(word, cptr, SNMP_VERSION_2c, SNMP_MSG_TRAP2);
 }
 
@@ -1590,7 +1604,9 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     }
 
 #ifndef NETSNMP_DISABLE_SNMPV1
-    if (ss->version == SNMP_VERSION_1)
+    if ((ss->version == SNMP_VERSION_1) &&
+        !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                NETSNMP_DS_LIB_DISABLE_V1))
         traptype = SNMP_MSG_TRAP;
 #endif
     netsnmp_add_notification_session(ss, traptype,

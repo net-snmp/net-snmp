@@ -2063,11 +2063,13 @@ in_a_view(oid *name, size_t *namelen, netsnmp_pdu *pdu, int type)
 #ifndef NETSNMP_DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
 #endif
-    case SNMP_VERSION_3:
+   case SNMP_VERSION_3:
+        NETSNMP_RUNTIME_PROTOCOL_CHECK(pdu->version,unsupported_version);
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_ACM_CHECK, &view_parms);
         return view_parms.errorcode;
     }
+  unsupported_version:
     return VACM_NOSECNAME;
 }
 
@@ -2104,10 +2106,12 @@ check_access(netsnmp_pdu *pdu)
     case SNMP_VERSION_2c:
 #endif
     case SNMP_VERSION_3:
+        NETSNMP_RUNTIME_PROTOCOL_CHECK(pdu->version,unsupported_version);
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_ACM_CHECK_INITIAL, &view_parms);
         return view_parms.errorcode;
     }
+  unsupported_version:
     return 1;
 }
 
@@ -2148,10 +2152,12 @@ netsnmp_acm_check_subtree(netsnmp_pdu *pdu, oid *name, size_t namelen)
     case SNMP_VERSION_2c:
 #endif
     case SNMP_VERSION_3:
+        NETSNMP_RUNTIME_PROTOCOL_CHECK(pdu->version,unsupported_version);
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_ACM_CHECK_SUBTREE, &view_parms);
         return view_parms.errorcode;
     }
+  unsupported_version:
     return 1;
 }
 

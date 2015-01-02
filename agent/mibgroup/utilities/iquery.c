@@ -19,6 +19,12 @@ netsnmp_parse_iquerySecLevel(const char *token, char *line)
 {
     int secLevel;
 
+#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_V3)) {
+        netsnmp_config_error("SNMPv3 disabled");
+    } else
+#endif
     if ((secLevel = parse_secLevel_conf( token, line )) >= 0 ) {
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_SECLEVEL, secLevel);
@@ -31,22 +37,37 @@ void
 netsnmp_parse_iqueryVersion(const char *token, char *line)
 {
 #ifndef NETSNMP_DISABLE_SNMPV1
-    if (!strcmp( line, "1" ))
+    if (!strcmp( line, "1" )
+#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
+        && !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                NETSNMP_DS_LIB_DISABLE_V1)
+#endif
+        )
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_1);
     else 
 #endif
 #ifndef NETSNMP_DISABLE_SNMPV2C
-         if (!strcmp( line, "2"  ) || !strcasecmp( line, "2c" ))
+        if ((!strcmp( line, "2"  ) || !strcasecmp( line, "2c" ))
+#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
+            && !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_DISABLE_V2c)
+#endif
+            )
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_2c);
     else 
 #endif
-         if (!strcmp( line, "3" ))
+         if (!strcmp( line, "3" )
+#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
+             && !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                        NETSNMP_DS_LIB_DISABLE_V3)
+#endif
+             )
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_3);
     else {
-	netsnmp_config_error("Unknown version: %s", line);
+	netsnmp_config_error("Unknown/disabled version: %s", line);
     }
 }
 
@@ -132,7 +153,7 @@ void init_iquery(void){
 
 #ifndef NETSNMP_FEATURE_REMOVE_IQUERY_PDU_SESSION
 netsnmp_session *netsnmp_iquery_pdu_session(netsnmp_pdu* pdu) {
-    if (!pdu)
+    if (!pdu || NETSNMP_RUNTIME_PROTOCOL_SKIP(pdu->version))
        return NULL;
     if (pdu->version == SNMP_VERSION_3)
         return netsnmp_iquery_session( pdu->securityName, 
@@ -143,6 +164,7 @@ netsnmp_session *netsnmp_iquery_pdu_session(netsnmp_pdu* pdu) {
                            pdu->securityEngineIDLen);
     else
         return netsnmp_iquery_session((char *) pdu->community, 
+
                            pdu->version,
                            pdu->version+1,
                            SNMP_SEC_LEVEL_NOAUTH,
@@ -183,6 +205,8 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
     extern int callback_master_num;
     netsnmp_session *ss = NULL;
 
+    NETSNMP_RUNTIME_PROTOCOL_CHECK(version, unsupported_version);
+
 #ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
     ss = netsnmp_callback_open( callback_master_num, NULL, NULL, NULL);
     if (ss) {
@@ -203,6 +227,7 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
     }
 #endif
 
+  unsupported_version:
     return ss;
 }
 

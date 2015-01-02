@@ -4113,22 +4113,14 @@ _snmp_parse(void *sessp,
     }
 
     switch (pdu->version) {
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 #ifndef NETSNMP_DISABLE_SNMPV1
     case SNMP_VERSION_1:
 #endif
 #ifndef NETSNMP_DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
 #endif
-#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
-#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
-        if (((pdu->version == SNMP_VERSION_1) &&
-             netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                                    NETSNMP_DS_LIB_DISABLE_V1)) ||
-            ((pdu->version == SNMP_VERSION_2c) &&
-             netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                                    NETSNMP_DS_LIB_DISABLE_V2c)))
-            goto unsupported_version;
-#endif
+        NETSNMP_RUNTIME_PROTOCOL_CHECK_V1V2(pdu->version,unsupported_version);
         DEBUGMSGTL(("snmp_api", "Parsing SNMPv%ld message...\n",
                     (1 + pdu->version)));
 
@@ -4199,11 +4191,7 @@ _snmp_parse(void *sessp,
 #endif /* support for community based SNMP */
 
     case SNMP_VERSION_3:
-#ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
-        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                                   NETSNMP_DS_LIB_DISABLE_V3))
-            goto unsupported_version;
-#endif
+        NETSNMP_RUNTIME_PROTOCOL_CHECK_V3(SNMP_VERSION_3,unsupported_version);
         result = snmpv3_parse(pdu, data, &length, NULL, session);
         DEBUGMSGTL(("snmp_parse",
                     "Parsed SNMPv3 message (secName:%s, secLevel:%s): %s\n",
