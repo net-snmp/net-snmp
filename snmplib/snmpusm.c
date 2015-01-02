@@ -4486,24 +4486,28 @@ usm_parse_create_usmUser(const char *token, char *line)
      * READ: Privacy Type 
      */
     testcase = 0;
-#ifndef NETSNMP_DISABLE_DES
     if (strncmp(cp, "DES", 3) == 0) {
+#ifndef NETSNMP_DISABLE_DES
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
         testcase = 1;
 	/* DES uses a 128 bit key, 64 bits of which is a salt */
 	privKeyLen = 16;
-    }
+#else
+        config_perror("DES support disabled");
 #endif
-#ifdef HAVE_AES
+    }
     if (strncmp(cp, "AES128", 6) == 0 ||
                strncmp(cp, "AES", 3) == 0) {
+#ifdef HAVE_AES
         memcpy(newuser->privProtocol, usmAESPrivProtocol,
                sizeof(usmAESPrivProtocol));
         testcase = 1;
 	privKeyLen = 16;
-    }
+#else
+        config_perror("AES support not available");
 #endif
+    }
     if (testcase == 0) {
         config_perror("Unknown privacy protocol");
         usm_free_user(newuser);
