@@ -116,6 +116,13 @@ static netsnmp_container *_container = NULL;
 static void     netsnmp_tdomain_dump(void);
 
 
+#if !defined(NETSNMP_FEATURE_REMOVE_FILTER_SOURCE)
+static netsnmp_container * filtered = NULL;
+
+void netsnmp_transport_parse_filterType(const char *word, char *cptr);
+void netsnmp_transport_parse_filter(const char *word, char *cptr);
+void netsnmp_transport_filter_cleanup(void);
+#endif /* NETSNMP_FEATURE_REMOVE_FILTER_SOURCE */
 
 void
 init_snmp_transport(void)
@@ -124,6 +131,15 @@ init_snmp_transport(void)
                                "snmp", "dontLoadHostConfig",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES);
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+    register_app_config_handler("sourceFilterType",
+                                netsnmp_transport_parse_filterType,
+                                NULL, "none|whitelist|blacklist");
+    register_app_config_handler("sourceFilterAddress",
+                                netsnmp_transport_parse_filter,
+                                netsnmp_transport_filter_cleanup,
+                                "host");
+#endif /* NETSNMP_FEATURE_REMOVE_FILTER_SOURCE */
 }
 
 /*
@@ -255,11 +271,6 @@ netsnmp_transport_peer_string(netsnmp_transport *t, void *data, int len)
 }
 
 #if !defined(NETSNMP_FEATURE_REMOVE_FILTER_SOURCE)
-static netsnmp_container * filtered = NULL;
-
-void netsnmp_transport_parse_filter(const char *word, char *cptr);
-void netsnmp_transport_filter_cleanup(void);
-
 static int _transport_filter_init(void)
 {
     if (filtered)
@@ -484,15 +495,6 @@ netsnmp_tdomain_init(void)
 
     netsnmp_tdomain_dump();
 
-#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
-    register_app_config_handler("sourceFilterType",
-                                netsnmp_transport_parse_filterType,
-                                NULL, "none|whitelist|blacklist");
-    register_app_config_handler("sourceFilterAddress",
-                                netsnmp_transport_parse_filter,
-                                netsnmp_transport_filter_cleanup,
-                                "host");
-#endif /* NETSNMP_FEATURE_REMOVE_FILTER_SOURCE */
 
 }
 
