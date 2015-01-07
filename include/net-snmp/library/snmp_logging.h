@@ -125,6 +125,11 @@ NETSNMP_IMPORT
 netsnmp_log_handler *
 netsnmp_create_stdio_loghandler(int stdout, int priority, int priority_max,
                                 const char *tok);
+NETSNMP_IMPORT
+netsnmp_log_handler *
+netsnmp_register_filelog_handler(const char* logfilename, int priority,
+                                 int priority_max, int dont_zero_log);
+
 #ifdef __cplusplus
 }
 #endif
