@@ -118,6 +118,11 @@ static int  logh_enabled = 0;
 static char syslogname[64] = DEFAULT_LOG_ID;
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
 
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
+netsnmp_log_handler *
+netsnmp_register_stdio_loghandler(int stdout, int priority, int priority_max,
+                                  const char *tok);
+#endif
 void
 netsnmp_disable_this_loghandler(netsnmp_log_handler *logh)
 {
@@ -416,12 +421,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             optind++;
         /* Fallthrough */
     case 'e':
-        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
-        if (logh) {
-            netsnmp_set_line_buffering(stderr);
-            logh->pri_max = pri_max;
-            logh->token   = strdup("stderr");
-	}
+        logh = netsnmp_register_stdio_loghandler(0, priority, pri_max, "stderr");
         break;
 
     /*
@@ -434,13 +434,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             optind++;
         /* Fallthrough */
     case 'o':
-        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
-        if (logh) {
-            netsnmp_set_line_buffering(stdout);
-            logh->pri_max = pri_max;
-            logh->token   = strdup("stdout");
-            logh->imagic  = 1;	    /* stdout, not stderr */
-	}
+        logh = netsnmp_register_stdio_loghandler( 1, priority, pri_max, "stdout" );
         break;
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_STDIO */
 
@@ -668,6 +662,28 @@ snmp_disable_filelog(void)
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_FILE */
 
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
+
+netsnmp_log_handler *
+netsnmp_register_stdio_loghandler(int is_stdout, int priority, int priority_max,
+                                  const char *tok)
+{
+    netsnmp_log_handler *logh =
+        netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
+    if (NULL == logh) {
+        return NULL;
+    }
+    if (is_stdout) {
+        netsnmp_set_line_buffering(stdout);
+        logh->imagic = 1; /* stdout, not stderr */
+    } else
+        netsnmp_set_line_buffering(stderr);
+
+    logh->pri_max = priority_max;
+    if (tok)
+        logh->token   = strdup(tok);
+    return logh;
+}
+
 /*
  * returns that status of stderr logging
  *

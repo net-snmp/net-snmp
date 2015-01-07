@@ -120,6 +120,11 @@ NETSNMP_IMPORT
 void netsnmp_disable_this_loghandler( netsnmp_log_handler *logh );
 NETSNMP_IMPORT
 void netsnmp_logging_restart(void);
+
+NETSNMP_IMPORT
+netsnmp_log_handler *
+netsnmp_create_stdio_loghandler(int stdout, int priority, int priority_max,
+                                const char *tok);
 #ifdef __cplusplus
 }
 #endif
