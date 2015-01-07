@@ -1081,7 +1081,8 @@ netsnmp_remove_loghandler( netsnmp_log_handler *logh )
         logh->next->prev = logh->prev;
 
     for (i=LOG_EMERG; i<=logh->priority; i++)
-        logh_priorities[i] = NULL;
+        if (logh == logh_priorities[i])
+            logh_priorities[i] = logh->next;
     free(NETSNMP_REMOVE_CONST(char*, logh->token));
     SNMP_FREE(logh);
 
