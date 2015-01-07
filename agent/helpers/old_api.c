@@ -319,8 +319,10 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
              * Actually call the old mib-module function 
              */
             if (vp && vp->findVar) {
-                memcpy(tmp_name, requests->requestvb->name,
-                                 requests->requestvb->name_length*sizeof(oid));
+                tmp_len = requests->requestvb->name_length*sizeof(oid);
+                memcpy(tmp_name, requests->requestvb->name, tmp_len);
+                /** clear the rest of tmp_name to keep valgrind happy */
+                memset(tmp_name+tmp_len, 0x0, sizeof(tmp_name)-tmp_len);
                 tmp_len = requests->requestvb->name_length;
                 access = (*(vp->findVar)) (cvp, tmp_name, &tmp_len,
                                            exact, &len, &write_method);
