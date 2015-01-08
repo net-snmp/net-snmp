@@ -46,7 +46,7 @@ static int      debug_print_everything = 0;
 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
 
 /*
- * Number of spaces to indent debug outpur. Valid range is [0,INT_MAX]
+ * Number of spaces to indent debug output. Valid range is [0,INT_MAX]
  */
 static int debugindent = 0;
 
