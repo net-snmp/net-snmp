@@ -53,6 +53,11 @@
 static int      dodebug = NETSNMP_ALWAYS_DEBUG;
 int             debug_num_tokens = 0;
 static int      debug_print_everything = 0;
+#ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
+static int      debug_log_level = LOG_DEBUG;
+#else
+#define debug_log_level LOG_DEBUG
+#endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 
 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
 
@@ -113,6 +118,27 @@ debug_config_turn_on_debugging(const char *configtoken, char *line)
 {
     snmp_set_do_debugging(atoi(line));
 }
+
+#ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
+
+NETSNMP_IMPORT void
+netsnmp_set_debug_log_level(int val)
+{
+    debug_log_level = val;
+}
+
+NETSNMP_IMPORT int
+netsnmp_get_debug_log_level(void)
+{
+    return debug_log_level;
+}
+
+static void
+debug_config_debug_log_level(const char *configtoken, char *line)
+{
+    netsnmp_set_debug_log_level(atoi(line));
+}
+#endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 
 void
 debug_register_tokens(const char *tokens)
@@ -271,7 +297,7 @@ debugmsg(const char *token, const char *format, ...)
 	va_list         debugargs;
 
 	va_start(debugargs, format);
-	snmp_vlog(LOG_DEBUG, format, debugargs);
+	snmp_vlog(debug_log_level, format, debugargs);
 	va_end(debugargs);
     }
 }
@@ -463,8 +489,8 @@ debug_combo_nc(const char *token, const char *format, ...)
     va_list         debugargs;
 
     va_start(debugargs, format);
-    snmp_log(LOG_DEBUG, "%s: ", token);
-    snmp_vlog(LOG_DEBUG, format, debugargs);
+    snmp_log(debug_log_level, "%s: ", token);
+    snmp_vlog(debug_log_level, format, debugargs);
     va_end(debugargs);
 }
 
@@ -504,6 +530,23 @@ void
 debug_config_register_tokens(const char *configtoken UNUSED,
                              char *tokens UNUSED)
 { }
+
+#ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
+static void
+debug_config_debug_log_level(const char *configtoken UNUSED,
+                             char *tokens UNUSED)
+{ }
+
+NETSNMP_IMPORT void
+netsnmp_set_debug_log_level(int val UNUSED)
+{ }
+
+NETSNMP_IMPORT int
+netsnmp_get_debug_log_level(void)
+{
+    return 0;
+}
+#endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 
 NETSNMP_IMPORT void
 debug_config_turn_on_debugging(const char *configtoken, char *line);
@@ -597,6 +640,11 @@ snmp_debug_init(void)
     register_prenetsnmp_mib_handler("snmp", "debugTokens",
                                     debug_config_register_tokens, NULL,
                                     "token[,token...]");
+#ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
+    register_prenetsnmp_mib_handler("snmp", "debugLogLevel",
+                                    debug_config_debug_log_level, NULL,
+                                    "(LOG_EMERG|LOG_ALERT|LOG_CRIT|LOG_ERR|LOG_WARNING|LOG_NOTICE|LOG_INFO)");
+#endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 }
 
 void

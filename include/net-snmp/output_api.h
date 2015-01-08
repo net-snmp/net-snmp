@@ -125,6 +125,12 @@ extern "C" {
     void            snmp_set_do_debugging(int);
     NETSNMP_IMPORT
     int             snmp_get_do_debugging(void);
+#ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
+    NETSNMP_IMPORT
+    void            netsnmp_set_debug_log_level(int val);
+    NETSNMP_IMPORT
+    int             netsnmp_get_debug_log_level(void);
+#endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 
     /*
      *    Having extracted the main ("public API") calls relevant
