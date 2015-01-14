@@ -6,12 +6,11 @@
       TEXTUAL-CONVENTION                  FROM SNMPv2-TC;
 
   ianaAddressFamilyNumbers MODULE-IDENTITY
-      LAST-UPDATED "201309250000Z"  -- September 25, 2013
+      LAST-UPDATED "201409020000Z"  -- September 2, 2014
       ORGANIZATION "IANA"
       CONTACT-INFO
           "Postal:    Internet Assigned Numbers Authority
-                      Internet Corporation for Assigned Names
-		      and Numbers
+                      Internet Corporation for Assigned Names and Numbers
                       12025 Waterfront Drive, Suite 300
                       Los Angeles, CA 90094-2536
                       USA
@@ -24,8 +23,11 @@
 
       -- revision history
 
+      REVISION     "201409020000Z"  -- September 2, 2014
+      DESCRIPTION  "Assigned value 16396."
+
       REVISION     "201309250000Z"  -- September 25, 2013
-      DESCRIPTION  "Fixed labels for 16389-16390."
+      DESCRIPTION  "Assigned values 16391-16395."
 
       REVISION     "201307160000Z"  -- July 16, 2013
       DESCRIPTION  "Fixed labels for 16389-16390."
@@ -115,6 +117,7 @@
           mac40(16393),  -- MAC/40
           ipv664(16394),  -- IPv6/64
           rBridgePortID(16395),  -- RBridge Port ID
+          trillNickname(16396),  -- TRILL Nickname 
           reserved(65535)
 
           Requests for new values should be made to IANA via
@@ -161,6 +164,7 @@
                   mac40(16393),
                   ipv664(16394),
                   rBridgePortID(16395),
+                  trillNickname(16396),
                   reserved(65535)
               }
       END
