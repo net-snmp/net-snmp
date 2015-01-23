@@ -17,52 +17,16 @@ config_require(header_complex)
 config_require(target)
 config_add_mib(SNMP-NOTIFICATION-MIB)
 
-
-    /*
-     * our storage structure(s) 
-     */
-     struct snmpNotifyTable_data {
-
-         char           *snmpNotifyName;
-         size_t          snmpNotifyNameLen;
-         char           *snmpNotifyTag;
-         size_t          snmpNotifyTagLen;
-         long            snmpNotifyType;
-         long            snmpNotifyStorageType;
-         long            snmpNotifyRowStatus;
-
-     };
-
-
-
-
-/*
- * enum definitions from the covered mib sections 
- */
-
-
-
-
-
-
-#define SNMPNOTIFYTYPE_TRAP                      1
-#define SNMPNOTIFYTYPE_INFORM                    2
-
-
+#include "snmpNotifyTable_data.h"
 
 
 /*
  * function prototypes 
  */
-
-
      void            init_snmpNotifyTable(void);
      void            shutdown_snmpNotifyTable(void);
      FindVarMethod   var_snmpNotifyTable;
      void            parse_snmpNotifyTable(const char *, char *);
-
-     int             snmpNotifyTable_add(struct snmpNotifyTable_data
-                                         *thedata);
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
      WriteMethod     write_snmpNotifyTag;

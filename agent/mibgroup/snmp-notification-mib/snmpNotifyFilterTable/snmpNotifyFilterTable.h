@@ -17,6 +17,7 @@ extern          "C" {
  * @{
  */
 #include <net-snmp/library/asn1.h>
+#include "snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_storage.h"
 
     /*
      * other required module components 
@@ -133,16 +134,6 @@ config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable
 
     } snmpNotifyFilterTable_mib_index;
 
-    /*
-     * TODO:121:r: |   |-> Review snmpNotifyFilterTable max index length.
-     * If you KNOW that your indexes will never exceed a certain
-     * length, update this macro to that length.
-     *
-     * BE VERY CAREFUL TO TAKE INTO ACCOUNT THE MAXIMUM
-     * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
-     * Guessing 128 - col/entry(2)  - oid len(9)
-     */
-#define MAX_snmpNotifyFilterTable_IDX_LEN     117
 
 
     /*

@@ -24,31 +24,9 @@
   #define   SNMPTARGETPARAMSSECURITYLEVELCOLUMN  5
   #define   SNMPTARGETPARAMSSTORAGETYPECOLUMN    6
   #define   SNMPTARGETPARAMSROWSTATUSCOLUMN      7
-      /*
-       * structure definitions 
-       */
-       struct targetParamTable_struct {
-           char           *paramName;
-           int             mpModel;
-           int             secModel;
-           char           *secName;
-           int             secLevel;
-           int             storageType;
-           int             rowStatus;
-           struct targetParamTable_struct *next;
-           time_t          updateTime;
-       };
- 
-  /*
-   * utility functions 
-   */
-       struct targetParamTable_struct *get_paramEntry(char *name);
-       void            snmpTargetParamTable_add(struct
-                                                targetParamTable_struct
-                                                *newEntry);
-       struct targetParamTable_struct *snmpTargetParamTable_create(void);
-       void snmpTargetParamTable_dispose(struct targetParamTable_struct *);
- 
+
+#include "snmpTargetParamsEntry_data.h"
+
   /*
    * function definitions 
    */

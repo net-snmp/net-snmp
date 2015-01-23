@@ -107,7 +107,7 @@ snmpNotifyFilterTable_container_init(netsnmp_container **container_ptr_ptr)
      * For advanced users, you can use a custom container. If you
      * do not create one, one will be created for you.
      */
-    *container_ptr_ptr = NULL;
+    *container_ptr_ptr = snmpNotifyFilterTable_storage_container_create();
 
 }                               /* snmpNotifyFilterTable_container_init */
 
@@ -488,104 +488,3 @@ snmpNotifyFilterTable_validate_index(snmpNotifyFilterTable_registration *
 }                               /* snmpNotifyFilterTable_validate_index */
 
 /** @} */
-
-/*
- * ugly, inefficient hack: create a dummy viewEntry list from the filter table
- * entries matching a profile name. This lets us use the existing vacm
- * routines for matching oids to views.
- */
-struct vacm_viewEntry *
-snmpNotifyFilterTable_vacm_view_subtree(const char *profile)
-{
-    oid             tmp_oid[MAX_OID_LEN];
-    netsnmp_index   tmp_idx;
-    size_t          i, j;
-    netsnmp_void_array *s;
-    struct vacm_viewEntry *tmp;
-    snmpNotifyFilterTable_rowreq_ctx *rowreq;
-    netsnmp_container *c;
-
-    tmp_idx.len = 0;
-    tmp_idx.oids = tmp_oid;
-
-    /*
-     * get the container
-     */
-    c = snmpNotifyFilterTable_container_get();
-    if ((NULL == profile) || (NULL == c))
-        return NULL;
-
-    /*
-     * get the profile subset
-     */
-    tmp_idx.oids[0] = strlen(profile);
-    tmp_idx.len = tmp_idx.oids[0] + 1;
-    for (i = 0; i < tmp_idx.len; ++i)
-        tmp_idx.oids[i + 1] = profile[i];
-    s = c->get_subset(c, &tmp_idx);
-    if (NULL == s)
-        return NULL;
-
-    /*
-     * allocate temporary storage
-     */
-    tmp = (struct vacm_viewEntry*)calloc(sizeof(struct vacm_viewEntry), s->size + 1);
-    if (NULL == tmp) {
-        free(s->array);
-        free(s);
-        return NULL;
-    }
-
-    /*
-     * copy data
-     */
-    for (i = 0, j = 0; i < s->size; ++i) {
-        rowreq = (snmpNotifyFilterTable_rowreq_ctx *) s->array[i];
-
-        /*
-         * must match profile name exactly, and subset will return
-         * longer matches, if they exist.
-         */
-        if (tmp_idx.oids[0] !=
-            rowreq->tbl_idx.snmpNotifyFilterProfileName_len)
-            continue;
-
-        /*
-         * exact match, copy data
-         * vacm_viewEntry viewName and viewSubtree are prefixed with length
-         */
-
-        tmp[j].viewName[0] =
-            rowreq->tbl_idx.snmpNotifyFilterProfileName_len;
-        memcpy(&tmp[j].viewName[1],
-               rowreq->tbl_idx.snmpNotifyFilterProfileName,
-               tmp[j].viewName[0]);
-
-        tmp[j].viewSubtree[0] =
-            rowreq->tbl_idx.snmpNotifyFilterSubtree_len;
-        memcpy(&tmp[j].viewSubtree[1],
-               rowreq->tbl_idx.snmpNotifyFilterSubtree,
-               tmp[j].viewSubtree[0] * sizeof(oid));
-        tmp[j].viewSubtreeLen = tmp[j].viewSubtree[0] + 1;
-
-        tmp[j].viewMaskLen = rowreq->data.snmpNotifyFilterMask_len;
-        memcpy(tmp[j].viewMask, rowreq->data.snmpNotifyFilterMask,
-               tmp[j].viewMaskLen * sizeof(oid));
-
-
-        tmp[j].viewType = rowreq->data.snmpNotifyFilterType;
-
-        tmp[j].next = &tmp[j + 1];
-        ++j;
-    }
-    if (j)
-        tmp[j - 1].next = NULL;
-    else {
-        SNMP_FREE(tmp);
-    }
-
-    free(s->array);
-    free(s);
-
-    return tmp;
-}

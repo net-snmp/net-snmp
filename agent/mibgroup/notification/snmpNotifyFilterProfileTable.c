@@ -128,40 +128,6 @@ init_snmpNotifyFilterProfileTable(void)
 
 
 /*
- * snmpNotifyFilterProfileTable_add(): adds a structure node to our data set 
- */
-int
-snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data
-                                 *thedata)
-{
-    netsnmp_variable_list *vars = NULL;
-    int retVal;
-
-    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "adding data...  "));
-    /*
-     * add the index variables to the varbind list, which is 
-     * used by header_complex to index the data 
-     */
-
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR,
-                              (u_char *) thedata->snmpTargetParamsName,
-                              thedata->snmpTargetParamsNameLen);
-
-    if (header_complex_maybe_add_data(&snmpNotifyFilterProfileTableStorage, vars,
-                                      thedata, 1) != NULL){
-       DEBUGMSGTL(("snmpNotifyFilterProfileTable", "registered an entry\n"));
-       retVal = SNMPERR_SUCCESS;
-    }else{
-       retVal = SNMPERR_GENERR;  	
-    }
-
-
-    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "done.\n"));
-    return retVal;
-}
-
-
-/*
  * parse_snmpNotifyFilterProfileTable():
  *   parses .conf file entries needed to configure the mib.
  */
@@ -194,7 +160,7 @@ parse_snmpNotifyFilterProfileTable(const char *token, char *line)
                               &StorageTmp->snmpNotifyFilterProfileNameLen);
     if (StorageTmp->snmpNotifyFilterProfileName == NULL) {
         config_perror("invalid specification for snmpNotifyFilterProfileName");
-        SNMP_FREE(StorageTmp);
+        snmpNotifyFilterProfileTable_free(StorageTmp);
         return;
     }
 
@@ -209,9 +175,8 @@ parse_snmpNotifyFilterProfileTable(const char *token, char *line)
                               snmpNotifyFilterProfileRowStatus, &tmpint);
 
     if (snmpNotifyFilterProfileTable_add(StorageTmp) != SNMPERR_SUCCESS){
-        SNMP_FREE(StorageTmp->snmpTargetParamsName);
-        SNMP_FREE(StorageTmp->snmpNotifyFilterProfileName);
-        SNMP_FREE(StorageTmp);
+        snmpNotifyFilterProfileTable_free(StorageTmp);
+        StorageTmp = NULL;
     }
 
     DEBUGMSGTL(("snmpNotifyFilterProfileTable", "done.\n"));
@@ -687,9 +652,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
          * Release any resources that have been allocated 
          */
         if (StorageNew != NULL) {
-            SNMP_FREE(StorageNew->snmpTargetParamsName);
-            SNMP_FREE(StorageNew->snmpNotifyFilterProfileName);
-            free(StorageNew);
+            snmpNotifyFilterProfileTable_free(StorageNew);
             StorageNew = NULL;
         }
         break;
@@ -786,9 +749,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         if (StorageDel != NULL) {
-            SNMP_FREE(StorageDel->snmpTargetParamsName);
-            SNMP_FREE(StorageDel->snmpNotifyFilterProfileName);
-            free(StorageDel);
+            snmpNotifyFilterProfileTable_free(StorageDel);
             StorageDel = NULL;
         }
         if (StorageTmp && set_value == RS_CREATEANDGO) {
@@ -808,40 +769,3 @@ write_snmpNotifyFilterProfileRowStatus(int action,
 
 
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
-
-
-char           *
-get_FilterProfileName(const char *paramName, size_t paramName_len,
-               size_t * profileName_len)
-{
-    netsnmp_variable_list *vars = NULL;
-    struct snmpNotifyFilterProfileTable_data *data;
-
-    /*
-     * put requested info into var structure 
-     */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR,
-                              (const u_char *) paramName, paramName_len);
-
-    /*
-     * get the data from the header_complex storage 
-     */
-    data = (struct snmpNotifyFilterProfileTable_data *)
-        header_complex_get(snmpNotifyFilterProfileTableStorage, vars);
-
-    /*
-     * free search index 
-     */
-    snmp_free_var(vars);
-
-    /*
-     * return the requested information (if this row is active) 
-     */
-    if (data && data->snmpNotifyFilterProfileRowStatus == RS_ACTIVE) {
-        *profileName_len = data->snmpNotifyFilterProfileNameLen;
-        return data->snmpNotifyFilterProfileName;
-    }
-
-    *profileName_len = 0;
-    return NULL;
-}

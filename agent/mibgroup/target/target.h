@@ -19,6 +19,7 @@ typedef int     (TargetFilterFunction) (struct targetAddrTable_struct *
 netsnmp_session *get_target_sessions(char *taglist, TargetFilterFunction *,
                                      void *filterArg);
 
-config_require(target/snmpTargetAddrEntry target/snmpTargetParamsEntry)
+config_require(target/snmpTargetAddrEntry_data)
+config_require(target/snmpTargetParamsEntry_data)
 
 #endif                          /* SNMP_TARGET_H */

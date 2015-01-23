@@ -20,6 +20,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "snmpTargetAddrEntry.h"
+#include "snmpTargetAddrEntry_data.h"
 #include "util_funcs/header_generic.h"
 
 #define snmpTargetAddrOIDLen 11 /*This is base+column, 
@@ -29,7 +30,6 @@ static oid      snmpTargetAddrOID[snmpTargetAddrOIDLen] =
     { 1, 3, 6, 1, 6, 3, 12, 1, 2, 1, 0 };
 
 static unsigned long snmpTargetSpinLock = 0;
-static struct targetAddrTable_struct *aAddrTable = NULL;
 
 
 static int
@@ -311,7 +311,8 @@ static const oid snmpTargetAddrEntry_variables_oid[] =
 void
 init_snmpTargetAddrEntry(void)
 {
-    aAddrTable = NULL;
+    init_snmpTargetAddrEntry_data(void);
+
     DEBUGMSGTL(("snmpTargetAddrEntry", "init\n"));
     REGISTER_MIB("target/snmpTargetAddrEntry",
                  snmpTargetAddrEntry_variables, variable2,
@@ -334,17 +335,10 @@ init_snmpTargetAddrEntry(void)
 void
 shutdown_snmpTargetAddrEntry(void)
 {
-    struct targetAddrTable_struct *ptr;
-    struct targetAddrTable_struct *next;
-
-    for (ptr = aAddrTable; ptr; ptr = next) {
-        next = ptr->next;
-        snmpTargetAddrTable_dispose(ptr);
-    }
-    aAddrTable = NULL;
-
     snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                              store_snmpTargetAddrEntry, NULL, FALSE);
+
+    shutdown_snmpTargetAddrEntry_data();
 }
 
 int
