@@ -486,6 +486,32 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
     return template_v1pdu;
 }
 
+/*
+ * Set t_oid from the PDU enterprise & specific trap fields.
+ */
+int
+netsnmp_build_trap_oid(netsnmp_pdu *pdu, oid *t_oid, size_t *t_oid_len)
+{
+    if (NULL == pdu || NULL == t_oid || NULL == t_oid_len)
+        return SNMPERR_GENERR;
+    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+        if (*t_oid_len < (pdu->enterprise_length + 2))
+            return SNMPERR_LONG_OID;
+        memcpy(t_oid, pdu->enterprise, pdu->enterprise_length*sizeof(oid));
+        *t_oid_len = pdu->enterprise_length;
+        t_oid[(*t_oid_len)++] = 0;
+        t_oid[(*t_oid_len)++] = pdu->specific_type;
+    } else {
+        /** use cold_start_oid as template */
+        if (*t_oid_len < OID_LENGTH(cold_start_oid))
+            return SNMPERR_LONG_OID;
+        memcpy(t_oid, cold_start_oid, sizeof(cold_start_oid));
+        t_oid[9]  = pdu->trap_type + 1; /* set actual trap type */
+        *t_oid_len = OID_LENGTH(cold_start_oid);
+    }
+    return SNMPERR_SUCCESS;
+}
+
 netsnmp_pdu*
 convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
 {
@@ -512,20 +538,11 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
      *   either using one of the standard defined trap OIDs,
      *   or constructing this from the PDU enterprise & specific trap fields
      */
-    if (template_v1pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-        memcpy(enterprise, template_v1pdu->enterprise,
-                           template_v1pdu->enterprise_length*sizeof(oid));
-        enterprise_len               = template_v1pdu->enterprise_length;
-        enterprise[enterprise_len++] = 0;
-        enterprise[enterprise_len++] = template_v1pdu->specific_type;
-    } else {
-        memcpy(enterprise, cold_start_oid, sizeof(cold_start_oid));
-	enterprise[9]  = template_v1pdu->trap_type+1;
-        enterprise_len = sizeof(cold_start_oid)/sizeof(oid);
-    }
-
     var = NULL;
-    if (!snmp_varlist_add_variable( &var,
+    enterprise_len = OID_LENGTH(enterprise);
+    if ((netsnmp_build_trap_oid(template_v1pdu, enterprise, &enterprise_len)
+         != SNMPERR_SUCCESS) ||
+        !snmp_varlist_add_variable( &var,
              snmptrap_oid, snmptrap_oid_len,
              ASN_OBJECT_ID,
              (u_char*)enterprise, enterprise_len*sizeof(oid))) {

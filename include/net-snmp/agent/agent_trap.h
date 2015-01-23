@@ -69,6 +69,8 @@ int             netsnmp_add_notification_session(netsnmp_session *, int, int,
                                                  int, const char*, const char*,
                                                  const char*);
 
+int             netsnmp_build_trap_oid(netsnmp_pdu *pdu, oid *, size_t *);
+
 void                   convert_v2_to_v1(netsnmp_variable_list *, netsnmp_pdu *);
 netsnmp_variable_list *convert_v1_to_v2(netsnmp_pdu *);
 netsnmp_pdu    *convert_v2pdu_to_v1(netsnmp_pdu *);
