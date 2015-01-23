@@ -87,6 +87,9 @@ struct trap_sink {
 
 struct trap_sink *sinks = NULL;
 
+static int _v1_sessions = 0;
+static int _v2_sessions = 0;
+
 const oid       objid_enterprisetrap[] = { NETSNMP_NOTIFICATION_MIB };
 const oid       trap_version_id[] = { NETSNMP_SYSTEM_MIB };
 const int       enterprisetrap_len = OID_LENGTH(objid_enterprisetrap);
@@ -149,6 +152,46 @@ free_trap_session(struct trap_sink *sp)
     free(sp);
 }
 
+static void
+_trap_version_incr(int version)
+{
+    switch (version) {
+        case SNMP_VERSION_1:
+            ++_v1_sessions;
+            break;
+        case SNMP_VERSION_2c:
+        case SNMP_VERSION_3:
+            ++_v2_sessions;
+            break;
+        default:
+            snmp_log(LOG_ERR, "unknown snmp version %d\n", version);
+    }
+    return;
+}
+
+static void
+_trap_version_decr(int version)
+{
+    switch (version) {
+        case SNMP_VERSION_1:
+            if (--_v1_sessions < 0) {
+                snmp_log(LOG_ERR,"v1 session count < 0! fixed.\n");
+                _v1_sessions = 0;
+            }
+            break;
+        case SNMP_VERSION_2c:
+        case SNMP_VERSION_3:
+            if (--_v2_sessions < 0) {
+                snmp_log(LOG_ERR,"v2 session count < 0! fixed.\n");
+                _v2_sessions = 0;
+            }
+            break;
+        default:
+            snmp_log(LOG_ERR, "unknown snmp version %d\n", version);
+    }
+    return;
+}
+
 int
 netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
                                  int confirm, int version, const char *name,
@@ -187,6 +230,9 @@ netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
         new_sink->next = sinks;
         sinks = new_sink;
     }
+
+    _trap_version_incr(version);
+
     return 1;
 }
 
@@ -212,6 +258,7 @@ remove_trap_session(netsnmp_session * ss)
             } else {
                 sinks = sp->next;
             }
+            _trap_version_decr(ss->version);
             /*
              * I don't believe you *really* want to close the session here;
              * it may still be in use for other purposes.  In particular this
@@ -340,6 +387,7 @@ snmpd_free_trapsinks(void)
     DEBUGMSGTL(("trap", "freeing trap sessions\n"));
     while (sp) {
         sinks = sinks->next;
+        _trap_version_decr(sp->version);
         free_trap_session(sp);
         sp = sinks;
     }
@@ -874,10 +922,10 @@ netsnmp_send_traps(int trap, int specific,
         }
 #endif
     }
-    if (template_v1pdu)
+    if (template_v1pdu && _v1_sessions)
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_SEND_TRAP1, template_v1pdu);
-    if (template_v2pdu)
+    if (template_v2pdu && _v2_sessions)
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_SEND_TRAP2, template_v2pdu);
     snmp_free_pdu(template_v1pdu);
