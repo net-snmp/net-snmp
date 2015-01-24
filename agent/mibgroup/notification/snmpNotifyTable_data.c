@@ -266,27 +266,39 @@ notifyTable_register_notifications(int major, int minor,
     struct agent_add_trap_args *args =
         (struct agent_add_trap_args *) serverarg;
     netsnmp_session *ss;
+    char            *name, *tag, *notifyProfile;
 
     if (!args || !(args->ss)) {
         return (0);
     }
     confirm = args->confirm;
     ss = args->ss;
+    name = args->name;
+    tag = args->tag;
+    notifyProfile = args->profile;
 
     /*
      * XXX: START move target creation to target code 
      */
-    for (i = 0; i < MAX_ENTRIES; i++) {
-        sprintf(buf, "internal%d", i);
-        if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
-            break;
-    }
-    if (i == MAX_ENTRIES) {
-        snmp_log(LOG_ERR,
-                 "Can't register new trap destination: max limit reached: %d",
-                 MAX_ENTRIES);
-        snmp_sess_close(ss);
-        return (0);
+    if (NULL == name) {
+        for (i = 0; i < MAX_ENTRIES; i++) {
+            sprintf(buf, "internal%d", i);
+            if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
+                break;
+        }
+        if (i == MAX_ENTRIES) {
+            snmp_log(LOG_ERR,
+                     "Can't register new trap destination: max limit reached: %d",
+                     MAX_ENTRIES);
+            snmp_sess_close(ss);
+            return (0);
+        }
+        name = buf;
+        if (NULL == tag)
+            tag = buf;
+    } else {
+        if (NULL == tag)
+            tag = name;
     }
 
     /*
@@ -300,7 +312,7 @@ notifyTable_register_notifications(int major, int minor,
         return 0;
     }
     ptr = snmpTargetAddrTable_create();
-    ptr->name = strdup(buf);
+    ptr->name = strdup(name);
     memcpy(ptr->tDomain, t->domain, t->domain_length * sizeof(oid));
     ptr->tDomainLen = t->domain_length;
     ptr->tAddressLen = t->remote_length;
@@ -309,8 +321,8 @@ notifyTable_register_notifications(int major, int minor,
     ptr->timeout = ss->timeout / 1000;
     ptr->retryCount = ss->retries;
     SNMP_FREE(ptr->tagList);
-    ptr->tagList = strdup("default");
-    ptr->params = strdup(ptr->name);
+    ptr->tagList = strdup(tag);
+    ptr->params = strdup(ptr->name); /* link to target param table */
     ptr->storageType = ST_READONLY;
     ptr->rowStatus = RS_ACTIVE;
     ptr->sess = ss;
@@ -321,7 +333,7 @@ notifyTable_register_notifications(int major, int minor,
      * param
      */
     pptr = snmpTargetParamTable_create();
-    pptr->paramName = strdup(buf);
+    pptr->paramName = ptr->params; /* link from target addr table */
     pptr->mpModel = ss->version;
     if (ss->version == SNMP_VERSION_3) {
         pptr->secModel = ss->securityModel;
@@ -369,9 +381,9 @@ notifyTable_register_notifications(int major, int minor,
     nptr = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
     if (nptr == NULL)
         return 0;
-    nptr->snmpNotifyName = strdup(buf);
-    nptr->snmpNotifyNameLen = strlen(buf);
-    nptr->snmpNotifyTag = strdup("default");
+    nptr->snmpNotifyName = strdup(name);
+    nptr->snmpNotifyNameLen = strlen(name);
+    nptr->snmpNotifyTag = strdup(tag); /* selects target addr */
     nptr->snmpNotifyTagLen = strlen(nptr->snmpNotifyTag);
     nptr->snmpNotifyType = confirm ?
         SNMPNOTIFYTYPE_INFORM : SNMPNOTIFYTYPE_TRAP;
@@ -379,6 +391,29 @@ notifyTable_register_notifications(int major, int minor,
     nptr->snmpNotifyRowStatus = RS_ACTIVE;
 
     snmpNotifyTable_add(nptr);
+
+    /*
+     * filter profile
+     */
+    if (NULL != notifyProfile) {
+        struct snmpNotifyFilterProfileTable_data *profile;
+        profile = snmpNotifyFilterProfileTable_create(ptr->params,
+                                                      strlen(ptr->params),
+                                                      notifyProfile,
+                                                      strlen(notifyProfile));
+        if (NULL == profile)
+            snmp_log(LOG_ERR, "couldn't create notify filter profile\n");
+        else {
+            profile->snmpNotifyFilterProfileRowStatus = RS_ACTIVE;
+            profile->snmpNotifyFilterProfileStorType = ST_READONLY;
+
+            if (snmpNotifyFilterProfileTable_add(profile) != SNMPERR_SUCCESS) {
+                snmp_log(LOG_ERR, "couldn't add notify filter profile\n");
+                snmpNotifyFilterProfileTable_free(profile);
+            }
+        }
+    }
+
     return 0;
 }
 
