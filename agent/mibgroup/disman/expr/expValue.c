@@ -731,7 +731,7 @@ expValue_evaluateExpression( struct expExpression *exp,
     char exprRaw[     EXP_STR3_LEN+1 ];
     netsnmp_variable_list *var;
     netsnmp_variable_list owner_var, name_var, param_var;
-    long n;
+    int n;
     char *cp;
 
     if (!exp)
