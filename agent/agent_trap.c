@@ -934,6 +934,11 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 #endif
     template_pdu->version = sess->version;
     pdu = snmp_clone_pdu(template_pdu);
+    if(!pdu) {
+        snmp_log(LOG_WARNING, "send_trap: failed to clone PDU\n");
+        return;
+    }
+
     pdu->sessid = sess->sessid; /* AgentX only ? */
 
     if ( template_pdu->command == SNMP_MSG_INFORM
