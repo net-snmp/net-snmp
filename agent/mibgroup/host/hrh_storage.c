@@ -421,7 +421,7 @@ really_try_next:
         if (store_idx > NETSNMP_MEM_TYPE_MAX) {
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                     NETSNMP_DS_AGENT_REALSTORAGEUNITS))
-                long_return = HRFS_entry->units & 0xffffffff;
+                long_return = HRFS_entry->units & 0x7fffffff;
             else
                 long_return = HRFS_entry->units_32;
         } else {
@@ -434,7 +434,7 @@ really_try_next:
         if (store_idx > NETSNMP_MEM_TYPE_MAX) {
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                     NETSNMP_DS_AGENT_REALSTORAGEUNITS))
-                long_return = HRFS_entry->size & 0xffffffff;
+                long_return = HRFS_entry->size & 0x7fffffff;
             else
                 long_return = HRFS_entry->size_32;
         } else {
@@ -447,7 +447,7 @@ really_try_next:
         if (store_idx > NETSNMP_MEM_TYPE_MAX) {
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                     NETSNMP_DS_AGENT_REALSTORAGEUNITS))
-                long_return = HRFS_entry->used & 0xffffffff;
+                long_return = HRFS_entry->used & 0x7fffffff;
             else
                 long_return = HRFS_entry->used_32;
         } else {
