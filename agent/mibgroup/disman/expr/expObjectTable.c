@@ -315,7 +315,7 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                 memset(entry->expObjectID, 0, sizeof(entry->expObjectID));
                 memcpy(entry->expObjectID, request->requestvb->val.string,
                                            request->requestvb->val_len);
-                entry->expObjectID_len = request->requestvb->val_len;
+                entry->expObjectID_len = request->requestvb->val_len/sizeof(oid);
                 break;
             case COLUMN_EXPOBJECTIDWILDCARD:
                 if (*request->requestvb->val.integer == TV_TRUE)
