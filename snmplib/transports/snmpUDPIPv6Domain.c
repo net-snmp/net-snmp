@@ -266,6 +266,27 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
+        char           *client_socket = NULL;
+        /*
+         * This is a client session.  If we've been given a
+         * client address to send from, then bind to that.
+         * Otherwise the send will use "something sensible".
+         */
+
+        client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_CLIENT_ADDR);
+        if (client_socket) {
+            struct sockaddr_in6 client_addr;
+            netsnmp_sockaddr_in6_2(&client_addr, client_socket, NULL);
+            rc = bind(t->sock, (struct sockaddr *)&client_addr,
+                              sizeof(struct sockaddr_in6));
+            if ( rc != 0 ) {
+                DEBUGMSGTL(("netsnmp_udp6", "failed to bind for clientaddr: %d %s\n",
+                                 errno, strerror(errno)));
+                netsnmp_socketbase_close(t);
+                netsnmp_transport_free(t);
+            }
+        }
         /*
          * This is a client session.  Save the address in the
          * transport-specific data pointer for later use by netsnmp_udp6_send.
