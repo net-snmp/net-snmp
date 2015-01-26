@@ -645,7 +645,16 @@ tcpTable_load_netlink(void)
 				break;
 			}
 
-			r = nlmsg_data(h);
+			/** handle the case where the kernel doesn't have netlink socket 
+			 * diagnostics enabled */
+			if ((h->nlmsg_type == NLMSG_ERROR) && 
+				(((struct nlmsgerr *)r)->error != 0)) {
+				int nlerr = ((struct nlmsgerr *)r)->error;
+				running = 0;
+				DEBUGMSGTL(("mibII/tcpTable", "netlink error: %d\n", nlerr));
+				snmp_log(LOG_ERR, "snmpd: netlink error: %d\n", nlerr);
+				break;
+			}
 
 			if (r->idiag_family != AF_INET) {
 				h = nlmsg_next(h, &len);
