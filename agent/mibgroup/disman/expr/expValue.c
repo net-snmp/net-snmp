@@ -242,6 +242,9 @@ _expValue_evalOperator(netsnmp_variable_list *left,
                        netsnmp_variable_list *right) {
     int n;
 
+    if (left->val.integer == NULL || right->val.integer == NULL) {
+	return right;
+    }
     switch( *op->val.integer ) {
     case EXP_OPERATOR_ADD:
         n = *left->val.integer + *right->val.integer; break;
@@ -354,6 +357,7 @@ _expValue_evalExpr(  netsnmp_variable_list *expIdx,
                 /* Note position of failure in expression */
                 var->data = (void *)(cp1 - exprRaw);
                 snmp_free_var(exprAlDente);
+		*exprEnd = cp1;
                 return var;
             } else {
                 if (vtail)
@@ -381,6 +385,7 @@ _expValue_evalExpr(  netsnmp_variable_list *expIdx,
                                             EXPERRCODE_PARENTHESIS );
                 var->type = ASN_NULL;
                 var->data = (void *)(cp2 - exprRaw);
+		*exprEnd = cp1;
                 return var;
             } else {
                 if (vtail)
@@ -501,6 +506,7 @@ DIGIT:
                                             EXPERRCODE_SYNTAX );
                 var->type = ASN_NULL;
                 var->data = (void *)(cp1 - exprRaw);
+		*exprEnd = cp1;
                 return var;
             }
             n = ops[ *cp1 & 0xFF ];
@@ -531,6 +537,7 @@ DIGIT:
                                             EXPERRCODE_SYNTAX );
                 var->type = ASN_NULL;
                 var->data = (void *)(cp1 - exprRaw);
+		*exprEnd = cp1;
                 return var;
             }
             if ( *(cp1+1) == '=' )
@@ -574,6 +581,7 @@ DIGIT:
                                             EXPERRCODE_FUNCTION );
                 var->type = ASN_NULL;
                 var->data = (void *)(cp1 - exprRaw);
+		*exprEnd = cp1;
                 return var;
             }
             else if (!isspace( *cp1 & 0xFF )) {
@@ -585,6 +593,7 @@ DIGIT:
                                             EXPERRCODE_OPERATOR );
                 var->type = ASN_NULL;
                 var->data = (void *)(cp1 - exprRaw);
+		*exprEnd = cp1;
                 return var;
             }
             cp1++;
@@ -743,7 +752,7 @@ expValue_evaluateExpression( struct expExpression *exp,
                   (u_char*)exp->expName,  strlen(exp->expName));
     n = 99; /* dummy value */
     snmp_set_var_typed_value( &param_var, ASN_INTEGER,
-                             (u_char*)&n, sizeof(long));
+                             (u_char*)&n, sizeof(n));
     owner_var.next_variable = &name_var;
     name_var.next_variable  = &param_var;
 
