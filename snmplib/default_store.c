@@ -290,11 +290,13 @@ netsnmp_ds_set_string(int storeid, int which, const char *value)
      */
     if (netsnmp_ds_strings[storeid][which] == value)
         return SNMPERR_SUCCESS;
-    
+
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     if (netsnmp_ds_strings[storeid][which] != NULL) {
         free(netsnmp_ds_strings[storeid][which]);
 	netsnmp_ds_strings[storeid][which] = NULL;
     }
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 
     if (value) {
         netsnmp_ds_strings[storeid][which] = strdup(value);
@@ -535,6 +537,7 @@ netsnmp_ds_shutdown(void)
     netsnmp_ds_read_config *drsp;
     int             i, j;
 
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for (drsp = netsnmp_ds_configs; drsp; drsp = netsnmp_ds_configs) {
         netsnmp_ds_configs = drsp->next;
 
@@ -558,5 +561,6 @@ netsnmp_ds_shutdown(void)
             }
         }
     }
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 }
 /**  @} */
