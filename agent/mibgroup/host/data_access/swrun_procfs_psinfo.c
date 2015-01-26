@@ -23,12 +23,7 @@
 #include <fcntl.h>
 #endif
 
-#define HAVE_SYS_PROCFS_H    /* XXX - Needs a configure check! */
-#ifdef HAVE_SYS_PROCFS_H
-#define _KERNEL              /* For psinfo_t */
-#include <sys/procfs.h>
-#undef _KERNEL
-#endif
+#include <procfs.h>
 #ifdef HAVE_SYS_PROC_H
 #include <sys/proc.h>
 #endif
