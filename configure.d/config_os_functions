@@ -88,7 +88,7 @@ AC_REPLACE_FUNCS([getopt        inet_ntop     inet_pton        ] dnl
 
 #  Agent:
 AC_CHECK_FUNCS([cgetnext        chown          execv           ] dnl
-               [gai_strerror                   getgrnam        ] dnl
+               [forkall         gai_strerror   getgrnam        ] dnl
                [gethostname     getloadavg                     ] dnl
                [getpid          getpwnam                       ] dnl
                [hasmntopt       initgroups                     ] dnl
