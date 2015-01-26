@@ -255,7 +255,11 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
      * Fork to return control to the invoking process and to
      * guarantee that we aren't a process group leader.
      */
+#if HAVE_FORKALL
+    i = forkall();
+#else
     i = fork();
+#endif
     if (i != 0) {
         /* Parent. */
         DEBUGMSGT(("daemonize","first fork returned %d.\n", i));
@@ -277,7 +281,12 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
         /*
          * Fork to let the process/session group leader exit.
          */
-        if ((i = fork()) != 0) {
+#if HAVE_FORKALL
+	i = forkall();
+#else
+	i = fork();
+#endif
+        if (i != 0) {
             DEBUGMSGT(("daemonize","second fork returned %d.\n", i));
             if(i == -1) {
                 snmp_log(LOG_ERR,"second fork failed (errno %d) in "
