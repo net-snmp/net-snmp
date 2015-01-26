@@ -738,6 +738,12 @@ expValue_evaluateExpression( struct expExpression *exp,
         return NULL;
 
     /*
+     * Gather data for evaluating expressions with no regular delta-value
+     * sampling, i.e. expressions with sampling/delta interval of 0
+     */
+    expExpression_getData(0, exp);
+
+    /* 
      * Set up a varbind list containing the various index values
      *   (including a placeholder for expObjectIndex).
      *
