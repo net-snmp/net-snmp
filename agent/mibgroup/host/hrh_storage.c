@@ -380,7 +380,7 @@ really_try_next:
         return (u_char *) & long_return;
     case HRSTORE_TYPE:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
-            if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE )
+            if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE && storageUseNFS)
                 storage_type_id[storage_type_len - 1] = 10;     /* Network Disk */
             else if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOVE )
                 storage_type_id[storage_type_len - 1] = 5;      /* Removable Disk */
@@ -415,29 +415,29 @@ really_try_next:
         }
     case HRSTORE_UNITS:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
-            long_return = HRFS_entry->units;
+            long_return = HRFS_entry->units & 0x7fffffff;
         else {
             if ( !mem || mem->units == -1 )
                 goto try_next;
-            long_return = mem->units;
+            long_return = mem->units & 0x7fffffff;
         }
         return (u_char *) & long_return;
     case HRSTORE_SIZE:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
-            long_return = HRFS_entry->size;
+            long_return = HRFS_entry->size & 0x7fffffff;
         else {
             if ( !mem || mem->size == -1 )
                 goto try_next;
-            long_return = mem->size;
+            long_return = mem->size & 0x7fffffff;
         }
         return (u_char *) & long_return;
     case HRSTORE_USED:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
-            long_return = HRFS_entry->used;
+            long_return = HRFS_entry->used & 0x7fffffff;
         else {
             if ( !mem || mem->size == -1 || mem->free == -1 )
                 goto try_next;
-            long_return = mem->size - mem->free;
+            long_return = (mem->size - mem->free) & 0x7fffffff;
         }
         return (u_char *) & long_return;
     case HRSTORE_FAILS:
