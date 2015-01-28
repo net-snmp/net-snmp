@@ -145,7 +145,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
     _ioctl_extras           *extras;
 
     if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        snmp_log(LOG_ERR, "could not create socket\n");
+        snmp_log_perror("_netsnmp_ioctl_ipaddress_container_load_v4: could not create socket");
         return -1;
     }
 
@@ -383,7 +383,7 @@ _next_alias(const char *if_name)
     len = strlen(if_name);
 
     if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        snmp_log(LOG_ERR, "could not create socket\n");
+        snmp_log_perror("_next_alias: could not create socket");
         return -1;
     }
 
@@ -469,7 +469,7 @@ _netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry)
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if(fd < 0) {
-        snmp_log(LOG_ERR,"couldn't create socket\n");
+        snmp_log_perror("_netsnmp_ioctl_ipaddress_set_v4: couldn't create socket");
         return -2;
     }
     memset(&ifrq, 0, sizeof(ifrq));
@@ -537,7 +537,7 @@ _netsnmp_ioctl_ipaddress_delete_v4(netsnmp_ipaddress_entry * entry)
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if(fd < 0) {
-        snmp_log(LOG_ERR,"couldn't create socket\n");
+        snmp_log_perror("_netsnmp_ioctl_ipaddress_delete_v4: couldn't create socket");
         return -2;
     }
 

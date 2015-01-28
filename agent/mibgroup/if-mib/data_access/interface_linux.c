@@ -616,7 +616,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     if (!(devin = fopen("/proc/net/dev", "r"))) {
         DEBUGMSGTL(("access:interface",
                     "Failed to load Interface Table (linux1)\n"));
-        NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/dev ...\n"));
+        snmp_log_perror("interface_linux: cannot open /proc/net/dev");
         return -2;
     }
 
@@ -625,7 +625,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
      */
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if(fd < 0) {
-        snmp_log(LOG_ERR, "could not create socket\n");
+        snmp_log_perror("interface_linux: could not create socket");
         fclose(devin);
         return -2;
     }
