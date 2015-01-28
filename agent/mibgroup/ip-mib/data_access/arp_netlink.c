@@ -78,7 +78,7 @@ int netsnmp_access_arp_load(netsnmp_arp_access *access)
 
         fd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
         if (fd < 0) {
-            snmp_log(LOG_ERR,"netsnmp_access_arp_load: netlink socket create error\n");
+            snmp_log_perror("netsnmp_access_arp_load: netlink socket create error");
             return -1;
         }
         access->arch_magic = (void *)(uintptr_t)fd;
@@ -87,7 +87,7 @@ int netsnmp_access_arp_load(netsnmp_arp_access *access)
         sa.nl_family = AF_NETLINK;
         sa.nl_groups = RTMGRP_NEIGH;
         if (bind(fd, (struct sockaddr*) &sa, sizeof(sa)) < 0) {
-            snmp_log(LOG_ERR,"netsnmp_access_arp_load: netlink bind failed\n");
+            snmp_log_perror("netsnmp_access_arp_load: netlink bind failed");
             return -1;
         }
 
@@ -109,7 +109,7 @@ int netsnmp_access_arp_load(netsnmp_arp_access *access)
 
     r = send(fd, &req, req.n.nlmsg_len, 0);
     if (r < 0) {
-        snmp_log(LOG_ERR,"netsnmp_access_arp_refresh: send failed\n");
+        snmp_log_perror("netsnmp_access_arp_refresh: send failed");
         return -1;
     }
 
