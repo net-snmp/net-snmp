@@ -380,7 +380,7 @@ really_try_next:
         return (u_char *) & long_return;
     case HRSTORE_TYPE:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
-            if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE )
+            if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE && storageUseNFS)
                 storage_type_id[storage_type_len - 1] = 10;     /* Network Disk */
             else if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOVE )
                 storage_type_id[storage_type_len - 1] = 5;      /* Removable Disk */
