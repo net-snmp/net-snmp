@@ -180,7 +180,7 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
                   sizeof(struct sockaddr));
             if ( rc != 0 ) {
                 snmp_log(LOG_ERR, "Cannot bind for clientaddr %s: %s\n",
-                            client_address, strerror(errno));
+                            client_socket, strerror(errno));
                 netsnmp_socketbase_close(t);
                 netsnmp_transport_free(t);
                 return NULL;

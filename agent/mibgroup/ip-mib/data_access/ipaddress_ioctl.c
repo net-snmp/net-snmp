@@ -591,7 +591,7 @@ _netsnmp_ioctl_ipaddress_v6(netsnmp_ipaddress_entry * entry, int operation)
 
     fd = socket(AF_INET6, SOCK_DGRAM, 0);
     if(fd < 0) {
-        snmp_log(LOG_ERR,"couldn't create socket\n");
+        snmp_log_perror("_netsnmp_ioctl_ipaddress_v6: couldn't create socket");
         return -2;
     }
     memset(&ifrq, 0, sizeof(ifrq));
