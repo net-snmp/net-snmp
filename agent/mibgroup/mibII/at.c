@@ -619,7 +619,7 @@ ARP_Scan_Init(void)
 
     in = fopen("/proc/net/arp", "r");
     if (!in) {
-        snmp_log(LOG_ERR, "snmpd: Cannot open /proc/net/arp\n");
+        snmp_log_perror("mibII/at: Cannot open /proc/net/arp");
         arptab_size = 0;
         return;
     }

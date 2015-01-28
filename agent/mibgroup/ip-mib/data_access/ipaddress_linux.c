@@ -216,7 +216,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
 
 #define PROCFILE "/proc/net/if_inet6"
     if (!(in = fopen(PROCFILE, "r"))) {
-        DEBUGMSGTL(("access:ipaddress:container","could not open " PROCFILE "\n"));
+        snmp_log_perror("ipaddress_linux: could not open " PROCFILE);
         return -2;
     }
 
@@ -417,7 +417,7 @@ netsnmp_access_other_info_get(int index, int family)
    memset(&addr, 0, sizeof(struct address_flag_info));
    sd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
    if(sd < 0) {
-      snmp_log(LOG_ERR, "could not open netlink socket\n");
+      snmp_log_perror("ipaddress_linux: could not open netlink socket");
       return addr;
    }
 
@@ -434,18 +434,18 @@ netsnmp_access_other_info_get(int index, int family)
 
     status = send(sd, &req, req.n.nlmsg_len, 0);
     if (status < 0) {
-        snmp_log(LOG_ERR, "could not send netlink request\n");
+        snmp_log_perror("ipadress_linux: could not send netlink request");
         return addr;
     }
 
     status = recv(sd, buf, sizeof(buf), 0);
     if (status < 0) {
-        snmp_log (LOG_ERR, "could not recieve netlink request\n");
+        snmp_log_perror("ipadress_linux: could not receive netlink request");
         return addr;
     }
 
     if(status == 0) {
-       snmp_log (LOG_ERR, "nothing to read\n");
+       snmp_log (LOG_ERR, "ipadress_linux: nothing to read\n");
        return addr;
     }
 

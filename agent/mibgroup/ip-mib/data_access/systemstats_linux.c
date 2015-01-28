@@ -114,9 +114,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     }
 
     if (!(devin = fopen("/proc/net/snmp", "r"))) {
-        DEBUGMSGTL(("access:systemstats",
-                    "Failed to load Systemstats Table (linux1)\n"));
-        NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/snmp ...\n"));
+        snmp_log_perror("systemstats_linux: cannot open /proc/net/snmp");
         return -2;
     }
 
@@ -127,7 +125,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     len = strlen(line);
     if (224 != len) {
         fclose(devin);
-        snmp_log(LOG_ERR, "unexpected header length in /proc/net/snmp."
+        snmp_log(LOG_ERR, "systemstats_linux: unexpected header length in /proc/net/snmp."
                  " %d != 224\n", len);
         return -4;
     }
@@ -279,9 +277,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
                 "load addtional v4 (flags %u)\n", load_flags));
 
     if (!(devin = fopen("/proc/net/netstat", "r"))) {
-        DEBUGMSGTL(("access:systemstats",
-                    "cannot open /proc/net/netstat\n"));
-        NETSNMP_LOGONCE((LOG_ERR,"cannot open /proc/net/netstat\n"));
+        snmp_log_perror("systemstats_linux: cannot open /proc/net/netstat");
         return -2;
     }
 
@@ -630,7 +626,9 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
             continue;
         }
         if (NULL == (devin = fopen(dev_filename, "r"))) {
-            snmp_log(LOG_ERR, "Failed to open %s\n", dev_filename);
+            char msg[128];
+            snprintf(msg, sizeof(msg), "systemstats_linux: %s", dev_filename);
+            snmp_log_perror(dev_filename);
             continue;
         }
     
