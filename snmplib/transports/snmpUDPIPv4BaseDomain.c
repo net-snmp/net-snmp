@@ -181,6 +181,8 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
             if ( rc != 0 ) {
                 DEBUGMSGTL(("netsnmp_udpbase", "failed to bind for clientaddr: %d %s\n",
                             errno, strerror(errno)));
+                snmp_log(LOG_ERR, "Cannot bind for clientaddr %s: %s\n",
+                            client_address, strerror(errno));
                 netsnmp_socketbase_close(t);
                 netsnmp_transport_free(t);
                 return NULL;
