@@ -176,6 +176,9 @@
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
+/* Define to 1 if you have the `forkall' function. */
+#undef HAVE_FORKALL
+
 /* Define to 1 if you have the <fstab.h> header file. */
 #undef HAVE_FSTAB_H
 
