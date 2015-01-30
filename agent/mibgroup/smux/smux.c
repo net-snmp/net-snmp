@@ -485,8 +485,8 @@ var_smux_write(int action,
 
             if (buf[0] == SMUX_TRAP) {
                 DEBUGMSGTL(("smux", "[var_smux_write] Received trap\n"));
-                snmp_log(LOG_INFO, "Got trap from peer on fd %d\n",
-                         rptr->sr_fd);
+                DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n",
+                         rptr->sr_fd));
                 ptr = asn_parse_header(buf, &len, &type);
                 smux_trap_process(ptr, &len);
 
@@ -594,9 +594,9 @@ smux_accept(int sd)
         snmp_log_perror("[smux_accept] accept failed");
         return -1;
     } else {
-        snmp_log(LOG_INFO, "[smux_accept] accepted fd %d from %s:%d\n",
+        DEBUGMSGTL(("smux", "[smux_accept] accepted fd %d from %s:%d\n",
                  fd, inet_ntoa(in_socket.sin_addr),
-                 ntohs(in_socket.sin_port));
+                 ntohs(in_socket.sin_port)));
         if (npeers + 1 == SMUXMAXPEERS) {
             snmp_log(LOG_ERR,
                      "[smux_accept] denied peer on fd %d, limit %d reached",
@@ -695,7 +695,8 @@ smux_process(int fd)
 
     if (length <= 0)
     {
-       snmp_log_perror("[smux_process] peek failed");
+       if (length < 0)
+           snmp_log_perror("[smux_process] peek failed");
        smux_peer_cleanup(fd);
        return -1;
     }
@@ -785,7 +786,7 @@ smux_pdu_process(int fd, u_char * data, size_t length)
             DEBUGMSGTL(("smux", "This shouldn't have happened!\n"));
             break;
         case SMUX_TRAP:
-            snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", fd);
+            DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n", fd));
             if (ptr)
             {
                DEBUGMSGTL(("smux", "[smux_pdu_process] call smux_trap_process.\n"));
@@ -891,9 +892,9 @@ smux_open_process(int fd, u_char * ptr, size_t * len, int *fail)
         *fail = TRUE;
         return ptr;
     }
-    snmp_log(LOG_INFO,
+    DEBUGMSGTL(("smux",
              "accepted smux peer: oid %s, descr %s\n",
-             oid_print, descr);
+             oid_print, descr));
     *fail = FALSE;
     return ptr;
 }
@@ -1458,7 +1459,7 @@ smux_snmp_process(int exact,
 
         if (result[0] == SMUX_TRAP) {
             DEBUGMSGTL(("smux", "[smux_snmp_process] Received trap\n"));
-            snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", sd);
+            DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n", sd));
             ptr = asn_parse_header(result, (size_t *) &length, &type);
             smux_trap_process(ptr, (size_t *) &length);
 
@@ -1810,7 +1811,7 @@ smux_peer_cleanup(int sd)
             Auths[i]->sa_active_fd = -1;
             snprint_objid(oid_name, sizeof(oid_name), Auths[i]->sa_oid,
                           Auths[i]->sa_oid_len);
-            snmp_log(LOG_INFO, "peer disconnected: %s\n", oid_name);
+            DEBUGMSGTL(("smux", "peer disconnected: %s\n", oid_name));
         }
     }
 }
