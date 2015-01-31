@@ -143,6 +143,7 @@ typedef long    fd_mask;
 #include <net-snmp/agent/agent_module_config.h>
 #include <net-snmp/agent/mib_module_config.h>
 
+#include "utilities/execute.h" /* netsnmp_close_fds() */
 #include "snmpd.h"
 
 #include <net-snmp/agent/mib_modules.h>
@@ -448,15 +449,11 @@ main(int argc, char *argv[])
     FILE           *PID;
 #endif
 
-#ifndef WIN32
     /*
      * close all non-standard file descriptors we may have
      * inherited from the shell.
      */
-    for (i = getdtablesize() - 1; i > 2; --i) {
-        (void) close(i);
-    }
-#endif /* #WIN32 */
+    netsnmp_close_fds(2);
     
     /*
      * register signals ASAP to prevent default action (usually core)

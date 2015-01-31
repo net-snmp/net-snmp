@@ -484,8 +484,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         /*
          * close all non-standard open file descriptors 
          */
-        for (cnt = getdtablesize() - 1; cnt >= 2; --cnt)
-            (void) close(cnt);
+        netsnmp_close_fds(1);
         (void) dup(1);          /* stderr */
 
         for (cnt = 1, cptr1 = cmd, cptr2 = argvs; *cptr1 != 0;
