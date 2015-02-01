@@ -200,11 +200,14 @@ run_exec_command( char *command, char *input,
          */
         close(0);
         dup(  ipipe[0]);
+        close(ipipe[0]);
 	close(ipipe[1]);
 
         close(1);
         dup(  opipe[1]);
         close(opipe[0]);
+        close(opipe[1]);
+
         close(2);
         dup(1);
         for (i = getdtablesize()-1; i>2; i--)

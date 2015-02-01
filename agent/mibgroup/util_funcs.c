@@ -463,16 +463,20 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         return 0;
     }
     if ((*pid = fork()) == 0) { /* First handle for the child */
+        close(fd[0][1]);
+        close(fd[1][0]);
         close(0);
         if (dup(fd[0][0]) != 0) {
             setPerrorstatus("dup 0");
             return 0;
         }
+        close(fd[0][0]);
         close(1);
         if (dup(fd[1][1]) != 1) {
             setPerrorstatus("dup 1");
             return 0;
         }
+        close(fd[1][1]);
 
         /*
          * write standard output and standard error to pipe. 
