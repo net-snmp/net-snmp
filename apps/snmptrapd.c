@@ -97,6 +97,7 @@ SOFTWARE.
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/fd_event_manager.h>
+#include "utilities/execute.h" /* netsnmp_close_fds() */
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
 #include "snmptrapd_auth.h"
@@ -655,7 +656,6 @@ main(int argc, char *argv[])
 #endif
 
 
-#ifndef WIN32
 #ifndef NETSNMP_NO_SYSTEMD
     /* check if systemd has sockets for us and don't close them */
     prepared_sockets = netsnmp_sd_listen_fds(0);
@@ -664,12 +664,8 @@ main(int argc, char *argv[])
      * close all non-standard file descriptors we may have
      * inherited from the shell.
      */
-    if (!prepared_sockets) {
-        for (i = getdtablesize() - 1; i > 2; --i) {
-            (void) close(i);
-        }
-    }
-#endif /* #WIN32 */
+    if (!prepared_sockets)
+        netsnmp_close_fds(2);
     
 #ifdef SIGTERM
     signal(SIGTERM, term_handler);
@@ -1379,18 +1375,6 @@ trapd_update_config(void)
 #endif
     read_configs();
 }
-
-
-#if !defined(HAVE_GETDTABLESIZE) && !defined(WIN32)
-#include <sys/resource.h>
-int
-getdtablesize(void)
-{
-    struct rlimit   rl;
-    getrlimit(RLIMIT_NOFILE, &rl);
-    return (rl.rlim_cur);
-}
-#endif
 
 /*
  * Windows Service Related functions 

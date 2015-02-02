@@ -22,6 +22,9 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
@@ -210,8 +213,8 @@ run_exec_command( char *command, char *input,
 
         close(2);
         dup(1);
-        for (i = getdtablesize()-1; i>2; i--)
-            close(i);
+
+        netsnmp_close_fds(2);
 
         /*
          * Set up the argv array and execute it
@@ -407,5 +410,32 @@ run_exec_command( char *command, char *input,
      */
     DEBUGMSGTL(("run:exec", "running shell command '%s'\n", command));
     return run_shell_command( command, input, output, out_len );
+#endif
+}
+
+/**
+ * Close all file descriptors larger than @fd.
+ */
+void netsnmp_close_fds(int fd)
+{
+#if defined(HAVE_FORK)
+    DIR            *dir;
+    struct dirent  *ent;
+    int             i, largest_fd = -1;
+
+    if ((dir = opendir("/proc/self/fd"))) {
+        while ((ent = readdir(dir))) {
+            if (sscanf(ent->d_name, "%d", &i) == 1) {
+                if (i > largest_fd)
+                    largest_fd = i;
+            }
+        }
+        closedir(dir);
+    } else {
+        largest_fd = getdtablesize() - 1;
+    }
+
+    for (i = largest_fd; i > fd; i--)
+        close(i);
 #endif
 }

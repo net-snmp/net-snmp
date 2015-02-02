@@ -134,6 +134,7 @@
 #include <net-snmp/agent/agent_module_config.h>
 #include <net-snmp/agent/mib_module_config.h>
 
+#include "utilities/execute.h" /* netsnmp_close_fds() */
 #include "snmpd.h"
 
 #include <net-snmp/agent/mib_modules.h>
@@ -446,22 +447,16 @@ main(int argc, char *argv[])
     FILE           *PID;
 #endif
 
-#ifndef WIN32
 #ifndef NETSNMP_NO_SYSTEMD
     /* check if systemd has sockets for us and don't close them */
     prepared_sockets = netsnmp_sd_listen_fds(0);
 #endif /* NETSNMP_NO_SYSTEMD */
-
     /*
      * close all non-standard file descriptors we may have
      * inherited from the shell.
      */
-    if (!prepared_sockets) {
-        for (i = getdtablesize() - 1; i > 2; --i) {
-            (void) close(i);
-        }
-    }
-#endif /* #WIN32 */
+    if (!prepared_sockets)
+        netsnmp_close_fds(2);
     
     /*
      * register signals ASAP to prevent default action (usually core)

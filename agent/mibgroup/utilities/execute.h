@@ -3,6 +3,7 @@
 
 config_belongs_in(agent_module)
 
+void netsnmp_close_fds(int fd);
 int run_shell_command(char *command, char *input,
                       char *output,  int  *out_len);
 int run_exec_command( char *command, char *input,
