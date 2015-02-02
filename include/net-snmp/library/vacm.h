@@ -268,6 +268,15 @@ extern          "C" {
                                             oid * viewSubtree,
                                             size_t viewSubtreeLen, int mode);
 
+    NETSNMP_IMPORT
+    int    netsnmp_vacm_simple_usm_add(const char *user, int rw, int authLevel,
+                                       const char *view, oid *oidView,
+                                       size_t oidViewLen, const char *context);
+
+    NETSNMP_IMPORT
+    int    netsnmp_vacm_simple_usm_del(const char *user, int authLevel,
+                                       const char *view, oid *oidView,
+                                       size_t oidViewLen, const char *context);
 
 #ifdef __cplusplus
 }
