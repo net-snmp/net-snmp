@@ -207,11 +207,37 @@ fi
 if test "x$with_nl" != "xno"; then
     case $target_os in
     linux*) # Check for libnl (linux)
+        # The test below verifies whether the libnl-3 package been installed.
+        # This test works as follows:
+        # - If pkg-config was not installed at the time autogen.sh was run,
+        #   the definition of the PKG_CHECK_EXISTS() macro will not be found by
+        #   autogen.sh. Augogen.sh will generate a configure script that prints
+        #   a warning about pkg-config and proceeds as if libnl-3 has not been
+        #   installed.
+        # - If pkg-config was installed at the time autogen.sh was run,
+        #   the generated configure script will try to detect the presence of
+        #   the libnl-3 library by looking up compile and linker flags in the
+        #   file called libnl-3.pc.
+        # - pkg-config settings can be overridden via the configure variables
+        #   LIBNL3_CFLAGS and LIBNL3_LIBS (added by the pkg-config m4 macro's to
+        #   the configure script -- see also ./configure --help).
+        # - The LIBNL3_CFLAGS and LIBNL3_LIBS configure variables can be used
+        #   even if the pkg-config executable is not present on the system on
+        #   which the configure script is run.
+        ifdef(
+          [PKG_CHECK_EXISTS],
+          [PKG_CHECK_EXISTS([libnl-3.0],
+            [PKG_CHECK_MODULES([LIBNL3], [libnl-3.0])])
+          ],
+          AC_MSG_WARN([pkg-config has not been installed or is too old.])
+          AC_MSG_WARN([Detection of libnl-3.0 will be skipped.])
+        )
+
         netsnmp_save_CPPFLAGS="$CPPFLAGS"
-        CPPFLAGS="-I/usr/include/libnl3 $CPPFLAGS"
+        CPPFLAGS="${LIBNL3_CFLAGS} $CPPFLAGS"
         NETSNMP_SEARCH_LIBS(nl_connect, nl-3,
             [AC_CHECK_HEADERS(netlink/netlink.h)
-            EXTERNAL_MIBGROUP_INCLUDES="$EXTERNAL_MIBGROUP_INCLUDES -I/usr/include/libnl3"],
+            EXTERNAL_MIBGROUP_INCLUDES="$EXTERNAL_MIBGROUP_INCLUDES ${LIBNL3_CFLAGS}"],
             [CPPFLAGS="$netsnmp_save_CPPFLAGS"], [], [], [LMIBLIBS])
         if test "x$ac_cv_header_netlink_netlink_h" != xyes; then
             NETSNMP_SEARCH_LIBS(nl_connect, nl, [
