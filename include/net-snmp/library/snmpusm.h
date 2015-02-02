@@ -262,6 +262,25 @@ extern          "C" {
     NETSNMP_IMPORT
     void            shutdown_usm(void);
 
+#define USM_CREATE_USER_AUTH_NONE 0
+#define USM_CREATE_USER_AUTH_MD5  1
+#define USM_CREATE_USER_AUTH_SHA  2
+
+#define USM_CREATE_USER_PRIV_NONE 0
+#define USM_CREATE_USER_PRIV_DES  1
+#define USM_CREATE_USER_PRIV_AES  2
+
+    NETSNMP_IMPORT
+    struct usmUser *usm_create_usmUser(const char *userName,
+                                       const char *engineID, 
+                                       int authType, const char *authPass,
+                                       int privType, const char *privPass,
+                                       const char **errorMsg);
+
+    NETSNMP_IMPORT
+    struct usmUser *usm_create_usmUser_from_string(char *line,
+                                                   const char **errorMsg);
+
     NETSNMP_IMPORT
     int             usm_create_user_from_session(netsnmp_session * session);
     SecmodPostDiscovery usm_create_user_from_session_hook;

@@ -4331,10 +4331,23 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
     }
 }                               /* end usm_set_password() */
 
-void
-usm_parse_create_usmUser(const char *token, char *line)
+/*
+ * create a usm user from a string.
+ *
+ * The format for the string is described in the createUser
+ * secion of the snmpd.conf man page.
+ *
+ * On success, a pointer to the created usmUser struct is returned.
+ * On error, a NULL pointer is returned. In this case, if a pointer to a
+ *    char pointer is provided in errorMsg, an error string is returned.
+ *    This error string points to a static message, and should not be
+ *    freed.
+ */
+struct usmUser *
+usm_create_usmUser_from_string(char *line, const char **errorMsg)
 {
     char           *cp;
+    const char     *dummy;
     char            buf[SNMP_MAXBUF_MEDIUM];
     struct usmUser *newuser;
     u_char          userKey[SNMP_MAXBUF_SMALL], *tmpp;
@@ -4343,6 +4356,13 @@ usm_parse_create_usmUser(const char *token, char *line)
     size_t          ret;
     int             ret2;
     int             testcase;
+
+    if (NULL == line)
+        return NULL;
+
+    if (NULL == errorMsg)
+        errorMsg = &dummy;
+    *errorMsg = NULL; /* no errors yet */
 
     newuser = usm_create_user();
 
@@ -4359,9 +4379,9 @@ usm_parse_create_usmUser(const char *token, char *line)
         u_char         *ebuf = (u_char *) malloc(ebuf_len);
 
         if (ebuf == NULL) {
-            config_perror("malloc failure processing -e flag");
+            *errorMsg = "malloc failure processing -e flag";
             usm_free_user(newuser);
-            return;
+            return NULL;
         }
 
         /*
@@ -4369,10 +4389,10 @@ usm_parse_create_usmUser(const char *token, char *line)
          */
         cp = copy_nword(cp, buf, sizeof(buf));
         if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, buf)) {
-            config_perror("invalid EngineID argument to -e");
+            *errorMsg = "invalid EngineID argument to -e";
             usm_free_user(newuser);
             SNMP_FREE(ebuf);
-            return;
+            return NULL;
         }
 
         newuser->engineID = ebuf;
@@ -4382,7 +4402,7 @@ usm_parse_create_usmUser(const char *token, char *line)
         newuser->engineID = snmpv3_generate_engineID(&ret);
         if (ret == 0) {
             usm_free_user(newuser);
-            return;
+            return NULL;
         }
         newuser->engineIDLen = ret;
     }
@@ -4406,9 +4426,9 @@ usm_parse_create_usmUser(const char *token, char *line)
         memcpy(newuser->authProtocol, usmHMACSHA1AuthProtocol,
                sizeof(usmHMACSHA1AuthProtocol));
     } else {
-        config_perror("Unknown authentication protocol");
+        *errorMsg = "Unknown authentication protocol";
         usm_free_user(newuser);
-        return;
+        return NULL;
     }
 
     cp = skip_token(cp);
@@ -4417,9 +4437,9 @@ usm_parse_create_usmUser(const char *token, char *line)
      * READ: Authentication Pass Phrase or key
      */
     if (!cp) {
-        config_perror("no authentication pass phrase");
+        *errorMsg = "no authentication pass phrase";
         usm_free_user(newuser);
-        return;
+        return NULL;
     }
     cp = copy_nword(cp, buf, sizeof(buf));
     if (strcmp(buf,"-m") == 0) {
@@ -4429,9 +4449,9 @@ usm_parse_create_usmUser(const char *token, char *line)
         tmpp = userKey;
         userKeyLen = 0;
         if (!snmp_hex_to_binary(&tmpp, &ret, &userKeyLen, 0, buf)) {
-            config_perror("invalid key value argument to -m");
+            *errorMsg = "invalid key value argument to -m";
             usm_free_user(newuser);
-            return;
+            return NULL;
         }
     } else if (strcmp(buf,"-l") != 0) {
         /* a password is specified */
@@ -4439,10 +4459,9 @@ usm_parse_create_usmUser(const char *token, char *line)
         ret2 = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
                           (u_char *) buf, strlen(buf), userKey, &userKeyLen);
         if (ret2 != SNMPERR_SUCCESS) {
-            config_perror("could not generate the authentication key from the "
-                          "supplied pass phrase.");
+            *errorMsg = "could not generate the authentication key from the supplied pass phrase.";
             usm_free_user(newuser);
-            return;
+            return NULL;
         }
     }        
         
@@ -4452,9 +4471,9 @@ usm_parse_create_usmUser(const char *token, char *line)
     ret2 = sc_get_properlength(newuser->authProtocol,
                                newuser->authProtocolLen);
     if (ret2 <= 0) {
-        config_perror("Could not get proper authentication protocol key length");
+        *errorMsg = "Could not get proper authentication protocol key length";
 	usm_free_user(newuser);
-        return;
+        return NULL;
     }
     newuser->authKey = (u_char *) malloc(ret2);
 
@@ -4465,14 +4484,14 @@ usm_parse_create_usmUser(const char *token, char *line)
         ret = ret2;
         if (!snmp_hex_to_binary(&newuser->authKey, &ret,
                                 &newuser->authKeyLen, 0, buf)) {
-            config_perror("invalid key value argument to -l");
+            *errorMsg = "invalid key value argument to -l";
             usm_free_user(newuser);
-            return;
+            return NULL;
         }
         if (ret != newuser->authKeyLen) {
-            config_perror("improper key length to -l");
+            *errorMsg = "improper key length to -l";
             usm_free_user(newuser);
-            return;
+            return NULL;
         }
     } else {
         newuser->authKeyLen = ret2;
@@ -4481,10 +4500,9 @@ usm_parse_create_usmUser(const char *token, char *line)
                            userKey, userKeyLen,
                            newuser->authKey, &newuser->authKeyLen);
         if (ret2 != SNMPERR_SUCCESS) {
-            config_perror("could not generate localized authentication key "
-                          "(Kul) from the master key (Ku).");
+            *errorMsg = "could not generate localized authentication key (Kul) from the master key (Ku).";
             usm_free_user(newuser);
-            return;
+            return NULL;
         }
     }
 
@@ -4503,7 +4521,7 @@ usm_parse_create_usmUser(const char *token, char *line)
 	/* DES uses a 128 bit key, 64 bits of which is a salt */
 	privKeyLen = 16;
 #else
-        config_perror("DES support disabled");
+        *errorMsg = "DES support disabled";
 #endif
     }
     if (strncmp(cp, "AES128", 6) == 0 ||
@@ -4514,13 +4532,13 @@ usm_parse_create_usmUser(const char *token, char *line)
         testcase = 1;
 	privKeyLen = 16;
 #else
-        config_perror("AES support not available");
+        *errorMsg = "AES support not available";
 #endif
     }
     if (testcase == 0) {
-        config_perror("Unknown privacy protocol");
+        *errorMsg = "Unknown privacy protocol";
         usm_free_user(newuser);
-        return;
+        return NULL;
     }
 
     cp = skip_token(cp);
@@ -4544,9 +4562,9 @@ usm_parse_create_usmUser(const char *token, char *line)
             tmpp = userKey;
             userKeyLen = 0;
             if (!snmp_hex_to_binary(&tmpp, &ret, &userKeyLen, 0, buf)) {
-                config_perror("invalid key value argument to -m");
+                *errorMsg = "invalid key value argument to -m";
                 usm_free_user(newuser);
-                return;
+                return NULL;
             }
         } else if (strcmp(buf,"-l") != 0) {
             /* a password is specified */
@@ -4554,10 +4572,9 @@ usm_parse_create_usmUser(const char *token, char *line)
             ret2 = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
                               (u_char *) buf, strlen(buf), userKey, &userKeyLen);
             if (ret2 != SNMPERR_SUCCESS) {
-                config_perror("could not generate the privacy key from the "
-                              "supplied pass phrase.");
+                *errorMsg = "could not generate the privacy key from the supplied pass phrase.";
                 usm_free_user(newuser);
-                return;
+                return NULL;
             }
         }        
         
@@ -4567,10 +4584,9 @@ usm_parse_create_usmUser(const char *token, char *line)
         ret2 = sc_get_properlength(newuser->authProtocol,
                                    newuser->authProtocolLen);
         if (ret2 < 0) {
-            config_perror("could not get proper key length to use for the "
-                          "privacy algorithm.");
+            *errorMsg = "could not get proper key length to use for the privacy algorithm.";
             usm_free_user(newuser);
-            return;
+            return NULL;
         }
         newuser->privKey = (u_char *) malloc(ret2);
 
@@ -4581,9 +4597,9 @@ usm_parse_create_usmUser(const char *token, char *line)
             newuser->privKeyLen = 0;
             if (!snmp_hex_to_binary(&newuser->privKey, &ret,
                                     &newuser->privKeyLen, 0, buf)) {
-                config_perror("invalid key value argument to -l");
+                *errorMsg = "invalid key value argument to -l";
                 usm_free_user(newuser);
-                return;
+                return NULL;
             }
         } else {
             newuser->privKeyLen = ret2;
@@ -4592,10 +4608,9 @@ usm_parse_create_usmUser(const char *token, char *line)
                                userKey, userKeyLen,
                                newuser->privKey, &newuser->privKeyLen);
             if (ret2 != SNMPERR_SUCCESS) {
-                config_perror("could not generate localized privacy key "
-                              "(Kul) from the master key (Ku).");
+                *errorMsg = "could not generate localized privacy key (Kul) from the master key (Ku).";
                 usm_free_user(newuser);
-                return;
+                return NULL;
             }
         }
     }
@@ -4606,7 +4621,7 @@ usm_parse_create_usmUser(const char *token, char *line)
     else {
       /* The privKey length is smaller than required by privProtocol */
       usm_free_user(newuser);
-      return;
+      return NULL;
     }
 
   add:
@@ -4614,6 +4629,91 @@ usm_parse_create_usmUser(const char *token, char *line)
     DEBUGMSGTL(("usmUser", "created a new user %s at ", newuser->secName));
     DEBUGMSGHEX(("usmUser", newuser->engineID, newuser->engineIDLen));
     DEBUGMSG(("usmUser", "\n"));
+
+    return newuser;
+}
+
+void
+usm_parse_create_usmUser(const char *token, char *line)
+{
+    const char *error = NULL;
+    usm_create_usmUser_from_string(line, &error);
+    if (error)
+        config_perror(error);
+}
+
+struct usmUser *
+usm_create_usmUser(const char *userName, const char *engineID, 
+                   int authType, const char *authPass,
+                   int privType, const char *privPass, const char **errorMsg)
+{
+    const char *errorMsgLoc;
+    char        line[SPRINT_MAX_LEN];
+    int         len;
+
+    if (NULL == errorMsg)
+        errorMsg = &errorMsgLoc;
+    *errorMsg = NULL;
+
+    /** [-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase] */
+
+    line[0] = 0;
+    if (engineID) {
+        strlcpy(line, "-e ", sizeof(line));
+        strlcat(line, engineID, sizeof(line));
+        strlcat(line, " ", sizeof(line));
+        len = strlcat(line, userName, sizeof(line));
+    } else {
+        len = strlcpy(line, userName, sizeof(line));
+    }
+
+    if (0 == authType)
+        goto create;
+#ifndef NETSNMP_DISABLE_MD5
+    else if (USM_CREATE_USER_AUTH_MD5 == authType)
+        strlcat(line, " MD5  ", sizeof(line));
+#endif
+    else if (USM_CREATE_USER_AUTH_SHA == authType)
+        strlcat(line, " SHA ", sizeof(line));
+    else {
+        *errorMsg = "Unknown authentication protocol";
+        return NULL;
+    }
+
+    if (NULL == authPass) {
+        *errorMsg = "missing authpassphrase";
+        return NULL;
+    }
+    len = strlcat(line, authPass, sizeof(line));
+
+    if (0 == privType)
+        goto create;
+#ifndef NETSNMP_DISABLE_DES
+    else if (USM_CREATE_USER_PRIV_DES == privType)
+        strlcat(line, " DES ", sizeof(line));
+#endif
+#ifdef HAVE_AES
+    else if (USM_CREATE_USER_PRIV_AES == privType)
+        strlcat(line, " AES ", sizeof(line));
+#endif
+    else {
+        *errorMsg = "Unknown privacy protocol";
+        return NULL;
+    }
+
+    if (NULL == privPass) {
+        *errorMsg = "missing privpassphrase";
+        return NULL;
+    }
+    len = strlcat(line, privPass, sizeof(line));
+
+  create:
+    if (len >= sizeof(line)) {
+        *errorMsg = "line exceeded buffer space";
+        return NULL;
+    };
+
+    return usm_create_usmUser_from_string(line, errorMsg);
 }
 
 void
