@@ -331,7 +331,7 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
                                                   ${context}_oid,
                                                   ${context}_oid_size,
                                                   HANDLER_CAN_BABY_STEP |
-#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
+#if (defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
                                                   HANDLER_CAN_RONLY
 #else
 @if $m2c_table_settable == 1@
