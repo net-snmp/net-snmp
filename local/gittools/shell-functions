@@ -131,6 +131,11 @@ nspatchtry() {
 	nspatchfile=`echo $nspatchargs | sed 's/.* \([^ ]+\)$/\1/'`
 	# attempt to count the slashes before any agent/snmplib/apps/etc
 	patchcount=$((`grep diff $nspatchfile | head -1 | awk '{print $NF}' | sed 's/\(agent\|snmplib\|apps\|local\|perl\|python\).*//;s#[^/]##g' | wc -c` - 1))
+	# if we failed to guess, bail out.
+	if [ "X$patchcount" = "X-1" ]; then
+	    echo "Please specify -p argument; I failed to guess the right one."
+	    return
+	fi
 	nspatchargs="-p $patchcount $nspatchargs"
     fi
 
