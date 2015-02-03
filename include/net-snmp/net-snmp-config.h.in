@@ -155,6 +155,9 @@
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
+/* Define to 1 if you have the `forkall' function. */
+#undef HAVE_FORKALL
+
 /* Define to 1 if you have the <fstab.h> header file. */
 #undef HAVE_FSTAB_H
 
@@ -966,7 +969,7 @@
 /* Define to 1 if `udps_opackets' is member of `struct udpstat'. */
 #undef HAVE_STRUCT_UDPSTAT_UDPS_OPACKETS
 
-/* Define to 1 if `pgswapin' is a member of `struct uvmexp'. */
+/* Define to 1 if `pgswapin' is member of `struct uvmexp'. */
 #undef HAVE_STRUCT_UVMEXP_PGSWAPIN
 
 /* Define to 1 if you have the `sysconf' function. */
