@@ -873,7 +873,7 @@ rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
         var->val_len = 0;
         while( 0 != mask ) {
             ++idx;
-            if ( *(($m2c_decl *) var->val.string) & mask )
+            if ( ntohl( *(($m2c_decl *) var->val.string) ) & mask )
                 var->val_len = idx;
             mask = mask >> 8;
         }
