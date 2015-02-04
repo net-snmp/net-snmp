@@ -72,12 +72,10 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 #include "winstub.h"
 #endif
 
-#define SET_MASK 0x01
-#define SET_GWAY 0x02
-#define SET_IFNO 0x04
-#define SET_TYPE 0x08
-#define SET_PRTO 0x10
-#define SET_ALL  0x1f
+#define SET_IFNO 0x01
+#define SET_TYPE 0x02
+#define SET_PRTO 0x04
+#define SET_ALL  0x07
 
 struct route_entry {
     oid             instance[4];
@@ -101,7 +99,7 @@ void
 routepr(void)
 {
     struct route_entry  route, *rp = &route;
-    oid    rtcol_oid[]  = { 1,3,6,1,2,1,4,21,1,0 };
+    oid    rtcol_oid[]  = { 1,3,6,1,2,1,4,24,4,1,0 };
     size_t rtcol_len    = OID_LENGTH( rtcol_oid );
     union {
         in_addr_t addr;
@@ -115,11 +113,9 @@ routepr(void)
 
 #define ADD_RTVAR( x ) rtcol_oid[ rtcol_len-1 ] = x; \
     snmp_varlist_add_variable( &var, rtcol_oid, rtcol_len, ASN_NULL, NULL,  0)
-    ADD_RTVAR( 2 );                 /* ipRouteIfIndex */
-    ADD_RTVAR( 7 );                 /* ipRouteNextHop */
-    ADD_RTVAR( 8 );                 /* ipRouteType    */
-    ADD_RTVAR( 9 );                 /* ipRouteProto   */
-    ADD_RTVAR( 11 );                /* ipRouteMask    */
+    ADD_RTVAR( 5 );                 /* ipCidrRouteIfIndex */
+    ADD_RTVAR( 6 );                 /* ipCidrCidrRouteType    */
+    ADD_RTVAR( 7 );                 /* ipCidrRouteProto   */
 #undef ADD_RTVAR
 
         /*
@@ -128,40 +124,48 @@ routepr(void)
     while ( 1 ) {
         if (netsnmp_query_getnext( var, ss ) != SNMP_ERR_NOERROR)
             break;
-        rtcol_oid[ rtcol_len-1 ] = 2;	/* ifRouteIfIndex */
+        rtcol_oid[ rtcol_len-1 ] = 5;	/* ipCidrRouteIfIndex */
         if ( snmp_oid_compare( rtcol_oid, rtcol_len,
                                var->name, rtcol_len) != 0 )
             break;    /* End of Table */
         memset( &route, 0, sizeof( struct route_entry ));
-        /* Extract ipRouteDest index value */
+        /* Extract ipCidrRouteDest index value */
         cp = tmpAddr.data;
-        cp[0] = var->name[ 10 ] & 0xff;
-        cp[1] = var->name[ 11 ] & 0xff;
-        cp[2] = var->name[ 12 ] & 0xff;
-        cp[3] = var->name[ 13 ] & 0xff;
+        cp[0] = var->name[ 11 ] & 0xff;
+        cp[1] = var->name[ 12 ] & 0xff;
+        cp[2] = var->name[ 13 ] & 0xff;
+        cp[3] = var->name[ 14 ] & 0xff;
         rp->destination = tmpAddr.addr;
 
+        /* Extract ipCidrRouteMask index value */
+        cp = tmpAddr.data;
+        cp[0] = var->name[ 15 ] & 0xff;
+        cp[1] = var->name[ 16 ] & 0xff;
+        cp[2] = var->name[ 17 ] & 0xff;
+        cp[3] = var->name[ 18 ] & 0xff;
+        rp->mask = tmpAddr.addr;
+
+        /* Extract ipCidrRouteNextHop index value */
+        cp = tmpAddr.data;
+        cp[0] = var->name[ 20 ] & 0xff;
+        cp[1] = var->name[ 21 ] & 0xff;
+        cp[2] = var->name[ 22 ] & 0xff;
+        cp[3] = var->name[ 23 ] & 0xff;
+        rp->gateway = tmpAddr.addr;
+
         for ( vp=var; vp; vp=vp->next_variable ) {
-            switch ( vp->name[ 9 ] ) {
-            case 2:     /* ifRouteIfIndex */
+            switch ( vp->name[ rtcol_len-1 ] ) {
+            case 5:     /* ipCidrRouteIfIndex */
                 rp->ifNumber  = *vp->val.integer;
                 rp->set_bits |= SET_IFNO;
                 break;
-            case 7:                 /* ipRouteNextHop */
-                memmove(&rp->gateway, vp->val.string, 4);
-                rp->set_bits |= SET_GWAY;
-                break;
-            case 8:                 /* ipRouteType    */
+            case 6:                 /* ipCidrRouteType    */
                 rp->type      = *vp->val.integer;
                 rp->set_bits |= SET_TYPE;
                 break;
-            case 9:                 /* ipRouteProto   */
+            case 7:                 /* ipCidrRouteProto   */
                 rp->proto     = *vp->val.integer;
                 rp->set_bits |= SET_PRTO;
-                break;
-            case 11:                /* ipRouteMask    */
-                memmove(&rp->mask, vp->val.string, 4);
-                rp->set_bits |= SET_MASK;
                 break;
             }
         }
@@ -519,11 +523,9 @@ p_rtnode( struct route_entry *rp )
     printf("%-*.*s ",
 	    WID_DST(AF_INET), WID_DST(AF_INET),
             (rp->destination == INADDR_ANY) ? "default" :
-                (rp->set_bits & SET_MASK) ?
-                    (rp->mask == 0xffffffff ?
-                        routename(rp->destination) :
-                        netname(rp->destination, rp->mask)) :
-                    netname(rp->destination, 0L));
+                (rp->mask == 0xffffffff ?
+                    routename(rp->destination) :
+                    netname(rp->destination, rp->mask)));
     printf("%-*.*s %-6.6s  %s\n",
 	    WID_GW(af), WID_GW(af),
 	    rp->gateway ? routename(rp->gateway) : "*",
