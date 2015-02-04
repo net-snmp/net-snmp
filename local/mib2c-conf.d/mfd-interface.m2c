@@ -911,7 +911,7 @@ rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
         var->val_len = 0;
         while( 0 != mask ) {
             ++idx;
-            if ( *(($m2c_decl *) var->val.string) & mask )
+            if ( ntohl( *(($m2c_decl *) var->val.string) ) & mask )
                 var->val_len = idx;
             mask = mask >> 8;
         }
@@ -957,7 +957,7 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
     
 @if $m2c_table_sparse == 1@
     DEBUGMSGTL(("9:${context}:_mfd_${context}_get_values",
-                "exists %p\n", (void*)rowreq_ctx->column_exists_flags));
+                "exists %x\n", rowreq_ctx->column_exists_flags));
 
 @end@
     for(;requests; requests = requests->next) {
@@ -1614,7 +1614,7 @@ _mfd_${context}_irreversible_commit(netsnmp_mib_handler *handler,
         if (rowreq_ctx->column_set_flags) {
 @if $m2c_table_sparse == 1@
            DEBUGMSGTL(("internal:${context}:_mfd_irreversible_commit",
-                       "updating exists (%p) w/set (%p) = %p\n",
+                       "updating exists (%x) w/set (%x) = %x\n",
                        rowreq_ctx->column_exists_flags,
                        rowreq_ctx->column_set_flags,
                        (rowreq_ctx->column_exists_flags |

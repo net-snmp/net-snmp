@@ -34,12 +34,13 @@ $example_start
     if ($m2c_ctx_rh & INTERNAL_$context.uc_$m2c_iname) {
         $m2c_node_lh |= $m2c_ename;
     }
+    $m2c_node_lh = htonl( $m2c_node_lh );
 @    end@ # for each
 $example_end
 @  else@
      * assuming generated code keeps $node BITS in SNMP order.
      */
-    $m2c_node_lh = @m2c_ctx_rh;
+    $m2c_node_lh = htonl( @m2c_ctx_rh@ );
 @  end@
 @end@
 ##
