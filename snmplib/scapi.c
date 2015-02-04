@@ -700,16 +700,14 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     int             have_trans;
 #ifndef NETSNMP_DISABLE_DES
     int             pad, plast, pad_size = 0;
-#endif /* NETSNMP_DISABLE_DES */
-#ifndef NETSNMP_DISABLE_DES
 #ifdef OLD_DES
     DES_key_schedule key_sch;
 #else
     DES_key_schedule key_sched_store;
     DES_key_schedule *key_sch = &key_sched_store;
-#endif
+#endif /* OLD_DES */
     DES_cblock       key_struct;
-#endif
+#endif /* NETSNMP_DISABLE_DES */
 #ifdef HAVE_AES
     AES_KEY aes_key;
     int new_ivlen = 0;
