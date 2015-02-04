@@ -514,8 +514,16 @@ _${context}_container_init(${context}_interface_ctx *if_ctx)
      */    
     ${context}_container_init(&if_ctx->container);
 @   end@ data cache
-    if(NULL == if_ctx->container)
+    if(NULL == if_ctx->container) {
         if_ctx->container = netsnmp_container_find("${context}:table_container");
+        if(NULL != if_ctx->container) {
+            /*
+             * When reporting container management errors, we log the container's
+             * name, so set it here.
+             */
+            if_ctx->container->container_name = strdup("${context}");
+        }
+    }
     if(NULL == if_ctx->container) {
         snmp_log(LOG_ERR,"error creating container in "
                  "${context}_container_init\n");

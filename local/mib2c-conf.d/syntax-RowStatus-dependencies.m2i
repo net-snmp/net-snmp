@@ -40,6 +40,14 @@
                 }
                 ${m2c_data_item}$node = ROWSTATUS_ACTIVE;
             }
+            else if (ROWSTATUS_CREATEANDWAIT ==  ${m2c_data_item}$node) {
+                if ((rowreq_ctx->column_set_flags & $context.uc_REQUIRED_COLS)
+                    != $context.uc_REQUIRED_COLS) {
+                    ${m2c_data_item}$node = ROWSTATUS_NOTREADY;
+                } else {
+                    ${m2c_data_item}$node = ROWSTATUS_NOTINSERVICE;
+                }
+            }
         } /* row creation */
         else {
 @end@
