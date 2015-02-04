@@ -28,15 +28,20 @@
 @   else@ # BITS
 ## {
     if($m2c_nv_len > 4) {
-        snmp_log(LOG_ERR,"I can not handle BITS > 4 bytes\n");
+        DEBUGMSGTL(("${context}:${node}",
+            "I can not handle BITS > 4 bytes\n"));
         rc = SNMP_ERR_GENERR;
     }
     else if (SNMPERR_SUCCESS == rc){
         u_long bits = 0;
         /* check that value is within enum mask */
         memcpy( &bits, $m2c_nv_str, $m2c_nv_len);
-        if( (bits | $m2c_enum_mask) != $m2c_enum_mask)
-        rc = SNMP_ERR_WRONGVALUE;
+        bits = ntohl( bits );
+        if( (bits | $m2c_enum_mask) != $m2c_enum_mask) {
+            DEBUGMSGTL(("${context}:${node}",
+                "bad bits set: bits = %x valid = %x", bits, $m2c_enum_mask));
+            rc = SNMP_ERR_WRONGVALUE;
+        }
     }
 @   end@
 ##----------------------------------------------------------------------
