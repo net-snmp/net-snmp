@@ -26,6 +26,7 @@ AC_CHECK_HEADERS([getopt.h   pthread.h  regex.h      ] dnl
                  [sys/param.h        ] dnl
                  [sys/select.h       ] dnl
                  [sys/socket.h       ] dnl
+                 [sys/syslog.h       ] dnl
                  [sys/time.h         ] dnl
                  [sys/timeb.h        ] dnl
                  [sys/un.h           ])

@@ -671,6 +671,9 @@
 /* Set if /etc/printcap exists */
 #undef HAVE_PRINTCAP
 
+/* Define if prioritynames variable is declared in <syslog.h> */
+#undef HAVE_PRIORITYNAMES
+
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
 
@@ -1171,6 +1174,9 @@
 
 /* Define to 1 if you have the <sys/sysget.h> header file. */
 #undef HAVE_SYS_SYSGET_H
+
+/* Define to 1 if you have the <sys/syslog.h> header file. */
+#undef HAVE_SYS_SYSLOG_H
 
 /* Define to 1 if you have the <sys/sysmp.h> header file. */
 #undef HAVE_SYS_SYSMP_H

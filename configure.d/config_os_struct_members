@@ -714,3 +714,20 @@ fi
 AC_DEFINE_UNQUOTED(RTENTRY,struct ${ac_cv_struct_rtentry},
         [define rtentry to ortentry on SYSV machines (alphas)])
 
+#       prioritynames
+AC_MSG_CHECKING([syslog prioritynames])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <stdio.h>
+#if HAVE_SYSLOG_H
+#define SYSLOG_NAMES
+#include <syslog.h>
+#endif
+]], [[
+  char *test = prioritynames[0].c_name;
+  printf("%s\n", test); /* so it's not unused */
+]])], [
+AC_MSG_RESULT([yes])
+AC_DEFINE([HAVE_PRIORITYNAMES], [1], [Define if prioritynames variable is declared in <syslog.h>])
+], [
+AC_MSG_RESULT([no])
+])
