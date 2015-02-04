@@ -11,6 +11,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#define SYSLOG_NAMES
+
 #include <limits.h>
 #include <stdio.h>
 #if HAVE_STDLIB_H
@@ -33,6 +35,8 @@
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
+
+#include <sys/syslog.h>
 
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
@@ -136,7 +140,29 @@ netsnmp_get_debug_log_level(void)
 static void
 debug_config_debug_log_level(const char *configtoken, char *line)
 {
-    netsnmp_set_debug_log_level(atoi(line));
+#if HAVE_PRIORITYNAMES
+    extern CODE prioritynames[];
+    int i = 0;
+
+    for(;prioritynames[i].c_name;++i) {
+        if (strncmp(line,prioritynames[i].c_name,
+                    strlen(prioritynames[i].c_name) != 0))
+            continue;
+        netsnmp_set_debug_log_level(prioritynames[i].c_val);
+        return;
+    }
+    config_perror("unknown debug log level, using debug");
+    netsnmp_set_debug_log_level(LOG_DEBUG);
+#else
+    long level;
+    errno = 0;
+    level = strtol(line, NULL, 10);
+    if (errno != 0) {
+        level = LOG_DEBUG;
+        config_perror("unknown debug log level, using debug");
+    }
+    netsnmp_set_debug_log_level(level);
+#endif /* HAVE_PRIORITYNAMES */
 }
 #endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 
@@ -643,7 +669,11 @@ snmp_debug_init(void)
 #ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
     register_prenetsnmp_mib_handler("snmp", "debugLogLevel",
                                     debug_config_debug_log_level, NULL,
-                                    "(LOG_EMERG|LOG_ALERT|LOG_CRIT|LOG_ERR|LOG_WARNING|LOG_NOTICE|LOG_INFO)");
+#if HAVE_PRIORITYNAMES
+                                    "(emerg|alert|crit|err|warning|notice|info|debug)");
+#else
+                                    "(0|1|2|3|4|5|6|7)");
+#endif
 #endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 }
 
