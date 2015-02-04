@@ -732,7 +732,9 @@ void
 netsnmp_logging_restart(void)
 {
     netsnmp_log_handler *logh;
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
     int doneone = 0;
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
 
     for (logh = logh_head; logh; logh = logh->next) {
         if (0 == logh->enabled)
