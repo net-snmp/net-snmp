@@ -901,9 +901,12 @@ int   forward_handler( netsnmp_pdu           *pdu,
         pdu2->transport_data        = NULL;
         pdu2->transport_data_length = 0;
     }
-    if (!snmp_send( ss, pdu2 )) {
-	snmp_sess_perror("Forward failed", ss);
-	snmp_free_pdu(pdu2);
+
+    ss->s_snmp_errno = SNMPERR_SUCCESS;
+    if (!snmp_send( ss, pdu2 ) &&
+            ss->s_snmp_errno != SNMPERR_SUCCESS) {
+        snmp_sess_perror("Forward failed", ss);
+        snmp_free_pdu(pdu2);
     }
     snmp_close( ss );
     return NETSNMPTRAPD_HANDLER_OK;
