@@ -135,6 +135,7 @@ if test ! -d $outfile ; then
     touch $outfile
 fi
 echo $line >> $outfile
+prefix="@prefix@"
 datarootdir="@datarootdir@"
 outfile="@datadir@/snmp/snmpd.conf"
 line="$token $user"
