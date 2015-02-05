@@ -358,10 +358,16 @@ ${context}_undo_commit( ${context}_rowreq_ctx *rowreq_ctx)
 
     /*
      * TODO:485:M: |-> Undo $context commit.
-     * check the column's flag in rowreq_ctx->column_set_flags to see
+     * check each column's flag in rowreq_ctx->column_set_flags to see
      * if it was set during commit, then undo it.
      *
+@   foreach $node nonindex@
+@      include m2c_setup_node.m2i@
+@      if $node.settable == 0@
+@          next@
+@      end@
      * eg: if (rowreq_ctx->column_set_flags & COLUMN_$node.uc_FLAG) {}
+@   end@ # foreach $node
      */
 
     
