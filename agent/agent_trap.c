@@ -207,6 +207,11 @@ netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
                                  int confirm, int version, const char *name,
                                  const char *tag, const char* profile)
 {
+    if (NETSNMP_RUNTIME_PROTOCOL_SKIP(version)) {
+        DEBUGMSGTL(("trap", "skipping trap sink (version %d disabled)\n",
+                    version));
+        return 0;
+    }
     if (snmp_callback_available(SNMP_CALLBACK_APPLICATION,
                                 SNMPD_CALLBACK_REGISTER_NOTIFICATIONS) ==
         SNMPERR_SUCCESS) {
@@ -309,6 +314,13 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
     char                 tmp[SPRINT_MAX_LEN];
     int                  rc;
     const char          *client_addr = NULL;
+
+    if (NETSNMP_RUNTIME_PROTOCOL_SKIP(version)) {
+        config_perror("SNMP version disabled");
+        DEBUGMSGTL(("trap", "skipping trap sink (version %d disabled)\n",
+                    version));
+        return 0;
+    }
 
     memset(&session, 0, sizeof(netsnmp_session));
     session.version = version;
@@ -941,22 +953,23 @@ netsnmp_send_traps(int trap, int specific,
     for (sink = sinks; sink; sink = sink->next) {
 #ifndef NETSNMP_DISABLE_SNMPV1
         if (sink->version == SNMP_VERSION_1) {
-          if (template_v1pdu) {
-            send_trap_to_sess(sink->sesp, template_v1pdu);
-          }
-        } else {
+            if (template_v1pdu &&
+                !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                        NETSNMP_DS_LIB_DISABLE_V1)) {
+                send_trap_to_sess(sink->sesp, template_v1pdu);
+            }
+        } else
 #endif
-          if (template_v2pdu) {
+        if (template_v2pdu) {
             template_v2pdu->command = sink->pdutype;
             send_trap_to_sess(sink->sesp, template_v2pdu);
-          }
-#ifndef NETSNMP_DISABLE_SNMPV1
         }
-#endif
     }
+#ifndef NETSNMP_DISABLE_SNMPV1
     if (template_v1pdu && _v1_sessions)
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_SEND_TRAP1, template_v1pdu);
+#endif
     if (template_v2pdu && _v2_sessions)
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_SEND_TRAP2, template_v2pdu);
@@ -1030,19 +1043,20 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     if (!sess || !template_pdu)
         return;
 
+    if (NETSNMP_RUNTIME_PROTOCOL_SKIP(sess->version)) {
+        DEBUGMSGTL(("trap", "not sending trap type=%d, version %ld disabled\n",
+                    template_pdu->command, sess->version));
+        return;
+    }
     DEBUGMSGTL(("trap", "sending trap type=%d, version=%ld\n",
                 template_pdu->command, sess->version));
 
 #ifndef NETSNMP_DISABLE_SNMPV1
     if (sess->version == SNMP_VERSION_1 &&
-        ((template_pdu->command != SNMP_MSG_TRAP) ||
-         netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                                NETSNMP_DS_LIB_DISABLE_V1)))
+        (template_pdu->command != SNMP_MSG_TRAP))
         return;                 /* Skip v1 sinks for v2 only traps */
     if (sess->version != SNMP_VERSION_1 &&
-        ((template_pdu->command == SNMP_MSG_TRAP) ||
-         netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                                NETSNMP_DS_LIB_DISABLE_V1)))
+        (template_pdu->command == SNMP_MSG_TRAP))
         return;                 /* Skip v2+ sinks for v1 only traps */
 #endif
     template_pdu->version = sess->version;
@@ -1333,7 +1347,7 @@ void
 snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DISABLE_V1)) {
+                               NETSNMP_DS_LIB_DISABLE_V2c)) {
         netsnmp_config_error("SNMPv2c disabled, cannot create trap2sinks");
         return;
     }
@@ -1562,6 +1576,11 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     netsnmp_parse_args(argn, argv, &session, "C:", trapOptProc,
                        NETSNMP_PARSE_ARGS_NOLOGGING |
                        NETSNMP_PARSE_ARGS_NOZERO);
+
+    if (NETSNMP_RUNTIME_PROTOCOL_SKIP(session.version)) {
+        config_perror("snmpd: protocol version disabled at runtime");
+        return;
+    }
 
     transport = netsnmp_transport_open_client("snmptrap", session.peername);
     if (transport == NULL) {

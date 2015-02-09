@@ -4859,6 +4859,11 @@ _sess_async_send(void *sessp,
         session->s_snmp_errno = SNMPERR_BAD_VERSION;
         return 0;
     }
+    if (NETSNMP_RUNTIME_PROTOCOL_SKIP(pdu->version)) {
+        DEBUGMSGTL(("sess_async_send", "version disabled at runtime\n"));
+        session->s_snmp_errno = SNMPERR_BAD_VERSION;
+        return 0;
+    }
 
     /*
      * do we expect a response?
