@@ -61,9 +61,10 @@
      void            shutdown_snmpTargetAddrEntry_data(void);
 
      struct targetAddrTable_struct *get_addrTable(void);
-     struct targetAddrTable_struct *get_addrForName(char *name);
+     struct targetAddrTable_struct *get_addrForName(const char *name);
      struct targetAddrTable_struct *snmpTargetAddrTable_create(void);
-     void            snmpTargetAddrTable_add(struct targetAddrTable_struct
-                                             *newEntry);
+     void         snmpTargetAddrTable_add(struct targetAddrTable_struct *);
+     void         snmpTargetAddrTable_remove(struct targetAddrTable_struct *);
+     void         snmpTargetAddrTable_dispose(struct targetAddrTable_struct *);
 
 #endif                          /* _MIBGROUP_SNMPTARGETADDRENTRY_DATA_H */

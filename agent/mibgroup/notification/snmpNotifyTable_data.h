@@ -42,8 +42,10 @@ struct snmpNotifyTable_data {
 void            init_snmpNotifyTable_data(void);
 void            shutdown_snmpNotifyTable_data(void);
 
-int             snmpNotifyTable_add(struct snmpNotifyTable_data
-                                    *thedata);
+int             snmpNotifyTable_add(struct snmpNotifyTable_data *thedata);
+int             snmpNotifyTable_remove(struct snmpNotifyTable_data *thedata);
+
+struct snmpNotifyTable_data *get_notifyTable(const char *name);
 
 
 #endif                          /* _MIBGROUP_SNMPNOTIFYTABLE_DATA_H */

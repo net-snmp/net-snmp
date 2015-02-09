@@ -11,6 +11,7 @@
 extern          "C" {
 #endif
 
+#include <snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_storage.h>
 
     /*
      * column number definitions for table snmpNotifyFilterTable 
@@ -75,13 +76,6 @@ extern          "C" {
  * since a Textual Convention may be referenced more than once in a
  * MIB, protect againt redefinitions of the enum values.
  */
-#ifndef SNMPNOTIFYFILTERTYPE_ENUMS
-#define SNMPNOTIFYFILTERTYPE_ENUMS
-
-#define SNMPNOTIFYFILTERTYPE_INCLUDED  1
-#define SNMPNOTIFYFILTERTYPE_EXCLUDED  2
-
-#endif                          /* SNMPNOTIFYFILTERTYPE_ENUMS */
 
 
 /*************************************************************

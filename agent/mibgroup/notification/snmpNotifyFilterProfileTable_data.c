@@ -36,7 +36,7 @@
  */
 static struct header_complex_index *snmpNotifyFilterProfileTableStorage =
     NULL;
-
+static int _active = 0;
 
 /*
  * init_snmpNotifyFilterProfileTable():
@@ -50,6 +50,36 @@ init_snmpNotifyFilterProfileTable_data(void)
 }
 
 void
+shutdown_snmpNotifyFilterProfileTable_data(void)
+{
+    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "shutdown...  "));
+
+    struct header_complex_index *hptr, *nhptr;
+
+    for (hptr = snmpNotifyFilterProfileTableStorage; hptr; hptr = nhptr) {
+        struct snmpNotifyFilterProfileTable_data *nptr = hptr->data;
+        nhptr = hptr->next;
+        if (nptr->snmpNotifyFilterProfileStorType == ST_READONLY) {
+            header_complex_extract_entry(&snmpNotifyFilterProfileTableStorage,
+                                         hptr);
+            snmpNotifyFilterProfileTable_free(nptr);
+        }
+    }
+    snmpNotifyFilterProfileTableStorage = NULL;
+
+    DEBUGMSGTL(("trap:notifyFilterProfile:shutdown",
+                "active count %d\n", _active));
+    if (_active != 0) {
+        DEBUGMSGTL(("trap:notifyFilterProfile:shutdown",
+                    "unexpected count %d after cleanup!\n", _active));
+        snmp_log(LOG_WARNING,
+                 "notifyFilterProfile count %d, not 0, after shutdown.\n",
+                 _active);
+    }
+
+}
+
+void
 snmpNotifyFilterProfileTable_free(struct snmpNotifyFilterProfileTable_data
                                   *data)
 {
@@ -59,6 +89,7 @@ snmpNotifyFilterProfileTable_free(struct snmpNotifyFilterProfileTable_data
     SNMP_FREE(data->snmpTargetParamsName);
     SNMP_FREE(data->snmpNotifyFilterProfileName);
     free(data);
+    --_active;
 }
 
 /*
@@ -76,6 +107,7 @@ snmpNotifyFilterProfileTable_create(char *paramsName, size_t paramsName_len,
                  "could not allocate snmpNotifyFilterProfileTable_data\n");
         return NULL;
     }
+    ++_active;
 
     profile->snmpTargetParamsName = malloc(paramsName_len+1);
     profile->snmpNotifyFilterProfileName = malloc(profileName_len+1);
@@ -134,6 +166,26 @@ snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data
     return retVal;
 }
 
+int
+snmpNotifyFilterProfileTable_remove(struct snmpNotifyFilterProfileTable_data *
+                                    thedata)
+{
+    struct header_complex_index *hptr;
+
+    for (hptr = snmpNotifyFilterProfileTableStorage; hptr; hptr = hptr->next) {
+        if (hptr->data == thedata)
+            break;
+    }
+    if (NULL != hptr) {
+        struct snmpNotifyFilterProfileTable_data *nptr = hptr->data;
+        header_complex_extract_entry(&snmpNotifyFilterProfileTableStorage,
+                                     hptr);
+        snmpNotifyFilterProfileTable_free(nptr);
+        return 1;
+    }
+    return 0;
+}
+
 
 struct snmpNotifyFilterProfileTable_data *
 snmpNotifyFilterProfileTable_find(const char *name, size_t len)
@@ -161,6 +213,12 @@ snmpNotifyFilterProfileTable_find(const char *name, size_t len)
     return data;
 }
 
+
+struct snmpNotifyFilterProfileTable_data *
+get_FilterProfile(const char *paramName)
+{
+    return snmpNotifyFilterProfileTable_find(paramName, strlen(paramName));
+}
 
 char           *
 get_FilterProfileName(const char *paramName, size_t paramName_len,

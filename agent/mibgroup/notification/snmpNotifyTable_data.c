@@ -46,6 +46,7 @@
  * global storage of our data, saved in and configured by header_complex()
  */
 static struct header_complex_index *snmpNotifyTableStorage = NULL;
+static int _active = 0;
 
 static int
 _checkFilter(const char* paramName, netsnmp_pdu *pdu)
@@ -257,9 +258,9 @@ int
 notifyTable_register_notifications(int major, int minor,
                                    void *serverarg, void *clientarg)
 {
-    struct targetAddrTable_struct *ptr;
-    struct targetParamTable_struct *pptr;
-    struct snmpNotifyTable_data *nptr;
+    struct targetAddrTable_struct *ptr = NULL;
+    struct targetParamTable_struct *pptr = NULL;
+    struct snmpNotifyTable_data *nptr = NULL;
     int             confirm, i;
     char            buf[SNMP_MAXBUF_SMALL];
     netsnmp_transport *t = NULL;
@@ -326,23 +327,21 @@ notifyTable_register_notifications(int major, int minor,
     ptr->storageType = ST_READONLY;
     ptr->rowStatus = RS_ACTIVE;
     ptr->sess = ss;
-    DEBUGMSGTL(("trapsess", "adding to trap table\n"));
+    DEBUGMSGTL(("trapsess", "adding %s to trap table\n", ptr->name));
     snmpTargetAddrTable_add(ptr);
 
     /*
      * param
      */
     pptr = snmpTargetParamTable_create();
-    pptr->paramName = ptr->params; /* link from target addr table */
+    pptr->paramName = strdup(ptr->params); /* link from target addr table */
     pptr->mpModel = ss->version;
     if (ss->version == SNMP_VERSION_3) {
         pptr->secModel = ss->securityModel;
         pptr->secLevel = ss->securityLevel;
         pptr->secName = (char *) malloc(ss->securityNameLen + 1);
-        if (pptr->secName == NULL) {
-            snmpTargetParamTable_dispose(pptr);
-            return 0;
-        }
+        if (pptr->secName == NULL)
+            goto bail;
         memcpy((void *) pptr->secName, (void *) ss->securityName,
                ss->securityNameLen);
         pptr->secName[ss->securityNameLen] = 0;
@@ -358,10 +357,8 @@ notifyTable_register_notifications(int major, int minor,
         pptr->secName = NULL;
         if (ss->community && (ss->community_len > 0)) {
             pptr->secName = (char *) malloc(ss->community_len + 1);
-            if (pptr->secName == NULL) {
-                snmpTargetParamTable_dispose(pptr);
-                return 0;
-            }
+            if (pptr->secName == NULL)
+                goto bail;
             memcpy((void *) pptr->secName, (void *) ss->community,
                    ss->community_len);
             pptr->secName[ss->community_len] = 0;
@@ -380,7 +377,8 @@ notifyTable_register_notifications(int major, int minor,
      */
     nptr = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
     if (nptr == NULL)
-        return 0;
+        goto bail;
+    ++_active;
     nptr->snmpNotifyName = strdup(name);
     nptr->snmpNotifyNameLen = strlen(name);
     nptr->snmpNotifyTag = strdup(tag); /* selects target addr */
@@ -401,9 +399,10 @@ notifyTable_register_notifications(int major, int minor,
                                                       strlen(ptr->params),
                                                       notifyProfile,
                                                       strlen(notifyProfile));
-        if (NULL == profile)
+        if (NULL == profile) {
             snmp_log(LOG_ERR, "couldn't create notify filter profile\n");
-        else {
+            goto bail;
+        } else {
             profile->snmpNotifyFilterProfileRowStatus = RS_ACTIVE;
             profile->snmpNotifyFilterProfileStorType = ST_READONLY;
 
@@ -415,8 +414,31 @@ notifyTable_register_notifications(int major, int minor,
     }
 
     return 0;
+
+  bail:
+    if (NULL != nptr)
+        snmpNotifyTable_remove(nptr);
+
+    if (NULL != pptr)
+        snmpTargetParamTable_remove(pptr);
+
+    if (NULL != ptr)
+        snmpTargetAddrTable_remove(ptr);
+
+    return 0;
 }
 
+static void
+snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata)
+{
+    if (NULL == thedata)
+        return;
+
+    SNMP_FREE(thedata->snmpNotifyName);
+    SNMP_FREE(thedata->snmpNotifyTag);
+    free(thedata);
+    --_active;
+}
 
 /*
  * XXX: this really needs to be done for the target mib entries too.
@@ -436,9 +458,7 @@ notifyTable_unregister_notifications(int major, int minor,
         nhptr = hptr->next;
         if (nptr->snmpNotifyStorageType == ST_READONLY) {
             header_complex_extract_entry(&snmpNotifyTableStorage, hptr);
-            free(nptr->snmpNotifyName);
-            free(nptr->snmpNotifyTag);
-            free(nptr);
+            snmpNotifyTable_dispose(nptr);
         }
     }
     snmpNotifyTableStorage = NULL;
@@ -496,6 +516,14 @@ shutdown_snmpNotifyTable_data(void)
                              SNMPD_CALLBACK_SEND_TRAP1, send_notifications,
                              NULL, FALSE);
 #endif
+    DEBUGMSGTL(("trap:notify:shutdown", "active count %d\n", _active));
+    if (_active != 0) {
+        DEBUGMSGTL(("trap:notify:shutdown",
+                    "unexpected count %d after cleanup!\n",_active));
+        snmp_log(LOG_WARNING,
+                 "notify count %d, not 0, after shutdown.\n", _active);
+    }
+
     DEBUGMSGTL(("snmpNotifyTable_data", "done.\n"));
 }
 
@@ -526,4 +554,72 @@ snmpNotifyTable_add(struct snmpNotifyTable_data *thedata)
 
     DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
     return retVal;
+}
+
+int
+snmpNotifyTable_remove(struct snmpNotifyTable_data *thedata)
+{
+    struct header_complex_index *hptr;
+
+    for (hptr = snmpNotifyTableStorage; hptr; hptr = hptr->next) {
+        if (hptr->data == thedata)
+            break;
+    }
+    if (NULL != hptr) {
+        struct snmpNotifyTable_data *nptr = hptr->data;
+        header_complex_extract_entry(&snmpNotifyTableStorage, hptr);
+        snmpNotifyTable_dispose(nptr);
+        return 1;
+    }
+    return 0;
+}
+
+struct snmpNotifyTable_data *
+get_notifyTable(const char *name)
+{
+    struct header_complex_index *hptr;
+
+    for (hptr = snmpNotifyTableStorage; hptr; hptr = hptr->next) {
+        struct snmpNotifyTable_data *nptr = hptr->data;
+        if (nptr->snmpNotifyName && strcmp(nptr->snmpNotifyName, name) == 0)
+            return nptr;
+    }
+    return NULL;
+}
+
+
+void
+notifyTable_unregister_notification(const char *name)
+{
+    struct targetAddrTable_struct *ta = get_addrForName(name);
+    struct targetParamTable_struct *tp = get_paramEntry(name);
+    struct snmpNotifyTable_data *nt = get_notifyTable(name);
+    struct snmpNotifyFilterProfileTable_data *fp = get_FilterProfile(name);
+
+    DEBUGMSGTL(("trapsess", "removing %s from trap tables\n", name));
+
+    if (NULL != nt)
+        snmpNotifyTable_remove(nt);
+    else
+        DEBUGMSGTL(("snmpNotifyTable:unregister",
+                    "No NotifyTable entry for %s\n", name));
+
+    if (NULL != tp)
+        snmpTargetParamTable_remove(tp);
+    else
+        DEBUGMSGTL(("snmpNotifyTable:unregister",
+                    "No TargetParamTable entry for %s\n", name));
+
+    if (NULL != ta)
+        snmpTargetAddrTable_remove(ta);
+    else
+        DEBUGMSGTL(("snmpNotifyTable:unregister",
+                    "No TargetAddrTable entry for %s\n", name));
+
+    if (NULL != fp)
+        snmpNotifyFilterProfileTable_remove(fp);
+    else
+        DEBUGMSGTL(("snmpNotifyTable:unregister",
+                    "No FilterProfileTable entry for %s\n", name));
+
 }

@@ -25,7 +25,7 @@ oid             snmpTargetParamsOID[snmpTargetParamsOIDLen] =
     { 1, 3, 6, 1, 6, 3, 12, 1, 3, 1, 0 };
 
 static struct targetParamTable_struct *aPTable = NULL;
-
+static int _active = 0;
 
 /*
  * Utility routines
@@ -44,6 +44,11 @@ snmpTargetParamTable_create(void)
 
     newEntry = (struct targetParamTable_struct *)
         malloc(sizeof(struct targetParamTable_struct));
+
+    if (NULL == newEntry)
+        return NULL;
+
+    ++_active;
 
     newEntry->paramName = NULL;
     newEntry->mpModel = -1;
@@ -66,10 +71,11 @@ snmpTargetParamTable_create(void)
 void
 snmpTargetParamTable_dispose(struct targetParamTable_struct *reaped)
 {
-    free(reaped->paramName);
-    free(reaped->secName);
+    SNMP_FREE(reaped->paramName);
+    SNMP_FREE(reaped->secName);
 
     free(reaped);
+    --_active;
 }                               /* snmpTargetParamTable_dispose  */
 
 
@@ -180,6 +186,11 @@ snmpTargetParamTable_remFromList(struct targetParamTable_struct *oldEntry,
     }
 }                               /* snmpTargetParamTable_remFromList  */
 
+void
+snmpTargetParamTable_remove(struct targetParamTable_struct *entry)
+{
+    snmpTargetParamTable_remFromList(entry, &aPTable);
+}
 
 /*
  * lookup OID in the link list of Table Entries
@@ -222,7 +233,7 @@ search_snmpTargetParamsTable(oid * baseName,
 
 
 struct targetParamTable_struct *
-get_paramEntry(char *name)
+get_paramEntry(const char *name)
 {
     static struct targetParamTable_struct *ptr;
     for (ptr = aPTable; ptr; ptr = ptr->next) {
@@ -250,8 +261,20 @@ init_snmpTargetParamsEntry_data(void)
  */
 
 void
-shutdown_snmpTargetParamsEntry(void)
+shutdown_snmpTargetParamsEntry_data(void)
 {
+    DEBUGMSGTL(("trap:targetParam:shutdown", "clearing %d object(s)\n",
+                _active));
+
     while (aPTable)
-	snmpTargetParamTable_remFromList(aPTable, &aPTable);
+        snmpTargetParamTable_remFromList(aPTable, &aPTable);
+
+    DEBUGMSGTL(("trap:targetParam:shutdown", "active count %d\n", _active));
+    if (_active != 0) {
+        DEBUGMSGTL(("trap:targetParam:shutdown",
+                    "unexpected count %d after cleanup!\n", _active));
+        snmp_log(LOG_WARNING, "targetAddr count %d, not 0, after shutdown.\n",
+                 _active);
+    }
+
 }

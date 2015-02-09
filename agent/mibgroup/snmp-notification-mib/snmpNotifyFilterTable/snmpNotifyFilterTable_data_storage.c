@@ -23,21 +23,9 @@
 
 #include <ctype.h>
 
-netsnmp_feature_child_of(snmpNotifyFilter_external_access, libnetsnmpmibs)
 
-netsnmp_feature_require(row_merge)
-netsnmp_feature_require(baby_steps)
-netsnmp_feature_require(table_container_row_insert)
-netsnmp_feature_require(check_all_requests_error)
-#ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(check_vb_type_and_max_size)
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
+netsnmp_feature_require(CONTAINER_FREE_ALL)
 
-
-netsnmp_feature_child_of(snmpNotifyFilter_container_size, snmpNotifyFilter_external_access)
-netsnmp_feature_child_of(snmpNotifyFilter_registration_set, snmpNotifyFilter_external_access)
-netsnmp_feature_child_of(snmpNotifyFilter_registration_get, snmpNotifyFilter_external_access)
-netsnmp_feature_child_of(snmpNotifyFilter_container_get, snmpNotifyFilter_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -47,9 +35,16 @@ netsnmp_feature_child_of(snmpNotifyFilter_container_get, snmpNotifyFilter_extern
  **********************************************************************
  **********************************************************************/
 static netsnmp_container *_container = NULL;
+static int _active = 0;
 
 static void
 _snmpNotifyFilter_parse(const char *token, char *buf);
+
+static void 
+_nf_free_item(void *data, void *dontcare)
+{
+    snmpNotifyFilter_storage_dispose((snmpNotifyFilter_data *)data);
+}
 
 netsnmp_container *
 snmpNotifyFilter_storage_container_create(void)
@@ -60,9 +55,11 @@ snmpNotifyFilter_storage_container_create(void)
         if (NULL == _container) {
             snmp_log(LOG_ERR, "error creating container in "
                      "snmpNotifyFilter_storage_container_create\n");
+            return NULL;
         }
         _container->container_name =
             strdup("snmpNotifyFilterTable_data_storage");
+        _container->free_item = _nf_free_item;
     }
     return _container;
 }
@@ -83,6 +80,24 @@ shutdown_snmpNotifyFilterTable_data_storage(void)
 {
 #warning "shutdown_snmpNotifyFilter_storage not implemented"
     // xxx-rks
+
+    if (NULL == _container)
+        return;
+
+    CONTAINER_FREE_ALL(_container, NULL);
+    CONTAINER_FREE(_container);
+    _container = NULL;
+    DEBUGMSGTL(("trap:notifyFilter:storage:shutdown",
+                "active count %d\n", _active));
+    if (_active != 0) {
+        DEBUGMSGTL(("trap:notifyFilter:storage:shutdown",
+                    "unexpected count %d after cleanup!\n",_active));
+        snmp_log(LOG_WARNING,
+                 "notifyFilter count %d, not 0, after shutdown.\n", _active);
+    }
+
+
+
 }
 
 snmpNotifyFilter_data *
@@ -113,6 +128,7 @@ snmpNotifyFilter_storage_create(u_char *name, size_t name_len,
         snmp_log(LOG_ERR, "memory allocation failed\n");
         return NULL;
     }
+    ++_active;
 
     /** copy data */
     data->snmpNotifyFilterProfileName_len = name_len;
@@ -125,9 +141,10 @@ snmpNotifyFilter_storage_create(u_char *name, size_t name_len,
 }
 
 void
-snmpNotifyFilter_storage_release(snmpNotifyFilter_data *data)
+snmpNotifyFilter_storage_dispose(snmpNotifyFilter_data *data)
 {
     free(data);
+    --_active;
 }
 
 int
@@ -164,6 +181,23 @@ snmpNotifyFilter_storage_insert(snmpNotifyFilter_data *data)
     return SNMPERR_SUCCESS;
 }
 
+int
+snmpNotifyFilter_storage_remove(snmpNotifyFilter_data *data)
+{
+    int     rc, i;
+    oid     *pos;
+
+    if (NULL == data)
+        return SNMPERR_GENERR;
+
+    DEBUGMSGTL(("internal:snmpNotifyFilter", "removing row\n"));
+    rc = CONTAINER_REMOVE(_container, data);
+    if (0 != rc)
+        return SNMPERR_GENERR;
+
+    return SNMPERR_SUCCESS;
+}
+
 snmpNotifyFilter_data *
 snmpNotifyFilter_storage_add(u_char *profileName, size_t profileName_len,
                              oid *filterSubtree, size_t filterSubtree_len,
@@ -182,7 +216,7 @@ snmpNotifyFilter_storage_add(u_char *profileName, size_t profileName_len,
     data->snmpNotifyFilterType = filterType;
 
     if (snmpNotifyFilter_storage_insert(data) != SNMPERR_SUCCESS) {
-        snmpNotifyFilter_storage_release(data);
+        snmpNotifyFilter_storage_dispose(data);
         return NULL;
     }
 

@@ -21,7 +21,7 @@
 #include "util_funcs/header_generic.h"
 
 static struct targetAddrTable_struct *aAddrTable = NULL;
-
+static int _active = 0;
 
 /*
  * Utility routines
@@ -33,7 +33,7 @@ get_addrTable(void)
 }
 
 struct targetAddrTable_struct *
-get_addrForName(char *name)
+get_addrForName(const char *name)
 {
     struct targetAddrTable_struct *ptr;
     for (ptr = aAddrTable; ptr != NULL; ptr = ptr->next) {
@@ -57,6 +57,7 @@ snmpTargetAddrTable_create(void)
         malloc(sizeof(struct targetAddrTable_struct));
 
     if (newEntry) {
+        ++_active;
         newEntry->name = NULL;
 
         newEntry->tDomainLen = 0;
@@ -85,6 +86,9 @@ snmpTargetAddrTable_create(void)
 void
 snmpTargetAddrTable_dispose(struct targetAddrTable_struct *reaped)
 {
+    if (NULL == reaped)
+        return;
+
     if (reaped->sess)
         snmp_close(reaped->sess);
     else
@@ -94,6 +98,7 @@ snmpTargetAddrTable_dispose(struct targetAddrTable_struct *reaped)
     SNMP_FREE(reaped->params);
 
     SNMP_FREE(reaped);
+    --_active;
 }                               /* snmpTargetAddrTable_dispose  */
 
 /*
@@ -205,6 +210,11 @@ snmpTargetAddrTable_remFromList(struct targetAddrTable_struct *oldEntry,
     }
 }                               /* snmpTargetAddrTable_remFromList  */
 
+void
+snmpTargetAddrTable_remove(struct targetAddrTable_struct *entry)
+{
+    snmpTargetAddrTable_remFromList(entry, &aAddrTable);
+}
 
 /*
  * lookup OID in the link list of Addr Table Entries
@@ -262,14 +272,24 @@ init_snmpTargetAddrEntry_data(void)
  */
 
 void
-shutdown_snmpTargetAddrEntry(void)
+shutdown_snmpTargetAddrEntry_data(void)
 {
     struct targetAddrTable_struct *ptr;
     struct targetAddrTable_struct *next;
 
+    DEBUGMSGTL(("trap:targetAddr:shutdown", "clearing %d object(s)\n",
+                _active));
     for (ptr = aAddrTable; ptr; ptr = next) {
         next = ptr->next;
         snmpTargetAddrTable_dispose(ptr);
     }
     aAddrTable = NULL;
+
+    DEBUGMSGTL(("trap:targetAddr:shutdown", "active count %d\n",_active));
+    if (_active != 0) {
+        DEBUGMSGTL(("trap:targetAddr:shutdown",
+                    "unexpected count %d after cleanup!\n", _active));
+        snmp_log(LOG_WARNING, "targetAddr count %d, not 0, after shutdown.\n",
+                 _active);
+    }
 }

@@ -11,6 +11,12 @@ extern          "C" {
 
 #include <net-snmp/library/asn1.h>
 
+#ifndef SNMPNOTIFYFILTERTYPE_ENUMS
+#define SNMPNOTIFYFILTERTYPE_ENUMS
+#define SNMPNOTIFYFILTERTYPE_INCLUDED  1
+#define SNMPNOTIFYFILTERTYPE_EXCLUDED  2
+#endif                          /* SNMPNOTIFYFILTERTYPE_ENUMS */
+
     /*
      * BE VERY CAREFUL TO TAKE INTO ACCOUNT THE MAXIMUM
      * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
@@ -70,7 +76,7 @@ extern          "C" {
                                     size_t snmpNotifyFilterSubtree_len);
 
     void
-    snmpNotifyFilter_storage_release(snmpNotifyFilter_data *data);
+    snmpNotifyFilter_storage_dispose(snmpNotifyFilter_data *data);
 
     int
     snmpNotifyFilter_storage_insert(snmpNotifyFilter_data *data);
@@ -80,14 +86,8 @@ extern          "C" {
                                  oid *filterSubtree, size_t filterSubtree_len,
                                  u_char *filterMask, size_t filterMask_len,
                                  u_long filterType);
-    // int
-    // snmpNotifyFilter_storage_add(snmpNotifyFilter_data* row);
-
-    // snmpNotifyFilterTable_data*
-    // snmpNotifyFilterTable_storage_find(u_char *snmpNotifyFilterProfileName,
-    //                                    size_t snmpNotifyFilterProfileName_len,
-    //                                    oid *snmpNotifyFilterSubtree,
-    //                                    size_t snmpNotifyFilterSubtree_len);
+    int
+    snmpNotifyFilter_storage_remove(snmpNotifyFilter_data *data);
 
     struct vacm_viewEntry *
     snmpNotifyFilter_vacm_view_subtree(const char *profile);
