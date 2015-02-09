@@ -213,6 +213,8 @@ netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
                             (void *) &args);
+        if (args.rc != SNMPERR_SUCCESS)
+            return 0;
     } else {
         /*
          * no other support exists, handle it ourselves. 
@@ -281,17 +283,18 @@ remove_trap_session(netsnmp_session * ss)
 #endif /* NETSNMP_FEATURE_REMOVE_REMOVE_TRAP_SESSION */
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
-static int
-netsnmp_create_notification_session(const char *sink, const char* sinkport,
-                                    const char *com, const char *src,
-                                    int version, int pdutype,
-                                    const char *name, const char *tag,
-                                    const char* profile)
+netsnmp_session *
+netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
+                                         const char *com, const char *src,
+                                         int version, int pdutype,
+                                         const char *name, const char *tag,
+                                         const char* profile)
 {
     netsnmp_transport *t;
     netsnmp_session session, *sesp;
     netsnmp_tdomain_spec tspec;
     char                 tmp[SPRINT_MAX_LEN];
+    int                  rc;
 
     memset(&session, 0, sizeof(netsnmp_session));
     session.version = version;
@@ -335,21 +338,16 @@ netsnmp_create_notification_session(const char *sink, const char* sinkport,
          */
         snmp_sess_perror("snmpd: netsnmp_create_notification_session",
                          &session);
-        return 0;
+        return NULL;
     }
 
-    return netsnmp_add_notification_session(sesp, pdutype,
-                                            (pdutype == SNMP_MSG_INFORM),
-                                            version, name, tag, profile);
-}
+    rc = netsnmp_add_notification_session(sesp, pdutype,
+                                          (pdutype == SNMP_MSG_INFORM),
+                                          version, name, tag, profile);
+    if (0 == rc)
+        return NULL;
 
-int
-create_trap_session2(const char *sink, const char* sinkport,
-                     char *com, int version, int pdutype)
-{
-    return netsnmp_create_notification_session(sink, sinkport, com, NULL,
-                                               version, pdutype, NULL, NULL,
-                                               NULL);
+    return sesp;
 }
 
 int
@@ -357,15 +355,25 @@ create_trap_session_with_src(const char *sink, const char* sinkport,
                              const char *com, const char *src, int version,
                              int pdutype)
 {
-    return netsnmp_create_notification_session(sink, sinkport, com, src,
-                                               version, pdutype, NULL, NULL,
-                                               NULL);
+    void *ss = netsnmp_create_v1v2_notification_session(sink, sinkport, com,
+                                                        src, version, pdutype,
+                                                        NULL, NULL, NULL);
+    return (ss != NULL);
+}
+
+int
+create_trap_session2(const char *sink, const char* sinkport,
+                     char *com, int version, int pdutype)
+{
+    return create_trap_session_with_src(sink, sinkport, com, NULL, version,
+                                        pdutype);
 }
 
 int
 create_trap_session(char *sink, u_short sinkport,
 		    char *com, int version, int pdutype)
 {
+    void *ss;
     char buf[sizeof(sinkport) * 3 + 2];
     if (sinkport != 0) {
 	sprintf(buf, ":%hu", sinkport);
@@ -373,9 +381,10 @@ create_trap_session(char *sink, u_short sinkport,
 		 "Using a separate port number is deprecated, please correct "
 		 "the sink specification instead");
     }
-    return netsnmp_create_notification_session(sink, sinkport ? buf : NULL,
-                                               com, NULL, version, pdutype,
-                                               NULL, NULL, NULL);
+    ss = netsnmp_create_v1v2_notification_session(sink, sinkport ? buf : NULL,
+                                                  com, NULL, version, pdutype,
+                                                  NULL, NULL, NULL);
+    return (ss != NULL);
 }
 
 #endif /* support for community based SNMP */
@@ -1270,10 +1279,10 @@ _parse_config_sink(const char *token, char *cptr, int version, int type)
         pp = strtok_r(NULL, " \t\n", &st);
     if (pp)
         config_pwarn("The separate port argument for sinks is deprecated");
-    if (netsnmp_create_notification_session(sp, pp,
-                                            cp ? cp : snmp_trapcommunity, src,
-                                            version, type, name, tag,
-                                            profile) == 0) {
+    if (netsnmp_create_v1v2_notification_session(sp, pp,
+                                                 cp ? cp : snmp_trapcommunity,
+                                                 src, version, type, name, tag,
+                                                 profile) == NULL) {
         netsnmp_config_error("cannot create sink: %s", cptr);
     }
 }

@@ -17,6 +17,7 @@ struct agent_add_trap_args {
     const char      *name; /* notification target addr name */
     const char      *tag; /* notification tag */
     const char      *profile; /* filter profile */
+    int             rc;
 };
 
 void            init_traps(void);
@@ -54,6 +55,14 @@ int             create_trap_session_with_src(const char *, const char *,
                                              int, int);
 int             add_trap_session(netsnmp_session *, int, int, int);
 int             remove_trap_session(netsnmp_session *);
+netsnmp_session *netsnmp_create_v1v2_notification_session(const char *,
+                                                          const char*,
+                                                          const char *,
+                                                          const char *,
+                                                          int, int,
+                                                          const char *,
+                                                          const char *,
+                                                          const char*);
 netsnmp_session *netsnmp_create_v3user_notification_session(const char *dst,
                                                             const char *user,
                                                             int lvl,

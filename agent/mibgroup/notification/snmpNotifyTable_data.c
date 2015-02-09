@@ -272,6 +272,7 @@ notifyTable_register_notifications(int major, int minor,
     if (!args || !(args->ss)) {
         return (0);
     }
+    args->rc = SNMPERR_GENERR;
     confirm = args->confirm;
     ss = args->ss;
     name = args->name;
@@ -413,6 +414,7 @@ notifyTable_register_notifications(int major, int minor,
         }
     }
 
+    args->rc = SNMPERR_SUCCESS;
     return 0;
 
   bail:
