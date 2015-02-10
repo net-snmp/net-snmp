@@ -181,7 +181,15 @@ Specifies the timeout in seconds between retries.
 .\"
 .\" XXX - It is probably about time to remove this choice!
 .\"
+.SH SNMPv1/SNMPv2c SETTINGS
+.IP "disableSNMPv1  (1|yes|true|0|no|false)"
+.IP "disableSNMPv2c (1|yes|true|0|no|false)"
+Disables protocol versions at runtime. Incoming and outgoing packets for
+the protocol will be dropped.
 .SH SNMPv3 SETTINGS
+.IP "disableSNMPv3  (1|yes|true|0|no|false)"
+Disables protocol versions at runtime. Incoming and outgoing packets for
+the protocol will be dropped.
 .IP "defSecurityName STRING"
 defines the default security name to use for SNMPv3 requests.
 This can be overridden using the \fB\-u\fR option.
