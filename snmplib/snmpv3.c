@@ -886,6 +886,44 @@ oldengineID_conf(const char *word, char *cptr)
 }
 
 /*
+ * set_exact_engineID_conf(const oid *, size_t):
+ *
+ * Specifies an exact engineID OID.
+ */
+int
+set_exact_engineID(const u_char *id, size_t len)
+{
+    int rc = SNMPERR_SUCCESS;
+    u_char *newID = NULL;
+
+    if (NULL == id || 0 == len)
+        return SNMPERR_GENERR;
+
+    if (len > MAX_ENGINEID_LENGTH) {
+        rc = SNMPERR_TOO_LONG;
+        len = MAX_ENGINEID_LENGTH;
+    }
+
+    newID = malloc(len+1);
+    if (NULL == newID) {
+        snmp_log(LOG_ERR, "malloc failed for engineID\n");
+        return SNMPERR_GENERR;
+    }
+    if (NULL != engineID)
+        free(engineID);
+
+    memcpy(newID, id, len);
+    newID[len] = 0;
+
+    engineID = newID;
+    engineIDLength = len;
+    engineIDIsSet = 1;
+    engineIDType = ENGINEID_TYPE_EXACT;
+
+    return rc;
+}
+
+/*
  * exactEngineID_conf(const char *, char *):
  * 
  * Reads a octet string encoded engineID into the engineID and
@@ -894,16 +932,19 @@ oldengineID_conf(const char *word, char *cptr)
 void
 exactEngineID_conf(const char *word, char *cptr)
 {
-    read_config_read_octet_string(cptr, &engineID, &engineIDLength);
-    if (engineIDLength > MAX_ENGINEID_LENGTH) {
+    int rc;
+    /** we want buf > max so we know if there is truncation */
+    u_char new_engineID[MAX_ENGINEID_LENGTH+2],
+        *new_engineIDptr = new_engineID;
+    size_t new_engineIDLength = sizeof(new_engineID);
+
+    read_config_read_octet_string(cptr, &new_engineIDptr, &new_engineIDLength);
+    rc = set_exact_engineID( new_engineIDptr, new_engineIDLength);
+    if (SNMPERR_TOO_LONG == rc) {
 	netsnmp_config_error(
 	    "exactEngineID '%s' too long; truncating to %d bytes",
 	    cptr, MAX_ENGINEID_LENGTH);
-        engineID[MAX_ENGINEID_LENGTH - 1] = '\0';
-        engineIDLength = MAX_ENGINEID_LENGTH;
     }
-    engineIDIsSet = 1;
-    engineIDType = ENGINEID_TYPE_EXACT;
 }
 
 

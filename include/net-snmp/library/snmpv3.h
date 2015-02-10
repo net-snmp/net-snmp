@@ -22,6 +22,8 @@ extern          "C" {
 
     NETSNMP_IMPORT
     int             setup_engineID(u_char ** eidp, const char *text);
+    NETSNMP_IMPORT
+    int             set_exact_engineID(const u_char *id, size_t len);
     void            engineID_conf(const char *word, char *cptr);
     void            engineBoots_conf(const char *, char *);
     void            engineIDType_conf(const char *, char *);
