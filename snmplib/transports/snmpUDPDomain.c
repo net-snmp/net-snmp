@@ -206,17 +206,100 @@ typedef struct com2SecEntry_s {
 
 static com2SecEntry   *com2SecList = NULL, *com2SecListLast = NULL;
 
+int
+netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
+                    const char *secName, const char *contextName,
+                    struct in_addr *network, struct in_addr *mask)
+{
+    int communityLen, secNameLen, contextNameLen;
+    void* v;
+    com2SecEntry* e;
+    char* last;
+    struct in_addr dflt_network, dflt_mask;
+
+    if (NULL != entryp)
+        *entryp = NULL;
+
+    if (NULL == community || NULL == secName)
+        return C2SE_ERR_MISSING_ARG;
+
+    if (NULL == network) {
+        network = &dflt_network;
+        dflt_network.s_addr = 0;
+    }
+    if (NULL == mask) {
+        mask = &dflt_mask;
+        dflt_mask.s_addr = 0;
+    }
+
+    /** Check that the network and mask are consistent. */
+    if (network->s_addr & ~mask->s_addr)
+        return C2SE_ERR_MASK_MISMATCH;
+
+    communityLen = strlen(community) + 1;
+    if (communityLen > VACMSTRINGLEN)
+        return C2SE_ERR_COMMUNITY_TOO_LONG;
+
+    secNameLen = strlen(secName) + 1;
+    if (secNameLen > VACMSTRINGLEN)
+        return C2SE_ERR_SECNAME_TOO_LONG;
+
+    contextNameLen = contextName ? strlen(contextName) : 0;
+    if (contextNameLen > VACMSTRINGLEN)
+        return C2SE_ERR_SECNAME_TOO_LONG;
+
+    e = (com2SecEntry*)malloc(offsetof(com2SecEntry, community) + communityLen
+                              + secNameLen + contextNameLen);
+    if (e == NULL)
+        return C2SE_ERR_MEMORY;
+    last = ((char*)v) + offsetof(com2SecEntry, community);
+
+    DEBUGIF("netsnmp_udp_parse_security") {
+        char buf1[INET_ADDRSTRLEN];
+        char buf2[INET_ADDRSTRLEN];
+        DEBUGMSGTL(("netsnmp_udp_parse_security",
+                    "<\"%s\", %s/%s> => \"%s\"\n", community,
+                    inet_ntop(AF_INET, &network, buf1, sizeof(buf1)),
+                    inet_ntop(AF_INET, &mask, buf2, sizeof(buf2)),
+                    secName));
+    }
+
+    memcpy(last, community, communityLen);
+    last += communityLen;
+    memcpy(last, secName, secNameLen);
+    e->secName = last;
+    last += secNameLen;
+    if (contextNameLen) {
+        memcpy(last, contextName, contextNameLen);
+        e->contextName = last;
+    } else
+        e->contextName = last - 1;
+    e->network = network->s_addr;
+    e->mask = mask->s_addr;
+    e->next = NULL;
+
+    if (com2SecListLast != NULL) {
+        com2SecListLast->next = e;
+        com2SecListLast = e;
+    } else {
+        com2SecListLast = com2SecList = e;
+    }
+
+    if (NULL != entryp)
+        *entryp = e;
+
+    return C2SE_ERR_SUCCESS;
+}
+
 void
 netsnmp_udp_parse_security(const char *token, char *param)
 {
     char            secName[VACMSTRINGLEN + 1];
-    size_t          secNameLen;
     char            contextName[VACMSTRINGLEN + 1];
-    size_t          contextNameLen;
     char            community[COMMUNITY_MAX_LEN + 1];
-    size_t          communityLen;
     char            source[270]; /* dns-name(253)+/(1)+mask(15)+\0(1) */
     struct in_addr  network, mask;
+    int rc;
 
     /*
      * Get security, source address/netmask and community strings.
@@ -229,26 +312,15 @@ netsnmp_udp_parse_security(const char *token, char *param)
             return;
         }
         param = copy_nword( param, contextName, sizeof(contextName));
-        contextNameLen = strlen(contextName) + 1;
-        if (contextNameLen > VACMSTRINGLEN) {
-            config_perror("context name too long");
-            return;
-        }
         if (!param) {
             config_perror("missing NAME parameter");
             return;
         }
         param = copy_nword( param, secName, sizeof(secName));
-    } else {
-        contextNameLen = 0;
     }
 
-    secNameLen = strlen(secName) + 1;
-    if (secNameLen == 1) {
+    if (secName[0] == '\0') {
         config_perror("empty NAME parameter");
-        return;
-    } else if (secNameLen > VACMSTRINGLEN) {
-        config_perror("security name too long");
         return;
     }
 
@@ -275,12 +347,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
         config_perror("empty COMMUNITY parameter");
         return;
     }
-    communityLen = strlen(community) + 1;
-    if (communityLen >= COMMUNITY_MAX_LEN) {
-        config_perror("community name too long");
-        return;
-    }
-    if (communityLen == sizeof(EXAMPLE_COMMUNITY) &&
+    if ((strlen(community) + 1) == sizeof(EXAMPLE_COMMUNITY) &&
         memcmp(community, EXAMPLE_COMMUNITY, sizeof(EXAMPLE_COMMUNITY)) == 0) {
         config_perror("example config COMMUNITY not properly configured");
         return;
@@ -339,54 +406,60 @@ netsnmp_udp_parse_security(const char *token, char *param)
         }
     }
 
-    {
-        void* v = malloc(offsetof(com2SecEntry, community) + communityLen +
-                         secNameLen + contextNameLen);
-
-        com2SecEntry* e = (com2SecEntry*)v;
-        char* last = ((char*)v) + offsetof(com2SecEntry, community);
-
-        if (v == NULL) {
-            config_perror("memory error");
-            return;
-        }
-
-        /*
-         * Everything is okay.  Copy the parameters to the structure allocated
-         * above and add it to END of the list.
-         */
-
-        {
-          char buf1[INET_ADDRSTRLEN];
-          char buf2[INET_ADDRSTRLEN];
-          DEBUGMSGTL(("netsnmp_udp_parse_security",
-                      "<\"%s\", %s/%s> => \"%s\"\n", community,
-                      inet_ntop(AF_INET, &network, buf1, sizeof(buf1)),
-                      inet_ntop(AF_INET, &mask, buf2, sizeof(buf2)),
-                      secName));
-        }
-
-        memcpy(last, community, communityLen);
-        last += communityLen;
-        memcpy(last, secName, secNameLen);
-        e->secName = last;
-        last += secNameLen;
-        if (contextNameLen) {
-            memcpy(last, contextName, contextNameLen);
-            e->contextName = last;
-        } else
-            e->contextName = last - 1;
-        e->network = network.s_addr;
-        e->mask = mask.s_addr;
-        e->next = NULL;
-
-        if (com2SecListLast != NULL) {
-            com2SecListLast->next = e;
-            com2SecListLast = e;
-        } else {
-            com2SecListLast = com2SecList = e;
-        }
+    /*
+     * Everything is okay.  Copy the parameters to the structure allocated
+     * above and add it to END of the list.
+     */
+    rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
+                                         &network, &mask);
+    switch(rc) {
+        case C2SE_ERR_SUCCESS:
+            break;
+        case C2SE_ERR_CONTEXT_TOO_LONG:
+            config_perror("context name too long");
+            break;
+        case C2SE_ERR_COMMUNITY_TOO_LONG:
+            config_perror("community name too long");
+            break;
+        case C2SE_ERR_SECNAME_TOO_LONG:
+            config_perror("security name too long");
+            break;
+        case C2SE_ERR_MASK_MISMATCH:
+            config_perror("source/mask mismatch");
+            break;
+        case C2SE_ERR_MISSING_ARG:
+        default:
+            config_perror("unexpected error; could not create com2SecEntry");
     }
+}
+
+void
+netsnmp_udp_com2Sec_free(com2SecEntry *e)
+{
+    free(e);
+}
+
+int
+netsnmp_udp_com2SecList_remove(com2SecEntry *e)
+{
+    com2SecEntry   *c = com2SecList, *p = NULL;
+    for (; c != NULL; p = c, c = c->next) {
+        if (e == c)
+            break;
+    }
+    if (NULL == c)
+        return 1;
+
+    if (NULL == p)
+        com2SecList = e->next;
+    else
+        p->next = e->next;
+    e->next = NULL;
+
+    if (e == com2SecListLast)
+        com2SecListLast = p;
+
+    return 0;
 }
 
 void
@@ -396,7 +469,7 @@ netsnmp_udp_com2SecList_free(void)
     while (e != NULL) {
         com2SecEntry   *tmp = e;
         e = e->next;
-        free(tmp);
+        netsnmp_udp_com2Sec_free(tmp);
     }
     com2SecList = com2SecListLast = NULL;
 }
