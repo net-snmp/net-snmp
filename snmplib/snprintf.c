@@ -379,10 +379,11 @@ dopr(char *buffer, size_t maxlen, const char *format, va_list args)
 
 static void
 fmtstr(char *buffer, size_t * currlen, size_t maxlen,
-       char *value, int flags, int min, int max)
+       char *valuein, int flags, int min, int max)
 {
     int             padlen, strln;      /* amount to pad */
     int             cnt = 0;
+    const char     *value = valuein;
 
     if (value == 0) {
         value = "<NULL>";
