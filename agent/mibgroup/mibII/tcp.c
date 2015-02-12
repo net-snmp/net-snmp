@@ -321,6 +321,9 @@ tcp_handler(netsnmp_mib_handler          *handler,
             ret_value = tcpstat.tcpOutRsts;
             break;
 	}
+#elif defined(solaris2)
+        ret_value = tcpstat.tcpOutRsts;
+        break;
 #endif			/* linux */
         netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
         continue;
