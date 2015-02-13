@@ -212,7 +212,6 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
                     struct in_addr *network, struct in_addr *mask)
 {
     int communityLen, secNameLen, contextNameLen;
-    void* v;
     com2SecEntry* e;
     char* last;
     struct in_addr dflt_network, dflt_mask;
@@ -252,7 +251,7 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
                               + secNameLen + contextNameLen);
     if (e == NULL)
         return C2SE_ERR_MEMORY;
-    last = ((char*)v) + offsetof(com2SecEntry, community);
+    last = ((char*)e) + offsetof(com2SecEntry, community);
 
     DEBUGIF("netsnmp_udp_parse_security") {
         char buf1[INET_ADDRSTRLEN];
