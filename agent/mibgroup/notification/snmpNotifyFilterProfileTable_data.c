@@ -222,9 +222,9 @@ get_FilterProfile(const char *paramName)
     return snmpNotifyFilterProfileTable_find(paramName, strlen(paramName));
 }
 
-char           *
+char *
 get_FilterProfileName(const char *paramName, size_t paramName_len,
-               size_t * profileName_len)
+                      size_t * profileName_len)
 {
     struct snmpNotifyFilterProfileTable_data *data =
         snmpNotifyFilterProfileTable_find(paramName, paramName_len);

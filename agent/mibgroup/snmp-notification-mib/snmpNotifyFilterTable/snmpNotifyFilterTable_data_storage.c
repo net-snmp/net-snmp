@@ -78,9 +78,6 @@ init_snmpNotifyFilterTable_data_storage(void)
 void
 shutdown_snmpNotifyFilterTable_data_storage(void)
 {
-#warning "shutdown_snmpNotifyFilter_storage not implemented"
-    // xxx-rks
-
     if (NULL == _container)
         return;
 
