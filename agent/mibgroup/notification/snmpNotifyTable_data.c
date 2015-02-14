@@ -267,7 +267,7 @@ notifyTable_register_notifications(int major, int minor,
     struct agent_add_trap_args *args =
         (struct agent_add_trap_args *) serverarg;
     netsnmp_session *ss;
-    char            *name, *tag, *notifyProfile;
+    const char      *name, *tag, *notifyProfile;
 
     if (!args || !(args->ss)) {
         return (0);

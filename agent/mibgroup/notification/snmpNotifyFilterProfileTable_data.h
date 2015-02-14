@@ -31,8 +31,8 @@ int
 snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data *);
 
 struct snmpNotifyFilterProfileTable_data *
-snmpNotifyFilterProfileTable_create(char *paramsName, size_t paramName_len,
-                                    char *profileName, size_t profileName_len);
+snmpNotifyFilterProfileTable_create(const char *params, size_t param_len,
+                                    const char *profile, size_t profile_len);
 
 void
 snmpNotifyFilterProfileTable_free(struct snmpNotifyFilterProfileTable_data *);

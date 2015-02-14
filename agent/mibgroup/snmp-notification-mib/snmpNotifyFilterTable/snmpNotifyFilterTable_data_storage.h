@@ -70,9 +70,9 @@ extern          "C" {
     void            shutdown_snmpNotifyFilterTable_data_storage(void);
 
     snmpNotifyFilter_data*
-    snmpNotifyFilter_storage_create(u_char *snmpNotifyFilterProfileName,
+    snmpNotifyFilter_storage_create(const u_char *snmpNotifyFilterProfileName,
                                     size_t snmpNotifyFilterProfileName_len,
-                                    oid *snmpNotifyFilterSubtree,
+                                    const oid *snmpNotifyFilterSubtree,
                                     size_t snmpNotifyFilterSubtree_len);
 
     void
@@ -82,10 +82,10 @@ extern          "C" {
     snmpNotifyFilter_storage_insert(snmpNotifyFilter_data *data);
 
     snmpNotifyFilter_data *
-    snmpNotifyFilter_storage_add(u_char *profileName, size_t profileName_len,
-                                 oid *filterSubtree, size_t filterSubtree_len,
-                                 u_char *filterMask, size_t filterMask_len,
-                                 u_long filterType);
+    snmpNotifyFilter_storage_add(const u_char *profile, size_t profile_len,
+                                 const oid *filterSubtree,
+                                 size_t filterSubtree_len, u_char *filterMask,
+                                 size_t filterMask_len, u_long filterType);
     int
     snmpNotifyFilter_storage_remove(snmpNotifyFilter_data *data);
 

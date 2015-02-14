@@ -101,8 +101,8 @@ shutdown_snmpNotifyFilterTable_data_storage(void)
 }
 
 snmpNotifyFilter_data *
-snmpNotifyFilter_storage_create(u_char *name, size_t name_len,
-                                oid *subtree, size_t subtree_len)
+snmpNotifyFilter_storage_create(const u_char *name, size_t name_len,
+                                const oid *subtree, size_t subtree_len)
 {
     snmpNotifyFilter_data *data;
     int subtree_bytes = subtree_len * sizeof(oid);
@@ -184,8 +184,7 @@ snmpNotifyFilter_storage_insert(snmpNotifyFilter_data *data)
 int
 snmpNotifyFilter_storage_remove(snmpNotifyFilter_data *data)
 {
-    int     rc, i;
-    oid     *pos;
+    int     rc;
 
     if (NULL == data)
         return SNMPERR_GENERR;
@@ -199,10 +198,10 @@ snmpNotifyFilter_storage_remove(snmpNotifyFilter_data *data)
 }
 
 snmpNotifyFilter_data *
-snmpNotifyFilter_storage_add(u_char *profileName, size_t profileName_len,
-                             oid *filterSubtree, size_t filterSubtree_len,
-                             u_char *filterMask, size_t filterMask_len,
-                             u_long filterType)
+snmpNotifyFilter_storage_add(const u_char *profileName, size_t profileName_len,
+                             const oid *filterSubtree,
+                             size_t filterSubtree_len, u_char *filterMask,
+                             size_t filterMask_len, u_long filterType)
 {
     snmpNotifyFilter_data *data;
 

@@ -96,8 +96,10 @@ snmpNotifyFilterProfileTable_free(struct snmpNotifyFilterProfileTable_data
  *
  */
 struct snmpNotifyFilterProfileTable_data *
-snmpNotifyFilterProfileTable_create(char *paramsName, size_t paramsName_len,
-                                    char *profileName, size_t profileName_len)
+snmpNotifyFilterProfileTable_create(const char *paramsName,
+                                    size_t paramsName_len,
+                                    const char *profileName,
+                                    size_t profileName_len)
 {
     struct snmpNotifyFilterProfileTable_data *profile = NULL;
 
