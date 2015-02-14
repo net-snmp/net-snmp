@@ -1410,6 +1410,11 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
     u_char             tmp_engineId[SPRINT_MAX_LEN];
     int                rc;
 
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_V3)) {
+        netsnmp_config_error("SNMPv3 disabled, cannot create notification session");
+        return NULL;
+    }
     if (NULL == dest || NULL == user)
         return NULL;
 
