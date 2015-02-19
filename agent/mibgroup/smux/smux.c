@@ -751,6 +751,10 @@ smux_pdu_process(int fd, u_char * data, size_t length)
     while (error == 0 && ptr != NULL && ptr < data + length) {
         len = length - (ptr - data);
         ptr = asn_parse_header(ptr, &len, &type);
+        if (ptr == NULL) {
+            DEBUGMSGTL(("smux", "[smux_pdu_process] cannot parse header\n"));
+            break;
+        }
         DEBUGMSGTL(("smux", "[smux_pdu_process] type is %d\n",
                     (int) type));
         switch (type) {
