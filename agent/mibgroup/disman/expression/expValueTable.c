@@ -127,7 +127,7 @@ init_expValueTable(void)
     REGISTER_MIB("expValueTable",
                  expValueTable_variables, variable2,
                  expValueTable_variables_oid);
-    init_snmp("snmpapp");
+    init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
 
     /*
      * Initialize a "session" that defines who we're going to talk to

@@ -297,7 +297,7 @@ main(int argc, char *argv[])
         }
     }
 
-    init_snmp("snmpapp");
+    init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
     if (optind < argc)
         current_name = argv[optind];
 
