@@ -1540,7 +1540,14 @@ read_config_store(const char *type, const char *line)
         DEBUGMSGTL(("read_config:store", "storing: %s\n", line));
         fclose(fout);
     } else {
-        snmp_log(LOG_ERR, "read_config_store open failure on %s\n", filep);
+        if (strcmp(NETSNMP_APPLICATION_CONFIG_TYPE, type) != 0) {
+            /*
+             * Ignore this error in client utilities, they can run with random
+             * UID/GID and typically cannot write to /var. Error message just
+             * confuses people.
+             */
+            snmp_log(LOG_ERR, "read_config_store open failure on %s");
+        }
     }
 #ifdef NETSNMP_PERSISTENT_MASK
     umask(oldmask);
