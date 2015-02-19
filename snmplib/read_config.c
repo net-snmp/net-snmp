@@ -1546,7 +1546,7 @@ read_config_store(const char *type, const char *line)
              * UID/GID and typically cannot write to /var. Error message just
              * confuses people.
              */
-            snmp_log(LOG_ERR, "read_config_store open failure on %s");
+            snmp_log(LOG_ERR, "read_config_store open failure on %s\n", filep);
         }
     }
 #ifdef NETSNMP_PERSISTENT_MASK
