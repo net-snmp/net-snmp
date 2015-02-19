@@ -386,7 +386,7 @@ main(int argc, char *argv[])
         snmp_free_pdu(response);
 
     snmp_close(ss);
-    snmp_shutdown("snmpapp");
+    snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
     SOCK_CLEANUP;
     return exitval;
 }
