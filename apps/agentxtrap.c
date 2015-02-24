@@ -511,7 +511,7 @@ main(int argc, char *argv[])
     /* initialize tcpip, if necessary */
     SOCK_STARTUP;
 
-    init_snmp("snmpapp");
+    init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
     agentx_config_init();
 
     /* NOTIFY varlist */
@@ -600,7 +600,7 @@ main(int argc, char *argv[])
     snmp_free_pdu(pdu);
     pdu = NULL;
 
-    snmp_shutdown("snmpapp");
+    snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
 
     SOCK_CLEANUP;
     exit(result);

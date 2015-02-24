@@ -252,7 +252,7 @@ netsnmp_parse_args(int argc,
             break;
 
         case 'H':
-            init_snmp("snmpapp");
+            init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
             fprintf(stderr, "Configuration directives understood:\n");
             read_config_print_usage("  ");
             return (NETSNMP_PARSE_ARGS_SUCCESS_EXIT);
@@ -645,7 +645,7 @@ netsnmp_parse_args(int argc,
     /*
      * read in MIB database and initialize the snmp library
      */
-    init_snmp("snmpapp");
+    init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
 
     /*
      * session default version 
