@@ -431,11 +431,13 @@ if test "x$with_opaque_special_types" != "xno"; then
 fi
 
 NETSNMP_ARG_ENABLE(ipv6,
-[  --enable-ipv6                   Generate IPv6 ready version.],
-    [if test "x$enable_ipv6" = "xyes"; then
-      AC_DEFINE(NETSNMP_ENABLE_IPV6, 1,
-        [define if you want to enable IPv6 support])
-    fi])
+[  --disable-ipv6                  Disable IPv6 support.],
+    [],dnl default to "yes"
+    [enable_ipv6="yes"])
+if test "x$enable_ipv6" != "xno"; then
+  AC_DEFINE(NETSNMP_ENABLE_IPV6, 1,
+      [define if you want to enable IPv6 support])
+fi
 
 NETSNMP_ARG_WITH(logfile,
 [  --with-logfile="location"       Default log file location for snmpd.],
