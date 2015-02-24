@@ -191,6 +191,14 @@ ${context}_container_load(netsnmp_container *container)
     size_t                 count = 0;
 
     /*
+     * storage for each column
+     */
+@  foreach $node index@
+@    include m2c_setup_node.m2i@
+@    include node-storage.m2i@
+@  end@ // foreach
+
+    /*
      * temporary storage for index values
      */
 @  foreach $node index@
