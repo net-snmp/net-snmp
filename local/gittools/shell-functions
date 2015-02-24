@@ -451,10 +451,10 @@ nsautoconf() {
     if [ "$VER" != "$COR" ] ; then
 	echo "failed to find the correct version of autoconf"
 	echo "please install autoconf version $COR in /usr/local/autoconf-$COR"
-	echo "  (configure autoconf-$COR using -prefix=/usr/local/autoconf-$COR"
+	echo "  (configure autoconf-$COR using --prefix=/usr/local/autoconf-$COR"
 	return
     fi
 
     echo "RUNNING AUTOCONF $COR"
-    PATH=/usr/local/autoconf-${autover}/bin:$PATH $tool
+    PATH=/usr/local/autoconf-${COR}/bin:$PATH $tool
 }
