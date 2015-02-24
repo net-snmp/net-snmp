@@ -15,6 +15,12 @@ extern          "C" {
 #define PREMIB_CONFIG 1
 #define EITHER_CONFIG 2
 
+/*
+ * Value of 'type' parameter of various snmp_config calls,
+ * used by Net-SNMP client utilities.
+ */
+#define NETSNMP_APPLICATION_CONFIG_TYPE "snmpapp"
+
 #include <net-snmp/config_api.h>
 
     /*
