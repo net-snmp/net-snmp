@@ -1705,7 +1705,7 @@ Optional Features:
   --disable-privacy               Don't compile in support for privacy (encryption).
   --disable-md5                   Do not support MD5 authentication.
   --enable-internal-md5           Use the internal MD5 support.
-  --enable-ipv6                   Generate IPv6 ready version.
+  --disable-ipv6                  Disable IPv6 support.
   --disable-snmpv1                Do not include code that implements SNMPv1.
   --disable-snmpv2c               Do not include code that implements SNMPv2c.
   --enable-debugging              Outputs extra debugging information at all
@@ -4020,11 +4020,9 @@ fi
 
 # Check whether --enable-ipv6 was given.
 if test "${enable_ipv6+set}" = set; then :
-  enableval=$enable_ipv6; if test "x$enable_ipv6" = "xyes"; then
-
-$as_echo "#define NETSNMP_ENABLE_IPV6 1" >>confdefs.h
-
-    fi
+  enableval=$enable_ipv6;
+else
+      enable_ipv6="yes"
 fi
 
 
@@ -4033,6 +4031,11 @@ if test "${with_ipv6+set}" = set; then :
   withval=$with_ipv6; as_fn_error $? "Invalid option. Use --enable-ipv6/--disable-ipv6 instead" "$LINENO" 5
 fi
 
+if test "x$enable_ipv6" != "xno"; then
+
+$as_echo "#define NETSNMP_ENABLE_IPV6 1" >>confdefs.h
+
+fi
 
 
 # Check whether --with-logfile was given.
