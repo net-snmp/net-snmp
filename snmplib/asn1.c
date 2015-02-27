@@ -3474,9 +3474,6 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
         return 0;
     }
 
-    CHECK_OVERFLOW_S(high,14);
-    CHECK_OVERFLOW_U(low,14);
-
     /*
      * Encode the low 4 bytes first.  
      */
