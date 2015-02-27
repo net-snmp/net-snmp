@@ -157,7 +157,7 @@ static void netsnmp_access_arp_read_netlink(int fd, void *data)
 		*access->cache_expired = 1;
             return;
         }
-    } while (0);
+    } while (r < 0 && errno == EINTR);
     len = r;
 
     for (h = (struct nlmsghdr *) buf; NLMSG_OK(h, len); h = NLMSG_NEXT(h, len)) {
