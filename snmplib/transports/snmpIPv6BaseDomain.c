@@ -97,6 +97,10 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
                 data, len));
     if (data != NULL && len == sizeof(struct sockaddr_in6)) {
         to = (struct sockaddr_in6 *) data;
+    } else if (data != NULL && len == sizeof(netsnmp_indexed_addr_pair)) {
+        netsnmp_indexed_addr_pair *addr_pair =
+            (netsnmp_indexed_addr_pair *) data;
+        to = (struct sockaddr_in6 *) &(addr_pair->remote_addr);
     } else if (t != NULL && t->data != NULL) {
         to = (struct sockaddr_in6 *) t->data;
     }
