@@ -193,7 +193,6 @@ _setup_trusted_certs(void)
         return;
     }
     _trusted_certs->container_name = strdup("trusted certificates");
-    _trusted_certs->free_item = (netsnmp_container_obj_func*) free;
     _trusted_certs->compare = (netsnmp_container_compare*) strcmp;
 }
 
