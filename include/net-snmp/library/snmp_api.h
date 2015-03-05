@@ -119,6 +119,7 @@ typedef struct request_list {
 
     NETSNMP_IMPORT void     snmp_set_detail(const char *);
 
+#define SNMP_MAX_RCV_MSG_SIZE      65536
 #define SNMP_MAX_MSG_SIZE          1472 /* ethernet MTU minus IP/UDP header */
 #define SNMP_MAX_MSG_V3_HDRS       (4+3+4+7+7+3+7+16)   /* fudge factor=16 */
 #define SNMP_MAX_ENG_SIZE          32

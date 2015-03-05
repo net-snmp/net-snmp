@@ -86,7 +86,7 @@ netsnmp_udpipv4base_transport_init(struct sockaddr_in *addr, int local)
 
     addr_ptr = (u_char *) malloc(6);
     if (NULL == addr_ptr) {
-        SNMP_FREE(t);
+        free(t);
         return NULL;
     }
 
@@ -107,7 +107,7 @@ netsnmp_udpipv4base_transport_init(struct sockaddr_in *addr, int local)
         netsnmp_indexed_addr_pair addr_pair;
         char                      *str;
         memset(&addr_pair, 0, sizeof(netsnmp_indexed_addr_pair));
-        memcpy(&(addr_pair.remote_addr), addr, sizeof(struct sockaddr_in));
+        memcpy(&(addr_pair.remote_addr), addr, sizeof(*addr));
         str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,
                                   sizeof(netsnmp_indexed_addr_pair));
         DEBUGMSGTL(("netsnmp_udpbase", "open %s %s\n",
@@ -130,13 +130,13 @@ netsnmp_udpipv4base_transport_init(struct sockaddr_in *addr, int local)
         t->data_length = sizeof(netsnmp_indexed_addr_pair);
 
         addr_pair = (netsnmp_indexed_addr_pair *)t->data;
-        memcpy(&addr_pair->remote_addr, addr, sizeof(struct sockaddr_in));
+        memcpy(&addr_pair->remote_addr, addr, sizeof(*addr));
     }
     return t;
 }
 
 int
-netsnmp_udpipv4base_transport_socket(struct sockaddr_in *addr, int flags)
+netsnmp_udpipv4base_transport_socket(int flags)
 {
     int local = flags & NETSNMP_TSPEC_LOCAL;
     int sock = -1;
@@ -153,7 +153,7 @@ netsnmp_udpipv4base_transport_socket(struct sockaddr_in *addr, int flags)
     if (-1 == sock)
         sock= socket(PF_INET, SOCK_DGRAM, 0);
 
-    DEBUGMSGTL(("UDPBase", "openned socket %d as local=%d\n", sock, local));
+    DEBUGMSGTL(("UDPBase", "opened socket %d as local=%d\n", sock, local));
     if (sock < 0)
         return -1;
 
@@ -274,7 +274,7 @@ netsnmp_udpipv4base_transport_with_source(struct sockaddr_in *addr, int local,
     else
         bind_addr = src_addr;
 
-    t->sock = netsnmp_udpipv4base_transport_socket(bind_addr, flags);
+    t->sock = netsnmp_udpipv4base_transport_socket(flags);
     if (t->sock < 0) {
         netsnmp_transport_free(t);
         return NULL;
@@ -289,8 +289,7 @@ netsnmp_udpipv4base_transport_with_source(struct sockaddr_in *addr, int local,
         netsnmp_transport_free(t);
         t = NULL;
     }
-
-    if (!local)
+    else if (!local)
         netsnmp_udpipv4base_transport_get_bound_addr(t);
 
     return t;
