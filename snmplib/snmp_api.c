@@ -5447,17 +5447,16 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
   if (dump || filter) {
       int filtered = 0;
       char *addrtxt = netsnmp_transport_peer_string(transport, opaque, olength);
-#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
-      char *sourceaddr;
-#endif
       snmp_log(LOG_DEBUG, "\nReceived %d byte packet from %s\n",
                length, addrtxt);
 
       if (dump)
           xdump(packetptr, length, "");
+
 #ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
       if (filter) {
-          char *c = strchr(addrtxt, '[');
+          char *sourceaddr, *c = strchr(addrtxt, '[');
+          const char *dropstr = NULL;
           if (c) {
               sourceaddr = ++c;
               c = strchr(sourceaddr, ']');
@@ -5465,12 +5464,6 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
                   *c = 0;
               filtered = netsnmp_transport_filter_check(sourceaddr);
           }
-      }
-#endif
-
-#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
-      if (filter) {
-          const char *dropstr = NULL;
           if ((filter == -1) && filtered)
               dropstr = "matched blacklist";
           else if ((filter == 1) && !filtered)
