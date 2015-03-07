@@ -143,13 +143,13 @@ typedef long    fd_mask;
 #include <net-snmp/agent/agent_module_config.h>
 #include <net-snmp/agent/mib_module_config.h>
 
-#include "utilities/execute.h" /* netsnmp_close_fds() */
 #include "snmpd.h"
 
 #include <net-snmp/agent/mib_modules.h>
 
 #include <net-snmp/agent/agent_trap.h>
 
+#include <net-snmp/agent/netsnmp_close_fds.h>
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_iterator.h>
 
