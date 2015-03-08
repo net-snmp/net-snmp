@@ -22,9 +22,6 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
@@ -37,6 +34,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <ucd-snmp/errormib.h>
+
+#include <net-snmp/agent/netsnmp_close_fds.h>
 
 #include "execute.h"
 #include "struct.h"
@@ -410,32 +409,5 @@ run_exec_command( char *command, char *input,
      */
     DEBUGMSGTL(("run:exec", "running shell command '%s'\n", command));
     return run_shell_command( command, input, output, out_len );
-#endif
-}
-
-/**
- * Close all file descriptors larger than @fd.
- */
-void netsnmp_close_fds(int fd)
-{
-#if defined(HAVE_FORK)
-    DIR            *dir;
-    struct dirent  *ent;
-    int             i, largest_fd = -1;
-
-    if ((dir = opendir("/proc/self/fd"))) {
-        while ((ent = readdir(dir))) {
-            if (sscanf(ent->d_name, "%d", &i) == 1) {
-                if (i > largest_fd)
-                    largest_fd = i;
-            }
-        }
-        closedir(dir);
-    } else {
-        largest_fd = getdtablesize() - 1;
-    }
-
-    for (i = largest_fd; i > fd; i--)
-        close(i);
 #endif
 }

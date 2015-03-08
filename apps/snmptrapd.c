@@ -97,7 +97,7 @@ SOFTWARE.
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/fd_event_manager.h>
-#include "utilities/execute.h" /* netsnmp_close_fds() */
+#include <net-snmp/agent/netsnmp_close_fds.h>
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
 #include "snmptrapd_auth.h"
