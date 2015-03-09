@@ -24,6 +24,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/data_access/swrun.h>
 
 #include "host.h"
 #include "host_res.h"
@@ -114,7 +115,14 @@ static long     get_max_solaris_processes(void);
 static int      get_load_dev(void);
 static int      count_users(void);
 extern int      count_processes(void);
-extern int      swrun_count_processes(void);
+#if USING_HOST_DATA_ACCESS_SWRUN_MODULE
+static int      count_kthreads = 1;
+
+static void parse_count_kthreads(const char *token, const char *line)
+{
+    count_kthreads = atoi(line);
+}
+#endif
 
         /*********************
 	 *
@@ -193,6 +201,11 @@ init_hr_system(void)
 {
 #ifdef NPROC_SYMBOL
     auto_nlist(NPROC_SYMBOL, 0, 0);
+#endif
+#if USING_HOST_DATA_ACCESS_SWRUN_MODULE
+    snmpd_register_const_config_handler("count_kthreads",
+                                        parse_count_kthreads, NULL,
+					"0|1    0 to exclude kernel threads from hrSystemProcesses.0");
 #endif
 
     REGISTER_MIB("host/hr_system", hrsystem_variables, variable2,
@@ -317,7 +330,7 @@ var_hrsys(struct variable * vp,
         return (u_char *) & long_return;
     case HRSYS_PROCS:
 #if USING_HOST_DATA_ACCESS_SWRUN_MODULE
-        long_return = swrun_count_processes();
+        long_return = swrun_count_processes(count_kthreads);
 #elif USING_HOST_HR_SWRUN_MODULE
         long_return = count_processes();
 #else

@@ -85,7 +85,7 @@ extern "C" {
 
     void netsnmp_swrun_entry_free(netsnmp_swrun_entry *entry);
 
-    int  swrun_count_processes( void );
+    int  swrun_count_processes( int include_kthreads );
     int  swrun_max_processes(   void );
     int  swrun_count_processes_by_name( char *name );
 
