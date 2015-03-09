@@ -797,6 +797,9 @@ static void
 print_error(const char *str, const char *token, int type)
 {
     erroneousMibs++;
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                NETSNMP_DS_LIB_MIB_ERRORS))
+	return;
     DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
         snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", str, mibLine,
@@ -1760,6 +1763,7 @@ do_linkup(struct module *mp, struct node *np)
             continue;
         tp = find_tree_node(mip->label, mip->modid);
         if (!tp) {
+	    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_ERRORS))
                 snmp_log(LOG_WARNING,
                          "Did not find '%s' in module %s (%s)\n",
                          mip->label, module_name(mip->modid, modbuf),
@@ -1801,6 +1805,7 @@ do_linkup(struct module *mp, struct node *np)
                             op->next = np->next;
                         else
                             nbuckets[hash] = np->next;
+			DEBUGMSGTL(("parse-mibs", "Moving %s to orphanage", np->label));
                         np->next = orphan_nodes;
                         orphan_nodes = np;
                         op = NULL;

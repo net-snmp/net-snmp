@@ -117,10 +117,12 @@ main(int argc, char *argv[])
     int             print = 0;
     int             find_all = 0;
     int             width = 1000000;
+    netsnmp_session dummy;
 
     /*
      * usage: snmptranslate name
      */
+    snmp_sess_init(&dummy);
     while ((arg = getopt(argc, argv, "Vhm:M:w:D:P:T:O:I:L:")) != EOF) {
         switch (arg) {
         case 'h':
