@@ -82,7 +82,7 @@ kstat_ctl_t    *kstat_fd = 0;
 static
 mibcache        Mibcache[MIBCACHE_SIZE+1] = {
     {MIB_SYSTEM, 0, (void *) -1, 0, 0, 0, 0},
-    {MIB_INTERFACES, 50 * sizeof(mib2_ifEntry_t), (void *) -1, 0, 30, 0,
+    {MIB_INTERFACES, 50 * sizeof(mib2_ifEntry_t), (void *) -1, 0, 3, 0,
      0},
     {MIB_AT, 0, (void *) -1, 0, 0, 0, 0},
     {MIB_IP, sizeof(mib2_ip_t), (void *) -1, 0, 60, 0, 0},
@@ -253,14 +253,10 @@ void
 init_kernel_sunos5(void)
 {
     static int creg   = 0;
-    const  int period = 30;
+    const  int period = 3;
     int    alarm_id   = 0;
 
     if (creg == 0) {
-	alarm_id = snmp_alarm_register(5, NULL, kernel_sunos5_cache_age,
-                                       NULL);
-	DEBUGMSGTL(("kernel_sunos5", "registered alarm %d with period 5s\n", 
-		    alarm_id));
 	alarm_id = snmp_alarm_register(period, SA_REPEAT, 
                                        kernel_sunos5_cache_age,
                                        (void *)period);
