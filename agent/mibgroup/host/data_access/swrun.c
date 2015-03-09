@@ -80,10 +80,27 @@ shutdown_swrun(void)
 }
 
 int
-swrun_count_processes( void )
+swrun_count_processes(int include_kthreads)
 {
+    netsnmp_swrun_entry *entry;
+    netsnmp_iterator  *it;
+    int i = 0;
+
     netsnmp_cache_check_and_reload(swrun_cache);
-    return ( swrun_container ? CONTAINER_SIZE(swrun_container) : 0 );
+    if ( !swrun_container )
+        return 0;    /* or -1 */
+
+    if (include_kthreads)
+        return ( swrun_container ? CONTAINER_SIZE(swrun_container) : 0 );
+
+    it = CONTAINER_ITERATOR( swrun_container );
+    while ((entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) != NULL) {
+        if (4 == entry->hrSWRunType)
+            i++;
+    }
+    ITERATOR_RELEASE( it );
+
+    return i;
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_SWRUN_MAX_PROCESSES
