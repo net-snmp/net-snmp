@@ -6994,7 +6994,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             if (*ecp != 0) {
 #ifndef NETSNMP_DISABLE_MIB_LOADING
                 for (ep = tp ? tp->enums : NULL; ep != NULL; ep = ep->next) {
-                    if (strncmp(ep->label, cp, strlen(ep->label)) == 0) {
+                    if (strcmp(ep->label, cp) == 0) {
                         break;
                     }
                 }
