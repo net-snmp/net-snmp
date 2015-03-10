@@ -208,7 +208,7 @@ netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
                                  const char *tag, const char* profile)
 {
     if (NETSNMP_RUNTIME_PROTOCOL_SKIP(version)) {
-        DEBUGMSGTL(("trap", "skipping trap sink (version %d disabled)\n",
+        DEBUGMSGTL(("trap", "skipping trap sink (version 0x%02x disabled)\n",
                     version));
         return 0;
     }
@@ -317,7 +317,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
 
     if (NETSNMP_RUNTIME_PROTOCOL_SKIP(version)) {
         config_perror("SNMP version disabled");
-        DEBUGMSGTL(("trap", "skipping trap sink (version %d disabled)\n",
+        DEBUGMSGTL(("trap", "skipping trap sink (version 0x%02x disabled)\n",
                     version));
         return 0;
     }
@@ -1044,7 +1044,7 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
         return;
 
     if (NETSNMP_RUNTIME_PROTOCOL_SKIP(sess->version)) {
-        DEBUGMSGTL(("trap", "not sending trap type=%d, version %ld disabled\n",
+        DEBUGMSGTL(("trap", "not sending trap type=%d, version %02lx disabled\n",
                     template_pdu->command, sess->version));
         return;
     }
