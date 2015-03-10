@@ -199,9 +199,10 @@ extern          "C" {
 
 #define NETSNMP_RUNTIME_PROTOCOL_CHECK_V1V2(pc_ver, pc_target) do {    \
         if (NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) ||                \
-            NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver))                  \
+            NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver)) {                \
             DEBUGMSGTL(("snmp:protocol:disabled", "enforced\n"));      \
             goto pc_target;                                            \
+        }                                                              \
     } while(0)
 #else
 #define NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) (0)
@@ -215,9 +216,10 @@ extern          "C" {
                             NETSNMP_DS_LIB_DISABLE_V3))
 
 #define NETSNMP_RUNTIME_PROTOCOL_CHECK_V3(pc_ver, pc_target) do {      \
-        if (NETSNMP_RUNTIME_PROTOCOL_SKIP_V3(pc_ver))                  \
+        if (NETSNMP_RUNTIME_PROTOCOL_SKIP_V3(pc_ver)) {                \
             DEBUGMSGTL(("snmp:protocol:disabled", "enforced\n"));      \
             goto pc_target;                                            \
+        }                                                              \
     } while(0)
 
 #define NETSNMP_RUNTIME_PROTOCOL_CHECK(pc_ver, pc_target) do {         \
