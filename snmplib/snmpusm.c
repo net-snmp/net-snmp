@@ -4619,7 +4619,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
       newuser->privKeyLen = privKeyLen;
     }
     else {
-      /* The privKey length is smaller than required by privProtocol */
+      *errorMsg = "privKey length is smaller than required by privProtocol";
       usm_free_user(newuser);
       return NULL;
     }
