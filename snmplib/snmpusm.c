@@ -3289,7 +3289,12 @@ init_usm_conf(const char *app)
                                   usm_parse_config_usmUser, NULL, NULL);
     register_config_handler(app, "createUser",
                                   usm_parse_create_usmUser, NULL,
-                                  "username [-e ENGINEID] (MD5|SHA) authpassphrase [DES [privpassphrase]]");
+#ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
+                                  "username [-e ENGINEID] (MD5|SHA) authpassphrase [DES [privpassphrase]]"
+#else
+                                  "username [-e ENGINEID] authpassphrase [privpassphrase]"
+#endif
+        );
 
     /*
      * we need to be called back later 
@@ -4355,7 +4360,12 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     size_t          privKeyLen = 0;
     size_t          ret;
     int             ret2;
+#ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     int             testcase;
+#else
+    const oid      *prot;
+    size_t          prot_len;
+#endif
 
     if (NULL == line)
         return NULL;
@@ -4410,9 +4420,28 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     newuser->secName = strdup(buf);
     newuser->name = strdup(buf);
 
-    if (!cp)
+    if (!cp) {
+#ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
+        /** no passwords ok iff defaults are noauth/nopriv */
+        prot = get_default_authtype(&prot_len);
+        if (snmp_oid_compare(usmNoAuthProtocol, OID_LENGTH(usmNoAuthProtocol),
+                             prot, prot_len) != 0) {
+            *errorMsg = "no authentication pass phrase";
+            usm_free_user(newuser);
+            return NULL;
+        }
+        prot = get_default_privtype(&prot_len);
+        if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
+                             prot, prot_len) != 0) {
+            *errorMsg = "no privacy pass phrase";
+            usm_free_user(newuser);
+            return NULL;
+        }
+#endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
         goto add;               /* no authentication or privacy type */
+    }
 
+#ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     /*
      * READ: Authentication Type 
      */
@@ -4433,14 +4462,19 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
 
     cp = skip_token(cp);
 
-    /*
-     * READ: Authentication Pass Phrase or key
-     */
     if (!cp) {
         *errorMsg = "no authentication pass phrase";
         usm_free_user(newuser);
         return NULL;
     }
+#else
+    prot = get_default_authtype(&prot_len);
+    memcpy(newuser->authProtocol, prot, prot_len * sizeof(oid));
+#endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
+
+    /*
+     * READ: Authentication Pass Phrase or key
+     */
     cp = copy_nword(cp, buf, sizeof(buf));
     if (strcmp(buf,"-m") == 0) {
         /* a master key is specified */
@@ -4506,9 +4540,18 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         }
     }
 
-    if (!cp)
+    if (!cp) {
+#ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
         goto add;               /* no privacy type (which is legal) */
+#else
+        prot = get_default_privtype(&prot_len);
+        if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
+                             prot, prot_len) == 0)
+            goto add;
+#endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
+    }
 
+#ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     /*
      * READ: Privacy Type 
      */
@@ -4542,6 +4585,11 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     }
 
     cp = skip_token(cp);
+#else
+    prot = get_default_privtype(&prot_len);
+    memcpy(newuser->privProtocol, prot, prot_len * sizeof(oid));
+#endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
+
     /*
      * READ: Encryption Pass Phrase or key
      */

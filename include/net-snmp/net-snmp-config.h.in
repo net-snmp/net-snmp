@@ -1401,6 +1401,9 @@
 /* testing code sections. */
 #undef NETSNMP_ENABLE_TESTING_CODE
 
+/* if defined always use default auth/priv protocol when creating usmUsers */
+#undef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
+
 /* Should evaluate to the name of the current function if defined */
 #undef NETSNMP_FUNCTION
 
