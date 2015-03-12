@@ -4657,8 +4657,10 @@ snmpv3_privtype_conf(const char *word, char *cptr)
 #endif
     if (testcase == 0)
         config_perror("Unknown privacy type");
-    defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
-    DEBUGMSGTL(("snmpv3", "set default privacy type: %s\n", cptr));
+    else {
+        defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
+        DEBUGMSGTL(("snmpv3", "set default privacy type: %s\n", cptr));
+    }
 }
 
 const oid      *
