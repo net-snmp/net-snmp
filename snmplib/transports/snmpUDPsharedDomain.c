@@ -225,7 +225,7 @@ netsnmp_udpshared_transport_with_source(struct sockaddr_in *addr, int flags,
 
     /** if no base transport found, create one */
     if (NULL == b) {
-        b = netsnmp_udpipv4base_transport_with_source(addr, local, src_addr);
+        b = netsnmp_udp_transport_with_source(addr, local, src_addr);
         if (NULL == b) {
             netsnmp_transport_free(t);
             return NULL;
