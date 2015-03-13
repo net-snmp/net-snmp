@@ -113,8 +113,9 @@ _udpshared_send(netsnmp_transport *t, void *buf, int size,
 static char *
 _udpshared_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
-    if (NULL == t || NULL == t->base_transport)
-        return NULL;
+    if (NULL == t || NULL == t->base_transport ||
+        NULL == t->base_transport->f_fmtaddr)
+        return strdup("<UNKNOWN>");
 
     return t->base_transport->f_fmtaddr(t->base_transport, data, len);
 }
