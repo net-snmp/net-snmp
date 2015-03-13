@@ -112,7 +112,7 @@ extern          "C" {
 
     struct vacm_viewEntry {
         char            viewName[VACMSTRINGLEN];
-        oid             viewSubtree[MAX_OID_LEN];
+        oid             viewSubtree[MAX_OID_LEN+1]; /* keep len in [0] */
         size_t          viewSubtreeLen;
         u_char          viewMask[VACMSTRINGLEN];
         size_t          viewMaskLen;

@@ -177,7 +177,7 @@ vacm_parse_config_view(const char *token, const char *line)
     len = sizeof(view.viewName);
     line =
         read_config_read_octet_string(line, (u_char **) & viewName, &len);
-    view.viewSubtreeLen = MAX_OID_LEN;
+    view.viewSubtreeLen = MAX_OID_LEN + 1;
     line =
         read_config_read_objid_const(line, (oid **) & viewSubtree,
                                &view.viewSubtreeLen);
