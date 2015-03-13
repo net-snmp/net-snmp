@@ -90,8 +90,16 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
                      void *data, int len)
 {
     struct sockaddr_in6 *to = NULL;
+    char scope_id[IF_NAMESIZE + 1] = "";
+    char port[6];
     char addr[INET6_ADDRSTRLEN];
-    char tmp[INET6_ADDRSTRLEN + 18];
+    /** tmp buffer size */
+    size_t tmplen = sizeof(addr) + sizeof(scope_id) + sizeof(port) +
+        strlen(prefix) + 10; /* 10 is spaces/separators + some wiggle room */
+    char *tmp = malloc(tmplen);
+
+    if (NULL == tmp)
+        return NULL;
 
     DEBUGMSGTL(("netsnmp_ipv6", "fmtaddr: t = %p, data = %p, len = %d\n", t,
                 data, len));
@@ -105,13 +113,13 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
         to = (struct sockaddr_in6 *) t->data;
     }
     if (to == NULL) {
-        snprintf(tmp, sizeof(tmp), "%s: unknown", prefix);
+        strlcpy(tmp, prefix, tmplen);
+        strlcat(tmp, ": unknown", tmplen);
     } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
 	struct hostent *host;
 	host = netsnmp_gethostbyaddr((char *)&to->sin6_addr, sizeof(struct in6_addr), AF_INET6);
 	return (host ? strdup(host->h_name) : NULL);
     } else {
-        char scope_id[IF_NAMESIZE + 1] = "";
 
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
 	if (to->sin6_scope_id
@@ -119,12 +127,17 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
             scope_id[0] = '%';
         }
 #endif
-        snprintf(tmp, sizeof(tmp), "%s: [%s%s]:%hu", prefix,
-                 inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr,
-                           INET6_ADDRSTRLEN), scope_id, ntohs(to->sin6_port));
+        strlcpy(tmp, prefix, tmplen);
+        inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr, sizeof(addr));
+        strlcat(tmp, ": [", tmplen);
+        strlcat(tmp, addr, tmplen);
+        strlcat(tmp, scope_id, tmplen);
+        strlcat(tmp, "]:", tmplen);
+        snprintf(port,sizeof(port), "%hu", ntohs(to->sin6_port));
+        strlcat(tmp, port, tmplen);
     }
-    tmp[sizeof(tmp)-1] = '\0';
-    return strdup(tmp);
+    tmp[tmplen-1] = '\0';
+    return tmp;
 }
 
 int
