@@ -34,7 +34,7 @@ number1=111
 number2=222
 rm -f $echo_two_numbers
 cat <<EOF >$echo_two_numbers
-#!$(if [ "x$MSYS_SH" != x ]; then echo "$MSYS_SH"; else echo /bin/sh; fi)
+#!${MSYS_SH:-/bin/sh}
 echo $number1
 echo $number2
 EOF
