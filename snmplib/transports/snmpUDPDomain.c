@@ -211,7 +211,7 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
                     const char *secName, const char *contextName,
                     struct in_addr *network, struct in_addr *mask)
 {
-    int communityLen, secNameLen, contextNameLen;
+    int communityLen, secNameLen, contextNameLen, len;
     com2SecEntry* e;
     char* last;
     struct in_addr dflt_network, dflt_mask;
@@ -235,20 +235,22 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
     if (network->s_addr & ~mask->s_addr)
         return C2SE_ERR_MASK_MISMATCH;
 
-    communityLen = strlen(community) + 1;
-    if (communityLen > VACMSTRINGLEN)
+    communityLen = strlen(community);
+    if (communityLen > VACM_MAX_STRING)
         return C2SE_ERR_COMMUNITY_TOO_LONG;
 
-    secNameLen = strlen(secName) + 1;
-    if (secNameLen > VACMSTRINGLEN)
+    secNameLen = strlen(secName);
+    if (secNameLen > VACM_MAX_STRING)
         return C2SE_ERR_SECNAME_TOO_LONG;
 
     contextNameLen = contextName ? strlen(contextName) : 0;
-    if (contextNameLen > VACMSTRINGLEN)
+    if (contextNameLen > COMMUNITY_MAX_LEN)
         return C2SE_ERR_SECNAME_TOO_LONG;
 
-    e = (com2SecEntry*)malloc(offsetof(com2SecEntry, community) + communityLen
-                              + secNameLen + contextNameLen);
+    /** alloc space for struct + 3 strings with NULLs */
+    len = offsetof(com2SecEntry, community) + communityLen + secNameLen +
+        contextNameLen + 3;
+    e = (com2SecEntry*)calloc(len, 1);
     if (e == NULL)
         return C2SE_ERR_MEMORY;
     last = ((char*)e) + offsetof(com2SecEntry, community);
@@ -264,10 +266,10 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
     }
 
     memcpy(last, community, communityLen);
-    last += communityLen;
+    last += communityLen + 1;
     memcpy(last, secName, secNameLen);
     e->secName = last;
-    last += secNameLen;
+    last += secNameLen + 1;
     if (contextNameLen) {
         memcpy(last, contextName, contextNameLen);
         e->contextName = last;
@@ -316,7 +318,8 @@ netsnmp_udp_parse_security(const char *token, char *param)
             return;
         }
         param = copy_nword( param, secName, sizeof(secName));
-    }
+    } else
+        contextName[0] = '\0';
 
     if (secName[0] == '\0') {
         config_perror("empty NAME parameter");
