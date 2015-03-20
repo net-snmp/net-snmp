@@ -195,14 +195,14 @@ netsnmp_udp_transport_with_source(struct sockaddr_in *addr, int local,
 #define EXAMPLE_NETWORK		"NETWORK"
 #define EXAMPLE_COMMUNITY	"COMMUNITY"
 
-typedef struct com2SecEntry_s {
+struct com2SecEntry_s {
     const char *secName;
     const char *contextName;
     struct com2SecEntry_s *next;
     in_addr_t   network;
     in_addr_t   mask;
     const char  community[1];
-} com2SecEntry;
+};
 
 static com2SecEntry   *com2SecList = NULL, *com2SecListLast = NULL;
 
