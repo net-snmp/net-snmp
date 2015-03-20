@@ -233,6 +233,7 @@ netsnmp_udpshared_transport_with_source(struct sockaddr_in *addr, int flags,
     }
     ++b->local_length; /* reference count */
     t->base_transport = b;
+    t->msgMaxSize = b->msgMaxSize;
     t->flags |= NETSNMP_TRANSPORT_FLAG_SHARED;
 
     /** get local socket address */
