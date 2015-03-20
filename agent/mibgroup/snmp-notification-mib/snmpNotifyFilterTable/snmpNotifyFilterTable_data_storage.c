@@ -42,7 +42,7 @@ _snmpNotifyFilter_parse(const char *token, char *buf);
 static void 
 _nf_free_item(void *data, void *dontcare)
 {
-    snmpNotifyFilter_storage_dispose((snmpNotifyFilter_data *)data);
+    snmpNotifyFilter_storage_dispose((snmpNotifyFilter_data_storage *)data);
 }
 
 netsnmp_container *
@@ -96,11 +96,11 @@ shutdown_snmpNotifyFilterTable_data_storage(void)
 
 }
 
-snmpNotifyFilter_data *
+snmpNotifyFilter_data_storage *
 snmpNotifyFilter_storage_create(const u_char *name, size_t name_len,
                                 const oid *subtree, size_t subtree_len)
 {
-    snmpNotifyFilter_data *data;
+    snmpNotifyFilter_data_storage *data;
     int subtree_bytes = subtree_len * sizeof(oid);
 
     DEBUGMSGTL(("verbose:snmpNotifyFilter:storage:create", "called\n"));
@@ -119,7 +119,7 @@ snmpNotifyFilter_storage_create(const u_char *name, size_t name_len,
     }
 
     /** allocate memory */
-    data = SNMP_MALLOC_TYPEDEF(snmpNotifyFilter_data);
+    data = SNMP_MALLOC_TYPEDEF(snmpNotifyFilter_data_storage);
     if (NULL == data) {
         snmp_log(LOG_ERR, "memory allocation failed\n");
         return NULL;
@@ -137,14 +137,14 @@ snmpNotifyFilter_storage_create(const u_char *name, size_t name_len,
 }
 
 void
-snmpNotifyFilter_storage_dispose(snmpNotifyFilter_data *data)
+snmpNotifyFilter_storage_dispose(snmpNotifyFilter_data_storage *data)
 {
     free(data);
     --_active;
 }
 
 int
-snmpNotifyFilter_storage_insert(snmpNotifyFilter_data *data)
+snmpNotifyFilter_storage_insert(snmpNotifyFilter_data_storage *data)
 {
     int     rc, i;
     oid     *pos;
@@ -178,7 +178,7 @@ snmpNotifyFilter_storage_insert(snmpNotifyFilter_data *data)
 }
 
 int
-snmpNotifyFilter_storage_remove(snmpNotifyFilter_data *data)
+snmpNotifyFilter_storage_remove(snmpNotifyFilter_data_storage *data)
 {
     int     rc;
 
@@ -193,13 +193,13 @@ snmpNotifyFilter_storage_remove(snmpNotifyFilter_data *data)
     return SNMPERR_SUCCESS;
 }
 
-snmpNotifyFilter_data *
+snmpNotifyFilter_data_storage *
 snmpNotifyFilter_storage_add(const u_char *profileName, size_t profileName_len,
                              const oid *filterSubtree,
                              size_t filterSubtree_len, u_char *filterMask,
                              size_t filterMask_len, u_long filterType)
 {
-    snmpNotifyFilter_data *data;
+    snmpNotifyFilter_data_storage *data;
 
     data = snmpNotifyFilter_storage_create(profileName, profileName_len,
                                            filterSubtree, filterSubtree_len);
@@ -231,7 +231,7 @@ snmpNotifyFilter_vacm_view_subtree(const char *profile)
     size_t          i, j;
     netsnmp_void_array *s;
     struct vacm_viewEntry *tmp;
-    snmpNotifyFilter_data *data;
+    snmpNotifyFilter_data_storage *data;
 
    if ((NULL == profile) || (NULL == _container))
         return NULL;
@@ -265,7 +265,7 @@ snmpNotifyFilter_vacm_view_subtree(const char *profile)
      * copy data
      */
     for (i = 0, j = 0; i < s->size; ++i) {
-        data = (snmpNotifyFilter_data *) s->array[i];
+        data = (snmpNotifyFilter_data_storage *) s->array[i];
 
         /*
          * must match profile name exactly, and subset will return
@@ -315,7 +315,7 @@ snmpNotifyFilter_vacm_view_subtree(const char *profile)
 static void
 _snmpNotifyFilter_parse(const char *token, char *buf)
 {
-    snmpNotifyFilter_data  data, *row;
+    snmpNotifyFilter_data_storage  data, *row;
     size_t                 len, tmp_len;
     char                   type_buf[9]; /* include/excluded */
 

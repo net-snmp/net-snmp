@@ -24,7 +24,7 @@ extern          "C" {
      */
 #define MAX_snmpNotifyFilterTable_IDX_LEN     117
 
-    typedef struct snmpNotifyFilterTable_data_s {
+    typedef struct snmpNotifyFilterTable_data_storage_s {
 
         /** this must be first for container compare to work */
         netsnmp_index   oid_idx;
@@ -60,7 +60,7 @@ extern          "C" {
          */
         u_long          snmpNotifyFilterType;
 
-    } snmpNotifyFilter_data;
+    } snmpNotifyFilter_data_storage;
 
     /*
      *********************************************************************
@@ -69,25 +69,25 @@ extern          "C" {
     void            init_snmpNotifyFilterTable_data_storage(void);
     void            shutdown_snmpNotifyFilterTable_data_storage(void);
 
-    snmpNotifyFilter_data*
+    snmpNotifyFilter_data_storage*
     snmpNotifyFilter_storage_create(const u_char *snmpNotifyFilterProfileName,
                                     size_t snmpNotifyFilterProfileName_len,
                                     const oid *snmpNotifyFilterSubtree,
                                     size_t snmpNotifyFilterSubtree_len);
 
     void
-    snmpNotifyFilter_storage_dispose(snmpNotifyFilter_data *data);
+    snmpNotifyFilter_storage_dispose(snmpNotifyFilter_data_storage *data);
 
     int
-    snmpNotifyFilter_storage_insert(snmpNotifyFilter_data *data);
+    snmpNotifyFilter_storage_insert(snmpNotifyFilter_data_storage *data);
 
-    snmpNotifyFilter_data *
+    snmpNotifyFilter_data_storage *
     snmpNotifyFilter_storage_add(const u_char *profile, size_t profile_len,
                                  const oid *filterSubtree,
                                  size_t filterSubtree_len, u_char *filterMask,
                                  size_t filterMask_len, u_long filterType);
     int
-    snmpNotifyFilter_storage_remove(snmpNotifyFilter_data *data);
+    snmpNotifyFilter_storage_remove(snmpNotifyFilter_data_storage *data);
 
     struct vacm_viewEntry *
     snmpNotifyFilter_vacm_view_subtree(const char *profile);
