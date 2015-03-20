@@ -284,6 +284,9 @@ netsnmp_udpipv4base_transport_with_source(struct sockaddr_in *addr, int local,
      * If we've been given an address to bind to, then bind to it.
      * Otherwise the OS will use "something sensible".
      */
+    if (NULL == bind_addr)
+        return t;
+
     rc = netsnmp_udpipv4base_transport_bind(t, bind_addr, flags);
     if (rc) {
         netsnmp_transport_free(t);
