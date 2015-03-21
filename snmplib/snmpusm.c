@@ -4561,8 +4561,6 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
         testcase = 1;
-	/* DES uses a 128 bit key, 64 bits of which is a salt */
-	privKeyLen = 16;
 #else
         *errorMsg = "DES support disabled";
 #endif
@@ -4573,7 +4571,6 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         memcpy(newuser->privProtocol, usmAESPrivProtocol,
                sizeof(usmAESPrivProtocol));
         testcase = 1;
-	privKeyLen = 16;
 #else
         *errorMsg = "AES support not available";
 #endif
@@ -4589,6 +4586,15 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     prot = get_default_privtype(&prot_len);
     memcpy(newuser->privProtocol, prot, prot_len * sizeof(oid));
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
+
+    if (newuser->privProtocol[9] == 2) {
+        /* DES uses a 128 bit key, 64 bits of which is a salt */
+        privKeyLen = 16;
+    } else if (newuser->privProtocol[9] == 4) {
+        privKeyLen = 16;
+    } else
+        DEBUGMSGTL(("usmUser",
+                    "warning: unknown keyLen for privacy protocol\n"));
 
     /*
      * READ: Encryption Pass Phrase or key
