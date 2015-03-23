@@ -1357,6 +1357,13 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
 void
 snmpd_parse_config_informsink(const char *word, char *cptr)
 {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_V2c) &&
+        netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_V3)) {
+        netsnmp_config_error("SNMPv2c/SNMPv3 disabled, cannot create informsinks");
+        return;
+    }
     _parse_config_sink(word, cptr, SNMP_VERSION_2c, SNMP_MSG_INFORM);
 }
 #endif
