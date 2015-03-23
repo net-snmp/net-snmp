@@ -1204,6 +1204,7 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
         n->next = a;
         *prevNext = n;
         SNMP_FREE(s);
+        DEBUGMSGTL(("netsnmp_register_agent_nsap", "handle %d\n", n->handle));
         return n->handle;
     } else {
         SNMP_FREE(s);
@@ -1261,7 +1262,34 @@ netsnmp_deregister_agent_nsap(int handle)
     }
 }
 
+int
+netsnmp_agent_listen_on(const char *port)
+{
+    netsnmp_transport *transport;
+    int                handle;
 
+    if (NULL == port)
+        return -1;
+
+    transport = netsnmp_transport_open_server("snmp", port);
+    if (transport == NULL) {
+        snmp_log(LOG_ERR, "Error opening specified endpoint \"%s\"\n", port);
+        return -1;
+    }
+
+    handle = netsnmp_register_agent_nsap(transport);
+    if (handle < 0) {
+        snmp_log(LOG_ERR, "Error registering specified transport \"%s\" as an "
+                 "agent NSAP\n", port);
+        return -1;
+    } else {
+        DEBUGMSGTL(("snmp_agent",
+                    "init_master_agent; \"%s\" registered as an agent NSAP\n",
+                    port));
+    }
+
+    return handle;
+}
 
 /*
  * 
@@ -1289,7 +1317,6 @@ netsnmp_deregister_agent_nsap(int handle)
 int
 init_master_agent(void)
 {
-    netsnmp_transport *transport;
     char           *cptr;
     char           *buf = NULL;
     char           *st;
@@ -1357,24 +1384,8 @@ init_master_agent(void)
 			"requested\n"));
             break;
         }
-        transport = netsnmp_transport_open_server("snmp", cptr);
-
-        if (transport == NULL) {
-            snmp_log(LOG_ERR, "Error opening specified endpoint \"%s\"\n",
-                     cptr);
+        if (0 != netsnmp_agent_listen_on(cptr))
             return 1;
-        }
-
-        if (netsnmp_register_agent_nsap(transport) == 0) {
-            snmp_log(LOG_ERR,
-                     "Error registering specified transport \"%s\" as an "
-		     "agent NSAP\n", cptr);
-            return 1;
-        } else {
-            DEBUGMSGTL(("snmp_agent",
-                        "init_master_agent; \"%s\" registered as an agent "
-			"NSAP\n", cptr));
-        }
     } while(st && *st != '\0');
     SNMP_FREE(buf);
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */

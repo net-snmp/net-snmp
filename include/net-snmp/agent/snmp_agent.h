@@ -300,6 +300,8 @@ extern          "C" {
                                                 *t);
     void            netsnmp_deregister_agent_nsap(int handle);
 
+    int             netsnmp_agent_listen_on(const char *port);
+
     void
         netsnmp_agent_add_list_data(netsnmp_agent_request_info *agent,
                                     netsnmp_data_list *node);
