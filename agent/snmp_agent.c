@@ -3726,7 +3726,7 @@ netsnmp_get_agent_runtime(void)
 
     netsnmp_get_monotonic_clock(&now);
     NETSNMP_TIMERSUB(&now, &starttimeM, &delta);
-    return delta.tv_sec * (uint64_t)100 + delta.tv_usec / 10000;
+    return (uint64_t)(delta.tv_sec * (uint64_t)100 + delta.tv_usec / 10000);
 }
 
 /**
@@ -3763,7 +3763,7 @@ netsnmp_get_agent_uptime(void)
 
     netsnmp_get_monotonic_clock(&now);
     NETSNMP_TIMERSUB(&now, &starttimeM, &delta);
-    return delta.tv_sec * 100UL + delta.tv_usec / 10000;
+    return (u_long)(delta.tv_sec * 100UL + delta.tv_usec / 10000);
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_SET_AGENT_UPTIME

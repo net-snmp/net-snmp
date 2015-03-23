@@ -1133,7 +1133,7 @@ calculate_sectime_diff(const struct timeval *now, const struct timeval *then)
     struct timeval  diff;
 
     NETSNMP_TIMERSUB(now, then, &diff);
-    return diff.tv_sec + (diff.tv_usec >= 500000L);
+    return (u_int)(diff.tv_sec + (diff.tv_usec >= 500000L));
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_SECTIME_DIFF */
 

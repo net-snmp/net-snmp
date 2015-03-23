@@ -444,7 +444,7 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
     netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *to = NULL;
 
-    if (opaque != NULL && *opaque != NULL &&
+    if (opaque != NULL && *opaque != NULL && NULL != olength &&
         ((*olength == sizeof(netsnmp_indexed_addr_pair) ||
           (*olength == sizeof(struct sockaddr_in))))) {
         addr_pair = (netsnmp_indexed_addr_pair *) (*opaque);

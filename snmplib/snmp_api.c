@@ -5543,6 +5543,11 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
         return 0;
     }
 
+    if (NULL == slp || NULL == sp || NULL == isp || NULL == transport) {
+        snmp_log(LOG_ERR, "bad parameters to _sess_read\n");
+        return SNMPERR_GENERR;
+    }
+
     /* to avoid subagent crash */ 
     if (transport->sock < 0) { 
         snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);

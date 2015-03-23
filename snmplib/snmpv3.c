@@ -523,7 +523,7 @@ setup_engineID(u_char ** eidp, const char *text)
     /*
      * Allocate memory and store enterprise ID.
      */
-    if ((bufp = (u_char *) malloc(len)) == NULL) {
+    if ((bufp = (u_char *) calloc(1, len)) == NULL) {
         snmp_log_perror("setup_engineID malloc");
         return -1;
     }
@@ -577,7 +577,8 @@ setup_engineID(u_char ** eidp, const char *text)
 #ifdef AF_INET6
     case ENGINEID_TYPE_IPV6:
         bufp[4] = ENGINEID_TYPE_IPV6;
-        memcpy(bufp + 5, hent->h_addr_list[0], hent->h_length);
+        if (hent)
+            memcpy(bufp + 5, hent->h_addr_list[0], hent->h_length);
         break;
 #endif
 #endif
