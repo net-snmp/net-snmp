@@ -1305,7 +1305,7 @@ netsnmp_vacm_simple_usm_add(const char *user, int rw, int authLevel,
     return SNMPERR_SUCCESS;
 
   bail:
-    if (NULL == accessEntry)
+    if (NULL != accessEntry)
         vacm_destroyAccessEntry(accessEntry->groupName+1, context,
                                 SNMP_SEC_MODEL_USM, authLevel);
 
