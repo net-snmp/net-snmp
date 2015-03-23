@@ -3289,12 +3289,7 @@ init_usm_conf(const char *app)
                                   usm_parse_config_usmUser, NULL, NULL);
     register_config_handler(app, "createUser",
                                   usm_parse_create_usmUser, NULL,
-#ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
-                                  "username [-e ENGINEID] (MD5|SHA) authpassphrase [DES [privpassphrase]]"
-#else
-                                  "username [-e ENGINEID] authpassphrase [privpassphrase]"
-#endif
-        );
+                                  "username [-e ENGINEID] (MD5|SHA|default) authpassphrase [(DES|AES|default) [privpassphrase]]");
 
     /*
      * we need to be called back later 
@@ -4360,11 +4355,12 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     size_t          privKeyLen = 0;
     size_t          ret;
     int             ret2;
-#ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
-    int             testcase;
-#else
-    const oid      *prot;
-    size_t          prot_len;
+#ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
+    const oid      *def_auth_prot, *def_priv_prot;
+    size_t          def_auth_prot_len, def_priv_prot_len;
+
+    def_auth_prot = get_default_authtype(&def_auth_prot_len);
+    def_priv_prot = get_default_privtype(&def_priv_prot_len);
 #endif
 
     if (NULL == line)
@@ -4423,14 +4419,12 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     if (!cp) {
 #ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
         /** no passwords ok iff defaults are noauth/nopriv */
-        prot = get_default_authtype(&prot_len);
         if (snmp_oid_compare(usmNoAuthProtocol, OID_LENGTH(usmNoAuthProtocol),
                              prot, prot_len) != 0) {
             *errorMsg = "no authentication pass phrase";
             usm_free_user(newuser);
             return NULL;
         }
-        prot = get_default_privtype(&prot_len);
         if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
                              prot, prot_len) != 0) {
             *errorMsg = "no privacy pass phrase";
@@ -4441,36 +4435,44 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         goto add;               /* no authentication or privacy type */
     }
 
-#ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     /*
      * READ: Authentication Type 
      */
-#ifndef NETSNMP_DISABLE_MD5
-    if (strncmp(cp, "MD5", 3) == 0) {
-        memcpy(newuser->authProtocol, usmHMACMD5AuthProtocol,
-               sizeof(usmHMACMD5AuthProtocol));
-    } else
-#endif
-        if (strncmp(cp, "SHA", 3) == 0) {
+    newuser->authProtocol[0] = 0;
+    if (strncmp(cp, "default", 7) == 0) {
+        memcpy(newuser->authProtocol, def_auth_prot,
+               def_auth_prot_len * sizeof(oid));
+    }
+    else if (strncmp(cp, "SHA", 3) == 0) {
         memcpy(newuser->authProtocol, usmHMACSHA1AuthProtocol,
                sizeof(usmHMACSHA1AuthProtocol));
-    } else {
+    }
+#ifndef NETSNMP_DISABLE_MD5
+    else if (strncmp(cp, "MD5", 3) == 0) {
+        memcpy(newuser->authProtocol, usmHMACMD5AuthProtocol,
+               sizeof(usmHMACMD5AuthProtocol));
+    }
+#endif
+#ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
+    if (snmp_oid_compare(newuser->authProtocol, newuser->authProtocolLen,
+                         def_auth_prot, def_auth_prot_len) != 0) {
+        config_perror("auth protocol does not match system policy");
+        usm_free_user(newuser);
+        return;
+    }
+#endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
+    if (0 == newuser->authProtocol[0]) {
         *errorMsg = "Unknown authentication protocol";
         usm_free_user(newuser);
         return NULL;
     }
 
     cp = skip_token(cp);
-
     if (!cp) {
         *errorMsg = "no authentication pass phrase";
         usm_free_user(newuser);
         return NULL;
     }
-#else
-    prot = get_default_authtype(&prot_len);
-    memcpy(newuser->authProtocol, prot, prot_len * sizeof(oid));
-#endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
 
     /*
      * READ: Authentication Pass Phrase or key
@@ -4544,48 +4546,52 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
 #ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
         goto add;               /* no privacy type (which is legal) */
 #else
-        prot = get_default_privtype(&prot_len);
         if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
-                             prot, prot_len) == 0)
+                             def_priv_prot, def_priv_prot_len) == 0)
             goto add;
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
     }
 
-#ifndef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     /*
      * READ: Privacy Type 
      */
-    testcase = 0;
+    newuser->privProtocol[0] = 0;
+    privKeyLen = 16;
     if (strncmp(cp, "DES", 3) == 0) {
 #ifndef NETSNMP_DISABLE_DES
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
-        testcase = 1;
 #else
         *errorMsg = "DES support disabled";
 #endif
     }
-    if (strncmp(cp, "AES128", 6) == 0 ||
-               strncmp(cp, "AES", 3) == 0) {
+    else if (strncmp(cp, "AES128", 6) == 0 || strncmp(cp, "AES", 3) == 0) {
 #ifdef HAVE_AES
         memcpy(newuser->privProtocol, usmAESPrivProtocol,
                sizeof(usmAESPrivProtocol));
-        testcase = 1;
 #else
         *errorMsg = "AES support not available";
 #endif
     }
-    if (testcase == 0) {
+    else if (strncmp(cp, "default", 7) == 0) {
+        memcpy(newuser->authProtocol, def_priv_prot,
+               def_priv_prot_len * sizeof(oid));
+    }
+#ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
+    if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
+                         def_priv_prot, def_priv_prot_len) != 0) {
+        config_perror("priv protocol does not match system policy");
+        usm_free_user(newuser);
+        return;
+    }
+#endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
+    if (0 == newuser->authProtocol[0]) {
         *errorMsg = "Unknown privacy protocol";
         usm_free_user(newuser);
         return NULL;
     }
 
     cp = skip_token(cp);
-#else
-    prot = get_default_privtype(&prot_len);
-    memcpy(newuser->privProtocol, prot, prot_len * sizeof(oid));
-#endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
 
     if (newuser->privProtocol[9] == 2) {
         /* DES uses a 128 bit key, 64 bits of which is a salt */
