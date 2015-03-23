@@ -4550,9 +4550,9 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                              def_priv_prot, def_priv_prot_len) == 0)
             goto add;
         else {
-            config_perror("priv protocol does not match system policy");
+            *errorMsg = "priv protocol does not match system policy";
             usm_free_user(newuser);
-            return;
+            return NULL;
         }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
     }
