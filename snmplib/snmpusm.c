@@ -4355,13 +4355,11 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     size_t          privKeyLen = 0;
     size_t          ret;
     int             ret2;
-#ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     const oid      *def_auth_prot, *def_priv_prot;
     size_t          def_auth_prot_len, def_priv_prot_len;
 
     def_auth_prot = get_default_authtype(&def_auth_prot_len);
     def_priv_prot = get_default_privtype(&def_priv_prot_len);
-#endif
 
     if (NULL == line)
         return NULL;
@@ -4439,7 +4437,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
      * READ: Authentication Type 
      */
     newuser->authProtocol[0] = 0;
-    if (strncmp(cp, "default", 7) == 0) {
+    if ((strncmp(cp, "default", 7) == 0) && (NULL != def_auth_prot)) {
         memcpy(newuser->authProtocol, def_auth_prot,
                def_auth_prot_len * sizeof(oid));
     }
@@ -4453,6 +4451,11 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                sizeof(usmHMACMD5AuthProtocol));
     }
 #endif
+    if (0 == newuser->authProtocol[0]) {
+        *errorMsg = "Unknown authentication protocol";
+        usm_free_user(newuser);
+        return NULL;
+    }
 #ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     if (snmp_oid_compare(newuser->authProtocol, newuser->authProtocolLen,
                          def_auth_prot, def_auth_prot_len) != 0) {
@@ -4461,11 +4464,6 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         return;
     }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
-    if (0 == newuser->authProtocol[0]) {
-        *errorMsg = "Unknown authentication protocol";
-        usm_free_user(newuser);
-        return NULL;
-    }
 
     cp = skip_token(cp);
     if (!cp) {
@@ -4578,9 +4576,14 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         *errorMsg = "AES support not available";
 #endif
     }
-    else if (strncmp(cp, "default", 7) == 0) {
+    else if ((strncmp(cp, "default", 7) == 0) && (NULL != def_priv_prot)) {
         memcpy(newuser->authProtocol, def_priv_prot,
                def_priv_prot_len * sizeof(oid));
+    }
+    if (0 == newuser->authProtocol[0]) {
+        *errorMsg = "Unknown privacy protocol";
+        usm_free_user(newuser);
+        return NULL;
     }
 #ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
@@ -4590,11 +4593,6 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         return;
     }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
-    if (0 == newuser->authProtocol[0]) {
-        *errorMsg = "Unknown privacy protocol";
-        usm_free_user(newuser);
-        return NULL;
-    }
 
     cp = skip_token(cp);
 
