@@ -5873,7 +5873,7 @@ _sess_read_accept(void *sessp)
     struct session_list *nslp;
     int               data_sock;
 
-    if (NULL == sessp || NULL == transport ||
+    if (NULL == sessp || NULL == sp || NULL == transport || NULL == isp ||
         !(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN))
         return -1;
 
