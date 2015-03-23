@@ -936,9 +936,18 @@ netsnmp_gethostbyname(const char *name)
     if (hp == NULL) {
         DEBUGMSGTL(("dns:gethostbyname",
                     "couldn't resolve %s\n", name));
-    } else if (hp->h_addrtype != AF_INET) {
+    } else if (hp->h_addrtype != AF_INET
+#ifdef AF_INET6
+               && hp->h_addrtype != AF_INET6
+#endif
+        ) {
         DEBUGMSGTL(("dns:gethostbyname",
-                    "warning: response for %s not AF_INET!\n", name));
+#ifdef AF_INET6
+                    "warning: response for %s not AF_INET/AF_INET6!\n"
+#else
+                    "warning: response for %s not AF_INET!\n"
+#endif
+                    , name));
     } else {
         DEBUGMSGTL(("dns:gethostbyname",
                     "%s resolved okay\n", name));
