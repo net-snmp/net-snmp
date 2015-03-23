@@ -1329,8 +1329,9 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
     }
 
     /** authkey */
-    if ((SNMP_SEC_LEVEL_AUTHPRIV == level) ||
-        (SNMP_SEC_LEVEL_AUTHNOPRIV == level)) {
+    if (((SNMP_SEC_LEVEL_AUTHPRIV == level) ||
+         (SNMP_SEC_LEVEL_AUTHNOPRIV == level)) &&
+        (usmUser->flags & USMUSER_FLAG_KEEP_MASTER_KEY)) {
         netsnmp_assert(usmUser->privKeyKuLen > 0);
         memcpy(session.securityAuthKey, usmUser->authKeyKu,
                usmUser->authKeyKuLen);
@@ -1348,7 +1349,8 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
     }
 
     /** privkey */
-    if (SNMP_SEC_LEVEL_AUTHPRIV == level) {
+    if ((SNMP_SEC_LEVEL_AUTHPRIV == level)  &&
+        (usmUser->flags & USMUSER_FLAG_KEEP_MASTER_KEY)) {
         netsnmp_assert(usmUser->privKeyKuLen > 0);
         memcpy(session.securityPrivKey, usmUser->privKeyKu,
                usmUser->privKeyKuLen);
