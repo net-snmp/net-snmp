@@ -4043,7 +4043,7 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
      * copy the privKeyKu
      */
     SNMP_FREE(to->privKeyKu);
-    if (from->privKeyKyLen > 0 &&
+    if (from->privKeyKuLen > 0 &&
         (to->privKeyKu = (u_char *) malloc(from->privKeyKuLen)) != NULL) {
         to->privKeyKuLen = from->privKeyKuLen;
         memcpy(to->privKeyKu, from->privKeyKu, to->privKeyKuLen);
