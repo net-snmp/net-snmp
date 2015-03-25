@@ -117,7 +117,7 @@ netsnmp_feature_child_of(find_prefix_info, prefix_info_all)
 netsnmp_feature_child_of(create_prefix_info, prefix_info_all)
 #endif /* HAVE_LINUX_RTNETLINK_H */
 
-#if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE)
+#if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)
 static long     cachetime;
 #endif
 
@@ -390,7 +390,7 @@ get_exec_output(struct extensible *ex)
     }
     return fd;
 #endif                          /* WIN32 */
-#endif
+#endif       /* HAVE_EXEC */
 #endif /* !defined(USING_UTILITIES_EXECUTE_MODULE) */
     return -1;
 }
@@ -676,11 +676,11 @@ clear_cache(int action,
         return SNMP_ERR_WRONGTYPE;
     }
     tmp = *((long *) var_val);
+#if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)
     if (tmp == 1 && action == COMMIT) {
-#ifdef NETSNMP_EXCACHETIME
         cachetime = 0;          /* reset the cache next read */
-#endif
     }
+#endif
     return SNMP_ERR_NOERROR;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CLEAR_CACHE */
