@@ -6,14 +6,6 @@
 #########################################
 
 ##
-# Protect against CCFLAGS with -Werror which causes failures
-#   (it causes type mismatches in the AC_CV_FUNCS call)
-##
-noerr_CCFLAGS="$CCFLAGS"
-CCFLAGS=`echo $CCFLAGS | sed 's/-Werror//'`
-export CCFLAGS
-
-##
 #   Standard checks:
 ##
 AC_FUNC_ALLOCA          #  alloca()
@@ -330,8 +322,3 @@ if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
     )
 fi
 
-##
-# Add back in the original CCFLAGS setting
-##
-CCFLAGS="$noerr_CCFLAGS"
-export CCFLAGS
