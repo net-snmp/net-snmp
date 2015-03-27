@@ -587,3 +587,13 @@ snmp_debug_init(void)
                                     debug_config_register_tokens, NULL,
                                     "token[,token...]");
 }
+
+void
+snmp_debug_shutdown(void)
+{
+    int i;
+
+   for (i=0; i<debug_num_tokens; i++) {
+       SNMP_FREE(dbg_tokens [i].token_name);
+    }
+}

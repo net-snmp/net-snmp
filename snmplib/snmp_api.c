@@ -927,6 +927,7 @@ snmp_shutdown(const char *type)
     netsnmp_clear_default_target();
     netsnmp_clear_default_domain();
     shutdown_secmod();
+    snmp_debug_shutdown();    /* should be done last */
 
     init_snmp_init_done  = 0;
     _init_snmp_init_done = 0;

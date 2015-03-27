@@ -216,6 +216,7 @@ extern          "C" {
 #endif
 
     void            snmp_debug_init(void);
+    void            snmp_debug_shutdown(void);
 
 #define MAX_DEBUG_TOKENS 256
 #define MAX_DEBUG_TOKEN_LEN 128
