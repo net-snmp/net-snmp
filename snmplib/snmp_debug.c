@@ -95,6 +95,7 @@ debug_indent_add(int amount)
 {
     if (-debugindent <= amount && amount <= INT_MAX - debugindent)
 	debugindent += amount;
+    netsnmp_assert( debugindent >= 0 ); /* no negative indents */
 }
 
 NETSNMP_IMPORT void
@@ -104,7 +105,7 @@ void
 debug_indent_reset(void)
 {
     if (debugindent != 0)
-        DEBUGMSGTL(("dump_indent","indent rest from %d\n", debugindent));
+        DEBUGMSGTL(("dump_indent","indent reset from %d\n", debugindent));
     debugindent = 0;
 }
 
