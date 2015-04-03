@@ -243,6 +243,7 @@ typedef struct netsnmp_tdomain_s {
 } netsnmp_tdomain;
 
 void init_snmp_transport(void);
+void shutdown_snmp_transport(void);
 
 /*  Some utility functions.  */
 

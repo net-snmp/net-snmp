@@ -142,6 +142,14 @@ init_snmp_transport(void)
 #endif /* NETSNMP_FEATURE_REMOVE_FILTER_SOURCE */
 }
 
+void
+shutdown_snmp_transport(void)
+{
+#ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
+    netsnmp_transport_filter_cleanup();
+#endif
+}
+
 /*
  * Make a deep copy of an netsnmp_transport.  
  */

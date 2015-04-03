@@ -1523,8 +1523,10 @@ init_master_agent(void)
 			"requested\n"));
             break;
         }
-        if (-1 == netsnmp_agent_listen_on(cptr))
+        if (-1 == netsnmp_agent_listen_on(cptr)) {
+            SNMP_FREE(buf);
             return 1;
+        }
     } while(st && *st != '\0');
     SNMP_FREE(buf);
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
