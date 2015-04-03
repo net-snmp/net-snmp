@@ -295,6 +295,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
     netsnmp_tdomain_spec tspec;
     char                 tmp[SPRINT_MAX_LEN];
     int                  rc;
+    const char          *client_addr = NULL;
 
     memset(&session, 0, sizeof(netsnmp_session));
     session.version = version;
@@ -311,15 +312,25 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
         session.retries = SNMP_DEFAULT_RETRIES;
     }
 
+    memset(&tspec, 0, sizeof(netsnmp_tdomain_spec));
+
     /*
+     * use specified soure or client addr, if available. If no, and
      * if the sink is localhost, bind to localhost, to reduce open ports.
      */
-    if ((NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                       NETSNMP_DS_LIB_CLIENT_ADDR)) && 
-        ((0 == strcmp("localhost",sink)) || (0 == strcmp("127.0.0.1",sink))))
-        session.localname = strdup("localhost");
+    if (NULL != src)
+        tspec.source = src;
+    else {
+        client_addr = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                            NETSNMP_DS_LIB_CLIENT_ADDR);
+        if ((NULL == client_addr) &&
+            ((0 == strcmp("localhost",sink)) ||
+             (0 == strcmp("127.0.0.1",sink))))
+            client_addr = "localhost";
+        tspec.source = client_addr;
+    }
+    session.localname = NETSNMP_REMOVE_CONST(char *,tspec.source);
 
-    memset(&tspec, 0, sizeof(netsnmp_tdomain_spec));
     tspec.application = "snmptrap";
     if (NULL == sinkport)
         tspec.target = sink;
@@ -329,7 +340,6 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
     }
     tspec.default_domain = NULL;
     tspec.default_target = sinkport;
-    tspec.source = src;
     t = netsnmp_tdomain_transport_tspec(&tspec);
     if ((NULL == t) ||
         ((sesp = snmp_add(&session, t, NULL, NULL)) == NULL)) {
@@ -1529,24 +1539,27 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     transport = netsnmp_transport_open_client("snmptrap", session.peername);
     if (transport == NULL) {
         config_perror("snmpd: failed to parse this line.");
-        return;
+        for (; argn > 0; argn--)
+            free(argv[argn - 1]);
+        goto cleanup;
     }
     if ((rc = netsnmp_sess_config_and_open_transport(&session, transport))
         != SNMPERR_SUCCESS) {
         session.s_snmp_errno = rc;
         session.s_errno = 0;
-        return;
+        for (; argn > 0; argn--)
+            free(argv[argn - 1]);
+        goto cleanup;
     }
     ss = snmp_add(&session, transport, NULL, NULL);
-    for (; argn > 0; argn--) {
+    for (; argn > 0; argn--)
         free(argv[argn - 1]);
-    }
 
     if (!ss) {
         config_perror
             ("snmpd: failed to parse this line or the remote trap receiver is down.  Possible cause:");
         snmp_sess_perror("snmpd: snmpd_parse_config_trapsess()", &session);
-        return;
+        goto cleanup;
     }
 
     /*
@@ -1570,6 +1583,8 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     netsnmp_add_notification_session(ss, traptype,
                                      (traptype == SNMP_MSG_INFORM),
                                      ss->version, name, tag, profile);
+
+  cleanup:
     SNMP_FREE(profile);
     SNMP_FREE(name);
     SNMP_FREE(tag);

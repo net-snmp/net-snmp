@@ -41,6 +41,8 @@
 #   include "notification-log-mib/notification_log.h"
 #endif
 
+static void snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata);
+
 
 /*
  * global storage of our data, saved in and configured by header_complex()
@@ -335,6 +337,8 @@ notifyTable_register_notifications(int major, int minor,
      * param
      */
     pptr = snmpTargetParamTable_create();
+    if (NULL == pptr)
+        goto bail;
     pptr->paramName = strdup(ptr->params); /* link from target addr table */
     pptr->mpModel = ss->version;
     if (ss->version == SNMP_VERSION_3) {
@@ -389,7 +393,11 @@ notifyTable_register_notifications(int major, int minor,
     nptr->snmpNotifyStorageType = ST_READONLY;
     nptr->snmpNotifyRowStatus = RS_ACTIVE;
 
-    snmpNotifyTable_add(nptr);
+    if (snmpNotifyTable_add(nptr) == SNMPERR_GENERR) {
+        snmpNotifyTable_dispose(nptr);
+        nptr = NULL;
+        goto bail;
+    }
 
     /*
      * filter profile
@@ -538,10 +546,14 @@ snmpNotifyTable_add(struct snmpNotifyTable_data *thedata)
     netsnmp_variable_list *vars = NULL;
     int retVal;
 
+    if (NULL == thedata)
+        return SNMPERR_GENERR;
+
     DEBUGMSGTL(("snmpNotifyTable_data", "adding data...  "));
     /*
      * add the index variables to the varbind list, which is
-     * used by header_complex to index the data
+     * used by header_complex to index the data. the allocated
+     * variable will be freed by header_complex_maybe_add_data().
      */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR, (u_char *) thedata->snmpNotifyName, thedata->snmpNotifyNameLen);      /* snmpNotifyName */
 
