@@ -494,7 +494,10 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_SYSLOG, priority);
         if (logh) {
             int facility = decode_facility(optarg);
-            if (facility == -1)  return -1;
+            if (facility == -1) {
+                netsnmp_remove_loghandler(logh);
+                return -1;
+            }
             logh->pri_max = pri_max;
             logh->token   = strdup(snmp_log_syslogname(NULL));
             logh->magic   = (void *)(intptr_t)facility;

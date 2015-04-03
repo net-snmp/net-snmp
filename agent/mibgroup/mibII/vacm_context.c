@@ -95,7 +95,7 @@ init_vacm_context(void)
     if (!table_info || !iinfo) {
         SNMP_FREE(table_info);
         SNMP_FREE(iinfo);
-        SNMP_FREE(my_handler);
+        netsnmp_handler_registration_free(my_handler);
         return;
     }
 

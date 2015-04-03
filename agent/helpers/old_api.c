@@ -103,9 +103,12 @@ netsnmp_register_old_api(const char *moduleName,
         reginfo->rootoid_len = (mibloclen + vp->namelen);
         reginfo->rootoid =
             (oid *) malloc(reginfo->rootoid_len * sizeof(oid));
-        if (reginfo->rootoid == NULL) {
+        if (NULL == reginfo->handler || NULL == reginfo->handlerName ||
+            NULL == reginfo->rootoid) {
+            netsnmp_handler_free(reginfo->handler);
             SNMP_FREE(vp);
             SNMP_FREE(reginfo->handlerName);
+            SNMP_FREE(reginfo->rootoid);
             SNMP_FREE(reginfo);
             return SNMP_ERR_GENERR;
         }
@@ -171,20 +174,13 @@ netsnmp_register_mib_table_row(const char *moduleName,
             rc = MIB_REGISTRATION_FAILED;
             break;
         }
-        memset(r, 0, sizeof(netsnmp_handler_registration));
 
         r->handler = get_old_api_handler();
         r->handlerName = strdup(moduleName);
-
-        if (r->handlerName == NULL) {
-            netsnmp_handler_registration_free(r);
-            break;
-        }
-
         r->rootoid_len = mibloclen;
         r->rootoid = (oid *) malloc(r->rootoid_len * sizeof(oid));
-
-        if (r->rootoid == NULL) {
+        if (r->handler == NULL || r->handlerName == NULL ||
+            r->rootoid == NULL) {
             netsnmp_handler_registration_free(r);
             rc = MIB_REGISTRATION_FAILED;
             break;
@@ -201,15 +197,9 @@ netsnmp_register_mib_table_row(const char *moduleName,
         r->handler->data_clone = (void *(*)(void *))netsnmp_duplicate_variable;
         r->handler->data_free = free;
 
-        if (r->handler->myvoid == NULL) {
-            netsnmp_handler_registration_free(r);
-            rc = MIB_REGISTRATION_FAILED;
-            break;
-        }
-
         r->contextName = (context) ? strdup(context) : NULL;
-
-        if (context != NULL && r->contextName == NULL) {
+        if (r->handler->myvoid == NULL ||
+            (context != NULL && r->contextName == NULL)) {
             netsnmp_handler_registration_free(r);
             rc = MIB_REGISTRATION_FAILED;
             break;
@@ -229,7 +219,7 @@ netsnmp_register_mib_table_row(const char *moduleName,
             MIB_REGISTERED_OK) {
             DEBUGMSGTL(("netsnmp_register_mib_table_row",
                         "register failed %d\n", rc));
-            netsnmp_handler_registration_free(r);
+            /** reginfo already freed */
             break;
         }
 

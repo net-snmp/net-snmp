@@ -927,6 +927,7 @@ snmp_shutdown(const char *type)
     netsnmp_clear_default_target();
     netsnmp_clear_default_domain();
     shutdown_secmod();
+    shutdown_data_list();
     snmp_debug_shutdown();    /* should be done last */
 
     init_snmp_init_done  = 0;
@@ -1437,7 +1438,7 @@ netsnmp_sess_config_transport(netsnmp_container *transport_configuration,
         if (transport->f_config) {
             netsnmp_iterator *iter;
             netsnmp_transport_config *config_data;
-            int ret;
+            int ret = 0;
 
             iter = CONTAINER_ITERATOR(transport_configuration);
             if (NULL == iter) {
@@ -1448,10 +1449,12 @@ netsnmp_sess_config_transport(netsnmp_container *transport_configuration,
                 config_data = (netsnmp_transport_config*)ITERATOR_NEXT(iter)) {
                 ret = transport->f_config(transport, config_data->key,
                                           config_data->value);
-                if (ret) {
-                    return SNMPERR_TRANSPORT_CONFIG_ERROR;
-                }
+                if (ret)
+                    break;
             }
+            ITERATOR_RELEASE(iter);
+            if (ret)
+                return SNMPERR_TRANSPORT_CONFIG_ERROR;
         } else {
             return SNMPERR_TRANSPORT_NO_CONFIG;
         }
@@ -5193,7 +5196,10 @@ snmp_create_sess_pdu(netsnmp_transport *transport, void *opaque,
  * This function processes a complete (according to asn_check_packet or the
  * AgentX equivalent) packet, parsing it into a PDU and calling the relevant
  * callbacks.  On entry, packetptr points at the packet in the session's
- * buffer and length is the length of the packet.  
+ * buffer and length is the length of the packet.  Return codes:
+ *   0: pdu handled (pdu deleted)
+ *  -1: error (pdu deleted)
+ *  -2: pdu not found for shared session (pdu NOT deleted)
  */
 
 static int
@@ -5402,7 +5408,9 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	      /*
 	       * TODO FIX: recover after message callback *?
                */
-	      return -1;
+                snmp_log(LOG_ERR, "malloc failed handling pdu\n");
+                snmp_free_pdu(pdu);
+                return -1;
 	    }
 	    memcpy(sp->securityEngineID, pdu->securityEngineID,
 		   pdu->securityEngineIDLen);
@@ -5415,6 +5423,8 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 		/*
 		 * TODO FIX: recover after message callback *?
 		 */
+                snmp_log(LOG_ERR, "malloc failed handling pdu\n");
+                snmp_free_pdu(pdu);
                 return -1;
 	      }
 	      memcpy(sp->contextEngineID,
@@ -5619,6 +5629,9 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                     (void)nslp->session->callback(NETSNMP_CALLBACK_OP_CONNECT,
                                                   nslp->session, 0, NULL,
                                                   sp->callback_magic);
+                } else {
+                    transport->f_close(new_transport);
+                    netsnmp_transport_free(new_transport);
                 }
                 return 0;
             } else {

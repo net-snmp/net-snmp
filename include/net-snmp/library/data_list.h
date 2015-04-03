@@ -98,6 +98,9 @@ extern          "C" {
                           Netsnmp_Save_List_Data * data_list_save_ptr);
     SNMPCallback netsnmp_save_all_data_callback;
     void netsnmp_read_data_callback(const char *token, char *line);
+
+    void shutdown_data_list(void);
+
 #ifdef __cplusplus
 }
 #endif

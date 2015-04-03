@@ -3224,7 +3224,11 @@ init_usm(void)
     def->handle_report = usm_handle_report;
     def->probe_engineid = usm_discover_engineid;
     def->post_probe_engineid = usm_create_user_from_session_hook;
-    register_sec_mod(USM_SEC_MODEL_NUMBER, "usm", def);
+    if (register_sec_mod(USM_SEC_MODEL_NUMBER, "usm", def) != SNMPERR_SUCCESS) {
+        SNMP_FREE(def);
+        snmp_log(LOG_ERR, "could not register usm sec mod\n");
+        return;
+    }
 
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,

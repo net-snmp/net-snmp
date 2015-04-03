@@ -379,5 +379,12 @@ netsnmp_read_data_callback(const char *token, char *line) {
 
     return;
 }
+
+void
+shutdown_data_list(void)
+{
+    netsnmp_free_all_list_data(saveHead);
+}
+
 /**  @} */
 
