@@ -303,7 +303,7 @@ netsnmp_transport_filter_add(const char *addrtxt)
     /*
      * create the container, if needed
      */
-    if (_transport_filter_init()) {
+    if (!filtered && _transport_filter_init()) {
         snmp_log(LOG_ERR,"netsnmp_transport_filter_add %s failed\n",
                  addrtxt);
         return (-1);
@@ -1207,7 +1207,7 @@ _tc_find_transport(netsnmp_transport *t)
 {
     /*
      * we shouldn't really have that many transports, so instead of
-     * using an addition key, just iterate over the whole container.
+     * using an additional key, just iterate over the whole container.
      */
     netsnmp_iterator  *itr;
     trans_cache *tc;
