@@ -134,8 +134,9 @@ netsnmp_register_old_api(const char *moduleName,
          * register ourselves in the mib tree 
          */
         if (netsnmp_register_handler(reginfo) != MIB_REGISTERED_OK) {
-            /** netsnmp_handler_registration_free(reginfo); already freed */
-            /* SNMP_FREE(vp); already freed */
+            /** reginfo already freed on error. */
+            snmp_log(LOG_ERR, "old_api handler registration failed\n");
+            return SNMP_ERR_GENERR;
         }
     }
     return SNMPERR_SUCCESS;
@@ -171,6 +172,7 @@ netsnmp_register_mib_table_row(const char *moduleName,
              * Unregister whatever we have registered so far, and
              * return an error.  
              */
+            snmp_log(LOG_ERR, "mib table row registration failed\n");
             rc = MIB_REGISTRATION_FAILED;
             break;
         }
@@ -217,6 +219,7 @@ netsnmp_register_mib_table_row(const char *moduleName,
         if ((rc =
              netsnmp_register_handler_nocallback(r)) !=
             MIB_REGISTERED_OK) {
+            snmp_log(LOG_ERR, "mib table row registration failed\n");
             DEBUGMSGTL(("netsnmp_register_mib_table_row",
                         "register failed %d\n", rc));
             /** reginfo already freed */

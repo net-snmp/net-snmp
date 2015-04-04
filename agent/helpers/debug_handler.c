@@ -161,6 +161,11 @@ netsnmp_debug_helper(netsnmp_mib_handler *handler,
 void
 netsnmp_init_debug_helper(void)
 {
-    netsnmp_register_handler_by_name("debug", netsnmp_get_debug_handler());
+    netsnmp_mib_handler *handler = netsnmp_get_debug_handler();
+    if (!handler) {
+        snmp_log(LOG_ERR, "could not create debug handler\n");
+        return;
+    }
+    netsnmp_register_handler_by_name("debug", handler);
 }
 /**  @} */

@@ -31,13 +31,18 @@ init_usmStats_5_5(void)
         netsnmp_create_handler_registration(
             "usmStats", NULL, usmStats, OID_LENGTH(usmStats),
             HANDLER_CAN_RONLY);
-    if (s &&
-	NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, USM) == MIB_REGISTERED_OK) {
-        REGISTER_SYSOR_ENTRY(usmMIBCompliance,
-                             "The management information definitions for the "
-                             "SNMP User-based Security Model.");
-        usmStats_reg = s;
+    if (!s)
+        return;
+
+    if (NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, USM) != MIB_REGISTERED_OK) {
+        netsnmp_handler_registration_free(s);
+        return;
     }
+
+    REGISTER_SYSOR_ENTRY(usmMIBCompliance,
+                         "The management information definitions for the "
+                         "SNMP User-based Security Model.");
+    usmStats_reg = s;
 }
 
 void

@@ -32,12 +32,17 @@ init_snmpMPDStats_5_5(void)
         netsnmp_create_handler_registration(
             "snmpMPDStats", NULL, snmpMPDStats, OID_LENGTH(snmpMPDStats),
             HANDLER_CAN_RONLY);
-    if (s &&
-	NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, MPD) == MIB_REGISTERED_OK) {
-        REGISTER_SYSOR_ENTRY(snmpMPDCompliance,
-                             "The MIB for Message Processing and Dispatching.");
-        snmpMPDStats_reg = s;
+    if (!s)
+        return;
+
+    if (NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, MPD) != MIB_REGISTERED_OK) {
+        netsnmp_handler_registration_free(s);
+        return;
     }
+
+    REGISTER_SYSOR_ENTRY(snmpMPDCompliance,
+                         "The MIB for Message Processing and Dispatching.");
+    snmpMPDStats_reg = s;
 }
 
 void

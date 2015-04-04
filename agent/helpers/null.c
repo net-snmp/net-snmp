@@ -32,6 +32,16 @@ netsnmp_register_null_context(oid * loc, size_t loc_len,
         if (contextName)
             reginfo->contextName = strdup(contextName);
         reginfo->modes = HANDLER_CAN_DEFAULT | HANDLER_CAN_GETBULK;
+
+        if (!reginfo->handlerName || !reginfo->handler ||
+            (contextName && !reginfo->contextName)) {
+            snmp_log(LOG_ERR,"null context allocation failure(s)\n");
+            netsnmp_handler_registration_free(reginfo);
+            return MIB_REGISTRATION_FAILED;
+        }
+    } else {
+        snmp_log(LOG_ERR,"null context allocation failure\n");
+        return MIB_REGISTRATION_FAILED;
     }
     return netsnmp_register_handler(reginfo);
 }

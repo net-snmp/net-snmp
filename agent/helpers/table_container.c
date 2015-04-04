@@ -340,6 +340,7 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
 
     if ((NULL == reginfo) || (NULL == reginfo->handler) || (NULL == tabreg)) {
         snmp_log(LOG_ERR, "bad param in netsnmp_container_table_register\n");
+        netsnmp_handler_registration_free(reginfo);
         return SNMPERR_GENERR;
     }
 
@@ -347,7 +348,13 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
         container = netsnmp_container_find(reginfo->handlerName);
 
     handler = netsnmp_container_table_handler_get(tabreg, container, key_type);
-    netsnmp_inject_handler(reginfo, handler );
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create container table handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
 
     return netsnmp_register_table(reginfo, tabreg);
 }

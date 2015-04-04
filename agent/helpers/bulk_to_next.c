@@ -132,8 +132,11 @@ netsnmp_bulk_to_next_helper(netsnmp_mib_handler *handler,
 void
 netsnmp_init_bulk_to_next_helper(void)
 {
-    netsnmp_register_handler_by_name("bulk_to_next",
-                                     netsnmp_get_bulk_to_next_handler());
+    netsnmp_mib_handler *hnd = netsnmp_get_bulk_to_next_handler();
+    if (!hnd)
+        return;
+
+    netsnmp_register_handler_by_name("bulk_to_next", hnd);
 }
 /**  @} */
 

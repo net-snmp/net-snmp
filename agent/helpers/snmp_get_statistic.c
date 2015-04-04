@@ -52,9 +52,17 @@ int
 netsnmp_register_statistic_handler(netsnmp_handler_registration *reginfo,
                                    oid start, int begin, int end)
 {
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_get_statistic_handler(begin - start));
-    return netsnmp_register_scalar_group(reginfo, start, start + (end - begin));
+    netsnmp_mib_handler *handler =
+        netsnmp_get_statistic_handler(begin - start);
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create statistic handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
+    return netsnmp_register_scalar_group(reginfo, start,
+                                         start + (end - begin));
 }
 #else /* !NETSNMP_FEATURE_REMOVE_HELPER_GET_STATISTICS */
 netsnmp_feature_unused(helper_statistics);

@@ -212,9 +212,17 @@ netsnmp_table_array_register(netsnmp_handler_registration *reginfo,
                              netsnmp_container *container,
                              int group_rows)
 {
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_create_handler(reginfo->handlerName,
-                               netsnmp_table_array_helper_handler));
+    netsnmp_mib_handler *handler =
+        netsnmp_create_handler(reginfo->handlerName,
+                               netsnmp_table_array_helper_handler);
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create table array handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return SNMP_ERR_GENERR;
+    }
+
     return netsnmp_table_container_register(reginfo, tabreg, cb,
                                             container, group_rows);
 }

@@ -405,7 +405,16 @@ netsnmp_tdata_register(netsnmp_handler_registration    *reginfo,
                        netsnmp_tdata                   *table,
                        netsnmp_table_registration_info *table_info)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_tdata_handler(table));
+    netsnmp_mib_handler *handler = netsnmp_get_tdata_handler(table);
+
+    if (!reginfo || !table || !table_info || !handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create tdata handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return SNMP_ERR_GENERR;
+    }
+
     return netsnmp_container_table_register(reginfo, table_info,
                   table->container, TABLE_CONTAINER_KEY_NETSNMP_INDEX);
 }

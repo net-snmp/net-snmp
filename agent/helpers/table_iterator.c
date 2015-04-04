@@ -259,14 +259,21 @@ int
 netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                                 netsnmp_iterator_info *iinfo)
 {
+    netsnmp_mib_handler *handler = netsnmp_get_table_iterator_handler(iinfo);
+
+    if (!reginfo || !iinfo || !handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create iterator table handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return SNMP_ERR_GENERR;
+    }
+
 #ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     reginfo->modes |= HANDLER_CAN_STASH;
 #endif  /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_get_table_iterator_handler(iinfo));
-    if (!iinfo)
-        return SNMPERR_GENERR;
-    if (!iinfo->indexes && iinfo->table_reginfo &&
+
+   if (!iinfo->indexes && iinfo->table_reginfo &&
                            iinfo->table_reginfo->indexes )
         iinfo->indexes = snmp_clone_varbind( iinfo->table_reginfo->indexes );
 

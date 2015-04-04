@@ -110,6 +110,7 @@ netsnmp_table_row_register(netsnmp_handler_registration *reginfo,
 
     if ((NULL == reginfo) || (NULL == reginfo->handler) || (NULL == tabreg)) {
         snmp_log(LOG_ERR, "bad param in netsnmp_table_row_register\n");
+        netsnmp_handler_registration_free(reginfo);
         return SNMPERR_GENERR;
     }
 
@@ -150,7 +151,13 @@ netsnmp_table_row_register(netsnmp_handler_registration *reginfo,
          * ... insert a minimal handler ...
          */
     handler = netsnmp_table_row_handler_get(row);
-    netsnmp_inject_handler(reginfo, handler );
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create table row handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return SNMP_ERR_GENERR;
+    }
 
         /*
          * ... and register the row

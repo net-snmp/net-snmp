@@ -73,8 +73,12 @@ netsnmp_read_only_helper(netsnmp_mib_handler *handler,
 void
 netsnmp_init_read_only_helper(void)
 {
-    netsnmp_register_handler_by_name("read_only",
-                                     netsnmp_get_read_only_handler());
+    netsnmp_mib_handler *handler = netsnmp_get_read_only_handler();
+    if (!handler) {
+        snmp_log(LOG_ERR, "could not create read_only handler\n");
+        return;
+    }
+    netsnmp_register_handler_by_name("read_only", handler);
 }
 /**  @} */
 

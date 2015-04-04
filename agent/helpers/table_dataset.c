@@ -425,6 +425,7 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
                                 netsnmp_table_data_set *data_set,
                                 netsnmp_table_registration_info *table_info)
 {
+    netsnmp_mib_handler *handler;
     int ret;
 
     if (NULL == table_info) {
@@ -462,8 +463,15 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
             table_info->max_column = maxcol;
     }
 
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_get_table_data_set_handler(data_set));
+    handler = netsnmp_get_table_data_set_handler(data_set);
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create table data set handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
+
     ret = netsnmp_register_table_data(reginfo, data_set->table,
                                        table_info);
     if (ret == SNMPERR_SUCCESS && reginfo->handler)

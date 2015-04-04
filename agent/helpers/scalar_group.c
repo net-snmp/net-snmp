@@ -60,9 +60,25 @@ int
 netsnmp_register_scalar_group(netsnmp_handler_registration *reginfo,
                               oid first, oid last)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());
-    netsnmp_inject_handler(reginfo, netsnmp_get_scalar_group_handler(first, last));
-    return netsnmp_register_serialize(reginfo);
+    netsnmp_mib_handler *h1, *h2;
+
+    h1 = netsnmp_get_instance_handler();
+    h2 = netsnmp_get_scalar_group_handler(first, last);
+
+    if (h1 && h2) {
+        if (netsnmp_inject_handler(reginfo, h1) == SNMPERR_SUCCESS) {
+            h1 = NULL;
+            if (netsnmp_inject_handler(reginfo, h2) == SNMPERR_SUCCESS)
+                return netsnmp_register_serialize(reginfo);
+        }
+    }
+
+    snmp_log(LOG_ERR, "register read only scalar group failed\n");
+    netsnmp_handler_free(h1);
+    netsnmp_handler_free(h2);
+    netsnmp_handler_registration_free(reginfo);
+
+    return MIB_REGISTRATION_FAILED;
 }
 
 

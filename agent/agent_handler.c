@@ -293,8 +293,16 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
      * for handlers that can't GETBULK, force a conversion handler on them 
      */
     if (!(reginfo->modes & HANDLER_CAN_GETBULK)) {
-        netsnmp_inject_handler(reginfo,
-                               netsnmp_get_bulk_to_next_handler());
+        handler = netsnmp_get_bulk_to_next_handler();
+        if (!handler ||
+            (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+            snmp_log(LOG_WARNING, "could not inject bulk to next handler\n");
+            if (handler)
+                netsnmp_handler_free(handler);
+            /** should this be a critical error? */
+            netsnmp_handler_registration_free(reginfo);
+            return SNMP_ERR_GENERR;
+        }
     }
 
     for (handler = reginfo->handler; handler; handler = handler->next) {

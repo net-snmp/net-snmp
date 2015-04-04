@@ -98,9 +98,17 @@ int
 netsnmp_register_instance(netsnmp_handler_registration *reginfo)
 {
     netsnmp_mib_handler *handler = netsnmp_get_instance_handler();
-    handler->flags |= MIB_HANDLER_INSTANCE;
-    netsnmp_inject_handler(reginfo, handler);
-    return netsnmp_register_serialize(reginfo);
+    if (handler) {
+        handler->flags |= MIB_HANDLER_INSTANCE;
+        if (netsnmp_inject_handler(reginfo, handler) == SNMPERR_SUCCESS)
+            return netsnmp_register_serialize(reginfo);
+    }
+
+    snmp_log(LOG_ERR, "failed to register instance\n");
+    netsnmp_handler_free(handler);
+    netsnmp_handler_registration_free(reginfo);
+
+    return MIB_REGISTRATION_FAILED;
 }
 
 /**
@@ -124,9 +132,24 @@ netsnmp_register_instance(netsnmp_handler_registration *reginfo)
 int
 netsnmp_register_read_only_instance(netsnmp_handler_registration *reginfo)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());
-    netsnmp_inject_handler(reginfo, netsnmp_get_read_only_handler());
-    return netsnmp_register_serialize(reginfo);
+    netsnmp_mib_handler *h1, *h2;
+    if (!reginfo)
+        return MIB_REGISTRATION_FAILED;
+
+    h1 = netsnmp_get_instance_handler();
+    h2 = netsnmp_get_read_only_handler();
+    if (h1 && h2 && netsnmp_inject_handler(reginfo, h1) == SNMPERR_SUCCESS) {
+        h1 = NULL;
+        if (netsnmp_inject_handler(reginfo, h2) == SNMPERR_SUCCESS)
+            return netsnmp_register_serialize(reginfo);
+    }
+
+    snmp_log(LOG_ERR, "failed to register read only instance\n");
+    netsnmp_handler_free(h1);
+    netsnmp_handler_free(h2);
+    netsnmp_handler_registration_free(reginfo);
+
+   return MIB_REGISTRATION_FAILED;
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_REGISTER_NUM_FILE_INSTANCE
@@ -145,29 +168,42 @@ get_reg(const char *name,
 
     if (subhandler) {
         myreg =
-            netsnmp_create_handler_registration(name,
-                                                subhandler,
-                                                reg_oid, reg_oid_len,
-                                                modes);
+            netsnmp_create_handler_registration(name, subhandler, reg_oid,
+                                                reg_oid_len, modes);
+        if (!myreg)
+            return NULL;
         myhandler = netsnmp_create_handler(ourname, scalarh);
+        if (!myhandler) {
+            netsnmp_handler_registration_free(myreg);
+            return NULL;
+        }
         myhandler->myvoid = it;
 	myhandler->data_clone = (void*(*)(void*))netsnmp_num_file_instance_ref;
 	myhandler->data_free = (void(*)(void*))netsnmp_num_file_instance_deref;
-        netsnmp_inject_handler(myreg, myhandler);
+        if (netsnmp_inject_handler(myreg, myhandler) != SNMPERR_SUCCESS) {
+            netsnmp_handler_free(myhandler);
+            netsnmp_handler_registration_free(myreg);
+            return NULL;
+        }
     } else {
-        myreg =
-            netsnmp_create_handler_registration(name,
-                                                scalarh,
-                                                reg_oid, reg_oid_len,
-                                                modes);
+        myreg = netsnmp_create_handler_registration(name, scalarh, reg_oid,
+                                                    reg_oid_len, modes);
+        if (!myreg)
+            return NULL;
         myreg->handler->myvoid = it;
 	myreg->handler->data_clone
 	    = (void *(*)(void *))netsnmp_num_file_instance_ref;
 	myreg->handler->data_free
 	    = (void (*)(void *))netsnmp_num_file_instance_deref;
     }
-    if (contextName)
+    if (contextName) {
         myreg->contextName = strdup(contextName);
+        if (!myreg->contextName) {
+            netsnmp_handler_registration_free(myreg);
+            return NULL;
+        }
+    }
+
     return myreg;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_REGISTER_NUM_FILE_INSTANCE */

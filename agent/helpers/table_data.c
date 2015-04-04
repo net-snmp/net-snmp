@@ -430,7 +430,15 @@ netsnmp_register_table_data(netsnmp_handler_registration *reginfo,
                             netsnmp_table_data *table,
                             netsnmp_table_registration_info *table_info)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_table_data_handler(table));
+    netsnmp_mib_handler *handler = netsnmp_get_table_data_handler(table);
+    if (!table || !handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create table data handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
+
     return netsnmp_register_table(reginfo, table_info);
 }
 
@@ -443,7 +451,15 @@ netsnmp_register_read_only_table_data(netsnmp_handler_registration *reginfo,
                                       netsnmp_table_data *table,
                                       netsnmp_table_registration_info *table_info)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_read_only_handler());
+    netsnmp_mib_handler *handler = netsnmp_get_read_only_handler();
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create read only table data handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
+
     return netsnmp_register_table_data(reginfo, table, table_info);
 }
 #endif /* NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_TABLE_DATA */
