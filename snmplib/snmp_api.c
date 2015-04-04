@@ -968,6 +968,19 @@ snmp_shutdown(const char *type)
     _init_snmp_init_done = 0;
 }
 
+/*
+ * inserts session into session list
+ */
+void  snmp_session_insert(struct session_list *slp)
+{
+    if (NULL == slp)
+        return;
+
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    slp->next = Sessions;
+    Sessions = slp;
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+}
 
 /*
  * Sets up the session with the snmp_session information provided by the user.
@@ -985,10 +998,7 @@ snmp_open(netsnmp_session *session)
         return NULL;
     }
 
-    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    slp->next = Sessions;
-    Sessions = slp;
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    snmp_session_insert(slp);
 
     return (slp->session);
 }
@@ -1025,10 +1035,7 @@ snmp_open_ex(netsnmp_session *session,
     slp->internal->hook_realloc_build = frbuild;
     slp->internal->check_packet = fcheck;
 
-    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    slp->next = Sessions;
-    Sessions = slp;
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    snmp_session_insert(slp);
 
     return (slp->session);
 }
@@ -1096,13 +1103,14 @@ _sess_copy(netsnmp_session * in_session)
      */
 
     if (in_session->peername != NULL) {
-        session->peername = (char *)malloc(strlen(in_session->peername) + 1);
+        session->peername =
+            netsnmp_strdup_and_null((u_char*)in_session->peername,
+                                    strlen(in_session->peername));
         if (session->peername == NULL) {
             snmp_sess_close(slp);
             in_session->s_snmp_errno = SNMPERR_MALLOC;
             return (NULL);
         }
-        strcpy(session->peername, in_session->peername);
     }
 
     /*
@@ -1692,10 +1700,7 @@ snmp_add(netsnmp_session * in_session,
         return NULL;
     }
 
-    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    slp->next = Sessions;
-    Sessions = slp;
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    snmp_session_insert(slp);
 
     return (slp->session);
 }
@@ -1728,10 +1733,7 @@ snmp_add_full(netsnmp_session * in_session,
         return NULL;
     }
 
-    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    slp->next = Sessions;
-    Sessions = slp;
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    snmp_session_insert(slp);
 
     return (slp->session);
 }
@@ -5927,8 +5929,7 @@ _sess_read_accept(void *sessp)
                          isp->hook_create_pdu);
 
     if (nslp != NULL) {
-        nslp->next = Sessions;
-        Sessions = nslp;
+        snmp_session_insert(nslp);
         /** Tell the new session about its existance if possible. */
         DEBUGMSGTL(("sess_read",
                     "perform callback with op=CONNECT\n"));
