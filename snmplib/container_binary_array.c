@@ -526,7 +526,7 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
     /*
      * if there is no data, return NULL;
      */
-    if (!c || !key)
+    if (!c || !key || !len)
         return NULL;
 
     t = (binary_array_table*)c->container_data;
@@ -554,6 +554,9 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
     }
 
     *len = end - start + 1;
+    if (*len <= 0)
+        return NULL;
+
     subset = (void **)malloc((*len) * sizeof(void*));
     if (subset)
         memcpy(subset, &t->data[start], sizeof(void*) * (*len));
@@ -625,10 +628,8 @@ _ba_get_subset(netsnmp_container *container, void *data)
     int len;
 
     rtn = netsnmp_binary_array_get_subset(container, data, &len);
-    if (rtn == NULL || len <= 0) {
-        free(rtn);
+    if (NULL==rtn)
         return NULL;
-    }
     
     va = SNMP_MALLOC_TYPEDEF(netsnmp_void_array);
     if (va == NULL) {

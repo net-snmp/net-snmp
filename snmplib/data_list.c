@@ -87,6 +87,9 @@ netsnmp_data_list_add_node(netsnmp_data_list **head, netsnmp_data_list *node)
 
     netsnmp_assert(NULL != head);
     netsnmp_assert(NULL != node);
+    if (!head || !node)
+        return;
+
     netsnmp_assert(NULL != node->name);
 
     DEBUGMSGTL(("data_list","adding key '%s'\n", node->name));

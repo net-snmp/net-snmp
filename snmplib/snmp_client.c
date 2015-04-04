@@ -430,6 +430,8 @@ _copy_varlist(netsnmp_variable_list * var,      /* source varList */
     while (var && (copy_count-- > 0)) {
         /*
          * Drop the specified variable (if applicable) 
+         * xxx hmm, is it intentional that dropping the errindex
+         *     counts towards copy_count?
          */
         if (++ii == errindex) {
             var = var->next_variable;
@@ -1285,16 +1287,34 @@ static int _query(netsnmp_variable_list *list,
                   int                    request,
                   netsnmp_session       *session) {
 
-    netsnmp_pdu *pdu      = snmp_pdu_create( request );
+    netsnmp_pdu *pdu;
     netsnmp_pdu *response = NULL;
     netsnmp_variable_list *vb1, *vb2, *vtmp;
     int ret, count;
 
     DEBUGMSGTL(("iquery", "query on session %p\n", session));
+
+    if (NULL == list) {
+        snmp_log(LOG_ERR, "empty variable list in _query\n");
+        return SNMP_ERR_GENERR;
+    }
+
+    pdu = snmp_pdu_create( request );
+    if (NULL == pdu) {
+        snmp_log(LOG_ERR, "could not allocate pdu\n");
+        return SNMP_ERR_GENERR;
+    }
+
     /*
      * Clone the varbind list into the request PDU...
      */
     pdu->variables = snmp_clone_varbind( list );
+    if (NULL == pdu->variables) {
+        snmp_log(LOG_ERR, "could not clone variable list\n");
+        snmp_free_pdu(pdu);
+        return SNMP_ERR_GENERR;
+    }
+
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 retry:
 #endif
@@ -1361,7 +1381,7 @@ retry:
                 }
                 vtmp = vb2->next_variable;
                 snmp_free_var_internals( vb2 );
-                snmp_clone_var( vb1, vb2 );
+                snmp_clone_var( vb1, vb2 ); /* xxx: check return? */
                 vb2->next_variable = vtmp;
             }
         }
