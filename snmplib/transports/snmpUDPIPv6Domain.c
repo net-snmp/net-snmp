@@ -349,12 +349,15 @@ void
 netsnmp_udp6_transport_get_bound_addr(netsnmp_transport *t)
 {
     netsnmp_indexed_addr_pair *addr_pair;
-    socklen_t                  local_addr_len;
+    socklen_t                  local_addr_len = sizeof(addr_pair->local_addr);
     int                        rc;
 
     /** only for client transports: must have data and not local */
-    if (NULL == t || NULL != t->local || NULL == t->data)
+    if (NULL == t || NULL != t->local || NULL == t->data ||
+        t->data_length < local_addr_len) {
+        snmp_log(LOG_ERR, "bad parameters for get bound addr\n");
         return;
+    }
 
     addr_pair = (netsnmp_indexed_addr_pair *)t->data;
 
