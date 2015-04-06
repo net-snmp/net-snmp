@@ -352,7 +352,7 @@ main(int argc, char *argv[])
     size_t          name_length = USM_OID_LEN;
     size_t          name_length2 = USM_OID_LEN;
     int             status;
-    int             exitval = 0;
+    int             exitval = 1;
     int             rval;
     int             command = 0;
     long            longvar;
@@ -383,12 +383,13 @@ main(int argc, char *argv[])
      */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
-        exit(1);
+        goto out;
     case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
-        exit(0);
+        exitval = 0;
+        goto out;
     case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
@@ -396,7 +397,7 @@ main(int argc, char *argv[])
     if (arg >= argc) {
         fprintf(stderr, "Please specify an operation to perform.\n");
         usage();
-        exit(1);
+        goto out;
     }
 
     SOCK_STARTUP;
@@ -414,7 +415,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpusm", &session);
-        exit(1);
+        goto sock_cleanup;
     }
 
     /*
@@ -432,7 +433,7 @@ main(int argc, char *argv[])
     pdu = snmp_pdu_create(SNMP_MSG_SET);
     if (!pdu) {
         fprintf(stderr, "Failed to create request\n");
-        exit(1);
+        goto close_session;
     }
 
 
@@ -458,14 +459,14 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "New passphrase must be greater than %d characters in length.\n",
                     USM_LENGTH_P_MIN);
-            exit(1);
+            goto close_session;
         }
 
         if (oldpass == NULL || strlen(oldpass) < USM_LENGTH_P_MIN) {
             fprintf(stderr,
                     "Old passphrase must be greater than %d characters in length.\n",
                     USM_LENGTH_P_MIN);
-            exit(1);
+            goto close_session;
         }
 
         /* 
@@ -534,7 +535,7 @@ main(int argc, char *argv[])
 	    if (!snmp_hex_to_binary((u_char **) (&buf), &buf_len, &oldkul_len, 0, oldpass)) {
 	      snmp_perror(argv[0]);
 	      fprintf(stderr, "generating the old Kul from localized key failed\n");
-	      exit(1);
+	      goto close_session;
 	    }
 	    
 	    memcpy(oldkul, buf, oldkul_len);
@@ -552,7 +553,7 @@ main(int argc, char *argv[])
 	    if (rval != SNMPERR_SUCCESS) {
 	        snmp_perror(argv[0]);
 	        fprintf(stderr, "generating the old Ku failed\n");
-	        exit(1);
+	        goto close_session;
 	    }
 
 	    /*
@@ -566,7 +567,7 @@ main(int argc, char *argv[])
 	    if (rval != SNMPERR_SUCCESS) {
 	        snmp_perror(argv[0]);
 		fprintf(stderr, "generating the old Kul failed\n");
-		exit(1);
+		goto close_session;
 	    }
 	}
 	if (uselocalizedkey && (strncmp(newpass, "0x", 2) == 0)) {
@@ -581,7 +582,7 @@ main(int argc, char *argv[])
 	    if (!snmp_hex_to_binary((u_char **) (&buf), &buf_len, &newkul_len, 0, newpass)) {
 	      snmp_perror(argv[0]);
 	      fprintf(stderr, "generating the new Kul from localized key failed\n");
-	      exit(1);
+	      goto close_session;
 	    }
 	    
 	    memcpy(newkul, buf, newkul_len);
@@ -595,7 +596,7 @@ main(int argc, char *argv[])
             if (rval != SNMPERR_SUCCESS) {
                 snmp_perror(argv[0]);
                 fprintf(stderr, "generating the new Ku failed\n");
-                exit(1);
+                goto close_session;
             }
 
 	    rval = generate_kul(session.securityAuthProto,
@@ -606,7 +607,7 @@ main(int argc, char *argv[])
 	    if (rval != SNMPERR_SUCCESS) {
 	        snmp_perror(argv[0]);
 		fprintf(stderr, "generating the new Kul failed\n");
-		exit(1);
+		goto close_session;
 	    }
 	}
 
@@ -618,7 +619,7 @@ main(int argc, char *argv[])
         if (doprivkey) {
             if (!session.securityPrivProto) {
                 snmp_log(LOG_ERR, "no encryption type specified, which I need in order to know to change the key\n");
-                exit(1);
+                goto close_session;
             }
                 
 #ifndef NETSNMP_DISABLE_DES
@@ -651,7 +652,7 @@ main(int argc, char *argv[])
 	    snmp_perror(argv[0]);
             fprintf(stderr, "encoding the keychange failed\n");
             usage();
-            exit(1);
+            goto close_session;
 	  }
 	}
 
@@ -668,7 +669,7 @@ main(int argc, char *argv[])
             snmp_perror(argv[0]);
             fprintf(stderr, "encoding the keychange failed\n");
             usage();
-            exit(1);
+            goto close_session;
 	  }
 	}
 
@@ -700,7 +701,7 @@ main(int argc, char *argv[])
         if (++arg >= argc) {
             fprintf(stderr, "You must specify the user name to create\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CREATE;
@@ -755,7 +756,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the user name to operate on\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CLONEFROM;
@@ -773,7 +774,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the user name to clone from\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         setup_oid(usmUserSecurityName, &name_length2,
@@ -791,7 +792,7 @@ main(int argc, char *argv[])
          */
         if (++arg >= argc) {
             fprintf(stderr, "You must specify the user name to delete\n");
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETE;
@@ -809,7 +810,7 @@ main(int argc, char *argv[])
          */
         if (++arg >= argc) {
             fprintf(stderr, "You must specify the user name to activate\n");
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_ACTIVATE;
@@ -827,7 +828,7 @@ main(int argc, char *argv[])
          */
         if (++arg >= argc) {
             fprintf(stderr, "You must specify the user name to deactivate\n");
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DEACTIVATE;
@@ -882,7 +883,7 @@ main(int argc, char *argv[])
         dhpdu = snmp_pdu_create(SNMP_MSG_GET);
         if (!dhpdu) {
             fprintf(stderr, "Failed to create DH request\n");
-            exit(1);
+            goto close_session;
         }
 
         /* get the current DH parameters */
@@ -960,7 +961,7 @@ main(int argc, char *argv[])
     } else {
         fprintf(stderr, "Unknown command\n");
         usage();
-        exit(1);
+        goto close_session;
     }
 
     /*
@@ -1012,12 +1013,19 @@ main(int argc, char *argv[])
         exitval = 1;
     }
 
+    exitval = 0;
 #if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
   begone:
 #endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
     if (response)
         snmp_free_pdu(response);
+
+close_session:
     snmp_close(ss);
+
+sock_cleanup:
     SOCK_CLEANUP;
+
+out:
     return exitval;
 }
