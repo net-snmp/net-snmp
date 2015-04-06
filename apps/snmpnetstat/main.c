@@ -296,6 +296,7 @@ optProc( int argc, char *const *argv, int opt )
             case '?':
             default:
                 usage();
+                exit(1);
             }
         }
         break;   /* End of '-Cx' switch */
@@ -322,6 +323,7 @@ main(int argc, char *argv[])
     netsnmp_session session;
     struct protoent *p;
     char *cp;
+    int exit_code = 1;
 
     af = AF_UNSPEC;
     cp = strrchr( argv[0], '/' );
@@ -332,12 +334,13 @@ main(int argc, char *argv[])
 
     switch (snmp_parse_args( argc, argv, &session, "C:iRs", optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
-        exit(1);
+        goto out;
     case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
-        exit(0);
+        exit_code = 0;
+        goto out;
     case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
@@ -359,7 +362,7 @@ main(int argc, char *argv[])
          */
         snmp_sess_perror("snmpnetstat", &session);
         SOCK_CLEANUP;
-        exit(1);
+        goto out;
     }
 
     /*
@@ -472,7 +475,11 @@ main(int argc, char *argv[])
       for (tp = atalkprotox; tp->pr_name; tp++)
       printproto(tp, tp->pr_name);
     */
-    exit(0);
+
+    exit_code = 0;
+
+out:
+    return exit_code;
 }
 
 /*
@@ -559,5 +566,4 @@ usage(void)
                   "       %s [snmp_opts] [-Cs[s]] [-Cp protocol]\n", progname);
     (void)fprintf(stderr,
                   "       %s [snmp_opts] [-Crnv] [-Cf address_family]\n", progname);
-    exit(1);
 }
