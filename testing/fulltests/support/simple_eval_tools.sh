@@ -214,7 +214,7 @@ KNORG
 
 	fi
 	echo "RUNNING: $*" > $junkoutputfile
-	( $* 2>&1 ) >> $junkoutputfile 2>&1
+	( $DYNAMIC_ANALYZER $* 2>&1 ) >> $junkoutputfile 2>&1
 	RC=$?
 
 	if [ $SNMP_VERBOSE -gt 1 ]; then
