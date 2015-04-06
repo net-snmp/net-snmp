@@ -117,7 +117,7 @@ main(int argc, char *argv[])
     size_t          name_length;
     int             status;
     int             failures = 0;
-    int             exitval = 0;
+    int             exitval = 1;
 
 
     /*
@@ -125,12 +125,13 @@ main(int argc, char *argv[])
      */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
-        exit(1);
+        goto out;
     case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
-        exit(0);
+        exitval = 0;
+        goto out;
     case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
@@ -138,13 +139,13 @@ main(int argc, char *argv[])
     if (arg >= argc) {
         fprintf(stderr, "Missing object name\n");
         usage();
-        exit(1);
+        goto out;
     }
     if ((argc - arg) > SNMP_MAX_CMDLINE_OIDS) {
         fprintf(stderr, "Too many object identifiers specified. ");
         fprintf(stderr, "Only %d allowed in one request.\n", SNMP_MAX_CMDLINE_OIDS);
         usage();
-        exit(1);
+        goto out;
     }
 
     /*
@@ -165,8 +166,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpget", &session);
-        SOCK_CLEANUP;
-        exit(1);
+        goto sock_cleanup;
     }
 
 
@@ -182,12 +182,10 @@ main(int argc, char *argv[])
         } else
             snmp_add_null_var(pdu, name, name_length);
     }
-    if (failures) {
-        snmp_close(ss);
-        SOCK_CLEANUP;
-        exit(1);
-    }
+    if (failures)
+        goto close_session;
 
+    exitval = 0;
 
     /*
      * Perform the request.
@@ -248,8 +246,14 @@ main(int argc, char *argv[])
 
     if (response)
         snmp_free_pdu(response);
+
+close_session:
     snmp_close(ss);
+
+sock_cleanup:
     SOCK_CLEANUP;
+
+out:
     return exitval;
 
 }                               /* end main() */
