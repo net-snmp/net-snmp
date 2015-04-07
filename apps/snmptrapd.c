@@ -660,12 +660,14 @@ main(int argc, char *argv[])
     /* check if systemd has sockets for us and don't close them */
     prepared_sockets = netsnmp_sd_listen_fds(0);
 #endif
+#ifndef WIN32
     /*
      * close all non-standard file descriptors we may have
      * inherited from the shell.
      */
     if (!prepared_sockets)
         netsnmp_close_fds(2);
+#endif
     
 #ifdef SIGTERM
     signal(SIGTERM, term_handler);

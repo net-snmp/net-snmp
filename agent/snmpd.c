@@ -451,12 +451,14 @@ main(int argc, char *argv[])
     /* check if systemd has sockets for us and don't close them */
     prepared_sockets = netsnmp_sd_listen_fds(0);
 #endif /* NETSNMP_NO_SYSTEMD */
+#ifndef WIN32
     /*
      * close all non-standard file descriptors we may have
      * inherited from the shell.
      */
     if (!prepared_sockets)
         netsnmp_close_fds(2);
+#endif
     
     /*
      * register signals ASAP to prevent default action (usually core)
