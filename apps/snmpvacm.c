@@ -278,6 +278,7 @@ main(int argc, char *argv[])
     u_char          viewMask[VACMSTRINGLEN];
     char           *st;
 
+    SOCK_STARTUP;
 
     /*
      * get the common command line arguments 
@@ -295,9 +296,6 @@ main(int argc, char *argv[])
         break;
     }
 
-
-    SOCK_STARTUP;
-
     /*
      * open an SNMP session 
      */
@@ -310,7 +308,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpvacm", &session);
-        goto sock_cleanup;
+        goto out;
     }
 
     /*
@@ -711,9 +709,7 @@ main(int argc, char *argv[])
 close_session:
     snmp_close(ss);
 
-sock_cleanup:
-    SOCK_CLEANUP;
-
 out:
+    SOCK_CLEANUP;
     return exitval;
 }

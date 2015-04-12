@@ -147,24 +147,25 @@ main(int argc, char *argv[])
     char            buf[40];
     int             interfaces;
     int             count;
-    int             exitval = 0;
+    int             exitval = 1;
+
+    SOCK_STARTUP;
 
     /*
      * get the common command line arguments 
      */
     switch (snmp_parse_args(argc, argv, &session, "C:", &optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
-        exit(1);
+        goto out;
     case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
-        exit(0);
+        exitval = 0;
+        goto out;
     case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
-
-    SOCK_STARTUP;
 
     /*
      * open an SNMP session 
@@ -175,8 +176,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpstatus", &session);
-        SOCK_CLEANUP;
-        exit(1);
+        goto out;
     }
 
     /*
@@ -251,13 +251,14 @@ main(int argc, char *argv[])
     } else if (status == STAT_TIMEOUT) {
         fprintf(stderr, "Timeout: No Response from %s\n",
                 session.peername);
-        SOCK_CLEANUP;
-        exit(1);
+        goto out;
     } else {                    /* status == STAT_ERROR */
         snmp_sess_perror("snmpstatus", ss);
-        SOCK_CLEANUP;
-        exit(2);
+        exitval = 2;
+        goto out;
     }
+
+    exitval = 0;
 
     transport = snmp_sess_transport(snmp_sess_pointer(ss));
     if (transport != NULL && transport->f_fmtaddr != NULL) {
@@ -381,6 +382,8 @@ main(int argc, char *argv[])
     }
 
     snmp_close(ss);
+
+out:
     SOCK_CLEANUP;
     return exitval;
 }

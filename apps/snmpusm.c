@@ -375,6 +375,8 @@ main(int argc, char *argv[])
         newkul[SNMP_MAXBUF_SMALL], keychange[SNMP_MAXBUF_SMALL],
         keychangepriv[SNMP_MAXBUF_SMALL];
 
+    SOCK_STARTUP;
+
     authKeyChange = authKeyOid;
     privKeyChange = privKeyOid;
 
@@ -400,8 +402,6 @@ main(int argc, char *argv[])
         goto out;
     }
 
-    SOCK_STARTUP;
-
     /*
      * open an SNMP session 
      */
@@ -415,7 +415,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpusm", &session);
-        goto sock_cleanup;
+        goto out;
     }
 
     /*
@@ -1023,9 +1023,7 @@ main(int argc, char *argv[])
 close_session:
     snmp_close(ss);
 
-sock_cleanup:
-    SOCK_CLEANUP;
-
 out:
+    SOCK_CLEANUP;
     return exitval;
 }

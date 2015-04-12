@@ -190,6 +190,8 @@ main(int argc, char *argv[])
     int             exitval = 1;
     struct timeval  tv1, tv2, tv_a, tv_b;
 
+    SOCK_STARTUP;
+
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
 			       NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_WALK_INCLUDE_REQUESTED);
@@ -267,8 +269,6 @@ main(int argc, char *argv[])
         end_oid[end_len-1]++;
     }
 
-    SOCK_STARTUP;
-
     /*
      * open an SNMP session 
      */
@@ -278,7 +278,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpwalk", &session);
-        goto sock_cleanup;
+        goto out;
     }
 
     /*
@@ -428,9 +428,7 @@ main(int argc, char *argv[])
                  (double) (tv2.tv_sec - tv1.tv_sec));
     }
 
-sock_cleanup:
-    SOCK_CLEANUP;
-
 out:
+    SOCK_CLEANUP;
     return exitval;
 }

@@ -400,6 +400,8 @@ main(int argc, char *argv[])
     int             print = 1;
     int             exit_code = 1;
 
+    SOCK_STARTUP;
+
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", &optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
         goto out;
@@ -438,8 +440,6 @@ main(int argc, char *argv[])
         varinfo[current_name++].name = NULL;
     }
 
-    SOCK_STARTUP;
-
     /*
      * open an SNMP session 
      */
@@ -449,7 +449,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpdelta", &session);
-        goto sock_cleanup;
+        goto out;
     }
 
     if (tableForm && timestamp) {
@@ -747,9 +747,7 @@ main(int argc, char *argv[])
 close_session:
     snmp_close(ss);
 
-sock_cleanup:
-    SOCK_CLEANUP;
-
 out:
+    SOCK_CLEANUP;
     return (exit_code);
 }
