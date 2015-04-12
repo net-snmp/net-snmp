@@ -336,7 +336,6 @@ usage(char *prog)
            "  -S d|i|0-7\t\tuse -Ls <facility> instead\n"
            "\n"
            );
-    exit(1);
 }
 
 static void
@@ -346,7 +345,6 @@ version(void)
            "Web:               http://www.net-snmp.org/\n"
            "Email:             net-snmp-coders@lists.sourceforge.net\n\n",
            netsnmp_get_version());
-    exit(0);
 }
 
 RETSIGTYPE
@@ -433,7 +431,7 @@ main(int argc, char *argv[])
 #endif
 {
     char            options[128] = "aAc:CdD::fhHI:l:L:m:M:n:p:P:qrsS:UvV-:Y:";
-    int             arg, i, ret;
+    int             arg, i, ret, exit_code = 1;
     int             dont_fork = 0, do_help = 0;
     int             log_set = 0;
     int             agent_mode = -1;
@@ -446,6 +444,8 @@ main(int argc, char *argv[])
     int fd;
     FILE           *PID;
 #endif
+
+    SOCK_STARTUP;
 
 #ifndef NETSNMP_NO_SYSTEMD
     /* check if systemd has sockets for us and don't close them */
@@ -546,9 +546,12 @@ main(int argc, char *argv[])
         case '-':
             if (strcasecmp(optarg, "help") == 0) {
                 usage(argv[0]);
+                goto out;
             }
             if (strcasecmp(optarg, "version") == 0) {
                 version();
+                exit_code = 0;
+                goto out;
             }
 
             handle_long_opt(optarg);
@@ -586,7 +589,7 @@ main(int argc, char *argv[])
         case 'D':
 #ifdef NETSNMP_DISABLE_DEBUGGING
             fprintf(stderr, "Debugging not configured\n");
-            exit(1);
+            goto out;
 #else
             debug_register_tokens(optarg);
             snmp_set_do_debugging(1);
@@ -615,7 +618,7 @@ main(int argc, char *argv[])
 #endif
                 if (gid < 0) {
                     fprintf(stderr, "Bad group id: %s\n", optarg);
-                    exit(1);
+                    goto out;
                 }
                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 				   NETSNMP_DS_AGENT_GROUPID, gid);
@@ -649,7 +652,7 @@ main(int argc, char *argv[])
                     fprintf(stderr,
                             "%s: logfile path too long (limit %d chars)\n",
                             argv[0], PATH_MAX);
-                    exit(1);
+                    goto out;
                 }
                 snmp_enable_filelog(optarg,
                                     netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
@@ -793,7 +796,7 @@ main(int argc, char *argv[])
 #endif
                 if (uid < 0) {
                     fprintf(stderr, "Bad user id: %s\n", optarg);
-                    exit(1);
+                    goto out;
                 }
                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 				   NETSNMP_DS_AGENT_USERID, uid);
@@ -831,7 +834,7 @@ main(int argc, char *argv[])
             fprintf(stderr, "%s: Illegal argument -X:"
 		            "AgentX support not compiled in.\n", argv[0]);
             usage(argv[0]);
-            exit(1);
+            goto out;
 #endif
             break;
 
@@ -853,7 +856,8 @@ main(int argc, char *argv[])
         init_snmp(app_name);
         fprintf(stderr, "Configuration directives understood:\n");
         read_config_print_usage("  ");
-        exit(0);
+        exit_code = 0;
+        goto out;
     }
 
     if (optind < argc) {
@@ -869,7 +873,7 @@ main(int argc, char *argv[])
                 astring = (char*)malloc(strlen(c) + 2 + strlen(argv[i]));
                 if (astring == NULL) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n", i);
-                    exit(1);
+                    goto out;
                 }
                 sprintf(astring, "%s,%s", c, argv[i]);
                 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
@@ -885,7 +889,7 @@ main(int argc, char *argv[])
 					  NETSNMP_DS_AGENT_PORTS)));
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
         fprintf(stderr, "You specified ports to open; this agent was built to only send notifications\n");
-        exit(1);
+        goto out;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     }
 
@@ -914,7 +918,7 @@ main(int argc, char *argv[])
         argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
         if (!argvrestartp || !argvrestart || !argvrestartname) {
             fprintf(stderr, "malloc failure processing argvrestart\n");
-            exit(1);
+            goto out;
         }
         strcpy(argvrestartname, argv[0]);
 
@@ -939,10 +943,9 @@ main(int argc, char *argv[])
 			       NETSNMP_DS_AGENT_ROLE, agent_mode);
     }
 
-    SOCK_STARTUP;
     if (init_agent(app_name) != 0) {
         snmp_log(LOG_ERR, "Agent initialization failed\n");
-        exit(1);
+        goto out;
     }
     init_mib_modules();
 
@@ -956,7 +959,7 @@ main(int argc, char *argv[])
          * Some error opening one of the specified agent transports.  
          */
         snmp_log(LOG_ERR, "Server Exiting with code 1\n");
-        exit(1);
+        goto out;
     }
 
     /*
@@ -977,7 +980,7 @@ main(int argc, char *argv[])
          */
         if(ret != 0) {
             snmp_log(LOG_ERR, "Server Exiting with code 1\n");
-            exit(1);
+            goto out;
         }
     }
 
@@ -994,12 +997,12 @@ main(int argc, char *argv[])
             snmp_log_perror(pid_file);
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                         NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                exit(1);
+                goto out;
             }
         } else {
             if ((PID = fdopen(fd, "w")) == NULL) {
                 snmp_log_perror(pid_file);
-                exit(1);
+                goto out;
             } else {
                 fprintf(PID, "%d\n", (int) getpid());
                 fclose(PID);
@@ -1043,7 +1046,7 @@ main(int argc, char *argv[])
             snmp_log_perror("setgid failed");
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                exit(1);
+                goto out;
             }
         }
     }
@@ -1065,7 +1068,7 @@ main(int argc, char *argv[])
                 snmp_log_perror("initgroups failed");
                 if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                             NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                    exit(1);
+                    goto out;
                 }
             }
         }
@@ -1076,7 +1079,7 @@ main(int argc, char *argv[])
             snmp_log_perror("setuid failed");
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                exit(1);
+                goto out;
             }
         }
     }
@@ -1150,8 +1153,11 @@ main(int argc, char *argv[])
     SNMP_FREE(argvrestartp);
 #endif /* USING_UTIL_FUNCS_RESTART_MODULE */
 
+    exit_code = 0;
+
+out:
     SOCK_CLEANUP;
-    return 0;
+    return exit_code;
 }                               /* End main() -- snmpd */
 
 #if defined(WIN32)
@@ -1488,16 +1494,14 @@ _tmain(int argc, TCHAR * argv[])
          */
         InputOptions.Argc = argc;
         InputOptions.Argv = argv;
-        exit (RegisterService(lpszServiceName,
+        return RegisterService(lpszServiceName,
                         lpszServiceDisplayName,
-                        lpszServiceDescription, &InputOptions, quiet));
-        break;
+                        lpszServiceDescription, &InputOptions, quiet);
     case UN_REGISTER_SERVICE:
         /*
          * Unregister service 
          */
-        exit (UnregisterService(lpszServiceName, quiet));
-        break;
+        return UnregisterService(lpszServiceName, quiet);
     case RUN_AS_SERVICE:
         /*
          * Run as service 
@@ -1507,13 +1511,11 @@ _tmain(int argc, TCHAR * argv[])
          */
         RegisterStopFunction(StopSnmpAgent);
         return RunAsService(SnmpDaemonMain);
-        break;
     default:
         /*
          * Run in console mode 
          */
         return SnmpDaemonMain(argc, argv);
-        break;
     }
 }
 

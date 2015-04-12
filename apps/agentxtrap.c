@@ -429,8 +429,10 @@ main(int argc, char *argv[])
     int             arg;
     char           *prognam;
     char           *cp = NULL;
-
     const char*     sysUpTime = NULL;
+
+    /* initialize tcpip, if necessary */
+    SOCK_STARTUP;
 
     prognam = strrchr(argv[0], '/');
     if (prognam)
@@ -449,7 +451,8 @@ main(int argc, char *argv[])
         switch (arg) {
         case 'h':
             usage(prognam);
-            exit(0);
+            result = 0;
+            goto out;
         case 'm':
             setenv("MIBS", optarg, 1);
             break;
@@ -473,22 +476,21 @@ main(int argc, char *argv[])
             break;
         case 'V':
             fprintf(stderr, "NET-SNMP version: %s\n", netsnmp_get_version());
-            exit(0);
-            break;
+            result = 0;
+            goto out;
 #ifndef DISABLE_MIB_LOADING
         case 'P':
             cp = snmp_mib_toggle_options(optarg);
             if (cp != NULL) {
                 fprintf(stderr, "Unknown parser option to -P: %c.\n", *cp);
                 usage(prognam);
-                exit(1);
+                goto out;
             }
             break;
 #endif /* DISABLE_MIB_LOADING */
         case 'L':
-            if (snmp_log_options(optarg, argc, argv) < 0) {
-                exit(1);
-            }
+            if (snmp_log_options(optarg, argc, argv) < 0)
+                goto out;
             break;
         case 'x':
             if (optarg != NULL) {
@@ -501,20 +503,15 @@ main(int argc, char *argv[])
         case ':':
             fprintf(stderr, "Option -%c requires an operand\n", optopt);
             usage(prognam);
-            exit(1);
-            break;
+            goto out;
         case '?':
             fprintf(stderr, "Unrecognized option: -%c\n", optopt);
             usage(prognam);
-            exit(1);
-            break;
+            goto out;
         }
     }
 
     arg = optind;
-
-    /* initialize tcpip, if necessary */
-    SOCK_STARTUP;
 
     init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
     agentx_config_init();
@@ -528,14 +525,12 @@ main(int argc, char *argv[])
     if (arg == argc) {
         fprintf(stderr, "Missing trap-oid parameter\n");
         usage(prognam);
-        SOCK_CLEANUP;
-        exit(1);
+        goto out;
     }
 
     if (snmp_add_var(pdu, snmptrap_oid, snmptrap_oid_len, 'o', argv[arg])) {
         snmp_perror(argv[arg]);
-        SOCK_CLEANUP;
-        exit(1);
+        goto out;
     }
     ++arg;
 
@@ -546,19 +541,16 @@ main(int argc, char *argv[])
         if (arg > argc) {
             fprintf(stderr, "%s: Missing type/value for variable\n",
                     argv[arg - 3]);
-            SOCK_CLEANUP;
-            exit(1);
+            goto out;
         }
         if (!snmp_parse_oid(argv[arg - 3], name, &name_length)) {
             snmp_perror(argv[arg - 3]);
-            SOCK_CLEANUP;
-            exit(1);
+            goto out;
         }
         if (snmp_add_var(pdu, name, name_length, argv[arg - 2][0],
                          argv[arg - 1]) != 0) {
             snmp_perror(argv[arg - 3]);
-            SOCK_CLEANUP;
-            exit(1);
+            goto out;
         }
     }
 
@@ -607,6 +599,7 @@ main(int argc, char *argv[])
 
     snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
 
+out:
     SOCK_CLEANUP;
-    exit(result);
+    return result;
 }

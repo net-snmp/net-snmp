@@ -186,7 +186,7 @@ main(int argc, char *argv[])
     int             running;
     int             status = STAT_ERROR;
     int             check;
-    int             exitval = 0;
+    int             exitval = 1;
 
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
 			       NETSNMP_DS_APPLICATION_ID, 
@@ -203,12 +203,13 @@ main(int argc, char *argv[])
      */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
-        exit(1);
+        goto out;
     case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
-        exit(0);
+        exitval = 0;
+        goto out;
     case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
@@ -223,7 +224,7 @@ main(int argc, char *argv[])
         rootlen = MAX_OID_LEN;
         if (snmp_parse_oid(argv[arg], root, &rootlen) == NULL) {
             snmp_perror(argv[arg]);
-            exit(1);
+            goto out;
         }
     } else {
         /*
@@ -244,8 +245,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpbulkwalk", &session);
-        SOCK_CLEANUP;
-        exit(1);
+        goto sock_cleanup;
     }
 
     /*
@@ -262,6 +262,8 @@ main(int argc, char *argv[])
 			       NETSNMP_DS_WALK_INCLUDE_REQUESTED)) {
         snmp_get_and_print(ss, root, rootlen);
     }
+
+    exitval = 0;
 
     while (running) {
         /*
@@ -381,6 +383,9 @@ main(int argc, char *argv[])
         printf("Variables found: %d\n", numprinted);
     }
 
+sock_cleanup:
     SOCK_CLEANUP;
+
+out:
     return exitval;
 }
