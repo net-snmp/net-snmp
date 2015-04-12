@@ -449,11 +449,13 @@ main(int argc, char *argv[])
 
     SOCK_STARTUP;
 
+#ifndef WIN32
     /*
      * close all non-standard file descriptors we may have
      * inherited from the shell.
      */
     netsnmp_close_fds(2);
+#endif
     
     /*
      * register signals ASAP to prevent default action (usually core)

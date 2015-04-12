@@ -660,11 +660,13 @@ main(int argc, char *argv[])
     netsnmp_trapd_handler *traph;
 
 
+#ifndef WIN32
     /*
      * close all non-standard file descriptors we may have
      * inherited from the shell.
      */
     netsnmp_close_fds(2);
+#endif
     
 #ifdef SIGTERM
     signal(SIGTERM, term_handler);
