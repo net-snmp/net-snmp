@@ -3291,7 +3291,7 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
     h1e = cp;
 
     /*
-     * store fields in the PDU preceeding the variable-bindings sequence 
+     * store fields in the PDU preceding the variable-bindings sequence
      */
     if (pdu->command != SNMP_MSG_TRAP) {
         /*
@@ -3536,7 +3536,7 @@ snmp_pdu_realloc_rbuild(u_char ** pkt, size_t * pkt_len, size_t * offset,
                                      *offset - start_offset);
 
     /*
-     * Store fields in the PDU preceeding the variable-bindings sequence.  
+     * Store fields in the PDU preceding the variable-bindings sequence.
      */
     if (pdu->command != SNMP_MSG_TRAP) {
         /*
@@ -4555,7 +4555,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
     pdu->flags &= (~UCD_MSG_FLAG_RESPONSE_PDU);
 
     /*
-     * get the fields in the PDU preceeding the variable-bindings sequence 
+     * get the fields in the PDU preceding the variable-bindings sequence
      */
     switch (pdu->command) {
     case SNMP_MSG_TRAP:
