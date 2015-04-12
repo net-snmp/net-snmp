@@ -150,7 +150,7 @@ usage(void)
     fprintf(stderr, "\t\t\t(it won't be active until you active it)\n");
     fprintf(stderr, "\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t-Ca\t\tChange the authentication key.\n");
-    fprintf(stderr, "\t-Ck\t\tAllows to use localized key (must start with 0x)\n");
+    fprintf(stderr, "\t-Ck\t\tAllows one to use localized key (must start with 0x)\n");
     fprintf(stderr, "\t\t\tinstead of passphrase.\n");
 }
 

@@ -111,7 +111,7 @@ parameters do not correspond to a valid slot, or because of a memory
 allocation failure).
 .TP
 .BI "int netsnmp_ds_register_premib(u_char " type ", const char *" ftype ", const char *" token ", int " store ", int " which ");"
-Analogous to the preceeding function, but the
+Analogous to the preceding function, but the
 .I token
 is processed before MIBs are read (this is therefore useful for controlling
 MIB processing options).
