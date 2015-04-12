@@ -325,6 +325,8 @@ main(int argc, char *argv[])
     char *cp;
     int exit_code = 1;
 
+    SOCK_STARTUP;
+
     af = AF_UNSPEC;
     cp = strrchr( argv[0], '/' );
     if (cp)
@@ -354,14 +356,12 @@ main(int argc, char *argv[])
     /*
      * Open an SNMP session.
      */
-    SOCK_STARTUP;
     ss = snmp_open(&session);
     if (ss == NULL) {
         /*
          * diagnose snmp_open errors with the input netsnmp_session pointer
          */
         snmp_sess_perror("snmpnetstat", &session);
-        SOCK_CLEANUP;
         goto out;
     }
 
@@ -378,11 +378,13 @@ main(int argc, char *argv[])
           mbpr(nl[N_MBSTAT].n_value, nl[N_MBPOOL].n_value,
           nl[N_MCLPOOL].n_value);
         */
-        exit(0);
+        exit_code = 0;
+        goto out;
     }
     if (pflag) {
         printproto(tp, tp->pr_name);
-        exit(0);
+        exit_code = 0;
+        goto out;
     }
 #endif
     /*
@@ -393,7 +395,8 @@ main(int argc, char *argv[])
     setnetent(1);
     if (iflag) {
         intpr(interval);
-        exit(0);
+        exit_code = 0;
+        goto out;
     }
     if (rflag) {
         /*
@@ -405,7 +408,8 @@ main(int argc, char *argv[])
             if (route4pr(af) == 0 && af == AF_INET) routepr();
             route6pr(af);
         }
-        exit(0);
+        exit_code = 0;
+        goto out;
     }
     /*
       if (gflag) {
@@ -432,7 +436,8 @@ main(int argc, char *argv[])
       nl[N_MIF6TABLE].n_value);
       #endif
       }
-      exit(0);
+      exit_code = 0;
+      goto out;
       }
     */
     setservent(1);
@@ -479,6 +484,7 @@ main(int argc, char *argv[])
     exit_code = 0;
 
 out:
+    SOCK_CLEANUP;
     return exit_code;
 }
 

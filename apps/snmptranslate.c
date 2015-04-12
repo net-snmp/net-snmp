@@ -119,6 +119,8 @@ main(int argc, char *argv[])
     int             exit_code = 1;
     netsnmp_session dummy;
 
+    SOCK_STARTUP;
+
     /*
      * usage: snmptranslate name
      */
@@ -236,8 +238,6 @@ main(int argc, char *argv[])
         }
     }
 
-    SOCK_STARTUP;
-
     init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
 
     if (optind < argc)
@@ -247,7 +247,7 @@ main(int argc, char *argv[])
         switch (print) {
         default:
             usage();
-            goto sock_cleanup;
+            goto out;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
         case 1:
             print_mib_tree(stdout, get_tree_head(), width);
@@ -261,7 +261,7 @@ main(int argc, char *argv[])
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         }
         exit_code = 0;
-        goto sock_cleanup;
+        goto out;
     }
 
     do {
@@ -274,7 +274,7 @@ main(int argc, char *argv[])
                 fprintf(stderr, "Unknown object identifier: %s\n",
                         current_name);
                 exit_code = 2;
-                goto sock_cleanup;
+                goto out;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
             }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
@@ -285,7 +285,7 @@ main(int argc, char *argv[])
                 fprintf(stderr,
                         "Unable to find a matching object identifier for \"%s\"\n",
                         current_name);
-                goto sock_cleanup;
+                goto out;
             }
             break;
         } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
@@ -296,7 +296,7 @@ main(int argc, char *argv[])
                 fprintf(stderr,
                         "Unable to find a matching object identifier for \"%s\"\n",
                         current_name);
-                goto sock_cleanup;
+                goto out;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
             }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
@@ -304,7 +304,7 @@ main(int argc, char *argv[])
             if (!read_objid(current_name, name, &name_length)) {
                 snmp_perror(current_name);
                 exit_code = 2;
-                goto sock_cleanup;
+                goto out;
             }
         }
 
@@ -318,7 +318,7 @@ main(int argc, char *argv[])
                 snmp_log(LOG_ERR,
                         "Unable to find a matching object identifier for \"%s\"\n",
                         current_name);
-                goto sock_cleanup;
+                goto out;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
             }
             print_mib_tree(stdout, tp, width);
@@ -338,10 +338,8 @@ main(int argc, char *argv[])
 
     exit_code = 0;
 
-sock_cleanup:
-    SOCK_CLEANUP;
-
 out:
+    SOCK_CLEANUP;
     return exit_code;
 }
 

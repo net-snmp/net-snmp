@@ -140,6 +140,8 @@ main(int argc, char *argv[])
     int             status;
     int             exitval = 1;
 
+    SOCK_STARTUP;
+
     /*
      * get the common command line arguments 
      */
@@ -174,8 +176,6 @@ main(int argc, char *argv[])
         namep++;
     }
 
-    SOCK_STARTUP;
-
     /*
      * open an SNMP session 
      */
@@ -185,7 +185,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpbulkget", &session);
-        goto sock_cleanup;
+        goto out;
     }
 
     exitval = 0;
@@ -248,9 +248,7 @@ main(int argc, char *argv[])
 
     snmp_close(ss);
 
-sock_cleanup:
-    SOCK_CLEANUP;
-
 out:
+    SOCK_CLEANUP;
     return exitval;
 }

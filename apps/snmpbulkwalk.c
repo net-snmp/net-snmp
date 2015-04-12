@@ -188,6 +188,8 @@ main(int argc, char *argv[])
     int             check;
     int             exitval = 1;
 
+    SOCK_STARTUP;
+
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
 			       NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_WALK_INCLUDE_REQUESTED);
@@ -234,8 +236,6 @@ main(int argc, char *argv[])
         rootlen = sizeof(objid_mib) / sizeof(oid);
     }
 
-    SOCK_STARTUP;
-
     /*
      * open an SNMP session 
      */
@@ -245,7 +245,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpbulkwalk", &session);
-        goto sock_cleanup;
+        goto out;
     }
 
     /*
@@ -383,9 +383,7 @@ main(int argc, char *argv[])
         printf("Variables found: %d\n", numprinted);
     }
 
-sock_cleanup:
-    SOCK_CLEANUP;
-
 out:
+    SOCK_CLEANUP;
     return exitval;
 }

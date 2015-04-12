@@ -257,6 +257,8 @@ main(int argc, char *argv[])
     netsnmp_variable_list *saved = NULL, *vlp = saved, *vlp2;
     int             count = 0, exit_code = 1;
 
+    SOCK_STARTUP;
+
     /*
      * get the common command line arguments 
      */
@@ -278,8 +280,6 @@ main(int argc, char *argv[])
 	goto out;
     }
 
-    SOCK_STARTUP;
-
     /*
      * Open an SNMP session.
      */
@@ -289,7 +289,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpdf", &session);
-        goto sock_cleanup;
+        goto out;
     }
 
     if (human_units) {
@@ -460,9 +460,7 @@ main(int argc, char *argv[])
 close_session:
     snmp_close(ss);
 
-sock_cleanup:
-    SOCK_CLEANUP;
-
 out:
+    SOCK_CLEANUP;
     return exit_code;
 }                               /* end main() */
