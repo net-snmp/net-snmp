@@ -145,7 +145,6 @@ proxy_parse_config(const char *token, char *line)
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpget", &session);
-        SOCK_CLEANUP;
         return;
     }
 

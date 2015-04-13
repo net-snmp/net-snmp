@@ -269,7 +269,7 @@ main(int argc, char *argv[])
 #endif
     size_t          name_length;
     int             status;
-    int             exitval = 0;
+    int             exitval = 1;
     int             command = 0;
     long            longvar;
     int             secModel, secLevel, contextMatch;
@@ -278,24 +278,23 @@ main(int argc, char *argv[])
     u_char          viewMask[VACMSTRINGLEN];
     char           *st;
 
+    SOCK_STARTUP;
 
     /*
      * get the common command line arguments 
      */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
-        exit(1);
+        goto out;
     case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
-        exit(0);
+        exitval = 0;
+        goto out;
     case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
-
-
-    SOCK_STARTUP;
 
     /*
      * open an SNMP session 
@@ -309,7 +308,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpvacm", &session);
-        exit(1);
+        goto out;
     }
 
     /*
@@ -320,7 +319,7 @@ main(int argc, char *argv[])
     if (arg >= argc) {
         fprintf(stderr, "Please specify a operation to perform.\n");
         usage();
-        exit(1);
+        goto close_session;
     }
 
     if (strcmp(argv[arg], CMD_DELETEVIEW_NAME) == 0)
@@ -334,7 +333,7 @@ main(int argc, char *argv[])
         if (++arg + 2 != argc) {
             fprintf(stderr, "You must specify the view to delete\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETEVIEW;
@@ -356,7 +355,7 @@ main(int argc, char *argv[])
         if (++arg + 2 > argc) {
             fprintf(stderr, "You must specify name, subtree and mask\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         command = CMD_CREATEVIEW;
         name_length = VIEW_OID_LEN;
@@ -374,11 +373,11 @@ main(int argc, char *argv[])
             for (mask = strtok_r(mask, ".:", &st); mask; mask = strtok_r(NULL, ".:", &st)) {
                 if (i >= sizeof(viewMask)) {
                     printf("MASK too long\n");
-                    exit(1);
+                    goto close_session;
                 }
                 if (sscanf(mask, "%x", &val) == 0) {
                     printf("invalid MASK\n");
-                    exit(1);
+                    goto close_session;
                 }
                 viewMask[i] = val;
                 i++;
@@ -409,7 +408,7 @@ main(int argc, char *argv[])
         if (++arg + 2 != argc) {
             fprintf(stderr, "You must specify the sec2group to delete\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETESEC2GROUP;
@@ -417,7 +416,7 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         sec2group_oid(vacmSec2GroupStatus, &name_length, secModel,
                       argv[arg + 1]);
@@ -437,7 +436,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify model, security name and group name\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CREATESEC2GROUP;
@@ -445,7 +444,7 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         sec2group_oid(vacmSec2GroupStatus, &name_length, secModel,
                       argv[arg + 1]);
@@ -470,7 +469,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the access entry to delete\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETEACCESS;
@@ -484,12 +483,12 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
             printf("invalid security level\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         access_oid(vacmAccessStatus, &name_length, groupName, prefix,
                    secModel, secLevel);
@@ -509,7 +508,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the access entry to create\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CREATEACCESS;
@@ -523,12 +522,12 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
             printf("invalid security level\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         access_oid(vacmAccessStatus, &name_length, groupName, prefix,
                    secModel, secLevel);
@@ -542,7 +541,7 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 3], "%d", &contextMatch) == 0) {
             printf("invalid contextMatch\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         snmp_pdu_add_variable(pdu, vacmAccessContextMatch, name_length,
                               ASN_INTEGER, (u_char *) & contextMatch,
@@ -577,7 +576,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the authAccess entry to delete\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETEAUTH;
@@ -591,12 +590,12 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
             printf("invalid security level\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         authtype = argv[arg+3];
         auth_oid(nsVacmRowStatus, &name_length, groupName, prefix,
@@ -617,7 +616,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the authAccess entry to create\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CREATEAUTH;
@@ -631,12 +630,12 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
             printf("invalid security level\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         authtype = argv[arg+3];
         auth_oid(nsVacmRowStatus, &name_length, groupName, prefix,
@@ -651,7 +650,7 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 4], "%d", &contextMatch) == 0) {
             printf("invalid contextMatch\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         snmp_pdu_add_variable(pdu, nsVacmContextPfx, name_length,
                               ASN_INTEGER, (u_char *) & contextMatch,
@@ -665,8 +664,10 @@ main(int argc, char *argv[])
     } else {
         printf("Unknown command\n");
         usage();
-        exit(1);
+        goto close_session;
     }
+
+    exitval = 0;
 
     /*
      * do the request 
@@ -705,7 +706,10 @@ main(int argc, char *argv[])
     if (response)
         snmp_free_pdu(response);
 
+close_session:
     snmp_close(ss);
+
+out:
     SOCK_CLEANUP;
     return exitval;
 }

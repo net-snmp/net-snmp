@@ -103,7 +103,6 @@ usage(void)
     fprintf(stderr,
             "  -L LOGOPTS\t\tToggle various defaults controlling logging:\n");
     snmp_log_options_usage("\t\t\t  ", stderr);
-    exit(1);
 }
 
 int
@@ -117,7 +116,10 @@ main(int argc, char *argv[])
     int             print = 0;
     int             find_all = 0;
     int             width = 1000000;
+    int             exit_code = 1;
     netsnmp_session dummy;
+
+    SOCK_STARTUP;
 
     /*
      * usage: snmptranslate name
@@ -127,7 +129,7 @@ main(int argc, char *argv[])
         switch (arg) {
         case 'h':
             usage();
-            exit(1);
+            goto out;
 
         case 'm':
             setenv("MIBS", optarg, 1);
@@ -142,13 +144,14 @@ main(int argc, char *argv[])
         case 'V':
             fprintf(stderr, "NET-SNMP version: %s\n",
                     netsnmp_get_version());
-            exit(0);
+            exit_code = 0;
+            goto out;
             break;
         case 'w':
 	    width = atoi(optarg);
 	    if (width <= 0) {
 		fprintf(stderr, "Invalid width specification: %s\n", optarg);
-		exit (1);
+		goto out;
 	    }
 	    break;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
@@ -157,7 +160,7 @@ main(int argc, char *argv[])
             if (cp != NULL) {
                 fprintf(stderr, "Unknown parser option to -P: %c.\n", *cp);
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
@@ -166,7 +169,7 @@ main(int argc, char *argv[])
             if (cp != NULL) {
                 fprintf(stderr, "Unknown OID option to -O: %c.\n", *cp);
                 usage();
-                exit(1);
+                goto out;
             }
             break;
         case 'I':
@@ -174,7 +177,7 @@ main(int argc, char *argv[])
             if (cp != NULL) {
                 fprintf(stderr, "Unknown OID option to -I: %c.\n", *cp);
                 usage();
-                exit(1);
+                goto out;
             }
             break;
         case 'T':
@@ -220,25 +223,23 @@ main(int argc, char *argv[])
                     fprintf(stderr, "Invalid -T<lostpad> character: %c\n",
                             *cp);
                     usage();
-                    exit(1);
-                    break;
+                    goto out;
                 }
             }
             break;
         case 'L':
-            if (snmp_log_options(optarg, argc, argv) < 0) {
-                return (-1);
-            }
+            if (snmp_log_options(optarg, argc, argv) < 0)
+                goto out;
             break;
         default:
             fprintf(stderr, "invalid option: -%c\n", arg);
             usage();
-            exit(1);
-            break;
+            goto out;
         }
     }
 
     init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
+
     if (optind < argc)
         current_name = argv[optind];
 
@@ -246,7 +247,7 @@ main(int argc, char *argv[])
         switch (print) {
         default:
             usage();
-            exit(1);
+            goto out;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
         case 1:
             print_mib_tree(stdout, get_tree_head(), width);
@@ -259,7 +260,8 @@ main(int argc, char *argv[])
             break;
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         }
-        exit(0);
+        exit_code = 0;
+        goto out;
     }
 
     do {
@@ -271,7 +273,8 @@ main(int argc, char *argv[])
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
                 fprintf(stderr, "Unknown object identifier: %s\n",
                         current_name);
-                exit(2);
+                exit_code = 2;
+                goto out;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
             }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
@@ -282,9 +285,9 @@ main(int argc, char *argv[])
                 fprintf(stderr,
                         "Unable to find a matching object identifier for \"%s\"\n",
                         current_name);
-                exit(1);
+                goto out;
             }
-            exit(0);
+            break;
         } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 					  NETSNMP_DS_LIB_REGEX_ACCESS)) {
 #ifndef NETSNMP_DISABLE_MIB_LOADING
@@ -293,14 +296,15 @@ main(int argc, char *argv[])
                 fprintf(stderr,
                         "Unable to find a matching object identifier for \"%s\"\n",
                         current_name);
-                exit(1);
+                goto out;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
             }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         } else {
             if (!read_objid(current_name, name, &name_length)) {
                 snmp_perror(current_name);
-                exit(2);
+                exit_code = 2;
+                goto out;
             }
         }
 
@@ -314,7 +318,7 @@ main(int argc, char *argv[])
                 snmp_log(LOG_ERR,
                         "Unable to find a matching object identifier for \"%s\"\n",
                         current_name);
-                exit(1);
+                goto out;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
             }
             print_mib_tree(stdout, tp, width);
@@ -332,7 +336,11 @@ main(int argc, char *argv[])
             printf("\n");
     } while (optind < argc);
 
-    return (0);
+    exit_code = 0;
+
+out:
+    SOCK_CLEANUP;
+    return exit_code;
 }
 
 /*

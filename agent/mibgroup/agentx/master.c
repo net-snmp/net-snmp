@@ -531,7 +531,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
 
             if (snmp_oid_compare(nptr, nlen, request->subtree->start_a,
                                  request->subtree->start_len) < 0) {
-                DEBUGMSGTL(("agentx/master","inexact request preceeding region ("));
+                DEBUGMSGTL(("agentx/master","inexact request preceding region ("));
                 DEBUGMSGOID(("agentx/master", request->subtree->start_a,
                              request->subtree->start_len));
                 DEBUGMSG(("agentx/master", ")\n"));

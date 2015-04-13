@@ -255,29 +255,30 @@ main(int argc, char *argv[])
     size_t          base_length;
     int             status;
     netsnmp_variable_list *saved = NULL, *vlp = saved, *vlp2;
-    int             count = 0;
+    int             count = 0, exit_code = 1;
+
+    SOCK_STARTUP;
 
     /*
      * get the common command line arguments 
      */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
-        exit(1);
+        goto out;
     case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
-        exit(0);
+        exit_code = 0;
+        goto out;
     case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
 
     if (arg != argc) {
 	fprintf(stderr, "snmpdf: extra argument: %s\n", argv[arg]);
-	exit(1);
+	goto out;
     }
-
-    SOCK_STARTUP;
 
     /*
      * Open an SNMP session.
@@ -288,8 +289,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpdf", &session);
-        SOCK_CLEANUP;
-        exit(1);
+        goto out;
     }
 
     if (human_units) {
@@ -332,7 +332,7 @@ main(int argc, char *argv[])
             status = snmp_synch_response(ss, pdu, &response);
             if (status != STAT_SUCCESS || !response) {
                 snmp_sess_perror("snmpdf", ss);
-                exit(1);
+                goto close_session;
             }
 
             vlp2 = response->variables;
@@ -411,7 +411,7 @@ main(int argc, char *argv[])
             status = snmp_synch_response(ss, pdu, &response);
             if (status != STAT_SUCCESS || !response) {
                 snmp_sess_perror("snmpdf", ss);
-                exit(1);
+                goto close_session;
             }
 
             vlp2 = response->variables;
@@ -452,11 +452,15 @@ main(int argc, char *argv[])
 
     if (count == 0) {
         fprintf(stderr, "Failed to locate any partitions.\n");
-        exit(1);
+        goto close_session;
     }
 
-    snmp_close(ss);
-    SOCK_CLEANUP;
-    return 0;
+    exit_code = 0;
 
+close_session:
+    snmp_close(ss);
+
+out:
+    SOCK_CLEANUP;
+    return exit_code;
 }                               /* end main() */
