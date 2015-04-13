@@ -57301,7 +57301,7 @@ Changes: V5.0.9 -> V5.1
 
    * agent/mibgroup/agentx/master.c:
 
-     - don't send requests for OIDs preceeding the start of a region
+     - don't send requests for OIDs preceding the start of a region
        (this can lead to loops if e.g. a subagent has registered two
        adjacent rows).
    
@@ -86684,7 +86684,7 @@ Changes: V5.0.9 -> V5.1
    snmplib/snmp_impl.h, man/Makefile.in:
 
    - (*/*/*/*): Patch from Niels Baggesen:
-     - fix auto_nlist on preceeding _ architectures.
+     - fix auto_nlist on preceding _ architectures.
      - Change *all* define usage to new SNMP_ and ASN_ prefixes.
      - leave mib access open if no com2sec statements were found in snmpd.conf.
    
@@ -104622,7 +104622,7 @@ Changes: V4.2 -> V5.0
 
    * agent/mibgroup/agentx/master.c:
 
-     - don't send requests for OIDs preceeding the start of a region
+     - don't send requests for OIDs preceding the start of a region
        (this can lead to loops if e.g. a subagent has registered two
        adjacent rows).
    
@@ -130364,7 +130364,7 @@ hardaker  9 Mar 98 17:40:04
 
 hardaker 11 Mar 98 08:06:17
     - (*/*/*/*): Patch from Niels Baggesen:
-      - fix auto_nlist on preceeding _ architectures.
+      - fix auto_nlist on preceding _ architectures.
       - Change *all* define usage to new SNMP_ and ASN_ prefixes.
       - leave mib access open if no com2sec statements were found in snmpd.conf.
 
