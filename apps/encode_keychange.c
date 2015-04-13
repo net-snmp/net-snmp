@@ -403,7 +403,7 @@ usage_to_file(FILE * ofp)
    "-f will require reading from the stdin/terminal, ignoring a) and b).\n\
     -P will prevent prompts for passphrases to stdout from being printed.\n\
 \n\
-    <engineID> is interpreted as a hex string when preceeded by \"0x\",\n\
+    <engineID> is interpreted as a hex string when preceded by \"0x\",\n\
     otherwise it is created to contain \"text\".  If nothing is given,\n\
     <engineID> is constructed from the first IP address for the local host.\n");
 
