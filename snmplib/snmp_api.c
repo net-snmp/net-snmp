@@ -4704,7 +4704,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                           (long *) vp->val.integer,
                           sizeof(*vp->val.integer));
             if (!p)
-                return -1;
+                goto fail;
             break;
         case ASN_COUNTER:
         case ASN_GAUGE:
@@ -4716,7 +4716,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                                    (u_long *) vp->val.integer,
                                    vp->val_len);
             if (!p)
-                return -1;
+                goto fail;
             break;
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_COUNTER64:
@@ -4729,7 +4729,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                                      (struct counter64 *) vp->val.
                                      counter64, vp->val_len);
             if (!p)
-                return -1;
+                goto fail;
             break;
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_FLOAT:
@@ -4738,7 +4738,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
             p = asn_parse_float(var_val, &len, &vp->type,
                             vp->val.floatVal, vp->val_len);
             if (!p)
-                return -1;
+                goto fail;
             break;
         case ASN_OPAQUE_DOUBLE:
             vp->val.doubleVal = (double *) vp->buf;
@@ -4746,7 +4746,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
             p = asn_parse_double(var_val, &len, &vp->type,
                              vp->val.doubleVal, vp->val_len);
             if (!p)
-                return -1;
+                goto fail;
             break;
         case ASN_OPAQUE_I64:
             vp->val.counter64 = (struct counter64 *) vp->buf;
@@ -4756,12 +4756,12 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                                    sizeof(*vp->val.counter64));
 
             if (!p)
-                return -1;
+                goto fail;
             break;
 #endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
         case ASN_IPADDRESS:
             if (vp->val_len != 4)
-                return -1;
+                goto fail;
             /* fallthrough */
         case ASN_OCTET_STR:
         case ASN_OPAQUE:
@@ -4777,13 +4777,13 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
             p = asn_parse_string(var_val, &len, &vp->type, vp->val.string,
                              &vp->val_len);
             if (!p)
-                return -1;
+                goto fail;
             break;
         case ASN_OBJECT_ID:
             vp->val_len = MAX_OID_LEN;
             p = asn_parse_objid(var_val, &len, &vp->type, objid, &vp->val_len);
             if (!p)
-                return -1;
+                goto fail;
             vp->val_len *= sizeof(oid);
             vp->val.objid = (oid *) malloc(vp->val_len);
             if (vp->val.objid == NULL) {
@@ -4804,7 +4804,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
             p = asn_parse_bitstring(var_val, &len, &vp->type,
                                 vp->val.bitstring, &vp->val_len);
             if (!p)
-                return -1;
+                goto fail;
             break;
         default:
             snmp_log(LOG_ERR, "bad type returned (%x)\n", vp->type);
