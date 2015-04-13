@@ -299,7 +299,6 @@ version(void)
     printf("\nNET-SNMP Version:  %s\n", netsnmp_get_version());
     printf("Web:               http://www.net-snmp.org/\n");
     printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
-    exit(0);
 }
 
 RETSIGTYPE
@@ -646,6 +645,7 @@ main(int argc, char *argv[])
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
     int             uid = 0, gid = 0;
+    int             exit_code = 1;
     char           *cp, *listen_ports = NULL;
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
     int             agentx_subagent = 1;
@@ -660,12 +660,14 @@ main(int argc, char *argv[])
     /* check if systemd has sockets for us and don't close them */
     prepared_sockets = netsnmp_sd_listen_fds(0);
 #endif
+#ifndef WIN32
     /*
      * close all non-standard file descriptors we may have
      * inherited from the shell.
      */
     if (!prepared_sockets)
         netsnmp_close_fds(2);
+#endif
     
 #ifdef SIGTERM
     signal(SIGTERM, term_handler);
@@ -738,13 +740,11 @@ main(int argc, char *argv[])
     while ((arg = getopt(argc, argv, options)) != EOF) {
         switch (arg) {
         case '-':
-            if (strcasecmp(optarg, "help") == 0) {
-                usage();
-                exit(0);
-            }
-            if (strcasecmp(optarg, "version") == 0) {
+            if (strcasecmp(optarg, "help") == 0 ||
+                strcasecmp(optarg, "version") == 0) {
                 version();
-                exit(0);
+                exit_code = 0;
+                goto out;
             }
 
             handle_long_opt(optarg);
@@ -765,7 +765,7 @@ main(int argc, char *argv[])
 				      NETSNMP_DS_LIB_OPTIONALCONFIG, optarg);
             } else {
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 
@@ -805,7 +805,7 @@ main(int argc, char *argv[])
                 }
             } else {
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 
@@ -816,14 +816,15 @@ main(int argc, char *argv[])
 				   NETSNMP_DS_AGENT_GROUPID, gid = atoi(optarg));
             } else {
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 #endif
 
         case 'h':
             usage();
-            exit(0);
+            exit_code = 0;
+            goto out;
 
         case 'H':
             init_agent("snmptrapd");
@@ -836,7 +837,8 @@ main(int argc, char *argv[])
             init_snmp("snmptrapd");
             fprintf(stderr, "Configuration directives understood:\n");
             read_config_print_usage("  ");
-            exit(0);
+            exit_code = 0;
+            goto out;
 
         case 'I':
             if (optarg != NULL) {
@@ -849,15 +851,14 @@ main(int argc, char *argv[])
 	case 'S':
             fprintf(stderr,
                     "Warning: -S option has been withdrawn; use -Ls <facility> instead\n");
-            exit(1);
-            break;
+            goto out;
 
         case 'm':
             if (optarg != NULL) {
                 setenv("MIBS", optarg, 1);
             } else {
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 
@@ -866,7 +867,7 @@ main(int argc, char *argv[])
                 setenv("MIBDIRS", optarg, 1);
             } else {
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 
@@ -878,8 +879,7 @@ main(int argc, char *argv[])
         case 'o':
             fprintf(stderr,
                     "Warning: -o option has been withdrawn; use -Lf <file> instead\n");
-            exit(1);
-            break;
+            goto out;
 
         case 'O':
             cp = snmp_out_toggle_options(optarg);
@@ -887,14 +887,14 @@ main(int argc, char *argv[])
                 fprintf(stderr, "Unknown output option passed to -O: %c\n",
 			*cp);
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 
         case 'L':
 	    if  (snmp_log_options( optarg, argc, argv ) < 0 ) {
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 
@@ -904,7 +904,7 @@ main(int argc, char *argv[])
                 parse_config_pidFile(NULL, optarg);
             } else {
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 #endif
@@ -912,14 +912,12 @@ main(int argc, char *argv[])
         case 'P':
             fprintf(stderr,
                     "Warning: -P option has been withdrawn; use -f -Le instead\n");
-            exit(1);
-            break;
+            goto out;
 
         case 's':
             fprintf(stderr,
                     "Warning: -s option has been withdrawn; use -Lsd instead\n");
-            exit(1);
-            break;
+            goto out;
 
         case 't':
             SyslogTrap++;
@@ -942,13 +940,13 @@ main(int argc, char *argv[])
 #endif
                 if (uid < 0) {
                     fprintf(stderr, "Bad user id: %s\n", optarg);
-                    exit(1);
+                    goto out;
                 }
                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
 				   NETSNMP_DS_AGENT_USERID, uid);
             } else {
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 #endif
@@ -965,7 +963,7 @@ main(int argc, char *argv[])
                                       NETSNMP_DS_AGENT_X_SOCKET, optarg);
             } else {
                 usage();
-                exit(1);
+                goto out;
             }
             break;
 
@@ -977,7 +975,7 @@ main(int argc, char *argv[])
         default:
             fprintf(stderr, "invalid option: -%c\n", arg);
             usage();
-            exit(1);
+            goto out;
             break;
         }
     }
@@ -992,7 +990,7 @@ main(int argc, char *argv[])
                 astring = malloc(strlen(listen_ports) + 2 + strlen(argv[i]));
                 if (astring == NULL) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n", i);
-                    exit(1);
+                    goto out;
                 }
                 sprintf(astring, "%s,%s", listen_ports, argv[i]);
                 free(listen_ports);
@@ -1001,7 +999,7 @@ main(int argc, char *argv[])
                 listen_ports = strdup(argv[i]);
                 if (listen_ports == NULL) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n", i);
-                    exit(1);
+                    goto out;
                 }
             }
         }
@@ -1189,8 +1187,7 @@ main(int argc, char *argv[])
             snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
                      cp, errno, strerror(errno));
             snmptrapd_close_sessions(sess_list);
-            SOCK_CLEANUP;
-            exit(1);
+            goto sock_cleanup;
         } else {
             ss = snmptrapd_add_session(transport);
             if (ss == NULL) {
@@ -1200,8 +1197,7 @@ main(int argc, char *argv[])
                  */
                 snmptrapd_close_sessions(sess_list);
                 snmp_log(LOG_ERR, "couldn't open snmp - %s", strerror(errno));
-                SOCK_CLEANUP;
-                exit(1);
+                goto sock_cleanup;
             } else {
                 ss->next = sess_list;
                 sess_list = ss;
@@ -1224,7 +1220,7 @@ main(int argc, char *argv[])
 #ifdef NETSNMP_USE_MYSQL
     if( netsnmp_mysql_init() ) {
         fprintf(stderr, "MySQL initialization failed\n");
-        exit(1);
+        goto sock_cleanup;
     }
 #endif
 
@@ -1238,7 +1234,7 @@ main(int argc, char *argv[])
         switch (fork()) {
         case -1:
             fprintf(stderr, "bad fork - %s\n", strerror(errno));
-            _exit(1);
+            goto sock_cleanup;
 
         case 0:
             /*
@@ -1246,7 +1242,7 @@ main(int argc, char *argv[])
              */
             if (setsid() == -1) {
                 fprintf(stderr, "bad setsid - %s\n", strerror(errno));
-                _exit(1);
+                goto sock_cleanup;
             }
 
             /*
@@ -1268,7 +1264,7 @@ main(int argc, char *argv[])
     if (pid_file != NULL) {
         if ((PID = fopen(pid_file, "w")) == NULL) {
             snmp_log_perror("fopen");
-            exit(1);
+            goto sock_cleanup;
         }
         fprintf(PID, "%d\n", (int) getpid());
         fclose(PID);
@@ -1296,7 +1292,7 @@ main(int argc, char *argv[])
             snmp_log_perror("setgid failed");
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                exit(1);
+                goto sock_cleanup;
             }
         }
     }
@@ -1309,7 +1305,7 @@ main(int argc, char *argv[])
             snmp_log_perror("setuid failed");
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                exit(1);
+                goto sock_cleanup;
             }
         }
     }
@@ -1356,8 +1352,14 @@ main(int argc, char *argv[])
     trapd_status = SNMPTRAPD_STOPPED;
 #endif
     snmp_disable_log();
+
+    exit_code = 0;
+
+sock_cleanup:
     SOCK_CLEANUP;
-    return 0;
+
+out:
+    return exit_code;
 }
 
 /*

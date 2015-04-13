@@ -343,6 +343,9 @@ _clone_pdu_header(netsnmp_pdu *pdu)
     struct snmp_secmod_def *sptr;
     int ret;
 
+    if (!pdu)
+        return NULL;
+
     newpdu = (netsnmp_pdu *) malloc(sizeof(netsnmp_pdu));
     if (!newpdu)
         return NULL;
@@ -382,7 +385,7 @@ _clone_pdu_header(netsnmp_pdu *pdu)
         return NULL;
     }
 
-    if (pdu != NULL && pdu->securityStateRef &&
+    if (pdu->securityStateRef &&
         pdu->command == SNMP_MSG_TRAP2) {
 
         ret = usm_clone_usmStateReference((struct usmStateReference *) pdu->securityStateRef,

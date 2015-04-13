@@ -1290,6 +1290,7 @@ static int get_sysfs_stats(void)
 
         if (fgets(buffer, sizeof(buffer), f) == NULL) {
             DEBUGMSGTL(("ucd-snmp/diskio", "Can't read %s, skipping", disks[i].syspath));
+            fclose(f);
             continue;
         }
 
