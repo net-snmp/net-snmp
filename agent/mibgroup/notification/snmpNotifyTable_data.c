@@ -316,6 +316,8 @@ notifyTable_register_notifications(int major, int minor,
         return 0;
     }
     ptr = snmpTargetAddrTable_create();
+    if (!ptr)
+        goto bail;
     ptr->name = strdup(name);
     memcpy(ptr->tDomain, t->domain, t->domain_length * sizeof(oid));
     ptr->tDomainLen = t->domain_length;
@@ -327,6 +329,8 @@ notifyTable_register_notifications(int major, int minor,
     SNMP_FREE(ptr->tagList);
     ptr->tagList = strdup(tag);
     ptr->params = strdup(ptr->name); /* link to target param table */
+    if (!ptr->params || !ptr->tagList || !ptr->name)
+        goto bail;
     ptr->storageType = ST_READONLY;
     ptr->rowStatus = RS_ACTIVE;
     ptr->sess = ss;
@@ -340,6 +344,8 @@ notifyTable_register_notifications(int major, int minor,
     if (NULL == pptr)
         goto bail;
     pptr->paramName = strdup(ptr->params); /* link from target addr table */
+    if (!pptr->paramName)
+        goto bail;
     pptr->mpModel = ss->version;
     if (ss->version == SNMP_VERSION_3) {
         pptr->secModel = ss->securityModel;
@@ -388,6 +394,8 @@ notifyTable_register_notifications(int major, int minor,
     nptr->snmpNotifyNameLen = strlen(name);
     nptr->snmpNotifyTag = strdup(tag); /* selects target addr */
     nptr->snmpNotifyTagLen = strlen(nptr->snmpNotifyTag);
+    if (!nptr->snmpNotifyName || !nptr->snmpNotifyTag)
+        goto bail;
     nptr->snmpNotifyType = confirm ?
         SNMPNOTIFYTYPE_INFORM : SNMPNOTIFYTYPE_TRAP;
     nptr->snmpNotifyStorageType = ST_READONLY;
@@ -426,6 +434,8 @@ notifyTable_register_notifications(int major, int minor,
     return 0;
 
   bail:
+    snmp_log(LOG_ERR, "Cannot add new trap destination");
+
     if (NULL != nptr)
         snmpNotifyTable_remove(nptr);
 
@@ -434,6 +444,8 @@ notifyTable_register_notifications(int major, int minor,
 
     if (NULL != ptr)
         snmpTargetAddrTable_remove(ptr);
+
+    snmp_sess_close(ss);
 
     return 0;
 }
