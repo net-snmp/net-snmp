@@ -2758,6 +2758,13 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     u_char         *cp;
     size_t          length;
 
+    if (NETSNMP_RUNTIME_PROTOCOL_SKIP(pdu->version)) {
+        DEBUGMSGTL(("snmp_send", "build packet (version 0x%02x disabled)\n",
+                    (u_int)pdu->version));
+        session->s_snmp_errno = SNMPERR_BAD_VERSION;
+        return -1;
+    }
+
     session->s_snmp_errno = 0;
     session->s_errno = 0;
 
