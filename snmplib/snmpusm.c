@@ -3806,9 +3806,15 @@ usm_remove_user(struct usmUser *user)
     return usm_remove_user_from_list(user, &userList);
 }
 
-struct usmUser *
-usm_remove_user_from_list(struct usmUser *user,
-                          struct usmUser **ppuserList)
+/*
+ * usm_remove_usmUser remove user from (optional) list
+ *
+ * if list is not specified, defaults to global userList.
+ *
+ * returns SNMPERR_SUCCESS or SNMPERR_USM_UNKNOWNSECURITYNAME
+ */
+int
+usm_remove_usmUser_from_list(struct usmUser *user, struct usmUser **ppuserList)
 {
     struct usmUser *nptr, *pptr;
 
@@ -3816,10 +3822,10 @@ usm_remove_user_from_list(struct usmUser *user,
      * NULL pointers aren't allowed 
      */
     if (ppuserList == NULL)
-        return NULL;
+        ppuserList = &userList;
 
     if (*ppuserList == NULL)
-        return NULL;
+        return SNMPERR_USM_UNKNOWNSECURITYNAME;
 
     /*
      * find the user in the list 
@@ -3844,11 +3850,40 @@ usm_remove_user_from_list(struct usmUser *user,
         /*
          * user didn't exist 
          */
-        return NULL;
+        return SNMPERR_USM_UNKNOWNSECURITYNAME;
     }
     if (nptr == *ppuserList)    /* we're the head of the list, need to change
                                  * * the head to the next user */
         *ppuserList = nptr->next;
+    return SNMPERR_SUCCESS;
+}                               /* end usm_remove_user_from_list() */
+
+int
+usm_remove_usmUser(struct usmUser *user)
+{
+    return usm_remove_usmUser_from_list(user, &userList);
+}
+
+/*
+ * usm_remove_user_from_list
+ *
+ * removes user from list.
+ *
+ * returns new list head on success, or NULL on error.
+ *
+ * NOTE: if there was only one user in the list, list head will be NULL.
+ *       So NULL can also mean success. Use the newer usm_remove_usmUser() for
+ *       more specific return codes. This function is kept for backwards
+ *       compatability with this ambiguous behaviour.
+ */
+struct usmUser *
+usm_remove_user_from_list(struct usmUser *user,
+                          struct usmUser **ppuserList)
+{
+    int rc = usm_remove_usmUser_from_list(user, ppuserList);
+    if (rc != SNMPERR_SUCCESS || NULL == ppuserList)
+        return NULL;
+
     return *ppuserList;
 }                               /* end usm_remove_user_from_list() */
 
@@ -4693,7 +4728,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
 #endif
     }
     else if ((strncmp(cp, "default", 7) == 0) && (NULL != def_priv_prot)) {
-        memcpy(newuser->authProtocol, def_priv_prot,
+        memcpy(newuser->privProtocol, def_priv_prot,
                def_priv_prot_len * sizeof(oid));
     }
     if (0 == newuser->authProtocol[0]) {

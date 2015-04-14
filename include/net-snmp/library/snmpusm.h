@@ -294,6 +294,13 @@ extern          "C" {
                                        const char **errorMsg);
 
     NETSNMP_IMPORT
+    int             usm_remove_usmUser(struct usmUser *user);
+
+    NETSNMP_IMPORT
+    int             usm_remove_usmUser_from_list(struct usmUser *user,
+                                                 struct usmUser **ppuserList);
+
+    NETSNMP_IMPORT
     struct usmUser *usm_create_usmUser_from_string(char *line,
                                                    const char **errorMsg);
 
