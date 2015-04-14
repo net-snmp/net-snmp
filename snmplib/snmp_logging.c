@@ -1003,6 +1003,11 @@ netsnmp_register_loghandler( int type, int priority )
 
     DEBUGMSGT(("logging:register", "registering log type %d with pri %d\n",
                type, priority));
+    if (priority > LOG_DEBUG) {
+        DEBUGMSGT(("logging:register", "  limiting pri %d to %d\n", priority,
+                   LOG_DEBUG));
+        priority = LOG_DEBUG;
+    }
 
     logh->type     = type;
     switch ( type ) {
@@ -1321,6 +1326,8 @@ snmp_log_string(int priority, const char *str)
     /*
      * Start at the given priority, and work "upwards"....
      */
+    if (priority > LOG_DEBUG)
+        priority = LOG_DEBUG;
     logh = logh_priorities[priority];
     for ( ; logh; logh = logh->next ) {
         /*
