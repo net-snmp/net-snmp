@@ -951,6 +951,9 @@ snmp_shutdown(const char *type)
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
     netsnmp_certs_shutdown();
 #endif
+#if !defined(NETSNMP_FEATURE_REMOVE_FILTER_SOURCE)
+    netsnmp_transport_filter_cleanup();
+#endif
     unregister_all_config_handlers();
     netsnmp_container_free_list();
     clear_sec_mod();
