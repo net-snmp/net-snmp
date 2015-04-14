@@ -236,7 +236,7 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
         return C2SE_ERR_MASK_MISMATCH;
 
     communityLen = strlen(community);
-    if (communityLen > VACM_MAX_STRING)
+    if (communityLen > COMMUNITY_MAX_LEN)
         return C2SE_ERR_COMMUNITY_TOO_LONG;
 
     secNameLen = strlen(secName);
@@ -244,7 +244,7 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
         return C2SE_ERR_SECNAME_TOO_LONG;
 
     contextNameLen = contextName ? strlen(contextName) : 0;
-    if (contextNameLen > COMMUNITY_MAX_LEN)
+    if (contextNameLen > VACM_MAX_STRING)
         return C2SE_ERR_SECNAME_TOO_LONG;
 
     /** alloc space for struct + 3 strings with NULLs */
