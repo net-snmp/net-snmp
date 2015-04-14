@@ -28,6 +28,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "header_complex.h"
+#include "snmpNotifyTable_data.h"
 #include "snmpNotifyFilterProfileTable_data.h"
 
 
@@ -102,6 +103,13 @@ snmpNotifyFilterProfileTable_create(const char *paramsName,
                                     size_t profileName_len)
 {
     struct snmpNotifyFilterProfileTable_data *profile = NULL;
+
+    if ((paramsName_len > NOTIFY_NAME_MAX) || (0 == paramsName_len) || 
+        (profileName_len > NOTIFY_NAME_MAX)|| (0 == profileName_len)) {
+        DEBUGMSGTL(("snmpNotifyFilterProfileTable",
+                    "bad params or profile name\n"));
+        return NULL;
+    }
 
     profile = SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
     if (NULL == profile) {

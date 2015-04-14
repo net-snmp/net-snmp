@@ -14,6 +14,7 @@
  * include our parent header
  */
 #include "snmpNotifyFilterTable_data_storage.h"
+#include "notification/snmpNotifyTable_data.h"
 #include "notification/snmpNotifyFilterProfileTable_data.h"
 
 #include <net-snmp/agent/table_container.h>

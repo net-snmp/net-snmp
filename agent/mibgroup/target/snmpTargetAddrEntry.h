@@ -15,6 +15,7 @@
 
 config_require(util_funcs/header_generic)
 
+#include "snmpTargetAddrEntry_data.h"
 
     /*
      * add the SNMPv2-TM mib into the default list of mibs to load, since

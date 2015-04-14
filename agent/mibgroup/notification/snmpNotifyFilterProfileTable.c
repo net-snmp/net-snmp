@@ -28,6 +28,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "header_complex.h"
+#include "snmpNotifyTable_data.h"
 #include "snmpNotifyFilterProfileTable.h"
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
@@ -367,7 +368,7 @@ write_snmpNotifyFilterProfileName(int action,
         if (var_val_type != ASN_OCTET_STR) {
             return SNMP_ERR_WRONGTYPE;
         }
-        if (var_val_len < 1 || var_val_len > 32) {
+        if (var_val_len < 1 || var_val_len > NOTIFY_NAME_MAX) {
             return SNMP_ERR_WRONGLENGTH;
         }
         break;
