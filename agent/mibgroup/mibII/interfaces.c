@@ -319,10 +319,10 @@ if_type_from_name(const char *pcch)
         {0, 0}                  /* end of list */
     };
 
-    int             ii, len;
+    int             len;
     register pmatch_if pm;
 
-    for (ii = 0, pm = lmatch_if; pm->mi_name; pm++) {
+    for (pm = lmatch_if; pm->mi_name; pm++) {
         len = strlen(pm->mi_name);
         if (0 == strncmp(pcch, pm->mi_name, len)) {
             return (pm->mi_type);
@@ -1864,7 +1864,9 @@ Interface_Scan_NextInt(int *Index,
                     struct ifnet *Retifnet, struct in_ifaddr *dummy)
 {
     struct ifnet    ifnet;
+#if !defined(linux)
     register char  *cp;
+#endif
 
     while (ifnetaddr) {
         /*
@@ -1898,7 +1900,6 @@ Interface_Scan_NextInt(int *Index,
 #endif
 
         saveName[sizeof(saveName) - 1] = '\0';
-        cp = (char *) strchr(saveName, '\0');
 #ifdef linux
         strlcat(saveName, ifnet.if_unit, sizeof(saveName));
 #else
@@ -1906,6 +1907,7 @@ Interface_Scan_NextInt(int *Index,
         /* this exists here just so we don't copy ifdef logic elsewhere */
         netsnmp_feature_require(string_append_int);
 #endif
+        cp = (char *) strchr(saveName, '\0');
         string_append_int(cp, ifnet.if_unit);
 #endif
         if (1 || strcmp(saveName, "lo0") != 0) {        /* XXX */

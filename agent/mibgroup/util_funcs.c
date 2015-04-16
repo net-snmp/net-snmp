@@ -668,17 +668,17 @@ clear_cache(int action,
             size_t var_val_len,
             u_char * statP, oid * name, size_t name_len)
 {
-
-    long            tmp = 0;
-
     if (var_val_type != ASN_INTEGER) {
         snmp_log(LOG_NOTICE, "Wrong type != int\n");
         return SNMP_ERR_WRONGTYPE;
     }
-    tmp = *((long *) var_val);
 #if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)
-    if (tmp == 1 && action == COMMIT) {
-        cachetime = 0;          /* reset the cache next read */
+    else {
+        long            tmp = 0;
+        tmp = *((long *) var_val);
+        if (tmp == 1 && action == COMMIT) {
+            cachetime = 0;          /* reset the cache next read */
+        }
     }
 #endif
     return SNMP_ERR_NOERROR;

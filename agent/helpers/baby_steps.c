@@ -359,7 +359,7 @@ netsnmp_baby_steps_handler_init(void)
     netsnmp_mib_handler *handler =
         netsnmp_baby_steps_handler_get(BABY_STEP_ALL);
     if (NULL == handler) {
-        netsnmp_free_handler(handler);
+        netsnmp_handler_free(handler);
         snmp_log(LOG_ERR, "could not create baby steps handler\n");
         return;
     }

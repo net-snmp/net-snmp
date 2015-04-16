@@ -519,7 +519,7 @@ netsnmp_register_watched_spinlock(netsnmp_handler_registration *reginfo,
     }
 
     snmp_log(LOG_ERR, "could not create watched spinlock handler\n");
-    SNMP_FREE(watchinfo);
+    SNMP_FREE(winfo);
     netsnmp_handler_free(whandler);
     netsnmp_handler_registration_free(reginfo);
 

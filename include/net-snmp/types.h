@@ -177,7 +177,7 @@ typedef struct snmp_pdu {
     long            version;
     /** Type of this PDU */	
     int             command;
-    /** Request id - note: not incremented on retries */
+    /** Request id - note: incremented for each retry */
     long            reqid;  
     /** Message id for V3 messages note: incremented for each retry */
     long            msgid;

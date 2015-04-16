@@ -60,6 +60,7 @@ static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 
 
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 static unsigned
 netsnmp_if_nametoindex(const char *ifname)
 {
@@ -220,12 +221,16 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
 	       *
 	       */
 	        char *scope_id;
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 	        unsigned int if_index = 0;
+#endif
                 *cp = '\0';
 		scope_id = strchr(peername + 1, '%');
 		if (scope_id != NULL) {
 		    *scope_id = '\0';
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		    if_index = netsnmp_if_nametoindex(scope_id + 1);
+#endif
 		}
                 if (*(cp + 1) == ':') {
                     portno = atoi(cp+2);
@@ -277,12 +282,16 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         cp = strrchr(peername, ':');
         if (cp != NULL) {
 	    char *scope_id;
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 	    unsigned int if_index = 0;
+#endif
 	    *cp = '\0';
 	    scope_id = strchr(peername + 1, '%');
 	    if (scope_id != NULL) {
 	        *scope_id = '\0';
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 	        if_index = netsnmp_if_nametoindex(scope_id + 1);
+#endif
 	    }
             portno = atoi(cp + 1);
             if (portno != 0 &&
