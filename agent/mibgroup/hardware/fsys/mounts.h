@@ -59,6 +59,9 @@
 #ifndef MOUNT_ZFS
 #define MOUNT_ZFS    "zfs"
 #endif
+#ifndef MOUNT_NVMFS
+#define MOUNT_NVMFS  "nvmfs"
+#endif
 #ifndef MOUNT_ACFS
 #define MOUNT_ACFS   "acfs"
 #endif
