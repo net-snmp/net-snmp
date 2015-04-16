@@ -50,7 +50,7 @@ In addition to the options described in this manual page, all of the
 tokens described in the \fIsnmp.conf\fR and other .conf manual pages
 can be used on the command line of Net-SNMP applications as well by
 prefixing them with "\-\-".  EG, specifying
-\fI\-\-dontLoadHostConfig=true\fR on the command line will turn of
+\fI\-\-dontLoadHostConfig=true\fR on the command line will turn off
 loading of the host specific configuration files.
 .PP
 The snmp.conf file settings and the double-dash arguments over-ride
