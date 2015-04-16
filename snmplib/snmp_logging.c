@@ -240,7 +240,7 @@ netsnmp_set_line_buffering(FILE *stream)
  *                 OUT - points to last character after the decoded priority
  * @param pri_max - OUT - maximum priority (i.e. 0x7 from "0-7")
  */
-int
+static int
 decode_priority( char **optarg, int *pri_max )
 {
     int pri_low = LOG_DEBUG;
@@ -309,7 +309,7 @@ decode_priority( char **optarg, int *pri_max )
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
-int
+static int
 decode_facility( char *optarg )
 {
     if (optarg == NULL)
@@ -444,8 +444,10 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      */
     case 'F':
         priority = decode_priority( &optarg, &pri_max );
-        if (priority == -1 || !argv)  return -1;
-        optarg = argv[++optind];
+        if (priority == -1) return -1;
+        while (*optarg == ' ') optarg++;
+        if (!*optarg && !argv) return -1;
+        else if (!*optarg) optarg = argv[++optind];
         /* Fallthrough */
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_FILE
     case 'f':
@@ -455,6 +457,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             fprintf(stderr, "Missing log file\n");
             return -1;
         }
+        DEBUGMSGTL(("logging:options", "%d-%d: '%s'\n", priority, pri_max, optarg));
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_FILE, priority);
         if (logh) {
             logh->pri_max = pri_max;
