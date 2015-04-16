@@ -368,7 +368,7 @@ udpTable_next_entry( void **loop_context,
 {
     UDPTABLE_ENTRY_TYPE	 *entry = (UDPTABLE_ENTRY_TYPE *)*loop_context;
     long port;
-    long addr;
+    in_addr_t addr;
 
     if (!entry)
         return NULL;
