@@ -67,6 +67,8 @@ _fs_type( char *typename )
        return NETSNMP_FS_TYPE_NTFS;
     else if ( !strcmp(typename, MOUNT_ZFS) )
        return NETSNMP_FS_TYPE_OTHER;
+    else if ( !strcmp(typename, MOUNT_NVMFS) )
+       return NETSNMP_FS_TYPE_OTHER;
     else if ( !strcmp(typename, MOUNT_ACFS) )
        return NETSNMP_FS_TYPE_OTHER;
 
