@@ -4017,36 +4017,50 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
         { 1, 3, 6, 1, 6, 3, 15, 1, 1, 6, 0 };
     oid            *err_var;
     int             err_var_len;
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
     int             stat_ind;
+#endif
 
     switch (error) {
     case SNMPERR_USM_UNKNOWNENGINEID:
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
         stat_ind = STAT_USMSTATSUNKNOWNENGINEIDS;
+#endif /* !NETSNMP_FEATURE_REMOVE_STATISTICS */
         err_var = unknownEngineID;
         err_var_len = ERROR_STAT_LENGTH;
         break;
     case SNMPERR_USM_UNKNOWNSECURITYNAME:
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
         stat_ind = STAT_USMSTATSUNKNOWNUSERNAMES;
+#endif /* !NETSNMP_FEATURE_REMOVE_STATISTICS */
         err_var = unknownUserName;
         err_var_len = ERROR_STAT_LENGTH;
         break;
     case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
         stat_ind = STAT_USMSTATSUNSUPPORTEDSECLEVELS;
+#endif /* !NETSNMP_FEATURE_REMOVE_STATISTICS */
         err_var = unknownSecurityLevel;
         err_var_len = ERROR_STAT_LENGTH;
         break;
     case SNMPERR_USM_AUTHENTICATIONFAILURE:
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
         stat_ind = STAT_USMSTATSWRONGDIGESTS;
+#endif /* !NETSNMP_FEATURE_REMOVE_STATISTICS */
         err_var = wrongDigest;
         err_var_len = ERROR_STAT_LENGTH;
         break;
     case SNMPERR_USM_NOTINTIMEWINDOW:
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
         stat_ind = STAT_USMSTATSNOTINTIMEWINDOWS;
+#endif /* !NETSNMP_FEATURE_REMOVE_STATISTICS */
         err_var = notInTimeWindow;
         err_var_len = ERROR_STAT_LENGTH;
         break;
     case SNMPERR_USM_DECRYPTIONERROR:
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
         stat_ind = STAT_USMSTATSDECRYPTIONERRORS;
+#endif /* !NETSNMP_FEATURE_REMOVE_STATISTICS */
         err_var = decryptionError;
         err_var_len = ERROR_STAT_LENGTH;
         break;
