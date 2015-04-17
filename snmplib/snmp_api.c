@@ -745,6 +745,8 @@ snmp_sess_init(netsnmp_session * session)
     session->version = SNMP_DEFAULT_VERSION;
     session->securityModel = SNMP_DEFAULT_SECMODEL;
     session->rcvMsgMaxSize = SNMP_MAX_MSG_SIZE;
+    session->sndMsgMaxSize = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                                NETSNMP_DS_LIB_MSG_SEND_MAX);
     session->flags |= SNMP_FLAGS_DONT_PROBE;
 }
 
@@ -800,6 +802,9 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENTSENDBUF);
     netsnmp_ds_register_config(ASN_INTEGER, "snmp", "clientRecvBuf",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENTRECVBUF);
+    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "sendMessageMaxSize",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_MSG_SEND_MAX);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noPersistentLoad",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noPersistentSave",

@@ -126,6 +126,7 @@ extern          "C" {
 #define NETSNMP_DS_SSHDOMAIN_SOCK_GROUP    13
 #define NETSNMP_DS_LIB_TIMEOUT             14
 #define NETSNMP_DS_LIB_RETRIES             15
+#define NETSNMP_DS_LIB_MSG_SEND_MAX        16 /* global max response size */
 #define NETSNMP_DS_LIB_MAX_INT_ID          48 /* match NETSNMP_DS_MAX_SUBIDS */
     
     /*
