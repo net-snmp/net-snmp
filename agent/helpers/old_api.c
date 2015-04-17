@@ -84,6 +84,7 @@ netsnmp_register_old_api(const char *moduleName,
 {
 
     unsigned int    i;
+    int             res;
 
     /*
      * register all subtree nodes 
@@ -133,10 +134,11 @@ netsnmp_register_old_api(const char *moduleName,
         /*
          * register ourselves in the mib tree 
          */
-        if (netsnmp_register_handler(reginfo) != MIB_REGISTERED_OK) {
+        res = netsnmp_register_handler(reginfo);
+        if (MIB_REGISTERED_OK != res) {
             /** reginfo already freed on error. */
-            snmp_log(LOG_ERR, "old_api handler registration failed\n");
-            return SNMP_ERR_GENERR;
+            snmp_log(LOG_WARNING, "old_api handler registration failed\n");
+            return res;
         }
     }
     return SNMPERR_SUCCESS;
