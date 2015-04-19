@@ -310,8 +310,10 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
                           " if %d: addr len %d, index 0x%" NETSNMP_PRIo "x\n",
                           i, entry->ia_address_len, entry->if_index));
             if (4 == entry->ia_address_len)
-                DEBUGMSGT_NC(("access:ipaddress:container", " address %p\n",
-                              *((void**)entry->ia_address)));
+                DEBUGMSGT_NC(("access:ipaddress:container",
+                              " address %d.%d.%d.%d\n",
+                              entry->ia_address[0], entry->ia_address[1],
+                              entry->ia_address[2], entry->ia_address[3]));
             DEBUGMSGT_NC(("access:ipaddress:container", "flags 0x%x\n",
                           extras->flags));
             _print_flags(extras->flags);
