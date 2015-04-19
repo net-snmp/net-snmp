@@ -37,8 +37,7 @@ typedef struct netsnmp_ipaddress_s {
     *  netsnmp_access_ipaddress_entry_update)
     */
 
-   u_char    ia_address[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE]
-                 __attribute__ ((aligned (8)));
+   u_char    ia_address[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
 
    oid       if_index;
 

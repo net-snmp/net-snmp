@@ -275,8 +275,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
         buf = entry->ia_address;
         if(1 != netsnmp_hex_to_binary(&buf, &in_len,
                                       &out_len, 0, addr, ":")) {
-            snmp_log(LOG_ERR,"error parsing '%s', skipping\n",
-                     entry->ia_address);
+            snmp_log(LOG_ERR,"error parsing '%s', skipping\n", addr);
             netsnmp_access_ipaddress_entry_free(entry);
             continue;
         }
