@@ -49,6 +49,7 @@ extern          "C" {
     void            debugmsg_hextli(const char *token, u_char * thedata,
                                     size_t len);
     void            debug_indent_add(int amount);
+    void            debug_indent_reset(void);
     int             debug_indent_get(void);
     /*
      * What is said above is true for this function as well. Further this

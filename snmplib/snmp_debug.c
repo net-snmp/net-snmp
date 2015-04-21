@@ -34,6 +34,7 @@
 
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #define SNMP_DEBUG_DISABLED           0
 #define SNMP_DEBUG_ACTIVE             1
@@ -75,6 +76,14 @@ debug_indent_add(int amount)
 {
     if (-debugindent <= amount && amount <= INT_MAX - debugindent)
 	debugindent += amount;
+}
+
+void
+debug_indent_reset(void)
+{
+    if (debugindent != 0)
+        DEBUGMSGTL(("dump_indent","indent rest from %d\n", debugindent));
+    debugindent = 0;
 }
 
 void
