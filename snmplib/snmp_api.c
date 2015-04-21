@@ -5143,6 +5143,8 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   struct snmp_secmod_def *sptr;
   int             ret = 0, handled = 0;
 
+  debug_indent_reset();
+
   DEBUGMSGTL(("sess_process_packet",
 	      "session %p fd %d pkt %p length %d\n", sessp,
 	      transport->sock, packetptr, length));
