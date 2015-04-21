@@ -31,6 +31,7 @@
 
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #define SNMP_DEBUG_DISABLED           0
 #define SNMP_DEBUG_ACTIVE             1
@@ -78,6 +79,14 @@ debug_indent_add(int amount)
 
 NETSNMP_IMPORT void
 debug_config_register_tokens(const char *configtoken, char *tokens);
+
+void
+debug_indent_reset(void)
+{
+    if (debugindent != 0)
+        DEBUGMSGTL(("dump_indent","indent rest from %d\n", debugindent));
+    debugindent = 0;
+}
 
 void
 debug_config_register_tokens(const char *configtoken, char *tokens)

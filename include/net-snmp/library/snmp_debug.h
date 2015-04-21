@@ -61,6 +61,8 @@ extern          "C" {
     NETSNMP_IMPORT
     void            debug_indent_add(int amount);
     NETSNMP_IMPORT
+    void            debug_indent_reset(void);
+    NETSNMP_IMPORT
     int             debug_indent_get(void);
     /*
      * What is said above is true for this function as well. Further this
