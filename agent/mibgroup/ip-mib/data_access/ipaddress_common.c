@@ -67,6 +67,7 @@ netsnmp_container *
 netsnmp_access_ipaddress_container_init(u_int flags)
 {
     netsnmp_container *container1;
+    int rc;
 
     DEBUGMSGTL(("access:ipaddress:container", "init\n"));
 
@@ -80,6 +81,7 @@ netsnmp_access_ipaddress_container_init(u_int flags)
         return NULL;
     }
     container1->container_name = strdup("ia_index");
+    container1->flags = CONTAINER_KEY_ALLOW_DUPLICATES;
 
     if (flags & NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR) {
         netsnmp_container *container2 =
@@ -92,11 +94,63 @@ netsnmp_access_ipaddress_container_init(u_int flags)
         
         container2->compare = _access_ipaddress_entry_compare_addr;
         container2->container_name = strdup("ia_addr");
+        /*
+         * With allowed duplicates, CONTAINER_INSERT does not need to sort whole
+         * container and check for duplicates. We remove duplicates manually in
+         * netsnmp_access_ipaddress_container_load.
+         */
+        container2->flags = CONTAINER_KEY_ALLOW_DUPLICATES;
         
         netsnmp_container_add_index(container1, container2);
     }
 
     return container1;
+}
+
+/**
+ * Remove duplicate entries from the container.
+ * This function returns new copy of the container and destroys
+ * the original one. Use like this:
+ *   c = _remove_duplicates(c, flags);
+ */
+static netsnmp_container *
+_remove_duplicates(netsnmp_container *container, u_int container_flags)
+{
+	netsnmp_container *c;
+	netsnmp_iterator *it;
+	netsnmp_container *ret;
+	netsnmp_ipaddress_entry *entry, *prev_entry;
+
+	if (! (container_flags & NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR)) {
+		/* We don't have address index, we can't detect duplicates */
+		return container;
+	}
+
+	ret = netsnmp_access_ipaddress_container_init(container_flags);
+
+	/* use the IpAddress index */
+	c = container->next;
+	it = CONTAINER_ITERATOR(c);
+	/* Sort the address index */
+	CONTAINER_FIND(c, ITERATOR_FIRST(it));
+
+
+	/*
+	 * Sequentially iterate over sorted container and add only unique entries
+	 * to 'ret'
+	 */
+	prev_entry = NULL;
+	for (entry = ITERATOR_FIRST(it); entry; entry = ITERATOR_NEXT(it)) {
+		if (prev_entry && _access_ipaddress_entry_compare_addr(prev_entry, entry) == 0) {
+			/* 'entry' is duplicate of the previous one -> delete it */
+			netsnmp_access_ipaddress_entry_free(entry);
+		} else {
+			CONTAINER_INSERT(ret, entry);
+			prev_entry = entry;
+		}
+	}
+	CONTAINER_FREE(container);
+	return ret;
 }
 
 /**
@@ -112,9 +166,10 @@ netsnmp_access_ipaddress_container_load(netsnmp_container* container,
 
     DEBUGMSGTL(("access:ipaddress:container", "load\n"));
 
+    if (load_flags & NETSNMP_ACCESS_IPADDRESS_LOAD_ADDL_IDX_BY_ADDR)
+        container_flags |= NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR;
+
     if (NULL == container) {
-        if (load_flags & NETSNMP_ACCESS_IPADDRESS_LOAD_ADDL_IDX_BY_ADDR)
-            container_flags |= NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR;
         container = netsnmp_access_ipaddress_container_init(container_flags);
     }
     if (NULL == container) {
@@ -128,6 +183,8 @@ netsnmp_access_ipaddress_container_load(netsnmp_container* container,
                                                 NETSNMP_ACCESS_IPADDRESS_FREE_NOFLAGS);
         container = NULL;
     }
+
+    container = _remove_duplicates(container, container_flags);
 
     return container;
 }
