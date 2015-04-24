@@ -150,6 +150,7 @@ _remove_duplicates(netsnmp_container *container, u_int container_flags)
 		}
 	}
 	CONTAINER_FREE(container);
+	free(it);
 	return ret;
 }
 
@@ -184,7 +185,8 @@ netsnmp_access_ipaddress_container_load(netsnmp_container* container,
         container = NULL;
     }
 
-    container = _remove_duplicates(container, container_flags);
+    if (container)
+        container = _remove_duplicates(container, container_flags);
 
     return container;
 }

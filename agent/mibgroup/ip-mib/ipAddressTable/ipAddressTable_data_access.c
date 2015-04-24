@@ -115,7 +115,6 @@ void
 ipAddressTable_container_init(netsnmp_container **container_ptr_ptr,
                               netsnmp_cache * cache)
 {
-	int rc;
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressTable_container_init",
                 "called\n"));
 
@@ -277,8 +276,7 @@ _add_new_entry(netsnmp_ipaddress_entry *ipaddress_entry,
     netsnmp_assert(NULL != container);
 
     if (to_ignore && CONTAINER_FIND(to_ignore, ipaddress_entry)) {
-        /* this entry already is in 'container', discard it */
-        netsnmp_access_ipaddress_entry_free(ipaddress_entry);
+        /* this entry already is in 'container', skip it */
         return;
     }
     /*
@@ -429,6 +427,19 @@ ipAddressTable_container_load(netsnmp_container *container)
              */
             CONTAINER_REMOVE(tmp_container, NULL);
         }
+        CONTAINER_FREE(tmp_container);
+    }
+
+    if (NULL != tmp_ptr[2]) {
+        /* list of interfaces to be ignored in ipaddress_container - free it */
+        netsnmp_container *to_ignore = (netsnmp_container *) tmp_ptr[2];
+        netsnmp_ipaddress_entry *ipaddress_entry;
+        while (CONTAINER_SIZE(to_ignore)) {
+            ipaddress_entry = (netsnmp_ipaddress_entry*)CONTAINER_FIRST(to_ignore);
+            CONTAINER_REMOVE(to_ignore, ipaddress_entry);
+            netsnmp_access_ipaddress_entry_free(ipaddress_entry);
+        }
+        CONTAINER_FREE(to_ignore);
     }
 
     DEBUGMSGT(("verbose:ipAddressTable:ipAddressTable_cache_load",
