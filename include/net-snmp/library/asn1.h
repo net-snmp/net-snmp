@@ -174,6 +174,7 @@ SOFTWARE.
 #define ASN_PRIV_IMPLIED_OCTET_STR  (ASN_PRIVATE | ASN_OCTET_STR)       /* 4 */
 #define ASN_PRIV_IMPLIED_OBJECT_ID  (ASN_PRIVATE | ASN_OBJECT_ID)       /* 6 */
 #define ASN_PRIV_RETRY      (ASN_PRIVATE | 7)   /* 199 */
+#define ASN_PRIV_STOP       (ASN_PRIVATE | 8)   /* 200 */
 #define IS_DELEGATED(x)   ((x) == ASN_PRIV_DELEGATED)
 
 

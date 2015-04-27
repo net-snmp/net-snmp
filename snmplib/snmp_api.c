@@ -219,9 +219,14 @@ struct snmp_internal_session {
     netsnmp_pdu    *(*hook_create_pdu) (netsnmp_transport *,
                                         void *, size_t);
 
-    u_char       *packet;      /* current packet data (may be incomplete) */
+    u_char       *packet;      /* curr rcv packet data (may be incomplete) */
     size_t        packet_len;  /* length of data received so far */
     size_t        packet_size; /* size of buffer for packet data */
+
+    u_char       *obuf;         /* send packet buffer */
+    size_t        obuf_size;    /* size of buffer for packet data */
+    u_char       *opacket;      /* send packet data (within obuf) */
+    size_t        opacket_len;  /* length of data */
 };
 
 /*
@@ -1560,7 +1565,7 @@ netsnmp_sess_config_and_open_transport(netsnmp_session *in_session,
         if ((0 == in_session->sndMsgMaxSize) ||
             (transport->msgMaxSize < in_session->sndMsgMaxSize)) {
             DEBUGMSGTL(("snmp_sess",
-                        "limiting session rcv size to tranport max\n"));
+                        "limiting session snd size to tranport max\n"));
             in_session->sndMsgMaxSize = transport->msgMaxSize;
         }
     }
@@ -2225,7 +2230,7 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
 
     DEBUGDUMPSECTION("send", "SNMPv3 Message");
 #ifdef NETSNMP_USE_REVERSE_ASNENCODING
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
+    if (!(pdu->flags & UCD_MSG_FLAG_FORWARD_ENCODE)) {
         ret = snmpv3_packet_realloc_rbuild(pkt, pkt_len, offset,
                                            session, pdu, NULL, 0);
     } else {
@@ -2798,6 +2803,14 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     session->s_snmp_errno = 0;
     session->s_errno = 0;
 
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
+    if ((pdu->flags & UCD_MSG_FLAG_BULK_TOOBIG) ||
+        (0 == netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                     NETSNMP_DS_LIB_REVERSE_ENCODE))) {
+        pdu->flags |= UCD_MSG_FLAG_FORWARD_ENCODE;
+    }
+#endif /* NETSNMP_USE_REVERSE_ASNENCODING */
+
     if (pdu->version == SNMP_VERSION_3) {
         return snmpv3_build(pkt, pkt_len, offset, session, pdu);
     }
@@ -2973,7 +2986,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         DEBUGMSGTL(("snmp_send", "Building SNMPv%ld message...\n",
                     (1 + pdu->version)));
 #ifdef NETSNMP_USE_REVERSE_ASNENCODING
-        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
+        if (!(pdu->flags & UCD_MSG_FLAG_FORWARD_ENCODE)) {
             DEBUGPRINTPDUTYPE("send", pdu->command);
             rc = snmp_pdu_realloc_rbuild(pkt, pkt_len, offset, pdu);
             if (rc == 0) {
@@ -3157,9 +3170,9 @@ snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
 u_char         *
 snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
 {
-    u_char         *h1, *h1e, *h2, *h2e;
-    netsnmp_variable_list *vp;
-    size_t          length;
+    u_char         *h1, *h1e, *h2, *h2e, *save_ptr;
+    netsnmp_variable_list *vp, *save_vp = NULL;
+    size_t          length, save_length;
 
     length = *out_length;
     /*
@@ -3300,15 +3313,53 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
      */
     DEBUGDUMPSECTION("send", "VarBindList");
     for (vp = pdu->variables; vp; vp = vp->next_variable) {
+        /*
+         * if estimated getbulk response size exceeded packet max size,
+         * processing was stopped before bulk cache was filled and type
+         * was set to ASN_PRIV_STOP, indicating that the rest of the varbinds
+         * in the cache are empty and we can stop encoding them.
+         */
+        if (ASN_PRIV_STOP == vp->type)
+            break;
+
+        /*
+         * save current ptr and length so that if we exceed the packet length
+         * encoding this varbind and this is a bulk response, we can drop
+         * the failed varbind (and any that follow it) and continue encoding
+         * the (shorter) bulk response.
+         */
+        save_ptr = cp;
+        save_length = *out_length;
+
         DEBUGDUMPSECTION("send", "VarBind");
         cp = snmp_build_var_op(cp, vp->name, &vp->name_length, vp->type,
                                vp->val_len, (u_char *) vp->val.string,
                                out_length);
         DEBUGINDENTLESS();
-        if (cp == NULL)
-            return NULL;
+        if (cp == NULL) {
+            if (save_vp && (pdu->flags & UCD_MSG_FLAG_BULK_TOOBIG)) {
+                DEBUGDUMPSECTION("send",
+                                 "VarBind would exceed packet size; dropped");
+                cp = save_ptr;
+                *out_length = save_length;
+                break;
+            } else
+                return NULL;
+        }
+        save_vp = vp;
     }
     DEBUGINDENTLESS();
+
+    /** did we run out of room? (should only happen for bulk reponses) */
+    if (vp && save_vp) {
+        save_vp->next_variable = NULL; /* truncate variable list */
+        /** count remaining varbinds in list, then free them */
+        save_vp = vp;
+        for(save_length = 0; save_vp; save_vp = save_vp->next_variable)
+            ++save_length;
+        DEBUGMSGTL(("send", "trimmed %ld variables\n", save_length));
+        snmp_free_varbind(vp);
+    }
 
     /*
      * insert actual length of variable-bindings sequence 
@@ -3344,6 +3395,14 @@ snmp_pdu_realloc_rbuild(u_char ** pkt, size_t * pkt_len, size_t * offset,
     DEBUGMSGTL(("snmp_pdu_realloc_rbuild", "starting\n"));
     for (vp = pdu->variables, i = VPCACHE_SIZE - 1; vp;
          vp = vp->next_variable, i--) {
+        /*
+         * if estimated getbulk response size exceeded packet max size,
+         * processing was stopped before bulk cache was filled and type
+         * was set to ASN_PRIV_STOP, indicating that the rest of the varbinds
+         * in the cache are empty and we can stop encoding them.
+         */
+        if (ASN_PRIV_STOP == vp->type)
+            break;
         if (i < 0) {
             wrapped = notdone = 1;
             i = VPCACHE_SIZE - 1;
@@ -4806,6 +4865,243 @@ snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp, size_t * length)
     return data;
 }
 
+
+/* ===========================================================================
+ *
+ * build pdu packet
+ */
+int
+netsnmp_build_packet(struct snmp_internal_session *isp, netsnmp_session *sp,
+                     netsnmp_pdu *pdu, u_char **pktbuf_p,
+                     size_t *pktbuf_len_p, u_char **pkt_p, size_t *len_p)
+{
+    size_t offset = 0;
+    int    result;
+
+    if (isp && isp->hook_realloc_build) {
+        result = isp->hook_realloc_build(sp, pdu, pktbuf_p, pktbuf_len_p,
+                                         &offset);
+
+        *pkt_p = *pktbuf_p;
+        *len_p = offset;
+    } else if (isp && isp->hook_build) {
+        *pkt_p = *pktbuf_p;
+        *len_p = *pktbuf_len_p;
+        result = isp->hook_build(sp, pdu, *pktbuf_p, len_p);
+    } else {
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
+        if (!(pdu->flags & UCD_MSG_FLAG_FORWARD_ENCODE)) {
+            result = snmp_build(pktbuf_p, pktbuf_len_p, &offset, sp, pdu);
+            *pkt_p = *pktbuf_p + *pktbuf_len_p - offset;
+            *len_p = offset;
+        } else {
+#endif
+            *pkt_p = *pktbuf_p;
+            *len_p = *pktbuf_len_p;
+            result = snmp_build(pktbuf_p, len_p, &offset, sp, pdu);
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
+        }
+#endif
+    }
+
+    return result;
+}
+
+int
+_build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
+{
+    netsnmp_session *session;
+    struct snmp_internal_session *isp;
+    netsnmp_transport *transport = NULL;
+    u_char         *pktbuf = NULL, *packet = NULL;
+    size_t          pktbuf_len = 0, offset = 0, length = 0, orig_length = 0;
+    int             result, orig_count = 0, curr_count = 0;
+
+    if (slp == NULL) {
+        return SNMPERR_GENERR;
+    }
+    session = slp->session;
+
+    isp = slp->internal;
+    transport = slp->transport;
+    if (!session || !isp || !transport) {
+        DEBUGMSGTL(("sess_async_send", "send fail: closing...\n"));
+        return SNMPERR_GENERR;
+    }
+
+    if (pdu == NULL) {
+        session->s_snmp_errno = SNMPERR_NULL_PDU;
+        return SNMPERR_GENERR;
+    }
+
+    SNMP_FREE(isp->obuf); /* should already be NULL */
+
+    session->s_snmp_errno = 0;
+    session->s_errno = 0;
+
+    /*
+     * Check/setup the version.  
+     */
+    if (pdu->version == SNMP_DEFAULT_VERSION) {
+        if (session->version == SNMP_DEFAULT_VERSION) {
+            session->s_snmp_errno = SNMPERR_BAD_VERSION;
+            return SNMPERR_GENERR;
+        }
+        pdu->version = session->version;
+    } else if (session->version == SNMP_DEFAULT_VERSION) {
+        /*
+         * It's OK  
+         */
+    } else if (pdu->version != session->version) {
+        /*
+         * ENHANCE: we should support multi-lingual sessions  
+         */
+        session->s_snmp_errno = SNMPERR_BAD_VERSION;
+        return SNMPERR_GENERR;
+    }
+    if (NETSNMP_RUNTIME_PROTOCOL_SKIP(pdu->version)) {
+        DEBUGMSGTL(("sess_async_send", "version disabled at runtime\n"));
+        session->s_snmp_errno = SNMPERR_BAD_VERSION;
+        return SNMPERR_GENERR;
+    }
+
+    /*
+     * do we expect a response?
+     */
+    switch (pdu->command) {
+
+        case SNMP_MSG_RESPONSE:
+        case SNMP_MSG_TRAP:
+        case SNMP_MSG_TRAP2:
+        case SNMP_MSG_REPORT:
+        case AGENTX_MSG_CLEANUPSET:
+        case AGENTX_MSG_RESPONSE:
+            pdu->flags &= ~UCD_MSG_FLAG_EXPECT_RESPONSE;
+            break;
+            
+        default:
+            pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
+            break;
+    }
+ 
+    pktbuf_len = 2048; /* default */
+    if (session->sndMsgMaxSize > 0 && session->sndMsgMaxSize < pktbuf_len)
+        pktbuf_len = session->sndMsgMaxSize;
+    if (transport->msgMaxSize > 0 && transport->msgMaxSize < pktbuf_len)
+        pktbuf_len = transport->msgMaxSize;
+
+    if ((pktbuf = (u_char *)malloc(pktbuf_len)) == NULL) {
+        DEBUGMSGTL(("sess_async_send",
+                    "couldn't malloc initial packet buffer\n"));
+        session->s_snmp_errno = SNMPERR_MALLOC;
+        return SNMPERR_MALLOC;
+    }
+
+#if TEMPORARILY_DISABLED
+    /*
+     *  NULL variable are allowed in certain PDU types.
+     *  In particular, SNMPv3 engineID probes are of this form.
+     *  There is an internal PDU flag to indicate that this
+     *    is acceptable, but until the construction of engineID
+     *    probes can be amended to set this flag, we'll simply
+     *    skip this test altogether.
+     */
+    if (pdu->variables == NULL) {
+        switch (pdu->command) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        case SNMP_MSG_SET:
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+        case SNMP_MSG_GET:
+        case SNMP_MSG_GETNEXT:
+        case SNMP_MSG_GETBULK:
+        case SNMP_MSG_RESPONSE:
+        case SNMP_MSG_TRAP2:
+        case SNMP_MSG_REPORT:
+        case SNMP_MSG_INFORM:
+            session->s_snmp_errno = snmp_errno = SNMPERR_NO_VARS;
+            return SNMPERR_NO_VARS;
+        case SNMP_MSG_TRAP:
+            break;
+        }
+    }
+#endif
+
+
+    /*
+     * Build the message to send. If a bulk response is too big, try
+     * dropping varbinds to make it fit.
+     */
+    do {
+        packet = pktbuf;
+        length = offset = 0;
+        result = netsnmp_build_packet(isp, session, pdu, &pktbuf, &pktbuf_len,
+                                      &packet, &length);
+        if (0 != result)
+            break;
+
+        if (orig_count) { /* 2nd pass, see how many varbinds remain */
+            curr_count = count_varbinds(pdu->variables);
+            DEBUGMSGTL(("sess_async_send", " vb count: %d -> %d\n", orig_count,
+                        curr_count));
+            DEBUGMSGTL(("sess_async_send", " pdu_len: %ld -> %ld (max %ld)\n",
+                        orig_length, length, session->sndMsgMaxSize));
+        }
+
+        /*
+         * Make sure we don't send something that is bigger than the msgMaxSize
+         * specified in the received PDU or of the underlying transport.
+         */
+        if ((session->sndMsgMaxSize == 0 || length <= session->sndMsgMaxSize) &&
+            (transport->msgMaxSize == 0 || length <= transport->msgMaxSize))
+            break;
+
+        if (!bulk) {
+           session->s_snmp_errno = SNMPERR_TOO_LONG;
+           break;
+        }
+
+        /** rebuild bulk response with truncation and fixed size */
+        pdu->flags |= UCD_MSG_FLAG_FORWARD_ENCODE | UCD_MSG_FLAG_BULK_TOOBIG;
+        pktbuf_len = session->sndMsgMaxSize;
+
+        /** save original number of vabinds & length */
+        if (0 == orig_count) {
+            curr_count = orig_count = count_varbinds(pdu->variables);
+            orig_length = length;
+        }
+
+    } while(1);
+
+    if (curr_count != orig_count)
+        DEBUGMSGTL(("sess_async_send",
+                    "sending %d of %d varbinds (-%d) from bulk response\n",
+                    curr_count, orig_count, orig_count - curr_count));
+
+    if (pdu->version == SNMP_VERSION_3 && session->sndMsgMaxSize != 0 &&
+        length > session->sndMsgMaxSize) {
+        DEBUGMSGTL(("sess_async_send",
+                "length of packet (%lu) exceeds session maximum (%lu)\n",
+                (unsigned long)length, (unsigned long)session->sndMsgMaxSize));
+    } else if (transport->msgMaxSize != 0 && length > transport->msgMaxSize) {
+        DEBUGMSGTL(("sess_async_send",
+                "length of packet (%lu) exceeds transport maximum (%lu)\n",
+                (unsigned long)length, (unsigned long)transport->msgMaxSize));
+    }
+
+    if ((SNMPERR_TOO_LONG == session->s_snmp_errno) || (result < 0)) {
+        DEBUGMSGTL(("sess_async_send", "encoding failure\n"));
+        SNMP_FREE(pktbuf);
+        return SNMPERR_GENERR;
+    }
+
+    isp->obuf = pktbuf;
+    isp->obuf_size = pktbuf_len;
+    isp->opacket = packet;
+    isp->opacket_len = length;
+
+    return SNMPERR_SUCCESS;
+}
+
 /*
  * These functions send PDUs using an active session:
  * snmp_send             - traditional API, no callback
@@ -4856,74 +5152,23 @@ _sess_async_send(void *sessp,
     netsnmp_session *session;
     struct snmp_internal_session *isp;
     netsnmp_transport *transport = NULL;
-    u_char         *pktbuf = NULL, *packet = NULL;
-    size_t          pktbuf_len = 0, offset = 0, length = 0;
     int             result;
     long            reqid;
 
-    if (slp == NULL) {
+    if (slp == NULL || NULL == slp->session || NULL ==slp->internal ||
+                NULL == slp->transport) {
         return 0;
-    } else {
-        session = slp->session;
-        isp = slp->internal;
-        transport = slp->transport;
-        if (!session || !isp || !transport) {
-            DEBUGMSGTL(("sess_async_send", "send fail: closing...\n"));
+    }
+
+    session = slp->session;
+    isp = slp->internal;
+    transport = slp->transport;
+
+    if (NULL == isp->opacket) {
+        result = _build_initial_pdu_packet(slp, pdu, 0);
+        if ((SNMPERR_SUCCESS != result) || (NULL == isp->opacket))
+            /** no packet to send?? */
             return 0;
-        }
-    }
-
-    if (pdu == NULL) {
-        session->s_snmp_errno = SNMPERR_NULL_PDU;
-        return 0;
-    }
-
-    session->s_snmp_errno = 0;
-    session->s_errno = 0;
-
-    /*
-     * Check/setup the version.  
-     */
-    if (pdu->version == SNMP_DEFAULT_VERSION) {
-        if (session->version == SNMP_DEFAULT_VERSION) {
-            session->s_snmp_errno = SNMPERR_BAD_VERSION;
-            return 0;
-        }
-        pdu->version = session->version;
-    } else if (session->version == SNMP_DEFAULT_VERSION) {
-        /*
-         * It's OK  
-         */
-    } else if (pdu->version != session->version) {
-        /*
-         * ENHANCE: we should support multi-lingual sessions  
-         */
-        session->s_snmp_errno = SNMPERR_BAD_VERSION;
-        return 0;
-    }
-    if (NETSNMP_RUNTIME_PROTOCOL_SKIP(pdu->version)) {
-        DEBUGMSGTL(("sess_async_send", "version disabled at runtime\n"));
-        session->s_snmp_errno = SNMPERR_BAD_VERSION;
-        return 0;
-    }
-
-    /*
-     * do we expect a response?
-     */
-    switch (pdu->command) {
-
-        case SNMP_MSG_RESPONSE:
-        case SNMP_MSG_TRAP:
-        case SNMP_MSG_TRAP2:
-        case SNMP_MSG_REPORT:
-        case AGENTX_MSG_CLEANUPSET:
-        case AGENTX_MSG_RESPONSE:
-            pdu->flags &= ~UCD_MSG_FLAG_EXPECT_RESPONSE;
-            break;
-            
-        default:
-            pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
-            break;
     }
 
     /*
@@ -4940,119 +5185,19 @@ _sess_async_send(void *sessp,
             return 0; /* s_snmp_errno already set */
     }
 
-    if ((pktbuf = (u_char *)malloc(2048)) == NULL) {
-        DEBUGMSGTL(("sess_async_send",
-                    "couldn't malloc initial packet buffer\n"));
-        session->s_snmp_errno = SNMPERR_MALLOC;
-        return 0;
-    } else {
-        pktbuf_len = 2048;
-    }
-
-#if TEMPORARILY_DISABLED
-    /*
-     *  NULL variable are allowed in certain PDU types.
-     *  In particular, SNMPv3 engineID probes are of this form.
-     *  There is an internal PDU flag to indicate that this
-     *    is acceptable, but until the construction of engineID
-     *    probes can be amended to set this flag, we'll simply
-     *    skip this test altogether.
-     */
-    if (pdu->variables == NULL) {
-        switch (pdu->command) {
-#ifndef NETSNMP_NO_WRITE_SUPPORT
-        case SNMP_MSG_SET:
-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
-        case SNMP_MSG_GET:
-        case SNMP_MSG_GETNEXT:
-        case SNMP_MSG_GETBULK:
-        case SNMP_MSG_RESPONSE:
-        case SNMP_MSG_TRAP2:
-        case SNMP_MSG_REPORT:
-        case SNMP_MSG_INFORM:
-            session->s_snmp_errno = snmp_errno = SNMPERR_NO_VARS;
-            return 0;
-        case SNMP_MSG_TRAP:
-            break;
-        }
-    }
-#endif
-
-
-    /*
-     * Build the message to send.  
-     */
-    if (isp->hook_realloc_build) {
-        result = isp->hook_realloc_build(session, pdu,
-                                         &pktbuf, &pktbuf_len, &offset);
-        packet = pktbuf;
-        length = offset;
-    } else if (isp->hook_build) {
-        packet = pktbuf;
-        length = pktbuf_len;
-        result = isp->hook_build(session, pdu, pktbuf, &length);
-    } else {
-#ifdef NETSNMP_USE_REVERSE_ASNENCODING
-        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
-            result =
-                snmp_build(&pktbuf, &pktbuf_len, &offset, session, pdu);
-            packet = pktbuf + pktbuf_len - offset;
-            length = offset;
-        } else {
-#endif
-            packet = pktbuf;
-            length = pktbuf_len;
-            result = snmp_build(&pktbuf, &length, &offset, session, pdu);
-#ifdef NETSNMP_USE_REVERSE_ASNENCODING
-        }
-#endif
-    }
-
-    if (result < 0) {
-        DEBUGMSGTL(("sess_async_send", "encoding failure\n"));
-        SNMP_FREE(pktbuf);
-        return 0;
-    }
-
-    /*
-     * Make sure we don't send something that is bigger than the msgMaxSize
-     * specified in the received PDU.  
-     */
-
-    if (pdu->version == SNMP_VERSION_3 && session->sndMsgMaxSize != 0 && length > session->sndMsgMaxSize) {
-        DEBUGMSGTL(("sess_async_send",
-                    "length of packet (%lu) exceeds session maximum (%lu)\n",
-                    (unsigned long)length, (unsigned long)session->sndMsgMaxSize));
-        session->s_snmp_errno = SNMPERR_TOO_LONG;
-        SNMP_FREE(pktbuf);
-        return 0;
-    }
-
-    /*
-     * Check that the underlying transport is capable of sending a packet as
-     * large as length.  
-     */
-
-    if (transport->msgMaxSize != 0 && length > transport->msgMaxSize) {
-        DEBUGMSGTL(("sess_async_send",
-                    "length of packet (%lu) exceeds transport maximum (%lu)\n",
-                    (unsigned long)length, (unsigned long)transport->msgMaxSize));
-        session->s_snmp_errno = SNMPERR_TOO_LONG;
-        SNMP_FREE(pktbuf);
-        return 0;
-    }
-
     /*
      * Send the message.  
      */
 
     DEBUGMSGTL(("sess_process_packet", "sending message id#%ld reqid#%ld len %"
-                NETSNMP_PRIz "u\n", pdu->msgid, pdu->reqid, length));
-    result = netsnmp_transport_send(transport, packet, length,
+                NETSNMP_PRIz "u\n", pdu->msgid, pdu->reqid, isp->opacket_len));
+    result = netsnmp_transport_send(transport, isp->opacket, isp->opacket_len,
                                     &(pdu->transport_data),
                                     &(pdu->transport_data_length));
 
-    SNMP_FREE(pktbuf);
+    SNMP_FREE(isp->obuf);
+    isp->opacket = NULL; /* opacket was in obuf, so no free needed */
+    isp->opacket_len = 0;
 
     if (result < 0) {
         session->s_snmp_errno = SNMPERR_BAD_SENDTO;
@@ -6392,7 +6537,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
     netsnmp_session *sp;
     netsnmp_transport *transport;
     u_char         *pktbuf = NULL, *packet = NULL;
-    size_t          pktbuf_len = 0, offset = 0, length = 0;
+    size_t          pktbuf_len = 0, length = 0;
     struct timeval  tv, now;
     int             result = 0;
 
@@ -6421,33 +6566,8 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
      */
     rp->pdu->msgid = rp->message_id = snmp_get_next_msgid();
 
-    if (isp->hook_realloc_build) {
-        result = isp->hook_realloc_build(sp, rp->pdu,
-                                         &pktbuf, &pktbuf_len, &offset);
-
-        packet = pktbuf;
-        length = offset;
-    } else if (isp->hook_build) {
-        packet = pktbuf;
-        length = pktbuf_len;
-        result = isp->hook_build(sp, rp->pdu, pktbuf, &length);
-    } else {
-#ifdef NETSNMP_USE_REVERSE_ASNENCODING
-        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
-            result =
-                snmp_build(&pktbuf, &pktbuf_len, &offset, sp, rp->pdu);
-            packet = pktbuf + pktbuf_len - offset;
-            length = offset;
-        } else {
-#endif
-            packet = pktbuf;
-            length = pktbuf_len;
-            result = snmp_build(&pktbuf, &length, &offset, sp, rp->pdu);
-#ifdef NETSNMP_USE_REVERSE_ASNENCODING
-        }
-#endif
-    }
-
+    result = netsnmp_build_packet(isp, sp, rp->pdu, &pktbuf, &pktbuf_len,
+                                  &packet, &length);
     if (result < 0) {
         /*
          * This should never happen.  

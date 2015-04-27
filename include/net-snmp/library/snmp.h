@@ -300,6 +300,7 @@ SOFTWARE.
     /*
      * control PDU handling characteristics 
      */
+/** NOTE low byte used for AGENTX_MSG_FLAG_*   */
 #define UCD_MSG_FLAG_RESPONSE_PDU            0x100
 #define UCD_MSG_FLAG_EXPECT_RESPONSE         0x200
 #define UCD_MSG_FLAG_FORCE_PDU_COPY          0x400
@@ -307,6 +308,10 @@ SOFTWARE.
 #define UCD_MSG_FLAG_PDU_TIMEOUT            0x1000
 #define UCD_MSG_FLAG_ONE_PASS_ONLY          0x2000
 #define UCD_MSG_FLAG_TUNNELED               0x4000
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
+#define UCD_MSG_FLAG_FORWARD_ENCODE         0x8000
+#endif
+#define UCD_MSG_FLAG_BULK_TOOBIG          0x010000
 
     /*
      * view status 
