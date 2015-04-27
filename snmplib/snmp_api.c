@@ -1548,6 +1548,23 @@ netsnmp_sess_config_and_open_transport(netsnmp_session *in_session,
         return SNMPERR_BAD_ADDRESS;
     }
 
+    /** if transport has a max size, make sure session is the same (or less) */
+    if (transport->msgMaxSize) {
+        if ((0 == in_session->rcvMsgMaxSize) ||
+            (transport->msgMaxSize < in_session->rcvMsgMaxSize)) {
+            DEBUGMSGTL(("snmp_sess",
+                        "limiting session rcv size to tranport max\n"));
+            in_session->rcvMsgMaxSize = transport->msgMaxSize;
+        }
+
+        if ((0 == in_session->sndMsgMaxSize) ||
+            (transport->msgMaxSize < in_session->sndMsgMaxSize)) {
+            DEBUGMSGTL(("snmp_sess",
+                        "limiting session rcv size to tranport max\n"));
+            in_session->sndMsgMaxSize = transport->msgMaxSize;
+        }
+    }
+
     transport->flags |= NETSNMP_TRANSPORT_FLAG_OPENED;
     DEBUGMSGTL(("snmp_sess", "done opening transport: %x\n", transport->flags & NETSNMP_TRANSPORT_FLAG_OPENED));
     return SNMPERR_SUCCESS;
@@ -1780,7 +1797,15 @@ snmp_sess_add_ex(netsnmp_session * in_session,
     slp->internal->check_packet = fcheck;
     slp->internal->hook_create_pdu = fcreate_pdu;
 
-    slp->session->rcvMsgMaxSize = transport->msgMaxSize;
+    /** don't let session max exceed transport max */
+    if (transport->msgMaxSize > 0) {
+        if (0 == slp->session->rcvMsgMaxSize ||
+            slp->session->rcvMsgMaxSize > transport->msgMaxSize)
+            slp->session->rcvMsgMaxSize = transport->msgMaxSize;
+        if (0 == slp->session->sndMsgMaxSize ||
+            slp->session->sndMsgMaxSize > transport->msgMaxSize)
+            slp->session->sndMsgMaxSize = transport->msgMaxSize;
+    }
 
     if (slp->session->version == SNMP_VERSION_3) {
         DEBUGMSGTL(("snmp_sess_add",
@@ -3693,7 +3718,12 @@ snmpv3_parse(netsnmp_pdu *pdu,
     } else {
         DEBUGMSGTL(("snmpv3_parse", "msgMaxSize %lu received\n",
                     msg_max_size));
-        sess->sndMsgMaxSize = msg_max_size;
+        /** don't increase max msg size if we've already got one */
+        if ((sess->sndMsgMaxSize > 0) && (sess->sndMsgMaxSize < msg_max_size)) {
+            DEBUGMSGTL(("snmpv3_parse",
+                        "msgMaxSize greater than session max; ignoring\n"));
+        } else
+            sess->sndMsgMaxSize = msg_max_size;
     }
 
     /*
