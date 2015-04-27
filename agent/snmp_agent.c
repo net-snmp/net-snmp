@@ -2364,6 +2364,9 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             int maxresponses =
                 netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES);
+            int avgvarbind =
+                netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                   NETSNMP_DS_AGENT_AVG_BULKVARBINDSIZE);
 
             if (maxresponses == 0)
                 maxresponses = 100;   /* more than reasonable default */
@@ -2374,8 +2377,27 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             if (maxresponses < 0 ||
                 maxresponses > (int)(INT_MAX / sizeof(struct varbind_list *)))
                 maxresponses = (int)(INT_MAX / sizeof(struct varbind_list *));
+            DEBUGMSGTL(("snmp_agent:bulk", "maxresponse %d\n", maxresponses));
 
-            /* ensure that the maximum number of repetitions will fit in the
+            /* reduce maxresponses by dividing the sessions max size by a
+             * (very) rough aproximation of the size of an average
+             * varbind. 15 seems to be a reasonable balance between getting
+             * enough varbinds to fill the packet vs retrieving varbinds
+             * that will be discarded to make the response fit the packet size.
+             */
+            if (avgvarbind == 0)
+                avgvarbind = 15;
+
+            if (asp->session->sndMsgMaxSize &&
+                (maxresponses > (asp->session->sndMsgMaxSize / avgvarbind))) {
+                maxresponses = asp->session->sndMsgMaxSize / avgvarbind;
+                DEBUGMSGTL(("snmp_agent:bulk",
+                            "lowering maxresponse to %d based on session sndMsgMaxSize %ld and avgBulkVarbindSize %d\n",
+                            maxresponses, asp->session->sndMsgMaxSize,
+                            avgvarbind));
+            }
+
+             /* ensure that the maximum number of repetitions will fit in the
              * result vector
              */
             if (maxbulk <= 0 || maxbulk > maxresponses / r)
@@ -2384,8 +2406,8 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             /* limit getbulk number of repeats to a configured size */
             if (asp->pdu->errindex > maxbulk) {
                 asp->pdu->errindex = maxbulk;
-                DEBUGMSGTL(("snmp_agent",
-                            "truncating number of getbulk repeats to %ld\n",
+                DEBUGMSGTL(("snmp_agent:bulk",
+                            "lowering requested getbulk repeats to %ld\n",
                             asp->pdu->errindex));
             }
 
@@ -2394,11 +2416,11 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
                     (n + asp->pdu->errindex * r) * sizeof(struct varbind_list *));
 
             if (!asp->bulkcache) {
-                DEBUGMSGTL(("snmp_agent", "Bulkcache malloc failed\n"));
+                DEBUGMSGTL(("snmp_agent:bulk", "Bulkcache malloc failed\n"));
                 return SNMP_ERR_GENERR;
             }
         }
-        DEBUGMSGTL(("snmp_agent", "GETBULK N = %d, M = %ld, R = %d\n",
+        DEBUGMSGTL(("snmp_agent:bulk", "GETBULK N = %d, M = %ld, R = %d\n",
                     n, asp->pdu->errindex, r));
     }
 

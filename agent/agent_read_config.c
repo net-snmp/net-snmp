@@ -280,6 +280,9 @@ init_agent_read_config(const char *app)
     netsnmp_ds_register_config(ASN_INTEGER, app, "maxGetbulkResponses",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES);
+    netsnmp_ds_register_config(ASN_INTEGER, app, "avgBulkVarbindSize",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_AVG_BULKVARBINDSIZE);
     netsnmp_init_handler_conf();
 
 #include "agent_module_dot_conf.h"

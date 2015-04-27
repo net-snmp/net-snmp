@@ -70,5 +70,5 @@
 #define NETSNMP_DS_AGENT_INTERNAL_SECLEVEL 12   /* used by internal queries */
 #define NETSNMP_DS_AGENT_MAX_GETBULKREPEATS 13 /* max getbulk repeats */
 #define NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES 14   /* max getbulk respones */
-
+#define NETSNMP_DS_AGENT_AVG_BULKVARBINDSIZE 15 /* avg varbind size estimate */
 #endif
