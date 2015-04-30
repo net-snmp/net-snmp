@@ -85,6 +85,7 @@ netsnmp_if_indextoname(unsigned ifindex, char *ifname)
     return NULL;
 #endif
 }
+#endif /* HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID */
 
 char *
 netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
