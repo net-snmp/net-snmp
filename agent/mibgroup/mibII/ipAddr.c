@@ -493,14 +493,16 @@ Address_Scan_Next(Index, Retin_ifaddr)
 }
 
 #elif defined(linux)
+#include <errno.h>
 static struct ifreq *ifr;
 static int ifr_counter;
 
 static void
 Address_Scan_Init(void)
 {
-    int num_interfaces = 0;
+    int i;
     int fd;
+    int lastlen = 0;
 
     /* get info about all interfaces */
 
@@ -508,30 +510,46 @@ Address_Scan_Init(void)
     SNMP_FREE(ifc.ifc_buf);
     ifr_counter = 0;
 
-    do
+    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
-	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	{
-	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
-	    return;
-	}
-	num_interfaces += 16;
-
-	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
-	ifc.ifc_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
-	
-	    if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
-	    {
-		ifr=NULL;
-		close(fd);
-	   	return;
-	    }
-	    close(fd);
+        DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
+        return;
     }
-    while (ifc.ifc_len >= (sizeof(struct ifreq) * num_interfaces));
-    
-    ifr = ifc.ifc_req;
+
+    /*
+     * Cope with lots of interfaces and brokenness of ioctl SIOCGIFCONF
+     * on some platforms; see W. R. Stevens, ``Unix Network Programming
+     * Volume I'', p.435...
+     */
+
+    for (i = 8;; i *= 2) {
+        ifc.ifc_len = sizeof(struct ifreq) * i;
+        ifc.ifc_buf = calloc(i, sizeof(struct ifreq));
+
+        if (ioctl(fd, SIOCGIFCONF, &ifc) < 0) {
+            if (errno != EINVAL || lastlen != 0) {
+                /*
+                 * Something has gone genuinely wrong...
+                 */
+                snmp_log(LOG_ERR, "bad rc from ioctl, errno %d", errno);
+                SNMP_FREE(ifc.ifc_buf);
+                close(fd);
+                return;
+            }
+        } else {
+            if (ifc.ifc_len == lastlen) {
+                /*
+                 * The length is the same as the last time; we're done...
+                 */
+                break;
+            }
+            lastlen = ifc.ifc_len;
+        }
+        free(ifc.ifc_buf); /* no SNMP_FREE, getting ready to reassign */
+    }
+
     close(fd);
+    ifr = ifc.ifc_req;
 }
 
 /*
