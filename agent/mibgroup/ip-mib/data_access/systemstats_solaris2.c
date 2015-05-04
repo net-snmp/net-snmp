@@ -31,9 +31,6 @@ netsnmp_access_systemstats_container_arch_load(netsnmp_container* container,
     if (container == NULL)
         return (-1);
 
-    //if (load_flags & NETSNMP_ACCESS_SYSTEMSTATS_LOAD_IFTABLE)
-    //  return 0; /* we do not support ipIfStatsTable yet */
-
     if ((rc = _systemstats(MIB_IP_TRAFFIC_STATS, container, load_flags)) < 0)
         return (rc);
 #if defined(NETSNMP_ENABLE_IPV6)
