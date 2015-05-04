@@ -20,6 +20,8 @@
 config_require(ip-mib/data_access/defaultrouter_common)
 #if defined( linux )
 config_require(ip-mib/data_access/defaultrouter_linux)
+#elif defined( solaris2 )
+config_require(ip-mib/data_access/defaultrouter_solaris2)
 #else
 /*
  * couldn't determine the correct file!
