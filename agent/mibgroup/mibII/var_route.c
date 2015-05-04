@@ -772,6 +772,8 @@ var_ipRouteEntry(struct variable * vp,
         if(entry.ipRouteInfo.re_ire_type&IRE_CACHE)
             continue;
 #endif /* HAVE_DEFINED_IRE_CACHE */
+        if(entry.ipRouteInfo.re_ire_type & IRE_BROADCAST)
+            continue;
         COPY_IPADDR(cp, (u_char *) & entry.ipRouteDest, op,
                     current + IP_ROUTEADDR_OFF);
         if (exact) {
