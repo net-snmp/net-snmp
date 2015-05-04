@@ -47,5 +47,6 @@ config_require(tcp-mib udp-mib)
  */
 #if defined( solaris2 ) && defined( HAVE_MIB2_IPIFSTATSENTRY_T )
 config_require(ip-mib/ipSystemStatsTable ip-mib/ipAddressTable ip-mib/ipAddressPrefixTable)
+config_require(ip-mib/ipIfStatsTable)
 config_require(ip-forward-mib)
 #endif
