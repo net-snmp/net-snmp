@@ -173,17 +173,21 @@ sc_get_proper_auth_length(int hashtype)
         case NETSNMP_USMAUTH_HMACSHA1:
             return BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1);
 
-        case NETSNMP_USMAUTH_HMAC192SHA256:
-            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC192SHA256);
-
-        case NETSNMP_USMAUTH_HMAC384SHA512:
-            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC384SHA512);
-
+#ifdef HAVE_EVP_SHA224
         case NETSNMP_USMAUTH_HMAC128SHA224:
             return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC128SHA224);
 
+        case NETSNMP_USMAUTH_HMAC192SHA256:
+            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC192SHA256);
+#endif /* HAVE_EVP_SHA224 */
+
+#ifdef HAVE_EVP_SHA384
         case NETSNMP_USMAUTH_HMAC256SHA384:
             return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC256SHA384);
+
+        case NETSNMP_USMAUTH_HMAC384SHA512:
+            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC384SHA512);
+#endif /* HAVE_EVP_SHA384 */
     }
 
     return SNMPERR_GENERR;
@@ -314,6 +318,50 @@ sc_random(u_char * buf, size_t * buflen)
 #else
 _SCAPI_NOT_CONFIGURED
 #endif                          /*  */
+
+
+#ifdef NETSNMP_USE_OPENSSL
+static const EVP_MD   *
+sc_get_openssl_hashfn(int auth_type)
+{
+    const EVP_MD   *hashfn = NULL;
+
+    switch (auth_type) {
+#ifndef NETSNMP_DISABLE_MD5
+        case NETSNMP_USMAUTH_HMACMD5:
+            hashfn = (const EVP_MD *) EVP_md5();
+            break;
+#endif
+        case NETSNMP_USMAUTH_HMACSHA1:
+            hashfn = (const EVP_MD *) EVP_sha1();
+            break;
+
+#ifdef HAVE_EVP_SHA224
+        case NETSNMP_USMAUTH_HMAC128SHA224:
+            hashfn = (const EVP_MD *) EVP_sha224();
+            break;
+
+        case NETSNMP_USMAUTH_HMAC192SHA256:
+            hashfn = (const EVP_MD *) EVP_sha256();
+            break;
+#endif /* HAVE_EVP_SHA224 */
+
+#ifdef HAVE_EVP_SHA384
+        case NETSNMP_USMAUTH_HMAC256SHA384:
+            hashfn = (const EVP_MD *) EVP_sha384();
+            break;
+
+        case NETSNMP_USMAUTH_HMAC384SHA512:
+            hashfn = (const EVP_MD *) EVP_sha512();
+            break;
+#endif /* HAVE_EVP_SHA384 */
+    }
+
+    return hashfn;
+}
+#endif /* openssl */
+
+
 /*******************************************************************-o-******
  * sc_generate_keyed_hash
  *
@@ -342,19 +390,23 @@ _SCAPI_NOT_CONFIGURED
  * ASSUMED that the number of hash bits is a multiple of 8.
  */
 int
-sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
+sc_generate_keyed_hash(const oid * authtypeOID, size_t authtypeOIDlen,
                        const u_char * key, u_int keylen,
                        const u_char * message, u_int msglen,
                        u_char * MAC, size_t * maclen)
 #if  defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
-    int             rval = SNMPERR_SUCCESS;
+    int             rval = SNMPERR_SUCCESS, auth_type;
     int             iproperlength;
     size_t          properlength;
-
     u_char          buf[SNMP_MAXBUF_SMALL];
 #if  defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
     unsigned int    buf_len = sizeof(buf);
+#endif
+#ifdef NETSNMP_USE_OPENSSL
+    const EVP_MD   *hashfn;
+#elif defined(NETSNMP_USE_PKCS11)
+    u_long          ck_type;
 #endif
 
     DEBUGTRACE;
@@ -373,13 +425,14 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     /*
      * Sanity check.
      */
-    if (!authtype || !key || !message || !MAC || !maclen
+    if (!authtypeOID || !key || !message || !MAC || !maclen
         || (keylen <= 0) || (msglen <= 0) || (*maclen <= 0)
-        || (authtypelen != USM_LENGTH_OID_TRANSFORM)) {
+        || (authtypeOIDlen != USM_LENGTH_OID_TRANSFORM)) {
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
 
-    iproperlength = sc_get_properlength(authtype, authtypelen);
+    auth_type = sc_get_authtype(authtypeOID, authtypeOIDlen);
+    iproperlength = sc_get_proper_auth_length(auth_type);
     if (iproperlength == SNMPERR_GENERR)
         return SNMPERR_GENERR;
     properlength = (size_t)iproperlength;
@@ -387,19 +440,13 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
 #ifdef NETSNMP_USE_OPENSSL
-    /*
-     * Determine transform type.
-     */
-#ifndef NETSNMP_DISABLE_MD5
-    if (ISTRANSFORM(authtype, HMACMD5Auth))
-        HMAC(EVP_md5(), key, keylen, message, msglen, buf, &buf_len);
-    else
-#endif
-        if (ISTRANSFORM(authtype, HMACSHA1Auth))
-        HMAC(EVP_sha1(), key, keylen, message, msglen, buf, &buf_len);
-    else {
+    /** get hash function */
+    hashfn = sc_get_openssl_hashfn(auth_type);
+    if (NULL == hashfn) {
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
+
+    HMAC(hashfn, key, keylen, message, msglen, buf, &buf_len);
     if (buf_len != properlength) {
         QUITFUN(rval, sc_generate_keyed_hash_quit);
     }
@@ -437,11 +484,11 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     if (*maclen > properlength)
         *maclen = properlength;
 #ifndef NETSNMP_DISABLE_MD5
-    if (ISTRANSFORM(authtype, HMACMD5Auth))
+    if (ISTRANSFORM(authtypeOID, HMACMD5Auth))
         rval = MD5_hmac(message, msglen, MAC, *maclen, key, keylen);
     else
 #endif
-         if (ISTRANSFORM(authtype, HMACSHA1Auth))
+         if (ISTRANSFORM(authtypeOID, HMACSHA1Auth))
         rval = SHA1_hmac(message, msglen, MAC, *maclen, key, keylen);
     else {
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
@@ -508,7 +555,7 @@ sc_hash(const oid * hashtype, size_t hashtypelen, const u_char * buf,
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
     unsigned int   tmp_len;
 #endif
-    int            ret;
+    int            ret, auth_type;
 
 #ifdef NETSNMP_USE_OPENSSL
     const EVP_MD   *hashfn;
@@ -523,7 +570,11 @@ sc_hash(const oid * hashtype, size_t hashtypelen, const u_char * buf,
     if (hashtype == NULL || buf == NULL || buf_len <= 0 ||
         MAC == NULL || MAC_len == NULL )
         return (SNMPERR_GENERR);
-    ret = sc_get_properlength(hashtype, hashtypelen);
+
+    auth_type = sc_get_authtype(hashtype, hashtypelen);
+    if (auth_type < 0 )
+        return (SNMPERR_GENERR);
+    ret = sc_get_proper_auth_length(auth_type);
     if (( ret < 0 ) || (*MAC_len < (size_t)ret ))
         return (SNMPERR_GENERR);
 
@@ -531,16 +582,9 @@ sc_hash(const oid * hashtype, size_t hashtypelen, const u_char * buf,
     /*
      * Determine transform type.
      */
-#ifndef NETSNMP_DISABLE_MD5
-    if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
-        hashfn = (const EVP_MD *) EVP_md5();
-    } else
-#endif
-        if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
-        hashfn = (const EVP_MD *) EVP_sha1();
-    } else {
-        return (SNMPERR_GENERR);
-    }
+    hashfn = sc_get_openssl_hashfn(auth_type);
+    if (NULL == hashfn)
+        return SNMPERR_GENERR;
 
 /** initialize the pointer */
 #ifdef HAVE_EVP_MD_CTX_CREATE
@@ -652,13 +696,13 @@ _SCAPI_NOT_CONFIGURED
  * length of the hash transform output.
  */
 int
-sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
+sc_check_keyed_hash(const oid * authtypeOID, size_t authtypeOIDlen,
                     const u_char * key, u_int keylen,
                     const u_char * message, u_int msglen,
                     const u_char * MAC, u_int maclen)
 #if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
-    int             rval = SNMPERR_SUCCESS;
+    int             rval = SNMPERR_SUCCESS, auth_type, auth_size;
     size_t          buf_len = SNMP_MAXBUF_SMALL;
 
     u_char          buf[SNMP_MAXBUF_SMALL];
@@ -678,24 +722,59 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
     /*
      * Sanity check.
      */
-    if (!authtype || !key || !message || !MAC
+    if (!authtypeOID || !key || !message || !MAC
         || (keylen <= 0) || (msglen <= 0) || (maclen <= 0)
-        || (authtypelen != USM_LENGTH_OID_TRANSFORM)) {
+        || (authtypeOIDlen != USM_LENGTH_OID_TRANSFORM)) {
         QUITFUN(SNMPERR_GENERR, sc_check_keyed_hash_quit);
     }
 
+    auth_type = sc_get_authtype(authtypeOID, authtypeOIDlen);
+    if (auth_type < 0 )
+        return (SNMPERR_GENERR);
 
-    if (maclen != USM_MD5_AND_SHA_AUTH_LEN) {
+
+    switch (auth_type) {
+#ifndef NETSNMP_DISABLE_MD5
+        case NETSNMP_USMAUTH_HMACMD5:
+#endif
+        case NETSNMP_USMAUTH_HMACSHA1:
+            auth_size = USM_MD5_AND_SHA_AUTH_LEN;
+            break;
+
+#ifdef HAVE_EVP_SHA224
+        case NETSNMP_USMAUTH_HMAC128SHA224:
+            auth_size = USM_HMAC128SHA224_AUTH_LEN;
+            break;
+
+        case NETSNMP_USMAUTH_HMAC192SHA256:
+            auth_size = USM_HMAC192SHA256_AUTH_LEN;
+            break;
+#endif /* HAVE_EVP_SHA224 */
+
+#ifdef HAVE_EVP_SHA384
+        case NETSNMP_USMAUTH_HMAC256SHA384:
+            auth_size = USM_HMAC256SHA384_AUTH_LEN;
+            break;
+
+        case NETSNMP_USMAUTH_HMAC384SHA512:
+            auth_size = USM_HMAC384SHA512_AUTH_LEN;
+            break;
+#endif /* HAVE_EVP_SHA384 */
+
+
+        default:
+            auth_size = 0;
+    }
+    if (0 == auth_size || maclen != auth_size) {
         QUITFUN(SNMPERR_GENERR, sc_check_keyed_hash_quit);
     }
-    
+
     /*
      * Generate a full hash of the message, then compare
      * the result with the given MAC which may shorter than
      * the full hash length.
      */
-    rval = sc_generate_keyed_hash(authtype, authtypelen,
-                                  key, keylen,
+    rval = sc_generate_keyed_hash(authtypeOID, authtypeOIDlen, key, keylen,
                                   message, msglen, buf, &buf_len);
     QUITFUN(rval, sc_check_keyed_hash_quit);
 
