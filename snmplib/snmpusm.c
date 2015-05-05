@@ -76,19 +76,36 @@
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpusm.h>
+#include <net-snmp/library/transform_oids.h>
 
 netsnmp_feature_child_of(usm_all, libnetsnmp)
 netsnmp_feature_child_of(usm_support, usm_all)
 
 netsnmp_feature_require(usm_support)
 
-oid             usmNoAuthProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 1, 1 };
+oid    usmNoAuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+                                 NETSNMP_USMAUTH_NOAUTH };
 #ifndef NETSNMP_DISABLE_MD5
-oid             usmHMACMD5AuthProtocol[10] =
-    { 1, 3, 6, 1, 6, 3, 10, 1, 1, 2 };
+oid    usmHMACMD5AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+                                      NETSNMP_USMAUTH_HMACMD5 };
 #endif
-oid             usmHMACSHA1AuthProtocol[10] =
-    { 1, 3, 6, 1, 6, 3, 10, 1, 1, 3 };
+oid    usmHMACSHA1AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+                                       NETSNMP_USMAUTH_HMACSHA1 };
+
+#ifdef HAVE_EVP_SHA384
+oid    usmHMAC192SHA256AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+                                            NETSNMP_USMAUTH_HMAC192SHA256 };
+oid    usmHMAC384SHA512AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+                                            NETSNMP_USMAUTH_HMAC384SHA512 };
+#endif /* HAVE_EVP_SHA384 */
+
+#ifdef HAVE_EVP_SHA224
+oid    usmHMAC256SHA384AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+                                            NETSNMP_USMAUTH_HMAC256SHA384 };
+oid    usmHMAC128SHA224AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+                                            NETSNMP_USMAUTH_HMAC128SHA224 };
+#endif /* HAVE_EVP_SHA384 */
+
 oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
 #ifndef NETSNMP_DISABLE_DES
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
@@ -1687,9 +1704,9 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
     /*
      * Remember where to put the actual HMAC we calculate later on.  An
      * encoded OCTET STRING of length USM_MD5_AND_SHA_AUTH_LEN has an ASN.1
-     * header of length 2, hence the fudge factor.  
+     * header of length 2, hence the fudge factor.  This works as long as
+     * auth lengths stay < 127.
      */
-
     mac_offset = *offset - 2;
 
     /*
