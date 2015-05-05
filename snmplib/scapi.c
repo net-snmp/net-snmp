@@ -130,6 +130,66 @@ int MD5_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
 #endif
 
 /*
+ * sc_get_authtype(oid *hashtype, u_int hashtype_len):
+ * 
+ * Given a hashing type ("hashtype" and its length hashtype_len), return
+ * its type (the last suboid). NETSNMP_USMAUTH_* constants are defined in
+ * transform_oids.h.
+ * 
+ * Returns SNMPERR_GENERR for an unknown hashing type.
+ */
+int
+sc_get_authtype(const oid * hashtype, u_int hashtype_len)
+{
+    /** make sure it's an auth transform */
+    if ((NULL == hashtype) || (hashtype_len != USM_LENGTH_OID_TRANSFORM) ||
+        snmp_oid_compare(hashtype, USM_LENGTH_OID_TRANSFORM - 1,
+                         usmNoAuthProtocol, USM_LENGTH_OID_TRANSFORM - 1))
+        return SNMPERR_GENERR;
+
+    return hashtype[USM_LENGTH_OID_TRANSFORM - 1];
+}
+
+/*
+ * sc_get_properlength(oid *hashtype, u_int hashtype_len):
+ * 
+ * Given a hashing type ("hashtype" and its length hashtype_len), return
+ * the length of the hash result.
+ * 
+ * Returns either the length or SNMPERR_GENERR for an unknown hashing type.
+ */
+int
+sc_get_proper_auth_length(int hashtype)
+{
+    DEBUGTRACE;
+    /*
+     * Determine transform type hash length.
+     */
+    switch (hashtype) {
+#ifndef NETSNMP_DISABLE_MD5
+        case NETSNMP_USMAUTH_HMACMD5:
+            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5);
+#endif
+        case NETSNMP_USMAUTH_HMACSHA1:
+            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1);
+
+        case NETSNMP_USMAUTH_HMAC192SHA256:
+            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC192SHA256);
+
+        case NETSNMP_USMAUTH_HMAC384SHA512:
+            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC384SHA512);
+
+        case NETSNMP_USMAUTH_HMAC128SHA224:
+            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC128SHA224);
+
+        case NETSNMP_USMAUTH_HMAC256SHA384:
+            return BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC256SHA384);
+    }
+
+    return SNMPERR_GENERR;
+}
+
+/*
  * sc_get_properlength(oid *hashtype, u_int hashtype_len):
  * 
  * Given a hashing type ("hashtype" and its length hashtype_len), return
@@ -144,15 +204,7 @@ sc_get_properlength(const oid * hashtype, u_int hashtype_len)
     /*
      * Determine transform type hash length.
      */
-#ifndef NETSNMP_DISABLE_MD5
-    if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
-        return BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5);
-    } else
-#endif
-        if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
-        return BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1);
-    }
-    return SNMPERR_GENERR;
+    return sc_get_proper_auth_length(sc_get_authtype(hashtype, hashtype_len));
 }
 
 netsnmp_feature_child_of(scapi_get_proper_priv_length, netsnmp_unused)

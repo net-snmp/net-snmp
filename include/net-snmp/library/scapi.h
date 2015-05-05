@@ -34,8 +34,13 @@ extern          "C" {
     /*
      * Prototypes.
      */
+    int             sc_get_authtype(const oid * hashtype, u_int hashtype_len);
+    int             sc_get_proper_auth_length(int hashtype);
+
+    /** deprectated, use sc_get_authtype() + sc_get_proper_auth_length() */
     int             sc_get_properlength(const oid * hashtype,
                                         u_int hashtype_len);
+
     int             sc_get_proper_priv_length(const oid * privtype,
                                               u_int privtype_len);
 
