@@ -99,7 +99,7 @@ snmp_parse_args_descriptions(FILE * outf)
 #endif /* support for community based SNMP */
     fprintf(outf, "SNMP Version 3 specific\n");
     fprintf(outf,
-            "  -a PROTOCOL\t\tset authentication protocol (MD5|SHA)\n");
+            "  -a PROTOCOL\t\tset authentication protocol (MD5|SHA|SHA-224|SHA-256|SHA-384|SHA-512)\n");
     fprintf(outf,
             "  -A PASSPHRASE\t\tset authentication protocol pass phrase\n");
     fprintf(outf,
@@ -561,15 +561,25 @@ netsnmp_parse_args(int argc,
 
 #ifdef NETSNMP_SECMOD_USM
         case 'a':
-#ifndef NETSNMP_DISABLE_MD5
-            if (!strcasecmp(optarg, "MD5")) {
-                session->securityAuthProto = usmHMACMD5AuthProtocol;
-                session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-            } else
-#endif
-                if (!strcasecmp(optarg, "SHA")) {
+            session->securityAuthProtoLen = USM_LENGTH_OID_TRANSFORM;
+            if (!strncasecmp(optarg, "SHA", 3)) {
                 session->securityAuthProto = usmHMACSHA1AuthProtocol;
-                session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
+#ifdef HAVE_EVP_SHA384
+            } else if (!strcasecmp(optarg, "SHA-256")) {
+                session->securityAuthProto = usmHMAC192SHA256AuthProtocol;
+            } else if (!strcasecmp(optarg, "SHA-512")) {
+                session->securityAuthProto = usmHMAC384SHA512AuthProtocol;
+#endif /* HAVE_EVP_SHA384 */
+#ifdef HAVE_EVP_SHA224
+            } else if (!strcasecmp(optarg, "SHA-384")) {
+                session->securityAuthProto = usmHMAC256SHA384AuthProtocol;
+            } else if (!strcasecmp(optarg, "SHA-224")) {
+                session->securityAuthProto = usmHMAC128SHA224AuthProtocol;
+#endif /* HAVE_EVP_SHA224 */
+#ifndef NETSNMP_DISABLE_MD5
+            } else if (!strcasecmp(optarg, "MD5")) {
+                session->securityAuthProto = usmHMACMD5AuthProtocol;
+#endif
             } else {
                 fprintf(stderr,
                         "Invalid authentication protocol specified after -a flag: %s\n",
@@ -729,20 +739,10 @@ netsnmp_parse_args(int argc,
                 snmp_duplicate_objid(def, session->securityAuthProtoLen);
         }
         if (session->securityAuthProto == NULL) {
-#ifndef NETSNMP_DISABLE_MD5
-            /*
-             * assume MD5
-             */
             session->securityAuthProto =
-                snmp_duplicate_objid(usmHMACMD5AuthProtocol,
-                                     USM_AUTH_PROTO_MD5_LEN);
-            session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-#else
-            session->securityAuthProto =
-                snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
-                                     USM_AUTH_PROTO_SHA_LEN);
-            session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
-#endif
+                snmp_duplicate_objid(SNMP_DEFAULT_AUTH_PROTO,
+                                     SNMP_DEFAULT_AUTH_PROTOLEN);
+            session->securityAuthProtoLen = SNMP_DEFAULT_AUTH_PROTOLEN;
         }
         if (generate_Ku(session->securityAuthProto,
                         session->securityAuthProtoLen,
@@ -767,21 +767,10 @@ netsnmp_parse_args(int argc,
                 snmp_duplicate_objid(def, session->securityPrivProtoLen);
         }
         if (session->securityPrivProto == NULL) {
-            /*
-             * assume DES 
-             */
-#ifndef NETSNMP_DISABLE_DES
             session->securityPrivProto =
-                snmp_duplicate_objid(usmDESPrivProtocol,
-                                     USM_PRIV_PROTO_DES_LEN);
-            session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
-#else
-            session->securityPrivProto =
-                snmp_duplicate_objid(usmAESPrivProtocol,
-                                     USM_PRIV_PROTO_AES_LEN);
-            session->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
-#endif
-
+                snmp_duplicate_objid(SNMP_DEFAULT_PRIV_PROTO,
+                                     SNMP_DEFAULT_PRIV_PROTOLEN);
+            session->securityPrivProtoLen = SNMP_DEFAULT_PRIV_PROTOLEN;
         }
         if (generate_Ku(session->securityAuthProto,
                         session->securityAuthProtoLen,
