@@ -215,7 +215,6 @@ _load_ipv6(netsnmp_container* container, u_long *index )
         return -2;
     }
     
-    fgets(line,sizeof(line),in); /* skip header */
     while (fgets(line, sizeof(line), in)) {
         char            c_name[IFNAMSIZ+1];
         char            c_dest[33], c_src[33], c_next[33];
