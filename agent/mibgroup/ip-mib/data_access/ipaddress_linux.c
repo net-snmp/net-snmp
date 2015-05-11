@@ -434,18 +434,18 @@ netsnmp_access_other_info_get(int index, int family)
     status = send(sd, &req, req.n.nlmsg_len, 0);
     if (status < 0) {
         snmp_log_perror("ipadress_linux: could not send netlink request");
-        return addr;
+        goto out;
     }
 
     status = recv(sd, buf, sizeof(buf), 0);
     if (status < 0) {
         snmp_log_perror("ipadress_linux: could not receive netlink request");
-        return addr;
+        goto out;
     }
 
     if(status == 0) {
        snmp_log (LOG_ERR, "ipadress_linux: nothing to read\n");
-       return addr;
+       goto out;
     }
 
     for(nlmp = (struct nlmsghdr *)buf; status > sizeof(*nlmp);) {
@@ -454,12 +454,12 @@ netsnmp_access_other_info_get(int index, int family)
 
         if (req_len < 0 || len > status) {
             snmp_log (LOG_ERR, "invalid netlink message\n");
-            return addr;
+            goto out;
         }
 
         if (!NLMSG_OK(nlmp, status)) {
             snmp_log (LOG_ERR, "invalid NLMSG message\n");
-            return addr;
+            goto out;
         }
         rtmp = (struct ifaddrmsg *)NLMSG_DATA(nlmp);
         rtatp = (struct rtattr *)IFA_RTA(rtmp);
@@ -479,6 +479,7 @@ netsnmp_access_other_info_get(int index, int family)
         status -= NLMSG_ALIGN(len);
         nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
     }
+out:
     close(sd);
     return addr;
 #endif
