@@ -435,7 +435,7 @@ _systemstats_v6_load_file(netsnmp_systemstats_entry *entry, FILE *devin)
                     entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINMCASTOCTETS] = 1;
                 } else
                     rc = 1;
-            } else if ('N' == line[5]) {
+            } else if ('N' == line[5] && 'R' == line[7]) {
                 entry->stats.HCInNoRoutes.low = scan_val & 0xffffffff;
                 entry->stats.HCInNoRoutes.high = scan_val >> 32;
                 entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINNOROUTES] = 1;
