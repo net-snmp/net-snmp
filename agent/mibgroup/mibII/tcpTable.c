@@ -913,14 +913,14 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     return -1;
 }
 
-#else				/* UDB_SYMBOL */
+#else				/* TCP_SYMBOL */
 int
 tcpTable_load(netsnmp_cache *cache, void *vmagic)
 {
     DEBUGMSGTL(("mibII/tcpTable", "Loading TCP Table not implemented\n"));
     return -1;
 }
-#endif				/* UDB_SYMBOL */
+#endif				/* TCP_SYMBOL */
 #endif				/* PCB_TABLE */
 #endif		/* (defined(NETSNMP_CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
 #endif                          /* WIN32 cygwin */
