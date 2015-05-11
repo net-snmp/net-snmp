@@ -36,6 +36,9 @@ config_require(ip-mib ip-forward-mib tcp-mib udp-mib)
 config_require(ip-mib ip-forward-mib tcp-mib udp-mib)
 #elif defined(solaris2)
 config_require(tcp-mib udp-mib)
+config_require(ip-forward-mib)
+config_require(ip-mib/ipAddressTable ip-mib/ipAddressPrefixTable)
+config_require(ip-mib/ipDefaultRouterTable)
 #elif defined(freebsd4)
 config_require(tcp-mib udp-mib)
 #elif defined(netbsd1)
@@ -46,11 +49,9 @@ config_require(tcp-mib udp-mib)
  * For Solaris, enable additional tables when it has extended MIB support.
  */
 #if defined( solaris2 ) && defined( HAVE_MIB2_IPIFSTATSENTRY_T )
-config_require(ip-mib/ipSystemStatsTable ip-mib/ipAddressTable ip-mib/ipAddressPrefixTable)
-config_require(ip-mib/ipIfStatsTable ip-mib/ipDefaultRouterTable)
+config_require(ip-mib/ipSystemStatsTable ip-mib/ipIfStatsTable)
 /* Still missing:
  * ip-mib/inetNetToMediaTable
  * ip-mib/ipv6ScopeZoneIndexTable
  */
-config_require(ip-forward-mib)
 #endif
