@@ -83,7 +83,7 @@ usage(void)
     snmp_parse_args_descriptions(stderr);
     fprintf(stderr, "\nsnmpps options:\n");
     fprintf(stderr,
-            "\t-Cp\tShow hrSWRunPath insteadof hrSWRunName\n");
+            "\t-Cp\tShow hrSWRunPath instead of hrSWRunName\n");
     fprintf(stderr,
             "\t-Ca\tShow hrSWRunParameters in addition to hrSWRunName/Path\n");
     fprintf(stderr,
