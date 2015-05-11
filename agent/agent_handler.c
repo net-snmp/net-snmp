@@ -439,8 +439,13 @@ netsnmp_inject_handler_before(netsnmp_handler_registration *reginfo,
             if (strcmp(nexth->handler_name, before_what) == 0)
                 break;
         }
-        if (!nexth)
+        if (!nexth) {
+	    snmp_log(LOG_ERR, "Cannot inject '%s' before '%s': not found\n", handler->handler_name, before_what);
+	    snmp_log(LOG_ERR, "The handlers are:\n");
+	    for (nexth = reginfo->handler; nexth; nexth = nexth->next)
+		snmp_log(LOG_ERR, "  %s\n", nexth->handler_name);
             return SNMP_ERR_GENERR;
+	}
         if (prevh) {
             /* after prevh and before nexth */
             prevh->next = handler;
