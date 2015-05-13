@@ -67,7 +67,6 @@ netsnmp_container *
 netsnmp_access_ipaddress_container_init(u_int flags)
 {
     netsnmp_container *container1;
-    int rc;
 
     DEBUGMSGTL(("access:ipaddress:container", "init\n"));
 
