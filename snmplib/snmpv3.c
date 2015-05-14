@@ -145,45 +145,20 @@ snmpv3_secLevel_conf(const char *word, char *cptr)
 
 
 NETSNMP_IMPORT int
-snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
-               char **Xpsz, int argc, char *const *argv);
+snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
+                 char **Xpsz, int argc, char *const *argv, int flags);
 int
-snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
-               char **Xpsz, int argc, char *const *argv)
+snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
+                 char **Xpsz, int argc, char *const *argv, int flags)
 {
-    char           *cp = optarg;
-    int testcase;
-    optarg++;
-    /*
-     * Support '... -3x=value ....' syntax
-     */
-    if (*optarg == '=') {
-        optarg++;
-    }
-    /*
-     * and '.... "-3x value" ....'  (*with* the quotes)
-     */
-    while (*optarg && isspace((unsigned char)(*optarg))) {
-        optarg++;
-    }
-    /*
-     * Finally, handle ".... -3x value ...." syntax
-     *   (*without* surrounding quotes)
-     */
-    if (!*optarg) {
-        /*
-         * We've run off the end of the argument
-         *  so move on the the next.
-         */
-        optarg = argv[optind++];
-        if (optind > argc) {
-            fprintf(stderr,
-                    "Missing argument after SNMPv3 '-3%c' option.\n", *cp);
-            return (-1);
-        }
-    }
+    int        testcase;
+    char      *cp;
+    int        zero_sensitive = !( flags & NETSNMP_PARSE_ARGS_NOZERO );
 
-    switch (*cp) {
+    /** init auth types list */
+    usm_init_auth_types();
+
+    switch (arg) {
 
     case 'Z':
         errno=0;
@@ -198,6 +173,16 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
             session->engineTime = strtoul(cp, &endptr, 10);
             if (errno || cp == endptr) {
                 fprintf(stderr, "Need engine time after \"-3Z engineBoot,\".\n");
+                return (-1);
+            }
+        }
+        /*
+         * Handle previous '-Z boot time' syntax
+         */
+        else if (optind < argc) {
+            session->engineTime = strtoul(argv[optind], &cp, 10);
+            if (errno || cp == argv[optind]) {
+                fprintf(stderr, "Need engine time after \"-Z engineBoot\".\n");
                 return (-1);
             }
         } else {
@@ -220,6 +205,11 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
                 SNMP_FREE(ebuf);
                 return (-1);
             }
+            if ((eout_len < 5) || (eout_len > 32)) {
+                fprintf(stderr, "Invalid engine ID value after -e flag.\n");
+                free(ebuf);
+                return (-1);
+            }
             session->securityEngineID = ebuf;
             session->securityEngineIDLen = eout_len;
             break;
@@ -239,6 +229,11 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
                 SNMP_FREE(ebuf);
                 return (-1);
             }
+            if ((eout_len < 5) || (eout_len > 32)) {
+                fprintf(stderr, "Invalid engine ID value after -E flag.\n");
+                free(ebuf);
+                return (-1);
+            }
             session->contextEngineID = ebuf;
             session->contextEngineIDLen = eout_len;
             break;
@@ -256,12 +251,14 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
 
     case 'l':
         if (!strcasecmp(optarg, "noAuthNoPriv") || !strcmp(optarg, "1") ||
-            !strcasecmp(optarg, "nanp")) {
+            !strcasecmp(optarg, "noauth") || !strcasecmp(optarg, "nanp")) {
             session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
         } else if (!strcasecmp(optarg, "authNoPriv")
+                   || !strcasecmp(optarg, "auth")
                    || !strcmp(optarg, "2") || !strcasecmp(optarg, "anp")) {
             session->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
         } else if (!strcasecmp(optarg, "authPriv") || !strcmp(optarg, "3")
+                   || !strcasecmp(optarg, "priv")
                    || !strcasecmp(optarg, "ap")) {
             session->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
         } else {
@@ -270,26 +267,21 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
                     optarg);
             return (-1);
         }
-
         break;
 
 #ifdef NETSNMP_SECMOD_USM
-    case 'a':
-#ifndef NETSNMP_DISABLE_MD5
-        if (!strcasecmp(optarg, "MD5")) {
-            session->securityAuthProto = usmHMACMD5AuthProtocol;
-            session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-        } else
-#endif
-            if (!strcasecmp(optarg, "SHA")) {
-            session->securityAuthProto = usmHMACSHA1AuthProtocol;
-            session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
-        } else {
+    case 'a': {
+        int auth_type = usm_lookup_auth_type(optarg);
+        if (auth_type > 0) {
+            session->securityAuthProto =
+                usm_get_auth_oid(auth_type, &session->securityAuthProtoLen);
+         } else {
             fprintf(stderr,
                     "Invalid authentication protocol specified after -3a flag: %s\n",
                     optarg);
             return (-1);
         }
+    }
         break;
 
     case 'x':
@@ -303,7 +295,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
 #endif
 #ifdef HAVE_AES
         if (!strcasecmp(optarg, "AES128") ||
-            strcasecmp(optarg, "AES")) {
+            !strcasecmp(optarg, "AES")) {
             session->securityPrivProto = usmAES128PrivProtocol;
             session->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
             testcase = 1;
@@ -318,11 +310,29 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         break;
 
     case 'A':
-        *Apsz = optarg;
+        if (zero_sensitive) {
+            *Apsz = strdup(optarg);
+            if (NULL == *Apsz) {
+                fprintf(stderr, "malloc failure processing -%c flag.\n",
+                        (char)arg);
+                return -1;
+            }
+            memset(optarg, 0x0, strlen(optarg));
+        } else
+            *Apsz = optarg;
         break;
 
     case 'X':
-        *Xpsz = optarg;
+        if (zero_sensitive) {
+            *Xpsz = strdup(optarg);
+            if (NULL == *Xpsz) {
+                fprintf(stderr, "malloc failure processing -%c flag.\n",
+                        (char)arg);
+                return -1;
+            }
+            memset(optarg, 0x0, strlen(optarg));
+        } else
+            *Xpsz = optarg;
         break;
 #endif /* NETSNMP_SECMOD_USM */
 
@@ -391,6 +401,48 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         return -1;
     }
     return 0;
+}
+
+NETSNMP_IMPORT int
+snmpv3_parse_args(char *optarg, netsnmp_session * session, char **Apsz,
+                  char **Xpsz, int argc, char *const *argv, int flags);
+int
+snmpv3_parse_args(char *optarg, netsnmp_session * session, char **Apsz,
+                  char **Xpsz, int argc, char *const *argv, int flags)
+{
+    char           *cp = optarg;
+    optarg++;
+    /*
+     * Support '... -3x=value ....' syntax
+     */
+    if (*optarg == '=') {
+        optarg++;
+    }
+    /*
+     * and '.... "-3x value" ....'  (*with* the quotes)
+     */
+    while (*optarg && isspace((unsigned char)(*optarg))) {
+        optarg++;
+    }
+    /*
+     * Finally, handle ".... -3x value ...." syntax
+     *   (*without* surrounding quotes)
+     */
+    if (!*optarg) {
+        /*
+         * We've run off the end of the argument
+         *  so move on the the next.
+         */
+        if (optind >= argc) {
+            fprintf(stderr,
+                    "Missing argument after SNMPv3 '-3%c' option.\n", *cp);
+            return (-1);
+        }
+        optarg = argv[optind++];
+    }
+
+    return snmpv3_parse_arg(*cp, optarg, session, Apsz, Xpsz, argc, argv,
+                            flags);
 }
 
 /*******************************************************************-o-******
