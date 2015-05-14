@@ -4983,7 +4983,22 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
             pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
             break;
     }
- 
+
+    /*
+     * check to see if we need a v3 engineID probe
+     */
+    if ((pdu->version == SNMP_VERSION_3) &&
+        (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) &&
+        (session->securityEngineIDLen == 0) &&
+        (0 == (session->flags & SNMP_FLAGS_DONT_PROBE))) {
+        int rc;
+        DEBUGMSGTL(("snmpv3_build", "delayed probe for engineID\n"));
+        rc = snmpv3_engineID_probe(slp, session);
+        if (rc == 0)
+            return 0; /* s_snmp_errno already set */
+    }
+
+
     pktbuf_len = 2048; /* default */
     if (session->sndMsgMaxSize > 0 && session->sndMsgMaxSize < pktbuf_len)
         pktbuf_len = session->sndMsgMaxSize;
@@ -5169,20 +5184,6 @@ _sess_async_send(void *sessp,
         if ((SNMPERR_SUCCESS != result) || (NULL == isp->opacket))
             /** no packet to send?? */
             return 0;
-    }
-
-    /*
-     * check to see if we need a v3 engineID probe
-     */
-    if ((pdu->version == SNMP_VERSION_3) &&
-        (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) &&
-        (session->securityEngineIDLen == 0) &&
-        (0 == (session->flags & SNMP_FLAGS_DONT_PROBE))) {
-        int rc;
-        DEBUGMSGTL(("snmpv3_build", "delayed probe for engineID\n"));
-        rc = snmpv3_engineID_probe(slp, session);
-        if (rc == 0)
-            return 0; /* s_snmp_errno already set */
     }
 
     /*
