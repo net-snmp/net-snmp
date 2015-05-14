@@ -13,6 +13,7 @@ use constant false => 0;
 use constant true => 1;
 my $target_arch = $ENV{TARGET_CPU} ? $ENV{TARGET_CPU} : $ENV{Platform} ?
                   $ENV{Platform} : "x86";
+$target_arch = lc $target_arch;
 if ($target_arch ne "x86" && $target_arch ne "x64") {
     print "Error: unsupported target architecture $target_arch\n";
     die;
