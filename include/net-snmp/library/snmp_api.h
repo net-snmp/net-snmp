@@ -399,9 +399,9 @@ typedef struct request_list {
                                  const char *);
     NETSNMP_IMPORT
     oid            *snmp_duplicate_objid(const oid * objToCopy, size_t);
-    NETSNMP_IMPORT
 
 #ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
+    NETSNMP_IMPORT
     u_int           snmp_increment_statistic(int which);
     NETSNMP_IMPORT
     u_int           snmp_increment_statistic_by(int which, int count);
