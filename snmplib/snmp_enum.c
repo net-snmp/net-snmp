@@ -221,6 +221,20 @@ se_find_value_in_list(struct snmp_enum_list *list, const char *label)
 }
 
 int
+se_find_casevalue_in_list(struct snmp_enum_list *list, const char *label)
+{
+    if (!list)
+        return SE_DNE;          /* XXX: um, no good solution here */
+    while (list) {
+        if (strcasecmp(list->label, label) == 0)
+            return (list->value);
+        list = list->next;
+    }
+
+    return SE_DNE;              /* XXX: um, no good solution here */
+}
+
+int
 se_find_free_value_in_list(struct snmp_enum_list *list)
 {
     int max_value = 0;
@@ -345,6 +359,12 @@ int
 se_find_value_in_slist(const char *listname, const char *label)
 {
     return (se_find_value_in_list(se_find_slist(listname), label));
+}
+
+int
+se_find_casevalue_in_slist(const char *listname, const char *label)
+{
+    return (se_find_casevalue_in_list(se_find_slist(listname), label));
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_SE_FIND_FREE_VALUE_IN_SLIST

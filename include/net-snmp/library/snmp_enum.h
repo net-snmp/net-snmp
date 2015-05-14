@@ -69,6 +69,9 @@ extern          "C" {
     NETSNMP_IMPORT
     int             se_find_value_in_slist(const char *listname,
                                            const char *label);
+    NETSNMP_IMPORT
+    int             se_find_casevalue_in_slist(const char *listname,
+                                               const char *label);
     int             se_find_free_value_in_slist(const char *listname);
     /**
      * Add the pair (label, value) to the slist with name listname. Transfers
@@ -86,6 +89,8 @@ extern          "C" {
                                           int value);
     int             se_find_value_in_list(struct snmp_enum_list *list,
                                           const char *label);
+    int             se_find_casevalue_in_list(struct snmp_enum_list *list,
+                                              const char *label);
     int             se_find_free_value_in_list(struct snmp_enum_list *list);
     int             se_add_pair_to_list(struct snmp_enum_list **list,
                                         char *label, int value);
