@@ -563,7 +563,10 @@ write_expExpression(int action,
          */
         tmpvar = StorageTmp->expExpression;
         tmplen = StorageTmp->expExpressionLen;
-        StorageTmp->expExpression = netsnmp_memdup(var_val, var_val_len);
+        StorageTmp->expExpression = malloc(var_val_len + 1);
+        if (StorageTmp->expExpression)
+            snprintf(StorageTmp->expExpression, var_val_len + 1, "%.*s",
+                     (int)var_val_len, var_val);
         StorageTmp->expExpressionLen = var_val_len;
         break;
 
