@@ -107,7 +107,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 #if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS,
-        nbytes = USM_LENGTH_EXPANDED_PASSPHRASE;
+        nbytes = USM_LENGTH_EXPANDED_PASSPHRASE, auth_type;
 #if !defined(NETSNMP_USE_OPENSSL) && \
     defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
     int             ret;
@@ -119,6 +119,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 
 #ifdef NETSNMP_USE_OPENSSL
     EVP_MD_CTX     *ctx = NULL;
+    const EVP_MD   *hashfn = NULL;
 #elif NETSNMP_USE_INTERNAL_CRYPTO
     SHA_CTX csha1;
     MD5_CTX cmd5;
@@ -143,11 +144,32 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
         QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
     }
 
+    auth_type = sc_get_authtype(hashtype, hashtype_len);
+    if (SNMPERR_GENERR == auth_type) {
+        snmp_log(LOG_ERR, "Error: unknown authtype");
+        snmp_set_detail("unknown authtype");
+        QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+    }
 
     /*
      * Setup for the transform type.
      */
 #ifdef NETSNMP_USE_OPENSSL
+
+    if (*kulen < EVP_MAX_MD_SIZE) {
+        snmp_log(LOG_ERR, "Internal Error: ku buffer too small (min=%d).\n",
+                 EVP_MAX_MD_SIZE);
+        snmp_set_detail("Internal Error: ku buffer too small.");
+        QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+    }
+
+    /** get hash function */
+    hashfn = sc_get_openssl_hashfn(auth_type);
+    if (NULL == hashfn) {
+        snmp_log(LOG_ERR, "Error: no hashfn for authtype");
+        snmp_set_detail("no hashfn for authtype");
+        QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+    }
 
 #ifdef HAVE_EVP_MD_CTX_CREATE
     ctx = EVP_MD_CTX_create();
@@ -156,17 +178,9 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     if (!EVP_MD_CTX_init(ctx))
         return SNMPERR_GENERR;
 #endif
-#ifndef NETSNMP_DISABLE_MD5
-    if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
-        if (!EVP_DigestInit(ctx, EVP_md5()))
-            return SNMPERR_GENERR;
-    } else
-#endif
-        if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
-            if (!EVP_DigestInit(ctx, EVP_sha1()))
-                return SNMPERR_GENERR;
-        } else
-        QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+    if (!EVP_DigestInit(ctx, hashfn))
+        return SNMPERR_GENERR;
+
 #elif NETSNMP_USE_INTERNAL_CRYPTO
 #ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth)) {

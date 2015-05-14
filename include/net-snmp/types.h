@@ -284,8 +284,9 @@ typedef struct snmp_pdu {
         struct snmp_session;
 typedef struct snmp_session netsnmp_session;
 
-#define USM_AUTH_KU_LEN     32
-#define USM_PRIV_KU_LEN     32
+/** for openssl this should match up with EVP_MAX_MD_SIZE */
+#define USM_AUTH_KU_LEN     64
+#define USM_PRIV_KU_LEN     64
 
 typedef int        (*snmp_callback) (int, netsnmp_session *, int,
                                           netsnmp_pdu *, void *);

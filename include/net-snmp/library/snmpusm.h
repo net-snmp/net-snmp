@@ -30,7 +30,7 @@ extern          "C" {
 #define USM_HMAC384SHA512_AUTH_LEN      48      /* SHOULD;   PENDING RFC ASSIGNMENT */
 #define USM_HMAC128SHA224_AUTH_LEN      16      /* OPTIONAL; PENDING RFC ASSIGNMENT */
 #define USM_HMAC256SHA384_AUTH_LEN      32      /* OPTIONAL; PENDING RFC ASSIGNMENT */
-#define USM_MAX_AUTHSIZE                USM_HMAC256SHA384_AUTH_LEN
+#define USM_MAX_AUTHSIZE                USM_HMAC384SHA512_AUTH_LEN
 
 #define USM_SEC_MODEL_NUMBER            SNMP_SEC_MODEL_USM
 
@@ -266,9 +266,19 @@ extern          "C" {
     NETSNMP_IMPORT
     void            shutdown_usm(void);
 
-#define USM_CREATE_USER_AUTH_NONE 0
-#define USM_CREATE_USER_AUTH_MD5  1
-#define USM_CREATE_USER_AUTH_SHA  2
+    void            usm_init_auth_types(void);
+    int             usm_lookup_auth_type(const char *str);
+    char           *usm_lookup_auth_str(int value);
+    oid            *usm_get_auth_oid(int auth_type, size_t *oid_len);
+
+
+#define USM_CREATE_USER_AUTH_DFLT -1
+#define USM_CREATE_USER_AUTH_NONE NETSNMP_USMAUTH_NONE
+#define USM_CREATE_USER_AUTH_MD5  NETSNMP_USMAUTH_HMACMD5
+#define USM_CREATE_USER_AUTH_SHA512  NETSNMP_USMAUTH_HMAC384SHA512
+#define USM_CREATE_USER_AUTH_SHA384  NETSNMP_USMAUTH_HMAC256SHA384
+#define USM_CREATE_USER_AUTH_SHA256  NETSNMP_USMAUTH_HMAC192SHA256
+#define USM_CREATE_USER_AUTH_SHA224  NETSNMP_USMAUTH_HMAC128SHA224
 
 #define USM_CREATE_USER_PRIV_NONE 0
 #define USM_CREATE_USER_PRIV_DES  1

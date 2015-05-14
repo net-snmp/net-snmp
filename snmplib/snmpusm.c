@@ -77,6 +77,7 @@
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpusm.h>
 #include <net-snmp/library/transform_oids.h>
+#include <net-snmp/library/snmp_enum.h>
 
 netsnmp_feature_child_of(usm_all, libnetsnmp)
 netsnmp_feature_child_of(usm_support, usm_all)
@@ -93,15 +94,15 @@ oid    usmHMACSHA1AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                        NETSNMP_USMAUTH_HMACSHA1 };
 
 #ifdef HAVE_EVP_SHA384
-oid    usmHMAC192SHA256AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
-                                            NETSNMP_USMAUTH_HMAC192SHA256 };
 oid    usmHMAC384SHA512AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                             NETSNMP_USMAUTH_HMAC384SHA512 };
+oid    usmHMAC256SHA384AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+                                            NETSNMP_USMAUTH_HMAC256SHA384 };
 #endif /* HAVE_EVP_SHA384 */
 
 #ifdef HAVE_EVP_SHA224
-oid    usmHMAC256SHA384AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
-                                            NETSNMP_USMAUTH_HMAC256SHA384 };
+oid    usmHMAC192SHA256AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+                                            NETSNMP_USMAUTH_HMAC192SHA256 };
 oid    usmHMAC128SHA224AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                             NETSNMP_USMAUTH_HMAC128SHA224 };
 #endif /* HAVE_EVP_SHA384 */
@@ -193,6 +194,43 @@ int
 	ref->field_len = len;						\
 									\
 	return 0;							\
+}
+
+
+oid *
+usm_get_auth_oid(int auth_type, size_t *oid_len)
+{
+    if (NULL == oid_len)
+        return NULL;
+
+    *oid_len = USM_LENGTH_OID_TRANSFORM;
+
+    switch (auth_type) {
+#ifndef NETSNMP_DISABLE_MD5
+        case NETSNMP_USMAUTH_HMACMD5:
+            return usmHMACMD5AuthProtocol;
+#endif
+        case NETSNMP_USMAUTH_HMACSHA1:
+            return usmHMACSHA1AuthProtocol;
+
+#ifdef HAVE_EVP_SHA224
+        case NETSNMP_USMAUTH_HMAC128SHA224:
+            return usmHMAC128SHA224AuthProtocol;
+
+        case NETSNMP_USMAUTH_HMAC192SHA256:
+            return usmHMAC192SHA256AuthProtocol;
+#endif /* HAVE_EVP_SHA224 */
+
+#ifdef HAVE_EVP_SHA384
+        case NETSNMP_USMAUTH_HMAC256SHA384:
+            return usmHMAC256SHA384AuthProtocol;
+
+        case NETSNMP_USMAUTH_HMAC384SHA512:
+            return usmHMAC384SHA512AuthProtocol;
+#endif /* HAVE_EVP_SHA384 */
+    }
+
+    return NULL;
 }
 
 
@@ -1682,12 +1720,14 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
 
     DEBUGDUMPHEADER("send", "msgAuthenticationParameters");
     /*
-     * msgAuthenticationParameters (warnings assumes 0x00 by 12).  
+     * msgAuthenticationParameters.
      */
     if (theSecLevel == SNMP_SEC_LEVEL_AUTHNOPRIV
         || theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
-        memset(authParams, 0, USM_MD5_AND_SHA_AUTH_LEN);
-        msgAuthParmLen = USM_MD5_AND_SHA_AUTH_LEN;
+        memset(authParams, 0, sizeof(authParams));
+        msgAuthParmLen =
+            sc_get_auth_maclen(sc_get_authtype(theAuthProtocol,
+                                               theAuthProtocolLength));
     }
 
     rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset, 1,
@@ -2365,8 +2405,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 #ifndef NETSNMP_DISABLE_DES
     int             i;
 #endif
-    u_char          signature[BYTESIZE(USM_MAX_KEYEDHASH_LENGTH)];
-    size_t          signature_length = BYTESIZE(USM_MAX_KEYEDHASH_LENGTH);
+    u_char          signature[USM_MAX_AUTHSIZE];
+    size_t          signature_length = USM_MAX_AUTHSIZE;
     u_char          salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
     size_t          salt_length = BYTESIZE(USM_MAX_SALT_LENGTH);
     u_char          iv[BYTESIZE(USM_MAX_SALT_LENGTH)];
@@ -3265,7 +3305,7 @@ init_usm(void)
                            free_engineID, NULL);
 
     register_config_handler("snmp", "defAuthType", snmpv3_authtype_conf,
-                            NULL, "MD5|SHA");
+                            NULL, "MD5|SHA|SHA512|SHA384|SHA256|SHA224");
     register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
                             NULL,
 #ifdef HAVE_AES
@@ -3297,7 +3337,65 @@ init_usm(void)
                             NULL, NULL);
     register_config_handler(type, "userSetPrivLocalKey", usm_set_password,
                             NULL, NULL);
+
+   usm_init_auth_types();
+
 }
+
+void
+usm_init_auth_types(void)
+{
+    static int done = 0;
+    if (++done != 1)
+        return;
+
+    /** hash algs */
+    se_add_pair_to_slist("usm_hash_alg", strdup("NOAUTH"),
+                         NETSNMP_USMAUTH_NOAUTH);
+
+   se_add_pair_to_slist("usm_hash_alg", strdup("SHA"),
+                         NETSNMP_USMAUTH_HMACSHA1);
+
+#ifndef NETSNMP_DISABLE_MD5
+    se_add_pair_to_slist("usm_hash_alg", strdup("MD5"),
+                         NETSNMP_USMAUTH_HMACMD5);
+#endif
+
+    se_add_pair_to_slist("usm_hash_alg", strdup("SHA224"),
+                         NETSNMP_USMAUTH_HMAC128SHA224);
+    se_add_pair_to_slist("usm_hash_alg", strdup("SHA256"),
+                         NETSNMP_USMAUTH_HMAC192SHA256);
+    se_add_pair_to_slist("usm_hash_alg", strdup("SHA384"),
+                         NETSNMP_USMAUTH_HMAC256SHA384);
+    se_add_pair_to_slist("usm_hash_alg", strdup("SHA512"),
+                         NETSNMP_USMAUTH_HMAC384SHA512);
+#if 0 /* se pairs dont' allow duplicate values. */
+    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA1"),
+                         NETSNMP_USMAUTH_HMACSHA1);
+    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA-224"),
+                         NETSNMP_USMAUTH_HMAC128SHA224);
+    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA-256"),
+                         NETSNMP_USMAUTH_HMAC192SHA256);
+    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA-384"),
+                         NETSNMP_USMAUTH_HMAC256SHA384);
+    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA-512"),
+                         NETSNMP_USMAUTH_HMAC384SHA512);
+#endif
+}
+
+int
+usm_lookup_auth_type(const char *str)
+{
+    return se_find_casevalue_in_slist("usm_hash_alg", str);
+}
+
+
+char *
+usm_lookup_auth_str(int value)
+{
+    return se_find_label_in_slist("usm_hash_alg", value);
+}
+
 
 void
 init_usm_conf(const char *app)
@@ -3306,7 +3404,7 @@ init_usm_conf(const char *app)
                                   usm_parse_config_usmUser, NULL, NULL);
     register_config_handler(app, "createUser",
                                   usm_parse_create_usmUser, NULL,
-                                  "username [-e ENGINEID] (MD5|SHA|default) authpassphrase [(DES|AES|default) [privpassphrase]]");
+                                  "username [-e ENGINEID] (MD5|SHA|SHA512|SHA384|SHA256|SHA224|default) authpassphrase [(DES|AES|default) [privpassphrase]]");
 
     /*
      * we need to be called back later 
@@ -4454,20 +4552,22 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
      * READ: Authentication Type 
      */
     newuser->authProtocol[0] = 0;
+    cp = copy_nword(cp, buf, sizeof(buf));
     if ((strncmp(cp, "default", 7) == 0) && (NULL != def_auth_prot)) {
         memcpy(newuser->authProtocol, def_auth_prot,
                def_auth_prot_len * sizeof(oid));
+    } else {
+        const oid *auth_prot;
+        size_t auth_prot_len;
+        int auth_type = usm_lookup_auth_type(buf);
+        if (auth_type < 0) {
+            *errorMsg = "unknown authProtocol";
+            usm_free_user(newuser);
+            return NULL;
+        }
+        auth_prot = usm_get_auth_oid(auth_type, &auth_prot_len);
+        memcpy(newuser->authProtocol, auth_prot, auth_prot_len * sizeof(oid));
     }
-    else if (strncmp(cp, "SHA", 3) == 0) {
-        memcpy(newuser->authProtocol, usmHMACSHA1AuthProtocol,
-               sizeof(usmHMACSHA1AuthProtocol));
-    }
-#ifndef NETSNMP_DISABLE_MD5
-    else if (strncmp(cp, "MD5", 3) == 0) {
-        memcpy(newuser->authProtocol, usmHMACMD5AuthProtocol,
-               sizeof(usmHMACMD5AuthProtocol));
-    }
-#endif
     if (0 == newuser->authProtocol[0]) {
         *errorMsg = "Unknown authentication protocol";
         usm_free_user(newuser);
@@ -4482,8 +4582,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
 
-    cp = skip_token(cp);
-    if (!cp) {
+   if (!cp) {
         *errorMsg = "no authentication pass phrase";
         usm_free_user(newuser);
         return NULL;
@@ -4727,7 +4826,7 @@ usm_create_usmUser(const char *userName, const char *engineID,
                    int authType, const char *authPass,
                    int privType, const char *privPass, const char **errorMsg)
 {
-    const char *errorMsgLoc;
+    const char *errorMsgLoc, *str;
     char        line[SPRINT_MAX_LEN];
     int         len;
 
@@ -4735,7 +4834,10 @@ usm_create_usmUser(const char *userName, const char *engineID,
         errorMsg = &errorMsgLoc;
     *errorMsg = NULL;
 
-    /** [-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase] */
+    /** [-M] [-e ENGINEID] username 
+     *  (MD5|SHA|SHA512|SHA384|SHA256|SHA224|default) authpassphrase
+     *  [DES|AES|default] [privpassphrase]
+     */
 
     line[0] = 0;
     if (engineID) {
@@ -4749,16 +4851,14 @@ usm_create_usmUser(const char *userName, const char *engineID,
 
     if (0 == authType)
         goto create;
-#ifndef NETSNMP_DISABLE_MD5
-    else if (USM_CREATE_USER_AUTH_MD5 == authType)
-        strlcat(line, " MD5  ", sizeof(line));
-#endif
-    else if (USM_CREATE_USER_AUTH_SHA == authType)
-        strlcat(line, " SHA ", sizeof(line));
-    else {
-        *errorMsg = "Unknown authentication protocol";
-        return NULL;
+    str = usm_lookup_auth_str(authType);
+    if (NULL == str) {
+        snmp_log(LOG_WARNING, "unknown authType; using default\n");
+        str = "default";
     }
+    strlcat(line, " ", sizeof(line));
+    strlcat(line, str, sizeof(line));
+    strlcat(line, " ", sizeof(line));
 
     if (NULL == authPass) {
         *errorMsg = "missing authpassphrase";
@@ -4799,16 +4899,10 @@ usm_create_usmUser(const char *userName, const char *engineID,
 void
 snmpv3_authtype_conf(const char *word, char *cptr)
 {
-#ifndef NETSNMP_DISABLE_MD5
-    if (strcasecmp(cptr, "MD5") == 0)
-        defaultAuthType = usmHMACMD5AuthProtocol;
-    else
-#endif
-        if (strcasecmp(cptr, "SHA") == 0)
-        defaultAuthType = usmHMACSHA1AuthProtocol;
-    else
+    int auth_type = usm_lookup_auth_type(cptr);
+    if (auth_type < 0)
         config_perror("Unknown authentication type");
-    defaultAuthTypeLen = USM_LENGTH_OID_TRANSFORM;
+    defaultAuthType = usm_get_auth_oid(auth_type, &defaultAuthTypeLen);
     DEBUGMSGTL(("snmpv3", "set default authentication type: %s\n", cptr));
 }
 

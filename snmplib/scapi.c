@@ -150,6 +150,46 @@ sc_get_authtype(const oid * hashtype, u_int hashtype_len)
     return hashtype[USM_LENGTH_OID_TRANSFORM - 1];
 }
 
+
+/*
+ * sc_get_auth_maclen(int hashtype):
+ *
+ * Given a hash type, return its MAC length, which may be shorter than
+ * the full hash length.
+ *
+ * Returns 0 for an unknown hash type.
+ */
+int
+sc_get_auth_maclen(int auth_type)
+{
+    switch (auth_type) {
+#ifndef NETSNMP_DISABLE_MD5
+        case NETSNMP_USMAUTH_HMACMD5:
+            /** fall through */
+#endif
+        case NETSNMP_USMAUTH_HMACSHA1:
+            return USM_MD5_AND_SHA_AUTH_LEN;
+
+#ifdef HAVE_EVP_SHA224
+        case NETSNMP_USMAUTH_HMAC128SHA224:
+            return USM_HMAC128SHA224_AUTH_LEN;
+
+        case NETSNMP_USMAUTH_HMAC192SHA256:
+            return USM_HMAC192SHA256_AUTH_LEN;
+#endif /* HAVE_EVP_SHA224 */
+
+#ifdef HAVE_EVP_SHA384
+        case NETSNMP_USMAUTH_HMAC256SHA384:
+            return USM_HMAC256SHA384_AUTH_LEN;
+
+        case NETSNMP_USMAUTH_HMAC384SHA512:
+            return USM_HMAC384SHA512_AUTH_LEN;
+#endif /* HAVE_EVP_SHA384 */
+    }
+
+    return 0;
+}
+
 /*
  * sc_get_properlength(oid *hashtype, u_int hashtype_len):
  * 
@@ -321,7 +361,7 @@ _SCAPI_NOT_CONFIGURED
 
 
 #ifdef NETSNMP_USE_OPENSSL
-static const EVP_MD   *
+const EVP_MD   *
 sc_get_openssl_hashfn(int auth_type)
 {
     const EVP_MD   *hashfn = NULL;
@@ -732,46 +772,14 @@ sc_check_keyed_hash(const oid * authtypeOID, size_t authtypeOIDlen,
     if (auth_type < 0 )
         return (SNMPERR_GENERR);
 
-
-    switch (auth_type) {
-#ifndef NETSNMP_DISABLE_MD5
-        case NETSNMP_USMAUTH_HMACMD5:
-#endif
-        case NETSNMP_USMAUTH_HMACSHA1:
-            auth_size = USM_MD5_AND_SHA_AUTH_LEN;
-            break;
-
-#ifdef HAVE_EVP_SHA224
-        case NETSNMP_USMAUTH_HMAC128SHA224:
-            auth_size = USM_HMAC128SHA224_AUTH_LEN;
-            break;
-
-        case NETSNMP_USMAUTH_HMAC192SHA256:
-            auth_size = USM_HMAC192SHA256_AUTH_LEN;
-            break;
-#endif /* HAVE_EVP_SHA224 */
-
-#ifdef HAVE_EVP_SHA384
-        case NETSNMP_USMAUTH_HMAC256SHA384:
-            auth_size = USM_HMAC256SHA384_AUTH_LEN;
-            break;
-
-        case NETSNMP_USMAUTH_HMAC384SHA512:
-            auth_size = USM_HMAC384SHA512_AUTH_LEN;
-            break;
-#endif /* HAVE_EVP_SHA384 */
-
-
-        default:
-            auth_size = 0;
-    }
+    auth_size = sc_get_auth_maclen(auth_type);
     if (0 == auth_size || maclen != auth_size) {
         QUITFUN(SNMPERR_GENERR, sc_check_keyed_hash_quit);
     }
 
     /*
      * Generate a full hash of the message, then compare
-     * the result with the given MAC which may shorter than
+     * the result with the given MAC which may be shorter than
      * the full hash length.
      */
     rval = sc_generate_keyed_hash(authtypeOID, authtypeOIDlen, key, keylen,
