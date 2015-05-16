@@ -226,6 +226,9 @@ static unsigned long pop(nodelink **stack)
     unsigned long   value;
     nodelink       *top;
 
+    if (!*stack)
+        return 0;
+
     top = *stack;
     *stack = (*stack)->next;
     value = top->data;
@@ -308,10 +311,36 @@ static int operator_class(char c)
         return c_other;
 }
 
+static void eval(nodelink **operator, nodelink **operand, char new_op)
+{
+    unsigned long a, b, op, c;
+
+    DEBUGMSG(("expValueTable", "eval: operator %c; new_op %c\n",
+              *operator ? (*operator)->data : '?', new_op));
+
+    while (*operator != NULL &&
+           priority(new_op) <= priority((*operator)->data)) {
+        b = pop(operand);
+        op = pop(operator);
+        if (op) {
+            a = pop(operand);
+            c = calculate(op, a, b);
+            DEBUGMSG(("expValueTable", "eval: %ld %c %ld -> %ld\n", a, (char)op,
+                      b, c));
+            push(operand, c);
+        } else {
+            DEBUGMSG(("expValueTable", "eval: returning %ld\n", b));
+            push(operand, b);
+            break;
+        }
+    }
+
+}
+
 static unsigned long get_result(const char *expr)
 {
     int             position = 0;
-    unsigned long   op = 0, a = 0, b = 0, result = 0;
+    unsigned long   a, result = 0;
     const char     *expression;
     nodelink       *operator = NULL;
     nodelink       *operand = NULL;
@@ -324,24 +353,11 @@ static unsigned long get_result(const char *expr)
             push(&operand, get_operand(expression + position, &position));
             break;
         case c_binop:
-            if (operator != NULL)
-                while (operator != NULL
-                       && priority(*(expression + position)) <=
-                       priority(operator->data)) {
-                    a = pop(&operand);
-                    b = pop(&operand);
-                    op = pop(&operator);
-                    push(&operand, calculate(op, b, a));
-                }
+            eval(&operator, &operand, *(expression + position));
             push(&operator, *(expression + position));
             break;
         case c_rpar:
-            while (operator != NULL && operator->data != '(') {
-                a = pop(&operand);
-                b = pop(&operand);
-                op = pop(&operator);
-                push(&operand, calculate(op, b, a));
-            }
+            eval(&operator, &operand, ')');
             if (operator->data == '(')
                 pop(&operator);
             break;
@@ -363,13 +379,9 @@ static unsigned long get_result(const char *expr)
         }                       /* end switch */
         position++;
     }
-    while (operator != NULL) {
-        op = pop(&operator);
-        a = pop(&operand);
-        b = pop(&operand);
-        push(&operand, calculate(op, b, a));
-    }
+    eval(&operator, &operand, ')');
     result = pop(&operand);
+    DEBUGMSG(("expValueTable", "%s: %s -> %ld\n", __func__, expr, result));
     return result;
 }
 
