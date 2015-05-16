@@ -265,8 +265,8 @@ static unsigned long calculate(int operator, unsigned long a, unsigned long b)
         return (a * b);
     case '/':
         if (operator == '/' && b == 0) {
-            printf("\nDivision mustn\'t be 0!");
-            exit(0);
+            snmp_log(LOG_ERR, "Division by zero attempted\n");
+            return 0;
         } else
             return (a / b);
     }
@@ -375,7 +375,7 @@ static unsigned long get_result(const char *expr)
                     printf("<%c>", *(expression + (int) a));
                 a++;
             }
-            exit(0);
+            return 0;
         }                       /* end switch */
         position++;
     }
@@ -498,7 +498,7 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
 
             if (!ss) {
                 /* err */
-                exit(2);
+                return 0;
             }
             pdu = snmp_pdu_create(SNMP_MSG_GET);
             snmp_add_null_var(pdu, anOID, anOID_len);
@@ -683,7 +683,7 @@ static void build_valuetable(void)
             if (!ss) {
                 snmp_perror("ack");
                 snmp_log(LOG_ERR, "something horrible happened!!!\n");
-                exit(2);
+                return;
             }
 
             next_OID = targetOID;
