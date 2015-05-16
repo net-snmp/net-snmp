@@ -378,12 +378,9 @@ static unsigned long get_result(const char *expr)
 
 static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
 {
-
     struct header_complex_index *hcindex;
     struct expObjectTable_data *objstorage, *objfound;
-    struct expValueTable_data *valstorage;
-    valstorage = vtable_data;
-
+    struct expValueTable_data *const valstorage = vtable_data;
     const char     *expression;
     char           *result, *resultbak;
     char           *temp, *tempbak;
@@ -391,6 +388,7 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
     int             i = 0, j, k, l;
     long            value;
     unsigned long   result_u_long;
+
     temp = malloc(100);
     result = malloc(100);
     tempbak = temp;
@@ -399,6 +397,10 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
     resultbak = result;
 
     expression = vtable_data->expression_data->expExpression;
+
+    DEBUGMSGTL(("expValueTable", "%s(%s.%s): evaluating %s\n", __func__,
+                valstorage->expExpressionOwner, valstorage->expExpressionName,
+                expression));
 
     while (*expression != '\0') {
         if (*expression == '$') {
@@ -439,11 +441,20 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                 }
             }
 
-
             if (!objfound) {
-                /* have err */
+                snmp_log(LOG_ERR, "%s: lookup of expression %s.%s failed\n",
+                         __func__, valstorage->expExpressionOwner,
+                         valstorage->expExpressionName);
                 return 0;
             }
+
+            DEBUGMSGTL(("expValueTable", "%s: Found OID ", __func__));
+            DEBUGMSGOID(("expValueTable", objfound->expObjectID,
+                         objfound->expObjectIDLen));
+            DEBUGMSG(("expValueTable", "%s\n",
+                      objfound->expObjectIDWildcard ==
+                      EXPOBJCETIDWILDCARD_TRUE ? "(wildcard)" : ""));
+
             struct snmp_session *ss;
             struct snmp_pdu *pdu;
             struct snmp_pdu *response;
@@ -462,6 +473,7 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                        (valstorage->expValueInstanceLen -
                         2) * sizeof(oid));
             }
+
             struct variable_list *vars;
             int             status;
 
@@ -488,16 +500,24 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
             ss = snmp_open(&session);   /* establish the session */
 
             if (!ss) {
-                /* err */
+                snmp_log(LOG_ERR, "%s: failed to create an SNMP session\n",
+                         __func__);
                 return 0;
             }
             pdu = snmp_pdu_create(SNMP_MSG_GET);
             snmp_add_null_var(pdu, anOID, anOID_len);
 
+            DEBUGMSGTL(("expValueTable", "%s Querying OID ", __func__));
+            DEBUGMSGOID(("expValueTable", anOID, anOID_len));
+            DEBUGMSG(("expValueTable", "\n"));
+
             /*
              * Send the Request out.
              */
             status = snmp_synch_response(ss, pdu, &response);
+
+            DEBUGMSGTL(("expValueTable", "%s SNMP response status %d\n",
+                        __func__, status));
 
             /*
              * Process the response.
@@ -515,7 +535,6 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                     *result = intchar[k - 1];
                     result++;
                 }
-
             } else {
                 /*
                  * FAILURE: print what went wrong!
@@ -526,7 +545,6 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                             snmp_errstring(response->errstat));
                 else
                     snmp_sess_perror("snmpget", ss);
-
             }
 
             /*
@@ -547,6 +565,9 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
         }
     }
     result_u_long = get_result(resultbak);
+    DEBUGMSGTL(("expValueTable", "%s(%s.%s): evaluated %s into %ld\n", __func__,
+                valstorage->expExpressionOwner, valstorage->expExpressionName,
+                resultbak, result_u_long));
     free(tempbak);
     free(resultbak);
     return result_u_long;
@@ -778,8 +799,12 @@ static unsigned char *var_expValueTable(struct variable *vp, oid * name,
      */
     if ((StorageTmp =
          header_complex(expValueTableStorage, vp, name, length, exact,
-                        var_len, write_method)) == NULL)
+                        var_len, write_method)) == NULL) {
+        DEBUGMSGTL(("expValueTable", "%s: entry not found.\n", __func__));
         return NULL;
+    }
+
+    DEBUGMSGTL(("expValueTable", "%s: vp->magic = %d.\n", __func__, vp->magic));
 
 
     /*
