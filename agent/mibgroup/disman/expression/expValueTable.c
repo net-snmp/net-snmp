@@ -57,7 +57,7 @@
  *   variable below.
  */
 
-static oid expValueTable_variables_oid[] = {
+static const oid expValueTable_variables_oid[] = {
     1, 3, 6, 1, 2, 1, 90, 1, 3, 1
 };
 
@@ -72,7 +72,7 @@ static FindVarMethod var_expValueTable;
  * variable2 expObjectTable_variables:
  */
 
-static struct variable2 expValueTable_variables[] = {
+static const struct variable2 expValueTable_variables[] = {
     /*
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
@@ -143,8 +143,8 @@ init_expValueTable(void)
  */
 static int
 expValueTable_add(struct expExpressionTable_data *expression_data,
-                  char *owner, size_t owner_len, char *name,
-                  size_t name_len, oid * index, size_t index_len)
+                  const char *owner, size_t owner_len, const char *name,
+                  size_t name_len, oid *index, size_t index_len)
 {
     netsnmp_variable_list *vars = NULL;
     struct expValueTable_data *thedata, *StorageTmp;
@@ -167,8 +167,8 @@ expValueTable_add(struct expExpressionTable_data *expression_data,
      */
 
 
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->expExpressionOwner, thedata->expExpressionOwnerLen);     /* expExpressionOwner */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->expExpressionName, thedata->expExpressionNameLen);       /* expExpressionName */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (const char *) thedata->expExpressionOwner, thedata->expExpressionOwnerLen);     /* expExpressionOwner */
+    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (const char *) thedata->expExpressionName, thedata->expExpressionNameLen);       /* expExpressionName */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OBJECT_ID,
                               (u_char *) thedata->expValueInstance,
                               thedata->expValueInstanceLen * sizeof(oid));
@@ -270,7 +270,7 @@ static unsigned long calculate(int operator, unsigned long a, unsigned long b)
     return 0;
 }
 
-static unsigned long get_operand(char *p, int *length)
+static unsigned long get_operand(const char *p, int *length)
 {
     char            c[13];
     int             i = 0, k = 1;
@@ -308,11 +308,11 @@ static int operator_class(char c)
         return c_other;
 }
 
-static unsigned long get_result(char *expr)
+static unsigned long get_result(const char *expr)
 {
     int             position = 0;
     unsigned long   op = 0, a = 0, b = 0, result = 0;
-    char           *expression;
+    const char     *expression;
     nodelink       *operator = NULL;
     nodelink       *operand = NULL;
 
@@ -381,7 +381,7 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
     struct expValueTable_data *valstorage;
     valstorage = vtable_data;
 
-    char           *expression;
+    const char     *expression;
     char           *result, *resultbak;
     char           *temp, *tempbak;
     char            intchar[10];
@@ -562,7 +562,7 @@ static void build_valuetable(void)
     struct expExpressionTable_data *expstorage;
     struct expObjectTable_data *objstorage, *objfound = NULL;
     struct header_complex_index *hcindex, *object_hcindex;
-    char           *expression;
+    const char     *expression;
     oid            *index;
     int             i = 0, j, l;
 
