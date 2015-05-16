@@ -22,6 +22,7 @@
  * This should always be included first before anything else 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <ctype.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -274,7 +275,8 @@ static unsigned long get_operand(char *p, int *length)
     char            c[13];
     int             i = 0, k = 1;
     unsigned long   result = 0;
-    while (*p <= 57 && *p >= 48)
+
+    while (isdigit((unsigned char) *p))
         c[i++] = *(p++);
     *length += --i;
     for (; i >= 0; i--) {
@@ -284,17 +286,26 @@ static unsigned long get_operand(char *p, int *length)
     return result;
 }
 
+enum operator_class {
+    c_other	= 0,
+    c_digit	= 1,
+    c_binop	= 2,
+    c_rpar	= 3,
+    c_lpar	= 4,
+};
+
 static int operator_class(char c)
 {
-    if (c <= 57 && c >= 48)
-        return 1;
-    if (c == 42 || c == 43 || c == 45 || c == 47)
-        return 2;
-    if (c == 41)
-        return 3;
-    if (c == 40)
-        return 4;
-    return 0;
+    if (isdigit((unsigned char) c))
+        return c_digit;
+    else if (c == '*' || c == '+' || c == '-' || c == '/')
+        return c_binop;
+    else if (c == ')')
+        return c_rpar;
+    else if (c == '(')
+        return c_lpar;
+    else
+        return c_other;
 }
 
 static unsigned long get_result(char *expr)
@@ -309,10 +320,10 @@ static unsigned long get_result(char *expr)
     while (*(expression + position) != '\0'
            && *(expression + position) != '\n') {
         switch (operator_class(*(expression + position))) {
-        case 1:
+        case c_digit:
             push(&operand, get_operand(expression + position, &position));
             break;
-        case 2:
+        case c_binop:
             if (operator != NULL)
                 while (operator != NULL
                        && priority(*(expression + position)) <=
@@ -324,7 +335,7 @@ static unsigned long get_result(char *expr)
                 }
             push(&operator, *(expression + position));
             break;
-        case 3:
+        case c_rpar:
             while (operator != NULL && operator->data != '(') {
                 a = pop(&operand);
                 b = pop(&operand);
@@ -334,7 +345,7 @@ static unsigned long get_result(char *expr)
             if (operator->data == '(')
                 pop(&operator);
             break;
-        case 4:
+        case c_lpar:
             push(&operator, '(');
             break;
         default:
