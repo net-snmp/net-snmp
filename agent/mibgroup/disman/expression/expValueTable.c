@@ -66,8 +66,6 @@ struct s_node {
 };
 typedef struct s_node nodelink;
 static FindVarMethod var_expValueTable;
-nodelink           *operator = NULL;
-nodelink           *operand = NULL;
 
 /*
  * variable2 expObjectTable_variables:
@@ -304,6 +302,9 @@ static unsigned long get_result(char *expr)
     int             position = 0;
     unsigned long   op = 0, a = 0, b = 0, result = 0;
     char           *expression;
+    nodelink       *operator = NULL;
+    nodelink       *operand = NULL;
+
     expression = expr;
     while (*(expression + position) != '\0'
            && *(expression + position) != '\n') {
