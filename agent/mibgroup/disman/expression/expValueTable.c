@@ -170,7 +170,8 @@ expValueTable_add(struct expExpressionTable_data *expression_data,
     netsnmp_variable_list *vars = NULL;
     struct expValueTable_data *thedata, *StorageTmp;
     struct header_complex_index *hcindex;
-    int             founded = 0;
+    int             found = 0;
+
     thedata = create_expValueTable_data();
     thedata->expValueCounter32Val = 0;
     thedata->expExpressionOwner = owner;
@@ -208,12 +209,12 @@ expValueTable_add(struct expExpressionTable_data *expression_data,
                                  StorageTmp->expValueInstanceLen,
                                  thedata->expValueInstance,
                                  thedata->expValueInstanceLen)) {
-            founded = 1;
+            found = 1;
             break;
         }
 
     }
-    if (!founded) {
+    if (!found) {
         header_complex_add_data(&expValueTableStorage, vars, thedata);
         DEBUGMSGTL(("expValueTable", "registered an entry\n"));
     } else {
