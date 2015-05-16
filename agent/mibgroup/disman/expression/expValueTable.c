@@ -388,26 +388,13 @@ Evaluate_Expression(struct expValueTable_data *vtable_data)
     return result_u_long;
 }
 
-
-
-
-
-
-
-
-void
-expValueTable_clean(void *data)
+static void expValueTable_clean(void *data)
 {
-    struct expValueTable_data *cleanme =
-        (struct expValueTable_data *) data;
+    struct expValueTable_data *cleanme = data;
+
     SNMP_FREE(cleanme->expValueInstance);
-    SNMP_FREE(cleanme->expValueIpAddressVal);
-    SNMP_FREE(cleanme->expValueOctetStringVal);
-    SNMP_FREE(cleanme->expValueOidVal);
     SNMP_FREE(cleanme);
 }
-
-
 
 void
 build_valuetable(void)
