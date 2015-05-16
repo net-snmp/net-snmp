@@ -137,28 +137,6 @@ init_expValueTable(void)
     DEBUGMSGTL(("expValueTable", "done.\n"));
 }
 
-struct expValueTable_data *
-create_expValueTable_data(void)
-{
-    struct expValueTable_data *StorageNew;
-
-    StorageNew = SNMP_MALLOC_STRUCT(expValueTable_data);
-
-    /*
-     * fill in default row values here into StorageNew 
-     */
-    /*
-     * fill in values for all tables (even if not
-     * appropriate), since its easier to do here than anywhere
-     * else 
-     */
-    StorageNew->expExpressionOwner = strdup("");
-    StorageNew->expExpressionName = strdup("");
-    StorageNew->expValueInstance = calloc(1, sizeof(oid) * sizeof(2));  /* 0.0.0 */
-    StorageNew->expValueInstanceLen = 3;
-    return StorageNew;
-}
-
 /*
  * mteTriggerTable_add(): adds a structure node to our data set 
  */
@@ -172,7 +150,7 @@ expValueTable_add(struct expExpressionTable_data *expression_data,
     struct header_complex_index *hcindex;
     int             found = 0;
 
-    thedata = create_expValueTable_data();
+    thedata = calloc(1, sizeof(*thedata));
     thedata->expValueCounter32Val = 0;
     thedata->expExpressionOwner = owner;
     thedata->expExpressionOwnerLen = owner_len;
@@ -218,6 +196,7 @@ expValueTable_add(struct expExpressionTable_data *expression_data,
         header_complex_add_data(&expValueTableStorage, vars, thedata);
         DEBUGMSGTL(("expValueTable", "registered an entry\n"));
     } else {
+        SNMP_FREE(index);
         SNMP_FREE(thedata);
         DEBUGMSGTL(("expValueTable",
                     "already have an entry, dont registe\n"));
