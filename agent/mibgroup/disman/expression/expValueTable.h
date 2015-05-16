@@ -45,6 +45,7 @@ config_require(header_complex)
          /* internal var */
          struct expExpressionTable_data *expression_data;
          char           *valuestr;
+         int             set;
      };
 
 

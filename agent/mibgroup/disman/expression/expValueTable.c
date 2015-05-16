@@ -138,73 +138,64 @@ init_expValueTable(void)
     DEBUGMSGTL(("expValueTable", "done.\n"));
 }
 
-/*
- * mteTriggerTable_add(): adds a structure node to our data set 
- */
 static int
-expValueTable_add(struct expExpressionTable_data *expression_data,
+expValueTable_set(struct expExpressionTable_data *expression_data,
                   const char *owner, size_t owner_len, const char *name,
                   size_t name_len, oid *index, size_t index_len)
 {
     netsnmp_variable_list *vars = NULL;
-    struct expValueTable_data *thedata, *StorageTmp;
+    struct expValueTable_data *thedata;
     struct header_complex_index *hcindex;
     int             found = 0;
 
-    thedata = calloc(1, sizeof(*thedata));
-    thedata->expValueCounter32Val = 0;
-    thedata->expExpressionOwner = owner;
-    thedata->expExpressionOwnerLen = owner_len;
-    thedata->expExpressionName = name;
-    thedata->expExpressionNameLen = name_len;
-    thedata->expValueInstance = index;
-    thedata->expValueInstanceLen = index_len;
-    thedata->expression_data = expression_data;
-    DEBUGMSGTL(("expValueTable", "adding data...  "));
-    /*
-     * add the index variables to the varbind list, which is 
-     * used by header_complex to index the data 
-     */
-
-
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (const char *) thedata->expExpressionOwner, thedata->expExpressionOwnerLen);     /* expExpressionOwner */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (const char *) thedata->expExpressionName, thedata->expExpressionNameLen);       /* expExpressionName */
-    snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OBJECT_ID,
-                              (u_char *) thedata->expValueInstance,
-                              thedata->expValueInstanceLen * sizeof(oid));
-
-    for (hcindex = expValueTableStorage; hcindex != NULL;
-         hcindex = hcindex->next) {
-        StorageTmp = (struct expValueTable_data *) hcindex->data;
-        if (!strcmp
-            (StorageTmp->expExpressionOwner, thedata->expExpressionOwner)
-            && (StorageTmp->expExpressionOwnerLen ==
-                thedata->expExpressionOwnerLen)
-            && !strcmp(StorageTmp->expExpressionName,
-                       thedata->expExpressionName)
-            && (StorageTmp->expExpressionNameLen ==
-                thedata->expExpressionNameLen)
-            && !snmp_oid_compare(StorageTmp->expValueInstance,
-                                 StorageTmp->expValueInstanceLen,
-                                 thedata->expValueInstance,
-                                 thedata->expValueInstanceLen)) {
+    for (hcindex = expValueTableStorage; hcindex; hcindex = hcindex->next) {
+        thedata = hcindex->data;
+        if (strcmp(thedata->expExpressionOwner, owner) == 0 &&
+            thedata->expExpressionOwnerLen == owner_len &&
+            strcmp(thedata->expExpressionName, name) == 0 &&
+            thedata->expExpressionNameLen == name_len) {
             found = 1;
             break;
         }
 
     }
-    if (!found) {
+
+    if (found) {
+        if (snmp_oid_compare(thedata->expValueInstance,
+                             thedata->expValueInstanceLen, index,
+                             index_len) != 0) {
+            SNMP_FREE(thedata->expValueInstance);
+            thedata->expValueInstance = netsnmp_memdup(index, index_len);
+            thedata->expValueInstanceLen = index_len;
+        } else {
+            SNMP_FREE(index);
+        }
+    } else if ((thedata = calloc(1, sizeof(*thedata)))) {
+        thedata->expExpressionOwner = owner;
+        thedata->expExpressionOwnerLen = owner_len;
+        thedata->expExpressionName = name;
+        thedata->expExpressionNameLen = name_len;
+        thedata->expValueInstance = index;
+        thedata->expValueInstanceLen = index_len;
+        thedata->expression_data = expression_data;
+
+        snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                                  (const char *) thedata->expExpressionOwner,
+                                  thedata->expExpressionOwnerLen);
+        snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
+                                  (const char *) thedata->expExpressionName,
+                                  thedata->expExpressionNameLen);
+        snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OBJECT_ID,
+                                  (u_char *) thedata->expValueInstance,
+                                  thedata->expValueInstanceLen * sizeof(oid));
+
         header_complex_add_data(&expValueTableStorage, vars, thedata);
-        DEBUGMSGTL(("expValueTable", "registered an entry\n"));
     } else {
-        SNMP_FREE(index);
-        SNMP_FREE(thedata);
-        DEBUGMSGTL(("expValueTable",
-                    "already have an entry, dont registe\n"));
+        return SNMPERR_GENERR;
     }
 
+    thedata->set = 1;
 
-    DEBUGMSGTL(("expValueTable", "done.\n"));
     return SNMPERR_SUCCESS;
 }
 
@@ -644,7 +635,7 @@ static void build_valuetable(void)
             *index = 0;
             *(index + 1) = 0;
             *(index + 2) = 0;
-            expValueTable_add(expstorage, objfound->expExpressionOwner,
+            expValueTable_set(expstorage, objfound->expExpressionOwner,
                               objfound->expExpressionOwnerLen,
                               objfound->expExpressionName,
                               objfound->expExpressionNameLen, index, 3);
@@ -723,7 +714,7 @@ static void build_valuetable(void)
                            response->variables->name + taggetOID_len,
                            (response->variables->name_length -
                             taggetOID_len) * sizeof(oid));
-                    expValueTable_add(expstorage,
+                    expValueTable_set(expstorage,
                                       objfound->expExpressionOwner,
                                       objfound->expExpressionOwnerLen,
                                       objfound->expExpressionName,
@@ -766,13 +757,21 @@ static unsigned char *var_expValueTable(struct variable *vp, oid * name,
 
     DEBUGMSGTL(("expValueTable", "var_expValueTable: Entering...  \n"));
 
-    /*
-     *  before we build valuetable we must free any other valutable if exist
-     */
-    header_complex_free_all(expValueTableStorage, expValueTable_clean);
-    expValueTableStorage = NULL;
+    struct header_complex_index *hciptr, *hciptrn;
+
+    for (hciptr = expValueTableStorage; hciptr; hciptr = hciptr->next) {
+        StorageTmp = hciptr->data;
+        StorageTmp->set = 0;
+    }
 
     build_valuetable();
+
+    for (hciptr = expValueTableStorage; hciptr; hciptr = hciptrn) {
+        hciptrn = hciptr->next;
+        StorageTmp = hciptr->data;
+        if (!StorageTmp->set)
+            header_complex_free_entry(hciptr, expValueTable_clean);
+    }
 
     /*
      * this assumes you have registered all your data properly
