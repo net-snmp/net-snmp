@@ -56,14 +56,16 @@
  *   variable below.
  */
 
-oid             expValueTable_variables_oid[] =
-    { 1, 3, 6, 1, 2, 1, 90, 1, 3, 1 };
+static oid expValueTable_variables_oid[] = {
+    1, 3, 6, 1, 2, 1, 90, 1, 3, 1
+};
 
 struct s_node {
     unsigned        data;
     struct s_node  *next;
 };
 typedef struct s_node nodelink;
+static FindVarMethod var_expValueTable;
 nodelink           *operator = NULL;
 nodelink           *operand = NULL;
 
@@ -71,7 +73,7 @@ nodelink           *operand = NULL;
  * variable2 expObjectTable_variables:
  */
 
-struct variable2 expValueTable_variables[] = {
+static struct variable2 expValueTable_variables[] = {
     /*
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
@@ -107,8 +109,8 @@ struct variable2 expValueTable_variables[] = {
  */
 extern struct header_complex_index *expExpressionTableStorage;
 extern struct header_complex_index *expObjectTableStorage;
-struct header_complex_index *expValueTableStorage = NULL;
-struct snmp_session session;
+static struct header_complex_index *expValueTableStorage = NULL;
+static struct snmp_session session;
 
 /*
  * init_expValueTable():
@@ -140,7 +142,7 @@ init_expValueTable(void)
 /*
  * mteTriggerTable_add(): adds a structure node to our data set 
  */
-int
+static int
 expValueTable_add(struct expExpressionTable_data *expression_data,
                   char *owner, size_t owner_len, char *name,
                   size_t name_len, oid * index, size_t index_len)
@@ -207,12 +209,159 @@ expValueTable_add(struct expExpressionTable_data *expression_data,
     return SNMPERR_SUCCESS;
 }
 
+static void push(nodelink ** stack, unsigned long value)
+{
+    nodelink           *newnode;
+    newnode = (nodelink *) malloc(sizeof(nodelink));
+    if (!newnode) {
+        printf("\nMemory allocation failure!");
+        return;
+    }
+    newnode->data = value;
+    newnode->next = *stack;
+    *stack = newnode;
+}
 
+static unsigned long pop(nodelink **stack)
+{
+    unsigned long   value;
+    nodelink       *top;
 
+    top = *stack;
+    *stack = (*stack)->next;
+    value = top->data;
+    free(top);
+    return value;
+}
 
+static int priority(char operator)
+{
+    switch (operator) {
+    case '*':
+    case '/':
+        return 4;
+    case '+':
+    case '-':
+        return 3;
+    case ')':
+        return 2;
+    case '(':
+        return 1;
+    default:
+        return 0;
+    }
+}
 
-unsigned long
-Evaluate_Expression(struct expValueTable_data *vtable_data)
+static unsigned long calculate(int operator, unsigned long a, unsigned long b)
+{
+    switch (operator) {
+    case '+':
+        return (a + b);
+    case '-':
+        return (a - b);
+    case '*':
+        return (a * b);
+    case '/':
+        if (operator == '/' && b == 0) {
+            printf("\nDivision mustn\'t be 0!");
+            exit(0);
+        } else
+            return (a / b);
+    }
+    return 0;
+}
+
+static unsigned long get_operand(char *p, int *length)
+{
+    char            c[13];
+    int             i = 0, k = 1;
+    unsigned long   result = 0;
+    while (*p <= 57 && *p >= 48)
+        c[i++] = *(p++);
+    *length += --i;
+    for (; i >= 0; i--) {
+        result += (c[i] - 48) * k;
+        k *= 10;
+    }
+    return result;
+}
+
+static int operator_class(char c)
+{
+    if (c <= 57 && c >= 48)
+        return 1;
+    if (c == 42 || c == 43 || c == 45 || c == 47)
+        return 2;
+    if (c == 41)
+        return 3;
+    if (c == 40)
+        return 4;
+    return 0;
+}
+
+static unsigned long get_result(char *expr)
+{
+    int             position = 0;
+    unsigned long   op = 0, a = 0, b = 0, result = 0;
+    char           *expression;
+    expression = expr;
+    while (*(expression + position) != '\0'
+           && *(expression + position) != '\n') {
+        switch (operator_class(*(expression + position))) {
+        case 1:
+            push(&operand, get_operand(expression + position, &position));
+            break;
+        case 2:
+            if (operator != NULL)
+                while (operator != NULL
+                       && priority(*(expression + position)) <=
+                       priority(operator->data)) {
+                    a = pop(&operand);
+                    b = pop(&operand);
+                    op = pop(&operator);
+                    push(&operand, calculate(op, b, a));
+                }
+            push(&operator, *(expression + position));
+            break;
+        case 3:
+            while (operator != NULL && operator->data != '(') {
+                a = pop(&operand);
+                b = pop(&operand);
+                op = pop(&operator);
+                push(&operand, calculate(op, b, a));
+            }
+            if (operator->data == '(')
+                pop(&operator);
+            break;
+        case 4:
+            push(&operator, '(');
+            break;
+        default:
+            printf("\nInvalid character in expression:");
+            a = 0;
+            while (*(expression + (int) a) != '\n'
+                   && *(expression + (int) a) != '\0') {
+                if (a != position)
+                    printf("%c", *(expression + (int) a));
+                else
+                    printf("<%c>", *(expression + (int) a));
+                a++;
+            }
+            exit(0);
+        }                       /* end switch */
+        position++;
+    }
+    while (operator != NULL) {
+        op = pop(&operator);
+        a = pop(&operand);
+        b = pop(&operand);
+        push(&operand, calculate(op, b, a));
+    }
+    result = pop(&operand);
+    return result;
+}
+
+static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
 {
 
     struct header_complex_index *hcindex;
@@ -396,8 +545,7 @@ static void expValueTable_clean(void *data)
     SNMP_FREE(cleanme);
 }
 
-void
-build_valuetable(void)
+static void build_valuetable(void)
 {
     struct expExpressionTable_data *expstorage;
     struct expObjectTable_data *objstorage, *objfound = NULL;
@@ -585,22 +733,12 @@ build_valuetable(void)
 
 }
 
-
-
-/*
- * var_expValueTable():
- */
-unsigned char  *
-var_expValueTable(struct variable *vp,
-                  oid * name,
-                  size_t *length,
-                  int exact, size_t *var_len, WriteMethod ** write_method)
+static unsigned char *var_expValueTable(struct variable *vp, oid * name,
+                                        size_t *length, int exact,
+                                        size_t *var_len,
+                                        WriteMethod ** write_method)
 {
-
     struct expValueTable_data *StorageTmp = NULL;
-
-
-
 
     DEBUGMSGTL(("expValueTable", "var_expValueTable: Entering...  \n"));
 
@@ -610,9 +748,7 @@ var_expValueTable(struct variable *vp,
     header_complex_free_all(expValueTableStorage, expValueTable_clean);
     expValueTableStorage = NULL;
 
-
     build_valuetable();
-
 
     /*
      * this assumes you have registered all your data properly
@@ -674,166 +810,4 @@ var_expValueTable(struct variable *vp,
         ERROR_MSG("");
 	return NULL;
     }
-}
-
-
-
-
-
-void
-push(nodelink ** stack, unsigned long value)
-{
-    nodelink           *newnode;
-    newnode = (nodelink *) malloc(sizeof(nodelink));
-    if (!newnode) {
-        printf("\nMemory allocation failure!");
-        return;
-    }
-    newnode->data = value;
-    newnode->next = *stack;
-    *stack = newnode;
-}
-
-unsigned long
-pop(nodelink ** stack)
-{
-    unsigned long   value;
-    nodelink           *top;
-    top = *stack;
-    *stack = (*stack)->next;
-    value = top->data;
-    free(top);
-    return value;
-}
-
-int
-priority(char operator)
-{
-    switch (operator) {
-    case '*':
-    case '/':
-        return 4;
-    case '+':
-    case '-':
-        return 3;
-    case ')':
-        return 2;
-    case '(':
-        return 1;
-    default:
-        return 0;
-    }
-}
-
-unsigned long
-calculate(int operator, unsigned long a, unsigned long b)
-{
-    switch (operator) {
-    case '+':
-        return (a + b);
-    case '-':
-        return (a - b);
-    case '*':
-        return (a * b);
-    case '/':
-        if (operator == '/' && b == 0) {
-            printf("\nDivision mustn\'t be 0!");
-            exit(0);
-        } else
-            return (a / b);
-    }
-    return 0;
-}
-
-unsigned long
-get_operand(char *p, int *length)
-{
-    char            c[13];
-    int             i = 0, k = 1;
-    unsigned long   result = 0;
-    while (*p <= 57 && *p >= 48)
-        c[i++] = *(p++);
-    *length += --i;
-    for (; i >= 0; i--) {
-        result += (c[i] - 48) * k;
-        k *= 10;
-    }
-    return result;
-}
-
-int
-operator_class(char c)
-{
-    if (c <= 57 && c >= 48)
-        return 1;
-    if (c == 42 || c == 43 || c == 45 || c == 47)
-        return 2;
-    if (c == 41)
-        return 3;
-    if (c == 40)
-        return 4;
-    return 0;
-}
-
-unsigned long
-get_result(char *expr)
-{
-    int             position = 0;
-    unsigned long   op = 0, a = 0, b = 0, result = 0;
-    char           *expression;
-    expression = expr;
-    while (*(expression + position) != '\0'
-           && *(expression + position) != '\n') {
-        switch (operator_class(*(expression + position))) {
-        case 1:
-            push(&operand, get_operand(expression + position, &position));
-            break;
-        case 2:
-            if (operator != NULL)
-                while (operator != NULL
-                       && priority(*(expression + position)) <=
-                       priority(operator->data)) {
-                    a = pop(&operand);
-                    b = pop(&operand);
-                    op = pop(&operator);
-                    push(&operand, calculate(op, b, a));
-                }
-            push(&operator, *(expression + position));
-            break;
-        case 3:
-            while (operator != NULL && operator->data != '(') {
-                a = pop(&operand);
-                b = pop(&operand);
-                op = pop(&operator);
-                push(&operand, calculate(op, b, a));
-            }
-            if (operator->data == '(')
-                pop(&operator);
-            break;
-        case 4:
-            push(&operator, '(');
-            break;
-        default:
-            printf("\nInvalid character in expression:");
-            a = 0;
-            while (*(expression + (int) a) != '\n'
-                   && *(expression + (int) a) != '\0') {
-                if (a != position)
-                    printf("%c", *(expression + (int) a));
-                else
-                    printf("<%c>", *(expression + (int) a));
-                a++;
-            }
-            exit(0);
-        }                       /* end switch */
-        position++;
-    }
-    while (operator != NULL) {
-        op = pop(&operator);
-        a = pop(&operand);
-        b = pop(&operand);
-        push(&operand, calculate(op, b, a));
-    }
-    result = pop(&operand);
-    return result;
 }

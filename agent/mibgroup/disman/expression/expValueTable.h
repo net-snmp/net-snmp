@@ -52,12 +52,5 @@ config_require(header_complex)
      * function prototypes 
      */
      void            init_expValueTable(void);
-     unsigned long   get_result(char *expr);
-     FindVarMethod   var_expValueTable;
-     int             expValueTable_add(struct expExpressionTable_data
-                                       *expression_data, char *owner,
-                                       size_t owner_len, char *name,
-                                       size_t name_len, oid * index,
-                                       size_t index_len);
 
 #endif                          /* _MIBGROUP_EXPVALUETABLE_H */
