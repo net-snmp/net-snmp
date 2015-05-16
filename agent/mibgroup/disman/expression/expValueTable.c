@@ -64,7 +64,7 @@ struct s_node {
     struct s_node  *next;
 };
 typedef struct s_node nodelink;
-nodelink           *operater = NULL;
+nodelink           *operator = NULL;
 nodelink           *operand = NULL;
 
 /*
@@ -740,9 +740,9 @@ pop(nodelink ** stack)
 }
 
 int
-priority(char operater)
+priority(char operator)
 {
-    switch (operater) {
+    switch (operator) {
     case '*':
     case '/':
         return 4;
@@ -759,9 +759,9 @@ priority(char operater)
 }
 
 unsigned long
-calculate(int operater, unsigned long a, unsigned long b)
+calculate(int operator, unsigned long a, unsigned long b)
 {
-    switch (operater) {
+    switch (operator) {
     case '+':
         return (a + b);
     case '-':
@@ -769,7 +769,7 @@ calculate(int operater, unsigned long a, unsigned long b)
     case '*':
         return (a * b);
     case '/':
-        if (operater == '/' && b == 0) {
+        if (operator == '/' && b == 0) {
             printf("\nDivision mustn\'t be 0!");
             exit(0);
         } else
@@ -822,29 +822,29 @@ get_result(char *expr)
             push(&operand, get_operand(expression + position, &position));
             break;
         case 2:
-            if (operater != NULL)
-                while (operater != NULL
+            if (operator != NULL)
+                while (operator != NULL
                        && priority(*(expression + position)) <=
-                       priority(operater->data)) {
+                       priority(operator->data)) {
                     a = pop(&operand);
                     b = pop(&operand);
-                    op = pop(&operater);
+                    op = pop(&operator);
                     push(&operand, calculate(op, b, a));
                 }
-            push(&operater, *(expression + position));
+            push(&operator, *(expression + position));
             break;
         case 3:
-            while (operater != NULL && operater->data != '(') {
+            while (operator != NULL && operator->data != '(') {
                 a = pop(&operand);
                 b = pop(&operand);
-                op = pop(&operater);
+                op = pop(&operator);
                 push(&operand, calculate(op, b, a));
             }
-            if (operater->data == '(')
-                pop(&operater);
+            if (operator->data == '(')
+                pop(&operator);
             break;
         case 4:
-            push(&operater, '(');
+            push(&operator, '(');
             break;
         default:
             printf("\nInvalid character in expression:");
@@ -861,8 +861,8 @@ get_result(char *expr)
         }                       /* end switch */
         position++;
     }
-    while (operater != NULL) {
-        op = pop(&operater);
+    while (operator != NULL) {
+        op = pop(&operator);
         a = pop(&operand);
         b = pop(&operand);
         push(&operand, calculate(op, b, a));
