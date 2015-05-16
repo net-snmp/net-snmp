@@ -1374,7 +1374,7 @@ write_expObjectEntryStatus(int action,
          */
 
 
-        if (StorageTmp == NULL) {
+        if (StorageTmp == NULL && set_value != RS_DESTROY) {
             /*
              * row creation, so add it 
              */
@@ -1383,7 +1383,7 @@ write_expObjectEntryStatus(int action,
             /*
              * XXX: ack, and if it is NULL? 
              */
-        } else if (set_value != RS_DESTROY) {
+        } else if (StorageTmp != NULL && set_value != RS_DESTROY) {
             /*
              * set the flag? 
              */
