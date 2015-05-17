@@ -1032,7 +1032,7 @@ write_expExpressionEntryStatus(int action,
          */
 
 
-        if (StorageTmp == NULL) {
+        if (StorageTmp == NULL && set_value != RS_DESTROY) {
             /*
              * row creation, so add it 
              */
@@ -1041,7 +1041,7 @@ write_expExpressionEntryStatus(int action,
             /*
              * XXX: ack, and if it is NULL? 
              */
-        } else if (set_value != RS_DESTROY) {
+        } else if (StorageTmp && set_value != RS_DESTROY) {
             /*
              * set the flag? 
              */

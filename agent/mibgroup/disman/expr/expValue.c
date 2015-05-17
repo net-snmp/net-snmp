@@ -376,7 +376,7 @@ _expValue_evalExpr(  netsnmp_variable_list *expIdx,
                                       suffix, suffix_len );
             if ( var && var->type == ASN_NULL ) {
                 /* Adjust position of failure */
-                var->data = (void *)(cp1 - exprRaw + (int)var->data);
+                var->data = (void *)(cp1 - exprRaw + (uintptr_t)var->data);
                 return var;
             } else if (*cp2 != ')') {
                 snmp_free_var(exprAlDente);
@@ -814,7 +814,7 @@ _expValue_setError( struct expExpression *exp, int reason,
         return;
     exp->expErrorCount++;
  /* exp->expErrorTime  = NOW; */
-    exp->expErrorIndex = ( var && var->data ? (int)var->data : 0 );
+    exp->expErrorIndex = ( var && var->data ? (uintptr_t)var->data : 0 );
     exp->expErrorCode  = reason;
     memset( exp->expErrorInstance, 0, sizeof(exp->expErrorInstance));
     memcpy( exp->expErrorInstance, suffix, suffix_len * sizeof(oid));
