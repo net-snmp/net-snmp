@@ -384,9 +384,7 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
     const char     *expression;
     char           *result, *resultbak;
     char           *temp, *tempbak;
-    char            intchar[10];
-    int             i = 0, j, k, l;
-    long            value;
+    int             i = 0, j, l;
     unsigned long   result_u_long;
 
     temp = malloc(100);
@@ -529,12 +527,8 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                  */
 
                 vars = response->variables;
-                value = *(vars->val.integer);
-                sprintf(intchar, "%lu", value);
-                for (k = 1; k <= strlen(intchar); k++) {
-                    *result = intchar[k - 1];
-                    result++;
-                }
+                sprintf(result, "%lu", *(vars->val.integer));
+                result += strlen(result);
             } else {
                 /*
                  * FAILURE: print what went wrong!
@@ -559,9 +553,7 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
             SOCK_CLEANUP;
 
         } else {
-            *result = *expression;
-            result++;
-            expression++;
+            *result++ = *expression++;
         }
     }
     result_u_long = get_result(resultbak);
