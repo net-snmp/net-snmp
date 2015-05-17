@@ -447,7 +447,8 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
     char           *result, *resultbak;
     char           *temp, *tempbak;
     int             i = 0, j, l;
-    unsigned long   result_u_long;
+    unsigned long   result_u_long = 0;
+    static int      level;
 
     temp = malloc(100);
     result = malloc(100);
@@ -455,6 +456,13 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
     memset(result, 0, 100);
     *result = '\0';
     resultbak = result;
+
+    level++;
+
+    if (level > 1) {
+        snmp_log(LOG_ERR, "%s: detected recursion\n", __func__);
+        goto out;
+    }
 
     expression = vtable_data->expression_data->expExpression;
 
@@ -505,7 +513,7 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                 snmp_log(LOG_ERR, "%s: lookup of expression %s.%s failed\n",
                          __func__, valstorage->expExpressionOwner,
                          valstorage->expExpressionName);
-                return 0;
+                goto out;
             }
 
             DEBUGMSGTL(("expValueTable", "%s: Found OID ", __func__));
@@ -550,8 +558,11 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
     DEBUGMSGTL(("expValueTable", "%s(%s.%s): evaluated %s into %ld\n", __func__,
                 valstorage->expExpressionOwner, valstorage->expExpressionName,
                 resultbak, result_u_long));
+
+out:
     free(tempbak);
     free(resultbak);
+    level--;
     return result_u_long;
 }
 
