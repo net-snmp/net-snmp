@@ -376,6 +376,80 @@ static unsigned long get_result(const char *expr)
     return result;
 }
 
+static int iquery(struct variable_list **vars, char *secName, int snmp_version,
+                  const oid *name, int name_len)
+{
+    struct snmp_session *ss;
+    struct snmp_pdu *pdu;
+    struct snmp_pdu *response;
+    struct variable_list *v;
+    int status, rc = SNMP_ERR_GENERR;
+
+    session.version = snmp_version;
+    session.community = (u_char *)secName;
+    session.community_len = strlen(secName);
+    ss = snmp_open(&session);
+    if (!ss) {
+        snmp_log(LOG_ERR, "%s: failed to create an SNMP session\n", __func__);
+        goto out;
+    }
+
+    ss->retries = 0;
+
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+    if (!pdu) {
+        snmp_log(LOG_ERR, "%s: failed to create an SNMP PDU\n", __func__);
+        goto close_session;
+    }
+
+    if (snmp_add_null_var(pdu, name, name_len) == NULL) {
+        snmp_log(LOG_ERR, "%s: appending a variable to a PDU failed\n",
+                 __func__);
+        goto free_pdu;
+    }
+
+    DEBUGMSGTL(("expValueTable", "%s: querying OID ", __func__));
+    DEBUGMSGOID(("expValueTable", name, name_len));
+    DEBUGMSG(("expValueTable", "\n"));
+
+    status = snmp_synch_response(ss, pdu, &response);
+
+    DEBUGMSGTL(("expValueTable", "%s: SNMP response status %d; rc %ld\n",
+                __func__, status, response ? response->errstat : -1));
+
+    if (status != STAT_SUCCESS)
+        goto free_pdu;
+
+    rc = response->errstat;
+    *vars = snmp_clone_varbind(response->variables);
+    if (*vars == NULL)
+        goto free_response;
+
+    for (v = *vars; v; v = v->next_variable) {
+        DEBUGMSGTL(("expValueTable", "%s: response variable type %d; oid ",
+                    __func__, v->type));
+        DEBUGMSGOID(("expValueTable", v->name, v->name_length));
+        if (v->type == ASN_INTEGER)
+            DEBUGMSG(("expValueTable", "; value %ld\n", *v->val.integer));
+        DEBUGMSG(("expValueTable", "\n"));
+    }
+
+    rc = SNMPERR_SUCCESS;
+
+free_response:
+    if (response)
+        snmp_free_pdu(response);
+
+free_pdu:
+    /* if (pdu) snmp_free_pdu(pdu); -- triggers a use-after-free */
+
+close_session:
+    snmp_close(ss);
+
+out:
+    return rc;
+}
+
 static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
 {
     struct header_complex_index *hcindex;
@@ -453,10 +527,6 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                       objfound->expObjectIDWildcard ==
                       EXPOBJCETIDWILDCARD_TRUE ? "(wildcard)" : ""));
 
-            struct snmp_session *ss;
-            struct snmp_pdu *pdu;
-            struct snmp_pdu *response;
-
             oid             anOID[MAX_OID_LEN];
             size_t          anOID_len;
 
@@ -473,85 +543,17 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
             }
 
             struct variable_list *vars;
-            int             status;
+            int             rc;
 
-            /*
-             * Initialize the SNMP library
-             */
-
-            /*
-             * Initialize a "session" that defines who we're going to talk to
-             */
-            session.version = vtable_data->expression_data->pdu_version;
-
-            /*
-             * set the SNMPv1 community name used for authentication 
-             */
-            session.community =
-                vtable_data->expression_data->pdu_community;
-            session.community_len =
-                vtable_data->expression_data->pdu_community_len;
-            /*
-             * Open the session
-             */
-            SOCK_STARTUP;
-            ss = snmp_open(&session);   /* establish the session */
-
-            if (!ss) {
-                snmp_log(LOG_ERR, "%s: failed to create an SNMP session\n",
-                         __func__);
-                return 0;
-            }
-            pdu = snmp_pdu_create(SNMP_MSG_GET);
-            snmp_add_null_var(pdu, anOID, anOID_len);
-
-            DEBUGMSGTL(("expValueTable", "%s Querying OID ", __func__));
-            DEBUGMSGOID(("expValueTable", anOID, anOID_len));
-            DEBUGMSG(("expValueTable", "\n"));
-
-            /*
-             * Send the Request out.
-             */
-            status = snmp_synch_response(ss, pdu, &response);
-
-            DEBUGMSGTL(("expValueTable", "%s SNMP response status %d\n",
-                        __func__, status));
-
-            /*
-             * Process the response.
-             */
-            if (status == STAT_SUCCESS
-                && response->errstat == SNMP_ERR_NOERROR) {
-                /*
-                 * SUCCESS: Print the result variables
-                 */
-
-                vars = response->variables;
-                sprintf(result, "%lu", *(vars->val.integer));
-                result += strlen(result);
-            } else {
-                /*
-                 * FAILURE: print what went wrong!
-                 */
-
-                if (status == STAT_SUCCESS)
-                    fprintf(stderr, "Error in packet\nReason: %s\n",
-                            snmp_errstring(response->errstat));
-                else
-                    snmp_sess_perror("snmpget", ss);
-            }
-
-            /*
-             * Clean up:
-             *  1) free the response.
-             *  2) close the session.
-             */
-            if (response)
-                snmp_free_pdu(response);
-            snmp_close(ss);
-
-            SOCK_CLEANUP;
-
+            rc = iquery(&vars,
+                        (char *)vtable_data->expression_data->pdu_community,
+                        vtable_data->expression_data->pdu_version,
+                        anOID, anOID_len);
+            if (rc != SNMP_ERR_NOERROR)
+                snmp_log(LOG_ERR, "Error in packet: %s\n", snmp_errstring(rc));
+            sprintf(result, "%lu", rc == SNMP_ERR_NOERROR ?
+                    *(vars->val.integer) : 0);
+            result += strlen(result);
         } else {
             *result++ = *expression++;
         }
@@ -653,69 +655,25 @@ static void build_valuetable(void)
                               objfound->expExpressionName,
                               objfound->expExpressionNameLen, index, 3);
         } else {
-            oid            *targetOID;
-            size_t          taggetOID_len;
-            targetOID = objfound->expObjectID;
-            struct snmp_pdu *pdu;
-            struct snmp_pdu *response;
+            oid            *targetOID = objfound->expObjectID;
+            size_t          taggetOID_len = objfound->expObjectIDLen;
             oid            *next_OID;
             size_t          next_OID_len;
-            taggetOID_len = objfound->expObjectIDLen;
-            int             status;
-            struct snmp_session *ss;
-            /*
-             * Initialize the SNMP library
-             */
-
-
-            /*
-             * set the SNMP version number 
-             */
-            session.version = expstorage->pdu_version;
-
-            /*
-             * set the SNMPv1 community name used for authentication 
-             */
-            session.community = expstorage->pdu_community;
-            session.community_len = expstorage->pdu_community_len;
-
-            /*
-             * Open the session
-             */
-            SOCK_STARTUP;
-            ss = snmp_open(&session);   /* establish the session */
-            if (!ss) {
-                snmp_perror("ack");
-                snmp_log(LOG_ERR, "something horrible happened!!!\n");
-                return;
-            }
+            struct variable_list *vars;
+            int             rc;
 
             next_OID = targetOID;
             next_OID_len = taggetOID_len;
             do {
                 index = calloc(1, MAX_OID_LEN);
-                pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
 
-                snmp_add_null_var(pdu, next_OID, next_OID_len);
-
-                /*
-                 * Send the Request out.
-                 */
-                status = snmp_synch_response(ss, pdu, &response);
-
-                /*
-                 * Process the response.
-                 */
-                if (status == STAT_SUCCESS
-                    && response->errstat == SNMP_ERR_NOERROR) {
-                    /*
-                     * SUCCESS: Print the result variables
-                     */
-
-                    if (((response->variables->type >= SNMP_NOSUCHOBJECT &&
-                          response->variables->type <= SNMP_ENDOFMIBVIEW)
+                rc = iquery(&vars, (char *)expstorage->pdu_community,
+                            expstorage->pdu_version, next_OID, next_OID_len);
+                if (rc == SNMP_ERR_NOERROR) {
+                    if (((vars->type >= SNMP_NOSUCHOBJECT &&
+                          vars->type <= SNMP_ENDOFMIBVIEW)
                          || snmp_oid_compare(targetOID, taggetOID_len,
-                                             response->variables->name,
+                                             vars->name,
                                              taggetOID_len) != 0)) {
                         break;
                     }
@@ -723,42 +681,26 @@ static void build_valuetable(void)
 
                     *index = 0;
                     *(index + 1) = 0;
-                    memcpy(index + 2,
-                           response->variables->name + taggetOID_len,
-                           (response->variables->name_length -
-                            taggetOID_len) * sizeof(oid));
+                    memcpy(index + 2, vars->name + taggetOID_len,
+                           (vars->name_length - taggetOID_len) * sizeof(oid));
                     expValueTable_set(expstorage,
                                       objfound->expExpressionOwner,
                                       objfound->expExpressionOwnerLen,
                                       objfound->expExpressionName,
                                       objfound->expExpressionNameLen,
                                       index,
-                                      response->variables->name_length -
+                                      vars->name_length -
                                       taggetOID_len + 2);
 
-                    next_OID = response->variables->name;
-
-                    next_OID_len = response->variables->name_length;
-
-
-
-
+                    next_OID = vars->name;
+                    next_OID_len = vars->name_length;
                 } else {
-                    /*
-                     * FAILURE: print what went wrong!
-                     */
-                    if (status == STAT_SUCCESS)
-                        fprintf(stderr, "Error in packet\nReason: %s\n",
-                                snmp_errstring(response->errstat));
-                    else
-                        snmp_sess_perror("snmpget", ss);
+                    snmp_log(LOG_ERR, "Error in packet: %s\n",
+                             snmp_errstring(rc));
                 }
             } while (TRUE);
-
         }
-
     }
-
 }
 
 static unsigned char *var_expValueTable(struct variable *vp, oid * name,
