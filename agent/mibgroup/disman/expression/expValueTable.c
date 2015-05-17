@@ -44,6 +44,7 @@
  */
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "utilities/iquery.h"
 #include "header_complex.h"
 #include "expExpressionTable.h"
 #include "expValueTable.h"
@@ -109,7 +110,6 @@ static const struct variable2 expValueTable_variables[] = {
 extern struct header_complex_index *expExpressionTableStorage;
 extern struct header_complex_index *expObjectTableStorage;
 static struct header_complex_index *expValueTableStorage = NULL;
-static struct snmp_session session;
 
 /*
  * init_expValueTable():
@@ -128,12 +128,6 @@ init_expValueTable(void)
     REGISTER_MIB("expValueTable",
                  expValueTable_variables, variable2,
                  expValueTable_variables_oid);
-
-    /*
-     * Initialize a "session" that defines who we're going to talk to
-     */
-    snmp_sess_init(&session);   /* set up defaults */
-    session.peername = strdup("localhost");
 
     DEBUGMSGTL(("expValueTable", "done.\n"));
 }
@@ -385,12 +379,9 @@ static int iquery(struct variable_list **vars, char *secName, int snmp_version,
     struct variable_list *v;
     int status, rc = SNMP_ERR_GENERR;
 
-    session.version = snmp_version;
-    session.community = (u_char *)secName;
-    session.community_len = strlen(secName);
-    ss = snmp_open(&session);
+    ss = netsnmp_query_get_default_session();
     if (!ss) {
-        snmp_log(LOG_ERR, "%s: failed to create an SNMP session\n", __func__);
+        snmp_log(LOG_ERR, "%s: default SNMP session not available\n", __func__);
         goto out;
     }
 
@@ -399,7 +390,7 @@ static int iquery(struct variable_list **vars, char *secName, int snmp_version,
     pdu = snmp_pdu_create(SNMP_MSG_GET);
     if (!pdu) {
         snmp_log(LOG_ERR, "%s: failed to create an SNMP PDU\n", __func__);
-        goto close_session;
+        goto out;
     }
 
     if (snmp_add_null_var(pdu, name, name_len) == NULL) {
@@ -442,9 +433,6 @@ free_response:
 
 free_pdu:
     /* if (pdu) snmp_free_pdu(pdu); -- triggers a use-after-free */
-
-close_session:
-    snmp_close(ss);
 
 out:
     return rc;
