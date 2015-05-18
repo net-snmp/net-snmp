@@ -326,6 +326,12 @@
 /* Define to 1 if you have the <kstat.h> header file. */
 #undef HAVE_KSTAT_H
 
+/* Define to 1 if you have the `kvm_getfile2' function. */
+#undef HAVE_KVM_GETFILE2
+
+/* Define to 1 if you have the `kvm_getfiles' function. */
+#undef HAVE_KVM_GETFILES
+
 /* Define to 1 if you have the `kvm_getproc2' function. */
 #undef HAVE_KVM_GETPROC2
 
