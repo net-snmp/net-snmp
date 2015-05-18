@@ -79,10 +79,12 @@ NETSNMP_SEARCH_LIBS(kvm_read, kvm,,,, LAGENTLIBS)
 NETSNMP_SEARCH_LIBS(kvm_openfiles, kvm,,,, LAGENTLIBS)
 NETSNMP_SEARCH_LIBS(kvm_getprocs, kvm,,,, LMIBLIBS)
 NETSNMP_SEARCH_LIBS(kvm_getproc2, kvm,,,, LMIBLIBS)
+NETSNMP_SEARCH_LIBS(kvm_getfiles, kvm,,,, LMIBLIBS)
+NETSNMP_SEARCH_LIBS(kvm_getfile2, kvm,,,, LMIBLIBS)
 NETSNMP_SEARCH_LIBS(kvm_getswapinfo, kvm,,,, LMIBLIBS)
 netsnmp_save_LIBS="$LIBS"
 LIBS="$LAGENTLIBS $LMIBLIBS $LIBS"
-AC_CHECK_FUNCS([kvm_openfiles kvm_getprocs kvm_getproc2 kvm_getswapinfo])
+AC_CHECK_FUNCS([kvm_openfiles kvm_getprocs kvm_getproc2 kvm_getswapinfo kvm_getfiles kvm_getfile2])
 LIBS="$netsnmp_save_LIBS"
 
 #
