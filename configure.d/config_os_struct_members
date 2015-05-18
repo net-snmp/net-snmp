@@ -127,6 +127,7 @@ AC_CHECK_MEMBERS([struct mbstat.m_clusters,
 AC_CHECK_MEMBERS([struct uvmexp.pgswapin],,,[
     AC_INCLUDES_DEFAULT()
     [
+#include <sys/sysctl.h>
 #include <uvm/uvm_extern.h>
     ]])
 
