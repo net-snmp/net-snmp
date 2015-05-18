@@ -20243,6 +20243,156 @@ $as_echo "$netsnmp_cv_func_kvm_getproc2_LMIBLIBS" >&6; }
  fi
 
 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kvm_getfiles" >&5
+$as_echo_n "checking for library containing kvm_getfiles... " >&6; }
+if ${netsnmp_cv_func_kvm_getfiles_LMIBLIBS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LMIBLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kvm_getfiles ();
+int
+main ()
+{
+return kvm_getfiles ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in kvm ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kvm_getfiles ();
+int
+main ()
+{
+return kvm_getfiles ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_kvm_getfiles_LMIBLIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kvm_getfiles_LMIBLIBS" >&5
+$as_echo "$netsnmp_cv_func_kvm_getfiles_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kvm_getfile2" >&5
+$as_echo_n "checking for library containing kvm_getfile2... " >&6; }
+if ${netsnmp_cv_func_kvm_getfile2_LMIBLIBS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LMIBLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kvm_getfile2 ();
+int
+main ()
+{
+return kvm_getfile2 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in kvm ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kvm_getfile2 ();
+int
+main ()
+{
+return kvm_getfile2 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_kvm_getfile2_LMIBLIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kvm_getfile2_LMIBLIBS" >&5
+$as_echo "$netsnmp_cv_func_kvm_getfile2_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kvm_getswapinfo" >&5
 $as_echo_n "checking for library containing kvm_getswapinfo... " >&6; }
 if ${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS+:} false; then :
@@ -20319,7 +20469,7 @@ $as_echo "$netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS" >&6; }
 
 netsnmp_save_LIBS="$LIBS"
 LIBS="$LAGENTLIBS $LMIBLIBS $LIBS"
-for ac_func in kvm_openfiles kvm_getprocs kvm_getproc2 kvm_getswapinfo
+for ac_func in kvm_openfiles kvm_getprocs kvm_getproc2 kvm_getswapinfo kvm_getfiles kvm_getfile2
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -27002,6 +27152,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct uvmexp" "pgswapin" "ac_cv_member_struct_uvmexp_pgswapin" "
     $ac_includes_default
 
+#include <sys/sysctl.h>
 #include <uvm/uvm_extern.h>
 
 "
