@@ -35,6 +35,7 @@
 #include <netinet/ip_icmp.h>
 #include <netinet/ip_var.h>
 #if HAVE_NETINET6_IP6_VAR_H
+#include <sys/queue.h>
 #include <netinet6/ip6_var.h>
 #endif
 #ifndef freebsd7
