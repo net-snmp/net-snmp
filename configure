@@ -27822,6 +27822,276 @@ $as_echo "$netsnmp_cv_func_kvm_getproc2_LMIBLIBS" >&6; }
  fi
 
 
+ { $as_echo "$as_me:$LINENO: checking for library containing kvm_getfiles" >&5
+$as_echo_n "checking for library containing kvm_getfiles... " >&6; }
+if test "${netsnmp_cv_func_kvm_getfiles_LMIBLIBS+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LMIBLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kvm_getfiles ();
+int
+main ()
+{
+return kvm_getfiles ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in kvm ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kvm_getfiles ();
+int
+main ()
+{
+return kvm_getfiles ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_kvm_getfiles_LMIBLIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_kvm_getfiles_LMIBLIBS" >&5
+$as_echo "$netsnmp_cv_func_kvm_getfiles_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+ { $as_echo "$as_me:$LINENO: checking for library containing kvm_getfile2" >&5
+$as_echo_n "checking for library containing kvm_getfile2... " >&6; }
+if test "${netsnmp_cv_func_kvm_getfile2_LMIBLIBS+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LMIBLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kvm_getfile2 ();
+int
+main ()
+{
+return kvm_getfile2 ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in kvm ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kvm_getfile2 ();
+int
+main ()
+{
+return kvm_getfile2 ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_kvm_getfile2_LMIBLIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_kvm_getfile2_LMIBLIBS" >&5
+$as_echo "$netsnmp_cv_func_kvm_getfile2_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
  { $as_echo "$as_me:$LINENO: checking for library containing kvm_getswapinfo" >&5
 $as_echo_n "checking for library containing kvm_getswapinfo... " >&6; }
 if test "${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS+set}" = set; then
@@ -27962,7 +28232,9 @@ LIBS="$LAGENTLIBS $LMIBLIBS $LIBS"
 
 
 
-for ac_func in kvm_openfiles kvm_getprocs kvm_getproc2 kvm_getswapinfo
+
+
+for ac_func in kvm_openfiles kvm_getprocs kvm_getproc2 kvm_getswapinfo kvm_getfiles kvm_getfile2
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -41409,6 +41681,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 
     $ac_includes_default
 
+#include <sys/sysctl.h>
 #include <uvm/uvm_extern.h>
 
 
@@ -41454,6 +41727,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 
     $ac_includes_default
 
+#include <sys/sysctl.h>
 #include <uvm/uvm_extern.h>
 
 
