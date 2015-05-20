@@ -777,7 +777,7 @@ expValue_evaluateExpression( struct expExpression *exp,
          * When we had finished, there was a lot
          * of bricks^Wcharacters left over....
          */
-        _expValue_setError( exp, EXPERRCODE_SYNTAX, suffix, suffix_len, NULL );
+        _expValue_setError( exp, EXPERRCODE_SYNTAX, suffix, suffix_len, var );
         return NULL;
     }
     if (!var) {
@@ -819,5 +819,6 @@ _expValue_setError( struct expExpression *exp, int reason,
     memset( exp->expErrorInstance, 0, sizeof(exp->expErrorInstance));
     memcpy( exp->expErrorInstance, suffix, suffix_len * sizeof(oid));
     exp->expErrorInst_len = suffix_len;
+    if (var) var->data = NULL;
     snmp_free_var( var );
 }
