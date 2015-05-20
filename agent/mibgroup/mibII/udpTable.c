@@ -318,8 +318,9 @@ udpTable_next_entry( void **loop_context,
     int i = (int)*loop_context;
     long port;
 
-#ifdef openbsd5
-    while (i <= udp_size && udp_head[i].so_protocol != IPPROTO_UDP)
+#if HAVE_KVM_GETFILES
+    while (i <= udp_size && (udp_head[i].so_protocol != IPPROTO_UDP
+	    || udp_head[i].so_family != AF_INET))
 	i++;
 #endif
     if (udp_size < i)

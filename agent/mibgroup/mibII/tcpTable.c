@@ -370,8 +370,9 @@ tcpTable_next_entry( void **loop_context,
     netsnmp_variable_list *idx;
     long port;
 
-#ifdef openbsd5
-    while (i < tcp_size && tcp_head[i].so_protocol != IPPROTO_TCP)
+#if HAVE_KVM_GETFILES
+    while (i < tcp_size && (tcp_head[i].so_protocol != IPPROTO_TCP
+	    || tcp_head[i].so_family != AF_INET))
 	i++;
 #endif
     if (tcp_size < i)
@@ -428,7 +429,7 @@ tcpTable_free(netsnmp_cache *cache, void *magic)
 	}
 #elif defined(openbsd5)
 #else
-	if (tcp_head)
+    if (tcp_head)
         free(tcp_head);
 #endif
     tcp_head  = NULL;
@@ -865,6 +866,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     tcp_head = kvm_getfiles(kd, KERN_FILE_BYFILE, DTYPE_SOCKET, sizeof(struct kinfo_file), &count);
     tcp_size = count;
     for (i = 0; i < tcp_size; i++) {
+	if (tcp_head[i].so_protocol != IPPROTO_TCP || tcp_head[i].so_family != AF_INET)
+	    continue;
 	if (StateMap[tcp_head[i].TCPTABLE_STATE] == 5 /* established */ ||
 	    StateMap[tcp_head[i].TCPTABLE_STATE] == 8 /*  closeWait  */ )
 	    tcp_estab++;
