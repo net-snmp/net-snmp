@@ -54,7 +54,7 @@ capture_snmpset DISMAN-EXPRESSION-MIB::expExpressionEntryStatus."${on}" \
     i $createAndWait
 CHECK "^DISMAN-EXPRESSION-MIB::expExpressionEntryStatus.${on} = INTEGER: createAndWait(5)"
 capture_snmpset DISMAN-EXPRESSION-MIB::expExpression."${on}"            \
-    = '$1+$2'
+    = '$1+$2*($1+$2*($1+$2))'
 CHECK "^DISMAN-EXPRESSION-MIB::expExpression.${on} = STRING: "
 capture_snmpset DISMAN-EXPRESSION-MIB::expExpressionValueType."${on}"   \
     = counter32
@@ -82,7 +82,7 @@ done
 
 capture_snmpget DISMAN-EXPRESSION-MIB::expValueCounter32Val."${on}".0.0.0
 
-CHECK "^DISMAN-EXPRESSION-MIB::expValueCounter32Val.${on}.0.0.0 = Counter32: 3"
+CHECK "^DISMAN-EXPRESSION-MIB::expValueCounter32Val.${on}.0.0.0 = Counter32: 15"
 
 STOPAGENT
 
