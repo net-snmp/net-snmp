@@ -406,7 +406,6 @@ _expValue_evalExpr(  netsnmp_variable_list *expIdx,
              */
             *exprEnd = cp1;
             var = _expValue_evalExpr2( exprAlDente );
-            snmp_free_var(exprAlDente);
             return var;
 
             /* === Constants === */
