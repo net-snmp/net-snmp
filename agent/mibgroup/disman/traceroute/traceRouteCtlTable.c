@@ -766,33 +766,25 @@ traceRouteProbeHistoryTable_delLast(struct traceRouteCtlTable_data
 void
 traceRouteCtlTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr = NULL;
-    struct traceRouteCtlTable_data *StorageDel = NULL;
+    struct header_complex_index *hciptr, *nhciptr;
+    struct traceRouteCtlTable_data *StorageDel;
+
     DEBUGMSGTL(("traceRouteCtlTable", "cleanerout  "));
-    for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
+    for (hciptr = thestuff; hciptr; hciptr = nhciptr) {
+        nhciptr = hciptr->next;
         StorageDel =
             header_complex_extract_entry(&traceRouteCtlTableStorage,
                                          hciptr);
         if (StorageDel != NULL) {
             free(StorageDel->traceRouteCtlOwnerIndex);
-            StorageDel->traceRouteCtlOwnerIndex = NULL;
             free(StorageDel->traceRouteCtlTestName);
-            StorageDel->traceRouteCtlTestName = NULL;
             free(StorageDel->traceRouteCtlTargetAddress);
-            StorageDel->traceRouteCtlTargetAddress = NULL;
             free(StorageDel->traceRouteCtlSourceAddress);
-            StorageDel->traceRouteCtlSourceAddress = NULL;
             free(StorageDel->traceRouteCtlMiscOptions);
-            StorageDel->traceRouteCtlMiscOptions = NULL;
             free(StorageDel->traceRouteCtlDescr);
-            StorageDel->traceRouteCtlDescr = NULL;
             free(StorageDel->traceRouteCtlTrapGeneration);
-            StorageDel->traceRouteCtlTrapGeneration = NULL;
             free(StorageDel->traceRouteCtlType);
-            StorageDel->traceRouteCtlType = NULL;
             free(StorageDel);
-            StorageDel = NULL;
-
         }
         DEBUGMSGTL(("traceRouteCtlTable", "cleaner  "));
     }
@@ -1368,7 +1360,7 @@ var_traceRouteCtlTable(struct variable *vp,
 int
 traceRouteResultsTable_del(struct traceRouteCtlTable_data *thedata)
 {
-    struct header_complex_index *hciptr2 = NULL;
+    struct header_complex_index *hciptr2, *nhciptr2;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len = 0;
@@ -1379,8 +1371,8 @@ traceRouteResultsTable_del(struct traceRouteCtlTable_data *thedata)
     memset(newoid, '\0', sizeof(oid) * MAX_OID_LEN);
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
-    for (hciptr2 = traceRouteResultsTableStorage; hciptr2 != NULL;
-         hciptr2 = hciptr2->next) {
+    for (hciptr2 = traceRouteResultsTableStorage; hciptr2; hciptr2 = nhciptr2) {
+        nhciptr2 = hciptr2->next;
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
             header_complex_extract_entry(&traceRouteResultsTableStorage,
@@ -1399,7 +1391,7 @@ traceRouteResultsTable_del(struct traceRouteCtlTable_data *thedata)
 int
 traceRouteProbeHistoryTable_del(struct traceRouteCtlTable_data *thedata)
 {
-    struct header_complex_index *hciptr2 = NULL;
+    struct header_complex_index *hciptr2, *nhciptr2;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len = 0;
@@ -1411,8 +1403,9 @@ traceRouteProbeHistoryTable_del(struct traceRouteCtlTable_data *thedata)
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
-    for (hciptr2 = traceRouteProbeHistoryTableStorage; hciptr2 != NULL;
-         hciptr2 = hciptr2->next) {
+    for (hciptr2 = traceRouteProbeHistoryTableStorage; hciptr2;
+         hciptr2 = nhciptr2) {
+        nhciptr2 = hciptr2->next;
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
             header_complex_extract_entry(&traceRouteProbeHistoryTableStorage,
@@ -4458,7 +4451,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
 
 
                 struct traceRouteHopsTable_data *StorageTmp = NULL;
-                struct header_complex_index *hciptr2 = NULL;
+                struct header_complex_index *hciptr2, *nhciptr2;
                 netsnmp_variable_list *vars = NULL;
                 oid             newoid[MAX_OID_LEN];
                 size_t          newoid_len;
@@ -4469,8 +4462,9 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                 header_complex_generate_oid(newoid, &newoid_len, NULL,
                                             0, vars);
 
-                for (hciptr2 = traceRouteHopsTableStorage;
-                     hciptr2 != NULL; hciptr2 = hciptr2->next) {
+                for (hciptr2 = traceRouteHopsTableStorage; hciptr2;
+                     hciptr2 = nhciptr2) {
+                    nhciptr2 = hciptr2->next;
                     if (snmp_oid_compare
                         (newoid, newoid_len, hciptr2->name,
                          newoid_len) == 0) {
@@ -5151,8 +5145,8 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
 
                 int             k = 0;
                 count = traceRouteHopsTable_count(item);
-                struct traceRouteHopsTable_data *StorageTmp = NULL;
-                struct header_complex_index *hciptr2 = NULL;
+                struct traceRouteHopsTable_data *StorageTmp;
+                struct header_complex_index *hciptr2, *nhciptr2;
                 netsnmp_variable_list *vars = NULL;
                 oid             newoid[MAX_OID_LEN];
                 size_t          newoid_len;
@@ -5166,8 +5160,9 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
                 snmp_free_varbind(vars);
                 vars = NULL;
 
-                for (hciptr2 = traceRouteHopsTableStorage;
-                     hciptr2 != NULL; hciptr2 = hciptr2->next) {
+                for (hciptr2 = traceRouteHopsTableStorage; hciptr2;
+                     hciptr2 = nhciptr2) {
+                    nhciptr2 = hciptr2->next;
                     if (snmp_oid_compare
                         (newoid, newoid_len, hciptr2->name,
                          newoid_len) == 0) {
