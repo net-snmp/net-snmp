@@ -1950,9 +1950,8 @@ smux_trap_process(u_char * rsp, size_t * len)
         ptr = snmp_parse_var_op(ptr, var_name, &var_name_len, &vartype,
                                 &var_val_len, (u_char **) & var_val, len);
 
-        if (ptr == NULL) {
-            return NULL;
-        }
+        if (ptr == NULL)
+            goto err;
 
         maxlen = SMUXMAXPKTSIZE;
         switch ((short) vartype) {
@@ -1986,7 +1985,7 @@ smux_trap_process(u_char * rsp, size_t * len)
              */
             if ((var_val =
                  asn_parse_header(var_val, &maxlen, &vartype)) == NULL)
-                return NULL;
+                goto err;
             memcpy((u_char *) & (smux_sa.sin_addr.s_addr), var_val,
                    var_val_len);
             var_val = (u_char *) & (smux_sa.sin_addr.s_addr);
@@ -1997,7 +1996,7 @@ smux_trap_process(u_char * rsp, size_t * len)
              * XXX 
              */
             if (len == NULL)
-                return NULL;
+                goto err;
             var_val_len = SMUXMAXSTRLEN;
             asn_parse_string(var_val, &maxlen, &vartype,
                              smux_str, &var_val_len);
@@ -2021,7 +2020,7 @@ smux_trap_process(u_char * rsp, size_t * len)
              * XXX 
              */
             if (len == NULL)
-                return NULL;
+                goto err;
             var_val_len = SMUXMAXSTRLEN;
             asn_parse_bitstring(var_val, &maxlen, &vartype,
                                 smux_str, &var_val_len);
@@ -2034,12 +2033,9 @@ smux_trap_process(u_char * rsp, size_t * len)
             break;
         }
 
-        snmptrap_tmp =
-            (netsnmp_variable_list *)
-            malloc(sizeof(netsnmp_variable_list));
+        snmptrap_tmp = calloc(1, sizeof(netsnmp_variable_list));
         if (snmptrap_tmp == NULL)
-            return NULL;
-        memset(snmptrap_tmp, 0, sizeof(netsnmp_variable_list));
+            goto err;
         if (snmptrap_head == NULL) {
             snmptrap_head = snmptrap_tmp;
             snmptrap_ptr = snmptrap_head;
@@ -2068,6 +2064,9 @@ smux_trap_process(u_char * rsp, size_t * len)
 
     return ptr;
 
+err:
+    snmp_free_varbind(snmptrap_head);
+    return NULL;
 }
 
 #define NUM_SOCKETS	32
