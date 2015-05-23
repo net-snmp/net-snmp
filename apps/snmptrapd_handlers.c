@@ -206,6 +206,8 @@ parse_forward(const char *token, char *line)
         traph->token = strdup(cptr);
         if (format)
             traph->format = format;
+    } else {
+        free(format);
     }
 }
 
