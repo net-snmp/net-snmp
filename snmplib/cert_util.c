@@ -3124,7 +3124,7 @@ _find_tlstmParams_fingerprint(const char *name)
     if ((NULL == result) || (NULL == result->fingerprint))
         return NULL;
 
-    return strdup(result->fingerprint);
+    return result->fingerprint;
 }
 /*
  * END snmpTlstmParmsTable data
