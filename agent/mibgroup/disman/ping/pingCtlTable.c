@@ -4960,6 +4960,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
             msg.msg_iovlen = 1;
             msg.msg_control = ans_data;
             msg.msg_controllen = sizeof(ans_data);
+            msg.msg_flags = 0;
 
             cc = recvmsg(icmp_sock, &msg, polling);
             time_t          timep;
