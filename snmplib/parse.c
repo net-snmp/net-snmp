@@ -2015,7 +2015,7 @@ parse_objectid(FILE * fp, char *name)
         if (op->label && (nop->label || (nop->subid != -1))) {
             np = alloc_node(nop->modid);
             if (np == NULL)
-                return (NULL);
+                goto err;
             if (root == NULL)
                 root = np;
 
@@ -2025,19 +2025,13 @@ parse_objectid(FILE * fp, char *name)
                  * The name for this node is the label for this entry 
                  */
                 np->label = strdup(name);
-                if (np->label == NULL) {
-                    SNMP_FREE(np->parent);
-                    SNMP_FREE(np);
-                    return (NULL);
-                }
+                if (np->label == NULL)
+                    goto err;
             } else {
                 if (!nop->label) {
                     nop->label = (char *) malloc(20 + ANON_LEN);
-                    if (nop->label == NULL) {
-                        SNMP_FREE(np->parent);
-                        SNMP_FREE(np);
-                        return (NULL);
-                    }
+                    if (nop->label == NULL)
+                        goto err;
                     sprintf(nop->label, "%s%d", ANON, anonymous++);
                 }
                 np->label = strdup(nop->label);
@@ -2057,6 +2051,7 @@ parse_objectid(FILE * fp, char *name)
         }                       /* end if(op->label... */
     }
 
+out:
     /*
      * free the loid array 
      */
@@ -2066,6 +2061,13 @@ parse_objectid(FILE * fp, char *name)
     }
 
     return root;
+
+err:
+    for (; root; root = np) {
+        np = root->next;
+        free_node(root);
+    }
+    goto out;
 }
 
 static int
