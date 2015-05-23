@@ -233,7 +233,8 @@ main(int argc, char **argv)
                     (unsigned long)engineid_len));
     } else {
         engineid_len = setup_engineID(&engineid, (char *) engineid);
-
+        if ((ssize_t)engineid_len < 0)
+            exit(1);
     }
 
 #ifdef NETSNMP_ENABLE_TESTING_CODE
