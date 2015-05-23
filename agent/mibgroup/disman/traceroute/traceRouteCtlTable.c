@@ -1419,7 +1419,7 @@ traceRouteProbeHistoryTable_del(struct traceRouteCtlTable_data *thedata)
 int
 traceRouteHopsTable_del(struct traceRouteCtlTable_data *thedata)
 {
-    struct header_complex_index *hciptr2 = NULL;
+    struct header_complex_index *hciptr2, *nhciptr2;
     netsnmp_variable_list *vars = NULL;
     oid             newoid[MAX_OID_LEN];
     size_t          newoid_len = 0;
@@ -1431,13 +1431,12 @@ traceRouteHopsTable_del(struct traceRouteCtlTable_data *thedata)
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
-    for (hciptr2 = traceRouteHopsTableStorage; hciptr2 != NULL;
-         hciptr2 = hciptr2->next) {
+    for (hciptr2 = traceRouteHopsTableStorage; hciptr2; hciptr2 = nhciptr2) {
+        nhciptr2 = hciptr2->next;
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
             header_complex_extract_entry(&traceRouteHopsTableStorage, hciptr2);
             DEBUGMSGTL(("traceRouteHopsTable", "delete  success!\n"));
-
         }
     }
     vars = NULL;

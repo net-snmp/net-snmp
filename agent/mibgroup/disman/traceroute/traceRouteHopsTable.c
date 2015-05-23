@@ -75,27 +75,24 @@ traceRouteHopsTable_inadd(struct traceRouteHopsTable_data *thedata);
 void
 traceRouteHopsTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr = NULL;
-    struct traceRouteHopsTable_data *StorageDel = NULL;
+    struct header_complex_index *hciptr, *nhciptr;
+    struct traceRouteHopsTable_data *StorageDel;
+
     DEBUGMSGTL(("traceRouteHopsTable", "cleanerout  "));
-    for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
-        StorageDel =
-            header_complex_extract_entry(&traceRouteHopsTableStorage,
-                                         hciptr);
+    for (hciptr = thestuff; hciptr; hciptr = nhciptr) {
+        nhciptr = hciptr->next;
+        StorageDel = header_complex_extract_entry(&traceRouteHopsTableStorage,
+                                                  hciptr);
         if (StorageDel != NULL) {
             free(StorageDel->traceRouteCtlOwnerIndex);
-            StorageDel->traceRouteCtlOwnerIndex = NULL;
             free(StorageDel->traceRouteCtlTestName);
-            StorageDel->traceRouteCtlTestName = NULL;
             free(StorageDel->traceRouteHopsLastGoodProbe);
-            StorageDel->traceRouteHopsLastGoodProbe = NULL;
             free(StorageDel);
-            StorageDel = NULL;
         }
         DEBUGMSGTL(("traceRouteHopsTable", "cleaner  "));
     }
-
 }
+
 void
 init_traceRouteHopsTable(void)
 {
