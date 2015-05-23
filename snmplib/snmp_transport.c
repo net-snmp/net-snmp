@@ -498,7 +498,8 @@ netsnmp_tdomain_transport_full(const char *application,
     const char * const *spec = NULL;
     int                 any_found = 0;
     char buf[SNMP_MAXPATH];
-    char **lspec = 0;
+    char *tokenized_domain = NULL;
+    char **lspec = NULL;
 
     DEBUGMSGTL(("tdomain",
                 "tdomain_transport_full(\"%s\", \"%s\", %d, \"%s\", \"%s\")\n",
@@ -593,12 +594,12 @@ netsnmp_tdomain_transport_full(const char *application,
             else {
                 int commas = 0;
                 const char *cp = default_domain;
-                char *dup = strdup(default_domain);
 
+                tokenized_domain = strdup(default_domain);
                 while (*++cp) if (*cp == ',') commas++;
                 lspec = calloc(commas+2, sizeof(char *));
                 commas = 1;
-                lspec[0] = strtok(dup, ",");
+                lspec[0] = strtok(tokenized_domain, ",");
                 while ((lspec[commas++] = strtok(NULL, ",")))
                     ;
                 spec = (const char * const *)lspec;
@@ -652,7 +653,7 @@ netsnmp_tdomain_transport_full(const char *application,
                 t = match->f_create_from_tstring_new(addr, local, addr2);
             if (t) {
                 if (lspec) {
-                    free(lspec[0]);
+                    free(tokenized_domain);
                     free(lspec);
                 }
                 return t;
@@ -667,7 +668,7 @@ netsnmp_tdomain_transport_full(const char *application,
     if (!any_found)
         snmp_log(LOG_ERR, "No support for any checked transport domain\n");
     if (lspec) {
-        free(lspec[0]);
+        free(tokenized_domain);
         free(lspec);
     }
     return NULL;
