@@ -496,11 +496,8 @@ _ssll_iterator_last(ssll_iterator *it)
     if (NULL == n)
         return NULL;
 
-    while(n->next)
+    while (n->next)
         n = n->next;
-
-    if (NULL == n)
-        return NULL;
 
     it->last = n;
 
