@@ -731,6 +731,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                 if (free_this_index_search)
                                     snmp_free_varbind
                                         (free_this_index_search);
+                                SNMP_FREE(reqtmp);
                                 return SNMP_ERR_GENERR;
                             }
                             vb->type = ASN_NULL;
