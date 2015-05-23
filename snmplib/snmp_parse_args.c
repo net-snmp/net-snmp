@@ -355,6 +355,7 @@ netsnmp_parse_args(int argc,
             tmpcp = strchr(tmpopt, '=');
             if (!tmpcp) {
                 fprintf(stderr, "-T expects a NAME=VALUE pair.\n");
+                free(tmpopt);
                 return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             *tmpcp++ = '\0';
