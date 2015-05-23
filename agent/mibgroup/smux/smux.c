@@ -600,7 +600,7 @@ smux_accept(int sd)
             snmp_log(LOG_ERR,
                      "[smux_accept] denied peer on fd %d, limit %d reached",
                      fd, SMUXMAXPEERS);
-            close(sd);
+            close(fd);
             return -1;
         }
 
