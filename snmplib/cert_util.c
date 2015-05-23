@@ -3210,6 +3210,13 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
 {
     size_t fp_len_save = *fp_len;
 
+    /*
+     * Calling this function with name == NULL, fp == NULL or id == NULL would
+     * trigger a memory leak.
+     */
+    if (!name || !fp || !id)
+        return -1;
+
     *line = read_config_read_octet_string(*line, (u_char **)&name, name_len);
     if (NULL == *line) {
         config_perror("incomplete line");
