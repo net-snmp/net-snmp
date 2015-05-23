@@ -354,8 +354,8 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
 {
     int line_len = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                       NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH);
-    if (!line_len)
-        line_len=len;
+    if (line_len <= 0)
+        line_len = len;
 
     for (; (int)len > line_len; len -= line_len) {
         if(!_sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, line_len))
