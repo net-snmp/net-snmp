@@ -2466,6 +2466,12 @@ linux_if_nameindex(void)
             if (if_index == 0)
                 continue;
             if_name[sizeof(if_name) - 1] = '\0';
+            /*
+             * Large if_index values can cause the multiplication in the
+             * realloc() statement to overflow. Hence check if_index.
+             */
+            if (if_index > 65536)
+                break;
             if (maxidx < 0 || maxidx < if_index) {
                 if (last_if_count < if_index)
                     last_if_count = if_index;
