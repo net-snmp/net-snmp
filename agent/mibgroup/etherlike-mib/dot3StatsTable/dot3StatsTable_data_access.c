@@ -286,6 +286,7 @@ dot3StatsTable_container_load(netsnmp_container * container)
         rowreq_ctx = dot3StatsTable_allocate_rowreq_ctx(NULL);
         if (NULL == rowreq_ctx) {
             snmp_log(LOG_ERR, "memory allocation for dot3StatsTable failed\n");
+            dot3stats_interface_name_list_free(list_head);
             close(fd);
             return MFD_RESOURCE_UNAVAILABLE;
         }
