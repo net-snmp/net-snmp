@@ -2460,7 +2460,7 @@ linux_if_nameindex(void)
         if_count = 0;
         maxidx = -1;
         while (!feof(f)) {
-            if (fscanf(f, "%*s %lx %*x %*x %*x %s",
+            if (fscanf(f, "%*s %lx %*x %*x %*x %255s",
                        &if_index, if_name) != 2)
                 continue;
             if (if_index == 0)
