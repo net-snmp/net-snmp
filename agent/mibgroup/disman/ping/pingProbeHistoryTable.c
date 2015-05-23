@@ -137,6 +137,7 @@ parse_pingProbeHistoryTable(const char *token, char *line)
                               &StorageTmp->pingCtlOwnerIndexLen);
     if (StorageTmp->pingCtlOwnerIndex == NULL) {
         config_perror("invalid specification for pingCtlOwnerIndex");
+        free(StorageTmp);
         return;
     }
 
@@ -146,6 +147,7 @@ parse_pingProbeHistoryTable(const char *token, char *line)
                               &StorageTmp->pingCtlTestNameLen);
     if (StorageTmp->pingCtlTestName == NULL) {
         config_perror("invalid specification for pingCtlTestName");
+        free(StorageTmp);
         return;
     }
 
@@ -171,6 +173,7 @@ parse_pingProbeHistoryTable(const char *token, char *line)
                               &StorageTmp->pingProbeHistoryTimeLen);
     if (StorageTmp->pingProbeHistoryTime == NULL) {
         config_perror("invalid specification for pingProbeHistoryTime");
+        free(StorageTmp);
         return;
     }
 
