@@ -218,6 +218,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                             addr->sin6_port = htons((u_short)portno);
                         } else {
                             DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "invalid port number: %d", portno));
+                            free(peername);
                             return 0;
                         }
 
@@ -273,6 +274,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                     addr->sin6_port = htons((u_short)portno);
                 } else {
                     DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "invalid port number: %d", portno));
+                    free(peername);
                     return 0;
                 }
 
@@ -312,6 +314,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                     addr->sin6_port = htons((u_short)portno);
                 } else {
                     DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "invalid port number: %d", portno));
+                    free(peername);
                     return 0;
                 }
 
