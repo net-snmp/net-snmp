@@ -1248,10 +1248,12 @@ main(int argc, char *argv[])
              * if we are forked, we don't want to print out to stdout or stderr 
              */
             fd = open("/dev/null", O_RDWR);
-            dup2(fd, STDIN_FILENO);
-            dup2(fd, STDOUT_FILENO);
-            dup2(fd, STDERR_FILENO);
-            close(fd);
+            if (fd >= 0) {
+                dup2(fd, STDIN_FILENO);
+                dup2(fd, STDOUT_FILENO);
+                dup2(fd, STDERR_FILENO);
+                close(fd);
+            }
             break;
 
         default:
