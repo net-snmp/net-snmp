@@ -2175,8 +2175,8 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       __get_type_str(type, type_str);
       av_store(varbind, VARBIND_TYPE_F, newSVpv(type_str, strlen(type_str)));
 
-      len=__snprint_value(str_buf, sizeof(str_buf),
-                         vars, tp, type, context->sprintval_f);
+      len = __snprint_value(str_buf, sizeof(str_buf) - 1,
+                            vars, tp, type, context->sprintval_f);
       av_store(varbind, VARBIND_VAL_F, newSVpv(str_buf, len));
 
       str_buf[len] = '\0';
