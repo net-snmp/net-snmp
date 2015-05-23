@@ -5680,8 +5680,6 @@ _add_strings_to_oid(void *tp, char *cp,
                 (*objidlen)++;
             }
 
-            if (!cp)
-                goto bad_id;
             while (*cp && *cp != doingquote) {
                 if (*objidlen >= maxlen)
                     goto bad_id;
