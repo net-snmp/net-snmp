@@ -6079,7 +6079,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
 {
     size_t          savlen = *rootlen;
     static size_t   tmpbuf_len = 0;
-    static char    *tmpbuf;
+    static char    *tmpbuf = NULL;
     const char     *suffix, *prefix;
 
     suffix = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
@@ -6093,7 +6093,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
             prefix = "";
         if ((strlen(suffix) + strlen(prefix) + strlen(argv) + 2) > tmpbuf_len) {
             tmpbuf_len = strlen(suffix) + strlen(argv) + strlen(prefix) + 2;
-            tmpbuf = (char *)realloc(tmpbuf, tmpbuf_len);
+            tmpbuf = malloc(tmpbuf_len);
         }
         snprintf(tmpbuf, tmpbuf_len, "%s%s%s%s", prefix, argv,
                  ((suffix[0] == '.' || suffix[0] == '\0') ? "" : "."),
@@ -6106,31 +6106,37 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_RANDOM_ACCESS)
         || strchr(argv, ':')) {
         if (get_node(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
     } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REGEX_ACCESS)) {
 	clear_tree_flags(tree_head);
         if (get_wild_node(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
     } else {
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         if (read_objid(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
 #ifndef NETSNMP_DISABLE_MIB_LOADING
         *rootlen = savlen;
         if (get_node(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
         *rootlen = savlen;
         DEBUGMSGTL(("parse_oid", "wildly parsing\n"));
 	clear_tree_flags(tree_head);
         if (get_wild_node(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
     }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
+    free(tmpbuf);
     return NULL;
 }
 
