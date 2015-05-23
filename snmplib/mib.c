@@ -2598,6 +2598,8 @@ netsnmp_init_mib(void)
      */
     netsnmp_fixup_mib_directory();
     env_var = strdup(netsnmp_get_mib_directory());
+    if (!env_var)
+        return;
     netsnmp_mibindex_load();
 
     DEBUGMSGTL(("init_mib",

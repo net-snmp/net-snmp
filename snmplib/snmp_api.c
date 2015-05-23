@@ -7089,6 +7089,10 @@ snmp_add_var(netsnmp_pdu *pdu,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 	vp = strdup(value);
+        if (!vp) {
+            SNMP_FREE(buf);
+            goto fail;
+        }
 	for (cp = strtok_r(vp, " ,\t", &st); cp; cp = strtok_r(NULL, " ,\t", &st)) {
             int             ix, bit;
 

@@ -204,8 +204,10 @@ netsnmp_container_find_factory(const char *type_list)
         return NULL;
 
     list = strdup(type_list);
+    if (!list)
+        return NULL;
     entry = strtok_r(list, ":", &st);
-    while(entry) {
+    while (entry) {
         f = netsnmp_container_get_factory(entry);
         if (NULL != f)
             break;
@@ -242,8 +244,10 @@ netsnmp_container_find_ct(const char *type_list)
         return NULL;
 
     list = strdup(type_list);
+    if (!list)
+        return NULL;
     entry = strtok_r(list, ":", &st);
-    while(entry) {
+    while (entry) {
         ct = netsnmp_container_get_ct(entry);
         if (NULL != ct)
             break;

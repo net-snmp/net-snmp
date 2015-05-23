@@ -1605,6 +1605,8 @@ _cert_indexes_load(void)
     subdirs[0] = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR);
     confpath_copy = strdup(confpath);
+    if (!confpath_copy)
+        return;
     for ( dir = strtok_r(confpath_copy, ENV_SEPARATOR, &st);
           dir; dir = strtok_r(NULL, ENV_SEPARATOR, &st)) {
 
