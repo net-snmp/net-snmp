@@ -1148,13 +1148,11 @@ snmpv3_generate_engineID(size_t * length)
 
     if (newID) {
         *length = snmpv3_get_engineID(newID, engineIDLength);
+        if (*length == 0) {
+            SNMP_FREE(newID);
+            newID = NULL;
+        }
     }
-
-    if (*length == 0) {
-        SNMP_FREE(newID);
-        newID = NULL;
-    }
-
     return newID;
 
 }                               /* end snmpv3_generate_engineID() */
