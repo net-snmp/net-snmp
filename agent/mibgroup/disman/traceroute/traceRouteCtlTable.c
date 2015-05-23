@@ -206,8 +206,8 @@ init_trResultsTable(struct traceRouteCtlTable_data *item)
     if (item->traceRouteCtlTargetAddressType == 1
         || item->traceRouteCtlTargetAddressType == 16) {
         struct sockaddr whereto;        /* Who to try to reach */
-        register struct sockaddr_in *to = (struct sockaddr_in *) &whereto;
-        register struct hostinfo *hi = NULL;
+        struct sockaddr_in *to = (struct sockaddr_in *) &whereto;
+        struct hostinfo *hi = NULL;
         hi = gethostinfo(host);
         if (hi == NULL) {
             DEBUGMSGTL(("traceRouteCtlTable", "hi calloc %s\n",
@@ -245,8 +245,7 @@ init_trResultsTable(struct traceRouteCtlTable_data *item)
     if (item->traceRouteCtlTargetAddressType == 2) {
 
         struct sockaddr_in6 whereto;    /* Who to try to reach */
-        register struct sockaddr_in6 *to =
-            (struct sockaddr_in6 *) &whereto;
+        struct sockaddr_in6 *to = (struct sockaddr_in6 *) &whereto;
         struct hostent *hp = NULL;
         /* struct hostenv hp; */
         char            pa[64];
@@ -4071,25 +4070,24 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
     if (item->traceRouteCtlTargetAddressType == 1
         || item->traceRouteCtlTargetAddressType == 16) {
-        register int    code, n;
+        int    code, n;
         const    char  *cp;
-        register const char *err;
-        register u_char *outp;
-        register u_int32_t *ap;
+        const char *err;
+        u_char *outp;
+        u_int32_t *ap;
         struct sockaddr whereto;        /* Who to try to reach */
         struct sockaddr wherefrom;      /* Who we are */
 
-        register struct sockaddr_in *from =
-            (struct sockaddr_in *) &wherefrom;
-        register struct sockaddr_in *to = (struct sockaddr_in *) &whereto;
-        register struct hostinfo *hi;
+        struct sockaddr_in *from = (struct sockaddr_in *) &wherefrom;
+        struct sockaddr_in *to = (struct sockaddr_in *) &whereto;
+        struct hostinfo *hi;
         int             on = 1;
-        register struct protoent *pe;
-        register int    ttl, probe, i;
-        register int    seq = 0;
+        struct protoent *pe;
+        int    ttl, probe, i;
+        int    seq = 0;
         int             tos = 0, settos = 0;
-        register int    lsrr = 0;
-        register u_short off = 0;
+        int    lsrr = 0;
+        u_short off = 0;
         struct ifaddrlist *al;
         char            errbuf[132];
         int             minpacket = 0;  /* min ip packet size */
@@ -4165,7 +4163,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
         outp = (u_char *) (outip + 1);
 #ifdef HAVE_RAW_OPTIONS
         if (lsrr > 0) {
-            register u_char *optlist;
+            u_char *optlist;
 
             optlist = outp;
             outp += optlen;
@@ -4565,18 +4563,18 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                                     "registered an entry error\n"));
 
             }
-            register unsigned long maxRtt = 0;
-            register unsigned long minRtt = 0;
-            register unsigned long averageRtt = 0;
-            register unsigned long sumRtt = 0;
-            register unsigned long responseProbe = 0;
-            register unsigned long sumOfSquare = 0;
+            unsigned long maxRtt = 0;
+            unsigned long minRtt = 0;
+            unsigned long averageRtt = 0;
+            unsigned long sumRtt = 0;
+            unsigned long responseProbe = 0;
+            unsigned long sumOfSquare = 0;
             for (probe = 0; probe < nprobes; ++probe) {
-                register int    cc;
+                int    cc;
                 struct timeval  t1, t2;
                 struct timezone tz;
-                register struct ip *ip = NULL;
-                register unsigned long Rtt = 0;
+                struct ip *ip = NULL;
+                unsigned long Rtt = 0;
 
                 if (sentfirst && pausemsecs > 0)
                     usleep(pausemsecs * 1000);
@@ -4599,8 +4597,8 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
                     if (i == 0)
                         continue;
                     if (!gotlastaddr || from->sin_addr.s_addr != lastaddr) {
-                        register struct ip *ip;
-                        register int    hlen;
+                        struct ip *ip;
+                        int    hlen;
                         ip = (struct ip *) packet;
                         hlen = ip->ip_hl << 2;
                         cc -= hlen;
@@ -5254,17 +5252,17 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
             }
 
-            register unsigned long maxRtt = 0;
-            register unsigned long minRtt = 0;
-            register unsigned long averageRtt = 0;
-            register unsigned long sumRtt = 0;
-            register unsigned long responseProbe = 0;
-            register unsigned long sumOfSquare = 0;
+            unsigned long maxRtt = 0;
+            unsigned long minRtt = 0;
+            unsigned long averageRtt = 0;
+            unsigned long sumRtt = 0;
+            unsigned long responseProbe = 0;
+            unsigned long sumOfSquare = 0;
             for (probe = 0; probe < nprobes; ++probe) {
                 int             cc = 0, reset_timer = 0;
                 struct timeval  t1, t2;
                 struct timezone tz;
-                register unsigned long Rtt = 0;
+                unsigned long Rtt = 0;
 
                 gettimeofday(&t1, &tz);
 
@@ -5581,14 +5579,14 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
 
 int
-wait_for_reply(register int sock, register struct sockaddr_in *fromp,
-               register const struct timeval *tp, u_char * packet,
+wait_for_reply(int sock, struct sockaddr_in *fromp,
+               const struct timeval *tp, u_char * packet,
                int waittime)
 {
     fd_set          fds;
     struct timeval  now, wait;
     struct timezone tz;
-    register int    cc = 0;
+    int    cc = 0;
     socklen_t       fromlen = sizeof(*fromp);
 
     FD_ZERO(&fds);
@@ -5654,14 +5652,14 @@ struct udpiphdr {
 #define ui_len ui_i.tot_len
 
 void
-send_probe(struct sockaddr_in *whereto, register int seq, int ttl,
-           register struct timeval *tp, register struct ip *outip,
-           register struct udphdr *outudp, int packlen, int optlen,
+send_probe(struct sockaddr_in *whereto, int seq, int ttl,
+           struct timeval *tp, struct ip *outip,
+           struct udphdr *outudp, int packlen, int optlen,
            char *hostname, u_short ident, int sndsock, u_short port,
            struct outdata *outdata)
 {
-    register int    cc = 0;
-    register struct udpiphdr *ui = NULL, *oui = NULL;
+    int    cc = 0;
+    struct udpiphdr *ui = NULL, *oui = NULL;
     struct ip       tip;
 
     outip->ip_ttl = ttl;
@@ -5791,7 +5789,7 @@ send_probe_v6(int seq, int ttl, char *sendbuff, pid_t ident,
 unsigned long
 deltaT(struct timeval *t1p, struct timeval *t2p)
 {
-    register unsigned long dt;
+    unsigned long dt;
 
     dt = (unsigned long) ((long) (t2p->tv_sec - t1p->tv_sec) * 1000 +
                           (long) (t2p->tv_usec - t1p->tv_usec) / 1000);
@@ -5800,14 +5798,14 @@ deltaT(struct timeval *t1p, struct timeval *t2p)
 
 
 int
-packet_ok(register u_char * buf, int cc, register struct sockaddr_in *from,
-          register int seq, u_short ident, int pmtu, u_short port)
+packet_ok(u_char * buf, int cc, struct sockaddr_in *from,
+          int seq, u_short ident, int pmtu, u_short port)
 {
-    register struct icmp *icp = NULL;
-    register u_char type, code;
-    register int    hlen = 0;
+    struct icmp *icp = NULL;
+    u_char type, code;
+    int    hlen = 0;
 #ifndef ARCHAIC
-    register struct ip *ip = NULL;
+    struct ip *ip = NULL;
 
     ip = (struct ip *) buf;
     hlen = ip->ip_hl << 2;
@@ -5836,8 +5834,8 @@ packet_ok(register u_char * buf, int cc, register struct sockaddr_in *from,
     }
     if ((type == ICMP_TIMXCEED && code == ICMP_TIMXCEED_INTRANS) ||
         type == ICMP_UNREACH || type == ICMP_ECHOREPLY) {
-        register struct ip *hip;
-        register struct udphdr *up;
+        struct ip *hip;
+        struct udphdr *up;
 
         hip = &icp->icmp_ip;
         hlen = hip->ip_hl << 2;
@@ -5906,12 +5904,12 @@ packet_ok_v6(u_char * buf, int cc, struct sockaddr_in6 *from, int seq,
  */
 
 u_short
-in_checksum(register u_short * addr, register int len)
+in_checksum(u_short * addr, int len)
 {
-    register int    nleft = len;
-    register u_short *w = addr;
-    register u_short answer;
-    register int    sum = 0;
+    int    nleft = len;
+    u_short *w = addr;
+    u_short answer;
+    int    sum = 0;
 
     /*
      *  Our algorithm is simple, using a 32 bit accumulator (sum),
@@ -5944,7 +5942,7 @@ in_checksum(register u_short * addr, register int len)
  * Out is assumed to be >= in.
  */
 void
-tvsub(register struct timeval *out, register struct timeval *in)
+tvsub(struct timeval *out, struct timeval *in)
 {
 
     if ((out->tv_usec -= in->tv_usec) < 0) {
@@ -5956,13 +5954,13 @@ tvsub(register struct timeval *out, register struct timeval *in)
 
 
 struct hostinfo *
-gethostinfo(register char *hostname)
+gethostinfo(char *hostname)
 {
-    register int    n;
-    register struct hostent *hp = NULL;
-    register struct hostinfo *hi = NULL;
-    register char **p = NULL;
-    register u_int32_t addr, *ap = NULL;
+    int    n;
+    struct hostent *hp = NULL;
+    struct hostinfo *hi = NULL;
+    char **p = NULL;
+    u_int32_t addr, *ap = NULL;
 
     if (strlen(hostname) > 64) {
         Fprintf(stderr, "%s: hostname \"%.32s...\" is too long\n",
@@ -6012,7 +6010,7 @@ gethostinfo(register char *hostname)
 }
 
 void
-freehostinfo(register struct hostinfo *hi)
+freehostinfo(struct hostinfo *hi)
 {
     if (hi->name != NULL) {
         free(hi->name);
@@ -6023,7 +6021,7 @@ freehostinfo(register struct hostinfo *hi)
 }
 
 void
-setsin(register struct sockaddr_in *sin, register u_int32_t addr)
+setsin(struct sockaddr_in *sin, u_int32_t addr)
 {
 
     memset(sin, 0, sizeof(*sin));
@@ -6039,12 +6037,12 @@ setsin(register struct sockaddr_in *sin, register u_int32_t addr)
  * Return the source address for the given destination address
  */
 const char     *
-findsaddr(register const struct sockaddr_in *to,
-          register struct sockaddr_in *from)
+findsaddr(const struct sockaddr_in *to,
+          struct sockaddr_in *from)
 {
-    register int    i, n;
-    register FILE  *f;
-    register u_int32_t mask;
+    int    i, n;
+    FILE  *f;
+    u_int32_t mask;
     u_int32_t       dest, tmask;
     struct ifaddrlist *al;
     char            buf[256], tdevice[256], device[256];
@@ -6105,15 +6103,15 @@ findsaddr(register const struct sockaddr_in *to,
 }
 
 int
-ifaddrlist(register struct ifaddrlist **ipaddrp, register char *errbuf)
+ifaddrlist(struct ifaddrlist **ipaddrp, char *errbuf)
 {
-    register int    fd, nipaddr;
+    int    fd, nipaddr;
 #ifdef HAVE_SOCKADDR_SA_LEN
-    register int    n;
+    int    n;
 #endif
-    register struct ifreq *ifrp, *ifend, *ifnext;
-    register struct sockaddr_in *sin;
-    register struct ifaddrlist *al;
+    struct ifreq *ifrp, *ifend, *ifnext;
+    struct sockaddr_in *sin;
+    struct ifaddrlist *al;
     struct ifconf   ifc;
     struct ifreq    ibuf[(32 * 1024) / sizeof(struct ifreq)], ifr;
 #define MAX_IPADDR (sizeof(ibuf) / sizeof(ibuf[0]))
