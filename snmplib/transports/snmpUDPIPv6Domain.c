@@ -285,6 +285,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
                                  errno, strerror(errno)));
                 netsnmp_socketbase_close(t);
                 netsnmp_transport_free(t);
+                return NULL;
             }
         }
         /*
