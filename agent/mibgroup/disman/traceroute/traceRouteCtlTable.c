@@ -814,6 +814,7 @@ parse_traceRouteCtlTable(const char *token, char *line)
                               &StorageTmp->traceRouteCtlOwnerIndexLen);
     if (StorageTmp->traceRouteCtlOwnerIndex == NULL) {
         config_perror("invalid specification for traceRouteCtlOwnerIndex");
+        free(StorageTmp);
         return;
     }
 
@@ -823,6 +824,7 @@ parse_traceRouteCtlTable(const char *token, char *line)
                               &StorageTmp->traceRouteCtlTestNameLen);
     if (StorageTmp->traceRouteCtlTestName == NULL) {
         config_perror("invalid specification for traceRouteCtlTestName");
+        free(StorageTmp);
         return;
     }
 
@@ -838,6 +840,7 @@ parse_traceRouteCtlTable(const char *token, char *line)
     if (StorageTmp->traceRouteCtlTargetAddress == NULL) {
         config_perror
             ("invalid specification for traceRouteCtlTargetAddress");
+        free(StorageTmp);
         return;
     }
 
@@ -882,6 +885,7 @@ parse_traceRouteCtlTable(const char *token, char *line)
     if (StorageTmp->traceRouteCtlSourceAddress == NULL) {
         config_perror
             ("invalid specification for traceRouteCtlSourceAddress");
+        free(StorageTmp);
         return;
     }
 
@@ -896,6 +900,7 @@ parse_traceRouteCtlTable(const char *token, char *line)
     if (StorageTmp->traceRouteCtlMiscOptions == NULL) {
         config_perror
             ("invalid specification for traceRouteCtlMiscOptions");
+        free(StorageTmp);
         return;
     }
 
@@ -935,6 +940,7 @@ parse_traceRouteCtlTable(const char *token, char *line)
                               &StorageTmp->traceRouteCtlDescrLen);
     if (StorageTmp->traceRouteCtlDescr == NULL) {
         config_perror("invalid specification for traceRouteCtlTrapDescr");
+        free(StorageTmp);
         return;
     }
 
@@ -949,6 +955,7 @@ parse_traceRouteCtlTable(const char *token, char *line)
     if (StorageTmp->traceRouteCtlTrapGeneration == NULL) {
         config_perror
             ("invalid specification for traceRouteCtlTrapGeneration");
+        free(StorageTmp);
         return;
     }
 
@@ -963,6 +970,7 @@ parse_traceRouteCtlTable(const char *token, char *line)
                               &StorageTmp->traceRouteCtlTypeLen);
     if (StorageTmp->traceRouteCtlType == NULL) {
         config_perror("invalid specification for traceRouteCtlType");
+        free(StorageTmp);
         return;
     }
 
@@ -4917,6 +4925,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
         }
 
         close(sndsock);
+        close(s);
 
         if (flag == 1) {
             DEBUGMSGTL(("traceRouteProbeHistoryTable", "path changed!\n"));

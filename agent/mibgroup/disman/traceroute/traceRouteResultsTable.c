@@ -166,6 +166,7 @@ parse_traceRouteResultsTable(const char *token, char *line)
                               &StorageTmp->traceRouteCtlOwnerIndexLen);
     if (StorageTmp->traceRouteCtlOwnerIndex == NULL) {
         config_perror("invalid specification for traceRouteCtlOwnerIndex");
+        free(StorageTmp);
         return;
     }
 
@@ -175,6 +176,7 @@ parse_traceRouteResultsTable(const char *token, char *line)
                               &StorageTmp->traceRouteCtlTestNameLen);
     if (StorageTmp->traceRouteCtlTestName == NULL) {
         config_perror("invalid specification for traceRouteCtlTestName");
+        free(StorageTmp);
         return;
     }
 
@@ -201,6 +203,7 @@ parse_traceRouteResultsTable(const char *token, char *line)
     if (StorageTmp->traceRouteResultsIpTgtAddr == NULL) {
         config_perror
             ("invalid specification for traceRouteResultsIpTgtAddr");
+        free(StorageTmp);
         return;
     }
 
@@ -220,6 +223,7 @@ parse_traceRouteResultsTable(const char *token, char *line)
     if (StorageTmp->traceRouteResultsLastGoodPath == NULL) {
         config_perror
             ("invalid specification for traceRouteResultsLastGoodPath!");
+        free(StorageTmp);
         return;
     }
 
