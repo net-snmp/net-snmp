@@ -304,7 +304,8 @@ netsnmp_access_interface_entry_create(const char *name, oid if_index)
         entry->index = if_index;
     _access_interface_entry_save_name(name, entry->index);
 
-    entry->descr = strdup(name);
+    if (name)
+        entry->descr = strdup(name);
 
     /*
      * make some assumptions
