@@ -212,6 +212,8 @@ netsnmp_feature_child_of(calculate_sectime_diff, system_all)
 static void
 _daemon_prep(int stderr_log)
 {
+    int fd;
+
     /* Avoid keeping any directory in use. */
     chdir("/");
 
@@ -222,16 +224,17 @@ _daemon_prep(int stderr_log)
      * Close inherited file descriptors to avoid
      * keeping unnecessary references.
      */
-    close(0);
-    close(1);
-    close(2);
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 
     /*
      * Redirect std{in,out,err} to /dev/null, just in case.
      */
-    open("/dev/null", O_RDWR);
-    dup(0);
-    dup(0);
+    if ((fd = open("/dev/null", O_RDWR)) >= 0) {
+        dup2(fd, STDOUT_FILENO);
+        dup2(fd, STDERR_FILENO);
+    }
 }
 #endif
 
