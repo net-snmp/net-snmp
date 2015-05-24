@@ -4774,7 +4774,7 @@ snmp_map_enum(tag, val, iflag, best_guess)
 	{
 	   struct tree *tp  = NULL;
            struct enum_list *ep;
-           char str_buf[STR_BUF_SIZE];
+           static char str_buf[STR_BUF_SIZE];
            int ival;
 
            RETVAL = NULL;
@@ -4817,7 +4817,7 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 	int		include_module_name
 	CODE:
 	{
-           char str_buf[STR_BUF_SIZE];
+           static char str_buf[STR_BUF_SIZE];
            char str_buf_temp[STR_BUF_SIZE];
            oid oid_arr[MAX_OID_LEN];
            size_t oid_arr_len = MAX_OID_LEN;
@@ -4885,9 +4885,9 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 	       if (verbose) warn("snmp_translate_obj:unknown translation mode: %d\n", mode);
            }
            if (*str_buf) {
-              RETVAL = (char*)str_buf;
+              RETVAL = str_buf;
            } else {
-              RETVAL = (char*)NULL;
+              RETVAL = NULL;
            }
            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, old_format);
 	}
