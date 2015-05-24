@@ -73,15 +73,16 @@ pingProbeHistoryTable_inadd(struct pingProbeHistoryTable_data *thedata);
 void
 pingProbeHistoryTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr = NULL;
+    struct header_complex_index *hciptr, *nhciptr;
 
     DEBUGMSGTL(("pingProbeHistoryTable", "cleanerout  "));
-    for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
+    for (hciptr = thestuff; hciptr; hciptr = nhciptr) {
+        nhciptr = hciptr->next;
         header_complex_extract_entry(&pingProbeHistoryTableStorage, hciptr);
         DEBUGMSGTL(("pingProbeHistoryTable", "cleaner  "));
     }
-
 }
+
 void
 init_pingProbeHistoryTable(void)
 {
