@@ -451,6 +451,8 @@ var_smux_write(int action,
              */
             packet_len = len;
             ptr = asn_parse_header(buf, &packet_len, &type);
+            if (ptr == NULL)
+                return SNMP_ERR_GENERR;
             packet_len += (ptr - buf);
             if (len > (ssize_t)packet_len) {
                 /*
@@ -486,6 +488,8 @@ var_smux_write(int action,
                 DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n",
                          rptr->sr_fd));
                 ptr = asn_parse_header(buf, &len, &type);
+                if (ptr == NULL)
+                    return SNMP_ERR_GENERR;
                 smux_trap_process(ptr, &len);
 
 
@@ -705,6 +709,8 @@ smux_process(int fd)
      */
     packet_len = length;
     ptr = asn_parse_header(data, &packet_len, &type);
+    if (ptr == NULL)
+        return -1;
     packet_len += (ptr - data);
     if (length > packet_len) {
         /*
@@ -1431,6 +1437,8 @@ smux_snmp_process(int exact,
          */
         packet_len = length;
         ptr = asn_parse_header(result, &packet_len, &type);
+        if (ptr == NULL)
+            return NULL;
         packet_len += (ptr - result);
         if (length > packet_len) {
             /*
@@ -1464,6 +1472,8 @@ smux_snmp_process(int exact,
             DEBUGMSGTL(("smux", "[smux_snmp_process] Received trap\n"));
             DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n", sd));
             ptr = asn_parse_header(result, (size_t *) &length, &type);
+            if (ptr == NULL)
+                return NULL;
             smux_trap_process(ptr, (size_t *) &length);
 
             /*
