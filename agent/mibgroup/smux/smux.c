@@ -1995,8 +1995,6 @@ smux_trap_process(u_char * rsp, size_t * len)
             /*
              * XXX 
              */
-            if (len == NULL)
-                goto err;
             var_val_len = SMUXMAXSTRLEN;
             asn_parse_string(var_val, &maxlen, &vartype,
                              smux_str, &var_val_len);
@@ -2019,8 +2017,6 @@ smux_trap_process(u_char * rsp, size_t * len)
             /*
              * XXX 
              */
-            if (len == NULL)
-                goto err;
             var_val_len = SMUXMAXSTRLEN;
             asn_parse_bitstring(var_val, &maxlen, &vartype,
                                 smux_str, &var_val_len);
