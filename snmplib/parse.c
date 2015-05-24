@@ -3689,6 +3689,10 @@ parse_imports(FILE * fp)
         type = get_token(fp, token, MAXTOKEN);
     }
 
+    /* Initialize modid in case the module name was missing. */
+    for (; i < import_count; ++i)
+        import_list[i].modid = -1;
+
     /*
      * Save the import information
      *   in the global module table
