@@ -125,13 +125,13 @@ usmDHUserKeyTable_allocate_data(void)
     if (NULL == rtn) {
         snmp_log(LOG_ERR, "unable to malloc memory for new "
                  "usmDHUserKeyTable_data.\n");
+    } else {
+        /*
+         * not real user, not in a list. mark for testing
+         */
+        rtn->next = (struct usmUser *) -1;
+        rtn->prev = (struct usmUser *) -1;
     }
-    /*
-     * not real user, not in a list. mark for testing
-     */
-    rtn->next = (struct usmUser *) -1;
-    rtn->prev = (struct usmUser *) -1;
-
     return rtn;
 }                               /* usmDHUserKeyTable_allocate_data */
 
