@@ -397,7 +397,10 @@ netsnmp_container *CONTAINER_DUP(netsnmp_container *x, void *ctx, u_int flags)
 int CONTAINER_FREE(netsnmp_container *x)
 {
     int  rc2, rc = 0;
-        
+
+    if (!x)
+        return rc;
+
     /** start at last container */
     while(x->next)
         x = x->next;
