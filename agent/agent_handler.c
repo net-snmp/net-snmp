@@ -1190,7 +1190,7 @@ netsnmp_inject_handler_into_subtree(netsnmp_subtree *tp, const char *name,
                         tptr->label_a, tptr->reginfo->handlerName));
             netsnmp_inject_handler_before(tptr->reginfo, _clone_handler(handler),
                                           before_what);
-        } else {
+        } else if (tptr->reginfo != NULL) {
             for (mh = tptr->reginfo->handler; mh != NULL; mh = mh->next) {
                 if (mh->handler_name && strcmp(mh->handler_name, name) == 0) {
                     DEBUGMSGTL(("injectHandler", "injecting handler into %s\n",
