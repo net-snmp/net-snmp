@@ -279,6 +279,7 @@ etherStatsTable_container_load(netsnmp_container * container)
         if (NULL == rowreq_ctx) {
             snmp_log(LOG_ERR, "memory allocation failed\n");
             close(fd);
+            etherstats_interface_name_list_free(list_head);
             return MFD_RESOURCE_UNAVAILABLE;
         }
 
