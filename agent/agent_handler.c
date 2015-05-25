@@ -327,6 +327,8 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
 int
 netsnmp_unregister_handler(netsnmp_handler_registration *reginfo)
 {
+    if (!reginfo)
+        return SNMPERR_SUCCESS;
     return unregister_mib_context(reginfo->rootoid, reginfo->rootoid_len,
                                   reginfo->priority,
                                   reginfo->range_subid, reginfo->range_ubound,
