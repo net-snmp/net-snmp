@@ -1336,7 +1336,11 @@ var_udp6(register struct variable * vp,
     DEBUGMSGOID(("mibII/ipv6", name, *length));
     DEBUGMSG(("mibII/ipv6", " %d\n", exact));
 
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 106250000 || defined(openbsd4)	/*1.6Y*/
+#if defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
+    if (!auto_nlist("udbtable", (char *) &udbtable, sizeof(udbtable)))
+        return NULL;
+    first = p = (caddr_t)udbtable.inpt_queue.tqh_first;
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 106250000 || defined(openbsd4)	/*1.6Y*/
     if (!auto_nlist("udbtable", (char *) &udbtable, sizeof(udbtable)))
         return NULL;
     first = p = (caddr_t)udbtable.inpt_queue.cqh_first;
@@ -1472,6 +1476,9 @@ var_udp6(register struct variable * vp,
       skip:
 #if defined(openbsd4)
         p = (caddr_t)in6pcb.inp_queue.cqe_next;
+	if (p == first) break;
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
+        p = (caddr_t)in6pcb.in6p_queue.tqe_next;
 	if (p == first) break;
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 106250000	/*1.6Y*/
         p = (caddr_t)in6pcb.in6p_queue.cqe_next;
@@ -1783,7 +1790,11 @@ var_tcp6(register struct variable * vp,
 #if defined(__NetBSD__) && __NetBSD_Version__ >= 106250000 || defined(openbsd4)	/*1.6Y*/
     if (!auto_nlist("tcbtable", (char *) &tcbtable, sizeof(tcbtable)))
         return NULL;
+#if defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
+    first = p = (caddr_t)tcbtable.inpt_queue.tqh_first;
+#else
     first = p = (caddr_t)tcbtable.inpt_queue.cqh_first;
+#endif
 #elif !defined(freebsd3) && !defined(darwin)
     if (!auto_nlist("tcb6", (char *) &tcb6, sizeof(tcb6)))
         return NULL;
@@ -1927,6 +1938,9 @@ var_tcp6(register struct variable * vp,
       skip:
 #if defined(openbsd4)
         p = (caddr_t)in6pcb.inp_queue.cqe_next;
+	if (p == first) break;
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
+        p = (caddr_t)in6pcb.in6p_queue.tqe_next;
 	if (p == first) break;
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 106250000 || defined(openbsd4)	/*1.6Y*/
         p = (caddr_t)in6pcb.in6p_queue.cqe_next;
