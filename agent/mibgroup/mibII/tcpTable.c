@@ -1023,7 +1023,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     /*
      *  Set up a linked list
      */
-    entry  = table.inpt_queue.cqh_first;
+    entry  = table.INP_FIRST_SYMBOL;
     while (entry) {
    
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
@@ -1047,7 +1047,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 	nnew->inp_next = tcp_head;
 	tcp_head   = nnew;
 
-        if (entry == table.inpt_queue.cqh_first)
+        if (entry == table.INP_FIRST_SYMBOL)
             break;
     }
 

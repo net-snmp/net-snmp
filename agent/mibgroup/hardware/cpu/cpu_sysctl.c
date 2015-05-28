@@ -29,6 +29,9 @@
 #ifdef HAVE_VM_VM_EXTERN_H
 #include <vm/vm_extern.h>
 #endif
+#ifdef HAVE_UVM_UVM_EXTERN_H
+#include <uvm/uvm_extern.h>
+#endif
 
 void _cpu_copy_stats( netsnmp_cpu_info *cpu );
 

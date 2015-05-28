@@ -737,7 +737,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     /*
      *  Set up a linked list
      */
-    entry  = table.inpt_queue.cqh_first;
+    entry  = table.INP_FIRST_SYMBOL;
     while (entry) {
    
         nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
@@ -749,11 +749,11 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
             break;
         }
 
-        entry    = nnew->inp_queue.cqe_next;	/* Next kernel entry */
-	nnew->inp_queue.cqe_next = udp_head;
+        entry    = nnew->INP_NEXT_SYMBOL;	/* Next kernel entry */
+	nnew->INP_NEXT_SYMBOL = udp_head;
 	udp_head = nnew;
 
-        if (entry == table.inpt_queue.cqh_first)
+        if (entry == table.INP_FIRST_SYMBOL)
             break;
     }
 
