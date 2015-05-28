@@ -131,6 +131,20 @@
 #include <syslog.h>
 #endif
 
+#if HAVE_KVM_GETFILES
+#if defined(HAVE_KVM_GETFILE2) || !defined(openbsd5)
+#undef HAVE_KVM_GETFILES
+#endif
+#endif
+
+#if HAVE_KVM_GETFILES
+#include <kvm.h>
+#include <sys/sysctl.h>
+#define _KERNEL
+#include <sys/file.h>
+#undef _KERNEL
+#endif
+
 #ifdef MIB_IPCOUNTER_SYMBOL
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
@@ -1302,6 +1316,91 @@ var_icmpv6Entry(register struct variable * vp,
 #endif
 }
 
+#if HAVE_KVM_GETFILES
+
+u_char         *
+var_udp6(register struct variable * vp,
+         oid * name,
+         size_t * length,
+         int exact, size_t * var_len, WriteMethod ** write_method)
+{
+    oid             newname[MAX_OID_LEN];
+    oid             savname[MAX_OID_LEN];
+    int             result, count, found, savnameLen;
+    int             p, i, j;
+    u_char         *sa, *savsa;
+    struct kinfo_file *udp;
+
+    udp = kvm_getfiles(kd, KERN_FILE_BYFILE, DTYPE_SOCKET, sizeof(struct kinfo_file), &count);
+    found = savnameLen = 0;
+    memcpy(newname, vp->name, (int) vp->namelen * sizeof(oid));
+    for (p = 0; p < count; p++) {
+	if (udp[p].so_protocol != IPPROTO_UDP || udp[p].so_family != AF_INET6)
+	    continue;
+	j = vp->namelen;
+        sa = (u_char *)&udp[p].inp_laddru[0];
+	for (i = 0; i < sizeof(struct in6_addr); i++)
+            newname[j++] = sa[i];
+        newname[j++] = ntohs(udp[p].inp_lport);
+        if (IN6_IS_ADDR_LINKLOCAL((struct in6_addr *)sa))
+            newname[j++] = ntohs(sa[2]);
+        else
+            newname[j++] = 0;
+        DEBUGMSGTL(("mibII/ipv6", "var_udp6 new: %d %d ",
+                    (int) vp->namelen, j));
+        DEBUGMSGOID(("mibII/ipv6", newname, j));
+        DEBUGMSG(("mibII/ipv6", " %d\n", exact));
+
+        result = snmp_oid_compare(name, *length, newname, j);
+        if (exact && result == 0) {
+                savnameLen = j;
+                memcpy(savname, newname, j * sizeof(oid));
+                savsa = sa;
+                found++;
+                break;
+        } else if (!exact && result < 0) {
+            /*
+             *  take the least greater one
+             */
+            if (savnameLen == 0 || snmp_oid_compare(savname, savnameLen, newname, j) > 0) {
+                savnameLen = j;
+                savsa = sa;
+                memcpy(savname, newname, j * sizeof(oid));
+                    found++;
+            }
+        }
+    }
+    DEBUGMSGTL(("mibII/ipv6", "found=%d\n", found));
+    if (!found)
+        return NULL;
+    *length = savnameLen;
+    memcpy((char *) name, (char *) savname, *length * sizeof(oid));
+    *write_method = 0;
+    *var_len = sizeof(long);    /* default to 'long' results */
+
+/*
+ *     DEBUGMSGTL(("mibII/ipv6", "var_udp6 found: "));
+ *     DEBUGMSGOID(("mibII/ipv6", name, *length));
+ *     DEBUGMSG(("mibII/ipv6", " %d\n", exact));
+ */
+    DEBUGMSGTL(("mibII/ipv6", "magic=%d\n", vp->magic));
+    switch (vp->magic) {
+    case IPV6UDPIFINDEX:
+        if (IN6_IS_ADDR_LINKLOCAL((struct in6_addr *)savsa))
+            long_return = ntohs(savsa[2]);
+        else
+            long_return = 0;
+        return (u_char *) &long_return;
+    default:
+        break;
+    }
+    ERROR_MSG("");
+
+    return NULL;
+}
+
+#else
+
 u_char         *
 var_udp6(register struct variable * vp,
          oid * name,
@@ -1531,6 +1630,7 @@ var_udp6(register struct variable * vp,
     ERROR_MSG("");
     return NULL;
 }
+#endif /* KVM_GETFILES */
 
 #ifdef TCP6
 u_char         *
@@ -1718,6 +1818,110 @@ var_tcp6(register struct variable * vp,
     case IPV6TCPCONNSTATE:
         long_return = tcp6statemap[in6pcb.t_state];
         return (u_char *) & long_return;
+    default:
+        break;
+    }
+    ERROR_MSG("");
+    return NULL;
+}
+
+#elif HAVE_KVM_GETFILES
+
+u_char         *
+var_tcp6(register struct variable * vp,
+         oid * name,
+         size_t * length,
+         int exact, size_t * var_len, WriteMethod ** write_method)
+{
+    oid             newname[MAX_OID_LEN];
+    oid             savname[MAX_OID_LEN];
+    int             result, count, found, savnameLen, savstate;
+    int             p, i, j;
+    u_char         *lsa, *savlsa, *fsa, *savfsa;
+    struct kinfo_file *tcp;
+    static int      tcp6statemap[16];
+    static int      initialized = 0;
+
+    if (!initialized) {
+        tcp6statemap[TCPS_CLOSED] = 1;
+        tcp6statemap[TCPS_LISTEN] = 2;
+        tcp6statemap[TCPS_SYN_SENT] = 3;
+        tcp6statemap[TCPS_SYN_RECEIVED] = 4;
+        tcp6statemap[TCPS_ESTABLISHED] = 5;
+        tcp6statemap[TCPS_CLOSE_WAIT] = 8;
+        tcp6statemap[TCPS_FIN_WAIT_1] = 6;
+        tcp6statemap[TCPS_CLOSING] = 10;
+        tcp6statemap[TCPS_LAST_ACK] = 9;
+        tcp6statemap[TCPS_FIN_WAIT_2] = 7;
+        tcp6statemap[TCPS_TIME_WAIT] = 11;
+        initialized++;
+    }
+
+    tcp = kvm_getfiles(kd, KERN_FILE_BYFILE, DTYPE_SOCKET, sizeof(struct kinfo_file), &count);
+    found = savnameLen = 0;
+    memcpy(newname, vp->name, (int) vp->namelen * sizeof(oid));
+    for (p = 0; p < count; p++) {
+	if (tcp[p].so_protocol != IPPROTO_TCP || tcp[p].so_family != AF_INET6)
+	    continue;
+	j = vp->namelen;
+        lsa = (u_char *)&tcp[p].inp_laddru[0];
+	for (i = 0; i < sizeof(struct in6_addr); i++)
+            newname[j++] = lsa[i];
+        newname[j++] = ntohs(tcp[p].inp_lport);
+        fsa = (u_char *)&tcp[p].inp_faddru[0];
+	for (i = 0; i < sizeof(struct in6_addr); i++)
+            newname[j++] = fsa[i];
+        newname[j++] = ntohs(tcp[p].inp_fport);
+        if (IN6_IS_ADDR_LINKLOCAL((struct in6_addr *)lsa))
+            newname[j++] = ntohs(lsa[2]);
+        else
+            newname[j++] = 0;
+        DEBUGMSGTL(("mibII/ipv6", "var_udp6 new: %d %d ",
+                    (int) vp->namelen, j));
+        DEBUGMSGOID(("mibII/ipv6", newname, j));
+        DEBUGMSG(("mibII/ipv6", " %d\n", exact));
+
+        result = snmp_oid_compare(name, *length, newname, j);
+        if (exact && result == 0) {
+                savnameLen = j;
+                memcpy(savname, newname, j * sizeof(oid));
+                savlsa = lsa;
+                savfsa = fsa;
+                savstate = tcp[p].t_state;
+                found++;
+                break;
+        } else if (!exact && result < 0) {
+            /*
+             *  take the least greater one
+             */
+            if (savnameLen == 0 || snmp_oid_compare(savname, savnameLen, newname, j) > 0) {
+                savnameLen = j;
+                savlsa = lsa;
+                savfsa = fsa;
+                savstate = tcp[p].t_state;
+                memcpy(savname, newname, j * sizeof(oid));
+		found++;
+            }
+        }
+    }
+    DEBUGMSGTL(("mibII/ipv6", "found=%d\n", found));
+    if (!found)
+        return NULL;
+    *length = savnameLen;
+    memcpy((char *) name, (char *) savname, *length * sizeof(oid));
+    *write_method = 0;
+    *var_len = sizeof(long);    /* default to 'long' results */
+
+/*
+ *     DEBUGMSGTL(("mibII/ipv6", "var_udp6 found: "));
+ *     DEBUGMSGOID(("mibII/ipv6", name, *length));
+ *     DEBUGMSG(("mibII/ipv6", " %d\n", exact));
+ */
+    DEBUGMSGTL(("mibII/ipv6", "magic=%d\n", vp->magic));
+    switch (vp->magic) {
+    case IPV6TCPCONNSTATE:
+	long_return = tcp6statemap[savstate & 0x0F];
+        return (u_char *) &long_return;
     default:
         break;
     }
