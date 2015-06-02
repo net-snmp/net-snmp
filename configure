@@ -15720,7 +15720,7 @@ $as_echo "none" >&6; }
 	fi
 	;;
 
-    darwin8*|darwin9*|darwin10*|darwin11*|darwin12*|darwin13*)
+    darwin8*|darwin9*|darwin1[0-4]*)
         #   Flat Namespace linking                      (Mac OS/X)
         #
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether darwin ld might need -flat_namespace" >&5
