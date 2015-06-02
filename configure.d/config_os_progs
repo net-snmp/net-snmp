@@ -401,7 +401,7 @@ case $target_os in
 	fi
 	;;
 
-    darwin8*|darwin9*|darwin10*|darwin11*|darwin12*|darwin13*)
+    darwin8*|darwin9*|darwin1[[0-4]]*)
         #   Flat Namespace linking                      (Mac OS/X)
         #
         AC_MSG_CHECKING([whether darwin ld might need -flat_namespace])
