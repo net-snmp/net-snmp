@@ -114,6 +114,8 @@ debug_register_tokens(const char *tokens)
         return;
 
     newp = strdup(tokens);      /* strtok_r messes it up */
+    if (!newp)
+        return;
     cp = strtok_r(newp, DEBUG_TOKEN_DELIMITER, &st);
     while (cp) {
         if (strlen(cp) < MAX_DEBUG_TOKEN_LEN) {

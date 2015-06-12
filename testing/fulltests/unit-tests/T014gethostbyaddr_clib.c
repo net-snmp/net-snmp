@@ -56,6 +56,7 @@ SOCK_STARTUP;
     if (s >= 0) {
         if (bind(s, (struct sockaddr *) &sin6_addr, sizeof(sin6_addr)) >=
             0) {
+            addr = NULL;
             strcpy(buf, "(failed)");
             h = netsnmp_gethostbyaddr(&v6loop, sizeof(v6loop), AF_INET6);
             if (h) {
@@ -74,18 +75,18 @@ SOCK_STARTUP;
                     }
                     if (!ap)
                         strcpy(buf, "no AF_INET6 address found");
-                    if (addr)
-                        freeaddrinfo(addr);
                 } else {
                     snprintf(buf, sizeof(buf), "getaddrinfo() failed: %s",
                              strerror(errno));
                 }
             }
             OKF(h && (strcmp(h->h_name, "localhost") == 0 ||
-                      (res == 0 && memcmp(addr->ai_addr, &sin6_addr,
-                                          sizeof(sin6_addr)) == 0)),
+                      (res == 0 && addr && memcmp(addr->ai_addr, &sin6_addr,
+                                                  sizeof(sin6_addr)) == 0)),
                 ("::1 lookup (%s -> %s)", h ? h->h_name : "(failed)",
                  buf));
+            if (addr)
+                freeaddrinfo(addr);
             ran_test = 1;
         }
         close(s);

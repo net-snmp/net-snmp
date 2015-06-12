@@ -53,7 +53,7 @@ void init_cpu_linux( void ) {
             cpu->status = 2;  /* running */
             sprintf( cpu->name, "cpu%d", i );
 #if defined(__s390__) || defined(__s390x__)
-            strcat( cpu->descr, "An S/390 CPU" );
+            strlcat(cpu->descr, "An S/390 CPU", sizeof(cpu->descr));
 #endif
         }
 #if defined(__s390__) || defined(__s390x__)
@@ -63,8 +63,8 @@ void init_cpu_linux( void ) {
                 n++;
                 cpu = netsnmp_cpu_get_byIdx( i, 1 );
                 cpu->status = 2;  /* running */
-                sprintf( cpu->name, "cpu%d", i );
-                strcat( cpu->descr, "An S/390 CPU" );
+                sprintf(cpu->name, "cpu%d", i);
+                strlcat(cpu->descr, "An S/390 CPU", sizeof(cpu->descr));
             }
         }
 #endif
@@ -80,7 +80,7 @@ void init_cpu_linux( void ) {
 #ifdef DESCR2_FIELD
         if (!strncmp( buf, DESCR2_FIELD, strlen(DESCR2_FIELD))) {
             cp = strchr( buf, ':' );
-            strcat( cpu->descr, cp );
+            strlcat(cpu->descr, cp, sizeof(cpu->descr));
             cp = strchr( cpu->descr, '\n' );
             *cp = 0;
         }

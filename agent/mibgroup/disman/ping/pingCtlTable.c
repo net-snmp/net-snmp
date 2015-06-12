@@ -507,6 +507,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlSourceAddressLen);
     if (StorageTmp->pingCtlSourceAddress == NULL) {
         config_perror("invalid specification for pingCtlSourceAddress");
+        free(StorageTmp);
         return;
     }
 
@@ -1944,6 +1945,7 @@ run_ping(unsigned int clientreg, void *clientarg)
                        sz_opt);
         if (err < 0) {
             perror("setsockopt(RAW_CHECKSUM)");
+            free(packet);
             return;
         }
 
@@ -1967,6 +1969,7 @@ run_ping(unsigned int clientreg, void *clientarg)
 
         if (err < 0) {
             perror("setsockopt(ICMP6_FILTER)");
+            free(packet);
             return;
         }
 
@@ -1975,6 +1978,7 @@ run_ping(unsigned int clientreg, void *clientarg)
             if (setsockopt(icmp_sock, IPPROTO_IPV6, IPV6_HOPLIMIT,
                            &on, sizeof(on)) == -1) {
                 perror("can't receive hop limit");
+                free(packet);
                 return;
             }
         }
@@ -4959,6 +4963,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
             msg.msg_iovlen = 1;
             msg.msg_control = ans_data;
             msg.msg_controllen = sizeof(ans_data);
+            msg.msg_flags = 0;
 
             cc = recvmsg(icmp_sock, &msg, polling);
             time_t          timep;

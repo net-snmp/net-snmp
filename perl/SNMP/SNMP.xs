@@ -1831,7 +1831,7 @@ _bulkwalk_send_pdu(walk_context *context)
       DBPRT(2,(DBOUT "bulkwalk_send_pdu(): snmp_async_send => 0x%08X\n", reqid));
 
       if (reqid == 0) {
-	 snmp_return_err(ss, *err_num_svp, *err_ind_svp, *err_str_svp);
+	 snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
 	 goto err;
       }
 
@@ -2175,8 +2175,8 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       __get_type_str(type, type_str);
       av_store(varbind, VARBIND_TYPE_F, newSVpv(type_str, strlen(type_str)));
 
-      len=__snprint_value(str_buf, sizeof(str_buf),
-                         vars, tp, type, context->sprintval_f);
+      len = __snprint_value(str_buf, sizeof(str_buf) - 1,
+                            vars, tp, type, context->sprintval_f);
       av_store(varbind, VARBIND_VAL_F, newSVpv(str_buf, len));
 
       str_buf[len] = '\0';
@@ -3173,7 +3173,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
-					snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
+                    snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
 		 goto done;
@@ -3363,7 +3363,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
-	  	    snmp_return_err(ss, *err_num_svp, *err_ind_svp, *err_str_svp);  
+		    snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
 		 goto done;
@@ -3604,7 +3604,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
-					snmp_return_err(ss, *err_num_svp, *err_ind_svp, *err_str_svp);
+                    snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
 		 goto done;
@@ -3846,7 +3846,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
-					snmp_return_err(ss, *err_num_svp, *err_ind_svp, *err_str_svp);
+                    snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
 		 goto done;
@@ -4707,7 +4707,7 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
-					snmp_return_err(ss, *err_num_svp, *err_ind_svp, *err_str_svp);
+                    snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
 		 goto done;
@@ -4774,7 +4774,7 @@ snmp_map_enum(tag, val, iflag, best_guess)
 	{
 	   struct tree *tp  = NULL;
            struct enum_list *ep;
-           char str_buf[STR_BUF_SIZE];
+           static char str_buf[STR_BUF_SIZE];
            int ival;
 
            RETVAL = NULL;
@@ -4817,7 +4817,7 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 	int		include_module_name
 	CODE:
 	{
-           char str_buf[STR_BUF_SIZE];
+           static char str_buf[STR_BUF_SIZE];
            char str_buf_temp[STR_BUF_SIZE];
            oid oid_arr[MAX_OID_LEN];
            size_t oid_arr_len = MAX_OID_LEN;
@@ -4885,9 +4885,9 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 	       if (verbose) warn("snmp_translate_obj:unknown translation mode: %d\n", mode);
            }
            if (*str_buf) {
-              RETVAL = (char*)str_buf;
+              RETVAL = str_buf;
            } else {
-              RETVAL = (char*)NULL;
+              RETVAL = NULL;
            }
            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, old_format);
 	}

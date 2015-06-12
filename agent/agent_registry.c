@@ -793,12 +793,12 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
     /*  Handle new subtrees that start in virgin territory.  */
 
     if (tree1 == NULL) {
-        netsnmp_subtree *new2 = NULL;
+        /*netsnmp_subtree *new2 = NULL;*/
 	/*  Is there any overlap with later subtrees?  */
 	if (tree2 && snmp_oid_compare(new_sub->end_a, new_sub->end_len,
 				      tree2->start_a, tree2->start_len) > 0) {
-	    new2 = netsnmp_subtree_split(new_sub, 
-					 tree2->start_a, tree2->start_len);
+	    /*new2 =*/
+            netsnmp_subtree_split(new_sub, tree2->start_a, tree2->start_len);
 	}
 
 	/*  Link the new subtree (less any overlapping region) with the list of
@@ -820,11 +820,15 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 
             netsnmp_subtree_change_next(new_sub, tree2);
 
+#if 0
+            /* The code below cannot be reached which is why it has been
+               surrounded with #if 0 / #endif. */
 	    /* If there was any overlap, recurse to merge in the overlapping
 	       region (including anything that may follow the overlap).  */
 	    if (new2) {
 		return netsnmp_subtree_load(new2, context_name);
 	    }
+#endif
 	}
     } else {
 	/*  If the new subtree starts *within* an existing registration

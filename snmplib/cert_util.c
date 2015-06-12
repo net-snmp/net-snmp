@@ -1605,6 +1605,8 @@ _cert_indexes_load(void)
     subdirs[0] = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR);
     confpath_copy = strdup(confpath);
+    if (!confpath_copy)
+        return;
     for ( dir = strtok_r(confpath_copy, ENV_SEPARATOR, &st);
           dir; dir = strtok_r(NULL, ENV_SEPARATOR, &st)) {
 
@@ -3122,7 +3124,7 @@ _find_tlstmParams_fingerprint(const char *name)
     if ((NULL == result) || (NULL == result->fingerprint))
         return NULL;
 
-    return strdup(result->fingerprint);
+    return result->fingerprint;
 }
 /*
  * END snmpTlstmParmsTable data
@@ -3209,6 +3211,13 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
                                  size_t *fp_len, u_char *ht)
 {
     size_t fp_len_save = *fp_len;
+
+    /*
+     * Calling this function with name == NULL, fp == NULL or id == NULL would
+     * trigger a memory leak.
+     */
+    if (!name || !fp || !id)
+        return -1;
 
     *line = read_config_read_octet_string(*line, (u_char **)&name, name_len);
     if (NULL == *line) {

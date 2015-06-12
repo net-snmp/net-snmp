@@ -767,6 +767,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         unsigned int    lp, fp;
         int             state, uid;
 
+        memset(&pcb, 0, sizeof(pcb));
         if (6 != sscanf(line,
                         "%*d: %x:%x %x:%x %x %*X:%*X %*X:%*X %*X %d",
                         &pcb.inp_laddr.s_addr, &lp,

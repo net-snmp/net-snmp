@@ -116,6 +116,11 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
             return 0;
         }
 
+#if 0
+        /*
+         * This code is unreachable because of the return statements above.
+         * Comment it out to avoid that Coverity complains about this code.
+         */
         if (0 == depth && verify_info &&
             (verify_info->flags & VRFY_PARENT_WAS_OK)) {
             DEBUGMSGTL(("tls_x509:verify", "verify_callback called with: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err)));
@@ -123,6 +128,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
             SNMP_FREE(fingerprint);
             return 1; /* we'll check the hostname later at this level */
         }
+#endif
     }
 
     if (0 == ok)

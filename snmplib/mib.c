@@ -354,8 +354,8 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
 {
     int line_len = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                       NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH);
-    if (!line_len)
-        line_len=len;
+    if (line_len <= 0)
+        line_len = len;
 
     for (; (int)len > line_len; len -= line_len) {
         if(!_sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, line_len))
@@ -2696,6 +2696,8 @@ netsnmp_init_mib(void)
      */
     netsnmp_fixup_mib_directory();
     env_var = strdup(netsnmp_get_mib_directory());
+    if (!env_var)
+        return;
     netsnmp_mibindex_load();
 
     DEBUGMSGTL(("init_mib",
@@ -5776,8 +5778,6 @@ _add_strings_to_oid(void *tp, char *cp,
                 (*objidlen)++;
             }
 
-            if (!cp)
-                goto bad_id;
             while (*cp && *cp != doingquote) {
                 if (*objidlen >= maxlen)
                     goto bad_id;
@@ -6177,7 +6177,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
 {
     size_t          savlen = *rootlen;
     static size_t   tmpbuf_len = 0;
-    static char    *tmpbuf;
+    static char    *tmpbuf = NULL;
     const char     *suffix, *prefix;
 
     suffix = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
@@ -6191,7 +6191,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
             prefix = "";
         if ((strlen(suffix) + strlen(prefix) + strlen(argv) + 2) > tmpbuf_len) {
             tmpbuf_len = strlen(suffix) + strlen(argv) + strlen(prefix) + 2;
-            tmpbuf = (char *)realloc(tmpbuf, tmpbuf_len);
+            tmpbuf = malloc(tmpbuf_len);
         }
         snprintf(tmpbuf, tmpbuf_len, "%s%s%s%s", prefix, argv,
                  ((suffix[0] == '.' || suffix[0] == '\0') ? "" : "."),
@@ -6204,31 +6204,37 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_RANDOM_ACCESS)
         || strchr(argv, ':')) {
         if (get_node(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
     } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REGEX_ACCESS)) {
 	clear_tree_flags(tree_head);
         if (get_wild_node(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
     } else {
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         if (read_objid(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
 #ifndef NETSNMP_DISABLE_MIB_LOADING
         *rootlen = savlen;
         if (get_node(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
         *rootlen = savlen;
         DEBUGMSGTL(("parse_oid", "wildly parsing\n"));
 	clear_tree_flags(tree_head);
         if (get_wild_node(argv, root, rootlen)) {
+            free(tmpbuf);
             return root;
         }
     }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
+    free(tmpbuf);
     return NULL;
 }
 

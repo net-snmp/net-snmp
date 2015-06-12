@@ -178,6 +178,7 @@ int _netsnmp_ioctl_route_delete_v4(netsnmp_route_entry * entry)
     else
 	mask.sin_addr.s_addr = entry->rt_mask;
 
+    memset(&gateway, 0, sizeof(gateway));
     gateway.sin_family = AF_INET;
     memcpy(&gateway.sin_addr.s_addr, entry->rt_nexthop, 4);
 

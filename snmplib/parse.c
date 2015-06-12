@@ -2015,7 +2015,7 @@ parse_objectid(FILE * fp, char *name)
         if (op->label && (nop->label || (nop->subid != -1))) {
             np = alloc_node(nop->modid);
             if (np == NULL)
-                return (NULL);
+                goto err;
             if (root == NULL)
                 root = np;
 
@@ -2025,19 +2025,13 @@ parse_objectid(FILE * fp, char *name)
                  * The name for this node is the label for this entry 
                  */
                 np->label = strdup(name);
-                if (np->label == NULL) {
-                    SNMP_FREE(np->parent);
-                    SNMP_FREE(np);
-                    return (NULL);
-                }
+                if (np->label == NULL)
+                    goto err;
             } else {
                 if (!nop->label) {
                     nop->label = (char *) malloc(20 + ANON_LEN);
-                    if (nop->label == NULL) {
-                        SNMP_FREE(np->parent);
-                        SNMP_FREE(np);
-                        return (NULL);
-                    }
+                    if (nop->label == NULL)
+                        goto err;
                     sprintf(nop->label, "%s%d", ANON, anonymous++);
                 }
                 np->label = strdup(nop->label);
@@ -2057,6 +2051,7 @@ parse_objectid(FILE * fp, char *name)
         }                       /* end if(op->label... */
     }
 
+out:
     /*
      * free the loid array 
      */
@@ -2066,6 +2061,13 @@ parse_objectid(FILE * fp, char *name)
     }
 
     return root;
+
+err:
+    for (; root; root = np) {
+        np = root->next;
+        free_node(root);
+    }
+    goto out;
 }
 
 static int
@@ -2391,20 +2393,24 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
             while (type != SYNTAX && type != ENDOFFILE) {
                 if (type == DISPLAYHINT) {
                     type = get_token(fp, token, MAXTOKEN);
-                    if (type != QUOTESTRING)
+                    if (type != QUOTESTRING) {
                         print_error("DISPLAY-HINT must be string", token,
                                     type);
-                    else
+                    } else {
+                        free(hint);
                         hint = strdup(token);
+                    }
                 } else if (type == DESCRIPTION &&
                            netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                                   NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
                     type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
-                    if (type != QUOTESTRING)
+                    if (type != QUOTESTRING) {
                         print_error("DESCRIPTION must be string", token,
                                     type);
-                    else
+                    } else {
+                        free(descr);
                         descr = strdup(quoted_string_buffer);
+                    }
                 } else
                     type =
                         get_token(fp, quoted_string_buffer, MAXQUOTESTR);
@@ -2414,8 +2420,7 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
                 type = get_token(fp, token, MAXTOKEN);
                 if (type != IDENTIFIER) {
                     print_error("Expected IDENTIFIER", token, type);
-                    SNMP_FREE(hint);
-                    return NULL;
+                    goto err;
                 }
                 type = OBJID;
             }
@@ -2423,7 +2428,7 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
             type = get_token(fp, token, MAXTOKEN);
             if (type != IDENTIFIER) {
                 print_error("Expected IDENTIFIER", token, type);
-                return NULL;
+                goto err;
             }
             type = OBJID;
         }
@@ -2442,14 +2447,12 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
 
         if (i == MAXTC) {
             print_error("Too many textual conventions", token, type);
-            SNMP_FREE(hint);
-            return NULL;
+            goto err;
         }
         if (!(type & SYNTAX_MASK)) {
             print_error("Textual convention doesn't map to real type",
                         token, type);
-            SNMP_FREE(hint);
-            return NULL;
+            goto err;
         }
         tcp = &tclist[i];
         tcp->modid = current_module;
@@ -2470,6 +2473,11 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
         }
         return NULL;
     }
+
+err:
+    SNMP_FREE(descr);
+    SNMP_FREE(hint);
+    return NULL;
 }
 
 
@@ -3680,6 +3688,10 @@ parse_imports(FILE * fp)
         }
         type = get_token(fp, token, MAXTOKEN);
     }
+
+    /* Initialize modid in case the module name was missing. */
+    for (; i < import_count; ++i)
+        import_list[i].modid = -1;
 
     /*
      * Save the import information

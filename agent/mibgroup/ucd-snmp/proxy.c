@@ -156,6 +156,7 @@ proxy_parse_config(const char *token, char *line)
     if (!snmp_parse_oid(args[arg++], newp->name, &newp->name_len)) {
         snmp_perror("proxy");
         config_perror("illegal proxy oid specified\n");
+        free(newp);
         return;
     }
 
@@ -165,6 +166,7 @@ proxy_parse_config(const char *token, char *line)
         if (!snmp_parse_oid(args[arg++], newp->base, &newp->base_len)) {
             snmp_perror("proxy");
             config_perror("illegal variable name specified (base oid)\n");
+            free(newp);
             return;
         }
     }

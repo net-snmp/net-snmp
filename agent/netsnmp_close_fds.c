@@ -18,6 +18,9 @@ void netsnmp_close_fds(int fd)
     struct dirent  *ent;
     int             i, largest_fd = -1;
 
+    if (fd < -1)
+        fd = -1;
+
     if ((dir = opendir("/proc/self/fd"))) {
         while ((ent = readdir(dir))) {
             if (sscanf(ent->d_name, "%d", &i) == 1) {

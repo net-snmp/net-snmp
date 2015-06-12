@@ -504,6 +504,8 @@ var_smux_write(int action,
              */
             packet_len = len;
             ptr = asn_parse_header(buf, &packet_len, &type);
+            if (ptr == NULL)
+                return SNMP_ERR_GENERR;
             packet_len += (ptr - buf);
             if (len > (ssize_t)packet_len) {
                 /*
@@ -539,6 +541,8 @@ var_smux_write(int action,
                 DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n",
                          rptr->sr_fd));
                 ptr = asn_parse_header(buf, &len, &type);
+                if (ptr == NULL)
+                    return SNMP_ERR_GENERR;
                 smux_trap_process(ptr, &len);
 
 
@@ -653,7 +657,7 @@ smux_accept(int sd)
             snmp_log(LOG_ERR,
                      "[smux_accept] denied peer on fd %d, limit %d reached",
                      fd, SMUXMAXPEERS);
-            close(sd);
+            close(fd);
             return -1;
         }
 
@@ -758,6 +762,8 @@ smux_process(int fd)
      */
     packet_len = length;
     ptr = asn_parse_header(data, &packet_len, &type);
+    if (ptr == NULL)
+        return -1;
     packet_len += (ptr - data);
     if (length > packet_len) {
         /*
@@ -1512,6 +1518,8 @@ smux_snmp_process(int exact,
          */
         packet_len = length;
         ptr = asn_parse_header(result, &packet_len, &type);
+        if (ptr == NULL)
+            return NULL;
         packet_len += (ptr - result);
         if (length > packet_len) {
             /*
@@ -1545,6 +1553,8 @@ smux_snmp_process(int exact,
             DEBUGMSGTL(("smux", "[smux_snmp_process] Received trap\n"));
             DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n", sd));
             ptr = asn_parse_header(result, (size_t *) &length, &type);
+            if (ptr == NULL)
+                return NULL;
             smux_trap_process(ptr, (size_t *) &length);
 
             /*
@@ -2047,9 +2057,8 @@ smux_trap_process(u_char * rsp, size_t * len)
         ptr = snmp_parse_var_op(ptr, var_name, &var_name_len, &vartype,
                                 &var_val_len, (u_char **) & var_val, len);
 
-        if (ptr == NULL) {
-            return NULL;
-        }
+        if (ptr == NULL)
+            goto err;
 
         maxlen = SMUXMAXPKTSIZE;
         switch ((short) vartype) {
@@ -2083,7 +2092,7 @@ smux_trap_process(u_char * rsp, size_t * len)
              */
             if ((var_val =
                  asn_parse_header(var_val, &maxlen, &vartype)) == NULL)
-                return NULL;
+                goto err;
             memcpy((u_char *) & (smux_sa.sin_addr.s_addr), var_val,
                    var_val_len);
             var_val = (u_char *) & (smux_sa.sin_addr.s_addr);
@@ -2093,8 +2102,6 @@ smux_trap_process(u_char * rsp, size_t * len)
             /*
              * XXX 
              */
-            if (len == NULL)
-                return NULL;
             var_val_len = SMUXMAXSTRLEN;
             asn_parse_string(var_val, &maxlen, &vartype,
                              smux_str, &var_val_len);
@@ -2117,8 +2124,6 @@ smux_trap_process(u_char * rsp, size_t * len)
             /*
              * XXX 
              */
-            if (len == NULL)
-                return NULL;
             var_val_len = SMUXMAXSTRLEN;
             asn_parse_bitstring(var_val, &maxlen, &vartype,
                                 smux_str, &var_val_len);
@@ -2131,12 +2136,9 @@ smux_trap_process(u_char * rsp, size_t * len)
             break;
         }
 
-        snmptrap_tmp =
-            (netsnmp_variable_list *)
-            malloc(sizeof(netsnmp_variable_list));
+        snmptrap_tmp = calloc(1, sizeof(netsnmp_variable_list));
         if (snmptrap_tmp == NULL)
-            return NULL;
-        memset(snmptrap_tmp, 0, sizeof(netsnmp_variable_list));
+            goto err;
         if (snmptrap_head == NULL) {
             snmptrap_head = snmptrap_tmp;
             snmptrap_ptr = snmptrap_head;
@@ -2165,6 +2167,9 @@ smux_trap_process(u_char * rsp, size_t * len)
 
     return ptr;
 
+err:
+    snmp_free_varbind(snmptrap_head);
+    return NULL;
 }
 
 #define NUM_SOCKETS	32

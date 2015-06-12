@@ -712,9 +712,10 @@ _cert_get_san_type(X509 *ocert, int mapType)
         }
         else if (GEN_IPADD == oname->type) {
             if ((TSNM_tlstmCertSANIpAddress == mapType) ||
-                (TSNM_tlstmCertSANAny == mapType))
+                (TSNM_tlstmCertSANAny == mapType)) {
                 buf = _extract_oname(oname);
                 break;
+            }
         }
         else if (GEN_EMAIL == oname->type) {
             if ((TSNM_tlstmCertSANRFC822Name == mapType) ||

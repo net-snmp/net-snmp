@@ -612,13 +612,14 @@ _ba_get_subset(netsnmp_container *container, void *data)
     int len;
 
     rtn = netsnmp_binary_array_get_subset(container, data, &len);
-    if ((NULL==rtn) || (len <=0))
+    if (rtn == NULL || len <= 0) {
+        free(rtn);
         return NULL;
+    }
     
     va = SNMP_MALLOC_TYPEDEF(netsnmp_void_array);
-    if (NULL==va)
-    {
-        free (rtn);
+    if (va == NULL) {
+        free(rtn);
         return NULL;
     }
     

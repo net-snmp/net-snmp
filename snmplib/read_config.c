@@ -1020,6 +1020,8 @@ read_configs_optional(const char *optional_config, int when)
                 "reading optional configuration tokens for %s\n", type));
     
     newp = strdup(optional_config);      /* strtok_r messes it up */
+    if (!newp)
+        return ret;
     cp = strtok_r(newp, ",", &st);
     while (cp) {
         struct stat     statbuf;

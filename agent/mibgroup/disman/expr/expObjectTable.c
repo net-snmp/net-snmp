@@ -372,7 +372,7 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                         ret = 1;   /* Set the prefix later  */
                     entry->flags |=  EXP_OBJ_FLAG_DWILD;
                 } else {
-                    if ( entry->flags | EXP_OBJ_FLAG_PREFIX ) {
+                    if ( entry->flags & EXP_OBJ_FLAG_PREFIX ) {
                         exp = expExpression_getEntry( entry->expOwner,
                                                       entry->expName );
                         memset( exp->expPrefix, 0, MAX_OID_LEN*sizeof(oid));

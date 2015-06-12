@@ -291,7 +291,7 @@ getTunnelParm(char *ifname)
     }
 
     memset(&parm, 0, sizeof(struct ip_tunnel_parm));
-    strcpy(ifrq.ifr_name, ifname);
+    strlcpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
     ifrq.ifr_ifru.ifru_data = (void *) &parm;
     if (ioctl(fd, SIOCGETTUNNEL, &ifrq) < 0) {
         /*
@@ -324,7 +324,7 @@ setTunnelParm(char *ifname, struct ip_tunnel_parm *parm)
         return -1;
     }
 
-    strcpy(ifrq.ifr_name, ifname);
+    strlcpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
     ifrq.ifr_ifru.ifru_data = (void *) parm;
     err = ioctl(fd, SIOCCHGTUNNEL, &ifrq);
     close(fd);
@@ -371,7 +371,7 @@ updateTunnel(struct tunnel *tunnel)
          * 4 bytes of sa_data. We don't use sa_data here, or we'd
          * need to memset it to 0 before the ioct.
          */
-        strcpy(ifrq.ifr_name, tunnel->ifname);
+        strlcpy(ifrq.ifr_name, tunnel->ifname, sizeof(ifrq.ifr_name));
         if (ioctl(fd, SIOCGIFHWADDR, &ifrq) == 0)
             switch (ifrq.ifr_hwaddr.sa_family) {
             case ARPHRD_TUNNEL:

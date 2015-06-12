@@ -1591,7 +1591,7 @@ netsnmp_get(PyObject *self, PyObject *args)
 
 	py_netsnmp_attr_set_string(varbind, "type", type_str, strlen(type_str));
 
-	len = __snprint_value((char *) str_buf, sizeof(str_buf),
+	len = __snprint_value((char *) str_buf, sizeof(str_buf) - 1,
                               vars, tp, type, sprintval_flag);
 	str_buf[len] = '\0';
 	py_netsnmp_attr_set_string(varbind, "val", (char *) str_buf, len);
@@ -1810,7 +1810,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 	py_netsnmp_attr_set_string(varbind, "type", type_str, 
 				   strlen(type_str));
 
-	len = __snprint_value((char *) str_buf, sizeof(str_buf),
+	len = __snprint_value((char *) str_buf, sizeof(str_buf) - 1,
                               vars, tp, type, sprintval_flag);
 	str_buf[len] = '\0';
 
@@ -2140,7 +2140,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
                   py_netsnmp_attr_set_string(varbind, "type", type_str,
                                              strlen(type_str));
 
-                  len = __snprint_value((char *) str_buf,sizeof(str_buf),
+                  len = __snprint_value((char *) str_buf,sizeof(str_buf) - 1,
                                         vars,tp,type,sprintval_flag);
                   str_buf[len] = '\0';
 
@@ -2395,7 +2395,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	    py_netsnmp_attr_set_string(varbind, "type", type_str, 
 				       strlen(type_str));
 
-	    len = __snprint_value((char *) str_buf, sizeof(str_buf),
+	    len = __snprint_value((char *) str_buf, sizeof(str_buf) - 1,
 				  vars, tp, type, sprintval_flag);
 	    str_buf[len] = '\0';
 

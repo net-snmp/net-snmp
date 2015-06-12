@@ -1392,7 +1392,7 @@ getstats(void)
 	    }
 	    pTemp = &head.indices[head.length];
 
-	    rc = fscanf (parts, "%d %d %lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+	    rc = fscanf(parts, "%d %d %lu %255s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    &pTemp->major, &pTemp->minor, &pTemp->blocks, pTemp->name,
 		    &pTemp->rio, &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse,
 		    &pTemp->wio, &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,

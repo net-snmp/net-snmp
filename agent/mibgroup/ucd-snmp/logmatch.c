@@ -157,7 +157,7 @@ updateLogmatch(int iindex)
 
             pos = counter = ccounter = 0;
 
-            if (fscanf(perfile, "%lu %lu %lu %s",
+            if (fscanf(perfile, "%lu %lu %lu %255s",
                        &pos, &ccounter, &counter, lastFilename)) {
 
 
