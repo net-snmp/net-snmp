@@ -758,7 +758,6 @@ bail:
 #endif
     if (scalar_reginfo)
         netsnmp_handler_registration_free(scalar_reginfo);
-    free(table_info);
 }
 
 
