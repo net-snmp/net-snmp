@@ -128,6 +128,91 @@ netsnmp_feature_child_of(set_all_requests_error, netsnmp_unused)
 netsnmp_feature_child_of(addrcache_age, netsnmp_unused)
 netsnmp_feature_child_of(delete_subtree_cache, netsnmp_unused)
 
+#ifndef NETSNMP_NO_PDU_STATS
+
+static netsnmp_container *_pdu_stats = NULL;
+static int _pdu_stats_max = 0;
+static u_long _pdu_stats_threshold = 0;
+static u_long _pdu_stats_current_lowest = 0;
+
+netsnmp_container *
+netsnmp_get_pdu_stats(void)
+{
+    return _pdu_stats;
+}
+
+int _pdu_stats_compare(const netsnmp_pdu_stats * lhs,
+                       const netsnmp_pdu_stats * rhs)
+{
+    if (NULL == lhs || NULL == rhs) {
+        snmp_log(LOG_WARNING,
+                 "WARNING: results undefined for compares with NULL\n");
+        return 0;
+    }
+
+    /** we want list sorted in reverse order, so invert tests */
+    if (lhs->processing_time > rhs->processing_time)
+        return -1;
+    else if (lhs->processing_time < rhs->processing_time)
+        return 1;
+
+    if (lhs->timestamp > rhs->timestamp)
+        return -1;
+    else if (lhs->timestamp < rhs->timestamp)
+        return 1;
+
+    return 0;
+}
+
+
+static void
+_pdu_stats_init(void) {
+    static int done = 0;
+    if ((NULL != _pdu_stats) || (++done != 1))
+        return;
+
+    _pdu_stats = netsnmp_container_find("netsnmp_pdustats:binary_array");
+    if (NULL == _pdu_stats) {
+        done = 0;
+        return;
+    }
+
+    _pdu_stats->compare = (netsnmp_container_compare*)_pdu_stats_compare;
+    _pdu_stats->get_subset = NULL; /** subsets not supported */
+
+    _pdu_stats_max = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                        NETSNMP_DS_AGENT_PDU_STATS_MAX);
+    _pdu_stats_threshold =
+        netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_PDU_STATS_THRESHOLD);
+    if (_pdu_stats_threshold < 100)
+        _pdu_stats_threshold = 100;
+    DEBUGMSGTL(("stats:pdu", "max: %d, threshold %ld ms\n", _pdu_stats_max,
+                _pdu_stats_threshold));
+}
+#endif /* NETSNMP_NO_PDU_STATS */
+
+
+static void
+_pdu_stats_shutdown(void)
+{
+    netsnmp_pdu_stats *entry;
+    int x = 0;
+
+    if (NULL == _pdu_stats)
+        return;
+
+    for( ; x < CONTAINER_SIZE(_pdu_stats); ++x) {
+        CONTAINER_GET_AT(_pdu_stats, x, (void**)&entry);
+        if (NULL == entry)
+            continue;
+        snmp_free_pdu(entry->pdu);
+        free(entry);
+    }
+    CONTAINER_FREE(_pdu_stats);
+    _pdu_stats = NULL;
+}
+
 
 NETSNMP_INLINE void
 netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
@@ -1400,6 +1485,10 @@ init_master_agent(void)
     real_init_smux();
 #endif
 
+#ifndef NETSNMP_NO_PDU_STATS
+    _pdu_stats_init();
+#endif /* NETSNMP_NO_PDU_STATS */
+
     return 0;
 }
 
@@ -1416,6 +1505,10 @@ void
 shutdown_master_agent(void)
 {
     clear_nsap_list();
+
+#ifndef NETSNMP_NO_PDU_STATS
+    _pdu_stats_shutdown();
+#endif /* NETSNMP_NO_PDU_STATS */
 }
 
 
@@ -1662,10 +1755,137 @@ netsnmp_add_queued(netsnmp_agent_session *asp)
     return 1;
 }
 
+#ifndef NETSNMP_NO_PDU_STATS
+/*
+ * netsnmp_pdu_stats_process: record time for pdu processing
+ */
+int
+netsnmp_pdu_stats_process(netsnmp_agent_session *asp)
+{
+    netsnmp_pdu_stats *new_entry, *old = NULL;
+    struct timeval tv_end;
+    marker_t start, end = &tv_end;
+    u_long msec;
+
+    if (NULL == asp) {
+        DEBUGMSGTL(("stats:pdu", "netsnmp_pdu_stats_process bad params\n"));
+        return -1;
+    }
+
+    /** get start/end time */
+    netsnmp_set_monotonic_marker(&end);
+    start = (marker_t)netsnmp_agent_get_list_data(asp->reqinfo,
+                                                  "netsnmp_pdu_stats");
+    if (NULL == start) {
+        DEBUGMSGTL(("stats:pdu:stop", "start time not found!\n"));
+        return -1;
+    }
+
+    msec = uatime_diff(start, end);
+    DEBUGMSGTL(("stats:pdu:stop", "pdu processing took %ld msec\n", msec));
+
+    /** bail if below threshold or less than current low time */
+    if (msec <= _pdu_stats_threshold || msec < _pdu_stats_current_lowest) {
+        DEBUGMSGTL(("9:stats:pdu",
+                    "time below thresholds (%ld/%ld); ignoring\n",
+                    _pdu_stats_threshold, _pdu_stats_current_lowest));
+        return 0;
+    }
+
+    /** insert in list. if list goes over max size, truncate last entry. */
+    new_entry = SNMP_MALLOC_TYPEDEF(netsnmp_pdu_stats);
+    if (NULL == new_entry) {
+        snmp_log(LOG_ERR, "malloc failed for pdu stats entry\n");
+        return -1;
+    }
+    new_entry->processing_time = msec;
+    time(&new_entry->timestamp);
+    new_entry->pdu = snmp_clone_pdu(asp->pdu);
+
+    CONTAINER_INSERT(_pdu_stats, new_entry);
+
+    if (CONTAINER_SIZE(_pdu_stats) > _pdu_stats_max) {
+        DEBUGMSGTL(("9:stats:pdu", "dropping old/low stat\n"));
+        CONTAINER_REMOVE_AT(_pdu_stats, _pdu_stats_max, (void**)&old);
+        if (old) {
+            snmp_free_pdu(old->pdu);
+            free(old);
+        }
+    }
+
+    if (CONTAINER_SIZE(_pdu_stats) < _pdu_stats_max)
+        _pdu_stats_current_lowest = 0; /* take anything over threshold */
+    else {
+        CONTAINER_GET_AT(_pdu_stats, _pdu_stats_max - 1, (void**)&old);
+        if (old)
+            _pdu_stats_current_lowest = old->processing_time;
+    }
+
+#define NETSNMP_DUMP_PDU_STATS 1
+#ifdef NETSNMP_DUMP_PDU_STATS
+    {
+        int x = 0;
+        struct tm *tm;
+        char timestr[40];
+        for( ; x < CONTAINER_SIZE(_pdu_stats); ++x) {
+            netsnmp_pdu    *response;
+            netsnmp_variable_list *vars;
+            CONTAINER_GET_AT(_pdu_stats, x, (void**)&old);
+            if (NULL == old) {
+                DEBUGMSGTL(("9:stats:pdu", "[%d] ERROR\n", x));
+                continue;
+            }
+            tm = localtime(&old->timestamp);
+            if (NULL == tm)
+                sprintf(timestr, "UNKNOWN");
+            else if (strftime(timestr, sizeof(timestr), "%m/%d/%Y %H:%M:%S",
+                              tm) == 0)
+                sprintf(timestr, "UNKNOWN");
+
+            DEBUGMSGTL(("9:stats:pdu", "[%d] %ld ms, %s\n",
+                        x, old->processing_time, timestr));
+            response = old->pdu;
+            if (response->errstat == SNMP_ERR_NOERROR) {
+                for (vars = response->variables; vars;
+                     vars = vars->next_variable) {
+                    DEBUGMSGTL(("9:stats:pdu", "    vb "));
+                    DEBUGMSGVAR(("9:stats:pdu", vars));
+                    DEBUGMSG(("9:stats:pdu", "\n"));
+                }
+            } else {
+                DEBUGMSGTL(("9:stats:pdu", "Error in packet: Reason: %s\n",
+                            snmp_errstring(response->errstat)));
+                if (response->errindex != 0) {
+                    int count;
+                    DEBUGMSGTL(("9:stats:pdu", "Failed object: "));
+                    for (count = 1, vars = response->variables;
+                         vars && count != response->errindex;
+                         vars = vars->next_variable, count++)
+                        /*EMPTY*/;
+                    if (vars) {
+                        DEBUGMSGOID(("9:stats:pdu", vars->name,
+                                     vars->name_length));
+                    }
+                    DEBUGMSG(("9:stats:pdu", "\n"));
+                }
+            }
+        }
+    }
+#endif /* NETSNMP_DUMP_PDU_STATS */
+
+    return 1;
+
+}
+#endif /* NETSNMP_NO_PDU_STATS */
 
 int
 netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
 {
+#ifndef NETSNMP_NO_PDU_STATS
+    if (_pdu_stats_max > 0)
+        netsnmp_pdu_stats_process(asp);
+#endif /* NETSNMP_NO_PDU_STATS */
+
     /*
      * if this request was a set, clear the global now that we are
      * done.
@@ -3374,6 +3594,28 @@ handle_set_loop(netsnmp_agent_session *asp)
 int
 netsnmp_handle_request(netsnmp_agent_session *asp, int status)
 {
+#ifndef NETSNMP_NO_PDU_STATS
+    if (_pdu_stats_max > 0) {
+        /** tag new pdus with a start time */
+        marker_t start;
+        start = (marker_t)netsnmp_agent_get_list_data(asp->reqinfo,
+                                                      "netsnmp_pdu_stats");
+        if (NULL == start) {
+            netsnmp_data_list *data_list;
+            DEBUGMSGTL(("stats:pdu:start", "starting pdu processing\n"));
+
+            netsnmp_set_monotonic_marker(&start); /* will alloc space */
+            data_list = netsnmp_create_data_list("netsnmp_pdu_stats", start,
+                                                 free);
+            if (NULL == data_list) {
+                free(start);
+                snmp_log(LOG_WARNING, "error creating data list for stats\n");
+            } else
+                netsnmp_agent_add_list_data(asp->reqinfo, data_list);
+        }
+    }
+#endif /* NETSNMP_NO_PDU_STATS */
+
     /*
      * if this isn't a delegated request trying to finish,
      * processing of a set request should not start until all

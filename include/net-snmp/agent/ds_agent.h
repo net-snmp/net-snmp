@@ -75,4 +75,6 @@
 #define NETSNMP_DS_AGENT_MAX_GETBULKREPEATS 13 /* max getbulk repeats */
 #define NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES 14   /* max getbulk respones */
 #define NETSNMP_DS_AGENT_AVG_BULKVARBINDSIZE 15 /* avg varbind size estimate */
+#define NETSNMP_DS_AGENT_PDU_STATS_MAX       16 /* size of top N array*/
+#define NETSNMP_DS_AGENT_PDU_STATS_THRESHOLD 17 /* minimum threshold time */
 #endif

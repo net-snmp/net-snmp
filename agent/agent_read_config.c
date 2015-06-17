@@ -283,6 +283,15 @@ init_agent_read_config(const char *app)
     netsnmp_ds_register_config(ASN_INTEGER, app, "avgBulkVarbindSize",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_AVG_BULKVARBINDSIZE);
+#ifndef NETSNMP_NO_PDU_STATS
+    netsnmp_ds_register_config(ASN_INTEGER, app, "pduStatsMax",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_PDU_STATS_MAX);
+    netsnmp_ds_register_config(ASN_INTEGER, app, "pduStatsThreshold",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_PDU_STATS_THRESHOLD);
+#endif /* NETSNMP_NO_PDU_STATS */
+
     netsnmp_init_handler_conf();
 
 #include "agent_module_dot_conf.h"

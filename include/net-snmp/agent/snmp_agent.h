@@ -322,6 +322,22 @@ extern          "C" {
     void
         netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari);
 
+
+#ifndef NETSNMP_NO_PDU_STATS
+    /*
+     * pdu stats
+     */
+    typedef struct netsnmp_pdu_stats_s {
+        u_long          processing_time;
+        time_t          timestamp;
+        netsnmp_pdu    *pdu;
+    } netsnmp_pdu_stats;
+
+    netsnmp_container * netsnmp_get_pdu_stats(void);
+
+#endif /* NETSNMP_NO_PDU_STATS */
+
+
 #ifdef __cplusplus
 }
 #endif
