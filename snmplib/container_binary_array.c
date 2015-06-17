@@ -151,7 +151,7 @@ linear_search(const void *val, netsnmp_container *c)
 }
 
 static int
-binary_search(const void *val, netsnmp_container *c, int exact)
+binary_search(const void *val, netsnmp_container *c, int exact, size_t *next)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
     size_t             len = t->count;
@@ -160,8 +160,11 @@ binary_search(const void *val, netsnmp_container *c, int exact)
     size_t             first = 0;
     int                result;
 
-    if (!len)
+    if (!len) {
+        if (NULL != next)
+            *next = 0;
         return -1;
+    }
 
     if (c->flags & CONTAINER_KEY_UNSORTED) {
         if (!exact) {
@@ -189,40 +192,36 @@ binary_search(const void *val, netsnmp_container *c, int exact)
         }
     }
 
-    if (first >= t->count)
+    if (first >= t->count) {
+        if (exact && NULL != next)
+            *next = t->count;
         return -1;
+    }
 
     if (first != middle) {
         /* last compare wasn't against first, so get actual result */
         result = c->compare(t->data[first], val);
     }
 
-    if (result == 0) {
-        if (!exact && ++first == t->count)
+    if(result == 0) {
+        if (exact && NULL != next)
+            *next = first+1;
+        else if (!exact && ++first == t->count) {
+            if (NULL != next)
+                *next = first;
             first = -1;
-    } else if (exact) {
-            first = -1;
+        }
+    } else if(exact) {
+        if (NULL != next) {
+            if (result > 0)
+                *next = first;
+            else
+                *next = t->count;
+        }
+        first = -1;
     }
 
     return first;
-}
-
-/* Returns the index of the first element which compares greater than *val. */
-static int
-upper_bound(const void *val, netsnmp_container *c)
-{
-    binary_array_table *t = (binary_array_table*)c->container_data;
-    int                 i;
-
-    netsnmp_assert(!(c->flags & CONTAINER_KEY_UNSORTED));
-
-    i = binary_search(val, c, 0);
-    if (i < 0)
-        return t->count;
-    while (i < t->count && c->compare(t->data[i], val) <= 0)
-        i++;
-
-    return i;
 }
 
 NETSNMP_STATIC_INLINE binary_array_table *
@@ -299,7 +298,7 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
      * if there is a key, search. Otherwise default is 0;
      */
     if (key) {
-        if ((index = binary_search(key, c, exact)) == -1)
+        if ((index = binary_search(key, c, exact, NULL)) == -1)
             return NULL;
         if (!exact &&
             c->flags & CONTAINER_KEY_ALLOW_DUPLICATES) {
@@ -324,6 +323,22 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
     return t->data[index];
 }
 
+static int
+netsnmp_binary_array_get_at(netsnmp_container *c, size_t pos, void **entry)
+{
+    binary_array_table *t = (binary_array_table*)c->container_data;
+
+    /*
+     * if there is no data, return NULL;
+     */
+    if (!t->count || pos >= t->count || NULL == entry)
+        return -1;
+
+    *entry = t->data[pos];
+
+    return 0;
+}
+
 int
 netsnmp_binary_array_remove_at(netsnmp_container *c, size_t index, void **save)
 {
@@ -336,7 +351,7 @@ netsnmp_binary_array_remove_at(netsnmp_container *c, size_t index, void **save)
      * if there is no data, return NULL;
      */
     if (!t->count)
-        return 0;
+        return -1;
 
     /*
      * find old data and save it, if ptr provided
@@ -360,6 +375,7 @@ netsnmp_binary_array_remove_at(netsnmp_container *c, size_t index, void **save)
 
     return 0;
 }
+
 int
 netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
 {
@@ -384,7 +400,7 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
     /*
      * search
      */
-    if ((index = binary_search(key, c, 1)) == -1)
+    if ((index = binary_search(key, c, 1, NULL)) == -1)
         return -1;
 
     return netsnmp_binary_array_remove_at(c, (size_t)index, save);
@@ -424,66 +440,116 @@ netsnmp_binary_array_clear(netsnmp_container *c,
     ++c->sync;
 }
 
-NETSNMP_STATIC_INLINE int
-netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
+static int
+_ba_resize_check(binary_array_table *t)
+{
+    if (t->max_size > t->count)
+        return 0; /* resize not needed */
+
+    /*
+     * Table is full, so extend it to double the size, or use 10 elements
+     * if it is empty.
+     */
+    size_t new_max = t->max_size > 0 ? 2 * t->max_size : 10;
+    void ** const new_data = (void**) realloc(t->data, new_max * sizeof(void*));
+    if (new_data == NULL) {
+        snmp_log(LOG_ERR, "malloc failed in _ba_resize_check\n");
+        return -1; /* error */
+    }
+
+    memset(new_data + t->max_size, 0x0,
+           (new_max - t->max_size) * sizeof(void*));
+
+    t->data = new_data;
+    t->max_size = new_max;
+
+    return 1; /* resized */
+}
+
+static int
+netsnmp_binary_array_insert_before(netsnmp_container *c, size_t index,
+                                   const void *entry, int dirty)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
-    int             was_dirty = 0;
-    int             i;
 
-    if (c->flags & CONTAINER_KEY_UNSORTED)
-        i = t->count;
-    else {
-        i = upper_bound(entry, c);
-        netsnmp_assert(0 <= i && i <= t->count);
+    if (NULL == entry)
+        return -1;
+
+    if (index > (t->count + 1)) {
+        DEBUGMSGTL(("container:insert:before", "index out of range\n"));
+        return -1;
     }
+
+     /*
+      * check if we need to resize the array
+      */
+    _ba_resize_check(t);
 
     /*
-     * check for duplicates
+     * shift array
      */
-    if (! (c->flags & CONTAINER_KEY_ALLOW_DUPLICATES)) {
-        was_dirty = t->dirty;
-        if (i > 0 && c->compare(t->data[i - 1], entry) == 0) {
-            DEBUGMSGTL(("container","not inserting duplicate key\n"));
-            return -1;
-        }
-    }
-    
-    /*
-     * check if we need to resize the array
-     */
-    if (t->max_size <= t->count) {
-        /*
-         * Table is full, so extend it to double the size, or use 10 elements
-         * if it is empty.
-         */
-        size_t const new_max = t->max_size > 0 ? 2 * t->max_size : 10;
-        void ** const new_data =
-            (void**) realloc(t->data, new_max * sizeof(void*));
-
-        if (new_data == NULL)
-            return -1;
-
-        t->data = new_data;
-        t->max_size = new_max;
-    }
+    memmove(&t->data[index+1], &t->data[index],
+            sizeof(void*) * (t->count - index));
 
     /*
      * Insert the new entry into the data array
      */
-    memmove(&t->data[i + 1], &t->data[i], (t->count - i) * sizeof(t->data[i]));
-    t->count++;
-    t->data[i] = NETSNMP_REMOVE_CONST(void *, entry);
+    t->data[index] = NETSNMP_REMOVE_CONST(void *, entry);
+    ++t->count;
 
-    /*
-     * if array was dirty before we called get, sync was incremented when
-     * get called SortArray. If we didn't call get or the array wasn't dirty,
-     * bump sync now.
-     */
-    if (!was_dirty)
-        ++c->sync;
+    if (dirty)
+        t->dirty = 1;
+
+    ++c->sync;
 
     return 0;
+}
+
+NETSNMP_STATIC_INLINE int
+netsnmp_binary_array_insert(netsnmp_container *c, const void *const_entry)
+{
+    binary_array_table *t = (binary_array_table*)c->container_data;
+    int             dirty = 0, i = -2;
+    size_t          next, pos;
+    void           *entry = NETSNMP_REMOVE_CONST(void *, const_entry);
+
+    if (NULL == entry)
+        return -1;
+
+    /*
+     * check key if we have at least 1 item and duplicates aren't allowed
+     */
+    if (! (c->flags & CONTAINER_KEY_ALLOW_DUPLICATES) && t->count) {
+        i = binary_search(entry, c, 1, &next);
+        if (i > 0) {
+            DEBUGMSGTL(("container","not inserting duplicate key\n"));
+            return -1;
+        }
+    }
+ 
+    /*
+     * if unsorted, just add at the end
+     */
+    if (c->flags & CONTAINER_KEY_UNSORTED) {
+        pos = t->count;
+        dirty = 1;
+    } else {
+        /** if we haven't searched for key yet, do it now */
+        if (-2 == i) {
+            if (0 == t->count) {
+                next = 0;
+                i = -1;
+            } else
+                i = binary_search(entry, c, 1, &next);
+        }
+
+        pos = next;
+        if ( i > 0 )  /* if key found, advance past any dups */
+            while (pos < t->count && c->compare(t->data[pos], entry) == 0)
+                ++pos;
+    }
+
+    return netsnmp_binary_array_insert_before(c, pos, entry, dirty);
 }
 
 /**********************************************************************
@@ -596,6 +662,13 @@ static int
 _ba_insert(netsnmp_container *container, const void *data)
 {
     return netsnmp_binary_array_insert(container, data);
+}
+
+static int
+_ba_insert_before(netsnmp_container *container, size_t index, void *data)
+{
+    /** don't trust users direct-acces inserts, mark array dirty */
+    return netsnmp_binary_array_insert_before(container, index, data, 1);
 }
 
 static int
@@ -734,7 +807,10 @@ netsnmp_container_get_binary_array(void)
     c->clear = _ba_clear;
     c->options = _ba_options;
     c->duplicate = _ba_duplicate;
-        
+    c->get_at = netsnmp_binary_array_get_at;
+    c->remove_at = netsnmp_binary_array_remove_at;
+    c->insert_before = _ba_insert_before;
+
     return c;
 }
 

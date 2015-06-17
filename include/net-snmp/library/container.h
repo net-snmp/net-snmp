@@ -360,6 +360,8 @@ extern "C" {
  */
 #define CONTAINER_KEY_ALLOW_DUPLICATES             0x00000001
 #define CONTAINER_KEY_UNSORTED                     0x00000002
+    /* ... */
+#define CONTAINER_FLAG_INTERNAL_1                  0x80000000
 
 #define CONTAINER_SET_OPTIONS(x,o,rc)  do {                             \
         if (NULL==(x)->options)                                         \
