@@ -705,6 +705,9 @@ messages can be controlled by passing various parameters to the
 .B \-L
 flag.
 .TP
+.B \-Ln
+Disable all logging.
+.TP
 .B \-Le
 Log messages to the standard error stream.
 .TP
@@ -726,9 +729,10 @@ priorities of message.  Using standard error logging as an example:
 .TP
 .B \-LE pri
 will log messages of priority 'pri' and above to standard error.
+See below for possible 'pri' values-
 .TP
-.B \-LE p1\-p2
-will log messages with priority between 'p1' and 'p2' (inclusive) to
+.B \-LE pri1\-pri2
+will log messages with priority between 'pri1' and 'pri2' (inclusive) to
 standard error.
 .PP
 For
@@ -736,6 +740,7 @@ For
 and
 .B \-LS
 the priority specification comes before the file or facility token.
+.PP
 The priorities recognised are:
 .IP
 .B 0
@@ -888,7 +893,9 @@ The standard prefix for object identifiers (when using UCD-style output).
 Defaults to .iso.org.dod.internet.mgmt.mib\-2
 .IP MIBS
 The list of MIBs to load. Defaults to
-SNMPv2\-TC:SNMPv2\-MIB:IF\-MIB:IP\-MIB:TCP\-MIB:UDP\-MIB:SNMP\-VACM\-MIB.
+.br
+SNMPv2\-TC:\:SNMPv2\-MIB:\:IF\-MIB:\:IP\-MIB:\:TCP\-MIB:\:UDP\-MIB:\:SNMP\-VACM\-MIB.
+.br
 Overridden by the
 .B \-m
 option.
