@@ -583,11 +583,9 @@ binary_search_for_start(netsnmp_index *val, netsnmp_container *c)
 
     while (len > 0) {
         half = len >> 1;
-        middle = first;
-        middle += half;
+        middle = first + half;
         if ((result = c->ncompare(t->data[middle], val)) < 0) {
-            first = middle;
-            ++first;
+            first = middle + 1;
             len = len - half - 1;
         } else
             len = half;
