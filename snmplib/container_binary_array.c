@@ -256,9 +256,17 @@ netsnmp_binary_array_options_set(netsnmp_container *c, int set, u_int flags)
 #define BA_FLAGS (CONTAINER_KEY_ALLOW_DUPLICATES|CONTAINER_KEY_UNSORTED)
 
     if (set) {
-        if ((flags & BA_FLAGS) == flags)
+        if ((flags & BA_FLAGS) == flags) {
+            /** if turning off unsorted, do sort */
+            int sort = ((c->flags & CONTAINER_KEY_UNSORTED) &&
+                        ! (flags & CONTAINER_KEY_UNSORTED));
             c->flags = flags;
-        else
+            if (sort) {
+                binary_array_table *t = (binary_array_table*)c->container_data;
+                t->dirty = 1; /* force sort */
+                Sort_Array(c);
+            }
+        } else
             flags = (u_int)-1; /* unsupported flag */
     }
     else
