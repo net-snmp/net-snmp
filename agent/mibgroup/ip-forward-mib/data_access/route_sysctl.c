@@ -223,6 +223,14 @@ _load_routing_table_from_sysctl(netsnmp_container* container, int *index,
          */
         if (rtm->rtm_addrs == RTA_DST)
             continue;
+#ifdef RTF_CLONED
+	if (rtm->rtm_flags & RTF_CLONED)
+	    continue;
+#endif
+#ifdef RTF_WASCLONED
+	if (rtm->rtm_flags & RTF_WASCLONED)
+	    continue;
+#endif
 
         entry = netsnmp_access_route_entry_create();
         if (entry == NULL)
