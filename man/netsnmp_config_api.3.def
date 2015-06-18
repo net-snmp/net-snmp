@@ -365,7 +365,9 @@ function that it should abort the operation of the application.
 SNMPCONFPATH
 A colon separated list of directories to search for configuration
 files in.
-Default: SYSCONFDIR/snmp:DATADIR/snmp:LIBDIR/snmp:$HOME/.snmp
+Default:
+.br
+SYSCONFDIR/snmp:\:DATADIR/snmp:\:LIBDIR/snmp:\:$HOME/.snmp
 .SH "SEE ALSO"
 netsnmp_mib_api(3), snmp_api(3)
 .\" Local Variables:
