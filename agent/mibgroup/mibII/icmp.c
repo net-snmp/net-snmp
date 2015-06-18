@@ -641,7 +641,7 @@ init_icmp(void)
     netsnmp_handler_registration *table_reginfo = NULL;
     netsnmp_iterator_info *iinfo;
     netsnmp_iterator_info *msg_stats_iinfo;
-    netsnmp_table_registration_info *table_info;
+    netsnmp_table_registration_info *table_info = NULL;
     netsnmp_table_registration_info *msg_stats_table_info;
 #endif
     netsnmp_handler_registration *scalar_reginfo = NULL;

@@ -277,7 +277,8 @@ A colon separated list of MIB modules to load.
 .br
 The default list of modules will depend on how the Net-SNMP software
 was originally compiled, but is typically:
-IP\-MIB:IF\-MIB:TCP\-MIB:UDP\-MIB:SNMPv2\-MIB:RFC1213\-MIB: UCD\-SNMP\-MIB:HOST\-RESOURCES\-MIB
+.br
+IP\-MIB:\:IF\-MIB:\:TCP\-MIB:\:UDP\-MIB:\:SNMPv2\-MIB:\:RFC1213\-MIB:\:UCD\-SNMP\-MIB:\:HOST\-RESOURCES\-MIB
 .IP
 If the value of the
 .B MIBS

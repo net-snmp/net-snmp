@@ -78,7 +78,7 @@ this to unlimited is not considered safe if your user population can
 not be trusted.  A repeat number greater than this will be truncated
 to this value.
 .IP
-This is set by default to -1.
+This is set by default to \-1.
 .IP "maxGetbulkResponses NUM"
 Sets the maximum number of responses allowed for a getbulk request.
 This is set by default to 100.  Set to 0 to enable the default and set
@@ -87,11 +87,11 @@ time, setting this to unlimited is not considered safe if your user
 population can not be trusted.
 .IP
 In general, the total number of responses will not be allowed to
-exceed the maxGetbulkResponses number and the total number returned
+exceed the maxGetbulkResponses number, and the total number returned
 will be an integer multiple of the number of variables requested times
 the calculated number of repeats allow to fit below this number.
 .IP
-Also not that processing of maxGetbulkRepeats is handled first.
+Also note that processing of maxGetbulkRepeats is handled first.
 .SS SNMPv3 Configuration - Real Security
 SNMPv3 is added flexible security models to the SNMP packet structure
 so that multiple security solutions could be used.  SNMPv3 was
