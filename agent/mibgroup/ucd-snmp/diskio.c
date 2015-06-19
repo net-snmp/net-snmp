@@ -405,13 +405,17 @@ add_device(char *path, int addNewDisks )
             }
             memset(disks, 0, maxdisks * sizeof(struct diskiopart));
         } else {
+            struct diskiopart *newdisks;
             maxdisks *= 2;
-            disks = realloc(disks, maxdisks * sizeof(struct diskiopart));
-            if (!disks) {
+            newdisks = realloc(disks, maxdisks * sizeof(struct diskiopart));
+            if (!newdisks) {
+                free(disks);
+                disks = NULL;
                 config_perror("malloc failed for new disko allocation.");
 	            netsnmp_config_error("\tignoring:  %s", path);
                 return;
             }
+            disks = newdisks;
             memset(disks + maxdisks/2, 0, maxdisks/2 * sizeof(struct diskiopart));
         }
     }
