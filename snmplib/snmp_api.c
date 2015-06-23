@@ -1886,6 +1886,9 @@ snmp_free_session(netsnmp_session * s)
         SNMP_FREE(s->securityAuthProto);
         SNMP_FREE(s->securityPrivProto);
         SNMP_FREE(s->paramName);
+#ifndef NETSNMP_NO_TRAP_STATS
+        SNMP_FREE(s->trap_stats);
+#endif /* NETSNMP_NO_TRAP_STATS */
 
         /*
          * clear session from any callbacks
@@ -5181,9 +5184,45 @@ _sess_async_send(void *sessp,
 
     if (NULL == isp->opacket) {
         result = _build_initial_pdu_packet(slp, pdu, 0);
-        if ((SNMPERR_SUCCESS != result) || (NULL == isp->opacket))
+        if ((SNMPERR_SUCCESS != result) || (NULL == isp->opacket)) {
+            if (callback) {
+                switch (session->s_snmp_errno) {
+                    /*
+                     * some of these probably don't make sense here, but
+                     * it's a rough first cut.
+                     */
+                    case SNMPERR_BAD_ENG_ID:
+                    case SNMPERR_BAD_SEC_LEVEL:
+                    case SNMPERR_UNKNOWN_SEC_MODEL:
+                    case SNMPERR_UNKNOWN_ENG_ID:
+                    case SNMPERR_UNKNOWN_USER_NAME:
+                    case SNMPERR_UNSUPPORTED_SEC_LEVEL:
+                    case SNMPERR_AUTHENTICATION_FAILURE:
+                    case SNMPERR_NOT_IN_TIME_WINDOW:
+                    case SNMPERR_USM_GENERICERROR:
+                    case SNMPERR_USM_UNKNOWNSECURITYNAME:
+                    case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
+                    case SNMPERR_USM_ENCRYPTIONERROR:
+                    case SNMPERR_USM_AUTHENTICATIONFAILURE:
+                    case SNMPERR_USM_PARSEERROR:
+                    case SNMPERR_USM_UNKNOWNENGINEID:
+                    case SNMPERR_USM_NOTINTIMEWINDOW:
+                        callback(NETSNMP_CALLBACK_OP_SEC_ERROR, session,
+                                 pdu->reqid, pdu, cb_data);
+                        break;
+                    case SNMPERR_TIMEOUT: /* engineID probe timed out */
+                        callback(NETSNMP_CALLBACK_OP_TIMED_OUT, session,
+                                 pdu->reqid, pdu, cb_data);
+                        break;
+                    default:
+                        callback(NETSNMP_CALLBACK_OP_SEND_FAILED, session,
+                                 pdu->reqid, pdu, cb_data);
+                        break;
+                }
+            }
             /** no packet to send?? */
             return 0;
+        }
     }
 
     /*
@@ -7691,6 +7730,32 @@ snmp_sess_session_lookup(void *sessp)
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 
     return (netsnmp_session *)slp;
+}
+
+
+/*
+ * returns NULL or internal pointer to session
+ * use this pointer for the other snmp_sess* routines,
+ * which guarantee action will occur ONLY for this given session.
+ */
+netsnmp_session *
+snmp_sess_lookup_by_name(const char *paramName)
+{
+    struct session_list *slp;
+
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    for (slp = Sessions; slp; slp = slp->next) {
+        if (NULL == slp->session->paramName)
+            continue;
+        if (strcmp(paramName, slp->session->paramName)  == 0)
+            break;
+    }
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+
+    if (slp == NULL)
+        return NULL;
+
+    return slp->session;
 }
 
 

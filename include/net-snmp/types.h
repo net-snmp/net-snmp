@@ -295,6 +295,30 @@ typedef int     (*netsnmp_callback) (int, netsnmp_session *, int,
 
 struct netsnmp_container_s;
 
+#ifndef NETSNMP_NO_TRAP_STATS
+    /*
+     * trap/inform statistics.
+     *
+     * all times are sysuptime
+     */
+typedef struct netsnmp_trap_stats_s {
+    u_long   sent_count;
+    u_long   sent_last_sent;
+
+    u_long   sent_fail_count;
+    u_long   sent_last_fail;
+
+    u_long   ack_count;
+    u_long   ack_last_rcvd;
+
+    u_long   sec_err_count;
+    u_long   sec_err_last;
+
+    u_long   timeouts;
+    u_long   sent_last_timeout;
+} netsnmp_trap_stats;
+#endif /* NETSNMP_NO_TRAP_STATS */
+
 /** @struct snmp_session
  * The snmp session structure.
  */
@@ -407,6 +431,9 @@ struct snmp_session {
     int             securityLevel;  
     /** target param name */
     char           *paramName;
+#ifndef NETSNMP_NO_TRAP_STATS
+    netsnmp_trap_stats *trap_stats;
+#endif /* NETSNMP_NO_TRAP_STATS */
 
     /**
      * security module specific 

@@ -229,7 +229,8 @@ extern          "C" {
     netsnmp_session *snmp_sess_session(void *);
     NETSNMP_IMPORT
     netsnmp_session *snmp_sess_session_lookup(void *);
-
+    NETSNMP_IMPORT
+    netsnmp_session *snmp_sess_lookup_by_name(const char *paramName);
 
     /*
      * use return value from snmp_sess_open as void * parameter 

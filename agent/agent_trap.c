@@ -202,6 +202,35 @@ _trap_version_decr(int version)
     return;
 }
 
+
+#ifndef NETSNMP_NO_TRAP_STATS
+static void
+_dump_trap_stats(netsnmp_session *sess)
+{
+    if (NULL == sess || NULL == sess->trap_stats)
+        return;
+
+    DEBUGIF("stats:informs") {
+        DEBUGMSGT_NC(("stats:informs", "%s inform stats\n", sess->paramName));
+        DEBUGMSGT_NC(("stats:informs", "    %ld sends, last @ %ld\n",
+                      sess->trap_stats->sent_count,
+                      sess->trap_stats->sent_last_sent));
+        DEBUGMSGT_NC(("stats:informs", "    %ld acks, last @ %ld\n",
+                      sess->trap_stats->ack_count,
+                      sess->trap_stats->ack_last_rcvd));
+        DEBUGMSGT_NC(("stats:informs", "    %ld failed sends, last @ %ld\n",
+                      sess->trap_stats->sent_fail_count,
+                      sess->trap_stats->sent_last_fail));
+        DEBUGMSGT_NC(("stats:informs", "    %ld timeouts, last @ %ld\n",
+                      sess->trap_stats->timeouts,
+                      sess->trap_stats->sent_last_timeout));
+        DEBUGMSGT_NC(("stats:informs", "    %ld v3 errs, last @ %ld\n",
+                      sess->trap_stats->sec_err_count,
+                      sess->trap_stats->sec_err_last));
+    }
+}
+#endif /* NETSNMP_NO_TRAP_STATS */
+
 int
 netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
                                  int confirm, int version, const char *name,
@@ -992,6 +1021,58 @@ send_enterprise_trap_vars(int trap,
 }
 
 /**
+ * Handles stats for basic traps (really just send failed
+*/
+int
+handle_trap_callback(int op, netsnmp_session * session, int reqid,
+                     netsnmp_pdu *pdu, void *magic)
+{
+    if (NULL == session)
+        return 0;
+
+    DEBUGMSGTL(("trap", "handle_trap_callback for session %s\n",
+                session->paramName ? session->paramName : "UNKNOWN"));
+    switch (op) {
+
+    case NETSNMP_CALLBACK_OP_SEND_FAILED:
+        DEBUGMSGTL(("trap", "failed to send an inform for reqid=%d\n", reqid));
+#ifndef NETSNMP_NO_TRAP_STATS
+        if (session->trap_stats) {
+            session->trap_stats->sent_last_fail = netsnmp_get_agent_uptime();
+            ++session->trap_stats->sent_fail_count;
+        }
+#endif /* NETSNMP_NO_TRAP_STATS */
+        break;
+
+    case NETSNMP_CALLBACK_OP_SEC_ERROR:
+        DEBUGMSGTL(("trap", "sec error sending a trap for reqid=%d\n",
+                    reqid));
+#ifndef NETSNMP_NO_TRAP_STATS
+        if (session->trap_stats) {
+            session->trap_stats->sec_err_last = netsnmp_get_agent_uptime();
+            ++session->trap_stats->sec_err_count;
+        }
+#endif /* NETSNMP_NO_TRAP_STATS */
+        break;
+
+    case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+    case NETSNMP_CALLBACK_OP_TIMED_OUT:
+    case NETSNMP_CALLBACK_OP_RESEND:
+    default:
+        DEBUGMSGTL(("trap",
+                    "received op=%d for reqid=%d when trying to send a trap\n",
+                    op, reqid));
+    }
+#ifndef NETSNMP_NO_TRAP_STATS
+    if (session->trap_stats)
+        _dump_trap_stats(session);
+#endif /* NETSNMP_NO_TRAP_STATS */
+
+    return 1;
+}
+
+
+/**
  * Captures responses or the lack there of from INFORMs that were sent
  * 1) a response is received from an INFORM
  * 2) one isn't received and the retries/timeouts have failed
@@ -1001,35 +1082,89 @@ handle_inform_response(int op, netsnmp_session * session,
                        int reqid, netsnmp_pdu *pdu,
                        void *magic)
 {
-    /* XXX: possibly stats update */
+    if (NULL == session)
+        return 0;
+
+    DEBUGMSGTL(("trap", "handle_inform_response for session %s\n",
+                session->paramName ? session->paramName : "UNKNOWN"));
     switch (op) {
 
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
         snmp_increment_statistic(STAT_SNMPINPKTS);
-        DEBUGMSGTL(("trap", "received the inform response for reqid=%d\n",
+        if (pdu->command != SNMP_MSG_REPORT) {
+            DEBUGMSGTL(("trap", "received the inform response for reqid=%d\n",
+                        reqid));
+#ifndef NETSNMP_NO_TRAP_STATS
+            if (session->trap_stats) {
+                ++session->trap_stats->ack_count;
+                session->trap_stats->ack_last_rcvd = netsnmp_get_agent_uptime();
+            }
+#endif /* NETSNMP_NO_TRAP_STATS */
+            break;
+        } else {
+            int type = session->s_snmp_errno ? session->s_snmp_errno :
+                snmpv3_get_report_type(pdu);
+            DEBUGMSGTL(("trap", "received report %d for inform reqid=%d\n",
+                        type, reqid));
+            /*
+             * xxx-rks: what stats, if any, to bump for other report types?
+             * - ignore NOT_IN_TIME, as agent will sync and retry.
+             */
+            if (SNMPERR_AUTHENTICATION_FAILURE != type)
+                break;
+        }
+        /** AUTH failures fall through to sec error */
+
+    case NETSNMP_CALLBACK_OP_SEC_ERROR:
+        DEBUGMSGTL(("trap", "sec error sending an inform for reqid=%d\n",
                     reqid));
+#ifndef NETSNMP_NO_TRAP_STATS
+        if (session->trap_stats) {
+            session->trap_stats->sec_err_last = netsnmp_get_agent_uptime();
+            ++session->trap_stats->sec_err_count;
+        }
+#endif /* NETSNMP_NO_TRAP_STATS */
         break;
 
     case NETSNMP_CALLBACK_OP_TIMED_OUT:
         DEBUGMSGTL(("trap",
                     "received a timeout sending an inform for reqid=%d\n",
                     reqid));
+#ifndef NETSNMP_NO_TRAP_STATS
+        if (session->trap_stats) {
+            ++session->trap_stats->timeouts;
+            session->trap_stats->sent_last_timeout =
+                netsnmp_get_agent_uptime();
         }
+#endif /* NETSNMP_NO_TRAP_STATS */
         break;
 
     case NETSNMP_CALLBACK_OP_RESEND:
         DEBUGMSGTL(("trap", "resending an inform for reqid=%d\n", reqid));
+#ifndef NETSNMP_NO_TRAP_STATS
+        if (session->trap_stats)
+            session->trap_stats->sent_last_sent = netsnmp_get_agent_uptime();
+#endif /* NETSNMP_NO_TRAP_STATS */
         break;
 
     case NETSNMP_CALLBACK_OP_SEND_FAILED:
-        DEBUGMSGTL(("trap",
-                    "failed to send an inform for reqid=%d\n",
-                    reqid));
+        DEBUGMSGTL(("trap", "failed to send an inform for reqid=%d\n", reqid));
+#ifndef NETSNMP_NO_TRAP_STATS
+        if (session->trap_stats) {
+            session->trap_stats->sent_last_fail = netsnmp_get_agent_uptime();
+            ++session->trap_stats->sent_fail_count;
+        }
+#endif /* NETSNMP_NO_TRAP_STATS */
         break;
 
     default:
         DEBUGMSGTL(("trap", "received op=%d for reqid=%d when trying to send an inform\n", op, reqid));
     }
+
+#ifndef NETSNMP_NO_TRAP_STATS
+    if (session->trap_stats)
+        _dump_trap_stats(session);
+#endif /* NETSNMP_NO_TRAP_STATS */
 
     return 1;
 }
@@ -1087,6 +1222,16 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     pdu->reqid = snmp_get_next_reqid();
     pdu->msgid = snmp_get_next_msgid();
 
+#ifndef NETSNMP_NO_TRAP_STATS
+    /** allocate space for trap stats */
+    if (NULL == sess->trap_stats) {
+        sess->trap_stats = SNMP_MALLOC_TYPEDEF(netsnmp_trap_stats);
+        if (NULL == sess->trap_stats)
+            snmp_log(LOG_ERR, "malloc for %s trap stats failed\n",
+                     sess->paramName ? sess->paramName : "UNKNOWN");
+    }
+#endif /* NETSNMP_NO_TRAP_STATS */
+
     if ( template_pdu->command == SNMP_MSG_INFORM
 #ifdef USING_AGENTX_PROTOCOL_MODULE
          || template_pdu->command == AGENTX_MSG_NOTIFY
@@ -1094,7 +1239,6 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
        ) {
         result =
             snmp_async_send(sess, pdu, &handle_inform_response, NULL);
-        
     } else {
         if ((sess->version == SNMP_VERSION_3) &&
                 (pdu->command == SNMP_MSG_TRAP2) &&
@@ -1106,15 +1250,23 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
             pdu->securityEngineIDLen = len;
         }
 
-        result = snmp_send(sess, pdu);
+        result = snmp_async_send(sess, pdu, &handle_trap_callback, NULL);
     }
 
     if (result == 0) {
         snmp_sess_perror("snmpd: send_trap", sess);
         snmp_free_pdu(pdu);
+        /** trap stats for failure handled in callback */
     } else {
         snmp_increment_statistic(STAT_SNMPOUTTRAPS);
         snmp_increment_statistic(STAT_SNMPOUTPKTS);
+#ifndef NETSNMP_NO_TRAP_STATS
+        if (sess->trap_stats) {
+            sess->trap_stats->sent_last_sent = netsnmp_get_agent_uptime();
+            ++sess->trap_stats->sent_count;
+            _dump_trap_stats(sess);
+        }
+#endif /* NETSNMP_NO_TRAP_STATS */
     }
 }
 
