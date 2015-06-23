@@ -5203,6 +5203,9 @@ _sess_async_send(void *sessp,
     if (result < 0) {
         session->s_snmp_errno = SNMPERR_BAD_SENDTO;
         session->s_errno = errno;
+        if (callback)
+            callback(NETSNMP_CALLBACK_OP_SEND_FAILED, session,
+                     pdu->reqid, pdu, cb_data);
         return 0;
     }
 
@@ -6635,6 +6638,9 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
         sp->s_errno = errno;
         snmp_set_detail(strerror(errno));
+        if (rp->callback)
+            rp->callback(NETSNMP_CALLBACK_OP_SEND_FAILED, sp,
+                         rp->pdu->reqid, rp->pdu, rp->cb_data);
         return -1;
     } else {
         netsnmp_get_monotonic_clock(&now);
@@ -6644,6 +6650,9 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         tv.tv_sec += tv.tv_usec / 1000000L;
         tv.tv_usec %= 1000000L;
         rp->expireM = tv;
+        if (rp->callback)
+            rp->callback(NETSNMP_CALLBACK_OP_RESEND, sp,
+                         rp->pdu->reqid, rp->pdu, rp->cb_data);
     }
     return 0;
 }

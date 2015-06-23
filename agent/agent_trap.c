@@ -1014,6 +1014,11 @@ handle_inform_response(int op, netsnmp_session * session,
         DEBUGMSGTL(("trap",
                     "received a timeout sending an inform for reqid=%d\n",
                     reqid));
+        }
+        break;
+
+    case NETSNMP_CALLBACK_OP_RESEND:
+        DEBUGMSGTL(("trap", "resending an inform for reqid=%d\n", reqid));
         break;
 
     case NETSNMP_CALLBACK_OP_SEND_FAILED:
