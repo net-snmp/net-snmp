@@ -210,21 +210,21 @@ _dump_trap_stats(netsnmp_session *sess)
     if (NULL == sess || NULL == sess->trap_stats)
         return;
 
-    DEBUGIF("stats:informs") {
-        DEBUGMSGT_NC(("stats:informs", "%s inform stats\n", sess->paramName));
-        DEBUGMSGT_NC(("stats:informs", "    %ld sends, last @ %ld\n",
+    DEBUGIF("stats:notif") {
+        DEBUGMSGT_NC(("stats:notif", "%s inform stats\n", sess->paramName));
+        DEBUGMSGT_NC(("stats:notif", "    %ld sends, last @ %ld\n",
                       sess->trap_stats->sent_count,
                       sess->trap_stats->sent_last_sent));
-        DEBUGMSGT_NC(("stats:informs", "    %ld acks, last @ %ld\n",
+        DEBUGMSGT_NC(("stats:notif", "    %ld acks, last @ %ld\n",
                       sess->trap_stats->ack_count,
                       sess->trap_stats->ack_last_rcvd));
-        DEBUGMSGT_NC(("stats:informs", "    %ld failed sends, last @ %ld\n",
+        DEBUGMSGT_NC(("stats:notif", "    %ld failed sends, last @ %ld\n",
                       sess->trap_stats->sent_fail_count,
                       sess->trap_stats->sent_last_fail));
-        DEBUGMSGT_NC(("stats:informs", "    %ld timeouts, last @ %ld\n",
+        DEBUGMSGT_NC(("stats:notif", "    %ld timeouts, last @ %ld\n",
                       sess->trap_stats->timeouts,
                       sess->trap_stats->sent_last_timeout));
-        DEBUGMSGT_NC(("stats:informs", "    %ld v3 errs, last @ %ld\n",
+        DEBUGMSGT_NC(("stats:notif", "    %ld v3 errs, last @ %ld\n",
                       sess->trap_stats->sec_err_count,
                       sess->trap_stats->sec_err_last));
     }
