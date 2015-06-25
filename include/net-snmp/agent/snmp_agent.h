@@ -328,8 +328,8 @@ extern          "C" {
      * pdu stats
      */
     typedef struct netsnmp_pdu_stats_s {
-        u_long          processing_time;
-        time_t          timestamp;
+        u_long          processing_time; /* ms */
+        time_t          timestamp; /* date/time */
         netsnmp_pdu    *pdu;
     } netsnmp_pdu_stats;
 

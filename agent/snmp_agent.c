@@ -190,7 +190,6 @@ _pdu_stats_init(void) {
     DEBUGMSGTL(("stats:pdu", "max: %d, threshold %ld ms\n", _pdu_stats_max,
                 _pdu_stats_threshold));
 }
-#endif /* NETSNMP_NO_PDU_STATS */
 
 
 static void
@@ -212,6 +211,61 @@ _pdu_stats_shutdown(void)
     CONTAINER_FREE(_pdu_stats);
     _pdu_stats = NULL;
 }
+
+
+static void
+_dump_pdu_stats(void)
+{
+    int x = 0;
+    struct tm *tm;
+    char timestr[40];
+    netsnmp_pdu_stats *entry;
+
+    for( ; x < CONTAINER_SIZE(_pdu_stats); ++x) {
+        netsnmp_pdu    *response;
+        netsnmp_variable_list *vars;
+        CONTAINER_GET_AT(_pdu_stats, x, (void**)&entry);
+        if (NULL == entry) {
+            DEBUGMSGT_NC(("9:stats:pdu", "[%d] ERROR\n", x));
+            continue;
+        }
+        tm = localtime(&entry->timestamp);
+        if (NULL == tm)
+            sprintf(timestr, "UNKNOWN");
+        else if (strftime(timestr, sizeof(timestr), "%m/%d/%Y %H:%M:%S",
+                          tm) == 0)
+            sprintf(timestr, "UNKNOWN");
+
+        DEBUGMSGT_NC(("9:stats:pdu", "[%d] %ld ms, %s\n",
+                      x, entry->processing_time, timestr));
+        response = entry->pdu;
+        if (response->errstat == SNMP_ERR_NOERROR) {
+            for (vars = response->variables; vars;
+                 vars = vars->next_variable) {
+                DEBUGMSGT_NC(("9:stats:pdu", "    vb "));
+                DEBUGMSGVAR(("9:stats:pdu", vars));
+                DEBUGMSG_NC(("9:stats:pdu", "\n"));
+            }
+        } else {
+            DEBUGMSGT_NC(("9:stats:pdu", "Error in packet: Reason: %s\n",
+                          snmp_errstring(response->errstat)));
+            if (response->errindex != 0) {
+                int count;
+                DEBUGMSGT_NC(("9:stats:pdu", "Failed object: "));
+                for (count = 1, vars = response->variables;
+                     vars && count != response->errindex;
+                     vars = vars->next_variable, count++)
+                    /*EMPTY*/;
+                if (vars) {
+                    DEBUGMSGOID(("9:stats:pdu", vars->name,
+                                 vars->name_length));
+                }
+                DEBUGMSG_NC(("9:stats:pdu", "\n"));
+            }
+        }
+    }
+}
+#endif /* NETSNMP_NO_PDU_STATS */
 
 
 NETSNMP_INLINE void
@@ -1821,57 +1875,9 @@ netsnmp_pdu_stats_process(netsnmp_agent_session *asp)
             _pdu_stats_current_lowest = old->processing_time;
     }
 
-#define NETSNMP_DUMP_PDU_STATS 1
-#ifdef NETSNMP_DUMP_PDU_STATS
-    {
-        int x = 0;
-        struct tm *tm;
-        char timestr[40];
-        for( ; x < CONTAINER_SIZE(_pdu_stats); ++x) {
-            netsnmp_pdu    *response;
-            netsnmp_variable_list *vars;
-            CONTAINER_GET_AT(_pdu_stats, x, (void**)&old);
-            if (NULL == old) {
-                DEBUGMSGTL(("9:stats:pdu", "[%d] ERROR\n", x));
-                continue;
-            }
-            tm = localtime(&old->timestamp);
-            if (NULL == tm)
-                sprintf(timestr, "UNKNOWN");
-            else if (strftime(timestr, sizeof(timestr), "%m/%d/%Y %H:%M:%S",
-                              tm) == 0)
-                sprintf(timestr, "UNKNOWN");
-
-            DEBUGMSGTL(("9:stats:pdu", "[%d] %ld ms, %s\n",
-                        x, old->processing_time, timestr));
-            response = old->pdu;
-            if (response->errstat == SNMP_ERR_NOERROR) {
-                for (vars = response->variables; vars;
-                     vars = vars->next_variable) {
-                    DEBUGMSGTL(("9:stats:pdu", "    vb "));
-                    DEBUGMSGVAR(("9:stats:pdu", vars));
-                    DEBUGMSG(("9:stats:pdu", "\n"));
-                }
-            } else {
-                DEBUGMSGTL(("9:stats:pdu", "Error in packet: Reason: %s\n",
-                            snmp_errstring(response->errstat)));
-                if (response->errindex != 0) {
-                    int count;
-                    DEBUGMSGTL(("9:stats:pdu", "Failed object: "));
-                    for (count = 1, vars = response->variables;
-                         vars && count != response->errindex;
-                         vars = vars->next_variable, count++)
-                        /*EMPTY*/;
-                    if (vars) {
-                        DEBUGMSGOID(("9:stats:pdu", vars->name,
-                                     vars->name_length));
-                    }
-                    DEBUGMSG(("9:stats:pdu", "\n"));
-                }
-            }
-        }
+    DEBUGIF("9:stats:pdu") {
+        _dump_pdu_stats();
     }
-#endif /* NETSNMP_DUMP_PDU_STATS */
 
     return 1;
 
