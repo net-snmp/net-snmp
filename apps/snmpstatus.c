@@ -307,30 +307,38 @@ main(int argc, char *argv[])
                         continue;
                     }
                     if (vars->name_length >= length_ifOperStatus
-                        && !memcmp(objid_ifOperStatus, vars->name,
-                                   sizeof(objid_ifOperStatus))) {
+                            && !memcmp(objid_ifOperStatus, vars->name,
+                                    sizeof(objid_ifOperStatus))
+                            && vars->type == ASN_INTEGER
+                            && vars->val.integer) {
                         if (*vars->val.integer != MIB_IFSTATUS_UP)
                             down_interfaces++;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
                         good_var++;
-                    } else if (vars->name_length >= length_ifInUCastPkts &&
-                               !memcmp(objid_ifInUCastPkts, vars->name,
-                                       sizeof(objid_ifInUCastPkts))) {
+                    } else if (vars->name_length >= length_ifInUCastPkts
+                            &&!memcmp(objid_ifInUCastPkts, vars->name,
+                                    sizeof(objid_ifInUCastPkts))
+                            && vars->type == ASN_COUNTER
+                            && vars->val.integer) {
                         ipackets += *vars->val.integer;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
                         good_var++;
                     } else if (vars->name_length >= length_ifInNUCastPkts
                                && !memcmp(objid_ifInNUCastPkts, vars->name,
-                                          sizeof(objid_ifInNUCastPkts))) {
+                                          sizeof(objid_ifInNUCastPkts))
+                               && vars->type == ASN_COUNTER
+                               && vars->val.integer) {
                         ipackets += *vars->val.integer;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
                         good_var++;
                     } else if (vars->name_length >= length_ifOutUCastPkts
                                && !memcmp(objid_ifOutUCastPkts, vars->name,
-                                          sizeof(objid_ifOutUCastPkts))) {
+                                          sizeof(objid_ifOutUCastPkts))
+                               && vars->type == ASN_COUNTER
+                               && vars->val.integer) {
                         opackets += *vars->val.integer;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
@@ -338,7 +346,9 @@ main(int argc, char *argv[])
                     } else if (vars->name_length >= length_ifOutNUCastPkts
                                && !memcmp(objid_ifOutNUCastPkts,
                                           vars->name,
-                                          sizeof(objid_ifOutNUCastPkts))) {
+                                          sizeof(objid_ifOutNUCastPkts))
+                               && vars->type == ASN_COUNTER
+                               && vars->val.integer) {
                         opackets += *vars->val.integer;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
