@@ -3,6 +3,273 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code. 
       
+*5.4.5*
+
+    snmplib:
+      - Add netsnmp_setenv().
+      - Add the symbol NETSNMP_PRIo to help in printing oid values.
+      - Avoid failure to trigger sign extension due to overlong types In
+	asn_realloc_rbuild_signed_int64 the algorithm assumes that shifting
+	values greater than 0x7fffffff right is an arithmetic shift that
+	will shift in 1's. On hosts where long is more than 32 bits the use
+	of long for 'low' and 'high' makes this assumption false. Thanks to
+	rkj@softhome.net for reporting this issue.
+      - Declare "type" argument of se_store_list() / se_store_slist() /
+	se_store_enum_list() const
+      - Do not crash from empty values in --token=value arguments
+      - Do not crash on incomplete configuration tokens.
+      - Do not truncate single default transport domains
+      - From Siddhesh Poyarekar: properly clean up old requests in a
+	subagent when we reconnect to master. An snmp subagent linked
+	against net-snmp-libs may crash if it handles a response which has
+	magic referring to an older disconnected main session. This may
+	happen when the subagent attempts to clean up old requests on
+	reconnection of the disconnected master session.
+      - Make it explicit that MAX_SUBID is an unsigned constant
+      - Make the data argument to read_config_save_octet_string accept
+	constant values
+      - Prevent gcc ped-warning for NETSNMP_REMOVE_CONST git-svn-id:
+	file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@1
+	8052 06827809-a52a-0410-b366-d66718629ded
+      - Rename memdup() into netsnmp_memdup() Rename the function memdup()
+	defined in libnetsnmp.so into netsnmp_memdup(). This avoids
+	conflicts with memdup() functions defined in other libraries that
+	define a function with the same name. As an example, if WINS name
+	resolution has been enabled via /etc/nsswitch.conf then performing
+	a host name lookup can trigger a crash in the SAMBA WINS name
+	lookup library because calls to memdup() from that library get
+	redirected to the incompatible Net-SNMP memdup() function. See also
+	https://bugzilla.redhat.com/show_bug.cgi?id=1000780 for the
+	details. This patch intentionally changes the Net-SNMP ABI.
+      - Simplify implementation of functions manipulating 64-bit numbers.
+      - Simplify the se_store_enum_list() implementation
+      - [PATCH 3526599]: Don't hang on retried failing SNMPv3 responses
+
+    snmplib, snmpd, perl:
+      - Eliminate dead variables agent/mibgroup/agentx/master_admin.c
+	agent/mibgroup/etherlike-mib/data_access/dot3stats_linux.c
+	agent/mibgroup/etherlike-mib/dot3StatsTable/dot3StatsTable_data_acc
+	ess.c agent/mibgroup/host/data_access/swinst_pkginfo.c
+	agent/mibgroup/host/data_access/swrun_procfs_status.c
+	agent/mibgroup/ip-mib/data_access/systemstats_linux.c
+	agent/mibgroup/mibII/kernel_linux.c
+	agent/mibgroup/rmon-mib/data_access/etherstats_linux.c
+	agent/mibgroup/rmon-mib/etherStatsTable/etherStatsTable_data_access
+	.c apps/snmptls.c apps/snmptrapd_log.c snmplib/dir_utils.c
+	snmplib/snmp_client.c snmplib/snmp_openssl.c
+	snmplib/transports/snmpTLSTCPDomain.c
+
+    snmp:
+      - BUG: 2622: Fix excessive indents in log file
+      - BUG: 3526549: CVE-2012-2141 Array index error leading to crash
+
+    snmpd:
+      - Add a missing function declaration
+      - BUG: 3463767: Handle parsing subidentifiers > 2^31
+      - BUG: 3532090: Fix high ifIndex values crashing hrDeviceDescr
+      - BUG: 3543864: Remove extraneous function type (and fix a related
+	typo)
+      - DISMAN-SCHEDULER-MIB: Handle 32-character schedContextName values
+	correctly. See also commit
+	b3c4982542e0ab151fb3884754cdfbcb472da52d.
+      - IF-MIB::ifType: Report type "infiniband (199)" for InfiniBand
+	interfaces instead of type "other (1)".
+      - PATCH 3453868: from "Bill Fenner <fenner@gmail.com>": Factor common
+	code into pass_common Move the code for pormatting and printing
+	values from pass and pass_persist into pass_common.
+      - PATCH: 3487867: Don't skip missing ifXTable entries
+	(ifConnectorPresent FALSE)
+      - Remove some unused includes
+      - Run signal handlers when select() is interrupted. This behavior is
+	indicated in comment on line 1244, but it was not actually done.
+      - Smux: simplify smux_list_detach()
+      - UDP-MIB: Report the proper address in udpLocalAddress instead of
+	0.0.0.0. Makes test T160snmpnetstat pass again. Fixes a bug
+	introduced in commit c76fb96f65e33ba2fd212a921e8c386155ee5c7a.
+      - Use 0 for the ignored numvars argument to netsnmp_register_mib The
+	numvars argument of netsnmp_register_mib is ignored if the var
+	argument is NULL. In order to unify this use of it with all other
+	ones, change it from 1 to 0
+      - [PATCH 3410050]: Skip already-'processed' varbinds Based on mib2c
+	patch provided by Stephen Turner
+      - [PATCH 3410059]: Fix sparsely augmenting trigger tables Patch
+	provided by Stephen Turner
+      - [PATCH 3447444]: Fix SIG_PIPE handling Patch provided by Bill
+	Fenner
+      - [PATCH 3447671]: Fix override handling of OID values Patch supplied
+	by Phillip O'Donnell
+      - [PATCH 3487919]: Fix compilation when caching is disabled
+      - [PATCH 3495697]: Store persistent snmpTarget table changes
+      - [PATCH 3543000]: Various fixes to Rmon code Supplied by Patrick
+	Ritter
+
+    snmpdx:
+      - [PATCH 3445437]: Log AgentX disconnections (in line with
+	connections) Patch provided by Bill Fenner
+
+    snmptrapd:
+      - Add missing newline character in a log message
+      - Avoid crash during shutdown due to invoking perl_destruct(NULL)
+      - Correctly forward traps with Request-ID '0'. Request-ID of
+	forwarded traps is taken from the incoming trap and it can be zero.
+	We should not report error in this case.
+      - Invoke shutdown_perl() when shutting down
+
+    apps:
+      - BUG: 3529768: Be more careful when stripping off numeric suffixes
+
+    apps, snmplib:
+      - PATCH: 2835577: identified by "Bart Van Assche": Replace SNMP_ZERO
+	of arrays with a memset. git-svn-id:
+	file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@1
+	7797 06827809-a52a-0410-b366-d66718629ded
+
+    building:
+      - Avoid duplicate and trailing spaces in the dependency files.
+      - Correct dependencies - since
+	bf74fea69f24dc6e85f908f3f41d1426b2e09688 snmpconf is located in
+	builddir, not srcdir
+      - Correct dependencies - since
+	bf74fea69f24dc6e85f908f3f41d1426b2e09688 snmpconf is located in
+	builddir, not srcdir" This reverts commit
+	9efa467a972bb6e1c7fbdaf2e27429d29f4ab89e.
+      - Make the -without options to rpmbuild work
+
+    doc:
+      - BUG: 3535269: Document use of [snmp] for client-side tools.
+
+    documentation:
+      - From "Eric S. Raymond": Correct man page markup problem Ambiguous
+	or invalid backslash.  This doesn't cause groff a problem. but it
+	confuses doclifter and may confuse older troff implementations.
+
+    libsnmp:
+      - Changed the type of the fourth argument of netsnmp_set_row_column()
+	from const char* to const void* such that no cast is necessary when
+	passing another datatype then char* or const char*.
+
+    man:
+      - [BUG 3490708]: Clarify use of common command-line options
+
+    mib2c:
+      - BUG: 2598: declare the storage for column variables in mfd's
+	_container_load   The _container_load function assumes that you're
+	going to fill in a variable for each column; declare these
+	variables so that the sample code compiles even before you get
+	around to filling in this part of the code.
+
+    perl:
+      - BUG: 3517030: Ensure large tables are walked properly
+      - BUG: 3541012: Fix handling of gettable columns
+      - Fix spelling in the documentation of the SNMP module
+      - Fixed segmentation fault when handler registration fails. When
+	netsnmp_register_handler fails, it frees its reginfo ->
+	nsahr_DESTROY (and any other function) must not dereference it.
+      - Perl: Make sure that the constant SNMP_DEFAULT_RETRIES is
+	recognized. SNMP module: Add constants
+	NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE and
+	NETSNMP_CALLBACK_OP_TIMED_OUT. When the Net-SNMP Perl modules are
+	built on Windows with MSVC or MinGW it is possible that each these
+	are linked with another version of the MSVC runtime library than
+	the Perl interpreter itself. In that case the "errno" variable used
+	inside .xs source files is another variable than the $! variable in
+	.pm files. Or: assignments to "errno" in a .xs file do not modify
+	the "$!" Perl variable This patch avoids using "errno" by modifying
+	the different constant() functions such that these return a
+	two-element array instead of returning a scalar and setting errno.
+      - [PATCH 3529541]: Don't refer to internal 'my' variables from
+	external scripts Fix provided by Lezz Giles
+
+    python:
+      - Avoid that an SNMP set with UseEnums enabled causes a segmentation
+	fault
+      - BUG: 3535967: Fix memory leak - snmp_{sess_}error allocates the
+	output buffer
+      - Fixed IPADDRESS size on 64bit systems.
+      - PATCH: 3310375: from Erinn Looney-Triggs: fixed parsing of varbinds
+	with MIB names
+      - [PATCH 1239]: Fix memory leak
+      - [PATCH 3433846]: Fix for use with python 2.4
+
+    testing:
+      - Fix Perl regression test failures All Perl regression tests pass
+	now on Linux and on Windows (MSVC).
+      - Perl regression tests: Don't fail skipped tests.
+
+    unspecified:
+      - [BUG 2476]: snmpd fails to start on AIX On an AIX system there is
+	no <kvm.h> header file nor do the /dev/dmem or /dev/drum devices
+	exist and hence DMEM_LOC is not defined. Avoid that init_kmem()
+	fails in that case.
+      - [BUG 2616]: Fix certain spelling errors in source code comments and
+	printed messages
+      - [BUG 3440752]: IF-MIB: Report interface speed correctly for
+	Ethernet interfaces if other than 10 Mbps, 100 Mbps, 1 Gbps, 2.5
+	Gbps or 10 Gbps. Add support for NICs faster than 65 Gbps.
+      - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
+	sprint_realloc_octet_string() embeds unprintable control characters
+	or binary zeroes in its output. This behavior could cause truncated
+	output in snmptrapd.
+      - [BUG 3540621]: dist: Add missing Provides: to net-snmp-perlmods RPM
+	spec
+      - [BUG ]: #2615: Don't return incompletely parsed varbinds
+
+    AIX:
+      - Make tcp-mib build
+      - Make udp-mib build
+
+    FreeBSD:
+      - [PATCH 3489387]: Install FreeBSD 10 header file (plus other missing
+	versions)
+
+    Linux:
+      - PATCH: 3525998: Don't use an uninitialised value in error message
+
+    MinGW:
+      - Net-SNMP Perl modules build again.
+
+    Win32:
+      - Building: Builds now correctly with a 64-bit compiler. git-svn-id:
+	file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@1
+	9458 06827809-a52a-0410-b366-d66718629ded
+      - Fix the compiler warnings triggered by the winExtDLL source code
+	and that are triggered by the change of the "oid" typedef from
+	uint32_t to u_long.
+      - Snmpd: Remove dlmod
+      - WinExtDLL: Invoke SnmpUtilOidFree() before SnmpUtilOidCpy(). It's
+	not clear yet why the original code did not make snmpwalk trigger a
+	memory leak.
+
+    Windows:
+      - Avoid that if the Net-SNMP Perl modules have been built with
+	another version of Microsoft Visual Studio than ActivePerl that
+	using one of these Perl modules triggers a "Free to wrong pool"
+	crash. This regression was caused by commit
+	3b14c59cf8278d410207ff42debda2636426a468 (the netsnmp_free() into
+	SNMP_FREE() changes in the *.xs files).
+      - Avoid that if the Net-SNMP Perl modules have been built with
+	another version of Microsoft Visual Studio than ActivePerl that
+	using one of these Perl modules triggers a "Free to wrong pool"
+	crash. This regression was caused by commit
+	3b14c59cf8278d410207ff42debda2636426a468 (the netsnmp_free() into
+	SNMP_FREE() changes in the *.xs files)." This reverts commit
+	7f42d0d93320484152271427cc9808cbda49bbd0 because that commit is not
+	suitable for the 5.4 branch.
+      - Avoid that running the Perl regression tests makes snmpd crash
+      - Build.bat: Generate PDB files in release mode. build.bat: Write PDB
+	files to the output directory instead of the intermediate
+	directory.
+      - Building (build.bat): Install netsnmp.dll before running the Perl
+	regression tests such that the regression tests are run with the
+	correct version of netsnmp.dll.
+      - Fix environment separator in snmpd/snmptrapd/snmptranslate help
+	text. Reported by Jason McCollum <jmccollum@comtechefdata.com>.
+      - Make linking with recent OpenSSL binaries succeed.
+      - Make winExtDLL work on 64-bit Windows systems
+      - Perl modules build now with IPv6 enabled.
+      - Ported ucd-snmp/dlmod to MinGW / MSVC
+      - Snmptrapd: Make the IP address to hostname conversion work
+
 * 5.4.4 *
 
     snmplib:

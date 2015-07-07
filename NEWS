@@ -3,6 +3,24 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.4.5*
+
+    snmp:
+      - BUG: 2622: Fix excessive indents in log file
+      - BUG: 3526549: CVE-2012-2141 Array index error leading to crash
+
+    snmpd:
+      - BUG: 3532090: Fix high ifIndex values crashing hrDeviceDescr
+
+    building:
+      - PATCH: 2091156: correctly declare dependencies in Makefile. 'make
+	-j <N>' should work now. Backport this to V5-4 as it is needed for
+	correct operation in the single threaded case of make miblib as
+	well.
+
+    misc:
+      - Many more bug fixes, listed in the CHANGES and ChangeLog files
+
 *5.4.4*
 
     snmplib:
