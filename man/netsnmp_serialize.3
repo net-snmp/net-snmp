@@ -1,10 +1,10 @@
-.TH "serialize" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "serialize" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-serialize \- 
+serialize \- serialize
 .PP
-Calls sub handlers one request at a time.  
+Calls sub handlers one request at a time\&.  
 
 .SS "Functions"
 
@@ -12,47 +12,51 @@ Calls sub handlers one request at a time.
 .ti -1c
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_serialize_handler\fP (void)"
 .br
-.RI "\fIreturns a serialize handler that can be injected into a given handler chain. \fP"
+.RI "\fIreturns a serialize handler that can be injected into a given handler chain\&. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_register_serialize\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
 .br
-.RI "\fIfunctionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a serialize handler at the same time for you. \fP"
+.RI "\fIfunctionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a serialize handler at the same time for you\&. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_serialize_helper_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
-.RI "\fIImplements the serial handler. \fP"
+.RI "\fIImplements the serial handler\&. \fP"
 .ti -1c
 .RI "void \fBnetsnmp_init_serialize\fP (void)"
 .br
-.RI "\fIinitializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. \fP"
+.RI "\fIinitializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use\&. \fP"
 .in -1c
 .SH "Detailed Description"
 .PP 
-Calls sub handlers one request at a time. 
+Calls sub handlers one request at a time\&. 
 
-This functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once. This is useful for handlers that don't want to iterate through the request lists themselves. Generally, this is probably less efficient so use with caution. The serialize handler might be useable to dynamically fix handlers with broken looping code, however. 
+This functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once\&. This is useful for handlers that don't want to iterate through the request lists themselves\&. Generally, this is probably less efficient so use with caution\&. The serialize handler might be useable to dynamically fix handlers with broken looping code, however\&. 
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_serialize_handler (void)"
+
 .PP
-returns a serialize handler that can be injected into a given handler chain. 
+returns a serialize handler that can be injected into a given handler chain\&. 
 .PP
-Definition at line 31 of file serialize.c.
+Definition at line 31 of file serialize\&.c\&.
 .SS "void netsnmp_init_serialize (void)"
+
 .PP
-initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. 
+initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use\&. 
 .PP
-Definition at line 93 of file serialize.c.
+Definition at line 93 of file serialize\&.c\&.
 .SS "int netsnmp_register_serialize (\fBnetsnmp_handler_registration\fP * reginfo)"
+
 .PP
-functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a serialize handler at the same time for you. 
+functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a serialize handler at the same time for you\&. 
 .PP
-Definition at line 40 of file serialize.c.
+Definition at line 40 of file serialize\&.c\&.
 .SS "int netsnmp_serialize_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
+
 .PP
-Implements the serial handler. 
+Implements the serial handler\&. 
 .PP
-Definition at line 48 of file serialize.c.
+Definition at line 48 of file serialize\&.c\&.
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

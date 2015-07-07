@@ -1,10 +1,10 @@
-.TH "stash_to_next" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "stash_to_next" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-stash_to_next \- 
+stash_to_next \- stash_to_next
 .PP
-Convert GET_STASH requests into GETNEXT requests for the handler.  
+Convert GET_STASH requests into GETNEXT requests for the handler\&.  
 
 .SS "Functions"
 
@@ -12,23 +12,24 @@ Convert GET_STASH requests into GETNEXT requests for the handler.
 .ti -1c
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_stash_to_next_handler\fP (void)"
 .br
-.RI "\fIreturns a stash_to_next handler that can be injected into a given handler chain. \fP"
+.RI "\fIreturns a stash_to_next handler that can be injected into a given handler chain\&. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_stash_to_next_helper\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
 .in -1c
 .SH "Detailed Description"
 .PP 
-Convert GET_STASH requests into GETNEXT requests for the handler. 
+Convert GET_STASH requests into GETNEXT requests for the handler\&. 
 
-The purpose of this handler is to convert a GET_STASH auto-cache request to a series of GETNEXT requests. It can be inserted into a handler chain where the lower-level handlers don't process such requests themselves. 
+The purpose of this handler is to convert a GET_STASH auto-cache request to a series of GETNEXT requests\&. It can be inserted into a handler chain where the lower-level handlers don't process such requests themselves\&. 
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_stash_to_next_handler (void)"
+
 .PP
-returns a stash_to_next handler that can be injected into a given handler chain. 
+returns a stash_to_next handler that can be injected into a given handler chain\&. 
 .PP
-Definition at line 28 of file stash_to_next.c.
+Definition at line 28 of file stash_to_next\&.c\&.
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

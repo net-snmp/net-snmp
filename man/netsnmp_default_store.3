@@ -1,10 +1,10 @@
-.TH "storage space for defaults" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "default_store" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-storage space for defaults \- 
+default_store \- storage space for defaults
 .PP
-The purpose of the default storage is three-fold:.  
+The purpose of the default storage is three-fold:  
 
 .SS "Data Structures"
 
@@ -29,7 +29,7 @@ The purpose of the default storage is three-fold:.
 .ti -1c
 .RI "int \fBnetsnmp_ds_set_boolean\fP (int storeid, int which, int value)"
 .br
-.RI "\fIStores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot. \fP"
+.RI "\fIStores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot\&. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_ds_toggle_boolean\fP (int storeid, int which)"
 .br
@@ -69,17 +69,17 @@ The purpose of the default storage is three-fold:.
 .in -1c
 .SH "Detailed Description"
 .PP 
-The purpose of the default storage is three-fold:. 
+The purpose of the default storage is three-fold: 
 
-1) To create a global storage space without creating a whole bunch of globally accessible variables or a whole bunch of access functions to work with more privately restricted variables.
+1) To create a global storage space without creating a whole bunch of globally accessible variables or a whole bunch of access functions to work with more privately restricted variables\&.
 .PP
-2) To provide a single location where the thread lock- ing needs to be implemented. At the time of this writing, however, thread locking is not yet in place.
+2) To provide a single location where the thread lock- ing needs to be implemented\&. At the time of this writing, however, thread locking is not yet in place\&.
 .PP
-3) To reduce the number of cross dependencies between code pieces that may or may not be linked together in the long run. This provides for a single loca- tion in which configuration data, for example, can be stored for a separate section of code that may not be linked in to the application in question.
+3) To reduce the number of cross dependencies between code pieces that may or may not be linked together in the long run\&. This provides for a single loca- tion in which configuration data, for example, can be stored for a separate section of code that may not be linked in to the application in question\&.
 .PP
-The functions defined here implement these goals.
+The functions defined here implement these goals\&.
 .PP
-Currently, three data types are supported: booleans, inte- gers, and strings. Each of these data types have separate storage spaces. In addition, the storage space for each data type is divided further by the application level. Currently, there are two storage spaces. The first is reserved for the SNMP library itself. The second is intended for use in applications and is not modified or checked by the library, and, therefore, this is the space usable by you.
+Currently, three data types are supported: booleans, inte- gers, and strings\&. Each of these data types have separate storage spaces\&. In addition, the storage space for each data type is divided further by the application level\&. Currently, there are two storage spaces\&. The first is reserved for the SNMP library itself\&. The second is intended for use in applications and is not modified or checked by the library, and, therefore, this is the space usable by you\&.
 .PP
 These definitions correspond with the 'storid' argument to the API
 .IP "\(bu" 2
@@ -109,7 +109,7 @@ library booleans
 .IP "\(bu" 2
 #define NETSNMP_DS_LIB_DONT_READ_CONFIGS 6
 .IP "\(bu" 2
-#define NETSNMP_DS_LIB_MIB_REPLACE 7 replace objects from latest \fBmodule\fP
+#define NETSNMP_DS_LIB_MIB_REPLACE 7 replace objects from latest module
 .IP "\(bu" 2
 #define NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM 8 print only numeric enum values
 .IP "\(bu" 2
@@ -227,8 +227,11 @@ library strings
 .SH "Function Documentation"
 .PP 
 .SS "int netsnmp_ds_set_boolean (int storeid, int which, int value)"
+
 .PP
-Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot. \fBParameters:\fP
+Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot\&. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIstoreid\fP an index to the boolean storage container's first index(store)
 .br
@@ -239,12 +242,12 @@ Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[s
 .PP
 \fBReturns:\fP
 .RS 4
-Returns SNMPPERR_GENERR if the storeid and which parameters do not correspond to a valid slot, or SNMPERR_SUCCESS otherwise. 
+Returns SNMPPERR_GENERR if the storeid and which parameters do not correspond to a valid slot, or SNMPERR_SUCCESS otherwise\&. 
 .RE
 .PP
 
 .PP
-Definition at line 200 of file default_store.c.
+Definition at line 200 of file default_store\&.c\&.
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

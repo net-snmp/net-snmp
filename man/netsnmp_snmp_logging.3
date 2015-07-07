@@ -1,16 +1,49 @@
-.TH "generic logging for net-snmp" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "snmp_logging" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-generic logging for net-snmp \- 
-.SS "Defines"
+snmp_logging \- generic logging for net-snmp
+.SS "Macros"
 
 .in +1c
 .ti -1c
 .RI "#define \fBLOGLENGTH\fP   1024"
 .br
 .ti -1c
-.RI "#define \fBva_copy\fP(dest, src)   memcpy (&dest, &src, sizeof (va_list))"
+.RI "#define \fBva_copy\fP(dest,  src)   memcpy (&dest, &src, sizeof (va_list))"
+.br
+.ti -1c
+.RI "#define \fBLOG_CONS\fP   0       /* Don't bother if not defined\&.\&.\&. */"
+.br
+.ti -1c
+.RI "#define \fBLOG_PID\fP   0       /* Don't bother if not defined\&.\&.\&. */"
+.br
+.ti -1c
+.RI "#define \fBLOG_LOCAL0\fP   0"
+.br
+.ti -1c
+.RI "#define \fBLOG_LOCAL1\fP   0"
+.br
+.ti -1c
+.RI "#define \fBLOG_LOCAL2\fP   0"
+.br
+.ti -1c
+.RI "#define \fBLOG_LOCAL3\fP   0"
+.br
+.ti -1c
+.RI "#define \fBLOG_LOCAL4\fP   0"
+.br
+.ti -1c
+.RI "#define \fBLOG_LOCAL5\fP   0"
+.br
+.ti -1c
+.RI "#define \fBLOG_LOCAL6\fP   0"
+.br
+.ti -1c
+.RI "#define \fBLOG_LOCAL7\fP   0"
+.br
+.ti -1c
+.RI "#define \fBLOG_DAEMON\fP   0"
 .br
 .ti -1c
 .RI "#define \fBLOG_USER\fP   0"
@@ -30,12 +63,6 @@ generic logging for net-snmp \-
 .br
 .ti -1c
 .RI "void \fBshutdown_snmp_logging\fP (void)"
-.br
-.ti -1c
-.RI "int \fBdecode_priority\fP (char **optarg, int *pri_max)"
-.br
-.ti -1c
-.RI "int \fBdecode_facility\fP (char *optarg)"
 .br
 .ti -1c
 .RI "int \fBsnmp_log_options\fP (char *optarg, int argc, char *const *argv)"
@@ -131,11 +158,11 @@ generic logging for net-snmp \-
 .ti -1c
 .RI "int \fBsnmp_vlog\fP (int priority, const char *format, va_list ap)"
 .br
-.RI "\fIThis snmp logging function allows \fBvariable\fP argument list given the specified priority, format and a populated va_list structure. \fP"
+.RI "\fIThis snmp logging function allows variable argument list given the specified priority, format and a populated va_list structure\&. \fP"
 .ti -1c
-.RI "int \fBsnmp_log\fP (int priority, const char *format,...)"
+.RI "int \fBsnmp_log\fP (int priority, const char *format,\&.\&.\&.)"
 .br
-.RI "\fIThis snmp logging function allows \fBvariable\fP argument list given the specified format and priority. \fP"
+.RI "\fIThis snmp logging function allows variable argument list given the specified format and priority\&. \fP"
 .ti -1c
 .RI "void \fBsnmp_log_perror\fP (const char *s)"
 .br
@@ -153,26 +180,32 @@ generic logging for net-snmp \-
 .RI "\fBnetsnmp_log_handler\fP * \fBlogh_priorities\fP [LOG_DEBUG+1]"
 .br
 .in -1c
+.SH "Detailed Description"
+.PP 
+
 .SH "Function Documentation"
 .PP 
 .SS "void netsnmp_logging_restart (void)"
+hmm, don't zero status isn't saved\&.\&. i think it's safer not to overwrite, in case a hup is just to re-read config files\&.\&.\&.
 .PP
-hmm, don't zero status isn't saved.. i think it's safer not to overwrite, in case a hup is just to re-read config files...
-.PP
-Definition at line 639 of file snmp_logging.c.
+Definition at line 642 of file snmp_logging\&.c\&.
 .SS "int snmp_get_do_logging (void)"
+
 .PP
-Is logging done? \fBReturns:\fP
+Is logging done? 
+.PP
+\fBReturns:\fP
 .RS 4
-Returns 0 if logging is off, 1 when it is done. 
+Returns 0 if logging is off, 1 when it is done\&. 
 .RE
 .PP
 
 .PP
-Definition at line 496 of file snmp_logging.c.
-.SS "int snmp_log (int priority, const char * format,  ...)"
+Definition at line 499 of file snmp_logging\&.c\&.
+.SS "int snmp_log (int priority, const char * format,  \&.\&.\&.)"
+
 .PP
-This snmp logging function allows \fBvariable\fP argument list given the specified format and priority. Calls the snmp_vlog function. The default logfile this function writes to is /var/log/snmpd.log.
+This snmp logging function allows variable argument list given the specified format and priority\&. Calls the snmp_vlog function\&. The default logfile this function writes to is /var/log/snmpd\&.log\&.
 .PP
 \fBSee also:\fP
 .RS 4
@@ -183,16 +216,17 @@ This snmp logging function allows \fBvariable\fP argument list given the specifi
 .PP
 \fBExamples: \fP
 .in +1c
-\fBdelayed_instance.c\fP.
+\fBdelayed_instance\&.c\fP\&.
 .PP
-Definition at line 1278 of file snmp_logging.c.
+Definition at line 1281 of file snmp_logging\&.c\&.
 .SS "int snmp_vlog (int priority, const char * format, va_list ap)"
+
 .PP
-This snmp logging function allows \fBvariable\fP argument list given the specified priority, format and a populated va_list structure. The default logfile this function writes to is /var/log/snmpd.log.
+This snmp logging function allows variable argument list given the specified priority, format and a populated va_list structure\&. The default logfile this function writes to is /var/log/snmpd\&.log\&.
 .PP
 \fBParameters:\fP
 .RS 4
-\fIpriority\fP is an integer representing the type of message to be written to the snmp log file. The types are errors, warning, and information.
+\fIpriority\fP is an integer representing the type of message to be written to the snmp log file\&. The types are errors, warning, and information\&.
 .IP "\(bu" 2
 The error types are:
 .IP "  \(bu" 4
@@ -223,14 +257,14 @@ LOG_DEBUG debug-level messages
 
 .PP
 .br
-\fIformat\fP is a pointer to a char representing the \fBvariable\fP argument list format used.
+\fIformat\fP is a pointer to a char representing the variable argument list format used\&.
 .br
-\fIap\fP is a va_list type used to traverse the list of arguments.
+\fIap\fP is a va_list type used to traverse the list of arguments\&.
 .RE
 .PP
 \fBReturns:\fP
 .RS 4
-Returns 0 on success, -1 when the code could not format the log- string, -2 when dynamic memory could not be allocated if the length of the log buffer is greater then 1024 bytes. For each of these errors a LOG_ERR messgae is written to the logfile.
+Returns 0 on success, -1 when the code could not format the log- string, -2 when dynamic memory could not be allocated if the length of the log buffer is greater then 1024 bytes\&. For each of these errors a LOG_ERR messgae is written to the logfile\&.
 .RE
 .PP
 \fBSee also:\fP
@@ -240,7 +274,7 @@ Returns 0 on success, -1 when the code could not format the log- string, -2 when
 .PP
 
 .PP
-Definition at line 1217 of file snmp_logging.c.
+Definition at line 1220 of file snmp_logging\&.c\&.
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

@@ -1,16 +1,14 @@
-.TH "snmp_session" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-snmp_session \- 
-.PP
-The snmp session structure.  
+snmp_session \- The snmp session structure\&.  
 
 .SH SYNOPSIS
 .br
 .PP
 .PP
-\fC#include <snmp_api.h>\fP
+\fC#include <snmp_api\&.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -21,11 +19,11 @@ The snmp session structure.
 .ti -1c
 .RI "int \fBretries\fP"
 .br
-.RI "\fINumber of retries before timeout. \fP"
+.RI "\fINumber of retries before timeout\&. \fP"
 .ti -1c
 .RI "long \fBtimeout\fP"
 .br
-.RI "\fINumber of uS until first timeout, then exponential backoff. \fP"
+.RI "\fINumber of uS until first timeout, then exponential backoff\&. \fP"
 .ti -1c
 .RI "u_long \fBflags\fP"
 .br
@@ -42,27 +40,27 @@ The snmp session structure.
 .ti -1c
 .RI "u_short \fBremote_port\fP"
 .br
-.RI "\fIUDP port number of peer. \fP"
+.RI "\fIUDP port number of peer\&. \fP"
 .ti -1c
 .RI "char * \fBlocalname\fP"
 .br
-.RI "\fIMy Domain name or dotted IP address, 0 for default. \fP"
+.RI "\fIMy Domain name or dotted IP address, 0 for default\&. \fP"
 .ti -1c
 .RI "u_short \fBlocal_port\fP"
 .br
-.RI "\fIMy UDP port number, 0 for default, picked randomly. \fP"
+.RI "\fIMy UDP port number, 0 for default, picked randomly\&. \fP"
 .ti -1c
 .RI "u_char *(* \fBauthenticator\fP )(u_char *, size_t *, u_char *, size_t)"
 .br
-.RI "\fIAuthentication function or NULL if null authentication is used. \fP"
+.RI "\fIAuthentication function or NULL if null authentication is used\&. \fP"
 .ti -1c
 .RI "netsnmp_callback \fBcallback\fP"
 .br
-.RI "\fIFunction to interpret incoming data. \fP"
+.RI "\fIFunction to interpret incoming data\&. \fP"
 .ti -1c
 .RI "void * \fBcallback_magic\fP"
 .br
-.RI "\fIPointer to data that the callback function may consider important. \fP"
+.RI "\fIPointer to data that the callback function may consider important\&. \fP"
 .ti -1c
 .RI "int \fBs_errno\fP"
 .br
@@ -74,23 +72,23 @@ The snmp session structure.
 .ti -1c
 .RI "long \fBsessid\fP"
 .br
-.RI "\fISession id - AgentX only. \fP"
+.RI "\fISession id - AgentX only\&. \fP"
 .ti -1c
 .RI "u_char * \fBcommunity\fP"
 .br
-.RI "\fIcommunity for outgoing requests. \fP"
+.RI "\fIcommunity for outgoing requests\&. \fP"
 .ti -1c
 .RI "size_t \fBcommunity_len\fP"
 .br
-.RI "\fILength of community name. \fP"
+.RI "\fILength of community name\&. \fP"
 .ti -1c
 .RI "size_t \fBrcvMsgMaxSize\fP"
 .br
-.RI "\fILargest message to try to receive. \fP"
+.RI "\fILargest message to try to receive\&. \fP"
 .ti -1c
 .RI "size_t \fBsndMsgMaxSize\fP"
 .br
-.RI "\fILargest message to try to send. \fP"
+.RI "\fILargest message to try to send\&. \fP"
 .ti -1c
 .RI "u_char \fBisAuthoritative\fP"
 .br
@@ -102,7 +100,7 @@ The snmp session structure.
 .ti -1c
 .RI "size_t \fBcontextEngineIDLen\fP"
 .br
-.RI "\fILength of contextEngineID. \fP"
+.RI "\fILength of contextEngineID\&. \fP"
 .ti -1c
 .RI "u_int \fBengineBoots\fP"
 .br
@@ -118,7 +116,7 @@ The snmp session structure.
 .ti -1c
 .RI "size_t \fBcontextNameLen\fP"
 .br
-.RI "\fILength of contextName. \fP"
+.RI "\fILength of contextName\&. \fP"
 .ti -1c
 .RI "u_char * \fBsecurityEngineID\fP"
 .br
@@ -126,7 +124,7 @@ The snmp session structure.
 .ti -1c
 .RI "size_t \fBsecurityEngineIDLen\fP"
 .br
-.RI "\fILength of contextEngineID. \fP"
+.RI "\fILength of contextEngineID\&. \fP"
 .ti -1c
 .RI "char * \fBsecurityName\fP"
 .br
@@ -134,7 +132,7 @@ The snmp session structure.
 .ti -1c
 .RI "size_t \fBsecurityNameLen\fP"
 .br
-.RI "\fILength of securityName. \fP"
+.RI "\fILength of securityName\&. \fP"
 .ti -1c
 .RI "oid * \fBsecurityAuthProto\fP"
 .br
@@ -142,23 +140,23 @@ The snmp session structure.
 .ti -1c
 .RI "size_t \fBsecurityAuthProtoLen\fP"
 .br
-.RI "\fILength of auth protocol oid. \fP"
+.RI "\fILength of auth protocol oid\&. \fP"
 .ti -1c
 .RI "u_char \fBsecurityAuthKey\fP [USM_AUTH_KU_LEN]"
 .br
-.RI "\fIKu for auth protocol XXX. \fP"
+.RI "\fIKu for auth protocol XXX\&. \fP"
 .ti -1c
 .RI "size_t \fBsecurityAuthKeyLen\fP"
 .br
-.RI "\fILength of Ku for auth protocol. \fP"
+.RI "\fILength of Ku for auth protocol\&. \fP"
 .ti -1c
 .RI "u_char * \fBsecurityAuthLocalKey\fP"
 .br
-.RI "\fIKul for auth protocol. \fP"
+.RI "\fIKul for auth protocol\&. \fP"
 .ti -1c
 .RI "size_t \fBsecurityAuthLocalKeyLen\fP"
 .br
-.RI "\fILength of Kul for auth protocol XXX. \fP"
+.RI "\fILength of Kul for auth protocol XXX\&. \fP"
 .ti -1c
 .RI "oid * \fBsecurityPrivProto\fP"
 .br
@@ -166,23 +164,23 @@ The snmp session structure.
 .ti -1c
 .RI "size_t \fBsecurityPrivProtoLen\fP"
 .br
-.RI "\fILength of priv protocol oid. \fP"
+.RI "\fILength of priv protocol oid\&. \fP"
 .ti -1c
 .RI "u_char \fBsecurityPrivKey\fP [USM_PRIV_KU_LEN]"
 .br
-.RI "\fIKu for privacy protocol XXX. \fP"
+.RI "\fIKu for privacy protocol XXX\&. \fP"
 .ti -1c
 .RI "size_t \fBsecurityPrivKeyLen\fP"
 .br
-.RI "\fILength of Ku for priv protocol. \fP"
+.RI "\fILength of Ku for priv protocol\&. \fP"
 .ti -1c
 .RI "u_char * \fBsecurityPrivLocalKey\fP"
 .br
-.RI "\fIKul for priv protocol. \fP"
+.RI "\fIKul for priv protocol\&. \fP"
 .ti -1c
 .RI "size_t \fBsecurityPrivLocalKeyLen\fP"
 .br
-.RI "\fILength of Kul for priv protocol XXX. \fP"
+.RI "\fILength of Kul for priv protocol XXX\&. \fP"
 .ti -1c
 .RI "int \fBsecurityModel\fP"
 .br
@@ -198,7 +196,7 @@ The snmp session structure.
 .ti -1c
 .RI "void * \fBsecurityInfo\fP"
 .br
-.RI "\fIsecurity \fBmodule\fP specific \fP"
+.RI "\fIsecurity module specific \fP"
 .ti -1c
 .RI "void * \fBmyvoid\fP"
 .br
@@ -206,235 +204,282 @@ The snmp session structure.
 .in -1c
 .SH "Detailed Description"
 .PP 
-The snmp session structure. 
+The snmp session structure\&. 
 .PP
-Definition at line 187 of file snmp_api.h.
+Definition at line 187 of file snmp_api\&.h\&.
 .SH "Field Documentation"
 .PP 
-.SS "u_char*(* \fBsnmp_session::authenticator\fP)(u_char *, size_t *, u_char *, size_t)"
+.SS "u_char*(* snmp_session::authenticator) (u_char *, size_t *, u_char *, size_t)"
+
 .PP
-Authentication function or NULL if null authentication is used. 
-.SS "netsnmp_callback \fBsnmp_session::callback\fP"
+Authentication function or NULL if null authentication is used\&. 
 .PP
-Function to interpret incoming data. 
+Definition at line 212 of file snmp_api\&.h\&.
+.SS "netsnmp_callback snmp_session::callback"
+
 .PP
-Definition at line 214 of file snmp_api.h.
-.SS "void* \fBsnmp_session::callback_magic\fP"
+Function to interpret incoming data\&. 
 .PP
-Pointer to data that the callback function may consider important. 
+Definition at line 214 of file snmp_api\&.h\&.
+.SS "void* snmp_session::callback_magic"
+
 .PP
-Definition at line 218 of file snmp_api.h.
-.SS "u_char* \fBsnmp_session::community\fP"
+Pointer to data that the callback function may consider important\&. 
 .PP
-community for outgoing requests. 
+Definition at line 218 of file snmp_api\&.h\&.
+.SS "u_char* snmp_session::community"
+
 .PP
-Definition at line 230 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::community_len\fP"
+community for outgoing requests\&. 
 .PP
-Length of community name. 
+Definition at line 230 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::community_len"
+
 .PP
-Definition at line 232 of file snmp_api.h.
-.SS "u_char* \fBsnmp_session::contextEngineID\fP"
+Length of community name\&. 
+.PP
+Definition at line 232 of file snmp_api\&.h\&.
+.SS "u_char* snmp_session::contextEngineID"
+
 .PP
 authoritative snmpEngineID 
 .PP
-Definition at line 244 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::contextEngineIDLen\fP"
+Definition at line 244 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::contextEngineIDLen"
+
 .PP
-Length of contextEngineID. 
+Length of contextEngineID\&. 
 .PP
-Definition at line 246 of file snmp_api.h.
-.SS "char* \fBsnmp_session::contextName\fP"
+Definition at line 246 of file snmp_api\&.h\&.
+.SS "char* snmp_session::contextName"
+
 .PP
 authoritative contextName 
 .PP
-Definition at line 252 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::contextNameLen\fP"
+Definition at line 252 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::contextNameLen"
+
 .PP
-Length of contextName. 
+Length of contextName\&. 
 .PP
-Definition at line 254 of file snmp_api.h.
-.SS "u_int \fBsnmp_session::engineBoots\fP"
+Definition at line 254 of file snmp_api\&.h\&.
+.SS "u_int snmp_session::engineBoots"
+
 .PP
 initial engineBoots for remote engine 
 .PP
-Definition at line 248 of file snmp_api.h.
-.SS "u_int \fBsnmp_session::engineTime\fP"
+Definition at line 248 of file snmp_api\&.h\&.
+.SS "u_int snmp_session::engineTime"
+
 .PP
 initial engineTime for remote engine 
 .PP
-Definition at line 250 of file snmp_api.h.
-.SS "u_char \fBsnmp_session::isAuthoritative\fP"
+Definition at line 250 of file snmp_api\&.h\&.
+.SS "u_char snmp_session::isAuthoritative"
+
 .PP
 are we the authoritative engine? 
 .PP
-Definition at line 242 of file snmp_api.h.
-.SS "u_short \fBsnmp_session::local_port\fP"
+Definition at line 242 of file snmp_api\&.h\&.
+.SS "u_short snmp_session::local_port"
+
 .PP
-My UDP port number, 0 for default, picked randomly. 
+My UDP port number, 0 for default, picked randomly\&. 
 .PP
-Definition at line 208 of file snmp_api.h.
-.SS "char* \fBsnmp_session::localname\fP"
+Definition at line 208 of file snmp_api\&.h\&.
+.SS "char* snmp_session::localname"
+
 .PP
-My Domain name or dotted IP address, 0 for default. 
+My Domain name or dotted IP address, 0 for default\&. 
 .PP
-Definition at line 206 of file snmp_api.h.
-.SS "void* \fBsnmp_session::myvoid\fP"
+Definition at line 206 of file snmp_api\&.h\&.
+.SS "void* snmp_session::myvoid"
+
 .PP
 use as you want data used by 'SNMP_FLAGS_RESP_CALLBACK' handling in the agent XXX: or should we add a new field into this structure? 
 .PP
-Definition at line 308 of file snmp_api.h.
-.SS "char* \fBsnmp_session::paramName\fP"
+Definition at line 308 of file snmp_api\&.h\&.
+.SS "char* snmp_session::paramName"
+
 .PP
 target param name 
 .PP
-Definition at line 295 of file snmp_api.h.
-.SS "char* \fBsnmp_session::peername\fP"
+Definition at line 295 of file snmp_api\&.h\&.
+.SS "char* snmp_session::peername"
+
 .PP
 name or address of default peer (may include transport specifier and/or port number) 
 .PP
-Definition at line 202 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::rcvMsgMaxSize\fP"
+Definition at line 202 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::rcvMsgMaxSize"
+
 .PP
-Largest message to try to receive. 
+Largest message to try to receive\&. 
 .PP
-Definition at line 234 of file snmp_api.h.
-.SS "u_short \fBsnmp_session::remote_port\fP"
+Definition at line 234 of file snmp_api\&.h\&.
+.SS "u_short snmp_session::remote_port"
+
 .PP
-UDP port number of peer. (NO LONGER USED - USE peername INSTEAD) 
+UDP port number of peer\&. (NO LONGER USED - USE peername INSTEAD) 
 .PP
-Definition at line 204 of file snmp_api.h.
-.SS "int \fBsnmp_session::retries\fP"
+Definition at line 204 of file snmp_api\&.h\&.
+.SS "int snmp_session::retries"
+
 .PP
-Number of retries before timeout. 
+Number of retries before timeout\&. 
 .PP
-Definition at line 194 of file snmp_api.h.
-.SS "int \fBsnmp_session::s_errno\fP"
+Definition at line 194 of file snmp_api\&.h\&.
+.SS "int snmp_session::s_errno"
+
 .PP
 copy of system errno 
 .PP
-Definition at line 220 of file snmp_api.h.
-.SS "int \fBsnmp_session::s_snmp_errno\fP"
+Definition at line 220 of file snmp_api\&.h\&.
+.SS "int snmp_session::s_snmp_errno"
+
 .PP
 copy of library errno 
 .PP
-Definition at line 222 of file snmp_api.h.
-.SS "u_char \fBsnmp_session::securityAuthKey\fP[USM_AUTH_KU_LEN]"
+Definition at line 222 of file snmp_api\&.h\&.
+.SS "u_char snmp_session::securityAuthKey[USM_AUTH_KU_LEN]"
+
 .PP
-Ku for auth protocol XXX. 
+Ku for auth protocol XXX\&. 
 .PP
-Definition at line 269 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::securityAuthKeyLen\fP"
+Definition at line 269 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::securityAuthKeyLen"
+
 .PP
-Length of Ku for auth protocol. 
+Length of Ku for auth protocol\&. 
 .PP
-Definition at line 271 of file snmp_api.h.
-.SS "u_char* \fBsnmp_session::securityAuthLocalKey\fP"
+Definition at line 271 of file snmp_api\&.h\&.
+.SS "u_char* snmp_session::securityAuthLocalKey"
+
 .PP
-Kul for auth protocol. 
+Kul for auth protocol\&. 
 .PP
-Definition at line 273 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::securityAuthLocalKeyLen\fP"
+Definition at line 273 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::securityAuthLocalKeyLen"
+
 .PP
-Length of Kul for auth protocol XXX. 
+Length of Kul for auth protocol XXX\&. 
 .PP
-Definition at line 275 of file snmp_api.h.
-.SS "oid* \fBsnmp_session::securityAuthProto\fP"
+Definition at line 275 of file snmp_api\&.h\&.
+.SS "oid* snmp_session::securityAuthProto"
+
 .PP
 auth protocol oid 
 .PP
-Definition at line 265 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::securityAuthProtoLen\fP"
+Definition at line 265 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::securityAuthProtoLen"
+
 .PP
-Length of auth protocol oid. 
+Length of auth protocol oid\&. 
 .PP
-Definition at line 267 of file snmp_api.h.
-.SS "u_char* \fBsnmp_session::securityEngineID\fP"
+Definition at line 267 of file snmp_api\&.h\&.
+.SS "u_char* snmp_session::securityEngineID"
+
 .PP
 authoritative snmpEngineID 
 .PP
-Definition at line 256 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::securityEngineIDLen\fP"
+Definition at line 256 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::securityEngineIDLen"
+
 .PP
-Length of contextEngineID. 
+Length of contextEngineID\&. 
 .PP
-Definition at line 258 of file snmp_api.h.
-.SS "void* \fBsnmp_session::securityInfo\fP"
+Definition at line 258 of file snmp_api\&.h\&.
+.SS "void* snmp_session::securityInfo"
+
 .PP
-security \fBmodule\fP specific 
+security module specific 
 .PP
-Definition at line 300 of file snmp_api.h.
-.SS "int \fBsnmp_session::securityLevel\fP"
+Definition at line 300 of file snmp_api\&.h\&.
+.SS "int snmp_session::securityLevel"
+
 .PP
 noAuthNoPriv, authNoPriv, authPriv 
 .PP
-Definition at line 293 of file snmp_api.h.
-.SS "int \fBsnmp_session::securityModel\fP"
+Definition at line 293 of file snmp_api\&.h\&.
+.SS "int snmp_session::securityModel"
+
 .PP
 snmp security model, v1, v2c, usm 
 .PP
-Definition at line 291 of file snmp_api.h.
-.SS "char* \fBsnmp_session::securityName\fP"
+Definition at line 291 of file snmp_api\&.h\&.
+.SS "char* snmp_session::securityName"
+
 .PP
 on behalf of this principal 
 .PP
-Definition at line 260 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::securityNameLen\fP"
+Definition at line 260 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::securityNameLen"
+
 .PP
-Length of securityName. 
+Length of securityName\&. 
 .PP
-Definition at line 262 of file snmp_api.h.
-.SS "u_char \fBsnmp_session::securityPrivKey\fP[USM_PRIV_KU_LEN]"
+Definition at line 262 of file snmp_api\&.h\&.
+.SS "u_char snmp_session::securityPrivKey[USM_PRIV_KU_LEN]"
+
 .PP
-Ku for privacy protocol XXX. 
+Ku for privacy protocol XXX\&. 
 .PP
-Definition at line 282 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::securityPrivKeyLen\fP"
+Definition at line 282 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::securityPrivKeyLen"
+
 .PP
-Length of Ku for priv protocol. 
+Length of Ku for priv protocol\&. 
 .PP
-Definition at line 284 of file snmp_api.h.
-.SS "u_char* \fBsnmp_session::securityPrivLocalKey\fP"
+Definition at line 284 of file snmp_api\&.h\&.
+.SS "u_char* snmp_session::securityPrivLocalKey"
+
 .PP
-Kul for priv protocol. 
+Kul for priv protocol\&. 
 .PP
-Definition at line 286 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::securityPrivLocalKeyLen\fP"
+Definition at line 286 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::securityPrivLocalKeyLen"
+
 .PP
-Length of Kul for priv protocol XXX. 
+Length of Kul for priv protocol XXX\&. 
 .PP
-Definition at line 288 of file snmp_api.h.
-.SS "oid* \fBsnmp_session::securityPrivProto\fP"
+Definition at line 288 of file snmp_api\&.h\&.
+.SS "oid* snmp_session::securityPrivProto"
+
 .PP
 priv protocol oid 
 .PP
-Definition at line 278 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::securityPrivProtoLen\fP"
+Definition at line 278 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::securityPrivProtoLen"
+
 .PP
-Length of priv protocol oid. 
+Length of priv protocol oid\&. 
 .PP
-Definition at line 280 of file snmp_api.h.
-.SS "long \fBsnmp_session::sessid\fP"
+Definition at line 280 of file snmp_api\&.h\&.
+.SS "long snmp_session::sessid"
+
 .PP
-Session id - AgentX only. 
+Session id - AgentX only\&. 
 .PP
-Definition at line 224 of file snmp_api.h.
-.SS "size_t \fBsnmp_session::sndMsgMaxSize\fP"
+Definition at line 224 of file snmp_api\&.h\&.
+.SS "size_t snmp_session::sndMsgMaxSize"
+
 .PP
-Largest message to try to send. 
+Largest message to try to send\&. 
 .PP
-Definition at line 236 of file snmp_api.h.
-.SS "long \fBsnmp_session::timeout\fP"
+Definition at line 236 of file snmp_api\&.h\&.
+.SS "long snmp_session::timeout"
+
 .PP
-Number of uS until first timeout, then exponential backoff. 
+Number of uS until first timeout, then exponential backoff\&. 
 .PP
-Definition at line 196 of file snmp_api.h.
-.SS "long \fBsnmp_session::version\fP"
+Definition at line 196 of file snmp_api\&.h\&.
+.SS "long snmp_session::version"
+
 .PP
 snmp version 
 .PP
-Definition at line 192 of file snmp_api.h.
+Definition at line 192 of file snmp_api\&.h\&.
 
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

@@ -1,16 +1,14 @@
-.TH "netsnmp_table_request_info_s" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_table_request_info_s" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_table_request_info_s \- 
-.PP
-The table request info structure.  
+netsnmp_table_request_info_s \- The table request info structure\&.  
 
 .SH SYNOPSIS
 .br
 .PP
 .PP
-\fC#include <table.h>\fP
+\fC#include <table\&.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -38,27 +36,30 @@ The table request info structure.
 .in -1c
 .SH "Detailed Description"
 .PP 
-The table request info structure. 
+The table request info structure\&. 
 .PP
-Definition at line 102 of file table.h.
+Definition at line 102 of file table\&.h\&.
 .SH "Field Documentation"
 .PP 
-.SS "unsigned int \fBnetsnmp_table_request_info_s::colnum\fP"
+.SS "unsigned int netsnmp_table_request_info_s::colnum"
+
 .PP
 0 if OID not long enough 
 .PP
-Definition at line 104 of file table.h.
-.SS "\fBnetsnmp_variable_list\fP* \fBnetsnmp_table_request_info_s::indexes\fP"
+Definition at line 104 of file table\&.h\&.
+.SS "\fBnetsnmp_variable_list\fP* netsnmp_table_request_info_s::indexes"
+
 .PP
 contents freed by helper upon exit 
 .PP
-Definition at line 108 of file table.h.
-.SS "unsigned int \fBnetsnmp_table_request_info_s::number_indexes\fP"
+Definition at line 108 of file table\&.h\&.
+.SS "unsigned int netsnmp_table_request_info_s::number_indexes"
+
 .PP
 0 if failure to parse any 
 .PP
-Definition at line 106 of file table.h.
+Definition at line 106 of file table\&.h\&.
 
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

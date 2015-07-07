@@ -1,12 +1,12 @@
-.TH "asn1 parsing and datatype manipulation routines." 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "asn1_packet_parse" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-asn1 parsing and datatype manipulation routines. \- 
+asn1_packet_parse \- asn1 parsing and datatype manipulation routines\&.
 .PP
-Note on.  
+Note on\&.  
 
-.SS "Defines"
+.SS "Macros"
 
 .in +1c
 .ti -1c
@@ -19,10 +19,10 @@ Note on.
 .RI "#define \fBINT32_MIN\fP   (0 - INT32_MAX - 1)"
 .br
 .ti -1c
-.RI "#define \fBCHECK_OVERFLOW_S\fP(x, y)"
+.RI "#define \fBCHECK_OVERFLOW_S\fP(x,  y)"
 .br
 .ti -1c
-.RI "#define \fBCHECK_OVERFLOW_U\fP(x, y)"
+.RI "#define \fBCHECK_OVERFLOW_U\fP(x,  y)"
 .br
 .in -1c
 .SS "Functions"
@@ -94,120 +94,90 @@ Note on.
 .ti -1c
 .RI "int \fBasn_realloc\fP (u_char **pkt, size_t *pkt_len)"
 .br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_length\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, size_t length)"
-.br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_header\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, size_t length)"
-.br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_int\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const long *intp, size_t intsize)"
-.br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_string\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const u_char *str, size_t strlength)"
-.br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_unsigned_int\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const u_long *intp, size_t intsize)"
-.br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_sequence\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, size_t length)"
-.br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_objid\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const oid *objid, size_t objidlength)"
-.br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_null\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type)"
-.br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_bitstring\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const u_char *str, size_t strlength)"
-.br
-.ti -1c
-.RI "int \fBasn_realloc_rbuild_unsigned_int64\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const struct \fBcounter64\fP *cp, size_t countersize)"
-.br
 .in -1c
 .SH "Detailed Description"
 .PP 
-Note on. 
+Note on\&. 
 
-Re-allocating reverse ASN.1 encoder functions. Synopsis:
+Re-allocating reverse ASN\&.1 encoder functions\&. Synopsis:
 .PP
 .PP
 .nf
- u_char *buf = (u_char*)malloc(100);
- u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
- size_t buf_len = 100, offset = 0;
- long data = 12345;
- int allow_realloc = 1;
- 
- if (asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
-                            type, &data, sizeof(long)) == 0) {
+u_char *buf = (u_char*)malloc(100);
+u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
+size_t buf_len = 100, offset = 0;
+long data = 12345;
+int allow_realloc = 1;
+
+if (asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                           type, &data, sizeof(long)) == 0) {
+    error;
+}
+.fi
+.PP
+.PP
+NOTE WELL: after calling one of these functions with allow_realloc non-zero, buf might have moved, buf_len might have grown and offset will have increased by the size of the encoded data\&. You should \fBNEVER\fP do something like this:
+.PP
+.PP
+.nf
+u_char *buf = (u_char *)malloc(100), *ptr;
+u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
+size_t buf_len = 100, offset = 0;
+long data1 = 1234, data2 = 5678;
+int rc = 0, allow_realloc = 1;
+
+rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                               type, &data1, sizeof(long));
+ptr = buf[buf_len - offset];   / * points at encoding of data1 * /
+if (rc == 0) {
      error;
- }
+}
+rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                             type, &data2, sizeof(long));
+make use of ptr here;
 .fi
 .PP
 .PP
-NOTE WELL: after calling one of these functions with allow_realloc non-zero, buf might have moved, buf_len might have grown and offset will have increased by the size of the encoded data. You should **NEVER** do something like this:
+ptr is \fBINVALID\fP at this point\&. In general, you should store the offset value and compute pointers when you need them:
 .PP
 .PP
 .nf
- u_char *buf = (u_char *)malloc(100), *ptr;
- u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
- size_t buf_len = 100, offset = 0;
- long data1 = 1234, data2 = 5678;
- int rc = 0, allow_realloc = 1;
- 
- rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
-                                type, &data1, sizeof(long));
- ptr = buf[buf_len - offset];   / * points at encoding of data1 * /
- if (rc == 0) {
-      error;
- }
- rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
-                              type, &data2, sizeof(long));
- make use of ptr here;
+u_char *buf = (u_char *)malloc(100), *ptr;
+u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
+size_t buf_len = 100, offset = 0, ptr_offset;
+long data1 = 1234, data2 = 5678;
+int rc = 0, allow_realloc = 1;
+
+rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                             type, &data1, sizeof(long));
+ptr_offset = offset;
+if (rc == 0) {
+     error;
+}
+rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                             type, &data2, sizeof(long));
+ptr = buf + buf_len - ptr_offset
+make use of ptr here;
 .fi
 .PP
 .PP
-ptr is **INVALID** at this point. In general, you should store the offset value and compute pointers when you need them:
+Here, you can see that ptr will be a valid pointer even if the block of memory has been moved, as it may well have been\&. Plenty of examples of usage all over \fBasn1\&.c\fP, \fBsnmp_api\&.c\fP, \fBsnmpusm\&.c\fP\&.
+.PP
+The other thing you should \fBNEVER\fP do is to pass a pointer to a buffer on the stack as the first argument when allow_realloc is non-zero, unless you really know what you are doing and your machine/compiler allows you to free non-heap memory\&. There are rumours that such things exist, but many consider them no more than the wild tales of a fool\&.
+.PP
+Of course, you can pass allow_realloc as zero, to indicate that you do not wish the packet buffer to be reallocated for some reason; perhaps because it is on the stack\&. This may be useful to emulate the functionality of the old API:
 .PP
 .PP
 .nf
- u_char *buf = (u_char *)malloc(100), *ptr;
- u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
- size_t buf_len = 100, offset = 0, ptr_offset;
- long data1 = 1234, data2 = 5678;
- int rc = 0, allow_realloc = 1;
- 
- rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
-                              type, &data1, sizeof(long));
- ptr_offset = offset;
- if (rc == 0) {
-      error;
- }
- rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
-                              type, &data2, sizeof(long));
- ptr = buf + buf_len - ptr_offset
- make use of ptr here;
-.fi
-.PP
-.PP
-Here, you can see that ptr will be a valid pointer even if the block of memory has been moved, as it may well have been. Plenty of examples of usage all over \fBasn1.c\fP, \fBsnmp_api.c\fP, \fBsnmpusm.c\fP.
-.PP
-The other thing you should **NEVER** do is to pass a pointer to a buffer on the stack as the first argument when allow_realloc is non-zero, unless you really know what you are doing and your machine/compiler allows you to free non-heap memory. There are rumours that such things exist, but many consider them no more than the wild tales of a fool.
-.PP
-Of course, you can pass allow_realloc as zero, to indicate that you do not wish the packet buffer to be reallocated for some reason; perhaps because it is on the stack. This may be useful to emulate the functionality of the old API:
-.PP
-.PP
-.nf
- u_char my_static_buffer[100], *cp = NULL;
- size_t my_static_buffer_len = 100;
- float my_pi = (float)22/(float)7;
- 
- cp = asn_rbuild_float(my_static_buffer, &my_static_buffer_len,
-                       ASN_OPAQUE_FLOAT, &my_pi, sizeof(float));
- if (cp == NULL) {
- error;
- }
+u_char my_static_buffer[100], *cp = NULL;
+size_t my_static_buffer_len = 100;
+float my_pi = (float)22/(float)7;
+
+cp = asn_rbuild_float(my_static_buffer, &my_static_buffer_len,
+                      ASN_OPAQUE_FLOAT, &my_pi, sizeof(float));
+if (cp == NULL) {
+error;
+}
 .fi
 .PP
 .PP
@@ -215,49 +185,51 @@ IS EQUIVALENT TO:
 .PP
 .PP
 .nf
- u_char my_static_buffer[100];
- size_t my_static_buffer_len = 100, my_offset = 0;
- float my_pi = (float)22/(float)7;
- int rc = 0;
- 
- rc = asn_realloc_rbuild_float(&my_static_buffer, &my_static_buffer_len,
-                               &my_offset, 0,
-                               ASN_OPAQUE_FLOAT, &my_pi, sizeof(float));
- if (rc == 0) {
-   error;
- }
+u_char my_static_buffer[100];
+size_t my_static_buffer_len = 100, my_offset = 0;
+float my_pi = (float)22/(float)7;
+int rc = 0;
+
+rc = asn_realloc_rbuild_float(&my_static_buffer, &my_static_buffer_len,
+                              &my_offset, 0,
+                              ASN_OPAQUE_FLOAT, &my_pi, sizeof(float));
+if (rc == 0) {
+  error;
+}
 .fi
 .PP
  
-.SH "Define Documentation"
+.SH "Macro Definition Documentation"
 .PP 
-.SS "#define CHECK_OVERFLOW_S(x, y)"\fBValue:\fP
+.SS "#define CHECK_OVERFLOW_S(x, y)"
+\fBValue:\fP
 .PP
 .nf
 do {                                    \
         if (x > INT32_MAX) {                                            \
-            DEBUGMSG(('asn','truncating signed value %ld to 32 bits (%d)\n',(long)(x),y)); \
+            DEBUGMSG(("asn","truncating signed value %ld to 32 bits (%d)\n",(long)(x),y)); \
             x &= 0xffffffff;                                            \
         } else if (x < INT32_MIN) {                                     \
-            DEBUGMSG(('asn','truncating signed value %ld to 32 bits (%d)\n',(long)(x),y)); \
+            DEBUGMSG(("asn","truncating signed value %ld to 32 bits (%d)\n",(long)(x),y)); \
             x = 0 - (x & 0xffffffff);                                   \
         }                                                               \
     } while(0)
 .fi
 .PP
-Definition at line 214 of file asn1.c.
-.SS "#define CHECK_OVERFLOW_U(x, y)"\fBValue:\fP
+Definition at line 214 of file asn1\&.c\&.
+.SS "#define CHECK_OVERFLOW_U(x, y)"
+\fBValue:\fP
 .PP
 .nf
 do {                                    \
         if (x > UINT32_MAX) {                                           \
             x &= 0xffffffff;                                            \
-            DEBUGMSG(('asn','truncating unsigned value to 32 bits (%d)\n',y)); \
+            DEBUGMSG(("asn","truncating unsigned value to 32 bits (%d)\n",y)); \
         }                                                               \
     } while(0)
 .fi
 .PP
-Definition at line 224 of file asn1.c.
+Definition at line 224 of file asn1\&.c\&.
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

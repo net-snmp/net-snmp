@@ -1,13 +1,13 @@
-.TH "Memory Utility Routines" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "util" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-Memory Utility Routines \- 
-.SS "Defines"
+util \- Memory Utility Routines
+.SS "Macros"
 
 .in +1c
 .ti -1c
-.RI "#define \fBSNMP_MAXPATH\fP   PATH_MAX"
+.RI "#define \fBSNMP_MAXPATH\fP   1024		/* Should be safe enough */"
 .br
 .ti -1c
 .RI "#define \fBSNMP_MAXBUF\fP   (1024 * 4)"
@@ -45,23 +45,27 @@ Memory Utility Routines \-
 .ti -1c
 .RI "#define \fBSNMP_FREE\fP(s)   do { if (s) { free((void *)s); s=NULL; } } while(0)"
 .br
-.RI "\fIFrees a pointer only if it is !NULL and sets its value to NULL. \fP"
+.RI "\fIFrees a pointer only if it is !NULL and sets its value to NULL\&. \fP"
 .ti -1c
-.RI "#define \fBSNMP_SWIPE_MEM\fP(n, s)   do { if (n) free((void *)n); n = s; s=NULL; } while(0)"
+.RI "#define \fBSNMP_SWIPE_MEM\fP(n,  s)   do { if (n) free((void *)n); n = s; s=NULL; } while(0)"
 .br
-.RI "\fIFrees pointer n only if it is !NULL, sets n to s and sets s to NULL. \fP"
+.RI "\fIFrees pointer n only if it is !NULL, sets n to s and sets s to NULL\&. \fP"
 .ti -1c
 .RI "#define \fBSNMP_MALLOC_STRUCT\fP(s)   (struct s *) calloc(1, sizeof(struct s))"
 .br
-.RI "\fIMallocs memory of sizeof(struct s), zeros it and returns a pointer to it. \fP"
+.RI "\fIMallocs memory of sizeof(struct s), zeros it and returns a pointer to it\&. \fP"
 .ti -1c
 .RI "#define \fBSNMP_MALLOC_TYPEDEF\fP(td)   (td *) calloc(1, sizeof(td))"
 .br
-.RI "\fIMallocs memory of sizeof(t), zeros it and returns a pointer to it. \fP"
+.RI "\fIMallocs memory of sizeof(t), zeros it and returns a pointer to it\&. \fP"
 .ti -1c
-.RI "#define \fBSNMP_ZERO\fP(s, l)   do { if (s) memset(s, 0, l); } while(0)"
+.RI "#define \fBSNMP_ZERO\fP(s,  l)   do { if (s) memset(s, 0, l); } while(0)"
 .br
-.RI "\fIZeros l bytes of memory starting at s. \fP"
+.RI "\fIZeros l bytes of memory starting at s\&. \fP"
+.ti -1c
+.RI "#define \fBNETSNMP_REMOVE_CONST\fP(t,  e)   ((t)(uintptr_t)(e))"
+.br
+.RI "\fICast away constness without that gcc -Wcast-qual prints a compiler warning, similar to const_cast<> in C++\&. \fP"
 .ti -1c
 .RI "#define \fBTOUPPER\fP(c)   (c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c)"
 .br
@@ -75,40 +79,51 @@ Memory Utility Routines \-
 .RI "#define \fBVAL2HEX\fP(s)   ( (s) + (((s) >= 10) ? ('a'-10) : '0') )"
 .br
 .ti -1c
-.RI "#define \fBSNMP_MAX\fP(a, b)   ((a) > (b) ? (a) : (b))"
+.RI "#define \fBSNMP_MAX\fP(a,  b)   ((a) > (b) ? (a) : (b))"
 .br
-.RI "\fIComputers the maximum of a and b. \fP"
+.RI "\fIComputers the maximum of a and b\&. \fP"
 .ti -1c
-.RI "#define \fBSNMP_MIN\fP(a, b)   ((a) > (b) ? (b) : (a))"
+.RI "#define \fBSNMP_MIN\fP(a,  b)   ((a) > (b) ? (b) : (a))"
 .br
-.RI "\fIComputers the minimum of a and b. \fP"
+.RI "\fIComputers the minimum of a and b\&. \fP"
 .ti -1c
 .RI "#define \fBSNMP_MACRO_VAL_TO_STR\fP(s)   SNMP_MACRO_VAL_TO_STR_PRIV(s)"
 .br
-.RI "\fIExpands to string with value of the s. \fP"
+.RI "\fIExpands to string with value of the s\&. \fP"
 .ti -1c
 .RI "#define \fBSNMP_MACRO_VAL_TO_STR_PRIV\fP(s)   #s"
 .br
 .ti -1c
-.RI "#define \fBQUITFUN\fP(e, l)"
+.RI "#define \fBFALSE\fP   0"
 .br
 .ti -1c
-.RI "#define \fBDIFFTIMEVAL\fP(now, then, diff)"
+.RI "#define \fBTRUE\fP   1"
 .br
+.ti -1c
+.RI "#define \fBQUITFUN\fP(e,  l)"
+.br
+.ti -1c
+.RI "#define \fBNETSNMP_TIMERADD\fP(a,  b,  res)"
+.br
+.RI "\fICompute res = a + b\&. \fP"
+.ti -1c
+.RI "#define \fBNETSNMP_TIMERSUB\fP(a,  b,  res)"
+.br
+.RI "\fICompute res = a - b\&. \fP"
 .ti -1c
 .RI "#define \fBUSM_LENGTH_OID_TRANSFORM\fP   10"
 .br
 .ti -1c
-.RI "#define \fBISTRANSFORM\fP(ttype, toid)"
+.RI "#define \fBISTRANSFORM\fP(ttype,  toid)"
 .br
 .ti -1c
-.RI "#define \fBENGINETIME_MAX\fP   2147483647"
+.RI "#define \fBENGINETIME_MAX\fP   2147483647      /* ((2^31)-1) */"
 .br
 .ti -1c
-.RI "#define \fBENGINEBOOT_MAX\fP   2147483647"
+.RI "#define \fBENGINEBOOT_MAX\fP   2147483647      /* ((2^31)-1) */"
 .br
 .ti -1c
-.RI "#define \fBsnmp_cstrcat\fP(b, l, o, a, s)   snmp_strcat(b,l,o,a,(const u_char *)s)"
+.RI "#define \fBsnmp_cstrcat\fP(b,  l,  o,  a,  s)   snmp_strcat(b,l,o,a,(const u_char *)s)"
 .br
 .in -1c
 .SS "Typedefs"
@@ -124,22 +139,22 @@ Memory Utility Routines \-
 .ti -1c
 .RI "int \fBsnmp_realloc\fP (u_char **buf, size_t *buf_len)"
 .br
-.RI "\fIThis function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len. \fP"
+.RI "\fIThis function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len\&. \fP"
 .ti -1c
 .RI "void \fBfree_zero\fP (void *buf, size_t size)"
 .br
-.RI "\fIzeros memory before freeing it. \fP"
+.RI "\fIzeros memory before freeing it\&. \fP"
 .ti -1c
 .RI "u_char * \fBmalloc_random\fP (size_t *size)"
 .br
-.RI "\fIReturns pointer to allocaed & set buffer on success, size contains number of random bytes filled. \fP"
+.RI "\fIReturns pointer to allocaed & set buffer on success, size contains number of random bytes filled\&. \fP"
 .ti -1c
 .RI "u_char * \fBmalloc_zero\fP (size_t size)"
 .br
 .ti -1c
-.RI "int \fBmemdup\fP (u_char **to, const u_char *from, size_t size)"
+.RI "NETSNMP_IMPORT void * \fBnetsnmp_memdup\fP (const void *from, size_t size)"
 .br
-.RI "\fIDuplicates a memory block. \fP"
+.RI "\fIDuplicates a memory block\&. \fP"
 .ti -1c
 .RI "u_int \fBbinary_to_hex\fP (const u_char *input, size_t len, char **output)"
 .br
@@ -175,204 +190,293 @@ Memory Utility Routines \-
 .ti -1c
 .RI "marker_t \fBatime_newMarker\fP (void)"
 .br
-.RI "\fIcreate a new time marker. \fP"
+.RI "\fIcreate a new time marker\&. \fP"
 .ti -1c
 .RI "void \fBatime_setMarker\fP (marker_t pm)"
 .br
-.RI "\fIset a time marker. \fP"
+.RI "\fIset a time marker\&. \fP"
 .ti -1c
 .RI "long \fBatime_diff\fP (marker_t first, marker_t second)"
 .br
-.RI "\fIReturns the difference (in msec) between the two markers. \fP"
+.RI "\fIReturns the difference (in msec) between the two markers\&. \fP"
 .ti -1c
 .RI "u_long \fBuatime_diff\fP (marker_t first, marker_t second)"
 .br
-.RI "\fIReturns the difference (in u_long msec) between the two markers. \fP"
+.RI "\fIReturns the difference (in u_long msec) between the two markers\&. \fP"
 .ti -1c
 .RI "u_long \fBuatime_hdiff\fP (marker_t first, marker_t second)"
 .br
-.RI "\fIReturns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs). \fP"
+.RI "\fIReturns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs) \fP"
 .ti -1c
 .RI "int \fBatime_ready\fP (marker_t pm, int deltaT)"
 .br
-.RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). \fP"
+.RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker)\&. \fP"
 .ti -1c
 .RI "int \fBuatime_ready\fP (marker_t pm, unsigned int deltaT)"
 .br
-.RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). \fP"
+.RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker)\&. \fP"
 .ti -1c
 .RI "int \fBmarker_tticks\fP (marker_t pm)"
 .br
-.RI "\fIReturn the number of timeTicks since the given marker. \fP"
+.RI "\fIReturn the number of timeTicks since the given marker\&. \fP"
 .ti -1c
 .RI "int \fBtimeval_tticks\fP (struct timeval *tv)"
 .br
 .ti -1c
-.RI "char * \fBnetsnmp_getenv\fP (const char *name)"
+.RI "NETSNMP_IMPORT char * \fBnetsnmp_getenv\fP (const char *name)"
 .br
-.RI "\fINon Windows: Returns a pointer to the desired environment \fBvariable\fP or NULL if the environment \fBvariable\fP does not exist. \fP"
+.RI "\fINon Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist\&. \fP"
+.ti -1c
+.RI "NETSNMP_IMPORT int \fBnetsnmp_setenv\fP (const char *envname, const char *envval, int overwrite)"
+.br
+.RI "\fISet an environment variable\&. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_addrstr_hton\fP (char *ptr, size_t len)"
 .br
 .in -1c
-.SH "Define Documentation"
+.SH "Detailed Description"
 .PP 
-.SS "#define DIFFTIMEVAL(now, then, diff)"\fBValue:\fP
-.PP
-.nf
-{                                                       \
-        now.tv_sec--;                                   \
-        now.tv_usec += 1000000L;                        \
-        diff.tv_sec  = now.tv_sec  - then.tv_sec;       \
-        diff.tv_usec = now.tv_usec - then.tv_usec;      \
-        if (diff.tv_usec > 1000000L){                   \
-                diff.tv_usec -= 1000000L;               \
-                diff.tv_sec++;                          \
-        }                                               \
-}
-.fi
-.PP
-Definition at line 131 of file tools.h.
-.SS "#define ISTRANSFORM(ttype, toid)"\fBValue:\fP
+
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define ISTRANSFORM(ttype, toid)"
+\fBValue:\fP
 .PP
 .nf
 !snmp_oid_compare(ttype, USM_LENGTH_OID_TRANSFORM,            \
                 usm ## toid ## Protocol, USM_LENGTH_OID_TRANSFORM)
 .fi
 .PP
-Definition at line 150 of file tools.h.
-.SS "#define QUITFUN(e, l)"\fBValue:\fP
+Definition at line 188 of file tools\&.h\&.
+.SS "#define NETSNMP_REMOVE_CONST(t, e)   ((t)(uintptr_t)(e))"
+
+.PP
+Cast away constness without that gcc -Wcast-qual prints a compiler warning, similar to const_cast<> in C++\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIt\fP A pointer type\&. 
+.br
+\fIe\fP An expression of a type that can be assigned to the type (const t)\&. 
+.RE
+.PP
+
+.PP
+Definition at line 92 of file tools\&.h\&.
+.SS "#define NETSNMP_TIMERADD(a, b, res)"
+\fBValue:\fP
 .PP
 .nf
-if ( (e) != SNMPERR_SUCCESS) {   \
+{                                                    \
+    (res)->tv_sec  = (a)->tv_sec  + (b)->tv_sec;     \
+    (res)->tv_usec = (a)->tv_usec + (b)->tv_usec;    \
+    if ((res)->tv_usec >= 1000000L) {                \
+        (res)->tv_usec -= 1000000L;                  \
+        (res)->tv_sec++;                             \
+    }                                                \
+}
+.fi
+.PP
+Compute res = a + b\&. 
+.PP
+\fBPrecondition:\fP
+.RS 4
+a and b must be normalized 'struct timeval' values\&.
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+res may be the same variable as one of the operands\&. In other words, &a == &res || &b == &res may hold\&. 
+.RE
+.PP
+
+.PP
+Definition at line 153 of file tools\&.h\&.
+.SS "#define NETSNMP_TIMERSUB(a, b, res)"
+\fBValue:\fP
+.PP
+.nf
+{                                                               \
+    (res)->tv_sec  = (a)->tv_sec  - (b)->tv_sec - 1;            \
+    (res)->tv_usec = (a)->tv_usec - (b)->tv_usec + 1000000L;    \
+    if ((res)->tv_usec >= 1000000L) {                           \
+        (res)->tv_usec -= 1000000L;                             \
+        (res)->tv_sec++;                                        \
+    }                                                           \
+}
+.fi
+.PP
+Compute res = a - b\&. 
+.PP
+\fBPrecondition:\fP
+.RS 4
+a and b must be normalized 'struct timeval' values\&.
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+res may be the same variable as one of the operands\&. In other words, &a == &res || &b == &res may hold\&. 
+.RE
+.PP
+
+.PP
+Definition at line 171 of file tools\&.h\&.
+.SS "#define QUITFUN(e, l)"
+\fBValue:\fP
+.PP
+.nf
+if ( (e) != SNMPERR_SUCCESS) {    \
                 rval = SNMPERR_GENERR;  \
                 goto l ;                \
         }
 .fi
 .PP
-Definition at line 118 of file tools.h.
+Definition at line 139 of file tools\&.h\&.
 .SS "#define SNMP_FREE(s)   do { if (s) { free((void *)s); s=NULL; } } while(0)"
+
 .PP
-Frees a pointer only if it is !NULL and sets its value to NULL. 
+Frees a pointer only if it is !NULL and sets its value to NULL\&. 
 .PP
-Definition at line 53 of file tools.h.
+Definition at line 57 of file tools\&.h\&.
 .SS "#define SNMP_MACRO_VAL_TO_STR(s)   SNMP_MACRO_VAL_TO_STR_PRIV(s)"
+
 .PP
-Expands to string with value of the s. If s is macro, the resulting string is value of the macro. Example: define TEST 1234 \fBSNMP_MACRO_VAL_TO_STR(TEST)\fP expands to '1234' SNMP_MACRO_VAL_TO_STR(TEST+1) expands to '1234+1' 
+Expands to string with value of the s\&. If s is macro, the resulting string is value of the macro\&. Example: #define TEST 1234 \fBSNMP_MACRO_VAL_TO_STR(TEST)\fP expands to '1234' SNMP_MACRO_VAL_TO_STR(TEST+1) expands to '1234+1' 
 .PP
-Definition at line 99 of file tools.h.
+Definition at line 120 of file tools\&.h\&.
 .SS "#define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))"
+
 .PP
-Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. 
+Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it\&. 
 .PP
-Definition at line 64 of file tools.h.
+Definition at line 68 of file tools\&.h\&.
 .SS "#define SNMP_MALLOC_TYPEDEF(td)   (td *) calloc(1, sizeof(td))"
+
 .PP
-Mallocs memory of sizeof(t), zeros it and returns a pointer to it. 
+Mallocs memory of sizeof(t), zeros it and returns a pointer to it\&. 
 .PP
-Definition at line 68 of file tools.h.
+Definition at line 72 of file tools\&.h\&.
 .SS "#define SNMP_MAX(a, b)   ((a) > (b) ? (a) : (b))"
+
 .PP
-Computers the maximum of a and b. 
+Computers the maximum of a and b\&. 
 .PP
-Definition at line 85 of file tools.h.
+Definition at line 106 of file tools\&.h\&.
 .SS "#define SNMP_MIN(a, b)   ((a) > (b) ? (b) : (a))"
+
 .PP
-Computers the minimum of a and b. 
+Computers the minimum of a and b\&. 
 .PP
-Definition at line 89 of file tools.h.
+Definition at line 110 of file tools\&.h\&.
 .SS "#define SNMP_SWIPE_MEM(n, s)   do { if (n) free((void *)n); n = s; s=NULL; } while(0)"
+
 .PP
-Frees pointer n only if it is !NULL, sets n to s and sets s to NULL. 
+Frees pointer n only if it is !NULL, sets n to s and sets s to NULL\&. 
 .PP
-Definition at line 57 of file tools.h.
+Definition at line 61 of file tools\&.h\&.
 .SS "#define SNMP_ZERO(s, l)   do { if (s) memset(s, 0, l); } while(0)"
+
 .PP
-Zeros l bytes of memory starting at s. 
+Zeros l bytes of memory starting at s\&. 
 .PP
-Definition at line 72 of file tools.h.
+Definition at line 76 of file tools\&.h\&.
 .SH "Function Documentation"
 .PP 
 .SS "long atime_diff (marker_t first, marker_t second)"
+
 .PP
-Returns the difference (in msec) between the two markers. 
+Returns the difference (in msec) between the two markers\&. 
 .PP
-Definition at line 798 of file tools.c.
+Definition at line 789 of file tools\&.c\&.
 .SS "marker_t atime_newMarker (void)"
+
 .PP
-create a new time marker. NOTE: Caller must free time marker when no longer needed. 
+create a new time marker\&. NOTE: Caller must free time marker when no longer needed\&. 
 .PP
-Definition at line 774 of file tools.c.
+Definition at line 765 of file tools\&.c\&.
 .SS "int atime_ready (marker_t pm, int deltaT)"
+
 .PP
-Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). 
+Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker)\&. 
 .PP
-Definition at line 853 of file tools.c.
+Definition at line 844 of file tools\&.c\&.
 .SS "void atime_setMarker (marker_t pm)"
+
 .PP
-set a time marker. 
+set a time marker\&. 
 .PP
-Definition at line 785 of file tools.c.
+Definition at line 776 of file tools\&.c\&.
 .SS "u_int binary_to_hex (const u_char * input, size_t len, char ** output)"
+
 .PP
-converts binary to hexidecimal \fBParameters:\fP
+converts binary to hexidecimal 
+.PP
+\fBParameters:\fP
 .RS 4
-\fI*input\fP Binary data. 
+\fI*input\fP Binary data\&. 
 .br
-\fIlen\fP Length of binary data. 
+\fIlen\fP Length of binary data\&. 
 .br
-\fI**output\fP NULL terminated string equivalent in hex.
+\fI**output\fP NULL terminated string equivalent in hex\&.
 .RE
 .PP
 \fBReturns:\fP
 .RS 4
-olen Length of output string not including NULL terminator.
+olen Length of output string not including NULL terminator\&.
 .RE
 .PP
-FIX Is there already one of these in the UCD SNMP codebase? The old one should be used, or this one should be moved to \fBsnmplib/snmp_api.c\fP. 
+FIX Is there already one of these in the UCD SNMP codebase? The old one should be used, or this one should be moved to \fBsnmplib/snmp_api\&.c\fP\&. 
 .PP
-Definition at line 290 of file tools.c.
+Definition at line 285 of file tools\&.c\&.
 .SS "void free_zero (void * buf, size_t size)"
+
 .PP
-zeros memory before freeing it. \fBParameters:\fP
+zeros memory before freeing it\&. 
+.PP
+\fBParameters:\fP
 .RS 4
-\fI*buf\fP Pointer at bytes to free. 
+\fI*buf\fP Pointer at bytes to free\&. 
 .br
-\fIsize\fP Number of bytes in buf. 
+\fIsize\fP Number of bytes in buf\&. 
 .RE
 .PP
 
 .PP
-Definition at line 188 of file tools.c.
+Definition at line 188 of file tools\&.c\&.
 .SS "int hex_to_binary2 (const u_char * input, size_t len, char ** output)"
+
 .PP
-hex_to_binary2 \fBParameters:\fP
+hex_to_binary2 
+.PP
+\fBParameters:\fP
 .RS 4
-\fI*input\fP Printable data in base16. 
+\fI*input\fP Printable data in base16\&. 
 .br
-\fIlen\fP Length in bytes of data. 
+\fIlen\fP Length in bytes of data\&. 
 .br
-\fI**output\fP Binary data equivalent to input.
+\fI**output\fP Binary data equivalent to input\&.
 .RE
 .PP
 \fBReturns:\fP
 .RS 4
-SNMPERR_GENERR on failure, otherwise length of allocated string.
+SNMPERR_GENERR on failure, otherwise length of allocated string\&.
 .RE
 .PP
-Input of an odd length is right aligned.
+Input of an odd length is right aligned\&.
 .PP
-FIX Another version of 'hex-to-binary' which takes odd length input strings. It also allocates the memory to hold the binary data. Should be integrated with the official hex_to_binary() function. 
+FIX Another version of 'hex-to-binary' which takes odd length input strings\&. It also allocates the memory to hold the binary data\&. Should be integrated with the official hex_to_binary() function\&. 
 .PP
-Definition at line 327 of file tools.c.
+Definition at line 322 of file tools\&.c\&.
 .SS "u_char* malloc_random (size_t * size)"
+
 .PP
-Returns pointer to allocaed & set buffer on success, size contains number of random bytes filled. buf is NULL and *size set to KMT error value upon failure.
+Returns pointer to allocaed & set buffer on success, size contains number of random bytes filled\&. buf is NULL and *size set to KMT error value upon failure\&. 
 .PP
-\fBParameters:\fP
-.RS 4
-\fIsize\fP Number of bytes to malloc() and fill with random bytes.
-.RE
+.nf
+ @param size        Number of bytes to malloc() and fill with random bytes.
+
+.fi
+.PP
 .PP
 \fBReturns:\fP
 .RS 4
@@ -381,78 +485,92 @@ a malloced buffer
 .PP
 
 .PP
-Definition at line 208 of file tools.c.
+Definition at line 208 of file tools\&.c\&.
 .SS "int marker_tticks (marker_t pm)"
+
 .PP
-Return the number of timeTicks since the given marker. 
+Return the number of timeTicks since the given marker\&. 
 .PP
-Definition at line 901 of file tools.c.
-.SS "void * netsnmp_memdup (const void * from, size_t size)"
+Definition at line 892 of file tools\&.c\&.
+.SS "NETSNMP_IMPORT char* netsnmp_getenv (const char * name)"
+
 .PP
-Duplicates a memory block. Copies a existing memory location from a pointer to another, newly malloced, pointer.
+Non Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist\&. Windows: Returns a pointer to the desired environment variable if it exists\&. If it does not, the variable is looked up in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP (whichever it finds first) and stores the result in the environment variable\&. It then returns a pointer to environment variable\&. 
+.PP
+Definition at line 920 of file tools\&.c\&.
+.SS "int netsnmp_hex_to_binary (u_char ** buf, size_t * buf_len, size_t * offset, int allow_realloc, const char * hex, const char * delim)"
+
+.PP
+convert an ASCII hex string (with specified delimiters) to binary 
 .PP
 \fBParameters:\fP
 .RS 4
-\fIto\fP Pointer to allocate and copy memory to. 
+\fIbuf\fP address of a pointer (pointer to pointer) for the output buffer\&. If allow_realloc is set, the buffer may be grown via snmp_realloc to accomodate the data\&.
 .br
-\fIfrom\fP Pointer to copy memory from. 
+\fIbuf_len\fP pointer to a size_t containing the initial size of buf\&.
 .br
-\fIsize\fP Size of the data to be copied.
+\fIoffset\fP On input, a pointer to a size_t indicating an offset into buf\&. The binary data will be stored at this offset\&. On output, this pointer will have updated the offset to be the first byte after the converted data\&.
+.br
+\fIallow_realloc\fP If true, the buffer can be reallocated\&. If false, and the buffer is not large enough to contain the string, an error will be returned\&.
+.br
+\fIhex\fP pointer to hex string to be converted\&. May be prefixed by '0x' or '0X'\&.
+.br
+\fIdelim\fP point to a string of allowed delimiters between bytes\&. If not specified, any non-hex characters will be an error\&.
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fI1\fP success 
+.br
+\fI0\fP error 
+.RE
+.PP
+
+.PP
+Definition at line 423 of file tools\&.c\&.
+.SS "NETSNMP_IMPORT void* netsnmp_memdup (const void * from, size_t size)"
+
+.PP
+Duplicates a memory block\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfrom\fP Pointer to copy memory from\&. 
+.br
+\fIsize\fP Size of the data to be copied\&.
 .RE
 .PP
 \fBReturns:\fP
 .RS 4
-SNMPERR_SUCCESS on success, SNMPERR_GENERR on failure. 
+Pointer to the duplicated memory block, or NULL if memory allocation failed\&. 
 .RE
 .PP
 
 .PP
-Definition at line 239 of file tools.c.
-.SS "char* netsnmp_getenv (const char * name)"
-.PP
-Non Windows: Returns a pointer to the desired environment \fBvariable\fP or NULL if the environment \fBvariable\fP does not exist. Windows: Returns a pointer to the desired environment \fBvariable\fP if it exists. If it does not, the \fBvariable\fP is looked up in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP (whichever it finds first) and stores the result in the environment \fBvariable\fP. It then returns a pointer to environment \fBvariable\fP. 
-.PP
-Definition at line 929 of file tools.c.
-.SS "int netsnmp_hex_to_binary (u_char ** buf, size_t * buf_len, size_t * offset, int allow_realloc, const char * hex, const char * delim)"
-.PP
-convert an ASCII hex string (with specified delimiters) to binary \fBParameters:\fP
-.RS 4
-\fIbuf\fP address of a pointer (pointer to pointer) for the output buffer. If allow_realloc is set, the buffer may be grown via snmp_realloc to accomodate the data.
-.br
-\fIbuf_len\fP pointer to a size_t containing the initial size of buf.
-.br
-\fIoffset\fP On input, a pointer to a size_t indicating an offset into buf. The binary data will be stored at this offset. On output, this pointer will have updated the offset to be the first byte after the converted data.
-.br
-\fIallow_realloc\fP If true, the buffer can be reallocated. If false, and the buffer is not large enough to contain the string, an error will be returned.
-.br
-\fIhex\fP pointer to hex string to be converted. May be prefixed by '0x' or '0X'.
-.br
-\fIdelim\fP point to a string of allowed delimiters between bytes. If not specified, any non-hex characters will be an error.
-.RE
-.PP
-\fBReturn values:\fP
-.RS 4
-\fI1\fP success 
-.br
-\fI0\fP error 
-.RE
-.PP
+Definition at line 237 of file tools\&.c\&.
+.SS "NETSNMP_IMPORT int netsnmp_setenv (const char * envname, const char * envval, int overwrite)"
 
 .PP
-Definition at line 428 of file tools.c.
+Set an environment variable\&. This function is only necessary on Windows for the MSVC and MinGW environments\&. If the process that uses the Net-SNMP DLL (e\&.g\&. a Perl interpreter) and the Net-SNMP have been built with a different compiler version then each will have a separate set of environment variables\&. This function allows to set an environment variable such that it gets noticed by the Net-SNMP DLL\&. 
+.PP
+Definition at line 1053 of file tools\&.c\&.
 .SS "char* netsnmp_strdup_and_null (const u_char * from, size_t from_len)"
+
 .PP
 copies a (possible) unterminated string of a given length into a new buffer and null terminates it as well (new buffer MAY be one byte longer to account for this 
 .PP
-Definition at line 258 of file tools.c.
+Definition at line 253 of file tools\&.c\&.
 .SS "int snmp_hex_to_binary (u_char ** buf, size_t * buf_len, size_t * offset, int allow_realloc, const char * hex)"
+
 .PP
-convert an ASCII hex string to binary \fBNote:\fP
+convert an ASCII hex string to binary 
+.PP
+\fBNote:\fP
 .RS 4
-This is a wrapper which calls netsnmp_hex_to_binary with a delimiter string of ' '.
+This is a wrapper which calls netsnmp_hex_to_binary with a delimiter string of ' '\&.
 .RE
 .PP
-See netsnmp_hex_to_binary for parameter descriptions.
+See netsnmp_hex_to_binary for parameter descriptions\&.
 .PP
 \fBReturn values:\fP
 .RS 4
@@ -463,10 +581,11 @@ See netsnmp_hex_to_binary for parameter descriptions.
 .PP
 
 .PP
-Definition at line 488 of file tools.c.
+Definition at line 483 of file tools\&.c\&.
 .SS "int snmp_realloc (u_char ** buf, size_t * buf_len)"
+
 .PP
-This function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len. Contents are preserved **AT THE BOTTOM END OF THE BUFFER**. If memory can be (re-)allocated then it returns 1, else it returns 0.
+This function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len\&. Contents are preserved \fBAT THE BOTTOM END OF THE BUFFER\fP\&. If memory can be (re-)allocated then it returns 1, else it returns 0\&.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -477,27 +596,30 @@ This function increase the size of the buffer pointed at by *buf, which is initi
 .PP
 \fBNote:\fP
 .RS 4
-The current re-allocation algorithm is to increase the buffer size by whichever is the greater of 256 bytes or the current buffer size, up to a maximum increase of 8192 bytes. 
+The current re-allocation algorithm is to increase the buffer size by whichever is the greater of 256 bytes or the current buffer size, up to a maximum increase of 8192 bytes\&. 
 .RE
 .PP
 
 .PP
-Definition at line 124 of file tools.c.
+Definition at line 124 of file tools\&.c\&.
 .SS "u_long uatime_diff (marker_t first, marker_t second)"
+
 .PP
-Returns the difference (in u_long msec) between the two markers. 
+Returns the difference (in u_long msec) between the two markers\&. 
 .PP
-Definition at line 815 of file tools.c.
+Definition at line 806 of file tools\&.c\&.
 .SS "u_long uatime_hdiff (marker_t first, marker_t second)"
+
 .PP
-Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs). 
+Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs) 
 .PP
-Definition at line 833 of file tools.c.
+Definition at line 824 of file tools\&.c\&.
 .SS "int uatime_ready (marker_t pm, unsigned int deltaT)"
+
 .PP
-Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). 
+Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker)\&. 
 .PP
-Definition at line 875 of file tools.c.
+Definition at line 866 of file tools\&.c\&.
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

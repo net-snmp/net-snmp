@@ -1,16 +1,14 @@
-.TH "netsnmp_data_list_s" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_data_list_s" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_data_list_s \- 
-.PP
-used to iterate through lists of data  
+netsnmp_data_list_s \- used to iterate through lists of data  
 
 .SH SYNOPSIS
 .br
 .PP
 .PP
-\fC#include <data_list.h>\fP
+\fC#include <data_list\&.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -23,7 +21,7 @@ used to iterate through lists of data
 .ti -1c
 .RI "void * \fBdata\fP"
 .br
-.RI "\fIThe pointer to the data passed on. \fP"
+.RI "\fIThe pointer to the data passed on\&. \fP"
 .ti -1c
 .RI "Netsnmp_Free_List_Data * \fBfree_func\fP"
 .br
@@ -33,20 +31,22 @@ used to iterate through lists of data
 .PP 
 used to iterate through lists of data 
 .PP
-Definition at line 41 of file data_list.h.
+Definition at line 41 of file data_list\&.h\&.
 .SH "Field Documentation"
 .PP 
-.SS "void* \fBnetsnmp_data_list_s::data\fP"
+.SS "void* netsnmp_data_list_s::data"
+
 .PP
-The pointer to the data passed on. 
+The pointer to the data passed on\&. 
 .PP
-Definition at line 45 of file data_list.h.
-.SS "Netsnmp_Free_List_Data* \fBnetsnmp_data_list_s::free_func\fP"
+Definition at line 45 of file data_list\&.h\&.
+.SS "Netsnmp_Free_List_Data* netsnmp_data_list_s::free_func"
+
 .PP
 must know how to free netsnmp_data_list->data 
 .PP
-Definition at line 47 of file data_list.h.
+Definition at line 47 of file data_list\&.h\&.
 
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

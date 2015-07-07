@@ -1,10 +1,10 @@
-.TH "table_data" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "table_data" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-table_data \- 
+table_data \- table_data
 .PP
-Helps you implement a table with datamatted storage.  
+Helps you implement a table with datamatted storage\&.  
 
 .SS "Modules"
 
@@ -12,9 +12,7 @@ Helps you implement a table with datamatted storage.
 .ti -1c
 .RI "\fBtable_dataset\fP"
 .br
-.PP
-
-.RI "\fIHelps you implement a table with automatted storage. \fP"
+.RI "\fIHelps you implement a table with automatted storage\&. \fP"
 .in -1c
 .SS "Functions"
 
@@ -33,19 +31,19 @@ Helps you implement a table with datamatted storage.
 .ti -1c
 .RI "\fBnetsnmp_table_row\fP * \fBnetsnmp_table_data_clone_row\fP (\fBnetsnmp_table_row\fP *row)"
 .br
-.RI "\fIclones a data row. \fP"
+.RI "\fIclones a data row\&. \fP"
 .ti -1c
 .RI "void * \fBnetsnmp_table_data_delete_row\fP (\fBnetsnmp_table_row\fP *row)"
 .br
-.RI "\fIdeletes a row's memory. \fP"
+.RI "\fIdeletes a row's memory\&. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_table_data_add_row\fP (\fBnetsnmp_table_data\fP *table, \fBnetsnmp_table_row\fP *row)"
 .br
-.RI "\fIAdds a row of data to a given table (stored in proper lexographical order). \fP"
+.RI "\fIAdds a row of data to a given table (stored in proper lexographical order)\&. \fP"
 .ti -1c
 .RI "NETSNMP_INLINE void \fBnetsnmp_table_data_replace_row\fP (\fBnetsnmp_table_data\fP *table, \fBnetsnmp_table_row\fP *origrow, \fBnetsnmp_table_row\fP *newrow)"
 .br
-.RI "\fIswaps out origrow with newrow. \fP"
+.RI "\fIswaps out origrow with newrow\&. \fP"
 .ti -1c
 .RI "\fBnetsnmp_table_row\fP * \fBnetsnmp_table_data_remove_row\fP (\fBnetsnmp_table_data\fP *table, \fBnetsnmp_table_row\fP *row)"
 .br
@@ -72,15 +70,15 @@ Helps you implement a table with datamatted storage.
 .ti -1c
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_table_data_handler\fP (\fBnetsnmp_table_data\fP *table)"
 .br
-.RI "\fICreates a table_data handler and returns it. \fP"
+.RI "\fICreates a table_data handler and returns it\&. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_register_table_data\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_data\fP *table, \fBnetsnmp_table_registration_info\fP *table_info)"
 .br
-.RI "\fIregisters a handler as a data table. \fP"
+.RI "\fIregisters a handler as a data table\&. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_register_read_only_table_data\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_data\fP *table, \fBnetsnmp_table_registration_info\fP *table_info)"
 .br
-.RI "\fIregisters a handler as a read-only data table If table_info != NULL, it registers it as a normal table too. \fP"
+.RI "\fIregisters a handler as a read-only data table If table_info != NULL, it registers it as a normal table too\&. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_table_data_helper_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
@@ -170,114 +168,131 @@ Helps you implement a table with datamatted storage.
 .in -1c
 .SH "Detailed Description"
 .PP 
-Helps you implement a table with datamatted storage. 
+Helps you implement a table with datamatted storage\&. 
 
-This helper is obsolete. If you are writing a new \fBmodule\fP, please consider using the table_tdata helper instead.
+This helper is obsolete\&. If you are writing a new module, please consider using the table_tdata helper instead\&.
 .PP
-This helper helps you implement a table where all the indexes are expected to be stored within the agent itself and not in some external storage location. It can be used to store a list of rows, where a row consists of the indexes to the table and a generic data pointer. You can then implement a subhandler which is passed the exact row definition and data it must return data for or accept data for. Complex GETNEXT handling is greatly simplified in this case. 
+This helper helps you implement a table where all the indexes are expected to be stored within the agent itself and not in some external storage location\&. It can be used to store a list of rows, where a row consists of the indexes to the table and a generic data pointer\&. You can then implement a subhandler which is passed the exact row definition and data it must return data for or accept data for\&. Complex GETNEXT handling is greatly simplified in this case\&. 
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_table_data\fP* netsnmp_create_table_data (const char * name)"
+
 .PP
 creates and returns a pointer to table data set 
 .PP
-Definition at line 52 of file table_data.c.
+Definition at line 52 of file table_data\&.c\&.
 .SS "\fBnetsnmp_table_row\fP* netsnmp_create_table_data_row (void)"
+
 .PP
 creates and returns a pointer to table data set 
 .PP
 \fBExamples: \fP
 .in +1c
-\fBdata_set.c\fP.
+\fBdata_set\&.c\fP\&.
 .PP
-Definition at line 62 of file table_data.c.
+Definition at line 62 of file table_data\&.c\&.
 .SS "\fBnetsnmp_table_data\fP* netsnmp_extract_table (\fBnetsnmp_request_info\fP * request)"
+
 .PP
 extracts the table being accessed passed from the table_data helper 
 .PP
-Definition at line 656 of file table_data.c.
+Definition at line 653 of file table_data\&.c\&.
 .SS "\fBnetsnmp_table_row\fP* netsnmp_extract_table_row (\fBnetsnmp_request_info\fP * request)"
+
 .PP
 extracts the row being accessed passed from the table_data helper 
 .PP
-Definition at line 664 of file table_data.c.
+Definition at line 661 of file table_data\&.c\&.
 .SS "void* netsnmp_extract_table_row_data (\fBnetsnmp_request_info\fP * request)"
+
 .PP
 extracts the data from the row being accessed passed from the table_data helper 
 .PP
-Definition at line 673 of file table_data.c.
+Definition at line 670 of file table_data\&.c\&.
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_table_data_handler (\fBnetsnmp_table_data\fP * table)"
+
 .PP
-Creates a table_data handler and returns it. 
+Creates a table_data handler and returns it\&. 
 .PP
-Definition at line 378 of file table_data.c.
+Definition at line 375 of file table_data\&.c\&.
 .SS "NETSNMP_INLINE void netsnmp_insert_table_row (\fBnetsnmp_request_info\fP * request, \fBnetsnmp_table_row\fP * row)"
+
 .PP
 inserts a newly created table_data row into a request 
 .PP
-Definition at line 685 of file table_data.c.
+Definition at line 682 of file table_data\&.c\&.
 .SS "int netsnmp_register_read_only_table_data (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_data\fP * table, \fBnetsnmp_table_registration_info\fP * table_info)"
+
 .PP
-registers a handler as a read-only data table If table_info != NULL, it registers it as a normal table too. 
+registers a handler as a read-only data table If table_info != NULL, it registers it as a normal table too\&. 
 .PP
-Definition at line 412 of file table_data.c.
+Definition at line 409 of file table_data\&.c\&.
 .SS "int netsnmp_register_table_data (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_data\fP * table, \fBnetsnmp_table_registration_info\fP * table_info)"
+
 .PP
-registers a handler as a data table. If table_info != NULL, it registers it as a normal table too. 
+registers a handler as a data table\&. If table_info != NULL, it registers it as a normal table too\&. 
 .PP
-Definition at line 401 of file table_data.c.
+Definition at line 398 of file table_data\&.c\&.
 .SS "int netsnmp_table_data_add_row (\fBnetsnmp_table_data\fP * table, \fBnetsnmp_table_row\fP * row)"
+
 .PP
-Adds a row of data to a given table (stored in proper lexographical order). returns SNMPERR_SUCCESS on successful addition. or SNMPERR_GENERR on failure (E.G., indexes already existed) 
+Adds a row of data to a given table (stored in proper lexographical order)\&. returns SNMPERR_SUCCESS on successful addition\&. or SNMPERR_GENERR on failure (E\&.G\&., indexes already existed) xxx-rks: remove invalid row? 
 .PP
-xxx-rks: remove invalid row? 
-.PP
-Definition at line 134 of file table_data.c.
+Definition at line 132 of file table_data\&.c\&.
 .SS "\fBnetsnmp_table_row\fP* netsnmp_table_data_clone_row (\fBnetsnmp_table_row\fP * row)"
+
 .PP
-clones a data row. DOES NOT CLONE THE CONTAINED DATA. 
+clones a data row\&. DOES NOT CLONE THE CONTAINED DATA\&. 
 .PP
-Definition at line 70 of file table_data.c.
+Definition at line 70 of file table_data\&.c\&.
 .SS "void* netsnmp_table_data_delete_row (\fBnetsnmp_table_row\fP * row)"
+
 .PP
-deletes a row's memory. returns the void data that it doesn't know how to delete. 
+deletes a row's memory\&. returns the void data that it doesn't know how to delete\&. 
 .PP
-Definition at line 105 of file table_data.c.
+Definition at line 103 of file table_data\&.c\&.
 .SS "\fBnetsnmp_table_row\fP* netsnmp_table_data_get (\fBnetsnmp_table_data\fP * table, \fBnetsnmp_variable_list\fP * indexes)"
+
 .PP
 finds the data in 'datalist' stored at 'indexes' 
 .PP
-Definition at line 811 of file table_data.c.
+Definition at line 808 of file table_data\&.c\&.
 .SS "\fBnetsnmp_table_row\fP* netsnmp_table_data_get_first_row (\fBnetsnmp_table_data\fP * table)"
+
 .PP
 returns the first row in the table 
 .PP
-Definition at line 792 of file table_data.c.
+Definition at line 789 of file table_data\&.c\&.
 .SS "\fBnetsnmp_table_row\fP* netsnmp_table_data_get_from_oid (\fBnetsnmp_table_data\fP * table, oid * searchfor, size_t searchfor_len)"
+
 .PP
 finds the data in 'datalist' stored at the searchfor oid 
 .PP
-Definition at line 825 of file table_data.c.
+Definition at line 822 of file table_data\&.c\&.
 .SS "\fBnetsnmp_table_row\fP* netsnmp_table_data_get_next_row (\fBnetsnmp_table_data\fP * table, \fBnetsnmp_table_row\fP * row)"
+
 .PP
 returns the next row in the table 
 .PP
-Definition at line 801 of file table_data.c.
+Definition at line 798 of file table_data\&.c\&.
 .SS "void* netsnmp_table_data_remove_and_delete_row (\fBnetsnmp_table_data\fP * table, \fBnetsnmp_table_row\fP * row)"
+
 .PP
-removes and frees a row of data to a given table and returns the void * returns the void * data on successful deletion. or NULL on failure (bad arguments) 
+removes and frees a row of data to a given table and returns the void * returns the void * data on successful deletion\&. or NULL on failure (bad arguments) 
 .PP
-Definition at line 274 of file table_data.c.
+Definition at line 272 of file table_data\&.c\&.
 .SS "\fBnetsnmp_table_row\fP* netsnmp_table_data_remove_row (\fBnetsnmp_table_data\fP * table, \fBnetsnmp_table_row\fP * row)"
+
 .PP
-removes a row of data to a given table and returns it (no free's called) returns the row pointer itself on successful removing. or NULL on failure (bad arguments) 
+removes a row of data to a given table and returns it (no free's called) returns the row pointer itself on successful removing\&. or NULL on failure (bad arguments) 
 .PP
-Definition at line 248 of file table_data.c.
+Definition at line 246 of file table_data\&.c\&.
 .SS "NETSNMP_INLINE void netsnmp_table_data_replace_row (\fBnetsnmp_table_data\fP * table, \fBnetsnmp_table_row\fP * origrow, \fBnetsnmp_table_row\fP * newrow)"
+
 .PP
-swaps out origrow with newrow. This does *not* delete/free anything! 
+swaps out origrow with newrow\&. This does \fInot\fP delete/free anything! 
 .PP
-Definition at line 233 of file table_data.c.
+Definition at line 231 of file table_data\&.c\&.
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

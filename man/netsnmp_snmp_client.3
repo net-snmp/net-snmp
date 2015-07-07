@@ -1,8 +1,37 @@
-.TH "various PDU processing routines" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "snmp_client" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-various PDU processing routines \- 
+snmp_client \- various PDU processing routines
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBBSD4_2\fP"
+.br
+.ti -1c
+.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)        /* bits per mask */"
+.br
+.ti -1c
+.RI "#define \fBFD_SET\fP(n,  p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
+.br
+.ti -1c
+.RI "#define \fBFD_CLR\fP(n,  p)   ((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))"
+.br
+.ti -1c
+.RI "#define \fBFD_ISSET\fP(n,  p)   ((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))"
+.br
+.ti -1c
+.RI "#define \fBFD_ZERO\fP(p)   memset((p), 0, sizeof(*(p)))"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef long \fBfd_mask\fP"
+.br
+.in -1c
 .SS "Functions"
 
 .in +1c
@@ -40,9 +69,9 @@ various PDU processing routines \-
 .RI "int \fBsnmp_set_var_objid\fP (\fBnetsnmp_variable_list\fP *vp, const oid *objid, size_t name_length)"
 .br
 .ti -1c
-.RI "int \fBsnmp_set_var_typed_value\fP (\fBnetsnmp_variable_list\fP *newvar, u_char type, const u_char *val_str, size_t val_len)"
+.RI "int \fBsnmp_set_var_typed_value\fP (\fBnetsnmp_variable_list\fP *newvar, u_char type, const void *val_str, size_t val_len)"
 .br
-.RI "\fIsnmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. \fP"
+.RI "\fIsnmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure\&. \fP"
 .ti -1c
 .RI "int \fBsnmp_set_var_typed_integer\fP (\fBnetsnmp_variable_list\fP *newvar, u_char type, long val)"
 .br
@@ -59,7 +88,7 @@ various PDU processing routines \-
 .RI "\fBnetsnmp_variable_list\fP * \fBfind_varbind_in_list\fP (\fBnetsnmp_variable_list\fP *vblist, oid *name, size_t len)"
 .br
 .ti -1c
-.RI "int \fBsnmp_set_var_value\fP (\fBnetsnmp_variable_list\fP *vars, const u_char *value, size_t len)"
+.RI "int \fBsnmp_set_var_value\fP (\fBnetsnmp_variable_list\fP *vars, const void *value, size_t len)"
 .br
 .ti -1c
 .RI "void \fBsnmp_replace_var_types\fP (\fBnetsnmp_variable_list\fP *vbl, u_char old_type, u_char new_type)"
@@ -98,19 +127,23 @@ various PDU processing routines \-
 .RI "int \fBnetsnmp_query_walk\fP (\fBnetsnmp_variable_list\fP *list, \fBnetsnmp_session\fP *session)"
 .br
 .in -1c
+.SH "Detailed Description"
+.PP 
+
 .SH "Function Documentation"
 .PP 
-.SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const u_char * val_str, size_t val_len)"
+.SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const void * val_str, size_t val_len)"
+
 .PP
-snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
+snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure\&. Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer\&.
 .PP
 \fBParameters:\fP
 .RS 4
-\fInewvar\fP the structure gets populated with the given data, type, val_str, and val_len. 
+\fInewvar\fP the structure gets populated with the given data, type, val_str, and val_len\&. 
 .br
 \fItype\fP is the asn data type to be copied 
 .br
-\fIval_str\fP is a buffer containing the value to be copied into the newvar structure. 
+\fIval_str\fP is a buffer containing the value to be copied into the newvar structure\&. 
 .br
 \fIval_len\fP the length of val_str
 .RE
@@ -124,14 +157,13 @@ returns 0 on success and 1 on a malloc error
 .PP
 \fBExamples: \fP
 .in +1c
-\fBdelayed_instance.c\fP.
+\fBdelayed_instance\&.c\fP\&.
 .PP
-Definition at line 687 of file snmp_client.c.
-.SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const u_char * value, size_t len)"
-.PP
+Definition at line 707 of file snmp_client\&.c\&.
+.SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const void * value, size_t len)"
 FALL THROUGH 
 .PP
-Definition at line 754 of file snmp_client.c.
+Definition at line 774 of file snmp_client\&.c\&.
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

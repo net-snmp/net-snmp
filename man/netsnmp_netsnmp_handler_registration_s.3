@@ -1,16 +1,14 @@
-.TH "netsnmp_handler_registration_s" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_handler_registration_s" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_handler_registration_s \- 
-.PP
-Root registration info.  
+netsnmp_handler_registration_s \- Root registration info\&.  
 
 .SH SYNOPSIS
 .br
 .PP
 .PP
-\fC#include <agent_handler.h>\fP
+\fC#include <agent_handler\&.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -21,7 +19,7 @@ Root registration info.
 .ti -1c
 .RI "char * \fBcontextName\fP"
 .br
-.RI "\fINULL = default context. \fP"
+.RI "\fINULL = default context\&. \fP"
 .ti -1c
 .RI "oid * \fBrootoid\fP"
 .br
@@ -59,49 +57,54 @@ Root registration info.
 .in -1c
 .SH "Detailed Description"
 .PP 
-Root registration info. 
+Root registration info\&. 
 
-The variables handlerName, contextName, and rootoid need to be allocated on the heap, when the registration structure is unregistered using \fBunregister_mib_context()\fP the code attempts to free them. 
+The variables handlerName, contextName, and rootoid need to be allocated on the heap, when the registration structure is unregistered using \fBunregister_mib_context()\fP the code attempts to free them\&. 
 .PP
 \fBExamples: \fP
 .in +1c
+\fBdelayed_instance\&.c\fP, and \fBwatched\&.c\fP\&.
 .PP
-\fBdelayed_instance.c\fP, and \fBwatched.c\fP.
-.PP
-Definition at line 95 of file agent_handler.h.
+Definition at line 95 of file agent_handler\&.h\&.
 .SH "Field Documentation"
 .PP 
-.SS "char* \fBnetsnmp_handler_registration_s::contextName\fP"
+.SS "char* netsnmp_handler_registration_s::contextName"
+
 .PP
-NULL = default context. 
+NULL = default context\&. 
 .PP
-Definition at line 100 of file agent_handler.h.
-.SS "\fBnetsnmp_mib_handler\fP* \fBnetsnmp_handler_registration_s::handler\fP"
+Definition at line 100 of file agent_handler\&.h\&.
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_handler_registration_s::handler"
+
 .PP
 handler details 
 .PP
-Definition at line 111 of file agent_handler.h.
-.SS "char* \fBnetsnmp_handler_registration_s::handlerName\fP"
+Definition at line 111 of file agent_handler\&.h\&.
+.SS "char* netsnmp_handler_registration_s::handlerName"
+
 .PP
 for mrTable listings, and other uses 
 .PP
-Definition at line 98 of file agent_handler.h.
-.SS "void* \fBnetsnmp_handler_registration_s::my_reg_void\fP"
+Definition at line 98 of file agent_handler\&.h\&.
+.SS "void* netsnmp_handler_registration_s::my_reg_void"
+
 .PP
 void ptr for registeree 
 .PP
-Definition at line 126 of file agent_handler.h.
-.SS "int \fBnetsnmp_handler_registration_s::priority\fP"
+Definition at line 126 of file agent_handler\&.h\&.
+.SS "int netsnmp_handler_registration_s::priority"
+
 .PP
 more optional stuff 
 .PP
-Definition at line 117 of file agent_handler.h.
-.SS "oid* \fBnetsnmp_handler_registration_s::rootoid\fP"
+Definition at line 117 of file agent_handler\&.h\&.
+.SS "oid* netsnmp_handler_registration_s::rootoid"
+
 .PP
 where are we registered at? 
 .PP
-Definition at line 105 of file agent_handler.h.
+Definition at line 105 of file agent_handler\&.h\&.
 
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.

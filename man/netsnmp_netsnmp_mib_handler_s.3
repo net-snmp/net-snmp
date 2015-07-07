@@ -1,16 +1,14 @@
-.TH "netsnmp_mib_handler_s" 3 "24 Jun 2011" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_mib_handler_s" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_mib_handler_s \- 
-.PP
-the mib handler structure to be registered  
+netsnmp_mib_handler_s \- the mib handler structure to be registered  
 
 .SH SYNOPSIS
 .br
 .PP
 .PP
-\fC#include <agent_handler.h>\fP
+\fC#include <agent_handler\&.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -46,29 +44,36 @@ the mib handler structure to be registered
 .PP
 \fBExamples: \fP
 .in +1c
+\fBdelayed_instance\&.c\fP\&.
 .PP
-\fBdelayed_instance.c\fP.
-.PP
-Definition at line 48 of file agent_handler.h.
+Definition at line 48 of file agent_handler\&.h\&.
 .SH "Field Documentation"
 .PP 
-.SS "int(* \fBnetsnmp_mib_handler_s::access_method\fP)(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
+.SS "int(* netsnmp_mib_handler_s::access_method) (struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
+
 .PP
-if you add more members, you probably also want to update _clone_handler in \fBagent_handler.c\fP. 
-.SS "void(* \fBnetsnmp_mib_handler_s::data_free\fP)(void *\fBmyvoid\fP)"
+if you add more members, you probably also want to update _clone_handler in \fBagent_handler\&.c\fP\&. 
+.PP
+Definition at line 58 of file agent_handler\&.h\&.
+.SS "void(* netsnmp_mib_handler_s::data_free) (void *\fBmyvoid\fP)"
+
 .PP
 data free hook for myvoid 
-.SS "int \fBnetsnmp_mib_handler_s::flags\fP"
+.PP
+Definition at line 64 of file agent_handler\&.h\&.
+.SS "int netsnmp_mib_handler_s::flags"
+
 .PP
 for agent_handler's internal use 
 .PP
-Definition at line 53 of file agent_handler.h.
-.SS "void* \fBnetsnmp_mib_handler_s::myvoid\fP"
+Definition at line 53 of file agent_handler\&.h\&.
+.SS "void* netsnmp_mib_handler_s::myvoid"
+
 .PP
 for handler's internal use 
 .PP
-Definition at line 51 of file agent_handler.h.
+Definition at line 51 of file agent_handler\&.h\&.
 
 .SH "Author"
 .PP 
-Generated automatically by Doxygen for net-snmp from the source code.
+Generated automatically by Doxygen for net-snmp from the source code\&.
