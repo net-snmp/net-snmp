@@ -6278,6 +6278,7 @@ done
   done
 IFS=$as_save_IFS
 
+  test -z "$ac_cv_path_AUTOCONF" && ac_cv_path_AUTOCONF=":"
   ;;
 esac
 fi
@@ -6318,6 +6319,7 @@ done
   done
 IFS=$as_save_IFS
 
+  test -z "$ac_cv_path_AUTOHEADER" && ac_cv_path_AUTOHEADER=":"
   ;;
 esac
 fi
@@ -6497,15 +6499,6 @@ cat >>confdefs.h <<_ACEOF
 #define UNAMEPROG "$UNAMEPROG"
 _ACEOF
 
-
-if test "x$ac_cv_prog_AUTOCONF" = "x"; then
-	AUTOCONF=":"
-
-fi
-if test "x$ac_cv_prog_AUTOHEADER" = "x"; then
-	AUTOHEADER=":"
-
-fi
 
 MAKE=${MAKE-"make"}
 $MAKE -v -f /dev/null 2>/dev/null | $GREP GNU >/dev/null
@@ -24332,7 +24325,7 @@ if test "x$install_perl" != "xno" ; then
 
     #       What compiler was used to build the perl binary?
     #
-    if test "xenable_perl_cc_checks" != "xno" ; then
+    if test "x$enable_perl_cc_checks" != "xno" ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Perl cc" >&5
 $as_echo_n "checking for Perl cc... " >&6; }
 
