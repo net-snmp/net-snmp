@@ -646,6 +646,8 @@ PERLLDOPTS_FOR_LIBS
 EMBEDPERLUNINSTALL
 EMBEDPERLINSTALL
 LIBCURSES
+NETSNMP_BUILD_PCAP_PROG_FALSE
+NETSNMP_BUILD_PCAP_PROG_TRUE
 MYSQL_INCLUDES
 MYSQL_LIBS
 MYSQLCONFIG
@@ -6319,6 +6321,7 @@ done
   done
 IFS=$as_save_IFS
 
+  test -z "$ac_cv_path_AUTOCONF" && ac_cv_path_AUTOCONF=":"
   ;;
 esac
 fi
@@ -6359,6 +6362,7 @@ done
   done
 IFS=$as_save_IFS
 
+  test -z "$ac_cv_path_AUTOHEADER" && ac_cv_path_AUTOHEADER=":"
   ;;
 esac
 fi
@@ -6538,15 +6542,6 @@ cat >>confdefs.h <<_ACEOF
 #define UNAMEPROG "$UNAMEPROG"
 _ACEOF
 
-
-if test "x$ac_cv_prog_AUTOCONF" = "x"; then
-	AUTOCONF=":"
-
-fi
-if test "x$ac_cv_prog_AUTOHEADER" = "x"; then
-	AUTOHEADER=":"
-
-fi
 
 MAKE=${MAKE-"make"}
 $MAKE -v -f /dev/null 2>/dev/null | $GREP GNU >/dev/null
@@ -24304,6 +24299,69 @@ fi
 
 
 
+##
+#   libpcap
+##
+NETSNMP_BUILD_PCAP_PROG_TRUE='#'
+NETSNMP_BUILD_PCAP_PROG_FALSE=''
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pcap_create in -lpcap" >&5
+$as_echo_n "checking for pcap_create in -lpcap... " >&6; }
+if ${ac_cv_lib_pcap_pcap_create+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpcap  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pcap_create ();
+int
+main ()
+{
+return pcap_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pcap_pcap_create=yes
+else
+  ac_cv_lib_pcap_pcap_create=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pcap_pcap_create" >&5
+$as_echo "$ac_cv_lib_pcap_pcap_create" >&6; }
+if test "x$ac_cv_lib_pcap_pcap_create" = xyes; then :
+
+   for ac_header in pcap/pcap.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "pcap/pcap.h" "ac_cv_header_pcap_pcap_h" "$ac_includes_default"
+if test "x$ac_cv_header_pcap_pcap_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PCAP_PCAP_H 1
+_ACEOF
+
+      NETSNMP_BUILD_PCAP_PROG_TRUE=''
+      NETSNMP_BUILD_PCAP_PROG_FALSE='#'
+
+fi
+
+done
+
+
+fi
+
+
+
 
 ##
 #   Non-library checks
@@ -24586,7 +24644,7 @@ if test "x$install_perl" != "xno" ; then
 
     #       What compiler was used to build the perl binary?
     #
-    if test "xenable_perl_cc_checks" != "xno" ; then
+    if test "x$enable_perl_cc_checks" != "xno" ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Perl cc" >&5
 $as_echo_n "checking for Perl cc... " >&6; }
 
