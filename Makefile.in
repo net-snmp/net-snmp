@@ -191,10 +191,7 @@ perlinstall:
         fi
 
 perluninstall:
-	@(cd perl ; $(MAKE) uninstall) ; \
-        if test $$? != 0 ; then \
-           exit 1 ; \
-        fi
+	echo "WARNING: perl doesn't support uninstall"
 
 perltest:
 	@(cd perl ; $(MAKE) test) ; \
