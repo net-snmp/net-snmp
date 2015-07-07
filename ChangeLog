@@ -1,4 +1,4156 @@
 -------------------------------------------------------------------------------
+Changes: V5.4.4 -> V5.4.5.pre1
+
+commit d6abdcf1262d5908ac371e70f63c1c48b9aeeb88
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 6 23:31:02 2015 -0700
+
+    make depend for 5.4.5.pre1
+
+commit 66a8561c10b69a284bf83c652e6656b6d2ca5008
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 6 23:10:13 2015 -0700
+
+    documentation update for 5.4.5.pre1
+
+commit a188afbe66349ee15fb5a0428f206d0d03208c54
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 6 22:15:40 2015 -0700
+
+    Version number update: 5.4.5.pre1
+
+commit 0b35a3e365e260e5d86e778b999954ea39092096
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 6 22:15:21 2015 -0700
+
+    version update for 5.4.5.pre1
+
+commit 5c03c35dc517c9acb7e1c6f733675c7808ed8a3e
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 6 14:18:56 2015 -0700
+
+    remove the 5.5 and 5.6 branches from the list of active branches
+
+commit c4e78ec41b7c10d8be2c36fdae1b2199f65e9e60
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed May 20 20:49:38 2015 +0200
+
+    disman/expr/expValue: Fix memory leak when expression has errors- Thanks to Alessandro Gherardi for posting bug 2629.
+
+commit d07fba92c58db6dbb8bee5f0fc98130fcd5d3e6b
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon May 11 21:41:56 2015 +0200
+
+    agent_handler: Alert if inject_handler_before cannot find the insertion point.
+
+commit b55d4c6cb9f9adb8406f99cab75084b3edcdd496
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon May 11 21:30:42 2015 +0200
+
+    tcpTable.c: Fis pre-processor comment.
+
+commit 0bcc064f39e001ab6d619cc76140b94ca2764655
+Author: Mike Moreton <mjvm_ns@hotmail.com>
+Date:   Mon Sep 30 11:40:27 2013 +0100
+
+    There seems to be a problem with mib2c.check_values_local.conf in that it generates a file with a double include symbol of XXX_CHECKFNS_H.
+    As this is the same symbol as is used in xxx_checkfns.h, xxx_checkfns_local.h never gets included at all.
+
+commit 85ec2e0881e2add1ebde5fb92cdaeedec8fa2659
+Author: Robert Story <rstory@localhost>
+Date:   Tue Apr 21 09:53:45 2015 -0400
+
+    NEWS: snmp: BUG: 2622: Fix excessive indents in log file
+
+commit 1f38c1b40039d0efb4ef22f17701fcc670747de0
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Apr 19 09:23:25 2015 +0200
+
+    ip-mib: Fix an error log statement
+    
+    Log the input string in the error message that reports that parsing
+    failed instead of the output buffer.
+
+commit 5db433599648418b624e2207324248f185e9a8a0
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Apr 19 08:25:34 2015 +0200
+
+    ip-mib: Improve portability
+    
+    Remove a gcc-specific alignment directive. Rework the code that
+    required ia_address to be aligned on SPARC. See also "Fix SIGBUS
+    on Sparc caused by wrong alignment" (commit ID e2513cd1c4b3).
+
+commit e2513cd1c4b31183d9c06286129e84a49afe88ac
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Apr 16 18:58:34 2015 +0200
+
+    Patch #a1301: Fix SIGBUS on Sparc caused by wrong alignment. Thanks to Eric Snowberg.
+
+commit c5c435658032c26fde69978e2610c879b3a4bcc8
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Apr 16 18:56:55 2015 +0200
+
+    Patch #1300: Fix big endian / 64bit problem with Sparc by properly typing. Thanks to Eric Snowberg.
+
+commit f9fb050282c67d4f5125a095a82ced7bd3cea397
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Apr 16 18:46:30 2015 +0200
+
+    iBug #a2610: Fix logOption F
+
+commit d75a16bc49546291682f8797236f2fa2b4df128e
+Merge: f23bcd3 e6c5e24
+Author: Robert Story <rstory@localhost>
+Date:   Mon Apr 13 09:05:53 2015 -0400
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit e6c5e24998d2ad4e535a3b0780007bae06e04f94
+Author: Hideki Yamane <henrichjp@users.sf.net>
+Date:   Sun Apr 12 20:44:48 2015 +0200
+
+    CHANGES: BUG: 2616: Fix certain spelling errors in source code comments and printed messages
+
+commit f23bcd3ac6ddee5d0a48f9703007ccc738914791
+Author: Robert Story <rstory@localhost>
+Date:   Sat Apr 11 18:49:02 2015 -0400
+
+    CHANGES: BUG: #2615: Don't return incompletely parsed varbinds
+
+commit dba5362b9fc262d66e4dcc9de2a9d4e84a900a92
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Mar 9 23:06:54 2015 +0100
+
+    Patch #a1297: adjust IF-MIB cache time on Solaris to match global cache time (3 secs). Thanks to hjbecker.
+
+commit ee9e36c79cceec354b783f3b38659f433f44f848
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Mar 9 21:59:06 2015 +0100
+
+    Fix BUG#a2604 bad comparison of enum names.
+
+commit b527e39fb658ca3d4bec05aa609ac8f09842ac5f
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Tue Feb 24 10:34:10 2015 -0800
+
+    Fix little bugs in nsautoconf(), so that it actually modifies $PATH correctly
+
+commit ffe0dcdf22a6225af8ed470d5977c882300a8ab2
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Tue Feb 24 12:17:25 2015 -0500
+
+    CHANGES: mib2c: BUG: 2598: declare the storage for column variables in mfd's _container_load
+    
+    The _container_load function assumes that you're going to fill
+    in a variable for each column; declare these variables so that
+    the sample code compiles even before you get around to filling
+    in this part of the code.
+
+commit 808422f29730977cbecd4c68c6388c3ab59affde
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Feb 12 20:24:33 2015 +0100
+
+    BUG#2599: Add missing tcpOutRsts.0 for Solaris. Thanks to Sowrabha.
+
+commit 8db1feef5e391213f6001faa45d893e008e51df7
+Merge: 077831e 16c3603
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Thu Feb 5 11:15:32 2015 -0800
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 077831ecf919db2b68709d7ff5c7f991892a136e
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Thu Feb 5 11:09:52 2015 -0800
+
+    Warn if a template tries to use an undefined variable.
+
+commit 5b19938a680e58076b2dfb0780f0c7c6401e6dda
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Thu Feb 5 10:52:46 2015 -0800
+
+    In ${context}_undo_commit, write one e.g. line for each writable node.
+    
+    The existing code was referring to $node without setting it,
+    resulting in a warning from perl about using an uninitialized
+    variable or three.
+
+commit 16c3603dba91f1a00a56e5db13ed46a913488f4d
+Merge: 148f2de c0f5ffa
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Feb 5 14:02:19 2015 +0100
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 148f2de48e1cd6ba8ebdab8591424df64ab967a3
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Feb 5 14:01:44 2015 +0100
+
+    CHANGES: snmptrapd: Correctly forward traps with Request-ID '0'.
+    
+    Request-ID of forwarded traps is taken from the incoming trap and it can be zero.
+    We should not report error in this case.
+
+commit c0f5ffa9230c1a776f0116930d8405f56eea7b27
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Wed Feb 4 10:31:28 2015 -0800
+
+    My ipCidrRouteTable fix is obsoleted by nba's work already in 5.7.3
+    
+    Undoing my ipCidrRouteTable change.  This is the danger of committing
+    patches that are just lying around in your old git tree.  Sorry for
+    the churn.
+
+commit 46163364f83ec5fc5548750146931d8f4653bdbb
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Wed Feb 4 08:59:17 2015 -0800
+
+    Use the RFC2096 ipCidrRouteTable instead of the RFC1213 ipRouteTable.
+
+commit fb985e43992df6ac646f86fed9af551d258fcb72
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Wed Feb 4 08:34:46 2015 -0800
+
+    If we are allocating the container, set its name.
+    
+    If the user allocated a container, don't mess with what the
+    user supplied, but if they are relying on us to allocate it,
+    give it a name so that container error logs have a useful
+    context.
+
+commit e96c7ba1f053e6287e7ecf7923b97644e72700da
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Wed Feb 4 08:32:08 2015 -0800
+
+    Transition from createAndWait to notReady or notInService
+    
+    When a row is set to createAndWait, the RowStatus TC requires
+    that it immediately transition to notReady (if the prerequisites
+    are not met yet) or notInService (if they are).
+
+commit f1cc242a0b4ea1e159580b0a26c2720a76356af4
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Wed Feb 4 08:31:01 2015 -0800
+
+    BITs are network byte order in the PDU
+
+commit 7955617c9259ad15a149ca691a902ad63630cc1c
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Wed Feb 4 08:30:18 2015 -0800
+
+    Use %x, not %p, to log hex values that are not pointers.
+
+commit 26c4c5ef94c2c237d369b901443e342bc81e6011
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Tue Feb 3 13:43:23 2015 -0500
+
+    If we guess a "-p" argument of "-1", bail early before running the syntax error.
+
+commit 75d17a242e524e66b6c8214f68dc9920d5bd59df
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Fri Jan 30 11:29:53 2015 +0100
+
+    CHANGES: snmpd: Remove some log messages from SMUX processing.
+    
+    These messages are not useful to system admin and only makes system log unreadable. Let's move them to debug level.
+
+commit a0b4565941d92c6a1d2442f9d0a74d8371187845
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Jan 26 22:27:15 2015 +0100
+
+    Fix agent crash in expression mib when syntax error in expr or inacessible variables.
+
+commit 8ebc56be4db016ef7b4d0c335ba79824df648847
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Jan 26 22:17:00 2015 +0100
+
+    BUG#a2511: Fix missing multithreading guard in default_store.
+
+commit e9eb2ca64775c82fe4466ea57d3ae0c32c89bfd8
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Jan 26 20:58:39 2015 +0100
+
+    PATCH#a1289: Fix a memory leak in expression-mib. Thanks to Niels Skou Olsen.
+
+commit 083af396e26227780f29049891a469e83fd063eb
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Jan 26 20:54:13 2015 +0100
+
+    PATCH#a1271: Fix for expressions with objects without deltain expression-mib. Thanks to Jahanzeb Farooq.
+
+commit 7ab2cb4feade75e3034dfc59bc31a4b3fd11c242
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Jan 26 20:39:42 2015 +0100
+
+    PATCH#a1268: Scale oid_len by sizeof(oid). Thanks to Jahanzeb Farooq.
+
+commit 6fe6a1bfaf5e625c741ccd1e4d51041d02e8e11b
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Sun Jan 25 22:57:21 2015 -0500
+
+    patch from Claus Klein for null ptr dereference
+
+commit 98f94dac3852ad5e77531ea4387926c6ec74fdc0
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Dec 8 13:52:33 2014 -0800
+
+    new makerelease with various text and step fixes
+
+commit d21c3a2258092cf6de07370f75632a0e8e51529e
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Dec 8 11:17:44 2014 -0800
+
+    V5-7-patches out of Release Candidate
+
+commit a68747ca8a4c2922581b7b6a9a3467a2a7776ab7
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Dec 8 10:56:25 2014 -0800
+
+    Another cygwin build improvement patch from Bart Van Assche
+
+commit 425cffcb2f322a50e4f80990667d93ad0bf11a26
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Dec 8 10:26:19 2014 -0800
+
+    CHANGES: Patch from Bart Van Assche to improve cygwin building
+
+commit 6b87ba2099908f7df425a9955df3299ee81549a8
+Merge: f6eb201 add1341
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Dec 8 10:25:47 2014 -0800
+
+    Merge branch 'V5-4-patches' of ssh://git.code.sf.net/p/net-snmp/code into V5-4-patches
+
+commit f6eb2013fd3db444df670b956010e77c0fc2b1d2
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Nov 10 11:30:01 2014 -0800
+
+    Release Candidate for V5-7-patches
+
+commit 6b43b9b9ae3e17fc2747dc522bf9a0c4a8025964
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Nov 7 15:47:10 2014 -0800
+
+    Release Candidate for V5-7-patches
+
+commit add1341c9ca33fea07221914ca2791e6ab7b1caa
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Fri Nov 7 06:47:09 2014 +0100
+
+    snmplib/system.c: make the test for return code from uname conform to POSIX.
+
+commit 3ea514423d9373af77cbc4b8336b170143864389
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Sep 30 23:12:40 2014 -0700
+
+    Release Candidate for V5-7-patches
+
+commit b3e2ef2300c2cdf3ccfb018157e683acaf139a1e
+Merge: d5d4030 bcaab48
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Sep 30 23:11:45 2014 -0700
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit bcaab48d9d498361fdd451652773b3b956c7f10c
+Author: Robert Story <rstory@localhost>
+Date:   Thu Sep 25 09:36:00 2014 -0400
+
+    remove bad assert check
+
+commit 3da0c378b5cb1bbf35d05a6212a483abda84a201
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Sep 1 08:59:04 2014 +0200
+
+    Fix commit 7f4a7b891332899cea26e95be0337aae01648742: dont mix code and declarations.
+
+commit 7f4a7b891332899cea26e95be0337aae01648742
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jul 31 13:46:49 2014 +0200
+
+    Added checks for printing variables with wrong types.
+    
+    When -OQ command line argument is used, variable formatter preffers the type
+    of the varible parsed from a MIB file instead of checking type of the variable
+    as parsed from SNMP message.
+    
+    This can lead to crashes when incoming packets contains a variable with
+    NULL type, while the MIB says the variable should be non-NULL, like Integer.
+    The formatter then tries to interpret the NULL (from packet) as Integer (from
+    MIB file).
+
+commit d5d40302b0ab340e211ad76d7f195b807f387ef3
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 11 12:33:50 2014 -0700
+
+    update to new key ID
+
+commit 418132f43cc43231966a8b9672c626f60b991039
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Aug 8 14:24:52 2014 -0700
+
+    fix the run-autoconf program
+
+commit a93991eaf53b199b19c582b630da25158300a9d1
+Author: Robert Story <rstory@localhost>
+Date:   Fri Aug 1 10:07:45 2014 -0400
+
+    fix #2482 snmp response: Too long
+
+commit a51cbedf7d1d424342ab5ca3a4b67217a364409a
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Jul 15 21:45:54 2014 +0200
+
+    snmpnetstat/if.c: properly detect snmp exceptions
+
+commit 8431f913554e0cccc48bedce1fd4a8a288b6c27d
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Tue Jul 15 07:19:33 2014 -0700
+
+    If the asp lookup returns NULL, don't try to use it
+    
+    If there is no corresponding asp, we set the result properly
+    but still fall through and attempt to use it.  Instead, just
+    continue.
+
+commit 42a65f11e3ed56963f78a5c1561edd67658ccd00
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Jul 13 09:47:26 2014 +0200
+
+    Remove C99 length specifier 'z' and use a cast instead
+    
+    See also commit b4eab11139eb122c9ad3c13ab8b9453e04e46842.
+
+commit b4eab11139eb122c9ad3c13ab8b9453e04e46842
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Jul 7 14:04:45 2014 -0700
+
+    AIX: Fix a few compiler warnings
+    
+    Avoid that the following compiler warnings are reported:
+    - Assignment discards const.
+    - Unused local variable.
+    - Mismatch between format string and argument list.
+    
+    Also correct the indentation of two Solaris-specific code statements.
+
+commit 82addd74f55de371f88fe066f327158fcfd0301a
+Merge: 5d06a5f 0dd2783
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Mon Jul 7 14:11:18 2014 -0700
+
+    Merge branch 'V5-4-patches' of ssh://git.code.sf.net/p/net-snmp/code into V5-4-patches
+
+commit 0dd2783b747fb96d74978e11c82a504c0df1d555
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Jul 6 11:12:30 2014 +0200
+
+    HP UX, CPU statistics: Fix an invalid pointer dereference
+    
+    See also commit 0034581deb3e676d328824c87637aaca31850c6a.
+
+commit 0034581deb3e676d328824c87637aaca31850c6a
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Jun 30 22:08:34 2014 +0200
+
+    BUG #a2551: fix non-sequential cpu numbers on HP-UX.
+    Thanks to Dave Olker.
+
+commit b0f49ba21fb810efcb0992f01c4fc5fd30cf69af
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Jun 26 21:42:48 2014 +0200
+
+    cpu_pstat.c: fix missing break(s) in switch statement
+
+commit 49e4e49b12aae0d8f7572839365d46cf932bfec9
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Jun 2 15:18:46 2014 +0200
+
+    Fix FreeBSD system define chain
+
+commit b31aede9c8b63461b5092e16d626a676b172f8aa
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu May 22 23:05:19 2014 +0200
+
+    PATCH #1277: Fix ifspeed for Solaris zones. Thanks to lijo
+
+commit 51302ba57285d4d47992ed15a460580112a3e924
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue May 6 06:21:24 2014 +0200
+
+    BUG #2521: AIX: dont die when CPU is dynamically added to system.
+
+commit 9ae5981530fd2bdd9f2a5c86b7d6994b873033d7
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sat Apr 26 22:36:26 2014 +0200
+
+    Prepare for FreeBSD 11 and 12
+
+commit 857037a8d2457ac9aa2a52510957647971a46634
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sat Apr 26 21:28:00 2014 +0200
+
+    Prepare for FreeBSD 11 and 12.
+
+commit 8a66814edad5a28fdbc8645fb0e14459bf915da0
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sat Mar 8 14:00:28 2014 +0100
+
+    mta_sendmail: isspace cannot take a char argument
+
+commit 3e734fb3bddf11b99b6ba7ddcb30ae932d8ba3b1
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sat Mar 8 13:58:07 2014 +0100
+
+    expExpressionConf, expValue: isspace cannot take a char argument.
+
+commit 76e8d6d100320629d8a23be4b0128619600c919d
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Mar 6 09:21:51 2014 +0100
+
+    CHANGES: snmpd: PATCH: 1275: from Viliam P√∫ƒçik: fixed Perl trap handler when processing trap with empty community string.
+
+commit b222e7a3eef59cbb68a453476cb364342c74e640
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Feb 19 22:26:08 2014 +0100
+
+    Fix speling error
+
+commit d214d70c4524e62fccaf1083abc5ba1a439a463e
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Feb 19 22:21:55 2014 +0100
+
+    snmpstatus: detect SNMP exception responses.
+
+commit 5d06a5fbb5ed3ca2b5820e8ef2d5b5b88b9d7df8
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Mon Feb 3 11:58:03 2014 -0800
+
+    Allow the nodemap to contain multiple nodes for mibs like IF-MIB
+    
+    In the IF-MIB, "interfaces" and "ifMIBObjects" both contain
+    significant subtrees.  Allow nodemap to contain a comma-separated
+    list of nodes, to handle MIBs like this.
+
+commit 8780662bd1b16aa3cf9803df02a16d5b58a04943
+Merge: f99ef5c 8f6991a
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Tue Feb 11 08:48:29 2014 -0800
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit f99ef5cef203ea378553a2ab4925fcd869e7f5a3
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Tue Feb 11 08:47:51 2014 -0800
+
+    David Jarvie's patch for bug 2507
+
+commit 8f6991a2114fd21ba5519ee9576beb082f603dec
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Jan 23 16:30:46 2014 +0100
+
+    snmpnetstat: search ifName and ifAlias when looking for interface
+    name from -CI option.
+
+commit 4a360104659c169ce232256e138d938d94e435f9
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Jan 23 16:28:32 2014 +0100
+
+    logmatch: fix out-of-bounds access. Thanks to gcc or clang
+    with -fsanitize=address (recommended!)
+
+commit eef2f64b46357b353c79504bc593535ebe7421e7
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Jan 23 16:27:07 2014 +0100
+
+    cpu_linux: support systems with more than 100 cpus.
+
+commit 9f4c572614091404decba0d4ef1a4cbaf9fc5bd2
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 9 13:35:27 2014 +0100
+
+    CHANGES: snmpd: Fixed monitoring based on non-delta trigger.
+    
+    snmpd crashed wit following snmpd.conf:
+        monitor -s -D -r 10 -e LOGMATCH -o logMatchCurrentCount "Log Match" != logMatchCurrentCount
+        logmatch LoginFailure1 /var/log/secure 10 su: .*fail.*
+    
+    The reason was unitialized variable sysUT_var in mteTrigger_run(), it was
+    filled only if the trigger was delta-valued, while its value was used for all
+    triggers.
+    
+    With this patch, sysUT_var is filled for all code branches where it is needed.
+
+commit 85bb4b5c9f4896876715cb1f14f4f1b582d223bd
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Dec 29 17:12:03 2013 +0100
+
+    Regenerate dependencies
+
+commit d255ca426d1e3d4bc48b8f3db937435788934c42
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Dec 29 12:35:30 2013 +0100
+
+    CHANGES: building: Avoid duplicate and trailing spaces in the dependency files.
+
+commit d15cd2b9743cccb502deafd143ade0aa90cf31e4
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Sep 21 09:05:13 2013 +0200
+
+    MinGW: Build fix
+    
+    Apparently with recent MinGW header files <winsock2.h> should be
+    included instead of <winsock.h>. Modify <net-snmp/types.h> accordingly.
+
+commit 6b706c53d4cf751e495aab66fe39fd51c32ce930
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Dec 15 10:06:21 2013 +0100
+
+    Win32: Visual Studio 2013 build fix
+    
+    Apparently Visual Studio 2013 does not support goto <typedef name>.
+    Hence rename the UINT label. For consistency reasons, also rename
+    the OCT label.
+
+commit 6e76cbbb2a0783f22f58fb7d323e9f7217cc604a
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Wed Nov 27 01:01:04 2013 +0100
+
+    CHANGES: snmplib: Avoid failure to trigger sign extension due to overlong types
+    
+    In asn_realloc_rbuild_signed_int64 the algorithm assumes that shifting
+    values greater than 0x7fffffff right is an arithmetic shift that will
+    shift in 1's. On hosts where long is more than 32 bits the use of long
+    for 'low' and 'high' makes this assumption false.
+    
+    Thanks to rkj@softhome.net for reporting this issue.
+
+commit 0cb14d4e5c39a07c78474881e6c73fa617507bdb
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Nov 27 22:06:58 2013 +0100
+
+    snmpnetstat: fix statistics for ipv6
+
+commit 2d4defe77bdebbbc1a773eb8d48498b6f2558f23
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Tue Nov 5 06:49:35 2013 +0100
+
+    CHANGES: snmpd: Use 0 for the ignored numvars argument to netsnmp_register_mib
+    
+    The numvars argument of netsnmp_register_mib is ignored if the var
+    argument is NULL. In order to unify this use of it with all other ones,
+    change it from 1 to 0
+
+commit b9933e6183b1715c90d7cf6dfac1891000796bce
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Fri Nov 22 23:04:08 2013 +0100
+
+    CHANGES: snmpd: Remove some unused includes
+
+commit a78307038bf0b4859e11bd86ca3049c339abe126
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Nov 23 09:49:01 2013 +0100
+
+    CHANGES: snmpd: Add a missing function declaration
+
+commit 823d51f79b84e13593e5b1ac9b407634c54346f4
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Oct 21 20:49:53 2013 +0200
+
+    Fix make install in man directory for Solaris caused by VPATH oddity.
+
+commit 940816e019171a0414ee00a46cda4ce60bc01f71
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Oct 5 11:05:12 2013 +0200
+
+    CHANGES: snmplib: PATCH: 1265: Fix a buffer overflow in dump_realloc_oid_to_inetaddress()
+
+commit 0992ecf8fc5d87837006d4bc3a8681e5736e3573
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Oct 17 07:16:23 2013 +0200
+
+    pass_persist: zap possible CR at end of line.
+
+commit e0280294e7e6bebd62fbab9928b1b5f01b735e72
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Oct 15 21:15:39 2013 +0200
+
+    Fix DISPLAY-HINT for negative values and hint "d-n".
+
+commit 4ebdf3fb0445f9067ecb38394c2df2bd3b738182
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Sep 30 06:54:28 2013 +0200
+
+    Properly handle the 'b' display hint.
+
+commit 435ee1f4023cb002245c3a56dbeaba37a3d3edbe
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sat Sep 28 14:26:10 2013 +0200
+
+    Patch a1259 (bug a2456): problems with ipCidrRouteTable on 64-bit bigendian machines. Thanks to Christopher Wu.
+
+commit 9a6f566392a3cf12dab488a76d69fc873dbec2ac
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Aug 25 10:18:53 2013 +0200
+
+    CHANGES: snmplib: Rename memdup() into netsnmp_memdup()
+    
+    Rename the function memdup() defined in libnetsnmp.so into
+    netsnmp_memdup(). This avoids conflicts with memdup() functions
+    defined in other libraries that define a function with the same
+    name. As an example, if WINS name resolution has been enabled via
+    /etc/nsswitch.conf then performing a host name lookup can trigger
+    a crash in the SAMBA WINS name lookup library because calls to
+    memdup() from that library get redirected to the incompatible
+    Net-SNMP memdup() function. See also
+    https://bugzilla.redhat.com/show_bug.cgi?id=1000780 for the details.
+    This patch intentionally changes the Net-SNMP ABI.
+
+commit b2725964bde921b6285e3a59a512552cae0a0ca5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Sep 21 19:49:58 2013 +0200
+
+    Revert "CHANGES: Win32: perl: BUG: 2488: Avoid "Free to wrong pool" error"
+    
+    This patch is not appropriate for the v5.4 branch.
+
+commit 6453717f6ac665bf532744a86cdb898aaf83d6bf
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Sep 21 19:34:25 2013 +0200
+
+    Add reproducer for bug 2488
+
+commit 0d0a4629702eb9f9fe9956c1bac4b445610ff3c7
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 31 17:21:22 2013 +0200
+
+    Simplify snmpTargetAddr_rowStatusCheck()
+
+commit 4b87e3cb4d3679ab60c353ba4ff301f6842b84bc
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Sep 21 16:37:09 2013 +0200
+
+    testing/fulltests/default/T068execfix_simple: Simplify
+
+commit 65c88e2ecf5de9365c83c46ef3bb4cd89cdc44e8
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Sep 15 11:11:43 2013 +0200
+
+    CHANGES: Win32: perl: BUG: 2488: Avoid "Free to wrong pool" error
+
+commit 1a4855da4b1dd693a2b0377b91e9c33e3c7f2a4d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Sep 21 17:11:45 2013 +0200
+
+    CHANGES: perl: BUG: 2402: Add support for SNMPv3 traps
+
+commit 3d0515693f6a0d29d39dd0c868d378c74bc4f87c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Sep 21 09:16:33 2013 +0200
+
+    testing/fulltests/default/T068execfix_simple: Port to MinGW and FreeBSD
+
+commit 5b6e431d9f663a3c327d71dac95392cfd86b3291
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Sep 21 09:03:59 2013 +0200
+
+    agent/mibgroup/ucd-snmp/extensible.c: Fix compiler warnings
+
+commit c85d64d54b06879a3a691dadffc03bfb1f59096d
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Tue Sep 17 06:37:18 2013 +0200
+
+    Only test the execfix configuration directive if it is enabled
+
+commit 5cbd54341a2a79bf8537377d11372483f08647ad
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Sep 14 14:28:21 2013 +0200
+
+    regression tests: Add a test for the execfix configuration directive
+
+commit 1c756349e4d31d39ec2fc53c6440ae53b3b03df0
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Sep 7 20:28:56 2013 +0200
+
+    snmpd: ucd-snmp: Fix a potential crash in fixExecError()
+    
+    Do not interpret a command specified via the execfix configuration
+    directive as a printf() format string.
+
+commit 7b82c61e753e157c4b8698219006f2f83df52801
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 31 16:51:15 2013 +0200
+
+    SNMP-TARGET-MIB: Eliminate two superfluous casts
+
+commit cc2fe6bde6a3c28b3c1ad165c9ba3fc1d583c253
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Aug 25 08:23:43 2013 +0200
+
+    IP-MIB: Fix Doxygen header of netsnmp_ipaddress_ipv4_prefix_len()
+
+commit 96302af7fc3108c208227432f0f0b75f3e7b906d
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Wed Aug 28 10:59:05 2013 +0200
+
+    Correct conversion factor from microseconds to centiseconds.
+
+commit ec96b35d5060c09b9f53d4dec73fb7965c2ac145
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Aug 19 22:11:36 2013 +0200
+
+    Fix netsnmp_ipaddress_ipv4_prefix_len to take an argument in network byte order as dokumentet
+
+commit 14f8d4ad6f06d09d87096dd68137a125a039c562
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Jun 29 17:42:54 2013 +0200
+
+    CHANGES: AIX: Make udp-mib build
+
+commit 38d77c7c20a3e7979c09c5144f86934ed46540dc
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Jun 29 17:39:38 2013 +0200
+
+    CHANGES: AIX: Make tcp-mib build
+
+commit 95ac190b526dba5205637411a892b52b9ed6b94c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Jul 21 17:16:42 2013 +0200
+
+    CHANGES: BUG: 2476: snmpd fails to start on AIX
+    
+    On an AIX system there is no <kvm.h> header file nor do the /dev/dmem
+    or /dev/drum devices exist and hence DMEM_LOC is not defined. Avoid
+    that init_kmem() fails in that case.
+
+commit 50481b769e29fc5ce6b1e40ce568185bb0898458
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Aug 16 07:22:02 2013 +0200
+
+    snmpd: Refactor init_kmem()
+    
+    This patch does not change any functionality.
+
+commit 390303059fbd98b1ee7621ddd4ad4c11d100fff9
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Jul 28 21:28:14 2013 +0200
+
+    Revert 78dac6e37943d1ad99841898806ea60b0eede636 and resolve a2478 in a way that avoids truncating snmpTargetAddrTimeout.
+
+commit e59d5db6d6e72d134591bbaaa6faa59b29338191
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Jul 28 21:17:58 2013 +0200
+
+    Check that the timeout value is in range.
+
+commit 279bab4db6f3b0dbee02974acd802d6e87f88e99
+Merge: 78dac6e ea39e36
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Jul 25 07:41:56 2013 -0700
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit ea39e3676665b7e8cc5dfeb5bbbcd0ad434ad912
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Thu Jul 18 01:36:26 2013 +0200
+
+    CHANGES: snmplib: Make the data argument to read_config_save_octet_string accept constant values
+
+commit 78dac6e37943d1ad99841898806ea60b0eede636
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 22 12:39:00 2013 -0700
+
+    fix bug number #a2478: fix mib representation of timeout values
+
+commit 9dbe12403ceaafe617f7d49993316a249fcbb99a
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Jul 11 20:13:36 2013 +0200
+
+    Fix a missing newfile in a debug message
+
+commit 2db5485fc1ccce39efa69a377bb8d6f6231eb0b2
+Author: Eric S. Raymond <esr@thyrsus.com>
+Date:   Fri Jun 21 10:47:32 2013 +0200
+
+    CHANGES: documentation: from "Eric S. Raymond": Correct man page markup problem
+    Ambiguous or invalid backslash.  This doesn't cause groff a problem.
+    but it confuses doclifter and may confuse older troff implementations.
+
+commit 931c87a05f5f66289613fed77ac78844b61cb79f
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed May 15 20:18:14 2013 +0200
+
+    BUG 2458: Fix missing initialization of auto_nlist structure (Thanks Ryan Steinmetz)
+
+commit 9104e2a3f195506a47733983d8cba38ed592a988
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed May 15 20:13:05 2013 +0200
+
+    PATCH 1253: Fix parsing of DEFVAL BITS (Thanks Mike)
+
+commit b94b734dd353bcf793c8b65a273a1387bfd256ea
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu May 2 22:12:11 2013 +0200
+
+    Darwin: support 64-bit counters for diskio table
+
+commit 27640fcfb20526bef2f6eb40c2a54566dfc6c4c6
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Apr 27 10:58:29 2013 +0200
+
+    CHANGES: snmpd: Correct the size of of the EXAMPLEIPADDRESS value on L64 hosts
+
+commit a488c9b6e810b7c56f7a47d084ef89696e9c354d
+Merge: db071d0 99ff953
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 22 22:31:39 2013 +0200
+
+    Merge remote branch 'origin/V5-4-patches' into V5-4-patches
+
+commit db071d0a6f487421769b69f22ccf09cc242d9454
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 22 22:23:52 2013 +0200
+
+    Only declare HRP_maxnames when needed
+
+commit faf00ce3b0feb4d37fabef6d4135e36803b00379
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 22 22:22:24 2013 +0200
+
+    ip.c: fix inconsistens declarations of ip_module_oid_len
+
+commit 99ff953673f73614463ace1210c4ac073a1f2a81
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 8 19:05:47 2013 +0200
+
+    snmpksm: fix some const cast warnings
+
+commit 0b6bfef2ca9ae9e1c2beafe700100fae5f6f4c1a
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Feb 23 11:20:23 2013 +0100
+
+    inet_ntop() / inet_pton(): Convert prototypes from K&R to ANSI C
+
+commit 6b5d784f4d6d000390014d120f15b937362f8c07
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 21 20:33:02 2013 +0100
+
+    Python bindings: Fix a recently introduced compiler warning
+
+commit 6d258efa2accadfccc50d86bd46379745449ca4a
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 21 15:27:19 2013 +0100
+
+    python/netsnmp/client_intf.c: Remove superfluous casts
+
+commit 2c2e1f416393d485f9ac90c87f72065c668b7321
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 21 15:48:34 2013 +0100
+
+    python/netsnmp/client_intf.c: Fix a compiler warning
+
+commit 1bc799de6cab010b25c0c4d3f5155b5fbaf527f0
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 21 20:05:14 2013 +0100
+
+    Python bindings: Fix the out-of-bounds write
+    
+    See also commit 234158b8e84cc204cbac96e6e9be6959635404b8
+
+commit 4f4eaeb920ad15c929c66782cc0a642912cabd06
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 17 12:24:26 2013 +0100
+
+    CHANGES: python: fixed IPADDRESS size on 64bit systems.
+
+commit 0bdd09889d0811f864df131b844f20b00392062b
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Feb 7 00:05:03 2013 +0100
+
+    snmp_client.c::netsnmp_query_walk: handle SNMPv2 exception results
+
+commit c0a6549597947f29c36efadb04927ff690189eba
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Jan 30 15:53:15 2013 +0100
+
+    RUNTESTS: don't trap on SIGCHLD. It confuses dash, mksh and maybe other shells.
+    (dash is /bin/sh on Ubuntu)
+
+commit 7a407ad34505ed4dbaa2e84e06a1dbf48c3c77e5
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Fri Jan 25 15:28:43 2013 +0100
+
+    snmpdf: Handle SNMP (v2c/v3) exceptions
+
+commit c739cb3875fb5d4cad4138661cc0a4171384c341
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Fri Jan 25 10:14:02 2013 +0100
+
+    Apply patch#1246: Fix passing a SET of a string to not cut it at
+    four characters to a pass/pass_persist helper.
+
+commit 9e0a0e35d8d1b36fa47cec938d6c874de0071bb6
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Jan 9 22:37:47 2013 +0000
+
+    CHANGES: python: PATCHES: 1239: Fix memory leak
+
+commit a32ca93a9b91674a8c1e89e1a383a76136b8ac38
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Jan 8 16:42:54 2013 +0000
+
+    CHANGES: snmpd: PATCHES: 1240: Fix deallocation of integer indexes
+
+commit 87681f0fb285a021636e06a6f2351d76409eebc8
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Jan 5 15:06:12 2013 +0100
+
+    Avoid using "local" since Solaris' /bin/sh does not understand it
+
+commit 59b4d40f3970ba82f3df2a399971254b04827443
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 4 18:00:53 2013 +0100
+
+    CHANGES: Windows: Make winExtDLL work on 64-bit Windows systems
+
+commit 39597106038f6e1c5ed49b3fce0021a6c59ec1fe
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 4 18:05:38 2013 +0100
+
+    winExtDLL: Add more debugging
+
+commit 85ce9062911d31b42e0c1e135abd3bda813e3003
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 4 18:02:30 2013 +0100
+
+    winExtDLL: Invoke SnmpExtensionClose() before unloading an extension agent
+
+commit 7e031229543579d37b006296e2f445482d0512cb
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Jan 5 13:04:02 2013 +0100
+
+    winExtDLL: Remove source file win32/MgmtApi-winExtDLL.h
+
+commit 9dfc44c91d7a29a4c43f779085dde34c5fe6d5ab
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Jan 3 10:30:27 2013 +0100
+
+    MinGW, test harness: Fix a log message
+
+commit 900aae8ea693fb840d57526fb671d215f865bedb
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jan 1 01:33:01 2013 -0800
+
+    ucd-snmp/dlmod: Fix an MSVC compiler warning
+
+commit 363e3fa1a43ca6223fe3b0808e66295b3d9386b8
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jan 1 01:27:42 2013 -0800
+
+    ucd-snmp/dlmod: Add dlmod.c to MSVC project
+
+commit e3542c04a84617857688ab8e8718cdc4c6a68cf5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jan 1 09:14:33 2013 +0100
+
+    ucd-snmp/dlmod: Remove more superfluous casts
+
+commit 1e3b0ae2b02cf1faccad4896bc3bdbea1db4a68f
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Dec 31 13:19:36 2012 +0100
+
+    CHANGES: Windows: Ported ucd-snmp/dlmod to MinGW / MSVC
+
+commit 986fb9b85e1383b81eaea40d2cb7c14492ddbdac
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Dec 31 12:32:56 2012 +0100
+
+    MinGW: Avoid confusion between MinGW's kill.exe and the SysInternals pskill.exe (backport commit 9b427b353f1ceb8fe87e6fc8ed3b6cfab3ce7f20)
+
+commit 798b73cf59e3687f65bd54a7a8ac29fe2498c69f
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Thu Dec 17 13:05:53 2009 +0000
+
+    Unbreak the MinGW build for the 5.4 branch - timeradd() is not ANSI C
+    
+    Remove DIFFTIMEVAL() because it's buggy: in "diff.tv_usec > 1000000L" the ">"
+    should have been ">=" instead.
+    
+    This is a partial backport of commit 858509c9e1998f6d26e90cb622e4b17eb2488a4f.
+
+commit 1e556cc7740c06367ff3361aa96bf45339c2e8a2
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Dec 30 17:59:44 2012 +0100
+
+    ucd-snmp/dlmod: Remove superfluous casts
+
+commit 51dfa6e67fd8487b8882c1632e811195d9496e41
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Dec 30 10:42:16 2012 +0100
+
+    ucd-snmp/dlmod: Mention library path in error messages
+
+commit 02a357d6b9538a48896368900bbb593dbb4dc374
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Dec 30 10:40:55 2012 +0100
+
+    ucd-snmp/dlmod: Remove a superfluous initializer
+
+commit ef748845b14c095049ed54803ea74cf457efd189
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Dec 30 09:57:38 2012 +0100
+
+    CHANGES: Windows: Fix environment separator in snmpd/snmptrapd/snmptranslate help text. Reported by Jason McCollum <jmccollum@comtechefdata.com>.
+
+commit bc0abae55dd867dbbf4e42e67a36234088c93771
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jan 2 09:25:33 2013 -0800
+
+    copyright update
+
+commit 007a7d24bc5f279392fd0ec4361477cd8f14e5af
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Dec 19 22:14:06 2012 +0100
+
+    git ignore tilde files
+
+commit 7edce0c311a7dd5428e0edb701dabe9dc79d0967
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Dec 15 12:40:10 2012 +0100
+
+    CHANGES: building: Make the -without options to rpmbuild work
+
+commit 430d10d296b8d8c98a3aafd27a8c6ff4f6408114
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Fri Dec 7 09:24:39 2012 +0100
+
+    Fix speling which has prevented ksm module from compiling for many years :-(
+    Also some fixes to support Heimdal Kerberos. This supports Free/NetBSD.
+
+commit 2e23ea0f293bb8e9ceaf5636db7b7d07f6d62c7a
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Nov 20 23:33:58 2012 +0100
+
+    Add missing ssIORawSent/received for Solaris.
+
+commit 59eebc41a9435811073fec50d76dd6aef9dd58a7
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Nov 20 23:32:53 2012 +0100
+
+    Add some error checking to gittools
+
+commit 80b18375826653626c2d70451c2b54a1c50a3ce6
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Nov 13 13:55:47 2012 +0100
+
+    Remember to init the systemstats provider
+
+commit 1898cfc71bdb3f4a1685c6d21b54dd1a3482591c
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Nov 12 15:48:15 2012 +0100
+
+    OpenBSD 5.2 support.
+
+commit ea8f74c81f82c105b9fc01965adce14b0d8186da
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Nov 12 15:46:34 2012 +0100
+
+    Fix NetBSD memory data typing
+
+commit aef76ca0cba2ca56f6aa1db5c5b58a54939f389b
+Author: qqshka <qqshka@users.sourceforge.net>
+Date:   Wed Oct 31 20:00:04 2012 +0100
+
+    AgentX, IPX: Restore default port (bug #3582283).
+    
+    This reverts commit 7b9e03441c3dc3a07670ed01f5d04791a82c750c.
+
+commit 4a6d0378a3916571ce7604c4a3d54a8c96a8f807
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Oct 28 09:54:12 2012 -0700
+
+    Windows: Visual Studio 6 build fix for strlcat()
+
+commit fa98b4cbd6dc15aa926166eef04d5bc8dfbaaad6
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Fri Oct 26 07:56:06 2012 +0200
+
+    Cope with additional statistics in /proc/net/sctp/snmp in RH6
+
+commit 21d5c6785e916b5101440ed1a4f71b41ba2eb809
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Oct 24 09:27:23 2012 +0200
+
+    Remember to free the description (if saved) during unload_all_mibs
+    (patch 3565922)
+
+commit 64c56f27c5ed432ce8de44e2579ca0c806a517ea
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Aug 22 17:45:19 2012 +0000
+
+    build.pl: Eliminate a temporary variable
+
+commit f40d440689067ef6c4da7ddadfb373a452197fbd
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Oct 22 19:47:06 2012 +0200
+
+    win32/Configure: Strip trailing whitespace
+
+commit d34e057779cb32e94324089dc4625638309cfe89
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Oct 22 18:36:59 2012 +0200
+
+    win32/build.pl: Strip trailing whitespace
+
+commit 8107a6352df2478660994ef103d52801a6607cc9
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Oct 22 17:03:47 2012 +0200
+
+    Fix speling errors
+
+commit 1a34d2249ef0d2215e5886f9b3c97ecfa7eb5190
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Oct 22 16:39:41 2012 +0200
+
+    Pick up ifDescr from ifXTable when available, and use that as the name.
+    Very useful if pci-utils were avalable when compiling the agent as the
+    name otherwise will be the very obscure chip name
+
+commit f67adf2a37a8c182eacbcfe52d5b789191a65929
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Oct 9 16:32:47 2012 -0700
+
+    remove release requirements
+
+commit 68aab572c2d2746b51a95eba110568c38b050808
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Sep 25 19:07:42 2012 -0700
+
+    Release Candidate for V5-7-patches
+
+commit d09d53a0fa6df63b21e6f12731bee51a3624e85e
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Sep 22 21:30:08 2012 +0200
+
+    CHANGES: snmplib: Do not crash on incomplete configuration tokens.
+
+commit 02dce6f43b99f85941627928c1a5022d6725d124
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Sep 22 21:28:51 2012 +0200
+
+    CHANGES: snmplib: Do not truncate single default transport domains
+
+commit 211e3c70625965441b2a029a6113802974673c43
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Sep 22 11:23:19 2012 +0200
+
+    CHANGES: snmplib: Do not crash from empty values in --token=value arguments
+
+commit af3d2d973b1e8e29d205d8a07acd82b1f854819e
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Sep 22 10:30:16 2012 +0200
+
+    CHANGES: snmplib: Add the symbol NETSNMP_PRIo to help in printing oid values.
+
+commit 0805420813de156c7fc5142534fb420a0fcc3572
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Sep 17 13:28:59 2012 -0700
+
+    fixes AT code on hpux 11i
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 07f914564e097224d677515c2f5fd1f3c0c9eb42
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Sat Sep 1 09:54:42 2012 -0700
+
+    Release Candidate for V5-7-patches
+
+commit 119b0d3cf12c97ca3c74d6d1e72319670a8378aa
+Author: Bill Fenner <fenner@users.sourceforge.net>
+Date:   Sat Sep 1 09:51:08 2012 -0700
+
+    CHANGES: libnetsnmp: PATCH 3560473: from fenner: Handle TimeTicks when pretty-printing OID
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 41d980c015564db7f22f763190f61ac0d56ba3b2
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Aug 24 14:35:53 2012 +0000
+
+    Windows: Unbreak DLL build
+
+commit 3358b65b11e2c0ee712f609f02071260f75f9bb3
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Sat Aug 11 11:39:38 2012 -0700
+
+    Release Candidate for V5-7-patches
+
+commit 0e3922ae21e4b7ec538867afd22ce74d741e0f1c
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Aug 8 22:17:34 2012 +0200
+
+    fix prototype for klookup
+
+commit ac062972c585174f95d7ba87aa5ec54c42fdec55
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Aug 8 22:00:26 2012 +0200
+
+    fix prototypes for klookup
+
+commit cd820949a1491af103a8555f6bdae04851f3d285
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Aug 8 16:16:43 2012 +0000
+
+    Undo build breakage caused by commit 37ba7e20a521fbf0458a0c77eea2e5e36bd7ec0a
+
+commit f143008ccc57ea10cbb88ab3554822b17b6270aa
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Aug 5 08:45:42 2012 +0000
+
+    Make get_exec_output() work on big endian systems.
+    
+    Undo API breakage introduced by commit 7374b84fe4c2ef8497fde3dae80a69aa89eba19c.
+
+commit 516b9f8275b8db03cdc41078e65c2170309a3f8b
+Author: Julien Pinon <jpinon@users.sourceforge.net>
+Date:   Tue Jul 31 13:25:31 2012 -0700
+
+    CHANGES: perl: PATCH 3412939: from jpinon: Repair tkmib
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 8f230f401c64d822883ac444624a2c2fd7128d8e
+Author: Harsha Shivanna <naanuhs@users.sourceforge.net>
+Date:   Tue Jul 31 13:22:11 2012 -0700
+
+    CHANGES: libnetsnmp: PATCH 3552745: from naanuhs: fix to support 32 chars for VACM names as per RFC-2575
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 37ba7e20a521fbf0458a0c77eea2e5e36bd7ec0a
+Author: Vincent Bernat <vbernat@users.sourceforge.net>
+Date:   Tue Jul 31 12:27:28 2012 -0700
+
+    CHANGES: agent: PATCH 3481686: from vbernat: Dont ping master agent unless there is no incoming traffic
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit c07b8d9b3770b615c8e162dbdf7643805f372d75
+Author: Mariusz Ceier <mceier@users.sourceforge.net>
+Date:   Mon Jul 30 10:18:42 2012 -0700
+
+    CHANGES: libnetsnmp: PATCH 3536692: from mceier: Fix for callback calling when unregistering config handler
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 5c2424f07d85c0c4f79d6c5faf64d7f3ee861726
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 30 10:08:42 2012 -0700
+
+    don't duplicate send_enterprise_trap_vars def
+
+commit 7374b84fe4c2ef8497fde3dae80a69aa89eba19c
+Author: Garrett Cooper <yaberauneya@users.sourceforge.net>
+Date:   Mon Jul 30 09:41:17 2012 -0700
+
+    CHANGES: freebsd: PATCH 3383970: from yaberauneya: Fix compile error on FreeBSD 9.x/POSIXify auto_nlist, etc
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 745465b385c3d9a4bc138ce3626fe2932cc5c0b1
+Merge: 670d96e 1221426
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Sun Jul 29 23:50:49 2012 -0700
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 670d96e786590fdd30a16a3300c0ed5bd6e53214
+Author: Mark Rusk <user_id=349895@users.sourceforge.net>
+Date:   Sun Jul 29 23:39:22 2012 -0700
+
+    CHANGES: agent: PATCH 3424933: from user_id=349895: Use NETSNMP_DS_AGENT_AGENTX_TIMEOUT for the default timeout
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit d783ad990e914c0ee1c98d0a93a429eb2b2f4997
+Author: Doug Manley <tekkamanendless@users.sourceforge.net>
+Date:   Sun Jul 29 23:25:40 2012 -0700
+
+    CHANGES: libnetsnmp: PATCH 3526599: from tekkamanendless: A buggy SNMPv3 agent can cause a net-snmp client to hang
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit e9851520c18d7ed172404a37dc0dc7a136bfaedd
+Author: Daniel Evers <daniel-evers@users.sourceforge.net>
+Date:   Sun Jul 29 23:14:19 2012 -0700
+
+    CHANGES: libnetsnmp: PATCH 3548257: from daniel-evers: fix for recursive pthread mutexes
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 1221426abad15b9b2fcee8f1e32ab52ef2692952
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jul 27 14:18:24 2012 +0100
+
+    CHANGES: perl: PATCHES: 3529541: Don't refer to internal 'my' variables from external scripts
+    
+    Fix provided by Lezz Giles
+
+commit 99b353f7253a5bb38b86f31c2708e16b34a46ce7
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jul 27 12:50:51 2012 +0100
+
+    Additional patch from Patch ID #3543000
+
+commit d0e03fe4a236945daf42af7a47094e686f9bdb9e
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jul 27 12:41:02 2012 +0100
+
+    CHANGES: snmpd: PATCHES: 3543000: Various fixes to Rmon code
+    Supplied by Patrick Ritter
+
+commit 6632a2b9b9fad1a0b0d6baedf2a2b391f5d4e914
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 26 14:39:42 2012 +0100
+
+    CHANGES: perl: BUG: 3517030: Ensure large tables are walked properly
+
+commit b8d16604dbb2f80ebe2852322aa83361a0323796
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 26 14:19:07 2012 +0100
+
+    CHANGES: apps: BUG: 3529768: Be more careful when stripping off numeric suffixes
+
+commit 0b3ad44ec4c1b9f41dc3ef70e6a38a53ef268ade
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 26 13:34:10 2012 +0100
+
+    Fix comments describing FreeBSD relationships
+
+commit 4258d852ca7b6aeae93ad73064d43aa807eb6104
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 26 13:16:20 2012 +0100
+
+    CHANGES: doc: BUG: 3535269: Document use of [snmp] for client-side tools.
+
+commit 26ed40cbd07cf271a9cfc4517d964774712ad77c
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 26 12:57:56 2012 +0100
+
+    Support local rollup of patches without first synchronising with extenal repo.
+
+commit 904c442d60c5b99aacd7f60307c28684efae854c
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 26 12:53:37 2012 +0100
+
+    CHANGES: python: BUG: 3535967: Fix memory leak - snmp_{sess_}error allocates the output buffer
+
+commit 597ecda68ee2b580b666288977b04aa133207517
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 26 12:17:14 2012 +0100
+
+    CHANGES: BUG: 3540621: dist: Add missing Provides: to net-snmp-perlmods RPM spec
+
+commit 43d5ba224c3f29fd8e7fd1d060a17045aad7eff0
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 26 11:25:43 2012 +0100
+
+    CHANGES: perl: BUG: 3541012: Fix handling of gettable columns
+
+commit bc293acad8d3487cddef3c70cea74368f34d9354
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 26 11:20:20 2012 +0100
+
+    CHANGES: snmpd: BUG: 3543864: Remove extraneous function type
+    (and fix a related typo)
+
+commit dceeacc998fe2322882e7eedec0a71a79dc494ab
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Jul 24 09:00:23 2012 +0100
+
+    Don't be surprised if there are no changes to various files
+
+commit 2f9ede419f40e848a2425389288cac0e2331b992
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Jul 19 17:10:52 2012 +0100
+
+    Fix example 'rsync' command for full releases
+
+commit 976696a128e57b512bf7ad400d002368b4a9a871
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Jul 18 14:34:31 2012 +0100
+
+    V5-6-patches out of Release Candidate
+
+commit 42b5afb3cd6d06adb426f1dbaa98358f2b2e8a53
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Jul 18 10:46:47 2012 +0100
+
+    V5-5-patches out of Release Candidate
+
+commit 07d825e8bb35eea9ac6b1cb82cbb234fe66b1ab6
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Jul 18 09:51:32 2012 +0100
+
+    Add missing return type in function declaration
+
+commit 17277689b629f4586d5d714d87ce6bc11f887668
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jul 11 14:55:38 2012 -0700
+
+    don't use --rebase
+
+commit 5206d25d4cb94d4b0dd331a5a4113d4d87782c42
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 2 12:14:39 2012 -0700
+
+    better description of --disable-set-support
+
+commit f92853281477ee724a51a9967f37d3f1dd1b0f7e
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 2 12:09:50 2012 -0700
+
+    remove duplicate definitions causing a problem
+
+commit 5be27368751691fc1ab55fe62b4106d8d99b8704
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 2 12:06:58 2012 -0700
+
+    after pulling all the branches, switch back to the initial one
+
+commit e72e205fdcef787ef840c8c928ed27351a69544b
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 13:58:07 2012 +0100
+
+    Release Candidate for V5-6-patches
+
+commit fe107794e7400d239e8af3da8b4a3fbef06b5da9
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 13:28:37 2012 +0100
+
+    Release Candidate for V5-5-patches
+
+commit 1e3bb6060be6156d3ff316c5a7e4fd7f05e37cff
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Jun 22 12:11:56 2012 +0100
+
+    NEWS: snmpd: BUG: 3532090: Fix high ifIndex values crashing hrDeviceDescr
+
+commit d813ce2eeefc68229cfcaf20603244cdd6d09d3c
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 14:07:52 2012 +0100
+
+    Fix dist/release format
+
+commit 131429e7062fbaa65b82affed1fb92df2c0cc813
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 13:38:38 2012 +0100
+
+    Release Candidate for V5-6-patches
+
+commit 1c8110b33b8105ca6190945a35fe7ae903252d68
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 13:21:38 2012 +0100
+
+    Avoid perl versioning problems when setting up the build environment
+
+commit 508ece16e6f6f49562da204792ae0644269994d1
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 13:20:58 2012 +0100
+
+    Fix handling of dist/release merge
+
+commit 3f2111de6733a04e12d910d306a34d671e008762
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu May 31 10:46:11 2012 +0100
+
+    Release Candidate for V5-5-patches
+
+commit ccf8ff2c4db60122d41302e4aeb700e0b868105f
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 28 10:18:43 2012 +0100
+
+    CHANGES: snmplib: PATCHES: 3526599: Don't hang on retried failing SNMPv3 responses
+
+commit 1fbf33711a19eac9739ad23f6f6251eacc41f1c4
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue May 22 14:54:45 2012 +0100
+
+    CHANGES: Linux: PATCH: 3525998: Don't use an uninitialised value in error message
+
+commit 32c1686b67dc85c4a189576363065609dfed5e61
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue May 22 14:52:56 2012 +0100
+
+    Attempt to mark release-candidate branches as such.
+    Omit final-release-only steps when preparing preN/rcN releases
+    (Relies on a tweak to the Makerelease perl modules)
+
+commit 4c5633f1603e4bd03ed05c37d782ec8911759c47
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Mon May 14 11:40:06 2012 -0400
+
+    NEWS: snmp: BUG: 3526549: CVE-2012-2141 Array index error leading to crash
+
+commit 91350092c46e66d06d74143f4816473db4d25160
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 7 19:56:33 2012 +0100
+
+    Mark version-specific changes _before_ pushing to central repository
+
+commit eba86b6f7aff261ee0e61334df70de7156e5c3cb
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon May 7 17:01:03 2012 +0100
+
+    When building a new release, the installed version of the perl
+    modules may well be different to the version being built.
+    That should not break the build.
+
+commit 5c0f64d6db2b593f7cc0ed2d4f55b7c592b774a8
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 23 22:25:15 2012 +0200
+
+    Only output cpu warnings once.
+
+commit ee58e4827b9fa16e6635ca003e8a4f11dcb5fb7a
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 23 22:17:42 2012 +0200
+
+    Fix speling in errormessage.
+
+commit 930838224f781696bd35225f22569347416f1b16
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Apr 23 22:10:15 2012 +0200
+
+    Check need for -lm to use round/exp
+
+commit 137fe582d6cc5611430dab46ef144efd84cfc803
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Fri Apr 6 20:46:56 2012 +0100
+
+    Revert commit 1f4a829b18275e4956ca91e5ec370df015f06133
+    (snmp_store_needed() API is not available in 5.[45].x)
+
+commit 7e95d80b698051259645c074a53ffd264a6fa916
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 16:06:56 2012 +0100
+
+    FreeBSD-9: Fix for 'const'ifyed nlist arguments
+    Backport of ed65eca6e7f9cfa7380a78d56c01ed314745b169 from V5-6-patches
+
+commit 1a9b7b7c02e2deefe994d595a7cc1dd2ffbeee1d
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 15:51:20 2012 +0100
+
+    Fix compilation on FreeBSD 9.x with 'recent' header shuffling
+    Backport of c53d8c3525f590f2213d35b0da94123862f3e366 from V5-5-patches
+    (Patch #3363308 - omitting tweaks to configure)
+
+commit 3d9ddb41e263bc1a78f9f9440b8d4ad4f86c82e1
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 10:36:18 2012 +0100
+
+    Fix typo
+    Backport of 5b702b024b60176d7f5699b92e55da50a8deae71 from V5-6-patches
+
+commit adf74bf753d3970357afd633803256241d9c7b87
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Apr 2 08:20:46 2012 +0100
+
+    Fix IPv6 TCP & UDP tables, *BSD support (including OpenBSD)
+    Backport of commits 5cd1573625471c0583e9087aec6802b77157d5a2
+      and 50d73f0d56fe22c590530b3e305d41dcdac3ce00 from V5-6-patches
+
+commit 9bdbcca122c37da304fc6aa6939729475f90f5fd
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Mar 28 09:30:49 2012 +0100
+
+    Doxygen-style documentation fixes (back-port of GIT commit c09903a42e9d97331fd9e48ee831a85afdf9c70a)
+
+commit 1f4a829b18275e4956ca91e5ec370df015f06133
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Mar 27 21:41:24 2012 +0100
+
+    CHANGES: snmpd: PATCHES: 3495697: Store persistent snmpTarget table changes
+
+commit 1f75f377d0db01754c0c161dc44373081beef520
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Mar 27 21:14:06 2012 +0100
+
+    CHANGES: FreeBSD: PATCHES: 3489387: Install FreeBSD 10 header file (plus other missing versions)
+
+commit 3d72c9e78f2ad817c9d1d82977327bbb20d63ab9
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Mar 27 21:06:31 2012 +0100
+
+    CHANGES: snmpd: PATCH: 3487867: Don't skip missing ifXTable entries (ifConnectorPresent FALSE)
+
+commit 37d2770cf50c98023eeba90e25d372bff7316ada
+Author: Niels Baggesen <nba@user.sourceforge.net>
+Date:   Sat Mar 24 15:06:40 2012 +0100
+
+    Fix TCP state values for DragonFly
+
+commit 86a948d8691e881d55591dcabddc2739ce72b30e
+Author: Niels Baggesen <nba@nba-linux.sb.statsbiblioteket.dk>
+Date:   Sat Mar 24 15:01:37 2012 +0100
+
+    Properly find pass helpers for testing.
+
+commit 5b38f062b99b6ef36708e2c7de4965a3192612e9
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Mar 21 18:34:48 2012 +0100
+
+    For safety, sizeof the right variable in memcpy
+
+commit 8327565e823270d10a4504568edbe5b5ae323a55
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Mar 21 18:31:54 2012 +0100
+
+    Clean up variables for OpenBSD/NetBSD
+
+commit dbb4573b69fae85cdc931b2892b5ce4e5b16b321
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Mar 21 18:23:36 2012 +0100
+
+    Require kernel_netbsd for NetBSD6
+
+commit f11681f15aad7d9a52fa29812ecbb507f1b7fe24
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Mar 21 12:36:38 2012 +0000
+
+    Check for old tarballs (and unpacked distributions) before starting.
+    These can confuse steps such as "make dependcheck", that do a 'find'
+    on the current tree, and would descend into such unpacked source trees.
+
+commit 470dcd4b6c3ff11ff0a3532a7340a56cffd69098
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Mar 21 12:32:13 2012 +0000
+
+    Don't run "make docs; make mancp" if there's no Makefile present
+
+commit c9ac420343e16df2b7065f5bf2790df44e247fba
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Mar 20 10:26:10 2012 +0000
+
+    Allow distribution as part of normal Net-SNMP packages.
+
+commit bdccc875710295aacf50f71eb1c1d2ee97f336fe
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Fri Mar 16 20:10:58 2012 +0100
+
+    Do not declare the local variables for opaque_special_types unless that option is set.
+
+commit b80a67da052adca1b5a644db83a782e15c2237c3
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Fri Mar 16 19:50:03 2012 +0100
+
+    Check that the data exist before trying to read it
+
+commit aaedd59cc2da701527dc2d261d4e9f85f16e7504
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Mar 11 20:57:38 2012 +0100
+
+    Allow make test where the source path contains the string Net-SNMP to succeed.
+
+commit abf8ceeaea1617c4c0846699f63ed89d5731e672
+Merge: 28f6226 ce85832
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Mar 12 08:21:23 2012 +0000
+
+    Merge remote branch 'origin/V5-4-patches' into V5-4-patches
+
+commit ce85832932ccd916c42319114c40885a466a9d0e
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Mar 5 20:56:40 2012 +0100
+
+    More fixes for Solaris sh
+
+commit 0dd1e54557d1ba498b55d017b0a93e8ccf9bd522
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Mar 5 15:08:26 2012 +0100
+
+    CHANGES: snmpd: UDP-MIB: Report the proper address in udpLocalAddress instead of 0.0.0.0. Makes test T160snmpnetstat pass again. Fixes a bug introduced in commit c76fb96f65e33ba2fd212a921e8c386155ee5c7a.
+
+commit 518917e9f39f7a9d3c3bf3a865e8ac0e3026d600
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Mar 5 14:04:54 2012 +0100
+
+    snmplib/snmpUDPDomain.c: Fix source code indentation
+
+commit 2651909ccceabfcfadaf942c02450e28fe837dc9
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Tue Nov 9 12:04:04 2010 +0000
+
+    Passes now on MinGW too.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@19653 06827809-a52a-0410-b366-d66718629ded
+
+commit 6e74d64f85a59d50e461db4c34ac76f9de468bfb
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Mar 5 09:22:31 2012 +0100
+
+    testing/eval_tools.sh: Avoid using grep options -q and -w because grep in Solaris' default path doesn't understand these options.
+
+commit 10f566f4d4cbb3e205023c23669289e4bfd089cb
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Mar 5 10:47:39 2012 +0100
+
+    perl/SNMP/SNMP.xs: Fix a compiler warning
+
+commit 28f6226f2e228b8ca248489735f86502b2cce0a1
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Mar 5 09:06:52 2012 +0000
+
+    Mark the changes make as part of the release process as specific to
+    the particular branch being released.  Version tags, changelog entries
+    and the like shouldn't propagate to later branches.
+
+commit 1fa1fee3693f67b820223806b3d73afd4c50ec18
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Fri Mar 2 01:37:20 2012 +0100
+
+    Silence a clang warning.
+
+commit d515e2a6e4c2a1c4d84734cc7b2d0b2fc5a894ad
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Feb 28 15:56:21 2012 +0000
+
+    CHANGES: snmpd: PATCHES: 3487919: Fix compilation when caching is disabled
+
+commit af8368ed8898a78d0868b47af46bc9db07d1c764
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Feb 28 15:50:56 2012 +0000
+
+    CHANGES: snmplib: PATCHES: 3414773: Encode integer value using ASN_INTEGER
+
+commit 19e2715807fe06fd0baedf88165011aee933e755
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Feb 28 14:05:34 2012 +0000
+
+    CHANGES: man: BUGS: 3490708: Clarify use of common command-line options
+
+commit c88d403547562fb2c6be566429b53b49bd86aa4f
+Merge: 2b7f134 01c930e
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Feb 27 10:15:42 2012 -0800
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 01c930edcc25700d6b5fb0376f55a26425e13fb0
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Feb 27 15:17:22 2012 +0000
+
+    Omit SET-related code when compiling with --disable-set-support
+    (inspired by patch #3424930)
+
+commit 2b7f13495228635d816e58b2174dc124dd0cf39f
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Feb 24 07:43:22 2012 -0800
+
+    set MERGE_AUTOEDIT before merging to avoid the future git 1.7.10 forced msg
+
+commit e1b910b0be9343586ae9edba6f46040af315fcdd
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 23 10:27:54 2012 +0100
+
+    CHANGES: snmpd: init_agent() + init_kmem(): Return an error value instead of invoking exit() if access to kernel virtual memory is denied
+
+commit 463eed2120f9d191bc22673496a49e8174664e4b
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 23 10:03:31 2012 +0100
+
+    Remove obsolete symbol NETSNMP_EXIT_ON_BAD_KLREAD
+
+commit aa766d196e5287f6ca79b58a345b024260aba354
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Feb 20 17:07:13 2012 +0100
+
+    IF-MIB: do not trigger undefined behavior (>> 32 of a 32-bit variable) when updating a counter and ifi_ipackets is a 32-bit variable
+
+commit c3fb6dd9e6b99e9542493188987871fc5017cb3c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 23 09:45:45 2012 +0100
+
+    Fix a compiler warning on systems where mode_t is unsigned
+
+commit a6db239945e195de5a90fa183700b27a6ecb28d3
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Feb 7 00:11:14 2012 +0100
+
+    Fix possible memory leak from recent declarations patch
+
+commit 0fbbb9a9e2906a7af956957061d485874462aea9
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Feb 6 20:43:04 2012 +0100
+
+    Do not mix declarations and statements
+
+commit f308d5bafb05d78ed4030c4ecff324b6cbda680f
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Feb 6 15:25:30 2012 +0100
+
+    Fix two compiler warnings in agent/mibgroup/disman/ping/pingCtlTable.c
+
+commit 910d7b0d99183609b9529b04c3f29330eb661021
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Feb 6 14:38:12 2012 +0100
+
+    Replace netsnmp_timeval_uptime() by netsnmp_get_agent_uptime()
+
+commit 43a83f6c6a96cc2316b70eecacf127eb6913c7a7
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Feb 6 11:19:15 2012 +0100
+
+    Use the assignment operator instead of memcpy() for copying struct timeval
+
+commit 881de6ab7355277a5c116a008fbe513293b05039
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Feb 3 10:08:21 2012 +0100
+
+    Fix compiler warnings triggered by the Rmon MIB implementation
+
+commit 4629933c0d3b3f9f4ba583534f79a37fb9633817
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 2 20:05:31 2012 +0000
+
+    More compiler warning fixes
+
+commit e9b5a3dee6f9afab8b90a29392040632b075ad7a
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 2 16:56:55 2012 +0100
+
+    Use SNMP_MIN() instead of min()
+
+commit 00fd62720ec454f5a690de4feba08223cfb2c3f8
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 2 14:48:44 2012 +0100
+
+    CHANGES: snmptrapd: Avoid crash during shutdown due to invoking perl_destruct(NULL)
+
+commit d9e229d81abeaf191ef2ccb077842885c230d622
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 2 14:47:41 2012 +0100
+
+    Remove a superfluous declaration
+
+commit 1e2e2af6cae830f381e87a244d029eb86bf3fcce
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 2 13:20:37 2012 +0100
+
+    perl/SNMP/examples/pingmib.pl: Add error checking
+
+commit 241a141e31f1684fc6cf70cc4a00cce636fd3526
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 2 11:28:37 2012 +0100
+
+    Make configure-time EVP_MD_CTX_create() detection work on the 5.4 branch.
+    
+    See also commit 46eac02e9a27bf4f3068e795cab891f05a848870.
+
+commit 6d9d14feaaa2d0fec68b4d158944d32cb04ff1bc
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 2 11:12:00 2012 +0100
+
+    Revert the changes that break the build on the 5.4 branch from commit dbb8795a7df595f0603f2ec61704799f4c482667.
+
+commit 8abe49e30c97c8983e83b45a35c716fe91f66bea
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Feb 1 11:56:58 2012 +0100
+
+    Fix several compiler warnings in the DISMAN MIB implementations.
+
+commit f9fb0a533375e14dc370025a0b2fbc761bf27be6
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 2 09:56:02 2012 +0100
+
+    Revert "HOST-RESOURCES_MIB: fix a compiler warning" because it's wrong.
+    
+    This reverts commit aa6b79bc124a7b7a885d7e5035ab06aa3ecef613.
+
+commit ca4a4fe25efd2714f8f1961b97856616563f42c9
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 2 10:21:49 2012 +0100
+
+    .gitignore: Add python/build
+
+commit 3a6e7e6e076736ec1b62d8ff04e2517e6d2b3019
+Merge: 3c3eeae aa6b79b
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Fri Jan 20 16:21:07 2012 +0100
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 3c3eeae80d796f27597c901e7ff2046c769ef4b8
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Fri Jan 20 15:08:09 2012 +0100
+
+    Mark rowreq_ctx as freed so next iteration allocates new one instead of reusing the freed one.
+
+commit af9abd53c2337c90a691a7b044ff3f97c1003161
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Fri Jan 20 15:05:10 2012 +0100
+
+    Don't touch reginfo when registration fails - it has been already freed.
+
+commit cf9465f54181e62e21a9b10219131107a3d2ebf6
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Fri Jan 20 15:04:06 2012 +0100
+
+    Don't touch reginfo when registration fails - it has been already freed.
+
+commit 7871f2b09b8b52f34a9e57784266459053165bcb
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Fri Jan 20 15:02:50 2012 +0100
+
+    Don't touch reginfo when registration fails - it has been already freed.
+
+commit 7a37f33d310c9598607bc323d9bdbf91aaf72c95
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Fri Jan 20 15:00:51 2012 +0100
+
+    Don't touch reginfo when registration fails - it has been already freed.
+
+commit 3e45f7026249e45350edaac85337423aa0e95d8b
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Fri Jan 20 14:13:18 2012 +0100
+
+    Revert "Fix format specifiers to avoid warnings" - there is no NETSNMP_PRIo in V5-4 or V5-5 branches
+    
+    This reverts commit 390c0114c8ec0bdb27b08b6f74e3f6ef3a62981b.
+
+commit aa6b79bc124a7b7a885d7e5035ab06aa3ecef613
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 20 09:20:31 2012 +0100
+
+    HOST-RESOURCES_MIB: fix a compiler warning
+
+commit 3a76b43e11fffada632fccb848ab500e876ad48b
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 18 16:21:05 2012 +0100
+
+    CHANGES: python: Avoid that an SNMP set with UseEnums enabled causes a segmentation fault
+
+commit 84dec9fa92b0aa2d58eb7020330f4f98e5154321
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 18 14:38:21 2012 +0100
+
+    python/netsnmp/client_intf.c: Fix most compiler warnings
+
+commit 7e21413ca6f2efd7a3afb62c62b644881b8bd1e7
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 19 13:46:30 2012 +0100
+
+    Properly allocate and free engineID.
+
+commit 536bc57556c3141561ea4a194810b16290a691ee
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 19 13:15:47 2012 +0100
+
+    Added check if the function actually does something.
+
+commit a0777d307dbcaf219ee0184a0fbab9d4e5d6aa0b
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 19 13:01:45 2012 +0100
+
+    Free previously allocated memory on errors.
+
+commit 8b97a71c8e7959428eb4d4e8d90e9096d43ff09f
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 19 12:57:26 2012 +0100
+
+    Free previously allocated memory on errors.
+
+commit 2c1507c22030549ae660c0e211fbdc5c75ec5c57
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 19 12:53:47 2012 +0100
+
+    Free previously allocated memory on errors.
+
+commit 65f2b7bcd4fe03906aa1a115ab60a89b8ae933d5
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 19 12:51:36 2012 +0100
+
+    Close open files on error.
+
+commit 0e52e4f66d44766bea37473556c78e5219b95461
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 18 15:45:33 2012 +0100
+
+    Free previously allocated memory on errors.
+
+commit 748da84b1fd654e338bc701e8f9e5da229187f1c
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 18 15:32:04 2012 +0100
+
+    Free previously allocated memory on errors.
+
+commit eb217146fd54036ea4202bfef78bbf774d7e382d
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 18 15:23:10 2012 +0100
+
+    Free previously allocated memory on errors.
+
+commit d9d938d3018c27f53277bc5e59578500490c1d09
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 18 15:16:38 2012 +0100
+
+    Close open file on error.
+
+commit a00f3d461121b545aed72ac12b2438791dcfc4ba
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 18 14:58:39 2012 +0100
+
+    Free previously allocated memory on errors.
+
+commit da2d6a7028a13b9edf3a5c84314d0f1feef76714
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 16:44:56 2012 +0100
+
+    Prevent dereferencing NULL.
+
+commit f88054a9b69b6de274f7a14a59b47323e5e4e4c6
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 16:37:35 2012 +0100
+
+    Don't dereference context if it's NULL.
+
+commit 5e95ca6790076b788072a801ee7c82969d995bcb
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 16:17:09 2012 +0100
+
+    Prevent dereferencing NULL when a transport does not have f_fmtaddr.
+
+commit eed6f5f9b9ae54d2ceab67ad85adde1f6a8a21d5
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 16:13:13 2012 +0100
+
+    Prevent dereferencing NULL.
+
+commit 41cde68b5fa4b38d81450cf91e082cdfa825e7cf
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 16:10:10 2012 +0100
+
+    Check if a registration was really found.
+
+commit 5b72a40853876a186efcc0090a4e32c235b9c05f
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 16:03:58 2012 +0100
+
+    Don't dereference NULL when difflen is SMUX_MAX_PRIORITY (which is highly unlikely, but...)
+
+commit fa6a912e41c5d0fd2a636894e86b6426c07375ab
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 15:37:44 2012 +0100
+
+    Check for missing value in setEvent.
+
+commit 410b71da425389fecc25d14f49f23753581576ad
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 15:28:41 2012 +0100
+
+    Dereference ereg only if it is not NULL.
+
+commit f33d33615d6d85d0073726473c4146cbcdf11ced
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 14:30:07 2012 +0100
+
+    Fixed sigsegv when empty config line is parsed.
+
+commit b5df1eeb47ed3559b6f4d9ecccdb242126e6c992
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 14:11:58 2012 +0100
+
+    Fixed (highly theoretical) sigsegv when sp->securityEngineID is NULL.
+
+commit 6feed629a71899c113096959d8549dc1201e8f9a
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 13:43:37 2012 +0100
+
+    Added NULL and len check just in case someone provides value = NULL and nozero len (-> NULL is then dereferenced).
+
+commit 355c5ab264af2a6020a1d8a923f80f11b942295e
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 13:36:41 2012 +0100
+
+    Extend the NULL check, i.e. return if there is nothing to remove.
+
+commit 40feba8d7a98f15ec53e8ae614fc875291927f84
+Merge: c1526fc ddd7948
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 17 10:21:58 2012 +0100
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit ddd7948acad938cd42974505ddca4f0372116709
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jan 16 11:11:29 2012 -0800
+
+    update sparta's copyright
+
+commit 41256086a7a5041453419cfd6e562c7b55c56b0a
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jan 16 10:32:04 2012 -0800
+
+    pulled full copy of extractnews from master
+
+commit 625a70dbdfd9902da79efa293fe6d2ac8ccf2b2e
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jan 16 10:24:19 2012 -0800
+
+    update to change to the newer log generating/parsing
+
+commit 62e32b13089b29edcf276f615da67e4508fe7bb5
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jan 16 09:29:42 2012 -0800
+
+    conflicting merge from master for extractnews
+
+commit 70084da61d2bcbd2cf1ed81bdc3bf6794c2affb6
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 13 11:49:16 2012 +0100
+
+    CHANGES: snmpd: DISMAN-SCHEDULER-MIB: Handle 32-character schedContextName values correctly.
+    
+    See also commit b3c4982542e0ab151fb3884754cdfbcb472da52d.
+
+commit c1526fccc0474c1db18caa9dbb833853cddde3cc
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 12 15:13:21 2012 +0100
+
+    Fixed a typo.
+
+commit a27aa19df283156c032c81eaee5e115859d38c17
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 12 15:11:32 2012 +0100
+
+    Don't replace 'rc' variable, it's value is needed outside the loop.
+
+commit 985dff2b0876d9483c414fccea3ef6bc63e14561
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 12 15:01:32 2012 +0100
+
+    Removed duplicate code.
+
+commit 2fd7818318e7a5dfe98f52ccf750c2a63e825ded
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 12 15:00:22 2012 +0100
+
+    Removed duplicate code.
+
+commit 15f21130ba33dc9afd164e52dfd74c9cec0e9232
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 12 14:58:14 2012 +0100
+
+    Removed duplicate code.
+
+commit ebd92e19b10c0a38e17cde407864b45c26e17327
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 12 14:07:43 2012 +0100
+
+    Removed unnecessary if (value) check - value is checked few lines before.
+
+commit acdceb50ea66d6b323c74ee021fb77e810e4e7af
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 12 13:43:19 2012 +0100
+
+    Prevent memory leak when malloc fails.
+
+commit 17053e34cfe9a8ab395fb50f5c3f1dafc7247aeb
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Jan 12 13:32:57 2012 +0100
+
+    Fixed double fclose().
+    Linux man page for fclose(3) says: In either case any further access (including another call to fclose()) to the stream results in undefined behavior.
+
+commit a6641edb9cb74fc2236b42ce5554fc3329956552
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 11 15:22:34 2012 +0100
+
+    MinGW: Skip test T065 if not started from inside an MSYS shell
+
+commit a883ef1982f301b1485d227301674927330f5b67
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 11 15:14:53 2012 +0100
+
+    Moved debug oputput before return.
+
+commit 3b686566296dd87bc42b7f1169daacdb3c45cc58
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Mon Oct 18 06:25:56 2010 +0000
+
+    Win32: builds again without warnings with MSVC 6.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/branches/V5-6-patches@19489 06827809-a52a-0410-b366-d66718629ded
+
+commit f3a7d1b09609dad649f58bbdb5b7e10d39b398c1
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Sun Oct 17 11:04:06 2010 +0000
+
+    Follow-up for r19476: fixed a typo.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/branches/V5-6-patches@19478 06827809-a52a-0410-b366-d66718629ded
+
+commit 2de73bd365a381b9c353ca5230769eefb1ac71ed
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 11 11:42:42 2012 +0100
+
+    local/passtest: Remove an incorrect PATH= statement
+
+commit 699513f1238e0adce1f1cec98e0d147293fc5047
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Sun Oct 17 09:25:51 2010 +0000
+
+    NETSNMP_REMOVE_CONST()-related cleanup.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/branches/V5-6-patches@19476 06827809-a52a-0410-b366-d66718629ded
+
+commit 6358dee72fb347e2600a0a7bd21f23270d3a00f6
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 11 10:58:15 2012 +0100
+
+    agent/mibgroup/ucd-snmp/versioninfo.c: Add a comment
+
+commit feb3af28dcae22015ae865a2e5dd8c416e9991d8
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 11 10:02:08 2012 +0100
+
+    Replace strncpy()/strncat() by strlcpy()/strlcat()
+
+commit b7e1aa255bae4a3453f9eca644a876634351f11d
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Sat Mar 20 19:36:28 2010 +0000
+
+    CHANGES: libsnmp: changed the type of the fourth argument of netsnmp_set_row_column() from const char* to const void* such that no cast is necessary when passing another datatype then char* or const char*.
+    CHANGES: Win32: changed in_addr_t from u_int to u_long such that it matches the datatype of sockaddr_in::sin_addr.
+    Also, fixed several compiler warnings (mostly char * <> u_char * mismatches) and removed some casts.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@18345 06827809-a52a-0410-b366-d66718629ded
+    
+    Conflicts:
+    	agent/agent_registry.c
+    	agent/mibgroup/ip-mib/data_access/ipaddress_ioctl.c
+    	agent/mibgroup/mibII/interfaces.c
+    	agent/mibgroup/ucd-snmp/disk.c
+    	apps/snmptrapd.c
+    	snmplib/snmpIPv6BaseDomain.c
+    	snmplib/snmpUDPIPv6Domain.c
+    	snmplib/system.c
+
+commit f47a3752849db075e6f2053b8595b7b792fb6462
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Fri Oct 15 10:56:09 2010 +0000
+
+    CHANGES: Win32: building: Builds now correctly with a 64-bit compiler.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@19458 06827809-a52a-0410-b366-d66718629ded
+
+commit 02b6056df95da8b673034e39c2c7c386ed0f369c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jan 10 11:44:53 2012 +0100
+
+    Fix a compiler warning about casting away const
+
+commit a19865832fc77f4c048144d91a431b1e94d329f2
+Author: Magnus Fromreide <magfr@users.sourceforge.net>
+Date:   Wed Oct 14 23:12:05 2009 +0000
+
+    CHANGES: apps, snmplib: PATCH: 2835577: identified by "Bart Van Assche": Replace SNMP_ZERO of arrays with a memset.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@17797 06827809-a52a-0410-b366-d66718629ded
+
+commit 67a3e2eccb95f9c9d0809efcbddcd866ee3062d5
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Wed Jan 6 14:27:15 2010 +0000
+
+    Fixed a compiler warning about discarding the const qualifier.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@17970 06827809-a52a-0410-b366-d66718629ded
+
+commit 3dcde2e8a595a527f06142c3b852de8433a1cf28
+Author: Magnus Fromreide <magfr@users.sourceforge.net>
+Date:   Sun Jan 24 14:27:55 2010 +0000
+
+    CHANGES: snmplib: Prevent gcc ped-warning for NETSNMP_REMOVE_CONST
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@18052 06827809-a52a-0410-b366-d66718629ded
+
+commit c2e1525a85bda5299a3b9f241614f7e6509aeeba
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Wed Jan 6 13:35:11 2010 +0000
+
+    Backport commit 295f473c83546221b2a71d815c61e33a67f98ae3: refine NETSNMP_REMOVE_CONST() implementation.
+
+commit cb423b0ae9ed0059aa100dc4e2fd93ad1b97faf8
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Wed Jan 6 11:57:51 2010 +0000
+
+    Backport commit e2fb09e0093e2f648fe2638da2f3af18fdb32bf0 - introduce NETSNMP_REMOVE_CONST().
+    
+    Conflicts:
+    	agent/snmp_perl.c
+    	snmplib/snmp_service.c
+
+commit afc396ab1618a8595a2519fbc25f7a498e174411
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 11 08:49:34 2012 +0100
+
+    Unbreak netsnmp_mktemp() and make_temp().
+    
+    These were broken by commit bb8fcbb874998000f945f058d1aa6fe14e925899.
+    Also replace a strncpy() call by a call to strlcpy() and replace the
+    make_tempfile() implementation by a call to netsnmp_mktemp().
+
+commit 210185c15d0d65f0ea98b5e3c2e0776f6222d170
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 11 08:27:43 2012 +0100
+
+    Fix a crash during startup of snmpd introduced by commit 885061687d9caa38470979667d7d8ad6563cedad.
+    
+    Also, make sure there is only a single copy of the cleanup code in function
+    mkdirhier().
+
+commit 8bb4e86abcf98ff28748af0af89c98e64d5cd961
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Wed Jan 11 07:47:12 2012 +0100
+
+    Reduce the scope of the oldmask variable.
+
+commit 3aad15ae560ac857e73c90764e903e7ca02b3295
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 15:40:59 2012 +0100
+
+    Fixed buffer overflow for large OID names
+
+commit fba188ee82010b2f2d8ca2e426ba654499ab3d0a
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 15:31:33 2012 +0100
+
+    fixed buffer overflow in __concat_oid_str
+
+commit 21d25d86b8e4904d798dc8c96dade9e5048457a8
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 15:26:07 2012 +0100
+
+    Fixed buffer overflow when parsing port numbers.
+
+commit d36931841b2fc2cebc6364b2949129a0ad42ad1d
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 15:05:51 2012 +0100
+
+    Fixed a buffer overflow when large SumFile is used.
+
+commit 0efdd022da09af1b5e16171fa7a2b523c5d6ec59
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 15:01:53 2012 +0100
+
+    Fixed buffer overflow when too big temp file pattern is used.
+
+commit 1cb24625372062b14c71d7dd51e20fef773e2743
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 14:41:00 2012 +0100
+
+    Fixed buffer overflow when a CPU has too long name.
+
+commit c310e390b5dd05f24be7eb1904c74e41259c93db
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 14:24:54 2012 +0100
+
+    Fixed buffer overflow when too big temp file pattern is used.
+
+commit 4600d11434e83b8653cf9f813a3d8b630455b42d
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 14:17:08 2012 +0100
+
+    Fixed plausible string overflow before parsing command line options.
+
+commit 885061687d9caa38470979667d7d8ad6563cedad
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 14:11:02 2012 +0100
+
+    Get rid of (insecure) SNMP_MAXPATH in mkdirhier()
+
+commit 8016890a445f6a7e2a873a04873d4e27b6ee64e3
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 13:48:34 2012 +0100
+
+    Fixed wrong integer size on 64 bit platform.
+
+commit bb8fcbb874998000f945f058d1aa6fe14e925899
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 10 13:31:36 2012 +0100
+
+    Secure mkstemp() with umask() - on some implementations it does not set 0600 permissions automatically.
+
+commit 2f4e6acd714183f015b763657f8f084593357e26
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jan 10 10:38:16 2012 +0100
+
+    .gitignore: Ignore perl/*.yml files
+
+commit d059fb878b1436599953cea5a077499ddcdcbcb5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 6 17:03:55 2012 +0000
+
+    CHANGES: BUG: 3440752: IF-MIB: Report interface speed correctly for Ethernet interfaces if other than 10 Mbps, 100 Mbps, 1 Gbps, 2.5 Gbps or 10 Gbps. Add support for NICs faster than 65 Gbps.
+
+commit e325ecbfce77f00ac5cf6fbd957f95495f61c59b
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Jan 9 13:25:10 2012 +0100
+
+    Suppress uninteresting Doxygen warnings
+
+commit be9161d3a5898e863767f926613486126c2cbf67
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 6 12:35:39 2012 +0100
+
+    CHANGES: snmplib: Simplify implementation of functions manipulating 64-bit numbers.
+
+commit 86e4c2be0852a0a13b0603075720b3264ec70dde
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 6 12:29:11 2012 +0100
+
+    CHANGES: snmplib: Make it explicit that MAX_SUBID is an unsigned constant
+
+commit 37e272d8f7b7180ba140fa386a5ff058968a08a2
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 6 18:21:48 2012 +0000
+
+    CHANGES: snmpd: IF-MIB::ifType: Report type "infiniband (199)" for InfiniBand interfaces instead of type "other (1)".
+
+commit 0d1c21f9991d1309d057e3e4056d547df7d40ecf
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 6 16:06:31 2012 +0100
+
+    Make declaration and definition of strlcat() consistent.
+
+commit 0c3d4dbb0a9cf5b359f70b2f19915495554f840f
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 6 15:23:16 2012 +0100
+
+    CHANGES: Win32: snmpd: Remove dlmod
+
+commit 893ecc97b587661045becbe09a320c1bcbc71c7c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 6 14:36:59 2012 +0100
+
+    Add strlcat() to the MSVC build infrastructure.
+
+commit 3d126422e625702b9d3fa0676a97ec5cb20d9d10
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 6 15:01:06 2012 +0100
+
+    Make win32/net-snmp/net-snmp-config.h consistent with its .in file
+
+commit af53b76c2ffa751e3958d0fc5d8279f78c2c1c26
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jan 6 14:43:55 2012 +0100
+
+    Skip T066pass_simple and T067passpersist_simple on MinGW
+
+commit b24ee7c909657db43bd8c5d8c01055ca0883c9cf
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 4 08:40:39 2012 +0100
+
+    Eliminate most strncpy() and strncat() calls
+    
+    Using strncpy() and strncat() is error prone -- see also
+    http://www.gratisoft.us/todd/papers/strlcpy.html. Hence replace
+    all invocations of strncpy() and strncat(). Replace
+    strncpy(dst, src, n) calls by:
+    * strlcpy(dst, src, n) if the goal was to avoid output buffer overflow.
+    * sprintf(dst, "%.*s", n, src) to copy a prefix of src to dst or if src is
+        not '\0'-terminated.
+    * memcpy(dst, src, n) if strlen(src) >= n and n < size of dst.
+    * strcpy(dst, src) if n > strlen(src) and n < size of dst.
+
+commit 6d95bc4149472931005475c30a541fed5534da39
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Jan 5 11:19:16 2012 +0100
+
+    Fix warnings triggered during compilation of the Perl xs source files
+
+commit 4fae5852103ec3893ad488bc0d905ca6914595ef
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Jan 5 09:17:15 2012 +0100
+
+    CHANGES: snmplib: Simplify the se_store_enum_list() implementation
+
+commit b3222bb275f2f2346e0fd0478afa2efb600773e5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Jan 5 09:16:45 2012 +0100
+
+    CHANGES: snmplib: Declare "type" argument of se_store_list() / se_store_slist() / se_store_enum_list() const
+
+commit 672a809c228e9550b99b8910be75d0b161985402
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 4 17:33:09 2012 +0000
+
+    Fix a 64-bit compiler warning
+
+commit 24ff260ad89ce2aa361a55c7c72e916031defe35
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 4 17:11:24 2012 +0100
+
+    Change the type of the second argument of snmp_set_var_value() and snmp_set_var_typed_value() from u_char* to void*, like on more recent branches
+
+commit c6ca737fb46f90a4bda5d43734aac34e837a05f4
+Author: Bart Van Assche <bvassche@users.sourceforge.net>
+Date:   Sat Mar 13 19:07:37 2010 +0000
+
+    Backport commit f504ce2d74a4bc88f68cc9515fa7053373cb15b5.
+    (Fixed most compiler warnings triggered by the source code in the perl subdirectory. Note: these changes may contain some real bug fixes.)
+    
+    Conflicts:
+    
+    	perl/ASN/ASN.xs
+    	perl/OID/OID.xs
+    	perl/SNMP/SNMP.xs
+    	perl/agent/agent.xs
+
+commit d212dc984ec34e4d230625e46e58b0c628a50df5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 4 16:46:49 2012 +0100
+
+    SNMP.xs compiler warning fixes
+
+commit 303c015bcfe9af0b154e9881c7b4f449e08f30bb
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed May 6 22:06:23 2009 +0000
+
+    Backport commit d3eb2b5ced22a8480053ce43acf9739729055404
+    (Sprinkle some const-ness where relevant / fix format string mismatches,
+    Niels Baggesen, May 2009)
+    
+    Conflicts:
+    
+    	agent/agent_sysORTable.c
+    	agent/helpers/instance.c
+    	agent/mibgroup/disman/event/mteTriggerConf.c
+    	include/net-snmp/agent/instance.h
+    	include/net-snmp/agent/sysORTable.h
+
+commit d95b40406916bda5b48b5a6131bec27b866b0a79
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed May 6 21:59:20 2009 +0000
+
+    Backport a2a7316c310f0fcc3728673fa047051c23b71960
+    (Trivial warning fixes, Niels Baggesen, May 2009).
+    
+    Conflicts:
+    
+    	agent/mibgroup/hardware/cpu/cpu_linux.c
+    	agent/mibgroup/host/hr_swrun.c
+    	agent/mibgroup/if-mib/data_access/interface_linux.c
+    	agent/mibgroup/ip-mib/data_access/ipaddress_ioctl.c
+    	agent/mibgroup/ip-mib/data_access/systemstats_linux.c
+    	agent/mibgroup/mibII/sysORTable.c
+    	agent/mibgroup/mibII/system_mib.c
+    	agent/mibgroup/ucd-snmp/logmatch.c
+    	agent/mibgroup/util_funcs/get_pid_from_inode.c
+    	agent/snmpd.c
+    	snmplib/container_list_ssll.c
+
+commit d86c47f003fdc192bce7b46ac4f06b09e387c12b
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 4 13:29:08 2012 +0100
+
+    Fixed a typo
+
+commit 2584de229973cd8feb2226ff57b4899ffdf180df
+Merge: 3dc0e00 0f53695
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 4 13:18:04 2012 +0100
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 3dc0e00a2fd8e34fe1ae33ecabf36e146460a31f
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 4 12:40:07 2012 +0100
+
+    Fixed buffer overflow when large 'token' is used.
+
+commit b3c4982542e0ab151fb3884754cdfbcb472da52d
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 4 12:28:52 2012 +0100
+
+    Fixed off-by-one memset.
+
+commit 0f53695044dd3f0c3507753e3f8c29d97e96872d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Aug 3 21:38:26 2011 +0200
+
+    CHANGES: snmplib, snmpd, perl: Eliminate dead variables
+    
+    Conflicts:
+    
+    	agent/mibgroup/agentx/master_admin.c
+    	agent/mibgroup/etherlike-mib/data_access/dot3stats_linux.c
+    	agent/mibgroup/etherlike-mib/dot3StatsTable/dot3StatsTable_data_access.c
+    	agent/mibgroup/host/data_access/swinst_pkginfo.c
+    	agent/mibgroup/host/data_access/swrun_procfs_status.c
+    	agent/mibgroup/ip-mib/data_access/systemstats_linux.c
+    	agent/mibgroup/mibII/kernel_linux.c
+    	agent/mibgroup/rmon-mib/data_access/etherstats_linux.c
+    	agent/mibgroup/rmon-mib/etherStatsTable/etherStatsTable_data_access.c
+    	apps/snmptls.c
+    	apps/snmptrapd_log.c
+    	snmplib/dir_utils.c
+    	snmplib/snmp_client.c
+    	snmplib/snmp_openssl.c
+    	snmplib/transports/snmpTLSTCPDomain.c
+
+commit 0153805c99b9197365935c5d11ae9c3d4bfaa0f3
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 4 09:48:41 2012 +0100
+
+    Fix a set-but-not-used warning
+
+commit 3f8885fbee9407748fc2f0573728a11ba2bc023a
+Author: Magnus Fromreide <magfr@users.sourceforge.net>
+Date:   Tue Apr 28 05:51:13 2009 +0000
+
+    Return a value from sprint_realloc_value even if no subtree is located.
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/trunk@17578 06827809-a52a-0410-b366-d66718629ded
+
+commit aee4e895fe3bd5f4a61e34275bfca0368b560555
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 4 11:31:22 2012 +0100
+
+    Added check of snmp_sess_transport() return value.
+
+commit 5d1d0a744ab30c8e645c3b8506cbbd2cceb3d275
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jan 4 11:04:48 2012 +0100
+
+    Added check of netsnmp_extract_iterator_context() return value.
+
+commit 90f1ae6757917481636eef77100caeeb53edfe01
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jan 3 10:06:56 2012 +0100
+
+    Add strlcat.c. Source: http://www.freebsd.org/cgi/cvsweb.cgi/src/lib/libc/string/strlcat.c.
+
+commit 199a0511f6eb0ef3ff1d9f922b790ab67dfde01e
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 4 10:31:26 2012 +0100
+
+    CHANGES: snmpd: smux: simplify smux_list_detach()
+
+commit d883573aa73e0f5fc188acedee6451f95dae900c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 4 10:23:06 2012 +0100
+
+    Fix a compiler warning introduced by commit a809fe5075c9f374715f7d1a682949a0730172c1.
+
+commit 7b7a3eb2500527eaa1699287a6ca6fcc4cc2e08a
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Jan 4 09:40:02 2012 +0100
+
+    Fix a build error caused by commit a809fe5075c9f374715f7d1a682949a0730172c1.
+
+commit 2b6c119fed4848da6663c11f0c2cbdc29921b5c6
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 15:51:10 2012 +0100
+
+    Check for netsnmp_ds_get_int() errors.
+
+commit 6ce5360caa4c9de51ade57879e83f96bd04b4c5a
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 15:42:23 2012 +0100
+
+    Check for missing view.
+
+commit 92075f51cd45a38ca38760b3ffe82e16559e9c2e
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 15:18:26 2012 +0100
+
+    Check open() result.
+
+commit d68dcae0f18d554571aef321944a5290548dde86
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 14:16:11 2012 +0100
+
+    Added 'fallthrough' comment for Coverity.
+
+commit fb6f80c0fe3ba36e56f5b911a47e3f6f32ba266e
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 14:14:07 2012 +0100
+
+    Fixed exit code of encode_keychange with wrong arguments.
+    Also added a comment for Coverity.
+
+commit 3130e24fdc232464dd7bb216f46cafa2e0e775a6
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 14:09:54 2012 +0100
+
+    Added missing break
+
+commit 18c126a9565cb4d69d7513b944a2105588045d35
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 14:07:29 2012 +0100
+
+    Added 'fallthrough' comment for Coverity.
+
+commit 6d31c82070a2c68fe3c519e9d56fa2779554d01f
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 14:01:53 2012 +0100
+
+    Added 'fallthrough' comment for Coverity.
+
+commit dab32867ed0b99301efd7b8d852ad1288a184be0
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 13:30:33 2012 +0100
+
+    Fixed QUITFUN usage.
+
+commit b1a2bcf64615eb66bc24d5be4950e45012962045
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 13:18:03 2012 +0100
+
+    Fixed wrong operator
+
+commit b2b1c851b94fed37c386eaa1bfead5c77696e3ef
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 13:14:52 2012 +0100
+
+    Fixed wrong operator
+
+commit a809fe5075c9f374715f7d1a682949a0730172c1
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 10:58:46 2012 +0100
+
+    Added check for failed register_mib.
+
+commit 5949f055c16ae650615aae7a1fee3f2d7b16d940
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jan 3 10:29:59 2012 +0100
+
+    Make MIB file parsing and detection more strict - LABEL is required at the beginning of MIB files.
+
+commit 88f0af3cfb916ae5863cc2986071d435f20c3064
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Dec 31 11:37:52 2011 +0100
+
+    Reduce the scope of the variables 'p' and 'len'.
+
+commit 0815a7536c76f7e4842638683f674894a1a8ce14
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Dec 29 14:42:54 2011 +0000
+
+    Report problems with SetUndo processing
+    Missed when applying patch #3445440
+
+commit eb2ab23742ca86c0b89ccfe91eb6ea374bf3acc1
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Dec 29 14:37:31 2011 +0000
+
+    Check for the expected error (EPIPE) on closure.
+    Missed when applying patch #3447444
+
+commit aac10bc4f053c014f382d6593fc32ab95e0b1a57
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Dec 29 12:59:52 2011 +0000
+
+    CHANGES: snmpd: BUG: 3463767: Handle parsing subidentifiers > 2^31
+
+commit 3898c04fd6f89867062fdfebf36857ab619c0450
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Wed Dec 28 16:53:24 2011 +0000
+
+    Add tests for pass/pass_persist, supplied by Bill Fenner
+
+commit d5ee3f0a1a63bb1752c74cbca55aa3d40bf9bf13
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 21:58:51 2011 +0000
+
+    CHANGES: snmpd: PATCHES: 3447444: Fix SIG_PIPE handling
+    Patch provided by Bill Fenner
+
+commit 2a17b37430c1852998c3588e547d7eb61c06da71
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 21:45:38 2011 +0000
+
+    CHANGES: agentx: PATCHES: 3445440: More robust handling of AgentX errors
+    Patch provided by Bill Fenner
+
+commit fe58a0e5f4d4e2e2ecbcb47382b08cb1e4df352c
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 18:16:23 2011 +0000
+
+    CHANGES: snmplib: PATCHES: 3456770: Handle (obsolete) UInteger type properly
+    Patch provided by Bill Fenner
+
+commit 1be8cf08a67a91855fee1ec4a2d8e087c7812456
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 18:04:10 2011 +0000
+
+    CHANGES: agentx: PATCHES: 3445437: Log AgentX disconnections
+    (in line with connections) Patch provided by Bill Fenner
+
+commit 068037289107faa2ba3f5cd2fb00c19494bb9a04
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 17:27:46 2011 +0000
+
+    Handle any GETNEXT request OID, not just a simple walk.
+
+commit a74fa528983123d355a8cdcaa77dd4eb4b8c6959
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 17:00:18 2011 +0000
+
+    CHANGES: pass: PATCHES: 349394: Bring pass_persisttest script into line with passtest*
+    (i.e. using the legitimate structure of NET-SNMP-PASS-MIB)
+    Patch provided by Bill Fenner
+
+commit bbe649ebfa61ea22399170b36b99db30a1de8012
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 16:54:38 2011 +0000
+
+    Rework "passtest" example to fully validate GETNEXT requests
+    and use a legitimate structure for output.  Backport of SVN
+    revision 17632 (which updated 'passtest.pl' but missed 'passtest')
+    Correct in branches 5.5 and above
+
+commit 82d06c7247b22c8b01d45bf55041d2f1e6427d49
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 13:45:18 2011 +0000
+
+    CHANGES: snmpd: PATCHES: 3447671: Fix override handling of OID values
+    Patch supplied by Phillip O'Donnell
+
+commit 827c8b28830171faa9c61d53efca9eb6600561c2
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 11:25:43 2011 +0000
+
+    CHANGES: python: PATCHES: 3433846: Fix for use with python 2.4
+
+commit f98a54a99caf7b46b100a920db942cbca9c43926
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Tue Dec 27 10:10:36 2011 +0000
+
+    Skip SET-based tests when configured with --disable-set-support
+
+commit c139ca123b44bb3b9b6bf921e1609cc45f63a660
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Sat Dec 24 16:55:30 2011 +0000
+
+    CHANGES: snmpd: PATCHES 3410059: Fix sparsely augmenting trigger tables
+    Patch provided by Stephen Turner
+
+commit c4ae021b2e6384437081c5623f360c8896390188
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Sat Dec 24 16:29:54 2011 +0000
+
+    CHANGES: snmpd: PATCHES 3410050: Skip already-'processed' varbinds
+    Based on mib2c patch provided by Stephen Turner
+
+commit c6accf8c66254fa8c48767ed7dec795ddafc522e
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Sat Dec 24 16:27:11 2011 +0000
+
+    CHANGES: mib2c: PATCHES 3410050: Skip already-'processed' varbinds
+    Patch provided by Stephen Turner
+
+commit a61826ad8ca54661d1d909712503bd3a8b32eed0
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Thu Dec 22 18:35:46 2011 +0100
+
+    Remove unused variable.
+    
+    myMatch is unused as nmatch is zero and also since regexBuffer is created
+    with REG_NOSUB set.
+
+commit 2b37e4e8f250a0d8821199a74ac3f4e5b7b7baba
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Dec 22 14:31:51 2011 +0100
+
+    Fixed unterminated strings after strncpy
+
+commit 30ff58d09d4c9d5438bb621054fd7ad7a2a597e4
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Dec 22 14:07:19 2011 +0100
+
+    Fixed wrong length of buffer when printing ASN_BIT_STR
+
+commit 6c1487e1d360d3d260a39cb1f5b15da978395053
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Dec 21 15:47:34 2011 +0100
+
+    Fixed potential free of uninitialized pointer in error cases
+
+commit c76fb96f65e33ba2fd212a921e8c386155ee5c7a
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Dec 21 15:44:46 2011 +0100
+
+    Fixed unitialized values in udpTable
+
+commit c44608679b89751176f28a2e54d5282b46e2a05c
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Dec 21 14:56:13 2011 +0100
+
+    Use calloc instead of malloc and manual clearing
+
+commit e4a5edc72393bd3de9bf12bceba9d83bbf7de70b
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Dec 21 14:31:25 2011 +0100
+
+    Removed unused variable
+
+commit fae2e5b835b8df1eae47e4cebb4eb404d7282377
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Dec 21 13:31:21 2011 +0100
+
+    Fixed dereferencing unitialized iid in error cases and with debug info enabled.
+
+commit 0bc8c08edeae7ae095f116258c20ae5767d60652
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Dec 21 13:20:52 2011 +0100
+
+    Fixed returning uninitialized variable 'status' when ss == NULL
+
+commit de9250d9dae9727a6cc7f647688dddf1b8597128
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Dec 8 11:58:04 2011 +0100
+
+    CHANGES: snmpd: Make sprint_mib_oid() treat OID components as unsigned instead of signed integers
+
+commit 0e33b3b6d5854a4bac15d4ea5e016c53d161d0cd
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Dec 8 10:02:28 2011 +0100
+
+    Fix recently introduced compiler warnings
+
+commit 73c9ee42d28afe2e107a7d6616b6d011890c36ea
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Dec 8 09:09:59 2011 +0100
+
+    Remove unused variables
+
+commit 3db97962b37eb12d254d61e6be234b06a391c8bb
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Thu Dec 8 07:43:45 2011 +0100
+
+    CHANGES: snmpd: PATCH 3453868: from "Bill Fenner <fenner@gmail.com>": Factor common code into pass_common
+    
+    Move the code for pormatting and printing values from pass and pass_persist
+    into pass_common.
+
+commit 7f05daa8e0e0f533b0f12a3e1cf07641519909d6
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Dec 1 11:58:32 2011 +0100
+
+    CHANGES: BUG: 3444939: BUG: 1796886: snmplib: Avoid that sprint_realloc_octet_string() embeds unprintable control characters or binary zeroes in its output. This behavior could cause truncated output in snmptrapd.
+
+commit db8f558fd2f3b7c109ea3a1c2133b75b6f8cb2ad
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Dec 1 10:04:41 2011 +0100
+
+    Compiler warning fix: pass unsigned chars to isprint() instead of signed chars.
+
+commit 800dc1028e7e0cd8cc14d84dd31723d47ac073db
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Thu Dec 1 10:18:58 2011 +0100
+
+    Reduce the scope of the hint variable
+
+commit 83ea4a080c90a74b9743d3f24cf0d4b8a1e8c849
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Nov 27 21:16:52 2011 +0100
+
+    Reduce the scope of the variable qos
+
+commit 7b9e03441c3dc3a07670ed01f5d04791a82c750c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Nov 30 14:04:01 2011 +0100
+
+    Remove #define val(x) __STRING(x) and change val(x) into __STRING(x).
+
+commit 2f379b0e4ecadfa4e541e3005c8fc8281882b741
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Nov 30 15:58:47 2011 +0100
+
+    Follow-up for commit 1aa704e: unbreak the MSVC build
+
+commit 64ef0f71127617837027fb2cfaf174b95ba79e0d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Nov 30 14:19:50 2011 +0100
+
+    Add SNMP::register_debug_tokens()
+
+commit 7bead9ca917c67566d5ed98ab507bbc02816217d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Nov 30 14:08:08 2011 +0100
+
+    AgentX subagent: Reduce code duplication
+
+commit 0ed71541f87e7d78bc998eebda3217c59e1df830
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Nov 30 14:03:19 2011 +0100
+
+    CHANGES: snmplib: Add Doxygen-style function header for netsnmp_register_default_target() and netsnmp_clear_default_target().
+
+commit 8c2972b61e40169b47c50988b6ae9e8c285f84f8
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Nov 30 14:02:54 2011 +0100
+
+    CHANGES: perl: Fix spelling in the documentation of the SNMP module
+
+commit 0baa9296c072bb3735760b0dd992f2d1d3ca27fa
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Nov 19 09:05:24 2011 +0100
+
+    CHANGES: snmpd: BUG: 3439234: Correct the dependencies of ucd-snmp/pass and ucd-snmp/pass_persist
+
+commit 1aa704e4a294430b28e39b6f9e4683b8a48bce04
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Nov 19 08:35:21 2011 +0100
+
+    CHANGES: snmpd: Factor out asc2bin and bin2asc. Add a netsnmp_internal_ prefix to them
+
+commit cda8fe91013f12cbf64a0775abb55720035af931
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sat Nov 19 00:55:24 2011 +0100
+
+    CHANGES: snmpd: Call snmp_oidtree_compare instead of snmp_oid_min_compare
+    CHANGES: snmpd: Remove snmp_oid_min_compare since it is internal and unused
+
+commit fe6269b1900cf44dc27a199a761d15a01c3f3092
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Nov 16 22:58:34 2011 +0100
+
+    Fix size_t/int mismatches
+
+commit 390c0114c8ec0bdb27b08b6f74e3f6ef3a62981b
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Nov 16 13:37:49 2011 +0100
+
+    Fix format specifiers to avoid warnings
+
+commit 0e86c781f3989bf022c8993a118617b74a75420c
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Nov 16 09:17:19 2011 +0100
+
+    memory_linux: get Shmem from /proc/meminfo for 2.6 (or newer) kernels
+
+commit bf264d15ded7acbbf2e3871b98fd1fcef43d9ec3
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Nov 16 09:16:16 2011 +0100
+
+    memory_linux: close sockets in error situations
+
+commit 57ff8a40bae5d9bcad16089142a9cf328c9fa1f5
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Nov 16 09:14:57 2011 +0100
+
+    disman/ping, disman/traceroute: Close sockets in error situations
+
+commit eaca7983e3655ab696fcc4461ca0cedbac6ce69a
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Fri Nov 11 19:00:12 2011 +0100
+
+    NetBSD-6: One more instance of timespec replacing timeval
+
+commit 2e7e9eda0b0d62a7645a9a8f70ef3fb6f3dd6941
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Nov 3 11:17:48 2011 +0100
+
+    Fix uninitialized variable warnings.
+
+commit 3462ebcdd0b7c298cb15c3099736f4f952257846
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Oct 28 16:07:15 2011 +0200
+
+    Remove those superfluous parentheses that trigger a clang warning.
+
+commit 3e5fedd3e7d1ef31683604bf73dc56e944cad349
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Thu Nov 3 09:45:27 2011 +0100
+
+    CHANGES: snmpd: fixed UCD-SNMP-MIB::systemStats after 30 days of uptime.
+    
+    After 30 days, values from /proc/stat (on Linux) can get bigger than 32bits and snmpd calculations might render counters like ssCpuUser negative or zero, while the real value is higher. Therefore the counters should be tracked as the largest integer available.
+
+commit 2801a2139f27021e1ab15e362e2d3d624ffaa494
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Oct 31 22:55:53 2011 +0100
+
+    Patch #3406364: Fix unstable data for NetBSD.
+
+commit 349591d03e17a55b43eacc6a687b02fd8d4e9528
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Mon Oct 31 08:59:37 2011 +0100
+
+    CHANGES: perl: Make it possible to build perl support without support for opaque types.
+
+commit 13952f6bee9f408867ab6d2fdfdde4f284074957
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Oct 26 14:05:16 2011 +0200
+
+    CHANGES: snmplib: from Siddhesh Poyarekar: properly clean up old requests in a subagent when we reconnect to master.
+    
+    An snmp subagent linked against net-snmp-libs may crash if it handles a
+    response which has magic referring to an older disconnected main session. This
+    may happen when the subagent
+    attempts to clean up old requests on reconnection of the disconnected master
+    session.
+
+commit ae052472b22720d08369e85127db214245df2e3f
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Oct 25 16:15:17 2011 +0200
+
+    CHANGES: perl: fixed segmentation fault when handler registration fails.
+    
+    When netsnmp_register_handler fails, it frees its reginfo -> nsahr_DESTROY (and any other function) must not dereference it.
+
+commit 747fdc71e64d09e080928ebbb4d04cbde3906799
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Oct 5 15:57:59 2011 +0200
+
+    CHANGES: snmpd: Lowered severity of 'error finding row index in _ifXTable_container_row_restore' message.
+    
+    The message is shows up when snmpd is started and there is different set of network interfaces than it was when snmpd wast last stopped. This is common on ppp-servers or virtual hosts.
+
+commit 866033db9904ffb1203f283f838092e4cf68de6b
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Thu Oct 6 07:33:27 2011 +0200
+
+    CHANGES: snmpd: Remove spurious #endif that seems to be the result of a mismerge.
+
+commit 995647c0cfe00412262cc5797bdfae9d00b70c76
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Oct 2 15:44:36 2011 +0200
+
+    CHANGES: building: Remove the use of -L flags for internal libraries as it confuses libtool.
+
+commit 93dc1235a0db58ffd29617cff00dc11263780202
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Oct 2 11:31:46 2011 +0200
+
+    CHANGES: building: Make make apps work again
+    
+    apps include snmptrapd and that require the agent libraries as well.
+
+commit ba41488ed44cd23c25963d4fc56c476853b2ab59
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Oct 2 11:29:33 2011 +0200
+
+    CHANGES: building: When you say make libs you expect all the libs to be built.
+    
+    This is demonstrated by the snmptrapd target at the top level which obviously
+    expected both libs to be built and so failed to compile before this patch.
+
+commit 3057c73e093473be46254bcdfb4ca788e432d1b8
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Sep 30 07:32:52 2008 +0000
+
+    NEWS: building: PATCH: 2091156: correctly declare dependencies in Makefile.
+    'make -j <N>' should work now.
+    
+    Backport this to V5-4 as it is needed for correct operation in the single
+    threaded case of make miblib as well.
+
+commit 848f6300efe38492fb454451a030f0b7e6ff8c9d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Sep 30 10:41:44 2011 +0200
+
+    perl/SNMP/SNMP.xs: Update emacs modeline
+
+commit d55bd4e0549f03b6fd32562c2aa7fe39272a9ef7
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Sep 28 06:55:19 2011 -0700
+
+    remove the v5.7 from the frozen list
+
+commit 46eac02e9a27bf4f3068e795cab891f05a848870
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Sep 26 21:49:27 2011 +0200
+
+    CHANGES: snmpd: Avoid that snmpd crashes if started on a system with another OpenSSL library version than the one it has been built with.
+
+commit c55f608f16f160f5e79dc057f8878def462973e1
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Thu Sep 22 10:35:24 2011 +0100
+
+    Fix the code for populating the table_tdata cache,
+    and clarify areas needing MIB-specific additions.
+
+commit bbe2c19a01ecec024f741e2e54701ae6212f4c3e
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Sep 4 14:44:38 2011 +0200
+
+    This should have gone only to master.
+    
+    Revert "CHANGES: building: Correct dependencies - since bf74fea69f24dc6e85f908f3f41d1426b2e09688 snmpconf is located in builddir, not srcdir"
+    
+    This reverts commit 9efa467a972bb6e1c7fbdaf2e27429d29f4ab89e.
+
+commit 9efa467a972bb6e1c7fbdaf2e27429d29f4ab89e
+Author: Magnus Fromreide <magfr@lysator.liu.se>
+Date:   Sun Sep 4 14:00:12 2011 +0200
+
+    CHANGES: building: Correct dependencies - since bf74fea69f24dc6e85f908f3f41d1426b2e09688 snmpconf is located in builddir, not srcdir
+
+commit 422b082a9593ca9c65aac449e6d128a9e97e94fb
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Aug 30 19:06:56 2011 -0700
+
+    added 7 as a rc series branch
+
+commit 71c0d7650493710631fa08d5dc4dad501a9aa771
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Aug 30 16:37:41 2011 -0700
+
+    deal properly with inverted error cases
+
+commit cf4cf7f32ad58f326ffed50494583231648d79d2
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Aug 26 11:08:09 2011 -0700
+
+    added .ft and .ft.1 for feature files
+
+commit 41b2cde19d22209b483207614e027483c3706877
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Aug 30 11:03:15 2011 -0700
+
+    auto-determine patch arguments if possible for nspatchtry
+
+commit 96bb589c2e5054890e98705ab5f4308ae6a130bb
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Aug 30 10:13:06 2011 -0700
+
+    make it so the git commit line can be cut/paste without linebreaks
+
+commit 6e54c4131af731ff90467a75bcc817c957f8f72a
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Aug 30 09:55:14 2011 -0700
+
+    describe that nsrollup needs to be run now.
+
+commit ea8bed79e81c42e33cbf37ca6f3c03c549987b22
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 25 06:56:22 2011 -0700
+
+    import stderr
+
+commit fd6d804dc3e703c4059dbe775001a3be9b93309f
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 25 06:55:38 2011 -0700
+
+    use >> to print to stderr
+
+commit 26bb2470c106f834442a2adbc7611bf16657fbdf
+Author: Thomas Anders <tanders@users.sourceforge.net>
+Date:   Tue Aug 23 23:22:44 2011 +0200
+
+    make sure that _KERNEL is defined to 1 so that "#if _KERNEL" works on systems that need it (e.g. IRIX)
+
+commit 28b54070514753e8d8abb718b224d657ab7a8ab8
+Author: Garrett Cooper <yaberauneya@users.sourceforge.net>
+Date:   Thu Aug 18 11:49:56 2011 -0700
+
+    CHANGES: BSD: PATCH 3383965: from yaberauneya: Fix if-mib agent compile warnings on *BSD
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 6a841d56518a727196e66b59e7e5b3304f54b0a1
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 18 08:31:06 2011 -0700
+
+    changed clientaddr so it registers as pre-mib to be picked up before the transports get created
+
+commit 6580556cc7bd833af731b62ce1ed2017564fe7eb
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Aug 17 18:08:01 2011 +0200
+
+    CHANGES: Windows: snmptrapd: Make the IP address to hostname conversion work
+
+commit 3cb3f1ede388d84e392e1d815d5994a4bf0f10f9
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Aug 14 07:59:25 2011 +0200
+
+    Windows, build.bat: Restore original build and install order. Apparently the correct netsnmp.dll is used during the Perl tests by setting PATH properly.
+    
+    This reverts commit c1b5a030d8f04876cd5b9af008c879cc468b212f.
+
+commit 3e50c3e00e9f321fb708bc579eb4dc1a0f1e7c4d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 11:31:40 2011 +0200
+
+    CHANGES: snmpd: pass_persist:  Fixes a race condition introduced in commit 31fa07cd9ffde46d41d2b5838c3fc4d01548bfb5.
+    
+    The following race condition could happen:
+    - A system call fails and errno is set accordingly by the C library.
+    - SIGCHLD handler invokes a system call that fails and hence overwrites errno.
+    - SIGCHLD handler leaves.
+    - original context checks errno and finds the value from the system call invoked
+      by the SIGCHLD handler instead of the system call that failed originally.
+    
+    Other fixes included in this patch:
+    - Renamed deinit_pass_persist() into shutdown_pass_persist() such that this
+      function gets called during agent shutdown.
+    - Made sure that shutdown_pass_persist() is called by the Windows snmpd.exe too.
+    - Windows: avoid calling CloseHandle(INVALID_HANDLE_VALUE).
+    - Windows: avoid that closing a pass_persist pipe triggers a crash.
+    - Windows: pass_persist: close handles of finished processes.
+    
+    Conflicts:
+    
+    	agent/mibgroup/ucd-snmp/pass_persist.c
+    	win32/mib_module_shutdown.h
+
+commit e147e4b96755207de1ce30990d67b4b7c76dd483
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:39:14 2011 +0200
+
+    Unbreak the Windows build. This is a follow-up for commit 1e1000a8815921b5ec2e7997b53592a544b3dfc2.
+
+commit c1b5a030d8f04876cd5b9af008c879cc468b212f
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:10:33 2011 +0200
+
+    CHANGES: Windows: building (build.bat): Install netsnmp.dll before running the Perl regression tests such that the regression tests are run with the correct version of netsnmp.dll.
+
+commit 1e9d2003baed227f68b68528f1e97e6f5ea86c1a
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:10:33 2011 +0200
+
+    CHANGES: Windows: perl (build.bat): When installing development files, install the PDB files too.
+
+commit a8d94007e32d03710692c8f1b417d5bdfe3650fa
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:10:32 2011 +0200
+
+    CHANGES: testing: Fix Perl regression test failures
+    
+    All Perl regression tests pass now on Linux and on Windows (MSVC).
+
+commit b6d0b490181c6df8c11ecf155f1e6eaf11b1ec58
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:10:33 2011 +0200
+
+    CHANGES: testing: Perl regression tests: Don't fail skipped tests.
+
+commit ca3acf2b07039d96a117f090f7ec76b6e8b541e9
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:10:32 2011 +0200
+
+    CHANGES: perl: Add SNMP::getenv() and SNMP::setenv().
+
+commit 56759e5ad537f01b4a51e7ff9994ec4b55c32135
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:14:46 2011 +0200
+
+    CHANGES: snmplib: Add netsnmp_setenv().
+
+commit 9843e5bcf472877e85b031b5e5dafaa9d5fc63c5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:10:32 2011 +0200
+
+    local/pass_persisttest: document how to use on Windows
+
+commit 6057866b73a022771e90e9967dd25bdc7192fbdc
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:10:32 2011 +0200
+
+    Set execute flag on local/pass_persisttest such that the instructions in that file work
+
+commit c2daf5940f21a13e8989dd055b17f3181112f856
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Aug 13 08:10:32 2011 +0200
+
+    .gitignore: Fix a suppression pattern
+
+commit 95752d67ac2d9f11e00c4752bc0785432b8ff1a5
+Merge: 1f0a928 1e1000a
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Aug 12 09:09:42 2011 -0700
+
+    Merge branch 'V5-4-patches' of ssh://net-snmp.git.sourceforge.net/gitroot/net-snmp/net-snmp into V5-4-patches
+
+commit 1f0a928a2913cfa7f5ceaaf4696c69fbdc687621
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Aug 12 09:09:11 2011 -0700
+
+    added the missing -e option to the createUser docs
+
+commit 1e1000a8815921b5ec2e7997b53592a544b3dfc2
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Aug 11 15:46:32 2011 +0200
+
+    CHANGES: MinGW: Net-SNMP Perl modules build again.
+
+commit 97d6432f95e1cdcf6fd85e7ca1d0c5557eb6d919
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Aug 11 18:16:44 2011 +0200
+
+    CHANGES: Windows: perl: Make sure that the constant SNMP_DEFAULT_RETRIES is recognized.
+    
+    CHANGES: perl: SNMP module: Add constants NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE and NETSNMP_CALLBACK_OP_TIMED_OUT.
+    
+    When the Net-SNMP Perl modules are built on Windows with MSVC or MinGW it
+    is possible that each these are linked with another version of the MSVC
+    runtime library than the Perl interpreter itself. In that case the "errno"
+    variable used inside .xs source files is another variable than the $! variable
+    in .pm files. Or: assignments to "errno" in a .xs file do not modify the "$!"
+    Perl variable This patch avoids using "errno" by modifying the different
+    constant() functions such that these return a two-element array instead of
+    returning a scalar and setting errno.
+
+commit e97de077a17c8a309709bdff485e20c91105ad03
+Merge: 69cb42a 0220392
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Aug 9 06:44:10 2011 -0700
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 0220392d899a9cab701f74af12030bb1d4cc5e2e
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jul 1 13:02:15 2011 +0200
+
+    .gitignore: Ignore *.exe files generated by the Win32 build
+
+commit 69cb42a4ea0583ce6f5ff8f8383516d34bc4c344
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 15:12:55 2011 -0700
+
+    fix C++ comments
+
+commit e0e63d069488cf422ee886558ca0d8ebfcecb39b
+Merge: b0a62eb bc13636
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Aug 8 22:15:09 2011 +0100
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit bc13636f4e15bf3b8ecb5d4c3e338f4e582195e7
+Merge: ffa05b0 b451607
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 14:00:33 2011 -0700
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit b0a62eb19763ab4f0b776430242a6117ccae5dd3
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Aug 8 21:59:17 2011 +0100
+
+    Define _BIND_TO_CURRENT_VCLIBS_VERSION token
+    (as per Alex' build instructions)
+
+commit ffa05b051ac3e2b197195a9989cc7a91fe8d9282
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 13:55:38 2011 -0700
+
+    a new macro nsautoconf to run the right version
+
+commit b451607dca015c111e96fdfeb2ddb0661fb4f724
+Author: Dave Shield <D.T.Shield@liverpool.ac.uk>
+Date:   Mon Aug 8 21:20:32 2011 +0100
+
+    Fix capitalisation of Net-SNMP
+
+commit c94813044a4c4a608e98e80223075c6faf04ee11
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Aug 8 21:56:15 2011 +0200
+
+    Revert "CHANGES: Windows: Avoid that if the Net-SNMP Perl modules have been built with another version of Microsoft Visual Studio than ActivePerl that using one of these Perl modules triggers a "Free to wrong pool" crash. This regression was caused by commit 3b14c59cf8278d410207ff42debda2636426a468 (the netsnmp_free() into SNMP_FREE() changes in the *.xs files)."
+    
+    This reverts commit 7f42d0d93320484152271427cc9808cbda49bbd0 because that commit is not suitable for the 5.4 branch.
+
+commit 58ca73d03589b0974d926bdfdc3927099fba2115
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 11:24:09 2011 -0700
+
+    display the branch we'll commit to
+
+commit 1d1bfd5f451c2bc420b710c98c79d04bdef4391b
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 11:10:52 2011 -0700
+
+    nssfpatchapply: split the displayed git commit command into multiple segments
+
+commit 8ca7ff1e692caec4186b788c9ae2d27be213290f
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 10:33:56 2011 -0700
+
+    fix another function typo
+
+commit f621e6f21ff9427be072c346b26f7be09d43e1f9
+Merge: 556e938 7f42d0d
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 10:05:56 2011 -0700
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 556e938e82a7ee2c10fa8c0b7c7a34e9e65a6d5a
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 10:05:20 2011 -0700
+
+    fix function name typo
+
+commit 969e866af983d986a26bebca85fef0f6c623ce26
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 09:56:43 2011 -0700
+
+    make nspull/nspush check for a clean repo
+
+commit 7e6fdc8b2a3d86a79543673435371621a2858737
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 09:56:13 2011 -0700
+
+    new function "nsmakeall" to test building on every branch
+
+commit e25be7c82d5545d88abea10e4e255c92bed3de6e
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 09:53:03 2011 -0700
+
+    default to merge
+
+commit bcb81b796dd6a92195d6db13177ad30f05fc63f7
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Aug 8 09:51:26 2011 -0700
+
+    separate nssync into nspull and nspush
+
+commit 7f42d0d93320484152271427cc9808cbda49bbd0
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Aug 8 09:50:51 2011 +0200
+
+    CHANGES: Windows: Avoid that if the Net-SNMP Perl modules have been built with another version of Microsoft Visual Studio than ActivePerl that using one of these Perl modules triggers a "Free to wrong pool" crash. This regression was caused by commit 3b14c59cf8278d410207ff42debda2636426a468 (the netsnmp_free() into SNMP_FREE() changes in the *.xs files).
+
+commit a3b8654a232c563bc97cc9925cd98590a30c5bc5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Aug 8 17:24:18 2011 +0200
+
+    Fix a recently introduced MinGW compiler warning
+
+commit a0dd3caf25926e43465718bf417a464c2fb36366
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Aug 7 10:17:01 2011 +0200
+
+    find \( -name '*.[ch]' -o -name '*.in' -o -name '*.dsp' \) -perm -u+x | xargs -r chmod a-x
+
+commit a9a252522fbe7dc1ed70ff2721a4f81583c0d92a
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Aug 5 10:20:51 2011 -0700
+
+    make rollup and sync support --rebase and change the default back to merge
+
+commit b4255bea479060dcb08a80c70168c2bac5b98e42
+Merge: 96f5f47 0dbc869
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Aug 5 09:25:54 2011 -0700
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 96f5f47ad427972d8d9a6ce06c5e16147362083b
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Aug 5 09:25:25 2011 -0700
+
+    try a multiple branch push
+
+commit 0dbc869fec07d8e90dbd1c95493ee7cbc623c95c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Aug 5 12:40:31 2011 +0200
+
+    CHANGES: Windows: build.bat: Generate PDB files in release mode.
+    
+    CHANGES: Windows: build.bat: Write PDB files to the output directory instead of the intermediate directory.
+
+commit 5b0291f91ed94835f8ae7d9436b15f40afb19473
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Aug 5 13:17:19 2011 +0200
+
+    .gitignore: Add perl/agent/default_store/default_store.def and perl/SNMP/t
+
+commit 2f8d4f5796cbc1c7e967acdaa8019b24f1520a36
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Aug 5 12:02:51 2011 +0200
+
+    CHANGES: Windows: Avoid that running the Perl regression tests makes snmpd crash
+
+commit 0c7507a1e0101f4b135a3ed8a961635b87093f1a
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Aug 5 10:57:33 2011 +0200
+
+    Unbreak the V5-4-patches - revert commit d2c4768bd2efb48664434a831425c2dda85d7133 (CHANGES: libnetsnmp: PATCH 3362233: from yaberauneya: Mute unnecessary cannot find module noise).
+
+commit 9b7ff4abfc9529bb9e18a3b874201520bc0e7141
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Aug 5 11:07:55 2011 +0200
+
+    Unbreak the V5-4-patches branch - was broken by commit bf7178b0b22587d43d1a80c269cd216bd5930214 (agent: change type of snmp_enableauthentraps to long)
+
+commit 03049e1036c2c06cbd6e5ed5fe084999d5468a5f
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Aug 5 10:56:48 2011 +0200
+
+    Unbreak the V5-4-patches branch - was broken by commit 0e6842fe080cec853b08cd2323015ababc381ce1 (CHANGES: snmptrapd: PATCH 3383441: from sachinsurendran: Fix crash on 5.4.4 due to access of freed memory).
+
+commit 3aa949fbdfc1a94a8340ad8baf8b314756a0bb9d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Aug 5 10:26:15 2011 +0200
+
+    Win32 makefile whitespace cleanup
+
+commit 943930e1e124385fd94738b6dcda37d29dc7ac7f
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 10:41:41 2011 -0700
+
+    CHANGES: agent: PATCH 3324769: from hardaker: Fix -Wunused warning
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit c1348b5284007f9289a13b48d154ec268fc03858
+Merge: 2dd9ed0 90c0e75
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 10:27:25 2011 -0700
+
+    Merge remote-tracking branch 'origin/V5-4-patches' into V5-4-patches
+
+commit 90c0e75f3e0de73d6aaab3e3d7146f18a8f9e187
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Aug 4 19:12:24 2011 +0200
+
+    snmpusm: Fix recently introduced compiler warnings
+
+commit 2dd9ed0858daa982b4160b4d2a7d5a2b80944171
+Author: Stuart Henderson <t0jw2fu0kmg@users.sourceforge.net>
+Date:   Thu Aug 4 10:06:57 2011 -0700
+
+    CHANGES: openbsd: PATCH 3357932: from t0jw2fu0kmg: Cleaning in memory_netbsd.c
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 2101bb2d7ad6db038c755aa9193c8ace0dbd4f58
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 09:28:06 2011 -0700
+
+    added the missing freebsd9.h file from the freebsd9 patch
+
+commit b6a481fa3062893e589bf6163c9d06d0f2053240
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 09:27:05 2011 -0700
+
+    ignore *.orig and *.rej
+
+commit cc5134e53d1c233dc41e31fbb78faab098f09361
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 09:26:44 2011 -0700
+
+    help output describes rebase vs merge better
+
+commit b372e5ab30aa155741e94df22e0752535c59e4bb
+Author: Stuart Henderson <t0jw2fu0kmg@users.sourceforge.net>
+Date:   Thu Aug 4 09:22:28 2011 -0700
+
+    CHANGES: openbsd: PATCH 3357927: from t0jw2fu0kmg: Recognise openbsd5
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 0548a4e97b2a1f0399e58c4efc004c9497398cd6
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 09:22:15 2011 -0700
+
+    fix where arguments are set
+
+commit 3b3780bca9adeebf4ef7508aee6b8ebcb94f656c
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 09:20:40 2011 -0700
+
+    split nssfpatchapply into two parts: apply and commiting
+
+commit 0422514a62bcaae6005017d7e9ed485075fe701c
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 09:15:25 2011 -0700
+
+    patch using -N
+
+commit ecbab0a98a02fde6bbca7dd370bcd9c3ca76affe
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 08:27:41 2011 -0700
+
+    nssync supports --merge now
+
+commit d2c4768bd2efb48664434a831425c2dda85d7133
+Author: Garrett Cooper <yaberauneya@users.sourceforge.net>
+Date:   Thu Aug 4 08:23:22 2011 -0700
+
+    CHANGES: libnetsnmp: PATCH 3362233: from yaberauneya: Mute unnecessary cannot find module noise
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit d19b8fca2384077f732a30f2946ab0c03bc0e738
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 08:15:17 2011 -0700
+
+    allow nsrollup to take a --merge flag for merging instead of rebasing
+
+commit 0e6842fe080cec853b08cd2323015ababc381ce1
+Author: Sachin Surendran <sachinsurendran@users.sourceforge.net>
+Date:   Thu Aug 4 08:12:09 2011 -0700
+
+    CHANGES: snmptrapd: PATCH 3383441: from sachinsurendran: Fix crash on 5.4.4 due to access of freed memory
+    
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit f3bc55184d96c58dcfd58953796c10f7354dd4a7
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 06:54:22 2011 -0700
+
+    prompt for patch and an area, and use the proper CHANGES line format
+
+commit ad696ba1249d3c4bc12c0eb38481ff0fc433f8a1
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Aug 4 06:42:42 2011 -0700
+
+    Use fetch --all and rebase as suggested by Bart for speed improvements
+
+commit 44969b4e57c27194e5bd357bc45275feb8695d22
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jul 8 20:52:25 2011 +0200
+
+    CHANGES: Win32: Fix the compiler warnings triggered by the winExtDLL source code and that are triggered by the change of the "oid" typedef from uint32_t to u_long.
+
+commit ea58b67b4f318acf1f9e852582bccad47b4d8e67
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jul 8 20:52:25 2011 +0200
+
+    CHANGES: Win32: winExtDLL: Invoke SnmpUtilOidFree() before SnmpUtilOidCpy(). It's not clear yet why the original code did not make snmpwalk trigger a memory leak.
+
+commit 8a01ec6423d400c4a13ccac68a3791d0218a0885
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Aug 4 11:19:17 2011 +0200
+
+    CHANGES: Windows: Make linking with recent OpenSSL binaries succeed.
+
+commit 284f5fb79e056a272f73b90937d7bf057c2af021
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Aug 3 11:06:23 2011 -0700
+
+    added a comment
+
+commit 8c0432a74fedf8a1385c8ad0ff1fb429a28eab99
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Aug 3 11:00:31 2011 -0700
+
+    at end of nsrollup mention that now would be a good time to run nssync
+
+commit ca3ad3a28f81f59dffa3dbb809a770147241e3e5
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Aug 3 10:56:14 2011 -0700
+
+    a new nssync() function for push/pulling active branches
+
+commit 9736234b3798ba5462a0a74943ede80e90a6485b
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Aug 3 10:23:00 2011 -0700
+
+    A new function: nssfpatchapply that auto-pulls git command line info from SF
+
+commit bf7178b0b22587d43d1a80c269cd216bd5930214
+Author: Ilya Yanok <yanok@emcraft.com>
+Date:   Mon Jul 18 04:31:08 2011 +0400
+
+    agent: change type of snmp_enableauthentraps to long
+    
+    Type of snmp_enableauthentraps variable is changed from int to long.
+    This fixes the bug with writing to snmpEnableAuthenTraps if server is
+    compiled for 64bit (snmpset reports wrong length). This bug was
+    introduced a long time ago (by faeecd0 commit).
+    
+    Actually this is a 'less effort' type of fix but I wonder why we need a
+    long to store an INTEGER in the first place?
+    
+    Signed-off-by: Ilya Yanok <yanok@emcraft.com>
+    Signed-off-by: Wes Hardaker <hardaker@users.sourceforge.net>
+
+commit 16c02d69cc9ce4fd4e7710a0bf9430f52175ed50
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Aug 2 14:43:52 2011 -0700
+
+    added variables names to the generated error messages.
+
+commit 7fed61bf0af1477eb740a0588f6a11a12b723595
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Aug 2 13:22:38 2011 -0700
+
+    Wording changes to help describe contexts better
+
+commit 9380612fdcb4f9bb081c4a46746692124abede50
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Aug 2 13:22:21 2011 -0700
+
+    Added the missing U64 m2i file
+
+commit 61b178f1ee8952aa03aa3b1ba51f4a6655e47f01
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Aug 3 18:09:47 2011 +0200
+
+    CHANGES: Windows: Perl modules build now with IPv6 enabled.
+
+commit 944612ef56ad2564aafe14df6d08e048b7228b86
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Aug 1 14:49:41 2011 +0200
+
+    .gitignore: Add file names and patterns for output files generated during the Windows build
+
+commit 26009012785f828bbfc8759afbbbfc58700ff1f6
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jul 29 09:59:31 2011 +0200
+
+    .gitignore: Sort alphabetically
+
+commit 5e3ff5596648e0907d571d7a4d3a3a8c2402d8ee
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jul 29 08:43:19 2011 +0200
+
+    .gitignore: Add apps/sshtosnmp
+
+commit 31a3a2a0624046511ca07ec1f521a22d7966db80
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Aug 1 13:38:01 2011 +0200
+
+    Remove two generated Perl files.
+
+commit 82d73fb11be3ae31f39c9d618d5388dc9b1006d7
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jul 29 20:51:27 2011 +0200
+
+    Unbreak the Windows build
+
+commit c48173c06a9eaadbf81e6b4962d55ef0a54db251
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Jul 29 10:27:39 2011 +0200
+
+    Fix a bug in a debug statement
+
+commit 31fa07cd9ffde46d41d2b5838c3fc4d01548bfb5
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jul 27 14:45:47 2011 +0200
+
+    CHANGES: snmpd: purge zombies of pass_persist child processes.
+    
+    If pass_persist process ends, we should process its sigchild signal.
+
+commit 11bd6e032d15ffb11d72e352ca6bc95023c3371a
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Wed Jul 27 14:45:09 2011 +0200
+
+    CHANGES: snmpd: run signal handlers when select() is interrupted.
+    
+    This behavior is indicated in comment on line 1244, but it was not actually done.
+
+commit cd6e382beda8d40edd0664e8faec8db224e5d5d6
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jul 26 16:16:46 2011 +0200
+
+    Clarify an IPv6 source code comment
+
+commit 2cec624792af8546505fba02ca0a2e2116a559e7
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jul 26 14:59:33 2011 +0200
+
+    Spelling fix: definedy -> defined
+
+commit f95a1f380ea18ff633f273a9aa5e9eb27627010e
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jul 26 14:19:14 2011 +0200
+
+    Spelling fix: aleviate -> alleviate
+
+commit c5a8464c42a94c250ee2dfa2a473109a734203d8
+Author: Jan Safranek <jsafranek@users.sourceforge.net>
+Date:   Tue Jul 26 14:24:55 2011 +0200
+
+    CHANGES: python: PATCH: 3310375: from Erinn Looney-Triggs: fixed parsing of varbinds with MIB names
+
+commit d65c7b14a0f91560bbf65274f62e48db97a34b3e
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Jul 19 18:46:10 2011 -0700
+
+    updated gitignore to ignore a number of auto-generated files
+
+commit ab1d887ba383c33d853aa4d348bbceab981aa245
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Jul 19 18:36:11 2011 -0700
+
+    remove broken whitespace lines that leads to reading confusion
+
+commit 690ea7dc45c6fe1a7bbfa1584ed9bf921f19b28f
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jul 19 08:28:59 2011 +0200
+
+    CHANGES: snmptrapd: Add missing newline character in a log message
+
+commit dd2fc2ed88d0f9bb81de35dbe1f9bd3bbbbb3d90
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jul 19 08:28:13 2011 +0200
+
+    CHANGES: snmptrapd: Invoke shutdown_perl() when shutting down
+
+commit 6deec1a89048c8db26523517af98ddd397fc77c3
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jul 19 08:23:05 2011 +0200
+
+    Spelling fix: branket -> bracket
+
+commit a56721a3e7754e389daa7e8a3d5792899edc9de3
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Jul 14 16:18:32 2011 +0200
+
+    Add autom4te.cache and stamp-h to .gitignore
+
+commit 851bcf53fcd13cdf0ba9f12e5d603e73f8bb9611
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Fri Jul 15 15:32:49 2011 -0700
+
+    mentione the 'before' part of the injectHandler line
+
+commit 9f793630162cb7713ac4b68c9aabe50e67514071
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Thu Jul 14 07:31:30 2011 -0700
+
+    fix a typo
+
+commit 196e110b314e37e73a74edb03c43da0299ea8b44
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 11 19:34:06 2011 -0700
+
+    added 5.7 patches
+
+commit a2ac24dd4b5b709773fe827687c85982775d9998
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 11 19:33:03 2011 -0700
+
+    added a copy of the shell-functions to the older branch
+
+commit 8ad32cefb37c62080c4f3d74443884bec1c49add
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Mon Jul 11 19:30:29 2011 -0700
+
+    a copy of the release file applied to the older branches
+
+commit 9ff471439e326255066377c76d995e1aaf296bd2
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jun 29 23:15:42 2011 -0700
+
+    fix tag pushing
+
+commit f9a65385b23d06dbbe9430a23c8ebcf68d12127e
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jun 29 22:32:10 2011 -0700
+
+    misc publication fixes found while publishing
+
+commit df9cf9a1e293d05a24786694f68c05a2be13a9b3
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jun 29 16:34:11 2011 -0700
+
+    xml fixes
+
+commit ee8d160416c2f7d1941863e7d37512658e3f2f36
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jun 29 16:33:50 2011 -0700
+
+    use git2cl to generate the ChangeLog file; needs much more work.
+
+commit 5d4bb80113ddcce5cee293a4e537b201fafcab83
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jun 29 14:48:39 2011 -0700
+
+    use the new run-autoconf script
+
+commit 61ffef6268675a91e230d44b3407a3d0c3ffc89d
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jun 29 14:47:56 2011 -0700
+
+    A script to invoke the correct version of the autoconf tool
+
+commit d0f6f8de37292b7fbc9e05793690b5784a041d46
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jun 29 08:41:45 2011 -0700
+
+    remaining command line changes for svn -> git
+
+commit 16560840020dc5e0c4b28cc2e30bb2cd034ce0d0
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jun 29 07:26:55 2011 -0700
+
+    make the branch echo output and svn update converted to git equivalents
+
+commit f775bcd6a7a50f33782526ecdb1beea55e3fe823
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Wed Jun 29 07:11:29 2011 -0700
+
+    pull the branch info from git
+
+commit af8b235234f72944a649a76f0d30cff95ac2e895
+Author: Wes Hardaker <opensource@hardakers.net>
+Date:   Tue Jun 28 13:11:19 2011 -0700
+
+    Mention the Git wiki page
+
+commit 9bc82e4ca4837f00072dba86b9497a27186909f9
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jun 28 19:13:35 2011 +0200
+
+    Add .gitignore
+
+commit f2df8a2b0165e0137fd017b41c7d04e3a5e168e6
+Author: Wes Hardaker <opensource@hardakers.net>
+Date:   Tue Jun 28 08:29:08 2011 -0700
+
+    We're now using git!
+
+commit 38fe8177d533135a6cc682724f16a91113bcd7f3
+Merge: 7d917cf dd58baf
+Author: Wes Hardaker <opensource@hardakers.net>
+Date:   Mon Jun 27 21:34:56 2011 -0700
+
+    Merge branch 'V5-3-patches' into V5-4-patches
+
+commit dd58baf79f9a6fa98fac70533a6bd7d7d3d1ebf2
+Merge: 2707435 5c177f5
+Author: Wes Hardaker <opensource@hardakers.net>
+Date:   Mon Jun 27 21:34:55 2011 -0700
+
+    Merge branch 'V5-2-patches' into V5-3-patches
+
+commit 5c177f517d16f05545b279d16f0e4fd5696be651
+Merge: f0d6bf0 c2bcebc
+Author: Wes Hardaker <opensource@hardakers.net>
+Date:   Mon Jun 27 21:34:55 2011 -0700
+
+    Merge branch 'V5-1-patches' into V5-2-patches
+
+commit c2bcebcefa3b602f390b2f9c83dc72f8f8561b4d
+Merge: 42b96ac c55f86f
+Author: Wes Hardaker <opensource@hardakers.net>
+Date:   Mon Jun 27 21:34:45 2011 -0700
+
+    Merge branch 'V5-0-patches' into V5-1-patches
+
+commit 7d917cfc8f74574032564815ab0fb483b691864e
+Author: Dave Shield <dts12@users.sourceforge.net>
+Date:   Fri Jun 24 13:00:50 2011 +0000
+
+    version update
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/branches/V5-4-patches@20524 06827809-a52a-0410-b366-d66718629ded
+
+commit a162e931f29931ce03d40d73dd969f6086083b80
+Author: Dave Shield <dts12@users.sourceforge.net>
+Date:   Fri Jun 24 12:38:14 2011 +0000
+
+    Missing check for rpmts.h
+    
+    
+    git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/branches/V5-4-patches@20523 06827809-a52a-0410-b366-d66718629ded
+
+-------------------------------------------------------------------------------
 Changes: V5.4.3 -> V5.4.4
 
 2011-06-24 12:38  dts12
@@ -3646,7 +7798,7 @@ Changes: V5.4.2 -> V5.4.3
 
    * agent/mibgroup/ip-mib/data_access/systemstats_common.c:
 
-   CHANGES: snmpd: from "Marcus R¸ckert": fix possible crash when
+   CHANGES: snmpd: from "Marcus R√ºckert": fix possible crash when
    64-bit counters in ipSystemStatsTable get bigger than 2^32
 
 2009-07-27 12:13  hardaker
@@ -4409,14 +8561,14 @@ Changes: V5.4.2 -> V5.4.3
    * snmplib/snmpUDPDomain.c:
 
    Fix src/dst confusion
-   Patch provided by Krzysztof Olødzki
+   Patch provided by Krzysztof Ol¬ødzki
 
 2009-01-28 09:29  dts12
 
    * agent/mibgroup/smux/smux.c:
 
    CHANGES: Fix two bugs with smux password support.
-   Patch supplied by Krzysztof Olødzki
+   Patch supplied by Krzysztof Ol¬ødzki
 
 2009-01-23 14:53  jsafranek
 
@@ -15436,7 +19588,7 @@ Changes: V5.3 -> V5.4.pre1
 
    * agent/mibgroup/ip-mib/data_access/ipaddress_linux.c:
 
-   Handle full-length IPv6 addresses.  Fix supplied by Radek Vok√°l
+   Handle full-length IPv6 addresses.  Fix supplied by Radek Vok√É¬°l
 
 2006-01-30 01:52  dts12
 
@@ -15483,7 +19635,7 @@ Changes: V5.3 -> V5.4.pre1
 , snmplib/snmp_api.c, perl/SNMP/SNMP.pm:
 
    Handle non-increasing OIDs during a (perl) bulkwalk.
-   Patch #1364650 from Ole Bj√∏rn Hessen
+   Patch #1364650 from Ole Bj√É¬∏rn Hessen
 
 2006-01-27 03:07  dts12
 
@@ -31198,7 +35350,7 @@ Changes: V5.1 -> V5.2
 
    * agent/mibgroup/ucd-snmp/disk.c:
 
-   fix float calc in var_extensible_disk per Harald Straﬂberger <hs@syslog.at>
+   fix float calc in var_extensible_disk per Harald Stra√überger <hs@syslog.at>
 
 2004-08-31 14:02  hardaker
 
@@ -33779,7 +37931,7 @@ Changes: V5.1 -> V5.2
    * configure.in, configure:
 
    Fix handling of --enable-local-smux option
-   (Patch #949808 from Erik ƒnggÂrd)
+   (Patch #949808 from Erik √Ñngg√•rd)
 
 2004-06-18 06:46  dts12
 
@@ -64743,7 +68895,7 @@ Changes: V5.0.9 -> V5.1
    * agent/mibgroup/host/: hr_swrun.c (V4-2-patches.5), hr_swrun.c
 :
 
-   Fix Linux file descriptor leak (reported by Oliver F‰nger)
+   Fix Linux file descriptor leak (reported by Oliver F√§nger)
    
 2001-03-14 05:22  jbpn
 
@@ -65957,7 +70109,7 @@ Changes: V5.0.9 -> V5.1
 
    * snmplib/parse.c:
 
-   -†parse.c: fix a C++ style comment
+   -¬†parse.c: fix a C++ style comment
    
 2000-11-24 15:14  nba
 
@@ -69268,7 +73420,7 @@ Changes: V5.0.9 -> V5.1
 
    * agent/mibgroup/ucd-snmp/memory.c:
 
-   - (memory.c): Patch from Ragnar Kj¯rstad:
+   - (memory.c): Patch from Ragnar Kj√∏rstad:
      - fixed linux problem: wrong params getting returned.
    
 2000-05-25 05:38  mslifcak
@@ -71048,7 +75200,7 @@ Changes: V5.0.9 -> V5.1
 
    - (configure* ucd-snmp/vmstat_solaris2.c):
      - Provide missing 'getpagesize' routine for Solaris 2.4
-       (Thanks to Ragnar Kj¯rstad)
+       (Thanks to Ragnar Kj√∏rstad)
    
 2000-02-16 20:17  mslifcak
 
@@ -78376,7 +82528,7 @@ Changes: V5.0.9 -> V5.1
      loadave.c, memory_solaris2.c, pass.c, pass_persist.c, proc.c,
      versioninfo.c, alarm.c, event.c, Makefile.in, parse.c, snmp.c,
      snmp_debug.c, snmp_logging.c, snmp_logging.h): Patch from Ragnar
-     Kj¯rstad:
+     Kj√∏rstad:
      - do file, stderr, and syslog support.
    
 1999-07-15 08:45  hardaker
@@ -78519,7 +82671,7 @@ Changes: V5.0.9 -> V5.1
 
    * agent/snmpd.c:
 
-   - (snmpd.c): Patch from Ragnar Kj¯rstad:
+   - (snmpd.c): Patch from Ragnar Kj√∏rstad:
      - Add options for switching to a given uid and gid.
    
 1999-07-08 15:16  hardaker
@@ -95288,7 +99440,7 @@ Changes: V5.0.7 -> V5.0.8
 
    * snmplib/mib.c:
 
-   Fix a C precedence botch-up, thanks to FabrÌcio Las Casas <Fabricio@atan.com.br>
+   Fix a C precedence botch-up, thanks to Fabr√≠cio Las Casas <Fabricio@atan.com.br>
    
 2003-02-26 14:14  nba
 
@@ -112071,7 +116223,7 @@ Changes: V4.2 -> V5.0
 
    * agent/mibgroup/host/: hr_swrun.c (V4-2-patches.5), hr_swrun.c:
 
-   Fix Linux file descriptor leak (reported by Oliver F‰nger)
+   Fix Linux file descriptor leak (reported by Oliver F√§nger)
    
 2001-03-14 05:22  jbpn
 
@@ -116316,7 +120468,7 @@ Changes: V4.2 -> V4.2.1
 
    * agent/mibgroup/host/hr_swrun.c:
 
-   Fix Linux file descriptor leak (reported by Oliver F‰nger)
+   Fix Linux file descriptor leak (reported by Oliver F√§nger)
    
 2001-03-13 13:20  hardaker
 
@@ -117234,7 +121386,7 @@ Changes: V4.1.2 -> V4.2
 	
 2000-11-27 13:41  nba
 
-	-†parse.c: fix a C++ style comment
+	-¬†parse.c: fix a C++ style comment
 	
 2000-11-24 15:14  nba
 
@@ -119562,7 +123714,7 @@ Changes: V4.1.2 -> V4.2
 	
 2000-05-25 10:07  hardaker
 
-	- (memory.c): Patch from Ragnar Kj¯rstad:
+	- (memory.c): Patch from Ragnar Kj√∏rstad:
 	  - fixed linux problem: wrong params getting returned.
 	
 2000-05-25 05:38  mslifcak
@@ -120751,7 +124903,7 @@ Changes: V4.1.2 -> V4.2
 
 	- (configure* ucd-snmp/vmstat_solaris2.c):
 	  - Provide missing 'getpagesize' routine for Solaris 2.4
-	    (Thanks to Ragnar Kj¯rstad)
+	    (Thanks to Ragnar Kj√∏rstad)
 	
 2000-02-16 20:17  mslifcak
 
@@ -126085,7 +130237,7 @@ hardaker  8 Jul 99 15:16:35
     - (snmpdelta.c, int64.c, int64.h): minimal c64 support for snmpdelta. Untested.
 
 hardaker  8 Jul 99 16:02:58
-    - (snmpd.c): Patch from Ragnar Kj¯rstad:
+    - (snmpd.c): Patch from Ragnar Kj√∏rstad:
       - Add options for switching to a given uid and gid.
 
 daves  9 Jul 99 01:49:49
@@ -126132,7 +130284,7 @@ hardaker 20 Jul 99 14:02:26
       loadave.c, memory_solaris2.c, pass.c, pass_persist.c, proc.c,
       versioninfo.c, alarm.c, event.c, Makefile.in, parse.c, snmp.c,
       snmp_debug.c, snmp_logging.c, snmp_logging.h): Patch from Ragnar
-      Kj¯rstad:
+      Kj√∏rstad:
       - do file, stderr, and syslog support.
 
 hardaker 20 Jul 99 17:06:53
