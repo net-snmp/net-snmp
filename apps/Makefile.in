@@ -61,6 +61,7 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmptest$(EXEEXT)			\
 		snmpdf$(EXEEXT) 			\
 		snmpps$(EXEEXT) 			\
+		snmpping$(EXEEXT) 			\
 		$(AGENTXTRAP)				\
 		$(SNMPVACMINSTALLBINPROG)	        \
                 $(SSHINSTALLBINPROG) $(TLSINSTALLBINPROG) \
@@ -213,6 +214,9 @@ snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
 
 snmpps$(EXEEXT):    snmpps.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpps.$(OSUFFIX) ${LDFLAGS} @LIBCURSES@ ${LIBS}
+
+snmpping$(EXEEXT):    snmpping.$(OSUFFIX) $(USELIBS)
+	$(LINK) ${CFLAGS} -o $@ snmpping.$(OSUFFIX) ${LDFLAGS} ${LIBS} -lm
 
 # TODO: @LIBPCAP@ and configure magic
 # (including @NETSNMP_BUILD_PCAP_PROG_{TRUE,FALSE}@)
