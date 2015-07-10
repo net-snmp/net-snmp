@@ -617,6 +617,9 @@
 /* Define to 1 if you have the <osreldate.h> header file. */
 #undef HAVE_OSRELDATE_H
 
+/* Define to 1 if you have the <pcap/pcap.h> header file. */
+#undef HAVE_PCAP_PCAP_H
+
 /* define if you have pci_lookup_name() */
 #undef HAVE_PCI_LOOKUP_NAME
 
