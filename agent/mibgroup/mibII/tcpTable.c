@@ -979,7 +979,11 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         memcpy(&(nnew->pcb), &(((NS_ELEM *) xig)->xt_inp),
                            sizeof(struct inpcb));
 
+#ifdef INP_ISIPV6
+	if (INP_ISIPV6(&nnew->pcb))
+#else
 	if (nnew->pcb.inp_vflag & INP_IPV6)
+#endif
 	    free(nnew);
 	else {
 	    nnew->inp_next = tcp_head;

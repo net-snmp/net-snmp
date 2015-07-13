@@ -1515,6 +1515,9 @@ var_udp6(register struct variable * vp,
 #if defined(__NetBSD__) && __NetBSD_Version__ >= 106250000	/*1.6Y*/
         if (in6pcb.in6p_af != AF_INET6)
             goto skip;
+#elif defined(INP_ISIPV6)
+	if (!INP_ISIPV6(&in6pcb))
+	    goto skip;
 #elif defined(freebsd3) || defined(darwin)
         if (0 == (in6pcb.inp_vflag & INP_IPV6))
             goto skip;
@@ -1731,6 +1734,9 @@ var_tcp6(register struct variable * vp,
 #if defined(__NetBSD__) && __NetBSD_Version__ >= 106250000	/*1.6Y*/
         if (in6pcb.in6p_af != AF_INET6)
             goto skip;
+#elif defined(INP_ISIPV6)
+	if (!INP_ISIPV6(&in6pcb))
+	    goto skip;
 #elif defined(freebsd3) || defined(darwin)
         if (0 == (in6pcb.inp_vflag & INP_IPV6))
             goto skip;
@@ -2073,6 +2079,9 @@ var_tcp6(register struct variable * vp,
 #if defined(__NetBSD__) && __NetBSD_Version__ >= 106250000	/*1.6Y*/
         if (in6pcb.in6p_af != AF_INET6)
             goto skip;
+#elif defined(INP_ISIPV6)
+	if (!INP_ISIPV6(&in6pcb))
+	    goto skip;
 #elif defined(freebsd3) || defined(darwin)
         if (0 == (in6pcb.inp_vflag & INP_IPV6))
             goto skip;
