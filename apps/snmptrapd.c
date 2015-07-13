@@ -1144,7 +1144,11 @@ main(int argc, char *argv[])
     if (dofork && netsnmp_running) {
         int             fd;
 
+#if HAVE_FORKALL
+        switch (forkall()) {
+#else
         switch (fork()) {
+#endif
         case -1:
             fprintf(stderr, "bad fork - %s\n", strerror(errno));
             _exit(1);
