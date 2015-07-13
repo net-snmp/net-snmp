@@ -741,6 +741,20 @@ var_diskio(struct variable * vp,
 #endif
         return (u_char *) & long_ret;
 
+    case DISKIO_NREADX:
+        *var_len = sizeof(struct counter64);
+        longlong_ret = dk[indx].rbytes;
+        c64_ret.low = longlong_ret & 0xffffffff;
+        c64_ret.high = longlong_ret >> 32;
+        return (u_char *) & c64_ret;
+
+    case DISKIO_NWRITTENX:
+        *var_len = sizeof(struct counter64);
+        longlong_ret = dk[indx].wbytes;
+        c64_ret.low = longlong_ret & 0xffffffff;
+        c64_ret.high = longlong_ret >> 32;
+        return (u_char *) & c64_ret;
+
     case DISKIO_READS:
 #ifdef HW_DISKSTATS
      	long_ret = dk[indx].dk_rxfer;
