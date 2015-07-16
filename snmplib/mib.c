@@ -2818,15 +2818,18 @@ netsnmp_mibindex_load( void )
         if (!fp)
             continue;
         cp = fgets( tmpbuf2, sizeof(tmpbuf2), fp );
+        fclose( fp );
         if ( !cp ) {
             DEBUGMSGTL(("mibindex", "Empty MIB index (%d)\n", i));
-            fclose(fp);
+            continue;
+        }
+        if ( strncmp( tmpbuf2, "DIR ", 4 ) != 0 ) {
+            DEBUGMSGTL(("mibindex", "Malformed MIB index (%d)\n", i));
             continue;
         }
         tmpbuf2[strlen(tmpbuf2)-1] = 0;
         DEBUGMSGTL(("mibindex", "load: (%d) %s\n", i, tmpbuf2));
         (void)_mibindex_add( tmpbuf2+4, i );  /* Skip 'DIR ' */
-        fclose( fp );
     }
     closedir( dir );
 }
