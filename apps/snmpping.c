@@ -378,6 +378,8 @@ wait_for_completion(netsnmp_session *ss, oid * index, size_t indexlen)
         status = snmp_synch_response(ss, pdu, &response);
         if (status != STAT_SUCCESS || !response) {
             snmp_sess_perror("snmpping", ss);
+            if (status == STAT_TIMEOUT)
+                goto retry;
             running = 0;
             goto out;
         }
@@ -390,24 +392,40 @@ wait_for_completion(netsnmp_session *ss, oid * index, size_t indexlen)
 
         vlp = response->variables;
         if (vlp->type == SNMP_NOSUCHINSTANCE) {
+            DEBUGMSGTL(("ping", "no-such-instance for pingResultsOperStatus\n"));
             goto retry;
         }
         pingStatus = *vlp->val.integer;
 
         vlp = vlp->next_variable;
         if (vlp->type == SNMP_NOSUCHINSTANCE) {
+            DEBUGMSGTL(("ping", "no-such-instance for pingResultsProbeResponses\n"));
             goto retry;
         }
         responses = *vlp->val.integer;
-#define PINGRESULTSOPERSTATUS_ENABLED 1 /* XXX */
+#define PINGRESULTSOPERSTATUS_ENABLED   1 /* XXX */
+#define PINGRESULTSOPERSTATUS_DISABLED  2 /* XXX */
+#define PINGRESULTSOPERSTATUS_COMPLETED 3 /* XXX */
 
-        if (responses > prev_responses || pingStatus != PINGRESULTSOPERSTATUS_ENABLED) {
+        if (responses > prev_responses || pingStatus == PINGRESULTSOPERSTATUS_COMPLETED) {
             DEBUGMSGTL(("ping", "responses %d (was %d), status %d\n", responses, prev_responses, pingStatus));
 
-            /* collect results by walking probeHistoryTable */
+            /* collect results between prev_responses and responses by walking probeHistoryTable */
+            prev_responses = responses;
         }
 
-        if (pingStatus != PINGRESULTSOPERSTATUS_ENABLED) {
+        /*
+         * Observed behavior: before the test has run, operStatus can be
+         * disabled, and then can turn to enabled, so we can't just stop
+         * if it's disabled.  However, it doesn't always go to completed.
+         * So, we say we're completed if it's completed, *or* if it's
+         * disabled and we've seen at least one response.
+         * (Note: this really needs to be pingResultsSentProbes, not
+         * responses, to handle the case where the other guy is not
+         * responding at all.)
+         */
+        if (pingStatus == PINGRESULTSOPERSTATUS_COMPLETED ||
+            (pingStatus == PINGRESULTSOPERSTATUS_DISABLED && responses > 0)) {
             running = 0;
             goto out;
         }
@@ -421,7 +439,10 @@ retry:
                 /* we can try again */
                 sleep(1);
             } else {
-                fprintf(stderr, "snmpping: pingResultsTable entry never created.\n");
+                if (status == STAT_TIMEOUT)
+                    fprintf(stderr, "snmpping: too many timeouts.\n");
+                else
+                    fprintf(stderr, "snmpping: pingResultsTable entry never created.\n");
                 running = 0;
             }
         }
@@ -498,6 +519,13 @@ overall_stats(netsnmp_session *ss, oid * index, size_t indexlen)
         stddev = result.pingResultsRttSumOfSquares;
         stddev /= result.pingResultsProbeResponses;
         stddev -= result.pingResultsAverageRtt * result.pingResultsAverageRtt;
+        /*
+         * If the RTT is less than 1.0, the sum of squares can be
+         * smaller than the number of responses, resulting in a
+         * negative stddev.  Clamp the stddev to 0.
+         */
+        if (stddev < 0)
+            stddev = 0.0;
         printf( "rtt min/avg/max/stddev = %d/%d/%d/%d ms\n",
                 result.pingResultsMinRtt,
                 result.pingResultsAverageRtt,
