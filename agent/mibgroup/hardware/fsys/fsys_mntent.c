@@ -210,6 +210,8 @@ netsnmp_fsys_arch_load( void )
 #if HAVE_HASMNTOPT
         if (hasmntopt( m, "ro" ))
             entry->flags |= NETSNMP_FS_FLAG_RONLY;
+        else
+            entry->flags &= ~NETSNMP_FS_FLAG_RONLY;
 #endif
         /*
          *  The root device is presumably bootable.
