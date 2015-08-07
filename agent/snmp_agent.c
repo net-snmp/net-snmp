@@ -636,15 +636,21 @@ int
 agent_check_and_process(int block)
 {
     int                  numfds;
-    netsnmp_large_fd_set fdset;
+    netsnmp_large_fd_set readfds;
+    netsnmp_large_fd_set writefds;
+    netsnmp_large_fd_set exceptfds;
     struct timeval       timeout = { LONG_MAX, 0 }, *tvp = &timeout;
     int                  count;
     int                  fakeblock = 0;
 
     numfds = 0;
-    netsnmp_large_fd_set_init(&fdset, FD_SETSIZE);
-    NETSNMP_LARGE_FD_ZERO(&fdset);
-    snmp_select_info2(&numfds, &fdset, tvp, &fakeblock);
+    netsnmp_large_fd_set_init(&readfds, FD_SETSIZE);
+    netsnmp_large_fd_set_init(&writefds, FD_SETSIZE);
+    netsnmp_large_fd_set_init(&exceptfds, FD_SETSIZE);
+    NETSNMP_LARGE_FD_ZERO(&readfds);
+    NETSNMP_LARGE_FD_ZERO(&writefds);
+    NETSNMP_LARGE_FD_ZERO(&exceptfds);
+    snmp_select_info2(&numfds, &readfds, tvp, &fakeblock);
     if (block != 0 && fakeblock != 0) {
         /*
          * There are no alarms registered, and the caller asked for blocking, so
@@ -667,13 +673,21 @@ agent_check_and_process(int block)
         timerclear(tvp);
     }
 
-    count = netsnmp_large_fd_set_select(numfds, &fdset, NULL, NULL, tvp);
+#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
+    netsnmp_external_event_info2(&numfds, &readfds, &writefds, &exceptfds);
+#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
+
+    count = netsnmp_large_fd_set_select(numfds, &readfds, &writefds, &exceptfds, tvp);
 
     if (count > 0) {
         /*
          * packets found, process them 
          */
-        snmp_read2(&fdset);
+#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
+        netsnmp_dispatch_external_events2(&count, &readfds, &writefds, &exceptfds);
+#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
+
+        snmp_read2(&readfds);
     } else
         switch (count) {
         case 0:
@@ -704,7 +718,9 @@ agent_check_and_process(int block)
     netsnmp_check_outstanding_agent_requests();
 
  exit:
-    netsnmp_large_fd_set_cleanup(&fdset);
+    netsnmp_large_fd_set_cleanup(&readfds);
+    netsnmp_large_fd_set_cleanup(&writefds);
+    netsnmp_large_fd_set_cleanup(&exceptfds);
     return count;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_AGENT_CHECK_AND_PROCESS */
