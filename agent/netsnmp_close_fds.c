@@ -33,7 +33,7 @@ void netsnmp_close_fds(int fd)
         largest_fd = getdtablesize() - 1;
     }
 
-    for (i = largest_fd; i > fd; i--)
+    for (i = largest_fd; i > fd && i >= 0; i--)
         close(i);
 #endif
 }
