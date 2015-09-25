@@ -131,9 +131,12 @@ it came from, what SNMP user name or community name it was sent under,
 etc).  The second argument is a reference to an array containing the
 variable bindings (OID and value information) that define the
 noification itself.  Each variable is itself a reference to an array
-containing three values: a NetSNMP::OID object, the value that came
-associated with it, and the value's numeric type (see NetSNMP::ASN for
-further details on SNMP typing information).
+containing four values: a NetSNMP::OID object, a string representation
+of the value that came associated with it, the value's numeric type (see
+NetSNMP::ASN for further details on SNMP typing information), and the raw
+value of the trap, encoded according to its type, 64-bit integer types are
+returned as strings, integer types as integers, strings as strings, object
+identifiers as NetSNMP::OID objects, and any other types as undefs.
 
 Registered functions should return one of the following values:
 

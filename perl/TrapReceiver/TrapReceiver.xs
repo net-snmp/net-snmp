@@ -186,6 +186,57 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         av_push(vba,newSVpvn((char *) outbuf, oo_len));
         netsnmp_free(outbuf);
         av_push(vba,newSViv(vb->type));
+	switch (vb->type) {
+	case ASN_INTEGER:
+		av_push(vba,newSViv((int32_t)*vb->val.integer));
+		break;
+	case ASN_COUNTER:
+	case ASN_GAUGE:
+	case ASN_TIMETICKS:
+	case ASN_UINTEGER: /* from rfc1442 */
+		av_push(vba,newSVuv((uint32_t)*vb->val.integer));
+		break;
+	case ASN_IPADDRESS:
+	case ASN_OCTET_STR:
+	case ASN_OPAQUE:
+	case ASN_NSAP:
+		av_push(vba,newSVpvn((char*)vb->val.string,vb->val_len));
+		break;
+	case ASN_BIT_STR:
+		av_push(vba,newSVpvn((char*)vb->val.bitstring,vb->val_len));
+		break;
+	case ASN_OBJECT_ID:
+		av_push(vba,newSVoid(vb->val.objid,vb->val_len / sizeof(oid)));
+		break;
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
+	case ASN_OPAQUE_FLOAT:
+		av_push(vba,newSVnv(*vb->val.floatVal));
+		break;
+	case ASN_OPAQUE_DOUBLE:
+		av_push(vba,newSVnv(*vb->val.doubleVal));
+		break;
+	case ASN_OPAQUE_I64:
+		{
+			char buf[I64CHARSZ + 1];
+			printI64(buf, vb->val.counter64);
+			av_push(vba,newSVpv(buf,0));
+		}
+		break;
+	case ASN_OPAQUE_COUNTER64:
+	case ASN_OPAQUE_U64:
+#endif
+	case ASN_COUNTER64:
+		{
+			char buf[I64CHARSZ + 1];
+			printU64(buf, vb->val.counter64);
+			av_push(vba,newSVpv(buf,0));
+		}
+		break;
+	case ASN_NULL:
+	default:
+		av_push(vba,newSV(0));
+		break;
+	}
         av_push(varbinds, (SV *) newRV_noinc((SV *) vba));
     }
 
