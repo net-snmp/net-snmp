@@ -4233,6 +4233,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
     int             output_format =
         netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
     char            intbuf[64];
+    struct tree    *orgtree = subtree;
 
     if (!objid || !buf) {
         return NULL;
@@ -4293,7 +4294,6 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
         }
     }
 
-
     if (end_of_known) {
         *end_of_known = *out_len;
     }
@@ -4301,6 +4301,18 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
     /*
      * Subtree not found.  
      */
+
+    if (orgtree && in_dices && objidlen > 0) {
+	sprintf(intbuf, "%" NETSNMP_PRIo "u.", *objid);
+	if (!*buf_overflow
+	    && !snmp_strcat(buf, buf_len, out_len,
+			    allow_realloc,
+			    (const u_char *) intbuf)) {
+	    *buf_overflow = 1;
+	}
+	objid++;
+	objidlen--;
+    }
 
     while (in_dices && (objidlen > 0) &&
            (NETSNMP_OID_OUTPUT_NUMERIC != output_format) &&
