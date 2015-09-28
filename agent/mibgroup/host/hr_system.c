@@ -635,12 +635,11 @@ count_users(void)
             continue;
 #endif
 #ifndef UTMP_HAS_NO_PID
-            /* This block of code fixes zombie user PIDs in the
+            /* This block of code skips zombie user PIDs in the
                utmp/utmpx file that would otherwise be counted as a
-               current user */
+               current user, but leaves updating the actual
+               utmp/utmpx file to the system. */
             if (kill(utmp_p->ut_pid, 0) == -1 && errno == ESRCH) {
-                utmp_p->ut_type = DEAD_PROCESS;
-                pututline(utmp_p);
                 continue;
             }
 #endif
