@@ -135,7 +135,7 @@ netsnmp_internal_pass_parse(char * buf,
         c64.high = (unsigned long)(v64 >> 32);
         c64.low  = (unsigned long)(v64 & 0xffffffff);
         *var_len = sizeof(c64);
-        vp->type = ASN_INTEGER64;
+        vp->type = ASN_OPAQUE_I64;
         return ((unsigned char *) &c64);
     }
 #endif
