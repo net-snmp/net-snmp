@@ -164,6 +164,24 @@ binary_search(const void *val, netsnmp_container *c, int exact)
     return first;
 }
 
+/* Returns the index of the first element which compares greater than *val. */
+static int
+upper_bound(const void *val, netsnmp_container *c)
+{
+    binary_array_table *t = (binary_array_table*)c->container_data;
+    int                 i;
+
+    netsnmp_assert(!(t->flags & CONTAINER_KEY_UNSORTED));
+
+    i = binary_search(val, c, 0);
+    if (i < 0)
+        return t->count;
+    while (i < t->count && c->compare(t->data[i], val) <= 0)
+        i++;
+
+    return i;
+}
+
 NETSNMP_STATIC_INLINE binary_array_table *
 netsnmp_binary_array_initialize(void)
 {
@@ -331,12 +349,16 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
     int             new_max, new_size;
     char           *new_data;   /* Used for * a) extending the data table
                                  * * b) the next entry to use */
+    int             i;
+
+    i = upper_bound(entry, c);
+    netsnmp_assert(0 <= i && i <= t->count);
+
     /*
      * check for duplicates
      */
     if (! (t->flags & CONTAINER_KEY_ALLOW_DUPLICATES)) {
-        new_data = netsnmp_binary_array_get(c, entry, 1);
-        if (NULL != new_data) {
+        if (i > 0 && c->compare(t->data[i - 1], entry) == 0) {
             DEBUGMSGTL(("container","not inserting duplicate key\n"));
             return -1;
         }
@@ -357,11 +379,6 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
         new_data = (char *) realloc(t->data, new_size);
         if (new_data == NULL)
             return -1;
-        else {
-            int old_size = t->max_size * t->data_size;
-            int count = new_size - old_size;
-            memset(&new_data[old_size], 0x0, count);
-        }
         t->data = (void**)new_data;
         t->max_size = new_max;
     }
@@ -369,8 +386,10 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
     /*
      * Insert the new entry into the data array
      */
-    t->data[t->count++] = NETSNMP_REMOVE_CONST(void *, entry);
-    t->dirty = 1;
+    memmove(&t->data[i + 1], &t->data[i], (t->count - i) * sizeof(t->data[i]));
+    t->count++;
+    t->data[i] = NETSNMP_REMOVE_CONST(void *, entry);
+
     return 0;
 }
 
