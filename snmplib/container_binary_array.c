@@ -122,9 +122,9 @@ binary_search(const void *val, netsnmp_container *c, int exact)
     binary_array_table *t = (binary_array_table*)c->container_data;
     size_t             len = t->count;
     size_t             half;
-    size_t             middle = 0;
+    size_t             middle;
     size_t             first = 0;
-    int                result = 0;
+    int                result;
 
     if (!len)
         return -1;
@@ -134,18 +134,14 @@ binary_search(const void *val, netsnmp_container *c, int exact)
 
     while (len > 0) {
         half = len >> 1;
-        middle = first;
-        middle += half;
-        if ((result =
-             c->compare(t->data[middle], val)) < 0) {
-            first = middle;
-            ++first;
+        middle = first + half;
+        if ((result = c->compare(t->data[middle], val)) < 0) {
+            first = middle + 1;
             len = len - half - 1;
+        } else if (result == 0) {
+            first = middle;
+            break;
         } else {
-            if(result == 0) {
-                first = middle;
-                break;
-            }
             len = half;
         }
     }
@@ -153,19 +149,15 @@ binary_search(const void *val, netsnmp_container *c, int exact)
     if (first >= t->count)
         return -1;
 
-    if(first != middle) {
+    if (first != middle) {
         /* last compare wasn't against first, so get actual result */
         result = c->compare(t->data[first], val);
     }
 
-    if(result == 0) {
-        if (!exact) {
-            if (++first == t->count)
-               first = -1;
-        }
-    }
-    else {
-        if(exact)
+    if (result == 0) {
+        if (!exact && ++first == t->count)
+            first = -1;
+    } else if (exact) {
             first = -1;
     }
 
