@@ -117,6 +117,8 @@ _load4(netsnmp_container *container, u_int load_flags)
     int             rc = 0;
     FILE           *in;
     char            line[160];
+    enum            { rbufsize = 65536 };
+    void           *rbuf = alloca(rbufsize);
     
     netsnmp_assert(NULL != container);
 
@@ -126,6 +128,7 @@ _load4(netsnmp_container *container, u_int load_flags)
         return -2;
     }
     
+    setvbuf(in, rbuf, _IOFBF, rbufsize);
     fgets(line, sizeof(line), in); /* skip header */
 
     /*
@@ -258,6 +261,8 @@ _load6(netsnmp_container *container, u_int load_flags)
     int             rc = 0;
     FILE           *in;
     char            line[360];
+    enum            { rbufsize = 65536 };
+    void           *rbuf = alloca(rbufsize);
 
     netsnmp_assert(NULL != container);
 
@@ -268,6 +273,7 @@ _load6(netsnmp_container *container, u_int load_flags)
         return -2;
     }
 
+    setvbuf(in, rbuf, _IOFBF, rbufsize);
     fgets(line, sizeof(line), in); /* skip header */
 
     /*
