@@ -80,24 +80,48 @@ proxy_parse_config(const char *token, char *line)
 
     netsnmp_session session, *ss;
     struct simple_proxy *newp, **listpp;
-    char            args[MAX_ARGS][SPRINT_MAX_LEN], *argv[MAX_ARGS];
+    char           *argv[MAX_ARGS];
     int             argn, arg;
     char           *cp;
+    char           *buff;
     netsnmp_handler_registration *reg;
 
     context_string = NULL;
 
     DEBUGMSGTL(("proxy_config", "entering\n"));
 
+    /* Put the first string into the array */
+    argv[0] = strdup("snmpd-proxy");
+    if (!argv[0]) {
+        config_perror("could not allocate memory for argv[0]");
+        return;
+    }
     /*
      * create the argv[] like array 
      */
-    strcpy(argv[0] = args[0], "snmpd-proxy");   /* bogus entry for getopt() */
+    /* Allocates memory to store the parameters value */     
+    buff = (char *) malloc (strlen(line)+1);
+    if (!buff) {
+        config_perror("could not allocate memory for buff");
+         /* Free the memory allocated */
+        SNMP_FREE(argv[0]);
+        return;
+    }
+
     for (argn = 1, cp = line; cp && argn < MAX_ARGS;) {
-	argv[argn] = args[argn];
-        cp = copy_nword(cp, argv[argn], SPRINT_MAX_LEN);
+        /* Copy a parameter into the buff */
+        cp = copy_nword(cp, buff, strlen(cp)+1);
+        argv[argn] = strdup(buff);
+        if (!argv[argn]) {
+            config_perror("could not allocate memory for argv[n]");
+            while(argn--)
+                SNMP_FREE(argv[argn]);
+            SNMP_FREE(buff);
+            return;
+        }
 	argn++;
     }
+    SNMP_FREE(buff);
 
     for (arg = 0; arg < argn; arg++) {
         DEBUGMSGTL(("proxy_args", "final args: %d = %s\n", arg,
@@ -116,12 +140,18 @@ proxy_parse_config(const char *token, char *line)
     
     if (arg < 0) {
         config_perror("failed to parse proxy args");
+        /* Free the memory allocated */
+        while(argn--)
+            SNMP_FREE(argv[argn]);
         return;
     }
     DEBUGMSGTL(("proxy_config", "done parsing args\n"));
 
     if (arg >= argn) {
         config_perror("missing base oid");
+        /* Free the memory allocated */
+        while(argn--)
+            SNMP_FREE(argv[argn]);   
         return;
     }
 
@@ -145,28 +175,37 @@ proxy_parse_config(const char *token, char *line)
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpget", &session);
+        /* Free the memory allocated */
+        while(argn--)
+            SNMP_FREE(argv[argn]);
         return;
     }
 
     newp = (struct simple_proxy *) calloc(1, sizeof(struct simple_proxy));
 
     newp->sess = ss;
-    DEBUGMSGTL(("proxy_init", "name = %s\n", args[arg]));
+    DEBUGMSGTL(("proxy_init", "name = %s\n", argv[arg]));
     newp->name_len = MAX_OID_LEN;
-    if (!snmp_parse_oid(args[arg++], newp->name, &newp->name_len)) {
+    if (!snmp_parse_oid(argv[arg++], newp->name, &newp->name_len)) {
         snmp_perror("proxy");
         config_perror("illegal proxy oid specified\n");
-        free(newp);
+        /*deallocate the memory previously allocated*/
+        SNMP_FREE(newp);
+        while(argn--)
+            SNMP_FREE(argv[argn]);
         return;
     }
 
     if (arg < argn) {
-        DEBUGMSGTL(("proxy_init", "base = %s\n", args[arg]));
+        DEBUGMSGTL(("proxy_init", "base = %s\n", argv[arg]));
         newp->base_len = MAX_OID_LEN;
-        if (!snmp_parse_oid(args[arg++], newp->base, &newp->base_len)) {
+        if (!snmp_parse_oid(argv[arg++], newp->base, &newp->base_len)) {
             snmp_perror("proxy");
             config_perror("illegal variable name specified (base oid)\n");
-            free(newp);
+            SNMP_FREE(newp);
+            /* Free the memory allocated */
+            while(argn--)
+                SNMP_FREE(argv[argn]);
             return;
         }
     }
@@ -214,6 +253,9 @@ proxy_parse_config(const char *token, char *line)
         reg->contextName = strdup(context_string);
 
     netsnmp_register_handler(reg);
+    /* Free the memory allocated */
+    while(argn--)
+        SNMP_FREE(argv[argn]);
 }
 
 void
