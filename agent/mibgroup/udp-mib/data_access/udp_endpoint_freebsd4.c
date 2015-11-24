@@ -195,6 +195,8 @@ _load(netsnmp_container *container, u_int load_flags)
         CONTAINER_INSERT(container, entry);
     }
 
+    free(udpcb_buf);
+
     if(rc<0)
         return rc;
 
