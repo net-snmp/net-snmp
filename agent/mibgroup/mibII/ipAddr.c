@@ -531,7 +531,6 @@ Address_Scan_Init(void)
     while (ifc.ifc_len >= (sizeof(struct ifreq) * num_interfaces));
     
     ifr = ifc.ifc_req;
-    close(fd);
 }
 
 /*
