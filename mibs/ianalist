@@ -1,4 +1,4 @@
-# updated 2015-03-24
+# updated 2015-10-26
 ianaaddressfamilynumbers-mib	IANA-ADDRESS-FAMILY-NUMBERS-MIB
 ianabfdtcstd-mib		IANA-BFD-TC-STD-MIB
 ianacharset-mib			IANA-CHARSET-MIB
@@ -18,3 +18,4 @@ ianapowerstateset-mib		IANAPowerStateSet-MIB
 ianaprinter-mib			IANA-PRINTER-MIB
 ianasmf-mib			IANA-SMF-MIB
 ianatn3270etc-mib		IANATn3270eTC-MIB
+ianastoragemediatype-mib	IANA-STORAGE-MEDIA-TYPE-MIB
