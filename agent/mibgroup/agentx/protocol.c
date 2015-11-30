@@ -1550,7 +1550,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
              size_t len)
 {
     register u_char *bufp = data;
-    u_char          buffer[SNMP_MAX_MSG_SIZE];
+    u_char          buffer[65535];
     oid             oid_buffer[MAX_OID_LEN], end_oid_buf[MAX_OID_LEN];
     size_t          buf_len = sizeof(buffer);
     size_t          oid_buf_len = MAX_OID_LEN;
