@@ -35,6 +35,7 @@ apps/snmpget
 apps/snmpgetnext
 apps/snmpnetstat/*.exe
 apps/snmpnetstat/snmpnetstat
+apps/snmpping
 apps/snmpps
 apps/snmpset
 apps/snmpstatus
