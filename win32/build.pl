@@ -204,6 +204,9 @@ print "Building main package...\n";
 system("nmake /nologo" . ($logging ? " > make.out 2>&1" : "")) == 0 || die ($logging ? "Build error (see make.out)" : "Build error (see above)");
 
 if ($perl) {
+  if ($Config{'ccname'} =~ /^gcc/) {
+    die "The perl interpreter has been built with gcc instead of MSVC. Giving up.\n";
+  }
   if (!$link_dynamic) {
     print "Running Configure for DLL...\n";
     system("perl Configure $configOpts --linktype=dynamic --prefix=\"$install_base\"" . ($logging ? " > perlconfigure.out 2>&1" : "")) == 0 || die ($logging ? "Build error (see perlconfigure.out)" : "Build error (see above)");
