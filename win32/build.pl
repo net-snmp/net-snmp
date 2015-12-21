@@ -169,13 +169,13 @@ $configOpts .= $debug ? "--config=debug" : "--config=release";
 $ENV{NO_EXTERNAL_DEPS}="1";
 
 # Set PATH environment variable so Perl make tests can locate the DLL
-$ENV{PATH} = "$current_pwd\\bin\\" . ($debug ? "debug" : "release" ) . ";$ENV{PATH}";
+$ENV{PATH} = File::Spec->catdir($current_pwd, "bin", $debug ? "debug" : "release") . ";$ENV{PATH}";
 
 $ENV{INCLUDE} .= ";$opensslincdir";
 $ENV{LIB}     .= ";$openssllibdir";
 
 # Set MIBDIRS environment variable so Perl make tests can locate the mibs
-$ENV{MIBDIRS} = dirname($current_pwd) . "/mibs";
+$ENV{MIBDIRS} = File::Spec->catdir(dirname($current_pwd), "mibs");
 
 # Set SNMPCONFPATH environment variable so Perl conf.t test can locate
 # the configuration files.
