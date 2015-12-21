@@ -42,15 +42,23 @@
 
 #include <ctype.h>
 
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 
 #include <sys/types.h>
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#if HAVE_NETDB_H
 #include <netdb.h>
+#endif
 
 #include <math.h>
 
 #include <net-snmp/net-snmp-includes.h>
+
+#include "inet_ntop.h"
 
 /* XXX */
 #define INETADDRESSTYPE_IPV4    1
@@ -542,6 +550,14 @@ out:
         snmp_free_pdu(response);
     return 0;
 }
+
+#ifdef WIN32
+/* To do: port this function to the Win32 platform. */
+const char *getlogin(void)
+{
+    return "";
+}
+#endif
 
 int main(int argc, char **argv)
 {
