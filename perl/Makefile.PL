@@ -1,4 +1,6 @@
+use Cwd 'abs_path';
 use ExtUtils::MakeMaker;
+use File::Basename;
 use Config;
 use Getopt::Long;
 require 5;
@@ -55,10 +57,13 @@ sub NetSNMPGetOpts {
       $ENV{'NET-SNMP-PATH'}         = $ret{'prefix'};
       $ENV{'NET-SNMP-DEBUG'}        = $ret{'debug'};
 
-      $basedir = `%COMSPEC% /c cd`;
-      chomp $basedir;
-      $basedir =~ /(.*?)\\perl.*/;
-      $basedir = $1;
+      $basedir = abs_path($0);
+      while (1) {
+          my $basename = basename($basedir);
+          last if (length($basename) <= 2);
+          $basedir = dirname($basedir);
+          last if ($basename eq "perl");
+      }
       print "Net-SNMP base directory: $basedir\n";
       if ($basedir =~ / /) {
         die "\nA space has been detected in the base directory.  This is not " .
