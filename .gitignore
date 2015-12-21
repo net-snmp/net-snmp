@@ -80,9 +80,12 @@ net-snmp-config
 net-snmp-config-x
 net-snmp-create-v3-user
 NEWS.new*
+perl/*.json
 perl/*.yml
 perl/*/*.def
+perl/*/*.json
 perl/*/*.yml
+perl/*/*/*.json
 perl/*/*/*.yml
 perl/agent/agent.c
 perl/agent/default_store/default_store.c

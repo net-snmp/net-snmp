@@ -1,4 +1,6 @@
+use Cwd 'abs_path';
 use ExtUtils::MakeMaker;
+use File::Basename;
 require 5;
 use Config;
 use Getopt::Long;
@@ -100,12 +102,12 @@ sub NetSNMPGetOpts {
     my $rootpath = shift;
     $rootpath = "../" if (!$rootpath);
     $rootpath .= '/' if ($rootpath !~ /\/$/);
-    
+
     if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} eq '')) {
 
       # Grab command line options first.  Only used if environment variables are not set
       GetOptions("NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
-        "NET-SNMP-PATH=s"      => \$ret{'prefix'},          
+        "NET-SNMP-PATH=s"      => \$ret{'prefix'},
         "NET-SNMP-DEBUG=s"     => \$ret{'debug'});
 
       if ($ENV{'NET-SNMP-IN-SOURCE'})
@@ -126,12 +128,15 @@ sub NetSNMPGetOpts {
       # Update environment variables in case they are needed
       $ENV{'NET-SNMP-IN-SOURCE'}    = $ret{'insource'};
       $ENV{'NET-SNMP-PATH'}         = $ret{'prefix'};
-      $ENV{'NET-SNMP-DEBUG'}        = $ret{'debug'};        
-     
-      $basedir = `%COMSPEC% /c cd`;
-      chomp $basedir;
-      $basedir =~ /(.*?)\\perl.*/;
-      $basedir = $1;
+      $ENV{'NET-SNMP-DEBUG'}        = $ret{'debug'};
+
+      $basedir = abs_path($0);
+      while (1) {
+          my $basename = basename($basedir);
+          last if (length($basename) <= 2);
+          $basedir = dirname($basedir);
+          last if ($basename eq "perl");
+      }
       print "Net-SNMP base directory: $basedir\n";
       if ($basedir =~ / /) {
         die "\nA space has been detected in the base directory.  This is not " .
@@ -140,7 +145,7 @@ sub NetSNMPGetOpts {
     }
     else
     {
-      if ($ENV{'NET-SNMP-CONFIG'} && 
+      if ($ENV{'NET-SNMP-CONFIG'} &&
         $ENV{'NET-SNMP-IN-SOURCE'}) {
 	# have env vars, pull from there
 	$ret{'nsconfig'} = $ENV{'NET-SNMP-CONFIG'};
@@ -159,8 +164,8 @@ sub NetSNMPGetOpts {
 	$ENV{'NET-SNMP-CONFIG'}    = $ret{'nsconfig'};
 	$ENV{'NET-SNMP-IN-SOURCE'} = $ret{'insource'};
       }
-    }	
-    
+    }
+
     $ret{'nsconfig'} =~ s/ROOTPATH/$rootpath/;
 
     $ret{'rootpath'} = $rootpath;
@@ -208,7 +213,7 @@ Perl Module Version:        $perlver
 These versions must match for perfect support of the module.  It is possible
 that different versions may work together, but it is strongly recommended
 that you make these two versions identical.  You can get the Net-SNMP
-source code and the associated perl modules directly from 
+source code and the associated perl modules directly from
 
    http://www.net-snmp.org/
 
@@ -222,7 +227,7 @@ environmental variable to 1 and re-run the Makefile.PL script.\n";
 	}
     }
     close(I);
-    die "ERROR: Couldn't find version number of this module\n" 
+    die "ERROR: Couldn't find version number of this module\n"
       if (!$foundversion);
   }
 }
