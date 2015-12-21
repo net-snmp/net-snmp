@@ -32,18 +32,18 @@ netsnmp_large_fd_setfd(SOCKET fd, netsnmp_large_fd_set * fdset)
 
     netsnmp_assert(fd != INVALID_SOCKET);
 
-    if (fdset->lfs_set.fd_count == fdset->lfs_setsize)
+    if (fdset->lfs_setptr->fd_count == fdset->lfs_setsize)
         netsnmp_large_fd_set_resize(fdset, 2 * (fdset->lfs_setsize + 1));
 
-    for (i = 0; i < fdset->lfs_set.fd_count; i++) {
-        if (fdset->lfs_set.fd_array[i] == (SOCKET) (fd))
+    for (i = 0; i < fdset->lfs_setptr->fd_count; i++) {
+        if (fdset->lfs_setptr->fd_array[i] == fd)
             break;
     }
 
-    if (i == fdset->lfs_set.fd_count
-        && fdset->lfs_set.fd_count < fdset->lfs_setsize) {
-        fdset->lfs_set.fd_count++;
-        fdset->lfs_set.fd_array[i] = fd;
+    if (i == fdset->lfs_setptr->fd_count &&
+        fdset->lfs_setptr->fd_count < fdset->lfs_setsize) {
+        fdset->lfs_setptr->fd_count++;
+        fdset->lfs_setptr->fd_array[i] = fd;
     }
 }
 
@@ -54,14 +54,14 @@ netsnmp_large_fd_clr(SOCKET fd, netsnmp_large_fd_set * fdset)
 
     netsnmp_assert(fd != INVALID_SOCKET);
 
-    for (i = 0; i < fdset->lfs_set.fd_count; i++) {
-        if (fdset->lfs_set.fd_array[i] == fd) {
-            while (i < fdset->lfs_set.fd_count - 1) {
-                fdset->lfs_set.fd_array[i] =
-                    fdset->lfs_set.fd_array[i + 1];
+    for (i = 0; i < fdset->lfs_setptr->fd_count; i++) {
+        if (fdset->lfs_setptr->fd_array[i] == fd) {
+            while (i < fdset->lfs_setptr->fd_count - 1) {
+                fdset->lfs_setptr->fd_array[i] =
+                    fdset->lfs_setptr->fd_array[i + 1];
                 i++;
             }
-            fdset->lfs_set.fd_count--;
+            fdset->lfs_setptr->fd_count--;
             break;
         }
     }
@@ -74,8 +74,8 @@ netsnmp_large_fd_is_set(SOCKET fd, netsnmp_large_fd_set * fdset)
 
     netsnmp_assert(fd != INVALID_SOCKET);
 
-    for (i = 0; i < fdset->lfs_set.fd_count; i++) {
-        if (fdset->lfs_set.fd_array[i] == fd)
+    for (i = 0; i < fdset->lfs_setptr->fd_count; i++) {
+        if (fdset->lfs_setptr->fd_array[i] == fd)
             return 1;
     }
     return 0;
@@ -231,8 +231,8 @@ netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
 
     fdset->lfs_setsize = setsize;
 #if !defined(cygwin) && defined(HAVE_WINSOCK_H)
-    if (setsize < fdset->lfs_set.fd_count)
-        fdset->lfs_set.fd_count = setsize;
+    if (setsize < fdset->lfs_setptr->fd_count)
+        fdset->lfs_setptr->fd_count = setsize;
 #endif
 success:
     return 1;
@@ -240,7 +240,7 @@ success:
 out_of_mem:
     fdset->lfs_setsize = 0;
 #if !defined(cygwin) && defined(HAVE_WINSOCK_H)
-    fdset->lfs_set.fd_count = 0;
+    fdset->lfs_setptr->fd_count = 0;
 #endif
     return 0;
 }

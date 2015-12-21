@@ -1,12 +1,4 @@
-GENERATE_LIST=./Makefile.PL \
-	      ./default_store/Makefile.PL \
-	      ./ASN/Makefile.PL \
-	      ./OID/Makefile.PL \
-	      ./agent/Makefile.PL \
-	      ./agent/default_store/Makefile.PL \
-	      ./agent/Support/Makefile.PL \
-	      ./SNMP/Makefile.PL \
-	      ./TrapReceiver/Makefile.PL
+GENERATE_LIST=$(shell find -name 'Makefile.PL' | xargs grep -lw NetSNMPGetOpts)
 
 all:
 	perl make-perl-makefiles $(GENERATE_LIST)
