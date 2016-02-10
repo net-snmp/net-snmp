@@ -113,6 +113,9 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     if (bsize == 0) {
         bsize = getpagesize()-1;
         buff = (char*)malloc(bsize+1);
+        if (buff == NULL) {
+            return -1;
+        }
     }
     while ((bytes_read = read(statfd, buff, bsize)) == bsize) {
         bsize += BUFSIZ;
@@ -320,4 +323,3 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
     }
     first = 0;
 }
-

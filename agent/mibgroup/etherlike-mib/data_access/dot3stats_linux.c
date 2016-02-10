@@ -463,6 +463,7 @@ _dot3Stats_netlink_get_errorcntrs(dot3StatsTable_rowreq_ctx *rowreq_ctx, const c
             done = 1;
         }
         kern_db = ke->next;
+        free(ke->name);
         free(ke);
     }
 
