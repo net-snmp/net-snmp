@@ -264,7 +264,7 @@ _calculate_entries(netsnmp_systemstats_entry * entry)
            && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGCREATES]
         && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTDISCARDS]) {
 
-        U64 tmp, tmp2, tmp3;
+        struct counter64 tmp, tmp2, tmp3;
         tmp = entry->stats.HCOutRequests;
         u64Incr(&tmp, &entry->stats.HCOutForwDatagrams);
         u64Incr(&tmp, &entry->stats.HCOutFragCreates);
