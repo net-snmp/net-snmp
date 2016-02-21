@@ -722,7 +722,7 @@ The total number of octets received on the interface,
  */
 int
 ifHCInOctets_get(ifXTable_rowreq_ctx * rowreq_ctx,
-                 U64 * ifHCInOctets_val_ptr)
+                 struct counter64 *ifHCInOctets_val_ptr)
 {
    /** we should have a non-NULL pointer */
     netsnmp_assert(NULL != ifHCInOctets_val_ptr);
@@ -779,7 +779,7 @@ The number of packets, delivered by this sub-layer to a
  */
 int
 ifHCInUcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
-                    U64 * ifHCInUcastPkts_val_ptr)
+                    struct counter64 *ifHCInUcastPkts_val_ptr)
 {
    /** we should have a non-NULL pointer */
     netsnmp_assert(NULL != ifHCInUcastPkts_val_ptr);
@@ -838,7 +838,7 @@ The number of packets, delivered by this sub-layer to a
  */
 int
 ifHCInMulticastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
-                        U64 * ifHCInMulticastPkts_val_ptr)
+                        struct counter64 *ifHCInMulticastPkts_val_ptr)
 {
    /** we should have a non-NULL pointer */
     netsnmp_assert(NULL != ifHCInMulticastPkts_val_ptr);
@@ -897,7 +897,7 @@ The number of packets, delivered by this sub-layer to a
  */
 int
 ifHCInBroadcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
-                        U64 * ifHCInBroadcastPkts_val_ptr)
+                        struct counter64 *ifHCInBroadcastPkts_val_ptr)
 {
    /** we should have a non-NULL pointer */
     netsnmp_assert(NULL != ifHCInBroadcastPkts_val_ptr);
@@ -955,7 +955,7 @@ The total number of octets transmitted out of the
  */
 int
 ifHCOutOctets_get(ifXTable_rowreq_ctx * rowreq_ctx,
-                  U64 * ifHCOutOctets_val_ptr)
+                  struct counter64 *ifHCOutOctets_val_ptr)
 {
    /** we should have a non-NULL pointer */
     netsnmp_assert(NULL != ifHCOutOctets_val_ptr);
@@ -1013,7 +1013,7 @@ The total number of packets that higher-level protocols
  */
 int
 ifHCOutUcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
-                     U64 * ifHCOutUcastPkts_val_ptr)
+                     struct counter64 *ifHCOutUcastPkts_val_ptr)
 {
    /** we should have a non-NULL pointer */
     netsnmp_assert(NULL != ifHCOutUcastPkts_val_ptr);
@@ -1074,7 +1074,7 @@ The total number of packets that higher-level protocols
  */
 int
 ifHCOutMulticastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
-                         U64 * ifHCOutMulticastPkts_val_ptr)
+                         struct counter64 *ifHCOutMulticastPkts_val_ptr)
 {
    /** we should have a non-NULL pointer */
     netsnmp_assert(NULL != ifHCOutMulticastPkts_val_ptr);
@@ -1134,7 +1134,7 @@ The total number of packets that higher-level protocols
  */
 int
 ifHCOutBroadcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
-                         U64 * ifHCOutBroadcastPkts_val_ptr)
+                         struct counter64 *ifHCOutBroadcastPkts_val_ptr)
 {
    /** we should have a non-NULL pointer */
     netsnmp_assert(NULL != ifHCOutBroadcastPkts_val_ptr);
