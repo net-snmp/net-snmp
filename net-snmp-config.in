@@ -138,10 +138,10 @@ else
       ;;
     #################################################### compile
     --base-cflags)
-      echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR}
+      echo -I${NSC_INCLUDEDIR}
       ;;
     --cflags|--cf*)
-      echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I${NSC_INCLUDEDIR}
+      echo @DEVFLAGS@ -I. -I${NSC_INCLUDEDIR}
       ;;
     --srcdir)
       echo $NSC_SRCDIR
