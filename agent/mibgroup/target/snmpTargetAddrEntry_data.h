@@ -10,9 +10,6 @@
  * we use header_generic from the util_funcs module
  */
 
-// config_require(util_funcs/header_generic)
-
-
     /*
      * Magic number definitions:
      */

@@ -19,8 +19,6 @@
 #include <net-snmp/agent/table_container.h>
 #include <net-snmp/library/container.h>
 
-//#include "snmpNotifyFilter_interface.h"
-
 #include <ctype.h>
 
 
