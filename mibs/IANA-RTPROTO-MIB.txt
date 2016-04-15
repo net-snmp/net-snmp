@@ -5,7 +5,7 @@ IMPORTS
     TEXTUAL-CONVENTION               FROM SNMPv2-TC;
 
 ianaRtProtoMIB  MODULE-IDENTITY
-    LAST-UPDATED "201208300000Z" -- August 30, 2012
+    LAST-UPDATED "201604060000Z" -- April 6, 2016
     ORGANIZATION "IANA"
     CONTACT-INFO
             " Internet Assigned Numbers Authority
@@ -27,6 +27,9 @@ ianaRtProtoMIB  MODULE-IDENTITY
             IANA Considerations Section in RFCs.  The Designated Expert 
             will be selected by the IESG Area Director(s) of the Routing
             Area."
+
+    REVISION     "2016040600000Z"  -- April 6, 2016 
+    DESCRIPTION  "Added ttdp(20)."
 
     REVISION     "201208300000Z"  -- August 30, 2012 
     DESCRIPTION  "Added dhcp(19)."
@@ -68,7 +71,8 @@ IANAipRouteProtocol ::= TEXTUAL-CONVENTION
                 ciscoEigrp (16), -- Cisco EIGRP
                 dvmrp      (17), -- DVMRP
                 rpl        (18), -- RPL [RFC-ietf-roll-rpl-19]
-                dhcp       (19)  -- DHCP [RFC2132]
+                dhcp       (19), -- DHCP [RFC2132]
+                ttdp       (20)  -- Train Topology Discovery Protocol (TTDP) [IEC 61375-2-5]
                }
 
 IANAipMRouteProtocol ::= TEXTUAL-CONVENTION
