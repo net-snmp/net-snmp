@@ -212,6 +212,14 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
         return -1;
     }
 
+    if (rtmp->ndm_family != AF_INET && rtmp->ndm_family != AF_INET6) {
+        /* Some address families, notably AF_BRIDGE, have RTM_NEWNEIGH
+         * and RTM_DELNEIGH messages that may not contain an IP address
+         * that we need later. So we drop everything that is not AF_INET or
+         * AF_INET6 silently.*/
+        return 0;
+    }
+
     if (rtmp->ndm_state == NUD_NOARP) {
         /* NUD_NOARP is for broadcast addresses and similar,
          * drop them silently */
