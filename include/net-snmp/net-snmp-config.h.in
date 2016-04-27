@@ -467,6 +467,9 @@
 /* Define to 1 if you have the <mtab.h> header file. */
 #undef HAVE_MTAB_H
 
+/* Define if having my_load_defaults */
+#undef HAVE_MY_LOAD_DEFAULTS
+
 /* Define to 1 if you have the <nbutil.h> header file. */
 #undef HAVE_NBUTIL_H
 
