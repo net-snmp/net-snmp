@@ -445,7 +445,11 @@ netsnmp_mysql_init(void)
 #endif
 
     /** load .my.cnf values */
+#if HAVE_MY_LOAD_DEFAULTS
+    my_load_defaults ("my", _sql.groups, &not_argc, &not_argv, 0);
+#else
     load_defaults ("my", _sql.groups, &not_argc, &not_argv);
+#endif
     for(i=0; i < not_argc; ++i) {
         if (NULL == not_argv[i])
             continue;

@@ -511,6 +511,16 @@ if test "x$with_mysql" = "xyes" ; then
       [AC_MSG_RESULT(no)
        AC_DEFINE([HAVE_BROKEN_LIBMYSQLCLIENT], 1,
                  [Define if using MY_INIT() causes a linker error])])
+  AC_MSG_CHECKING([whether my_load_defaults() exists])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM(
+      [[#include <my_global.h>
+        #include <my_sys.h>]],
+      [[my_load_defaults("my_init_test")]])],
+      [AC_MSG_RESULT(yes)
+       AC_DEFINE([HAVE_MY_LOAD_DEFAULTS], 1,
+                 [Define if having my_load_defaults])],
+      [AC_MSG_RESULT(no)])
   CPPFLAGS="${_cppflags}"
   LIBS="${_libs}"
   AC_MSG_CACHE_ADD(MYSQL Trap Logging:         enabled)

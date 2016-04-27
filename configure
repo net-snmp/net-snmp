@@ -24114,6 +24114,33 @@ $as_echo "#define HAVE_BROKEN_LIBMYSQLCLIENT 1" >>confdefs.h
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether my_load_defaults() exists" >&5
+$as_echo_n "checking whether my_load_defaults() exists... " >&6; }
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+    #include <my_global.h>
+        #include <my_sys.h>
+int
+main ()
+{
+my_load_defaults("my_init_test")
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_MY_LOAD_DEFAULTS 1" >>confdefs.h
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
   CPPFLAGS="${_cppflags}"
   LIBS="${_libs}"
 
