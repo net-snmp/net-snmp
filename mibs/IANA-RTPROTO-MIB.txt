@@ -5,7 +5,7 @@ IMPORTS
     TEXTUAL-CONVENTION               FROM SNMPv2-TC;
 
 ianaRtProtoMIB  MODULE-IDENTITY
-    LAST-UPDATED "201604060000Z" -- April 6, 2016
+    LAST-UPDATED "201604250000Z" -- April 25, 2016
     ORGANIZATION "IANA"
     CONTACT-INFO
             " Internet Assigned Numbers Authority
@@ -28,7 +28,10 @@ ianaRtProtoMIB  MODULE-IDENTITY
             will be selected by the IESG Area Director(s) of the Routing
             Area."
 
-    REVISION     "2016040600000Z"  -- April 6, 2016 
+    REVISION     "201604250000Z"  -- April 25, 2016 
+    DESCRIPTION  "Corrected typographical error in revision date."
+
+    REVISION     "201604060000Z"  -- April 6, 2016 
     DESCRIPTION  "Added ttdp(20)."
 
     REVISION     "201208300000Z"  -- August 30, 2012 
