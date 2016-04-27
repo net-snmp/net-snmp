@@ -102,6 +102,10 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
     }
     if (to == NULL) {
         snprintf(tmp, sizeof(tmp), "%s: unknown", prefix);
+    } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
+	struct hostent *host;
+	host = netsnmp_gethostbyaddr((char *)&to->sin6_addr, sizeof(struct in6_addr), AF_INET6);
+	return (host ? strdup(host->h_name) : NULL);
     } else {
         char scope_id[IF_NAMESIZE + 1] = "";
 
