@@ -82,6 +82,12 @@ netsnmp_access_route_container_free(netsnmp_container *container, u_int free_fla
                         (netsnmp_container_obj_func*)_access_route_entry_release,
                         NULL);
     }
+    else {
+        /*
+         * free the CONTAINER's sl_nodes, but not their data
+         */
+        CONTAINER_CLEAR(container, NULL, NULL);
+    }
 
     if(! (free_flags & NETSNMP_ACCESS_ROUTE_FREE_KEEP_CONTAINER))
         CONTAINER_FREE(container);
