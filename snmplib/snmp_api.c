@@ -1531,7 +1531,7 @@ _sess_open(netsnmp_session * in_session)
                                                NULL);
         }
 
-        if (NULL != clientaddr_save)
+        if (NULL != in_session->localname)
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                                   NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
     }
