@@ -245,7 +245,7 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
 
     contextNameLen = contextName ? strlen(contextName) : 0;
     if (contextNameLen > VACM_MAX_STRING)
-        return C2SE_ERR_SECNAME_TOO_LONG;
+        return C2SE_ERR_CONTEXT_TOO_LONG;
 
     /** alloc space for struct + 3 strings with NULLs */
     len = offsetof(com2SecEntry, community) + communityLen + secNameLen +
@@ -260,8 +260,8 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
         char buf2[INET_ADDRSTRLEN];
         DEBUGMSGTL(("netsnmp_udp_parse_security",
                     "<\"%s\", %s/%s> => \"%s\"\n", community,
-                    inet_ntop(AF_INET, &network, buf1, sizeof(buf1)),
-                    inet_ntop(AF_INET, &mask, buf2, sizeof(buf2)),
+                    inet_ntop(AF_INET, network, buf1, sizeof(buf1)),
+                    inet_ntop(AF_INET, mask, buf2, sizeof(buf2)),
                     secName));
     }
 
@@ -295,9 +295,11 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
 void
 netsnmp_udp_parse_security(const char *token, char *param)
 {
-    char            secName[VACMSTRINGLEN + 1];
-    char            contextName[VACMSTRINGLEN + 1];
-    char            community[COMMUNITY_MAX_LEN + 1];
+    /** copy_nword does null term, so we need vars of max size + 2. */
+    /** (one for null, one to detect param too long */
+    char            secName[VACMSTRINGLEN]; /* == VACM_MAX_STRING + 2 */
+    char            contextName[VACMSTRINGLEN];
+    char            community[COMMUNITY_MAX_LEN + 2];
     char            source[270]; /* dns-name(253)+/(1)+mask(15)+\0(1) */
     struct in_addr  network, mask;
     int rc;

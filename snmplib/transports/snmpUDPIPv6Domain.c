@@ -541,11 +541,13 @@ create_com2Sec6Entry(const struct addrinfo* const run,
 void
 netsnmp_udp6_parse_security(const char *token, char *param)
 {
-    char            secName[VACMSTRINGLEN + 1];
+    /** copy_nword does null term, so we need vars of max size + 2. */
+    /** (one for null, one to detect param too long */
+    char            secName[VACMSTRINGLEN]; /* == VACM_MAX_STRING + 2 */
     size_t          secNameLen;
-    char            contextName[VACMSTRINGLEN + 1];
+    char            contextName[VACMSTRINGLEN];
     size_t          contextNameLen;
-    char            community[COMMUNITY_MAX_LEN + 1];
+    char            community[COMMUNITY_MAX_LEN + 2];/* overflow + null char */
     size_t          communityLen;
     char            source[300]; /* dns-name(253)+/(1)+mask(45)+\0(1) */
     struct in6_addr mask;
@@ -561,8 +563,8 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             return;
         }
         param = copy_nword( param, contextName, sizeof(contextName));
-        contextNameLen = strlen(contextName) + 1;
-        if (contextNameLen > VACMSTRINGLEN) {
+        contextNameLen = strlen(contextName);
+        if (contextNameLen > VACM_MAX_STRING) {
             config_perror("context name too long");
             return;
         }
@@ -570,19 +572,21 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             config_perror("missing NAME parameter");
             return;
         }
+        ++contextNameLen; /* null termination */
         param = copy_nword( param, secName, sizeof(secName));
     } else {
         contextNameLen = 0;
     }
 
-    secNameLen = strlen(secName) + 1;
-    if (secNameLen == 1) {
+    secNameLen = strlen(secName);
+    if (secNameLen == 0) {
         config_perror("empty NAME parameter");
         return;
-    } else if (secNameLen > VACMSTRINGLEN) {
+    } else if (secNameLen > VACM_MAX_STRING) {
         config_perror("security name too long");
         return;
     }
+    ++secNameLen; /* null termination */
 
     if (!param) {
         config_perror("missing SOURCE parameter");
@@ -607,11 +611,12 @@ netsnmp_udp6_parse_security(const char *token, char *param)
         config_perror("empty COMMUNITY parameter");
         return;
     }
-    communityLen = strlen(community) + 1;
-    if (communityLen >= COMMUNITY_MAX_LEN) {
+    communityLen = strlen(community);
+    if (communityLen > COMMUNITY_MAX_LEN) {
         config_perror("community name too long");
         return;
     }
+    ++communityLen; /* null termination */
     if (communityLen == sizeof(EXAMPLE_COMMUNITY) &&
         memcmp(community, EXAMPLE_COMMUNITY, sizeof(EXAMPLE_COMMUNITY)) == 0) {
         config_perror("example config COMMUNITY not properly configured");
