@@ -929,7 +929,9 @@ _tc_compare(trans_cache *lhs, trans_cache *rhs)
             return -1;
         else if (lha->sin_port > rha->sin_port)
             return 1;
-    } else if (AF_INET6 == lhs->af) {
+    }
+#ifdef NETSNMP_ENABLE_IPV6
+    else if (AF_INET6 == lhs->af) {
         struct sockaddr_in6 *lha = &lhs->bind_addr.sin6,
             *rha = &rhs->bind_addr.sin6;
         int rc = memcmp(lha->sin6_addr.s6_addr, rha->sin6_addr.s6_addr,
@@ -952,6 +954,7 @@ _tc_compare(trans_cache *lhs, trans_cache *rhs)
         else if (lha->sin6_scope_id > rha->sin6_scope_id)
             return 1;
     }
+#endif
     return 0;
 }
 
