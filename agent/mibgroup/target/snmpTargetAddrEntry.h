@@ -43,26 +43,6 @@ config_add_mib(SNMPv2-TM)
 #define   SNMPTARGETADDRPARAMSCOLUMN       7
 #define   SNMPTARGETADDRSTORAGETYPECOLUMN  8
 #define   SNMPTARGETADDRROWSTATUSCOLUMN    9
-    /*
-     * structure definitions 
-     */
-     struct targetAddrTable_struct {
-         char           *nameData;
-         unsigned char   nameLen;
-         oid             tDomain[MAX_OID_LEN];
-         int             tDomainLen;
-         unsigned char  *tAddress;
-         size_t          tAddressLen;
-         int             timeout;	/* Timeout in centiseconds */
-         int             retryCount;
-         char           *tagList;
-         char           *params;
-         int             storageType;
-         int             rowStatus;
-         struct targetAddrTable_struct *next;
-         netsnmp_session *sess; /* a snmp session to the target host */
-         time_t          sessionCreationTime;
-     };
 
 /*
  * function definitions 
@@ -71,13 +51,6 @@ config_add_mib(SNMPv2-TM)
      void            init_snmpTargetAddrEntry(void);
      void            shutdown_snmpTargetAddrEntry(void);
      FindVarMethod   var_snmpTargetAddrEntry;
-
-     struct targetAddrTable_struct *get_addrTable(void);
-     struct targetAddrTable_struct *get_addrForName2(const char *name,
-                                                     unsigned char nameLen);
-     struct targetAddrTable_struct *snmpTargetAddrTable_create(void);
-     void            snmpTargetAddrTable_add(struct targetAddrTable_struct
-                                             *newEntry);
 
      void            snmpd_parse_config_targetAddr(const char *, char *);
 
