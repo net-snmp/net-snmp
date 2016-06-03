@@ -4883,6 +4883,7 @@ usm_create_usmUser(const char *userName, const char *engineID,
     } else {
         len = strlcpy(line, userName, sizeof(line));
     }
+    strlcat(line, " ", sizeof(line));
 
     if (0 == authType)
         goto create;
