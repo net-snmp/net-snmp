@@ -23,26 +23,6 @@ config_require(util_funcs/header_generic)
      */
 config_add_mib(SNMPv2-TM)
 
-    /*
-     * Magic number definitions: 
-     */
-#define   SNMPTARGETADDRTDOMAIN      1
-#define   SNMPTARGETADDRTADDRESS     2
-#define   SNMPTARGETADDRTIMEOUT      3
-#define   SNMPTARGETADDRRETRYCOUNT   4
-#define   SNMPTARGETADDRTAGLIST      5
-#define   SNMPTARGETADDRPARAMS       6
-#define   SNMPTARGETADDRSTORAGETYPE  7
-#define   SNMPTARGETADDRROWSTATUS    8
-#define	  SNMPTARGETSPINLOCK	     99
-#define   SNMPTARGETADDRTDOMAINCOLUMN      2
-#define   SNMPTARGETADDRTADDRESSCOLUMN     3
-#define   SNMPTARGETADDRTIMEOUTCOLUMN      4
-#define   SNMPTARGETADDRRETRYCOUNTCOLUMN   5
-#define   SNMPTARGETADDRTAGLISTCOLUMN      6
-#define   SNMPTARGETADDRPARAMSCOLUMN       7
-#define   SNMPTARGETADDRSTORAGETYPECOLUMN  8
-#define   SNMPTARGETADDRROWSTATUSCOLUMN    9
 
 /*
  * function definitions 
