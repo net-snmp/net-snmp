@@ -1236,6 +1236,7 @@ netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo,
 }
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_GET_OR_CREATE_ROW_STASH
 static void
 _row_stash_data_list_free(void *ptr) {
     netsnmp_oid_stash_node **tmp = (netsnmp_oid_stash_node **)ptr;
@@ -1243,7 +1244,6 @@ _row_stash_data_list_free(void *ptr) {
     free(ptr);
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_TABLE_GET_OR_CREATE_ROW_STASH
 /** returns a row-wide place to store data in.
     @todo This function will likely change to add free pointer functions. */
 netsnmp_oid_stash_node **

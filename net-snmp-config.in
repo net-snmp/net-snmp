@@ -74,6 +74,8 @@ NSC_SRC_LIBDEPS="agent/.libs/libnetsnmpmibs.a agent/.libs/libnetsnmpagent.a snmp
 
 if test "x$NSC_SRCDIR" = "x." ; then
    NSC_SRCDIR="NET-SNMP-SOURCE-DIR"
+elif test "x$NSC_SRCDIR" = "x" ; then
+   NSC_SRCDIR="NET-SNMP-SOURCE-DIR"
 fi
 
 if test "x$1" = "x"; then

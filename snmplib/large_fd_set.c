@@ -4,15 +4,18 @@
  * @brief Macro's and functions for manipulation of large file descriptor sets.
  */
 
-
 #include <net-snmp/net-snmp-config.h>
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+#error broken
+#endif
 
 #include <stdio.h>
 #include <string.h> /* memset(), which is invoked by FD_ZERO() */
 
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
+#include <stddef.h>
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmp_assert.h>

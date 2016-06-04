@@ -544,8 +544,10 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
                                netsnmp_agent_request_info *reqinfo,
                                netsnmp_request_info *requests)
 {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     int     *spinlock = (int *) handler->myvoid;
     netsnmp_request_info *request;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     DEBUGMSGTL(("helper:watcher:spinlock",
                                "Got request:  %d\n", reqinfo->mode));

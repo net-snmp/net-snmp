@@ -806,6 +806,10 @@ vacm_create_simple(const char *token, char *confline,
     char           *view_ptr = viewname;
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     char            addressname[SPRINT_MAX_LEN];
+    /* Conveniently, the community-based security
+       model values can also be used as bit flags */
+    int             commversion = SNMP_SEC_MODEL_SNMPv1 |
+                                  SNMP_SEC_MODEL_SNMPv2c;
 #endif
     const char     *rw = "none";
     char            model[SPRINT_MAX_LEN];
@@ -816,10 +820,6 @@ vacm_create_simple(const char *token, char *confline,
     char            context[SPRINT_MAX_LEN];
     int             ctxprefix = 1;  /* Default to matching all contexts */
     static int      commcount = 0;
-    /* Conveniently, the community-based security
-       model values can also be used as bit flags */
-    int             commversion = SNMP_SEC_MODEL_SNMPv1 |
-                                  SNMP_SEC_MODEL_SNMPv2c;
 
     /*
      * init 
@@ -1262,7 +1262,9 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
     const char     *contextName = vacm_default_context;
     const char     *sn = NULL;
     char           *vn;
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     const char     *pdu_community;
+#endif
 
     /*
      * len defined by the vacmContextName object 

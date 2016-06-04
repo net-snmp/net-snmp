@@ -521,23 +521,29 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                                       netsnmp_request_info *requests)
 {
     netsnmp_table_data_set_storage *data = NULL;
-    newrow_stash   *newrowstash = NULL;
-    netsnmp_table_row *row, *newrow = NULL;
     netsnmp_table_request_info *table_info;
     netsnmp_request_info *request;
+    newrow_stash   *newrowstash = NULL;
+    netsnmp_table_row *row = NULL;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     netsnmp_oid_stash_node **stashp = NULL;
+    netsnmp_table_row *newrow = NULL;
+    newrow_stash   *newrowstash = NULL;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     if (!handler)
         return SNMPERR_GENERR;
         
     DEBUGMSGTL(("netsnmp_table_data_set", "handler starting\n"));
     for (request = requests; request; request = request->next) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         netsnmp_table_data_set *datatable =
             (netsnmp_table_data_set *) handler->myvoid;
         const oid * const suffix =
             requests->requestvb->name + reginfo->rootoid_len + 2;
         const size_t suffix_len =
             requests->requestvb->name_length - (reginfo->rootoid_len + 2);
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
         if (request->processed)
             continue;

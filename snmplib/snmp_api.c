@@ -879,7 +879,7 @@ init_snmp(const char *type)
     init_snmp_alarm();
     init_snmp_enum(type);
     init_vacm();
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && NETSNMP_TRANSPORT_TLSBASE_DOMAIN
     netsnmp_certs_init();
 #endif
 #ifdef DNSSEC_LOCAL_VALIDATION
@@ -948,7 +948,7 @@ snmp_shutdown(const char *type)
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     shutdown_mib();
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && NETSNMP_TRANSPORT_TLSBASE_DOMAIN
     netsnmp_certs_shutdown();
 #endif
 #if !defined(NETSNMP_FEATURE_REMOVE_FILTER_SOURCE)

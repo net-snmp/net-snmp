@@ -12,7 +12,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && NETSNMP_TRANSPORT_TLSBASE_DOMAIN
 netsnmp_feature_child_of(cert_util_all, libnetsnmp)
 netsnmp_feature_child_of(cert_util, cert_util_all)
 #ifdef NETSNMP_FEATURE_REQUIRE_CERT_UTIL
@@ -3383,4 +3383,4 @@ netsnmp_tlstmAddr_get_serverId(const char *name)
 netsnmp_feature_unused(cert_util);
 #endif /* NETSNMP_FEATURE_REMOVE_CERT_UTIL */
 netsnmp_feature_unused(cert_util);
-#endif /* defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) */
+#endif /* defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && NETSNMP_TRANSPORT_TLSBASE_DOMAIN */

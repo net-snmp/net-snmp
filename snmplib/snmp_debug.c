@@ -15,6 +15,9 @@
 
 #include <limits.h>
 #include <stdio.h>
+#ifndef HAVE_PRIORITYNAMES
+#include <errno.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

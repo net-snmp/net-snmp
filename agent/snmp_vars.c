@@ -347,7 +347,7 @@ init_agent(const char *app)
     init_perl();
 #endif
 
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && NETSNMP_TRANSPORT_TLSBASE_DOMAIN
     /** init secname mapping */
     netsnmp_certs_agent_init();
 #endif
