@@ -523,7 +523,6 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_table_data_set_storage *data = NULL;
     netsnmp_table_request_info *table_info;
     netsnmp_request_info *request;
-    newrow_stash   *newrowstash = NULL;
     netsnmp_table_row *row = NULL;
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     netsnmp_oid_stash_node **stashp = NULL;
