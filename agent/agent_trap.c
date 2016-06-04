@@ -87,7 +87,9 @@ struct trap_sink {
 
 struct trap_sink *sinks = NULL;
 
+#ifndef NETSNMP_DISABLE_SNMPV1
 static int _v1_sessions = 0;
+#endif /* NETSNMP_DISABLE_SNMPV1 */
 static int _v2_sessions = 0;
 
 const oid       objid_enterprisetrap[] = { NETSNMP_NOTIFICATION_MIB };
@@ -156,10 +158,14 @@ static void
 _trap_version_incr(int version)
 {
     switch (version) {
+#ifndef NETSNMP_DISABLE_SNMPV1
         case SNMP_VERSION_1:
             ++_v1_sessions;
             break;
+#endif
+#ifndef NETSNMP_DISABLE_SNMPV2C
         case SNMP_VERSION_2c:
+#endif
         case SNMP_VERSION_3:
             ++_v2_sessions;
             break;
@@ -173,13 +179,17 @@ static void
 _trap_version_decr(int version)
 {
     switch (version) {
+#ifndef NETSNMP_DISABLE_SNMPV1
         case SNMP_VERSION_1:
             if (--_v1_sessions < 0) {
                 snmp_log(LOG_ERR,"v1 session count < 0! fixed.\n");
                 _v1_sessions = 0;
             }
             break;
+#endif
+#ifndef NETSNMP_DISABLE_SNMPV2C
         case SNMP_VERSION_2c:
+#endif
         case SNMP_VERSION_3:
             if (--_v2_sessions < 0) {
                 snmp_log(LOG_ERR,"v2 session count < 0! fixed.\n");
@@ -1253,7 +1263,7 @@ snmpd_parse_config_authtrap(const char *token, char *cptr)
     }
 }
 
-#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2c)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 static void
 _parse_config_sink(const char *token, char *cptr, int version, int type)
 {
