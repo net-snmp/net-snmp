@@ -719,7 +719,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
      * Sanity check.
      */
 #if	!defined(NETSNMP_ENABLE_SCAPI_AUTHPRIV)
-    snmp_log(LOG_ERR, "Encryption support not enabled.\n");
+    snmp_log(LOG_ERR, "Encryption support not enabled.(2)\n");
     return SNMPERR_SC_NOT_CONFIGURED;
 #endif
 
@@ -879,7 +879,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
      * Sanity check.
      */
 #if	!defined(NETSNMP_ENABLE_SCAPI_AUTHPRIV)
-    snmp_log(LOG_ERR, "Encryption support not enabled.\n");
+    snmp_log(LOG_ERR, "Encryption support not enabled.(1)\n");
     return SNMPERR_SC_NOT_CONFIGURED;
 #endif
 
@@ -920,7 +920,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
 {
 #	if NETSNMP_USE_INTERNAL_MD5
     {
-        snmp_log(LOG_ERR, "Encryption support not enabled.\n");
+        snmp_log(LOG_ERR, "Encryption support not enabled.(3)\n");
         DEBUGMSGTL(("scapi", "Encrypt function not defined.\n"));
         return SNMPERR_SC_GENERAL_FAILURE;
     }
@@ -1129,7 +1129,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 #else
 {
 #if	!defined(NETSNMP_ENABLE_SCAPI_AUTHPRIV)
-    snmp_log(LOG_ERR, "Encryption support not enabled.\n");
+    snmp_log(LOG_ERR, "Encryption support not enabled.(4)\n");
     return SNMPERR_SC_NOT_CONFIGURED;
 #else
 #	if NETSNMP_USE_INTERNAL_MD5
