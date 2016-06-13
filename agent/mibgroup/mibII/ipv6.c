@@ -5,6 +5,11 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
 #if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
@@ -12,9 +17,7 @@
 #if NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
 #define _KERNEL_STRUCTURES
 #endif
-#include <sys/types.h>
 #include <sys/param.h>
-#include <sys/socket.h>
 #if defined(freebsd3) || defined(darwin)
 # if HAVE_SYS_SOCKETVAR_H
 #  include <sys/socketvar.h>
@@ -31,9 +34,6 @@
 #endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#if HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -53,7 +53,13 @@
 #if HAVE_SYS_TCPIPSTATS_H
 #include <sys/tcpipstats.h>
 #endif
+#ifdef _I_DEFINED_KERNEL
+#undef _KERNEL
+#endif
 #include <net/if.h>
+#ifdef _I_DEFINED_KERNEL
+#define _KERNEL 1
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -81,6 +87,7 @@
 # include <netinet/ip_var.h>
 #endif
 #if HAVE_NETINET6_IP6_VAR_H
+# include <sys/queue.h>
 # include <netinet6/ip6_var.h>
 #endif
 #include <net/route.h>
@@ -611,6 +618,43 @@ if_getindex(const char *name)
 
 /*------------------------------------------------------------*/
 #ifndef linux
+
+#ifdef __OpenBSD__
+
+ /*
+  * It is not possible to use struct ifnet anymore on OpenBSD, get
+  * interface flags and L2 address through getifaddrs(3).
+  */
+
+#include <ifaddrs.h>
+
+static int
+if_getifflags(int ifindex, int *ifflags)
+{
+    const char      *ifname;
+    struct ifaddrs  *ifa0, *ifa;
+    int              ret = -1;
+
+    ifname = if_getname(ifindex);
+    if (ifname == NULL)
+        return ret;
+
+    if (getifaddrs(&ifa0) != -1) {
+        for (ifa = ifa0; ifa != NULL; ifa = ifa->ifa_next) {
+            if (strcmp(ifa->ifa_name, ifname) == 0) {
+                *ifflags = ifa->ifa_flags;
+                ret = 0;
+                break;
+            }
+        }
+        freeifaddrs(ifa0);
+    }
+
+    return ret;
+}
+
+#else
+
 /*
  * KAME dependent part 
  */
@@ -643,6 +687,8 @@ if_getifnet(int idx, struct ifnet *result)
     }
     return -1;
 }
+
+#endif /* !__OpenBSD__ */
 
 #if TRUST_IFLASTCHANGE         /*untrustable value returned... */
 #ifdef HAVE_NET_IF_MIB_H
@@ -858,6 +904,37 @@ var_ifv6Entry(register struct variable * vp,
 #endif
     case IPV6IFPHYSADDRESS:
         {
+#ifdef __OpenBSD__
+	    struct ifaddrs *ifa0, *ifa;
+            static struct sockaddr_dl sdl;
+            char ifnam[IF_NAMESIZE];
+
+	    if (if_indextoname(interface, ifnam) == NULL) {
+                *var_len = 0;
+                return NULL;
+            }
+
+	    if (getifaddrs(&ifa0) != -1) {
+                for (ifa = ifa0; ifa != NULL; ifa = ifa->ifa_next) {
+
+                    if (strcmp(ifnam, ifa->ifa_name) != 0)
+                       continue;
+
+                    if (ifa->ifa_addr == NULL)
+                       continue;
+
+                    memcpy(&sdl, ifa->ifa_addr, sizeof(sdl));
+                    if (sdl.sdl_family != AF_LINK)
+                       continue;
+
+                   freeifaddrs(ifa0);
+                   *var_len = sdl.sdl_alen;
+                   return (u_char *) (sdl.sdl_data + sdl.sdl_nlen);
+		}
+	    }
+	    freeifaddrs(ifa0);
+	    return NULL;
+#else
             struct ifnet    ifnet;
             struct ifaddr   ifaddr;
 #if defined(__DragonFly__) && __DragonFly_version >= 197700
@@ -943,23 +1020,38 @@ var_ifv6Entry(register struct variable * vp,
              */
             *var_len = 0;
             return NULL;
+#endif /* !__OpenBSD__ */
         }
     case IPV6IFADMSTATUS:
         {
+#ifdef __OpenBSD__
+            int    if_flags;
+            if (if_getifflags(interface, &if_flags) < 0)
+                break;
+            long_return = (if_flags & IFF_RUNNING) ? 1 : 2;
+#else
             struct ifnet    ifnet;
 
             if (if_getifnet(interface, &ifnet) < 0)
                 break;
             long_return = (ifnet.if_flags & IFF_RUNNING) ? 1 : 2;
+#endif
             return (u_char *) & long_return;
         }
     case IPV6IFOPERSTATUS:
         {
+#ifdef __OpenBSD__
+            int    if_flags;
+            if (if_getifflags(interface, &if_flags) < 0)
+                break;
+            long_return = (if_flags & IFF_UP) ? 1 : 2;
+#else
             struct ifnet    ifnet;
 
             if (if_getifnet(interface, &ifnet) < 0)
                 break;
             long_return = (ifnet.if_flags & IFF_UP) ? 1 : 2;
+#endif
             return (u_char *) & long_return;
         }
 #if TRUST_IFLASTCHANGE         /*untrustable value returned... */
@@ -1442,7 +1534,11 @@ var_udp6(register struct variable * vp,
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 106250000 || defined(openbsd4)	/*1.6Y*/
     if (!auto_nlist("udbtable", (char *) &udbtable, sizeof(udbtable)))
         return NULL;
+#if defined(openbsd5)
+    first = p = (caddr_t)TAILQ_FIRST(&udbtable.inpt_queue);
+#else
     first = p = (caddr_t)udbtable.inpt_queue.cqh_first;
+#endif
 #elif !defined(freebsd3) && !defined(darwin)
     if (!auto_nlist("udb6", (char *) &udb6, sizeof(udb6)))
         return NULL;
@@ -1576,7 +1672,10 @@ var_udp6(register struct variable * vp,
         }
 
       skip:
-#if defined(openbsd4)
+#ifdef openbsd5
+        p = (caddr_t)TAILQ_NEXT(&in6pcb, inp_queue);
+        if (p == NULL) break;
+#elif defined(openbsd4)
         p = (caddr_t)in6pcb.inp_queue.cqe_next;
 	if (p == first) break;
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
@@ -2000,7 +2099,9 @@ var_tcp6(register struct variable * vp,
 #if defined(__NetBSD__) && __NetBSD_Version__ >= 106250000 || defined(openbsd4)	/*1.6Y*/
     if (!auto_nlist("tcbtable", (char *) &tcbtable, sizeof(tcbtable)))
         return NULL;
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
+#ifdef openbsd5
+    first = p = (caddr_t)TAILQ_FIRST(&tcbtable.inpt_queue);
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
     first = p = (caddr_t)tcbtable.inpt_queue.tqh_first;
 #else
     first = p = (caddr_t)tcbtable.inpt_queue.cqh_first;
@@ -2149,7 +2250,10 @@ var_tcp6(register struct variable * vp,
         }
 
       skip:
-#if defined(openbsd4)
+#ifdef openbsd5
+        p = (caddr_t)TAILQ_NEXT(&in6pcb, inp_queue);
+        if (p == NULL) break;
+#elif defined(openbsd4)
         p = (caddr_t)in6pcb.inp_queue.cqe_next;
 	if (p == first) break;
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
