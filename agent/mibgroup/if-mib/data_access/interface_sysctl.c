@@ -241,7 +241,12 @@ netsnmp_sysctl_get_if_speed(char *name, u_int *speed,
 {
     int s;
     struct ifmediareq ifmr;
-    int *media_list, i;
+#if defined(OpenBSD) && OpenBSD >= 201605
+    uint64_t *media_list;
+#else
+    int *media_list;
+#endif
+    int i;
     u_int t_speed, t_speed_high; 
     u_int m_speed, m_speed_high;
 
@@ -272,7 +277,7 @@ netsnmp_sysctl_get_if_speed(char *name, u_int *speed,
     netsnmp_sysctl_ifmedia_to_speed(ifmr.ifm_current, speed, speed_high);
 
     if (*speed == 0 &&
-        (media_list = (int *) malloc(ifmr.ifm_count * sizeof(int))) != NULL ) {
+        (media_list = malloc(ifmr.ifm_count * sizeof(*media_list))) != NULL ) {
 
         ifmr.ifm_ulist = media_list;
 

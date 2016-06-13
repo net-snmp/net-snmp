@@ -38,7 +38,7 @@
 #include <sys/queue.h>
 #include <netinet6/ip6_var.h>
 #endif
-#ifndef freebsd7
+#if !defined(freebsd7) && !defined(openbsd5)
 #include <netinet6/in6_var.h>
 #endif
 
