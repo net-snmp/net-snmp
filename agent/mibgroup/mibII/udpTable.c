@@ -319,7 +319,7 @@ udpTable_next_entry( void **loop_context,
     long port;
 
 #if HAVE_KVM_GETFILES
-    while (i <= udp_size && (udp_head[i].so_protocol != IPPROTO_UDP
+    while (i < udp_size && (udp_head[i].so_protocol != IPPROTO_UDP
 	    || udp_head[i].so_family != AF_INET))
 	i++;
 #endif
@@ -553,6 +553,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     int count;
     udp_head = kvm_getfiles(kd, KERN_FILE_BYFILE, DTYPE_SOCKET, sizeof(struct kinfo_file), &count);
     udp_size = count;
+    DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table (kvm_getfiles)\n"));
     return 0;
 }
 
