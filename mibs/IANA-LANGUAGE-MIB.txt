@@ -30,10 +30,10 @@ ianaLanguages MODULE-IDENTITY
 
          Note, this module does not have to register all possible
          languages since languages are identified by object
-         identifier values. It is therefore possible to registered 
+         identifier values. It is therefore possible to registered
          languages in private OID trees. The references given below are not
          normative with regard to the language version. Other
-         references might be better suited to describe some newer 
+         references might be better suited to describe some newer
          versions of this language. The references are only
          provided as `a pointer into the right direction'."
 
