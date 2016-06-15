@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "201409240000Z" -- September 24, 2014
+       LAST-UPDATED "201606090000Z" -- June 9, 2016
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,21 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "201606090000Z"  -- June 9, 2016
+       DESCRIPTION  "Registration of new IANAifType 282."
+
+       REVISION     "201606080000Z"  -- June 8, 2016
+       DESCRIPTION  "Updated description for tunnelType 17."
+
+       REVISION     "201605190000Z"  -- May 19, 2016
+       DESCRIPTION  "Updated description for tunnelType 16."
+
+       REVISION     "201605030000Z"  -- May 3, 2016
+       DESCRIPTION  "Registration of new IANAifType 281."
+
+       REVISION     "201604290000Z"  -- April 29, 2016
+       DESCRIPTION  "Registration of new tunnelTypes 16 and 17."
 
        REVISION     "201409240000Z"  -- September 24, 2014
 	   DESCRIPTION  "Registration of new IANAifType 280."
@@ -602,7 +617,9 @@
                    docsOfdmDownstream (277), -- CATV Downstream OFDM interface
                    docsOfdmaUpstream (278), -- CATV Upstream OFDMA interface
                    gfast (279), -- G.fast port
-                   sdci (280) -- SDCI (IO-Link)
+                   sdci (280), -- SDCI (IO-Link)
+                   xboxWireless, (281) -- Xbox wireless
+                   fastdsl (282) -- FastDSL
                    }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
@@ -630,6 +647,15 @@ IANAtunnelType ::= TEXTUAL-CONVENTION
             header of the protocol of that name is inserted
             between the outer header and the payload header.
 
+            The IP Tunnel MIB [RFC4087] is designed for managing 
+            tunnels of any type over IPv4 and IPv6 networks, 
+            therefore it has already supports IP in IP tunnels.  
+            But in a DS-Lite scenario, the tunnel type is
+            point-to-multipoint IP in IP tunnels.  The direct(2) 
+            defined in IP Tunnel MIB only supports point-to-point 
+            tunnel.  So it needs to define a new tunnel type for
+            DS-Lite.
+
             The assignment policy for IANAtunnelType values is
             identical to the policy for assigning IANAifType
             values."
@@ -648,7 +674,9 @@ IANAtunnelType ::= TEXTUAL-CONVENTION
                    sixOverFour(12), -- 6over4 encapsulation
                    isatap(13),      -- ISATAP encapsulation
                    teredo(14),      -- Teredo encapsulation
-                   ipHttps(15)      -- IPHTTPS
+                   ipHttps(15),      -- IPHTTPS
+                   softwireMesh(16), -- softwire mesh tunnel
+                   dsLite(17)        -- DS-Lite tunnel
                }
 
    END
