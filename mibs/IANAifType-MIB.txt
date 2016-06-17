@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "201606090000Z" -- June 9, 2016
+       LAST-UPDATED "201606160000Z" -- June 16, 2016
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,9 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "201606160000Z"  -- June 16, 2016
+       DESCRIPTION  "Updated IANAtunnelType DESCRIPTION per RFC 7870"
 
        REVISION     "201606090000Z"  -- June 9, 2016
        DESCRIPTION  "Registration of new IANAifType 282."
@@ -618,7 +621,7 @@
                    docsOfdmaUpstream (278), -- CATV Upstream OFDMA interface
                    gfast (279), -- G.fast port
                    sdci (280), -- SDCI (IO-Link)
-                   xboxWireless, (281) -- Xbox wireless
+                   xboxWireless (281), -- Xbox wireless
                    fastdsl (282) -- FastDSL
                    }
 
@@ -647,13 +650,13 @@ IANAtunnelType ::= TEXTUAL-CONVENTION
             header of the protocol of that name is inserted
             between the outer header and the payload header.
 
-            The IP Tunnel MIB [RFC4087] is designed for managing
-            tunnels of any type over IPv4 and IPv6 networks,
-            therefore it has already supports IP in IP tunnels.
+            The IP Tunnel MIB [RFC4087] is designed to manage
+            tunnels of any type over IPv4 and IPv6 networks;
+            therefore, it already supports IP-in-IP tunnels.
             But in a DS-Lite scenario, the tunnel type is
-            point-to-multipoint IP in IP tunnels.  The direct(2)
-            defined in IP Tunnel MIB only supports point-to-point
-            tunnel.  So it needs to define a new tunnel type for
+            point-to-multipoint IP-in-IP tunnels.  The direct(2)
+            defined in the IP Tunnel MIB only supports point-to-point
+            tunnels.  So, it needs to define a new tunnel type for
             DS-Lite.
 
             The assignment policy for IANAtunnelType values is
