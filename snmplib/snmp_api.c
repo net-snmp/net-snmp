@@ -2797,10 +2797,10 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     size_t          start_offset = *offset;
     long            version;
     int             rc = 0;
-#endif /* support for community based SNMP */
-    
-    u_char         *cp;
     size_t          length;
+#endif /* support for community based SNMP */
+
+    u_char         *cp;
 
     if (NETSNMP_RUNTIME_PROTOCOL_SKIP(pdu->version)) {
         DEBUGMSGTL(("snmp_send", "build packet (version 0x%02x disabled)\n",
@@ -2935,7 +2935,9 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     /*
      * save length 
      */
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     length = *pkt_len;
+#endif
 
     /*
      * setup administrative fields based on version 

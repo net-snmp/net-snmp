@@ -1263,13 +1263,13 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
     struct vacm_accessEntry *ap;
     struct vacm_groupEntry *gp;
     struct vacm_viewEntry *vp;
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     char            vacm_default_context[1] = "";
     const char     *contextName = vacm_default_context;
-    const char     *sn = NULL;
-    char           *vn;
-#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     const char     *pdu_community;
 #endif
+    const char     *sn = NULL;
+    char           *vn;
 
     /*
      * len defined by the vacmContextName object 
@@ -1386,7 +1386,7 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
         }
 
     } else
-#endif /* support for community based SNMP */
+#endif /* !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C) */
       if (find_sec_mod(pdu->securityModel)) {
         /*
          * any legal defined v3 security model 
@@ -1395,7 +1395,6 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
                   "vacm_in_view: ver=%ld, model=%d, secName=%s\n",
                   pdu->version, pdu->securityModel, pdu->securityName));
         sn = pdu->securityName;
-        contextName = pdu->contextName;
     } else {
         sn = NULL;
     }

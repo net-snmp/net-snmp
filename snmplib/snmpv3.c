@@ -394,7 +394,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
     }
         
     default:
-        fprintf(stderr, "Unknown SNMPv3 option passed to -3: %c.\n", *cp);
+        fprintf(stderr, "Unknown SNMPv3 option passed to -3: %c.\n", arg);
         return -1;
     }
     return 0;
