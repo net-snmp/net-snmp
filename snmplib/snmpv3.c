@@ -155,9 +155,6 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
     char      *cp;
     int        zero_sensitive = !( flags & NETSNMP_PARSE_ARGS_NOZERO );
 
-    /** init auth types list */
-    usm_init_auth_types();
-
     switch (arg) {
 
     case 'Z':

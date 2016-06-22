@@ -279,7 +279,7 @@ extern          "C" {
 
     void            usm_init_auth_types(void);
     int             usm_lookup_auth_type(const char *str);
-    char           *usm_lookup_auth_str(int value);
+    const char     *usm_lookup_auth_str(int value);
     oid            *usm_get_auth_oid(int auth_type, size_t *oid_len);
 
 

@@ -279,7 +279,8 @@ file, see
 .I snmp.conf(5).
 .TP
 .BI \-a " authProtocol"
-Set the authentication protocol (MD5 or SHA) used for authenticated SNMPv3
+Set the authentication protocol (MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224)
+used for authenticated SNMPv3
 messages. Overrides the \fIdefAuthType\fR token in the
 .I snmp.conf
 file.

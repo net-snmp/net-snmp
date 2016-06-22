@@ -219,7 +219,7 @@ The
 .B defPassphrase
 value will be used for the authentication and/or privacy pass phrases
 if either of the other directives are not specified.
-.IP "defAuthType MD5|SHA"
+.IP "defAuthType MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224"
 .IP "defPrivType DES|AES"
 define the default authentication and privacy protocols to use for
 SNMPv3 requests.

@@ -262,16 +262,17 @@ them.  It is recommended you
 .B "use the net\-snmp\-config command"
 to do this, but you can also do it by directly specifying createUser
 directives yourself instead:
-.IP "createUser [\-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase]"
+.IP "createUser [\-e ENGINEID] username (MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224) authpassphrase [DES|AES] [privpassphrase]"
 .IP
-MD5 and SHA are the authentication types to use.  DES and AES are the
-privacy protocols to use.  If the privacy
+MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224 are the authentication types to use.
+DES and AES are the privacy protocols to use.  If the privacy
 passphrase is not specified, it is assumed to be the same as the
 authentication passphrase.  Note that the users created will be
 useless unless they are also added to the VACM access control tables
 described above.
 .IP
-SHA authentication and DES/AES privacy require OpenSSL to be installed and
+SHA|SHA-512|SHA-384|SHA-256|SHA-224 authentication and DES/AES privacy
+require OpenSSL to be installed and
 the agent to be built with OpenSSL support.  MD5 authentication may be
 used without OpenSSL.
 .IP

@@ -117,7 +117,7 @@ to trigger the types of processing listed.
 See
 .IR snmpd.conf (5)
 for more details.
-.IP "createUser [-e  ENGINEID] username (MD5|SHA) authpassphrase [DES|AES]"
+.IP "createUser [-e  ENGINEID] username (MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224) authpassphrase [DES|AES]"
 See the 
 .IR snmpd.conf (5)
 manual page for a description of how to create SNMPv3 users.  This

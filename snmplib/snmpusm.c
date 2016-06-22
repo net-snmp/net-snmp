@@ -107,6 +107,33 @@ oid    usmHMAC128SHA224AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                             NETSNMP_USMAUTH_HMAC128SHA224 };
 #endif /* HAVE_EVP_SHA384 */
 
+typedef struct usm_hash_alg_pair_s {
+    const char *label;
+    int         value;
+} usm_hash_alg_pair_t;
+
+static usm_hash_alg_pair_t usm_hash_alg[] = {
+    { "NOAUTH", NETSNMP_USMAUTH_NOAUTH },
+    { "SHA", NETSNMP_USMAUTH_HMACSHA1 },
+    { "SHA-1", NETSNMP_USMAUTH_HMACSHA1 },
+#ifndef NETSNMP_DISABLE_MD5
+    { "MD5", NETSNMP_USMAUTH_HMACMD5 },
+#endif
+#ifdef HAVE_EVP_SHA224
+    { "SHA-224", NETSNMP_USMAUTH_HMAC128SHA224 },
+    { "SHA224", NETSNMP_USMAUTH_HMAC128SHA224 },
+    { "SHA-256", NETSNMP_USMAUTH_HMAC192SHA256 },
+    { "SHA256", NETSNMP_USMAUTH_HMAC192SHA256 },
+#endif
+#ifdef HAVE_EVP_SHA384
+    { "SHA-384", NETSNMP_USMAUTH_HMAC256SHA384 },
+    { "SHA384", NETSNMP_USMAUTH_HMAC256SHA384 },
+    { "SHA-512",  NETSNMP_USMAUTH_HMAC384SHA512 },
+    { "SHA512",  NETSNMP_USMAUTH_HMAC384SHA512 },
+#endif
+    { NULL, -1 }
+};
+
 oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
 #ifndef NETSNMP_DISABLE_DES
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
@@ -3305,7 +3332,7 @@ init_usm(void)
                            free_engineID, NULL);
 
     register_config_handler("snmp", "defAuthType", snmpv3_authtype_conf,
-                            NULL, "MD5|SHA|SHA512|SHA384|SHA256|SHA224");
+                            NULL, "MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224");
     register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
                             NULL,
 #ifdef HAVE_AES
@@ -3337,63 +3364,33 @@ init_usm(void)
                             NULL, NULL);
     register_config_handler(type, "userSetPrivLocalKey", usm_set_password,
                             NULL, NULL);
-
-   usm_init_auth_types();
-
-}
-
-void
-usm_init_auth_types(void)
-{
-    static int done = 0;
-    if (++done != 1)
-        return;
-
-    /** hash algs */
-    se_add_pair_to_slist("usm_hash_alg", strdup("NOAUTH"),
-                         NETSNMP_USMAUTH_NOAUTH);
-
-   se_add_pair_to_slist("usm_hash_alg", strdup("SHA"),
-                         NETSNMP_USMAUTH_HMACSHA1);
-
-#ifndef NETSNMP_DISABLE_MD5
-    se_add_pair_to_slist("usm_hash_alg", strdup("MD5"),
-                         NETSNMP_USMAUTH_HMACMD5);
-#endif
-
-    se_add_pair_to_slist("usm_hash_alg", strdup("SHA224"),
-                         NETSNMP_USMAUTH_HMAC128SHA224);
-    se_add_pair_to_slist("usm_hash_alg", strdup("SHA256"),
-                         NETSNMP_USMAUTH_HMAC192SHA256);
-    se_add_pair_to_slist("usm_hash_alg", strdup("SHA384"),
-                         NETSNMP_USMAUTH_HMAC256SHA384);
-    se_add_pair_to_slist("usm_hash_alg", strdup("SHA512"),
-                         NETSNMP_USMAUTH_HMAC384SHA512);
-#if 0 /* se pairs dont' allow duplicate values. */
-    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA1"),
-                         NETSNMP_USMAUTH_HMACSHA1);
-    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA-224"),
-                         NETSNMP_USMAUTH_HMAC128SHA224);
-    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA-256"),
-                         NETSNMP_USMAUTH_HMAC192SHA256);
-    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA-384"),
-                         NETSNMP_USMAUTH_HMAC256SHA384);
-    se_add_pair_to_slist("usm_hash_alt_alg", strdup("SHA-512"),
-                         NETSNMP_USMAUTH_HMAC384SHA512);
-#endif
 }
 
 int
 usm_lookup_auth_type(const char *str)
 {
-    return se_find_casevalue_in_slist("usm_hash_alg", str);
+    int i, il, sl = strlen(str);
+    for (i = 0; usm_hash_alg[i].label; ++i) {
+        il = strlen(usm_hash_alg[i].label);
+        if (il != sl)
+            continue;
+        if (0 == strcasecmp(usm_hash_alg[i].label, str))
+            return usm_hash_alg[i].value;
+    }
+
+    return -1;
 }
 
 
-char *
+const char *
 usm_lookup_auth_str(int value)
 {
-    return se_find_label_in_slist("usm_hash_alg", value);
+    int i;
+    for (i = 0; usm_hash_alg[i].label; ++i)
+        if (value == usm_hash_alg[i].value)
+            return usm_hash_alg[i].label;
+
+    return NULL;
 }
 
 
@@ -3404,7 +3401,7 @@ init_usm_conf(const char *app)
                                   usm_parse_config_usmUser, NULL, NULL);
     register_config_handler(app, "createUser",
                                   usm_parse_create_usmUser, NULL,
-                                  "username [-e ENGINEID] (MD5|SHA|SHA512|SHA384|SHA256|SHA224|default) authpassphrase [(DES|AES|default) [privpassphrase]]");
+                                  "username [-e ENGINEID] (MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224|default) authpassphrase [(DES|AES|default) [privpassphrase]]");
 
     /*
      * we need to be called back later 
