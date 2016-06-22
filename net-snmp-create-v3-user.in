@@ -37,7 +37,7 @@ case $1 in
 	    exit 1
 	fi
         case $1 in
-            MD5|SHA)
+            MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224)
 	    Aalgorithm=$1
 	    shift
 	    ;;
@@ -91,7 +91,7 @@ if test "x$usage" = "xyes"; then
     echo ""
     echo "Usage:"
     echo "  net-snmp-create-v3-user [-ro] [-A authpass] [-X privpass]"
-    echo "                          [-a MD5|SHA] [-x DES|AES] [username]"
+    echo "                          [-a MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224] [-x DES|AES] [username]"
     echo ""
     exit
 fi
