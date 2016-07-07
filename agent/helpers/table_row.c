@@ -3,7 +3,14 @@
  *
  * Helper for registering single row slices of a shared table
  *
- * $Id$
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 #define TABLE_ROW_DATA  "table_row"
 
