@@ -3,6 +3,11 @@
  * This code is based on code written by Patrick Powell (papowell@astart.com)
  * It may be used for any purpose as long as this notice remains intact
  * on all source code distributions
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 /**************************************************************
