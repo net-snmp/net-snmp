@@ -10,6 +10,11 @@
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 /** @defgroup agent_trap Trap generation routines for mib modules to use
  *  @ingroup agent
@@ -927,6 +932,20 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     }
 
     pdu->sessid = sess->sessid; /* AgentX only ? */
+    /*
+     * RFC 3414 sayeth:
+     *
+     * - If an SNMP engine uses a msgID for correlating Response messages to
+     *   outstanding Request messages, then it MUST use different msgIDs in
+     *   all such Request messages that it sends out during a Time Window
+     *   (150 seconds) period.
+     *
+     *   A Command Generator or Notification Originator Application MUST use
+     *   different request-ids in all Request PDUs that it sends out during
+     *   a TimeWindow (150 seconds) period.
+     */
+    pdu->reqid = snmp_get_next_reqid();
+    pdu->msgid = snmp_get_next_msgid();
 
     if ( template_pdu->command == SNMP_MSG_INFORM
 #ifdef USING_AGENTX_PROTOCOL_MODULE

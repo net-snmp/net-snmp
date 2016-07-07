@@ -6,6 +6,11 @@
 # Use is subject to license terms specified in the COPYING file
 # distributed with the Net-SNMP package.
 #
+# Portions of this file are copyrighted by:
+# Copyright (c) 2016 VMware, Inc. All rights reserved.
+# Use is subject to license terms specified in the COPYING file
+# distributed with the Net-SNMP package.
+#
 
 #
 # Process this file with autoconf to produce a configure script.
@@ -42,6 +47,13 @@ AC_SUBST(CONFIGURE_OPTIONS)
 #     checks for system services
 
 m4_include([configure.d/config_project_with_enable])
+##
+# Protect against CFLAGS with -Werror which causes failures for some tests
+#   (e.g. it causes type mismatches in the AC_CV_FUNCS call)
+##
+noerr_CFLAGS="$CFLAGS"
+CFLAGS=`echo $CFLAGS | sed 's/-Werror//'`
+export CFLAGS
 m4_include([configure.d/config_project_manual])
 m4_include([configure.d/config_os_progs])
 m4_include([configure.d/config_project_paths])
@@ -64,6 +76,11 @@ m4_include([configure.d/config_os_functions])
 m4_include([configure.d/config_os_struct_members])
 m4_include([configure.d/config_os_misc4])
 AC_CACHE_SAVE
+##
+# Add back in the original CFLAGS setting
+##
+CFLAGS="$noerr_CFLAGS"
+export CFLAGS
 
 #
 # define the agent libraries variables

@@ -1,4 +1,13 @@
 /* IPV4 base transport support functions
+ *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -225,6 +234,7 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
                 netsnmp_transport_free(t);
                 return NULL;
             }
+            memset(&addr_pair, 0, sizeof(netsnmp_indexed_addr_pair));
             local_addr_len = sizeof(addr_pair.local_addr);
             rc2 = getsockname(t->sock, (struct sockaddr*)&addr_pair.local_addr,
                               &local_addr_len);

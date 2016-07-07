@@ -1,4 +1,13 @@
 /* IPV6 base transport support functions
+ *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -60,6 +69,7 @@ static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 
 
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 static unsigned
 netsnmp_if_nametoindex(const char *ifname)
 {
@@ -84,30 +94,43 @@ netsnmp_if_indextoname(unsigned ifindex, char *ifname)
     return NULL;
 #endif
 }
+#endif /* HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID */
 
 char *
 netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
                      void *data, int len)
 {
     struct sockaddr_in6 *to = NULL;
+    char scope_id[IF_NAMESIZE + 1] = "";
+    char port[6];
     char addr[INET6_ADDRSTRLEN];
-    char tmp[INET6_ADDRSTRLEN + 18];
+    /** tmp buffer size */
+    size_t tmplen = sizeof(addr) + sizeof(scope_id) + sizeof(port) +
+        strlen(prefix) + 10; /* 10 is spaces/separators + some wiggle room */
+    char *tmp = malloc(tmplen);
+
+    if (NULL == tmp)
+        return NULL;
 
     DEBUGMSGTL(("netsnmp_ipv6", "fmtaddr: t = %p, data = %p, len = %d\n", t,
                 data, len));
     if (data != NULL && len == sizeof(struct sockaddr_in6)) {
         to = (struct sockaddr_in6 *) data;
+    } else if (data != NULL && len == sizeof(netsnmp_indexed_addr_pair)) {
+        netsnmp_indexed_addr_pair *addr_pair =
+            (netsnmp_indexed_addr_pair *) data;
+        to = (struct sockaddr_in6 *) &(addr_pair->remote_addr);
     } else if (t != NULL && t->data != NULL) {
         to = (struct sockaddr_in6 *) t->data;
     }
     if (to == NULL) {
-        snprintf(tmp, sizeof(tmp), "%s: unknown", prefix);
+        strlcpy(tmp, prefix, tmplen);
+        strlcat(tmp, ": unknown", tmplen);
     } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
 	struct hostent *host;
 	host = netsnmp_gethostbyaddr((char *)&to->sin6_addr, sizeof(struct in6_addr), AF_INET6);
 	return (host ? strdup(host->h_name) : NULL);
     } else {
-        char scope_id[IF_NAMESIZE + 1] = "";
 
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
 	if (to->sin6_scope_id
@@ -115,12 +138,17 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
             scope_id[0] = '%';
         }
 #endif
-        snprintf(tmp, sizeof(tmp), "%s: [%s%s]:%hu", prefix,
-                 inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr,
-                           INET6_ADDRSTRLEN), scope_id, ntohs(to->sin6_port));
+        strlcpy(tmp, prefix, tmplen);
+        inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr, sizeof(addr));
+        strlcat(tmp, ": [", tmplen);
+        strlcat(tmp, addr, tmplen);
+        strlcat(tmp, scope_id, tmplen);
+        strlcat(tmp, "]:", tmplen);
+        snprintf(port,sizeof(port), "%hu", ntohs(to->sin6_port));
+        strlcat(tmp, port, tmplen);
     }
-    tmp[sizeof(tmp)-1] = '\0';
-    return strdup(tmp);
+    tmp[tmplen-1] = '\0';
+    return tmp;
 }
 
 int
@@ -203,12 +231,16 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
 	       *
 	       */
 	        char *scope_id;
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 	        unsigned int if_index = 0;
+#endif
                 *cp = '\0';
 		scope_id = strchr(peername + 1, '%');
 		if (scope_id != NULL) {
 		    *scope_id = '\0';
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		    if_index = netsnmp_if_nametoindex(scope_id + 1);
+#endif
 		}
                 if (*(cp + 1) == ':') {
                     portno = atoi(cp+2);
@@ -260,12 +292,16 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         cp = strrchr(peername, ':');
         if (cp != NULL) {
 	    char *scope_id;
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 	    unsigned int if_index = 0;
+#endif
 	    *cp = '\0';
 	    scope_id = strchr(peername + 1, '%');
 	    if (scope_id != NULL) {
 	        *scope_id = '\0';
+#if HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 	        if_index = netsnmp_if_nametoindex(scope_id + 1);
+#endif
 	    }
             portno = atoi(cp + 1);
             if (portno != 0 &&

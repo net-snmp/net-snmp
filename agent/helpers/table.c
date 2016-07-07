@@ -17,6 +17,11 @@
  * Copyright (C) 2007 Apple, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -151,9 +156,14 @@ int
 netsnmp_register_table(netsnmp_handler_registration *reginfo,
                        netsnmp_table_registration_info *tabreq)
 {
-    int rc = netsnmp_inject_handler(reginfo, netsnmp_get_table_handler(tabreq));
-    if (SNMPERR_SUCCESS != rc)
-        return rc;
+    netsnmp_mib_handler *handler = netsnmp_get_table_handler(tabreq);
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create table handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
 
     return netsnmp_register_handler(reginfo);
 }
@@ -828,12 +838,11 @@ netsnmp_sparse_table_register(netsnmp_handler_registration *reginfo,
                        netsnmp_table_registration_info *tabreq)
 {
     netsnmp_mib_handler *handler1, *handler2;
-    int rc;
 
     handler1 = netsnmp_create_handler(SPARSE_TABLE_HANDLER_NAME,
                                      sparse_table_helper_handler);
     if (NULL == handler1)
-        return SNMP_ERR_GENERR;
+        return MIB_REGISTRATION_FAILED;
 
     handler2 = netsnmp_get_table_handler(tabreq);
     if (NULL == handler2 ) {
@@ -841,18 +850,16 @@ netsnmp_sparse_table_register(netsnmp_handler_registration *reginfo,
         return SNMP_ERR_GENERR;
     }
 
-    rc = netsnmp_inject_handler(reginfo, handler1);
-    if (SNMPERR_SUCCESS != rc) {
+    if (SNMPERR_SUCCESS != netsnmp_inject_handler(reginfo, handler1)) {
         netsnmp_handler_free(handler1);
         netsnmp_handler_free(handler2);
-        return rc;
+        return MIB_REGISTRATION_FAILED;
     }
 
-    rc = netsnmp_inject_handler(reginfo, handler2);
-    if (SNMPERR_SUCCESS != rc) {
+    if (SNMPERR_SUCCESS != netsnmp_inject_handler(reginfo, handler2)) {
         /** handler1 is in reginfo... remove and free?? */
         netsnmp_handler_free(handler2);
-        return rc;
+        return MIB_REGISTRATION_FAILED;
     }
 
     /** both handlers now in reginfo, so nothing to do on error */

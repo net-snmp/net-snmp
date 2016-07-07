@@ -1,5 +1,14 @@
 /*
  * snmpv3.c
+ *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -523,7 +532,7 @@ setup_engineID(u_char ** eidp, const char *text)
     /*
      * Allocate memory and store enterprise ID.
      */
-    if ((bufp = (u_char *) malloc(len)) == NULL) {
+    if ((bufp = (u_char *) calloc(1, len)) == NULL) {
         snmp_log_perror("setup_engineID malloc");
         return -1;
     }
@@ -577,7 +586,8 @@ setup_engineID(u_char ** eidp, const char *text)
 #ifdef AF_INET6
     case ENGINEID_TYPE_IPV6:
         bufp[4] = ENGINEID_TYPE_IPV6;
-        memcpy(bufp + 5, hent->h_addr_list[0], hent->h_length);
+        if (hent)
+            memcpy(bufp + 5, hent->h_addr_list[0], hent->h_length);
         break;
 #endif
 #endif

@@ -36,6 +36,11 @@ SOFTWARE.
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
@@ -126,6 +131,7 @@ netsnmp_feature_child_of(mib_to_asn_type, mib_api)
 
 static char    *uptimeString(u_long, char *, size_t);
 
+#ifndef NETSNMP_DISABLE_MIB_LOADING
 static struct tree *_get_realloc_symbol(const oid * objid, size_t objidlen,
                                         struct tree *subtree,
                                         u_char ** buf, size_t * buf_len,
@@ -141,6 +147,7 @@ static int      print_tree_node(u_char ** buf, size_t * buf_len,
 static void     handle_mibdirs_conf(const char *token, char *line);
 static void     handle_mibs_conf(const char *token, char *line);
 static void     handle_mibfile_conf(const char *token, char *line);
+#endif /*NETSNMP_DISABLE_MIB_LOADING */
 
 static void     _oid_finish_printing(const oid * objid, size_t objidlen,
                                      u_char ** buf, size_t * buf_len,
@@ -150,8 +157,8 @@ static void     _oid_finish_printing(const oid * objid, size_t objidlen,
 /*
  * helper functions for get_module_node 
  */
-static int      node_to_oid(struct tree *, oid *, size_t *);
 #ifndef NETSNMP_DISABLE_MIB_LOADING
+static int      node_to_oid(struct tree *, oid *, size_t *);
 static int      _add_strings_to_oid(struct tree *, char *,
                                     oid *, size_t *, size_t);
 #else
@@ -173,7 +180,9 @@ static char     Standard_Prefix[] = ".1.3.6.1.2.1";
 /*
  * Set default here as some uses of read_objid require valid pointer. 
  */
+#ifndef NETSNMP_DISABLE_MIB_LOADING
 static char    *Prefix = &Standard_Prefix[0];
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 typedef struct _PrefixList {
     const char     *str;
     int             len;
@@ -3146,8 +3155,8 @@ read_objid(const char *input, oid * output, size_t * out_len)
 {                               /* number of subid's in "output" */
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     struct tree    *root = tree_top;
-#endif /* NETSNMP_DISABLE_MIB_LOADING */
     char            buf[SPRINT_MAX_LEN];
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     int             ret, max_out_len;
     char           *name, ch;
     const char     *cp;
@@ -5399,7 +5408,6 @@ node_to_oid(struct tree *tp, oid * objid, size_t * objidlen)
 
     return (numids);
 }
-#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 /*
  * Replace \x with x stop at eos_marker
@@ -5433,6 +5441,7 @@ static char *_apply_escapes(char *src, char eos_marker)
 	return src;
     }
 }
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 static int
 #ifndef NETSNMP_DISABLE_MIB_LOADING
@@ -5444,18 +5453,17 @@ _add_strings_to_oid(void *tp, char *cp,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 {
     oid             subid;
-    int             len_index = 1000000;
+    char           *fcp, *ecp, *cp2 = NULL;
+    char            doingquote;
+    int             len = -1;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     struct tree    *tp2 = NULL;
     struct index_list *in_dices = NULL;
-#endif /* NETSNMP_DISABLE_MIB_LOADING */
-    char           *fcp, *ecp, *cp2 = NULL;
-    char            doingquote;
-    int             len = -1, pos = -1;
-#ifndef NETSNMP_DISABLE_MIB_LOADING
+    int             pos = -1;
     int             check =
         !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     int             do_hint = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
+    int             len_index = 1000000;
 
     while (cp && tp && tp->child_list) {
         fcp = cp;
@@ -6190,7 +6198,9 @@ uptime_string_n(u_long timeticks, char *buf, size_t buflen)
 oid            *
 snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
 {
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     size_t          savlen = *rootlen;
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     static size_t   tmpbuf_len = 0;
     static char    *tmpbuf = NULL;
     const char     *suffix, *prefix;

@@ -3,10 +3,6 @@
  *
  * Simple Network Management Protocol (RFC 1067).
  */
-/* Portions of this file are subject to the following copyright(s).  See
- * the Net-SNMP's COPYING file for more details and other copyrights
- * that may apply:
- */
 /* Portions of this file are subject to the following copyrights.  See
  * the Net-SNMP's COPYING file for more details and other copyrights
  * that may apply:
@@ -37,6 +33,11 @@ SOFTWARE.
  * Copyright © 2003 Sun Microsystems, Inc. All rights 
  * reserved.  Use is subject to license terms specified in the 
  * COPYING file distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 /** @defgroup snmp_agent net-snmp agent related processing 
  *  @ingroup agent
@@ -246,11 +247,11 @@ int             netsnmp_add_queued(netsnmp_agent_session *asp);
 int             netsnmp_remove_from_delegated(netsnmp_agent_session *asp);
 
 
-static int      current_globalid = 0;
-
 int      netsnmp_running = 1;
 
 #ifndef NETSNMP_FEATURE_REMOVE_ALLOCATE_GLOBALCACHEID
+static int      current_globalid = 0;
+
 int
 netsnmp_allocate_globalcacheid(void)
 {
@@ -1730,6 +1731,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                     break;
             }
         }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         /*
          * Similarly we may need to "dumb down" v2 exception
          *  types to throw an error for a v1 query.
@@ -1755,7 +1757,6 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                 ++i;
             }
         }
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
 #endif /* snmpv1 support */
     } /** if asp->pdu */
 
@@ -1963,6 +1964,16 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
         asp = (netsnmp_agent_session *) magic;
         status = asp->status;
     }
+
+#ifdef NETSNMP_DISABLE_SET_SUPPORT
+    if (pdu->command == SNMP_MSG_SET) {
+        /** Silvercreek protocol tests send set with 0 varbinds */
+        if (NULL == pdu->variables)
+            return netsnmp_wrap_up_request(asp, SNMP_ERR_NOERROR);
+        asp->index = 1;
+        return netsnmp_wrap_up_request(asp, SNMP_ERR_NOTWRITABLE);
+    }
+#endif /* NETSNMP_DISABLE_SET_SUPPORT */
 
     if ((access_ret = check_access(asp->pdu)) != 0) {
         if (access_ret == VACM_NOSUCHCONTEXT) {
@@ -3764,7 +3775,7 @@ netsnmp_get_agent_runtime(void)
 
     netsnmp_get_monotonic_clock(&now);
     NETSNMP_TIMERSUB(&now, &starttimeM, &delta);
-    return delta.tv_sec * (uint64_t)100 + delta.tv_usec / 10000;
+    return (uint64_t)(delta.tv_sec * (uint64_t)100 + delta.tv_usec / 10000);
 }
 
 /**
@@ -3801,7 +3812,7 @@ netsnmp_get_agent_uptime(void)
 
     netsnmp_get_monotonic_clock(&now);
     NETSNMP_TIMERSUB(&now, &starttimeM, &delta);
-    return delta.tv_sec * 100UL + delta.tv_usec / 10000;
+    return (u_long)(delta.tv_sec * 100UL + delta.tv_usec / 10000);
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_SET_AGENT_UPTIME

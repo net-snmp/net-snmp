@@ -2,6 +2,15 @@
  * vacm.h
  *
  * SNMPv3 View-based Access Control Model
+ *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #ifndef VACM_H
@@ -112,7 +121,7 @@ extern          "C" {
 
     struct vacm_viewEntry {
         char            viewName[VACMSTRINGLEN];
-        oid             viewSubtree[MAX_OID_LEN];
+        oid             viewSubtree[MAX_OID_LEN+1]; /* keep len in [0] */
         size_t          viewSubtreeLen;
         u_char          viewMask[VACMSTRINGLEN];
         size_t          viewMaskLen;

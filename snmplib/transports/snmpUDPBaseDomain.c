@@ -1,4 +1,13 @@
 /* UDP base transport support functions
+ *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -442,13 +451,21 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
     netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *to = NULL;
 
-    if (opaque != NULL && *opaque != NULL &&
+    if (opaque != NULL && *opaque != NULL && NULL != olength &&
         ((*olength == sizeof(netsnmp_indexed_addr_pair) ||
           (*olength == sizeof(struct sockaddr_in))))) {
         addr_pair = (netsnmp_indexed_addr_pair *) (*opaque);
     } else if (t != NULL && t->data != NULL &&
                 t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
         addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
+    } else {
+        int len = -1;
+        if (opaque != NULL && *opaque != NULL && NULL != olength)
+            len = *olength;
+        else if (t != NULL && t->data != NULL)
+            len = t->data_length;
+        snmp_log(LOG_ERR, "unknown addr type of size %d\n", len);
+        return SNMPERR_GENERR;
     }
 
     to = &addr_pair->remote_addr.sa;

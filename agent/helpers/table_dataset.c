@@ -1,3 +1,14 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
@@ -425,6 +436,7 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
                                 netsnmp_table_data_set *data_set,
                                 netsnmp_table_registration_info *table_info)
 {
+    netsnmp_mib_handler *handler;
     int ret;
 
     if (NULL == table_info) {
@@ -462,8 +474,15 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
             table_info->max_column = maxcol;
     }
 
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_get_table_data_set_handler(data_set));
+    handler = netsnmp_get_table_data_set_handler(data_set);
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create table data set handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
+
     ret = netsnmp_register_table_data(reginfo, data_set->table,
                                        table_info);
     if (ret == SNMPERR_SUCCESS && reginfo->handler)

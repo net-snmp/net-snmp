@@ -29,6 +29,11 @@ SOFTWARE.
  * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 /** @defgroup library The Net-SNMP library
@@ -921,6 +926,8 @@ snmp_shutdown(const char *type)
     netsnmp_clear_default_target();
     netsnmp_clear_default_domain();
     shutdown_secmod();
+    shutdown_data_list();
+    snmp_debug_shutdown();    /* should be done last */
 
     init_snmp_init_done  = 0;
     _init_snmp_init_done = 0;
@@ -1430,7 +1437,7 @@ netsnmp_sess_config_transport(netsnmp_container *transport_configuration,
         if (transport->f_config) {
             netsnmp_iterator *iter;
             netsnmp_transport_config *config_data;
-            int ret;
+            int ret = 0;
 
             iter = CONTAINER_ITERATOR(transport_configuration);
             if (NULL == iter) {
@@ -1441,10 +1448,12 @@ netsnmp_sess_config_transport(netsnmp_container *transport_configuration,
                 config_data = (netsnmp_transport_config*)ITERATOR_NEXT(iter)) {
                 ret = transport->f_config(transport, config_data->key,
                                           config_data->value);
-                if (ret) {
-                    return SNMPERR_TRANSPORT_CONFIG_ERROR;
-                }
+                if (ret)
+                    break;
             }
+            ITERATOR_RELEASE(iter);
+            if (ret)
+                return SNMPERR_TRANSPORT_CONFIG_ERROR;
         } else {
             return SNMPERR_TRANSPORT_NO_CONFIG;
         }
@@ -4978,6 +4987,18 @@ _sess_async_send(void *sessp,
     reqid = pdu->reqid;
 
     /*
+     * Bug 2387: 0 is a valid request id, so since reqid is used as a return
+     * code with 0 meaning an error, set reqid to 1 if there is no error. This
+     * does not affect the request id in the packet and fixes a memory leak
+     * for incoming PDUs with a request id of 0. This could cause some
+     * confusion if the caller is expecting the request id to match the
+     * return code, as the documentation states it will. Most example code
+     * just checks for non-zero, so hopefully this wont be an issue.
+     */
+    if (0 == reqid && (SNMPERR_SUCCESS == session->s_snmp_errno))
+        ++reqid;
+
+    /*
      * Add to pending requests list if we expect a response.  
      */
     if (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) {
@@ -5179,7 +5200,10 @@ snmp_create_sess_pdu(netsnmp_transport *transport, void *opaque,
  * This function processes a complete (according to asn_check_packet or the
  * AgentX equivalent) packet, parsing it into a PDU and calling the relevant
  * callbacks.  On entry, packetptr points at the packet in the session's
- * buffer and length is the length of the packet.  
+ * buffer and length is the length of the packet.  Return codes:
+ *   0: pdu handled (pdu deleted)
+ *  -1: error (pdu deleted)
+ *  -2: pdu not found for shared session (pdu NOT deleted)
  */
 
 static int
@@ -5359,7 +5383,9 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	      /*
 	       * TODO FIX: recover after message callback *?
                */
-	      return -1;
+                snmp_log(LOG_ERR, "malloc failed handling pdu\n");
+                snmp_free_pdu(pdu);
+                return -1;
 	    }
 	    memcpy(sp->securityEngineID, pdu->securityEngineID,
 		   pdu->securityEngineIDLen);
@@ -5372,6 +5398,8 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 		/*
 		 * TODO FIX: recover after message callback *?
 		 */
+                snmp_log(LOG_ERR, "malloc failed handling pdu\n");
+                snmp_free_pdu(pdu);
                 return -1;
 	      }
 	      memcpy(sp->contextEngineID,
@@ -5486,6 +5514,11 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
         return 0;
     }
 
+    if (NULL == slp || NULL == sp || NULL == isp || NULL == transport) {
+        snmp_log(LOG_ERR, "bad parameters to _sess_read\n");
+        return SNMPERR_GENERR;
+    }
+
     /* to avoid subagent crash */ 
     if (transport->sock < 0) { 
         snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
@@ -5557,6 +5590,9 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                     (void)nslp->session->callback(NETSNMP_CALLBACK_OP_CONNECT,
                                                   nslp->session, 0, NULL,
                                                   sp->callback_magic);
+                } else {
+                    transport->f_close(new_transport);
+                    netsnmp_transport_free(new_transport);
                 }
                 return 0;
             } else {
@@ -6616,6 +6652,7 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
                            Return its length. */
 }
 
+#ifndef NETSNMP_DISABLE_MIB_LOADING
 static int _check_range(struct tree *tp, long ltmp, int *resptr,
 	                const char *errmsg)
 {
@@ -6658,7 +6695,7 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
     free(temp);
     return 1;
 }
-        
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 /*
  * Add a variable with the requested name to the end of the list of
@@ -6747,14 +6784,14 @@ snmp_add_var(netsnmp_pdu *pdu,
 					     NETSNMP_DS_LIB_NO_DISPLAY_HINT);
     u_char         *hintptr;
     struct tree    *tp;
+    struct enum_list *ep;
+    int             itmp;
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
     u_char         *buf = NULL;
     const u_char   *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;
     in_addr_t       atmp;
     long            ltmp;
-    int             itmp;
-    struct enum_list *ep;
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     double          dtmp;
     float           ftmp;
@@ -7000,8 +7037,6 @@ snmp_add_var(netsnmp_pdu *pdu,
                 snmp_set_detail(value);
                 break;
             }
-            /* initialize itmp value so that range check below works */
-            itmp = value_len;
             buf_ptr = buf;
         } else if (type == 's') {
             buf_ptr = (const u_char *)value;

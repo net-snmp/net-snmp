@@ -7,6 +7,11 @@
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 /*
  * snmpusm.c
@@ -2340,6 +2345,9 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 #ifdef HAVE_AES
     u_int           net_boots, net_time;
 #endif
+#ifndef NETSNMP_DISABLE_DES
+    int             i;
+#endif
     u_char          signature[BYTESIZE(USM_MAX_KEYEDHASH_LENGTH)];
     size_t          signature_length = BYTESIZE(USM_MAX_KEYEDHASH_LENGTH);
     u_char          salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
@@ -2351,7 +2359,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
     u_char          type_value;
     u_char         *end_of_overhead = NULL;
     int             error;
-    int             i, rc = 0;
+    int             rc = 0;
     struct usmStateReference **secStateRef =
         (struct usmStateReference **) secStateRf;
 
@@ -3221,7 +3229,11 @@ init_usm(void)
     def->handle_report = usm_handle_report;
     def->probe_engineid = usm_discover_engineid;
     def->post_probe_engineid = usm_create_user_from_session_hook;
-    register_sec_mod(USM_SEC_MODEL_NUMBER, "usm", def);
+    if (register_sec_mod(USM_SEC_MODEL_NUMBER, "usm", def) != SNMPERR_SUCCESS) {
+        SNMP_FREE(def);
+        snmp_log(LOG_ERR, "could not register usm sec mod\n");
+        return;
+    }
 
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
@@ -4483,24 +4495,28 @@ usm_parse_create_usmUser(const char *token, char *line)
      * READ: Privacy Type 
      */
     testcase = 0;
-#ifndef NETSNMP_DISABLE_DES
     if (strncmp(cp, "DES", 3) == 0) {
+#ifndef NETSNMP_DISABLE_DES
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
         testcase = 1;
 	/* DES uses a 128 bit key, 64 bits of which is a salt */
 	privKeyLen = 16;
-    }
+#else
+        config_perror("DES support disabled");
 #endif
-#ifdef HAVE_AES
+    }
     if (strncmp(cp, "AES128", 6) == 0 ||
                strncmp(cp, "AES", 3) == 0) {
+#ifdef HAVE_AES
         memcpy(newuser->privProtocol, usmAESPrivProtocol,
                sizeof(usmAESPrivProtocol));
         testcase = 1;
 	privKeyLen = 16;
-    }
+#else
+        config_perror("AES support not available");
 #endif
+    }
     if (testcase == 0) {
         config_perror("Unknown privacy protocol");
         usm_free_user(newuser);
@@ -4650,8 +4666,10 @@ snmpv3_privtype_conf(const char *word, char *cptr)
 #endif
     if (testcase == 0)
         config_perror("Unknown privacy type");
-    defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
-    DEBUGMSGTL(("snmpv3", "set default privacy type: %s\n", cptr));
+    else {
+        defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
+        DEBUGMSGTL(("snmpv3", "set default privacy type: %s\n", cptr));
+    }
 }
 
 const oid      *

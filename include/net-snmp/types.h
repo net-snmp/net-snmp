@@ -1,3 +1,14 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #ifndef NET_SNMP_TYPES_H
 #define NET_SNMP_TYPES_H
 
@@ -177,7 +188,7 @@ typedef struct snmp_pdu {
     long            version;
     /** Type of this PDU */	
     int             command;
-    /** Request id - note: not incremented on retries */
+    /** Request id - note: incremented for each retry */
     long            reqid;  
     /** Message id for V3 messages note: incremented for each retry */
     long            msgid;

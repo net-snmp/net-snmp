@@ -1,5 +1,14 @@
 /*
  * snmp_openssl.c
+ *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -303,6 +312,7 @@ _cert_get_extension_id(X509 *ocert, int which, char **buf, int *len, int flags)
     return _cert_get_extension_at(ocert, pos, buf, len, flags);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_OPENSSL_CERT_GET_SUBJECTALTNAMES
 /** _cert_get_extension_id_str: get extension field from cert
  * @internal
  */
@@ -325,6 +335,7 @@ _cert_get_extension_id_str(X509 *ocert, int which, char **buf, int *len,
 
     return _cert_get_extension_str_at(ocert, pos, buf, len, flags);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OPENSSL_CERT_GET_SUBJECTALTNAMES */
 
 static char *
 _extract_oname(const GENERAL_NAME *oname)

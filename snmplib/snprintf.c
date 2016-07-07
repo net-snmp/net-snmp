@@ -3,6 +3,11 @@
  * This code is based on code written by Patrick Powell (papowell@astart.com)
  * It may be used for any purpose as long as this notice remains intact
  * on all source code distributions
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 /**************************************************************
@@ -243,7 +248,7 @@ dopr(char *buffer, size_t maxlen, const char *format, va_list args)
             case 'd':
             case 'i':
                 if (cflags == DP_C_SHORT)
-                    value = va_arg(args, short int);
+                    value = va_arg(args, long);
                 else if (cflags == DP_C_LONG)
                     value = va_arg(args, long int);
                 else
@@ -254,7 +259,7 @@ dopr(char *buffer, size_t maxlen, const char *format, va_list args)
             case 'o':
                 flags |= DP_F_UNSIGNED;
                 if (cflags == DP_C_SHORT)
-                    value = va_arg(args, unsigned short int);
+                    value = va_arg(args, unsigned long);
                 else if (cflags == DP_C_LONG)
                     value = va_arg(args, unsigned long int);
                 else
@@ -265,7 +270,7 @@ dopr(char *buffer, size_t maxlen, const char *format, va_list args)
             case 'u':
                 flags |= DP_F_UNSIGNED;
                 if (cflags == DP_C_SHORT)
-                    value = va_arg(args, unsigned short int);
+                    value = va_arg(args, unsigned long);
                 else if (cflags == DP_C_LONG)
                     value = va_arg(args, unsigned long int);
                 else
@@ -278,7 +283,7 @@ dopr(char *buffer, size_t maxlen, const char *format, va_list args)
             case 'x':
                 flags |= DP_F_UNSIGNED;
                 if (cflags == DP_C_SHORT)
-                    value = va_arg(args, unsigned short int);
+                    value = va_arg(args, unsigned long);
                 else if (cflags == DP_C_LONG)
                     value = va_arg(args, unsigned long int);
                 else
@@ -379,10 +384,11 @@ dopr(char *buffer, size_t maxlen, const char *format, va_list args)
 
 static void
 fmtstr(char *buffer, size_t * currlen, size_t maxlen,
-       char *value, int flags, int min, int max)
+       char *valuein, int flags, int min, int max)
 {
     int             padlen, strln;      /* amount to pad */
     int             cnt = 0;
+    const char     *value = valuein;
 
     if (value == 0) {
         value = "<NULL>";
@@ -524,7 +530,7 @@ abs_val(LDOUBLE value)
 }
 
 static          LDOUBLE
-pow10(int exp)
+ns_pow10(int exp)
 {
     LDOUBLE         result = 1;
 
@@ -537,7 +543,7 @@ pow10(int exp)
 }
 
 static long
-round(LDOUBLE value)
+ns_round(LDOUBLE value)
 {
     long            intpart;
 
@@ -599,11 +605,11 @@ fmtfp(char *buffer, size_t * currlen, size_t maxlen,
      * We "cheat" by converting the fractional part to integer by
      * * multiplying by a factor of 10
      */
-    fracpart = round((pow10(max)) * (ufvalue - intpart));
+    fracpart = ns_round((ns_pow10(max)) * (ufvalue - intpart));
 
-    if (fracpart >= pow10(max)) {
+    if (fracpart >= ns_pow10(max)) {
         intpart++;
-        fracpart -= pow10(max);
+        fracpart -= ns_pow10(max);
     }
 #ifdef DEBUG_SNPRINTF
     dprint(1,

@@ -1,5 +1,14 @@
 /*
  * snmpMPDStats.c: tallies errors for SNMPv3 message processing.
+ *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -32,12 +41,17 @@ init_snmpMPDStats(void)
         netsnmp_create_handler_registration(
             "snmpMPDStats", NULL, snmpMPDStats, OID_LENGTH(snmpMPDStats),
             HANDLER_CAN_RONLY);
-    if (s &&
-	NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, MPD) == MIB_REGISTERED_OK) {
-        REGISTER_SYSOR_ENTRY(snmpMPDCompliance,
-                             "The MIB for Message Processing and Dispatching.");
-        snmpMPDStats_reg = s;
+    if (!s)
+        return;
+
+    if (NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, MPD) != MIB_REGISTERED_OK) {
+        netsnmp_handler_registration_free(s);
+        return;
     }
+
+    REGISTER_SYSOR_ENTRY(snmpMPDCompliance,
+                         "The MIB for Message Processing and Dispatching.");
+    snmpMPDStats_reg = s;
 }
 
 void

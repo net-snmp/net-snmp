@@ -1,3 +1,14 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #ifndef NET_SNMP_SESSION_API_H
 #define NET_SNMP_SESSION_API_H
 
@@ -54,6 +65,7 @@ extern          "C" {
      * session defaults.  Add a request corresponding to this pdu to the list
      * of outstanding requests on this session, then send the pdu.
      * Returns the request id of the generated packet if applicable, otherwise 1.
+     * (There is a special case: if the request id is 0, 1 will be returned).
      * On any error, 0 is returned.
      * The pdu is freed by snmp_send() unless a failure occured.
      */

@@ -37,6 +37,11 @@ SOFTWARE.
  * Copyright (C) 2007 Apple, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 /*
  * System dependent routines go here
@@ -936,9 +941,18 @@ netsnmp_gethostbyname(const char *name)
     if (hp == NULL) {
         DEBUGMSGTL(("dns:gethostbyname",
                     "couldn't resolve %s\n", name));
-    } else if (hp->h_addrtype != AF_INET) {
+    } else if (hp->h_addrtype != AF_INET
+#ifdef AF_INET6
+               && hp->h_addrtype != AF_INET6
+#endif
+        ) {
         DEBUGMSGTL(("dns:gethostbyname",
-                    "warning: response for %s not AF_INET!\n", name));
+#ifdef AF_INET6
+                    "warning: response for %s not AF_INET/AF_INET6!\n"
+#else
+                    "warning: response for %s not AF_INET!\n"
+#endif
+                    , name));
     } else {
         DEBUGMSGTL(("dns:gethostbyname",
                     "%s resolved okay\n", name));
@@ -1124,7 +1138,7 @@ calculate_sectime_diff(const struct timeval *now, const struct timeval *then)
     struct timeval  diff;
 
     NETSNMP_TIMERSUB(now, then, &diff);
-    return diff.tv_sec + (diff.tv_usec >= 500000L);
+    return (u_int)(diff.tv_sec + (diff.tv_usec >= 500000L));
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_SECTIME_DIFF */
 

@@ -11,6 +11,11 @@
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 /** @defgroup snmp_logging generic logging for net-snmp 
  *  @ingroup library
@@ -494,7 +499,10 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_SYSLOG, priority);
         if (logh) {
             int facility = decode_facility(optarg);
-            if (facility == -1)  return -1;
+            if (facility == -1) {
+                netsnmp_remove_loghandler(logh);
+                return -1;
+            }
             logh->pri_max = pri_max;
             logh->token   = strdup(snmp_log_syslogname(NULL));
             logh->magic   = (void *)(intptr_t)facility;
@@ -732,7 +740,9 @@ void
 netsnmp_logging_restart(void)
 {
     netsnmp_log_handler *logh;
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
     int doneone = 0;
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
 
     for (logh = logh_head; logh; logh = logh->next) {
         if (0 == logh->enabled)
@@ -998,6 +1008,11 @@ netsnmp_register_loghandler( int type, int priority )
 
     DEBUGMSGT(("logging:register", "registering log type %d with pri %d\n",
                type, priority));
+    if (priority > LOG_DEBUG) {
+        DEBUGMSGT(("logging:register", "  limiting pri %d to %d\n", priority,
+                   LOG_DEBUG));
+        priority = LOG_DEBUG;
+    }
 
     logh->type     = type;
     switch ( type ) {
@@ -1081,7 +1096,8 @@ netsnmp_remove_loghandler( netsnmp_log_handler *logh )
         logh->next->prev = logh->prev;
 
     for (i=LOG_EMERG; i<=logh->priority; i++)
-        logh_priorities[i] = NULL;
+        if (logh == logh_priorities[i])
+            logh_priorities[i] = logh->next;
     free(NETSNMP_REMOVE_CONST(char*, logh->token));
     SNMP_FREE(logh);
 
@@ -1315,6 +1331,8 @@ snmp_log_string(int priority, const char *str)
     /*
      * Start at the given priority, and work "upwards"....
      */
+    if (priority > LOG_DEBUG)
+        priority = LOG_DEBUG;
     logh = logh_priorities[priority];
     for ( ; logh; logh = logh->next ) {
         /*

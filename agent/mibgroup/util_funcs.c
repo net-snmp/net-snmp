@@ -6,6 +6,11 @@
  * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -117,7 +122,7 @@ netsnmp_feature_child_of(find_prefix_info, prefix_info_all)
 netsnmp_feature_child_of(create_prefix_info, prefix_info_all)
 #endif /* HAVE_LINUX_RTNETLINK_H */
 
-#ifdef NETSNMP_EXCACHETIME
+#if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)
 static long     cachetime;
 #endif
 
@@ -390,7 +395,7 @@ get_exec_output(struct extensible *ex)
     }
     return fd;
 #endif                          /* WIN32 */
-#endif
+#endif       /* HAVE_EXEC */
 #endif /* !defined(USING_UTILITIES_EXECUTE_MODULE) */
     return -1;
 }
@@ -668,19 +673,19 @@ clear_cache(int action,
             size_t var_val_len,
             u_char * statP, oid * name, size_t name_len)
 {
-
-    long            tmp = 0;
-
     if (var_val_type != ASN_INTEGER) {
         snmp_log(LOG_NOTICE, "Wrong type != int\n");
         return SNMP_ERR_WRONGTYPE;
     }
-    tmp = *((long *) var_val);
-    if (tmp == 1 && action == COMMIT) {
-#ifdef NETSNMP_EXCACHETIME
-        cachetime = 0;          /* reset the cache next read */
-#endif
+#if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)
+    else {
+        long            tmp = 0;
+        tmp = *((long *) var_val);
+        if (tmp == 1 && action == COMMIT) {
+            cachetime = 0;          /* reset the cache next read */
+        }
     }
+#endif
     return SNMP_ERR_NOERROR;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CLEAR_CACHE */

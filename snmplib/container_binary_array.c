@@ -1,9 +1,16 @@
 /*
  * container_binary_array.c
- * $Id$
  *
  * see comments in header file.
  *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -526,7 +533,7 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
     /*
      * if there is no data, return NULL;
      */
-    if (!c || !key)
+    if (!c || !key || !len)
         return NULL;
 
     t = (binary_array_table*)c->container_data;
@@ -554,6 +561,9 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
     }
 
     *len = end - start + 1;
+    if (*len <= 0)
+        return NULL;
+
     subset = (void **)malloc((*len) * sizeof(void*));
     if (subset)
         memcpy(subset, &t->data[start], sizeof(void*) * (*len));
@@ -625,10 +635,8 @@ _ba_get_subset(netsnmp_container *container, void *data)
     int len;
 
     rtn = netsnmp_binary_array_get_subset(container, data, &len);
-    if (rtn == NULL || len <= 0) {
-        free(rtn);
+    if (NULL==rtn)
         return NULL;
-    }
     
     va = SNMP_MALLOC_TYPEDEF(netsnmp_void_array);
     if (va == NULL) {

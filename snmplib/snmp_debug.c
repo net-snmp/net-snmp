@@ -1,3 +1,14 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #include <limits.h>
@@ -46,7 +57,7 @@ static int      debug_print_everything = 0;
 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
 
 /*
- * Number of spaces to indent debug outpur. Valid range is [0,INT_MAX]
+ * Number of spaces to indent debug output. Valid range is [0,INT_MAX]
  */
 static int debugindent = 0;
 
@@ -586,4 +597,14 @@ snmp_debug_init(void)
     register_prenetsnmp_mib_handler("snmp", "debugTokens",
                                     debug_config_register_tokens, NULL,
                                     "token[,token...]");
+}
+
+void
+snmp_debug_shutdown(void)
+{
+    int i;
+
+   for (i=0; i<debug_num_tokens; i++) {
+       SNMP_FREE(dbg_tokens [i].token_name);
+    }
 }
