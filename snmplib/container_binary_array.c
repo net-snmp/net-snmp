@@ -431,8 +431,12 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
     int             was_dirty = 0;
     int             i;
 
-    i = upper_bound(entry, c);
-    netsnmp_assert(0 <= i && i <= t->count);
+    if (c->flags & CONTAINER_KEY_UNSORTED)
+        i = t->count;
+    else {
+        i = upper_bound(entry, c);
+        netsnmp_assert(0 <= i && i <= t->count);
+    }
 
     /*
      * check for duplicates
