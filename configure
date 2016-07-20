@@ -5285,6 +5285,7 @@ fi
 ##
 noerr_CFLAGS="$CFLAGS"
 CFLAGS=`echo $CFLAGS | sed 's/-Werror//'`
+CFLAGS_without_Werror=$CFLAGS
 export CFLAGS
 # -*- autoconf -*-
 #
@@ -30526,7 +30527,7 @@ rm -f confcache
 ##
 # Add back in the original CFLAGS setting
 ##
-CFLAGS="$noerr_CFLAGS"
+CFLAGS="$noerr_CFLAGS ${CFLAGS#$CFLAGS_without_Werror}"
 export CFLAGS
 
 #
