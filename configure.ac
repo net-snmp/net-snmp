@@ -53,6 +53,7 @@ m4_include([configure.d/config_project_with_enable])
 ##
 noerr_CFLAGS="$CFLAGS"
 CFLAGS=`echo $CFLAGS | sed 's/-Werror//'`
+CFLAGS_without_Werror=$CFLAGS
 export CFLAGS
 m4_include([configure.d/config_project_manual])
 m4_include([configure.d/config_os_progs])
@@ -79,7 +80,7 @@ AC_CACHE_SAVE
 ##
 # Add back in the original CFLAGS setting
 ##
-CFLAGS="$noerr_CFLAGS"
+CFLAGS="$noerr_CFLAGS ${CFLAGS#$CFLAGS_without_Werror}"
 export CFLAGS
 
 #
