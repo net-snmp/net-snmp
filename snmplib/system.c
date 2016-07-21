@@ -946,13 +946,13 @@ netsnmp_gethostbyname(const char *name)
                && hp->h_addrtype != AF_INET6
 #endif
         ) {
-        DEBUGMSGTL(("dns:gethostbyname",
 #ifdef AF_INET6
-                    "warning: response for %s not AF_INET/AF_INET6!\n"
+        DEBUGMSGTL(("dns:gethostbyname",
+                    "warning: response for %s not AF_INET/AF_INET6!\n", name));
 #else
-                    "warning: response for %s not AF_INET!\n"
+        DEBUGMSGTL(("dns:gethostbyname",
+                    "warning: response for %s not AF_INET!\n", name));
 #endif
-                    , name));
     } else {
         DEBUGMSGTL(("dns:gethostbyname",
                     "%s resolved okay\n", name));

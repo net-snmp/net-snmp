@@ -88,7 +88,7 @@ void init_cpu_sysctl( void ) {
 #elif defined(KERN_CPTIME2)                /* OpenBSD */
 #define NETSNMP_KERN_CPU  KERN_CPTIME
 #define NETSNMP_KERN_MCPU
-#define NETSNMP_KERN_MCPU_TYPE u_int64_t
+#define NETSNMP_KERN_MCPU_TYPE NETSNMP_CPU_STATS
 #elif defined(KERN_CPTIME)                /* OpenBSD */
 #define NETSNMP_KERN_CPU  KERN_CPTIME
 
