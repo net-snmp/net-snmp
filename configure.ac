@@ -52,7 +52,7 @@ m4_include([configure.d/config_project_with_enable])
 #   (e.g. it causes type mismatches in the AC_CV_FUNCS call)
 ##
 noerr_CFLAGS="$CFLAGS"
-CFLAGS=`echo $CFLAGS | sed 's/-Werror//'`
+CFLAGS=`echo $CFLAGS | sed 's/-Werror[[^ ]]*//g'`
 CFLAGS_without_Werror=$CFLAGS
 export CFLAGS
 m4_include([configure.d/config_project_manual])
