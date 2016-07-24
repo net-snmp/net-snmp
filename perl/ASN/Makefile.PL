@@ -7,9 +7,7 @@ my $lib_version;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
-%MakeParams = InitMakeParams();
-
-WriteMakefile(%MakeParams);
+WriteMakefile(InitMakeParams());
 
 Check_Version();
 

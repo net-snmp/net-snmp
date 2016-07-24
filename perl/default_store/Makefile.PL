@@ -3,12 +3,8 @@ require 5;
 use Config;
 use Getopt::Long;
 my $lib_version;
-my %MakeParams = ();
 
-%MakeParams = InitMakeParams();
-
-WriteMakefile(%MakeParams);
-
+WriteMakefile(InitMakeParams());
 
 sub InitMakeParams {
     my $opts;

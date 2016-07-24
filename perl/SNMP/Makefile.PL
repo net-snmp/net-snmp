@@ -3,15 +3,12 @@ require 5;
 use Config;
 use Getopt::Long;
 my $lib_version;
-my %MakeParams = ();
 my $opts;
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
-%MakeParams = InitMakeParams();
-
-WriteMakefile(%MakeParams);
+WriteMakefile(InitMakeParams());
 
 Check_Version();
 

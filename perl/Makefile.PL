@@ -3,9 +3,7 @@ use Config;
 use Getopt::Long;
 require 5;
 
-%MakeParams = InitMakeParams();
-
-WriteMakefile(%MakeParams);
+WriteMakefile(InitMakeParams());
 
 sub InitMakeParams {
     $nsconfig="net-snmp-config"; # in path by default
