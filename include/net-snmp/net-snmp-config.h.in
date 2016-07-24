@@ -1,5 +1,6 @@
 /* include/net-snmp/net-snmp-config.h.in.  Generated from configure.ac by autoheader.  */
-/* 
+
+/*
  * net-snmp configuration header file
  *
  * NOTE: DO NOT EDIT include/net-snmp/net-snmp-config.h.in as your changes
@@ -30,6 +31,10 @@
 
 /* definitions added by configure on-the-fly */
 
+#define config_error(x)
+
+#define config_warning(x)
+
 #define config_belongs_in(x)
 
 #define config_exclude(x)
@@ -43,10 +48,6 @@
 #define config_add_mib(x)
 
 #define config_parse_dot_conf(w,x,y,z)
-
-#define config_error(x)
-
-#define config_warning(x)
 
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
