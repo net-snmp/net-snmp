@@ -46,6 +46,7 @@ AC_SUBST(CONFIGURE_OPTIONS)
 #     checks for library functions
 #     checks for system services
 
+m4_include([configure.d/config_net_snmp_config_h])
 m4_include([configure.d/config_project_with_enable])
 ##
 # Protect against CFLAGS with -Werror which causes failures for some tests
