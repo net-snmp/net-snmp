@@ -4926,7 +4926,7 @@ add_mibdir(const char *dirname)
             DEBUGMSGTL(("parse-mibs", "The index is good\n"));
             if ((ip = fopen(token, "r")) != NULL) {
                 fgets(tmpstr, sizeof(tmpstr), ip); /* Skip dir line */
-                while (fscanf(ip, "%127s%c%299s%c", token, &space, tmpstr,
+                while (fscanf(ip, "%127s%c%299[^\n]%c", token, &space, tmpstr,
 		    &newline) == 4) {
 
 		    /*
