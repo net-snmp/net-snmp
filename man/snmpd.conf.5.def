@@ -1346,10 +1346,11 @@ respectively, where OID is the requested OID.
 The PROG command should return the response varbind as three separate
 lines printed to stdout - the first line should be the OID of the returned
 value, the second should be its TYPE (one of the text strings
-.B integer, gauge, counter, timeticks, ipaddress, objectid,
+.B integer, gauge, counter, timeticks, ipaddress, objectid, octet,
 or
 .B string
-), and the third should be the value itself.
+), and the third should be the value itself. (Note: octets are sent as
+ASCII, space-separated hex strings, e.g. "00 3f dd 00 c6 be".)
 .IP
 If the command cannot return an appropriate varbind - e.g the specified
 OID did not correspond to a valid instance for a GET request, or there
