@@ -4771,7 +4771,7 @@ add_mibdir(const char *dirname)
         if (dir_stat.st_mtime < idx_stat.st_mtime) {
             DEBUGMSGTL(("parse-mibs", "The index is good\n"));
             if ((ip = fopen(token, "r")) != NULL) {
-                while (fscanf(ip, "%127s%c%299s%c", token, &space, tmpstr,
+                while (fscanf(ip, "%127s%c%299[^\n]%c", token, &space, tmpstr,
 		    &newline) == 4) {
 
                     empty = 0;
@@ -4783,7 +4783,7 @@ add_mibdir(const char *dirname)
 		    if (space != ' ' || newline != '\n') {
 			snmp_log(LOG_ERR,
 			    "add_mibdir: strings scanned in from %s/%s " \
-			    "are too large.  count = %d\n ", dirname,
+			    "are too large.  count = %d\n", dirname,
 			    ".index", count);
 			    break;
 		    }
