@@ -423,7 +423,7 @@ parse_trapd_address(const char *token, char *cptr)
     } else {
         p = malloc(strlen(buf) + 1 + strlen(default_port) + 1);
         if (p) {
-            strcat(p, buf);
+            strcpy(p, buf);
             strcat(p, ",");
             strcat(p, default_port );
         }
