@@ -1401,7 +1401,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
      ifnp->if_index != 0 && (i < nentries); ifnp++) {
 
         DEBUGMSGTL(("kernel_sunos5", "...... getif %s\n", ifnp->if_name));
-        memcpy(lifrp->lifr_name, ifnp->if_name, LIFNAMSIZ);
+        strlcpy(lifrp->lifr_name, ifnp->if_name, LIFNAMSIZ);
         if_isv6 = B_FALSE;
 
         if (ioctl(ifsd, SIOCGLIFFLAGS, lifrp) < 0) {
