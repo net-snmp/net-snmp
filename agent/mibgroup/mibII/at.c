@@ -637,11 +637,12 @@ ARP_Scan_Init(void)
             struct arptab  *newtab = (struct arptab *)
                 realloc(at, (sizeof(struct arptab) *
                              (arptab_curr_max_size + ARP_CACHE_INCR)));
-            if (newtab == at) {
+            if (newtab == NULL) {
                 snmp_log(LOG_ERR,
                          "Error allocating more space for arpcache.  "
                          "Cache will continue to be limited to %d entries",
                          arptab_curr_max_size);
+                newtab = at;
                 break;
             } else {
                 arptab_curr_max_size += ARP_CACHE_INCR;
