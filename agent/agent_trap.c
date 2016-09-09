@@ -265,7 +265,6 @@ create_trap_session2(const char *sink, const char* sinkport,
         snprintf(tmp, sizeof(tmp)-1,"%s:%s", sink, sinkport);
         tspec.target = tmp;
     }
-    tspec.local = 0;
     tspec.default_domain = NULL;
     tspec.default_target = sinkport;
     t = netsnmp_tdomain_transport_tspec(&tspec);

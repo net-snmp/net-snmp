@@ -167,6 +167,7 @@ typedef struct request_list {
 #define SNMP_FLAGS_STREAM_SOCKET   0x80
 #define SNMP_FLAGS_LISTENING       0x40 /* Server stream sockets only */
 #define SNMP_FLAGS_SUBSESSION      0x20
+#define SNMP_FLAGS_SHARED_SOCKET   0x10 /* subsession list=related sessions */
 #define SNMP_FLAGS_STRIKE2         0x02
 #define SNMP_FLAGS_STRIKE1         0x01
 

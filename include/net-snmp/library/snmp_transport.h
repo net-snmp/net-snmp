@@ -48,6 +48,7 @@ extern          "C" {
                                                           TSM tmStateReference */
 #define		NETSNMP_TRANSPORT_FLAG_EMPTY_PKT 0x10
 #define		NETSNMP_TRANSPORT_FLAG_OPENED	 0x20  /* f_open called */
+#define		NETSNMP_TRANSPORT_FLAG_SHARED	 0x40
 #define		NETSNMP_TRANSPORT_FLAG_HOSTNAME	 0x80  /* for fmtaddr hook */
 
 /*  The standard SNMP domains.  */
@@ -106,11 +107,15 @@ typedef struct netsnmp_tmStateReference_s {
    void *otherTransportOpaque; /* XXX: May have mem leak issues */
 } netsnmp_tmStateReference;
 
+#define NETSNMP_TSPEC_LOCAL                     0x01 /* 1=server, 0=client */
+#define NETSNMP_TSPEC_SHARED                    0x02
+#define NETSNMP_TSPEC_NO_DFTL_CLIENT_ADDR       0x04
+
 struct netsnmp_container; /* forward decl */
 typedef struct netsnmp_tdomain_spec_s {
     const char *application;             /* application name */
     const char *target;                  /* target as string */
-    int         local;                   /* 1=local/server, 0=remote/client */
+    u_int       flags;
     const char *default_domain;          /* default domain */
     const char *default_target;          /* default target */
     const char *source;                  /* source as string iff remote */
@@ -262,6 +267,23 @@ netsnmp_transport *netsnmp_transport_copy(netsnmp_transport *t);
 NETSNMP_IMPORT
 void            netsnmp_transport_free(netsnmp_transport *t);
 
+#ifndef FEATURE_REMOVE_TRANSPORT_CACHE
+
+/**  transport cache support */
+
+NETSNMP_IMPORT
+netsnmp_transport *netsnmp_transport_cache_get(int af, int type, int local,
+                                               netsnmp_sockaddr_storage *bind_addr);
+
+NETSNMP_IMPORT
+int                netsnmp_transport_cache_save(int af, int type, int local,
+                                                netsnmp_sockaddr_storage *addr,
+                                                netsnmp_transport *t);
+
+NETSNMP_IMPORT
+int                netsnmp_transport_cache_remove(netsnmp_transport *t);
+
+#endif /* FEATURE_REMOVE_TRANSPORT_CACHE */
 
 /*
  * If the passed oid (in_oid, in_len) corresponds to a supported transport

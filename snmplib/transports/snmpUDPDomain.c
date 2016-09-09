@@ -590,21 +590,12 @@ netsnmp_udp_create_tstring(const char *str, int local,
 netsnmp_transport *
 netsnmp_udp_create_tspec(netsnmp_tdomain_spec *tspec)
 {
-    struct sockaddr_in addr, src_addr;
-
-    if (NULL == tspec)
-        return NULL;
-
-    if (netsnmp_sockaddr_in2(&addr, tspec->target, tspec->default_target)) {
-        if (NULL != tspec->source)
-            netsnmp_sockaddr_in2(&src_addr, tspec->source, NULL);
-        else
-            memset(&src_addr, 0x00, sizeof(src_addr));
-        return netsnmp_udp_transport_with_source(&addr, tspec->local,
-                                                 &src_addr);
-    } else {
-        return NULL;
+    netsnmp_transport *t = netsnmp_udpipv4base_tspec_transport(tspec);
+    if (NULL != t) {
+        netsnmp_udp_transport_base(t);
     }
+    return t;
+
 }
 
 netsnmp_transport *

@@ -2014,6 +2014,10 @@
     available.   */
 #undef NETSNMP_TRANSPORT_UDP_DOMAIN
 
+/*  This is defined if support for the shared UDP/IP transport domain is
+    available.   */
+#undef NETSNMP_TRANSPORT_UDPSHARED_DOMAIN
+
 /*  This is defined if support for the "callback" transport domain is
     available.   */
 #undef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
