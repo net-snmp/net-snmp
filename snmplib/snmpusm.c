@@ -3924,6 +3924,16 @@ usm_free_user(struct usmUser *user)
         SNMP_FREE(user->privKey);
     }
 
+    if (user->authKeyKu != NULL) {
+        SNMP_ZERO(user->authKeyKu, user->authKeyKuLen);
+        SNMP_FREE(user->authKeyKu);
+    }
+
+    if (user->privKeyKu != NULL) {
+        SNMP_ZERO(user->privKeyKu, user->privKeyKuLen);
+        SNMP_FREE(user->privKeyKu);
+    }
+
 
     /*
      * FIX  Why not put this check *first?*
@@ -3985,6 +3995,20 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
         to->authKeyLen = 0;
     }
 
+    /*
+     * copy the authKeyKu
+     */
+    SNMP_FREE(to->authKeyKu);
+
+    if (from->authKeyKuLen > 0 &&
+        (to->authKeyKu = (u_char *) malloc(from->authKeyKuLen)) != NULL) {
+        to->authKeyKuLen = from->authKeyKuLen;
+        memcpy(to->authKeyKu, from->authKeyKu, to->authKeyKuLen);
+    } else {
+        to->authKeyKu = NULL;
+        to->authKeyKuLen = 0;
+    }
+
 
     /*
      * copy the privProtocol oid row pointer 
@@ -4011,6 +4035,19 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
     } else {
         to->privKey = NULL;
         to->privKeyLen = 0;
+    }
+
+    /*
+     * copy the privKeyKu
+     */
+    SNMP_FREE(to->privKeyKu);
+    if (from->privKeyKyLen > 0 &&
+        (to->privKeyKu = (u_char *) malloc(from->privKeyKuLen)) != NULL) {
+        to->privKeyKuLen = from->privKeyKuLen;
+        memcpy(to->privKeyKu, from->privKeyKu, to->privKeyKuLen);
+    } else {
+        to->privKeyKu = NULL;
+        to->privKeyKuLen = 0;
     }
     return to;
 }
@@ -4443,6 +4480,14 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
             config_perror("setting key failed (in sc_genKu())");
             return;
         }
+        /* save master key */
+        if (userKey == user->privKey) {
+            user->privKeyKu = netsnmp_memdup(userKey, userKeyLen);
+            user->privKeyKuLen = userKeyLen;
+        } else if (userKey == user->authKey) {
+            user->authKeyKu = netsnmp_memdup(userKey, userKeyLen);
+            user->authKeyKuLen = userKeyLen;
+        }
     } else if (type == 1) {
         cp = read_config_read_octet_string(cp, &userKeyP, &userKeyLen);
 
@@ -4648,6 +4693,9 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             usm_free_user(newuser);
             return NULL;
         }
+        /* save master key */
+        newuser->authKeyKu = netsnmp_memdup(userKey, userKeyLen);
+        newuser->authKeyKuLen = userKeyLen;
     }        
         
     /*
@@ -4766,6 +4814,9 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         newuser->privKey = netsnmp_memdup(newuser->authKey,
                                           newuser->authKeyLen);
         newuser->privKeyLen = newuser->authKeyLen;
+        newuser->privKeyKu = netsnmp_memdup(newuser->authKeyKu,
+                                            newuser->authKeyKuLen);
+        newuser->privKeyKuLen = newuser->authKeyKuLen;
     } else {
         cp = copy_nword(cp, buf, sizeof(buf));
         
@@ -4790,6 +4841,9 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                 usm_free_user(newuser);
                 return NULL;
             }
+            /* save master key */
+            newuser->privKeyKu = netsnmp_memdup(userKey, userKeyLen);
+            newuser->privKeyKuLen = userKeyLen;
         }        
         
         /*

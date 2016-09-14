@@ -74,8 +74,12 @@ extern          "C" {
         size_t          authProtocolLen;
         u_char         *authKey;
         size_t          authKeyLen;
+        u_char         *authKeyKu;
+        size_t          authKeyKuLen;
         oid            *privProtocol;
         size_t          privProtocolLen;
+        u_char         *privKeyKu;
+        size_t          privKeyKuLen;
         u_char         *privKey;
         size_t          privKeyLen;
         u_char         *userPublicString;
