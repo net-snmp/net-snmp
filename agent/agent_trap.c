@@ -1334,12 +1334,10 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
     /** authkey */
     if ((SNMP_SEC_LEVEL_AUTHPRIV == level) ||
         (SNMP_SEC_LEVEL_AUTHNOPRIV == level)) {
-        session.securityAuthLocalKey = netsnmp_memdup(usmUser->authKey,
-                                                      usmUser->authKeyLen);
-        if (NULL == session.securityAuthLocalKey) {
-            DEBUGMSGTL(("trap:v3user_notif_sess", "authKey copy failed\n"));
-            goto bail;
-        }
+        netsnmp_assert(usmUser->privKeyKuLen > 0);
+        memcpy(session.securityAuthKey, usmUser->authKeyKu,
+               usmUser->authKeyKuLen);
+        session.securityAuthKeyLen = usmUser->authKeyKuLen;
     }
 
     /** priv prot */
@@ -1354,12 +1352,10 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
 
     /** privkey */
     if (SNMP_SEC_LEVEL_AUTHPRIV == level) {
-        session.securityPrivLocalKey = netsnmp_memdup(usmUser->privKey,
-                                                      usmUser->privKeyLen);
-        if (NULL == session.securityPrivLocalKey) {
-            DEBUGMSGTL(("trap:v3user_notif_sess", "privKey copy failed\n"));
-            goto bail;
-        }
+        netsnmp_assert(usmUser->privKeyKuLen > 0);
+        memcpy(session.securityPrivKey, usmUser->privKeyKu,
+               usmUser->privKeyKuLen);
+        session.securityPrivKeyLen = usmUser->privKeyKuLen;
     }
 
     /** open the tranport */
@@ -1393,9 +1389,7 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
   bail:
     /** free any allocated mem in session */
     SNMP_FREE(session.securityAuthProto);
-    SNMP_FREE(session.securityAuthLocalKey);
     SNMP_FREE(session.securityPrivProto);
-    SNMP_FREE(session.securityPrivLocalKey);
 
     return ss;
 }
