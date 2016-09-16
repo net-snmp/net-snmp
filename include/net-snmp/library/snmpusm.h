@@ -64,6 +64,7 @@ extern          "C" {
 
     struct usmUser;
     struct usmUser {
+        u_int          flags;
         u_char         *engineID;
         size_t          engineIDLen;
         char           *name;
@@ -93,6 +94,7 @@ extern          "C" {
         struct usmUser *prev;
     };
 
+#define USMUSER_FLAG_KEEP_MASTER_KEY             0x01
 
 
     /*

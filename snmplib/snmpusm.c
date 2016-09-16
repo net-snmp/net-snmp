@@ -3967,6 +3967,8 @@ usm_free_user(struct usmUser *user)
 struct usmUser *
 usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
 {
+    to->flags = from->flags;
+
     /*
      * copy the authProtocol oid row pointer 
      */
@@ -4481,12 +4483,14 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
             return;
         }
         /* save master key */
-        if (userKey == user->privKey) {
-            user->privKeyKu = netsnmp_memdup(userKey, userKeyLen);
-            user->privKeyKuLen = userKeyLen;
-        } else if (userKey == user->authKey) {
-            user->authKeyKu = netsnmp_memdup(userKey, userKeyLen);
-            user->authKeyKuLen = userKeyLen;
+        if (user->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
+            if (userKey == user->privKey) {
+                user->privKeyKu = netsnmp_memdup(userKey, userKeyLen);
+                user->privKeyKuLen = userKeyLen;
+            } else if (userKey == user->authKey) {
+                user->authKeyKu = netsnmp_memdup(userKey, userKeyLen);
+                user->authKeyKuLen = userKeyLen;
+            }
         }
     } else if (type == 1) {
         cp = read_config_read_octet_string(cp, &userKeyP, &userKeyLen);
@@ -4569,6 +4573,15 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
      * READ: Security Name 
      */
     cp = copy_nword(line, buf, sizeof(buf));
+
+    /*
+     * check for (undocumented) 'keep master key' flag. so far, this is
+     * just used for users for informs (who need non-localized keys).
+     */
+    if (strcmp(buf, "-M") == 0) {
+        newuser->flags |= USMUSER_FLAG_KEEP_MASTER_KEY;
+        cp = copy_nword(cp, buf, sizeof(buf));
+    }
 
     /*
      * might be a -e ENGINEID argument 
@@ -4694,8 +4707,10 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             return NULL;
         }
         /* save master key */
-        newuser->authKeyKu = netsnmp_memdup(userKey, userKeyLen);
-        newuser->authKeyKuLen = userKeyLen;
+        if (newuser->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
+            newuser->authKeyKu = netsnmp_memdup(userKey, userKeyLen);
+            newuser->authKeyKuLen = userKeyLen;
+        }
     }        
         
     /*
@@ -4815,9 +4830,11 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         newuser->privKey = netsnmp_memdup(newuser->authKey,
                                           newuser->authKeyLen);
         newuser->privKeyLen = newuser->authKeyLen;
-        newuser->privKeyKu = netsnmp_memdup(newuser->authKeyKu,
-                                            newuser->authKeyKuLen);
-        newuser->privKeyKuLen = newuser->authKeyKuLen;
+        if (newuser->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
+            newuser->privKeyKu = netsnmp_memdup(newuser->authKeyKu,
+                                                newuser->authKeyKuLen);
+            newuser->privKeyKuLen = newuser->authKeyKuLen;
+        }
     } else {
         cp = copy_nword(cp, buf, sizeof(buf));
         
@@ -4843,8 +4860,10 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                 return NULL;
             }
             /* save master key */
-            newuser->privKeyKu = netsnmp_memdup(userKey, userKeyLen);
-            newuser->privKeyKuLen = userKeyLen;
+            if (newuser->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
+                newuser->privKeyKu = netsnmp_memdup(userKey, userKeyLen);
+                newuser->privKeyKuLen = userKeyLen;
+            }
         }        
         
         /*
