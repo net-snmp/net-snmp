@@ -1266,13 +1266,14 @@ netsnmp_session *
 netsnmp_create_v3user_notification_session(const char *dest, const char *user,
                                            int level, const char *context,
                                            int pdutype, const u_char *engineId,
-                                           size_t engineId_len,
+                                           size_t engineId_len, const char *src,
                                            const char *notif_name,
                                            const char *notif_tag,
                                            const char* notif_profile)
 {
     netsnmp_session    session, *ss;
     struct usmUser    *usmUser;
+    netsnmp_tdomain_spec tspec;
     netsnmp_transport *transport;
     u_char             tmp_engineId[SPRINT_MAX_LEN];
     int                rc;
@@ -1280,13 +1281,16 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
     if (NULL == dest || NULL == user)
         return NULL;
 
+    /** authlevel */
+    if ((SNMP_SEC_LEVEL_AUTHPRIV != level) &&
+        (SNMP_SEC_LEVEL_AUTHNOPRIV != level) &&
+        (SNMP_SEC_LEVEL_NOAUTH != level)) {
+        DEBUGMSGTL(("trap:v3user_notif_sess", "bad level %d\n", level));
+        return NULL;
+    }
+
     /** need engineId to look up users */
     if (NULL == engineId) {
-        if (pdutype == SNMP_MSG_INFORM) {
-            DEBUGMSGTL(("trap:v3user_notif_sess",
-                        "need remote engineId for v3 inform\n"));
-            return NULL;
-        }
         engineId_len = snmpv3_get_engineID( tmp_engineId, sizeof(tmp_engineId));
         engineId = tmp_engineId;
     }
@@ -1312,13 +1316,6 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
         session.contextNameLen = strlen(context);
     }
 
-    /** authlevel */
-    if ((SNMP_SEC_LEVEL_AUTHPRIV != level) &&
-        (SNMP_SEC_LEVEL_AUTHNOPRIV != level) &&
-        (SNMP_SEC_LEVEL_NOAUTH != level)) {
-        DEBUGMSGTL(("trap:v3user_notif_sess", "bad level %d\n", level));
-        return NULL;
-    }
     session.securityLevel = level;
 
     /** auth prot */
@@ -1358,12 +1355,25 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
         session.securityPrivKeyLen = usmUser->privKeyKuLen;
     }
 
+    /** engineId */
+    session.contextEngineID = netsnmp_memdup(usmUser->engineID,
+                                             usmUser->engineIDLen);
+    session.contextEngineIDLen = usmUser->engineIDLen;
+
     /** open the tranport */
-    transport = netsnmp_transport_open_client("snmptrap", session.peername);
+
+    memset(&tspec, 0, sizeof(netsnmp_tdomain_spec));
+    tspec.application = "snmptrap";
+    tspec.target = session.peername;
+    tspec.default_domain = NULL;
+    tspec.default_target = NULL;
+    tspec.source = src;
+    transport = netsnmp_tdomain_transport_tspec(&tspec);
     if (transport == NULL) {
-        config_perror("snmpd: failed to parse this line.");
+        DEBUGMSGTL(("trap:v3user_notif_sess", "could not create transport\n"));
         goto bail;
     }
+
     if ((rc = netsnmp_sess_config_and_open_transport(&session, transport))
         != SNMPERR_SUCCESS) {
         DEBUGMSGTL(("trap:v3user_notif_sess", "config/open failed\n"));

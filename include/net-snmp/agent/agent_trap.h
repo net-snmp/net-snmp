@@ -48,14 +48,17 @@ int             create_trap_session_with_src(const char *, const char *,
                                              int, int);
 int             add_trap_session(netsnmp_session *, int, int, int);
 int             remove_trap_session(netsnmp_session *);
-netsnmp_session *netsnmp_create_v3user_notification_session(const char *,
-                                                            const char *,
-                                                            int, const char *,
-                                                            int, const u_char *,
-                                                            size_t,
-                                                            const char *,
-                                                            const char *,
-                                                            const char *);
+netsnmp_session *netsnmp_create_v3user_notification_session(const char *dst,
+                                                            const char *user,
+                                                            int lvl,
+                                                            const char *ctx,
+                                                            int pdutype,
+                                                            const u_char *eid,
+                                                            size_t eidl,
+                                                            const char *src,
+                                                            const char *name,
+                                                            const char *tag,
+                                                            const char *prof);
 int             netsnmp_add_notification_session(netsnmp_session *, int, int,
                                                  int, const char*, const char*,
                                                  const char*);
