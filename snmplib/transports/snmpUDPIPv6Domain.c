@@ -66,6 +66,7 @@ static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/tools.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #ifndef NETSNMP_NO_SYSTEMD
 #include <net-snmp/library/sd-daemon.h>
@@ -184,17 +185,17 @@ netsnmp_udp6_send(netsnmp_transport *t, void *buf, int size,
 
 
 /*
- * Open a UDP/IPv6-based transport for SNMP.  Local is TRUE if addr is the
+ * Initialize a UDP/IPv6-based transport for SNMP.  Local is TRUE if addr is the
  * local address to bind to (i.e. this is a server-type session); otherwise
  * addr is the remote address to send things to.  
  */
 
 netsnmp_transport *
-netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
+netsnmp_udp6_transport_init(struct sockaddr_in6 *addr, int flags)
 {
     netsnmp_transport *t = NULL;
-    int             rc = 0;
-    int             socket_initialized = 0;
+    int             local = flags & NETSNMP_TSPEC_LOCAL;
+    u_char         *addr_ptr;
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     if (local)
@@ -209,38 +210,73 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
     if (t == NULL) {
         return NULL;
     }
+    addr_ptr = (unsigned char*)malloc(18);
+    if (addr_ptr == NULL) {
+        free(t);
+        return NULL;
+    }
+    if (local) {
+        /** This is a server session. */
+        t->local_length = 18;
+        t->local = addr_ptr;
+    } else {
+        /** This is a client session. */
+        t->remote = addr_ptr;
+        t->remote_length = 18;
+    }
+    memcpy(addr_ptr, addr->sin6_addr.s6_addr, 16);
+    addr_ptr[16] = (addr->sin6_port & 0xff00) >> 8;
+    addr_ptr[17] = (addr->sin6_port & 0x00ff) >> 0;
 
     DEBUGIF("netsnmp_udp6") {
-        char *str = netsnmp_udp6_fmtaddr(NULL, (void *) addr,
-                                         sizeof(struct sockaddr_in6));
+        char *str = netsnmp_udp6_fmtaddr(NULL, (void *)addr, sizeof(*addr));
         DEBUGMSGTL(("netsnmp_udp6", "open %s %s\n", local ? "local" : "remote",
                     str));
         free(str);
     }
 
+    if (!local) {
+        netsnmp_indexed_addr_pair *addr_pair;
+
+        /*
+         * allocate space to save the (remote) address in the
+         * transport-specific data pointer for later use by netsnmp_udp_send.
+         */
+        t->data = calloc(1, sizeof(netsnmp_indexed_addr_pair));
+        if (NULL == t->data) {
+            netsnmp_transport_free(t);
+            return NULL;
+        }
+        t->data_length = sizeof(netsnmp_indexed_addr_pair);
+
+        addr_pair = (netsnmp_indexed_addr_pair *)t->data;
+        memcpy(&addr_pair->remote_addr, addr, sizeof(*addr));
+    }
+
+    /*
+     * 16-bit length field, 8 byte UDP header, 40 byte IPv6 header.
+     */
+
+    t->msgMaxSize = 0xffff - 8 - 40;
+    t->f_recv     = netsnmp_udp6_recv;
+    t->f_send     = netsnmp_udp6_send;
+    t->f_close    = netsnmp_socketbase_close;
+    t->f_accept   = NULL;
+    t->f_fmtaddr  = netsnmp_udp6_fmtaddr;
+
     t->domain = netsnmp_UDPIPv6Domain;
     t->domain_length =
         sizeof(netsnmp_UDPIPv6Domain) / sizeof(netsnmp_UDPIPv6Domain[0]);
 
-#ifndef NETSNMP_NO_SYSTEMD
-    /*
-     * Maybe the socket was already provided by systemd...
-     */
-    if (local) {
-        t->sock = netsnmp_sd_find_inet_socket(PF_INET6, SOCK_DGRAM, -1,
-                ntohs(addr->sin6_port));
-        if (t->sock)
-            socket_initialized = 1;
-    }
-#endif
-    if (!socket_initialized)
-        t->sock = (int) socket(PF_INET6, SOCK_DGRAM, 0);
-    if (t->sock < 0) {
-        netsnmp_transport_free(t);
-        return NULL;
-    }
+    return t;
+}
 
-    _netsnmp_udp_sockopt_set(t->sock, local);
+int
+netsnmp_udp6_transport_bind(netsnmp_transport *t, struct sockaddr_in6 *addr,
+                            int flags)
+{
+    int             local = flags & NETSNMP_TSPEC_LOCAL;
+    int             rc = 0;
 
     if (local) {
 #ifndef NETSNMP_NO_LISTEN_SUPPORT
@@ -259,90 +295,148 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
             } 
         }
 #endif
-        if (!socket_initialized) {
-            rc = bind(t->sock, (struct sockaddr *) addr,
-                    sizeof(struct sockaddr_in6));
-            if (rc != 0) {
-                netsnmp_socketbase_close(t);
-                netsnmp_transport_free(t);
-                return NULL;
-            }
-        }
-        t->local = (unsigned char*)malloc(18);
-        if (t->local == NULL) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
-        }
-        memcpy(t->local, addr->sin6_addr.s6_addr, 16);
-        t->local[16] = (ntohs(addr->sin6_port) & 0xff00) >> 8;
-        t->local[17] = (ntohs(addr->sin6_port) & 0x00ff) >> 0;
-        t->local_length = 18;
-        t->data = NULL;
-        t->data_length = 0;
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
-        return NULL;
+        return -1;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
-    } else {
-        char           *client_socket = NULL;
-        /*
-         * This is a client session.  If we've been given a
-         * client address to send from, then bind to that.
-         * Otherwise the send will use "something sensible".
-         */
+    }
 
-        client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                    NETSNMP_DS_LIB_CLIENT_ADDR);
-        if (client_socket) {
-            struct sockaddr_in6 client_addr;
-            netsnmp_sockaddr_in6_2(&client_addr, client_socket, NULL);
-            rc = bind(t->sock, (struct sockaddr *)&client_addr,
-                              sizeof(struct sockaddr_in6));
-            if ( rc != 0 ) {
-                DEBUGMSGTL(("netsnmp_udp6", "failed to bind for clientaddr: %d %s\n",
-                                 errno, strerror(errno)));
-                netsnmp_socketbase_close(t);
-                netsnmp_transport_free(t);
-                return NULL;
-            }
-        }
-        /*
-         * This is a client session.  Save the address in the
-         * transport-specific data pointer for later use by netsnmp_udp6_send.
-         */
+    DEBUGIF("netsnmp_udp6") {
+        char *str;
+        str = netsnmp_udp6_fmtaddr(NULL, (void *)addr, sizeof(*addr));
+        DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d to %s\n",
+                    t->sock, str));
+        free(str);
+    }
+    rc = bind(t->sock, (struct sockaddr *)addr, sizeof(*addr));
+    if (rc != 0) {
+        DEBUGMSGTL(("netsnmp_udp6", "failed to bind for clientaddr: %d %s\n",
+                    errno, strerror(errno)));
+        netsnmp_socketbase_close(t);
+        return -1;
+    }
 
-        t->data = malloc(sizeof(netsnmp_indexed_addr_pair));
-        if (t->data == NULL) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
-        }
-        memcpy(t->data, addr, sizeof(struct sockaddr_in6));
-        t->data_length = sizeof(netsnmp_indexed_addr_pair);
-        t->remote = (unsigned char*)malloc(18);
-        if (t->remote == NULL) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
-        }
-        memcpy(t->remote, addr->sin6_addr.s6_addr, 16);
-        t->remote[16] = (ntohs(addr->sin6_port) & 0xff00) >> 8;
-        t->remote[17] = (ntohs(addr->sin6_port) & 0x00ff) >> 0;
-        t->remote_length = 18;
+    return 0;
+}
+
+int
+netsnmp_udp6_transport_socket(int flags)
+{
+    int local = flags & NETSNMP_TSPEC_LOCAL;
+    int sock = -1;
+
+#ifndef NETSNMP_NO_SYSTEMD
+    /*
+     * Maybe the socket was already provided by systemd...
+     */
+    if (local) {
+        sock = netsnmp_sd_find_inet_socket(PF_INET6, SOCK_DGRAM, -1,
+                                           ntohs(addr->sin6_port));
+    }
+#endif
+    if (-1 == sock)
+        socket(PF_INET6, SOCK_DGRAM, 0);
+
+    DEBUGMSGTL(("UDPBase", "opened socket %d as local=%d\n", sock, local));
+    if (sock < 0)
+        return -1;
+
+    _netsnmp_udp_sockopt_set(sock, local);
+
+    return sock;
+}
+
+void
+netsnmp_udp6_transport_get_bound_addr(netsnmp_transport *t)
+{
+    netsnmp_indexed_addr_pair *addr_pair;
+    socklen_t                  local_addr_len = sizeof(addr_pair->local_addr);
+    int                        rc;
+
+    /** only for client transports: must have data and not local */
+    if (NULL == t || NULL != t->local || NULL == t->data ||
+        t->data_length < local_addr_len) {
+        snmp_log(LOG_ERR, "bad parameters for get bound addr\n");
+        return;
+    }
+
+    addr_pair = (netsnmp_indexed_addr_pair *)t->data;
+
+    /** get local socket address for client session */
+    local_addr_len = sizeof(addr_pair->local_addr);
+    rc = getsockname(t->sock, (struct sockaddr*)&addr_pair->local_addr,
+                     &local_addr_len);
+    netsnmp_assert(rc == 0);
+    DEBUGIF("netsnmp_udpbase") {
+        char *str = netsnmp_udp6_fmtaddr(NULL, (void *)&addr_pair->local_addr,
+                                         sizeof(addr_pair->local_addr));
+        DEBUGMSGTL(("netsnmp_udpbase", "socket %d bound to %s\n",
+                    t->sock, str));
+        free(str);
+    }
+}
+
+netsnmp_transport *
+netsnmp_udp6_transport_with_source(struct sockaddr_in6 *addr, int local,
+                                   struct sockaddr_in6 *src_addr)
+{
+    netsnmp_transport         *t = NULL;
+    struct sockaddr_in6        *bind_addr;
+    int                        rc, flags = 0;
+
+    t = netsnmp_udp6_transport_init(addr, local);
+    if (NULL == t)
+        return NULL;
+
+    if (local) {
+        bind_addr = addr;
+        flags |= NETSNMP_TSPEC_LOCAL;
+    }
+    else
+        bind_addr = src_addr;
+
+    t->sock = netsnmp_udp6_transport_socket(flags);
+    if (t->sock < 0) {
+        netsnmp_transport_free(t);
+        return NULL;
     }
 
     /*
-     * 16-bit length field, 8 byte UDP header, 40 byte IPv6 header.  
+     * If we've been given an address to bind to, then bind to it.
+     * Otherwise the OS will use "something sensible".
      */
-
-    t->msgMaxSize = 0xffff - 8 - 40;
-    t->f_recv     = netsnmp_udp6_recv;
-    t->f_send     = netsnmp_udp6_send;
-    t->f_close    = netsnmp_socketbase_close;
-    t->f_accept   = NULL;
-    t->f_fmtaddr  = netsnmp_udp6_fmtaddr;
+    rc = netsnmp_udp6_transport_bind(t, bind_addr, flags);
+    if (rc) {
+        netsnmp_transport_free(t);
+        t = NULL;
+    }
+    else if (!local)
+        netsnmp_udp6_transport_get_bound_addr(t);
 
     return t;
+}
+
+/*
+ * Open a UDP/IPv6-based transport for SNMP.  Local is TRUE if addr is the
+ * local address to bind to (i.e. this is a server-type session); otherwise
+ * addr is the remote address to send things to.
+ */
+
+netsnmp_transport *
+netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
+{
+    if (!local) {
+        const char *client_socket;
+        client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                              NETSNMP_DS_LIB_CLIENT_ADDR);
+        if (client_socket) {
+            struct sockaddr_in6 client_addr;
+            if(!netsnmp_sockaddr_in6_2(&client_addr, client_socket, NULL)) {
+                return netsnmp_udp6_transport_with_source(addr, local,
+                                                          &client_addr);
+            }
+        }
+    }
+    return netsnmp_udp6_transport_with_source(addr, local, NULL);
 }
 
 
@@ -447,11 +541,13 @@ create_com2Sec6Entry(const struct addrinfo* const run,
 void
 netsnmp_udp6_parse_security(const char *token, char *param)
 {
-    char            secName[VACMSTRINGLEN + 1];
+    /** copy_nword does null term, so we need vars of max size + 2. */
+    /** (one for null, one to detect param too long */
+    char            secName[VACMSTRINGLEN]; /* == VACM_MAX_STRING + 2 */
     size_t          secNameLen;
-    char            contextName[VACMSTRINGLEN + 1];
+    char            contextName[VACMSTRINGLEN];
     size_t          contextNameLen;
-    char            community[COMMUNITY_MAX_LEN + 1];
+    char            community[COMMUNITY_MAX_LEN + 2];/* overflow + null char */
     size_t          communityLen;
     char            source[300]; /* dns-name(253)+/(1)+mask(45)+\0(1) */
     struct in6_addr mask;
@@ -467,8 +563,8 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             return;
         }
         param = copy_nword( param, contextName, sizeof(contextName));
-        contextNameLen = strlen(contextName) + 1;
-        if (contextNameLen > VACMSTRINGLEN) {
+        contextNameLen = strlen(contextName);
+        if (contextNameLen > VACM_MAX_STRING) {
             config_perror("context name too long");
             return;
         }
@@ -476,19 +572,21 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             config_perror("missing NAME parameter");
             return;
         }
+        ++contextNameLen; /* null termination */
         param = copy_nword( param, secName, sizeof(secName));
     } else {
         contextNameLen = 0;
     }
 
-    secNameLen = strlen(secName) + 1;
-    if (secNameLen == 1) {
+    secNameLen = strlen(secName);
+    if (secNameLen == 0) {
         config_perror("empty NAME parameter");
         return;
-    } else if (secNameLen > VACMSTRINGLEN) {
+    } else if (secNameLen > VACM_MAX_STRING) {
         config_perror("security name too long");
         return;
     }
+    ++secNameLen; /* null termination */
 
     if (!param) {
         config_perror("missing SOURCE parameter");
@@ -513,11 +611,12 @@ netsnmp_udp6_parse_security(const char *token, char *param)
         config_perror("empty COMMUNITY parameter");
         return;
     }
-    communityLen = strlen(community) + 1;
-    if (communityLen >= COMMUNITY_MAX_LEN) {
+    communityLen = strlen(community);
+    if (communityLen > COMMUNITY_MAX_LEN) {
         config_perror("community name too long");
         return;
     }
+    ++communityLen; /* null termination */
     if (communityLen == sizeof(EXAMPLE_COMMUNITY) &&
         memcmp(community, EXAMPLE_COMMUNITY, sizeof(EXAMPLE_COMMUNITY)) == 0) {
         config_perror("example config COMMUNITY not properly configured");

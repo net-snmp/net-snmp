@@ -546,6 +546,9 @@ AC_ARG_WITH(out_transports,
                 This transport is available for Linux, Solaris and
                 FreeBSD at least.
                 This transport is compiled in by default if IPv6 support is enabled.
+    UDPshared   Allows a UDP port to be shared with multiple transports. It
+                enables multiple notification destinations to share a single
+                source address/port.
     TCPIPv6     support for SNMP over UDP/IPv6.
                 This transport is available for Linux, Solaris and
                 FreeBSD at least.

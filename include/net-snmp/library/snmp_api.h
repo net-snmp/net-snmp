@@ -119,6 +119,7 @@ typedef struct request_list {
 
     NETSNMP_IMPORT void     snmp_set_detail(const char *);
 
+#define SNMP_MAX_RCV_MSG_SIZE      65536
 #define SNMP_MAX_MSG_SIZE          1472 /* ethernet MTU minus IP/UDP header */
 #define SNMP_MAX_MSG_V3_HDRS       (4+3+4+7+7+3+7+16)   /* fudge factor=16 */
 #define SNMP_MAX_ENG_SIZE          32
@@ -167,6 +168,7 @@ typedef struct request_list {
 #define SNMP_FLAGS_STREAM_SOCKET   0x80
 #define SNMP_FLAGS_LISTENING       0x40 /* Server stream sockets only */
 #define SNMP_FLAGS_SUBSESSION      0x20
+#define SNMP_FLAGS_SHARED_SOCKET   0x10 /* subsession list=related sessions */
 #define SNMP_FLAGS_STRIKE2         0x02
 #define SNMP_FLAGS_STRIKE1         0x01
 

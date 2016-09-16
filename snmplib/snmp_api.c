@@ -219,9 +219,20 @@ struct snmp_internal_session {
     netsnmp_pdu    *(*hook_create_pdu) (netsnmp_transport *,
                                         void *, size_t);
 
-    u_char         *packet;
-    size_t          packet_len, packet_size;
+    u_char       *packet;      /* current packet data (may be incomplete) */
+    size_t        packet_len;  /* length of data received so far */
+    size_t        packet_size; /* size of buffer for packet data */
 };
+
+/*
+ * information about received packet
+ */
+typedef struct snmp_rcv_packet_s {
+    u_char   *packet;
+    size_t    packet_len;
+    void     *opaque;
+    int       olength;
+} snmp_rcv_packet;
 
 static const char *api_errors[-SNMPERR_MAX + 1] = {
     "No error",                 /* SNMPERR_SUCCESS */
@@ -5197,26 +5208,17 @@ snmp_create_sess_pdu(netsnmp_transport *transport, void *opaque,
 
 
 /*
- * This function processes a complete (according to asn_check_packet or the
- * AgentX equivalent) packet, parsing it into a PDU and calling the relevant
- * callbacks.  On entry, packetptr points at the packet in the session's
- * buffer and length is the length of the packet.  Return codes:
- *   0: pdu handled (pdu deleted)
- *  -1: error (pdu deleted)
- *  -2: pdu not found for shared session (pdu NOT deleted)
+ * This function parses a packet into a PDU
  */
-
-static int
-_sess_process_packet(void *sessp, netsnmp_session * sp,
-                     struct snmp_internal_session *isp,
-                     netsnmp_transport *transport,
-                     void *opaque, int olength,
-                     u_char * packetptr, int length)
+static netsnmp_pdu *
+_sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
+                               struct snmp_internal_session *isp,
+                               netsnmp_transport *transport,
+                               void *opaque, int olength,
+                               u_char * packetptr, int length)
 {
-  struct session_list *slp = (struct session_list *) sessp;
   netsnmp_pdu    *pdu;
-  netsnmp_request_list *rp, *orp = NULL;
-  int             ret = 0, handled = 0;
+  int             ret = 0;
 
   debug_indent_reset();
 
@@ -5240,7 +5242,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     if (isp->hook_pre(sp, transport, opaque, olength) == 0) {
       DEBUGMSGTL(("sess_process_packet", "pre-parse fail\n"));
       SNMP_FREE(opaque);
-      return -1;
+      return NULL;
     }
   }
 
@@ -5253,7 +5255,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   if (pdu == NULL) {
     snmp_log(LOG_ERR, "pdu failed to be created\n");
     SNMP_FREE(opaque);
-    return -1;
+    return NULL;
   }
 
   /* if the transport was a magic tunnel, mark the PDU as having come
@@ -5290,8 +5292,23 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
       free_securityStateRef(pdu);
     }
     snmp_free_pdu(pdu);
-    return -1;
+    return NULL;
   }
+
+  return pdu;
+}
+
+/*
+ * This function processes a PDU and calls the relevant callbacks.
+ */
+static int
+_sess_process_packet_handle_pdu(void *sessp, netsnmp_session * sp,
+                                struct snmp_internal_session *isp,
+                                netsnmp_transport *transport, netsnmp_pdu *pdu)
+{
+  struct session_list *slp = (struct session_list *) sessp;
+  netsnmp_request_list *rp, *orp = NULL;
+  int             handled = 0;
 
   if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
     /*
@@ -5454,12 +5471,70 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   }
 
   if (!handled) {
+    if (sp->flags & SNMP_FLAGS_SHARED_SOCKET)
+      return -2;
     snmp_increment_statistic(STAT_SNMPUNKNOWNPDUHANDLERS);
     DEBUGMSGTL(("sess_process_packet", "unhandled PDU\n"));
   }
 
   snmp_free_pdu(pdu);
   return 0;
+}
+
+/*
+ * This function processes a complete (according to asn_check_packet or the
+ * AgentX equivalent) packet, parsing it into a PDU and calling the relevant
+ * callbacks.  On entry, packetptr points at the packet in the session's
+ * buffer and length is the length of the packet.  Return codes:
+ *   0: pdu handled (pdu deleted)
+ *  -1: parse error (pdu deleted)
+ *  -2: pdu not found for shared session (pdu NOT deleted)
+ */
+static int
+_sess_process_packet(void *sessp, netsnmp_session * sp,
+                     struct snmp_internal_session *isp,
+                     netsnmp_transport *transport,
+                     void *opaque, int olength,
+                     u_char * packetptr, int length)
+{
+    struct session_list *slp;
+    netsnmp_pdu         *pdu;
+    int                  rc;
+
+    pdu = _sess_process_packet_parse_pdu(sessp, sp, isp, transport, opaque,
+                                         olength, packetptr, length);
+    if (NULL == pdu)
+        return -1;
+
+    /*
+     * find session to process pdu. usually that will be the current session,
+     * but with the introduction of shared transports, another session may
+     * have the same socket.
+     */
+    do {
+        rc = _sess_process_packet_handle_pdu(sessp, sp, isp, transport, pdu);
+        if (-2 != rc || !(transport->flags & NETSNMP_TRANSPORT_FLAG_SHARED))
+            break;
+
+        /** -2 means pdu not in request list. check other sessions */
+        do  {
+            slp = slp->next;
+        } while (slp && slp->transport->sock != transport->sock);
+        if (!slp)
+            break; /* no more sessions with same socket */
+
+        sp = slp->session;
+        isp = slp->internal;
+        transport = slp->transport;
+    } while(slp);
+
+    if (-2 == rc) { /* did not find session for pdu */
+        snmp_increment_statistic(STAT_SNMPUNKNOWNPDUHANDLERS);
+        DEBUGMSGTL(("sess_process_packet", "unhandled PDU\n"));
+        snmp_free_pdu(pdu);
+    }
+
+  return rc;
 }
 
 /*
@@ -5492,6 +5567,160 @@ snmp_read2(netsnmp_large_fd_set * fdset)
 }
 
 /*
+ * accept new connections
+ * returns 0 if success, -1 if fail
+ */
+static int
+_sess_read_accept(void *sessp)
+{
+    struct session_list *slp = (struct session_list *) sessp;
+    netsnmp_session *sp = slp ? slp->session : NULL;
+    struct snmp_internal_session *isp = slp ? slp->internal : NULL;
+    netsnmp_transport *transport = slp ? slp->transport : NULL;
+    netsnmp_transport *new_transport;
+    struct session_list *nslp;
+    int               data_sock;
+
+    if (NULL == sessp || NULL == transport ||
+        !(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN))
+        return -1;
+
+    data_sock = transport->f_accept(transport);
+    if (data_sock < 0) {
+        sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
+        sp->s_errno = errno;
+        snmp_set_detail(strerror(errno));
+        return -1;
+    }
+
+    /*
+     * We've successfully accepted a new stream-based connection.
+     * It's not too clear what should happen here if we are using the
+     * single-session API at this point.  Basically a "session
+     * accepted" callback is probably needed to hand the new session
+     * over to the application.
+     *
+     * However, for now, as in th original snmp_api, we will ASSUME
+     * that we're using the traditional API, and simply add the new
+     * session to the list.  Note we don't have to get the Session
+     * list lock here, because under that assumption we already hold
+     * it (this is also why we don't just use snmp_add).
+     *
+     * The moral of the story is: don't use listening stream-based
+     * transports in a multi-threaded environment because something
+     * will go HORRIBLY wrong (and also that SNMP/TCP is not trivial).
+     *
+     * Another open issue: what should happen to sockets that have
+     * been accept()ed from a listening socket when that original
+     * socket is closed?  If they are left open, then attempting to
+     * re-open the listening socket will fail, which is semantically
+     * confusing.  Perhaps there should be some kind of chaining in
+     * the transport structure so that they can all be closed.
+     * Discuss.  ;-)
+     */
+    new_transport=netsnmp_transport_copy(transport);
+    if (new_transport == NULL) {
+        sp->s_snmp_errno = SNMPERR_MALLOC;
+        sp->s_errno = errno;
+        snmp_set_detail(strerror(errno));
+        return -1;
+    }
+    nslp = NULL;
+
+    new_transport->sock = data_sock;
+    new_transport->flags &= ~NETSNMP_TRANSPORT_FLAG_LISTEN;
+
+    nslp = (struct session_list *)
+        snmp_sess_add_ex(sp, new_transport, isp->hook_pre, isp->hook_parse,
+                         isp->hook_post, isp->hook_build,
+                         isp->hook_realloc_build, isp->check_packet,
+                         isp->hook_create_pdu);
+
+    if (nslp != NULL) {
+        nslp->next = Sessions;
+        Sessions = nslp;
+        /** Tell the new session about its existance if possible. */
+        DEBUGMSGTL(("sess_read",
+                    "perform callback with op=CONNECT\n"));
+        (void)nslp->session->callback(NETSNMP_CALLBACK_OP_CONNECT,
+                                      nslp->session, 0, NULL,
+                                      sp->callback_magic);
+    }
+
+    return 0;
+}
+
+/*
+ * Same as snmp_read, but works just one non-stream session.
+ * returns 0 if success, -1 if protocol err, -2 if no packet to process
+ * MTR: can't lock here and at snmp_read
+ * Beware recursive send maybe inside snmp_read callback function.
+ */
+static int
+_sess_read_dgram_packet(void *sessp, netsnmp_large_fd_set * fdset,
+                        snmp_rcv_packet *rcvp)
+{
+    struct session_list *slp = (struct session_list *) sessp;
+    netsnmp_session *sp = slp ? slp->session : NULL;
+    struct snmp_internal_session *isp = slp ? slp->internal : NULL;
+    netsnmp_transport *transport = slp ? slp->transport : NULL;
+
+    if (!sp || !isp || !transport || !rcvp ) {
+        DEBUGMSGTL(("sess_read_packet", "missing arguments\n"));
+        return -2;
+    }
+
+    if (transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM)
+        return -2;
+
+    if (NULL != rcvp->packet) {
+        snmp_log(LOG_WARNING, "overwriting existing saved packet; sess %p\n",
+                 sp);
+        SNMP_FREE(rcvp->packet);
+    }
+
+    if ((rcvp->packet = (u_char *) malloc(SNMP_MAX_RCV_MSG_SIZE)) == NULL) {
+        DEBUGMSGTL(("sess_read_packet", "can't malloc %" NETSNMP_PRIz
+                    "u bytes for packet\n",
+                    (unsigned long)SNMP_MAX_RCV_MSG_SIZE));
+        return -2;
+    }
+
+    rcvp->packet_len = netsnmp_transport_recv(transport, rcvp->packet,
+                                              SNMP_MAX_RCV_MSG_SIZE,
+                                              &rcvp->opaque, &rcvp->olength);
+    if (rcvp->packet_len == -1) {
+        sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
+        sp->s_errno = errno;
+        snmp_set_detail(strerror(errno));
+        SNMP_FREE(rcvp->packet);
+        SNMP_FREE(rcvp->opaque);
+        return -1;
+    }
+
+    /** clear so any other sess sharing this socket won't try reading again */
+    NETSNMP_LARGE_FD_CLR(transport->sock, fdset);
+
+    if (0 == rcvp->packet_len &&
+        transport->flags & NETSNMP_TRANSPORT_FLAG_EMPTY_PKT) {
+        /* this allows for a transport that needs to return from
+         * packet processing that doesn't necessarily have any
+         * consumable data in it. */
+
+        /* reset the flag since it's a per-message flag */
+        transport->flags &= (~NETSNMP_TRANSPORT_FLAG_EMPTY_PKT);
+
+        /** free packet */
+        SNMP_FREE(rcvp->packet);
+        SNMP_FREE(rcvp->opaque);
+
+        return -2;
+    }
+
+    return 0;
+}
+
+/*
  * Same as snmp_read, but works just one session. 
  * returns 0 if success, -1 if fail 
  * MTR: can't lock here and at snmp_read 
@@ -5504,15 +5733,10 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
     netsnmp_session *sp = slp ? slp->session : NULL;
     struct snmp_internal_session *isp = slp ? slp->internal : NULL;
     netsnmp_transport *transport = slp ? slp->transport : NULL;
-    size_t          pdulen = 0, rxbuf_len = 65536;
+    size_t          pdulen = 0, rxbuf_len = SNMP_MAX_RCV_MSG_SIZE;
     u_char         *rxbuf = NULL;
     int             length = 0, olength = 0, rc = 0;
     void           *opaque = NULL;
-
-    if (!sp || !isp || !transport) {
-        DEBUGMSGTL(("sess_read", "read fail: closing...\n"));
-        return 0;
-    }
 
     if (NULL == slp || NULL == sp || NULL == isp || NULL == transport) {
         snmp_log(LOG_ERR, "bad parameters to _sess_read\n");
@@ -5521,7 +5745,8 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
 
     /* to avoid subagent crash */ 
     if (transport->sock < 0) { 
-        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
+        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n",
+                  transport->sock);
         return 0; 
     }
 
@@ -5536,84 +5761,30 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
     sp->s_snmp_errno = 0;
     sp->s_errno = 0;
 
-    if (transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN) {
-        int             data_sock = transport->f_accept(transport);
+    if (transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)
+        return _sess_read_accept(sessp);
 
-        if (data_sock >= 0) {
-            /*
-             * We've successfully accepted a new stream-based connection.
-             * It's not too clear what should happen here if we are using the
-             * single-session API at this point.  Basically a "session
-             * accepted" callback is probably needed to hand the new session
-             * over to the application.
-             * 
-             * However, for now, as in the original snmp_api, we will ASSUME
-             * that we're using the traditional API, and simply add the new
-             * session to the list.  Note we don't have to get the Session
-             * list lock here, because under that assumption we already hold
-             * it (this is also why we don't just use snmp_add).
-             * 
-             * The moral of the story is: don't use listening stream-based
-             * transports in a multi-threaded environment because something
-             * will go HORRIBLY wrong (and also that SNMP/TCP is not trivial).
-             * 
-             * Another open issue: what should happen to sockets that have
-             * been accept()ed from a listening socket when that original
-             * socket is closed?  If they are left open, then attempting to
-             * re-open the listening socket will fail, which is semantically
-             * confusing.  Perhaps there should be some kind of chaining in
-             * the transport structure so that they can all be closed.
-             * Discuss.  ;-)
-             */
+    if (!(transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM)) {
+        snmp_rcv_packet rcvp;
+        memset(&rcvp, 0x0, sizeof(rcvp));
 
-	    netsnmp_transport *new_transport=netsnmp_transport_copy(transport);
-            if (new_transport != NULL) {
-                struct session_list *nslp = NULL;
-
-                new_transport->sock = data_sock;
-                new_transport->flags &= ~NETSNMP_TRANSPORT_FLAG_LISTEN;
-
-                nslp = (struct session_list *)snmp_sess_add_ex(sp,
-			  new_transport, isp->hook_pre, isp->hook_parse,
-			  isp->hook_post, isp->hook_build,
-			  isp->hook_realloc_build, isp->check_packet,
-			  isp->hook_create_pdu);
-
-                if (nslp != NULL) {
-                    nslp->next = Sessions;
-                    Sessions = nslp;
-                    /*
-                     * Tell the new session about its existance if possible.
-                     */
-                    DEBUGMSGTL(("sess_read",
-                                "perform callback with op=CONNECT\n"));
-                    (void)nslp->session->callback(NETSNMP_CALLBACK_OP_CONNECT,
-                                                  nslp->session, 0, NULL,
-                                                  sp->callback_magic);
-                } else {
-                    transport->f_close(new_transport);
-                    netsnmp_transport_free(new_transport);
-                }
-                return 0;
-            } else {
-                sp->s_snmp_errno = SNMPERR_MALLOC;
-                sp->s_errno = errno;
-                snmp_set_detail(strerror(errno));
-                return -1;
-            }
-        } else {
-            sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
-            sp->s_errno = errno;
-            snmp_set_detail(strerror(errno));
+        /** read the packet */
+        rc = _sess_read_dgram_packet(sessp, fdset, &rcvp);
+        if (-1 == rc) /* protocol error */
             return -1;
-        }
+        else if (-2 == rc) /* no packet to process */
+            return 0;
+
+        rc = _sess_process_packet(sessp, sp, isp, transport,
+                                  rcvp.opaque, rcvp.olength,
+                                  rcvp.packet, rcvp.packet_len);
+        SNMP_FREE(rcvp.packet);
+        /** opaque is freed in _sess_process_packet */
+        return rc;
     }
 
-    /*
-     * Work out where to receive the data to.  
-     */
+    /** stream transport */
 
-    if (transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM) {
         if (isp->packet == NULL) {
             /*
              * We have no saved packet.  Allocate one.  
@@ -5654,25 +5825,9 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                 rxbuf_len = isp->packet_size - isp->packet_len;
             }
         }
-    } else {
-        if ((rxbuf = (u_char *) malloc(rxbuf_len)) == NULL) {
-            DEBUGMSGTL(("sess_read", "can't malloc %" NETSNMP_PRIz
-                        "u bytes for rxbuf\n", rxbuf_len));
-            return 0;
-        }
-    }
 
     length = netsnmp_transport_recv(transport, rxbuf, rxbuf_len, &opaque,
                                     &olength);
-
-    if (length == -1 && !(transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM)) {
-        sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
-        sp->s_errno = errno;
-        snmp_set_detail(strerror(errno));
-        SNMP_FREE(rxbuf);
-        SNMP_FREE(opaque);
-        return -1;
-    }
 
     if (0 == length && transport->flags & NETSNMP_TRANSPORT_FLAG_EMPTY_PKT) {
         /* this allows for a transport that needs to return from
@@ -5688,8 +5843,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
     /*
      * Remote end closed connection.  
      */
-
-    if (length <= 0 && transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM) {
+    if (length <= 0) {
         /*
          * Alert the application if possible.  
          */
@@ -5708,7 +5862,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
         return -1;
     }
 
-    if (transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM) {
+    {
         u_char *pptr = isp->packet;
 	void *ocopy = NULL;
 
@@ -5864,13 +6018,9 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
             isp->packet = rxbuf;
             isp->packet_size = isp->packet_len;
         }
-        return rc;
-    } else {
-        rc = _sess_process_packet(sessp, sp, isp, transport, opaque,
-                                  olength, rxbuf, length);
-        SNMP_FREE(rxbuf);
-        return rc;
     }
+
+    return rc;
 }
 
 

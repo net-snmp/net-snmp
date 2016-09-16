@@ -25,6 +25,25 @@ NETSNMP_IMPORT oid      netsnmp_UDPIPv6Domain[];
 netsnmp_transport *netsnmp_udp6_transport(struct sockaddr_in6 *addr,
                                           int local);
 
+netsnmp_transport *
+netsnmp_udp6_transport_with_source(struct sockaddr_in6 *addr, int local,
+                                   struct sockaddr_in6 *src_addr);
+
+    /** internal functions for derivatives of udpipv6 */
+
+    netsnmp_transport *
+    netsnmp_udp6_transport_init(struct sockaddr_in6 *addr, int local);
+
+    int
+    netsnmp_udp6_transport_socket(int flags);
+
+    int
+    netsnmp_udp6_transport_bind(netsnmp_transport *t,
+                                struct sockaddr_in6 *addr, int flags);
+
+    void
+    netsnmp_udp6_transport_get_bound_addr(netsnmp_transport *t);
+
 
 /*
  * Convert a "traditional" peername into a sockaddr_in6 structure which is
