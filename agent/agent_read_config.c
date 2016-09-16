@@ -223,22 +223,22 @@ init_agent_read_config(const char *app)
         register_app_config_handler("trapsink",
                                     snmpd_parse_config_trapsink,
                                     snmpd_free_trapsinks,
-                                    "host [community] [port]");
+                                    "[-profile p] [-name n] [-tag t] host [community] [port]");
 #endif
 #ifndef NETSNMP_DISABLE_SNMPV2C
         register_app_config_handler("trap2sink",
                                     snmpd_parse_config_trap2sink, 
                                     snmpd_free_trapsinks,
-                                    "host [community] [port]");
+                                    "[-profile p] [-name n] [-tag t] host [community] [port]");
         register_app_config_handler("informsink",
                                     snmpd_parse_config_informsink,
                                     snmpd_free_trapsinks,
-                                    "host [community] [port]");
+                                    "[-profile p] [-name n] [-tag t] host [community] [port]");
 #endif
         register_app_config_handler("trapsess",
                                     snmpd_parse_config_trapsess,
                                     snmpd_free_trapsinks,
-                                    "[snmpcmdargs] host");
+                                    "[-profile p] [-name n] [-tag t] [snmpcmdargs] host");
     }
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     register_app_config_handler("trapcommunity",

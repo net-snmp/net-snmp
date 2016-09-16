@@ -8,6 +8,9 @@ extern          "C" {
 struct agent_add_trap_args {
     netsnmp_session *ss;
     int             confirm;
+    const char      *name; /* notification target addr name */
+    const char      *tag; /* notification tag */
+    const char      *profile; /* filter profile */
 };
 
 void            init_traps(void);
@@ -42,6 +45,9 @@ void            send_trap_to_sess(netsnmp_session * sess,
 int             create_trap_session(char *, u_short, char *, int, int);
 int             add_trap_session(netsnmp_session *, int, int, int);
 int             remove_trap_session(netsnmp_session *);
+int             netsnmp_add_notification_session(netsnmp_session *, int, int,
+                                                 int, const char*, const char*,
+                                                 const char*);
 
 void                   convert_v2_to_v1(netsnmp_variable_list *, netsnmp_pdu *);
 netsnmp_variable_list *convert_v1_to_v2(netsnmp_pdu *);
