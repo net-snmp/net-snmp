@@ -43,6 +43,9 @@ void            send_trap_to_sess(netsnmp_session * sess,
                                   netsnmp_pdu *template_pdu);
 
 int             create_trap_session(char *, u_short, char *, int, int);
+int             create_trap_session_with_src(const char *, const char *,
+                                             const char *, const char *,
+                                             int, int);
 int             add_trap_session(netsnmp_session *, int, int, int);
 int             remove_trap_session(netsnmp_session *);
 int             netsnmp_add_notification_session(netsnmp_session *, int, int,
