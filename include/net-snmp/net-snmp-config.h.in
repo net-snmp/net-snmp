@@ -162,7 +162,7 @@
 /* Define if you have EVP_sha224/256 in openssl */
 #undef HAVE_EVP_SHA224
 
-/* Define if you have EVP_sha384/256 in openssl */
+/* Define if you have EVP_sha384/512 in openssl */
 #undef HAVE_EVP_SHA384
 
 /* Define to 1 if you have the `execv' function. */

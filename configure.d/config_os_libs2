@@ -318,6 +318,14 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
                 AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
                     [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
 
+            AC_CHECK_DECL([EVP_sha224],
+             [AC_DEFINE([HAVE_EVP_SHA224], 1, [Define if you have EVP_sha224/256 in openssl])],,
+             [[#include <openssl/evp.h>]])
+
+            AC_CHECK_DECL([EVP_sha384],
+             [AC_DEFINE([HAVE_EVP_SHA384], 1, [Define if you have EVP_sha384/512 in openssl])],,
+             [[#include <openssl/evp.h>]])
+
             AC_CHECK_LIB(${CRYPTO}, EVP_MD_CTX_create,
                 AC_DEFINE([HAVE_EVP_MD_CTX_CREATE], [],
                     [Define to 1 if you have the `EVP_MD_CTX_create' function.])

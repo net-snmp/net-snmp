@@ -923,6 +923,8 @@ enable_ipv6
 with_ipv6
 with_logfile
 enable_logfile
+enable_usmUser_uses_default_auth_priv
+with_usmUser_uses_default_auth_priv
 with_persistent_directory
 enable_persistent_directory
 with_persistent_mask
@@ -1713,6 +1715,8 @@ Optional Features:
   --disable-md5                   Do not support MD5 authentication.
   --enable-internal-md5           Use the internal MD5 support.
   --disable-ipv6                  Disable IPv6 support.
+  --enable-usmUser-uses-default-auth-priv Use default auth/priv protocols; createUser
+                                          only needs auth/priv passphrases.
   --disable-snmpv1                Do not include code that implements SNMPv1.
   --disable-snmpv2c               Do not include code that implements SNMPv2c.
   --enable-debugging              Outputs extra debugging information at all
@@ -4083,6 +4087,22 @@ fi
 if test "$ac_cv_user_prompt_NETSNMP_LOGFILE" = "no"; then
     ac_cv_user_prompt_NETSNMP_LOGFILE="none"
 fi
+
+# Check whether --enable-usmUser-uses-default-auth-priv was given.
+if test "${enable_usmUser_uses_default_auth_priv+set}" = set; then :
+  enableval=$enable_usmUser_uses_default_auth_priv; if test "x$enable_usmUser_uses_default_auth_priv" = "xyes"; then
+
+$as_echo "#define NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV 1" >>confdefs.h
+
+    fi
+fi
+
+
+# Check whether --with-usmUser-uses-default-auth-priv was given.
+if test "${with_usmUser_uses_default_auth_priv+set}" = set; then :
+  withval=$with_usmUser_uses_default_auth_priv; as_fn_error $? "Invalid option. Use --enable-usmUser-uses-default-auth-priv/--disable-usmUser-uses-default-auth-priv instead" "$LINENO" 5
+fi
+
 
 
 # Check whether --with-persistent-directory was given.
@@ -23730,6 +23750,24 @@ $as_echo "#define HAVE_AES_CFB128_ENCRYPT 1" >>confdefs.h
 fi
 
 
+            ac_fn_c_check_decl "$LINENO" "EVP_sha224" "ac_cv_have_decl_EVP_sha224" "#include <openssl/evp.h>
+"
+if test "x$ac_cv_have_decl_EVP_sha224" = xyes; then :
+
+$as_echo "#define HAVE_EVP_SHA224 1" >>confdefs.h
+
+fi
+
+
+            ac_fn_c_check_decl "$LINENO" "EVP_sha384" "ac_cv_have_decl_EVP_sha384" "#include <openssl/evp.h>
+"
+if test "x$ac_cv_have_decl_EVP_sha384" = xyes; then :
+
+$as_echo "#define HAVE_EVP_SHA384 1" >>confdefs.h
+
+fi
+
+
             as_ac_Lib=`$as_echo "ac_cv_lib_${CRYPTO}''_EVP_MD_CTX_create" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_create in -l${CRYPTO}" >&5
 $as_echo_n "checking for EVP_MD_CTX_create in -l${CRYPTO}... " >&6; }
@@ -25125,7 +25163,7 @@ $as_echo "#define NETSNMP_USE_INTERNAL_CRYPTO 1" >>confdefs.h
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: Internal Crypto Support" >&5
 $as_echo "Internal Crypto Support" >&6; }
 elif test "x$useopenssl" != "xno" ; then
-    authmodes="MD5 SHA1"
+    authmodes="MD5 SHA1 SHA512 SHA384 SHA256 SHA192"
     if test "x$enable_privacy" != "xno" ; then
         if test "x$ac_cv_header_openssl_aes_h" = "xyes" ; then
             encrmodes="DES AES"
