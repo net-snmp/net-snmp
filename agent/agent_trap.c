@@ -1262,6 +1262,134 @@ trapOptProc(int argc, char *const *argv, int opt)
     }
 }
 
+netsnmp_session *
+netsnmp_create_v3user_notification_session(const char *dest, const char *user,
+                                           int level, const char *context,
+                                           int pdutype, const char *notif_name,
+                                           const char *notif_tag,
+                                           const char* notif_profile)
+{
+    netsnmp_session    session, *ss;
+    struct usmUser    *usmUser;
+    netsnmp_transport *transport;
+    u_char             engineId[SPRINT_MAX_LEN];
+    size_t             engineId_len;
+    int                rc;
+
+    if (NULL == dest || NULL == user)
+        return NULL;
+
+    /** need engineId to look up users */
+    engineId_len = snmpv3_get_engineID( engineId, sizeof(engineId));
+
+    usmUser = usm_get_user(engineId, engineId_len,
+                           NETSNMP_REMOVE_CONST(char *,user));
+    if (NULL == usmUser) {
+        DEBUGMSGTL(("trap:v3user_notif_sess", "usmUser %s not found\n", user));
+        return NULL;
+    }
+
+    snmp_sess_init(&session);
+
+    session.version = SNMP_VERSION_3;
+
+    session.peername = NETSNMP_REMOVE_CONST(char*,dest);
+
+    session.securityName = NETSNMP_REMOVE_CONST(char*,user);
+    session.securityNameLen = strlen(user);
+
+    if (NULL != context) {
+        session.contextName = NETSNMP_REMOVE_CONST(char*,context);
+        session.contextNameLen = strlen(context);
+    }
+
+    /** authlevel */
+    if ((SNMP_SEC_LEVEL_AUTHPRIV != level) &&
+        (SNMP_SEC_LEVEL_AUTHNOPRIV != level) &&
+        (SNMP_SEC_LEVEL_NOAUTH != level)) {
+        DEBUGMSGTL(("trap:v3user_notif_sess", "bad level %d\n", level));
+        return NULL;
+    }
+    session.securityLevel = level;
+
+    /** auth prot */
+    if (NULL != usmUser->authProtocol) {
+        session.securityAuthProto =
+            snmp_duplicate_objid(usmUser->authProtocol,
+                                 usmUser->authProtocolLen);
+        session.securityAuthProtoLen = usmUser->authProtocolLen;
+        if (NULL == session.securityAuthProto)
+            goto bail;
+    }
+
+    /** authkey */
+    if ((SNMP_SEC_LEVEL_AUTHPRIV == level) ||
+        (SNMP_SEC_LEVEL_AUTHNOPRIV == level)) {
+        session.securityAuthLocalKey = netsnmp_memdup(usmUser->authKey,
+                                                      usmUser->authKeyLen);
+        if (NULL == session.securityAuthLocalKey) {
+            DEBUGMSGTL(("trap:v3user_notif_sess", "authKey copy failed\n"));
+            goto bail;
+        }
+    }
+
+    /** priv prot */
+    if (NULL != usmUser->privProtocol) {
+        session.securityPrivProto =
+            snmp_duplicate_objid(usmUser->privProtocol,
+                                 usmUser->privProtocolLen);
+        session.securityPrivProtoLen = usmUser->privProtocolLen;
+        if (NULL == session.securityPrivProto)
+            goto bail;
+    }
+
+    /** privkey */
+    if (SNMP_SEC_LEVEL_AUTHPRIV == level) {
+        session.securityPrivLocalKey = netsnmp_memdup(usmUser->privKey,
+                                                      usmUser->privKeyLen);
+        if (NULL == session.securityPrivLocalKey) {
+            DEBUGMSGTL(("trap:v3user_notif_sess", "privKey copy failed\n"));
+            goto bail;
+        }
+    }
+
+    /** open the tranport */
+    transport = netsnmp_transport_open_client("snmptrap", session.peername);
+    if (transport == NULL) {
+        config_perror("snmpd: failed to parse this line.");
+        goto bail;
+    }
+    if ((rc = netsnmp_sess_config_and_open_transport(&session, transport))
+        != SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("trap:v3user_notif_sess", "config/open failed\n"));
+        goto bail;
+    }
+
+    ss = snmp_add(&session, transport, NULL, NULL);
+    if (!ss) {
+        DEBUGMSGTL(("trap:v3user_notif_sess", "snmp_add failed\n"));
+        goto bail;
+    }
+
+    if (netsnmp_add_notification_session(ss, pdutype,
+                                         (pdutype == SNMP_MSG_INFORM),
+                                         ss->version, notif_name, notif_tag,
+                                         notif_profile) != 1) {
+        DEBUGMSGTL(("trap:v3user_notif_sess", "add notification failed\n"));
+        snmp_sess_close(ss);
+        ss = NULL;
+        goto bail;
+    }
+
+  bail:
+    /** free any allocated mem in session */
+    SNMP_FREE(session.securityAuthProto);
+    SNMP_FREE(session.securityAuthLocalKey);
+    SNMP_FREE(session.securityPrivProto);
+    SNMP_FREE(session.securityPrivLocalKey);
+
+    return ss;
+}
 
 void
 snmpd_parse_config_trapsess(const char *word, char *cptr)
