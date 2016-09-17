@@ -1173,7 +1173,7 @@ snmpd_parse_config_authtrap(const char *token, char *cptr)
 static void
 _parse_config_sink(const char *token, char *cptr, int version, int type)
 {
-    char           *sp, *cp, *pp = NULL, *src = NULL;;
+    char           *sp, *cp, *pp = NULL, *src = NULL;
     char           *st, *name = NULL, *tag = NULL, *profile = NULL;
     int            done = 0;
 
