@@ -598,7 +598,7 @@ ns_set_time(int action,
                 minutes_from_utc=(int)var_val[10];
             }
 
-            newtimetm.tm_sec=(int)var_val[6];;
+            newtimetm.tm_sec=(int)var_val[6];
             newtimetm.tm_min=(int)var_val[5];
             newtimetm.tm_hour=(int)var_val[4];
 

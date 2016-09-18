@@ -208,19 +208,19 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
         entry->stats.HCInDelivers.high = scan_vals[8] >> 32;
         entry->stats.HCOutRequests.low = scan_vals[9] & 0xffffffff;
         entry->stats.HCOutRequests.high = scan_vals[9] >> 32;
-        entry->stats.HCOutDiscards.low = scan_vals[10] & 0xffffffff;;
+        entry->stats.HCOutDiscards.low = scan_vals[10] & 0xffffffff;
         entry->stats.HCOutDiscards.high = scan_vals[10] >> 32;
-        entry->stats.HCOutNoRoutes.low = scan_vals[11] & 0xffffffff;;
+        entry->stats.HCOutNoRoutes.low = scan_vals[11] & 0xffffffff;
         entry->stats.HCOutNoRoutes.high = scan_vals[11] >> 32;
         /* entry->stats. = scan_vals[12]; / * ReasmTimeout */
         entry->stats.ReasmReqds = scan_vals[13];
         entry->stats.ReasmOKs = scan_vals[14];
         entry->stats.ReasmFails = scan_vals[15];
-        entry->stats.HCOutFragOKs.low = scan_vals[16] & 0xffffffff;;
+        entry->stats.HCOutFragOKs.low = scan_vals[16] & 0xffffffff;
         entry->stats.HCOutFragOKs.high = scan_vals[16] >> 32;
-        entry->stats.HCOutFragFails.low = scan_vals[17] & 0xffffffff;;
+        entry->stats.HCOutFragFails.low = scan_vals[17] & 0xffffffff;
         entry->stats.HCOutFragFails.high = scan_vals[17] >> 32;
-        entry->stats.HCOutFragCreates.low = scan_vals[18] & 0xffffffff;;
+        entry->stats.HCOutFragCreates.low = scan_vals[18] & 0xffffffff;
         entry->stats.HCOutFragCreates.high = scan_vals[18] >> 32;
 
         entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINRECEIVES] = 1;

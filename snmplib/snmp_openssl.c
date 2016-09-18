@@ -717,7 +717,7 @@ _cert_get_san_type(X509 *ocert, int mapType)
         if (GEN_DNS == oname->type) {
             if ((TSNM_tlstmCertSANDNSName == mapType) ||
                 (TSNM_tlstmCertSANAny == mapType)) {
-                lower = buf = _extract_oname( oname );;
+                lower = buf = _extract_oname( oname );
                 break;
             }
         }

@@ -376,16 +376,16 @@ updateTunnel(struct tunnel *tunnel)
             switch (ifrq.ifr_hwaddr.sa_family) {
             case ARPHRD_TUNNEL:
                 tunnel->encaps = 2;
-                break;;         /* direct */
+                break;         /* direct */
             case ARPHRD_TUNNEL6:
                 tunnel->encaps = 2;
-                break;;         /* direct */
+                break;         /* direct */
             case ARPHRD_IPGRE:
                 tunnel->encaps = 3;
-                break;;         /* gre */
+                break;         /* gre */
             case ARPHRD_SIT:
                 tunnel->encaps = 2;
-                break;;         /* direct */
+                break;         /* direct */
             default:
                 tunnel->encaps = 1;     /* other */
             }

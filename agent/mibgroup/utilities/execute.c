@@ -326,7 +326,7 @@ run_exec_command( char *command, char *input,
                         break;
                     } else
                         DEBUGMSGTL(("verbose:run:exec",
-                                    "      child not done!?!\n"));;
+                                    "      child not done!?!\n"));
                 } else {
                     DEBUGMSGTL(("verbose:run:exec", "      child done\n"));
                     waited = 1; /* don't wait again */
