@@ -117,7 +117,7 @@ typedef struct netsnmp_tmStateReference_s {
 #define NETSNMP_TSPEC_SHARED                    0x02
 #define NETSNMP_TSPEC_NO_DFTL_CLIENT_ADDR       0x04
 
-struct netsnmp_container; /* forward decl */
+struct netsnmp_container_s; /* forward decl */
 typedef struct netsnmp_tdomain_spec_s {
     const char *application;             /* application name */
     const char *target;                  /* target as string */
@@ -125,7 +125,7 @@ typedef struct netsnmp_tdomain_spec_s {
     const char *default_domain;          /* default domain */
     const char *default_target;          /* default target */
     const char *source;                  /* source as string iff remote */
-    struct netsnmp_container *transport_config; /* extra config */
+    struct netsnmp_container_s *transport_config; /* extra config */
 } netsnmp_tdomain_spec;
 
 /*  Structure which defines the transport-independent API.  */
