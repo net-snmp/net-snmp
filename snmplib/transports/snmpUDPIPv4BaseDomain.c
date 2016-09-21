@@ -166,7 +166,7 @@ int
 netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
                                    struct sockaddr_in *addr, int flags)
 {
-#if defined(IP_PKTINFO) || defined(IP_RECVDSTADDR)
+#if defined(HAVE_IP_PKTINFO) || defined(IP_RECVDSTADDR)
     int                sockopt = 1;
 #endif
     int                rc;
@@ -176,7 +176,7 @@ netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
         return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
 #ifndef WIN32
-#if defined(IP_PKTINFO)
+#if defined(HAVE_IP_PKTINFO)
         if (setsockopt(t->sock, SOL_IP, IP_PKTINFO, &sockopt, sizeof sockopt) == -1) {
             DEBUGMSGTL(("netsnmp_udpbase", "couldn't set IP_PKTINFO: %s\n",
                         strerror(errno)));
