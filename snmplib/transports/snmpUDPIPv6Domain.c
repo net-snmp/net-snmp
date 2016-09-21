@@ -340,7 +340,7 @@ netsnmp_udp6_transport_socket(int flags)
     }
 #endif
     if (-1 == sock)
-        socket(PF_INET6, SOCK_DGRAM, 0);
+        sock = socket(PF_INET6, SOCK_DGRAM, 0);
 
     DEBUGMSGTL(("UDPBase", "opened socket %d as local=%d\n", sock, local));
     if (sock < 0)
@@ -379,6 +379,38 @@ netsnmp_udp6_transport_get_bound_addr(netsnmp_transport *t)
                     t->sock, str));
         free(str);
     }
+}
+
+netsnmp_transport *
+netsnmp_udpipv6base_tspec_transport(netsnmp_tdomain_spec *tspec)
+{
+    struct sockaddr_in6 addr;
+    int local;
+
+    if (NULL == tspec)
+        return NULL;
+
+    local = tspec->flags & NETSNMP_TSPEC_LOCAL;
+
+    /** get address from target */
+    if (!netsnmp_sockaddr_in6_2(&addr, tspec->target, tspec->default_target))
+        return NULL;
+
+    if (NULL != tspec->source) {
+        struct sockaddr_in6 src_addr, *srcp = &src_addr;
+        /** get sockaddr from source */
+        if (!netsnmp_sockaddr_in6_2(&src_addr, tspec->source, NULL))
+            return NULL;
+        return netsnmp_udp6_transport_with_source(&addr, local, srcp);
+     } else {
+        /** if no source and we do not want any default client address */
+        if (tspec->flags & NETSNMP_TSPEC_NO_DFTL_CLIENT_ADDR)
+            return netsnmp_udp6_transport_with_source(&addr, local,
+                                                             NULL);
+    }
+
+    /** no source and default client address ok */
+    return netsnmp_udp6_transport(&addr, local);
 }
 
 netsnmp_transport *
@@ -880,6 +912,14 @@ netsnmp_udp6_create_tstring(const char *str, int local,
     }
 }
 
+netsnmp_transport *
+netsnmp_udp6_create_tspec(netsnmp_tdomain_spec *tspec)
+{
+    netsnmp_transport *t = netsnmp_udpipv6base_tspec_transport(tspec);
+    return t;
+
+}
+
 
 /*
  * See:
@@ -913,6 +953,7 @@ netsnmp_udpipv6_ctor(void)
     udp6Domain.name_length = sizeof(netsnmp_UDPIPv6Domain) / sizeof(oid);
     udp6Domain.f_create_from_tstring     = NULL;
     udp6Domain.f_create_from_tstring_new = netsnmp_udp6_create_tstring;
+    udp6Domain.f_create_from_tspec       = netsnmp_udp6_create_tspec;
     udp6Domain.f_create_from_ostring     = netsnmp_udp6_create_ostring;
     udp6Domain.prefix = (const char**)calloc(5, sizeof(char *));
     udp6Domain.prefix[0] = "udp6";
