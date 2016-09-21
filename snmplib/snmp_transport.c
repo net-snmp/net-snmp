@@ -681,9 +681,11 @@ netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
                 t = match->f_create_from_tspec(&tspec_tmp);
             }
             else {
+#if 0 /** remove warning until all transports implement tspec */
                 NETSNMP_LOGONCE((LOG_WARNING,
                                  "transport domain %s uses deprecated f_create function\n",
                                  match->prefix[0]));
+#endif
                 if (match->f_create_from_tstring) {
                     t = match->f_create_from_tstring(addr, local);
                 }
