@@ -7,6 +7,22 @@
 #define _MIBGROUP_SNMPTARGETPARAMSENTRY_DATA_H
 
 /*
+ * Magic number definitions: 
+ */
+#define   SNMPTARGETPARAMSMPMODEL        1
+#define   SNMPTARGETPARAMSSECURITYMODEL  2
+#define   SNMPTARGETPARAMSSECURITYNAME   3
+#define   SNMPTARGETPARAMSSECURITYLEVEL  4
+#define   SNMPTARGETPARAMSSTORAGETYPE    5
+#define   SNMPTARGETPARAMSROWSTATUS      6
+#define   SNMPTARGETPARAMSMPMODELCOLUMN        2
+#define   SNMPTARGETPARAMSSECURITYMODELCOLUMN  3
+#define   SNMPTARGETPARAMSSECURITYNAMECOLUMN   4
+#define   SNMPTARGETPARAMSSECURITYLEVELCOLUMN  5
+#define   SNMPTARGETPARAMSSTORAGETYPECOLUMN    6
+#define   SNMPTARGETPARAMSROWSTATUSCOLUMN      7
+
+/*
  * structure definitions
  */
 struct targetParamTable_struct {
@@ -28,6 +44,11 @@ struct targetParamTable_struct *get_paramEntry(const char *name);
 
 void snmpTargetParamTable_add(struct targetParamTable_struct *newEntry);
 void snmpTargetParamTable_remove(struct targetParamTable_struct *entry);
+struct targetParamTable_struct *search_snmpTargetParamsTable(oid * baseName,
+                                                             size_t nameLen,
+                                                             oid * name,
+                                                             size_t * length,
+                                                             int exact);
 
 struct targetParamTable_struct *snmpTargetParamTable_create(void);
 

@@ -107,7 +107,7 @@ snmpNotifyFilterTable_container_init(netsnmp_container **container_ptr_ptr)
      * For advanced users, you can use a custom container. If you
      * do not create one, one will be created for you.
      */
-    *container_ptr_ptr = snmpNotifyFilterTable_storage_container_create();
+    *container_ptr_ptr = NULL;
 
 }                               /* snmpNotifyFilterTable_container_init */
 

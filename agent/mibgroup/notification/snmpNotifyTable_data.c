@@ -41,7 +41,7 @@
 #   include "notification-log-mib/notification_log.h"
 #endif
 
-static void snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata);
+SNMPCallback    store_snmpNotifyTable;
 
 
 /*
@@ -450,7 +450,7 @@ notifyTable_register_notifications(int major, int minor,
     return 0;
 }
 
-static void
+void
 snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata)
 {
     if (NULL == thedata)
@@ -494,7 +494,21 @@ notifyTable_unregister_notifications(int major, int minor,
 void
 init_snmpNotifyTable_data(void)
 {
+    static int done = 0;
+
+    if (++done != 1) {
+        DEBUGMSGTL(("snmpNotifyTable_data", "multiple init calls"));
+        return;
+    }
+
     DEBUGMSGTL(("snmpNotifyTable_data", "initializing...  "));
+
+    /*
+     * we need to be called back later to store our data 
+     */
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                           store_snmpNotifyTable, NULL);
+
 
 #ifndef DISABLE_SNMPV1
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
@@ -518,6 +532,9 @@ void
 shutdown_snmpNotifyTable_data(void)
 {
     DEBUGMSGTL(("snmpNotifyTable_data", "shutting down ... "));
+
+    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                             store_snmpNotifyTable, NULL, FALSE);
 
     notifyTable_unregister_notifications(SNMP_CALLBACK_APPLICATION,
                                          SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
@@ -582,18 +599,24 @@ snmpNotifyTable_add(struct snmpNotifyTable_data *thedata)
     return retVal;
 }
 
-int
-snmpNotifyTable_remove(struct snmpNotifyTable_data *thedata)
+struct snmpNotifyTable_data *
+snmpNotifyTable_extract(struct snmpNotifyTable_data *thedata)
 {
     struct header_complex_index *hptr;
 
-    for (hptr = snmpNotifyTableStorage; hptr; hptr = hptr->next) {
-        if (hptr->data == thedata)
-            break;
-    }
-    if (NULL != hptr) {
-        struct snmpNotifyTable_data *nptr = hptr->data;
-        header_complex_extract_entry(&snmpNotifyTableStorage, hptr);
+    hptr = header_complex_find_entry(snmpNotifyTableStorage, thedata);
+    if (NULL == hptr)
+        return NULL;
+
+    return header_complex_extract_entry((struct header_complex_index**)
+                                        &snmpNotifyTableStorage, hptr);
+}
+
+int
+snmpNotifyTable_remove(struct snmpNotifyTable_data *thedata)
+{
+    struct snmpNotifyTable_data *nptr = snmpNotifyTable_extract(thedata);
+    if (nptr) {
         snmpNotifyTable_dispose(nptr);
         return 1;
     }
@@ -613,6 +636,16 @@ get_notifyTable(const char *name)
     return NULL;
 }
 
+struct snmpNotifyTable_data *
+find_row_notifyTable(struct variable *vp, oid * name, size_t * len, int exact,
+                    size_t * var_len, WriteMethod ** write_method)
+{
+    struct snmpNotifyTable_data *result =
+        header_complex((struct header_complex_index *)
+                       snmpNotifyTableStorage, vp, name, len, exact,
+                       var_len, write_method);
+    return result;
+}
 
 void
 notifyTable_unregister_notification(const char *name)
@@ -649,3 +682,65 @@ notifyTable_unregister_notification(const char *name)
                     "No FilterProfileTable entry for %s\n", name));
 
 }
+
+/*
+ * store_snmpNotifyTable():
+ *   stores .conf file entries needed to configure the mib.
+ */
+int
+store_snmpNotifyTable(int majorID, int minorID, void *serverarg,
+                      void *clientarg)
+{
+    char            line[SNMP_MAXBUF];
+    char           *cptr;
+    size_t          tmpint;
+    struct snmpNotifyTable_data *StorageTmp;
+    struct header_complex_index *hcindex;
+
+
+    DEBUGMSGTL(("snmpNotifyTable", "storing data...  "));
+
+
+    for (hcindex = snmpNotifyTableStorage; hcindex != NULL;
+         hcindex = hcindex->next) {
+        StorageTmp = (struct snmpNotifyTable_data *) hcindex->data;
+
+        /*
+         * store permanent and nonvolatile rows.
+         * XXX should there be a qualification on RowStatus??
+         */
+        if ((StorageTmp->snmpNotifyStorageType == ST_NONVOLATILE) ||
+            (StorageTmp->snmpNotifyStorageType == ST_PERMANENT) ){
+
+            memset(line, 0, sizeof(line));
+            strcat(line, "snmpNotifyTable ");
+            cptr = line + strlen(line);
+
+            cptr =
+                read_config_store_data(ASN_OCTET_STR, cptr,
+                                       &StorageTmp->snmpNotifyName,
+                                       &StorageTmp->snmpNotifyNameLen);
+            cptr =
+                read_config_store_data(ASN_OCTET_STR, cptr,
+                                       &StorageTmp->snmpNotifyTag,
+                                       &StorageTmp->snmpNotifyTagLen);
+            cptr =
+                read_config_store_data(ASN_INTEGER, cptr,
+                                       &StorageTmp->snmpNotifyType,
+                                       &tmpint);
+            cptr =
+                read_config_store_data(ASN_INTEGER, cptr,
+                                       &StorageTmp->snmpNotifyStorageType,
+                                       &tmpint);
+            cptr =
+                read_config_store_data(ASN_INTEGER, cptr,
+                                       &StorageTmp->snmpNotifyRowStatus,
+                                       &tmpint);
+
+            snmpd_store_config(line);
+        }
+    }
+    DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
+    return 0;
+}
+

@@ -32,10 +32,6 @@ static oid      snmpTargetAddrOID[snmpTargetAddrOIDLen] =
 static unsigned long snmpTargetSpinLock = 0;
 
 
-static int
-store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
-                          void *clientarg);
-
 /*
  * snmpTargetAddr_rowStatusCheck is boolean funciton that checks 
  * the status of a row's values in order to determine whether
@@ -94,7 +90,7 @@ static const oid snmpTargetAddrEntry_variables_oid[] =
 void
 init_snmpTargetAddrEntry(void)
 {
-    init_snmpTargetAddrEntry_data(void);
+    init_snmpTargetAddrEntry_data();
 
     DEBUGMSGTL(("snmpTargetAddrEntry", "init\n"));
     REGISTER_MIB("target/snmpTargetAddrEntry",
@@ -103,407 +99,17 @@ init_snmpTargetAddrEntry(void)
     REGISTER_MIB("target/snmpTargetSpinLock", snmpTargetSpinLock_var,
                  variable2, snmpTargetSpinLock_oid);
 
-    snmpd_register_config_handler("targetAddr",
-                                  snmpd_parse_config_targetAddr,
-                                  (void (*)(void))0, NULL);
-
-    /*
-     * we need to be called back later 
-     */
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                           store_snmpTargetAddrEntry, NULL);
-
 }                               /* init_snmpTargetAddrEntry */
 
 void
 shutdown_snmpTargetAddrEntry(void)
 {
-    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                             store_snmpTargetAddrEntry, NULL, FALSE);
-
     shutdown_snmpTargetAddrEntry_data();
 }
-
-int
-snmpTargetAddr_addTDomain(struct targetAddrTable_struct *entry, char *cptr)
-{
-    size_t          len = 128;
-
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no tDomain in config string\n"));
-        return (0);
-    }
-
-    if (!read_objid(cptr, entry->tDomain, &len)) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: tDomain unreadable in config string\n"));
-        return (0);
-    }
-
-    /*
-     * spec check for oid 1-128 
-     */
-    if (len < 1 || len > 128) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: tDomain out of range in config string\n"));
-        return (0);
-    }
-
-    entry->tDomainLen = len;
-    return (1);
-}                               /* snmpTargetAddr_addTDomain */
-
-
-int
-snmpTargetAddr_addTAddress(struct targetAddrTable_struct *entry,
-                           char *cptr, size_t len)
-{
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no tAddress in config string\n"));
-        return (0);
-    } else {
-        /*
-         * spec check for string 1-32 
-         */
-        /*
-         * if (len < 1 || len > 32)  {
-         * DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: name out of range in config string\n"));
-         * return(0);
-         * } 
-         */
-        SNMP_FREE(entry->tAddress);
-        entry->tAddress = (u_char *) malloc(len);
-        entry->tAddressLen = len;
-        memcpy(entry->tAddress, cptr, len);
-    }
-    return (1);
-}                               /* snmpTargetAddr_addTAddress */
-
-
-int
-snmpTargetAddr_addTimeout(struct targetAddrTable_struct *entry, char *cptr)
-{
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetParamsEntry: no Timeout in config string\n"));
-        return (0);
-    } else if (!(isdigit((unsigned char)(*cptr)))) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargeParamsEntry: Timeout is not a digit in config string\n"));
-        return (0);
-    }
-    /*
-     * check Timeout >= 0 
-     */
-    else if ((entry->timeout = (int) strtol(cptr, (char **) NULL, 0)) < 0) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargeParamsEntry: Timeout out of range in config string\n"));
-        return (0);
-    }
-    return (1);
-}                               /* snmpTargetAddr_addTimeout  */
-
-
-int
-snmpTargetAddr_addRetryCount(struct targetAddrTable_struct *entry,
-                             char *cptr)
-{
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetParamsEntry: no Retry Count in config string\n"));
-        return (0);
-    } else if (!(isdigit((unsigned char)(*cptr)))) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargeParamsEntry: Retry Count is not a digit in config string\n"));
-        return (0);
-    }
-    /*
-     * spec check 0..255 
-     */
-    else {
-        entry->retryCount = (int) strtol(cptr, (char **) NULL, 0);
-        if ((entry->retryCount < 0) || (entry->retryCount > 255)) {
-            DEBUGMSGTL(("snmpTargetAddrEntry",
-                        "ERROR snmpTargeParamsEntry: Retry Count is out of range in config string\n"));
-            return (0);
-        }
-    }
-    return (1);
-}                               /* snmpTargetAddr_addRetryCount  */
-
-
-int
-snmpTargetAddr_addTagList(struct targetAddrTable_struct *entry, char *cptr)
-{
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no tag list in config string\n"));
-        return (0);
-    } else {
-        size_t len = strlen(cptr);
-        /*
-         * spec check for string 0-255 
-         */
-        if (len > 255) {
-            DEBUGMSGTL(("snmpTargetAddrEntry",
-                        "ERROR snmpTargetAddrEntry: tag list out of range in config string\n"));
-            return (0);
-        }
-        SNMP_FREE(entry->tagList);
-        entry->tagList = strdup(cptr);
-    }
-    return (1);
-}                               /* snmpTargetAddr_addTagList */
-
-
-int
-snmpTargetAddr_addParams(struct targetAddrTable_struct *entry, char *cptr)
-{
-    size_t          len;
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no params in config string\n"));
-        return (0);
-    } else {
-        len = strlen(cptr);
-        /*
-         * spec check for string 1-32 
-         */
-        if (len < 1 || len > 32) {
-            DEBUGMSGTL(("snmpTargetAddrEntry",
-                        "ERROR snmpTargetAddrEntry: params out of range in config string\n"));
-            return (0);
-        }
-        entry->params = strdup(cptr);
-    }
-    return (1);
-}                               /* snmpTargetAddr_addParams */
-
-
-int
-snmpTargetAddr_addStorageType(struct targetAddrTable_struct *entry,
-                              char *cptr)
-{
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no storage type in config "
-                    "string\n"));
-        return (0);
-    } else if (!(isdigit((unsigned char)(*cptr)))) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: storage type is not a digit "
-                    "in config string\n"));
-        return (0);
-    }
-    /*
-     * check that storage type is a possible value 
-     */
-    else if (((entry->storageType = (int) strtol(cptr, (char **) NULL, 0))
-              != SNMP_STORAGE_OTHER) &&
-             (entry->storageType != SNMP_STORAGE_VOLATILE) &&
-             (entry->storageType != SNMP_STORAGE_NONVOLATILE) &&
-             (entry->storageType != SNMP_STORAGE_PERMANENT) &&
-             (entry->storageType != SNMP_STORAGE_READONLY)) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: storage type not a valid "
-                    "value of other(%d), volatile(%d), nonvolatile(%d), "
-                    "permanent(%d), or readonly(%d) in config string.\n",
-                    SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE,
-                    SNMP_STORAGE_NONVOLATILE, SNMP_STORAGE_PERMANENT,
-                    SNMP_STORAGE_READONLY));
-        return (0);
-    }
-    return (1);
-}                               /* snmpTargetAddr_addStorageType */
-
-
-int
-snmpTargetAddr_addRowStatus(struct targetAddrTable_struct *entry,
-                            char *cptr)
-{
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no Row Status in config "
-                    "string\n"));
-        return (0);
-    } else if (!(isdigit((unsigned char)(*cptr)))) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: Row Status is not a digit in "
-                    "config string\n"));
-        return (0);
-    }
-    /*
-     * check that row status is a valid value 
-     */
-    else if (((entry->rowStatus = (int) strtol(cptr, (char **) NULL, 0))
-              != SNMP_ROW_ACTIVE) &&
-             (entry->rowStatus != SNMP_ROW_NOTINSERVICE) &&
-             (entry->rowStatus != SNMP_ROW_NOTREADY)) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: Row Status is not a valid "
-                    "value of active(%d), notinservice(%d), or notready(%d) "
-                    "in config string.\n",
-                    SNMP_ROW_ACTIVE, SNMP_ROW_NOTINSERVICE, SNMP_ROW_NOTREADY));
-        return (0);
-    }
-    return (1);
-}                               /* snmpTargetAddr_addRowStatus  */
-
-
-void
-snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
-{
-    const char     *cptr = char_ptr;
-    char            buff[1024], *bptr;
-    struct targetAddrTable_struct *newEntry;
-    int             i;
-    size_t          bufl;
-
-    newEntry = snmpTargetAddrTable_create();
-
-    cptr = skip_white_const(cptr);
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no name in config string\n"));
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-
-    bufl = 0;
-    cptr = read_config_read_octet_string_const(cptr,
-                                               (u_char**)&newEntry->nameData,
-                                               &bufl);
-    if (bufl < 1 || bufl > 32) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: name out of range in config "
-                    "string\n"));
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-    newEntry->nameLen = bufl;
-
-    cptr = copy_nword_const(cptr, buff, sizeof(buff));
-    if (snmpTargetAddr_addTDomain(newEntry, buff) == 0) {
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-    cptr =
-        read_config_read_octet_string_const(cptr,
-                                      (u_char **) & newEntry->tAddress,
-                                      &newEntry->tAddressLen);
-    if (!cptr || !(newEntry->tAddress)) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no TAddress in config string\n"));
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-    cptr = copy_nword_const(cptr, buff, sizeof(buff));
-    if (snmpTargetAddr_addTimeout(newEntry, buff) == 0) {
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-    cptr = copy_nword_const(cptr, buff, sizeof(buff));
-    if (snmpTargetAddr_addRetryCount(newEntry, buff) == 0) {
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-    cptr = copy_nword_const(cptr, buff, sizeof(buff));
-    if (snmpTargetAddr_addTagList(newEntry, buff) == 0) {
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-    cptr = copy_nword_const(cptr, buff, sizeof(buff));
-    if (snmpTargetAddr_addParams(newEntry, buff) == 0) {
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-    cptr = copy_nword_const(cptr, buff, sizeof(buff));
-    if (snmpTargetAddr_addStorageType(newEntry, buff) == 0) {
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-    cptr = copy_nword_const(cptr, buff, sizeof(buff));
-    if (snmpTargetAddr_addRowStatus(newEntry, buff) == 0) {
-        snmpTargetAddrTable_dispose(newEntry);
-        return;
-    }
-    bptr = buff;
-    bptr += sprintf(bptr, "snmp_parse_config_targetAddr, read: ");
-    bptr = read_config_save_octet_string(bptr, (u_char*)newEntry->nameData,
-                                         newEntry->nameLen);
-    *bptr++ = '\n';
-    for (i = 0; i < newEntry->tDomainLen; i++) {
-        bptr += snprintf(bptr, buff + sizeof(buff) - bptr,
-                         ".%d", (int) newEntry->tDomain[i]);
-    }
-    bptr += snprintf(bptr, buff + sizeof(buff) - bptr,
-                     " %s %d %d %s %s %d %d\n",
-                     newEntry->tAddress, newEntry->timeout,
-                     newEntry->retryCount, newEntry->tagList,
-                     newEntry->params, newEntry->storageType,
-                     newEntry->rowStatus);
-    buff[ sizeof(buff) - 1 ] = 0;
-    DEBUGMSGTL(("snmpTargetAddrEntry", "%s", buff));
-
-    snmpTargetAddrTable_addToList(newEntry, &aAddrTable);
-}                               /* snmpd_parse_config_target */
-
 
 /*
  * Shutdown routines 
  */
-
-
-/*
- * store_snmpTargetAddrEntry handles the persistent storage proccess 
- * for this MIB table. It writes out all the non-volatile rows 
- * to permanent storage on a shutdown  
- */
-static int
-store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
-                          void *clientarg)
-{
-    const struct targetAddrTable_struct *curr_struct;
-    char            line[1024], *cur, *ep = line + sizeof(line);
-    int             i;
-
-    curr_struct = aAddrTable;
-    while (curr_struct != NULL) {
-        if ((curr_struct->storageType == SNMP_STORAGE_NONVOLATILE ||
-             curr_struct->storageType == SNMP_STORAGE_PERMANENT) &&
-            (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
-             curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE)) {
-            cur = line + snprintf(line, sizeof(line), "targetAddr ");
-            cur = read_config_save_octet_string(
-                cur, (u_char*)curr_struct->nameData, curr_struct->nameLen);
-            *cur++ = ' ';
-            for (i = 0; i < curr_struct->tDomainLen; i++) {
-                cur += snprintf(cur, ep - cur, ".%i",
-                                (int) curr_struct->tDomain[i]);
-            }
-            *cur++ = ' ';
-            cur = read_config_save_octet_string(
-                cur, curr_struct->tAddress, curr_struct->tAddressLen);
-            cur += snprintf(cur, ep - cur, " %i %i \"%s\" %s %i %i",
-                            curr_struct->timeout,
-                            curr_struct->retryCount, curr_struct->tagList,
-                            curr_struct->params, curr_struct->storageType,
-                            curr_struct->rowStatus);
-            line[ sizeof(line)-1 ] = 0;
-
-            /*
-             * store to file
-             */
-            snmpd_store_config(line);
-        }
-
-        curr_struct = curr_struct->next;
-    }
-
-    return SNMPERR_SUCCESS;
-}                               /*  store_snmpTargetAddrEntry  */
 
 
 /*
@@ -1237,21 +843,14 @@ snmpTargetAddr_createNewRow(oid * name, size_t name_len)
         temp_struct = snmpTargetAddrTable_create();
         if (!temp_struct)
             return SNMP_ERR_GENERR;
-        temp_struct->nameData = (char *) malloc(newNameLen);
-        if (temp_struct->nameData == NULL) {
-            SNMP_FREE(temp_struct->tagList);
-            SNMP_FREE(temp_struct);
-            return 0;
-        }
-
-        temp_struct->nameLen = newNameLen;
+        temp_struct->tDomainLen = newNameLen;
         for (i = 0; i < (int) newNameLen; i++) {
-            temp_struct->nameData[i] = (char) name[i + snmpTargetAddrOIDLen];
+            temp_struct->tDomain[i] = (char) name[i + snmpTargetAddrOIDLen];
         }
 
         temp_struct->rowStatus = SNMP_ROW_NOTREADY;
 
-        snmpTargetAddrTable_addToList(temp_struct, &aAddrTable);
+        snmpTargetAddrTable_add(temp_struct);
 
         return 1;
     }
@@ -1389,7 +988,7 @@ write_snmpTargetAddrRowStatus(int action,
                                        &name_len, 1);
         if (target != NULL) {
             if (value == RS_DESTROY) {
-                snmpTargetAddrTable_remFromList(target, &aAddrTable);
+                snmpTargetAddrTable_remove(target);
             }
             if (value == RS_NOTINSERVICE) {
                 if (target->sess != NULL) {
@@ -1408,7 +1007,7 @@ write_snmpTargetAddrRowStatus(int action,
                                        &name_len, 1);
         if (value == RS_CREATEANDGO || value == RS_CREATEANDWAIT) {
             if (target != NULL) {
-                snmpTargetAddrTable_remFromList(target, &aAddrTable);
+                snmpTargetAddrTable_remove(target);
             }
         }
     }

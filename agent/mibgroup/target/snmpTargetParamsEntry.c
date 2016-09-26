@@ -95,11 +95,6 @@ init_snmpTargetParamsEntry(void)
                                   snmpd_parse_config_targetParams,
                                   (void (*)(void))0, NULL);
 
-    /*
-     * we need to be called back later 
-     */
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                           store_snmpTargetParamsEntry, NULL);
 }                               /*  init_snmpTargetParmsEntry  */
 
 void
@@ -355,53 +350,13 @@ snmpd_parse_config_targetParams(const char *token, char *char_ptr)
                 newEntry->rowStatus));
 
     update_timestamp(newEntry);
-    snmpTargetParamTable_addToList(newEntry, &aPTable);
+    snmpTargetParamTable_add(newEntry);
 }                               /* snmpd_parse_config_target */
 
 
 /*
  * shutdown routines 
  */
-
-
-/*
- * store_snmpTargetParamsEntry handles the presistent storage proccess 
- * for this MIB table. It writes out all the non-volatile rows 
- * to permanent storage on a shutdown  
- */
-int
-store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
-                            void *clientarg)
-{
-    struct targetParamTable_struct *curr_struct;
-    char            line[1024];
-
-    strcpy(line, "");
-    if ((curr_struct = aPTable) != NULL) {
-        while (curr_struct != NULL) {
-            if ((curr_struct->storageType == SNMP_STORAGE_NONVOLATILE ||
-                 curr_struct->storageType == SNMP_STORAGE_PERMANENT)
-                &&
-                (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
-                 curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE)) {
-                snprintf(line, sizeof(line),
-                        "targetParams %s %i %i %s %i %i %i\n",
-                        curr_struct->paramName, curr_struct->mpModel,
-                        curr_struct->secModel, curr_struct->secName,
-                        curr_struct->secLevel, curr_struct->storageType,
-                        curr_struct->rowStatus);
-                line[ sizeof(line)-1 ] = 0;
-
-                /*
-                 * store to file 
-                 */
-                snmpd_store_config(line);
-            }
-            curr_struct = curr_struct->next;
-        }
-    }
-    return SNMPERR_SUCCESS;
-}                               /*  store_snmpTargetParmsEntry  */
 
 
 /*
@@ -1045,7 +1000,7 @@ snmpTargetParams_createNewRow(oid * name, size_t name_len)
         temp_struct->rowStatus = SNMP_ROW_NOTREADY;
 
         update_timestamp(temp_struct);
-        snmpTargetParamTable_addToList(temp_struct, &aPTable);
+        snmpTargetParamTable_add(temp_struct);
 
         return 1;
     }
@@ -1177,13 +1132,12 @@ write_snmpTargetParamsRowStatus(int action,
                                               name, &name_len, 1);
         if (params != NULL) {
             if (value == SNMP_ROW_DESTROY) {
-                snmpTargetParamTable_remFromList(params, &aPTable);
+                snmpTargetParamTable_remove(params);
             }
             if (value == SNMP_ROW_ACTIVE || value == SNMP_ROW_NOTINSERVICE) {
                 update_timestamp(params);
             }
         }
-        snmp_store_needed(NULL);
     } else if (action == UNDO || action == FREE) {
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSROWSTATUSCOLUMN;
@@ -1193,7 +1147,7 @@ write_snmpTargetParamsRowStatus(int action,
         if (value == SNMP_ROW_CREATEANDGO
             || value == SNMP_ROW_CREATEANDWAIT) {
             if (params != NULL) {
-                snmpTargetParamTable_remFromList(params, &aPTable);
+                snmpTargetParamTable_remove(params);
             }
         }
     }

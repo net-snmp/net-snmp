@@ -47,8 +47,15 @@ void            shutdown_snmpNotifyTable_data(void);
 
 int             snmpNotifyTable_add(struct snmpNotifyTable_data *thedata);
 int             snmpNotifyTable_remove(struct snmpNotifyTable_data *thedata);
+struct snmpNotifyTable_data *
+                snmpNotifyTable_extract(struct snmpNotifyTable_data *thedata);
+void            snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata);
 
 struct snmpNotifyTable_data *get_notifyTable(const char *name);
+struct snmpNotifyTable_data *find_row_notifyTable(struct variable *vp,
+                                                  oid * name, size_t * length,
+                                                  int exact, size_t * var_len,
+                                                  WriteMethod ** write_method);
 
 
 #endif                          /* _MIBGROUP_SNMPNOTIFYTABLE_DATA_H */

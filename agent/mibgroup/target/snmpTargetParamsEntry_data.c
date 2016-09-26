@@ -18,19 +18,15 @@
 
 #include "snmpTargetParamsEntry_data.h"
 
-#define snmpTargetParamsOIDLen 11       /*This is base+column,
-                                         * i.e. everything but index */
-
-oid             snmpTargetParamsOID[snmpTargetParamsOIDLen] =
-    { 1, 3, 6, 1, 6, 3, 12, 1, 3, 1, 0 };
-
 static struct targetParamTable_struct *aPTable = NULL;
 static int _active = 0;
 
 /*
  * Utility routines
  */
-
+static int
+store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
+                            void *clientarg);
 
 /*
  * TargetParamTable_create creates and returns a pointer
@@ -94,6 +90,8 @@ snmpTargetParamTable_addToList(struct targetParamTable_struct *newEntry,
     int             i;
     size_t          newOIDLen = 0, currOIDLen = 0;
     oid             newOID[128], currOID[128];
+
+    snmp_store_needed(NULL);
 
     /*
      * if the list is empty, add the new entry to the top
@@ -173,13 +171,14 @@ snmpTargetParamTable_remFromList(struct targetParamTable_struct *oldEntry,
     else if (tptr == oldEntry) {
         *listPtr = (*listPtr)->next;
         snmpTargetParamTable_dispose(tptr);
-        return;
+        snmp_store_needed(NULL);
     } else {
         while (tptr->next != NULL) {
             if (tptr->next == oldEntry) {
                 tptr->next = tptr->next->next;
                 snmpTargetParamTable_dispose(oldEntry);
-                return;
+                snmp_store_needed(NULL);
+                break;
             }
             tptr = tptr->next;
         }
@@ -252,7 +251,17 @@ get_paramEntry(const char *name)
 void
 init_snmpTargetParamsEntry_data(void)
 {
-    aPTable = NULL;
+    static int done = 0;
+
+    if (++done != 1)
+        return;
+
+    /*
+     * we need to be called back later 
+     */
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                           store_snmpTargetParamsEntry, NULL);
+
 }                               /*  init_snmpTargetParmsEntry  */
 
 
@@ -278,3 +287,43 @@ shutdown_snmpTargetParamsEntry_data(void)
     }
 
 }
+
+/*
+ * store_snmpTargetParamsEntry handles the presistent storage proccess 
+ * for this MIB table. It writes out all the non-volatile rows 
+ * to permanent storage on a shutdown  
+ */
+static int
+store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
+                            void *clientarg)
+{
+    struct targetParamTable_struct *curr_struct;
+    char            line[1024];
+
+    strcpy(line, "");
+    if ((curr_struct = aPTable) != NULL) {
+        while (curr_struct != NULL) {
+            if ((curr_struct->storageType == SNMP_STORAGE_NONVOLATILE ||
+                 curr_struct->storageType == SNMP_STORAGE_PERMANENT)
+                &&
+                (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
+                 curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE)) {
+                snprintf(line, sizeof(line),
+                        "targetParams %s %i %i %s %i %i %i\n",
+                        curr_struct->paramName, curr_struct->mpModel,
+                        curr_struct->secModel, curr_struct->secName,
+                        curr_struct->secLevel, curr_struct->storageType,
+                        curr_struct->rowStatus);
+                line[ sizeof(line)-1 ] = 0;
+
+                /*
+                 * store to file 
+                 */
+                snmpd_store_config(line);
+            }
+            curr_struct = curr_struct->next;
+        }
+    }
+    return SNMPERR_SUCCESS;
+}                               /*  store_snmpTargetParmsEntry  */
+
