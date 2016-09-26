@@ -71,7 +71,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
             (targaddrs->tDomain, targaddrs->tDomainLen, NULL, NULL) == 0) {
             snmp_log(LOG_ERR,
                      "unsupported domain for target address table entry %s\n",
-                     targaddrs->nameData);
+                     targaddrs->name);
         }
 
         /*
@@ -214,8 +214,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                     t->f_config(t, "localCert",
                                                 cert->fingerprint);
                                 }
-                                memcpy(buf, targaddrs->nameData,
-                                       targaddrs->nameLen);
+                                strncpy(buf, sizeof(buf), targaddrs->name);
                                 buf[targaddrs->nameLen] = '\0';
                                 DEBUGMSGTL(("target_sessions",
                                             "  looking up their id: %s\n",
@@ -256,7 +255,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                 snmp_log(LOG_ERR,
                                          "unsupported mpModel/secModel combo %d/%d for target %s\n",
                                          param->mpModel, param->secModel,
-                                         targaddrs->nameData);
+                                         targaddrs->name);
                                 /*
                                  * XXX: memleak 
                                  */
