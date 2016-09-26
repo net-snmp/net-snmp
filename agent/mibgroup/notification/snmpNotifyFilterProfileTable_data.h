@@ -6,6 +6,7 @@
 #ifndef _MIBGROUP_SNMPNOTIFYFILTERPROFILETABLE_DATA_H
 #define _MIBGROUP_SNMPNOTIFYFILTERPROFILETABLE_DATA_H
 
+config_require(header_complex)
 
 /*
  * our storage structure(s)

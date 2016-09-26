@@ -11,7 +11,7 @@
 /*
  * we may use header_complex from the header_complex module 
  */
-config_require(header_complex)
+config_require(notification/snmpNotifyFilterProfileTable_data)
 
 #include "snmpNotifyFilterProfileTable_data.h"
 
