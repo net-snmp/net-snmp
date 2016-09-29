@@ -284,6 +284,38 @@ void *netsnmp_memdup(const void *from, size_t size)
     return to;
 }                               /* end netsnmp_memdup() */
 
+/**
+ * Duplicates a memory block, adding a NULL at the end.
+ *
+ * NOTE: the returned size DOES NOT include the extra byte for the NULL
+ *       termination, just the raw data (i.e. from_size).
+ *
+ * This is mainly to protect agains code that uses str* functions on
+ * a fixed buffer that may not have a terminating NULL.
+ *
+ * @param[in] from Pointer to copy memory from.
+ * @param[in] from_size Size of the data to be copied.
+ * @param[out] new_size Pointer to size var for new block (OPTIONAL)
+ *
+ * @return Pointer to the duplicated memory block, or NULL if memory allocation
+ * failed.
+ */
+void *netsnmp_memdup_nt(const void *from, size_t from_size, size_t *to_size)
+{
+    char *to = NULL;
+
+    if (from) {
+        to = malloc(from_size+1);
+        if (to) {
+            memcpy(to, from, from_size);
+            to[from_size] = 0;
+            if (to_size)
+               *to_size = from_size;
+        }
+    }
+    return to;
+}                               /* end netsnmp_memdupNT() */
+
 #ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_CHECK_DEFINEDNESS
 /**
  * When running under Valgrind, check whether all bytes in the range [packet,
