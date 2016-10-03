@@ -14,9 +14,12 @@ extern          "C" {
 struct agent_add_trap_args {
     netsnmp_session *ss;
     int             confirm;
-    const char      *name; /* notification target addr name */
-    const char      *tag; /* notification tag */
-    const char      *profile; /* filter profile */
+    const char      *nameData; /* notification target addr name */
+    int             nameLen;
+    const char      *tagData; /* notification tag */
+    int             tagLen;
+    const char      *profileData; /* filter profile */
+    int             profileLen;
     int             rc;
 };
 

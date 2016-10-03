@@ -40,7 +40,7 @@ static unsigned long snmpTargetSpinLock = 0;
 static int
 snmpTargetAddr_rowStatusCheck(const struct targetAddrTable_struct *entry)
 {
-    return entry->tDomainLen && entry->tAddress && entry->params;
+    return entry->tDomainLen && entry->tAddress && entry->paramsData;
 }                               /* snmtpTargetAddrTable_rowStatusCheck */
 
 
@@ -217,19 +217,17 @@ var_snmpTargetAddrEntry(struct variable * vp,
         return (unsigned char *) &long_ret;
 
     case SNMPTARGETADDRTAGLIST:
-        if (temp_struct->tagList != NULL) {
-            strlcpy(string, temp_struct->tagList, sizeof(string));
-            *var_len = strlen(string);
-            return (unsigned char *) string;
-        } else {
+        if (temp_struct->tagListData == NULL)
             return NULL;
-        }
+        memcpy(string, temp_struct->tagListData, temp_struct->tagListLen);
+        *var_len = temp_struct->tagListLen;
+        return (unsigned char *) string;
 
     case SNMPTARGETADDRPARAMS:
-        if (temp_struct->params == NULL)
+        if (temp_struct->paramsData == NULL)
             return NULL;
-        strlcpy(string, temp_struct->params, sizeof(string));
-        *var_len = strlen(string);
+        memcpy(string, temp_struct->paramsData, temp_struct->paramsLen);
+        *var_len = temp_struct->paramsLen;
         return (unsigned char *) string;
 
     case SNMPTARGETADDRSTORAGETYPE:
@@ -606,7 +604,8 @@ write_snmpTargetAddrTagList(int action,
                             u_char * statP, oid * name, size_t name_len)
 {
     struct targetAddrTable_struct *target = NULL;
-    static char    *old_tlist;
+    static char    *old_tlist = NULL;
+    static int      old_tlist_len;
 
     if (action == RESERVE1) {
         if (var_val_type != ASN_OCTET_STR) {
@@ -638,19 +637,25 @@ write_snmpTargetAddrTagList(int action,
                             "write to snmpTargetAddrTagList: row is read only\n"));
                 return SNMP_ERR_NOTWRITABLE;
             }
-            old_tlist = target->tagList;
-            target->tagList = (char *) malloc(var_val_len + 1);
-            if (target->tagList == NULL) {
+            if (old_tlist != NULL) {
+                DEBUGMSGTL(("snmpTargetAddrEntry",
+                            "writing multiple rows/values not supported\n"));
+                return SNMP_ERR_GENERR;
+            }
+            old_tlist = target->tagListData;
+            old_tlist_len = target->tagListLen;
+            target->tagListData = netsnmp_memdup_nt(var_val, var_val_len,
+                                                    &target->tagListLen);
+            if (target->tagListData == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
-            memcpy(target->tagList, var_val, var_val_len);
-            target->tagList[var_val_len] = '\0';
         }
     } else if (action == COMMIT) {
         SNMP_FREE(old_tlist);
         old_tlist = NULL;
         snmp_store_needed(NULL);
     } else if (action == FREE || action == UNDO) {
+        old_tlist = NULL;
         snmpTargetAddrOID[snmpTargetAddrOIDLen - 1] =
             SNMPTARGETADDRTAGLISTCOLUMN;
         if ((target =
@@ -658,8 +663,9 @@ write_snmpTargetAddrTagList(int action,
                                         snmpTargetAddrOIDLen, name,
                                         &name_len, 1)) != NULL) {
             if (target->storageType != SNMP_STORAGE_READONLY) {
-                SNMP_FREE(target->tagList);
-                target->tagList = old_tlist;
+                SNMP_FREE(target->tagListData);
+                target->tagListData = old_tlist;
+                target->tagListLen = old_tlist_len;
             }
         }
     }
@@ -677,6 +683,7 @@ write_snmpTargetAddrParams(int action,
 {
     struct targetAddrTable_struct *target = NULL;
     static char    *old_params = NULL;
+    static size_t   old_params_len;
 
     if (action == RESERVE1) {
         if (var_val_type != ASN_OCTET_STR) {
@@ -707,14 +714,19 @@ write_snmpTargetAddrParams(int action,
                             "write to snmpTargetAddrParams: not allowed in active row.\n"));
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
+            if (old_params != NULL) {
+                DEBUGMSGTL(("snmpTargetAddrEntry",
+                            "writing multiple rows/values not supported\n"));
+                return SNMP_ERR_GENERR;
+            }
 
-            old_params = target->params;
-            target->params = malloc(var_val_len + 1);
-            if (target->params == NULL) {
+            old_params = target->paramsData;
+            old_params_len = target->paramsLen;
+            target->paramsData = netsnmp_memdup_nt(var_val, var_val_len,
+                                                   &target->paramsLen);
+            if (target->paramsData == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
-            memcpy(target->params, var_val, var_val_len);
-            target->params[var_val_len] = '\0';
 
             /*
              * If row is new, check if its status can be updated.  
@@ -740,8 +752,10 @@ write_snmpTargetAddrParams(int action,
                                         &name_len, 1)) != NULL) {
             if (target->storageType != SNMP_STORAGE_READONLY
                 && target->rowStatus != SNMP_ROW_ACTIVE) {
-                SNMP_FREE(target->params);
-                target->params = old_params;
+                SNMP_FREE(target->paramsData);
+                target->paramsData = old_params;
+                target->paramsLen = old_params_len;
+                old_params = NULL;
                 if (target->rowStatus == SNMP_ROW_NOTINSERVICE &&
                     snmpTargetAddr_rowStatusCheck(target) == 0) {
                     target->rowStatus = SNMP_ROW_NOTREADY;
@@ -843,10 +857,17 @@ snmpTargetAddr_createNewRow(oid * name, size_t name_len)
         temp_struct = snmpTargetAddrTable_create();
         if (!temp_struct)
             return SNMP_ERR_GENERR;
-        temp_struct->tDomainLen = newNameLen;
-        for (i = 0; i < (int) newNameLen; i++) {
-            temp_struct->tDomain[i] = (char) name[i + snmpTargetAddrOIDLen];
+        temp_struct->nameData = (char *) malloc(newNameLen+1);
+        if (temp_struct->nameData == NULL) {
+            snmpTargetAddrTable_dispose(temp_struct);
+            return 0;
         }
+
+        temp_struct->nameLen = newNameLen;
+        for (i = 0; i < (int) newNameLen; i++) {
+            temp_struct->nameData[i] = (char) name[i + snmpTargetAddrOIDLen];
+        }
+        temp_struct->nameData[i] = 0; /* just-in-case null term */
 
         temp_struct->rowStatus = SNMP_ROW_NOTREADY;
 

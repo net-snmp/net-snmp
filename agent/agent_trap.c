@@ -217,9 +217,12 @@ netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
         DEBUGMSGTL(("trap", "adding callback trap sink (%p)\n", ss));
         args.ss = ss;
         args.confirm = confirm;
-        args.name = name;
-        args.tag = tag;
-        args.profile = profile;
+        args.nameData = name;
+        args.nameLen = (NULL == name) ? 0 : strlen(name);
+        args.tagData = tag;
+        args.tagLen = (NULL == tag) ? 0 : strlen(tag);
+        args.profileData = profile;
+        args.profileLen = (NULL == profile) ? 0: strlen(profile);
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
                             (void *) &args);

@@ -26,10 +26,12 @@
  * structure definitions
  */
 struct targetParamTable_struct {
-    char           *paramName;
+    char           *paramNameData;
+    size_t          paramNameLen;
     int             mpModel;
     int             secModel;
-    char           *secName;
+    char           *secNameData;
+    size_t          secNameLen;
     int             secLevel;
     int             storageType;
     int             rowStatus;
@@ -40,7 +42,8 @@ struct targetParamTable_struct {
 /*
  * utility functions
  */
-struct targetParamTable_struct *get_paramEntry(const char *name);
+struct targetParamTable_struct *get_paramEntry2(const char *name,
+                                                size_t nameLen);
 
 void snmpTargetParamTable_add(struct targetParamTable_struct *newEntry);
 void snmpTargetParamTable_remove(struct targetParamTable_struct *entry);

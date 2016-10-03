@@ -39,23 +39,21 @@ snmpTargetParamTable_create(void)
     struct targetParamTable_struct *newEntry;
 
     newEntry = (struct targetParamTable_struct *)
-        malloc(sizeof(struct targetParamTable_struct));
+        calloc(1, sizeof(struct targetParamTable_struct));
 
     if (NULL == newEntry)
         return NULL;
 
     ++_active;
 
-    newEntry->paramName = NULL;
     newEntry->mpModel = -1;
 
     newEntry->secModel = -1;
-    newEntry->secName = NULL;
     newEntry->secLevel = -1;
 
     newEntry->storageType = SNMP_STORAGE_NONVOLATILE;
     newEntry->rowStatus = SNMP_ROW_NONEXISTENT;
-    newEntry->next = NULL;
+
     return newEntry;
 }
 
@@ -67,8 +65,8 @@ snmpTargetParamTable_create(void)
 void
 snmpTargetParamTable_dispose(struct targetParamTable_struct *reaped)
 {
-    SNMP_FREE(reaped->paramName);
-    SNMP_FREE(reaped->secName);
+    SNMP_FREE(reaped->paramNameData);
+    SNMP_FREE(reaped->secNameData);
 
     free(reaped);
     --_active;
@@ -88,8 +86,6 @@ snmpTargetParamTable_addToList(struct targetParamTable_struct *newEntry,
 {
     static struct targetParamTable_struct *curr_struct, *prev_struct;
     int             i;
-    size_t          newOIDLen = 0, currOIDLen = 0;
-    oid             newOID[128], currOID[128];
 
     snmp_store_needed(NULL);
 
@@ -101,23 +97,13 @@ snmpTargetParamTable_addToList(struct targetParamTable_struct *newEntry,
         return;
     } else {
         /*
-         * get the 'OID' value of the new entry
-         */
-        newOIDLen = strlen(newEntry->paramName);
-        for (i = 0; i < (int) newOIDLen; i++) {
-            newOID[i] = newEntry->paramName[i];
-        }
-
-        /*
          * search through the list for an equal or greater OID value
          */
         while (curr_struct != NULL) {
-            currOIDLen = strlen(curr_struct->paramName);
-            for (i = 0; i < (int) currOIDLen; i++) {
-                currOID[i] = curr_struct->paramName[i];
-            }
-
-            i = snmp_oid_compare(newOID, newOIDLen, currOID, currOIDLen);
+            i = netsnmp_compare_mem(newEntry->paramNameData,
+                                    newEntry->paramNameLen,
+                                    curr_struct->paramNameData,
+                                    curr_struct->paramNameLen);
             if (i == 0) {       /* Exact match, overwrite with new struct */
                 newEntry->next = curr_struct->next;
                 /*
@@ -211,10 +197,10 @@ search_snmpTargetParamsTable(oid * baseName,
 
     for (temp_struct = aPTable; temp_struct != NULL;
          temp_struct = temp_struct->next) {
-        for (i = 0; i < (int) strlen(temp_struct->paramName); i++) {
-            newNum[baseNameLen + i] = temp_struct->paramName[i];
+        for (i = 0; i < temp_struct->paramNameLen; i++) {
+            newNum[baseNameLen + i] = temp_struct->paramNameData[i];
         }
-        myOIDLen = baseNameLen + strlen(temp_struct->paramName);
+        myOIDLen = baseNameLen + temp_struct->paramNameLen;
         i = snmp_oid_compare(name, *length, newNum, myOIDLen);
         /*
          * Assumes that the linked list sorted by OID, low to high
@@ -232,11 +218,12 @@ search_snmpTargetParamsTable(oid * baseName,
 
 
 struct targetParamTable_struct *
-get_paramEntry(const char *name)
+get_paramEntry2(const char *name, size_t nameLen)
 {
     static struct targetParamTable_struct *ptr;
     for (ptr = aPTable; ptr; ptr = ptr->next) {
-        if (strcmp(ptr->paramName, name) == 0) {
+        if (nameLen == ptr->paramNameLen &&
+            memcmp(ptr->paramNameData, name, nameLen) == 0) {
             return ptr;
         }
     }
@@ -310,8 +297,8 @@ store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
                  curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE)) {
                 snprintf(line, sizeof(line),
                         "targetParams %s %i %i %s %i %i %i\n",
-                        curr_struct->paramName, curr_struct->mpModel,
-                        curr_struct->secModel, curr_struct->secName,
+                        curr_struct->paramNameData, curr_struct->mpModel,
+                        curr_struct->secModel, curr_struct->secNameData,
                         curr_struct->secLevel, curr_struct->storageType,
                         curr_struct->rowStatus);
                 line[ sizeof(line)-1 ] = 0;

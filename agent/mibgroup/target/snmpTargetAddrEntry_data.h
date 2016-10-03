@@ -35,15 +35,18 @@
      * structure definitions
      */
      struct targetAddrTable_struct {
-         char           *name;
+         char           *nameData;
+         size_t          nameLen;
          oid             tDomain[MAX_OID_LEN];
          int             tDomainLen;
          unsigned char  *tAddress;
          size_t          tAddressLen;
-         int             timeout;
+         int             timeout;      /* Timeout in centiseconds */
          int             retryCount;
-         char           *tagList;
-         char           *params;
+         char           *tagListData;
+         size_t          tagListLen;
+         char           *paramsData;
+         size_t          paramsLen;
          int             storageType;
          int             rowStatus;
          struct targetAddrTable_struct *next;
@@ -59,7 +62,8 @@
      void            shutdown_snmpTargetAddrEntry_data(void);
 
      struct targetAddrTable_struct *get_addrTable(void);
-     struct targetAddrTable_struct *get_addrForName(const char *name);
+     struct targetAddrTable_struct *get_addrForName2(const char *name,
+                                                     size_t nameLen);
      struct targetAddrTable_struct *snmpTargetAddrTable_create(void);
      struct targetAddrTable_struct *search_snmpTargetAddrTable(oid * baseName,
                                                                size_t nameLen,

@@ -43,7 +43,7 @@ int
 snmpTargetParams_rowStatusCheck(struct targetParamTable_struct *entry)
 {
     if ((entry->mpModel < 0) || (entry->secModel < 0) ||
-        (entry->secLevel < 0) || (entry->secName == NULL))
+        (entry->secLevel < 0) || (entry->secNameData == NULL))
         return 0;
     else
         return 1;
@@ -123,7 +123,8 @@ snmpTargetParams_addParamName(struct targetParamTable_struct *entry,
                         "ERROR snmpTargetParamsEntry: param name out of range in config string\n"));
             return (0);
         }
-        entry->paramName = strdup(cptr);
+        entry->paramNameData = strdup(cptr);
+        entry->paramNameLen = strlen(cptr);
     }
     return (1);
 }
@@ -189,7 +190,8 @@ snmpTargetParams_addSecName(struct targetParamTable_struct *entry,
                     "ERROR snmpTargetParamsEntry: no security name in config string\n"));
         return (0);
     } else {
-        entry->secName = strdup(cptr);
+        entry->secNameData = strdup(cptr);
+        entry->secNameLen = strlen(cptr);
     }
     return (1);
 }                               /* snmpTargetParams_addSecName  */
@@ -345,9 +347,9 @@ snmpd_parse_config_targetParams(const char *token, char *char_ptr)
     }
     DEBUGMSGTL(("snmpTargetParamsEntry",
                 "snmp_parse_config_targetParams, read: %s %d %d %s %d %d %d\n",
-                newEntry->paramName, newEntry->mpModel, newEntry->secModel,
-                newEntry->secName, newEntry->secLevel, newEntry->storageType,
-                newEntry->rowStatus));
+                newEntry->paramNameData, newEntry->mpModel, newEntry->secModel,
+                newEntry->secNameData, newEntry->secLevel,
+                newEntry->storageType, newEntry->rowStatus));
 
     update_timestamp(newEntry);
     snmpTargetParamTable_add(newEntry);
@@ -445,14 +447,14 @@ var_snmpTargetParamsEntry(struct variable * vp,
         /*
          * if unset value, (i.e. new row) 
          */
-        if (temp_struct->secName == NULL)
+        if (temp_struct->secNameData == NULL)
             return NULL;
         /*
          * including null character. 
          */
-        memcpy(string, temp_struct->secName, strlen(temp_struct->secName));
-        string[strlen(temp_struct->secName)] = '\0';
-        *var_len = strlen(temp_struct->secName);
+        memcpy(string, temp_struct->secNameData, temp_struct->secNameLen);
+        string[temp_struct->secNameLen] = '\0';
+        *var_len = temp_struct->secNameLen;
         return (unsigned char *) string;
 
     case SNMPTARGETPARAMSSECURITYLEVEL:
@@ -879,7 +881,8 @@ write_snmpTargetParamsSecName(int action,
                               size_t var_val_len,
                               u_char * statP, oid * name, size_t name_len)
 {
-    static char    *old_name;
+    static char    *old_name = NULL;
+    static size_t   old_name_len;
     struct targetParamTable_struct *params = NULL;
 
     if (action == RESERVE1) {
@@ -920,14 +923,19 @@ write_snmpTargetParamsSecName(int action,
                             "write to snmpTargetParamsSecName: this change not allowed in active row.\n"));
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
+            if (old_name != NULL) {
+                DEBUGMSGTL(("snmpTargetParamsEntry",
+                            "multiple rows/sets no supported.\n"));
+                return SNMP_ERR_GENERR;
+            }
 
-            old_name = params->secName;
-            params->secName = (char *) malloc(var_val_len + 1);
-            if (params->secName == NULL) {
+            old_name = params->secNameData;
+            old_name_len = params->secNameLen;
+            params->secNameData = netsnmp_memdup_nt(var_val, var_val_len,
+                                                    &params->secNameLen);
+            if (params->secNameData == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
-            memcpy(params->secName, var_val, var_val_len);
-            params->secName[var_val_len] = '\0';
 
             if (params->rowStatus == SNMP_ROW_NOTREADY &&
                 snmpTargetParams_rowStatusCheck(params)) {
@@ -957,14 +965,16 @@ write_snmpTargetParamsSecName(int action,
                                                    1)) != NULL) {
             if (params->storageType != SNMP_STORAGE_READONLY
                 && params->rowStatus != SNMP_ROW_ACTIVE) {
-                SNMP_FREE(params->secName);
-                params->secName = old_name;
+                SNMP_FREE(params->secNameData);
+                params->secNameData = old_name;
+                params->secNameLen = old_name_len;
                 if (params->rowStatus == SNMP_ROW_NOTINSERVICE &&
                     !snmpTargetParams_rowStatusCheck(params)) {
                     params->rowStatus = SNMP_ROW_NOTREADY;
                 }
             }
         }
+        old_name = NULL;
     }
 
     return SNMP_ERR_NOERROR;
@@ -989,14 +999,17 @@ snmpTargetParams_createNewRow(oid * name, size_t name_len)
     pNameLen = name_len - snmpTargetParamsOIDLen;
     if (pNameLen > 0) {
         temp_struct = snmpTargetParamTable_create();
-        temp_struct->paramName = (char *) malloc(pNameLen + 1);
+        if (NULL == temp_struct)
+            return 0;
+        temp_struct->paramNameData = (char *) malloc(pNameLen + 1);
 
         for (i = 0; i < pNameLen; i++) {
-            temp_struct->paramName[i] =
+            temp_struct->paramNameData[i] =
                 (char) name[i + snmpTargetParamsOIDLen];
         }
 
-        temp_struct->paramName[pNameLen] = '\0';
+        temp_struct->paramNameData[pNameLen] = '\0';
+        temp_struct->paramNameLen = pNameLen;
         temp_struct->rowStatus = SNMP_ROW_NOTREADY;
 
         update_timestamp(temp_struct);

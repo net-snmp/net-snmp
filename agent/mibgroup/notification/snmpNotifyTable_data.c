@@ -67,7 +67,8 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
     netsnmp_assert(NULL != paramName);
     netsnmp_assert(NULL != pdu);
 
-    DEBUGMSGTL(("send_notifications", "checking filters...\n"));
+    DEBUGMSGTL(("send_notifications", "checking filters for '%s'...\n",
+                paramName));
 
     /*
    A notification originator uses the snmpNotifyFilterTable to filter
@@ -79,6 +80,8 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
    snmpNotifyFilterProfileTable, no filtering is performed for that
    management target.
     */
+    /** xxx paramName from session doesn't have length. will be
+     * trouble with paramNames with embedded NULL */
     profileName = get_FilterProfileName(paramName, strlen(paramName),
                                         &profileNameLen);
     if (NULL == profileName) /* try default */
@@ -270,6 +273,7 @@ notifyTable_register_notifications(int major, int minor,
         (struct agent_add_trap_args *) serverarg;
     netsnmp_session *ss;
     const char      *name, *tag, *notifyProfile;
+    int             nameLen, tagLen, notifyProfileLen;
 
     if (!args || !(args->ss)) {
         return (0);
@@ -277,17 +281,23 @@ notifyTable_register_notifications(int major, int minor,
     args->rc = SNMPERR_GENERR;
     confirm = args->confirm;
     ss = args->ss;
-    name = args->name;
-    tag = args->tag;
-    notifyProfile = args->profile;
+    name = args->nameData;
+    nameLen = args->nameLen;
+    tag = args->tagData;
+    tagLen = args->tagLen;
+    notifyProfile = args->profileData;
+    notifyProfileLen = args->profileLen;
 
     /*
      * XXX: START move target creation to target code 
      */
     if (NULL == name) {
+        int len;
         for (i = 0; i < MAX_ENTRIES; i++) {
             sprintf(buf, "internal%d", i);
-            if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
+            len = strlen(buf);
+            if ((get_addrForName2(buf,len) == NULL) &&
+                (get_paramEntry2(buf,len) == NULL))
                 break;
         }
         if (i == MAX_ENTRIES) {
@@ -298,11 +308,16 @@ notifyTable_register_notifications(int major, int minor,
             return (0);
         }
         name = buf;
-        if (NULL == tag)
+        nameLen = len;
+        if (NULL == tag) {
             tag = buf;
+            tagLen = len;
+        }
     } else {
-        if (NULL == tag)
+        if (NULL == tag) {
             tag = name;
+            tagLen = nameLen;
+        }
     }
 
     /*
@@ -318,7 +333,7 @@ notifyTable_register_notifications(int major, int minor,
     ptr = snmpTargetAddrTable_create();
     if (!ptr)
         goto bail;
-    ptr->name = strdup(name);
+    ptr->nameData = netsnmp_memdup_nt(name, nameLen, &ptr->nameLen);
     memcpy(ptr->tDomain, t->domain, t->domain_length * sizeof(oid));
     ptr->tDomainLen = t->domain_length;
     ptr->tAddressLen = t->remote_length;
@@ -326,15 +341,16 @@ notifyTable_register_notifications(int major, int minor,
 
     ptr->timeout = ss->timeout / 1000;
     ptr->retryCount = ss->retries;
-    SNMP_FREE(ptr->tagList);
-    ptr->tagList = strdup(tag);
-    ptr->params = strdup(ptr->name); /* link to target param table */
-    if (!ptr->params || !ptr->tagList || !ptr->name)
+    SNMP_FREE(ptr->tagListData);
+    ptr->tagListData = netsnmp_memdup_nt(tag, tagLen, &ptr->tagListLen);
+    /** link to target param table */
+    ptr->paramsData = netsnmp_memdup_nt(name, nameLen, &ptr->paramsLen);
+    if (!ptr->paramsData || !ptr->tagListData || !ptr->nameData)
         goto bail;
     ptr->storageType = ST_READONLY;
     ptr->rowStatus = RS_ACTIVE;
     ptr->sess = ss;
-    DEBUGMSGTL(("trapsess", "adding %s to trap table\n", ptr->name));
+    DEBUGMSGTL(("trapsess", "adding %s to trap table\n", ptr->nameData));
     snmpTargetAddrTable_add(ptr);
 
     /*
@@ -343,19 +359,20 @@ notifyTable_register_notifications(int major, int minor,
     pptr = snmpTargetParamTable_create();
     if (NULL == pptr)
         goto bail;
-    pptr->paramName = strdup(ptr->params); /* link from target addr table */
-    if (!pptr->paramName)
+    /** link from target addr table */
+    pptr->paramNameData = netsnmp_memdup_nt(ptr->paramsData, ptr->paramsLen,
+                                            &pptr->paramNameLen);
+    if (!pptr->paramNameData)
         goto bail;
     pptr->mpModel = ss->version;
     if (ss->version == SNMP_VERSION_3) {
         pptr->secModel = ss->securityModel;
         pptr->secLevel = ss->securityLevel;
-        pptr->secName = (char *) malloc(ss->securityNameLen + 1);
-        if (pptr->secName == NULL)
+        pptr->secNameData = netsnmp_memdup_nt(ss->securityName,
+                                              ss->securityNameLen,
+                                              &pptr->secNameLen);
+        if (pptr->secNameData == NULL)
             goto bail;
-        memcpy((void *) pptr->secName, (void *) ss->securityName,
-               ss->securityNameLen);
-        pptr->secName[ss->securityNameLen] = 0;
     }
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
        else {
@@ -365,14 +382,13 @@ notifyTable_register_notifications(int major, int minor,
 #endif
                                              SNMP_SEC_MODEL_SNMPv2c;
         pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
-        pptr->secName = NULL;
+        pptr->secNameData = NULL;
         if (ss->community && (ss->community_len > 0)) {
-            pptr->secName = (char *) malloc(ss->community_len + 1);
-            if (pptr->secName == NULL)
+            pptr->secNameData = netsnmp_memdup_nt(ss->community,
+                                                  ss->community_len,
+                                                  &pptr->secNameLen);
+            if (pptr->secNameData == NULL)
                 goto bail;
-            memcpy((void *) pptr->secName, (void *) ss->community,
-                   ss->community_len);
-            pptr->secName[ss->community_len] = 0;
         }
     }
 #endif
@@ -390,10 +406,11 @@ notifyTable_register_notifications(int major, int minor,
     if (nptr == NULL)
         goto bail;
     ++_active;
-    nptr->snmpNotifyName = strdup(name);
-    nptr->snmpNotifyNameLen = strlen(name);
-    nptr->snmpNotifyTag = strdup(tag); /* selects target addr */
-    nptr->snmpNotifyTagLen = strlen(nptr->snmpNotifyTag);
+    nptr->snmpNotifyName = netsnmp_memdup_nt(name, nameLen,
+                                             &nptr->snmpNotifyNameLen);
+    /** selects target addr */
+    nptr->snmpNotifyTag = netsnmp_memdup_nt(tag, tagLen,
+                                            &nptr->snmpNotifyTagLen);
     if (!nptr->snmpNotifyName || !nptr->snmpNotifyTag)
         goto bail;
     nptr->snmpNotifyType = confirm ?
@@ -412,10 +429,10 @@ notifyTable_register_notifications(int major, int minor,
      */
     if (NULL != notifyProfile) {
         struct snmpNotifyFilterProfileTable_data *profile;
-        profile = snmpNotifyFilterProfileTable_create(ptr->params,
-                                                      strlen(ptr->params),
+        profile = snmpNotifyFilterProfileTable_create(ptr->paramsData,
+                                                      ptr->paramsLen,
                                                       notifyProfile,
-                                                      strlen(notifyProfile));
+                                                      notifyProfileLen);
         if (NULL == profile) {
             snmp_log(LOG_ERR, "couldn't create notify filter profile\n");
             goto bail;
@@ -624,13 +641,14 @@ snmpNotifyTable_remove(struct snmpNotifyTable_data *thedata)
 }
 
 struct snmpNotifyTable_data *
-get_notifyTable(const char *name)
+get_notifyTable2(const char *name, size_t nameLen)
 {
     struct header_complex_index *hptr;
 
     for (hptr = snmpNotifyTableStorage; hptr; hptr = hptr->next) {
         struct snmpNotifyTable_data *nptr = hptr->data;
-        if (nptr->snmpNotifyName && strcmp(nptr->snmpNotifyName, name) == 0)
+        if (nptr->snmpNotifyNameLen == nameLen && nptr->snmpNotifyName &&
+            memcmp(nptr->snmpNotifyName, name, nameLen) == 0)
             return nptr;
     }
     return NULL;
@@ -648,12 +666,13 @@ find_row_notifyTable(struct variable *vp, oid * name, size_t * len, int exact,
 }
 
 void
-notifyTable_unregister_notification(const char *name)
+notifyTable_unregister_notification(const char *name, unsigned char nameLen)
 {
-    struct targetAddrTable_struct *ta = get_addrForName(name);
-    struct targetParamTable_struct *tp = get_paramEntry(name);
-    struct snmpNotifyTable_data *nt = get_notifyTable(name);
-    struct snmpNotifyFilterProfileTable_data *fp = get_FilterProfile(name);
+    struct targetAddrTable_struct *ta = get_addrForName2(name,nameLen);
+    struct targetParamTable_struct *tp = get_paramEntry2(name,nameLen);
+    struct snmpNotifyTable_data *nt = get_notifyTable2(name,nameLen);
+    struct snmpNotifyFilterProfileTable_data *fp =
+        snmpNotifyFilterProfileTable_find(name, nameLen);
 
     DEBUGMSGTL(("trapsess", "removing %s from trap tables\n", name));
 
