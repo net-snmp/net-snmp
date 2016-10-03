@@ -20,6 +20,7 @@ config_require(notification/snmpNotifyFilterProfileTable_data)
  * function prototypes 
  */
      void            init_snmpNotifyFilterProfileTable(void);
+     void            shutdown_snmpNotifyFilterProfileTable(void);
      FindVarMethod   var_snmpNotifyFilterProfileTable;
      void            parse_snmpNotifyFilterProfileTable(const char *,
                                                         char *);

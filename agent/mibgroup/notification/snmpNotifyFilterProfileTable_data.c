@@ -39,6 +39,10 @@ static struct header_complex_index *snmpNotifyFilterProfileTableStorage =
     NULL;
 static int _active = 0;
 
+void parse_snmpNotifyFilterProfileTable(const char *token, char *line);
+int store_snmpNotifyFilterProfileTable(int majorID, int minorID,
+                                       void *serverarg, void *clientarg);
+
 /*
  * init_snmpNotifyFilterProfileTable():
  *   Initialization routine.  This is called when the agent starts up.
@@ -47,7 +51,25 @@ static int _active = 0;
 void
 init_snmpNotifyFilterProfileTable_data(void)
 {
+    int done = 0;
+
+    if (++done != 1)
+        return;
+
     DEBUGMSGTL(("snmpNotifyFilterProfileTable", "initializing...  "));
+
+    /*
+     * register our config handler(s) to deal with registrations
+     */
+    snmpd_register_config_handler("snmpNotifyFilterProfileTable",
+                                  parse_snmpNotifyFilterProfileTable, NULL,
+                                  NULL);
+
+    /*
+     * we need to be called back later to store our data
+     */
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                           store_snmpNotifyFilterProfileTable, NULL);
 }
 
 void
@@ -176,8 +198,8 @@ snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data
     return retVal;
 }
 
-int
-snmpNotifyFilterProfileTable_remove(struct snmpNotifyFilterProfileTable_data *
+struct snmpNotifyFilterProfileTable_data *
+snmpNotifyFilterProfileTable_extract(struct snmpNotifyFilterProfileTable_data *
                                     thedata)
 {
     struct header_complex_index *hptr;
@@ -190,7 +212,20 @@ snmpNotifyFilterProfileTable_remove(struct snmpNotifyFilterProfileTable_data *
         struct snmpNotifyFilterProfileTable_data *nptr = hptr->data;
         header_complex_extract_entry(&snmpNotifyFilterProfileTableStorage,
                                      hptr);
-        snmpNotifyFilterProfileTable_free(nptr);
+        return nptr;
+    }
+    return NULL;
+}
+
+
+int
+snmpNotifyFilterProfileTable_remove(struct snmpNotifyFilterProfileTable_data *
+                                    thedata)
+{
+    struct snmpNotifyFilterProfileTable_data * found =
+        snmpNotifyFilterProfileTable_extract(thedata);
+    if (NULL != found) {
+        snmpNotifyFilterProfileTable_free(found);
         return 1;
     }
     return 0;
@@ -223,12 +258,17 @@ snmpNotifyFilterProfileTable_find(const char *name, size_t len)
     return data;
 }
 
-
 struct snmpNotifyFilterProfileTable_data *
-get_FilterProfile(const char *paramName)
+snmpNotifyFilterProfileTable_oldapi_find(struct variable *vp,
+                                         oid *name, size_t *nameLen, int exact,
+                                         size_t *var_len,
+                                         WriteMethod ** write_method)
 {
-    return snmpNotifyFilterProfileTable_find(paramName, strlen(paramName));
+    return header_complex((struct header_complex_index *)
+                          snmpNotifyFilterProfileTableStorage, vp, name,
+                          nameLen, exact, var_len, write_method);
 }
+
 
 char *
 get_FilterProfileName(const char *paramName, size_t paramName_len,
@@ -247,4 +287,119 @@ get_FilterProfileName(const char *paramName, size_t paramName_len,
 
     *profileName_len = 0;
     return NULL;
+}
+
+/*
+ * parse_snmpNotifyFilterProfileTable():
+ *   parses .conf file entries needed to configure the mib.
+ */
+void
+parse_snmpNotifyFilterProfileTable(const char *token, char *line)
+{
+    size_t          tmpint;
+    struct snmpNotifyFilterProfileTable_data *StorageTmp =
+        SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
+
+    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "parsing config...  "));
+
+    if (StorageTmp == NULL) {
+        config_perror("malloc failure");
+        return;
+    }
+
+    line =
+        read_config_read_data(ASN_OCTET_STR, line,
+                              &StorageTmp->snmpTargetParamsName,
+                              &StorageTmp->snmpTargetParamsNameLen);
+    if (StorageTmp->snmpTargetParamsName == NULL) {
+        config_perror("invalid specification for snmpTargetParamsName");
+        return;
+    }
+
+    line =
+        read_config_read_data(ASN_OCTET_STR, line,
+                              &StorageTmp->snmpNotifyFilterProfileName,
+                              &StorageTmp->snmpNotifyFilterProfileNameLen);
+    if (StorageTmp->snmpNotifyFilterProfileName == NULL) {
+        config_perror("invalid specification for snmpNotifyFilterProfileName");
+        snmpNotifyFilterProfileTable_free(StorageTmp);
+        return;
+    }
+
+    line =
+        read_config_read_data(ASN_INTEGER, line,
+                              &StorageTmp->snmpNotifyFilterProfileStorType,
+                              &tmpint);
+
+    line =
+        read_config_read_data(ASN_INTEGER, line,
+                              &StorageTmp->
+                              snmpNotifyFilterProfileRowStatus, &tmpint);
+
+    if (snmpNotifyFilterProfileTable_add(StorageTmp) != SNMPERR_SUCCESS){
+        snmpNotifyFilterProfileTable_free(StorageTmp);
+        StorageTmp = NULL;
+    }
+
+    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "done.\n"));
+}
+
+
+
+
+/*
+ * store_snmpNotifyFilterProfileTable():
+ *   stores .conf file entries needed to configure the mib.
+ */
+int
+store_snmpNotifyFilterProfileTable(int majorID, int minorID,
+                                   void *serverarg, void *clientarg)
+{
+    char            line[SNMP_MAXBUF];
+    char           *cptr;
+    struct snmpNotifyFilterProfileTable_data *StorageTmp;
+    struct header_complex_index *hcindex;
+
+
+    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "storing data...  "));
+
+    for (hcindex = snmpNotifyFilterProfileTableStorage; hcindex != NULL;
+         hcindex = hcindex->next) {
+        StorageTmp =
+            (struct snmpNotifyFilterProfileTable_data *) hcindex->data;
+
+        if ((StorageTmp->snmpNotifyFilterProfileStorType == ST_NONVOLATILE) ||
+            (StorageTmp->snmpNotifyFilterProfileStorType == ST_PERMANENT)) {
+
+            memset(line, 0, sizeof(line));
+            strcat(line, "snmpNotifyFilterProfileTable ");
+            cptr = line + strlen(line);
+
+            cptr =
+                read_config_store_data(ASN_OCTET_STR, cptr,
+                                       &StorageTmp->snmpTargetParamsName,
+                                       &StorageTmp->
+                                       snmpTargetParamsNameLen);
+            cptr =
+                read_config_store_data(ASN_OCTET_STR, cptr,
+                                       &StorageTmp->
+                                       snmpNotifyFilterProfileName,
+                                       &StorageTmp->
+                                       snmpNotifyFilterProfileNameLen);
+            cptr =
+                read_config_store_data(ASN_INTEGER, cptr,
+                                       &StorageTmp->
+                                       snmpNotifyFilterProfileStorType,
+                                       NULL);
+            cptr =
+                read_config_store_data(ASN_INTEGER, cptr,
+                                       &StorageTmp->
+                                       snmpNotifyFilterProfileRowStatus,
+                                       NULL);
+
+            snmpd_store_config(line);
+        }
+    }
+    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "done.\n"));
+    return 0;
 }

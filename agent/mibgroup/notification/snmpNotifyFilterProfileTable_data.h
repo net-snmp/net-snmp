@@ -42,10 +42,16 @@ int
 snmpNotifyFilterProfileTable_remove(struct snmpNotifyFilterProfileTable_data *);
 
 struct snmpNotifyFilterProfileTable_data *
-snmpNotifyFilterProfileTable_find(const char *name, size_t len);
+snmpNotifyFilterProfileTable_extract(struct snmpNotifyFilterProfileTable_data *);
 
 struct snmpNotifyFilterProfileTable_data *
-get_FilterProfile(const char *paramName);
+snmpNotifyFilterProfileTable_oldapi_find(struct variable *vp,
+                                         oid *name, size_t *length, int exact,
+                                         size_t *var_len,
+                                         WriteMethod ** write_method);
+
+struct snmpNotifyFilterProfileTable_data *
+snmpNotifyFilterProfileTable_find(const char *name, size_t len);
 
 char           *get_FilterProfileName(const char *paramName,
                                       size_t paramName_len,
