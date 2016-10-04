@@ -1,6 +1,11 @@
 /*
  * This file was created to separate notification data storage from
  * the MIB implementation.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #ifndef _MIBGROUP_SNMPTARGETADDRENTRY_DATA_H
