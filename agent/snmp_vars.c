@@ -41,6 +41,11 @@ PERFORMANCE OF THIS SOFTWARE.
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 /*
@@ -48,12 +53,6 @@ PERFORMANCE OF THIS SOFTWARE.
  * (schoenfr@ibr.cs.tu-bs.de) 1994/1995.
  * Linux additions taken from CMU to UCD stack by Jennifer Bray of Origin
  * (jbray@origin-at.co.uk) 1997
- */
-/*
- * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
- * Use is subject to license terms specified in the COPYING file
- * distributed with the Net-SNMP package.
  */
 
 /*
