@@ -8,6 +8,10 @@
  *    If new ds_agent entries are added to this header file,
  *    then remember to run 'perl/agent/default_store/gen' to
  *    update the corresponding perl interface.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
  */
 
 /*

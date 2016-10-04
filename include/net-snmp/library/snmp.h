@@ -31,6 +31,12 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ */
+
 
 #define SNMP_PORT	    161 /* standard UDP port for SNMP agents
                                  * to receive requests messages */
