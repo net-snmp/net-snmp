@@ -381,6 +381,8 @@ netsnmp_callback_transport(int to)
     if (!t)
         return NULL;
 
+    t->sock = -1;
+
     /*
      * our stuff 
      */
@@ -399,11 +401,9 @@ netsnmp_callback_transport(int to)
 #else
     rc = pipe(mydata->pipefds);
 #endif
-    t->sock = mydata->pipefds[0];
 
-    if (rc) {
-        SNMP_FREE(mydata);
-        SNMP_FREE(t);
+    if (rc || ((t->sock = mydata->pipefds[0]) == -1)) {
+        netsnmp_transport_free(t);
         return NULL;
     }
 

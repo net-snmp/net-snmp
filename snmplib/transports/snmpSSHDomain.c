@@ -720,6 +720,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
         t->sock = STDIN_FILENO;
 #endif /* ! SNMPSSHDOMAIN_USE_EXTERNAL_PIPE */
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
+        netsnmp_transport_free(t);
         return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
@@ -733,6 +734,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
                                          NETSNMP_DS_LIB_SSH_USERNAME);
         if (!username || 0 == *username) {
             snmp_log(LOG_ERR, "You must specify a ssh username to use.  See the snmp.conf manual page\n");
+            netsnmp_transport_free(t);
             return NULL;
         }
 
@@ -742,6 +744,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
         if (!keyfilepub || 0 == *keyfilepub) {
             /* XXX: default to ~/.ssh/id_rsa.pub */
             snmp_log(LOG_ERR, "You must specify a ssh public key file to use.  See the snmp.conf manual page\n");
+            netsnmp_transport_free(t);
             return NULL;
         }
 
@@ -751,6 +754,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
         if (!keyfilepriv || 0 == *keyfilepriv) {
             /* XXX: default to keyfilepub without the .pub suffix */
             snmp_log(LOG_ERR, "You must specify a ssh private key file to use.  See the snmp.conf manual page\n");
+            netsnmp_transport_free(t);
             return NULL;
         }
 
