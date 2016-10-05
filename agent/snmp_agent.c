@@ -3163,7 +3163,7 @@ check_getnext_results(netsnmp_agent_session *asp)
 int
 handle_getnext_loop(netsnmp_agent_session *asp)
 {
-    int             status, rough_size, count, total;
+    int             status, rough_size, count, total, val_len;
     netsnmp_variable_list *var_ptr, *last_var;
 
     total = count_varbinds(asp->pdu->variables);
@@ -3219,7 +3219,17 @@ handle_getnext_loop(netsnmp_agent_session *asp)
              * we'll later have to trim. This is left as an exercise for the
              * reader.]
              */
-            rough_size += var_ptr->name_length + var_ptr->val_len;
+            rough_size += var_ptr->name_length;
+#if (SIZEOF_LONG == 8)
+            /** sizeof(oid) is 8 on 64bit systems :-( Hardcode for 4 */
+            if (ASN_OBJECT_ID == var_ptr->type)
+                val_len = (var_ptr->val_len / 2);
+            else
+#endif
+                val_len = var_ptr->val_len;
+
+            DEBUGMSGTL(("results:intermediate", "\t+ %ld %d = %d\n",
+                        var_ptr->name_length,  val_len, rough_size));
             if (asp->session->sndMsgMaxSize &&
                 rough_size > asp->session->sndMsgMaxSize) {
                 DEBUGMSGTL(("results",
