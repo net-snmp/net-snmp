@@ -344,7 +344,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
      */
     if (local) {
         t->sock = netsnmp_sd_find_unix_socket(SOCK_STREAM, 1, addr->sun_path);
-        if (t->sock)
+        if (t->sock >= 0)
             socket_initialized = 1;
     }
 #endif

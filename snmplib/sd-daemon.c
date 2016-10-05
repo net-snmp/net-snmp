@@ -358,7 +358,7 @@ netsnmp_sd_find_inet_socket(int family, int type, int listening, int port)
     count = netsnmp_sd_listen_fds(0);
     if (count <= 0) {
         DEBUGMSGTL(("systemd:find_inet_socket", "No LISTEN_FDS found.\n"));
-        return 0;
+        return -1;
     }
     DEBUGMSGTL(("systemd:find_inet_socket", "LISTEN_FDS reports %d sockets.\n",
             count));
@@ -375,7 +375,7 @@ netsnmp_sd_find_inet_socket(int family, int type, int listening, int port)
         }
     }
     DEBUGMSGTL(("systemd:find_inet_socket", "Socket not found in LISTEN_FDS\n"));
-    return 0;
+    return -1;
 }
 
 int
@@ -386,7 +386,7 @@ netsnmp_sd_find_unix_socket(int type, int listening, const char *path)
     count = netsnmp_sd_listen_fds(0);
     if (count <= 0) {
         DEBUGMSGTL(("systemd:find_unix_socket", "No LISTEN_FDS found.\n"));
-        return 0;
+        return -1;
     }
     DEBUGMSGTL(("systemd:find_unix_socket", "LISTEN_FDS reports %d sockets.\n",
             count));
@@ -403,7 +403,7 @@ netsnmp_sd_find_unix_socket(int type, int listening, const char *path)
         }
     }
     DEBUGMSGTL(("systemd:find_unix_socket", "Socket not found in LISTEN_FDS\n"));
-    return 0;
+    return -1;
 }
 
 #endif /* ! NETSNMP_NO_SYSTEMD */

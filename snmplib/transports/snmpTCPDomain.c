@@ -190,7 +190,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
     if (local) {
         t->sock = netsnmp_sd_find_inet_socket(PF_INET, SOCK_STREAM, 1,
                 ntohs(addr->sin_port));
-        if (t->sock)
+        if (t->sock >= 0)
             socket_initialized = 1;
     }
 #endif

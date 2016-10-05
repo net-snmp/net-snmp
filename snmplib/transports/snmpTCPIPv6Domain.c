@@ -186,7 +186,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     if (local) {
         t->sock = netsnmp_sd_find_inet_socket(PF_INET6, SOCK_STREAM, 1,
                 ntohs(addr->sin6_port));
-        if (t->sock)
+        if (t->sock >= 0)
             socket_initialized = 1;
     }
 #endif
