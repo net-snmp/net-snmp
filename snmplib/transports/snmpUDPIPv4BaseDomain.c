@@ -84,6 +84,8 @@ netsnmp_udpipv4base_transport_init(struct sockaddr_in *addr, int local)
     if (NULL == t)
         return NULL;
 
+    t->sock = -1;
+
     addr_ptr = (u_char *) malloc(6);
     if (NULL == addr_ptr) {
         free(t);
@@ -139,19 +141,7 @@ int
 netsnmp_udpipv4base_transport_socket(int flags)
 {
     int local = flags & NETSNMP_TSPEC_LOCAL;
-    int sock = -1;
-
-#ifndef NETSNMP_NO_SYSTEMD
-    /*
-     * Maybe the socket was already provided by systemd...
-     */
-    if (local) {
-        sock = netsnmp_sd_find_inet_socket(PF_INET, SOCK_DGRAM, -1,
-                                           ntohs(addr->sin_port));
-    }
-#endif
-    if (-1 == sock)
-        sock= socket(PF_INET, SOCK_DGRAM, 0);
+    int sock = socket(PF_INET, SOCK_DGRAM, 0);
 
     DEBUGMSGTL(("UDPBase", "opened socket %d as local=%d\n", sock, local));
     if (sock < 0)
@@ -272,11 +262,20 @@ netsnmp_udpipv4base_transport_with_source(struct sockaddr_in *addr, int local,
     if (local) {
         bind_addr = addr;
         flags |= NETSNMP_TSPEC_LOCAL;
+
+#ifndef NETSNMP_NO_SYSTEMD
+        /*
+         * Maybe the socket was already provided by systemd...
+         */
+        t->sock = netsnmp_sd_find_inet_socket(PF_INET, SOCK_DGRAM, -1,
+                                              ntohs(addr->sin_port));
+#endif
     }
     else
         bind_addr = src_addr;
 
-    t->sock = netsnmp_udpipv4base_transport_socket(flags);
+    if (-1 == t->sock)
+        t->sock = netsnmp_udpipv4base_transport_socket(flags);
     if (t->sock < 0) {
         netsnmp_transport_free(t);
         return NULL;

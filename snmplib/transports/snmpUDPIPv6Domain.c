@@ -216,6 +216,9 @@ netsnmp_udp6_transport_init(struct sockaddr_in6 *addr, int flags)
     if (t == NULL) {
         return NULL;
     }
+
+    t->sock = -1;
+
     addr_ptr = (unsigned char*)malloc(18);
     if (addr_ptr == NULL) {
         free(t);
@@ -328,19 +331,7 @@ int
 netsnmp_udp6_transport_socket(int flags)
 {
     int local = flags & NETSNMP_TSPEC_LOCAL;
-    int sock = -1;
-
-#ifndef NETSNMP_NO_SYSTEMD
-    /*
-     * Maybe the socket was already provided by systemd...
-     */
-    if (local) {
-        sock = netsnmp_sd_find_inet_socket(PF_INET6, SOCK_DGRAM, -1,
-                                           ntohs(addr->sin6_port));
-    }
-#endif
-    if (-1 == sock)
-        sock = socket(PF_INET6, SOCK_DGRAM, 0);
+    int sock = socket(PF_INET6, SOCK_DGRAM, 0);
 
     DEBUGMSGTL(("UDPBase", "opened socket %d as local=%d\n", sock, local));
     if (sock < 0)
@@ -428,11 +419,20 @@ netsnmp_udp6_transport_with_source(struct sockaddr_in6 *addr, int local,
     if (local) {
         bind_addr = addr;
         flags |= NETSNMP_TSPEC_LOCAL;
+
+#ifndef NETSNMP_NO_SYSTEMD
+        /*
+         * Maybe the socket was already provided by systemd...
+         */
+        t->sock = netsnmp_sd_find_inet_socket(PF_INET6, SOCK_DGRAM, -1,
+                                              ntohs(addr->sin6_port));
+#endif
     }
     else
         bind_addr = src_addr;
 
-    t->sock = netsnmp_udp6_transport_socket(flags);
+    if (-1 == t->sock)
+        t->sock = netsnmp_udp6_transport_socket(flags);
     if (t->sock < 0) {
         netsnmp_transport_free(t);
         return NULL;
