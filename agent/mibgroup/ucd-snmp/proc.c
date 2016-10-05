@@ -134,8 +134,8 @@ proc_free_config(void)
         ptmp2 = ptmp;
         ptmp = ptmp->next;
 #if HAVE_PCRE_H
-        if (ptmp->regexp) {
-            free(ptmp->regexp);
+        if (ptmp2->regexp) {
+            free(ptmp2->regexp);
         }
 #endif
         free(ptmp2);
