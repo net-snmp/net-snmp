@@ -108,6 +108,8 @@ turns on debugging for all applications run if set to 1.
 defines the debugging tokens that should be turned on when
 \fIdoDebugging\fR is set.
 This is equivalent to the \fB\-D\fR option.
+.IP "debugLogLevel (emerg|alert|crit|err|warning|notice|info|debug)"
+Set the priority level for logging of debug output. Defaults to isbug.
 .\".IP "16bitIDs (1|yes|true|0|no|false)"
 .IP "16bitIDs yes"
 restricts requestIDs, etc to 16-bit values.
