@@ -925,6 +925,8 @@ with_logfile
 enable_logfile
 enable_usmUser_uses_default_auth_priv
 with_usmUser_uses_default_auth_priv
+enable_daemons_syslog_as_default
+with_daemons_syslog_as_default
 with_persistent_directory
 enable_persistent_directory
 with_persistent_mask
@@ -1717,6 +1719,7 @@ Optional Features:
   --disable-ipv6                  Disable IPv6 support.
   --enable-usmUser-uses-default-auth-priv Use default auth/priv protocols; createUser
                                           only needs auth/priv passphrases.
+  --enable-daemons-syslog-as-default Use syslog when no other log destination defined.
   --disable-snmpv1                Do not include code that implements SNMPv1.
   --disable-snmpv2c               Do not include code that implements SNMPv2c.
   --enable-debugging              Outputs extra debugging information at all
@@ -4101,6 +4104,22 @@ fi
 # Check whether --with-usmUser-uses-default-auth-priv was given.
 if test "${with_usmUser_uses_default_auth_priv+set}" = set; then :
   withval=$with_usmUser_uses_default_auth_priv; as_fn_error $? "Invalid option. Use --enable-usmUser-uses-default-auth-priv/--disable-usmUser-uses-default-auth-priv instead" "$LINENO" 5
+fi
+
+
+# Check whether --enable-daemons-syslog-as-default was given.
+if test "${enable_daemons_syslog_as_default+set}" = set; then :
+  enableval=$enable_daemons_syslog_as_default; if test "x$enable_daemons_syslog_as_default" = "xyes"; then
+
+$as_echo "#define NETSNMP_DAEMONS_DEFAULT_LOG_SYSLOG 1" >>confdefs.h
+
+    fi
+fi
+
+
+# Check whether --with-daemons-syslog-as-default was given.
+if test "${with_daemons_syslog_as_default+set}" = set; then :
+  withval=$with_daemons_syslog_as_default; as_fn_error $? "Invalid option. Use --enable-daemons-syslog-as-default/--disable-daemons-syslog-as-default instead" "$LINENO" 5
 fi
 
 
@@ -16282,7 +16301,7 @@ if test "x$NETSNMP_QUICK_CHECK" = "x" ; then
 #   Stand-alone headers:
 ##
 #  Core:
-for ac_header in getopt.h   pthread.h  regex.h                        string.h   syslog.h   unistd.h                       stdint.h   inttypes.h                                sys/param.h                          sys/select.h                         sys/socket.h                         sys/time.h                           sys/timeb.h                          sys/un.h
+for ac_header in getopt.h   pthread.h  regex.h                        string.h   syslog.h   unistd.h                       stdint.h   inttypes.h                                sys/param.h                          sys/select.h                         sys/socket.h                         sys/syslog.h                         sys/time.h                           sys/timeb.h                          sys/un.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -29804,6 +29823,45 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+#       prioritynames
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking syslog prioritynames" >&5
+$as_echo_n "checking syslog prioritynames... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <stdio.h>
+#if HAVE_SYSLOG_H
+#define SYSLOG_NAMES
+#include <syslog.h>
+#endif
+
+int
+main ()
+{
+
+  char *test = prioritynames[0].c_name;
+  printf("%s\n", test); /* so it's not unused */
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_PRIORITYNAMES 1" >>confdefs.h
+
+
+else
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 
 # -*- autoconf -*-
 #########################################
