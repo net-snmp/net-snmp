@@ -129,6 +129,10 @@ debug_config_turn_on_debugging(const char *configtoken, char *line)
 NETSNMP_IMPORT void
 netsnmp_set_debug_log_level(int val)
 {
+    if (val < LOG_EMERG)
+        val = LOG_EMERG;
+    else if (val > LOG_DEBUG)
+        val = LOG_DEBUG;
     debug_log_level = val;
 }
 
@@ -143,27 +147,35 @@ debug_config_debug_log_level(const char *configtoken, char *line)
 {
 #if HAVE_PRIORITYNAMES
     extern CODE prioritynames[];
-    int i = 0;
+#else
+    struct strval_s {
+        const char *c_name;
+        int         c_val;
+    } prioritynames[] = {
+        { "alert", LOG_ALERT },
+        { "crit", LOG_CRIT },
+        { "debug", LOG_DEBUG },
+        { "emerg", LOG_EMERG },
+        { "err", LOG_ERR },
+        { "info", LOG_INFO },
+        { "notice", LOG_NOTICE },
+        { "warning", LOG_WARNING },
+        { NULL, 0 }
+    };
+#endif
+    int i = 0, len_l, len_p;
 
+    len_l = strlen(line);
     for(;prioritynames[i].c_name;++i) {
-        if (strncmp(line,prioritynames[i].c_name,
-                    strlen(prioritynames[i].c_name) != 0))
+        len_p = strlen(prioritynames[i].c_name);
+        if ((len_p != len_l) ||
+            (strcasecmp(line,prioritynames[i].c_name) != 0))
             continue;
         netsnmp_set_debug_log_level(prioritynames[i].c_val);
         return;
     }
     config_perror("unknown debug log level, using debug");
     netsnmp_set_debug_log_level(LOG_DEBUG);
-#else
-    long level;
-    errno = 0;
-    level = strtol(line, NULL, 10);
-    if (errno != 0) {
-        level = LOG_DEBUG;
-        config_perror("unknown debug log level, using debug");
-    }
-    netsnmp_set_debug_log_level(level);
-#endif /* HAVE_PRIORITYNAMES */
 }
 #endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 
@@ -670,11 +682,7 @@ snmp_debug_init(void)
 #ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
     register_prenetsnmp_mib_handler("snmp", "debugLogLevel",
                                     debug_config_debug_log_level, NULL,
-#if HAVE_PRIORITYNAMES
                                     "(emerg|alert|crit|err|warning|notice|info|debug)");
-#else
-                                    "(0|1|2|3|4|5|6|7)");
-#endif
 #endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 }
 
