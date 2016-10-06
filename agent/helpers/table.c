@@ -340,6 +340,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
             else if (reqinfo->mode == MODE_GET)
                 table_helper_cleanup(reqinfo, request,
                                      SNMP_NOSUCHOBJECT);
+            else
+                request->processed = 1; /* skip if next handler called */
             continue;
         }
 
@@ -409,6 +411,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 else if (reqinfo->mode == MODE_GET)
                     table_helper_cleanup(reqinfo, request,
                                          SNMP_NOSUCHOBJECT);
+                else
+                    request->processed = 1; /* skip if next handler called */
                 continue;
             }
             /*
