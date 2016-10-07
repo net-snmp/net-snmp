@@ -442,6 +442,9 @@ netsnmp_udp6_transport_with_source(struct sockaddr_in6 *addr, int local,
      * If we've been given an address to bind to, then bind to it.
      * Otherwise the OS will use "something sensible".
      */
+    if (NULL == bind_addr)
+        return t;
+
     rc = netsnmp_udp6_transport_bind(t, bind_addr, flags);
     if (rc) {
         netsnmp_transport_free(t);
