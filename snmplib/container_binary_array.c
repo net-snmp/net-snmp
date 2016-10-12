@@ -156,9 +156,9 @@ binary_search(const void *val, netsnmp_container *c, int exact, size_t *next)
     binary_array_table *t = (binary_array_table*)c->container_data;
     size_t             len = t->count;
     size_t             half;
-    size_t             middle;
     size_t             first = 0;
-    int                result;
+    size_t             middle = 0; /* init not needed; keeps compiler happy */
+    int                result = 0; /* init not needed; keeps compiler happy */
 
     if (!len) {
         if (NULL != next)
