@@ -5497,7 +5497,7 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
 
 #ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
       if (filter) {
-          char *sourceaddr, *c = strchr(addrtxt, '[');
+          char *sourceaddr = NULL, *c = strchr(addrtxt, '[');
           const char *dropstr = NULL;
           if (c) {
               sourceaddr = ++c;
@@ -5512,7 +5512,8 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
               dropstr = "didn't match whitelist";
           if (dropstr) {
               DEBUGMSGTL(("sess_process_packet:filter",
-                          "packet from %s %s\n", sourceaddr, dropstr));
+                          "packet from %s %s\n",
+                          sourceaddr ? sourceaddr : "UNKNOWN", dropstr));
               SNMP_FREE(opaque);
               SNMP_FREE(addrtxt);
               return NULL;
@@ -5786,7 +5787,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
                      void *opaque, int olength,
                      u_char * packetptr, int length)
 {
-    struct session_list *slp;
+    struct session_list *slp = (struct session_list *) sessp;
     netsnmp_pdu         *pdu;
     int                  rc;
 

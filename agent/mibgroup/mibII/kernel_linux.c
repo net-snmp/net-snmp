@@ -71,7 +71,7 @@ decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
 
     lineptr = line_cpy;
     dataptr = data_cpy;
-    saveptr1 = NULL;
+    saveptr1 = saveptr = NULL;
     while (1) {
         if(NULL == (token = strtok_r(lineptr, " ", &saveptr)))
             break;

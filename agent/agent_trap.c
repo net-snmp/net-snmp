@@ -1560,7 +1560,7 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
                                            const char *notif_tag,
                                            const char* notif_profile)
 {
-    netsnmp_session    session, *ss;
+    netsnmp_session    session, *ss = NULL;
     struct usmUser    *usmUser;
     netsnmp_tdomain_spec tspec;
     netsnmp_transport *transport;

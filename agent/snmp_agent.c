@@ -3400,8 +3400,8 @@ check_getnext_results(netsnmp_agent_session *asp)
 int
 handle_getnext_loop(netsnmp_agent_session *asp)
 {
-    int             status, rough_size, count, total, val_len;
-    netsnmp_variable_list *var_ptr, *last_var;
+    int             status, rough_size, count = 0, total, val_len;
+    netsnmp_variable_list *var_ptr, *last_var = NULL;
 
     total = count_varbinds(asp->pdu->variables);
 
@@ -3474,7 +3474,8 @@ handle_getnext_loop(netsnmp_agent_session *asp)
                 asp->pdu->flags |= UCD_MSG_FLAG_BULK_TOOBIG |
                     UCD_MSG_FLAG_FORWARD_ENCODE;
                 var_ptr->type = ASN_PRIV_STOP;
-                last_var->next_variable = NULL;
+                if (NULL != last_var)
+                    last_var->next_variable = NULL;
                 break;
             }
             last_var = var_ptr;
