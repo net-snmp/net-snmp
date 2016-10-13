@@ -121,6 +121,9 @@ updateLogmatch(int iindex)
     struct stat     sb;
     char            lastFilename[256];
 
+    if (iindex >= MAXLOGMATCH)
+        return;
+
     /*
      * ------------------------------------ 
      * we can never be sure if this is the  
@@ -512,8 +515,8 @@ var_logmatch_table(struct variable *vp,
 {
     static long     long_ret;
     static char     message[1024];
-    int             iindex;
-    struct logmatchstat *logmatch;
+    int             iindex = 0;
+    struct logmatchstat *logmatch = NULL;
 
     if (vp->magic == LOGMATCH_INFO) {
         if (header_generic(vp, name, length, exact, var_len, write_method)
@@ -526,6 +529,8 @@ var_logmatch_table(struct variable *vp,
             return (NULL);
 
         iindex = name[*length - 1] - 1;
+        if (iindex >= MAXLOGMATCH)
+            return NULL;
         logmatch = &logmatchTable[iindex];
 
         if (logmatch->myRegexError == 0)
