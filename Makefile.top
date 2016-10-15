@@ -81,9 +81,10 @@ LINKCC	        = @LINKCC@
 # 5.3 was at 10, 5.4 is at 15, ...  This leaves some room for needed
 # changes for past releases if absolutely necessary.
 #
-LIBCURRENT  = 30
+# Most recent change: 35 for release 5.8
+LIBCURRENT  = 35
 LIBAGE      = 0
-LIBREVISION = 1
+LIBREVISION = o
 
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(LINKCC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
 LIB_EXTENSION   = la
