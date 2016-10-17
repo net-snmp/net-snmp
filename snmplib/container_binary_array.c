@@ -451,6 +451,8 @@ netsnmp_binary_array_clear(netsnmp_container *c,
 static int
 _ba_resize_check(binary_array_table *t)
 {
+    size_t new_max;
+    void ** new_data;
     if (t->max_size > t->count)
         return 0; /* resize not needed */
 
@@ -458,8 +460,8 @@ _ba_resize_check(binary_array_table *t)
      * Table is full, so extend it to double the size, or use 10 elements
      * if it is empty.
      */
-    size_t new_max = t->max_size > 0 ? 2 * t->max_size : 10;
-    void ** const new_data = (void**) realloc(t->data, new_max * sizeof(void*));
+    new_max = t->max_size > 0 ? 2 * t->max_size : 10;
+    new_data = (void**) realloc(t->data, new_max * sizeof(void*));
     if (new_data == NULL) {
         snmp_log(LOG_ERR, "malloc failed in _ba_resize_check\n");
         return -1; /* error */

@@ -80,9 +80,9 @@ init_snmpNotifyFilterProfileTable_data(void)
 void
 shutdown_snmpNotifyFilterProfileTable_data(void)
 {
-    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "shutdown...  "));
-
     struct header_complex_index *hptr, *nhptr;
+
+    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "shutdown...  "));
 
     for (hptr = snmpNotifyFilterProfileTableStorage; hptr; hptr = nhptr) {
         struct snmpNotifyFilterProfileTable_data *nptr = hptr->data;
