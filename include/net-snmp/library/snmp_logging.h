@@ -123,7 +123,7 @@ void netsnmp_logging_restart(void);
 
 NETSNMP_IMPORT
 netsnmp_log_handler *
-netsnmp_create_stdio_loghandler(int stdout, int priority, int priority_max,
+netsnmp_create_stdio_loghandler(int is_stdout, int priority, int priority_max,
                                 const char *tok);
 NETSNMP_IMPORT
 netsnmp_log_handler *
