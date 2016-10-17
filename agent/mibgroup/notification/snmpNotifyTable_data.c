@@ -65,7 +65,7 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
     char                  *profileName;
     size_t                 profileNameLen;
     struct vacm_viewEntry *vp, *head;
-    int                    vb_oid_excluded = 0, free_trapvar = 0;;
+    int                    vb_oid_excluded = 0, free_trapvar = 0;
     extern const oid       snmptrap_oid[];
     extern const size_t    snmptrap_oid_len;
 
