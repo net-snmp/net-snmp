@@ -381,8 +381,6 @@ netsnmp_callback_transport(int to)
     if (!t)
         return NULL;
 
-    t->sock = -1;
-
     /*
      * our stuff 
      */
@@ -402,11 +400,13 @@ netsnmp_callback_transport(int to)
     rc = pipe(mydata->pipefds);
 #endif
 
-    if (rc || ((t->sock = mydata->pipefds[0]) == -1)) {
+    if (rc) {
         netsnmp_transport_free(t);
         return NULL;
     }
 
+    netsnmp_assert(mydata->pipefds[0] != -1);
+    t->sock      = mydata->pipefds[0];
     t->f_recv    = netsnmp_callback_recv;
     t->f_send    = netsnmp_callback_send;
     t->f_close   = netsnmp_callback_close;
