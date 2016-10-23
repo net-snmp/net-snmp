@@ -1362,6 +1362,9 @@
 /* configure options specified */
 #undef NETSNMP_CONFIGURE_OPTIONS
 
+/* if defined daemons will use syslog when no log destination is defined */
+#undef NETSNMP_DAEMONS_DEFAULT_LOG_SYSLOG
+
 /* default location to look for mibs to load using the above tokens and/or
    those in the MIBS envrionment variable */
 #undef NETSNMP_DEFAULT_MIBDIRS
@@ -1818,9 +1821,6 @@
 /* NETSNMP_LOGFILE:  If defined it closes stdout/err/in and opens this in 
    out/err's place.  (stdin is closed so that sh scripts won't wait for it) */
 #undef NETSNMP_LOGFILE
-
-/* if defined daemons will use syslog when no log destination is defined */
-#undef NETSNMP_DAEMONS_DEFAULT_LOG_SYSLOG
 
 /* default system contact */
 #undef NETSNMP_SYS_CONTACT
