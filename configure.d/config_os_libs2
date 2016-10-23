@@ -368,7 +368,7 @@ if test "x$TLSPROG" = "xyes"; then
     : ,
     [[#include <openssl/evp.h>]])
    AC_CHECK_DECL([EVP_sha384],
-    AC_DEFINE([HAVE_EVP_SHA384], [], [Define if you have EVP_sha384/256 in openssl]),
+    AC_DEFINE([HAVE_EVP_SHA384], [], [Define if you have EVP_sha384/512 in openssl]),
     : ,
     [[#include <openssl/evp.h>]])
 fi
