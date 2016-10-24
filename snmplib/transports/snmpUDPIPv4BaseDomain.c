@@ -198,6 +198,7 @@ netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
     DEBUGIF("netsnmp_udpbase") {
         netsnmp_indexed_addr_pair addr_pair;
         char *str;
+        memset(&addr_pair, 0x0, sizeof(addr_pair));
         memcpy(&(addr_pair.local_addr), addr, sizeof(*addr));
         str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,
                                   sizeof(netsnmp_indexed_addr_pair));
