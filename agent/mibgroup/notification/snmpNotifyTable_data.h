@@ -56,6 +56,8 @@ struct snmpNotifyTable_data *
                 snmpNotifyTable_extract(struct snmpNotifyTable_data *thedata);
 void            snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata);
 
+void            snmpNotifyTable_unregister_notification(const char *, u_char);
+
 struct snmpNotifyTable_data *get_notifyTable2(const char *name, size_t len);
 struct snmpNotifyTable_data *find_row_notifyTable(struct variable *vp,
                                                   oid * name, size_t * length,

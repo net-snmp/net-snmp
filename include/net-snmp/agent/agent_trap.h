@@ -80,6 +80,7 @@ netsnmp_session *netsnmp_create_v3user_notification_session(const char *dst,
 int             netsnmp_add_notification_session(netsnmp_session *, int, int,
                                                  int, const char*, const char*,
                                                  const char*);
+void            netsnmp_unregister_notification(const char *, u_char);
 
 int             netsnmp_build_trap_oid(netsnmp_pdu *pdu, oid *, size_t *);
 

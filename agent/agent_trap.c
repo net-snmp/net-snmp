@@ -70,6 +70,10 @@
 #include "agentx/protocol.h"
 #endif
 
+#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_DATA_MODULE
+#include "mibgroup/notification/snmpNotifyTable_data.h"
+#endif
+
 netsnmp_feature_child_of(agent_trap_all, libnetsnmpagent)
 
 netsnmp_feature_child_of(trap_vars_with_context, agent_trap_all)
@@ -283,6 +287,21 @@ netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
     _trap_version_incr(version);
 
     return 1;
+}
+
+/*
+ * xxx needs update to support embedded NUL.
+ * xxx should probably also be using and unregister callback, similar to
+ *     how registaration is done.
+ */
+void
+netsnmp_unregister_notification(const char *name, u_char len)
+{
+#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_DATA_MODULE
+    snmpNotifyTable_unregister_notification(name, len);
+#else
+    NETSNMP_LOGONCE("netsnmp_unregister_notification not supported\n");
+#endif
 }
 
 int
