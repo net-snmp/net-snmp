@@ -875,6 +875,7 @@ netsnmp_register_filelog_handler(const char* logfilename, int priority,
                                     priority );
     if (NULL == logh)
         return NULL;
+    logh->pri_max = priority_max;
     logh->token = strdup(logfilename);
     if (-1 == dont_zero_log)
         dont_zero_log = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
