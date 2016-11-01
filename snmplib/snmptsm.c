@@ -138,14 +138,11 @@ tsm_clone_pdu(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
         return SNMPERR_SUCCESS;
 
     newref = SNMP_MALLOC_TYPEDEF(netsnmp_tsmSecurityReference);
+    netsnmp_assert_or_return(NULL != newref, SNMPERR_GENERR);
     DEBUGMSGTL(("tsm", "cloned as pdu=%p, ref=%p (oldref=%p)\n",
-            pdu2, newref, pdu2->securityStateRef));
-    if (!newref)
-        return SNMPERR_GENERR;
+                pdu2, newref, pdu2->securityStateRef));
     
     memcpy(newref, oldref, sizeof(*oldref));
-
-    pdu2->securityStateRef = newref;
 
     /* the tm state reference is just a link to the one in the pdu,
        which was already copied by snmp_clone_pdu before handing it to
@@ -153,6 +150,14 @@ tsm_clone_pdu(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
 
     newref->tmStateRef = netsnmp_memdup(oldref->tmStateRef,
                                         sizeof(*oldref->tmStateRef));
+    if (!newref->tmStateRef) {
+        snmp_log(LOG_ERR, "tsm: malloc failure\n");
+        free(newref);
+        return SNMPERR_GENERR;
+    }
+
+    pdu2->securityStateRef = newref;
+
     return SNMPERR_SUCCESS;
 }
 
@@ -368,12 +373,15 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
     /* put the transport state reference into the PDU for the transport */
     parms->pdu->transport_data = netsnmp_memdup(tmStateRef, sizeof(*tmStateRef));
-    if (!parms->pdu->transport_data)
-        snmp_log(LOG_ERR, "tsm: malloc failure\n");
-    parms->pdu->transport_data_length = sizeof(*tmStateRef);
-
     if (tmStateRefLocal)
         SNMP_FREE(tmStateRef);
+
+    if (!parms->pdu->transport_data) {
+        snmp_log(LOG_ERR, "tsm: malloc failure\n");
+        return SNMPERR_GENERR;
+    }
+    parms->pdu->transport_data_length = sizeof(*tmStateRef);
+
     DEBUGMSGTL(("tsm", "TSM processing completed.\n"));
     return SNMPERR_SUCCESS;
 }
