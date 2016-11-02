@@ -4589,8 +4589,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
 
         if (ebuf == NULL) {
             *errorMsg = "malloc failure processing -e flag";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
 
         /*
@@ -4599,9 +4598,8 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         cp = copy_nword(cp, buf, sizeof(buf));
         if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, buf)) {
             *errorMsg = "invalid EngineID argument to -e";
-            usm_free_user(newuser);
             SNMP_FREE(ebuf);
-            return NULL;
+            goto fail;
         }
 
         newuser->engineID = ebuf;
@@ -4610,8 +4608,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     } else {
         newuser->engineID = snmpv3_generate_engineID(&ret);
         if (ret == 0) {
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
         newuser->engineIDLen = ret;
     }
@@ -4625,14 +4622,12 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         if (snmp_oid_compare(usmNoAuthProtocol, OID_LENGTH(usmNoAuthProtocol),
                              def_auth_prot, def_auth_prot_len) != 0) {
             *errorMsg = "no authentication pass phrase";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
         if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
                              def_priv_prot, def_priv_prot_len) != 0) {
             *errorMsg = "no privacy pass phrase";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
         goto add;               /* no authentication or privacy type */
@@ -4652,30 +4647,26 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         int auth_type = usm_lookup_auth_type(buf);
         if (auth_type < 0) {
             *errorMsg = "unknown authProtocol";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
         auth_prot = usm_get_auth_oid(auth_type, &auth_prot_len);
         memcpy(newuser->authProtocol, auth_prot, auth_prot_len * sizeof(oid));
     }
     if (0 == newuser->authProtocol[0]) {
         *errorMsg = "Unknown authentication protocol";
-        usm_free_user(newuser);
-        return NULL;
+        goto fail;
     }
 #ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     if (snmp_oid_compare(newuser->authProtocol, newuser->authProtocolLen,
                          def_auth_prot, def_auth_prot_len) != 0) {
-        config_perror("auth protocol does not match system policy");
-        usm_free_user(newuser);
-        return;
+        *errorMsg = "auth protocol does not match system policy";
+        goto fail;
     }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
 
    if (!cp) {
         *errorMsg = "no authentication pass phrase";
-        usm_free_user(newuser);
-        return NULL;
+        goto fail;
     }
 
     /*
@@ -4690,8 +4681,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         userKeyLen = 0;
         if (!snmp_hex_to_binary(&tmpp, &ret, &userKeyLen, 0, buf)) {
             *errorMsg = "invalid key value argument to -m";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
     } else if (strcmp(buf,"-l") != 0) {
         /* a password is specified */
@@ -4700,8 +4690,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                           (u_char *) buf, strlen(buf), userKey, &userKeyLen);
         if (ret2 != SNMPERR_SUCCESS) {
             *errorMsg = "could not generate the authentication key from the supplied pass phrase.";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
         /* save master key */
         if (newuser->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
@@ -4717,8 +4706,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                                newuser->authProtocolLen);
     if (ret2 <= 0) {
         *errorMsg = "Could not get proper authentication protocol key length";
-	usm_free_user(newuser);
-        return NULL;
+        goto fail;
     }
     newuser->authKey = (u_char *) malloc(ret2);
 
@@ -4730,13 +4718,11 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         if (!snmp_hex_to_binary(&newuser->authKey, &ret,
                                 &newuser->authKeyLen, 0, buf)) {
             *errorMsg = "invalid key value argument to -l";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
         if (ret != newuser->authKeyLen) {
             *errorMsg = "improper key length to -l";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
     } else {
         newuser->authKeyLen = ret2;
@@ -4746,8 +4732,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                            newuser->authKey, &newuser->authKeyLen);
         if (ret2 != SNMPERR_SUCCESS) {
             *errorMsg = "could not generate localized authentication key (Kul) from the master key (Ku).";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
     }
 
@@ -4760,8 +4745,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             goto add;
         else {
             *errorMsg = "priv protocol does not match system policy";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
     }
@@ -4792,16 +4776,13 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     }
     if (0 == newuser->authProtocol[0] && NULL == *errorMsg)
         *errorMsg = "Unknown privacy protocol";
-    if (NULL != *errorMsg) {
-        usm_free_user(newuser);
-        return NULL;
-    }
+    if (NULL != *errorMsg)
+        goto fail;
 #ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
                          def_priv_prot, def_priv_prot_len) != 0) {
         *errorMsg = "priv protocol does not match system policy";
-        usm_free_user(newuser);
-        return;
+        goto fail;
     }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
 
@@ -4842,8 +4823,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             userKeyLen = 0;
             if (!snmp_hex_to_binary(&tmpp, &ret, &userKeyLen, 0, buf)) {
                 *errorMsg = "invalid key value argument to -m";
-                usm_free_user(newuser);
-                return NULL;
+                goto fail;
             }
         } else if (strcmp(buf,"-l") != 0) {
             /* a password is specified */
@@ -4852,8 +4832,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                               (u_char *) buf, strlen(buf), userKey, &userKeyLen);
             if (ret2 != SNMPERR_SUCCESS) {
                 *errorMsg = "could not generate the privacy key from the supplied pass phrase.";
-                usm_free_user(newuser);
-                return NULL;
+                goto fail;
             }
             /* save master key */
             if (newuser->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
@@ -4869,8 +4848,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                                    newuser->authProtocolLen);
         if (ret2 < 0) {
             *errorMsg = "could not get proper key length to use for the privacy algorithm.";
-            usm_free_user(newuser);
-            return NULL;
+            goto fail;
         }
         newuser->privKey = (u_char *) malloc(ret2);
 
@@ -4882,8 +4860,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             if (!snmp_hex_to_binary(&newuser->privKey, &ret,
                                     &newuser->privKeyLen, 0, buf)) {
                 *errorMsg = "invalid key value argument to -l";
-                usm_free_user(newuser);
-                return NULL;
+                goto fail;
             }
         } else {
             newuser->privKeyLen = ret2;
@@ -4893,8 +4870,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                                newuser->privKey, &newuser->privKeyLen);
             if (ret2 != SNMPERR_SUCCESS) {
                 *errorMsg = "could not generate localized privacy key (Kul) from the master key (Ku).";
-                usm_free_user(newuser);
-                return NULL;
+                goto fail;
             }
         }
     }
@@ -4904,8 +4880,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     }
     else {
       *errorMsg = "privKey length is smaller than required by privProtocol";
-      usm_free_user(newuser);
-      return NULL;
+      goto fail;
     }
 
   add:
@@ -4915,6 +4890,10 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     DEBUGMSG(("usmUser", "\n"));
 
     return newuser;
+
+  fail:
+    usm_free_user(newuser);
+    return NULL;
 }
 
 void
