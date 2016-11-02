@@ -293,13 +293,18 @@ extern          "C" {
 #define USM_CREATE_USER_AUTH_SHA256  NETSNMP_USMAUTH_HMAC192SHA256
 #define USM_CREATE_USER_AUTH_SHA224  NETSNMP_USMAUTH_HMAC128SHA224
 
+#define USM_CREATE_USER_PRIV_DFLT -1
 #define USM_CREATE_USER_PRIV_NONE 0
+#ifndef NETSNMP_DISABLE_DES
 #define USM_CREATE_USER_PRIV_DES  1
+#endif
+#ifdef HAVE_AES
 #define USM_CREATE_USER_PRIV_AES  2
+#endif
 
     NETSNMP_IMPORT
     struct usmUser *usm_create_usmUser(const char *userName,
-                                       const char *engineID, 
+                                       const char *engineID, u_int flags,
                                        int authType, const char *authPass,
                                        int privType, const char *privPass,
                                        const char **errorMsg);

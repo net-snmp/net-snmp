@@ -4623,13 +4623,13 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
 #ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
         /** no passwords ok iff defaults are noauth/nopriv */
         if (snmp_oid_compare(usmNoAuthProtocol, OID_LENGTH(usmNoAuthProtocol),
-                             prot, prot_len) != 0) {
+                             def_auth_prot, def_auth_prot_len) != 0) {
             *errorMsg = "no authentication pass phrase";
             usm_free_user(newuser);
             return NULL;
         }
         if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
-                             prot, prot_len) != 0) {
+                             def_priv_prot, def_priv_prot_len) != 0) {
             *errorMsg = "no privacy pass phrase";
             usm_free_user(newuser);
             return NULL;
@@ -4770,7 +4770,6 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
      * READ: Privacy Type 
      */
     newuser->privProtocol[0] = 0;
-    privKeyLen = 16;
     if (strncmp(cp, "DES", 3) == 0) {
 #ifndef NETSNMP_DISABLE_DES
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
@@ -4800,7 +4799,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
 #ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
     if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
                          def_priv_prot, def_priv_prot_len) != 0) {
-        config_perror("priv protocol does not match system policy");
+        *errorMsg = "priv protocol does not match system policy";
         usm_free_user(newuser);
         return;
     }
@@ -4928,7 +4927,7 @@ usm_parse_create_usmUser(const char *token, char *line)
 }
 
 struct usmUser *
-usm_create_usmUser(const char *userName, const char *engineID, 
+usm_create_usmUser(const char *userName, const char *engineID, u_int flags,
                    int authType, const char *authPass,
                    int privType, const char *privPass, const char **errorMsg)
 {
@@ -4946,31 +4945,30 @@ usm_create_usmUser(const char *userName, const char *engineID,
      */
 
     line[0] = 0;
+    if (flags & USMUSER_FLAG_KEEP_MASTER_KEY)
+        strlcat(line, "-M ", sizeof(line));
+
     if (engineID) {
-        strlcpy(line, "-e ", sizeof(line));
+        strlcat(line, "-e ", sizeof(line));
         strlcat(line, engineID, sizeof(line));
         strlcat(line, " ", sizeof(line));
-        len = strlcat(line, userName, sizeof(line));
-    } else {
-        len = strlcpy(line, userName, sizeof(line));
     }
-    strlcat(line, " ", sizeof(line));
-
+    len = strlcat(line, userName, sizeof(line));
     if (0 == authType)
         goto create;
+
     str = usm_lookup_auth_str(authType);
     if (NULL == str) {
-        snmp_log(LOG_WARNING, "unknown authType; using default\n");
-        str = "default";
+        *errorMsg = "unknown authType";
+        return NULL;
     }
-    strlcat(line, " ", sizeof(line));
-    strlcat(line, str, sizeof(line));
-    strlcat(line, " ", sizeof(line));
-
     if (NULL == authPass) {
         *errorMsg = "missing authpassphrase";
         return NULL;
     }
+    strlcat(line, " ", sizeof(line));
+    strlcat(line, str, sizeof(line));
+    strlcat(line, " ", sizeof(line));
     len = strlcat(line, authPass, sizeof(line));
 
     if (0 == privType)
