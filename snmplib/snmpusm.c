@@ -4970,26 +4970,31 @@ usm_create_usmUser(const char *userName, const char *engineID, u_int flags,
     strlcat(line, str, sizeof(line));
     strlcat(line, " ", sizeof(line));
     len = strlcat(line, authPass, sizeof(line));
-
     if (0 == privType)
         goto create;
+
+    str = NULL;
 #ifndef NETSNMP_DISABLE_DES
-    else if (USM_CREATE_USER_PRIV_DES == privType)
-        strlcat(line, " DES ", sizeof(line));
+    if (USM_CREATE_USER_PRIV_DES == privType)
+        str = "DES";
 #endif
 #ifdef HAVE_AES
-    else if (USM_CREATE_USER_PRIV_AES == privType)
-        strlcat(line, " AES ", sizeof(line));
+    if (USM_CREATE_USER_PRIV_AES == privType)
+        str = "AES";
 #endif
-    else {
+    if (USM_CREATE_USER_PRIV_DFLT == privType)
+        str = "default";
+    if (NULL == str) {
         *errorMsg = "Unknown privacy protocol";
         return NULL;
     }
-
     if (NULL == privPass) {
         *errorMsg = "missing privpassphrase";
         return NULL;
     }
+    strlcat(line, " ", sizeof(line));
+    strlcat(line, str, sizeof(line));
+    strlcat(line, " ", sizeof(line));
     len = strlcat(line, privPass, sizeof(line));
 
   create:
