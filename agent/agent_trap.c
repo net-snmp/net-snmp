@@ -378,7 +378,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
         config_perror("SNMP version disabled");
         DEBUGMSGTL(("trap", "skipping trap sink (version 0x%02x disabled)\n",
                     version));
-        return 0;
+        return NULL;
     }
 
     memset(&session, 0, sizeof(netsnmp_session));
