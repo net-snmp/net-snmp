@@ -38,11 +38,6 @@ typedef int Py_ssize_t;
 
 #define NO_RETRY_NOSUCH 0
 
-/* these should be part of transform_oids.h ? */
-#define USM_AUTH_PROTO_MD5_LEN 10
-#define USM_AUTH_PROTO_SHA_LEN 10
-#define USM_PRIV_PROTO_DES_LEN 10
-
 #define STRLEN(x) (x ? strlen(x) : 0)
 
 /* from perl/SNMP/perlsnmp.h: */
