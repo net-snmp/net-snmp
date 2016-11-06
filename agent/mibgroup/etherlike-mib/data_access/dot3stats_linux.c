@@ -154,7 +154,7 @@ struct rtnl_handle {
 
 struct ifstat_ent {
     struct ifstat_ent *next;
-    const char *name;
+    char *name;
     int ifindex;
     struct rtnl_link_stats stats;
 };
