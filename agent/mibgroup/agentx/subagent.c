@@ -744,11 +744,11 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg)
 	return 0;
     }
     agentx_close_session(thesession, AGENTX_CLOSE_SHUTDOWN);
-    snmp_close(thesession);
     if (main_session != NULL) {
         remove_trap_session(main_session);
         main_session = NULL;
     }
+    snmp_close(thesession);
     DEBUGMSGTL(("agentx/subagent", "shut down finished.\n"));
 
     subagent_init_init = 0;
