@@ -128,8 +128,8 @@ netsnmp_std_close(netsnmp_transport *t)
         /* XXX: set an alarm to kill harder the child */
     } else {
         /* close stdout/in */
-        close(1);
-        close(0);
+        close(STDOUT_FILENO);
+        close(STDIN_FILENO);
     }
     return 0;
 }
@@ -226,16 +226,9 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
         } else {
             /* we're in the child */
 
-            /* close stdin */
-            close(0);
-            /* copy pipe output to stdout */
-            dup(infd[0]);
+            dup2(infd[0], STDIN_FILENO);
+            dup2(outfd[1], STDOUT_FILENO);
 
-            /* close stdout */
-            close(1);
-            /* copy pipe output to stdin */
-            dup(outfd[1]);
-            
             /* close all the pipes themselves */
             close(infd[0]);
             close(infd[1]);
