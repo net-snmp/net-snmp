@@ -91,11 +91,6 @@ static int mainloop_finish = 0;
 /* Internal flag to determine which API we're using */
 static int api_mode = SNMP_API_TRADITIONAL;
 
-/* these should be part of transform_oids.h ? */
-#define USM_AUTH_PROTO_MD5_LEN 10
-#define USM_AUTH_PROTO_SHA_LEN 10
-#define USM_PRIV_PROTO_DES_LEN 10
-
 /* why does ucd-snmp redefine sockaddr_in ??? */
 #define SIN_ADDR(snmp_addr) (((struct sockaddr_in *) &(snmp_addr))->sin_addr)
 
