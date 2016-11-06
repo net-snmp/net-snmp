@@ -82,9 +82,9 @@ CONFIGAGENT 'com2sec t407b a2345678901234567890123456789012345678901234567890123
 
 # 408 Lookup tests, require network access
 # 408a Test lookup returning a single host
-CONFIGAGENT 'com2sec t408a onea.net-snmp.org c408a'
+CONFIGAGENT 'com2sec t408a www.google.com c408a'
 # 408a Test lookup returning multiple hosts
-CONFIGAGENT 'com2sec t408b twoa.net-snmp.org c408b'
+CONFIGAGENT 'com2sec t408b www.ietf.org c408b'
 
 # Default agent setup
 CONFIGAGENT "[snmp] persistentdir $SNMP_TMP_PERSISTENTDIR"
