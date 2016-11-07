@@ -234,8 +234,8 @@ netsnmp_udp6_transport_init(struct sockaddr_in6 *addr, int flags)
         t->remote_length = 18;
     }
     memcpy(addr_ptr, addr->sin6_addr.s6_addr, 16);
-    addr_ptr[16] = (addr->sin6_port & 0xff00) >> 8;
-    addr_ptr[17] = (addr->sin6_port & 0x00ff) >> 0;
+    addr_ptr[16] = (ntohs(addr->sin6_port) & 0xff00) >> 8;
+    addr_ptr[17] = (ntohs(addr->sin6_port) & 0x00ff) >> 0;
 
     DEBUGIF("netsnmp_udp6") {
         char *str = netsnmp_udp6_fmtaddr(NULL, (void *)addr, sizeof(*addr));

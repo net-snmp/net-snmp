@@ -102,8 +102,8 @@ netsnmp_udpipv4base_transport_init(struct sockaddr_in *addr, int local)
         t->remote_length = 6;
     }
     memcpy(addr_ptr, (u_char *) & (addr->sin_addr.s_addr), 4);
-    addr_ptr[4] = (htons(addr->sin_port) & 0xff00) >> 8;
-    addr_ptr[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
+    addr_ptr[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
+    addr_ptr[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
 
     DEBUGIF("netsnmp_udpbase") {
         netsnmp_indexed_addr_pair addr_pair;
