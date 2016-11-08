@@ -23,7 +23,6 @@ static oid      my_test_oid[4] = { 1, 2, 3, 4 };
 static oid      my_table_oid[4] = { 1, 2, 3, 5 };
 static oid      my_instance_oid[5] = { 1, 2, 3, 6, 1 };
 static oid      my_data_table_oid[4] = { 1, 2, 3, 7 };
-static oid      my_data_table_set_oid[4] = { 1, 2, 3, 8 };
 static oid      my_data_ulong_instance[4] = { 1, 2, 3, 9 };
 
 u_long          my_ulong = 0;
@@ -38,7 +37,6 @@ init_testhandler(void)
     netsnmp_table_registration_info *table_info;
     u_long          ind1;
     netsnmp_table_data *table;
-    netsnmp_table_data_set *table_set;
     netsnmp_table_row *row;
 
     DEBUGMSGTL(("testhandler", "initializing\n"));
@@ -106,7 +104,7 @@ init_testhandler(void)
     netsnmp_table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
     netsnmp_table_row_add_index(row, ASN_OCTET_STR, "partridge",
                                 strlen("partridge"));
-    row->data = (void *) "pear tree";
+    row->data = NETSNMP_REMOVE_CONST(void *, "pear tree");
     netsnmp_table_data_add_row(table, row);
 
     /*
@@ -117,7 +115,7 @@ init_testhandler(void)
     netsnmp_table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
     netsnmp_table_row_add_index(row, ASN_OCTET_STR, "turtle",
                                 strlen("turtle"));
-    row->data = (void *) "doves";
+    row->data = NETSNMP_REMOVE_CONST(void *, "doves");
     netsnmp_table_data_add_row(table, row);
 
     /*
@@ -356,7 +354,7 @@ my_test_instance_handler(netsnmp_mib_handler *handler,
          * update current 
          */
         accesses = *(requests->requestvb->val.integer);
-        DEBUGMSGTL(("testhandler", "updated accesses -> %d\n", accesses));
+        DEBUGMSGTL(("testhandler", "updated accesses -> %lu\n", accesses));
         break;
 
     case MODE_SET_UNDO:
@@ -398,17 +396,16 @@ my_data_table_handler(netsnmp_mib_handler *handler,
          */
         row = netsnmp_extract_table_row(requests);
         table_info = netsnmp_extract_table_info(requests);
-        if (row)
-            column3 = (char *) row->data;
-        if (!row || !table_info || !column3)
+        if (!table_info || !row || !row->data)
             continue;
+        column3 = (char *) row->data;
 
         /*
          * there's only one column, we don't need to check if it's right 
          */
         netsnmp_table_data_build_result(reginfo, reqinfo, requests, row,
                                         table_info->colnum,
-                                        ASN_OCTET_STR, column3,
+                                        ASN_OCTET_STR, (u_char*)column3,
                                         strlen(column3));
         requests = requests->next;
     }
