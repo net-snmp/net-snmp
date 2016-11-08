@@ -297,11 +297,22 @@ netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
 void
 netsnmp_unregister_notification(const char *name, u_char len)
 {
-#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_DATA_MODULE
-    snmpNotifyTable_unregister_notification(name, len);
-#else
-    NETSNMP_LOGONCE("netsnmp_unregister_notification not supported\n");
-#endif
+    if (snmp_callback_available(SNMP_CALLBACK_APPLICATION,
+                                SNMPD_CALLBACK_UNREGISTER_NOTIFICATIONS) ==
+        SNMPERR_SUCCESS) {
+        /*
+         * something else wants to handle notification registrations 
+         */
+        struct agent_add_trap_args args;
+        DEBUGMSGTL(("trap", "removing callback trap sink\n"));
+        args.nameData = name;
+        args.nameLen = len;
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                            SNMPD_CALLBACK_UNREGISTER_NOTIFICATIONS,
+                            (void *) &args);
+    } else
+        NETSNMP_LOGONCE((LOG_WARNING,
+                         "netsnmp_unregister_notification not supported\n"));
 }
 
 int

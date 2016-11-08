@@ -48,6 +48,9 @@
 
 SNMPCallback    store_snmpNotifyTable;
 
+static int
+_unregister_notification_cb(int major, int minor,
+                            void *serverarg, void *clientarg);
 
 /*
  * global storage of our data, saved in and configured by header_complex()
@@ -492,8 +495,8 @@ snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata)
  * will be a slow memory leak in the target mib.
  */
 int
-notifyTable_unregister_notifications(int major, int minor,
-                                     void *serverarg, void *clientarg)
+notifyTable_unregister_all_notifications(int major, int minor,
+                                         void *serverarg, void *clientarg)
 {
     struct header_complex_index *hptr, *nhptr;
 
@@ -544,8 +547,11 @@ init_snmpNotifyTable_data(void)
                            SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
                            notifyTable_register_notifications, NULL);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_UNREGISTER_NOTIFICATIONS,
+                           _unregister_notification_cb, NULL);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
-                           notifyTable_unregister_notifications, NULL);
+                           notifyTable_unregister_all_notifications, NULL);
 
     DEBUGMSGTL(("snmpNotifyTable_data", "done.\n"));
 }
@@ -558,17 +564,20 @@ shutdown_snmpNotifyTable_data(void)
     snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                              store_snmpNotifyTable, NULL, FALSE);
 
-    notifyTable_unregister_notifications(SNMP_CALLBACK_APPLICATION,
-                                         SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
-                                         NULL,
-                                         NULL);
+    notifyTable_unregister_all_notifications(SNMP_CALLBACK_APPLICATION,
+                                             SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                                             NULL, NULL);
 
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
-                             notifyTable_unregister_notifications, NULL, FALSE);
+                             notifyTable_unregister_all_notifications, NULL,
+                             FALSE);
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
                              notifyTable_register_notifications, NULL, FALSE);
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                             SNMPD_CALLBACK_UNREGISTER_NOTIFICATIONS,
+                             _unregister_notification_cb, NULL, FALSE);
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_SEND_TRAP2, send_notifications,
                              NULL, FALSE);
@@ -705,6 +714,20 @@ snmpNotifyTable_unregister_notification(const char *name, unsigned char nameLen)
         DEBUGMSGTL(("snmpNotifyTable:unregister",
                     "No FilterProfileTable entry for %s\n", name));
 
+}
+
+static int
+_unregister_notification_cb(int major, int minor,
+                            void *serverarg, void *clientarg)
+{
+    struct agent_add_trap_args *args =
+        (struct agent_add_trap_args *) serverarg;
+
+    if (!args || !(args->nameData))
+        return 0;
+
+    snmpNotifyTable_unregister_notification(args->nameData, args->nameLen);
+    return 1;
 }
 
 /*
