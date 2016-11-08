@@ -671,7 +671,7 @@ find_row_notifyTable(struct variable *vp, oid * name, size_t * len, int exact,
 }
 
 void
-notifyTable_unregister_notification(const char *name, unsigned char nameLen)
+snmpNotifyTable_unregister_notification(const char *name, unsigned char nameLen)
 {
     struct targetAddrTable_struct *ta = get_addrForName2(name,nameLen);
     struct targetParamTable_struct *tp = get_paramEntry2(name,nameLen);
