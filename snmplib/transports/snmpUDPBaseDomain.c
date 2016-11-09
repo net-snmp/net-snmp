@@ -110,8 +110,8 @@ _netsnmp_udp_sockopt_set(int fd, int local)
 }
 
 #if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
-# if defined(IP_RECVDSTADDR) && !defined(IP_SENDSRCADDR)
-#  define IP_SENDSRCADDR IP_RECVDSTADDR /* DragonFly BSD */
+# if defined(HAVE_IP_RECVDSTADDR) && !defined(HAVE_IP_SENDSRCADDR)
+#  define HAVE_IP_SENDSRCADDR HAVE_IP_RECVDSTADDR /* DragonFly BSD */
 # endif
 
 #define netsnmp_udpbase_recvfrom_sendto_defined
@@ -318,7 +318,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 #endif
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
-#elif defined(IP_SENDSRCADDR)
+#elif defined(HAVE_IP_SENDSRCADDR)
         cm->cmsg_level = IPPROTO_IP;
         cm->cmsg_type = IP_SENDSRCADDR;
         memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));

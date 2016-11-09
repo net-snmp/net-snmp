@@ -156,7 +156,7 @@ int
 netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
                                    struct sockaddr_in *addr, int flags)
 {
-#if defined(HAVE_IP_PKTINFO) || defined(IP_RECVDSTADDR)
+#if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
     int                sockopt = 1;
 #endif
     int                rc;
@@ -173,7 +173,7 @@ netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
             return 1;
         }
         DEBUGMSGTL(("netsnmp_udpbase", "set IP_PKTINFO\n"));
-#elif defined(IP_RECVDSTADDR)
+#elif defined(HAVE_IP_RECVDSTADDR)
         if (setsockopt(t->sock, IPPROTO_IP, IP_RECVDSTADDR, &sockopt, sizeof sockopt) == -1) {
             DEBUGMSGTL(("netsnmp_udp", "couldn't set IP_RECVDSTADDR: %s\n",
                         strerror(errno)));
