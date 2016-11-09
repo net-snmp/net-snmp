@@ -73,8 +73,6 @@
 #include <net-snmp/library/snmpv3.h>
 #include <net-snmp/library/transform_oids.h>
 
-int             random_access = 0;
-
 void
 snmp_parse_args_usage(FILE * outf)
 {

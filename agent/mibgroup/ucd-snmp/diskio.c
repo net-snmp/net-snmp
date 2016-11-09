@@ -120,8 +120,6 @@ static int      getstats(void);
 void		devla_getstats(unsigned int regno, void *dummy);
 #endif
 
-FILE           *file;
-
 #ifdef linux
 static int	diskio_free_config(int, int, void *, void *);
 #endif

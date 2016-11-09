@@ -29,8 +29,6 @@ netsnmp_feature_require(request_set_error_idx)
 
 static struct simple_proxy *proxies = NULL;
 
-oid             testoid[] = { 1, 3, 6, 1, 4, 1, 2021, 8888, 1 };
-
 /*
  * this must be standardized somewhere, right? 
  */

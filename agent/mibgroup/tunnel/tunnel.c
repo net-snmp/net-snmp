@@ -98,10 +98,6 @@ oid             tunnel_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 10, 131, 1, 1 };
 const int       tunnel_len = 10;
 
-oid             tunnel_ifEntry_oid[] =
-    { 1, 3, 6, 1, 2, 1, 10, 131, 1, 1, 1, 1 };
-const int       tunnel_ifEntry_len = 12;
-
 oid             tunnel_configEntry_oid[] =
     { 1, 3, 6, 1, 2, 1, 10, 131, 1, 1, 2, 1 };
 const int       tunnel_configEntry_len = 12;
