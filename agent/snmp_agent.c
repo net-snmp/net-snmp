@@ -2025,7 +2025,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                 (asp->pdu->command == SNMP_MSG_SET ?
                  STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS),
 #else
-                SNMPINTOTALREQVARS,
+                STAT_SNMPINTOTALREQVARS,
 #endif
                 count_varbinds(asp->pdu->variables));
     } /** if asp->pdu */
