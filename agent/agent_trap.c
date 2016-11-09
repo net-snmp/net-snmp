@@ -432,6 +432,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
          */
         snmp_sess_perror("snmpd: netsnmp_create_notification_session",
                          &session);
+        netsnmp_transport_free(t);
         return NULL;
     }
 
@@ -1479,11 +1480,6 @@ _parse_config_sink(const char *token, char *cptr, int version, int type)
     char           *st, *name = NULL, *tag = NULL, *profile = NULL;
     int            done = 0;
 
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DISABLE_V1)) {
-        netsnmp_config_error("SNMPv1 disabled, cannot create trapsinks");
-        return;
-    }
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
     sp = strtok_r(cptr, " \t\n", &st);
@@ -1533,24 +1529,12 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
 void
 snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DISABLE_V2c)) {
-        netsnmp_config_error("SNMPv2c disabled, cannot create trap2sinks");
-        return;
-    }
     _parse_config_sink(word, cptr, SNMP_VERSION_2c, SNMP_MSG_TRAP2);
 }
 
 void
 snmpd_parse_config_informsink(const char *word, char *cptr)
 {
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DISABLE_V2c) &&
-        netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DISABLE_V3)) {
-        netsnmp_config_error("SNMPv2c/SNMPv3 disabled, cannot create informsinks");
-        return;
-    }
     _parse_config_sink(word, cptr, SNMP_VERSION_2c, SNMP_MSG_INFORM);
 }
 #endif
@@ -1778,7 +1762,9 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
 
     if (NETSNMP_RUNTIME_PROTOCOL_SKIP(session.version)) {
         config_perror("snmpd: protocol version disabled at runtime");
-        return;
+        for (; argn > 0; argn--)
+            free(argv[argn - 1]);
+        goto cleanup;
     }
 
     transport = netsnmp_transport_open_client("snmptrap", session.peername);
