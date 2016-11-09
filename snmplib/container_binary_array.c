@@ -542,7 +542,7 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
 
     t = (binary_array_table*)c->container_data;
     netsnmp_assert(c->ncompare);
-    if (!t->count | !c->ncompare)
+    if (!t->count || !c->ncompare)
         return NULL;
 
     /*
