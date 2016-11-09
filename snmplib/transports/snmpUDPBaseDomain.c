@@ -243,7 +243,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 {
 #if !defined(WIN32)
     struct iovec iov;
-    struct msghdr m = { 0 };
+    struct msghdr m = { NULL };
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
     int           rc;
 

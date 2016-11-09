@@ -380,7 +380,7 @@ header_dlmod(struct variable *vp,
 
     memcpy(name, newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = NULL;
     *var_len = sizeof(long);    /* default to 'long' results */
     return MATCH_SUCCEEDED;
 }
@@ -397,7 +397,7 @@ var_dlmod(struct variable * vp,
      * variables we may use later
      */
 
-    *write_method = 0;         /* assume it isn't writable for the time being */
+    *write_method = NULL;      /* assume it isn't writable for the time being */
     *var_len = sizeof(int);    /* assume an integer and change later if not */
 
     if (header_dlmod(vp, name, length, exact,
@@ -556,7 +556,7 @@ header_dlmodEntry(struct variable *vp,
     unsigned int    dlmod_index;
 
     memcpy(newname, vp->name, vp->namelen * sizeof(oid));
-    *write_method = 0;
+    *write_method = NULL;
 
     for (dlmod_index = 1; dlmod_index < dlmod_next_index; dlmod_index++) {
         dlm = dlmod_get_by_index(dlmod_index);

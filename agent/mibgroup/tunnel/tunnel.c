@@ -897,7 +897,7 @@ var_tunnelIfEntry(struct variable *vp,
         *write_method = writeTOS;
         return (u_char *) & ret_int;
     default:
-        return 0;
+        return NULL;
     }
 
     return NULL;
@@ -994,7 +994,7 @@ var_tunnelConfigEntry(struct variable *vp,
         vp->type = ASN_INTEGER;
         return (u_char *) & ret_int;
     default:
-        return 0;
+        return NULL;
     }
 
     return NULL;

@@ -291,7 +291,7 @@ extensible_parse_config(const char *token, char *cptr)
         if (etmp == NULL)
             return;                 /* XXX memory alloc error */
         for (i = 0, ptmp = *pp;
-             i < scount && ptmp != 0; i++, ptmp = ptmp->next)
+             i < scount && ptmp != NULL; i++, ptmp = ptmp->next)
             etmp[i] = ptmp;
         qsort(etmp, scount, sizeof(struct extensible *),
               pass_compare);
@@ -429,7 +429,7 @@ var_extensible_shell(struct variable * vp,
                      size_t * var_len, WriteMethod ** write_method)
 {
 
-    static struct extensible *exten = 0;
+    static struct extensible *exten = NULL;
     static long     long_ret;
     int len;
 
@@ -530,7 +530,7 @@ var_extensible_relocatable(struct variable *vp,
 
     int             i;
     int             len;
-    struct extensible *exten = 0;
+    struct extensible *exten = NULL;
     static long     long_ret;
     static char     errmsg[STRMAX];
     char            *cp, *cp1;
@@ -643,7 +643,7 @@ find_extensible(netsnmp_subtree *tp, oid *tname, size_t tnamelen, int exact)
 {
     size_t          tmp;
     int             i;
-    struct extensible *exten = 0;
+    struct extensible *exten = NULL;
     struct variable myvp;
     oid             name[MAX_OID_LEN];
     static netsnmp_subtree mysubtree[2] =

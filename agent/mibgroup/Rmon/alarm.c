@@ -185,7 +185,7 @@ fetch_var_val(oid * name, size_t namelen, u_long * new_value)
                     && snmp_oid_compare(name, namelen, tree_ptr->end_a,
                                         tree_ptr->end_len) > 0) {
                     memcpy(name, tree_ptr->end_a, tree_ptr->end_len);
-                    access = 0;
+                    access = NULL;
                     ag_trace("access := 0");
                 }
 

@@ -884,7 +884,7 @@ _sql_save_varbind_info(sql_buf *sqlb, netsnmp_pdu  *pdu)
         tmp_size = 0;
         buf_val_len_t = 0;
         sprint_realloc_by_type((u_char**)&sqlvb->val, &tmp_size,
-                               &buf_val_len_t, 1, var, 0, 0, 0);
+                               &buf_val_len_t, 1, var, NULL, NULL, NULL);
         sqlvb->val_len = buf_val_len_t;
 #else
         sqlvb->val = netsnmp_memdup(var->val.string, var->val_len);
@@ -941,7 +941,7 @@ mysql_handler(netsnmp_pdu           *pdu,
     if(rc) {
         snmp_log(LOG_ERR, "Could not log queue sql trap buffer\n");
         _sql_log(sqlb, NULL);
-        _sql_buf_free(sqlb, 0);
+        _sql_buf_free(sqlb, NULL);
         return -1;
     }
 

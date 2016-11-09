@@ -405,7 +405,7 @@ _clone_pdu_header(netsnmp_pdu *pdu)
         if (ret)
         {
             snmp_free_pdu(newpdu);
-            return 0;
+            return NULL;
         }
     }
 
@@ -1065,7 +1065,7 @@ snmp_synch_response_cb(netsnmp_session * ss,
         block = NETSNMP_SNMPBLOCK;
         tvp = &timeout;
         timerclear(tvp);
-        snmp_sess_select_info_flags(0, &numfds, &fdset, tvp, &block,
+        snmp_sess_select_info_flags(NULL, &numfds, &fdset, tvp, &block,
                                     NETSNMP_SELECT_NOALARMS);
         if (block == 1)
             tvp = NULL;         /* block without timeout */
