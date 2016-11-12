@@ -101,7 +101,7 @@ extern          "C" {
     void            se_store_slist(const char *listname, const char *type);
     int             se_store_slist_callback(int majorID, int minorID,
                                            void *serverargs, void *clientargs);
-    void            se_read_conf(const char *word, char *cptr);
+    void            se_read_conf(const char *word, const char *cptr);
     /**
      * Deallocate the memory allocated by init_snmp_enum(): remove all key/value
      * pairs stored by se_add_*() calls.
