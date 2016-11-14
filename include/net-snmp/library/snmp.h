@@ -46,6 +46,7 @@ SOFTWARE.
 
 #define SNMP_MAX_LEN	    1500        /* typical maximum message size */
 #define SNMP_MIN_MAX_LEN    484 /* minimum maximum message size */
+#define SNMP_MAX_PACKET_LEN (0x7fffffff)
 
     /*
      * SNMP versions 

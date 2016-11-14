@@ -171,7 +171,7 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
      * is equal to the maximum legal size of an SNMP message).  
      */
 
-    t->msgMaxSize = 0x7fffffff;
+    t->msgMaxSize = SNMP_MAX_PACKET_LEN;
     t->f_recv     = netsnmp_std_recv;
     t->f_send     = netsnmp_std_send;
     t->f_close    = netsnmp_std_close;

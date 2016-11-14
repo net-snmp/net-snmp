@@ -397,7 +397,7 @@ _asn_parse_length_check(const char *str,
         return 1;
     }
     header_len = bufp - data;
-    if (plen > 0x7fffffff || header_len > 0x7fffffff ||
+    if (plen > SNMP_MAX_PACKET_LEN || header_len > SNMP_MAX_PACKET_LEN ||
         ((size_t) plen + header_len) > dlen) {
         snprintf(ebuf, sizeof(ebuf),
                 "%s: message overflow: %d len + %d delta > %d len",

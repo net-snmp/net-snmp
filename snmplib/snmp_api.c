@@ -172,7 +172,6 @@ static int      _snmp_store_needed = 0;
 /*
  * Globals.
  */
-#define MAX_PACKET_LENGTH	(0x7fffffff)
 #ifndef NETSNMP_STREAM_QUEUE_LEN
 #define NETSNMP_STREAM_QUEUE_LEN  5
 #endif
@@ -192,12 +191,6 @@ static oid      default_enterprise[] = { 1, 3, 6, 1, 4, 1, 3, 1, 1 };
 #define DEFAULT_REMPORT	    SNMP_PORT
 #define DEFAULT_ENTERPRISE  default_enterprise
 #define DEFAULT_TIME	    0
-
-/*
- * don't set higher than 0x7fffffff, and I doubt it should be that high
- * * = 4 gig snmp messages max 
- */
-#define MAXIMUM_PACKET_SIZE 0x7fffffff
 
 /*
  * Internal information about the state of the snmp session.
@@ -3737,7 +3730,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
      * field is out of bounds).  
      */
 
-    if (pdu->msgid < 0 || pdu->msgid > 0x7fffffff) {
+    if (pdu->msgid < 0 || pdu->msgid > SNMP_MAX_PACKET_LEN) {
         snmp_log(LOG_ERR, "Received bad msgID (%ld %s %s).\n", pdu->msgid,
                  (pdu->msgid < 0) ? "<" : ">",
                  (pdu->msgid < 0) ? "0" : "2^31 - 1");
@@ -3779,7 +3772,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         DEBUGINDENTADD(-4);
         return SNMPERR_ASN_PARSE_ERR;
-    } else if (msg_max_size > 0x7fffffff) {
+    } else if (pdu->msgMaxSize > SNMP_MAX_PACKET_LEN) {
         snmp_log(LOG_ERR, "Received bad msgMaxSize (%lu > 2^31 - 1).\n",
                  msg_max_size);
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
@@ -4676,7 +4669,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
         if (snmp_set_var_objid(vp, objid, vp->name_length))
             goto fail;
 
-        len = MAX_PACKET_LENGTH;
+        len = SNMP_MAX_PACKET_LEN;
         DEBUGDUMPHEADER("recv", "Value");
         switch ((short) vp->type) {
         case ASN_INTEGER:
@@ -6195,7 +6188,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                         "  loop packet_len %" NETSNMP_PRIz "u, PDU length %"
                         NETSNMP_PRIz "u\n", isp->packet_len, pdulen));
 
-            if (pdulen > MAX_PACKET_LENGTH) {
+            if (pdulen > SNMP_MAX_PACKET_LEN) {
                 /*
                  * Illegal length, drop the connection.  
                  */
@@ -6280,7 +6273,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
 
 	SNMP_FREE(opaque);
 
-        if (isp->packet_len >= MAXIMUM_PACKET_SIZE) {
+        if (isp->packet_len >= SNMP_MAX_PACKET_LEN) {
             /*
              * Obviously this should never happen!  
              */

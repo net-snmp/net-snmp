@@ -311,7 +311,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
      * is equal to the maximum legal size of an SNMP message).  
      */
 
-    t->msgMaxSize = 0x7fffffff;
+    t->msgMaxSize = SNMP_MAX_PACKET_LEN;
     t->f_recv     = netsnmp_tcpbase_recv;
     t->f_send     = netsnmp_tcpbase_send;
     t->f_close    = netsnmp_socketbase_close;
