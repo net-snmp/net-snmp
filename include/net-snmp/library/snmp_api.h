@@ -348,6 +348,9 @@ typedef struct request_list {
     long            snmp_get_next_transid(void);
 
     NETSNMP_IMPORT
+    int             netsnmp_max_send_msg_size(void);
+
+    NETSNMP_IMPORT
     int             snmp_oid_compare(const oid *, size_t, const oid *,
                                      size_t);
     NETSNMP_IMPORT

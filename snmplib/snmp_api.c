@@ -366,6 +366,24 @@ void            snmp_synch_reset(netsnmp_session * notused);
 NETSNMP_IMPORT
 void            snmp_synch_setup(netsnmp_session * notused);
 
+/*
+ * return configured max message size for outgoing packets
+ */
+int
+netsnmp_max_send_msg_size(void)
+{
+    u_int max = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_MSG_SEND_MAX);
+    if (0 == max)
+        max = SNMP_MAX_PACKET_LEN;
+    else if (max < SNMP_MIN_MAX_LEN)
+        max = SNMP_MIN_MAX_LEN; /* minimum max size per SNMP specs */
+    else if (max > SNMP_MAX_PACKET_LEN)
+        max = SNMP_MAX_PACKET_LEN;
+
+    return max;
+}
+
 #ifndef HAVE_STRERROR
 const char     *
 strerror(int err)
@@ -743,8 +761,7 @@ snmp_sess_init(netsnmp_session * session)
     session->version = SNMP_DEFAULT_VERSION;
     session->securityModel = SNMP_DEFAULT_SECMODEL;
     session->rcvMsgMaxSize = SNMP_MAX_MSG_SIZE;
-    session->sndMsgMaxSize = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
-                                                NETSNMP_DS_LIB_MSG_SEND_MAX);
+    session->sndMsgMaxSize = netsnmp_max_send_msg_size();
     session->flags |= SNMP_FLAGS_DONT_PROBE;
 }
 
@@ -1559,20 +1576,16 @@ netsnmp_sess_config_and_open_transport(netsnmp_session *in_session,
     }
 
     /** if transport has a max size, make sure session is the same (or less) */
-    if (transport->msgMaxSize) {
-        if ((0 == in_session->rcvMsgMaxSize) ||
-            (transport->msgMaxSize < in_session->rcvMsgMaxSize)) {
-            DEBUGMSGTL(("snmp_sess",
-                        "limiting session rcv size to tranport max\n"));
-            in_session->rcvMsgMaxSize = transport->msgMaxSize;
-        }
+    if (transport->msgMaxSize < in_session->rcvMsgMaxSize) {
+        DEBUGMSGTL(("snmp_sess",
+                    "limiting session rcv size to transport max\n"));
+        in_session->rcvMsgMaxSize = transport->msgMaxSize;
+    }
 
-        if ((0 == in_session->sndMsgMaxSize) ||
-            (transport->msgMaxSize < in_session->sndMsgMaxSize)) {
-            DEBUGMSGTL(("snmp_sess",
-                        "limiting session snd size to tranport max\n"));
-            in_session->sndMsgMaxSize = transport->msgMaxSize;
-        }
+    if (transport->msgMaxSize < in_session->sndMsgMaxSize) {
+        DEBUGMSGTL(("snmp_sess",
+                    "limiting session snd size to transport max\n"));
+        in_session->sndMsgMaxSize = transport->msgMaxSize;
     }
 
     transport->flags |= NETSNMP_TRANSPORT_FLAG_OPENED;
@@ -1762,6 +1775,13 @@ snmp_sess_add_ex(netsnmp_session * in_session,
     if (transport == NULL)
         return NULL;
 
+    if (NULL != in_session && (in_session->rcvMsgMaxSize < SNMP_MIN_MAX_LEN ||
+                               in_session->sndMsgMaxSize < SNMP_MIN_MAX_LEN)) {
+        DEBUGMSGTL(("snmp_sess_add",
+                    "invalid session (msg sizes). need snmp_sess_init"));
+        in_session = NULL; /* force transport cleanup below */
+    }
+
     if (in_session == NULL) {
         transport->f_close(transport);
         netsnmp_transport_free(transport);
@@ -1802,13 +1822,15 @@ snmp_sess_add_ex(netsnmp_session * in_session,
     slp->internal->hook_create_pdu = fcreate_pdu;
 
     /** don't let session max exceed transport max */
-    if (transport->msgMaxSize > 0) {
-        if (0 == slp->session->rcvMsgMaxSize ||
-            slp->session->rcvMsgMaxSize > transport->msgMaxSize)
-            slp->session->rcvMsgMaxSize = transport->msgMaxSize;
-        if (0 == slp->session->sndMsgMaxSize ||
-            slp->session->sndMsgMaxSize > transport->msgMaxSize)
-            slp->session->sndMsgMaxSize = transport->msgMaxSize;
+    if (transport->msgMaxSize < slp->session->rcvMsgMaxSize) {
+        DEBUGMSGTL(("snmp_sess_add",
+                    "limiting session rcv size to transport max\n"));
+        slp->session->rcvMsgMaxSize = transport->msgMaxSize;
+    }
+    if (transport->msgMaxSize < slp->session->sndMsgMaxSize) {
+        DEBUGMSGTL(("snmp_sess_add",
+                    "limiting session snd size to transport max\n"));
+        slp->session->sndMsgMaxSize = transport->msgMaxSize;
     }
 
     if (slp->session->version == SNMP_VERSION_3) {
@@ -2318,8 +2340,10 @@ snmpv3_header_build(netsnmp_session * session, netsnmp_pdu *pdu,
     /*
      * msgMaxSize 
      */
-    max_size = session->rcvMsgMaxSize;
-    DEBUGDUMPHEADER("send", "msgMaxSize");
+    max_size = netsnmp_max_send_msg_size();
+    if (session->rcvMsgMaxSize < max_size)
+        max_size = session->rcvMsgMaxSize;
+    DEBUGDUMPHEADER("send:msgMaxSize1", "msgMaxSize");
     cp = asn_build_int(cp, out_length,
                        (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                  ASN_INTEGER), &max_size,
@@ -2421,8 +2445,10 @@ snmpv3_header_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
     /*
      * msgMaxSize.  
      */
-    max_size = session->rcvMsgMaxSize;
-    DEBUGDUMPHEADER("send", "msgMaxSize");
+    max_size = netsnmp_max_send_msg_size();
+    if (session->rcvMsgMaxSize < max_size)
+        max_size = session->rcvMsgMaxSize;
+    DEBUGDUMPHEADER("send:msgMaxSize2", "msgMaxSize");
     rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
                                 (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                           ASN_INTEGER), &max_size,
@@ -3640,7 +3666,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
              u_char ** after_header, netsnmp_session * sess)
 {
     u_char          type, msg_flags;
-    long            ver, msg_max_size, msg_sec_model;
+    long            ver, msg_sec_model;
     size_t          max_size_response;
     u_char          tmp_buf[SNMP_MAX_MSG_SIZE];
     size_t          tmp_buf_len;
@@ -3742,9 +3768,9 @@ snmpv3_parse(netsnmp_pdu *pdu,
     /*
      * msgMaxSize 
      */
-    DEBUGDUMPHEADER("recv", "msgMaxSize");
-    data = asn_parse_int(data, length, &type, &msg_max_size,
-                         sizeof(msg_max_size));
+    DEBUGDUMPHEADER("recv:msgMaxSize", "msgMaxSize");
+    data = asn_parse_int(data, length, &type, &pdu->msgMaxSize,
+                         sizeof(pdu->msgMaxSize));
     DEBUGINDENTLESS();
     if (data == NULL || type != ASN_INTEGER) {
         ERROR_MSG("error parsing msgMaxSize");
@@ -3759,34 +3785,29 @@ snmpv3_parse(netsnmp_pdu *pdu,
      * 2572, para. 7.2, section 2 -- note that a bad msgMaxSize means that the
      * received message is NOT a serialiization of an SNMPv3Message, since the
      * msgMaxSize field is out of bounds).
-     * 
-     * Note we store the msgMaxSize on a per-session basis which also seems
-     * reasonable; it could vary from PDU to PDU but that would be strange
-     * (also since we deal with a PDU at a time, it wouldn't make any
-     * difference to our responses, if any).  
      */
 
-    if (msg_max_size < 484) {
+    if (pdu->msgMaxSize < SNMP_MIN_MAX_LEN) {
         snmp_log(LOG_ERR, "Received bad msgMaxSize (%lu < 484).\n",
-                 msg_max_size);
+                 pdu->msgMaxSize);
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         DEBUGINDENTADD(-4);
         return SNMPERR_ASN_PARSE_ERR;
     } else if (pdu->msgMaxSize > SNMP_MAX_PACKET_LEN) {
         snmp_log(LOG_ERR, "Received bad msgMaxSize (%lu > 2^31 - 1).\n",
-                 msg_max_size);
+                 pdu->msgMaxSize);
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         DEBUGINDENTADD(-4);
         return SNMPERR_ASN_PARSE_ERR;
     } else {
-        DEBUGMSGTL(("snmpv3_parse", "msgMaxSize %lu received\n",
-                    msg_max_size));
+        DEBUGMSGTL(("snmpv3_parse:msgMaxSize", "msgMaxSize %lu received\n",
+                    pdu->msgMaxSize));
         /** don't increase max msg size if we've already got one */
-        if ((sess->sndMsgMaxSize > 0) && (sess->sndMsgMaxSize < msg_max_size)) {
-            DEBUGMSGTL(("snmpv3_parse",
-                        "msgMaxSize greater than session max; ignoring\n"));
-        } else
-            sess->sndMsgMaxSize = msg_max_size;
+        if (sess->sndMsgMaxSize < pdu->msgMaxSize) {
+            DEBUGMSGTL(("snmpv3_parse:msgMaxSize",
+                        "msgMaxSize greater than session max; reducing\n"));
+            pdu->msgMaxSize = sess->sndMsgMaxSize;
+        }
     }
 
     /*
@@ -3889,7 +3910,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
     if (sptr->decode) {
         struct snmp_secmod_incoming_params parms;
         parms.msgProcModel = pdu->msgParseModel;
-        parms.maxMsgSize = msg_max_size;
+        parms.maxMsgSize = pdu->msgMaxSize;
         parms.secParams = sec_params;
         parms.secModel = msg_sec_model;
         parms.secLevel = pdu->securityLevel;
@@ -5016,13 +5037,23 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
             return 0; /* s_snmp_errno already set */
     }
 
+    /*
+     * determine max packet size
+     */
+    if (0 == pdu->msgMaxSize) {
+        pdu->msgMaxSize = netsnmp_max_send_msg_size();
+        if (transport->msgMaxSize < pdu->msgMaxSize)
+            pdu->msgMaxSize = transport->msgMaxSize;
+        if (session->sndMsgMaxSize < pdu->msgMaxSize)
+            pdu->msgMaxSize = session->sndMsgMaxSize;
+    }
+    netsnmp_assert(pdu->msgMaxSize > 0);
 
-    pktbuf_len = 2048; /* default */
-    if (session->sndMsgMaxSize > 0 && session->sndMsgMaxSize < pktbuf_len)
-        pktbuf_len = session->sndMsgMaxSize;
-    if (transport->msgMaxSize > 0 && transport->msgMaxSize < pktbuf_len)
-        pktbuf_len = transport->msgMaxSize;
-
+    /*
+     * allocate initial packet buffer. Buffer will be grown as needed
+     * while building the packet.
+     */
+    pktbuf_len = SNMP_MIN_MAX_LEN;
     if ((pktbuf = (u_char *)malloc(pktbuf_len)) == NULL) {
         DEBUGMSGTL(("sess_async_send",
                     "couldn't malloc initial packet buffer\n"));
@@ -5061,8 +5092,8 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
 
 
     /*
-     * Build the message to send. If a bulk response is too big, try
-     * dropping varbinds to make it fit.
+     * Build the message to send. If a bulk response is too big, switch to
+     * forward encoding and set a flag to drop varbinds to make it fit.
      */
     do {
         packet = pktbuf;
@@ -5077,17 +5108,14 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
             DEBUGMSGTL(("sess_async_send", " vb count: %d -> %d\n", orig_count,
                         curr_count));
             DEBUGMSGTL(("sess_async_send", " pdu_len: %ld -> %ld (max %ld)\n",
-                        orig_length, length, session->sndMsgMaxSize));
+                        orig_length, length, pdu->msgMaxSize));
         }
 
-        /*
-         * Make sure we don't send something that is bigger than the msgMaxSize
-         * specified in the received PDU or of the underlying transport.
-         */
-        if ((session->sndMsgMaxSize == 0 || length <= session->sndMsgMaxSize) &&
-            (transport->msgMaxSize == 0 || length <= transport->msgMaxSize))
+        /** if length is less than max size, we're done (success). */
+        if (length <= pdu->msgMaxSize)
             break;
 
+        /** packet too big. if this is not a bulk request, we're done (err). */
         if (!bulk) {
            session->s_snmp_errno = SNMPERR_TOO_LONG;
            break;
@@ -5095,7 +5123,7 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
 
         /** rebuild bulk response with truncation and fixed size */
         pdu->flags |= UCD_MSG_FLAG_FORWARD_ENCODE | UCD_MSG_FLAG_BULK_TOOBIG;
-        pktbuf_len = session->sndMsgMaxSize;
+        pktbuf_len = pdu->msgMaxSize;
 
         /** save original number of vabinds & length */
         if (0 == orig_count) {
@@ -5105,20 +5133,18 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
 
     } while(1);
 
+    DEBUGMSGTL(("sess_async_send",
+                "final pktbuf_len after building packet %lu\n", pktbuf_len));
     if (curr_count != orig_count)
         DEBUGMSGTL(("sess_async_send",
                     "sending %d of %d varbinds (-%d) from bulk response\n",
                     curr_count, orig_count, orig_count - curr_count));
 
-    if (pdu->version == SNMP_VERSION_3 && session->sndMsgMaxSize != 0 &&
-        length > session->sndMsgMaxSize) {
+    if (length > pdu->msgMaxSize) {
         DEBUGMSGTL(("sess_async_send",
-                "length of packet (%lu) exceeds session maximum (%lu)\n",
-                (unsigned long)length, (unsigned long)session->sndMsgMaxSize));
-    } else if (transport->msgMaxSize != 0 && length > transport->msgMaxSize) {
-        DEBUGMSGTL(("sess_async_send",
-                "length of packet (%lu) exceeds transport maximum (%lu)\n",
-                (unsigned long)length, (unsigned long)transport->msgMaxSize));
+                    "length of packet (%lu) exceeded pdu maximum (%lu)\n",
+                    length, pdu->msgMaxSize));
+        netsnmp_assert(SNMPERR_TOO_LONG == session->s_snmp_errno);
     }
 
     if ((SNMPERR_TOO_LONG == session->s_snmp_errno) || (result < 0)) {

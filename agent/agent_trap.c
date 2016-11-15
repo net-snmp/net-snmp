@@ -381,7 +381,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
         return NULL;
     }
 
-    memset(&session, 0, sizeof(netsnmp_session));
+    snmp_sess_init(&session);
     session.version = version;
     if (com) {
         session.community = (u_char *) NETSNMP_REMOVE_CONST(char *, com);
@@ -427,12 +427,10 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
     t = netsnmp_tdomain_transport_tspec(&tspec);
     if ((NULL == t) ||
         ((sesp = snmp_add(&session, t, NULL, NULL)) == NULL)) {
-        /*
-         * diagnose snmp_open errors with the input netsnmp_session pointer
-         */
+        /** diagnose snmp_open errors with the input netsnmp_session pointer */
         snmp_sess_perror("snmpd: netsnmp_create_notification_session",
                          &session);
-        netsnmp_transport_free(t);
+        /* transport freed by snmp_add */
         return NULL;
     }
 
@@ -1756,6 +1754,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
         argv[argn] = strdup(tmp);
     }
 
+    /** parse args (also initializes session) */
     netsnmp_parse_args(argn, argv, &session, "C:", trapOptProc,
                        NETSNMP_PARSE_ARGS_NOLOGGING |
                        NETSNMP_PARSE_ARGS_NOZERO);

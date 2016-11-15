@@ -209,6 +209,9 @@ typedef struct snmp_pdu {
     int             securityLevel;  
     int             msgParseModel;
 
+    /** smallest of max for transport, v3 msgMaxSize and local cfg. */
+    long            msgMaxSize;
+
     /**
      * Transport-specific opaque data.  This replaces the IP-centric address
      * field.  

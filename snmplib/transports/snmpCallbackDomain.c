@@ -407,6 +407,13 @@ netsnmp_callback_transport(int to)
 
     netsnmp_assert(mydata->pipefds[0] != -1);
     t->sock      = mydata->pipefds[0];
+
+    /*
+     * Message size is not limited by this transport (hence msgMaxSize
+     * is equal to the maximum legal size of an SNMP message).  
+     */
+
+    t->msgMaxSize = SNMP_MAX_PACKET_LEN;
     t->f_recv    = netsnmp_callback_recv;
     t->f_send    = netsnmp_callback_send;
     t->f_close   = netsnmp_callback_close;

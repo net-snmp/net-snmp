@@ -146,6 +146,8 @@ main(int argc, char *argv[])
 
     if (strcmp(prognam, "snmpinform") == 0)
         inform = 1;
+
+    /** parse args (also initializes session) */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
         goto out;

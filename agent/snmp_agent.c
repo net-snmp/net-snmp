@@ -625,12 +625,12 @@ NETSNMP_STATIC_INLINE void
 _reorder_getbulk(netsnmp_agent_session *asp)
 {
     int             i, n = 0, r = 0;
-    int             repeats = asp->pdu->errindex;
+    int             repeats;
     int             j, k;
     int             all_eoMib;
     netsnmp_variable_list *prev = NULL, *curr;
-            
-    if (asp->vbcount == 0)  /* Nothing to do! */
+
+    if (NULL == asp || NULL == asp->pdu || asp->vbcount == 0)
         return;
 
     if (asp->pdu->errstat < asp->vbcount) {
@@ -642,10 +642,13 @@ _reorder_getbulk(netsnmp_agent_session *asp)
         r = 0;
     }
 
+    DEBUGMSGTL(("snmp_agent:bulk", "reorder n=%d, r=%d\n", n, r));
+
     /* we do nothing if there is nothing repeated */
     if (r == 0)
         return;
-            
+
+    repeats = asp->pdu->errindex;
     /* Fix endOfMibView entries. */
     for (i = 0; i < r; i++) {
         prev = NULL;
@@ -1275,7 +1278,6 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
         SNMP_FREE(n);
         return -1;
     }
-    memset(s, 0, sizeof(netsnmp_session));
     snmp_sess_init(s);
 
     /*
@@ -2583,6 +2585,13 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
     int             i = 0, n = 0, r = 0;
     netsnmp_request_info *request;
 
+    if (NULL == asp || NULL == asp->pdu)
+        return SNMP_ERR_GENERR;
+
+    if (0 == asp->pdu->msgMaxSize)
+        asp->pdu->msgMaxSize = netsnmp_max_send_msg_size();
+    DEBUGMSGTL(("msgMaxSize", "pdu max size %lu\n", asp->pdu->msgMaxSize));
+
     if (asp->treecache == NULL && asp->treecache_len == 0) {
         asp->treecache_len = SNMP_MAX(1 + asp->vbcount / 4, 16);
         asp->treecache =
@@ -2643,13 +2652,11 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             if (avgvarbind == 0)
                 avgvarbind = 15;
 
-            if (asp->session->sndMsgMaxSize &&
-                (maxresponses > (asp->session->sndMsgMaxSize / avgvarbind))) {
-                maxresponses = asp->session->sndMsgMaxSize / avgvarbind;
+            if (maxresponses > (asp->pdu->msgMaxSize / avgvarbind)) {
+                maxresponses = asp->pdu->msgMaxSize / avgvarbind;
                 DEBUGMSGTL(("snmp_agent:bulk",
-                            "lowering maxresponse to %d based on session sndMsgMaxSize %ld and avgBulkVarbindSize %d\n",
-                            maxresponses, asp->session->sndMsgMaxSize,
-                            avgvarbind));
+                            "lowering maxresponse to %d based pdusession msgMaxSize %ld and avgBulkVarbindSize %d\n",
+                            maxresponses, asp->pdu->msgMaxSize, avgvarbind));
             }
 
              /* ensure that the maximum number of repetitions will fit in the
@@ -3405,6 +3412,9 @@ handle_getnext_loop(netsnmp_agent_session *asp)
     int             status, rough_size, count = 0, total, val_len;
     netsnmp_variable_list *var_ptr, *last_var = NULL;
 
+    if (NULL == asp || NULL == asp->pdu)
+        return SNMP_ERR_GENERR;
+
     total = count_varbinds(asp->pdu->variables);
 
     /*
@@ -3451,7 +3461,7 @@ handle_getnext_loop(netsnmp_agent_session *asp)
             /*
              * make a very rough guesstimate of the encoded varbind size by
              * adding the name and val lengths. If these rough sizes add up
-             * to more than the sndMsgMaxSize, stop gathing new varbinds.
+             * to more than the msgMaxSize, stop gathing new varbinds.
              *
              * [Increasing the accuracy of this estimate would allow us to
              * do better at filling packets and collecting fewer varbinds that
@@ -3469,8 +3479,7 @@ handle_getnext_loop(netsnmp_agent_session *asp)
 
             DEBUGMSGTL(("results:intermediate", "\t+ %ld %d = %d\n",
                         var_ptr->name_length,  val_len, rough_size));
-            if (asp->session->sndMsgMaxSize &&
-                rough_size > asp->session->sndMsgMaxSize) {
+            if (rough_size > asp->pdu->msgMaxSize) {
                 DEBUGMSGTL(("results",
                             "estimating packet too big; stop gathering\n"));
                 asp->pdu->flags |= UCD_MSG_FLAG_BULK_TOOBIG |
@@ -3482,8 +3491,7 @@ handle_getnext_loop(netsnmp_agent_session *asp)
             }
             last_var = var_ptr;
         }
-        if (asp->session->sndMsgMaxSize &&
-            rough_size > asp->session->sndMsgMaxSize)
+        if (rough_size > asp->pdu->msgMaxSize)
             break;
 
         netsnmp_reassign_requests(asp);
