@@ -5860,6 +5860,7 @@ packet_ok(u_char * buf, int cc, struct sockaddr_in *from,
     /*
      * Path MTU Discovery (RFC1191) 
      */
+#if 0
     if (code != ICMP_UNREACH_NEEDFRAG)
         pmtu = 0;
     else {
@@ -5869,6 +5870,7 @@ packet_ok(u_char * buf, int cc, struct sockaddr_in *from,
         pmtu = ntohs(((struct my_pmtu *) &icp->icmp_void)->ipm_nextmtu);
 #endif
     }
+#endif
     if ((type == ICMP_TIMXCEED && code == ICMP_TIMXCEED_INTRANS) ||
         type == ICMP_UNREACH || type == ICMP_ECHOREPLY) {
         struct ip *hip;
