@@ -594,7 +594,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 /*  see <netinet/tcp.h> */
 #define TCP_ALL ((1 << (TCP_CLOSING + 1)) - 1)
 
-const static int linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
+static const int linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
 #if HAVE_NETLINK_NETLINK_H
 
