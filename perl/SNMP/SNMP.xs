@@ -2560,6 +2560,8 @@ snmp_new_session(version, community, peer, lport, retries, timeout)
 	   SnmpSession *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
+           snmp_sess_init(&session);
+
            __libraries_init("perl");
            
            session.version = -1;
@@ -2636,6 +2638,8 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
 	   SnmpSession session = {0};
 	   SnmpSession *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+
+           snmp_sess_init(&session);
 
            __libraries_init("perl");
 
@@ -2805,6 +2809,8 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
 	   SnmpSession session = {0};
 	   SnmpSession *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+
+           snmp_sess_init(&session);
 
            __libraries_init("perl");
 
