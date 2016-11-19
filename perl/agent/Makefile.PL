@@ -91,6 +91,7 @@ sub InitMakeParams {
 #	    $Params{'PREREQ_PM'} = {'NetSNMP::OID' => '0.1'};
 	}
 	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
+        $Params{'CCFLAGS'} .= ' -Wformat';
 	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
 	    die "You need to install net-snmp first (I can't find net-snmp-config)";
 	}
