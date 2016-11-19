@@ -2588,7 +2588,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
     if (NULL == asp || NULL == asp->pdu)
         return SNMP_ERR_GENERR;
 
-    if (0 == asp->pdu->msgMaxSize)
+    if (asp->pdu->msgMaxSize == 0)
         asp->pdu->msgMaxSize = netsnmp_max_send_msg_size();
     DEBUGMSGTL(("msgMaxSize", "pdu max size %lu\n", asp->pdu->msgMaxSize));
 

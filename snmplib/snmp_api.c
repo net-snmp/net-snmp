@@ -1576,13 +1576,13 @@ netsnmp_sess_config_and_open_transport(netsnmp_session *in_session,
     }
 
     /** if transport has a max size, make sure session is the same (or less) */
-    if (transport->msgMaxSize < in_session->rcvMsgMaxSize) {
+    if (in_session->rcvMsgMaxSize > transport->msgMaxSize) {
         DEBUGMSGTL(("snmp_sess",
                     "limiting session rcv size to transport max\n"));
         in_session->rcvMsgMaxSize = transport->msgMaxSize;
     }
 
-    if (transport->msgMaxSize < in_session->sndMsgMaxSize) {
+    if (in_session->sndMsgMaxSize > transport->msgMaxSize) {
         DEBUGMSGTL(("snmp_sess",
                     "limiting session snd size to transport max\n"));
         in_session->sndMsgMaxSize = transport->msgMaxSize;
@@ -1822,12 +1822,12 @@ snmp_sess_add_ex(netsnmp_session * in_session,
     slp->internal->hook_create_pdu = fcreate_pdu;
 
     /** don't let session max exceed transport max */
-    if (transport->msgMaxSize < slp->session->rcvMsgMaxSize) {
+    if (slp->session->rcvMsgMaxSize > transport->msgMaxSize) {
         DEBUGMSGTL(("snmp_sess_add",
                     "limiting session rcv size to transport max\n"));
         slp->session->rcvMsgMaxSize = transport->msgMaxSize;
     }
-    if (transport->msgMaxSize < slp->session->sndMsgMaxSize) {
+    if (slp->session->sndMsgMaxSize > transport->msgMaxSize) {
         DEBUGMSGTL(("snmp_sess_add",
                     "limiting session snd size to transport max\n"));
         slp->session->sndMsgMaxSize = transport->msgMaxSize;
@@ -5040,11 +5040,11 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
     /*
      * determine max packet size
      */
-    if (0 == pdu->msgMaxSize) {
+    if (pdu->msgMaxSize == 0) {
         pdu->msgMaxSize = netsnmp_max_send_msg_size();
-        if (transport->msgMaxSize < pdu->msgMaxSize)
+        if (pdu->msgMaxSize > transport->msgMaxSize)
             pdu->msgMaxSize = transport->msgMaxSize;
-        if (session->sndMsgMaxSize < pdu->msgMaxSize)
+        if (pdu->msgMaxSize > session->sndMsgMaxSize)
             pdu->msgMaxSize = session->sndMsgMaxSize;
     }
     netsnmp_assert(pdu->msgMaxSize > 0);
