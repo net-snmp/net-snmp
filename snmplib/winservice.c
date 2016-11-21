@@ -159,7 +159,8 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
     /*
      * Generate the command to be executed by the SCM 
      */
-    _sntprintf (szServiceCommand, CountOf(szServiceCommand), _T("%s %s"), szServicePath, _T ("-service"));
+    _sntprintf(szServiceCommand, CountOf(szServiceCommand), _T("\"%s\" %s"),
+               szServicePath, _T("-service"));
 
     /*
      * Create the desired service 
