@@ -62,6 +62,7 @@ extern          "C" {
     NETSNMP_IMPORT
     void            netsnmp_config_error(const char *, ...)
 	NETSNMP_ATTRIBUTE_FORMAT(printf, 1, 2);
+    NETSNMP_IMPORT
     void            netsnmp_config_warn(const char *, ...)
 	NETSNMP_ATTRIBUTE_FORMAT(printf, 1, 2);
 

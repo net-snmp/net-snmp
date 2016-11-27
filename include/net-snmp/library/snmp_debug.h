@@ -38,6 +38,7 @@ extern          "C" {
     void            debugmsgtoken(const char *token, const char *format,
                                   ...)
                         NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
+    NETSNMP_IMPORT
     void            debug_combo_nc(const char *token, const char *format,
                                    ...)
                         NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);

@@ -267,6 +267,7 @@ extern          "C" {
     void            netsnmp_set_monotonic_marker(marker_t *pm);
     NETSNMP_IMPORT
     long            atime_diff(const_marker_t first, const_marker_t second);
+    NETSNMP_IMPORT
     u_long          uatime_diff(const_marker_t first, const_marker_t second);       /* 1/1000th sec */
     NETSNMP_IMPORT
     u_long          uatime_hdiff(const_marker_t first, const_marker_t second);      /* 1/100th sec */

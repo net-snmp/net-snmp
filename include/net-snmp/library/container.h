@@ -309,6 +309,7 @@ extern "C" {
     int netsnmp_ncompare_cstring(const void * lhs, const void * rhs);
 
     /** useful for octet strings */
+    NETSNMP_IMPORT
     int netsnmp_compare_mem(const char * lhs, size_t lhs_len,
                             const char * rhs, size_t rhs_len);
 
