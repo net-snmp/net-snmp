@@ -3387,7 +3387,7 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
         save_vp = vp;
         for(save_length = 0; save_vp; save_vp = save_vp->next_variable)
             ++save_length;
-        DEBUGMSGTL(("send", "trimmed %ld variables\n", save_length));
+        DEBUGMSGTL(("send", "trimmed %" NETSNMP_PRIz "d variables\n", save_length));
         snmp_free_varbind(vp);
     }
 
@@ -5107,7 +5107,7 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
             curr_count = count_varbinds(pdu->variables);
             DEBUGMSGTL(("sess_async_send", " vb count: %d -> %d\n", orig_count,
                         curr_count));
-            DEBUGMSGTL(("sess_async_send", " pdu_len: %ld -> %ld (max %ld)\n",
+            DEBUGMSGTL(("sess_async_send", " pdu_len: %" NETSNMP_PRIz "d -> %" NETSNMP_PRIz "d (max %ld)\n",
                         orig_length, length, pdu->msgMaxSize));
         }
 
@@ -5134,7 +5134,8 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
     } while(1);
 
     DEBUGMSGTL(("sess_async_send",
-                "final pktbuf_len after building packet %lu\n", pktbuf_len));
+                "final pktbuf_len after building packet %" NETSNMP_PRIz "u\n",
+                pktbuf_len));
     if (curr_count != orig_count)
         DEBUGMSGTL(("sess_async_send",
                     "sending %d of %d varbinds (-%d) from bulk response\n",
@@ -5142,7 +5143,7 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
 
     if (length > pdu->msgMaxSize) {
         DEBUGMSGTL(("sess_async_send",
-                    "length of packet (%lu) exceeded pdu maximum (%lu)\n",
+                    "length of packet (%" NETSNMP_PRIz "u) exceeded pdu maximum (%lu)\n",
                     length, pdu->msgMaxSize));
         netsnmp_assert(SNMPERR_TOO_LONG == session->s_snmp_errno);
     }
@@ -6010,9 +6011,8 @@ _sess_read_dgram_packet(void *sessp, netsnmp_large_fd_set * fdset,
     }
 
     if ((rcvp->packet = (u_char *) malloc(SNMP_MAX_RCV_MSG_SIZE)) == NULL) {
-        DEBUGMSGTL(("sess_read_packet", "can't malloc %" NETSNMP_PRIz
-                    "u bytes for packet\n",
-                    (unsigned long)SNMP_MAX_RCV_MSG_SIZE));
+        DEBUGMSGTL(("sess_read_packet", "can't malloc %u bytes for packet\n",
+                    SNMP_MAX_RCV_MSG_SIZE));
         return -2;
     }
 

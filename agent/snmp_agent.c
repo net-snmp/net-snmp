@@ -3477,8 +3477,8 @@ handle_getnext_loop(netsnmp_agent_session *asp)
 #endif
                 val_len = var_ptr->val_len;
 
-            DEBUGMSGTL(("results:intermediate", "\t+ %ld %d = %d\n",
-                        var_ptr->name_length,  val_len, rough_size));
+            DEBUGMSGTL(("results:intermediate", "\t+ %" NETSNMP_PRIz "d %d = %d\n",
+                        var_ptr->name_length, val_len, rough_size));
             if (rough_size > asp->pdu->msgMaxSize) {
                 DEBUGMSGTL(("results",
                             "estimating packet too big; stop gathering\n"));

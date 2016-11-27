@@ -374,7 +374,7 @@ int CONTAINER_INSERT_BEFORE(netsnmp_container *x, size_t pos, void *k)
 
     rc = x->insert_before(x, pos, k);
     if (rc < 0)
-        snmp_log(LOG_ERR,"error on container '%s' insert_before %ld (%d)\n",
+        snmp_log(LOG_ERR, "error on container '%s' insert_before %" NETSNMP_PRIz "d (%d)\n",
                  x->container_name ? x->container_name : "", pos, rc);
 
     return rc;
@@ -423,7 +423,7 @@ int CONTAINER_REMOVE_AT(netsnmp_container *x, size_t pos, void **k)
     /** start at given container */
     rc = x->remove_at(x, pos, k);
     if (rc < 0) {
-        snmp_log(LOG_ERR,"error on container '%s' remove_at %ld (%d)\n",
+        snmp_log(LOG_ERR, "error on container '%s' remove_at %" NETSNMP_PRIz "d (%d)\n",
                  x->container_name ? x->container_name : "", pos, rc);
         return rc;
     } else if (NULL == k || NULL == *k)
@@ -457,7 +457,7 @@ int CONTAINER_GET_AT(netsnmp_container *x, size_t pos, void **k)
     /** start at given container */
     rc = x->get_at(x, pos, k);
     if (rc < 0)
-        snmp_log(LOG_ERR,"error on container '%s' get_at %ld (%d)\n",
+        snmp_log(LOG_ERR, "error on container '%s' get_at %" NETSNMP_PRIz "d (%d)\n",
                  x->container_name ? x->container_name : "", pos, rc);
 
     return rc;
