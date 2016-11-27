@@ -23,6 +23,8 @@
 extern          "C" {
 #endif
 
+    struct session_list;
+
     NETSNMP_IMPORT
     void            snmp_sess_init(netsnmp_session *);
 
@@ -54,6 +56,10 @@ extern          "C" {
     NETSNMP_IMPORT
     int             snmp_close_sessions(void);
 
+    NETSNMP_IMPORT
+    int
+    _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu,
+                              int bulk);
 
     /*
      * int snmp_send(session, pdu)

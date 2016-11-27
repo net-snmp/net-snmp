@@ -2002,9 +2002,6 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
 
         /** so far so good? try and build packet */
         if (status == SNMP_ERR_NOERROR) {
-            int _build_initial_pdu_packet(struct session_list *slp,
-                                          netsnmp_pdu *pdu, int bulk);
-
             struct session_list *slp = snmp_sess_pointer(asp->session);
 
             /** build packet to send */
