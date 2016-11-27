@@ -6,8 +6,9 @@
      *    (including error handling and debugging).
      */
 
-#include <net-snmp/types.h>
 #include <stdarg.h>	/* for va_list */
+#include <net-snmp/types.h>
+#include <net-snmp/library/netsnmp-attribute-format.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,14 +39,9 @@ extern "C" {
 
     /* Logging messages */
 
-#if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
-#define _LOG_ATTR
-#else
-#define _LOG_ATTR   __attribute__ ((__format__ (__printf__, 2, 3)))
-#endif
-
     NETSNMP_IMPORT
-    int  snmp_log( int priority, const char *format, ...) _LOG_ATTR;
+    int  snmp_log( int priority, const char *format, ...)
+        NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
     NETSNMP_IMPORT
     int  snmp_vlog(int priority, const char *format, va_list ap);
     NETSNMP_IMPORT
