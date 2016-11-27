@@ -10,6 +10,10 @@
 #ifndef _SCAPI_H
 #define _SCAPI_H
 
+#ifdef NETSNMP_USE_OPENSSL
+#include <openssl/ossl_typ.h> /* EVP_MD */
+#endif
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -50,7 +54,7 @@ extern          "C" {
     int             sc_get_proper_priv_length(const oid * privtype,
                                               u_int privtype_len);
 #ifdef NETSNMP_USE_OPENSSL
-    const struct env_md_st *sc_get_openssl_hashfn(int auth_type);
+    const EVP_MD *sc_get_openssl_hashfn(int auth_type);
 #endif
 
     NETSNMP_IMPORT
