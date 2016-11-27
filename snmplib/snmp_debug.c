@@ -39,7 +39,9 @@
 #include <dmalloc.h>
 #endif
 
+#ifdef HAVE_PRIORITYNAMES
 #include <sys/syslog.h>
+#endif
 
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
