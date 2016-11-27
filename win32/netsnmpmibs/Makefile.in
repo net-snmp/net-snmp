@@ -103,12 +103,17 @@ LIB32_OBJS2= \
 	"$(INTDIR)\usmStats.obj" \
 	"$(INTDIR)\usmUser.obj" \
 	"$(INTDIR)\snmpNotifyFilterProfileTable.obj" \
+	"$(INTDIR)\snmpNotifyFilterProfileTable_data.obj" \
 	"$(INTDIR)\snmpNotifyFilterTable.obj" \
 	"$(INTDIR)\snmpNotifyFilterTable_data_access.obj" \
+	"$(INTDIR)\snmpNotifyFilterTable_data_storage.obj" \
 	"$(INTDIR)\snmpNotifyFilterTable_interface.obj" \
 	"$(INTDIR)\snmpNotifyTable.obj" \
+	"$(INTDIR)\snmpNotifyTable_data.obj" \
 	"$(INTDIR)\snmpTargetAddrEntry.obj" \
+	"$(INTDIR)\snmpTargetAddrEntry_data.obj" \
 	"$(INTDIR)\snmpTargetParamsEntry.obj" \
+	"$(INTDIR)\snmpTargetParamsEntry_data.obj" \
 	"$(INTDIR)\target.obj" \
 	"$(INTDIR)\target_counters.obj" \
 	"$(INTDIR)\agentx_config.obj" \
@@ -417,6 +422,12 @@ SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable_data.c
+
+"$(INTDIR)\snmpNotifyFilterProfileTable_data.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE="..\..\agent\mibgroup\notification-log-mib\notification_log.c"
 
 "$(INTDIR)\notification_log.obj" : $(SOURCE) "$(INTDIR)"
@@ -435,6 +446,12 @@ SOURCE=..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNoti
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable_data_storage.c
+
+"$(INTDIR)\snmpNotifyFilterTable_data_storage.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable_interface.c
 
 "$(INTDIR)\snmpNotifyFilterTable_interface.obj" : $(SOURCE) "$(INTDIR)"
@@ -447,15 +464,33 @@ SOURCE=..\..\agent\mibgroup\notification\snmpNotifyTable.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=..\..\agent\mibgroup\notification\snmpNotifyTable_data.c
+
+"$(INTDIR)\snmpNotifyTable_data.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=..\..\agent\mibgroup\target\snmpTargetAddrEntry.c
 
 "$(INTDIR)\snmpTargetAddrEntry.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=..\..\agent\mibgroup\target\snmpTargetAddrEntry_data.c
+
+"$(INTDIR)\snmpTargetAddrEntry_data.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=..\..\agent\mibgroup\target\snmpTargetParamsEntry.c
 
 "$(INTDIR)\snmpTargetParamsEntry.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\target\snmpTargetParamsEntry_data.c
+
+"$(INTDIR)\snmpTargetParamsEntry_data.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
