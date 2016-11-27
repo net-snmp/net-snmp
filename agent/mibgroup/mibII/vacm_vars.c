@@ -108,7 +108,7 @@ init_vacm_vars(void)
          var_vacm_view, 3, {2, 1, 4}},
         {VIEWSTORAGE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
          var_vacm_view, 3, {2, 1, 5}},
-        {VIEWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+        {VACMVIEWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
          var_vacm_view, 3, {2, 1, 6}},
     };
 
@@ -522,7 +522,7 @@ var_vacm_view(struct variable * vp,
     case VIEWSTORAGE:
         *write_method = write_vacmViewStorageType;
         break;
-    case VIEWSTATUS:
+    case VACMVIEWSTATUS:
         *write_method = write_vacmViewStatus;
         break;
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
@@ -670,7 +670,7 @@ var_vacm_view(struct variable * vp,
         long_return = gp->viewStorageType;
         return (u_char *) & long_return;
 
-    case VIEWSTATUS:
+    case VACMVIEWSTATUS:
         long_return = gp->viewStatus;
         return (u_char *) & long_return;
     }
