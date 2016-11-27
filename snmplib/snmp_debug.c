@@ -149,7 +149,7 @@ static void
 debug_config_debug_log_level(const char *configtoken, char *line)
 {
 #if !HAVE_PRIORITYNAMES
-    struct strval_s {
+    static const struct strval_s {
         const char *c_name;
         int         c_val;
     } prioritynames[] = {
