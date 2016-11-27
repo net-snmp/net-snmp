@@ -5,6 +5,7 @@
 #define NET_SNMP_CONFIG_H
 
 /* _MSC_VER values
+   1900 = MSCV++ 14.0 (Visual Studio 2015)
    1800 = MSVC++ 12.0 (Visual Studio 2013)
    1700 = MSVC++ 11.0 (Visual Studio 2012)
    1600 = MSVC++ 10.0 (Visual Studio 2010)
