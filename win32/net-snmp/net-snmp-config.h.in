@@ -1761,7 +1761,7 @@ enum {
 
 /* Define to 1 if you have the `strtoull' function. */
 #if _MSC_VER >= 1800
-#define HAVE_STRTOULL
+#define HAVE_STRTOULL 1
 #else
 /* #undef HAVE_STRTOULL */
 #endif
