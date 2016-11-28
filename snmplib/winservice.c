@@ -631,7 +631,7 @@ ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int qu
 static BOOL
 UpdateServiceStatus (DWORD dwStatus, DWORD dwErrorCode, DWORD dwWaitHint)
 {
-  DWORD static dwCheckpoint = 1;
+  static DWORD dwCheckpoint = 1;
   DWORD dwControls = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
   if (g_fRunningAsService == FALSE)
     return FALSE;
