@@ -51,7 +51,7 @@ extern          "C" {
 #define VIEWMASK	4
 #define VIEWTYPE	5
 #define VIEWSTORAGE	6
-#define VIEWSTATUS	7
+#define VACMVIEWSTATUS	7
 
 #define VACM_MAX_STRING 32
 #define VACMSTRINGLEN   34      /* VACM_MAX_STRING + 2 */

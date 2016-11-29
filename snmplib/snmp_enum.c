@@ -28,6 +28,7 @@
 
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/library/tools.h>
+#include <net-snmp/library/system.h>      /* strcasecmp() */
 #include <net-snmp/library/snmp_assert.h>
 
 netsnmp_feature_child_of(snmp_enum_all, libnetsnmp)

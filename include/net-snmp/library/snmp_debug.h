@@ -12,6 +12,8 @@
 #ifndef SNMP_DEBUG_H
 #define SNMP_DEBUG_H
 
+#include <net-snmp/library/netsnmp-attribute-format.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -25,14 +27,6 @@ extern          "C" {
      * compile time.
      */
 
-
-#if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
-#define NETSNMP_ATTRIBUTE_FORMAT(type, formatArg, firstArg)
-#else
-#define NETSNMP_ATTRIBUTE_FORMAT(type, formatArg, firstArg) \
-  __attribute__((__format__( __ ## type ## __, formatArg, firstArg )))
-#endif
-
     /*
      * These functions should not be used, if at all possible.  Instead, use
      * the macros below. 
@@ -44,12 +38,10 @@ extern          "C" {
     void            debugmsgtoken(const char *token, const char *format,
                                   ...)
                         NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
+    NETSNMP_IMPORT
     void            debug_combo_nc(const char *token, const char *format,
                                    ...)
                         NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
-
-#undef NETSNMP_ATTRIBUTE_FORMAT
-
     NETSNMP_IMPORT
     void            debugmsg_oid(const char *token, const oid * theoid,
                                  size_t len);

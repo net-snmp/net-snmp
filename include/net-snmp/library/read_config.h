@@ -22,6 +22,7 @@ extern          "C" {
 #define NETSNMP_APPLICATION_CONFIG_TYPE "snmpapp"
 
 #include <net-snmp/config_api.h>
+#include <net-snmp/library/netsnmp-attribute-format.h>
 
     /*
      * Defines a set of file types and the parse and free functions
@@ -58,17 +59,12 @@ extern          "C" {
     int             read_config_files(int);
     NETSNMP_IMPORT
     void            free_config(void);
-#if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2&& __GNUC_MINOR__ < 8)
-    NETSNMP_IMPORT
-    void            netsnmp_config_error(const char *, ...);
-    void            netsnmp_config_warn(const char *, ...);
-#else
     NETSNMP_IMPORT
     void            netsnmp_config_error(const char *, ...)
-	__attribute__((__format__(__printf__, 1, 2)));
+	NETSNMP_ATTRIBUTE_FORMAT(printf, 1, 2);
+    NETSNMP_IMPORT
     void            netsnmp_config_warn(const char *, ...)
-	__attribute__((__format__(__printf__, 1, 2)));
-#endif
+	NETSNMP_ATTRIBUTE_FORMAT(printf, 1, 2);
 
     NETSNMP_IMPORT
     char           *skip_white(char *);

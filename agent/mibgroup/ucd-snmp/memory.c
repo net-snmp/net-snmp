@@ -59,7 +59,7 @@ handle_memory(netsnmp_mib_handler *handler,
                 netsnmp_request_info *requests)
 {
     netsnmp_memory_info *mem_info;
-    unsigned long val;
+    unsigned long long val;
     struct counter64 c64;
     int type = ASN_INTEGER;
     char buf[1024];

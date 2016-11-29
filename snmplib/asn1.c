@@ -332,7 +332,7 @@ _asn_short_err(const char *str, size_t wrongsize, size_t rightsize)
  *
  */
 u_char *
-asn_parse_nlength(u_char *pkt, size_t pkt_len, size_t *data_len)
+asn_parse_nlength(u_char *pkt, size_t pkt_len, u_long *data_len)
 {
     int len_len;
 

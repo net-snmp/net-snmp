@@ -5,6 +5,7 @@
 #define NET_SNMP_CONFIG_H
 
 /* _MSC_VER values
+   1900 = MSCV++ 14.0 (Visual Studio 2015)
    1800 = MSVC++ 12.0 (Visual Studio 2013)
    1700 = MSVC++ 11.0 (Visual Studio 2012)
    1600 = MSVC++ 10.0 (Visual Studio 2010)
@@ -1687,15 +1688,31 @@ enum {
 #  if defined(NETSNMP_USE_OPENSSL)
 #    ifdef _DLL
 #      ifdef _DEBUG
-#        pragma comment(lib, "libeay32MDd.lib")
+#        ifdef OPENSSL_BEFORE_1_1_0
+#          pragma comment(lib, "libeay32MDd.lib")
+#        else
+#          pragma comment(lib, "libcrypto32MDd.lib")
+#        endif
 #      else
-#        pragma comment(lib, "libeay32MD.lib")
+#        ifdef OPENSSL_BEFORE_1_1_0
+#          pragma comment(lib, "libeay32MD.lib")
+#        else
+#          pragma comment(lib, "libcrypto32MD.lib")
+#        endif
 #      endif
 #    else
 #      ifdef _DEBUG
-#        pragma comment(lib, "libeay32MTd.lib")
+#        ifdef OPENSSL_BEFORE_1_1_0
+#          pragma comment(lib, "libeay32MTd.lib")
+#        else
+#          pragma comment(lib, "libcrypto32MTd.lib")
+#        endif
 #      else
-#        pragma comment(lib, "libeay32MT.lib")
+#        ifdef OPENSSL_BEFORE_1_1_0
+#          pragma comment(lib, "libeay32MT.lib")
+#        else
+#          pragma comment(lib, "libcrypto32MT.lib")
+#        endif
 #      endif
 #    endif
 #    pragma comment(lib, "gdi32.lib")
