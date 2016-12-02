@@ -339,7 +339,7 @@ var_example(struct variable *vp,
      */
     switch (vp->magic) {
     case EXAMPLESTRING:
-        sprintf(string, example_str);
+        sprintf(string, "%s", example_str);
         /*
          * Note that the assumption that the answer will be an
          *  integer does not hold true in this case, so the length
@@ -732,7 +732,7 @@ write_exampletrap2(int action,
         var_obj.name = example_string_oid;
         var_obj.name_length = sizeof(example_string_oid) / sizeof(oid); /* number of sub-ids */
         var_obj.type = ASN_OCTET_STR;   /* type of variable */
-        var_obj.val.string = example_str;       /* value */
+        var_obj.val.string = (u_char *)example_str;       /* value */
         var_obj.val_len = strlen(example_str);
         DEBUGMSGTL(("example", "write_exampletrap2 sending the v2 trap\n"));
         send_v2trap(&var_trap);
