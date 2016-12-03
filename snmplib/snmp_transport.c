@@ -119,9 +119,7 @@ static void     netsnmp_tdomain_dump(void);
 #if !defined(NETSNMP_FEATURE_REMOVE_FILTER_SOURCE)
 static netsnmp_container * filtered = NULL;
 
-void netsnmp_transport_parse_filterType(const char *word, char *cptr);
 void netsnmp_transport_parse_filter(const char *word, char *cptr);
-void netsnmp_transport_filter_cleanup(void);
 #endif /* NETSNMP_FEATURE_REMOVE_FILTER_SOURCE */
 
 void

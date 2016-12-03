@@ -36,6 +36,7 @@
 #include "target/snmpTargetParamsEntry_data.h"
 #include "target/snmpTargetAddrEntry_data.h"
 #include "target/target.h"
+#include "agentx/subagent.h"
 #include "snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_storage.h"
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
@@ -69,8 +70,6 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
     size_t                 profileNameLen;
     struct vacm_viewEntry *vp, *head;
     int                    vb_oid_excluded = 0, free_trapvar = 0;
-    extern const oid       snmptrap_oid[];
-    extern const size_t    snmptrap_oid_len;
 
     netsnmp_assert(NULL != paramName);
     netsnmp_assert(NULL != pdu);
