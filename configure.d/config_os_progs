@@ -121,7 +121,7 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
 
     #       WWWXXX - strict type checking
     #
-    DEVFLAGS="-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Wno-type-limits"
+    DEVFLAGS="-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Wno-type-limits -Wno-unused-result"
 else
     DEVFLAGS=""
 fi
