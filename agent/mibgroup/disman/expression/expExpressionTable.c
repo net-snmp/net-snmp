@@ -97,8 +97,6 @@ struct variable2 expExpressionTable_variables[] = {
  */
 
 struct header_complex_index *expExpressionTableStorage = NULL;
-extern struct header_complex_index *expObjectTableStorage;
-extern struct header_complex_index *expValueTableStorage;
 
 oid             mmTimeInstance[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
 

@@ -5,6 +5,7 @@
 #include <net-snmp/data_access/ipstats.h>
 #include <net-snmp/data_access/systemstats.h>
 
+#include "systemstats_private.h"
 #include "kernel_sunos5.h"
 
 static int _systemstats(mibgroup_e, netsnmp_container *, u_int);

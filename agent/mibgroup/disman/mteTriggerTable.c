@@ -189,7 +189,6 @@ struct variable2 mteTriggerTable_variables[] = {
 struct header_complex_index *mteTriggerTableStorage = NULL;
 
 netsnmp_session *mte_callback_sess = NULL;
-extern int      callback_master_num;
 
 /*
  * init_mteTriggerTable():

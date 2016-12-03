@@ -79,8 +79,7 @@ struct stat_table {
     char            description[80];
 };
 
-char	*inet6name(const unsigned char *);
-void	inet6print(unsigned char *, int, const char *, int);
+static char *inet6name(const unsigned char *);
 
 /*
  * Print a summary of TCPv6 connections

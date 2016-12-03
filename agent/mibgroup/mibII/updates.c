@@ -1,6 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "updates.h"
 
 static int
 handle_updates(netsnmp_mib_handler *handler,

@@ -24,6 +24,10 @@ config_arch_require(netbsdelf5, mibII/kernel_netbsd)
 #include "var_route.h"
 #include "route_write.h"
 
+extern oid ip_module_oid[];
+extern int ip_module_oid_len;
+extern int ip_module_count;
+
 extern void     init_ip(void);
 extern Netsnmp_Node_Handler ip_handler;
 extern NetsnmpCacheLoad ip_load;

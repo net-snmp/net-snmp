@@ -130,9 +130,6 @@
 	 *
 	 *********************/
 
-void            Init_HR_Disk(void);
-int             Get_Next_HR_Disk(void);
-int             Get_Next_HR_Disk_Partition(char *, size_t, int);
 #if !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
 static void     Add_HR_Disk_entry(const char *, int, int, int, int,
                                   const char *, int, int);

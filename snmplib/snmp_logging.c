@@ -89,6 +89,9 @@
 #define va_copy(dest, src) memcpy (&dest, &src, sizeof (va_list))
 #endif
 #endif
+#ifndef HAVE_VSNPRINTF
+#include "snprintf.h"
+#endif
 
 netsnmp_feature_child_of(logging_all, libnetsnmp)
 
@@ -141,14 +144,6 @@ netsnmp_enable_this_loghandler(netsnmp_log_handler *logh)
 void
 netsnmp_enable_filelog(netsnmp_log_handler *logh, int dont_zero_log);
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_FILE */
-
-#ifndef HAVE_VSNPRINTF
-                /*
-                 * Need to use the UCD-provided one 
-                 */
-int             vsnprintf(char *str, size_t count, const char *fmt,
-                          va_list arg);
-#endif
 
 void
 parse_config_logOption(const char *token, char *cptr)

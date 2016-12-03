@@ -32,6 +32,8 @@ extern          "C" {
 #define SNMP_MAX_PDU_SIZE 64000 /* local constraint on PDU size sent by agent
                                  * (see also SNMP_MAX_MSG_SIZE in snmp_api.h) */
 
+    extern int      netsnmp_running;
+
     /*
      * If non-zero, causes the addresses of peers to be logged when receptions
      * occur.  
@@ -44,6 +46,9 @@ extern          "C" {
      */
 
     extern int      lastAddrAge;
+
+    extern const oid version_sysoid[];
+    extern const int version_sysoid_len;
 
     /** @typedef struct netsnmp_request_info_s netsnmp_request_info
      * Typedefs the netsnmp_request_info_s struct into
@@ -206,6 +211,11 @@ extern          "C" {
         netsnmp_cachemap *cache_store;
         int             vbcount;
     } netsnmp_agent_session;
+
+    extern netsnmp_session *main_session;
+
+    extern netsnmp_agent_session *netsnmp_processing_set;
+    extern netsnmp_agent_session *agent_delegated_list;
 
     /*
      * Address cache handling functions.  

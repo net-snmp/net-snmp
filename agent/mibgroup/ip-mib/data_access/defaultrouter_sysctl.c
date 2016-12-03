@@ -10,6 +10,7 @@
 #include <net-snmp/data_access/defaultrouter.h>
 
 #include "ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h"
+#include "defaultrouter_private.h"
 
 #include <sys/param.h>
 #include <sys/socket.h>

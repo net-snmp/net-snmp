@@ -14,6 +14,7 @@
 #include "../agent/mibgroup/agentx/agentx_config.h"
 #include "../agent/mibgroup/agentx/client.h"
 #include "../agent/mibgroup/agentx/protocol.h"
+#include "../agent/mibgroup/agentx/subagent.h"
 
 netsnmp_feature_require(snmp_split_pdu)
 netsnmp_feature_require(snmp_reset_var_types)
@@ -24,11 +25,6 @@ netsnmp_feature_require(snmp_reset_var_types)
 #else
 #define UNUSED
 #endif
-
-extern const oid sysuptime_oid[];
-extern const size_t sysuptime_oid_len;
-extern const oid snmptrap_oid[];
-extern const size_t snmptrap_oid_len;
 
 static void
 usage(const char* progname)

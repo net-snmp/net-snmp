@@ -18,6 +18,7 @@
 #include "ip-forward-mib/data_access/route_ioctl.h"
 #include "ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_constants.h"
 #include "if-mib/data_access/interface_ioctl.h"
+#include "route_private.h"
 
 static int _load_v4(netsnmp_container *container, u_long *count);
 static int _load_v6(netsnmp_container *container, u_long *count);

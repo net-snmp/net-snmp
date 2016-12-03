@@ -71,13 +71,6 @@ struct variable2 traceRouteResultsTable_variables[] = {
 };
 
 
-
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-
-extern struct header_complex_index *traceRouteCtlTableStorage;
-extern struct header_complex_index *traceRouteResultsTableStorage;
 void
 traceRouteResultsTable_inadd(struct traceRouteResultsTable_data *thedata);
 

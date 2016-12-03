@@ -106,24 +106,13 @@
 
 #include "struct.h"
 #include "extensible.h"
+#include "pass.h"
 #include "mibgroup/util_funcs.h"
 #include "utilities/execute.h"
 #include "util_funcs/header_simple_table.h"
 
 netsnmp_feature_require(get_exten_instance)
 netsnmp_feature_require(parse_miboid)
-
-extern struct myproc *procwatch;        /* moved to proc.c */
-extern int      numprocs;       /* ditto */
-extern struct extensible *extens;       /* In exec.c */
-extern struct extensible *relocs;       /* In exec.c */
-extern int      numextens;      /* ditto */
-extern int      numrelocs;      /* ditto */
-extern struct extensible *passthrus;    /* In pass.c */
-extern int      numpassthrus;   /* ditto */
-extern netsnmp_subtree *subtrees;
-extern struct variable2 extensible_relocatable_variables[];
-extern struct variable2 extensible_passthru_variables[];
 
 /*
  * the relocatable extensible commands variables 
@@ -192,8 +181,6 @@ init_extensible(void)
                            SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
                            extensible_unregister, NULL);
 }
-
-extern int pass_compare(const void *a, const void *b);
 
 void
 extensible_parse_config(const char *token, char *cptr)

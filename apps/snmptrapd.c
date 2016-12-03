@@ -98,9 +98,14 @@ SOFTWARE.
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/fd_event_manager.h>
 #include <net-snmp/agent/netsnmp_close_fds.h>
+#include "../agent/mibgroup/snmpv3/snmpEngine.h"
+#include "../agent/mibgroup/snmpv3/usmUser.h"
+#include "../agent/mibgroup/agent/nsVacmAccessTable.h"
+#include "../agent/mibgroup/agentx/subagent.h"
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
 #include "snmptrapd_auth.h"
+#include "snmptrapd_sql.h"
 #include "notification-log-mib/notification_log.h"
 #include "tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.h"
 #include "mibII/vacm_conf.h"
@@ -142,8 +147,6 @@ typedef long    fd_mask;
 #endif
 
 char           *logfile = NULL;
-extern int      SyslogTrap;
-extern int      dropauth;
 static int      reconfig = 0;
 char            ddefault_port[] = "udp:162";	/* Default default port */
 char           *default_port = ddefault_port;
@@ -151,16 +154,8 @@ char           *default_port = ddefault_port;
     FILE           *PID;
     char           *pid_file = NULL;
 #endif
-extern void parse_format(const char *token, char *line);
 char           *trap1_fmt_str_remember = NULL;
 int             dofork = 1;
-
-extern int      netsnmp_running;
-
-#ifdef NETSNMP_USE_MYSQL
-extern int      netsnmp_mysql_init(void);
-extern void     snmptrapd_register_sql_configs( void );
-#endif
 
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
@@ -221,15 +216,7 @@ const char     *app_name = "snmptrapd";
 void            trapd_update_config(void);
 
 #ifdef WIN32SERVICE
-void            StopSnmpTrapd(void);
-int             SnmpTrapdMain(int argc, TCHAR * argv[]);
-int __cdecl     _tmain(int argc, TCHAR * argv[]);
-#else
-int             main(int, char **);
-#endif
-
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
-extern void            subagent_init(void);
+static void     StopSnmpTrapd(void);
 #endif
 
 
@@ -311,9 +298,6 @@ version(void)
 RETSIGTYPE
 term_handler(int sig)
 {
-#ifdef WIN32SERVICE
-    extern netsnmp_session *main_session;
-#endif
     netsnmp_running = 0;
 
 #ifdef WIN32SERVICE
@@ -1068,9 +1052,6 @@ main(int argc, char *argv[])
      * initialize local modules 
      */
     if (agentx_subagent) {
-#ifdef USING_SNMPV3_SNMPENGINE_MODULE
-        extern void register_snmpEngine_scalars_context(const char *);
-#endif
         subagent_init();
 #ifdef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE
         /* register the notification log table */
@@ -1100,14 +1081,10 @@ main(int argc, char *argv[])
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
     if (agentx_subagent) {
-#ifdef USING_AGENT_NSVACMACCESSTABLE_MODULE
-        extern void init_register_nsVacm_context(const char *);
-#endif
 #ifdef USING_SNMPV3_USMUSER_MODULE
 #ifdef NETSNMP_FEATURE_CHECKING
         netsnmp_feature_require(init_register_usmUser_context)
 #endif /* NETSNMP_FEATURE_CHECKING */
-        extern void init_register_usmUser_context(const char *);
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
 #endif

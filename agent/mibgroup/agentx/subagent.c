@@ -31,6 +31,7 @@
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/agent_index.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_assert.h>
 
@@ -89,8 +90,6 @@ struct agent_netsnmp_set_info {
 static struct agent_netsnmp_set_info *Sets = NULL;
 
 netsnmp_session *agentx_callback_sess = NULL;
-extern int      callback_master_num;
-extern netsnmp_session *main_session;   /* from snmp_agent.c */
 
 int
 subagent_startup(int majorID, int minorID,

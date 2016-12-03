@@ -30,9 +30,8 @@ netsnmp_feature_require(ipaddress_ioctl_entry_copy)
 #endif /* NETSNMP_FEATURE_REQUIRE_IPADDRESS_ARCH_ENTRY_COPY */
 
 #include "ipaddress_ioctl.h"
-#ifdef SUPPORT_PREFIX_FLAGS
-extern prefix_cbx *prefix_head_list;
-#endif
+#include "ipaddress_private.h"
+#include "interface_private.h"
 
 #define ROUNDUP(a) \
   ((a) > 0 ? (1 + (((a) - 1) | (sizeof(long) - 1))) : sizeof(long))

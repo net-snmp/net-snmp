@@ -438,8 +438,6 @@ struct small_ifaddr {
     struct in_addr  sifa_broadcast;
 };
 
-extern const struct sockaddr *get_address(const void *, int, int);
-extern const struct in_addr *get_in_address(const void *, int, int);
 static int      Interface_Scan_By_Index(int, struct if_msghdr *, char *,
                                         struct small_ifaddr *);
 static int      Interface_Get_Ether_By_Index(int, u_char *);
@@ -1469,11 +1467,6 @@ static int      saveIndex = 0;
 unsigned int getIfSpeed(int fd, struct ifreq ifr, unsigned int defaultspeed)
 {
 #ifdef linux
-    /** temporary expose internal until this module can be re-written */
-    extern unsigned int
-        netsnmp_linux_interface_get_if_speed(int fd, const char *name,
-                unsigned long long defaultspeed);
-
     return netsnmp_linux_interface_get_if_speed(fd, ifr.ifr_name, defaultspeed);
 #else /*!linux*/			   
     return defaultspeed;
@@ -2381,8 +2374,6 @@ static int      header_interfaces(struct variable *, oid *, size_t *, int,
                                   size_t *, WriteMethod ** write);
 static int      header_ifEntry(struct variable *, oid *, size_t *, int,
                                size_t *, WriteMethod ** write);
-u_char         *var_ifEntry(struct variable *, oid *, size_t *, int,
-                            size_t *, WriteMethod ** write);
 
 static char    *physaddrbuf;
 static int      nphysaddrs;

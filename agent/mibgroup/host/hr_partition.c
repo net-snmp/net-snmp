@@ -65,8 +65,6 @@ static void     Save_HR_Partition(int, int);
 
 static void     Init_HR_Partition(void);
 static int      Get_Next_HR_Partition(void);
-int             header_hrpartition(struct variable *, oid *, size_t *, int,
-                                   size_t *, WriteMethod **);
 
 
 #define	HRPART_INDEX		1

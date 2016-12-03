@@ -186,11 +186,6 @@ static char *netsnmp_ds_strings[NETSNMP_DS_MAX_IDS][NETSNMP_DS_MAX_SUBIDS];
 static void *netsnmp_ds_voids[NETSNMP_DS_MAX_IDS][NETSNMP_DS_MAX_SUBIDS];
 #endif /* NETSNMP_FEATURE_REMOVE_DEFAULT_STORE_VOID */
 
-/*
- * Prototype definitions 
- */
-void            netsnmp_ds_handle_config(const char *token, char *line);
-
 /**
  * Stores "true" or "false" given an int value for value into
  * netsnmp_ds_booleans[store][which] slot.  

@@ -92,9 +92,6 @@ perfstat_id_t ps_name;
 int  hz = 1000;
 #endif
 
-#ifndef NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS
-extern int TCP_Count_Connections( void );
-#endif /* NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS */
         /*********************
 	 *
 	 *  Initialisation & common implementation functions

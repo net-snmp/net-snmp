@@ -144,9 +144,6 @@ snmpv3_secLevel_conf(const char *word, char *cptr)
 }
 
 
-NETSNMP_IMPORT int
-snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
-               char **Xpsz, int argc, char *const *argv);
 int
 snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
                char **Xpsz, int argc, char *const *argv)

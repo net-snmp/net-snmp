@@ -2,6 +2,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/cpu.h>
+#include "cpu_linux.h"
 
 #include <unistd.h>
 #include <fcntl.h>

@@ -1743,7 +1743,7 @@ enum {
 #define       LOG_DAEMON      (3<<3)  /* system daemons */
 #endif
 
-#if UCD_COMPATIBLE
+#ifdef UCD_COMPATIBLE
 /* old and in the way */
 #define EXTENSIBLEMIB NETSNMP_UCDAVIS_MIB
 #endif

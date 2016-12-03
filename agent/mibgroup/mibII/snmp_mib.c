@@ -16,6 +16,7 @@
 #include <net-snmp/agent/sysORTable.h>
 
 #include "snmp_mib.h"
+#include "system_mib.h"
 #include "updates.h"
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
@@ -23,9 +24,6 @@ netsnmp_feature_require(check_vb_truthvalue)
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 static const oid snmp_oid[] = { 1, 3, 6, 1, 2, 1, 11 };
-
-extern long snmp_enableauthentraps;
-extern int snmp_enableauthentrapsset;
 
 static int
 snmp_enableauthentraps_store(int a, int b, void *c, void *d)
@@ -103,12 +101,6 @@ handle_snmp(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
-
-#ifdef USING_MIBII_SYSTEM_MIB_MODULE
-extern oid      system_module_oid[];
-extern int      system_module_oid_len;
-extern int      system_module_count;
-#endif
 
 /** Initializes the snmp module */
 void

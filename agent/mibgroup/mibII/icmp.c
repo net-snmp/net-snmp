@@ -29,6 +29,7 @@
 
 #include "util_funcs/MIB_STATS_CACHE_TIMEOUT.h"
 #include "icmp.h"
+#include "ip.h"
 
 #ifndef MIB_STATS_CACHE_TIMEOUT
 #define MIB_STATS_CACHE_TIMEOUT	5
@@ -167,11 +168,6 @@ static struct icmp6_mib icmp6stat;
 static const oid icmp_oid[] = { SNMP_OID_MIB2, 5 };
 static const oid icmp_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 29 };
 static const oid icmp_msg_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 30 };
-#ifdef USING_MIBII_IP_MODULE
-extern oid      ip_module_oid[];
-extern int      ip_module_oid_len;
-extern int      ip_module_count;
-#endif
 
 #ifdef USES_SNMP_DESIGNED_ICMPSTAT
 struct icmp_stats_table_entry {

@@ -11,6 +11,8 @@
 #include <net-snmp/data_access/interface.h>
 
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
+#include "ipaddress.h"
+#include "ipaddress_private.h"
 
 #include <net-snmp/net-snmp-features.h>
 
@@ -33,29 +35,6 @@ static int _access_ipaddress_entry_compare_addr(const void *lhs,
                                                 const void *rhs);
 static void _access_ipaddress_entry_release(netsnmp_ipaddress_entry * entry,
                                             void *unused);
-
-/**---------------------------------------------------------------------*/
-/*
- * external per-architecture functions prototypes
- *
- * These shouldn't be called by the general public, so they aren't in
- * the header file.
- */
-extern int
-netsnmp_arch_ipaddress_container_load(netsnmp_container* container,
-                                      u_int load_flags);
-extern int
-netsnmp_arch_ipaddress_entry_init(netsnmp_ipaddress_entry *entry);
-extern int
-netsnmp_arch_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
-                                  netsnmp_ipaddress_entry *rhs);
-extern void
-netsnmp_arch_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry);
-extern int
-netsnmp_arch_ipaddress_create(netsnmp_ipaddress_entry *entry);
-extern int
-netsnmp_arch_ipaddress_delete(netsnmp_ipaddress_entry *entry);
-
 
 /**---------------------------------------------------------------------*/
 /*

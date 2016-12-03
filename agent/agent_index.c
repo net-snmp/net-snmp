@@ -65,8 +65,6 @@ struct snmp_index {
     struct snmp_index *next_idx;
 }              *snmp_index_head = NULL;
 
-extern netsnmp_session *main_session;
-
 /*
  * The caller is responsible for free()ing the memory returned by
  * this function.  

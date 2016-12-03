@@ -95,8 +95,6 @@ init_nsTransactionTable(void)
     each appropriately according to the data matching the first row
     and return the put_index_data variable at the end of the function.
 */
-extern netsnmp_agent_session *agent_delegated_list;
-
 netsnmp_variable_list *
 nsTransactionTable_get_first_data_point(void **my_loop_context,
                                         void **my_data_context,

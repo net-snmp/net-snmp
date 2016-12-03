@@ -88,12 +88,6 @@ typedef struct tlstmAddrTable_entry_s {
 
 } tlstmAddrTable_entry;
 
-netsnmp_tdata_row *tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
-                                              char *snmpTargetAddrName,
-                                              size_t snmpTargetAddrName_len);
-void tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
-                                netsnmp_tdata_row * row);
-
 static Netsnmp_Node_Handler tlstmAddrTable_handler;
 static int _cache_load(netsnmp_cache *cache, netsnmp_tdata *table);
 static void _cache_free(netsnmp_cache *cache, netsnmp_tdata *table);

@@ -44,8 +44,6 @@
 
 #include <net-snmp/net-snmp-includes.h>
 
-int             main(int, char **);
-
 #define CMD_CREATESEC2GROUP_NAME    "createSec2Group"
 #define CMD_CREATESEC2GROUP         1
 #define CMD_DELETESEC2GROUP_NAME    "deleteSec2Group"

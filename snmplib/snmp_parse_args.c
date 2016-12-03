@@ -59,6 +59,7 @@
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
+#include <net-snmp/library/snmpv3.h>
 #include <net-snmp/library/snmp_parse_args.h>   /* for "internal" definitions */
 #include <net-snmp/utilities.h>
 
@@ -183,10 +184,6 @@ handle_long_opt(const char *myoptarg)
     netsnmp_config(cp);
     free(cp);
 }
-
-extern int      snmpv3_options(char *optarg, netsnmp_session * session,
-                               char **Apsz, char **Xpsz, int argc,
-                               char *const *argv);
 
 int
 netsnmp_parse_args(int argc,

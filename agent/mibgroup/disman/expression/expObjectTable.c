@@ -99,12 +99,6 @@ struct variable2 expObjectTable_variables[] = {
 };
 
 
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-extern struct header_complex_index *expExpressionTableStorage;
-extern struct header_complex_index *expValueTableStorage;
-
 struct header_complex_index *expObjectTableStorage = NULL;
 
 /*

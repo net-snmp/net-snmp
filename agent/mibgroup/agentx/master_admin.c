@@ -35,6 +35,8 @@
 
 #include "agentx/protocol.h"
 #include "agentx/client.h"
+#include "agentx/subagent.h"
+#include "agentx/master_admin.h"
 
 #include <net-snmp/agent/agent_index.h>
 #include <net-snmp/agent/agent_trap.h>
@@ -408,8 +410,6 @@ agentx_notify(netsnmp_session * session, netsnmp_pdu *pdu)
 {
     netsnmp_session       *sp;
     netsnmp_variable_list *var;
-    extern const oid       sysuptime_oid[], snmptrap_oid[];
-    extern const size_t    sysuptime_oid_len, snmptrap_oid_len;
 
     sp = find_agentx_session(session, pdu->sessid);
     if (sp == NULL)

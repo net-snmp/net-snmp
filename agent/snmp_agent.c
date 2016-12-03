@@ -190,8 +190,8 @@ netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
     }
 }
 
-oid      version_sysoid[] = { NETSNMP_SYSTEM_MIB };
-int      version_sysoid_len = OID_LENGTH(version_sysoid);
+const oid version_sysoid[] = { NETSNMP_SYSTEM_MIB };
+const int version_sysoid_len = OID_LENGTH(version_sysoid);
 
 #define SNMP_ADDRCACHE_SIZE 10
 #define SNMP_ADDRCACHE_MAXAGE 300 /* in seconds */
@@ -226,23 +226,13 @@ netsnmp_agent_session *agent_delegated_list = NULL;
 netsnmp_agent_session *netsnmp_agent_queued_list = NULL;
 
 
-int             netsnmp_agent_check_packet(netsnmp_session *,
-                                           struct netsnmp_transport_s *,
-                                           void *, int);
-int             netsnmp_agent_check_parse(netsnmp_session *, netsnmp_pdu *,
-                                          int);
-void            delete_subnetsnmp_tree_cache(netsnmp_agent_session *asp);
 int             handle_pdu(netsnmp_agent_session *asp);
 int             netsnmp_handle_request(netsnmp_agent_session *asp,
                                        int status);
-int             netsnmp_wrap_up_request(netsnmp_agent_session *asp,
-                                        int status);
 int             check_delayed_request(netsnmp_agent_session *asp);
 int             handle_getnext_loop(netsnmp_agent_session *asp);
 int             handle_set_loop(netsnmp_agent_session *asp);
 
-int             netsnmp_check_queued_chain_for(netsnmp_agent_session *asp);
-int             netsnmp_add_queued(netsnmp_agent_session *asp);
 int             netsnmp_remove_from_delegated(netsnmp_agent_session *asp);
 
 

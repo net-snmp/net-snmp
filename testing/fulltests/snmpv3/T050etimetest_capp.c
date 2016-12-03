@@ -95,19 +95,6 @@ int             sleeptime = 2;
 #define BLAT "alk;djf;an riu;alicenmrul;aiknglksajhe1 adcfalcenrco2"
 
 
-
-
-/*
- * Prototypes.
- */
-void            usage(FILE * ofp);
-
-int             test_etime(void);
-int             test_hashindex(void);
-
-
-
-
 int
 main(int argc, char **argv)
 {

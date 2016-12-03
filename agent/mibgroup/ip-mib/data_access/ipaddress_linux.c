@@ -15,6 +15,7 @@
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
 #include "ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_constants.h"
 #include "mibgroup/util_funcs.h"
+#include "../../if-mib/data_access/interface_private.h"
 
 #include <errno.h>
 #include <sys/ioctl.h>
@@ -40,11 +41,12 @@ netsnmp_feature_require(ipaddress_ioctl_entry_copy)
 #endif /* HAVE_LINUX_RTNETLINK_H */
 #endif
 
+#include "ipaddress.h"
 #include "ipaddress_ioctl.h"
-#ifdef SUPPORT_PREFIX_FLAGS
-extern prefix_cbx *prefix_head_list;
-#endif
+#include "ipaddress_private.h"
+
 int _load_v6(netsnmp_container *container, int idx_offset);
+
 #ifdef HAVE_LINUX_RTNETLINK_H
 int
 netsnmp_access_ipaddress_extra_prefix_info(int index,

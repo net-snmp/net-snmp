@@ -201,6 +201,9 @@ struct pingProbeHistoryTable_data {
 
 };
 
+extern struct header_complex_index *pingCtlTableStorage;
+extern struct header_complex_index *pingResultsTableStorage;
+extern struct header_complex_index *pingProbeHistoryTableStorage;
 
 /*
  * function declarations 

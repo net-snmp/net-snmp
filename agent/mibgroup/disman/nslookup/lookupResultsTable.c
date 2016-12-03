@@ -34,12 +34,6 @@ struct variable2 lookupResultsTable_variables[] = {
      var_lookupResultsTable, 2, {1, 3}}
 };
 
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-
-extern struct header_complex_index *lookupCtlTableStorage;
-extern struct header_complex_index *lookupResultsTableStorage;
 
 int
 lookupResultsTable_inadd(struct lookupResultsTable_data *thedata);

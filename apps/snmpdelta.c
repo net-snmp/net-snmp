@@ -100,7 +100,7 @@ int             keepSeconds = 0, peaks = 0;
 int             tableForm = 0;
 int             varbindsPerPacket = 60;
 
-void            processFileArgs(char *fileName);
+static void     processFileArgs(char *fileName);
 
 void
 usage(void)

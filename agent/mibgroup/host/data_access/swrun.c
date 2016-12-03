@@ -14,6 +14,8 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/swrun.h>
+#include "swrun.h"
+#include "swrun_private.h"
 
 netsnmp_feature_child_of(software_running, libnetsnmpmibs)
 
@@ -29,25 +31,11 @@ static int _swrun_init = 0;
 static netsnmp_cache     *swrun_cache     = NULL;
 static netsnmp_container *swrun_container = NULL;
 
-netsnmp_container * netsnmp_swrun_container(void);
-netsnmp_cache     * netsnmp_swrun_cache    (void);
-
 /*
  * local static prototypes
  */
 static void _swrun_entry_release(netsnmp_swrun_entry * entry,
                                             void *unused);
-
-/**---------------------------------------------------------------------*/
-/*
- * external per-architecture functions prototypes
- *
- * These shouldn't be called by the general public, so they aren't in
- * the header file.
- */
-extern void netsnmp_arch_swrun_init(void);
-extern int netsnmp_arch_swrun_container_load(netsnmp_container* container,
-                                             u_int load_flags);
 
 /**
  * initialization

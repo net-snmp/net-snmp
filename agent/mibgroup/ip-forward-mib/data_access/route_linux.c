@@ -15,6 +15,8 @@
 #include "ip-forward-mib/data_access/route_ioctl.h"
 #include "ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_constants.h"
 #include "if-mib/data_access/interface_ioctl.h"
+#include "route.h"
+#include "route_private.h"
 
 static int
 _type_from_flags(unsigned int flags)

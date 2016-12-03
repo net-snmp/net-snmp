@@ -14,6 +14,7 @@
 #include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable.h"
 #include "if-mib/data_access/interface.h"
+#include "interface_private.h"
 
 netsnmp_feature_child_of(interface_all, libnetsnmpmibs)
 netsnmp_feature_child_of(interface, interface_all)
@@ -44,24 +45,6 @@ static void _access_interface_entry_release(netsnmp_interface_entry * entry,
 static void _access_interface_entry_save_name(const char *name, oid index);
 static void _parse_interface_config(const char *token, char *cptr);
 static void _free_interface_config(void);
-
-/**---------------------------------------------------------------------*/
-/*
- * external per-architecture functions prototypes
- *
- * These shouldn't be called by the general public, so they aren't in
- * the header file.
- */
-#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
-extern void netsnmp_arch_interface_init(void);
-extern int
-netsnmp_arch_interface_container_load(netsnmp_container* container,
-                                      u_int load_flags);
-extern int
-netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
-                              int ifAdminStatus);
-extern int netsnmp_arch_interface_index_find(const char*name);
-#endif
 
 
 /**

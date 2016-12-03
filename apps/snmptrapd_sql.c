@@ -55,6 +55,7 @@
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_auth.h"
 #include "snmptrapd_log.h"
+#include "snmptrapd_sql.h"
 
 netsnmp_feature_require(container_fifo)
 

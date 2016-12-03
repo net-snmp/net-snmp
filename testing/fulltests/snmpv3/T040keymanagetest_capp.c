@@ -103,18 +103,6 @@ const u_char   *newkey = NULL;
 int             bequiet = 0;
 
 
-/*
- * Prototypes.
- */
-void            usage(FILE * ofp);
-
-int             test_genkul(void);
-int             test_genKu(void);
-int             test_keychange(void);
-
-
-
-
 int
 main(int argc, char **argv)
 {

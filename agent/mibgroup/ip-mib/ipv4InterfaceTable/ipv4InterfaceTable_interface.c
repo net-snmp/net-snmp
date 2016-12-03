@@ -166,8 +166,6 @@ NETSNMP_STATIC_INLINE int
                                                 var, int column);
 #endif
 
-ipv4InterfaceTable_data *ipv4InterfaceTable_allocate_data(void);
-
 /**
  * @internal
  * Initialize the table ipv4InterfaceTable 

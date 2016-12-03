@@ -74,12 +74,6 @@ oid netsnmp_UDPIPv6Domain[] = { TRANSPORT_DOMAIN_UDP_IPV6 };
 static netsnmp_tdomain udp6Domain;
 
 /*
- * from snmpUDPDomain. not static, but not public, either.
- * (ie don't put it in a public header.)
- */
-extern void _netsnmp_udp_sockopt_set(int fd, int server);
-
-/*
  * Return a string representing the address in data, or else the "far end"
  * address if data is NULL.  
  */

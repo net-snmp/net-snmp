@@ -75,8 +75,6 @@ netsnmp_feature_child_of(get_routes, libnetsnmpmibs)
 #include <netinet/mib_kern.h>
 #endif                          /* hpux */
 
-extern WriteMethod write_rte;
-
 #if !defined (WIN32) && !defined (cygwin)
 
 #ifdef USE_SYSCTL_ROUTE_DUMP
@@ -86,9 +84,6 @@ static void     Route_Scan_Reload(void);
 static unsigned char *all_routes = 0;
 static unsigned char *all_routes_end;
 static size_t   all_routes_size;
-
-extern const struct sockaddr *get_address(const void *, int, int);
-extern const struct in_addr *get_in_address(const void *, int, int);
 
 /*
  * var_ipRouteEntry(...

@@ -140,16 +140,15 @@ SOFTWARE.
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/vacm.h>
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+#include <openssl/ssl.h>
+#include <net-snmp/library/cert_util.h>
+#endif
 
 netsnmp_feature_child_of(statistics, libnetsnmp)
 netsnmp_feature_child_of(snmp_api, libnetsnmp)
 netsnmp_feature_child_of(oid_is_subtree, snmp_api)
 netsnmp_feature_child_of(snmpv3_probe_contextEngineID_rfc5343, snmp_api)
-
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
-extern void netsnmp_certs_init(void);
-extern void netsnmp_certs_shutdown(void);
-#endif
 
 static void     _init_snmp(void);
 
@@ -345,9 +344,6 @@ static int      snmp_detail_f = 0;
 /*
  * Prototypes.
  */
-int             snmp_build(u_char ** pkt, size_t * pkt_len,
-                           size_t * offset, netsnmp_session * pss,
-                           netsnmp_pdu *pdu);
 static int      snmp_parse(void *, netsnmp_session *, netsnmp_pdu *,
                            u_char *, size_t);
 
@@ -362,11 +358,6 @@ static int      snmp_resend_request(struct session_list *slp,
                                     int incr_retries);
 static void     register_default_handlers(void);
 static struct session_list *snmp_sess_copy(netsnmp_session * pss);
-int             snmp_get_errno(void);
-NETSNMP_IMPORT
-void            snmp_synch_reset(netsnmp_session * notused);
-NETSNMP_IMPORT
-void            snmp_synch_setup(netsnmp_session * notused);
 
 #ifndef HAVE_STRERROR
 const char     *

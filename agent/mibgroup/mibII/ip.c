@@ -59,9 +59,6 @@ perfstat_id_t ps_name;
 	 *
 	 *********************/
 
-extern void     init_routes(void);
-
-
 /*
  * define the structure we're going to ask the agent to register our
  * information at 

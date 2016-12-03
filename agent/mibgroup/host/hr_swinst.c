@@ -141,10 +141,10 @@ int             header_hrswInstEntry(struct variable *, oid *, size_t *,
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-extern void     Init_HR_SWInst(void);
-extern int      Get_Next_HR_SWInst(void);
-extern void     End_HR_SWInst(void);
-extern int      Save_HR_SW_info(int ix);
+static void     Init_HR_SWInst(void);
+static int      Get_Next_HR_SWInst(void);
+static void     End_HR_SWInst(void);
+static int      Save_HR_SW_info(int ix);
 
 static void     Mark_HRSW_token(void);
 static void     Release_HRSW_token(void);
