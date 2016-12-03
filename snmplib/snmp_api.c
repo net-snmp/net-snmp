@@ -5277,6 +5277,18 @@ _sess_async_send(void *sessp,
     reqid = pdu->reqid;
 
     /*
+     * Bug 2387: 0 is a valid request id, so since reqid is used as a return
+     * code with 0 meaning an error, set reqid to 1 if there is no error. This
+     * does not affect the request id in the packet and fixes a memory leak
+     * for incoming PDUs with a request id of 0. This could cause some
+     * confusion if the caller is expecting the request id to match the
+     * return code, as the documentation states it will. Most example code
+     * just checks for non-zero, so hopefully this wont be an issue.
+     */
+    if (0 == reqid && (SNMPERR_SUCCESS == session->s_snmp_errno))
+        ++reqid;
+
+    /*
      * Add to pending requests list if we expect a response.  
      */
     if (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) {
