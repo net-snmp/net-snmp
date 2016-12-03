@@ -4087,8 +4087,8 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
     int             minpacket = 0;  /* min ip packet size */
 
 
-    struct ip      *outip;  /* last output (udp) packet */
-    struct udphdr  *outudp; /* last output (udp) packet */
+    struct ip      *outip = NULL;   /* last output (udp) packet */
+    struct udphdr  *outudp;         /* last output (udp) packet */
     int             packlen = 0;    /* total length of packet */
     int             optlen = 0;     /* length of ip options */
     int             options = 0;    /* socket options */
