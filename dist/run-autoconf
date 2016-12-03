@@ -10,6 +10,10 @@ for path in $searchprefixes ; do
 	prog="$path/autoconf-$version/bin/$prog"
 	break;
     fi
+    if [ -x "$path/bin/autoconf-$version" ]; then
+	prog="$path/bin/$prog-$version"
+	break;
+    fi
 done
 
 echo "trying $prog version"
