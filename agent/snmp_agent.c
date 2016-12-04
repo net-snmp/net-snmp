@@ -1571,6 +1571,7 @@ netsnmp_remove_delegated_requests_for_session(netsnmp_session *sess)
     return count;
 }
 
+#if 0
 int
 netsnmp_check_queued_chain_for(netsnmp_agent_session *asp)
 {
@@ -1581,6 +1582,7 @@ netsnmp_check_queued_chain_for(netsnmp_agent_session *asp)
     }
     return 0;
 }
+#endif
 
 int
 netsnmp_add_queued(netsnmp_agent_session *asp)
