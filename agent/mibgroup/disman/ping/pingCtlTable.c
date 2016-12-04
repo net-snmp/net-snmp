@@ -57,6 +57,23 @@ static char    *pr_addr(struct in6_addr *, int);
 static char    *pr_addr_n(struct in6_addr *);
 void pingCtlTable_cleaner(struct header_complex_index *thestuff);
 
+static char rcvd_tbl[MAX_DUP_CHK / 8];
+
+static struct proto {
+    int             (*fproc) (char *, ssize_t, struct timeval *, time_t,
+                              struct pingCtlTable_data *,
+                              struct addrinfo *, int, unsigned long *,
+                              unsigned long *, unsigned long *,
+                              unsigned long *, unsigned long, int, int,
+                              int, struct pingProbeHistoryTable_data *,
+                              pid_t);
+    void            (*fsend) (int, pid_t, int, int, char *);
+    struct sockaddr *sasend;    /* sockaddr{} for send, from getaddrinfo */
+    struct sockaddr *sarecv;    /* sockaddr{} for receiving */
+    socklen_t       salen;      /* length of sockaddr{}s */
+    int             icmpproto;  /* IPPROTO_xxx value for ICMP */
+} *pr;
+
 /*
  *pingCtlTable_variables_oid:
  *                                                      
