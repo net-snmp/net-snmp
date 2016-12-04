@@ -2066,20 +2066,3 @@ main(int argc, char **argv)
 }
 #endif /*_GETMIBSTAT_TEST */
 #endif                          /* SUNOS5 */
-
-
-/*-
- * These variables describe the formatting of this file.  If you don't like the
- * template defaults, feel free to change them here (not in your .emacs file).
- *
- * Local Variables:
- * comment-column: 32
- * c-indent-level: 4
- * c-continued-statement-offset: 4
- * c-brace-offset: -4
- * c-argdecl-indent: 0
- * c-label-offset: -4
- * fill-column: 79
- * fill-prefix: " * "
- * End:
- */
