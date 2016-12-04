@@ -131,7 +131,7 @@ debug_config_turn_on_debugging(const char *configtoken, char *line)
 
 #ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
 
-NETSNMP_IMPORT void
+void
 netsnmp_set_debug_log_level(int val)
 {
     if (val < LOG_EMERG)
@@ -141,7 +141,7 @@ netsnmp_set_debug_log_level(int val)
     debug_log_level = val;
 }
 
-NETSNMP_IMPORT int
+int
 netsnmp_get_debug_log_level(void)
 {
     return debug_log_level;
