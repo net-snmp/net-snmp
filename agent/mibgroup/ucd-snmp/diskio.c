@@ -335,7 +335,7 @@ diskio_pre_update_config(int major, int minor, void *serverarg, void *clientarg)
 }
 
 static void
-diskio_free_config()
+diskio_free_config(void)
 {
     int i;
 
