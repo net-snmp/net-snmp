@@ -684,7 +684,7 @@ Save_HR_SW_info(int ix)
         swi->swi_name[ sizeof(swi->swi_name)-1 ] = 0;
     }
 #else
-    snprintf(swi->swi_name, sizeof(swi->swi_name), swi->swi_dep->d_name);
+    snprintf(swi->swi_name, sizeof(swi->swi_name), "%s", swi->swi_dep->d_name);
     swi->swi_name[ sizeof(swi->swi_name)-1 ] = 0;
 #endif
     return 0;
