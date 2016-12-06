@@ -147,7 +147,7 @@ netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
 /** deletes a single dataset table data.
  *  returns the (possibly still good) next pointer of the deleted data object.
  */
-NETSNMP_INLINE netsnmp_table_data_set_storage *
+NETSNMP_STATIC_INLINE netsnmp_table_data_set_storage *
 netsnmp_table_dataset_delete_data(netsnmp_table_data_set_storage *data)
 {
     netsnmp_table_data_set_storage *nextPtr = NULL;
