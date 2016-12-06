@@ -43201,8 +43201,6 @@ fi
 
 # else ack.
 if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
-  echo "$as_me:$LINENO: result: Unknown" >&5
-echo "${ECHO_T}Unknown" >&6
   ac_cv_RTENTRY_TYPE="unknown"
 fi
 

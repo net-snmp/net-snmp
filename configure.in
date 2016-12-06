@@ -5121,7 +5121,6 @@ fi
 
 # else ack.
 if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
-  AC_MSG_RESULT(Unknown)
   ac_cv_RTENTRY_TYPE="unknown"
 fi
 
