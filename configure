@@ -15623,6 +15623,8 @@ esac
 #   Compiler flags:
 #
 
+CFLAGS="-DNETSNMP_REMOVE_U64 $CFLAGS"
+
 # The Net-SNMP source code is not strict-aliasing safe, so add
 # -fno-strict-aliasing to $CFLAGS if the compiler supports it.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports -fno-strict-aliasing" >&5
@@ -26377,7 +26379,7 @@ fi
 #
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether static inline functions are broken (Unixware)" >&5
 $as_echo_n "checking whether static inline functions are broken (Unixware)... " >&6; }
-if ${netsnmp_cv_c_broken_inline+:} false; then :
+if ${netsnmp_cv_broken_inline+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26392,15 +26394,6 @@ inline int main_inline_function( void ) {
 
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_broken_inline=no
-else
-  netsnmp_cv_broken_inline=yes
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_c_broken_inline" >&5
-$as_echo "$netsnmp_cv_c_broken_inline" >&6; }
-
 
 #       Yes -  static inline functions are broken       (Solaris 2.x)
 #
@@ -26409,8 +26402,18 @@ case "$target_os" in
         netsnmp_cv_broken_inline=yes
         ;;
     *)
+        netsnmp_cv_broken_inline=no
         ;;
 esac
+else
+
+    netsnmp_cv_broken_inline=yes
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_broken_inline" >&5
+$as_echo "$netsnmp_cv_broken_inline" >&6; }
 
 if test "$netsnmp_cv_broken_inline" = yes ; then
 

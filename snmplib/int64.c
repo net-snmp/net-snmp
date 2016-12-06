@@ -161,7 +161,8 @@ incrByU32(struct counter64 *pu64, unsigned int u32)
  * @param[out] pu64out pu64one - pu64two.
  */
 void
-u64Subtract(const struct counter64 *pu64one, const struct counter64 *pu64two, struct counter64 *pu64out)
+u64Subtract(const struct counter64 *pu64one, const struct counter64 *pu64two,
+            struct counter64 *pu64out)
 {
     int carry;
 
@@ -191,7 +192,8 @@ u64Incr(struct counter64 *pu64out, const struct counter64 *pu64one)
  * @param[out] pu64out pu64out += (pu64one - pu64two)
  */
 void
-u64UpdateCounter(struct counter64 *pu64out, const struct counter64 *pu64one, const struct counter64 *pu64two)
+u64UpdateCounter(struct counter64 *pu64out, const struct counter64 *pu64one,
+                 const struct counter64 *pu64two)
 {
     struct counter64 tmp;
 
@@ -333,8 +335,10 @@ netsnmp_c64_check_for_32bit_wrap(struct counter64 *old_val,
  * @retval -2 : look like we have 64 bit values, but sums aren't consistent
  */
 int
-netsnmp_c64_check32_and_update(struct counter64 *prev_val, struct counter64 *new_val,
-                               struct counter64 *old_prev_val, int *need_wrap_check)
+netsnmp_c64_check32_and_update(struct counter64 *prev_val,
+                               struct counter64 *new_val,
+                               struct counter64 *old_prev_val,
+                               int *need_wrap_check)
 {
     int rc;
 

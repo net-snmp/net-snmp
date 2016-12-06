@@ -434,7 +434,7 @@ The total number of input IP datagrams received, including
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCInReceives data.
@@ -444,7 +444,7 @@ The total number of input IP datagrams received, including
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCInReceives_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -561,7 +561,7 @@ The total number of octets received in input IP datagrams,
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCInOctets data.
@@ -571,7 +571,7 @@ The total number of octets received in input IP datagrams,
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCInOctets_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -1039,7 +1039,7 @@ The number of input datagrams for which this entity was not
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCInForwDatagrams data.
@@ -1049,7 +1049,7 @@ The number of input datagrams for which this entity was not
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCInForwDatagrams_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -1456,7 +1456,7 @@ The total number of datagrams successfully delivered to IP
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCInDelivers data.
@@ -1466,7 +1466,7 @@ The total number of datagrams successfully delivered to IP
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCInDelivers_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -1584,7 +1584,7 @@ The total number of IP datagrams which local IP user-
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCOutRequests data.
@@ -1594,7 +1594,7 @@ The total number of IP datagrams which local IP user-
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCOutRequests_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -1790,7 +1790,7 @@ The number of datagrams for which this entity was not their
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCOutForwDatagrams data.
@@ -1800,7 +1800,7 @@ The number of datagrams for which this entity was not their
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCOutForwDatagrams_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -2270,7 +2270,7 @@ The total number of IP datagrams that this entity supplied
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCOutTransmits data.
@@ -2280,7 +2280,7 @@ The total number of IP datagrams that this entity supplied
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCOutTransmits_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -2397,7 +2397,7 @@ The total number of octets in IP datagrams delivered to the
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCOutOctets data.
@@ -2407,7 +2407,7 @@ The total number of octets in IP datagrams delivered to the
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCOutOctets_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -2521,7 +2521,7 @@ The number of IP multicast datagrams received.  This object
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCInMcastPkts data.
@@ -2531,7 +2531,7 @@ The number of IP multicast datagrams received.  This object
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCInMcastPkts_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -2646,7 +2646,7 @@ The total number of octets received in IP multicast
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCInMcastOctets data.
@@ -2656,7 +2656,7 @@ The total number of octets received in IP multicast
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCInMcastOctets_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -2772,7 +2772,7 @@ The number of IP multicast datagrams transmitted.  This
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCOutMcastPkts data.
@@ -2782,7 +2782,7 @@ The number of IP multicast datagrams transmitted.  This
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCOutMcastPkts_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -2902,7 +2902,7 @@ The total number of octets transmitted in IP multicast
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCOutMcastOctets data.
@@ -2912,7 +2912,7 @@ The total number of octets transmitted in IP multicast
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCOutMcastOctets_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -3028,7 +3028,7 @@ The number of IP broadcast datagrams received.  This object
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCInBcastPkts data.
@@ -3038,7 +3038,7 @@ The number of IP broadcast datagrams received.  This object
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCInBcastPkts_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
@@ -3152,7 +3152,7 @@ The number of IP broadcast datagrams transmitted.  This
  *
  *
  * Its syntax is COUNTER64 (based on perltype COUNTER64)
- * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
+ * The net-snmp type is ASN_COUNTER64. The C type is struct counter64.
  */
 /**
  * Extract the current value of the ipSystemStatsHCOutBcastPkts data.
@@ -3162,7 +3162,7 @@ The number of IP broadcast datagrams transmitted.  This
  * @param rowreq_ctx
  *        Pointer to the row request context.
  * @param ipSystemStatsHCOutBcastPkts_val_ptr
- *        Pointer to storage for a U64 variable
+ *        Pointer to storage for a struct counter64 variable
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_SKIP            : skip this node (no value for now)
