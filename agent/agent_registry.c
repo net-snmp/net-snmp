@@ -339,7 +339,7 @@ netsnmp_subtree_replace_first(netsnmp_subtree *new_tree,
     return add_subtree(new_tree, context_name);
 }
 
-NETSNMP_INLINE void
+NETSNMP_STATIC_INLINE void
 netsnmp_subtree_change_next(netsnmp_subtree *ptr, netsnmp_subtree *thenext)
 {
     ptr->next = thenext;
@@ -351,7 +351,7 @@ netsnmp_subtree_change_next(netsnmp_subtree *ptr, netsnmp_subtree *thenext)
                                &thenext->oid_off);
 }
 
-NETSNMP_INLINE void
+NETSNMP_STATIC_INLINE void
 netsnmp_subtree_change_prev(netsnmp_subtree *ptr, netsnmp_subtree *theprev)
 {
     ptr->prev = theprev;

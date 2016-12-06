@@ -1998,10 +1998,10 @@ read_config_read_memory(int type, char *readfrom,
         return readfrom;
 
     case ASN_COUNTER64:
-        if (*len < sizeof(U64))
+        if (*len < sizeof(struct counter64 ))
             return NULL;
-        *len = sizeof(U64);
-        read64((U64 *) dataptr, readfrom);
+        *len = sizeof(struct counter64);
+        read64((struct counter64 *) dataptr, readfrom);
         readfrom = skip_token(readfrom);
         return readfrom;
     }

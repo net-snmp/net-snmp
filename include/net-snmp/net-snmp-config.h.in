@@ -1,6 +1,6 @@
 /* include/net-snmp/net-snmp-config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* 
+/*
  * net-snmp configuration header file
  */
 /* Portions of this file are subject to the following copyright(s).  See
