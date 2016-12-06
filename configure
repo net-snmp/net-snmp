@@ -21661,6 +21661,8 @@ echo "${ECHO_T}$EXTRACPPFLAGS" >&6
 #   Compiler flags:
 #
 
+CFLAGS="-DNETSNMP_REMOVE_U64 $CFLAGS"
+
 # The Net-SNMP source code is not strict-aliasing safe, so add
 # -fno-strict-aliasing to $CFLAGS if the compiler supports it.
 echo "$as_me:$LINENO: checking whether the compiler supports -fno-strict-aliasing" >&5

@@ -303,7 +303,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCInReceives_get(ipSystemStatsTable_rowreq_ctx *
                                       rowreq_ctx,
-                                      U64 *
+                                      struct counter64 *
                                       ipSystemStatsHCInReceives_val_ptr);
     int             ipSystemStatsInOctets_get(ipSystemStatsTable_rowreq_ctx
                                               * rowreq_ctx,
@@ -327,7 +327,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCInOctets_get(ipSystemStatsTable_rowreq_ctx *
                                     rowreq_ctx,
-                                    U64 * ipSystemStatsHCInOctets_val_ptr);
+                                    struct counter64 *ipSystemStatsHCInOctets_val_ptr);
     int
      
         
@@ -466,7 +466,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCInForwDatagrams_get(ipSystemStatsTable_rowreq_ctx *
                                            rowreq_ctx,
-                                           U64 *
+                                           struct counter64 *
                                            ipSystemStatsHCInForwDatagrams_val_ptr);
     int
      
@@ -570,7 +570,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCInDelivers_get(ipSystemStatsTable_rowreq_ctx *
                                       rowreq_ctx,
-                                      U64 *
+                                      struct counter64 *
                                       ipSystemStatsHCInDelivers_val_ptr);
     int
      
@@ -610,7 +610,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCOutRequests_get(ipSystemStatsTable_rowreq_ctx *
                                        rowreq_ctx,
-                                       U64 *
+                                       struct counter64 *
                                        ipSystemStatsHCOutRequests_val_ptr);
     int
      
@@ -670,7 +670,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCOutForwDatagrams_get(ipSystemStatsTable_rowreq_ctx *
                                             rowreq_ctx,
-                                            U64 *
+                                            struct counter64 *
                                             ipSystemStatsHCOutForwDatagrams_val_ptr);
     int
      
@@ -810,7 +810,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCOutTransmits_get(ipSystemStatsTable_rowreq_ctx *
                                         rowreq_ctx,
-                                        U64 *
+                                        struct counter64 *
                                         ipSystemStatsHCOutTransmits_val_ptr);
     int
      
@@ -850,7 +850,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCOutOctets_get(ipSystemStatsTable_rowreq_ctx *
                                      rowreq_ctx,
-                                     U64 *
+                                     struct counter64 *
                                      ipSystemStatsHCOutOctets_val_ptr);
     int
      
@@ -890,7 +890,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCInMcastPkts_get(ipSystemStatsTable_rowreq_ctx *
                                        rowreq_ctx,
-                                       U64 *
+                                       struct counter64 *
                                        ipSystemStatsHCInMcastPkts_val_ptr);
     int
      
@@ -930,7 +930,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCInMcastOctets_get(ipSystemStatsTable_rowreq_ctx *
                                          rowreq_ctx,
-                                         U64 *
+                                         struct counter64 *
                                          ipSystemStatsHCInMcastOctets_val_ptr);
     int
      
@@ -970,7 +970,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCOutMcastPkts_get(ipSystemStatsTable_rowreq_ctx *
                                         rowreq_ctx,
-                                        U64 *
+                                        struct counter64 *
                                         ipSystemStatsHCOutMcastPkts_val_ptr);
     int
      
@@ -1010,7 +1010,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCOutMcastOctets_get(ipSystemStatsTable_rowreq_ctx *
                                           rowreq_ctx,
-                                          U64 *
+                                          struct counter64 *
                                           ipSystemStatsHCOutMcastOctets_val_ptr);
     int
      
@@ -1050,7 +1050,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCInBcastPkts_get(ipSystemStatsTable_rowreq_ctx *
                                        rowreq_ctx,
-                                       U64 *
+                                       struct counter64 *
                                        ipSystemStatsHCInBcastPkts_val_ptr);
     int
      
@@ -1090,7 +1090,7 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         
         ipSystemStatsHCOutBcastPkts_get(ipSystemStatsTable_rowreq_ctx *
                                         rowreq_ctx,
-                                        U64 *
+                                        struct counter64 *
                                         ipSystemStatsHCOutBcastPkts_val_ptr);
     int
      

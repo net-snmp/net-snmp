@@ -1773,7 +1773,7 @@ u_char         *
 asn_parse_unsigned_int64(u_char * data,
                          size_t * datalength,
                          u_char * type,
-                         struct counter64 * cp, size_t countersize)
+                         struct counter64 *cp, size_t countersize)
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -1869,7 +1869,7 @@ u_char         *
 asn_build_unsigned_int64(u_char * data,
                          size_t * datalength,
                          u_char type,
-                         const struct counter64 * cp, size_t countersize)
+                         const struct counter64 *cp, size_t countersize)
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -2023,7 +2023,7 @@ u_char         *
 asn_parse_signed_int64(u_char * data,
                        size_t * datalength,
                        u_char * type,
-                       struct counter64 * cp, size_t countersize)
+                       struct counter64 *cp, size_t countersize)
 {
     static const char *errpre = "parse int64";
     const int       int64sizelimit = (4 * 2) + 1;
@@ -2127,7 +2127,7 @@ u_char         *
 asn_build_signed_int64(u_char * data,
                        size_t * datalength,
                        u_char type,
-                       const struct counter64 * cp, size_t countersize)
+                       const struct counter64 *cp, size_t countersize)
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*

@@ -2435,6 +2435,8 @@ AC_MSG_RESULT($EXTRACPPFLAGS)
 #   Compiler flags:
 #
 
+CFLAGS="-DNETSNMP_REMOVE_U64 $CFLAGS"
+
 # The Net-SNMP source code is not strict-aliasing safe, so add
 # -fno-strict-aliasing to $CFLAGS if the compiler supports it.
 AC_MSG_CHECKING([whether the compiler supports -fno-strict-aliasing])
