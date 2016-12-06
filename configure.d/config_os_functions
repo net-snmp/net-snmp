@@ -195,7 +195,7 @@ fi
 #       Whether static inline functions are broken      (SCO Unixware)
 #
 AC_CACHE_CHECK([[whether static inline functions are broken (Unixware)]],
-                [netsnmp_cv_c_broken_inline],
+                [netsnmp_cv_broken_inline],
     AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 static inline int nested_inline_function(void) {
   return 0;
@@ -203,11 +203,7 @@ static inline int nested_inline_function(void) {
 inline int main_inline_function( void ) {
   return nested_inline_function();
 }
-    ])],
-    netsnmp_cv_broken_inline=no,
-    netsnmp_cv_broken_inline=yes))
-
-
+    ])], [[
 #       Yes -  static inline functions are broken       (Solaris 2.x)
 #
 case "$target_os" in
@@ -215,8 +211,11 @@ case "$target_os" in
         netsnmp_cv_broken_inline=yes
         ;;
     *)
+        netsnmp_cv_broken_inline=no
         ;;
-esac
+esac]], [
+    netsnmp_cv_broken_inline=yes]
+))
 
 if test "$netsnmp_cv_broken_inline" = yes ; then
   AC_DEFINE(NETSNMP_BROKEN_INLINE, 1,
