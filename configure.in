@@ -4890,7 +4890,7 @@ fi
 # are not supported, so this disables the whole inline thing if it
 # doesn't work properly. Should have no effect on other platforms.
 AC_CACHE_CHECK([[whether static inline functions are broken (Unixware)]],
-    [netsnmp_cv_c_broken_inline],
+    [netsnmp_cv_broken_inline],
 AC_COMPILE_IFELSE([[
 static inline int nested_inline_function(void) {
   return 0;
@@ -4898,8 +4898,7 @@ static inline int nested_inline_function(void) {
 inline int main_inline_function( void ) {
   return nested_inline_function();
 }
-]], netsnmp_cv_broken_inline=no, netsnmp_cv_broken_inline=yes))
-
+]], [[
 # But, sadly, the usage of inline in NET_SNMP disagrees seriously with at least
 # solaris2, so disable it for now.
 case "$target_os" in
@@ -4907,8 +4906,11 @@ case "$target_os" in
         netsnmp_cv_broken_inline=yes
         ;;
     *)
+        netsnmp_cv_broken_inline=no
         ;;
 esac
+]], [
+netsnmp_cv_broken_inline=yes]))
 
 if test "$netsnmp_cv_broken_inline" = yes ; then
   AC_DEFINE(NETSNMP_BROKEN_INLINE, 1,

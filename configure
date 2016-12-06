@@ -41926,7 +41926,7 @@ fi
 # doesn't work properly. Should have no effect on other platforms.
 echo "$as_me:$LINENO: checking whether static inline functions are broken (Unixware)" >&5
 echo $ECHO_N "checking whether static inline functions are broken (Unixware)... $ECHO_C" >&6
-if test "${netsnmp_cv_c_broken_inline+set}" = set; then
+if test "${netsnmp_cv_broken_inline+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -41961,17 +41961,6 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  netsnmp_cv_broken_inline=no
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-netsnmp_cv_broken_inline=yes
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-echo "$as_me:$LINENO: result: $netsnmp_cv_c_broken_inline" >&5
-echo "${ECHO_T}$netsnmp_cv_c_broken_inline" >&6
 
 # But, sadly, the usage of inline in NET_SNMP disagrees seriously with at least
 # solaris2, so disable it for now.
@@ -41980,8 +41969,21 @@ case "$target_os" in
         netsnmp_cv_broken_inline=yes
         ;;
     *)
+        netsnmp_cv_broken_inline=no
         ;;
 esac
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+netsnmp_cv_broken_inline=yes
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $netsnmp_cv_broken_inline" >&5
+echo "${ECHO_T}$netsnmp_cv_broken_inline" >&6
 
 if test "$netsnmp_cv_broken_inline" = yes ; then
 
