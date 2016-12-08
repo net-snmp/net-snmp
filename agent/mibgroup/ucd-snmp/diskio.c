@@ -174,6 +174,8 @@ init_diskio(void)
          var_diskio, 1, {12}},
         {DISKIO_NWRITTENX, ASN_COUNTER64, NETSNMP_OLDAPI_RONLY,
          var_diskio, 1, {13}},
+        {DISKIO_BUSYTIME, ASN_COUNTER64, NETSNMP_OLDAPI_RONLY,
+         var_diskio, 1, {14}},
     };
 
     /*
@@ -516,6 +518,7 @@ var_diskio(struct variable * vp,
            int exact, size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
+    static long long        longlong_ret;
     static struct counter64 c64_ret;
     unsigned int    indx;
 
@@ -559,7 +562,12 @@ var_diskio(struct variable * vp,
         c64_ret.low = dk[indx].ds_rbytes & 0xffffffff;
         c64_ret.high = dk[indx].ds_rbytes >> 32;
         return (u_char *) & c64_ret;
-
+    case DISKIO_BUSYTIME:
+        *var_len = sizeof(struct counter64);
+	longlong_ret = dk[indx].ds_time.tv_sec*1000000 + dk[indx].ds_time.tv_usec;
+        c64_ret.low = longlong_ret & 0xffffffff;
+        c64_ret.high = longlong_ret >> 32;
+	return (u_char *) &c64_ret;
     default:
         ERROR_MSG("diskio.c: don't know how to handle this request.");
     }
@@ -649,6 +657,8 @@ var_diskio(struct variable * vp,
            int exact, size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
+    static long long        longlong_ret;
+    static struct counter64 c64_ret;
     unsigned int    indx;
 
     if (getstats() == 0)
@@ -724,6 +734,21 @@ var_diskio(struct variable * vp,
 	    long_ret = dk[indx].wxfer;
 #endif
         return (u_char *) & long_ret;
+
+    case DISKIO_BUSYTIME:
+#ifdef HW_IOSTATS
+        *var_len = sizeof(struct counter64);
+	if (dk[indx].type == IOSTAT_DISK) {
+	    longlong_ret = dk[indx].time_sec*1000 + dk[indx].time_usec/1000;
+	    c64_ret.low = longlong_ret & 0xffffffff;
+	    c64_ret.high = longlong_ret >> 32;
+	    return (u_char *) & c64_ret;
+	}
+	else
+	    return NULL;
+#else
+	return NULL;
+#endif
 
     default:
         ERROR_MSG("diskio.c: don't know how to handle this request.");
@@ -1203,6 +1228,11 @@ var_diskio(struct variable * vp,
     case DISKIO_LA15:
       long_ret = la_head.indices[indx].la15;
       return (u_char *) & long_ret;
+    case DISKIO_BUSYTIME:
+      *var_len = sizeof(struct counter64);
+      c64_ret.low = head.indices[indx].use*1000 & 0xffffffff;
+      c64_ret.high = head.indices[indx].use*1000 >> 32;
+      return (u_char *) & c64_ret;
     case DISKIO_NREADX:
       *var_len = sizeof(struct counter64);
       c64_ret.low = head.indices[indx].rsect * 512 & 0xffffffff;
