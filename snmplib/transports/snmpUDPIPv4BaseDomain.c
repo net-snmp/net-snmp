@@ -54,7 +54,7 @@
 #include <net-snmp/library/sd-daemon.h>
 #endif
 
-#if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
+#if defined(HAVE_IP_PKTINFO) || (defined(HAVE_IP_RECVDSTADDR) && defined(HAVE_IP_SENDSRCADDR))
 int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                              socklen_t *fromlen, struct sockaddr *dstip,
                              socklen_t *dstlen, int *if_index)
