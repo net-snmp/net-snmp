@@ -1,4 +1,4 @@
-.TH "table" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "table" 3 "Thu Dec 8 2016" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -117,7 +117,7 @@ To do this, the table handler needs to know up front how your table is structure
 .PP
 checks the original request against the current data being passed in if its greater than the request oid but less than the current valid return, set the current valid return to the new value\&. returns 1 if outvar was replaced with the oid from newvar (success)\&. returns 0 if not\&. 
 .PP
-Definition at line 881 of file table\&.c\&.
+Definition at line 885 of file table\&.c\&.
 .SS "NETSNMP_INLINE \fBnetsnmp_table_request_info\fP* netsnmp_extract_table_info (\fBnetsnmp_request_info\fP * request)"
 
 .PP
@@ -173,13 +173,13 @@ Definition at line 108 of file table\&.c\&.
 .PP
 create sparse table handler 
 .PP
-Definition at line 722 of file table\&.c\&.
+Definition at line 726 of file table\&.c\&.
 .SS "int netsnmp_sparse_table_register (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_registration_info\fP * tabreq)"
 
 .PP
 creates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent\&. 
 .PP
-Definition at line 733 of file table\&.c\&.
+Definition at line 737 of file table\&.c\&.
 .SS "int netsnmp_table_build_oid (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
 
 .PP
@@ -187,31 +187,31 @@ given a registration info object, a request object and the table info object it 
 .PP
 \&.column 
 .PP
-Definition at line 784 of file table\&.c\&.
+Definition at line 788 of file table\&.c\&.
 .SS "int netsnmp_table_build_oid_from_index (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
 
 .PP
 given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object\&. Index values are extracted from the table_info index oid\&. 
 .PP
-Definition at line 821 of file table\&.c\&.
+Definition at line 825 of file table\&.c\&.
 .SS "int netsnmp_table_build_result (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info, u_char type, u_char * result, size_t result_len)"
 
 .PP
 Builds the result to be returned to the agent given the table information\&. Use this function to return results from lowel level handlers to the agent\&. It takes care of building the proper resulting oid (containing proper indexing) and inserts the result value into the returning varbind\&. 
 .PP
-Definition at line 751 of file table\&.c\&.
+Definition at line 755 of file table\&.c\&.
 .SS "int netsnmp_update_indexes_from_variable_list (\fBnetsnmp_table_request_info\fP * tri)"
 
 .PP
 builds an oid given a set of indexes\&. 
 .PP
-Definition at line 863 of file table\&.c\&.
+Definition at line 867 of file table\&.c\&.
 .SS "int netsnmp_update_variable_list_from_index (\fBnetsnmp_table_request_info\fP * tri)"
 
 .PP
 parses an OID into table indexses 
 .PP
-Definition at line 847 of file table\&.c\&.
+Definition at line 851 of file table\&.c\&.
 .SS "int table_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 
 .PP

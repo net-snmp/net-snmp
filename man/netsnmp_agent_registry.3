@@ -1,4 +1,4 @@
-.TH "agent_registry" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "agent_registry" 3 "Thu Dec 8 2016" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -69,10 +69,10 @@ agent_registry \- Maintain a registry of MIB subtrees, together with related inf
 .RI "\fBnetsnmp_subtree\fP * \fBnetsnmp_subtree_replace_first\fP (\fBnetsnmp_subtree\fP *new_tree, const char *context_name)"
 .br
 .ti -1c
-.RI "NETSNMP_INLINE void \fBnetsnmp_subtree_change_next\fP (\fBnetsnmp_subtree\fP *ptr, \fBnetsnmp_subtree\fP *thenext)"
+.RI "NETSNMP_STATIC_INLINE void \fBnetsnmp_subtree_change_next\fP (\fBnetsnmp_subtree\fP *ptr, \fBnetsnmp_subtree\fP *thenext)"
 .br
 .ti -1c
-.RI "NETSNMP_INLINE void \fBnetsnmp_subtree_change_prev\fP (\fBnetsnmp_subtree\fP *ptr, \fBnetsnmp_subtree\fP *theprev)"
+.RI "NETSNMP_STATIC_INLINE void \fBnetsnmp_subtree_change_prev\fP (\fBnetsnmp_subtree\fP *ptr, \fBnetsnmp_subtree\fP *theprev)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_subtree_compare\fP (const \fBnetsnmp_subtree\fP *ap, const \fBnetsnmp_subtree\fP *bp)"

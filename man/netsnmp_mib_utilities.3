@@ -1,4 +1,4 @@
-.TH "mib_utilities" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "mib_utilities" 3 "Thu Dec 8 2016" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -17,7 +17,7 @@ mib_utilities \- mib parsing and datatype manipulation routines\&.
 
 .in +1c
 .ti -1c
-.RI "typedef struct \fB_PrefixList\fP * \fBPrefixListPtr\fP"
+.RI "typedef struct \fB_PrefixList\fP                         * \fBPrefixListPtr\fP"
 .br
 .ti -1c
 .RI "typedef struct \fB_PrefixList\fP \fBPrefixList\fP"
@@ -462,7 +462,7 @@ Prints on oid description into a file descriptor\&.
 .PP
 
 .PP
-Definition at line 4493 of file mib\&.c\&.
+Definition at line 4505 of file mib\&.c\&.
 .SS "void fprint_objid (FILE * f, const oid * objid, size_t objidlen)"
 
 .PP
@@ -522,7 +522,7 @@ comments on find_best_tree_node for usage after first time\&.
 .PP
 
 .PP
-Definition at line 5531 of file mib\&.c\&.
+Definition at line 5543 of file mib\&.c\&.
 .SS "void netsnmp_fixup_mib_directory (void)"
 swap in the new value and repeat 
 .PP
@@ -560,7 +560,7 @@ Converts an OID to its character form\&. in example 5 \&. 1 \&. 2 \&. 3 \&. 4 \&
 .PP
 length 
 .PP
-Definition at line 6317 of file mib\&.c\&.
+Definition at line 6329 of file mib\&.c\&.
 .SS "int netsnmp_oid2str (char * S, int L, oid * O)"
 
 .PP
@@ -582,7 +582,7 @@ Converts an OID to its string form\&. in example 5 \&. 'h' \&. 'e' \&. 'l' \&. '
 .PP
 
 .PP
-Definition at line 6345 of file mib\&.c\&.
+Definition at line 6357 of file mib\&.c\&.
 .SS "void netsnmp_set_mib_directory (const char * dir)"
 New dir starts with '+', thus we add it\&.
 .PP
@@ -612,7 +612,7 @@ Converts a string to its OID form\&. in example 'hello' = 5 \&. 'h' \&. 'e' \&. 
 .PP
 
 .PP
-Definition at line 6282 of file mib\&.c\&.
+Definition at line 6294 of file mib\&.c\&.
 .SS "void print_description (oid * objid, size_t objidlen, int width)"
 
 .PP
@@ -625,7 +625,7 @@ Prints on oid description on stdout\&.
 .PP
 
 .PP
-Definition at line 4477 of file mib\&.c\&.
+Definition at line 4489 of file mib\&.c\&.
 .SS "void print_mib (FILE * fp)"
 
 .PP
@@ -748,7 +748,7 @@ The root oid pointer if successful, or NULL otherwise\&.
 .PP
 
 .PP
-Definition at line 5888 of file mib\&.c\&.
+Definition at line 5900 of file mib\&.c\&.
 .SS "int sprint_realloc_asciistring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp, size_t len)"
 
 .PP
@@ -1319,7 +1319,7 @@ uptimeString
 .PP
 
 .PP
-Definition at line 5853 of file mib\&.c\&.
+Definition at line 5865 of file mib\&.c\&.
 .SH "Variable Documentation"
 .PP 
 .SS "\fBPrefixList\fP mib_prefixes[]"

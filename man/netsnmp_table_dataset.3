@@ -1,4 +1,4 @@
-.TH "table_dataset" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "table_dataset" 3 "Thu Dec 8 2016" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -24,7 +24,7 @@ Helps you implement a table with automatted storage\&.
 .br
 .RI "\fIclones a dataset row, including all data\&. \fP"
 .ti -1c
-.RI "NETSNMP_INLINE \fBnetsnmp_table_data_set_storage\fP * \fBnetsnmp_table_dataset_delete_data\fP (\fBnetsnmp_table_data_set_storage\fP *data)"
+.RI "NETSNMP_STATIC_INLINE \fBnetsnmp_table_data_set_storage\fP * \fBnetsnmp_table_dataset_delete_data\fP (\fBnetsnmp_table_data_set_storage\fP *data)"
 .br
 .RI "\fIdeletes a single dataset table data\&. \fP"
 .ti -1c
@@ -267,7 +267,7 @@ Definition at line 187 of file table_dataset\&.c\&.
 deletes all the data from this node and beyond in the linked list 
 .PP
 Definition at line 164 of file table_dataset\&.c\&.
-.SS "NETSNMP_INLINE \fBnetsnmp_table_data_set_storage\fP* netsnmp_table_dataset_delete_data (\fBnetsnmp_table_data_set_storage\fP * data)"
+.SS "NETSNMP_STATIC_INLINE \fBnetsnmp_table_data_set_storage\fP* netsnmp_table_dataset_delete_data (\fBnetsnmp_table_data_set_storage\fP * data)"
 
 .PP
 deletes a single dataset table data\&. returns the (possibly still good) next pointer of the deleted data object\&. 

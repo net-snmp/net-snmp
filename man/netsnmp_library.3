@@ -1,4 +1,4 @@
-.TH "library" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "library" 3 "Thu Dec 8 2016" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -14,7 +14,7 @@ library \- The Net-SNMP library
 .RI "\fBA generic callback mechanism\fP"
 .br
 .ti -1c
-.RI "\fBgeneric linked-list data handling with a string as a key\&.\fP"
+.RI "\fBgeneric linked\-list data handling with a string as a key\&.\fP"
 .br
 .ti -1c
 .RI "\fBstorage space for defaults\fP"
@@ -38,7 +38,7 @@ library \- The Net-SNMP library
 .RI "\fBvarious PDU processing routines\fP"
 .br
 .ti -1c
-.RI "\fBgeneric logging for net-snmp\fP"
+.RI "\fBgeneric logging for net\-snmp\fP"
 .br
 .ti -1c
 .RI "\fBMemory Utility Routines\fP"
@@ -58,7 +58,7 @@ library \- The Net-SNMP library
 
 .in +1c
 .ti -1c
-.RI "#define \fBMIN\fP(a,  b)   (((a) < (b)) ? (a) : (b))"
+.RI "#define \fBMIN\fP(a,  b)                                         (((a) < (b)) ? (a) : (b))"
 .br
 .ti -1c
 .RI "#define \fBMIB_CLIENTS_ARE_EVIL\fP   1"
@@ -73,7 +73,7 @@ library \- The Net-SNMP library
 .RI "#define \fBtimercmp\fP(tvp,  uvp,  cmp)"
 .br
 .ti -1c
-.RI "#define \fBtimerclear\fP(tvp)   (tvp)->tv_sec = (tvp)->tv_usec = 0"
+.RI "#define \fBtimerclear\fP(tvp)   (tvp)\->tv_sec = (tvp)\->tv_usec = 0"
 .br
 .ti -1c
 .RI "#define \fBMAX_PACKET_LENGTH\fP   (0x7fffffff)"
@@ -88,13 +88,13 @@ library \- The Net-SNMP library
 .RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)        /* bits per mask */"
 .br
 .ti -1c
-.RI "#define \fBFD_SET\fP(n,  p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
+.RI "#define \fBFD_SET\fP(n,  p)   ((p)\->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
 .br
 .ti -1c
-.RI "#define \fBFD_CLR\fP(n,  p)   ((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))"
+.RI "#define \fBFD_CLR\fP(n,  p)   ((p)\->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))"
 .br
 .ti -1c
-.RI "#define \fBFD_ISSET\fP(n,  p)   ((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))"
+.RI "#define \fBFD_ISSET\fP(n,  p)   ((p)\->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))"
 .br
 .ti -1c
 .RI "#define \fBFD_ZERO\fP(p)   memset((p), 0, sizeof(*(p)))"
@@ -219,23 +219,23 @@ library \- The Net-SNMP library
 .RI "\fBnetsnmp_session\fP * \fBsnmp_open\fP (\fBnetsnmp_session\fP *session)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_session\fP * \fBsnmp_open_ex\fP (\fBnetsnmp_session\fP *session, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *, void *, int), int(*fparse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *, size_t), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, int), int(*fbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *, size_t *), int(*frbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char **, size_t *, size_t *), int(*fcheck)(u_char *, size_t))"
+.RI "\fBnetsnmp_session\fP * \fBsnmp_open_ex\fP (\fBnetsnmp_session\fP *session, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *,                                                                                                                       void *, int), int(*fparse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *, size_t), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, int), int(*fbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *, size_t *), int(*frbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char **, size_t *, size_t *), int(*fcheck)(u_char *, size_t))"
 .br
 .ti -1c
 .RI "int \fBsnmpv3_engineID_probe\fP (struct \fBsession_list\fP *slp, \fBnetsnmp_session\fP *in_session)"
 .br
 .RI "\fIprobe for peer engineID \fP"
 .ti -1c
-.RI "\fBnetsnmp_session\fP * \fBsnmp_add\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *, void *, int), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, int))"
+.RI "\fBnetsnmp_session\fP * \fBsnmp_add\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *, void *,                                                                                                       int), int(*fpost_parse)(\fBnetsnmp_session\fP *,                                                                                                                                                                                                               \fBnetsnmp_pdu\fP *, int))"
 .br
 .ti -1c
-.RI "\fBnetsnmp_session\fP * \fBsnmp_add_full\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *, void *, int), int(*fparse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *, size_t), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, int), int(*fbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *, size_t *), int(*frbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char **, size_t *, size_t *), int(*fcheck)(u_char *, size_t), \fBnetsnmp_pdu\fP *(*fcreate_pdu)(\fBnetsnmp_transport\fP *, void *, size_t))"
+.RI "\fBnetsnmp_session\fP * \fBsnmp_add_full\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *,                                                                                                                           void *, int), int(*fparse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *,                                                                                                           size_t), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, int), int(*fbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *,                                                                                                           size_t *), int(*frbuild)(\fBnetsnmp_session\fP *,                                                                                                                                                                                                                       \fBnetsnmp_pdu\fP *,                                                                                                                                                                                                                       u_char **,                                                                                                                                                                                                                       size_t *,                                                                                                                                                                                                                       size_t *), int(*fcheck)(u_char *, size_t), \fBnetsnmp_pdu\fP *(*fcreate_pdu)(\fBnetsnmp_transport\fP *, void *,                                                                                                                                                                   size_t))"
 .br
 .ti -1c
-.RI "void * \fBsnmp_sess_add_ex\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *, void *, int), int(*fparse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *, size_t), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, int), int(*fbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *, size_t *), int(*frbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char **, size_t *, size_t *), int(*fcheck)(u_char *, size_t), \fBnetsnmp_pdu\fP *(*fcreate_pdu)(\fBnetsnmp_transport\fP *, void *, size_t))"
+.RI "void * \fBsnmp_sess_add_ex\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *,                                                                                                                                       void *, int), int(*fparse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *,                                                                                                                       size_t), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *,                                                                                                                                           int), int(*fbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, u_char *,                                                                                                                       size_t *), int(*frbuild)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *,                                                                                                                           u_char **, size_t *, size_t *), int(*fcheck)(u_char *, size_t), \fBnetsnmp_pdu\fP *(*fcreate_pdu)(\fBnetsnmp_transport\fP *, void *,                                                                                                                                                                               size_t))"
 .br
 .ti -1c
-.RI "void * \fBsnmp_sess_add\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *, void *, int), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, int))"
+.RI "void * \fBsnmp_sess_add\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *,                                                                                                                           void *, int), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, int))"
 .br
 .ti -1c
 .RI "void * \fBsnmp_sess_open\fP (\fBnetsnmp_session\fP *pss)"
@@ -411,7 +411,7 @@ library \- The Net-SNMP library
 .RI "struct timeval \fBstarttime\fP"
 .br
 .ti -1c
-.RI "int \fBcallback_master_num\fP = -1"
+.RI "int \fBcallback_master_num\fP = \-1"
 .br
 .ti -1c
 .RI "oid \fBnullOid\fP [] = { 0, 0 }"
@@ -450,7 +450,7 @@ XXX-rks: why no SNMP_FREE(isp->packet); ??
 .PP
 XXX-rks: why no SNMP_FREE(isp->packet); ?? 
 .PP
-Definition at line 5458 of file snmp_api\&.c\&.
+Definition at line 5470 of file snmp_api\&.c\&.
 .SS "int init_agent (const char * app)"
 
 .PP
@@ -509,7 +509,7 @@ lexicographical compare two object identifiers and return the point where they d
 .PP
 
 .PP
-Definition at line 6396 of file snmp_api\&.c\&.
+Definition at line 6408 of file snmp_api\&.c\&.
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 
 .PP
@@ -533,7 +533,7 @@ Compares 2 OIDs to determine if they are exactly equal\&. This should be faster 
 .PP
 
 .PP
-Definition at line 6477 of file snmp_api\&.c\&.
+Definition at line 6489 of file snmp_api\&.c\&.
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 
 .PP
@@ -557,7 +557,7 @@ length of common prefix 0 if no common prefix, -1 on error\&.
 .PP
 
 .PP
-Definition at line 6541 of file snmp_api\&.c\&.
+Definition at line 6553 of file snmp_api\&.c\&.
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 
 .PP
@@ -581,7 +581,7 @@ Identical to netsnmp_oid_equals, except only the length up to len1 is compared\&
 .PP
 
 .PP
-Definition at line 6520 of file snmp_api\&.c\&.
+Definition at line 6532 of file snmp_api\&.c\&.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 
 .PP
@@ -594,7 +594,7 @@ lexicographical compare two object identifiers\&. Caution: this method is called
 .PP
 
 .PP
-Definition at line 6347 of file snmp_api\&.c\&.
+Definition at line 6359 of file snmp_api\&.c\&.
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 
 .PP
@@ -618,7 +618,7 @@ Compares 2 OIDs to determine if they are equal up until the shortest length\&.
 .PP
 
 .PP
-Definition at line 6449 of file snmp_api\&.c\&.
+Definition at line 6461 of file snmp_api\&.c\&.
 .SS "int snmp_pdu_parse (\fBnetsnmp_pdu\fP * pdu, u_char * data, size_t * length)"
 if we were parsing a var, remove it from the pdu and free it 
 .PP
@@ -645,7 +645,7 @@ snmp_sess_session()
 .PP
 
 .PP
-Definition at line 7207 of file snmp_api\&.c\&.
+Definition at line 7219 of file snmp_api\&.c\&.
 .SS "void snmp_shutdown (const char * type)"
 
 .PP

@@ -1,4 +1,4 @@
-.TH "util" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "util" 3 "Thu Dec 8 2016" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -34,16 +34,16 @@ util \- Memory Utility Routines
 .RI "#define \fBSNMP_FILEMODE_OPEN\fP   0644"
 .br
 .ti -1c
-.RI "#define \fBBYTESIZE\fP(bitsize)   ((bitsize + 7) >> 3)"
+.RI "#define \fBBYTESIZE\fP(bitsize)             ((bitsize + 7) >> 3)"
 .br
 .ti -1c
 .RI "#define \fBROUNDUP8\fP(x)   ( ( (x+7) >> 3 ) * 8 )"
 .br
 .ti -1c
-.RI "#define \fBSNMP_STRORNULL\fP(x)   ( x ? x : '(null)')"
+.RI "#define \fBSNMP_STRORNULL\fP(x)             ( x ? x : '(null)')"
 .br
 .ti -1c
-.RI "#define \fBSNMP_FREE\fP(s)   do { if (s) { free((void *)s); s=NULL; } } while(0)"
+.RI "#define \fBSNMP_FREE\fP(s)       do { if (s) { free((void *)s); s=NULL; } } while(0)"
 .br
 .RI "\fIFrees a pointer only if it is !NULL and sets its value to NULL\&. \fP"
 .ti -1c
@@ -51,7 +51,7 @@ util \- Memory Utility Routines
 .br
 .RI "\fIFrees pointer n only if it is !NULL, sets n to s and sets s to NULL\&. \fP"
 .ti -1c
-.RI "#define \fBSNMP_MALLOC_STRUCT\fP(s)   (struct s *) calloc(1, sizeof(struct s))"
+.RI "#define \fBSNMP_MALLOC_STRUCT\fP(s)     (struct s *) calloc(1, sizeof(struct s))"
 .br
 .RI "\fIMallocs memory of sizeof(struct s), zeros it and returns a pointer to it\&. \fP"
 .ti -1c
@@ -67,16 +67,16 @@ util \- Memory Utility Routines
 .br
 .RI "\fICast away constness without that gcc -Wcast-qual prints a compiler warning, similar to const_cast<> in C++\&. \fP"
 .ti -1c
-.RI "#define \fBTOUPPER\fP(c)   (c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c)"
+.RI "#define \fBTOUPPER\fP(c)   (c >= 'a' && c <= 'z' ? c \- ('a' \- 'A') : c)"
 .br
 .ti -1c
-.RI "#define \fBTOLOWER\fP(c)   (c >= 'A' && c <= 'Z' ? c + ('a' - 'A') : c)"
+.RI "#define \fBTOLOWER\fP(c)   (c >= 'A' && c <= 'Z' ? c + ('a' \- 'A') : c)"
 .br
 .ti -1c
-.RI "#define \fBHEX2VAL\fP(s)   ((isalpha(s) ? (TOLOWER(s)-'a'+10) : (TOLOWER(s)-'0')) & 0xf)"
+.RI "#define \fBHEX2VAL\fP(s)   ((isalpha(s) ? (TOLOWER(s)\-'a'+10) : (TOLOWER(s)\-'0')) & 0xf)"
 .br
 .ti -1c
-.RI "#define \fBVAL2HEX\fP(s)   ( (s) + (((s) >= 10) ? ('a'-10) : '0') )"
+.RI "#define \fBVAL2HEX\fP(s)   ( (s) + (((s) >= 10) ? ('a'\-10) : '0') )"
 .br
 .ti -1c
 .RI "#define \fBSNMP_MAX\fP(a,  b)   ((a) > (b) ? (a) : (b))"
@@ -103,11 +103,11 @@ util \- Memory Utility Routines
 .RI "#define \fBQUITFUN\fP(e,  l)"
 .br
 .ti -1c
-.RI "#define \fBNETSNMP_TIMERADD\fP(a,  b,  res)"
+.RI "#define \fBNETSNMP_TIMERADD\fP(a,  b,  res)                                "
 .br
 .RI "\fICompute res = a + b\&. \fP"
 .ti -1c
-.RI "#define \fBNETSNMP_TIMERSUB\fP(a,  b,  res)"
+.RI "#define \fBNETSNMP_TIMERSUB\fP(a,  b,  res)                                                      "
 .br
 .RI "\fICompute res = a - b\&. \fP"
 .ti -1c
@@ -117,10 +117,10 @@ util \- Memory Utility Routines
 .RI "#define \fBISTRANSFORM\fP(ttype,  toid)"
 .br
 .ti -1c
-.RI "#define \fBENGINETIME_MAX\fP   2147483647      /* ((2^31)-1) */"
+.RI "#define \fBENGINETIME_MAX\fP   2147483647      /* ((2^31)\-1) */"
 .br
 .ti -1c
-.RI "#define \fBENGINEBOOT_MAX\fP   2147483647      /* ((2^31)-1) */"
+.RI "#define \fBENGINEBOOT_MAX\fP   2147483647      /* ((2^31)\-1) */"
 .br
 .ti -1c
 .RI "#define \fBsnmp_cstrcat\fP(b,  l,  o,  a,  s)   snmp_strcat(b,l,o,a,(const u_char *)s)"

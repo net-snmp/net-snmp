@@ -1,4 +1,4 @@
-.TH "snmp_client" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "snmp_client" 3 "Thu Dec 8 2016" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -13,13 +13,13 @@ snmp_client \- various PDU processing routines
 .RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)        /* bits per mask */"
 .br
 .ti -1c
-.RI "#define \fBFD_SET\fP(n,  p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
+.RI "#define \fBFD_SET\fP(n,  p)   ((p)\->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
 .br
 .ti -1c
-.RI "#define \fBFD_CLR\fP(n,  p)   ((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))"
+.RI "#define \fBFD_CLR\fP(n,  p)   ((p)\->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))"
 .br
 .ti -1c
-.RI "#define \fBFD_ISSET\fP(n,  p)   ((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))"
+.RI "#define \fBFD_ISSET\fP(n,  p)   ((p)\->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))"
 .br
 .ti -1c
 .RI "#define \fBFD_ZERO\fP(p)   memset((p), 0, sizeof(*(p)))"

@@ -1,4 +1,4 @@
-.TH "callback" 3 "Mon Jul 6 2015" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "callback" 3 "Thu Dec 8 2016" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -16,7 +16,7 @@ callback \- A generic callback mechanism
 .RI "#define \fBCALLBACK_LOCK\fP(maj,  min)   ++_locks[maj][min]"
 .br
 .ti -1c
-.RI "#define \fBCALLBACK_UNLOCK\fP(maj,  min)   --_locks[maj][min]"
+.RI "#define \fBCALLBACK_UNLOCK\fP(maj,  min)   \-\-_locks[maj][min]"
 .br
 .ti -1c
 .RI "#define \fBCALLBACK_LOCK_COUNT\fP(maj,  min)   _locks[maj][min]"
