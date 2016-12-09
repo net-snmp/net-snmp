@@ -468,7 +468,7 @@ parse_simple_monitor(const char *token, char *line)
                      */
                     return;
                 }
-                StorageNew->mteTriggerFrequency = (unsigend long) freq;
+                StorageNew->mteTriggerFrequency = (unsigned long) freq;
             } else {
                 config_perror("No parameter after -r given\n");
                 /*
