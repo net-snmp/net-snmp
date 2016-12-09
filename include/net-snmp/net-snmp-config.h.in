@@ -1144,6 +1144,9 @@
 /* Define if SNMPv2c code should not be included */
 #undef NETSNMP_DISABLE_SNMPV2C
 
+/* Define if U64 typedef should not be defined */
+#undef NETSNMP_REMOVE_U64
+
 /* Pattern of temporary files */
 #undef NETSNMP_TEMP_FILE_PATTERN
 

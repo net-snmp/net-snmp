@@ -1406,6 +1406,15 @@ AC_ARG_ENABLE(ipv6,
 AC_ARG_WITH(ipv6,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-ipv6/--disable-ipv6 instead ]) )
 
+AC_ARG_ENABLE(U64,
+[  --disable-U64                   Do not define U64 structure (defined by default).],
+    [if test "x$enable_U64" = "xno"; then
+      AC_DEFINE([NETSNMP_REMOVE_U64], 1,
+                [Define if U64 typedef should not be defined])
+    fi])
+AC_ARG_WITH(U64,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-U64/--disable-U64 instead ]) )
+
 AC_ARG_ENABLE(local-smux,
 [  --enable-local-smux             Restrict SMUX connections to localhost (by default).],
     [if test "x$enable_local_smux" = "xyes"; then
@@ -2434,8 +2443,6 @@ AC_MSG_RESULT($EXTRACPPFLAGS)
 
 #   Compiler flags:
 #
-
-CFLAGS="-DNETSNMP_REMOVE_U64 $CFLAGS"
 
 # The Net-SNMP source code is not strict-aliasing safe, so add
 # -fno-strict-aliasing to $CFLAGS if the compiler supports it.
