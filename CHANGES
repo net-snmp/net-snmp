@@ -102,6 +102,7 @@ listing of all changes made to the code.
       - [PATCH 3495697]: Store persistent snmpTarget table changes
       - [PATCH 3543000]: Various fixes to Rmon code Supplied by Patrick
 	Ritter
+      - [BUG 2615]: Don't return incompletely parsed varbinds
 
     snmpdx:
       - [PATCH 3445437]: Log AgentX disconnections (in line with
@@ -126,14 +127,9 @@ listing of all changes made to the code.
 
     building:
       - Avoid duplicate and trailing spaces in the dependency files.
-      - Correct dependencies - since
-	bf74fea69f24dc6e85f908f3f41d1426b2e09688 snmpconf is located in
-	builddir, not srcdir
-      - Correct dependencies - since
-	bf74fea69f24dc6e85f908f3f41d1426b2e09688 snmpconf is located in
-	builddir, not srcdir" This reverts commit
-	9efa467a972bb6e1c7fbdaf2e27429d29f4ab89e.
+      - Correct dependencies
       - Make the -without options to rpmbuild work
+      - [BUG 2712]: Fix Perl module compilation 
 
     doc:
       - BUG: 3535269: Document use of [snmp] for client-side tools.
@@ -212,7 +208,7 @@ listing of all changes made to the code.
 	output in snmptrapd.
       - [BUG 3540621]: dist: Add missing Provides: to net-snmp-perlmods RPM
 	spec
-      - [BUG ]: #2615: Don't return incompletely parsed varbinds
+      - [BUG 2602]: Added return statement to example code for TrapReceiver
 
     AIX:
       - Make tcp-mib build
