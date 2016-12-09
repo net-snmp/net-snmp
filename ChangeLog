@@ -1,4 +1,253 @@
 -------------------------------------------------------------------------------
+
+Changes: V5.4.5.pre1 -> V5.4.5.pre2
+
+commit 24ab33a0a0798748957669cde374907ce5f37984
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Thu Dec 8 22:41:09 2016
+
+    make depend for 5.4.5.pre2
+
+commit 78d42b4e3b9eac40759da601327a053eaaf3b967
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Thu Dec 8 22:28:11 2016
+
+    documentation update for 5.4.5.pre2
+
+commit 0c32eea3e292a948d6973d4cb8df57e338fe3362
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Thu Dec 8 22:27:06 2016
+
+    Version number update: 5.4.5.pre2
+
+commit 75e89633833446f48bbe016c155febcf3edaa72f
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Thu Dec 8 22:23:18 2016
+
+    configure option to disable U64 typedef
+
+commit 0a0c5d02332023a212590e7d890b71d9fdcfbdbc
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Sat Dec 3 22:30:30 2016
+
+    fix more printf format errors
+
+commit 31613e8b1eb7515ddc7cb89d72755a671c9c41f5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Dec 5 21:29:18 2016
+
+    Do not define U64 typedef while building Net-SNMP
+    
+    The U64 typedef conflicts with a typedef in a Perl header file. Hence
+    disable the U64 typedef from the Net-SNMP header files. This patch
+    neither changes the Net-SNMP ABI nor the Net-SNMP API.
+
+commit 3df26802b258d93023f05ac0f1af889361b40fcd
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Dec 5 22:10:59 2016
+
+    Avoid that linking fails with a C99 compliant compiler and optimization disabled
+    
+    The semantics of the C99 inline keyword differs slightly of that of
+    the C++ inline keyword. See also
+    http://stackoverflow.com/questions/16245521/c99-inline-function-in-c-file/16245669.
+
+commit 0fd0962d32b47ffa2f418cf31226c94541a5c2a5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Dec 5 21:46:22 2016
+
+    configure: Display result of 'static inline' test
+
+commit a7b6cb4d1a55962e553f2f9ae465d6aab4709ff2
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Dec 5 23:28:14 2016
+
+    configure: Display rtentry structure type once
+
+commit 3f758abeb91ccb4e57b795330e3f8c969956d6bc
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Dec 2 22:53:47 2016
+
+    agent/mibgroup/examples/example.c: Make the code consistent with the v5.5 branch
+
+commit 7b505a457b6f4d8e748803728f0051e8e6765358
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Fri Dec 2 17:24:01 2016
+
+    fix printf without format string and compiler warning
+
+commit 933084b217b144ba302da9a410203919d9290186
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Nov 19 14:39:25 2016
+
+    CHANGES: BUG: 2701: Fix Perl module build on Fedora 23/24/25
+    
+    Avoid that building the Perl modules fails as follows:
+    
+    cc1: error: -Wformat-security ignored without -Wformat [-Werror=format-security]
+
+commit b898c729ec4df1ce6585deef68cc7db7d38f2749
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Wed Nov 30 21:46:35 2016
+
+    search for autoconf-$version too
+
+commit a7d3d54136c88a1d2eb335d3f7a2a2080f3c0142
+Author: VMwareDev Randy <snmp-maintainers@vmware.com>
+Date:   Wed Jan 7 09:42:10 2015
+
+    CHANGES: BUG: 2387: fixed memory leak when request id is 0
+    
+    Signed-off-by: Robert Story <rstory@freesnmp.com>
+
+commit 7ffb8e25a0db851953155de91f0170e9bf8c457d
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Thu Oct 6 10:43:10 2016
+
+    CHANGES: BUG: 2743: snmpd crashes when receiving a GetNext PDU with multiple Varbinds
+    
+    skip out-of-range varbinds when calling next handler
+
+commit d6e7f8962b110a2cd65667b2c57a8a60ad3cd222
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Aug 31 15:43:36 2016
+
+    at.c: properly check return status from realloc. Thanks to Daniel Eiland (bug 2678)
+
+commit 7cdb389a2814c6fdc0e7d9c43248329bfc028e3b
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Aug 31 15:17:17 2016
+
+    kernel_sunos5: fix a possible buffer overrun. Thanks to lvosh.
+
+commit 0e6c1927d2ee2f4abaf18160016c10fd13712a95
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Aug 31 14:59:29 2016
+
+    snmptrapd.c: First stringop after malloc must be strcpy, not strcat. Tankts to Jaap Keuter.
+
+commit 7d3d56f07d3bd88d2583ee8832ec756af377215e
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Aug 30 01:59:12 2016
+
+    Backport fix for MIB files with space in the name
+
+commit 85297cfadff81606d5a3b5ab162b39e5966ed963
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Aug 30 01:31:31 2016
+
+    Document the "octet" varbind type for pass/pass_persist. Thanks to Sam Tannous.
+
+commit 088622974007093fbb63f4a5964427f3c754e26d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Jul 23 22:37:03 2016
+
+    configure: Convert acconfig.h into AH_TOP() and AH_BOTTOM()
+    
+    This patch avoids that autoheader prints the following warning:
+    
+    autoheader: WARNING: Using auxiliary files such as `acconfig.h', `config.h.bot'
+    autoheader: WARNING: and `config.h.top', to define templates for `config.h.in'
+    autoheader: WARNING: is deprecated and discouraged.
+    autoheader:
+    autoheader: WARNING: Using the third argument of `AC_DEFINE' and
+    autoheader: WARNING: `AC_DEFINE_UNQUOTED' allows to define a template without
+    autoheader: WARNING: `acconfig.h':
+    autoheader:
+    autoheader: WARNING:   AC_DEFINE([NEED_FUNC_MAIN], 1,
+    autoheader:             [Define if a function `main' is needed.])
+    autoheader:
+    autoheader: WARNING: More sophisticated templates can also be produced, see the
+    autoheader: WARNING: documentation.
+
+commit 4e793461e96a2b4fd81142ab312d074d5c8841fa
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Jul 23 21:41:10 2016
+
+    CHANGES: BUG: 2712: Fix Perl module compilation
+    
+    Avoid that building the Net-SNMP Perl modules fails as follows:
+    
+    ERROR from evaluation of /sources/net-snmp-5.7.3/perl/ASN/Makefile.PL: Bizarre \ copy of HASH in list assignment at /usr/lib/perl5/site_perl/5.24.0/Carp.pm line\ 229.
+    
+    See also https://sourceforge.net/p/net-snmp/bugs/2712/.
+
+commit f6ffa6f131fd82068773fcebdcbf2cdf2412cc03
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Jul 21 15:41:28 2016
+
+    Bug#2726: Fix memory leak from udpEndpointTable when attemptinmg to insert duplicate. Thanks to Marc Branchaud
+
+commit 8dabf9a43cca47f65c3e4ada4aac1c9eb7e414e9
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Wed Apr 27 14:41:53 2016
+
+    PATCH 1326/BUG 2503: Fix memory leak when walking ip forwarding tables.
+    Thanks to Christian Krause/Sam Tannous
+
+commit 3bbeec993754ab6fb3c23b3851479b8f714ac4db
+Author: codarrenvelvindron <codarren@hackers.mu>
+Date:   Sun Jan 17 00:20:12 2016
+
+    Check for malloc failure
+
+commit f67f8f2b5d9779ecfb8f8f4bee32573e5b241afe
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Dec 21 10:10:16 2015
+
+    .gitignore: Ignore Perl .json files
+
+commit f561f6414a7a5b8be2be544f7b24fe6b529782b4
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Nov 24 02:32:43 2015
+
+    BUG#2675: fix a stray close of filedescriptor. Thanks to Vit Zikmund.
+
+commit 2331a015dcd95d7f34aa28962d1a37b5e360c646
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Oct 6 00:42:58 2015
+
+    BUG: 2671: container_binary_array takes O((n^2)*log(n)) time to insert n entries
+    
+    Change the complexity of netsnmp_binary_array_insert() from
+    O((n^2)*log(n)) into O(log(n)).
+
+commit 10a71e97f096ce3d0c284c8213da1b2107c32699
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Oct 6 00:24:38 2015
+
+    snmplib: binary_search(): Make source code more compact
+    
+    Additionally, remove two superfluous initializations.
+
+commit a9e46754357a3852b788e0d3df27b1f432cd1b8f
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Mon Sep 28 14:49:24 2015
+
+    BUG a#2656: proper printing of index-oid for column not defined in MIB.
+
+commit 0c490ab4b8f3a7b3a226adc69b8f8a86cd864b04
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Fri Sep 11 14:12:10 2015
+
+    Don't attempt to write to utmp if the process appears dead
+    
+    net-snmp has no business writing to utmp; let the system
+    handle that.  Simply skip counting processes that appear dead.
+
+commit 7f00e801a134bb6f72d40368cc4931e2d051ae58
+Author: Bill Fenner <fenner@gmail.com>
+Date:   Wed Jul 8 16:37:25 2015
+
+    CHANGES: BUG: 2602: Added return statement to example code for TrapReceiver
+
+commit 74e03d37c7a805d476f71bc85d300915fe48e6cb
+Author: Wes Hardaker <hardaker@users.sourceforge.net>
+Date:   Tue Jul 7 02:39:50 2015
+
+    fixes for the 5.4 release tree
+-------------------------------------------------------------------------------
+
 Changes: V5.4.4 -> V5.4.5.pre1
 
 commit d6abdcf1262d5908ac371e70f63c1c48b9aeeb88
@@ -4151,6 +4400,7 @@ Date:   Fri Jun 24 12:38:14 2011 +0000
     git-svn-id: file:///home/hardaker/lib/sf-bkups/net-snmp-convert-svnrepo/branches/V5-4-patches@20523 06827809-a52a-0410-b366-d66718629ded
 
 -------------------------------------------------------------------------------
+
 Changes: V5.4.3 -> V5.4.4
 
 2011-06-24 12:38  dts12
