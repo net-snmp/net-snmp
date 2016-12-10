@@ -9,6 +9,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "agentx/subagent.h"
 #include "utilities/iquery.h"
 
 netsnmp_feature_child_of(iquery_all, libnetsnmpmibs)
@@ -208,7 +209,6 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
      * It might be worth keeping track of which 'secNames' already
      * have iquery sessions created, and re-using the appropriate one.  
      */
-    extern int callback_master_num;
     netsnmp_session *ss = NULL;
 
     NETSNMP_RUNTIME_PROTOCOL_CHECK(version, unsupported_version);

@@ -68,6 +68,7 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 
 #include "main.h"
 #include "netstat.h"
+#include "ffs.h"
 #if HAVE_WINSOCK_H
 #include "winstub.h"
 #endif
@@ -92,7 +93,6 @@ struct route_entry {
 };
 
 void p_rtnode( struct route_entry *rp );
-extern int _ffs(int mask);
 
 /*
  * Print routing tables.

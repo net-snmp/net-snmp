@@ -104,8 +104,6 @@ int
 agentx_open_session(netsnmp_session * ss)
 {
     netsnmp_pdu    *pdu, *response;
-    extern oid      version_sysoid[];
-    extern int      version_sysoid_len;
     u_long 	    timeout;
 
     DEBUGMSGTL(("agentx/subagent", "opening session \n"));

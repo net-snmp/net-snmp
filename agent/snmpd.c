@@ -144,6 +144,8 @@
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_iterator.h>
 
+#include "mibgroup/util_funcs/restart.h"
+
 /*
  * Include winservice.h to support Windows Service
  */
@@ -190,13 +192,6 @@ LPCTSTR         app_name_long = _T("Net-SNMP Agent");     /* Application Name */
 
 const char     *app_name = "snmpd";
 
-extern int      netsnmp_running;
-#ifdef USING_UTIL_FUNCS_RESTART_MODULE
-extern char   **argvrestartp;
-extern char    *argvrestart;
-extern char    *argvrestartname;
-#endif /* USING_UTIL_FUNCS_RESTART_MODULE */
-
 #ifdef USING_SMUX_MODULE
 #include <mibgroup/smux/smux.h>
 #endif /* USING_SMUX_MODULE */
@@ -204,18 +199,11 @@ extern char    *argvrestartname;
 /*
  * Prototypes.
  */
-int             snmp_read_packet(int);
-int             snmp_input(int, netsnmp_session *, int, netsnmp_pdu *,
-                           void *);
 static void     usage(char *);
 static void     SnmpTrapNodeDown(void);
 static int      receive(void);
 #ifdef WIN32SERVICE
-void            StopSnmpAgent(void);
-int             SnmpDaemonMain(int argc, TCHAR * argv[]);
-int __cdecl     _tmain(int argc, TCHAR * argv[]);
-#else
-int             main(int, char **);
+static void     StopSnmpAgent(void);
 #endif
 
 /*
@@ -350,9 +338,6 @@ version(void)
 RETSIGTYPE
 SnmpdShutDown(int a)
 {
-#ifdef WIN32SERVICE
-    extern netsnmp_session *main_session;
-#endif
     netsnmp_running = 0;
 #ifdef WIN32SERVICE
     /*
@@ -374,7 +359,6 @@ SnmpdReconfig(int a)
 #endif
 
 #ifdef SIGUSR1
-extern void     dump_registry(void);
 RETSIGTYPE
 SnmpdDump(int a)
 {
@@ -423,10 +407,11 @@ SnmpTrapNodeDown(void)
  *
  * Also successfully EXITs with zero for some options.
  */
-int
 #ifdef WIN32SERVICE
+static int
 SnmpDaemonMain(int argc, TCHAR * argv[])
 #else
+int
 main(int argc, char *argv[])
 #endif
 {

@@ -11,6 +11,7 @@
 #include <net-snmp/data_access/interface.h>
 
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
+#include "ipaddress_private.h"
 
 #include "kernel_sunos5.h"
 #include "mibII/mibII_common.h"

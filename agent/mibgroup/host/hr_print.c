@@ -28,7 +28,6 @@
 
 void            Init_HR_Print(void);
 int             Get_Next_HR_Print(void);
-void            Save_HR_Print(void);
 const char     *describe_printer(int);
 int             printer_status(int);
 int             printer_detail_status(int);

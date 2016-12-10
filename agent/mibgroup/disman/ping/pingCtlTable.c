@@ -1030,6 +1030,7 @@ sock_ntop_host(const struct sockaddr *sa, socklen_t salen)
 }
 
 
+#if 0
 char           *
 Sock_ntop_host(const struct sockaddr *sa, socklen_t salen)
 {
@@ -1041,6 +1042,7 @@ Sock_ntop_host(const struct sockaddr *sa, socklen_t salen)
     }
     return (ptr);
 }
+#endif
 
 
 
@@ -1101,6 +1103,7 @@ host_serv(const char *host, const char *serv, int family, int socktype)
  * end host_serv 
  */
 
+#if 0
 /*
  * There is no easy way to pass back the integer return code from
  * getaddrinfo() in the function above, short of adding another argument
@@ -1134,6 +1137,7 @@ Host_serv(const char *host, const char *serv, int family, int socktype)
 
     return (res);               /* return pointer to first on linked list */
 }
+#endif
 
 int
 readable_timeo(int fd, int sec)

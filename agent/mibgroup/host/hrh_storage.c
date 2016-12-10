@@ -12,6 +12,7 @@
 #include "hrh_filesys.h"
 #include "hrh_storage.h"
 #include "hr_disk.h"
+#include "hr_filesys.h"
 #include <net-snmp/utilities.h>
 
 
@@ -75,8 +76,6 @@ static void parse_storage_config(const char *, char *);
 	 *********************/
 int             Get_Next_HR_Store(void);
 void            Init_HR_Store(void);
-int             header_hrstore(struct variable *, oid *, size_t *, int,
-                               size_t *, WriteMethod **);
 void*           header_hrstoreEntry(struct variable *, oid *, size_t *,
                                     int, size_t *, WriteMethod **);
 Netsnmp_Node_Handler handle_memsize;

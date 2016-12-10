@@ -65,6 +65,7 @@
 
 #include "ip.h"
 #include "route_write.h"
+#include "var_route.h"
 
 #ifdef cygwin
 #include <windows.h>
@@ -596,9 +597,6 @@ write_rte(int action,
 
 #elif defined(HAVE_IPHLPAPI_H)  /* WIN32 cygwin */
 #include <iphlpapi.h>
-
-extern PMIB_IPFORWARDROW route_row;
-extern int      create_flag;
 
 int
 write_rte(int action,

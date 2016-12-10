@@ -68,7 +68,7 @@ SOFTWARE.
 
 int             command = SNMP_MSG_GET;
 
-int             input_variable(netsnmp_variable_list *);
+static int      input_variable(netsnmp_variable_list *);
 
 void
 usage(void)

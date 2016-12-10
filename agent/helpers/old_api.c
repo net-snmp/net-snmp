@@ -40,7 +40,6 @@ static void free_wrapper(void * p)
  * don't use these! 
  */
 void            set_current_agent_session(netsnmp_agent_session *asp);
-netsnmp_agent_session *netsnmp_get_current_agent_session(void);
 
 /** @defgroup old_api old_api
  *  Calls mib module code written in the old style of code.

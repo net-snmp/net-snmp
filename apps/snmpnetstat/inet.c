@@ -75,8 +75,7 @@ struct stat_table {
     char            description[80];
 };
 
-char	*inetname(struct in_addr *);
-void	inetprint(struct in_addr *, int, const char *, int);
+static char *inetname(struct in_addr *);
 
 	/*
 	 * Print a summary of connections related to

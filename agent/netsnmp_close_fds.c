@@ -8,6 +8,8 @@
 #include <unistd.h>
 #endif
 
+#include <net-snmp/agent/netsnmp_close_fds.h>
+
 /**
  * Close all file descriptors larger than @fd.
  */

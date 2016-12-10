@@ -3,6 +3,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/fsys.h>
 #include "hardware/fsys/hw_fsys.h"
+#include "hardware/fsys/hw_fsys_private.h"
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>

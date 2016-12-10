@@ -259,10 +259,6 @@ void*           header_hrstoreEntry(struct variable *, oid *, size_t *,
                                     int, size_t *, WriteMethod **);
 Netsnmp_Node_Handler handle_memsize;
 
-#ifdef solaris2
-void            sol_get_swapinfo(int *, int *);
-#endif
-
 #define	HRSTORE_MEMSIZE		1
 #define	HRSTORE_INDEX		2
 #define	HRSTORE_TYPE		3
@@ -696,7 +692,7 @@ Get_Next_HR_Store(void)
 	}
 }
 
-#ifdef solaris2
+#if 0
 void
 sol_get_swapinfo(int *totalP, int *usedP)
 {

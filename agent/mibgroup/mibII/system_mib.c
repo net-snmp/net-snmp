@@ -62,14 +62,8 @@ static char     sysLocation[SYS_STRING_LEN] = NETSNMP_SYS_LOC;
 static oid      sysObjectID[MAX_OID_LEN];
 static size_t sysObjectIDByteLength;
 
-extern oid      version_sysoid[];
-extern int      version_sysoid_len;
-
 static int      sysServices = 72;
 static int      sysServicesConfiged = 0;
-
-extern oid      version_id[];
-extern int      version_id_len;
 
 static int      sysContactSet = 0, sysLocationSet = 0, sysNameSet = 0;
 

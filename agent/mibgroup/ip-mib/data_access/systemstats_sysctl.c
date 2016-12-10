@@ -11,6 +11,7 @@
 #include <net-snmp/data_access/systemstats.h>
 
 #include "../ipSystemStatsTable/ipSystemStatsTable.h"
+#include "systemstats_private.h"
 
 #if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1

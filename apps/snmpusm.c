@@ -61,8 +61,6 @@
 
 #include <net-snmp/net-snmp-includes.h>
 
-int             main(int, char **);
-
 #define CMD_PASSWD_NAME    "passwd"
 #define CMD_PASSWD         1
 #define CMD_CREATE_NAME    "create"

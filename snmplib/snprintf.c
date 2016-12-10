@@ -68,7 +68,9 @@
 #include <ctype.h>
 #include <sys/types.h>
 
-# include <stdarg.h>
+#include <stdarg.h>
+#include "snprintf.h"
+
 # define VA_LOCAL_DECL   va_list ap
 # define VA_START(f)     va_start(ap, f)
 # define VA_SHIFT(v,t)  ;       /* no-op for ANSI */
@@ -79,10 +81,6 @@
 #else
 #define LDOUBLE double
 #endif
-
-int             snprintf(char *str, size_t count, const char *fmt, ...);
-int             vsnprintf(char *str, size_t count, const char *fmt,
-                          va_list arg);
 
 static void     dopr(char *buffer, size_t maxlen, const char *format,
                      va_list args);

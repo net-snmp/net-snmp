@@ -43,6 +43,7 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/data_access/swinst.h>
+#include "swinst_private.h"
 
 netsnmp_feature_require(date_n_time)
 

@@ -86,13 +86,6 @@ struct variable2 mteTriggerDeltaTable_variables[] = {
 
 
 /*
- * global storage of our data, saved in and configured by header_complex() 
- */
-extern struct header_complex_index *mteTriggerTableStorage;
-
-
-
-/*
  * init_mteTriggerDeltaTable():
  *   Initialization routine.  This is called when the agent starts up.
  *   At a minimum, registration of your variables should take place here.

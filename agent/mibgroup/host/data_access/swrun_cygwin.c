@@ -27,6 +27,7 @@
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/data_access/swrun.h>
 #include <net-snmp/data_access/swrun.h>
+#include "swrun_private.h"
 
 /*
  * a lot of this is "stolen" from cygwin ps.cc

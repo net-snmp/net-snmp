@@ -157,11 +157,6 @@ struct variable2 mteTriggerThresholdTable_variables[] = {
  * (L = length of the oidsuffix) 
  */
 
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-extern struct header_complex_index *mteTriggerTableStorage;
-
 
 /*
  * init_mteTriggerThresholdTable():

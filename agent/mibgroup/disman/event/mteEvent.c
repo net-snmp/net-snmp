@@ -7,6 +7,7 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "agentx/subagent.h"
 #include "disman/event/mteEvent.h"
 #include "disman/event/mteTrigger.h"
 #include "disman/event/mteObjects.h"
@@ -349,8 +350,6 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
                        oid *suffix, size_t sfx_len ) /* Matching instance  */
 {
     netsnmp_variable_list *var, *v2;
-    extern const oid       snmptrap_oid[];
-    extern const size_t    snmptrap_oid_len;
     netsnmp_session       *s;
 
          /*

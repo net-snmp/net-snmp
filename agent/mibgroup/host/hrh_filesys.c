@@ -23,6 +23,7 @@
 #include "hrh_filesys.h"
 #include "hrh_storage.h"
 #include "hr_disk.h"
+#include "hr_filesys.h"
 #include <net-snmp/utilities.h>
 
 #if HAVE_MNTENT_H
@@ -77,9 +78,6 @@ netsnmp_fsys_info *HRFS_entry;
 #define	FULL_DUMP	0
 #define	PART_DUMP	1
 
-extern void     Init_HR_FileSys(void);
-extern int      Get_Next_HR_FileSys(void);
-char           *cook_device(char *);
 static u_char  *when_dumped(char *filesys, int level, size_t * length);
 int             header_hrhfilesys(struct variable *, oid *, size_t *, int,
                                  size_t *, WriteMethod **);

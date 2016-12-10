@@ -219,7 +219,6 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     }
 
     {
-	extern netsnmp_agent_session *netsnmp_processing_set;
 	if (netsnmp_processing_set) {
 	    /*
 	     * netsnmp_handle_request will not be responsive to our efforts to

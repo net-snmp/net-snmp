@@ -40,6 +40,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "alarm.h"
+#include "event.h"
     /*
      * Implementation headers 
      */
@@ -127,19 +128,6 @@
          kuku_cnt =
          0;
 #endif
-
-/*
- * find & enjoy it in event.c 
- */
-     extern int
-     event_api_send_alarm(u_char is_rising,
-                          u_long alarm_index,
-                          u_long event_index,
-                          oid * alarmed_var,
-                          size_t alarmed_var_length,
-                          u_long sample_type,
-                          u_long value,
-                          u_long the_threshold, char *alarm_descr);
 
 static int
 fetch_var_val(oid * name, size_t namelen, u_long * new_value)

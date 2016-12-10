@@ -166,8 +166,6 @@ NETSNMP_STATIC_INLINE int
                                                 var, int column);
 #endif
 
-ipv4InterfaceTable_data *ipv4InterfaceTable_allocate_data(void);
-
 /**
  * @internal
  * Initialize the table ipv4InterfaceTable 
@@ -389,6 +387,7 @@ ipv4InterfaceTable_valid_columns_set(netsnmp_column_info *vc)
     ipv4InterfaceTable_if_ctx.tbl_info.valid_columns = vc;
 }                               /* ipv4InterfaceTable_valid_columns_set */
 
+#if 0
 /*
  * ipv4InterfaceTable_allocate_data
  *
@@ -409,6 +408,7 @@ ipv4InterfaceTable_allocate_data(void)
 
     return rtn;
 }                               /* ipv4InterfaceTable_allocate_data */
+#endif
 
 /**
  * @internal

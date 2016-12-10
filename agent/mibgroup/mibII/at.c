@@ -861,7 +861,7 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
 #elif defined(HAVE_IPHLPAPI_H)  /* WIN32 cygwin */
 #include <iphlpapi.h>
 
-extern WriteMethod write_arp;
+static WriteMethod write_arp;
 MIB_IPNETROW   *arp_row = NULL;
 int             create_flag = 0;
 

@@ -154,6 +154,7 @@ netsnmp_container *netsnmp_cert_get_trustlist(void);
     netsnmp_container *netsnmp_cert_map_container_create(int with_fp);
     netsnmp_container *netsnmp_cert_map_container(void);
 
+    netsnmp_cert_map *netsnmp_certToTSN_parse_common(char **line);
     int netsnmp_cert_get_secname_maps(netsnmp_container *cm);
 
     /*************************************************************************

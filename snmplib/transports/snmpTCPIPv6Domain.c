@@ -330,12 +330,6 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     return t;
 }
 
-/*
- * Not extern but still defined in snmpUDPIPv6Domain.c
- */
-extern int
-netsnmp_sockaddr_in6_2(struct sockaddr_in6*, const char*, const char*);
-
 netsnmp_transport *
 netsnmp_tcp6_create_tstring(const char *str, int local,
 			    const char *default_target)

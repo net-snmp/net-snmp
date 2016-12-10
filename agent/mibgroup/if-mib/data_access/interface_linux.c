@@ -6,6 +6,9 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/agent/snmp_vars.h>
+#include "interface_private.h"
 
 netsnmp_feature_require(fd_event_manager)
 netsnmp_feature_require(delete_prefix_info)

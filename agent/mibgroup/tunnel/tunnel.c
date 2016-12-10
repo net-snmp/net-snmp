@@ -78,13 +78,6 @@
 #ifdef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
 #include "if-mib/ifTable/ifTable.h"
 #include "if-mib/ifTable/ifTable_defs.h"
-#else
-/*
- * This is used, because the TUNNEL-MIB augments ifTable. 
- */
-extern unsigned char *var_ifEntry(struct variable *,
-                                  oid *, size_t *,
-                                  int, size_t *, WriteMethod **);
 #endif
 
 

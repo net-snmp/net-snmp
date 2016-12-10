@@ -43,6 +43,8 @@ PERFORMANCE OF THIS SOFTWARE.
  * distributed with the Net-SNMP package.
  */
 
+    extern int callback_master_num;
+
     struct variable;
 
     /**

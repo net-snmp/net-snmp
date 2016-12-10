@@ -61,15 +61,10 @@ struct variable2 pingProbeHistoryTable_variables[] = {
 };
 
 
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-
-extern struct header_complex_index *pingCtlTableStorage;
-extern struct header_complex_index *pingProbeHistoryTableStorage;
 int
 pingProbeHistoryTable_inadd(struct pingProbeHistoryTable_data *thedata);
 
+#if 0
 void
 pingProbeHistoryTable_cleaner(struct header_complex_index *thestuff)
 {
@@ -82,6 +77,7 @@ pingProbeHistoryTable_cleaner(struct header_complex_index *thestuff)
         DEBUGMSGTL(("pingProbeHistoryTable", "cleaner  "));
     }
 }
+#endif
 
 void
 init_pingProbeHistoryTable(void)

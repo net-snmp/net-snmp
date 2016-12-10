@@ -115,19 +115,6 @@ int             doalltests = 0, docrypt = 0, dokeyedhash = 0, dorandom = 0;
 #define MLCOUNT_MAX	6       /* MAC Length Count Maximum. */
 
 
-
-/*
- * Prototypes.
- */
-void            usage(void);
-
-int             test_docrypt(void);
-int             test_dokeyedhash(void);
-int             test_dorandom(void);
-
-
-
-
 int
 main(int argc, char **argv)
 {

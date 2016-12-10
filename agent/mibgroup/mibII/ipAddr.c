@@ -115,6 +115,7 @@
 #include <net-snmp/data_access/interface.h>
 
 #include "ip.h"
+#include "ipAddr.h"
 #include "interfaces.h"
 
 #ifdef cygwin

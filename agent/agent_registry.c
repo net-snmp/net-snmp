@@ -64,6 +64,7 @@
 #include <net-snmp/agent/null.h>
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_iterator.h>
+#include <net-snmp/agent/agent_index.h>
 #include <net-snmp/agent/agent_registry.h>
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
@@ -1262,7 +1263,6 @@ netsnmp_register_mib(const char *moduleName,
      */
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT) {
-        extern struct snmp_session *main_session;
         if (main_session == NULL) {
             register_mib_detach_node(subtree);
 	}
@@ -2247,7 +2247,6 @@ shutdown_tree(void) {
 
 }
 
-extern void     dump_idx_registry(void);
 void
 dump_registry(void)
 {

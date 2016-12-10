@@ -33,9 +33,6 @@ netsnmp_feature_require(table_tdata_insert_row)
 
 #define MAP_MIB_CONFIG_TOKEN "snmpTlstmCertToTSNEntry"
 
-extern netsnmp_cert_map *netsnmp_certToTSN_parse_common(char **line);
-
-
     /*
      * structure for undo storage and other vars for set processing 
      */

@@ -34,6 +34,7 @@
 
 #include "struct.h"
 #include "disk.h"
+#include "disk_hw.h"
 #include "util_funcs/header_simple_table.h"
 #if USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"

@@ -176,8 +176,6 @@ struct module_init_list *noinitlist = NULL;
  */
 #define MIB_CLIENTS_ARE_EVIL 1
 
-extern netsnmp_subtree *subtrees;
-
 /*
  *      Each variable name is placed in the variable table, without the
  * terminating substring that determines the instance of the variable.  When

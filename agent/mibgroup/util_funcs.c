@@ -126,8 +126,6 @@ netsnmp_feature_child_of(create_prefix_info, prefix_info_all)
 static long     cachetime;
 #endif
 
-extern int      numprocs, numextens;
-
 /** deprecated, use netsnmp_mktemp instead */
 const char *
 make_tempfile(void)

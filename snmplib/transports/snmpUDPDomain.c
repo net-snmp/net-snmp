@@ -85,11 +85,6 @@ static netsnmp_tdomain udpDomain;
  */
 typedef netsnmp_indexed_addr_pair netsnmp_udp_addr_pair;
 
-/*
- * not static, since snmpUDPIPv6Domain needs it, but not public, either.
- * (ie don't put it in a public header.)
- */
-void _netsnmp_udp_sockopt_set(int fd, int server);
 int
 netsnmp_sockaddr_in2(struct sockaddr_in *addr,
                      const char *inpeername, const char *default_target);

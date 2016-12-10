@@ -11,6 +11,8 @@
 #include <net-snmp/data_access/systemstats.h>
 
 #include "../ipSystemStatsTable/ipSystemStatsTable.h"
+#include "systemstats.h"
+#include "systemstats_private.h"
 
 #include <sys/types.h>
 #include <dirent.h>
