@@ -643,8 +643,8 @@ netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
     const char * const *spec = NULL;
     int                 any_found = 0;
     char buf[SNMP_MAXPATH];
-    char **lspec = 0;
-    char *tokenized_domain = 0;
+    char **lspec = NULL;
+    char *tokenized_domain = NULL;
 
     application = tspec->application;
     str = tspec->target;

@@ -175,8 +175,6 @@ static int      getstats(void);
 void		devla_getstats(unsigned int regno, void *dummy);
 #endif
 
-FILE           *file;
-
 #ifdef linux
 struct diskiopart {
     char            syspath[STRMAX];	/* full stat path */

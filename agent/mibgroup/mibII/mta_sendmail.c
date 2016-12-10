@@ -1396,7 +1396,7 @@ var_mtaGroupEntry(struct variable *vp,
         *length = vp->namelen + 2;
     }
 
-    *write_method = 0;
+    *write_method = NULL;
     *var_len = sizeof(long);    /* default to 'long' results */
 
     if (vp->magic & NEEDS_STATS) {

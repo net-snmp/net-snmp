@@ -468,7 +468,7 @@ parse_simple_monitor(const char *token, char *line)
                      */
                     return;
                 }
-                StorageNew->mteTriggerFrequency = (unsigend long) freq;
+                StorageNew->mteTriggerFrequency = (unsigned long) freq;
             } else {
                 config_perror("No parameter after -r given\n");
                 /*
@@ -2917,7 +2917,7 @@ write_mteTriggerEntryStatus(int action,
          */
         if (StorageDel != NULL) {
             mte_disable_trigger(StorageDel);
-            StorageDel = 0;
+            StorageDel = NULL;
             /*
              * XXX: free it, its dead 
              */
@@ -3164,7 +3164,7 @@ mte_get_response(struct mteTriggerTable_data *item, netsnmp_pdu *pdu)
              * xxx 
              */
             char           *errstr;
-            snmp_error(mte_callback_sess, 0, 0, &errstr);
+            snmp_error(mte_callback_sess, NULL, NULL, &errstr);
             if (response) {
                 DEBUGMSGTL(("mteTriggerTable",
                             "Error received: status=%d, sess_error=%s, pduerr=%d/%s, pdu version=%d\n",

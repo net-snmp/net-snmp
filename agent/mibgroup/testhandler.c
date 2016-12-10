@@ -251,7 +251,7 @@ my_test_table_handler(netsnmp_mib_handler *handler,
                 /*
                  * or no index specified 
                  */
-                table_info->indexes->val.integer == 0) {
+                table_info->indexes->val.integer == NULL) {
                 table_info->colnum = RESULT_COLUMN;
                 x = 0;
                 y = 0;

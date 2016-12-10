@@ -201,23 +201,9 @@ snmpNotifyFilterTable_data *snmpNotifyFilterTable_allocate_data(void);
  *    (Define its contents and how it's structured)
  */
 void
- 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    _snmpNotifyFilterTable_initialize_interface
-    (snmpNotifyFilterTable_registration * reg_ptr, u_long flags) {
+_snmpNotifyFilterTable_initialize_interface
+    (snmpNotifyFilterTable_registration *reg_ptr, u_long flags)
+{
     netsnmp_baby_steps_access_methods *access_multiplexer =
         &snmpNotifyFilterTable_if_ctx.access_multiplexer;
     netsnmp_table_registration_info *tbl_info =
@@ -415,23 +401,9 @@ void
  * Shutdown the table snmpNotifyFilterTable
  */
 void
- 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    _snmpNotifyFilterTable_shutdown_interface
-    (snmpNotifyFilterTable_registration * reg_ptr) {
+_snmpNotifyFilterTable_shutdown_interface
+    (snmpNotifyFilterTable_registration *reg_ptr)
+{
     /*
      * shutdown the container
      */
@@ -450,9 +422,8 @@ snmpNotifyFilterTable_valid_columns_set(netsnmp_column_info *vc)
  * convert the index component stored in the context to an oid
  */
 int
-snmpNotifyFilterTable_index_to_oid(netsnmp_index * oid_idx,
-                                   snmpNotifyFilterTable_mib_index *
-                                   mib_idx)
+snmpNotifyFilterTable_index_to_oid(netsnmp_index *oid_idx,
+                                   snmpNotifyFilterTable_mib_index *mib_idx)
 {
     int             err = SNMP_ERR_NOERROR;
 
@@ -525,9 +496,8 @@ snmpNotifyFilterTable_index_to_oid(netsnmp_index * oid_idx,
  * @retval SNMP_ERR_GENERR   : error
  */
 int
-snmpNotifyFilterTable_index_from_oid(netsnmp_index * oid_idx,
-                                     snmpNotifyFilterTable_mib_index *
-                                     mib_idx)
+snmpNotifyFilterTable_index_from_oid(netsnmp_index *oid_idx,
+                                     snmpNotifyFilterTable_mib_index *mib_idx)
 {
     int             err = SNMP_ERR_NOERROR;
 

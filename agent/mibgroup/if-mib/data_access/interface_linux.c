@@ -1064,7 +1064,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
 void netsnmp_prefix_process(int fd, void *data);
 
 /* Open netlink socket to watch new ipv6 addresses and prefixes. */
-int netsnmp_prefix_listen()
+int netsnmp_prefix_listen(void)
 {
     struct {
                 struct nlmsghdr n;

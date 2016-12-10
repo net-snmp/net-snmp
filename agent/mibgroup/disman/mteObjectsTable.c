@@ -801,7 +801,7 @@ write_mteObjectsEntryStatus(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         if (StorageDel != NULL) {
-            StorageDel = 0;
+            StorageDel = NULL;
             /*
              * XXX: free it, its dead 
              */

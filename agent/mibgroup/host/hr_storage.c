@@ -288,7 +288,6 @@ struct variable2 hrstore_variables[] = {
     {HRSTORE_FAILS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
      var_hrstore, 1, {7}}
 };
-oid             hrstore_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 2 };
 oid             hrMemorySize_oid[]   = { 1, 3, 6, 1, 2, 1, 25, 2, 2 };
 oid             hrStorageTable_oid[] = { 1, 3, 6, 1, 2, 1, 25, 2, 3, 1 };
 
