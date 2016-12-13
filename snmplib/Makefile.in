@@ -69,6 +69,7 @@ INCLUDESUBDIRHEADERS=README \
 	md5.h \
 	mib.h \
 	mt_support.h \
+	netsnmp-attribute-format.h \
 	oid.h \
 	oid_stash.h \
 	parse.h \
