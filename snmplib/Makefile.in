@@ -31,71 +31,71 @@ mysubdir=snmplib
 
 # headers
 INSTALLHEADERS=\
-	net-snmp-includes.h \
 	config_api.h  \
+	definitions.h \
 	mib_api.h     \
+	net-snmp-includes.h \
 	output_api.h  \
 	pdu_api.h     \
 	session_api.h \
 	snmpv3_api.h  \
-	varbind_api.h \
 	types.h       \
 	utilities.h   \
-	version.h     \
-	definitions.h
+	varbind_api.h \
+	version.h
 
 INCLUDESUBDIR=library
 INCLUDESUBDIRHEADERS=README \
 	asn1.h \
 	callback.h \
 	cert_util.h \
+	check_varbind.h \
 	container.h \
 	container_binary_array.h \
-	container_list_ssll.h \
 	container_iterator.h \
+	container_list_ssll.h \
 	container_null.h \
-	factory.h \
 	data_list.h \
 	default_store.h \
 	dir_utils.h \
+	factory.h \
 	fd_event_manager.h \
 	file_utils.h \
+	getopt.h \
 	int64.h \
 	keytools.h \
-	mib.h \
+	large_fd_set.h \
+	lcd_time.h \
 	md5.h \
+	mib.h \
+	mt_support.h \
+	oid.h \
+	oid_stash.h \
 	parse.h \
 	read_config.h \
 	scapi.h \
+	snmp-tc.h \
 	snmp.h \
 	snmp_alarm.h \
 	snmp_api.h \
-	large_fd_set.h \
 	snmp_assert.h \
 	snmp_client.h \
 	snmp_debug.h \
+	snmp_enum.h \
 	snmp_impl.h \
 	snmp_logging.h \
 	snmp_parse_args.h \
+	snmp_secmod.h \
 	snmp_service.h \
-	snmp-tc.h \
+	snmp_transport.h \
 	snmpv3.h \
 	system.h \
 	text_utils.h \
 	tools.h \
 	transform_oids.h \
 	types.h \
-        getopt.h \
-        lcd_time.h \
-        mt_support.h \
-        oid.h \
-        oid_stash.h \
-        snmp_enum.h \
-        snmp_secmod.h \
-        ucd_compat.h \
-        vacm.h \
-	check_varbind.h \
-	snmp_transport.h \
+	ucd_compat.h \
+	vacm.h \
 	winpipe.h \
 	winservice.h \
 	@transport_hdr_list@ \
@@ -105,28 +105,29 @@ INSTALLBUILTSUBDIRHEADERS=../include/net-snmp/library/snmpv3-security-includes.h
 INSTALLBUILTSUBDIR=library
 
 
-INSTALLUCDHEADERS= asn1.h \
+INSTALLUCDHEADERS=\
+	asn1.h          \
 	callback.h	\
 	default_store.h	\
 	int64.h		\
 	keytools.h	\
+	large_fd_set.h	\
 	mib.h		\
 	parse.h		\
 	read_config.h	\
 	scapi.h		\
+	snmp-tc.h	\
+	snmp.h		\
 	snmp_alarm.h	\
 	snmp_api.h	\
-	large_fd_set.h	\
 	snmp_client.h	\
 	snmp_debug.h	\
-	snmp.h		\
 	snmp_impl.h	\
 	snmp_logging.h	\
 	snmp_parse_args.h \
-	snmp-tc.h	\
+	snmp_vars.h	\
 	snmpusm.h	\
 	snmpv3.h	\
-	snmp_vars.h	\
 	struct.h	\
 	system.h	\
 	tools.h		\
