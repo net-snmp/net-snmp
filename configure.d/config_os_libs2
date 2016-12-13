@@ -560,5 +560,6 @@ AC_SUBST(NETSNMP_BUILD_PCAP_PROG_FALSE)
 AC_CHECK_FUNCS(nlist nlist64 knlist)
 
 AC_CHECK_HEADERS([curses.h])
+AC_CHECK_HEADERS([ncurses/curses.h])
 NETSNMP_SEARCH_LIBS([endwin], [curses ncurses],,,,[LIBCURSES])
 AC_SUBST([LIBCURSES])

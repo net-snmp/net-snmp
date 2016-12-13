@@ -67,7 +67,9 @@ SOFTWARE.
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#if HAVE_CURSES_H
+#if HAVE_NCURSES_CURSES_H
+#include <ncurses/curses.h>
+#elif HAVE_CURSES_H
 #include <curses.h>
 #endif
 #include <signal.h>
