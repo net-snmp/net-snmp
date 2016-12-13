@@ -31,7 +31,7 @@ netsnmp_feature_require(ipaddress_ioctl_entry_copy)
 
 #include "ipaddress_ioctl.h"
 #include "ipaddress_private.h"
-#include "interface_private.h"
+#include "if-mib/data_access/interface_private.h"
 
 #define ROUNDUP(a) \
   ((a) > 0 ? (1 + (((a) - 1) | (sizeof(long) - 1))) : sizeof(long))
