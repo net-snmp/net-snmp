@@ -44,10 +44,10 @@
 
 #undef DEBUGGING
 
-#ifdef DEBUGGING
 #define DEBUG(x) deb(x)
+#ifdef DEBUGGING
 FILE *debf = NULL;
-void
+static void
 deb(const char *string) {
     if (NULL == debf) {
         debf = fopen("/tmp/sshtosnmp.log", "a");
@@ -58,7 +58,8 @@ deb(const char *string) {
     }
 }
 #else  /* !DEBUGGING */
-#define DEBUG(x)
+NETSNMP_STATIC_INLINE void
+deb(const char *string) { }
 #endif /* DEBUGGING code */
 
 int
