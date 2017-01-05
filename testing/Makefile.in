@@ -31,7 +31,7 @@ all:
 	@echo "Also see the RUNFULLTESTS script for details"
 
 test:
-	@./check_for_pskill
+	@$(srcdir)/check_for_pskill
 	@if test "x$(PERL)" = "x" \
 	         -o "x@PERL_SYSTEM_INVOKES_POSIX_SHELL@" != xyes \
 		 || { ! $(PERL) -e 'require TAP::Harness;' >/dev/null 2>&1 \
