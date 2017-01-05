@@ -4228,6 +4228,31 @@ _oid_finish_printing(const oid * objid, size_t objidlen,
 }
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
+static void
+_get_realloc_symbol_octet_string(size_t numids, const oid * objid,
+				 u_char ** buf, size_t * buf_len,
+				 size_t * out_len, int allow_realloc,
+				 int *buf_overflow, struct tree* tp)
+{
+  netsnmp_variable_list	var = { 0 };
+  u_char		buffer[1024];
+  size_t		i;
+
+  for (i = 0; i < numids; i++)
+    buffer[i] = (u_char) objid[i];
+  var.type = ASN_OCTET_STR;
+  var.val.string = buffer;
+  var.val_len = numids;
+  if (!*buf_overflow) {
+    if (!sprint_realloc_octet_string(buf, buf_len, out_len,
+				     allow_realloc, &var,
+				     NULL, tp->hint,
+				     NULL)) {
+      *buf_overflow = 1;
+    }
+  }
+}
+
 static struct tree *
 _get_realloc_symbol(const oid * objid, size_t objidlen,
                     struct tree *subtree,
@@ -4351,11 +4376,6 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
         switch (tp->type) {
         case TYPE_OCTETSTR:
             if (extended_index && tp->hint) {
-                netsnmp_variable_list var;
-                u_char          buffer[1024];
-                int             i;
-
-                memset(&var, 0, sizeof var);
                 if (in_dices->isimplied) {
                     numids = objidlen;
                     if (numids > objidlen)
@@ -4374,19 +4394,9 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                 }
                 if (numids > objidlen)
                     goto finish_it;
-                for (i = 0; i < (int) numids; i++)
-                    buffer[i] = (u_char) objid[i];
-                var.type = ASN_OCTET_STR;
-                var.val.string = buffer;
-                var.val_len = numids;
-                if (!*buf_overflow) {
-                    if (!sprint_realloc_octet_string(buf, buf_len, out_len,
-                                                     allow_realloc, &var,
-                                                     NULL, tp->hint,
-                                                     NULL)) {
-                        *buf_overflow = 1;
-                    }
-                }
+		_get_realloc_symbol_octet_string(numids, objid, buf, buf_len,
+						 out_len, allow_realloc,
+						 buf_overflow, tp);
             } else if (in_dices->isimplied) {
                 numids = objidlen;
                 if (numids > objidlen)
