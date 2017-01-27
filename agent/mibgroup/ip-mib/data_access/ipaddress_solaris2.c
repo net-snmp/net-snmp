@@ -143,11 +143,11 @@ _load_v4(netsnmp_container *container, int idx_offset)
     while ((rc = getMibstat(MIB_IP_ADDR, &ipae, sizeof(ipae), req,
                             &Get_everything, NULL)) == 0) {
         req = GET_NEXT;
+        if (ipae.ipAdEntAddr == INADDR_ANY)
+            continue;
         entry = netsnmp_access_ipaddress_entry_create();
         if (entry == NULL)
             return (-1);    
-        if (ipae.ipAdEntAddr == INADDR_ANY)
-            continue;
 
         ipae.ipAdEntIfIndex.o_bytes[ipae.ipAdEntIfIndex.o_length] = '\0';
         DEBUGMSGTL(("access:ipaddress:container", "found if %s\n",
