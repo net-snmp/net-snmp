@@ -193,7 +193,9 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 			    ? 2      /* operatingSystem */
 			    : 4;     /*  application    */
 
-	    /* Do we need to free 'v' & 'c' ??? */
+	    /* pkgparam() return values must be freed. */
+	    free(c);
+	    free(v);
 #else
 	    entry->swName_len = snprintf( entry->swName, sizeof(entry->swName),
 					  "%s", dp->d_name );
