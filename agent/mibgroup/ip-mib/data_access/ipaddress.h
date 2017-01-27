@@ -29,5 +29,3 @@ config_error(the ipaddress data access library is not available in this environm
 #endif
 
 struct address_flag_info netsnmp_access_other_info_get(int index, int family);
-int netsnmp_access_ipaddress_extra_prefix_info(int index, u_long *preferedlt,
-                                               ulong *validlt, char *addr);
