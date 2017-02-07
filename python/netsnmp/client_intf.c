@@ -1424,8 +1424,8 @@ netsnmp_get(PyObject *self, PyObject *args)
   int oid_arr_len = MAX_OID_LEN;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
-  u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
-  size_t str_buf_len = sizeof(str_buf);
+  u_char *str_buf = NULL;
+  size_t str_buf_len = 0;
   size_t out_len = 0;
   int buf_over = 0;
   char *tag;
@@ -1552,17 +1552,19 @@ netsnmp_get(PyObject *self, PyObject *args)
       varbind = PySequence_GetItem(varlist, varlist_ind);
 
       if (PyObject_HasAttrString(varbind, "tag")) {
+        if (str_buf == NULL) {
+          str_buf = (u_char *) netsnmp_malloc(STR_BUF_SIZE);
+          str_buf_len = STR_BUF_SIZE;
+        }
 	*str_buf = '.';
 	*(str_buf+1) = '\0';
 	out_len = 0;
-	tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
-					       &out_len, 0, &buf_over,
+	tp = netsnmp_sprint_realloc_objid_tree(&str_buf, &str_buf_len,
+					       &out_len, 1, &buf_over,
 					       vars->name,vars->name_length);
-	if (_debug_level)
-            printf("netsnmp_get:str_bufp:%s:%d:%d\n", str_bufp,
+	if (_debug_level) 
+            printf("netsnmp_get:str_buf:%s:%d:%d\n", str_buf,
                    (int)str_buf_len, (int)out_len);
-
-	str_buf[sizeof(str_buf)-1] = '\0';
 
 	if (__is_leaf(tp)) {
 	  type = (tp->type ? tp->type : tp->parent->type);
@@ -1573,9 +1575,6 @@ netsnmp_get(PyObject *self, PyObject *args)
 	  type = __translate_asn_type(vars->type);
 	  if (_debug_level) printf("netsnmp_get:!is_leaf:%d\n",tp->type);
 	}
-
-	if (_debug_level) printf("netsnmp_get:str_buf:%s\n",str_buf);
-
 	__get_label_iid((char *) str_buf, &tag, &iid, getlabel_flag);
 
 	py_netsnmp_attr_set_string(varbind, "tag", tag, STRLEN(tag));
@@ -1585,7 +1584,7 @@ netsnmp_get(PyObject *self, PyObject *args)
 
 	py_netsnmp_attr_set_string(varbind, "type", type_str, strlen(type_str));
 
-	len = __snprint_value((char *) str_buf, sizeof(str_buf) - 1,
+	len = __snprint_value((char *) str_buf, str_buf_len - 1,
                               vars, tp, type, sprintval_flag);
 	str_buf[len] = '\0';
 	py_netsnmp_attr_set_string(varbind, "val", (char *) str_buf, len);
@@ -1618,6 +1617,7 @@ netsnmp_get(PyObject *self, PyObject *args)
 
  done:
   SAFE_FREE(oid_arr);
+  if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
@@ -1639,8 +1639,8 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   int oid_arr_len = MAX_OID_LEN;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
-  u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
-  size_t str_buf_len = sizeof(str_buf);
+  u_char *str_buf = NULL;
+  size_t str_buf_len = 0;
   size_t out_len = 0;
   int buf_over = 0;
   char *tag;
@@ -1774,13 +1774,16 @@ netsnmp_getnext(PyObject *self, PyObject *args)
       varbind = PySequence_GetItem(varlist, varlist_ind);
 
       if (PyObject_HasAttrString(varbind, "tag")) {
+        if (str_buf == NULL) {
+          str_buf = (u_char *) netsnmp_malloc(STR_BUF_SIZE);
+          str_buf_len = STR_BUF_SIZE;
+        }
 	*str_buf = '.';
 	*(str_buf+1) = '\0';
 	out_len = 0;
-	tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
-					       &out_len, 0, &buf_over,
+	tp = netsnmp_sprint_realloc_objid_tree(&str_buf, &str_buf_len,
+					       &out_len, 1, &buf_over,
 					       vars->name,vars->name_length);
-	str_buf[sizeof(str_buf)-1] = '\0';
 
 	if (__is_leaf(tp)) {
 	  type = (tp->type ? tp->type : tp->parent->type);
@@ -1803,7 +1806,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 	py_netsnmp_attr_set_string(varbind, "type", type_str,
 				   strlen(type_str));
 
-	len = __snprint_value((char *) str_buf, sizeof(str_buf) - 1,
+	len = __snprint_value((char *) str_buf, str_buf_len-1,
                               vars, tp, type, sprintval_flag);
 	str_buf[len] = '\0';
 
@@ -1837,6 +1840,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 
  done:
   SAFE_FREE(oid_arr);
+  if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
@@ -1864,8 +1868,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
   int status;
-  u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
-  size_t str_buf_len = sizeof(str_buf);
+  u_char *str_buf = NULL;
+  size_t str_buf_len = 0;
   size_t out_len = 0;
   int buf_over = 0;
   char *tag;
@@ -2105,13 +2109,16 @@ netsnmp_walk(PyObject *self, PyObject *args)
               varbind = py_netsnmp_construct_varbind();
 
               if (PyObject_HasAttrString(varbind, "tag")) {
+                  if (str_buf == NULL) {
+                      str_buf = (u_char *) netsnmp_malloc(STR_BUF_SIZE);
+                      str_buf_len = STR_BUF_SIZE;
+                  }
                   str_buf[0] = '.';
                   str_buf[1] = '\0';
                   out_len = 0;
-                  tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
-                                                         &out_len, 0, &buf_over,
+                  tp = netsnmp_sprint_realloc_objid_tree(&str_buf, &str_buf_len,
+                                                         &out_len, 1, &buf_over,
                                                          vars->name,vars->name_length);
-                  str_buf[sizeof(str_buf)-1] = '\0';
 
                   if (__is_leaf(tp)) {
                       type = (tp->type ? tp->type : tp->parent->type);
@@ -2133,8 +2140,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
                   py_netsnmp_attr_set_string(varbind, "type", type_str,
                                              strlen(type_str));
 
-                  len = __snprint_value((char *) str_buf,sizeof(str_buf) - 1,
-                                        vars,tp,type,sprintval_flag);
+                  len = __snprint_value((char *) str_buf, str_buf_len-1,
+                                        vars, tp, type, sprintval_flag);
                   str_buf[len] = '\0';
 
                   py_netsnmp_attr_set_string(varbind, "val", (char *) str_buf,
@@ -2193,6 +2200,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   }
   SAFE_FREE(oid_arr);
   SAFE_FREE(oid_arr_broken_check);
+  if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
@@ -2218,8 +2226,8 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   int oid_arr_len = MAX_OID_LEN;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
-  u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
-  size_t str_buf_len = sizeof(str_buf);
+  u_char *str_buf = NULL;
+  size_t str_buf_len = 0;
   size_t out_len = 0;
   int buf_over = 0;
   char *tag;
@@ -2361,15 +2369,17 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	  varbind = py_netsnmp_construct_varbind();
 
 	  if (PyObject_HasAttrString(varbind, "tag")) {
+            if (str_buf == NULL) {
+              str_buf = (u_char *) netsnmp_malloc(STR_BUF_SIZE);
+              str_buf_len = STR_BUF_SIZE;
+            }
 	    *str_buf = '.';
 	    *(str_buf+1) = '\0';
 	    out_len = 0;
 	    buf_over = 0;
-	    str_bufp = str_buf;
-	    tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
-						   &out_len, 0, &buf_over,
+	    tp = netsnmp_sprint_realloc_objid_tree(&str_buf, &str_buf_len,
+						   &out_len, 1, &buf_over,
 						   vars->name,vars->name_length);
-	    str_buf[sizeof(str_buf)-1] = '\0';
 	    if (__is_leaf(tp)) {
 	      type = (tp->type ? tp->type : tp->parent->type);
 	      getlabel_flag &= ~NON_LEAF_NAME;
@@ -2388,7 +2398,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	    py_netsnmp_attr_set_string(varbind, "type", type_str,
 				       strlen(type_str));
 
-	    len = __snprint_value((char *) str_buf, sizeof(str_buf) - 1,
+	    len = __snprint_value((char *) str_buf, str_buf_len-1,
 				  vars, tp, type, sprintval_flag);
 	    str_buf[len] = '\0';
 
@@ -2438,6 +2448,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 
  done:
   SAFE_FREE(oid_arr);
+  if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
