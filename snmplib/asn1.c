@@ -585,8 +585,6 @@ asn_parse_unsigned_int(u_char * data,
         return NULL;
     }
     *datalength -= (int) asn_length + (bufp - data);
-    if (*bufp & 0x80)
-        value = ~value;         /* integer is negative */
 
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
