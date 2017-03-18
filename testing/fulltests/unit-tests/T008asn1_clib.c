@@ -106,6 +106,40 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
     }
 }
 
+{
+    static struct {
+        unsigned char encoded[8];
+        unsigned encoded_len;
+        unsigned long decoded;
+    } data[] = {
+        { { ASN_UINTEGER, 1, 0x80			}, 3, 0x80 },
+        { { ASN_UINTEGER, 2, 0x80, 0x00			}, 4, 0x8000 },
+        { { ASN_UINTEGER, 3, 0x80, 0x00, 0x00		}, 5, 0x800000 },
+        { { ASN_UINTEGER, 4, 0x80, 0x00, 0x00, 0x00	}, 6, 0x80000000 },
+    };
+    for (i = 0; i < sizeof(data)/sizeof(data[0]); i++) {
+	size_t decoded_length;
+	u_char decoded_type;
+	unsigned long decoded_value = 0;
+	u_char *parse_result;
+
+	decoded_length = data[i].encoded_len;
+	parse_result = asn_parse_unsigned_int(data[i].encoded,
+                                              &decoded_length,
+					      &decoded_type, &decoded_value,
+					      sizeof(decoded_value));
+	OKF(parse_result && decoded_type == ASN_UINTEGER
+	    && decoded_value == data[i].decoded,
+	    ("asn_parse_unsigned_int(%02x %02x %02x %02x %02x %02x %02x %02x, %d) %s;"
+	     " decoded type %d <> %d; decoded length %d; decoded value %lu",
+	     data[i].encoded[0], data[i].encoded[1], data[i].encoded[2],
+             data[i].encoded[3], data[i].encoded[4], data[i].encoded[5],
+             data[i].encoded[6], data[i].encoded[7], data[i].encoded_len,
+             parse_result ? "succeeded" : "failed",
+	     decoded_type, ASN_UINTEGER, (int)decoded_length, decoded_value));
+    }
+}
+
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
 
 #define TOINT64(c) ((long long)(long)(c).high << 32 | (c).low)
