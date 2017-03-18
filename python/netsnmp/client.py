@@ -47,7 +47,7 @@ def STR(obj):
     if obj != None:
         obj = str(obj)
     return obj
-    
+
 
 class Varbind(object):
     def __init__(self, tag=None, iid=None, val=None, type=None):
@@ -81,7 +81,7 @@ class VarList(object):
 
     def __len__(self):
         return len(self.varbinds)
-    
+
     def __getitem__(self, index):
         return self.varbinds[index]
 
@@ -109,7 +109,6 @@ class VarList(object):
                 self.varbinds.append(var)
             else:
                 raise TypeError
-       
 
 
 class Session(object):
@@ -121,16 +120,14 @@ class Session(object):
         self.UseEnums = 0
         self.BestGuess = 0
         self.RetryNoSuch = 0
-        self.ErrorStr = ''
-        self.ErrorNum = 0
-        self.ErrorInd = 0
-    
+        self._clear_error()
+
         sess_args = _parse_session_args(args)
 
         for k,v in sess_args.items():
             self.__dict__[k] = v
 
-            
+
         # check for transports that may be tunneled
         transportCheck = re.compile('^(tls|dtls|ssh)');
         match = transportCheck.match(sess_args['DestHost'])
@@ -177,26 +174,36 @@ class Session(object):
                 sess_args['LocalPort'],
                 sess_args['Retries'],
                 sess_args['Timeout'])
-        
+
+    def _clear_error(self):
+        self.ErrorStr = ''
+        self.ErrorNum = 0
+        self.ErrorInd = 0
+
     def get(self, varlist):
+        self._clear_error()
         res = client_intf.get(self, varlist)
         return res
 
     def set(self, varlist):
+        self._clear_error()
         res = client_intf.set(self, varlist)
         return res
-    
+
     def getnext(self, varlist):
+        self._clear_error()
         res = client_intf.getnext(self, varlist)
         return res
 
     def getbulk(self, nonrepeaters, maxrepetitions, varlist):
+        self._clear_error()
         if self.Version == 1:
             return None
         res = client_intf.getbulk(self, nonrepeaters, maxrepetitions, varlist)
         return res
 
     def walk(self, varlist):
+        self._clear_error()
         res = client_intf.walk(self, varlist)
         return res
 
@@ -205,7 +212,7 @@ class Session(object):
         return res
 
 import netsnmp
-        
+
 def snmpget(*args, **kargs):
     sess = Session(**kargs)
     var_list = VarList()
@@ -263,4 +270,3 @@ def snmpwalk(*args, **kargs):
                 var_list.append(Varbind(arg))
     res = sess.walk(var_list)
     return res
-    
