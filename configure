@@ -16403,7 +16403,7 @@ fi
 done
 
 
-for ac_header in sys/diskio.h  sys/dkio.h                                                   sys/file.h    sys/filio.h   sys/fixpoint.h                                 sys/fs.h      sys/ioctl.h   sys/loadavg.h  sys/mntent.h                    sys/mnttab.h  sys/pool.h    sys/protosw.h  sys/pstat.h                     sys/sockio.h  sys/stat.h    sys/statfs.h   sys/statvfs.h                   sys/stream.h  sys/sysget.h  sys/sysmp.h                                    sys/tcpipstats.h            sys/utsname.h  sys/vfs.h                       sys/vm.h      sys/vmmac.h   sys/vmmeter.h  sys/vmparam.h                   sys/vmsystm.h
+for ac_header in sys/diskio.h  sys/dkio.h                                                   sys/file.h    sys/filio.h   sys/fixpoint.h                                 sys/fs.h      sys/ioctl.h   sys/loadavg.h   sys/mntent.h                   sys/mnttab.h  sys/pool.h    sys/protosw.h   sys/pstat.h                    sys/sockio.h  sys/stat.h    sys/statfs.h    sys/statvfs.h                  sys/stream.h  sys/sysget.h  sys/sysmacros.h sys/sysmp.h                    sys/tcpipstats.h            sys/utsname.h  sys/vfs.h                       sys/vm.h      sys/vmmac.h   sys/vmmeter.h  sys/vmparam.h                   sys/vmsystm.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"

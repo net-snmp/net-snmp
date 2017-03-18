@@ -1181,6 +1181,9 @@
 /* Define to 1 if you have the <sys/syslog.h> header file. */
 #undef HAVE_SYS_SYSLOG_H
 
+/* Define to 1 if you have the <sys/sysmacros.h> header file. */
+#undef HAVE_SYS_SYSMACROS_H
+
 /* Define to 1 if you have the <sys/sysmp.h> header file. */
 #undef HAVE_SYS_SYSMP_H
 

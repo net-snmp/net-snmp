@@ -33,6 +33,10 @@
 #include <sys/stat.h>
 #endif
 
+#ifdef HAVE_SYS_SYSMACROS_H
+#include <sys/sysmacros.h> /* major() */
+#endif
+
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/agent_callbacks.h>
