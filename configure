@@ -23601,10 +23601,58 @@ eval ac_res=\$$as_ac_Lib
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
 
-$as_echo "#define HAVE_EVP_MD_CTX_CREATE /**/" >>confdefs.h
+$as_echo "#define HAVE_EVP_MD_CTX_CREATE 1" >>confdefs.h
 
 
-$as_echo "#define HAVE_EVP_MD_CTX_DESTROY /**/" >>confdefs.h
+$as_echo "#define HAVE_EVP_MD_CTX_DESTROY 1" >>confdefs.h
+
+fi
+
+
+            as_ac_Lib=`$as_echo "ac_cv_lib_${CRYPTO}''_EVP_MD_CTX_new" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_MD_CTX_new in -l${CRYPTO}" >&5
+$as_echo_n "checking for EVP_MD_CTX_new in -l${CRYPTO}... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l${CRYPTO}  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char EVP_MD_CTX_new ();
+int
+main ()
+{
+return EVP_MD_CTX_new ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+
+$as_echo "#define HAVE_EVP_MD_CTX_NEW 1" >>confdefs.h
+
+
+$as_echo "#define HAVE_EVP_MD_CTX_FREE 1" >>confdefs.h
 
 fi
 
@@ -23664,7 +23712,7 @@ if ${ac_cv_lib_ssl_SSL_library_init+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lssl -lcrypto $LIBS"
+LIBS="-lssl  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -23698,11 +23746,55 @@ if test "x$ac_cv_lib_ssl_SSL_library_init" = xyes; then :
 
 $as_echo "#define HAVE_LIBSSL 1" >>confdefs.h
 
+fi
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENSSL_init_ssl in -lssl" >&5
+$as_echo_n "checking for OPENSSL_init_ssl in -lssl... " >&6; }
+if ${ac_cv_lib_ssl_OPENSSL_init_ssl+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char OPENSSL_init_ssl ();
+int
+main ()
+{
+return OPENSSL_init_ssl ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_ssl_OPENSSL_init_ssl=yes
+else
+  ac_cv_lib_ssl_OPENSSL_init_ssl=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_OPENSSL_init_ssl" >&5
+$as_echo "$ac_cv_lib_ssl_OPENSSL_init_ssl" >&6; }
+if test "x$ac_cv_lib_ssl_OPENSSL_init_ssl" = xyes; then :
+
+$as_echo "#define HAVE_LIBSSL 1" >>confdefs.h
+
+fi
+
+	    if test "$ac_cv_lib_ssl_SSL_library_init" = yes -o "$ac_cv_lib_ssl_OPENSSL_init_ssl" = yes; then
                 LIBCRYPTO=" -lssl $LIBCRYPTO"
 else
   as_fn_error $? "The DTLS based transports require the libssl library from OpenSSL to be available" "$LINENO" 5
 fi
-
             TLSPROG=yes
         fi
         if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then
