@@ -327,10 +327,16 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
              [[#include <openssl/evp.h>]])
 
             AC_CHECK_LIB(${CRYPTO}, EVP_MD_CTX_create,
-                AC_DEFINE([HAVE_EVP_MD_CTX_CREATE], [],
+                AC_DEFINE([HAVE_EVP_MD_CTX_CREATE], [1],
                     [Define to 1 if you have the `EVP_MD_CTX_create' function.])
-                AC_DEFINE([HAVE_EVP_MD_CTX_DESTROY], [],
+                AC_DEFINE([HAVE_EVP_MD_CTX_DESTROY], [1],
                     [Define to 1 if you have the `EVP_MD_CTX_destroy' function.]))
+
+            AC_CHECK_LIB(${CRYPTO}, EVP_MD_CTX_new,
+                AC_DEFINE([HAVE_EVP_MD_CTX_NEW], [1],
+                    [Define to 1 if you have the `EVP_MD_CTX_new' function.])
+                AC_DEFINE([HAVE_EVP_MD_CTX_FREE], [1],
+                    [Define to 1 if you have the `EVP_MD_CTX_free' function.]))
         fi
         if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
 	    AC_CHECK_LIB(ssl, DTLSv1_method,
@@ -343,9 +349,15 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
         if echo " $transport_result_list " | $GREP "TLS" > /dev/null; then
 	    AC_CHECK_LIB(ssl, SSL_library_init,
                 AC_DEFINE(HAVE_LIBSSL, 1,
-                    [Define to 1 if you have the `ssl' library (-lssl).])
-                LIBCRYPTO=" -lssl $LIBCRYPTO",	
-		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available])	,-lcrypto)
+                    [Define to 1 if you have the `ssl' library (-lssl).]))
+	    AC_CHECK_LIB(ssl, OPENSSL_init_ssl,
+                AC_DEFINE(HAVE_LIBSSL, 1,
+                    [Define to 1 if you have the `ssl' library (-lssl).]))
+	    if test "$ac_cv_lib_ssl_SSL_library_init" = yes -o "$ac_cv_lib_ssl_OPENSSL_init_ssl" = yes; then
+                LIBCRYPTO=" -lssl $LIBCRYPTO"
+	    else
+		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available])
+	    fi
             TLSPROG=yes
         fi
         if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then

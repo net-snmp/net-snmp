@@ -164,6 +164,12 @@
 /* Define to 1 if you have the `EVP_MD_CTX_destroy' function. */
 #undef HAVE_EVP_MD_CTX_DESTROY
 
+/* Define to 1 if you have the `EVP_MD_CTX_free' function. */
+#undef HAVE_EVP_MD_CTX_FREE
+
+/* Define to 1 if you have the `EVP_MD_CTX_new' function. */
+#undef HAVE_EVP_MD_CTX_NEW
+
 /* Define if you have EVP_sha224/256 in openssl */
 #undef HAVE_EVP_SHA224
 

@@ -123,6 +123,32 @@ char           *usmUserPublic_val = NULL;
 int             docreateandwait = 0;
 
 
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
+
+#include <string.h>
+#include <openssl/engine.h>
+
+void DH_get0_pqg(const DH *dh,
+                const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
+{
+   if (p != NULL)
+       *p = dh->p;
+   if (q != NULL)
+       *q = dh->q;
+   if (g != NULL)
+       *g = dh->g;
+}
+
+void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
+{
+   if (pub_key != NULL)
+       *pub_key = dh->pub_key;
+   if (priv_key != NULL)
+       *priv_key = dh->priv_key;
+}
+
+#endif
+
 void
 usage(void)
 {
@@ -188,7 +214,7 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                oid *keyoid, size_t keyoid_len) {
     u_char *dhkeychange;
     DH *dh;
-    BIGNUM *other_pub;
+    BIGNUM *p, *g, *pub_key, *other_pub;
     u_char *key;
     size_t key_len;
             
@@ -203,25 +229,29 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
         dh = d2i_DHparams(NULL, &cp, dhvar->val_len);
     }
 
-    if (!dh || !dh->g || !dh->p) {
+    if (dh)
+        DH_get0_pqg(dh, &p, NULL, &g);
+
+    if (!dh || !g || !p) {
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
 
-    DH_generate_key(dh);
-    if (!dh->pub_key) {
+    if (!DH_generate_key(dh)) {
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
             
-    if (vars->val_len != (unsigned int)BN_num_bytes(dh->pub_key)) {
+    DH_get0_key(dh, &pub_key, NULL);
+
+    if (vars->val_len != (unsigned int)BN_num_bytes(pub_key)) {
         SNMP_FREE(dhkeychange);
         fprintf(stderr,"incorrect diffie-helman lengths (%lu != %d)\n",
-                (unsigned long)vars->val_len, BN_num_bytes(dh->pub_key));
+                (unsigned long)vars->val_len, BN_num_bytes(pub_key));
         return SNMPERR_GENERR;
     }
 
-    BN_bn2bin(dh->pub_key, dhkeychange + vars->val_len);
+    BN_bn2bin(pub_key, dhkeychange + vars->val_len);
 
     key_len = DH_size(dh);
     if (!key_len) {
