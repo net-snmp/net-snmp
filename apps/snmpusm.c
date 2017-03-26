@@ -214,7 +214,8 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                oid *keyoid, size_t keyoid_len) {
     u_char *dhkeychange;
     DH *dh;
-    BIGNUM *p, *g, *pub_key, *other_pub;
+    const BIGNUM *p, *g, *pub_key;
+    BIGNUM *other_pub;
     u_char *key;
     size_t key_len;
             
