@@ -11,6 +11,9 @@
 #define _SCAPI_H
 
 #ifdef NETSNMP_USE_OPENSSL
+#ifdef WIN32
+#define OPENSSL_SYS_WIN32
+#endif
 #include <openssl/ossl_typ.h> /* EVP_MD */
 #endif
 
