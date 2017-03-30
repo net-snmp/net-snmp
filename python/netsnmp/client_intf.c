@@ -1764,7 +1764,6 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 
     val_tuple = PyTuple_New(varlist_len);
     /* initialize return tuple */
-    val_tuple = PyTuple_New(varlist_len);
     for (varlist_ind = 0; varlist_ind < varlist_len; varlist_ind++) {
       PyTuple_SetItem(val_tuple, varlist_ind, Py_BuildValue(""));
     }
