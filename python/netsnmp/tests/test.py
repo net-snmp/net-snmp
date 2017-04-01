@@ -1,8 +1,20 @@
 """ Runs all unit tests for the netsnmp package.   """
 # Copyright (c) 2006 Andy Gross.  See LICENSE.txt for details.
 
+import os
 import unittest
 import netsnmp
+
+def snmp_dest(**kwargs):
+    """Return information about how to communicate with snmpd"""
+    dest = {
+        'Version':    1,
+        'DestHost':   'localhost:' + os.environ.get("SNMP_SNMPD_PORT", 161),
+        'Community':  'public',
+    }
+    for key, value in kwargs.iteritems():
+        dest[key] = value
+    return dest
 
 class BasicTests(unittest.TestCase):
     """Basic unit tests for the Net-SNMP Python interface"""
@@ -20,20 +32,14 @@ class BasicTests(unittest.TestCase):
         var = netsnmp.Varbind('.1.3.6.1.2.1.1.1', '0')
 
         print "---v1 GET tests -------------------------------------\n"
-        res = netsnmp.snmpget(var,
-                              Version=1,
-                              DestHost='localhost',
-                              Community='public')
+        res = netsnmp.snmpget(var, **snmp_dest())
 
         print "v1 snmpget result: ", res, "\n"
 
         print "v1 get var: ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
         print "---v1 GETNEXT tests-------------------------------------\n"
-        res = netsnmp.snmpgetnext(var,
-                                  Version=1,
-                                  DestHost='localhost',
-                                  Community='public')
+        res = netsnmp.snmpgetnext(var, **snmp_dest())
 
         print "v1 snmpgetnext result: ", res, "\n"
 
@@ -41,10 +47,7 @@ class BasicTests(unittest.TestCase):
 
         print "---v1 SET tests-------------------------------------\n"
         var = netsnmp.Varbind('sysLocation', '0', 'my new location')
-        res = netsnmp.snmpset(var,
-                              Version=1,
-                              DestHost='localhost',
-                              Community='public')
+        res = netsnmp.snmpset(var, **snmp_dest())
 
         print "v1 snmpset result: ", res, "\n"
 
@@ -57,10 +60,7 @@ class BasicTests(unittest.TestCase):
         for var in varlist:
             print "  ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
-        res = netsnmp.snmpwalk(varlist,
-                               Version=1,
-                               DestHost='localhost',
-                               Community='public')
+        res = netsnmp.snmpwalk(varlist, **snmp_dest())
         print "v1 snmpwalk result: ", res, "\n"
 
         for var in varlist:
@@ -71,18 +71,13 @@ class BasicTests(unittest.TestCase):
 
         print "v1 varbind walk in: "
         var = netsnmp.Varbind('system')
-        res = netsnmp.snmpwalk(var,
-                               Version=1,
-                               DestHost='localhost',
-                               Community='public')
+        res = netsnmp.snmpwalk(var, **snmp_dest())
         print "v1 snmpwalk result (should be = orig): ", res, "\n"
 
         print var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
         print "---v1 multi-varbind test-------------------------------------\n"
-        sess = netsnmp.Session(Version=1,
-                               DestHost='localhost',
-                               Community='public')
+        sess = netsnmp.Session(**snmp_dest())
 
         varlist = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
                                   netsnmp.Varbind('sysContact', 0),
@@ -129,9 +124,7 @@ class BasicTests(unittest.TestCase):
 
         print "---v2c get-------------------------------------\n"
 
-        sess = netsnmp.Session(Version=2,
-                               DestHost='localhost',
-                               Community='public')
+        sess = netsnmp.Session(**snmp_dest(Version=2))
 
         sess.UseEnums = 1
         sess.UseLongNames = 1
@@ -188,12 +181,11 @@ class BasicTests(unittest.TestCase):
             print "  ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
         print "---v3 setup-------------------------------------\n"
-        sess = netsnmp.Session(Version=3,
-                               DestHost='localhost',
-                               SecLevel='authPriv',
-                               SecName='initial',
-                               PrivPass='priv_pass',
-                               AuthPass='auth_pass')
+        sess = netsnmp.Session(**snmp_dest(Version=3,
+                                           SecLevel='authPriv',
+                                           SecName='initial',
+                                           PrivPass='priv_pass',
+                                           AuthPass='auth_pass'))
 
         sess.UseSprintValue = 1
 
@@ -254,34 +246,27 @@ class SetTests(unittest.TestCase):
         print "\n-------------- SET Test Start ----------------------------\n"
 
         var = netsnmp.Varbind('sysUpTime', '0')
-        res = netsnmp.snmpget(var, Version=1, DestHost='localhost',
-                              Community='public')
+        res = netsnmp.snmpget(var, **snmp_dest())
         print "uptime = ", res[0]
 
 
         var = netsnmp.Varbind('versionRestartAgent', '0', 1)
-        res = netsnmp.snmpset(var, Version=1, DestHost='localhost',
-                              Community='public')
+        res = netsnmp.snmpset(var, **snmp_dest())
 
         var = netsnmp.Varbind('sysUpTime', '0')
-        res = netsnmp.snmpget(var, Version=1, DestHost='localhost',
-                              Community='public')
+        res = netsnmp.snmpget(var, **snmp_dest())
         print "uptime = ", res[0]
 
         var = netsnmp.Varbind('nsCacheEntry')
-        res = netsnmp.snmpgetnext(var, Version=1, DestHost='localhost',
-                                  Community='public')
+        res = netsnmp.snmpgetnext(var, **snmp_dest())
         print "var = ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
         var.val = 65
-        res = netsnmp.snmpset(var, Version=1, DestHost='localhost',
-                              Community='public')
-        res = netsnmp.snmpget(var, Version=1, DestHost='localhost',
-                              Community='public')
+        res = netsnmp.snmpset(var, **snmp_dest())
+        res = netsnmp.snmpget(var, **snmp_dest())
         print "var = ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
-        sess = netsnmp.Session(Version=1, DestHost='localhost',
-                               Community='public')
+        sess = netsnmp.Session(**snmp_dest())
 
         varlist = netsnmp.VarList(
             netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.2.116.101.115.116', '', '.1.3.6.1.6.1.1'),
