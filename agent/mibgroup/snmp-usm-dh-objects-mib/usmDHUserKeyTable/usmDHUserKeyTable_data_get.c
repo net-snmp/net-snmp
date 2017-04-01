@@ -19,10 +19,64 @@
 #define NEED_USMDH_FUNCTIONS
 #include "usmDHUserKeyTable.h"
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+static int
+DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
+{
+   /* If the fields p and g in d are NULL, the corresponding input
+    * parameters MUST be non-NULL.  q may remain NULL.
+    */
+   if ((dh->p == NULL && p == NULL)
+       || (dh->g == NULL && g == NULL))
+       return 0;
+
+   if (p != NULL) {
+       BN_free(dh->p);
+       dh->p = p;
+   }
+   if (q != NULL) {
+       BN_free(dh->q);
+       dh->q = q;
+   }
+   if (g != NULL) {
+       BN_free(dh->g);
+       dh->g = g;
+   }
+
+   if (q != NULL) {
+       dh->length = BN_num_bits(q);
+   }
+
+   return 1;
+}
+
+static void
+DH_get0_pqg(const DH *dh,
+            const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
+{
+   if (p != NULL)
+       *p = dh->p;
+   if (q != NULL)
+       *q = dh->q;
+   if (g != NULL)
+       *g = dh->g;
+}
+
+static void
+DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
+{
+   if (pub_key != NULL)
+       *pub_key = dh->pub_key;
+   if (priv_key != NULL)
+       *priv_key = dh->priv_key;
+}
+#endif
+
 DH             *
 usmDHGetUserDHptr(struct usmUser *user, int for_auth_key)
 {
     DH             *dh, *dh_params;
+    const BIGNUM   *g, *p;
     void          **theptr;
 
     if (user == NULL)
@@ -43,9 +97,10 @@ usmDHGetUserDHptr(struct usmUser *user, int for_auth_key)
         dh_params = get_dh_params();
         if (!dh_params)
             return NULL;
-        dh->g = BN_dup(dh_params->g);
-        dh->p = BN_dup(dh_params->p);
-        if (!dh->g || !dh->p)
+        DH_get0_pqg(dh_params, &p, NULL, &g);
+        DH_set0_pqg(dh, BN_dup(p), NULL, BN_dup(g));
+        DH_get0_pqg(dh, &p, NULL, &g);
+        if (!g || !p)
             return NULL;
         DH_generate_key(dh);
         *theptr = dh;
@@ -60,6 +115,7 @@ usmDHGetUserKeyChange(struct usmUser *user, int for_auth_key,
                       char **keyobj, size_t *keyobj_len)
 {
     DH             *dh;
+    const BIGNUM   *pub_key;
 
     dh = usmDHGetUserDHptr(user, for_auth_key);
 
@@ -69,9 +125,10 @@ usmDHGetUserKeyChange(struct usmUser *user, int for_auth_key,
         return MFD_ERROR;
     }
 
-    *keyobj_len = BN_num_bytes(dh->pub_key);
+    DH_get0_key(dh, &pub_key, NULL);
+    *keyobj_len = BN_num_bytes(pub_key);
     *keyobj = malloc(*keyobj_len);
-    BN_bn2bin(dh->pub_key, *keyobj);
+    BN_bn2bin(pub_key, *keyobj);
 
     return MFD_SUCCESS;
 }
