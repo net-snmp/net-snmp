@@ -49,19 +49,19 @@ class BasicTests(unittest.TestCase):
         print "v1 set var: ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
         print "---v1 walk tests-------------------------------------\n"
-        vars = netsnmp.VarList(netsnmp.Varbind('system'))
+        varlist = netsnmp.VarList(netsnmp.Varbind('system'))
 
         print "v1 varlist walk in: "
-        for var in vars:
+        for var in varlist:
             print "  ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
-        res = netsnmp.snmpwalk(vars,
+        res = netsnmp.snmpwalk(varlist,
                                Version=1,
                                DestHost='localhost',
                                Community='public')
         print "v1 snmpwalk result: ", res, "\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
 
@@ -82,47 +82,47 @@ class BasicTests(unittest.TestCase):
                                DestHost='localhost',
                                Community='public')
 
-        vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
-                               netsnmp.Varbind('sysContact', 0),
-                               netsnmp.Varbind('sysLocation', 0))
-        vals = sess.get(vars)
+        varlist = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
+                                  netsnmp.Varbind('sysContact', 0),
+                                  netsnmp.Varbind('sysLocation', 0))
+        vals = sess.get(varlist)
         print "v1 sess.get result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
-        vals = sess.getnext(vars)
+        vals = sess.getnext(varlist)
         print "v1 sess.getnext result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
-        vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime'),
-                               netsnmp.Varbind('sysORLastChange'),
-                               netsnmp.Varbind('sysORID'),
-                               netsnmp.Varbind('sysORDescr'),
-                               netsnmp.Varbind('sysORUpTime'))
+        varlist = netsnmp.VarList(netsnmp.Varbind('sysUpTime'),
+                                  netsnmp.Varbind('sysORLastChange'),
+                                  netsnmp.Varbind('sysORID'),
+                                  netsnmp.Varbind('sysORDescr'),
+                                  netsnmp.Varbind('sysORUpTime'))
 
-        vals = sess.getbulk(2, 8, vars)
+        vals = sess.getbulk(2, 8, varlist)
         print "v1 sess.getbulk result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
         print "---v1 set2-------------------------------------\n"
 
-        vars = netsnmp.VarList(
+        varlist = netsnmp.VarList(
             netsnmp.Varbind('sysLocation', '0', 'my newer location'))
-        res = sess.set(vars)
+        res = sess.set(varlist)
         print "v1 sess.set result: ", res, "\n"
 
         print "---v1 walk3-------------------------------------\n"
-        vars = netsnmp.VarList(netsnmp.Varbind('system'))
+        varlist = netsnmp.VarList(netsnmp.Varbind('system'))
 
-        vals = sess.walk(vars)
+        vals = sess.walk(varlist)
         print "v1 sess.walk result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print "  ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
         print "---v2c get-------------------------------------\n"
@@ -134,55 +134,55 @@ class BasicTests(unittest.TestCase):
         sess.UseEnums = 1
         sess.UseLongNames = 1
 
-        vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
-                               netsnmp.Varbind('sysContact', 0),
-                               netsnmp.Varbind('sysLocation', 0))
-        vals = sess.get(vars)
+        varlist = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
+                                  netsnmp.Varbind('sysContact', 0),
+                                  netsnmp.Varbind('sysLocation', 0))
+        vals = sess.get(varlist)
         print "v2 sess.get result: ", vals, "\n"
 
         print "---v2c getnext-------------------------------------\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
         print "\n"
 
-        vals = sess.getnext(vars)
+        vals = sess.getnext(varlist)
         print "v2 sess.getnext result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
         print "\n"
 
         print "---v2c getbulk-------------------------------------\n"
 
-        vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime'),
-                               netsnmp.Varbind('sysORLastChange'),
-                               netsnmp.Varbind('sysORID'),
-                               netsnmp.Varbind('sysORDescr'),
-                               netsnmp.Varbind('sysORUpTime'))
+        varlist = netsnmp.VarList(netsnmp.Varbind('sysUpTime'),
+                                  netsnmp.Varbind('sysORLastChange'),
+                                  netsnmp.Varbind('sysORID'),
+                                  netsnmp.Varbind('sysORDescr'),
+                                  netsnmp.Varbind('sysORUpTime'))
 
-        vals = sess.getbulk(2, 8, vars)
+        vals = sess.getbulk(2, 8, varlist)
         print "v2 sess.getbulk result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
         print "\n"
 
         print "---v2c set-------------------------------------\n"
 
-        vars = netsnmp.VarList(
+        varlist = netsnmp.VarList(
             netsnmp.Varbind('sysLocation', '0', 'my even newer location'))
 
-        res = sess.set(vars)
+        res = sess.set(varlist)
         print "v2 sess.set result: ", res, "\n"
 
         print "---v2c walk-------------------------------------\n"
-        vars = netsnmp.VarList(netsnmp.Varbind('system'))
+        varlist = netsnmp.VarList(netsnmp.Varbind('system'))
 
-        vals = sess.walk(vars)
+        vals = sess.walk(varlist)
         print "v2 sess.walk result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print "  ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
         print "---v3 setup-------------------------------------\n"
@@ -195,53 +195,53 @@ class BasicTests(unittest.TestCase):
 
         sess.UseSprintValue = 1
 
-        vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
-                               netsnmp.Varbind('sysContact', 0),
-                               netsnmp.Varbind('sysLocation', 0))
+        varlist = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
+                                  netsnmp.Varbind('sysContact', 0),
+                                  netsnmp.Varbind('sysLocation', 0))
         print "---v3 get-------------------------------------\n"
-        vals = sess.get(vars)
+        vals = sess.get(varlist)
         print "v3 sess.get result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
         print "\n"
 
         print "---v3 getnext-------------------------------------\n"
 
-        vals = sess.getnext(vars)
+        vals = sess.getnext(varlist)
         print "v3 sess.getnext result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
         print "\n"
 
-        vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime'),
-                               netsnmp.Varbind('sysORLastChange'),
-                               netsnmp.Varbind('sysORID'),
-                               netsnmp.Varbind('sysORDescr'),
-                               netsnmp.Varbind('sysORUpTime'))
+        varlist = netsnmp.VarList(netsnmp.Varbind('sysUpTime'),
+                                  netsnmp.Varbind('sysORLastChange'),
+                                  netsnmp.Varbind('sysORID'),
+                                  netsnmp.Varbind('sysORDescr'),
+                                  netsnmp.Varbind('sysORUpTime'))
 
-        vals = sess.getbulk(2, 8, vars)
+        vals = sess.getbulk(2, 8, varlist)
         print "v3 sess.getbulk result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
         print "\n"
 
         print "---v3 set-------------------------------------\n"
 
-        vars = netsnmp.VarList(
+        varlist = netsnmp.VarList(
             netsnmp.Varbind('sysLocation', '0', 'my final destination'))
-        res = sess.set(vars)
+        res = sess.set(varlist)
         print "v3 sess.set result: ", res, "\n"
 
         print "---v3 walk-------------------------------------\n"
-        vars = netsnmp.VarList(netsnmp.Varbind('system'))
+        varlist = netsnmp.VarList(netsnmp.Varbind('system'))
 
-        vals = sess.walk(vars)
+        vals = sess.walk(varlist)
         print "v3 sess.walk result: ", vals, "\n"
 
-        for var in vars:
+        for var in varlist:
             print "  ", var.tag, var.iid, "=", var.val, '(', var.type, ')'
 
 
@@ -279,36 +279,36 @@ class SetTests(unittest.TestCase):
         sess = netsnmp.Session(Version=1, DestHost='localhost',
                                Community='public')
 
-        vars = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.2.116.101.115.116', '', '.1.3.6.1.6.1.1'),
-                               netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.3.116.101.115.116', '', '1234'),
-                               netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116', '', 4))
-        res = sess.set(vars)
+        varlist = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.2.116.101.115.116', '', '.1.3.6.1.6.1.1'),
+                                  netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.3.116.101.115.116', '', '1234'),
+                                  netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116', '', 4))
+        res = sess.set(varlist)
 
         print "res = ", res
 
-        vars = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
-                               netsnmp.Varbind('snmpTargetAddrTAddress'),
-                               netsnmp.Varbind('snmpTargetAddrRowStatus'))
+        varlist = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
+                                  netsnmp.Varbind('snmpTargetAddrTAddress'),
+                                  netsnmp.Varbind('snmpTargetAddrRowStatus'))
 
-        res = sess.getnext(vars)
+        res = sess.getnext(varlist)
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
         print "\n"
 
-        vars = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116', '', 6))
+        varlist = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116', '', 6))
 
-        res = sess.set(vars)
+        res = sess.set(varlist)
 
         print "res = ", res
 
-        vars = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
-                               netsnmp.Varbind('snmpTargetAddrTAddress'),
-                               netsnmp.Varbind('snmpTargetAddrRowStatus'))
+        varlist = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
+                                  netsnmp.Varbind('snmpTargetAddrTAddress'),
+                                  netsnmp.Varbind('snmpTargetAddrRowStatus'))
 
-        res = sess.getnext(vars)
+        res = sess.getnext(varlist)
 
-        for var in vars:
+        for var in varlist:
             print var.tag, var.iid, "=", var.val, '(', var.type, ')'
         print "\n"
 
