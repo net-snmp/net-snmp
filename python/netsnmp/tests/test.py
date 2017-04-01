@@ -1,10 +1,8 @@
 """ Runs all unit tests for the netsnmp package.   """
 # Copyright (c) 2006 Andy Gross.  See LICENSE.txt for details.
 
-import sys
 import unittest
 import netsnmp
-import time
 
 class BasicTests(unittest.TestCase):
     def testFuncs(self):
