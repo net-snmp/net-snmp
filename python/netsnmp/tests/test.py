@@ -5,7 +5,9 @@ import unittest
 import netsnmp
 
 class BasicTests(unittest.TestCase):
+    """Basic unit tests for the Net-SNMP Python interface"""
     def testFuncs(self):
+        """Test code"""
         print ""
         var = netsnmp.Varbind('sysDescr.0')
         var = netsnmp.Varbind('sysDescr', '0')
@@ -246,7 +248,9 @@ class BasicTests(unittest.TestCase):
 
 
 class SetTests(unittest.TestCase):
+    """SNMP set tests for the Net-SNMP Python interface"""
     def testFuncs(self):
+        """Test code"""
         print "\n-------------- SET Test Start ----------------------------\n"
 
         var = netsnmp.Varbind('sysUpTime', '0')
