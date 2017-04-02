@@ -49,11 +49,11 @@ def STR(obj):
 
 
 class Varbind(object):
-    def __init__(self, tag=None, iid=None, val=None, type=None):
+    def __init__(self, tag=None, iid=None, val=None, type_arg=None):
         self.tag = STR(tag)
         self.iid = STR(iid)
         self.val = STR(val)
-        self.type = STR(type)
+        self.type = STR(type_arg)
         # parse iid out of tag if needed
         if iid is None and tag is not None:
             regex = re.compile(r'^((?:\.\d+)+|(?:\w+(?:[-:]*\w+)+))\.?(.*)$')
@@ -102,8 +102,8 @@ class VarList(object):
     def __getslice__(self, i, j):
         return self.varbinds[i:j]
 
-    def append(self, *vars):
-        for var in vars:
+    def append(self, *varlist):
+        for var in varlist:
             if isinstance(var, netsnmp.client.Varbind):
                 self.varbinds.append(var)
             else:
