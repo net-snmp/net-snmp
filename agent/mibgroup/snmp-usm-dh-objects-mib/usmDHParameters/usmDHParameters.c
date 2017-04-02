@@ -54,7 +54,7 @@ get_dh_params(void)
 void
 init_usmDHParameters(void)
 {
-    BIGNUM         *p, *g;
+    BIGNUM         *p = NULL, *g = NULL;
     static oid      usmDHParameters_oid[] =
         { 1, 3, 6, 1, 3, 101, 1, 1, 1 };
 
