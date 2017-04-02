@@ -314,7 +314,7 @@ struct snmp_session {
     /** name or address of default peer (may include transport specifier and/or port number) */
     char           *peername;
     /** UDP port number of peer. (NO LONGER USED - USE peername INSTEAD) */
-    u_short         remote_port;
+    u_short         remote_port NETSNMP_ATTRIBUTE_DEPRECATED;
     /** My Domain name or dotted IP address, 0 for default */
     char           *localname;
     /** My UDP port number, 0 for default, picked randomly */

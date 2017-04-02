@@ -1336,6 +1336,10 @@
 /* Unix domain socket for AgentX master-subagent communication */
 #undef NETSNMP_AGENTX_SOCKET
 
+/* Used to make the compiler issue a warning about deprecated functions and
+   variables */
+#undef NETSNMP_ATTRIBUTE_DEPRECATED
+
 /* Define if static inline functions are unsupported */
 #undef NETSNMP_BROKEN_INLINE
 
