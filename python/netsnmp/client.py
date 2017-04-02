@@ -128,7 +128,7 @@ class Session(object):
 
 
         # check for transports that may be tunneled
-        transportCheck = re.compile('^(tls|dtls|ssh)');
+        transportCheck = re.compile('^(tls|dtls|ssh)')
         match = transportCheck.match(sess_args['DestHost'])
 
         if match:
@@ -146,7 +146,7 @@ class Session(object):
                 sess_args['TheirIdentity'],
                 sess_args['TheirHostname'],
                 sess_args['TrustCert'],
-                );
+                )
         elif sess_args['Version'] == 3:
             self.sess_ptr = netsnmp.client_intf.session_v3(
                 sess_args['Version'],
