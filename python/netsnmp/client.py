@@ -47,6 +47,9 @@ def STR(obj):
         obj = str(obj)
     return obj
 
+def obj_to_str(obj):
+    return type(obj).__name__ + ":" + str(obj.__dict__)
+
 
 class Varbind(object):
     def __init__(self, tag=None, iid=None, val=None, type_arg=None):
@@ -63,6 +66,9 @@ class Varbind(object):
 
     def __setattr__(self, name, val):
         self.__dict__[name] = STR(val)
+
+    def __str__(self):
+        return obj_to_str(self)
 
     def print_str(self):
         return self.tag, self.iid, self.val, self.type
@@ -101,6 +107,9 @@ class VarList(object):
 
     def __getslice__(self, i, j):
         return self.varbinds[i:j]
+
+    def __str__(self):
+        return str([str(v) for v in self.varbinds])
 
     def append(self, *varlist):
         for var in varlist:
@@ -209,6 +218,9 @@ class Session(object):
     def __del__(self):
         res = netsnmp.client_intf.delete_session(self)
         return res
+
+    def __str__(self):
+        return obj_to_str(self)
 
 def snmpget(*args, **kargs):
     sess = Session(**kargs)
