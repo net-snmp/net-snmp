@@ -1,8 +1,7 @@
-import client_intf
-import string
 import re
-import types
 from sys import stderr
+import netsnmp
+import netsnmp.client_intf
 
 # control verbosity of error output
 verbose = 1
@@ -133,7 +132,7 @@ class Session(object):
         match = transportCheck.match(sess_args['DestHost'])
 
         if match:
-            self.sess_ptr = client_intf.session_tunneled(
+            self.sess_ptr = netsnmp.client_intf.session_tunneled(
                 sess_args['Version'],
                 sess_args['DestHost'],
                 sess_args['LocalPort'],
@@ -149,7 +148,7 @@ class Session(object):
                 sess_args['TrustCert'],
                 );
         elif sess_args['Version'] == 3:
-            self.sess_ptr = client_intf.session_v3(
+            self.sess_ptr = netsnmp.client_intf.session_v3(
                 sess_args['Version'],
                 sess_args['DestHost'],
                 sess_args['LocalPort'],
@@ -167,7 +166,7 @@ class Session(object):
                 sess_args['Engineboots'],
                 sess_args['Enginetime'])
         else:
-            self.sess_ptr = client_intf.session(
+            self.sess_ptr = netsnmp.client_intf.session(
                 sess_args['Version'],
                 sess_args['Community'],
                 sess_args['DestHost'],
@@ -182,36 +181,34 @@ class Session(object):
 
     def get(self, varlist):
         self._clear_error()
-        res = client_intf.get(self, varlist)
+        res = netsnmp.client_intf.get(self, varlist)
         return res
 
     def set(self, varlist):
         self._clear_error()
-        res = client_intf.set(self, varlist)
+        res = netsnmp.client_intf.set(self, varlist)
         return res
 
     def getnext(self, varlist):
         self._clear_error()
-        res = client_intf.getnext(self, varlist)
+        res = netsnmp.client_intf.getnext(self, varlist)
         return res
 
     def getbulk(self, nonrepeaters, maxrepetitions, varlist):
         self._clear_error()
         if self.Version == 1:
             return None
-        res = client_intf.getbulk(self, nonrepeaters, maxrepetitions, varlist)
+        res = netsnmp.client_intf.getbulk(self, nonrepeaters, maxrepetitions, varlist)
         return res
 
     def walk(self, varlist):
         self._clear_error()
-        res = client_intf.walk(self, varlist)
+        res = netsnmp.client_intf.walk(self, varlist)
         return res
 
     def __del__(self):
-        res = client_intf.delete_session(self)
+        res = netsnmp.client_intf.delete_session(self)
         return res
-
-import netsnmp
 
 def snmpget(*args, **kargs):
     sess = Session(**kargs)
