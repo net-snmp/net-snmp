@@ -746,7 +746,6 @@ snmp_sess_init(netsnmp_session * session)
      */
 
     memset(session, 0, sizeof(netsnmp_session));
-    session->remote_port = SNMP_DEFAULT_REMPORT;
     session->timeout = SNMP_DEFAULT_TIMEOUT;
     session->retries = SNMP_DEFAULT_RETRIES;
     session->version = SNMP_DEFAULT_VERSION;

@@ -1,13 +1,12 @@
-import client_intf
-import string
 import re
-import types
 from sys import stderr
+import netsnmp
+import netsnmp.client_intf
 
 # control verbosity of error output
 verbose = 1
 
-secLevelMap = { 'noAuthNoPriv':1, 'authNoPriv':2, 'authPriv':3 }
+secLevelMap = {'noAuthNoPriv':1, 'authNoPriv':2, 'authPriv':3}
 
 def _parse_session_args(kargs):
     sessArgs = {
@@ -48,22 +47,28 @@ def STR(obj):
         obj = str(obj)
     return obj
 
+def obj_to_str(obj):
+    return type(obj).__name__ + ":" + str(obj.__dict__)
+
 
 class Varbind(object):
-    def __init__(self, tag=None, iid=None, val=None, type=None):
+    def __init__(self, tag=None, iid=None, val=None, type_arg=None):
         self.tag = STR(tag)
         self.iid = STR(iid)
         self.val = STR(val)
-        self.type = STR(type)
+        self.type = STR(type_arg)
         # parse iid out of tag if needed
-        if iid == None and tag != None:
+        if iid is None and tag is not None:
             regex = re.compile(r'^((?:\.\d+)+|(?:\w+(?:[-:]*\w+)+))\.?(.*)$')
             match = regex.match(tag)
             if match:
-                (self.tag, self.iid) = match.group(1,2)
+                (self.tag, self.iid) = match.group(1, 2)
 
     def __setattr__(self, name, val):
         self.__dict__[name] = STR(val)
+
+    def __str__(self):
+        return obj_to_str(self)
 
     def print_str(self):
         return self.tag, self.iid, self.val, self.type
@@ -103,8 +108,11 @@ class VarList(object):
     def __getslice__(self, i, j):
         return self.varbinds[i:j]
 
-    def append(self, *vars):
-         for var in vars:
+    def __str__(self):
+        return str([str(v) for v in self.varbinds])
+
+    def append(self, *varlist):
+        for var in varlist:
             if isinstance(var, netsnmp.client.Varbind):
                 self.varbinds.append(var)
             else:
@@ -124,16 +132,16 @@ class Session(object):
 
         sess_args = _parse_session_args(args)
 
-        for k,v in sess_args.items():
+        for k, v in sess_args.items():
             self.__dict__[k] = v
 
 
         # check for transports that may be tunneled
-        transportCheck = re.compile('^(tls|dtls|ssh)');
+        transportCheck = re.compile('^(tls|dtls|ssh)')
         match = transportCheck.match(sess_args['DestHost'])
 
         if match:
-            self.sess_ptr = client_intf.session_tunneled(
+            self.sess_ptr = netsnmp.client_intf.session_tunneled(
                 sess_args['Version'],
                 sess_args['DestHost'],
                 sess_args['LocalPort'],
@@ -147,9 +155,9 @@ class Session(object):
                 sess_args['TheirIdentity'],
                 sess_args['TheirHostname'],
                 sess_args['TrustCert'],
-                );
+                )
         elif sess_args['Version'] == 3:
-            self.sess_ptr = client_intf.session_v3(
+            self.sess_ptr = netsnmp.client_intf.session_v3(
                 sess_args['Version'],
                 sess_args['DestHost'],
                 sess_args['LocalPort'],
@@ -167,7 +175,7 @@ class Session(object):
                 sess_args['Engineboots'],
                 sess_args['Enginetime'])
         else:
-            self.sess_ptr = client_intf.session(
+            self.sess_ptr = netsnmp.client_intf.session(
                 sess_args['Version'],
                 sess_args['Community'],
                 sess_args['DestHost'],
@@ -182,36 +190,37 @@ class Session(object):
 
     def get(self, varlist):
         self._clear_error()
-        res = client_intf.get(self, varlist)
+        res = netsnmp.client_intf.get(self, varlist)
         return res
 
     def set(self, varlist):
         self._clear_error()
-        res = client_intf.set(self, varlist)
+        res = netsnmp.client_intf.set(self, varlist)
         return res
 
     def getnext(self, varlist):
         self._clear_error()
-        res = client_intf.getnext(self, varlist)
+        res = netsnmp.client_intf.getnext(self, varlist)
         return res
 
     def getbulk(self, nonrepeaters, maxrepetitions, varlist):
         self._clear_error()
         if self.Version == 1:
             return None
-        res = client_intf.getbulk(self, nonrepeaters, maxrepetitions, varlist)
+        res = netsnmp.client_intf.getbulk(self, nonrepeaters, maxrepetitions, varlist)
         return res
 
     def walk(self, varlist):
         self._clear_error()
-        res = client_intf.walk(self, varlist)
+        res = netsnmp.client_intf.walk(self, varlist)
         return res
 
     def __del__(self):
-        res = client_intf.delete_session(self)
+        res = netsnmp.client_intf.delete_session(self)
         return res
 
-import netsnmp
+    def __str__(self):
+        return obj_to_str(self)
 
 def snmpget(*args, **kargs):
     sess = Session(**kargs)
@@ -246,7 +255,7 @@ def snmpgetnext(*args, **kargs):
     res = sess.getnext(var_list)
     return res
 
-def snmpgetbulk(nonrepeaters, maxrepetitions,*args, **kargs):
+def snmpgetbulk(nonrepeaters, maxrepetitions, *args, **kargs):
     sess = Session(**kargs)
     var_list = VarList()
     for arg in args:

@@ -203,7 +203,6 @@ extern          "C" {
      
      snmp_sess_init(&session);
      session.retries = ...
-     session.remote_port = ...
      sessp = snmp_sess_open(&session);
      ss = snmp_sess_session(sessp);
      if (ss == NULL)
