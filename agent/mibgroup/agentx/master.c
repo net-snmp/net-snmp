@@ -123,7 +123,6 @@ real_init_master(void)
          *  Let 'snmp_open' interpret the descriptor.
          */
         sess.local_port = AGENTX_PORT;      /* Indicate server & set default port */
-        sess.remote_port = 0;
         sess.callback = handle_master_agentx_packet;
         errno = 0;
         t = netsnmp_transport_open_server("agentx", sess.peername);

@@ -583,7 +583,6 @@ netsnmp_callback_open(int attach_to,
     } else {
         callback_sess.isAuthoritative = SNMP_SESS_AUTHORITATIVE;
     }
-    callback_sess.remote_port = 0;
     callback_sess.retries = 0;
     callback_sess.timeout = 30000000;
     callback_sess.version = SNMP_DEFAULT_VERSION;       /* (mostly) bogus */
