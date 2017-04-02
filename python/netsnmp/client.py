@@ -55,7 +55,7 @@ class Varbind(object):
         self.val = STR(val)
         self.type = STR(type)
         # parse iid out of tag if needed
-        if iid == None and tag != None:
+        if iid is None and tag is not None:
             regex = re.compile(r'^((?:\.\d+)+|(?:\w+(?:[-:]*\w+)+))\.?(.*)$')
             match = regex.match(tag)
             if match:
