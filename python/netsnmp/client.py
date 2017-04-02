@@ -7,7 +7,7 @@ from sys import stderr
 # control verbosity of error output
 verbose = 1
 
-secLevelMap = { 'noAuthNoPriv':1, 'authNoPriv':2, 'authPriv':3 }
+secLevelMap = {'noAuthNoPriv':1, 'authNoPriv':2, 'authPriv':3}
 
 def _parse_session_args(kargs):
     sessArgs = {
@@ -60,7 +60,7 @@ class Varbind(object):
             regex = re.compile(r'^((?:\.\d+)+|(?:\w+(?:[-:]*\w+)+))\.?(.*)$')
             match = regex.match(tag)
             if match:
-                (self.tag, self.iid) = match.group(1,2)
+                (self.tag, self.iid) = match.group(1, 2)
 
     def __setattr__(self, name, val):
         self.__dict__[name] = STR(val)
@@ -104,7 +104,7 @@ class VarList(object):
         return self.varbinds[i:j]
 
     def append(self, *vars):
-         for var in vars:
+        for var in vars:
             if isinstance(var, netsnmp.client.Varbind):
                 self.varbinds.append(var)
             else:
@@ -124,7 +124,7 @@ class Session(object):
 
         sess_args = _parse_session_args(args)
 
-        for k,v in sess_args.items():
+        for k, v in sess_args.items():
             self.__dict__[k] = v
 
 
@@ -246,7 +246,7 @@ def snmpgetnext(*args, **kargs):
     res = sess.getnext(var_list)
     return res
 
-def snmpgetbulk(nonrepeaters, maxrepetitions,*args, **kargs):
+def snmpgetbulk(nonrepeaters, maxrepetitions, *args, **kargs):
     sess = Session(**kargs)
     var_list = VarList()
     for arg in args:
