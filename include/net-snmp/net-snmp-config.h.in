@@ -125,6 +125,12 @@
 /* define if you have devstat_getdevs() */
 #undef HAVE_DEVSTAT_GETDEVS
 
+/* Define to 1 if you have the `DH_get0_key' function. */
+#undef HAVE_DH_GET0_KEY
+
+/* Define to 1 if you have the `DH_get0_pqg' function. */
+#undef HAVE_DH_GET0_PQG
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
@@ -1316,6 +1322,15 @@
 
 /* Define to 1 if you have the <ws2tcpip.h> header file. */
 #undef HAVE_WS2TCPIP_H
+
+/* Define to 1 if you have the `X509_get_signature_nid' function. */
+#undef HAVE_X509_GET_SIGNATURE_NID
+
+/* Define to 1 if you have the `X509_NAME_ENTRY_get_data' function. */
+#undef HAVE_X509_NAME_ENTRY_GET_DATA
+
+/* Define to 1 if you have the `X509_NAME_ENTRY_get_object' function. */
+#undef HAVE_X509_NAME_ENTRY_GET_OBJECT
 
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H

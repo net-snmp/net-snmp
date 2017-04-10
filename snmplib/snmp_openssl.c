@@ -150,6 +150,28 @@ netsnmp_openssl_cert_get_commonName(X509 *ocert, char **buf, int *len)
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_CERT_DUMP_NAMES
+
+#ifndef HAVE_X509_NAME_ENTRY_GET_DATA
+static ASN1_STRING * X509_NAME_ENTRY_get_data(const X509_NAME_ENTRY *ne)
+{
+    return ne ? ne->value : NULL;
+}
+#endif
+
+#ifndef HAVE_X509_NAME_ENTRY_GET_OBJECT
+static ASN1_OBJECT *X509_NAME_ENTRY_get_object(const X509_NAME_ENTRY *ne)
+{
+    return ne ? ne->object : NULL;
+}
+#endif
+
+#ifndef HAVE_X509_GET_SIGNATURE_NID
+static int X509_get_signature_nid(const X509 *x)
+{
+    return OBJ_obj2nid(x->sig_alg->algorithm);
+}
+#endif
+
 /** netsnmp_openssl_cert_dump_name: dump subject names in cert
  */
 void
@@ -157,6 +179,7 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
 {
     int              i, onid;
     X509_NAME_ENTRY *oname_entry;
+    ASN1_STRING     *oname_value;
     X509_NAME       *osubj_name;
     const char      *prefix_short, *prefix_long;
 
@@ -172,12 +195,13 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
     for (i = 0; i < X509_NAME_entry_count(osubj_name); i++) {
         oname_entry = X509_NAME_get_entry(osubj_name, i);
         netsnmp_assert(NULL != oname_entry);
+        oname_value = X509_NAME_ENTRY_get_data(oname_entry);
 
-        if (oname_entry->value->type != V_ASN1_PRINTABLESTRING)
+        if (oname_value->type != V_ASN1_PRINTABLESTRING)
             continue;
 
         /** get NID */
-        onid = OBJ_obj2nid(oname_entry->object);
+        onid = OBJ_obj2nid(X509_NAME_ENTRY_get_object(oname_entry));
         if (onid == NID_undef) {
             prefix_long = prefix_short = "UNKNOWN";
         }
@@ -188,9 +212,9 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
 
         DEBUGMSGT(("9:cert:dump:names",
                    "[%02d] NID type %d, ASN type %d\n", i, onid,
-                   oname_entry->value->type));
+                   oname_value->type));
         DEBUGMSGT(("9:cert:dump:names", "%s/%s: '%s'\n", prefix_long,
-                   prefix_short, ASN1_STRING_data(oname_entry->value)));
+                   prefix_short, ASN1_STRING_data(oname_value)));
     }
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CERT_DUMP_NAMES */
@@ -481,7 +505,7 @@ netsnmp_openssl_cert_get_hash_type(X509 *ocert)
     if (NULL == ocert)
         return 0;
 
-    return _nid2ht(OBJ_obj2nid(ocert->sig_alg->algorithm));
+    return _nid2ht(X509_get_signature_nid(ocert));
 }
 
 /**
@@ -498,7 +522,7 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
     if (NULL == ocert)
         return NULL;
 
-    nid = OBJ_obj2nid(ocert->sig_alg->algorithm);
+    nid = X509_get_signature_nid(ocert);
     DEBUGMSGT(("9:openssl:fingerprint", "alg %d, cert nid %d (%d)\n", alg, nid,
                _nid2ht(nid)));
         

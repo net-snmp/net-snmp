@@ -329,6 +329,13 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
                     [Define to 1 if you have the `EVP_MD_CTX_new' function.])
                 AC_DEFINE([HAVE_EVP_MD_CTX_FREE], [1],
                     [Define to 1 if you have the `EVP_MD_CTX_free' function.]))
+            save_LIBS=$LIBS
+            LIBS="$LIBS -l${CRYPTO}"
+            AC_CHECK_FUNCS([DH_get0_pqg DH_get0_key   ] dnl
+                           [X509_NAME_ENTRY_get_data  ] dnl
+                           [X509_NAME_ENTRY_get_object] dnl
+                           [X509_get_signature_nid])
+            LIBS=$save_LIBS
         fi
         if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
 	    AC_CHECK_LIB(ssl, DTLSv1_method,

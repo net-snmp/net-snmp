@@ -255,6 +255,21 @@
 /* Define to 1 if you have the <direct.h> header file. */
 #define HAVE_DIRECT_H 1
 
+/* Define to 1 if you have the `DH_get0_key' function. */
+#define HAVE_DH_GET0_KEY 1
+
+/* Define to 1 if you have the `DH_get0_pqg' function. */
+#define HAVE_DH_GET0_PQG 1
+
+/* Define to 1 if you have the `X509_get_signature_nid' function. */
+#define HAVE_X509_GET_SIGNATURE_NID 1
+
+/* Define to 1 if you have the `X509_NAME_ENTRY_get_data' function. */
+#define HAVE_X509_NAME_ENTRY_GET_DATA 1
+
+/* Define to 1 if you have the `X509_NAME_ENTRY_get_object' function. */
+#define HAVE_X509_NAME_ENTRY_GET_OBJECT 1
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 /* #undef HAVE_DIRENT_H */
