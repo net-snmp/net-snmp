@@ -123,10 +123,10 @@ char           *usmUserPublic_val = NULL;
 int             docreateandwait = 0;
 
 
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
+#if !defined(HAVE_DH_GET0_PQG)
 
 #include <string.h>
-#include <openssl/engine.h>
+#include <openssl/dh.h>
 
 void DH_get0_pqg(const DH *dh,
                 const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
@@ -138,6 +138,13 @@ void DH_get0_pqg(const DH *dh,
    if (g != NULL)
        *g = dh->g;
 }
+
+#endif
+
+#if !defined(HAVE_DH_GET0_KEY)
+
+#include <string.h>
+#include <openssl/dh.h>
 
 void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
 {
