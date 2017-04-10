@@ -92,6 +92,10 @@
 /* define if you are using the codeS11 library ...*/
 /* #undef NETSNMP_USE_PKCS11 */
 
+/* Used to make the compiler issue a warning about deprecated functions and
+   variables */
+#define NETSNMP_ATTRIBUTE_DEPRECATED
+
 /* add in recent CMU library extensions (not complete) */
 /* #undef CMU_COMPATIBLE */
 
