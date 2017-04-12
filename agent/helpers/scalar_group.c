@@ -125,17 +125,12 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
     root_tmp[reginfo->rootoid_len + 1] = 0;
     root_save = reginfo->rootoid;
 
-    ret = SNMP_ERR_NOCREATION;
     switch (reqinfo->mode) {
     /*
      * The handling of "exact" requests is basically the same.
      * The only difference between GET and SET requests is the
      *     error/exception to return on failure.
      */
-    case MODE_GET:
-        ret = SNMP_NOSUCHOBJECT;
-        /* Fallthrough */
-
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
@@ -144,6 +139,8 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
     case MODE_SET_UNDO:
     case MODE_SET_FREE:
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
+    case MODE_GET:
+	ret = reqinfo->mode == MODE_GET ? SNMP_NOSUCHOBJECT : SNMP_ERR_NOCREATION;
         if (cmp != 0 ||
             requests->requestvb->name_length <= reginfo->rootoid_len) {
 	    /*

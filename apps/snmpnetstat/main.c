@@ -457,6 +457,7 @@ main(int argc, char *argv[])
         case AF_INET:
             for (tp = protox; tp->pr_name; tp++)
                 printproto(tp, tp->pr_name);
+	    /* FALL THROUGH */
         case AF_INET6:
             for (tp = ip6protox; tp->pr_name; tp++)
                 printproto(tp, tp->pr_name);

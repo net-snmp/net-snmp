@@ -2125,9 +2125,8 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     case SNMP_MSG_TRAP2:
     case SNMP_MSG_REPORT:
         netsnmp_assert(0 == (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE));
-        /*
-         * Fallthrough 
-         */
+        /* FALL THROUGH */
+    case SNMP_MSG_INFORM:
 #ifndef NETSNMP_NOTIFY_ONLY
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
@@ -2135,7 +2134,6 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
-    case SNMP_MSG_INFORM:
         if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
             pdu->errstat = 0;
         if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
@@ -2836,9 +2834,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     switch (pdu->command) {
     case SNMP_MSG_RESPONSE:
         netsnmp_assert(0 == (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE));
-        /*
-         * Fallthrough 
-         */
+        /* FALL THROUGH */
 #ifndef NETSNMP_NOTIFY_ONLY
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
@@ -2861,9 +2857,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
 
     case SNMP_MSG_TRAP2:
         netsnmp_assert(0 == (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE));
-        /*
-         * Fallthrough 
-         */
+        /* FALL THROUGH */
     case SNMP_MSG_INFORM:
 #ifndef NETSNMP_DISABLE_SNMPV1
         /*
@@ -4595,10 +4589,10 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
     case SNMP_MSG_RESPONSE:
     case SNMP_MSG_REPORT:
         pdu->flags |= UCD_MSG_FLAG_RESPONSE_PDU;
-        /*
-         * fallthrough 
-         */
+        /* FALL THROUGH */
 
+    case SNMP_MSG_TRAP2:
+    case SNMP_MSG_INFORM:
 #ifndef NETSNMP_NOTIFY_ONLY
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
@@ -4607,8 +4601,6 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
-    case SNMP_MSG_TRAP2:
-    case SNMP_MSG_INFORM:
         /*
          * PDU is not an SNMPv1 TRAP 
          */

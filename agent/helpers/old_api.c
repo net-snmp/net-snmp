@@ -398,6 +398,7 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
             /*
              * BBB: fall through for everything that is a set (see AAA) 
              */
+	    /* FALL THROUGH */
 
         default:
             /*
