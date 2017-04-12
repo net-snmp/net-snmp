@@ -317,6 +317,7 @@ route6pr(int af)
                 cp = (unsigned char *)&sin6->sin6_addr;
                 for (i = 0; i < 16; i++) *cp++ = *cp1++;
                 rp->set_bits |= SET_HOP;
+		break;
             case 6:     /* ipv6RouteType     */
                 rp->type      = *vp->val.integer;
                 /* This enum maps to similar values in inetCidrRouteType */

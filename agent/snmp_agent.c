@@ -3349,7 +3349,7 @@ handle_pdu(netsnmp_agent_session *asp)
                 /*
                  * Leave the type for now (it gets set to
                  * ASN_NULL in netsnmp_add_varbind_to_cache,
-                 * called by create_subnetsnmp_tree_cache below).
+                 * called by netsnmp_create_subtree_cache below).
                  * If we set it to ASN_NULL now, we wouldn't be
                  * able to distinguish INCLUSIVE search
                  * ranges.  
@@ -3359,15 +3359,13 @@ handle_pdu(netsnmp_agent_session *asp)
                 snmp_set_var_typed_value(v, ASN_NULL, NULL, 0);
             }
         }
-        /*
-         * fall through 
-         */
+        /* FALL THROUGH */
 
+    default:
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_INTERNAL_SET_BEGIN:
     case SNMP_MSG_INTERNAL_SET_RESERVE1:
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
-    default:
         asp->vbcount = count_varbinds(asp->pdu->variables);
         if (asp->vbcount) /* efence doesn't like 0 size allocs */
             asp->requests = (netsnmp_request_info *)
@@ -3411,9 +3409,7 @@ handle_pdu(netsnmp_agent_session *asp)
 
     case SNMP_MSG_GETNEXT:
         snmp_increment_statistic(STAT_SNMPINGETNEXTS);
-        /*
-         * fall through 
-         */
+        /* FALL THROUGH */
 
     case SNMP_MSG_GETBULK:     /* note: there is no getbulk stat */
         /*

@@ -441,14 +441,14 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
     /*
      * Log to a named file
      */
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_FILE
     case 'F':
         priority = decode_priority( &optarg, &pri_max );
         if (priority == -1) return -1;
         while (*optarg == ' ') optarg++;
         if (!*optarg && !argv) return -1;
         else if (!*optarg) optarg = argv[++optind];
-        /* Fallthrough */
-#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_FILE
+        /* FALL THROUGH */
     case 'f':
         if (inc_optind)
             optind++;
@@ -1012,7 +1012,8 @@ netsnmp_register_loghandler( int type, int priority )
     switch ( type ) {
     case NETSNMP_LOGHANDLER_STDOUT:
         logh->imagic  = 1;
-        /* fallthrough */
+        logh->handler = log_handler_stdouterr;
+        break;
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
     case NETSNMP_LOGHANDLER_STDERR:
         logh->handler = log_handler_stdouterr;

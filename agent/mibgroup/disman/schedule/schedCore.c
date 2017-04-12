@@ -312,8 +312,8 @@ sched_nextTime( struct schedTable_entry *entry )
                         ctime(&entry->schedNextRun)));
             return;
         }
-        /* Fallthrough */
         DEBUGMSGTL(("disman:schedule:time", "one-shot: fallthrough\n"));
+        /* FALL THROUGH */
     case SCHED_TYPE_CALENDAR:
         /*
          *  Check for complete time specification

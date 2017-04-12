@@ -365,17 +365,15 @@ _netsnmp_tdata_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_request_info       *request;
     netsnmp_table_request_info *table_info;
     netsnmp_tdata_row          *row;
-    int                         need_processing = 1;
+    int                         need_processing;
 
     switch ( reqinfo->mode ) {
     case MODE_GET:
-        need_processing = 0; /* only need processing if some vars found */
-        /** Fall through */
-
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
+        need_processing = reqinfo->mode == MODE_GET ? 0 : 1;
         for (request = requests; request; request = request->next) {
             if (request->processed)
                 continue;

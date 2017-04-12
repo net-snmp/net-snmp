@@ -739,8 +739,7 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
         if (rc < 0)
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_UNDOFAILED);
-        /** fall through */
-
+        /* FALL THROUGH */
     case MODE_SET_COMMIT:
     case MODE_SET_FREE:
         if (NULL != nfi->filep) {

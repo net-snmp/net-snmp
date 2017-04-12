@@ -2356,9 +2356,7 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
                                 *ntype);
                     return NULL;
                 }
-                /*
-                 * fall through 
-                 */
+                /* FALL THROUGH */
             case INTEGER:
                 *ntype = get_token(fp, ntoken, MAXTOKEN);
                 do {
@@ -4081,7 +4079,8 @@ unload_module_by_ID(int modID, struct tree *tree_top)
                 tp->number_modules = cnt;
                 switch (cnt) {
                 case 0:
-                    tp->module_list[0] = -1;    /* Mark unused, and FALL THROUGH */
+                    tp->module_list[0] = -1;    /* Mark unused, */
+		    /* FALL THROUGH */
 
                 case 1:        /* save the remaining module */
                     if (&(tp->modid) != tp->module_list) {
@@ -4677,6 +4676,7 @@ get_token(FILE * fp, char *token, int maxtlen)
                 if (ch == '0' || ch == '1')
                     break;
                 seenSymbols = xdigits;
+		/* FALL THROUGH */
             case xdigits:
                 if (isxdigit(ch))
                     break;
