@@ -15356,8 +15356,7 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
     netsnmp_save_CFLAGS="$CFLAGS"
     for opt in \
 	-Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
-	-Wno-type-limits -Wno-unused-result -Wno-sign-compare \
-	-Wno-implicit-fallthrough
+	-Wno-type-limits -Wno-unused-result -Wno-sign-compare
     do
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
 $as_echo_n "checking whether the compiler supports $opt... " >&6; }
