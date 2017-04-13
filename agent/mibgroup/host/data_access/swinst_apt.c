@@ -64,7 +64,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     char status[SNMP_MAXBUF];
     char buf[BUFSIZ];
     netsnmp_swinst_entry *entry;
-    int i = 0;
+    int i = 1;
 
     if (p == NULL) {
 	snmp_perror("dpkg-list");
