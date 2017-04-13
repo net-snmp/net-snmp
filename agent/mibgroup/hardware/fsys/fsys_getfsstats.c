@@ -118,7 +118,7 @@ netsnmp_fsys_arch_load( void )
     /*
      * Retrieve information about the currently mounted filesystems...
      */
-    n = NSFS_GETFSSTAT( NULL, 0, 0 );
+    n = NSFS_GETFSSTAT( NULL, 0, MNT_NOWAIT );
     if ( n==0 )
         return;
     stats = (struct NSFS_STATFS *)malloc( n * sizeof( struct NSFS_STATFS ));
