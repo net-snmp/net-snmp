@@ -794,6 +794,8 @@ main(int argc, char *argv[])
 
         case 'v':
             version();
+            exit_code = 0;
+            goto out;
 
         case 'V':
             netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
