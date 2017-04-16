@@ -31,7 +31,8 @@ AC_CHECK_FUNCS([lrand48         rand          random    ] dnl
                [signal          sigset                  ] )
 
 #  Library:
-AC_CHECK_FUNCS([fork            gai_strerror                   ] dnl
+AC_CHECK_FUNCS([asprintf                                       ] dnl
+               [fork            gai_strerror                   ] dnl
                [getaddrinfo     gethostname   gethostbyname    ] dnl
                [getipnodebyname               gettimeofday     ] dnl
                [if_nametoindex  mkstemp       regcomp          ] dnl

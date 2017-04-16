@@ -146,7 +146,8 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	scapi.c callback.c default_store.c snmp_alarm.c		\
 	data_list.c oid_stash.c fd_event_manager.c 		\
 	mt_support.c snmp_enum.c snmp-tc.c snmp_service.c	\
-	snprintf.c strlcat.c strlcpy.c strtol.c strtoul.c	\
+	snprintf.c asprintf.c					\
+	strlcat.c strlcpy.c strtol.c strtoul.c			\
 	strtok_r.c snmp_transport.c @transport_src_list@	\
 	snmp_secmod.c @security_src_list@ snmp_version.c        \
 	check_varbind.c container.c container_binary_array.c	\
@@ -162,7 +163,8 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	scapi.o callback.o default_store.o snmp_alarm.o		\
 	data_list.o oid_stash.o fd_event_manager.o		\
 	mt_support.o snmp_enum.o snmp-tc.o snmp_service.o	\
-	snprintf.o strlcat.o strlcpy.o strtol.o strtoul.o	\
+	snprintf.o asprintf.o					\
+	strlcat.o strlcpy.o strtol.o strtoul.o			\
 	strtok_r.o snmp_transport.o @transport_obj_list@	\
 	snmp_secmod.o @security_obj_list@ snmp_version.o        \
 	check_varbind.o container.o container_binary_array.o	\
@@ -178,7 +180,8 @@ LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
 	scapi.lo callback.lo default_store.lo snmp_alarm.lo		\
 	data_list.lo oid_stash.lo fd_event_manager.lo		\
 	mt_support.lo snmp_enum.lo snmp-tc.lo snmp_service.lo	\
-	snprintf.lo strlcat.lo strlcpy.lo strtol.lo strtoul.lo	\
+	snprintf.lo asprintf.lo					\
+	strlcat.lo strlcpy.lo strtol.lo strtoul.lo		\
 	strtok_r.lo snmp_transport.lo @transport_lobj_list@	\
 	snmp_secmod.lo @security_lobj_list@ snmp_version.lo       \
 	check_varbind.lo container.lo container_binary_array.lo	\
