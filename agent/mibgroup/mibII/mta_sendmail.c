@@ -273,8 +273,8 @@ struct statisticsV8_8 {
     /*
      * queue groups (strictly a sendmail 8.12+ thing 
      */
-    struct QDir {
-    char            dir[FILENAMELEN + 1];
+struct QDir {
+    char           *dir;
     struct QDir    *next;
 };
 
@@ -629,11 +629,14 @@ add_queuegroup(const char *name, char *path)
                 /*
                  * single queue directory 
                  */
-                subdir = (struct QDir *) malloc(sizeof(struct QDir));
-                snprintf(subdir->dir, FILENAMELEN - 5, "%s/%s", parentdir,
-                         dirp->d_name);
-                subdir->next = new;
-                new = subdir;
+                if ((subdir = calloc(1, sizeof(*subdir))) != NULL &&
+                    asprintf(&subdir->dir, "%s/%s", parentdir, dirp->d_name) >=
+                    0) {
+                    subdir->next = new;
+                    new = subdir;
+                } else {
+                    free(subdir);
+                }
             }
         }
 
@@ -642,8 +645,8 @@ add_queuegroup(const char *name, char *path)
         /*
          * single queue directory 
          */
-        new = (struct QDir *) malloc(sizeof(struct QDir));
-        strcpy(new->dir, path);
+        new = malloc(sizeof(*new));
+        new->dir = strdup(path);
         new->next = NULL;
     }
 
@@ -651,16 +654,19 @@ add_queuegroup(const char *name, char *path)
      * check 'new' for /qf directories 
      */
     for (subdir = new; subdir != NULL; subdir = subdir->next) {
-        char            qf[FILENAMELEN + 1];
+        char *qf = NULL;
 
-        snprintf(qf, FILENAMELEN, "%s/qf", subdir->dir);
-        if ((dp = opendir(qf)) != NULL) {
+        if (asprintf(&qf, "%s/qf", subdir->dir) >= 0 &&
+            (dp = opendir(qf)) != NULL) {
             /*
              * it exists ! 
              */
-            strcpy(subdir->dir, qf);
+            free(subdir->dir);
+            subdir->dir = qf;
+            qf = NULL;
             closedir(dp);
         }
+        free(qf);
     }
 
     /*
