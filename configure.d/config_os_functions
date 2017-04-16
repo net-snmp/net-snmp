@@ -36,7 +36,8 @@ AC_CHECK_FUNCS([lrand48         rand          random    ] dnl
                [signal          sigset                  ] )
 
 #  Library:
-AC_CHECK_FUNCS([closedir        fgetc_unlocked  flockfile        ] dnl
+AC_CHECK_FUNCS([asprintf                                         ] dnl
+               [closedir        fgetc_unlocked  flockfile        ] dnl
                [fork            funlockfile     getipnodebyname  ] dnl
                [gettimeofday    if_nametoindex  mkstemp          ] dnl
                [opendir         readdir         regcomp          ] dnl

@@ -5,6 +5,8 @@
 #error "Please include <net-snmp/net-snmp-config.h> before this file"
 #endif
 
+#include <stdarg.h> /* va_list */
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -183,6 +185,12 @@ SOFTWARE.
 #endif
 #ifndef HAVE_SNPRINTF
     int             snprintf(char *, size_t, const char *, ...);
+#endif
+#ifndef HAVE_ASPRINTF
+    NETSNMP_IMPORT
+    int vasprintf(char **strp, const char *fmt, va_list ap);
+    NETSNMP_IMPORT
+    int asprintf(char **strp, const char *fmt, ...);
 #endif
 
     NETSNMP_IMPORT
