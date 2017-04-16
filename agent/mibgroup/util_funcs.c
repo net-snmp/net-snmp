@@ -139,7 +139,7 @@ shell_command(struct extensible *ex)
 {
 #if HAVE_SYSTEM
     const char     *ofname;
-    char            shellline[STRMAX];
+    char           *shellline = NULL;
     FILE           *shellout;
 
     ofname = make_tempfile();
@@ -149,10 +149,11 @@ shell_command(struct extensible *ex)
         return ex->result;
     }
 
-    snprintf(shellline, sizeof(shellline), "%s > %s", ex->command, ofname);
-    shellline[ sizeof(shellline)-1 ] = 0;
-    ex->result = system(shellline);
-    ex->result = WEXITSTATUS(ex->result);
+    if (asprintf(&shellline, "%s > %s", ex->command, ofname) >= 0) {
+        ex->result = system(shellline);
+        ex->result = WEXITSTATUS(ex->result);
+        free(shellline);
+    }
     shellout = fopen(ofname, "r");
     if (shellout != NULL) {
         if (fgets(ex->output, sizeof(ex->output), shellout) == NULL) {

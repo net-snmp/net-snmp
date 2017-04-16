@@ -249,7 +249,10 @@ extensible_parse_config(const char *token, char *cptr)
         for (tcptr = cptr; *tcptr != 0 && *tcptr != '#'; tcptr++)
             if (*tcptr == ';' && ptmp->type == EXECPROC)
                 break;
-        sprintf(ptmp->command, "%.*s", (int) (tcptr - cptr), cptr);
+        free(ptmp->command);
+        ptmp->command = NULL;
+        if (asprintf(&ptmp->command, "%.*s", (int) (tcptr - cptr), cptr) < 0) {
+        }
     }
 #ifdef NETSNMP_EXECFIXCMD
     sprintf(ptmp->fixcmd, NETSNMP_EXECFIXCMD, ptmp->name);
@@ -494,13 +497,14 @@ fixExecError(int action,
         }
         tmp = *((long *) var_val);
         if ((tmp == 1) && (action == COMMIT) && (exten->fixcmd[0] != 0)) {
-            strlcpy(ex.command, exten->fixcmd, sizeof(ex.command));
+            ex.command = strdup(exten->fixcmd);
             if ((fd = get_exec_output(&ex)) != -1) {
                 file = fdopen(fd, "r");
                 while (fgets(ex.output, sizeof(ex.output), file) != NULL);
                 fclose(file);
                 wait_on_exec(&ex);
             }
+            free(ex.command);
         }
         return SNMP_ERR_NOERROR;
     }

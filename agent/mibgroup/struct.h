@@ -10,7 +10,7 @@
 
 struct extensible {
     char            name[STRMAX];
-    char            command[STRMAX];
+    char           *command;
     char            fixcmd[STRMAX];
     int             type;
     int             result;

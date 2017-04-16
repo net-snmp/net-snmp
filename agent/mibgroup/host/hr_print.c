@@ -361,10 +361,9 @@ run_lpstat(int *fd)
     struct extensible ex;
 
     memset(&ex, 0, sizeof(ex));
-    strcpy(ex.command, LPSTAT_PATH " -v");
-    if ((*fd = get_exec_output(&ex)) < 0)
-        return NULL;
-
-    return fdopen(*fd, "r");
+    ex.command = strdup(LPSTAT_PATH " -v");
+    *fd = get_exec_output(&ex);
+    free(ex.command);
+    return *fd >= 0 ? fdopen(*fd, "r") : NULL;
 }
 #endif

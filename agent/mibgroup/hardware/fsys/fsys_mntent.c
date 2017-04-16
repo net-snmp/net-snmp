@@ -174,15 +174,16 @@ netsnmp_fsys_arch_load( void )
 #endif
     struct NSFS_STATFS stat_buf;
     netsnmp_fsys_info *entry;
-    char               tmpbuf[1024];
+    char              *tmpbuf = NULL;
 
     /*
      * Retrieve information about the currently mounted filesystems...
      */
     fp = fopen( ETC_MNTTAB, "r" );   /* OR setmntent()?? */
     if ( !fp ) {
-        snprintf( tmpbuf, sizeof(tmpbuf), "Cannot open %s", ETC_MNTTAB );
-        snmp_log_perror( tmpbuf );
+        if (asprintf(&tmpbuf, "Cannot open %s", ETC_MNTTAB) >= 0)
+            snmp_log_perror(tmpbuf);
+        free(tmpbuf);
         return;
     }
 
@@ -243,8 +244,10 @@ netsnmp_fsys_arch_load( void )
         if ( NSFS_STATFS( entry->path, &stat_buf ) < 0 )
 #endif
         {
-            snprintf( tmpbuf, sizeof(tmpbuf), "Cannot statfs %s", entry->path );
-            snmp_log_perror( tmpbuf );
+            tmpbuf = NULL;
+            if (asprintf(&tmpbuf, "Cannot statfs %s", entry->path) >= 0)
+                snmp_log_perror(tmpbuf);
+            free(tmpbuf);
             entry->units = stat_buf.NSFS_SIZE;
             entry->size  = 0;
             entry->used  = 0;
