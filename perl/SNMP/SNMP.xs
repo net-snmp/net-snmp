@@ -1120,6 +1120,7 @@ retry:
                   if (*response) snmp_free_pdu(*response);
                   goto retry;
                }
+               /* FALLTHROUGH */
 
             /* Pv1, SNMPsec, Pv2p, v2c, v2u, v2*, and SNMPv3 PDUs */
             case SNMP_ERR_TOOBIG:
