@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "201606160000Z" -- June 16, 2016
+       LAST-UPDATED "201703300000Z" -- March 30, 2017
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,15 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "201703300000Z"  -- March 30, 2017
+       DESCRIPTION  "Registration of new IANAifType 290."
+
+       REVISION     "201701190000Z"  -- January 19, 2017
+       DESCRIPTION  "Registration of new IANAifType 289."
+
+       REVISION     "201611230000Z"  -- November 23, 2016
+       DESCRIPTION  "Registration of new IANAifTypes 283-288."
 
        REVISION     "201606160000Z"  -- June 16, 2016
        DESCRIPTION  "Updated IANAtunnelType DESCRIPTION per RFC 7870"
@@ -622,7 +631,15 @@
                    gfast (279), -- G.fast port
                    sdci (280), -- SDCI (IO-Link)
                    xboxWireless (281), -- Xbox wireless
-                   fastdsl (282) -- FastDSL
+                   fastdsl (282), -- FastDSL
+                   docsCableScte55d1FwdOob (283), -- Cable SCTE 55-1 OOB Forward Channel
+                   docsCableScte55d1RetOob (284), -- Cable SCTE 55-1 OOB Return Channel
+                   docsCableScte55d2DsOob (285), -- Cable SCTE 55-2 OOB Downstream Channel
+                   docsCableScte55d2UsOob (286), -- Cable SCTE 55-2 OOB Upstream Channel
+                   docsCableNdf (287), -- Cable Narrowband Digital Forward
+                   docsCableNdr (288), -- Cable Narrowband Digital Return
+                   ptm (289), -- Packet Transfer Mode
+                   ghn (290) -- G.hn port
                    }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
