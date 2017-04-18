@@ -368,6 +368,8 @@ setPassPersist(int action,
                 sprint_mib_oid(buf, name, name_len);
             netsnmp_internal_pass_set_format(buf2, var_val, var_val_type,
                                              var_val_len);
+            free(persistpassthru->command);
+            persistpassthru->command = NULL;
             if (asprintf(&persistpassthru->command, "set\n%s\n%s\n", buf,
                          buf2) < 0) {
             }
