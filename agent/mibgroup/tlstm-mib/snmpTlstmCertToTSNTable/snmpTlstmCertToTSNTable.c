@@ -1200,7 +1200,7 @@ _parse_mib_maps(const char *token, char *line)
 static int
 _save_entry(certToTSN_entry *entry, void *app_type)
 {
-    char buf[SNMP_MAXBUF_SMALL], *hashType, *mapType, *data = NULL;
+    char *buf = NULL, *hashType, *mapType, *data = NULL;
 
     if (NULL == entry)
         return SNMP_ERR_GENERR;
@@ -1214,12 +1214,15 @@ _save_entry(certToTSN_entry *entry, void *app_type)
     mapType = se_find_label_in_slist("cert_map_type", entry->mapType);
     if (TSNM_tlstmCertSpecified == entry->mapType)
         data = entry->data;
-    snprintf(buf, sizeof(buf), "%s %ld --%s %s --%s %s %d",
-             MAP_MIB_CONFIG_TOKEN, entry->tlstmCertToTSNID, hashType,
-             entry->fingerprint, mapType, data ? data : "", entry->rowStatus);
+    if (asprintf(&buf, "%s %ld --%s %s --%s %s %d", MAP_MIB_CONFIG_TOKEN,
+                 entry->tlstmCertToTSNID, hashType, entry->fingerprint,
+                 mapType, data ? data : "", entry->rowStatus) < 0) {
+        return SNMP_ERR_GENERR;
+    }
 
     DEBUGMSGTL(("tlstmCertToTSNTable:save", "saving '%s'\n", buf));
     read_config_store(app_type, buf);
+    free(buf);
 
     return SNMP_ERR_NOERROR;
 }

@@ -537,7 +537,7 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
         
         case NS_HASH_NONE:
             snmp_log(LOG_ERR, "hash type none not supported. using SHA1\n");
-            /** fall through */
+            /* FALLTHROUGH */
 
         case NS_HASH_SHA1:
             digest = EVP_sha1();

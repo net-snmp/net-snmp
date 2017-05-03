@@ -313,7 +313,7 @@ var_extensible_disk(struct variable *vp,
     netsnmp_fsys_info *entry;
     unsigned long long val;
     static long     long_ret;
-    static char     errmsg[300];
+    static char    *errmsg;
     netsnmp_cache  *cache;
 
     /* Update the fsys H/W module */
@@ -418,23 +418,21 @@ tryAgain:
         return ((u_char *) (&long_ret));
 
     case ERRORMSG:
-        errmsg[0] = 0;
+        free(errmsg);
+        errmsg = NULL;
+        *var_len = 0;
         val = netsnmp_fsys_avail_ull(entry);
-        if (( entry->minspace >= 0 ) &&
-            ( val < entry->minspace ))
-                snprintf(errmsg, sizeof(errmsg),
-                        "%s: less than %d free (= %d)",
-                        entry->path, entry->minspace,
-                        (int) val);
-        else if (( entry->minpercent >= 0 ) &&
-                 (_percent( entry->avail, entry->size ) < entry->minpercent ))
-                snprintf(errmsg, sizeof(errmsg),
-                        "%s: less than %d%% free (= %d%%)",
-                        entry->path, entry->minpercent,
-                        _percent( entry->avail, entry->size ));
-        errmsg[ sizeof(errmsg)-1 ] = 0;
-        *var_len = strlen(errmsg);
-        return ((u_char *) (errmsg));
+        if ((entry->minspace >= 0 && val < entry->minspace &&
+             asprintf(&errmsg, "%s: less than %d free (= %d)", entry->path,
+                      entry->minspace, (int) val) >= 0) ||
+            (entry->minpercent >= 0 &&
+             _percent(entry->avail, entry->size) < entry->minpercent &&
+             asprintf(&errmsg, "%s: less than %d%% free (= %d%%)", entry->path,
+                      entry->minpercent, _percent(entry->avail, entry->size))
+             >= 0)) {
+            *var_len = strlen(errmsg);
+        }
+        return (u_char *) errmsg;
     }
     return NULL;
 }

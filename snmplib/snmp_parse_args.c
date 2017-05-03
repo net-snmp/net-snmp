@@ -561,6 +561,7 @@ netsnmp_parse_args(int argc,
                     "Error generating a key (Ku) from the supplied authentication pass phrase. \n");
             return (NETSNMP_PARSE_ARGS_ERROR);
         }
+        free(Apsz);
     }
     if (Xpsz) {
         session->securityPrivKeyLen = USM_PRIV_KU_LEN;
@@ -589,6 +590,7 @@ netsnmp_parse_args(int argc,
                     "Error generating a key (Ku) from the supplied privacy pass phrase. \n");
             return (NETSNMP_PARSE_ARGS_ERROR);
         }
+        free(Xpsz);
     }
 #endif /* NETSNMP_SECMOD_USM */
 

@@ -249,7 +249,9 @@ init_system_mib(void)
     /*
      * set default values of system stuff 
      */
-    sprintf(extmp.command, "%s -a", UNAMEPROG);
+    extmp.command = NULL;
+    if (asprintf(&extmp.command, "%s -a", UNAMEPROG) < 0) {
+    }
     /*
      * setup defaults 
      */
@@ -275,7 +277,9 @@ init_system_mib(void)
     strlcpy(sysName, utsName.nodename, sizeof(sysName));
 #else
 #if defined (HAVE_EXECV) && !defined (mingw32)
-    sprintf(extmp.command, "%s -n", UNAMEPROG);
+    extmp.command = NULL;
+    if (asprintf(&extmp.command, "%s -n", UNAMEPROG) < 0) {
+    }
     /*
      * setup defaults 
      */

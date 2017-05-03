@@ -218,7 +218,7 @@ var_hrhfilesys(struct variable *vp,
               int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             fsys_idx;
-    static char     string[1024];
+    static char    *string;
 
     fsys_idx =
         header_hrhfilesys(vp, name, length, exact, var_len, write_method);
@@ -230,17 +230,22 @@ var_hrhfilesys(struct variable *vp,
         long_return = fsys_idx;
         return (u_char *) & long_return;
     case HRFSYS_MOUNT:
-        snprintf(string, sizeof(string), "%s", HRFS_entry->path);
-        string[ sizeof(string)-1 ] = 0;
-        *var_len = strlen(string);
+        free(string);
+        string = NULL;
+        *var_len = 0;
+        if (asprintf(&string, "%s", HRFS_entry->path) >= 0)
+            *var_len = strlen(string);
         return (u_char *) string;
     case HRFSYS_RMOUNT:
+        free(string);
+        string = NULL;
         if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE) {
-            snprintf(string, sizeof(string), "%s", HRFS_entry->device);
-            string[ sizeof(string)-1 ] = 0;
-        } else
-            string[0] = '\0';
-        *var_len = strlen(string);
+            if (asprintf(&string, "%s", HRFS_entry->device) < 0) {
+            }
+        } else {
+            string = strdup("");
+        }
+        *var_len = string ? strlen(string) : 0;
         return (u_char *) string;
 
     case HRFSYS_TYPE:

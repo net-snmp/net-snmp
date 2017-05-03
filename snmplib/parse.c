@@ -537,7 +537,7 @@ static struct module_compatability module_map[] = {
 #define MODULE_SYNTAX_ERROR     4
 
 int gMibError = 0,gLoop = 0;
-char *gpMibErrorString = NULL;
+static char *gpMibErrorString;
 char gMibNames[STRINGMAX];
 
 #define HASHSIZE        32
@@ -5042,14 +5042,12 @@ read_all_mibs(void)
     /* If entered the syntax error loop in "read_module()" */
     if (gLoop == 1) {
         gLoop = 0;
-        if (gpMibErrorString != NULL) {
-            SNMP_FREE(gpMibErrorString);
-        }
-        gpMibErrorString = (char *) calloc(1, MAXQUOTESTR);
-        if (gpMibErrorString == NULL) {
-            snmp_log(LOG_CRIT, "failed to allocated memory for gpMibErrorString\n");
-        } else {
-            snprintf(gpMibErrorString, sizeof(gpMibErrorString)-1, "Error in parsing MIB module(s): %s ! Unable to load corresponding MIB(s)", gMibNames);
+        free(gpMibErrorString);
+        gpMibErrorString = NULL;
+        if (asprintf(&gpMibErrorString, "Error in parsing MIB module(s): %s !"
+                     " Unable to load corresponding MIB(s)", gMibNames) < 0) {
+            snmp_log(LOG_CRIT,
+                     "failed to allocated memory for gpMibErrorString\n");
         }
     }
 

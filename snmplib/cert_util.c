@@ -942,7 +942,8 @@ netsnmp_ocert_get(netsnmp_cert *cert)
             if (NULL != ocert)
                 break;
             (void)BIO_reset(certbio);
-            /** FALLTHROUGH: check for PEM if DER didn't work */
+            /* Check for PEM if DER didn't work */
+            /* FALLTHROUGH */
 
         case NS_CERT_TYPE_PEM:
             ocert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);

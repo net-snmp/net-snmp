@@ -108,6 +108,8 @@ struct header_complex_index *traceRouteResultsTableStorage = NULL;
 struct header_complex_index *traceRouteProbeHistoryTableStorage = NULL;
 struct header_complex_index *traceRouteHopsTableStorage = NULL;
 
+static char *
+findsaddr(const struct sockaddr_in *to, struct sockaddr_in *from);
 int
 traceRouteResultsTable_add(struct traceRouteCtlTable_data *thedata);
 int
@@ -4066,7 +4068,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
 
     int    code, n, k;
     const    char  *cp;
-    const char *err;
+    char *err;
     u_char *outp;
     u_int32_t *ap;
     struct sockaddr whereto;        /* Who to try to reach */
@@ -4353,6 +4355,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
         else if ((err = findsaddr(to, from)) != NULL) {
             DEBUGMSGTL(("traceRouteCtlTable",
                         " findsaddr: %s\n", err));
+            free(err);
             exit(1);
         }
 
@@ -6075,7 +6078,7 @@ setsin(struct sockaddr_in *sin, u_int32_t addr)
 /*
  * Return the source address for the given destination address
  */
-const char     *
+static char *
 findsaddr(const struct sockaddr_in *to,
           struct sockaddr_in *from)
 {
@@ -6085,12 +6088,13 @@ findsaddr(const struct sockaddr_in *to,
     u_int32_t       dest, tmask;
     struct ifaddrlist *al;
     char            buf[256], tdevice[256], device[256];
-    static char     errbuf[132];
+    char            *errbuf = NULL;
     static const char route[] = "/proc/net/route";
 
     if ((f = fopen(route, "r")) == NULL) {
-        sprintf(errbuf, "open %s: %.128s", route, strerror(errno));
-        return (errbuf);
+        if (asprintf(&errbuf, "open %s: %s", route, strerror(errno)) < 0)
+            snmp_log(LOG_ERR, "error buffer allocation failed\n");
+        return errbuf;
     }
 
     /*
@@ -6106,7 +6110,7 @@ findsaddr(const struct sockaddr_in *to,
         if ((i = sscanf(buf, "%s %x %*s %*s %*s %*s %*s %x",
                         tdevice, &dest, &tmask)) != 3) {
             fclose(f);
-            return "junk in buffer";
+            return strdup("junk in buffer");
         }
         if ((to->sin_addr.s_addr & tmask) == dest &&
             (tmask > mask || mask == 0)) {
@@ -6117,7 +6121,7 @@ findsaddr(const struct sockaddr_in *to,
     fclose(f);
 
     if (device[0] == '\0')
-        return ("Can't find interface");
+        return strdup("Can't find interface");
 
     /*
      * Get the interface address list 
@@ -6126,7 +6130,7 @@ findsaddr(const struct sockaddr_in *to,
         return (errbuf);
 
     if (n == 0)
-        return ("Can't find any network interfaces");
+        return strdup("Can't find any network interfaces");
 
     /*
      * Find our appropriate source address 

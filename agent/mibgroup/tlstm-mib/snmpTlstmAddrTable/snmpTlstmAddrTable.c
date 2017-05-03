@@ -1234,7 +1234,7 @@ _tlstmAddr_init_persistence(void)
 static int
 _save_entry(tlstmAddrTable_entry *entry, void *type)
 {
-    char   buf[SNMP_MAXBUF_SMALL], *hashType;
+    char *buf = NULL, *hashType;
 
     hashType = se_find_label_in_slist("cert_hash_alg", entry->hashType);
     if (NULL == hashType) {
@@ -1250,15 +1250,17 @@ _save_entry(tlstmAddrTable_entry *entry, void *type)
                        entry->snmpTargetAddrName_len]);
     netsnmp_assert(0 == entry->tlstmAddrServerFingerprint[
                        entry->tlstmAddrServerFingerprint_len]);
-    snprintf(buf, sizeof(buf), "%s %s --%s %s %s %d", mib_token,
-             entry->snmpTargetAddrName, hashType,
-             entry->tlstmAddrServerFingerprint,
-             entry->tlstmAddrServerIdentity,
-             entry->tlstmAddrRowStatus);
-    buf[sizeof(buf)-1] = 0;
+    if (asprintf(&buf, "%s %s --%s %s %s %d", mib_token,
+                 entry->snmpTargetAddrName, hashType,
+                 entry->tlstmAddrServerFingerprint,
+                 entry->tlstmAddrServerIdentity,
+                 entry->tlstmAddrRowStatus) < 0) {
+        return SNMP_ERR_GENERR;
+    }
 
     read_config_store(type, buf);
     DEBUGMSGTL(("tlstmAddrTable:row:save", "saving entry '%s'\n", buf));
+    free(buf);
 
     return SNMP_ERR_NOERROR;
 }

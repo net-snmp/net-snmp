@@ -178,7 +178,7 @@ pass_persist_parse_config(const char *token, char *cptr)
 
     while (*ppass != NULL)
         ppass = &((*ppass)->next);
-    (*ppass) = (struct extensible *) malloc(sizeof(struct extensible));
+    *ppass = calloc(1, sizeof(**ppass));
     if (*ppass == NULL)
         return;
     (*ppass)->type = PASSTHRU_PERSIST;
@@ -190,14 +190,19 @@ pass_persist_parse_config(const char *token, char *cptr)
     /*
      * path
      */
+    free((*ppass)->command);
+    (*ppass)->command = NULL;
     cptr = skip_white(cptr);
     if (cptr == NULL) {
         config_perror("No command specified on pass_persist line");
-        (*ppass)->command[0] = 0;
+        if (asprintf(&(*ppass)->command, "%s", "") < 0) {
+        }
     } else {
         for (tcptr = cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
              tcptr++);
-        sprintf((*ppass)->command, "%.*s", (int) (tcptr - cptr), cptr);
+        if (asprintf(&(*ppass)->command, "%.*s", (int)(tcptr - cptr), cptr)
+            < 0) {
+        }
     }
     strlcpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
     (*ppass)->next = NULL;
@@ -330,13 +335,11 @@ var_extensible_pass_persist(struct variable *vp,
                 return (NULL);
             }
 
-            if (exact)
-                snprintf(persistpassthru->command,
-                  sizeof(persistpassthru->command), "get\n%s\n", buf);
-            else
-                snprintf(persistpassthru->command,
-                  sizeof(persistpassthru->command), "getnext\n%s\n", buf);
-            persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
+            free(persistpassthru->command);
+            persistpassthru->command = NULL;
+            if (asprintf(&persistpassthru->command, "%s\n%s\n",
+                         exact ? "get" : "getnext", buf) < 0) {
+            }
 
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "persistpass-sending:\n%s",
@@ -444,14 +447,13 @@ setPassPersist(int action,
                                persistpassthru->miblen);
             else
                 sprint_mib_oid(buf, name, name_len);
-            snprintf(persistpassthru->command,
-                     sizeof(persistpassthru->command), "set\n%s\n", buf);
-            persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
-            netsnmp_internal_pass_set_format(buf, var_val, var_val_type, var_val_len);
-            strlcat(persistpassthru->command, buf,
-                    sizeof(persistpassthru->command));
-            persistpassthru->command[ sizeof(persistpassthru->command)-2 ] = '\n';
-            persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
+            netsnmp_internal_pass_set_format(buf2, var_val, var_val_type,
+                                             var_val_len);
+            free(persistpassthru->command);
+            persistpassthru->command = NULL;
+            if (asprintf(&persistpassthru->command, "set\n%s\n%s\n", buf,
+                         buf2) < 0) {
+            }
 
             if (!open_persist_pipe(pipe_idx, persistpassthru->name)) {
                 return SNMP_ERR_NOTWRITABLE;

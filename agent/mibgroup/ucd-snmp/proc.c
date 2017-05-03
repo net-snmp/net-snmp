@@ -266,7 +266,7 @@ var_extensible_proc(struct variable *vp,
 
     struct myproc  *proc;
     static long     long_ret;
-    static char     errmsg[300];
+    static char    *errmsg;
 
 
     if (header_simple_table
@@ -305,29 +305,31 @@ var_extensible_proc(struct variable *vp,
             }
             return ((u_char *) (&long_ret));
         case ERRORMSG:
+            free(errmsg);
+            errmsg = NULL;
             long_ret = sh_count_myprocs(proc);
             if (long_ret < 0) {
-                errmsg[0] = 0;  /* catch out of mem errors return 0 count */
+                /* catch out of mem errors return 0 count */
             } else if (proc->min && long_ret < proc->min) {
-                if ( long_ret > 0 )
-                    snprintf(errmsg, sizeof(errmsg),
-                        "Too few %s running (# = %d)",
-                        proc->name, (int) long_ret);
-                else
-                    snprintf(errmsg, sizeof(errmsg),
-                        "No %s process running", proc->name);
+                if (long_ret > 0) {
+                    if (asprintf(&errmsg, "Too few %s running (# = %d)",
+                                 proc->name, (int) long_ret) < 0) {
+                    }
+                } else {
+                    if (asprintf(&errmsg, "No %s process running", proc->name)
+                        < 0) {
+                    }
+                }
             } else if (proc->max && long_ret > proc->max) {
-                snprintf(errmsg, sizeof(errmsg),
-                        "Too many %s running (# = %d)",
-                        proc->name, (int) long_ret);
+                if (asprintf(&errmsg, "Too many %s running (# = %d)",
+                             proc->name, (int) long_ret) < 0) {
+                }
             } else if (proc->min == 0 && proc->max == 0 && long_ret > 0) {
-                snprintf(errmsg, sizeof(errmsg),
-                        "%s process should not be running.", proc->name);
-            } else {
-                errmsg[0] = 0;
+                if (asprintf(&errmsg, "%s process should not be running.",
+                             proc->name) < 0) {
+                }
             }
-            errmsg[ sizeof(errmsg)-1 ] = 0;
-            *var_len = strlen(errmsg);
+            *var_len = errmsg ? strlen(errmsg) : 0;
             return ((u_char *) errmsg);
         case ERRORFIX:
             *write_method = fixProcError;
@@ -366,7 +368,8 @@ fixProcError(int action,
         tmp = *((long *) var_val);
         if (tmp == 1 && action == COMMIT) {
             if (proc->fixcmd[0]) {
-                strcpy(fixproc.command, proc->fixcmd);
+                free(fixproc.command);
+                fixproc.command = strdup(proc->fixcmd);
                 exec_command(&fixproc);
             }
         }
