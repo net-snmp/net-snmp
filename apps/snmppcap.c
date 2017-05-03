@@ -87,8 +87,9 @@ snmppcap_recv(netsnmp_transport *t, void *buf, int bufsiz, void **opaque, int *o
 /*
  * snmplib calls us back with the received packet.
  */
-int
-snmppcap_callback(int op, netsnmp_session *sess, unsigned int reqid, netsnmp_pdu *pdu, void *magic)
+static int
+snmppcap_callback(int op, netsnmp_session *sess, int reqid, netsnmp_pdu *pdu,
+                  void *magic)
 {
     mystuff_t *mystuff = (mystuff_t *)magic;
     netsnmp_variable_list *vars;
