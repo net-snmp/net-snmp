@@ -123,7 +123,7 @@ char           *usmUserPublic_val = NULL;
 int             docreateandwait = 0;
 
 
-#if !defined(HAVE_DH_GET0_PQG)
+#if defined(HAVE_OPENSSL_DH_H) && !defined(HAVE_DH_GET0_PQG)
 
 #include <string.h>
 #include <openssl/dh.h>
