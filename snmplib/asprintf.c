@@ -19,13 +19,9 @@ int vasprintf(char **strp, const char *fmt, va_list ap)
         return len;
 
     len++;
-    str = realloc(*strp, len);
-    if (!str)
-        return -1;
-
+    str = malloc(*strp, len);
     *strp = str;
-    
-    return vsnprintf(str, len, fmt, ap);
+    return str ? vsnprintf(str, len, fmt, ap) : -1;
 }
 
 int asprintf(char **strp, const char *fmt, ...)
