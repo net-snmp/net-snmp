@@ -190,14 +190,15 @@ dlmod_load_module(struct dlmod *dlm)
         (dlm->status != DLMOD_UNLOADED && dlm->status != DLMOD_ERROR))
         return;
 
+    free(dlm->error);
+    dlm->error = NULL;
+
     if (dlmod_is_abs_path(dlm->path)) {
         dlm->handle = dlmod_dlopen(dlm->path);
         if (dlm->handle == NULL) {
-            free(dlm->error);
-            dlm->error = NULL;
             if (asprintf(&dlm->error, "dlopen(%s) failed: %s", dlm->path,
-                         dlmod_dlerror()) < 0) {
-            }
+                         dlmod_dlerror()) < 0)
+                dlm->error = NULL;
             dlm->status = DLMOD_ERROR;
             return;
         }
@@ -206,22 +207,22 @@ dlmod_load_module(struct dlmod *dlm)
 
         for (p = strtok_r(dlmod_path, ENV_SEPARATOR, &st); p;
              p = strtok_r(NULL, ENV_SEPARATOR, &st)) {
+            free(tmp_path);
             if (asprintf(&tmp_path, "%s/%s.%s", p, dlm->path, dlmod_dl_suffix)
-                < 0) {
-            }
+                < 0)
+                tmp_path = NULL;
             DEBUGMSGTL(("dlmod", "p: %s tmp_path: %s\n", p, tmp_path));
             dlm->handle = tmp_path ? dlmod_dlopen(tmp_path) : NULL;
             if (dlm->handle == NULL) {
                 free(dlm->error);
-                dlm->error = NULL;
                 if (asprintf(&dlm->error, "dlopen(%s) failed: %s", tmp_path,
-                             dlmod_dlerror()) < 0) {
-                }
+                             dlmod_dlerror()) < 0)
+                    dlm->error = NULL;
                 dlm->status = DLMOD_ERROR;
             }
-            free(tmp_path);
         }
         strlcpy(dlm->path, tmp_path, sizeof(dlm->path));
+        free(tmp_path);
         if (dlm->status == DLMOD_ERROR)
             return;
     }
