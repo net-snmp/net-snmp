@@ -426,15 +426,10 @@ netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
                                    marker_t timestamp)
 {
     netsnmp_mib_handler *whandler;
-    int                  rc;
 
     whandler         = netsnmp_get_watched_timestamp_handler();
 
-    rc = netsnmp_watched_timestamp_register(whandler, reginfo, timestamp);
-    if (MIB_REGISTRATION_FAILED == rc && whandler)
-        netsnmp_handler_free(whandler);
-
-    return rc;
+    return netsnmp_watched_timestamp_register(whandler, reginfo, timestamp);
 }
 #endif /* NETSNMP_FEATURE_REMOVE_WATCHER_REGISTER_TIMESTAMP */
 
