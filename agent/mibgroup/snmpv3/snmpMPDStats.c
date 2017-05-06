@@ -44,10 +44,8 @@ init_snmpMPDStats(void)
     if (!s)
         return;
 
-    if (NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, MPD) != MIB_REGISTERED_OK) {
-        netsnmp_handler_registration_free(s);
+    if (NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, MPD) != MIB_REGISTERED_OK)
         return;
-    }
 
     REGISTER_SYSOR_ENTRY(snmpMPDCompliance,
                          "The MIB for Message Processing and Dispatching.");
