@@ -168,7 +168,7 @@ procfix_parse_config(const char *token, char *cptr)
         return;
     }
 
-    strcpy(procp->fixcmd, cptr);
+    strlcpy(procp->fixcmd, cptr, sizeof(procp->fixcmd));
 }
 
 

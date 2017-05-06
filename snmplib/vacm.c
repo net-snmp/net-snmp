@@ -59,6 +59,7 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/system.h> /* strlcpy() */
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/vacm.h>
 
@@ -444,7 +445,7 @@ netsnmp_view_get(struct vacm_viewEntry *head, const char *viewName,
     if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
     view[0] = glen;
-    strcpy(view + 1, viewName);
+    strlcpy(view + 1, viewName, sizeof(view) - 1);
     for (vp = head; vp; vp = vp->next) {
         if (!memcmp(view, vp->viewName, glen + 1)
             && viewSubtreeLen >= (vp->viewSubtreeLen - 1)) {
@@ -527,7 +528,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
     if (glen < 0 || glen > VACM_MAX_STRING)
         return VACM_NOTINVIEW;
     view[0] = glen;
-    strcpy(view + 1, viewName);
+    strlcpy(view + 1, viewName, sizeof(view) - 1);
     DEBUGMSGTL(("9:vacm:checkSubtree", "view %s\n", viewName));
     for (vp = head; vp; vp = vp->next) {
         if (!memcmp(view, vp->viewName, glen + 1)) {
@@ -694,7 +695,7 @@ netsnmp_view_create(struct vacm_viewEntry **head, const char *viewName,
     }
 
     vp->viewName[0] = glen;
-    strcpy(vp->viewName + 1, viewName);
+    strlcpy(vp->viewName + 1, viewName, sizeof(vp->viewName) - 1);
     vp->viewSubtree[0] = viewSubtreeLen;
     memcpy(vp->viewSubtree + 1, viewSubtree, viewSubtreeLen * sizeof(oid));
     vp->viewSubtreeLen = viewSubtreeLen + 1;
@@ -773,7 +774,7 @@ vacm_getGroupEntry(int securityModel, const char *securityName)
     if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
     secname[0] = glen;
-    strcpy(secname + 1, securityName);
+    strlcpy(secname + 1, securityName, sizeof(secname) - 1);
 
     for (vp = groupList; vp; vp = vp->next) {
         if ((securityModel == vp->securityModel
@@ -822,7 +823,7 @@ vacm_createGroupEntry(int securityModel, const char *securityName)
 
     gp->securityModel = securityModel;
     gp->securityName[0] = glen;
-    strcpy(gp->securityName + 1, securityName);
+    strlcpy(gp->securityName + 1, securityName, sizeof(gp->securityName) - 1);
 
     lg = groupList;
     og = NULL;
@@ -944,9 +945,9 @@ vacm_getAccessEntry(const char *groupName,
         return NULL;
 
     group[0] = glen;
-    strcpy(group + 1, groupName);
+    strlcpy(group + 1, groupName, sizeof(group) - 1);
     context[0] = clen;
-    strcpy(context + 1, contextPrefix);
+    strlcpy(context + 1, contextPrefix, sizeof(context) - 1);
     for (vp = accessList; vp; vp = vp->next) {
         if ((securityModel == vp->securityModel
              || vp->securityModel == SNMP_SEC_MODEL_ANY)
@@ -1011,9 +1012,10 @@ vacm_createAccessEntry(const char *groupName,
     vp->securityModel = securityModel;
     vp->securityLevel = securityLevel;
     vp->groupName[0] = glen;
-    strcpy(vp->groupName + 1, groupName);
+    strlcpy(vp->groupName + 1, groupName, sizeof(vp->groupName) - 1);
     vp->contextPrefix[0] = clen;
-    strcpy(vp->contextPrefix + 1, contextPrefix);
+    strlcpy(vp->contextPrefix + 1, contextPrefix,
+            sizeof(vp->contextPrefix) - 1);
 
     lp = accessList;
     while (lp) {

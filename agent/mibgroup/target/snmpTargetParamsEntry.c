@@ -686,8 +686,7 @@ var_snmpTargetParamsEntry(struct variable * vp,
         /*
          * including null character. 
          */
-        memcpy(string, temp_struct->secName, strlen(temp_struct->secName));
-        string[strlen(temp_struct->secName)] = '\0';
+        strlcpy((char *)string, temp_struct->secName, sizeof(string));
         *var_len = strlen(temp_struct->secName);
         return (unsigned char *) string;
 

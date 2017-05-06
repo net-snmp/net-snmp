@@ -148,7 +148,7 @@ netsnmp_cpu_info *netsnmp_cpu_get_byName( char *name, int create ) {
         return NULL;
     }
 
-    strcpy(cpu->name, name);
+    strlcpy(cpu->name, name, sizeof(cpu));
     if ( _cpu_tail ) {
         cpu->idx = _cpu_tail->idx+1;
         _cpu_tail->next = cpu;

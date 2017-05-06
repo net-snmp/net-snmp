@@ -480,7 +480,7 @@ vacm_parse_authaccess(const char *token, char *confline)
 
     for (i = 0; i <= VACM_MAX_VIEWS; i++) {
         if (viewtypes & (1 << i)) {
-            strcpy(ap->views[i], view);
+            strlcpy(ap->views[i], view, sizeof(ap->views[i]));
         }
     }
     ap->contextMatch = prefix;
@@ -542,7 +542,7 @@ vacm_parse_setaccess(const char *token, char *param)
         return;
     }
 
-    strcpy(ap->views[viewnum], viewval);
+    strlcpy(ap->views[viewnum], viewval, sizeof(ap->views[viewnum]));
     ap->contextMatch = iprefix;
     ap->storageType = SNMP_STORAGE_PERMANENT;
     ap->status = SNMP_ROW_ACTIVE;
@@ -598,9 +598,12 @@ vacm_parse_access(const char *token, char *param)
         config_perror("failed to create access entry");
         return;
     }
-    strcpy(ap->views[VACM_VIEW_READ], readView);
-    strcpy(ap->views[VACM_VIEW_WRITE], writeView);
-    strcpy(ap->views[VACM_VIEW_NOTIFY], notify);
+    strlcpy(ap->views[VACM_VIEW_READ], readView,
+            sizeof(ap->views[VACM_VIEW_READ]));
+    strlcpy(ap->views[VACM_VIEW_WRITE], writeView,
+            sizeof(ap->views[VACM_VIEW_WRITE]));
+    strlcpy(ap->views[VACM_VIEW_NOTIFY], notify,
+            sizeof(ap->views[VACM_VIEW_NOTIFY]));
     ap->contextMatch = iprefix;
     ap->storageType = SNMP_STORAGE_PERMANENT;
     ap->status = SNMP_ROW_ACTIVE;

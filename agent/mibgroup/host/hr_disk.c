@@ -404,7 +404,7 @@ parse_disk_config(const char *token, char *cptr)
                  *p != '\0' && *p != '?' && *p != '*' && *p != '['; p++);
             c = *p;
             *p = '\0';
-            d_str = (char *) malloc(strlen(name) + 1);
+            d_str = strdup(name);
             if (!d_str) {
                 SNMP_FREE(d_new);
                 SNMP_FREE(d_str);
@@ -413,7 +413,6 @@ parse_disk_config(const char *token, char *cptr)
                 config_perror("Out of memory");
                 return;
             }
-            strcpy(d_str, name);
             *p = c;
             di_curr->item_type = ITEM_STRING;
             di_curr->item_details = (void *) d_str;

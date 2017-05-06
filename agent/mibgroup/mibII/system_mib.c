@@ -307,7 +307,7 @@ init_system_mib(void)
           if (RegQueryValueEx(hKey, "RegisteredOwner", NULL, NULL,
                               (LPBYTE)registeredOwner,
                               &registeredOwnerSz) == ERROR_SUCCESS) {
-              strcpy(sysContact, registeredOwner);
+              strlcpy(sysContact, registeredOwner, sizeof(sysContact));
           }
           RegCloseKey(hKey);
       }
