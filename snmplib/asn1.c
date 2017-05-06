@@ -1465,8 +1465,7 @@ asn_parse_objid(u_char * data,
     u_long          asn_length;
     size_t          original_length = *objidlength;
 
-    if (NULL == data || NULL == datalength || NULL == type || NULL == objid ||
-        NULL == objidlength) {
+    if (NULL == data || NULL == datalength || NULL == type || NULL == objid) {
         ERROR_MSG("parse objid: NULL pointer");
         return NULL;
     }
