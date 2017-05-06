@@ -368,7 +368,7 @@ int CONTAINER_INSERT_BEFORE(netsnmp_container *x, size_t pos, void *k)
 
     if (NULL == x || NULL == x->insert_before) {
         snmp_log(LOG_ERR, "container '%s' does not support insert_before\n",
-                 x->container_name ? x->container_name : "");
+                 x && x->container_name ? x->container_name : "");
         return -1;
     }
 
@@ -416,7 +416,7 @@ int CONTAINER_REMOVE_AT(netsnmp_container *x, size_t pos, void **k)
 
     if (NULL == x || NULL == x->remove_at) {
         snmp_log(LOG_ERR, "container '%s' does not support REMOVE_AT\n",
-                 x->container_name ? x->container_name : "");
+                 x && x->container_name ? x->container_name : "");
         return -1;
     }
 
@@ -450,7 +450,7 @@ int CONTAINER_GET_AT(netsnmp_container *x, size_t pos, void **k)
 
     if (NULL == x || NULL == x->get_at) {
         snmp_log(LOG_ERR, "container '%s' does not support GET_AT\n",
-                 x->container_name ? x->container_name : "");
+                 x && x->container_name ? x->container_name : "");
         return -1;
     }
 
