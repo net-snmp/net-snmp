@@ -259,6 +259,8 @@ ctime_to_timet(const char *str)
         tm.tm_isdst = 1;
 
     tm.tm_sec -= timezone;
+#else
+    tm.tm_isdst = 0;
 #endif
 
     return (mktime(&tm));
