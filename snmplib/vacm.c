@@ -1292,11 +1292,14 @@ netsnmp_vacm_simple_usm_add(const char *user, int rw, int authLevel,
         DEBUGMSGTL(("vacm:simple_usm", "createViewEntry failed"));
         goto bail;
     }
-    strcpy(accessEntry->views[VACM_VIEW_READ], view);
+    strlcpy(accessEntry->views[VACM_VIEW_READ], view,
+            sizeof(accessEntry->views[VACM_VIEW_READ]));
     if (0 == rw)
         view = "none";
-    strcpy(accessEntry->views[VACM_VIEW_WRITE], view);
-    strcpy(accessEntry->views[VACM_VIEW_NOTIFY], view);
+    strlcpy(accessEntry->views[VACM_VIEW_WRITE], view,
+            sizeof(accessEntry->views[VACM_VIEW_WRITE]));
+    strlcpy(accessEntry->views[VACM_VIEW_NOTIFY], view,
+            sizeof(accessEntry->views[VACM_VIEW_NOTIFY]));
 
     accessEntry->contextMatch = exact;
     accessEntry->storageType = SNMP_STORAGE_PERMANENT;
