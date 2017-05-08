@@ -457,11 +457,6 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
            |--------------------+-------|
         */
         
-        if (tmStateRef->transportDomain == NULL) {
-            /* XXX: snmpTsmInvalidCaches++ ??? */
-            return SNMPERR_GENERR;
-        }
-
         /* XXX: cache in session! */
 #ifdef NETSNMP_TRANSPORT_SSH_DOMAIN
         if (netsnmp_oid_equals(netsnmp_snmpSSHDomain,
