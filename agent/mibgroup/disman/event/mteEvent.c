@@ -77,9 +77,7 @@ _init_builtin_mteEvent( const char *event, const char *oname, oid *trapOID, size
     netsnmp_tdata_row *row;
     struct mteEvent   *entry;
 
-    memset(ename, 0, sizeof(ename));
-    ename[0] = '_';
-    memcpy(ename+1, event, strlen(event));
+    snprintf(ename, sizeof(ename), "_%s", event);
 
     row = mteEvent_createEntry( "_snmpd", ename, 1 );
     if (!row || !row->data)
@@ -90,7 +88,7 @@ _init_builtin_mteEvent( const char *event, const char *oname, oid *trapOID, size
     entry->mteNotification_len = trapOID_len;
     memcpy( entry->mteNotification, trapOID, trapOID_len*sizeof(oid));
     memcpy( entry->mteNotifyOwner, "_snmpd", 6 );
-    memcpy( entry->mteNotifyObjects,  oname, strlen(oname));
+    strlcpy(entry->mteNotifyObjects, oname, sizeof(entry->mteNotifyObjects));
     entry->flags |= MTE_EVENT_FLAG_ENABLED|
                     MTE_EVENT_FLAG_ACTIVE|
                     MTE_EVENT_FLAG_VALID;

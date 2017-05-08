@@ -455,9 +455,8 @@ var_snmpTargetParamsEntry(struct variable * vp,
         /*
          * including null character. 
          */
-        memcpy(string, temp_struct->secNameData, temp_struct->secNameLen);
-        string[temp_struct->secNameLen] = '\0';
-        *var_len = temp_struct->secNameLen;
+        strlcpy((char *)string, temp_struct->secNameData, sizeof(string));
+        *var_len = strlen(temp_struct->secNameData);
         return (unsigned char *) string;
 
     case SNMPTARGETPARAMSSECURITYLEVEL:

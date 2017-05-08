@@ -263,7 +263,7 @@ get_exec_output(struct extensible *ex)
     curtime = time(NULL);
     if (curtime > (cachetime + NETSNMP_EXCACHETIME) ||
         strcmp(ex->command, lastcmd) != 0) {
-        strcpy(lastcmd, ex->command);
+        strlcpy(lastcmd, ex->command, sizeof(lastcmd));
         cachetime = curtime;
 #endif
 

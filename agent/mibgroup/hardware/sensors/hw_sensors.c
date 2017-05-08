@@ -167,7 +167,7 @@ sensor_by_name( const char *name, int create_type )
             free(sp);
             return NULL;
         }
-        strcpy( sp->name, name );
+        strlcpy(sp->name, name, sizeof(sp->name));
         sp->type = create_type;
         /*
          * Set up the index value.

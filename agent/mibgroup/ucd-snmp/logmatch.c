@@ -396,8 +396,9 @@ logmatch_parse_config(const char *token, char *cptr)
                logmatchTable[logmatchCount].regEx);
 
         /* fill in filename with initial data */
-        strcpy(logmatchTable[logmatchCount].filename,
-               logmatchTable[logmatchCount].filenamePattern);
+        strlcpy(logmatchTable[logmatchCount].filename,
+                logmatchTable[logmatchCount].filenamePattern,
+                sizeof(logmatchTable[logmatchCount].filename));
         logmatch_update_filename(logmatchTable[logmatchCount].filenamePattern,
                                  logmatchTable[logmatchCount].filename);
 

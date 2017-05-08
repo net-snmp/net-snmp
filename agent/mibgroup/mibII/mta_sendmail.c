@@ -586,7 +586,7 @@ add_queuegroup(const char *name, char *path)
          */
         *p = '\0';
 
-        strcpy(parentdir, path);
+        strlcpy(parentdir, path, sizeof(parentdir));
         /*
          * remove last directory component from parentdir 
          */
@@ -883,7 +883,7 @@ read_sendmailcf(BOOL config)
                                 linenr, sendmailcf_fn);
                     break;
                 }
-                strcpy(sendmailst_fn, line + 2);
+                strlcpy(sendmailst_fn, line + 2, sizeof(sendmailst_fn));
                 found_sendmailst = TRUE;
                 DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf",
                             "found statatistics file \"%s\"\n",

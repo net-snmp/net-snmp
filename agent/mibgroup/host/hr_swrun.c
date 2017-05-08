@@ -698,13 +698,13 @@ var_hrswrun(struct variable * vp,
             *cp = '\0';
 #elif HAVE_KVM_GETPROCS
     #if defined(freebsd5) && __FreeBSD_version >= 500014
-        strcpy(string, proc_table[LowProcIndex].ki_comm);
+        strlcpy(string, proc_table[LowProcIndex].ki_comm, sizeof(string));
     #elif defined(dragonfly) && __DragonFly_version >= 190000
-        strcpy(string, proc_table[LowProcIndex].kp_comm);
+        strlcpy(string, proc_table[LowProcIndex].kp_comm, sizeof(string));
     #elif defined(openbsd5)
-        strcpy(string, proc_table[LowProcIndex].p_comm);
+        strlcpy(string, proc_table[LowProcIndex].p_comm, sizeof(string));
     #else
-        strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
+        strlcpy(string, proc_table[LowProcIndex].kp_proc.p_comm, sizeof(string));
     #endif
 #elif defined(linux)
 	if( (cp=get_proc_name_from_status(pid,buf,sizeof(buf))) == NULL ) {
@@ -712,7 +712,7 @@ var_hrswrun(struct variable * vp,
             *var_len = strlen(string);
             return (u_char *) string;
         }
-        strcpy(string, cp);
+        strlcpy(string, cp, sizeof(string));
 #elif defined(cygwin)
         /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
         if (lowproc.process_state & PID_EXITED || (lowproc.exitcode & ~0xffff))
@@ -721,7 +721,7 @@ var_hrswrun(struct variable * vp,
             cygwin_conv_to_posix_path(lowproc.progname, string);
             cp = strrchr(string, '/');
             if (cp)
-                strcpy(string, cp + 1);
+                strlcpy(string, cp + 1, sizeof(string));
         } else if (query == CW_GETPINFO_FULL) {
             DWORD           n = lowproc.dwProcessId & 0xffff;
             HANDLE          h =
@@ -739,7 +739,7 @@ var_hrswrun(struct variable * vp,
                                              sizeof string)) {
                     cp = strrchr(string, '\\');
                     if (cp)
-                        strcpy(string, cp + 1);
+                        strlcpy(string, cp + 1, sizeof(string));
                 } else
                     strcpy(string, "*** unknown");
                 CloseHandle(h);
@@ -795,7 +795,7 @@ var_hrswrun(struct variable * vp,
 #elif defined(solaris2)
 #ifdef _SLASH_PROC_METHOD_
         if (proc_buf)
-            strcpy(string, proc_buf->pr_psargs);
+            strlcpy(string, proc_buf->pr_psargs, sizeof(string));
         else
             sprintf(string, "<exited>");
         cp = strchr(string, ' ');
@@ -821,18 +821,18 @@ var_hrswrun(struct variable * vp,
             *cp = '\0';
 #elif HAVE_KVM_GETPROCS
     #if defined(freebsd5) && __FreeBSD_version >= 500014
-        strcpy(string, proc_table[LowProcIndex].ki_comm);
+        strlcpy(string, proc_table[LowProcIndex].ki_comm, sizeof(string));
     #elif defined(dragonfly) && __DragonFly_version >= 190000
-        strcpy(string, proc_table[LowProcIndex].kp_comm);
+        strlcpy(string, proc_table[LowProcIndex].kp_comm, sizeof(string));
     #elif defined(openbsd5)
-        strcpy(string, proc_table[LowProcIndex].p_comm);
+        strlcpy(string, proc_table[LowProcIndex].p_comm, sizeof(string));
     #else
-        strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
+        strlcpy(string, proc_table[LowProcIndex].kp_proc.p_comm, sizeof(string));
     #endif
 #elif defined(linux)
         cp = get_proc_name_from_cmdline(pid,buf,sizeof(buf)-1);
         if (cp != NULL && *cp)    /* argv[0] '\0' argv[1] '\0' .... */
-            strcpy(string, cp);
+            strlcpy(string, cp, sizeof(string));
         else {
             /*
              * swapped out - no cmdline 
@@ -842,7 +842,7 @@ var_hrswrun(struct variable * vp,
 		*var_len = strlen(string);
 		return (u_char *) string;
 	    }
-            strcpy(string, cp);
+            strlcpy(string, cp, sizeof(string));
         }
 #elif defined(cygwin)
         /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
@@ -900,7 +900,7 @@ var_hrswrun(struct variable * vp,
         if (proc_buf) {
             cp = strchr(proc_buf->pr_psargs, ' ');
             if (cp)
-                strcpy(string, cp + 1);
+                strlcpy(string, cp + 1, sizeof(string));
             else
                 string[0] = 0;
         } else
@@ -911,7 +911,7 @@ var_hrswrun(struct variable * vp,
             cp++;
         if (*cp == ' ')
             cp++;
-        strcpy(string, cp);
+        strlcpy(string, cp, sizeof(string));
 #endif
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         cp = strchr(proc_table[LowProcIndex].pi_comm, ' ');
@@ -972,7 +972,7 @@ var_hrswrun(struct variable * vp,
         while (*cp)
             ++cp;
         ++cp;
-        strcpy(string, cp);
+        strlcpy(string, cp, sizeof(string));
 #elif defined(cygwin)
         string[0] = 0;
 #else

@@ -141,7 +141,7 @@ void DH_get0_pqg(const DH *dh,
 
 #endif
 
-#if !defined(HAVE_DH_GET0_KEY)
+#if defined(HAVE_OPENSSL_DH_H) && !defined(HAVE_DH_GET0_KEY)
 
 #include <string.h>
 #include <openssl/dh.h>
