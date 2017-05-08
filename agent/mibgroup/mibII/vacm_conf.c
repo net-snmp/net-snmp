@@ -478,7 +478,7 @@ vacm_parse_authaccess(const char *token, char *confline)
         return;
     }
 
-    for (i = 0; i <= VACM_MAX_VIEWS; i++) {
+    for (i = 0; i < VACM_MAX_VIEWS; i++) {
         if (viewtypes & (1 << i)) {
             strlcpy(ap->views[i], view, sizeof(ap->views[i]));
         }
