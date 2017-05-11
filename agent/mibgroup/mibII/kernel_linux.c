@@ -34,6 +34,7 @@ struct stats_descr {
     const char *col_name;
     void *var;
     unsigned int offset;
+    unsigned int validity_offset;
 };
 
 static const struct stats_descr ipv4_snmp_stats[] = {
@@ -154,9 +155,11 @@ static const struct stats_descr ipv4_snmp_stats[] = {
     { "Tcp:", "RetransSegs", &cached_tcp_mib,
       offsetof(typeof(cached_tcp_mib), tcpRetransSegs) },
     { "Tcp:", "InErrs", &cached_tcp_mib,
-      offsetof(typeof(cached_tcp_mib), tcpInErrs) },
+      offsetof(typeof(cached_tcp_mib), tcpInErrs),
+      offsetof(typeof(cached_tcp_mib), tcpInErrsValid) },
     { "Tcp:", "OutRsts", &cached_tcp_mib,
-      offsetof(typeof(cached_tcp_mib), tcpOutRsts) },
+      offsetof(typeof(cached_tcp_mib), tcpOutRsts),
+      offsetof(typeof(cached_tcp_mib), tcpOutRstsValid) },
 
     { "Udp:", "InDatagrams", &cached_udp_mib,
       offsetof(typeof(cached_udp_mib), udpInDatagrams) },
@@ -268,6 +271,9 @@ linux_read_mibII_stats(void)
                     if (strcmp(d->prefix, pfx) == 0 &&
                         strcmp(d->col_name, hdr) == 0) {
                         *(unsigned long *)(d->var + d->offset) = atol(v);
+                        if (d->validity_offset != 0) {
+                           *(short *)(d->var + d->validity_offset) = 1;
+                        }
                         break;
                     }
                 }
