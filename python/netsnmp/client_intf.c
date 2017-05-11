@@ -214,27 +214,41 @@ int type;
         }
 }
 
+static void *enlarge_buffer(char **buf, size_t *buf_len, size_t desired_len)
+{
+    void *new_buf;
+
+    if (desired_len > *buf_len) {
+        new_buf = netsnmp_realloc(*buf, desired_len);
+        if (!new_buf)
+            return NULL;
+        *buf = new_buf;
+        *buf_len = desired_len;
+    }
+    return *buf;
+}
+
 #define USE_BASIC 0
 #define USE_ENUMS 1
 #define USE_SPRINT_VALUE 2
 static int
-__snprint_value (buf, buf_len, var, tp, type, flag)
-char ** buf;
-size_t * buf_len;
-netsnmp_variable_list * var;
-struct tree * tp;
-int type;
-int flag;
+__snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
+                struct tree *tp, int type, int flag)
 {
+   size_t out_len = 0;
    int len = 0;
    u_char* ip;
    struct enum_list *ep;
 
 
+   enlarge_buffer(buf, buf_len, 32);
    (*buf)[0] = '\0';
    if (flag == USE_SPRINT_VALUE) {
-	snprint_value(*buf, *buf_len, var->name, var->name_length, var);
-	len = STRLEN(*buf);
+       if (sprint_realloc_value((u_char **)buf, buf_len, &out_len, 1,
+                                var->name, var->name_length, var)) {
+           *buf_len = out_len;
+           len = STRLEN(*buf);
+       }
    } else {
      switch (var->type) {
         case ASN_INTEGER:
@@ -264,16 +278,10 @@ int flag;
         case ASN_OCTET_STR:
         case ASN_OPAQUE:
            len = var->val_len;
-           if (len > *buf_len) {
-               char *new_buf = (char *)netsnmp_realloc(*buf, len);
-               if (! new_buf) {
-                   len = *buf_len;
-               } else {
-                   *buf = new_buf;
-                   *buf_len = len;
-               }
-           }
-           memcpy(*buf, (char*)var->val.string, len);
+           enlarge_buffer(buf, buf_len, len + 1);
+           if (len > *buf_len - 1)
+               len = *buf_len - 1;
+           memcpy(*buf, var->val.string, len);
            break;
 
         case ASN_IPADDRESS:
@@ -286,6 +294,7 @@ int flag;
            break;
 
         case ASN_OBJECT_ID:
+          enlarge_buffer(buf, buf_len, var->val_len * 16);
           __sprint_num_objid(*buf, (oid *)(var->val.objid),
                              var->val_len/sizeof(oid));
           len = STRLEN(*buf);
@@ -318,8 +327,11 @@ int flag;
 #endif
 
         case ASN_BIT_STR:
-            snprint_bitstring(*buf, *buf_len, var, NULL, NULL, NULL);
-            len = STRLEN(*buf);
+            if (sprint_realloc_bitstring((u_char **)buf, buf_len, &out_len, 1,
+                                         var, NULL, NULL, NULL)) {
+                *buf_len = out_len;
+                len = STRLEN(*buf);
+            }
             break;
 #ifdef OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_FLOAT:
