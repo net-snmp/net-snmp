@@ -72,8 +72,6 @@ static int __add_var_val_str (netsnmp_pdu *, oid *, int, char *,
 static int _debug_level;
 
 
-#define SAFE_FREE(x) do {if (x != NULL) free(x);} while(/*CONSTCOND*/0)
-
 void
 __libraries_init(char *appname)
 {
@@ -1599,7 +1597,7 @@ netsnmp_get(PyObject *self, PyObject *args)
   }
 
  done:
-  SAFE_FREE(oid_arr);
+  free(oid_arr);
   if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
@@ -1822,7 +1820,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   }
 
  done:
-  SAFE_FREE(oid_arr);
+  free(oid_arr);
   if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
@@ -2175,14 +2173,14 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
  done:
   Py_XDECREF(varbinds);
-  SAFE_FREE(oid_arr_len);
-  SAFE_FREE(oid_arr_broken_check_len);
+  free(oid_arr_len);
+  free(oid_arr_broken_check_len);
   for(varlist_ind = 0; varlist_ind < varlist_len; varlist_ind ++) {
-      SAFE_FREE(oid_arr[varlist_ind]);
-      SAFE_FREE(oid_arr_broken_check[varlist_ind]);
+      free(oid_arr[varlist_ind]);
+      free(oid_arr_broken_check[varlist_ind]);
   }
-  SAFE_FREE(oid_arr);
-  SAFE_FREE(oid_arr_broken_check);
+  free(oid_arr);
+  free(oid_arr_broken_check);
   if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
@@ -2430,7 +2428,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   }
 
  done:
-  SAFE_FREE(oid_arr);
+  free(oid_arr);
   if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
@@ -2573,7 +2571,7 @@ netsnmp_set(PyObject *self, PyObject *args)
   }
  done:
   Py_XDECREF(varbind);
-  SAFE_FREE(oid_arr);
+  free(oid_arr);
   return (ret ? ret : Py_BuildValue(""));
 }
 
