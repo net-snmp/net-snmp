@@ -55,7 +55,7 @@ static int __translate_asn_type (int);
 static int __snprint_value (char **, size_t *,
                             netsnmp_variable_list*, struct tree *,
                             int, int);
-static int __sprint_num_objid (char *, oid *, int);
+static int __sprint_num_objid (char **, size_t *, oid *, int);
 static int __scan_num_objid (char *, oid *, size_t *);
 static int __get_type_str (int, char *);
 static int __get_label_iid (char *, char **, char **, int);
@@ -277,8 +277,7 @@ __snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
            break;
 
         case ASN_OBJECT_ID:
-          enlarge_buffer(buf, buf_len, var->val_len * 16);
-          __sprint_num_objid(*buf, (oid *)(var->val.objid),
+          __sprint_num_objid(buf, buf_len, (oid *)(var->val.objid),
                              var->val_len/sizeof(oid));
           len = STRLEN(*buf);
           break;
@@ -337,14 +336,18 @@ __snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
 }
 
 static int
-__sprint_num_objid(char *buf, oid *objid, int len)
+__sprint_num_objid(char **buf, size_t *buf_len, oid *objid, int len)
 {
+   char *p, *end;
    int i;
-   buf[0] = '\0';
-   for (i=0; i < len; i++) {
-	sprintf(buf,".%lu",*objid++);
-	buf += STRLEN(buf);
-   }
+
+   enlarge_buffer(buf, buf_len, len * 16);
+   p = *buf;
+   end = *buf + *buf_len;
+   (*buf)[0] = '\0';
+   for (i = 0; i < len; i++)
+       p += snprintf(p, end - p, ".%lu", *objid++);
+
    return SUCCESS;
 }
 
