@@ -50,7 +50,7 @@ typedef netsnmp_session SnmpSession;
 typedef struct tree SnmpMibNode;
 static int __is_numeric_oid (char*);
 static int __is_leaf (struct tree*);
-static int __translate_appl_type (char*);
+static int __translate_appl_type (const char *);
 static int __translate_asn_type (int);
 static int __snprint_value (char **, size_t *,
                             netsnmp_variable_list*, struct tree *,
@@ -110,7 +110,7 @@ __is_leaf(struct tree* tp)
 }
 
 static int
-__translate_appl_type(char* typestr)
+__translate_appl_type(const char *typestr)
 {
 	if (typestr == NULL || *typestr == '\0') return TYPE_UNKNOWN;
 
