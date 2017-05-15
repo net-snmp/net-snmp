@@ -69,19 +69,8 @@ static int __add_var_val_str (netsnmp_pdu *, oid *, int, char *,
 #define FAIL_ON_NULL_IID 0x01
 #define NO_FLAGS 0x00
 
+static int _debug_level;
 
-/* Wrapper around fprintf(stderr, ...) for clean and easy debug output. */
-static int _debug_level = 0;
-#ifdef	DEBUGGING
-#define	DBPRT(severity, otherargs)					\
-	do {								\
-	    if (_debug_level && severity <= _debug_level) {		\
-	      (void)printf(otherargs);					\
-	    }								\
-	} while (/*CONSTCOND*/0)
-#else	/* DEBUGGING */
-#define	DBPRT(severity, otherargs)	/* Ignore */
-#endif	/* DEBUGGING */
 
 #define SAFE_FREE(x) do {if (x != NULL) free(x);} while(/*CONSTCOND*/0)
 
