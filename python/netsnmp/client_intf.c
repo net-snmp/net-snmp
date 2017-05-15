@@ -109,92 +109,71 @@ __is_leaf(struct tree* tp)
 		  (tp->parent && __get_type_str(tp->parent->type,buf) )));
 }
 
+struct type_table_entry {
+    uint8_t	mib_type;
+    uint8_t	asn_type;
+    int8_t	cmp_len;
+    const char *name;
+};
+
+static const struct type_table_entry type_table[] = {
+    { TYPE_INTEGER32,	0,		8,	"INTEGER32"	},
+    { TYPE_INTEGER,	ASN_INTEGER,	3,	"INTEGER"	},
+    { TYPE_UNSIGNED32,	0,		3,	"UNSIGNED32"	},
+    /* -1 to use strcasecmp() to avoid matching COUNTER64 */
+    { TYPE_COUNTER,	ASN_COUNTER,	-1,	"COUNTER"	},
+    { TYPE_GAUGE,	ASN_GAUGE,	3,	"GAUGE"		},
+    { TYPE_IPADDR,	ASN_IPADDRESS,	3,	"IPADDR"	},
+    { TYPE_OCTETSTR,	ASN_OCTET_STR,	3,	"OCTETSTR"	},
+    { TYPE_TIMETICKS,	ASN_TIMETICKS,	3,	"TICKS"		},
+    { TYPE_OPAQUE,	ASN_OPAQUE,	3,	"OPAQUE"	},
+    { TYPE_OBJID,	ASN_OBJECT_ID,	3,	"OBJECTID"	},
+    { TYPE_NETADDR,	0,		3,	"NETADDR"	},
+    { TYPE_COUNTER64,	ASN_COUNTER64,	3,	"COUNTER64"	},
+    { TYPE_NULL,	ASN_NULL,	3,	"NULL"		},
+    { TYPE_BITSTRING,	ASN_BIT_STR,	3,	"BITS"		},
+    /* historic - should not show up but it does? */
+    { TYPE_UINTEGER,	ASN_UINTEGER,	3,	"UINTEGER"	},
+    { TYPE_NOTIFTYPE,	0,		3,	"NOTIF"		},
+    { TYPE_TRAPTYPE,	0,		4,	"TRAP"		},
+
+    { SNMP_ENDOFMIBVIEW,   SNMP_ENDOFMIBVIEW,	3,	"ENDOFMIBVIEW"	},
+    { SNMP_NOSUCHOBJECT,   SNMP_NOSUCHOBJECT,	7,	"NOSUCHOBJECT"	},
+    { SNMP_NOSUCHINSTANCE, SNMP_NOSUCHINSTANCE,	7,	"NOSUCHINSTANCE"},
+
+    { }
+};
+
 static int
 __translate_appl_type(const char *typestr)
 {
-	if (typestr == NULL || *typestr == '\0') return TYPE_UNKNOWN;
+    const struct type_table_entry *e;
 
-	if (!strncasecmp(typestr,"INTEGER32",8))
-            return(TYPE_INTEGER32);
-	if (!strncasecmp(typestr,"INTEGER",3))
-            return(TYPE_INTEGER);
-	if (!strncasecmp(typestr,"UNSIGNED32",3))
-            return(TYPE_UNSIGNED32);
-	if (!strcasecmp(typestr,"COUNTER")) /* check all in case counter64 */
-            return(TYPE_COUNTER);
-	if (!strncasecmp(typestr,"GAUGE",3))
-            return(TYPE_GAUGE);
-	if (!strncasecmp(typestr,"IPADDR",3))
-            return(TYPE_IPADDR);
-	if (!strncasecmp(typestr,"OCTETSTR",3))
-            return(TYPE_OCTETSTR);
-	if (!strncasecmp(typestr,"TICKS",3))
-            return(TYPE_TIMETICKS);
-	if (!strncasecmp(typestr,"OPAQUE",3))
-            return(TYPE_OPAQUE);
-	if (!strncasecmp(typestr,"OBJECTID",3))
-            return(TYPE_OBJID);
-	if (!strncasecmp(typestr,"NETADDR",3))
-	    return(TYPE_NETADDR);
-	if (!strncasecmp(typestr,"COUNTER64",3))
-	    return(TYPE_COUNTER64);
-	if (!strncasecmp(typestr,"NULL",3))
-	    return(TYPE_NULL);
-	if (!strncasecmp(typestr,"BITS",3))
-	    return(TYPE_BITSTRING);
-	if (!strncasecmp(typestr,"ENDOFMIBVIEW",3))
-	    return(SNMP_ENDOFMIBVIEW);
-	if (!strncasecmp(typestr,"NOSUCHOBJECT",7))
-	    return(SNMP_NOSUCHOBJECT);
-	if (!strncasecmp(typestr,"NOSUCHINSTANCE",7))
-	    return(SNMP_NOSUCHINSTANCE);
-	if (!strncasecmp(typestr,"UINTEGER",3))
-	    return(TYPE_UINTEGER); /* historic - should not show up */
-                                   /* but it does?                  */
-	if (!strncasecmp(typestr, "NOTIF", 3))
-		return(TYPE_NOTIFTYPE);
-	if (!strncasecmp(typestr, "TRAP", 4))
-		return(TYPE_TRAPTYPE);
-        return(TYPE_UNKNOWN);
+    if (typestr == NULL || *typestr == '\0')
+        return TYPE_UNKNOWN;
+
+    for (e = type_table; e->name; e++) {
+        if ((e->cmp_len < 0 && strcasecmp(typestr, e->name) == 0) ||
+            (e->cmp_len > 0 && strncasecmp(typestr, e->name, e->cmp_len) == 0))
+            return e->mib_type;
+    }
+
+    return TYPE_UNKNOWN;
 }
 
 static int
-__translate_asn_type(int type)
+__translate_asn_type(int asn_type)
 {
-   switch (type) {
-        case ASN_INTEGER:
-            return(TYPE_INTEGER);
-	case ASN_OCTET_STR:
-            return(TYPE_OCTETSTR);
-	case ASN_OPAQUE:
-            return(TYPE_OPAQUE);
-	case ASN_OBJECT_ID:
-            return(TYPE_OBJID);
-	case ASN_TIMETICKS:
-            return(TYPE_TIMETICKS);
-	case ASN_GAUGE:
-            return(TYPE_GAUGE);
-	case ASN_COUNTER:
-            return(TYPE_COUNTER);
-	case ASN_IPADDRESS:
-            return(TYPE_IPADDR);
-	case ASN_BIT_STR:
-            return(TYPE_BITSTRING);
-	case ASN_NULL:
-            return(TYPE_NULL);
-	/* no translation for these exception type values */
-	case SNMP_ENDOFMIBVIEW:
-	case SNMP_NOSUCHOBJECT:
-	case SNMP_NOSUCHINSTANCE:
-	    return(type);
-	case ASN_UINTEGER:
-            return(TYPE_UINTEGER);
-	case ASN_COUNTER64:
-            return(TYPE_COUNTER64);
-	default:
-            fprintf(stderr, "translate_asn_type: unhandled asn type (%d)\n",type);
-            return(TYPE_OTHER);
-        }
+    const struct type_table_entry *e;
+
+    netsnmp_assert(asn_type != 0);
+
+    for (e = type_table; e->name; e++)
+        if (asn_type == e->asn_type)
+            return e->mib_type;
+
+    fprintf(stderr, "translate_asn_type: unhandled asn type (%d)\n", asn_type);
+    return TYPE_OTHER;
 }
 
 static void *enlarge_buffer(char **buf, size_t *buf_len, size_t desired_len)
@@ -379,77 +358,20 @@ __scan_num_objid(char *buf, oid *objid, size_t *len)
 static int
 __get_type_str(int type, char * str)
 {
-   switch (type) {
-	case TYPE_OBJID:
-       		strcpy(str, "OBJECTID");
-	        break;
-	case TYPE_OCTETSTR:
-       		strcpy(str, "OCTETSTR");
-	        break;
-	case TYPE_INTEGER:
-       		strcpy(str, "INTEGER");
-	        break;
-	case TYPE_INTEGER32:
-       		strcpy(str, "INTEGER32");
-	        break;
-	case TYPE_UNSIGNED32:
-       		strcpy(str, "UNSIGNED32");
-	        break;
-	case TYPE_NETADDR:
-       		strcpy(str, "NETADDR");
-	        break;
-	case TYPE_IPADDR:
-       		strcpy(str, "IPADDR");
-	        break;
-	case TYPE_COUNTER:
-       		strcpy(str, "COUNTER");
-	        break;
-	case TYPE_GAUGE:
-       		strcpy(str, "GAUGE");
-	        break;
-	case TYPE_TIMETICKS:
-       		strcpy(str, "TICKS");
-	        break;
-	case TYPE_OPAQUE:
-       		strcpy(str, "OPAQUE");
-	        break;
-	case TYPE_COUNTER64:
-       		strcpy(str, "COUNTER64");
-	        break;
-	case TYPE_NULL:
-                strcpy(str, "NULL");
-                break;
-	case SNMP_ENDOFMIBVIEW:
-                strcpy(str, "ENDOFMIBVIEW");
-                break;
-	case SNMP_NOSUCHOBJECT:
-                strcpy(str, "NOSUCHOBJECT");
-                break;
-	case SNMP_NOSUCHINSTANCE:
-                strcpy(str, "NOSUCHINSTANCE");
-                break;
-	case TYPE_UINTEGER:
-                strcpy(str, "UINTEGER"); /* historic - should not show up */
-                                          /* but it does?                  */
-                break;
-	case TYPE_NOTIFTYPE:
-		strcpy(str, "NOTIF");
-		break;
-	case TYPE_BITSTRING:
-		strcpy(str, "BITS");
-		break;
-	case TYPE_TRAPTYPE:
-		strcpy(str, "TRAP");
-		break;
-	case TYPE_OTHER: /* not sure if this is a valid leaf type?? */
-	case TYPE_NSAPADDRESS:
-        default: /* unsupported types for now */
-           strcpy(str, "");
-	   if (_debug_level) printf("__get_type_str:FAILURE(%d)\n", type);
+    const struct type_table_entry *e;
 
-           return(FAILURE);
-   }
-   return SUCCESS;
+    for (e = type_table; e->name; e++) {
+        if (type == e->mib_type) {
+            strcpy(str, e->name);
+            return SUCCESS;
+        }
+    }
+
+    strcpy(str, "");
+    if (_debug_level)
+        printf("__get_type_str:FAILURE(%d)\n", type);
+
+    return FAILURE;
 }
 
 /* does a destructive disection of <label1>...<labeln>.<iid> returning
