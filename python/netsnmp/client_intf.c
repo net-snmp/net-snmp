@@ -45,12 +45,12 @@ typedef netsnmp_session SnmpSession;
 typedef struct tree SnmpMibNode;
 static int __is_numeric_oid (char*);
 static int __is_leaf (struct tree*);
-static int __translate_appl_type (char*);
+static int __translate_appl_type (const char *);
 static int __translate_asn_type (int);
 static int __snprint_value (char **, size_t *,
                             netsnmp_variable_list*, struct tree *,
                             int, int);
-static int __sprint_num_objid (char *, oid *, int);
+static int __sprint_num_objid (char **, size_t *, oid *, int);
 static int __scan_num_objid (char *, oid *, size_t *);
 static int __get_type_str (int, char *);
 static int __get_label_iid (char *, char **, char **, int);
@@ -64,21 +64,8 @@ static int __add_var_val_str (netsnmp_pdu *, oid *, int, char *,
 #define FAIL_ON_NULL_IID 0x01
 #define NO_FLAGS 0x00
 
+static int _debug_level;
 
-/* Wrapper around fprintf(stderr, ...) for clean and easy debug output. */
-static int _debug_level = 0;
-#ifdef	DEBUGGING
-#define	DBPRT(severity, otherargs)					\
-	do {								\
-	    if (_debug_level && severity <= _debug_level) {		\
-	      (void)printf(otherargs);					\
-	    }								\
-	} while (/*CONSTCOND*/0)
-#else	/* DEBUGGING */
-#define	DBPRT(severity, otherargs)	/* Ignore */
-#endif	/* DEBUGGING */
-
-#define SAFE_FREE(x) do {if (x != NULL) free(x);} while(/*CONSTCOND*/0)
 
 void
 __libraries_init(char *appname)
@@ -100,8 +87,7 @@ __libraries_init(char *appname)
 }
 
 static int
-__is_numeric_oid (oidstr)
-char* oidstr;
+__is_numeric_oid(char* oidstr)
 {
   if (!oidstr) return 0;
   for (; *oidstr; oidstr++) {
@@ -111,102 +97,78 @@ char* oidstr;
 }
 
 static int
-__is_leaf (tp)
-struct tree* tp;
+__is_leaf(struct tree* tp)
 {
    char buf[MAX_TYPE_NAME_LEN];
    return (tp && (__get_type_str(tp->type,buf) ||
 		  (tp->parent && __get_type_str(tp->parent->type,buf) )));
 }
 
-static int
-__translate_appl_type(typestr)
-char* typestr;
-{
-	if (typestr == NULL || *typestr == '\0') return TYPE_UNKNOWN;
+struct type_table_entry {
+    uint8_t	mib_type;
+    uint8_t	asn_type;
+    int8_t	cmp_len;
+    const char *name;
+};
 
-	if (!strncasecmp(typestr,"INTEGER32",8))
-            return(TYPE_INTEGER32);
-	if (!strncasecmp(typestr,"INTEGER",3))
-            return(TYPE_INTEGER);
-	if (!strncasecmp(typestr,"UNSIGNED32",3))
-            return(TYPE_UNSIGNED32);
-	if (!strcasecmp(typestr,"COUNTER")) /* check all in case counter64 */
-            return(TYPE_COUNTER);
-	if (!strncasecmp(typestr,"GAUGE",3))
-            return(TYPE_GAUGE);
-	if (!strncasecmp(typestr,"IPADDR",3))
-            return(TYPE_IPADDR);
-	if (!strncasecmp(typestr,"OCTETSTR",3))
-            return(TYPE_OCTETSTR);
-	if (!strncasecmp(typestr,"TICKS",3))
-            return(TYPE_TIMETICKS);
-	if (!strncasecmp(typestr,"OPAQUE",3))
-            return(TYPE_OPAQUE);
-	if (!strncasecmp(typestr,"OBJECTID",3))
-            return(TYPE_OBJID);
-	if (!strncasecmp(typestr,"NETADDR",3))
-	    return(TYPE_NETADDR);
-	if (!strncasecmp(typestr,"COUNTER64",3))
-	    return(TYPE_COUNTER64);
-	if (!strncasecmp(typestr,"NULL",3))
-	    return(TYPE_NULL);
-	if (!strncasecmp(typestr,"BITS",3))
-	    return(TYPE_BITSTRING);
-	if (!strncasecmp(typestr,"ENDOFMIBVIEW",3))
-	    return(SNMP_ENDOFMIBVIEW);
-	if (!strncasecmp(typestr,"NOSUCHOBJECT",7))
-	    return(SNMP_NOSUCHOBJECT);
-	if (!strncasecmp(typestr,"NOSUCHINSTANCE",7))
-	    return(SNMP_NOSUCHINSTANCE);
-	if (!strncasecmp(typestr,"UINTEGER",3))
-	    return(TYPE_UINTEGER); /* historic - should not show up */
-                                   /* but it does?                  */
-	if (!strncasecmp(typestr, "NOTIF", 3))
-		return(TYPE_NOTIFTYPE);
-	if (!strncasecmp(typestr, "TRAP", 4))
-		return(TYPE_TRAPTYPE);
-        return(TYPE_UNKNOWN);
+static const struct type_table_entry type_table[] = {
+    { TYPE_INTEGER32,	0,		8,	"INTEGER32"	},
+    { TYPE_INTEGER,	ASN_INTEGER,	3,	"INTEGER"	},
+    { TYPE_UNSIGNED32,	0,		3,	"UNSIGNED32"	},
+    /* -1 to use strcasecmp() to avoid matching COUNTER64 */
+    { TYPE_COUNTER,	ASN_COUNTER,	-1,	"COUNTER"	},
+    { TYPE_GAUGE,	ASN_GAUGE,	3,	"GAUGE"		},
+    { TYPE_IPADDR,	ASN_IPADDRESS,	3,	"IPADDR"	},
+    { TYPE_OCTETSTR,	ASN_OCTET_STR,	3,	"OCTETSTR"	},
+    { TYPE_TIMETICKS,	ASN_TIMETICKS,	3,	"TICKS"		},
+    { TYPE_OPAQUE,	ASN_OPAQUE,	3,	"OPAQUE"	},
+    { TYPE_OBJID,	ASN_OBJECT_ID,	3,	"OBJECTID"	},
+    { TYPE_NETADDR,	0,		3,	"NETADDR"	},
+    { TYPE_COUNTER64,	ASN_COUNTER64,	3,	"COUNTER64"	},
+    { TYPE_NULL,	ASN_NULL,	3,	"NULL"		},
+    { TYPE_BITSTRING,	ASN_BIT_STR,	3,	"BITS"		},
+    /* historic - should not show up but it does? */
+    { TYPE_UINTEGER,	ASN_UINTEGER,	3,	"UINTEGER"	},
+    { TYPE_NOTIFTYPE,	0,		3,	"NOTIF"		},
+    { TYPE_TRAPTYPE,	0,		4,	"TRAP"		},
+
+    { SNMP_ENDOFMIBVIEW,   SNMP_ENDOFMIBVIEW,	3,	"ENDOFMIBVIEW"	},
+    { SNMP_NOSUCHOBJECT,   SNMP_NOSUCHOBJECT,	7,	"NOSUCHOBJECT"	},
+    { SNMP_NOSUCHINSTANCE, SNMP_NOSUCHINSTANCE,	7,	"NOSUCHINSTANCE"},
+
+    { }
+};
+
+static int
+__translate_appl_type(const char *typestr)
+{
+    const struct type_table_entry *e;
+
+    if (typestr == NULL || *typestr == '\0')
+        return TYPE_UNKNOWN;
+
+    for (e = type_table; e->name; e++) {
+        if ((e->cmp_len < 0 && strcasecmp(typestr, e->name) == 0) ||
+            (e->cmp_len > 0 && strncasecmp(typestr, e->name, e->cmp_len) == 0))
+            return e->mib_type;
+    }
+
+    return TYPE_UNKNOWN;
 }
 
 static int
-__translate_asn_type(type)
-int type;
+__translate_asn_type(int asn_type)
 {
-   switch (type) {
-        case ASN_INTEGER:
-            return(TYPE_INTEGER);
-	case ASN_OCTET_STR:
-            return(TYPE_OCTETSTR);
-	case ASN_OPAQUE:
-            return(TYPE_OPAQUE);
-	case ASN_OBJECT_ID:
-            return(TYPE_OBJID);
-	case ASN_TIMETICKS:
-            return(TYPE_TIMETICKS);
-	case ASN_GAUGE:
-            return(TYPE_GAUGE);
-	case ASN_COUNTER:
-            return(TYPE_COUNTER);
-	case ASN_IPADDRESS:
-            return(TYPE_IPADDR);
-	case ASN_BIT_STR:
-            return(TYPE_BITSTRING);
-	case ASN_NULL:
-            return(TYPE_NULL);
-	/* no translation for these exception type values */
-	case SNMP_ENDOFMIBVIEW:
-	case SNMP_NOSUCHOBJECT:
-	case SNMP_NOSUCHINSTANCE:
-	    return(type);
-	case ASN_UINTEGER:
-            return(TYPE_UINTEGER);
-	case ASN_COUNTER64:
-            return(TYPE_COUNTER64);
-	default:
-            fprintf(stderr, "translate_asn_type: unhandled asn type (%d)\n",type);
-            return(TYPE_OTHER);
-        }
+    const struct type_table_entry *e;
+
+    netsnmp_assert(asn_type != 0);
+
+    for (e = type_table; e->name; e++)
+        if (asn_type == e->asn_type)
+            return e->mib_type;
+
+    fprintf(stderr, "translate_asn_type: unhandled asn type (%d)\n", asn_type);
+    return TYPE_OTHER;
 }
 
 static void *enlarge_buffer(char **buf, size_t *buf_len, size_t desired_len)
@@ -289,8 +251,7 @@ __snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
            break;
 
         case ASN_OBJECT_ID:
-          enlarge_buffer(buf, buf_len, var->val_len * 16);
-          __sprint_num_objid(*buf, (oid *)(var->val.objid),
+          __sprint_num_objid(buf, buf_len, (oid *)(var->val.objid),
                              var->val_len/sizeof(oid));
           len = STRLEN(*buf);
           break;
@@ -349,25 +310,23 @@ __snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
 }
 
 static int
-__sprint_num_objid (buf, objid, len)
-char *buf;
-oid *objid;
-int len;
+__sprint_num_objid(char **buf, size_t *buf_len, oid *objid, int len)
 {
+   char *p, *end;
    int i;
-   buf[0] = '\0';
-   for (i=0; i < len; i++) {
-	sprintf(buf,".%lu",*objid++);
-	buf += STRLEN(buf);
-   }
+
+   enlarge_buffer(buf, buf_len, len * 16);
+   p = *buf;
+   end = *buf + *buf_len;
+   (*buf)[0] = '\0';
+   for (i = 0; i < len; i++)
+       p += snprintf(p, end - p, ".%lu", *objid++);
+
    return SUCCESS;
 }
 
 static int
-__scan_num_objid (buf, objid, len)
-char *buf;
-oid *objid;
-size_t *len;
+__scan_num_objid(char *buf, oid *objid, size_t *len)
 {
    char *cp;
    *len = 0;
@@ -392,92 +351,29 @@ size_t *len;
 }
 
 static int
-__get_type_str (type, str)
-int type;
-char * str;
+__get_type_str(int type, char * str)
 {
-   switch (type) {
-	case TYPE_OBJID:
-       		strcpy(str, "OBJECTID");
-	        break;
-	case TYPE_OCTETSTR:
-       		strcpy(str, "OCTETSTR");
-	        break;
-	case TYPE_INTEGER:
-       		strcpy(str, "INTEGER");
-	        break;
-	case TYPE_INTEGER32:
-       		strcpy(str, "INTEGER32");
-	        break;
-	case TYPE_UNSIGNED32:
-       		strcpy(str, "UNSIGNED32");
-	        break;
-	case TYPE_NETADDR:
-       		strcpy(str, "NETADDR");
-	        break;
-	case TYPE_IPADDR:
-       		strcpy(str, "IPADDR");
-	        break;
-	case TYPE_COUNTER:
-       		strcpy(str, "COUNTER");
-	        break;
-	case TYPE_GAUGE:
-       		strcpy(str, "GAUGE");
-	        break;
-	case TYPE_TIMETICKS:
-       		strcpy(str, "TICKS");
-	        break;
-	case TYPE_OPAQUE:
-       		strcpy(str, "OPAQUE");
-	        break;
-	case TYPE_COUNTER64:
-       		strcpy(str, "COUNTER64");
-	        break;
-	case TYPE_NULL:
-                strcpy(str, "NULL");
-                break;
-	case SNMP_ENDOFMIBVIEW:
-                strcpy(str, "ENDOFMIBVIEW");
-                break;
-	case SNMP_NOSUCHOBJECT:
-                strcpy(str, "NOSUCHOBJECT");
-                break;
-	case SNMP_NOSUCHINSTANCE:
-                strcpy(str, "NOSUCHINSTANCE");
-                break;
-	case TYPE_UINTEGER:
-                strcpy(str, "UINTEGER"); /* historic - should not show up */
-                                          /* but it does?                  */
-                break;
-	case TYPE_NOTIFTYPE:
-		strcpy(str, "NOTIF");
-		break;
-	case TYPE_BITSTRING:
-		strcpy(str, "BITS");
-		break;
-	case TYPE_TRAPTYPE:
-		strcpy(str, "TRAP");
-		break;
-	case TYPE_OTHER: /* not sure if this is a valid leaf type?? */
-	case TYPE_NSAPADDRESS:
-        default: /* unsupported types for now */
-           strcpy(str, "");
-	   if (_debug_level) printf("__get_type_str:FAILURE(%d)\n", type);
+    const struct type_table_entry *e;
 
-           return(FAILURE);
-   }
-   return SUCCESS;
+    for (e = type_table; e->name; e++) {
+        if (type == e->mib_type) {
+            strcpy(str, e->name);
+            return SUCCESS;
+        }
+    }
+
+    strcpy(str, "");
+    if (_debug_level)
+        printf("__get_type_str:FAILURE(%d)\n", type);
+
+    return FAILURE;
 }
 
 /* does a destructive disection of <label1>...<labeln>.<iid> returning
    <labeln> and <iid> in seperate strings (note: will destructively
    alter input string, 'name') */
 static int
-__get_label_iid (name, last_label, iid, flag)
-char * name;
-char ** last_label;
-char ** iid;
-int flag;
+__get_label_iid(char *name, char **last_label, char **iid, int flag)
 {
    char *lcp;
    char *icp;
@@ -581,13 +477,8 @@ int flag;
 /* Convert a tag (string) to an OID array              */
 /* Tag can be either a symbolic name, or an OID string */
 static struct tree *
-__tag2oid(tag, iid, oid_arr, oid_arr_len, type, best_guess)
-char * tag;
-char * iid;
-oid  * oid_arr;
-int  * oid_arr_len;
-int  * type;
-int    best_guess;
+__tag2oid(char *tag, char *iid, oid  *oid_arr, int  *oid_arr_len, int *type,
+          int best_guess)
 {
    struct tree *tp = NULL;
    struct tree *rtp = NULL;
@@ -696,10 +587,7 @@ int    best_guess;
  * returns : SUCCESS, FAILURE
  */
 static int
-__concat_oid_str(doid_arr, doid_arr_len, soid_str)
-oid *doid_arr;
-int *doid_arr_len;
-char * soid_str;
+__concat_oid_str(oid *doid_arr, int *doid_arr_len, char *soid_str)
 {
    char *soid_buf;
    char *cp;
@@ -724,13 +612,8 @@ char * soid_str;
  * add a varbind to PDU
  */
 static int
-__add_var_val_str(pdu, name, name_length, val, len, type)
-    netsnmp_pdu *pdu;
-    oid *name;
-    int name_length;
-    char * val;
-    int len;
-    int type;
+__add_var_val_str(netsnmp_pdu *pdu, oid *name, int name_length, char *val,
+                  int len, int type)
 {
     netsnmp_variable_list *vars;
     oid oidbuf[MAX_OID_LEN];
@@ -1611,7 +1494,7 @@ netsnmp_get(PyObject *self, PyObject *args)
   }
 
  done:
-  SAFE_FREE(oid_arr);
+  free(oid_arr);
   if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
@@ -1834,7 +1717,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   }
 
  done:
-  SAFE_FREE(oid_arr);
+  free(oid_arr);
   if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
@@ -2187,14 +2070,14 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
  done:
   Py_XDECREF(varbinds);
-  SAFE_FREE(oid_arr_len);
-  SAFE_FREE(oid_arr_broken_check_len);
+  free(oid_arr_len);
+  free(oid_arr_broken_check_len);
   for(varlist_ind = 0; varlist_ind < varlist_len; varlist_ind ++) {
-      SAFE_FREE(oid_arr[varlist_ind]);
-      SAFE_FREE(oid_arr_broken_check[varlist_ind]);
+      free(oid_arr[varlist_ind]);
+      free(oid_arr_broken_check[varlist_ind]);
   }
-  SAFE_FREE(oid_arr);
-  SAFE_FREE(oid_arr_broken_check);
+  free(oid_arr);
+  free(oid_arr_broken_check);
   if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
@@ -2442,7 +2325,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   }
 
  done:
-  SAFE_FREE(oid_arr);
+  free(oid_arr);
   if (str_buf != NULL) netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
@@ -2585,7 +2468,7 @@ netsnmp_set(PyObject *self, PyObject *args)
   }
  done:
   Py_XDECREF(varbind);
-  SAFE_FREE(oid_arr);
+  free(oid_arr);
   return (ret ? ret : Py_BuildValue(""));
 }
 
