@@ -46,11 +46,9 @@ if test "x$with_rpm" != "xno"; then
   ],, $LMIBLIBS, _rpmlibs)
 
   # rpm 4.6 has incompatible API, turn on the legacy one
-  AC_CHECK_DECL([headerGetEntry],
-    : ,
-    AC_DEFINE([_RPM_4_4_COMPAT], [], [Define if you have RPM 4.6 or newer to turn on legacy API]),
-    [[#include <rpm/rpmlib.h>]]
-  )
+  NETSNMP_SEARCH_LIBS(headerGet,, [
+    AC_DEFINE(HAVE_HEADERGET, 1,
+      [Define to 1 if you have the headerGet function.])],, $LMIBLIBS)
 fi
 
 #
