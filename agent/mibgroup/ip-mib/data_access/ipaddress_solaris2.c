@@ -225,13 +225,13 @@ _load_v6(netsnmp_container *container, int idx_offset)
     while ((rc = getMibstat(MIB_IP6_ADDR, &ip6ae, sizeof(ip6ae), req,
                             &Get_everything, NULL)) == 0) {
         req = GET_NEXT;
-        entry = netsnmp_access_ipaddress_entry_create();
-        if (entry == NULL)
-            return (-1);    
         if (memcmp((const void *)&ip6ae.ipv6AddrAddress,
                    (const void *)&in6addr_any,
                    sizeof (ip6ae.ipv6AddrAddress)) == 0)
             continue;
+        entry = netsnmp_access_ipaddress_entry_create();
+        if (entry == NULL)
+            return (-1);    
 
         ip6ae.ipv6AddrIfIndex.o_bytes[ip6ae.ipv6AddrIfIndex.o_length] = '\0';
         DEBUGMSGTL(("access:ipaddress:container", "found if %s\n",
