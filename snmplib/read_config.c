@@ -150,7 +150,6 @@ netsnmp_feature_child_of(read_config_all, libnetsnmp)
 
 netsnmp_feature_child_of(unregister_app_config_handler, read_config_all)
 netsnmp_feature_child_of(read_config_register_app_prenetsnmp_mib_handler, netsnmp_unused)
-netsnmp_feature_child_of(read_config_register_const_config_handler, netsnmp_unused)
 
 static int      config_errors;
 
@@ -314,7 +313,6 @@ register_config_handler(const char *type,
 					    help, NORMAL_CONFIG);
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_READ_CONFIG_REGISTER_CONST_CONFIG_HANDLER
 struct config_line *
 register_const_config_handler(const char *type,
                               const char *token,
@@ -326,7 +324,6 @@ register_const_config_handler(const char *type,
                                             parser, releaser,
 					    help, NORMAL_CONFIG);
 }
-#endif /* NETSNMP_FEATURE_REMOVE_READ_CONFIG_REGISTER_CONST_CONFIG_HANDLER */
 
 struct config_line *
 register_app_config_handler(const char *token,
