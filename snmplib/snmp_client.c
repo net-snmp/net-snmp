@@ -1046,11 +1046,13 @@ snmp_synch_response_cb(netsnmp_session * ss,
     ss->callback_magic = (void *) state;
     netsnmp_large_fd_set_init(&fdset, FD_SETSIZE);
 
-    if ((state->reqid = snmp_send(ss, pdu)) == 0) {
+    if (snmp_send(ss, pdu) == 0) {
         snmp_free_pdu(pdu);
         state->status = STAT_ERROR;
-    } else
+    } else {
+        state->reqid = pdu->reqid;
         state->waiting = 1;
+    }
 
     while (state->waiting) {
         numfds = 0;
@@ -1138,11 +1140,13 @@ snmp_sess_synch_response(void *sessp,
     ss->callback_magic = (void *) state;
     netsnmp_large_fd_set_init(&fdset, FD_SETSIZE);
 
-    if ((state->reqid = snmp_sess_send(sessp, pdu)) == 0) {
+    if (snmp_sess_send(sessp, pdu) == 0) {
         snmp_free_pdu(pdu);
         state->status = STAT_ERROR;
-    } else
+    } else {
         state->waiting = 1;
+        state->reqid = pdu->reqid;
+    }
 
     while (state->waiting) {
         numfds = 0;
