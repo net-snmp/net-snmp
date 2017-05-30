@@ -3,4 +3,6 @@
 
 netsnmp_feature_require(snprint_value)
 netsnmp_feature_require(enable_stderrlog)
+netsnmp_feature_require(memory_malloc)
+netsnmp_feature_require(memory_free)
 
