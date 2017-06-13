@@ -267,6 +267,9 @@
 /* Define to 1 if you have the `hasmntopt' function. */
 #undef HAVE_HASMNTOPT
 
+/* Define to 1 if you have the headerGet function. */
+#undef HAVE_HEADERGET
+
 /* Define to 1 if you have the `if_freenameindex' function. */
 #undef HAVE_IF_FREENAMEINDEX
 
@@ -1628,9 +1631,6 @@
 
 /* Define to 1 if you need to in order for `stat' and other things to work. */
 #undef _POSIX_SOURCE
-
-/* Define if you have RPM 4.6 or newer to turn on legacy API */
-#undef _RPM_4_4_COMPAT
 
 /* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
    <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
