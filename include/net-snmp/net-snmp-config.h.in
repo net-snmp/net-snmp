@@ -106,6 +106,9 @@
 /* Define to 1 if you have the `closedir' function. */
 #undef HAVE_CLOSEDIR
 
+/* Define to 1 if you have the `closesocket' function. */
+#undef HAVE_CLOSESOCKET
+
 /* Define to 1 if the system has the type `Counter64'. */
 #undef HAVE_COUNTER64
 
