@@ -123,6 +123,7 @@ LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\netsnmp.lib" 
 LIB32_OBJS= \
 	"$(INTDIR)\asn1.obj" \
+	"$(INTDIR)\asprintf.obj" \
 	"$(INTDIR)\callback.obj" \
 	"$(INTDIR)\check_varbind.obj" \
 	"$(INTDIR)\cmu_compat.obj" \
@@ -378,6 +379,12 @@ LIB32_OBJS= \
 SOURCE=..\..\snmplib\asn1.c
 
 "$(INTDIR)\asn1.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\asprintf.c
+
+"$(INTDIR)\asprintf.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
