@@ -332,7 +332,7 @@ netsnmp_callback_close(netsnmp_transport *t)
     netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t->data;
     DEBUGMSGTL(("transport_callback", "hook_close enter\n"));
 
-#ifdef WIN32
+#ifdef HAVE_CLOSESOCKET
     rc  = closesocket(mystuff->pipefds[0]);
     rc |= closesocket(mystuff->pipefds[1]);
 #else

@@ -26163,6 +26163,25 @@ case x$target_os in
   xmingw*)
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+#include <winsock2.h>
+int
+main ()
+{
+ closesocket(0);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+   ac_cv_func_closesocket=yes
+      $as_echo  "#define HAVE_CLOSESOCKET 1" >>confdefs.h
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 #include <ws2tcpip.h>
 int
 main ()
@@ -26258,7 +26277,7 @@ rm -f core conftest.err conftest.$ac_objext \
     ;;
 
   *)
-    for ac_func in gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname gethostbyaddr
+    for ac_func in closesocket gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname gethostbyaddr
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
