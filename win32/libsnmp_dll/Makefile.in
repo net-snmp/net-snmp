@@ -14,6 +14,7 @@ ALL : "..\bin\$(OUTDIR)\netsnmp.dll"
 
 LINK32_OBJS= \
 	"$(INTDIR)\asn1.obj" \
+	"$(INTDIR)\asprintf.obj" \
 	"$(INTDIR)\callback.obj" \
 	"$(INTDIR)\check_varbind.obj" \
 	"$(INTDIR)\closedir.obj" \
@@ -151,6 +152,12 @@ LINK32=link.exe
 SOURCE=..\..\snmplib\asn1.c
 
 "$(INTDIR)\asn1.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\asprintf.c
+
+"$(INTDIR)\asprintf.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

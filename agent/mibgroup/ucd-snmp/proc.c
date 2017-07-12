@@ -881,7 +881,7 @@ sh_count_procs(char *procname)
     struct extensible ex;
     int             slow = strstr(PSCMD, "ax") != NULL;
 
-    strcpy(ex.command, PSCMD);
+    ex.command = strdup(PSCMD);
     if ((fd = get_exec_output(&ex)) >= 0) {
         if ((file = fdopen(fd, "r")) == NULL) {
             setPerrorstatus("fdopen");

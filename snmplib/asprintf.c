@@ -5,6 +5,7 @@
 
 #ifndef HAVE_ASPRINTF
 
+NETSNMP_IMPORT
 int vasprintf(char **strp, const char *fmt, va_list ap)
 {
     va_list ap_copy;
@@ -28,6 +29,7 @@ int vasprintf(char **strp, const char *fmt, va_list ap)
     return str ? vsnprintf(str, len, fmt, ap) : -1;
 }
 
+NETSNMP_IMPORT
 int asprintf(char **strp, const char *fmt, ...)
 {
     va_list arg;

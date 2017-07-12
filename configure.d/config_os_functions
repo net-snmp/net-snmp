@@ -50,6 +50,12 @@ AC_CHECK_FUNCS([asprintf                                         ] dnl
 # since these functions have the __cdecl calling convention on MinGW.
 case x$target_os in
   xmingw*)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <winsock2.h>],
+    [ closesocket(0); ])],
+    [ ac_cv_func_closesocket=yes
+      AS_ECHO "#define HAVE_CLOSESOCKET 1" >>confdefs.h
+    ], [ ])
+
     AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <ws2tcpip.h>],
     [ gai_strerror(0); ])],
     [ ac_cv_func_gai_strerror=yes
@@ -82,7 +88,7 @@ case x$target_os in
     ;;
 
   *)
-    AC_CHECK_FUNCS([gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname gethostbyaddr])
+    AC_CHECK_FUNCS([closesocket gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname gethostbyaddr])
     ;;
 esac
 
