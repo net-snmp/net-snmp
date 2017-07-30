@@ -28,6 +28,7 @@
 #include <my_sys.h>
 #include <mysql.h>
 #include <errmsg.h>
+#include <mysql_version.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -439,6 +440,7 @@ netsnmp_mysql_init(void)
         return -1;
     }
 
+#if MYSQL_VERSION_ID < 100000
 #ifdef HAVE_BROKEN_LIBMYSQLCLIENT
     my_init();
 #else
@@ -450,6 +452,7 @@ netsnmp_mysql_init(void)
     my_load_defaults ("my", _sql.groups, &not_argc, &not_argv, 0);
 #else
     load_defaults ("my", _sql.groups, &not_argc, &not_argv);
+#endif
 #endif
     for(i=0; i < not_argc; ++i) {
         if (NULL == not_argv[i])
@@ -547,6 +550,10 @@ netsnmp_mysql_init(void)
         netsnmp_sql_error("mysql_init() failed (out of memory?)");
         return -1;
     }
+
+#if MYSQL_VERSION_ID >= 100000
+    mysql_options(_sql.conn, MYSQL_READ_DEFAULT_GROUP, "snmptrapd");
+#endif
 
     /** try to connect; we'll try again later if we fail */
     (void) netsnmp_mysql_connect();
