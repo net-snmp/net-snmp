@@ -631,7 +631,11 @@ SnmpTrapdMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "aAc:CdD::efF:g:hHI:L:m:M:no:O:Ptu:vx:X-:";
+    static const char options[] = "aAc:CdD::efF:g:hHI:L:m:M:no:O:Ptu:vx:X-:"
+#if HAVE_GETPID
+        "p:"
+#endif
+        ;
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
@@ -700,13 +704,6 @@ main(int argc, char *argv[])
 
     register_config_handler("snmptrapd", "outputOption",
                             parse_config_outputOption, NULL, "string");
-
-    /*
-     * Add some options if they are available.  
-     */
-#if HAVE_GETPID
-    strcat(options, "p:");
-#endif
 
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
 #ifdef WIN32
