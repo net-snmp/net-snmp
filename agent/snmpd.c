@@ -415,7 +415,17 @@ int
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "aAc:CdD::fhHI:l:L:m:M:n:p:P:qrsS:UvV-:Y:";
+    static const char options[] = "aAc:CdD::fhHI:l:L:m:M:n:p:P:qrsS:UvV-:Y:"
+#if HAVE_UNISTD_H
+        "g:u:"
+#endif
+#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)
+        "x:"
+#endif
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+        "X"
+#endif
+        ;
     int             arg, i, ret, exit_code = 1;
     int             dont_fork = 0, do_help = 0;
     int             log_set = 0;
@@ -491,18 +501,6 @@ main(int argc, char *argv[])
 
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                        NETSNMP_DS_AGENT_CACHE_TIMEOUT, 5);
-    /*
-     * Add some options if they are available.  
-     */
-#if HAVE_UNISTD_H
-    strcat(options, "g:u:");
-#endif
-#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)
-    strcat(options, "x:");
-#endif
-#ifdef USING_AGENTX_SUBAGENT_MODULE
-    strcat(options, "X");
-#endif
 
     /*
      * This is incredibly ugly, but it's probably the simplest way
