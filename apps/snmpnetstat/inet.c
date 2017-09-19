@@ -211,10 +211,14 @@ udpprotopr(const char *name)
                                    ASN_NULL, NULL,  0);
     if (!var)
         return;
-    if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
+    if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR) {
+        snmp_free_varbind(var);
         return;
-    if ((var->type & 0xF0) == 0x80)	/* Exception */
-	return;
+    }
+    if ((var->type & 0xF0) == 0x80) {	/* Exception */
+        snmp_free_varbind(var);
+        return;
+    }
 
     printf("Active Internet (%s) Connections\n", name);
     printf("%-5.5s %-27.27s\n", "Proto", "Local Address");
@@ -367,7 +371,7 @@ _dump_stats( const char *name, oid *oid_buf, size_t buf_len,
  
     if (netsnmp_query_get( var, ss ) != SNMP_ERR_NOERROR) {
         /* Need to fix and re-try SNMPv1 errors */
-        snmp_free_var( var );
+        snmp_free_varbind( var );
         return;
     }
 

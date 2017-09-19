@@ -274,8 +274,6 @@ intpr(int interval)
         if ( snmp_oid_compare( ifcol_oid, ifcol_len,
                                var->name, ifcol_len) != 0 )
             break;    /* End of Table */
-        if ((var->type & 0xF0) == 0x80)     /* Exception */
-            return;
         cur_if = SNMP_MALLOC_TYPEDEF( struct _if_info );
         if (!cur_if)
             break;
@@ -421,6 +419,7 @@ intpr(int interval)
             }
         }
     }   /* while (1) */
+    snmp_free_varbind(var);
 
         /*
          * Now display the specified results (in Free-BSD format)
