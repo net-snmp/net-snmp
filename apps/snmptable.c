@@ -332,11 +332,18 @@ main(int argc, char *argv[])
             print_table();
 
         if (data) {
+            int i, j;
+            for (i = 0; i < entries; i++)
+                for (j = 0; j < fields; j++)
+                free(data[i*fields+j]);
             free (data);
             data = NULL;
         }
 
         if (indices) {
+            int i;
+            for (i = 0; i < entries; i++)
+                free(indices[i]);
             free (indices);
             indices = NULL;
         }
@@ -454,6 +461,8 @@ print_table(void)
     }
 
     first_pass = 0;
+    if (index_fmt)
+        free(index_fmt);
 }
 
 void
@@ -761,6 +770,8 @@ get_table_entries(netsnmp_session * ss)
                         column[col].width = i;
                     }
                 }
+                if (buf)
+                    free(buf);
 
                 if (end_of_table) {
                     --entries;
@@ -771,6 +782,7 @@ get_table_entries(netsnmp_session * ss)
                         printf("End of table: %s\n",
                                buf ? (char *) buf : "[NIL]");
                     }
+                    snmp_free_pdu(response);
                     running = 0;
                     continue;
                 }
@@ -972,6 +984,8 @@ getbulk_table_entries(netsnmp_session * ss)
                     memcpy(name, last_var->name,
                            name_length * sizeof(oid));
                 }
+                if (buf)
+                    free(buf);
             } else {
                 /*
                  * error in response, print it 

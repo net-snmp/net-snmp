@@ -230,10 +230,14 @@ tcpxprotopr(const char *name)
     snmp_varlist_add_variable( &var, tcpConnectionState_oid,
                                      tcpConnectionState_len,
                                      ASN_NULL, NULL,  0);
-    if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
+    if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR) {
+        snmp_free_varbind(var);
         return;
-    if ((var->type & 0xF0) == 0x80)	/* Exception */
+    }
+    if ((var->type & 0xF0) == 0x80) {	/* Exception */
+        snmp_free_varbind(var);
         return;
+    }
 
     for (vp = var; vp ; vp=vp->next_variable) {
 	char lname[5];
@@ -375,10 +379,14 @@ udpxprotopr(const char *name)
     snmp_varlist_add_variable( &var, udpEndpointProcess_oid,
                                      udpEndpointProcess_len,
                                      ASN_NULL, NULL,  0);
-    if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
+    if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR) {
+	snmp_free_varbind(var);
         return;
-    if ((var->type & 0xF0) == 0x80)	/* Exception */
+    }
+    if ((var->type & 0xF0) == 0x80) {	/* Exception */
+	snmp_free_varbind(var);
         return;
+    }
 
     printf("Active Internet (%s) Connections\n", "udp");
     printf("%-5.5s %-27.27s %-27.27s %5s\n", "Proto", "Local Address", "Remote Address", "PID");

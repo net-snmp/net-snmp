@@ -273,6 +273,7 @@ route4pr(int af)
         p_rtnode( rp );
         printed++;
     }
+    snmp_free_varbind(var);
     return printed;
 }
 
@@ -317,6 +318,7 @@ get_ifname(char *name, int ifIndex)
         memmove(ip->name, var->val.string, var->val_len);
         ip->name[var->val_len] = '\0';
 	strcpy(name, ip->name);
+	snmp_free_varbind(var);
 	return;
     }
 
@@ -328,6 +330,7 @@ get_ifname(char *name, int ifIndex)
             var->val_len  = sizeof(ip->name) - 1;
         memmove(ip->name, var->val.string, var->val_len);
         ip->name[var->val_len] = '\0';
+	snmp_free_varbind(var);
     } else {
         sprintf(ip->name, "if%d", ifIndex);
     }

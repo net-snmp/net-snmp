@@ -239,6 +239,7 @@ routexpr(int af)
         p_rtnodex( rp );
         printed++;
     }
+    snmp_free_varbind(var);
     return printed;
 }
 
@@ -352,6 +353,7 @@ route6pr(int af)
         p_rtnodex( rp );
         printed++;
     }
+    snmp_free_varbind(var);
     return printed;
 }
 
