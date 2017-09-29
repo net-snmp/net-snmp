@@ -294,6 +294,17 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             session->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
             testcase = 1;
         }
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+        else if (!strcasecmp(optarg, "AES192")) {
+            session->securityPrivProto = usmAES192PrivProtocol;
+            session->securityPrivProtoLen = USM_PRIV_PROTO_AES192_LEN;
+            testcase = 1;
+        } else if (!strcasecmp(optarg, "AES256")) {
+            session->securityPrivProto = usmAES256PrivProtocol;
+            session->securityPrivProtoLen = USM_PRIV_PROTO_AES256_LEN;
+            testcase = 1;
+        }
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 #endif
         if (testcase == 0) {
             fprintf(stderr,

@@ -932,6 +932,15 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES_IV);
         have_trans = 1;
     }
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+    else if (ISTRANSFORM(privtype, AES192Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192_IV);
+    } else if (ISTRANSFORM(privtype, AES256Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256_IV);
+    }
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 #endif
     if (!have_trans) {
         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
@@ -983,7 +992,12 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     }
 #endif
 #ifdef HAVE_AES
-    if (ISTRANSFORM(privtype, AESPriv)) {
+    if (ISTRANSFORM(privtype, AESPriv)
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+        || ISTRANSFORM(privtype, AES192Priv)
+        || ISTRANSFORM(privtype, AES256Priv)
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+        ) {
         (void) AES_set_encrypt_key(key, properlength*8, &aes_key);
 
         memcpy(my_iv, iv, ivlen);
@@ -1184,6 +1198,17 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES_IV);
         have_transform = 1;
     }
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+    else if (ISTRANSFORM(privtype, AES192Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192_IV);
+        have_transform = 1;
+    } else if (ISTRANSFORM(privtype, AES256Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256_IV);
+        have_transform = 1;
+    }
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 #endif
     if (!have_transform) {
         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
@@ -1206,7 +1231,12 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
     }
 #endif
 #ifdef HAVE_AES
-    if (ISTRANSFORM(privtype, AESPriv)) {
+    if (ISTRANSFORM(privtype, AESPriv)
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+        || ISTRANSFORM(privtype, AES192Priv) 
+        || ISTRANSFORM(privtype, AES256Priv)
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+        ) {
         (void) AES_set_encrypt_key(key, properlength*8, &aes_key);
 
         memcpy(my_iv, iv, ivlen);

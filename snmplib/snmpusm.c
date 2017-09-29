@@ -141,6 +141,11 @@ oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
 oid             usmAESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
 /* backwards compat */
 oid             *usmAES128PrivProtocol = usmAESPrivProtocol;
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+    /* OIDs from http://www.snmp.com/eso/esoConsortiumMIB.txt */
+oid             usmAES192PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,3 };
+oid             usmAES256PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,4 };
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 
 static u_int    dummy_etime, dummy_eboot;       /* For ISENGINEKNOWN(). */
 
@@ -1159,7 +1164,12 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
          * XXX  Hardwired to seek into a 1DES private key!
          */
 #ifdef HAVE_AES
-        if (ISTRANSFORM(thePrivProtocol, AESPriv)) {
+        if (ISTRANSFORM(thePrivProtocol, AESPriv)
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+            || ISTRANSFORM(thePrivProtocol, AES192Priv)
+            || ISTRANSFORM(thePrivProtocol, AES256Priv)
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+            ) {
             if (!thePrivKey ||
                 usm_set_aes_iv(salt, &salt_length,
                                htonl(boots_uint), htonl(time_uint),
@@ -1639,7 +1649,12 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
          * XXX Hardwired to seek into a 1DES private key!  
          */
 #ifdef HAVE_AES
-        if (ISTRANSFORM(thePrivProtocol, AESPriv)) {
+        if (ISTRANSFORM(thePrivProtocol, AESPriv)
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+            || ISTRANSFORM(thePrivProtocol, AES192Priv)
+            || ISTRANSFORM(thePrivProtocol, AES256Priv)
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+            ) {
             salt_length = BYTESIZE(USM_AES_SALT_LENGTH);
             save_salt_length = BYTESIZE(USM_AES_SALT_LENGTH)/2;
             if (!thePrivKey ||
@@ -2739,7 +2754,12 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         }
 #endif
 #ifdef HAVE_AES
-        if (ISTRANSFORM(user->privProtocol, AESPriv)) {
+        if (ISTRANSFORM(user->privProtocol, AESPriv)
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+            || ISTRANSFORM(user->privProtocol, AES192Priv)
+            || ISTRANSFORM(user->privProtocol, AES256Priv)
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+            ) {
             iv_length = BYTESIZE(USM_AES_SALT_LENGTH);
             net_boots = ntohl(boots_uint);
             net_time = ntohl(time_uint);
@@ -3336,7 +3356,11 @@ init_usm(void)
     register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
                             NULL,
 #ifdef HAVE_AES
+#ifndef NETSNMP_DRAFT_BLUMENTHAL_AES_04
                             "DES|AES"
+#else
+                            "DES|AES|AES-128|AES-192|AES-256"
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 #else
                             "DES (AES support not available)"
 #endif
@@ -4311,6 +4335,13 @@ usm_read_user(const char *line)
     if (ISTRANSFORM(user->privProtocol, AESPriv)) {
         expected_privKeyLen = 16;
     }
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+    else if (ISTRANSFORM(thePrivProtocol, AES192Priv)) {
+        expected_privKeyLen = 24;
+    } else if (ISTRANSFORM(thePrivProtocol, AES256Priv)) {
+        expected_privKeyLen = 32;
+    }
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 #endif
     /* For backwards compatibility */
     if (user->privKeyLen > expected_privKeyLen) {
@@ -4763,17 +4794,36 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
 #ifndef NETSNMP_DISABLE_DES
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
+        /* DES uses a 128 bit key, 64 bits of which is a salt */
+        privKeyLen = 16;
 #else
         *errorMsg = "DES support disabled";
 #endif
     }
-    else if (strncmp(cp, "AES128", 6) == 0 || strncmp(cp, "AES", 3) == 0) {
+    if (strncmp(cp, "AES", 3) == 0) {
 #ifdef HAVE_AES
-        memcpy(newuser->privProtocol, usmAESPrivProtocol,
-               sizeof(usmAESPrivProtocol));
+        if (strlen(cp) == 3 || strncmp(cp, "AES128", 6) == 0) {
+            memcpy(newuser->privProtocol, usmAESPrivProtocol,
+                   sizeof(usmAESPrivProtocol));
+            privKeyLen = 16;
+        }
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+        else if (strncmp(cp, "AES192", 6) == 0) {
+            memcpy(newuser->privProtocol, usmAES192PrivProtocol,
+                   sizeof(usmAES192PrivProtocol));
+            privKeyLen = 24;
+        }
+        else if (strncmp(cp, "AES256", 6) == 0) {
+            memcpy(newuser->privProtocol, usmAES256PrivProtocol,
+                   sizeof(usmAES256PrivProtocol));
+            privKeyLen = 32;
+        }
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+        else
+            *errorMsg = "Unknown AES protocol";
 #else
         *errorMsg = "AES support not available";
-#endif
+#endif /* HAVE_AES */
     }
     else if ((strncmp(cp, "default", 7) == 0) && (NULL != def_priv_prot)) {
         memcpy(newuser->privProtocol, def_priv_prot,
@@ -4793,12 +4843,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
 
     cp = skip_token(cp);
 
-    if (newuser->privProtocol[9] == 2) {
-        /* DES uses a 128 bit key, 64 bits of which is a salt */
-        privKeyLen = 16;
-    } else if (newuser->privProtocol[9] == 4) {
-        privKeyLen = 16;
-    } else
+    if (privKeyLen == 0)
         DEBUGMSGTL(("usmUser",
                     "warning: unknown keyLen for privacy protocol\n"));
 
@@ -5036,6 +5081,16 @@ snmpv3_privtype_conf(const char *word, char *cptr)
         testcase = 1;
         defaultPrivType = usmAES128PrivProtocol;
     }
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+    else if (strcasecmp(cptr, "AES192") == 0) {
+        testcase = 1;
+        defaultPrivType = usmAES192PrivProtocol;
+    }
+    else if (strcasecmp(cptr, "AES256") == 0) {
+        testcase = 1;
+        defaultPrivType = usmAES256PrivProtocol;
+    }
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 #endif
     if (testcase == 0)
         config_perror("Unknown privacy type");

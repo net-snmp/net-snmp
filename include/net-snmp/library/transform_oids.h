@@ -43,10 +43,14 @@ NETSNMP_IMPORT oid      usmNoPrivProtocol[10];  /* == { 1,3,6,1,6,3,10,1,2,1 }; 
 NETSNMP_IMPORT oid      usmDESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,2 }; */
 #endif
 
-/* XXX: OIDs not defined yet */
 NETSNMP_IMPORT oid      usmAESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,4 }; */
 NETSNMP_IMPORT oid      *usmAES128PrivProtocol; /* backwards compat */
 
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+    /* OIDs from http://www.snmp.com/eso/esoConsortiumMIB.txt */
+NETSNMP_IMPORT oid      usmAES192PrivProtocol[10]; /* == { 1,3,6,1,4,1,14832,1,3 }; */
+NETSNMP_IMPORT oid      usmAES256PrivProtocol[10]; /* == { 1,3,6,1,4,1,14832,1,4 }; */
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 
 #define USM_AUTH_PROTO_NOAUTH_LEN USM_LENGTH_OID_TRANSFORM
 #define USM_AUTH_PROTO_MD5_LEN    USM_LENGTH_OID_TRANSFORM
@@ -56,6 +60,11 @@ NETSNMP_IMPORT oid      *usmAES128PrivProtocol; /* backwards compat */
 
 #define USM_PRIV_PROTO_AES_LEN    USM_LENGTH_OID_TRANSFORM
 #define USM_PRIV_PROTO_AES128_LEN USM_LENGTH_OID_TRANSFORM /* backwards compat */
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+#define USM_PRIV_PROTO_AES192_LEN 9
+#define USM_PRIV_PROTO_AES256_LEN 9
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+
 
 #ifdef __cplusplus
 }
