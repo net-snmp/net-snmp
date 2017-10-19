@@ -7110,7 +7110,7 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
 	while (rp) {
 	    if (rp->low <= ltmp && ltmp <= rp->high) break;
                                   /* Allow four digits per range value */
-            temp_len += ((rp->low != rp->high) ? 14 : 8 );
+            temp_len += ((rp->low != rp->high) ? 27 : 15 );
 	    rp = rp->next;
 	}
 	if (!rp) {
