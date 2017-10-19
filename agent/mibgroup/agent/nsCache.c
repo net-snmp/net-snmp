@@ -92,6 +92,7 @@ init_nsCache(void)
      */
     iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
     if (!iinfo) {
+        SNMP_FREE(table_info);
         return;
     }
     iinfo->get_first_data_point = get_first_cache_entry;
