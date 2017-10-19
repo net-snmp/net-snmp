@@ -184,6 +184,7 @@ parse_snmpNotifyFilterProfileTable(const char *token, char *line)
                               &StorageTmp->snmpTargetParamsName,
                               &StorageTmp->snmpTargetParamsNameLen);
     if (StorageTmp->snmpTargetParamsName == NULL) {
+        SNMP_FREE(StorageTmp);
         config_perror("invalid specification for snmpTargetParamsName");
         return;
     }
