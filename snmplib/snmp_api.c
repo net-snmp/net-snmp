@@ -1613,6 +1613,9 @@ _sess_open(netsnmp_session * in_session)
             clientaddr_save =
                 netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                       NETSNMP_DS_LIB_CLIENT_ADDR);
+            if (clientaddr_save)
+                clientaddr_save = strdup(clientaddr_save);
+
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                                   NETSNMP_DS_LIB_CLIENT_ADDR,
                                   in_session->localname);
@@ -1633,6 +1636,7 @@ _sess_open(netsnmp_session * in_session)
         if (NULL != in_session->localname)
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                                   NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
+        free(clientaddr_save);
     }
 
     if (transport == NULL) {
