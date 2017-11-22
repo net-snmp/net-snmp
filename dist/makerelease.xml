@@ -253,7 +253,7 @@
 	      </commands>
 	    </step>
 	    <step type="system" stepname="release:versiondiff"
-	      title="Running svn diff to check changes">
+	      title="Running diff to check changes">
 
 	      <text>Check the following changes for proper version number
 		differences before we commit the chances.</text>
@@ -274,7 +274,7 @@
 	</step>
         <step type="section" title="Handle dist/release">
           <steps>
-	    <step type="system" skipunless="'{RELEASETYPE}' eq 'rc'">
+	    <step type="system" title="Set RC mode" skipunless="'{RELEASETYPE}' eq 'rc'">
 	      <text>Note in 'dist/release' that this branch is in release candidate mode
 	      </text>
 	      <commands>
@@ -286,7 +286,7 @@
 	        <command>git commit                </command>
 	      </commands>
 	    </step>
-	    <step type="system" skipif="'{RELEASETYPE}' eq 'rc'">
+	    <step type="system" title="Unset RC mode" skipif="'{RELEASETYPE}' eq 'rc'">
 	      <text>Ensure that 'dist/release' doesn't reference this branch
 	      </text>
 	      <commands>
@@ -320,7 +320,7 @@
 	  done.  After this step, we'll commit all the modified files.
 
 	  You may find additional files (marked with a ?) that should
-	  be added to the svn repository and you'll need to do this by
+	  be added to the repository and you'll need to do this by
 	  hand before going on to the next step.
 
 	  Note: based on a recent net-snmp-admin discussion, we're no
@@ -489,13 +489,13 @@
       <steps>
 	<step prompt="true" type="system" stepname="release:tag" title="release:tag">
 	  <text>
-	    This will actually svn copy the current checked out branch
+	    This will actually copy the current checked out branch
 	    to the new tag name.  Specifically:
 
-               git tag -u E0F81533 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"
+               git tag -u ACB19FD6 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"
 	  </text>
 	  <commands>
-	    <command>git tag -u E0F81533 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"</command>
+	    <command>git tag -u ACB19FD6 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"</command>
 	  </commands>
 	</step>
 	<step prompt="true" type="system" stepname="release:makedist" title="release:makedist">
@@ -530,12 +530,12 @@
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg --use-agent -u E0F81533 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
+	    <command>gpg --use-agent -u ACB19FD6 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg --use-agent -u E0F81533 -a --detach-sign net-snmp-{VERSION}.zip</command>
+	    <command>gpg --use-agent -u ACB19FD6 -a --detach-sign net-snmp-{VERSION}.zip</command>
 	  </commands>
 	</step>
 	<step type="command" name="release:nextbranch" title="Don't propagate code modifications"
@@ -642,7 +642,7 @@
 	</step>
       </steps>
     </step>
-    <step type="informational">
+    <step type="informational" title="reminder:binaries">
       <text>
 	Binaries: build rpms, .tar.gzs, etc.
       </text>
@@ -667,7 +667,7 @@
     </step>
     <step type="section" title="Advertise it!">
       <steps>
-	<step type="informational" pause="1">
+	<step type="informational" pause="1" title="announcements">
 	  <text>Send an announcement message to one of the following
 	  mailing lists based on its type:
 
@@ -679,14 +679,14 @@
                        (one week after the source tarball is made available)
 	  </text>
 	</step>
-	<step type="informational" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
+	<step type="informational" title="irc:topicupdate" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
 	  <text>Update the topic on the #Net-SNMP channel if this is a
 	    trunk based release (or the latest on the top most patch tree).
 	  </text>
 	</step>
       </steps>
     </step>
-    <step type="informational" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
+    <step type="informational" title="publish" skipunless="'{RELEASETYPE}' eq 'full'" pause="1">
       <text>
 	Advertise: NEWS upload to sf, publish on -announce, freshmeat,
 	and the GNU FSF directory
