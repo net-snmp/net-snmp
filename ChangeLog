@@ -1,5 +1,99 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.5.pre2 -> V5.4.5.rc1
+
+commit 2a424d11c0c8b3adf260defd54f16c8670570fb1
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Wed Nov 22 13:26:40 2017 -0500
+
+    make depend for 5.4.5.rc1
+
+commit 454212142ed531cf842703831a187177e27923fa
+Author: Robert Story <rstory@isi.edu>
+Date:   Wed Nov 22 11:20:03 2017 -0500
+
+    add missing titles; update gpg key for signing; remove refs to svn
+
+commit d688d9cceece90af6c620345d2c5fb0468df924e
+Author: Robert Story <rstory@isi.edu>
+Date:   Thu Oct 26 23:22:04 2017 -0400
+
+     remove commented code
+
+commit 032b28d9c1ad174c70f25e31757c3d427fb96bad
+Author: Robert Story <rstory@isi.edu>
+Date:   Thu Oct 26 22:36:30 2017 -0400
+
+    add --disable-U64 to makerelease.xml
+
+commit 3b36fec8fb13fd5cf0ed7423b8c5d0943d8ea989
+Author: Robert Story <rstory@isi.edu>
+Date:   Thu Oct 26 21:42:33 2017 -0400
+
+    Release Candidate for V5-4-patches
+
+commit d8e7bc0246009a9ac58784c1b67baafb44d77902
+Author: Robert Story <rstory@isi.edu>
+Date:   Thu Oct 26 21:42:29 2017 -0400
+
+    Version number update: 5.4.5.rc1
+
+commit a5b4994061b1c45a960ff3e5e3941ae7ee295541
+Author: Robert Story <rstory@freesnmp.com>
+Date:   Thu Oct 26 15:24:32 2017 -0400
+
+    remove distrelease script (should be using newest version from github)
+
+commit bba1451f8ae64e3f58986408041a28f8e34e6f35
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Oct 19 21:09:30 2017 +0200
+
+    BUG 2788: fix memory leaks in error paths.
+
+    Thanks to shqking.
+
+commit 2f739528b6ff89c28c58f98b0e81a2568b72348e
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Thu Oct 19 21:06:02 2017 +0200
+
+    BUG 2452: fix core dump from bad data to snmp_add_var
+
+    Thanks to bottles and Thiruvadi Rajaraman
+
+commit 15a2435e4db0ac9d44135dfa8a5fbf1b8b7391d8
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Tue Jun 13 08:44:06 2017 +0200
+
+    Fix counters for 10Gb interfaces on FreeBSD.
+
+    Fixes bug 2741. Patch from Andrey V. Elsukov forwarded by Ryan Steinmetz.
+
+commit 0336d11e91e345e65fe6101ae6242568984b479a
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Apr 2 09:37:20 2017 -0700
+
+    Fix a recently introduced init_usmDHParameters() crash
+
+    The pointer of which the address is passed to BN_hex2bn() must be
+    initialized. See also commit 14bb72fd12bf.
+
+commit 14bb72fd12bf5b68662893f7d8afbc4a8d52a6c8
+Author: Niels Baggesen <nba@users.sourceforge.net>
+Date:   Sat Apr 1 07:55:47 2017 +0200
+
+    OpenSSL 1.1 fixes for SNMP-USM-DH-OBJECTS-MIB implementation.
+
+commit 639d172c31c8fa9ce7f8ed52a484599a9e23cd7b
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Mar 18 15:59:55 2017 -0700
+
+    CHANGES: snmplib: BUG: 2768: Fix decoding of unsigned integers
+
+    See also https://sourceforge.net/p/net-snmp/bugs/2768/.
+
+
+-------------------------------------------------------------------------------
+
 Changes: V5.4.5.pre1 -> V5.4.5.pre2
 
 commit 24ab33a0a0798748957669cde374907ce5f37984
