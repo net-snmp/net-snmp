@@ -5,7 +5,8 @@
 ./if.lo: ../../include/net-snmp/system/sysv.h
 ./if.lo: ../../include/net-snmp/system/generic.h
 ./if.lo: ../../include/net-snmp/net-snmp-includes.h
-./if.lo: ../../include/net-snmp/definitions.h ../../include/net-snmp/types.h
+./if.lo: ../../include/net-snmp/definitions.h
+./if.lo: ../../include/net-snmp/types.h
 ./if.lo: ../../include/net-snmp/library/snmp_api.h
 ./if.lo: ../../include/net-snmp/library/asn1.h
 ./if.lo: ../../include/net-snmp/library/snmp_impl.h
@@ -63,8 +64,7 @@
 ./if.lo: ../../include/net-snmp/library/snmp_secmod.h
 ./if.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
 ./if.lo: ../../include/net-snmp/library/snmpusm.h
-./if.lo: main.h
-./if.lo: netstat.h
+./if.lo: main.h netstat.h
 ./inet.lo: ../../include/net-snmp/net-snmp-config.h
 ./inet.lo: ../../include/net-snmp/system/linux.h
 ./inet.lo: ../../include/net-snmp/system/sysv.h

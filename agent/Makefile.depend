@@ -203,7 +203,8 @@
 ./agent_index.lo: ../include/net-snmp/agent/mfd.h
 ./agent_index.lo: ../include/net-snmp/agent/agent_callbacks.h
 ./agent_index.lo: ../include/net-snmp/agent/agent_index.h snmpd.h
-./agent_index.lo: mibgroup/struct.h
+./agent_index.lo: mibgroup/struct.h ../agent/mibgroup/agentx/subagent.h
+./agent_index.lo: ../agent/mibgroup/agentx/client.h
 ./agent_read_config.lo: ../include/net-snmp/net-snmp-config.h
 ./agent_read_config.lo: ../include/net-snmp/system/linux.h
 ./agent_read_config.lo: ../include/net-snmp/system/sysv.h
@@ -555,13 +556,13 @@
 ./agent_registry.lo: ../include/net-snmp/agent/table_array.h
 ./agent_registry.lo: ../include/net-snmp/agent/mfd.h
 ./agent_registry.lo: ../include/net-snmp/agent/agent_callbacks.h snmpd.h
-./agent_registry.lo: mibgroup/struct.h
+./agent_registry.lo: mibgroup/struct.h ../agent/mibgroup/agentx/subagent.h
+./agent_registry.lo: ../agent/mibgroup/agentx/client.h
 ./agent_trap.lo: ../include/net-snmp/net-snmp-config.h
 ./agent_trap.lo: ../include/net-snmp/system/linux.h
 ./agent_trap.lo: ../include/net-snmp/system/sysv.h
 ./agent_trap.lo: ../include/net-snmp/system/generic.h
-./agent_trap.lo: ../include/net-snmp/utilities.h
-./agent_trap.lo: ../include/net-snmp/types.h
+./agent_trap.lo: ../include/net-snmp/utilities.h ../include/net-snmp/types.h
 ./agent_trap.lo: ../include/net-snmp/definitions.h
 ./agent_trap.lo: ../include/net-snmp/library/snmp_api.h
 ./agent_trap.lo: ../include/net-snmp/library/asn1.h
@@ -867,6 +868,7 @@
 ./mib_modules.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable.h
 ./mib_modules.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable_data_access.h
 ./mib_modules.lo: mibgroup/if-mib/data_access/interface.h
+./mib_modules.lo: mibgroup/agentx/subagent.h
 ./mib_modules.lo: ../agent/mibgroup/mib_module_shutdown.h
 ./mib_modules.lo: ../agent/mibgroup/mib_module_inits.h
 ./object_monitor.lo: ../include/net-snmp/net-snmp-config.h
@@ -1080,8 +1082,7 @@
 ./snmp_perl.lo: ../include/net-snmp/system/sysv.h
 ./snmp_perl.lo: ../include/net-snmp/system/generic.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-includes.h
-./snmp_perl.lo: ../include/net-snmp/definitions.h
-./snmp_perl.lo: ../include/net-snmp/types.h
+./snmp_perl.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
 ./snmp_perl.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_perl.lo: ../include/net-snmp/library/asn1.h
 ./snmp_perl.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1180,7 +1181,8 @@
 ./snmp_vars.lo: ../include/net-snmp/system/sysv.h
 ./snmp_vars.lo: ../include/net-snmp/system/generic.h
 ./snmp_vars.lo: ../include/net-snmp/net-snmp-includes.h
-./snmp_vars.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
+./snmp_vars.lo: ../include/net-snmp/definitions.h
+./snmp_vars.lo: ../include/net-snmp/types.h
 ./snmp_vars.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_vars.lo: ../include/net-snmp/library/asn1.h
 ./snmp_vars.lo: ../include/net-snmp/library/snmp_impl.h
