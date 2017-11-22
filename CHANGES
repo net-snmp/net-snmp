@@ -6,6 +6,8 @@ listing of all changes made to the code.
 *5.4.5*
 
     snmplib:
+      - BUG: 2768: Fix decoding of unsigned integers
+      - BUG: 2788: fix memory leaks in error paths.
       - Add netsnmp_setenv().
       - Add the symbol NETSNMP_PRIo to help in printing oid values.
       - Avoid failure to trigger sign extension due to overlong types In
@@ -64,6 +66,8 @@ listing of all changes made to the code.
       - BUG: 3526549: CVE-2012-2141 Array index error leading to crash
 
     snmpd:
+      - BUG: 2452: fix core dump from bad data to snmp_add_var
+      - BUG: 2741: Fix counters for 10Gb interfaces on FreeBSD.
       - Add a missing function declaration
       - BUG: 3463767: Handle parsing subidentifiers > 2^31
       - BUG: 3532090: Fix high ifIndex values crashing hrDeviceDescr
