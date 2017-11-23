@@ -84,6 +84,7 @@ netsnmp_multiplexer_helper_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
@@ -100,6 +101,7 @@ netsnmp_multiplexer_helper_handler(netsnmp_mib_handler *handler,
         /*
          * XXX: process SETs specially, and possibly others 
          */
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
     default:
         snmp_log(LOG_ERR, "unsupported mode for multiplexer: %d\n",
                  reqinfo->mode);

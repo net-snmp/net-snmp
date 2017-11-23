@@ -37,7 +37,7 @@
 %endif
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.4.5.rc1
+Version: 5.7.3
 # update release for vendor release. (eg 1.fc6, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
 URL: http://www.net-snmp.org/
@@ -133,7 +133,7 @@ exit 1
 	--enable-shared \
 	%{?netsnmp_perl_modules: --with-perl-modules="INSTALLDIRS=vendor"} \
 	%{!?netsnmp_perl_modules: --without-perl-modules} \
-	%{?netsnmp_embedded_perl: --enable-as-needed --enable-embedded-perl} \
+	%{?netsnmp_embedded_perl: --enable-embedded-perl} \
 	%{!?netsnmp_embedded_perl: --disable-embedded-perl} \
 	--with-cflags="$RPM_OPT_FLAGS %{netsnmp_cflags}"
 
@@ -252,12 +252,12 @@ echo "No additional verification is done for net-snmp"
 
 * Tue May  6 2008 Jan Safranek <jsafranek@users.sf.net>
 - remove %{libcurrent}
-- don't use Provides: unless necessary, let rpmbuild compute the provided
+- add openssl-devel to build requirements
+- don't use Provides: unless necessary, let rpmbuild compute the provided 
   libraries
 
-* Tue Jun 30 2007 Thomas Anders <tanders@users.sf.net>
+* Tue Jun 19 2007 Thomas Anders <tanders@users.sf.net>
 - add "BuildRequires: perl-ExtUtils-Embed", e.g. for Fedora 7
-- add --enable-as-needed if building with embedded Perl support
 
 * Wed Nov 23 2006 Thomas Anders <tanders@users.sf.net>
 - fixes for 5.4 and 64-bit platforms

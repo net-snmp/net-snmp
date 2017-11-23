@@ -19,7 +19,7 @@
 
 #include "ipSystemStatsTable_data_access.h"
 
-static int      ipss_cache_refresh = 30;
+static int      ipss_cache_refresh = IPSYSTEMSTATSTABLE_CACHE_TIMEOUT;
 
 /** @ingroup interface 
  * @addtogroup data_access data_access: Routines to access data
@@ -58,60 +58,9 @@ int
 ipSystemStatsTable_init_data(ipSystemStatsTable_registration *
                              ipSystemStatsTable_reg)
 {
-    static unsigned int my_columns[] = {
-        COLUMN_IPSYSTEMSTATSINRECEIVES, COLUMN_IPSYSTEMSTATSHCINRECEIVES,
-        /** COLUMN_IPSYSTEMSTATSINOCTETS, */
-        COLUMN_IPSYSTEMSTATSHCINOCTETS,
-        COLUMN_IPSYSTEMSTATSINHDRERRORS,
-        /** COLUMN_IPSYSTEMSTATSINNOROUTES, */
-        COLUMN_IPSYSTEMSTATSINADDRERRORS,
-        COLUMN_IPSYSTEMSTATSINUNKNOWNPROTOS,
-        /** COLUMN_IPSYSTEMSTATSINTRUNCATEDPKTS, */
-        COLUMN_IPSYSTEMSTATSINFORWDATAGRAMS,
-        COLUMN_IPSYSTEMSTATSHCINFORWDATAGRAMS,
-        COLUMN_IPSYSTEMSTATSREASMREQDS,
-        COLUMN_IPSYSTEMSTATSREASMOKS, COLUMN_IPSYSTEMSTATSREASMFAILS,
-        COLUMN_IPSYSTEMSTATSINDISCARDS, COLUMN_IPSYSTEMSTATSINDELIVERS,
-        COLUMN_IPSYSTEMSTATSHCINDELIVERS, COLUMN_IPSYSTEMSTATSOUTREQUESTS,
-        COLUMN_IPSYSTEMSTATSHCOUTREQUESTS, COLUMN_IPSYSTEMSTATSOUTNOROUTES,
-        /** COLUMN_IPSYSTEMSTATSOUTFORWDATAGRAMS, */
-        COLUMN_IPSYSTEMSTATSHCOUTFORWDATAGRAMS,
-        COLUMN_IPSYSTEMSTATSOUTDISCARDS,
-        /** COLUMN_IPSYSTEMSTATSOUTFRAGREQDS, */
-        COLUMN_IPSYSTEMSTATSOUTFRAGOKS, COLUMN_IPSYSTEMSTATSOUTFRAGFAILS,
-        COLUMN_IPSYSTEMSTATSOUTFRAGCREATES,
-        /** COLUMN_IPSYSTEMSTATSOUTTRANSMITS, */
-        /** COLUMN_IPSYSTEMSTATSHCOUTTRANSMITS, */
-        /** COLUMN_IPSYSTEMSTATSOUTOCTETS, */
-        /** COLUMN_IPSYSTEMSTATSHCOUTOCTETS, */
-        /** COLUMN_IPSYSTEMSTATSINMCASTPKTS, */
-        /** COLUMN_IPSYSTEMSTATSHCINMCASTPKTS, */
-        /** COLUMN_IPSYSTEMSTATSINMCASTOCTETS, */
-        /** COLUMN_IPSYSTEMSTATSHCINMCASTOCTETS, */
-        /** COLUMN_IPSYSTEMSTATSOUTMCASTPKTS, */
-        /** COLUMN_IPSYSTEMSTATSHCOUTMCASTPKTS, */
-        /** COLUMN_IPSYSTEMSTATSOUTMCASTOCTETS, */
-        /** COLUMN_IPSYSTEMSTATSHCOUTMCASTOCTETS, */
-        /** COLUMN_IPSYSTEMSTATSINBCASTPKTS, */
-        /** COLUMN_IPSYSTEMSTATSHCINBCASTPKTS, */
-        /** COLUMN_IPSYSTEMSTATSOUTBCASTPKTS, */
-        /** COLUMN_IPSYSTEMSTATSHCOUTBCASTPKTS, */
-        COLUMN_IPSYSTEMSTATSDISCONTINUITYTIME,
-        COLUMN_IPSYSTEMSTATSREFRESHRATE
-    };
-    static netsnmp_column_info valid_columns;
-
-    DEBUGMSGTL(("verbose:ipSystemStatsTable:ipSystemStatsTable_init_data",
+   DEBUGMSGTL(("verbose:ipSystemStatsTable:ipSystemStatsTable_init_data",
                 "called\n"));
 
-    /*
-     * we only want to process certain columns, and ignore
-     * anything else.
-     */
-    valid_columns.isRange = 0;
-    valid_columns.details.list = my_columns;
-    valid_columns.list_count = sizeof(my_columns) / sizeof(unsigned int);
-    ipSystemStatsTable_valid_columns_set(&valid_columns);
     /*
      * TODO:303:o: Initialize ipSystemStatsTable data.
      */
@@ -167,7 +116,11 @@ ipSystemStatsTable_container_init(netsnmp_container **container_ptr_ptr,
      * For advanced users, you can use a custom container. If you
      * do not create one, one will be created for you.
      */
-    *container_ptr_ptr = NULL;
+
+
+    *container_ptr_ptr = netsnmp_container_find("ipSystemStatsTable:table_container");
+    if (NULL != *container_ptr_ptr)
+        (*container_ptr_ptr)->container_name = strdup("ipSystemStatsTable");
 
     if (NULL == cache) {
         snmp_log(LOG_ERR,
@@ -192,6 +145,7 @@ ipSystemStatsTable_container_init(netsnmp_container **container_ptr_ptr,
         (NETSNMP_CACHE_DONT_AUTO_RELEASE | NETSNMP_CACHE_DONT_FREE_EXPIRED
          | NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD |
          NETSNMP_CACHE_AUTO_RELOAD);
+    ipSystemStatsTable_container_load(*container_ptr_ptr);
 }                               /* ipSystemStatsTable_container_init */
 
 /**
@@ -204,7 +158,7 @@ _check_for_updates(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
     /*
      * check for matching entry. works because indexes are the same.
      */
-    netsnmp_systemstats_entry *systemstats_entry =
+    netsnmp_systemstats_entry *systemstats_entry = (netsnmp_systemstats_entry*)
         CONTAINER_FIND(stats, rowreq_ctx->data);
     if (NULL == systemstats_entry) {
         DEBUGMSGTL(("ipSystemStatsTable:access",
@@ -267,7 +221,7 @@ _add_new(netsnmp_systemstats_entry *systemstats_entry,
         && (MFD_SUCCESS ==
             ipSystemStatsTable_indexes_set(rowreq_ctx,
                                            systemstats_entry->
-                                           ns_ip_version))) {
+                                           index[0]))) {
         rowreq_ctx->ipSystemStatsRefreshRate = ipss_cache_refresh * 1000;       /* milli-seconds */
         CONTAINER_INSERT(container, rowreq_ctx);
     } else {
@@ -386,7 +340,7 @@ ipSystemStatsTable_container_load(netsnmp_container *container)
                                               NETSNMP_ACCESS_SYSTEMSTATS_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:ipSystemStatsTable:ipSystemStatsTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%" NETSNMP_PRIz "u records\n", CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* ipSystemStatsTable_container_load */

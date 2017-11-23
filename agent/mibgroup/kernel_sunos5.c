@@ -45,6 +45,7 @@
 #include <kstat.h>
 #include <errno.h>
 #include <time.h>
+#include <ctype.h>
 
 #include <sys/sockio.h>
 #include <sys/socket.h>
@@ -103,11 +104,28 @@ mibcache        Mibcache[MIBCACHE_SIZE+1] = {
     {MIB_TRANSMISSION, 0, (void *) -1, 0, 0, 0, 0},
     {MIB_SNMP, 0, (void *) -1, 0, 0, 0, 0},
 #ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
+#ifdef SOLARIS_HAVE_RFC4293_SUPPORT
+    {MIB_IP_TRAFFIC_STATS, 20 * sizeof(mib2_ipIfStatsEntry_t), (void *)-1, 0,
+     30, 0, 0},
+    {MIB_IP6, 20 * sizeof(mib2_ipIfStatsEntry_t), (void *)-1, 0, 30, 0, 0},
+#else
+    {MIB_IP6, 20 * sizeof(mib2_ipv6IfStatsEntry_t), (void *)-1, 0, 30, 0, 0},
+#endif
     {MIB_IP6_ADDR, 20 * sizeof(mib2_ipv6AddrEntry_t), (void *)-1, 0, 30, 0, 0},
+    {MIB_IP6_ROUTE, 200 * sizeof(mib2_ipv6AddrEntry_t), (void *)-1, 0, 30, 0, 0},
+    {MIB_ICMP6, 20 * sizeof(mib2_ipv6IfIcmpEntry_t), (void *)-1, 0, 30, 0, 0},
     {MIB_TCP6_CONN, 1000 * sizeof(mib2_tcp6ConnEntry_t), (void *) -1, 0, 30,
      0, 0},
     {MIB_UDP6_ENDPOINT, 1000 * sizeof(mib2_udp6Entry_t), (void *) -1, 0, 30,
      0, 0},
+#endif
+#ifdef MIB2_SCTP
+    {MIB_SCTP, sizeof(mib2_sctp_t), (void *)-1, 0, 60, 0, 0},
+    {MIB_SCTP_CONN, sizeof(mib2_sctpConnEntry_t), (void *)-1, 0, 60, 0, 0},
+    {MIB_SCTP_CONN_LOCAL, sizeof(mib2_sctpConnLocalEntry_t), (void *)-1, 0,
+     60, 0, 0},
+    {MIB_SCTP_CONN_REMOTE, sizeof(mib2_sctpConnRemoteEntry_t), (void *)-1, 0,
+     60, 0, 0},
 #endif
     {0},
 };
@@ -131,9 +149,21 @@ mibmap          Mibmap[MIBCACHE_SIZE+1] = {
     {MIB2_TRANSMISSION, 0,},
     {MIB2_SNMP, 0,},
 #ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
+#ifdef SOLARIS_HAVE_RFC4293_SUPPORT
+    {MIB2_IP, MIB2_IP_TRAFFIC_STATS},
+#endif
+    {MIB2_IP6, 0},
     {MIB2_IP6, MIB2_IP6_ADDR},
+    {MIB2_IP6, MIB2_IP6_ROUTE},
+    {MIB2_ICMP6, 0},
     {MIB2_TCP6, MIB2_TCP6_CONN},
     {MIB2_UDP6, MIB2_UDP6_ENTRY},
+#endif
+#ifdef MIB2_SCTP
+    {MIB2_SCTP, 0},
+    {MIB2_SCTP, MIB2_SCTP_CONN},
+    {MIB2_SCTP, MIB2_SCTP_CONN_LOCAL},
+    {MIB2_SCTP, MIB2_SCTP_CONN_REMOTE},
 #endif
     {0},
 };
@@ -149,7 +179,7 @@ getentry(req_e req_type, void *bufaddr, size_t len, size_t entrysize,
          void *resp, int (*comp)(void *, void *), void *arg);
 
 static int
-getmib(int groupname, int subgroupname, void *statbuf, size_t size,
+getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
        size_t entrysize, req_e req_type, void *resp, size_t *length,
        int (*comp)(void *, void *), void *arg);
 
@@ -214,7 +244,7 @@ kernel_sunos5_cache_age(unsigned int regnumber, void *data)
 
     for (i = 0; i < MIBCACHE_SIZE; i++) {
 	DEBUGMSGTL(("kernel_sunos5", "cache[%d] time %ld ttl %d\n", i,
-		    Mibcache[i].cache_time, Mibcache[i].cache_ttl));
+		    Mibcache[i].cache_time, (int)Mibcache[i].cache_ttl));
 	if (Mibcache[i].cache_time < period) {
 	    Mibcache[i].cache_time = 0;
 	} else {
@@ -344,7 +374,8 @@ getKstat(const char *statname, const char *varname, void *value)
     kstat_ctl_t    *ksc;
     kstat_t        *ks, *kstat_data;
     kstat_named_t  *d;
-    size_t          i, instance;
+    uint_t          i;
+    int             instance = 0;
     char            module_name[64];
     int             ret;
     u_longlong_t    val;    /* The largest value */
@@ -451,11 +482,11 @@ getKstat(const char *statname, const char *varname, void *value)
 		break;
 	    case KSTAT_DATA_INT64:
 		*(int64_t *)v = d->value.i64;
-		DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", d->value.i64));
+		DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", (long)d->value.i64));
 		break;
 	    case KSTAT_DATA_UINT64:
 		*(uint64_t *)v = d->value.ui64;
-		DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", d->value.ui64));
+		DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", (unsigned long)d->value.ui64));
 		break;
 #else
 	    case KSTAT_DATA_LONG:
@@ -508,7 +539,7 @@ getKstatString(const char *statname, const char *varname,
     kstat_ctl_t    *ksc;
     kstat_t        *ks, *kstat_data;
     kstat_named_t  *d;
-    size_t          i, instance;
+    size_t          i, instance = 0;
     char            module_name[64];
     int             ret;
 
@@ -633,7 +664,7 @@ getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
      */
 
     DEBUGMSGTL(("kernel_sunos5", "getMibstat (%d, *, %d, %d, *, *)\n",
-		grid, entrysize, req_type));
+		grid, (int)entrysize, req_type));
     cachep = &Mibcache[grid];
     mibgr = Mibmap[grid].group;
     mibtb = Mibmap[grid].table;
@@ -651,7 +682,7 @@ getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
     cache_valid = (cachep->cache_time > 0);
 
     DEBUGMSGTL(("kernel_sunos5","... cache_valid %d time %ld ttl %d now %ld\n",
-		cache_valid, cachep->cache_time, cachep->cache_ttl,
+		cache_valid, cachep->cache_time, (int)cachep->cache_ttl,
 		time(NULL)));
     if (cache_valid) {
 	/*
@@ -694,8 +725,8 @@ getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
 		       cachep->cache_size, req_type,
 		       (mib2_ifEntry_t *) & ep, &length, comp, arg);
 	} else {
-	    rc = getmib(mibgr, mibtb, cachep->cache_addr,
-			cachep->cache_size, entrysize, req_type, &ep,
+	    rc = getmib(mibgr, mibtb, &(cachep->cache_addr),
+			&(cachep->cache_size), entrysize, req_type, &ep,
 			&length, comp, arg);
 	}
 
@@ -758,7 +789,7 @@ getentry(req_e req_type, void *bufaddr, size_t len,
          */
         DEBUGMSGTL(("kernel_sunos5", 
             "bad cache length %d - not multiple of entry size %d\n", 
-            len, entrysize));
+            (int)len, (int)entrysize));
         return NOT_FOUND;
     }
 
@@ -837,7 +868,7 @@ init_mibcache_element(mibcache * cp)
  */
 
 static int
-getmib(int groupname, int subgroupname, void *statbuf, size_t size,
+getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
        size_t entrysize, req_e req_type, void *resp,
        size_t *length, int (*comp)(void *, void *), void *arg)
 {
@@ -849,6 +880,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
     struct T_error_ack *tea = (struct T_error_ack *) buf;
     struct opthdr  *req;
     found_e         result = FOUND;
+    size_t oldsize;
 
     DEBUGMSGTL(("kernel_sunos5", "...... getmib (%d, %d, ...)\n",
 		groupname, subgroupname));
@@ -962,23 +994,42 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
 	 * reducing the number of getmsg calls
 	 */
 
-	strbuf.buf = statbuf;
-	strbuf.maxlen = size;
+	strbuf.buf = *statbuf;
+	strbuf.maxlen = *size;
 	strbuf.len = 0;
 	flags = 0;
 	do {
 	    rc = getmsg(sd, NULL, &strbuf, &flags);
 	    switch (rc) {
 	    case -1:
-		rc = -ENOSR;
+		ret = -ENOSR;
+		snmp_perror("getmsg");
 		goto Return;
 
 	    default:
-		rc = -ENODATA;
+		snmp_log(LOG_ERR, "kernel_sunos5/getmib: getmsg returned %d\n", rc);
+		ret = -ENODATA;
 		goto Return;
 
 	    case MOREDATA:
+		DEBUGMSGTL(("kernel_sunos5", "...... getmib increased buffer size\n"));
+		oldsize = ( strbuf.buf - (char *)*statbuf) + strbuf.len;
+		strbuf.buf = (char *)realloc(*statbuf, oldsize+4096);
+		if(strbuf.buf != NULL) {
+		    *statbuf = strbuf.buf;
+		    *size = oldsize + 4096;
+		    strbuf.buf = (char *)*statbuf + oldsize;
+		    strbuf.maxlen = 4096;
+		    result = NOT_FOUND;
+		    break;
+		}
+		strbuf.buf = (char *)*statbuf + (oldsize - strbuf.len);
 	    case 0:
+		/* fix buffer to real size & position */
+		strbuf.len += strbuf.buf - (char*)*statbuf;
+		strbuf.buf = *statbuf;
+		strbuf.maxlen = *size;
+
 		if (req_type == GET_NEXT && result == NEED_NEXT)
 		    /*
 		     * End of buffer, so "next" is the first item in the next
@@ -991,6 +1042,8 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
 		break;
 	    }
 	} while (rc == MOREDATA && result != FOUND);
+
+	DEBUGMSGTL(("kernel_sunos5", "...... getmib buffer size is %d\n", (int)*size));
 
 	if (result == FOUND) {      /* Search is successful */
 	    if (rc != MOREDATA) {
@@ -1131,7 +1184,7 @@ _dlpi_get_phys_address(int fd, char *addr, int maxlen, int *addrlen)
         return (errp->dl_errno);
     }
     default:
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type: %x\n", dlp->dl_primitive));
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type: %x\n", (unsigned)dlp->dl_primitive));
         return (-1);
     }
 }
@@ -1177,7 +1230,7 @@ _dlpi_get_iftype(int fd, unsigned int *iftype)
             return (-1); 
 
         DEBUGMSGTL(("kernel_sunos5:dlpi", "dl_mac_type: %x\n",
-	           info->dl_mac_type));
+	           (unsigned)info->dl_mac_type));
 	switch (info->dl_mac_type) {
 	case DL_CSMACD:
 	case DL_ETHER:
@@ -1242,15 +1295,15 @@ _dlpi_get_iftype(int fd, unsigned int *iftype)
         dl_error_ack_t *errp = (dl_error_ack_t *)buf;
 
         DEBUGMSGTL(("kernel_sunos5:dlpi",
-                    "got DL_ERROR_ACK: dlpi %d, error %d\n", errp->dl_errno,
-                    errp->dl_unix_errno));
+                    "got DL_ERROR_ACK: dlpi %ld, error %ld\n",
+		    (long)errp->dl_errno, (long)errp->dl_unix_errno));
 
         if (ctlbuf.len < DL_ERROR_ACK_SIZE)
             return (-1);
         return (errp->dl_errno);
     }
     default:
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type %x\n", dlp->dl_primitive));
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type %x\n", (unsigned)dlp->dl_primitive));
         return (-1);
     }
 }
@@ -1293,7 +1346,7 @@ _dlpi_parse_devname(char *devname, int *ppap)
     int m = 1;
     int i = strlen(devname) - 1;
 
-    while (i >= 0 && isdigit(devname[i])) {
+    while (i >= 0 && isdigit(devname[i] & 0xFF)) {
         ppa += m * (devname[i] - '0'); 
         m *= 10;
         i--;
@@ -2013,20 +2066,3 @@ main(int argc, char **argv)
 }
 #endif /*_GETMIBSTAT_TEST */
 #endif                          /* SUNOS5 */
-
-
-/*-
- * These variables describe the formatting of this file.  If you don't like the
- * template defaults, feel free to change them here (not in your .emacs file).
- *
- * Local Variables:
- * comment-column: 32
- * c-indent-level: 4
- * c-continued-statement-offset: 4
- * c-brace-offset: -4
- * c-argdecl-indent: 0
- * c-label-offset: -4
- * fill-column: 79
- * fill-prefix: " * "
- * End:
- */

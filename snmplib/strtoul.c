@@ -29,8 +29,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#if !HAVE_STRTOUL
-
 #if defined(LIBC_SCCS) && !defined(lint)
 static char     sccsid[] = "@(#)strtoul.c   8.1 (Berkeley) 6/4/93";
 #endif                          /* LIBC_SCCS and not lint */
@@ -107,5 +105,3 @@ strtoul(const char *nptr, char **endptr, int base)
         *endptr = (char *) (any ? s - 1 : nptr);
     return (acc);
 }
-
-#endif                          /* !HAVE_STRTOUL */

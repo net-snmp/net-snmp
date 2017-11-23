@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -47,6 +48,10 @@
 #include "if-mib/ifTable/ifTable.h"
 
 #include <ctype.h>
+
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -194,7 +199,7 @@ _ipv6InterfaceTable_initialize_interface(ipv6InterfaceTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPV6INTERFACETABLE_MIN_COL;
     tbl_info->max_column = IPV6INTERFACETABLE_MAX_COL;
@@ -267,10 +272,12 @@ _ipv6InterfaceTable_initialize_interface(ipv6InterfaceTable_registration *
         netsnmp_handler_registration_create("ipv6InterfaceTable", handler,
                                             ipv6InterfaceTable_oid,
                                             ipv6InterfaceTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP
+                                            HANDLER_CAN_BABY_STEP |
 #ifndef NETSNMP_DISABLE_SET_SUPPORT
-                                          | HANDLER_CAN_RWRITE
-#endif
+                                            HANDLER_CAN_RWRITE
+#else
+                                            HANDLER_CAN_RONLY
+#endif /* NETSNMP_DISABLE_SET_SUPPORT */
                                           );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering table ipv6InterfaceTable\n");
@@ -345,7 +352,7 @@ _ipv6InterfaceTable_initialize_interface(ipv6InterfaceTable_registration *
      */
     {
         oid             lc_oid[] = { IPV6INTERFACETABLELASTCHANGE_OID };
-        netsnmp_register_watched_scalar(netsnmp_create_handler_registration
+        netsnmp_register_watched_scalar2(netsnmp_create_handler_registration
                                         ("ipv6TableLastChanged", NULL,
                                          lc_oid, OID_LENGTH(lc_oid),
                                          HANDLER_CAN_RONLY),
@@ -1352,7 +1359,7 @@ _ipv6InterfaceTable_container_init(ipv6InterfaceTable_interface_ctx *
                  "ipv6InterfaceTable_container_init\n");
         return;
     }
-
+    if_ctx->container->container_name = strdup("ipv6InterfaceTable");
 }                               /* _ipv6InterfaceTable_container_init */
 
 /**

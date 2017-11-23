@@ -7,7 +7,7 @@ extern "C" {
 
 /* Default port handling */
 
-extern int
+NETSNMP_IMPORT int
 netsnmp_register_default_domain(const char* application, const char* domain);
 
 extern const char*
@@ -19,7 +19,7 @@ netsnmp_lookup_default_domains(const char* application);
 extern void
 netsnmp_clear_default_domain(void);
 
-extern int
+NETSNMP_IMPORT int
 netsnmp_register_default_target(const char* application, const char* domain,
 				const char* target);
 
@@ -29,7 +29,7 @@ netsnmp_lookup_default_target(const char* application, const char* domain);
 extern void
 netsnmp_clear_default_target(void);
 
-extern void
+NETSNMP_IMPORT void
 netsnmp_register_service_handlers(void);
 
 #ifdef __cplusplus

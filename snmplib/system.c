@@ -33,9 +33,21 @@ SOFTWARE.
  * distributed with the Net-SNMP package.
  */
 /*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/*
  * System dependent routines go here
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
@@ -54,11 +66,7 @@ SOFTWARE.
 #endif
 
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -74,15 +82,16 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
 
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
@@ -144,8 +153,32 @@ SOFTWARE.
 #include <sys/systeminfo.h>
 #endif
 
+#if defined(darwin9)
+#include <crt_externs.h>        /* for _NSGetArgv() */
+#endif
+
+#if HAVE_PWD_H
+#include <pwd.h>
+#endif
+#if HAVE_GRP_H
+#include <grp.h>
+#endif
+
 #if HAVE_LIMITS_H
 #include <limits.h>
+#endif
+
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
+#ifdef DNSSEC_LOCAL_VALIDATION
+#if 1 /*HAVE_ARPA_NAMESER_H*/
+#include <arpa/nameser.h>
+#endif
+#include <validator/validator.h>
+/* NetSNMP and DNSSEC-Tools both define FREE. We'll not use either here. */
+#undef FREE
 #endif
 
 #include <net-snmp/types.h>
@@ -156,6 +189,16 @@ SOFTWARE.
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/read_config.h> /* for get_temp_file_pattern() */
 
+#include "inet_ntop.h"
+
+/* NetSNMP and DNSSEC-Tools both define FREE. We'll not use either here. */
+#undef FREE
+
+netsnmp_feature_child_of(system_all, libnetsnmp)
+
+netsnmp_feature_child_of(user_information, system_all)
+netsnmp_feature_child_of(calculate_sectime_diff, system_all)
+
 #ifndef IFF_LOOPBACK
 #	define IFF_LOOPBACK 0
 #endif
@@ -164,6 +207,40 @@ SOFTWARE.
 # define LOOPBACK    INADDR_LOOPBACK
 #else
 # define LOOPBACK    0x7f000001
+#endif
+
+#ifndef EAI_FAIL
+# define EAI_FAIL    -4    /* Non-recoverable failure in name res.  */
+#endif
+
+#if defined(HAVE_FORK)
+static void
+_daemon_prep(int stderr_log)
+{
+    int fd;
+
+    /* Avoid keeping any directory in use. */
+    chdir("/");
+
+    if (stderr_log)
+        return;
+
+    /*
+     * Close inherited file descriptors to avoid
+     * keeping unnecessary references.
+     */
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+
+    /*
+     * Redirect std{in,out,err} to /dev/null, just in case.
+     */
+    if ((fd = open("/dev/null", O_RDWR)) >= 0) {
+        dup2(fd, STDOUT_FILENO);
+        dup2(fd, STDERR_FILENO);
+    }
+}
 #endif
 
 /**
@@ -194,11 +271,31 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
     int i = 0;
     DEBUGMSGT(("daemonize","deamonizing...\n"));
 #if HAVE_FORK
+#if defined(darwin9)
+     char            path [PATH_MAX] = "";
+     uint32_t        size = sizeof (path);
+
+     /*
+      * if we are already launched in a "daemonized state", just
+      * close & redirect the file descriptors
+      */
+     if(getppid() <= 2) {
+         _daemon_prep(stderr_log);
+         return 0;
+     }
+
+     if (_NSGetExecutablePath (path, &size))
+         return -1;
+#endif
     /*
      * Fork to return control to the invoking process and to
      * guarantee that we aren't a process group leader.
      */
+#if HAVE_FORKALL
+    i = forkall();
+#else
     i = fork();
+#endif
     if (i != 0) {
         /* Parent. */
         DEBUGMSGT(("daemonize","first fork returned %d.\n", i));
@@ -220,7 +317,12 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
         /*
          * Fork to let the process/session group leader exit.
          */
-        if ((i = fork()) != 0) {
+#if HAVE_FORKALL
+	i = forkall();
+#else
+	i = fork();
+#endif
+        if (i != 0) {
             DEBUGMSGT(("daemonize","second fork returned %d.\n", i));
             if(i == -1) {
                 snmp_log(LOG_ERR,"second fork failed (errno %d) in "
@@ -235,26 +337,22 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
             
             DEBUGMSGT(("daemonize","child continuing\n"));
 
-            /* Avoid keeping any directory in use. */
-            chdir("/");
-            
-            if (!stderr_log) {
-                /*
-                 * Close inherited file descriptors to avoid
-                 * keeping unnecessary references.
-                 */
-                close(0);
-                close(1);
-                close(2);
-                
-                /*
-                 * Redirect std{in,out,err} to /dev/null, just in
-                 * case.
-                 */
-                open("/dev/null", O_RDWR);
-                dup(0);
-                dup(0);
-            }
+#if ! defined(darwin9)
+            _daemon_prep(stderr_log);
+#else
+             /*
+              * Some darwin calls (using mach ports) don't work after
+              * a fork. So, now that we've forked, we re-exec ourself
+              * to ensure that the child's mach ports are all set up correctly,
+              * the getppid call above will prevent the exec child from
+              * forking...
+              */
+             char * const *argv = *_NSGetArgv ();
+             DEBUGMSGT(("daemonize","re-execing forked child\n"));
+             execv (path, argv);
+             snmp_log(LOG_ERR,"Forked child unable to re-exec - %s.\n", strerror (errno));
+             exit (0);
+#endif
         }
 #endif /* !WIN32 */
     }
@@ -266,204 +364,6 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
  * ********************************************* 
  */
 #ifdef							WIN32
-#	define WIN32_LEAN_AND_MEAN
-#	define WIN32IO_IS_STDIO
-#	define PATHLEN	1024
-
-#	include <tchar.h>
-#	include <windows.h>
-
-/*
- * MinGW defines WIN32, but has working dirent stuff.
- */
-#ifndef HAVE_DIRENT_H 
-
-/*
- * The idea here is to read all the directory names into a string table
- * * (separated by nulls) and when one of the other dir functions is called
- * * return the pointer to the current file name.
- */
-DIR            *
-opendir(const char *filename)
-{
-    DIR            *p;
-    long            len;
-    long            idx;
-    char            scannamespc[PATHLEN];
-    char           *scanname = scannamespc;
-    struct stat     sbuf;
-    WIN32_FIND_DATA FindData;
-    HANDLE          fh;
-
-    /*
-     * check to see if filename is a directory 
-     */
-    if ((stat(filename, &sbuf) < 0) || ((sbuf.st_mode & S_IFDIR) == 0)) {
-        return NULL;
-    }
-
-    /*
-     * get the file system characteristics 
-     */
-    /*
-     * if(GetFullPathName(filename, SNMP_MAXPATH, root, &dummy)) {
-     * *    if(dummy = strchr(root, '\\'))
-     * *        *++dummy = '\0';
-     * *    if(GetVolumeInformation(root, volname, SNMP_MAXPATH, &serial,
-     * *                            &maxname, &flags, 0, 0)) {
-     * *        downcase = !(flags & FS_CASE_IS_PRESERVED);
-     * *    }
-     * *  }
-     * *  else {
-     * *    downcase = TRUE;
-     * *  }
-     */
-
-    /*
-     * Create the search pattern 
-     */
-    strcpy(scanname, filename);
-
-    if (strchr("/\\", *(scanname + strlen(scanname) - 1)) == NULL)
-        strcat(scanname, "/*");
-    else
-        strcat(scanname, "*");
-
-    /*
-     * do the FindFirstFile call 
-     */
-    fh = FindFirstFile(scanname, &FindData);
-    if (fh == INVALID_HANDLE_VALUE) {
-        return NULL;
-    }
-
-    /*
-     * Get us a DIR structure 
-     */
-    p = (DIR *) malloc(sizeof(DIR));
-    /*
-     * Newz(1303, p, 1, DIR); 
-     */
-    if (p == NULL)
-        return NULL;
-
-    /*
-     * now allocate the first part of the string table for
-     * * the filenames that we find.
-     */
-    idx = strlen(FindData.cFileName) + 1;
-    p->start = (char *) malloc(idx);
-    /*
-     * New(1304, p->start, idx, char);
-     */
-    if (p->start == NULL) {
-        free(p);
-        return NULL;
-    }
-    strcpy(p->start, FindData.cFileName);
-    /*
-     * if(downcase)
-     * *    strlwr(p->start);
-     */
-    p->nfiles = 0;
-
-    /*
-     * loop finding all the files that match the wildcard
-     * * (which should be all of them in this directory!).
-     * * the variable idx should point one past the null terminator
-     * * of the previous string found.
-     */
-    while (FindNextFile(fh, &FindData)) {
-        len = strlen(FindData.cFileName);
-        /*
-         * bump the string table size by enough for the
-         * * new name and it's null terminator
-         */
-        p->start = (char *) realloc((void *) p->start, idx + len + 1);
-        /*
-         * Renew(p->start, idx+len+1, char);
-         */
-        if (p->start == NULL) {
-            free(p);
-            return NULL;
-        }
-        strcpy(&p->start[idx], FindData.cFileName);
-        /*
-         * if (downcase) 
-         * *        strlwr(&p->start[idx]);
-         */
-        p->nfiles++;
-        idx += len + 1;
-    }
-    FindClose(fh);
-    p->size = idx;
-    p->curr = p->start;
-    return p;
-}
-
-
-/*
- * Readdir just returns the current string pointer and bumps the
- * * string pointer to the nDllExport entry.
- */
-struct direct  *
-readdir(DIR * dirp)
-{
-    int             len;
-    static int      dummy = 0;
-
-    if (dirp->curr) {
-        /*
-         * first set up the structure to return 
-         */
-        len = strlen(dirp->curr);
-        strcpy(dirp->dirstr.d_name, dirp->curr);
-        dirp->dirstr.d_namlen = len;
-
-        /*
-         * Fake an inode 
-         */
-        dirp->dirstr.d_ino = dummy++;
-
-        /*
-         * Now set up for the nDllExport call to readdir 
-         */
-        dirp->curr += len + 1;
-        if (dirp->curr >= (dirp->start + dirp->size)) {
-            dirp->curr = NULL;
-        }
-
-        return &(dirp->dirstr);
-    } else
-        return NULL;
-}
-
-/*
- * free the memory allocated by opendir 
- */
-int
-closedir(DIR * dirp)
-{
-    free(dirp->start);
-    free(dirp);
-    return 1;
-}
-#endif /* HAVE_DIRENT_H */
-
-#ifndef HAVE_GETTIMEOFDAY
-
-int
-gettimeofday(struct timeval *tv, struct timezone *tz)
-{
-    struct _timeb   timebuffer;
-
-    _ftime(&timebuffer);
-    tv->tv_usec = timebuffer.millitm * 1000;
-    tv->tv_sec = timebuffer.time;
-    return (0);
-}
-#endif                          /* !HAVE_GETTIMEOFDAY */
-
 in_addr_t
 get_myaddr(void)
 {
@@ -646,7 +546,7 @@ get_myaddr(void)
 
     for (ifrp = ifc.ifc_req;
         (char *)ifrp < (char *)ifc.ifc_req + ifc.ifc_len;
-#ifdef STRUCT_SOCKADDR_HAS_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
         ifrp = (struct ifreq *)(((char *) ifrp) +
                                 sizeof(ifrp->ifr_name) +
                                 ifrp->ifr_addr.sa_len)
@@ -709,14 +609,17 @@ get_boottime(void)
     size_t          len;
 #elif defined(NETSNMP_CAN_USE_NLIST)
     int             kmem;
-    static struct nlist nl[] = {
 #if !defined(hpux)
-        {(char *) "_boottime"},
+    static char boottime_name[] = "_boottime";
 #else
-        {(char *) "boottime"},
+    static char boottime_name[] = "boottime";
 #endif
-        {(char *) ""}
-    };
+    static char empty_name[] = "";
+    struct nlist nl[2];
+
+    memset(nl, 0, sizeof(nl));
+    nl[0].n_name = boottime_name;
+    nl[1].n_name = empty_name;
 #endif                          /* NETSNMP_CAN_USE_SYSCTL */
 #endif                          /* hpux10 || hpux 11 */
 
@@ -756,30 +659,25 @@ get_boottime(void)
 }
 #endif
 
-/*
- * Returns uptime in centiseconds(!).
+/**
+ * Returns the system uptime in centiseconds.
+ *
+ * @note The value returned by this function is not identical to sysUpTime
+ *   defined in RFC 1213. get_uptime() returns the system uptime while
+ *   sysUpTime represents the time that has elapsed since the most recent
+ *   restart of the network manager (snmpd).
+ *
+ * @see See also netsnmp_get_agent_uptime().
  */
 long
 get_uptime(void)
 {
-#if !defined(solaris2) && !defined(linux) && !defined(cygwin) && !defined(aix4) && !defined(aix5) && !defined(aix6)
-    struct timeval  now;
-    long            boottime_csecs, nowtime_csecs;
-
-    boottime_csecs = get_boottime();
-    if (boottime_csecs == 0)
-        return 0;
-    gettimeofday(&now, (struct timezone *) 0);
-    nowtime_csecs = (now.tv_sec * 100) + (now.tv_usec / 10000);
-
-    return (nowtime_csecs - boottime_csecs);
-#endif
-
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
+    static char lbolt_name[] = "lbolt";
     struct nlist nl;
     int kmem;
     time_t lbolt;
-    nl.n_name = (char *) "lbolt";
+    nl.n_name = lbolt_name;
     if(knlist(&nl, 1, sizeof(struct nlist)) != 0) return(0);
     if(nl.n_type == 0 || nl.n_value == 0) return(0);
     if((kmem = open("/dev/mem", 0)) < 0) return 0;
@@ -787,9 +685,7 @@ get_uptime(void)
     read(kmem, &lbolt, sizeof(lbolt));
     close(kmem);
     return(lbolt);
-#endif
-
-#ifdef solaris2
+#elif defined(solaris2)
     kstat_ctl_t    *ksc = kstat_open();
     kstat_t        *ks;
     kid_t           kid;
@@ -814,9 +710,7 @@ get_uptime(void)
         kstat_close(ksc);
     }
     return lbolt;
-#endif                          /* solaris2 */
-
-#ifdef linux
+#elif defined(linux) || defined(cygwin)
     FILE           *in = fopen("/proc/uptime", "r");
     long            uptim = 0, a, b;
     if (in) {
@@ -825,14 +719,310 @@ get_uptime(void)
         fclose(in);
     }
     return uptim;
-#endif                          /* linux */
+#else
+    struct timeval  now;
+    long            boottime_csecs, nowtime_csecs;
 
-#ifdef cygwin
-    return (0);                 /* not implemented */
+    boottime_csecs = get_boottime();
+    if (boottime_csecs == 0)
+        return 0;
+    gettimeofday(&now, (struct timezone *) 0);
+    nowtime_csecs = (now.tv_sec * 100) + (now.tv_usec / 10000);
+
+    return (nowtime_csecs - boottime_csecs);
 #endif
 }
 
 #endif                          /* ! WIN32 */
+/*******************************************************************/
+
+#ifdef DNSSEC_LOCAL_VALIDATION
+static val_context_t *_val_context = NULL;
+
+static val_context_t *
+netsnmp_validator_context(void)
+{
+    if (NULL == _val_context) {
+        int rc;
+        char *apptype = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                              NETSNMP_DS_LIB_APPTYPE);
+        DEBUGMSGTL(("dns:sec:context", "creating dnssec context for %s\n",
+                    apptype));
+        rc = val_create_context(apptype, &_val_context);
+    }
+
+    return _val_context;
+}
+#endif /* DNSSEC_LOCAL_VALIDATION */
+
+int
+netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
+{
+#if HAVE_GETADDRINFO
+    struct addrinfo *addrs = NULL;
+    struct addrinfo hint;
+    int             err;
+
+    memset(&hint, 0, sizeof hint);
+    hint.ai_flags = 0;
+    hint.ai_family = PF_INET;
+    hint.ai_socktype = SOCK_DGRAM;
+    hint.ai_protocol = 0;
+
+    err = netsnmp_getaddrinfo(name, NULL, &hint, &addrs);
+    if (err != 0) {
+        return -1;
+    }
+
+    if (addrs != NULL) {
+        memcpy(addr_out,
+               &((struct sockaddr_in *) addrs->ai_addr)->sin_addr,
+               sizeof(in_addr_t));
+        freeaddrinfo(addrs);
+    } else {
+        DEBUGMSGTL(("get_thisaddr",
+                    "Failed to resolve IPv4 hostname\n"));
+    }
+    return 0;
+
+#elif HAVE_GETHOSTBYNAME
+    struct hostent *hp = NULL;
+
+    hp = netsnmp_gethostbyname(name);
+    if (hp == NULL) {
+        DEBUGMSGTL(("get_thisaddr",
+                    "hostname (couldn't resolve)\n"));
+        return -1;
+    } else if (hp->h_addrtype != AF_INET) {
+        DEBUGMSGTL(("get_thisaddr",
+                    "hostname (not AF_INET!)\n"));
+        return -1;
+    } else {
+        DEBUGMSGTL(("get_thisaddr",
+                    "hostname (resolved okay)\n"));
+        memcpy(addr_out, hp->h_addr, sizeof(in_addr_t));
+    }
+    return 0;
+
+#elif HAVE_GETIPNODEBYNAME
+    struct hostent *hp = NULL;
+    int             err;
+
+    hp = getipnodebyname(peername, AF_INET, 0, &err);
+    if (hp == NULL) {
+        DEBUGMSGTL(("get_thisaddr",
+                    "hostname (couldn't resolve = %d)\n", err));
+        return -1;
+    }
+    DEBUGMSGTL(("get_thisaddr",
+                "hostname (resolved okay)\n"));
+    memcpy(addr_out, hp->h_addr, sizeof(in_addr_t));
+    return 0;
+
+#else /* HAVE_GETIPNODEBYNAME */
+    return -1;
+#endif
+}
+
+int
+netsnmp_getaddrinfo(const char *name, const char *service,
+                    const struct addrinfo *hints, struct addrinfo **res)
+{
+#if HAVE_GETADDRINFO
+    struct addrinfo *addrs = NULL;
+    struct addrinfo hint;
+    int             err;
+#ifdef DNSSEC_LOCAL_VALIDATION
+    val_status_t    val_status;
+#endif
+
+    DEBUGMSGTL(("dns:getaddrinfo", "looking up "));
+    if (name)
+        DEBUGMSG(("dns:getaddrinfo", "\"%s\"", name));
+    else
+        DEBUGMSG(("dns:getaddrinfo", "<NULL>"));
+
+    if (service)
+	DEBUGMSG(("dns:getaddrinfo", ":\"%s\"", service));
+
+    if (hints)
+	DEBUGMSG(("dns:getaddrinfo", " with hint ({ ... })"));
+    else
+	DEBUGMSG(("dns:getaddrinfo", " with no hint"));
+
+    DEBUGMSG(("dns:getaddrinfo", "\n"));
+
+    if (NULL == hints) {
+        memset(&hint, 0, sizeof hint);
+        hint.ai_flags = 0;
+        hint.ai_family = PF_INET;
+        hint.ai_socktype = SOCK_DGRAM;
+        hint.ai_protocol = 0;
+        hints = &hint;
+    } else {
+        memcpy(&hint, hints, sizeof hint);
+    }
+
+#ifndef DNSSEC_LOCAL_VALIDATION
+    err = getaddrinfo(name, NULL, &hint, &addrs);
+#else /* DNSSEC_LOCAL_VALIDATION */
+    err = val_getaddrinfo(netsnmp_validator_context(), name, NULL, &hint,
+                          &addrs, &val_status);
+    DEBUGMSGTL(("dns:sec:val", "err %d, val_status %d / %s; trusted: %d\n",
+                err, val_status, p_val_status(val_status),
+                val_istrusted(val_status)));
+    if (! val_istrusted(val_status)) {
+        int rc;
+        if ((err != 0) && VAL_GETADDRINFO_HAS_STATUS(err)) {
+            snmp_log(LOG_WARNING,
+                     "WARNING: UNTRUSTED error in DNS resolution for %s!\n",
+                     name);
+            rc = EAI_FAIL;
+        } else {
+            snmp_log(LOG_WARNING,
+                     "The authenticity of DNS response is not trusted (%s)\n",
+                     p_val_status(val_status));
+            rc = EAI_NONAME;
+        }
+        /** continue anyways if DNSSEC_WARN_ONLY is set */
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                    NETSNMP_DS_LIB_DNSSEC_WARN_ONLY))
+            return rc;
+    }
+
+
+#endif /* DNSSEC_LOCAL_VALIDATION */
+    *res = addrs;
+    if ((0 == err) && addrs && addrs->ai_addr) {
+        DEBUGMSGTL(("dns:getaddrinfo", "answer { AF_INET, %s:%hu }\n",
+                    inet_ntoa(((struct sockaddr_in*)addrs->ai_addr)->sin_addr),
+                    ntohs(((struct sockaddr_in*)addrs->ai_addr)->sin_port)));
+    }
+    return err;
+#else
+    NETSNMP_LOGONCE((LOG_ERR, "getaddrinfo not available"));
+    return EAI_FAIL;
+#endif /* getaddrinfo */
+}
+
+struct hostent *
+netsnmp_gethostbyname(const char *name)
+{
+#if HAVE_GETHOSTBYNAME
+#ifdef DNSSEC_LOCAL_VALIDATION
+    val_status_t val_status;
+#endif
+    struct hostent *hp = NULL;
+
+    if (NULL == name)
+        return NULL;
+
+    DEBUGMSGTL(("dns:gethostbyname", "looking up %s\n", name));
+
+#ifdef DNSSEC_LOCAL_VALIDATION
+    hp  = val_gethostbyname(netsnmp_validator_context(), name, &val_status);
+    DEBUGMSGTL(("dns:sec:val", "val_status %d / %s; trusted: %d\n",
+                val_status, p_val_status(val_status),
+                val_istrusted(val_status)));
+    if (!val_istrusted(val_status)) {
+        snmp_log(LOG_WARNING,
+                 "The authenticity of DNS response is not trusted (%s)\n",
+                 p_val_status(val_status));
+        /** continue anyways if DNSSEC_WARN_ONLY is set */
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                    NETSNMP_DS_LIB_DNSSEC_WARN_ONLY))
+            hp = NULL;
+    }
+    else if (val_does_not_exist(val_status) && hp)
+        hp = NULL;
+#else
+    hp = gethostbyname(name);
+#endif
+    if (hp == NULL) {
+        DEBUGMSGTL(("dns:gethostbyname",
+                    "couldn't resolve %s\n", name));
+    } else if (hp->h_addrtype != AF_INET
+#ifdef AF_INET6
+               && hp->h_addrtype != AF_INET6
+#endif
+        ) {
+#ifdef AF_INET6
+        DEBUGMSGTL(("dns:gethostbyname",
+                    "warning: response for %s not AF_INET/AF_INET6!\n", name));
+#else
+        DEBUGMSGTL(("dns:gethostbyname",
+                    "warning: response for %s not AF_INET!\n", name));
+#endif
+    } else {
+        DEBUGMSGTL(("dns:gethostbyname",
+                    "%s resolved okay\n", name));
+    }
+    return hp;
+#else
+    NETSNMP_LOGONCE((LOG_ERR, "gethostbyname not available"));
+    return NULL;
+#endif /* HAVE_GETHOSTBYNAME */
+}
+
+/**
+ * Look up the host name via DNS.
+ *
+ * @param[in] addr Pointer to the address to resolve. This argument points e.g.
+ *   to a struct in_addr for AF_INET or to a struct in6_addr for AF_INET6.
+ * @param[in] len  Length in bytes of *addr.
+ * @param[in] type Address family, e.g. AF_INET or AF_INET6.
+ *
+ * @return Pointer to a hostent structure if address lookup succeeded or NULL
+ *   if the lookup failed.
+ *
+ * @see See also the gethostbyaddr() man page.
+ */
+struct hostent *
+netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
+{
+#if HAVE_GETHOSTBYADDR
+    struct hostent *hp = NULL;
+    char buf[64];
+
+    DEBUGMSGTL(("dns:gethostbyaddr", "resolving %s\n",
+                inet_ntop(type, addr, buf, sizeof(buf))));
+
+#ifdef DNSSEC_LOCAL_VALIDATION
+    val_status_t val_status;
+    hp = val_gethostbyaddr(netsnmp_validator_context(), addr, len, type,
+                           &val_status);
+    DEBUGMSGTL(("dns:sec:val", "val_status %d / %s; trusted: %d\n",
+                val_status, p_val_status(val_status),
+                val_istrusted(val_status)));
+    if (!val_istrusted(val_status)) {
+        snmp_log(LOG_WARNING,
+                 "The authenticity of DNS response is not trusted (%s)\n",
+                 p_val_status(val_status));
+        /** continue anyways if DNSSEC_WARN_ONLY is set */
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                    NETSNMP_DS_LIB_DNSSEC_WARN_ONLY))
+            hp = NULL;
+    }
+    else if (val_does_not_exist(val_status) && hp)
+        hp = NULL;
+#else
+    hp = gethostbyaddr(addr, len, type);
+#endif
+    if (hp == NULL) {
+        DEBUGMSGTL(("dns:gethostbyaddr", "couldn't resolve addr\n"));
+    } else if (hp->h_addrtype != AF_INET) {
+        DEBUGMSGTL(("dns:gethostbyaddr",
+                    "warning: response for addr not AF_INET!\n"));
+    } else {
+        DEBUGMSGTL(("dns:gethostbyaddr", "addr resolved okay\n"));
+    }
+    return hp;
+#else
+    NETSNMP_LOGONCE((LOG_ERR, "gethostbyaddr not available"));
+    return NULL;
+#endif
+}
+
 /*******************************************************************/
 
 #ifndef HAVE_STRNCASECMP
@@ -925,41 +1115,32 @@ setenv(const char *name, const char *value, int overwrite)
 }
 #endif                          /* HAVE_SETENV */
 
-/* returns centiseconds */
+netsnmp_feature_child_of(calculate_time_diff, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_CALCULATE_TIME_DIFF
+/**
+ * Compute (*now - *then) in centiseconds.
+ */
 int
-calculate_time_diff(struct timeval *now, struct timeval *then)
+calculate_time_diff(const struct timeval *now, const struct timeval *then)
 {
-    struct timeval  tmp, diff;
-    memcpy(&tmp, now, sizeof(struct timeval));
-    tmp.tv_sec--;
-    tmp.tv_usec += 1000000L;
-    diff.tv_sec = tmp.tv_sec - then->tv_sec;
-    diff.tv_usec = tmp.tv_usec - then->tv_usec;
-    if (diff.tv_usec > 1000000L) {
-        diff.tv_usec -= 1000000L;
-        diff.tv_sec++;
-    }
-    return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
-}
+    struct timeval  diff;
 
-/* returns diff in rounded seconds */
-u_int
-calculate_sectime_diff(struct timeval *now, struct timeval *then)
-{
-    struct timeval  tmp, diff;
-    memcpy(&tmp, now, sizeof(struct timeval));
-    tmp.tv_sec--;
-    tmp.tv_usec += 1000000L;
-    diff.tv_sec = tmp.tv_sec - then->tv_sec;
-    diff.tv_usec = tmp.tv_usec - then->tv_usec;
-    if (diff.tv_usec > 1000000L) {
-        diff.tv_usec -= 1000000L;
-        diff.tv_sec++;
-    }
-    if (diff.tv_usec >= 500000L)
-        return diff.tv_sec + 1;
-    return  diff.tv_sec;
+    NETSNMP_TIMERSUB(now, then, &diff);
+    return (int)(diff.tv_sec * 100 + diff.tv_usec / 10000);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_TIME_DIFF */
+
+#ifndef NETSNMP_FEATURE_REMOVE_CALCULATE_SECTIME_DIFF
+/** Compute rounded (*now - *then) in seconds. */
+u_int
+calculate_sectime_diff(const struct timeval *now, const struct timeval *then)
+{
+    struct timeval  diff;
+
+    NETSNMP_TIMERSUB(now, then, &diff);
+    return (u_int)(diff.tv_sec + (diff.tv_usec >= 500000L));
+}
+#endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_SECTIME_DIFF */
 
 #ifndef HAVE_STRCASESTR
 /*
@@ -1070,13 +1251,14 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
             /*
              * DNE, make it 
              */
-            snmp_log(LOG_INFO, "Creating directory: %s\n", buf);
 #ifdef WIN32
             if (CreateDirectory(buf, NULL) == 0)
 #else
             if (mkdir(buf, mode) == -1)
 #endif
                 goto out;
+            else
+                snmp_log(LOG_INFO, "Created directory: %s\n", buf);
         } else {
             /*
              * exists, is it a file? 
@@ -1204,7 +1386,7 @@ netsnmp_os_kernel_width(void)
   } else {
     return -1;
   }
-#elif defined(aix4) || defined(aix5) || defined(aix6)
+#elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
   return (__KERNEL_32() ? 32 : (__KERNEL_64() ? 64 : -1));
 #elif defined(osf4) || defined(osf5) || defined(__alpha)
   return 64; /* Alpha is always 64bit */
@@ -1214,3 +1396,68 @@ netsnmp_os_kernel_width(void)
 #endif
 }
 
+netsnmp_feature_child_of(str_to_uid, user_information)
+#ifndef NETSNMP_FEATURE_REMOVE_STR_TO_UID
+/**
+ * Convert a user name or number into numeric form.
+ *
+ * @param[in] useroruid Either a Unix user name or the ASCII representation
+ *   of a user number.
+ *
+ * @return Either a user number > 0 or 0 if useroruid is not a valid user
+ *   name, not a valid user number or the name of the root user.
+ */
+int netsnmp_str_to_uid(const char *useroruid) {
+    int uid;
+#if HAVE_GETPWNAM && HAVE_PWD_H
+    struct passwd *pwd;
+#endif
+
+    uid = atoi(useroruid);
+
+    if (uid == 0) {
+#if HAVE_GETPWNAM && HAVE_PWD_H
+        pwd = getpwnam(useroruid);
+        uid = pwd ? pwd->pw_uid : 0;
+        endpwent();
+#endif
+        if (uid == 0)
+            snmp_log(LOG_WARNING, "Can't identify user (%s).\n", useroruid);
+    }
+    return uid;
+    
+}
+#endif /* NETSNMP_FEATURE_REMOVE_STR_TO_UID */
+
+netsnmp_feature_child_of(str_to_gid, user_information)
+#ifndef NETSNMP_FEATURE_REMOVE_STR_TO_GID
+/**
+ * Convert a group name or number into numeric form.
+ *
+ * @param[in] grouporgid Either a Unix group name or the ASCII representation
+ *   of a group number.
+ *
+ * @return Either a group number > 0 or 0 if grouporgid is not a valid group
+ *   name, not a valid group number or the root group.
+ */
+int netsnmp_str_to_gid(const char *grouporgid)
+{
+    int gid;
+
+    gid = atoi(grouporgid);
+
+    if (gid == 0) {
+#if HAVE_GETGRNAM && HAVE_GRP_H
+        struct group  *grp;
+
+        grp = getgrnam(grouporgid);
+        gid = grp ? grp->gr_gid : 0;
+        endgrent();
+#endif
+        if (gid == 0)
+            snmp_log(LOG_WARNING, "Can't identify group (%s).\n", grouporgid);
+    }
+
+    return gid;
+}
+#endif /* NETSNMP_FEATURE_REMOVE_STR_TO_GID */

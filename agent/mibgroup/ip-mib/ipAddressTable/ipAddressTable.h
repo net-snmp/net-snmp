@@ -96,13 +96,13 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access)
         /*
          * ipAddressAddrType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h
          */
-        u_long          ipAddressAddrType;
+        long            ipAddressAddrType;
 
         /*
          * ipAddressAddr(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
         /** 128 - 1(other indexes) - oid length(10) = 116 */
-        char            ipAddressAddr[116];
+        u_char          ipAddressAddr[116];
         size_t          ipAddressAddr_len;
 
 
@@ -197,8 +197,8 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access)
         * ipAddressTable_row_find_by_mib_index(ipAddressTable_mib_index *
                                                mib_idx);
 
-    extern oid      ipAddressTable_oid[];
-    extern int      ipAddressTable_oid_size;
+    extern const oid      ipAddressTable_oid[];
+    extern const int      ipAddressTable_oid_size;
 
 
 #include "ipAddressTable_interface.h"
@@ -227,9 +227,9 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access)
     /*
      * indexes
      */
-    int             ipAddressAddrType_map(u_long *
+    int             ipAddressAddrType_map(long *
                                           mib_ipAddressAddrType_val_ptr,
-                                          u_long
+                                          long
                                           raw_ipAddressAddrType_val);
 
     int             ipAddressIfIndex_get(ipAddressTable_rowreq_ctx *
@@ -270,15 +270,15 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access)
     int
         ipAddressTable_indexes_set_tbl_idx(ipAddressTable_mib_index *
                                            tbl_idx,
-                                           u_long ipAddressAddrType_val,
-                                           char *ipAddressAddr_val_ptr,
+                                           long ipAddressAddrType_val,
+                                           u_char *ipAddressAddr_val_ptr,
                                            size_t
                                            ipAddressAddr_val_ptr_len);
     int             ipAddressTable_indexes_set(ipAddressTable_rowreq_ctx *
                                                rowreq_ctx,
                                                u_long
                                                ipAddressAddrType_val,
-                                               char *ipAddressAddr_val_ptr,
+                                               u_char *ipAddressAddr_val_ptr,
                                                size_t
                                                ipAddressAddr_val_ptr_len);
 

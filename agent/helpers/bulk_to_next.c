@@ -1,10 +1,14 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
-
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -138,8 +142,11 @@ netsnmp_bulk_to_next_helper(netsnmp_mib_handler *handler,
 void
 netsnmp_init_bulk_to_next_helper(void)
 {
-    netsnmp_register_handler_by_name("bulk_to_next",
-                                     netsnmp_get_bulk_to_next_handler());
+    netsnmp_mib_handler *hnd = netsnmp_get_bulk_to_next_handler();
+    if (!hnd)
+        return;
+
+    netsnmp_register_handler_by_name("bulk_to_next", hnd);
 }
 /**  @} */
 

@@ -8,8 +8,11 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+netsnmp_feature_require(container_linked_list)
 
 /*
  * include our parent header 
@@ -23,11 +26,33 @@
 #   include "mibgroup/ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
 #endif
 
+#ifdef USING_IP_MIB_IPV6INTERFACETABLE_IPV6INTERFACETABLE_MODULE
+#   include "mibgroup/ip-mib/ipv6InterfaceTable/ipv6InterfaceTable.h"
+#endif
+
+typedef struct cd_container_s {
+    netsnmp_container *current;
+    netsnmp_container *deleted;
+} cd_container;
+
 /*
  * flag so we know not to set row/table last change times
  * during startup.
  */
 static int      _first_load = 1;
+
+/*
+ * Value of interface_fadeout config option
+ */
+static int fadeout = IFTABLE_REMOVE_MISSING_AFTER;
+/*
+ * Value of interface_replace_old config option
+ */
+static int replace_old = 0;
+
+static void
+_delete_missing_interface(ifTable_rowreq_ctx *rowreq_ctx,
+                          netsnmp_container *container);
 
 /** @ingroup interface 
  * @defgroup data_access data_access: Routines to access data
@@ -50,6 +75,32 @@ static int      _first_load = 1;
  * OID: .1.3.6.1.2.1.2.2, length: 8
  */
 
+static void
+parse_interface_fadeout(const char *token, char *line)
+{
+    fadeout = atoi(line);
+}
+static void
+parse_interface_replace_old(const char *token, char *line)
+{
+    if (strcmp(line, "yes") == 0
+            || strcmp(line, "y") == 0
+            || strcmp(line, "true") == 0
+            || strcmp(line, "1") == 0) {
+        replace_old = 1;
+        return;
+    }
+    if (strcmp(line, "no") == 0
+            || strcmp(line, "n") == 0
+            || strcmp(line, "false") == 0
+            || strcmp(line, "0") == 0) {
+        replace_old = 0;
+        return;
+    }
+    snmp_log(LOG_ERR, "Invalid value of interface_replace_old parameter: '%s'\n",
+            line);
+}
+
 /**
  * initialization for ifTable data access
  *
@@ -70,6 +121,10 @@ ifTable_init_data(ifTable_registration * ifTable_reg)
     /*
      * TODO:303:o: Initialize ifTable data.
      */
+    snmpd_register_config_handler("interface_fadeout", parse_interface_fadeout, NULL,
+            "interface_fadeout seconds");
+    snmpd_register_config_handler("interface_replace_old",
+            parse_interface_replace_old, NULL, "interface_replace_old yes|no");
 
     return MFD_SUCCESS;
 }                               /* ifTable_init_data */
@@ -152,23 +207,122 @@ ifTable_container_init(netsnmp_container **container_ptr_ptr,
          NETSNMP_CACHE_AUTO_RELOAD | NETSNMP_CACHE_DONT_INVALIDATE_ON_SET);
 }                               /* ifTable_container_init */
 
+void
+send_linkUpDownNotifications(oid *notification_oid, size_t notification_oid_len, int if_index, int if_admin_status, int if_oper_status)
+{
+    /*
+     * In the notification, we have to assign our notification OID to
+     * the snmpTrapOID.0 object. Here is it's definition. 
+     */
+    oid             objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
+    size_t          objid_snmptrap_len = OID_LENGTH(objid_snmptrap);
+
+    /*
+     * define the OIDs for the varbinds we're going to include
+     *  with the notification -
+     * IF-MIB::ifIndex,
+     * IF-MIB::ifAdminStatus, and
+     * IF-MIB::ifOperStatus
+     */
+    oid      if_index_oid[]   = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 1, 0 };
+    size_t   if_index_oid_len = OID_LENGTH(if_index_oid);
+    oid      if_admin_status_oid[]   = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 7, 0 };
+    size_t   if_admin_status_oid_len = OID_LENGTH(if_admin_status_oid);
+    oid      if_oper_status_oid[]   = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 8, 0 };
+    size_t   if_oper_status_oid_len = OID_LENGTH(if_oper_status_oid);
+
+    /*
+     * here is where we store the variables to be sent in the trap 
+     */
+    netsnmp_variable_list *notification_vars = NULL;
+
+    DEBUGMSGTL(("rsys:linkUpDownNotifications", "defining the trap\n"));
+
+    /*
+     * update the instance for each variable to be sent in the trap
+     */
+    if_index_oid[10] = if_index;
+    if_admin_status_oid[10] = if_index;
+    if_oper_status_oid[10] = if_index;
+
+    /*
+     * add in the trap definition object 
+     */
+    snmp_varlist_add_variable(&notification_vars,
+                              /*
+                               * the snmpTrapOID.0 variable 
+                               */
+                              objid_snmptrap, objid_snmptrap_len,
+                              /*
+                               * value type is an OID 
+                               */
+                              ASN_OBJECT_ID,
+                              /*
+                               * value contents is our notification OID 
+                               */
+                              (u_char *) notification_oid,
+                              /*
+                               * size in bytes = oid length * sizeof(oid) 
+                               */
+                              notification_oid_len * sizeof(oid));
+
+    /*
+     * add in the additional objects defined as part of the trap
+     */
+    snmp_varlist_add_variable(&notification_vars,
+                               if_index_oid, if_index_oid_len,
+                               ASN_INTEGER,
+                              (u_char *)&if_index,
+                                  sizeof(if_index));
+
+    /*
+     * if we want to insert additional objects, we do it here 
+     */
+    snmp_varlist_add_variable(&notification_vars,
+                               if_admin_status_oid, if_admin_status_oid_len,
+                               ASN_INTEGER,
+                              (u_char *)&if_admin_status,
+                                  sizeof(if_admin_status));
+
+    snmp_varlist_add_variable(&notification_vars,
+                               if_oper_status_oid, if_oper_status_oid_len,
+                               ASN_INTEGER,
+                              (u_char *)&if_oper_status,
+                                  sizeof(if_oper_status));
+
+    /*
+     * send the trap out.  This will send it to all registered
+     * receivers (see the "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
+     * section of the snmpd.conf manual page. 
+     */
+    DEBUGMSGTL(("rsys:linkUpDownNotifications", "sending the trap\n"));
+    send_v2trap(notification_vars);
+
+    /*
+     * free the created notification variable list 
+     */
+    DEBUGMSGTL(("rsys:linkUpDownNotifications", "cleaning up\n"));
+    snmp_free_varbind(notification_vars);
+}
+
 /**
  * check entry for update
  *
  */
 static void
 _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
-                                   netsnmp_container *ifcontainer)
+                                   cd_container *cdc)
 {
     char            oper_changed = 0;
-    u_long lastchange = rowreq_ctx->data.ifLastChange;
+    int lastchanged = rowreq_ctx->data.ifLastChange;
+    netsnmp_container *ifcontainer = cdc->current;
 
     /*
      * check for matching entry. We can do this directly, since
      * both containers use the same index.
      */
     netsnmp_interface_entry *ifentry =
-        CONTAINER_FIND(ifcontainer, rowreq_ctx);
+        (netsnmp_interface_entry*)CONTAINER_FIND(ifcontainer, rowreq_ctx);
 
 #ifdef USING_IP_MIB_IPV4INTERFACETABLE_IPV4INTERFACETABLE_MODULE
     /*
@@ -193,28 +347,40 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
          * deleted (and thus need to update ifTableLastChanged)?
          */
         if (!rowreq_ctx->known_missing) {
-            DEBUGMSGTL(("ifTable:access", "updating missing entry\n"));
             rowreq_ctx->known_missing = 1;
+            DEBUGMSGTL(("ifTable:access", "updating missing entry %s\n",rowreq_ctx->data.ifName));
             rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
-            if ((!(rowreq_ctx->data.ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
-                && (rowreq_ctx->data.ifOperStatus != IFOPERSTATUS_DOWN))
-                oper_changed = 1;
             rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
+            oper_changed = 1;
+        }
+        if (rowreq_ctx->known_missing) {
+            time_t now = netsnmp_get_agent_uptime();
+            u_long diff = (now - rowreq_ctx->data.ifLastChange) / 100;
+            DEBUGMSGTL(("verbose:ifTable:access", "missing entry for %ld seconds\n", diff));
+            if (diff >= fadeout) {
+                DEBUGMSGTL(("ifTable:access", "marking missing entry %s for "
+                            "removal after %d seconds\n", rowreq_ctx->data.ifName,
+                            fadeout));
+                if (NULL == cdc->deleted)
+                   cdc->deleted = netsnmp_container_find("ifTable_deleted:linked_list");
+                if (NULL == cdc->deleted)
+                   snmp_log(LOG_ERR, "couldn't create container for deleted interface\n");
+                else {
+                   CONTAINER_INSERT(cdc->deleted, rowreq_ctx);
+                }
+            }
         }
     } else {
-        DEBUGMSGTL(("ifTable:access", "updating existing entry\n"));
+        DEBUGMSGTL(("ifTable:access", "updating existing entry %s\n",
+                    rowreq_ctx->data.ifName));
 
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
         {
             int rc = strcmp(rowreq_ctx->data.ifName,
                             ifentry->name);
             if (rc != 0) {
-                static int logged = 0;
-                if (!logged) {
-                    snmp_log(LOG_ERR, "Name of an interface changed. Such " \
-                        "interfaces will keep its old name in IF-MIB.\n");
-                    logged = 1;
-                }
+                NETSNMP_LOGONCE((LOG_ERR, "Name of an interface changed. Such " \
+                        "interfaces will keep its old name in IF-MIB.\n"));
                 DEBUGMSGTL(("ifTable:access", "interface %s changed name to %s, ignoring\n",
                     rowreq_ctx->data.ifName, ifentry->name));
             }
@@ -253,10 +419,63 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
     /*
      * if ifOperStatus changed, update ifLastChange
      */
-    if (oper_changed)
+    if (oper_changed) {
         rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
+#ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
+        if (rowreq_ctx->data.ifLinkUpDownTrapEnable == 1) {
+            if (rowreq_ctx->data.ifOperStatus == IFOPERSTATUS_UP) {
+                oid notification_oid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5, 4 };
+                send_linkUpDownNotifications(notification_oid, OID_LENGTH(notification_oid),
+                                             rowreq_ctx->tbl_idx.ifIndex,
+                                             rowreq_ctx->data.ifAdminStatus,
+                                             rowreq_ctx->data.ifOperStatus);
+            } else if (rowreq_ctx->data.ifOperStatus == IFOPERSTATUS_DOWN) {
+                oid notification_oid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5, 3 };
+                send_linkUpDownNotifications(notification_oid, OID_LENGTH(notification_oid),
+                                             rowreq_ctx->tbl_idx.ifIndex,
+                                             rowreq_ctx->data.ifAdminStatus,
+                                             rowreq_ctx->data.ifOperStatus);
+            }
+        }
+#endif
+    }
+
     else
-        rowreq_ctx->data.ifLastChange = lastchange;
+        rowreq_ctx->data.ifLastChange = lastchanged;
+}
+
+/**
+ * Remove all old interfaces with the same name as the newly added one.
+ */
+static void
+_check_and_replace_old(netsnmp_interface_entry *ifentry,
+                   netsnmp_container *container)
+{
+    netsnmp_iterator *it;
+    ifTable_rowreq_ctx * rowreq_ctx;
+    netsnmp_container *to_delete;
+
+    to_delete = netsnmp_container_find("ifTable_deleted:linked_list");
+    if (NULL == to_delete) {
+       snmp_log(LOG_ERR, "couldn't create container for deleted interface\n");
+       return;
+    }
+
+    it = CONTAINER_ITERATOR(container);
+    for (rowreq_ctx = ITERATOR_FIRST(it); rowreq_ctx; rowreq_ctx = ITERATOR_NEXT(it)) {
+        if (strcmp(ifentry->name, rowreq_ctx->data.ifentry->name) == 0) {
+            DEBUGMSGTL(("ifTable:access",
+                    "removing interface %ld due to new %s\n",
+                    (long) rowreq_ctx->data.ifentry->index, ifentry->name));
+            CONTAINER_INSERT(to_delete, rowreq_ctx);
+        }
+    }
+    ITERATOR_RELEASE(it);
+
+    CONTAINER_FOR_EACH(to_delete,
+                       (netsnmp_container_obj_func *) _delete_missing_interface,
+                       container);
+    CONTAINER_FREE(to_delete);
 }
 
 /**
@@ -277,6 +496,9 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
     rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
+        if (replace_old)
+                _check_and_replace_old(ifentry, container);
+
         CONTAINER_INSERT(container, rowreq_ctx);
         if (0 == _first_load) {
             rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
@@ -305,6 +527,21 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
             netsnmp_access_interface_entry_free(ifentry);
         }
     }
+}
+
+/**
+ * add new entry
+ */
+static void
+_delete_missing_interface(ifTable_rowreq_ctx *rowreq_ctx,
+                          netsnmp_container *container)
+{
+    DEBUGMSGTL(("ifTable:access", "removing missing entry %s\n",
+                rowreq_ctx->data.ifName));
+
+    CONTAINER_REMOVE(container, rowreq_ctx);
+
+    ifTable_release_rowreq_ctx(rowreq_ctx);
 }
 
 /**
@@ -371,7 +608,7 @@ ifTable_container_shutdown(netsnmp_container *container_ptr)
 int
 ifTable_container_load(netsnmp_container *container)
 {
-    netsnmp_container *ifcontainer;
+    cd_container cdc;
 
     DEBUGMSGTL(("verbose:ifTable:ifTable_container_load", "called\n"));
 
@@ -384,23 +621,35 @@ ifTable_container_load(netsnmp_container *container)
     /*
      * ifTable gets its data from the netsnmp_interface API.
      */
-    ifcontainer =
+    cdc.current =
         netsnmp_access_interface_container_load(NULL,
                                                 NETSNMP_ACCESS_INTERFACE_INIT_NOFLAGS);
-    if (NULL == ifcontainer)
+    if (NULL == cdc.current)
         return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
+
+    cdc.deleted = NULL; /* created as needed */
 
     /*
      * we just got a fresh copy of interface data. compare it to
      * what we've already got, and make any adjustements...
      */
     CONTAINER_FOR_EACH(container, (netsnmp_container_obj_func *)
-                       _check_interface_entry_for_updates, ifcontainer);
+                       _check_interface_entry_for_updates, &cdc);
+
+    /*
+     * now remove any missing interfaces
+     */
+    if (NULL != cdc.deleted) {
+       CONTAINER_FOR_EACH(cdc.deleted,
+                          (netsnmp_container_obj_func *) _delete_missing_interface,
+                          container);
+       CONTAINER_FREE(cdc.deleted);
+    }
 
     /*
      * now add any new interfaces
      */
-    CONTAINER_FOR_EACH(ifcontainer,
+    CONTAINER_FOR_EACH(cdc.current,
                        (netsnmp_container_obj_func *) _add_new_interface,
                        container);
 
@@ -408,11 +657,11 @@ ifTable_container_load(netsnmp_container *container)
      * free the container. we've either claimed each ifentry, or released it,
      * so the dal function doesn't need to clear the container.
      */
-    netsnmp_access_interface_container_free(ifcontainer,
+    netsnmp_access_interface_container_free(cdc.current,
                                             NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:ifTable:ifTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%lu records\n", (unsigned long)CONTAINER_SIZE(container)));
 
     if (_first_load)
         _first_load = 0;

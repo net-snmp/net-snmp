@@ -10,10 +10,10 @@
 #define _MIBGROUP_SNMPTARGETADDRENTRY_H
 
 /*
- * we use header_generic and checkmib from the util_funcs module 
+ * we use header_generic from the util_funcs module
  */
 
-config_require(util_funcs)
+config_require(util_funcs/header_generic)
 
 
     /*
@@ -46,7 +46,8 @@ config_add_mib(SNMPv2-TM)
      * structure definitions 
      */
      struct targetAddrTable_struct {
-         char           *name;
+         char           *nameData;
+         unsigned char   nameLen;
          oid             tDomain[MAX_OID_LEN];
          int             tDomainLen;
          unsigned char  *tAddress;
@@ -67,19 +68,19 @@ config_add_mib(SNMPv2-TM)
  */
 
      void            init_snmpTargetAddrEntry(void);
-     int             store_snmpTargetAddrEntry(int majorID, int minorID,
-                                               void *serverarg,
-                                               void *clientarg);
+     void            shutdown_snmpTargetAddrEntry(void);
      FindVarMethod   var_snmpTargetAddrEntry;
 
      struct targetAddrTable_struct *get_addrTable(void);
-     struct targetAddrTable_struct *get_addrForName(char *name);
+     struct targetAddrTable_struct *get_addrForName2(const char *name,
+                                                     unsigned char nameLen);
      struct targetAddrTable_struct *snmpTargetAddrTable_create(void);
      void            snmpTargetAddrTable_add(struct targetAddrTable_struct
                                              *newEntry);
 
      void            snmpd_parse_config_targetAddr(const char *, char *);
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
      WriteMethod     write_snmpTargetAddrTDomain;
      WriteMethod     write_snmpTargetAddrTAddress;
      WriteMethod     write_snmpTargetAddrTimeout;
@@ -89,7 +90,8 @@ config_add_mib(SNMPv2-TM)
      WriteMethod     write_snmpTargetAddrStorageType;
      WriteMethod     write_snmpTargetAddrRowStatus;
 
-     FindVarMethod   var_targetSpinLock;
      WriteMethod     write_targetSpinLock;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+     FindVarMethod   var_targetSpinLock;
 
 #endif                          /* _MIBGROUP_SNMPTARGETADDRENTRY_H */

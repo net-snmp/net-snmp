@@ -270,7 +270,7 @@ ipCidrRouteTable_container_load(netsnmp_container *container)
                                         NETSNMP_ACCESS_ROUTE_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:ipCidrRouteTable:ipCidrRouteTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%d records\n", (int)CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteTable_container_load */

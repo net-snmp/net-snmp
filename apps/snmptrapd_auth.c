@@ -4,11 +4,13 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#else
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 
@@ -126,8 +128,10 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
         /* pass the PDU to the VACM routine for handling authorization */
         DEBUGMSGTL(("snmptrapd:auth", "Calling VACM for checking phase %d:%s\n",
                     i, se_find_label_in_slist(VACM_VIEW_ENUM_NAME, i)));
-        if (vacm_check_view(newpdu, var->val.objid,
-                            var->val_len/sizeof(oid), 0, i) == VACM_SUCCESS) {
+        if (vacm_check_view_contents(newpdu, var->val.objid,
+                                     var->val_len/sizeof(oid), 0, i,
+                                     VACM_CHECK_VIEW_CONTENTS_DNE_CONTEXT_OK)
+            == VACM_SUCCESS) {
             DEBUGMSGTL(("snmptrapd:auth", "  result: authorized\n"));
             ret |= 1 << i;
         } else {

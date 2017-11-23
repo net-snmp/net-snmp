@@ -138,7 +138,7 @@ ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
              * yes.
              */
             DEBUGMSGTL(("ipv6InterfaceTable:check_entry_for_updates",
-                        "inserted row for index %d\n", entry->index));
+                        "inserted row for index %" NETSNMP_PRIo "d\n", entry->index));
             CONTAINER_INSERT(c, ift_rrc);
             changed = 1;
         }
@@ -152,7 +152,7 @@ ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
              * no
              */
             DEBUGMSGTL(("ipv6InterfaceTable:check_entry_for_updates",
-                        "removed  row for index %d\n",
+                        "removed  row for index %" NETSNMP_PRIo "d\n",
                         ift_rrc->data.ifentry->index));
             CONTAINER_REMOVE(c, ift_rrc);
             changed = 1;
@@ -190,7 +190,7 @@ ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
                     && (entry->forwarding_v6 !=
                         ift_rrc->data.ifentry->forwarding_v6))) {
                 DEBUGMSGTL(("ipv6InterfaceTable:check_entry_for_updates",
-                            "row changed for index %d\n",
+                            "row changed for index %" NETSNMP_PRIo "d\n",
                             ift_rrc->data.ifentry->index));
                 changed = 1;
             }
@@ -329,7 +329,7 @@ ipv6InterfaceTable_container_load(netsnmp_container *container)
         ++count;
     }
 
-    DEBUGMSGT(("verbose:ipv6InterfaceTable:ipv6InterfaceTable_container_load", "inserted %d records\n", count));
+    DEBUGMSGT(("verbose:ipv6InterfaceTable:ipv6InterfaceTable_container_load", "inserted %d records\n", (int)count));
 
     return MFD_SUCCESS;
 }                               /* ipv6InterfaceTable_container_load */

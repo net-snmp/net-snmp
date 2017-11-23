@@ -4,10 +4,13 @@
 #endif
 
 extern  netsnmp_session *ss;
+NETSNMP_IMPORT
 int netsnmp_query_get(    netsnmp_variable_list *list,
                           netsnmp_session       *session);
+NETSNMP_IMPORT
 int netsnmp_query_getnext(netsnmp_variable_list *list,
                           netsnmp_session       *session);
+NETSNMP_IMPORT
 int netsnmp_query_walk(   netsnmp_variable_list *list,
                           netsnmp_session       *session);
 

@@ -4,10 +4,17 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/vacm.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "nsVacmAccessTable.h"
+
+netsnmp_feature_require(check_vb_storagetype)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(table_iterator_insert_context)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /** Initializes the nsVacmAccessTable module */
 void
@@ -17,17 +24,22 @@ init_register_nsVacm_context(const char *context)
      * Initialize the nsVacmAccessTable table by defining its
      *   contents and how it's structured
      */
-    static oid nsVacmAccessTable_oid[]   = { 1,3,6,1,4,1,8072,1,9,1 };
-    size_t     nsVacmAccessTable_oid_len = OID_LENGTH(nsVacmAccessTable_oid);
+    const oid nsVacmAccessTable_oid[]   = { 1,3,6,1,4,1,8072,1,9,1 };
     netsnmp_handler_registration    *reg;
     netsnmp_iterator_info           *iinfo;
     netsnmp_table_registration_info *table_info;
 
-    reg = netsnmp_create_handler_registration("nsVacmAccessTable",
-                                            nsVacmAccessTable_handler,
-                                            nsVacmAccessTable_oid,
-                                            nsVacmAccessTable_oid_len,
-                                            HANDLER_CAN_RWRITE);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+    reg = netsnmp_create_handler_registration(
+        "nsVacmAccessTable", nsVacmAccessTable_handler,
+        nsVacmAccessTable_oid, OID_LENGTH(nsVacmAccessTable_oid),
+        HANDLER_CAN_RWRITE);
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+    reg = netsnmp_create_handler_registration(
+        "nsVacmAccessTable", nsVacmAccessTable_handler,
+        nsVacmAccessTable_oid, OID_LENGTH(nsVacmAccessTable_oid),
+        HANDLER_CAN_RONLY);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
     netsnmp_table_helper_add_indexes(table_info,
@@ -48,7 +60,7 @@ init_register_nsVacm_context(const char *context)
     if ( context && context[0] )
         reg->contextName = strdup(context);
 
-    netsnmp_register_table_iterator(reg, iinfo);
+    netsnmp_register_table_iterator2(reg, iinfo);
 }
 
 void
@@ -191,6 +203,7 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         /*
          * Write-support
          */
@@ -336,6 +349,7 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
             }
         }
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
     return SNMP_ERR_NOERROR;
 }

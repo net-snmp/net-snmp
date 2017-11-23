@@ -14,11 +14,12 @@ config_require(sctp-mib/sctpLookupRemIPAddrTable)
 config_require(sctp-mib/sctpAssocTable)
 #if defined( linux )
 config_require(sctp-mib/sctpTables_linux)
+config_require(util_funcs/get_pid_from_inode)
+#elif defined( freebsd7 ) || defined( freebsd8 )
+config_require(sctp-mib/sctpTables_freebsd)
+#elif defined( solaris2 )
+config_require(sctp-mib/sctpTables_solaris2)
 #else
-/*
-* couldn't determine the correct file!
-* require a bogus file to generate an error.
-*/
-config_require(sctp-mib/tables-unknown-arch)
+config_error(SCTP-MIB is not available in tihs environment)
 #endif
 #endif                          /* SCTP_TABLES_H */

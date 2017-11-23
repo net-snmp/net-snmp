@@ -994,10 +994,8 @@ Net-SNMP may be compiled with Perl support by configuring like:
 
    ./configure -enable-embedded-perl ...
 
-It's recommended to add --enable-as-needed for proper libperl linking.
-
-Enabling Perl support should only be done if you are sure you really 
-need Perl, for the following reasons:
+This should only be done if you are sure you really need Perl, 
+for the following reasons:
 
 Solaris 8 and later ship with a version of Perl compiled using Sun's cc. 
 

@@ -8,6 +8,8 @@
 config_require(host/hr_device)
 
 extern void     init_hr_disk(void);
+extern void     shutdown_hr_disk(void);
+
 extern void     Init_HR_Disk(void);
 extern int      Get_Next_HR_Disk(void);
 extern int      Get_Next_HR_Disk_Partition(char *, size_t, int);

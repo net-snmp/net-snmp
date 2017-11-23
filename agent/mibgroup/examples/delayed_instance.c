@@ -172,6 +172,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg)
                                  sizeof(delay_time));
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         /*
          * check type 
@@ -223,7 +224,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg)
          * update current value 
          */
         delay_time = *(requests->requestvb->val.integer);
-        DEBUGMSGTL(("testhandler", "updated delay_time -> %d\n",
+        DEBUGMSGTL(("testhandler", "updated delay_time -> %ld\n",
                     delay_time));
         break;
 
@@ -246,6 +247,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg)
          * we don't have anything to actually do here 
          */
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
     }
 
     /*

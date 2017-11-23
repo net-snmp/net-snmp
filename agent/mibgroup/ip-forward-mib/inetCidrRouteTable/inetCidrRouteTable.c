@@ -14,6 +14,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -26,8 +27,11 @@
 
 #include "inetCidrRouteTable_interface.h"
 
-oid             inetCidrRouteTable_oid[] = { INETCIDRROUTETABLE_OID };
-int             inetCidrRouteTable_oid_size =
+netsnmp_feature_require(inetCidrRouteTable_container_get)
+netsnmp_feature_require(inetCidrRouteTable_container_size)
+
+const oid       inetCidrRouteTable_oid[] = { INETCIDRROUTETABLE_OID };
+const int       inetCidrRouteTable_oid_size =
 OID_LENGTH(inetCidrRouteTable_oid);
 
 inetCidrRouteTable_registration inetCidrRouteTable_user_context;
@@ -410,25 +414,28 @@ inetCidrRouteTable_indexes_set_tbl_idx(inetCidrRouteTable_mib_index *
     /*
      * inetCidrRoutePolicy(4)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h 
      */
-    tbl_idx->inetCidrRoutePolicy_len = sizeof(tbl_idx->inetCidrRoutePolicy) / sizeof(tbl_idx->inetCidrRoutePolicy[0]);  /* max length */
+    tbl_idx->inetCidrRoutePolicy_len = sizeof(tbl_idx->inetCidrRoutePolicy) / sizeof(tbl_idx->inetCidrRoutePolicy[0]);
     /** WARNING: this code might not work for netsnmp_route_entry */
     /*
      * make sure there is enough space for inetCidrRoutePolicy data
      */
-    if ((NULL == tbl_idx->inetCidrRoutePolicy) ||
-        (tbl_idx->inetCidrRoutePolicy_len <
-         (inetCidrRoutePolicy_val_ptr_len))) {
-        snmp_log(LOG_ERR, "not enough space for value\n");
+    if (tbl_idx->inetCidrRoutePolicy == NULL ||
+        inetCidrRoutePolicy_val_ptr_len >
+        tbl_idx->inetCidrRoutePolicy_len *
+        sizeof(inetCidrRoutePolicy_val_ptr[0])) {
+        snmp_log(LOG_ERR,
+	    "inetCidrRoutePolicy: Not enough space for value (%d < %d)\n",
+	    (int)tbl_idx->inetCidrRoutePolicy_len,
+	    (int)(inetCidrRoutePolicy_val_ptr_len / sizeof(inetCidrRoutePolicy_val_ptr[0])));
         return MFD_ERROR;
     }
     if (0 == inetCidrRoutePolicy_val_ptr_len) {
-        inetCidrRoutePolicy_val_ptr_len = nullOidLen / sizeof(oid);
+        inetCidrRoutePolicy_val_ptr_len = nullOidLen;
         inetCidrRoutePolicy_val_ptr = nullOid;
     }
-    tbl_idx->inetCidrRoutePolicy_len = inetCidrRoutePolicy_val_ptr_len;
+    tbl_idx->inetCidrRoutePolicy_len = inetCidrRoutePolicy_val_ptr_len / sizeof(oid);
     memcpy(tbl_idx->inetCidrRoutePolicy, inetCidrRoutePolicy_val_ptr,
-           inetCidrRoutePolicy_val_ptr_len *
-           sizeof(inetCidrRoutePolicy_val_ptr[0]));
+           inetCidrRoutePolicy_val_ptr_len);
 
     /*
      * inetCidrRouteNextHopType(5)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
@@ -446,11 +453,14 @@ inetCidrRouteTable_indexes_set_tbl_idx(inetCidrRouteTable_mib_index *
      */
     if ((NULL == tbl_idx->inetCidrRouteNextHop) ||
         (tbl_idx->inetCidrRouteNextHop_len <
-         (inetCidrRouteNextHop_val_ptr_len))) {
-        snmp_log(LOG_ERR, "not enough space for value\n");
+         (inetCidrRouteNextHop_val_ptr_len / sizeof(inetCidrRouteNextHop_val_ptr[0])))) {
+        snmp_log(LOG_ERR,
+	    "inetCidrRouteNexthop: Not enough space for value (%d < %d)\n",
+	    (int)tbl_idx->inetCidrRouteNextHop_len,
+	    (int)(inetCidrRouteNextHop_val_ptr_len / sizeof(inetCidrRouteNextHop_val_ptr[0])));
         return MFD_ERROR;
     }
-    tbl_idx->inetCidrRouteNextHop_len = inetCidrRouteNextHop_val_ptr_len;
+    tbl_idx->inetCidrRouteNextHop_len = inetCidrRouteNextHop_val_ptr_len / sizeof(inetCidrRouteNextHop_val_ptr[0]);
     memcpy(tbl_idx->inetCidrRouteNextHop, inetCidrRouteNextHop_val_ptr,
            inetCidrRouteNextHop_val_ptr_len *
            sizeof(inetCidrRouteNextHop_val_ptr[0]));

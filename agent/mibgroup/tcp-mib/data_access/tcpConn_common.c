@@ -21,26 +21,6 @@ static void _access_tcpconn_entry_release(netsnmp_tcpconn_entry * entry,
 
 /**---------------------------------------------------------------------*/
 /*
- * external per-architecture functions prototypes
- *
- * These shouldn't be called by the general public, so they aren't in
- * the header file.
- */
-extern int
-netsnmp_arch_tcpconn_container_load(netsnmp_container* container,
-                                      u_int load_flags);
-extern int
-netsnmp_arch_tcpconn_entry_init(netsnmp_tcpconn_entry *entry);
-extern int
-netsnmp_arch_tcpconn_entry_copy(netsnmp_tcpconn_entry *lhs,
-                                  netsnmp_tcpconn_entry *rhs);
-extern void
-netsnmp_arch_tcpconn_entry_cleanup(netsnmp_tcpconn_entry *entry);
-
-
-
-/**---------------------------------------------------------------------*/
-/*
  * container functions
  */
 /**
@@ -164,6 +144,13 @@ netsnmp_access_tcpconn_entry_free(netsnmp_tcpconn_entry * entry)
     free(entry);
 }
 
+#ifdef TCPCONN_DELETE_SUPPORTED
+
+/* XXX TODO: these are currently unsupported everywhere; to enable the
+   functions first implement netsnmp_arch_tcpconn_entry_delete in the
+   tcpConn_{OS}.c file and then define TCPCONN_DELETE_SUPPORTED in the
+   tcpConn_{OS}.h file (which may need to be created first). */
+
 /**
  * update underlying data store (kernel) for entry
  *
@@ -189,10 +176,11 @@ netsnmp_access_tcpconn_entry_set(netsnmp_tcpconn_entry * entry)
     if (! (entry->flags & NETSNMP_ACCESS_TCPCONN_DELETE))
         return -1;
     
-    rc = netsnmp_arch_tcpconn_delete(entry);
+    rc = netsnmp_arch_tcpconn_entry_delete(entry);
     
     return rc;
 }
+#endif /* TCPCONN_DELETE_SUPPORTED */
 
 /**
  * update an old tcpconn_entry from a new one

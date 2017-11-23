@@ -118,7 +118,9 @@ SOFTWARE.
 #define SNMP_MSG_GET        (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x0) /* a0=160 */
 #define SNMP_MSG_GETNEXT    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x1) /* a1=161 */
 #define SNMP_MSG_RESPONSE   (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x2) /* a2=162 */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #define SNMP_MSG_SET        (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x3) /* a3=163 */
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     /*
      * PDU types in SNMPv1 and SNMPsec 
@@ -137,6 +139,7 @@ SOFTWARE.
      */
 #define SNMP_MSG_REPORT     (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x8) /* a8=168 */
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     /*
      * internal modes that should never be used by the protocol for the
      * pdu type.
@@ -162,6 +165,7 @@ SOFTWARE.
 #define SNMP_MSG_INTERNAL_UNDO_COMMIT           24
 #define SNMP_MSG_INTERNAL_IRREVERSIBLE_COMMIT   25
 #define SNMP_MSG_INTERNAL_UNDO_CLEANUP          26
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     /*
      * modes > 128 for non sets.
@@ -175,9 +179,14 @@ SOFTWARE.
     /*
      * test for member of Confirmed Class i.e., reportable 
      */
+#ifdef NETSNMP_NO_WRITE_SUPPORT
+#define SNMP_CMD_CONFIRMED(c) (c == SNMP_MSG_INFORM || c == SNMP_MSG_GETBULK ||\
+                               c == SNMP_MSG_GETNEXT || c == SNMP_MSG_GET )
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
 #define SNMP_CMD_CONFIRMED(c) (c == SNMP_MSG_INFORM || c == SNMP_MSG_GETBULK ||\
                                c == SNMP_MSG_GETNEXT || c == SNMP_MSG_GET || \
-                               c == SNMP_MSG_SET)
+                               c == SNMP_MSG_SET )
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     /*
      * Exception values for SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 
@@ -277,6 +286,7 @@ SOFTWARE.
 #define SNMP_SEC_MODEL_SNMPv1		1
 #define SNMP_SEC_MODEL_SNMPv2c		2
 #define SNMP_SEC_MODEL_USM		3
+#define SNMP_SEC_MODEL_TSM              4
 #define SNMP_SEC_MODEL_SNMPv2p		256
 
 #define SNMP_SEC_LEVEL_NOAUTH		1
@@ -319,11 +329,15 @@ SOFTWARE.
 #define SNMPADMINLENGTH 255
 
 
+    NETSNMP_IMPORT
     char           *uptime_string(u_long, char *);
     char           *uptime_string_n(u_long, char *, size_t);
-    void            xdump(const u_char *, size_t, const char *);
+    NETSNMP_IMPORT
+    void            xdump(const void *, size_t, const char *);
+    NETSNMP_IMPORT
     u_char         *snmp_parse_var_op(u_char *, oid *, size_t *, u_char *,
                                       size_t *, u_char **, size_t *);
+    NETSNMP_IMPORT
     u_char         *snmp_build_var_op(u_char *, oid *, size_t *, u_char,
                                       size_t, u_char *, size_t *);
 

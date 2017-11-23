@@ -10,8 +10,6 @@
 # fallback to regular VPATH for non-gnu...
 @NON_GNU_VPATH@ $(srcdir)
 
-#TARG		= etest ktest misctest stest
-
 USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 LIBS		= -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
@@ -20,10 +18,44 @@ PARSEOBJS	=
 CPPFLAGS	= $(SNMPLIB_INCLUDES) @CPPFLAGS@
 CC		= @CC@ $(CPPFLAGS)
 
-all: $(TARG)
+all:
+	@echo "Select one of the following targets to run:"
+	@echo ""
+	@echo "  make test        -- default test suites"
+	@echo "  make testall     -- Run all available tests"
+	@echo "  make testfailed  -- Run only the tests that failed last time."
+	@echo "  make testsimple  -- Run tests directly with simple_run"
+	@echo ""
+	@echo "Set additional test parameters with TESTOPTS=args"
+	@echo ""
+	@echo "Also see the RUNFULLTESTS script for details"
 
 test:
-	$(srcdir)/RUNTESTS -a -D `pwd`/.. $(TESTOPTS)
+	@$(srcdir)/check_for_pskill
+	@if test "x$(PERL)" = "x" \
+	         -o "x@PERL_SYSTEM_INVOKES_POSIX_SHELL@" != xyes \
+		 || { ! $(PERL) -e 'require TAP::Harness;' >/dev/null 2>&1 \
+		    && ! $(PERL) -e 'require Test::Harness; die if $$Test::Harness::VERSION < 1.21;' >/dev/null 2>&1; };\
+	then \
+		echo $(srcdir)/RUNTESTS ; \
+		$(srcdir)/RUNTESTS ; \
+	else \
+		echo $(srcdir)/RUNFULLTESTS $(TESTOPTS) ; \
+		$(PERL) $(srcdir)/RUNFULLTESTS $(TESTOPTS) ; \
+	fi
+
+testsimple:
+	@(export srcdir=$(top_srcdir) ; \
+		export builddir=$(top_builddir) ; \
+		$(srcdir)/fulltests/support/simple_run $(TESTOPTS) \
+	)
+
+testall:
+	$(srcdir)/RUNFULLTESTS -g all $(TESTOPTS)
+
+testfailed:
+	$(srcdir)/RUNFULLTESTS -f $(TESTOPTS)
+
 
 test-mibs:
 	cd $(srcdir)/rfc1213 ; ./run

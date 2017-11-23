@@ -15,42 +15,46 @@ extern          "C" {
 #include <netinet/in.h>
 #endif
 
+config_require(UDPIPv4Base)
+#include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
+
 netsnmp_transport *netsnmp_udp_transport(struct sockaddr_in *addr, int local);
-
-
-/*
- * Convert a "traditional" peername into a sockaddr_in structure which is
- * written to *addr.  Returns 1 if the conversion was successful, or 0 if it
- * failed.  
- */
-
-int             netsnmp_sockaddr_in(struct sockaddr_in *addr,
-                                    const char *peername, int remote_port);
 
 
 /*
  * Register any configuration tokens specific to the agent.  
  */
 
+NETSNMP_IMPORT
 void            netsnmp_udp_agent_config_tokens_register(void);
 
+NETSNMP_IMPORT
 void            netsnmp_udp_parse_security(const char *token, char *param);
 
+NETSNMP_IMPORT
 int             netsnmp_udp_getSecName(void *opaque, int olength,
                                        const char *community,
                                        size_t community_len,
-                                       char **secname,
-                                       char **contextName);
-
-int             netsnmp_sock_buffer_set(int s, int optname, int local,
-                                        int size);
-
+                                       const char **secname,
+                                       const char **contextName);
 
 /*
  * "Constructor" for transport domain object.  
  */
 
 void            netsnmp_udp_ctor(void);
+
+/*
+ * protected-ish functions used by other core-code
+ */
+char *netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len);
+#if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
+int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from,
+                         socklen_t *fromlen, struct sockaddr *dstip,
+                         socklen_t *dstlen, int *if_index);
+int netsnmp_udp_sendto(int fd, struct in_addr *srcip, int if_index,
+					   struct sockaddr *remote, void *data, int len);
+#endif
 
 #ifdef __cplusplus
 }

@@ -187,7 +187,12 @@ _add_connection(netsnmp_tcpconn_entry *entry, netsnmp_container *container)
                                                        entry->rmt_addr,
                                                        entry->rmt_addr_len,
                                                        entry->rmt_port))) {
-        CONTAINER_INSERT(container, rowreq_ctx);
+        if (CONTAINER_INSERT(container, rowreq_ctx)) {
+            NETSNMP_LOGONCE((LOG_DEBUG,
+                    "Error inserting entry to tcpConnectionTable,"\
+                    " entry already exists.\n"));
+            tcpConnectionTable_release_rowreq_ctx(rowreq_ctx);
+        }
     } else {
         if (rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
@@ -260,7 +265,7 @@ tcpConnectionTable_container_load(netsnmp_container *container)
                                           NETSNMP_ACCESS_TCPCONN_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:tcpConnectionTable:tcpConnectionTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%d records\n", (int)CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* tcpConnectionTable_container_load */

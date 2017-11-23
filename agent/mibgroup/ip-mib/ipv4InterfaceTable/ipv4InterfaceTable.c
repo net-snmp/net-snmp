@@ -26,15 +26,14 @@
 
 #include "ipv4InterfaceTable_interface.h"
 
-oid             ipv4InterfaceTable_oid[] = { IPV4INTERFACETABLE_OID };
-int             ipv4InterfaceTable_oid_size =
+const oid       ipv4InterfaceTable_oid[] = { IPV4INTERFACETABLE_OID };
+const int       ipv4InterfaceTable_oid_size =
 OID_LENGTH(ipv4InterfaceTable_oid);
 
 ipv4InterfaceTable_registration ipv4InterfaceTable_user_context;
 static ipv4InterfaceTable_registration *ipv4InterfaceTable_user_context_p;
 
-void            initialize_table_ipv4InterfaceTable(void);
-void            shutdown_table_ipv4InterfaceTable(void);
+static void     shutdown_table_ipv4InterfaceTable(void);
 
 
 /**

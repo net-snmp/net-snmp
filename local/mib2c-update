@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # $Id$
 #
@@ -39,7 +39,7 @@ debug()
 
 error()
 {
-    echo "ERROR: $@" > /dev/stderr
+    echo "ERROR: $@" >&2
 }
 
 die()
@@ -308,8 +308,16 @@ if [ -f $HOME/.mib2c-updaterc ]; then
     . $HOME/.mib2c-updaterc
 fi
 
-if [ -f .mib2c-updaterc ]; then
-    . .mib2c-updaterc
+if [ -f $PWD/.mib2c-updaterc ]; then
+    . $PWD/.mib2c-updaterc
+else
+   echo "creating example .mib2c-udpaterc. edit as needed and re-run "
+   echo "mib2c-update."
+   
+   echo "UPDATE_OID=ipAddressTable" >> .mib2c-updaterc
+   echo "UPDATE_CONF=mib2c.mfd.conf" >> .mib2c-updaterc
+   echo "UPDATE_MIB2C_OPTS=" >> .mib2c-updaterc
+   echo "#UPDATE_NOPROBE=1" >> .mib2c-updaterc
 fi
 
 check_setup

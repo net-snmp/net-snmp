@@ -26,8 +26,8 @@
 
 #include "tcpConnectionTable_interface.h"
 
-oid             tcpConnectionTable_oid[] = { TCPCONNECTIONTABLE_OID };
-int             tcpConnectionTable_oid_size =
+const oid       tcpConnectionTable_oid[] = { TCPCONNECTIONTABLE_OID };
+const int       tcpConnectionTable_oid_size =
 OID_LENGTH(tcpConnectionTable_oid);
 
 tcpConnectionTable_registration tcpConnectionTable_user_context;
@@ -355,8 +355,7 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
         tcpConnectionLocalAddress_val_ptr_len;
     memcpy(tbl_idx->tcpConnectionLocalAddress,
            tcpConnectionLocalAddress_val_ptr,
-           tcpConnectionLocalAddress_val_ptr_len *
-           sizeof(tcpConnectionLocalAddress_val_ptr[0]));
+           tcpConnectionLocalAddress_val_ptr_len);
 
     /*
      * tcpConnectionLocalPort(3)/InetPortNumber/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/H 
@@ -389,8 +388,7 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
         tcpConnectionRemAddress_val_ptr_len;
     memcpy(tbl_idx->tcpConnectionRemAddress,
            tcpConnectionRemAddress_val_ptr,
-           tcpConnectionRemAddress_val_ptr_len *
-           sizeof(tcpConnectionRemAddress_val_ptr[0]));
+           tcpConnectionRemAddress_val_ptr_len);
 
     /*
      * tcpConnectionRemPort(6)/InetPortNumber/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/H 
@@ -406,7 +404,7 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
  * @internal
  * set row context indexes
  *
- * @param reqreq_ctx the row context that needs updated indexes
+ * @param rowreq_ctx the row context that needs updated indexes
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.

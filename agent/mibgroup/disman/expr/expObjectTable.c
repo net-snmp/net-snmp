@@ -7,11 +7,18 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "disman/expr/expObject.h"
 #include "disman/expr/expObjectTable.h"
 
+netsnmp_feature_require(table_tdata)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(check_vb_oid)
+netsnmp_feature_require(check_vb_truthvalue)
+netsnmp_feature_require(table_tdata_insert_row)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /* Initializes the expObjectTable module */
 void
@@ -51,7 +58,7 @@ init_expObjectTable(void)
 
     /* Register this using the common expObject_table_data container */
     netsnmp_tdata_register(reg, expObject_table_data, table_info);
-    DEBUGMSGTL(("disman:expr:init", "Expression Object Table container (%x)\n",
+    DEBUGMSGTL(("disman:expr:init", "Expression Object Table container (%p)\n",
                                      expObject_table_data));
 }
 
@@ -281,7 +288,8 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
             tinfo = netsnmp_extract_table_info(request);
             entry = (struct expObject *)
                     netsnmp_tdata_extract_entry(request);
-            if (!entry) {
+            if (!entry && tinfo->colnum != COLUMN_EXPOBJECTENTRYSTATUS &&
+                *request->requestvb->val.integer != RS_DESTROY) {
                 /*
                  * New rows must be created via the RowStatus column
                  */
@@ -364,7 +372,7 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                         ret = 1;   /* Set the prefix later  */
                     entry->flags |=  EXP_OBJ_FLAG_DWILD;
                 } else {
-                    if ( entry->flags | EXP_OBJ_FLAG_PREFIX ) {
+                    if ( entry->flags & EXP_OBJ_FLAG_PREFIX ) {
                         exp = expExpression_getEntry( entry->expOwner,
                                                       entry->expName );
                         memset( exp->expPrefix, 0, MAX_OID_LEN*sizeof(oid));

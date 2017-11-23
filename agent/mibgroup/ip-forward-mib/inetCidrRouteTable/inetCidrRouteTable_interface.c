@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -46,6 +47,16 @@
 
 #include <ctype.h>
 
+netsnmp_feature_child_of(inetCidrRouteTable_external_access, libnetsnmpmibs)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
+
+netsnmp_feature_child_of(inetCidrRouteTable_container_size, inetCidrRouteTable_external_access)
+netsnmp_feature_child_of(inetCidrRouteTable_registration_set, inetCidrRouteTable_external_access)
+netsnmp_feature_child_of(inetCidrRouteTable_registration_get, inetCidrRouteTable_external_access)
+netsnmp_feature_child_of(inetCidrRouteTable_container_get, inetCidrRouteTable_external_access)
 /**********************************************************************
  **********************************************************************
  ***
@@ -82,19 +93,23 @@ static void
                 _inetCidrRouteTable_container_shutdown(inetCidrRouteTable_interface_ctx *
                                                        if_ctx);
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_GET
 netsnmp_container *
 inetCidrRouteTable_container_get(void)
 {
     return inetCidrRouteTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_GET
 inetCidrRouteTable_registration *
 inetCidrRouteTable_registration_get(void)
 {
     return inetCidrRouteTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_SET
 inetCidrRouteTable_registration *
 inetCidrRouteTable_registration_set(inetCidrRouteTable_registration *
                                     newreg)
@@ -104,12 +119,15 @@ inetCidrRouteTable_registration_set(inetCidrRouteTable_registration *
     inetCidrRouteTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_SET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_SIZE
 int
 inetCidrRouteTable_container_size(void)
 {
     return CONTAINER_SIZE(inetCidrRouteTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_SIZE */
 
 u_int
 inetCidrRouteTable_dirty_get(void)
@@ -140,7 +158,7 @@ static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_pre_request;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_post_request;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_get_values;
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_check_objects;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_set_values;
@@ -150,12 +168,10 @@ static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_commit;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_check_dependencies;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
 NETSNMP_STATIC_INLINE int
-                _inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
-                                                  rowreq_ctx);
-
+                _inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx * rowreq_ctx);
 /**
  * @internal
  * Initialize the table inetCidrRouteTable 
@@ -199,7 +215,7 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = INETCIDRROUTETABLE_MIN_COL;
     tbl_info->max_column = INETCIDRROUTETABLE_MAX_COL;
@@ -239,7 +255,7 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
         _mfd_inetCidrRouteTable_post_request;
 
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -264,7 +280,7 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
      */
     access_multiplexer->consistency_checks =
         _mfd_inetCidrRouteTable_check_dependencies;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     /*************************************************
      *
@@ -278,10 +294,12 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
         netsnmp_handler_registration_create("inetCidrRouteTable", handler,
                                             inetCidrRouteTable_oid,
                                             inetCidrRouteTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP
+                                            HANDLER_CAN_BABY_STEP |
 #ifndef NETSNMP_DISABLE_SET_SUPPORT
-                                          | HANDLER_CAN_RWRITE
-#endif
+                                            HANDLER_CAN_RWRITE
+#else
+                                            HANDLER_CAN_RONLY
+#endif /* NETSNMP_DISABLE_SET_SUPPORT */
                                           );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering table inetCidrRouteTable\n");
@@ -300,7 +318,7 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
@@ -323,7 +341,7 @@ _inetCidrRouteTable_initialize_interface(inetCidrRouteTable_registration *
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -793,7 +811,7 @@ _mfd_inetCidrRouteTable_post_request(netsnmp_mib_handler *handler,
                                      *agtreq_info,
                                      netsnmp_request_info *requests)
 {
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -911,7 +929,7 @@ _mfd_inetCidrRouteTable_object_lookup(netsnmp_mib_handler *handler, netsnmp_hand
                                       netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetCidrRouteTable:_mfd_inetCidrRouteTable_object_lookup", "called\n"));
@@ -1105,7 +1123,7 @@ _mfd_inetCidrRouteTable_get_values(netsnmp_mib_handler *handler,
                                    netsnmp_agent_request_info *agtreq_info,
                                    netsnmp_request_info *requests)
 {
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -1212,6 +1230,8 @@ _inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
     if (MFD_SUCCESS != rc)
         return SNMP_ERR_NOCREATION;
 
+    /* MORE CHECKING REQUIRED */
+
     /*
      * (INDEX) inetCidrRouteDest(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
      */
@@ -1310,7 +1330,7 @@ _inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
                                              user_ctx, rowreq_ctx);
 }                               /* _inetCidrRouteTable_check_indexes */
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 /***********************************************************************
  *
  * SET processing
@@ -1615,7 +1635,7 @@ _mfd_inetCidrRouteTable_check_objects(netsnmp_mib_handler *handler, netsnmp_hand
                                       *agtreq_info,
                                       netsnmp_request_info *requests)
 {
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc;
@@ -1663,7 +1683,7 @@ _mfd_inetCidrRouteTable_check_dependencies(netsnmp_mib_handler *handler, netsnmp
                                            netsnmp_request_info *requests)
 {
     int             rc;
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     DEBUGMSGTL(("internal:inetCidrRouteTable:_mfd_inetCidrRouteTable_check_dependencies", "called\n"));
 
@@ -1785,7 +1805,7 @@ _mfd_inetCidrRouteTable_undo_setup(netsnmp_mib_handler *handler,
                                    netsnmp_request_info *requests)
 {
     int             rc;
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetCidrRouteTable:_mfd_inetCidrRouteTable_undo_setup", "called\n"));
@@ -1850,7 +1870,7 @@ _mfd_inetCidrRouteTable_undo_cleanup(netsnmp_mib_handler *handler,
                                      *agtreq_info,
                                      netsnmp_request_info *requests)
 {
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc;
 
@@ -2005,7 +2025,7 @@ _mfd_inetCidrRouteTable_set_values(netsnmp_mib_handler *handler,
                                    netsnmp_agent_request_info *agtreq_info,
                                    netsnmp_request_info *requests)
 {
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc = SNMP_ERR_NOERROR;
@@ -2053,7 +2073,7 @@ _mfd_inetCidrRouteTable_commit(netsnmp_mib_handler *handler,
                                netsnmp_request_info *requests)
 {
     int             rc;
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetCidrRouteTable:_mfd_inetCidrRouteTable_commit", "called\n"));
@@ -2087,7 +2107,7 @@ _mfd_inetCidrRouteTable_undo_commit(netsnmp_mib_handler *handler,
                                     netsnmp_request_info *requests)
 {
     int             rc;
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetCidrRouteTable:_mfd_inetCidrRouteTable_undo_commit", "called\n"));
@@ -2133,7 +2153,7 @@ _mfd_inetCidrRouteTable_undo_values(netsnmp_mib_handler *handler,
                                     netsnmp_request_info *requests)
 {
     int             rc;
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetCidrRouteTable:_mfd_inetCidrRouteTable_undo_values", "called\n"));
@@ -2167,7 +2187,7 @@ _mfd_inetCidrRouteTable_irreversible_commit(netsnmp_mib_handler *handler, netsnm
                                             *agtreq_info,
                                             netsnmp_request_info *requests)
 {
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx =
+    inetCidrRouteTable_rowreq_ctx *rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetCidrRouteTable:_mfd_inetCidrRouteTable_irreversible:commit", "called\n"));
@@ -2194,7 +2214,7 @@ _mfd_inetCidrRouteTable_irreversible_commit(netsnmp_mib_handler *handler, netsnm
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_inetCidrRouteTable_irreversible_commit */
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
 /***********************************************************************
  *
@@ -2328,9 +2348,11 @@ _inetCidrRouteTable_container_init(inetCidrRouteTable_interface_ctx *
         }
     }
 
-    /* set allow duplicates this makes insert O(1) */
-    netsnmp_binary_array_options_set(if_ctx->container, 1,
-                                     CONTAINER_KEY_ALLOW_DUPLICATES);
+    if_ctx->container->container_name = strdup("inetCidrRouteTable");
+
+   /* set allow duplicates this makes insert O(1) */
+   netsnmp_binary_array_options_set(if_ctx->container, 1,
+                                    CONTAINER_KEY_ALLOW_DUPLICATES);
 
     if (NULL != if_ctx->cache)
         if_ctx->cache->magic = (void *) if_ctx->container;
@@ -2353,6 +2375,7 @@ _inetCidrRouteTable_container_shutdown(inetCidrRouteTable_interface_ctx *
 }                               /* _inetCidrRouteTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_EXTERNAL_ACCESS
 inetCidrRouteTable_rowreq_ctx *
 inetCidrRouteTable_row_find_by_mib_index(inetCidrRouteTable_mib_index *
                                          mib_idx)
@@ -2375,8 +2398,9 @@ inetCidrRouteTable_row_find_by_mib_index(inetCidrRouteTable_mib_index *
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx =
+    rowreq_ctx = (inetCidrRouteTable_rowreq_ctx*)
         CONTAINER_FIND(inetCidrRouteTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_EXTERNAL_ACCESS */

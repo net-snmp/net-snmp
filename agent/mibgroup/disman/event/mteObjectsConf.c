@@ -62,7 +62,7 @@ parse_mteOTable(const char *token, char *line)
     line  = read_config_read_data(ASN_OCTET_STR, line, &vp,    &len);
     line  = read_config_read_data(ASN_UNSIGNED,  line, &index, &len);
 
-    DEBUGMSG(("disman:event:conf", "(%s, %s, %d) ", owner, oname, index));
+    DEBUGMSG(("disman:event:conf", "(%s, %s, %lu) ", owner, oname, index));
 
     row   = mteObjects_createEntry( owner, oname, index, 0 );
     /* entry = (struct mteObject *)netsnmp_tdata_row_entry( row ); */
@@ -111,7 +111,7 @@ int
 store_mteOTable(int majorID, int minorID, void *serverarg, void *clientarg)
 {
     char            line[SNMP_MAXBUF];
-    char           *cptr;
+    char           *cptr, *cp;
     void           *vp;
     size_t          tint;
     netsnmp_tdata_row *row;
@@ -131,16 +131,16 @@ store_mteOTable(int majorID, int minorID, void *serverarg, void *clientarg)
         if ( entry->flags & MTE_OBJECT_FLAG_FIXED )
             continue;
 
-        DEBUGMSGTL(("disman:event:conf", "  Storing (%s %s %d)\n",
+        DEBUGMSGTL(("disman:event:conf", "  Storing (%s %s %ld)\n",
                          entry->mteOwner, entry->mteOName, entry->mteOIndex));
         memset(line, 0, sizeof(line));
         strcat(line, "_mteOTable ");
         cptr = line + strlen(line);
 
-        vp = entry->mteOwner; tint = strlen( vp );
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
-        vp = entry->mteOName; tint = strlen( vp );
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
+        cp = entry->mteOwner; tint = strlen( cp );
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
+        cp = entry->mteOName; tint = strlen( cp );
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
         cptr = read_config_store_data(ASN_UNSIGNED,  cptr,
                                       &entry->mteOIndex, NULL);
         vp   = entry->mteObjectID;

@@ -7,9 +7,9 @@ config_require(utilities/iquery)
  * function declarations 
  */
 void            init_mteTriggerConf(void);
-void            parse_mteMonitor( const char *, char *);
-void            parse_default_mteMonitors( const char *, char *);
-void            parse_linkUpDown_traps(const char *, char *);
+void            parse_mteMonitor( const char *, const char *);
+void            parse_default_mteMonitors( const char *, const char *);
+void            parse_linkUpDown_traps(const char *, const char *);
 
 void            parse_mteTTable(  const char *, char *);
 void            parse_mteTDTable( const char *, char *);

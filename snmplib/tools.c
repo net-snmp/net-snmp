@@ -4,17 +4,23 @@
 
 #define NETSNMP_TOOLS_C 1 /* dont re-define malloc wrappers here */
 
+#ifdef HAVE_CRTDBG_H
+/*
+ * Define _CRTDBG_MAP_ALLOC such that in debug builds (when _DEBUG has been
+ * defined) e.g. malloc() is rerouted to _malloc_dbg().
+ */
+#define _CRTDBG_MAP_ALLOC 1
+#include <crtdbg.h>
+#endif
+
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <ctype.h>
 #include <stdio.h>
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -26,8 +32,8 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
 #endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -42,6 +48,9 @@
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
+#ifdef HAVE_VALGRIND_MEMCHECK_H
+#include <valgrind/memcheck.h>
 #endif
 #ifdef cygwin
 #include <windows.h>
@@ -63,14 +72,35 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
 
-#ifdef WIN32
+netsnmp_feature_child_of(tools_all, libnetsnmp)
+
+netsnmp_feature_child_of(memory_wrappers, tools_all)
+netsnmp_feature_child_of(valgrind, tools_all)
+netsnmp_feature_child_of(string_time_to_secs, tools_all)
+netsnmp_feature_child_of(netsnmp_check_definedness, valgrind)
+
+netsnmp_feature_child_of(uatime_ready, netsnmp_unused)
+netsnmp_feature_child_of(timeval_tticks, netsnmp_unused)
+
+netsnmp_feature_child_of(memory_strdup, memory_wrappers)
+netsnmp_feature_child_of(memory_calloc, memory_wrappers)
+netsnmp_feature_child_of(memory_malloc, memory_wrappers)
+netsnmp_feature_child_of(memory_realloc, memory_wrappers)
+netsnmp_feature_child_of(memory_free, memory_wrappers)
+
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_WRAPPERS
 /**
  * This function is a wrapper for the strdup function.
+ *
+ * @note The strdup() implementation calls _malloc_dbg() when linking with
+ * MSVCRT??D.dll and malloc() when linking with MSVCRT??.dll
  */
 char * netsnmp_strdup( const char * ptr)
 {
     return strdup(ptr);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_STRDUP */
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_CALLOC
 /**
  * This function is a wrapper for the calloc function.
  */
@@ -78,7 +108,8 @@ void * netsnmp_calloc(size_t nmemb, size_t size)
 {
     return calloc(nmemb, size);
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_CALLOC */
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_MALLOC
 /**
  * This function is a wrapper for the malloc function.
  */
@@ -86,7 +117,8 @@ void * netsnmp_malloc(size_t size)
 {
     return malloc(size);
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_MALLOC */
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_REALLOC
 /**
  * This function is a wrapper for the realloc function.
  */
@@ -94,7 +126,8 @@ void * netsnmp_realloc( void * ptr, size_t size)
 {
     return realloc(ptr, size);
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_REALLOC */
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_FREE
 /**
  * This function is a wrapper for the free function.
  * It calls free only if the calling parameter has a non-zero value.
@@ -104,7 +137,7 @@ void netsnmp_free( void * ptr)
     if (ptr)
         free(ptr);
 }
-#endif /* WIN32 */
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_FREE */
 
 /**
  * This function increase the size of the buffer pointed at by *buf, which is
@@ -174,6 +207,9 @@ snmp_strcat(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
 
+    if (!*buf)
+        return 0;
+
     strcpy((char *) (*buf + *out_len), (const char *) s);
     *out_len += strlen((char *) (*buf + *out_len));
     return 1;
@@ -194,6 +230,7 @@ free_zero(void *buf, size_t size)
 
 }                               /* end free_zero() */
 
+#ifndef NETSNMP_FEATURE_REMOVE_USM_SCAPI
 /**
  * Returns pointer to allocaed & set buffer on success, size contains
  * number of random bytes filled.  buf is NULL and *size set to KMT
@@ -224,6 +261,7 @@ malloc_random(size_t * size)
     return buf;
 
 }                               /* end malloc_random() */
+#endif /* NETSNMP_FEATURE_REMOVE_USM_SCAPI */
 
 /**
  * Duplicates a memory block.
@@ -246,6 +284,39 @@ void *netsnmp_memdup(const void *from, size_t size)
     return to;
 }                               /* end netsnmp_memdup() */
 
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_CHECK_DEFINEDNESS
+/**
+ * When running under Valgrind, check whether all bytes in the range [packet,
+ * packet+length) are defined. Let Valgrind print a backtrace if one or more
+ * bytes with uninitialized values have been found. This function can help to
+ * find the cause of undefined value errors if --track-origins=yes is not
+ * sufficient. Does nothing when not running under Valgrind.
+ *
+ * Note: this requires a fairly recent valgrind.
+ */
+void
+netsnmp_check_definedness(const void *packet, size_t length)
+{
+#if defined(__VALGRIND_MAJOR__) && defined(__VALGRIND_MINOR__)   \
+    && (__VALGRIND_MAJOR__ > 3                                   \
+        || (__VALGRIND_MAJOR__ == 3 && __VALGRIND_MINOR__ >= 6))
+
+    if (RUNNING_ON_VALGRIND) {
+        int i;
+        char vbits;
+
+        for (i = 0; i < length; ++i) {
+            if (VALGRIND_GET_VBITS((const char *)packet + i, &vbits, 1) == 1
+                && vbits)
+                VALGRIND_PRINTF_BACKTRACE("Undefined: byte %d/%d", i,
+                                          (int)length);
+        }
+    }
+
+#endif
+}
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_CHECK_DEFINEDNESS */
+
 /** copies a (possible) unterminated string of a given length into a
  *  new buffer and null terminates it as well (new buffer MAY be one
  *  byte longer to account for this */
@@ -254,20 +325,67 @@ netsnmp_strdup_and_null(const u_char * from, size_t from_len)
 {
     char         *ret;
 
-    if (from_len == 0 || from[from_len - 1] != '\0') {
-        ret = (char *)malloc(from_len + 1);
-        if (!ret)
-            return NULL;
+    if (from_len > 0 && from[from_len - 1] == '\0')
+        from_len--;
+    ret = malloc(from_len + 1);
+    if (ret) {
+        memcpy(ret, from, from_len);
         ret[from_len] = '\0';
-    } else {
-        ret = (char *)malloc(from_len);
-        if (!ret)
-            return NULL;
-        ret[from_len - 1] = '\0';
     }
-    memcpy(ret, from, from_len);
     return ret;
 }
+
+/** converts binary to hexidecimal
+ *
+ *     @param *input            Binary data.
+ *     @param len               Length of binary data.
+ *     @param **dest            NULL terminated string equivalent in hex.
+ *     @param *dest_len         size of destination buffer
+ *     @param allow_realloc     flag indicating if buffer can be realloc'd
+ *      
+ * @return olen	Length of output string not including NULL terminator.
+ */
+u_int
+netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len, int allow_realloc, 
+                      const u_char * input, size_t len)
+{
+    u_int           olen = (len * 2) + 1;
+    u_char         *s, *op;
+    const u_char   *ip = input;
+
+    if (dest == NULL || dest_len == NULL || input == NULL)
+        return 0;
+
+    if (NULL == *dest) {
+        s = (unsigned char *) calloc(1, olen);
+        *dest_len = olen;
+    }
+    else
+        s = *dest;
+
+    if (*dest_len < olen) {
+        if (!allow_realloc)
+            return 0;
+        *dest_len = olen;
+        if (snmp_realloc(dest, dest_len))
+            return 0;
+    }
+
+    op = s;
+    while (ip - input < (int) len) {
+        *op++ = VAL2HEX((*ip >> 4) & 0xf);
+        *op++ = VAL2HEX(*ip & 0xf);
+        ip++;
+    }
+    *op = '\0';
+
+    if (s != *dest)
+        *dest = s;
+    *dest_len = olen;
+
+    return olen;
+
+}                               /* end netsnmp_binary_to_hex() */
 
 /** converts binary to hexidecimal
  *
@@ -284,21 +402,11 @@ netsnmp_strdup_and_null(const u_char * from, size_t from_len)
 u_int
 binary_to_hex(const u_char * input, size_t len, char **output)
 {
-    u_int           olen = (len * 2) + 1;
-    char           *s = (char *) calloc(1, olen), *op = s;
-    const u_char   *ip = input;
+    size_t out_len = 0;
 
+    *output = NULL; /* will alloc new buffer */
 
-    while (ip - input < (int) len) {
-        *op++ = VAL2HEX((*ip >> 4) & 0xf);
-        *op++ = VAL2HEX(*ip & 0xf);
-        ip++;
-    }
-    *op = '\0';
-
-    *output = s;
-    return olen;
-
+    return netsnmp_binary_to_hex((u_char**)output, &out_len, 1, input, len);
 }                               /* end binary_to_hex() */
 
 
@@ -322,11 +430,14 @@ int
 hex_to_binary2(const u_char * input, size_t len, char **output)
 {
     u_int           olen = (len / 2) + (len % 2);
-    char           *s = (char *) calloc(1, (olen) ? olen : 1), *op = s;
+    char           *s = calloc(1, olen ? olen : 1), *op = s;
     const u_char   *ip = input;
 
 
     *output = NULL;
+    if (!s)
+        goto hex_to_binary2_quit;
+
     *op = 0;
     if (len % 2) {
         if (!isxdigit(*ip))
@@ -335,7 +446,7 @@ hex_to_binary2(const u_char * input, size_t len, char **output)
         ip++;
     }
 
-    while (ip - input < (int) len) {
+    while (ip < input + len) {
         if (!isxdigit(*ip))
             goto hex_to_binary2_quit;
         *op = HEX2VAL(*ip) << 4;
@@ -423,7 +534,7 @@ int
 netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * offset,
                       int allow_realloc, const char *hex, const char *delim)
 {
-    int             subid = 0;
+    unsigned int    subid = 0;
     const char     *cp = hex;
 
     if (buf == NULL || buf_len == NULL || offset == NULL || hex == NULL) {
@@ -758,19 +869,23 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 
 
 /**
- * create a new time marker.
- * NOTE: Caller must free time marker when no longer needed.
+ * Create a new real-time marker.
+ *
+ * \deprecated Use netsnmp_set_monotonic_marker() instead.
+ *
+ * @note Caller must free time marker when no longer needed.
  */
 marker_t
 atime_newMarker(void)
 {
     marker_t        pm = (marker_t) calloc(1, sizeof(struct timeval));
-    gettimeofday((struct timeval *) pm, 0);
+    gettimeofday((struct timeval *) pm, NULL);
     return pm;
 }
 
 /**
- * set a time marker.
+ * Set a time marker to the current value of the real-time clock.
+ * \deprecated Use netsnmp_set_monotonic_marker() instead.
  */
 void
 atime_setMarker(marker_t pm)
@@ -778,40 +893,113 @@ atime_setMarker(marker_t pm)
     if (!pm)
         return;
 
-    gettimeofday((struct timeval *) pm, 0);
+    gettimeofday((struct timeval *) pm, NULL);
 }
 
+/**
+ * Query the current value of the monotonic clock.
+ *
+ * Returns the current value of a monotonic clock if such a clock is provided by
+ * the operating system or the wall clock time if no such clock is provided by
+ * the operating system. A monotonic clock is a clock that is never adjusted
+ * backwards and that proceeds at the same rate as wall clock time.
+ *
+ * @param[out] tv Pointer to monotonic clock time.
+ */
+void netsnmp_get_monotonic_clock(struct timeval* tv)
+{
+#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+    struct timespec ts;
+    int res;
+
+    res = clock_gettime(CLOCK_MONOTONIC, &ts);
+    if (res >= 0) {
+        tv->tv_sec = ts.tv_sec;
+        tv->tv_usec = ts.tv_nsec / 1000;
+    } else {
+        gettimeofday(tv, NULL);
+    }
+#elif defined(WIN32)
+    /*
+     * Windows: return tick count. Note: the rate at which the tick count
+     * increases is not adjusted by the time synchronization algorithm, so
+     * expect an error of <= 100 ppm for the rate at which this clock
+     * increases.
+     */
+    typedef ULONGLONG (WINAPI * pfGetTickCount64)(void);
+    static int s_initialized;
+    static pfGetTickCount64 s_pfGetTickCount64;
+    uint64_t now64;
+
+    if (!s_initialized) {
+        HMODULE hKernel32 = GetModuleHandle("kernel32");
+        s_pfGetTickCount64 =
+            (pfGetTickCount64) GetProcAddress(hKernel32, "GetTickCount64");
+        s_initialized = TRUE;
+    }
+
+    if (s_pfGetTickCount64) {
+        /* Windows Vista, Windows 2008 or any later Windows version */
+        now64 = (*s_pfGetTickCount64)();
+    } else {
+        /* Windows XP, Windows 2003 or any earlier Windows version */
+        static uint32_t s_wraps, s_last;
+        uint32_t now;
+
+        now = GetTickCount();
+        if (now < s_last)
+            s_wraps++;
+        s_last = now;
+        now64 = ((uint64_t)s_wraps << 32) | now;
+    }
+    tv->tv_sec = now64 / 1000;
+    tv->tv_usec = (now64 % 1000) * 1000;
+#else
+    /* At least FreeBSD 4 doesn't provide monotonic clock support. */
+#warning Not sure how to query a monotonically increasing clock on your system. \
+Timers will not work correctly if the system clock is adjusted by e.g. ntpd.
+    gettimeofday(tv, NULL);
+#endif
+}
+
+/**
+ * Set a time marker to the current value of the monotonic clock.
+ */
+void
+netsnmp_set_monotonic_marker(marker_t *pm)
+{
+    if (!*pm)
+        *pm = malloc(sizeof(struct timeval));
+    if (*pm)
+        netsnmp_get_monotonic_clock(*pm);
+}
 
 /**
  * Returns the difference (in msec) between the two markers
+ *
+ * \deprecated Don't use in new code.
  */
 long
-atime_diff(marker_t first, marker_t second)
+atime_diff(const_marker_t first, const_marker_t second)
 {
-    struct timeval *tv1, *tv2, diff;
+    struct timeval diff;
 
-    tv1 = (struct timeval *) first;
-    tv2 = (struct timeval *) second;
+    NETSNMP_TIMERSUB((const struct timeval *) second, (const struct timeval *) first, &diff);
 
-    diff.tv_sec = tv2->tv_sec - tv1->tv_sec - 1;
-    diff.tv_usec = tv2->tv_usec - tv1->tv_usec + 1000000;
-
-    return (diff.tv_sec * 1000 + diff.tv_usec / 1000);
+    return (long)(diff.tv_sec * 1000 + diff.tv_usec / 1000);
 }
 
 /**
  * Returns the difference (in u_long msec) between the two markers
+ *
+ * \deprecated Don't use in new code.
  */
 u_long
-uatime_diff(marker_t first, marker_t second)
+uatime_diff(const_marker_t first, const_marker_t second)
 {
-    struct timeval *tv1, *tv2, diff;
+    struct timeval diff;
 
-    tv1 = (struct timeval *) first;
-    tv2 = (struct timeval *) second;
-
-    diff.tv_sec = tv2->tv_sec - tv1->tv_sec - 1;
-    diff.tv_usec = tv2->tv_usec - tv1->tv_usec + 1000000;
+    NETSNMP_TIMERSUB((const struct timeval *) second, (const struct timeval *) first, &diff);
 
     return (((u_long) diff.tv_sec) * 1000 + diff.tv_usec / 1000);
 }
@@ -819,29 +1007,26 @@ uatime_diff(marker_t first, marker_t second)
 /**
  * Returns the difference (in u_long 1/100th secs) between the two markers
  * (functionally this is what sysUpTime needs)
+ *
+ * \deprecated Don't use in new code.
  */
 u_long
-uatime_hdiff(marker_t first, marker_t second)
+uatime_hdiff(const_marker_t first, const_marker_t second)
 {
-    struct timeval *tv1, *tv2, diff;
-    u_long          res;
+    struct timeval diff;
 
-    tv1 = (struct timeval *) first;
-    tv2 = (struct timeval *) second;
-
-    diff.tv_sec = tv2->tv_sec - tv1->tv_sec - 1;
-    diff.tv_usec = tv2->tv_usec - tv1->tv_usec + 1000000;
-
-    res = ((u_long) diff.tv_sec) * 100 + diff.tv_usec / 10000;
-    return res;
+    NETSNMP_TIMERSUB((const struct timeval *) second, (const struct timeval *) first, &diff);
+    return ((u_long) diff.tv_sec) * 100 + diff.tv_usec / 10000;
 }
 
 /**
- * Test: Has (marked time plus delta) exceeded current time (in msec) ?
+ * Test: Has (marked time plus delta) exceeded current time ?
  * Returns 0 if test fails or cannot be tested (no marker).
+ *
+ * \deprecated Use netsnmp_ready_monotonic() instead.
  */
 int
-atime_ready(marker_t pm, int deltaT)
+atime_ready(const_marker_t pm, int delta_ms)
 {
     marker_t        now;
     long            diff;
@@ -852,18 +1037,21 @@ atime_ready(marker_t pm, int deltaT)
 
     diff = atime_diff(pm, now);
     free(now);
-    if (diff < deltaT)
+    if (diff < delta_ms)
         return 0;
 
     return 1;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_UATIME_READY
 /**
- * Test: Has (marked time plus delta) exceeded current time (in msec) ?
+ * Test: Has (marked time plus delta) exceeded current time ?
  * Returns 0 if test fails or cannot be tested (no marker).
+ *
+ * \deprecated Use netsnmp_ready_monotonic() instead.
  */
 int
-uatime_ready(marker_t pm, unsigned int deltaT)
+uatime_ready(const_marker_t pm, unsigned int delta_ms)
 {
     marker_t        now;
     u_long          diff;
@@ -874,10 +1062,37 @@ uatime_ready(marker_t pm, unsigned int deltaT)
 
     diff = uatime_diff(pm, now);
     free(now);
-    if (diff < deltaT)
+    if (diff < delta_ms)
         return 0;
 
     return 1;
+}
+#endif /* NETSNMP_FEATURE_REMOVE_UATIME_READY */
+
+/**
+ * Is the current time past (marked time plus delta) ?
+ *
+ * @param[in] pm Pointer to marked time as obtained via
+ *   netsnmp_set_monotonic_marker().
+ * @param[in] delta_ms Time delta in milliseconds.
+ *
+ * @return pm != NULL && now >= (*pm + delta_ms)
+ */
+int
+netsnmp_ready_monotonic(const_marker_t pm, int delta_ms)
+{
+    struct timeval  now, diff, delta;
+
+    netsnmp_assert(delta_ms >= 0);
+    if (pm) {
+        netsnmp_get_monotonic_clock(&now);
+        NETSNMP_TIMERSUB(&now, (const struct timeval *) pm, &diff);
+        delta.tv_sec = delta_ms / 1000;
+        delta.tv_usec = (delta_ms % 1000) * 1000UL;
+        return timercmp(&diff, &delta, >=) ? TRUE : FALSE;
+    } else {
+        return FALSE;
+    }
 }
 
 
@@ -886,10 +1101,12 @@ uatime_ready(marker_t pm, unsigned int deltaT)
          */
 
 /**
- * Return the number of timeTicks since the given marker 
+ * Return the number of timeTicks since the given marker
+ *
+ * \deprecated Don't use in new code.
  */
 int
-marker_tticks(marker_t pm)
+marker_tticks(const_marker_t pm)
 {
     int             res;
     marker_t        now = atime_newMarker();
@@ -899,11 +1116,16 @@ marker_tticks(marker_t pm)
     return res / 10;            /* atime_diff works in msec, not csec */
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TIMEVAL_TTICKS
+/**
+ * \deprecated Don't use in new code.
+ */
 int
-timeval_tticks(struct timeval *tv)
+timeval_tticks(const struct timeval *tv)
 {
-    return marker_tticks((marker_t) tv);
+    return marker_tticks((const_marker_t) tv);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TIMEVAL_TTICKS */
 
 /**
  * Non Windows:  Returns a pointer to the desired environment variable  
@@ -962,8 +1184,7 @@ char *netsnmp_getenv(const char *name)
             NULL,               /* Just get the size */
             &key_value_size) == ERROR_SUCCESS) {
 
-        if (key_value)
-          SNMP_FREE(key_value);
+        SNMP_FREE(key_value);
 
         /* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the
          * string data in registry is missing one (which is unlikely).
@@ -1004,8 +1225,7 @@ char *netsnmp_getenv(const char *name)
             NULL,               /* Just get the size */
             &key_value_size) == ERROR_SUCCESS) {
 
-        if (key_value)
-          SNMP_FREE(key_value);
+        SNMP_FREE(key_value);
 
         /* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the
          * string data in registry is missing one (which is unlikely).
@@ -1087,3 +1307,65 @@ netsnmp_addrstr_hton(char *ptr, size_t len)
 
     return 0;
 }
+
+#ifndef NETSNMP_FEATURE_REMOVE_STRING_TIME_TO_SECS
+/**
+ * Takes a time string like 4h and converts it to seconds.
+ * The string time given may end in 's' for seconds (the default
+ * anyway if no suffix is specified),
+ * 'm' for minutes, 'h' for hours, 'd' for days, or 'w' for weeks.  The
+ * upper case versions are also accepted.
+ *
+ * @param time_string The time string to convert.
+ *
+ * @return seconds converted from the string
+ * @return -1  : on failure
+ */
+int
+netsnmp_string_time_to_secs(const char *time_string) {
+    int secs = -1;
+    if (!time_string || !time_string[0])
+        return secs;
+
+    secs = atoi(time_string);
+
+    if (isdigit((unsigned char)time_string[strlen(time_string)-1]))
+        return secs; /* no letter specified, it's already in seconds */
+    
+    switch (time_string[strlen(time_string)-1]) {
+    case 's':
+    case 'S':
+        /* already in seconds */
+        break;
+
+    case 'm':
+    case 'M':
+        secs = secs * 60;
+        break;
+
+    case 'h':
+    case 'H':
+        secs = secs * 60 * 60;
+        break;
+
+    case 'd':
+    case 'D':
+        secs = secs * 60 * 60 * 24;
+        break;
+
+    case 'w':
+    case 'W':
+        secs = secs * 60 * 60 * 24 * 7;
+        break;
+
+    default:
+        snmp_log(LOG_ERR, "time string %s contains an invalid suffix letter\n",
+                 time_string);
+        return -1;
+    }
+
+    DEBUGMSGTL(("string_time_to_secs", "Converted time string %s to %d\n",
+                time_string, secs));
+    return secs;
+}
+#endif /* NETSNMP_FEATURE_REMOVE_STRING_TIME_TO_SECS */

@@ -32,12 +32,13 @@ config_exclude(mibII/interfaces)
 
 #   if defined( linux )
 
+    config_require(util_funcs)
     config_require(if-mib/data_access/interface_linux)
     config_require(if-mib/data_access/interface_ioctl)
 
 #   elif defined( openbsd3 ) || \
          defined( freebsd4 ) || defined( freebsd5 ) || defined( freebsd6 ) || \
-         defined (darwin)    || defined( dragonfly )
+         defined( darwin )   || defined( dragonfly ) || defined( netbsd1 )
 
     config_require(if-mib/data_access/interface_sysctl)
 

@@ -236,8 +236,7 @@ mteObjects_removeEntry(netsnmp_tdata_row *row)
         return;                 /* Nothing to remove */
     entry = (struct mteObject *)
         netsnmp_tdata_remove_and_delete_row(objects_table_data, row);
-    if (entry)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 
@@ -312,7 +311,7 @@ mteObjects_vblist( netsnmp_variable_list *vblist,
     while (row && !netsnmp_tdata_compare_subtree_idx( row, &owner_var )) {
         entry = (struct mteObject *)netsnmp_tdata_row_entry(row);
 
-        memset(name, 0, MAX_OID_LEN);
+        memset(name, 0, sizeof(name));
         memcpy(name, entry->mteObjectID,
                      entry->mteObjectID_len*sizeof(oid));
         name_len = entry->mteObjectID_len;

@@ -10,34 +10,32 @@
 #endif
 
 #include "agent/nsDebug.h"
-#include "util_funcs.h"
 
-
-
-/*
- * OIDs for the debugging control scalar objects
- *
- * Note that these we're registering the full object rather
- *  than the (sole) valid instance in each case, in order
- *  to handle requests for invalid instances properly.
- */
-oid nsDebugEnabled_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 1};
-oid nsDebugOutputAll_oid[]  = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 2};
-oid nsDebugDumpPdu_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 3};
-
-/*
- * ... and for the token table.
- */
-
-#define  DBGTOKEN_PREFIX	2
-#define  DBGTOKEN_ENABLED	3
-#define  DBGTOKEN_STATUS	4
-oid nsDebugTokenTable_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 4};
-
+#define nsConfigDebug 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1
 
 void
 init_nsDebug(void)
 {
+    /*
+     * OIDs for the debugging control scalar objects
+     *
+     * Note that these we're registering the full object rather
+     *  than the (sole) valid instance in each case, in order
+     *  to handle requests for invalid instances properly.
+     */
+    const oid nsDebugEnabled_oid[]    = { nsConfigDebug, 1};
+    const oid nsDebugOutputAll_oid[]  = { nsConfigDebug, 2};
+    const oid nsDebugDumpPdu_oid[]    = { nsConfigDebug, 3};
+
+    /*
+     * ... and for the token table.
+     */
+
+#define  DBGTOKEN_PREFIX	2
+#define  DBGTOKEN_ENABLED	3
+#define  DBGTOKEN_STATUS	4
+    const oid nsDebugTokenTable_oid[] = { nsConfigDebug, 4};
+
     netsnmp_table_registration_info *table_info;
     netsnmp_iterator_info           *iinfo;
 
@@ -93,7 +91,7 @@ init_nsDebug(void)
     /*
      * .... and register the table with the agent.
      */
-    netsnmp_register_table_iterator(
+    netsnmp_register_table_iterator2(
         netsnmp_create_handler_registration(
             "tzDebugTable", handle_nsDebugTable,
             nsDebugTokenTable_oid, OID_LENGTH(nsDebugTokenTable_oid),
@@ -126,6 +124,7 @@ handle_nsDebugEnabled(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if (request->processed != 0)
@@ -151,6 +150,7 @@ handle_nsDebugEnabled(netsnmp_mib_handler *handler,
 	    enabled = 0;
 	snmp_set_do_debugging( enabled );
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -181,6 +181,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if (request->processed != 0)
@@ -206,6 +207,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
 	    enabled = 0;
 	snmp_set_do_debugging( enabled );
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -237,6 +239,7 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if (request->processed != 0)
@@ -263,6 +266,7 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
 	                       NETSNMP_DS_LIB_DUMP_PACKET, enabled);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -347,6 +351,7 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if (request->processed != 0)
@@ -453,6 +458,7 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 	    }
         }
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;

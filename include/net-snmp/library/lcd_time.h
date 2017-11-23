@@ -99,7 +99,7 @@ extern          "C" {
     /*
      * Prototypes.
      */
-    int             get_enginetime(u_char * engineID, u_int engineID_len,
+    int             get_enginetime(const u_char * engineID, u_int engineID_len,
                                    u_int * engine_boot,
                                    u_int * engine_time,
                                    u_int authenticated);
@@ -111,7 +111,7 @@ extern          "C" {
                                       u_int * last_engine_time,
                                       u_int authenticated);
 
-    int             set_enginetime(u_char * engineID, u_int engineID_len,
+    int             set_enginetime(const u_char * engineID, u_int engineID_len,
                                    u_int engine_boot, u_int engine_time,
                                    u_int authenticated);
 
@@ -122,9 +122,9 @@ extern          "C" {
          
          
         Enginetime
-        search_enginetime_list(u_char * engineID, u_int engineID_len);
+        search_enginetime_list(const u_char * engineID, u_int engineID_len);
 
-    int             hash_engineID(u_char * engineID, u_int engineID_len);
+    int             hash_engineID(const u_char * engineID, u_int engineID_len);
 
     void            dump_etimelist_entry(Enginetime e, int count);
     void            dump_etimelist(void);

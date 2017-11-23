@@ -3,24 +3,21 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/sysORTable.h>
 
-#include "mibII/sysORTable.h"
 #include "snmpMPDStats.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 
 
 struct variable2 snmpMPDStats_variables[] = {
-    {SNMPUNKNOWNSECURITYMODELS, ASN_COUNTER, RONLY, var_snmpMPDStats, 1,
-     {1}},
-    {SNMPINVALIDMSGS, ASN_COUNTER, RONLY, var_snmpMPDStats, 1, {2}},
-    {SNMPUNKNOWNPDUHANDLERS, ASN_COUNTER, RONLY, var_snmpMPDStats, 1, {3}},
+    {SNMPUNKNOWNSECURITYMODELS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_snmpMPDStats, 1, {1}},
+    {SNMPINVALIDMSGS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_snmpMPDStats, 1, {2}},
+    {SNMPUNKNOWNPDUHANDLERS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_snmpMPDStats, 1, {3}},
 };
 
 /*
@@ -32,12 +29,9 @@ oid             snmpMPDStats_variables_oid[] =
 void
 init_snmpMPDStats(void)
 {
-#ifdef USING_MIBII_SYSORTABLE_MODULE
     static oid      reg[] = { 1, 3, 6, 1, 6, 3, 11, 3, 1, 1 };
-    register_sysORTable(reg, 10,
-                        "The MIB for Message Processing and Dispatching.");
-#endif
-
+    REGISTER_SYSOR_ENTRY(reg,
+                         "The MIB for Message Processing and Dispatching.");
     REGISTER_MIB("snmpv3/snmpMPDStats", snmpMPDStats_variables, variable2,
                  snmpMPDStats_variables_oid);
 }

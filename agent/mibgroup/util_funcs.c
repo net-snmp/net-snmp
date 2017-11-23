@@ -6,9 +6,15 @@
  * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #if HAVE_IO_H
@@ -43,11 +49,7 @@
 # define WIFEXITED(stat_val) (((stat_val) & 255) == 0)
 #endif
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -70,9 +72,6 @@
 #include <strings.h>
 #endif
 #include <ctype.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -86,23 +85,10 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#if HAVE_DIRENT_H
-#include <dirent.h>
-#else
-# define dirent direct
-# if HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# if HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# if HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/snmp_logging.h>
+#include <net-snmp/agent/netsnmp_close_fds.h>
 
 #include "struct.h"
 #include "util_funcs.h"
@@ -117,19 +103,28 @@
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 
+netsnmp_feature_child_of(util_funcs, libnetsnmpmibs)
 
-#ifdef NETSNMP_EXCACHETIME
+netsnmp_feature_child_of(shell_command, util_funcs)
+netsnmp_feature_child_of(get_exten_instance, util_funcs)
+netsnmp_feature_child_of(clear_cache, util_funcs)
+netsnmp_feature_child_of(find_field, util_funcs)
+netsnmp_feature_child_of(parse_miboid, util_funcs)
+netsnmp_feature_child_of(string_append_int, util_funcs)
+netsnmp_feature_child_of(internal_mib_table, util_funcs)
+
+#if defined(HAVE_LINUX_RTNETLINK_H)
+netsnmp_feature_child_of(prefix_info_all, util_funcs)
+netsnmp_feature_child_of(prefix_info, prefix_info_all)
+netsnmp_feature_child_of(update_prefix_info, prefix_info_all)
+netsnmp_feature_child_of(delete_prefix_info, prefix_info_all)
+netsnmp_feature_child_of(find_prefix_info, prefix_info_all)
+netsnmp_feature_child_of(create_prefix_info, prefix_info_all)
+#endif /* HAVE_LINUX_RTNETLINK_H */
+
+#if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)
 static long     cachetime;
 #endif
-
-extern int      numprocs, numextens;
-
-void
-Exit(int var)
-{
-    snmp_log(LOG_ERR, "Server Exiting with code %d\n", var);
-    exit(var);
-}
 
 /** deprecated, use netsnmp_mktemp instead */
 const char *
@@ -138,12 +133,13 @@ make_tempfile(void)
     return netsnmp_mktemp();
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_SHELL_COMMAND
 int
 shell_command(struct extensible *ex)
 {
 #if HAVE_SYSTEM
     const char     *ofname;
-    char            shellline[STRMAX];
+    char           *shellline = NULL;
     FILE           *shellout;
 
     ofname = make_tempfile();
@@ -153,10 +149,11 @@ shell_command(struct extensible *ex)
         return ex->result;
     }
 
-    snprintf(shellline, sizeof(shellline), "%s > %s", ex->command, ofname);
-    shellline[ sizeof(shellline)-1 ] = 0;
-    ex->result = system(shellline);
-    ex->result = WEXITSTATUS(ex->result);
+    if (asprintf(&shellline, "%s > %s", ex->command, ofname) >= 0) {
+        ex->result = system(shellline);
+        ex->result = WEXITSTATUS(ex->result);
+        free(shellline);
+    }
     shellout = fopen(ofname, "r");
     if (shellout != NULL) {
         if (fgets(ex->output, sizeof(ex->output), shellout) == NULL) {
@@ -171,6 +168,7 @@ shell_command(struct extensible *ex)
 #endif
     return (ex->result);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SHELL_COMMAND */
 
 #define MAXOUTPUT 300
 
@@ -197,6 +195,7 @@ exec_command(struct extensible *ex)
     return (ex->result);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_GET_EXTEN_INSTANCE
 struct extensible *
 get_exten_instance(struct extensible *exten, size_t inst)
 {
@@ -208,6 +207,7 @@ get_exten_instance(struct extensible *exten, size_t inst)
         exten = exten->next;
     return (exten);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_GET_EXTEN_INSTANCE */
 
 void
 wait_on_exec(struct extensible *ex)
@@ -216,7 +216,7 @@ wait_on_exec(struct extensible *ex)
   int rc;
   if (ex->tid != 0 && ex->pid != 0) {
     HANDLE hThread = ex->tid;
-    HANDLE hProcess = (HANDLE) ex->pid;
+    HANDLE hProcess = ex->pid;
     rc = WaitForSingleObject(hProcess, NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT);
     DEBUGMSGT(("exec:wait_on_exec","WaitForSingleObject rc=(%d)\n",rc ));
     rc = CloseHandle( hThread );
@@ -241,6 +241,10 @@ wait_on_exec(struct extensible *ex)
 int
 get_exec_output(struct extensible *ex)
 {
+#ifndef USING_UTILITIES_EXECUTE_MODULE
+    ex->result = -1;
+    NETSNMP_LOGONCE((LOG_WARNING, "support for run_exec_command not available\n"));
+#else
 #if HAVE_EXECV
     char            cachefile[STRMAX];
     char            cache[NETSNMP_MAXCACHESIZE];
@@ -259,7 +263,7 @@ get_exec_output(struct extensible *ex)
     curtime = time(NULL);
     if (curtime > (cachetime + NETSNMP_EXCACHETIME) ||
         strcmp(ex->command, lastcmd) != 0) {
-        strcpy(lastcmd, ex->command);
+        strlcpy(lastcmd, ex->command, sizeof(lastcmd));
         cachetime = curtime;
 #endif
 
@@ -270,7 +274,7 @@ get_exec_output(struct extensible *ex)
             /*
              * XXX  Use SNMP_FILEMODE_CLOSED instead of 644? 
              */
-        if ((cfd = open(cachefile, O_WRONLY | O_TRUNC | O_CREAT, 0644)) < 0) {
+        if ((cfd = open(cachefile, O_WRONLY | O_TRUNC | O_CREAT, 0600)) < 0) {
                 snmp_log(LOG_ERR,"can not create cache file\n");
                 setPerrorstatus(cachefile);
 #ifdef NETSNMP_EXCACHETIME
@@ -369,7 +373,7 @@ get_exec_output(struct extensible *ex)
     }
     
     /* Set global child process handle */
-    ex->pid = (int)pi.hProcess;
+    ex->pid = pi.hProcess;
     ex->tid = pi.hThread;
 
     /* Close pipe handles to make sure that no handles to the write end of the
@@ -390,11 +394,12 @@ get_exec_output(struct extensible *ex)
     }
     return fd;
 #endif                          /* WIN32 */
+#endif       /* HAVE_EXEC */
+#endif /* !defined(USING_UTILITIES_EXECUTE_MODULE) */
     return -1;
-#endif
 }
 int
-get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
+get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
 {
 /* 	Alexander Prömel, alexander@proemel.de 08/24/2006
 	The following code, is tested on picotux rev. 1.01.
@@ -463,16 +468,20 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
         return 0;
     }
     if ((*pid = fork()) == 0) { /* First handle for the child */
+        close(fd[0][1]);
+        close(fd[1][0]);
         close(0);
         if (dup(fd[0][0]) != 0) {
             setPerrorstatus("dup 0");
             return 0;
         }
+        close(fd[0][0]);
         close(1);
         if (dup(fd[1][1]) != 1) {
             setPerrorstatus("dup 1");
             return 0;
         }
+        close(fd[1][1]);
 
         /*
          * write standard output and standard error to pipe. 
@@ -480,8 +489,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
         /*
          * close all non-standard open file descriptors 
          */
-        for (cnt = getdtablesize() - 1; cnt >= 2; --cnt)
-            (void) close(cnt);
+        netsnmp_close_fds(1);
         (void) dup(1);          /* stderr */
 
         for (cnt = 1, cptr1 = cmd, cptr2 = argvs; *cptr1 != 0;
@@ -627,7 +635,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
     DEBUGMSGTL(("util_funcs","child dwProcessId (task manager): %d\n",(int)pi.dwProcessId));
 
     /* Set global child process handle */
-    *pid = (int)pi.hProcess;
+    *pid = pi.hProcess;
 
     /* Cleanup */
     if (!CloseHandle(pi.hThread))
@@ -656,6 +664,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
     return 0;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CLEAR_CACHE
 int
 clear_cache(int action,
             u_char * var_val,
@@ -663,85 +672,22 @@ clear_cache(int action,
             size_t var_val_len,
             u_char * statP, oid * name, size_t name_len)
 {
-
-    long            tmp = 0;
-
     if (var_val_type != ASN_INTEGER) {
         snmp_log(LOG_NOTICE, "Wrong type != int\n");
         return SNMP_ERR_WRONGTYPE;
     }
-    tmp = *((long *) var_val);
-    if (tmp == 1 && action == COMMIT) {
-#ifdef NETSNMP_EXCACHETIME
-        cachetime = 0;          /* reset the cache next read */
-#endif
+#if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)
+    else {
+        long            tmp = 0;
+        tmp = *((long *) var_val);
+        if (tmp == 1 && action == COMMIT) {
+            cachetime = 0;          /* reset the cache next read */
+        }
     }
+#endif
     return SNMP_ERR_NOERROR;
 }
-
-char          **argvrestartp, *argvrestartname, *argvrestart;
-
-RETSIGTYPE
-restart_doit(int a)
-{
-    char * name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-                                        NETSNMP_DS_LIB_APPTYPE);
-    snmp_shutdown(name);
-
-    /*  This signal handler may run with SIGALARM blocked.
-     *  Since the signal mask is preserved accross execv(), we must 
-     *  make sure that SIGALARM is unblocked prior of execv'ing.
-     *  Otherwise SIGALARM will be ignored in the next incarnation
-     *  of snmpd, because the signal is blocked. And thus, the 
-     *  restart doesn't work anymore. 
-     *
-     *  A quote from the sigprocmask() man page:
-     *  The use of sigprocmask() is unspecified in a multithreaded process; see
-     *  pthread_sigmask(3). 
-     */ 
-#if HAVE_SIGPROCMASK
-    {
-        sigset_t empty_set;
-      
-        sigemptyset(&empty_set);
-        sigprocmask(SIG_SETMASK, &empty_set, NULL);
-    }
-#elif HAVE_SIGBLOCK
-    sigsetmask(0);
-#endif
-
-    /*
-     * do the exec 
-     */
-#if HAVE_EXECV
-    execv(argvrestartname, argvrestartp);
-    setPerrorstatus(argvrestartname);
-#endif
-}
-
-int
-restart_hook(int action,
-             u_char * var_val,
-             u_char var_val_type,
-             size_t var_val_len,
-             u_char * statP, oid * name, size_t name_len)
-{
-
-    long            tmp = 0;
-
-    if (var_val_type != ASN_INTEGER) {
-        snmp_log(LOG_NOTICE, "Wrong type != int\n");
-        return SNMP_ERR_WRONGTYPE;
-    }
-    tmp = *((long *) var_val);
-    if (tmp == 1 && action == COMMIT) {
-#ifdef SIGALRM
-        signal(SIGALRM, restart_doit);
-#endif
-        alarm(NETSNMP_RESTARTSLEEP);
-    }
-    return SNMP_ERR_NOERROR;
-}
+#endif /* NETSNMP_FEATURE_REMOVE_CLEAR_CACHE */
 
 void
 print_mib_oid(oid name[], size_t len)
@@ -763,169 +709,7 @@ sprint_mib_oid(char *buf, const oid *name, size_t len)
     int             i;
 
     for (i = 0; i < (int) len; i++)
-        buf += sprintf(buf, ".%u", (unsigned) name[i]);
-}
-
-/*******************************************************************-o-******
- * header_simple_table
- *
- * Parameters:
- *	  *vp		 Variable data.
- *	  *name		 Fully instantiated OID name.
- *	  *length	 Length of name.
- *	   exact	 TRUE if an exact match is desired.
- *	  *var_len	 Hook for size of returned data type.
- *	(**write_method) Hook for write method (UNUSED).
- *	   max
- *      
- * Returns:
- *	0	If name matches vp->name (accounting for 'exact') and is
- *			not greater in length than 'max'.
- *	1	Otherwise.
- *
- *
- * Compare 'name' to vp->name for the best match or an exact match (if
- *	requested).  Also check that 'name' is not longer than 'max' if
- *	max is greater-than/equal 0.
- * Store a successful match in 'name', and increment the OID instance if
- *	the match was not exact.  
- *
- * 'name' and 'length' are undefined upon failure.
- *
- */
-int
-header_simple_table(struct variable *vp, oid * name, size_t * length,
-                    int exact, size_t * var_len,
-                    WriteMethod ** write_method, int max)
-{
-    int             i, rtest;   /* Set to:      -1      If name < vp->name,
-                                 *              1       If name > vp->name,
-                                 *              0       Otherwise.
-                                 */
-    oid             newname[MAX_OID_LEN];
-
-    for (i = 0, rtest = 0;
-         i < (int) vp->namelen && i < (int) (*length) && !rtest; i++) {
-        if (name[i] != vp->name[i]) {
-            if (name[i] < vp->name[i])
-                rtest = -1;
-            else
-                rtest = 1;
-        }
-    }
-    if (rtest > 0 ||
-        (exact == 1
-         && (rtest || (int) *length != (int) (vp->namelen + 1)))) {
-        if (var_len)
-            *var_len = 0;
-        return MATCH_FAILED;
-    }
-
-    memset(newname, 0, sizeof(newname));
-
-    if (((int) *length) <= (int) vp->namelen || rtest == -1) {
-        memmove(newname, vp->name, (int) vp->namelen * sizeof(oid));
-        newname[vp->namelen] = 1;
-        *length = vp->namelen + 1;
-    } else if (((int) *length) > (int) vp->namelen + 1) {       /* exact case checked earlier */
-        *length = vp->namelen + 1;
-        memmove(newname, name, (*length) * sizeof(oid));
-        if (name[*length - 1] < ULONG_MAX) {
-            newname[*length - 1] = name[*length - 1] + 1;
-        } else {
-            /*
-             * Careful not to overflow...  
-             */
-            newname[*length - 1] = name[*length - 1];
-        }
-    } else {
-        *length = vp->namelen + 1;
-        memmove(newname, name, (*length) * sizeof(oid));
-        if (!exact) {
-            if (name[*length - 1] < ULONG_MAX) {
-                newname[*length - 1] = name[*length - 1] + 1;
-            } else {
-                /*
-                 * Careful not to overflow...  
-                 */
-                newname[*length - 1] = name[*length - 1];
-            }
-        } else {
-            newname[*length - 1] = name[*length - 1];
-        }
-    }
-    if ((max >= 0 && ((int)newname[*length - 1] > max)) ||
-               ( 0 == newname[*length - 1] )) {
-        if (var_len)
-            *var_len = 0;
-        return MATCH_FAILED;
-    }
-
-    memmove(name, newname, (*length) * sizeof(oid));
-    if (write_method)
-        *write_method = 0;
-    if (var_len)
-        *var_len = sizeof(long);        /* default */
-    return (MATCH_SUCCEEDED);
-}
-
-/*
- * header_generic(...
- * Arguments:
- * vp     IN      - pointer to variable entry that points here
- * name    IN/OUT  - IN/name requested, OUT/name found
- * length  IN/OUT  - length of IN/OUT oid's 
- * exact   IN      - TRUE if an exact match was requested
- * var_len OUT     - length of variable or 0 if function returned
- * write_method
- * 
- */
-
-/*******************************************************************-o-******
- * generic_header
- *
- * Parameters:
- *	  *vp	   (I)     Pointer to variable entry that points here.
- *	  *name	   (I/O)   Input name requested, output name found.
- *	  *length  (I/O)   Length of input and output oid's.
- *	   exact   (I)     TRUE if an exact match was requested.
- *	  *var_len (O)     Length of variable or 0 if function returned.
- *	(**write_method)   Hook to name a write method (UNUSED).
- *      
- * Returns:
- *	MATCH_SUCCEEDED	If vp->name matches name (accounting for exact bit).
- *	MATCH_FAILED	Otherwise,
- *
- *
- * Check whether variable (vp) matches name.
- */
-int
-header_generic(struct variable *vp,
-               oid * name,
-               size_t * length,
-               int exact, size_t * var_len, WriteMethod ** write_method)
-{
-    oid             newname[MAX_OID_LEN];
-    int             result;
-
-    DEBUGMSGTL(("util_funcs", "header_generic: "));
-    DEBUGMSGOID(("util_funcs", name, *length));
-    DEBUGMSG(("util_funcs", " exact=%d\n", exact));
-
-    memcpy((char *) newname, (char *) vp->name,
-           (int) vp->namelen * sizeof(oid));
-    newname[vp->namelen] = 0;
-    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
-    DEBUGMSGTL(("util_funcs", "  result: %d\n", result));
-    if ((exact && (result != 0)) || (!exact && (result >= 0)))
-        return (MATCH_FAILED);
-    memcpy((char *) name, (char *) newname,
-           ((int) vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-
-    *write_method = 0;
-    *var_len = sizeof(long);    /* default to 'long' results */
-    return (MATCH_SUCCEEDED);
+        buf += sprintf(buf, ".%" NETSNMP_PRIo "u", name[i]);
 }
 
 /*
@@ -944,6 +728,7 @@ checkmib(struct variable *vp, oid * name, size_t * length,
                                  write_method, max));
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_FIND_FIELD
 char           *
 find_field(char *ptr, int field)
 {
@@ -959,15 +744,15 @@ find_field(char *ptr, int field)
         /*
          * rewind a field length 
          */
-        while (*ptr != 0 && isspace(*ptr) && init <= ptr)
+        while (*ptr != 0 && isspace((unsigned char)(*ptr)) && init <= ptr)
             ptr--;
-        while (*ptr != 0 && !isspace(*ptr) && init <= ptr)
+        while (*ptr != 0 && !isspace((unsigned char)(*ptr)) && init <= ptr)
             ptr--;
-        if (isspace(*ptr))
+        if (isspace((unsigned char)(*ptr)))
             ptr++;              /* past space */
         if (ptr < init)
             ptr = init;
-        if (!isspace(*ptr) && *ptr != 0)
+        if (!isspace((unsigned char)(*ptr)) && *ptr != 0)
             return (ptr);
     } else {
         if ((ptr = skip_white(ptr)) == NULL)
@@ -984,7 +769,9 @@ find_field(char *ptr, int field)
     }
     return (NULL);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_FIND_FIELD */
 
+#ifndef NETSNMP_FEATURE_REMOVE_PARSE_MIBOID
 int
 parse_miboid(const char *buf, oid * oidout)
 {
@@ -994,12 +781,12 @@ parse_miboid(const char *buf, oid * oidout)
         return 0;
     if (*buf == '.')
         buf++;
-    for (i = 0; isdigit(*buf); i++) {
+    for (i = 0; isdigit((unsigned char)(*buf)); i++) {
         /* Subidentifiers are unsigned values, up to 2^32-1
          * so we need to use 'strtoul' rather than 'atoi'
          */
         oidout[i] = strtoul(buf, NULL, 10) & 0xffffffff;
-        while (isdigit(*buf++));
+        while (isdigit((unsigned char)(*buf))) buf++;
         if (*buf == '.')
             buf++;
     }
@@ -1008,7 +795,9 @@ parse_miboid(const char *buf, oid * oidout)
      */
     return i;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_PARSE_MIBOID */
 
+#ifndef NETSNMP_FEATURE_REMOVE_STRING_APPEND_INT
 void
 string_append_int(char *s, int val)
 {
@@ -1023,13 +812,16 @@ string_append_int(char *s, int val)
     strcpy(s, textVal);
     return;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_STRING_APPEND_INT */
+
+#ifndef NETSNMP_FEATURE_REMOVE_INTERNAL_MIB_TABLE
 
 struct internal_mib_table {
     int             max_size;   /* Size of the current data table */
     int             next_index; /* Index of the next free entry */
     int             current_index;      /* Index of the 'current' entry */
     int             cache_timeout;
-    marker_t        cache_marker;
+    marker_t        cache_markerM;
     RELOAD         *reload;     /* Routine to read in the data */
     COMPARE        *compare;    /* Routine to compare two entries */
     int             data_size;  /* Size of an individual entry */
@@ -1050,7 +842,7 @@ Initialise_Table(int size, int timeout, RELOAD *reload, COMPARE *compare)
     t->next_index = 1;          /* Don't use index 0 */
     t->current_index = 1;
     t->cache_timeout = timeout;
-    t->cache_marker = NULL;
+    t->cache_markerM = NULL;
     t->reload = reload;
     t->compare = compare;
     t->data_size = size;
@@ -1072,8 +864,9 @@ check_and_reload_table(struct internal_mib_table *table)
      * If the saved data is fairly recent,
      *    we don't need to reload it
      */
-    if (table->cache_marker &&
-        !(atime_ready(table->cache_marker, table->cache_timeout * 1000)))
+    if (table->cache_markerM &&
+        !(netsnmp_ready_monotonic(table->cache_markerM,
+                                  table->cache_timeout * 1000)))
         return 1;
 
 
@@ -1083,15 +876,12 @@ check_and_reload_table(struct internal_mib_table *table)
      * N.B:  Update the cache marker *before* calling
      *   this routine, to avoid problems with recursion
      */
-    if (!table->cache_marker)
-        table->cache_marker = atime_newMarker();
-    else
-        atime_setMarker(table->cache_marker);
+    netsnmp_set_monotonic_marker(&table->cache_markerM);
 
     table->next_index = 1;
     if (table->reload((mib_table_t) table) < 0) {
-        free(table->cache_marker);
-        table->cache_marker = NULL;
+        free(table->cache_markerM);
+        table->cache_markerM = NULL;
         return 0;
     }
     table->current_index = 1;
@@ -1201,89 +991,147 @@ Retrieve_Table_Data(mib_table_t t, int *max_idx)
     *max_idx = table->next_index - 1;
     return table->data;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INTERNAL_MIB_TABLE */
 
-#ifdef linux
-# define PROC_PATH          "/proc"
-# define FILE_DISP          "fd/"
-# define SOCKET_TYPE_1      "socket:["
-# define SOCKET_TYPE_2      "[0000]:"
+#if defined(HAVE_LINUX_RTNETLINK_H)
 
-unsigned long long
-extract_inode(char *format)
+#ifndef NETSNMP_FEATURE_REMOVE_CREATE_PREFIX_INFO
+prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
+                                        unsigned long AutonomousFlag,
+                                        char *in6ptr)
 {
-    unsigned long long ret = 0;
+   prefix_cbx *node = SNMP_MALLOC_TYPEDEF(prefix_cbx);
+   if(!in6ptr) {
+      free(node);
+      return NULL;
+   }
+   if(!node) {
+      free(node);
+      return NULL;
+   }
+   node->next_info = NULL;
+   node->ipAddressPrefixOnLinkFlag = OnLinkFlag;
+   node->ipAddressPrefixAutonomousFlag = AutonomousFlag;
+   memcpy(node->in6p, in6ptr, sizeof(node->in6p));
 
-    if (!strncmp(format, SOCKET_TYPE_1, 8)) {
-        ret = strtoull(format + 8, NULL, 0);
-    } else if (!strncmp(format, SOCKET_TYPE_2, 7)) {
-        ret = strtoull(format + 7, NULL, 0);
-    }
-
-    return ret;
+   return node;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CREATE_PREFIX_INFO */
 
-unsigned int
-get_pid_from_inode(unsigned long long inode)
+#ifndef NETSNMP_FEATURE_REMOVE_FIND_PREFIX_INFO
+int net_snmp_find_prefix_info(prefix_cbx **head,
+                              char *address,
+                              prefix_cbx *node_to_find)
 {
-    DIR            *procdirs = NULL, *piddirs = NULL;
-    char           *name = NULL;
-    char            path_name[PATH_MAX + 1];
-    char            socket_lnk[NAME_MAX + 1];
-    int             filelen = 0, readlen = 0, iflag = 0;
-    struct dirent  *procinfo, *pidinfo;
-    unsigned int    pid;
-    unsigned long long temp_inode;
+    int iret;
+    memset(node_to_find, 0, sizeof(prefix_cbx));
+    if(!*head)
+       return -1;
+    memcpy(node_to_find->in6p, address, sizeof(node_to_find->in6p));
 
-    if (!(procdirs = opendir(PROC_PATH))) {
-        snmp_log(LOG_ERR, "snmpd: cannot open /proc\n");       
-        return 0;
-    }
+    iret = net_snmp_search_update_prefix_info(head, node_to_find, 1);
+    if(iret < 0) {
+       DEBUGMSGTL(("util_funcs:prefix", "Unable to search the list\n"));
+       return -1;
+    } else if (!iret) {
+       DEBUGMSGTL(("util_funcs:prefix", "Could not find prefix info\n"));
+       return -1;
+    } else
+       return 0;
+}
+#endif /* NETSNMP_FEATURE_REMOVE_FIND_PREFIX_INFO */
 
-    while ((procinfo = readdir(procdirs)) != NULL) {
-        name = procinfo->d_name;
-        for (; *name; name++) {
-            if (!isdigit(*name))
-                break;
-        }
-        if(*name)
-            continue;
+#ifndef NETSNMP_FEATURE_REMOVE_UPDATE_PREFIX_INFO
+int net_snmp_update_prefix_info(prefix_cbx **head,
+                                prefix_cbx *node_to_update)
+{
+    int iret;
+    iret = net_snmp_search_update_prefix_info(head, node_to_update, 0);
+    if(iret < 0) {
+       DEBUGMSGTL(("util_funcs:prefix", "Unable to update prefix info\n"));
+       return -1;
+    } else if (!iret) {
+       DEBUGMSGTL(("util_funcs:prefix", "Unable to find the node to update\n"));
+       return -1;
+    } else
+       return 0;
+}
+#endif /* NETSNMP_FEATURE_REMOVE_UPDATE_PREFIX_INFO */
 
-        memset(path_name, '\0', PATH_MAX + 1);
-        filelen = snprintf(path_name, PATH_MAX,
-                           PROC_PATH "/%s/" FILE_DISP, procinfo->d_name);
-        if (filelen <= 0 || PATH_MAX < filelen)
-            continue;
+int net_snmp_search_update_prefix_info(prefix_cbx **head,
+                                       prefix_cbx *node_to_use,
+                                       int functionality)
+{
 
-        pid = strtoul(procinfo->d_name, NULL, 0);
+   /* We define functionality based on need                                                         *
+    * 0 - Need to do a search and update. We have to provide the node_to_use structure filled fully *
+    * 1 - Need to do only search. Provide the node_to_use with in6p value filled                    */
 
-        if (!(piddirs = opendir(path_name)))
-            continue;
+    prefix_cbx *temp_node;
+    netsnmp_assert(NULL != head);
+    netsnmp_assert(NULL != node_to_use);
 
-        while ((pidinfo = readdir(piddirs)) != NULL) {
-            if (filelen + strlen(pidinfo->d_name) > PATH_MAX)
-                continue;
+    if(functionality > 1)
+       return -1;
+    if(!node_to_use)
+       return -1;
 
-            strcpy(path_name + filelen, pidinfo->d_name);
 
-            memset(socket_lnk, '\0', NAME_MAX + 1);
-            readlen = readlink(path_name, socket_lnk, NAME_MAX);
-            if (readlen < 0)
-                continue;
-            socket_lnk[readlen] = '\0';
+    if (!functionality) {
+       if (!*head) {
+           *head = node_to_use;
+           return 1;
+       }
 
-            temp_inode = extract_inode(socket_lnk);
-            if (inode == temp_inode) {
-                iflag = 1;
-                break;
+       for (temp_node = *head; temp_node->next_info != NULL ; temp_node = temp_node->next_info) {
+            if (0 == strcmp(temp_node->in6p, node_to_use->in6p)) {
+                temp_node->ipAddressPrefixOnLinkFlag = node_to_use->ipAddressPrefixOnLinkFlag;
+                temp_node->ipAddressPrefixAutonomousFlag = node_to_use->ipAddressPrefixAutonomousFlag;
+                return 2;
             }
-        }
-        closedir(piddirs);
-        if (iflag == 1)
-            break;
+       }
+       temp_node->next_info = node_to_use;
+       return 1;
+    } else {
+         for (temp_node = *head; temp_node != NULL ; temp_node = temp_node->next_info) {
+              if (0 == strcmp(temp_node->in6p, node_to_use->in6p)) {
+                /*need yo put sem here as i read here */
+                node_to_use->ipAddressPrefixOnLinkFlag = temp_node->ipAddressPrefixOnLinkFlag;
+                node_to_use->ipAddressPrefixAutonomousFlag = temp_node->ipAddressPrefixAutonomousFlag;
+                return 1;
+              }
+         }
+         return 0;
     }
-    if (procdirs)
-        closedir(procdirs);
-    return pid;
 }
 
-#endif  /* #ifdef linux */
+#ifndef NETSNMP_FEATURE_REMOVE_DELETE_PREFIX_INFO
+int net_snmp_delete_prefix_info(prefix_cbx **head,
+                                char *address)
+{
+
+    prefix_cbx *temp_node,*prev_node;
+    if(!address)
+       return -1;
+    if(!head)
+       return -1;
+
+    for (temp_node = *head, prev_node = NULL; temp_node;
+         prev_node = temp_node, temp_node = temp_node->next_info) {
+
+         if (temp_node->in6p && strcmp(temp_node->in6p, address) == 0) {
+            if (prev_node)
+                prev_node->next_info = temp_node->next_info;
+            else
+                *head = temp_node->next_info;
+            free(temp_node);
+            return 1;
+        }
+
+    }
+    return 0;
+}
+#endif /* NETSNMP_FEATURE_REMOVE_DELETE_PREFIX_INFO */
+
+#endif /* HAVE_LINUX_RTNETLINK_H */
+         

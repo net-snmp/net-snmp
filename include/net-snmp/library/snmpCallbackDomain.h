@@ -11,6 +11,7 @@ extern          "C" {
 
 #ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
 
+#include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>
 
 typedef struct netsnmp_callback_pass_s {
@@ -38,6 +39,7 @@ int             netsnmp_callback_hook_build(netsnmp_session * sp,
 int             netsnmp_callback_check_packet(u_char * pkt, size_t len);
 netsnmp_pdu    *netsnmp_callback_create_pdu(netsnmp_transport *transport,
                                             void *opaque, size_t olength);
+NETSNMP_IMPORT
 netsnmp_session *netsnmp_callback_open(int attach_to,
                                        int (*return_func) (int op,
                                                            netsnmp_session
@@ -55,6 +57,7 @@ netsnmp_session *netsnmp_callback_open(int attach_to,
                                                            *,
                                                            netsnmp_pdu *,
                                                            int));
+NETSNMP_IMPORT
 void             netsnmp_clear_callback_list(void);
 
 #else

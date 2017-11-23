@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/scalar.h>
@@ -11,9 +12,11 @@
 
 #include <net-snmp/library/snmp_logging.h>
 #include "agent/nsLogging.h"
-#include "util_funcs.h"
 
-
+netsnmp_feature_require(logging_external)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(table_iterator_insert_context)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * OID and columns for the logging table.
@@ -23,14 +26,13 @@
 #define  NSLOGGING_MAXLEVEL	4
 #define  NSLOGGING_STATUS	5
 
-oid nsLoggingTable_oid[]      = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 2, 1};
-
-
 void
 init_nsLogging(void)
 {
     netsnmp_table_registration_info *table_info;
     netsnmp_iterator_info           *iinfo;
+
+    const oid nsLoggingTable_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 2, 1};
 
     /*
      * Register the table.
@@ -63,7 +65,7 @@ init_nsLogging(void)
     /*
      * .... and register the table with the agent.
      */
-    netsnmp_register_table_iterator(
+    netsnmp_register_table_iterator2(
         netsnmp_create_handler_registration(
             "tzLoggingTable", handle_nsLoggingTable,
             nsLoggingTable_oid, OID_LENGTH(nsLoggingTable_oid),
@@ -191,6 +193,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         for (request=requests; request; request=request->next) {
             if ( request->status != 0 ) {
@@ -309,7 +312,6 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
             default:
                 netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
                 return SNMP_NOSUCHOBJECT;
-                continue;
 	    }
 	}
 	break;
@@ -450,11 +452,11 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                 switch (*request->requestvb->val.integer) {
                     case RS_ACTIVE:
                     case RS_CREATEANDGO:
-                        logh->enabled = 1;
+                        netsnmp_enable_this_loghandler(logh);
                         break;
                     case RS_NOTINSERVICE:
                     case RS_CREATEANDWAIT:
-                        logh->enabled = 0;
+                        netsnmp_disable_this_loghandler(logh);
                         break;
 		    case RS_DESTROY:
 		        netsnmp_remove_loghandler( logh );
@@ -464,6 +466,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
 	    }
 	}
 	break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;

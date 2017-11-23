@@ -7,7 +7,7 @@
 
 void            init_disk(void);
 
-config_require(util_funcs)
+config_require(util_funcs/header_simple_table)
 
      extern FindVarMethod var_extensible_disk;
 
@@ -21,5 +21,11 @@ config_require(util_funcs)
 #define DISKUSED 8
 #define DISKPERCENT 9
 #define DISKPERCENTNODE 10
+#define DISKTOTALLOW 11
+#define DISKTOTALHIGH 12
+#define DISKAVAILLOW 13
+#define DISKAVAILHIGH 14
+#define DISKUSEDLOW 15
+#define DISKUSEDHIGH 16
 
 #endif                          /* _MIBGROUP_DISK_H */

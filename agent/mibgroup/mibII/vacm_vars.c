@@ -10,6 +10,11 @@
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -40,24 +45,17 @@
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/agent_callbacks.h>
+#include <net-snmp/agent/sysORTable.h>
 #include "vacm_vars.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 
-#ifdef USING_MIBII_SYSORTABLE_MODULE
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -66,41 +64,52 @@
 #  include <time.h>
 # endif
 #endif
-#include "sysORTable.h"
-#endif
+
 static unsigned int vacmViewSpinLock = 0;
 
 void
 init_vacm_vars(void)
 {
 
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-    static oid      reg[] = { SNMP_OID_SNMPMODULES, 16, 2, 2, 1 };
-#endif
+    oid      reg[] = { SNMP_OID_SNMPMODULES, 16, 2, 2, 1 };
 
 #define PRIVRW	(NETSNMP_SNMPV2ANY | 0x5000)
 
     struct variable1 vacm_sec2group[] = {
-        {SECURITYGROUP, ASN_OCTET_STR, RWRITE, var_vacm_sec2group, 1, {3}},
-        {SECURITYSTORAGE, ASN_INTEGER, RWRITE, var_vacm_sec2group, 1, {4}},
-        {SECURITYSTATUS, ASN_INTEGER, RWRITE, var_vacm_sec2group, 1, {5}},
+        {SECURITYGROUP, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_sec2group, 1, {3}},
+        {SECURITYSTORAGE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_sec2group, 1, {4}},
+        {SECURITYSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_sec2group, 1, {5}},
     };
 
     struct variable1 vacm_access[] = {
-        {ACCESSMATCH, ASN_INTEGER, RWRITE, var_vacm_access, 1, {4}},
-        {ACCESSREAD, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {5}},
-        {ACCESSWRITE, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {6}},
-        {ACCESSNOTIFY, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {7}},
-        {ACCESSSTORAGE, ASN_INTEGER, RWRITE, var_vacm_access, 1, {8}},
-        {ACCESSSTATUS, ASN_INTEGER, RWRITE, var_vacm_access, 1, {9}},
+        {ACCESSMATCH, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {4}},
+        {ACCESSREAD, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {5}},
+        {ACCESSWRITE, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {6}},
+        {ACCESSNOTIFY, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {7}},
+        {ACCESSSTORAGE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {8}},
+        {ACCESSSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {9}},
     };
 
     struct variable3 vacm_view[] = {
-        {VACMVIEWSPINLOCK, ASN_INTEGER, RWRITE, var_vacm_view, 1, {1}},
-        {VIEWMASK, ASN_OCTET_STR, RWRITE, var_vacm_view, 3, {2, 1, 3}},
-        {VIEWTYPE, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2, 1, 4}},
-        {VIEWSTORAGE, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2, 1, 5}},
-        {VIEWSTATUS, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2, 1, 6}},
+        {VACMVIEWSPINLOCK, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 1, {1}},
+        {VIEWMASK, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 3, {2, 1, 3}},
+        {VIEWTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 3, {2, 1, 4}},
+        {VIEWSTORAGE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 3, {2, 1, 5}},
+        {VACMVIEWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 3, {2, 1, 6}},
     };
 
     /*
@@ -126,11 +135,7 @@ init_vacm_vars(void)
                  vacm_access_oid);
     REGISTER_MIB("mibII/vacm:view", vacm_view, variable3, vacm_view_oid);
 
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-    register_sysORTable(reg, 10,
-                        "View-based Access Control Model for SNMP.");
-#endif
-
+    REGISTER_SYSOR_ENTRY(reg, "View-based Access Control Model for SNMP.");
 }
 
 
@@ -144,8 +149,8 @@ var_vacm_sec2group(struct variable * vp,
 {
     struct vacm_groupEntry *gp;
     oid            *groupSubtree;
-    int             groupSubtreeLen;
-    int             secmodel;
+    ssize_t         groupSubtreeLen;
+    oid             secmodel;
     char            secname[VACMSTRINGLEN], *cp;
 
     /*
@@ -156,6 +161,7 @@ var_vacm_sec2group(struct variable * vp,
      */
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
     case SECURITYGROUP:
         *write_method = write_vacmGroupName;
         break;
@@ -165,9 +171,12 @@ var_vacm_sec2group(struct variable * vp,
     case SECURITYSTATUS:
         *write_method = write_vacmSecurityToGroupStatus;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
     default:
         *write_method = NULL;
     }
+
+	*var_len = 0; /* assume 0 length until found */
 
     if (memcmp(name, vp->name, sizeof(oid) * vp->namelen) != 0) {
         memcpy(name, vp->name, sizeof(oid) * vp->namelen);
@@ -181,13 +190,13 @@ var_vacm_sec2group(struct variable * vp,
         groupSubtree = name + 13;
         groupSubtreeLen = *length - 13;
         if ( name[12] != groupSubtreeLen )
-            return 0;		/* Either extra subids, or an incomplete string */
+            return NULL;	/* Either extra subids, or an incomplete string */
         cp = secname;
         while (groupSubtreeLen-- > 0) {
             if (*groupSubtree > 255)
-                return 0;       /* illegal value */
+                return NULL;    /* illegal value */
             if (cp - secname > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             *cp++ = (char) *groupSubtree++;
         }
         *cp = 0;
@@ -200,9 +209,9 @@ var_vacm_sec2group(struct variable * vp,
         cp = secname;
         while (groupSubtreeLen-- > 0) {
             if (*groupSubtree > 255)
-                return 0;       /* illegal value */
+                return NULL;    /* illegal value */
             if (cp - secname > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             *cp++ = (char) *groupSubtree++;
         }
         *cp = 0;
@@ -252,6 +261,7 @@ var_vacm_sec2group(struct variable * vp,
     default:
         break;
     }
+
     return NULL;
 }
 
@@ -262,7 +272,7 @@ var_vacm_access(struct variable * vp,
                 int exact, size_t * var_len, WriteMethod ** write_method)
 {
     struct vacm_accessEntry *gp;
-    int             secmodel, seclevel;
+    oid             secmodel, seclevel;
     char            groupName[VACMSTRINGLEN] = { 0 };
     char            contextPrefix[VACMSTRINGLEN] = { 0 };
     oid            *op;
@@ -278,6 +288,7 @@ var_vacm_access(struct variable * vp,
      */
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
     case ACCESSMATCH:
         *write_method = write_vacmAccessContextMatch;
         break;
@@ -296,9 +307,12 @@ var_vacm_access(struct variable * vp,
     case ACCESSSTATUS:
         *write_method = write_vacmAccessStatus;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
     default:
         *write_method = NULL;
     }
+
+	*var_len = 0; /* assume 0 length until found */
 
     if (memcmp(name, vp->name, sizeof(oid) * vp->namelen) != 0) {
         memcpy(name, vp->name, sizeof(oid) * vp->namelen);
@@ -315,11 +329,11 @@ var_vacm_access(struct variable * vp,
         op = name + 11;
         len = *op++;
         if (len > VACM_MAX_STRING)
-            return 0;
+            return NULL;
         cp = groupName;
         while (len-- > 0) {
             if (*op > 255)
-                return 0;       /* illegal value */
+                return NULL;    /* illegal value */
             *cp++ = (char) *op++;
         }
         *cp = 0;
@@ -329,11 +343,11 @@ var_vacm_access(struct variable * vp,
          */
         len = *op++;
         if (len > VACM_MAX_STRING)
-            return 0;
+            return NULL;
         cp = contextPrefix;
         while (len-- > 0) {
             if (*op > 255)
-                return 0;       /* illegal value */
+                return NULL;    /* illegal value */
             *cp++ = (char) *op++;
         }
         *cp = 0;
@@ -361,13 +375,14 @@ var_vacm_access(struct variable * vp,
         } else {
             len = *op;
             if (len > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             cp = groupName;
-            for (i = 0; i <= len; i++) {
+            for (i = 0; i <= len && op < name + *length; i++) {
                 if (*op > 255) {
-                    return 0;   /* illegal value */
-                }
-                *cp++ = (char) *op++;
+                    *cp++ = 255;
+                    ++op;
+                } else
+                    *cp++ = (char) *op++;
             }
             *cp = 0;
         }
@@ -375,13 +390,14 @@ var_vacm_access(struct variable * vp,
         } else {
             len = *op;
             if (len > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             cp = contextPrefix;
-            for (i = 0; i <= len; i++) {
+            for (i = 0; i <= len && op < name + *length; i++) {
                 if (*op > 255) {
-                    return 0;   /* illegal value */
-                }
-                *cp++ = (char) *op++;
+                    *cp++ = 255;
+                    ++op;
+                } else
+                    *cp++ = (char) *op++;
             }
             *cp = 0;
         }
@@ -469,6 +485,7 @@ var_vacm_access(struct variable * vp,
         long_return = gp->status;
         return (u_char *) & long_return;
     }
+
     return NULL;
 }
 
@@ -495,6 +512,7 @@ var_vacm_view(struct variable * vp,
      */
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
     case VIEWMASK:
         *write_method = write_vacmViewMask;
         break;
@@ -504,14 +522,16 @@ var_vacm_view(struct variable * vp,
     case VIEWSTORAGE:
         *write_method = write_vacmViewStorageType;
         break;
-    case VIEWSTATUS:
+    case VACMVIEWSTATUS:
         *write_method = write_vacmViewStatus;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
     default:
         *write_method = NULL;
     }
 
     *var_len = sizeof(long_return);
+
     if (vp->magic != VACMVIEWSPINLOCK) {
         if (memcmp(name, vp->name, sizeof(oid) * vp->namelen) != 0) {
             memcpy(name, vp->name, sizeof(oid) * vp->namelen);
@@ -528,11 +548,11 @@ var_vacm_view(struct variable * vp,
             op = name + 12;
             len = *op++;
             if (len > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             cp = viewName;
             while (len-- > 0) {
                 if (*op > 255)
-                    return 0;
+                    return NULL;
                 *cp++ = (char) *op++;
             }
             *cp = 0;
@@ -543,7 +563,7 @@ var_vacm_view(struct variable * vp,
             subtree[0] = len = *op++;
             subtreeLen = 1;
             if (len > MAX_OID_LEN)
-                return 0;
+                return NULL;
             if ( (op+len) != (name + *length) )
                 return NULL;     /* Declared length doesn't match what we actually got */
             op1 = &(subtree[1]);
@@ -566,13 +586,14 @@ var_vacm_view(struct variable * vp,
             } else {
                 len = *op;
                 if (len > VACM_MAX_STRING)
-                    return 0;
+                    return NULL;
                 cp = viewName;
                 for (i = 0; i <= len && op < name + *length; i++) {
                     if (*op > 255) {
-                        return 0;
-                    }
-                    *cp++ = (char) *op++;
+                        *cp++ = 255;
+                        ++op;
+                    } else
+                        *cp++ = (char) *op++;
                 }
                 *cp = 0;
             }
@@ -623,7 +644,9 @@ var_vacm_view(struct variable * vp,
 
     switch (vp->magic) {
     case VACMVIEWSPINLOCK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_vacmViewSpinLock;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         long_return = vacmViewSpinLock;
         return (u_char *) & long_return;
 
@@ -647,38 +670,15 @@ var_vacm_view(struct variable * vp,
         long_return = gp->viewStorageType;
         return (u_char *) & long_return;
 
-    case VIEWSTATUS:
+    case VACMVIEWSTATUS:
         long_return = gp->viewStatus;
         return (u_char *) & long_return;
     }
+
     return NULL;
 }
 
-oid            *
-sec2group_generate_OID(oid * prefix, size_t prefixLen,
-                       struct vacm_groupEntry * geptr, size_t * length)
-{
-    oid            *indexOid;
-    int             i, securityNameLen;
-
-    securityNameLen = strlen(geptr->securityName);
-
-    *length = 2 + securityNameLen + prefixLen;
-    indexOid = (oid *) malloc(*length * sizeof(oid));
-    if (indexOid) {
-        memmove(indexOid, prefix, prefixLen * sizeof(oid));
-
-        indexOid[prefixLen] = geptr->securityModel;
-
-        indexOid[prefixLen + 1] = securityNameLen;
-        for (i = 0; i < securityNameLen; i++)
-            indexOid[prefixLen + 2 + i] = (oid) geptr->securityName[i];
-
-    }
-    return indexOid;
-
-}
-
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 int
 sec2group_parse_oid(oid * oidIndex, size_t oidLen,
                     int *model, unsigned char **name, size_t * nameLen)
@@ -979,40 +979,6 @@ write_vacmSecurityToGroupStatus(int action,
     }
 
     return SNMP_ERR_NOERROR;
-}
-
-oid            *
-access_generate_OID(oid * prefix, size_t prefixLen,
-                    struct vacm_accessEntry * aptr, size_t * length)
-{
-    oid            *indexOid;
-    int             i, groupNameLen, contextPrefixLen;
-
-    groupNameLen = strlen(aptr->groupName);
-    contextPrefixLen = strlen(aptr->contextPrefix);
-
-    *length = 4 + groupNameLen + contextPrefixLen + prefixLen;
-    indexOid = (oid *) malloc(*length * sizeof(oid));
-    if (indexOid) {
-        memmove(indexOid, prefix, prefixLen * sizeof(oid));
-
-        indexOid[prefixLen] = groupNameLen;
-        for (i = 0; i < groupNameLen; i++)
-            indexOid[groupNameLen + 1 + i] = (oid) aptr->groupName[i];
-
-        indexOid[prefixLen + groupNameLen + 1] = contextPrefixLen;
-        for (i = 0; i < contextPrefixLen; i++)
-            indexOid[prefixLen + groupNameLen + 2 + i] =
-                (oid) aptr->contextPrefix[i];
-
-        indexOid[prefixLen + groupNameLen + contextPrefixLen + 3] =
-            aptr->securityModel;
-        indexOid[prefixLen + groupNameLen + contextPrefixLen + 4] =
-            aptr->securityLevel;
-
-    }
-    return indexOid;
-
 }
 
 int
@@ -1550,35 +1516,6 @@ view_parse_oid(oid * oidIndex, size_t oidLen,
     return 0;
 }
 
-oid            *
-view_generate_OID(oid * prefix, size_t prefixLen,
-                  struct vacm_viewEntry * vptr, size_t * length)
-{
-    oid            *indexOid;
-    int             i, viewNameLen, viewSubtreeLen;
-
-    viewNameLen = strlen(vptr->viewName);
-    viewSubtreeLen = vptr->viewSubtreeLen;
-
-    *length = 2 + viewNameLen + viewSubtreeLen + prefixLen;
-    indexOid = (oid *) malloc(*length * sizeof(oid));
-    if (indexOid) {
-        memmove(indexOid, prefix, prefixLen * sizeof(oid));
-
-        indexOid[prefixLen] = viewNameLen;
-        for (i = 0; i < viewNameLen; i++)
-            indexOid[viewNameLen + 1 + i] = (oid) vptr->viewName[i];
-
-        indexOid[prefixLen + viewNameLen + 1] = viewSubtreeLen;
-        for (i = 0; i < viewSubtreeLen; i++)
-            indexOid[prefixLen + viewNameLen + 2 + i] =
-                (oid) vptr->viewSubtree[i];
-
-    }
-    return indexOid;
-
-}
-
 struct vacm_viewEntry *
 view_parse_viewEntry(oid * name, size_t name_len)
 {
@@ -1911,3 +1848,4 @@ write_vacmViewSpinLock(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 

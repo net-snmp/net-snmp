@@ -26,8 +26,8 @@
 
 #include "ipSystemStatsTable_interface.h"
 
-oid             ipSystemStatsTable_oid[] = { IPSYSTEMSTATSTABLE_OID };
-int             ipSystemStatsTable_oid_size =
+const oid       ipSystemStatsTable_oid[] = { IPSYSTEMSTATSTABLE_OID };
+const int       ipSystemStatsTable_oid_size =
 OID_LENGTH(ipSystemStatsTable_oid);
 
 ipSystemStatsTable_registration ipSystemStatsTable_user_context;
@@ -163,6 +163,8 @@ ipSystemStatsTable_rowreq_ctx_cleanup(ipSystemStatsTable_rowreq_ctx *
     /*
      * TODO:211:o: |-> Perform extra ipSystemStatsTable rowreq cleanup.
      */
+    netsnmp_access_systemstats_entry_free(rowreq_ctx->data);
+    rowreq_ctx->data = NULL;
 }                               /* ipSystemStatsTable_rowreq_ctx_cleanup */
 
 /**
@@ -390,11 +392,14 @@ ipSystemStatsInReceives_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
                 "called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
-
+    
     /*
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInReceives data.
      * copy (* ipSystemStatsInReceives_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINRECEIVES])
+        return MFD_SKIP;
+
     (*ipSystemStatsInReceives_val_ptr) =
         rowreq_ctx->data->stats.HCInReceives.low;
 
@@ -456,6 +461,9 @@ ipSystemStatsHCInReceives_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCInReceives data.
      * get (* ipSystemStatsHCInReceives_val_ptr ).low and (* ipSystemStatsHCInReceives_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINRECEIVES])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCInReceives_val_ptr).low =
         rowreq_ctx->data->stats.HCInReceives.low;
     (*ipSystemStatsHCInReceives_val_ptr).high =
@@ -520,6 +528,9 @@ ipSystemStatsInOctets_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInOctets data.
      * copy (* ipSystemStatsInOctets_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINOCTETS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInOctets_val_ptr) =
         rowreq_ctx->data->stats.HCInOctets.low;
 
@@ -577,6 +588,9 @@ ipSystemStatsHCInOctets_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCInOctets data.
      * get (* ipSystemStatsHCInOctets_val_ptr ).low and (* ipSystemStatsHCInOctets_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINOCTETS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCInOctets_val_ptr).low =
         rowreq_ctx->data->stats.HCInOctets.low;
     (*ipSystemStatsHCInOctets_val_ptr).high =
@@ -644,6 +658,9 @@ ipSystemStatsInHdrErrors_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInHdrErrors data.
      * copy (* ipSystemStatsInHdrErrors_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_INHDRERRORS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInHdrErrors_val_ptr) =
         rowreq_ctx->data->stats.InHdrErrors;
 
@@ -705,8 +722,11 @@ ipSystemStatsInNoRoutes_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInNoRoutes data.
      * copy (* ipSystemStatsInNoRoutes_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINNOROUTES])
+        return MFD_SKIP;
+
     (*ipSystemStatsInNoRoutes_val_ptr) =
-        rowreq_ctx->data->stats.InNoRoutes;
+        rowreq_ctx->data->stats.HCInNoRoutes.low;
 
     return MFD_SUCCESS;
 }                               /* ipSystemStatsInNoRoutes_get */
@@ -772,6 +792,9 @@ ipSystemStatsInAddrErrors_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInAddrErrors data.
      * copy (* ipSystemStatsInAddrErrors_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_INADDRERRORS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInAddrErrors_val_ptr) =
         rowreq_ctx->data->stats.InAddrErrors;
 
@@ -843,6 +866,9 @@ ipSystemStatsInUnknownProtos_get(ipSystemStatsTable_rowreq_ctx *
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInUnknownProtos data.
      * copy (* ipSystemStatsInUnknownProtos_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_INUNKNOWNPROTOS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInUnknownProtos_val_ptr) =
         rowreq_ctx->data->stats.InUnknownProtos;
 
@@ -905,6 +931,9 @@ ipSystemStatsInTruncatedPkts_get(ipSystemStatsTable_rowreq_ctx *
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInTruncatedPkts data.
      * copy (* ipSystemStatsInTruncatedPkts_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_INTRUNCATEDPKTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInTruncatedPkts_val_ptr) =
         rowreq_ctx->data->stats.InTruncatedPkts;
 
@@ -976,6 +1005,9 @@ ipSystemStatsInForwDatagrams_get(ipSystemStatsTable_rowreq_ctx *
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInForwDatagrams data.
      * copy (* ipSystemStatsInForwDatagrams_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINFORWDATAGRAMS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInForwDatagrams_val_ptr) =
         rowreq_ctx->data->stats.HCInForwDatagrams.low;
 
@@ -1036,6 +1068,9 @@ ipSystemStatsHCInForwDatagrams_get(ipSystemStatsTable_rowreq_ctx *
      * TODO:231:o: |-> copy ipSystemStatsHCInForwDatagrams data.
      * get (* ipSystemStatsHCInForwDatagrams_val_ptr ).low and (* ipSystemStatsHCInForwDatagrams_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINFORWDATAGRAMS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCInForwDatagrams_val_ptr).low =
         rowreq_ctx->data->stats.HCInForwDatagrams.low;
     (*ipSystemStatsHCInForwDatagrams_val_ptr).high =
@@ -1105,6 +1140,9 @@ ipSystemStatsReasmReqds_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsReasmReqds data.
      * copy (* ipSystemStatsReasmReqds_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_REASMREQDS])
+        return MFD_SKIP;
+
     (*ipSystemStatsReasmReqds_val_ptr) =
         rowreq_ctx->data->stats.ReasmReqds;
 
@@ -1175,6 +1213,9 @@ ipSystemStatsReasmOKs_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsReasmOKs data.
      * copy (* ipSystemStatsReasmOKs_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_REASMOKS])
+        return MFD_SKIP;
+
     (*ipSystemStatsReasmOKs_val_ptr) = rowreq_ctx->data->stats.ReasmOKs;
 
     return MFD_SUCCESS;
@@ -1245,6 +1286,9 @@ ipSystemStatsReasmFails_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsReasmFails data.
      * copy (* ipSystemStatsReasmFails_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_REASMFAILS])
+        return MFD_SKIP;
+
     (*ipSystemStatsReasmFails_val_ptr) =
         rowreq_ctx->data->stats.ReasmFails;
 
@@ -1309,6 +1353,9 @@ ipSystemStatsInDiscards_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInDiscards data.
      * copy (* ipSystemStatsInDiscards_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_INDISCARDS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInDiscards_val_ptr) =
         rowreq_ctx->data->stats.InDiscards;
 
@@ -1376,6 +1423,9 @@ ipSystemStatsInDelivers_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInDelivers data.
      * copy (* ipSystemStatsInDelivers_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINDELIVERS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInDelivers_val_ptr) =
         rowreq_ctx->data->stats.HCInDelivers.low;
 
@@ -1433,6 +1483,9 @@ ipSystemStatsHCInDelivers_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCInDelivers data.
      * get (* ipSystemStatsHCInDelivers_val_ptr ).low and (* ipSystemStatsHCInDelivers_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINDELIVERS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCInDelivers_val_ptr).low =
         rowreq_ctx->data->stats.HCInDelivers.low;
     (*ipSystemStatsHCInDelivers_val_ptr).high =
@@ -1498,6 +1551,9 @@ ipSystemStatsOutRequests_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutRequests data.
      * copy (* ipSystemStatsOutRequests_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTREQUESTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutRequests_val_ptr) =
         rowreq_ctx->data->stats.HCOutRequests.low;
 
@@ -1555,6 +1611,9 @@ ipSystemStatsHCOutRequests_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCOutRequests data.
      * get (* ipSystemStatsHCOutRequests_val_ptr ).low and (* ipSystemStatsHCOutRequests_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTREQUESTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCOutRequests_val_ptr).low =
         rowreq_ctx->data->stats.HCOutRequests.low;
     (*ipSystemStatsHCOutRequests_val_ptr).high =
@@ -1619,8 +1678,11 @@ ipSystemStatsOutNoRoutes_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutNoRoutes data.
      * copy (* ipSystemStatsOutNoRoutes_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTNOROUTES])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutNoRoutes_val_ptr) =
-        rowreq_ctx->data->stats.OutNoRoutes;
+        rowreq_ctx->data->stats.HCOutNoRoutes.low;
 
     return MFD_SUCCESS;
 }                               /* ipSystemStatsOutNoRoutes_get */
@@ -1694,6 +1756,9 @@ ipSystemStatsOutForwDatagrams_get(ipSystemStatsTable_rowreq_ctx *
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutForwDatagrams data.
      * copy (* ipSystemStatsOutForwDatagrams_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFORWDATAGRAMS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutForwDatagrams_val_ptr) =
         rowreq_ctx->data->stats.HCOutForwDatagrams.low;
 
@@ -1754,6 +1819,9 @@ ipSystemStatsHCOutForwDatagrams_get(ipSystemStatsTable_rowreq_ctx *
      * TODO:231:o: |-> copy ipSystemStatsHCOutForwDatagrams data.
      * get (* ipSystemStatsHCOutForwDatagrams_val_ptr ).low and (* ipSystemStatsHCOutForwDatagrams_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFORWDATAGRAMS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCOutForwDatagrams_val_ptr).low =
         rowreq_ctx->data->stats.HCOutForwDatagrams.low;
     (*ipSystemStatsHCOutForwDatagrams_val_ptr).high =
@@ -1821,8 +1889,11 @@ ipSystemStatsOutDiscards_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutDiscards data.
      * copy (* ipSystemStatsOutDiscards_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTDISCARDS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutDiscards_val_ptr) =
-        rowreq_ctx->data->stats.OutDiscards;
+        rowreq_ctx->data->stats.HCOutDiscards.low;
 
     return MFD_SUCCESS;
 }                               /* ipSystemStatsOutDiscards_get */
@@ -1890,8 +1961,11 @@ ipSystemStatsOutFragReqds_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutFragReqds data.
      * copy (* ipSystemStatsOutFragReqds_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGREQDS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutFragReqds_val_ptr) =
-        rowreq_ctx->data->stats.OutFragReqds;
+        rowreq_ctx->data->stats.HCOutFragReqds.low;
 
     return MFD_SUCCESS;
 }                               /* ipSystemStatsOutFragReqds_get */
@@ -1956,9 +2030,11 @@ ipSystemStatsOutFragOKs_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutFragOKs data.
      * copy (* ipSystemStatsOutFragOKs_val_ptr ) from rowreq_ctx->data
      */
-    snmp_log(LOG_ERR,
-             "ipSystemStatsTable node ipSystemStatsOutFragOKs not implemented: skipping\n");
-    return MFD_SKIP;
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGOKS])
+        return MFD_SKIP;
+
+    (*ipSystemStatsOutFragOKs_val_ptr) =
+        rowreq_ctx->data->stats.HCOutFragOKs.low;
 
     return MFD_SUCCESS;
 }                               /* ipSystemStatsOutFragOKs_get */
@@ -2026,8 +2102,11 @@ ipSystemStatsOutFragFails_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutFragFails data.
      * copy (* ipSystemStatsOutFragFails_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGFAILS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutFragFails_val_ptr) =
-        rowreq_ctx->data->stats.OutFragFails;
+        rowreq_ctx->data->stats.HCOutFragFails.low;
 
     return MFD_SUCCESS;
 }                               /* ipSystemStatsOutFragFails_get */
@@ -2092,8 +2171,11 @@ ipSystemStatsOutFragCreates_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutFragCreates data.
      * copy (* ipSystemStatsOutFragCreates_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGCREATES])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutFragCreates_val_ptr) =
-        rowreq_ctx->data->stats.OutFragCreates;
+        rowreq_ctx->data->stats.HCOutFragCreates.low;
 
     return MFD_SUCCESS;
 }                               /* ipSystemStatsOutFragCreates_get */
@@ -2155,6 +2237,9 @@ ipSystemStatsOutTransmits_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutTransmits data.
      * copy (* ipSystemStatsOutTransmits_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTTRANSMITS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutTransmits_val_ptr) =
         rowreq_ctx->data->stats.HCOutTransmits.low;
 
@@ -2212,6 +2297,9 @@ ipSystemStatsHCOutTransmits_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCOutTransmits data.
      * get (* ipSystemStatsHCOutTransmits_val_ptr ).low and (* ipSystemStatsHCOutTransmits_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTTRANSMITS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCOutTransmits_val_ptr).low =
         rowreq_ctx->data->stats.HCOutTransmits.low;
     (*ipSystemStatsHCOutTransmits_val_ptr).high =
@@ -2276,6 +2364,9 @@ ipSystemStatsOutOctets_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutOctets data.
      * copy (* ipSystemStatsOutOctets_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTOCTETS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutOctets_val_ptr) =
         rowreq_ctx->data->stats.HCOutOctets.low;
 
@@ -2333,6 +2424,9 @@ ipSystemStatsHCOutOctets_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCOutOctets data.
      * get (* ipSystemStatsHCOutOctets_val_ptr ).low and (* ipSystemStatsHCOutOctets_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTOCTETS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCOutOctets_val_ptr).low =
         rowreq_ctx->data->stats.HCOutOctets.low;
     (*ipSystemStatsHCOutOctets_val_ptr).high =
@@ -2395,6 +2489,9 @@ ipSystemStatsInMcastPkts_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInMcastPkts data.
      * copy (* ipSystemStatsInMcastPkts_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINMCASTPKTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInMcastPkts_val_ptr) =
         rowreq_ctx->data->stats.HCInMcastPkts.low;
 
@@ -2451,6 +2548,9 @@ ipSystemStatsHCInMcastPkts_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCInMcastPkts data.
      * get (* ipSystemStatsHCInMcastPkts_val_ptr ).low and (* ipSystemStatsHCInMcastPkts_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINMCASTPKTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCInMcastPkts_val_ptr).low =
         rowreq_ctx->data->stats.HCInMcastPkts.low;
     (*ipSystemStatsHCInMcastPkts_val_ptr).high =
@@ -2514,6 +2614,9 @@ ipSystemStatsInMcastOctets_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInMcastOctets data.
      * copy (* ipSystemStatsInMcastOctets_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINMCASTOCTETS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInMcastOctets_val_ptr) =
         rowreq_ctx->data->stats.HCInMcastOctets.low;
 
@@ -2572,6 +2675,9 @@ ipSystemStatsHCInMcastOctets_get(ipSystemStatsTable_rowreq_ctx *
      * TODO:231:o: |-> copy ipSystemStatsHCInMcastOctets data.
      * get (* ipSystemStatsHCInMcastOctets_val_ptr ).low and (* ipSystemStatsHCInMcastOctets_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINMCASTOCTETS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCInMcastOctets_val_ptr).low =
         rowreq_ctx->data->stats.HCInMcastOctets.low;
     (*ipSystemStatsHCInMcastOctets_val_ptr).high =
@@ -2634,6 +2740,9 @@ ipSystemStatsOutMcastPkts_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutMcastPkts data.
      * copy (* ipSystemStatsOutMcastPkts_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTMCASTPKTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutMcastPkts_val_ptr) =
         rowreq_ctx->data->stats.HCOutMcastPkts.low;
 
@@ -2690,6 +2799,9 @@ ipSystemStatsHCOutMcastPkts_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCOutMcastPkts data.
      * get (* ipSystemStatsHCOutMcastPkts_val_ptr ).low and (* ipSystemStatsHCOutMcastPkts_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTMCASTPKTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCOutMcastPkts_val_ptr).low =
         rowreq_ctx->data->stats.HCOutMcastPkts.low;
     (*ipSystemStatsHCOutMcastPkts_val_ptr).high =
@@ -2754,6 +2866,9 @@ ipSystemStatsOutMcastOctets_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutMcastOctets data.
      * copy (* ipSystemStatsOutMcastOctets_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTMCASTOCTETS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutMcastOctets_val_ptr) =
         rowreq_ctx->data->stats.HCOutMcastOctets.low;
 
@@ -2816,6 +2931,9 @@ ipSystemStatsHCOutMcastOctets_get(ipSystemStatsTable_rowreq_ctx *
      * TODO:231:o: |-> copy ipSystemStatsHCOutMcastOctets data.
      * get (* ipSystemStatsHCOutMcastOctets_val_ptr ).low and (* ipSystemStatsHCOutMcastOctets_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTMCASTOCTETS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCOutMcastOctets_val_ptr).low =
         rowreq_ctx->data->stats.HCOutMcastOctets.low;
     (*ipSystemStatsHCOutMcastOctets_val_ptr).high =
@@ -2878,6 +2996,9 @@ ipSystemStatsInBcastPkts_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsInBcastPkts data.
      * copy (* ipSystemStatsInBcastPkts_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINBCASTPKTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsInBcastPkts_val_ptr) =
         rowreq_ctx->data->stats.HCInBcastPkts.low;
 
@@ -2934,6 +3055,9 @@ ipSystemStatsHCInBcastPkts_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCInBcastPkts data.
      * get (* ipSystemStatsHCInBcastPkts_val_ptr ).low and (* ipSystemStatsHCInBcastPkts_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINBCASTPKTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCInBcastPkts_val_ptr).low =
         rowreq_ctx->data->stats.HCInBcastPkts.low;
     (*ipSystemStatsHCInBcastPkts_val_ptr).high =
@@ -2996,6 +3120,9 @@ ipSystemStatsOutBcastPkts_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsOutBcastPkts data.
      * copy (* ipSystemStatsOutBcastPkts_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTBCASTPKTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsOutBcastPkts_val_ptr) =
         rowreq_ctx->data->stats.HCOutBcastPkts.low;
 
@@ -3052,6 +3179,9 @@ ipSystemStatsHCOutBcastPkts_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> copy ipSystemStatsHCOutBcastPkts data.
      * get (* ipSystemStatsHCOutBcastPkts_val_ptr ).low and (* ipSystemStatsHCOutBcastPkts_val_ptr ).high from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTBCASTPKTS])
+        return MFD_SKIP;
+
     (*ipSystemStatsHCOutBcastPkts_val_ptr).low =
         rowreq_ctx->data->stats.HCOutBcastPkts.low;
     (*ipSystemStatsHCOutBcastPkts_val_ptr).high =
@@ -3116,6 +3246,9 @@ ipSystemStatsDiscontinuityTime_get(ipSystemStatsTable_rowreq_ctx *
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsDiscontinuityTime data.
      * copy (* ipSystemStatsDiscontinuityTime_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_DISCONTINUITYTIME])
+        return MFD_SKIP;
+
     (*ipSystemStatsDiscontinuityTime_val_ptr) =
         rowreq_ctx->ipSystemStatsDiscontinuityTime;
 
@@ -3172,6 +3305,9 @@ ipSystemStatsRefreshRate_get(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipSystemStatsRefreshRate data.
      * copy (* ipSystemStatsRefreshRate_val_ptr ) from rowreq_ctx->data
      */
+    if (!rowreq_ctx->data->stats.columnAvail[IPSYSTEMSTATSTABLE_REFRESHRATE])
+        return MFD_SKIP;
+
     (*ipSystemStatsRefreshRate_val_ptr) =
         rowreq_ctx->ipSystemStatsRefreshRate;
 

@@ -211,8 +211,8 @@ config_require(ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access)
         * ipAddressPrefixTable_row_find_by_mib_index
         (ipAddressPrefixTable_mib_index * mib_idx);
 
-    extern oid      ipAddressPrefixTable_oid[];
-    extern int      ipAddressPrefixTable_oid_size;
+    extern const oid      ipAddressPrefixTable_oid[];
+    extern const int      ipAddressPrefixTable_oid_size;
 
 
 #include "ipAddressPrefixTable_interface.h"
@@ -271,7 +271,7 @@ config_require(ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access)
         ipAddressPrefixTable_indexes_set_tbl_idx
         (ipAddressPrefixTable_mib_index * tbl_idx,
          long ipAddressPrefixIfIndex_val, u_long ipAddressPrefixType_val,
-         char *ipAddressPrefixPrefix_val_ptr,
+         u_char *ipAddressPrefixPrefix_val_ptr,
          size_t ipAddressPrefixPrefix_val_ptr_len,
          u_long ipAddressPrefixLength_val);
     int
@@ -279,7 +279,7 @@ config_require(ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access)
                                          rowreq_ctx,
                                          long ipAddressPrefixIfIndex_val,
                                          u_long ipAddressPrefixType_val,
-                                         char
+                                         u_char
                                          *ipAddressPrefixPrefix_val_ptr,
                                          size_t
                                          ipAddressPrefixPrefix_val_ptr_len,

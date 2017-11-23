@@ -26,8 +26,8 @@
 
 #include "ipCidrRouteTable_interface.h"
 
-oid             ipCidrRouteTable_oid[] = { IPCIDRROUTETABLE_OID };
-int             ipCidrRouteTable_oid_size =
+const oid       ipCidrRouteTable_oid[] = { IPCIDRROUTETABLE_OID };
+const int       ipCidrRouteTable_oid_size =
 OID_LENGTH(ipCidrRouteTable_oid);
 
 ipCidrRouteTable_registration ipCidrRouteTable_user_context;
@@ -706,13 +706,13 @@ ipCidrRouteInfo_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
      * copy (* ipCidrRouteInfo_val_ptr_ptr ) data and (* ipCidrRouteInfo_val_ptr_len_ptr ) from rowreq_ctx->data
      */
     /** nullOidLen is in bytes, so not sizeof(oid) needed */
-    if ((*ipCidrRouteInfo_val_ptr_len_ptr) < nullOidLen) {
-        (*ipCidrRouteInfo_val_ptr_ptr) = malloc(nullOidLen);
+    if ((*ipCidrRouteInfo_val_ptr_len_ptr) < (size_t)nullOidLen) {
+        (*ipCidrRouteInfo_val_ptr_ptr) = (oid*)malloc(nullOidLen);
         if (NULL == (*ipCidrRouteInfo_val_ptr_ptr))
             return MFD_ERROR;
     }
-    (*ipCidrRouteInfo_val_ptr_len_ptr) = nullOidLen;
-    memcpy((*ipCidrRouteInfo_val_ptr_ptr), nullOid, nullOidLen);
+    (*ipCidrRouteInfo_val_ptr_len_ptr) = (size_t)nullOidLen;
+    memcpy((*ipCidrRouteInfo_val_ptr_ptr), nullOid, (size_t)nullOidLen);
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteInfo_get */

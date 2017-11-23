@@ -1,4 +1,20 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/agent/scalar_group.h>
 
 #include <stdlib.h>
 #if HAVE_STRING_H
@@ -7,13 +23,19 @@
 #include <strings.h>
 #endif
 
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
-#include <net-snmp/agent/scalar_group.h>
-#include <net-snmp/agent/scalar.h>
+#include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/serialize.h>
-#include <net-snmp/agent/read_only.h>
+
+static netsnmp_scalar_group*
+clone_scalar_group(netsnmp_scalar_group* src)
+{
+  netsnmp_scalar_group *t = SNMP_MALLOC_TYPEDEF(netsnmp_scalar_group);
+  if(t != NULL) {
+    t->lbound = src->lbound;
+    t->ubound = src->ubound;
+  }
+  return t;
+}
 
 /** @defgroup scalar_group_group scalar_group
  *  Process groups of scalars.
@@ -38,6 +60,8 @@ netsnmp_get_scalar_group_handler(oid first, oid last)
 	    sgroup->lbound = first;
 	    sgroup->ubound = last;
             ret->myvoid = (void *)sgroup;
+            ret->data_free = free;
+            ret->data_clone = (void *(*)(void *))clone_scalar_group;
 	}
     }
     return ret;
@@ -47,10 +71,25 @@ int
 netsnmp_register_scalar_group(netsnmp_handler_registration *reginfo,
                               oid first, oid last)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());
-    netsnmp_inject_handler(reginfo, netsnmp_get_scalar_handler());
-    netsnmp_inject_handler(reginfo, netsnmp_get_scalar_group_handler(first, last));
-    return netsnmp_register_serialize(reginfo);
+    netsnmp_mib_handler *h1, *h2;
+
+    h1 = netsnmp_get_instance_handler();
+    h2 = netsnmp_get_scalar_group_handler(first, last);
+
+    if (h1 && h2) {
+        if (netsnmp_inject_handler(reginfo, h1) == SNMPERR_SUCCESS) {
+            h1 = NULL;
+            if (netsnmp_inject_handler(reginfo, h2) == SNMPERR_SUCCESS)
+                return netsnmp_register_serialize(reginfo);
+        }
+    }
+
+    snmp_log(LOG_ERR, "register read only scalar group failed\n");
+    netsnmp_handler_free(h1);
+    netsnmp_handler_free(h2);
+    netsnmp_handler_registration_free(reginfo);
+
+    return MIB_REGISTRATION_FAILED;
 }
 
 
@@ -97,12 +136,14 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
         ret = SNMP_NOSUCHOBJECT;
         /* Fallthrough */
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
     case MODE_SET_COMMIT:
     case MODE_SET_UNDO:
     case MODE_SET_FREE:
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         if (cmp != 0 ||
             requests->requestvb->name_length <= reginfo->rootoid_len) {
 	    /*
@@ -128,12 +169,13 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
                 netsnmp_set_request_error(reqinfo, requests, ret);
                 return SNMP_ERR_NOERROR;
 	    }
-            root_tmp[reginfo->rootoid_len++] = subid;
+            root_tmp[reginfo->rootoid_len] = subid;
+            reginfo->rootoid_len += 2;
             reginfo->rootoid = root_tmp;
             ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                             requests);
             reginfo->rootoid = root_save;
-            reginfo->rootoid_len--;
+            reginfo->rootoid_len -= 2;
             return ret;
         }
         break;
@@ -162,7 +204,8 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
 	else if (subid > sgroup->ubound)
             return SNMP_ERR_NOERROR;
         
-        root_tmp[reginfo->rootoid_len++] = subid;
+        root_tmp[reginfo->rootoid_len] = subid;
+        reginfo->rootoid_len += 2;
         reginfo->rootoid = root_tmp;
         ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                             requests);
@@ -175,12 +218,12 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
              requests->requestvb->type == SNMP_NOSUCHOBJECT ||
              requests->requestvb->type == SNMP_NOSUCHINSTANCE)) {
             snmp_set_var_objid(requests->requestvb,
-                               reginfo->rootoid, reginfo->rootoid_len);
-            requests->requestvb->name[reginfo->rootoid_len-1] = ++subid;
+                               reginfo->rootoid, reginfo->rootoid_len - 1);
+            requests->requestvb->name[reginfo->rootoid_len - 2] = ++subid;
             requests->requestvb->type = ASN_PRIV_RETRY;
         }
         reginfo->rootoid = root_save;
-        reginfo->rootoid_len--;
+        reginfo->rootoid_len -= 2;
         return ret;
     }
     /*

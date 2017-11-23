@@ -12,11 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -24,9 +20,6 @@
 # else
 #  include <time.h>
 # endif
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #if HAVE_STRING_H
 #include <string.h>
@@ -41,7 +34,7 @@
 
 #include "struct.h"
 #include "file.h"
-#include "util_funcs.h"
+#include "util_funcs/header_simple_table.h"
 
 #define MAXFILE   20
 
@@ -52,12 +45,18 @@ void
 init_file(void)
 {
     struct variable2 file_table[] = {
-        {FILE_INDEX, ASN_INTEGER, RONLY, var_file_table, 1, {1}},
-        {FILE_NAME, ASN_OCTET_STR, RONLY, var_file_table, 1, {2}},
-        {FILE_SIZE, ASN_INTEGER, RONLY, var_file_table, 1, {3}},
-        {FILE_MAX, ASN_INTEGER, RONLY, var_file_table, 1, {4}},
-        {FILE_ERROR, ASN_INTEGER, RONLY, var_file_table, 1, {100}},
-        {FILE_MSG, ASN_OCTET_STR, RONLY, var_file_table, 1, {101}}
+        {FILE_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {1}},
+        {FILE_NAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {2}},
+        {FILE_SIZE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {3}},
+        {FILE_MAX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {4}},
+        {FILE_ERROR, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {100}},
+        {FILE_MSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {101}}
     };
 
     /*

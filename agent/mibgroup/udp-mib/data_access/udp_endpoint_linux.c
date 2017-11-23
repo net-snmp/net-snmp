@@ -4,6 +4,7 @@
  * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -14,10 +15,14 @@
 #include <net-snmp/data_access/udp_endpoint.h>
 
 #include "udp-mib/udpEndpointTable/udpEndpointTable_constants.h"
-
+#include "mibgroup/util_funcs/get_pid_from_inode.h"
 #include "udp_endpoint_private.h"
 
 #include <fcntl.h>
+
+netsnmp_feature_require(text_utils)
+netsnmp_feature_child_of(udp_endpoint_all, libnetsnmpmibs)
+netsnmp_feature_child_of(udp_endpoint_writable, udp_endpoint_all)
 
 static int _load4(netsnmp_container *container, u_int flags);
 #if defined (NETSNMP_ENABLE_IPV6)
@@ -30,6 +35,7 @@ static int _load6(netsnmp_container *container, u_int flags);
  * @retval  0: success
  * @retval <0: error
  */
+#ifndef NETSNMP_FEATURE_REMOVE_UDP_ENDPOINT_WRITABLE
 int
 netsnmp_arch_udp_endpoint_entry_init(netsnmp_udp_endpoint_entry *entry)
 {
@@ -71,6 +77,7 @@ netsnmp_arch_udp_endpoint_delete(netsnmp_udp_endpoint_entry *entry)
     /** xxx-rks:9 udp_endpoint delete not implemented */
     return -1;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDP_ENDPOINT_WRITABLE */
 
 
 /**
@@ -83,6 +90,9 @@ netsnmp_arch_udp_endpoint_container_load(netsnmp_container *container,
                                     u_int load_flags )
 {
     int rc = 0;
+
+    /* Setup the pid_from_inode table, and fill it.*/
+    netsnmp_get_pid_from_inode_init();
 
     rc = _load4(container, load_flags);
     if(rc < 0) {
@@ -150,14 +160,14 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     len = (sep - ptr);
     if (-1 == netsnmp_addrstr_hton(ptr, len)) {
         DEBUGMSGTL(("text:util:tvi", "bad length %d for loc addr '%s'\n",
-                    u_ptr_len, line_info->start));
+                    (int)u_ptr_len, line_info->start));
         return PMLP_RC_MEMORY_UNUSED;
     }
     offset = 0;
     netsnmp_hex_to_binary(&u_ptr, &u_ptr_len, &offset, 0, ptr, NULL);
     if ((4 != offset) && (16 != offset)) {
         DEBUGMSGTL(("text:util:tvi", "bad offset %d for loc addr '%s'\n",
-                    offset, line_info->start));
+                    (int)offset, line_info->start));
         return PMLP_RC_MEMORY_UNUSED;
     }
     ep->loc_addr_len = offset;
@@ -186,14 +196,14 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     len = (sep - ptr);
     if (-1 == netsnmp_addrstr_hton(ptr, len)) {
         DEBUGMSGTL(("text:util:tvi", "bad length %d for rmt addr '%s'\n",
-                    u_ptr_len, line_info->start));
+                    (int)u_ptr_len, line_info->start));
         return PMLP_RC_MEMORY_UNUSED;
     }
     offset = 0;
     netsnmp_hex_to_binary(&u_ptr, &u_ptr_len, &offset, 0, ptr, NULL);
     if ((4 != offset) && (16 != offset)) {
         DEBUGMSGTL(("text:util:tvi", "bad offset %d for rmt addr '%s'\n",
-                    offset, line_info->start));
+                    (int)offset, line_info->start));
         return PMLP_RC_MEMORY_UNUSED;
     }
     ep->rmt_addr_len = offset;
@@ -222,8 +232,13 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     inode = strtoull(ptr, &ptr, 0);
     ep->instance = (u_int)inode;
 
-    ep->index = (u_int)(lpi->user_context);
-    lpi->user_context = (void*)((u_int)(lpi->user_context) + 1);
+    /*
+     * get the pid also
+     */
+    ep->pid = netsnmp_get_pid_from_inode(inode);
+
+    ep->index = (uintptr_t)(lpi->user_context);
+    lpi->user_context = (void*)((char*)(lpi->user_context) + 1);
 
     ep->oid_index.oids = &ep->index;
     ep->oid_index.len = 1;

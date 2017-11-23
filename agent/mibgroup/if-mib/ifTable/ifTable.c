@@ -14,8 +14,13 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(interface_access_entry_set_admin_status)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * include our parent header 
@@ -31,14 +36,14 @@
 #   include "ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
 #endif
 #ifdef USING_IP_MIB_IPV6INTERFACETABLE_IPV6INTERFACETABLE_MODULE
-#   include "ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
+#   include "ip-mib/ipv6InterfaceTable/ipv6InterfaceTable.h"
 #endif
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
 #   include "if-mib/ifXTable/ifXTable.h"
 #endif
 
-oid             ifTable_oid[] = { IFTABLE_OID };
-int             ifTable_oid_size = OID_LENGTH(ifTable_oid);
+const oid       ifTable_oid[] = { IFTABLE_OID };
+const int       ifTable_oid_size = OID_LENGTH(ifTable_oid);
 
 ifTable_registration ifTable_user_context;
 static ifTable_registration *ifTable_user_context_p;
@@ -147,8 +152,7 @@ initialize_table_ifTable(void)
      * register scalar for ifNumber
      */
     {
-        oid             reg_oid[] =
-            { IFTABLE_NUMBER };
+        const oid       reg_oid[] = { IFTABLE_NUMBER };
         netsnmp_handler_registration *myreg;
 
         myreg =
@@ -279,9 +283,9 @@ ifTable_post_request(ifTable_registration * user_context, int rc)
          */
         if (MFD_SUCCESS == rc) {
             /*
-             * save changed rows, if you haven't already
+             * notify library to save changed rows
              */
-            snmp_store(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+            snmp_store_needed(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                              NETSNMP_DS_LIB_APPTYPE));
         }
 
@@ -474,7 +478,7 @@ ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
          * allocate space for ifDescr data
          */
         (*ifDescr_val_ptr_ptr) =
-            malloc(tmp_len * sizeof(rowreq_ctx->data.ifDescr[0]));
+            (char*)malloc(tmp_len * sizeof(rowreq_ctx->data.ifDescr[0]));
         if (NULL == (*ifDescr_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;
@@ -752,7 +756,7 @@ ifPhysAddress_get(ifTable_rowreq_ctx * rowreq_ctx,
          * allocate space for ifPhysAddress data
          */
         (*ifPhysAddress_val_ptr_ptr) =
-            malloc(rowreq_ctx->data.ifPhysAddress_len *
+            (char*)malloc(rowreq_ctx->data.ifPhysAddress_len *
                    sizeof(rowreq_ctx->data.ifPhysAddress[0]));
         if (NULL == (*ifPhysAddress_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
@@ -1773,9 +1777,9 @@ ifSpecific_get(ifTable_rowreq_ctx * rowreq_ctx,
     /*
      * hard coded
      */
-    netsnmp_assert((*ifSpecific_val_ptr_len_ptr) > nullOidLen);
-    (*ifSpecific_val_ptr_len_ptr) = nullOidLen;
-    memcpy(*ifSpecific_val_ptr_ptr, &nullOid, nullOidLen);
+    netsnmp_assert((*ifSpecific_val_ptr_len_ptr) > (size_t)nullOidLen);
+    (*ifSpecific_val_ptr_len_ptr) = (size_t)nullOidLen;
+    memcpy(*ifSpecific_val_ptr_ptr, &nullOid, (size_t)nullOidLen);
 #endif
 
     return MFD_SUCCESS;
@@ -1784,6 +1788,9 @@ ifSpecific_get(ifTable_rowreq_ctx * rowreq_ctx,
 
 
 /** @} */
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+
 /**********************************************************************
  **********************************************************************
  ***
@@ -2329,6 +2336,8 @@ ifTable_check_dependencies(ifTable_rowreq_ctx * rowreq_ctx)
     return rc;
 }                               /* ifTable_check_dependencies */
 
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 static int
 _if_number_handler(netsnmp_mib_handler *handler,

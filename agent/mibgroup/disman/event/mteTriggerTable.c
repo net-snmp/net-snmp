@@ -7,12 +7,27 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "utilities/iquery.h"
 #include "disman/event/mteTrigger.h"
 #include "disman/event/mteTriggerTable.h"
 
+netsnmp_feature_require(iquery)
+netsnmp_feature_require(table_tdata)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(iquery_pdu_session)
+netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(check_vb_oid)
+netsnmp_feature_require(check_vb_uint)
+netsnmp_feature_require(mtetrigger_removeentry)
+netsnmp_feature_require(check_vb_truthvalue)
+netsnmp_feature_require(table_tdata_insert_row)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+
+static netsnmp_table_registration_info *table_info;
 
 /** Initializes the mteTriggerTable module */
 void
@@ -21,7 +36,6 @@ init_mteTriggerTable(void)
     static oid  mteTriggerTable_oid[]   = { 1, 3, 6, 1, 2, 1, 88, 1, 2, 2 };
     size_t      mteTriggerTable_oid_len = OID_LENGTH(mteTriggerTable_oid);
     netsnmp_handler_registration    *reg;
-    netsnmp_table_registration_info *table_info;
 
     /*
      * Ensure the (combined) table container is available...
@@ -31,11 +45,19 @@ init_mteTriggerTable(void)
     /*
      * ... then set up the MIB interface to the mteTriggerTable slice
      */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     reg = netsnmp_create_handler_registration("mteTriggerTable",
                                             mteTriggerTable_handler,
                                             mteTriggerTable_oid,
                                             mteTriggerTable_oid_len,
                                             HANDLER_CAN_RWRITE);
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+    reg = netsnmp_create_handler_registration("mteTriggerTable",
+                                            mteTriggerTable_handler,
+                                            mteTriggerTable_oid,
+                                            mteTriggerTable_oid_len,
+                                            HANDLER_CAN_RONLY);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
     netsnmp_table_helper_add_indexes(table_info,
@@ -50,6 +72,15 @@ init_mteTriggerTable(void)
     /* Register this using the (common) trigger_table_data container */
     netsnmp_tdata_register(reg, trigger_table_data, table_info);
     DEBUGMSGTL(("disman:event:init", "Trigger Table\n"));
+}
+
+void
+shutdown_mteTriggerTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
 }
 
 
@@ -152,6 +183,7 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         /*
          * Write-support
          */
@@ -463,7 +495,14 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
                 break;
             }
         }
+
+        /** set up to save persistent store */
+        snmp_store_needed(NULL);
+
         break;
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
     }
     return SNMP_ERR_NOERROR;
 }

@@ -6,6 +6,8 @@
 
 #ifdef WIN32
 
+#include <net-snmp/net-snmp-config.h>
+
 #include <windows.h>
 #include <tchar.h>
 
@@ -35,6 +37,17 @@ labelFIN: \
 #define CountOf(arr) ( sizeof(arr) / sizeof(arr[0]) )
 
 
+#if defined(WIN32) && defined(HAVE_WIN32_PLATFORM_SDK) && !defined(mingw32)
+#pragma comment(lib, "iphlpapi.lib")
+#endif
+#if defined(WIN32) && !defined(mingw32)
+#ifdef USING_WINEXTDLL_MODULE
+#pragma comment(lib, "snmpapi.lib")
+#pragma comment(lib, "mgmtapi.lib")
+#endif
+#endif
+
+ 
     /*
      * External global variables used here
      */
@@ -90,6 +103,18 @@ static INT (*ServiceEntryPoint) (INT Argc, LPTSTR Argv[]) = 0L;
      */
 static VOID (*StopFunction) (VOID) = 0L;
 
+
+    /*
+     * To update windows service status to SCM 
+     */
+static BOOL UpdateServiceStatus (DWORD dwStatus, DWORD dwErrorCode,
+				 DWORD dwWaitHint);
+
+    /*
+     * To Report current service status to SCM 
+     */
+static BOOL ReportCurrentServiceStatus (VOID);
+
 VOID
 ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int quiet);
 
@@ -134,7 +159,8 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
     /*
      * Generate the command to be executed by the SCM 
      */
-    _sntprintf (szServiceCommand, CountOf(szServiceCommand), _T("%s %s"), szServicePath, _T ("-service"));
+    _sntprintf(szServiceCommand, CountOf(szServiceCommand), _T("\"%s\" %s"),
+               szServicePath, _T("-service"));
 
     /*
      * Create the desired service 
@@ -549,7 +575,7 @@ ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int qu
   
   hEventSource = RegisterEventSource (NULL, app_name_long);
   if (hEventSource != NULL) {
-    LPCSTR LogStr[1];
+    LPCTSTR LogStr[1];
     LogStr[0] = pszMessageFull;
     
     if (ReportEvent (hEventSource, 
@@ -606,7 +632,7 @@ ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int qu
 static BOOL
 UpdateServiceStatus (DWORD dwStatus, DWORD dwErrorCode, DWORD dwWaitHint)
 {
-  DWORD static dwCheckpoint = 1;
+  static DWORD dwCheckpoint = 1;
   DWORD dwControls = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
   if (g_fRunningAsService == FALSE)
     return FALSE;

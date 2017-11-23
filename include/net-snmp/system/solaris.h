@@ -25,14 +25,9 @@
 #define UDP_PORTS_IN_HOST_ORDER 1
 #define TCP_PORTS_IN_HOST_ORDER 1
 
-/* get some required prototypes (strtok_r) from include files */
-#define __EXTENSIONS__
-
 /* define the extra mib modules that are supported */
 #define NETSNMP_INCLUDE_HOST_RESOURCES
-#ifdef NETSNMP_ENABLE_MFD_REWRITES
 #define NETSNMP_INCLUDE_IFTABLE_REWRITES
-#endif
 
 /* Solaris 2.6+ */
 #define _SLASH_PROC_METHOD_ 1
@@ -43,6 +38,6 @@
 /*
  * NEW_MIB_COMPLIANT is a define used in Solaris 10U4+ to enable additional
  * MIB information (it affects the structs in <inet/mib2.h>)
- */
-
+ */ 
+ 
 #define NEW_MIB_COMPLIANT

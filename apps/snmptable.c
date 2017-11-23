@@ -43,11 +43,7 @@ SOFTWARE.
 # include <netinet/in.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -60,9 +56,6 @@ SOFTWARE.
 #include <sys/select.h>
 #endif
 #include <stdio.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -100,7 +93,7 @@ static size_t   name_length;
 static oid      root[MAX_OID_LEN];
 static size_t   rootlen;
 static int      localdebug;
-static int      exitval = 0;
+static int      exitval = 1;
 static int      use_getbulk = 1;
 static int      max_getbulk = 10;
 static int      extra_columns = 0;
@@ -208,6 +201,7 @@ optProc(int argc, char *const *argv, int opt)
             default:
                 fprintf(stderr, "Bad option after -C: %c\n", optarg[-1]);
                 usage();
+                exit(1);
             }
         }
         break;
@@ -256,7 +250,10 @@ main(int argc, char *argv[])
     netsnmp_session session, *ss;
     int            total_entries = 0;
 
-    setvbuf(stdout, NULL, _IOLBF, 1024);
+    SOCK_STARTUP;
+
+    netsnmp_set_line_buffering(stdout);
+
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
                            NETSNMP_DS_LIB_QUICK_PRINT, 1);
 
@@ -264,11 +261,14 @@ main(int argc, char *argv[])
      * get the common command line arguments 
      */
     switch (snmp_parse_args(argc, argv, &session, "C:", optProc)) {
-    case -2:
-        exit(0);
-    case -1:
+    case NETSNMP_PARSE_ARGS_ERROR:
+        goto out;
+    case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
+        exitval = 0;
+        goto out;
+    case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
@@ -282,13 +282,13 @@ main(int argc, char *argv[])
     if (optind + 1 != argc) {
         fprintf(stderr, "Must have exactly one table name\n");
         usage();
-        exit(1);
+        goto out;
     }
 
     rootlen = MAX_OID_LEN;
     if (!snmp_parse_oid(argv[optind], root, &rootlen)) {
         snmp_perror(argv[optind]);
-        exit(1);
+        goto out;
     }
     localdebug = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                         NETSNMP_DS_LIB_DUMP_PACKET);
@@ -299,21 +299,21 @@ main(int argc, char *argv[])
     /*
      * open an SNMP session 
      */
-    SOCK_STARTUP;
     ss = snmp_open(&session);
     if (ss == NULL) {
         /*
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmptable", &session);
-        SOCK_CLEANUP;
-        exit(1);
+        goto out;
     }
 
 #ifndef NETSNMP_DISABLE_SNMPV1
     if (ss->version == SNMP_VERSION_1)
         use_getbulk = 0;
 #endif
+
+    exitval = 0;
 
     do {
         entries = 0;
@@ -325,21 +325,25 @@ main(int argc, char *argv[])
                 get_table_entries(ss);
         }
 
-        if (exitval) {
-            snmp_close(ss);
-            SOCK_CLEANUP;
-            return exitval;
-        }
+        if (exitval)
+            goto close_session;
 
         if (entries || headers_only)
             print_table();
 
         if (data) {
+            int i, j;
+            for (i = 0; i < entries; i++)
+                for (j = 0; j < fields; j++)
+                free(data[i*fields+j]);
             free (data);
             data = NULL;
         }
 
         if (indices) {
+            int i;
+            for (i = 0; i < entries; i++)
+                free(indices[i]);
             free (indices);
             indices = NULL;
         }
@@ -348,15 +352,19 @@ main(int argc, char *argv[])
 
     } while (!end_of_table);
 
-    snmp_close(ss);
-    SOCK_CLEANUP;
-
     if (total_entries == 0)
         printf("%s: No entries\n", table_name);
     if (extra_columns)
 	printf("%s: WARNING: More columns on agent than in MIB\n", table_name);
 
-    return 0;
+    exitval = 0;
+
+close_session:
+    snmp_close(ss);
+
+out:
+    SOCK_CLEANUP;
+    return exitval;
 }
 
 void
@@ -453,6 +461,8 @@ print_table(void)
     }
 
     first_pass = 0;
+    if (index_fmt)
+        free(index_fmt);
 }
 
 void
@@ -669,7 +679,7 @@ get_table_entries(netsnmp_session * ss)
                     col++;
                     name[rootlen] = column[col].subid;
                     if ((vars->name_length < name_length) ||
-                        ((int) vars->name[rootlen] != column[col].subid) ||
+                        (vars->name[rootlen] != column[col].subid) ||
                         memcmp(name, vars->name,
                                name_length * sizeof(oid)) != 0
                         || vars->type == SNMP_ENDOFMIBVIEW) {
@@ -760,6 +770,8 @@ get_table_entries(netsnmp_session * ss)
                         column[col].width = i;
                     }
                 }
+                if (buf)
+                    free(buf);
 
                 if (end_of_table) {
                     --entries;
@@ -770,6 +782,7 @@ get_table_entries(netsnmp_session * ss)
                         printf("End of table: %s\n",
                                buf ? (char *) buf : "[NIL]");
                     }
+                    snmp_free_pdu(response);
                     running = 0;
                     continue;
                 }
@@ -971,6 +984,8 @@ getbulk_table_entries(netsnmp_session * ss)
                     memcpy(name, last_var->name,
                            name_length * sizeof(oid));
                 }
+                if (buf)
+                    free(buf);
             } else {
                 /*
                  * error in response, print it 

@@ -47,7 +47,7 @@ require NetSNMP::OID;
 	NETSNMPTRAPD_PRE_HANDLER
 );
 
-$VERSION = '5.0405';
+$VERSION = '5.0703';
 
 # sub new {
 #     my $type = shift;
@@ -161,9 +161,7 @@ Stops searching for further appropriate handlers.
 =back
 
 If a handler function does not return anything appropriate or even
-nothing at all, a return value of NETSNMPTRAPD_HANDLER_OK is assumed
-and a warning is logged.  Avoid this warning by explicitly returning
-NETSNMPTRAPD_HANDLER_OK.
+nothing at all, a return value of NETSNMPTRAPD_HANDLER_OK is assumed.
 
 Subroutines are registered using the NetSNMP::TrapReceiver::register
 function, which takes two arguments.  The first is a string describing
@@ -201,7 +199,6 @@ As an example, put the following code into a file (say
       foreach my $x (@{$_[1]}) { 
 	  printf "  %-30s type=%-2d value=%s\n", $x->[0], $x->[2], $x->[1]; 
       }
-      return NETSNMPTRAPD_HANDLER_OK;
   }
 
   NetSNMP::TrapReceiver::register("all", \&my_receiver) || 

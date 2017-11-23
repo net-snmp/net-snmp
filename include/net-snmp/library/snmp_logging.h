@@ -1,18 +1,17 @@
 #ifndef SNMP_LOGGING_H
 #define SNMP_LOGGING_H
 
-#ifdef __cplusplus
-extern          "C" {
-#endif
+#include <net-snmp/types.h>
+#include <net-snmp/output_api.h>
 
-#include <stdio.h>
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
-#if HAVE_STDARG_H
+#include <stdio.h>
 #include <stdarg.h>
-#else
-#include <varargs.h>
+
+#ifdef __cplusplus
+extern          "C" {
 #endif
 
 #ifndef LOG_ERR
@@ -35,50 +34,35 @@ extern          "C" {
 #define DEFAULT_LOG_ID "net-snmp"
 #endif
 
+#define NETSNMP_LOGONCE(x) do { \
+        static char logged = 0; \
+        if (!logged) {          \
+            logged = 1;         \
+            snmp_log x ;        \
+        }                       \
+    } while(0)
+
     void            init_snmp_logging(void);
-    void            shutdown_snmp_logging(void);
-    int             snmp_get_do_logging(void);
+    NETSNMP_IMPORT
     void            snmp_disable_syslog(void);
     void            snmp_disable_filelog(void);
+    NETSNMP_IMPORT
     void            snmp_disable_stderrlog(void);
     void            snmp_disable_calllog(void);
-    void            snmp_disable_log(void);
+    NETSNMP_IMPORT
     void            snmp_enable_syslog(void);
+    NETSNMP_IMPORT
     void            snmp_enable_syslog_ident(const char *ident,
                                              const int   facility);
+    NETSNMP_IMPORT
     void            snmp_enable_filelog(const char *logfilename,
                                         int dont_zero_log);
+    NETSNMP_IMPORT
     void            snmp_enable_stderrlog(void);
     void            snmp_enable_calllog(void);
 
+    NETSNMP_IMPORT
     int             snmp_stderrlog_status(void);
-
-#if HAVE_STDARG_H
-# if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
-    int             snmp_log(int priority, const char *format, ...);
-# else
-    int             snmp_log(int priority, const char *format, ...)
-                    	__attribute__ ((__format__ (__printf__, 2, 3)));
-# endif
-#else
-    int             snmp_log(va_alist);
-#endif
-    int             snmp_vlog(int priority, const char *format,
-                              va_list ap);
-    /*
-     * 0 - successful message formatting 
-     */
-    /*
-     * -1 - Could not format log-string 
-     */
-    /*
-     * -2 - Could not allocate memory for log-message 
-     */
-    /*
-     * -3 - Log-message too long! 
-     */
-
-    void            snmp_log_perror(const char *s);
 
 
 #define NETSNMP_LOGHANDLER_STDOUT	1
@@ -88,8 +72,13 @@ extern          "C" {
 #define NETSNMP_LOGHANDLER_CALLBACK	5
 #define NETSNMP_LOGHANDLER_NONE		6
 
+    NETSNMP_IMPORT
+    void netsnmp_set_line_buffering(FILE *stream);
+    NETSNMP_IMPORT
     int snmp_log_options(char *optarg, int argc, char *const *argv);
+    NETSNMP_IMPORT
     void snmp_log_options_usage(const char *lead, FILE *outf);
+    NETSNMP_IMPORT
     char *snmp_log_syslogname(const char *syslogname);
     typedef struct netsnmp_log_handler_s netsnmp_log_handler; 
     typedef int (NetsnmpLogHandler)(netsnmp_log_handler*, int, const char *);
@@ -115,13 +104,21 @@ extern          "C" {
 	netsnmp_log_handler	*next, *prev;
     };
 
+NETSNMP_IMPORT
 netsnmp_log_handler *get_logh_head( void );
+NETSNMP_IMPORT
 netsnmp_log_handler *netsnmp_register_loghandler( int type, int pri );
 netsnmp_log_handler *netsnmp_find_loghandler( const char *token );
 int netsnmp_add_loghandler(    netsnmp_log_handler *logh );
+NETSNMP_IMPORT
 int netsnmp_remove_loghandler( netsnmp_log_handler *logh );
 int netsnmp_enable_loghandler( const char *token );
 int netsnmp_disable_loghandler( const char *token );
+NETSNMP_IMPORT
+void netsnmp_enable_this_loghandler( netsnmp_log_handler *logh );
+NETSNMP_IMPORT
+void netsnmp_disable_this_loghandler( netsnmp_log_handler *logh );
+NETSNMP_IMPORT
 void netsnmp_logging_restart(void);
 #ifdef __cplusplus
 }

@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,18 @@
 #include "tcpConnectionTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_child_of(tcpConnectionTable_external_access, libnetsnmpmibs)
+
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(tcpConnectionTable_container_size, tcpConnectionTable_external_access)
+netsnmp_feature_child_of(tcpConnectionTable_registration_set, tcpConnectionTable_external_access)
+netsnmp_feature_child_of(tcpConnectionTable_registration_get, tcpConnectionTable_external_access)
+netsnmp_feature_child_of(tcpConnectionTable_container_get, tcpConnectionTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -82,19 +95,23 @@ static void
                 _tcpConnectionTable_container_shutdown(tcpConnectionTable_interface_ctx *
                                                        if_ctx);
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_CONTAINER_GET
 netsnmp_container *
 tcpConnectionTable_container_get(void)
 {
     return tcpConnectionTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_CONTAINER_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_REGISTRATION_GET
 tcpConnectionTable_registration *
 tcpConnectionTable_registration_get(void)
 {
     return tcpConnectionTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_REGISTRATION_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_REGISTRATION_SET
 tcpConnectionTable_registration *
 tcpConnectionTable_registration_set(tcpConnectionTable_registration *
                                     newreg)
@@ -104,12 +121,15 @@ tcpConnectionTable_registration_set(tcpConnectionTable_registration *
     tcpConnectionTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_REGISTRATION_SET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_CONTAINER_SIZE
 int
 tcpConnectionTable_container_size(void)
 {
     return CONTAINER_SIZE(tcpConnectionTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_CONTAINER_SIZE */
 
 u_int
 tcpConnectionTable_dirty_get(void)
@@ -133,7 +153,7 @@ static Netsnmp_Node_Handler _mfd_tcpConnectionTable_pre_request;
 static Netsnmp_Node_Handler _mfd_tcpConnectionTable_post_request;
 static Netsnmp_Node_Handler _mfd_tcpConnectionTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_tcpConnectionTable_get_values;
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 static Netsnmp_Node_Handler _mfd_tcpConnectionTable_check_objects;
 static Netsnmp_Node_Handler _mfd_tcpConnectionTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_tcpConnectionTable_set_values;
@@ -148,7 +168,7 @@ NETSNMP_STATIC_INLINE int
                 _tcpConnectionTable_undo_column(tcpConnectionTable_rowreq_ctx * rowreq_ctx,
                                                 netsnmp_variable_list *
                                                 var, int column);
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
 /**
  * @internal
@@ -193,7 +213,7 @@ _tcpConnectionTable_initialize_interface(tcpConnectionTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = TCPCONNECTIONTABLE_MIN_COL;
     tbl_info->max_column = TCPCONNECTIONTABLE_MAX_COL;
@@ -232,8 +252,7 @@ _tcpConnectionTable_initialize_interface(tcpConnectionTable_registration *
     access_multiplexer->post_request =
         _mfd_tcpConnectionTable_post_request;
 
-
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -258,7 +277,7 @@ _tcpConnectionTable_initialize_interface(tcpConnectionTable_registration *
      */
     access_multiplexer->consistency_checks =
         _mfd_tcpConnectionTable_check_dependencies;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     /*************************************************
      *
@@ -272,10 +291,12 @@ _tcpConnectionTable_initialize_interface(tcpConnectionTable_registration *
         netsnmp_handler_registration_create("tcpConnectionTable", handler,
                                             tcpConnectionTable_oid,
                                             tcpConnectionTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
-                                          | HANDLER_CAN_RWRITE
-#endif
+                                            HANDLER_CAN_BABY_STEP |
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
+                                            HANDLER_CAN_RWRITE
+#else
+                                            HANDLER_CAN_RONLY
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT  */
                                           );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering table tcpConnectionTable\n");
@@ -294,7 +315,7 @@ _tcpConnectionTable_initialize_interface(tcpConnectionTable_registration *
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
@@ -317,7 +338,7 @@ _tcpConnectionTable_initialize_interface(tcpConnectionTable_registration *
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -784,7 +805,7 @@ _mfd_tcpConnectionTable_post_request(netsnmp_mib_handler *handler,
                                      *agtreq_info,
                                      netsnmp_request_info *requests)
 {
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -840,7 +861,7 @@ _mfd_tcpConnectionTable_object_lookup(netsnmp_mib_handler *handler, netsnmp_hand
                                       netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:tcpConnectionTable:_mfd_tcpConnectionTable_object_lookup", "called\n"));
@@ -921,7 +942,7 @@ _mfd_tcpConnectionTable_get_values(netsnmp_mib_handler *handler,
                                    netsnmp_agent_request_info *agtreq_info,
                                    netsnmp_request_info *requests)
 {
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -990,7 +1011,7 @@ _mfd_tcpConnectionTable_get_values(netsnmp_mib_handler *handler,
 }                               /* _mfd_tcpConnectionTable_get_values */
 
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 /***********************************************************************
  *
  * SET processing
@@ -1118,7 +1139,7 @@ _mfd_tcpConnectionTable_check_objects(netsnmp_mib_handler *handler, netsnmp_hand
                                       *agtreq_info,
                                       netsnmp_request_info *requests)
 {
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc;
@@ -1166,7 +1187,7 @@ _mfd_tcpConnectionTable_check_dependencies(netsnmp_mib_handler *handler, netsnmp
                                            netsnmp_request_info *requests)
 {
     int             rc;
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     DEBUGMSGTL(("internal:tcpConnectionTable:_mfd_tcpConnectionTable_check_dependencies", "called\n"));
 
@@ -1233,7 +1254,7 @@ _mfd_tcpConnectionTable_undo_setup(netsnmp_mib_handler *handler,
                                    netsnmp_request_info *requests)
 {
     int             rc;
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:tcpConnectionTable:_mfd_tcpConnectionTable_undo_setup", "called\n"));
@@ -1298,7 +1319,7 @@ _mfd_tcpConnectionTable_undo_cleanup(netsnmp_mib_handler *handler,
                                      *agtreq_info,
                                      netsnmp_request_info *requests)
 {
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc;
 
@@ -1381,7 +1402,7 @@ _mfd_tcpConnectionTable_set_values(netsnmp_mib_handler *handler,
                                    netsnmp_agent_request_info *agtreq_info,
                                    netsnmp_request_info *requests)
 {
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc = SNMP_ERR_NOERROR;
@@ -1429,7 +1450,7 @@ _mfd_tcpConnectionTable_commit(netsnmp_mib_handler *handler,
                                netsnmp_request_info *requests)
 {
     int             rc;
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:tcpConnectionTable:_mfd_tcpConnectionTable_commit", "called\n"));
@@ -1463,7 +1484,7 @@ _mfd_tcpConnectionTable_undo_commit(netsnmp_mib_handler *handler,
                                     netsnmp_request_info *requests)
 {
     int             rc;
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:tcpConnectionTable:_mfd_tcpConnectionTable_undo_commit", "called\n"));
@@ -1542,7 +1563,7 @@ _mfd_tcpConnectionTable_undo_values(netsnmp_mib_handler *handler,
                                     netsnmp_request_info *requests)
 {
     int             rc;
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
 
@@ -1597,7 +1618,7 @@ _mfd_tcpConnectionTable_irreversible_commit(netsnmp_mib_handler *handler, netsnm
                                             *agtreq_info,
                                             netsnmp_request_info *requests)
 {
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx =
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:tcpConnectionTable:_mfd_tcpConnectionTable_irreversible:commit", "called\n"));
@@ -1618,7 +1639,7 @@ _mfd_tcpConnectionTable_irreversible_commit(netsnmp_mib_handler *handler, netsnm
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_tcpConnectionTable_irreversible_commit */
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
 /***********************************************************************
  *
@@ -1742,9 +1763,12 @@ _tcpConnectionTable_container_init(tcpConnectionTable_interface_ctx *
     if_ctx->cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 
     tcpConnectionTable_container_init(&if_ctx->container, if_ctx->cache);
-    if (NULL == if_ctx->container)
+    if (NULL == if_ctx->container) {
         if_ctx->container =
             netsnmp_container_find("tcpConnectionTable:table_container");
+        if (if_ctx->container)
+        if_ctx->container->container_name = strdup("tcpConnectionTable");
+    }
     if (NULL == if_ctx->container) {
         snmp_log(LOG_ERR, "error creating container in "
                  "tcpConnectionTable_container_init\n");
@@ -1772,6 +1796,7 @@ _tcpConnectionTable_container_shutdown(tcpConnectionTable_interface_ctx *
 }                               /* _tcpConnectionTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_EXTERNAL_ACCESS
 tcpConnectionTable_rowreq_ctx *
 tcpConnectionTable_row_find_by_mib_index(tcpConnectionTable_mib_index *
                                          mib_idx)
@@ -1794,8 +1819,9 @@ tcpConnectionTable_row_find_by_mib_index(tcpConnectionTable_mib_index *
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx =
+    rowreq_ctx = (tcpConnectionTable_rowreq_ctx*)
         CONTAINER_FIND(tcpConnectionTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_EXTERNAL_ACCESS */

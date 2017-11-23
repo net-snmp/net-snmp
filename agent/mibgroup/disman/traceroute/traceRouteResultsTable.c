@@ -18,6 +18,8 @@
 
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -40,6 +42,8 @@
 #include "traceRouteHopsTable.h"
 #include "header_complex.h"
 
+netsnmp_feature_require(table_dataset)
+
 /*
  *traceRouteResultsTable_variables_oid:
  *
@@ -48,53 +52,49 @@ oid             traceRouteResultsTable_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 81, 1, 3 };
 
 struct variable2 traceRouteResultsTable_variables[] = {
-    {COLUMN_TRACEROUTERESULTSOPERSTATUS,     ASN_INTEGER, RONLY, var_traceRouteResultsTable, 2, {1, 1}},
-    {COLUMN_TRACEROUTERESULTSCURHOPCOUNT,      ASN_GAUGE, RONLY, var_traceRouteResultsTable, 2, {1, 2}},
-    {COLUMN_TRACEROUTERESULTSCURPROBECOUNT,    ASN_GAUGE, RONLY, var_traceRouteResultsTable, 2, {1, 3}},
-    {COLUMN_TRACEROUTERESULTSIPTGTADDRTYPE,  ASN_INTEGER, RONLY, var_traceRouteResultsTable, 2, {1, 4}},
-    {COLUMN_TRACEROUTERESULTSIPTGTADDR,    ASN_OCTET_STR, RONLY, var_traceRouteResultsTable, 2, {1, 5}},
-    {COLUMN_TRACEROUTERESULTSTESTATTEMPTS,  ASN_UNSIGNED, RONLY, var_traceRouteResultsTable, 2, {1, 6}},
-    {COLUMN_TRACEROUTERESULTSTESTSUCCESSES, ASN_UNSIGNED, RONLY, var_traceRouteResultsTable, 2, {1, 7}},
-    {COLUMN_TRACEROUTERESULTSLASTGOODPATH, ASN_OCTET_STR, RONLY, var_traceRouteResultsTable, 2, {1, 8}}
+    {COLUMN_TRACEROUTERESULTSOPERSTATUS,     ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 1}},
+    {COLUMN_TRACEROUTERESULTSCURHOPCOUNT,      ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 2}},
+    {COLUMN_TRACEROUTERESULTSCURPROBECOUNT,    ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 3}},
+    {COLUMN_TRACEROUTERESULTSIPTGTADDRTYPE,  ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 4}},
+    {COLUMN_TRACEROUTERESULTSIPTGTADDR,    ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 5}},
+    {COLUMN_TRACEROUTERESULTSTESTATTEMPTS,  ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 6}},
+    {COLUMN_TRACEROUTERESULTSTESTSUCCESSES, ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 7}},
+    {COLUMN_TRACEROUTERESULTSLASTGOODPATH, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 8}}
 };
 
 
-
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-
-extern struct header_complex_index *traceRouteCtlTableStorage;
-extern struct header_complex_index *traceRouteResultsTableStorage;
 void
 traceRouteResultsTable_inadd(struct traceRouteResultsTable_data *thedata);
 
 void
 traceRouteResultsTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr = NULL;
-    struct traceRouteResultsTable_data *StorageDel = NULL;
+    struct header_complex_index *hciptr, *nhciptr;
+    struct traceRouteResultsTable_data *StorageDel;
+
     DEBUGMSGTL(("traceRouteResultsTable", "cleanerout  "));
-    for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
+    for (hciptr = thestuff; hciptr; hciptr = nhciptr) {
+        nhciptr = hciptr->next;
         StorageDel =
             header_complex_extract_entry(&traceRouteResultsTableStorage,
                                          hciptr);
         if (StorageDel != NULL) {
             free(StorageDel->traceRouteCtlOwnerIndex);
-            StorageDel->traceRouteCtlOwnerIndex = NULL;
             free(StorageDel->traceRouteCtlTestName);
-            StorageDel->traceRouteCtlTestName = NULL;
             free(StorageDel->traceRouteResultsIpTgtAddr);
-            StorageDel->traceRouteResultsIpTgtAddr = NULL;
             free(StorageDel->traceRouteResultsLastGoodPath);
-            StorageDel->traceRouteResultsLastGoodPath = NULL;
             free(StorageDel);
-            StorageDel = NULL;
-
         }
         DEBUGMSGTL(("traceRouteResultsTable", "cleaner  "));
     }
-
 }
 
 void
@@ -154,6 +154,7 @@ parse_traceRouteResultsTable(const char *token, char *line)
                               &StorageTmp->traceRouteCtlOwnerIndexLen);
     if (StorageTmp->traceRouteCtlOwnerIndex == NULL) {
         config_perror("invalid specification for traceRouteCtlOwnerIndex");
+        free(StorageTmp);
         return;
     }
 
@@ -163,6 +164,7 @@ parse_traceRouteResultsTable(const char *token, char *line)
                               &StorageTmp->traceRouteCtlTestNameLen);
     if (StorageTmp->traceRouteCtlTestName == NULL) {
         config_perror("invalid specification for traceRouteCtlTestName");
+        free(StorageTmp);
         return;
     }
 
@@ -189,6 +191,7 @@ parse_traceRouteResultsTable(const char *token, char *line)
     if (StorageTmp->traceRouteResultsIpTgtAddr == NULL) {
         config_perror
             ("invalid specification for traceRouteResultsIpTgtAddr");
+        free(StorageTmp);
         return;
     }
 
@@ -208,6 +211,7 @@ parse_traceRouteResultsTable(const char *token, char *line)
     if (StorageTmp->traceRouteResultsLastGoodPath == NULL) {
         config_perror
             ("invalid specification for traceRouteResultsLastGoodPath!");
+        free(StorageTmp);
         return;
     }
 

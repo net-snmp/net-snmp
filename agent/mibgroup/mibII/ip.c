@@ -19,12 +19,12 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/sysORTable.h>
 
-#include "util_funcs.h"
+#include "util_funcs/MIB_STATS_CACHE_TIMEOUT.h"
 #include "ip.h"
 #include "ipAddr.h"
 #include "interfaces.h"
-#include "sysORTable.h"
 
 #ifndef MIB_STATS_CACHE_TIMEOUT
 #define MIB_STATS_CACHE_TIMEOUT	5
@@ -33,7 +33,10 @@
 #define IP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
-#if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5) || defined(aix6)) && !defined(FIRST_PROTOCOL)
+#if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)) && !defined(FIRST_PROTOCOL)
+#ifdef HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
 #include <libperfstat.h>
 #ifdef FIRST_PROTOCOL
 perfstat_protocol_t ps_proto;
@@ -56,51 +59,74 @@ perfstat_id_t ps_name;
 	 *
 	 *********************/
 
-extern void     init_routes(void);
-
-
 /*
  * define the structure we're going to ask the agent to register our
  * information at 
  */
 struct variable1 ipaddr_variables[] = {
-    {IPADADDR,      ASN_IPADDRESS, RONLY, var_ipAddrEntry, 1, {1}},
-    {IPADIFINDEX,   ASN_INTEGER,   RONLY, var_ipAddrEntry, 1, {2}},
+    {IPADADDR,      ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {1}},
+    {IPADIFINDEX,   ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {2}},
 #ifndef sunV3
-    {IPADNETMASK,   ASN_IPADDRESS, RONLY, var_ipAddrEntry, 1, {3}},
+    {IPADNETMASK,   ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {3}},
 #endif
-    {IPADBCASTADDR, ASN_INTEGER,   RONLY, var_ipAddrEntry, 1, {4}},
-    {IPADREASMMAX,  ASN_INTEGER,   RONLY, var_ipAddrEntry, 1, {5}}
+    {IPADBCASTADDR, ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {4}},
+    {IPADREASMMAX,  ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {5}}
 };
 
 struct variable1 iproute_variables[] = {
-    {IPROUTEDEST,    ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 1, {1}},
-    {IPROUTEIFINDEX, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {2}},
-    {IPROUTEMETRIC1, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {3}},
-    {IPROUTEMETRIC2, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {4}},
-    {IPROUTEMETRIC3, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {5}},
-    {IPROUTEMETRIC4, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {6}},
-    {IPROUTENEXTHOP, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 1, {7}},
-    {IPROUTETYPE,    ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {8}},
-    {IPROUTEPROTO,   ASN_INTEGER,   RONLY,  var_ipRouteEntry, 1, {9}},
-    {IPROUTEAGE,     ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {10}},
-    {IPROUTEMASK,    ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 1, {11}},
-    {IPROUTEMETRIC5, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {12}},
-    {IPROUTEINFO,    ASN_OBJECT_ID, RONLY,  var_ipRouteEntry, 1, {13}}
+    {IPROUTEDEST,    ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {1}},
+    {IPROUTEIFINDEX, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {2}},
+    {IPROUTEMETRIC1, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {3}},
+    {IPROUTEMETRIC2, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {4}},
+    {IPROUTEMETRIC3, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {5}},
+    {IPROUTEMETRIC4, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {6}},
+    {IPROUTENEXTHOP, ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {7}},
+    {IPROUTETYPE,    ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {8}},
+    {IPROUTEPROTO,   ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_ipRouteEntry, 1, {9}},
+    {IPROUTEAGE,     ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {10}},
+    {IPROUTEMASK,    ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {11}},
+    {IPROUTEMETRIC5, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {12}},
+    {IPROUTEINFO,    ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_ipRouteEntry, 1, {13}}
 };
 
 struct variable1 ipmedia_variables[] = {
 #ifdef USING_MIBII_AT_MODULE
 #if defined (WIN32) || defined (cygwin)
-    {IPMEDIAIFINDEX,     ASN_INTEGER,   RWRITE, var_atEntry, 1, {1}},
-    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RWRITE, var_atEntry, 1, {2}},
-    {IPMEDIANETADDRESS,  ASN_IPADDRESS, RWRITE, var_atEntry, 1, {3}},
-    {IPMEDIATYPE,        ASN_INTEGER,   RWRITE, var_atEntry, 1, {4}}
+    {IPMEDIAIFINDEX,     ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_atEntry, 1, {1}},
+    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_atEntry, 1, {2}},
+    {IPMEDIANETADDRESS,  ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_atEntry, 1, {3}},
+    {IPMEDIATYPE,        ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_atEntry, 1, {4}}
 #else
-    {IPMEDIAIFINDEX,     ASN_INTEGER,   RONLY, var_atEntry, 1, {1}},
-    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 1, {2}},
-    {IPMEDIANETADDRESS,  ASN_IPADDRESS, RONLY, var_atEntry, 1, {3}},
-    {IPMEDIATYPE,        ASN_INTEGER,   RONLY, var_atEntry, 1, {4}}
+    {IPMEDIAIFINDEX,     ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {1}},
+    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {2}},
+    {IPMEDIANETADDRESS,  ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {3}},
+    {IPMEDIATYPE,        ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {4}}
 #endif
 #endif
 };
@@ -122,6 +148,7 @@ void
 init_ip(void)
 {
     netsnmp_handler_registration *reginfo;
+    int rc;
 
     /*
      * register ourselves with the agent as a group of scalars...
@@ -129,7 +156,9 @@ init_ip(void)
     DEBUGMSGTL(("mibII/ip", "Initialising IP group\n"));
     reginfo = netsnmp_create_handler_registration("ip", ip_handler,
                             ip_oid, OID_LENGTH(ip_oid), HANDLER_CAN_RONLY);
-    netsnmp_register_scalar_group(reginfo, IPFORWARDING, IPROUTEDISCARDS);
+    rc = netsnmp_register_scalar_group(reginfo, IPFORWARDING, IPROUTEDISCARDS);
+    if (rc != SNMPERR_SUCCESS)
+        return;
 
     /*
      * .... with a local cache
@@ -200,12 +229,12 @@ init_ip(void)
 #endif
 
 #ifdef NETBSD_STATS_VIA_SYSCTL
-#define IP_STAT_STRUCTURE      struct ip_mib
+#define IP_STAT_STRUCTURE	struct ip_mib
 #define USES_SNMP_DESIGNED_IPSTAT
 #undef IP_NSTATS
 #endif
 
-#if defined (WIN32) || defined (cygwin)
+#ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define IP_STAT_STRUCTURE MIB_IPSTATS
 long            ipForwarding;
@@ -378,7 +407,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         ret_value = ipstat.ips_forward;
         break;
     case IPINUNKNOWNPROTOS:
-#if STRUCT_IPSTAT_HAS_IPS_NOPROTO
+#if HAVE_STRUCT_IPSTAT_IPS_NOPROTO
         ret_value = ipstat.ips_noproto;
         break;
 #else
@@ -386,7 +415,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPINDISCARDS:
-#if STRUCT_IPSTAT_HAS_IPS_FRAGDROPPED
+#if HAVE_STRUCT_IPSTAT_IPS_FRAGDROPPED
         ret_value = ipstat.ips_fragdropped;   /* ?? */
         break;
 #else
@@ -394,7 +423,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPINDELIVERS:
-#if STRUCT_IPSTAT_HAS_IPS_DELIVERED
+#if HAVE_STRUCT_IPSTAT_IPS_DELIVERED
         ret_value = ipstat.ips_delivered & 0xffffffff;
         break;
 #else
@@ -402,7 +431,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPOUTREQUESTS:
-#if STRUCT_IPSTAT_HAS_IPS_LOCALOUT
+#if HAVE_STRUCT_IPSTAT_IPS_LOCALOUT
         ret_value = ipstat.ips_localout & 0xffffffff;
         break;
 #else
@@ -410,7 +439,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPOUTDISCARDS:
-#if STRUCT_IPSTAT_HAS_IPS_ODROPPED
+#if HAVE_STRUCT_IPSTAT_IPS_ODROPPED
         ret_value = ipstat.ips_odropped;
         break;
 #else
@@ -433,7 +462,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         ret_value = ipstat.ips_fragments;
         break;
     case IPREASMOKS:
-#if STRUCT_IPSTAT_HAS_IPS_REASSEMBLED
+#if HAVE_STRUCT_IPSTAT_IPS_REASSEMBLED
         ret_value = ipstat.ips_reassembled;
         break;
 #else
@@ -444,7 +473,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         ret_value = ipstat.ips_fragdropped + ipstat.ips_fragtimeout;
         break;
     case IPFRAGOKS:
-#if STRUCT_IPSTAT_HAS_IPS_FRAGMENTED
+#if HAVE_STRUCT_IPSTAT_IPS_FRAGMENTED
         ret_value = ipstat.ips_fragments;
         break;
 #else            /* XXX */
@@ -453,7 +482,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         break;
 #endif
     case IPFRAGFAILS:
-#if STRUCT_IPSTAT_HAS_IPS_CANTFRAG
+#if HAVE_STRUCT_IPSTAT_IPS_CANTFRAG
         ret_value = ipstat.ips_cantfrag;
         break;
 #else
@@ -461,7 +490,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPFRAGCREATES:
-#if STRUCT_IPSTAT_HAS_IPS_OFRAGMENTS
+#if HAVE_STRUCT_IPSTAT_IPS_OFRAGMENTS
         ret_value = ipstat.ips_ofragments;
         break;
 #else
@@ -469,7 +498,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPROUTEDISCARDS:
-#if STRUCT_IPSTAT_HAS_IPS_NOROUTE
+#if HAVE_STRUCT_IPSTAT_IPS_NOROUTE
         ret_value = ipstat.ips_noroute;
         break;
 #else
@@ -645,6 +674,7 @@ ip_handler(netsnmp_mib_handler          *handler,
 
     case MODE_GETNEXT:
     case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 		/* XXX - Windows currently supports setting this */
     case MODE_SET_RESERVE2:
@@ -655,6 +685,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         snmp_log(LOG_WARNING, "mibII/ip: Unsupported mode (%d)\n",
                                reqinfo->mode);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         snmp_log(LOG_WARNING, "mibII/ip: Unrecognised mode (%d)\n",
                                reqinfo->mode);
@@ -806,9 +837,9 @@ ip_load(netsnmp_cache *cache, void *vmagic)
     ret_value = netbsd_read_ip_stat(&ipstat);
 
     if ( ret_value < 0) {
-       DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (netbsd)\n"));
+	DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (netbsd)\n"));
     } else {
-       DEBUGMSGTL(("mibII/ip", "Loaded IP Group (netbsd)\n"));
+	DEBUGMSGTL(("mibII/ip", "Loaded IP Group (netbsd)\n"));
     }
     return ret_value;
 }

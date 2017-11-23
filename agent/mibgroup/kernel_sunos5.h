@@ -71,9 +71,21 @@ typedef enum {
     MIB_TRANSMISSION = 14,
     MIB_SNMP = 15,
 #ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
-    MIB_IP6_ADDR = 16,
+#ifdef SOLARIS_HAVE_RFC4293_SUPPORT
+    MIB_IP_TRAFFIC_STATS,
+#endif
+    MIB_IP6,
+    MIB_IP6_ADDR,
+    MIB_IP6_ROUTE,
+    MIB_ICMP6,
     MIB_TCP6_CONN,
     MIB_UDP6_ENDPOINT,
+#endif
+#ifdef MIB2_SCTP
+    MIB_SCTP,
+    MIB_SCTP_CONN,
+    MIB_SCTP_CONN_LOCAL,
+    MIB_SCTP_CONN_REMOTE,
 #endif
     MIBCACHE_SIZE	
 } mibgroup_e;
@@ -196,19 +208,4 @@ extern          "C" {
 }
 #endif
 #endif
-/*-
- * These variables describe the formatting of this file.  If you don't like the
- * template defaults, feel free to change them here (not in your .emacs file).
- *
- * Local Variables:
- * comment-column: 32
- * c-indent-level: 4
- * c-continued-statement-offset: 4
- * c-brace-offset: -4
- * c-argdecl-indent: 0
- * c-label-offset: -4
- * fill-column: 79
- * fill-prefix: " * "
- * End:
- */
 #endif

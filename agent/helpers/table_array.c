@@ -1,9 +1,24 @@
 /*
  * table_array.c
  * $Id$
+ *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/agent/table_array.h>
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -11,13 +26,18 @@
 #include <strings.h>
 #endif
 
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
 #include <net-snmp/agent/table.h>
-#include <net-snmp/agent/table_array.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_assert.h>
+
+netsnmp_feature_child_of(table_array_all, mib_helpers)
+
+netsnmp_feature_child_of(table_array_register,table_array_all)
+netsnmp_feature_child_of(table_array_find_table_array_handler,table_array_all)
+netsnmp_feature_child_of(table_array_extract_array_context,table_array_all)
+netsnmp_feature_child_of(table_array_check_row_status,table_array_all)
+
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER
 
 /*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_BEGIN        -1 
@@ -193,6 +213,7 @@ netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
     return netsnmp_register_table(reginfo, tabreg);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_REGISTER
 int
 netsnmp_table_array_register(netsnmp_handler_registration *reginfo,
                              netsnmp_table_registration_info *tabreg,
@@ -200,14 +221,24 @@ netsnmp_table_array_register(netsnmp_handler_registration *reginfo,
                              netsnmp_container *container,
                              int group_rows)
 {
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_create_handler(reginfo->handlerName,
-                               netsnmp_table_array_helper_handler));
+    netsnmp_mib_handler *handler =
+        netsnmp_create_handler(reginfo->handlerName,
+                               netsnmp_table_array_helper_handler);
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create table array handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return SNMP_ERR_GENERR;
+    }
+
     return netsnmp_table_container_register(reginfo, tabreg, cb,
                                             container, group_rows);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_REGISTER */
 
 /** find the handler for the table_array helper. */
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_FIND_TABLE_ARRAY_HANDLER
 netsnmp_mib_handler *
 netsnmp_find_table_array_handler(netsnmp_handler_registration *reginfo)
 {
@@ -223,15 +254,19 @@ netsnmp_find_table_array_handler(netsnmp_handler_registration *reginfo)
 
     return mh;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_FIND_TABLE_ARRAY_HANDLER */
 
 /** find the context data used by the table_array helper */
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_EXTRACT_ARRAY_CONTEXT
 netsnmp_container      *
 netsnmp_extract_array_context(netsnmp_request_info *request)
 {
-    return netsnmp_request_get_list_data(request, TABLE_ARRAY_NAME);
+    return (netsnmp_container*)netsnmp_request_get_list_data(request, TABLE_ARRAY_NAME);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_EXTRACT_ARRAY_CONTEXT */
 
 /** this function is called to validate RowStatus transitions. */
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_CHECK_ROW_STATUS
 int
 netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
                                      netsnmp_request_group *ag,
@@ -310,6 +345,7 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
 
     return SNMP_ERR_NOERROR;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_CHECK_ROW_STATUS */
 
 /** @} */
 
@@ -344,37 +380,13 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
 /*
  * context info for SET requests
  */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 typedef struct set_context_s {
     netsnmp_agent_request_info *agtreq_info;
     table_container_data *tad;
     int             status;
 } set_context;
-
-static void
-release_netsnmp_request_group(netsnmp_index *g, void *v)
-{
-    netsnmp_request_group_item *tmp;
-    netsnmp_request_group *group = (netsnmp_request_group *) g;
-
-    if (!g)
-        return;
-    while (group->list) {
-        tmp = group->list;
-        group->list = tmp->next;
-        free(tmp);
-    }
-
-    free(group);
-}
-
-static void
-release_netsnmp_request_groups(void *vp)
-{
-    netsnmp_container *c = (netsnmp_container*)vp;
-    CONTAINER_FOR_EACH(c, (netsnmp_container_obj_func*)
-                       release_netsnmp_request_group, NULL);
-    CONTAINER_FREE(c);
-}
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 void
 build_new_oid(netsnmp_handler_registration *reginfo,
@@ -488,7 +500,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
             index.oids = tblreq_info->index_oid;
             index.len = tblreq_info->index_oid_len;
 
-            row = CONTAINER_FIND(tad->table, &index);
+            row = (netsnmp_index*)CONTAINER_FIND(tad->table, &index);
             if (!row) {
                 DEBUGMSGTL(("table_array:get", "no row found\n"));
                 netsnmp_set_request_error(agtreq_info, current,
@@ -555,7 +567,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
          */
         index.oids = tblreq_info->index_oid;
         index.len = tblreq_info->index_oid_len;
-        tmp = CONTAINER_FIND(request_group, &index);
+        tmp = (netsnmp_index*)CONTAINER_FIND(request_group, &index);
         if (tmp) {
             DEBUGMSGTL(("table_array:group",
                         "    existing group:"));
@@ -564,6 +576,8 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
             DEBUGMSG(("table_array:group", "\n"));
             g = (netsnmp_request_group *) tmp;
             i = SNMP_MALLOC_TYPEDEF(netsnmp_request_group_item);
+            if (i == NULL)
+                return;
             i->ri = current;
             i->tri = tblreq_info;
             i->next = g->list;
@@ -579,6 +593,11 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         DEBUGMSG(("table_array:group", "\n"));
         g = SNMP_MALLOC_TYPEDEF(netsnmp_request_group);
         i = SNMP_MALLOC_TYPEDEF(netsnmp_request_group_item);
+        if (i == NULL || g == NULL) {
+            SNMP_FREE(i);
+            SNMP_FREE(g);
+            return;
+        }
         g->list = i;
         g->table = tad->table;
         i->ri = current;
@@ -589,13 +608,15 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
          * search for row. all changes are made to the original row,
          * later, we'll make a copy in undo_info before we start processing.
          */
-        row = g->existing_row = CONTAINER_FIND(tad->table, &index);
+        row = g->existing_row = (netsnmp_index*)CONTAINER_FIND(tad->table, &index);
         if (!g->existing_row) {
             if (!tad->cb->create_row) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
                 if(MODE_IS_SET(agtreq_info->mode))
                     netsnmp_set_request_error(agtreq_info, current,
                                               SNMP_ERR_NOTWRITABLE);
                 else
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
                     netsnmp_set_request_error(agtreq_info, current,
                                               SNMP_NOSUCHINSTANCE);
                 free(g);
@@ -622,6 +643,33 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         CONTAINER_INSERT(request_group, g);
 
     } /** for( current ... ) */
+}
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+static void
+release_netsnmp_request_group(netsnmp_index *g, void *v)
+{
+    netsnmp_request_group_item *tmp;
+    netsnmp_request_group *group = (netsnmp_request_group *) g;
+
+    if (!g)
+        return;
+    while (group->list) {
+        tmp = group->list;
+        group->list = tmp->next;
+        free(tmp);
+    }
+
+    free(group);
+}
+
+static void
+release_netsnmp_request_groups(void *vp)
+{
+    netsnmp_container *c = (netsnmp_container*)vp;
+    CONTAINER_FOR_EACH(c, (netsnmp_container_obj_func*)
+                       release_netsnmp_request_group, NULL);
+    CONTAINER_FREE(c);
 }
 
 static void
@@ -817,6 +865,7 @@ process_set_requests(netsnmp_agent_request_info *agtreq_info,
 
     return context.status;
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 
 /**********************************************************************
@@ -852,6 +901,7 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
                     mode_name[agtreq_info->mode]));
     }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (MODE_IS_SET(agtreq_info->mode)) {
         /*
          * netsnmp_mutex_lock(&tad->lock);
@@ -862,6 +912,7 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
          * netsnmp_mutex_unlock(&tad->lock);
          */
     } else
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         rc = process_get_requests(reginfo, agtreq_info, requests, tad);
 
     if (rc != SNMP_ERR_NOERROR) {
@@ -881,4 +932,5 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
     
     return rc;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER */
 /** @endcond */

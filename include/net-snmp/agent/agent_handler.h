@@ -61,6 +61,17 @@ typedef struct netsnmp_mib_handler_s {
                                           struct
                                           netsnmp_agent_request_info_s *,
                                           struct netsnmp_request_info_s *);
+        /** data clone hook for myvoid
+         *  deep copy the myvoid member - default is to copy the pointer
+         *  This method is only called if myvoid != NULL
+         *  myvoid is the current myvoid pointer.
+         *  returns NULL on failure
+         */
+        void *(*data_clone)(void *myvoid);
+        /** data free hook for myvoid
+         *  delete the myvoid member - default is to do nothing
+         *  This method is only called if myvoid != NULL
+         */
         void (*data_free)(void *myvoid); /**< data free hook for myvoid */
 
         struct netsnmp_mib_handler_s *next;
@@ -207,12 +218,13 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
     netsnmp_handler_registration *
     netsnmp_handler_registration_create(const char *name,
                                         netsnmp_mib_handler *handler,
-                                        oid * reg_oid, size_t reg_oid_len,
+                                        const oid * reg_oid, size_t reg_oid_len,
                                         int modes);
     netsnmp_handler_registration *
     netsnmp_create_handler_registration(const char *name, Netsnmp_Node_Handler*
-                                        handler_access_method, oid *reg_oid,
-                                        size_t reg_oid_len, int modes);
+                                        handler_access_method,
+                                        const oid *reg_oid, size_t reg_oid_len,
+                                        int modes);
 
     netsnmp_delegated_cache
         *netsnmp_create_delegated_cache(netsnmp_mib_handler *,
@@ -231,6 +243,8 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
     void
         netsnmp_request_add_list_data(netsnmp_request_info *request,
                                       netsnmp_data_list *node);
+    int netsnmp_request_remove_list_data(netsnmp_request_info *request,
+                                         const char *name);
 
     int
         netsnmp_request_remove_list_data(netsnmp_request_info *request,

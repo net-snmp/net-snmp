@@ -82,6 +82,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/agent/mib_module_config.h>
 
 #ifdef USING_WINEXTDLL_MODULE
@@ -100,6 +101,8 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "util_funcs.h"
 #include "winExtDLL.h"
+
+netsnmp_feature_require(oid_is_subtree)
 
 
 #define MAX_VALUE_NAME          16383
@@ -753,6 +756,79 @@ get_context_info(const int index)
     return NULL;
 }
 
+/*
+ * Translate Net-SNMP request mode into an SnmpExtensionQuery() PDU type
+ * or into an SnmpExtensionQueryEx() request type.
+ */
+static int
+get_request_type(int mode, int request_type, UINT *nRequestType)
+{
+    switch (request_type) {
+    case 0:
+        /* SnmpExtensionQuery() PDU type */
+        switch (mode) {
+        case MODE_GET:
+            *nRequestType = SNMP_PDU_GET;
+            return 1;
+        case MODE_GETNEXT:
+            *nRequestType = SNMP_PDU_GETNEXT;
+            return 1;
+        case MODE_SET_RESERVE1:
+            return 0;
+        case MODE_SET_RESERVE2:
+            return 0;
+        case MODE_SET_ACTION:
+            return 0;
+        case MODE_SET_UNDO:
+            return 0;
+        case MODE_SET_COMMIT:
+            *nRequestType = SNMP_PDU_SET;
+            return 1;
+        case MODE_SET_FREE:
+            return 0;
+        default:
+            DEBUGMSG(("winExtDLL", "internal error: invalid mode %d.\n", mode));
+            netsnmp_assert(0);
+            return 0;
+        }
+    case 1:
+        /* SnmpExtensionQueryEx() request type */
+        switch (mode) {
+        case MODE_GET:
+            *nRequestType = SNMP_EXTENSION_GET;
+            return 1;
+        case MODE_GETNEXT:
+            *nRequestType = SNMP_EXTENSION_GET_NEXT;
+            return 1;
+        case MODE_SET_RESERVE1:
+            *nRequestType = SNMP_EXTENSION_SET_TEST;
+            return 1;
+        case MODE_SET_RESERVE2:
+            return 0;
+        case MODE_SET_ACTION:
+            return 0;
+        case MODE_SET_UNDO:
+            *nRequestType = SNMP_EXTENSION_SET_UNDO;
+            return 1;
+        case MODE_SET_COMMIT:
+            *nRequestType = SNMP_EXTENSION_SET_COMMIT;
+            return 1;
+        case MODE_SET_FREE:
+            *nRequestType = SNMP_EXTENSION_SET_CLEANUP;
+            return 1;
+        default:
+            DEBUGMSG(("winExtDLL", "internal error: invalid mode %d.\n", mode));
+            netsnmp_assert(0);
+            return 0;
+        }
+    default:
+        DEBUGMSG(("winExtDLL", "internal error: invalid argument %d.\n",
+                  request_type));
+        netsnmp_assert(0);
+        return 0;
+    }
+}
+
 static int
 var_winExtDLL(netsnmp_mib_handler *handler,
               netsnmp_handler_registration *reginfo,
@@ -763,7 +839,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     winextdll      *ext_dll_info;
     netsnmp_request_info *request;
     UINT            nRequestType;
-    const char     *mode_name;
     int             rc;
 
     netsnmp_assert(ext_dll_view_info);
@@ -780,43 +855,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         return SNMP_ERR_GENERR;
     }
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        mode_name = "GET";
-        nRequestType = SNMP_EXTENSION_GET;
-        netsnmp_assert(!context_info_head);
-        break;
-    case MODE_GETNEXT:
-        mode_name = "GETNEXT";
-        nRequestType = SNMP_EXTENSION_GET_NEXT;
-        netsnmp_assert(!context_info_head);
-        break;
-    case MODE_SET_RESERVE1:
-        mode_name = "SET_RESERVE1";
-        nRequestType = SNMP_EXTENSION_SET_TEST;
-        break;
-    case MODE_SET_RESERVE2:
-        mode_name = "SET_RESERVE2";
-        return SNMP_ERR_NOERROR;
-    case MODE_SET_ACTION:
-        mode_name = "SET_ACTION";
-        return SNMP_ERR_NOERROR;
-    case MODE_SET_UNDO:
-        mode_name = "SET_UNDO";
-        nRequestType = SNMP_EXTENSION_SET_UNDO;
-        break;
-    case MODE_SET_COMMIT:
-        mode_name = "SET_COMMIT";
-        nRequestType = SNMP_EXTENSION_SET_COMMIT;
-        break;
-    case MODE_SET_FREE:
-        mode_name = "SET_FREE";
-        nRequestType = SNMP_EXTENSION_SET_CLEANUP;
-        break;
-    default:
-        DEBUGMSG(("winExtDLL",
-                  "internal error: invalid mode %d.\n", reqinfo->mode));
-        netsnmp_assert(0);
+    if (!get_request_type(reqinfo->mode, !!ext_dll_info->pfSnmpExtensionQueryEx,
+                          &nRequestType)) {
         return SNMP_ERR_NOERROR;
     }
 

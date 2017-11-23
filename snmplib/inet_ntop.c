@@ -19,16 +19,10 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifndef HAVE_INET_NTOP
-
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
 
-#if defined(HAVE_WINSOCK_H)
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
 #include <errno.h>
 #include <stdio.h>
 #if HAVE_STRING_H
@@ -38,6 +32,8 @@
 #endif
 
 #include <net-snmp/types.h>
+
+#include "inet_ntop.h"
 
 #ifndef EAFNOSUPPORT
 #define EAFNOSUPPORT            WSAEAFNOSUPPORT
@@ -76,7 +72,7 @@ static const char *inet_ntop6(const u_char *src, char *dst, size_t size);
  *	Paul Vixie, 1996.
  */
 const char *
-inet_ntop(int af, const void *src, char *dst, size_t size)
+netsnmp_inet_ntop(int af, const void *src, char *dst, size_t size)
 {
 
 	switch (af) {
@@ -212,5 +208,3 @@ inet_ntop6(const u_char *src, char *dst, size_t size)
 	return (dst);
 }
 #endif
-
-#endif /* HAVE_INET_NTOP */

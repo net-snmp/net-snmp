@@ -1,5 +1,18 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #ifndef SNMP_DEBUG_H
 #define SNMP_DEBUG_H
+
+#include <net-snmp/library/netsnmp-attribute-format.h>
 
 #ifdef __cplusplus
 extern          "C" {
@@ -14,38 +27,53 @@ extern          "C" {
      * compile time.
      */
 
-
     /*
      * These functions should not be used, if at all possible.  Instead, use
      * the macros below. 
      */
-#if HAVE_STDARG_H
-    void            debugmsg(const char *token, const char *format, ...);
+    NETSNMP_IMPORT
+    void            debugmsg(const char *token, const char *format, ...)
+                        NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
+    NETSNMP_IMPORT
     void            debugmsgtoken(const char *token, const char *format,
-                                  ...);
+                                  ...)
+                        NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
+    NETSNMP_IMPORT
     void            debug_combo_nc(const char *token, const char *format,
-                                   ...);
-#else
-    void            debugmsg(va_alist);
-    void            debugmsgtoken(va_alist);
-    void            debug_combo_nc(va_alist);
-#endif
+                                   ...)
+                        NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
+    NETSNMP_IMPORT
     void            debugmsg_oid(const char *token, const oid * theoid,
                                  size_t len);
+    NETSNMP_IMPORT
     void            debugmsg_suboid(const char *token, const oid * theoid,
                                     size_t len);
+    NETSNMP_IMPORT
     void            debugmsg_var(const char *token,
                                  netsnmp_variable_list * var);
+    NETSNMP_IMPORT
     void            debugmsg_oidrange(const char *token,
                                       const oid * theoid, size_t len,
                                       size_t var_subid, oid range_ubound);
-    void            debugmsg_hex(const char *token, u_char * thedata,
+    NETSNMP_IMPORT
+    void            debugmsg_hex(const char *token, const u_char * thedata,
                                  size_t len);
-    void            debugmsg_hextli(const char *token, u_char * thedata,
+    NETSNMP_IMPORT
+    void            debugmsg_hextli(const char *token, const u_char * thedata,
                                     size_t len);
+    NETSNMP_IMPORT
     void            debug_indent_add(int amount);
+    NETSNMP_IMPORT
     void            debug_indent_reset(void);
-    char           *debug_indent(void);
+    NETSNMP_IMPORT
+    int             debug_indent_get(void);
+    /*
+     * What is said above is true for this function as well. Further this
+     * function is deprecated and only provided for backwards compatibility.
+     * Please use "%*s", debug_indent_get(), "" if you used this one before.
+     */
+    NETSNMP_IMPORT
+    const char     *debug_indent(void);
 
     /*
      * Use these macros instead of the functions above to allow them to be
@@ -122,11 +150,14 @@ extern          "C" {
 #define __DBGMSGL_NC(x)  __DBGTRACE; debugmsg x
 #define __DBGMSGTL_NC(x) __DBGTRACE; debug_combo_nc x
 
-#ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
-#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d:\n",__FUNCTION__,\
-                                 __FILE__,__LINE__))
+#ifdef  NETSNMP_FUNCTION
+#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d:\n",\
+				NETSNMP_FUNCTION,__FILE__,__LINE__))
+#define __DBGTRACETOK(x) __DBGMSGT((x,"%s(): %s, %d:\n",       \
+                                    NETSNMP_FUNCTION,__FILE__,__LINE__))
 #else
 #define __DBGTRACE       __DBGMSGT(("trace"," %s, %d:\n", __FILE__,__LINE__))
+#define __DBGTRACETOK(x) __DBGMSGT((x," %s, %d:\n", __FILE__,__LINE__))
 #endif
 
 #define __DBGMSGL(x)     __DBGTRACE, debugmsg x
@@ -137,11 +168,11 @@ extern          "C" {
 #define __DBGMSGOIDRANGE(x) debugmsg_oidrange x
 #define __DBGMSGHEX(x)     debugmsg_hex x
 #define __DBGMSGHEXTLI(x)  debugmsg_hextli x
-#define __DBGINDENT()      debug_indent()
+#define __DBGINDENT()      debug_indent_get()
 #define __DBGINDENTADD(x)  debug_indent_add(x)
 #define __DBGINDENTMORE()  debug_indent_add(2)
 #define __DBGINDENTLESS()  debug_indent_add(-2)
-#define __DBGPRINTINDENT(token) __DBGMSGTL((token, "%s", __DBGINDENT()))
+#define __DBGPRINTINDENT(token) __DBGMSGTL((token, "%*s", __DBGINDENT(), ""))
 
 #define __DBGDUMPHEADER(token,x) \
         __DBGPRINTINDENT("dumph_" token); \
@@ -158,12 +189,11 @@ extern          "C" {
 
 #define __DBGDUMPSECTION(token,x) \
         __DBGPRINTINDENT("dumph_" token); \
-        debugmsg("dumph_" token,x); \
-        debugmsg("dumph_" token,"\n"); \
+        debugmsg("dumph_" token,"%s\n",x);\
         __DBGINDENTMORE()
 
 #define __DBGDUMPSETUP(token,buf,len) \
-        debugmsg("dumpx" token, "dumpx_%s:%s", token, __DBGINDENT()); \
+        debugmsg("dumpx" token, "dumpx_%s:%*s", token, __DBGINDENT(), ""); \
         __DBGMSGHEX(("dumpx_" token,buf,len)); \
         if (debug_is_token_registered("dumpv" token) == SNMPERR_SUCCESS || \
             debug_is_token_registered("dumpv_" token) != SNMPERR_SUCCESS) { \
@@ -171,95 +201,32 @@ extern          "C" {
         } else { \
             debugmsg("dumpx_" token,"  "); \
         } \
-        debugmsg("dumpv" token, "dumpv_%s:%s", token, __DBGINDENT());
+        debugmsg("dumpv" token, "dumpv_%s:%*s", token, __DBGINDENT(), "");
 
 /******************* End   private macros ************************/
 /*****************************************************************/
+#endif /* NETSNMP_NO_DEBUGGING */
 
-/*****************************************************************/
-/********************Start public  macros ************************/
-
-#define DEBUGMSG(x)        do {if (_DBG_IF_) {debugmsg x;} }while(0)
-#define DEBUGMSGT(x)       do {if (_DBG_IF_) {__DBGMSGT(x);} }while(0)
-#define DEBUGTRACE         do {if (_DBG_IF_) {__DBGTRACE;} }while(0)
-#define DEBUGMSGL(x)       do {if (_DBG_IF_) {__DBGMSGL(x);} }while(0)
-#define DEBUGMSGTL(x)      do {if (_DBG_IF_) {__DBGMSGTL(x);} }while(0)
-#define DEBUGMSGOID(x)     do {if (_DBG_IF_) {__DBGMSGOID(x);} }while(0)
-#define DEBUGMSGSUBOID(x)  do {if (_DBG_IF_) {__DBGMSGSUBOID(x);} }while(0)
-#define DEBUGMSGVAR(x)     do {if (_DBG_IF_) {__DBGMSGVAR(x);} }while(0)
-#define DEBUGMSGOIDRANGE(x) do {if (_DBG_IF_) {__DBGMSGOIDRANGE(x);} }while(0)
-#define DEBUGMSGHEX(x)     do {if (_DBG_IF_) {__DBGMSGHEX(x);} }while(0)
-#define DEBUGMSGHEXTLI(x)  do {if (_DBG_IF_) {__DBGMSGHEXTLI(x);} }while(0)
-#define DEBUGINDENT()      do {if (_DBG_IF_) {__DBGINDENT();} }while(0)
-#define DEBUGINDENTADD(x)  do {if (_DBG_IF_) {__DBGINDENTADD(x);} }while(0)
-#define DEBUGINDENTMORE()  do {if (_DBG_IF_) {__DBGINDENTMORE();} }while(0)
-#define DEBUGINDENTLESS()  do {if (_DBG_IF_) {__DBGINDENTLESS();} }while(0)
-#define DEBUGPRINTINDENT(token) \
-	do {if (_DBG_IF_) {__DBGPRINTINDENT(token);} }while(0)
-
-
-#define DEBUGDUMPHEADER(token,x) \
-	do {if (_DBG_IF_) {__DBGDUMPHEADER(token,x);} }while(0)
-
-#define DEBUGDUMPSECTION(token,x) \
-	do {if (_DBG_IF_) {__DBGDUMPSECTION(token,x);} }while(0)
-
-#define DEBUGDUMPSETUP(token,buf,len) \
-	do {if (_DBG_IF_) {__DBGDUMPSETUP(token,buf,len);} }while(0)
-
-#define DEBUGMSG_NC(x)  do { __DBGMSG_NC(x); }while(0)
-#define DEBUGMSGT_NC(x) do { __DBGMSGT_NC(x); }while(0)
-
-#else                           /* NETSNMP_NO_DEBUGGING := enable streamlining of the code */
-
-#define DEBUGMSG(x)
-#define DEBUGMSGT(x)
-#define DEBUGTRACE
-#define DEBUGMSGL(x)
-#define DEBUGMSGTL(x)
-#define DEBUGMSGOID(x)
-#define DEBUGMSGSUBOID(x)
-#define DEBUGMSGVAR(x)
-#define DEBUGMSGOIDRANGE(x)
-#define DEBUGMSGHEX(x)
-#define DEBUGIF(x)        if(0)
-#define DEBUGDUMP(t,b,l,p)
-#define DEBUGINDENT()
-#define DEBUGINDENTMORE()
-#define DEBUGINDENTLESS()
-#define DEBUGINDENTADD(x)
-#define DEBUGMSGHEXTLI(x)
-#define DEBUGPRINTINDENT(token)
-#define DEBUGDUMPHEADER(token,x)
-#define DEBUGDUMPSECTION(token,x)
-#define DEBUGDUMPSETUP(token, buf, len)
-
-#define DEBUGMSG_NC(x)
-#define DEBUGMSGT_NC(x)
-
+#ifdef __cplusplus
+}
 #endif
+
+    /* Public macros moved to top-level API header file */
+#include <net-snmp/output_api.h>
+
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
+    void            snmp_debug_init(void);
+    void            snmp_debug_shutdown(void);
 
 #define MAX_DEBUG_TOKENS 256
 #define MAX_DEBUG_TOKEN_LEN 128
 #define DEBUG_TOKEN_DELIMITER ","
 #define DEBUG_ALWAYS_TOKEN "all"
 
-    /*
-     * setup routines:
-     * 
-     * debug_register_tokens(char *):     registers a list of tokens to
-     * print debugging output for.
-     * 
-     * debug_is_token_registered(char *): returns SNMPERR_SUCCESS or SNMPERR_GENERR
-     * if a token has been registered or
-     * not (and debugging output is "on").
-     * snmp_debug_init(void):             registers .conf handlers.
-     */
-    void            debug_register_tokens(char *tokens);
-    int             debug_is_token_registered(const char *token);
-    void            snmp_debug_init(void);
-    void            snmp_set_do_debugging(int);
-    int             snmp_get_do_debugging(void);
+#ifndef NETSNMP_NO_DEBUGGING
 
 /*
  * internal:
@@ -273,7 +240,9 @@ typedef struct netsnmp_token_descr_s {
 
 NETSNMP_IMPORT int                 debug_num_tokens;
 NETSNMP_IMPORT netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
-    
+
+#endif /* NETSNMP_NO_DEBUGGING */
+
 #ifdef __cplusplus
 }
 #endif

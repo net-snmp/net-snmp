@@ -8,6 +8,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -18,6 +19,9 @@
 
 
 #include "inetNetToMediaTable_data_access.h"
+
+netsnmp_feature_require(container_lifo)
+static netsnmp_arp_access * arp_access = NULL;
 
 /** @ingroup interface 
  * @addtogroup data_access data_access: Routines to access data
@@ -71,6 +75,123 @@ inetNetToMediaTable_init_data(inetNetToMediaTable_registration *
  */
 
 /**
+ * check entry for update
+ */
+static void
+_add_or_update_arp_entry(netsnmp_arp_entry *arp_entry,
+                 netsnmp_container *container)
+{
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx, *old;
+    int             inetAddressType;
+
+    DEBUGTRACE;
+
+    netsnmp_assert(NULL != arp_entry);
+    netsnmp_assert(NULL != container);
+
+    /*
+     * convert the addr len to an inetAddressType
+     */
+    switch (arp_entry->arp_ipaddress_len) {
+    case 4:
+        inetAddressType = INETADDRESSTYPE_IPV4;
+        break;
+
+    case 16:
+        inetAddressType = INETADDRESSTYPE_IPV6;
+        break;
+
+    default:
+        snmp_log(LOG_ERR, "inetNetToMediaTable:_add_or_update_arpentry: unsupported address type, len = %d\n", arp_entry->arp_ipaddress_len);
+        netsnmp_access_arp_entry_free(arp_entry);
+        return;
+    }
+
+    /*
+     * allocate an row context and set the index(es), then try to find it in
+     * the cache.
+     */
+    rowreq_ctx = inetNetToMediaTable_allocate_rowreq_ctx(arp_entry, NULL);
+    if ((NULL != rowreq_ctx) &&
+        (MFD_SUCCESS == inetNetToMediaTable_indexes_set
+         (rowreq_ctx, rowreq_ctx->data->if_index, inetAddressType,
+          (char *) rowreq_ctx->data->arp_ipaddress,
+          rowreq_ctx->data->arp_ipaddress_len))) {
+
+        /* try to find old entry */
+        old = (inetNetToMediaTable_rowreq_ctx*)CONTAINER_FIND(container, rowreq_ctx);
+        if (arp_entry->flags & NETSNMP_ACCESS_ARP_ENTRY_FLAG_DELETE) {
+            /* delete existing entry */
+            if (old != NULL) {
+                CONTAINER_REMOVE(container, old);
+                inetNetToMediaTable_release_rowreq_ctx(old);
+            }
+            inetNetToMediaTable_release_rowreq_ctx(rowreq_ctx);
+        } else if (old != NULL) {
+            /* the entry is already there, update it */
+            netsnmp_access_arp_entry_update(old->data, arp_entry);
+            /* delete the auxiliary context we used to find the entry
+             * (this deletes also arp_entry) */
+            inetNetToMediaTable_release_rowreq_ctx(rowreq_ctx);
+        } else {
+            /* create new entry and add it to the cache*/
+            rowreq_ctx->inetNetToMediaRowStatus = ROWSTATUS_ACTIVE;
+            rowreq_ctx->data->arp_last_updated = netsnmp_get_agent_uptime();
+            CONTAINER_INSERT(container, rowreq_ctx);
+        }
+    } else {
+        if (rowreq_ctx) {
+            snmp_log(LOG_ERR, "error setting index while loading "
+                     "inetNetToMediaTable cache.\n");
+            inetNetToMediaTable_release_rowreq_ctx(rowreq_ctx);
+        } else
+            netsnmp_access_arp_entry_free(arp_entry);
+    }
+}
+
+static void  _arp_hook_update(netsnmp_arp_access *access, netsnmp_arp_entry *entry)
+{
+    _add_or_update_arp_entry(entry, access->magic);
+}
+
+typedef struct {
+    unsigned generation;
+    netsnmp_container *to_delete;
+} _collect_ctx;
+
+/**
+ * Put all entries with outdated generation to deletion list.
+ */
+static void
+_collect_invalid_arp_ctx(inetNetToMediaTable_rowreq_ctx *ctx,
+                         _collect_ctx *cctx)
+{
+    if (ctx->data->generation != cctx->generation)
+        CONTAINER_INSERT(cctx->to_delete, ctx);
+}
+
+static void _arp_hook_gc(netsnmp_arp_access *access)
+{
+    netsnmp_container *container = access->magic;
+    _collect_ctx cctx;
+
+    cctx.to_delete = netsnmp_container_find("lifo");
+    cctx.generation = access->generation;
+
+    CONTAINER_FOR_EACH(container,
+                       (netsnmp_container_obj_func *) _collect_invalid_arp_ctx,
+                       &cctx);
+
+    while (CONTAINER_SIZE(cctx.to_delete)) {
+        inetNetToMediaTable_rowreq_ctx *ctx = (inetNetToMediaTable_rowreq_ctx*)CONTAINER_FIRST(cctx.to_delete);
+        CONTAINER_REMOVE(container, ctx);
+        inetNetToMediaTable_release_rowreq_ctx(ctx);
+        CONTAINER_REMOVE(cctx.to_delete, NULL);
+    }
+    CONTAINER_FREE(cctx.to_delete);
+}
+
+/**
  * container initialization
  *
  * @param container_ptr_ptr A pointer to a container pointer. If you
@@ -120,72 +241,19 @@ inetNetToMediaTable_container_init(netsnmp_container **container_ptr_ptr,
         return;
     }
 
-    /*
-     * TODO:345:A: Set up inetNetToMediaTable cache properties.
-     *
-     * Also for advanced users, you can set parameters for the
-     * cache. Do not change the magic pointer, as it is used
-     * by the MFD helper. To completely disable caching, set
-     * cache->enabled to 0.
-     */
-    cache->timeout = INETNETTOMEDIATABLE_CACHE_TIMEOUT; /* seconds */
-}                               /* inetNetToMediaTable_container_init */
-
-/**
- * check entry for update
- *
- */
-static void
-_snarf_arp_entry(netsnmp_arp_entry *arp_entry,
-                 netsnmp_container *container)
-{
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx;
-    int             inetAddressType;
-
-    DEBUGTRACE;
-
-    netsnmp_assert(NULL != arp_entry);
-    netsnmp_assert(NULL != container);
-
-    /*
-     * convert the addr len to an inetAddressType
-     */
-    switch (arp_entry->arp_ipaddress_len) {
-    case 4:
-        inetAddressType = INETADDRESSTYPE_IPV4;
-        break;
-
-    case 6:
-        inetAddressType = INETADDRESSTYPE_IPV6;
-        break;
-
-    default:
-        netsnmp_access_arp_entry_free(arp_entry);
-        snmp_log(LOG_ERR, "unsupported address type\n");
+    arp_access = netsnmp_access_arp_create(
+                           NETSNMP_ACCESS_ARP_CREATE_NOFLAGS,
+                           _arp_hook_update,
+                           _arp_hook_gc,
+                           &cache->timeout,
+                           &cache->flags,
+                           &cache->expired);
+    if (arp_access == NULL) {
+        snmp_log(LOG_ERR,
+                 "unable to create arp access in inetNetToMediaTable_container_init\n");
         return;
     }
-
-    /*
-     * allocate an row context and set the index(es), then add it to
-     * the container
-     */
-    rowreq_ctx = inetNetToMediaTable_allocate_rowreq_ctx(arp_entry, NULL);
-    if ((NULL != rowreq_ctx) &&
-        (MFD_SUCCESS == inetNetToMediaTable_indexes_set
-         (rowreq_ctx, rowreq_ctx->data->if_index, inetAddressType,
-          (char *) rowreq_ctx->data->arp_ipaddress,
-          rowreq_ctx->data->arp_ipaddress_len))) {
-        rowreq_ctx->inetNetToMediaRowStatus = ROWSTATUS_ACTIVE;
-        CONTAINER_INSERT(container, rowreq_ctx);
-    } else {
-        if (rowreq_ctx) {
-            snmp_log(LOG_ERR, "error setting index while loading "
-                     "inetNetToMediaTable cache.\n");
-            inetNetToMediaTable_release_rowreq_ctx(rowreq_ctx);
-        } else
-            netsnmp_access_arp_entry_free(arp_entry);
-    }
-}
+}                               /* inetNetToMediaTable_container_init */
 
 /**
  * container shutdown
@@ -208,12 +276,16 @@ inetNetToMediaTable_container_shutdown(netsnmp_container *container_ptr)
 {
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaTable_container_shutdown", "called\n"));
 
+    if (NULL != arp_access) {
+        netsnmp_access_arp_delete(arp_access);
+        arp_access = NULL;
+    }
+
     if (NULL == container_ptr) {
         snmp_log(LOG_ERR,
                  "bad params to inetNetToMediaTable_container_shutdown\n");
         return;
     }
-
 }                               /* inetNetToMediaTable_container_shutdown */
 
 /**
@@ -252,37 +324,11 @@ inetNetToMediaTable_container_shutdown(netsnmp_container *container_ptr)
 int
 inetNetToMediaTable_container_load(netsnmp_container *container)
 {
-    netsnmp_container *arp_container;
-
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaTable_cache_load", "called\n"));
 
-    /*
-     * TODO:351:M: |-> Load/update data in the inetNetToMediaTable container.
-     * loop over your inetNetToMediaTable data, allocate a rowreq context,
-     * set the index(es) [and data, optionally] and insert into
-     * the container.
-     */
-    arp_container =
-        netsnmp_access_arp_container_load(NULL,
-                                          NETSNMP_ACCESS_ARP_LOAD_NOFLAGS);
-    if (NULL == arp_container)
-        return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
-
-    /*
-     * we just got a fresh copy of data. snarf data
-     */
-    CONTAINER_FOR_EACH(arp_container,
-                       (netsnmp_container_obj_func *) _snarf_arp_entry,
-                       container);
-
-    /*
-     * free the container. we've either claimed each entry, or released it,
-     * so the access function doesn't need to clear the container.
-     */
-    netsnmp_access_arp_container_free(arp_container,
-                                      NETSNMP_ACCESS_ARP_FREE_DONT_CLEAR);
-
-    DEBUGMSGT(("verbose:inetNetToMediaTable:inetNetToMediaTable_cache_load", "%d records\n", CONTAINER_SIZE(container)));
+    arp_access->magic = container;
+    if (netsnmp_access_arp_load(arp_access) < 0)
+        return MFD_ERROR;
 
     return MFD_SUCCESS;
 }                               /* inetNetToMediaTable_container_load */
@@ -304,6 +350,11 @@ void
 inetNetToMediaTable_container_free(netsnmp_container *container)
 {
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaTable_container_free", "called\n"));
+
+    if (NULL != arp_access) {
+        netsnmp_access_arp_unload(arp_access);
+        arp_access->magic = NULL;
+    }
 
     /*
      * TODO:380:M: Free inetNetToMediaTable container data.

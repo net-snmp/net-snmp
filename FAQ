@@ -1,7 +1,7 @@
       Frequently Asked Questions (FAQ) for the UCD/Net-SNMP package
       =============================================================
 		       FAQ Author: Dave Shield
-	        Net-SNMP Version: 5.4.5.rc1 SVN branch
+			Net-SNMP Version: 5.7.3
 	    Net-SNMP/UCD-SNMP Project Leader: Wes Hardaker
 	     Email: net-snmp-coders@lists.sourceforge.net
 
@@ -1314,7 +1314,7 @@ How do I send traps and notifications?
   covered in the AGENT and CODING sections.
 
   You should also read the snmptrap tutorial at
-	http://www.net-snmp.org/tutorial-5/commands/snmptrap.html
+        http://www.net-snmp.org/wiki/index.php/TUT:snmptrap
   which will help you understand everything you need to know about traps.
 
 
@@ -1351,7 +1351,7 @@ How do I receive traps and notifications?
         forward default                  10.0.0.2
 
   There's a tutorial with more details on the web site at
-	http://www.net-snmp.org/tutorial-5/commands/snmptrap.html
+        http://www.net-snmp.org/wiki/index.php/TUT:snmptrap
 
 
 
@@ -2158,6 +2158,15 @@ What's the difference between 'exec', 'sh', 'extend' and 'pass'?
   output is returned in a fixed format, and it is up to the receiving
   application to interpret this appropriately.
 
+  Note that the "relocatable" form of the 'exec' directive ('exec OID ....')
+  produces MIB output that is not strictly valid. For this reason, support
+  for this has been deprecated in favour of 'extend OID ...', which produces
+  well-formed MIB results (as well as providing fuller functionality).
+  The most recent releases of the agent don't include support for "relocatable
+  exec" by default. This needs to be explicitly included when the agent is
+  first compiled, by including the module 'ucd-snmp/extensible' instead of
+  'agent/extend'.
+
 
   'pass' is a more general mechanism for implementing arbitrary MIB
   objects.  The specified command will be invoked for any request within
@@ -2594,7 +2603,7 @@ The agent is complaining about 'snmpd.conf'.  Where is this?
 
 
 Why does the agent complain about 'no access control information'?
-------------------------------------------------------------------
+-----------------------------------------------------------------
 
   Although an SNMP agent may support a wide range of management
   information, it is not necessarily appropriate to report the whole

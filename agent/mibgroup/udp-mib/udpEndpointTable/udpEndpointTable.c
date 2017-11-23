@@ -26,8 +26,8 @@
 
 #include "udpEndpointTable_interface.h"
 
-oid             udpEndpointTable_oid[] = { UDPENDPOINTTABLE_OID };
-int             udpEndpointTable_oid_size =
+const oid       udpEndpointTable_oid[] = { UDPENDPOINTTABLE_OID };
+const int       udpEndpointTable_oid_size =
 OID_LENGTH(udpEndpointTable_oid);
 
 udpEndpointTable_registration udpEndpointTable_user_context;
@@ -226,7 +226,8 @@ udpEndpointTable_indexes_set_tbl_idx(udpEndpointTable_mib_index * tbl_idx,
                                      size_t
                                      udpEndpointRemoteAddress_val_ptr_len,
                                      u_long udpEndpointRemotePort_val,
-                                     u_long udpEndpointInstance_val)
+                                     u_long udpEndpointInstance_val,
+                                     u_long udpEndpointProcess_val)
 {
     DEBUGMSGTL(("verbose:udpEndpointTable:udpEndpointTable_indexes_set_tbl_idx", "called\n"));
 
@@ -295,6 +296,10 @@ udpEndpointTable_indexes_set_tbl_idx(udpEndpointTable_mib_index * tbl_idx,
      * udpEndpointInstance(7)/UNSIGNED32/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/h 
      */
     tbl_idx->udpEndpointInstance = udpEndpointInstance_val;
+    /*
+     * udpEndpointProcess(8)/UNSIGNED32/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/h 
+     */
+    tbl_idx->udpEndpointProcess = udpEndpointProcess_val;
 
 
     return MFD_SUCCESS;
@@ -323,7 +328,8 @@ udpEndpointTable_indexes_set(udpEndpointTable_rowreq_ctx * rowreq_ctx,
                              char *udpEndpointRemoteAddress_val_ptr,
                              size_t udpEndpointRemoteAddress_val_ptr_len,
                              u_long udpEndpointRemotePort_val,
-                             u_long udpEndpointInstance_val)
+                             u_long udpEndpointInstance_val,
+                             u_long udpEndpointProcess_val)
 {
     DEBUGMSGTL(("verbose:udpEndpointTable:udpEndpointTable_indexes_set",
                 "called\n"));
@@ -338,7 +344,8 @@ udpEndpointTable_indexes_set(udpEndpointTable_rowreq_ctx * rowreq_ctx,
                                              udpEndpointRemoteAddress_val_ptr,
                                              udpEndpointRemoteAddress_val_ptr_len,
                                              udpEndpointRemotePort_val,
-                                             udpEndpointInstance_val))
+                                             udpEndpointInstance_val,
+                                             udpEndpointProcess_val))
         return MFD_ERROR;
 
     /*
@@ -405,9 +412,9 @@ udpEndpointProcess_get(udpEndpointTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the udpEndpointProcess data.
-     * copy (* udpEndpointProcess_val_ptr ) from rowreq_ctx->data
+     * copy (* udpEndpointProcess_val_ptr ) from rowreq_ctx->tbl_idx.udpEndpointProcess
      */
-    (*udpEndpointProcess_val_ptr) = rowreq_ctx->data.udpEndpointProcess;
+    (*udpEndpointProcess_val_ptr) = rowreq_ctx->tbl_idx.udpEndpointProcess;
 
     return MFD_SUCCESS;
 }                               /* udpEndpointProcess_get */

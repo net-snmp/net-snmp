@@ -20,6 +20,7 @@ typedef struct netsnmp_stash_cache_data_s {
 } netsnmp_stash_cache_data;
 
 /* function prototypes */
+void netsnmp_init_stash_cache_helper(void);
 netsnmp_mib_handler *netsnmp_get_bare_stash_cache_handler(void);
 netsnmp_mib_handler *netsnmp_get_stash_cache_handler(void);
 netsnmp_mib_handler *netsnmp_get_timed_bare_stash_cache_handler(int timeout,

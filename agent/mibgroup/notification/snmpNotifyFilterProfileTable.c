@@ -10,9 +10,6 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -26,12 +23,16 @@
 /*
  * minimal include directives 
  */
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "header_complex.h"
 #include "snmpNotifyFilterProfileTable.h"
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(header_complex_find_entry)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * snmpNotifyFilterProfileTable_variables_oid:
@@ -57,13 +58,13 @@ struct variable2 snmpNotifyFilterProfileTable_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   SNMPNOTIFYFILTERPROFILENAME  3
-    {SNMPNOTIFYFILTERPROFILENAME, ASN_OCTET_STR, RWRITE,
+    {SNMPNOTIFYFILTERPROFILENAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
      var_snmpNotifyFilterProfileTable, 2, {1, 1}},
 #define   SNMPNOTIFYFILTERPROFILESTORTYPE  4
-    {SNMPNOTIFYFILTERPROFILESTORTYPE, ASN_INTEGER, RWRITE,
+    {SNMPNOTIFYFILTERPROFILESTORTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_snmpNotifyFilterProfileTable, 2, {1, 2}},
 #define   SNMPNOTIFYFILTERPROFILEROWSTATUS  5
-    {SNMPNOTIFYFILTERPROFILEROWSTATUS, ASN_INTEGER, RWRITE,
+    {SNMPNOTIFYFILTERPROFILEROWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_snmpNotifyFilterProfileTable, 2, {1, 3}},
 
 };
@@ -134,7 +135,7 @@ snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data
                                  *thedata)
 {
     netsnmp_variable_list *vars = NULL;
-
+    int retVal;
 
     DEBUGMSGTL(("snmpNotifyFilterProfileTable", "adding data...  "));
     /*
@@ -146,13 +147,17 @@ snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data
                               (u_char *) thedata->snmpTargetParamsName,
                               thedata->snmpTargetParamsNameLen);
 
-    header_complex_add_data(&snmpNotifyFilterProfileTableStorage, vars,
-                            thedata);
-    DEBUGMSGTL(("snmpNotifyFilterProfileTable", "registered an entry\n"));
+    if (header_complex_maybe_add_data(&snmpNotifyFilterProfileTableStorage, vars,
+                                      thedata, 1) != NULL){
+       DEBUGMSGTL(("snmpNotifyFilterProfileTable", "registered an entry\n"));
+       retVal = SNMPERR_SUCCESS;
+    }else{
+       retVal = SNMPERR_GENERR;  	
+    }
 
 
     DEBUGMSGTL(("snmpNotifyFilterProfileTable", "done.\n"));
-    return SNMPERR_SUCCESS;
+    return retVal;
 }
 
 
@@ -204,7 +209,11 @@ parse_snmpNotifyFilterProfileTable(const char *token, char *line)
                               &StorageTmp->
                               snmpNotifyFilterProfileRowStatus, &tmpint);
 
-    snmpNotifyFilterProfileTable_add(StorageTmp);
+    if (snmpNotifyFilterProfileTable_add(StorageTmp) != SNMPERR_SUCCESS){
+        SNMP_FREE(StorageTmp->snmpTargetParamsName);
+        SNMP_FREE(StorageTmp->snmpNotifyFilterProfileName);
+        SNMP_FREE(StorageTmp);
+    }
 
     DEBUGMSGTL(("snmpNotifyFilterProfileTable", "done.\n"));
 }
@@ -222,7 +231,6 @@ store_snmpNotifyFilterProfileTable(int majorID, int minorID,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
-    size_t          tmpint;
     struct snmpNotifyFilterProfileTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -256,12 +264,12 @@ store_snmpNotifyFilterProfileTable(int majorID, int minorID,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        snmpNotifyFilterProfileStorType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        snmpNotifyFilterProfileRowStatus,
-                                       &tmpint);
+                                       NULL);
 
             snmpd_store_config(line);
         }
@@ -305,6 +313,7 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
     }
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMPNOTIFYFILTERPROFILENAME:
         *write_method = write_snmpNotifyFilterProfileName;
         break;
@@ -316,7 +325,7 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
     case SNMPNOTIFYFILTERPROFILEROWSTATUS:
         *write_method = write_snmpNotifyFilterProfileRowStatus;
         break;
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         *write_method = NULL;
     }
@@ -346,12 +355,15 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
     default:
         ERROR_MSG("");
     }
+
     return NULL;
 }
 
 
 
 static struct snmpNotifyFilterProfileTable_data *StorageNew;
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 
 int
 write_snmpNotifyFilterProfileName(int action,
@@ -403,7 +415,7 @@ write_snmpNotifyFilterProfileName(int action,
          */
         tmpvar = StorageTmp->snmpNotifyFilterProfileName;
         tmplen = StorageTmp->snmpNotifyFilterProfileNameLen;
-        StorageTmp->snmpNotifyFilterProfileName = calloc(1, var_val_len + 1);
+        StorageTmp->snmpNotifyFilterProfileName = (char*)calloc(1, var_val_len + 1);
         if (NULL == StorageTmp->snmpNotifyFilterProfileName)
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         break;
@@ -443,6 +455,7 @@ write_snmpNotifyFilterProfileName(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -535,7 +548,7 @@ write_snmpNotifyFilterProfileStorType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -650,6 +663,8 @@ write_snmpNotifyFilterProfileRowStatus(int action,
 
             StorageNew =
                 SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
+            if (StorageNew == NULL)
+                return SNMP_ERR_GENERR;
             StorageNew->snmpTargetParamsName =
                 netsnmp_memdup(vars->val.string, vars->val_len);
             StorageNew->snmpTargetParamsNameLen = vars->val_len;
@@ -786,11 +801,14 @@ write_snmpNotifyFilterProfileRowStatus(int action,
                 StorageTmp->snmpNotifyFilterProfileRowStatus = RS_NOTINSERVICE;
             StorageNew = NULL;
         }
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
 }
 
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 
 
 char           *

@@ -10,7 +10,7 @@ extern          "C" {
 #endif
 
 #define MAX_CALLBACK_IDS    2
-#define MAX_CALLBACK_SUBIDS 16
+#define MAX_CALLBACK_SUBIDS 17
 
     /*
      * Callback Major Types 
@@ -27,6 +27,8 @@ extern          "C" {
 #define SNMP_CALLBACK_POST_PREMIB_READ_CONFIG	3
 #define SNMP_CALLBACK_LOGGING			4
 #define SNMP_CALLBACK_SESSION_INIT		5
+#define SNMP_CALLBACK_PRE_READ_CONFIG	        7
+#define SNMP_CALLBACK_PRE_PREMIB_READ_CONFIG	8
 
 
     /*
@@ -49,21 +51,29 @@ extern          "C" {
     /*
      * function prototypes 
      */
+    NETSNMP_IMPORT
     void            init_callbacks(void);
 
+    NETSNMP_IMPORT
     int             netsnmp_register_callback(int major, int minor,
                                               SNMPCallback * new_callback,
                                               void *arg, int priority);
+    NETSNMP_IMPORT
     int             snmp_register_callback(int major, int minor,
                                            SNMPCallback * new_callback,
                                            void *arg);
+    NETSNMP_IMPORT
     int             snmp_call_callbacks(int major, int minor,
                                         void *caller_arg);
+    NETSNMP_IMPORT
     int             snmp_callback_available(int major, int minor);      /* is >1 available */
+    NETSNMP_IMPORT
     int             snmp_count_callbacks(int major, int minor); /* ret the number registered */
+    NETSNMP_IMPORT
     int             snmp_unregister_callback(int major, int minor,
                                              SNMPCallback * new_callback,
                                              void *arg, int matchargs);
+    NETSNMP_IMPORT
     void            clear_callback (void);
     int             netsnmp_callback_clear_client_arg(void *, int i, int j);
 

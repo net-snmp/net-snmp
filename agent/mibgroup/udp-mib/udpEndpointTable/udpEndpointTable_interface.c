@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,18 @@
 #include "udpEndpointTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_child_of(udpEndpointTable_external_access, libnetsnmpmibs)
+
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(udpEndpointTable_container_size, udpEndpointTable_external_access)
+netsnmp_feature_child_of(udpEndpointTable_registration_set, udpEndpointTable_external_access)
+netsnmp_feature_child_of(udpEndpointTable_registration_get, udpEndpointTable_external_access)
+netsnmp_feature_child_of(udpEndpointTable_container_get, udpEndpointTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -79,19 +92,23 @@ static void
                 _udpEndpointTable_container_shutdown(udpEndpointTable_interface_ctx *
                                                      if_ctx);
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_GET
 netsnmp_container *
 udpEndpointTable_container_get(void)
 {
     return udpEndpointTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_GET
 udpEndpointTable_registration *
 udpEndpointTable_registration_get(void)
 {
     return udpEndpointTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_SET
 udpEndpointTable_registration *
 udpEndpointTable_registration_set(udpEndpointTable_registration * newreg)
 {
@@ -99,12 +116,15 @@ udpEndpointTable_registration_set(udpEndpointTable_registration * newreg)
     udpEndpointTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_SET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_SIZE
 int
 udpEndpointTable_container_size(void)
 {
     return CONTAINER_SIZE(udpEndpointTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_SIZE */
 
 /*
  * mfd multiplexer modes
@@ -158,7 +178,7 @@ _udpEndpointTable_initialize_interface(udpEndpointTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = UDPENDPOINTTABLE_MIN_COL;
     tbl_info->max_column = UDPENDPOINTTABLE_MAX_COL;
@@ -228,7 +248,8 @@ _udpEndpointTable_initialize_interface(udpEndpointTable_registration *
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
+    /* XXX - are these actually necessary? */
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
@@ -251,7 +272,7 @@ _udpEndpointTable_initialize_interface(udpEndpointTable_registration *
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -701,7 +722,7 @@ _mfd_udpEndpointTable_post_request(netsnmp_mib_handler *handler,
                                    netsnmp_agent_request_info *agtreq_info,
                                    netsnmp_request_info *requests)
 {
-    udpEndpointTable_rowreq_ctx *rowreq_ctx =
+    udpEndpointTable_rowreq_ctx *rowreq_ctx = (udpEndpointTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -748,7 +769,7 @@ _mfd_udpEndpointTable_object_lookup(netsnmp_mib_handler *handler,
                                     netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    udpEndpointTable_rowreq_ctx *rowreq_ctx =
+    udpEndpointTable_rowreq_ctx *rowreq_ctx = (udpEndpointTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:udpEndpointTable:_mfd_udpEndpointTable_object_lookup", "called\n"));
@@ -819,7 +840,7 @@ _mfd_udpEndpointTable_get_values(netsnmp_mib_handler *handler,
                                  netsnmp_agent_request_info *agtreq_info,
                                  netsnmp_request_info *requests)
 {
-    udpEndpointTable_rowreq_ctx *rowreq_ctx =
+    udpEndpointTable_rowreq_ctx *rowreq_ctx = (udpEndpointTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -1024,6 +1045,7 @@ _udpEndpointTable_container_init(udpEndpointTable_interface_ctx * if_ctx)
                  "udpEndpointTable_container_init\n");
         return;
     }
+    if_ctx->container->container_name = strdup("udpEndpointTable");
 
     if (NULL != if_ctx->cache)
         if_ctx->cache->magic = (void *) if_ctx->container;
@@ -1046,6 +1068,7 @@ _udpEndpointTable_container_shutdown(udpEndpointTable_interface_ctx *
 }                               /* _udpEndpointTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_EXTERNAL_ACCESS
 udpEndpointTable_rowreq_ctx *
 udpEndpointTable_row_find_by_mib_index(udpEndpointTable_mib_index *
                                        mib_idx)
@@ -1068,8 +1091,9 @@ udpEndpointTable_row_find_by_mib_index(udpEndpointTable_mib_index *
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx =
+    rowreq_ctx = (udpEndpointTable_rowreq_ctx*)
         CONTAINER_FIND(udpEndpointTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_EXTERNAL_ACCESS */

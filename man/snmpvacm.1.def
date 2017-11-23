@@ -15,7 +15,7 @@ MODEL SECURITYNAME
 .B snmpvacm
 [COMMON OPTIONS] AGENT
 .B createView
-[-Ce] NAME SUBTREE MASK
+[\-Ce] NAME SUBTREE MASK
 .br
 .B snmpvacm
 [COMMON OPTIONS] AGENT
@@ -102,7 +102,7 @@ in the corresponding
 .B createSec2Group
 command (or equivalent).
 
-.SS createView \fR[-Ce] NAME SUBTREE MASK\fP
+.SS createView \fR[\-Ce] NAME SUBTREE MASK\fP
 .PP
 Create an entry in the SNMPv3 MIB view table.
 A MIB view consists of a family of view subtrees which may be individually
@@ -110,7 +110,7 @@ included in or (occasionally) excluded from the view.  Each view subtree is
 defined by a combination of an OID subtree together with a bit string mask.
 The view table is indexed by the view name and subtree OID values.
 .PP
-[-Ce]
+[\-Ce]
 .IP
 An optional flag to indicate that this view subtree should be excluded
 from the named view.
@@ -327,7 +327,7 @@ snmpvacm localhost createAccess  ROGroup 3 0 1 sysView none none
 .PP
 This creates a new security group named "ROGroup" containing the (pre-existing)
 user "wes", a new view "sysView" containing just the OID tree based on
-.I .iso(1).org(3).dod(6).inet(1).mgmt(2).mib-2(1).system(1)
+.I .iso(1).org(3).dod(6).inet(1).mgmt(2).mib\-2(1).system(1)
 , and then allows those users in the group "ROGroup" (i.e. "wes")
 read-access, but not write-access to the view "sysView" (i.e. the system group).
 

@@ -20,11 +20,15 @@ extern          "C" {
     void            multBy10(struct counter64, struct counter64 *);
     void            incrByU16(struct counter64 *, unsigned int);
     void            incrByU32(struct counter64 *, unsigned int);
+    NETSNMP_IMPORT
     void            zeroU64(struct counter64 *);
     int             isZeroU64(const struct counter64 *);
+    NETSNMP_IMPORT
     void            printU64(char *, const struct counter64 *);
+    NETSNMP_IMPORT
     void            printI64(char *, const struct counter64 *);
     int             read64(struct counter64 *, const char *);
+    NETSNMP_IMPORT
     void            u64Subtract(const struct counter64 *pu64one,
                                 const struct counter64 *pu64two,
                                 struct counter64 *pu64out);
@@ -39,6 +43,7 @@ extern          "C" {
     int             netsnmp_c64_check_for_32bit_wrap(struct counter64 *old_val,
                                                      struct counter64 *new_val,
                                                      int adjust);
+    NETSNMP_IMPORT
     int             netsnmp_c64_check32_and_update(struct counter64 *prev_val,
                                                    struct counter64 *new_val,
                                                    struct counter64 *old_prev_val,

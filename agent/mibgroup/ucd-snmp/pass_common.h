@@ -6,6 +6,9 @@
  * or disappear at any time
  */
 
+int
+netsnmp_internal_pass_str_to_errno(const char *buf);
+
 unsigned char *
 netsnmp_internal_pass_parse(char *buf, char *buf2, size_t *var_len,
                             struct variable *vp);

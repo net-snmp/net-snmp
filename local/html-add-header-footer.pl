@@ -21,7 +21,7 @@ use File::Copy;
 use File::stat;
 use Getopt::Long;
 
-my $tidy_options = '-f /dev/null -m -i -asxhtml -wrap 130 -quiet';
+my $tidy_options = '-f /dev/null -m -i -asxhtml -wrap 130 -quiet --quote-nbsp n';
 
 my $pattern = '';
 my $section = '';

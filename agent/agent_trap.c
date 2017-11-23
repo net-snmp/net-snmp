@@ -10,6 +10,11 @@
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 /** @defgroup agent_trap Trap generation routines for mib modules to use
  *  @ingroup agent
@@ -18,6 +23,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -34,11 +40,7 @@
 #include <strings.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -49,8 +51,6 @@
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#elif HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -58,6 +58,7 @@
 #include <net-snmp/utilities.h>
 
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_callbacks.h>
@@ -69,6 +70,14 @@
 #include "agentx/protocol.h"
 #endif
 
+netsnmp_feature_child_of(agent_trap_all, libnetsnmpagent)
+
+netsnmp_feature_child_of(trap_vars_with_context, agent_trap_all)
+netsnmp_feature_child_of(remove_trap_session, agent_trap_all)
+
+netsnmp_feature_child_of(send_v3trap,netsnmp_unused)
+netsnmp_feature_child_of(send_trap_pdu,netsnmp_unused)
+
 struct trap_sink {
     netsnmp_session *sesp;
     struct trap_sink *next;
@@ -78,36 +87,28 @@ struct trap_sink {
 
 struct trap_sink *sinks = NULL;
 
-extern struct timeval starttime;
-
-oid             objid_enterprisetrap[] = { NETSNMP_NOTIFICATION_MIB };
-oid             trap_version_id[] = { NETSNMP_SYSTEM_MIB };
-int             enterprisetrap_len;
-int             trap_version_id_len;
+const oid       objid_enterprisetrap[] = { NETSNMP_NOTIFICATION_MIB };
+const oid       trap_version_id[] = { NETSNMP_SYSTEM_MIB };
+const int       enterprisetrap_len = OID_LENGTH(objid_enterprisetrap);
+const int       trap_version_id_len = OID_LENGTH(trap_version_id);
 
 #define SNMPV2_TRAPS_PREFIX	SNMP_OID_SNMPMODULES,1,1,5
-oid             trap_prefix[]    = { SNMPV2_TRAPS_PREFIX };
-oid             cold_start_oid[] = { SNMPV2_TRAPS_PREFIX, 1 };  /* SNMPv2-MIB */
-oid             warm_start_oid[] = { SNMPV2_TRAPS_PREFIX, 2 };  /* SNMPv2-MIB */
-oid             link_down_oid[]  = { SNMPV2_TRAPS_PREFIX, 3 };  /* IF-MIB */
-oid             link_up_oid[]    = { SNMPV2_TRAPS_PREFIX, 4 };  /* IF-MIB */
-oid             auth_fail_oid[]  = { SNMPV2_TRAPS_PREFIX, 5 };  /* SNMPv2-MIB */
-oid             egp_xxx_oid[]    = { SNMPV2_TRAPS_PREFIX, 99 }; /* ??? */
+const oid       trap_prefix[]    = { SNMPV2_TRAPS_PREFIX };
+const oid       cold_start_oid[] = { SNMPV2_TRAPS_PREFIX, 1 };  /* SNMPv2-MIB */
 
 #define SNMPV2_TRAP_OBJS_PREFIX	SNMP_OID_SNMPMODULES,1,1,4
-oid             snmptrap_oid[] = { SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
-oid             snmptrapenterprise_oid[] =
-    { SNMPV2_TRAP_OBJS_PREFIX, 3, 0 };
-oid             sysuptime_oid[] = { SNMP_OID_MIB2, 1, 3, 0 };
-size_t          snmptrap_oid_len;
-size_t          snmptrapenterprise_oid_len;
-size_t          sysuptime_oid_len;
+const oid       snmptrap_oid[] = { SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
+const oid       snmptrapenterprise_oid[] = { SNMPV2_TRAP_OBJS_PREFIX, 3, 0 };
+const oid       sysuptime_oid[] = { SNMP_OID_MIB2, 1, 3, 0 };
+const size_t    snmptrap_oid_len = OID_LENGTH(snmptrap_oid);
+const size_t    snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
+const size_t    sysuptime_oid_len = OID_LENGTH(sysuptime_oid);
 
 #define SNMPV2_COMM_OBJS_PREFIX	SNMP_OID_SNMPMODULES,18,1
-oid             agentaddr_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 };
-size_t          agentaddr_oid_len;
-oid             community_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 };
-size_t          community_oid_len;
+const oid       agentaddr_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 };
+const size_t    agentaddr_oid_len = OID_LENGTH(agentaddr_oid);
+const oid       community_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 };
+const size_t    community_oid_len = OID_LENGTH(community_oid);
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 char           *snmp_trapcommunity = NULL;
 #endif
@@ -141,18 +142,12 @@ int             snmp_enableauthentrapsset = 0;
 void
 init_traps(void)
 {
-    enterprisetrap_len  = OID_LENGTH(objid_enterprisetrap);
-    trap_version_id_len = OID_LENGTH(trap_version_id);
-    snmptrap_oid_len    = OID_LENGTH(snmptrap_oid);
-    snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
-    sysuptime_oid_len   = OID_LENGTH(sysuptime_oid);
-    agentaddr_oid_len   = OID_LENGTH(agentaddr_oid);
-    community_oid_len   = OID_LENGTH(community_oid);
 }
 
 static void
 free_trap_session(struct trap_sink *sp)
 {
+    DEBUGMSGTL(("trap", "freeing callback trap session (%p, %p)\n", sp, sp->sesp));
     snmp_close(sp->sesp);
     free(sp);
 }
@@ -168,7 +163,7 @@ add_trap_session(netsnmp_session * ss, int pdutype, int confirm,
          * something else wants to handle notification registrations 
          */
         struct agent_add_trap_args args;
-        DEBUGMSGTL(("trap", "adding callback trap sink\n"));
+        DEBUGMSGTL(("trap", "adding callback trap sink (%p)\n", ss));
         args.ss = ss;
         args.confirm = confirm;
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
@@ -194,11 +189,13 @@ add_trap_session(netsnmp_session * ss, int pdutype, int confirm,
     return 1;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_REMOVE_TRAP_SESSION
 int
 remove_trap_session(netsnmp_session * ss)
 {
-    struct trap_sink *sp = sinks, *prev = 0;
+    struct trap_sink *sp = sinks, *prev = NULL;
 
+    DEBUGMSGTL(("trap", "removing trap sessions\n"));
     while (sp) {
         if (sp->sesp == ss) {
             if (prev) {
@@ -216,6 +213,7 @@ remove_trap_session(netsnmp_session * ss)
             /*
              * free_trap_session(sp);  
              */
+            DEBUGMSGTL(("trap", "removing trap session (%p, %p)\n", sp, sp->sesp));
             free(sp);
             return 1;
         }
@@ -224,6 +222,7 @@ remove_trap_session(netsnmp_session * ss)
     }
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REMOVE_TRAP_SESSION */
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 static int
@@ -318,6 +317,7 @@ void
 snmpd_free_trapsinks(void)
 {
     struct trap_sink *sp = sinks;
+    DEBUGMSGTL(("trap", "freeing trap sessions\n"));
     while (sp) {
         sinks = sinks->next;
         free_trap_session(sp);
@@ -338,7 +338,6 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
     netsnmp_pdu           *template_v1pdu;
     netsnmp_variable_list *first_vb, *vblist;
     netsnmp_variable_list *var;
-    size_t                 len;
 
     /*
      * Make a copy of the v2 Trap PDU
@@ -418,9 +417,10 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
                              snmptrapenterprise_oid,
                              snmptrapenterprise_oid_len);
         if (var) {
-            template_v1pdu->enterprise =
-                netsnmp_memdup(var->val.objid, var->val_len);
             template_v1pdu->enterprise_length = var->val_len/sizeof(oid);
+            template_v1pdu->enterprise =
+                snmp_duplicate_objid(var->val.objid,
+                                     template_v1pdu->enterprise_length);
         } else {
             template_v1pdu->enterprise        = NULL;
             template_v1pdu->enterprise_length = 0;		/* XXX ??? */
@@ -430,7 +430,7 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
          * For enterprise-specific traps, split the snmpTrapOID value
          *   into enterprise and specific trap
          */
-        len = vblist->val_len / sizeof(oid);
+        size_t len = vblist->val_len / sizeof(oid);
         if ( len <= 2 ) {
             snmp_log(LOG_WARNING,
                      "send_trap: v2 trapOID too short (%d)\n", (int)len);
@@ -444,7 +444,7 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
             len--;
         SNMP_FREE(template_v1pdu->enterprise);
         template_v1pdu->enterprise =
-            netsnmp_memdup(vblist->val.objid, len*sizeof(oid));
+            snmp_duplicate_objid(vblist->val.objid, len);
         template_v1pdu->enterprise_length = len;
     }
     var = find_varbind_in_list( vblist, agentaddr_oid,
@@ -625,9 +625,9 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
  */
 int
 netsnmp_send_traps(int trap, int specific,
-                          oid * enterprise, int enterprise_length,
+                          const oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars,
-                          char * context, int flags)
+                          const char * context, int flags)
 {
     netsnmp_pdu           *template_v1pdu;
     netsnmp_pdu           *template_v2pdu;
@@ -637,6 +637,8 @@ netsnmp_send_traps(int trap, int specific,
     in_addr_t             *pdu_in_addr_t;
     u_long                 uptime;
     struct trap_sink *sink;
+    const char            *v1trapaddress;
+    int                    res = 0;
 
     DEBUGMSGTL(( "trap", "send_trap %d %d ", trap, specific));
     DEBUGMSGOID(("trap", enterprise, enterprise_length));
@@ -718,7 +720,7 @@ netsnmp_send_traps(int trap, int specific,
                 !snmp_varlist_add_variable( &(template_v2pdu->variables),
                      snmptrapenterprise_oid, snmptrapenterprise_oid_len,
                      ASN_OBJECT_ID,
-                     (char*)enterprise, enterprise_length*sizeof(oid))) {
+                     enterprise, enterprise_length*sizeof(oid))) {
                 snmp_log(LOG_WARNING,
                      "send_trap: failed to add snmpEnterprise to v2 trap\n");
                 snmp_free_pdu(template_v2pdu);
@@ -790,9 +792,29 @@ netsnmp_send_traps(int trap, int specific,
      * Ensure that the v1 trap PDU includes the local IP address
      */
        pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
-      *pdu_in_addr_t = get_myaddr();
+       v1trapaddress = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                             NETSNMP_DS_AGENT_TRAP_ADDR);
+       if (v1trapaddress != NULL) {
+           /* "v1trapaddress" was specified in config, try to resolve it */
+           res = netsnmp_gethostbyname_v4(v1trapaddress, pdu_in_addr_t);
+       }
+       if (v1trapaddress == NULL || res < 0) {
+           /* "v1trapaddress" was not specified in config or the resolution failed,
+            * try any local address */
+           *pdu_in_addr_t = get_myaddr();
+       }
+
     }
 
+    if (template_v2pdu) {
+	/* A context name was provided, so copy it and its length to the v2 pdu
+	 * template. */
+	if (context != NULL)
+	{
+		template_v2pdu->contextName    = strdup(context);
+		template_v2pdu->contextNameLen = strlen(context);
+	}
+    }
 
     /*
      *  Now loop through the list of trap sinks
@@ -830,7 +852,7 @@ netsnmp_send_traps(int trap, int specific,
 void
 send_enterprise_trap_vars(int trap,
                           int specific,
-                          oid * enterprise, int enterprise_length,
+                          const oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars)
 {
     netsnmp_send_traps(trap, specific,
@@ -887,9 +909,6 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 {
     netsnmp_pdu    *pdu;
     int            result;
-    char           tmp[SPRINT_MAX_LEN];
-    int            len;
-
 
     if (!sess || !template_pdu)
         return;
@@ -913,6 +932,20 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     }
 
     pdu->sessid = sess->sessid; /* AgentX only ? */
+    /*
+     * RFC 3414 sayeth:
+     *
+     * - If an SNMP engine uses a msgID for correlating Response messages to
+     *   outstanding Request messages, then it MUST use different msgIDs in
+     *   all such Request messages that it sends out during a Time Window
+     *   (150 seconds) period.
+     *
+     *   A Command Generator or Notification Originator Application MUST use
+     *   different request-ids in all Request PDUs that it sends out during
+     *   a TimeWindow (150 seconds) period.
+     */
+    pdu->reqid = snmp_get_next_reqid();
+    pdu->msgid = snmp_get_next_msgid();
 
     if ( template_pdu->command == SNMP_MSG_INFORM
 #ifdef USING_AGENTX_PROTOCOL_MODULE
@@ -926,7 +959,9 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
         if ((sess->version == SNMP_VERSION_3) &&
                 (pdu->command == SNMP_MSG_TRAP2) &&
                 (sess->securityEngineIDLen == 0)) {
-            len = snmpv3_get_engineID(tmp, sizeof(tmp));
+            u_char          tmp[SPRINT_MAX_LEN];
+
+            int len = snmpv3_get_engineID(tmp, sizeof(tmp));
             pdu->securityEngineID = netsnmp_memdup(tmp, len);
             pdu->securityEngineIDLen = len;
         }
@@ -953,6 +988,23 @@ send_trap_vars(int trap, int specific, netsnmp_variable_list * vars)
         send_enterprise_trap_vars(trap, specific, trap_version_id,
                                   OID_LENGTH(trap_version_id), vars);
 }
+
+#ifndef NETSNMP_FEATURE_REMOVE_TRAP_VARS_WITH_CONTEXT
+/* Send a trap under a context */
+void send_trap_vars_with_context(int trap, int specific, 
+              netsnmp_variable_list *vars, const char *context)
+{
+    if (trap == SNMP_TRAP_ENTERPRISESPECIFIC)
+        netsnmp_send_traps(trap, specific, objid_enterprisetrap,
+                                  OID_LENGTH(objid_enterprisetrap), vars,
+								  context, 0);
+    else
+        netsnmp_send_traps(trap, specific, trap_version_id,
+                                  OID_LENGTH(trap_version_id), vars, 
+								  context, 0);
+    	
+}
+#endif /* NETSNMP_FEATURE_REMOVE_TRAP_VARS_WITH_CONTEXT */
 
 /**
  * Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of  
@@ -1012,11 +1064,34 @@ send_v2trap(netsnmp_variable_list * vars)
     send_trap_vars(-1, -1, vars);
 }
 
+/**
+ * Similar to send_v2trap(), with the added ability to specify a context.  If
+ * the last parameter is NULL, then this call is equivalent to send_v2trap().
+ *
+ * @param vars is used to supply the list of variable bindings for the trap.
+ * 
+ * @param context is used to specify the context of the trap.
+ *
+ * @return void
+ *
+ * @see send_v2trap
+ */
+#ifndef NETSNMP_FEATURE_REMOVE_SEND_V3TRAP
+void send_v3trap(netsnmp_variable_list *vars, const char *context)
+{
+    netsnmp_send_traps(-1, -1, 
+                       trap_version_id, OID_LENGTH(trap_version_id),
+                       vars, context, 0);
+}
+#endif /* NETSNMP_FEATURE_REMOVE_SEND_V3TRAP */
+
+#ifndef NETSNMP_FEATURE_REMOVE_SEND_TRAP_PDU
 void
 send_trap_pdu(netsnmp_pdu *pdu)
 {
     send_trap_vars(-1, -1, pdu->variables);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SEND_TRAP_PDU */
 
 
 
@@ -1078,7 +1153,6 @@ snmpd_parse_config_authtrap(const char *token, char *cptr)
 void
 snmpd_parse_config_trapsink(const char *token, char *cptr)
 {
-    char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
     char            *st;
 
@@ -1091,9 +1165,7 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
     if (pp)
 	config_pwarn("The separate port argument to trapsink is deprecated");
     if (create_v1_trap_session(sp, pp, cp ? cp : snmp_trapcommunity) == 0) {
-        snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trapsink: %s", cptr);
-        tmpbuf[sizeof(tmpbuf)-1] = '\0';
-        config_perror(tmpbuf);
+	netsnmp_config_error("cannot create trapsink: %s", cptr);
     }
 }
 #endif
@@ -1102,9 +1174,7 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
 void
 snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
-    char            tmpbuf[1024];
-    char           *sp, *cp, *pp = NULL;
-    char            *st;
+    char           *st, *sp, *cp, *pp = NULL;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
@@ -1115,18 +1185,14 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
     if (pp)
 	config_pwarn("The separate port argument to trapsink2 is deprecated");
     if (create_v2_trap_session(sp, pp, cp ? cp : snmp_trapcommunity) == 0) {
-        snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trap2sink: %s", cptr);
-        tmpbuf[sizeof(tmpbuf)-1] = '\0';
-        config_perror(tmpbuf);
+	netsnmp_config_error("cannot create trap2sink: %s", cptr);
     }
 }
 
 void
 snmpd_parse_config_informsink(const char *word, char *cptr)
 {
-    char            tmpbuf[1024];
-    char           *sp, *cp, *pp = NULL;
-    char            *st;
+    char           *st, *sp, *cp, *pp = NULL;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
@@ -1137,9 +1203,7 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
     if (pp)
 	config_pwarn("The separate port argument to informsink is deprecated");
     if (create_v2_inform_session(sp, pp, cp ? cp : snmp_trapcommunity) == 0) {
-        snprintf(tmpbuf, sizeof(tmpbuf), "cannot create informsink: %s", cptr);
-        tmpbuf[sizeof(tmpbuf)-1] = '\0';
-        config_perror(tmpbuf);
+	netsnmp_config_error("cannot create informsink: %s", cptr);
     }
 }
 #endif
@@ -1174,9 +1238,10 @@ trapOptProc(int argc, char *const *argv, int opt)
 void
 snmpd_parse_config_trapsess(const char *word, char *cptr)
 {
-    char           *argv[MAX_ARGS], *cp = cptr, tmp[SPRINT_MAX_LEN];
-    int             argn;
+    char           *argv[MAX_ARGS], *cp = cptr;
+    int             argn, rc;
     netsnmp_session session, *ss;
+    netsnmp_transport *transport;
     size_t          len;
 
     /*
@@ -1189,15 +1254,28 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
      */
     argv[0] = strdup("snmpd-trapsess"); /* bogus entry for getopt() */
     for (argn = 1; cp && argn < MAX_ARGS; argn++) {
+        char            tmp[SPRINT_MAX_LEN];
+
         cp = copy_nword(cp, tmp, SPRINT_MAX_LEN);
         argv[argn] = strdup(tmp);
     }
 
-    snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
+    netsnmp_parse_args(argn, argv, &session, "C:", trapOptProc,
+                       NETSNMP_PARSE_ARGS_NOLOGGING |
+                       NETSNMP_PARSE_ARGS_NOZERO);
 
-    ss = snmp_add(&session,
-		  netsnmp_transport_open_client("snmptrap", session.peername),
-		  NULL, NULL);
+    transport = netsnmp_transport_open_client("snmptrap", session.peername);
+    if (transport == NULL) {
+        config_perror("snmpd: failed to parse this line.");
+        return;
+    }
+    if ((rc = netsnmp_sess_config_and_open_transport(&session, transport))
+        != SNMPERR_SUCCESS) {
+        session.s_snmp_errno = rc;
+        session.s_errno = 0;
+        return;
+    }
+    ss = snmp_add(&session, transport, NULL, NULL);
     for (; argn > 0; argn--) {
         free(argv[argn - 1]);
     }
@@ -1216,21 +1294,18 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     if (ss->version == SNMP_VERSION_3 &&
         traptype != SNMP_MSG_INFORM   &&
         ss->securityEngineIDLen == 0) {
+            u_char          tmp[SPRINT_MAX_LEN];
+
             len = snmpv3_get_engineID( tmp, sizeof(tmp));
             ss->securityEngineID = netsnmp_memdup(tmp, len);
             ss->securityEngineIDLen = len;
     }
 
 #ifndef NETSNMP_DISABLE_SNMPV1
-    if (ss->version == SNMP_VERSION_1) {
-        add_trap_session(ss, SNMP_MSG_TRAP, 0, SNMP_VERSION_1);
-    } else {
+    if (ss->version == SNMP_VERSION_1)
+        traptype = SNMP_MSG_TRAP;
 #endif
-        add_trap_session(ss, traptype, (traptype == SNMP_MSG_INFORM),
-                         ss->version);
-#ifndef NETSNMP_DISABLE_SNMPV1
-    }
-#endif
+    add_trap_session(ss, traptype, (traptype == SNMP_MSG_INFORM), ss->version);
 }
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)

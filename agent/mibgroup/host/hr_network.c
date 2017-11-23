@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
@@ -22,6 +23,9 @@
 #include "mibII/interfaces.h"
 #include "hr_network.h"
 
+#if !defined( solaris2 )
+netsnmp_feature_require(interface_legacy)
+#endif /* !solaris2 */
 
         /*********************
 	 *
@@ -51,7 +55,8 @@ int             header_hrnet(struct variable *, oid *, size_t *, int,
 #define	HRNET_IFINDEX		1
 
 struct variable4 hrnet_variables[] = {
-    {HRNET_IFINDEX, ASN_INTEGER, RONLY, var_hrnet, 2, {1, 1}}
+    {HRNET_IFINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrnet, 2, {1, 1}}
 };
 oid             hrnet_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 3, 4 };
 
@@ -136,7 +141,7 @@ header_hrnet(struct variable *vp,
     memcpy((char *) name, (char *) newname,
            (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_network", "... get net stats "));
@@ -252,7 +257,7 @@ int      HRN_index;
 void
 Save_HR_Network_Info(void)
 {
-    strcpy(HRN_savedName, HRN_name);
+    strlcpy(HRN_savedName, HRN_name, sizeof(HRN_savedName));
 #if defined( USING_IF_MIB_IFTABLE_IFTABLE_DATA_ACCESS_MODULE )
     HRN_savedFlags  = HRN_ifnet->os_flags;
     HRN_savedErrors = HRN_ifnet->stats.ierrors + HRN_ifnet->stats.oerrors;

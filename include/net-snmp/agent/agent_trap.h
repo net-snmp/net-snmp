@@ -10,20 +10,32 @@ struct agent_add_trap_args {
     int             confirm;
 };
 
+extern long snmp_enableauthentraps;
+extern int snmp_enableauthentrapsset;
+
+extern const oid       snmptrap_oid[];
+extern const oid       sysuptime_oid[];
+extern const size_t    snmptrap_oid_len;
+extern const size_t    sysuptime_oid_len;
+
 void            init_traps(void);
 void            send_easy_trap(int, int);
 void            send_trap_pdu(netsnmp_pdu *);
 void            send_v2trap(netsnmp_variable_list *);
+void            send_v3trap(netsnmp_variable_list *vars, const char *context);
 void            send_trap_vars(int, int, netsnmp_variable_list *);
+void            send_trap_vars_with_context(int trap, int specific, 
+                                            netsnmp_variable_list *vars,
+                                            const char *context);
 void            send_enterprise_trap_vars(int trap, int specific,
-                                          oid * enterprise,
+                                          const oid * enterprise,
                                           int enterprise_length,
                                           netsnmp_variable_list * vars);
 int             netsnmp_send_traps(int trap, int specific,
-                          oid * enterprise, int enterprise_length,
+                          const oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars,
-                          /* These next two are currently unused */
-                          char * context, int flags);
+                          /* flags are currently unused */
+                          const char * context, int flags);
 void            snmpd_parse_config_authtrap(const char *, char *);
 void            snmpd_parse_config_trapsink(const char *, char *);
 void            snmpd_parse_config_trap2sink(const char *, char *);

@@ -14,6 +14,7 @@
 
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #if HAVE_IO_H
 #include <io.h>
 #endif
@@ -30,9 +31,6 @@
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -53,19 +51,16 @@
 #include "agentx/protocol.h"
 #include "agentx/master_admin.h"
 
+netsnmp_feature_require(handler_mark_requests_as_delegated)
+netsnmp_feature_require(unix_socket_paths)
+netsnmp_feature_require(free_agent_snmp_session_by_session)
+
 void
 real_init_master(void)
 {
     netsnmp_session sess, *session = NULL;
     char *agentx_sockets;
     char *cp1;
-
-#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
-    int agentx_dir_perm;
-    int agentx_sock_perm;
-    int agentx_sock_user;
-    int agentx_sock_group;
-#endif
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
@@ -98,6 +93,18 @@ real_init_master(void)
                                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
     sess.retries = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                       NETSNMP_DS_AGENT_AGENTX_RETRIES);
+
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
+    {
+	int agentx_dir_perm =
+	    netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+			       NETSNMP_DS_AGENT_X_DIR_PERM);
+	if (agentx_dir_perm == 0)
+	    agentx_dir_perm = NETSNMP_AGENT_DIRECTORY_MODE;
+	netsnmp_unix_create_path_with_mode(agentx_dir_perm);
+    }
+#endif
+
     cp1 = agentx_sockets;
     while (cp1) {
         netsnmp_transport *t;
@@ -111,44 +118,14 @@ real_init_master(void)
         if (cp1 != NULL) {
             *cp1++ = '\0';
 	}
-    
-        if (sess.peername[0] == '/') {
-#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
-            /*
-             *  If this is a Unix pathname,
-             *  try and create the directory first.
-             */
-            agentx_dir_perm = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
-                                                 NETSNMP_DS_AGENT_X_DIR_PERM);
-            if (agentx_dir_perm == 0)
-                agentx_dir_perm = NETSNMP_AGENT_DIRECTORY_MODE;
-            if (mkdirhier(sess.peername, (mode_t)agentx_dir_perm, 1)) {
-                snmp_log(LOG_ERR,
-                         "Failed to create the directory for the agentX socket: %s\n",
-                         sess.peername);
-            }
-#else
-            netsnmp_sess_log_error(LOG_WARNING,
-                                   "unix domain support not available\n",
-                                   &sess);
-#endif
-        }
-    
+
         /*
-         *  Otherwise, let 'snmp_open' interpret the string.
+         *  Let 'snmp_open' interpret the descriptor.
          */
         sess.local_port = AGENTX_PORT;      /* Indicate server & set default port */
-        sess.remote_port = 0;
         sess.callback = handle_master_agentx_packet;
         errno = 0;
         t = netsnmp_transport_open_server("agentx", sess.peername);
-        if (t == NULL && errno == EADDRINUSE) {
-            /*
-             * Could be a left-over socket (now deleted)
-             * Try again
-             */
-            t = netsnmp_transport_open_server("agentx", sess.peername);
-        }
         if (t == NULL) {
             /*
              * diagnose snmp_open errors with the input netsnmp_session
@@ -171,22 +148,23 @@ real_init_master(void)
         } else {
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
             if (t->domain == netsnmp_UnixDomain && t->local != NULL) {
-                char name[sizeof(struct sockaddr_un) + 1];
-                memcpy(name, t->local, t->local_length);
-                name[t->local_length] = '\0';
                 /*
                  * Apply any settings to the ownership/permissions of the
                  * AgentX socket
                  */
-                agentx_sock_perm =
+                int agentx_sock_perm =
                     netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                        NETSNMP_DS_AGENT_X_SOCK_PERM);
-                agentx_sock_user =
+                int agentx_sock_user =
                     netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                        NETSNMP_DS_AGENT_X_SOCK_USER);
-                agentx_sock_group =
+                int agentx_sock_group =
                     netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                        NETSNMP_DS_AGENT_X_SOCK_GROUP);
+
+                char name[sizeof(struct sockaddr_un) + 1];
+                memcpy(name, t->local, t->local_length);
+                name[t->local_length] = '\0';
 
                 if (agentx_sock_perm != 0)
                     chmod(name, agentx_sock_perm);
@@ -213,6 +191,10 @@ real_init_master(void)
         }
     }
 
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
+    netsnmp_unix_dont_create_path();
+#endif
+
     SNMP_FREE(agentx_sockets);
     DEBUGMSGTL(("agentx/master", "initializing...   DONE\n"));
 }
@@ -234,7 +216,7 @@ agentx_got_response(int operation,
 
     cache = netsnmp_handler_check_cache(cache);
     if (!cache) {
-        DEBUGMSGTL(("agentx/master", "response too late on session %08p\n",
+        DEBUGMSGTL(("agentx/master", "response too late on session %8p\n",
                     session));
         return 0;
     }
@@ -243,8 +225,8 @@ agentx_got_response(int operation,
     switch (operation) {
     case NETSNMP_CALLBACK_OP_TIMED_OUT:{
             void           *s = snmp_sess_pointer(session);
-            DEBUGMSGTL(("agentx/master", "timeout on session %08p\n",
-                        session));
+            DEBUGMSGTL(("agentx/master", "timeout on session %8p req=0x%x\n",
+                        session, (unsigned)reqid));
 
             netsnmp_handler_mark_requests_as_delegated(requests,
                                        REQUEST_IS_NOT_DELEGATED);
@@ -281,10 +263,10 @@ agentx_got_response(int operation,
     case NETSNMP_CALLBACK_OP_DISCONNECT:
     case NETSNMP_CALLBACK_OP_SEND_FAILED:
         if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
-            DEBUGMSGTL(("agentx/master", "disconnect on session %08p\n",
+            DEBUGMSGTL(("agentx/master", "disconnect on session %8p\n",
                         session));
         } else {
-            DEBUGMSGTL(("agentx/master", "send failed on session %08p\n",
+            DEBUGMSGTL(("agentx/master", "send failed on session %8p\n",
                         session));
         }
         close_agentx_session(session, -1);
@@ -308,9 +290,10 @@ agentx_got_response(int operation,
         return 0;
     }
 
-    DEBUGMSGTL(("agentx/master", "got response errstat=%d, (req=0x%x,trans="
+    DEBUGMSGTL(("agentx/master", "got response errstat=%ld, (req=0x%x,trans="
                 "0x%x,sess=0x%x)\n",
-                pdu->errstat,pdu->reqid,pdu->transid, pdu->sessid));
+                pdu->errstat, (unsigned)pdu->reqid, (unsigned)pdu->transid,
+		(unsigned)pdu->sessid));
 
     if (pdu->errstat != AGENTX_ERR_NOERROR) {
         /* [RFC 2471 - 7.2.5.2.]
@@ -387,9 +370,9 @@ agentx_got_response(int operation,
             DEBUGMSGOID(("agentx/master", var->name, var->name_length));
             DEBUGMSG(("agentx/master", "\n"));
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_VERBOSE)) {
-                DEBUGMSGTL(("snmp_agent", "    >> "));
-                DEBUGMSGVAR(("snmp_agent", var));
-                DEBUGMSG(("snmp_agent", "\n"));
+                DEBUGMSGTL(("agentx/master", "    >> "));
+                DEBUGMSGVAR(("agentx/master", var));
+                DEBUGMSG(("agentx/master", "\n"));
             }
 
             /*
@@ -481,6 +464,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
         pdu = snmp_pdu_create(AGENTX_MSG_GETNEXT);
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         pdu = snmp_pdu_create(AGENTX_MSG_TESTSET);
         break;
@@ -504,6 +488,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     case MODE_SET_FREE:
         pdu = snmp_pdu_create(AGENTX_MSG_CLEANUPSET);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     default:
         snmp_log(LOG_WARNING,
@@ -615,12 +600,11 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     /*
      * send the requests out.
      */
-    DEBUGMSGTL(("agentx", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
-                pdu->reqid,pdu->transid, pdu->sessid));
+    DEBUGMSGTL(("agentx/master", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
+                (unsigned)pdu->reqid, (unsigned)pdu->transid, (unsigned)pdu->sessid));
     result = snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
-
-    if (result == 0 ) {
-        snmp_free_pdu( pdu );
+    if (result == 0) {
+        snmp_free_pdu(pdu);
     }
 
     return SNMP_ERR_NOERROR;

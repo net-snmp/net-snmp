@@ -35,9 +35,13 @@ static char    *rcsid =
     "$Id$";
 #endif                          /* LIBC_SCCS and not lint */
 
+#include <net-snmp/net-snmp-config.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <net-snmp/library/getopt.h>
 
 #ifdef _BSD
 extern char    *__progname;

@@ -46,7 +46,9 @@ extern          "C" {
      * A 10 Mbps stream can wrap if*Octets in ~57 minutes.
      * At 100 Mbps it is ~5 minutes, and at 1 Gbps, ~34 seconds.
      */
-#define IFTABLE_CACHE_TIMEOUT   15
+#define IFTABLE_CACHE_TIMEOUT   3
+
+#define IFTABLE_REMOVE_MISSING_AFTER     (5 * 60) /* seconds */
 
     void            ifTable_container_init(netsnmp_container
                                            **container_ptr_ptr,

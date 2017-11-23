@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 netsnmp.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"../bin/release/snmpnetstat.exe" /libpath:"../lib/release"
+# ADD LINK32 advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"../bin/release/snmpnetstat.exe" /libpath:"../lib/release"
 
 !ELSEIF  "$(CFG)" == "snmpnetstat - Win32 Debug"
 
@@ -74,7 +74,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 netsnmp.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"../bin/debug/snmpnetstat.exe" /pdbtype:sept /libpath:"../lib/debug"
+# ADD LINK32 advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"../bin/debug/snmpnetstat.exe" /pdbtype:sept /libpath:"../lib/debug"
 
 !ENDIF 
 
@@ -82,6 +82,10 @@ LINK32=link.exe
 
 # Name "snmpnetstat - Win32 Release"
 # Name "snmpnetstat - Win32 Debug"
+# Begin Source File
+
+SOURCE=..\..\apps\snmpnetstat\ffs.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\apps\snmpnetstat\if.c
@@ -96,6 +100,10 @@ SOURCE=..\..\apps\snmpnetstat\inet6.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\apps\snmpnetstat\inetx.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\apps\snmpnetstat\main.c
 # End Source File
 # Begin Source File
@@ -104,7 +112,7 @@ SOURCE=..\..\apps\snmpnetstat\route.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\apps\snmpnetstat\ffs.c
+SOURCE=..\..\apps\snmpnetstat\routex.c
 # End Source File
 # Begin Source File
 

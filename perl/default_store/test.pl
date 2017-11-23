@@ -10,7 +10,7 @@ BEGIN { $| = 1;
 
 	%tests = ( 
                   "NETSNMP_DS_MAX_IDS"                     => 3,
-                  "NETSNMP_DS_MAX_SUBIDS"                  => 40,
+                  "NETSNMP_DS_MAX_SUBIDS"                  => 48,
                   "NETSNMP_DS_LIBRARY_ID"                  => 0,
                   "NETSNMP_DS_APPLICATION_ID"              => 1,
                   "NETSNMP_DS_TOKEN_ID"                    => 2,

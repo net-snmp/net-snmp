@@ -25,14 +25,19 @@
 #if HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETDB_H
+#ifdef cygwin
+#define getnetent cygwin_getnetent
+#define getnetbyaddr cygwin_getnetbyaddr
+#endif
 #include <netdb.h>
+#ifdef cygwin
+#undef getnetent
+#undef getnetbyaddr
+#endif
 #endif
 
 static int      h_stay_open, s_stay_open, p_stay_open, n_stay_open;

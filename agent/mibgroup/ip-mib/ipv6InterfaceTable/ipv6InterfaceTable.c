@@ -26,15 +26,14 @@
 
 #include "ipv6InterfaceTable_interface.h"
 
-oid             ipv6InterfaceTable_oid[] = { IPV6INTERFACETABLE_OID };
-int             ipv6InterfaceTable_oid_size =
+const oid       ipv6InterfaceTable_oid[] = { IPV6INTERFACETABLE_OID };
+const int       ipv6InterfaceTable_oid_size =
 OID_LENGTH(ipv6InterfaceTable_oid);
 
 ipv6InterfaceTable_registration ipv6InterfaceTable_user_context;
 static ipv6InterfaceTable_registration *ipv6InterfaceTable_user_context_p;
 
-void            initialize_table_ipv6InterfaceTable(void);
-void            shutdown_table_ipv6InterfaceTable(void);
+static void     shutdown_table_ipv6InterfaceTable(void);
 
 
 /**

@@ -8,6 +8,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/vacm.h>
@@ -19,6 +20,8 @@
 
 
 #include "snmpNotifyFilterTable_data_access.h"
+
+netsnmp_feature_require(snmpNotifyFilterTable_container_get)
 
 /** @ingroup interface 
  * @addtogroup data_access data_access: Routines to access data
@@ -243,7 +246,8 @@ snmpNotifyFilterTable_container_load(netsnmp_container *container)
         ++count;
     }
 
-    DEBUGMSGT(("verbose:snmpNotifyFilterTable:snmpNotifyFilterTable_container_load", "inserted %d records\n", count));
+    DEBUGMSGT(("verbose:snmpNotifyFilterTable:snmpNotifyFilterTable_container_load",
+               "inserted %" NETSNMP_PRIz "u records\n", count));
 
     return MFD_SUCCESS;
 }                               /* snmpNotifyFilterTable_container_load */
@@ -495,7 +499,7 @@ snmpNotifyFilterTable_vacm_view_subtree(const char *profile)
 {
     oid             tmp_oid[MAX_OID_LEN];
     netsnmp_index   tmp_idx;
-    int             i, j;
+    size_t          i, j;
     netsnmp_void_array *s;
     struct vacm_viewEntry *tmp;
     snmpNotifyFilterTable_rowreq_ctx *rowreq;
@@ -525,7 +529,7 @@ snmpNotifyFilterTable_vacm_view_subtree(const char *profile)
     /*
      * allocate temporary storage
      */
-    tmp = calloc(sizeof(struct vacm_viewEntry), s->size + 1);
+    tmp = (struct vacm_viewEntry*)calloc(sizeof(struct vacm_viewEntry), s->size + 1);
     if (NULL == tmp) {
         free(s->array);
         free(s);

@@ -5,10 +5,8 @@
 
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -16,16 +14,12 @@
 #if HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_STDLIB_H
-#include <stdlib.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 
 #if TIME_WITH_SYS_TIME
-#ifdef WIN32
-# include <sys/timeb.h>
-#else
 # include <sys/time.h>
-#endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -39,6 +33,14 @@
 #include <net-snmp/library/snmp-tc.h>   /* for "internal" definitions */
 #include <net-snmp/library/snmp_api.h>
 
+netsnmp_feature_child_of(snmp_tc_all, libnetsnmp)
+
+netsnmp_feature_child_of(netsnmp_dateandtime_set_buf_from_vars, netsnmp_unused)
+netsnmp_feature_child_of(date_n_time, snmp_tc_all)
+netsnmp_feature_child_of(ctime_to_timet, snmp_tc_all)
+netsnmp_feature_child_of(check_rowstatus_with_storagetype_transition, snmp_tc_all)
+
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_DATEANDTIME_SET_BUF_FROM_VARS
 /*
   DateAndTime ::= TEXTUAL-CONVENTION
     DISPLAY-HINT "2d-1d-1d,1d:1d:1d.1d,1a1d:1d"
@@ -119,9 +121,11 @@ netsnmp_dateandtime_set_buf_from_vars(u_char *buf, size_t *bufsize,
 
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_DATEANDTIME_SET_BUF_FROM_VARS */
 
+#ifndef NETSNMP_FEATURE_REMOVE_DATE_N_TIME
 u_char         *
-date_n_time(time_t * when, size_t * length)
+date_n_time(const time_t * when, size_t * length)
 {
     struct tm      *tm_p;
     static u_char   string[11];
@@ -159,15 +163,15 @@ date_n_time(time_t * when, size_t * length)
     string[7] = 0;
     *length = 8;
 
-#ifndef cygwin
+#if defined(HAVE_STRUCT_TM_TM_GMTOFF) || defined(HAVE_TIMEZONE_VARIABLE)
     /*
      * Timezone offset
      */
     {
-#ifdef STRUCT_TM_HAS_TM_GMTOFF
-    const int tzoffset = -tm_p->tm_gmtoff;     /* Seconds east of UTC */
+#ifdef HAVE_STRUCT_TM_TM_GMTOFF
+    const int tzoffset = -tm_p->tm_gmtoff;   /* Seconds east of UTC */
 #else
-    const int tzoffset = timezone;             /* Seconds west of UTC */
+    const int tzoffset = timezone;           /* Seconds west of UTC */
 #endif
     if (tzoffset > 0)
         string[8] = '-';
@@ -179,7 +183,7 @@ date_n_time(time_t * when, size_t * length)
     }
 #endif
 
-#ifdef SYSV
+#if defined(SYSV) && !HAVE_STRUCT_TM_TM_GMTOFF
     /*
      * Daylight saving time
      */
@@ -199,10 +203,11 @@ date_n_time(time_t * when, size_t * length)
 
     return string;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_DATE_N_TIME */
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_CTIME_TO_TIMET
 time_t
-ctime_to_timet(char *str)
+ctime_to_timet(const char *str)
 {
     struct tm       tm;
 
@@ -254,13 +259,16 @@ ctime_to_timet(char *str)
         tm.tm_isdst = 1;
 
     tm.tm_sec -= timezone;
+#else
+    tm.tm_isdst = 0;
 #endif
 
     return (mktime(&tm));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CTIME_TO_TIMET */
 
 /*
- * blatantly lifted from opensmp 
+ * blatantly lifted from opensnmp 
  */
 char
 check_rowstatus_transition(int oldValue, int newValue)
@@ -370,16 +378,13 @@ check_rowstatus_transition(int oldValue, int newValue)
     switch (newValue) {
         /*
          * these two end up being equivelent as far as checking the 
-         */
-        /*
          * status goes, although the final states are based on the 
-         */
-        /*
          * newValue. 
          */
     case RS_ACTIVE:
     case RS_NOTINSERVICE:
-        if (oldValue == RS_NOTINSERVICE || oldValue == RS_ACTIVE);
+        if (oldValue == RS_NOTINSERVICE || oldValue == RS_ACTIVE)
+            ;
         else
             return SNMP_ERR_INCONSISTENTVALUE;
         break;
@@ -392,13 +397,6 @@ check_rowstatus_transition(int oldValue, int newValue)
         break;
 
     case RS_CREATEANDGO:
-        if (oldValue != RS_NONEXISTENT)
-            /*
-             * impossible, we already exist. 
-             */
-            return SNMP_ERR_INCONSISTENTVALUE;
-        break;
-
     case RS_CREATEANDWAIT:
         if (oldValue != RS_NONEXISTENT)
             /*
@@ -418,6 +416,25 @@ check_rowstatus_transition(int oldValue, int newValue)
     return SNMP_ERR_NOERROR;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_ROWSTATUS_WITH_STORAGETYPE_TRANSITION
+char
+check_rowstatus_with_storagetype_transition(int oldValue, int newValue,
+                                            int oldStorage)
+{
+    /*
+     * can not destroy permanent or readonly rows
+     */
+    if ((RS_DESTROY == newValue) &&
+        ((SNMP_STORAGE_PERMANENT == oldStorage) ||
+         (SNMP_STORAGE_READONLY == oldStorage)))
+        return SNMP_ERR_WRONGVALUE;
+
+    return check_rowstatus_transition(oldValue, newValue);
+}
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_ROWSTATUS_WITH_STORAGETYPE_TRANSITION */
+
+netsnmp_feature_child_of(check_storage_transition, snmp_tc_all)
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_STORAGE_TRANSITION
 char
 check_storage_transition(int oldValue, int newValue)
 {
@@ -458,3 +475,4 @@ check_storage_transition(int oldValue, int newValue)
 
     return SNMP_ERR_NOERROR;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_STORAGE_TRANSITION */

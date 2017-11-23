@@ -49,42 +49,47 @@ oid             pingResultsTable_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 80, 1, 3 };
 
 struct variable2 pingResultsTable_variables[] = {
-    {COLUMN_PINGRESULTSOPERSTATUS,       ASN_INTEGER, RONLY, var_pingResultsTable, 2, {1, 1}},
-    {COLUMN_PINGRESULTSIPTARGETADDRESSTYPE, ASN_INTEGER, RONLY, var_pingResultsTable, 2, {1, 2}},
-    {COLUMN_PINGRESULTSIPTARGETADDRESS, ASN_OCTET_STR, RONLY, var_pingResultsTable, 2, {1, 3}},
-    {COLUMN_PINGRESULTSMINRTT,          ASN_UNSIGNED, RONLY, var_pingResultsTable, 2, {1, 4}},
-    {COLUMN_PINGRESULTSMAXRTT,          ASN_UNSIGNED, RONLY, var_pingResultsTable, 2, {1, 5}},
-    {COLUMN_PINGRESULTSAVERAGERTT,      ASN_UNSIGNED, RONLY, var_pingResultsTable, 2, {1, 6}},
-    {COLUMN_PINGRESULTSPROBERESPONSES,  ASN_UNSIGNED, RONLY, var_pingResultsTable, 2, {1, 7}},
-    {COLUMN_PINGRESULTSSENTPROBES,      ASN_UNSIGNED, RONLY, var_pingResultsTable, 2, {1, 8}},
-    {COLUMN_PINGRESULTSRTTSUMOFSQUARES, ASN_UNSIGNED, RONLY, var_pingResultsTable, 2, {1, 9}},
-    {COLUMN_PINGRESULTSLASTGOODPROBE,  ASN_OCTET_STR, RONLY, var_pingResultsTable, 2, {1, 10}}
+    {COLUMN_PINGRESULTSOPERSTATUS,       ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 1}},
+    {COLUMN_PINGRESULTSIPTARGETADDRESSTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 2}},
+    {COLUMN_PINGRESULTSIPTARGETADDRESS, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 3}},
+    {COLUMN_PINGRESULTSMINRTT,          ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 4}},
+    {COLUMN_PINGRESULTSMAXRTT,          ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 5}},
+    {COLUMN_PINGRESULTSAVERAGERTT,      ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 6}},
+    {COLUMN_PINGRESULTSPROBERESPONSES,  ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 7}},
+    {COLUMN_PINGRESULTSSENTPROBES,      ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 8}},
+    {COLUMN_PINGRESULTSRTTSUMOFSQUARES, ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 9}},
+    {COLUMN_PINGRESULTSLASTGOODPROBE,  ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_pingResultsTable, 2, {1, 10}}
 };
 
 
-
-
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-
-extern struct header_complex_index *pingCtlTableStorage;
-extern struct header_complex_index *pingResultsTableStorage;
 int
 pingResultsTable_inadd(struct pingResultsTable_data *thedata);
 
+#if 0
 void
 pingResultsTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr;
+    struct header_complex_index *hciptr, *nhciptr;
 
     DEBUGMSGTL(("pingResultsTable", "cleanerout  "));
-    for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
+    for (hciptr = thestuff; hciptr; hciptr = nhciptr) {
+        nhciptr = hciptr->next;
         header_complex_extract_entry(&pingResultsTableStorage, hciptr);
         DEBUGMSGTL(("pingResultsTable", "cleaner  "));
     }
-
 }
+#endif
+
 void
 init_pingResultsTable(void)
 {

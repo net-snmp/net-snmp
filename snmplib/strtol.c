@@ -33,8 +33,6 @@
 static char     sccsid[] = "@(#)strtol.c    5.4 (Berkeley) 2/23/91";
 #endif                          /* LIBC_SCCS and not lint */
 
-#if !HAVE_STRTOL
-
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -125,5 +123,3 @@ strtol(const char *nptr, char **endptr, int base)
         *endptr = any ? s - 1 : (char *) nptr;
     return (acc);
 }
-
-#endif                          /* !HAVE_STRTOL */

@@ -104,7 +104,7 @@ Remember that these \fIcreateUser\fR directives should be defined in the
 PERSISTENT_DIRECTORY/snmpd.conf file, rather than the usual location.
 .RE
 .\"
-.\"  ??? Illustrate "-e", "-l" and "-m" forms ??
+.\"  ??? Illustrate "\-e", "\-l" and "\-m" forms ??
 .\"
 .SS Traditional Access Control
 The SNMPv3 users defined above can be granted access to the full
@@ -219,7 +219,7 @@ A similar configuration could also be configured as follows:
 view   sys2View included    system
 view   sys2View included    .1.3.6.1.2.1.25.1
 
-authcommunity read       public  default      -v sys2View
+authcommunity read       public  default      \-v sys2View
 authcommunity read,write private 10.10.10.0/8
 .fi
 .RE
@@ -238,12 +238,12 @@ The full contents of the 'system' group (with the exception of \fCsysUpTime\fR)
 can be explicitly configured using:
 .RS
 .nf
-\fI# Override 'uname -a' and hardcoded system OID - inherently read-only values\fR
+\fI# Override 'uname \-a' and hardcoded system OID - inherently read-only values\fR
 sysDescr     Universal Turing Machine mk I
 sysObjectID  .1.3.6.1.4.1.8072.3.2.1066
 
 \fI# Override default values from 'configure' - makes these objects read-only\fR
-sysContact   Alan.Turing@pre-cs.man.ac.uk
+sysContact   Alan.Turing@pre\-cs.man.ac.uk
 sysName      tortoise.turing.com
 sysLocation  An idea in the mind of AT
 
@@ -262,7 +262,7 @@ which prevents the device \fI/dev/rdsk/c0t2d0\fR from being scanned,
 .RS
 .nf
 ignoredisk /dev/rdsk/c0t[!6]d0
-ignoredisk /dev/rdsk/c0t[0-57-9a-f]d0
+ignoredisk /dev/rdsk/c0t[0\-57\-9a\-f]d0
 .fi
 .RE
 either of which prevents all devices \fI/dev/rdsk/c0t\fRX\fId0\fR
@@ -388,7 +388,7 @@ destination configured to actually send the resulting notifications to.
 .PP
 A more detailed monitor example is given by:
 .RS
-monitor -u me -o hrSWRunName "high process memory" hrSWRunPerfMem > 10000
+monitor \-u me \-o hrSWRunName "high process memory" hrSWRunPerfMem > 10000
 .RE
 .PP
 This defines an explicit boolean monitor entry, looking for any process
@@ -402,7 +402,7 @@ earlier) for retrieving the monitored values, and building the trap.
 Objects that could potentially fluctuate around the specified level
 are better monitored using a threshold monitor entry: 
 .RS
-monitor -D -r 10 "network traffic" ifInOctets 1000000 5000000
+monitor \-D \-r 10 "network traffic" ifInOctets 1000000 5000000
 .RE
 .PP
 This will send a \fCmteTriggerRising\fR trap whenever the incoming
@@ -410,11 +410,11 @@ traffic rises above (roughly) 500 kB/s on any network interface,
 and a corresponding \fCmteTriggerFalling\fR trap when it falls below
 100 kB/s again.
 .PP
-Note that this monitors the deltas between successive samples (\fI-D\fR)
+Note that this monitors the deltas between successive samples (\fI\-D\fR)
 rather than the actual sample values themselves.  The same effect
 could be obtained using:
 .RS
-monitor -r 10 "network traffic" ifInOctets - - 1000000 5000000
+monitor \-r 10 "network traffic" ifInOctets \- \- 1000000 5000000
 .RE
 .PP
 The \fIlinkUpDownNotifications\fR directive above is broadly
@@ -424,8 +424,8 @@ equivalent to:
 notificationEvent  linkUpTrap    linkUp   ifIndex ifAdminStatus ifOperStatus
 notificationEvent  linkDownTrap  linkDown ifIndex ifAdminStatus ifOperStatus
 
-monitor  -r 60 -e linkUpTrap   "Generate linkUp"   ifOperStatus != 2
-monitor  -r 60 -e linkDownTrap "Generate linkDown" ifOperStatus == 2
+monitor  \-r 60 \-e linkUpTrap   "Generate linkUp"   ifOperStatus != 2
+monitor  \-r 60 \-e linkDownTrap "Generate linkDown" ifOperStatus == 2
 .fi
 .RE
 .PP
@@ -437,12 +437,12 @@ The \fIdefaultMonitors\fR directive above is equivalent to a series
 of (boolean) monitor entries:
 .RS
 .nf
-monitor	-o prNames      -o prErrMessage  "procTable" prErrorFlag   != 0
-monitor	-o memErrorName -o memSwapErrorMsg "memory"  memSwapError  != 0
-monitor	-o extNames     -o extOutput     "extTable"  extResult     != 0
-monitor	-o dskPath      -o dskErrorMsg   "dskTable"  dskErrorFlag  != 0
-monitor	-o laNames      -o laErrMessage  "laTable"   laErrorFlag   != 0
-monitor	-o fileName     -o fileErrorMsg  "fileTable" fileErrorFlag != 0
+monitor	\-o prNames      \-o prErrMessage  "procTable" prErrorFlag   != 0
+monitor	\-o memErrorName \-o memSwapErrorMsg "memory"  memSwapError  != 0
+monitor	\-o extNames     \-o extOutput     "extTable"  extResult     != 0
+monitor	\-o dskPath      \-o dskErrorMsg   "dskTable"  dskErrorFlag  != 0
+monitor	\-o laNames      \-o laErrMessage  "laTable"   laErrorFlag   != 0
+monitor	\-o fileName     \-o fileErrorMsg  "fileTable" fileErrorFlag != 0
 .fi
 .RE
 and will send a trap whenever any of these entries indicate a problem.
@@ -452,7 +452,7 @@ An alternative approach would be to automatically invoke the corresponding
 .RS
 .nf
 setEvent   prFixIt  prErrFix = 1
-monitor -e prFixIt "procTable" prErrorFlag   != 0
+monitor \-e prFixIt "procTable" prErrorFlag   != 0
 .fi
 .RE
 (and similarly for any of the other \fIdefaultMonitor\fR entries).
@@ -494,12 +494,12 @@ extendfix [MIBOID] NAME PROG ARGS"
 .SS "MIB-Specific Extension Commands"
 .I One-Shot
 .RS
-"pass [-p priority] MIBOID PROG"
+"pass [\-p priority] MIBOID PROG"
 .RE
 .IP
 .I Persistent
 .RS
-"pass_persist [-p priority] MIBOID PROG"
+"pass_persist [\-p priority] MIBOID PROG"
 .RE
 .SS "Embedded Perl Support"
 If embedded perl support is enabled in the agent, the default
@@ -517,7 +517,7 @@ MIB handler could be registered using:
 .nf
 perl use Data::Dumper;
 perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
-perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
+perl $agent\->register('mylink', '.1.3.6.1.8765', \\&myroutine);
 .fi
 .RE
 .PP
@@ -548,11 +548,11 @@ A configuration for acting as a simple proxy for two other
 SNMP agents (running on remote systems) might be:
 .RS
 .nf
-com2sec -Cn rem1context  rem1user default  remotehost1
-com2sec -Cn rem2context  rem2user default  remotehost2
+com2sec \-Cn rem1context  rem1user default  remotehost1
+com2sec \-Cn rem2context  rem2user default  remotehost2
 
-proxy -Cn rem1context  -v 1 -c public  remotehost1  .1.3
-proxy -Cn rem2context  -v 1 -c public  remotehost2  .1.3
+proxy \-Cn rem1context  \-v 1 -c public  remotehost1  .1.3
+proxy \-Cn rem2context  \-v 1 -c public  remotehost2  .1.3
 .fi
 .RE
 (plus suitable access control entries).
@@ -572,7 +572,7 @@ part of the OID tree to another agent (either on a remote host
 or listening on a different port on the same system),
 while handling the rest internally:
 .RS
-proxy -v 1 -c public  localhost:6161  .1.3.6.1.4.1.99
+proxy \-v 1 \-c public  localhost:6161  .1.3.6.1.4.1.99
 .RE
 This mechanism can be used to link together two separate SNMP agents.
 .PP
@@ -582,7 +582,7 @@ of the overall MIB tree (either locally or on a remote system):
 .nf
 \fI# uses SNMPv3 to access the MIB tree .1.3.6.1.2.1.1 on 'remotehost'
 # and maps this to the local tree .1.3.6.1.3.10\fR
-proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
+proxy \-v 3 \-l noAuthNoPriv \-u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
 .fi
 .RE
 .SS SMUX Sub-Agents
@@ -649,7 +649,7 @@ injectHandler stash_cache NAME table_iterator
 .SH "FILES"
 SYSCONFDIR/snmp/snmpd.conf
 .SH "SEE ALSO"
-snmpconf(1), snmpd.conf(5), snmp.conf(5), snmp_config(5), snmpd(8), EXAMPLE.conf, read_config(3).
+snmpconf(1), snmpd.conf(5), snmp.conf(5), snmp_config(5), snmpd(8), EXAMPLE.conf, netsnmp_config_api(3).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

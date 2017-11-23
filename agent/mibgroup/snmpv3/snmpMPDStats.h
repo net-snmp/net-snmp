@@ -8,10 +8,11 @@
 #define _MIBGROUP_SNMPMPDSTATS_H
 
 /*
- * we use header_generic and checkmib from the util_funcs module 
+ * we use header_generic from the util_funcs module 
  */
 
-config_require(util_funcs)
+config_require(util_funcs/header_generic)
+config_exclude(snmpv3/snmpMPDStats_5_5)
 config_add_mib(SNMP-MPD-MIB)
 
     /*

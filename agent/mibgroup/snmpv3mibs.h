@@ -7,8 +7,10 @@
  */
 
 config_require(snmpv3/snmpEngine)
-config_require(snmpv3/snmpMPDStats)
-config_require(snmpv3/usmStats)
+config_version_require((snmpv3/snmpMPDStats, 5.5, snmpv3/snmpMPDStats_5_5))
+#ifdef NETSNMP_SECMOD_USM
+config_version_require((snmpv3/usmStats, 5.5, snmpv3/usmStats_5_5))
 config_require(snmpv3/usmConf)
 config_require(snmpv3/usmUser)
-#endif                          /* NSMPV3MIBS_H */
+#endif /* NETSNMP_SECMOD_USM */
+#endif                          /* SNMPV3MIBS_H */

@@ -19,18 +19,12 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifndef HAVE_INET_PTON
-
 #include <ctype.h>
 
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
 
-#if defined(HAVE_WINSOCK_H)
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
 #include <errno.h>
 #include <stdio.h>
 #if HAVE_STRING_H
@@ -40,6 +34,7 @@
 #endif
 
 #include <net-snmp/types.h>
+#include "inet_pton.h"
 
 #ifndef EAFNOSUPPORT
 #define EAFNOSUPPORT            WSAEAFNOSUPPORT
@@ -52,9 +47,6 @@
 #ifndef INT16SZ
 #define	INT16SZ		2
 #endif
-  /*
-   * End of Net-SNMP Win32 additions
-   */
 
 #ifndef INADDRSZ
 #define	INADDRSZ	4
@@ -82,7 +74,7 @@ static int	inet_pton6(const char *src, u_char *dst);
  *	Paul Vixie, 1996.
  */
 int
-inet_pton(int af, const char *src, void *dst)
+netsnmp_inet_pton(int af, const char *src, void *dst)
 {
 
 	switch (af) {
@@ -317,5 +309,3 @@ inet_pton6(const char *src, u_char *dst)
 	return (1);
 }
 #endif
-
-#endif /* HAVE_INET_PTON */

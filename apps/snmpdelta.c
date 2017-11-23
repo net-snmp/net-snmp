@@ -46,11 +46,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -61,9 +57,6 @@
 #endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #if HAVE_NETDB_H
 #include <netdb.h>
@@ -107,7 +100,7 @@ int             keepSeconds = 0, peaks = 0;
 int             tableForm = 0;
 int             varbindsPerPacket = 60;
 
-void            processFileArgs(char *fileName);
+static void     processFileArgs(char *fileName);
 
 void
 usage(void)
@@ -221,7 +214,7 @@ wait_for_peak_start(int period, int peak)
     /*
      * Now figure out the amount of time to sleep 
      */
-    target = (SecondsAtNextHour - tv->tv_sec) % seconds;
+    target = (int)(SecondsAtNextHour - tv->tv_sec) % seconds;
 
     return target;
 }
@@ -256,7 +249,7 @@ sprint_descriptor(char *buffer, struct varInfo *vip)
 
     for (cp = buf; *cp; cp++);
     while (cp >= buf) {
-        if (isalpha(*cp))
+        if (isalpha((unsigned char)(*cp)))
             break;
         cp--;
     }
@@ -296,7 +289,7 @@ processFileArgs(char *fileName)
             continue;
         blank = TRUE;
         for (cp = buf; *cp; cp++)
-            if (!isspace(*cp)) {
+            if (!isspace((unsigned char)(*cp))) {
                 blank = FALSE;
                 break;
             }
@@ -357,7 +350,7 @@ wait_for_period(int period)
     }
     count = 1;
     while (count != 0) {
-        count = select(0, 0, 0, 0, tv);
+        count = select(0, NULL, NULL, NULL, tv);
         switch (count) {
         case 0:
             break;
@@ -405,14 +398,19 @@ main(int argc, char *argv[])
     int             status;
     int             begin, end, last_end;
     int             print = 1;
-    int             exit_code = 0;
+    int             exit_code = 1;
+
+    SOCK_STARTUP;
 
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", &optProc)) {
-    case -2:
-        exit(0);
-    case -1:
+    case NETSNMP_PARSE_ARGS_ERROR:
+        goto out;
+    case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
+        exit_code = 0;
+        goto out;
+    case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
@@ -423,26 +421,24 @@ main(int argc, char *argv[])
 	if (current_name >= MAX_ARGS) {
 	    fprintf(stderr, "%s: Too many variables specified (max %d)\n",
 	    	argv[optind], MAX_ARGS);
-	    exit(1);
+	    goto out;
 	}
         varinfo[current_name++].name = argv[optind];
     }
 
     if (current_name == 0) {
         usage();
-        exit(1);
+        goto out;
     }
 
     if (dosum) {
 	if (current_name >= MAX_ARGS) {
 	    fprintf(stderr, "Too many variables specified (max %d)\n",
 	    	MAX_ARGS);
-	    exit(1);
+	    goto out;
 	}
-        varinfo[current_name++].name = 0;
+        varinfo[current_name++].name = NULL;
     }
-
-    SOCK_STARTUP;
 
     /*
      * open an SNMP session 
@@ -453,8 +449,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpdelta", &session);
-        SOCK_CLEANUP;
-        exit(1);
+        goto out;
     }
 
     if (tableForm && timestamp) {
@@ -468,8 +463,7 @@ main(int argc, char *argv[])
             if (snmp_parse_oid(vip->name, vip->info_oid, &vip->oidlen) ==
                 NULL) {
                 snmp_perror(vip->name);
-                SOCK_CLEANUP;
-                exit(1);
+                goto close_session;
             }
             sprint_descriptor(vip->descriptor, vip);
             if (tableForm)
@@ -596,7 +590,7 @@ main(int argc, char *argv[])
                         if (vip->type == ASN_COUNTER64) {
                             fprintf(stderr,
                                     "time delta and table form not supported for counter64s\n");
-                            exit(1);
+                            goto close_session;
                         } else {
                             printvalue =
                                 ((float) value * 100) / delta_time;
@@ -731,12 +725,12 @@ main(int argc, char *argv[])
 
         } else if (status == STAT_TIMEOUT) {
             fprintf(stderr, "Timeout: No Response from %s\n", gateway);
-            response = 0;
+            response = NULL;
             exit_code = 1;
             break;
         } else {                /* status == STAT_ERROR */
             snmp_sess_perror("snmpdelta", ss);
-            response = 0;
+            response = NULL;
             exit_code = 1;
             break;
         }
@@ -747,7 +741,13 @@ main(int argc, char *argv[])
             wait_for_period(period);
         }
     }
+
+    exit_code = 0;
+
+close_session:
     snmp_close(ss);
+
+out:
     SOCK_CLEANUP;
     return (exit_code);
 }

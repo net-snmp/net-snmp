@@ -7,11 +7,20 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "disman/event/mteEvent.h"
 #include "disman/event/mteEventSetTable.h"
 
+netsnmp_feature_require(table_tdata)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(check_vb_oid)
+netsnmp_feature_require(check_vb_truthvalue)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+
+static netsnmp_table_registration_info *table_info;
 
 /* Initializes the mteEventSetTable module */
 void
@@ -20,7 +29,6 @@ init_mteEventSetTable(void)
     static oid  mteEventSetTable_oid[]   = { 1, 3, 6, 1, 2, 1, 88, 1, 4, 4 };
     size_t      mteEventSetTable_oid_len = OID_LENGTH(mteEventSetTable_oid);
     netsnmp_handler_registration    *reg;
-    netsnmp_table_registration_info *table_info;
 
     /*
      * Ensure the (combined) table container is available...
@@ -30,11 +38,19 @@ init_mteEventSetTable(void)
     /*
      * ... then set up the MIB interface to the mteEventSetTable slice
      */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     reg = netsnmp_create_handler_registration("mteEventSetTable",
                                             mteEventSetTable_handler,
                                             mteEventSetTable_oid,
                                             mteEventSetTable_oid_len,
                                             HANDLER_CAN_RWRITE);
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+    reg = netsnmp_create_handler_registration("mteEventSetTable",
+                                            mteEventSetTable_handler,
+                                            mteEventSetTable_oid,
+                                            mteEventSetTable_oid_len,
+                                            HANDLER_CAN_RONLY);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
     netsnmp_table_helper_add_indexes(table_info,
@@ -48,8 +64,17 @@ init_mteEventSetTable(void)
 
     /* Register this using the (common) event_table_data container */
     netsnmp_tdata_register(reg, event_table_data, table_info);
-    DEBUGMSGTL(("disman:event:init", "Event Set Table container (%x)\n",
+    DEBUGMSGTL(("disman:event:init", "Event Set Table container (%p)\n",
                                       event_table_data));
+}
+
+void
+shutdown_mteEventSetTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
 }
 
 
@@ -123,6 +148,7 @@ mteEventSetTable_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         /*
          * Write-support
          */
@@ -278,6 +304,7 @@ mteEventSetTable_handler(netsnmp_mib_handler *handler,
             }
         }
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
     return SNMP_ERR_NOERROR;
 }

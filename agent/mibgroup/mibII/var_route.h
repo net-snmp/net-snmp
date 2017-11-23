@@ -5,8 +5,14 @@
 #ifndef _MIBGROUP_VAR_ROUTE_H
 #define _MIBGROUP_VAR_ROUTE_H
 
-config_require(mibII/ip util_funcs)
+config_require(mibII/ip)
 config_arch_require(solaris2, kernel_sunos5)
+
+#if defined(HAVE_IPHLPAPI_H)
+#include <iphlpapi.h>
+     extern PMIB_IPFORWARDROW route_row;
+#endif
+     extern int      create_flag;
 
      void            init_var_route(void);
 #if defined(RTENTRY_4_4) && !defined(hpux11)

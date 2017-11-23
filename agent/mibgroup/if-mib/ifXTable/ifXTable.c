@@ -14,6 +14,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -29,6 +30,9 @@
 
 #include "ifXTable_interface.h"
 
+netsnmp_feature_require(ifTable_container_get)
+netsnmp_feature_require(ifTable_container_size)
+
 /*
  * not sure if we want to support set for promiscuous mode, because
  * 1) careful thought should go into any settable object that performs
@@ -38,9 +42,8 @@
  */
 #undef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
 
-oid             ifXTable_oid[] = { IFXTABLE_OID };
-int             ifXTable_oid_size = OID_LENGTH(ifXTable_oid);
-const char     *row_token = "ifXTable";
+const oid       ifXTable_oid[] = { IFXTABLE_OID };
+const int       ifXTable_oid_size = OID_LENGTH(ifXTable_oid);
 
 ifXTable_registration ifXTable_user_context;
 static ifXTable_registration *ifXTable_user_context_p;
@@ -236,9 +239,9 @@ ifXTable_post_request(ifXTable_registration * user_context, int rc)
          */
         if (MFD_SUCCESS == rc) {
             /*
-             * save changed rows, if you haven't already
+             * notify library to save changed rows
              */
-            snmp_store(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+            snmp_store_needed(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                              NETSNMP_DS_LIB_APPTYPE));
         }
 
@@ -400,7 +403,7 @@ int
 ifName_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifName_val_ptr_ptr,
            size_t * ifName_val_ptr_len_ptr)
 {
-    int             tmp_len;
+    size_t tmp_len;
 
    /** we should have a non-NULL pointer and enough storage */
     netsnmp_assert((NULL != ifName_val_ptr_ptr)
@@ -425,7 +428,7 @@ ifName_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifName_val_ptr_ptr,
         /*
          * allocate space for ifName data
          */
-        (*ifName_val_ptr_ptr) = malloc(tmp_len);
+        (*ifName_val_ptr_ptr) = (char*)malloc(tmp_len);
         if (NULL == (*ifName_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;
@@ -1493,7 +1496,7 @@ ifAlias_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifAlias_val_ptr_ptr,
         /*
          * allocate space for ifAlias data
          */
-        (*ifAlias_val_ptr_ptr) =
+        (*ifAlias_val_ptr_ptr) = (char*)
             malloc(rowreq_ctx->data.ifAlias_len *
                    sizeof(rowreq_ctx->data.ifAlias[0]));
         if (NULL == (*ifAlias_val_ptr_ptr)) {
@@ -1573,6 +1576,7 @@ ifCounterDiscontinuityTime_get(ifXTable_rowreq_ctx * rowreq_ctx,
 }                               /* ifCounterDiscontinuityTime_get */
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 
 /** @} */
 /**********************************************************************
@@ -2530,6 +2534,8 @@ ifXTable_check_dependencies(ifXTable_rowreq_ctx * rowreq_ctx)
      */
     return rc;
 }                               /* ifXTable_check_dependencies */
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /** @} */
 /** @{ */

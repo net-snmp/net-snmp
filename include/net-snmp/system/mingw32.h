@@ -16,6 +16,15 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
  
  */
+
+/*
+ * Make the getnameinfo() function available.
+ * Note: according to MSDN getnameinfo() is available in ws2_32 on Windows 2000
+ * and above. MinGW only makes getnameinfo() visible when setting _WIN32_WINNT
+ * to 0x0501 (Windows XP) or higher, which is a bug in the MinGW 5.1.6 headers.
+ */
+#define _WIN32_WINNT 0x0501
+
 #include <net-snmp/system/generic.h>
 
 #ifdef HAVE_STDINT_H
@@ -30,10 +39,7 @@
 #undef HAVE_SIGNAL
 
 /* Define if you have the gettimeofday function.  */
-/* Only when compiling Perl module                */
-#ifdef MINGW_PERL
 #define HAVE_GETTIMEOFDAY 1
-#endif
 
 /* Define if you have the gethostbyname function.  */
 #define HAVE_GETHOSTBYNAME 1
@@ -43,6 +49,9 @@
 
 /* Define if you have raise() instead of alarm() */
 #define HAVE_RAISE 1
+
+/* Define if you have the socket function.  */
+#define HAVE_SOCKET 1
 
 /* Define to 1 if you have the `execv' function. */
 #undef HAVE_EXECV
@@ -72,15 +81,13 @@
 #define	F_SETFL		4
 #define	O_NONBLOCK	0x4000  /* non blocking I/O (POSIX style) */
 
+#ifndef HAVE_STRUCT_TIMEZONE_TZ_DSTTIME
 /*
- * I dunno why. It's just not there. Define struct timezone.
- * If other systems need this it could be moved to system.h
- * and the proper checking done at config time. Right now I have
- * just put it here to keep the MinGW out of the main tree as much
- * as possible.
+ * Older MinGW versions do not have struct timezone, so define it here.
  */
 struct timezone {
 	int tz_minuteswest;
 	int tz_dsttime;
 };
+#endif
 

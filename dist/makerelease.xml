@@ -362,7 +362,7 @@
 	<step type="system" stepname="build:configure" title="build:configure">
 	  <text>We need to run configure to set up the build tree.</text>
 	  <commands>
-	    <command>./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example testhandler smux Rmon disman/event-mib' --with-transports="IPX" --enable-ipv6 --enable-embedded-perl --enable-shared --disable-U64</command>
+	    <command>./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example testhandler tlstm-mib tsm-mib smux Rmon disman/event-mib' --with-transports="IPX TLSTCP DTLSUDP" --with-security-modules="tsm" --enable-ipv6 --enable-embedded-perl --enable-shared --disable-U64</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="build:make" title="build:make">
@@ -384,7 +384,17 @@
 	  set up test results.  If not, this needs to be fixed or at
 	  least understood and accepted as is for some other reason.</text>
 	  <commands>
-	    <command>cd testing &amp;&amp; make test</command>
+	    <command>cd testing &amp;&amp; ./RUNFULLTESTS -g unit-tests</command>
+	  </commands>
+	</step>
+	<step type="system" stepname="build:test:transports" title="testing: transports">
+	  <text>Now we run the transport tests which should also
+	  produce a perfect set up test results, if your machine
+	  supports all the transports.  If not, this needs to be fixed
+	  or at least understood and accepted as is for some other
+	  reason (like you can't do IPv6 on your system).</text>
+	  <commands>
+	    <command>cd testing &amp;&amp; ./RUNFULLTESTS -g transports</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="code:checkcomments" title="code:checkcomments">

@@ -258,7 +258,7 @@ tcpListenerTable_container_load(netsnmp_container *container)
                                           NETSNMP_ACCESS_TCPCONN_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:tcpListenerTable:tcpListenerTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%d records\n", (int)CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* tcpListenerTable_container_load */

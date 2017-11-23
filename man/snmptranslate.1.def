@@ -27,7 +27,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPTRANSLATE 1 "20 Jul 2010" VVERSIONINFO "Net-SNMP"
+.TH SNMPTRANSLATE 1 "13 Nov 2013" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmptranslate - translate MIB OID names between numeric and textual forms
 .SH SYNOPSIS
@@ -42,17 +42,17 @@ values from their symbolic (textual) forms into their numerical forms
 OID is either a numeric or textual object identifier.
 .SH OPTIONS
 .TP 8
-.B -D\fI[TOKEN[,...]]
+.B \-D\fI[TOKEN[,...]]
 Turn on debugging output for the given
 .IR "TOKEN" "(s)."
 Try
 .IR ALL
 for extremely verbose output.
 .TP
-.B -h
+.B \-h
 Display a brief usage message and then exit.
 .TP
-.BI -m " MIBLIST"
+.BI \-m " MIBLIST"
 Specifies a colon separated list of MIB modules to load for this
 application.  This overrides the environment variable MIBS.
 .IP
@@ -62,17 +62,20 @@ is used to specify all modules in all directories when searching for MIB
 files.  Every file whose name does not begin with "." will be parsed as
 if it were a MIB file.
 .TP
-.BI -M " DIRLIST"
+.BI \-M " DIRLIST"
 Specifies a colon separated list of directories to search for MIBs.
 This overrides the environment variable MIBDIRS.
 .TP
-.BI -T " TRANSOPTS"
+.BI \-T " TRANSOPTS"
 Provides control over the translation of the OID values.  The
 following
 .I TRANSOPTS
 are available:
 .RS
 .TP 6
+.B \-TB
+Print all matching objects for a regex search.
+.TP
 .B \-Td
 Print full details of the specified OID.
 .TP
@@ -98,24 +101,24 @@ Dump a tree form of the loaded MIBs (mostly useful for debugging).
 Dump a numeric and labeled form of all objects (compatible with MIB2SCHEMA format).
 .RE
 .TP
-.B -V
+.B \-V
 Display version information for the application and then exit.
 .TP
-.BI -w " WIDTH"
+.BI \-w " WIDTH"
 Specifies the width of
-.B -Tp
+.B \-Tp
 and
-.B -Td
+.B \-Td
 output. The default is very large.
 .PP
 In addition to the above options, 
 .B snmptranslate
 takes the OID input 
-.RB ( -I ),
+.RB ( \-I ),
 MIB parsing
-.RB ( -M )
+.RB ( \-M )
 and OID output
-.RB ( -O )
+.RB ( \-O )
 options described in the 
 .BR "INPUT OPTIONS" ", " "MIB PARSING OPTIONS" " and " "OUTPUT OPTIONS"
 sections of the
@@ -123,40 +126,40 @@ sections of the
 manual page.
 .SH EXAMPLES
 .IP \(bu 4
-snmptranslate -On -IR sysDescr
+snmptranslate \-On \-IR sysDescr
 .br
 will translate "sysDescr" to a more qualified form:
 .IP
 system.sysDescr
 .IP \(bu 4
-snmptranslate -Onf -IR sysDescr
+snmptranslate \-Onf \-IR sysDescr
 .br
 will translate "sysDecr" to:
 .IP
-.RI .iso.org.dod.internet.mgmt.mib-2.system.sysDescr
+.RI .iso.org.dod.internet.mgmt.mib\-2.system.sysDescr
 .IP \(bu 4 
-snmptranslate -Td -OS system.sysDescr
+snmptranslate \-Td \-OS system.sysDescr
 .br
 will translate "sysDecr" into:
 .IP
 .nf
-SNMPv2-MIB::sysDescr
-sysDescr OBJECT-TYPE
-  -- FROM SNMPv2-MIB
-  -- TEXTUAL CONVENTION DisplayString
+SNMPv2\-MIB::sysDescr
+sysDescr OBJECT\-TYPE
+  \-\- FROM SNMPv2\-MIB
+  \-\- TEXTUAL CONVENTION DisplayString
   SYNTAX OCTET STRING (0..255)
-  DISPLAY-HINT "255a"
-  MAX-ACCESS read-only
+  DISPLAY\-HINT "255a"
+  MAX\-ACCESS read\-only
   STATUS current
   DESCRIPTION "A textual description of the entity. This
                value should include the full name and
                version identification of the system's
-               hardware type, software operating-system,
+               hardware type, software operating\-system,
                and networking software."
-::= { iso(1) org(3) dod(6) internet(1) mgmt(2) mib-2(1) system(1) 1 }
+::= { iso(1) org(3) dod(6) internet(1) mgmt(2) mib\-2(1) system(1) 1 }
 .fi
 .IP \(bu 4 
-snmptranslate -Tp -OS system
+snmptranslate \-Tp \-OS system
 .br
 will print the following tree:
 .IP
@@ -196,7 +199,7 @@ will print the following tree:
 .fi
 .PP
 .IP \(bu 4
-snmptranslate -Ta | head
+snmptranslate \-Ta | head
 .br
 will produce the following dump:
 .IP
@@ -214,7 +217,7 @@ snmpV2 ::= { internet 6 }
 .fi
 .PP
 .IP \(bu 4
-snmptranslate -Tl | head
+snmptranslate \-Tl | head
 .br
 will produce the following dump:
 .IP
@@ -224,15 +227,15 @@ will produce the following dump:
 .RI .iso(1).org(3).dod(6).internet(1)
 .RI .iso(1).org(3).dod(6).internet(1).directory(1)
 .RI .iso(1).org(3).dod(6).internet(1).mgmt(2)
-.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib-2(1)
-.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib-2(1).system(1)
-.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib-2(1).system(1).sysDescr(1)
-.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib-2(1).system(1).sysObjectID(2)
-.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib-2(1).system(1).sysUpTime(3)
+.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib\-2(1)
+.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib\-2(1).system(1)
+.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib\-2(1).system(1).sysDescr(1)
+.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib\-2(1).system(1).sysObjectID(2)
+.RI .iso(1).org(3).dod(6).internet(1).mgmt(2).mib\-2(1).system(1).sysUpTime(3)
 .fi
 .PP
 .IP \(bu 4
-snmptranslate -To | head
+snmptranslate \-To | head
 .br
 will produce the following dump
 .IP
@@ -250,7 +253,7 @@ will produce the following dump
 .fi
 .PP
 .IP \(bu 4
-snmptranslate -Ts | head
+snmptranslate \-Ts | head
 .br
 will produce the following dump
 .IP
@@ -260,15 +263,15 @@ will produce the following dump
 .RI .iso.org.dod.internet
 .RI .iso.org.dod.internet.directory
 .RI .iso.org.dod.internet.mgmt
-.RI .iso.org.dod.internet.mgmt.mib-2
-.RI .iso.org.dod.internet.mgmt.mib-2.system
-.RI .iso.org.dod.internet.mgmt.mib-2.system.sysDescr
-.RI .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID
-.RI .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime
+.RI .iso.org.dod.internet.mgmt.mib\-2
+.RI .iso.org.dod.internet.mgmt.mib\-2.system
+.RI .iso.org.dod.internet.mgmt.mib\-2.system.sysDescr
+.RI .iso.org.dod.internet.mgmt.mib\-2.system.sysObjectID
+.RI .iso.org.dod.internet.mgmt.mib\-2.system.sysUpTime
 .fi
 .PP
 .IP \(bu 4
-snmptranslate -Tt | head
+snmptranslate \-Tt | head
 .br
 will produce the following dump
 .IP
@@ -278,7 +281,7 @@ will produce the following dump
       internet(1) type=0
         directory(1) type=0
         mgmt(2) type=0
-          mib-2(1) type=0
+          mib\-2(1) type=0
             system(1) type=0
               sysDescr(1) type=2 tc=4 hint=255a
               sysObjectID(2) type=1

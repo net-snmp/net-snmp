@@ -4,12 +4,16 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "mteTriggerTable.h"
 #include "mteEventTable.h"
 #include "mteEventNotificationTable.h"
 #include "mteObjectsTable.h"
+
+netsnmp_feature_require(table_dataset)
+netsnmp_feature_require(table_set_multi_add_default_row)
 
 static netsnmp_table_data_set *table_set = NULL;
 
@@ -259,7 +263,7 @@ run_mte_events(struct mteTriggerTable_data *item,
             
             tc = netsnmp_table_data_set_find_column(col1,
                                                     COLUMN_MTEEVENTACTIONS);
-            if (!tc->data.bitstring[0] & 0x80) {
+            if (!(tc->data.bitstring[0] & 0x80)) {
                 /* not a notification.  next! (XXX: do sets) */
                 continue;
             }

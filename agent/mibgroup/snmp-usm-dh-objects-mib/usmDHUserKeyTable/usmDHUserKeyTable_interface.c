@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,10 @@
 #include "usmDHUserKeyTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -184,7 +189,7 @@ _usmDHUserKeyTable_initialize_interface(usmDHUserKeyTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = USMDHUSERKEYTABLE_MIN_COL;
     tbl_info->max_column = USMDHUSERKEYTABLE_MAX_COL;
@@ -261,10 +266,12 @@ _usmDHUserKeyTable_initialize_interface(usmDHUserKeyTable_registration *
         netsnmp_handler_registration_create("usmDHUserKeyTable", handler,
                                             usmDHUserKeyTable_oid,
                                             usmDHUserKeyTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP
+                                            HANDLER_CAN_BABY_STEP |
 #ifndef NETSNMP_DISABLE_SET_SUPPORT
-                                          | HANDLER_CAN_RWRITE
-#endif
+                                            HANDLER_CAN_RWRITE
+#else
+                                            HANDLER_CAN_RONLY
+#endif /* NETSNMP_DISABLE_SET_SUPPORT */
                                           );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering table usmDHUserKeyTable\n");
@@ -764,7 +771,7 @@ _usmDHUserKeyTable_get_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     case COLUMN_USMDHUSERAUTHKEYCHANGE:
         var->type = ASN_OCTET_STR;
         rc = usmDHUserAuthKeyChange_get(rowreq_ctx,
-                                        (char **) &var->val.string,
+                                        &var->val.string,
                                         &var->val_len);
         break;
 
@@ -774,7 +781,7 @@ _usmDHUserKeyTable_get_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     case COLUMN_USMDHUSEROWNAUTHKEYCHANGE:
         var->type = ASN_OCTET_STR;
         rc = usmDHUserOwnAuthKeyChange_get(rowreq_ctx,
-                                           (char **) &var->val.string,
+                                           &var->val.string,
                                            &var->val_len);
         break;
 
@@ -784,7 +791,7 @@ _usmDHUserKeyTable_get_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     case COLUMN_USMDHUSERPRIVKEYCHANGE:
         var->type = ASN_OCTET_STR;
         rc = usmDHUserPrivKeyChange_get(rowreq_ctx,
-                                        (char **) &var->val.string,
+                                        &var->val.string,
                                         &var->val_len);
         break;
 
@@ -794,7 +801,7 @@ _usmDHUserKeyTable_get_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     case COLUMN_USMDHUSEROWNPRIVKEYCHANGE:
         var->type = ASN_OCTET_STR;
         rc = usmDHUserOwnPrivKeyChange_get(rowreq_ctx,
-                                           (char **) &var->val.string,
+                                           &var->val.string,
                                            &var->val_len);
         break;
 
@@ -919,7 +926,7 @@ _usmDHUserKeyTable_check_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
             DEBUGMSGTL(("usmDHUserKeyTable:_usmDHUserKeyTable_check_column:usmDHUserAuthKeyChange", "varbind validation failed (eg bad type or size)\n"));
         } else {
             rc = usmDHUserAuthKeyChange_check_value(rowreq_ctx,
-                                                    (char *) var->val.
+                                                    var->val.
                                                     string, var->val_len);
             if ((MFD_SUCCESS != rc) && (MFD_NOT_VALID_EVER != rc)
                 && (MFD_NOT_VALID_NOW != rc)) {
@@ -940,7 +947,7 @@ _usmDHUserKeyTable_check_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
             DEBUGMSGTL(("usmDHUserKeyTable:_usmDHUserKeyTable_check_column:usmDHUserOwnAuthKeyChange", "varbind validation failed (eg bad type or size)\n"));
         } else {
             rc = usmDHUserOwnAuthKeyChange_check_value(rowreq_ctx,
-                                                       (char *) var->val.
+                                                       var->val.
                                                        string,
                                                        var->val_len);
             if ((MFD_SUCCESS != rc) && (MFD_NOT_VALID_EVER != rc)
@@ -962,7 +969,7 @@ _usmDHUserKeyTable_check_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
             DEBUGMSGTL(("usmDHUserKeyTable:_usmDHUserKeyTable_check_column:usmDHUserPrivKeyChange", "varbind validation failed (eg bad type or size)\n"));
         } else {
             rc = usmDHUserPrivKeyChange_check_value(rowreq_ctx,
-                                                    (char *) var->val.
+                                                    var->val.
                                                     string, var->val_len);
             if ((MFD_SUCCESS != rc) && (MFD_NOT_VALID_EVER != rc)
                 && (MFD_NOT_VALID_NOW != rc)) {
@@ -983,7 +990,7 @@ _usmDHUserKeyTable_check_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
             DEBUGMSGTL(("usmDHUserKeyTable:_usmDHUserKeyTable_check_column:usmDHUserOwnPrivKeyChange", "varbind validation failed (eg bad type or size)\n"));
         } else {
             rc = usmDHUserOwnPrivKeyChange_check_value(rowreq_ctx,
-                                                       (char *) var->val.
+                                                       var->val.
                                                        string,
                                                        var->val_len);
             if ((MFD_SUCCESS != rc) && (MFD_NOT_VALID_EVER != rc)
@@ -1283,7 +1290,7 @@ _usmDHUserKeyTable_set_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     case COLUMN_USMDHUSERAUTHKEYCHANGE:
         rowreq_ctx->column_set_flags |= COLUMN_USMDHUSERAUTHKEYCHANGE_FLAG;
         rc = usmDHUserAuthKeyChange_set(rowreq_ctx,
-                                        (char *) var->val.string,
+                                        var->val.string,
                                         var->val_len);
         break;
 
@@ -1294,7 +1301,7 @@ _usmDHUserKeyTable_set_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
         rowreq_ctx->column_set_flags |=
             COLUMN_USMDHUSEROWNAUTHKEYCHANGE_FLAG;
         rc = usmDHUserOwnAuthKeyChange_set(rowreq_ctx,
-                                           (char *) var->val.string,
+                                           var->val.string,
                                            var->val_len);
         break;
 
@@ -1304,7 +1311,7 @@ _usmDHUserKeyTable_set_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     case COLUMN_USMDHUSERPRIVKEYCHANGE:
         rowreq_ctx->column_set_flags |= COLUMN_USMDHUSERPRIVKEYCHANGE_FLAG;
         rc = usmDHUserPrivKeyChange_set(rowreq_ctx,
-                                        (char *) var->val.string,
+                                        var->val.string,
                                         var->val_len);
         break;
 
@@ -1315,7 +1322,7 @@ _usmDHUserKeyTable_set_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
         rowreq_ctx->column_set_flags |=
             COLUMN_USMDHUSEROWNPRIVKEYCHANGE_FLAG;
         rc = usmDHUserOwnPrivKeyChange_set(rowreq_ctx,
-                                           (char *) var->val.string,
+                                           var->val.string,
                                            var->val_len);
         break;
 

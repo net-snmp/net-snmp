@@ -23,7 +23,7 @@
 /*
  * don't define _KERNEL before including sys/unistd.h 
  */
-#define IFNET_NEEDS_KERNEL_LATE  1
+#define NETSNMP_IFNET_NEEDS_KERNEL_LATE  1
 
 #define STREAM_NEEDS_KERNEL_ISLANDS
 

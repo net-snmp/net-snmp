@@ -77,11 +77,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <errno.h>
 
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -89,9 +85,6 @@ PERFORMANCE OF THIS SOFTWARE.
 # else
 #  include <time.h>
 # endif
-#endif
-#if HAVE_WINSOCK_H
-# include <winsock.h>
 #endif
 #if HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
@@ -143,6 +136,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/mib_modules.h>
+#include <net-snmp/agent/agent_sysORTable.h>
 #include "kernel.h"
 
 #include "mibgroup/struct.h"
@@ -152,6 +146,12 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "net-snmp/agent/all_helpers.h"
 #include "agent_module_includes.h"
 #include "net-snmp/library/container.h"
+
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+#include <openssl/ssl.h>
+#include <openssl/x509v3.h>
+#include <net-snmp/library/cert_util.h>
+#endif
 
 #include "snmp_perl.h"
 
@@ -176,8 +176,6 @@ struct module_init_list *noinitlist = NULL;
  * * the expense of a few memcpy's.
  */
 #define MIB_CLIENTS_ARE_EVIL 1
-
-extern netsnmp_subtree *subtrees;
 
 /*
  *      Each variable name is placed in the variable table, without the
@@ -236,8 +234,6 @@ u_char          return_buf[258];
 u_char          return_buf[256];        /* nee 64 */
 #endif
 
-struct timeval  starttime;
-
 int             callback_master_num = -1;
 
 #ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
@@ -285,9 +281,7 @@ init_agent(const char *app)
     /*
      * get current time (ie, the time the agent started) 
      */
-    gettimeofday(&starttime, NULL);
-    starttime.tv_sec--;
-    starttime.tv_usec += 1000000L;
+    netsnmp_set_agent_starttime(NULL);
 
     /*
      * we handle alarm signals ourselves in the select loop 
@@ -312,15 +306,18 @@ init_agent(const char *app)
     netsnmp_init_helpers();
     init_traps();
     netsnmp_container_init_list();
+    init_agent_sysORTable();
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
     /*
      * initialize agentx configs
      */
     agentx_config_init();
+#if defined(USING_AGENTX_SUBAGENT_MODULE)
     if(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                               NETSNMP_DS_AGENT_ROLE) == SUB_AGENT)
         subagent_init();
+#endif
 #endif
 
     /*
@@ -338,6 +335,11 @@ init_agent(const char *app)
 
 #ifdef NETSNMP_EMBEDDED_PERL
     init_perl();
+#endif
+
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+    /** init secname mapping */
+    netsnmp_certs_agent_init();
 #endif
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
@@ -366,12 +368,16 @@ shutdown_agent(void) {
     netsnmp_clear_callback_list();
     netsnmp_clear_tdomain_list();
     netsnmp_clear_handler_list();
+    shutdown_agent_sysORTable();
     netsnmp_container_free_list();
     clear_sec_mod();
     clear_snmp_enum();
     clear_callback();
-    clear_user_list();
+    shutdown_secmod();
     netsnmp_addrcache_destroy();
+#ifdef NETSNMP_CAN_USE_NLIST
+    free_kmem();
+#endif
 
     done_init_agent = 0;
 }

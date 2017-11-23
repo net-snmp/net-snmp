@@ -67,7 +67,11 @@ extern          "C" {
      * TODO:405:r: Review IFXTABLE_SETTABLE_COLS macro.
      * OR together all the writable cols.
      */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #define IFXTABLE_SETTABLE_COLS (COLUMN_IFLINKUPDOWNTRAPENABLE_FLAG | COLUMN_IFALIAS_FLAG)
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+#define IFXTABLE_SETTABLE_COLS 0
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
     /*
      * NOTES on enums
      * ==============

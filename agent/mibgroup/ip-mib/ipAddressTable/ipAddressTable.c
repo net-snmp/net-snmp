@@ -14,6 +14,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -28,8 +29,12 @@
 
 #include "ipAddressTable_interface.h"
 
-oid             ipAddressTable_oid[] = { IPADDRESSTABLE_OID };
-int             ipAddressTable_oid_size = OID_LENGTH(ipAddressTable_oid);
+netsnmp_feature_require(check_storage_transition)
+netsnmp_feature_require(ipaddress_entry_copy)
+netsnmp_feature_require(ipaddress_prefix_copy)
+
+const oid       ipAddressTable_oid[] = { IPADDRESSTABLE_OID };
+const int       ipAddressTable_oid_size = OID_LENGTH(ipAddressTable_oid);
 
 ipAddressTable_registration ipAddressTable_user_context;
 static ipAddressTable_registration *ipAddressTable_user_context_p;
@@ -333,8 +338,8 @@ The address type of ipAddressAddr.
  *  Otherwise, just do a direct copy.
  */
 int
-ipAddressAddrType_map(u_long * mib_ipAddressAddrType_val_ptr,
-                      u_long raw_ipAddressAddrType_val)
+ipAddressAddrType_map(long * mib_ipAddressAddrType_val_ptr,
+                      long raw_ipAddressAddrType_val)
 {
     netsnmp_assert(NULL != mib_ipAddressAddrType_val_ptr);
 
@@ -382,8 +387,8 @@ ipAddressAddrType_map(u_long * mib_ipAddressAddrType_val_ptr,
  */
 int
 ipAddressTable_indexes_set_tbl_idx(ipAddressTable_mib_index * tbl_idx,
-                                   u_long ipAddressAddrType_val,
-                                   char *ipAddressAddr_val_ptr,
+                                   long ipAddressAddrType_val,
+                                   u_char *ipAddressAddr_val_ptr,
                                    size_t ipAddressAddr_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressTable_indexes_set_tbl_idx", "called\n"));
@@ -431,7 +436,7 @@ ipAddressTable_indexes_set_tbl_idx(ipAddressTable_mib_index * tbl_idx,
 int
 ipAddressTable_indexes_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
                            u_long ipAddressAddrType_val,
-                           char *ipAddressAddr_val_ptr,
+                           u_char *ipAddressAddr_val_ptr,
                            size_t ipAddressAddr_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressTable_indexes_set",
@@ -626,7 +631,7 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
     oid            *dst, tmp_oid[MAX_OID_LEN] =
         { 1, 3, 6, 1, 2, 1, 4, 32, 1, 5 };
     u_char          tmp_buf[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
-    int             len;
+    size_t          len;
 
    /** we should have a non-NULL pointer and enough storage */
     netsnmp_assert((NULL != ipAddressPrefix_val_ptr_ptr)
@@ -657,7 +662,7 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     len *= sizeof((*ipAddressPrefix_val_ptr_ptr)[0]);
     if ((*ipAddressPrefix_val_ptr_len_ptr) < len) {
-        (*ipAddressPrefix_val_ptr_ptr) = malloc(len);
+        (*ipAddressPrefix_val_ptr_ptr) = (oid*)malloc(len);
         if (NULL == (*ipAddressPrefix_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;
@@ -944,7 +949,10 @@ ipAddressRowStatus_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != ipAddressRowStatus_val_ptr);
 
     /** WARNING: this code might not work for netsnmp_ipaddress_entry */
-    (*ipAddressRowStatus_val_ptr) = rowreq_ctx->ipAddressRowStatus;
+    if(rowreq_ctx->data->if_index)
+       (*ipAddressRowStatus_val_ptr) = rowreq_ctx->ipAddressRowStatus;
+    else
+       (*ipAddressRowStatus_val_ptr) = ROWSTATUS_NOTREADY;
 
     return MFD_SUCCESS;
 }                               /* ipAddressRowStatus_get */
@@ -1469,7 +1477,7 @@ ipAddressIfIndex_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /*
      * if the new value is the same as the old, accept it.
      */
-    if (ipAddressIfIndex_val == rowreq_ctx->data->if_index)
+    if (ipAddressIfIndex_val == (long)rowreq_ctx->data->if_index)
         return MFD_SUCCESS;
 
     /*
@@ -1486,7 +1494,7 @@ ipAddressIfIndex_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * find name for ifIndex
      */
     if (NULL == netsnmp_access_interface_name_find(ipAddressIfIndex_val)) {
-        DEBUGMSGT(("ipAddressTable", "cant find name for index %d\n",
+        DEBUGMSGT(("ipAddressTable", "cant find name for index %ld\n",
                    ipAddressIfIndex_val));
         return MFD_NOT_VALID_NOW;
     }
@@ -1556,8 +1564,8 @@ ipAddressIfIndex_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * TODO:461:M: |-> Set ipAddressIfIndex value.
      * set ipAddressIfIndex value in rowreq_ctx->data
      */
-    if (rowreq_ctx->data->if_index != ipAddressIfIndex_val)
-        rowreq_ctx->data->if_index = ipAddressIfIndex_val;
+    if (rowreq_ctx->data->if_index != (oid)ipAddressIfIndex_val)
+        rowreq_ctx->data->if_index  = (oid)ipAddressIfIndex_val;
     else
         rowreq_ctx->column_set_flags &= ~COLUMN_IPADDRESSIFINDEX_FLAG;
 
@@ -2032,7 +2040,7 @@ ipAddressRowStatus_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
                                     ipAddressRowStatus_val);
     if (MFD_SUCCESS != rc) {
         DEBUGMSGTL(("ipAddressTable",
-                    "row status transition from %d to %d\n",
+                    "row status transition from %d to %lu\n",
                     rowreq_ctx->ipAddressRowStatus,
                     ipAddressRowStatus_val));
         return rc;

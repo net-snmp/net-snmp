@@ -122,8 +122,8 @@ struct mteTrigger {
     /*
      * Column values for Existence tests (mteTriggerExistenceTable)
      */
-    char            mteTExTest;
-    char            mteTExStartup;
+    u_char          mteTExTest;
+    u_char          mteTExStartup;
     char            mteTExObjOwner[MTE_STR1_LEN+1];
     char            mteTExObjects[ MTE_STR1_LEN+1];
     char            mteTExEvOwner[ MTE_STR1_LEN+1];
@@ -184,6 +184,7 @@ struct mteTrigger {
    * Container structure for the (combined) mteTrigger*Tables,
    * and routine to create this.
    */
+extern long mteTriggerFailures;
 extern netsnmp_tdata *trigger_table_data;
 extern void      init_trigger_table_data(void);
 

@@ -1,8 +1,15 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+use Cwd 'abs_path';
+use File::Basename;
+use File::Spec;
 
-open(I, "Makefile.subs.pl");
-@stuff = <I>;
+my $perldir = dirname(abs_path($0));
+
+open(my $I, File::Spec->catfile($perldir, "Makefile.subs.pl"));
+my @stuff = <$I>;
 
 foreach my $i (@ARGV) {
     print "updating $i\n";

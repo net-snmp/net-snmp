@@ -27,10 +27,10 @@ maximum number of processes that should be running, defaults to 1
 check process against database /local/etc/fixproc.conf.
 .TP
 .B \-kill
-kill process, wait 5 seconds, kill -9 if still exist
+kill process, wait 5 seconds, kill \-9 if still exist
 .TP
 .B \-restart
-kill process, wait 5 seconds, kill -9 if still exist, then start again
+kill process, wait 5 seconds, kill \-9 if still exist, then start again
 .TP
 .B \-exist
 checks if proc exists in ps && (min <= num. of processes <= max)

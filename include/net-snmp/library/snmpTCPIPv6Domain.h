@@ -1,12 +1,19 @@
 #ifndef _SNMPTCPIPV6DOMAIN_H
 #define _SNMPTCPIPV6DOMAIN_H
 
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+config_require(IPv6Base)
+config_require(SocketBase)
+config_require(TCPBase)
+
+#include <net-snmp/library/snmpIPv6BaseDomain.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
-
-#include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/asn1.h>
 
 /*
  * The SNMP over TCP over IPv6 transport domain is identified by
@@ -23,7 +30,7 @@ netsnmp_transport *netsnmp_tcp6_transport(struct sockaddr_in6 *addr,
  * "Constructor" for transport domain object.  
  */
 
-void            netsnmp_tcp6_ctor(void);
+NETSNMP_IMPORT void     netsnmp_tcpipv6_ctor(void);
 
 #ifdef __cplusplus
 }

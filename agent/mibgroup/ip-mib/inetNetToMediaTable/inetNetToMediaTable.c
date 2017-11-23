@@ -26,8 +26,8 @@
 
 #include "inetNetToMediaTable_interface.h"
 
-oid             inetNetToMediaTable_oid[] = { INETNETTOMEDIATABLE_OID };
-int             inetNetToMediaTable_oid_size =
+const oid       inetNetToMediaTable_oid[] = { INETNETTOMEDIATABLE_OID };
+const int       inetNetToMediaTable_oid_size =
 OID_LENGTH(inetNetToMediaTable_oid);
 
 inetNetToMediaTable_registration inetNetToMediaTable_user_context;
@@ -159,10 +159,10 @@ inetNetToMediaTable_rowreq_ctx_cleanup(inetNetToMediaTable_rowreq_ctx *
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaTable_rowreq_ctx_cleanup", "called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
-
     /*
      * TODO:211:o: |-> Perform extra inetNetToMediaTable rowreq cleanup.
      */
+    SNMP_FREE(rowreq_ctx->data);
 }                               /* inetNetToMediaTable_rowreq_ctx_cleanup */
 
 /**
@@ -536,11 +536,7 @@ inetNetToMediaLastUpdated_get(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the inetNetToMediaLastUpdated data.
      * copy (* inetNetToMediaLastUpdated_val_ptr ) from rowreq_ctx->data
      */
-    /*
-     * xxx-rks: get this value?
-     */
-    return MFD_SKIP;
-
+    *inetNetToMediaLastUpdated_val_ptr = rowreq_ctx->data->arp_last_updated;
     return MFD_SUCCESS;
 }                               /* inetNetToMediaLastUpdated_get */
 

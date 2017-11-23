@@ -25,17 +25,13 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
-# if defined (WIN32) || defined (cygwin)
-#  include <sys/timeb.h>
-# else
 # include <sys/time.h>
-# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -88,9 +84,6 @@
 #endif
 #ifdef solaris2
 #include "kernel_sunos5.h"
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 
 #ifdef hpux11
@@ -146,9 +139,12 @@ static int      ARP_Scan_Next(in_addr_t *, char *, int *, u_long *);
  * information at 
  */
 struct variable1 at_variables[] = {
-    {ATIFINDEX, ASN_INTEGER, RONLY, var_atEntry, 1, {1}},
-    {ATPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 1, {2}},
-    {ATNETADDRESS, ASN_IPADDRESS, RONLY, var_atEntry, 1, {3}}
+    {ATIFINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {1}},
+    {ATPHYSADDRESS, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {2}},
+    {ATNETADDRESS, ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {3}}
 };
 
 /*
@@ -304,7 +300,7 @@ var_atEntry(struct variable *vp,
 
     memcpy((char *) name, (char *) lowest, oid_length * sizeof(oid));
     *length = oid_length;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     switch (vp->magic) {
     case IPMEDIAIFINDEX:       /* also ATIFINDEX */
         *var_len = sizeof long_return;
@@ -357,7 +353,8 @@ AT_Cmp(void *addr, void *ep)
                                     mp->ipNetToMediaIfIndex.o_length);
 #endif
     DEBUGMSGTL(("mibII/at", "......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
-                mp->ipNetToMediaNetAddress, ((if_ip_t *) addr)->ipAddr,
+                (unsigned long)mp->ipNetToMediaNetAddress,
+                (unsigned long)((if_ip_t *) addr)->ipAddr,
                 ((if_ip_t *) addr)->ifIdx, index,
                 mp->ipNetToMediaIfIndex.o_bytes));
     if (mp->ipNetToMediaNetAddress != ((if_ip_t *) addr)->ipAddr)
@@ -393,7 +390,7 @@ var_atEntry(struct variable * vp,
     static mib2_ipNetToMediaEntry_t Lowentry;
     int             Found = 0;
     req_e           req_type;
-    int             offset, olength;
+    int             offset, olength = 0;
     static in_addr_t      addr_ret;
 
     /*
@@ -510,7 +507,7 @@ static int      arptab_size, arptab_current;
 static char    *lim, *rtnext;
 static char    *at = 0;
 #else
-#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+#ifdef HAVE_STRUCT_ARPHD_AT_NEXT
 static struct arphd *at = 0;
 static struct arptab *at_ptr, at_entry;
 static struct arpcom at_com;
@@ -528,7 +525,6 @@ static mib_ipNetToMediaEnt *at = (mib_ipNetToMediaEnt *) 0;
  */
 #define ARP_CACHE_INCR 1024
 static struct arptab *at = NULL;
-static int      arptab_curr_max_size = 0;
 
 #endif
 #endif                          /* NETSNMP_CAN_USE_SYSCTL */
@@ -583,7 +579,7 @@ ARP_Scan_Init(void)
 #ifdef ARPTAB_SIZE_SYMBOL
         auto_nlist(ARPTAB_SIZE_SYMBOL, (char *) &arptab_size,
                    sizeof arptab_size);
-#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+#ifdef HAVE_STRUCT_ARPHD_AT_NEXT
         at = (struct arphd *) malloc(arptab_size * sizeof(struct arphd));
 #else
         at = (struct arptab *) malloc(arptab_size * sizeof(struct arptab));
@@ -592,7 +588,7 @@ ARP_Scan_Init(void)
         return;
 #endif
     }
-#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+#ifdef HAVE_STRUCT_ARPHD_AT_NEXT
     auto_nlist(ARPTAB_SYMBOL, (char *) at,
                arptab_size * sizeof(struct arphd));
     at_ptr = at[0].at_next;
@@ -622,7 +618,7 @@ ARP_Scan_Init(void)
 
     in = fopen("/proc/net/arp", "r");
     if (!in) {
-        snmp_log(LOG_ERR, "snmpd: Cannot open /proc/net/arp\n");
+        snmp_log_perror("mibII/at: Cannot open /proc/net/arp");
         arptab_size = 0;
         return;
     }
@@ -634,8 +630,10 @@ ARP_Scan_Init(void)
 
     i = 0;
     while (fgets(line, sizeof(line), in)) {
+        static int      arptab_curr_max_size;
         u_long          tmp_a;
-        int             tmp_flags;
+        unsigned int    tmp_flags;
+
         if (i >= arptab_curr_max_size) {
             struct arptab  *newtab = (struct arptab *)
                 realloc(at, (sizeof(struct arptab) *
@@ -780,7 +778,7 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
     register struct arptab *atab;
 
     while (arptab_current < arptab_size) {
-#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+#ifdef HAVE_STRUCT_ARPHD_AT_NEXT
         /*
          * The arp table is an array of linked lists of arptab entries.
          * Unused slots have pointers back to the array entry itself 
@@ -809,9 +807,9 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
         at_ptr = at_entry.at_next;
         atab = &at_entry;
         *ifIndex = at_com.ac_if.if_index;       /* not strictly ARPHD */
-#else                           /* STRUCT_ARPHD_HAS_AT_NEXT */
+#else                           /* HAVE_STRUCT_ARPHD_AT_NEXT */
         atab = &at[arptab_current++];
-#endif                          /* STRUCT_ARPHD_HAS_AT_NEXT */
+#endif                          /* HAVE_STRUCT_ARPHD_AT_NEXT */
         if (!(atab->at_flags & ATF_COM))
             continue;
         *ifType = (atab->at_flags & ATF_PERM) ? 4 : 3;
@@ -860,10 +858,10 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
 }
 #endif                          /* solaris2 */
 
-#else                           /* WIN32 cygwin */
+#elif defined(HAVE_IPHLPAPI_H)  /* WIN32 cygwin */
 #include <iphlpapi.h>
 
-extern WriteMethod write_arp;
+static WriteMethod write_arp;
 MIB_IPNETROW   *arp_row = NULL;
 int             create_flag = 0;
 
@@ -894,6 +892,7 @@ var_atEntry(struct variable *vp,
     DWORD           status = NO_ERROR;
     DWORD           dwActualSize = 0;
     UINT            i;
+    int             j;
     u_char          dest_addr[4];
     void           *result = NULL;
     static in_addr_t	addr_ret;
@@ -917,6 +916,7 @@ var_atEntry(struct variable *vp,
             status = GetIpNetTable(pIpNetTable, &dwActualSize, TRUE);
     }
 
+    i = -1;
 
     if (status == NO_ERROR) {
         for (i = 0; i < pIpNetTable->dwNumEntries; ++i) {
@@ -971,16 +971,16 @@ var_atEntry(struct variable *vp,
             arp_row->dwIndex = name[10];
 
             if (*length == 15) {        /* ipNetToMediaTable */
-                i = 11;
+                j = 11;
             } else {            /* at Table */
 
-                i = 12;
+                j = 12;
             }
 
-            dest_addr[0] = (u_char) name[i];
-            dest_addr[1] = (u_char) name[i + 1];
-            dest_addr[2] = (u_char) name[i + 2];
-            dest_addr[3] = (u_char) name[i + 3];
+            dest_addr[0] = (u_char) name[j];
+            dest_addr[1] = (u_char) name[j + 1];
+            dest_addr[2] = (u_char) name[j + 2];
+            dest_addr[3] = (u_char) name[j + 3];
             arp_row->dwAddr = *((DWORD *) dest_addr);
 
             arp_row->dwType = 4;        /* Static */
@@ -993,6 +993,7 @@ var_atEntry(struct variable *vp,
     memcpy((char *) name, (char *) lowest, oid_length * sizeof(oid));
     *length = oid_length;
     *write_method = write_arp;
+    netsnmp_assert(0 <= i && i < pIpNetTable->dwNumEntries);
     *arp_row = pIpNetTable->table[i];
 
     switch (vp->magic) {

@@ -9,6 +9,12 @@
  * distributed with the Net-SNMP package.
  */
 /*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/*
  * @file table.h
  *
  * @addtogroup table
@@ -115,15 +121,14 @@ extern          "C" {
     netsnmp_mib_handler
         *netsnmp_get_table_handler(netsnmp_table_registration_info
                                    *tabreq);
-    int             netsnmp_register_table(netsnmp_handler_registration
-                                           *reginfo,
-                                           netsnmp_table_registration_info
-                                           *tabreq);
-    int             netsnmp_table_build_oid(netsnmp_handler_registration
-                                            *reginfo,
-                                            netsnmp_request_info *reqinfo,
-                                            netsnmp_table_request_info
-                                            *table_info);
+    void  netsnmp_handler_owns_table_info(netsnmp_mib_handler *handler);
+    void  netsnmp_registration_owns_table_info(netsnmp_handler_registration *reg);
+    int   netsnmp_register_table(  netsnmp_handler_registration    *reginfo,
+                                   netsnmp_table_registration_info *tabreq);
+    int   netsnmp_unregister_table(netsnmp_handler_registration    *reginfo);
+    int   netsnmp_table_build_oid( netsnmp_handler_registration    *reginfo,
+                                   netsnmp_request_info            *reqinfo,
+                                   netsnmp_table_request_info   *table_info);
     int            
         netsnmp_table_build_oid_from_index(netsnmp_handler_registration
                                            *reginfo,
@@ -147,6 +152,10 @@ extern          "C" {
     netsnmp_table_registration_info
         *netsnmp_find_table_registration_info(netsnmp_handler_registration
                                               *reginfo);
+    netsnmp_table_registration_info *
+        netsnmp_table_registration_info_clone(netsnmp_table_registration_info *tri);
+    void netsnmp_table_registration_info_free(netsnmp_table_registration_info *);
+
     netsnmp_index * netsnmp_table_index_find_next_row(netsnmp_container *c,
                                                       netsnmp_table_request_info *tblreq);
 
@@ -158,13 +167,9 @@ extern          "C" {
 
 #define netsnmp_table_helper_add_index(tinfo, type) snmp_varlist_add_variable(&tinfo->indexes, NULL, 0, (u_char)type, NULL, 0);
 
-#if HAVE_STDARG_H
     void           
         netsnmp_table_helper_add_indexes(netsnmp_table_registration_info
                                          *tinfo, ...);
-#else
-    void            netsnmp_table_helper_add_indexes(va_alist);
-#endif
 
     int netsnmp_check_getnext_reply(netsnmp_request_info *request,
                                     oid * prefix, size_t prefix_len,

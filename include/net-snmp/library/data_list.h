@@ -7,6 +7,11 @@
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 /*
  * @file netsnmp_data_list.h
@@ -56,6 +61,7 @@ extern          "C" {
        Netsnmp_Free_List_Data *data_list_free_ptr;
     } netsnmp_data_list_saveinfo;
 
+    NETSNMP_IMPORT
     netsnmp_data_list *
       netsnmp_create_data_list(const char *, void *, Netsnmp_Free_List_Data* );
     void            netsnmp_data_list_add_node(netsnmp_data_list **head,
@@ -64,17 +70,23 @@ extern          "C" {
       netsnmp_data_list_add_data(netsnmp_data_list **head,
                                  const char *name, void *data,
                                  Netsnmp_Free_List_Data * beer);
+    NETSNMP_IMPORT
     void           *netsnmp_get_list_data(netsnmp_data_list *head,
                                           const char *node);
+    NETSNMP_IMPORT
     void            netsnmp_free_list_data(netsnmp_data_list *head);    /* single */
+    NETSNMP_IMPORT
     void            netsnmp_free_all_list_data(netsnmp_data_list *head);        /* multiple */
+    NETSNMP_IMPORT
     int             netsnmp_remove_list_node(netsnmp_data_list **realhead,
                                              const char *name);
+    NETSNMP_IMPORT
     netsnmp_data_list *
     netsnmp_get_list_node(netsnmp_data_list *head,
                           const char *name);
 
     /** depreciated: use netsnmp_data_list_add_node() */
+    NETSNMP_IMPORT
     void            netsnmp_add_list_data(netsnmp_data_list **head,
                                           netsnmp_data_list *node);
 
@@ -91,6 +103,9 @@ extern          "C" {
                           Netsnmp_Save_List_Data * data_list_save_ptr);
     SNMPCallback netsnmp_save_all_data_callback;
     void netsnmp_read_data_callback(const char *token, char *line);
+
+    void shutdown_data_list(void);
+
 #ifdef __cplusplus
 }
 #endif

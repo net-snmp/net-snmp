@@ -1,0 +1,786 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+  <head>
+    <title>rstory's NET-SNMP Developers Frequently Asked Questions Page</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="ucd-snmp-bg3.gif">
+    <div align=center>
+    <h1>rstory's NET-SNMP Developers Frequently Asked Questions Page</h1>
+    </div>
+<hr>
+    <div align=center>
+    <font size=-1>
+      <a href="FAQ.html">[Official FAQ]</a> | 
+	<a href="#tokens">[Debug tokens]</a> | 
+	<a href="#agentx">[AgentX]</a> | 
+	<a href="#install">[Install]</a> | 
+	<a href="#disable">[Disable]</a> | 
+	<a href="#errors">[Errors]</a> | 
+	<a href="#bits">[Bits]</a> | 
+	<a href="#embedded">[embedded perl]</a> | 
+	<a href="#smux">[SMUX]</a> | 
+	<a href="#entid">[Enterprise OID]</a> | 
+	<a href="#autodeps">[Automatic dependencies]</a> | 
+	<a href="#cross">[Cross compiling]</a> | 
+	<a href="#static">[Static linking]</a> | 
+	<a href="#readfds">[readfds]</a> | 
+	<a href="#sharing">[Sharing data]</a> | 
+	<a href="man1-mib2c.1.html">[mib2c.array-user.conf]</a> | 
+	<a href="#steps">[Baby Steps flow]</a> | 
+      </font>
+    </div>
+<hr>
+This is just a quick page to answer some common questions that aren't covered
+in the <a href="/FAQ.html">official FAQ</a>.
+
+<a name="agentx"></a> <h2>AgentX</h2>
+<pre> To have the sub-agent communicate on a different socket, or with
+different permissions, add these line to your snmpd.conf
+
+	# socket path
+	agentxsocket /tmp/agentx
+
+	# perms socket directory userid groupid
+	agentxperms 777 777 rstory rstory
+
+
+and add this line to your subagent:
+
+	netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET, "/tmp/agentx");
+
+*before* you call init_agent().
+
+ </pre>
+
+<a name="install"></a><h2>install</h2>
+<pre> INSTALL_PREFIX goes before everything.. so, with the defaults, just
+setting INSTALL_PREFIX=/tmp would result in /tmp/usr/local.. 
+so INSTALL_PREFIX=/tmp prefix=/usr exec_prefix=/usr would go into /tmp/usr
+ </pre>
+
+<a name="disable"></a><h2>disable</h2>
+<pre> If you are using net-snmp Version >= 5.1, then the following configure
+options may be useful to you:
+
+  --disable-agent                 Do not build the agent (snmpd).
+  --disable-applications          Do not build the apps (snmpget, ...).
+  --disable-manuals               Do not install the manuals.
+  --disable-scripts               Do not install the scripts (mib2c, ...).
+  --disable-mibs                  Do not install the mib files.
+  --disable-mib-loading            Do not include code that parses and
+                                   manipulates the mib files.
+ </pre>
+
+<a name="errors"></a><h2>errors</h2>
+<pre> from RFC 3416:
+
+                   noError(0),
+                   tooBig(1),
+                   noSuchName(2),      -- for proxy compatibility
+                   badValue(3),        -- for proxy compatibility
+                   readOnly(4),        -- for proxy compatibility
+                   genErr(5),
+                   noAccess(6),
+                   wrongType(7),
+                   wrongLength(8),
+                   wrongEncoding(9),
+                   wrongValue(10),
+                   noCreation(11),
+                   inconsistentValue(12),
+                   resourceUnavailable(13),
+                   commitFailed(14),
+                   undoFailed(15),
+                   authorizationError(16),
+                   notWritable(17),
+                   inconsistentName(18)
+ </pre>
+
+<a name="bits"></a><h2>bits</h2>
+<pre> SNMPv1 use BIT STRINGs (RFC 1212, 5.1.1):
+
+          (3)  An object with BIT STRING syntax containing no more than
+               32 bits becomes an INTEGER defined as a sum; otherwise if
+               more than 32 bits are present, the object becomes an
+               OCTET STRING, with the bits numbered from left-to-right,
+               in which the least significant bits of the last octet may
+               be "reserved for future use".
+
+SNMPv2 and beyond uses BITS (RFC 3417, 8.1):
+
+   (3)   When encoding an object whose syntax is described using the
+         BITS construct, the value is encoded as an OCTET STRING, in
+         which all the named bits in (the definition of) the bitstring,
+         commencing with the first bit and proceeding to the last bit,
+         are placed in bits 8 (high order bit) to 1 (low order bit) of
+         the first octet, followed by bits 8 to 1 of each subsequent
+         octet in turn, followed by as many bits as are needed of the
+         final subsequent octet, commencing with bit 8.  Remaining bits,
+         if any, of the final octet are set to zero on generation and
+         ignored on receipt.
+ </pre>
+
+<a name="embedded"></a> <h2>embedded perl</h2>
+<pre> Add the following line to snmpd.conf:
+ 
+   perl do "/path/to/perl_module.pl"
+
+
+To test:
+
+1) Try staring up snmpd, like so: 'snmpd -Dperl'. Check your log files for:
+
+  perl: initializing perl (/tmp/snmp_perl.pl)
+  starting perl_module.pl
+  perl_module.pl loaded ok
+  registering at netSnmp.999
+
+If you get:
+
+  perl: initializing perl (/usr/local/share/snmp/snmp_perl.pl)
+  Can't open perl script "/usr/local/share/snmp/snmp_perl.pl": No such file or directory
+  embedded perl support failed to initalize
+
+Then you need to locate snmp_perl.pl, and put it in the correct path, OR put
+the path in your snmpd.conf:
+
+	perlInitFile /tmp/snmp_perl.pl
+
+
+2) Once it's loaded ok, try a walk:
+
+	snmpwalk -v2c -c public localhost netSnmp.999
+
+You should see something like this in your logs:
+
+ refs: NetSNMP::agent::netsnmp_mib_handler, NetSNMP::agent::reginfo, NetSNMP::agent::netsnmp_agent_request_info, NetSNMP::agent::netsnmp_request_infoPtr
+processing a request of type 161
+   processing request of nsTransactionEntry.3
+    .1.3.6.1.4.1.8072.999.1.2.1 -> hello world
+   finished processing
+
+3) If not, maybe check /path/to/perl_module.pl and make sure it is executable.
+
+Hope that helps.
+
+ </pre>
+
+<a name="smux"></a> <h2>SMUX</h2>
+<pre> To turn off SMUX when you don't have the options of recompiling from source
+to disable SMUX support, you have to give it an invalid IP address to bind
+to. This may be OS specific. On Linux, if I put this in my snmpd.conf:
+
+	smuxsocket 1.0.0.0
+
+I get an error at startup, and lsof or netstat show that snmpd is no longer
+listenting on port 199. If you get and error message about the smuxsocket
+token not being recongnized, then you're out of luck. You'll have to recompile
+from source (or just use local firewall rules to block connections to port
+199).
+ </pre>
+
+<a name="entid"></a> <h2>Enterprise OID</h2>
+<pre> From: Dave Shield, RObert Story
+
+Recent Versions (5.x)
+---------------------
+If you want to *just* change the sysObjectID numbering,
+(and leave the notifications using the Net-SNMP enterprise OID)
+then use  --with-enterprise-sysoid
+Or you could just use the snmpd.conf directive 'sysobjectid'
+to set this at run time.
+
+
+If you want to *just* change enterprise-specific notification OID
+(and leave the sysObjectID using the Net-SNMP values)
+then use  --with-enterprise-notification-oid
+
+
+If you want to change *both* of these,
+then use --with-enterprise-oid
+
+Older Versions (4.2.x)
+----------------------
+In older version, you have to manuall update the version_id in
+agent/agent_trap.c:80
+
+   oid version_id[]    = { EXTENSIBLEMIB, AGENTID, OSTYPE };
+
+ </pre>
+
+<a name="autodeps"></a> <h2>Automatic dependencies</h2>
+<pre> For auto-dependencies, add the following to your Makefile:
+
+#
+# Build rules
+#
+%.d : %.c
+	@echo "Generating makefile $@ ..."
+	@set -e; $(CC) -M $(COPTS) $(CFLAGS) $(CPPFLAGS) $< \
+	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
+	[ -s $@ ] || $(RM) $(RMFLAGS) $@
+
+include $(SOURCES:.c=.d)
+
+ </pre>
+
+<a name="cross"></a> <h2>Cross compiling</h2>
+<pre> From the net-snmp INSTALL file:
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Specifying the System Type
+==========================
+
+   There may be some features `configure' can not figure out
+automatically, but needs to determine by the type of host the package
+will run on.  Usually `configure' can figure that out, but if it prints
+a message saying it can not guess the host type, give it the
+`--host=TYPE' option.  TYPE can either be a short name for the system
+type, such as `sun4', or a canonical name with three fields:
+     CPU-COMPANY-SYSTEM
+
+See the file `config.sub' for the possible values of each field.  If
+`config.sub' isn't included in this package, then this package doesn't
+need to know the host type.
+
+   If you are building compiler tools for cross-compiling, you can also
+use the `--target=TYPE' option to select the type of system they will
+produce code for and the `--build=TYPE' option to select the type of
+system on which you are compiling the package.
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+The most important configure options are:
+
+	--with-cc=[cross-compiler]
+	--with-ld=[cross-linker]
+	--target=[target-environment]
+	--with-endianness=[big|little]
+
+Other potentially useful options:
+
+	--with-cflags="..."
+	--with-ldlags="..."
+	--with-ar=/path/ar
+
+	--enable-mini-agent
+	--enable-shared="no"
+	--without-pic
+
+Two simple examples of cross-compiling:
+
+./configure --target=ppc-linux --with-cc=ppc_405-gcc --with-endianness=big
+
+./configure --target=powerpc-snmc-linux-gnu --build=i386-redhat-linux \
+        --with-endianness=big
+
+A more complex example involves setting environment variables for all
+the flags for the tools needed for the cross compile:
+
+   export TOOLPATH=/opt/hardhat/devkit/ppc/405
+   export PATH=$TOOLPATH/bin:$PATH
+   export CFLAGS=' -g -fPIC -msoft-float -D_SOFT_FLOAT -Dlinux -mcpu=403'
+   export CPPFLAGS='-I$TOOLPATH/include -I$TOOLPATH/target/usr/include'
+   export ASFLAGS='-g -gstabs'
+   export LDFLAGS='-Wl,-soname,-Bdynamic -lc' 
+   export LIB='ar rcu' 
+
+   ./configure --build=i686-pc-linux-gnu  --host=powerpc \
+           --target=powerpc-hardhat-linux-gnu --with-endianness=big
+
+
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+The mibgroup section is the most OS specific part of the agent. It's likely
+that you will have to remove some of them. You just need to figure out which
+ones to remove. 
+
+For example, agent/mibgroup/mibII/tcpTable.c is a common module that doesn't
+work on new platforms. So if it isn't working, omit it during configure, like
+so:
+
+	./configure --with-out-mib-modules=mibII/tcpTable
+
+
+Alternatively, you could work the other way. Start with a minimal
+configuration:
+
+	./configure --enable-mini-agent
+
+and then start adding MIB modules one-by-one:
+
+	./configure --enable-mini-agent
+                    --with-mib-modules=mibII/system_mib,mibII/sysORTable
+
+
+ </pre>
+
+<a name="static"></a> <h2>Static linking</h2>
+<pre> mXaureliu: I want to compile the 5.1 snmptrapd binary with statically linked libraries.. Can anyone help me with this? Is it just a simple configure switch
+rstory: mXaureliu: you want static snmp libraries, or totally static (system libraries too)?
+mXaureliu: totally static.. everything in one executable
+mXaureliu: actually, how do i do both ways?
+rstory: for snmp libs, try 'configure --enable-shared=no'.. that won't build the shared libraries
+rstory: (though if you have previous versions of net-snmp libraries installed, the linker might pick those up and try and use them)
+rstory: for totally static, you'll have to tweak the Makefile
+rstory: add -Bstatic to LDFLAGS
+
+[note: actually, for totally static, 'configure --with-ldflags=-Bstatic']
+ </pre>
+
+<a name="readfds"></a> <h2>readfds</h2>
+<pre> > can you please tell me the meaning of the third argument. obviously the 
+> first parameter to register_readfd is a file descriptor and second is the 
+> callback function.
+
+Correct.
+The third parameter is arbitrary data that you can specify when you
+register the file descriptor, and will then be passed to the callback
+function when it's invoked.
+
+
+So if you were listening on two separate sockets, for very similar
+types of data, then you could use the same callback for both and
+use this third parameter to distinguish between them:
+
+
+	fd1 = open( "/proc/tweedledum" );
+	fd2 = open( "/proc/tweedledee" );
+
+	register_readfd( fd1, who_broke_the_rattle(), "tweedledee" );
+	register_readfd( fd2, who_broke_the_rattle(), "tweedledum" );
+
+
+void
+who_broke_the_rattle( int fd, void *data )
+{
+    char *he_did = (char *)data;
+
+    printf("%s broke the rattle!\n", he_did );
+}
+
+ </pre>
+
+<a name="sharing"></a> <h2>sharing data</h2>
+<pre> If two modules are compiled into the same agent/subagent, then just use a
+normal C global var. No need to involve net-snmp in the process.
+
+if they are different sub-agents, you are better off using tradition IPC
+mechanisms. there is no net-snmp api for sharing data between subagents.
+
+That said, *IF* you only need the data during processing of GET requests, or
+when you aren't processing a request at all, you send a snmp request to the
+master, which will query the other subagent. If you are processing a GET
+request and are compiled into the master, you will have to delegate the
+current request).
+
+It's a little inefficient, compared to direct communication w/the other
+subagent and it *will not* work during set processing.
+ </pre>
+
+<a name="tokens"></a> <h2>Debug Tokens</h2>
+<pre> Some of the more common ones are:
+
+   Agent: agent, agentx, dlmod, handler, helper, snmpd, trap, table
+   MIBs: init_mib, mib_init, parse-file, parse-mibs
+   Apps: read_config
+
+Add them to your snmp.conf like so:
+
+   # optionally turn on time stamps
+   logTimestamp true
+   doDebugging 1
+   debugTokens agentx/config
+
+If you put them in a different conf file, like snmpd.conf or myapp.conf,
+prefix each with '[snmp]', like so:
+
+   [snmp] doDebugging 1
+
+
+This list was generated by running the following command in the main CVS branch:
+
+find . -name \"*.c\" -print | xargs grep DEBUGMSGT | grep \" | cut -f 2 -d\" | sort -u
+
+add
+agent_handler
+agent_registry
+agent_set
+agentx
+agentx_build
+agentx_build_varbind
+agentx/config
+agentx/config/retries
+agentx/config/timeout
+agentx/master
+agentx/subagent
+agentx/subgaent
+asn_realloc
+auto_nlist
+build_oid_noalloc
+build_oid_segment
+callback
+callback_clear
+check_getnext_results
+clear_nsap_list
+compare:index
+comparex
+container
+container_iterator
+container_iterator:results
+container:null:
+container:null:find
+container:null:find_next
+container:null:for_each
+container:null:free
+container:null:get_null
+container:null:get_null_factory
+container:null:get_null_noalloc
+container:null:insert
+container:null:remove
+container:null:size
+container_registry
+daemonize
+deinit_usm_post_config
+delayed_instance
+dlmod
+dump_etimelist
+encode_keychange
+example
+example_data_set
+example_notification
+example_scalar_int
+fixup_mib_directory
+generate_Ku
+generate_kul
+get_mib_directory
+handler:calling
+handler:inject
+handler::register
+handler_registry
+handler:returned
+header_complex
+header_complex_add_data
+header_complex_dump
+header_complex_extract_entry
+header_complex_generate_oid
+header_complex_generate_varoid
+header_complex_parse_oid
+header_complex_test
+helper:baby_steps
+helper:cache_handler
+helper:debug
+helper:instance
+helper:mfd
+helper:null
+helper:read_only
+helper:row_merge
+helper:scalar
+helper:scalar_group
+helper:serialize
+helper:stash_cache
+helper:table
+helper:watcher
+helper:watcher:spinlock
+helper:watcher:timestamp
+host/hr_device
+host/hr_disk
+host/hr_filesys
+host/hr_inst
+host/hr_network
+host/hr_partition
+host/hr_print
+host/hr_proc
+host/hr_storage
+host/hr_swinst
+host/hr_swrun
+host/hr_swrun::GetNextHR_SWRun
+host/hr_system
+hr_proc
+initialize_table_ipCidrRouteTable
+initialize_table_mteEventNotificationTable
+initialize_table_mteEventTable
+initialize_table_netSnmpHostsTable
+initialize_table_nlmLogTable
+initialize_table_nlmLogVariableTable
+initialize_table_nsModuleTable
+initialize_table_nsTransactionTable
+init_mib
+init_usm
+injectHandler
+kernel_sunos5
+ksm
+lcd_get_enginetime
+lcd_get_enginetime_ex
+lcd_set_enginetime
+log_notification
+md5
+mfd
+mibII/at
+mibII/icmp
+mibII/interfaces
+mibII/ip
+mibII/ipv6
+mibII/mta_sendmail.c:mta_sendmail_parse_config
+mibII/mta_sendmail.c:open_sendmailst
+mibII/mta_sendmail.c:read_sendmailcf
+mibII/snmp_mib
+mibII/sysORTable
+mibII/tcpScalar
+mibII/tcpTable
+mibII/udpScalar
+mibII/udpTable
+mibII/vacm_vars
+mibII/var_route
+mib_init
+mte_disco
+mteEventTable:send_events
+mteObjectsTable
+mteTriggerBooleanTable
+mteTriggerDeltaTable
+mteTriggerExistenceTable
+mteTriggertable
+mteTriggerTable
+mteTriggerTest
+mteTriggerTest:send_mte_trap
+mteTriggerThresholdTable
+netsnmp_aal5pvc
+netsnmp_agent_check_packet
+netsnmp_deregister_agent_nsap
+netsnmp_ds_handle_config
+netsnmp_ds_set_boolean
+netsnmp_ds_set_int
+netsnmp_ds_set_string
+netsnmp_ds_set_void
+netsnmp_ds_toggle_boolean
+netsnmp_instance_counter32_handler
+netsnmp_instance_int_handler
+netsnmp_instance_long_handler
+netsnmp_instance_ulong_handler
+netsnmp_ipx
+netsnmp_register_agent_nsap
+netsnmp_register_mib_table_row
+netsnmp_sockaddr_in
+netsnmp_sockaddr_in6
+netsnmp_sockaddr_ipx
+netsnmp_table_data_set
+netsnmp_tcp
+netsnmp_tcp6
+netsnmp_udp
+netsnmp_udp6
+netsnmp_udp6_getSecName
+netsnmp_udp6_parse_security
+netsnmp_udp_getSecName
+netsnmp_udp_parse_security
+netsnmp_unix
+netsnmp_unix_getSecName
+netsnmp_unix_parse_security
+netsnmp_unix_transport
+netstat:if
+notification_log
+nsCacheScalars
+nsDebugScalars
+object_monitor
+old_api
+output
+override
+parse-file
+parse-mibs
+parse_oid
+parse_oid_indexes
+perl
+proc
+proxy
+proxy_args
+proxy_config
+proxy_init
+read_config
+read_config_copy_word
+read_config_files
+read_config:forward
+read_config:initmib
+read_config_read_data
+read_config_read_memory
+read_config_read_objid
+read_config_read_octet_string
+read_config_store_data_prefix
+read_config:traphandle
+register_exceptfd
+register_index
+register_mib
+register_readfd
+register_signal
+register_writefd
+report
+results
+scalar_int
+scapi
+scopedPDU_parse
+send_notifications
+sess_async_send
+_sess_open
+sess_process_packet
+sess_read
+sess_resend
+sess_select
+setting auth type: \
+signal
+smux
+smux_conf
+smux_init
+smux/snmp_bgp
+smux/snmp_ospf
+smux/snmp_rip2
+snmp_agent
+snmp_alarm
+snmp_api
+snmp_build
+snmp_clean_persistent
+snmp_config
+snmpd
+snmpd/main
+snmpd_ports
+snmpd_register_app_config_handler
+snmpd/select
+snmpEngine
+snmpNotifyFilterProfileTable
+snmpNotifyFilterTable
+snmpNotifyTable
+snmp_parse
+snmp_parse_args
+snmp_parse_oid
+snmp_pdu_realloc_rbuild
+snmp_save_persistent
+snmp_send
+snmp_sess_add
+snmp_sess_close
+snmp_sess_open
+snmpSetSerialNo
+snmp_store
+snmpTargetAddrEntry
+snmpTargetParamsEntry
+snmptrapd
+snmpv3
+snmpv3_parse
+sprint_by_type
+stash_cache
+subtree
+table_array
+table_array:get
+table_array:group
+table_data_add_data
+table_iterator
+table_set_add_row
+take_snapshot
+target_counters
+target_sessions
+tdomain
+testhandler
+testhandler_table
+transport_callback
+trap
+trapsess
+tunnel
+ucdDemoPublic
+ucd-snmp/disk
+ucd-snmp/disk:
+ucd-snmp/memory
+ucd-snmp/pass
+ucd-snmp/pass_persist
+ucd-snmp/proc
+ucd-snmp/versioninfo
+ucd-snmp/vmstat_aix4.c:update_stats
+ucd-snmp/vmstat_dynix.c:update_stats
+ucd-snmp/vmstat_hpux.c:update_stats
+ucd-snmp/vmstat_solaris2.c:update_stats
+unlink_tree
+unload-mib
+unregister_exceptfd
+unregister_readfd
+unregister_signal
+unregister_writefd
+usm
+usmUser
+util_funcs
+vacm:checkSubtree
+vacm:getView
+versioninfo
+vmstat
+yyyinjectHandler
+ </pre>
+
+<a name="steps"></a> <h2>Baby Steps Flow</h2>
+<pre>     /**
+     * Baby Steps Flow diagram (rev 2003.09.29.1330)
+     *
+     * Legend: (test) [optional] &lt;required>
+     *
+     * OLD              NEW
+     * ========  ============================================
+     * +++           [pre_request]
+     *                    |
+     *               (row exists?) N ->(row_creation) N >-->+
+     *                    |                   | Y           |
+     *                    |&lt;------------------+             |
+     *                   \|/                               \|/
+     * RESERVE1  &lt;object_syntax_checks>                     |
+     *                    |                                 | 
+     *                  (err?)  Y >------------------------>+
+     *                    |                                 |
+     *                   \|/                               \|/
+     * +++          (row existed?) N --->[row_creation]     |
+     *                    |                   |             |
+     *                    |&lt;--------------N (err?)          |
+     *                    |                   | Y           |
+     *                    |                   |             |
+     *                    |       [row_creation_cleanup]--->+
+     *                   \|/                                |
+     * RESERVER2     [undo_setup]                           |
+     *                    |                                 |
+     *                  (err?)  Y --->-------->--------->+  |
+     *                    |                              | \|/
+     * ACTION        &lt;set_values>                        |  |
+     *                    |                              |  |
+     *                  (err?)  Y >---------+           \|/ |
+     *                    |                 |            |  |
+     * +++        [consistency_checks]      |            |  |
+     *                    |                \|/           |  |
+     * UNDO             (err?)  Y >-------[undo]-------->+  |
+     *                    |                              |  |
+     *            [reversible_commit]                    |  |
+     * +++                |                              | \|/
+     *                  (err?)  Y >--[reverse_commit]    |  |
+     *                    |              |               |  |
+     * COMMIT        &lt;final_commit>      |               |  |
+     *                    |              |               |  |
+     *                  (err?)  Y >--[log msg]           |  |
+     *                    |              |               |  |
+     *                    |             \|/             \|/ |
+     *                    | &lt;-----------&lt;+---&lt;-----------+  |
+     *                   \|/                                |
+     * FREE          [undo_cleanup]                         |
+     *                    |                                \|/
+     *                    |&lt;--------------&lt;-----------------+
+     *                   \|/
+     *               [post_request]
+     */
+ </pre>
+
+<hr>
+<table width="100%">
+<tr><td align=left>
+<br>Page
+<!-- Created: Thu Jul 24 10:08:26 MET DST 1997 -->
+<!-- hhmts start -->
+Last modified: Wed Mar 12 13:49:32 PST 2003
+<!-- hhmts end -->
+</td><td align=right>
+<br>Powered by:
+<A href="http://sourceforge.net">
+      <IMG src="http://sourceforge.net/sflogo.php?group_id=12694&amp;type=1" width="88" height="31" border="0" alt="SourceForge Logo"></A>
+
+</td></tr></table>
+  </body>
+</html>

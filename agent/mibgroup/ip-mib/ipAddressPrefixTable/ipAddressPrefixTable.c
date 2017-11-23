@@ -26,8 +26,8 @@
 
 #include "ipAddressPrefixTable_interface.h"
 
-oid             ipAddressPrefixTable_oid[] = { IPADDRESSPREFIXTABLE_OID };
-int             ipAddressPrefixTable_oid_size =
+const oid       ipAddressPrefixTable_oid[] = { IPADDRESSPREFIXTABLE_OID };
+const int       ipAddressPrefixTable_oid_size =
 OID_LENGTH(ipAddressPrefixTable_oid);
 
 ipAddressPrefixTable_registration ipAddressPrefixTable_user_context;
@@ -255,7 +255,7 @@ ipAddressPrefixTable_indexes_set_tbl_idx(ipAddressPrefixTable_mib_index *
                                          tbl_idx,
                                          long ipAddressPrefixIfIndex_val,
                                          u_long ipAddressPrefixType_val,
-                                         char
+                                         u_char
                                          *ipAddressPrefixPrefix_val_ptr,
                                          size_t
                                          ipAddressPrefixPrefix_val_ptr_len,
@@ -318,7 +318,7 @@ ipAddressPrefixTable_indexes_set(ipAddressPrefixTable_rowreq_ctx *
                                  rowreq_ctx,
                                  long ipAddressPrefixIfIndex_val,
                                  u_long ipAddressPrefixType_val,
-                                 char *ipAddressPrefixPrefix_val_ptr,
+                                 u_char *ipAddressPrefixPrefix_val_ptr,
                                  size_t ipAddressPrefixPrefix_val_ptr_len,
                                  u_long ipAddressPrefixLength_val)
 {
@@ -395,10 +395,9 @@ ipAddressPrefixOrigin_get(ipAddressPrefixTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipAddressPrefixOrigin data.
      * copy (* ipAddressPrefixOrigin_val_ptr ) from rowreq_ctx->data
      */
-    (*ipAddressPrefixOrigin_val_ptr) =
-        rowreq_ctx->data.ipAddressPrefixOrigin;
-
-    return MFD_SUCCESS;
+          (*ipAddressPrefixOrigin_val_ptr) = rowreq_ctx->data.ipAddressPrefixOrigin;
+    
+           return MFD_SUCCESS;
 }                               /* ipAddressPrefixOrigin_get */
 
 /*---------------------------------------------------------------------
@@ -594,7 +593,7 @@ ipAddressPrefixAdvPreferredLifetime_get(ipAddressPrefixTable_rowreq_ctx *
      * copy (* ipAddressPrefixAdvPreferredLifetime_val_ptr ) from rowreq_ctx->data
      */
     if (INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.ipAddressPrefixType)
-        (*ipAddressPrefixAdvPreferredLifetime_val_ptr) = 4294967295;    /* per MIB */
+        (*ipAddressPrefixAdvPreferredLifetime_val_ptr) = 4294967295U;    /* per MIB */
     else
         (*ipAddressPrefixAdvPreferredLifetime_val_ptr) =
             rowreq_ctx->data.ipAddressPrefixAdvPreferredLifetime;
@@ -661,7 +660,7 @@ ipAddressPrefixAdvValidLifetime_get(ipAddressPrefixTable_rowreq_ctx *
      * copy (* ipAddressPrefixAdvValidLifetime_val_ptr ) from rowreq_ctx->data
      */
     if (INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.ipAddressPrefixType)
-        (*ipAddressPrefixAdvValidLifetime_val_ptr) = 4294967295;        /* per MIB */
+        (*ipAddressPrefixAdvValidLifetime_val_ptr) = 4294967295U;        /* per MIB */
     else
         (*ipAddressPrefixAdvValidLifetime_val_ptr) =
             rowreq_ctx->data.ipAddressPrefixAdvValidLifetime;

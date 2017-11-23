@@ -2,18 +2,10 @@
  *  @{ */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#ifdef STILL_TO_DO
-        /*
-         * It ought to be possible to just #include these files,
-         *   but they rely on various other types being defined first.
-         *
-         * I really can't face tracking down the dependency chain
-         *   just at the moment.
-         * So we'll just have to live with the warnings....
-         */
 #include <net-snmp/agent/debug_handler.h>
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/read_only.h>
@@ -21,15 +13,8 @@
 #include <net-snmp/agent/table_dataset.h>
 #include <net-snmp/agent/stash_cache.h>
 
-#else
+netsnmp_feature_child_of(mib_helpers, libnetsnmpagent)
 
-void  netsnmp_init_debug_helper(void);
-void  netsnmp_init_serialize(void);
-void  netsnmp_init_read_only_helper(void);
-void  netsnmp_init_bulk_to_next_helper(void);
-void  netsnmp_init_table_dataset(void);
-void  netsnmp_init_stash_cache_helper(void);
-#endif
 
 /** call the initialization sequence for all handlers with init_ routines. */
 void
@@ -39,8 +24,16 @@ netsnmp_init_helpers(void)
     netsnmp_init_serialize();
     netsnmp_init_read_only_helper();
     netsnmp_init_bulk_to_next_helper();
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET
     netsnmp_init_table_dataset();
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATASET */
+
+#ifndef NETSNMP_FEATURE_REMOVE_ROW_MERGE
+    netsnmp_init_row_merge();
+#endif /* NETSNMP_FEATURE_REMOVE_ROW_MERGE */
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     netsnmp_init_stash_cache_helper();
+#endif /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
 }
 
 /** @defgroup utilities utility_handlers

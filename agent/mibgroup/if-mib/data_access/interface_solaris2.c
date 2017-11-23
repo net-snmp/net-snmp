@@ -2,19 +2,23 @@
  *  Interface MIB architecture support for Solaris
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
-#include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable_constants.h"
 #include "kernel_sunos5.h"
+#include "mibII/mibII_common.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/data_access/interface.h>
 #include "if-mib/data_access/interface.h"
+#include "interface_private.h"
 #include <sys/ioctl.h>
 #include <sys/sockio.h>
 #include <strings.h>
 #include <string.h>
+
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
 
 static int _set_ip_flags_v4(netsnmp_interface_entry *, mib2_ifEntry_t *);
 static int _match_ifname_v4addr(void *ifname, void *ipaddr);
@@ -63,7 +67,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     req_e                   req = GET_FIRST;
     int                     error = 0;
 
-    DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
+    DEBUGMSGTL(("access:interface:container:arch", "load (flags %u)\n",
                 l_flags));
 
     if (container == NULL) {
@@ -104,7 +108,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         /*
          * collect the information needed by IF-MIB
          */
-        entry->paddr = malloc(ife.ifPhysAddress.o_length);
+        entry->paddr = (char*)malloc(ife.ifPhysAddress.o_length);
         if (entry->paddr == NULL) {
             netsnmp_access_interface_entry_free(entry);
             error = 1;
@@ -306,7 +310,7 @@ _get_v4addr(mib2_ifEntry_t *ife, mib2_ipAddrEntry_t *ipv4e)
     if ((rc = getMibstat(MIB_IP_ADDR, ipv4e, sizeof(*ipv4e), GET_EXACT, 
         &_match_ifname_v4addr, &ife->ifDescr.o_bytes)) == 0)
         return (1);
-    bzero((void *)ipv4e, sizeof(*ipv4e));
+    memset(ipv4e, '\0', sizeof(*ipv4e));
     return (0);
 }
 
@@ -340,11 +344,12 @@ _get_v6addr(mib2_ifEntry_t *ife, mib2_ipv6AddrEntry_t *ipv6e)
         &_match_ifname_v6addr, &ife->ifDescr.o_bytes)) == 0) {
         return (1);
     } 
-    bzero((void *)ipv6e, sizeof(*ipv6e));
+    memset(ipv6e, '\0', sizeof(*ipv6e));
     return (0);
 }
 #endif /* SOLARIS_HAVE_IPV6_MIB_SUPPORT */
 
+#ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS
 int
 netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
                               int ifAdminStatus_val)
@@ -356,3 +361,4 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
      */
     return (-1);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS */

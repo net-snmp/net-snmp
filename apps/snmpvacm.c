@@ -23,11 +23,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -39,9 +35,6 @@
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -50,8 +43,6 @@
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
-
-int             main(int, char **);
 
 #define CMD_CREATESEC2GROUP_NAME    "createSec2Group"
 #define CMD_CREATESEC2GROUP         1
@@ -90,19 +81,15 @@ static const char *successNotes[CMD_NUM] = {
 
 static oid      vacmGroupName[MAX_OID_LEN] =
     { 1, 3, 6, 1, 6, 3, 16, 1, 2, 1, 3 },
-    vacmSec2GroupStorageType[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 16, 1, 2, 1, 4}, vacmSec2GroupStatus[MAX_OID_LEN] = {
+    vacmSec2GroupStatus[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 2, 1, 5}, vacmAccessContextMatch[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 4}, vacmAccessReadViewName[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 5}, vacmAccessWriteViewName[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 6}, vacmAccessNotifyViewName[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 7}, vacmAccessStorageType[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 8}, vacmAccessStatus[MAX_OID_LEN] = {
+1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 7}, vacmAccessStatus[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 9}, vacmViewTreeFamilyMask[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 5, 2, 1, 3}, vacmViewTreeFamilyType[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 5, 2, 1, 4},
-    vacmViewTreeFamilyStorageType[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 16, 1, 5, 2, 1, 5},
     vacmViewTreeFamilyStatus[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 5, 2, 1, 6}
 
@@ -111,7 +98,6 @@ static oid      vacmGroupName[MAX_OID_LEN] =
 #define NSVACMACCESSTABLE    1, 3, 6, 1, 4, 1, 8072, 1, 9, 1
 static oid nsVacmContextPfx[MAX_OID_LEN]  = { NSVACMACCESSTABLE, 1, 2 };
 static oid nsVacmViewName[MAX_OID_LEN]    = { NSVACMACCESSTABLE, 1, 3 };
-static oid nsVacmStorageType[MAX_OID_LEN] = { NSVACMACCESSTABLE, 1, 4 };
 static oid nsVacmRowStatus[MAX_OID_LEN]   = { NSVACMACCESSTABLE, 1, 5 };
 
 int             viewTreeFamilyType = 1;
@@ -281,30 +267,32 @@ main(int argc, char *argv[])
 #endif
     size_t          name_length;
     int             status;
-    int             exitval = 0;
+    int             exitval = 1;
     int             command = 0;
     long            longvar;
-    int             secModel, secLevel, contextMatch, val, i = 0;
+    int             secModel, secLevel, contextMatch;
+    unsigned int    val, i = 0;
     char           *mask, *groupName, *prefix, *authtype;
     u_char          viewMask[VACMSTRINGLEN];
     char           *st;
 
+    SOCK_STARTUP;
 
     /*
      * get the common command line arguments 
      */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
-    case -2:
-        exit(0);
-    case -1:
+    case NETSNMP_PARSE_ARGS_ERROR:
+        goto out;
+    case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
+        exitval = 0;
+        goto out;
+    case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
-
-
-    SOCK_STARTUP;
 
     /*
      * open an SNMP session 
@@ -318,7 +306,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpvacm", &session);
-        exit(1);
+        goto out;
     }
 
     /*
@@ -329,7 +317,7 @@ main(int argc, char *argv[])
     if (arg >= argc) {
         fprintf(stderr, "Please specify a operation to perform.\n");
         usage();
-        exit(1);
+        goto close_session;
     }
 
     if (strcmp(argv[arg], CMD_DELETEVIEW_NAME) == 0)
@@ -343,7 +331,7 @@ main(int argc, char *argv[])
         if (++arg + 2 != argc) {
             fprintf(stderr, "You must specify the view to delete\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETEVIEW;
@@ -365,7 +353,7 @@ main(int argc, char *argv[])
         if (++arg + 2 > argc) {
             fprintf(stderr, "You must specify name, subtree and mask\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         command = CMD_CREATEVIEW;
         name_length = VIEW_OID_LEN;
@@ -383,17 +371,17 @@ main(int argc, char *argv[])
             for (mask = strtok_r(mask, ".:", &st); mask; mask = strtok_r(NULL, ".:", &st)) {
                 if (i >= sizeof(viewMask)) {
                     printf("MASK too long\n");
-                    exit(1);
+                    goto close_session;
                 }
                 if (sscanf(mask, "%x", &val) == 0) {
                     printf("invalid MASK\n");
-                    exit(1);
+                    goto close_session;
                 }
                 viewMask[i] = val;
                 i++;
             }
 	} else {
-            for (i=0 ; i < ((int)name_length+7)/8; i++)
+            for (i=0 ; i < (name_length+7)/8; i++)
                 viewMask[i] = (u_char)0xff;
         }
         view_oid(vacmViewTreeFamilyMask, &name_length, argv[arg],
@@ -418,7 +406,7 @@ main(int argc, char *argv[])
         if (++arg + 2 != argc) {
             fprintf(stderr, "You must specify the sec2group to delete\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETESEC2GROUP;
@@ -426,7 +414,7 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         sec2group_oid(vacmSec2GroupStatus, &name_length, secModel,
                       argv[arg + 1]);
@@ -446,7 +434,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify model, security name and group name\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CREATESEC2GROUP;
@@ -454,7 +442,7 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         sec2group_oid(vacmSec2GroupStatus, &name_length, secModel,
                       argv[arg + 1]);
@@ -479,7 +467,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the access entry to delete\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETEACCESS;
@@ -493,12 +481,12 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
             printf("invalid security level\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         access_oid(vacmAccessStatus, &name_length, groupName, prefix,
                    secModel, secLevel);
@@ -518,7 +506,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the access entry to create\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CREATEACCESS;
@@ -532,12 +520,12 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
             printf("invalid security level\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         access_oid(vacmAccessStatus, &name_length, groupName, prefix,
                    secModel, secLevel);
@@ -551,7 +539,7 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 3], "%d", &contextMatch) == 0) {
             printf("invalid contextMatch\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         snmp_pdu_add_variable(pdu, vacmAccessContextMatch, name_length,
                               ASN_INTEGER, (u_char *) & contextMatch,
@@ -586,7 +574,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the authAccess entry to delete\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETEAUTH;
@@ -600,12 +588,12 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
             printf("invalid security level\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         authtype = argv[arg+3];
         auth_oid(nsVacmRowStatus, &name_length, groupName, prefix,
@@ -626,7 +614,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the authAccess entry to create\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CREATEAUTH;
@@ -640,12 +628,12 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
             printf("invalid security model\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
             printf("invalid security level\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         authtype = argv[arg+3];
         auth_oid(nsVacmRowStatus, &name_length, groupName, prefix,
@@ -660,7 +648,7 @@ main(int argc, char *argv[])
         if (sscanf(argv[arg + 4], "%d", &contextMatch) == 0) {
             printf("invalid contextMatch\n");
             usage();
-            exit(1);
+            goto close_session;
         }
         snmp_pdu_add_variable(pdu, nsVacmContextPfx, name_length,
                               ASN_INTEGER, (u_char *) & contextMatch,
@@ -674,8 +662,10 @@ main(int argc, char *argv[])
     } else {
         printf("Unknown command\n");
         usage();
-        exit(1);
+        goto close_session;
     }
+
+    exitval = 0;
 
     /*
      * do the request 
@@ -714,7 +704,10 @@ main(int argc, char *argv[])
     if (response)
         snmp_free_pdu(response);
 
+close_session:
     snmp_close(ss);
+
+out:
     SOCK_CLEANUP;
     return exitval;
 }

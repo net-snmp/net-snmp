@@ -138,7 +138,7 @@ ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
              * yes.
              */
             DEBUGMSGTL(("ipv4InterfaceTable:check_entry_for_updates",
-                        "inserted row for %d\n", entry->index));
+                        "inserted row for %" NETSNMP_PRIo "d\n", entry->index));
             CONTAINER_INSERT(c, ift_rrc);
             changed = 1;
         }
@@ -152,7 +152,7 @@ ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
              * no
              */
             DEBUGMSGTL(("ipv4InterfaceTable:check_entry_for_updates",
-                        "removed  row for %d\n",
+                        "removed  row for %" NETSNMP_PRIo "d\n",
                         ift_rrc->data.ifentry->index));
             CONTAINER_REMOVE(c, ift_rrc);
             changed = 1;
@@ -164,7 +164,7 @@ ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
                  ift_rrc->data.ifentry->retransmit_v4) ||
                 (entry->reasm_max_v4 != ift_rrc->data.ifentry->reasm_max_v4)) {
                 DEBUGMSGTL(("ipv4InterfaceTable:check_entry_for_updates",
-                            "row changed for %d\n",
+                            "row changed for %" NETSNMP_PRIo "d\n",
                             ift_rrc->data.ifentry->index));
                 changed = 1;
             }

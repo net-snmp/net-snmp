@@ -22,8 +22,6 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "util_funcs.h"
-
 #include "agutil.h"
 #include "agutil_api.h"
 
@@ -202,20 +200,7 @@ AGUTIL_get_oid_value(u_char * var_val, u_char var_val_type,
 u_long
 AGUTIL_sys_up_time(void)
 {
-    struct timeval  current, delta;
-    extern struct timeval starttime;
-
-    gettimeofday(&current, NULL);
-    current.tv_sec--;
-    current.tv_usec += 1000000L;
-    delta.tv_sec = current.tv_sec - starttime.tv_sec;
-    delta.tv_usec = current.tv_usec - starttime.tv_usec;
-    if (delta.tv_usec > 1000000L) {
-        delta.tv_usec -= 1000000L;
-        delta.tv_sec++;
-    }
-
-    return delta.tv_sec * 100 + delta.tv_usec / 10000;
+    return netsnmp_get_agent_runtime();
 }
 
 /*

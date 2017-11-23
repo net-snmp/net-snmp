@@ -61,6 +61,51 @@ netsnmp_internal_bin2asc(char *p, size_t n)
     return 3 * n - 1;
 }
 
+int
+netsnmp_internal_pass_str_to_errno(const char *buf)
+{
+    if (!strncasecmp(buf, "too-big", 7)) {
+        /* Shouldn't happen */
+        return SNMP_ERR_TOOBIG;
+    } else if (!strncasecmp(buf, "no-such-name", 12)) {
+        return SNMP_ERR_NOSUCHNAME;
+    } else if (!strncasecmp(buf, "bad-value", 9)) {
+        return SNMP_ERR_BADVALUE;
+    } else if (!strncasecmp(buf, "read-only", 9)) {
+        return SNMP_ERR_READONLY;
+    } else if (!strncasecmp(buf, "gen-error", 9)) {
+        return SNMP_ERR_GENERR;
+    } else if (!strncasecmp(buf, "no-access", 9)) {
+        return SNMP_ERR_NOACCESS;
+    } else if (!strncasecmp(buf, "wrong-type", 10)) {
+        return SNMP_ERR_WRONGTYPE;
+    } else if (!strncasecmp(buf, "wrong-length", 12)) {
+        return SNMP_ERR_WRONGLENGTH;
+    } else if (!strncasecmp(buf, "wrong-encoding", 14)) {
+        return SNMP_ERR_WRONGENCODING;
+    } else if (!strncasecmp(buf, "wrong-value", 11)) {
+        return SNMP_ERR_WRONGVALUE;
+    } else if (!strncasecmp(buf, "no-creation", 11)) {
+        return SNMP_ERR_NOCREATION;
+    } else if (!strncasecmp(buf, "inconsistent-value", 18)) {
+        return SNMP_ERR_INCONSISTENTVALUE;
+    } else if (!strncasecmp(buf, "resource-unavailable", 20)) {
+        return SNMP_ERR_RESOURCEUNAVAILABLE;
+    } else if (!strncasecmp(buf, "commit-failed", 13)) {
+        return SNMP_ERR_COMMITFAILED;
+    } else if (!strncasecmp(buf, "undo-failed", 11)) {
+        return SNMP_ERR_UNDOFAILED;
+    } else if (!strncasecmp(buf, "authorization-error", 19)) {
+        return SNMP_ERR_AUTHORIZATIONERROR;
+    } else if (!strncasecmp(buf, "not-writable", 12)) {
+        return SNMP_ERR_NOTWRITABLE;
+    } else if (!strncasecmp(buf, "inconsistent-name", 17)) {
+        return SNMP_ERR_INCONSISTENTNAME;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
 unsigned char *
 netsnmp_internal_pass_parse(char * buf,
                             char * buf2,
@@ -82,7 +127,19 @@ netsnmp_internal_pass_parse(char * buf,
         *var_len = strlen(buf2);
         vp->type = ASN_OCTET_STR;
         return ((unsigned char *) buf2);
-    } else if (!strncasecmp(buf, "integer", 7)) {
+    }
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
+    else if (!strncasecmp(buf, "integer64", 9)) {
+        static struct counter64 c64;
+        uint64_t v64 = strtoull(buf2, NULL, 10);
+        c64.high = (unsigned long)(v64 >> 32);
+        c64.low  = (unsigned long)(v64 & 0xffffffff);
+        *var_len = sizeof(c64);
+        vp->type = ASN_OPAQUE_I64;
+        return ((unsigned char *) &c64);
+    }
+#endif
+    else if (!strncasecmp(buf, "integer", 7)) {
         *var_len = sizeof(long_ret);
         long_ret = strtol(buf2, NULL, 10);
         vp->type = ASN_INTEGER;
@@ -92,7 +149,17 @@ netsnmp_internal_pass_parse(char * buf,
         long_ret = strtoul(buf2, NULL, 10);
         vp->type = ASN_UNSIGNED;
         return ((unsigned char *) &long_ret);
-    } else if (!strncasecmp(buf, "counter", 7)) {
+    }
+    else if (!strncasecmp(buf, "counter64", 9)) {
+        static struct counter64 c64;
+        uint64_t v64 = strtoull(buf2, NULL, 10);
+        c64.high = (unsigned long)(v64 >> 32);
+        c64.low  = (unsigned long)(v64 & 0xffffffff);
+        *var_len = sizeof(c64);
+        vp->type = ASN_COUNTER64;
+        return ((unsigned char *) &c64);
+    }
+    else if (!strncasecmp(buf, "counter", 7)) {
         *var_len = sizeof(long_ret);
         long_ret = strtoul(buf2, NULL, 10);
         vp->type = ASN_COUNTER;

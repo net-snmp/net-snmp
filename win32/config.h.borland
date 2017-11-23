@@ -164,9 +164,6 @@
 /* If you don't have root access don't exit upon kmem errors */
 #undef NETSNMP_NO_ROOT_ACCESS
 
-/* Define if you have the bcopy function.  */
-#undef HAVE_BCOPY
-
 /* Define if you have the gethostbyname function.  */
 #define HAVE_GETHOSTBYNAME 1
 
@@ -185,20 +182,11 @@
 /* Define if you have the vsnprintf function.  */
 #define HAVE_VSNPRINTF 1
 
-/* Define if you have the index function.  */
-#undef HAVE_INDEX
-
 /* Define if you have the kvm_openfiles function.  */
 #undef HAVE_KVM_OPENFILES
 
 /* Define if you have the lrand48 function.  */
 #undef HAVE_LRAND48
-
-/* Define if you have the memcpy function.  */
-#define HAVE_MEMCPY 1
-
-/* Define if you have the memmove function.  */
-#define HAVE_MEMMOVE 1
 
 /* Define if you have the rand function.  */
 #define HAVE_RAND 1
@@ -238,9 +226,6 @@
 
 /* Define if you have the statvfs function.  */
 #undef HAVE_STATVFS
-
-/* Define if you have the strchr function.  */
-#define HAVE_STRCHR 1
 
 /* Define if you have the strcasecmp function */
 #define HAVE_STRCASECMP 1
@@ -491,9 +476,6 @@
 /* Define if you have the kstat library (-lkstat).  */
 #undef HAVE_LIBKSTAT
 
-/* Define if you have the kvm library (-lkvm).  */
-#undef HAVE_LIBKVM
-
 /* Define if you have the m library (-lm).  */
 #undef HAVE_LIBM
 
@@ -542,9 +524,6 @@
 
 /* type check for in_addr_t */
 #define in_addr_t u_long
-
-/* define if your compiler (processor) defines __FUNCTION__ for you */
-#undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
 
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the
@@ -731,43 +710,6 @@
 
 /* Define if you have the strerror function.  */
 #define HAVE_STRERROR 1
-
-#ifndef HAVE_STRCHR
-#ifdef HAVE_INDEX
-# define strchr index
-# define strrchr rindex
-#endif
-#endif
-
-#ifndef HAVE_INDEX
-#ifdef HAVE_STRCHR
-# define index strchr
-# define rindex strrchr
-#endif
-#endif
-
-#ifndef HAVE_MEMCPY
-#ifdef HAVE_BCOPY
-# define memcpy(d, s, n) bcopy ((s), (d), (n))
-# define memmove(d, s, n) bcopy ((s), (d), (n))
-# define memcmp bcmp
-#endif
-#endif
-
-#ifndef HAVE_MEMMOVE
-#ifdef HAVE_MEMCPY
-# define memmove memcpy
-#endif
-#endif
-
-#ifndef HAVE_BCOPY
-#ifdef HAVE_MEMCPY
-# define bcopy(s, d, n) memcpy ((d), (s), (n))
-# define bzero(p,n) memset((p),(0),(n))
-# define bcmp memcmp
-#endif
-#endif
-
 
 /* define random functions */
 

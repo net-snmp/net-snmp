@@ -167,7 +167,7 @@ netSnmpHostsTable_context_convert_function(void *loop_context,
 
 /** Create a data_context for non-existent rows that SETs are performed on.
  *  return a void * pointer which will be passed to subsequent get_XXX
- *  and set_XXX functions for data retrival and modification during
+ *  and set_XXX functions for data retrieval and modification during
  *  this SET request.
  *
  *  The indexs are encoded (in order) into the index_data pointer if it
@@ -225,8 +225,10 @@ netSnmpHostsTable_commit_row(void **my_data_context, int new_or_del)
     if ((out = fopen(HOSTS_FILE ".snmp", "w")) == NULL)
         return SNMP_ERR_COMMITFAILED;
     
-    if ((in = fopen(HOSTS_FILE, "r")) == NULL)
+    if ((in = fopen(HOSTS_FILE, "r")) == NULL) {
+        fclose(out);
         return SNMP_ERR_COMMITFAILED;
+    }
 
     while(fgets(line, sizeof(line), in)) {
         copy_nword(line,myaddr,sizeof(myaddr));

@@ -1,4 +1,4 @@
-.TH SNMP_CONFIG 5 "5 May 2005" VVERSIONINFO "Net-SNMP"
+.TH SNMP_CONFIG 5 "08 Mar 2010" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmp_config - handling of Net-SNMP configuration files
 .SH DESCRIPTION
@@ -11,9 +11,10 @@ found and read from.  By default, the applications look for
 configuration files in the following 4 directories, in order:
 SYSCONFDIR/snmp,
 DATADIR/snmp, LIBDIR/snmp, and $HOME/.snmp.  In each of these
-directories, it looks for files with the extension of both
-.IR conf " and " local.conf
-(reading the second ones last).  In this manner, there are
+directories, it looks for files snmp.conf, snmpd.conf and/or
+snmptrapd.conf, as well as snmp.local.conf, snmpd.local.conf
+and/or snmptrapd.local.conf. *.local.conf are always
+read last. In this manner, there are
 8 default places a configuration file can exist for any given
 configuration file type.
 .PP
@@ -171,15 +172,44 @@ Similarly for any other application token (as passed to init_snmp()).
 .PP
 Any lines beginning with the character '#' in the configuration files
 are treated as a comment and are not parsed.
+.SH "INCLUDING OTHER CONFIGURATION FILES"
+It is possible to include other configuration files for processing
+during normal configuration file processing.:
+.PP
+.RS
+.nf
+# include site specific config
+includeFile site.conf
+.RE
+.PP
+This will load the specified configuration file. The
+path to file must be either absolute, starting with '/',
+or relative. The relative path is then relative to the directory
+where the parent file with 'includeFile' directive resides.
+.PP
+The included file name does not need to have '.conf' suffix.
+.PP
+.RS
+.nf
+# include a all *.conf files in a directory
+includeDir /etc/snmp/config.d
+.RE
+.PP
+This will search specified directory for all files with '.conf'
+suffix and process them as if they were included using includeFile
+directive. The configuration files are not processed in any particular
+order.
+.PP
+The specified directory must be absolute directory path.
 .SH "API INTERFACE"
 .PP
 Information about writing C code that makes use of this system in
 either the agent's MIB modules or in applications can be found in the
-.I read_config(3)
+.I netsnmp_config_api(3)
 manual page.
 .SH "SEE ALSO"
 snmpconf(1),
-read_config(3),
+netsnmp_config_api(3),
 snmp.conf(5),
 snmpd.conf(5)
 .\" Local Variables:

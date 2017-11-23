@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #if HAVE_STDLIB_H
@@ -28,6 +29,9 @@
 
 #include <net-snmp/library/container_iterator.h>
 
+netsnmp_feature_child_of(container_iterator, container_types)
+
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_ITERATOR
 /**
  *  Holds iterator information containing functions which should be called
  *  by the iterator_handler to loop over your data set and sort it in a
@@ -504,3 +508,6 @@ netsnmp_container_iterator_set_data_cb(netsnmp_container *c,
     ii->remove_data = remove_data;
     ii->get_size = get_size;
 }
+#else  /* NETSNMP_FEATURE_REMOVE_CONTAINER_ITERATOR */
+netsnmp_feature_unused(container_iterator);
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_ITERATOR */

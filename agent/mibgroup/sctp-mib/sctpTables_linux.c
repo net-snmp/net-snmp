@@ -7,7 +7,7 @@
 #include "sctpAssocRemAddrTable.h"
 #include "sctpTables_common.h"
 
-#include <util_funcs.h>
+#include "mibgroup/util_funcs/get_pid_from_inode.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -150,13 +150,7 @@ parse_assoc_line(char *line, sctpTables_containers * containers)
     }
     entry->sctpAssocState = strtol(token, NULL, 10);
 
-    token = strtok(NULL, " ");  /* HBKT */
-    if (token == NULL) {
-        ret = SNMP_ERR_GENERR;
-        goto error;
-    }
-    entry->sctpAssocHeartBeatInterval = strtol(token, NULL, 10);
-
+    token = strtok(NULL, " ");  /* HBKT, ignore */
     token = strtok(NULL, " ");  /* ASSOC-ID, store */
     if (token == NULL) {
         ret = SNMP_ERR_GENERR;
@@ -174,7 +168,7 @@ parse_assoc_line(char *line, sctpTables_containers * containers)
         goto error;
     }
     inode = strtoull(token, NULL, 10);
-    entry->sctpAssocPrimProcess = get_pid_from_inode(inode);
+    entry->sctpAssocPrimProcess = netsnmp_get_pid_from_inode(inode);
 
     token = strtok(NULL, " ");  /* LPORT */
     if (token == NULL) {
@@ -286,6 +280,8 @@ load_assoc(sctpTables_containers * containers)
                     "arch load failed: can't open" ASSOC_FILE "\n"));
         return SNMP_ERR_GENERR;
     }
+
+    netsnmp_get_pid_from_inode_init();
 
     /*
      * ignore the header. 

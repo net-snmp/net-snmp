@@ -8,6 +8,7 @@
  * This should always be included first before anything else 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -20,6 +21,13 @@
 #include <limits.h>
 #endif
 
+netsnmp_feature_require(mib_snprint_variable)
+netsnmp_feature_require(tdomain_support)
+netsnmp_feature_require(check_vb_uint)
+netsnmp_feature_require(string_time_to_secs)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(header_complex_find_entry)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * minimal include directives 
@@ -78,50 +86,98 @@ oid             mteTriggerTable_variables_oid[] =
  */
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 struct variable2 mteTriggerTable_variables[] = {
     /*
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   MTETRIGGERCOMMENT     5
-    {MTETRIGGERCOMMENT, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 3}},
+    {MTETRIGGERCOMMENT, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 3}},
 #define   MTETRIGGERTEST        6
-    {MTETRIGGERTEST, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2, {1, 4}},
+    {MTETRIGGERTEST, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 4}},
 #define   MTETRIGGERSAMPLETYPE  7
-    {MTETRIGGERSAMPLETYPE, ASN_INTEGER, RWRITE, var_mteTriggerTable, 2,
-     {1, 5}},
+    {MTETRIGGERSAMPLETYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 5}},
 #define   MTETRIGGERVALUEID     8
-    {MTETRIGGERVALUEID, ASN_OBJECT_ID, RWRITE, var_mteTriggerTable, 2,
-     {1, 6}},
+    {MTETRIGGERVALUEID, ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 6}},
 #define   MTETRIGGERVALUEIDWILDCARD  9
-    {MTETRIGGERVALUEIDWILDCARD, ASN_INTEGER, RWRITE, var_mteTriggerTable,
-     2, {1, 7}},
+    {MTETRIGGERVALUEIDWILDCARD, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 7}},
 #define   MTETRIGGERTARGETTAG   10
-    {MTETRIGGERTARGETTAG, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 8}},
+    {MTETRIGGERTARGETTAG, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 8}},
 #define   MTETRIGGERCONTEXTNAME  11
-    {MTETRIGGERCONTEXTNAME, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 9}},
+    {MTETRIGGERCONTEXTNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 9}},
 #define   MTETRIGGERCONTEXTNAMEWILDCARD  12
-    {MTETRIGGERCONTEXTNAMEWILDCARD, ASN_INTEGER, RWRITE,
+    {MTETRIGGERCONTEXTNAMEWILDCARD, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerTable, 2, {1, 10}},
 #define   MTETRIGGERFREQUENCY   13
-    {MTETRIGGERFREQUENCY, ASN_UNSIGNED, RWRITE, var_mteTriggerTable, 2,
-     {1, 11}},
+    {MTETRIGGERFREQUENCY, ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 11}},
 #define   MTETRIGGEROBJECTSOWNER  14
-    {MTETRIGGEROBJECTSOWNER, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 12}},
+    {MTETRIGGEROBJECTSOWNER, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 12}},
 #define   MTETRIGGEROBJECTS     15
-    {MTETRIGGEROBJECTS, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 13}},
+    {MTETRIGGEROBJECTS, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 13}},
 #define   MTETRIGGERENABLED     16
-    {MTETRIGGERENABLED, ASN_INTEGER, RWRITE, var_mteTriggerTable, 2,
-     {1, 14}},
+    {MTETRIGGERENABLED, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 14}},
 #define   MTETRIGGERENTRYSTATUS  17
-    {MTETRIGGERENTRYSTATUS, ASN_INTEGER, RWRITE, var_mteTriggerTable, 2,
-     {1, 15}},
-
+    {MTETRIGGERENTRYSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 15}},
 };
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+struct variable2 mteTriggerTable_variables[] = {
+    /*
+     * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
+     */
+#define   MTETRIGGERCOMMENT     5
+    {MTETRIGGERCOMMENT, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 3}},
+#define   MTETRIGGERTEST        6
+    {MTETRIGGERTEST, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 4}},
+#define   MTETRIGGERSAMPLETYPE  7
+    {MTETRIGGERSAMPLETYPE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 5}},
+#define   MTETRIGGERVALUEID     8
+    {MTETRIGGERVALUEID, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 6}},
+#define   MTETRIGGERVALUEIDWILDCARD  9
+    {MTETRIGGERVALUEIDWILDCARD, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 7}},
+#define   MTETRIGGERTARGETTAG   10
+    {MTETRIGGERTARGETTAG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 8}},
+#define   MTETRIGGERCONTEXTNAME  11
+    {MTETRIGGERCONTEXTNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 9}},
+#define   MTETRIGGERCONTEXTNAMEWILDCARD  12
+    {MTETRIGGERCONTEXTNAMEWILDCARD, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 10}},
+#define   MTETRIGGERFREQUENCY   13
+    {MTETRIGGERFREQUENCY, ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 11}},
+#define   MTETRIGGEROBJECTSOWNER  14
+    {MTETRIGGEROBJECTSOWNER, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 12}},
+#define   MTETRIGGEROBJECTS     15
+    {MTETRIGGEROBJECTS, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 13}},
+#define   MTETRIGGERENABLED     16
+    {MTETRIGGERENABLED, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 14}},
+#define   MTETRIGGERENTRYSTATUS  17
+    {MTETRIGGERENTRYSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerTable, 2, {1, 15}},
+};
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 /*
  * (L = length of the oidsuffix) 
  */
@@ -133,7 +189,6 @@ struct variable2 mteTriggerTable_variables[] = {
 struct header_complex_index *mteTriggerTableStorage = NULL;
 
 netsnmp_session *mte_callback_sess = NULL;
-extern int      callback_master_num;
 
 /*
  * init_mteTriggerTable():
@@ -356,8 +411,7 @@ static int      monitor_call_count = 0;
 void
 parse_simple_monitor(const char *token, char *line)
 {
-    char            buf[SPRINT_MAX_LEN], *cp, ebuf[SPRINT_MAX_LEN],
-                    eventname[64];
+    char            buf[SPRINT_MAX_LEN], *cp, eventname[64];
     oid             obuf[MAX_OID_LEN];
     size_t          obufLen;
     struct mteTriggerTable_data *StorageNew;
@@ -403,8 +457,17 @@ parse_simple_monitor(const char *token, char *line)
            break;
         case 'r':
             if (cp) {
+                int freq;
                 cp = copy_nword(cp, buf, sizeof(buf));
-                StorageNew->mteTriggerFrequency = strtoul(buf, NULL, 0);
+                freq = netsnmp_string_time_to_secs(buf);
+                if (freq == -1) {
+                    config_perror("Invalid -r value\n");
+                    /*
+                     * XXX: free StorageNew 
+                     */
+                    return;
+                }
+                StorageNew->mteTriggerFrequency = (unsigned long) freq;
             } else {
                 config_perror("No parameter after -r given\n");
                 /*
@@ -444,8 +507,7 @@ parse_simple_monitor(const char *token, char *line)
             cp = copy_nword(cp, buf, sizeof(buf));
             obufLen = MAX_OID_LEN;
             if (!snmp_parse_oid(buf, obuf, &obufLen)) {
-                sprintf(ebuf, "unable to parse oid: %s", buf);
-                config_perror(ebuf);
+		netsnmp_config_error("unable to parse oid: %s", buf);
                 /*
                  * XXX: free StorageNew 
                  */
@@ -506,8 +568,7 @@ parse_simple_monitor(const char *token, char *line)
     cp = copy_nword(cp, buf, sizeof(buf));
     obufLen = MAX_OID_LEN;
     if (!snmp_parse_oid(buf, obuf, &obufLen)) {
-        sprintf(ebuf, "unable to parse oid: %s", buf);
-        config_perror(ebuf);
+	netsnmp_config_error("unable to parse oid: %s", buf);
         /*
          * XXX: free StorageNew 
          */
@@ -595,7 +656,7 @@ parse_simple_monitor(const char *token, char *line)
 
     DEBUGMSGTL(("mteTriggerTable", "added simple monitor: %s\n",
                 StorageNew->mteTriggerName));
-}
+} /* parse_simple_monitor */
 
 
 /*
@@ -1078,9 +1139,7 @@ parse_mteTriggerTable(const char *token, char *line)
         mte_enable_trigger(StorageTmp);
 
     DEBUGMSGTL(("mteTriggerTable", "done.\n"));
-}
-
-
+} /* parse_mteTriggerTable */
 
 
 /*
@@ -1431,14 +1490,20 @@ var_mteTriggerTable(struct variable *vp,
 
     DEBUGMSGTL(("mteTriggerTable",
                 "var_mteTriggerTable: Entering...  \n"));
+
+	/* set default value */
+	*write_method = NULL;
+
     /*
      * this assumes you have registered all your data properly
      */
     if ((StorageTmp =
          header_complex(mteTriggerTableStorage, vp, name, length, exact,
                         var_len, write_method)) == NULL) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         if (vp->magic == MTETRIGGERENTRYSTATUS)
             *write_method = write_mteTriggerEntryStatus;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         return NULL;
     }
 
@@ -1450,67 +1515,93 @@ var_mteTriggerTable(struct variable *vp,
 
 
     case MTETRIGGERCOMMENT:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerComment;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerCommentLen;
         return (u_char *) StorageTmp->mteTriggerComment;
 
     case MTETRIGGERTEST:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerTest;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerTestLen;
         return (u_char *) StorageTmp->mteTriggerTest;
 
     case MTETRIGGERSAMPLETYPE:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerSampleType;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->mteTriggerSampleType);
         return (u_char *) & StorageTmp->mteTriggerSampleType;
 
     case MTETRIGGERVALUEID:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerValueID;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerValueIDLen * sizeof(oid);
         return (u_char *) StorageTmp->mteTriggerValueID;
 
     case MTETRIGGERVALUEIDWILDCARD:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerValueIDWildcard;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->mteTriggerValueIDWildcard);
         return (u_char *) & StorageTmp->mteTriggerValueIDWildcard;
 
     case MTETRIGGERTARGETTAG:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerTargetTag;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerTargetTagLen;
         return (u_char *) StorageTmp->mteTriggerTargetTag;
 
     case MTETRIGGERCONTEXTNAME:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerContextName;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerContextNameLen;
         return (u_char *) StorageTmp->mteTriggerContextName;
 
     case MTETRIGGERCONTEXTNAMEWILDCARD:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerContextNameWildcard;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->mteTriggerContextNameWildcard);
         return (u_char *) & StorageTmp->mteTriggerContextNameWildcard;
 
     case MTETRIGGERFREQUENCY:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerFrequency;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->mteTriggerFrequency);
         return (u_char *) & StorageTmp->mteTriggerFrequency;
 
     case MTETRIGGEROBJECTSOWNER:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerObjectsOwner;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerObjectsOwnerLen;
         return (u_char *) StorageTmp->mteTriggerObjectsOwner;
 
     case MTETRIGGEROBJECTS:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerObjects;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerObjectsLen;
         return (u_char *) StorageTmp->mteTriggerObjects;
 
     case MTETRIGGERENABLED:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerEnabled;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->mteTriggerEnabled);
         return (u_char *) & StorageTmp->mteTriggerEnabled;
 
     case MTETRIGGERENTRYSTATUS:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerEntryStatus;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->mteTriggerEntryStatus);
         return (u_char *) & StorageTmp->mteTriggerEntryStatus;
 
@@ -1523,7 +1614,7 @@ var_mteTriggerTable(struct variable *vp,
 
 
 
-
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 write_mteTriggerComment(int action,
                         u_char * var_val,
@@ -1606,10 +1697,11 @@ write_mteTriggerComment(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerComment */
 
 
 
@@ -1692,10 +1784,11 @@ write_mteTriggerTest(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerTest */
 
 
 
@@ -1774,11 +1867,11 @@ write_mteTriggerSampleType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerSampleType */
 
 
 
@@ -1868,10 +1961,11 @@ write_mteTriggerValueID(int action,
          * previous values, as these are from a different object?  
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerValueID */
 
 
 
@@ -1951,11 +2045,11 @@ write_mteTriggerValueIDWildcard(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerValueIDWildcard */
 
 
 
@@ -2040,10 +2134,11 @@ write_mteTriggerTargetTag(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerTargetTag */
 
 
 
@@ -2129,10 +2224,11 @@ write_mteTriggerContextName(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerContextName */
 
 
 
@@ -2212,11 +2308,11 @@ write_mteTriggerContextNameWildcard(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerContextNameWildcard */
 
 
 
@@ -2299,10 +2395,11 @@ write_mteTriggerFrequency(int action,
             StorageTmp->mteTriggerEntryStatus == RS_ACTIVE)
             mte_enable_trigger(StorageTmp);
 
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerFrequency */
 
 
 
@@ -2388,10 +2485,11 @@ write_mteTriggerObjectsOwner(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerObjectsOwner */
 
 
 
@@ -2476,10 +2574,11 @@ write_mteTriggerObjects(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerObjects */
 
 
 
@@ -2564,14 +2663,11 @@ write_mteTriggerEnabled(int action,
         else if (StorageTmp->mteTriggerEnabled == MTETRIGGERENABLED_FALSE)
             mte_disable_trigger(StorageTmp);
 
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
-
-
-
+} /* write_mteTriggerEnabled */
 
 
 
@@ -2820,7 +2916,7 @@ write_mteTriggerEntryStatus(int action,
          */
         if (StorageDel != NULL) {
             mte_disable_trigger(StorageDel);
-            StorageDel = 0;
+            StorageDel = NULL;
             /*
              * XXX: free it, its dead 
              */
@@ -2895,10 +2991,15 @@ write_mteTriggerEntryStatus(int action,
             StorageTmp->mteTriggerEnabled == MTETRIGGERENABLED_TRUE &&
             StorageTmp->mteTriggerEntryStatus == RS_ACTIVE)
             mte_enable_trigger(StorageTmp);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
-}
+} /* write_mteTriggerEntryStatus */
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
+
 
 /*
  * send trap 
@@ -2993,7 +3094,8 @@ send_mte_trap(struct mteTriggerTable_data *item,
 
     send_v2trap(var_list);
     snmp_free_varbind(var_list);
-}
+} /* send_mte_trap */
+
 
 void
 last_state_clean(void *data)
@@ -3002,6 +3104,7 @@ last_state_clean(void *data)
     SNMP_FREE(cleanme->value);
     SNMP_FREE(cleanme);
 }
+
 
 /*
  * retrieves requested info in pdu from the current target 
@@ -3060,7 +3163,7 @@ mte_get_response(struct mteTriggerTable_data *item, netsnmp_pdu *pdu)
              * xxx 
              */
             char           *errstr;
-            snmp_error(mte_callback_sess, 0, 0, &errstr);
+            snmp_error(mte_callback_sess, NULL, NULL, &errstr);
             if (response) {
                 DEBUGMSGTL(("mteTriggerTable",
                             "Error received: status=%d, sess_error=%s, pduerr=%d/%s, pdu version=%d\n",
@@ -3094,7 +3197,7 @@ mte_get_response(struct mteTriggerTable_data *item, netsnmp_pdu *pdu)
     buf[sizeof(buf) - 1] = '\0';
     DEBUGMSGTL(("mteTriggerTable", "got a variables: %s\n", buf));
     return response;
-}
+} /* mte_get_response */
 
 
 /*
@@ -3123,7 +3226,6 @@ mte_is_integer_type(unsigned char type)
         return 0;
     }
 }
-
 
 
 /*
@@ -3256,7 +3358,7 @@ mte_discontinuity_occurred(struct mteTriggerTable_data *item)
      */
     DEBUGMSGTL(("mte_disco", "no discontinuity\n"));
     return 0;
-}
+} /* mte_discontinuity_occurred */
 
 
 void
@@ -3663,7 +3765,8 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
     }
 
     item->started = MTE_STARTED;
-}
+} /* mte_run_trigger */
+
 
 
 /*

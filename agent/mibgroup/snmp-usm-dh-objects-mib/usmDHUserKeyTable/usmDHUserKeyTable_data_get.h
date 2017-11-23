@@ -26,7 +26,8 @@ extern          "C" {
 
 #ifdef NEED_USMDH_FUNCTIONS
     int             usmDHGetUserKeyChange(struct usmUser *user,
-                                          int for_auth_key, char **keyobj,
+                                          int for_auth_key,
+                                          u_char **keyobj,
                                           size_t *keyobj_len);
     DH             *usmDHGetUserDHptr(struct usmUser *user,
                                       int for_auth_key);
@@ -54,29 +55,38 @@ extern          "C" {
      */
 
     int             usmDHUserAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx
-                                               * rowreq_ctx, char
-                                               **usmDHUserAuthKeyChange_val_ptr_ptr, size_t
+                                               * rowreq_ctx,
+                                               u_char
+                                               **usmDHUserAuthKeyChange_val_ptr_ptr,
+                                               size_t
                                                *usmDHUserAuthKeyChange_val_ptr_len_ptr);
     int            
         usmDHUserOwnAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx *
-                                      rowreq_ctx, char
-                                      **usmDHUserOwnAuthKeyChange_val_ptr_ptr, size_t
+                                      rowreq_ctx,
+                                      u_char
+                                      **usmDHUserOwnAuthKeyChange_val_ptr_ptr,
+                                      size_t
                                       *usmDHUserOwnAuthKeyChange_val_ptr_len_ptr);
     int             usmDHUserPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx
-                                               * rowreq_ctx, char
-                                               **usmDHUserPrivKeyChange_val_ptr_ptr, size_t
+                                               * rowreq_ctx,
+                                               u_char
+                                               **usmDHUserPrivKeyChange_val_ptr_ptr,
+                                               size_t
                                                *usmDHUserPrivKeyChange_val_ptr_len_ptr);
     int            
         usmDHUserOwnPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx *
-                                      rowreq_ctx, char
-                                      **usmDHUserOwnPrivKeyChange_val_ptr_ptr, size_t
+                                      rowreq_ctx,
+                                      u_char
+                                      **usmDHUserOwnPrivKeyChange_val_ptr_ptr,
+                                      size_t
                                       *usmDHUserOwnPrivKeyChange_val_ptr_len_ptr);
 
 
     int            
         usmDHUserKeyTable_indexes_set_tbl_idx(usmDHUserKeyTable_mib_index *
-                                              tbl_idx, char
-                                              *usmUserEngineID_val_ptr, size_t
+                                              tbl_idx,
+                                              u_char *usmUserEngineID_val_ptr,
+                                              size_t
                                               usmUserEngineID_val_ptr_len,
                                               char *usmUserName_val_ptr,
                                               size_t
@@ -84,7 +94,7 @@ extern          "C" {
     int            
         usmDHUserKeyTable_indexes_set(usmDHUserKeyTable_rowreq_ctx *
                                       rowreq_ctx,
-                                      char *usmUserEngineID_val_ptr,
+                                      u_char *usmUserEngineID_val_ptr,
                                       size_t usmUserEngineID_val_ptr_len,
                                       char *usmUserName_val_ptr,
                                       size_t usmUserName_val_ptr_len);

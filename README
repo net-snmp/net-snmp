@@ -1,4 +1,4 @@
-	       README file for net-snmp Version: 5.4.5.rc1
+	       README file for net-snmp Version: 5.7.3
 
 DISCLAIMER
 
@@ -256,7 +256,7 @@ THANKS
     Dan A. Dickey <ddickey@transition.com>
     Dave Shield <D.T.Shield@csc.liv.ac.uk>
     Giovanni S. Marzot <gmarzot@nortelnetworks.com>
-    Niels Baggesen <recnba@mediator.uni-c.dk>
+    Niels Baggesen <nba@users.sourceforge.net>
     Simon Leinen <simon@limmat.switch.ch>
     David T. Perkins <dperkins@dsperkins.com>
     Mike Perik <mikep@crt.com>
@@ -349,7 +349,12 @@ THANKS
     Peter Martin <pnmartin@users.sourceforge.net>
     Thomas Lackey <telackey@users.sourceforge.net>
     Joe Buehler <jbuehler@spirentcom.com>
+    Anders Persson <apersson@users.sourceforge.net>
+    Rojer <rojer@users.sourceforge.net>
     Bart Van Assche <bart.vanassche@gmail.com>
+    Pablo Carboni <pcarboni@users.sourceforge.net>
+    Bill Fenner <fenner@gmail.com>
+    Brian Sipos <bsiposrkf@users.sourceforge.net>
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.

@@ -51,9 +51,6 @@ SOFTWARE.
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifndef NULL
 #define NULL 0
 #endif
@@ -90,10 +87,11 @@ SOFTWARE.
 */
 
 void
-xdump(const u_char * cp, size_t length, const char *prefix)
+xdump(const void * data, size_t length, const char *prefix)
 {
-    int             col, count;
-    char           *buffer;
+    const u_char * const cp = (const u_char*)data;
+    int                  col, count;
+    char                *buffer;
 
     buffer = (char *) malloc(strlen(prefix) + 80);
     if (!buffer) {

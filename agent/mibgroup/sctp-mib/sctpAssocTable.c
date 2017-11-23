@@ -16,6 +16,7 @@ static int      _cache_load(netsnmp_cache * cache, void *vmagic);
  * content of the sctpAssocTable 
  */
 static netsnmp_container *sctpAssocTable_container;
+static netsnmp_table_registration_info *table_info;
 
 /** Initializes the sctpAssocTable module */
 void
@@ -30,7 +31,7 @@ init_sctpAssocTable(void)
 void
 shutdown_sctpAssocTable(void)
 {
-    sctpAssocTable_container_clear(sctpAssocTable_container);
+    shutdown_table_sctpAssocTable();
 }
 
 /** Initialize the sctpAssocTable table by defining its contents and how it's structured */
@@ -43,7 +44,6 @@ initialize_table_sctpAssocTable(void)
     netsnmp_handler_registration *reg = NULL;
     netsnmp_mib_handler *handler = NULL;
     netsnmp_container *container = NULL;
-    netsnmp_table_registration_info *table_info = NULL;
     netsnmp_cache  *cache = NULL;
 
     reg =
@@ -120,6 +120,8 @@ initialize_table_sctpAssocTable(void)
         goto bail;
     }
 
+    netsnmp_cache_handler_owns_cache(handler);
+
     if (SNMPERR_SUCCESS != netsnmp_inject_handler(reg, handler)) {
         snmp_log(LOG_ERR,
                  "error injecting cache handler for sctpAssocTable\n");
@@ -133,6 +135,7 @@ initialize_table_sctpAssocTable(void)
     if (SNMPERR_SUCCESS != netsnmp_register_table(reg, table_info)) {
         snmp_log(LOG_ERR,
                  "error registering table handler for sctpAssocTable\n");
+        reg = NULL; /* it was freed inside netsnmp_register_table */
         goto bail;
     }
 
@@ -151,11 +154,28 @@ initialize_table_sctpAssocTable(void)
     if (handler)
         netsnmp_handler_free(handler);
 
+    if (cache)
+        netsnmp_cache_free(cache);
+
+    if (table_info)
+        netsnmp_table_registration_info_free(table_info);
+
     if (container)
         CONTAINER_FREE(container);
 
     if (reg)
         netsnmp_handler_registration_free(reg);
+}
+
+void
+shutdown_table_sctpAssocTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
+    if (sctpAssocTable_container)
+	sctpAssocTable_container_clear(sctpAssocTable_container);
 }
 
 
@@ -487,8 +507,7 @@ sctpAssocTable_entry_copy(sctpAssocTable_entry * from,
 void
 sctpAssocTable_entry_free(sctpAssocTable_entry * entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

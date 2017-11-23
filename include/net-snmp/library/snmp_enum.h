@@ -63,8 +63,10 @@ extern          "C" {
      * find a list, and then operate on that list
      *   ( direct methods further below if you already have the list pointer)
      */
+    NETSNMP_IMPORT
     char           *se_find_label_in_slist(const char *listname,
                                            int value);
+    NETSNMP_IMPORT
     int             se_find_value_in_slist(const char *listname,
                                            const char *label);
     int             se_find_free_value_in_slist(const char *listname);
@@ -73,6 +75,7 @@ extern          "C" {
      * ownership of the memory pointed to by label to the list:
      * clear_snmp_enum() deallocates that memory.
      */
+    NETSNMP_IMPORT
     int             se_add_pair_to_slist(const char *listname, char *label,
                                          int value);
 
@@ -94,14 +97,16 @@ extern          "C" {
                                        const char *token, const char *type);
     void            se_store_list(unsigned int major, unsigned int minor,
                                   const char *type);
+    void            se_clear_slist(const char *listname);
     void            se_store_slist(const char *listname, const char *type);
     int             se_store_slist_callback(int majorID, int minorID,
                                            void *serverargs, void *clientargs);
-    void            se_read_conf(const char *word, char *cptr);
+    void            se_read_conf(const char *word, const char *cptr);
     /**
      * Deallocate the memory allocated by init_snmp_enum(): remove all key/value
      * pairs stored by se_add_*() calls.
      */
+    NETSNMP_IMPORT
     void            clear_snmp_enum(void);
 
 #ifdef __cplusplus

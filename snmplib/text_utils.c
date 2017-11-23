@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
 #include <stdio.h>
@@ -42,7 +43,14 @@
 #include <net-snmp/library/file_utils.h>
 #include <net-snmp/library/text_utils.h>
 
+netsnmp_feature_child_of(text_utils, libnetsnmp)
 
+netsnmp_feature_provide(text_utils)
+#ifdef NETSNMP_FEATURE_REQUIRE_TEXT_UTILS
+netsnmp_feature_require(file_utils)
+#endif /* NETSNMP_FEATURE_REQUIRE_TEXT_UTILS */
+
+#ifndef NETSNMP_FEATURE_REMOVE_TEXT_UTILS
 /*------------------------------------------------------------------
  *
  * Prototypes
@@ -147,6 +155,8 @@ netsnmp_file_text_parse(netsnmp_file *f, netsnmp_container *cin,
     return c;
 }
 
+netsnmp_feature_child_of(text_token_container_from_file, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_TEXT_TOKEN_CONTAINER_FROM_FILE
 netsnmp_container *
 netsnmp_text_token_container_from_file(const char *file, u_int flags,
                                        netsnmp_container *cin, void *context)
@@ -199,6 +209,7 @@ netsnmp_text_token_container_from_file(const char *file, u_int flags,
     
     return c;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TEXT_TOKEN_CONTAINER_FROM_FILE */
 
 
 /*------------------------------------------------------------------
@@ -465,13 +476,13 @@ _process_line_tvi(netsnmp_line_info *line_info, void *mem,
 
         case PMLP_TYPE_UNSIGNED:
             tvi->value.ul = strtoul(ptr, NULL, 0);
-            if ((errno == ERANGE) &&(ULONG_MAX == tvi->value.sl))
+            if ((errno == ERANGE) && (ULONG_MAX == tvi->value.ul))
                 snmp_log(LOG_WARNING,"value overflow\n");
             break;
 
 
         case PMLP_TYPE_INTEGER:
-            tvi->value.ul = strtol(ptr, NULL, 0);
+            tvi->value.sl = strtol(ptr, NULL, 0);
             if ((errno == ERANGE) &&
                 ((LONG_MAX == tvi->value.sl) ||
                  (LONG_MIN == tvi->value.sl)))
@@ -483,7 +494,7 @@ _process_line_tvi(netsnmp_line_info *line_info, void *mem,
             break;
 
         case PMLP_TYPE_BOOLEAN:
-            if (isdigit(*ptr))
+            if (isdigit((unsigned char)(*ptr)))
                 tvi->value.ul = strtoul(ptr, NULL, 0);
             else if (strcasecmp(ptr,"true") == 0)
                 tvi->value.ul = 1;
@@ -510,3 +521,6 @@ _process_line_tvi(netsnmp_line_info *line_info, void *mem,
     return PMLP_RC_MEMORY_USED;
 }
 
+#else  /* ! NETSNMP_FEATURE_REMOVE_TEXT_UTILS */
+netsnmp_feature_unused(text_utils);
+#endif /* ! NETSNMP_FEATURE_REMOVE_TEXT_UTILS */

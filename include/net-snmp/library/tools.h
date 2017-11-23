@@ -199,6 +199,7 @@ extern          "C" {
      * Prototypes.
      */
 
+    NETSNMP_IMPORT
     int             snmp_realloc(u_char ** buf, size_t * buf_len);
 
     void            free_zero(void *buf, size_t size);
@@ -208,6 +209,15 @@ extern          "C" {
     NETSNMP_IMPORT
     void           *netsnmp_memdup(const void * from, size_t size);
 
+    void            netsnmp_check_definedness(const void *packet,
+                                              size_t length);
+
+    NETSNMP_IMPORT
+    u_int           netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len,
+                                          int allow_realloc,
+                                          const u_char * input, size_t len);
+
+    NETSNMP_IMPORT
     u_int           binary_to_hex(const u_char * input, size_t len,
                                   char **output);
                     /* preferred */
@@ -215,39 +225,60 @@ extern          "C" {
                                          size_t * offset, int allow_realloc,
                                          const char *hex, const char *delim);
                     /* calls netsnmp_hex_to_binary w/delim of " " */
+    NETSNMP_IMPORT
     int             snmp_hex_to_binary(u_char ** buf, size_t * buf_len,
                                        size_t * offset, int allow_realloc,
                                        const char *hex);
                     /* handles odd lengths */
+    NETSNMP_IMPORT
     int             hex_to_binary2(const u_char * input, size_t len,
                                    char **output);
 
+    NETSNMP_IMPORT
     int             snmp_decimal_to_binary(u_char ** buf, size_t * buf_len,
                                            size_t * out_len,
                                            int allow_realloc,
                                            const char *decimal);
 #define snmp_cstrcat(b,l,o,a,s) snmp_strcat(b,l,o,a,(const u_char *)s)
+    NETSNMP_IMPORT
     int             snmp_strcat(u_char ** buf, size_t * buf_len,
                                 size_t * out_len, int allow_realloc,
                                 const u_char * s);
+    NETSNMP_IMPORT
     char           *netsnmp_strdup_and_null(const u_char * from,
                                             size_t from_len);
 
+    NETSNMP_IMPORT
     void            dump_chunk(const char *debugtoken, const char *title,
                                const u_char * buf, int size);
     char           *dump_snmpEngineID(const u_char * buf, size_t * buflen);
 
+    /** A pointer to an opaque time marker value. */
     typedef void   *marker_t;
-    marker_t        atime_newMarker(void);
-    void            atime_setMarker(marker_t pm);
-    long            atime_diff(marker_t first, marker_t second);
-    u_long          uatime_diff(marker_t first, marker_t second);       /* 1/1000th sec */
-    u_long          uatime_hdiff(marker_t first, marker_t second);      /* 1/100th sec */
-    int             atime_ready(marker_t pm, int deltaT);
-    int             uatime_ready(marker_t pm, unsigned int deltaT);
+    typedef const void* const_marker_t;
 
-    int             marker_tticks(marker_t pm);
-    int             timeval_tticks(struct timeval *tv);
+    NETSNMP_IMPORT
+    marker_t        atime_newMarker(void);
+    NETSNMP_IMPORT
+    void            atime_setMarker(marker_t pm);
+    NETSNMP_IMPORT
+    void            netsnmp_get_monotonic_clock(struct timeval* tv);
+    NETSNMP_IMPORT
+    void            netsnmp_set_monotonic_marker(marker_t *pm);
+    NETSNMP_IMPORT
+    long            atime_diff(const_marker_t first, const_marker_t second);
+    NETSNMP_IMPORT
+    u_long          uatime_diff(const_marker_t first, const_marker_t second);       /* 1/1000th sec */
+    NETSNMP_IMPORT
+    u_long          uatime_hdiff(const_marker_t first, const_marker_t second);      /* 1/100th sec */
+    NETSNMP_IMPORT
+    int             atime_ready(const_marker_t pm, int delta_ms);
+    NETSNMP_IMPORT
+    int             netsnmp_ready_monotonic(const_marker_t pm, int delta_ms);
+    int             uatime_ready(const_marker_t pm, unsigned int delta_ms);
+
+    int             marker_tticks(const_marker_t pm);
+    int             timeval_tticks(const struct timeval *tv);
     NETSNMP_IMPORT
     char            *netsnmp_getenv(const char *name);
     NETSNMP_IMPORT
@@ -255,6 +286,9 @@ extern          "C" {
                                    int overwrite);
 
     int             netsnmp_addrstr_hton(char *ptr, size_t len);
+
+    NETSNMP_IMPORT
+    int             netsnmp_string_time_to_secs(const char *time_string);
 
 #ifdef __cplusplus
 }

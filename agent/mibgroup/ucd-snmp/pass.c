@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -23,9 +24,6 @@
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifdef WIN32
 #include <limits.h>
 #endif
@@ -39,6 +37,9 @@
 #include "extensible.h"
 #include "util_funcs.h"
 
+netsnmp_feature_require(get_exten_instance)
+netsnmp_feature_require(parse_miboid)
+
 struct extensible *passthrus = NULL;
 int             numpassthrus = 0;
 
@@ -49,7 +50,8 @@ struct variable2 extensible_passthru_variables[] = {
     /*
      * bogus entry.  Only some of it is actually used. 
      */
-    {MIBINDEX, ASN_INTEGER, RWRITE, var_extensible_pass, 0, {MIBINDEX}},
+    {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_extensible_pass, 0, {MIBINDEX}},
 };
 
 
@@ -80,7 +82,7 @@ pass_parse_config(const char *token, char *cptr)
 	/* change priority level */
 	cptr++;
 	cptr = skip_white(cptr);
-	if (! isdigit(*cptr)) {
+	if (! isdigit((unsigned char)(*cptr))) {
 	  config_perror("priority must be an integer");
 	  return;
 	}
@@ -103,7 +105,7 @@ pass_parse_config(const char *token, char *cptr)
      */
     if (*cptr == '.')
         cptr++;
-    if (!isdigit(*cptr)) {
+    if (!isdigit((unsigned char)(*cptr))) {
         config_perror("second token is not a OID");
         return;
     }
@@ -111,32 +113,39 @@ pass_parse_config(const char *token, char *cptr)
 
     while (*ppass != NULL)
         ppass = &((*ppass)->next);
-    (*ppass) = (struct extensible *) malloc(sizeof(struct extensible));
+    *ppass = calloc(1, sizeof(**ppass));
     if (*ppass == NULL)
         return;
     (*ppass)->type = PASSTHRU;
+    (*ppass)->mibpriority = priority;
 
     (*ppass)->miblen = parse_miboid(cptr, (*ppass)->miboid);
-    while (isdigit(*cptr) || *cptr == '.')
+    while (isdigit((unsigned char)(*cptr)) || *cptr == '.')
         cptr++;
     /*
      * path
      */
+    free((*ppass)->command);
+    (*ppass)->command = NULL;
     cptr = skip_white(cptr);
     if (cptr == NULL) {
         config_perror("No command specified on pass line");
-        (*ppass)->command[0] = 0;
+        if (asprintf(&(*ppass)->command, "%s", "") < 0) {
+        }
     } else {
         for (tcptr = cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
              tcptr++);
-        sprintf((*ppass)->command, "%.*s", (int) (tcptr - cptr), cptr);
+        if (asprintf(&(*ppass)->command, "%.*s", (int) (tcptr - cptr), cptr)
+            < 0) {
+        }
     }
     strlcpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
     (*ppass)->next = NULL;
 
-    register_mib_priority("pass", (struct variable *) extensible_passthru_variables,
-			  sizeof(struct variable2),
-			  1, (*ppass)->miboid, (*ppass)->miblen, priority);
+    register_mib_priority("pass",
+                 (struct variable *) extensible_passthru_variables,
+                 sizeof(struct variable2), 1, (*ppass)->miboid,
+                 (*ppass)->miblen, (*ppass)->mibpriority);
 
     /*
      * argggg -- passthrus must be sorted 
@@ -148,7 +157,7 @@ pass_parse_config(const char *token, char *cptr)
             return;
 
         for (i = 0, ptmp = (struct extensible *) passthrus;
-             i < numpassthrus && ptmp != 0; i++, ptmp = ptmp->next)
+             i < numpassthrus && ptmp != NULL; i++, ptmp = ptmp->next)
             etmp[i] = ptmp;
         qsort(etmp, numpassthrus, sizeof(struct extensible *),
               pass_compare);
@@ -172,7 +181,8 @@ pass_free_config(void)
     for (etmp = passthrus; etmp != NULL;) {
         etmp2 = etmp;
         etmp = etmp->next;
-        unregister_mib(etmp2->miboid, etmp2->miblen);
+        unregister_mib_priority(etmp2->miboid, etmp2->miblen, etmp2->mibpriority);
+        free(etmp2->command);
         free(etmp2);
     }
     passthrus = NULL;
@@ -205,13 +215,11 @@ var_extensible_pass(struct variable *vp,
                 sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
             else
                 sprint_mib_oid(buf, name, *length);
-            if (exact)
-                snprintf(passthru->command, sizeof(passthru->command),
-                         "%s -g %s", passthru->name, buf);
-            else
-                snprintf(passthru->command, sizeof(passthru->command),
-                         "%s -n %s", passthru->name, buf);
-            passthru->command[ sizeof(passthru->command)-1 ] = 0;
+            free(passthru->command);
+            passthru->command = NULL;
+            if (asprintf(&passthru->command, "%s %s %s", passthru->name,
+                         exact ? "-g" : "-n", buf) < 0) {
+            }
             DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s\n",
                         passthru->command));
             /*
@@ -286,26 +294,23 @@ setPass(int action, u_char * var_val, u_char var_val_type,
             /*
              * setup args 
              */
+            free(passthru->command);
+            passthru->command = NULL;
             if (passthru->miblen >= name_len || rtest < 0)
                 sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
             else
                 sprint_mib_oid(buf, name, name_len);
-            snprintf(passthru->command, sizeof(passthru->command),
-                     "%s -s %s ", passthru->name, buf);
-            passthru->command[ sizeof(passthru->command)-1 ] = 0;
-            netsnmp_internal_pass_set_format(buf, var_val, var_val_type, var_val_len);
-            strlcat(passthru->command, buf, sizeof(passthru->command));
+            netsnmp_internal_pass_set_format(buf2, var_val, var_val_type,
+                                             var_val_len);
+            if (asprintf(&passthru->command, "%s -s %s %s", passthru->name, buf,
+                         buf2) < 0) {
+            }
             DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s",
                         passthru->command));
             exec_command(passthru);
             DEBUGMSGTL(("ucd-snmp/pass", "pass-running returned: %s",
                         passthru->output));
-            if (!strncasecmp(passthru->output, "not-writable", 12)) {
-                return SNMP_ERR_NOTWRITABLE;
-            } else if (!strncasecmp(passthru->output, "wrong-type", 10)) {
-                return SNMP_ERR_WRONGTYPE;
-            }
-            return SNMP_ERR_NOERROR;
+            return netsnmp_internal_pass_str_to_errno(passthru->output);
         }
     }
     if (snmp_get_do_debugging()) {

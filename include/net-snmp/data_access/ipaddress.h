@@ -47,7 +47,10 @@ typedef struct netsnmp_ipaddress_s {
    u_char    ia_status;     /* IpAddressStatus (1-7) */
    u_char    ia_origin;     /* IpAddressOrigin (1-6) */
    u_char    ia_storagetype; /* IpAddressStorageType (1-5) */
-
+   u_char    ia_onlink_flag; /* IpOnlinkFlag */
+   u_char    ia_autonomous_flag; /*IpAutonomousFlag */
+   u_long    ia_prefered_lifetime;/*IpPreferedLifeTime*/
+   u_long    ia_valid_lifetime;/*IpValidLifeTime*/
    netsnmp_data_list *arch_data;      /* arch specific data */
 
 } netsnmp_ipaddress_entry;
@@ -141,8 +144,22 @@ int netsnmp_ipaddress_prefix_copy(u_char *dst, u_char *src,
                                   int addr_len, int pfx_len);
 
 int netsnmp_ipaddress_ipv4_prefix_len(in_addr_t mask);
+in_addr_t netsnmp_ipaddress_ipv4_mask(int len);
+int netsnmp_ipaddress_ipv6_prefix_len(struct in6_addr mask);
 
+int netsnmp_ipaddress_flags_copy(u_long *ipAddressPrefixAdvPreferredLifetime,
+                                 u_long *ipAddressPrefixAdvValidLifetime,
+                                 u_long *ipAddressPrefixOnLinkFlag,
+                                 u_long *ipAddressPrefixAutonomousFlag,
+                                 u_long *ia_prefered_lifetime,
+                                 u_long *ia_valid_lifetime,
+                                 u_char *ia_onlink_flag,
+                                 u_char *ia_autonomous_flag);
 
+int netsnmp_ipaddress_prefix_origin_copy(u_long *ipAddressPrefixOrigin,
+                                         u_char ia_origin,
+                                         int flags,
+                                         u_long ipAddressAddrType);
 
 /**---------------------------------------------------------------------*/
 

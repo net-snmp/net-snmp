@@ -1,7 +1,7 @@
 #ifndef NETSNMP_EXTEND_H
 #define NETSNMP_EXTEND_H
 
-config_require( util_funcs )
+config_require( util_funcs/header_simple_table )
 config_require( utilities/execute )
 config_add_mib(NET-SNMP-EXTEND-MIB)
 
@@ -28,6 +28,7 @@ typedef struct netsnmp_extend_s {
 } netsnmp_extend;
 
 void                 init_extend(void);
+void                 shutdown_extend(void);
 Netsnmp_Node_Handler handle_nsExtendConfigTable;
 Netsnmp_Node_Handler handle_nsExtendOutput1Table;
 Netsnmp_Node_Handler handle_nsExtendOutput2Table;

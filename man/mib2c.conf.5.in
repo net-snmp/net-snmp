@@ -1,7 +1,6 @@
-.TH MIB2C.CONF 5 "28 Apr 2004" V5.2 "Net-SNMP"
-.UC 4
+.TH MIB2C.CONF 5 "28 Apr 2004" VVERSIONINFO "Net-SNMP"
 .SH NAME
-mib2c.conf -- How to write mib2c.conf files to do ANYTHING based on MIB input.
+mib2c.conf \- How to write mib2c.conf files to do ANYTHING based on MIB input.
 .SH SYNOPSIS
 % cat > mib2c.test.conf  << EOF
 @foreach $t table@
@@ -13,7 +12,7 @@ mib2c.conf -- How to write mib2c.conf files to do ANYTHING based on MIB input.
 @end@
 EOF
 
-% mib2c -c mib2c.test.conf internet
+% mib2c \-c mib2c.test.conf internet
 .SH DESCRIPTION
 The mib2c.conf script language is a MIB-particular language designed
 to easily process MIB nodes in ways that you want.  mib2c is a

@@ -3,6 +3,7 @@
  *     e.g. AIX
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/cpu.h>
@@ -11,8 +12,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+#include <sys/protosw.h>
 #include <libperfstat.h>
 
+netsnmp_feature_require(hardware_cpu_copy_stats)
 void _cpu_copy_stats( netsnmp_cpu_info *cpu );
 
     /*
@@ -27,7 +30,7 @@ void init_cpu_perfstat( void ) {
     strcpy(cpu->name, "Overall CPU statistics");
 
     cpu_num = perfstat_cpu( NULL, NULL, sizeof(perfstat_cpu_t), 0 );
-    cs2 = malloc( cpu_num*sizeof(perfstat_cpu_t));
+    cs2 = (perfstat_cpu_t*)malloc( cpu_num*sizeof(perfstat_cpu_t));
  
     strcpy( name.name, "");
     if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), cpu_num) > 0) {
@@ -83,7 +86,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
      * Per-CPU statistics
      */
     n   = cs.ncpus;   /* XXX - Compare against cpu_num */
-    cs2 = malloc( n*sizeof(perfstat_cpu_t));
+    cs2 = (perfstat_cpu_t*)malloc( n*sizeof(perfstat_cpu_t));
     strcpy( name.name, "");
     if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), n) > 0) {
         for ( i = 0; i < n; i++ ) {

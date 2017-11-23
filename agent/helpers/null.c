@@ -1,15 +1,25 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/agent/null.h>
 
 #if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
-#include <net-snmp/agent/null.h>
 
 int
 netsnmp_register_null(oid * loc, size_t loc_len)
@@ -23,14 +33,26 @@ netsnmp_register_null_context(oid * loc, size_t loc_len,
 {
     netsnmp_handler_registration *reginfo;
     reginfo = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
-    reginfo->handlerName = strdup("");
-    reginfo->rootoid = loc;
-    reginfo->rootoid_len = loc_len;
-    reginfo->handler =
-        netsnmp_create_handler("null", netsnmp_null_handler);
-    if (contextName)
-        reginfo->contextName = strdup(contextName);
-    reginfo->modes = HANDLER_CAN_DEFAULT;
+    if (reginfo != NULL) {
+        reginfo->handlerName = strdup("");
+        reginfo->rootoid = loc;
+        reginfo->rootoid_len = loc_len;
+        reginfo->handler =
+            netsnmp_create_handler("null", netsnmp_null_handler);
+        if (contextName)
+            reginfo->contextName = strdup(contextName);
+        reginfo->modes = HANDLER_CAN_DEFAULT | HANDLER_CAN_GETBULK;
+
+        if (!reginfo->handlerName || !reginfo->handler ||
+            (contextName && !reginfo->contextName)) {
+            snmp_log(LOG_ERR,"null context allocation failure(s)\n");
+            netsnmp_handler_registration_free(reginfo);
+            return MIB_REGISTRATION_FAILED;
+        }
+    } else {
+        snmp_log(LOG_ERR,"null context allocation failure\n");
+        return MIB_REGISTRATION_FAILED;
+    }
     return netsnmp_register_handler(reginfo);
 }
 

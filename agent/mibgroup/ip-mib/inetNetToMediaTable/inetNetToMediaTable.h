@@ -200,8 +200,8 @@ config_require(ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access)
         * inetNetToMediaTable_row_find_by_mib_index
         (inetNetToMediaTable_mib_index * mib_idx);
 
-    extern oid      inetNetToMediaTable_oid[];
-    extern int      inetNetToMediaTable_oid_size;
+    extern const oid      inetNetToMediaTable_oid[];
+    extern const int      inetNetToMediaTable_oid_size;
 
 
 #include "inetNetToMediaTable_interface.h"
@@ -250,11 +250,18 @@ config_require(ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access)
                                             * rowreq_ctx,
                                             u_long *
                                             inetNetToMediaState_val_ptr);
+
     int
         inetNetToMediaRowStatus_get(inetNetToMediaTable_rowreq_ctx *
                                     rowreq_ctx,
                                     u_long *
                                     inetNetToMediaRowStatus_val_ptr);
+
+    int
+        inetNetToMediaRowStatus_set(inetNetToMediaTable_rowreq_ctx *
+                                    rowreq_ctx,
+                                    u_long
+                                    inetNetToMediaRowStatus_val);
 
 
     int

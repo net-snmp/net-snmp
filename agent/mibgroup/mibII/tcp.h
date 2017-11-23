@@ -6,7 +6,7 @@
 #define _MIBGROUP_TCP_H
 
 
-config_require(mibII/tcpTable util_funcs)
+config_require(mibII/tcpTable)
 
 config_arch_require(solaris2,        kernel_sunos5)
 config_arch_require(linux,     mibII/kernel_linux)

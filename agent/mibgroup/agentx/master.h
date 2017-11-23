@@ -7,7 +7,6 @@ config_require(agentx/protocol)
 config_require(agentx/client)
 config_require(agentx/master_admin)
 config_require(agentx/agentx_config)
-config_require(mibII/sysORTable)
 
      void            init_master(void);
      void            real_init_master(void);

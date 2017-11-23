@@ -79,7 +79,7 @@ typedef struct {
  * Api prototypes 
  */
 void            ROWAPI_init_table(TABLE_DEFINTION_T * table_ptr,
-                                  char *name,
+                                  const char *name,
                                   u_long max_number_of_entries,
                                   ENTRY_CALLBACK_T * ClbkCreate,
                                   ENTRY_CALLBACK_T * ClbkClone,

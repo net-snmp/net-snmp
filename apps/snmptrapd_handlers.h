@@ -35,15 +35,19 @@ Netsnmp_Trap_Handler   event_handler;
 Netsnmp_Trap_Handler   forward_handler;
 Netsnmp_Trap_Handler   axforward_handler;
 Netsnmp_Trap_Handler   notification_handler;
+Netsnmp_Trap_Handler   mysql_handler;
 
 void free_trap1_fmt(void);
 void free_trap2_fmt(void);
 extern char *print_format1;
 extern char *print_format2;
+extern int   SyslogTrap;
+extern int   dropauth;
 
 #define NETSNMPTRAPD_AUTH_HANDLER    1
 #define NETSNMPTRAPD_PRE_HANDLER     2
 #define NETSNMPTRAPD_POST_HANDLER    3
+#define NETSNMPTRAPD_DEFAULT_HANDLER 4
 
 #define NETSNMPTRAPD_HANDLER_OK      1	/* Succeed, & keep going */
 #define NETSNMPTRAPD_HANDLER_FAIL    2	/* Failed but keep going */
@@ -62,5 +66,7 @@ void do_external(char *cmd, struct hostent *host,
             netsnmp_pdu *pdu, netsnmp_transport *transport);
 int snmp_input(int op, netsnmp_session *session,
            int reqid, netsnmp_pdu *pdu, void *magic);
+
+void parse_format(const char *token, char *line);
 
 #endif                          /* SNMPTRAPD_HANDLERS_H */

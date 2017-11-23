@@ -11,9 +11,6 @@
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -28,7 +25,7 @@
 #if HAVE_SYS_TCPIPSTATS_H
 #include <sys/tcpipstats.h>
 #endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
@@ -36,7 +33,13 @@
 #include <sys/socket.h>
 #endif
 #if HAVE_NET_IF_H
+#ifdef _I_DEFINED_KERNEL
+#undef _KERNEL
+#endif
 #include <net/if.h>
+#ifdef _I_DEFINED_KERNEL
+#define _KERNEL 1
+#endif
 #endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
@@ -91,7 +94,6 @@
 #include <dmalloc.h>
 #endif
 
-
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -103,6 +105,10 @@
 #ifdef NETBSD_STATS_VIA_SYSCTL
 #include "kernel_netbsd.h"
 #endif
+#if defined(NETSNMP_CAN_USE_SYSCTL) /* && defined(ICMPCTL_STATS) */
+#include "kernel_sysctl.h"
+#endif
+
 	/* or MIB_xxxCOUNTER_SYMBOL || hpux11 */
 #ifdef hpux
 #include <sys/mib.h>

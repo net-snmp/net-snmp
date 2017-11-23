@@ -19,16 +19,13 @@
  ******************************************************************/
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -45,8 +42,6 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "util_funcs.h"
-
 #include "event.h"
 
 /*
@@ -54,6 +49,8 @@
  */
 #include "agutil_api.h"
 #include "row_api.h"
+
+netsnmp_feature_require(snprint_objid)
 
 /*
  * File scope definitions section 
@@ -772,23 +769,34 @@ struct variable2 eventTable_variables[] = {
     /*
      * magic number        , variable type, ro/rw , callback fn  ,           L, oidsuffix 
      */
-    {EVENTINDEX, ASN_INTEGER, RONLY, var_eventTable, 2, {1, 1}},
-    {EVENTDESCRIPTION, ASN_OCTET_STR, RWRITE, var_eventTable, 2, {1, 2}},
-    {EVENTTYPE, ASN_INTEGER, RWRITE, var_eventTable, 2, {1, 3}},
-    {EVENTCOMMUNITY, ASN_OCTET_STR, RWRITE, var_eventTable, 2, {1, 4}},
-    {EVENTLASTTIMESENT, ASN_TIMETICKS, RONLY, var_eventTable, 2, {1, 5}},
-    {EVENTOWNER, ASN_OCTET_STR, RWRITE, var_eventTable, 2, {1, 6}},
-    {EVENTSTATUS, ASN_INTEGER, RWRITE, var_eventTable, 2, {1, 7}}
+    {EVENTINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_eventTable, 2, {1, 1}},
+    {EVENTDESCRIPTION, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 2}},
+    {EVENTTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 3}},
+    {EVENTCOMMUNITY, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 4}},
+    {EVENTLASTTIMESENT, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_eventTable, 2, {1, 5}},
+    {EVENTOWNER, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 6}},
+    {EVENTSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 7}}
 };
 
 struct variable2 logTable_variables[] = {
     /*
      * magic number        , variable type, ro/rw , callback fn  ,           L, oidsuffix 
      */
-    {LOGEVENTINDEX, ASN_INTEGER, RONLY, var_logTable, 2, {1, 1}},
-    {LOGINDEX, ASN_INTEGER, RONLY, var_logTable, 2, {1, 2}},
-    {LOGTIME, ASN_TIMETICKS, RONLY, var_logTable, 2, {1, 3}},
-    {LOGDESCRIPTION, ASN_OCTET_STR, RONLY, var_logTable, 2, {1, 4}}
+    {LOGEVENTINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_logTable, 2, {1, 1}},
+    {LOGINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_logTable, 2, {1, 2}},
+    {LOGTIME, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_logTable, 2, {1, 3}},
+    {LOGDESCRIPTION, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_logTable, 2, {1, 4}}
 
 };
 

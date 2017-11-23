@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DOIT=
+DOIT=echo
 
 if [ $2 = "tag" -o $2 = "tar" ];
 then

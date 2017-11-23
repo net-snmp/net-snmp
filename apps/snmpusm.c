@@ -36,11 +36,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -51,9 +47,6 @@
 #endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #if HAVE_NETDB_H
 #include <netdb.h>
@@ -67,8 +60,6 @@
 #endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
 
 #include <net-snmp/net-snmp-includes.h>
-
-int             main(int, char **);
 
 #define CMD_PASSWD_NAME    "passwd"
 #define CMD_PASSWD         1
@@ -129,7 +120,41 @@ int             doauthkey = 0, doprivkey = 0, uselocalizedkey = 0;
 size_t          usmUserEngineIDLen = 0;
 u_char         *usmUserEngineID = NULL;
 char           *usmUserPublic_val = NULL;
+int             docreateandwait = 0;
 
+
+#if defined(HAVE_OPENSSL_DH_H) && !defined(HAVE_DH_GET0_PQG)
+
+#include <string.h>
+#include <openssl/dh.h>
+
+void DH_get0_pqg(const DH *dh,
+                const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
+{
+   if (p != NULL)
+       *p = dh->p;
+   if (q != NULL)
+       *q = dh->q;
+   if (g != NULL)
+       *g = dh->g;
+}
+
+#endif
+
+#if defined(HAVE_OPENSSL_DH_H) && !defined(HAVE_DH_GET0_KEY)
+
+#include <string.h>
+#include <openssl/dh.h>
+
+void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
+{
+   if (pub_key != NULL)
+       *pub_key = dh->pub_key;
+   if (priv_key != NULL)
+       *priv_key = dh->priv_key;
+}
+
+#endif
 
 void
 usage(void)
@@ -139,19 +164,21 @@ usage(void)
     fprintf(stderr, " COMMAND\n\n");
     snmp_parse_args_descriptions(stderr);
     fprintf(stderr, "\nsnmpusm commands:\n");
-    fprintf(stderr, "  [options] create     USER [CLONEFROM-USER]\n");
-    fprintf(stderr, "  [options] delete     USER\n");
-    fprintf(stderr, "  [options] cloneFrom  USER CLONEFROM-USER\n");
-    fprintf(stderr, "  [options] activate   USER\n");
-    fprintf(stderr, "  [options] deactivate USER\n");
-    fprintf(stderr, "  [options] [-Ca] [-Cx] changekey [USER]\n");
+    fprintf(stderr, "  [options]               create     USER [CLONEFROM-USER]\n");
+    fprintf(stderr, "  [options]               delete     USER\n");
+    fprintf(stderr, "  [options]               activate   USER\n");
+    fprintf(stderr, "  [options]               deactivate USER\n");
+    fprintf(stderr, "  [options] [-Cw]         cloneFrom  USER CLONEFROM-USER\n");
+    fprintf(stderr, "  [options] [-Ca] [-Cx]   changekey  [USER]\n");
     fprintf(stderr,
-            "  [options] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
+            "  [options] [-Ca] [-Cx]   passwd     OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
     fprintf(stderr,
-            "  [options] (-Ca|-Cx) -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]\n");
+            "  [options] (-Ca|-Cx) -Ck passwd     OLD-KEY-OR-PASS NEW-KEY-OR-PASS [USER]\n");
     fprintf(stderr, "\nsnmpusm options:\n");
     fprintf(stderr, "\t-CE ENGINE-ID\tSet usmUserEngineID (e.g. 800000020109840301).\n");
     fprintf(stderr, "\t-Cp STRING\tSet usmUserPublic value to STRING.\n");
+    fprintf(stderr, "\t-Cw\t\tCreate the user with createAndWait.\n");
+    fprintf(stderr, "\t\t\t(it won't be active until you active it)\n");
     fprintf(stderr, "\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t-Ca\t\tChange the authentication key.\n");
     fprintf(stderr, "\t-Ck\t\tAllows one to use localized key (must start with 0x)\n");
@@ -194,10 +221,10 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                oid *keyoid, size_t keyoid_len) {
     u_char *dhkeychange;
     DH *dh;
+    const BIGNUM *p, *g, *pub_key;
     BIGNUM *other_pub;
     u_char *key;
     size_t key_len;
-    unsigned char *cp;
             
     dhkeychange = (u_char *) malloc(2 * vars->val_len * sizeof(char));
     if (!dhkeychange)
@@ -205,29 +232,34 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     
     memcpy(dhkeychange, vars->val.string, vars->val_len);
 
-    cp = dhvar->val.string;
-    dh = d2i_DHparams(NULL, (const unsigned char **) &cp,
-                      dhvar->val_len);
+    {
+        const unsigned char *cp = dhvar->val.string;
+        dh = d2i_DHparams(NULL, &cp, dhvar->val_len);
+    }
 
-    if (!dh || !dh->g || !dh->p) {
+    if (dh)
+        DH_get0_pqg(dh, &p, NULL, &g);
+
+    if (!dh || !g || !p) {
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
 
-    DH_generate_key(dh);
-    if (!dh->pub_key) {
+    if (!DH_generate_key(dh)) {
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
             
-    if (vars->val_len != BN_num_bytes(dh->pub_key)) {
+    DH_get0_key(dh, &pub_key, NULL);
+
+    if (vars->val_len != (unsigned int)BN_num_bytes(pub_key)) {
         SNMP_FREE(dhkeychange);
         fprintf(stderr,"incorrect diffie-helman lengths (%lu != %d)\n",
-                (unsigned long)vars->val_len, BN_num_bytes(dh->pub_key));
+                (unsigned long)vars->val_len, BN_num_bytes(pub_key));
         return SNMPERR_GENERR;
     }
 
-    BN_bn2bin(dh->pub_key, dhkeychange + vars->val_len);
+    BN_bn2bin(pub_key, dhkeychange + vars->val_len);
 
     key_len = DH_size(dh);
     if (!key_len) {
@@ -253,7 +285,7 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
 
         printf("new %s key: 0x", keyname);
         for(kp = key + key_len - outkey_len;
-            kp - key < key_len;  kp++) {
+            kp - key < (int)key_len;  kp++) {
             printf("%02x", (unsigned char) *kp);
         }
         printf("\n");
@@ -300,8 +332,12 @@ optProc(int argc, char *const *argv, int opt)
                 optind++;
                 break;
 
+            case 'w':
+                docreateandwait = 1;
+                break;
+
 	    case 'E': {
-	        size_t ebuf_len = 32; /* XXX: MAX_ENGINEID_LENGTH */
+	        size_t ebuf_len = MAX_ENGINEID_LENGTH;
                 u_char *ebuf;
                 if (optind < argc) {
                     if (argv[optind]) {
@@ -352,7 +388,7 @@ main(int argc, char *argv[])
     size_t          name_length = USM_OID_LEN;
     size_t          name_length2 = USM_OID_LEN;
     int             status;
-    int             exitval = 0;
+    int             exitval = 1;
     int             rval;
     int             command = 0;
     long            longvar;
@@ -375,6 +411,8 @@ main(int argc, char *argv[])
         newkul[SNMP_MAXBUF_SMALL], keychange[SNMP_MAXBUF_SMALL],
         keychangepriv[SNMP_MAXBUF_SMALL];
 
+    SOCK_STARTUP;
+
     authKeyChange = authKeyOid;
     privKeyChange = privKeyOid;
 
@@ -382,11 +420,14 @@ main(int argc, char *argv[])
      * get the common command line arguments 
      */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
-    case -2:
-        exit(0);
-    case -1:
+    case NETSNMP_PARSE_ARGS_ERROR:
+        goto out;
+    case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
+        exitval = 0;
+        goto out;
+    case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
@@ -394,10 +435,8 @@ main(int argc, char *argv[])
     if (arg >= argc) {
         fprintf(stderr, "Please specify an operation to perform.\n");
         usage();
-        exit(1);
+        goto out;
     }
-
-    SOCK_STARTUP;
 
     /*
      * open an SNMP session 
@@ -412,7 +451,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpusm", &session);
-        exit(1);
+        goto out;
     }
 
     /*
@@ -430,7 +469,7 @@ main(int argc, char *argv[])
     pdu = snmp_pdu_create(SNMP_MSG_SET);
     if (!pdu) {
         fprintf(stderr, "Failed to create request\n");
-        exit(1);
+        goto close_session;
     }
 
 
@@ -456,14 +495,14 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "New passphrase must be greater than %d characters in length.\n",
                     USM_LENGTH_P_MIN);
-            exit(1);
+            goto close_session;
         }
 
         if (oldpass == NULL || strlen(oldpass) < USM_LENGTH_P_MIN) {
             fprintf(stderr,
                     "Old passphrase must be greater than %d characters in length.\n",
                     USM_LENGTH_P_MIN);
-            exit(1);
+            goto close_session;
         }
 
         /* 
@@ -532,7 +571,7 @@ main(int argc, char *argv[])
 	    if (!snmp_hex_to_binary((u_char **) (&buf), &buf_len, &oldkul_len, 0, oldpass)) {
 	      snmp_perror(argv[0]);
 	      fprintf(stderr, "generating the old Kul from localized key failed\n");
-	      exit(1);
+	      goto close_session;
 	    }
 	    
 	    memcpy(oldkul, buf, oldkul_len);
@@ -550,7 +589,7 @@ main(int argc, char *argv[])
 	    if (rval != SNMPERR_SUCCESS) {
 	        snmp_perror(argv[0]);
 	        fprintf(stderr, "generating the old Ku failed\n");
-	        exit(1);
+	        goto close_session;
 	    }
 
 	    /*
@@ -564,7 +603,7 @@ main(int argc, char *argv[])
 	    if (rval != SNMPERR_SUCCESS) {
 	        snmp_perror(argv[0]);
 		fprintf(stderr, "generating the old Kul failed\n");
-		exit(1);
+		goto close_session;
 	    }
 	}
 	if (uselocalizedkey && (strncmp(newpass, "0x", 2) == 0)) {
@@ -579,7 +618,7 @@ main(int argc, char *argv[])
 	    if (!snmp_hex_to_binary((u_char **) (&buf), &buf_len, &newkul_len, 0, newpass)) {
 	      snmp_perror(argv[0]);
 	      fprintf(stderr, "generating the new Kul from localized key failed\n");
-	      exit(1);
+	      goto close_session;
 	    }
 	    
 	    memcpy(newkul, buf, newkul_len);
@@ -593,7 +632,7 @@ main(int argc, char *argv[])
             if (rval != SNMPERR_SUCCESS) {
                 snmp_perror(argv[0]);
                 fprintf(stderr, "generating the new Ku failed\n");
-                exit(1);
+                goto close_session;
             }
 
 	    rval = generate_kul(session.securityAuthProto,
@@ -604,7 +643,7 @@ main(int argc, char *argv[])
 	    if (rval != SNMPERR_SUCCESS) {
 	        snmp_perror(argv[0]);
 		fprintf(stderr, "generating the new Kul failed\n");
-		exit(1);
+		goto close_session;
 	    }
 	}
 
@@ -616,7 +655,7 @@ main(int argc, char *argv[])
         if (doprivkey) {
             if (!session.securityPrivProto) {
                 snmp_log(LOG_ERR, "no encryption type specified, which I need in order to know to change the key\n");
-                exit(1);
+                goto close_session;
             }
                 
 #ifndef NETSNMP_DISABLE_DES
@@ -649,7 +688,7 @@ main(int argc, char *argv[])
 	    snmp_perror(argv[0]);
             fprintf(stderr, "encoding the keychange failed\n");
             usage();
-            exit(1);
+            goto close_session;
 	  }
 	}
 
@@ -666,7 +705,7 @@ main(int argc, char *argv[])
             snmp_perror(argv[0]);
             fprintf(stderr, "encoding the keychange failed\n");
             usage();
-            exit(1);
+            goto close_session;
 	  }
 	}
 
@@ -698,7 +737,7 @@ main(int argc, char *argv[])
         if (++arg >= argc) {
             fprintf(stderr, "You must specify the user name to create\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CREATE;
@@ -710,7 +749,11 @@ main(int argc, char *argv[])
              */
             setup_oid(usmUserStatus, &name_length,
                       usmUserEngineID, usmUserEngineIDLen, argv[arg-1]);
-            longvar = RS_CREATEANDGO;
+            if (docreateandwait) {
+                longvar = RS_CREATEANDWAIT;
+            } else {
+                longvar = RS_CREATEANDGO;
+            }
             snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                                   ASN_INTEGER, (u_char *) & longvar,
                                   sizeof(longvar));
@@ -749,7 +792,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the user name to operate on\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_CLONEFROM;
@@ -767,7 +810,7 @@ main(int argc, char *argv[])
             fprintf(stderr,
                     "You must specify the user name to clone from\n");
             usage();
-            exit(1);
+            goto close_session;
         }
 
         setup_oid(usmUserSecurityName, &name_length2,
@@ -785,7 +828,7 @@ main(int argc, char *argv[])
          */
         if (++arg >= argc) {
             fprintf(stderr, "You must specify the user name to delete\n");
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DELETE;
@@ -803,7 +846,7 @@ main(int argc, char *argv[])
          */
         if (++arg >= argc) {
             fprintf(stderr, "You must specify the user name to activate\n");
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_ACTIVATE;
@@ -821,7 +864,7 @@ main(int argc, char *argv[])
          */
         if (++arg >= argc) {
             fprintf(stderr, "You must specify the user name to deactivate\n");
-            exit(1);
+            goto close_session;
         }
 
         command = CMD_DEACTIVATE;
@@ -876,7 +919,7 @@ main(int argc, char *argv[])
         dhpdu = snmp_pdu_create(SNMP_MSG_GET);
         if (!dhpdu) {
             fprintf(stderr, "Failed to create DH request\n");
-            exit(1);
+            goto close_session;
         }
 
         /* get the current DH parameters */
@@ -954,7 +997,7 @@ main(int argc, char *argv[])
     } else {
         fprintf(stderr, "Unknown command\n");
         usage();
-        exit(1);
+        goto close_session;
     }
 
     /*
@@ -1006,12 +1049,17 @@ main(int argc, char *argv[])
         exitval = 1;
     }
 
+    exitval = 0;
 #if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
   begone:
 #endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
     if (response)
         snmp_free_pdu(response);
+
+close_session:
     snmp_close(ss);
+
+out:
     SOCK_CLEANUP;
     return exitval;
 }

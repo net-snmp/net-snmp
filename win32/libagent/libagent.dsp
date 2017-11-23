@@ -101,7 +101,71 @@ SOURCE=..\..\agent\agent_registry.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\agent_sysORTable.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\agent_trap.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\all_helpers.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\baby_steps.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\bulk_to_next.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\cache_handler.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\debug_handler.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\instance.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\mode_end_call.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\multiplexer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\null.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\old_api.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\read_only.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\row_merge.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\scalar.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\scalar_group.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\serialize.c
 # End Source File
 # Begin Source File
 
@@ -110,6 +174,50 @@ SOURCE=..\..\agent\snmp_agent.c
 # Begin Source File
 
 SOURCE=..\..\agent\snmp_vars.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\snmp_get_statistic.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\stash_cache.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\stash_to_next.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\table.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\table_array.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\table_container.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\table_data.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\table_dataset.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\table_iterator.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\table_tdata.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\watcher.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -133,7 +241,47 @@ SOURCE="..\..\include\net-snmp\agent\agent_registry.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\include\net-snmp\agent\agent_sysORTable.h"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\include\net-snmp\agent\agent_trap.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\all_helpers.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\bulk_to_next.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\debug_handler.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\instance.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\multiplexer.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\null.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\old_api.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\read_only.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\serialize.h"
 # End Source File
 # Begin Source File
 
@@ -142,6 +290,30 @@ SOURCE="..\..\include\net-snmp\agent\snmp_agent.h"
 # Begin Source File
 
 SOURCE="..\..\include\net-snmp\agent\snmp_vars.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\table.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\table_array.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\table_data.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\table_dataset.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\table_iterator.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\table_tdata.h"
 # End Source File
 # End Group
 # End Target

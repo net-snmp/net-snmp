@@ -48,31 +48,41 @@ oid             mteTriggerDeltaTable_variables_oid[] =
  */
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 struct variable2 mteTriggerDeltaTable_variables[] = {
     /*
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   MTETRIGGERDELTADISCONTINUITYID  3
-    {MTETRIGGERDELTADISCONTINUITYID, ASN_OBJECT_ID, RWRITE,
+    {MTETRIGGERDELTADISCONTINUITYID, ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerDeltaTable, 2, {1, 1}},
 #define   MTETRIGGERDELTADISCONTINUITYIDWILDCARD  4
-    {MTETRIGGERDELTADISCONTINUITYIDWILDCARD, ASN_INTEGER, RWRITE,
+    {MTETRIGGERDELTADISCONTINUITYIDWILDCARD, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerDeltaTable, 2, {1, 2}},
 #define   MTETRIGGERDELTADISCONTINUITYIDTYPE  5
-    {MTETRIGGERDELTADISCONTINUITYIDTYPE, ASN_INTEGER, RWRITE,
+    {MTETRIGGERDELTADISCONTINUITYIDTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerDeltaTable, 2, {1, 3}},
-
 };
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+struct variable2 mteTriggerDeltaTable_variables[] = {
+    /*
+     * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
+     */
+#define   MTETRIGGERDELTADISCONTINUITYID  3
+    {MTETRIGGERDELTADISCONTINUITYID, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerDeltaTable, 2, {1, 1}},
+#define   MTETRIGGERDELTADISCONTINUITYIDWILDCARD  4
+    {MTETRIGGERDELTADISCONTINUITYIDWILDCARD, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerDeltaTable, 2, {1, 2}},
+#define   MTETRIGGERDELTADISCONTINUITYIDTYPE  5
+    {MTETRIGGERDELTADISCONTINUITYIDTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerDeltaTable, 2, {1, 3}},
+};
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 /*
  * (L = length of the oidsuffix) 
  */
-
-
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-extern struct header_complex_index *mteTriggerTableStorage;
-
 
 
 /*
@@ -114,6 +124,10 @@ var_mteTriggerDeltaTable(struct variable *vp,
 
     DEBUGMSGTL(("mteTriggerDeltaTable",
                 "var_mteTriggerDeltaTable: Entering...  \n"));
+
+    /* set default value */
+	*write_method = NULL;
+
     /*
      * this assumes you have registered all your data properly
      */
@@ -129,23 +143,28 @@ var_mteTriggerDeltaTable(struct variable *vp,
 
 
     case MTETRIGGERDELTADISCONTINUITYID:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerDeltaDiscontinuityID;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len =
             StorageTmp->mteTriggerDeltaDiscontinuityIDLen * sizeof(oid);
         return (u_char *) StorageTmp->mteTriggerDeltaDiscontinuityID;
 
     case MTETRIGGERDELTADISCONTINUITYIDWILDCARD:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerDeltaDiscontinuityIDWildcard;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len =
             sizeof(StorageTmp->mteTriggerDeltaDiscontinuityIDWildcard);
         return (u_char *) & StorageTmp->
             mteTriggerDeltaDiscontinuityIDWildcard;
 
     case MTETRIGGERDELTADISCONTINUITYIDTYPE:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerDeltaDiscontinuityIDType;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->mteTriggerDeltaDiscontinuityIDType);
         return (u_char *) & StorageTmp->mteTriggerDeltaDiscontinuityIDType;
-
 
     default:
         ERROR_MSG("");
@@ -155,7 +174,7 @@ var_mteTriggerDeltaTable(struct variable *vp,
 
 
 
-
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 write_mteTriggerDeltaDiscontinuityID(int action,
                                      u_char * var_val,
@@ -414,3 +433,4 @@ write_mteTriggerDeltaDiscontinuityIDType(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */

@@ -1,9 +1,24 @@
 /*
  * table_container.c
  * $Id$
+ *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/agent/table_container.h>
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -11,13 +26,20 @@
 #include <strings.h>
 #endif
 
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
 #include <net-snmp/agent/table.h>
-#include <net-snmp/agent/table_container.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_assert.h>
+
+netsnmp_feature_provide(table_container)
+netsnmp_feature_child_of(table_container, table_container_all)
+netsnmp_feature_child_of(table_container_replace_row, table_container_all)
+netsnmp_feature_child_of(table_container_extract, table_container_all)
+netsnmp_feature_child_of(table_container_management, table_container_all)
+netsnmp_feature_child_of(table_container_row_remove, table_container_all)
+netsnmp_feature_child_of(table_container_row_insert, table_container_all)
+netsnmp_feature_child_of(table_container_all, mib_helpers)
+
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER
 
 /*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_BEGIN        -1 
@@ -33,6 +55,9 @@
  * PRIVATE structure for holding important info for each table.
  */
 typedef struct container_table_data_s {
+
+    /** Number of handlers whose myvoid pointer points to this structure. */
+    int refcnt;
 
    /** registration info for the table */
     netsnmp_table_registration_info *tblreg_info;
@@ -159,6 +184,7 @@ _find_next_row(netsnmp_container *c,
  *
  * ================================== */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_MANAGEMENT
 container_table_data *
 netsnmp_tcontainer_create_table( const char *name,
                                  netsnmp_container *container, long flags )
@@ -179,7 +205,7 @@ netsnmp_tcontainer_create_table( const char *name,
     }
 
     if (flags)
-        table->key_type = flags & 0x03;  /* Use lowest two bits */
+        table->key_type = (char)(flags & 0x03);  /* Use lowest two bits */
     else
         table->key_type = TABLE_CONTAINER_KEY_NETSNMP_INDEX;
 
@@ -203,6 +229,7 @@ netsnmp_tcontainer_delete_table( container_table_data *table )
     SNMP_FREE(table);
     return;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_MANAGEMENT */
 
     /*
      * The various standalone row operation routines
@@ -229,6 +256,7 @@ netsnmp_tcontainer_remove_row( container_table_data *table, netsnmp_index *row )
     return NULL;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_REPLACE_ROW
 int
 netsnmp_tcontainer_replace_row( container_table_data *table,
                                 netsnmp_index *old_row, netsnmp_index *new_row )
@@ -239,6 +267,7 @@ netsnmp_tcontainer_replace_row( container_table_data *table,
     netsnmp_tcontainer_add_row(    table, new_row );
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_REPLACE_ROW */
 
     /* netsnmp_tcontainer_remove_delete_row() will be table-specific too */
 
@@ -248,6 +277,20 @@ netsnmp_tcontainer_replace_row( container_table_data *table,
  * Container Table API: MIB maintenance
  *
  * ================================== */
+
+static container_table_data *
+netsnmp_container_table_data_clone(container_table_data *tad)
+{
+    ++tad->refcnt;
+    return tad;
+}
+
+static void
+netsnmp_container_table_data_free(container_table_data *tad)
+{
+    if (--tad->refcnt == 0)
+	free(tad);
+}
 
 /** returns a netsnmp_mib_handler object for the table_container helper */
 netsnmp_mib_handler *
@@ -273,6 +316,7 @@ netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
         return NULL;
     }
 
+    tad->refcnt = 1;
     tad->tblreg_info = tabreg;  /* we need it too, but it really is not ours */
     if(key_type)
         tad->key_type = key_type;
@@ -289,6 +333,8 @@ netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
         container->ncompare = netsnmp_ncompare_netsnmp_index;
     
     handler->myvoid = (void*)tad;
+    handler->data_clone = (void *(*)(void *))netsnmp_container_table_data_clone;
+    handler->data_free = (void (*)(void *))netsnmp_container_table_data_free;
     handler->flags |= MIB_HANDLER_AUTO_NEXT;
     
     return handler;
@@ -303,6 +349,7 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
 
     if ((NULL == reginfo) || (NULL == reginfo->handler) || (NULL == tabreg)) {
         snmp_log(LOG_ERR, "bad param in netsnmp_container_table_register\n");
+        netsnmp_handler_registration_free(reginfo);
         return SNMPERR_GENERR;
     }
 
@@ -310,18 +357,46 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
         container = netsnmp_container_find(reginfo->handlerName);
 
     handler = netsnmp_container_table_handler_get(tabreg, container, key_type);
-    netsnmp_inject_handler(reginfo, handler );
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create container table handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
 
     return netsnmp_register_table(reginfo, tabreg);
 }
 
+int
+netsnmp_container_table_unregister(netsnmp_handler_registration *reginfo)
+{
+    container_table_data *tad;
+
+    if (!reginfo)
+        return MIB_UNREGISTRATION_FAILED;
+    tad = (container_table_data *)
+        netsnmp_find_handler_data_by_name(reginfo, "table_container");
+    if (tad) {
+        CONTAINER_FREE( tad->table );
+        tad->table = NULL;
+	/*
+	 * Note: don't free the memory tad points at here - that is done
+	 * by netsnmp_container_table_data_free().
+	 */
+    }
+    return netsnmp_unregister_table( reginfo );
+}
+
 /** retrieve the container used by the table_container helper */
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_EXTRACT
 netsnmp_container*
 netsnmp_container_table_container_extract(netsnmp_request_info *request)
 {
     return (netsnmp_container *)
          netsnmp_request_get_list_data(request, TABLE_CONTAINER_CONTAINER);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_EXTRACT */
 
 #ifndef NETSNMP_USE_INLINE
 /** find the context data used by the table_container helper */
@@ -346,6 +421,7 @@ netsnmp_container_table_extract_context(netsnmp_request_info *request)
 }
 #endif /* inline */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_ROW_INSERT
 /** inserts a newly created table_container entry into a request list */
 void
 netsnmp_container_table_row_insert(netsnmp_request_info *request,
@@ -413,6 +489,76 @@ netsnmp_container_table_row_insert(netsnmp_request_info *request,
         }
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_ROW_INSERT */
+
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_ROW_REMOVE
+/** removes a table_container entry from a request list */
+void
+netsnmp_container_table_row_remove(netsnmp_request_info *request,
+                                   netsnmp_index        *row)
+{
+    netsnmp_request_info       *req;
+    netsnmp_table_request_info *table_info = NULL;
+    netsnmp_variable_list      *this_index = NULL;
+    netsnmp_variable_list      *that_index = NULL;
+    oid      base_oid[] = {0, 0};	/* Make sure index OIDs are legal! */
+    oid      this_oid[MAX_OID_LEN];
+    oid      that_oid[MAX_OID_LEN];
+    size_t   this_oid_len, that_oid_len;
+
+    if (!request)
+        return;
+
+    /*
+     * We'll add the new row information to any request
+     * structure with the same index values as the request
+     * passed in (which includes that one!).
+     *
+     * So construct an OID based on these index values.
+     */
+
+    table_info = netsnmp_extract_table_info(request);
+    this_index = table_info->indexes;
+    build_oid_noalloc(this_oid, MAX_OID_LEN, &this_oid_len,
+                      base_oid, 2, this_index);
+
+    /*
+     * We need to look through the whole of the request list
+     * (as received by the current handler), as there's no
+     * guarantee that this routine will be called by the first
+     * varbind that refers to this row.
+     *   In particular, a RowStatus controlled row creation
+     * may easily occur later in the variable list.
+     *
+     * So first, we rewind to the head of the list....
+     */
+    for (req=request; req->prev; req=req->prev)
+        ;
+
+    /*
+     * ... and then start looking for matching indexes
+     * (by constructing OIDs from these index values)
+     */
+    for (; req; req=req->next) {
+        if (req->processed) 
+            continue;
+        
+        table_info = netsnmp_extract_table_info(req);
+        that_index = table_info->indexes;
+        build_oid_noalloc(that_oid, MAX_OID_LEN, &that_oid_len,
+                          base_oid, 2, that_index);
+      
+        /*
+         * This request has the same index values,
+         * so add the newly-created row information.
+         */
+        if (snmp_oid_compare(this_oid, this_oid_len,
+                             that_oid, that_oid_len) == 0) {
+            netsnmp_request_remove_list_data(req, TABLE_CONTAINER_ROW);
+        }
+    }
+}
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_ROW_REMOVE */
 
 /** @cond */
 /**********************************************************************
@@ -482,7 +628,7 @@ _data_lookup(netsnmp_handler_registration *reginfo,
          * column, if necessary.
          */
         _set_key( tad, request, tblreq_info, &key, &index );
-        row = _find_next_row(tad->table, tblreq_info, key);
+        row = (netsnmp_index*)_find_next_row(tad->table, tblreq_info, key);
         if (row) {
             /*
              * update indexes in tblreq_info (index & varbind),
@@ -518,17 +664,21 @@ _data_lookup(netsnmp_handler_registration *reginfo,
     else {
 
         _set_key( tad, request, tblreq_info, &key, &index );
-        row = CONTAINER_FIND(tad->table, key);
+        row = (netsnmp_index*)CONTAINER_FIND(tad->table, key);
         if (NULL == row) {
             /*
              * not results found. For a get, that is an error
              */
             DEBUGMSGTL(("table_container", "no row found\n"));
+#ifndef NETSNMP_NO_WRITE_SUPPORT
             if((agtreq_info->mode != MODE_SET_RESERVE1) || /* get */
                (reginfo->modes & HANDLER_CAN_NOT_CREATE)) { /* no create */
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
                 netsnmp_set_request_error(agtreq_info, request,
                                           SNMP_NOSUCHINSTANCE);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
             }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         }
     } /** GET/SET */
     
@@ -590,7 +740,11 @@ _container_table_handler(netsnmp_mib_handler *handler,
      * registration.
      */
     oldmode = agtreq_info->mode;
-    if(MODE_IS_GET(oldmode) || (MODE_SET_RESERVE1 == oldmode)) {
+    if(MODE_IS_GET(oldmode)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+       || (MODE_SET_RESERVE1 == oldmode)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+        ) {
         netsnmp_request_info *curr_request;
         /*
          * Loop through each of the requests, and
@@ -721,7 +875,7 @@ netsnmp_index *
 netsnmp_table_index_find_next_row(netsnmp_container *c,
                                   netsnmp_table_request_info *tblreq)
 {
-    return _find_next_row(c, tblreq, NULL );
+    return (netsnmp_index*)_find_next_row(c, tblreq, NULL );
 }
 
 /* ==================================
@@ -730,4 +884,9 @@ netsnmp_table_index_find_next_row(netsnmp_container *c,
  *
  * ================================== */
 
+#else /* NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER */
+netsnmp_feature_unused(table_container);
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER */
 /** @} */
+
+

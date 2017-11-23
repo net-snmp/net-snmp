@@ -1,5 +1,17 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
+#include <limits.h>
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -13,14 +25,7 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -43,44 +48,48 @@
 #define SNMP_DEBUG_ACTIVE             1
 #define SNMP_DEBUG_EXCLUDED           2
 
+#ifndef NETSNMP_NO_DEBUGGING
+
 static int      dodebug = NETSNMP_ALWAYS_DEBUG;
 int             debug_num_tokens = 0;
-int             debug_num_excluded = 0;
 static int      debug_print_everything = 0;
 
 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
 
-#ifdef NETSNMP_DEBUG_STATS
-netsnmp_container  *dbg_stats = NULL;
- static int _debug_cmp( const void *lhs, const void *rhs );
- static int _save_debug_stat(netsnmp_token_descr *tb, void *type);
- static int _debug_stats_callback(int majorID, int minorID,
-                   void *serverarg, void *clientarg);
-#endif
-
 /*
- * indent debugging:  provide a space padded section to return an indent for 
+ * Number of spaces to indent debug output. Valid range is [0,INT_MAX]
  */
-static int      debugindent = 0;
-#define INDENTMAX 80
-static char     debugindentchars[] =
-    "                                                                                ";
+static int debugindent = 0;
 
-char           *
+int
+debug_indent_get(void)
+{
+    return debugindent;
+}
+
+const char*
 debug_indent(void)
 {
-    return debugindentchars;
+#define SPACES "                                        " \
+               "                                        "
+    if ((sizeof(SPACES) - 1) < (unsigned int)debugindent) {
+        snmp_log(LOG_ERR, "Too deep indentation for debug_indent. "
+                 "Consider using \"%%*s\", debug_indent_get(), \"\" instead.");
+        return SPACES;
+    }
+    return SPACES + sizeof(SPACES) - 1 - debugindent;
+#undef SPACES
 }
 
 void
 debug_indent_add(int amount)
 {
-    if (debugindent + amount >= 0 && debugindent + amount < 80) {
-        debugindentchars[debugindent] = ' ';
-        debugindent += amount;
-        debugindentchars[debugindent] = '\0';
-    }
+    if (-debugindent <= amount && amount <= INT_MAX - debugindent)
+	debugindent += amount;
 }
+
+NETSNMP_IMPORT void
+debug_config_register_tokens(const char *configtoken, char *tokens);
 
 void
 debug_indent_reset(void)
@@ -96,6 +105,9 @@ debug_config_register_tokens(const char *configtoken, char *tokens)
     debug_register_tokens(tokens);
 }
 
+NETSNMP_IMPORT void
+debug_config_turn_on_debugging(const char *configtoken, char *line);
+
 void
 debug_config_turn_on_debugging(const char *configtoken, char *line)
 {
@@ -103,50 +115,18 @@ debug_config_turn_on_debugging(const char *configtoken, char *line)
 }
 
 void
-snmp_debug_init(void)
-{
-    debugindentchars[0] = '\0'; /* zero out the debugging indent array. */
-    /*
-     * Hmmm....
-     *   this "init" routine seems to be called *after* processing
-     *   the command line options.   So we can't clear the debug
-     *   token array here, and will just have to rely on it being
-     *   initialised to 0 automatically.
-     * So much for trying to program responsibly :-)
-     */
-/*  memset(dbg_tokens, 0, MAX_DEBUG_TOKENS*sizeof(struct token_dscr));  */
-    register_prenetsnmp_mib_handler("snmp", "doDebugging",
-                                    debug_config_turn_on_debugging, NULL,
-                                    "(1|0)");
-    register_prenetsnmp_mib_handler("snmp", "debugTokens",
-                                    debug_config_register_tokens, NULL,
-                                    "token[,token...]");
-
-#ifdef NETSNMP_DEBUG_STATS
-    /*
-     * debug stats
-     */
-    dbg_stats = netsnmp_container_find("debug_exclude:table_container");
-    if (NULL != dbg_stats) {
-        dbg_stats->compare = _debug_cmp;
-        netsnmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                                  SNMP_CALLBACK_STORE_DATA,
-                                  _debug_stats_callback, dbg_stats, 1024);
-    }
-#endif
-}
-
-void
-debug_register_tokens(char *tokens)
+debug_register_tokens(const char *tokens)
 {
     char           *newp, *cp;
     char           *st = NULL;
     int             status;
 
-    if (tokens == 0 || *tokens == 0)
+    if (tokens == NULL || *tokens == 0)
         return;
 
     newp = strdup(tokens);      /* strtok_r messes it up */
+    if (!newp)
+        return;
     cp = strtok_r(newp, DEBUG_TOKEN_DELIMITER, &st);
     while (cp) {
         if (strlen(cp) < MAX_DEBUG_TOKEN_LEN) {
@@ -173,17 +153,16 @@ debug_register_tokens(char *tokens)
     free(newp);
 }
 
-
-/* 
+/*
  * Print all registered tokens along with their current status
  */
-void 
+void
 debug_print_registered_tokens(void) {
     int i;
 
     snmp_log(LOG_INFO, "%d tokens registered :\n", debug_num_tokens);
     for (i=0; i<debug_num_tokens; i++) {
-        snmp_log( LOG_INFO, "%d) %s : %d\n", 
+        snmp_log( LOG_INFO, "%d) %s : %d\n",
                  i, dbg_tokens [i].token_name, dbg_tokens [i].enabled);
     }
 }
@@ -206,7 +185,7 @@ debug_enable_token_logs (const char *token) {
     } else {
         for(i=0; i < debug_num_tokens; i++) {
             if (dbg_tokens[i].token_name &&
-                strncmp(dbg_tokens[i].token_name, token, 
+                strncmp(dbg_tokens[i].token_name, token,
                         strlen(dbg_tokens[i].token_name)) == 0) {
                 dbg_tokens[i].enabled = SNMP_DEBUG_ACTIVE;
                 return SNMPERR_SUCCESS;
@@ -242,13 +221,12 @@ debug_disable_token_logs (const char *token) {
     return SNMPERR_GENERR;
 }
 
-
 /*
  * debug_is_token_registered(char *TOKEN):
- * 
+ *
  * returns SNMPERR_SUCCESS
  * or SNMPERR_GENERR
- * 
+ *
  * if TOKEN has been registered and debugging support is turned on.
  */
 int
@@ -257,21 +235,16 @@ debug_is_token_registered(const char *token)
     int             i, rc;
 
     /*
-     * debugging flag is on or off 
+     * debugging flag is on or off
      */
     if (!dodebug)
         return SNMPERR_GENERR;
 
     if (debug_num_tokens == 0 || debug_print_everything) {
         /*
-         * no tokens specified, print everything 
-         * (unless something might be excluded)
+         * no tokens specified, print everything
          */
-        if (debug_num_excluded) {
-            rc = SNMPERR_SUCCESS; /* ! found = success */
-        } else {
-            return SNMPERR_SUCCESS;
-        }
+        return SNMPERR_SUCCESS;
     }
     else
         rc = SNMPERR_GENERR; /* ! found = err */
@@ -288,53 +261,19 @@ debug_is_token_registered(const char *token)
                 return SNMPERR_GENERR; /* excluded */
         }
     }
-
-#ifdef NETSNMP_DEBUG_STATS
-    if ((SNMPERR_SUCCESS == rc) && (NULL != dbg_stats)) {
-        netsnmp_token_descr td, *found;
-
-        td.token_name = token;
-        found = CONTAINER_FIND(dbg_stats, &td);
-        if (NULL == found) {
-            found = SNMP_MALLOC_TYPEDEF(netsnmp_token_descr);
-            netsnmp_assert(NULL != found);
-            found->token_name = strdup(token);
-            netsnmp_assert(0 == found->enabled);
-            CONTAINER_INSERT(dbg_stats, found);
-        }
-        ++found->enabled;
-    /*  snmp_log(LOG_ERR,"tok %s, %d hits\n", token, found->enabled);  */
-    }
-#endif
-
     return rc;
 }
 
 void
-#if HAVE_STDARG_H
 debugmsg(const char *token, const char *format, ...)
-#else
-debugmsg(va_alist)
-     va_dcl
-#endif
 {
-    va_list         debugargs;
-
-#if HAVE_STDARG_H
-    va_start(debugargs, format);
-#else
-    const char     *format;
-    const char     *token;
-
-    va_start(debugargs);
-    token = va_arg(debugargs, const char *);
-    format = va_arg(debugargs, const char *);   /* ??? */
-#endif
-
     if (debug_is_token_registered(token) == SNMPERR_SUCCESS) {
-        snmp_vlog(LOG_DEBUG, format, debugargs);
+	va_list         debugargs;
+
+	va_start(debugargs, format);
+	snmp_vlog(LOG_DEBUG, format, debugargs);
+	va_end(debugargs);
     }
-    va_end(debugargs);
 }
 
 void
@@ -425,12 +364,12 @@ debugmsg_oidrange(const char *token, const oid * theoid, size_t len,
         rc = sprint_realloc_objid(&buf, &buf_len, &out_len, 1, theoid,
                                   var_subid-1);  /* Adjust for C's 0-based array indexing */
         if (rc) {
-            sprintf(tmpbuf, ".%lu--%lu", theoid[var_subid - 1],
-                    range_ubound);
+            sprintf(tmpbuf, ".%" NETSNMP_PRIo "u--%" NETSNMP_PRIo "u",
+                    theoid[var_subid - 1], range_ubound);
             rc = snmp_cstrcat(&buf, &buf_len, &out_len, 1, tmpbuf);
             if (rc) {
                 for (i = var_subid; i < len; i++) {
-                    sprintf(tmpbuf, ".%lu", theoid[i]);
+                    sprintf(tmpbuf, ".%" NETSNMP_PRIo "u", theoid[i]);
                     if (!snmp_cstrcat(&buf, &buf_len, &out_len, 1, tmpbuf)) {
                         break;
                     }
@@ -447,7 +386,7 @@ debugmsg_oidrange(const char *token, const oid * theoid, size_t len,
 }
 
 void
-debugmsg_hex(const char *token, u_char * thedata, size_t len)
+debugmsg_hex(const char *token, const u_char * thedata, size_t len)
 {
     u_char         *buf = NULL;
     size_t          buf_len = 0, out_len = 0;
@@ -469,7 +408,7 @@ debugmsg_hex(const char *token, u_char * thedata, size_t len)
 }
 
 void
-debugmsg_hextli(const char *token, u_char * thedata, size_t len)
+debugmsg_hextli(const char *token, const u_char * thedata, size_t len)
 {
     char            buf[SPRINT_MAX_LEN], token2[SPRINT_MAX_LEN];
     u_char         *b3 = NULL;
@@ -489,7 +428,7 @@ debugmsg_hextli(const char *token, u_char * thedata, size_t len)
              * XXnext two lines were DEBUGPRINTINDENT(token);
              */
             sprintf(buf, "dumpx%s", token);
-            debugmsg(buf, "%s: %s", token2, debug_indent());
+            debugmsg(buf, "%s: %*s", token2, debug_indent_get(), "");
             if (sprint_realloc_hexstring
                 (&b3, &b3_len, &o3_len, 1, thedata, incr)) {
                 if (b3 != NULL) {
@@ -509,53 +448,23 @@ debugmsg_hextli(const char *token, u_char * thedata, size_t len)
 }
 
 void
-#if HAVE_STDARG_H
 debugmsgtoken(const char *token, const char *format, ...)
-#else
-debugmsgtoken(va_alist)
-     va_dcl
-#endif
 {
     va_list         debugargs;
 
-#if HAVE_STDARG_H
     va_start(debugargs, format);
-#else
-    const char     *token;
-
-    va_start(debugargs);
-    token = va_arg(debugargs, const char *);
-#endif
-
     debugmsg(token, "%s: ", token);
-
     va_end(debugargs);
 }
 
 void
-#if HAVE_STDARG_H
 debug_combo_nc(const char *token, const char *format, ...)
-#else
-debug_combo_nc(va_alist)
-     va_dcl
-#endif
 {
     va_list         debugargs;
 
-#if HAVE_STDARG_H
     va_start(debugargs, format);
-#else
-    const char     *format;
-    const char     *token;
-
-    va_start(debugargs);
-    token = va_arg(debugargs, const char *);
-    format = va_arg(debugargs, const char *);   /* ??? */
-#endif
-
     snmp_log(LOG_DEBUG, "%s: ", token);
     snmp_vlog(LOG_DEBUG, format, debugargs);
-
     va_end(debugargs);
 }
 
@@ -574,62 +483,128 @@ snmp_get_do_debugging(void)
     return dodebug;
 }
 
-#ifdef NETSNMP_DEBUG_STATS
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- */
-static int
-_debug_cmp( const void *lhs, const void *rhs )
-{
-    netsnmp_token_descr *dbg_l = (netsnmp_token_descr *)lhs;
-    netsnmp_token_descr *dbg_r = (netsnmp_token_descr *)rhs;
+#else /* ! NETSNMP_NO_DEBUGGING */
 
- /* snmp_log(LOG_ERR,"%s/%s\n",dbg_l->token_name, dbg_r->token_name); */
-    return strcmp(dbg_l->token_name, dbg_r->token_name);
-}
-
-
-static int
-_save_debug_stat(netsnmp_token_descr *tb, void *type)
-{
-    char buf[256];
-
-    snprintf(buf, sizeof(buf), "debug_hits %s %d",
-             tb->token_name, tb->enabled);
-    read_config_store((char *) type, buf);
-
-    return SNMP_ERR_NOERROR;
-}
-
-static int
-_debug_stats_callback(int majorID, int minorID,
-                  void *serverarg, void *clientarg)
-{
-    char            sep[] =
-        "##############################################################";
-    char            buf[] =
-        "#\n" "# debug stats\n" "#";
-    char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                                 NETSNMP_DS_LIB_APPTYPE);
-
-    read_config_store((char *) type, sep);
-    read_config_store((char *) type, buf);
-
-    /*
-     * save all rows
-     */
-    CONTAINER_FOR_EACH((netsnmp_container *) clientarg,
-                       (netsnmp_container_obj_func *)
-                       _save_debug_stat, type);
-
-    read_config_store((char *) type, sep);
-    read_config_store((char *) type, "\n");
-
-    /*
-     * never fails 
-     */
-    return SNMPERR_SUCCESS;
-}
+#if __GNUC__ > 2
+#define UNUSED __attribute__((unused))
+#else
+#define UNUSED
 #endif
 
+int debug_indent_get(void) { return 0; }
+
+const char* debug_indent(void) { return ""; }
+
+void debug_indent_add(int amount UNUSED) { }
+
+NETSNMP_IMPORT void
+debug_config_register_tokens(const char *configtoken, char *tokens);
+
+void
+debug_config_register_tokens(const char *configtoken UNUSED,
+                             char *tokens UNUSED)
+{ }
+
+NETSNMP_IMPORT void
+debug_config_turn_on_debugging(const char *configtoken, char *line);
+
+void
+debug_config_turn_on_debugging(const char *configtoken UNUSED,
+                               char *line UNUSED)
+{ }
+
+void
+debug_register_tokens(const char *tokens UNUSED)
+{ }
+
+void
+debug_print_registered_tokens(void)
+{ }
+
+
+int
+debug_enable_token_logs (const char *token UNUSED)
+{ return SNMPERR_GENERR; }
+
+int
+debug_disable_token_logs (const char *token UNUSED)
+{ return SNMPERR_GENERR; }
+
+int
+debug_is_token_registered(const char *token UNUSED)
+{ return SNMPERR_GENERR; }
+
+void
+debugmsg(const char *token UNUSED, const char *format UNUSED, ...)
+{ }
+
+void
+debugmsg_oid(const char *token UNUSED, const oid * theoid UNUSED,
+             size_t len UNUSED)
+{ }
+
+void
+debugmsg_suboid(const char *token UNUSED, const oid * theoid UNUSED,
+                size_t len UNUSED)
+{ }
+
+void
+debugmsg_var(const char *token UNUSED, netsnmp_variable_list * var UNUSED)
+{ }
+
+void
+debugmsg_oidrange(const char *token UNUSED, const oid * theoid UNUSED,
+                  size_t len UNUSED, size_t var_subid UNUSED,
+                  oid range_ubound UNUSED)
+{ }
+
+void
+debugmsg_hex(const char *token UNUSED, const u_char * thedata UNUSED,
+             size_t len UNUSED)
+{ }
+
+void
+debugmsg_hextli(const char *token UNUSED, const u_char * thedata UNUSED,
+                size_t len UNUSED)
+{ }
+
+void
+debugmsgtoken(const char *token UNUSED, const char *format UNUSED, ...)
+{ }
+
+void
+debug_combo_nc(const char *token UNUSED, const char *format UNUSED, ...)
+{ }
+
+void
+snmp_set_do_debugging(int val UNUSED)
+{ }
+
+int
+snmp_get_do_debugging(void)
+{
+    return 0;
+}
+
+#endif /* NETSNMP_NO_DEBUGGING */
+
+void
+snmp_debug_init(void)
+{
+    register_prenetsnmp_mib_handler("snmp", "doDebugging",
+                                    debug_config_turn_on_debugging, NULL,
+                                    "(1|0)");
+    register_prenetsnmp_mib_handler("snmp", "debugTokens",
+                                    debug_config_register_tokens, NULL,
+                                    "token[,token...]");
+}
+
+void
+snmp_debug_shutdown(void)
+{
+    int i;
+
+   for (i=0; i<debug_num_tokens; i++) {
+       SNMP_FREE(dbg_tokens [i].token_name);
+    }
+}

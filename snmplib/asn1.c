@@ -6,6 +6,14 @@
  *
  * Encodes abstract data types into a machine independent stream of bytes.
  *
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 /**********************************************************************
 	Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
@@ -170,9 +178,6 @@ SOFTWARE.
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -251,6 +256,24 @@ _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)
 }
 
 /**
+ * @internal
+ * output an error for a wrong type
+ * 
+ * @param str        error string
+ * @param wrongtype  wrong type
+ */
+static
+    void
+_asn_type_err(const char *str, int wrongtype)
+{
+    char            ebuf[128];
+
+    snprintf(ebuf, sizeof(ebuf), "%s type %d", str, wrongtype);
+    ebuf[ sizeof(ebuf)-1 ] = 0;
+    ERROR_MSG(ebuf);
+}
+
+/**
  * @internal 
  * output an error for a wrong length
  * 
@@ -273,13 +296,88 @@ _asn_length_err(const char *str, size_t wrongsize, size_t rightsize)
 
 /**
  * @internal
+ * output an error for a wrong length
+ *
+ * @param str        error string
+ * @param wrongsize  wrong  length
+ * @param rightsize  expected length
+ */
+static
+    void
+_asn_short_err(const char *str, size_t wrongsize, size_t rightsize)
+{
+    char            ebuf[128];
+
+    snprintf(ebuf, sizeof(ebuf),
+            "%s length %lu too short: need %lu", str,
+	    (unsigned long)wrongsize, (unsigned long)rightsize);
+    ebuf[ sizeof(ebuf)-1 ] = 0;
+    ERROR_MSG(ebuf);
+}
+
+/**
+ * @internal
+ * checks a buffer with a length + data to see if it is big enough for
+ *    the length encoding and the data of the parsed length.
+ *
+ * @param IN  pkt      The buffer
+ * @param IN  pkt_len  The length of the bugger
+ * @param OUT data_len Pointer to size of data
+ *
+ * @return Pointer to start of data or NULL if pkt isn't long enough
+ *
+ * pkt = get_buf(..., &pkt_len);
+ * data = asn_parse_nlength(pkt, pkt_len, &data_len);
+ * if (NULL == data) { handle_error(); }
+ *
+ */
+u_char *
+asn_parse_nlength(u_char *pkt, size_t pkt_len, u_long *data_len)
+{
+    int len_len;
+
+    if (pkt_len < 1)
+        return NULL;               /* always too short */
+
+    if (NULL == pkt || NULL == data_len || NULL == data_len)
+        return NULL;
+
+    *data_len = 0;
+
+    if (*pkt & 0x80) {
+        /*
+         * long length; first byte is length of length (after masking high bit)
+         */
+        len_len = (int) ((*pkt & ~0x80) + 1);
+        if ((int) pkt_len <= len_len )
+            return NULL;           /* still too short for length and data */
+
+        /* now we know we have enough data to parse length */
+        asn_parse_length(pkt, data_len);
+    } else {
+        /*
+         * short length; first byte is the length
+         */
+        len_len = 1;
+        *data_len = *pkt;
+    }
+
+    if ((*data_len + len_len) > pkt_len)
+        return NULL;
+
+    return (pkt + len_len);
+}
+
+#if 0
+/**
+ * @internal
  * call after asn_parse_length to verify result.
  * 
  * @param str  error string
  * @param bufp start of buffer
  * @param data start of data
- * @param plen  ?
- * @param dlen  ?
+ * @param plen  ? parsed length
+ * @param dlen  ? data/buf length
  * 
  * @return 1 on error 0 on success
  */
@@ -310,6 +408,7 @@ _asn_parse_length_check(const char *str,
     }
     return 0;
 }
+#endif
 
 
 /**
@@ -477,17 +576,35 @@ asn_parse_int(u_char * data,
     u_long          asn_length;
     register long   value = 0;
 
+    if (NULL == data || NULL == datalength || NULL == type || NULL == intp) {
+        ERROR_MSG("parse int: NULL pointer");
+        return NULL;
+    }
+
     if (intsize != sizeof(long)) {
         _asn_size_err(errpre, intsize, sizeof(long));
         return NULL;
     }
-    *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check
-        (errpre, bufp, data, asn_length, *datalength))
-        return NULL;
 
-    if ((size_t) asn_length > intsize) {
+    /** need at least 2 bytes to work with: type, length (which might be 0)  */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 2);
+        return NULL;
+    }
+
+    *type = *bufp++;
+    if (*type != ASN_INTEGER) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
+
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
+        return NULL;
+    }
+
+    if ((size_t) asn_length > intsize || (int) asn_length == 0) {
         _asn_length_err(errpre, (size_t) asn_length, intsize);
         return NULL;
     }
@@ -503,7 +620,7 @@ asn_parse_int(u_char * data,
 
     CHECK_OVERFLOW_S(value,1);
 
-    DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2X)\n", value, value));
+    DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2lX)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -544,18 +661,37 @@ asn_parse_unsigned_int(u_char * data,
     u_long          asn_length;
     register u_long value = 0;
 
+    if (NULL == data || NULL == datalength || NULL == type || NULL == intp) {
+        ERROR_MSG("parse uint: NULL pointer");
+        return NULL;
+    }
+
     if (intsize != sizeof(long)) {
         _asn_size_err(errpre, intsize, sizeof(long));
         return NULL;
     }
-    *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check
-        (errpre, bufp, data, asn_length, *datalength))
-        return NULL;
 
-    if (((int) asn_length > (intsize + 1)) ||
-        (((int) asn_length == intsize + 1) && *bufp != 0x00)) {
+    /** need at least 2 bytes to work with: type, length (which might be 0)  */
+    if (*datalength <= 2) {
+        _asn_short_err(errpre, *datalength, 2);
+        return NULL;
+    }
+
+    *type = *bufp++;
+    if (*type != ASN_COUNTER && *type != ASN_GAUGE && *type != ASN_TIMETICKS
+            && *type != ASN_UINTEGER) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
+
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
+        return NULL;
+    }
+
+    if ((asn_length > (intsize + 1)) || ((int) asn_length == 0) ||
+        ((asn_length == intsize + 1) && *bufp != 0x00)) {
         _asn_length_err(errpre, (size_t) asn_length, intsize);
         return NULL;
     }
@@ -568,7 +704,7 @@ asn_parse_unsigned_int(u_char * data,
 
     CHECK_OVERFLOW_U(value,2);
 
-    DEBUGMSG(("dumpv_recv", "  UInteger:\t%ld (0x%.2X)\n", value, value));
+    DEBUGMSG(("dumpv_recv", "  UInteger:\t%ld (0x%.2lX)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -647,7 +783,7 @@ asn_build_int(u_char * data,
         integer <<= 8;
     }
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
-    DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", *intp, *intp));
+    DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2lX)\n", *intp, *intp));
     return data;
 }
 
@@ -743,7 +879,7 @@ asn_build_unsigned_int(u_char * data,
         integer <<= 8;
     }
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
-    DEBUGMSG(("dumpv_send", "  UInteger:\t%ld (0x%.2X)\n", *intp, *intp));
+    DEBUGMSG(("dumpv_send", "  UInteger:\t%ld (0x%.2lX)\n", *intp, *intp));
     return data;
 }
 
@@ -785,14 +921,32 @@ asn_parse_string(u_char * data,
     u_char         *bufp = data;
     u_long          asn_length;
 
-    *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check
-        (errpre, bufp, data, asn_length, *datalength)) {
+    if (NULL == data || NULL == datalength || NULL == type || NULL == str ||
+        NULL == strlength) {
+        ERROR_MSG("parse string: NULL pointer");
         return NULL;
     }
 
-    if ((int) asn_length > *strlength) {
+    /** need at least 2 bytes to work with: type, length (which might be 0)  */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 2);
+        return NULL;
+    }
+
+    *type = *bufp++;
+    if (*type != ASN_OCTET_STR && *type != ASN_IPADDRESS && *type != ASN_OPAQUE
+            && *type != ASN_NSAP) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
+
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
+        return NULL;
+    }
+
+    if (asn_length > *strlength) {
         _asn_length_err(errpre, (size_t) asn_length, *strlength);
         return NULL;
     }
@@ -800,10 +954,10 @@ asn_parse_string(u_char * data,
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
     memmove(str, bufp, asn_length);
-    if (*strlength > (int) asn_length)
+    if (*strlength > asn_length)
         str[asn_length] = 0;
-    *strlength = (int) asn_length;
-    *datalength -= (int) asn_length + (bufp - data);
+    *strlength = asn_length;
+    *datalength -= asn_length + (bufp - data);
 
     DEBUGIF("dumpv_recv") {
         u_char         *buf = (u_char *) malloc(1 + asn_length);
@@ -926,12 +1080,20 @@ u_char         *
 asn_parse_header(u_char * data, size_t * datalength, u_char * type)
 {
     register u_char *bufp;
-    u_long          asn_length;
+    u_long          asn_length = 0;
+    const char      *errpre = "parse header";
 
     if (!data || !datalength || !type) {
         ERROR_MSG("parse header: NULL pointer");
         return NULL;
     }
+
+    /** need at least 2 bytes to work with: type, length (which might be 0) */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 2);
+        return NULL;
+    }
+
     bufp = data;
     /*
      * this only works on data types < 30, i.e. no extension octets 
@@ -940,12 +1102,13 @@ asn_parse_header(u_char * data, size_t * datalength, u_char * type)
         ERROR_MSG("can't process ID >= 30");
         return NULL;
     }
-    *type = *bufp;
-    bufp = asn_parse_length(bufp + 1, &asn_length);
+    *type = *bufp++;
 
-    if (_asn_parse_length_check
-        ("parse header", bufp, data, asn_length, *datalength))
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
         return NULL;
+    }
 
 #ifdef DUMP_PRINT_HEADERS
     DEBUGDUMPSETUP("recv", data, (bufp - data));
@@ -984,10 +1147,11 @@ asn_parse_header(u_char * data, size_t * datalength, u_char * type)
         /*
          * value is encoded as special format 
          */
-        bufp = asn_parse_length(bufp + 2, &asn_length);
-        if (_asn_parse_length_check("parse opaque header", bufp, data,
-                                    asn_length, *datalength))
+        bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
+        if (NULL == bufp) {
+            _asn_short_err("parse opaque header", *datalength, asn_length);
             return NULL;
+        }
     }
 #endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
@@ -1132,6 +1296,9 @@ asn_build_sequence(u_char * data,
  *  @return Returns a pointer to the first byte after this length
  *          field (aka: the start of the data field).
  *          Returns NULL on any error.
+ *
+ * WARNING: this function does not know the length of the data
+*           buffer, so it can go past the end of a short buffer.
  */
 u_char         *
 asn_parse_length(u_char * data, u_long * length)
@@ -1284,6 +1451,7 @@ asn_parse_objid(u_char * data,
                 size_t * datalength,
                 u_char * type, oid * objid, size_t * objidlength)
 {
+    static const char *errpre = "parse objid";
     /*
      * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
      * subidentifier ::= {leadingbyte}* lastbyte
@@ -1297,11 +1465,27 @@ asn_parse_objid(u_char * data,
     u_long          asn_length;
     size_t          original_length = *objidlength;
 
-    *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check("parse objid", bufp, data,
-                                asn_length, *datalength))
+    if (NULL == data || NULL == datalength || NULL == type || NULL == objid) {
+        ERROR_MSG("parse objid: NULL pointer");
         return NULL;
+    }
+
+    /** need at least 2 bytes to work with: type, length (which might be 0)  */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 3);
+        return NULL;
+    }
+
+    *type = *bufp++;
+    if (*type != ASN_OBJECT_ID) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
+        return NULL;
+    }
 
     *datalength -= (int) asn_length + (bufp - data);
 
@@ -1575,11 +1759,23 @@ asn_parse_null(u_char * data, size_t * datalength, u_char * type)
      */
     register u_char *bufp = data;
     u_long          asn_length;
+    static const char *errpre = "parse null";
+
+    if (NULL == data || NULL == datalength || NULL == type) {
+        ERROR_MSG("parse null: NULL pointer");
+        return NULL;
+    }
+
+    /** need at least 2 bytes to work with: type, length  (which should be 0) */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 2);
+        return NULL;
+    }
 
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL) {
-        ERROR_MSG("parse null: bad length");
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
         return NULL;
     }
     if (asn_length != 0) {
@@ -1666,11 +1862,29 @@ asn_parse_bitstring(u_char * data,
     register u_char *bufp = data;
     u_long          asn_length;
 
-    *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check(errpre, bufp, data,
-                                asn_length, *datalength))
+    if (NULL == data || NULL == datalength || NULL == type ||
+        NULL == str || NULL == strlength) {
+        ERROR_MSG("parse bitstring: NULL pointer");
         return NULL;
+    }
+
+    /** need at least 2 bytes to work with: type, length (which might be 0)  */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 3);
+        return NULL;
+    }
+
+    *type = *bufp++;
+    if (*type != ASN_BIT_STR) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
+
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
+        return NULL;
+    }
 
     if ((size_t) asn_length > *strlength) {
         _asn_length_err(errpre, (size_t) asn_length, *strlength);
@@ -1786,11 +2000,32 @@ asn_parse_unsigned_int64(u_char * data,
         _asn_size_err(errpre, countersize, sizeof(struct counter64));
         return NULL;
     }
-    *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check
-        (errpre, bufp, data, asn_length, *datalength))
+
+    if (NULL == data || NULL == datalength || NULL == type || NULL == cp) {
+        ERROR_MSG("parse uint64: NULL pointer");
         return NULL;
+    }
+
+    /** need at least 2 bytes to work with: type, length (which might be 0)  */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 3);
+        return NULL;
+    }
+
+    *type = *bufp++;
+    if (*type != ASN_COUNTER64
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
+            && *type != ASN_OPAQUE
+#endif
+            ) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
+        return NULL;
+    }
 
     DEBUGDUMPSETUP("recv", data, bufp - data);
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
@@ -1809,10 +2044,11 @@ asn_parse_unsigned_int64(u_char * data,
         /*
          * value is encoded as special format 
          */
-        bufp = asn_parse_length(bufp + 2, &asn_length);
-        if (_asn_parse_length_check("parse opaque uint64", bufp, data,
-                                    asn_length, *datalength))
+        bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
+        if (NULL == bufp) {
+            _asn_short_err("parse opaque uint64", *datalength, asn_length);
             return NULL;
+        }
     }
 #endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
     if (((int) asn_length > uint64sizelimit) ||
@@ -1986,7 +2222,7 @@ asn_build_unsigned_int64(u_char * data,
     DEBUGIF("dumpv_send") {
         char            i64buf[I64CHARSZ + 1];
         printU64(i64buf, cp);
-        DEBUGMSG(("dumpv_send", i64buf));
+        DEBUGMSG(("dumpv_send", "%s", i64buf));
     }
     return data;
 }
@@ -2034,11 +2270,24 @@ asn_parse_signed_int64(u_char * data,
         _asn_size_err(errpre, countersize, sizeof(struct counter64));
         return NULL;
     }
-    *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check
-        (errpre, bufp, data, asn_length, *datalength))
+
+    if (NULL == data || NULL == datalength || NULL == type || NULL == cp) {
+        ERROR_MSG("parse int64: NULL pointer");
         return NULL;
+    }
+
+    /** need at least 2 bytes to work with: type, length (which might be 0) */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 3);
+        return NULL;
+    }
+
+    *type = *bufp++;
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
+        return NULL;
+    }
 
     DEBUGDUMPSETUP("recv", data, bufp - data);
     if ((*type == ASN_OPAQUE) &&
@@ -2051,10 +2300,11 @@ asn_parse_signed_int64(u_char * data,
         /*
          * value is encoded as special format 
          */
-        bufp = asn_parse_length(bufp + 2, &asn_length);
-        if (_asn_parse_length_check("parse opaque int64", bufp, data,
-                                    asn_length, *datalength))
+        bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
+        if (NULL == bufp) {
+            _asn_short_err("parse opaque int64", *datalength, asn_length);
             return NULL;
+        }
     }
     /*
      * this should always have been true until snmp gets int64 PDU types 
@@ -2222,6 +2472,7 @@ asn_parse_float(u_char * data,
                 size_t * datalength,
                 u_char * type, float *floatp, size_t floatsize)
 {
+    static const char *errpre = "parse float";
     register u_char *bufp = data;
     u_long          asn_length;
     union {
@@ -2234,11 +2485,24 @@ asn_parse_float(u_char * data,
         _asn_size_err("parse float", floatsize, sizeof(float));
         return NULL;
     }
-    *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check("parse float", bufp, data,
-                                asn_length, *datalength))
+
+    if (NULL == data || NULL == datalength || NULL == type || NULL == floatp) {
+        ERROR_MSG("parse float: NULL pointer");
         return NULL;
+    }
+
+    /** need at least 2 bytes to work with: type, length (which might be 0)  */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 3);
+        return NULL;
+    }
+
+    *type = *bufp++;
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
+        return NULL;
+    }
 
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
     /*
@@ -2251,15 +2515,20 @@ asn_parse_float(u_char * data,
         /*
          * value is encoded as special format 
          */
-        bufp = asn_parse_length(bufp + 2, &asn_length);
-        if (_asn_parse_length_check("parse opaque float", bufp, data,
-                                    asn_length, *datalength))
+        bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
+        if (NULL == bufp) {
+            _asn_short_err("parse opaque float", *datalength, asn_length);
             return NULL;
-
+        }
         /*
          * change type to Float 
          */
         *type = ASN_OPAQUE_FLOAT;
+    }
+
+    if (*type != ASN_OPAQUE_FLOAT) {
+        _asn_type_err(errpre, *type);
+        return NULL;
     }
 
     if (asn_length != sizeof(float)) {
@@ -2387,6 +2656,7 @@ asn_parse_double(u_char * data,
                  size_t * datalength,
                  u_char * type, double *doublep, size_t doublesize)
 {
+    static const char *errpre = "parse double";
     register u_char *bufp = data;
     u_long          asn_length;
     long            tmp;
@@ -2401,11 +2671,24 @@ asn_parse_double(u_char * data,
         _asn_size_err("parse double", doublesize, sizeof(double));
         return NULL;
     }
-    *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check("parse double", bufp, data,
-                                asn_length, *datalength))
+
+    if (NULL == data || NULL == datalength || NULL == type || NULL == doublep) {
+        ERROR_MSG("parse double: NULL pointer");
         return NULL;
+    }
+
+    /** need at least 2 bytes to work with: type, length (which might be 0)  */
+    if (*datalength < 2) {
+        _asn_short_err(errpre, *datalength, 3);
+        return NULL;
+    }
+
+    *type = *bufp++;
+    bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
+    if (NULL == bufp) {
+        _asn_short_err(errpre, *datalength, asn_length);
+        return NULL;
+    }
 
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
     /*
@@ -2418,15 +2701,21 @@ asn_parse_double(u_char * data,
         /*
          * value is encoded as special format 
          */
-        bufp = asn_parse_length(bufp + 2, &asn_length);
-        if (_asn_parse_length_check("parse opaque double", bufp, data,
-                                    asn_length, *datalength))
+        bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
+        if (NULL == bufp) {
+            _asn_short_err("parse opaque double", *datalength, asn_length);
             return NULL;
+        }
 
         /*
          * change type to Double 
          */
         *type = ASN_OPAQUE_DOUBLE;
+    }
+
+    if (*type != ASN_OPAQUE_DOUBLE) {
+        _asn_type_err(errpre, *type);
+        return NULL;
     }
 
     if (asn_length != sizeof(double)) {
@@ -2555,15 +2844,16 @@ asn_realloc(u_char ** pkt, size_t * pkt_len)
     if (pkt != NULL && pkt_len != NULL) {
         size_t          old_pkt_len = *pkt_len;
 
-        DEBUGMSGTL(("asn_realloc", " old_pkt %08p, old_pkt_len %08x\n",
-                    *pkt, old_pkt_len));
+        DEBUGMSGTL(("asn_realloc", " old_pkt %8p, old_pkt_len %lu\n",
+                    *pkt, (unsigned long)old_pkt_len));
 
         if (snmp_realloc(pkt, pkt_len)) {
-            DEBUGMSGTL(("asn_realloc", " new_pkt %08p, new_pkt_len %08x\n",
-                        *pkt, *pkt_len));
+            DEBUGMSGTL(("asn_realloc", " new_pkt %8p, new_pkt_len %lu\n",
+                        *pkt, (unsigned long)*pkt_len));
             DEBUGMSGTL(("asn_realloc",
-                        " memmove(%08p + %08x, %08p, %08x)\n", *pkt,
-                        (*pkt_len - old_pkt_len), *pkt, old_pkt_len));
+                        " memmove(%8p + %08x, %8p, %08x)\n",
+			*pkt, (unsigned)(*pkt_len - old_pkt_len),
+			*pkt, (unsigned)old_pkt_len));
             memmove(*pkt + (*pkt_len - old_pkt_len), *pkt, old_pkt_len);
             memset(*pkt, (int) ' ', *pkt_len - old_pkt_len);
             return 1;
@@ -2754,7 +3044,7 @@ asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
         } else {
             DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset),
                            (*offset - start_offset));
-            DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", *intp,
+            DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2lX)\n", *intp,
                       *intp));
             return 1;
         }
@@ -2907,7 +3197,7 @@ asn_realloc_rbuild_unsigned_int(u_char ** pkt, size_t * pkt_len,
         } else {
             DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset),
                            (*offset - start_offset));
-            DEBUGMSG(("dumpv_send", "  UInteger:\t%lu (0x%.2X)\n", *intp,
+            DEBUGMSG(("dumpv_send", "  UInteger:\t%lu (0x%.2lX)\n", *intp,
                       *intp));
             return 1;
         }
@@ -3410,9 +3700,6 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
                       sizeof(struct counter64));
         return 0;
     }
-
-    CHECK_OVERFLOW_S(high,14);
-    CHECK_OVERFLOW_U(low,14);
 
     /*
      * Encode the low 4 bytes first.  

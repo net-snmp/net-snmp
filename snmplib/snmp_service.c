@@ -11,7 +11,7 @@ create_word_array_helper(const char* cptr, size_t idx, char* tmp, size_t tmplen)
 {
     char* item;
     char** res;
-    cptr = copy_nword(NETSNMP_REMOVE_CONST(char *, cptr), tmp, tmplen);
+    cptr = copy_nword_const(cptr, tmp, tmplen);
     item = strdup(tmp);
     if (cptr)
         res = create_word_array_helper(cptr, idx + 1, tmp, tmplen);
@@ -68,7 +68,7 @@ netsnmp_register_default_domain(const char* application, const char* domain)
     if (run && strcmp(run->application, application) == 0) {
       if (run->domain != NULL) {
           destroy_word_array(run->domain);
-	  run->domain=NULL;
+	  run->domain = NULL;
 	  res = 1;
       }
     } else {
@@ -120,12 +120,8 @@ netsnmp_register_user_domain(const char* token, char* cptr)
     {
         char* cp = copy_nword(cptr, application, len);
         if (cp == NULL) {
-            char tmpbuf[STRINGMAX];
-            snprintf(tmpbuf, sizeof(tmpbuf),
-                     "No domain(s) in registration of defDomain \"%s\"",
-                     application);
-            tmpbuf[sizeof(tmpbuf) - 1] = '\0';
-            config_perror(tmpbuf);
+            netsnmp_config_error("No domain(s) in registration of "
+                                 "defDomain \"%s\"", application);
             free(application);
             return;
         }
@@ -320,22 +316,15 @@ netsnmp_register_user_target(const char* token, char* cptr)
     {
 	char* cp = copy_nword(cptr, application, len);
         if (cp == NULL) {
-            char tmpbuf[STRINGMAX];
-            snprintf(tmpbuf, sizeof(tmpbuf),
-                     "No domain and target in registration of "
-                     "defTarget \"%s\"", application);
-            tmpbuf[sizeof(tmpbuf) - 1] = '\0';
-            config_perror(tmpbuf);
+            netsnmp_config_error("No domain and target in registration of "
+                                 "defTarget \"%s\"", application);
             goto done;
         }
 	cp = copy_nword(cp, domain, len);
         if (cp == NULL) {
-            char tmpbuf[STRINGMAX];
-            snprintf(tmpbuf, sizeof(tmpbuf),
-                     "No target in registration of defTarget \"%s\" \"%s\"",
-                     application, domain);
-            tmpbuf[sizeof(tmpbuf) - 1] = '\0';
-            config_perror(tmpbuf);
+            netsnmp_config_error("No target in registration of "
+                                 "defTarget \"%s\" \"%s\"",
+                                 application, domain);
             goto done;
         }
 	cp = copy_nword(cp, target, len);

@@ -4,11 +4,15 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <ctype.h>
 #include "disman/schedule/schedCore.h"
 #include "disman/schedule/schedConf.h"
+
+netsnmp_feature_require(iquery)
+netsnmp_feature_require(string_time_to_secs)
 
 static int schedEntries;
 
@@ -51,7 +55,7 @@ parse_sched_periodic( const char *token, char *line )
 {
     netsnmp_tdata_row       *row;
     struct schedTable_entry *entry;
-    char   buf[24];
+    char   buf[24], tmpbuf[SPRINT_MAX_LEN];
     long   frequency;
     long   value;
     size_t tmpint;
@@ -65,7 +69,13 @@ parse_sched_periodic( const char *token, char *line )
     /*
      *  Parse the configure directive line
      */
-    line = read_config_read_data(ASN_INTEGER,   line, &frequency, &tmpint);
+    line = copy_nword(line, tmpbuf, sizeof(tmpbuf));
+    frequency = netsnmp_string_time_to_secs(tmpbuf);
+    if (frequency == -1) {
+        config_perror("Illegal frequency specified");
+        return;
+    }
+
     line = read_config_read_data(ASN_OBJECT_ID, line, &var_ptr,   &var_len);
     if (var_len == 0) {
         config_perror("invalid specification for schedVariable");
@@ -74,11 +84,11 @@ parse_sched_periodic( const char *token, char *line )
     /*
      * Skip over optional assignment in "var = value"
      */
-    while (line && isspace(*line))
+    while (line && isspace((unsigned char)(*line)))
         line++;
     if (line && *line == '=' ) {
         line++;
-        while (line && isspace(*line)) {
+        while (line && isspace((unsigned char)(*line))) {
             line++;
         }
     }
@@ -119,7 +129,7 @@ void
 _sched_convert_bits( char *cron_spec, char *bit_buf,
                      int  bit_buf_len, int max_val, int startAt1 ) {
     char *cp = cron_spec;
-    char b[] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
+    u_char b[] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
     int val, major, minor;
     int overshoot;
 
@@ -219,11 +229,11 @@ parse_sched_timed( const char *token, char *line )
     /*
      * Skip over optional assignment in "var = value"
      */
-    while (line && isspace(*line))
+    while (line && isspace((unsigned char)(*line)))
         line++;
     if ( *line == '=' ) {
         line++;
-        while (line && isspace(*line)) {
+        while (line && isspace((unsigned char)(*line))) {
             line++;
         }
     }
@@ -357,7 +367,7 @@ store_schedTable(int majorID, int minorID, void *serverarg, void *clientarg)
 {
     char              line[SNMP_MAXBUF];
     char              time_bits[22];  /* schedWeekDay..schedMinute */
-    char             *cptr;
+    char             *cptr, *cp;
     void             *vp;
     size_t            tint;
     netsnmp_tdata_row *row;
@@ -387,12 +397,12 @@ store_schedTable(int majorID, int minorID, void *serverarg, void *clientarg)
         strcpy(line, "_schedTable ");
         cptr = line + strlen(line);
 
-        vp   = entry->schedOwner;     tint = strlen( vp );
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp,  &tint );
-        vp   = entry->schedName;      tint = strlen( vp );
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp,  &tint );
-        vp   = entry->schedDescr;     tint = strlen( vp );
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp,  &tint );
+        cp   = entry->schedOwner;     tint = strlen( cp );
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp,  &tint );
+        cp   = entry->schedName;      tint = strlen( cp );
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp,  &tint );
+        cp   = entry->schedDescr;     tint = strlen( cp );
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp,  &tint );
         tint = entry->schedInterval;
         cptr = read_config_store_data(ASN_UNSIGNED,  cptr, &tint, NULL );
 
@@ -408,8 +418,8 @@ store_schedTable(int majorID, int minorID, void *serverarg, void *clientarg)
         vp   = time_bits;    tint = 22;
         cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
 
-        vp   = entry->schedContextName; tint = strlen( vp );
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp,  &tint );
+        cp   = entry->schedContextName; tint = strlen( cp );
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp,  &tint );
         vp   = entry->schedVariable;
         tint = entry->schedVariable_len;
         cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &vp,  &tint );

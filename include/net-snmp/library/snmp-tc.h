@@ -18,8 +18,9 @@ extern          "C" {
                                           u_char utc_offset_hours,
                                           u_char utc_offset_minutes);
 
-    u_char         *date_n_time(time_t *, size_t *);
-    time_t          ctime_to_timet(char *);
+    NETSNMP_IMPORT
+    u_char         *date_n_time(const time_t *, size_t *);
+    time_t          ctime_to_timet(const char *);
 
     /*
      * TrueValue 
@@ -52,7 +53,11 @@ extern          "C" {
 #define ST_PERMANENT	4
 #define ST_READONLY	5
 
+    NETSNMP_IMPORT
     char            check_rowstatus_transition(int old_val, int new_val);
+    NETSNMP_IMPORT
+    char            check_rowstatus_with_storagetype_transition(int old_val, int new_val, int old_storage);
+    NETSNMP_IMPORT
     char            check_storage_transition(int old_val, int new_val);
 
 #ifdef __cplusplus

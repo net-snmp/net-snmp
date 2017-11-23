@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,18 @@
 #include "tcpListenerTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_child_of(tcpListenerTable_external_access, libnetsnmpmibs)
+
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(tcpListenerTable_container_size, tcpListenerTable_external_access)
+netsnmp_feature_child_of(tcpListenerTable_registration_set, tcpListenerTable_external_access)
+netsnmp_feature_child_of(tcpListenerTable_registration_get, tcpListenerTable_external_access)
+netsnmp_feature_child_of(tcpListenerTable_container_get, tcpListenerTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -79,19 +92,23 @@ static void
                 _tcpListenerTable_container_shutdown(tcpListenerTable_interface_ctx *
                                                      if_ctx);
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_GET
 netsnmp_container *
 tcpListenerTable_container_get(void)
 {
     return tcpListenerTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_GET
 tcpListenerTable_registration *
 tcpListenerTable_registration_get(void)
 {
     return tcpListenerTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_SET
 tcpListenerTable_registration *
 tcpListenerTable_registration_set(tcpListenerTable_registration * newreg)
 {
@@ -99,12 +116,15 @@ tcpListenerTable_registration_set(tcpListenerTable_registration * newreg)
     tcpListenerTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_SET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_SIZE
 int
 tcpListenerTable_container_size(void)
 {
     return CONTAINER_SIZE(tcpListenerTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_SIZE */
 
 /*
  * mfd multiplexer modes
@@ -150,7 +170,7 @@ _tcpListenerTable_initialize_interface(tcpListenerTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = TCPLISTENERTABLE_MIN_COL;
     tbl_info->max_column = TCPLISTENERTABLE_MAX_COL;
@@ -220,7 +240,8 @@ _tcpListenerTable_initialize_interface(tcpListenerTable_registration *
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
+    /* XXX - are these actually necessary? */
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
@@ -243,7 +264,7 @@ _tcpListenerTable_initialize_interface(tcpListenerTable_registration *
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -609,7 +630,7 @@ _mfd_tcpListenerTable_post_request(netsnmp_mib_handler *handler,
                                    netsnmp_agent_request_info *agtreq_info,
                                    netsnmp_request_info *requests)
 {
-    tcpListenerTable_rowreq_ctx *rowreq_ctx =
+    tcpListenerTable_rowreq_ctx *rowreq_ctx = (tcpListenerTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -656,7 +677,7 @@ _mfd_tcpListenerTable_object_lookup(netsnmp_mib_handler *handler,
                                     netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    tcpListenerTable_rowreq_ctx *rowreq_ctx =
+    tcpListenerTable_rowreq_ctx *rowreq_ctx = (tcpListenerTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:tcpListenerTable:_mfd_tcpListenerTable_object_lookup", "called\n"));
@@ -727,7 +748,7 @@ _mfd_tcpListenerTable_get_values(netsnmp_mib_handler *handler,
                                  netsnmp_agent_request_info *agtreq_info,
                                  netsnmp_request_info *requests)
 {
-    tcpListenerTable_rowreq_ctx *rowreq_ctx =
+    tcpListenerTable_rowreq_ctx *rowreq_ctx = (tcpListenerTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -924,9 +945,12 @@ _tcpListenerTable_container_init(tcpListenerTable_interface_ctx * if_ctx)
     if_ctx->cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 
     tcpListenerTable_container_init(&if_ctx->container, if_ctx->cache);
-    if (NULL == if_ctx->container)
+    if (NULL == if_ctx->container) {
         if_ctx->container =
             netsnmp_container_find("tcpListenerTable:table_container");
+        if (if_ctx->container)
+            if_ctx->container->container_name = strdup("tcpListenerTable");
+    }
     if (NULL == if_ctx->container) {
         snmp_log(LOG_ERR, "error creating container in "
                  "tcpListenerTable_container_init\n");
@@ -954,6 +978,7 @@ _tcpListenerTable_container_shutdown(tcpListenerTable_interface_ctx *
 }                               /* _tcpListenerTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_EXTERNAL_ACCESS
 tcpListenerTable_rowreq_ctx *
 tcpListenerTable_row_find_by_mib_index(tcpListenerTable_mib_index *
                                        mib_idx)
@@ -976,8 +1001,9 @@ tcpListenerTable_row_find_by_mib_index(tcpListenerTable_mib_index *
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx =
+    rowreq_ctx = (tcpListenerTable_rowreq_ctx*)
         CONTAINER_FIND(tcpListenerTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_EXTERNAL_ACCESS */

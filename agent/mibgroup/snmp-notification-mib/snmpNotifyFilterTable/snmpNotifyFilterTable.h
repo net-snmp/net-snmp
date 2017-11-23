@@ -311,8 +311,8 @@ config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable
         * snmpNotifyFilterTable_row_find_by_mib_index
         (snmpNotifyFilterTable_mib_index * mib_idx);
 
-    extern oid      snmpNotifyFilterTable_oid[];
-    extern int      snmpNotifyFilterTable_oid_size;
+    extern const oid      snmpNotifyFilterTable_oid[];
+    extern const int      snmpNotifyFilterTable_oid_size;
 
 
 #include "snmpNotifyFilterTable_interface.h"

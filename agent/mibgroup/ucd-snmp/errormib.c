@@ -11,11 +11,7 @@
 #endif
 #include <signal.h>
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -112,9 +108,6 @@
 #if HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -122,7 +115,7 @@
 
 #include "struct.h"
 #include "errormib.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 
 static time_t   errorstatustime = 0;
 static int      errorstatusprior = 0;
@@ -159,14 +152,14 @@ init_errormib(void)
      * information at 
      */
     struct variable2 extensible_error_variables[] = {
-        {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_errors, 1,
-         {MIBINDEX}},
-        {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_errors, 1,
-         {ERRORNAME}},
-        {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_errors, 1,
-         {ERRORFLAG}},
-        {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_errors, 1,
-         {ERRORMSG}}
+        {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_errors, 1, {MIBINDEX}},
+        {ERRORNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_errors, 1, {ERRORNAME}},
+        {ERRORFLAG, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_errors, 1, {ERRORFLAG}},
+        {ERRORMSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_errors, 1, {ERRORMSG}}
     };
 
     /*

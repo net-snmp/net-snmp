@@ -1,5 +1,6 @@
 /*
- * snmpstatus.c - send snmp GET requests to a network entity.
+ * snmpstatus.c - retrieves a fixed set of management information from
+ * a network entity.
  *
  */
 /***********************************************************************
@@ -43,11 +44,7 @@ SOFTWARE.
 #include <stdio.h>
 #include <ctype.h>
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -58,9 +55,6 @@ SOFTWARE.
 #endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #if HAVE_NETDB_H
 #include <netdb.h>
@@ -153,22 +147,25 @@ main(int argc, char *argv[])
     char            buf[40];
     int             interfaces;
     int             count;
-    int             exitval = 0;
+    int             exitval = 1;
+
+    SOCK_STARTUP;
 
     /*
      * get the common command line arguments 
      */
     switch (snmp_parse_args(argc, argv, &session, "C:", &optProc)) {
-    case -2:
-        exit(0);
-    case -1:
+    case NETSNMP_PARSE_ARGS_ERROR:
+        goto out;
+    case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
+        exitval = 0;
+        goto out;
+    case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
-        exit(1);
+        goto out;
     default:
         break;
     }
-
-    SOCK_STARTUP;
 
     /*
      * open an SNMP session 
@@ -179,8 +176,7 @@ main(int argc, char *argv[])
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
         snmp_sess_perror("snmpstatus", &session);
-        SOCK_CLEANUP;
-        exit(1);
+        goto out;
     }
 
     /*
@@ -255,13 +251,14 @@ main(int argc, char *argv[])
     } else if (status == STAT_TIMEOUT) {
         fprintf(stderr, "Timeout: No Response from %s\n",
                 session.peername);
-        SOCK_CLEANUP;
-        exit(1);
+        goto out;
     } else {                    /* status == STAT_ERROR */
         snmp_sess_perror("snmpstatus", ss);
-        SOCK_CLEANUP;
-        exit(2);
+        exitval = 2;
+        goto out;
     }
+
+    exitval = 0;
 
     transport = snmp_sess_transport(snmp_sess_pointer(ss));
     if (transport != NULL && transport->f_fmtaddr != NULL) {
@@ -310,30 +307,38 @@ main(int argc, char *argv[])
                         continue;
                     }
                     if (vars->name_length >= length_ifOperStatus
-                        && !memcmp(objid_ifOperStatus, vars->name,
-                                   sizeof(objid_ifOperStatus))) {
+                            && !memcmp(objid_ifOperStatus, vars->name,
+                                    sizeof(objid_ifOperStatus))
+                            && vars->type == ASN_INTEGER
+                            && vars->val.integer) {
                         if (*vars->val.integer != MIB_IFSTATUS_UP)
                             down_interfaces++;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
                         good_var++;
-                    } else if (vars->name_length >= length_ifInUCastPkts &&
-                               !memcmp(objid_ifInUCastPkts, vars->name,
-                                       sizeof(objid_ifInUCastPkts))) {
+                    } else if (vars->name_length >= length_ifInUCastPkts
+                            &&!memcmp(objid_ifInUCastPkts, vars->name,
+                                    sizeof(objid_ifInUCastPkts))
+                            && vars->type == ASN_COUNTER
+                            && vars->val.integer) {
                         ipackets += *vars->val.integer;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
                         good_var++;
                     } else if (vars->name_length >= length_ifInNUCastPkts
                                && !memcmp(objid_ifInNUCastPkts, vars->name,
-                                          sizeof(objid_ifInNUCastPkts))) {
+                                          sizeof(objid_ifInNUCastPkts))
+                               && vars->type == ASN_COUNTER
+                               && vars->val.integer) {
                         ipackets += *vars->val.integer;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
                         good_var++;
                     } else if (vars->name_length >= length_ifOutUCastPkts
                                && !memcmp(objid_ifOutUCastPkts, vars->name,
-                                          sizeof(objid_ifOutUCastPkts))) {
+                                          sizeof(objid_ifOutUCastPkts))
+                               && vars->type == ASN_COUNTER
+                               && vars->val.integer) {
                         opackets += *vars->val.integer;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
@@ -341,7 +346,9 @@ main(int argc, char *argv[])
                     } else if (vars->name_length >= length_ifOutNUCastPkts
                                && !memcmp(objid_ifOutNUCastPkts,
                                           vars->name,
-                                          sizeof(objid_ifOutNUCastPkts))) {
+                                          sizeof(objid_ifOutNUCastPkts))
+                               && vars->type == ASN_COUNTER
+                               && vars->val.integer) {
                         opackets += *vars->val.integer;
                         snmp_add_null_var(pdu, vars->name,
                                           vars->name_length);
@@ -385,6 +392,8 @@ main(int argc, char *argv[])
     }
 
     snmp_close(ss);
+
+out:
     SOCK_CLEANUP;
     return exitval;
 }

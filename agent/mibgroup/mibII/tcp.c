@@ -5,6 +5,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include "mibII_common.h"
 
 #if HAVE_STDLIB_H
@@ -49,11 +50,11 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/sysORTable.h>
 
-#include "util_funcs.h"
+#include "util_funcs/MIB_STATS_CACHE_TIMEOUT.h"
 #include "tcp.h"
 #include "tcpTable.h"
-#include "sysORTable.h"
 
 #ifndef MIB_STATS_CACHE_TIMEOUT
 #define MIB_STATS_CACHE_TIMEOUT	5
@@ -62,7 +63,10 @@
 #define TCP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
-#if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5) || defined(aix6)) && !defined(FIRST_PROTOCOL)
+#if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)) && !defined(FIRST_PROTOCOL)
+#ifdef HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
 #include <libperfstat.h>
 #ifdef FIRST_PROTOCOL
 perfstat_protocol_t ps_proto;
@@ -88,7 +92,6 @@ perfstat_id_t ps_name;
 int  hz = 1000;
 #endif
 
-extern int TCP_Count_Connections( void );
         /*********************
 	 *
 	 *  Initialisation & common implementation functions
@@ -176,7 +179,7 @@ init_tcp(void)
 #undef TCP_NSTATS
 #endif
 
-#if defined (WIN32) || defined (cygwin)
+#ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define TCP_STAT_STRUCTURE     MIB_TCPSTATS
 #endif
@@ -370,11 +373,14 @@ tcp_handler(netsnmp_mib_handler          *handler,
         ret_value = tcpstat.tcps_drops;
         break;
     case TCPCURRESTAB:
-#ifdef USING_MIBII_TCPTABLE_MODULE
+#ifdef NETSNMP_FEATURE_CHECKING
+        netsnmp_feature_want(tcp_count_connections)
+#endif
+#ifndef NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS
         ret_value = TCP_Count_Connections();
 #else
         ret_value = 0;
-#endif
+#endif /* NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS */
         type = ASN_GAUGE;
         break;
     case TCPINSEGS:
@@ -392,7 +398,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
         break;
     case TCPINERRS:
         ret_value = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff
-#ifdef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
+#ifdef HAVE_STRUCT_TCPSTAT_TCPS_RCVMEMDROP
             + tcpstat.tcps_rcvmemdrop
 #endif
             + tcpstat.tcps_rcvshort;
@@ -549,6 +555,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
 
     case MODE_GETNEXT:
     case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
@@ -558,6 +565,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
         snmp_log(LOG_WARNING, "mibII/tcp: Unsupported mode (%d)\n",
                                reqinfo->mode);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         snmp_log(LOG_WARNING, "mibII/tcp: Unrecognised mode (%d)\n",
                                reqinfo->mode);

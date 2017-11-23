@@ -66,6 +66,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -73,8 +74,11 @@
  * minimal include directives 
  */
 
-#include "util_funcs.h"
+#include "util_funcs/header_simple_table.h"
 #include <time.h>
+
+netsnmp_feature_require(table_container)
+
 
 /*
  * Load required drivers and libraries.
@@ -84,9 +88,10 @@
     #include <kstat.h>
     #ifdef HAVE_PICL_H 
         #include <picl.h> /* accesses the picld daemon */
+    #else 
+        /* the following should be sufficient for any Sun-based sensors */
+	#include </usr/platform/sun4u/include/sys/envctrl.h>
     #endif 
-/* the following should be sufficient for any Sun-based sensors */
-    #include </usr/platform/sun4u/include/sys/envctrl.h>
 #else
     #include <sensors/sensors.h>
     #define CONFIG_FILE_NAME "/etc/sensors.conf"
@@ -131,41 +136,41 @@ struct variable4 lmSensors_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   LMTEMPSENSORSINDEX    3
-    {LMTEMPSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
-     {2, 1, 1}},
+    {LMTEMPSENSORSINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {2, 1, 1}},
 #define   LMTEMPSENSORSDEVICE   4
-    {LMTEMPSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
-     {2, 1, 2}},
+    {LMTEMPSENSORSDEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {2, 1, 2}},
 #define   LMTEMPSENSORSVALUE    5
-    {LMTEMPSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
-     {2, 1, 3}},
+    {LMTEMPSENSORSVALUE, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {2, 1, 3}},
 #define   LMFANSENSORSINDEX     8
-    {LMFANSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
-     {3, 1, 1}},
+    {LMFANSENSORSINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {3, 1, 1}},
 #define   LMFANSENSORSDEVICE    9
-    {LMFANSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
-     {3, 1, 2}},
+    {LMFANSENSORSDEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {3, 1, 2}},
 #define   LMFANSENSORSVALUE     10
-    {LMFANSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
-     {3, 1, 3}},
+    {LMFANSENSORSVALUE, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {3, 1, 3}},
 #define   LMVOLTSENSORSINDEX    13
-    {LMVOLTSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
-     {4, 1, 1}},
+    {LMVOLTSENSORSINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {4, 1, 1}},
 #define   LMVOLTSENSORSDEVICE   14
-    {LMVOLTSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
-     {4, 1, 2}},
+    {LMVOLTSENSORSDEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {4, 1, 2}},
 #define   LMVOLTSENSORSVALUE    15
-    {LMVOLTSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
-     {4, 1, 3}},
+    {LMVOLTSENSORSVALUE, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {4, 1, 3}},
 #define   LMMISCSENSORSINDEX    18
-    {LMMISCSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
-     {5, 1, 1}},
+    {LMMISCSENSORSINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {5, 1, 1}},
 #define   LMMISCSENSORSDEVICE   19
-    {LMMISCSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
-     {5, 1, 2}},
+    {LMMISCSENSORSDEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {5, 1, 2}},
 #define   LMMISCSENSORSVALUE    20
-    {LMMISCSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
-     {5, 1, 3}},
+    {LMMISCSENSORSVALUE, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {5, 1, 3}},
 };
 
 typedef struct {
@@ -247,7 +252,7 @@ var_lmSensorsTable(struct variable *vp,
                    size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
-    static unsigned char string[SPRINT_MAX_LEN];
+    static char     string[SPRINT_MAX_LEN];
 
     int             s_index;
     int             s_type = -1;
@@ -379,9 +384,9 @@ sensor_init(void)
     }
 
     _sensor_load(t); /* I'll let the linux people decide whether they want to load right away */
+leaving:
 #endif /* not solaris2 */
 
-leaving:
     DEBUGMSG(("ucd-snmp/lmSensors", "<= sensor_init\n"));
     return res;
 }
@@ -415,7 +420,7 @@ sensor_load(void)
    the scale variable handles miniVolts */
 
 static int
-read_num_sensor(picl_nodehdl_t childh, char *prop ,int scale, int *value)
+read_num_sensor(picl_nodehdl_t childh, const char *prop, int scale, int *value)
  {
   picl_nodehdl_t  sensorh;
   picl_propinfo_t sensor_info;
@@ -481,7 +486,7 @@ read_num_sensor(picl_nodehdl_t childh, char *prop ,int scale, int *value)
 } /* end of read_num_sensor() */
 
 static int
-read_enum_sensor(picl_nodehdl_t childh, char **options, u_int *value)
+read_enum_sensor(picl_nodehdl_t childh, const char **options, u_int *value)
 {
   picl_nodehdl_t  sensorh;
   picl_propinfo_t sensor_info;
@@ -526,10 +531,10 @@ read_enum_sensor(picl_nodehdl_t childh, char **options, u_int *value)
 
 /* scale variable handles miniVolts*/
  
-static int
+static void
 process_num_sensor(picl_nodehdl_t childh, 
-                  char propname[PICL_PROPNAMELEN_MAX], 
-                  char propval[PICL_PROPNAMELEN_MAX], int typ, int scale)
+                  const char propname[PICL_PROPNAMELEN_MAX], 
+                  const char propval[PICL_PROPNAMELEN_MAX], int typ, int scale)
 {
   int value = 0;
   picl_errno_t error_code;
@@ -553,10 +558,10 @@ process_num_sensor(picl_nodehdl_t childh,
   }
 } /* end process_num_sensor() */
 
-static int
+static void
 process_enum_sensor(picl_nodehdl_t childh, 
-                  char propname[PICL_PROPNAMELEN_MAX], 
-                  int typ, char **options)
+                  const char propname[PICL_PROPNAMELEN_MAX], 
+                  int typ, const char **options)
 {
   int value = 0;
   picl_errno_t error_code;
@@ -583,69 +588,69 @@ process_enum_sensor(picl_nodehdl_t childh,
 /* The following are modules for dealing with individual sensors types.
    They call the generic modules above.  */
 
-static int
+static void
 process_individual_fan(picl_nodehdl_t childh, 
-                     char propname[PICL_PROPNAMELEN_MAX])
+                     const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "AtoDSensorValue", FAN_TYPE, 1);
 }
 
 
-static int
+static void
 process_newtype_fan(picl_nodehdl_t childh,
-                     char propname[PICL_PROPNAMELEN_MAX])
+                     const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "Speed", FAN_TYPE, 1);
 }
 
 
-static int
+static void
 process_temperature_sensor(picl_nodehdl_t childh,
-                               char propname[PICL_PROPNAMELEN_MAX])
+                               const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "Temperature", TEMP_TYPE, 1000);
 } /* MIB asks for mC */
 
-static int
+static void
 process_voltage_sensor(picl_nodehdl_t childh,
-                      char propname[PICL_PROPNAMELEN_MAX])
+                      const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "Voltage", VOLT_TYPE, 1000);
 } /* MIB asks for mV */
 
-static int
+static void
 process_digital_sensor(picl_nodehdl_t childh,
-                      char propname[PICL_PROPNAMELEN_MAX])
+                      const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "AtoDSensorValue", VOLT_TYPE, 1);
 }
 
 
-static int
+static void
 process_switch(picl_nodehdl_t childh,
-                   char propname[PICL_PROPNAMELEN_MAX])
+                   const char propname[PICL_PROPNAMELEN_MAX])
 {
 
-  char *settings[]={"OFF","ON","NORMAL","LOCKED","UNKNOWN",
+  const char *settings[]={"OFF","ON","NORMAL","LOCKED","UNKNOWN",
                    "DIAG","SECURE",NULL};
 
   process_enum_sensor(childh, propname, MISC_TYPE, settings);
 }
 
-static int
+static void
 process_led(picl_nodehdl_t childh,
-                   char propname[PICL_PROPNAMELEN_MAX])
+                   const char propname[PICL_PROPNAMELEN_MAX])
 {
 
-  char *settings[]={"OFF","ON","BLINK",NULL};
+  const char *settings[]={"OFF","ON","BLINK",NULL};
   process_enum_sensor(childh, propname, MISC_TYPE, settings);
 }
 
-static int
+static void
 process_i2c(picl_nodehdl_t childh,
-                   char propname[PICL_PROPNAMELEN_MAX])
+                   const char propname[PICL_PROPNAMELEN_MAX])
 {
-  char *settings[]={"OK",NULL};
+  const char *settings[]={"OK",NULL};
   process_enum_sensor(childh, propname, MISC_TYPE, settings);
 }
 
@@ -752,6 +757,12 @@ _sensor_load(time_t t)
 {
 #ifdef solaris2
     int i,j;
+#ifdef HAVE_PICL_H 
+    int er_code;
+    picl_errno_t     error_code;
+    int level=0;
+    picl_nodehdl_t  rooth;
+#else
     int typ;
     int temp=0; /* do not reset this later, more than one typ has temperatures*/
     int other=0;
@@ -761,6 +772,7 @@ _sensor_load(time_t t)
     envctrl_fan_t *fan_info;
     envctrl_ps_t *power_info;
     envctrl_encl_t *enc_info;
+#endif
 
 /* DEBUGMSG(("ucd-snmp/lmSensors", "Reading the sensors\n")); */
 
@@ -775,13 +787,6 @@ _sensor_load(time_t t)
 
 /* try picld (if supported), if that doesn't work, try kstat */
 #ifdef HAVE_PICL_H 
-
-/* some more declarations */
-
-    int er_code;
-    picl_errno_t     error_code;
-    int level=0;
-    picl_nodehdl_t  rooth;
 
 er_code = picl_initialize();
 
@@ -809,7 +814,7 @@ else {
 
 } /*end else picl_initialize */
 
-#endif  /* end of picld section */
+#else  /* end of picld section */
 /* initialize kstat */
 
 kc = kstat_open();
@@ -923,7 +928,7 @@ else{
                    temp++;
                    break;
                default:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "unknown element instance &d type &d value %d\n",
+                   DEBUGMSG(("ucd-snmp/lmSensors", "unknown element instance %d type %d value %d\n",
                        enc_info->instance, enc_info->type, enc_info->value));
                    break;
                } /* end switch */
@@ -937,13 +942,16 @@ else{
     kstat_close(kc);
 
 } /* end else kstat */
+#endif
+
 #else /* end solaris2 only ie. ifdef everything else */
 
     const sensors_chip_name *chip;
     const sensors_feature_data *data;
     int             chip_nr = 0;
-    int             rc = 0;
     unsigned int    i = 0;
+
+    DEBUGMSG(("ucd-snmp/lmSensors", "=> sensor_load\n"));
 
     for (i = 0; i < N_TYPES; i++)
     {
@@ -956,7 +964,7 @@ else{
         {
            /* Continuing would be unsafe */
            snmp_log(LOG_ERR, "Cannot malloc sensor array!"); 
-           return (rc = 1);
+           return 1;
         } /* end if */
         sensor_array[i].current_len = DEFAULT_SENSORS;
     } /* end for */
@@ -974,7 +982,7 @@ else{
                 !sensors_get_label(*chip, data->number, &label) &&
                 !sensors_get_feature(*chip, data->number, &val)) {
                 int             type = -1;
-                float           mul;
+                float           mul = 0;
                 _sensor_array  *array;
 
                 /* The label, as determined for a given chip in sensors.conf,
@@ -1016,14 +1024,14 @@ else{
                            free(label);
                            label = NULL;
                        } /* end if label */
-                       return (rc=1);
+                       return 1;
                     } /* end if array->sensor */
                     array->current_len = new_size / sizeof(_sensor);
-                    DEBUGMSG(("ucd-snmp/lmSensors", "type #%d increased to %d elements\n", type, array->current_len));
+                    DEBUGMSG(("ucd-snmp/lmSensors", "type #%d increased to %d elements\n", type, (int)array->current_len));
                 } /* end if array->current */
                 strlcpy(array->sensor[array->n].name, label, MAX_NAME);
                 array->sensor[array->n].value = (int) (val * mul);
-                DEBUGMSGTL(("sensors","sensor %d, value %d\n",
+                DEBUGMSGTL(("sensors","sensor %s, value %d\n",
                             array->sensor[array->n].name,
                             array->sensor[array->n].value));
                 array->n++;
@@ -1034,10 +1042,11 @@ else{
 	    } /* end if label */
         } /* end while data */
     } /* end while chip */
-    return rc;
+    DEBUGMSG(("ucd-snmp/lmSensors", "<= sensor_load\n"));
 #endif  /* end else ie. ifdef everything else */
     /* Update the timestamp after a load. */
     timestamp = t;
+    return 0;
 }
 
 #ifndef solaris2

@@ -10,32 +10,30 @@
 #include "memory.h"
 
 #define DEFAULTMINIMUMSWAP 16000        /* kilobytes */
-int memory_object_index;
-int minimum_swap;
+static int minimum_swap;
 
 /** Initializes the memory module */
 void
 init_memory(void)
 {
-    static oid      memory_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 4 };
-    static oid      memSwapError_oid[]  = { 1, 3, 6, 1, 4, 1, 2021, 4, 100 };
-    static oid      memSwapErrMsg_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 4, 101 };
+    const oid      memory_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 4 };
+    const oid      memSwapError_oid[]  = { 1, 3, 6, 1, 4, 1, 2021, 4, 100 };
+    const oid      memSwapErrMsg_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 4, 101 };
 
     DEBUGMSGTL(("memory", "Initializing\n"));
 
-    memory_object_index = OID_LENGTH(memory_oid);
     netsnmp_register_scalar_group(
         netsnmp_create_handler_registration("memory", handle_memory,
-                                 memory_oid, memory_object_index,
+                                 memory_oid, OID_LENGTH(memory_oid),
                                              HANDLER_CAN_RONLY),
-                                 1, 17);
+                                 1, 26);
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("memSwapError", handle_memory,
-                           memSwapError_oid, memory_object_index+1,
+                           memSwapError_oid, OID_LENGTH(memSwapError_oid),
                                              HANDLER_CAN_RONLY));
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("memSwapErrMsg", handle_memory,
-                          memSwapErrMsg_oid, memory_object_index+1,
+                          memSwapErrMsg_oid, OID_LENGTH(memSwapErrMsg_oid),
                                              HANDLER_CAN_RONLY));
 
     snmpd_register_config_handler("swap", memory_parse_config,
@@ -61,7 +59,9 @@ handle_memory(netsnmp_mib_handler *handler,
                 netsnmp_request_info *requests)
 {
     netsnmp_memory_info *mem_info;
-    int val;
+    unsigned long long val;
+    struct counter64 c64;
+    int type = ASN_INTEGER;
     char buf[1024];
 
     /*
@@ -74,7 +74,7 @@ handle_memory(netsnmp_mib_handler *handler,
     switch (reqinfo->mode) {
     case MODE_GET:
         netsnmp_memory_load();
-        switch (requests->requestvb->name[ memory_object_index ]) {
+        switch (requests->requestvb->name[ reginfo->rootoid_len - 2 ]) {
         case MEMORY_INDEX:
             val = 0;
             break;
@@ -186,6 +186,92 @@ handle_memory(netsnmp_mib_handler *handler,
             val  = (mem_info->size - mem_info->free);      /* cached */
             val *= (mem_info->units/1024);
             break;
+	case MEMORY_SWAP_TOTAL_X:
+	    type = ASN_COUNTER64;
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 0 );
+            if (!mem_info)
+               goto NOSUCH;
+            val  = mem_info->size;
+            val *= (mem_info->units/1024);
+	    c64.low = val & 0xFFFFFFFF;
+	    c64.high = val >>32;
+            break;
+	case MEMORY_SWAP_AVAIL_X:
+	    type = ASN_COUNTER64;
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 0 );
+            if (!mem_info)
+               goto NOSUCH;
+            val  = mem_info->free;
+            val *= (mem_info->units/1024);
+	    c64.low = val & 0xFFFFFFFF;
+	    c64.high = val >>32;
+            break;
+	case MEMORY_REAL_TOTAL_X:
+	    type = ASN_COUNTER64;
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 0 );
+            if (!mem_info)
+               goto NOSUCH;
+            val  = mem_info->size;
+            val *= (mem_info->units/1024);
+	    c64.low = val & 0xFFFFFFFF;
+	    c64.high = val >>32;
+            break;
+	case MEMORY_REAL_AVAIL_X:
+	    type = ASN_COUNTER64;
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 0 );
+            if (!mem_info)
+               goto NOSUCH;
+            val  = mem_info->free;
+            val *= (mem_info->units/1024);
+	    c64.low = val & 0xFFFFFFFF;
+	    c64.high = val >>32;
+            break;
+	case MEMORY_SWAP_MIN_X:
+	    type = ASN_COUNTER64;
+	    val = minimum_swap;
+	    c64.low = val & 0xFFFFFFFF;
+	    c64.high = val >>32;
+            break;
+	case MEMORY_FREE_X:
+	    type = ASN_COUNTER64;
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_VIRTMEM, 0 );
+            if (!mem_info)
+               goto NOSUCH;
+            val  = mem_info->free;
+            val *= (mem_info->units/1024);
+	    c64.low = val & 0xFFFFFFFF;
+	    c64.high = val >>32;
+            break;
+	case MEMORY_SHARED_X:
+	    type = ASN_COUNTER64;
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SHARED, 0 );
+            if (!mem_info)
+               goto NOSUCH;
+            val  = mem_info->size;
+            val *= (mem_info->units/1024);
+	    c64.low = val & 0xFFFFFFFF;
+	    c64.high = val >>32;
+            break;
+	case MEMORY_BUFFER_X:
+	    type = ASN_COUNTER64;
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MBUF, 0 );
+            if (!mem_info)
+               goto NOSUCH;
+            val  = mem_info->size - mem_info->free;
+            val *= (mem_info->units/1024);
+	    c64.low = val & 0xFFFFFFFF;
+	    c64.high = val >>32;
+            break;
+	case MEMORY_CACHED_X:
+	    type = ASN_COUNTER64;
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_CACHED, 0 );
+            if (!mem_info)
+               goto NOSUCH;
+            val  = mem_info->size - mem_info->free;
+            val *= (mem_info->units/1024);
+	    c64.low = val & 0xFFFFFFFF;
+	    c64.high = val >>32;
+            break;
         case MEMORY_SWAP_ERROR:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 0 );
             if (!mem_info)
@@ -204,8 +290,9 @@ handle_memory(netsnmp_mib_handler *handler,
                                      (u_char *)buf, strlen(buf));
             return SNMP_ERR_NOERROR;
         default:
-            snmp_log(LOG_ERR, "unknown object (%lu) in handle_memory\n",
-                     requests->requestvb->name[ memory_object_index ]);
+            snmp_log(LOG_ERR,
+                     "unknown object (%" NETSNMP_PRIo "u) in handle_memory\n",
+                     requests->requestvb->name[ reginfo->rootoid_len - 2 ]);
 NOSUCH:
             netsnmp_set_request_error( reqinfo, requests, SNMP_NOSUCHOBJECT );
             return SNMP_ERR_NOERROR;
@@ -214,8 +301,12 @@ NOSUCH:
          * All non-integer objects (and errors) have already been
          * processed.  So return the integer value.
          */
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *)&val, sizeof(val));
+	if (type == ASN_INTEGER)
+	    snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+				     (u_char *)&val, sizeof(val));
+	else
+	    snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER64,
+				     (u_char *)&c64, sizeof(c64));
         break;
 
     default:

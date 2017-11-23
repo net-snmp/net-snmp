@@ -34,6 +34,20 @@ extern          "C" {
 #define NETSNMP_INTERFACE_FLAGS_HAS_V6_REACHABLE        0x00040000
 #define NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID             0x00080000
 #define NETSNMP_INTERFACE_FLAGS_HAS_V6_FORWARDING       0x00100000
+/* Some platforms, e.g.Linux, do not provide standalone counter
+ * for incoming unicast packets - they provide counter of all packets
+ * + separate counter for the multicast ones.
+ * That means the counter of all packets must watched and checked
+ * for overflows to reconstruct its 64-bit value (i.e. as usual
+ * for counter of unicast packets), and after its expansion to 64-bits,
+ * nr.of multicast packets must be substracted to get nr. of unicast
+ * packets.
+ * This flag marks stats of such platforms. Nr. of all incoming packets,
+ * provided by the platform, must be stored in
+ * netsnmp_interface_stats.iall and netsnmp_interface_stats.iucast will
+ * be automatically calculated later.
+ */
+#define NETSNMP_INTERFACE_FLAGS_CALCULATE_UCAST         0x00200000
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -93,6 +107,11 @@ typedef struct netsnmp_interface_stats_s {
      */
    /** input */
     struct counter64 ibytes;
+    /*
+     * nr. of all packets (to calculate iucast, when underlying platform does
+     * not provide it)
+     */
+    struct counter64 iall;
     struct counter64 iucast;
     struct counter64 imcast;
     struct counter64 ibcast;
@@ -179,7 +198,7 @@ typedef struct netsnmp_interface_entry_s {
 typedef struct _conf_if_list {
     const char     *name;
     int             type;
-    uint64_t        speed;
+    uint64_t speed;
     struct _conf_if_list *next;
 } netsnmp_conf_if_list;
 

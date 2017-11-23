@@ -35,19 +35,24 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <ucd-snmp/errormib.h>
 
-#include "util_funcs.h"
+#include <net-snmp/agent/netsnmp_close_fds.h>
+
 #include "execute.h"
+#include "struct.h"
 
 #define setPerrorstatus(x) snmp_log_perror(x)
+
+#ifdef _MSC_VER
+#define popen  _popen
+#define pclose _pclose
+#endif
+
 
 int
 run_shell_command( char *command, char *input,
                    char *output,  int *out_len)	/* Or realloc style ? */
 {
 #if HAVE_SYSTEM
-    const char *ifname;    /* Filename for input  redirection */
-    const char *ofname;    /* Filename for output redirection */
-    char        shellline[STRMAX];   /* The full command to run */
     int         result;    /* and the return value of the command */
 
     if (!command)
@@ -56,25 +61,31 @@ run_shell_command( char *command, char *input,
     DEBUGMSGTL(("run_shell_command", "running %s\n", command));
     DEBUGMSGTL(("run:shell", "running '%s'\n", command));
 
+    result = -1;
+
     /*
-     * Set up the command to run....
+     * Set up the command and run it.
      */
     if (input) {
         FILE       *file;
 
-        ifname = netsnmp_mktemp();
-        if(NULL == ifname)
-            return -1;
-        file = fopen(ifname, "w");
-        if(NULL == file) {
-            snmp_log(LOG_ERR,"couldn't open temporary file %s\n", ifname);
-            unlink(ifname);
-            return -1;
-        }
-	fprintf(file, "%s", input);
-        fclose( file );
-
         if (output) {
+            const char *ifname;
+            const char *ofname;    /* Filename for output redirection */
+            char        shellline[STRMAX];   /* The full command to run */
+
+            ifname = netsnmp_mktemp();
+            if(NULL == ifname)
+                return -1;
+            file = fopen(ifname, "w");
+            if(NULL == file) {
+                snmp_log(LOG_ERR,"couldn't open temporary file %s\n", ifname);
+                unlink(ifname);
+                return -1;
+            }
+            fprintf(file, "%s", input);
+            fclose( file );
+
             ofname = netsnmp_mktemp();
             if(NULL == ofname) {
                 if(ifname)
@@ -83,49 +94,46 @@ run_shell_command( char *command, char *input,
             }
             snprintf( shellline, sizeof(shellline), "(%s) < \"%s\" > \"%s\"",
                       command, ifname, ofname );
+            result = system(shellline);
+            /*
+             * If output was requested, then retrieve & return it.
+             * Tidy up, and return the result of the command.
+             */
+            if (out_len && *out_len != 0) {
+                int         fd;        /* For processing any output */
+                int         len = 0;
+                fd = open(ofname, O_RDONLY);
+                if(fd >= 0)
+                    len  = read( fd, output, *out_len-1 );
+                *out_len = len;
+                if (len >= 0) output[len] = 0;
+                else output[0] = 0;
+                if (fd >= 0) close(fd);
+            }
+            unlink(ofname);
+            unlink(ifname);
         } else {
-            ofname = NULL;   /* Just to shut the compiler up! */
-            snprintf( shellline, sizeof(shellline), "(%s) < \"%s\"",
-                      command, ifname );
+            file = popen(command, "w");
+            if (file) {
+                fwrite(input, 1, strlen(input), file);
+                result = pclose(file);
+            }
         }
     } else {
-        ifname = NULL;   /* Just to shut the compiler up! */
         if (output) {
-            ofname = netsnmp_mktemp();
-            if(NULL == ofname)
-                return -1;
-            snprintf( shellline, sizeof(shellline), "(%s) > \"%s\"",
-                      command, ofname );
-        } else {
-            ofname = NULL;   /* Just to shut the compiler up! */
-            snprintf( shellline, sizeof(shellline), "%s",
-                      command );
-        }
-    }
+            FILE* file;
 
-    /*
-     * ... and run it
-     */
-    result = system(shellline);
-
-    /*
-     * If output was requested, then retrieve & return it.
-     * Tidy up, and return the result of the command.
-     */
-    if ( output && out_len && (*out_len != 0) ) {
-        int         fd;        /* For processing any output */
-        int         len = 0;
-        fd = open(ofname, O_RDONLY);
-        if(fd >= 0)
-            len  = read( fd, output, *out_len-1 );
-	*out_len = len;
-	if (len >= 0) output[len] = 0;
-	else output[0] = 0;
-	if (fd >= 0) close(fd);
-        unlink(ofname);
-    }
-    if ( input ) {
-        unlink(ifname);
+            file = popen(command, "r");
+            if (file) {
+                *out_len = fread(output, 1, *out_len - 1, file);
+                if (*out_len >= 0)
+                    output[*out_len] = 0;
+                else
+                    output[0] = 0;
+                result = pclose(file);
+            }
+        } else
+            result = system(command);
     }
 
     return result;
@@ -160,64 +168,9 @@ tokenize_exec_command( char *command, int *argc )
     if (cp) {
         argv[i++] = strdup( cp );
     }
-    argv[i] = 0;
+    argv[i] = NULL;
     *argc = i;
 
-    return argv;
-}
-
-char **
-xx_tokenize_exec_command( char *command, int *argc )
-{
-    char ctmp[STRMAX];
-    char *cptr1, *cptr2;
-    char **argv;
-    int  count, i;
-
-    if (!command)
-        return NULL;
-
-    memset( ctmp, 0, STRMAX );
-    /*
-     * Make a copy of the command into the 'ctmp' buffer,
-     *    splitting it into separate tokens
-     *    (but still all in the one buffer).
-     */
-    count = 1;
-    for (cptr1 = command, cptr2 = ctmp;
-            cptr1 && *cptr1;
-            cptr1++, cptr2++) {
-        *cptr2 = *cptr1;
-	if (isspace(*cptr1)) {
-            /*
-             * We've reached the end of a token, so increase
-             * the count, and mark this in the command copy.
-             * Then get ready for the next word.
-             */
-            count++;
-            *cptr2 = 0;    /* End of token */
-	    cptr1 = skip_white(cptr1);
-	    if (!cptr1)
-	        break;
-	    cptr1--;	/* Back up one, ready for the next loop */
-	}
-    }
-
-    /*
-     * Now set up the 'argv' array,
-     *   copying tokens out of the 'cptr' buffer
-     */
-    argv = (char **) calloc((count + 2), sizeof(char *));
-    if (argv == NULL)
-        return NULL;
-    cptr2 = ctmp;
-    for (i = 0; i < count; i++) {
-        argv[i] = strdup( cptr2 );
-        cptr2  += strlen( cptr2 )+1;
-    }
-    argv[count] = 0;
-    *argc       = count;
-        
     return argv;
 }
 
@@ -249,15 +202,18 @@ run_exec_command( char *command, char *input,
          */
         close(0);
         dup(  ipipe[0]);
+        close(ipipe[0]);
 	close(ipipe[1]);
 
         close(1);
         dup(  opipe[1]);
         close(opipe[0]);
+        close(opipe[1]);
+
         close(2);
         dup(1);
-        for (i = getdtablesize()-1; i>2; i--)
-            close(i);
+
+        netsnmp_close_fds(2);
 
         /*
          * Set up the argv array and execute it
@@ -355,7 +311,7 @@ run_exec_command( char *command, char *input,
              */
             count = read(opipe[0], &cache_ptr[offset], cache_size);
             DEBUGMSGTL(("verbose:run:exec",
-                        "    read %d bytes\n", count));
+                        "    read %d bytes\n", (int)count));
             if (0 == count) {
                 int rc;
                 /*
@@ -390,7 +346,7 @@ run_exec_command( char *command, char *input,
                         break;
                     }
                     DEBUGMSGTL(("verbose:run:exec",
-                                "    %d left in buffer\n", cache_size));
+                                "    %d left in buffer\n", (int)cache_size));
                 }
             }
             else if ((count == -1) && (EAGAIN != errno)) {

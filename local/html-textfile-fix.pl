@@ -8,6 +8,7 @@ use File::Copy;
 # Date:           December 29th, 2005
 # 
 @files = qw"
+CHANGES
 ERRATA
 INSTALL
 NEWS
@@ -17,6 +18,7 @@ README.agent-mibs
 README.agentx
 README.aix
 README.hpux11
+README.irix
 README.krb5
 README.mib2c
 README.mibs

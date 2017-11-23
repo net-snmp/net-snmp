@@ -28,8 +28,8 @@
 #include "mibgroup/Rmon.h"
 #endif
 
-#ifdef USING_DISMAN_EVENT_MIB_MODULE
-#include "mibgroup/disman/event-mib.h"
+#ifdef USING_DISMAN_EVENT_MODULE
+#include "mibgroup/disman/event.h"
 #endif
 
 #ifdef USING_SMUX_MODULE
@@ -88,8 +88,9 @@
 #include "mibgroup/snmpv3/usmStats.h"
 #include "mibgroup/snmpv3/usmUser.h"
 #include "mibgroup/notification/snmpNotifyTable.h"
-#include "mibgroup/snmp-notification-mib/snmpNotifyFilterTable.h"
 #include "mibgroup/notification/snmpNotifyFilterProfileTable.h"
+#include "mibgroup/snmp-notification-mib/snmpNotifyFilterTable.h"
+#include "mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h"
 #include "mibgroup/target/snmpTargetAddrEntry.h"
 #include "mibgroup/target/snmpTargetParamsEntry.h"
 #include "mibgroup/target/target.h"
@@ -99,6 +100,7 @@
 #include "mibgroup/agent/nsDebug.h"
 #include "mibgroup/agent/nsCache.h"
 #include "mibgroup/agent/nsLogging.h"
+#include "mibgroup/utilities/iquery.h"
 #include "mibgroup/utilities/override.h"
 
 #ifdef USING_HOST_MODULE
@@ -125,15 +127,23 @@
 #include "mibgroup/Rmon/event.h"
 #endif
 
-#ifdef USING_DISMAN_EVENT_MIB_MODULE
-#include "mibgroup/disman/mteTriggerTable.h"
-#include "mibgroup/disman/mteTriggerDeltaTable.h"
-#include "mibgroup/disman/mteTriggerExistenceTable.h"
-#include "mibgroup/disman/mteTriggerBooleanTable.h"
-#include "mibgroup/disman/mteTriggerThresholdTable.h"
-#include "mibgroup/disman/mteObjectsTable.h"
-#include "mibgroup/disman/mteEventTable.h"
-#include "mibgroup/disman/mteEventNotificationTable.h"
+#ifdef USING_DISMAN_EVENT_MODULE
+#include "mibgroup/disman/event/mteEventConf.h"
+#include "mibgroup/disman/event/mteEvent.h"
+#include "mibgroup/disman/event/mteEventNotificationTable.h"
+#include "mibgroup/disman/event/mteEventSetTable.h"
+#include "mibgroup/disman/event/mteEventTable.h"
+#include "mibgroup/disman/event/mteObjectsConf.h"
+#include "mibgroup/disman/event/mteObjects.h"
+#include "mibgroup/disman/event/mteObjectsTable.h"
+#include "mibgroup/disman/event/mteScalars.h"
+#include "mibgroup/disman/event/mteTriggerBooleanTable.h"
+#include "mibgroup/disman/event/mteTriggerConf.h"
+#include "mibgroup/disman/event/mteTriggerDeltaTable.h"
+#include "mibgroup/disman/event/mteTriggerExistenceTable.h"
+#include "mibgroup/disman/event/mteTrigger.h"
+#include "mibgroup/disman/event/mteTriggerTable.h"
+#include "mibgroup/disman/event/mteTriggerThresholdTable.h"
 #endif
 
 #ifdef USING_SMUX_MODULE

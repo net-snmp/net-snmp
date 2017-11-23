@@ -51,6 +51,7 @@ $debug=0;
 $quiet=0;
 $strict_unk_token = 0;
 $noindent = 0;
+$nosed = 0;
 $currentline = 0;
 $currentlevel = -1;
 %assignments;
@@ -73,6 +74,7 @@ sub usage {
     print "  -d\t\tdebugging output (don't do it.  trust me.)\n\n";
     print "  -S VAR=VAL\tSet \$VAR variable to \$VAL\n\n";
     print "  -i\t\tDon't run indent on the resulting code\n\n";
+    print "  -s\t\tDon't look for mibNode.sed and run sed on the resulting code\n\n";
     print "  mibNode\tThe name of the top level mib node you want to\n\t\tgenerate code for.  By default, the code will be stored in\n\t\tmibNode.c and mibNode.h (use the -f flag to change this)\n\n";
     1;
 }	
@@ -99,6 +101,8 @@ while($#ARGV >= 0) {
         $quiet = 1;
       } elsif (/^-i/) {
         $noindent = 1;
+      } elsif (/^-s/) {
+        $nosed = 1;
       } elsif (/^-h/) {
         usage && exit(1);
       } elsif (/^-f/) {
@@ -231,6 +235,15 @@ $fh = open_conf($configfile);
 process("-balanced");
 $fh->close;
 
+if (-f "$outputName.sed" && !$nosed) {
+  foreach $i (keys(%written)) {
+    next if ($i eq "-");
+    next if (!($i =~ /\.[ch]$/));
+    print STDERR "running sed --in-place=.orig --file=$outputName.sed $i\n" if (!$quiet);
+    system("sed --in-place=.orig --file=$outputName.sed $i");
+  }
+}
+
 if (!$noindent) {
   foreach $i (keys(%written)) {
     next if ($i eq "-");
@@ -290,9 +303,11 @@ sub oidlength {
 #   $var.creatable     -- 1 if a column object can be created as part of a new row, 0 if not
 #   $var.noaccess      -- 1 if not-accessible, 0 if not
 #   $var.accessible    -- 1 if accessible, 0 if not
+#   $var.storagetype   -- 1 if an object is a StorageType object, 0 if not
 #   $var.rowstatus     -- 1 if an object is a RowStatus object, 0 if not
-#     'settable', 'creatable' and 'rowstatus' can also be used with table variables
-#     to indicate whether it contains writable, creatable or RowStatus column objects
+#     'settable', 'creatable', 'lastchange', 'storagetype' and 'rowstatus' can
+#     also be used with table variables to indicate whether it contains
+#     writable, creatable, LastChange, StorageType or RowStatus column objects
 #
 #   $var.hasdefval     -- returns 1 if var has a DEFVAL clause
 #   $var.defval        -- node's DEFVAL
@@ -350,6 +365,7 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(enums)/(%{$SNMP::MIB{$vars{$1}}{'enums'}} == 0) ? 0 : 1/eg;
     $it =~ s/\$(\w+)\.(enumrange)/%{$SNMP::MIB{$vars{$1}}{'enums'}}/eg;
     $it =~ s/\$(\w+)\.(rowstatus)/(($SNMP::MIB{$vars{$1}}{syntax} =~ \/(RowStatus)\/)?1:0)/eg;
+    $it =~ s/\$(\w+)\.(storagetype)/(($SNMP::MIB{$vars{$1}}{syntax} =~ \/(StorageType)\/)?1:0)/eg;
     if ( $it =~ /\$(\w+)\.(\w+)/ ) {
       warn "Possible unknown variable attribute \$$1.$2 at $currentfile:$currentline\n";
     }

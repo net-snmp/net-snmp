@@ -4,10 +4,15 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "disman/event/mteTrigger.h"
 #include "disman/event/mteEvent.h"
+
+netsnmp_feature_child_of(disman_debugging, libnetsnmpmibs)
+netsnmp_feature_child_of(mtetrigger, libnetsnmpmibs)
+netsnmp_feature_child_of(mtetrigger_removeentry, mtetrigger)
 
 netsnmp_tdata *trigger_table_data;
 
@@ -31,7 +36,7 @@ init_trigger_table_data(void)
             snmp_log(LOG_ERR, "failed to create mteTriggerTable");
             return;
         }
-        DEBUGMSGTL(("disman:event:init", "create trigger container (%x)\n",
+        DEBUGMSGTL(("disman:event:init", "create trigger container (%p)\n",
                                           trigger_table_data));
     }
     mteTriggerFailures = 0;
@@ -53,6 +58,7 @@ init_mteTrigger(void)
      *
      * =================================================== */
 
+#ifndef NETSNMP_FEATURE_REMOVE_DISMAN_DEBUGGING
 void
 _mteTrigger_dump(void)
 {
@@ -69,12 +75,12 @@ _mteTrigger_dump(void)
         DEBUGMSG(("disman:event:dump", "(%s, %s)",
                                          row->indexes->val.string,
                                          row->indexes->next_variable->val.string));
-        DEBUGMSG(("disman:event:dump", ": %x, %x\n", row, entry));
+        DEBUGMSG(("disman:event:dump", ": %p, %p\n", row, entry));
         i++;
     }
     DEBUGMSGTL(("disman:event:dump", "TriggerTable %d entries\n", i));
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_DISMAN_DEBUGGING */
 
 /*
  * Create a new row in the trigger table 
@@ -142,6 +148,7 @@ mteTrigger_createEntry(const char *mteOwner, char *mteTName, int fixed)
     return row;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_MTETRIGGER_REMOVEENTRY
 /*
  * Remove a row from the trigger table 
  */
@@ -159,6 +166,7 @@ mteTrigger_removeEntry(netsnmp_tdata_row *row)
         SNMP_FREE(entry);
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_MTETRIGGER_REMOVEENTRY */
 
     /* ===================================================
      *
@@ -211,7 +219,6 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     }
 
     {
-	extern netsnmp_agent_session *netsnmp_processing_set;
 	if (netsnmp_processing_set) {
 	    /*
 	     * netsnmp_handle_request will not be responsive to our efforts to

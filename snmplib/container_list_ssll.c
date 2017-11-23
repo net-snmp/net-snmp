@@ -4,6 +4,7 @@
  *
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #if HAVE_STDLIB_H
@@ -28,6 +29,19 @@
 
 #include <net-snmp/library/container_list_ssll.h>
 
+netsnmp_feature_child_of(container_linked_list, container_types)
+netsnmp_feature_child_of(container_fifo, container_types)
+netsnmp_feature_child_of(container_lifo, container_types)
+
+/* this is a fancy way of cleaning up ifdefs */
+#ifdef NETSNMP_FEATURE_REQUIRE_CONTAINER_FIFO
+netsnmp_feature_require(container_linked_list)
+#endif /* NETSNMP_FEATURE_REQUIRE_CONTAINER_FIFO */
+#ifdef NETSNMP_FEATURE_REQUIRE_CONTAINER_LIFO
+netsnmp_feature_require(container_linked_list)
+#endif /* NETSNMP_FEATURE_REQUIRE_CONTAINER_LIFO */
+
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_LINKED_LIST
 typedef struct sl_node {
    void           *data;
    struct sl_node *next;
@@ -43,6 +57,15 @@ typedef struct sl_container_s {
    int                        fifo;       /* lifo or fifo? */
 
 } sl_container;
+
+typedef struct ssll_iterator_s {
+    netsnmp_iterator base;
+ 
+    sl_node         *pos;
+    sl_node         *last;
+} ssll_iterator;
+
+static netsnmp_iterator *_ssll_iterator_get(netsnmp_container *c);
 
 
 static void *
@@ -85,12 +108,13 @@ _get(netsnmp_container *c, const void *key, int exact)
  *
  *
  **********************************************************************/
-static void
+static int
 _ssll_free(netsnmp_container *c)
 {
     if(c) {
         free(c);
     }
+    return 0;
 }
 
 static void *
@@ -115,16 +139,19 @@ static int
 _ssll_insert(netsnmp_container *c, const void *data)
 {
     sl_container *sl = (sl_container*)c;
-    sl_node  *new_node, *curr = sl->head;
+    sl_node  *new_node, *curr;
     
-    if(NULL == c)
+    if (c == NULL)
         return -1;
-    
+
+    curr = sl->head;
+
     new_node = SNMP_MALLOC_TYPEDEF(sl_node);
-    if(NULL == new_node)
+    if (new_node == NULL)
         return -1;
     new_node->data = NETSNMP_REMOVE_CONST(void *, data);
     ++sl->count;
+    ++c->sync;
 
     /*
      * first node?
@@ -183,11 +210,15 @@ static int
 _ssll_remove(netsnmp_container *c, const void *data)
 {
     sl_container *sl = (sl_container*)c;
-    sl_node  *curr = sl->head;
+    sl_node  *curr;
     
-    if((NULL == c) || (NULL == curr))
+    if (c == NULL)
         return -1;
-    
+
+    curr = sl->head;
+    if (curr == NULL)
+        return -1;
+
     /*
      * special case for NULL data, act like stack
      */
@@ -223,6 +254,7 @@ _ssll_remove(netsnmp_container *c, const void *data)
      */
     free(curr);
     --sl->count;
+    ++c->sync;
     
     return 0;
 }
@@ -278,6 +310,7 @@ _ssll_clear(netsnmp_container *c, netsnmp_container_obj_func *f,
     }
     sl->head = NULL;
     sl->count = 0;
+    ++c->sync;
 }
 
 /**********************************************************************
@@ -297,16 +330,12 @@ netsnmp_container_get_ssll(void)
         return NULL;
     }
 
-    sl->c.cfree = (netsnmp_container_rc*)_ssll_free;
-        
-    sl->c.get_size = _ssll_size;
-    sl->c.init = NULL;
-    sl->c.insert = _ssll_insert;
-    sl->c.remove = _ssll_remove;
-    sl->c.find = _ssll_find;
+    netsnmp_init_container((netsnmp_container *)sl, NULL, _ssll_free,
+                           _ssll_size, NULL, _ssll_insert, _ssll_remove,
+                           _ssll_find);
     sl->c.find_next = _ssll_find_next;
     sl->c.get_subset = NULL;
-    sl->c.get_iterator = NULL;
+    sl->c.get_iterator =_ssll_iterator_get;
     sl->c.for_each = _ssll_for_each;
     sl->c.clear = _ssll_clear;
 
@@ -391,3 +420,154 @@ netsnmp_container_ssll_init(void)
                                netsnmp_container_get_fifo_factory());
 }
 
+
+/**********************************************************************
+ *
+ * iterator
+ *
+ */
+NETSNMP_STATIC_INLINE sl_container *
+_ssll_it2cont(ssll_iterator *it)
+{
+    if(NULL == it) {
+        netsnmp_assert(NULL != it);
+        return NULL;
+    }
+
+    if(NULL == it->base.container) {
+        netsnmp_assert(NULL != it->base.container);
+        return NULL;
+    }
+
+    if(it->base.container->sync != it->base.sync) {
+        DEBUGMSGTL(("container:iterator", "out of sync\n"));
+        return NULL;
+    }
+
+    return (sl_container *)it->base.container;
+}
+
+static void *
+_ssll_iterator_curr(ssll_iterator *it)
+{
+    sl_container *t = _ssll_it2cont(it);
+    if ((NULL == t) || (NULL == it->pos))
+        return NULL;
+
+    return it->pos->data;
+}
+
+static void *
+_ssll_iterator_first(ssll_iterator *it)
+{
+    sl_container *t = _ssll_it2cont(it);
+    if ((NULL == t) || (NULL == t->head))
+        return NULL;
+
+    return t->head->data;
+}
+
+static void *
+_ssll_iterator_next(ssll_iterator *it)
+{
+    sl_container *t = _ssll_it2cont(it);
+    if ((NULL == t) || (NULL == it->pos))
+        return NULL;
+
+    it->pos = it->pos->next;
+    if (NULL == it->pos)
+        return NULL;
+
+    return it->pos->data;
+}
+
+static void *
+_ssll_iterator_last(ssll_iterator *it)
+{
+    sl_node      *n;
+    sl_container *t = _ssll_it2cont(it);
+    if(NULL == t)
+        return NULL;
+    
+    if (it->last)
+        return it->last;
+
+    n = it->pos ? it->pos : t->head;
+    if (NULL == n)
+        return NULL;
+
+    while (n->next)
+        n = n->next;
+
+    it->last = n;
+
+    return it->last->data;
+}
+
+static int
+_ssll_iterator_reset(ssll_iterator *it)
+{
+    sl_container *t;
+
+    /** can't use it2conf cuz we might be out of sync */
+    if(NULL == it) {
+        netsnmp_assert(NULL != it);
+        return 0;
+    }
+
+    if(NULL == it->base.container) {
+        netsnmp_assert(NULL != it->base.container);
+        return 0;
+    }
+    t = (sl_container *)it->base.container;
+    if(NULL == t)
+        return -1;
+
+    it->last = NULL;
+    it->pos = t->head;
+
+    /*
+     * save sync count, to make sure container doesn't change while
+     * iterator is in use.
+     */
+    it->base.sync = it->base.container->sync;
+
+    return 0;
+}
+
+static int
+_ssll_iterator_release(netsnmp_iterator *it)
+{
+    free(it);
+
+    return 0;
+}
+
+static netsnmp_iterator *
+_ssll_iterator_get(netsnmp_container *c)
+{
+    ssll_iterator* it;
+
+    if(NULL == c)
+        return NULL;
+
+    it = SNMP_MALLOC_TYPEDEF(ssll_iterator);
+    if(NULL == it)
+        return NULL;
+
+    it->base.container = c;
+    
+    it->base.first = (netsnmp_iterator_rtn*)_ssll_iterator_first;
+    it->base.next = (netsnmp_iterator_rtn*)_ssll_iterator_next;
+    it->base.curr = (netsnmp_iterator_rtn*)_ssll_iterator_curr;
+    it->base.last = (netsnmp_iterator_rtn*)_ssll_iterator_last;
+    it->base.reset = (netsnmp_iterator_rc*)_ssll_iterator_reset;
+    it->base.release = (netsnmp_iterator_rc*)_ssll_iterator_release;
+
+    (void)_ssll_iterator_reset(it);
+
+    return (netsnmp_iterator *)it;
+}
+#else /* NETSNMP_FEATURE_REMOVE_CONTAINER_LINKED_LIST */
+netsnmp_feature_unused(container_linked_list);
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_LINKED_LIST */

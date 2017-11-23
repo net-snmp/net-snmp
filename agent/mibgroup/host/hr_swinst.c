@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -45,6 +46,10 @@
 #include <rpm/header.h>
 #include <fcntl.h>
 
+#ifdef HAVE_RPM_RPMFILEUTIL_H
+#include <rpm/rpmfileutil.h>
+#endif
+
 #ifdef HAVE_RPMGETPATH
 #include <rpm/rpmmacro.h>
 #endif
@@ -66,6 +71,8 @@
 #include <net-snmp/utilities.h>
 
 #define HRSWINST_MONOTONICALLY_INCREASING
+
+netsnmp_feature_require(date_n_time)
 
         /*********************
 	 *
@@ -127,25 +134,20 @@ int             header_hrswinst(struct variable *, oid *, size_t *, int,
 int             header_hrswInstEntry(struct variable *, oid *, size_t *,
                                      int, size_t *, WriteMethod **);
 
-extern struct timeval starttime;
+#define starttime (*(const struct timeval*)netsnmp_get_agent_starttime())
 
         /*********************
 	 *
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-extern void     Init_HR_SWInst(void);
-extern int      Get_Next_HR_SWInst(void);
-extern void     End_HR_SWInst(void);
-extern int      Save_HR_SW_info(int ix);
+static void     Init_HR_SWInst(void);
+static int      Get_Next_HR_SWInst(void);
+static void     End_HR_SWInst(void);
+static int      Save_HR_SW_info(int ix);
 
-#ifdef HAVE_LIBRPM
 static void     Mark_HRSW_token(void);
 static void     Release_HRSW_token(void);
-#else
-#define	Mark_HRSW_token()
-#define	Release_HRSW_token()
-#endif
 
 
 #define	HRSWINST_CHANGE		1
@@ -157,13 +159,20 @@ static void     Release_HRSW_token(void);
 #define	HRSWINST_DATE		7
 
 struct variable4 hrswinst_variables[] = {
-    {HRSWINST_CHANGE, ASN_TIMETICKS, RONLY, var_hrswinst, 1, {1}},
-    {HRSWINST_UPDATE, ASN_TIMETICKS, RONLY, var_hrswinst, 1, {2}},
-    {HRSWINST_INDEX, ASN_INTEGER, RONLY, var_hrswinst, 3, {3, 1, 1}},
-    {HRSWINST_NAME, ASN_OCTET_STR, RONLY, var_hrswinst, 3, {3, 1, 2}},
-    {HRSWINST_ID, ASN_OBJECT_ID, RONLY, var_hrswinst, 3, {3, 1, 3}},
-    {HRSWINST_TYPE, ASN_INTEGER, RONLY, var_hrswinst, 3, {3, 1, 4}},
-    {HRSWINST_DATE, ASN_OCTET_STR, RONLY, var_hrswinst, 3, {3, 1, 5}}
+    {HRSWINST_CHANGE, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 1, {1}},
+    {HRSWINST_UPDATE, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 1, {2}},
+    {HRSWINST_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 1}},
+    {HRSWINST_NAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 2}},
+    {HRSWINST_ID, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 3}},
+    {HRSWINST_TYPE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 4}},
+    {HRSWINST_DATE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 5}}
 };
 oid             hrswinst_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 6 };
 
@@ -182,9 +191,6 @@ oid             hrswinst_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 6 };
 #endif
 #ifdef freebsd2
 #define	_PATH_HRSW_directory	"/var/db/pkg"
-#endif
-#if defined(linux) && !defined(HAVE_LIBRPM)
-#define	_PATH_HRSW_directory	"/var/cache/hrmib"
 #endif
 #if defined(linux) && !defined(HAVE_LIBRPM)
 #define	_PATH_HRSW_directory	"/var/cache/hrmib"
@@ -278,7 +284,7 @@ header_hrswinst(struct variable *vp,
            (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
     return (MATCH_SUCCEEDED);
 }
@@ -348,7 +354,7 @@ header_hrswInstEntry(struct variable *vp,
     memcpy((char *) name, (char *) newname,
            (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_inst", "... get installed S/W stats "));
@@ -431,7 +437,7 @@ var_hrswinst(struct variable * vp,
 #ifdef HAVE_PKGINFO
             pver = pkgparam(swi->swi_name, "VERSION");
             /* 1 spot for the terminating null and one for the dash */
-            if (pver &&
+            if (pver && 
                (strlen(pver) + 2 + strlen(string) <= sizeof(string))) {
                 strcat(string, "-");
                 strcat(string, pver);
@@ -492,27 +498,31 @@ var_hrswinst(struct variable * vp,
     case HRSWINST_DATE:
         {
 #ifdef HAVE_LIBRPM
-            int         *rpm_data;
+            int32_t         *rpm_data;
             if ( headerGetEntry(swi->swi_h, RPMTAG_INSTALLTIME, NULL, (void **) &rpm_data, NULL) ) {
                 time_t          installTime = *rpm_data;
                 ret = date_n_time(&installTime, var_len);
             } else {
-                ret = date_n_time(0, var_len);
+                ret = date_n_time(NULL, var_len);
             }
 #else
             if (swi->swi_directory != NULL) {
                 snprintf(string, sizeof(string), "%s/%s",
                          swi->swi_directory, swi->swi_name);
                 string[ sizeof(string)-1 ] = 0;
-                stat(string, &stat_buf);
-                ret = date_n_time(&stat_buf.st_mtime, var_len);
+                if (stat(string, &stat_buf) >= 0)
+                    ret = date_n_time(&stat_buf.st_mtime, var_len);
+                else
+                    goto err;
             } else {
+err:
 #if NETSNMP_NO_DUMMY_VALUES
-                return NULL;
-#endif
+                ret = NULL;
+#else
                 sprintf(string, "back in the mists of time");
                 *var_len = strlen(string);
                 ret = (u_char *) string;
+#endif
             }
 #endif
         }
@@ -690,7 +700,6 @@ Save_HR_SW_info(int ix)
     return 0;
 }
 
-#ifdef	HAVE_LIBRPM
 void
 Mark_HRSW_token(void)
 {
@@ -699,14 +708,15 @@ Mark_HRSW_token(void)
 void
 Release_HRSW_token(void)
 {
+#ifdef	HAVE_LIBRPM
     SWI_t          *swi = &_myswi;      /* XXX static for now */
     if (swi != NULL && swi->swi_h) {
         headerFree(swi->swi_h);
         swi->swi_h = NULL;
         swi->swi_prevx = -1;
     }
-}
 #endif                          /* HAVE_LIBRPM */
+}
 
 void
 End_HR_SWInst(void)

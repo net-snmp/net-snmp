@@ -29,6 +29,9 @@
 #ifndef _MSC_VER
   if (should_init("disk")) init_disk();
 #endif
+#ifdef USING_UCD_SNMP_DLMOD_MODULE
+  if (should_init("dlmod")) init_dlmod();
+#endif
   if (should_init("loadave")) init_loadave();
   if (should_init("extensible")) init_extensible();
   if (should_init("extend")) init_extend();
@@ -78,17 +81,22 @@
 
   if (should_init("override")) init_override();
 
-#ifdef USING_DISMAN_EVENT_MIB_MODULE
-#ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
+#ifdef USING_DISMAN_EVENT_MODULE
+  if (should_init("mteTrigger")) init_mteTrigger();
+  if (should_init("mteTriggerConf")) init_mteTriggerConf();
   if (should_init("mteTriggerTable")) init_mteTriggerTable();
-#endif
   if (should_init("mteTriggerDeltaTable")) init_mteTriggerDeltaTable();
   if (should_init("mteTriggerExistenceTable")) init_mteTriggerExistenceTable();
   if (should_init("mteTriggerBooleanTable")) init_mteTriggerBooleanTable();
   if (should_init("mteTriggerThresholdTable")) init_mteTriggerThresholdTable();
+  if (should_init("mteObjects")) init_mteObjects();
+  if (should_init("mteObjectsConf")) init_mteObjectsConf();
   if (should_init("mteObjectsTable")) init_mteObjectsTable();
+  if (should_init("mteEvent")) init_mteEvent();
+  if (should_init("mteEventConf")) init_mteEventConf();
   if (should_init("mteEventTable")) init_mteEventTable();
   if (should_init("mteEventNotificationTable")) init_mteEventNotificationTable();
+  if (should_init("mteEventSetTable")) init_mteEventSetTable();
 #endif
 
   if (should_init("vacm_context")) init_vacm_context();

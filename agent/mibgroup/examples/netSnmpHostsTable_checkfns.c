@@ -14,10 +14,13 @@
  * standard headers 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include "netSnmpHostsTable_checkfns.h"
 #include "netSnmpHostsTable_checkfns_local.h"
 #include "netSnmpHostsTable_enums.h"
+
+netsnmp_feature_require(check_storage_transition)
 
 /** Decides if an incoming value for the netSnmpHostAddressType mib node is legal.
  *  @param type    The incoming data type.

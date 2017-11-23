@@ -22,13 +22,13 @@
 
 int
 usmDHUserCheckValue(struct usmUser *user, int for_auth_key,
-                    char *val, size_t val_len)
+                    u_char *val, size_t val_len)
 {
     /*
      * The set value must be composed of 2 parts, the first being the
      * current value 
      */
-    char           *current_value;
+    u_char         *current_value;
     size_t          current_value_len;
 
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserCheckValue",
@@ -50,11 +50,11 @@ usmDHUserCheckValue(struct usmUser *user, int for_auth_key,
 
 int
 usmDHSetKey(struct usmUser *user, int for_auth_key,
-            char *val, size_t val_len)
+            u_char *val, size_t val_len)
 {
     DH             *dh;
     BIGNUM         *other_pub;
-    char           *key;
+    u_char         *key;
     size_t          key_len;
 
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHSetKey", "called\n"));
@@ -336,7 +336,6 @@ int
 usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
 {
     int             rc = MFD_SUCCESS;
-    int             save_flags;
 
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserKeyTable_commit",
                 "called\n"));
@@ -528,7 +527,7 @@ The object used to change any given user's Authentication Key
 int
 usmDHUserAuthKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
                                    rowreq_ctx,
-                                   char *usmDHUserAuthKeyChange_val_ptr,
+                                   u_char *usmDHUserAuthKeyChange_val_ptr,
                                    size_t
                                    usmDHUserAuthKeyChange_val_ptr_len)
 {
@@ -605,7 +604,7 @@ usmDHUserAuthKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
  */
 int
 usmDHUserAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                           char *usmDHUserAuthKeyChange_val_ptr,
+                           u_char *usmDHUserAuthKeyChange_val_ptr,
                            size_t usmDHUserAuthKeyChange_val_ptr_len)
 {
 
@@ -728,8 +727,9 @@ The object used to change the agents own Authentication Key
  */
 int
 usmDHUserOwnAuthKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
-                                      rowreq_ctx, char
-                                      *usmDHUserOwnAuthKeyChange_val_ptr, size_t
+                                      rowreq_ctx,
+                                      u_char *usmDHUserOwnAuthKeyChange_val_ptr,
+                                      size_t
                                       usmDHUserOwnAuthKeyChange_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserOwnAuthKeyChange_check_value", "called\n"));
@@ -798,7 +798,7 @@ usmDHUserOwnAuthKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
  */
 int
 usmDHUserOwnAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                              char *usmDHUserOwnAuthKeyChange_val_ptr,
+                              u_char *usmDHUserOwnAuthKeyChange_val_ptr,
                               size_t usmDHUserOwnAuthKeyChange_val_ptr_len)
 {
 
@@ -912,7 +912,7 @@ The object used to change any given user's Privacy Key using
 int
 usmDHUserPrivKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
                                    rowreq_ctx,
-                                   char *usmDHUserPrivKeyChange_val_ptr,
+                                   u_char *usmDHUserPrivKeyChange_val_ptr,
                                    size_t
                                    usmDHUserPrivKeyChange_val_ptr_len)
 {
@@ -989,7 +989,7 @@ usmDHUserPrivKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
  */
 int
 usmDHUserPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                           char *usmDHUserPrivKeyChange_val_ptr,
+                           u_char *usmDHUserPrivKeyChange_val_ptr,
                            size_t usmDHUserPrivKeyChange_val_ptr_len)
 {
 
@@ -1113,8 +1113,9 @@ The object used to change the agent's own Privacy Key using a
  */
 int
 usmDHUserOwnPrivKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
-                                      rowreq_ctx, char
-                                      *usmDHUserOwnPrivKeyChange_val_ptr, size_t
+                                      rowreq_ctx,
+                                      u_char *usmDHUserOwnPrivKeyChange_val_ptr,
+                                      size_t
                                       usmDHUserOwnPrivKeyChange_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserOwnPrivKeyChange_check_value", "called\n"));
@@ -1183,7 +1184,7 @@ usmDHUserOwnPrivKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
  */
 int
 usmDHUserOwnPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                              char *usmDHUserOwnPrivKeyChange_val_ptr,
+                              u_char *usmDHUserOwnPrivKeyChange_val_ptr,
                               size_t usmDHUserOwnPrivKeyChange_val_ptr_len)
 {
 

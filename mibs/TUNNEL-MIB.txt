@@ -37,8 +37,6 @@ tunnelMIB MODULE-IDENTITY
             version of this MIB module is part of RFC 4087;  see
             the RFC itself for full legal notices."
 
-
-
     REVISION     "200505160000Z" -- May 16, 2005
     DESCRIPTION
             "IPv4-specific objects were deprecated, including
@@ -87,9 +85,6 @@ tunnelIfTable OBJECT-TYPE
     DESCRIPTION
             "The (conceptual) table containing information on
             configured tunnels."
-
-
-
     ::= { tunnel 1 }
 
 tunnelIfEntry OBJECT-TYPE
@@ -138,8 +133,6 @@ tunnelIfRemoteAddress OBJECT-TYPE
             "The address of the remote endpoint of the tunnel
             (i.e., the destination address used in the outer IP
             header), or 0.0.0.0 if unknown, or an IPv6 address, or
-
-
 
             the tunnel is not a point-to-point link (e.g., if it
             is a 6to4 tunnel).
@@ -190,8 +183,6 @@ tunnelIfTOS OBJECT-TYPE
     DESCRIPTION
             "The method used to set the high 6 bits (the
 
-
-
             differentiated services codepoint) of the IPv4 TOS or
             IPv6 Traffic Class in the outer IP header.  A value of
             -1 indicates that the bits are copied from the
@@ -241,8 +232,6 @@ tunnelIfLocalInetAddress OBJECT-TYPE
             (i.e., the source address used in the outer IP
             header).  If the address is unknown, the value is
 
-
-
             0.0.0.0 for IPv4 or :: for IPv6.  The type of this
             object is given by tunnelIfAddressType."
     ::= { tunnelIfEntry 9 }
@@ -290,9 +279,6 @@ tunnelConfigTable OBJECT-TYPE
             Since this table does not support IPv6, it is
             deprecated in favor of tunnelInetConfigTable."
     ::= { tunnel 2 }
-
-
-
 
 tunnelConfigEntry OBJECT-TYPE
     SYNTAX     TunnelConfigEntry
@@ -343,8 +329,6 @@ tunnelConfigRemoteAddress OBJECT-TYPE
             deprecated in favor of tunnelInetConfigRemoteAddress."
     ::= { tunnelConfigEntry 2 }
 
-
-
 tunnelConfigEncapsMethod OBJECT-TYPE
     SYNTAX     IANAtunnelType
     MAX-ACCESS not-accessible
@@ -393,9 +377,6 @@ tunnelConfigIfIndex OBJECT-TYPE
 
 tunnelConfigStatus OBJECT-TYPE
     SYNTAX     RowStatus
-
-
-
     MAX-ACCESS read-create
     STATUS     deprecated
     DESCRIPTION
@@ -444,9 +425,6 @@ tunnelInetConfigTable OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-
-
-
             "The (conceptual) table containing information on
             configured tunnels.  This table can be used to map a
             set of tunnel endpoints to the associated ifIndex
@@ -495,9 +473,6 @@ TunnelInetConfigEntry ::= SEQUENCE {
 }
 
 tunnelInetConfigAddressType OBJECT-TYPE
-
-
-
     SYNTAX     InetAddressType
     MAX-ACCESS not-accessible
     STATUS     current
@@ -546,8 +521,6 @@ tunnelInetConfigID OBJECT-TYPE
             1.  For encapsulation methods (such as L2F) which
             allow multiple parallel tunnels, the manager is
             responsible for choosing any ID which does not
-
-
 
             conflict with an existing row, such as choosing a
             random number."
@@ -598,8 +571,6 @@ tunnelInetConfigStatus OBJECT-TYPE
             implementation-dependent manner, and corresponding
             rows will be instantiated in the ifTable and the
 
-
-
             tunnelIfTable.  The status of this row will become
             active as soon as the agent assigns the interface
             index, regardless of whether the interface is
@@ -648,9 +619,6 @@ tunnelMIBCompliance MODULE-COMPLIANCE
 
         OBJECT      tunnelIfTOS
         MIN-ACCESS  read-only
-
-
-
         DESCRIPTION
             "Write access is not required."
 
@@ -700,8 +668,6 @@ tunnelMIBInetReadOnlyCompliance MODULE-COMPLIANCE
         DESCRIPTION
             "Write access is not required."
 
-
-
         OBJECT      tunnelIfAddressType
         SYNTAX      InetAddressType { ipv4(1), ipv6(2),
                                       ipv4z(3), ipv6z(4) }
@@ -750,8 +716,6 @@ tunnelMIBBasicGroup OBJECT-GROUP
     STATUS  deprecated
     DESCRIPTION
             "A collection of objects to support basic management
-
-
 
             of IPv4 Tunnels.  Since this group cannot support
             IPv6, it is deprecated in favor of

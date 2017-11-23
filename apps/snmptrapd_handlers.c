@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -14,10 +15,10 @@
 #endif
 #include <ctype.h>
 #include <sys/types.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#else
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #if HAVE_SYS_WAIT_H
@@ -37,10 +38,17 @@
 #include "snmptrapd_log.h"
 #include "notification-log-mib/notification_log.h"
 
+netsnmp_feature_child_of(add_default_traphandler, snmptrapd)
+
 char *syslog_format1 = NULL;
 char *syslog_format2 = NULL;
 char *print_format1  = NULL;
 char *print_format2  = NULL;
+char *exec_format1   = NULL;
+char *exec_format2   = NULL;
+
+int   SyslogTrap = 0;
+int   dropauth = 0;
 
 const char     *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n";
 const char     *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
@@ -81,19 +89,28 @@ snmptrapd_parse_traphandle(const char *token, char *line)
     char           *cptr, *cp;
     netsnmp_trapd_handler *traph;
     int             flags = 0;
+    char           *format = NULL;
 
     memset( buf, 0, sizeof(buf));
     memset(obuf, 0, sizeof(obuf));
     cptr = copy_nword(line, buf, sizeof(buf));
+
+    if ( buf[0] == '-' && buf[1] == 'F' ) {
+        cptr = copy_nword(cptr, buf, sizeof(buf));
+        format = strdup( buf );
+        cptr = copy_nword(cptr, buf, sizeof(buf));
+    }
     if ( !cptr ) {
-        config_perror("Missing traphandle command");
+        netsnmp_config_error("Missing traphandle command (%s)", buf);
+        free(format);
         return;
     }
 
     DEBUGMSGTL(("read_config:traphandle", "registering handler for: "));
     if (!strcmp(buf, "default")) {
         DEBUGMSG(("read_config:traphandle", "default"));
-        traph = netsnmp_add_default_traphandler( command_handler );
+        traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_DEFAULT_HANDLER,
+                                               command_handler );
     } else {
         cp = buf+strlen(buf)-1;
         if ( *cp == '*' ) {
@@ -108,11 +125,9 @@ snmptrapd_parse_traphandle(const char *token, char *line)
             }
         }
         if (!read_objid(buf, obuf, &olen)) {
-            char            buf1[STRINGMAX];
-            snprintf(buf1,  sizeof(buf1),
-                    "Bad trap OID in traphandle directive: %s", buf);
-            buf1[ sizeof(buf1)-1 ] = 0;
-            config_perror(buf1);
+	    netsnmp_config_error("Bad trap OID in traphandle directive: %s",
+				 buf);
+            free(format);
             return;
         }
         DEBUGMSGOID(("read_config:traphandle", obuf, olen));
@@ -125,7 +140,12 @@ snmptrapd_parse_traphandle(const char *token, char *line)
         traph->flags = flags;
         traph->authtypes = TRAP_AUTH_EXE;
         traph->token = strdup(cptr);
+        if (format) {
+            traph->format = format;
+            format = NULL;
+        }
     }
+    free(format);
 }
 
 
@@ -138,17 +158,26 @@ parse_forward(const char *token, char *line)
     char           *cptr, *cp;
     netsnmp_trapd_handler *traph;
     int             flags = 0;
+    char           *format = NULL;
 
     memset( buf, 0, sizeof(buf));
     memset(obuf, 0, sizeof(obuf));
     cptr = copy_nword(line, buf, sizeof(buf));
+
+    if ( buf[0] == '-' && buf[1] == 'F' ) {
+        cptr = copy_nword(cptr, buf, sizeof(buf));
+        format = strdup( buf );
+        cptr = copy_nword(cptr, buf, sizeof(buf));
+    }
     DEBUGMSGTL(("read_config:forward", "registering forward for: "));
     if (!strcmp(buf, "default")) {
         DEBUGMSG(("read_config:forward", "default"));
         if ( !strcmp( cptr, "agentx" ))
-            traph = netsnmp_add_default_traphandler( axforward_handler );
+            traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_DEFAULT_HANDLER,
+                                            axforward_handler );
         else
-            traph = netsnmp_add_default_traphandler( forward_handler );
+            traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_DEFAULT_HANDLER,
+                                            forward_handler );
     } else {
         cp = buf+strlen(buf)-1;
         if ( *cp == '*' ) {
@@ -164,11 +193,8 @@ parse_forward(const char *token, char *line)
         }
 
         if (!read_objid(buf, obuf, &olen)) {
-            char            buf1[STRINGMAX];
-            snprintf(buf1,  sizeof(buf1),
-                    "Bad trap OID in forward directive: %s", buf);
-            buf1[ sizeof(buf1)-1 ] = 0;
-            config_perror(buf1);
+	    netsnmp_config_error("Bad trap OID in forward directive: %s", buf);
+            free(format);
             return;
         }
         DEBUGMSGOID(("read_config:forward", obuf, olen));
@@ -184,21 +210,25 @@ parse_forward(const char *token, char *line)
         traph->flags = flags;
         traph->authtypes = TRAP_AUTH_NET;
         traph->token = strdup(cptr);
+        if (format)
+            traph->format = format;
+    } else {
+        free(format);
     }
 }
 
 
-static void
+void
 parse_format(const char *token, char *line)
 {
-    char *cp;
+    char *cp, *sep;
 
     /*
      * Extract the first token from the value
      * which tells us which style of format this is
      */
     cp = line;
-    while (*cp && !isspace(*cp))
+    while (*cp && !isspace((unsigned char)(*cp)))
         cp++;
     if (!(*cp)) {
         /*
@@ -209,8 +239,9 @@ parse_format(const char *token, char *line)
         return;
     }
 
+    sep = cp;
     *(cp++) = '\0';
-    while (*cp && !isspace(*cp))
+    while (*cp && isspace((unsigned char)(*cp)))
         cp++;
 
     /*
@@ -240,7 +271,20 @@ parse_format(const char *token, char *line)
         SNMP_FREE( syslog_format2 );
         syslog_format1 = strdup(cp);
         syslog_format2 = strdup(cp);
+    } else if (!strcmp( line, "execute1")) {
+        SNMP_FREE( exec_format1 );
+        exec_format1 = strdup(cp);
+    } else if (!strcmp( line, "execute2")) {
+        SNMP_FREE( exec_format2 );
+        exec_format2 = strdup(cp);
+    } else if (!strcmp( line, "execute")) {
+        SNMP_FREE( exec_format1 );
+        SNMP_FREE( exec_format2 );
+        exec_format1 = strdup(cp);
+        exec_format2 = strdup(cp);
     }
+
+    *sep = ' ';
 }
 
 
@@ -289,7 +333,7 @@ snmptrapd_register_configs( void )
                             parse_trap2_fmt, free_trap2_fmt, "format");
     register_config_handler("snmptrapd", "format",
                             parse_format, NULL,
-			    "[print{,1,2}|syslog{,1,2}] format");
+			    "[print{,1,2}|syslog{,1,2}|execute{,1,2}] format");
     register_config_handler("snmptrapd", "forward",
                             parse_forward, NULL, "OID|\"default\" destination");
 }
@@ -308,12 +352,26 @@ netsnmp_trapd_handler *netsnmp_post_global_traphandlers   = NULL;
 netsnmp_trapd_handler *netsnmp_default_traphandlers  = NULL;
 netsnmp_trapd_handler *netsnmp_specific_traphandlers = NULL;
 
+typedef struct netsnmp_handler_map_t {
+   netsnmp_trapd_handler **handler;
+   const char             *descr;
+} netsnmp_handler_map;
+
+static netsnmp_handler_map handlers[] = {
+    { &netsnmp_auth_global_traphandlers, "auth trap" },
+    { &netsnmp_pre_global_traphandlers, "pre-global trap" },
+    { NULL, "trap specific" },
+    { &netsnmp_post_global_traphandlers, "global" },
+    { NULL, NULL }
+};
+
 /*
  * Register a new "global" traphandler,
  * to be applied to *all* incoming traps
  */
 netsnmp_trapd_handler *
-netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler* handler) {
+netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler *handler)
+{
     netsnmp_trapd_handler *traph;
 
     if ( !handler )
@@ -324,7 +382,7 @@ netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler* handler) {
         return NULL;
 
     /*
-     * Add this new handler to the front of the appropriate global list
+     * Add this new handler to the front of the appropriate list
      *   (or should it go on the end?)
      */
     traph->handler = handler;
@@ -342,6 +400,10 @@ netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler* handler) {
         traph->nexth   = netsnmp_post_global_traphandlers;
         netsnmp_post_global_traphandlers = traph;
         break;
+    case NETSNMPTRAPD_DEFAULT_HANDLER:
+        traph->nexth   = netsnmp_default_traphandlers;
+        netsnmp_default_traphandlers = traph;
+        break;
     default:
         free( traph );
         return NULL;
@@ -349,32 +411,17 @@ netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler* handler) {
     return traph;
 }
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_ADD_DEFAULT_TRAPHANDLER
 /*
  * Register a new "default" traphandler, to be applied to all
  * traps with no specific trap handlers of their own.
  */
 netsnmp_trapd_handler *
-netsnmp_add_default_traphandler( Netsnmp_Trap_Handler* handler) {
-    netsnmp_trapd_handler *traph;
-
-    if ( !handler )
-        return NULL;
-
-    traph = SNMP_MALLOC_TYPEDEF(netsnmp_trapd_handler);
-    if ( !traph )
-        return NULL;
-
-    /*
-     * Add this new handler to the front of the default list
-     *   (or should it go on the end?)
-     */
-    traph->authtypes = TRAP_AUTH_ALL; /* callers will likely change this */
-    traph->handler = handler;
-    traph->nexth   = netsnmp_default_traphandlers;
-    netsnmp_default_traphandlers = traph;
-    return traph;
+netsnmp_add_default_traphandler(Netsnmp_Trap_Handler *handler) {
+    return netsnmp_add_global_traphandler(NETSNMPTRAPD_DEFAULT_HANDLER,
+                                          handler);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_ADD_DEFAULT_TRAPHANDLER */
 
 
 /*
@@ -399,7 +446,7 @@ netsnmp_add_traphandler(Netsnmp_Trap_Handler* handler,
     traph->authtypes   = TRAP_AUTH_ALL; /* callers will likely change this */
     traph->handler     = handler;
     traph->trapoid_len = trapOidLen;
-    traph->trapoid = netsnmp_memdup(trapOid, sizeof(oid) * trapOidLen);
+    traph->trapoid     = snmp_duplicate_objid(trapOid, trapOidLen);
 
     /*
      * Now try to find the appropriate place in the trap-specific
@@ -514,8 +561,13 @@ netsnmp_trapd_handler *
 netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
     netsnmp_trapd_handler *traph;
     
-    if (!trapOid || !trapOidLen)
+    if (!trapOid || !trapOidLen) {
+        DEBUGMSGTL(( "snmptrapd:lookup", "get_traphandler no OID!\n"));
         return NULL;
+    }
+    DEBUGMSGTL(( "snmptrapd:lookup", "Looking up Trap OID: "));
+    DEBUGMSGOID(("snmptrapd:lookup", trapOid, trapOidLen));
+    DEBUGMSG(( "snmptrapd:lookup", "\n"));
 
     /*
      * Look for a matching OID, and return that list...
@@ -530,7 +582,8 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
         if (!(traph->flags & NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE)) {
             if (snmp_oid_compare(traph->trapoid, traph->trapoid_len,
                                  trapOid, trapOidLen) == 0) {
-                DEBUGMSGTL(( "snmptrapd", "get_traphandler exact match (%x)\n", traph));
+                DEBUGMSGTL(( "snmptrapd:lookup",
+                             "get_traphandler exact match (%p)\n", traph));
 	        return traph;
             }
 	} else {
@@ -548,11 +601,11 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
                      */
                     if (snmp_oid_compare(traph->trapoid, traph->trapoid_len,
                                          trapOid, trapOidLen) != 0) {
-                        DEBUGMSGTL(( "snmptrapd", "get_traphandler strict subtree match (%x)\n", traph));
+                        DEBUGMSGTL(( "snmptrapd:lookup", "get_traphandler strict subtree match (%p)\n", traph));
 	                return traph;
                     }
                 } else {
-                    DEBUGMSGTL(( "snmptrapd", "get_traphandler subtree match (%x)\n", traph));
+                    DEBUGMSGTL(( "snmptrapd:lookup", "get_traphandler subtree match (%p)\n", traph));
 	            return traph;
                 }
             }
@@ -562,7 +615,7 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
     /*
      * .... or failing that, return the "default" list (which may be NULL)
      */
-    DEBUGMSGTL(( "snmptrapd", "get_traphandler default (%x)\n",
+    DEBUGMSGTL(( "snmptrapd:lookup", "get_traphandler default (%p)\n",
 			    netsnmp_default_traphandlers));
     return netsnmp_default_traphandlers;
 }
@@ -587,7 +640,6 @@ int   syslog_handler(  netsnmp_pdu           *pdu,
     u_char         *rbuf = NULL;
     size_t          r_len = 64, o_len = 0;
     int             trunc = 0;
-    extern int      SyslogTrap;
 
     DEBUGMSGTL(( "snmptrapd", "syslog_handler\n"));
 
@@ -670,7 +722,6 @@ int   print_handler(   netsnmp_pdu           *pdu,
     u_char         *rbuf = NULL;
     size_t          r_len = 64, o_len = 0;
     int             trunc = 0;
-    extern int      dropauth;
 
     DEBUGMSGTL(( "snmptrapd", "print_handler\n"));
 
@@ -738,163 +789,20 @@ int   print_handler(   netsnmp_pdu           *pdu,
 }
 
 
+#define EXECUTE_FORMAT	"%B\n%b\n%V\n%v\n"
+
 /*
  *  Trap handler for invoking a suitable script
  */
-void
-send_handler_data(FILE * file, struct hostent *host,
-                  netsnmp_pdu *pdu, netsnmp_transport *transport)
-{
-    netsnmp_variable_list tmpvar, *vars;
-    static oid      trapoids[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5, 0 };
-    static oid      snmpsysuptime[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
-    static oid      snmptrapoid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
-    static oid      snmptrapent[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 3, 0 };
-    static oid      snmptrapaddr[] = { 1, 3, 6, 1, 6, 3, 18, 1, 3, 0 };
-    static oid      snmptrapcom[] = { 1, 3, 6, 1, 6, 3, 18, 1, 4, 0 };
-    oid             enttrapoid[MAX_OID_LEN];
-    int             enttraplen = pdu->enterprise_length;
-
-    if (transport != NULL && transport->f_fmtaddr != NULL) {
-        char *tstr = transport->f_fmtaddr(transport, pdu->transport_data,
-                                          pdu->transport_data_length);
-        if (tstr != NULL) {
-            fprintf(file, "%s\n%s\n", host ? host->h_name : tstr, tstr);
-            free(tstr);
-        }
-    } else {
-        fprintf(file, "%s\n<UNKNOWN>\n", host ? host->h_name : "<UNKNOWN>");
-    }
-    if (pdu->command == SNMP_MSG_TRAP) {
-        /*
-         * convert a v1 trap to a v2 variable binding list:
-         * The uptime and trapOID go first in the list. 
-         */
-        tmpvar.val.integer = (long *) &pdu->time;
-        tmpvar.val_len = sizeof(pdu->time);
-        tmpvar.type = ASN_TIMETICKS;
-        fprint_variable(file, snmpsysuptime,
-                        sizeof(snmpsysuptime) / sizeof(oid), &tmpvar);
-        tmpvar.type = ASN_OBJECT_ID;
-        if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-            memcpy(enttrapoid, pdu->enterprise, sizeof(oid) * enttraplen);
-            if (enttrapoid[enttraplen - 1] != 0)
-                enttrapoid[enttraplen++] = 0;
-            enttrapoid[enttraplen++] = pdu->specific_type;
-            tmpvar.val.objid = enttrapoid;
-            tmpvar.val_len = enttraplen * sizeof(oid);
-        } else {
-            trapoids[9] = pdu->trap_type + 1;
-            tmpvar.val.objid = trapoids;
-            tmpvar.val_len = 10 * sizeof(oid);
-        }
-        fprint_variable(file, snmptrapoid,
-                        sizeof(snmptrapoid) / sizeof(oid), &tmpvar);
-    }
-    /*
-     * do the variables in the pdu 
-     */
-    for (vars = pdu->variables; vars; vars = vars->next_variable) {
-        fprint_variable(file, vars->name, vars->name_length, vars);
-    }
-    if (pdu->command == SNMP_MSG_TRAP) {
-        /*
-         * convert a v1 trap to a v2 variable binding list:
-         * The enterprise goes last. 
-         */
-        tmpvar.val.string = pdu->agent_addr;
-        tmpvar.val_len = 4;
-        tmpvar.type = ASN_IPADDRESS;
-        fprint_variable(file, snmptrapaddr,
-                        sizeof(snmptrapaddr) / sizeof(oid), &tmpvar);
-        tmpvar.val.string = pdu->community;
-        tmpvar.val_len = pdu->community_len;
-        tmpvar.type = ASN_OCTET_STR;
-        fprint_variable(file, snmptrapcom,
-                        sizeof(snmptrapcom) / sizeof(oid), &tmpvar);
-        tmpvar.val.objid = pdu->enterprise;
-        tmpvar.val_len = pdu->enterprise_length * sizeof(oid);
-        tmpvar.type = ASN_OBJECT_ID;
-        fprint_variable(file, snmptrapent,
-                        sizeof(snmptrapent) / sizeof(oid), &tmpvar);
-    }
-}
-
-void
-do_external(char *cmd, struct hostent *host,
-            netsnmp_pdu *pdu, netsnmp_transport *transport)
-{
-    FILE           *file;
-    int             oldquick, result;
-
-    DEBUGMSGTL(("snmptrapd", "Running: %s\n", cmd));
-    oldquick = snmp_get_quick_print();
-    snmp_set_quick_print(1);
-    if (cmd) {
-#ifndef WIN32
-        int             fd[2];
-        int             pid;
-
-        if (pipe(fd)) {
-            snmp_log_perror("pipe");
-        }
-        if ((pid = fork()) == 0) {
-            /*
-             * child 
-             */
-            close(0);
-            if (dup(fd[0]) != 0) {
-                snmp_log_perror("dup");
-            }
-            close(fd[1]);
-            close(fd[0]);
-            system(cmd);
-            exit(0);
-        } else if (pid > 0) {
-            file = fdopen(fd[1], "w");
-            send_handler_data(file, host, pdu, transport);
-            fclose(file);
-            close(fd[0]);
-            close(fd[1]);
-            if (waitpid(pid, &result, 0) < 0) {
-                snmp_log_perror("waitpid");
-            }
-        } else {
-            snmp_log_perror("fork");
-        }
-#else
-        char            command_buf[128];
-        char            file_buf[L_tmpnam];
-
-        tmpnam(file_buf);
-        file = fopen(file_buf, "w");
-        if (!file) {
-            fprintf(stderr, "fopen: %s: %s\n", file_buf, strerror(errno));
-        } else {
-            send_handler_data(file, host, pdu, transport);
-            fclose(file);
-            snprintf(command_buf, sizeof(command_buf),
-                     "%s < %s", cmd, file_buf);
-            command_buf[ sizeof(command_buf)-1 ] = 0;
-            result = system(command_buf);
-            if (result == -1)
-                fprintf(stderr, "system: %s: %s\n", command_buf,
-                        strerror(errno));
-            else if (result)
-                fprintf(stderr, "system: %s: %d\n", command_buf, result);
-            remove(file_buf);
-        }
-#endif                          /* WIN32 */
-    }
-    snmp_set_quick_print(oldquick);
-}
-
-#define EXECUTE_FORMAT	"%B\n%b\n%V\n%v\n"
-
 int   command_handler( netsnmp_pdu           *pdu,
                        netsnmp_transport     *transport,
                        netsnmp_trapd_handler *handler)
 {
+#ifndef USING_UTILITIES_EXECUTE_MODULE
+    NETSNMP_LOGONCE((LOG_WARNING,
+                     "support for run_shell_command not available\n"));
+    return NETSNMPTRAPD_HANDLER_FAIL;
+#else
     u_char         *rbuf = NULL;
     size_t          r_len = 64, o_len = 0;
     int             oldquick;
@@ -907,8 +815,10 @@ int   command_handler( netsnmp_pdu           *pdu,
 	    v2_pdu = convert_v1pdu_to_v2(pdu);
 	else
 	    v2_pdu = pdu;
-        oldquick = snmp_get_quick_print();
-        snmp_set_quick_print(1);
+        oldquick = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                          NETSNMP_DS_LIB_QUICK_PRINT);
+        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                               NETSNMP_DS_LIB_QUICK_PRINT, 1);
 
         /*
 	 * Format the trap and pass this string to the external command
@@ -928,42 +838,36 @@ int   command_handler( netsnmp_pdu           *pdu,
                                              handler->format,
                                              v2_pdu, transport);
         } else {
-            DEBUGMSGTL(( "snmptrapd", "execute format\n"));
-            realloc_format_trap(&rbuf, &r_len, &o_len, 1,
-                                             EXECUTE_FORMAT,
+	    if ( pdu->command == SNMP_MSG_TRAP && exec_format1 ) {
+                DEBUGMSGTL(( "snmptrapd", "exec v1 = '%s'\n", exec_format1));
+                realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                                             exec_format1, pdu, transport);
+	    } else if ( pdu->command != SNMP_MSG_TRAP && exec_format2 ) {
+                DEBUGMSGTL(( "snmptrapd", "exec v2/3 = '%s'\n", exec_format2));
+                realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                                             exec_format2, pdu, transport);
+	    } else {
+                DEBUGMSGTL(( "snmptrapd", "execute format\n"));
+                realloc_format_trap(&rbuf, &r_len, &o_len, 1, EXECUTE_FORMAT,
                                              v2_pdu, transport);
+            }
 	}
 
         /*
          *  and pass this formatted string to the command specified
          */
-        run_shell_command(handler->token, (char*)rbuf, NULL, 0);   /* Not interested in output */
-        snmp_set_quick_print(oldquick);
+        run_shell_command(handler->token, (char*)rbuf, NULL, NULL);   /* Not interested in output */
+        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                               NETSNMP_DS_LIB_QUICK_PRINT, oldquick);
         if (pdu->command == SNMP_MSG_TRAP)
             snmp_free_pdu(v2_pdu);
         free(rbuf);
     }
     return NETSNMPTRAPD_HANDLER_OK;
+#endif /* !def USING_UTILITIES_EXECUTE_MODULE */
 }
 
 
-
-
-/*
- *  Trap handler for doing something with "event" traps
- *      (not entirely clear what this is about ???)
- */
-	/* XXX - in snmptrapd.c */
-void event_input(netsnmp_variable_list * vp);
-
-int   event_handler( netsnmp_pdu           *pdu,
-                     netsnmp_transport     *transport,
-                     netsnmp_trapd_handler *handler)
-{
-    DEBUGMSGTL(( "snmptrapd", "event_handler\n"));
-    event_input(pdu->variables);
-    return NETSNMPTRAPD_HANDLER_OK;
-}
 
 
 /*
@@ -1058,11 +962,7 @@ snmp_input(int op, netsnmp_session *session,
     netsnmp_variable_list *vars;
     netsnmp_trapd_handler *traph;
     netsnmp_transport *transport = (netsnmp_transport *) magic;
-    int ret;
-    extern netsnmp_trapd_handler *netsnmp_auth_global_traphandlers;
-    extern netsnmp_trapd_handler *netsnmp_pre_global_traphandlers;
-    extern netsnmp_trapd_handler *netsnmp_post_global_traphandlers;
-
+    int ret, idx;
 
     switch (op) {
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
@@ -1159,77 +1059,26 @@ t        *     d) any other global handlers
          *  OK - Enough waffling, let's get to work.....
 	 */
 
-        /*
-	 *  a) authentication handlers
-	 */
-        traph = netsnmp_auth_global_traphandlers;
-        DEBUGMSGTL(("snmptrapd", "Running auth trap handlers\n"));
-	while (traph) {
-            if (!netsnmp_trapd_check_auth(traph->authtypes)) {
-                traph = traph->nexth;
-                continue; /* we continue on and skip this one */
-            }
-	    ret = (*(traph->handler))(pdu, transport, traph);
-            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
-                return 1;
-            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
-                break;
-	    traph = traph->nexth;
-	}
+        for( idx = 0; handlers[idx].descr; ++idx ) {
+            DEBUGMSGTL(("snmptrapd", "Running %s handlers\n",
+                        handlers[idx].descr));
+            if (NULL == handlers[idx].handler) /* specific */
+                traph = netsnmp_get_traphandler(trapOid, trapOidLen);
+            else
+                traph = *handlers[idx].handler;
 
-        /*
-	 *  b) pre-specific global handlers
-	 */
-        traph = netsnmp_pre_global_traphandlers;
-        DEBUGMSGTL(("snmptrapd", "Running pre-global trap handlers\n"));
-	while (traph) {
-            if (!netsnmp_trapd_check_auth(traph->authtypes)) {
-                traph = traph->nexth;
-                continue; /* we continue on and skip this one */
-            }
-	    ret = (*(traph->handler))(pdu, transport, traph);
-            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
-                return 1;
-            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
-                break;
-	    traph = traph->nexth;
-	}
+            for( ; traph; traph = traph->nexth) {
+                if (!netsnmp_trapd_check_auth(traph->authtypes))
+                    continue; /* we continue on and skip this one */
 
-        /*
-	 *  c) trap-specific handlers
-	 */
-        DEBUGMSGTL(("snmptrapd", "Running trap specific handlers\n"));
-        traph = netsnmp_get_traphandler(trapOid, trapOidLen);
-	while (traph) {
-            if (!netsnmp_trapd_check_auth(traph->authtypes)) {
-                traph = traph->nexth;
-                continue; /* we continue on and skip this one */
-            }
-	    ret = (*(traph->handler))(pdu, transport, traph);
-            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
-                return 1;
-            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
-                break;
-	    traph = traph->nexth;
-	}
+                ret = (*(traph->handler))(pdu, transport, traph);
+                if(NETSNMPTRAPD_HANDLER_FINISH == ret)
+                    return 1;
+                if (ret == NETSNMPTRAPD_HANDLER_BREAK)
+                    break; /* move on to next type */
+            } /* traph */
+        } /* handlers */
 
-        /*
-	 *  d) other global handlers
-	 */
-        DEBUGMSGTL(("snmptrapd", "Running global handlers\n"));
-        traph = netsnmp_post_global_traphandlers;
-	while (traph) {
-            if (!netsnmp_trapd_check_auth(traph->authtypes)) {
-                traph = traph->nexth;
-                continue; /* we continue on and skip this one */
-            }
-	    ret = (*(traph->handler))(pdu, transport, traph);
-            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
-                return 1;
-            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
-                break;
-	    traph = traph->nexth;
-	}
 
 	if (pdu->command == SNMP_MSG_INFORM) {
 	    netsnmp_pdu *reply = snmp_clone_pdu(pdu);

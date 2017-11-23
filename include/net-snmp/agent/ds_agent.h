@@ -27,10 +27,18 @@
 #define NETSNMP_DS_AGENT_DONT_LOG_TCPWRAPPERS_CONNECTS 12   /* 1 = disable logging */
 #define NETSNMP_DS_APP_DONT_LOG         NETSNMP_DS_AGENT_DONT_RETAIN_NOTIFICATIONS /* compat */
 #define NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES    13   /* 1 = don't store NFS entries in hrStorageTable */
+#define NETSNMP_DS_AGENT_REALSTORAGEUNITS 14    /* 1 = use real allocation units in hrStorageTable, 0 = recalculate it to fit 32bits */
 
-/* WARNING: The trap receiver uses DS flags and must not conflict with
-   these!  If you use a value above 15, change the minimimum DS bool
-   value in snmptrapd_log.h */
+   /* Repeated from "apps/snmptrapd_ds.h" */
+#define NETSNMP_DS_APP_NUMERIC_IP       16
+#define NETSNMP_DS_APP_NO_AUTHORIZATION 17
+
+#define NETSNMP_DS_AGENT_DISKIO_NO_FD   18      /* 1 = don't report /dev/fd*   entries in diskIOTable */
+#define NETSNMP_DS_AGENT_DISKIO_NO_LOOP 19      /* 1 = don't report /dev/loop* entries in diskIOTable */
+#define NETSNMP_DS_AGENT_DISKIO_NO_RAM  20      /* 1 = don't report /dev/ram*  entries in diskIOTable */
+
+/* WARNING: The trap receiver also uses DS flags and must not conflict with these!
+ * If you define additional boolean entries, check in "apps/snmptrapd_ds.h" first */
 
 /*
  * strings 
@@ -42,6 +50,7 @@
 #define NETSNMP_DS_AGENT_PERL_INIT_FILE    4    /* used by embedded perl */
 #define NETSNMP_DS_SMUX_SOCKET    5     /* ip:port socket addr */
 #define NETSNMP_DS_NOTIF_LOG_CTX  6     /* "" | "snmptrapd" */
+#define NETSNMP_DS_AGENT_TRAP_ADDR      7     /* used as v1 trap agent address */
 
 /*
  * integers 

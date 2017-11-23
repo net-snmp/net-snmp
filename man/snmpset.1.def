@@ -1,7 +1,7 @@
 .\" -*- nroff -*-
-.\" Portions of this file are subject to the following copyright. 
-.\" See the Net-SNMP COPYING file for more details and other
-.\" copyrights that may apply:
+.\" Portions of this file are subject to the following copyright.  See
+.\" the Net-SNMP COPYING file for more details and other copyrights
+.\" that may apply:
 .\" /***********************************************************
 .\" 	Copyright 1988, 1989 by Carnegie Mellon University
 .\" 
@@ -86,13 +86,13 @@ Right Thing".
 .PP
 For example:
 .PP
-snmpset -c private -v 1 test-hub system.sysContact.0 s dpz@noc.rutgers.edu ip.ipforwarding.0 = 2
+snmpset \-c private \-v 1 test\-hub system.sysContact.0 s dpz@noc.rutgers.edu ip.ipforwarding.0 = 2
 .PP
 will set the variables sysContact.0 and ipForwarding.0:
 .PP
 system.sysContact.0 = STRING: "dpz@noc.rutgers.edu"
 .br
-ip.ipForwarding.0 = INTEGER: not-forwarding(2)
+ip.ipForwarding.0 = INTEGER: not\-forwarding(2)
 .PP
 If the network entity has an error processing the request packet, an
 error packet will be returned and a message will be shown, helping to

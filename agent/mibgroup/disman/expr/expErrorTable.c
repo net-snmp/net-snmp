@@ -7,10 +7,13 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "disman/expr/expExpression.h"
 #include "disman/expr/expErrorTable.h"
+
+netsnmp_feature_require(table_tdata)
 
 /* Initializes the expExpressionErrorTable module */
 void
@@ -48,7 +51,7 @@ init_expErrorTable(void)
 
     /* Register this using the (common) expr_table_data container */
     netsnmp_tdata_register(reg, expr_table_data, table_info);
-    DEBUGMSGTL(("disman:expr:init", "Expression Error Table container (%x)\n",
+    DEBUGMSGTL(("disman:expr:init", "Expression Error Table container (%p)\n",
                                      expr_table_data));
 }
 

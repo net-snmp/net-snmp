@@ -64,10 +64,12 @@ config_add_mib(SNMP-NOTIFICATION-MIB)
      int             snmpNotifyTable_add(struct snmpNotifyTable_data
                                          *thedata);
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
      WriteMethod     write_snmpNotifyTag;
      WriteMethod     write_snmpNotifyType;
      WriteMethod     write_snmpNotifyStorageType;
      WriteMethod     write_snmpNotifyRowStatus;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 
 

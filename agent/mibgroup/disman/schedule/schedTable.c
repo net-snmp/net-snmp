@@ -7,11 +7,26 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "utilities/iquery.h"
 #include "disman/schedule/schedCore.h"
 #include "disman/schedule/schedTable.h"
+
+netsnmp_feature_require(iquery)
+netsnmp_feature_require(iquery_pdu_session)
+netsnmp_feature_require(table_tdata)
+netsnmp_feature_require(date_n_time)
+netsnmp_feature_require(check_vb_uint)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(check_vb_oid)
+netsnmp_feature_require(check_vb_truthvalue)
+netsnmp_feature_require(table_tdata_insert_row)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+
+static netsnmp_table_registration_info *table_info;
 
 /** Initializes the schedTable module */
 void
@@ -20,7 +35,6 @@ init_schedTable(void)
     static oid      schedTable_oid[] = { 1, 3, 6, 1, 2, 1, 63, 1, 2 };
     size_t          schedTable_oid_len = OID_LENGTH(schedTable_oid);
     netsnmp_handler_registration    *reg;
-    netsnmp_table_registration_info *table_info;
 
     DEBUGMSGTL(("disman:schedule:init", "Initializing table\n"));
     /*
@@ -48,6 +62,14 @@ init_schedTable(void)
     netsnmp_tdata_register(reg, schedule_table, table_info);
 }
 
+void
+shutdown_schedTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
+}
 
 /** handles requests for the schedTable table */
 int
@@ -165,7 +187,7 @@ schedTable_handler(netsnmp_mib_handler *handler,
                  * Convert 'schedLastFailed' timestamp
                  *   into DateAndTime string
                  */
-                cp = date_n_time( &entry->schedLastFailed, &len );
+                cp = (char *) date_n_time( &entry->schedLastFailed, &len );
                 snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
                                          cp, len);
                 break;

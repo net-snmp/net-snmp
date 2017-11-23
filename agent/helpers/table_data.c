@@ -1,4 +1,21 @@
+/*
+ * Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/agent/table_data.h>
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -6,12 +23,29 @@
 #include <strings.h>
 #endif
 
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
 #include <net-snmp/agent/table.h>
-#include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/read_only.h>
+
+netsnmp_feature_child_of(table_data_all, mib_helpers)
+
+netsnmp_feature_child_of(table_data, table_data_all)
+netsnmp_feature_child_of(register_read_only_table_data, table_data_all)
+netsnmp_feature_child_of(extract_table_row_data, table_data_all)
+netsnmp_feature_child_of(insert_table_row, table_data_all)
+netsnmp_feature_child_of(table_data_delete_table, table_data_all)
+
+netsnmp_feature_child_of(table_data_extras, table_data_all)
+
+netsnmp_feature_child_of(table_data_create_table, table_data_extras)
+netsnmp_feature_child_of(table_data_create_row, table_data_extras)
+netsnmp_feature_child_of(table_data_copy_row, table_data_extras)
+netsnmp_feature_child_of(table_data_remove_delete_row, table_data_extras)
+netsnmp_feature_child_of(table_data_unregister, table_data_extras)
+netsnmp_feature_child_of(table_data_row_count, table_data_extras)
+netsnmp_feature_child_of(table_data_row_operations, table_data_extras)
+netsnmp_feature_child_of(table_data_row_first, table_data_extras)
+
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA
 
 /** @defgroup table_data table_data
  *  Helps you implement a table with datamatted storage.
@@ -80,16 +114,17 @@ netsnmp_table_data_clone_row(netsnmp_table_row *row)
     if (row->indexes) {
         newrow->indexes = snmp_clone_varbind(newrow->indexes);
         if (!newrow->indexes) {
-            free (newrow);
+            free(newrow);
             return NULL;
         }
     }
 
     if (row->index_oid) {
-        newrow->index_oid = netsnmp_memdup(row->index_oid,
-                                           row->index_oid_len * sizeof(oid));
+        newrow->index_oid =
+            snmp_duplicate_objid(row->index_oid, row->index_oid_len);
         if (!newrow->index_oid) {
-            free (newrow);
+            free(newrow->indexes);
+            free(newrow);
             return NULL;
         }
     }
@@ -227,7 +262,7 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
 }
 
 /** swaps out origrow with newrow.  This does *not* delete/free anything! */
-NETSNMP_INLINE void
+void
 netsnmp_table_data_replace_row(netsnmp_table_data *table,
                                netsnmp_table_row *origrow,
                                netsnmp_table_row *newrow)
@@ -286,12 +321,15 @@ netsnmp_table_data_remove_and_delete_row(netsnmp_table_data *table,
      * Generic API - mostly renamed wrappers
      * ===================================== */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_CREATE_TABLE
 netsnmp_table_data *
 netsnmp_table_data_create_table(const char *name, long flags)
 {
     return netsnmp_create_table_data( name );
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_CREATE_TABLE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_DELETE_TABLE
 void
 netsnmp_table_data_delete_table( netsnmp_table_data *table )
 {
@@ -311,14 +349,13 @@ netsnmp_table_data_delete_table( netsnmp_table_data *table )
     }
     table->first_row = NULL;
 
-    if (table->name) {
-        SNMP_FREE(table->name);
-        table->name = NULL;
-    }
+    SNMP_FREE(table->name);
     SNMP_FREE(table);
     return;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_DELETE_TABLE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_CREATE_ROW
 netsnmp_table_row *
 netsnmp_table_data_create_row( void* entry )
 {
@@ -327,9 +364,11 @@ netsnmp_table_data_create_row( void* entry )
         row->data = entry;
     return row;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_CREATE_ROW */
 
     /* netsnmp_table_data_clone_row() defined above */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_COPY_ROW
 int
 netsnmp_table_data_copy_row( netsnmp_table_row  *old_row,
                              netsnmp_table_row  *new_row )
@@ -342,11 +381,12 @@ netsnmp_table_data_copy_row( netsnmp_table_row  *old_row,
     if (old_row->indexes)
         new_row->indexes = snmp_clone_varbind(old_row->indexes);
     if (old_row->index_oid)
-        new_row->index_oid = netsnmp_memdup(old_row->index_oid,
-                                         old_row->index_oid_len * sizeof(oid));
+        new_row->index_oid =
+            snmp_duplicate_objid(old_row->index_oid, old_row->index_oid_len);
     /* XXX - Doesn't copy table-specific row structure */
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_COPY_ROW */
 
     /*
      * netsnmp_table_data_delete_row()
@@ -356,12 +396,14 @@ netsnmp_table_data_copy_row( netsnmp_table_row  *old_row,
      *     all defined above
      */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_REMOVE_DELETE_ROW
 void *
 netsnmp_table_data_remove_delete_row(netsnmp_table_data *table,
                                      netsnmp_table_row *row)
 {
     return netsnmp_table_data_remove_and_delete_row(table, row);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_REMOVE_DELETE_ROW */
 
 
 /* ==================================
@@ -399,10 +441,20 @@ netsnmp_register_table_data(netsnmp_handler_registration *reginfo,
                             netsnmp_table_data *table,
                             netsnmp_table_registration_info *table_info)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_table_data_handler(table));
+    netsnmp_mib_handler *handler = netsnmp_get_table_data_handler(table);
+    if (!table || !handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create table data handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
+
     return netsnmp_register_table(reginfo, table_info);
 }
 
+
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_TABLE_DATA
 /** registers a handler as a read-only data table
  *  If table_info != NULL, it registers it as a normal table too. */
 int
@@ -410,9 +462,27 @@ netsnmp_register_read_only_table_data(netsnmp_handler_registration *reginfo,
                                       netsnmp_table_data *table,
                                       netsnmp_table_registration_info *table_info)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_read_only_handler());
+    netsnmp_mib_handler *handler = netsnmp_get_read_only_handler();
+    if (!handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create read only table data handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return MIB_REGISTRATION_FAILED;
+    }
+
     return netsnmp_register_table_data(reginfo, table, table_info);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_TABLE_DATA */
+
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_UNREGISTER
+int
+netsnmp_unregister_table_data(netsnmp_handler_registration *reginfo)
+{
+    /* free table; */
+    return netsnmp_unregister_table(reginfo);
+}
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_UNREGISTER */
 
 /*
  * The helper handler that takes care of passing a specific row of
@@ -445,7 +515,9 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
         switch (reqinfo->mode) {
         case MODE_GET:
         case MODE_GETNEXT:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         case MODE_SET_RESERVE1:
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
             netsnmp_request_add_list_data(request,
                                       netsnmp_create_data_list(
                                           TABLE_DATA_TABLE, table, NULL));
@@ -519,9 +591,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                         /*
                          * equal match, return the next row 
                          */
-                        if (row) {
-                            row = row->next;
-                        }
+                        row = row->next;
                         break;
                     } else if (result > 0) {
                         /*
@@ -598,6 +668,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
             }
             break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         case MODE_SET_RESERVE1:
             valid_request = 1;
             if (NULL !=
@@ -622,6 +693,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
         case MODE_SET_FREE:
         case MODE_SET_UNDO:
             valid_request = 1;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
         }
     }
@@ -664,6 +736,7 @@ netsnmp_extract_table_row(netsnmp_request_info *request)
                                                                TABLE_DATA_ROW);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_EXTRACT_TABLE_ROW_DATA
 /** extracts the data from the row being accessed passed from the
  * table_data helper */
 void           *
@@ -676,9 +749,11 @@ netsnmp_extract_table_row_data(netsnmp_request_info *request)
     else
         return NULL;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_EXTRACT_TABLE_ROW_DATA */
 
+#ifndef NETSNMP_FEATURE_REMOVE_INSERT_TABLE_ROW
 /** inserts a newly created table_data row into a request */
-NETSNMP_INLINE void
+void
 netsnmp_insert_table_row(netsnmp_request_info *request,
                          netsnmp_table_row *row)
 {
@@ -741,6 +816,7 @@ netsnmp_insert_table_row(netsnmp_request_info *request,
         }
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INSERT_TABLE_ROW */
 
 /* builds a result given a row, a varbind to set and the data */
 int
@@ -852,11 +928,13 @@ netsnmp_table_data_num_rows(netsnmp_table_data *table)
      * Generic API - mostly renamed wrappers
      * ===================================== */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_ROW_FIRST
 netsnmp_table_row *
 netsnmp_table_data_row_first(netsnmp_table_data *table)
 {
     return netsnmp_table_data_get_first_row(table);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_ROW_FIRST */
 
 netsnmp_table_row *
 netsnmp_table_data_row_get(  netsnmp_table_data *table,
@@ -921,11 +999,13 @@ netsnmp_table_data_row_next_byidx(netsnmp_table_data    *table,
     return netsnmp_table_data_row_next_byoid(table, instance, len);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_ROW_COUNT
 int
 netsnmp_table_data_row_count(netsnmp_table_data *table)
 {
     return netsnmp_table_data_num_rows(table);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_ROW_COUNT */
 
 
 /* ==================================
@@ -935,6 +1015,7 @@ netsnmp_table_data_row_count(netsnmp_table_data *table)
  *
  * ================================== */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_ROW_OPERATIONS
 void *
 netsnmp_table_data_entry_first(netsnmp_table_data *table)
 {
@@ -994,6 +1075,7 @@ netsnmp_table_data_entry_next_byoid(netsnmp_table_data *table,
         netsnmp_table_data_row_next_byoid(table, instance, len);
     return (row ? row->data : NULL );
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_ROW_OPERATIONS */
 
     /* =====================================
      * Generic API - mostly renamed wrappers
@@ -1004,6 +1086,10 @@ netsnmp_table_data_entry_next_byoid(netsnmp_table_data *table,
  * Table Data API: Index operations
  *
  * ================================== */
+
+#else /* NETSNMP_FEATURE_REMOVE_TABLE_DATA */
+netsnmp_feature_unused(table_data);
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA */
 
 /** @} 
  */

@@ -8,6 +8,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -22,6 +23,8 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
+netsnmp_feature_require(container_lifo)
+netsnmp_feature_require(ipaddress_entry_update)
 
 /** @ingroup interface 
  * @addtogroup data_access data_access: Routines to access data
@@ -134,6 +137,7 @@ ipAddressTable_container_init(netsnmp_container **container_ptr_ptr,
     *container_ptr_ptr =
         netsnmp_container_find("ipAddressTable:table_container");
     if (NULL != *container_ptr_ptr) {
+        (*container_ptr_ptr)->container_name = strdup("ipAddressTable");
         ipAddressTable_container_load(*container_ptr_ptr);
         CONTAINER_FOR_EACH(*container_ptr_ptr,
                            (netsnmp_container_obj_func *) _clear_times,
@@ -201,13 +205,13 @@ static void
 _check_entry_for_updates(ipAddressTable_rowreq_ctx * rowreq_ctx,
                          void **magic)
 {
-    netsnmp_container *ipaddress_container = magic[0];
-    netsnmp_container *to_delete = (netsnmp_container *) magic[1];
+    netsnmp_container *ipaddress_container = (netsnmp_container*)magic[0];
+    netsnmp_container *to_delete           = (netsnmp_container*)magic[1];
 
     /*
      * check for matching entry using secondary index.
      */
-    netsnmp_ipaddress_entry *ipaddress_entry =
+    netsnmp_ipaddress_entry *ipaddress_entry = (netsnmp_ipaddress_entry*)
         CONTAINER_FIND(ipaddress_container, rowreq_ctx->data);
     if (NULL == ipaddress_entry) {
         DEBUGMSGTL(("ipAddressTable:access", "removing missing entry\n"));
@@ -259,7 +263,7 @@ _add_new_entry(netsnmp_ipaddress_entry *ipaddress_entry,
         (MFD_SUCCESS ==
          ipAddressTable_indexes_set(rowreq_ctx,
                                     ipaddress_entry->ia_address_len,
-                                    (char *) ipaddress_entry->ia_address,
+                                    ipaddress_entry->ia_address,
                                     ipaddress_entry->ia_address_len))) {
         if (CONTAINER_INSERT(container, rowreq_ctx) < 0) {
             DEBUGMSGTL (("ipAddressTable:access","container insert failed for new entry\n"));
@@ -379,7 +383,7 @@ ipAddressTable_container_load(netsnmp_container *container)
             /*
              * get from delete list
              */
-            tmp_ctx = CONTAINER_FIRST(tmp_container);
+            tmp_ctx = (ipAddressTable_rowreq_ctx*)CONTAINER_FIRST(tmp_container);
 
             /*
              * release context, delete from table container
@@ -395,7 +399,7 @@ ipAddressTable_container_load(netsnmp_container *container)
     }
 
     DEBUGMSGT(("verbose:ipAddressTable:ipAddressTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%lu records\n", (unsigned long)CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }
@@ -672,9 +676,9 @@ ipAddressTable_validate_index(ipAddressTable_registration *
      * TODO:430:M: |-> Validate potential ipAddressTable index.
      *
      *
-     * xxx-rks: we only plan ipv4 support initially
      */
-    if ((4 != rowreq_ctx->tbl_idx.ipAddressAddr_len)) {
+    if ((4 != rowreq_ctx->tbl_idx.ipAddressAddr_len)
+            && (16 != rowreq_ctx->tbl_idx.ipAddressAddr_len)) {
         snmp_log(LOG_WARNING, "invalid index for a new row in the "
                  "ipAddressTable table.\n");
         /*
@@ -691,15 +695,9 @@ ipAddressTable_validate_index(ipAddressTable_registration *
             return MFD_CANNOT_CREATE_NOW;
         }
     } else {
-        rowreq_ctx->data->ia_address[0] =
-            rowreq_ctx->tbl_idx.ipAddressAddr[0];
-        rowreq_ctx->data->ia_address[1] =
-            rowreq_ctx->tbl_idx.ipAddressAddr[1];
-        rowreq_ctx->data->ia_address[2] =
-            rowreq_ctx->tbl_idx.ipAddressAddr[2];
-        rowreq_ctx->data->ia_address[3] =
-            rowreq_ctx->tbl_idx.ipAddressAddr[3];
-        rowreq_ctx->data->ia_address_len = 4;
+        memcpy(rowreq_ctx->data->ia_address, rowreq_ctx->tbl_idx.ipAddressAddr,
+                rowreq_ctx->tbl_idx.ipAddressAddr_len);
+        rowreq_ctx->data->ia_address_len = rowreq_ctx->tbl_idx.ipAddressAddr_len;
     }
 
     return rc;

@@ -32,7 +32,7 @@
 snmpstatus - retrieves a fixed set of management information from a network entity
 .SH SYNOPSIS
 .B snmpstatus
-[COMMON OPTIONS] [-Cf] AGENT
+[COMMON OPTIONS] [\-Cf] AGENT
 .SH DESCRIPTION
 .B snmpstatus
 is an SNMP application that retrieves several important statistics
@@ -68,7 +68,7 @@ The number of IP output packets (ipOutRequests.0)
 .PP
 For example:
 .PP
-snmpstatus -c public -v 1 netdev-kbox.cc.cmu.edu
+snmpstatus \-c public \-v 1 netdev\-kbox.cc.cmu.edu
 .PP
 will produce output similar to the following:
 .PP
@@ -90,7 +90,7 @@ pinpoint in what way the request was malformed.
 .B snmpstatus
 will attempt to reform its request to eliminate the malformed
 variable (unless the
-.B -Cf
+.B \-Cf
 option is given, see below), but this variable will then be missing
 from the displayed data.
 .PP
@@ -102,10 +102,10 @@ Please see
 for a list of possible values for COMMON OPTIONS
 as well as their descriptions.
 .TP
-.B -Cf
+.B \-Cf
 By default, snmpstatus will try to fix errors returned
 by the agent and retry a request. In this situation,
-the command will display the data that it can. If the -Cf option
+the command will display the data that it can. If the \-Cf option
 is specified, then snmpstatus will not try to fix
 errors, and the error will cause the command to terminate.
 .SH "SEE ALSO"

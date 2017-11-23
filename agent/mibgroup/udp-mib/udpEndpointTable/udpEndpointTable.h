@@ -132,6 +132,11 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
          */
         u_long          udpEndpointInstance;
 
+        /*
+         * udpEndpointProcess(8)/UNSIGNED32/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/h
+         */
+        u_long          udpEndpointProcess;
+
 
     } udpEndpointTable_mib_index;
 
@@ -200,8 +205,8 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
         * udpEndpointTable_row_find_by_mib_index(udpEndpointTable_mib_index
                                                  * mib_idx);
 
-    extern oid      udpEndpointTable_oid[];
-    extern int      udpEndpointTable_oid_size;
+    extern const oid      udpEndpointTable_oid[];
+    extern const int      udpEndpointTable_oid_size;
 
 
 #include "udpEndpointTable_interface.h"
@@ -257,7 +262,9 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
                                              u_long
                                              udpEndpointRemotePort_val,
                                              u_long
-                                             udpEndpointInstance_val);
+                                             udpEndpointInstance_val,
+                                             u_long
+                                             udpEndpointProcess_val);
     int
         udpEndpointTable_indexes_set(udpEndpointTable_rowreq_ctx *
                                      rowreq_ctx,
@@ -273,7 +280,8 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
                                      size_t
                                      udpEndpointRemoteAddress_val_ptr_len,
                                      u_long udpEndpointRemotePort_val,
-                                     u_long udpEndpointInstance_val);
+                                     u_long udpEndpointInstance_val,
+                                     u_long udpEndpointProcess_val);
 
 
 

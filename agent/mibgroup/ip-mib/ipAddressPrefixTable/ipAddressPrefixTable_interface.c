@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,16 @@
 #include "ipAddressPrefixTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
+
+netsnmp_feature_child_of(ipaddressprefixtable_row_find_by_mib_index, ipaddressprefixtable_all)
+netsnmp_feature_child_of(ipaddressprefixtable_container_get, ipaddressprefixtable_all)
+netsnmp_feature_child_of(ipAddressPrefixTable_registration_get, ipaddressprefixtable_all)
+netsnmp_feature_child_of(ipAddressPrefixTable_registration_set, ipaddressprefixtable_all)
+netsnmp_feature_child_of(ipAddressPrefixTable_container_size, ipaddressprefixtable_all)
 
 /**********************************************************************
  **********************************************************************
@@ -81,18 +92,23 @@ static void
                                                          * if_ctx);
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_CONTAINER_GET
 netsnmp_container *
 ipAddressPrefixTable_container_get(void)
 {
     return ipAddressPrefixTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_CONTAINER_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_REGISTRATION_GET
 ipAddressPrefixTable_registration *
 ipAddressPrefixTable_registration_get(void)
 {
     return ipAddressPrefixTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_REGISTRATION_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_REGISTRATION_SET
 ipAddressPrefixTable_registration *
 ipAddressPrefixTable_registration_set(ipAddressPrefixTable_registration *
                                       newreg)
@@ -102,12 +118,15 @@ ipAddressPrefixTable_registration_set(ipAddressPrefixTable_registration *
     ipAddressPrefixTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_REGISTRATION_SET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_CONTAINER_SIZE
 int
 ipAddressPrefixTable_container_size(void)
 {
     return CONTAINER_SIZE(ipAddressPrefixTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_CONTAINER_SIZE */
 
 /*
  * mfd multiplexer modes
@@ -155,7 +174,7 @@ void
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPADDRESSPREFIXTABLE_MIN_COL;
     tbl_info->max_column = IPADDRESSPREFIXTABLE_MAX_COL;
@@ -229,7 +248,8 @@ void
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
+    /* XXX - are these actually necessary? */
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
@@ -252,7 +272,7 @@ void
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -849,7 +869,7 @@ _mfd_ipAddressPrefixTable_get_values(netsnmp_mib_handler *handler,
 }                               /* _mfd_ipAddressPrefixTable_get_values */
 
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 /***********************************************************************
  *
  * SET processing
@@ -1014,6 +1034,7 @@ _ipAddressPrefixTable_container_shutdown(ipAddressPrefixTable_interface_ctx
 }                               /* _ipAddressPrefixTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_ROW_FIND_BY_MIB_INDEX
 ipAddressPrefixTable_rowreq_ctx *
 ipAddressPrefixTable_row_find_by_mib_index(ipAddressPrefixTable_mib_index *
                                            mib_idx)
@@ -1041,3 +1062,4 @@ ipAddressPrefixTable_row_find_by_mib_index(ipAddressPrefixTable_mib_index *
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSPREFIXTABLE_ROW_FIND_BY_MIB_INDEX */

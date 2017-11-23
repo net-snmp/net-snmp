@@ -55,9 +55,11 @@ config_require(header_complex)
                                                         char *);
      SNMPCallback    store_snmpNotifyFilterProfileTable;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
      WriteMethod     write_snmpNotifyFilterProfileName;
      WriteMethod     write_snmpNotifyFilterProfileStorType;
      WriteMethod     write_snmpNotifyFilterProfileRowStatus;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
      char           *get_FilterProfileName(const char *paramName,
                                            size_t paramName_len,

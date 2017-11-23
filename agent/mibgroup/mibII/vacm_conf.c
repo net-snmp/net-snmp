@@ -40,34 +40,12 @@
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/agent_callbacks.h>
 #include "vacm_conf.h"
-#include "util_funcs.h"
-
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-#if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-#include "sysORTable.h"
-#endif
 
 #include "snmpd.h"
 
@@ -88,14 +66,17 @@ init_vacm_config_tokens(void) {
                                   "name context model level prefix viewname viewval");
     snmpd_register_config_handler("view", vacm_parse_view, vacm_free_view,
                                   "name type subtree [mask]");
-    snmpd_register_config_handler("vacmView", vacm_parse_config_view, NULL,
-                                  NULL);
-    snmpd_register_config_handler("vacmGroup", vacm_parse_config_group,
-                                  NULL, NULL);
-    snmpd_register_config_handler("vacmAccess", vacm_parse_config_access,
-                                  NULL, NULL);
-    snmpd_register_config_handler("vacmAuthAccess", vacm_parse_config_auth_access,
-                                  NULL, NULL);
+    snmpd_register_const_config_handler("vacmView",
+                                        vacm_parse_config_view, NULL, NULL);
+    snmpd_register_const_config_handler("vacmGroup",
+                                        vacm_parse_config_group,
+                                        NULL, NULL);
+    snmpd_register_const_config_handler("vacmAccess",
+                                        vacm_parse_config_access,
+                                        NULL, NULL);
+    snmpd_register_const_config_handler("vacmAuthAccess",
+                                        vacm_parse_config_auth_access,
+                                        NULL, NULL);
 
     /* easy community auth handler */
     snmpd_register_config_handler("authcommunity",
@@ -119,7 +100,7 @@ init_vacm_config_tokens(void) {
      * Define standard views "_all_" and "_none_"
      */
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+                           SNMP_CALLBACK_PRE_READ_CONFIG,
                            vacm_standard_views, NULL);
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_READ_CONFIG,
@@ -174,24 +155,24 @@ init_vacm_conf(void)
 void
 vacm_parse_group(const char *token, char *param)
 {
-    char           *group, *model, *security;
+    char            group[VACMSTRINGLEN], model[VACMSTRINGLEN], security[VACMSTRINGLEN];
     int             imodel;
     struct vacm_groupEntry *gp = NULL;
     char           *st;
 
-    group = strtok_r(param, " \t\n", &st);
-    model = strtok_r(NULL, " \t\n", &st);
-    security = strtok_r(NULL, " \t\n", &st);
+    st = copy_nword(param, group, sizeof(group)-1);
+    st = copy_nword(st, model, sizeof(model)-1);
+    st = copy_nword(st, security, sizeof(security)-1);
 
-    if (group == NULL || *group == 0) {
+    if (group[0] == 0) {
         config_perror("missing GROUP parameter");
         return;
     }
-    if (model == NULL || *model == 0) {
+    if (model[0] == 0) {
         config_perror("missing MODEL parameter");
         return;
     }
-    if (security == NULL || *security == 0) {
+    if (security[0] == 0) {
         config_perror("missing SECURITY parameter");
         return;
     }
@@ -270,7 +251,7 @@ _vacm_parse_access_common(const char *token, char *param, char **st,
         return PARSE_FAIL;
     }
 
-    if (strcmp(*context, "\"\"") == 0)
+    if (strcmp(*context, "\"\"") == 0 || strcmp(*context, "\'\'") == 0)
         **context = 0;
     if (strcasecmp(model, "any") == 0)
         *imodel = SNMP_SEC_MODEL_ANY;
@@ -497,9 +478,9 @@ vacm_parse_authaccess(const char *token, char *confline)
         return;
     }
 
-    for (i = 0; i <= VACM_MAX_VIEWS; i++) {
+    for (i = 0; i < VACM_MAX_VIEWS; i++) {
         if (viewtypes & (1 << i)) {
-            strcpy(ap->views[i], view);
+            strlcpy(ap->views[i], view, sizeof(ap->views[i]));
         }
     }
     ap->contextMatch = prefix;
@@ -561,7 +542,7 @@ vacm_parse_setaccess(const char *token, char *param)
         return;
     }
 
-    strcpy(ap->views[viewnum], viewval);
+    strlcpy(ap->views[viewnum], viewval, sizeof(ap->views[viewnum]));
     ap->contextMatch = iprefix;
     ap->storageType = SNMP_STORAGE_PERMANENT;
     ap->status = SNMP_ROW_ACTIVE;
@@ -617,9 +598,12 @@ vacm_parse_access(const char *token, char *param)
         config_perror("failed to create access entry");
         return;
     }
-    strcpy(ap->views[VACM_VIEW_READ], readView);
-    strcpy(ap->views[VACM_VIEW_WRITE], writeView);
-    strcpy(ap->views[VACM_VIEW_NOTIFY], notify);
+    strlcpy(ap->views[VACM_VIEW_READ], readView,
+            sizeof(ap->views[VACM_VIEW_READ]));
+    strlcpy(ap->views[VACM_VIEW_WRITE], writeView,
+            sizeof(ap->views[VACM_VIEW_WRITE]));
+    strlcpy(ap->views[VACM_VIEW_NOTIFY], notify,
+            sizeof(ap->views[VACM_VIEW_NOTIFY]));
     ap->contextMatch = iprefix;
     ap->storageType = SNMP_STORAGE_PERMANENT;
     ap->status = SNMP_ROW_ACTIVE;
@@ -643,7 +627,7 @@ vacm_parse_view(const char *token, char *param)
     size_t          suboid_len = 0;
     size_t          mask_len = 0;
     u_char          viewMask[VACMSTRINGLEN];
-    int             i;
+    size_t          i;
     char            *st;
 
     name = strtok_r(param, " \t\n", &st);
@@ -680,7 +664,7 @@ vacm_parse_view(const char *token, char *param)
         return;
     }
     if (mask) {
-        int             val;
+        unsigned int val;
         i = 0;
         for (mask = strtok_r(mask, " .:", &st); mask; mask = strtok_r(NULL, " .:", &st)) {
             if (i >= sizeof(viewMask)) {
@@ -962,6 +946,7 @@ vacm_create_simple(const char *token, char *confline,
     commcount++;
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+#ifdef NETSNMP_TRANSPORT_UDP_DOMAIN
     if (parsetype == VACM_CREATE_SIMPLE_COMIPV4 ||
         parsetype == VACM_CREATE_SIMPLE_COM) {
         vacm_gen_com2sec(commcount, community, addressname,
@@ -969,13 +954,14 @@ vacm_create_simple(const char *token, char *confline,
                          secname, sizeof(secname),
                          view_ptr, sizeof(viewname), commversion, context);
     }
-    
+#endif
+
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     if (parsetype == VACM_CREATE_SIMPLE_COMUNIX ||
         parsetype == VACM_CREATE_SIMPLE_COM) {
-        if (context && *context)
-            snprintf(line, sizeof(line), "-Cn %s %s %s '%s'",
-                 context, secname, addressname, community);
+        if ( *context )
+           snprintf(line, sizeof(line), "-Cn %s %s %s '%s'",
+             context, secname, addressname, community);
         else
             snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
@@ -1014,10 +1000,10 @@ vacm_create_simple(const char *token, char *confline,
              */
             snprintf(grpname, sizeof(grpname), "grp%.28s", secname);
             for (tmp=grpname; *tmp; tmp++)
-                if (!isalnum(*tmp))
+                if (!isalnum((unsigned char)(*tmp)))
                     *tmp = '_';
             snprintf(line, sizeof(line),
-                     "%s %s %s", grpname, model, secname);
+                     "%s %s \"%s\"", grpname, model, secname);
             line[ sizeof(line)-1 ] = 0;
             DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
             vacm_parse_group("group", line);
@@ -1025,7 +1011,7 @@ vacm_create_simple(const char *token, char *confline,
     } else {
         snprintf(grpname, sizeof(grpname), "grp%.28s", secname);
         for (tmp=grpname; *tmp; tmp++)
-            if (!isalnum(*tmp))
+            if (!isalnum((unsigned char)(*tmp)))
                 *tmp = '_';
     }
 
@@ -1218,9 +1204,11 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     case SNMP_MSG_GETBULK:
         viewtype = VACM_VIEW_READ;
         break;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
         viewtype = VACM_VIEW_WRITE;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
     case SNMP_MSG_INFORM:
@@ -1262,12 +1250,20 @@ int
 vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
                 int check_subtree, int viewtype)
 {
+    return vacm_check_view_contents(pdu, name, namelen, check_subtree, viewtype,
+                                    VACM_CHECK_VIEW_CONTENTS_NO_FLAGS);
+}
+
+int
+vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
+                         int check_subtree, int viewtype, int flags)
+{
     struct vacm_accessEntry *ap;
     struct vacm_groupEntry *gp;
     struct vacm_viewEntry *vp;
     char            vacm_default_context[1] = "";
-    char           *contextName = vacm_default_context;
-    char           *sn = NULL;
+    const char     *contextName = vacm_default_context;
+    const char     *sn = NULL;
     char           *vn;
     const char     *pdu_community;
 
@@ -1314,7 +1310,9 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
          * community string to a security name for us.  
          */
 
-        if (pdu->tDomain == netsnmpUDPDomain
+        if (0) {
+#ifdef NETSNMP_TRANSPORT_UDP_DOMAIN
+        } else if (pdu->tDomain == netsnmpUDPDomain
 #ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
             || pdu->tDomain == netsnmp_snmpTCPDomain
 #endif
@@ -1333,6 +1331,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             SNMP_FREE(pdu->contextName);
             pdu->contextName = strdup(contextName);
             pdu->contextNameLen = strlen(contextName);
+#endif
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
         } else if (pdu->tDomain == netsnmp_UDPIPv6Domain
 #ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
@@ -1421,7 +1420,8 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
         contextNameIndex[0] = '\0';
 
     contextNameIndex[pdu->contextNameLen] = '\0';
-    if (!netsnmp_subtree_find_first(contextNameIndex)) {
+    if (!(flags & VACM_CHECK_VIEW_CONTENTS_DNE_CONTEXT_OK) &&
+        !netsnmp_subtree_find_first(contextNameIndex)) {
         /*
          * rfc 3415 section 3.2, step 1
          * no such context here; return no such context error 
@@ -1447,7 +1447,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
         return VACM_NOACCESS;
     }
 
-    if (name == 0) {            /* only check the setup of the vacm for the request */
+    if (name == NULL) { /* only check the setup of the vacm for the request */
         DEBUGMSG(("mibII/vacm_vars", ", Done checking setup\n"));
         return VACM_SUCCESS;
     }

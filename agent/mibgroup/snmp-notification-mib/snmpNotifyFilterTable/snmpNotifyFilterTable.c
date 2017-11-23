@@ -14,6 +14,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -26,9 +27,11 @@
 
 #include "snmpNotifyFilterTable_interface.h"
 
-oid             snmpNotifyFilterTable_oid[] =
+netsnmp_feature_require(check_storage_transition)
+
+const oid       snmpNotifyFilterTable_oid[] =
     { SNMPNOTIFYFILTERTABLE_OID };
-int             snmpNotifyFilterTable_oid_size =
+const int       snmpNotifyFilterTable_oid_size =
 OID_LENGTH(snmpNotifyFilterTable_oid);
 
 snmpNotifyFilterTable_registration snmpNotifyFilterTable_user_context;
@@ -267,9 +270,9 @@ snmpNotifyFilterTable_post_request(snmpNotifyFilterTable_registration *
          */
         if (MFD_SUCCESS == rc) {
             /*
-             * save changed rows, if you haven't already
+             * notify library to save changed rows
              */
-            snmp_store(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+            snmp_store_needed(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                              NETSNMP_DS_LIB_APPTYPE));
         }
 
@@ -544,7 +547,7 @@ snmpNotifyFilterMask_get(snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx,
         /*
          * allocate space for snmpNotifyFilterMask data
          */
-        (*snmpNotifyFilterMask_val_ptr_ptr) =
+        (*snmpNotifyFilterMask_val_ptr_ptr) = (char*)
             malloc(rowreq_ctx->data.snmpNotifyFilterMask_len *
                    sizeof(rowreq_ctx->data.snmpNotifyFilterMask[0]));
         if (NULL == (*snmpNotifyFilterMask_val_ptr_ptr)) {

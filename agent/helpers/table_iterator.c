@@ -10,6 +10,11 @@
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
+ *
+ * Portions of this file are copyrighted by:
+ * Copyright (c) 2016 VMware, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 /** @defgroup table_iterator table_iterator
@@ -84,19 +89,33 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/net-snmp-features.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/agent/table_iterator.h>
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/serialize.h>
-#include <net-snmp/agent/table_iterator.h>
 #include <net-snmp/agent/stash_cache.h>
+
+netsnmp_feature_child_of(table_iterator_all, mib_helpers)
+
+netsnmp_feature_child_of(table_iterator_insert_context, table_iterator_all)
+netsnmp_feature_child_of(table_iterator_create_table, table_iterator_all)
+netsnmp_feature_child_of(table_iterator_row_first, table_iterator_all)
+netsnmp_feature_child_of(table_iterator_row_count, table_iterator_all)
+
+#ifdef NETSNMP_FEATURE_REQUIRE_STASH_CACHE
+netsnmp_feature_require(data_list_get_list_node)
+netsnmp_feature_require(oid_stash_add_data)
+#endif /* NETSNMP_FEATURE_REQUIRE_STASH_CACHE */
 
 /* ==================================
  *
@@ -116,6 +135,7 @@
      *
      * Time will show whether this is a sensible approach or not.
      */
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_CREATE_TABLE
 netsnmp_iterator_info *
 netsnmp_iterator_create_table( Netsnmp_First_Data_Point *firstDP,
                                Netsnmp_Next_Data_Point  *nextDP,
@@ -136,7 +156,9 @@ netsnmp_iterator_create_table( Netsnmp_First_Data_Point *firstDP,
 
     return iinfo;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_CREATE_TABLE */
 
+/** Free the memory that was allocated for a table iterator. */
 void
 netsnmp_iterator_delete_table( netsnmp_iterator_info *iinfo )
 {
@@ -147,6 +169,7 @@ netsnmp_iterator_delete_table( netsnmp_iterator_info *iinfo )
         snmp_free_varbind( iinfo->indexes );
         iinfo->indexes = NULL;
     }
+    netsnmp_table_registration_info_free(iinfo->table_reginfo);
     SNMP_FREE( iinfo );
 }
 
@@ -164,7 +187,37 @@ netsnmp_iterator_delete_table( netsnmp_iterator_info *iinfo )
  *
  * ================================== */
 
-/** returns a netsnmp_mib_handler object for the table_iterator helper */
+static netsnmp_iterator_info *
+netsnmp_iterator_ref(netsnmp_iterator_info *iinfo)
+{
+    iinfo->refcnt++;
+    return iinfo;
+}
+
+static void
+netsnmp_iterator_deref(netsnmp_iterator_info *iinfo)
+{
+    if (--iinfo->refcnt == 0)
+        netsnmp_iterator_delete_table(iinfo);
+}
+
+void netsnmp_handler_owns_iterator_info(netsnmp_mib_handler *h)
+{
+    netsnmp_assert(h);
+    netsnmp_assert(h->myvoid);
+    ((netsnmp_iterator_info *)(h->myvoid))->refcnt++;
+    h->data_clone = (void *(*)(void *))netsnmp_iterator_ref;
+    h->data_free  = (void(*)(void *))netsnmp_iterator_deref;
+}
+
+/**
+ * Returns a netsnmp_mib_handler object for the table_iterator helper.
+ *
+ * The caller remains the owner of the iterator information object if
+ * the flag NETSNMP_HANDLER_OWNS_IINFO has not been set, and the created
+ * handler becomes the owner of the iterator information if the flag
+ * NETSNMP_HANDLER_OWNS_IINFO has been set.
+ */
 netsnmp_mib_handler *
 netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
 {
@@ -181,6 +234,8 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
         return NULL;
 
     me->myvoid = iinfo;
+    if (iinfo->flags & NETSNMP_HANDLER_OWNS_IINFO)
+        netsnmp_handler_owns_iterator_info(me);
     return me;
 }
 
@@ -194,7 +249,11 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
  *
  * @param reginfo is a pointer to a netsnmp_handler_registration struct
  *
- * @param iinfo is a pointer to a netsnmp_iterator_info struct
+ * @param iinfo A pointer to a netsnmp_iterator_info struct. If the flag
+ * NETSNMP_HANDLER_OWNS_IINFO is not set in iinfo->flags, the caller remains
+ * the owner of this structure. And if the flag NETSNMP_HANDLER_OWNS_IINFO is
+ * set in iinfo->flags, ownership of this data structure is passed to the
+ * handler.
  *
  * @return MIB_REGISTERED_OK is returned if the registration was a success.
  *	Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION.
@@ -205,12 +264,21 @@ int
 netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                                 netsnmp_iterator_info *iinfo)
 {
+    netsnmp_mib_handler *handler = netsnmp_get_table_iterator_handler(iinfo);
+
+    if (!reginfo || !iinfo || !handler ||
+        (netsnmp_inject_handler(reginfo, handler) != SNMPERR_SUCCESS)) {
+        snmp_log(LOG_ERR, "could not create iterator table handler\n");
+        netsnmp_handler_free(handler);
+        netsnmp_handler_registration_free(reginfo);
+        return SNMP_ERR_GENERR;
+    }
+
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     reginfo->modes |= HANDLER_CAN_STASH;
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_get_table_iterator_handler(iinfo));
-    if (!iinfo)
-        return SNMPERR_GENERR;
-    if (!iinfo->indexes && iinfo->table_reginfo &&
+#endif  /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
+
+   if (!iinfo->indexes && iinfo->table_reginfo &&
                            iinfo->table_reginfo->indexes )
         iinfo->indexes = snmp_clone_varbind( iinfo->table_reginfo->indexes );
 
@@ -236,6 +304,7 @@ netsnmp_extract_iterator_context(netsnmp_request_info *request)
     return netsnmp_request_get_list_data(request, TABLE_ITERATOR_NAME);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_INSERT_CONTEXT
 /** inserts table_iterator specific data for a newly
  *  created row into a request */
 NETSNMP_INLINE void
@@ -300,6 +369,7 @@ netsnmp_insert_iterator_context(netsnmp_request_info *request, void *data)
         }
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_INSERT_CONTEXT */
 
 #define TI_REQUEST_CACHE "ti_cache"
 
@@ -314,7 +384,7 @@ typedef struct ti_cache_info_s {
 
 static void
 netsnmp_free_ti_cache(void *it) {
-    ti_cache_info *beer = it;
+    ti_cache_info *beer = (ti_cache_info*)it;
     if (!it) return;
     if (beer->data_context && beer->free_context) {
             (beer->free_context)(beer->data_context, beer->iinfo);
@@ -340,11 +410,13 @@ netsnmp_iterator_remember(netsnmp_request_info *request,
         return NULL;
 
     /* extract existing cached state */
-    ti_info = netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
+    ti_info = (ti_cache_info*)netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
 
     /* no existing cached state.  make a new one. */
     if (!ti_info) {
         ti_info = SNMP_MALLOC_TYPEDEF(ti_cache_info);
+        if (ti_info == NULL)
+            return NULL;
         netsnmp_request_add_list_data(request,
                                       netsnmp_create_data_list
                                       (TI_REQUEST_CACHE,
@@ -400,15 +472,17 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     void           *callback_data_context = NULL;
     ti_cache_info  *ti_info = NULL;
     int             request_count = 0;
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     netsnmp_oid_stash_node **cinfo = NULL;
     netsnmp_variable_list *old_indexes = NULL, *vb;
     netsnmp_table_registration_info *table_reg_info = NULL;
     int i;
     netsnmp_data_list    *ldata = NULL;
-    
+#endif /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
+
     iinfo = (netsnmp_iterator_info *) handler->myvoid;
     if (!iinfo || !reginfo || !reqinfo)
-        return SNMPERR_GENERR;
+        return SNMP_ERR_GENERR;
 
     tbl_info = iinfo->table_reginfo;
 
@@ -431,12 +505,15 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
     /* preliminary analysis */
     switch (reqinfo->mode) {
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     case MODE_GET_STASH:
         cinfo = netsnmp_extract_stash_cache(reqinfo);
         table_reg_info = netsnmp_find_table_registration_info(reginfo);
 
         /* XXX: move this malloc to stash_cache handler? */
         reqtmp = SNMP_MALLOC_TYPEDEF(netsnmp_request_info);
+        if (reqtmp == NULL)
+            return SNMP_ERR_GENERR;
         reqtmp->subtree = requests->subtree;
         table_info = netsnmp_extract_table_info(requests);
         netsnmp_request_add_list_data(reqtmp,
@@ -447,12 +524,21 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         /* remember the indexes that were originally parsed. */
         old_indexes = table_info->indexes;
         break;
+#endif /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
 
     case MODE_GETNEXT:
         for(request = requests ; request; request = request->next) {
             if (request->processed)
                 continue;
             table_info = netsnmp_extract_table_info(request);
+            if (table_info == NULL) {
+                /*
+                 * Cleanup 
+                 */
+                if (free_this_index_search)
+                    snmp_free_varbind(free_this_index_search);
+                return SNMP_ERR_GENERR;
+            }
             if (table_info->colnum < tbl_info->min_column - 1) {
                 /* XXX: optimize better than this */
                 /* for now, just increase to colnum-1 */
@@ -463,10 +549,18 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 request->processed = TABLE_ITERATOR_NOTAGAIN;
             }
 
-            ti_info =
+            ti_info = (ti_cache_info*)
                 netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
             if (!ti_info) {
                 ti_info = SNMP_MALLOC_TYPEDEF(ti_cache_info);
+                if (ti_info == NULL) {
+                    /*
+                     * Cleanup 
+                     */
+                    if (free_this_index_search)
+                        snmp_free_varbind(free_this_index_search);
+                    return SNMP_ERR_GENERR;
+                }
                 netsnmp_request_add_list_data(request,
                                               netsnmp_create_data_list
                                               (TI_REQUEST_CACHE,
@@ -484,8 +578,11 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
      */
     if (reqinfo->mode == MODE_GET ||
         reqinfo->mode == MODE_GETNEXT ||
-        reqinfo->mode == MODE_GET_STASH ||
-        reqinfo->mode == MODE_SET_RESERVE1) {
+        reqinfo->mode == MODE_GET_STASH
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        || reqinfo->mode == MODE_SET_RESERVE1
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+        ) {
         /*
          * Count the number of request in the list,
          *   so that we'll know when we're finished
@@ -555,27 +652,53 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     if (request->processed)
                         continue;
 
-                    /* XXX: store in an array for faster retrival */
+                    /* XXX: store in an array for faster retrieval */
                     table_info = netsnmp_extract_table_info(request);
+                    if (table_info == NULL) {
+                        /*
+                         * Cleanup 
+                         */
+                        if (free_this_index_search)
+                            snmp_free_varbind(free_this_index_search);
+                        netsnmp_free_request_data_sets(reqtmp);
+                        SNMP_FREE(reqtmp);
+                        return SNMP_ERR_GENERR;
+                    }
                     coloid[reginfo->rootoid_len + 1] = table_info->colnum;
 
-                    ti_info =
+                    ti_info = (ti_cache_info*)
                         netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
 
                     switch(reqinfo->mode) {
                     case MODE_GET:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
                     case MODE_SET_RESERVE1:
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
                         /* looking for exact matches */
                         build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
                                           coloid, coloid_len, index_search);
                         if (snmp_oid_compare(myname, myname_len,
                                              request->requestvb->name,
                                              request->requestvb->name_length) == 0) {
-                            /* keep this */
-                            netsnmp_iterator_remember(request,
-                                                      myname, myname_len,
-                                                      callback_data_context,
-                                                      callback_loop_context, iinfo);
+                            /* 
+                             * keep this
+                             */
+                            if (netsnmp_iterator_remember(request,
+                                                          myname,
+                                                          myname_len,
+                                                          callback_data_context,
+                                                          callback_loop_context,
+                                                          iinfo) == NULL) {
+                                /*
+                                 * Cleanup 
+                                 */
+                                if (free_this_index_search)
+                                    snmp_free_varbind
+                                        (free_this_index_search);
+                                netsnmp_free_request_data_sets(reqtmp);
+                                SNMP_FREE(reqtmp);
+                                return SNMP_ERR_GENERR;
+                            }
                             request_count--;   /* One less to look for */
                         } else {
                             if (iinfo->free_data_context && callback_data_context) {
@@ -585,6 +708,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         }
                         break;
 
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
                     case MODE_GET_STASH:
                         /* collect data for each column for every row */
                         build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
@@ -612,6 +736,16 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                             table_info->colnum = i;
                             vb = reqtmp->requestvb =
                                 SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
+                            if (vb == NULL) {
+                                /*
+                                 * Cleanup 
+                                 */
+                                if (free_this_index_search)
+                                    snmp_free_varbind
+                                        (free_this_index_search);
+                                SNMP_FREE(reqtmp);
+                                return SNMP_ERR_GENERR;
+                            }
                             vb->type = ASN_NULL;
                             snmp_set_var_objid(vb, myname, myname_len);
                             netsnmp_call_next_handler(handler, reginfo,
@@ -627,17 +761,30 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         }
                         reqinfo->mode = MODE_GET_STASH;
                         break;
+#endif  /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
 
                     case MODE_GETNEXT:
                         /* looking for "next" matches */
                         if (netsnmp_check_getnext_reply
                             (request, coloid, coloid_len, index_search,
                              &ti_info->results)) {
-                            netsnmp_iterator_remember(request,
-                                                      ti_info->results->name,
-                                                      ti_info->results->name_length,
-                                                      callback_data_context,
-                                                      callback_loop_context, iinfo);
+                            if (netsnmp_iterator_remember(request,
+                                                          ti_info->
+                                                          results->name,
+                                                          ti_info->
+                                                          results->
+                                                          name_length,
+                                                          callback_data_context,
+                                                          callback_loop_context,
+                                                          iinfo) == NULL) {
+                                /*
+                                 * Cleanup 
+                                 */
+                                if (free_this_index_search)
+                                    snmp_free_varbind
+                                        (free_this_index_search);
+                                return SNMP_ERR_GENERR;
+                            }
                             /*
                              *  If we've been told that the rows are sorted,
                              *   then the first valid one we find
@@ -654,12 +801,14 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         }
                         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
                     case MODE_SET_RESERVE2:
                     case MODE_SET_FREE:
                     case MODE_SET_UNDO:
                     case MODE_SET_COMMIT:
                         /* needed processing already done in RESERVE1 */
                         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
                     default:
                         snmp_log(LOG_ERR,
@@ -697,7 +846,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 for(request = requests ; request; request = request->next) {
                     if (request->processed)
                         continue;
-                    ti_info =
+                    ti_info = (ti_cache_info*)
                         netsnmp_request_get_list_data(request,
                                                       TI_REQUEST_CACHE);
                     if (!ti_info->results) {
@@ -722,13 +871,16 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     }
 
     if (reqinfo->mode == MODE_GET ||
-        reqinfo->mode == MODE_GETNEXT ||
-        reqinfo->mode == MODE_SET_RESERVE1) {
+        reqinfo->mode == MODE_GETNEXT
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        || reqinfo->mode == MODE_SET_RESERVE1
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+        ) {
         /* per request last minute processing */
         for(request = requests ; request; request = request->next) {
             if (request->processed)
                 continue;
-            ti_info =
+            ti_info = (ti_cache_info*)
                 netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
             table_info =
                 netsnmp_extract_table_info(request);
@@ -759,7 +911,9 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 /* FALL THROUGH */
 
             case MODE_GET:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
             case MODE_SET_RESERVE1:
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
                 if (ti_info->data_context)
                     /* we don't add a free pointer, since it's in the
                        TI_REQUEST_CACHE instead */
@@ -782,10 +936,12 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         if (reqinfo->mode == MODE_GETNEXT) {
             reqinfo->mode = MODE_GET;
         }
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     } else if (reqinfo->mode == MODE_GET_STASH) {
         netsnmp_free_request_data_sets(reqtmp);
         SNMP_FREE(reqtmp);
         table_info->indexes = old_indexes;
+#endif  /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
     }
 
 
@@ -816,6 +972,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
  *
  * ================================== */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_ROW_FIRST
 void *
 netsnmp_iterator_row_first( netsnmp_iterator_info *iinfo ) {
     netsnmp_variable_list *vp1, *vp2;
@@ -834,6 +991,7 @@ netsnmp_iterator_row_first( netsnmp_iterator_info *iinfo ) {
     snmp_free_varbind( vp1 );
     return ctx2;  /* or *ctx2 ?? */
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_ROW_FIRST */
 
 void *
 netsnmp_iterator_row_get( netsnmp_iterator_info *iinfo, void *row )
@@ -945,7 +1103,7 @@ netsnmp_iterator_row_get_byoid(  netsnmp_iterator_info *iinfo,
 
     vp1 = snmp_clone_varbind(iinfo->indexes);
     vp2 = iinfo->get_first_data_point( &ctx1, &ctx2, vp1, iinfo );
-    DEBUGMSGTL(("table:iterator:get", "first DP: %x %x %x\n",
+    DEBUGMSGTL(("table:iterator:get", "first DP: %p %p %p\n",
                                        ctx1, ctx2, vp2));
 
     /* XXX - free context ? */
@@ -964,7 +1122,7 @@ netsnmp_iterator_row_get_byoid(  netsnmp_iterator_info *iinfo,
         }
         
         vp2 = iinfo->get_next_data_point( &ctx1, &ctx2, vp2, iinfo );
-        DEBUGMSGTL(("table:iterator:get", "next DP: %x %x %x\n",
+        DEBUGMSGTL(("table:iterator:get", "next DP: %p %p %p\n",
                                            ctx1, ctx2, vp2));
         /* XXX - free context ? */
     }
@@ -994,7 +1152,7 @@ netsnmp_iterator_row_next_byoid( netsnmp_iterator_info *iinfo,
 
     vp1 = snmp_clone_varbind(iinfo->indexes);
     vp2 = iinfo->get_first_data_point( &ctx1, &ctx2, vp1, iinfo );
-    DEBUGMSGTL(("table:iterator:get", "first DP: %x %x %x\n",
+    DEBUGMSGTL(("table:iterator:get", "first DP: %p %p %p\n",
                                        ctx1, ctx2, vp2));
 
     if ( !instance || !len ) {
@@ -1031,7 +1189,7 @@ netsnmp_iterator_row_next_byoid( netsnmp_iterator_info *iinfo,
         }
         
         vp2 = iinfo->get_next_data_point( &ctx1, &ctx2, vp2, iinfo );
-        DEBUGMSGTL(("table:iterator:get", "next DP: %x %x %x\n",
+        DEBUGMSGTL(("table:iterator:get", "next DP: %p %p %p\n",
                                            ctx1, ctx2, vp2));
         /* XXX - free context ? */
     }
@@ -1042,6 +1200,7 @@ netsnmp_iterator_row_next_byoid( netsnmp_iterator_info *iinfo,
     return ( vp2 ? ctx2 : NULL );
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_ROW_COUNT
 int
 netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
 {
@@ -1060,7 +1219,7 @@ netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
         return 0;
     }
     
-    DEBUGMSGTL(("table:iterator:count", "first DP: %x %x %x\n",
+    DEBUGMSGTL(("table:iterator:count", "first DP: %p %p %p\n",
                                          ctx1, ctx2, vp2));
 
     /* XXX - free context ? */
@@ -1068,7 +1227,7 @@ netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
     while (vp2) {
         i++;
         vp2 = iinfo->get_next_data_point( &ctx1, &ctx2, vp2, iinfo );
-        DEBUGMSGTL(("table:iterator:count", "next DP: %x %x %x (%d)\n",
+        DEBUGMSGTL(("table:iterator:count", "next DP: %p %p %p (%d)\n",
                                              ctx1, ctx2, vp2, i));
         /* XXX - free context ? */
     }
@@ -1077,6 +1236,7 @@ netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
     snmp_free_varbind( vp1 );
     return i;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_ROW_COUNT */
 
 
 /* ==================================

@@ -16,15 +16,15 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/sysORTable.h>
 
-#include "util_funcs.h"
+#include "util_funcs/MIB_STATS_CACHE_TIMEOUT.h"
 
 #ifdef linux
 #include "tcp.h"
 #endif
 #include "udp.h"
 #include "udpTable.h"
-#include "sysORTable.h"
 
 #ifdef NETSNMP_CAN_USE_SYSCTL
 #include <sys/sysctl.h>
@@ -37,7 +37,10 @@
 #define UDP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
-#if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5) || defined(aix6)) && !defined(FIRST_PROTOCOL)
+#if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)) && !defined(FIRST_PROTOCOL)
+#ifdef HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
 #include <libperfstat.h>
 #ifdef FIRST_PROTOCOL
 perfstat_protocol_t ps_proto;
@@ -138,7 +141,7 @@ init_udp(void)
 #undef UDP_NSTATS
 #endif
 
-#ifdef WIN32
+#ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define UDP_STAT_STRUCTURE MIB_UDPSTATS
 #endif
@@ -235,7 +238,7 @@ udp_handler(netsnmp_mib_handler          *handler,
 #define udpstat          udpstat.udpstat
 #endif
     case UDPINDATAGRAMS:
-#if STRUCT_UDPSTAT_HAS_UDPS_IPACKETS
+#if HAVE_STRUCT_UDPSTAT_UDPS_IPACKETS
         ret_value = udpstat.udps_ipackets;
         break;
 #else
@@ -244,7 +247,7 @@ udp_handler(netsnmp_mib_handler          *handler,
 #endif
 
     case UDPNOPORTS:
-#if STRUCT_UDPSTAT_HAS_UDPS_NOPORT
+#if HAVE_STRUCT_UDPSTAT_UDPS_NOPORT
         ret_value = udpstat.udps_noport;
         break;
 #else
@@ -253,7 +256,7 @@ udp_handler(netsnmp_mib_handler          *handler,
 #endif
 
     case UDPOUTDATAGRAMS:
-#if STRUCT_UDPSTAT_HAS_UDPS_OPACKETS
+#if HAVE_STRUCT_UDPSTAT_UDPS_OPACKETS
         ret_value = udpstat.udps_opackets;
         break;
 #else
@@ -263,10 +266,10 @@ udp_handler(netsnmp_mib_handler          *handler,
 
     case UDPINERRORS:
         ret_value = udpstat.udps_hdrops + udpstat.udps_badsum +
-#ifdef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
+#ifdef HAVE_STRUCT_UDPSTAT_UDPS_DISCARD
             udpstat.udps_discard +
 #endif
-#ifdef STRUCT_UDPSTAT_HAS_UDPS_FULLSOCK
+#ifdef HAVE_STRUCT_UDPSTAT_UDPS_FULLSOCK
             udpstat.udps_fullsock +
 #endif
             udpstat.udps_badlen;
@@ -326,6 +329,7 @@ udp_handler(netsnmp_mib_handler          *handler,
 
     case MODE_GETNEXT:
     case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
@@ -335,6 +339,7 @@ udp_handler(netsnmp_mib_handler          *handler,
         snmp_log(LOG_WARNING, "mibII/udp: Unsupported mode (%d)\n",
                                reqinfo->mode);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         snmp_log(LOG_WARNING, "mibII/udp: Unrecognised mode (%d)\n",
                                reqinfo->mode);

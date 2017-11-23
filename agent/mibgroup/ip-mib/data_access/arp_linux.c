@@ -1,7 +1,5 @@
 /*
  *  Interface MIB architecture support
- *
- * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -14,46 +12,76 @@
 #include <netinet/in.h>
 #include <net/if_arp.h>
 #include <arpa/inet.h>
+#include <linux/types.h>
+#include <asm/types.h>
 
-int _load_v4(netsnmp_container *container, int idx_offset);
+static int _load_v4(netsnmp_arp_access *access);
 
-/**
- */
-int
-netsnmp_access_arp_container_arch_load(netsnmp_container *container)
+netsnmp_arp_access *
+netsnmp_access_arp_create(u_int init_flags,
+                          NetsnmpAccessArpUpdate *update_hook,
+                          NetsnmpAccessArpGC *gc_hook,
+                          int *cache_timeout, int *cache_flags,
+                          char *cache_expired)
 {
-    int rc = 0, idx_offset = 0;
+    netsnmp_arp_access *access;
 
-    rc = _load_v4(container, idx_offset);
-    if(rc < 0) {
-        u_int flags = NETSNMP_ACCESS_ARP_FREE_KEEP_CONTAINER;
-        netsnmp_access_arp_container_free(container, flags);
-        return rc;
+    access = SNMP_MALLOC_TYPEDEF(netsnmp_arp_access);
+    if (NULL == access) {
+        snmp_log(LOG_ERR,"malloc error in netsnmp_access_arp_create\n");
+        return NULL;
     }
 
-#if defined (NETSNMP_ENABLE_IPV6) && 0 /* xx-rks: arp for v6? */
-    idx_offset = rc;
+    access->arch_magic = NULL;
+    access->magic = NULL;
+    access->update_hook = update_hook;
+    access->gc_hook = gc_hook;
+    access->synchronized = 0;
 
-    rc = _load_v6(container, idx_offset);
-    if(rc < 0) {
-        u_int flags = NETSNMP_ACCESS_ARP_FREE_KEEP_CONTAINER;
-        netsnmp_access_arp_container_free(container, flags);
-    }
-#endif
+    if (cache_timeout != NULL)
+        *cache_timeout = 5;
+    if (cache_flags != NULL)
+        *cache_flags |= NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD
+                        | NETSNMP_CACHE_AUTO_RELOAD;
+    access->cache_expired = cache_expired;
 
-    /*
-     * return no errors (0) if we found any interfaces
-     */
-    if(rc > 0)
-        rc = 0;
+    return access;
+}
+
+int netsnmp_access_arp_delete(netsnmp_arp_access *access)
+{
+    if (NULL == access)
+        return 0;
+
+    netsnmp_access_arp_unload(access);
+    free(access);
+
+    return 0;
+}
+
+int netsnmp_access_arp_load(netsnmp_arp_access *access)
+{
+    int rc = 0;
+
+    access->generation++;
+    rc =_load_v4(access);
+    access->gc_hook(access);
+    access->synchronized = (rc == 0);
 
     return rc;
 }
 
+int netsnmp_access_arp_unload(netsnmp_arp_access *access)
+{
+    access->synchronized = 0;
+
+    return 0;
+}
+
 /**
  */
-int
-_load_v4(netsnmp_container *container, int idx_offset)
+static int
+_load_v4(netsnmp_arp_access *access)
 {
     FILE           *in;
     char            line[128];
@@ -63,11 +91,11 @@ _load_v4(netsnmp_container *container, int idx_offset)
     char           *arp_token;
     int             i;
 
-    netsnmp_assert(NULL != container);
+    netsnmp_assert(NULL != access);
 
 #define PROCFILE "/proc/net/arp"
     if (!(in = fopen(PROCFILE, "r"))) {
-        snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
+        snmp_log_perror("arp_linux: could not open " PROCFILE);
         return -2;
     }
 
@@ -83,7 +111,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
     while (fgets(line, sizeof(line), in)) {
         
         int             za, zb, zc, zd;
-        int             tmp_flags;
+        unsigned int    tmp_flags;
         char            ifname[21];
 
         rc = sscanf(line,
@@ -110,6 +138,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
         /*
          * look up ifIndex
          */
+        entry->generation = access->generation;
         entry->if_index = netsnmp_access_interface_index_find(ifname);
         if(0 == entry->if_index) {
             snmp_log(LOG_ERR,"couldn't find ifIndex for '%s', skipping\n",
@@ -122,7 +151,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
          * now that we've passed all the possible 'continue', assign
          * index offset.
          */
-        entry->ns_arp_index = ++idx_offset;
+        /* entry->ns_arp_index = ++idx_offset; */
 
         /*
          * parse ip addr
@@ -177,17 +206,9 @@ _load_v4(netsnmp_container *container, int idx_offset)
         /*
          * add entry to container
          */
-        if (CONTAINER_INSERT(container, entry) < 0)
-        {
-            DEBUGMSGTL(("access:arp:container","error with arp_entry: insert into container failed.\n"));
-            netsnmp_access_arp_entry_free(entry);
-            continue;
-        }
+        access->update_hook(access, entry);
     }
 
     fclose(in);
-    if( rc < 0 )
-        return rc;
-
-    return idx_offset;
+    return 0;
 }

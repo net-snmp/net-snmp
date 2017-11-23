@@ -6,6 +6,7 @@
  * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable_constants.h"
@@ -21,6 +22,7 @@
 #include <net-snmp/data_access/interface.h>
 #include <net-snmp/data_access/ipaddress.h>
 #include "if-mib/data_access/interface.h"
+#include "interface_private.h"
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -28,6 +30,8 @@
 #include <net/if_dl.h>
 #include <net/if_types.h>
 #include <net/if_media.h>
+
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
 
 /*
  * account for minor differences between FreeBSD and OpenBSD.
@@ -49,7 +53,7 @@
 #   define ARCH_PROMISC_FLAG IFF_PROMISC
 #endif
 
-extern struct timeval starttime;
+#define starttime (*(const struct timeval*)netsnmp_get_agent_starttime())
 
 /* sa_len roundup macro. */
 #define ROUNDUP(a) \
@@ -366,7 +370,12 @@ netsnmp_sysctl_get_if_speed(char *name, u_int *speed,
 {
     int s;
     struct ifmediareq ifmr;
-    int *media_list, i;
+#if defined(OpenBSD) && OpenBSD >= 201605
+    uint64_t *media_list;
+#else
+    int *media_list;
+#endif
+    int i;
     u_int t_speed, t_speed_high; 
     u_int m_speed, m_speed_high;
 
@@ -397,7 +406,7 @@ netsnmp_sysctl_get_if_speed(char *name, u_int *speed,
     netsnmp_sysctl_ifmedia_to_speed(ifmr.ifm_current, speed, speed_high);
 
     if (*speed == 0 &&
-        (media_list = (int *) malloc(ifmr.ifm_count * sizeof(int))) != NULL ) {
+        (media_list = malloc(ifmr.ifm_count * sizeof(*media_list))) != NULL ) {
 
         ifmr.ifm_ulist = media_list;
 
@@ -409,7 +418,7 @@ netsnmp_sysctl_get_if_speed(char *name, u_int *speed,
                 netsnmp_sysctl_ifmedia_to_speed(media_list[i], &t_speed,
                                                 &t_speed_high);
                 if (t_speed_high > m_speed_high ||
-                    (t_speed_high == m_speed_high && t_speed > t_speed)) {
+                    (t_speed_high == m_speed_high && t_speed > m_speed)) {
                     m_speed_high = t_speed_high;
                     m_speed = t_speed;
                 }
@@ -477,7 +486,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         return -2;
     }
 
-    if_list = malloc(if_list_size);
+    if_list = (u_char*)malloc(if_list_size);
     if (if_list == NULL) {
         snmp_log(LOG_ERR, "could not allocate memory for interface info "
                  "(%u bytes)\n", (unsigned) if_list_size);
@@ -542,7 +551,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         /* get physical address */
         if (adl != NULL && adl->sdl_alen > 0) {
             entry->paddr_len = adl->sdl_alen;
-            entry->paddr = malloc(entry->paddr_len);
+            entry->paddr = (char*)malloc(entry->paddr_len);
             memcpy(entry->paddr, adl->sdl_data + adl->sdl_nlen, adl->sdl_alen);
             DEBUGMSGTL(("access:interface:container:sysctl",
                         "%s: paddr_len=%d, entry->paddr=%x:%x:%x:%x:%x:%x\n",
@@ -550,7 +559,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                         entry->paddr[0], entry->paddr[1], entry->paddr[2],
                         entry->paddr[3], entry->paddr[4], entry->paddr[5]));
         } else {
-            entry->paddr = malloc(6);
+            entry->paddr = (char*)malloc(6);
             entry->paddr_len = 6;
             memset(entry->paddr, 0, 6);
         }
@@ -689,6 +698,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     return 0;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS
 int
 netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
                               int ifAdminStatus_val)
@@ -703,3 +713,4 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
 
     return -4;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS */

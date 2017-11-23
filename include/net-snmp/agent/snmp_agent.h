@@ -32,6 +32,8 @@ extern          "C" {
 #define SNMP_MAX_PDU_SIZE 64000 /* local constraint on PDU size sent by agent
                                  * (see also SNMP_MAX_MSG_SIZE in snmp_api.h) */
 
+    extern int      netsnmp_running;
+
     /*
      * If non-zero, causes the addresses of peers to be logged when receptions
      * occur.  
@@ -44,6 +46,9 @@ extern          "C" {
      */
 
     extern int      lastAddrAge;
+
+    extern const oid version_sysoid[];
+    extern const int version_sysoid_len;
 
     /** @typedef struct netsnmp_request_info_s netsnmp_request_info
      * Typedefs the netsnmp_request_info_s struct into
@@ -118,9 +123,15 @@ extern          "C" {
 #define MODE_GETNEXT          SNMP_MSG_GETNEXT
 #define MODE_GETBULK          SNMP_MSG_GETBULK
 #define MODE_GET_STASH        SNMP_MSG_INTERNAL_GET_STASH
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #define MODE_IS_GET(x)        ((x >= 128) && (x != -1)  && (x != SNMP_MSG_SET))
+#else /* NETSNMP_NO_WRITE_SUPPORT */
+#define MODE_IS_GET(x)        ((x >= 128) && (x != -1))
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+
     /* #define MODE_IS_GET(x)        ((x == SNMP_MSG_GET) || (x == SNMP_MSG_GETNEXT) || (x == SNMP_MSG_GETBULK) || (x == SNMP_MSG_INTERNAL_GET_STASH)) */
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #define MODE_SET_BEGIN        SNMP_MSG_INTERNAL_SET_BEGIN
 #define MODE_SET_RESERVE1     SNMP_MSG_INTERNAL_SET_RESERVE1
 #define MODE_SET_RESERVE2     SNMP_MSG_INTERNAL_SET_RESERVE2
@@ -130,11 +141,13 @@ extern          "C" {
 #define MODE_SET_UNDO         SNMP_MSG_INTERNAL_SET_UNDO
 #define MODE_IS_SET(x)         ((x < 128) || (x == -1) || (x == SNMP_MSG_SET))
     /* #define MODE_IS_SET(x)         (!MODE_IS_GET(x)) */
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 #define MODE_BSTEP_PRE_REQUEST   SNMP_MSG_INTERNAL_PRE_REQUEST
 #define MODE_BSTEP_POST_REQUEST  SNMP_MSG_INTERNAL_POST_REQUEST
 
 #define MODE_BSTEP_OBJECT_LOOKUP       SNMP_MSG_INTERNAL_OBJECT_LOOKUP
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #define MODE_BSTEP_CHECK_VALUE         SNMP_MSG_INTERNAL_CHECK_VALUE
 #define MODE_BSTEP_ROW_CREATE          SNMP_MSG_INTERNAL_ROW_CREATE
 #define MODE_BSTEP_UNDO_SETUP          SNMP_MSG_INTERNAL_UNDO_SETUP
@@ -145,7 +158,7 @@ extern          "C" {
 #define MODE_BSTEP_UNDO_COMMIT         SNMP_MSG_INTERNAL_UNDO_COMMIT
 #define MODE_BSTEP_IRREVERSIBLE_COMMIT SNMP_MSG_INTERNAL_IRREVERSIBLE_COMMIT
 #define MODE_BSTEP_UNDO_CLEANUP        SNMP_MSG_INTERNAL_UNDO_CLEANUP
-
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /** @typedef struct netsnmp_agent_request_info_s netsnmp_agent_request_info
  * Typedefs the netsnmp_agent_request_info_s struct into
@@ -198,6 +211,11 @@ extern          "C" {
         netsnmp_cachemap *cache_store;
         int             vbcount;
     } netsnmp_agent_session;
+
+    extern netsnmp_session *main_session;
+
+    extern netsnmp_agent_session *netsnmp_processing_set;
+    extern netsnmp_agent_session *agent_delegated_list;
 
     /*
      * Address cache handling functions.  
@@ -262,7 +280,11 @@ extern          "C" {
 
     u_long          netsnmp_marker_uptime(marker_t pm);
     u_long          netsnmp_timeval_uptime(struct timeval *tv);
+    const_marker_t  netsnmp_get_agent_starttime(void);
+    uint64_t        netsnmp_get_agent_runtime(void);
+    void            netsnmp_set_agent_starttime(marker_t s);
     u_long          netsnmp_get_agent_uptime(void);
+    void            netsnmp_set_agent_uptime(u_long hsec);
     int             netsnmp_check_transaction_id(int transaction_id);
     int             netsnmp_agent_check_packet(netsnmp_session *,
                                                struct netsnmp_transport_s

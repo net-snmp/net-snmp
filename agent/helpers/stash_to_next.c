@@ -1,16 +1,21 @@
 #include <net-snmp/net-snmp-config.h>
 
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include <net-snmp/agent/stash_cache.h>
+netsnmp_feature_provide(stash_to_next)
+netsnmp_feature_child_of(stash_to_next, mib_helpers)
+
+#ifdef NETSNMP_FEATURE_REQUIRE_STASH_TO_NEXT
+netsnmp_feature_require(oid_stash)
+netsnmp_feature_require(oid_stash_add_data)
+#endif
+
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_TO_NEXT
 #include <net-snmp/agent/stash_to_next.h>
+
+#include <net-snmp/agent/stash_cache.h>
 
 /** @defgroup stash_to_next stash_to_next
  *  Convert GET_STASH requests into GETNEXT requests for the handler.
@@ -119,3 +124,6 @@ netsnmp_stash_to_next_helper(netsnmp_mib_handler *handler,
 }
 /**  @} */
 
+#else  /* ! NETSNMP_FEATURE_REMOVE_STASH_TO_NEXT */
+netsnmp_feature_unused(stash_to_next);
+#endif /* ! NETSNMP_FEATURE_REMOVE_STASH_TO_NEXT */

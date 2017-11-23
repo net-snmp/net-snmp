@@ -39,6 +39,7 @@ config_require(ip-mib/ipv6InterfaceTable/ipv6InterfaceTable_data_access)
      *********************************************************************
      * function declarations
      */
+    void            initialize_table_ipv6InterfaceTable(void);
     void            init_ipv6InterfaceTable(void);
     void            shutdown_ipv6InterfaceTable(void);
 
@@ -191,8 +192,8 @@ config_require(ip-mib/ipv6InterfaceTable/ipv6InterfaceTable_data_access)
         * ipv6InterfaceTable_row_find_by_mib_index
         (ipv6InterfaceTable_mib_index * mib_idx);
 
-    extern oid      ipv6InterfaceTable_oid[];
-    extern int      ipv6InterfaceTable_oid_size;
+    extern const oid      ipv6InterfaceTable_oid[];
+    extern const int      ipv6InterfaceTable_oid_size;
 
 
 #include "ipv6InterfaceTable_interface.h"

@@ -2,14 +2,26 @@
  *  Host Resources MIB - File System device group implementation - hr_filesys.c
  *
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/memory.h>
 #include "host_res.h"
 #include "hr_filesys.h"
 #include "hr_storage.h"
+#include "hr_disk.h"
 #include <net-snmp/utilities.h>
 
 #if HAVE_MNTENT_H
@@ -42,11 +54,19 @@
 #include <stdlib.h>
 #endif
 
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if HAVE_NBUTIL_H
+#include <nbutil.h>
+#endif
+
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
 #include <sys/mntctl.h>
 #include <sys/vmount.h>
 #include <sys/statfs.h>
 #endif
+
+netsnmp_feature_require(se_find_free_value_in_slist)
+netsnmp_feature_require(date_n_time)
+netsnmp_feature_require(ctime_to_timet)
 
 #if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5) || defined(darwin)
 #if HAVE_GETFSSTAT && defined(MFSNAMELEN)
@@ -109,6 +129,16 @@ static int		fscount;
 #define	HRFS_name	f_mntfromname
 #define HRFS_statfs	statvfs
 #define	HRFS_type	f_fstypename
+#elif defined(HAVE_GETFSSTAT) && !defined(HAVE_STATFS) && defined(HAVE_STATVFS)
+
+static struct statfs	*fsstats = NULL;
+struct statfs		*HRFS_entry;
+static int		fscount;
+#define HRFS_mount	f_mntonname
+#define HRFS_name	f_mntfromname
+#define HRFS_statfs	statvfs
+#define HRFS_type	f_fstypename
+
 #elif defined(HAVE_GETFSSTAT)
 static struct statfs *fsstats = 0;
 static int      fscount;
@@ -137,7 +167,7 @@ static int		fscount;
 #define HRFS_statfs	win_statfs
 #define	HRFS_type	f_type
 
-#elif defined(aix4) || defined(aix5) || defined(aix6)
+#elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
 
 struct vmount *aixmnt, *aixcurr;
 struct HRFS_entry {
@@ -171,12 +201,7 @@ struct mntent  *HRFS_entry;
 #define	FULL_DUMP	0
 #define	PART_DUMP	1
 
-extern void     Init_HR_FileSys(void);
-extern int      Get_Next_HR_FileSys(void);
-char           *cook_device(char *);
 static u_char  *when_dumped(char *filesys, int level, size_t * length);
-int             header_hrfilesys(struct variable *, oid *, size_t *, int,
-                                 size_t *, WriteMethod **);
 
         /*********************
 	 *
@@ -195,15 +220,24 @@ int             header_hrfilesys(struct variable *, oid *, size_t *, int,
 #define HRFSYS_PARTDUMP		9
 
 struct variable4 hrfsys_variables[] = {
-    {HRFSYS_INDEX, ASN_INTEGER, RONLY, var_hrfilesys, 2, {1, 1}},
-    {HRFSYS_MOUNT, ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1, 2}},
-    {HRFSYS_RMOUNT, ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1, 3}},
-    {HRFSYS_TYPE, ASN_OBJECT_ID, RONLY, var_hrfilesys, 2, {1, 4}},
-    {HRFSYS_ACCESS, ASN_INTEGER, RONLY, var_hrfilesys, 2, {1, 5}},
-    {HRFSYS_BOOT, ASN_INTEGER, RONLY, var_hrfilesys, 2, {1, 6}},
-    {HRFSYS_STOREIDX, ASN_INTEGER, RONLY, var_hrfilesys, 2, {1, 7}},
-    {HRFSYS_FULLDUMP, ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1, 8}},
-    {HRFSYS_PARTDUMP, ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1, 9}},
+    {HRFSYS_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrfilesys, 2, {1, 1}},
+    {HRFSYS_MOUNT, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrfilesys, 2, {1, 2}},
+    {HRFSYS_RMOUNT, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrfilesys, 2, {1, 3}},
+    {HRFSYS_TYPE, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_hrfilesys, 2, {1, 4}},
+    {HRFSYS_ACCESS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrfilesys, 2, {1, 5}},
+    {HRFSYS_BOOT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrfilesys, 2, {1, 6}},
+    {HRFSYS_STOREIDX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrfilesys, 2, {1, 7}},
+    {HRFSYS_FULLDUMP, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrfilesys, 2, {1, 8}},
+    {HRFSYS_PARTDUMP, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrfilesys, 2, {1, 9}},
 };
 oid             hrfsys_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 3, 8 };
 
@@ -212,7 +246,7 @@ init_hr_filesys(void)
 {
     REGISTER_MIB("host/hr_filesys", hrfsys_variables, variable4,
                  hrfsys_variables_oid);
-#if defined(aix4) || defined(aix5) || defined(aix6) 
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     /* something leaks, make it idiot-safe */
     aixmnt = NULL;
     aixcurr = NULL;
@@ -279,7 +313,7 @@ header_hrfilesys(struct variable *vp,
     memcpy((char *) name, (char *) newname,
            (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_filesys", "... get filesys stats "));
@@ -405,7 +439,7 @@ var_hrfilesys(struct variable *vp,
             break;
 #endif
         }
-#elif defined(aix4) || defined(aix5) || defined(aix6)
+#elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         switch (HRFS_entry->HRFS_type) {
         case MNT_AIX:
         case MNT_JFS:
@@ -526,10 +560,14 @@ var_hrfilesys(struct variable *vp,
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
 	long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
 #elif defined(HAVE_GETFSSTAT)
+#if HAVE_STRUCT_STATFS_F_FLAGS
         long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
+#else
+        long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
+#endif
 #elif defined(cygwin)
         long_return = 1;
-#elif defined(aix4) || defined(aix5) || defined(aix6)
+#elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (HRFS_entry->HRFS_flags & MNT_READONLY) == 0 ? 1 : 2;
 #else
 #if HAVE_HASMNTOPT
@@ -592,7 +630,7 @@ Init_HR_FileSys(void)
     getfsstat(fsstats, fscount * sizeof(*fsstats), MNT_NOWAIT);
 #endif
     HRFS_index = 0;
-#elif defined(aix4) || defined(aix5) || defined(aix6)
+#elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     int ret;
     uint size;
     ret = 0;
@@ -621,9 +659,7 @@ Init_HR_FileSys(void)
         fclose(fp);
     fp = fopen(ETC_MNTTAB, "r");
     if (!fp) {
-      char tmpbuf[STRINGMAX];
-      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open mnttab %s\n", ETC_MNTTAB );
-      config_perror(tmpbuf);
+      netsnmp_config_error("Can't open mnttab %s\n", ETC_MNTTAB);
     }
 #endif
 }
@@ -678,7 +714,7 @@ const char     *HRFS_ignores[] = {
     "proc",
     "fd",
 #endif
-    0
+    NULL
 };
 
 int
@@ -689,7 +725,7 @@ Get_Next_HR_FileSys(void)
         return -1;
     HRFS_entry = fsstats + HRFS_index;
     return ++HRFS_index;
-#elif defined(aix4) || defined(aix5) || defined(aix6)
+#elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     if(aixcurr == NULL) {
         if(aixmnt != NULL) free(aixmnt);
         aixmnt = NULL;
@@ -729,13 +765,9 @@ Get_Next_HR_FileSys(void)
         return -1;
 #endif                          /* solaris2 */
 
-    DEBUGMSGTL(("host/hr_filesys", "Get_Next_HRFS %s\n", HRFS_entry->HRFS_name));
-
     for (cpp = HRFS_ignores; *cpp != NULL; ++cpp)
-        if (!strcmp(HRFS_entry->HRFS_type, *cpp)) {
-            DEBUGMSGTL(("host/hr_filesys", "Get_Next_HRFS: skipping %s (%s)\n", HRFS_entry->HRFS_type, *cpp));
+        if (!strcmp(HRFS_entry->HRFS_type, *cpp))
             return Get_Next_HR_FileSys();
-        }
 
     /*
      * Try and ensure that index values are persistent
@@ -765,7 +797,7 @@ Check_HR_FileSys_NFS (void)
 #if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
     if ((HRFS_entry->HRFS_type == MOUNT_NFS) ||
         (HRFS_entry->HRFS_type == MOUNT_AFS))
-#elif defined(aix4) || defined(aix5) || defined(aix6)
+#elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     if(HRFS_entry->HRFS_type == MNT_NFS || HRFS_entry->HRFS_type == MNT_NFS3)
 #else /* HAVE_GETFSSTAT */
     if ( HRFS_entry->HRFS_type != NULL && (
@@ -809,7 +841,7 @@ End_HR_FileSys(void)
     if (fsstats)
         free((char *) fsstats);
     fsstats = NULL;
-#elif defined(aix4) || defined(aix5) || defined(aix6)
+#elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     if(aixmnt != NULL) {
         free(aixmnt);
         aixmnt = NULL;
@@ -866,13 +898,13 @@ when_dumped(char *filesys, int level, size_t * length)
                 continue;
 
             ++cp2;
-            while (isspace(*cp2))
+            while (isspace(*cp2 & 0xFF))
                 ++cp2;          /* Now find the dump level */
 
             if (level == FULL_DUMP) {
                 if (*(cp2++) != '0')
                     continue;   /* Not interested in partial dumps */
-                while (isspace(*cp2))
+                while (isspace(*cp2 & 0xFF))
                     ++cp2;
 
                 dumpdate = ctime_to_timet(cp2);
@@ -881,7 +913,7 @@ when_dumped(char *filesys, int level, size_t * length)
             } else {            /* Partial Dump */
                 if (*(cp2++) == '0')
                     continue;   /* Not interested in full dumps */
-                while (isspace(*cp2))
+                while (isspace(*cp2 & 0xFF))
                     ++cp2;
 
                 tmp = ctime_to_timet(cp2);
@@ -955,7 +987,7 @@ Get_FSSize(char *dev)
   		 * in case of 512 (f_blocks/2) is returned
   		 * otherwise (f_blocks*(f_bsize/1024)) is returned
   		 */
-#if defined(solaris2) && defined(STRUCT_STATVFS_HAS_F_FRSIZE)
+#if defined(solaris2) && defined(HAVE_STRUCT_STATVFS_F_FRSIZE)
                 return (statfs_buf.f_blocks*(statfs_buf.f_frsize/1024));
 #else
   		if (statfs_buf.f_bsize == 512)

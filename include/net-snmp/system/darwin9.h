@@ -3,6 +3,16 @@
  * substantially enough to not warrant pretending it is a BSD flavor.
  * This first section are the vestigal BSD remnants.
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 /*
  * BSD systems use a different method of looking up sockaddr_in values 
@@ -35,6 +45,9 @@
  * This section defines Mac OS X 10.5 (and later) specific additions.
  */
 #define darwin 9
+#ifndef darwin9
+#   define darwin9 darwin
+#endif
 
 /*
  * Mac OS X should only use the modern API and definitions.
@@ -48,6 +61,14 @@
  */
  
 #define NETSNMP_INCLUDE_IFTABLE_REWRITES
+
+/*
+ * use new host resources files as well
+ */
+#define NETSNMP_INCLUDE_HRSWINST_REWRITES
+#define NETSNMP_INCLUDE_HRSWRUN_REWRITES
+#undef NETSNMP_INCLUDE_HRSWRUN_WRITE_SUPPORT
+#define NETSNMP_CAN_GET_DISK_LABEL 1
 
 /*
  * Enabling this restricts the compiler to mostly public APIs.
@@ -69,25 +90,6 @@
 #  define WORDS_BIGENDIAN 1
 # endif
 #endif
-
-/*
- * Darwin's tools are capable of building multiple architectures in one pass.
- * As a result, platform definitions should be deferred until compile time.
- */
-#ifdef BYTE_ORDER
-# undef WORDS_BIGENDIAN
-# if BYTE_ORDER == BIG_ENDIAN
-#  define WORDS_BIGENDIAN 1
-# endif
-#endif
-
-/*
- * Although Darwin does have a kvm.h file, kvm_openfiles etc. always
- * return null because /dev/kmem was removed completely in OS X 10.5.
- */
-#undef HAVE_KVM_H
-#undef HAVE_KVM_GETPROCS
-#undef HAVE_KVM_OPENFILES
 
 /*
  * Although Darwin does have an fstab.h file, getfsfile etc. always return null.
@@ -120,6 +122,11 @@
 #undef STRUCT_in6pcb_HAS_inp_vflag
 
 /*
+ * utility macro used in several darwin specific files
+ */
+#define SNMP_CFRelease(x) do { if (x) { CFRelease(x); x = NULL; } } while(0)
+
+/*
  * Mac OS X runs on both PPC and Intel hardware,
  *   which handle udpTable index values differently
  */
@@ -127,3 +134,4 @@
 #ifdef TARGET_RT_LITTLE_ENDIAN
 #define UDP_ADDRESSES_IN_HOST_ORDER 1
 #endif
+

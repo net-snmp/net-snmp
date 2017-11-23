@@ -326,7 +326,7 @@ $vars = new SNMP::VarList ( ['sysUpTime'], ['ifNumber'], # NON-repeaters
 			    ['ifSpeed'], ['ifDescr']);	 # Repeated variables.
 
 if ($^O =~ /win32/i) {
-  warn "Win32 detected - skipping async calls\n";
+  warn "Win32/Win64 detected - skipping async calls\n";
 }
 else {
   @list = $s1->bulkwalk(2, 16, $vars, [ \&async_cb1, $vars ] );

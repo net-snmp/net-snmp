@@ -25,7 +25,7 @@
 
 #if ! defined TRUE
 #  define TRUE 1
-#elif TRUE != 1
+#elsif TRUE != 1
 error "TRUE != 1"
 #endif
 /**************************************************************************

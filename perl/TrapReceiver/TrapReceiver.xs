@@ -99,7 +99,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         char *tstr = transport->f_fmtaddr(transport, pdu->transport_data,
                                           pdu->transport_data_length);
         STOREPDUs("receivedfrom", tstr);
-        free(tstr);
+        netsnmp_free(tstr);
     }
 
 
@@ -113,7 +113,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     for(vb = pdu->variables; vb; vb = vb->next_variable) {
 
         /* get the oid */
-        o = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        o = malloc(sizeof(netsnmp_oid));
         o->name = o->namebuf;
         o->len = vb->name_length;
         memcpy(o->name, vb->name, vb->name_length * sizeof(oid));
@@ -178,7 +178,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
 
         av_push(vba,tmparray[i]);
         av_push(vba,newSVpvn((char *) outbuf, oo_len));
-        free(outbuf);
+        netsnmp_free(outbuf);
         av_push(vba,newSViv(vb->type));
         av_push(varbinds, (SV *) newRV_noinc((SV *) vba));
     }
@@ -214,7 +214,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
 	SV *rv = POPs;
 
 	if (SvTYPE(rv) != SVt_IV) {
-	  snmp_log(LOG_WARNING, " perl callback function %p returned a scalar of type %d instead of an integer, assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", pcallback, SvTYPE(rv), NETSNMPTRAPD_HANDLER_OK);
+	  snmp_log(LOG_WARNING, " perl callback function %p returned a scalar of type %lu instead of an integer, assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", pcallback, (unsigned long)SvTYPE(rv), NETSNMPTRAPD_HANDLER_OK);
 	}
 	else {
 	  int rvi = (IV)SvIVx(rv);
@@ -300,7 +300,7 @@ trapd_register(regoid, perlcallback)
             }
         
             if (handler) {
-                cb_data = SNMP_MALLOC_TYPEDEF(trapd_cb_data);
+                cb_data = malloc(sizeof(trapd_cb_data));
                 cb_data->perl_cb = newSVsv(perlcallback);
                 handler->handler_data = cb_data;
                 handler->authtypes = (1 << VACM_VIEW_EXECUTE);

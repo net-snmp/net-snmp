@@ -5,15 +5,37 @@
 #ifndef _MIBGROUP_ICMP_H
 #define _MIBGROUP_ICMP_H
 
-config_arch_require(solaris2,        kernel_sunos5)
+config_arch_require(solaris2,  kernel_sunos5)
 config_arch_require(linux,     mibII/kernel_linux)
+config_arch_require(freebsd4,  mibII/kernel_sysctl)
+config_arch_require(freebsd5,  mibII/kernel_sysctl)
+config_arch_require(freebsd6,  mibII/kernel_sysctl)
+config_arch_require(freebsd7,  mibII/kernel_sysctl)
+config_arch_require(freebsd8,  mibII/kernel_sysctl)
+config_arch_require(freebsd9,  mibII/kernel_sysctl)
+config_arch_require(freebsd10, mibII/kernel_sysctl)
+config_arch_require(freebsd11, mibII/kernel_sysctl)
+config_arch_require(freebsd12, mibII/kernel_sysctl)
 config_arch_require(netbsd,    mibII/kernel_netbsd)
 config_arch_require(netbsdelf, mibII/kernel_netbsd)
+config_arch_require(openbsd4,  mibII/kernel_sysctl)
+config_arch_require(openbsd5,  mibII/kernel_sysctl)
+config_arch_require(openbsd6,  mibII/kernel_sysctl)
+config_arch_require(dragonfly2, mibII/kernel_sysctl)
+config_arch_require(dragonfly3, mibII/kernel_sysctl)
+config_arch_require(dragonfly4, mibII/kernel_sysctl)
+config_arch_require(dragonfly5, mibII/kernel_sysctl)
+config_arch_require(darwin10,  mibII/kernel_sysctl)
+config_arch_require(darwin11,  mibII/kernel_sysctl)
+config_arch_require(darwin12,  mibII/kernel_sysctl)
+config_arch_require(darwin13,  mibII/kernel_sysctl)
 
 #include <net-snmp/agent/cache_handler.h>
 
 extern void     init_icmp(void);
 extern Netsnmp_Node_Handler icmp_handler;
+extern Netsnmp_Node_Handler icmp_stats_table_handler;
+extern Netsnmp_Node_Handler icmp_msg_stats_table_handler;
 extern NetsnmpCacheLoad icmp_load;
 extern NetsnmpCacheFree icmp_free;
 
@@ -43,5 +65,18 @@ extern NetsnmpCacheFree icmp_free;
 #define ICMPOUTTIMESTAMPREPS 24
 #define ICMPOUTADDRMASKS     25
 #define ICMPOUTADDRMASKREPS  26
+
+#define ICMPSTATSTABLE       29
+#define ICMP_STAT_IPVER       1
+#define ICMP_STAT_INMSG       2 
+#define ICMP_STAT_INERR       3 
+#define ICMP_STAT_OUTMSG      4 
+#define ICMP_STAT_OUTERR      5 
+
+#define ICMPMSGSTATSTABLE     30
+#define ICMP_MSG_STAT_IPVER    1
+#define ICMP_MSG_STAT_TYPE     2
+#define ICMP_MSG_STAT_IN_PKTS  3
+#define ICMP_MSG_STAT_OUT_PKTS 4
 
 #endif                          /* _MIBGROUP_ICMP_H */

@@ -137,3 +137,17 @@ extern          "C" {
 }
 #endif
 #endif                          /* IPADDRESSPREFIXTABLE_OIDS_H */
+/****************************************************************
+* Additional constants and definitions for common implementation
+*/
+#define INFINITY_LIFE_TIME      0xFFFFFFFFU
+#define NIP6(addr) \
+        ntohs((addr).s6_addr16[0]), \
+        ntohs((addr).s6_addr16[1]), \
+        ntohs((addr).s6_addr16[2]), \
+        ntohs((addr).s6_addr16[3]), \
+        ntohs((addr).s6_addr16[4]), \
+        ntohs((addr).s6_addr16[5]), \
+        ntohs((addr).s6_addr16[6]), \
+        ntohs((addr).s6_addr16[7])
+

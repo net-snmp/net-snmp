@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib netsnmptrapd.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"../bin/release/snmptrapd.exe" /libpath:"../lib/release"
+# ADD LINK32 advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"../bin/release/snmptrapd.exe" /libpath:"../lib/release"
 
 !ELSEIF  "$(CFG)" == "snmptrapd - Win32 Debug"
 
@@ -74,7 +74,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib netsnmptrapd.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"../bin/debug/snmptrapd.exe" /pdbtype:sept /libpath:"../lib/debug"
+# ADD LINK32 advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"../bin/debug/snmptrapd.exe" /pdbtype:sept /libpath:"../lib/debug"
 
 !ENDIF 
 
@@ -85,6 +85,10 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=..\..\apps\snmptrapd.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\apps\snmptrapd_handlers.c
 # End Source File
 # Begin Source File
 

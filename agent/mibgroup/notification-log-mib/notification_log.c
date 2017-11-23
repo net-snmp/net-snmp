@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
@@ -16,8 +17,14 @@
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/table_dataset.h>
-#include "mibgroup/mibII/sysORTable.h"
+#include "net-snmp/agent/sysORTable.h"
 #include "notification_log.h"
+
+netsnmp_feature_require(register_ulong_instance_context)
+netsnmp_feature_require(register_read_only_counter32_instance_context)
+netsnmp_feature_require(delete_table_data_set)
+netsnmp_feature_require(table_dataset)
+netsnmp_feature_require(date_n_time)
 
 /*
  * column number definitions for table nlmLogTable
@@ -143,11 +150,11 @@ check_log_size(unsigned int clientreg, void *clientarg)
      */
     count = netsnmp_table_set_num_rows(nlmLogTable);
     DEBUGMSGTL(("notification_log",
-                "logged notifications %d; max %d\n",
+                "logged notifications %lu; max %lu\n",
                     count, max_logged));
     if (count > max_logged) {
         count = count - max_logged;
-        DEBUGMSGTL(("notification_log", "removing %d extra notifications\n",
+        DEBUGMSGTL(("notification_log", "removing %lu extra notifications\n",
                     count));
         netsnmp_notif_log_remove_oldest(count);
     }
@@ -165,13 +172,13 @@ check_log_size(unsigned int clientreg, void *clientarg)
         data = (netsnmp_table_data_set_storage *) row->data;
         data = netsnmp_table_data_set_find_column(data, COLUMN_NLMLOGTIME);
 
-        if (uptime < ((long)(*(data->data.integer) + max_age * 100 * 60)))
+        if (uptime < ((u_long)(*(data->data.integer) + max_age * 100 * 60)))
             break;
         ++count;
     }
 
     if (count) {
-        DEBUGMSGTL(("notification_log", "removing %d expired notifications\n",
+        DEBUGMSGTL(("notification_log", "removing %lu expired notifications\n",
                     count));
         netsnmp_notif_log_remove_oldest(count);
     }
@@ -467,8 +474,10 @@ notification_log_config_handler(netsnmp_mib_handler *handler,
      * configuration variables get set to a value and thus
      * notifications must be possibly deleted from our archives.
      */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (reqinfo->mode == MODE_SET_COMMIT)
         check_log_size(0, NULL);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     return SNMP_ERR_NOERROR;
 }
 
@@ -562,7 +571,7 @@ shutdown_notification_log(void)
     netsnmp_delete_table_data_set(nlmLogTable);
     nlmLogTable = NULL;
 
-    unregister_sysORTable(nlm_module_oid, OID_LENGTH(nlm_module_oid));
+    UNREGISTER_SYSOR_ENTRY(nlm_module_oid);
 }
 
 void

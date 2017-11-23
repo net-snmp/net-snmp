@@ -21,14 +21,21 @@
 #ifndef _MIBGROUP_EVENT_H
 #define _MIBGROUP_EVENT_H
 
+    /*
+     * function prototypes 
+     */
+     void            init_event(void);
+
 config_require(util_funcs)
 
 config_require(Rmon/agutil)
 config_require(Rmon/rows)
 
-    /*
-     * function prototypes 
-     */
-     void            init_event(void);
+     int
+     event_api_send_alarm(u_char is_rising, u_long alarm_index,
+                          u_long event_index, oid * alarmed_var,
+                          size_t alarmed_var_length, u_long sample_type,
+                          u_long value, u_long the_threshold,
+                          char *alarm_descr);
 
 #endif                          /* _MIBGROUP_EVENT_H */

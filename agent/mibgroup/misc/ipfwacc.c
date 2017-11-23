@@ -22,7 +22,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "util_funcs.h"
+#include "util_funcs/header_simple_table.h"
 #include "ipfwacc.h"
 
 /*
@@ -185,40 +185,58 @@ getnumeric(int skip)
  */
 
 struct variable2 ipfwacc_variables[] = {
-    {IPFWACCINDEX, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCINDEX}},
-    {IPFWACCSRCADDR, ASN_IPADDRESS, RONLY, var_ipfwacc, 1,
-     {IPFWACCSRCADDR}},
-    {IPFWACCSRCNM, ASN_IPADDRESS, RONLY, var_ipfwacc, 1, {IPFWACCSRCNM}},
-    {IPFWACCDSTADDR, ASN_IPADDRESS, RONLY, var_ipfwacc, 1,
-     {IPFWACCDSTADDR}},
-    {IPFWACCDSTNM, ASN_IPADDRESS, RONLY, var_ipfwacc, 1, {IPFWACCDSTNM}},
-    {IPFWACCVIANAME, ASN_OCTET_STR, RONLY, var_ipfwacc, 1,
-     {IPFWACCVIANAME}},
-    {IPFWACCVIAADDR, ASN_IPADDRESS, RONLY, var_ipfwacc, 1,
-     {IPFWACCVIAADDR}},
-    {IPFWACCPROTO, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPROTO}},
-    {IPFWACCBIDIR, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCBIDIR}},
-    {IPFWACCDIR, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCDIR}},
-    {IPFWACCBYTES, ASN_COUNTER, RONLY, var_ipfwacc, 1, {IPFWACCBYTES}},
-    {IPFWACCPACKETS, ASN_COUNTER, RONLY, var_ipfwacc, 1, {IPFWACCPACKETS}},
-    {IPFWACCNSRCPRTS, ASN_INTEGER, RONLY, var_ipfwacc, 1,
-     {IPFWACCNSRCPRTS}},
-    {IPFWACCNDSTPRTS, ASN_INTEGER, RONLY, var_ipfwacc, 1,
-     {IPFWACCNDSTPRTS}},
-    {IPFWACCSRCISRNG, ASN_INTEGER, RONLY, var_ipfwacc, 1,
-     {IPFWACCSRCISRNG}},
-    {IPFWACCDSTISRNG, ASN_INTEGER, RONLY, var_ipfwacc, 1,
-     {IPFWACCDSTISRNG}},
-    {IPFWACCPORT1, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT1}},
-    {IPFWACCPORT2, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT2}},
-    {IPFWACCPORT3, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT3}},
-    {IPFWACCPORT4, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT4}},
-    {IPFWACCPORT5, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT5}},
-    {IPFWACCPORT6, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT6}},
-    {IPFWACCPORT7, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT7}},
-    {IPFWACCPORT8, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT8}},
-    {IPFWACCPORT9, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT9}},
-    {IPFWACCPORT10, ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT10}}
+    {IPFWACCINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCINDEX}},
+    {IPFWACCSRCADDR, ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCSRCADDR}},
+    {IPFWACCSRCNM, ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCSRCNM}},
+    {IPFWACCDSTADDR, ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCDSTADDR}},
+    {IPFWACCDSTNM, ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCDSTNM}},
+    {IPFWACCVIANAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCVIANAME}},
+    {IPFWACCVIAADDR, ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCVIAADDR}},
+    {IPFWACCPROTO, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPROTO}},
+    {IPFWACCBIDIR, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCBIDIR}},
+    {IPFWACCDIR, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCDIR}},
+    {IPFWACCBYTES, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCBYTES}},
+    {IPFWACCPACKETS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPACKETS}},
+    {IPFWACCNSRCPRTS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCNSRCPRTS}},
+    {IPFWACCNDSTPRTS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCNDSTPRTS}},
+    {IPFWACCSRCISRNG, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCSRCISRNG}},
+    {IPFWACCDSTISRNG, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCDSTISRNG}},
+    {IPFWACCPORT1, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT1}},
+    {IPFWACCPORT2, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT2}},
+    {IPFWACCPORT3, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT3}},
+    {IPFWACCPORT4, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT4}},
+    {IPFWACCPORT5, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT5}},
+    {IPFWACCPORT6, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT6}},
+    {IPFWACCPORT7, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT7}},
+    {IPFWACCPORT8, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT8}},
+    {IPFWACCPORT9, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT9}},
+    {IPFWACCPORT10, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ipfwacc, 1, {IPFWACCPORT10}}
 };
 
 oid             ipfwacc_variables_oid[] =
@@ -238,7 +256,7 @@ var_ipfwacc(struct variable *vp,
             size_t * length,
             int exact, size_t * var_len, WriteMethod ** write_method)
 {
-    *write_method = 0;          /* assume it isnt writable for the time being */
+    *write_method = NULL;       /* assume it isnt writable for the time being */
     *var_len = sizeof(ret_val); /* assume an integer and change later if not */
 
     if (header_simple_table

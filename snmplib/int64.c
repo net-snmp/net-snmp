@@ -16,15 +16,14 @@
 #else
 #include <strings.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/int64.h>
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/snmp_logging.h>
+
+#include <net-snmp/net-snmp-features.h>
 
 /**
  * Divide an unsigned 64-bit integer by 10.
@@ -202,6 +201,8 @@ u64UpdateCounter(struct counter64 *pu64out, const struct counter64 *pu64one,
     u64Incr(pu64out, &tmp);
 }
 
+netsnmp_feature_child_of(u64copy, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_U64COPY
 /**
  * Copy a 64-bit number.
  *
@@ -213,6 +214,7 @@ u64Copy(struct counter64 *pu64one, const struct counter64 *pu64two)
 {
     *pu64one = *pu64two;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_U64COPY */
 
 /**
  * Set an unsigned 64-bit number to zero.
@@ -268,7 +270,7 @@ netsnmp_c64_check_for_32bit_wrap(struct counter64 *old_val,
     if( (NULL == old_val) || (NULL == new_val) )
         return -1;
 
-    DEBUGMSGTL(("9:c64:check_wrap", "check wrap 0x%0x.0x%0x 0x%0x.0x%0x\n",
+    DEBUGMSGTL(("9:c64:check_wrap", "check wrap 0x%0lx.0x%0lx 0x%0lx.0x%0lx\n",
                 old_val->high, old_val->low, new_val->high, new_val->low));
     
     /*
@@ -349,7 +351,7 @@ netsnmp_c64_check32_and_update(struct counter64 *prev_val,
     if ((NULL == need_wrap_check) || (0 != *need_wrap_check)) {
         rc = netsnmp_c64_check_for_32bit_wrap(old_prev_val,new_val, 1);
         if (rc < 0) {
-            snmp_log(LOG_ERR,"c64 32 bit check failed\n");
+            DEBUGMSGTL(("c64","32 bit check failed\n"));
             return -1;
         }
     }
@@ -379,7 +381,7 @@ netsnmp_c64_check32_and_update(struct counter64 *prev_val,
          */
         if ((prev_val->low != new_val->low) ||
             (prev_val->high != new_val->high)) {
-            snmp_log(LOG_ERR, "looks like a 64bit wrap, but prev!=new\n");
+            DEBUGMSGTL(("c64", "looks like a 64bit wrap, but prev!=new\n"));
             return -2;
         }
         else if (NULL != need_wrap_check)
@@ -446,7 +448,7 @@ read64(struct counter64 *i64, const char *str)
         str++;
     }
 
-    while (*str && isdigit(*str)) {
+    while (*str && isdigit((unsigned char)(*str))) {
         ok = 1;
         u = *str - '0';
         multBy10(*i64, &i64p);

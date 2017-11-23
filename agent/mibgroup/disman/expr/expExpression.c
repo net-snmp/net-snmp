@@ -21,7 +21,7 @@ init_expr_table_data(void)
     DEBUGMSGTL(("disman:expr:init", "init expression container\n"));
     if (!expr_table_data) {
          expr_table_data = netsnmp_tdata_create_table("expExpressionTable", 0);
-         DEBUGMSGTL(("disman:expr:init", "create expression container (%x)\n",
+         DEBUGMSGTL(("disman:expr:init", "create expression container (%p)\n",
                                           expr_table_data));
     }
 }
@@ -57,7 +57,7 @@ _mteExpr_dump(void)
         DEBUGMSG(("disman:expr:dump", "(%s, %s)",
                                          row->indexes->val.string,
                                          row->indexes->next_variable->val.string));
-        DEBUGMSG(("disman:expr:dump", ": %x, %x\n", row, entry));
+        DEBUGMSG(("disman:expr:dump", ": %p, %p\n", row, entry));
         i++;
     }
     DEBUGMSGTL(("disman:expr:dump", "ExpressionTable %d entries\n", i));
@@ -304,7 +304,7 @@ expExpression_getData( unsigned int reg, void *clientarg )
 void
 expExpression_enable( struct expExpression *entry )
 {
-    DEBUGMSG(("disman:expr:run", "Enabling %s\n", entry->expName));
+    DEBUGMSGTL(("disman:expr:run", "Enabling %s\n", entry->expName));
     if (!entry)
         return;
 

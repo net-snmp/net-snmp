@@ -45,7 +45,7 @@ void init_watched_string(void)
      * variables needed for registration
      */
     netsnmp_handler_registration *reginfo;
-    netsnmp_watcher_info *watcher_info;
+    static netsnmp_watcher_info watcher_info;
     int watcher_flags;
 
     /*
@@ -57,8 +57,6 @@ void init_watched_string(void)
                 my_string));
 
     /*
-     * create the registration info for our string. If you want to
-     *
      * If we wanted a callback when the value was retrieved or set
      * (even though the details of doing this are handled for you),
      * you could change the NULL pointer below to a valid handler
@@ -72,32 +70,28 @@ void init_watched_string(void)
                                                   HANDLER_CAN_RWRITE);
                                                   
     /*
-     * the two options for a string watcher are:
+     * the three options for a string watcher are:
      *   fixed size string (length never changes)
      *   variable size (length can be 0 - MAX, for some MAX)
+     *   c string (length can be 0 - MAX-1 for some max, \0 is not a valid
+     *     character in the string, the length is provided by strlen)
      *
      * we'll use a variable length string.
      */
     watcher_flags = WATCHER_MAX_SIZE;
 
     /*
-     * create the watcher info for our string, and set the max size.
+     * create the watcher info for our string.
      */
-    watcher_info =
-        netsnmp_create_watcher_info(my_string, strlen(my_string),
-                                    ASN_OCTET_STR, watcher_flags);
-    watcher_info->max_size = sizeof(my_string);
+    netsnmp_init_watcher_info6(&watcher_info, my_string, strlen(my_string),
+			       ASN_OCTET_STR, watcher_flags,
+			       sizeof(my_string), NULL);
 
     /*
      * the line below registers our "my_string" variable above as
      * accessible and makes it writable. 
-     * 
-     * If we wanted a callback when the value was retrieved or set
-     * (even though the details of doing this are handled for you),
-     * you could change the NULL pointer below to a valid handler
-     * function. 
      */
-    netsnmp_register_watched_instance(reginfo, watcher_info);
+    netsnmp_register_watched_instance(reginfo, &watcher_info);
 
     DEBUGMSGTL(("example_string_instance",
                 "Done initalizing example string instance\n"));

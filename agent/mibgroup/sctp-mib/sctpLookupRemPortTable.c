@@ -10,6 +10,7 @@
 #include "sctpLookupRemPortTable.h"
 
 static netsnmp_container *sctpLookupRemPortTable_container;
+static netsnmp_table_registration_info *table_info;
 
 /** Initializes the sctpLookupRemPortTable module */
 void
@@ -24,8 +25,7 @@ init_sctpLookupRemPortTable(void)
 void
 shutdown_sctpLookupRemPortTable(void)
 {
-    sctpLookupRemPortTable_container_clear
-        (sctpLookupRemPortTable_container);
+    shutdown_table_sctpLookupRemPortTable();
 }
 
 /** Initialize the sctpLookupRemPortTable table by defining its contents and how it's structured */
@@ -39,7 +39,6 @@ initialize_table_sctpLookupRemPortTable(void)
     netsnmp_handler_registration *reg = NULL;
     netsnmp_mib_handler *handler = NULL;
     netsnmp_container *container = NULL;
-    netsnmp_table_registration_info *table_info = NULL;
 
     reg =
         netsnmp_create_handler_registration("sctpLookupRemPortTable",
@@ -98,6 +97,7 @@ initialize_table_sctpLookupRemPortTable(void)
     if (SNMPERR_SUCCESS != netsnmp_register_table(reg, table_info)) {
         snmp_log(LOG_ERR,
                  "error registering table handler for sctpLookupRemPortTable\n");
+        reg = NULL; /* it was freed inside netsnmp_register_table */
         goto bail;
     }
 
@@ -111,12 +111,25 @@ initialize_table_sctpLookupRemPortTable(void)
     if (handler)
         netsnmp_handler_free(handler);
 
+    if (table_info)
+        netsnmp_table_registration_info_free(table_info);
 
     if (container)
         CONTAINER_FREE(container);
 
     if (reg)
         netsnmp_handler_registration_free(reg);
+}
+
+void
+shutdown_table_sctpLookupRemPortTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
+    sctpLookupRemPortTable_container_clear
+        (sctpLookupRemPortTable_container);
 }
 
 /** handles requests for the sctpLookupRemPortTable table */
@@ -240,8 +253,7 @@ sctpLookupRemPortTable_entry_copy(sctpLookupRemPortTable_entry * from,
 void
 sctpLookupRemPortTable_entry_free(sctpLookupRemPortTable_entry * entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

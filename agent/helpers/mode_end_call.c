@@ -9,12 +9,17 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/mode_end_call.h>
 
+netsnmp_feature_provide(mode_end_call)
+netsnmp_feature_child_of(mode_end_call, mib_helpers)
+
+#ifndef NETSNMP_FEATURE_REMOVE_MODE_END_CALL
 /** @defgroup mode_end_call mode_end_call
  *  At the end of a series of requests, call another handler hook.
  *  Handlers that want to loop through a series of requests and then
@@ -101,7 +106,7 @@ netsnmp_mode_end_call_helper(netsnmp_mib_handler *handler,
                                     requests);
 
     /* then call the callback handlers */
-    for(ptr = handler->myvoid; ptr; ptr = ptr->next) {
+    for (ptr = (netsnmp_mode_handler_list*)handler->myvoid; ptr; ptr = ptr->next) {
         if (ptr->mode == NETSNMP_MODE_END_ALL_MODES ||
             reqinfo->mode == ptr->mode) {
             ret2 = netsnmp_call_handler(ptr->callback_handler, reginfo,
@@ -113,5 +118,10 @@ netsnmp_mode_end_call_helper(netsnmp_mib_handler *handler,
     
     return ret2;
 }
+#else
+netsnmp_feature_unused(mode_end_call);
+#endif /* NETSNMP_FEATURE_REMOVE_MODE_END_CALL */
+
+
 /**  @} */
 

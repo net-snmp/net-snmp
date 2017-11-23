@@ -88,12 +88,14 @@ INSTALLATION
   Net-SNMP, see 'Overview' document in the Configuration section of the Net-SNMP help file.
 
   For information on running snmpd.exe and snmptrapd.exe as a Windows service, see 
-  'How to Register the Net-SNMP Agent and Trap Daemon as Windows services' in README.win32.
+  'How to Register the Net-SNMP Agent and Trap Daemon as Windows services' in README.win32
+  which can be found in the Net-SNMP Help file in the Start menu.
 
 
 CO-EXISTENCE WITH MICROSOFT SNMP SERVICES
 
-Please see the section 'Co-existence with Microsoft SNMP services' in README.win32
+Please see the section 'Co-existence with Microsoft SNMP services' in README.win32 which 
+can be found in the Net-SNMP Help file in the Start menu.
 
 
 INSTALLATION - PERL MODULE
@@ -154,6 +156,7 @@ BUILD INFORMATION
   Build date:		
   Built by:		
   Installer Package by: 
+  NSIS Compiler:	Version 2.3
   
   OS:			Windows 2000 SP4
   Compiler:		MSVC++ 6.0 SP5
@@ -162,6 +165,7 @@ BUILD INFORMATION
   REGEX:		gnu_regex.exe (0.12) - http://people.delphiforums.com/gjc/gnu_regex.html
 
   Source: 		net-snmp-x.x.x.tar.gz
+  Patches		
   Destination:  	c:\usr
   Project:		win32sdk.dsw / libdll.dsw
   Library:		netsnmp for applications, netsnmp.dll for Perl modules

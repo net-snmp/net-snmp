@@ -3,6 +3,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -19,11 +20,7 @@
 #endif
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -36,9 +33,6 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -48,7 +42,7 @@
 #include "agentx/client.h"
 #include "agentx/subagent.h"
 
-extern struct timeval starttime;
+netsnmp_feature_require(set_agent_uptime)
 
         /*
          * AgentX handling utility routines
@@ -63,7 +57,6 @@ agentx_synch_input(int op,
                    int reqid, netsnmp_pdu *pdu, void *magic)
 {
     struct synch_state *state = (struct synch_state *) magic;
-    struct timeval  now, diff;
 
     if (!state || reqid != state->reqid) {
         return handle_agentx_packet(op, session, reqid, pdu, magic);
@@ -80,17 +73,7 @@ agentx_synch_input(int op,
             /*
              * Synchronise sysUpTime with the master agent
              */
-            gettimeofday(&now, NULL);
-            now.tv_sec--;
-            now.tv_usec += 1000000L;
-            diff.tv_sec = pdu->time / 100;
-            diff.tv_usec = (pdu->time - (diff.tv_sec * 100)) * 10000;
-            starttime.tv_sec = now.tv_sec - diff.tv_sec;
-            starttime.tv_usec = now.tv_usec - diff.tv_usec;
-            if (starttime.tv_usec > 1000000L) {
-                starttime.tv_usec -= 1000000L;
-                starttime.tv_sec++;
-            }
+            netsnmp_set_agent_uptime(pdu->time);
         }
     } else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
         state->pdu = NULL;
@@ -121,8 +104,6 @@ int
 agentx_open_session(netsnmp_session * ss)
 {
     netsnmp_pdu    *pdu, *response;
-    extern oid      version_sysoid[];
-    extern int      version_sysoid_len;
     u_long 	    timeout;
 
     DEBUGMSGTL(("agentx/subagent", "opening session \n"));
@@ -212,7 +193,7 @@ agentx_register(netsnmp_session * ss, oid start[], size_t startlen,
     pdu->range_subid = range_subid;
     if (contextName) {
         pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
-        pdu->community = strdup(contextName);
+        pdu->community = (u_char *) strdup(contextName);
         pdu->community_len = strlen(contextName);
     }
 
@@ -269,7 +250,7 @@ agentx_unregister(netsnmp_session * ss, oid start[], size_t startlen,
     pdu->range_subid = range_subid;
     if (contextName) {
         pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
-        pdu->community = strdup(contextName);
+        pdu->community = (u_char *) strdup(contextName);
         pdu->community_len = strlen(contextName);
     }
 

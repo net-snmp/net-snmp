@@ -43,7 +43,26 @@ PERFORMANCE OF THIS SOFTWARE.
  * distributed with the Net-SNMP package.
  */
 
+    extern int callback_master_num;
+
     struct variable;
+
+    /**
+     * Duplicates a variable.
+     *
+     * @return Pointer to the duplicate variable upon success; NULL upon
+     *   failure.
+     *
+     * @see struct variable
+     * @see struct variable1
+     * @see struct variable2
+     * @see struct variable3
+     * @see struct variable4
+     * @see struct variable7
+     * @see struct variable8
+     * @see struct variable13
+     */
+    struct variable *netsnmp_duplicate_variable(const struct variable *var);
 
     /*
      * Function pointer called by the master agent for writes. 

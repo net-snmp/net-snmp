@@ -19,7 +19,6 @@ CLEAN :
 	-@erase "$(INTDIR)\snmptrapd_handlers.obj"
 	-@erase "$(INTDIR)\snmptrapd_log.obj"
 	-@erase "$(INTDIR)\snmptrapd_auth.obj"
-	-@erase "$(INTDIR)\notification_log.obj"
 	-@erase "$(INTDIR)\winservice.obj"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
@@ -32,7 +31,7 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MD /W3 /GX /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\libnetsnmptrapd.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
+CPP_PROJ=/nologo /MD /W3 /EHsc /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "NDEBUG" /D "_CONSOLE" /D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_WARNINGS" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -76,7 +75,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmptrapd_handlers.obj" \
 	"$(INTDIR)\snmptrapd_log.obj" \
 	"$(INTDIR)\snmptrapd_auth.obj" \
-	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\winservice.obj"
 
 "..\lib\$(OUTDIR)\netsnmptrapd.lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
@@ -94,7 +92,6 @@ CLEAN :
 	-@erase "$(INTDIR)\snmptrapd_handlers.obj"
 	-@erase "$(INTDIR)\snmptrapd_log.obj"
 	-@erase "$(INTDIR)\snmptrapd_auth.obj"
-	-@erase "$(INTDIR)\notification_log.obj"
 	-@erase "$(INTDIR)\winservice.obj"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\vc??.pdb"
@@ -108,7 +105,7 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\libnetsnmptrapd.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
+CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "_DEBUG" /D "_CONSOLE" /D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_WARNINGS" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -152,7 +149,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmptrapd_handlers.obj" \
 	"$(INTDIR)\snmptrapd_log.obj" \
 	"$(INTDIR)\snmptrapd_auth.obj" \
-	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\winservice.obj"
 
 "..\lib\$(OUTDIR)\netsnmptrapd.lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
@@ -196,11 +192,6 @@ SOURCE=..\..\apps\snmptrapd_auth.c
 "$(INTDIR)\snmptrapd_auth.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-SOURCE=..\..\agent\mibgroup\notification-log-mib\notification_log.c
-
-"$(INTDIR)\notification_log.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 SOURCE=..\..\snmplib\winservice.c
 

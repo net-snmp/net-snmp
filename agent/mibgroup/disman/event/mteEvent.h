@@ -46,7 +46,7 @@ struct mteEvent {
      * Column values for the main mteEventTable
      */
     char            mteEventComment[MTE_STR2_LEN+1];
-    char            mteEventActions;
+    u_char          mteEventActions;
 
     /*
      * Column values for Notification events (mteEventNotificationTable)

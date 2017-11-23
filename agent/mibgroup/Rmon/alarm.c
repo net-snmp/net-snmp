@@ -27,11 +27,7 @@
 #include <unistd.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -43,8 +39,8 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "util_funcs.h"
 #include "alarm.h"
+#include "event.h"
     /*
      * Implementation headers 
      */
@@ -133,19 +129,6 @@
          0;
 #endif
 
-/*
- * find & enjoy it in event.c 
- */
-     extern int
-     event_api_send_alarm(u_char is_rising,
-                          u_long alarm_index,
-                          u_long event_index,
-                          oid * alarmed_var,
-                          size_t alarmed_var_length,
-                          u_long sample_type,
-                          u_long value,
-                          u_long the_threshold, char *alarm_descr);
-
 static int
 fetch_var_val(oid * name, size_t namelen, u_long * new_value)
 {
@@ -190,7 +173,7 @@ fetch_var_val(oid * name, size_t namelen, u_long * new_value)
                     && snmp_oid_compare(name, namelen, tree_ptr->end_a,
                                         tree_ptr->end_len) > 0) {
                     memcpy(name, tree_ptr->end_a, tree_ptr->end_len);
-                    access = 0;
+                    access = NULL;
                     ag_trace("access := 0");
                 }
 
@@ -684,23 +667,30 @@ var_alarmEntry(struct variable * vp, oid * name, size_t * length,
 oid             oidalarmVariablesOid[] = { 1, 3, 6, 1, 2, 1, 16, 3 };
 
 struct variable7 oidalarmVariables[] = {
-    {IDalarmIndex, ASN_INTEGER, RONLY, var_alarmEntry, 3, {1, 1, 1}},
-    {IDalarmInterval, ASN_INTEGER, RWRITE, var_alarmEntry, 3, {1, 1, 2}},
-    {IDalarmVariable, ASN_OBJECT_ID, RWRITE, var_alarmEntry, 3, {1, 1, 3}},
-    {IDalarmSampleType, ASN_INTEGER, RWRITE, var_alarmEntry, 3, {1, 1, 4}},
-    {IDalarmValue, ASN_INTEGER, RONLY, var_alarmEntry, 3, {1, 1, 5}},
-    {IDalarmStartupAlarm, ASN_INTEGER, RWRITE, var_alarmEntry, 3,
-     {1, 1, 6}},
-    {IDalarmRisingThreshold, ASN_INTEGER, RWRITE, var_alarmEntry, 3,
-     {1, 1, 7}},
-    {IDalarmFallingThreshold, ASN_INTEGER, RWRITE, var_alarmEntry, 3,
-     {1, 1, 8}},
-    {IDalarmRisingEventIndex, ASN_INTEGER, RWRITE, var_alarmEntry, 3,
-     {1, 1, 9}},
-    {IDalarmFallingEventIndex, ASN_INTEGER, RWRITE, var_alarmEntry, 3,
-     {1, 1, 10}},
-    {IDalarmOwner, ASN_OCTET_STR, RWRITE, var_alarmEntry, 3, {1, 1, 11}},
-    {IDalarmStatus, ASN_INTEGER, RWRITE, var_alarmEntry, 3, {1, 1, 12}}
+    {IDalarmIndex, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_alarmEntry, 3, {1, 1, 1}},
+    {IDalarmInterval, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 2}},
+    {IDalarmVariable, ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 3}},
+    {IDalarmSampleType, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 4}},
+    {IDalarmValue, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_alarmEntry, 3, {1, 1, 5}},
+    {IDalarmStartupAlarm, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 6}},
+    {IDalarmRisingThreshold, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 7}},
+    {IDalarmFallingThreshold, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 8}},
+    {IDalarmRisingEventIndex, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 9}},
+    {IDalarmFallingEventIndex, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 10}},
+    {IDalarmOwner, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 11}},
+    {IDalarmStatus, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_alarmEntry, 3, {1, 1, 12}}
 };
 
 void

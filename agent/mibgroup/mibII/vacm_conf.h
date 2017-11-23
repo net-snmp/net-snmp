@@ -7,7 +7,6 @@
 
 #include <net-snmp/library/vacm.h>
 
-config_require(util_funcs)
 config_belongs_in(agent_module)
 
 #define VACM_CREATE_SIMPLE_V3       1
@@ -43,5 +42,10 @@ config_belongs_in(agent_module)
 
      int             vacm_in_view(netsnmp_pdu *, oid *, size_t, int);
      int             vacm_check_view(netsnmp_pdu *, oid *, size_t, int, int);
+     int             vacm_check_view_contents(netsnmp_pdu *, oid *, size_t,
+                                              int, int, int);
+
+#define VACM_CHECK_VIEW_CONTENTS_NO_FLAGS        0
+#define VACM_CHECK_VIEW_CONTENTS_DNE_CONTEXT_OK  1
 
 #endif                          /* _MIBGROUP_VACM_CONF_H */

@@ -15,11 +15,12 @@
 /* Define if compiling with the notification module files.  */
 #define USING_NOTIFICATION_MODULE 1
  
+/* Define if compiling with the disman/event module files.  */
+#define USING_DISMAN_EVENT_MODULE 1
+ 
 /* Define if compiling with the notification-log-mib module files. */
 #ifdef HAVE_WIN32_PLATFORM_SDK
 #define USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE 1
-#else
-/* #undef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE */
 #endif
 
 /* Define if compiling with the target module files.  */
@@ -245,33 +246,57 @@
 #endif /* USING_RMON_MODULE */
 
 
-#ifdef USING_DISMAN_EVENT_MIB_MODULE 
+#ifdef USING_DISMAN_EVENT_MODULE 
  
-/* Define if compiling with the disman/mteTriggerTable module files.  */
-#define USING_DISMAN_MTETRIGGERTABLE_MODULE 1
+/* Define if compiling with the disman/event/mteScalars module files.  */
+#define USING_DISMAN_EVENT_MTESCALARS_MODULE 1
  
-/* Define if compiling with the disman/mteTriggerDeltaTable module files.  */
-#define USING_DISMAN_MTETRIGGERDELTATABLE_MODULE 1
+/* Define if compiling with the disman/event/mteTrigger module files.  */
+#define USING_DISMAN_EVENT_MTETRIGGER_MODULE 1
  
-/* Define if compiling with the disman/mteTriggerExistenceTable module files.  */
-#define USING_DISMAN_MTETRIGGEREXISTENCETABLE_MODULE 1
+/* Define if compiling with the disman/event/mteTriggerTable module files.  */
+#define USING_DISMAN_EVENT_MTETRIGGERTABLE_MODULE 1
  
-/* Define if compiling with the disman/mteTriggerBooleanTable module files.  */
-#define USING_DISMAN_MTETRIGGERBOOLEANTABLE_MODULE 1
+/* Define if compiling with the disman/event/mteTriggerDeltaTable module files.  */
+#define USING_DISMAN_EVENT_MTETRIGGERDELTATABLE_MODULE 1
  
-/* Define if compiling with the disman/mteTriggerThresholdTable module files.  */
-#define USING_DISMAN_MTETRIGGERTHRESHOLDTABLE_MODULE 1
+/* Define if compiling with the disman/event/mteTriggerExistenceTable module files.  */
+#define USING_DISMAN_EVENT_MTETRIGGEREXISTENCETABLE_MODULE 1
  
-/* Define if compiling with the disman/mteObjectsTable module files.  */
-#define USING_DISMAN_MTEOBJECTSTABLE_MODULE 1
+/* Define if compiling with the disman/event/mteTriggerBooleanTable module files.  */
+#define USING_DISMAN_EVENT_MTETRIGGERBOOLEANTABLE_MODULE 1
  
-/* Define if compiling with the disman/mteEventTable module files.  */
-#define USING_DISMAN_MTEEVENTTABLE_MODULE 1
+/* Define if compiling with the disman/event/mteTriggerThresholdTable module files.  */
+#define USING_DISMAN_EVENT_MTETRIGGERTHRESHOLDTABLE_MODULE 1
  
-/* Define if compiling with the disman/mteEventNotificationTable module files.  */
-#define USING_DISMAN_MTEEVENTNOTIFICATIONTABLE_MODULE 1
+/* Define if compiling with the disman/event/mteTriggerConf module files.  */
+#define USING_DISMAN_EVENT_MTETRIGGERCONF_MODULE 1
  
-#endif /* USING_DISMAN_EVENT_MIB_MODULE */
+/* Define if compiling with the disman/event/mteEvent module files.  */
+#define USING_DISMAN_EVENT_MTEEVENT_MODULE 1
+ 
+/* Define if compiling with the disman/event/mteEventTable module files.  */
+#define USING_DISMAN_EVENT_MTEEVENTTABLE_MODULE 1
+ 
+/* Define if compiling with the disman/event/mteEventSetTable module files.  */
+#define USING_DISMAN_EVENT_MTEEVENTSETTABLE_MODULE 1
+ 
+/* Define if compiling with the disman/event/mteEventNotificationTable module files.  */
+#define USING_DISMAN_EVENT_MTEEVENTNOTIFICATIONTABLE_MODULE 1
+ 
+/* Define if compiling with the disman/event/mteEventConf module files.  */
+#define USING_DISMAN_EVENT_MTEEVENTCONF_MODULE 1
+ 
+/* Define if compiling with the disman/event/mteObjects module files.  */
+#define USING_DISMAN_EVENT_MTEOBJECTS_MODULE 1
+ 
+/* Define if compiling with the disman/event/mteObjectsTable module files.  */
+#define USING_DISMAN_EVENT_MTEOBJECTSTABLE_MODULE 1
+ 
+/* Define if compiling with the disman/event/mteObjectsConf module files.  */
+#define USING_DISMAN_EVENT_MTEOBJECTSCONF_MODULE 1
+ 
+#endif /* USING_DISMAN_EVENT_MODULE */
 
 #ifdef USING_SMUX_MODULE
  

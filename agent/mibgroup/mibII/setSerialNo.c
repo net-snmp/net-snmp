@@ -2,8 +2,12 @@
  *  This file implements the snmpSetSerialNo TestAndIncr counter
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+netsnmp_feature_require(watcher_spinlock)
+
 
 #include "setSerialNo.h"
 
@@ -60,13 +64,21 @@ init_setSerialNo(void)
     /*
      * Register 'setserialno' as a watched spinlock object
      */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     netsnmp_register_watched_spinlock(
         netsnmp_create_handler_registration("snmpSetSerialNo", NULL,
                                    set_serial_oid,
                                    OID_LENGTH(set_serial_oid),
                                    HANDLER_CAN_RWRITE),
                                        &setserialno );
-
+#else  /* !NETSNMP_NO_WRITE_SUPPORT */
+    netsnmp_register_watched_spinlock(
+        netsnmp_create_handler_registration("snmpSetSerialNo", NULL,
+                                   set_serial_oid,
+                                   OID_LENGTH(set_serial_oid),
+                                   HANDLER_CAN_RONLY),
+                                       &setserialno );
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     DEBUGMSGTL(("scalar_int", "Done initalizing example scalar int\n"));
 }
 

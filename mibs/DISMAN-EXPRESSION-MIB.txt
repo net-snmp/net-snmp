@@ -29,7 +29,6 @@ dismanExpressionMIB MODULE-IDENTITY
                     Published as RFC 2982"
     ::= { mib-2 90 }
 
-
 dismanExpressionMIBObjects OBJECT IDENTIFIER ::=
                                             { dismanExpressionMIB 1 }
 
@@ -40,7 +39,6 @@ expValue  OBJECT IDENTIFIER ::= { dismanExpressionMIBObjects 3 }
 --
 -- Resource Control
 --
-
 
 expResourceDeltaMinimum OBJECT-TYPE
     SYNTAX      Integer32 (-1 | 1..600)
@@ -90,7 +88,6 @@ expResourceDeltaWildcardInstanceMaximum OBJECT-TYPE
      Unless explicitly resource limited, a system's value for
      this object should be 0.
 
-
      Changing this value will not eliminate or inhibit existing delta
      wildcard instance objects but will prevent the creation of more
      such objects.
@@ -139,7 +136,6 @@ expResourceDeltaWildcardInstanceResourceLacks OBJECT-TYPE
 --
 
 expExpressionTable OBJECT-TYPE
-
     SYNTAX      SEQUENCE OF ExpExpressionEntry
     MAX-ACCESS  not-accessible
     STATUS      current
@@ -335,7 +331,6 @@ expExpression OBJECT-TYPE
 
           If either side is IpAddress, use that.
 
-
           If either side is TimeTicks, use that.
 
           If either side is Counter32, use that.
@@ -383,7 +378,6 @@ expExpression OBJECT-TYPE
           minimum
           sum
           exists
-
 
      The following function definitions indicate their parameters by
      naming the data type of the parameter in the parameter's position
@@ -433,7 +427,6 @@ expExpression OBJECT-TYPE
      exists(anyTypeObject) - verifies the object instance exists. A
      return value of 0 indicates NoSuchInstance (i.e. boolean
      false)."
-
     ::= { expExpressionEntry 3 }
 
 expExpressionValueType OBJECT-TYPE
@@ -531,7 +524,6 @@ expExpressionPrefix OBJECT-TYPE
     ::= { expExpressionEntry 7 }
 
 expExpressionErrors OBJECT-TYPE
-
     SYNTAX      Counter32
     MAX-ACCESS  read-only
     STATUS      current
@@ -580,7 +572,6 @@ expErrorEntry OBJECT-TYPE
      error for that expression as reflected by the error codes
      defined for expErrorCode."
     INDEX       { expExpressionOwner, expExpressionName }
-
     ::= { expErrorTable 1 }
 
 ExpErrorEntry ::= SEQUENCE {
@@ -678,7 +669,6 @@ expErrorCode OBJECT-TYPE
 expErrorInstance OBJECT-TYPE
     SYNTAX      OBJECT IDENTIFIER
     MAX-ACCESS  read-only
-
     STATUS      current
     DESCRIPTION
      "The expValueInstance being evaluated when the error
@@ -727,7 +717,6 @@ ExpObjectEntry ::= SEQUENCE {
     expObjectIndex                     Unsigned32,
     expObjectID                        OBJECT IDENTIFIER,
     expObjectIDWildcard                TruthValue,
-
     expObjectSampleType                INTEGER,
     expObjectDeltaDiscontinuityID      OBJECT IDENTIFIER,
     expObjectDiscontinuityIDWildcard   TruthValue,
@@ -776,7 +765,6 @@ expObjectIDWildcard  OBJECT-TYPE
         "A true value indicates the expObjecID of this row is a wildcard
         object. False indicates that expObjectID is fully instanced.
         If all expObjectWildcard values for a given expression are FALSE,
-
         expExpressionPrefix will reflect a scalar object (i.e. will
         be 0.0).
 
@@ -824,7 +812,6 @@ expObjectDeltaDiscontinuityID OBJECT-TYPE
      "The OBJECT IDENTIFIER (OID) of a TimeTicks, TimeStamp, or
      DateAndTime object that indicates a discontinuity in the value
      at expObjectID.
-
 
      This object is instantiated only if expObjectSampleType is
      'deltaValue' or 'changedValue'.
@@ -874,7 +861,6 @@ expObjectDiscontinuityIDType OBJECT-TYPE
     DEFVAL      { timeTicks }
      ::= { expObjectEntry 7 }
 
-
 expObjectConditional OBJECT-TYPE
     SYNTAX      OBJECT IDENTIFIER
     MAX-ACCESS  read-create
@@ -910,7 +896,6 @@ expObjectConditional OBJECT-TYPE
      MAX-ACCESS  read-create
      STATUS      current
      DESCRIPTION
-
      "A true value indicates the expObjectConditional of this row is
      a wildcard object. False indicates that expObjectConditional is
      fully instanced.
@@ -923,7 +908,6 @@ expObjectConditional OBJECT-TYPE
 expObjectEntryStatus OBJECT-TYPE
     SYNTAX      RowStatus
     MAX-ACCESS  read-create
-
     STATUS      current
     DESCRIPTION
      "The control that allows creation/deletion of entries.
@@ -1021,7 +1005,6 @@ expValueInstance OBJECT-TYPE
 expValueCounter32Val OBJECT-TYPE
     SYNTAX      Counter32
     MAX-ACCESS  read-only
-
     STATUS      current
     DESCRIPTION
      "The value when expExpressionValueType is 'counter32'."
@@ -1060,7 +1043,7 @@ expValueIpAddressVal OBJECT-TYPE
     ::= { expValueEntry 6 }
 
 expValueOctetStringVal OBJECT-TYPE
-    SYNTAX      OCTET STRING -- (SIZE (0..65536))
+    SYNTAX      OCTET STRING (SIZE (0..65536))
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -1070,7 +1053,6 @@ expValueOctetStringVal OBJECT-TYPE
 expValueOidVal OBJECT-TYPE
     SYNTAX      OBJECT IDENTIFIER
     MAX-ACCESS  read-only
-
     STATUS      current
     DESCRIPTION
      "The value when expExpressionValueType is 'objectId'."
@@ -1136,7 +1118,6 @@ dismanExpressionMIBCompliance MODULE-COMPLIANCE
      WRITE-SYNTAX   INTEGER { false(2) }
      DESCRIPTION
           "Implementation need not allow deltas wildcards."
-
      ::= { dismanExpressionMIBCompliances 1 }
 
 -- Units of Conformance
@@ -1163,12 +1144,10 @@ dismanExpressionDefinitionGroup OBJECT-GROUP
           expExpressionPrefix,
           expExpressionErrors,
           expExpressionEntryStatus,
-
           expErrorTime,
           expErrorIndex,
           expErrorCode,
           expErrorInstance,
-
           expObjectID,
           expObjectIDWildcard,
           expObjectSampleType,
@@ -1201,5 +1180,3 @@ dismanExpressionValueGroup OBJECT-GROUP
      ::= { dismanExpressionMIBGroups 3 }
 
 END
-
-

@@ -14,20 +14,6 @@
 /*
  * This should always be included first before anything else 
  */
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
-
-
-
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -42,16 +28,12 @@ oid             lookupResultsTable_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 82, 1, 4 };
 
 struct variable2 lookupResultsTable_variables[] = {
-    {COLUMN_LOOKUPRESULTSADDRESSTYPE, ASN_INTEGER, RONLY, var_lookupResultsTable, 2, {1, 2}},
-    {COLUMN_LOOKUPRESULTSADDRESS,   ASN_OCTET_STR, RONLY, var_lookupResultsTable, 2, {1, 3}}
+    {COLUMN_LOOKUPRESULTSADDRESSTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lookupResultsTable, 2, {1, 2}},
+    {COLUMN_LOOKUPRESULTSADDRESS,   ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lookupResultsTable, 2, {1, 3}}
 };
 
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-
-extern struct header_complex_index *lookupCtlTableStorage;
-extern struct header_complex_index *lookupResultsTableStorage;
 
 int
 lookupResultsTable_inadd(struct lookupResultsTable_data *thedata);
@@ -59,13 +41,14 @@ lookupResultsTable_inadd(struct lookupResultsTable_data *thedata);
 void
 lookupResultsTable_cleaner(struct header_complex_index *thestuff)
 {
-    struct header_complex_index *hciptr = NULL;
-    struct lookupResultsTable_data *StorageDel = NULL;
+    struct header_complex_index *hciptr, *nhciptr;
+    struct lookupResultsTable_data *StorageDel;
+
     DEBUGMSGTL(("lookupResultsTable", "cleanerout  "));
-    for (hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
-        StorageDel =
-            header_complex_extract_entry(&lookupResultsTableStorage,
-                                         hciptr);
+    for (hciptr = thestuff; hciptr; hciptr = nhciptr) {
+        nhciptr = hciptr->next;
+        StorageDel = header_complex_extract_entry(&lookupResultsTableStorage,
+                                                  hciptr);
         if (StorageDel != NULL) {
             SNMP_FREE(StorageDel->lookupCtlOwnerIndex);
             SNMP_FREE(StorageDel->lookupCtlOperationName);
@@ -74,8 +57,8 @@ lookupResultsTable_cleaner(struct header_complex_index *thestuff)
         }
         DEBUGMSGTL(("lookupResultsTable", "cleaner  "));
     }
-
 }
+
 void
 init_lookupResultsTable(void)
 {
@@ -237,9 +220,15 @@ lookupResultsTable_inadd(struct lookupResultsTable_data *thedata)
 {
     netsnmp_variable_list *vars_list = NULL;
 
-    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);      /* lookupCtlOwnerIndex */
-    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) thedata->lookupCtlOperationName, thedata->lookupCtlOperationNameLen);        /* lookupCtlOperationName */
-    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED, (char *) &thedata->lookupResultsIndex, sizeof(thedata->lookupResultsIndex));   /* lookupResultsIndex */
+    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+    		(char *) thedata->lookupCtlOwnerIndex,
+		thedata->lookupCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+    		(char *) thedata->lookupCtlOperationName,
+		thedata->lookupCtlOperationNameLen);
+    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED,
+    		(char *) &thedata->lookupResultsIndex,
+		sizeof(thedata->lookupResultsIndex));
 
     /*
      * XXX: fill in default row values here into StorageNew 

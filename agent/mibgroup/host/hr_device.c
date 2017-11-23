@@ -63,12 +63,18 @@ int             header_hrdevice(struct variable *, oid *, size_t *, int,
 #define	HRDEV_ERRORS		6
 
 struct variable4 hrdevice_variables[] = {
-    {HRDEV_INDEX, ASN_INTEGER, RONLY, var_hrdevice, 2, {1, 1}},
-    {HRDEV_TYPE, ASN_OBJECT_ID, RONLY, var_hrdevice, 2, {1, 2}},
-    {HRDEV_DESCR, ASN_OCTET_STR, RONLY, var_hrdevice, 2, {1, 3}},
-    {HRDEV_ID, ASN_OBJECT_ID, RONLY, var_hrdevice, 2, {1, 4}},
-    {HRDEV_STATUS, ASN_INTEGER, RONLY, var_hrdevice, 2, {1, 5}},
-    {HRDEV_ERRORS, ASN_COUNTER, RONLY, var_hrdevice, 2, {1, 6}}
+    {HRDEV_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrdevice, 2, {1, 1}},
+    {HRDEV_TYPE, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_hrdevice, 2, {1, 2}},
+    {HRDEV_DESCR, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrdevice, 2, {1, 3}},
+    {HRDEV_ID, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_hrdevice, 2, {1, 4}},
+    {HRDEV_STATUS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrdevice, 2, {1, 5}},
+    {HRDEV_ERRORS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_hrdevice, 2, {1, 6}}
 };
 oid             hrdevice_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 3, 2 };
 
@@ -191,7 +197,7 @@ header_hrdevice(struct variable *vp,
     memcpy((char *) name, (char *) newname,
            ((int) vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_device", "... get device stats "));

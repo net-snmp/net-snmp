@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -44,7 +45,13 @@
 
 #include "ipv4InterfaceTable_interface.h"
 
+#include "if-mib/ifTable/ifTable.h"
+
 #include <ctype.h>
+
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -159,8 +166,6 @@ NETSNMP_STATIC_INLINE int
                                                 var, int column);
 #endif
 
-ipv4InterfaceTable_data *ipv4InterfaceTable_allocate_data(void);
-
 /**
  * @internal
  * Initialize the table ipv4InterfaceTable 
@@ -194,7 +199,7 @@ _ipv4InterfaceTable_initialize_interface(ipv4InterfaceTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPV4INTERFACETABLE_MIN_COL;
     tbl_info->max_column = IPV4INTERFACETABLE_MAX_COL;
@@ -267,10 +272,12 @@ _ipv4InterfaceTable_initialize_interface(ipv4InterfaceTable_registration *
         netsnmp_handler_registration_create("ipv4InterfaceTable", handler,
                                             ipv4InterfaceTable_oid,
                                             ipv4InterfaceTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP
+                                            HANDLER_CAN_BABY_STEP |
 #ifndef NETSNMP_DISABLE_SET_SUPPORT
-                                          | HANDLER_CAN_RWRITE
-#endif
+                                            HANDLER_CAN_RWRITE
+#else
+                                            HANDLER_CAN_RONLY
+#endif /* NETSNMP_DISABLE_SET_SUPPORT */
                                           );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering table ipv4InterfaceTable\n");
@@ -345,7 +352,7 @@ _ipv4InterfaceTable_initialize_interface(ipv4InterfaceTable_registration *
      */
     {
         oid             lc_oid[] = { IPV4INTERFACETABLELASTCHANGE_OID };
-        netsnmp_register_watched_scalar(netsnmp_create_handler_registration
+        netsnmp_register_watched_scalar2(netsnmp_create_handler_registration
                                         ("ipv4TableLastChanged", NULL,
                                          lc_oid, OID_LENGTH(lc_oid),
                                          HANDLER_CAN_RONLY),
@@ -380,6 +387,7 @@ ipv4InterfaceTable_valid_columns_set(netsnmp_column_info *vc)
     ipv4InterfaceTable_if_ctx.tbl_info.valid_columns = vc;
 }                               /* ipv4InterfaceTable_valid_columns_set */
 
+#if 0
 /*
  * ipv4InterfaceTable_allocate_data
  *
@@ -400,6 +408,7 @@ ipv4InterfaceTable_allocate_data(void)
 
     return rtn;
 }                               /* ipv4InterfaceTable_allocate_data */
+#endif
 
 /**
  * @internal
@@ -447,8 +456,6 @@ _mfd_ipv4InterfaceTable_post_request(netsnmp_mib_handler *handler,
                                      *agtreq_info,
                                      netsnmp_request_info *requests)
 {
-    ipv4InterfaceTable_rowreq_ctx *rowreq_ctx =
-        netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
     DEBUGMSGTL(("internal:ipv4InterfaceTable:_mfd_ipv4InterfaceTable_post_request", "called\n"));
@@ -1270,6 +1277,7 @@ _ipv4InterfaceTable_container_init(ipv4InterfaceTable_interface_ctx *
                  "ipv4InterfaceTable_container_init\n");
         return;
     }
+    if_ctx->container->container_name = strdup("ipv4InterfaceTable");
 
 }                               /* _ipv4InterfaceTable_container_init */
 

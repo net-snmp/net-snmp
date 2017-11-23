@@ -66,17 +66,18 @@ struct variable2 expErrorTable_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define	EXPERRORTIME  1
-    {EXPERRORTIME,  ASN_UNSIGNED, RONLY, var_expErrorTable, 2, {1, 1}},
+    {EXPERRORTIME,  ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_expErrorTable, 2, {1, 1}},
 #define	EXPERRORINDEX 2
-    {EXPERRORINDEX, ASN_INTEGER,  RONLY, var_expErrorTable, 2, {1, 2}},
+    {EXPERRORINDEX, ASN_INTEGER,  NETSNMP_OLDAPI_RONLY,
+     var_expErrorTable, 2, {1, 2}},
 #define	EXPERRORCODE 3
-    {EXPERRORCODE,  ASN_INTEGER,  RONLY, var_expErrorTable, 2, {1, 3}},
+    {EXPERRORCODE,  ASN_INTEGER,  NETSNMP_OLDAPI_RONLY,
+     var_expErrorTable, 2, {1, 3}},
 #define	EXPERRORINSTANCE 4
-    {EXPERRORINSTANCE, ASN_OBJECT_ID, RONLY, var_expErrorTable, 2, {1, 4}}
+    {EXPERRORINSTANCE, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_expErrorTable, 2, {1, 4}}
 };
-
-extern struct header_complex_index *expExpressionTableStorage;
-
 
 void
 init_expErrorTable(void)
@@ -135,4 +136,6 @@ var_expErrorTable(struct variable *vp,
         *var_len = StorageTmp->expErrorInstanceLen * sizeof(oid);
         return (u_char *) StorageTmp->expErrorInstance;
     }
+
+    return NULL;
 }

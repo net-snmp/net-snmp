@@ -89,20 +89,28 @@ SOURCE=..\..\apps\snmptrapd.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\apps\snmptrapd_auth.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\apps\snmptrapd_handlers.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\apps\snmptrapd_log.c
 # End Source File
-# Begin Source File
-
-SOURCE=..\..\apps\snmptrapd_auth.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE="..\..\agent\mibgroup\notification-log-mib\notification_log.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\apps\snmptrapd_auth.h"
+# End Source File
 # Begin Source File
 
 SOURCE="..\..\apps\snmptrapd_handlers.h"
@@ -111,15 +119,6 @@ SOURCE="..\..\apps\snmptrapd_handlers.h"
 
 SOURCE="..\..\apps\snmptrapd_log.h"
 # End Source File
-# Begin Source File
-
-SOURCE="..\..\apps\snmptrapd_auth.h"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\agent\mibgroup\notification-log-mib\notification_log.h"
-# End Source File
 # End Group
 # End Target
 # End Project
-

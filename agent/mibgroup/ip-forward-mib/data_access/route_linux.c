@@ -15,6 +15,8 @@
 #include "ip-forward-mib/data_access/route_ioctl.h"
 #include "ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_constants.h"
 #include "if-mib/data_access/interface_ioctl.h"
+#include "route.h"
+#include "route_private.h"
 
 static int
 _type_from_flags(unsigned int flags)
@@ -53,7 +55,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
      * fetch routes from the proc file-system:
      */
     if (!(in = fopen("/proc/net/route", "r"))) {
-        snmp_log(LOG_ERR, "cannot open /proc/net/route\n");
+        NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/route\n"));
         return -2;
     }
 
@@ -71,9 +73,9 @@ _load_ipv4(netsnmp_container* container, u_long *index )
 
     while (fgets(line, sizeof(line), in)) {
         char            rtent_name[32];
-        int             refcnt, flags, rc;
+        int             refcnt, rc;
         uint32_t        dest, nexthop, mask;
-        unsigned        use;
+        unsigned        flags, use;
 
         entry = netsnmp_access_route_entry_create();
 
@@ -83,7 +85,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          * BE eth0  00000000 C0A80101 0003  0      0   0   FFFFFFFF 1500 0   0 
          * LE eth0  00000000 0101A8C0 0003  0      0   0   00FFFFFF    0 0   0  
          */
-        rc = sscanf(line, "%s %x %x %x %u %d %d %x %*d %*d %*d\n",
+        rc = sscanf(line, "%s %x %x %x %d %u %d %x %*d %*d %*d\n",
                     rtent_name, &dest, &nexthop,
                     /*
                      * XXX: fix type of the args 
@@ -161,12 +163,12 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          * as the policy, to distinguise between them. Hopefully this is
          * unique.
          * xxx-rks: It should really only be for the duplicate case, but that
-         *     would be more complicated thanI want to get into now. Fix later.
+         *     would be more complicated than I want to get into now. Fix later.
          */
         if (0 == nexthop) {
-            entry->rt_policy = &entry->if_index;
-            entry->rt_policy_len = 1;
-            entry->flags |= NETSNMP_ACCESS_ROUTE_POLICY_STATIC;
+            entry->rt_policy = calloc(3, sizeof(oid));
+            entry->rt_policy[2] = entry->if_index;
+            entry->rt_policy_len = sizeof(oid)*3;
         }
 #endif
 
@@ -201,7 +203,6 @@ _load_ipv6(netsnmp_container* container, u_long *index )
     FILE           *in;
     char            line[256];
     netsnmp_route_entry *entry = NULL;
-    static int      log_open_err = 1;
 
     DEBUGMSGTL(("access:route:container",
                 "route_container_arch_load ipv6\n"));
@@ -212,19 +213,10 @@ _load_ipv6(netsnmp_container* container, u_long *index )
      * fetch routes from the proc file-system:
      */
     if (!(in = fopen("/proc/net/ipv6_route", "r"))) {
-        if (1 == log_open_err) {
-            snmp_log(LOG_ERR, "cannot open /proc/net/ipv6_route\n");
-            log_open_err = 0;
-        }
+        DEBUGMSGTL(("9:access:route:container", "cannot open /proc/net/ipv6_route\n"));
         return -2;
     }
-    /*
-     * if we turned off logging of open errors, turn it back on now that
-     * we have been able to open the file.
-     */
-    if (0 == log_open_err)
-        log_open_err = 1;
-    fgets(line,sizeof(line),in); /* skip header */
+    
     while (fgets(line, sizeof(line), in)) {
         char            c_name[IFNAMSIZ+1];
         char            c_dest[33], c_src[33], c_next[33];
@@ -320,11 +312,11 @@ _load_ipv6(netsnmp_container* container, u_long *index )
         /*
          * on linux, default routes all look alike, and would have the same
          * indexed based on dest and next hop. So we use our arbitrary index
-         * as the policy, to distinguise between them.
+         * as the policy, to distinguish between them.
          */
-        entry->rt_policy = &entry->ns_rt_index;
-        entry->rt_policy_len = 1;
-        entry->flags |= NETSNMP_ACCESS_ROUTE_POLICY_STATIC;
+        entry->rt_policy = calloc(3, sizeof(oid));
+        entry->rt_policy[2] = entry->ns_rt_index;
+        entry->rt_policy_len = sizeof(oid)*3;
 #endif
 
         /*

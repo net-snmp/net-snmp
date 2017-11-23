@@ -6,7 +6,6 @@ Some notes for the AIX port
 
 There are the following known problems on AIX:
 
-
 1) Shared libraries / embedded perl
 
 Up to (and including) net-snmp 5.4, configure forced a static build
@@ -14,11 +13,10 @@ on AIX which caused embedded Perl to be disabled as well.
 
 Starting with net-snmp 5.4.1, we build shared libraries by default on AIX
 (like on any other platform) using run-time linking. configure forces the
-use of the required "-brtl" linker flag. We also recommend
+use of the required "-brtl" linker flag.
 
-   ./configure --enable-as-needed ...
-
-for proper libperl linking.
+With net-snmp 5.5 the shared library build is broken again but the there is
+no forced static build - use --disable-shared when building.
 
 2) "grep: capacity exceeded" or "sed: Command line is too long" during configure
 

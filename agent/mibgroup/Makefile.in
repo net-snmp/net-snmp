@@ -1,4 +1,6 @@
 top_builddir=../..
+mysubdir=agent/mibgroup
+
 # currently assumes gcc:    (XXX: fix via configure tests)
 DLFLAGS=-fPIC -shared
 
@@ -16,6 +18,8 @@ CPPFLAGS= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 
 OTHERCLEANTARGETS=@dllcleans@
 
+FEATUREFILE=../../include/net-snmp/agent/features-mibgroups.h
+
 # Need a special .c -> .o definition here to make sure we place the
 # object files in the sub directory.
 
@@ -25,10 +29,12 @@ OTHERCLEANTARGETS=@dllcleans@
 @mib_module_list_o@
 @mib_module_list_lo@
 @mib_module_list_c@
+@mib_module_list_ft@
 
-OBJS  = $(mib_module_list_o)
-LOBJS = $(mib_module_list_lo)
-SRCS  = $(mib_module_list_c)
+OBJS   = $(mib_module_list_o)
+LOBJS  = $(mib_module_list_lo)
+SRCS   = $(mib_module_list_c)
+FTOBJS = $(mib_module_list_ft)
 
 all: standardall $(LOBJS)
 

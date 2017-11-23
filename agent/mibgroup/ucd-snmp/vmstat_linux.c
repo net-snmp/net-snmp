@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_LIMITS_H
 #include <limits.h>
@@ -108,8 +109,11 @@
 
 #include "mibdefs.h"
 #include "struct.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 #include "vmstat.h"
+
+netsnmp_feature_require(hardware_cpu_load)
+
 
 FindVarMethod var_extensible_vmstat;
 
@@ -128,54 +132,64 @@ void
 init_vmstat(void)
 {
     struct variable2 extensible_vmstat_variables[] = {
-        {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_vmstat, 1,
-         {MIBINDEX}},
-        {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_vmstat, 1,
-         {ERRORNAME}},
-        {SWAPIN, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SWAPIN}},
-        {SWAPOUT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SWAPOUT}},
-        {RAWSWAPIN, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {RAWSWAPIN}},
-        {RAWSWAPOUT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {RAWSWAPOUT}},
-        {IOSENT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {IOSENT}},
-        {IORECEIVE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1,
-         {IORECEIVE}},
-        {IORAWSENT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {IORAWSENT}},
-        {IORAWRECEIVE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {IORAWRECEIVE}},
-        {SYSINTERRUPTS, ASN_INTEGER, RONLY, var_extensible_vmstat, 1,
-         {SYSINTERRUPTS}},
-        {SYSCONTEXT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1,
-         {SYSCONTEXT}},
-        {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
-        {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1,
-         {CPUSYSTEM}},
-        {CPUIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUIDLE}},
-        {CPURAWUSER, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {CPURAWUSER}},
-        {CPURAWNICE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {CPURAWNICE}},
-        {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {CPURAWSYSTEM}},
-        {CPURAWKERNEL, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {CPURAWKERNEL}},
-        {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {CPURAWIDLE}},
-        {SYSRAWINTERRUPTS, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {SYSRAWINTERRUPTS}},
-        {SYSRAWCONTEXT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {SYSRAWCONTEXT}},
-        {CPURAWWAIT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {CPURAWWAIT}},
-        {CPURAWINTR, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {CPURAWINTR}},
-        {CPURAWSOFTIRQ, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
-         {CPURAWSOFTIRQ}},
+        {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {MIBINDEX}},
+        {ERRORNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {ERRORNAME}},
+        {SWAPIN, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {SWAPIN}},
+        {SWAPOUT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {SWAPOUT}},
+        {RAWSWAPIN, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {RAWSWAPIN}},
+        {RAWSWAPOUT, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {RAWSWAPOUT}},
+        {IOSENT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {IOSENT}},
+        {IORECEIVE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {IORECEIVE}},
+        {IORAWSENT, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {IORAWSENT}},
+        {IORAWRECEIVE, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {IORAWRECEIVE}},
+        {SYSINTERRUPTS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {SYSINTERRUPTS}},
+        {SYSCONTEXT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {SYSCONTEXT}},
+        {CPUUSER, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPUUSER}},
+        {CPUSYSTEM, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPUSYSTEM}},
+        {CPUIDLE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPUIDLE}},
+        {CPURAWUSER, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPURAWUSER}},
+        {CPURAWNICE, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPURAWNICE}},
+        {CPURAWSYSTEM, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPURAWSYSTEM}},
+        {CPURAWKERNEL, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPURAWKERNEL}},
+        {CPURAWIDLE, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPURAWIDLE}},
+        {SYSRAWINTERRUPTS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {SYSRAWINTERRUPTS}},
+        {SYSRAWCONTEXT, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {SYSRAWCONTEXT}},
+        {CPURAWWAIT, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPURAWWAIT}},
+        {CPURAWINTR, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPURAWINTR}},
+        {CPURAWSOFTIRQ, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_vmstat, 1, {CPURAWSOFTIRQ}},
         /*
          * Future use: 
          */
         /*
-         * {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
-         * {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_vmstat, 1, {ERRORMSG }}
+         * {ERRORFLAG, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         *  var_extensible_vmstat, 1, {ERRORFLAG }},
+         * {ERRORMSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         *  var_extensible_vmstat, 1, {ERRORMSG }}
          */
     };
 

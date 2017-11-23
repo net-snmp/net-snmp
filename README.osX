@@ -7,10 +7,6 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
 
   - ALL
 
-    - Test 44 (Perl AgentX Subagent) fails.
-
-       - configure with --enable-as-needed for proper libperl linking
-
     - nlist doesn't support icmpstat
 
        - disable the icmp module during configure by specifying
@@ -19,7 +15,7 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
 
 
   - 10.4.7 (Universal) and Leopard with 5.4 sources:
-        [Supplied by Chris Jalbert, slightly updated]
+        [Supplied by Chris Jalbert]
 
        - build using gcc 4.0 (see below) and configure using:
                         --with-persistent-directory=/var/db/net-snmp \
@@ -27,7 +23,6 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
                         --without-rpm \
                         --with-mib-modules="host ucd-snmp/diskio" \
                         --with-out-mib-modules="mibII/icmp host/hr_swrun" \
-                        --enable-as-needed \
                         --without-kmem-usage
 
        The first line sets up persistent storage in the OS X standard location.
@@ -64,20 +59,3 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
                    --prefix=/usr --with-persistent-directory=/var/db/ucd-snmp
                    --with-mib-modules=host
 
--------------------------------------
-
-With Mac OS X 10.5.2, and Net-SNMP 5.4.2, the default configuration
-seems to build and run successfully.   The main tweak needed to get
-things working was to disable "embedded perl" (which is active by
-default in 5.4 and above).
-
-  The issue here is that enabling embedded perl will try to use the
-same CFLAGS used for compiling perl, when compiling the Net-SNMP code
-(which is probably reasonable).  Unfortunately, the default perl binary
-that comes with Mac OS/X 10.5 (at least) is a "universal binary",
-so the CFLAGS that it uses include "-arch i386 -arch ppc".  This
-dual-architecture option confuses the configure script, and means
-that it cannot detect the characteristics of the host system correctly.
-
-Dave
-June 2008

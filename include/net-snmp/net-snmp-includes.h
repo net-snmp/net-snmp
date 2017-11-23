@@ -38,11 +38,7 @@
 #endif
 
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -71,6 +67,7 @@
 #include <net-snmp/definitions.h>
 #include <net-snmp/types.h>
 
+#include <net-snmp/library/getopt.h>
 #include <net-snmp/utilities.h>
 #include <net-snmp/session_api.h>
 #include <net-snmp/pdu_api.h>
@@ -79,9 +76,5 @@
 #include <net-snmp/config_api.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/snmpv3_api.h>
-
-#ifdef CMU_COMPATIBLE
-#include <net-snmp/library/cmu_compat.h>
-#endif
 
 #endif                          /* NET_SNMP_INCLUDES_H */

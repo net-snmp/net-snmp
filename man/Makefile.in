@@ -14,70 +14,68 @@ OTHERUNINSTALL=manuninstall
 # local stuff
 #
 
-MAN1  = snmpinform.1
-MAN1G = snmpbulkget.1 snmpcmd.1 snmpget.1 snmpset.1 snmpwalk.1 \
+MAN1  = snmpinform.1 snmp-bridge-mib.1
+
+@NETSNMP_HAVE_AGENTX_LIBS_TRUE@AGENTXTRAP = agentxtrap.1
+@NETSNMP_HAVE_AGENTX_LIBS_FALSE@AGENTXTRAP =
+
+MAN1G = $(AGENTXTRAP) snmpbulkget.1 snmpcmd.1 snmpget.1 snmpset.1 snmpwalk.1 \
 	snmpbulkwalk.1 snmpgetnext.1 snmptest.1 snmptranslate.1 snmptrap.1 \
 	snmpusm.1 snmpvacm.1 snmptable.1 snmpstatus.1 snmpconf.1 mib2c.1 \
 	snmpnetstat.1 snmpdelta.1 snmpdf.1 encode_keychange.1 fixproc.1 \
-	net-snmp-config.1 mib2c-update.1 tkmib.1 traptoemail.1
+	net-snmp-config.1 mib2c-update.1 tkmib.1 traptoemail.1 \
+	net-snmp-create-v3-user.1
 
-MAN3  = snmp_close.3 snmp_free_pdu.3 snmp_open.3 snmp_read.3 \
-	snmp_select_info.3 snmp_send.3 snmp_timeout.3			       \
-	snmp_sess_async_send.3 snmp_sess_close.3 snmp_sess_error.3     \
-	snmp_sess_init.3 snmp_sess_open.3 snmp_sess_read.3	       \
-	snmp_sess_select_info.3 snmp_sess_send.3 snmp_sess_timeout.3   \
-	snmp_sess_session.3 snmp_perror.3 snmp_sess_perror.3	       \
-	snmp_error.3 snmp_api_errstring.3 init_mib.3 add_mibdir.3      \
-	init_mib_internals.3 snmp_set_mib_warnings.3 read_module.3     \
-	read_all_mibs.3 read_mib.3 read_module_node.3 read_objid.3     \
-	add_module_replacement.3 shutdown_mib.3 print_mib.3	       \
-	print_variable.3 print_value.3 print_objid.3		       \
-	print_description.3 snmp_set_save_descriptions.3	       \
-	get_module_node.3 netsnmp_agent.3 netsnmp_bulk_to_next.3       \
-	netsnmp_debug.3 netsnmp_example_scalar_int.3 netsnmp_handler.3 \
-	netsnmp_instance.3 netsnmp_mib_handler_methods.3	       \
-	netsnmp_multiplexer.3 netsnmp_old_api.3 netsnmp_read_only.3    \
-	netsnmp_serialize.3 netsnmp_table.3 netsnmp_table_array.3      \
-	netsnmp_table_data.3 netsnmp_table_dataset.3		       \
-	netsnmp_table_iterator.3 netsnmp_scalar.3       \
-	netsnmp_watcher.3 netsnmp_mode_end_call.3 netsnmp_library.3    \
-	netsnmp_mib_utilities.3					       \
-	netsnmp_baby_steps.3 netsnmp_cache_handler.3		       \
-	netsnmp_container.3 netsnmp_iterator_info_s.3 netsnmp_leaf.3   \
-	netsnmp_row_merge.3		       \
-	netsnmp_scalar_group_group.3 netsnmp_stash_cache.3	       \
-	netsnmp_utilities.3
-
-MAN3G = default_store.3 mib_api.3 read_config.3 snmp_agent_api.3 snmp_alarm.3 \
-	snmp_api.3 snmp_sess_api.3 snmp_trap_api.3
+# If MAN3 is populated again, then remember to re-enable the corresponding
+# action line within the 'maninstall' target
+MAN3  = 
+MAN3_API = netsnmp_mib_api.3 netsnmp_config_api.3 snmp_alarm.3 \
+	netsnmp_session_api.3 netsnmp_sess_api.3 netsnmp_trap_api.3 netsnmp_varbind_api.3 netsnmp_pdu_api.3 
+MAN3G = default_store.3 netsnmp_agent_api.3 $(MAN3_API)
 MAN5G = snmpd.conf.5 snmptrapd.conf.5 snmp.conf.5 snmp_config.5 variables.5 \
         mib2c.conf.5 snmpd.examples.5 snmpd.internal.5
 MAN8G = snmptrapd.8 snmpd.8
 
-DEFAULT_STORE_ALIASES = netsnmp_ds_get_boolean.3 netsnmp_ds_get_int.3	\
-	netsnmp_ds_get_string.3 netsnmp_ds_register_config.3		\
-	netsnmp_ds_register_premib.3 netsnmp_ds_set_boolean.3 		\
-	netsnmp_ds_set_int.3						\
-	netsnmp_ds_set_string.3 netsnmp_ds_shutdown.3
-READ_CONFIG_ALIASES = config_perror.3 config_pwarn.3			\
-	read_config_print_usage.3 read_configs.3 read_premib_configs.3	\
-	register_app_config_handler.3 register_app_premib_handler.3	\
-	register_config_handler.3 register_mib_handlers.3 		\
-	register_premib_handler.3 					\
+MIB_ALIASES     = add_mibdir.3 add_module_replacement.3		\
+	fprint_description.3 fprint_objid.3 get_module_node.3	\
+	netsnmp_init_mib.3 netsnmp_read_module.3		\
+	print_description.3 print_mib.3 print_objid.3		\
+	read_all_mibs.3 read_mib.3 read_objid.3			\
+	shutdown_mib.3 snmp_parse_oid.3 snmp_set_mib_errors.3	\
+	snmp_set_mib_warnings.3 snmp_set_save_descriptions.3	\
+	snprint_description.3 snprint_objid.3
+CONFIG_ALIASES  = config_perror.3 config_pwarn.3			    \
+	read_config_print_usage.3 read_configs.3 read_premib_configs.3	    \
+	register_app_config_handler.3 register_app_prenetsnmp_mib_handler.3 \
+	register_config_handler.3 register_const_config_handler.3	    \
+	register_mib_handlers.3 register_prenetsnmp_mib_handler.3	    \
+	unregister_all_config_handlers.3			 	    \
 	unregister_app_config_handler.3 unregister_config_handler.3
-SNMP_ALARM_ALIASES = snmp_alarm_register.3 snmp_alarm_register_hr.3 	\
-	snmp_alarm_unregister.3
-SNMP_SET_SAVE_DESCRIPTIONS_ALIASES = fprint_description.3 fprint_objid.3 \
-	fprint_value.3 fprint_variable.3 snprint_objid.3 snprint_value.3 \
-	snprint_variable.3 sprint_realloc_objid.3 sprint_realloc_value.3 \
-	sprint_realloc_variable.3
-SNMP_TRAP_API_ALIASES = send_easy_trap.3 send_trap_vars.3 send_v2trap.3
+ALARM_ALIASES   = snmp_alarm_register.3 snmp_alarm_register_hr.3 snmp_alarm_unregister.3
+SESSION_ALIASES = snmp_api_errstring.3 snmp_close.3 snmp_error.3    \
+	snmp_open.3 snmp_perror.3 snmp_read.3 snmp_select_info.3    \
+	snmp_send.3 snmp_sess_perror.3 snmp_timeout.3               \
+	snmp_async_send.3 snmp_synch_response.3
+SSESS_ALIASES   = snmp_sess_async_send.3 snmp_sess_close.3 snmp_sess_error.3 \
+	snmp_sess_init.3 snmp_sess_open.3 snmp_sess_read.3		     \
+	snmp_sess_select_info.3 snmp_sess_send.3			     \
+	snmp_sess_session.3 snmp_sess_timeout.3                              \
+	snmp_sess_synch_response.3
+TRAP_ALIASES    = send_easy_trap.3 send_trap_vars.3 send_v2trap.3 
+VARBIND_ALIASES = fprint_value.3 fprint_variable.3	\
+	print_value.3 print_variable.3			\
+	snmp_add_null_var.3 snmp_clone_varbind.3	\
+	snmp_free_var.3 snmp_free_varbind.3		\
+	snmp_pdu_add_variable.3				\
+	snmp_set_var_objid.3 snmp_set_var_typed_integer.3 \
+	snmp_set_var_typed_value.3 snmp_set_var_value.3   \
+	snmp_varlist_add_variable.3 snprint_value.3 snprint_variable.3
+PDU_ALIASES     = snmp_clone_pdu.3 snmp_fix_pdu.3 snmp_free_pdu.3 snmp_pdu_create.3
 
 
 
-MANALIASES=$(DEFAULT_STORE_ALIASES) $(READ_CONFIG_ALIASES) 		\
-	$(SNMP_ALARM_ALIASES) $(SNMP_SET_SAVE_DESCRIPTIONS_ALIASES) 	\
-	$(SNMP_TRAP_API_ALIASES)
+MANALIASES=$(MIB_ALIASES) $(CONFIG_ALIASES) $(ALARM_ALIASES) $(SESSION_ALIASES) \
+	$(SSESS_ALIASES) $(TRAP_ALIASES) $(VARBIND_ALIASES) $(PDU_ALIASES)
 MANALL = $(MAN1) $(MAN1G) $(MAN3) $(MAN3G) $(MAN5G) $(MAN8G) $(MANALIASES)
 
 TARGETS = $(MAN5G) $(MAN1G) $(MAN3G) $(MAN8G)
@@ -85,28 +83,29 @@ OTHERCLEANTARGETS=$(TARGETS) default_store.3.h $(MANALIASES) manaliases
 
 all: $(TARGETS) standardall manaliases
 
-manaliases: Makefile
+manaliases: Makefile $(MAN3_API)
 	touch manaliases
-	@for i in $(DEFAULT_STORE_ALIASES) ; do				\
-		echo "making man page alias $$i -> default_store APIs" ; \
-		echo ".so man3/default_store.3" > $$i ; 		\
-	done
-	@for i in $(READ_CONFIG_ALIASES) ; do				\
-		echo "making man page alias $$i -> read_config APIs" ;	\
-		echo ".so man3/read_config.3" > $$i ; 			\
-	done
-	@for i in $(SNMP_ALARM_ALIASES) ; do				\
-		echo "making man page alias $$i -> snmp_alarm APIs" ;	\
-		echo ".so man3/snmp_alarm.3" > $$i ; 			\
-	done
-	@for i in $(SNMP_SET_SAVE_DESCRIPTIONS_ALIASES) ; do		\
-		echo "making man page alias $$i -> snmp_set_save_descriptions APIs" ; \
-		echo ".so man3/snmp_set_save_descriptions.3" > $$i ; 	\
-	done
-	@for i in $(SNMP_TRAP_API_ALIASES) ; do				\
-		echo "making man page alias $$i -> snmp_trap APIs" ;	\
-		echo ".so man3/snmp_trap_api.3" > $$i ;			\
-	done
+	@result=0 ; \
+        for i in $(MAN3_API) ; do				  \
+            for j in `$(SED) -n '/^.SH NAME/,/^.SH SYNOPSIS/p' $$i  | $(SED) -e 's/.- .*//' | $(SED) 's/,.*//'  | $(EGREP) -v '^.SH ' `; do \
+		echo "making man page alias $$j -> $$i APIs" ;    \
+		echo ".so man3/$$i" > $$j.3 ; 		  \
+		if expr "$(MANALIASES)" : ".*$$j\\.3" > /dev/null ; \
+		then \
+		  : ; \
+		else \
+		    var=`echo $$i | $(SED) -e 's/^netsnmp_//' -e 's/_api.3//' | tr '[a-z]' '[A-Z]'` ; \
+		    echo "You must add $$j.3 to the $${var}_ALIASES variable in the Makefile.in" ; \
+		    result=1 ; \
+	        fi; \
+	    done                                                  \
+	done ; \
+	exit $$result
+
+$(MANALIASES): manaliases
+
+agentxtrap.1: $(srcdir)/agentxtrap.1.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/agentxtrap.1.def > agentxtrap.1
 
 snmpbulkget.1: $(srcdir)/snmpbulkget.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpbulkget.1.def > snmpbulkget.1
@@ -180,56 +179,65 @@ fixproc.1: $(srcdir)/fixproc.1.def ../sedscript
 net-snmp-config.1: $(srcdir)/net-snmp-config.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/net-snmp-config.1.def > net-snmp-config.1
 
+net-snmp-create-v3-user.1: $(srcdir)/net-snmp-create-v3-user.1.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/net-snmp-create-v3-user.1.def > net-snmp-create-v3-user.1
+
 tkmib.1: $(srcdir)/tkmib.1.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/tkmib.1.def > tkmib.1
+	$(SED) -f ../sedscript < $(srcdir)/tkmib.1.def > $@
 
 traptoemail.1: $(srcdir)/traptoemail.1.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/traptoemail.1.def > traptoemail.1
+	$(SED) -f ../sedscript < $(srcdir)/traptoemail.1.def > $@
 
-mib_api.3: $(srcdir)/mib_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/mib_api.3.def > mib_api.3
+netsnmp_varbind_api.3: $(srcdir)/netsnmp_varbind_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_varbind_api.3.def > $@
 
-read_config.3: $(srcdir)/read_config.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/read_config.3.def > read_config.3
+netsnmp_pdu_api.3: $(srcdir)/netsnmp_pdu_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_pdu_api.3.def > $@
 
-snmp_agent_api.3: $(srcdir)/snmp_agent_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_agent_api.3.def > snmp_agent_api.3
+netsnmp_session_api.3: $(srcdir)/netsnmp_session_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_session_api.3.def > $@
+
+netsnmp_mib_api.3: $(srcdir)/netsnmp_mib_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_mib_api.3.def > $@
+
+netsnmp_config_api.3: $(srcdir)/netsnmp_config_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_config_api.3.def > $@
 
 snmp_alarm.3: $(srcdir)/snmp_alarm.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_alarm.3.def > snmp_alarm.3
+	$(SED) -f ../sedscript < $(srcdir)/snmp_alarm.3.def > $@
 
-snmp_api.3: $(srcdir)/snmp_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_api.3.def > snmp_api.3
+netsnmp_sess_api.3: $(srcdir)/netsnmp_sess_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_sess_api.3.def > $@
 
-snmp_sess_api.3: $(srcdir)/snmp_sess_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_sess_api.3.def > snmp_sess_api.3
+netsnmp_agent_api.3: $(srcdir)/netsnmp_agent_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_agent_api.3.def > $@
 
-snmp_trap_api.3: $(srcdir)/snmp_trap_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_trap_api.3.def > snmp_trap_api.3
+netsnmp_trap_api.3: $(srcdir)/netsnmp_trap_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_trap_api.3.def > $@
 
 snmp.conf.5: $(srcdir)/snmp.conf.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp.conf.5.def > snmp.conf.5
+	$(SED) -f ../sedscript < $(srcdir)/snmp.conf.5.def > $@
 
 snmp_config.5: $(srcdir)/snmp_config.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_config.5.def > snmp_config.5
+	$(SED) -f ../sedscript < $(srcdir)/snmp_config.5.def > $@
 
 snmpd.conf.5: $(srcdir)/snmpd.conf.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmpd.conf.5.def > snmpd.conf.5
+	$(SED) -f ../sedscript < $(srcdir)/snmpd.conf.5.def > $@
 
 snmpd.examples.5: $(srcdir)/snmpd.examples.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmpd.examples.5.def > snmpd.examples.5
+	$(SED) -f ../sedscript < $(srcdir)/snmpd.examples.5.def > $@
 
 snmpd.internal.5: $(srcdir)/snmpd.internal.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmpd.internal.5.def > snmpd.internal.5
+	$(SED) -f ../sedscript < $(srcdir)/snmpd.internal.5.def > $@
 
 snmptrapd.conf.5: $(srcdir)/snmptrapd.conf.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.conf.5.def > snmptrapd.conf.5
+	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.conf.5.def > $@
 
 variables.5: $(srcdir)/variables.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/variables.5.def > variables.5
+	$(SED) -f ../sedscript < $(srcdir)/variables.5.def > $@
 
 snmptrapd.8: $(srcdir)/snmptrapd.8.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.8.def > snmptrapd.8
+	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.8.def > $@
 
 default_store.3.h: $(srcdir)/../include/net-snmp/library/default_store.h
 	awk '{ if ($$0 == "     * begin storage definitions ") { p = 1 } else if ($$0 == "     * end storage definitions ") { p = 0 } else if (p) { print $$0}}' < $(srcdir)/../include/net-snmp/library/default_store.h > default_store.3.h
@@ -245,11 +253,11 @@ mib2c.conf.5: $(top_srcdir)/local/mib2c mib2c.conf.5.in $(srcdir)/mib2c.extract.
 	  touch mib2c.conf.5 ; \
 	fi
 
-maninstall:  maninstalldirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5G) $(MAN8) $(MANALIASES)
+maninstall:  maninstalldirs $(MAN1) $(MAN1G) $(MAN3) $(MAN3_API) $(MAN3G) $(MAN5G) $(MAN8G) $(MANALIASES)
 	@for i in $(MAN1) ; do $(INSTALL_DATA) $(srcdir)/`basename $$i` $(INSTALL_PREFIX)$(man1dir) ; echo "install:  installed $$i in $(INSTALL_PREFIX)$(man1dir)" ; done
 	@$(INSTALL_DATA) $(MAN1G) $(INSTALL_PREFIX)$(man1dir)
 	@for i in $(MAN1G) ; do echo "install:  installed $$i in $(INSTALL_PREFIX)$(man1dir)" ; done
-	@for i in $(MAN3) ; do $(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_PREFIX)$(man3dir) ; echo "install:  installed $$i in $(INSTALL_PREFIX)$(man3dir)" ; done
+	#EMPTY LIST#@for i in $(MAN3) ; do $(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_PREFIX)$(man3dir) ; echo "install:  installed $$i in $(INSTALL_PREFIX)$(man3dir)" ; done
 	@$(INSTALL_DATA) $(MAN3G) $(INSTALL_PREFIX)$(man3dir)
 	@for i in $(MAN3G) ; do echo "install:  installed $$i in $(INSTALL_PREFIX)$(man3dir)" ; done
 	@$(INSTALL_DATA) $(MANALIASES) $(INSTALL_PREFIX)$(man3dir)
@@ -274,11 +282,11 @@ maninstalldirs:
 #
 html: $(MANALL)
 	for i in $(MANALL); do \
-	   if test `wc -l $$i | awk '{print $$1}'` != 1 ; then \
+#	   if test `wc -l $$i | awk '{print $$1}'` != 1 ; then \
 		   base=`echo $$i | sed 's/.[0-9]$$//;'` ; \
 		   echo "<HTML><BODY bgcolor=\"#ffffff\" background=\"../ucd-snmp-bg3.gif\"><PRE>" > $$base.html; \
 		   man2html -r ./$$i | $(PERL) -p -e 's/HREF=\"..\/man.\//HREF=\"/g;s/\.[1-9]\.html/.html/g;' | grep -v 'Content-type:' >> $$base.html; \
 		   a="$$a $$i"; \
-	   fi ; \
+#	   fi ; \
 	done ;\
 	$(PERL) make_index.pl man_sections.txt $$a > index.html

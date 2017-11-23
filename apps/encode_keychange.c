@@ -38,10 +38,6 @@
 #include <netinet/in.h>
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 
 #include <stdlib.h>
@@ -233,11 +229,12 @@ main(int argc, char **argv)
         engineid_len = hex_to_binary2(engineid + 2,
                                       strlen((char *) engineid) - 2,
                                       (char **) &engineid);
-        DEBUGMSGTL(("encode_keychange", "engineIDLen: %d\n",
-                    engineid_len));
+        DEBUGMSGTL(("encode_keychange", "engineIDLen: %lu\n",
+                    (unsigned long)engineid_len));
     } else {
         engineid_len = setup_engineID(&engineid, (char *) engineid);
-
+        if ((ssize_t)engineid_len < 0)
+            exit(1);
     }
 
 #ifdef NETSNMP_ENABLE_TESTING_CODE
@@ -295,12 +292,12 @@ main(int argc, char **argv)
     QUITFUN(rval, main_quit);
 
 
-    DEBUGMSGTL(("encode_keychange", "EID (%d): ", engineid_len));
+    DEBUGMSGTL(("encode_keychange", "EID (%lu): ", (unsigned long)engineid_len));
     for (i = 0; i < (int) engineid_len; i++)
         DEBUGMSGTL(("encode_keychange", "%02x", (int) (engineid[i])));
     DEBUGMSGTL(("encode_keychange", "\n"));
 
-    DEBUGMSGTL(("encode_keychange", "old Ku (%d) (from %s): ", oldKu_len,
+    DEBUGMSGTL(("encode_keychange", "old Ku (%lu) (from %s): ", (unsigned long)oldKu_len,
                 oldpass));
     for (i = 0; i < (int) oldKu_len; i++)
         DEBUGMSGTL(("encode_keychange", "%02x", (int) (oldKu[i])));
@@ -312,8 +309,8 @@ main(int argc, char **argv)
     QUITFUN(rval, main_quit);
 
 
-    DEBUGMSGTL(("encode_keychange", "generating old Kul (%d) (from Ku): ",
-                oldkul_len));
+    DEBUGMSGTL(("encode_keychange", "generating old Kul (%lu) (from Ku): ",
+                (unsigned long)oldkul_len));
     for (i = 0; i < (int) oldkul_len; i++)
         DEBUGMSGTL(("encode_keychange", "%02x", (int) (oldkul[i])));
     DEBUGMSGTL(("encode_keychange", "\n"));
@@ -323,8 +320,8 @@ main(int argc, char **argv)
                         newKu, newKu_len, newkul, &newkul_len);
     QUITFUN(rval, main_quit);
 
-    DEBUGMSGTL(("encode_keychange", "generating new Kul (%d) (from Ku): ",
-                oldkul_len));
+    DEBUGMSGTL(("encode_keychange", "generating new Kul (%lu) (from Ku): ",
+                (unsigned long)oldkul_len));
     for (i = 0; i < (int) newkul_len; i++)
         DEBUGMSGTL(("encode_keychange", "%02x", newkul[i]));
     DEBUGMSGTL(("encode_keychange", "\n"));
@@ -394,22 +391,22 @@ usage_to_file(FILE * ofp)
 
     usage_synopsis(ofp);
 
-    fprintf(ofp, "\n\
-    Only -t is mandatory.  The transform is used to convert P=>Ku, convert\n\
-    Ku=>Kul, and to hash the old Kul with the random bits.\n\
-\n\
-    Passphrase will be taken from the first successful source as follows:\n\
+    fprintf(ofp, "\n%s\
 	a) Commandline options,\n\
 	b) The file \"%s/%s\",\n\
-	c) stdin  -or-  User input from the terminal.\n\
+	c) stdin  -or-  User input from the terminal.\n\n%s\
+		" NL,
+   "Only -t is mandatory.  The transform is used to convert P=>Ku, convert\n\
+    Ku=>Kul, and to hash the old Kul with the random bits.\n\
 \n\
-    -f will require reading from the stdin/terminal, ignoring a) and b).\n\
+    Passphrase will be taken from the first successful source as follows:\n",
+    (s = getenv("HOME")) ? s : "$HOME", local_passphrase_filename,
+   "-f will require reading from the stdin/terminal, ignoring a) and b).\n\
     -P will prevent prompts for passphrases to stdout from being printed.\n\
 \n\
     <engineID> is interpreted as a hex string when preceded by \"0x\",\n\
     otherwise it is created to contain \"text\".  If nothing is given,\n\
-    <engineID> is constructed from the first IP address for the local host.\n\
-		" NL, (s = getenv("HOME")) ? s : "$HOME", local_passphrase_filename);
+    <engineID> is constructed from the first IP address for the local host.\n");
 
 
     /*
@@ -744,11 +741,15 @@ snmp_getpassphrase(const char *prompt, int bvisible)
         ti = snmp_ttyecho(0, 0);
     }
 
-    fgets(buffer, sizeof(buffer), stdin);
+    bufp = fgets(buffer, sizeof(buffer), stdin);
 
     if (!bvisible) {
         ti = snmp_ttyecho(0, ti);
         fputs("\n", ofp);
+    }
+    if (!bufp) {
+        fprintf(stderr, "Aborted...\n");
+        exit(1);
     }
 
 

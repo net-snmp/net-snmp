@@ -27,8 +27,6 @@
 #include "ip.h"
 #include "kernel.h"
 #include "interfaces.h"
-#include "struct.h"
-#include "util_funcs.h"
 
 #else /* !NETSNMP_CAN_USE_SYSCTL */
 
@@ -42,11 +40,7 @@
 #include <sys/socket.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# if defined (WIN32) || defined (cygwin)
-#  include <sys/timeb.h>
-# else
 # include <sys/time.h>
-# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -94,28 +88,28 @@
 #endif
 #undef	KERNEL
 #ifdef RTENTRY_4_4
-#ifndef STRUCT_RTENTRY_HAS_RT_UNIT
+#ifndef HAVE_STRUCT_RTENTRY_RT_UNIT
 #define rt_unit rt_refcnt       /* Reuse this field for device # */
 #endif
-#ifndef STRUCT_RTENTRY_HAS_RT_DST
+#ifndef HAVE_STRUCT_RTENTRY_RT_DST
 #define rt_dst rt_nodes->rn_key
 #endif
 #else                           /* RTENTRY_4_3 */
-#ifndef STRUCT_RTENTRY_HAS_RT_DST
+#ifndef HAVE_STRUCT_RTENTRY_RT_DST
 #define rt_dst rt_nodes->rn_key
 #endif
-#ifndef STRUCT_RTENTRY_HAS_RT_HASH
+#ifndef HAVE_STRUCT_RTENTRY_RT_HASH
 #define rt_hash rt_pad1
 #endif
-#ifndef STRUCT_RTENTRY_HAS_RT_REFCNT
+#ifndef HAVE_STRUCT_RTENTRY_RT_REFCNT
 #ifndef hpux10
 #define rt_refcnt rt_pad2
 #endif
 #endif
-#ifndef STRUCT_RTENTRY_HAS_RT_USE
+#ifndef HAVE_STRUCT_RTENTRY_RT_USE
 #define rt_use rt_pad3
 #endif
-#ifndef STRUCT_RTENTRY_HAS_RT_UNIT
+#ifndef HAVE_STRUCT_RTENTRY_RT_UNIT
 #define rt_unit rt_refcnt       /* Reuse this field for device # */
 #endif
 #endif
@@ -151,16 +145,23 @@
 #endif
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #if HAVE_NLIST_H
 #include <nlist.h>
 #endif
 
 #ifdef solaris2
 #include "kernel_sunos5.h"
+/* Solaris 2.6/7 need sys/stream.h (mblk_t) to include inet/ip.h */
+#ifdef HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
+/* Solaris 2.6 needs inet/common.h (u16) to include inet/ip.h */
+#ifdef HAVE_INET_COMMON_H
+#include <inet/common.h>
+#endif
+#ifdef HAVE_INET_IP_H
+#include <inet/ip.h>
+#endif /* HAVE_INET_IP_H */
 #endif
 
 #ifdef HAVE_SYS_SYSCTL_H

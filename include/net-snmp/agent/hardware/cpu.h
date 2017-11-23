@@ -33,6 +33,9 @@ struct netsnmp_cpu_info_s {
      unsigned long long kern_ticks;
      unsigned long long intrpt_ticks;
      unsigned long long sirq_ticks;
+     unsigned long long steal_ticks;
+     unsigned long long guest_ticks;
+     unsigned long long guestnice_ticks;
 
      unsigned long long total_ticks;
      unsigned long long sys2_ticks;  /* For non-atomic system counts */
@@ -63,3 +66,4 @@ netsnmp_cpu_info *netsnmp_cpu_get_byName( char*, int );
 
 netsnmp_cache *netsnmp_cpu_get_cache( void );
 int netsnmp_cpu_load( void );
+int netsnmp_cpu_arch_load(netsnmp_cache *cache, void *magic);

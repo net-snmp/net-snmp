@@ -7,12 +7,12 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH MIB2C 1 "1 Sep 2004" VVERSIONINFO "Net-SNMP"
+.TH MIB2C 1 "05 Apr 2010" VVERSIONINFO "Net-SNMP"
 .SH NAME
 mib2c -- generate template code for extending the agent
 .SH SYNOPSIS
 .B mib2c
-[-h] -c CONFIGFILE [-I PATH] [-f OUTNAME] [-i][q][-S VAR=VAL] MIBNODE
+[-h] -c CONFIGFILE [-I PATH] [-f OUTNAME] [-i][-s][-q][-S VAR=VAL] MIBNODE
 .SH DESCRIPTION
 The mib2c tool is designed to take a portion of the MIB tree (as defined
 by a MIB file) and generate the template C code necessary to implement
@@ -174,6 +174,10 @@ names it is generating code for, which is probably what you want anyway.
 .TP
 .BI -i
 Do not run indent on the resulting code.
+.TP
+.BI -s
+Do not look for MIBNODE.sed and run sed on the resulting code. This
+is useful to shorten long mib variable names in the code.
 .TP
 .BI -q
 Run in "quiet" mode, which minimizes the status messages

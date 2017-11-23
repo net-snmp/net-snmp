@@ -265,7 +265,7 @@ usmDHUserKeyTable_container_load(netsnmp_container * container)
         ++count;
     }
 
-    DEBUGMSGT(("verbose:usmDHUserKeyTable:usmDHUserKeyTable_container_load", "inserted %d records\n", count));
+    DEBUGMSGT(("verbose:usmDHUserKeyTable:usmDHUserKeyTable_container_load", "inserted %d records\n", (int)count));
 
     return MFD_SUCCESS;
 }                               /* usmDHUserKeyTable_container_load */

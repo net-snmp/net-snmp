@@ -263,7 +263,7 @@ inetCidrRouteTable_container_load(netsnmp_container *container)
         netsnmp_access_route_container_load(NULL,
                                             NETSNMP_ACCESS_ROUTE_LOAD_NOFLAGS);
     DEBUGMSGT(("verbose:inetCidrRouteTable:inetCidrRouteTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(route_container)));
+               "%d records\n", (int)CONTAINER_SIZE(route_container)));
 
     if (NULL == route_container)
         return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
@@ -283,7 +283,7 @@ inetCidrRouteTable_container_load(netsnmp_container *container)
                                         NETSNMP_ACCESS_ROUTE_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:inetCidrRouteTable:inetCidrRouteTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%d records\n", (int)CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* inetCidrRouteTable_container_load */

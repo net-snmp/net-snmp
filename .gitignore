@@ -66,6 +66,7 @@ include/net-snmp/library/snmpv3-security-includes.h
 include/net-snmp/net-snmp-config.h
 libtool
 local/snmpcheck
+local/snmpconf
 Makefile
 man/*.[1358]
 man/default_store.3.h

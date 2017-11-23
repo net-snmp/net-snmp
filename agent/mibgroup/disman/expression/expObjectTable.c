@@ -22,6 +22,7 @@
  * This should always be included first before anything else 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -34,6 +35,9 @@
 #include <limits.h>
 #endif
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(header_complex_find_entry)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * minimal include directives 
@@ -66,31 +70,34 @@ struct variable2 expObjectTable_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define	EXPOBJECTID  2
-    {EXPOBJECTID,         ASN_OBJECT_ID, RWRITE, var_expObjectTable, 2, {1, 2}},
+    {EXPOBJECTID,         ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
+     var_expObjectTable, 2, {1, 2}},
 #define	EXPOBJECTIDWILDCARD 3
-    {EXPOBJECTIDWILDCARD, ASN_INTEGER,   RWRITE, var_expObjectTable, 2, {1, 3}},
+    {EXPOBJECTIDWILDCARD, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_expObjectTable, 2, {1, 3}},
 #define	EXPOBJECTSAMPLETYPE 4
-    {EXPOBJECTSAMPLETYPE, ASN_INTEGER,   RWRITE, var_expObjectTable, 2, {1, 4}},
+    {EXPOBJECTSAMPLETYPE, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_expObjectTable, 2, {1, 4}},
 #define	EXPOBJECTDELTADISCONTINUITYID 5
-    {EXPOBJECTDELTADISCONTINUITYID,  ASN_OBJECT_ID, RWRITE, var_expObjectTable, 2, {1, 5}},
+    {EXPOBJECTDELTADISCONTINUITYID,  ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
+     var_expObjectTable, 2, {1, 5}},
 #define	EXPOBJECTDISCONTINUITYIDWILDCARD 6
-    {EXPOBJECTDISCONTINUITYIDWILDCARD, ASN_INTEGER, RWRITE, var_expObjectTable, 2, {1, 6}},
+    {EXPOBJECTDISCONTINUITYIDWILDCARD, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_expObjectTable, 2, {1, 6}},
 #define	EXPOBJECTDISCONTINUITYIDTYPE 7
-    {EXPOBJECTDISCONTINUITYIDTYPE,     ASN_INTEGER, RWRITE, var_expObjectTable, 2, {1, 7}},
+    {EXPOBJECTDISCONTINUITYIDTYPE,     ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_expObjectTable, 2, {1, 7}},
 #define	EXPOBJECTCONDITIONAL  8
-    {EXPOBJECTCONDITIONAL, ASN_OBJECT_ID, RWRITE, var_expObjectTable, 2, {1, 8}},
+    {EXPOBJECTCONDITIONAL, ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
+     var_expObjectTable, 2, {1, 8}},
 #define	EXPOBJECTCONDITIONALWILDCARD  9
-    {EXPOBJECTCONDITIONALWILDCARD,     ASN_INTEGER, RWRITE, var_expObjectTable, 2, {1, 9}},
+    {EXPOBJECTCONDITIONALWILDCARD,     ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_expObjectTable, 2, {1, 9}},
 #define	EXPOBJECTENTRYSTATUS  10
-    {EXPOBJECTENTRYSTATUS, ASN_INTEGER, RWRITE, var_expObjectTable, 2, {1, 10}}
+    {EXPOBJECTENTRYSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_expObjectTable, 2, {1, 10}}
 };
 
-
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-extern struct header_complex_index *expExpressionTableStorage;
-extern struct header_complex_index *expValueTableStorage;
 
 struct header_complex_index *expObjectTableStorage = NULL;
 
@@ -207,7 +214,6 @@ void
 parse_expObjectTable(const char *token, char *line)
 {
     size_t          tmpint;
-    oid            *tmpoid = NULL;
     struct expObjectTable_data *StorageTmp =
         SNMP_MALLOC_STRUCT(expObjectTable_data);
 
@@ -394,6 +400,7 @@ store_expObjectTable(int majorID, int minorID, void *serverarg,
         }
     }
     DEBUGMSGTL(("expObjectTable", "storage done\n"));
+    return 0;
 }
 
 
@@ -564,6 +571,7 @@ write_expObjectID(int action,
          * previous values, as these are from a different object?  
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -644,6 +652,7 @@ write_expObjectIDWildcard(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -725,7 +734,7 @@ write_expObjectSampleType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -822,6 +831,7 @@ write_expObjectDeltaDiscontinuityID(int action,
          * previous values, as these are from a different object?  
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -905,7 +915,7 @@ write_expObjectDiscontinuityIDWildcard(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -989,7 +999,7 @@ write_expObjectDiscontinuityIDType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -1083,6 +1093,7 @@ write_expObjectConditional(int action,
          * previous values, as these are from a different object?  
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -1167,7 +1178,7 @@ write_expObjectConditionalWildcard(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -1357,7 +1368,7 @@ write_expObjectEntryStatus(int action,
          */
 
 
-        if (StorageTmp == NULL) {
+        if (StorageTmp == NULL && set_value != RS_DESTROY) {
             /*
              * row creation, so add it 
              */
@@ -1366,7 +1377,7 @@ write_expObjectEntryStatus(int action,
             /*
              * XXX: ack, and if it is NULL? 
              */
-        } else if (set_value != RS_DESTROY) {
+        } else if (StorageTmp != NULL && set_value != RS_DESTROY) {
             /*
              * set the flag? 
              */
@@ -1438,6 +1449,7 @@ write_expObjectEntryStatus(int action,
                 StorageTmp->expObjectEntryStatus = RS_NOTINSERVICE;
             }
         }
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;

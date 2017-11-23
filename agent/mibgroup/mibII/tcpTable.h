@@ -6,7 +6,6 @@
 #define _MIBGROUP_TCPTABLE_H
 
 config_arch_require(solaris2, kernel_sunos5)
-config_require(util_funcs)
 #if !defined(NETSNMP_ENABLE_MFD_REWRITES)
 config_require(mibII/ip)
 #endif

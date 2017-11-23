@@ -343,6 +343,9 @@ config_exclude(mibII/interfaces)
      *********************************************************************
      * function prototypes
      */
+    	
+    int             _mfd_ifTable_undo_setup_allocate(ifTable_rowreq_ctx *rowreq_ctx);
+    void            _mfd_ifTable_undo_setup_release(ifTable_rowreq_ctx *rowreq_ctx);
     int             ifTable_pre_request(ifTable_registration *
                                         user_context);
     int             ifTable_post_request(ifTable_registration *
@@ -361,8 +364,8 @@ config_exclude(mibII/interfaces)
     ifTable_rowreq_ctx *ifTable_row_find_by_mib_index(ifTable_mib_index *
                                                       mib_idx);
 
-    extern oid      ifTable_oid[];
-    extern int      ifTable_oid_size;
+    extern const oid ifTable_oid[];
+    extern const int ifTable_oid_size;
 
 
 #include "ifTable_interface.h"
@@ -448,6 +451,7 @@ config_exclude(mibII/interfaces)
 
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     /*
      *********************************************************************
      * SET function declarations
@@ -663,7 +667,7 @@ config_exclude(mibII/interfaces)
 
 
     int             ifTable_check_dependencies(ifTable_rowreq_ctx * ctx);
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     /*
      * DUMMY markers, ignore

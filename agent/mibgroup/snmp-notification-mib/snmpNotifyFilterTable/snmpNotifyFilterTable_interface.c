@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,22 @@
 #include "snmpNotifyFilterTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_child_of(snmpNotifyFilterTable_external_access, libnetsnmpmibs)
+
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(check_vb_type_and_max_size)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+
+
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_size, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_set, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_get, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_get, snmpNotifyFilterTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -96,19 +113,23 @@ static void
     _snmpNotifyFilterTable_container_shutdown
     (snmpNotifyFilterTable_interface_ctx * if_ctx);
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_GET
 netsnmp_container *
 snmpNotifyFilterTable_container_get(void)
 {
     return snmpNotifyFilterTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_GET
 snmpNotifyFilterTable_registration *
 snmpNotifyFilterTable_registration_get(void)
 {
     return snmpNotifyFilterTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_GET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_SET
 snmpNotifyFilterTable_registration *
 snmpNotifyFilterTable_registration_set(snmpNotifyFilterTable_registration *
                                        newreg)
@@ -118,12 +139,15 @@ snmpNotifyFilterTable_registration_set(snmpNotifyFilterTable_registration *
     snmpNotifyFilterTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_SET */
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_SIZE
 int
 snmpNotifyFilterTable_container_size(void)
 {
     return CONTAINER_SIZE(snmpNotifyFilterTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_SIZE */
 
 u_int
 snmpNotifyFilterTable_dirty_get(void)
@@ -177,23 +201,9 @@ snmpNotifyFilterTable_data *snmpNotifyFilterTable_allocate_data(void);
  *    (Define its contents and how it's structured)
  */
 void
- 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    _snmpNotifyFilterTable_initialize_interface
-    (snmpNotifyFilterTable_registration * reg_ptr, u_long flags) {
+_snmpNotifyFilterTable_initialize_interface
+    (snmpNotifyFilterTable_registration *reg_ptr, u_long flags)
+{
     netsnmp_baby_steps_access_methods *access_multiplexer =
         &snmpNotifyFilterTable_if_ctx.access_multiplexer;
     netsnmp_table_registration_info *tbl_info =
@@ -220,7 +230,7 @@ void
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = SNMPNOTIFYFILTERTABLE_MIN_COL;
     tbl_info->max_column = SNMPNOTIFYFILTERTABLE_MAX_COL;
@@ -261,7 +271,7 @@ void
         _mfd_snmpNotifyFilterTable_post_request;
 
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -287,7 +297,7 @@ void
      */
     access_multiplexer->consistency_checks =
         _mfd_snmpNotifyFilterTable_check_dependencies;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     /*************************************************
      *
@@ -302,10 +312,12 @@ void
                                             handler,
                                             snmpNotifyFilterTable_oid,
                                             snmpNotifyFilterTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
-                                          | HANDLER_CAN_RWRITE
-#endif
+                                            HANDLER_CAN_BABY_STEP |
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
+                                            HANDLER_CAN_RWRITE
+#else
+                                            HANDLER_CAN_RONLY
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT  */
                                           );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR,
@@ -325,7 +337,7 @@ void
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
@@ -348,7 +360,7 @@ void
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -389,23 +401,9 @@ void
  * Shutdown the table snmpNotifyFilterTable
  */
 void
- 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    _snmpNotifyFilterTable_shutdown_interface
-    (snmpNotifyFilterTable_registration * reg_ptr) {
+_snmpNotifyFilterTable_shutdown_interface
+    (snmpNotifyFilterTable_registration *reg_ptr)
+{
     /*
      * shutdown the container
      */
@@ -424,9 +422,8 @@ snmpNotifyFilterTable_valid_columns_set(netsnmp_column_info *vc)
  * convert the index component stored in the context to an oid
  */
 int
-snmpNotifyFilterTable_index_to_oid(netsnmp_index * oid_idx,
-                                   snmpNotifyFilterTable_mib_index *
-                                   mib_idx)
+snmpNotifyFilterTable_index_to_oid(netsnmp_index *oid_idx,
+                                   snmpNotifyFilterTable_mib_index *mib_idx)
 {
     int             err = SNMP_ERR_NOERROR;
 
@@ -499,9 +496,8 @@ snmpNotifyFilterTable_index_to_oid(netsnmp_index * oid_idx,
  * @retval SNMP_ERR_GENERR   : error
  */
 int
-snmpNotifyFilterTable_index_from_oid(netsnmp_index * oid_idx,
-                                     snmpNotifyFilterTable_mib_index *
-                                     mib_idx)
+snmpNotifyFilterTable_index_from_oid(netsnmp_index *oid_idx,
+                                     snmpNotifyFilterTable_mib_index *mib_idx)
 {
     int             err = SNMP_ERR_NOERROR;
 
@@ -729,7 +725,7 @@ _mfd_snmpNotifyFilterTable_post_request(netsnmp_mib_handler *handler, netsnmp_ha
                                         *agtreq_info,
                                         netsnmp_request_info *requests)
 {
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -773,6 +769,7 @@ _mfd_snmpNotifyFilterTable_post_request(netsnmp_mib_handler *handler, netsnmp_ha
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_snmpNotifyFilterTable_post_request */
+
 
 /**
  * @internal
@@ -847,7 +844,7 @@ _mfd_snmpNotifyFilterTable_object_lookup(netsnmp_mib_handler *handler, netsnmp_h
                                          netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:_mfd_snmpNotifyFilterTable_object_lookup", "called\n"));
@@ -974,7 +971,7 @@ _mfd_snmpNotifyFilterTable_get_values(netsnmp_mib_handler *handler, netsnmp_hand
                                       *agtreq_info,
                                       netsnmp_request_info *requests)
 {
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -1082,7 +1079,7 @@ _snmpNotifyFilterTable_check_indexes(snmpNotifyFilterTable_rowreq_ctx *
                                              user_ctx, rowreq_ctx);
 }                               /* _snmpNotifyFilterTable_check_indexes */
 
-#ifndef NETSNMP_DISABLE_SET_SUPPORT
+#if !(defined(NETSNMP_NO_WRITE_SUPPORT) || defined(NETSNMP_DISABLE_SET_SUPPORT))
 /***********************************************************************
  *
  * SET processing
@@ -1253,7 +1250,7 @@ _mfd_snmpNotifyFilterTable_check_objects(netsnmp_mib_handler *handler, netsnmp_h
                                          *agtreq_info,
                                          netsnmp_request_info *requests)
 {
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc;
@@ -1301,7 +1298,7 @@ _mfd_snmpNotifyFilterTable_check_dependencies(netsnmp_mib_handler *handler, nets
                                               *requests)
 {
     int             rc;
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:_mfd_snmpNotifyFilterTable_check_dependencies", "called\n"));
 
@@ -1394,7 +1391,7 @@ _mfd_snmpNotifyFilterTable_undo_setup(netsnmp_mib_handler *handler, netsnmp_hand
                                       netsnmp_request_info *requests)
 {
     int             rc;
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:_mfd_snmpNotifyFilterTable_undo_setup", "called\n"));
@@ -1459,7 +1456,7 @@ _mfd_snmpNotifyFilterTable_undo_cleanup(netsnmp_mib_handler *handler, netsnmp_ha
                                         *agtreq_info,
                                         netsnmp_request_info *requests)
 {
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc;
 
@@ -1573,7 +1570,7 @@ _mfd_snmpNotifyFilterTable_set_values(netsnmp_mib_handler *handler, netsnmp_hand
                                       *agtreq_info,
                                       netsnmp_request_info *requests)
 {
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc = SNMP_ERR_NOERROR;
@@ -1621,7 +1618,7 @@ _mfd_snmpNotifyFilterTable_commit(netsnmp_mib_handler *handler,
                                   netsnmp_request_info *requests)
 {
     int             rc;
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:_mfd_snmpNotifyFilterTable_commit", "called\n"));
@@ -1654,7 +1651,7 @@ _mfd_snmpNotifyFilterTable_undo_commit(netsnmp_mib_handler *handler, netsnmp_han
                                        netsnmp_request_info *requests)
 {
     int             rc;
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:_mfd_snmpNotifyFilterTable_undo_commit", "called\n"));
@@ -1754,7 +1751,7 @@ _mfd_snmpNotifyFilterTable_undo_values(netsnmp_mib_handler *handler, netsnmp_han
                                        netsnmp_request_info *requests)
 {
     int             rc;
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
 
@@ -1810,7 +1807,7 @@ _mfd_snmpNotifyFilterTable_irreversible_commit(netsnmp_mib_handler
                                                *agtreq_info, netsnmp_request_info
                                                *requests)
 {
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx =
+    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:_mfd_snmpNotifyFilterTable_irreversible:commit", "called\n"));
@@ -1838,7 +1835,7 @@ _mfd_snmpNotifyFilterTable_irreversible_commit(netsnmp_mib_handler
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_snmpNotifyFilterTable_irreversible_commit */
-#endif
+#endif /* NETSNMP_NO_WRITE_SUPPORT || NETSNMP_DISABLE_SET_SUPPORT */
 
 /***********************************************************************
  *
@@ -2013,15 +2010,18 @@ void
 snmpNotifyFilterTable_container_init_persistence(netsnmp_container
                                                  *container)
 {
+    netsnmp_container **container_p;
     int             rc;
 
     register_config_handler(NULL, row_token,
                             _snmpNotifyFilterTable_container_row_restore,
                             NULL, NULL);
+    container_p = netsnmp_memdup(&container, sizeof(container));
+    netsnmp_assert(container_p);
     rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                                 SNMP_CALLBACK_STORE_DATA,
                                 _snmpNotifyFilterTable_container_save_rows,
-                                container);
+                                container_p);
 
     if (rc != SNMP_ERR_NOERROR)
         snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
@@ -2039,9 +2039,11 @@ _snmpNotifyFilterTable_container_save_rows(int majorID, int minorID,
         "#\n" "# snmpNotifyFilterTable persistent data\n" "#";
     char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                                  NETSNMP_DS_LIB_APPTYPE);
-    netsnmp_container *c = (netsnmp_container *) clientarg;
+    netsnmp_container *c = *(netsnmp_container **)clientarg;
 
-    DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_container_save_rows", "saving %d rows\n", CONTAINER_SIZE(c)));
+    DEBUGMSGTL(("internal:snmpNotifyFilterTable:"
+                "_snmpNotifyFilterTable_container_save_rows",
+                "saving %" NETSNMP_PRIz "u rows\n", CONTAINER_SIZE(c)));
 
     read_config_store((char *) type, sep);
     read_config_store((char *) type, buf);
@@ -2092,7 +2094,7 @@ _snmpNotifyFilterTable_container_row_save(snmpNotifyFilterTable_rowreq_ctx
      * be treated a little differently. Specifically, you will need
      * (4 * len) + 4 [3 ASCII chars per byte + 1 for ., + 4 for len].
      *
-     * 3) Also, remeber to add space for the identifier and seperator
+     * 3) Also, remember to add space for the identifier and separator
      * characters (for example, each column is prefixed by the
      * column number and a semicolon. To allow for the maximum
      * column values, 12 bytes [11 for oid + 1 for ':'] per
@@ -2220,7 +2222,7 @@ _snmpNotifyFilterTable_container_row_restore(const char *token, char *buf)
      * loop through and get each column
      */
     buf = skip_white(buf);
-    while ((NULL != buf) && isdigit(*buf)) {
+    while ((NULL != buf) && isdigit((unsigned char)(*buf))) {
         /*
          * extract column, skip ':'
          */
@@ -2403,6 +2405,7 @@ static char    *_snmpNotifyFilterTable_container_col_restore
 }
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_EXTERNAL_ACCESS
 snmpNotifyFilterTable_rowreq_ctx *
 snmpNotifyFilterTable_row_find_by_mib_index(snmpNotifyFilterTable_mib_index
                                             * mib_idx)
@@ -2425,8 +2428,9 @@ snmpNotifyFilterTable_row_find_by_mib_index(snmpNotifyFilterTable_mib_index
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx =
+    rowreq_ctx = (snmpNotifyFilterTable_rowreq_ctx*)
         CONTAINER_FIND(snmpNotifyFilterTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_EXTERNAL_ACCESS */

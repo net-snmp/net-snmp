@@ -9,27 +9,14 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/route.h>
+#include "route.h"
+#include "route_private.h"
 
 /**---------------------------------------------------------------------*/
 /*
  * local static prototypes
  */
 static void _access_route_entry_release(netsnmp_route_entry * entry, void *unused);
-
-/**---------------------------------------------------------------------*/
-/*
- * external per-architecture functions prototypes
- *
- * These shouldn't be called by the general public, so they aren't in
- * the header file.
- */
-extern int netsnmp_access_route_container_arch_load(netsnmp_container* container,
-                                                    u_int load_flags);
-extern int
-netsnmp_arch_route_create(netsnmp_route_entry *entry);
-extern int
-netsnmp_arch_route_delete(netsnmp_route_entry *entry);
-
 
 /**---------------------------------------------------------------------*/
 /*
@@ -54,6 +41,8 @@ netsnmp_access_route_container_load(netsnmp_container* container, u_int load_fla
             return NULL;
         }
     }
+
+    container->container_name = strdup("_route");
 
     rc =  netsnmp_access_route_container_arch_load(container, load_flags);
     if (0 != rc) {
@@ -246,8 +235,7 @@ netsnmp_access_route_entry_copy(netsnmp_route_entry *lhs,
     lhs->rt_proto = rhs->rt_proto;
 
 #ifdef USING_IP_FORWARD_MIB_IPCIDRROUTETABLE_IPCIDRROUTETABLE_MODULE
-    if (NULL != lhs->rt_info)
-        SNMP_FREE(lhs->rt_info);
+    SNMP_FREE(lhs->rt_info);
     if (NULL != rhs->rt_info)
         snmp_clone_mem((void **) &lhs->rt_info, rhs->rt_info,
                        rhs->rt_info_len * sizeof(oid));

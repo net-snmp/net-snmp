@@ -4,12 +4,36 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "disman/schedule/schedCore.h"
 #include "utilities/iquery.h"
 
+netsnmp_feature_require(iquery)
+
+netsnmp_feature_child_of(sched_nextrowtime, netsnmp_unused)
+
 netsnmp_tdata *schedule_table;
+
+
+#if !defined(HAVE_LOCALTIME_R) && !defined(localtime_r)
+/*
+ * localtime_r() replacement for older MinGW versions.
+ * Note: this implementation is not thread-safe, while it should.
+ */
+struct tm      *
+localtime_r(const time_t * timer, struct tm *result)
+{
+    struct tm      *result_p;
+
+    result_p = localtime(timer);
+    if (result && result_p)
+        *result = *result_p;
+    return result_p;
+}
+#endif
+
 
     /*
      * Initialize the container for the schedule table,
@@ -22,7 +46,7 @@ init_schedule_container(void)
     if (!schedule_table) {
         schedule_table = netsnmp_tdata_create_table("schedTable", 0);
         DEBUGMSGTL(("disman:schedule:init",
-                        "create schedule container(%x)\n", schedule_table));
+                        "create schedule container(%p)\n", schedule_table));
     }
 }
 
@@ -53,13 +77,13 @@ _sched_callback( unsigned int reg, void *magic )
         DEBUGMSGTL(("disman:schedule:callback", "missing entry\n"));
         return;
     }
-    entry->schedLastRun = time(0);
+    entry->schedLastRun = time(NULL);
     entry->schedTriggers++;
 
     DEBUGMSGTL(( "disman:schedule:callback", "assignment "));
     DEBUGMSGOID(("disman:schedule:callback", entry->schedVariable,
                                              entry->schedVariable_len));
-    DEBUGMSG((   "disman:schedule:callback", " = %d\n", entry->schedValue));
+    DEBUGMSG((   "disman:schedule:callback", " = %ld\n", entry->schedValue));
 
     memset(&assign, 0, sizeof(netsnmp_variable_list));
     snmp_set_var_objid(&assign, entry->schedVariable, entry->schedVariable_len);
@@ -84,10 +108,10 @@ _sched_callback( unsigned int reg, void *magic )
      * Internal utility routines to help interpret
      *  calendar-based schedule bit strings
      */
-static char _masks[] = { /* 0xff, */ 0x7f, 0x3f, 0x1f,
-                         0x0f, 0x07, 0x03, 0x01, 0x00 };
-static char _bits[]  = { 0x80, 0x40, 0x20, 0x10,
-                         0x08, 0x04, 0x02, 0x01 };
+static u_char _masks[] = { /* 0xff, */ 0x7f, 0x3f, 0x1f,
+                           0x0f, 0x07, 0x03, 0x01, 0x00 };
+static u_char _bits[]  = { 0x80, 0x40, 0x20, 0x10,
+                           0x08, 0x04, 0x02, 0x01 };
 
 /*
  * Are any of the bits set?
@@ -146,7 +170,7 @@ _bit_next( char *pattern, int current, size_t len ) {
         /*
          * Look for the first bit that's set
          */
-    for ( i=0; i<len; i++ ) {
+    for ( i=0; i<(int)len; i++ ) {
         if ( buf[i] != 0 ) {
             major = i*8;
             for ( j=0; j<8; j++ ) {
@@ -164,9 +188,9 @@ static int _daysPerMonth[] = { 31, 28, 31, 30,
                                31, 30, 31, 31,
                                30, 31, 30, 31, 29 };
 
-static char _truncate[] = { 0xfe, 0xf0, 0xfe, 0xfc,
-                            0xfe, 0xfc, 0xfe, 0xfe,
-                            0xfc, 0xfe, 0xfc, 0xfe, 0xf8 };
+static u_char _truncate[] = { 0xfe, 0xf0, 0xfe, 0xfc,
+                              0xfe, 0xfc, 0xfe, 0xfe,
+                              0xfc, 0xfe, 0xfc, 0xfe, 0xf8 };
 
 /*
  * What is the next day with a relevant bit set?
@@ -239,20 +263,6 @@ _bit_next_day( char *day_pattern, char weekday_pattern,
 }
 
 
-#ifndef HAVE_LOCALTIME_R
-struct tm *
-localtime_r(const time_t *timep, struct tm *result) {
-    struct tm *tmp;
-
-    tmp = localtime( timep );
-    if ( tmp && result ) {
-        memcpy( result, tmp, sizeof(struct tm));
-    }
-
-    return (tmp ? result : NULL );
-}
-#endif
-
 /*
  * determine the time for the next scheduled action of a given entry
  */
@@ -291,16 +301,15 @@ sched_nextTime( struct schedTable_entry *entry )
         } else {
              entry->schedNextRun = now + entry->schedInterval;
         }
-        DEBUGMSGTL(("disman:schedule:time", "periodic: (%d) %s",
-                                  entry->schedNextRun,
-                           ctime(&entry->schedNextRun)));
+        DEBUGMSGTL(("disman:schedule:time", "periodic: (%ld) %s",
+                    (long) entry->schedNextRun, ctime(&entry->schedNextRun)));
         break;
 
     case SCHED_TYPE_ONESHOT:
         if ( entry->schedLastRun ) {
-            DEBUGMSGTL(("disman:schedule:time", "one-shot: expired (%d) %s",
-                                  entry->schedNextRun,
-                           ctime(&entry->schedNextRun)));
+            DEBUGMSGTL(("disman:schedule:time", "one-shot: expired (%ld) %s",
+                        (long) entry->schedNextRun,
+                        ctime(&entry->schedNextRun)));
             return;
         }
         /* Fallthrough */
@@ -337,8 +346,8 @@ sched_nextTime( struct schedTable_entry *entry )
          *    the first specified day (in that month)
          */
 
-        localtime_r( &now, &now_tm );
-        localtime_r( &now, &next_tm );
+        (void) localtime_r( &now, &now_tm );
+        (void) localtime_r( &now, &next_tm );
 
         next_tm.tm_mon=-1;
         next_tm.tm_mday=-1;
@@ -414,13 +423,12 @@ sched_nextTime( struct schedTable_entry *entry )
          * 'next_tm' now contains the time for the next scheduled run
          */
         entry->schedNextRun = mktime( &next_tm );
-        DEBUGMSGTL(("disman:schedule:time", "calendar: (%d) %s",
-                                  entry->schedNextRun,
-                           ctime(&entry->schedNextRun)));
+        DEBUGMSGTL(("disman:schedule:time", "calendar: (%ld) %s",
+                    (long) entry->schedNextRun, ctime(&entry->schedNextRun)));
         return;
 
     default:
-        DEBUGMSGTL(("disman:schedule:time", "unknown type (%d)\n",
+        DEBUGMSGTL(("disman:schedule:time", "unknown type (%ld)\n",
                                              entry->schedType));
         return;
     }
@@ -430,11 +438,13 @@ sched_nextTime( struct schedTable_entry *entry )
     return;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_SCHED_NEXTROWTIME
 void
 sched_nextRowTime( netsnmp_tdata_row *row )
 {
     sched_nextTime((struct schedTable_entry *) row->data );
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SCHED_NEXTROWTIME */
 
 /*
  * create a new row in the table 
@@ -444,6 +454,7 @@ schedTable_createEntry(const char *schedOwner, const char *schedName)
 {
     struct schedTable_entry *entry;
     netsnmp_tdata_row *row;
+    int len;
 
     DEBUGMSGTL(("disman:schedule:entry", "creating entry (%s, %s)\n",
                                           schedOwner, schedName));
@@ -462,16 +473,20 @@ schedTable_createEntry(const char *schedOwner, const char *schedName)
      *  data structure, and in the table_data helper.
      */
     if (schedOwner) {
-        memcpy(entry->schedOwner, schedOwner, strlen(schedOwner));
-        netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
-                           entry->schedOwner, strlen(schedOwner));
+        len = strlen(schedOwner);
+        if (len > sizeof(entry->schedOwner))
+            len = sizeof(entry->schedOwner);
+        memcpy(entry->schedOwner, schedOwner, len);
+        netsnmp_tdata_row_add_index(row, ASN_OCTET_STR, entry->schedOwner, len);
     }
     else
         netsnmp_tdata_row_add_index(row, ASN_OCTET_STR, "", 0 );
 
-    memcpy(    entry->schedName,  schedName,  strlen(schedName));
-    netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
-                           entry->schedName,  strlen(schedName));
+    len = strlen(schedName);
+    if (len > sizeof(entry->schedName))
+        len = sizeof(entry->schedName);
+    memcpy(entry->schedName, schedName, len);
+    netsnmp_tdata_row_add_index(row, ASN_OCTET_STR, entry->schedName, len);
     /*
      * Set the (non-zero) default values in the row data structure.
      */

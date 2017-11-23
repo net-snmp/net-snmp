@@ -2,6 +2,7 @@ PROGNAME=
 CFG=
 OUTDIR=
 INTDIR=
+SDK=
 
 !IF "$(OS)" == "Windows_NT"
 NULL=
@@ -9,74 +10,7 @@ NULL=
 NULL=nul
 !ENDIF 
 
-!IF  "$(CFG)" == "release"
-
 ALL : "..\lib\$(OUTDIR)\$(PROGNAME).lib"
-
-
-CLEAN :
-	-@erase "$(INTDIR)\agentx_config.obj"
-	-@erase "$(INTDIR)\client.obj"
-	-@erase "$(INTDIR)\errormib.obj"
-	-@erase "$(INTDIR)\example.obj"
-	-@erase "$(INTDIR)\execute.obj"
-	-@erase "$(INTDIR)\iquery.obj"
-	-@erase "$(INTDIR)\extensible.obj"
-	-@erase "$(INTDIR)\file.obj"
-	-@erase "$(INTDIR)\header_complex.obj"
-	-@erase "$(INTDIR)\loadave.obj"
-	-@erase "$(INTDIR)\master.obj"
-	-@erase "$(INTDIR)\master_admin.obj"
-	-@erase "$(INTDIR)\mib_modules.obj"
-	-@erase "$(INTDIR)\mteEventNotificationTable.obj"
-	-@erase "$(INTDIR)\mteEventTable.obj"
-	-@erase "$(INTDIR)\mteObjectsTable.obj"
-	-@erase "$(INTDIR)\mteTriggerBooleanTable.obj"
-	-@erase "$(INTDIR)\mteTriggerDeltaTable.obj"
-	-@erase "$(INTDIR)\mteTriggerExistenceTable.obj"
-	-@erase "$(INTDIR)\mteTriggerTable.obj"
-	-@erase "$(INTDIR)\mteTriggerThresholdTable.obj"
-	-@erase "$(INTDIR)\extend.obj"
-	-@erase "$(INTDIR)\nsCache.obj"
-	-@erase "$(INTDIR)\nsDebug.obj"
-	-@erase "$(INTDIR)\nsLogging.obj"
-	-@erase "$(INTDIR)\nsModuleTable.obj"
-	-@erase "$(INTDIR)\nsTransactionTable.obj"
-	-@erase "$(INTDIR)\override.obj"
-	-@erase "$(INTDIR)\pass.obj"
-	-@erase "$(INTDIR)\pass_persist.obj"
-	-@erase "$(INTDIR)\proc.obj"
-	-@erase "$(INTDIR)\protocol.obj"
-	-@erase "$(INTDIR)\proxy.obj"
-	-@erase "$(INTDIR)\setSerialNo.obj"
-	-@erase "$(INTDIR)\smux.obj"
-	-@erase "$(INTDIR)\snmp_mib.obj"
-	-@erase "$(INTDIR)\snmpEngine.obj"
-	-@erase "$(INTDIR)\snmpMPDStats.obj"
-	-@erase "$(INTDIR)\snmpNotifyFilterProfileTable.obj"
-	-@erase "$(INTDIR)\snmpNotifyFilterTable.obj"
-	-@erase "$(INTDIR)\snmpNotifyFilterTable_data_access.obj"
-	-@erase "$(INTDIR)\snmpNotifyFilterTable_interface.obj"
-	-@erase "$(INTDIR)\snmpNotifyTable.obj"
-	-@erase "$(INTDIR)\snmpTargetAddrEntry.obj"
-	-@erase "$(INTDIR)\snmpTargetParamsEntry.obj"
-	-@erase "$(INTDIR)\subagent.obj"
-	-@erase "$(INTDIR)\sysORTable.obj"
-	-@erase "$(INTDIR)\system_mib.obj"
-	-@erase "$(INTDIR)\target.obj"
-	-@erase "$(INTDIR)\target_counters.obj"
-	-@erase "$(INTDIR)\ucdDemoPublic.obj"
-	-@erase "$(INTDIR)\usmConf.obj"
-	-@erase "$(INTDIR)\usmStats.obj"
-	-@erase "$(INTDIR)\usmUser.obj"
-	-@erase "$(INTDIR)\util_funcs.obj"
-	-@erase "$(INTDIR)\vacm_context.obj"
-	-@erase "$(INTDIR)\vacm_conf.obj"
-	-@erase "$(INTDIR)\vacm_vars.obj"
-	-@erase "$(INTDIR)\vc??.idb"
-	-@erase "$(INTDIR)\versioninfo.obj"
-	-@erase "$(INTDIR)\$(PROGNAME).pch"
-	-@erase "..\lib\$(OUTDIR)\$(PROGNAME).lib"
 
 "..\lib\$(OUTDIR)" :
     if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
@@ -85,7 +19,11 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MD /W3 /GX /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\$(PROGNAME).pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
+!IF  "$(CFG)" == "release"
+CPP_PROJ=/nologo /MD /W3 /EHsc /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "NDEBUG" /D "_CONSOLE" /D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_WARNINGS" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
+!ELSEIF  "$(CFG)" == "debug"
+CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "_DEBUG" /D "_CONSOLE" /D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_WARNINGS" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
+!ENDIF
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -118,33 +56,40 @@ CPP_PROJ=/nologo /MD /W3 /GX /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\..
 <<
 
 RSC=rc.exe
-BSC32=bscmake.exe
-BSC32_FLAGS=/nologo /o"$(INTDIR)\$(PROGNAME).bsc" 
-BSC32_SBRS= \
-
 LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\$(PROGNAME).lib" 
-LIB32_OBJS= \
+LIB32_OBJS1= \
 	"$(INTDIR)\setSerialNo.obj" \
 	"$(INTDIR)\snmp_mib.obj" \
 	"$(INTDIR)\sysORTable.obj" \
 	"$(INTDIR)\system_mib.obj" \
+	"$(INTDIR)\updates.obj" \
 	"$(INTDIR)\vacm_context.obj" \
 	"$(INTDIR)\vacm_conf.obj" \
 	"$(INTDIR)\vacm_vars.obj" \
+	"$(INTDIR)\mteEvent.obj" \
+	"$(INTDIR)\mteEventConf.obj" \
 	"$(INTDIR)\mteEventNotificationTable.obj" \
+	"$(INTDIR)\mteEventSetTable.obj" \
 	"$(INTDIR)\mteEventTable.obj" \
+	"$(INTDIR)\mteObjects.obj" \
+	"$(INTDIR)\mteObjectsConf.obj" \
 	"$(INTDIR)\mteObjectsTable.obj" \
+	"$(INTDIR)\mteScalars.obj" \
 	"$(INTDIR)\mteTriggerBooleanTable.obj" \
+	"$(INTDIR)\mteTrigger.obj" \
+	"$(INTDIR)\mteTriggerConf.obj" \
 	"$(INTDIR)\mteTriggerDeltaTable.obj" \
 	"$(INTDIR)\mteTriggerExistenceTable.obj" \
 	"$(INTDIR)\mteTriggerTable.obj" \
 	"$(INTDIR)\mteTriggerThresholdTable.obj" \
 	"$(INTDIR)\example.obj" \
 	"$(INTDIR)\ucdDemoPublic.obj" \
+	"$(INTDIR)\dlmod.obj" \
 	"$(INTDIR)\errormib.obj" \
 	"$(INTDIR)\extensible.obj" \
-	"$(INTDIR)\file.obj" \
+	"$(INTDIR)\file.obj"
+LIB32_OBJS2= \
 	"$(INTDIR)\loadave.obj" \
 	"$(INTDIR)\pass.obj" \
 	"$(INTDIR)\pass_common.obj" \
@@ -180,200 +125,43 @@ LIB32_OBJS= \
 	"$(INTDIR)\nsTransactionTable.obj" \
 	"$(INTDIR)\execute.obj" \
 	"$(INTDIR)\iquery.obj" \
+	"$(INTDIR)\override.obj" \
+	"$(INTDIR)\header_generic.obj" \
+	"$(INTDIR)\header_simple_table.obj" \
 	"$(INTDIR)\header_complex.obj" \
 	"$(INTDIR)\mib_modules.obj" \
-	"$(INTDIR)\override.obj" \
 	"$(INTDIR)\util_funcs.obj" \
+	"$(INTDIR)\Exit.obj" \
+	"$(INTDIR)\restart.obj" \
 	"$(INTDIR)\smux.obj"
-
-"..\lib\$(OUTDIR)\$(PROGNAME).lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
-    $(LIB32) @<<
-  $(LIB32_FLAGS) $(DEF_FLAGS) $(LIB32_OBJS)
-<<
-
-!ELSEIF  "$(CFG)" == "debug"
-
-ALL : "..\lib\$(OUTDIR)\$(PROGNAME).lib"
-
+!IF "$(SDK)" == "true"
+LIB32_OBJS3= \
+	"$(INTDIR)\at.obj" \
+	"$(INTDIR)\icmp.obj" \
+	"$(INTDIR)\interfaces.obj" \
+	"$(INTDIR)\ip.obj" \
+	"$(INTDIR)\ipAddr.obj" \
+	"$(INTDIR)\notification_log.obj" \
+	"$(INTDIR)\route_write.obj" \
+	"$(INTDIR)\tcp.obj" \
+	"$(INTDIR)\tcpTable.obj" \
+	"$(INTDIR)\udp.obj" \
+	"$(INTDIR)\udpTable.obj" \
+	"$(INTDIR)\var_route.obj" \
+	"$(INTDIR)\winExtDLL.obj"
+!ENDIF
+LIB32_OBJS=$(LIB32_OBJS1) $(LIB32_OBJS2) $(LIB32_OBJS3)
 
 CLEAN :
-	-@erase "$(INTDIR)\agentx_config.obj"
-	-@erase "$(INTDIR)\client.obj"
-	-@erase "$(INTDIR)\errormib.obj"
-	-@erase "$(INTDIR)\example.obj"
-	-@erase "$(INTDIR)\execute.obj"
-	-@erase "$(INTDIR)\iquery.obj"
-	-@erase "$(INTDIR)\extensible.obj"
-	-@erase "$(INTDIR)\file.obj"
-	-@erase "$(INTDIR)\header_complex.obj"
-	-@erase "$(INTDIR)\loadave.obj"
-	-@erase "$(INTDIR)\master.obj"
-	-@erase "$(INTDIR)\master_admin.obj"
-	-@erase "$(INTDIR)\mib_modules.obj"
-	-@erase "$(INTDIR)\mteEventNotificationTable.obj"
-	-@erase "$(INTDIR)\mteEventTable.obj"
-	-@erase "$(INTDIR)\mteObjectsTable.obj"
-	-@erase "$(INTDIR)\mteTriggerBooleanTable.obj"
-	-@erase "$(INTDIR)\mteTriggerDeltaTable.obj"
-	-@erase "$(INTDIR)\mteTriggerExistenceTable.obj"
-	-@erase "$(INTDIR)\mteTriggerTable.obj"
-	-@erase "$(INTDIR)\mteTriggerThresholdTable.obj"
-	-@erase "$(INTDIR)\extend.obj"
-	-@erase "$(INTDIR)\nsCache.obj"
-	-@erase "$(INTDIR)\nsDebug.obj"
-	-@erase "$(INTDIR)\nsLogging.obj"
-	-@erase "$(INTDIR)\nsModuleTable.obj"
-	-@erase "$(INTDIR)\nsTransactionTable.obj"
-	-@erase "$(INTDIR)\override.obj"
-	-@erase "$(INTDIR)\pass.obj"
-	-@erase "$(INTDIR)\pass_persist.obj"
-	-@erase "$(INTDIR)\proc.obj"
-	-@erase "$(INTDIR)\protocol.obj"
-	-@erase "$(INTDIR)\proxy.obj"
-	-@erase "$(INTDIR)\setSerialNo.obj"
-	-@erase "$(INTDIR)\smux.obj"
-	-@erase "$(INTDIR)\snmp_mib.obj"
-	-@erase "$(INTDIR)\snmpEngine.obj"
-	-@erase "$(INTDIR)\snmpMPDStats.obj"
-	-@erase "$(INTDIR)\snmpNotifyFilterProfileTable.obj"
-	-@erase "$(INTDIR)\snmpNotifyFilterTable.obj"
-	-@erase "$(INTDIR)\snmpNotifyFilterTable_data_access.obj"
-	-@erase "$(INTDIR)\snmpNotifyFilterTable_interface.obj"
-	-@erase "$(INTDIR)\snmpNotifyTable.obj"
-	-@erase "$(INTDIR)\snmpTargetAddrEntry.obj"
-	-@erase "$(INTDIR)\snmpTargetParamsEntry.obj"
-	-@erase "$(INTDIR)\subagent.obj"
-	-@erase "$(INTDIR)\sysORTable.obj"
-	-@erase "$(INTDIR)\system_mib.obj"
-	-@erase "$(INTDIR)\target.obj"
-	-@erase "$(INTDIR)\target_counters.obj"
-	-@erase "$(INTDIR)\ucdDemoPublic.obj"
-	-@erase "$(INTDIR)\usmConf.obj"
-	-@erase "$(INTDIR)\usmStats.obj"
-	-@erase "$(INTDIR)\usmUser.obj"
-	-@erase "$(INTDIR)\util_funcs.obj"
-	-@erase "$(INTDIR)\vacm_context.obj"
-	-@erase "$(INTDIR)\vacm_conf.obj"
-	-@erase "$(INTDIR)\vacm_vars.obj"
-	-@erase "$(INTDIR)\vc??.idb"
-	-@erase "$(INTDIR)\vc??.pdb"
-	-@erase "$(INTDIR)\versioninfo.obj"
-	-@erase "$(INTDIR)\$(PROGNAME).pch"
+	-@for %f in ($(LIB32_OBJS1)) do erase %%f
+	-@for %f in ($(LIB32_OBJS2)) do erase %%f
+	-@for %f in ($(LIB32_OBJS3)) do erase %%f
 	-@erase "..\lib\$(OUTDIR)\$(PROGNAME).lib"
-
-"..\lib\$(OUTDIR)" :
-    if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
-
-"$(INTDIR)" :
-    if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
-
-CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\$(PROGNAME).pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c 
-
-.c{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.c{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-RSC=rc.exe
-BSC32=bscmake.exe
-BSC32_FLAGS=/nologo /o"$(INTDIR)\$(PROGNAME).bsc" 
-BSC32_SBRS= \
-
-LIB32=link.exe -lib
-LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\$(PROGNAME).lib" 
-LIB32_OBJS= \
-	"$(INTDIR)\setSerialNo.obj" \
-	"$(INTDIR)\snmp_mib.obj" \
-	"$(INTDIR)\sysORTable.obj" \
-	"$(INTDIR)\system_mib.obj" \
-	"$(INTDIR)\vacm_context.obj" \
-	"$(INTDIR)\vacm_conf.obj" \
-	"$(INTDIR)\vacm_vars.obj" \
-	"$(INTDIR)\mteEventNotificationTable.obj" \
-	"$(INTDIR)\mteEventTable.obj" \
-	"$(INTDIR)\mteObjectsTable.obj" \
-	"$(INTDIR)\mteTriggerBooleanTable.obj" \
-	"$(INTDIR)\mteTriggerDeltaTable.obj" \
-	"$(INTDIR)\mteTriggerExistenceTable.obj" \
-	"$(INTDIR)\mteTriggerTable.obj" \
-	"$(INTDIR)\mteTriggerThresholdTable.obj" \
-	"$(INTDIR)\example.obj" \
-	"$(INTDIR)\ucdDemoPublic.obj" \
-	"$(INTDIR)\errormib.obj" \
-	"$(INTDIR)\extensible.obj" \
-	"$(INTDIR)\file.obj" \
-	"$(INTDIR)\loadave.obj" \
-	"$(INTDIR)\pass.obj" \
-	"$(INTDIR)\pass_persist.obj" \
-	"$(INTDIR)\proc.obj" \
-	"$(INTDIR)\proxy.obj" \
-	"$(INTDIR)\versioninfo.obj" \
-	"$(INTDIR)\snmpEngine.obj" \
-	"$(INTDIR)\snmpMPDStats.obj" \
-	"$(INTDIR)\usmConf.obj" \
-	"$(INTDIR)\usmStats.obj" \
-	"$(INTDIR)\usmUser.obj" \
-	"$(INTDIR)\snmpNotifyFilterProfileTable.obj" \
-	"$(INTDIR)\snmpNotifyFilterTable.obj" \
-	"$(INTDIR)\snmpNotifyFilterTable_data_access.obj" \
-	"$(INTDIR)\snmpNotifyFilterTable_interface.obj" \
-	"$(INTDIR)\snmpNotifyTable.obj" \
-	"$(INTDIR)\snmpTargetAddrEntry.obj" \
-	"$(INTDIR)\snmpTargetParamsEntry.obj" \
-	"$(INTDIR)\target.obj" \
-	"$(INTDIR)\target_counters.obj" \
-	"$(INTDIR)\agentx_config.obj" \
-	"$(INTDIR)\client.obj" \
-	"$(INTDIR)\master.obj" \
-	"$(INTDIR)\master_admin.obj" \
-	"$(INTDIR)\protocol.obj" \
-	"$(INTDIR)\subagent.obj" \
-	"$(INTDIR)\extend.obj" \
-	"$(INTDIR)\nsCache.obj" \
-	"$(INTDIR)\nsDebug.obj" \
-	"$(INTDIR)\nsLogging.obj" \
-	"$(INTDIR)\nsModuleTable.obj" \
-	"$(INTDIR)\nsTransactionTable.obj" \
-	"$(INTDIR)\execute.obj" \
-	"$(INTDIR)\iquery.obj" \
-	"$(INTDIR)\header_complex.obj" \
-	"$(INTDIR)\mib_modules.obj" \
-	"$(INTDIR)\override.obj" \
-	"$(INTDIR)\util_funcs.obj" \
-	"$(INTDIR)\smux.obj"
 
 "..\lib\$(OUTDIR)\$(PROGNAME).lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
     $(LIB32) @<<
   $(LIB32_FLAGS) $(DEF_FLAGS) $(LIB32_OBJS)
 <<
-
-!ENDIF 
 
 
 !IF "$(NO_EXTERNAL_DEPS)" != "1"
@@ -410,6 +198,12 @@ SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=..\..\agent\mibgroup\mibII\updates.c
+
+"$(INTDIR)\updates.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
 
 "$(INTDIR)\vacm_context.obj" : $(SOURCE) "$(INTDIR)"
@@ -428,49 +222,82 @@ SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\agent\mibgroup\disman\mteEventNotificationTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteEvent.c
+
+"$(INTDIR)\mteEvent.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventConf.c
+
+"$(INTDIR)\mteEventConf.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventNotificationTable.c
 
 "$(INTDIR)\mteEventNotificationTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventSetTable.c
 
-SOURCE=..\..\agent\mibgroup\disman\mteEventTable.c
+"$(INTDIR)\mteEventSetTable.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventTable.c
 
 "$(INTDIR)\mteEventTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+SOURCE=..\..\agent\mibgroup\disman\event\mteObjects.c
 
-SOURCE=..\..\agent\mibgroup\disman\mteObjectsTable.c
+"$(INTDIR)\mteObjects.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteObjectsConf.c
+
+"$(INTDIR)\mteObjectsConf.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteObjectsTable.c
 
 "$(INTDIR)\mteObjectsTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+SOURCE=..\..\agent\mibgroup\disman\event\mteScalars.c
 
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerBooleanTable.c
+"$(INTDIR)\mteScalars.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerBooleanTable.c
 
 "$(INTDIR)\mteTriggerBooleanTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+SOURCE=..\..\agent\mibgroup\disman\event\mteTrigger.c
 
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerDeltaTable.c
+"$(INTDIR)\mteTrigger.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerConf.c
+
+"$(INTDIR)\mteTriggerConf.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerDeltaTable.c
 
 "$(INTDIR)\mteTriggerDeltaTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerExistenceTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerExistenceTable.c
 
 "$(INTDIR)\mteTriggerExistenceTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerTable.c
 
 "$(INTDIR)\mteTriggerTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerThresholdTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerThresholdTable.c
 
 "$(INTDIR)\mteTriggerThresholdTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
@@ -485,6 +312,12 @@ SOURCE=..\..\agent\mibgroup\examples\example.c
 SOURCE=..\..\agent\mibgroup\examples\ucdDemoPublic.c
 
 "$(INTDIR)\ucdDemoPublic.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE="..\..\agent\mibgroup\ucd-snmp\dlmod.c"
+
+"$(INTDIR)\dlmod.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -581,6 +414,12 @@ SOURCE=..\..\agent\mibgroup\snmpv3\usmUser.c
 SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable.c
 
 "$(INTDIR)\snmpNotifyFilterProfileTable.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE="..\..\agent\mibgroup\notification-log-mib\notification_log.c"
+
+"$(INTDIR)\notification_log.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -715,6 +554,25 @@ SOURCE=..\..\agent\mibgroup\utilities\iquery.c
 "$(INTDIR)\iquery.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+
+SOURCE=..\..\agent\mibgroup\utilities\override.c
+
+"$(INTDIR)\override.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\util_funcs\header_generic.c
+
+"$(INTDIR)\header_generic.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\util_funcs\header_simple_table.c
+
+"$(INTDIR)\header_simple_table.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=..\..\agent\mibgroup\header_complex.c
 
 "$(INTDIR)\header_complex.obj" : $(SOURCE) "$(INTDIR)"
@@ -727,15 +585,21 @@ SOURCE=..\..\agent\mib_modules.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\agent\mibgroup\utilities\override.c
-
-"$(INTDIR)\override.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
 SOURCE=..\..\agent\mibgroup\util_funcs.c
 
 "$(INTDIR)\util_funcs.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\util_funcs\Exit.c
+
+"$(INTDIR)\Exit.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\util_funcs\restart.c
+
+"$(INTDIR)\restart.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -745,8 +609,64 @@ SOURCE=..\..\agent\mibgroup\smux\smux.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=..\..\agent\mibgroup\winExtDLL.c
+"$(INTDIR)\winExtDLL.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\at.c
+"$(INTDIR)\at.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\icmp.c
+"$(INTDIR)\icmp.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\interfaces.c
+"$(INTDIR)\interfaces.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\ip.c
+"$(INTDIR)\ip.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\ipAddr.c
+"$(INTDIR)\ipAddr.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\route_write.c
+"$(INTDIR)\route_write.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\tcp.c
+"$(INTDIR)\tcp.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\tcpTable.c
+"$(INTDIR)\tcpTable.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\udp.c
+"$(INTDIR)\udp.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\udpTable.c
+"$(INTDIR)\udpTable.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\var_route.c
+"$(INTDIR)\var_route.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
 
 !ENDIF 
-
-
-

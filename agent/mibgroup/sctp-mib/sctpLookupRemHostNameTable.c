@@ -10,6 +10,7 @@
 #include "sctpLookupRemHostNameTable.h"
 
 static netsnmp_container *sctpLookupRemHostNameTable_container;
+static netsnmp_table_registration_info *table_info;
 
 /** Initializes the sctpLookupRemHostNameTable module */
 void
@@ -24,8 +25,7 @@ init_sctpLookupRemHostNameTable(void)
 void
 shutdown_sctpLookupRemHostNameTable(void)
 {
-    sctpLookupRemHostNameTable_container_clear
-        (sctpLookupRemHostNameTable_container);
+    shutdown_table_sctpLookupRemHostNameTable();
 }
 
 /** Initialize the sctpLookupRemHostNameTable table by defining its contents and how it's structured */
@@ -39,7 +39,6 @@ initialize_table_sctpLookupRemHostNameTable(void)
     netsnmp_handler_registration *reg = NULL;
     netsnmp_mib_handler *handler = NULL;
     netsnmp_container *container = NULL;
-    netsnmp_table_registration_info *table_info = NULL;
 
     reg =
         netsnmp_create_handler_registration("sctpLookupRemHostNameTable",
@@ -100,6 +99,7 @@ initialize_table_sctpLookupRemHostNameTable(void)
     if (SNMPERR_SUCCESS != netsnmp_register_table(reg, table_info)) {
         snmp_log(LOG_ERR,
                  "error registering table handler for sctpLookupRemHostNameTable\n");
+        reg = NULL; /* it was freed inside netsnmp_register_table */
         goto bail;
     }
 
@@ -118,11 +118,25 @@ initialize_table_sctpLookupRemHostNameTable(void)
     if (handler)
         netsnmp_handler_free(handler);
 
+    if (table_info)
+        netsnmp_table_registration_info_free(table_info);
+
     if (container)
         CONTAINER_FREE(container);
 
     if (reg)
         netsnmp_handler_registration_free(reg);
+}
+
+void
+shutdown_table_sctpLookupRemHostNameTable(void)
+{
+    if (table_info) {
+        netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
+    sctpLookupRemHostNameTable_container_clear
+        (sctpLookupRemHostNameTable_container);
 }
 
 /** handles requests for the sctpLookupRemHostNameTable table */
@@ -249,8 +263,7 @@ void
 sctpLookupRemHostNameTable_entry_free(sctpLookupRemHostNameTable_entry *
                                       entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

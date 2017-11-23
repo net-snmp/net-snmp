@@ -39,6 +39,7 @@ config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access)
      *********************************************************************
      * function declarations
      */
+    void            initialize_table_ipv4InterfaceTable(void);
     void            init_ipv4InterfaceTable(void);
     void            shutdown_ipv4InterfaceTable(void);
 
@@ -107,8 +108,8 @@ config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access)
         * ipv4InterfaceTable_row_find_by_mib_index
         (ipv4InterfaceTable_mib_index * mib_idx);
 
-    extern oid      ipv4InterfaceTable_oid[];
-    extern int      ipv4InterfaceTable_oid_size;
+    extern const oid      ipv4InterfaceTable_oid[];
+    extern const int      ipv4InterfaceTable_oid_size;
 
 
 #include "ipv4InterfaceTable_interface.h"

@@ -18,6 +18,7 @@ init_sctpScalars(void)
 {
     netsnmp_handler_registration *reginfo_stats;
     netsnmp_handler_registration *reginfo_params;
+    int rc;
 
     DEBUGMSGTL(("sctp:scalars:init", "Initializing\n"));
 
@@ -27,8 +28,14 @@ init_sctpScalars(void)
                                             sctp_stats_oid,
                                             OID_LENGTH(sctp_stats_oid),
                                             HANDLER_CAN_RONLY);
-    netsnmp_register_scalar_group(reginfo_stats, SCTP_CURRESTAB,
+    if (!reginfo_stats)
+        return;
+
+    rc = netsnmp_register_scalar_group(reginfo_stats, SCTP_CURRESTAB,
                                   SCTP_DISCONTINUITYTIME);
+    if (rc != SNMPERR_SUCCESS)
+        return;
+
     netsnmp_inject_handler(reginfo_stats,
                            netsnmp_get_cache_handler
                            (SCTP_STATS_CACHE_TIMEOUT,
@@ -43,8 +50,13 @@ init_sctpScalars(void)
                                             sctp_params_oid,
                                             OID_LENGTH(sctp_params_oid),
                                             HANDLER_CAN_RONLY);
-    netsnmp_register_scalar_group(reginfo_params, SCTP_RTOALGORITHM,
+    if (!reginfo_params)
+        return;
+
+    rc = netsnmp_register_scalar_group(reginfo_params, SCTP_RTOALGORITHM,
                                   SCTP_MAXINITRETR);
+    if (!rc)
+        return;
     netsnmp_inject_handler(reginfo_params,
                            netsnmp_get_cache_handler
                            (SCTP_PARAMS_CACHE_TIMEOUT,
@@ -65,7 +77,6 @@ sctp_stats_handler(netsnmp_mib_handler *handler,
 {
     netsnmp_variable_list *requestvb;
     int             subid;
-    int             ret;
 
     DEBUGMSGTL(("sctp:scalars:stats", "Handler - mode %s\n",
                 se_find_label_in_slist("agent_mode", reqinfo->mode)));
@@ -215,7 +226,6 @@ sctp_params_handler(netsnmp_mib_handler *handler,
 {
     netsnmp_variable_list *requestvb;
     int             subid;
-    int             ret;
 
     DEBUGMSGTL(("sctp:scalars:params", "Handler - mode %s\n",
                 se_find_label_in_slist("agent_mode", reqinfo->mode)));

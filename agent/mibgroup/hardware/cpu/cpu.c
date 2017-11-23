@@ -1,9 +1,17 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/cpu.h>
+#include "cpu.h"
 
-extern NetsnmpCacheLoad netsnmp_cpu_arch_load;
+netsnmp_feature_child_of(hardware_cpu, libnetsnmpmibs)
+
+netsnmp_feature_child_of(hardware_cpu_copy_stats, hardware_cpu)
+netsnmp_feature_child_of(hardware_cpu_load, hardware_cpu)
+netsnmp_feature_child_of(hardware_cpu_get_cache, hardware_cpu)
+netsnmp_feature_child_of(hardware_cpu_get_byName, hardware_cpu)
+
 static void _cpu_update_stats( unsigned int, void* );
 
 static int _cpuAutoUpdate =  5;
@@ -84,8 +92,8 @@ netsnmp_cpu_info *netsnmp_cpu_get_byIdx(  int idx, int create ) {
          */
     cpu = SNMP_MALLOC_TYPEDEF( netsnmp_cpu_info );
     if (!cpu) {
-        return NULL;
         DEBUGMSG(("cpu", "(failed)\n"));
+        return NULL;
     }
     DEBUGMSG(("cpu", "(created)\n"));
     cpu->idx = idx;
@@ -107,14 +115,14 @@ netsnmp_cpu_info *netsnmp_cpu_get_byIdx(  int idx, int create ) {
             return cpu;
         }
     }
-    if (cpu)
-        SNMP_FREE(cpu); /* just in case */
+    SNMP_FREE(cpu); /* just in case */
     return NULL;  /* Shouldn't happen! */
 }
 
     /*
      * Work with a list of CPU entries, indexed by name
      */
+#ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_BYNAME
 netsnmp_cpu_info *netsnmp_cpu_get_byName( char *name, int create ) {
     netsnmp_cpu_info *cpu;
 
@@ -140,7 +148,7 @@ netsnmp_cpu_info *netsnmp_cpu_get_byName( char *name, int create ) {
         return NULL;
     }
 
-    strcpy(cpu->name, name);
+    strlcpy(cpu->name, name, sizeof(cpu));
     if ( _cpu_tail ) {
         cpu->idx = _cpu_tail->idx+1;
         _cpu_tail->next = cpu;
@@ -152,11 +160,15 @@ netsnmp_cpu_info *netsnmp_cpu_get_byName( char *name, int create ) {
     }
     return cpu;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_BYNAME */
 
+#ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_CACHE
 netsnmp_cache *netsnmp_cpu_get_cache( void ) {
     return _cpu_cache;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_CACHE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_LOAD
 int netsnmp_cpu_load( void ) {
         /*
          * If we're automatically updating the stats regularly,
@@ -165,6 +177,7 @@ int netsnmp_cpu_load( void ) {
     return ( _cpuAutoUpdate ? 1
                             : netsnmp_cache_check_and_reload( _cpu_cache ));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_LOAD */
 
     /*
      * Call the system-specific load routine regularly,
@@ -181,7 +194,7 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
              * First time through, we need to create buffers
              * for the historical stats
              */
-            cpu->history  = calloc( _cpuHistoryLen, sizeof(struct netsnmp_cpu_history));
+            cpu->history  = (struct netsnmp_cpu_history *)calloc( _cpuHistoryLen, sizeof(struct netsnmp_cpu_history));
         } else {
             /*
              * Otherwise, rotate these values - in descending order
@@ -220,10 +233,14 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
                            cpu->wait_ticks +
                            cpu->kern_ticks +
                            cpu->intrpt_ticks +
-                           cpu->sirq_ticks;
+                           cpu->sirq_ticks +
+                           cpu->steal_ticks +
+                           cpu->guest_ticks +
+                           cpu->guestnice_ticks;
     }
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_COPY_STATS
 void _cpu_copy_stats( netsnmp_cpu_info *cpu )
 {
     netsnmp_cpu_info *cpu2;
@@ -243,6 +260,9 @@ void _cpu_copy_stats( netsnmp_cpu_info *cpu )
     cpu2->kern_ticks = cpu->kern_ticks;
     cpu2->intrpt_ticks = cpu->intrpt_ticks;
     cpu2->sirq_ticks = cpu->sirq_ticks;
+    cpu2->steal_ticks = cpu->steal_ticks;
+    cpu2->guest_ticks = cpu->guest_ticks;
+    cpu2->guestnice_ticks = cpu->guestnice_ticks;
 
     cpu2->nInterrupts  = cpu->nInterrupts;
     cpu2->nCtxSwitches = cpu->nCtxSwitches;
@@ -251,3 +271,4 @@ void _cpu_copy_stats( netsnmp_cpu_info *cpu )
     cpu2->pageIn     = cpu->pageIn;
     cpu2->pageOut    = cpu->pageOut;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_COPY_STATS */

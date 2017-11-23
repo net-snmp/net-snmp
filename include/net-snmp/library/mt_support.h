@@ -63,9 +63,13 @@ error "There is no re-entrant support as defined."
 #endif /*  HAVE_PTHREAD_H  */
 
 
+NETSNMP_IMPORT
 int             snmp_res_init(void);
+NETSNMP_IMPORT
 int             snmp_res_lock(int groupID, int resourceID);
+NETSNMP_IMPORT
 int             snmp_res_unlock(int groupID, int resourceID);
+NETSNMP_IMPORT
 int             snmp_res_destroy_mutex(int groupID, int resourceID);
 
 #else /*  NETSNMP_REENTRANT  */

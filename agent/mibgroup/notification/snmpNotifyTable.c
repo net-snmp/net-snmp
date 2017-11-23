@@ -8,11 +8,9 @@
  * This should always be included first before anything else 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -38,11 +36,15 @@
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/mib_module_config.h>
-#include "mibgroup/mibII/sysORTable.h"
+#include "net-snmp/agent/sysORTable.h"
 
 #ifdef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE
 #   include "notification-log-mib/notification_log.h"
 #endif
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(header_complex_find_entry)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 SNMPCallback    store_snmpNotifyTable;
 
@@ -60,11 +62,6 @@ oid             snmpNotifyTable_variables_oid[] =
 static oid snmpNotifyFullCompliance[] =
     { SNMP_OID_SNMPMODULES, 13, 3, 1, 3 }; /* SNMP-NOTIFICATION-MIB::snmpNotifyFullCompliance */
 
-void shutdown_snmpNotifyTable(void)
-{
-    unregister_sysORTable(snmpNotifyFullCompliance, OID_LENGTH(snmpNotifyFullCompliance));
-}
-
 
 /*
  * variable2 snmpNotifyTable_variables:
@@ -78,15 +75,17 @@ struct variable2 snmpNotifyTable_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   SNMPNOTIFYTAG         4
-    {SNMPNOTIFYTAG, ASN_OCTET_STR, RWRITE, var_snmpNotifyTable, 2, {1, 2}},
+    {SNMPNOTIFYTAG, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_snmpNotifyTable, 2, {1, 2}},
 #define   SNMPNOTIFYTYPE        5
-    {SNMPNOTIFYTYPE, ASN_INTEGER, RWRITE, var_snmpNotifyTable, 2, {1, 3}},
+    {SNMPNOTIFYTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_snmpNotifyTable, 2, {1, 3}},
 #define   SNMPNOTIFYSTORAGETYPE  6
-    {SNMPNOTIFYSTORAGETYPE, ASN_INTEGER, RWRITE, var_snmpNotifyTable, 2,
-     {1, 4}},
+    {SNMPNOTIFYSTORAGETYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_snmpNotifyTable, 2, {1, 4}},
 #define   SNMPNOTIFYROWSTATUS   7
-    {SNMPNOTIFYROWSTATUS, ASN_INTEGER, RWRITE, var_snmpNotifyTable, 2,
-     {1, 5}},
+    {SNMPNOTIFYROWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_snmpNotifyTable, 2, {1, 5}},
 
 };
 /*
@@ -110,8 +109,8 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
     size_t                 profileNameLen;
     struct vacm_viewEntry *vp, *head;
     int                    vb_oid_excluded = 0;
-    extern oid             snmptrap_oid[];
-    extern size_t          snmptrap_oid_len;
+    extern const oid       snmptrap_oid[];
+    extern const size_t    snmptrap_oid_len;
 
     netsnmp_assert(NULL != paramName);
     netsnmp_assert(NULL != pdu);
@@ -219,7 +218,7 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
     netsnmp_pdu    *template_pdu = (netsnmp_pdu *) serverarg;
     int             count = 0, send = 0;
 
-    DEBUGMSGTL(("send_notifications", "starting: pdu=%x, vars=%x\n",
+    DEBUGMSGTL(("send_notifications", "starting: pdu=%p, vars=%p\n",
                 template_pdu, template_pdu->variables));
 
     for (hptr = snmpNotifyTableStorage; hptr; hptr = hptr->next) {
@@ -286,7 +285,7 @@ notifyTable_register_notifications(int major, int minor,
     struct targetAddrTable_struct *ptr;
     struct targetParamTable_struct *pptr;
     struct snmpNotifyTable_data *nptr;
-    int             confirm, i;
+    int             confirm, i, bufLen;
     char            buf[SNMP_MAXBUF_SMALL];
     netsnmp_transport *t = NULL;
     struct agent_add_trap_args *args =
@@ -303,8 +302,9 @@ notifyTable_register_notifications(int major, int minor,
      * XXX: START move target creation to target code 
      */
     for (i = 0; i < MAX_ENTRIES; i++) {
-        sprintf(buf, "internal%d", i);
-        if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
+        bufLen = sprintf(buf, "internal%d", i);
+        if (get_addrForName2(buf, bufLen) == NULL &&
+            get_paramEntry(buf) == NULL)
             break;
     }
     if (i == MAX_ENTRIES) {
@@ -326,7 +326,8 @@ notifyTable_register_notifications(int major, int minor,
         return 0;
     }
     ptr = snmpTargetAddrTable_create();
-    ptr->name = strdup(buf);
+    ptr->nameData = netsnmp_memdup(buf, bufLen);
+    ptr->nameLen = bufLen;
     memcpy(ptr->tDomain, t->domain, t->domain_length * sizeof(oid));
     ptr->tDomainLen = t->domain_length;
     ptr->tAddressLen = t->remote_length;
@@ -335,8 +336,8 @@ notifyTable_register_notifications(int major, int minor,
     ptr->timeout = ss->timeout / 10000;
     ptr->retryCount = ss->retries;
     SNMP_FREE(ptr->tagList);
-    ptr->tagList = strdup(ptr->name);
-    ptr->params = strdup(ptr->name);
+    ptr->tagList = strdup(buf); /* strdup ok since buf contains 'internal%d' */
+    ptr->params = strdup(buf);
     ptr->storageType = ST_READONLY;
     ptr->rowStatus = RS_ACTIVE;
     ptr->sess = ss;
@@ -353,6 +354,10 @@ notifyTable_register_notifications(int major, int minor,
         pptr->secModel = ss->securityModel;
         pptr->secLevel = ss->securityLevel;
         pptr->secName = (char *) malloc(ss->securityNameLen + 1);
+        if (pptr->secName == NULL) {
+            snmpTargetParamTable_dispose(pptr);
+            return 0;
+        }
         memcpy((void *) pptr->secName, (void *) ss->securityName,
                ss->securityNameLen);
         pptr->secName[ss->securityNameLen] = 0;
@@ -368,6 +373,10 @@ notifyTable_register_notifications(int major, int minor,
         pptr->secName = NULL;
         if (ss->community && (ss->community_len > 0)) {
             pptr->secName = (char *) malloc(ss->community_len + 1);
+            if (pptr->secName == NULL) {
+                snmpTargetParamTable_dispose(pptr);
+                return 0;
+            }
             memcpy((void *) pptr->secName, (void *) ss->community,
                    ss->community_len);
             pptr->secName[ss->community_len] = 0;
@@ -385,6 +394,8 @@ notifyTable_register_notifications(int major, int minor,
      * notify table 
      */
     nptr = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
+    if (nptr == NULL)
+        return 0;
     nptr->snmpNotifyName = strdup(buf);
     nptr->snmpNotifyNameLen = strlen(buf);
     nptr->snmpNotifyTag = strdup(buf);
@@ -411,18 +422,18 @@ notifyTable_unregister_notifications(int major, int minor,
                                      void *serverarg, void *clientarg)
 {
     struct header_complex_index *hptr, *nhptr;
-    struct snmpNotifyTable_data *nptr;
 
     for (hptr = snmpNotifyTableStorage; hptr; hptr = nhptr) {
-        nptr = (struct snmpNotifyTable_data *) hptr->data;
+        struct snmpNotifyTable_data *nptr = hptr->data;
         nhptr = hptr->next;
         if (nptr->snmpNotifyStorageType == ST_READONLY) {
             header_complex_extract_entry(&snmpNotifyTableStorage, hptr);
-            SNMP_FREE(nptr->snmpNotifyName);
-            SNMP_FREE(nptr->snmpNotifyTag);
-            SNMP_FREE(nptr);
+            free(nptr->snmpNotifyName);
+            free(nptr->snmpNotifyTag);
+            free(nptr);
         }
     }
+    snmpNotifyTableStorage = NULL;
     return (0);
 }
 
@@ -482,6 +493,37 @@ init_snmpNotifyTable(void)
     DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
 }
 
+void
+shutdown_snmpNotifyTable(void)
+{
+    DEBUGMSGTL(("snmpNotifyTable", "shutting down ... "));
+
+    notifyTable_unregister_notifications(SNMP_CALLBACK_APPLICATION,
+                                         SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                                         NULL,
+                                         NULL);
+
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                             SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                             notifyTable_unregister_notifications, NULL, FALSE);
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                             SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
+                             notifyTable_register_notifications, NULL, FALSE);
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                             SNMPD_CALLBACK_SEND_TRAP2, send_notifications,
+                             NULL, FALSE);
+#ifndef DISABLE_SNMPV1
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                             SNMPD_CALLBACK_SEND_TRAP1, send_notifications,
+                             NULL, FALSE);
+#endif
+    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                             store_snmpNotifyTable, NULL, FALSE);
+
+    UNREGISTER_SYSOR_ENTRY(snmpNotifyFullCompliance);
+
+    DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
+}
 
 /*
  * snmpNotifyTable_add(): adds a structure node to our data set 
@@ -490,7 +532,7 @@ int
 snmpNotifyTable_add(struct snmpNotifyTable_data *thedata)
 {
     netsnmp_variable_list *vars = NULL;
-
+    int retVal;	
 
     DEBUGMSGTL(("snmpNotifyTable", "adding data...  "));
     /*
@@ -503,12 +545,17 @@ snmpNotifyTable_add(struct snmpNotifyTable_data *thedata)
 
 
 
-    header_complex_add_data(&snmpNotifyTableStorage, vars, thedata);
-    DEBUGMSGTL(("snmpNotifyTable", "registered an entry\n"));
+    if (header_complex_maybe_add_data(&snmpNotifyTableStorage, vars, thedata, 1)
+        != NULL){
+    	DEBUGMSGTL(("snmpNotifyTable", "registered an entry\n"));
+	retVal = SNMPERR_SUCCESS;
+    }else{
+        retVal = SNMPERR_GENERR; 
+    }	
 
 
     DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
-    return SNMPERR_SUCCESS;
+    return retVal;
 }
 
 
@@ -559,15 +606,21 @@ parse_snmpNotifyTable(const char *token, char *line)
     line =
         read_config_read_data(ASN_INTEGER, line,
                               &StorageTmp->snmpNotifyStorageType, &tmpint);
+    if (!StorageTmp->snmpNotifyStorageType)
+        StorageTmp->snmpNotifyStorageType = ST_READONLY;
 
     line =
         read_config_read_data(ASN_INTEGER, line,
                               &StorageTmp->snmpNotifyRowStatus, &tmpint);
+    if (!StorageTmp->snmpNotifyRowStatus)
+        StorageTmp->snmpNotifyRowStatus = RS_ACTIVE;
 
 
-
-
-    snmpNotifyTable_add(StorageTmp);
+    if (snmpNotifyTable_add(StorageTmp) != SNMPERR_SUCCESS){
+        SNMP_FREE(StorageTmp->snmpNotifyName);
+        SNMP_FREE(StorageTmp->snmpNotifyTag);
+        SNMP_FREE(StorageTmp);
+    }
 
 
     DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
@@ -668,6 +721,7 @@ var_snmpNotifyTable(struct variable *vp,
     }
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMPNOTIFYTAG:
         *write_method = write_snmpNotifyTag;
         break;
@@ -680,6 +734,7 @@ var_snmpNotifyTable(struct variable *vp,
     case SNMPNOTIFYROWSTATUS:
         *write_method = write_snmpNotifyRowStatus;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         *write_method = NULL;
     }
@@ -688,6 +743,7 @@ var_snmpNotifyTable(struct variable *vp,
         return NULL;
     }
 
+#ifndef NETSNMP_NO_READ_SUPPORT
     switch (vp->magic) {
     case SNMPNOTIFYTAG:
         *var_len = StorageTmp->snmpNotifyTagLen;
@@ -708,6 +764,7 @@ var_snmpNotifyTable(struct variable *vp,
     default:
         ERROR_MSG("");
     }
+#endif /* !NETSNMP_NO_READ_SUPPORT */ 
     return NULL;
 }
 
@@ -735,6 +792,8 @@ snmpTagValid(const char *tag, const size_t tagLen)
 }
 
 static struct snmpNotifyTable_data *StorageNew;
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 
 int
 write_snmpNotifyTag(int action,
@@ -770,10 +829,10 @@ write_snmpNotifyTag(int action,
         if (var_val_type != ASN_OCTET_STR) {
             return SNMP_ERR_WRONGTYPE;
         }
-        if (var_val_len < 0 || var_val_len > 255) {
+        if (var_val_len > 255) {
             return SNMP_ERR_WRONGLENGTH;
         }
-        if (!snmpTagValid(var_val, var_val_len)) {
+        if (!snmpTagValid((char *) var_val, var_val_len)) {
             return SNMP_ERR_WRONGVALUE;
         }
         break;
@@ -785,7 +844,7 @@ write_snmpNotifyTag(int action,
          */
         tmpvar = StorageTmp->snmpNotifyTag;
         tmplen = StorageTmp->snmpNotifyTagLen;
-        StorageTmp->snmpNotifyTag = calloc(1, var_val_len + 1);
+        StorageTmp->snmpNotifyTag = (char*)calloc(1, var_val_len + 1);
         if (NULL == StorageTmp->snmpNotifyTag)
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         break;
@@ -821,6 +880,7 @@ write_snmpNotifyTag(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
 
@@ -1041,7 +1101,7 @@ write_snmpNotifyRowStatus(int action,
             if (StorageNew == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
-            StorageNew->snmpNotifyName = calloc( 1, vp->val_len + 1 );
+            StorageNew->snmpNotifyName = (char*)calloc( 1, vp->val_len + 1 );
             if (StorageNew->snmpNotifyName == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
@@ -1156,7 +1216,9 @@ write_snmpNotifyRowStatus(int action,
             StorageTmp->snmpNotifyRowStatus = RS_NOTINSERVICE;
             StorageNew = NULL;
         }
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */

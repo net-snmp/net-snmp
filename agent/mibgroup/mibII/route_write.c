@@ -60,15 +60,12 @@
 #include <stdlib.h>
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "ip.h"
 #include "route_write.h"
+#include "var_route.h"
 
 #ifdef cygwin
 #include <windows.h>
@@ -76,10 +73,10 @@
 
 #if !defined (WIN32) && !defined (cygwin)
 
-#ifndef STRUCT_RTENTRY_HAS_RT_DST
+#ifndef HAVE_STRUCT_RTENTRY_RT_DST
 #define rt_dst rt_nodes->rn_key
 #endif
-#ifndef STRUCT_RTENTRY_HAS_RT_HASH
+#ifndef HAVE_STRUCT_RTENTRY_RT_HASH
 #define rt_hash rt_pad1
 #endif
 
@@ -202,10 +199,11 @@ delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 
     flags |= RTF_UP;
 
+    memset(&dst, 0, sizeof(dst));
     dst.sin_family = AF_INET;
     dst.sin_addr.s_addr = htonl(dstip);
 
-
+    memset(&gateway, 0, sizeof(gateway));
     gateway.sin_family = AF_INET;
     gateway.sin_addr.s_addr = htonl(gwip);
 
@@ -269,7 +267,7 @@ delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 }
 
 
-#ifndef STRUCT_RTENTRY_HAS_RT_DST
+#ifndef HAVE_STRUCT_RTENTRY_RT_DST
 #undef rt_dst
 #endif
 
@@ -313,7 +311,7 @@ findCacheRTE(u_long dst)
             return (&rtcache[i]);
         }
     }
-    return 0;
+    return NULL;
 }
 
 struct rtent   *
@@ -329,7 +327,7 @@ newCacheRTE(void)
             return (&rtcache[i]);
         }
     }
-    return 0;
+    return NULL;
 
 }
 
@@ -351,7 +349,7 @@ delCacheRTE(u_long dst)
 struct rtent   *
 cacheKernelRTE(u_long dst)
 {
-    return 0;                   /* for now */
+    return NULL;                /* for now */
     /*
      * ...... 
      */
@@ -597,11 +595,8 @@ write_rte(int action,
     return SNMP_ERR_NOERROR;
 }
 
-#else                           /* WIN32 cygwin */
+#elif defined(HAVE_IPHLPAPI_H)  /* WIN32 cygwin */
 #include <iphlpapi.h>
-
-extern PMIB_IPFORWARDROW route_row;
-extern int      create_flag;
 
 int
 write_rte(int action,

@@ -48,41 +48,59 @@ oid             mteTriggerExistenceTable_variables_oid[] =
  */
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 struct variable2 mteTriggerExistenceTable_variables[] = {
     /*
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   MTETRIGGEREXISTENCETEST  3
-    {MTETRIGGEREXISTENCETEST, ASN_BIT_STR, RWRITE,
+    {MTETRIGGEREXISTENCETEST, ASN_BIT_STR, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerExistenceTable, 2, {1, 1}},
 #define   MTETRIGGEREXISTENCESTARTUP  4
-    {MTETRIGGEREXISTENCESTARTUP, ASN_BIT_STR, RWRITE,
+    {MTETRIGGEREXISTENCESTARTUP, ASN_BIT_STR, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerExistenceTable, 2, {1, 2}},
 #define   MTETRIGGEREXISTENCEOBJECTSOWNER  5
-    {MTETRIGGEREXISTENCEOBJECTSOWNER, ASN_OCTET_STR, RWRITE,
+    {MTETRIGGEREXISTENCEOBJECTSOWNER, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerExistenceTable, 2, {1, 3}},
 #define   MTETRIGGEREXISTENCEOBJECTS  6
-    {MTETRIGGEREXISTENCEOBJECTS, ASN_OCTET_STR, RWRITE,
+    {MTETRIGGEREXISTENCEOBJECTS, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerExistenceTable, 2, {1, 4}},
 #define   MTETRIGGEREXISTENCEEVENTOWNER  7
-    {MTETRIGGEREXISTENCEEVENTOWNER, ASN_OCTET_STR, RWRITE,
+    {MTETRIGGEREXISTENCEEVENTOWNER, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerExistenceTable, 2, {1, 5}},
 #define   MTETRIGGEREXISTENCEEVENT  8
-    {MTETRIGGEREXISTENCEEVENT, ASN_OCTET_STR, RWRITE,
+    {MTETRIGGEREXISTENCEEVENT, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerExistenceTable, 2, {1, 6}},
-
 };
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+struct variable2 mteTriggerExistenceTable_variables[] = {
+    /*
+     * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
+     */
+#define   MTETRIGGEREXISTENCETEST  3
+    {MTETRIGGEREXISTENCETEST, ASN_BIT_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerExistenceTable, 2, {1, 1}},
+#define   MTETRIGGEREXISTENCESTARTUP  4
+    {MTETRIGGEREXISTENCESTARTUP, ASN_BIT_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerExistenceTable, 2, {1, 2}},
+#define   MTETRIGGEREXISTENCEOBJECTSOWNER  5
+    {MTETRIGGEREXISTENCEOBJECTSOWNER, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerExistenceTable, 2, {1, 3}},
+#define   MTETRIGGEREXISTENCEOBJECTS  6
+    {MTETRIGGEREXISTENCEOBJECTS, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerExistenceTable, 2, {1, 4}},
+#define   MTETRIGGEREXISTENCEEVENTOWNER  7
+    {MTETRIGGEREXISTENCEEVENTOWNER, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerExistenceTable, 2, {1, 5}},
+#define   MTETRIGGEREXISTENCEEVENT  8
+    {MTETRIGGEREXISTENCEEVENT, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_mteTriggerExistenceTable, 2, {1, 6}},
+};
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 /*
  * (L = length of the oidsuffix) 
  */
-
-
-/*
- * global storage of our data, saved in and configured by header_complex() 
- */
-extern struct header_complex_index *mteTriggerTableStorage;
-
-
 
 
 /*
@@ -131,6 +149,10 @@ var_mteTriggerExistenceTable(struct variable *vp,
 
     DEBUGMSGTL(("mteTriggerExistenceTable",
                 "var_mteTriggerExistenceTable: Entering...  \n"));
+
+	/* set default value */
+	*write_method = NULL;
+
     /*
      * this assumes you have registered all your data properly
      */
@@ -149,32 +171,44 @@ var_mteTriggerExistenceTable(struct variable *vp,
 
 
     case MTETRIGGEREXISTENCETEST:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerExistenceTest;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerExistenceTestLen;
         return (u_char *) StorageTmp->mteTriggerExistenceTest;
 
     case MTETRIGGEREXISTENCESTARTUP:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerExistenceStartup;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerExistenceStartupLen;
         return (u_char *) StorageTmp->mteTriggerExistenceStartup;
 
     case MTETRIGGEREXISTENCEOBJECTSOWNER:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerExistenceObjectsOwner;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerExistenceObjectsOwnerLen;
         return (u_char *) StorageTmp->mteTriggerExistenceObjectsOwner;
 
     case MTETRIGGEREXISTENCEOBJECTS:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerExistenceObjects;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerExistenceObjectsLen;
         return (u_char *) StorageTmp->mteTriggerExistenceObjects;
 
     case MTETRIGGEREXISTENCEEVENTOWNER:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerExistenceEventOwner;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerExistenceEventOwnerLen;
         return (u_char *) StorageTmp->mteTriggerExistenceEventOwner;
 
     case MTETRIGGEREXISTENCEEVENT:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_mteTriggerExistenceEvent;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = StorageTmp->mteTriggerExistenceEventLen;
         return (u_char *) StorageTmp->mteTriggerExistenceEvent;
 
@@ -187,6 +221,7 @@ var_mteTriggerExistenceTable(struct variable *vp,
 
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 
 int
 write_mteTriggerExistenceTest(int action,
@@ -735,3 +770,5 @@ write_mteTriggerExistenceEvent(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */

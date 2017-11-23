@@ -20,11 +20,10 @@
 config_require(ip-mib/data_access/systemstats_common)
 #if defined( linux )
 config_require(ip-mib/data_access/systemstats_linux)
+#elif defined( solaris2 )
+config_require(ip-mib/data_access/systemstats_solaris2)
+#elif defined( freebsd7 ) || defined( netbsd5 ) || defined( openbsd4 ) || defined( dragonfly ) || defined( darwin )
+config_require(ip-mib/data_access/systemstats_sysctl)
 #else
-/*
- * couldn't determine the correct file!
- * require a bogus file to generate an error.
- */
-config_require(ip-mib/data_access/systemstats-unknown-arch);
+config_error(the systemstats data access library is not available in this environment.)
 #endif
-

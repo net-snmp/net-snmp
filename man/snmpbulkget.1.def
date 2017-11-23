@@ -17,13 +17,13 @@ error packet will be returned and a message will be shown, helping to
 pinpoint why the request was malformed.
 .SH OPTIONS
 .TP 8
-.BI -Cn <NUM>
+.BI \-Cn <NUM>
 Set the
 .I non-repeaters
 field in the GETBULK PDU.  This specifies the number of supplied
 variables that should not be iterated over.  The default is 0.
 .TP
-.BI -Cr <NUM>
+.BI \-Cr <NUM>
 Set the
 .I max-repetitions
 field in the GETBULK PDU.  This specifies the maximum number of
@@ -41,7 +41,7 @@ and at least one OID argument, as described there.
 .SH EXAMPLE
 The command:
 .PP
-snmpbulkget -v2c -Cn1 -Cr5 -Os -c public zeus system ifTable
+snmpbulkget \-v2c \-Cn1 \-Cr5 \-Os \-c public zeus system ifTable
 .PP
 will retrieve the variable system.sysDescr.0 (which is the
 lexicographically next object to system) and the first 5 objects in

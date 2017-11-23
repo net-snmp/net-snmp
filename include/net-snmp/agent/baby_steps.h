@@ -16,6 +16,7 @@ extern          "C" {
 #define BABY_STEP_NONE                  0
 #define BABY_STEP_PRE_REQUEST           (0x1 <<  1)
 #define BABY_STEP_OBJECT_LOOKUP         (0x1 <<  2)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #define BABY_STEP_CHECK_VALUE           (0x1 <<  3)
 #define BABY_STEP_ROW_CREATE            (0x1 <<  4)
 #define BABY_STEP_UNDO_SETUP            (0x1 <<  5)
@@ -26,14 +27,17 @@ extern          "C" {
 #define BABY_STEP_UNDO_COMMIT           (0x1 << 10)
 #define BABY_STEP_IRREVERSIBLE_COMMIT   (0x1 << 11)
 #define BABY_STEP_UNDO_CLEANUP          (0x1 << 12)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 #define BABY_STEP_POST_REQUEST          (0x1 << 13)
 
 #define BABY_STEP_ALL                   (0xffffffff)
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #define BABY_STEP_CHECK_OBJECT          BABY_STEP_CHECK_VALUE
 #define BABY_STEP_SET_VALUES            BABY_STEP_SET_VALUE
 #define BABY_STEP_UNDO_SETS             BABY_STEP_UNDO_SET
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /** @name baby_steps
  *
@@ -43,6 +47,8 @@ extern          "C" {
  *  @{ */
 
     typedef struct netsnmp_baby_steps_modes_s {
+       /** Number of handlers whose myvoid pointer points at this object. */
+       int         refcnt;
        u_int       registered;
        u_int       completed;
     } netsnmp_baby_steps_modes;
@@ -74,6 +80,7 @@ typedef struct netsnmp_baby_steps_access_methods_s {
    Netsnmp_Node_Handler *pre_request;
    Netsnmp_Node_Handler *object_lookup;
    Netsnmp_Node_Handler *get_values;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
    Netsnmp_Node_Handler *object_syntax_checks;
    Netsnmp_Node_Handler *row_creation;
    Netsnmp_Node_Handler *undo_setup;
@@ -84,6 +91,7 @@ typedef struct netsnmp_baby_steps_access_methods_s {
    Netsnmp_Node_Handler *undo_cleanup;
    Netsnmp_Node_Handler *undo_commit;
    Netsnmp_Node_Handler *irreversible_commit;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
    Netsnmp_Node_Handler *post_request;
 
    void                 *my_access_void;

@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/scalar.h>
@@ -11,7 +12,8 @@
 
 #include <net-snmp/agent/cache_handler.h>
 #include "agent/nsCache.h"
-#include "util_funcs.h"
+
+netsnmp_feature_require(cache_get_head)
 
 
 /*
@@ -21,6 +23,8 @@
 extern netsnmp_cache *netsnmp_cache_get_head(void);
 
 
+#define nsCache 1, 3, 6, 1, 4, 1, 8072, 1, 5
+
 /*
  * OIDs for the cacheging control scalar objects
  *
@@ -28,8 +32,6 @@ extern netsnmp_cache *netsnmp_cache_get_head(void);
  *  than the (sole) valid instance in each case, in order
  *  to handle requests for invalid instances properly.
  */
-oid nsCacheTimeout_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 5, 1};
-oid nsCacheEnabled_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 5, 2};
 
 /*
  * ... and for the cache table.
@@ -44,15 +46,17 @@ oid nsCacheEnabled_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 5, 2};
 #define NSCACHE_STATUS_ACTIVE   4
 #define NSCACHE_STATUS_EXPIRED  5
 
-oid nsCacheTable_oid[]      = { 1, 3, 6, 1, 4, 1, 8072, 1, 5, 3};
-
-extern struct snmp_alarm *
+NETSNMP_IMPORT struct snmp_alarm *
 sa_find_specific(unsigned int clientreg);
 
 
 void
 init_nsCache(void)
 {
+    const oid nsCacheTimeout_oid[]    = { nsCache, 1 };
+    const oid nsCacheEnabled_oid[]    = { nsCache, 2 };
+    const oid nsCacheTable_oid[]      = { nsCache, 3 };
+
     netsnmp_table_registration_info *table_info;
     netsnmp_iterator_info           *iinfo;
 
@@ -103,7 +107,7 @@ init_nsCache(void)
     /*
      * .... and register the table with the agent.
      */
-    netsnmp_register_table_iterator(
+    netsnmp_register_table_iterator2(
         netsnmp_create_handler_registration(
             "tzCacheTable", handle_nsCacheTable,
             nsCacheTable_oid, OID_LENGTH(nsCacheTable_oid),
@@ -138,6 +142,7 @@ handle_nsCacheTimeout(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if ( request->status != 0 ) {
@@ -159,6 +164,7 @@ handle_nsCacheTimeout(netsnmp_mib_handler *handler,
                            NETSNMP_DS_AGENT_CACHE_TIMEOUT,
                            *requests->requestvb->val.integer);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -188,6 +194,7 @@ handle_nsCacheEnabled(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
             if ( request->status != 0 ) {
@@ -212,6 +219,7 @@ handle_nsCacheEnabled(netsnmp_mib_handler *handler,
 	netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_NO_CACHING, enabled);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;
@@ -296,9 +304,10 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
                     continue;
 		}
 		status = (cache_entry->enabled ?
-	                   (cache_entry->timestamp ?
-                             (!atime_ready(cache_entry->timestamp,
-                                          1000*cache_entry->timeout) ?
+	                   (cache_entry->timestampM ?
+                             (cache_entry->timeout >= 0 &&
+                              !netsnmp_ready_monotonic(cache_entry->timestampM,
+                                                       1000*cache_entry->timeout) ?
 	                        NSCACHE_STATUS_ACTIVE:
 	                        NSCACHE_STATUS_EXPIRED) :
 	                      NSCACHE_STATUS_EMPTY) :
@@ -315,6 +324,7 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
 	break;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         for (request=requests; request; request=request->next) {
             if (request->processed != 0)
@@ -362,7 +372,6 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
             default:
                 netsnmp_set_request_error(reqinfo, request, SNMP_ERR_NOCREATION);
                 return SNMP_ERR_NOCREATION;	/* XXX - is this right ? */
-                continue;
 	    }
 	}
 	break;
@@ -406,14 +415,15 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
                         break;
 		    case NSCACHE_STATUS_EMPTY:
                         cache_entry->free_cache(cache_entry, cache_entry->magic);
-                        free(cache_entry->timestamp);
-                        cache_entry->timestamp = NULL;
+                        free(cache_entry->timestampM);
+                        cache_entry->timestampM = NULL;
                         break;
 		}
 	        break;
 	    }
 	}
 	break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;

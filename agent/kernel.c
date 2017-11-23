@@ -1,7 +1,19 @@
-
-/*
- *  13 Jun 91  wsak (wk0x@andrew) added mips support
+/***********************************************************************
+   Net-SNMP - Simple Network Management Protocol agent library.
+ ***********************************************************************/
+/** @file kernel.c
+ *     Net-SNMP Kernel Data Access Library.
+ *     Provides access to kernel virtual memory for systems that
+ *     support it.
+ * @author   See README file for a list of contributors
  */
+/* Copyrights:
+ *     Copyright holders are listed in README file.
+ *     Redistribution and use in source and binary forms, with or
+ *     without modification, are permitted. License terms are specified
+ *     in COPYING file distributed with the Net-SNMP package.
+ */
+/***********************************************************************/
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -40,7 +52,7 @@
 
 
 #if HAVE_KVM_H
-kvm_t          *kd;
+kvm_t *kd = NULL;
 
 /**
  * Initialize the support for accessing kernel virtual memory.
@@ -56,6 +68,12 @@ init_kmem(const char *file)
     char            err[4096];
 
     kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, err);
+    if (!kd)
+#ifdef KVM_NO_FILES
+	kd = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, err);
+#else
+	kd = kvm_openfiles(NULL, "/dev/null", NULL, O_RDONLY, err);
+#endif
     if (!kd && !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                        NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
         snmp_log(LOG_CRIT, "init_kmem: kvm_openfiles failed: %s\n", err);
@@ -73,18 +91,18 @@ init_kmem(const char *file)
     return res;
 }
 
-
-/*
- *  klookup:
+/** Reads kernel memory.
+ *  Seeks to the specified location in kmem, then
+ *  does a read of given amount ob bytes into target buffer.
  *
- *  It seeks to the location  off  in kmem
- *  It does a read into  target  of  siz  bytes.
+ * @param off The location to seek.
  *
- *  Return 0 on failure and 1 on sucess.
+ * @param target The target buffer to read into.
  *
+ * @param siz Number of bytes to read.
+ *
+ * @return gives 1 on success and 0 on failure.
  */
-
-
 int
 klookup(unsigned long off, void *target, size_t siz)
 {
@@ -105,6 +123,18 @@ klookup(unsigned long off, void *target, size_t siz)
         return 0;
     }
     return 1;
+}
+
+/** Closes the kernel memory support.
+ */
+void
+free_kmem(void)
+{
+    if (kd != NULL)
+    {
+      kvm_close(kd);
+      kd = NULL;
+    }
 }
 
 #else                           /* HAVE_KVM_H */
@@ -151,19 +181,17 @@ init_kmem(const char *file)
     return res;
 }
 
-
-/*
+/** @private
  *  Seek into the kernel for a value.
  */
-static          off_t
+static off_t
 klseek(off_t base)
 {
     return (lseek(kmem, (off_t) base, SEEK_SET));
 }
 
-
-/*
- *  Read from the kernel 
+/** @private
+ *  Read from the kernel.
  */
 static int
 klread(char *buf, int buflen)
@@ -171,18 +199,18 @@ klread(char *buf, int buflen)
     return (read(kmem, buf, buflen));
 }
 
-
-/*
- *  klookup:
+/** Reads kernel memory.
+ *  Seeks to the specified location in kmem, then
+ *  does a read of given amount ob bytes into target buffer.
  *
- *  It seeks to the location  off  in kmem
- *  It does a read into  target  of  siz  bytes.
+ * @param off The location to seek.
  *
- *  Return 0 on failure and 1 on sucess.
+ * @param target The target buffer to read into.
  *
+ * @param siz Number of bytes to read.
+ *
+ * @return gives 1 on success and 0 on failure.
  */
-
-
 int
 klookup(unsigned long off, void *target, size_t siz)
 {
@@ -212,6 +240,27 @@ klookup(unsigned long off, void *target, size_t siz)
     return (1);
 }
 
+/** Closes the kernel memory support.
+ */
+void
+free_kmem(void)
+{
+    if (swap >= 0) {
+        close(swap);
+        swap = -1;
+    }
+    if (mem >= 0) {
+        close(mem);
+        mem = -1;
+    }
+    if (kmem >= 0) {
+        close(kmem);
+        kmem = -1;
+    }
+}
+
 #endif                          /* HAVE_KVM_H */
 
+#else
+int unused;	/* Suppress "empty translation unit" warning */
 #endif                          /* NETSNMP_CAN_USE_NLIST */

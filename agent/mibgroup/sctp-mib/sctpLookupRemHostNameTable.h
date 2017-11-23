@@ -13,6 +13,7 @@
 void            init_sctpLookupRemHostNameTable(void);
 void            shutdown_sctpLookupRemHostNameTable(void);
 void            initialize_table_sctpLookupRemHostNameTable(void);
+void            shutdown_table_sctpLookupRemHostNameTable(void);
 Netsnmp_Node_Handler sctpLookupRemHostNameTable_handler;
 
 /*
