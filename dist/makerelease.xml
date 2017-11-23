@@ -604,7 +604,7 @@
 	    is just as an example - this script does *not* upload the
 	    files automatically.  You must do something like:</text>
 	  <commands>
-	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc hardaker,net-snmp@frs.sourceforge.net:/home/frs/project/n/ne/net-snmp/net-snmp/{VERSIONTARGET}-pre-releases/</command>
+	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc $USER@frs.sourceforge.net:/home/frs/project/net-snmp/{VERSIONTARGET}-pre-releases/</command>
 	  </commands>
 	</step>
 	<step pause="true" type="system" skipunless="'{RELEASETYPE}' eq 'full'"
@@ -614,7 +614,7 @@
 	    is just as an example - this script does *not* upload the
 	    files automatically.  You must do something like:</text>
 	  <commands>
-	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc hardaker,net-snmp@frs.sourceforge.net:/home/frs/project/n/ne/net-snmp/net-snmp/{VERSIONTARGET}/</command>
+	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc $USER@frs.sourceforge.net:/home/frs/project/net-snmp/{VERSIONTARGET}/</command>
 	  </commands>
 	</step>
 	<step type="informational" stepname="publish:editrelease"
