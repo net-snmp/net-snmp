@@ -71,7 +71,6 @@
 #include <net-snmp/utilities.h>
 
 #include <net-snmp/library/callback.h>
-#define LOGLENGTH 1024
 
 #ifdef va_copy
 #define NEED_VA_END_AFTER_VA_COPY
@@ -1279,53 +1278,17 @@ snmp_log_string(int priority, const char *str)
 int
 snmp_vlog(int priority, const char *format, va_list ap)
 {
-    char            buffer[LOGLENGTH];
+    char           *buffer = NULL;
     int             length;
-    char           *dynamic;
-    va_list         aq;
 
-    va_copy(aq, ap);
-    length = vsnprintf(buffer, LOGLENGTH, format, ap);
-    va_end(ap);
-
-    if (length == 0) {
-#ifdef NEED_VA_END_AFTER_VA_COPY
-        va_end(aq);
-#endif
-        return (0);             /* Empty string */
-    }
-
-    if (length == -1) {
+    length = vasprintf(&buffer, format, ap);
+    if (length < 0) {
         snmp_log_string(LOG_ERR, "Could not format log-string\n");
-#ifdef NEED_VA_END_AFTER_VA_COPY
-        va_end(aq);
-#endif
-        return (-1);
+        return -1;
     }
 
-    if (length < LOGLENGTH) {
-        snmp_log_string(priority, buffer);
-#ifdef NEED_VA_END_AFTER_VA_COPY
-        va_end(aq);
-#endif
-        return (0);
-    }
-
-    dynamic = (char *) malloc(length + 1);
-    if (dynamic == NULL) {
-        snmp_log_string(LOG_ERR,
-                        "Could not allocate memory for log-message\n");
-        snmp_log_string(priority, buffer);
-#ifdef NEED_VA_END_AFTER_VA_COPY
-        va_end(aq);
-#endif
-        return (-2);
-    }
-
-    vsnprintf(dynamic, length + 1, format, aq);
-    snmp_log_string(priority, dynamic);
-    free(dynamic);
-    va_end(aq);
+    snmp_log_string(priority, buffer);
+    free(buffer);
     return 0;
 }
 
