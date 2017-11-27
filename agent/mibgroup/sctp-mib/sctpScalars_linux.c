@@ -143,8 +143,6 @@ netsnmp_access_sctp_stats_arch_load(netsnmp_sctp_stats * sctp_stats)
         if (ret < 0) {
             DEBUGMSGTL(("sctp:scalars:stats:arch_load",
                         "Unknown entry: %s\n", line));
-            // fclose(f);
-            // return ret;
 	    ret = 0;
         }
     }
