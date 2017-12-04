@@ -59,6 +59,7 @@ extern          "C" {
                                         int dont_zero_log);
     NETSNMP_IMPORT
     void            snmp_enable_stderrlog(void);
+    NETSNMP_IMPORT
     void            snmp_enable_calllog(void);
 
     NETSNMP_IMPORT
