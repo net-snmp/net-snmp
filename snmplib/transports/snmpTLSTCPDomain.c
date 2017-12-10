@@ -688,8 +688,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         /* XXX: check securityLevel and ensure no NULL fingerprints are used */
 
         /* set up the needed SSL context */
-        tlsdata->ssl_context = ctx =
-            sslctx_client_setup(TLSv1_method(), tlsdata);
+        tlsdata->ssl_context = ctx = sslctx_client_setup(TLS_method(), tlsdata);
         if (!ctx) {
             snmp_log(LOG_ERR, "failed to create TLS context\n");
             return NULL;
@@ -894,8 +893,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         }
 
         /* create the OpenSSL TLS context */
-        tlsdata->ssl_context =
-            sslctx_server_setup(TLSv1_method());
+        tlsdata->ssl_context = sslctx_server_setup(TLS_method());
 
         t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;

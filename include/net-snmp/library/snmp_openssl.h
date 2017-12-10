@@ -6,10 +6,13 @@
 #define SNMP_OPENSSL_H
 
 #include <openssl/dh.h>
+#include <openssl/ssl.h>
 
 #ifdef __cplusplus
 extern          "C" {
 #endif
+
+    struct netsnmp_cert_map_s;
 
     NETSNMP_IMPORT
     void netsnmp_init_openssl(void);
@@ -27,8 +30,8 @@ extern          "C" {
 
     int netsnmp_openssl_cert_issued_by(X509 *issuer, X509 *cert);
 
-    char *netsnmp_openssl_extract_secname(netsnmp_cert_map *cert_map,
-                                          netsnmp_cert_map *peer_cert);
+    char *netsnmp_openssl_extract_secname(struct netsnmp_cert_map_s *cert_map,
+                                          struct netsnmp_cert_map_s *peer_cert);
 
     char *netsnmp_openssl_cert_get_subjectAltName(X509 *, char **buf, int *len);
 
@@ -54,6 +57,30 @@ extern          "C" {
     NETSNMP_IMPORT
     void DH_get0_key(const DH *dh, const BIGNUM **pub_key,
                      const BIGNUM **priv_key);
+#ifndef ASN1_STRING_GET0_DATA
+    NETSNMP_IMPORT
+    const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *x);
+#endif
+#ifndef HAVE_X509_NAME_ENTRY_GET_OBJECT
+    NETSNMP_IMPORT
+    ASN1_OBJECT *X509_NAME_ENTRY_get_object(const X509_NAME_ENTRY *ne);
+#endif
+#ifndef HAVE_X509_NAME_ENTRY_GET_DATA
+    NETSNMP_IMPORT
+    ASN1_STRING *X509_NAME_ENTRY_get_data(const X509_NAME_ENTRY *ne);
+#endif
+#ifndef HAVE_X509_GET_SIGNATURE_NID
+    NETSNMP_IMPORT
+    int X509_get_signature_nid(const X509_REQ *req);
+#endif
+#ifndef HAVE_TLS_METHOD
+    NETSNMP_IMPORT
+    const SSL_METHOD *TLS_method(void);
+#endif
+#ifndef HAVE_DTLS_METHOD
+    NETSNMP_IMPORT
+    const SSL_METHOD *DTLS_method(void);
+#endif
 
 #ifdef __cplusplus
 }

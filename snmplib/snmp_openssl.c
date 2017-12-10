@@ -38,8 +38,12 @@ void netsnmp_init_openssl(void) {
     DEBUGMSGTL(("snmp_openssl", "initializing\n"));
 
     /* Initializing OpenSSL */
+#ifdef HAVE_SSL_LIBRARY_INIT
     SSL_library_init();
+#endif
+#ifdef HAVE_SSL_LOAD_ERROR_STRINGS
     SSL_load_error_strings();
+#endif
     ERR_load_BIO_strings();
     OpenSSL_add_all_algorithms();
 }
@@ -154,11 +158,12 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
         oname_entry = X509_NAME_get_entry(osubj_name, i);
         netsnmp_assert(NULL != oname_entry);
 
-        if (oname_entry->value->type != V_ASN1_PRINTABLESTRING)
+        if (X509_NAME_ENTRY_get_data(oname_entry)->type !=
+            V_ASN1_PRINTABLESTRING)
             continue;
 
         /** get NID */
-        onid = OBJ_obj2nid(oname_entry->object);
+        onid = OBJ_obj2nid(X509_NAME_ENTRY_get_object(oname_entry));
         if (onid == NID_undef) {
             prefix_long = prefix_short = "UNKNOWN";
         }
@@ -169,9 +174,10 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
 
         DEBUGMSGT(("9:cert:dump:names",
                    "[%02d] NID type %d, ASN type %d\n", i, onid,
-                   oname_entry->value->type));
+                   X509_NAME_ENTRY_get_data(oname_entry)->type));
         DEBUGMSGT(("9:cert:dump:names", "%s/%s: '%s'\n", prefix_long,
-                   prefix_short, ASN1_STRING_data(oname_entry->value)));
+                   prefix_short,
+                   ASN1_STRING_get0_data(X509_NAME_ENTRY_get_data(oname_entry))));
     }
 }
 
@@ -457,7 +463,7 @@ netsnmp_openssl_cert_get_hash_type(X509 *ocert)
     if (NULL == ocert)
         return 0;
 
-    return _nid2ht(OBJ_obj2nid(ocert->sig_alg->algorithm));
+    return _nid2ht(X509_get_signature_nid(ocert));
 }
 
 /**
@@ -474,7 +480,7 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
     if (NULL == ocert)
         return NULL;
 
-    nid = OBJ_obj2nid(ocert->sig_alg->algorithm);
+    nid = X509_get_signature_nid(ocert);
     DEBUGMSGT(("9:openssl:fingerprint", "alg %d, cert nid %d (%d)\n", alg, nid,
                _nid2ht(nid)));
         
@@ -915,6 +921,52 @@ DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
        *pub_key = dh->pub_key;
    if (priv_key != NULL)
        *priv_key = dh->priv_key;
+}
+#endif
+
+#ifndef ASN1_STRING_GET0_DATA
+const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *x)
+{
+    return x->data;
+}
+#endif
+
+#ifndef HAVE_X509_NAME_ENTRY_GET_OBJECT
+ASN1_OBJECT *X509_NAME_ENTRY_get_object(const X509_NAME_ENTRY *ne)
+{
+    if (ne == NULL)
+        return NULL;
+    return ne->object;
+}
+#endif
+
+#ifndef HAVE_X509_NAME_ENTRY_GET_DATA
+ASN1_STRING *X509_NAME_ENTRY_get_data(const X509_NAME_ENTRY *ne)
+{
+    if (ne == NULL)
+        return NULL;
+    return ne->value;
+}
+#endif
+
+#ifndef HAVE_X509_GET_SIGNATURE_NID
+int X509_get_signature_nid(const X509_REQ *req)
+{
+    return OBJ_obj2nid(req->sig_alg.algorithm);
+}
+#endif
+
+#ifndef HAVE_TLS_METHOD
+const SSL_METHOD *TLS_method(void)
+{
+    return TLSv1_method();
+}
+#endif
+
+#ifndef HAVE_DTLS_METHOD
+const SSL_METHOD *DTLS_method(void)
+{
+    return DTLSv1_method();
 }
 #endif
 

@@ -94,6 +94,9 @@
 /* Define to 1 if you have the <asm/types.h> header file. */
 #undef HAVE_ASM_TYPES_H
 
+/* Define to 1 if you have the `ASN1_STRING_get0_data' function. */
+#undef HAVE_ASN1_STRING_GET0_DATA
+
 /* Define to 1 if you have the `cgetnext' function. */
 #undef HAVE_CGETNEXT
 
@@ -143,6 +146,12 @@
 
 /* Set if the dpkg-query command is available */
 #undef HAVE_DPKG_QUERY
+
+/* Define to 1 if you have the `DTLSv1_method' function. */
+#undef HAVE_DTLSV1_METHOD
+
+/* Define to 1 if you have the `DTLS_method' function. */
+#undef HAVE_DTLS_METHOD
 
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
@@ -747,6 +756,12 @@
 /* Define to 1 if the system has the type `ssize_t'. */
 #undef HAVE_SSIZE_T
 
+/* Define to 1 if you have the `SSL_library_init' function. */
+#undef HAVE_SSL_LIBRARY_INIT
+
+/* Define to 1 if you have the `SSL_load_error_strings' function. */
+#undef HAVE_SSL_LOAD_ERROR_STRINGS
+
 /* Define to 1 if you have the `statfs' function. */
 #undef HAVE_STATFS
 
@@ -1203,6 +1218,12 @@
 /* Define if a timezone variable is declared in <sys/time.h> */
 #undef HAVE_TIMEZONE_VARIABLE
 
+/* Define to 1 if you have the `TLSv1_method' function. */
+#undef HAVE_TLSV1_METHOD
+
+/* Define to 1 if you have the `TLS_method' function. */
+#undef HAVE_TLS_METHOD
+
 /* Define to 1 if you have the <ufs/ffs/fs.h> header file. */
 #undef HAVE_UFS_FFS_FS_H
 
@@ -1274,6 +1295,15 @@
 
 /* Define to 1 if you have the <ws2tcpip.h> header file. */
 #undef HAVE_WS2TCPIP_H
+
+/* Define to 1 if you have the `X509_get_signature_nid' function. */
+#undef HAVE_X509_GET_SIGNATURE_NID
+
+/* Define to 1 if you have the `X509_NAME_ENTRY_get_data' function. */
+#undef HAVE_X509_NAME_ENTRY_GET_DATA
+
+/* Define to 1 if you have the `X509_NAME_ENTRY_get_object' function. */
+#undef HAVE_X509_NAME_ENTRY_GET_OBJECT
 
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
@@ -1453,6 +1483,10 @@
 
 /* Use BSD 4.4 routing table entries? */
 #undef RTENTRY_4_4
+
+/* Qualifier for second argument of the appverify_cookie_cb() callback
+   function */
+#undef SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER
 
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT

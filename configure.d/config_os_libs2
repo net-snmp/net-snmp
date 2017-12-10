@@ -301,23 +301,53 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
             AC_CHECK_FUNCS([AES_cfb128_encrypt]dnl
                            [EVP_MD_CTX_create EVP_MD_CTX_destroy]dnl
                            [EVP_MD_CTX_new    EVP_MD_CTX_free   ]dnl
-                           [DH_set0_pqg DH_get0_pqg DH_get0_key])
+                           [DH_set0_pqg DH_get0_pqg DH_get0_key]dnl
+                           [ASN1_STRING_get0_data X509_NAME_ENTRY_get_object]dnl
+                           [X509_NAME_ENTRY_get_data X509_get_signature_nid])
+            AC_MSG_CHECKING([whether 2nd app_verify_cookie_cb() arg is const])
+            netsnmp_save_CFLAGS="$CFLAGS"
+            CFLAGS="$CFLAGS -Werror"
+            AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
+              #include <openssl/ssl.h>
+            ],[
+              int (*app_verify_cookie_cb)(SSL *ssl,
+                                          const unsigned char *cookie,
+                                          unsigned int cookie_len) = NULL;
+              SSL_CTX_set_cookie_verify_cb(NULL, app_verify_cookie_cb);
+            ]),
+            [AC_MSG_RESULT(yes); ac_cv_saccaq=const],
+            [AC_MSG_RESULT(no)])
+            AC_DEFINE_UNQUOTED([SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER],
+                               [$ac_cv_saccaq],
+                               [Qualifier for second argument of the appverify_cookie_cb() callback function])
+            CFLAGS="$netsnmp_save_CFLAGS"
             LIBS="$netsnmp_save_LIBS"
         fi
+        netsnmp_save_LIBS="$LIBS"
+        LIBS="-lssl"
+        AC_CHECK_FUNCS([TLS_method TLSv1_method DTLS_method DTLSv1_method]dnl
+                       [SSL_library_init SSL_load_error_strings])
+        LIBS="$netsnmp_save_LIBS"
         if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
-	    AC_CHECK_LIB(ssl, DTLSv1_method,
+	    if test x$ac_cv_func_DTLSv1_method = xyes -o \
+                    x$ac_cv_func_DTLS_method = xyes; then
                 AC_DEFINE(HAVE_LIBSSL_DTLS, 1,
                     [Define to 1 if your `ssl' library supports DTLS (-lssl).])
-                LIBCRYPTO=" -lssl $LIBCRYPTO",	
-		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available and support DTLS])	,-lcrypto)
+                LIBCRYPTO=" -lssl $LIBCRYPTO"
+	    else
+		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available and support DTLS])
+            fi
             TLSPROG=yes
         fi
         if echo " $transport_result_list " | $GREP "TLS" > /dev/null; then
-	    AC_CHECK_LIB(ssl, SSL_library_init,
+	    if test x$ac_cv_func_TLSv1_method = xyes -o \
+                    x$ac_cv_func_TLS_method = xyes; then
                 AC_DEFINE(HAVE_LIBSSL, 1,
                     [Define to 1 if you have the `ssl' library (-lssl).])
-                LIBCRYPTO=" -lssl $LIBCRYPTO",	
-		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available])	,-lcrypto)
+                LIBCRYPTO=" -lssl $LIBCRYPTO"
+            else
+		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available])
+            fi
             TLSPROG=yes
         fi
         if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then

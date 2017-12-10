@@ -118,7 +118,9 @@ static bio_cache *biocache = NULL;
 
 static int openssl_addr_index = 0;
 
-static int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
+static int netsnmp_dtls_verify_cookie(SSL *ssl,
+                                      SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER
+                                      unsigned char *cookie,
                                       unsigned int cookie_len);
 static int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
                                    unsigned int *cookie_len);
@@ -295,12 +297,12 @@ start_new_cached_connection(netsnmp_transport *t,
         DEBUGMSGTL(("dtlsudp",
                     "starting a new connection as a client to sock: %d\n",
                     t->sock));
-        tlsdata->ssl = SSL_new(sslctx_client_setup(DTLSv1_method(), tlsdata));
+        tlsdata->ssl = SSL_new(sslctx_client_setup(DTLS_method(), tlsdata));
 
         /* XXX: session setting 735 */
     } else {
         /* we're the server */
-        SSL_CTX *ctx = sslctx_server_setup(DTLSv1_method());
+        SSL_CTX *ctx = sslctx_server_setup(DTLS_method());
         if (!ctx) {
             BIO_free(cachep->read_bio);
             BIO_free(cachep->write_bio);
@@ -1537,7 +1539,9 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
     return 1;
 }
 
-int netsnmp_dtls_verify_cookie(SSL *ssl, unsigned char *cookie,
+int netsnmp_dtls_verify_cookie(SSL *ssl,
+                               SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER
+                               unsigned char *cookie,
                                unsigned int cookie_len)
 {
     unsigned char *buffer, result[EVP_MAX_MD_SIZE];
