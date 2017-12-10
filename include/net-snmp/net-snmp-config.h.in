@@ -94,12 +94,6 @@
 /* Define to 1 if you have the <asm/types.h> header file. */
 #undef HAVE_ASM_TYPES_H
 
-/* Define to 1 if you have the `asprintf' function. */
-#undef HAVE_ASPRINTF
-
-/* Define if using MY_INIT() causes a linker error */
-#undef HAVE_BROKEN_LIBMYSQLCLIENT
-
 /* Define to 1 if you have the `cgetnext' function. */
 #undef HAVE_CGETNEXT
 
@@ -124,6 +118,15 @@
 
 /* define if you have devstat_getdevs() */
 #undef HAVE_DEVSTAT_GETDEVS
+
+/* Define to 1 if you have the `DH_get0_key' function. */
+#undef HAVE_DH_GET0_KEY
+
+/* Define to 1 if you have the `DH_get0_pqg' function. */
+#undef HAVE_DH_GET0_PQG
+
+/* Define to 1 if you have the `DH_set0_pqg' function. */
+#undef HAVE_DH_SET0_PQG
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
@@ -152,6 +155,12 @@
 
 /* Define to 1 if you have the `EVP_MD_CTX_destroy' function. */
 #undef HAVE_EVP_MD_CTX_DESTROY
+
+/* Define to 1 if you have the `EVP_MD_CTX_free' function. */
+#undef HAVE_EVP_MD_CTX_FREE
+
+/* Define to 1 if you have the `EVP_MD_CTX_new' function. */
+#undef HAVE_EVP_MD_CTX_NEW
 
 /* Define to 1 if you have the `execv' function. */
 #undef HAVE_EXECV
@@ -387,6 +396,9 @@
 /* Define to 1 if you have the <linux/tasks.h> header file. */
 #undef HAVE_LINUX_TASKS_H
 
+/* Define if load_defaults() is available in libmysqlclient */
+#undef HAVE_LOAD_DEFAULTS
+
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
 
@@ -434,6 +446,12 @@
 
 /* Define to 1 if you have the <mtab.h> header file. */
 #undef HAVE_MTAB_H
+
+/* Define if mysql_init() is available in libmysqlclient */
+#undef HAVE_MYSQL_INIT
+
+/* Define if MY_INIT() is availabe in libmysqlclient */
+#undef HAVE_MY_INIT
 
 /* Define to 1 if you have the <nbutil.h> header file. */
 #undef HAVE_NBUTIL_H

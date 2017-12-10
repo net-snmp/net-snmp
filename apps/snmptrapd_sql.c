@@ -23,8 +23,12 @@
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
 #include <my_config.h>
+#ifdef HAVE_MY_GLOBAL_H
 #include <my_global.h>
+#endif
+#ifdef HAVE_MY_SYS_H
 #include <my_sys.h>
+#endif
 #include <mysql.h>
 #include <errmsg.h>
 
@@ -435,14 +439,19 @@ netsnmp_mysql_init(void)
         return -1;
     }
 
-#ifdef HAVE_BROKEN_LIBMYSQLCLIENT
-    my_init();
-#else
+#if defined(HAVE_MYSQL_INIT)
+    mysql_init(NULL);
+#elif defined(HAVE_MY_INIT)
     MY_INIT("snmptrapd");
+#else
+    my_init();
 #endif
 
+#ifdef HAVE_LOAD_DEFAULTS
     /** load .my.cnf values */
     load_defaults ("my", _sql.groups, &not_argc, &not_argv);
+#endif
+
     for(i=0; i < not_argc; ++i) {
         if (NULL == not_argv[i])
             continue;

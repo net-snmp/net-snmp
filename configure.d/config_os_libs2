@@ -296,15 +296,13 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
             AC_DEFINE(HAVE_LIBCRYPTO, 1,
                 [Define to 1 if you have the OpenSSL library (-lcrypto or -leay32).])
             LIBCRYPTO="-l${CRYPTO}"
-            AC_CHECK_LIB(${CRYPTO}, AES_cfb128_encrypt, 
-                AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
-                    [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
-
-            AC_CHECK_LIB(${CRYPTO}, EVP_MD_CTX_create,
-                AC_DEFINE([HAVE_EVP_MD_CTX_CREATE], [],
-                    [Define to 1 if you have the `EVP_MD_CTX_create' function.])
-                AC_DEFINE([HAVE_EVP_MD_CTX_DESTROY], [],
-                    [Define to 1 if you have the `EVP_MD_CTX_destroy' function.]))
+            netsnmp_save_LIBS="$LIBS"
+            LIBS="$LIBCRYPTO"
+            AC_CHECK_FUNCS([AES_cfb128_encrypt]dnl
+                           [EVP_MD_CTX_create EVP_MD_CTX_destroy]dnl
+                           [EVP_MD_CTX_new    EVP_MD_CTX_free   ]dnl
+                           [DH_set0_pqg DH_get0_pqg DH_get0_key])
+            LIBS="$netsnmp_save_LIBS"
         fi
         if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
 	    AC_CHECK_LIB(ssl, DTLSv1_method,
@@ -449,16 +447,30 @@ if test "x$with_mysql" = "xyes" ; then
   CPPFLAGS="${CPPFLAGS} ${MYSQL_INCLUDES}"
   AC_CHECK_HEADER(mysql.h,,
      [AC_MSG_ERROR([Could not find mysql.h and was specifically asked to use MySQL support])])
+  AC_CHECK_HEADER([my_global.h my_sys.h])
   AC_MSG_CHECKING([whether MY_INIT() works])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM(
-      [[#include <my_global.h>
-        #include <my_sys.h>]],
+      [[#ifdef HAVE_MY_GLOBAL_H
+        #include <my_global.h>
+        #endif
+        #ifdef HAVE_MY_SYS_H
+        #include <my_sys.h>
+        #endif
+        #include <mysql.h>]],
       [[MY_INIT("my_init_test")]])],
-      [AC_MSG_RESULT(yes)],
-      [AC_MSG_RESULT(no)
-       AC_DEFINE([HAVE_BROKEN_LIBMYSQLCLIENT], 1,
-                 [Define if using MY_INIT() causes a linker error])])
+      [AC_MSG_RESULT(yes)
+       AC_DEFINE([HAVE_MY_INIT], 1,
+                 [Define if MY_INIT() is availabe in libmysqlclient])],
+      [AC_MSG_RESULT(no)])
+  AC_CHECK_FUNC(
+    [mysql_init],
+    AC_DEFINE([HAVE_MYSQL_INIT], 1,
+              [Define if mysql_init() is available in libmysqlclient]))
+  AC_CHECK_FUNC(
+    [load_defaults],
+    AC_DEFINE([HAVE_LOAD_DEFAULTS], 1,
+              [Define if load_defaults() is available in libmysqlclient]))
   CPPFLAGS="${_cppflags}"
   LIBS="${_libs}"
   AC_MSG_CACHE_ADD(MYSQL Trap Logging:         enabled)
