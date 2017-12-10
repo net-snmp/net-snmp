@@ -30,7 +30,7 @@
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/data_access/swinst.h>
 
-netsnmp_feature_require(date_n_time)
+config_require(date_n_time)
 
 char pkg_directory[SNMP_MAXBUF];
 static char apt_fmt[SNMP_MAXBUF];
