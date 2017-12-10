@@ -67,6 +67,7 @@
 #endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
 
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/library/snmp_openssl.h>
 
 int             main(int, char **);
 
@@ -194,6 +195,7 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                oid *keyoid, size_t keyoid_len) {
     u_char *dhkeychange;
     DH *dh;
+    const BIGNUM *pub_key;
     BIGNUM *other_pub;
     u_char *key;
     size_t key_len;
@@ -209,25 +211,26 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     dh = d2i_DHparams(NULL, (const unsigned char **) &cp,
                       dhvar->val_len);
 
-    if (!dh || !dh->g || !dh->p) {
+    if (!dh) {
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
 
     DH_generate_key(dh);
-    if (!dh->pub_key) {
+    DH_get0_key(dh, &pub_key, NULL);
+    if (!pub_key) {
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
             
-    if (vars->val_len != BN_num_bytes(dh->pub_key)) {
+    if (vars->val_len != BN_num_bytes(pub_key)) {
         SNMP_FREE(dhkeychange);
         fprintf(stderr,"incorrect diffie-helman lengths (%lu != %d)\n",
-                (unsigned long)vars->val_len, BN_num_bytes(dh->pub_key));
+                (unsigned long)vars->val_len, BN_num_bytes(pub_key));
         return SNMPERR_GENERR;
     }
 
-    BN_bn2bin(dh->pub_key, dhkeychange + vars->val_len);
+    BN_bn2bin(pub_key, dhkeychange + vars->val_len);
 
     key_len = DH_size(dh);
     if (!key_len) {

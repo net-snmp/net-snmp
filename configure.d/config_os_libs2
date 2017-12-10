@@ -255,15 +255,13 @@ if test "x$tryopenssl" != "xno"; then
             AC_DEFINE(HAVE_LIBCRYPTO, 1,
                 [Define to 1 if you have the OpenSSL library (-lcrypto or -leay32).])
             LIBCRYPTO="-l${CRYPTO}"
-            AC_CHECK_LIB(${CRYPTO}, AES_cfb128_encrypt, 
-                AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
-                    [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
-
-            AC_CHECK_LIB(${CRYPTO}, EVP_MD_CTX_create,
-                AC_DEFINE([HAVE_EVP_MD_CTX_CREATE], [],
-                    [Define to 1 if you have the `EVP_MD_CTX_create' function.])
-                AC_DEFINE([HAVE_EVP_MD_CTX_DESTROY], [],
-                    [Define to 1 if you have the `EVP_MD_CTX_destroy' function.]))
+            netsnmp_save_LIBS="$LIBS"
+            LIBS="$LIBCRYPTO"
+            AC_CHECK_FUNCS([AES_cfb128_encrypt]dnl
+                           [EVP_MD_CTX_create EVP_MD_CTX_destroy]dnl
+                           [EVP_MD_CTX_new    EVP_MD_CTX_free   ]dnl
+                           [DH_set0_pqg DH_get0_pqg DH_get0_key])
+            LIBS="$netsnmp_save_LIBS"
         fi
         if echo " $transport_result_list " | $GREP "TLS" > /dev/null; then
 	    AC_CHECK_LIB(ssl, SSL_library_init,

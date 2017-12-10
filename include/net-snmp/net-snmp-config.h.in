@@ -109,6 +109,15 @@
 /* define if you have devstat_getdevs() */
 #undef HAVE_DEVSTAT_GETDEVS
 
+/* Define to 1 if you have the `DH_get0_key' function. */
+#undef HAVE_DH_GET0_KEY
+
+/* Define to 1 if you have the `DH_get0_pqg' function. */
+#undef HAVE_DH_GET0_PQG
+
+/* Define to 1 if you have the `DH_set0_pqg' function. */
+#undef HAVE_DH_SET0_PQG
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
@@ -133,6 +142,12 @@
 
 /* Define to 1 if you have the `EVP_MD_CTX_destroy' function. */
 #undef HAVE_EVP_MD_CTX_DESTROY
+
+/* Define to 1 if you have the `EVP_MD_CTX_free' function. */
+#undef HAVE_EVP_MD_CTX_FREE
+
+/* Define to 1 if you have the `EVP_MD_CTX_new' function. */
+#undef HAVE_EVP_MD_CTX_NEW
 
 /* Define to 1 if you have the `execv' function. */
 #undef HAVE_EXECV
