@@ -32453,6 +32453,140 @@ $as_echo "$as_me: error: Could not find mysql.h and was specifically asked to us
 fi
 
 
+  if test "${ac_cv_header_my_global_h_my_sys_h+set}" = set; then
+  { $as_echo "$as_me:$LINENO: checking for my_global.h my_sys.h" >&5
+$as_echo_n "checking for my_global.h my_sys.h... " >&6; }
+if test "${ac_cv_header_my_global_h_my_sys_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_my_global_h_my_sys_h" >&5
+$as_echo "$ac_cv_header_my_global_h_my_sys_h" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:$LINENO: checking my_global.h my_sys.h usability" >&5
+$as_echo_n "checking my_global.h my_sys.h usability... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <my_global.h my_sys.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:$LINENO: checking my_global.h my_sys.h presence" >&5
+$as_echo_n "checking my_global.h my_sys.h presence... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <my_global.h my_sys.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { $as_echo "$as_me:$LINENO: WARNING: my_global.h my_sys.h: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: my_global.h my_sys.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: my_global.h my_sys.h: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: my_global.h my_sys.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:$LINENO: WARNING: my_global.h my_sys.h: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: my_global.h my_sys.h: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: my_global.h my_sys.h:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: my_global.h my_sys.h:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: my_global.h my_sys.h: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: my_global.h my_sys.h: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: my_global.h my_sys.h:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: my_global.h my_sys.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: my_global.h my_sys.h: proceeding with the preprocessor's result" >&5
+$as_echo "$as_me: WARNING: my_global.h my_sys.h: proceeding with the preprocessor's result" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: my_global.h my_sys.h: in the future, the compiler will take precedence" >&5
+$as_echo "$as_me: WARNING: my_global.h my_sys.h: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ---------------------------------------------------- ##
+## Report this to net-snmp-coders@lists.sourceforge.net ##
+## ---------------------------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ $as_echo "$as_me:$LINENO: checking for my_global.h my_sys.h" >&5
+$as_echo_n "checking for my_global.h my_sys.h... " >&6; }
+if test "${ac_cv_header_my_global_h_my_sys_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_header_my_global_h_my_sys_h=$ac_header_preproc
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_my_global_h_my_sys_h" >&5
+$as_echo "$ac_cv_header_my_global_h_my_sys_h" >&6; }
+
+fi
+
+
   { $as_echo "$as_me:$LINENO: checking whether MY_INIT() works" >&5
 $as_echo_n "checking whether MY_INIT() works... " >&6; }
   cat >conftest.$ac_ext <<_ACEOF
@@ -32462,8 +32596,13 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <my_global.h>
+#ifdef HAVE_MY_GLOBAL_H
+        #include <my_global.h>
+        #endif
+        #ifdef HAVE_MY_SYS_H
         #include <my_sys.h>
+        #endif
+        #include <mysql.h>
 int
 main ()
 {
@@ -32495,22 +32634,208 @@ $as_echo "$ac_try_echo") >&5
        }; then
   { $as_echo "$as_me:$LINENO: result: yes" >&5
 $as_echo "yes" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_MY_INIT 1
+_ACEOF
+
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 	{ $as_echo "$as_me:$LINENO: result: no" >&5
 $as_echo "no" >&6; }
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_BROKEN_LIBMYSQLCLIENT 1
-_ACEOF
-
 fi
 
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
+  { $as_echo "$as_me:$LINENO: checking for mysql_init" >&5
+$as_echo_n "checking for mysql_init... " >&6; }
+if test "${ac_cv_func_mysql_init+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define mysql_init to an innocuous variant, in case <limits.h> declares mysql_init.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define mysql_init innocuous_mysql_init
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char mysql_init (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef mysql_init
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char mysql_init ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined __stub_mysql_init || defined __stub___mysql_init
+choke me
+#endif
+
+int
+main ()
+{
+return mysql_init ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  ac_cv_func_mysql_init=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_func_mysql_init=no
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_func_mysql_init" >&5
+$as_echo "$ac_cv_func_mysql_init" >&6; }
+if test "x$ac_cv_func_mysql_init" = x""yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_MYSQL_INIT 1
+_ACEOF
+
+fi
+
+  { $as_echo "$as_me:$LINENO: checking for load_defaults" >&5
+$as_echo_n "checking for load_defaults... " >&6; }
+if test "${ac_cv_func_load_defaults+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define load_defaults to an innocuous variant, in case <limits.h> declares load_defaults.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define load_defaults innocuous_load_defaults
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char load_defaults (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef load_defaults
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char load_defaults ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined __stub_load_defaults || defined __stub___load_defaults
+choke me
+#endif
+
+int
+main ()
+{
+return load_defaults ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  ac_cv_func_load_defaults=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_func_load_defaults=no
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_func_load_defaults" >&5
+$as_echo "$ac_cv_func_load_defaults" >&6; }
+if test "x$ac_cv_func_load_defaults" = x""yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LOAD_DEFAULTS 1
+_ACEOF
+
+fi
+
   CPPFLAGS="${_cppflags}"
   LIBS="${_libs}"
 
