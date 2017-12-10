@@ -446,9 +446,9 @@ var_atEntry(struct variable * vp,
                 break;          /* no need to search further */
             }
         } else {
-            if (snmp_oid_compare(current, olength, name, *length) > 0
-                && snmp_oid_compare(current, olength, lowest,
-                                    *length) < 0) {
+            if (snmp_oid_compare(current, olength, name, *length) > 0 &&
+                (Found == 0 ||
+                 snmp_oid_compare(current, olength, lowest, olength) < 0)) {
                 /*
                  * if new one is greater than input and closer to input than
                  * previous lowest, and is not equal to it, save this one as the "next" one.
