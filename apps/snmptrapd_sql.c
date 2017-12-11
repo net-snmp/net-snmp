@@ -23,7 +23,6 @@
 #undef PACKAGE_STRING
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
-#include <my_config.h>
 #ifdef HAVE_MY_GLOBAL_H
 #include <my_global.h>
 #endif
@@ -32,7 +31,6 @@
 #endif
 #include <mysql.h>
 #include <errmsg.h>
-#include <mysql_version.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
