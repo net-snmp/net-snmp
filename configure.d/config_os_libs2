@@ -314,49 +314,58 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
             AC_DEFINE(HAVE_LIBCRYPTO, 1,
                 [Define to 1 if you have the OpenSSL library (-lcrypto or -leay32).])
             LIBCRYPTO="-l${CRYPTO}"
-            AC_CHECK_LIB(${CRYPTO}, AES_cfb128_encrypt, 
-                AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
-                    [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
-
-            AC_CHECK_LIB(${CRYPTO}, EVP_MD_CTX_create,
-                AC_DEFINE([HAVE_EVP_MD_CTX_CREATE], [1],
-                    [Define to 1 if you have the `EVP_MD_CTX_create' function.])
-                AC_DEFINE([HAVE_EVP_MD_CTX_DESTROY], [1],
-                    [Define to 1 if you have the `EVP_MD_CTX_destroy' function.]))
-
-            AC_CHECK_LIB(${CRYPTO}, EVP_MD_CTX_new,
-                AC_DEFINE([HAVE_EVP_MD_CTX_NEW], [1],
-                    [Define to 1 if you have the `EVP_MD_CTX_new' function.])
-                AC_DEFINE([HAVE_EVP_MD_CTX_FREE], [1],
-                    [Define to 1 if you have the `EVP_MD_CTX_free' function.]))
-            save_LIBS=$LIBS
-            LIBS="$LIBS -l${CRYPTO}"
-            AC_CHECK_FUNCS([DH_get0_pqg DH_get0_key   ] dnl
-                           [X509_NAME_ENTRY_get_data  ] dnl
-                           [X509_NAME_ENTRY_get_object] dnl
-                           [X509_get_signature_nid])
-            LIBS=$save_LIBS
+            netsnmp_save_LIBS="$LIBS"
+            LIBS="$LIBCRYPTO"
+            AC_CHECK_FUNCS([AES_cfb128_encrypt]dnl
+                           [EVP_MD_CTX_create EVP_MD_CTX_destroy]dnl
+                           [EVP_MD_CTX_new    EVP_MD_CTX_free   ]dnl
+                           [DH_set0_pqg DH_get0_pqg DH_get0_key]dnl
+                           [ASN1_STRING_get0_data X509_NAME_ENTRY_get_object]dnl
+                           [X509_NAME_ENTRY_get_data X509_get_signature_nid])
+            AC_MSG_CHECKING([whether 2nd app_verify_cookie_cb() arg is const])
+            netsnmp_save_CFLAGS="$CFLAGS"
+            CFLAGS="$CFLAGS -Werror"
+            AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
+              #include <openssl/ssl.h>
+            ],[
+              int (*app_verify_cookie_cb)(SSL *ssl,
+                                          const unsigned char *cookie,
+                                          unsigned int cookie_len) = NULL;
+              SSL_CTX_set_cookie_verify_cb(NULL, app_verify_cookie_cb);
+            ]),
+            [AC_MSG_RESULT(yes); ac_cv_saccaq=const],
+            [AC_MSG_RESULT(no)])
+            AC_DEFINE_UNQUOTED([SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER],
+                               [$ac_cv_saccaq],
+                               [Qualifier for second argument of the appverify_cookie_cb() callback function])
+            CFLAGS="$netsnmp_save_CFLAGS"
+            LIBS="$netsnmp_save_LIBS"
         fi
+        netsnmp_save_LIBS="$LIBS"
+        LIBS="-lssl"
+        AC_CHECK_FUNCS([TLS_method TLSv1_method DTLS_method DTLSv1_method]dnl
+                       [SSL_library_init SSL_load_error_strings])
+        LIBS="$netsnmp_save_LIBS"
         if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
-	    AC_CHECK_LIB(ssl, DTLSv1_method,
+	    if test x$ac_cv_func_DTLSv1_method = xyes -o \
+                    x$ac_cv_func_DTLS_method = xyes; then
                 AC_DEFINE(HAVE_LIBSSL_DTLS, 1,
                     [Define to 1 if your `ssl' library supports DTLS (-lssl).])
-                LIBCRYPTO=" -lssl $LIBCRYPTO",	
-		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available and support DTLS])	,-lcrypto)
+                LIBCRYPTO=" -lssl $LIBCRYPTO"
+	    else
+		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available and support DTLS])
+            fi
             TLSPROG=yes
         fi
         if echo " $transport_result_list " | $GREP "TLS" > /dev/null; then
-	    AC_CHECK_LIB(ssl, SSL_library_init,
+	    if test x$ac_cv_func_TLSv1_method = xyes -o \
+                    x$ac_cv_func_TLS_method = xyes; then
                 AC_DEFINE(HAVE_LIBSSL, 1,
-                    [Define to 1 if you have the `ssl' library (-lssl).]))
-	    AC_CHECK_LIB(ssl, OPENSSL_init_ssl,
-                AC_DEFINE(HAVE_LIBSSL, 1,
-                    [Define to 1 if you have the `ssl' library (-lssl).]))
-	    if test "$ac_cv_lib_ssl_SSL_library_init" = yes -o "$ac_cv_lib_ssl_OPENSSL_init_ssl" = yes; then
+                    [Define to 1 if you have the `ssl' library (-lssl).])
                 LIBCRYPTO=" -lssl $LIBCRYPTO"
-	    else
-		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available])
-	    fi
+            else
+		AC_MSG_ERROR([The TLS based transports require the libssl library from OpenSSL to be available])
+            fi
             TLSPROG=yes
         fi
         if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then
@@ -520,26 +529,45 @@ if test "x$with_mysql" = "xyes" ; then
   CPPFLAGS="${CPPFLAGS} ${MYSQL_INCLUDES}"
   AC_CHECK_HEADER(mysql.h,,
      [AC_MSG_ERROR([Could not find mysql.h and was specifically asked to use MySQL support])])
+  AC_CHECK_HEADER([my_global.h my_sys.h])
   AC_MSG_CHECKING([whether MY_INIT() works])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM(
-      [[#include <my_global.h>
-        #include <my_sys.h>]],
+      [[#ifdef HAVE_MY_GLOBAL_H
+        #include <my_global.h>
+        #endif
+        #ifdef HAVE_MY_SYS_H
+        #include <my_sys.h>
+        #endif
+        #include <mysql.h>]],
       [[MY_INIT("my_init_test")]])],
-      [AC_MSG_RESULT(yes)],
-      [AC_MSG_RESULT(no)
-       AC_DEFINE([HAVE_BROKEN_LIBMYSQLCLIENT], 1,
-                 [Define if using MY_INIT() causes a linker error])])
+      [AC_MSG_RESULT(yes)
+       AC_DEFINE([HAVE_MY_INIT], 1,
+                 [Define if MY_INIT() is availabe in libmysqlclient])],
+      [AC_MSG_RESULT(no)])
   AC_MSG_CHECKING([whether my_load_defaults() exists])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM(
-      [[#include <my_global.h>
-        #include <my_sys.h>]],
+      [[#ifdef HAVE_MY_GLOBAL_H
+        #include <my_global.h>
+        #endif
+        #ifdef HAVE_MY_SYS_H
+        #include <my_sys.h>
+        #endif
+        #include <mysql.h>]],
       [[my_load_defaults("my_init_test")]])],
       [AC_MSG_RESULT(yes)
        AC_DEFINE([HAVE_MY_LOAD_DEFAULTS], 1,
-                 [Define if having my_load_defaults])],
+                 [Define if having my_load_defaults()])],
       [AC_MSG_RESULT(no)])
+  AC_CHECK_FUNC(
+    [mysql_init],
+    AC_DEFINE([HAVE_MYSQL_INIT], 1,
+              [Define if mysql_init() is available in libmysqlclient]))
+  AC_CHECK_FUNC(
+    [load_defaults],
+    AC_DEFINE([HAVE_LOAD_DEFAULTS], 1,
+              [Define if load_defaults() is available in libmysqlclient]))
   CPPFLAGS="${_cppflags}"
   LIBS="${_libs}"
   AC_MSG_CACHE_ADD(MYSQL Trap Logging:         enabled)

@@ -149,9 +149,9 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
      */
 #ifdef NETSNMP_USE_OPENSSL
 
-#ifdef HAVE_EVP_MD_CTX_NEW
+#if defined(HAVE_EVP_MD_CTX_NEW)
     ctx = EVP_MD_CTX_new();
-#elif HAVE_EVP_MD_CTX_CREATE
+#elif defined(HAVE_EVP_MD_CTX_CREATE)
     ctx = EVP_MD_CTX_create();
 #else
     ctx = malloc(sizeof(*ctx));
@@ -261,9 +261,9 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     memset(buf, 0, sizeof(buf));
 #ifdef NETSNMP_USE_OPENSSL
     if (ctx) {
-#ifdef HAVE_EVP_MD_CTX_FREE
+#if defined(HAVE_EVP_MD_CTX_FREE)
         EVP_MD_CTX_free(ctx);
-#elif HAVE_EVP_MD_CTX_DESTROY
+#elif defined(HAVE_EVP_MD_CTX_DESTROY)
         EVP_MD_CTX_destroy(ctx);
 #else
         EVP_MD_CTX_cleanup(ctx);

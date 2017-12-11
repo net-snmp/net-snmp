@@ -56,8 +56,12 @@ void netsnmp_init_openssl(void) {
     DEBUGMSGTL(("snmp_openssl", "initializing\n"));
 
     /* Initializing OpenSSL */
+#ifdef HAVE_SSL_LIBRARY_INIT
     SSL_library_init();
+#endif
+#ifdef HAVE_SSL_LOAD_ERROR_STRINGS
     SSL_load_error_strings();
+#endif
     ERR_load_BIO_strings();
     OpenSSL_add_all_algorithms();
 }
@@ -214,7 +218,7 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
                    "[%02d] NID type %d, ASN type %d\n", i, onid,
                    oname_value->type));
         DEBUGMSGT(("9:cert:dump:names", "%s/%s: '%s'\n", prefix_long,
-                   prefix_short, ASN1_STRING_data(oname_value)));
+                   prefix_short, ASN1_STRING_get0_data(oname_value)));
     }
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CERT_DUMP_NAMES */
@@ -911,5 +915,107 @@ netsnmp_openssl_null_checks(SSL *ssl, int *null_auth, int *null_cipher)
         }
     }
 }
+
+#ifndef HAVE_DH_SET0_PQG
+int
+DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
+{
+   /* If the fields p and g in d are NULL, the corresponding input
+    * parameters MUST be non-NULL.  q may remain NULL.
+    */
+   if ((dh->p == NULL && p == NULL)
+       || (dh->g == NULL && g == NULL))
+       return 0;
+
+   if (p != NULL) {
+       BN_free(dh->p);
+       dh->p = p;
+   }
+   if (q != NULL) {
+       BN_free(dh->q);
+       dh->q = q;
+   }
+   if (g != NULL) {
+       BN_free(dh->g);
+       dh->g = g;
+   }
+
+   if (q != NULL) {
+       dh->length = BN_num_bits(q);
+   }
+
+   return 1;
+}
+#endif
+
+#ifndef HAVE_DH_GET0_PQG
+void
+DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
+{
+   if (p != NULL)
+       *p = dh->p;
+   if (q != NULL)
+       *q = dh->q;
+   if (g != NULL)
+       *g = dh->g;
+}
+#endif
+
+#ifndef HAVE_DH_GET0_KEY
+void
+DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
+{
+   if (pub_key != NULL)
+       *pub_key = dh->pub_key;
+   if (priv_key != NULL)
+       *priv_key = dh->priv_key;
+}
+#endif
+
+#ifndef ASN1_STRING_GET0_DATA
+const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *x)
+{
+    return x->data;
+}
+#endif
+
+#ifndef HAVE_X509_NAME_ENTRY_GET_OBJECT
+ASN1_OBJECT *X509_NAME_ENTRY_get_object(const X509_NAME_ENTRY *ne)
+{
+    if (ne == NULL)
+        return NULL;
+    return ne->object;
+}
+#endif
+
+#ifndef HAVE_X509_NAME_ENTRY_GET_DATA
+ASN1_STRING *X509_NAME_ENTRY_get_data(const X509_NAME_ENTRY *ne)
+{
+    if (ne == NULL)
+        return NULL;
+    return ne->value;
+}
+#endif
+
+#ifndef HAVE_X509_GET_SIGNATURE_NID
+int X509_get_signature_nid(const X509_REQ *req)
+{
+    return OBJ_obj2nid(req->sig_alg.algorithm);
+}
+#endif
+
+#ifndef HAVE_TLS_METHOD
+const SSL_METHOD *TLS_method(void)
+{
+    return TLSv1_method();
+}
+#endif
+
+#ifndef HAVE_DTLS_METHOD
+const SSL_METHOD *DTLS_method(void)
+{
+    return DTLSv1_method();
+}
+#endif
 
 #endif /* NETSNMP_USE_OPENSSL && HAVE_LIBSSL && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL) */
