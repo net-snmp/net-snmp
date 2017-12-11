@@ -60,6 +60,7 @@
 #endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
 
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/library/snmp_openssl.h>
 
 #define CMD_PASSWD_NAME    "passwd"
 #define CMD_PASSWD         1
@@ -249,9 +250,8 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
-            
-    DH_get0_key(dh, &pub_key, NULL);
 
+    DH_get0_key(dh, &pub_key, NULL);
     if (vars->val_len != (unsigned int)BN_num_bytes(pub_key)) {
         SNMP_FREE(dhkeychange);
         fprintf(stderr,"incorrect diffie-helman lengths (%lu != %d)\n",

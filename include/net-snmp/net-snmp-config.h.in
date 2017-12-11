@@ -99,11 +99,11 @@
 /* Define to 1 if you have the <asm/types.h> header file. */
 #undef HAVE_ASM_TYPES_H
 
+/* Define to 1 if you have the `ASN1_STRING_get0_data' function. */
+#undef HAVE_ASN1_STRING_GET0_DATA
+
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
-
-/* Define if using MY_INIT() causes a linker error */
-#undef HAVE_BROKEN_LIBMYSQLCLIENT
 
 /* Define to 1 if you have the `cgetnext' function. */
 #undef HAVE_CGETNEXT
@@ -145,6 +145,9 @@
 /* Define to 1 if you have the `DH_get0_pqg' function. */
 #undef HAVE_DH_GET0_PQG
 
+/* Define to 1 if you have the `DH_set0_pqg' function. */
+#undef HAVE_DH_SET0_PQG
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
@@ -160,6 +163,12 @@
 
 /* Set if the dpkg-query command is available */
 #undef HAVE_DPKG_QUERY
+
+/* Define to 1 if you have the `DTLSv1_method' function. */
+#undef HAVE_DTLSV1_METHOD
+
+/* Define to 1 if you have the `DTLS_method' function. */
+#undef HAVE_DTLS_METHOD
 
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
@@ -446,6 +455,9 @@
 /* Define to 1 if you have the <linux/tasks.h> header file. */
 #undef HAVE_LINUX_TASKS_H
 
+/* Define if load_defaults() is available in libmysqlclient */
+#undef HAVE_LOAD_DEFAULTS
+
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
 
@@ -494,7 +506,13 @@
 /* Define to 1 if you have the <mtab.h> header file. */
 #undef HAVE_MTAB_H
 
-/* Define if having my_load_defaults */
+/* Define if mysql_init() is available in libmysqlclient */
+#undef HAVE_MYSQL_INIT
+
+/* Define if MY_INIT() is availabe in libmysqlclient */
+#undef HAVE_MY_INIT
+
+/* Define if having my_load_defaults() */
 #undef HAVE_MY_LOAD_DEFAULTS
 
 /* Define to 1 if you have the <nbutil.h> header file. */
@@ -808,6 +826,12 @@
 
 /* Define to 1 if the system has the type `ssize_t'. */
 #undef HAVE_SSIZE_T
+
+/* Define to 1 if you have the `SSL_library_init' function. */
+#undef HAVE_SSL_LIBRARY_INIT
+
+/* Define to 1 if you have the `SSL_load_error_strings' function. */
+#undef HAVE_SSL_LOAD_ERROR_STRINGS
 
 /* Define to 1 if you have the `statfs' function. */
 #undef HAVE_STATFS
@@ -1277,6 +1301,12 @@
 /* Define if a timezone variable is declared in <sys/time.h> */
 #undef HAVE_TIMEZONE_VARIABLE
 
+/* Define to 1 if you have the `TLSv1_method' function. */
+#undef HAVE_TLSV1_METHOD
+
+/* Define to 1 if you have the `TLS_method' function. */
+#undef HAVE_TLS_METHOD
+
 /* Define to 1 if you have the <ufs/ffs/fs.h> header file. */
 #undef HAVE_UFS_FFS_FS_H
 
@@ -1579,6 +1609,10 @@
 
 /* Use BSD 4.4 routing table entries? */
 #undef RTENTRY_4_4
+
+/* Qualifier for second argument of the appverify_cookie_cb() callback
+   function */
+#undef SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER
 
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
