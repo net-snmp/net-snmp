@@ -22,7 +22,6 @@
 #undef PACKAGE_STRING
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
-#include <my_config.h>
 #ifdef HAVE_MY_GLOBAL_H
 #include <my_global.h>
 #endif
