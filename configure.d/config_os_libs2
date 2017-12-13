@@ -307,14 +307,14 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
             AC_MSG_CHECKING([whether 2nd app_verify_cookie_cb() arg is const])
             netsnmp_save_CFLAGS="$CFLAGS"
             CFLAGS="$CFLAGS -Werror"
-            AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
+            AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
               #include <openssl/ssl.h>
-            ],[
+            ]],[[
               int (*app_verify_cookie_cb)(SSL *ssl,
                                           const unsigned char *cookie,
                                           unsigned int cookie_len) = NULL;
               SSL_CTX_set_cookie_verify_cb(NULL, app_verify_cookie_cb);
-            ]),
+            ]])],
             [AC_MSG_RESULT(yes); ac_cv_saccaq=const],
             [AC_MSG_RESULT(no)])
             AC_DEFINE_UNQUOTED([SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER],
