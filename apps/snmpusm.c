@@ -195,7 +195,7 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                oid *keyoid, size_t keyoid_len) {
     u_char *dhkeychange;
     DH *dh;
-    const BIGNUM *pub_key;
+    const BIGNUM *p, *g, *pub_key;
     BIGNUM *other_pub;
     u_char *key;
     size_t key_len;
@@ -211,7 +211,10 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     dh = d2i_DHparams(NULL, (const unsigned char **) &cp,
                       dhvar->val_len);
 
-    if (!dh) {
+    if (dh)
+        DH_get0_pqg(dh, &p, NULL, &g);
+
+    if (!dh || !g || !p) {
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
