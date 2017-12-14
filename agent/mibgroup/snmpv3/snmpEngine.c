@@ -46,6 +46,15 @@ struct variable2 snmpEngine_variables[] = {
 oid             snmpEngine_variables_oid[] =
     { 1, 3, 6, 1, 6, 3, 10, 2, 1 };
 
+#if !defined(NETSNMP_NO_WRITE_SUPPORT) && defined(NETSNMP_ENABLE_TESTING_CODE)
+int write_engineBoots(int action, u_char * var_val, u_char var_val_type,
+                      size_t var_val_len, u_char * statP, oid * name,
+                      size_t name_len);
+int write_engineTime(int action, u_char * var_val, u_char var_val_type,
+                     size_t var_val_len, u_char * statP, oid * name,
+                     size_t name_len);
+#endif
+
 void
 register_snmpEngine_scalars(void)
 {
@@ -137,8 +146,7 @@ var_snmpEngine(struct variable *vp,
 }
 
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
-#ifdef NETSNMP_ENABLE_TESTING_CODE
+#if !defined(NETSNMP_NO_WRITE_SUPPORT) && defined(NETSNMP_ENABLE_TESTING_CODE)
 /*
  * write_engineBoots():
  * 
@@ -233,5 +241,4 @@ write_engineTime(int action,
     return SNMP_ERR_NOERROR;
 }
 
-#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
+#endif /* ! NETSNMP_NO_WRITE_SUPPORT && NETSNMP_ENABLE_TESTING_CODE */
