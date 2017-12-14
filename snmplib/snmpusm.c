@@ -4774,7 +4774,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         memcpy(newuser->privProtocol, def_priv_prot,
                def_priv_prot_len * sizeof(oid));
     }
-    if (0 == newuser->authProtocol[0] && NULL == *errorMsg)
+    if (0 == newuser->privProtocol[0] && NULL == *errorMsg)
         *errorMsg = "Unknown privacy protocol";
     if (NULL != *errorMsg)
         goto fail;
