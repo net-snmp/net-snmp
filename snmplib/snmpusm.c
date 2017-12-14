@@ -4779,7 +4779,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     if (NULL != *errorMsg)
         goto fail;
 #ifdef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
-    if (snmp_oid_compare(usmNoPrivProtocol, OID_LENGTH(usmNoPrivProtocol),
+    if (snmp_oid_compare(newuser->privProtocol, newuser->privProtocolLen,
                          def_priv_prot, def_priv_prot_len) != 0) {
         *errorMsg = "priv protocol does not match system policy";
         goto fail;
