@@ -410,6 +410,13 @@ if test "x$enable_internal_md5" = "xyes"; then
   fi
 fi
 
+NETSNMP_ARG_ENABLE(blumenthal-aes,
+[  --enable-blumenthal-aes         Enable AES-192/AES-256 (Blumenthal draft)])
+if test "x$enable_blumenthal_aes" = "xyes"; then
+  AC_DEFINE([NETSNMP_DRAFT_BLUMENTHAL_AES_04], 1,
+            [Define if AES-192/AES-256 encryption should be supported])
+fi
+
 
 ##
 #   Project: Library: Misc configuration

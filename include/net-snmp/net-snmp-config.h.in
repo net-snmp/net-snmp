@@ -1466,6 +1466,9 @@
 /* Define if SNMPv2c code should not be included */
 #undef NETSNMP_DISABLE_SNMPV2C
 
+/* Define if AES-192/AES-256 encryption should be supported */
+#undef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+
 /* Define if you are embedding perl in the main agent. */
 #undef NETSNMP_EMBEDDED_PERL
 

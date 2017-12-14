@@ -143,16 +143,16 @@ static usm_alg_type_t usm_auth_type[] = {
     { "MD5", NETSNMP_USMAUTH_HMACMD5 },
 #endif
 #ifdef HAVE_EVP_SHA224
-    { "SHA-128", NETSNMP_USMAUTH_HMAC128SHA224 },
-    { "SHA128", NETSNMP_USMAUTH_HMAC128SHA224 },
-    { "SHA-192", NETSNMP_USMAUTH_HMAC192SHA256 },
-    { "SHA192", NETSNMP_USMAUTH_HMAC192SHA256 },
+    { "SHA-224", NETSNMP_USMAUTH_HMAC128SHA224 },
+    { "SHA224", NETSNMP_USMAUTH_HMAC128SHA224 },
+    { "SHA-256", NETSNMP_USMAUTH_HMAC192SHA256 },
+    { "SHA256", NETSNMP_USMAUTH_HMAC192SHA256 },
 #endif
 #ifdef HAVE_EVP_SHA384
-    { "SHA-256", NETSNMP_USMAUTH_HMAC256SHA384 },
-    { "SHA256", NETSNMP_USMAUTH_HMAC256SHA384 },
-    { "SHA-384",  NETSNMP_USMAUTH_HMAC384SHA512 },
-    { "SHA384",  NETSNMP_USMAUTH_HMAC384SHA512 },
+    { "SHA-384", NETSNMP_USMAUTH_HMAC256SHA384 },
+    { "SHA384", NETSNMP_USMAUTH_HMAC256SHA384 },
+    { "SHA-512",  NETSNMP_USMAUTH_HMAC384SHA512 },
+    { "SHA512",  NETSNMP_USMAUTH_HMAC384SHA512 },
 #endif
     { NULL, -1 }
 };
@@ -4602,9 +4602,9 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     struct usmUser *newuser;
     u_char          userKey[SNMP_MAXBUF_SMALL], *tmpp;
     size_t          userKeyLen = SNMP_MAXBUF_SMALL;
-    size_t          privKeyLen = 0;
+    size_t          privKeyLen = 0, privKeySize;
     size_t          ret;
-    int             ret2, properLen, priv_type;
+    int             ret2, properLen, properPrivKeyLen, priv_type;
     const oid      *def_auth_prot, *def_priv_prot;
     size_t          def_auth_prot_len, def_priv_prot_len;
 
@@ -4873,12 +4873,12 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
 
-    privKeyLen = sc_get_proper_priv_length_bytype(priv_type);
-    if (privKeyLen == 0)
+    properPrivKeyLen = sc_get_proper_priv_length_bytype(priv_type);
+    if (properPrivKeyLen == 0)
         DEBUGMSGTL(("usmUser",
                     "warning: unknown keyLen for privacy protocol\n"));
     if (USM_CREATE_USER_PRIV_DES == priv_type)
-        privKeyLen *= 2; /* ?? we store salt with key */
+        properPrivKeyLen *= 2; /* ?? we store salt with key */
 
     /*
      * READ: Encryption Pass Phrase or key
@@ -4889,7 +4889,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
          */
         newuser->privKey = netsnmp_memdup(newuser->authKey,
                                           newuser->authKeyLen);
-        privKeyLen = newuser->privKeyLen = newuser->authKeyLen;
+        privKeySize = newuser->privKeyLen = newuser->authKeyLen;
         if (newuser->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
             newuser->privKeyKu = netsnmp_memdup(newuser->authKeyKu,
                                                 newuser->authKeyKuLen);
@@ -4930,10 +4930,12 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         }        
         
         /*
-         * And turn it into a localized key 
+         * And turn it into a localized key
+         * Allocate enough space for greater of auth mac and privKey len.
          */
-        newuser->privKey = (u_char *) malloc(privKeyLen);
-        newuser->privKeyLen = privKeyLen;
+        privKeySize = SNMP_MAX(properPrivKeyLen, properLen);
+        newuser->privKey = (u_char *) malloc(privKeySize);
+        newuser->privKeyLen = privKeySize;
 
         if (strcmp(buf,"-l") == 0) {
             /* a local key is directly specified */
@@ -4955,14 +4957,26 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                 goto fail;
             }
         }
+
+        if (newuser->privKeyLen < properPrivKeyLen) {
+            ret = usm_extend_user_kul(newuser, properPrivKeyLen);
+            if (ret != SNMPERR_SUCCESS) {
+                *errorMsg = "could not extend localized privacy key to required length.";
+                goto fail;
+            }
+        }
     }
 
-    if ((newuser->privKeyLen >= privKeyLen) || (privKeyLen == 0)){
-      newuser->privKeyLen = privKeyLen;
+    if ((newuser->privKeyLen >= properPrivKeyLen) || (properPrivKeyLen == 0)){
+        DEBUGMSGTL(("9:usmUser", "truncating privKeyLen from %d to %d\n",
+                    newuser->privKeyLen, properPrivKeyLen));
+        newuser->privKeyLen = properPrivKeyLen;
     }
     else {
-        DEBUGMSGTL(("usmUser", "privKey length %d is smaller than %d required by privProtoco\n", newuser->privKeyLen, privKeyLen));
-      *errorMsg = "privKey length is smaller than required by privProtocol";
+        DEBUGMSGTL(("usmUser",
+                    "privKey length %d < %d required by privProtocol\n",
+                    newuser->privKeyLen, properPrivKeyLen));
+      *errorMsg = "privKey length is less than required by privProtocol";
       goto fail;
     }
 

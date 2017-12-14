@@ -42,6 +42,8 @@
 #include <dmalloc.h>
 #endif
 
+#include <math.h>
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -271,7 +273,8 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 
 
 #ifdef NETSNMP_ENABLE_TESTING_CODE
-    DEBUGMSGTL(("generate_Ku", "generating Ku (from %s): ", P));
+    DEBUGMSGTL(("generate_Ku", "generating Ku (%s from %s): ",
+                usm_lookup_auth_str(auth_type), P));
     for (i = 0; i < *kulen; i++)
         DEBUGMSG(("generate_Ku", "%02x", Ku[i]));
     DEBUGMSG(("generate_Ku", "\n"));
@@ -454,6 +457,279 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
 #else
 _KEYTOOLS_NOT_AVAILABLE
 #endif                          /* internal or openssl */
+
+/*******************************************************************-o-******
+ * _kul_extend_blumenthal
+ *
+ * Parameters:
+ *     *hashoid        MIB OID for the hash transform type.
+ *      hashoid_len    Length of the MIB OID hash transform type.
+ *     *origKul        original kul (localized; IN/OUT)
+ *     *origKulLen     Length of original kul in bytes (IN/OUT)
+ *      origKulSize    Size of original kul buffer
+ *      needKeyLen     Size needed for key
+ *
+ * Returns:
+ *      SNMPERR_SUCCESS      Success.
+ *      SNMPERR_GENERR       All errors.
+ */
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+static int
+_kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
+                       u_char *origKul, size_t *origKulLen, int origKulSize)
+{
+    char newKul[USM_LENGTH_KU_HASHBLOCK];
+    size_t newKulLen;
+    int count, hashBits, hashBytes, authtype, i, saveLen;
+
+    DEBUGMSGTL(("usm:extend_kul", " blumenthal called\n"));
+
+    if (NULL == hashoid || NULL == origKul || NULL == origKulLen ||
+        needKeyLen > origKulSize)
+        return SNMPERR_GENERR;
+
+    authtype = sc_get_authtype(hashoid, hashoid_len);
+    if (authtype < 0 )
+        return SNMPERR_GENERR;
+
+    saveLen = *origKulLen;
+    needKeyLen -= *origKulLen; /* subtract bytes we already have */
+
+    /*
+     * 3.1.2.1:
+     *   1)Let Hnnn() the hash function of the authentication protocol for
+     *      the user U on the SNMP authoritative engine E. nnn being the size
+     *      of the output of the hash function (e.g. nnn=128 bits for MD5, or
+     *      nnn=160 bits for SHA1).
+     */
+    hashBytes = sc_get_proper_auth_length_bytype(authtype);
+    hashBits = 8 * hashBytes;
+
+    /* 3.1.2.1:
+     *   2)Set c = ceil ( 256 / nnn )
+     */
+    count = ceil( 256 / hashBits );
+
+    /* 3.1.2.1:
+     *   3)For i = 1, 2, ..., c
+     *        a.Set Kul = Kul || Hnnn(Kul);     Where Hnnn() is the hash
+     *          function of the authentication protocol defined for that user
+     */
+    for(i = 0; i < count; ++i) {
+        int copyLen, rc;
+
+        rc = sc_hash_type( authtype, origKul, *origKulLen, newKul, &newKulLen);
+        if (SNMPERR_SUCCESS != rc)
+            return SNMPERR_GENERR;
+
+        copyLen = SNMP_MIN(needKeyLen, newKulLen);
+        memcpy(origKul + *origKulLen, newKul, copyLen);
+        needKeyLen -= copyLen;
+        *origKulLen += copyLen;
+
+        /** not part of the draft, but stop if we already have enought bits */
+        if (needKeyLen <= 0)
+            break;
+    }
+
+    DEBUGMSGTL(("usm:extend_kul:blumenthal","orig len %d, new len %d\n",
+                saveLen, *origKulLen));
+
+    return SNMPERR_SUCCESS;
+}
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+
+/*******************************************************************-o-******
+ * _kul_extend_reeder
+ *
+ * Parameters:
+ *     *hashoid        MIB OID for the hash transform type.
+ *      hashoid_len    Length of the MIB OID hash transform type.
+ *     *engineID       engineID
+ *      engineIDLen    Length of engineID
+ *     *origKul        original kul (localized; IN/OUT)
+ *     *origKulLen     Length of original kul in bytes (IN/OUT)
+ *      origKulSize    Size of original kul buffer
+ *
+ * Returns:
+ *      SNMPERR_SUCCESS      Success.
+ *      SNMPERR_GENERR       All errors.
+ */
+#if defined(NETSNMP_DRAFT_REEDER_3DES) || defined(NETSNMP_DRAFT_BLUMENTHAL_AES_04)
+static int
+_kul_extend_reeder(int needKeyLen, oid *hashoid, u_int hashoid_len,
+                   u_char *engineID, int engineIDLen,
+                   u_char *origKul, size_t *origKulLen, int origKulSize)
+{
+    char newKu[USM_LENGTH_KU_HASHBLOCK], newKul[USM_LENGTH_KU_HASHBLOCK];
+    size_t newKuLen, newKulLen, saveLen;
+    int authType, copylen;
+
+    DEBUGMSGTL(("usm:extend_kul", " reeder called\n"));
+
+    if (NULL == hashoid || NULL == engineID || NULL == origKul ||
+        NULL == origKulLen || needKeyLen > origKulSize)
+        return SNMPERR_GENERR;
+
+    authType = sc_get_authtype(hashoid, hashoid_len);
+    if (SNMPERR_GENERR == authType)
+        return SNMPERR_GENERR;
+    newKulLen = sc_get_proper_auth_length_bytype(authType);
+    saveLen = *origKulLen;
+    needKeyLen -= *origKulLen; /* subtract bytes we already have */
+    while (needKeyLen > 0) {
+
+        newKuLen = sizeof(newKu);
+        /*
+         * hash the existing key using the passphrase to Ku algorithm.
+         * [ Ku' = Ku(kul) ]
+         */
+        if (generate_Ku(hashoid, hashoid_len, origKul, *origKulLen,
+                        newKu, &newKuLen) != SNMPERR_SUCCESS)
+            return SNMPERR_GENERR;
+
+        /*
+         * localize the new key generated from current localized key
+         * and append it to the current localized key.
+         * [ kul' = kul || kul(Ku') ]
+         */
+        newKulLen = sizeof(newKul);
+        if(generate_kul(hashoid, hashoid_len, engineID, engineIDLen,
+                        newKu, newKuLen, newKul,
+                        &newKulLen) != SNMPERR_SUCCESS)
+            return SNMPERR_GENERR;
+
+        copylen = SNMP_MIN(needKeyLen, newKulLen);
+        memcpy(origKul + *origKulLen, newKul, copylen);
+        needKeyLen -= copylen;
+        *origKulLen += copylen;
+    }
+
+    DEBUGMSGTL(("usm:extend_kul:reeder","orig len %d, new len %d\n",
+                saveLen, *origKulLen));
+    return SNMPERR_SUCCESS;
+}
+#endif /* NETSNMP_DRAFT_REEDER_3DES || NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+
+/*******************************************************************-o-******
+ * netsnmp_extend_key
+ *
+ * Extend a kul buffer to the needed key size. if the passed kulBuf
+ * is not large enough, a new one will be allocated and the old one
+ * will be freed.
+ *
+ * Parameters:
+ *       neededKeyLen   The neede key length
+ *      *hashoid        MIB OID for the hash transform type.
+ *       hashoid_len    Length of the MIB OID hash transform type.
+ *       privType       Privay algorithm type
+ *       engineID       engineID
+ *       engineIDLen    Length of engineID
+ *     **kulBuf         Pointer to a buffer pointer
+ *      *kulBufLen      Length of current kul buffer
+ *       kulBufSize     Allocated size of current kul buffer
+ *
+ * OUT:
+ *     **kulBuf         New kulBuf pointer (if it needed to be expanded)
+ *      *kulBufLen      Length of new kul buffer
+ *
+ * Returns:
+ *     SNMPERR_SUCCESS  Success.
+ *     SNMPERR_GENERR   All errors.
+ */
+int
+netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
+                   int privType, u_char *engineID, u_int engineIDLen,
+                   u_char **kulBuf, u_int *kulBufLen, u_int kulBufSize)
+{
+    int ret;
+    u_char *newKul;
+    size_t newKulLen;
+    /* authType = sc_get_authtype(hashoid, hashoid_len); */
+
+    DEBUGMSGTL(("usm:extend_kul", " called\n"));
+
+    if (*kulBufLen >= needKeyLen) {
+        DEBUGMSGTL(("usm:extend_kul", " key already big enough\n"));
+        return SNMPERR_SUCCESS; /* already have enough key material */
+    }
+
+    switch (privType & (USM_PRIV_MASK_ALG | USM_PRIV_MASK_VARIANT)) {
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+        case USM_CREATE_USER_PRIV_AES192:
+        case USM_CREATE_USER_PRIV_AES256:
+            break;
+#endif
+#if defined(NETSNMP_DRAFT_REEDER_3DES) || defined(NETSNMP_DRAFT_BLUMENTHAL_AES_04)
+        case USM_CREATE_USER_PRIV_3DES:
+            break;
+#endif
+         default:
+            DEBUGMSGTL(("usm:extend_kul",
+                        "no extension method defined for priv type 0x%x\n",
+                        privType));
+            return SNMPERR_SUCCESS;
+    }
+
+    DEBUGMSGTL(("usm:extend_kul", " have %d bytes; need %d\n", *kulBufLen,
+                needKeyLen));
+
+    if (kulBufSize < needKeyLen) {
+        newKul = calloc(1, needKeyLen);
+        if (NULL == newKul)
+            return SNMPERR_GENERR;
+        memcpy(newKul, *kulBuf, *kulBufLen);
+        newKulLen = *kulBufLen;
+        kulBufSize = needKeyLen;
+    }
+    else {
+        newKul = *kulBuf;
+        newKulLen = *kulBufLen;
+    }
+
+    ret = SNMPERR_SUCCESS; /* most privTypes don't need extended kul */
+    switch (privType & (USM_PRIV_MASK_ALG | USM_PRIV_MASK_VARIANT)) {
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+        case USM_CREATE_USER_PRIV_AES192:
+        case USM_CREATE_USER_PRIV_AES256:
+        {
+            int reeder = privType & USM_AES_REEDER_FLAG;
+            if (!reeder) {
+                ret = _kul_extend_blumenthal(needKeyLen, hashoid, hashoid_len,
+                                             newKul, &newKulLen, kulBufSize);
+                break;
+            }
+            /** fall through to reeder, if available */
+            ret = SNMPERR_GENERR; /* in case reeder not available */
+        }
+#endif
+#if defined(NETSNMP_DRAFT_REEDER_3DES) || defined(NETSNMP_DRAFT_BLUMENTHAL_AES_04)
+        case USM_CREATE_USER_PRIV_3DES:
+            ret = _kul_extend_reeder(needKeyLen, hashoid, hashoid_len,
+                                     engineID, engineIDLen,
+                                     newKul, &newKulLen, kulBufSize);
+            break;
+#endif
+         default:
+            DEBUGMSGTL(("usm:extend_kul", " unknown priv type 0x%x\n", privType));
+            ret = SNMPERR_GENERR;
+    }
+
+    if (SNMPERR_SUCCESS == ret) {
+        *kulBufLen = newKulLen;
+        if (newKul != *kulBuf) {
+            free(*kulBuf);
+            *kulBuf = newKul;
+        }
+    }
+    else {
+        if (newKul != *kulBuf)
+            free(newKul);
+    }
+
+    return ret;
+}
+
 /*******************************************************************-o-******
  * encode_keychange
  *

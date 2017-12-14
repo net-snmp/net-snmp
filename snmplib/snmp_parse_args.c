@@ -115,7 +115,11 @@ snmp_parse_args_descriptions(FILE * outf)
     fprintf(outf, "  -n CONTEXT\t\tset context name (e.g. bridge1)\n");
     fprintf(outf, "  -u USER-NAME\t\tset security name (e.g. bert)\n");
 #ifdef HAVE_AES
-    fprintf(outf, "  -x PROTOCOL\t\tset privacy protocol (DES|AES)\n");
+    fprintf(outf, "  -x PROTOCOL\t\tset privacy protocol (DES|AES"
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+            "|AES-192|AES-256"
+#endif
+            ")\n");
 #else
     fprintf(outf, "  -x PROTOCOL\t\tset privacy protocol (DES)\n");
 #endif

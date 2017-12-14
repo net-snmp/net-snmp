@@ -36,6 +36,11 @@ extern          "C" {
 #define SNMP_TRANS_PRIVLEN_1DES		64
 #define SNMP_TRANS_PRIVLEN_1DES_IV	64
 
+#ifdef NETSNMP_DRAFT_REEDER_3DES
+#define SNMP_TRANS_PRIVLEN_3DESEDE      256
+#define SNMP_TRANS_PRIVLEN_3DESEDE_IV   64
+#endif /* NETSNMP_DRAFT_REEDER_3DES */
+
 #define SNMP_TRANS_PRIVLEN_AES          128
 #define SNMP_TRANS_PRIVLEN_AES_IV       128
 
@@ -130,6 +135,10 @@ typedef struct netsnmp_priv_alg_info_s {
                                u_char * iv, u_int ivlen,
                                u_char * ciphertext, u_int ctlen,
                                u_char * plaintext, size_t * ptlen);
+
+    int             sc_hash_type(int auth_type, const u_char * buf,
+                                 size_t buf_len, u_char * MAC,
+                                 size_t * MAC_len);
 
     int             sc_hash(const oid * hashtype, size_t hashtypelen,
                             const u_char * buf, size_t buf_len,
