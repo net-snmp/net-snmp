@@ -544,7 +544,7 @@ hash_engineID(const u_char * engineID, u_int engineID_len)
 void
 dump_etimelist_entry(Enginetime e, int count)
 {
-    u_int           buflen;
+    size_t          buflen;
     char            tabs[SNMP_MAXBUF], *t = tabs, *s;
 
 
@@ -556,13 +556,9 @@ dump_etimelist_entry(Enginetime e, int count)
 
 
     buflen = e->engineID_len;
-#ifdef NETSNMP_ENABLE_TESTING_CODE
     if (!(s = dump_snmpEngineID(e->engineID, &buflen))) {
-#endif
         binary_to_hex(e->engineID, e->engineID_len, &s);
-#ifdef NETSNMP_ENABLE_TESTING_CODE
     }
-#endif
 
     DEBUGMSGTL(("dump_etimelist", "%s\n", tabs));
     DEBUGMSGTL(("dump_etimelist", "%s%s (len=%d) <%d,%d>\n", tabs,
