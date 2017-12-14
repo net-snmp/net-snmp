@@ -124,39 +124,6 @@ char           *usmUserPublic_val = NULL;
 int             docreateandwait = 0;
 
 
-#if defined(HAVE_OPENSSL_DH_H) && !defined(HAVE_DH_GET0_PQG)
-
-#include <string.h>
-#include <openssl/dh.h>
-
-void DH_get0_pqg(const DH *dh,
-                const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
-{
-   if (p != NULL)
-       *p = dh->p;
-   if (q != NULL)
-       *q = dh->q;
-   if (g != NULL)
-       *g = dh->g;
-}
-
-#endif
-
-#if defined(HAVE_OPENSSL_DH_H) && !defined(HAVE_DH_GET0_KEY)
-
-#include <string.h>
-#include <openssl/dh.h>
-
-void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
-{
-   if (pub_key != NULL)
-       *pub_key = dh->pub_key;
-   if (priv_key != NULL)
-       *priv_key = dh->priv_key;
-}
-
-#endif
-
 void
 usage(void)
 {
