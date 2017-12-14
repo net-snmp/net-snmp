@@ -4683,6 +4683,11 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             *errorMsg = "invalid key value argument to -m";
             goto fail;
         }
+        /* save master key */
+        if (newuser->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
+            newuser->authKeyKu = netsnmp_memdup(userKey, userKeyLen);
+            newuser->authKeyKuLen = userKeyLen;
+        }
     } else if (strcmp(buf,"-l") != 0) {
         /* a password is specified */
         userKeyLen = sizeof(userKey);
@@ -4824,6 +4829,11 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             if (!snmp_hex_to_binary(&tmpp, &ret, &userKeyLen, 0, buf)) {
                 *errorMsg = "invalid key value argument to -m";
                 goto fail;
+            }
+            /* save master key */
+            if (newuser->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
+                newuser->privKeyKu = netsnmp_memdup(userKey, userKeyLen);
+                newuser->privKeyKuLen = userKeyLen;
             }
         } else if (strcmp(buf,"-l") != 0) {
             /* a password is specified */
