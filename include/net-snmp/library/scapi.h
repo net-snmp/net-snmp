@@ -52,22 +52,57 @@ extern          "C" {
 #define SNMP_TRANS_PRIVLEN_AES256_IV    256
 #define SNMP_TRANS_AES_AES256_PADSIZE   128
 
+
+typedef struct netsnmp_auth_alg_info_s {
+    int          type;
+    const char * name;
+    oid *        alg_oid;
+    int          oid_len;
+    int          proper_length;
+    int          mac_length;
+} netsnmp_auth_alg_info;
+
+typedef struct netsnmp_priv_alg_info_s {
+    int          type;
+    const char * name;
+    oid *        alg_oid;
+    int          oid_len;
+    int          proper_length;
+    int         iv_length;
+    int         pad_size;
+    const EVP_CIPHER *  cipher;
+} netsnmp_priv_alg_info;
+
     /*
      * Prototypes.
      */
-    int             sc_get_authtype(const oid * hashtype, u_int hashtype_len);
-    int             sc_get_proper_auth_length(int hashtype);
+    int             sc_get_authtype(const oid * hashoid, u_int hashoid_len);
+    int             sc_get_proper_auth_length_bytype(int auth_type);
     int             sc_get_auth_maclen(int auth_type);
+    const char*     sc_get_auth_name(int auth_type);
+    oid *           sc_get_auth_oid(int auth_type, size_t *oid_len);
+    netsnmp_auth_alg_info * sc_get_auth_alg_byoid(const oid *oid, u_int len);
+    netsnmp_auth_alg_info * sc_get_auth_alg_bytype(u_int type);
+    netsnmp_auth_alg_info * sc_get_auth_alg_byindex(u_int index);
 
-    /** deprectated, use sc_get_authtype() + sc_get_proper_auth_length() */
+    /** deprectated, use
+     *        sc_get_authtype() + sc_get_proper_auth_length_bytype() */
     int             sc_get_properlength(const oid * hashtype,
                                         u_int hashtype_len);
 
-    int             sc_get_proper_priv_length(const oid * privtype,
-                                              u_int privtype_len);
 #ifdef NETSNMP_USE_OPENSSL
     const EVP_MD *sc_get_openssl_hashfn(int auth_type);
+    const EVP_CIPHER *sc_get_openssl_privfn(int priv_type);
 #endif
+
+    int             sc_get_privtype(const oid * privtype, u_int privtype_len);
+    oid *           sc_get_priv_oid(int type, size_t *oid_len);
+    int             sc_get_proper_priv_length(const oid * privtype,
+                                              u_int privtype_len);
+    int             sc_get_proper_priv_length_bytype(int privtype);
+    netsnmp_priv_alg_info * sc_get_priv_alg_byoid(const oid *oid, u_int len);
+    netsnmp_priv_alg_info * sc_get_priv_alg_bytype(u_int type);
+    netsnmp_priv_alg_info * sc_get_priv_alg_byindex(u_int index);
 
     NETSNMP_IMPORT
     int             sc_init(void);

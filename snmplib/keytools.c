@@ -68,6 +68,9 @@
 
 #include <net-snmp/library/transform_oids.h>
 
+#include <net-snmp/library/snmp_secmod.h>
+#include <net-snmp/library/snmpusm.h>
+
 netsnmp_feature_child_of(usm_support, libnetsnmp)
 netsnmp_feature_child_of(usm_keytools, usm_support)
 
@@ -137,8 +140,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     /*
      * Sanity check.
      */
-    if (!hashtype || !P || !Ku || !kulen || (*kulen <= 0)
-        || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+    if (!hashtype || !P || !Ku || !kulen || (*kulen <= 0)) {
         QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
     }
 
@@ -190,13 +192,13 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 
 #elif NETSNMP_USE_INTERNAL_CRYPTO
 #ifndef NETSNMP_DISABLE_MD5
-    if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
+    if (NETSNMP_USMAUTH_HMACMD5 == auth_type) {
         if (!MD5_Init(&cmd5))
             return SNMPERR_GENERR;
         cryptotype = TYPE_MD5;
     } else
 #endif
-           if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
+           if (NETSNMP_USMAUTH_HMACSHA1 == auth_type) {
         if (!SHA1_Init(&csha1))
             return SNMPERR_GENERR;
         cryptotype = TYPE_SHA1;
@@ -295,13 +297,12 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 }                               /* end generate_Ku() */
 #elif NETSNMP_USE_PKCS11
 {
-    int             rval = SNMPERR_SUCCESS;
+    int             rval = SNMPERR_SUCCESS, auth_type;;
 
     /*
      * Sanity check.
      */
-    if (!hashtype || !P || !Ku || !kulen || (*kulen <= 0)
-        || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+    if (!hashtype || !P || !Ku || !kulen || (*kulen <= 0)) {
         QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
     }
 
@@ -312,16 +313,24 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
         QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
     }
 
+    auth_type = sc_get_authtype(hashtype, hashtype_len);
+    if (SNMPERR_GENERR == auth_type) {
+        snmp_log(LOG_ERR, "Error: unknown authtype");
+        snmp_set_detail("unknown authtype");
+        QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+    }
+
+
     /*
      * Setup for the transform type.
      */
 
 #ifndef NETSNMP_DISABLE_MD5
-    if (ISTRANSFORM(hashtype, HMACMD5Auth))
+    if (NETSNMP_USMAUTH_HMACMD5 == auth_type)
         return pkcs_generate_Ku(CKM_MD5, P, pplen, Ku, kulen);
     else
 #endif
-        if (ISTRANSFORM(hashtype, HMACSHA1Auth))
+        if (NETSNMP_USMAUTH_HMACSHA1 == auth_type)
         return pkcs_generate_Ku(CKM_SHA_1, P, pplen, Ku, kulen);
     else {
         return (SNMPERR_GENERR);
@@ -379,7 +388,7 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
              u_char * Kul, size_t * kul_len)
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
-    int             rval = SNMPERR_SUCCESS;
+    int             rval = SNMPERR_SUCCESS, auth_type;
     u_int           nbytes = 0;
     size_t          properlength;
     int             iproperlength;
@@ -394,13 +403,15 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
      * Sanity check.
      */
     if (!hashtype || !engineID || !Ku || !Kul || !kul_len
-        || (engineID_len <= 0) || (ku_len <= 0) || (*kul_len <= 0)
-        || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+        || (engineID_len <= 0) || (ku_len <= 0) || (*kul_len <= 0)) {
         QUITFUN(SNMPERR_GENERR, generate_kul_quit);
     }
 
+    auth_type = sc_get_authtype(hashtype, hashtype_len);
+    if (SNMPERR_GENERR == auth_type)
+        QUITFUN(SNMPERR_GENERR, generate_kul_quit);
 
-    iproperlength = sc_get_properlength(hashtype, hashtype_len);
+    iproperlength = sc_get_proper_auth_length_bytype(auth_type);
     if (iproperlength == SNMPERR_GENERR)
         QUITFUN(SNMPERR_GENERR, generate_kul_quit);
 
@@ -425,7 +436,8 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
     rval = sc_hash(hashtype, hashtype_len, buf, nbytes, Kul, kul_len);
 
 #ifdef NETSNMP_ENABLE_TESTING_CODE
-    DEBUGMSGTL(("generate_kul", "generating Kul (from Ku): "));
+    DEBUGMSGTL(("generate_kul", "generating Kul (%s from Ku): ",
+                usm_lookup_auth_str(auth_type) ));
     for (i = 0; i < *kul_len; i++)
         DEBUGMSG(("generate_kul", "%02x", Kul[i]));
     DEBUGMSG(("generate_kul", "keytools\n"));
@@ -487,7 +499,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
                  u_char * kcstring, size_t * kcstring_len)
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
-    int             rval = SNMPERR_SUCCESS;
+    int             rval = SNMPERR_SUCCESS, auth_type;
     int             iproperlength;
     size_t          properlength;
     size_t          nbytes = 0;
@@ -502,15 +514,15 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
 	return SNMPERR_GENERR;
 
     if (!hashtype || !oldkey || !newkey || !kcstring || !kcstring_len
-        || (oldkey_len <= 0) || (newkey_len <= 0) || (*kcstring_len <= 0)
-        || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+        || (oldkey_len <= 0) || (newkey_len <= 0) || (*kcstring_len <= 0)) {
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
     }
 
     /*
      * Setup for the transform type.
      */
-    iproperlength = sc_get_properlength(hashtype, hashtype_len);
+    auth_type = sc_get_authtype(hashtype, hashtype_len);
+    iproperlength = sc_get_proper_auth_length_bytype(auth_type);
     if (iproperlength == SNMPERR_GENERR)
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
 
@@ -616,7 +628,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
                  u_char * newkey, size_t * newkey_len)
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
-    int             rval = SNMPERR_SUCCESS;
+    int             rval = SNMPERR_SUCCESS, auth_type;
     size_t          properlength = 0;
     int             iproperlength = 0;
     u_int           nbytes = 0;
@@ -631,8 +643,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
      * Sanity check.
      */
     if (!hashtype || !oldkey || !kcstring || !newkey || !newkey_len
-        || (oldkey_len <= 0) || (kcstring_len <= 0) || (*newkey_len <= 0)
-        || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+        || (oldkey_len <= 0) || (kcstring_len <= 0) || (*newkey_len <= 0)) {
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
     }
 
@@ -640,7 +651,8 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
     /*
      * Setup for the transform type.
      */
-    iproperlength = sc_get_properlength(hashtype, hashtype_len);
+    auth_type = sc_get_authtype(hashtype, hashtype_len);
+    iproperlength = sc_get_proper_auth_length_bytype(auth_type);
     if (iproperlength == SNMPERR_GENERR)
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
 

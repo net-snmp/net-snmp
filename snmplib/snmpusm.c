@@ -107,45 +107,83 @@ oid    usmHMAC128SHA224AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                             NETSNMP_USMAUTH_HMAC128SHA224 };
 #endif /* HAVE_EVP_SHA384 */
 
-typedef struct usm_hash_alg_pair_s {
+oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
+
+#ifndef NETSNMP_DISABLE_DES
+oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
+#endif
+
+
+oid    usmAESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
+/* backwards compat */
+oid    *usmAES128PrivProtocol = usmAESPrivProtocol;
+
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+    /* OIDs from http://www.snmp.com/eso/esoConsortiumMIB.txt */
+oid    usmAES192PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,3 };
+oid    usmAES256PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,4 };
+    /* OIDs from CISCO MIB */
+oid    usmAES192CiscoPrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,1 };
+oid    usmAES256CiscoPrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,2 };
+oid    usmAES192Cisco2PrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,101 };
+oid    usmAES256Cisco2PrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,102 };
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+
+typedef struct usm_alg_type_s {
     const char *label;
     int         value;
-} usm_hash_alg_pair_t;
+} usm_alg_type_t;
 
-static usm_hash_alg_pair_t usm_hash_alg[] = {
+static usm_alg_type_t usm_auth_type[] = {
     { "NOAUTH", NETSNMP_USMAUTH_NOAUTH },
     { "SHA", NETSNMP_USMAUTH_HMACSHA1 },
     { "SHA-1", NETSNMP_USMAUTH_HMACSHA1 },
+    { "SHA1", NETSNMP_USMAUTH_HMACSHA1 },
 #ifndef NETSNMP_DISABLE_MD5
     { "MD5", NETSNMP_USMAUTH_HMACMD5 },
 #endif
 #ifdef HAVE_EVP_SHA224
-    { "SHA-224", NETSNMP_USMAUTH_HMAC128SHA224 },
-    { "SHA224", NETSNMP_USMAUTH_HMAC128SHA224 },
-    { "SHA-256", NETSNMP_USMAUTH_HMAC192SHA256 },
-    { "SHA256", NETSNMP_USMAUTH_HMAC192SHA256 },
+    { "SHA-128", NETSNMP_USMAUTH_HMAC128SHA224 },
+    { "SHA128", NETSNMP_USMAUTH_HMAC128SHA224 },
+    { "SHA-192", NETSNMP_USMAUTH_HMAC192SHA256 },
+    { "SHA192", NETSNMP_USMAUTH_HMAC192SHA256 },
 #endif
 #ifdef HAVE_EVP_SHA384
-    { "SHA-384", NETSNMP_USMAUTH_HMAC256SHA384 },
-    { "SHA384", NETSNMP_USMAUTH_HMAC256SHA384 },
-    { "SHA-512",  NETSNMP_USMAUTH_HMAC384SHA512 },
-    { "SHA512",  NETSNMP_USMAUTH_HMAC384SHA512 },
+    { "SHA-256", NETSNMP_USMAUTH_HMAC256SHA384 },
+    { "SHA256", NETSNMP_USMAUTH_HMAC256SHA384 },
+    { "SHA-384",  NETSNMP_USMAUTH_HMAC384SHA512 },
+    { "SHA384",  NETSNMP_USMAUTH_HMAC384SHA512 },
 #endif
     { NULL, -1 }
 };
 
-oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
+static usm_alg_type_t usm_priv_type[] = {
+    { "NOPRIV", USM_CREATE_USER_PRIV_NONE },
 #ifndef NETSNMP_DISABLE_DES
-oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
+    { "DES", USM_CREATE_USER_PRIV_DES },
 #endif
-oid             usmAESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
-/* backwards compat */
-oid             *usmAES128PrivProtocol = usmAESPrivProtocol;
+#ifdef HAVE_AES
+    { "AES", USM_CREATE_USER_PRIV_AES },
+    { "AES-128", USM_CREATE_USER_PRIV_AES },
+    { "AES128", USM_CREATE_USER_PRIV_AES },
 #ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-    /* OIDs from http://www.snmp.com/eso/esoConsortiumMIB.txt */
-oid             usmAES192PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,3 };
-oid             usmAES256PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,4 };
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+    { "AES-192", USM_CREATE_USER_PRIV_AES192 },
+    { "AES192", USM_CREATE_USER_PRIV_AES192 },
+    { "AES-256", USM_CREATE_USER_PRIV_AES256 },
+    { "AES256", USM_CREATE_USER_PRIV_AES256 },
+    /** cisco / pysnmp variations */
+    { "AES-192-C", USM_CREATE_USER_PRIV_AES192_CISCO },
+    { "AES192C", USM_CREATE_USER_PRIV_AES192_CISCO },
+    { "AES-192-C2", USM_CREATE_USER_PRIV_AES192_CISCO2 },
+    { "AES192C2", USM_CREATE_USER_PRIV_AES192_CISCO2 },
+    { "AES-256-C", USM_CREATE_USER_PRIV_AES256_CISCO },
+    { "AES256C", USM_CREATE_USER_PRIV_AES256_CISCO },
+    { "AES-256-C2", USM_CREATE_USER_PRIV_AES256_CISCO2 },
+    { "AES256C2", USM_CREATE_USER_PRIV_AES256_CISCO2 },
+#endif
+#endif
+    { NULL, -1 },
+};
 
 static u_int    dummy_etime, dummy_eboot;       /* For ISENGINEKNOWN(). */
 
@@ -227,44 +265,6 @@ int
 									\
 	return 0;							\
 }
-
-
-oid *
-usm_get_auth_oid(int auth_type, size_t *oid_len)
-{
-    if (NULL == oid_len)
-        return NULL;
-
-    *oid_len = USM_LENGTH_OID_TRANSFORM;
-
-    switch (auth_type) {
-#ifndef NETSNMP_DISABLE_MD5
-        case NETSNMP_USMAUTH_HMACMD5:
-            return usmHMACMD5AuthProtocol;
-#endif
-        case NETSNMP_USMAUTH_HMACSHA1:
-            return usmHMACSHA1AuthProtocol;
-
-#ifdef HAVE_EVP_SHA224
-        case NETSNMP_USMAUTH_HMAC128SHA224:
-            return usmHMAC128SHA224AuthProtocol;
-
-        case NETSNMP_USMAUTH_HMAC192SHA256:
-            return usmHMAC192SHA256AuthProtocol;
-#endif /* HAVE_EVP_SHA224 */
-
-#ifdef HAVE_EVP_SHA384
-        case NETSNMP_USMAUTH_HMAC256SHA384:
-            return usmHMAC256SHA384AuthProtocol;
-
-        case NETSNMP_USMAUTH_HMAC384SHA512:
-            return usmHMAC384SHA512AuthProtocol;
-#endif /* HAVE_EVP_SHA384 */
-    }
-
-    return NULL;
-}
-
 
 int
 free_enginetime_on_shutdown(int majorid, int minorid, void *serverarg,
@@ -1159,17 +1159,10 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
         size_t          encrypted_length = theTotalLength - dataOffset;
         size_t          salt_length = BYTESIZE(USM_MAX_SALT_LENGTH);
         u_char          salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
-
-        /*
-         * XXX  Hardwired to seek into a 1DES private key!
-         */
+        int             priv_type = sc_get_privtype(thePrivProtocol,
+                                                    thePrivProtocolLength);
 #ifdef HAVE_AES
-        if (ISTRANSFORM(thePrivProtocol, AESPriv)
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-            || ISTRANSFORM(thePrivProtocol, AES192Priv)
-            || ISTRANSFORM(thePrivProtocol, AES256Priv)
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
-            ) {
+        if (USM_CREATE_USER_PRIV_AES == (priv_type & USM_PRIV_MASK_ALG)) {
             if (!thePrivKey ||
                 usm_set_aes_iv(salt, &salt_length,
                                htonl(boots_uint), htonl(time_uint),
@@ -1178,10 +1171,13 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
                 usm_free_usmStateReference(secStateRef);
                 return SNMPERR_USM_GENERICERROR;
             }
-        } 
+        }
 #endif
 #ifndef NETSNMP_DISABLE_DES
-        if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
+        /*
+         * XXX  Hardwired to seek into a 1DES private key!
+         */
+        if (USM_CREATE_USER_PRIV_DES == (priv_type & USM_PRIV_MASK_ALG)) {
             if (!thePrivKey ||
                 (usm_set_salt(salt, &salt_length,
                               thePrivKey + 8, thePrivKeyLength - 8,
@@ -1636,6 +1632,8 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
          */
         u_char         *ciphertext = NULL;
         size_t          ciphertextlen = scopedPduLen + 64;
+        int             priv_type = sc_get_privtype(thePrivProtocol,
+                                                    thePrivProtocolLength);
 
         if ((ciphertext = (u_char *) malloc(ciphertextlen)) == NULL) {
             DEBUGMSGTL(("usm",
@@ -1649,12 +1647,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
          * XXX Hardwired to seek into a 1DES private key!  
          */
 #ifdef HAVE_AES
-        if (ISTRANSFORM(thePrivProtocol, AESPriv)
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-            || ISTRANSFORM(thePrivProtocol, AES192Priv)
-            || ISTRANSFORM(thePrivProtocol, AES256Priv)
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
-            ) {
+        if (USM_CREATE_USER_PRIV_AES == (priv_type & USM_PRIV_MASK_ALG)) {
             salt_length = BYTESIZE(USM_AES_SALT_LENGTH);
             save_salt_length = BYTESIZE(USM_AES_SALT_LENGTH)/2;
             if (!thePrivKey ||
@@ -1669,7 +1662,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
         } 
 #endif
 #ifndef NETSNMP_DISABLE_DES
-        if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
+        if (USM_CREATE_USER_PRIV_DES == (priv_type & USM_PRIV_MASK_ALG)) {
             salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
             save_salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
             if (!thePrivKey || (usm_set_salt(salt, &salt_length,
@@ -2698,6 +2691,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
      * If needed, decrypt the scoped PDU.
      */
     if (secLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+        int priv_type = sc_get_privtype(user->privProtocol,
+                                        user->privProtocolLen);
         remaining = wholeMsgLen - (data_ptr - wholeMsg);
 
         if ((value_ptr = asn_parse_sequence(data_ptr, &remaining,
@@ -2714,7 +2709,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         }
 
 #ifndef NETSNMP_DISABLE_DES
-        if (ISTRANSFORM(user->privProtocol, DESPriv)) {
+        if (USM_CREATE_USER_PRIV_DES == (priv_type & USM_PRIV_MASK_ALG)) {
             /*
              * From RFC2574:
              * 
@@ -2754,12 +2749,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         }
 #endif
 #ifdef HAVE_AES
-        if (ISTRANSFORM(user->privProtocol, AESPriv)
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-            || ISTRANSFORM(user->privProtocol, AES192Priv)
-            || ISTRANSFORM(user->privProtocol, AES256Priv)
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
-            ) {
+        if (USM_CREATE_USER_PRIV_AES == (priv_type & USM_PRIV_MASK_ALG)) {
             iv_length = BYTESIZE(USM_AES_SALT_LENGTH);
             net_boots = ntohl(boots_uint);
             net_time = ntohl(time_uint);
@@ -2865,6 +2855,27 @@ usm_handle_report(void *sessp,
         }
         break;
     }       
+}
+
+/** utility function to call netsnmp_extend_kul for a usmUser */
+static int
+usm_extend_user_kul(struct usmUser *user, u_int privKeyBufSize)
+{
+    netsnmp_priv_alg_info *pai;
+
+    DEBUGMSGTL(("usm", "extending key\n"));
+
+    if (NULL == user)
+        return SNMPERR_GENERR;
+
+    pai = sc_get_priv_alg_byoid(user->privProtocol, user->privProtocolLen);
+    if (NULL == pai)
+        return SNMPERR_GENERR;
+
+    return netsnmp_extend_kul(pai->proper_length, user->authProtocol,
+                              user->authProtocolLen, pai->type, user->engineID,
+                              user->engineIDLen, &user->privKey,
+                              &user->privKeyLen, privKeyBufSize);
 }
 
 /* sets up initial default session parameters */
@@ -3008,7 +3019,9 @@ usm_create_user_from_session(netsnmp_session * session)
                                   session->securityEngineIDLen,
                                   session->securityName,
                                   usm_get_userList(), 0);
-    DEBUGMSGTL(("usm", "user exists? x=%p\n", user));
+    if (NULL != user) 
+        DEBUGMSGTL(("usm", "user exists x=%p\n", user));
+    else
     if (user == NULL) {
         DEBUGMSGTL(("usm", "Building user %s...\n",
                     session->securityName));
@@ -3094,14 +3107,10 @@ usm_create_user_from_session(netsnmp_session * session)
                    && session->securityAuthKeyLen != 0) {
             SNMP_FREE(user->authKey);
             user->authKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
-            if (user->authKey == NULL) {
-                usm_free_user(user);
-                return SNMPERR_GENERR;
-            }
             user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
-            if (generate_kul(user->authProtocol, user->authProtocolLen,
-                             session->securityEngineID,
-                             session->securityEngineIDLen,
+            if ((user->authKey == NULL) ||
+                generate_kul(user->authProtocol, user->authProtocolLen,
+                             user->engineID, user->engineIDLen,
                              session->securityAuthKey,
                              session->securityAuthKeyLen, user->authKey,
                              &user->authKeyLen) != SNMPERR_SUCCESS) {
@@ -3115,7 +3124,8 @@ usm_create_user_from_session(netsnmp_session * session)
             user->authKey = (u_char *)malloc(buflen); /* max length needed */
             user->authKeyLen = 0;
             /* it will be a hex string */
-            if (!snmp_hex_to_binary(&user->authKey, &buflen, &user->authKeyLen,
+            if ((NULL == user->authKey) ||
+                !snmp_hex_to_binary(&user->authKey, &buflen, &user->authKeyLen,
                                     0, cp)) {
                 usm_free_user(user);
                 return SNMPERR_GENERR;
@@ -3127,6 +3137,9 @@ usm_create_user_from_session(netsnmp_session * session)
      * copy in the privacy Key.  If not localized, localize it 
      */
     if (user->privKey == NULL) {
+        /** save buffer size in case we need to extend key */
+        int keyBufSize = USM_PRIV_KU_LEN;
+
         if (session->securityPrivLocalKey != NULL
             && session->securityPrivLocalKeyLen != 0) {
             /* already localized key passed in.  use it */
@@ -3137,19 +3150,15 @@ usm_create_user_from_session(netsnmp_session * session)
                 usm_free_user(user);
                 return SNMPERR_GENERR;
             }
-            user->privKeyLen = session->securityPrivLocalKeyLen;
+            keyBufSize = user->privKeyLen = session->securityPrivLocalKeyLen;
         } else if (session->securityPrivKey != NULL
                    && session->securityPrivKeyLen != 0) {
             SNMP_FREE(user->privKey);
-            user->privKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
-            if (user->privKey == NULL) {
-                usm_free_user(user);
-                return SNMPERR_GENERR;
-            }
-            user->privKeyLen = USM_LENGTH_KU_HASHBLOCK;
-            if (generate_kul(user->authProtocol, user->authProtocolLen,
-                             session->securityEngineID,
-                             session->securityEngineIDLen,
+            user->privKey = (u_char *) calloc(1, keyBufSize);
+            user->privKeyLen = keyBufSize;
+            if ((user->privKey == NULL) ||
+                generate_kul(user->authProtocol, user->authProtocolLen,
+                             user->engineID, user->engineIDLen,
                              session->securityPrivKey,
                              session->securityPrivKeyLen, user->privKey,
                              &user->privKeyLen) != SNMPERR_SUCCESS) {
@@ -3158,16 +3167,21 @@ usm_create_user_from_session(netsnmp_session * session)
             }
         } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
                                                NETSNMP_DS_LIB_PRIVLOCALIZEDKEY))) {
-            size_t buflen = USM_PRIV_KU_LEN;
-            SNMP_FREE(user->privKey);
+            size_t buflen = keyBufSize;
             user->privKey = (u_char *)malloc(buflen); /* max length needed */
             user->privKeyLen = 0;
             /* it will be a hex string */
-            if (!snmp_hex_to_binary(&user->privKey, &buflen, &user->privKeyLen,
+            if ((NULL == user->privKey) ||
+                !snmp_hex_to_binary(&user->privKey, &buflen, &user->privKeyLen,
                                     0, cp)) {
                 usm_free_user(user);
                 return SNMPERR_GENERR;
             }
+        }
+        DEBUGMSGTL(("usm", "extending key?\n"));
+        if (usm_extend_user_kul(user, keyBufSize) != SNMPERR_SUCCESS) {
+            usm_free_user(user);
+            return SNMPERR_GENERR;
         }
     }
 
@@ -3355,14 +3369,14 @@ init_usm(void)
                             NULL, "MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224");
     register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
                             NULL,
+                            "DES"
 #ifdef HAVE_AES
-#ifndef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-                            "DES|AES"
-#else
-                            "DES|AES|AES-128|AES-192|AES-256"
+                            "|AES|AES-128"
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+                            "|AES-192|AES-256"
 #endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 #else
-                            "DES (AES support not available)"
+                            " (AES support not available)"
 #endif
                            );
 
@@ -3391,32 +3405,50 @@ init_usm(void)
 }
 
 int
-usm_lookup_auth_type(const char *str)
+usm_lookup_alg_type(const char *str, usm_alg_type_t *types)
 {
-    int i, il, sl = strlen(str);
-    for (i = 0; usm_hash_alg[i].label; ++i) {
-        il = strlen(usm_hash_alg[i].label);
-        if (il != sl)
-            continue;
-        if (0 == strcasecmp(usm_hash_alg[i].label, str))
-            return usm_hash_alg[i].value;
+    int i;
+    for (i = 0; types[i].label; ++i) {
+        if (0 == strcasecmp(types[i].label, str))
+            return types[i].value;
     }
 
     return -1;
 }
 
+const char *
+usm_lookup_alg_str(int value, usm_alg_type_t *types)
+{
+    int i;
+    for (i = 0; types[i].label; ++i)
+        if (value == types[i].value)
+            return types[i].label;
+
+    return NULL;
+}
+int
+usm_lookup_auth_type(const char *str)
+{
+    return usm_lookup_alg_type(str, usm_auth_type );
+}
+
+int
+usm_lookup_priv_type(const char *str)
+{
+    return usm_lookup_alg_type(str, usm_priv_type );
+}
 
 const char *
 usm_lookup_auth_str(int value)
 {
-    int i;
-    for (i = 0; usm_hash_alg[i].label; ++i)
-        if (value == usm_hash_alg[i].value)
-            return usm_hash_alg[i].label;
-
-    return NULL;
+    return usm_lookup_alg_str(value, usm_auth_type );
 }
 
+const char *
+usm_lookup_priv_str(int value)
+{
+    return usm_lookup_alg_str(value, usm_priv_type );
+}
 
 void
 init_usm_conf(const char *app)
@@ -3470,22 +3502,14 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
     
 #ifndef NETSNMP_DISABLE_MD5
     noNameUser = usm_create_initial_user("", usmHMACMD5AuthProtocol,
-                                         USM_LENGTH_OID_TRANSFORM,
-#ifndef NETSNMP_DISABLE_DES
-                                         usmDESPrivProtocol,
-#else
-                                         usmAESPrivProtocol,
-#endif
-                                         USM_LENGTH_OID_TRANSFORM);
+                                         OID_LENGTH(usmHMACMD5AuthProtocol),
+                                         SNMP_DEFAULT_PRIV_PROTO,
+                                         SNMP_DEFAULT_PRIV_PROTOLEN);
 #else
     noNameUser = usm_create_initial_user("", usmHMACSHA1AuthProtocol,
                                          USM_LENGTH_OID_TRANSFORM,
-#ifndef NETSNMP_DISABLE_DES
-                                         usmDESPrivProtocol,
-#else
-                                         usmAESPrivProtocol,
-#endif
-                                         USM_LENGTH_OID_TRANSFORM);
+                                         SNMP_DEFAULT_PRIV_PROTO,
+                                         SNMP_DEFAULT_PRIV_PROTOLEN);
 #endif
 
     if ( noNameUser ) {
@@ -4279,8 +4303,7 @@ struct usmUser *
 usm_read_user(const char *line)
 {
     struct usmUser *user;
-    size_t          len;
-    size_t expected_privKeyLen = 0;
+    size_t          len, proper_length, privtype;
 
     user = usm_create_user();
     if (user == NULL)
@@ -4325,27 +4348,14 @@ usm_read_user(const char *line)
                                         &user->privProtocolLen);
     line = read_config_read_octet_string(line, &user->privKey,
                                          &user->privKeyLen);
-#ifndef NETSNMP_DISABLE_DES
-    if (ISTRANSFORM(user->privProtocol, DESPriv)) {
-        /* DES uses a 128 bit key, 64 bits of which is a salt */
-        expected_privKeyLen = 16;
-    }
-#endif
-#ifdef HAVE_AES
-    if (ISTRANSFORM(user->privProtocol, AESPriv)) {
-        expected_privKeyLen = 16;
-    }
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-    else if (ISTRANSFORM(thePrivProtocol, AES192Priv)) {
-        expected_privKeyLen = 24;
-    } else if (ISTRANSFORM(thePrivProtocol, AES256Priv)) {
-        expected_privKeyLen = 32;
-    }
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
-#endif
+
+    privtype = sc_get_privtype(user->privProtocol, user->privProtocolLen);
+    proper_length = sc_get_proper_priv_length_bytype(privtype);
+    if (USM_CREATE_USER_PRIV_DES == privtype)
+        proper_length *= 2; /* ?? we store salt with key */
     /* For backwards compatibility */
-    if (user->privKeyLen > expected_privKeyLen) {
-	  user->privKeyLen = expected_privKeyLen;
+    if (user->privKeyLen > proper_length) {
+        user->privKeyLen = proper_length;
     }
 
     line = read_config_read_octet_string(line, &user->userPublicString,
@@ -4556,6 +4566,14 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
             return;
         }
     }
+
+    if (key == &user->privKey) {
+        ret = usm_extend_user_kul(user, *keyLen);
+        if (SNMPERR_SUCCESS != ret) {
+            config_perror("error extending localized user key");
+            return;
+        }
+    }
 }                               /* end usm_set_password() */
 
 /*
@@ -4581,7 +4599,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     size_t          userKeyLen = SNMP_MAXBUF_SMALL;
     size_t          privKeyLen = 0;
     size_t          ret;
-    int             ret2;
+    int             ret2, properLen, priv_type;
     const oid      *def_auth_prot, *def_priv_prot;
     size_t          def_auth_prot_len, def_priv_prot_len;
 
@@ -4596,6 +4614,10 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     *errorMsg = NULL; /* no errors yet */
 
     newuser = usm_create_user();
+    if (newuser == NULL) {
+        *errorMsg = "malloc failure creating new user";
+        goto fail;
+    }
 
     /*
      * READ: Security Name 
@@ -4670,8 +4692,13 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     newuser->authProtocol[0] = 0;
     cp = copy_nword(cp, buf, sizeof(buf));
     if ((strncmp(cp, "default", 7) == 0) && (NULL != def_auth_prot)) {
-        memcpy(newuser->authProtocol, def_auth_prot,
-               def_auth_prot_len * sizeof(oid));
+        newuser->authProtocol = snmp_duplicate_objid(def_auth_prot,
+                                                     def_auth_prot_len);
+        if (newuser->authProtocol == NULL) {
+            *errorMsg = "malloc failed";
+            goto fail;
+        }
+        newuser->authProtocolLen = def_auth_prot_len;
     } else {
         const oid *auth_prot;
         size_t auth_prot_len;
@@ -4680,8 +4707,14 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             *errorMsg = "unknown authProtocol";
             goto fail;
         }
-        auth_prot = usm_get_auth_oid(auth_type, &auth_prot_len);
-        memcpy(newuser->authProtocol, auth_prot, auth_prot_len * sizeof(oid));
+        auth_prot = sc_get_auth_oid(auth_type, &newuser->authProtocolLen);
+        if (auth_prot)
+            newuser->authProtocol =
+                snmp_duplicate_objid(auth_prot, newuser->authProtocolLen);
+        if (newuser->authProtocol == NULL) {
+            *errorMsg = "malloc failed";
+            goto fail;
+        }
     }
     if (0 == newuser->authProtocol[0]) {
         *errorMsg = "Unknown authentication protocol";
@@ -4738,30 +4771,30 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     /*
      * And turn it into a localized key 
      */
-    ret2 = sc_get_properlength(newuser->authProtocol,
-                               newuser->authProtocolLen);
-    if (ret2 <= 0) {
+    properLen = sc_get_proper_auth_length_bytype(
+        sc_get_authtype(newuser->authProtocol, newuser->authProtocolLen));
+    if (properLen <= 0) {
         *errorMsg = "Could not get proper authentication protocol key length";
         goto fail;
     }
-    newuser->authKey = (u_char *) malloc(ret2);
+    newuser->authKey = (u_char *) malloc(properLen);
+    newuser->authKeyLen = properLen;
 
     if (strcmp(buf,"-l") == 0) {
         /* a local key is directly specified */
         cp = copy_nword(cp, buf, sizeof(buf));
+        ret = newuser->authKeyLen;
         newuser->authKeyLen = 0;
-        ret = ret2;
         if (!snmp_hex_to_binary(&newuser->authKey, &ret,
                                 &newuser->authKeyLen, 0, buf)) {
             *errorMsg = "invalid key value argument to -l";
             goto fail;
         }
-        if (ret != newuser->authKeyLen) {
+        if (properLen != newuser->authKeyLen) {
             *errorMsg = "improper key length to -l";
             goto fail;
         }
     } else {
-        newuser->authKeyLen = ret2;
         ret2 = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
                            newuser->engineID, newuser->engineIDLen,
                            userKey, userKeyLen,
@@ -4790,45 +4823,35 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
      * READ: Privacy Type 
      */
     newuser->privProtocol[0] = 0;
-    if (strncmp(cp, "DES", 3) == 0) {
-#ifndef NETSNMP_DISABLE_DES
-        memcpy(newuser->privProtocol, usmDESPrivProtocol,
-               sizeof(usmDESPrivProtocol));
-        /* DES uses a 128 bit key, 64 bits of which is a salt */
-        privKeyLen = 16;
-#else
-        *errorMsg = "DES support disabled";
-#endif
-    }
-    if (strncmp(cp, "AES", 3) == 0) {
-#ifdef HAVE_AES
-        if (strlen(cp) == 3 || strncmp(cp, "AES128", 6) == 0) {
-            memcpy(newuser->privProtocol, usmAESPrivProtocol,
-                   sizeof(usmAESPrivProtocol));
-            privKeyLen = 16;
+    cp = copy_nword(cp, buf, sizeof(buf));
+    if ((strncmp(buf, "default", 7) == 0) && (NULL != def_priv_prot)) {
+        newuser->privProtocol =
+            snmp_duplicate_objid(def_priv_prot, def_priv_prot_len);
+        if (newuser->privProtocol == NULL) {
+            *errorMsg = "malloc failed";
+            goto fail;
         }
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-        else if (strncmp(cp, "AES192", 6) == 0) {
-            memcpy(newuser->privProtocol, usmAES192PrivProtocol,
-                   sizeof(usmAES192PrivProtocol));
-            privKeyLen = 24;
+        newuser->privProtocolLen = def_priv_prot_len;
+        priv_type = sc_get_privtype(def_priv_prot, def_priv_prot_len);
+        netsnmp_assert(priv_type > 0);
+    } else {
+        const oid *priv_prot;
+        priv_type = usm_lookup_priv_type(buf);
+        if (priv_type < 0) {
+            *errorMsg = "unknown privProtocol";
+            DEBUGMSGTL(("usmUser", "%s %s\n", *errorMsg, buf));
+            goto fail;
         }
-        else if (strncmp(cp, "AES256", 6) == 0) {
-            memcpy(newuser->privProtocol, usmAES256PrivProtocol,
-                   sizeof(usmAES256PrivProtocol));
-            privKeyLen = 32;
+        priv_prot = sc_get_priv_oid(priv_type, &newuser->privProtocolLen);
+        if (priv_prot)
+            newuser->privProtocol =
+                snmp_duplicate_objid(priv_prot, newuser->privProtocolLen);
+        if (newuser->privProtocol == NULL) {
+            *errorMsg = "malloc failed";
+            goto fail;
         }
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
-        else
-            *errorMsg = "Unknown AES protocol";
-#else
-        *errorMsg = "AES support not available";
-#endif /* HAVE_AES */
     }
-    else if ((strncmp(cp, "default", 7) == 0) && (NULL != def_priv_prot)) {
-        memcpy(newuser->privProtocol, def_priv_prot,
-               def_priv_prot_len * sizeof(oid));
-    }
+
     if (0 == newuser->privProtocol[0] && NULL == *errorMsg)
         *errorMsg = "Unknown privacy protocol";
     if (NULL != *errorMsg)
@@ -4841,11 +4864,12 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
 
-    cp = skip_token(cp);
-
+    privKeyLen = sc_get_proper_priv_length_bytype(priv_type);
     if (privKeyLen == 0)
         DEBUGMSGTL(("usmUser",
                     "warning: unknown keyLen for privacy protocol\n"));
+    if (USM_CREATE_USER_PRIV_DES == priv_type)
+        privKeyLen *= 2; /* ?? we store salt with key */
 
     /*
      * READ: Encryption Pass Phrase or key
@@ -4856,7 +4880,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
          */
         newuser->privKey = netsnmp_memdup(newuser->authKey,
                                           newuser->authKeyLen);
-        newuser->privKeyLen = newuser->authKeyLen;
+        privKeyLen = newuser->privKeyLen = newuser->authKeyLen;
         if (newuser->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
             newuser->privKeyKu = netsnmp_memdup(newuser->authKeyKu,
                                                 newuser->authKeyKuLen);
@@ -4899,18 +4923,13 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         /*
          * And turn it into a localized key 
          */
-        ret2 = sc_get_properlength(newuser->authProtocol,
-                                   newuser->authProtocolLen);
-        if (ret2 < 0) {
-            *errorMsg = "could not get proper key length to use for the privacy algorithm.";
-            goto fail;
-        }
-        newuser->privKey = (u_char *) malloc(ret2);
+        newuser->privKey = (u_char *) malloc(privKeyLen);
+        newuser->privKeyLen = privKeyLen;
 
         if (strcmp(buf,"-l") == 0) {
             /* a local key is directly specified */
             cp = copy_nword(cp, buf, sizeof(buf));
-            ret = ret2;
+            ret = newuser->privKeyLen;
             newuser->privKeyLen = 0;
             if (!snmp_hex_to_binary(&newuser->privKey, &ret,
                                     &newuser->privKeyLen, 0, buf)) {
@@ -4918,7 +4937,6 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                 goto fail;
             }
         } else {
-            newuser->privKeyLen = ret2;
             ret2 = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
                                newuser->engineID, newuser->engineIDLen,
                                userKey, userKeyLen,
@@ -5007,17 +5025,7 @@ usm_create_usmUser(const char *userName, const char *engineID, u_int flags,
     if (0 == privType)
         goto create;
 
-    str = NULL;
-#ifndef NETSNMP_DISABLE_DES
-    if (USM_CREATE_USER_PRIV_DES == privType)
-        str = "DES";
-#endif
-#ifdef HAVE_AES
-    if (USM_CREATE_USER_PRIV_AES == privType)
-        str = "AES";
-#endif
-    if (USM_CREATE_USER_PRIV_DFLT == privType)
-        str = "default";
+    str = usm_lookup_priv_str(privType);
     if (NULL == str) {
         *errorMsg = "Unknown privacy protocol";
         return NULL;
@@ -5046,7 +5054,7 @@ snmpv3_authtype_conf(const char *word, char *cptr)
     int auth_type = usm_lookup_auth_type(cptr);
     if (auth_type < 0)
         config_perror("Unknown authentication type");
-    defaultAuthType = usm_get_auth_oid(auth_type, &defaultAuthTypeLen);
+    defaultAuthType = sc_get_auth_oid(auth_type, &defaultAuthTypeLen);
     DEBUGMSGTL(("snmpv3", "set default authentication type: %s\n", cptr));
 }
 
@@ -5065,51 +5073,19 @@ get_default_authtype(size_t * len)
 void
 snmpv3_privtype_conf(const char *word, char *cptr)
 {
-    int testcase = 0;
-
-#ifndef NETSNMP_DISABLE_DES
-    if (strcasecmp(cptr, "DES") == 0) {
-        testcase = 1;
-        defaultPrivType = usmDESPrivProtocol;
-    }
-#endif
-
-#if HAVE_AES
-    /* XXX AES: assumes oid length == des oid length */
-    if (strcasecmp(cptr, "AES128") == 0 ||
-        strcasecmp(cptr, "AES") == 0) {
-        testcase = 1;
-        defaultPrivType = usmAES128PrivProtocol;
-    }
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-    else if (strcasecmp(cptr, "AES192") == 0) {
-        testcase = 1;
-        defaultPrivType = usmAES192PrivProtocol;
-    }
-    else if (strcasecmp(cptr, "AES256") == 0) {
-        testcase = 1;
-        defaultPrivType = usmAES256PrivProtocol;
-    }
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
-#endif
-    if (testcase == 0)
+    int priv_type = usm_lookup_priv_type(cptr);
+    if (priv_type < 0)
         config_perror("Unknown privacy type");
-    else {
-        defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
-        DEBUGMSGTL(("snmpv3", "set default privacy type: %s\n", cptr));
-    }
+    defaultPrivType = sc_get_priv_oid(priv_type, &defaultPrivTypeLen);
+    DEBUGMSGTL(("snmpv3", "set default privacy type: %s\n", cptr));
 }
 
 const oid      *
 get_default_privtype(size_t * len)
 {
     if (defaultPrivType == NULL) {
-#ifndef NETSNMP_DISABLE_DES
-        defaultPrivType = usmDESPrivProtocol;
-#else
-        defaultPrivType = usmAESPrivProtocol;
-#endif
-        defaultPrivTypeLen = USM_LENGTH_OID_TRANSFORM;
+        defaultPrivType = SNMP_DEFAULT_PRIV_PROTO;
+        defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
     }
     if (len)
         *len = defaultPrivTypeLen;

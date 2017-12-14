@@ -83,7 +83,7 @@ char           *newpass = NULL, *oldpass = NULL;
 char           *transform_type_input = NULL;
 
 const oid      *transform_type = NULL;  /* Type of HMAC hash to use.      */
-
+size_t          transform_type_len = 0;
 
 
 /*
@@ -120,7 +120,7 @@ main(int argc, char **argv)
         oldkul[SNMP_MAXBUF_SMALL],
         newkul[SNMP_MAXBUF_SMALL], keychange[SNMP_MAXBUF_SMALL];
 
-    int             i;
+    int             i, auth_type;
     int             arg = 1;
 
     local_progname = argv[0];
@@ -188,16 +188,9 @@ main(int argc, char **argv)
     /*
      * Convert and error check transform_type.
      */
-#ifndef NETSNMP_DISABLE_MD5
-    if (!strcmp(transform_type_input, "md5")) {
-        transform_type = usmHMACMD5AuthProtocol;
-
-    } else
-#endif
-        if (!strcmp(transform_type_input, "sha1")) {
-        transform_type = usmHMACSHA1AuthProtocol;
-
-    } else {
+    auth_type = usm_lookup_auth_type(transform_type_input);
+    transform_type = sc_get_auth_oid( auth_type, &transform_type_len );
+    if (NULL == transform_type) {
         fprintf(stderr,
                 "Unrecognized hash transform: \"%s\".\n",
                 transform_type_input);
@@ -206,13 +199,7 @@ main(int argc, char **argv)
     }
 
     if (verbose) {
-        fprintf(stderr, "Hash:\t\t%s\n",
-#ifndef NETSNMP_DISABLE_MD5
-                (transform_type == usmHMACMD5AuthProtocol)
-                ? "usmHMACMD5AuthProtocol" :
-#endif
-                "usmHMACSHA1AuthProtocol"
-            );
+        fprintf(stderr, "Hash:\t\t%s\n", sc_get_auth_name(auth_type));
     }
 
 
@@ -280,13 +267,13 @@ main(int argc, char **argv)
     QUITFUN(rval, main_quit);
 
 
-    rval = generate_Ku(transform_type, USM_LENGTH_OID_TRANSFORM,
+    rval = generate_Ku(transform_type, transform_type_len,
                        (u_char *) oldpass, strlen(oldpass),
                        oldKu, &oldKu_len);
     QUITFUN(rval, main_quit);
 
 
-    rval = generate_Ku(transform_type, USM_LENGTH_OID_TRANSFORM,
+    rval = generate_Ku(transform_type, transform_type_len,
                        (u_char *) newpass, strlen(newpass),
                        newKu, &newKu_len);
     QUITFUN(rval, main_quit);
@@ -303,7 +290,7 @@ main(int argc, char **argv)
         DEBUGMSGTL(("encode_keychange", "%02x", (int) (oldKu[i])));
     DEBUGMSGTL(("encode_keychange", "\n"));
 
-    rval = generate_kul(transform_type, USM_LENGTH_OID_TRANSFORM,
+    rval = generate_kul(transform_type, transform_type_len,
                         engineid, engineid_len,
                         oldKu, oldKu_len, oldkul, &oldkul_len);
     QUITFUN(rval, main_quit);
@@ -315,7 +302,7 @@ main(int argc, char **argv)
         DEBUGMSGTL(("encode_keychange", "%02x", (int) (oldkul[i])));
     DEBUGMSGTL(("encode_keychange", "\n"));
 
-    rval = generate_kul(transform_type, USM_LENGTH_OID_TRANSFORM,
+    rval = generate_kul(transform_type, transform_type_len,
                         engineid, engineid_len,
                         newKu, newKu_len, newkul, &newkul_len);
     QUITFUN(rval, main_quit);
@@ -326,7 +313,7 @@ main(int argc, char **argv)
         DEBUGMSGTL(("encode_keychange", "%02x", newkul[i]));
     DEBUGMSGTL(("encode_keychange", "\n"));
 
-    rval = encode_keychange(transform_type, USM_LENGTH_OID_TRANSFORM,
+    rval = encode_keychange(transform_type, transform_type_len,
                             oldkul, oldkul_len,
                             newkul, newkul_len, keychange, &keychange_len);
     QUITFUN(rval, main_quit);

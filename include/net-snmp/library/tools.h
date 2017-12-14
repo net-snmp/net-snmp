@@ -183,17 +183,6 @@ extern          "C" {
     }                                                           \
 }
 
-
-    /*
-     * ISTRANSFORM
-     * ASSUMES the minimum length for ttype and toid.
-     */
-#define USM_LENGTH_OID_TRANSFORM	10
-
-#define ISTRANSFORM(ttype, toid)					\
-	!snmp_oid_compare(ttype, USM_LENGTH_OID_TRANSFORM,		\
-		usm ## toid ## Protocol, USM_LENGTH_OID_TRANSFORM)
-
 #define ENGINETIME_MAX	2147483647      /* ((2^31)-1) */
 #define ENGINEBOOT_MAX	2147483647      /* ((2^31)-1) */
 

@@ -1092,15 +1092,15 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
   if (!strcmp(auth_proto, "MD5")) {
     session.securityAuthProto =
       snmp_duplicate_objid(usmHMACMD5AuthProtocol,
-			   USM_AUTH_PROTO_MD5_LEN);
-    session.securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
+                           OID_LENGTH(usmHMACMD5AuthProtocol));
+    session.securityAuthProtoLen = OID_LENGTH(usmHMACMD5AuthProtocol);
   } else
 #endif
     if (!strcmp(auth_proto, "SHA")) {
       session.securityAuthProto =
 	snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
-			     USM_AUTH_PROTO_SHA_LEN);
-      session.securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
+                             OID_LENGTH(usmHMACSHA1AuthProtocol));
+      session.securityAuthProtoLen = OID_LENGTH(usmHMACSHA1AuthProtocol);
     } else if (!strcmp(auth_proto, "DEFAULT")) {
       const oid* a = get_default_authtype(&session.securityAuthProtoLen);
       session.securityAuthProto
@@ -1128,15 +1128,15 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
   if (!strcmp(priv_proto, "DES")) {
     session.securityPrivProto =
       snmp_duplicate_objid(usmDESPrivProtocol,
-			   USM_PRIV_PROTO_DES_LEN);
-    session.securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+                           OID_LENGTH(usmDESPrivProtocol));
+    session.securityPrivProtoLen = OID_LENGTH(usmDESPrivProtocol);
   } else
 #endif
     if (!strncmp(priv_proto, "AES", 3)) {
       session.securityPrivProto =
 	snmp_duplicate_objid(usmAESPrivProtocol,
-			     USM_PRIV_PROTO_AES_LEN);
-      session.securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
+                             OID_LENGTH(usmAESPrivProtocol));
+      session.securityPrivProtoLen = OID_LENGTH(usmAESPrivProtocol);
     } else if (!strcmp(priv_proto, "DEFAULT")) {
       const oid *p = get_default_privtype(&session.securityPrivProtoLen);
       session.securityPrivProto

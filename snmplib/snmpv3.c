@@ -148,7 +148,7 @@ int
 snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                  char **Xpsz, int argc, char *const *argv, int flags)
 {
-    int        testcase;
+    int        priv_type;;
     char      *cp;
     int        zero_sensitive = !( flags & NETSNMP_PARSE_ARGS_NOZERO );
 
@@ -268,7 +268,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         int auth_type = usm_lookup_auth_type(optarg);
         if (auth_type > 0) {
             session->securityAuthProto =
-                usm_get_auth_oid(auth_type, &session->securityAuthProtoLen);
+                sc_get_auth_oid(auth_type, &session->securityAuthProtoLen);
          } else {
             fprintf(stderr,
                     "Invalid authentication protocol specified after -3a flag: %s\n",
@@ -279,39 +279,15 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         break;
 
     case 'x':
-        testcase = 0;
-#ifndef NETSNMP_DISABLE_DES
-        if (!strcasecmp(optarg, "DES")) {
-            session->securityPrivProto = usmDESPrivProtocol;
-            session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
-            testcase = 1;
-        }
-#endif
-#ifdef HAVE_AES
-        if (!strcasecmp(optarg, "AES128") ||
-            !strcasecmp(optarg, "AES")) {
-            session->securityPrivProto = usmAES128PrivProtocol;
-            session->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
-            testcase = 1;
-        }
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-        else if (!strcasecmp(optarg, "AES192")) {
-            session->securityPrivProto = usmAES192PrivProtocol;
-            session->securityPrivProtoLen = USM_PRIV_PROTO_AES192_LEN;
-            testcase = 1;
-        } else if (!strcasecmp(optarg, "AES256")) {
-            session->securityPrivProto = usmAES256PrivProtocol;
-            session->securityPrivProtoLen = USM_PRIV_PROTO_AES256_LEN;
-            testcase = 1;
-        }
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
-#endif
-        if (testcase == 0) {
+        priv_type = usm_lookup_priv_type(optarg);
+        if (priv_type < 0) {
             fprintf(stderr,
                     "Invalid privacy protocol specified after -3x flag: %s\n",
                     optarg);
             return (-1);
         }
+        session->securityPrivProto =
+            sc_get_priv_oid(priv_type, &session->securityPrivProtoLen);
         break;
 
     case 'A':

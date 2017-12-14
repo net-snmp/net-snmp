@@ -620,26 +620,21 @@ main(int argc, char *argv[])
          * they're the same lengths.
          */
         if (doprivkey) {
+            int privtype;
             if (!session.securityPrivProto) {
                 snmp_log(LOG_ERR, "no encryption type specified, which I need in order to know to change the key\n");
                 goto close_session;
             }
-                
-#ifndef NETSNMP_DISABLE_DES
-            if (ISTRANSFORM(session.securityPrivProto, DESPriv)) {
-                /* DES uses a 128 bit key, 64 bits of which is a salt */
-                oldkulpriv_len = newkulpriv_len = 16;
-            }
-#endif
-#ifdef HAVE_AES
-            if (ISTRANSFORM(session.securityPrivProto, AESPriv)) {
-                oldkulpriv_len = newkulpriv_len = 16;
-            }
-#endif
+
+            privtype = sc_get_privtype(session.securityPrivProto,
+                                       session.securityPrivProtoLen);
+            oldkulpriv_len = sc_get_proper_priv_length_bytype(privtype);
+            if (USM_CREATE_USER_PRIV_DES == privtype)
+                oldkulpriv_len *= 2; /* ?? we store salt with key */
+            newkulpriv_len = oldkulpriv_len;
             memcpy(oldkulpriv, oldkul, oldkulpriv_len);
             memcpy(newkulpriv, newkul, newkulpriv_len);
         }
-            
 
         /*
          * create the keychange string 
@@ -939,18 +934,12 @@ main(int argc, char *argv[])
             vars = vars->next_variable;
         }
         if (doprivkey) {
-	    size_t dhprivKeyLen = 0;
-#ifndef NETSNMP_DISABLE_DES
-	    if (ISTRANSFORM(ss->securityPrivProto, DESPriv)) {
-                /* DES uses a 128 bit key, 64 bits of which is a salt */
-	        dhprivKeyLen = 16;
-	    }
-#endif
-#ifdef HAVE_AES
-	    if (ISTRANSFORM(ss->securityPrivProto, AESPriv)) {
-	        dhprivKeyLen = 16;
-	    }
-#endif
+            size_t dhprivKeyLen = 0;
+            int privtype = sc_get_privtype(ss->securityPrivProto,
+                                           ss->securityPrivProtoLen);
+            dhprivKeyLen = sc_get_proper_priv_length_bytype(privtype);
+            if (USM_CREATE_USER_PRIV_DES == privtype)
+                dhprivKeyLen *= 2; /* ?? we store salt with key */
             if (get_USM_DH_key(vars, dhvar,
                                dhprivKeyLen,
                                pdu, "priv",

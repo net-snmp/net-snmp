@@ -26,11 +26,13 @@ extern          "C" {
 #define NETSNMP_USMAUTH_HMAC256SHA384     6 /* RFC 7860; OPTIONAL */
 #define NETSNMP_USMAUTH_HMAC384SHA512     7 /* RFC 7860; SHOULD */
 
-NETSNMP_IMPORT oid      usmNoAuthProtocol[10];  /* == { NETSNMP_USMAUTH_BASE,1 }; */
+NETSNMP_IMPORT oid      usmNoAuthProtocol[10];
+
 #ifndef NETSNMP_DISABLE_MD5
-NETSNMP_IMPORT oid      usmHMACMD5AuthProtocol[10];     /* == { NETSNMP_USMAUTH_BASE,2 }; */
+NETSNMP_IMPORT oid      usmHMACMD5AuthProtocol[10];
 #endif
-NETSNMP_IMPORT oid      usmHMACSHA1AuthProtocol[10];    /* == { NETSNMP_USMAUTH_BASE,3 }; */
+
+NETSNMP_IMPORT oid      usmHMACSHA1AuthProtocol[10];
 
 NETSNMP_IMPORT oid      usmHMAC128SHA224AuthProtocol[10];
 NETSNMP_IMPORT oid      usmHMAC192SHA256AuthProtocol[10];
@@ -38,31 +40,24 @@ NETSNMP_IMPORT oid      usmHMAC256SHA384AuthProtocol[10];
 NETSNMP_IMPORT oid      usmHMAC384SHA512AuthProtocol[10];
 
 /** priv */
-NETSNMP_IMPORT oid      usmNoPrivProtocol[10];  /* == { 1,3,6,1,6,3,10,1,2,1 }; */
+NETSNMP_IMPORT oid      usmNoPrivProtocol[10];
+
 #ifndef NETSNMP_DISABLE_DES
-NETSNMP_IMPORT oid      usmDESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,2 }; */
+NETSNMP_IMPORT oid      usmDESPrivProtocol[10];
 #endif
 
-NETSNMP_IMPORT oid      usmAESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,4 }; */
+NETSNMP_IMPORT oid      usmAESPrivProtocol[10];
 NETSNMP_IMPORT oid      *usmAES128PrivProtocol; /* backwards compat */
 
 #ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-    /* OIDs from http://www.snmp.com/eso/esoConsortiumMIB.txt */
-NETSNMP_IMPORT oid      usmAES192PrivProtocol[10]; /* == { 1,3,6,1,4,1,14832,1,3 }; */
-NETSNMP_IMPORT oid      usmAES256PrivProtocol[10]; /* == { 1,3,6,1,4,1,14832,1,4 }; */
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+NETSNMP_IMPORT oid      usmAES192PrivProtocol[9];
+NETSNMP_IMPORT oid      usmAES256PrivProtocol[9];
 
-#define USM_AUTH_PROTO_NOAUTH_LEN USM_LENGTH_OID_TRANSFORM
-#define USM_AUTH_PROTO_MD5_LEN    USM_LENGTH_OID_TRANSFORM
-#define USM_AUTH_PROTO_SHA_LEN    USM_LENGTH_OID_TRANSFORM
-#define USM_PRIV_PROTO_NOPRIV_LEN USM_LENGTH_OID_TRANSFORM
-#define USM_PRIV_PROTO_DES_LEN    USM_LENGTH_OID_TRANSFORM
+NETSNMP_IMPORT oid      usmAES192CiscoPrivProtocol[11];
+NETSNMP_IMPORT oid      usmAES256CiscoPrivProtocol[11];
 
-#define USM_PRIV_PROTO_AES_LEN    USM_LENGTH_OID_TRANSFORM
-#define USM_PRIV_PROTO_AES128_LEN USM_LENGTH_OID_TRANSFORM /* backwards compat */
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-#define USM_PRIV_PROTO_AES192_LEN 9
-#define USM_PRIV_PROTO_AES256_LEN 9
+NETSNMP_IMPORT oid      usmAES192Cisco2PrivProtocol[11];
+NETSNMP_IMPORT oid      usmAES256Cisco2PrivProtocol[11];
 #endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 
 

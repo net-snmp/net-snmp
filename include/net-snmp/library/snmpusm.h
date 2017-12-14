@@ -277,10 +277,13 @@ extern          "C" {
     NETSNMP_IMPORT
     void            shutdown_usm(void);
 
-    void            usm_init_auth_types(void);
     int             usm_lookup_auth_type(const char *str);
     const char     *usm_lookup_auth_str(int value);
     oid            *usm_get_auth_oid(int auth_type, size_t *oid_len);
+
+    int             usm_lookup_priv_type(const char *str);
+    const char     *usm_lookup_priv_str(int value);
+    oid            *usm_get_priv_oid(int priv_type, size_t *oid_len);
 
 
 #define USM_CREATE_USER_AUTH_DFLT -1
@@ -293,16 +296,42 @@ extern          "C" {
 #define USM_CREATE_USER_AUTH_SHA256  NETSNMP_USMAUTH_HMAC192SHA256
 #define USM_CREATE_USER_AUTH_SHA224  NETSNMP_USMAUTH_HMAC128SHA224
 
-#define USM_CREATE_USER_PRIV_DFLT -1
-#define USM_CREATE_USER_PRIV_NONE 0
-#ifndef NETSNMP_DISABLE_DES
-#define USM_CREATE_USER_PRIV_DES  1
-#endif
-#ifdef HAVE_AES
-#define USM_CREATE_USER_PRIV_AES  2
-#endif
+    /** flags for variants fo priv algorithsm */
+#define USM_DES_FLAG_3                      0x000100
 
-    NETSNMP_IMPORT
+#define USM_AES_FLAG_192                    0x000100
+#define USM_AES_FLAG_256                    0x000200
+
+#define USM_AES_REEDER_FLAG                 0x030000
+#define USM_AES_FLAG_CISCO                  0x100000
+
+#define USM_PRIV_MASK_ALG                   0x0000ff
+#define USM_PRIV_MASK_VARIANT               0x00ff00
+
+#define USM_CREATE_USER_PRIV_DFLT          -1
+#define USM_CREATE_USER_PRIV_NONE           0
+
+#define USM_CREATE_USER_PRIV_DES            0x01
+#define USM_CREATE_USER_PRIV_3DES           \
+    (USM_CREATE_USER_PRIV_DES | USM_DES_FLAG_3)
+
+#define USM_CREATE_USER_PRIV_AES            0x02
+#define USM_CREATE_USER_PRIV_AES192         \
+    (USM_CREATE_USER_PRIV_AES | USM_AES_FLAG_192)
+#define USM_CREATE_USER_PRIV_AES256         \
+    (USM_CREATE_USER_PRIV_AES | USM_AES_FLAG_256)
+
+#define USM_CREATE_USER_PRIV_AES192_CISCO   \
+    (USM_CREATE_USER_PRIV_AES | USM_AES_FLAG_192 | USM_AES_FLAG_CISCO)
+#define USM_CREATE_USER_PRIV_AES256_CISCO   \
+    (USM_CREATE_USER_PRIV_AES | USM_AES_FLAG_256 | USM_AES_FLAG_CISCO)
+
+#define USM_CREATE_USER_PRIV_AES192_CISCO2  \
+    (USM_CREATE_USER_PRIV_AES192_CISCO | USM_AES_REEDER_FLAG)
+#define USM_CREATE_USER_PRIV_AES256_CISCO2  \
+    (USM_CREATE_USER_PRIV_AES256_CISCO | USM_AES_REEDER_FLAG)
+
+
     struct usmUser *usm_create_usmUser(const char *userName,
                                        const char *engineID, u_int flags,
                                        int authType, const char *authPass,
