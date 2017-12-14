@@ -2758,7 +2758,15 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             memcpy(iv+8, salt, salt_length);
         }
 #endif
-        
+
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+        if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
+            dump_chunk("usm/dump", "Cypher Text", value_ptr, remaining);
+            dump_chunk("usm/dump", "salt + Encrypted form:",
+                       salt, salt_length);
+            dump_chunk("usm/dump", "IV + Encrypted form:", iv, iv_length);
+        }
+#endif
         if (sc_decrypt(user->privProtocol, user->privProtocolLen,
                        user->privKey, user->privKeyLen,
                        iv, iv_length,
@@ -2770,10 +2778,6 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         }
 #ifdef NETSNMP_ENABLE_TESTING_CODE
         if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
-            dump_chunk("usm/dump", "Cypher Text", value_ptr, remaining);
-            dump_chunk("usm/dump", "salt + Encrypted form:",
-                       salt, salt_length);
-            dump_chunk("usm/dump", "IV + Encrypted form:", iv, iv_length);
             dump_chunk("usm/dump", "Decrypted chunk:",
                        *scopedPdu, *scopedPduLen);
         }
@@ -3140,6 +3144,7 @@ usm_create_user_from_session(netsnmp_session * session)
         /** save buffer size in case we need to extend key */
         int keyBufSize = USM_PRIV_KU_LEN;
 
+        DEBUGMSGTL(("usm", "copying privKey\n"));
         if (session->securityPrivLocalKey != NULL
             && session->securityPrivLocalKeyLen != 0) {
             /* already localized key passed in.  use it */
@@ -3178,7 +3183,6 @@ usm_create_user_from_session(netsnmp_session * session)
                 return SNMPERR_GENERR;
             }
         }
-        DEBUGMSGTL(("usm", "extending key?\n"));
         if (usm_extend_user_kul(user, keyBufSize) != SNMPERR_SUCCESS) {
             usm_free_user(user);
             return SNMPERR_GENERR;
@@ -3193,6 +3197,7 @@ usm_create_user_from_session(netsnmp_session * session)
         user->userStorageType = ST_READONLY;
         usm_add_user(user);
     }
+    DEBUGMSGTL(("9:usm", "user created\n"));
 
     return SNMPERR_SUCCESS;
 
@@ -4609,6 +4614,10 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     if (NULL == line)
         return NULL;
 
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+    DEBUGMSGTL(("usmUser", "new user %s\n", line)); /* logs passphrases */
+#endif
+
     if (NULL == errorMsg)
         errorMsg = &dummy;
     *errorMsg = NULL; /* no errors yet */
@@ -4952,6 +4961,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
       newuser->privKeyLen = privKeyLen;
     }
     else {
+        DEBUGMSGTL(("usmUser", "privKey length %d is smaller than %d required by privProtoco\n", newuser->privKeyLen, privKeyLen));
       *errorMsg = "privKey length is smaller than required by privProtocol";
       goto fail;
     }
