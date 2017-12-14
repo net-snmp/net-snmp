@@ -632,6 +632,8 @@ sc_get_openssl_hashfn(int auth_type)
 {
     const EVP_MD   *hashfn = NULL;
 
+    DEBUGTRACE;
+
     switch (auth_type) {
 #ifndef NETSNMP_DISABLE_MD5
         case NETSNMP_USMAUTH_HMACMD5:
@@ -763,13 +765,17 @@ sc_generate_keyed_hash(const oid * authtypeOID, size_t authtypeOIDlen,
     }
 
     auth_type = sc_get_authtype(authtypeOID, authtypeOIDlen);
-    iproperlength = sc_get_proper_auth_length(auth_type);
+    iproperlength = sc_get_auth_maclen(auth_type);
     if (iproperlength == SNMPERR_GENERR)
         return SNMPERR_GENERR;
     properlength = (size_t)iproperlength;
     if (keylen < properlength) {
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+    DEBUGMSGTL(("scapi", "iproperlength: %d, maclen:%d\n", iproperlength,
+                *maclen));
+#endif
 #ifdef NETSNMP_USE_OPENSSL
     /** get hash function */
     hashfn = sc_get_openssl_hashfn(auth_type);
@@ -1207,16 +1213,16 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
         if (buf != NULL) {
             if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
                                          iv, ivlen)) {
-                DEBUGMSGTL(("scapi", "encrypt: IV: %s/", buf));
+                DEBUGMSGTL(("scapi", "encrypt: IV: %s\n", buf));
             } else {
-                DEBUGMSGTL(("scapi", "encrypt: IV: %s [TRUNCATED]/", buf));
+                DEBUGMSGTL(("scapi", "encrypt: IV: %s [TRUNCATED]\n", buf));
             }
             out_len = 0;
             if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
                                          key, keylen)) {
-                DEBUGMSG(("scapi", "%s\n", buf));
+                DEBUGMSG(("scapi", "key: %s\n", buf));
             } else {
-                DEBUGMSG(("scapi", "%s [TRUNCATED]\n", buf));
+                DEBUGMSG(("scapi", "key: %s [TRUNCATED]\n", buf));
             }
             out_len = 0;
             if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
@@ -1265,6 +1271,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
         if (pad == pad_size)
             pad = 0;
         if (ptlen + pad > *ctlen) {
+            DEBUGMSGTL(("scapi:encrypt", "not enough space\n"));
             QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);    /* not enough space */
         }
         if (pad > 0) {              /* copy data into pad block if needed */
@@ -1478,16 +1485,16 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
         if (buf != NULL) {
             if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
                                          iv, ivlen)) {
-                DEBUGMSGTL(("scapi", "decrypt: IV: %s/", buf));
+                DEBUGMSGTL(("scapi", "decrypt: IV: %s\n", buf));
             } else {
-                DEBUGMSGTL(("scapi", "decrypt: IV: %s [TRUNCATED]/", buf));
+                DEBUGMSGTL(("scapi", "decrypt: IV: %s [TRUNCATED]\n", buf));
             }
             out_len = 0;
             if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
                                          key, keylen)) {
-                DEBUGMSG(("scapi", "%s\n", buf));
+                DEBUGMSG(("scapi", "key: %s\n", buf));
             } else {
-                DEBUGMSG(("scapi", "%s\n", buf));
+                DEBUGMSG(("scapi", "key: %s [TRUNCATED]\n", buf));
             }
             free(buf);
         } else {
@@ -1659,6 +1666,8 @@ MD5_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
     u_char         *newdata = NULL;
     int             rc = 0;
 
+    DEBUGTRACE;
+
     /*
      * memset(K1,0,MD5_HASHKEYLEN);
      * memset(K2,0,MD5_HASHKEYLEN);
@@ -1756,6 +1765,8 @@ SHA1_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
     const u_char   *cp;
     u_char         *newdata = NULL;
     int             rc = 0;
+
+    DEBUGTRACE;
 
     /*
      * memset(K1,0,SHA1_HASHKEYLEN);
