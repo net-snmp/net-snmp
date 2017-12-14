@@ -3812,6 +3812,9 @@ snmpv3_parse(netsnmp_pdu *pdu,
     DEBUGDUMPSECTION("recv", "ScopedPDU");
     data = snmpv3_scopedPDU_parse(pdu, cp, length);
     if (data == NULL) {
+        snmp_log(LOG_WARNING, "security service %ld error parsing ScopedPDU\n",
+                 msg_sec_model);
+        ERROR_MSG("error parsing PDU");
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         DEBUGINDENTADD(-4);
         SNMP_FREE(mallocbuf);
@@ -3835,6 +3838,8 @@ snmpv3_parse(netsnmp_pdu *pdu,
     }
 
     if (ret != SNMPERR_SUCCESS) {
+        snmp_log(LOG_WARNING, "security service %ld error parsing ScopedPDU\n",
+                 msg_sec_model);
         ERROR_MSG("error parsing PDU");
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         SNMP_FREE(mallocbuf);
