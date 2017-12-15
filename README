@@ -62,15 +62,12 @@ AVAILABILITY
 
   Download:
     - http://www.net-snmp.org/download/
-    - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/
   Web page:
     - http://www.net-snmp.org/
   Project Wiki:
     - http://www.net-snmp.org/wiki/
   Sourceforge Project page:
     - http://sourceforge.net/projects/net-snmp
-  Mirrors:
-    - US:        ftp://ftp.freesnmp.com/mirrors/net-snmp/
 
   The old ucd-snmp.ucdavis.edu web site and ftp server is now
   offline and should not be accessed any longer.
