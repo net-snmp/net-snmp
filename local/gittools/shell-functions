@@ -85,6 +85,13 @@ nsmakeall () {
 
     for branch in $nsbranches ; do
 	git checkout $branch
+	if [ $? != 0 ] ; then
+            echo ""
+            echo "---------------------------------------------"
+            echo "Checkout of $branch failed!!!"
+            echo
+            return
+        fi
 	nsmake "$@"
     done
 }
@@ -150,6 +157,13 @@ nspatchtry() {
     for branch in $nsbranches ; do
 	$nsverbose checking out and applying patch in $branch
 	$nsecho git checkout $branch
+	if [ $? != 0 ] ; then
+            echo ""
+            echo "---------------------------------------------"
+            echo "Checkout of $branch failed!!!"
+            echo
+            return
+        fi
 
 	$nsverbose Appling patch
 	$nsecho patch -N --batch $nspatchargs
@@ -181,6 +195,13 @@ _nspatchapplybase() {
 
     $nsverbose Checking out $patchbranch
     $nsecho git checkout $patchbranch
+    if [ $? != 0 ] ; then
+        echo ""
+        echo "---------------------------------------------"
+        echo "Checkout of $branch failed!!!"
+        echo
+        return
+    fi
 
     $nsverbose applying the patch "$nspatchargs"
     $nsecho patch $nspatchargs
@@ -304,6 +325,13 @@ nsrollup() {
 	if [ "$nslastbranch" != "" ] ; then
 	    $nsverbose checking out $branch
 	    $nsecho git checkout $branch
+	    if [ $? != 0 ] ; then
+		echo ""
+		echo "---------------------------------------------"
+		echo "Checkout of $branch failed!!!"
+                echo
+                return
+            fi
 
 	    if [ -f dist/release ] ; then
 		if [ "`egrep ^$branch dist/release`" = "$branch rc" ] ; then
@@ -403,6 +431,13 @@ nspull() {
     git fetch --all
     for branch in $nsbranches ; do
 	git checkout $branch
+        if [ $? != 0 ] ; then
+            echo ""
+            echo "---------------------------------------------"
+            echo "Checkout of $branch failed!!!"
+            echo
+            return
+        fi
 	MERGE_AUTOEDIT=no git $mergeop origin/$branch
 	if [ $? != 0 ] ; then
 	    echo "git $mergeop failed; please fix first"
@@ -410,6 +445,13 @@ nspull() {
 	fi
     done
     git checkout $nscurrentbranch
+    if [ $? != 0 ] ; then
+        echo ""
+        echo "---------------------------------------------"
+        echo "Checkout of $branch failed!!!"
+        echo
+        return
+    fi
 }
 
 nspush() {
