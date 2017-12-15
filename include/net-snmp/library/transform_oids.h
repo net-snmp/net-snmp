@@ -60,7 +60,6 @@ NETSNMP_IMPORT oid      usmAES192Cisco2PrivProtocol[11];
 NETSNMP_IMPORT oid      usmAES256Cisco2PrivProtocol[11];
 #endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 
-
 #ifdef __cplusplus
 }
 #endif

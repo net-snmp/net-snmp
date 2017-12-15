@@ -4917,7 +4917,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             /* a password is specified */
             userKeyLen = sizeof(userKey);
             ret2 = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
-                              (u_char *) buf, strlen(buf), userKey, &userKeyLen);
+                              (u_char*)buf, strlen(buf), userKey, &userKeyLen);
             if (ret2 != SNMPERR_SUCCESS) {
                 *errorMsg = "could not generate the privacy key from the supplied pass phrase.";
                 goto fail;
@@ -4927,8 +4927,8 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
                 newuser->privKeyKu = netsnmp_memdup(userKey, userKeyLen);
                 newuser->privKeyKuLen = userKeyLen;
             }
-        }        
-        
+        }
+
         /*
          * And turn it into a localized key
          * Allocate enough space for greater of auth mac and privKey len.

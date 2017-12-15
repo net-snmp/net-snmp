@@ -569,6 +569,7 @@ sc_init(void)
      * * XXX ogud: seed random number generator 
      */
 #endif                          /* ifndef NETSNMP_USE_OPENSSL */
+
     return rval;
 }                               /* end sc_init() */
 
@@ -998,7 +999,7 @@ sc_hash_type(int auth_type, const u_char * buf, size_t buf_len, u_char * MAC,
     if (NETSNMP_USMAUTH_HMACMD5 == auth_type) {
         if (*MAC_len < MD5_DIGEST_LENGTH)
             return (SNMPERR_GENERR);      /* the buffer isn't big enough */
-	MD5_Init(&cmd5);
+        MD5_Init(&cmd5);
         MD5_Update(&cmd5, buf, buf_len);
         MD5_Final(MAC, &cmd5);
         *MAC_len = MD5_DIGEST_LENGTH;
@@ -1007,7 +1008,7 @@ sc_hash_type(int auth_type, const u_char * buf, size_t buf_len, u_char * MAC,
     if (NETSNMP_USMAUTH_HMACSHA1 == auth_type) {
         if (*MAC_len < SHA_DIGEST_LENGTH)
             return (SNMPERR_GENERR);      /* the buffer isn't big enough */
-	SHA1_Init(&csha1);
+        SHA1_Init(&csha1);
         SHA1_Update(&csha1, buf, buf_len);
         SHA1_Final(MAC, &csha1);
         *MAC_len = SHA_DIGEST_LENGTH;
