@@ -843,7 +843,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
         }
     }
 #endif
-#ifdef HAVE_AES
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_AES)
     if (ISTRANSFORM(privtype, AESPriv)) {
         (void) AES_set_encrypt_key(key, properlength*8, &aes_key);
 
@@ -1066,7 +1066,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
         *ptlen = ctlen;
     }
 #endif
-#ifdef HAVE_AES
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_AES)
     if (ISTRANSFORM(privtype, AESPriv)) {
         (void) AES_set_encrypt_key(key, properlength*8, &aes_key);
 

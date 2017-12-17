@@ -5,6 +5,7 @@
 #ifndef SNMP_OPENSSL_H
 #define SNMP_OPENSSL_H
 
+#ifdef NETSNMP_USE_OPENSSL
 #include <openssl/dh.h>
 #include <openssl/ssl.h>
 
@@ -86,6 +87,7 @@ extern          "C" {
 #ifndef HAVE_DTLS_METHOD
     NETSNMP_IMPORT
     const SSL_METHOD *DTLS_method(void);
+#endif
 #endif
 
 #ifdef __cplusplus
