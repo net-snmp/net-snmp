@@ -640,7 +640,7 @@ _kul_extend_reeder(int needKeyLen, oid *hashoid, u_int hashoid_len,
 int
 netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
                    int privType, u_char *engineID, u_int engineIDLen,
-                   u_char **kulBuf, u_int *kulBufLen, u_int kulBufSize)
+                   u_char **kulBuf, size_t *kulBufLen, u_int kulBufSize)
 {
     int ret;
     u_char *newKul;
