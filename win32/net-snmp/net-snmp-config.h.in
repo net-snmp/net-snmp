@@ -1407,20 +1407,6 @@
 #endif /* ! NETSNMP_USE_OPENSSL */
 
 
-/* define random functions */
-
-#ifndef HAVE_RANDOM
-#ifdef HAVE_LRAND48
-#define random lrand48
-#define srandom(s) srand48(s)
-#else
-#ifdef HAVE_RAND
-#define random rand
-#define srandom(s) srand(s)
-#endif
-#endif
-#endif
-
 /* define signal if DNE */
 
 #ifndef HAVE_SIGNAL

@@ -195,7 +195,7 @@ sc_init(void)
 
     gettimeofday(&tv, (struct timezone *) 0);
 
-    srandom((unsigned)(tv.tv_sec ^ tv.tv_usec));
+    netsnmp_srandom((unsigned)(tv.tv_sec ^ tv.tv_usec));
 #elif NETSNMP_USE_PKCS11
     DEBUGTRACE;
     rval = pkcs_init();
@@ -245,12 +245,12 @@ sc_random(u_char * buf, size_t * buflen)
      */
     rval = *buflen - *buflen % sizeof(rndval);
     for (i = 0; i < rval; i += sizeof(rndval)) {
-        rndval = random();
+        rndval = netsnmp_random();
         memcpy(ucp, &rndval, sizeof(rndval));
         ucp += sizeof(rndval);
     }
 
-    rndval = random();
+    rndval = netsnmp_random();
     memcpy(ucp, &rndval, *buflen % sizeof(rndval));
 
     rval = SNMPERR_SUCCESS;
