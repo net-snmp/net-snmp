@@ -972,7 +972,7 @@ DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
 }
 #endif
 
-#ifndef ASN1_STRING_GET0_DATA
+#ifndef HAVE_ASN1_STRING_GET0_DATA
 const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *x)
 {
     return x->data;

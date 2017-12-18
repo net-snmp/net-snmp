@@ -30,46 +30,56 @@ extern          "C" {
     /*
      * Prototypes.
      */
+    NETSNMP_IMPORT
     int             sc_get_properlength(const oid * hashtype,
                                         u_int hashtype_len);
+    NETSNMP_IMPORT
     int             sc_get_proper_priv_length(const oid * privtype,
                                               u_int privtype_len);
 
     NETSNMP_IMPORT
     int             sc_init(void);
+    NETSNMP_IMPORT
     int             sc_shutdown(int majorID, int minorID, void *serverarg,
                                 void *clientarg);
 
+    NETSNMP_IMPORT
     int             sc_random(u_char * buf, size_t * buflen);
 
+    NETSNMP_IMPORT
     int             sc_generate_keyed_hash(const oid * authtype,
                                            size_t authtypelen,
                                            const u_char * key, u_int keylen,
                                            const u_char * message, u_int msglen,
                                            u_char * MAC, size_t * maclen);
 
+    NETSNMP_IMPORT
     int             sc_check_keyed_hash(const oid * authtype,
                                         size_t authtypelen, const u_char * key,
                                         u_int keylen, const u_char * message,
                                         u_int msglen, const u_char * MAC,
                                         u_int maclen);
 
+    NETSNMP_IMPORT
     int             sc_encrypt(const oid * privtype, size_t privtypelen,
                                u_char * key, u_int keylen,
                                u_char * iv, u_int ivlen,
                                const u_char * plaintext, u_int ptlen,
                                u_char * ciphertext, size_t * ctlen);
 
+    NETSNMP_IMPORT
     int             sc_decrypt(const oid * privtype, size_t privtypelen,
                                u_char * key, u_int keylen,
                                u_char * iv, u_int ivlen,
                                u_char * ciphertext, u_int ctlen,
                                u_char * plaintext, size_t * ptlen);
 
+    NETSNMP_IMPORT
     int             sc_hash(const oid * hashtype, size_t hashtypelen,
                             const u_char * buf, size_t buf_len,
                             u_char * MAC, size_t * MAC_len);
 
+    NETSNMP_IMPORT
     int             sc_get_transform_type(oid * hashtype,
                                           u_int hashtype_len,
                                           int (**hash_fn) (const int mode,
