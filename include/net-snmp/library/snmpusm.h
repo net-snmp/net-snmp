@@ -277,12 +277,18 @@ extern          "C" {
     NETSNMP_IMPORT
     void            shutdown_usm(void);
 
+    NETSNMP_IMPORT
     int             usm_lookup_auth_type(const char *str);
+    NETSNMP_IMPORT
     const char     *usm_lookup_auth_str(int value);
+    NETSNMP_IMPORT
     oid            *usm_get_auth_oid(int auth_type, size_t *oid_len);
 
+    NETSNMP_IMPORT
     int             usm_lookup_priv_type(const char *str);
+    NETSNMP_IMPORT
     const char     *usm_lookup_priv_str(int value);
+    NETSNMP_IMPORT
     oid            *usm_get_priv_oid(int priv_type, size_t *oid_len);
 
 

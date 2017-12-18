@@ -824,6 +824,15 @@
 /* Define to 1 if the system has the type `socklen_t'. */
 #undef HAVE_SOCKLEN_T
 
+/* Define to 1 if you have the `srand' function. */
+#undef HAVE_SRAND
+
+/* Define to 1 if you have the `srand48' function. */
+#undef HAVE_SRAND48
+
+/* Define to 1 if you have the `srandom' function. */
+#undef HAVE_SRANDOM
+
 /* Define to 1 if the system has the type `ssize_t'. */
 #undef HAVE_SSIZE_T
 
@@ -1794,20 +1803,6 @@
 #undef NETSNMP_USE_OPENSSL
 #if (defined(NETSNMP_USE_OPENSSL) && defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 #define HAVE_AES 1
-#endif
-
-/* define random functions */
-
-#ifndef HAVE_RANDOM
-#ifdef HAVE_LRAND48
-#define random lrand48
-#define srandom(s) srand48(s)
-#else
-#ifdef HAVE_RAND
-#define random rand
-#define srandom(s) srand(s)
-#endif
-#endif
 #endif
 
 /* define signal if DNE */

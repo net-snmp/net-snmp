@@ -288,6 +288,9 @@ typedef struct request_list {
     NETSNMP_IMPORT void netsnmp_free(void *ptr);
     NETSNMP_IMPORT char *netsnmp_strdup(const char *s1);
 
+    NETSNMP_IMPORT long int netsnmp_random(void);
+    NETSNMP_IMPORT void netsnmp_srandom(unsigned int seed);
+
     /*
      * void
      * snmp_free_pdu(pdu)

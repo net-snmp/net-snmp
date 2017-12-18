@@ -639,7 +639,27 @@ snmp_sess_perror(const char *prog_string, netsnmp_session * ss)
     netsnmp_sess_log_error(LOG_ERR, prog_string, ss);
 }
 
+long int netsnmp_random(void)
+{
+#if defined(HAVE_RANDOM)
+    return random();
+#elif defined(HAVE_LRAND48)
+    return lrand48();
+#elif defined(rand)
+    return rand();
+#endif
+}
 
+void netsnmp_srandom(unsigned int seed)
+{
+#if defined(HAVE_SRANDOM)
+    srandom(seed);
+#elif defined(HAVE_SRAND48)
+    srand48(seed);
+#else
+    srand(seed);
+#endif
+}
 
 /*
  * Primordial SNMP library initialization.
@@ -678,15 +698,9 @@ _init_snmp(void)
     /*
      * get pseudo-random values for request ID and message ID 
      */
-#ifdef SVR4
-    srand48(tv.tv_sec ^ tv.tv_usec);
-    tmpReqid = lrand48();
-    tmpMsgid = lrand48();
-#else
-    srandom((unsigned)(tv.tv_sec ^ tv.tv_usec));
-    tmpReqid = random();
-    tmpMsgid = random();
-#endif
+    netsnmp_srandom((unsigned)(tv.tv_sec ^ tv.tv_usec));
+    tmpReqid = netsnmp_random();
+    tmpMsgid = netsnmp_random();
 
     /*
      * don't allow zero value to repeat init 

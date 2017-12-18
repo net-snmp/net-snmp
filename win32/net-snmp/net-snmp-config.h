@@ -1386,14 +1386,59 @@
 /* Define to 1 if you have the <openssl/aes.h> header file. */
 #define HAVE_OPENSSL_AES_H 1
 
+/* Define to 1 if you have the `AES_cfb128_encrypt' function. */
+#define HAVE_AES_CFB128_ENCRYPT 1
+
+/* Define to 1 if you have the `ASN1_STRING_get0_data' function. */
+#define HAVE_ASN1_STRING_GET0_DATA 1
+
+/* Define to 1 if you have the `DH_get0_key' function. */
+#define HAVE_DH_GET0_KEY 1
+
+/* Define to 1 if you have the `DH_get0_pqg' function. */
+#define HAVE_DH_GET0_PQG 1
+
+/* Define to 1 if you have the `DH_set0_pqg' function. */
+#define HAVE_DH_SET0_PQG 1
+
+/* Define to 1 if you have the `DTLSv1_method' function. */
+#define HAVE_DTLSV1_METHOD 1
+
+/* Define to 1 if you have the `DTLS_method' function. */
+#define HAVE_DTLS_METHOD 1
+
+/* Define to 1 if you have the `EVP_MD_CTX_free' function. */
+#define HAVE_EVP_MD_CTX_FREE 1
+
+/* Define to 1 if you have the `EVP_MD_CTX_new' function. */
+#define HAVE_EVP_MD_CTX_NEW 1
+
 /* Define to 1 if you have the `EVP_MD_CTX_create' function. */
 #define HAVE_EVP_MD_CTX_CREATE 1
 
 /* Define to 1 if you have the `EVP_MD_CTX_destroy' function. */
 #define HAVE_EVP_MD_CTX_DESTROY 1
 
-/* Define to 1 if you have the `AES_cfb128_encrypt' function. */
-#define HAVE_AES_CFB128_ENCRYPT 1
+/* Define if you have EVP_sha224/256 in openssl */
+#define HAVE_EVP_SHA224 /**/
+
+/* Define if you have EVP_sha384/512 in openssl */
+#define HAVE_EVP_SHA384 /**/
+
+/* Define to 1 if you have the `TLSv1_method' function. */
+#define HAVE_TLSV1_METHOD 1
+
+/* Define to 1 if you have the `TLS_method' function. */
+#define HAVE_TLS_METHOD 1
+
+/* Define to 1 if you have the `X509_get_signature_nid' function. */
+#define HAVE_X509_GET_SIGNATURE_NID 1
+
+/* Define to 1 if you have the `X509_NAME_ENTRY_get_data' function. */
+#define HAVE_X509_NAME_ENTRY_GET_DATA 1
+
+/* Define to 1 if you have the `X509_NAME_ENTRY_get_object' function. */
+#define HAVE_X509_NAME_ENTRY_GET_OBJECT 1
 
 #if defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)
 #define HAVE_AES 1
@@ -1406,20 +1451,6 @@
 
 #endif /* ! NETSNMP_USE_OPENSSL */
 
-
-/* define random functions */
-
-#ifndef HAVE_RANDOM
-#ifdef HAVE_LRAND48
-#define random lrand48
-#define srandom(s) srand48(s)
-#else
-#ifdef HAVE_RAND
-#define random rand
-#define srandom(s) srand(s)
-#endif
-#endif
-#endif
 
 /* define signal if DNE */
 

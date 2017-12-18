@@ -32,8 +32,8 @@ AC_TYPE_SIGNAL
 #   Stand-alone function checks:
 ##
 #  Core:
-AC_CHECK_FUNCS([lrand48         rand          random    ] dnl
-               [signal          sigset                  ] )
+AC_CHECK_FUNCS([rand   random srand srandom lrand48 srand48] dnl
+               [signal sigset                              ] )
 
 #  Library:
 AC_CHECK_FUNCS([asprintf                                         ] dnl

@@ -5,6 +5,7 @@
 #ifndef SNMP_OPENSSL_H
 #define SNMP_OPENSSL_H
 
+#ifdef NETSNMP_USE_OPENSSL
 #include <openssl/dh.h>
 #include <openssl/ssl.h>
 
@@ -49,15 +50,21 @@ extern          "C" {
     /*
      * backports
      */
+#ifndef HAVE_DH_SET0_PQG
     NETSNMP_IMPORT
     int DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g);
+#endif
+#ifndef HAVE_DH_GET0_PQG
     NETSNMP_IMPORT
     void DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q,
                      const BIGNUM **g);
+#endif
+#ifndef HAVE_DH_GET0_KEY
     NETSNMP_IMPORT
     void DH_get0_key(const DH *dh, const BIGNUM **pub_key,
                      const BIGNUM **priv_key);
-#ifndef ASN1_STRING_GET0_DATA
+#endif
+#ifndef HAVE_ASN1_STRING_GET0_DATA
     NETSNMP_IMPORT
     const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *x);
 #endif
@@ -80,6 +87,7 @@ extern          "C" {
 #ifndef HAVE_DTLS_METHOD
     NETSNMP_IMPORT
     const SSL_METHOD *DTLS_method(void);
+#endif
 #endif
 
 #ifdef __cplusplus

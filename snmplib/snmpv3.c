@@ -602,7 +602,7 @@ setup_engineID(u_char ** eidp, const char *text)
              * seed at startup, but few OSes should have that problem.
              */
             bufp[4] = ENGINEID_TYPE_NETSNMP_RND;
-            tmpint = random();
+            tmpint = netsnmp_random();
             memcpy(bufp + 5, &tmpint, sizeof(tmpint));
             tmptime = time(NULL);
             memcpy(bufp + 5 + sizeof(tmpint), &tmptime, sizeof(tmptime));
