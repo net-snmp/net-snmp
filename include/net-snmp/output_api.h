@@ -86,15 +86,38 @@ extern "C" {
 
 #else        /* NETSNMP_NO_DEBUGGING := enable streamlining of the code */
 
-#define DEBUGMSG(x)
-#define DEBUGMSGT(x)
-#define DEBUGTRACE
-#define DEBUGTRACETOK(x)
-#define DEBUGMSGL(x)
-#define DEBUGMSGTL(x)
-#define DEBUGMSGOID(x)
-#define DEBUGMSGSUBOID(x)
-#define DEBUGMSGVAR(x)
+NETSNMP_STATIC_INLINE void
+netsnmp_debug_no_msg(const char *token, const char *fmt, ...)
+{ }
+
+NETSNMP_STATIC_INLINE void
+netsnmp_debug_no_tracetok(const char *token)
+{ }
+
+NETSNMP_STATIC_INLINE void
+netsnmp_debug_no_oid(const char *token, const oid *oid, size_t oid_len)
+{ }
+
+struct variable_list;
+
+NETSNMP_STATIC_INLINE void
+netsnmp_debug_no_var(const char *token, const struct variable_list *var)
+{ }
+
+NETSNMP_STATIC_INLINE void
+netsnmp_debug_no_dumpsetup(const char *token, const void *buf, size_t len)
+{ }
+
+#define DEBUGMSG(x)			do { netsnmp_debug_no_msg x; } while (0)
+#define DEBUGMSGT(x)			do { netsnmp_debug_no_msg x; } while (0)
+#define DEBUGTRACE			do { } while (0)
+#define DEBUGTRACETOK(x)                                \
+    do { netsnmp_debug_no_tracetok(x); } while (0)
+#define DEBUGMSGL(x)			do { netsnmp_debug_no_msg x; } while (0)
+#define DEBUGMSGTL(x)			do { netsnmp_debug_no_msg x; } while (0)
+#define DEBUGMSGOID(x)			do { netsnmp_debug_no_oid x; } while (0)
+#define DEBUGMSGSUBOID(x)		do { netsnmp_debug_no_oid x; } while (0)
+#define DEBUGMSGVAR(x)			do { netsnmp_debug_no_var x; } while (0)
 #define DEBUGMSGOIDRANGE(x)
 #define DEBUGMSGHEX(x)
 #define DEBUGIF(x)        if(0)
@@ -106,10 +129,11 @@ extern "C" {
 #define DEBUGPRINTINDENT(token)
 #define DEBUGDUMPHEADER(token,x)
 #define DEBUGDUMPSECTION(token,x)
-#define DEBUGDUMPSETUP(token, buf, len)
+#define DEBUGDUMPSETUP(token, buf, len)                                 \
+    do { netsnmp_debug_no_dumpsetup(token, buf, len); } while (0)
 
-#define DEBUGMSG_NC(x)
-#define DEBUGMSGT_NC(x)
+#define DEBUGMSG_NC(x)			do { netsnmp_debug_no_msg x; } while (0)
+#define DEBUGMSGT_NC(x)			do { netsnmp_debug_no_msg x; } while (0)
 
 #endif    /* NETSNMP_NO_DEBUGGING */
 
