@@ -744,9 +744,7 @@ asn_build_int(u_char * data,
     static const char *errpre = "build int";
     register long   integer;
     register u_long mask;
-#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
-#endif
 
     if (intsize != sizeof(long)) {
         _asn_size_err(errpre, intsize, sizeof(long));
@@ -824,9 +822,7 @@ asn_build_unsigned_int(u_char * data,
     register u_long integer;
     register u_long mask;
     int             add_null_byte = 0;
-#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
-#endif
 
     if (intsize != sizeof(long)) {
         _asn_size_err(errpre, intsize, sizeof(long));
@@ -1016,9 +1012,7 @@ asn_build_string(u_char * data,
      * cmpdstring ::= 0x24 asnlength string {string}*
      * This code will never send a compound string.
      */
-#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
-#endif
     data = asn_build_header(data, datalength, type, strlength);
     if (_asn_build_header_check
         ("build string", data, *datalength, strlength))
@@ -1602,9 +1596,7 @@ asn_build_objid(u_char * data,
     register u_long objid_val;
     u_long          first_objid_val;
     register int    i;
-#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
-#endif
 
     /*
      * check if there are at least 2 sub-identifiers 
@@ -1818,9 +1810,7 @@ asn_build_null(u_char * data, size_t * datalength, u_char type)
     /*
      * ASN.1 null ::= 0x05 0x00
      */
-#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
-#endif
     data = asn_build_header(data, datalength, type, 0);
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
     DEBUGMSG(("dumpv_send", "  NULL\n"));
@@ -2113,9 +2103,7 @@ asn_build_unsigned_int64(u_char * data,
     register u_long mask, mask2;
     int             add_null_byte = 0;
     size_t          intsize;
-#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
-#endif
 
     if (countersize != sizeof(struct counter64)) {
         _asn_size_err("build uint64", countersize,
@@ -2385,9 +2373,7 @@ asn_build_signed_int64(u_char * data,
     u_long          low;
     long            high; /* MUST be signed because of CHECK_OVERFLOW_S(). */
     size_t          intsize;
-#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
-#endif
 
     if (countersize != sizeof(struct counter64)) {
         _asn_size_err("build int64", countersize,
@@ -2583,9 +2569,7 @@ asn_build_float(u_char * data,
         int             intVal;
         u_char          c[sizeof(float)];
     } fu;
-#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
-#endif
 
     if (floatsize != sizeof(float)) {
         _asn_size_err("build float", floatsize, sizeof(float));
@@ -2773,9 +2757,7 @@ asn_build_double(u_char * data,
         int             intVal[2];
         u_char          c[sizeof(double)];
     } fu;
-#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
-#endif
 
     if (doublesize != sizeof(double)) {
         _asn_size_err("build double", doublesize, sizeof(double));
