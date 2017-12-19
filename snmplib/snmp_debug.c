@@ -483,6 +483,15 @@ snmp_get_do_debugging(void)
     return dodebug;
 }
 
+void
+snmp_debug_shutdown(void)
+{
+    int i;
+
+    for (i = 0; i < debug_num_tokens; i++)
+       SNMP_FREE(dbg_tokens[i].token_name);
+}
+
 #else /* ! NETSNMP_NO_DEBUGGING */
 
 #if __GNUC__ > 2
@@ -499,6 +508,10 @@ void debug_indent_add(int amount UNUSED) { }
 
 NETSNMP_IMPORT void
 debug_config_register_tokens(const char *configtoken, char *tokens);
+
+void
+debug_indent_reset(void)
+{ }
 
 void
 debug_config_register_tokens(const char *configtoken UNUSED,
@@ -586,6 +599,10 @@ snmp_get_do_debugging(void)
     return 0;
 }
 
+void
+snmp_debug_shutdown(void)
+{  }
+
 #endif /* NETSNMP_NO_DEBUGGING */
 
 void
@@ -599,12 +616,3 @@ snmp_debug_init(void)
                                     "token[,token...]");
 }
 
-void
-snmp_debug_shutdown(void)
-{
-    int i;
-
-   for (i=0; i<debug_num_tokens; i++) {
-       SNMP_FREE(dbg_tokens [i].token_name);
-    }
-}
