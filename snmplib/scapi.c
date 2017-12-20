@@ -142,7 +142,7 @@ static netsnmp_auth_alg_info _auth_alg_info[] = {
 #endif
 #ifdef HAVE_EVP_SHA224
     { NETSNMP_USMAUTH_HMAC128SHA224, "usmHMAC128SHA224AuthProtocol",
-      usmHMAC128SHA224AuthProtocol, sizeof(usmHMAC128SHA224AuthProtocol),
+      usmHMAC128SHA224AuthProtocol, OID_LENGTH(usmHMAC128SHA224AuthProtocol),
       BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC128SHA224), USM_HMAC128SHA224_AUTH_LEN },
     { NETSNMP_USMAUTH_HMAC192SHA256, "usmHMAC192SHA256AuthProtocol",
       usmHMAC192SHA256AuthProtocol, OID_LENGTH(usmHMAC192SHA256AuthProtocol),
