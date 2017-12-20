@@ -17,6 +17,38 @@
 
 #include <net-snmp/net-snmp-features.h>
 
+/** OpenSSL compat functions for apps */
+#if defined(NETSNMP_USE_OPENSSL)
+
+#include <string.h>
+#include <openssl/dh.h>
+
+#ifndef HAVE_DH_GET0_PQG
+void
+DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
+{
+   if (p != NULL)
+       *p = dh->p;
+   if (q != NULL)
+       *q = dh->q;
+   if (g != NULL)
+       *g = dh->g;
+}
+#endif
+
+#ifndef HAVE_DH_GET0_KEY
+void
+DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
+{
+   if (pub_key != NULL)
+       *pub_key = dh->pub_key;
+   if (priv_key != NULL)
+       *priv_key = dh->priv_key;
+}
+#endif
+#endif /* defined(NETSNMP_USE_OPENSSL) */
+
+/** TLS/DTLS certificatte support */
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
 
 netsnmp_feature_require(container_free_all)
@@ -945,30 +977,6 @@ DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
    }
 
    return 1;
-}
-#endif
-
-#ifndef HAVE_DH_GET0_PQG
-void
-DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
-{
-   if (p != NULL)
-       *p = dh->p;
-   if (q != NULL)
-       *q = dh->q;
-   if (g != NULL)
-       *g = dh->g;
-}
-#endif
-
-#ifndef HAVE_DH_GET0_KEY
-void
-DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
-{
-   if (pub_key != NULL)
-       *pub_key = dh->pub_key;
-   if (priv_key != NULL)
-       *priv_key = dh->priv_key;
 }
 #endif
 
