@@ -187,20 +187,6 @@ netsnmp_openssl_cert_get_commonName(X509 *ocert, char **buf, int *len)
 
 #ifndef NETSNMP_FEATURE_REMOVE_CERT_DUMP_NAMES
 
-#ifndef HAVE_X509_NAME_ENTRY_GET_DATA
-static ASN1_STRING * X509_NAME_ENTRY_get_data(const X509_NAME_ENTRY *ne)
-{
-    return ne ? ne->value : NULL;
-}
-#endif
-
-#ifndef HAVE_X509_NAME_ENTRY_GET_OBJECT
-static ASN1_OBJECT *X509_NAME_ENTRY_get_object(const X509_NAME_ENTRY *ne)
-{
-    return ne ? ne->object : NULL;
-}
-#endif
-
 #ifndef HAVE_X509_GET_SIGNATURE_NID
 int X509_get_signature_nid(const X509 *x)
 {
