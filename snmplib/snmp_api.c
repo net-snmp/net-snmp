@@ -5713,16 +5713,18 @@ _sess_process_packet_handle_pdu(void *sessp, netsnmp_session * sp,
 	      break;
 	    } else {
 	      /* We're done with retries, so no longer waiting for a response */
-	      if (magic) {
-		((struct synch_state*)magic)->waiting = 0;
+	      if (callback) {
+	        callback(NETSNMP_CALLBACK_OP_SEC_ERROR, sp,
+	                 pdu->reqid, pdu, magic);
 	      }
 	    }
 	  } else {
 	    if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
 	      break;
-	    } else { /* Set the state to no longer be waiting, since we're done with retries */
-	      if (magic) {
-		((struct synch_state*)magic)->waiting = 0;
+	    } else { /* We're done with retries */
+	      if (callback) {
+	        callback(NETSNMP_CALLBACK_OP_SEC_ERROR, sp,
+	                 pdu->reqid, pdu, magic);
 	      }
 	    }
 	  }
