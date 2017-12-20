@@ -209,12 +209,24 @@ snmp_synch_input(int op,
         state->status = STAT_TIMEOUT;
         session->s_snmp_errno = SNMPERR_TIMEOUT;
         SET_SNMP_ERROR(SNMPERR_TIMEOUT);
+    } else if (op == NETSNMP_CALLBACK_OP_SEC_ERROR) {
+        state->pdu = NULL;
+        /*
+         * If we already have an error in status, then leave it alone.
+         */
+        if (state->status == STAT_SUCCESS) {
+            state->status = STAT_ERROR;
+            session->s_snmp_errno = SNMPERR_GENERR;
+            SET_SNMP_ERROR(SNMPERR_GENERR);
+        }
     } else if (op == NETSNMP_CALLBACK_OP_DISCONNECT) {
         state->pdu = NULL;
         state->status = STAT_ERROR;
         session->s_snmp_errno = SNMPERR_ABORT;
         SET_SNMP_ERROR(SNMPERR_ABORT);
     }
+    DEBUGMSGTL(("snmp_synch", "status = %d errno = %d\n",
+                               state->status, session->s_snmp_errno));
 
     return 1;
 }

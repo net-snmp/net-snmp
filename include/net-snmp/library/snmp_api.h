@@ -723,6 +723,7 @@ struct variable_list {
 #define NETSNMP_CALLBACK_OP_SEND_FAILED		3
 #define NETSNMP_CALLBACK_OP_CONNECT		4
 #define NETSNMP_CALLBACK_OP_DISCONNECT		5
+#define NETSNMP_CALLBACK_OP_SEC_ERROR		7
 
     long            snmp_get_next_msgid(void);
     long            snmp_get_next_reqid(void);
