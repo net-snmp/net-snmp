@@ -17,6 +17,38 @@
 
 #include <net-snmp/net-snmp-features.h>
 
+/** OpenSSL compat functions for apps */
+#if defined(NETSNMP_USE_OPENSSL)
+
+#include <string.h>
+#include <openssl/dh.h>
+
+#ifndef HAVE_DH_GET0_PQG
+void
+DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
+{
+   if (p != NULL)
+       *p = dh->p;
+   if (q != NULL)
+       *q = dh->q;
+   if (g != NULL)
+       *g = dh->g;
+}
+#endif
+
+#ifndef HAVE_DH_GET0_KEY
+void
+DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
+{
+   if (pub_key != NULL)
+       *pub_key = dh->pub_key;
+   if (priv_key != NULL)
+       *priv_key = dh->priv_key;
+}
+#endif
+#endif /* defined(NETSNMP_USE_OPENSSL) */
+
+/** TLS/DTLS certificatte support */
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
 
 netsnmp_feature_require(container_free_all)
@@ -170,7 +202,7 @@ static ASN1_OBJECT *X509_NAME_ENTRY_get_object(const X509_NAME_ENTRY *ne)
 #endif
 
 #ifndef HAVE_X509_GET_SIGNATURE_NID
-static int X509_get_signature_nid(const X509 *x)
+int X509_get_signature_nid(const X509 *x)
 {
     return OBJ_obj2nid(x->sig_alg->algorithm);
 }
@@ -948,30 +980,6 @@ DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
 }
 #endif
 
-#ifndef HAVE_DH_GET0_PQG
-void
-DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
-{
-   if (p != NULL)
-       *p = dh->p;
-   if (q != NULL)
-       *q = dh->q;
-   if (g != NULL)
-       *g = dh->g;
-}
-#endif
-
-#ifndef HAVE_DH_GET0_KEY
-void
-DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
-{
-   if (pub_key != NULL)
-       *pub_key = dh->pub_key;
-   if (priv_key != NULL)
-       *priv_key = dh->priv_key;
-}
-#endif
-
 #ifndef HAVE_ASN1_STRING_GET0_DATA
 const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *x)
 {
@@ -994,13 +1002,6 @@ ASN1_STRING *X509_NAME_ENTRY_get_data(const X509_NAME_ENTRY *ne)
     if (ne == NULL)
         return NULL;
     return ne->value;
-}
-#endif
-
-#ifndef HAVE_X509_GET_SIGNATURE_NID
-int X509_get_signature_nid(const X509_REQ *req)
-{
-    return OBJ_obj2nid(req->sig_alg.algorithm);
 }
 #endif
 
