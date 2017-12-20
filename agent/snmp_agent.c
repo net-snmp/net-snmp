@@ -2140,6 +2140,8 @@ check_acm(netsnmp_agent_session *asp, u_char type)
                             }
                         }
                         snmp_set_var_typed_value(vb, type, NULL, 0);
+                        if (ASN_PRIV_RETRY == type)
+                            request->inclusive = 0;
                     }
                 }
             }
