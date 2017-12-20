@@ -81,7 +81,8 @@ __libraries_init(char *appname)
     return;
   have_inited = 1;
 
-  snmp_set_quick_print(1);
+  netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                         NETSNMP_DS_LIB_QUICK_PRINT, 1);
   snmp_enable_stderrlog();
   init_snmp(appname);
 
