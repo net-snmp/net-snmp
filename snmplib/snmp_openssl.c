@@ -202,7 +202,7 @@ static ASN1_OBJECT *X509_NAME_ENTRY_get_object(const X509_NAME_ENTRY *ne)
 #endif
 
 #ifndef HAVE_X509_GET_SIGNATURE_NID
-static int X509_get_signature_nid(const X509 *x)
+int X509_get_signature_nid(const X509 *x)
 {
     return OBJ_obj2nid(x->sig_alg->algorithm);
 }
@@ -1002,13 +1002,6 @@ ASN1_STRING *X509_NAME_ENTRY_get_data(const X509_NAME_ENTRY *ne)
     if (ne == NULL)
         return NULL;
     return ne->value;
-}
-#endif
-
-#ifndef HAVE_X509_GET_SIGNATURE_NID
-int X509_get_signature_nid(const X509_REQ *req)
-{
-    return OBJ_obj2nid(req->sig_alg.algorithm);
 }
 #endif
 
