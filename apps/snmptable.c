@@ -893,6 +893,10 @@ getbulk_table_entries(netsnmp_session * ss)
                     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                               NETSNMP_DS_LIB_EXTENDED_INDEX)) {
                         name_p = strchr(buf, '[');
+                        if (name_p == NULL) {
+                            running = 0;
+                            break;
+                        }
                     } else {
                         switch (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                                   NETSNMP_DS_LIB_OID_OUTPUT_FORMAT)) {
