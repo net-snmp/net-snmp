@@ -148,7 +148,7 @@ int
 snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                  char **Xpsz, int argc, char *const *argv, int flags)
 {
-    int        priv_type;;
+    int        priv_type;
     char      *cp;
     int        zero_sensitive = !( flags & NETSNMP_PARSE_ARGS_NOZERO );
 
