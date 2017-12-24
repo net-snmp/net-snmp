@@ -500,11 +500,14 @@ sc_get_proper_priv_length(const oid * privtype, u_int privtype_len)
 {
     DEBUGTRACE;
 
-    netsnmp_priv_alg_info *pai = sc_get_priv_alg_byoid(privtype, privtype_len);
-    if (NULL == pai)
-        return 0;
+    {
+        netsnmp_priv_alg_info *pai =
+            sc_get_priv_alg_byoid(privtype, privtype_len);
+        if (NULL == pai)
+            return 0;
 
-    return pai->proper_length;
+        return pai->proper_length;
+    }
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SCAPI_GET_PROPER_PRIV_LENGTH */
 
@@ -530,11 +533,13 @@ sc_get_proper_priv_length_bytype(int privtype)
 {
     DEBUGTRACE;
 
-    netsnmp_priv_alg_info *pai = sc_get_priv_alg_bytype(privtype);
-    if (NULL == pai)
-        return 0;
+    {
+        netsnmp_priv_alg_info *pai = sc_get_priv_alg_bytype(privtype);
+        if (NULL == pai)
+            return 0;
 
-    return pai->proper_length;
+        return pai->proper_length;
+    }
 }
 
 
