@@ -6046,7 +6046,7 @@ findsaddr(register const struct sockaddr_in *to,
     static const char route[] = "/proc/net/route";
 
     if ((f = fopen(route, "r")) == NULL) {
-        sprintf(errbuf, "open %s: %.128s", route, strerror(errno));
+        sprintf(errbuf, "open %s: %s", route, strerror(errno));
         return (errbuf);
     }
 
