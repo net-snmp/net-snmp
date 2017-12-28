@@ -14793,8 +14793,8 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
     #       WWWXXX - strict type checking
     #
     netsnmp_save_CFLAGS="$CFLAGS"
-    for opt in \
-       -Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual
+    for opt in -Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
+        -Wno-format-truncation
     do
       { $as_echo "$as_me:$LINENO: checking whether the compiler supports $opt" >&5
 $as_echo_n "checking whether the compiler supports $opt... " >&6; }
