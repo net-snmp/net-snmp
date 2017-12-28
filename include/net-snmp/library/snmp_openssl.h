@@ -71,7 +71,7 @@ extern          "C" {
 #endif
 #ifndef HAVE_X509_GET_SIGNATURE_NID
     NETSNMP_IMPORT
-    int X509_get_signature_nid(const X509_REQ *req);
+    int X509_get_signature_nid(const X509 *req);
 #endif
 #ifndef HAVE_TLS_METHOD
     NETSNMP_IMPORT
