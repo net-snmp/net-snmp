@@ -717,7 +717,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
 #endif /* OLD_DES */
     DES_cblock       key_struct;
 #endif /* NETSNMP_DISABLE_DES */
-#ifdef HAVE_AES
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_AES)
     AES_KEY aes_key;
     int new_ivlen = 0;
 #endif
@@ -870,7 +870,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     memset(&key_sched_store, 0, sizeof(key_sched_store));
 #endif
 #endif
-#ifdef HAVE_AES
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_AES)
     memset(&aes_key,0,sizeof(aes_key));
 #endif
     return rval;
@@ -989,7 +989,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 #endif
     u_int           properlength = 0, properlength_iv = 0;
     int             have_transform;
-#ifdef HAVE_AES
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_AES)
     int new_ivlen = 0;
     AES_KEY aes_key;
 #endif
