@@ -1429,6 +1429,9 @@
    variables */
 #undef NETSNMP_ATTRIBUTE_DEPRECATED
 
+/* Used to suppress compiler warnings about unused functions and variables */
+#undef NETSNMP_ATTRIBUTE_UNUSED
+
 /* Define if static inline functions are unsupported */
 #undef NETSNMP_BROKEN_INLINE
 

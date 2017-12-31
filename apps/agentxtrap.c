@@ -20,12 +20,6 @@ netsnmp_feature_require(snmp_split_pdu)
 netsnmp_feature_require(snmp_reset_var_types)
 
 
-#ifdef __GNUC__
-#define UNUSED __attribute__((unused))
-#else
-#define UNUSED
-#endif
-
 static void
 usage(const char* progname)
 {
@@ -113,8 +107,9 @@ change_state(tState new_state)
 }
 
 static int
-handle_agentx_response(int operation, netsnmp_session *sp, UNUSED int reqid,
-                       netsnmp_pdu *act, UNUSED void *magic)
+handle_agentx_response(int operation, netsnmp_session *sp,
+                       NETSNMP_ATTRIBUTE_UNUSED int reqid,
+                       netsnmp_pdu *act, NETSNMP_ATTRIBUTE_UNUSED void *magic)
 {
     switch(operation) {
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
@@ -191,14 +186,14 @@ extern const struct tState_s Disconnecting;
 extern const struct tState_s Exit;
 
 static void
-StateDisconnect(UNUSED tState self)
+StateDisconnect(tState self)
 {
     snmp_log(LOG_ERR, "Unexpected disconnect in state %s\n", self->name);
     change_state(&Disconnecting);
 }
 
 static void
-StateClose(UNUSED tState self, netsnmp_pdu *act)
+StateClose(tState self, netsnmp_pdu *act)
 {
     snmp_log(LOG_ERR, "Unexpected close with reason code %ld in state %s\n",
              act->errstat, self->name);
@@ -206,7 +201,7 @@ StateClose(UNUSED tState self, netsnmp_pdu *act)
 }
 
 static void
-ConnectingEntry(UNUSED tState self)
+ConnectingEntry(NETSNMP_ATTRIBUTE_UNUSED tState self)
 {
     netsnmp_session init;
     netsnmp_transport* t;
@@ -268,7 +263,7 @@ pdu_create_opt_context(int command, const char* context, size_t len)
 }
 
 static void
-OpeningEntry(UNUSED tState self)
+OpeningEntry(NETSNMP_ATTRIBUTE_UNUSED tState self)
 {
     netsnmp_pdu* act =
         pdu_create_opt_context(AGENTX_MSG_OPEN, context, contextLen);
@@ -284,7 +279,7 @@ OpeningEntry(UNUSED tState self)
 }
 
 static void
-OpeningRes(UNUSED tState self, netsnmp_pdu *act)
+OpeningRes(NETSNMP_ATTRIBUTE_UNUSED tState self, netsnmp_pdu *act)
 {
     if(act->errstat == AGENTX_ERR_NOERROR) {
         session = act->sessid;
@@ -307,7 +302,7 @@ const struct tState_s Opening = {
 };
 
 static void
-NotifyingEntry(UNUSED tState self)
+NotifyingEntry(NETSNMP_ATTRIBUTE_UNUSED tState self)
 {
     netsnmp_pdu* act = snmp_clone_pdu(pdu);
     if(act) {
@@ -320,7 +315,7 @@ NotifyingEntry(UNUSED tState self)
 }
 
 static void
-NotifyingRes(UNUSED tState self, netsnmp_pdu *act)
+NotifyingRes(NETSNMP_ATTRIBUTE_UNUSED tState self, netsnmp_pdu *act)
 {
     if(act->errstat == AGENTX_ERR_NOERROR)
         result = 0;
@@ -342,7 +337,7 @@ const struct tState_s Notifying = {
 };
 
 static void
-ClosingEntry(UNUSED tState self)
+ClosingEntry(NETSNMP_ATTRIBUTE_UNUSED tState self)
 {
     /* CLOSE pdu->errstat */
     netsnmp_pdu* act =
@@ -358,7 +353,7 @@ ClosingEntry(UNUSED tState self)
 }
 
 static void
-ClosingRes(UNUSED tState self, netsnmp_pdu *act)
+ClosingRes(NETSNMP_ATTRIBUTE_UNUSED tState self, netsnmp_pdu *act)
 {
     if(act->errstat != AGENTX_ERR_NOERROR) {
         snmp_log(LOG_ERR, "AgentX error status of %ld\n", act->errstat);
@@ -367,13 +362,14 @@ ClosingRes(UNUSED tState self, netsnmp_pdu *act)
 }
 
 static void
-ClosingDisconnect(UNUSED tState self)
+ClosingDisconnect(NETSNMP_ATTRIBUTE_UNUSED tState self)
 {
     change_state(&Disconnecting);
 }
 
 static void
-ClosingClose(UNUSED tState self, UNUSED netsnmp_pdu *act)
+ClosingClose(NETSNMP_ATTRIBUTE_UNUSED tState self,
+             NETSNMP_ATTRIBUTE_UNUSED netsnmp_pdu *act)
 {
     change_state(&Disconnecting);
 }
@@ -390,7 +386,7 @@ const struct tState_s Closing = {
 };
 
 static void
-DisconnectingEntry(UNUSED tState self)
+DisconnectingEntry(NETSNMP_ATTRIBUTE_UNUSED tState self)
 {
     snmp_sess_close(sessp);
     sessp = NULL;
