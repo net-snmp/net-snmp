@@ -334,14 +334,8 @@ static int reconfig = 0;
 
 extern int netsnmp_running;
 
-#ifdef __GNUC__
-#define UNUSED __attribute__((unused))
-#else
-#define UNUSED
-#endif
-
 RETSIGTYPE
-stop_server(UNUSED int a) {
+stop_server(NETSNMP_ATTRIBUTE_UNUSED int a) {
     netsnmp_running = 0;
 }
 
