@@ -629,8 +629,10 @@ long int netsnmp_random(void)
     return random();
 #elif defined(HAVE_LRAND48)
     return lrand48();
-#elif defined(rand)
+#elif defined(HAVE_RAND)
     return rand();
+#else
+#error "Neither random(), nor lrand48() nor rand() are available"
 #endif
 }
 
@@ -640,8 +642,10 @@ void netsnmp_srandom(unsigned int seed)
     srandom(seed);
 #elif defined(HAVE_SRAND48)
     srand48(seed);
-#else
+#elif defined(HAVE_SRAND)
     srand(seed);
+#else
+#error "Neither srandom(), nor srand48() nor srand() are available"
 #endif
 }
 
