@@ -226,7 +226,7 @@ int main(int argc, char **argv)
     mystuff.pktnum = 0;
     /* todo: user, etc. parsing. */
     ss->securityModel = SNMP_SEC_MODEL_USM;
-    printf("flags %x securityModel %d version %d securityNameLen %d securityEngineIDLen %d\n",
+    printf("flags %lx securityModel %d version %ld securityNameLen %" NETSNMP_PRIz "d securityEngineIDLen %" NETSNMP_PRIz "d\n",
           ss->flags, ss->securityModel, ss->version,
           ss->securityNameLen, ss->securityEngineIDLen);
     create_user_from_session(ss);
