@@ -123,7 +123,7 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
     #
     netsnmp_save_CFLAGS="$CFLAGS"
     for opt in -Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
-        -Wno-format-truncation
+        -Wno-unused-parameter -Wno-format-truncation
     do
       AC_MSG_CHECKING([whether the compiler supports $opt])
       CFLAGS="$opt $CFLAGS"

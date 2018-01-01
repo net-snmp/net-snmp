@@ -498,7 +498,7 @@ int debug_indent_get(void) { return 0; }
 
 const char* debug_indent(void) { return ""; }
 
-void debug_indent_add(int amount NETSNMP_ATTRIBUTE_UNUSED)
+void debug_indent_add(int amount)
 { }
 
 NETSNMP_IMPORT void
@@ -509,20 +509,18 @@ debug_indent_reset(void)
 { }
 
 void
-debug_config_register_tokens(const char *configtoken NETSNMP_ATTRIBUTE_UNUSED,
-                             char *tokens NETSNMP_ATTRIBUTE_UNUSED)
+debug_config_register_tokens(const char *configtoken, char *tokens)
 { }
 
 NETSNMP_IMPORT void
 debug_config_turn_on_debugging(const char *configtoken, char *line);
 
 void
-debug_config_turn_on_debugging(const char *configtoken NETSNMP_ATTRIBUTE_UNUSED,
-                               char *line NETSNMP_ATTRIBUTE_UNUSED)
+debug_config_turn_on_debugging(const char *configtokenu, char *line)
 { }
 
 void
-debug_register_tokens(const char *tokens NETSNMP_ATTRIBUTE_UNUSED)
+debug_register_tokens(const char *tokens)
 { }
 
 void
@@ -531,71 +529,61 @@ debug_print_registered_tokens(void)
 
 
 int
-debug_enable_token_logs (const char *token NETSNMP_ATTRIBUTE_UNUSED)
-{ return SNMPERR_GENERR; }
+debug_enable_token_logs (const char *token)
+{
+    return SNMPERR_GENERR;
+}
 
 int
-debug_disable_token_logs (const char *token NETSNMP_ATTRIBUTE_UNUSED)
-{ return SNMPERR_GENERR; }
+debug_disable_token_logs (const char *token)
+{
+    return SNMPERR_GENERR;
+}
 
 int
-debug_is_token_registered(const char *token NETSNMP_ATTRIBUTE_UNUSED)
-{ return SNMPERR_GENERR; }
+debug_is_token_registered(const char *token)
+{
+    return SNMPERR_GENERR;
+}
 
 void
-debugmsg(const char *token NETSNMP_ATTRIBUTE_UNUSED,
-         const char *format NETSNMP_ATTRIBUTE_UNUSED, ...)
+debugmsg(const char *token, const char *format, ...)
+{ }
+
+void debugmsg_oid(const char *token, const oid * theoid, size_t len)
 { }
 
 void
-debugmsg_oid(const char *token NETSNMP_ATTRIBUTE_UNUSED,
-             const oid * theoid NETSNMP_ATTRIBUTE_UNUSED,
-             size_t len NETSNMP_ATTRIBUTE_UNUSED)
+debugmsg_suboid(const char *token, const oid * theoid, size_t len)
 { }
 
 void
-debugmsg_suboid(const char *token NETSNMP_ATTRIBUTE_UNUSED,
-                const oid * theoid NETSNMP_ATTRIBUTE_UNUSED,
-                size_t len NETSNMP_ATTRIBUTE_UNUSED)
+debugmsg_var(const char *token, netsnmp_variable_list * var)
 { }
 
 void
-debugmsg_var(const char *token NETSNMP_ATTRIBUTE_UNUSED,
-             netsnmp_variable_list * var NETSNMP_ATTRIBUTE_UNUSED)
+debugmsg_oidrange(const char *token, const oid * theoid, size_t len,
+                  size_t var_subid, oid range_ubound)
 { }
 
 void
-debugmsg_oidrange(const char *token NETSNMP_ATTRIBUTE_UNUSED,
-                  const oid * theoid NETSNMP_ATTRIBUTE_UNUSED,
-                  size_t len NETSNMP_ATTRIBUTE_UNUSED,
-                  size_t var_subid NETSNMP_ATTRIBUTE_UNUSED,
-                  oid range_ubound NETSNMP_ATTRIBUTE_UNUSED)
+debugmsg_hex(const char *token, const u_char * thedata, size_t len)
 { }
 
 void
-debugmsg_hex(const char *token NETSNMP_ATTRIBUTE_UNUSED,
-             const u_char * thedata NETSNMP_ATTRIBUTE_UNUSED,
-             size_t len NETSNMP_ATTRIBUTE_UNUSED)
+debugmsg_hextli(const char *token, const u_char * thedata, size_t len)
 { }
 
 void
-debugmsg_hextli(const char *token NETSNMP_ATTRIBUTE_UNUSED,
-                const u_char * thedata NETSNMP_ATTRIBUTE_UNUSED,
-                size_t len NETSNMP_ATTRIBUTE_UNUSED)
+debugmsgtoken(const char *token, const char *format, ...)
 { }
 
 void
-debugmsgtoken(const char *token NETSNMP_ATTRIBUTE_UNUSED,
-              const char *format NETSNMP_ATTRIBUTE_UNUSED, ...)
+debug_combo_nc(const char *token, const char *format, ...)
 { }
 
 void
-debug_combo_nc(const char *token NETSNMP_ATTRIBUTE_UNUSED,
-               const char *format NETSNMP_ATTRIBUTE_UNUSED, ...)
-{ }
-
-void
-snmp_set_do_debugging(int val NETSNMP_ATTRIBUTE_UNUSED)
+snmp_set_do_debugging(int val)
 { }
 
 int
