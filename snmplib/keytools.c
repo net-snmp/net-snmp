@@ -671,8 +671,8 @@ netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
             return SNMPERR_SUCCESS;
     }
 
-    DEBUGMSGTL(("usm:extend_kul", " have %d bytes; need %d\n", *kulBufLen,
-                needKeyLen));
+    DEBUGMSGTL(("usm:extend_kul", " have %" NETSNMP_PRIz "d bytes; need %d\n",
+                *kulBufLen, needKeyLen));
 
     if (kulBufSize < needKeyLen) {
         newKul = calloc(1, needKeyLen);

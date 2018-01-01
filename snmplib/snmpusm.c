@@ -4602,7 +4602,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     struct usmUser *newuser;
     u_char          userKey[SNMP_MAXBUF_SMALL], *tmpp;
     size_t          userKeyLen = SNMP_MAXBUF_SMALL;
-    size_t          privKeyLen = 0, privKeySize;
+    size_t          privKeySize;
     size_t          ret;
     int             ret2, properLen, properPrivKeyLen, priv_type;
     const oid      *def_auth_prot, *def_priv_prot;
@@ -4710,7 +4710,6 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         newuser->authProtocolLen = def_auth_prot_len;
     } else {
         const oid *auth_prot;
-        size_t auth_prot_len;
         int auth_type = usm_lookup_auth_type(buf);
         if (auth_type < 0) {
             *errorMsg = "unknown authProtocol";
@@ -4968,13 +4967,13 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     }
 
     if ((newuser->privKeyLen >= properPrivKeyLen) || (properPrivKeyLen == 0)){
-        DEBUGMSGTL(("9:usmUser", "truncating privKeyLen from %d to %d\n",
+        DEBUGMSGTL(("9:usmUser", "truncating privKeyLen from %" NETSNMP_PRIz "d to %d\n",
                     newuser->privKeyLen, properPrivKeyLen));
         newuser->privKeyLen = properPrivKeyLen;
     }
     else {
         DEBUGMSGTL(("usmUser",
-                    "privKey length %d < %d required by privProtocol\n",
+                    "privKey length %" NETSNMP_PRIz "d < %d required by privProtocol\n",
                     newuser->privKeyLen, properPrivKeyLen));
       *errorMsg = "privKey length is less than required by privProtocol";
       goto fail;

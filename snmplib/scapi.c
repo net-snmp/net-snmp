@@ -1473,7 +1473,6 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 #endif
     DES_cblock      key_struct;
 #endif
-    u_int           properlength = 0, properlength_iv = 0;
     netsnmp_priv_alg_info *pai = NULL;
 
     DEBUGTRACE;
