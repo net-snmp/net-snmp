@@ -148,6 +148,13 @@ my %subs = (
     "pfx" => [ "^PREFIX=",     "PREFIX=$prefix"                     ],
     "dos" => [ "^PREFIX_DOS=", "PREFIX_DOS=$prefixdos"              ],
     "sdk" => [ "^SDK=",        $sdk == 1 ? "SDK=true" : "SDK=false" ],
+    "cfl" => [ "^CFLAGS=",     "CFLAGS=" .
+                               "/D _CRT_NONSTDC_NO_WARNINGS " .
+                               "/D _CRT_SECURE_NO_WARNINGS " .
+                               "/D _WINSOCK_DEPRECATED_NO_WARNINGS " .
+                               "/wd4244 " .
+                               "/wd4267 "
+             ],
     );
 
 substitute("Makefile", "Makefile.in", \%subs);
