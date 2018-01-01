@@ -5839,7 +5839,8 @@ deltaT(struct timeval *t1p, struct timeval *t2p)
 
 int
 packet_ok(u_char * buf, int cc, struct sockaddr_in *from,
-          int seq, u_short ident, int pmtu, u_short port)
+          int seq, u_short ident, int pmtu NETSNMP_ATTRIBUTE_UNUSED,
+          u_short port)
 {
     struct icmp *icp = NULL;
     u_char type, code;

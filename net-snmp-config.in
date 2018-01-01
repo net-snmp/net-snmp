@@ -343,7 +343,7 @@ static int reconfig = 0;
 extern int netsnmp_running;
 
 RETSIGTYPE
-stop_server(NETSNMP_ATTRIBUTE_UNUSED int a) {
+stop_server(int a) {
     netsnmp_running = 0;
 }
 
