@@ -33,10 +33,6 @@ CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\winservice.res" /d "_DEBUG" 
 !ENDIF
 
-!IF "$(LINKTYPE)" == "dynamic"
-CPP_PROJ=$(CPP_PROJ) /D "NMAKE_NETSNMP_USE_DLL"
-!ENDIF
-
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
    $(CPP_PROJ) $< 
