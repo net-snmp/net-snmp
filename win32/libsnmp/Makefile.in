@@ -11,6 +11,9 @@ NULL=
 NULL=nul
 !ENDIF 
 
+CPP=cl.exe
+CPP_PROJ=/I.. /I..\..\snmplib /I..\..\include $(CFLAGS)
+
 ALL : "..\lib\$(OUTDIR)\netsnmp.lib"
 
 LIB32_OBJS= \
@@ -94,13 +97,6 @@ CLEAN :
 
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
-
-CPP=cl.exe
-!IF  "$(CFG)" == "release"
-CPP_PROJ=/nologo /MD /W3 /EHsc /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c $(CFLAGS)
-!ELSEIF  "$(CFG)" == "debug"
-CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c $(CFLAGS)
-!ENDIF
 
 .c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<

@@ -149,11 +149,27 @@ my %subs = (
     "dos" => [ "^PREFIX_DOS=", "PREFIX_DOS=$prefixdos"              ],
     "sdk" => [ "^SDK=",        $sdk == 1 ? "SDK=true" : "SDK=false" ],
     "cfl" => [ "^CFLAGS=",     "CFLAGS=" .
+                               "/D WIN32 " .
+                               "/D _BIND_TO_CURRENT_VCLIBS_VERSION " .
+                               "/D _CONSOLE " .
                                "/D _CRT_NONSTDC_NO_WARNINGS " .
                                "/D _CRT_SECURE_NO_WARNINGS " .
+                               "/D _MBCS " .
                                "/D _WINSOCK_DEPRECATED_NO_WARNINGS " .
+                               "/EHsc " .
+                               "/FD " .
+                               "/FR\$(INTDIR)\\ " .
+                               "/Fd\$(INTDIR)\\\$(PROGNAME).pdb " .
+                               "/Fo\$(INTDIR)\\ " .
+                               "/c " .
+                               "/W3 " .
+                               "/Zi " .
+                               "/nologo " .
                                "/wd4244 " .
-                               "/wd4267 "
+                               "/wd4267 " .
+               ($config eq "release" ?
+                "/MD  /D NDEBUG /O2 " :
+                "/MDd /D _DEBUG /Od /Gm ")
              ],
     );
 
