@@ -10,6 +10,9 @@ NULL=
 NULL=nul
 !ENDIF 
 
+CPP=cl.exe
+CPP_PROJ=/I.. /I..\..\include /I..\..\agent\mibgroup $(CFLAGS)
+
 !IF  "$(CFG)" == "release"
 
 ALL : "..\lib\$(OUTDIR)\netsnmptrapd.lib"
@@ -30,9 +33,6 @@ CLEAN :
 
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
-
-CPP=cl.exe
-CPP_PROJ=/nologo /MD /W3 /EHsc /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c $(CFLAGS)
 
 .c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<
@@ -90,9 +90,6 @@ CLEAN :
 
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
-
-CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c $(CFLAGS)
 
 .c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<
