@@ -35,10 +35,6 @@ CLEAN :
 CPP=cl.exe
 CPP_PROJ=/nologo /MD /W3 /EHsc /Zi /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c $(CFLAGS)
 
-!IF "$(LINKTYPE)" == "dynamic"
-CPP_PROJ=$(CPP_PROJ) /D "NMAKE_NETSNMP_USE_DLL"
-!ENDIF
-
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
    $(CPP_PROJ) $< 
@@ -116,10 +112,6 @@ CLEAN :
 
 CPP=cl.exe
 CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_BIND_TO_CURRENT_VCLIBS_VERSION" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"$(INTDIR)\\" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\$(PROGNAME).pdb" /FD /c $(CFLAGS)
-
-!IF "$(LINKTYPE)" == "dynamic"
-CPP_PROJ=$(CPP_PROJ) /D "NMAKE_NETSNMP_USE_DLL"
-!ENDIF
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
