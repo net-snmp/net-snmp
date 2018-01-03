@@ -34,19 +34,13 @@ RSC_PROJ=/l 0x409 /fo"$(INTDIR)\winservice.res" /d "_DEBUG"
 !ENDIF
 
 .c{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 .cpp{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 .cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 RSC=rc.exe
 LINK32=link.exe
@@ -70,9 +64,7 @@ CLEAN :
 
 "..\bin\$(OUTDIR)\$(PROGNAME).exe" : "..\bin\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
 !IF "$(LINKTYPE)" == "static" || "$(ALLOW_DLL)" == "1"
-    $(LINK32) @<<
-  $(LINK32_FLAGS) $(LINK32_OBJS)
-<<
+    $(LINK32) $(LINK32_FLAGS) $(LINK32_OBJS)
  if exist "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest" \
 	    mt.exe -manifest "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest" -outputresource:"..\bin\$(OUTDIR)\$(PROGNAME).exe";1
 !ELSE	# Linktype check
