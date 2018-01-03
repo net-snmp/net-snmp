@@ -478,7 +478,7 @@ static int
 _kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
                        u_char *origKul, size_t *origKulLen, int origKulSize)
 {
-    char newKul[USM_LENGTH_KU_HASHBLOCK];
+    u_char newKul[USM_LENGTH_KU_HASHBLOCK];
     size_t newKulLen;
     int count, hashBits, hashBytes, authtype, i, saveLen;
 
@@ -532,7 +532,8 @@ _kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
             break;
     }
 
-    DEBUGMSGTL(("usm:extend_kul:blumenthal","orig len %d, new len %d\n",
+    DEBUGMSGTL(("usm:extend_kul:blumenthal",
+                "orig len %d, new len %" NETSNMP_PRIz "d\n",
                 saveLen, *origKulLen));
 
     return SNMPERR_SUCCESS;
@@ -561,7 +562,7 @@ _kul_extend_reeder(int needKeyLen, oid *hashoid, u_int hashoid_len,
                    u_char *engineID, int engineIDLen,
                    u_char *origKul, size_t *origKulLen, int origKulSize)
 {
-    char newKu[USM_LENGTH_KU_HASHBLOCK], newKul[USM_LENGTH_KU_HASHBLOCK];
+    u_char newKu[USM_LENGTH_KU_HASHBLOCK], newKul[USM_LENGTH_KU_HASHBLOCK];
     size_t newKuLen, newKulLen, saveLen;
     int authType, copylen;
 
@@ -605,7 +606,8 @@ _kul_extend_reeder(int needKeyLen, oid *hashoid, u_int hashoid_len,
         *origKulLen += copylen;
     }
 
-    DEBUGMSGTL(("usm:extend_kul:reeder","orig len %d, new len %d\n",
+    DEBUGMSGTL(("usm:extend_kul:reeder",
+                "orig len %" NETSNMP_PRIz "d, new len %" NETSNMP_PRIz "d\n",
                 saveLen, *origKulLen));
     return SNMPERR_SUCCESS;
 }
@@ -694,24 +696,26 @@ netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
         case USM_CREATE_USER_PRIV_AES256:
         {
             int reeder = privType & USM_AES_REEDER_FLAG;
-            if (!reeder) {
+            if (reeder)
+                ret = _kul_extend_reeder(needKeyLen, hashoid, hashoid_len,
+                                         engineID, engineIDLen,
+                                         newKul, &newKulLen, kulBufSize);
+            else
                 ret = _kul_extend_blumenthal(needKeyLen, hashoid, hashoid_len,
                                              newKul, &newKulLen, kulBufSize);
-                break;
-            }
-            /** fall through to reeder, if available */
-            ret = SNMPERR_GENERR; /* in case reeder not available */
         }
+        break;
 #endif
-#if defined(NETSNMP_DRAFT_REEDER_3DES) || defined(NETSNMP_DRAFT_BLUMENTHAL_AES_04)
+#if defined(NETSNMP_DRAFT_REEDER_3DES)
         case USM_CREATE_USER_PRIV_3DES:
             ret = _kul_extend_reeder(needKeyLen, hashoid, hashoid_len,
                                      engineID, engineIDLen,
                                      newKul, &newKulLen, kulBufSize);
             break;
 #endif
-         default:
-            DEBUGMSGTL(("usm:extend_kul", " unknown priv type 0x%x\n", privType));
+        default:
+            DEBUGMSGTL(("usm:extend_kul",
+                        "unknown priv type 0x%x\n", privType));
             ret = SNMPERR_GENERR;
     }
 
