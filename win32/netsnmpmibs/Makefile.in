@@ -27,34 +27,22 @@ CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I
 !ENDIF
 
 .c{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 .cpp{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 .cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 .c{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 .cpp{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 .cxx{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 RSC=rc.exe
 LIB32=link.exe -lib
@@ -165,9 +153,7 @@ CLEAN :
 	-@erase "..\lib\$(OUTDIR)\$(PROGNAME).lib"
 
 "..\lib\$(OUTDIR)\$(PROGNAME).lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
-    $(LIB32) @<<
-  $(LIB32_FLAGS) $(DEF_FLAGS) $(LIB32_OBJS)
-<<
+    $(LIB32) $(LIB32_FLAGS) $(DEF_FLAGS) $(LIB32_OBJS)
 
 
 !IF "$(NO_EXTERNAL_DEPS)" != "1"

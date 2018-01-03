@@ -108,19 +108,13 @@ CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I
 !ENDIF
 
 .c{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 .cpp{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 .cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
+   $(CPP) $(CPP_PROJ) $<
 
 MTL=midl.exe
 MTL_PROJ=/nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32 
@@ -133,9 +127,7 @@ LINK32_FLAGS=advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:
 !ENDIF
 
 "..\bin\$(OUTDIR)\netsnmp.dll" : "..\bin\$(OUTDIR)" "..\lib\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
-    $(LINK32) @<<
-  $(LINK32_FLAGS) $(LINK32_OBJS)
-<<
+    $(LINK32) $(LINK32_FLAGS) $(LINK32_OBJS)
  if exist "../bin/$(OUTDIR)/netsnmp.dll.manifest" \
 	    mt.exe -manifest "../bin/$(OUTDIR)/netsnmp.dll.manifest" -outputresource:"../bin/$(OUTDIR)/netsnmp.dll";2
 LINK32=link.exe
