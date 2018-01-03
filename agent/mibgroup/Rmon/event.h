@@ -36,6 +36,6 @@ config_require(Rmon/rows)
                           u_long event_index, oid * alarmed_var,
                           size_t alarmed_var_length, u_long sample_type,
                           u_long value, u_long the_threshold,
-                          char *alarm_descr);
+                          const char *alarm_descr);
 
 #endif                          /* _MIBGROUP_EVENT_H */
