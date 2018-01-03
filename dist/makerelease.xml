@@ -362,7 +362,7 @@
 	<step type="system" stepname="build:configure" title="build:configure">
 	  <text>We need to run configure to set up the build tree.</text>
 	  <commands>
-	    <command>./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example testhandler tlstm-mib tsm-mib smux Rmon disman/event-mib' --with-transports="IPX TLSTCP DTLSUDP" --with-security-modules="tsm" --enable-ipv6 --enable-embedded-perl --enable-shared --disable-U64</command>
+	    <command>./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example testhandler tlstm-mib tsm-mib smux Rmon disman/event-mib' --with-transports="IPX TLSTCP DTLSUDP" --with-security-modules="tsm" --enable-ipv6 --enable-embedded-perl --enable-shared</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="build:make" title="build:make">
@@ -587,7 +587,7 @@
 	    </step>
 	    <step type="system" stepname="posttest:configure" title="posttest:configure">
 	      <commands>
-		<command>cd net-snmp-{VERSION} &amp;&amp; ./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example     testhandler smux Rmon disman/event-mib' --with-transports=IPX --enable-ipv6 --enable-embedded-perl --enable-shared --disable-U64</command>
+		<command>cd net-snmp-{VERSION} &amp;&amp; ./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example     testhandler smux Rmon disman/event-mib' --with-transports=IPX --enable-ipv6 --enable-embedded-perl --enable-shared</command>
 	      </commands>
 	    </step>
 	    <step type="system" stepname="posttest:make" title="posttest:make">
