@@ -33,4 +33,4 @@ if [ "$version" != "$toolversion" ] ; then
 fi
 
 echo "Running $prog"
-autoconf "$@"
+$prog "$@"
