@@ -2856,10 +2856,11 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     switch (pdu->command) {
     case SNMP_MSG_RESPONSE:
         netsnmp_assert(0 == (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE));
-        /* FALL THROUGH */
 #ifndef NETSNMP_NOTIFY_ONLY
+        /* FALL THROUGH */
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
+        /* FALL THROUGH */
 #endif /* ! NETSNMP_NOTIFY_ONLY */
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
