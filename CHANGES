@@ -3,6 +3,81 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.8.pre1*
+    snmplib:
+      - Fixed reporting 'error writing to /var/xxx/snmpapp.conf'. When a
+	client utility, such as snmptrap, tries to write to its persistent
+	configuration file (/var/net-snmp/snmpapp.conf in Fedora), do not
+	report any error when open() fails. The tool is typically run by
+	non-root, who cannot write to /var and the error just confuses
+	users. And when doing it, make sure that "snmpapp" string is
+	defined only on one place, just in case.
+
+    snmp:
+      - BUG: 2622: Fix excessive indents in log file
+
+    snmpd:
+      - Add new snmpd.conf option 'diskio' to monitor only selected disks.
+	On machines with thousands of block devices, parsing
+	/proc/diskstats is really slow. The new option enables monitoring
+	of selected devices, saving lot of CPU time.
+
+    snmptranslate:
+      - Introduce bulk translation mode The special argument "-" causes
+	snmptranslate to enter bulk translation mode, in which it expects
+	one OID per line.  Whitespace is treated as the end of the OID, and
+	only that portion of the line is replaced, meaning that this can be
+	used to translate, e.g., "snmpwalk" output without the proper MIBs
+	loaded: snmptranslate -m all -OX < numeric.txt > symbolic.txt
+
+    snmptrapd:
+      - Add support for the latest libmysqlclient version
+      - Correctly forward traps with Request-ID '0'. Request-ID of
+	forwarded traps is taken from the incoming trap and it can be zero.
+	We should not report error in this case.
+
+    mib2c:
+      - PATCH: 1281, BUG: 2534 fixed mfd writability
+
+    python:
+      - Patch from David Hankins to fix python binding error codes
+
+    unspecified:
+      - Fixed crash when receiving non-standard compliant responses. Some
+	HW sends ifOperStatus as NULL instead of INTEGER type. We should
+	not try to dereference this NULL.
+      - IPv6 support is now compiled by default.  If you need an IPv4-only
+	agent, use --disable-ipv6.
+      - [BUG 2616]: Fix certain spelling errors in source code comments and
+	printed messages
+      - [BUG 2624]: stop trying to use the deprecated perl uninstall
+      - [BUG 2712]: Fix Perl module compilation 
+      - [BUG ]: #2615: Don't return incompletely parsed varbinds
+
+    DISMAN EXPRESSION MIB:
+      - Avoid that enabling this MIB causes snmpd to crash during startup
+
+    DISMAN MIB:
+      - Avoid reading past the end of a buffer Terminate the expExpression
+	string with a NUL character.
+
+    HP:
+      - UX on ia64: Fix large fd set implementation Reported-by: Dixon
+	Xavier <dixoncx@gmail.com>
+
+    MIB:
+      - Speed up reading /proc/net/tcp and /proc/net/tcp6 The time needed
+	to read Linux procfs files is proportional to the square of the
+	quotient of the file size and the read buffer size. Increase the
+	read buffer size to decrease the time needed to read large procfs
+	files.
+
+    Windows:
+      - BUG: 2550: Suppress netsnmp_assert s != (-1) messages
+      - Feature-request: 181: Export snmp_api and ASN functions See also
+	http://sourceforge.net/p/net-snmp/feature-requests/181/.
+
+
 *5.7.3*
     snmplib:
       - Fixed crash when MD5 hash is not supported by OpenSSL.

@@ -3,6 +3,24 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.8.pre1*
+    Many many bug fixes and minor improvements
+
+    snmplib:
+      - BUG: 2592: from Stuart Kendrick - increase MAXTC to 16384
+      - Restore AES-192 and AES-256 privacy protocols - from
+	draft-blumenthal-aes-usm-04 (precursor to RFC 3826)
+        - Use OIDs from http://www.snmp.com/eso/esoConsortiumMIB.txt
+        - Some code borrowed from PATCH 1346, thanks to
+          Alexander Ivanov and Vladimir Sukhorukov.
+
+    snmp:
+      - BUG: 2622: Fix excessive indents in log file
+
+    unspecified:
+      - IPv6 support is now compiled by default.  If you need an IPv4-only
+	agent, use --disable-ipv6.
+
 *5.7.3*
     Many many bug fixes and minor improvements
 
