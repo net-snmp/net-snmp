@@ -133,7 +133,7 @@ _load_defaultrouter_from_mib2(netsnmp_container *container, int family)
                         "error with defaultrouter_entry: "
                         "insert into container failed.\n"));
             netsnmp_access_defaultrouter_entry_free(entry);
-            // goto out;
+            /* goto out; */
         }
     }
 
