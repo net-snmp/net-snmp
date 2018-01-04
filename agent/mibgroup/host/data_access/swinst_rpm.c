@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #endif
 
+#define inline __inline__
 #ifdef HAVE_RPM_RPMLIB_H
 #include <rpm/rpmlib.h>
 #endif
@@ -37,6 +38,7 @@
 #include <rpm/rpmts.h>
 #include <rpm/rpmdb.h>
 #endif
+#undef inline
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
