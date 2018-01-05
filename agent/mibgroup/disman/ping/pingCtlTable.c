@@ -45,12 +45,12 @@
 #include "pingProbeHistoryTable.h"
 #include "header_complex.h"
 
-static inline void tvsub(struct timeval *, struct timeval *);
-static inline int schedule_exit(int, int *, long *, long *, long *, long *);
-static inline int in_flight(__u16 *, long *, long *, long *);
-static inline void acknowledge(__u16, __u16 *, long *, int *);
-static inline void advance_ntransmitted(__u16 *, long *);
-static inline void update_interval(int, int, int *, int *);
+NETSNMP_STATIC_INLINE void tvsub(struct timeval *, struct timeval *);
+NETSNMP_STATIC_INLINE int schedule_exit(int, int *, long *, long *, long *, long *);
+NETSNMP_STATIC_INLINE int in_flight(__u16 *, long *, long *, long *);
+NETSNMP_STATIC_INLINE void acknowledge(__u16, __u16 *, long *, int *);
+NETSNMP_STATIC_INLINE void advance_ntransmitted(__u16 *, long *);
+NETSNMP_STATIC_INLINE void update_interval(int, int, int *, int *);
 static long     llsqrt(long long);
 static __inline__ int ipv6_addr_any(struct in6_addr *);
 static char    *pr_addr(struct in6_addr *, int);
@@ -4434,7 +4434,7 @@ write_pingCtlRowStatus(int action,
 }
 
 
-static inline void
+NETSNMP_STATIC_INLINE void
 tvsub(struct timeval *out, struct timeval *in)
 {
     if ((out->tv_usec -= in->tv_usec) < 0) {
@@ -4445,7 +4445,7 @@ tvsub(struct timeval *out, struct timeval *in)
 }
 
 
-static inline int
+NETSNMP_STATIC_INLINE int
 schedule_exit(int next, int *deadline, long *npackets, long *nreceived,
               long *ntransmitted, long *tmax)
 {
@@ -4454,7 +4454,7 @@ schedule_exit(int next, int *deadline, long *npackets, long *nreceived,
     return next;
 }
 
-static inline int
+NETSNMP_STATIC_INLINE int
 in_flight(__u16 * acked, long *nreceived, long *ntransmitted,
           long *nerrors)
 {
@@ -4463,7 +4463,7 @@ in_flight(__u16 * acked, long *nreceived, long *ntransmitted,
             0x7FFF) ? diff : (*ntransmitted) - (*nreceived) - (*nerrors);
 }
 
-static inline void
+NETSNMP_STATIC_INLINE void
 acknowledge(__u16 seq, __u16 * acked, long *ntransmitted, int *pipesize)
 {
     __u16           diff = (__u16) (*ntransmitted) - seq;
@@ -4476,7 +4476,7 @@ acknowledge(__u16 seq, __u16 * acked, long *ntransmitted, int *pipesize)
     }
 }
 
-static inline void
+NETSNMP_STATIC_INLINE void
 advance_ntransmitted(__u16 * acked, long *ntransmitted)
 {
     (*ntransmitted)++;
@@ -4488,7 +4488,7 @@ advance_ntransmitted(__u16 * acked, long *ntransmitted)
 }
 
 
-static inline void
+NETSNMP_STATIC_INLINE void
 update_interval(int uid, int interval, int *rtt_addend, int *rtt)
 {
     int             est = (*rtt) ? (*rtt) / 8 : interval * 1000;

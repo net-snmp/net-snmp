@@ -101,7 +101,7 @@ static unsigned long ret_val;   /* Used by var_ipfwacc to return ulongs */
  * * this because stol returns a signed long. 
  */
 
-static inline void
+NETSNMP_STATIC_INLINE void
 atoip(int pos)
 {
     int             i;
