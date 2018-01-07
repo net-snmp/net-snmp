@@ -162,7 +162,7 @@
    */
 #  if defined(__i386) || defined(__i386__) || defined(__x86_64) || defined(__x86_64__)
 #   define ROTATE(a,n)	({ register unsigned int ret;	\
-				asm (			\
+				__asm__ (		\
 				"roll %1,%0"		\
 				: "=r"(ret)		\
 				: "I"(n), "0"(a)	\
@@ -172,7 +172,7 @@
 #  elif defined(_ARCH_PPC) || defined(_ARCH_PPC64) || \
 	defined(__powerpc) || defined(__ppc__) || defined(__powerpc64__)
 #   define ROTATE(a,n)	({ register unsigned int ret;	\
-				asm (			\
+				__asm__ (		\
 				"rlwinm %0,%1,%2,0,31"	\
 				: "=r"(ret)		\
 				: "r"(a), "I"(n));	\
@@ -180,7 +180,7 @@
 			})
 #  elif defined(__s390x__)
 #   define ROTATE(a,n) ({ register unsigned int ret;	\
-				asm ("rll %0,%1,%2"	\
+				__asm__ ("rll %0,%1,%2"	\
 				: "=r"(ret)		\
 				: "r"(a), "I"(n));	\
 			  ret;				\
@@ -207,10 +207,10 @@
      * unaligned data without raising an exception.
      */
 #   define HOST_c2l(c,l)	({ unsigned int r=*((const unsigned int *)(c));	\
-				   asm ("bswapl %0":"=r"(r):"0"(r));	\
+				   __asm__ ("bswapl %0":"=r"(r):"0"(r)); \
 				   (c)+=4; (l)=r;			})
 #   define HOST_l2c(l,c)	({ unsigned int r=(l);			\
-				   asm ("bswapl %0":"=r"(r):"0"(r));	\
+				   __asm__ ("bswapl %0":"=r"(r):"0"(r)); \
 				   *((unsigned int *)(c))=r; (c)+=4;	})
 #   endif
 #  endif
@@ -239,10 +239,10 @@
 #ifndef PEDANTIC
 # if defined(__GNUC__) && __GNUC__>=2 && !defined(OPENSSL_NO_ASM) && !defined(OPENSSL_NO_INLINE_ASM)
 #  if defined(__s390x__)
-#   define HOST_c2l(c,l)	({ asm ("lrv	%0,0(%1)"		\
+#   define HOST_c2l(c,l)	({ __asm__ ("lrv	%0,0(%1)"	\
 					:"=r"(l) : "r"(c));		\
 				   (c)+=4;				})
-#   define HOST_l2c(l,c)	({ asm ("strv	%0,0(%1)"		\
+#   define HOST_l2c(l,c)	({ __asm__ ("strv	%0,0(%1)"	\
 					: : "r"(l),"r"(c) : "memory");	\
 				   (c)+=4;				})
 #  endif
