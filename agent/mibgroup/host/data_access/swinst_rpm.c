@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #endif
 
+/* A hack to make the compiler accept the rpmlib header file with -std=c89 */
 #define inline __inline__
 #ifdef HAVE_RPM_RPMLIB_H
 #include <rpm/rpmlib.h>
