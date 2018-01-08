@@ -202,9 +202,6 @@ etherStatsTable_container_load(netsnmp_container * container)
 {
     size_t          count = 0;
 
-    DEBUGMSGTL(("verbose:etherStatsTable:etherStatsTable_container_load",
-                "called\n"));
-
     /*
      * TODO:352:M: |   |-> set indexes in new etherStatsTable rowreq context.
      * data context will be set from the param (unless NULL,
@@ -224,6 +221,10 @@ etherStatsTable_container_load(netsnmp_container * container)
 #if defined(linux)
     struct ifname *list_head = NULL, *p = NULL;
 #endif
+
+    DEBUGMSGTL(("verbose:etherStatsTable:etherStatsTable_container_load",
+                "called\n"));
+
     
     /*
      * create socket for ioctls
