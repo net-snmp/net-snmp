@@ -435,6 +435,10 @@
 /* Define to 1 if you have the <linux/ethtool.h> header file. */
 #undef HAVE_LINUX_ETHTOOL_H
 
+/* Define if __u8 .. __u64 must be declared explicitly before including
+   <linux/ethtool.h> */
+#undef HAVE_LINUX_ETHTOOL_NEEDS_U64
+
 /* Define to 1 if you have the <linux/hdreg.h> header file. */
 #undef HAVE_LINUX_HDREG_H
 

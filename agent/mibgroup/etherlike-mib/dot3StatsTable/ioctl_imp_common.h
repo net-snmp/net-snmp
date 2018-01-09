@@ -7,11 +7,13 @@
 
 /* use kernel's ethtool.h  */
 
+#ifdef HAVE_LINUX_ETHTOOL_NEEDS_U64
 #include <linux/types.h>
 typedef __u64 u64;
 typedef __u32 u32;
 typedef __u16 u16;
 typedef __u8 u8;
+#endif
 #include <linux/ethtool.h>
 
 /* structure for storing the interface names in the system */

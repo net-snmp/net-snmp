@@ -49,14 +49,13 @@ netsnmp_pci_error(char *msg, ...)
 #endif
 
 #ifdef HAVE_LINUX_ETHTOOL_H
+#ifdef HAVE_LINUX_ETHTOOL_NEEDS_U64
 #include <linux/types.h>
-#ifndef HAVE_PCI_LOOKUP_NAME
 typedef __u64 u64;         /* hack, so we may include kernel's ethtool.h */
 typedef __u32 u32;         /* ditto */
 typedef __u16 u16;         /* ditto */
 typedef __u8 u8;           /* ditto */
 #endif
-
 #include <linux/ethtool.h>
 #endif /* HAVE_LINUX_ETHTOOL_H */
 
