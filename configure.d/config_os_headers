@@ -454,6 +454,8 @@ AC_CHECK_HEADERS(netinet/in_pcb.h,,,
 #       (major ugh!)
 #  Agent:
 #
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <linux/ethtool.h>],[])],
+		  AC_CHECK_HEADERS([linux/ethtool.h]),
 AC_CHECK_HEADERS([linux/ethtool.h],,,
 [[
 #include <linux/types.h>
@@ -462,6 +464,8 @@ typedef __u32 u32;         /* ditto */
 typedef __u16 u16;         /* ditto */
 typedef __u8 u8;           /* ditto */
 ]])
+AC_DEFINE([HAVE_LINUX_ETHTOOL_NEEDS_U64], 1,
+          [Define if __u8 .. __u64 must be declared explicitly before including <linux/ethtool.h>]))
 
 ##
 #   Headers requiring particular libraries

@@ -17085,7 +17085,32 @@ done
 #       (major ugh!)
 #  Agent:
 #
-for ac_header in linux/ethtool.h
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <linux/ethtool.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  for ac_header in linux/ethtool.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "linux/ethtool.h" "ac_cv_header_linux_ethtool_h" "$ac_includes_default"
+if test "x$ac_cv_header_linux_ethtool_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LINUX_ETHTOOL_H 1
+_ACEOF
+
+fi
+
+done
+
+else
+  for ac_header in linux/ethtool.h
 do :
   ac_fn_c_check_header_compile "$LINENO" "linux/ethtool.h" "ac_cv_header_linux_ethtool_h" "
 #include <linux/types.h>
@@ -17104,6 +17129,11 @@ fi
 
 done
 
+
+$as_echo "#define HAVE_LINUX_ETHTOOL_NEEDS_U64 1" >>confdefs.h
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 ##
 #   Headers requiring particular libraries
