@@ -806,7 +806,7 @@ Get_Next_HR_Disk(void)
                      */
                     DEBUGMSGTL(("host/hr_disk",
                                 "Get_Next_HR_Disk: %s ignored\n", string));
-                    HRD_history[iindex] = LONG_MAX;
+                    HRD_history[iindex] = (time_t)LONG_MAX;
                     HRD_index++;
                     continue;
                 }
