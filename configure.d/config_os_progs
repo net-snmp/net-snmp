@@ -128,7 +128,11 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
         -Wno-sign-compare -Wno-unused-parameter -Wno-type-limits
     do
       AC_MSG_CHECKING([whether the compiler supports $opt])
-      CFLAGS="$opt $CFLAGS"
+      if test x$opt != x-Wstrict-prototypes; then
+        CFLAGS="-Werror $opt $CFLAGS"
+      else
+        CFLAGS="$opt $CFLAGS"
+      fi
       AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])], [
         AC_MSG_RESULT([yes])
         DEVFLAGS="$DEVFLAGS $opt"
