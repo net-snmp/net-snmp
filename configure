@@ -15269,8 +15269,7 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
     #       WWWXXX - strict type checking
     #
     netsnmp_save_CFLAGS="$CFLAGS"
-    for opt in -std=c89                                                      \
-        -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
+    for opt in -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
         -Wimplicit-fallthrough=2                                             \
         -Wno-format-truncation -Wno-missing-field-initializers               \
         -Wno-sign-compare -Wno-unused-parameter -Wno-type-limits
