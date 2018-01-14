@@ -621,7 +621,11 @@ ns_set_time(int action,
                 snmp_log(LOG_ERR, "Unable to convert time value\n");
                 return SNMP_ERR_GENERR;
             }
+#ifdef HAVE_STIME
             status=stime(&seconds);
+#else
+            status=-1;
+#endif
             if(status!=0) {
                 snmp_log(LOG_ERR, "Unable to set time\n");
                 return SNMP_ERR_GENERR;
@@ -632,7 +636,11 @@ ns_set_time(int action,
             /* revert to old value */
             int status=0;
             if(oldtime != 0) {
+#ifdef HAVE_STIME
                 status=stime(&oldtime);
+#else
+                status=-1;
+#endif
                 oldtime=0;    
                 if(status!=0) {
                     snmp_log(LOG_ERR, "Unable to set time\n");

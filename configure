@@ -15374,15 +15374,18 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
     #       WWWXXX - strict type checking
     #
     netsnmp_save_CFLAGS="$CFLAGS"
-    for opt in -std=c89                                                      \
-        -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
+    for opt in -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
         -Wimplicit-fallthrough=2                                             \
         -Wno-format-truncation -Wno-missing-field-initializers               \
         -Wno-sign-compare -Wno-unused-parameter -Wno-type-limits
     do
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
 $as_echo_n "checking whether the compiler supports $opt... " >&6; }
-      CFLAGS="$opt $CFLAGS"
+      if test x$opt != x-Wstrict-prototypes; then
+        CFLAGS="-Werror $opt $CFLAGS"
+      else
+        CFLAGS="$opt $CFLAGS"
+      fi
       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -19867,34 +19870,6 @@ return headerGet ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in  ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char headerGet ();
-int
-main ()
-{
-return headerGet ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext

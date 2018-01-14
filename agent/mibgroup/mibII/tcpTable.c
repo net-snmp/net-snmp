@@ -31,10 +31,7 @@
 #include <netinet/tcp_var.h>
 #endif
 #if HAVE_NETLINK_NETLINK_H
-/* A hack to make the compiler accept the netlink header file with -std=c89 */
-#define inline __inline__
 #include <netlink/netlink.h>
-#undef inline
 #include <netlink/msg.h>
 #include <linux/inet_diag.h>
 #endif

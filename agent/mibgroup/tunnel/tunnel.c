@@ -53,12 +53,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-/*
- * A hack to make this file build with -std=c89 against older Linux kernel
- * header files (e.g. RHEL 5).
- */
-#undef __STRICT_ANSI__
-
 #include <linux/if.h>
 #include <linux/ip.h>
 #include <linux/sockios.h>
