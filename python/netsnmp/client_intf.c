@@ -1044,6 +1044,7 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
   char *  auth_pass;
   char *  priv_proto;
   char *  priv_pass;
+  int     priv_type;
   int     eng_boots;
   int     eng_time;
   SnmpSession session = {0};
@@ -1089,28 +1090,23 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
   session.engineBoots = eng_boots;
   session.engineTime = eng_time;
 
-#ifndef DISABLE_MD5
-  if (!strcmp(auth_proto, "MD5")) {
-    session.securityAuthProto =
-      snmp_duplicate_objid(usmHMACMD5AuthProtocol,
-                           OID_LENGTH(usmHMACMD5AuthProtocol));
-    session.securityAuthProtoLen = OID_LENGTH(usmHMACMD5AuthProtocol);
-  } else
-#endif
-    if (!strcmp(auth_proto, "SHA")) {
-      session.securityAuthProto =
-	snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
-                             OID_LENGTH(usmHMACSHA1AuthProtocol));
-      session.securityAuthProtoLen = OID_LENGTH(usmHMACSHA1AuthProtocol);
-    } else if (!strcmp(auth_proto, "DEFAULT")) {
-      const oid* a = get_default_authtype(&session.securityAuthProtoLen);
-      session.securityAuthProto
-        = snmp_duplicate_objid(a, session.securityAuthProtoLen);
-    } else {
+  if (!strcmp(auth_proto, "DEFAULT")) {
+    const oid* a = get_default_authtype(&session.securityAuthProtoLen);
+    session.securityAuthProto
+      = snmp_duplicate_objid(a, session.securityAuthProtoLen);
+  } else {
+    const oid *auth_prot;
+    int auth_type = usm_lookup_auth_type(auth_proto);
+    if (auth_type < 0) {
       if (verbose)
 	printf("error:snmp_new_v3_session:Unsupported authentication protocol(%s)\n", auth_proto);
       goto end;
     }
+    auth_prot = sc_get_auth_oid(auth_type, &session.securityAuthProtoLen);
+    if (auth_prot)
+        session.securityAuthProto =
+            snmp_duplicate_objid(auth_prot, session.securityAuthProtoLen);
+  }
   if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHNOPRIV) {
     if (STRLEN(auth_pass) > 0) {
       session.securityAuthKeyLen = USM_AUTH_KU_LEN;
@@ -1125,28 +1121,23 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
       }
     }
   }
-#ifndef DISABLE_DES
-  if (!strcmp(priv_proto, "DES")) {
-    session.securityPrivProto =
-      snmp_duplicate_objid(usmDESPrivProtocol,
-                           OID_LENGTH(usmDESPrivProtocol));
-    session.securityPrivProtoLen = OID_LENGTH(usmDESPrivProtocol);
-  } else
-#endif
-    if (!strncmp(priv_proto, "AES", 3)) {
-      session.securityPrivProto =
-	snmp_duplicate_objid(usmAESPrivProtocol,
-                             OID_LENGTH(usmAESPrivProtocol));
-      session.securityPrivProtoLen = OID_LENGTH(usmAESPrivProtocol);
-    } else if (!strcmp(priv_proto, "DEFAULT")) {
-      const oid *p = get_default_privtype(&session.securityPrivProtoLen);
-      session.securityPrivProto
-        = snmp_duplicate_objid(p, session.securityPrivProtoLen);
-    } else {
+  if (!strcmp(priv_proto, "DEFAULT")) {
+    const oid *p = get_default_privtype(&session.securityPrivProtoLen);
+    session.securityPrivProto
+      = snmp_duplicate_objid(p, session.securityPrivProtoLen);
+  } else {
+    const oid *priv_prot;
+    priv_type = usm_lookup_priv_type(priv_proto);
+    if (priv_type < 0) {
       if (verbose)
 	printf("error:snmp_new_v3_session:Unsupported privacy protocol(%s)\n", priv_proto);
       goto end;
     }
+    priv_prot = sc_get_priv_oid(priv_type, &session.securityPrivProtoLen);
+    if (priv_prot)
+        session.securityPrivProto =
+            snmp_duplicate_objid(priv_prot, session.securityPrivProtoLen);
+  }
 
   if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHPRIV) {
     session.securityPrivKeyLen = USM_PRIV_KU_LEN;
