@@ -518,6 +518,7 @@ _kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
     for(i = 0; i < count; ++i) {
         int copyLen, rc;
 
+        newKulLen = sizeof(newKul);
         rc = sc_hash_type( authtype, origKul, *origKulLen, newKul, &newKulLen);
         if (SNMPERR_SUCCESS != rc)
             return SNMPERR_GENERR;
