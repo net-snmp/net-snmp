@@ -3512,7 +3512,7 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                                          SNMP_DEFAULT_PRIV_PROTOLEN);
 #else
     noNameUser = usm_create_initial_user("", usmHMACSHA1AuthProtocol,
-                                         USM_LENGTH_OID_TRANSFORM,
+                                         OID_LENGTH(usmHMACSHA1AuthProtocol),
                                          SNMP_DEFAULT_PRIV_PROTO,
                                          SNMP_DEFAULT_PRIV_PROTOLEN);
 #endif
