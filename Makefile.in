@@ -229,7 +229,7 @@ pythonmodules: subdirs
         fi
 
 pythoninstall:
-	@(dir=`pwd`; cd python; $(PYMAKE) install --basedir=$$dir) ; \
+	@(dir=`pwd`; cd python; $(PYMAKE) install --basedir=$$dir --root=$(DESTDIR) --prefix=$(prefix)) ; \
         if test $$? != 0 ; then \
            exit 1 ; \
         fi
