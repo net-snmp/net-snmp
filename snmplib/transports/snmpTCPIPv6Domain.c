@@ -60,7 +60,7 @@ static netsnmp_tdomain tcp6Domain;
  */
 
 static char *
-netsnmp_tcp6_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_tcp6_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
     return netsnmp_ipv6_fmtaddr("TCP/IPv6", t, data, len);
 }
@@ -136,7 +136,7 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
  */
 
 netsnmp_transport *
-netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
+netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0;
@@ -156,8 +156,8 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     }
 
     DEBUGIF("netsnmp_tcp6") {
-        char *str = netsnmp_tcp6_fmtaddr(NULL, (void *)addr,
-                                   sizeof(struct sockaddr_in6));
+        char *str = netsnmp_tcp6_fmtaddr(NULL, addr,
+                                         sizeof(struct sockaddr_in6));
         DEBUGMSGTL(("netsnmp_tcp6", "open %s %s\n", local ? "local" : "remote",
                     str));
         free(str);
@@ -220,8 +220,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
 
         setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof(opt));
 
-        rc = bind(t->sock, (struct sockaddr *) addr,
-		  sizeof(struct sockaddr_in6));
+        rc = bind(t->sock, addr, sizeof(struct sockaddr_in6));
         if (rc != 0) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
@@ -274,8 +273,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
          * had completed.  So this can block.
          */
 
-        rc = connect(t->sock, (struct sockaddr *) addr,
-                     sizeof(struct sockaddr_in6));
+        rc = connect(t->sock, addr, sizeof(struct sockaddr_in6));
 
         DEBUGMSGTL(("netsnmp_tcp6", "connect returns %d\n", rc));
 

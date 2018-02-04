@@ -98,9 +98,9 @@ netsnmp_if_indextoname(unsigned ifindex, char *ifname)
 
 char *
 netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
-                     void *data, int len)
+                     const void *data, int len)
 {
-    struct sockaddr_in6 *to = NULL;
+    const struct sockaddr_in6 *to = NULL;
     char scope_id[IF_NAMESIZE + 1] = "";
     char port[6];
     char addr[INET6_ADDRSTRLEN];
@@ -115,20 +115,20 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
     DEBUGMSGTL(("netsnmp_ipv6", "fmtaddr: t = %p, data = %p, len = %d\n", t,
                 data, len));
     if (data != NULL && len == sizeof(struct sockaddr_in6)) {
-        to = (struct sockaddr_in6 *) data;
+        to = (const struct sockaddr_in6 *) data;
     } else if (data != NULL && len == sizeof(netsnmp_indexed_addr_pair)) {
-        netsnmp_indexed_addr_pair *addr_pair =
-            (netsnmp_indexed_addr_pair *) data;
-        to = (struct sockaddr_in6 *) &(addr_pair->remote_addr);
+        const netsnmp_indexed_addr_pair *addr_pair =
+            (const netsnmp_indexed_addr_pair *) data;
+        to = (const struct sockaddr_in6 *) &(addr_pair->remote_addr);
     } else if (t != NULL && t->data != NULL) {
-        to = (struct sockaddr_in6 *) t->data;
+        to = (const struct sockaddr_in6 *) t->data;
     }
     if (to == NULL) {
         strlcpy(tmp, prefix, tmplen);
         strlcat(tmp, ": unknown", tmplen);
     } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
 	struct hostent *host;
-	host = netsnmp_gethostbyaddr((char *)&to->sin6_addr, sizeof(struct in6_addr), AF_INET6);
+	host = netsnmp_gethostbyaddr(&to->sin6_addr, sizeof(struct in6_addr), AF_INET6);
 	return (host ? strdup(host->h_name) : NULL);
     } else {
 
@@ -139,7 +139,7 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
         }
 #endif
         strlcpy(tmp, prefix, tmplen);
-        inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr, sizeof(addr));
+        inet_ntop(AF_INET6, &to->sin6_addr, addr, sizeof(addr));
         strlcat(tmp, ": [", tmplen);
         strlcat(tmp, addr, tmplen);
         strlcat(tmp, scope_id, tmplen);

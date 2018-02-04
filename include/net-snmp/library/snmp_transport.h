@@ -158,7 +158,7 @@ typedef struct netsnmp_transport_s {
 
     int             (*f_recv)   (struct netsnmp_transport_s *, void *,
 				 int, void **, int *);
-    int             (*f_send)   (struct netsnmp_transport_s *, void *,
+    int             (*f_send)   (struct netsnmp_transport_s *, const void *,
 				 int, void **, int *);
     int             (*f_close)  (struct netsnmp_transport_s *);
 
@@ -171,7 +171,8 @@ typedef struct netsnmp_transport_s {
 
     /*  Optional callback to format a transport address.  */
 
-    char           *(*f_fmtaddr)(struct netsnmp_transport_s *, void *, int);
+    char           *(*f_fmtaddr)(struct netsnmp_transport_s *, const void *,
+                                 int);
 
     /*  Optional callback to support extra configuration token/value pairs */
     /*  return non-zero on error */
@@ -180,7 +181,7 @@ typedef struct netsnmp_transport_s {
 
     /*  Optional callback that is called after the first transport is
         cloned to the second */
-    int            (*f_copy)(struct netsnmp_transport_s *,
+    int            (*f_copy)(const struct netsnmp_transport_s *,
                              struct netsnmp_transport_s *);
 
     /*  Setup initial session config if special things are needed */
@@ -221,9 +222,10 @@ void init_snmp_transport(void);
 
 /*  Some utility functions.  */
 
-char *netsnmp_transport_peer_string(netsnmp_transport *t, void *data, int len);
+char *netsnmp_transport_peer_string(netsnmp_transport *t, const void *data,
+                                    int len);
 
-int netsnmp_transport_send(netsnmp_transport *t, void *data, int len,
+int netsnmp_transport_send(netsnmp_transport *t, const void *data, int len,
                            void **opaque, int *olength);
 int netsnmp_transport_recv(netsnmp_transport *t, void *data, int len,
                            void **opaque, int *olength);
@@ -232,7 +234,7 @@ int netsnmp_transport_add_to_list(netsnmp_transport_list **transport_list,
 				  netsnmp_transport *transport);
 int netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
 				       netsnmp_transport *transport);
-int netsnmp_sockaddr_size(struct sockaddr *sa);
+int netsnmp_sockaddr_size(const struct sockaddr *sa);
 
 
 /*
@@ -240,7 +242,7 @@ int netsnmp_sockaddr_size(struct sockaddr *sa);
  * problem (for instance).
  */
 
-netsnmp_transport *netsnmp_transport_copy(netsnmp_transport *t);
+netsnmp_transport *netsnmp_transport_copy(const netsnmp_transport *t);
 
 
 /*  Free an netsnmp_transport.  */

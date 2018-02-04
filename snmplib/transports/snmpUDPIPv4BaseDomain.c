@@ -58,15 +58,16 @@ int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                                     if_index);
 }
 
-int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
-                           struct sockaddr *remote, void *data, int len)
+int netsnmp_udpipv4_sendto(int fd, const struct in_addr *srcip, int if_index,
+                           const struct sockaddr *remote, const void *data,
+                           int len)
 {
     return netsnmp_udpbase_sendto(fd, srcip, if_index, remote, data, len);
 }
 #endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */
 
 netsnmp_transport *
-netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
+netsnmp_udpipv4base_transport(const struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0, rc2;
@@ -119,7 +120,7 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->local, (u_char *) & (addr->sin_addr.s_addr), 4);
+        memcpy(t->local, &addr->sin_addr.s_addr, 4);
         t->local[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
         t->local[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
         t->local_length = 6;
@@ -160,8 +161,7 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
             }
         }
 #endif /* !defined(WIN32) */
-        rc = bind(t->sock, (struct sockaddr *) addr,
-                  sizeof(struct sockaddr));
+        rc = bind(t->sock, addr, sizeof(struct sockaddr));
         if (rc != 0) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
@@ -219,7 +219,7 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->remote, (u_char *) & (addr->sin_addr.s_addr), 4);
+        memcpy(t->remote, &addr->sin_addr.s_addr, 4);
         t->remote[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
         t->remote[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
         t->remote_length = 6;

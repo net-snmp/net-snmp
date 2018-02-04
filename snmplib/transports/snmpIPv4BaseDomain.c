@@ -183,23 +183,24 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
 
 char *
 netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
-                     void *data, int len)
+                     const void *data, int len)
 {
-    netsnmp_indexed_addr_pair *addr_pair = NULL;
+    const netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct hostent *host;
     char tmp[64];
 
     if (data != NULL && len == sizeof(netsnmp_indexed_addr_pair)) {
-	addr_pair = (netsnmp_indexed_addr_pair *) data;
+	addr_pair = (const netsnmp_indexed_addr_pair *) data;
     } else if (t != NULL && t->data != NULL) {
-	addr_pair = (netsnmp_indexed_addr_pair *) t->data;
+	addr_pair = (const netsnmp_indexed_addr_pair *) t->data;
     }
 
     if (addr_pair == NULL) {
         snprintf(tmp, sizeof(tmp), "%s: unknown", prefix);
     } else {
-        struct sockaddr_in *to = NULL;
-        to = (struct sockaddr_in *) &(addr_pair->remote_addr);
+        const struct sockaddr_in *to;
+
+        to = (const struct sockaddr_in *) &(addr_pair->remote_addr);
         if (to == NULL) {
             snprintf(tmp, sizeof(tmp), "%s: unknown->[%s]:%hu", prefix,
                      inet_ntoa(addr_pair->local_addr.sin.sin_addr),
@@ -207,7 +208,7 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
         } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
             /* XXX: hmm...  why isn't this prefixed */
             /* assuming intentional */
-            host = netsnmp_gethostbyaddr((char *)&to->sin_addr, sizeof(struct in_addr), AF_INET);
+            host = netsnmp_gethostbyaddr(&to->sin_addr, sizeof(struct in_addr), AF_INET);
             return (host ? strdup(host->h_name) : NULL); 
         } else {
             snprintf(tmp, sizeof(tmp), "%s: [%s]:%hu->", prefix,

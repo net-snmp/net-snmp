@@ -45,15 +45,15 @@ static netsnmp_tdomain aal5pvcDomain;
  */
 
 static char *
-netsnmp_aal5pvc_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_aal5pvc_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
-    struct sockaddr_atmpvc *to = NULL;
+    const struct sockaddr_atmpvc *to = NULL;
 
     if (data != NULL && len == sizeof(struct sockaddr_atmpvc)) {
-        to = (struct sockaddr_atmpvc *) data;
+        to = (const struct sockaddr_atmpvc *) data;
     } else if (t != NULL && t->data != NULL &&
                t->data_length == sizeof(struct sockaddr_atmpvc)) {
-        to = (struct sockaddr_atmpvc *) t->data;
+        to = (const struct sockaddr_atmpvc *) t->data;
     }
     if (to == NULL) {
         return strdup("AAL5 PVC: unknown");
@@ -108,23 +108,23 @@ netsnmp_aal5pvc_recv(netsnmp_transport *t, void *buf, int size,
 
 
 static int
-netsnmp_aal5pvc_send(netsnmp_transport *t, void *buf, int size,
-                  void **opaque, int *olength)
+netsnmp_aal5pvc_send(netsnmp_transport *t, const void *buf, int size,
+                     void **opaque, int *olength)
 {
     int rc = -1;
-    struct sockaddr *to = NULL;
+    const struct sockaddr *to = NULL;
 
     if (opaque != NULL && *opaque != NULL &&
         *olength == sizeof(struct sockaddr_atmpvc)) {
-        to = (struct sockaddr *) (*opaque);
+        to = (const struct sockaddr *) (*opaque);
     } else if (t != NULL && t->data != NULL &&
                t->data_length == sizeof(struct sockaddr_atmpvc)) {
-        to = (struct sockaddr *) (t->data);
+        to = (const struct sockaddr *) (t->data);
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
         DEBUGIF("netsnmp_aal5pvc") {
-            char *str = netsnmp_aal5pvc_fmtaddr(NULL, (void *)to,
+            char *str = netsnmp_aal5pvc_fmtaddr(NULL, to,
                                                 sizeof(struct sockaddr_atmpvc));
             DEBUGMSGTL(("netsnmp_aal5pvc",
                         "send %d bytes from %p to %s on fd %d\n",
@@ -169,7 +169,7 @@ netsnmp_aal5pvc_close(netsnmp_transport *t)
  */
 
 netsnmp_transport *
-netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
+netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr, int local)
 {
     netsnmp_transport *t = NULL;
 
@@ -188,7 +188,7 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
     }
 
     DEBUGIF("netsnmp_aal5pvc") {
-        char *str = netsnmp_aal5pvc_fmtaddr(NULL, (void *) addr,
+        char *str = netsnmp_aal5pvc_fmtaddr(NULL, addr,
                                             sizeof(struct sockaddr_atmpvc));
         DEBUGMSGTL(("netsnmp_aal5pvc", "open %s %s\n",
                     local ? "local" : "remote", str));
@@ -244,7 +244,7 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
         t->local[7] = (addr->sap_addr.vci & 0x000000ff) >> 0;
         t->local_length = 8;
 
-        if (bind(t->sock, (struct sockaddr *) addr,
+        if (bind(t->sock, (const struct sockaddr *)addr,
                  sizeof(struct sockaddr_atmpvc)) < 0) {
             DEBUGMSGTL(("netsnmp_aal5pvc", "bind failed (%s)\n",
                         strerror(errno)));
@@ -271,7 +271,7 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
         t->remote[7] = (addr->sap_addr.vci & 0x000000ff) >> 0;
         t->remote_length = 8;
 
-        if (connect(t->sock, (struct sockaddr *) addr,
+        if (connect(t->sock, (const struct sockaddr *)addr,
                     sizeof(struct sockaddr_atmpvc)) < 0) {
             DEBUGMSGTL(("netsnmp_aal5pvc", "connect failed (%s)\n",
                         strerror(errno)));

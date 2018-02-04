@@ -24,7 +24,7 @@ extern          "C" {
  * Prototypes
  */
 
-    netsnmp_transport *netsnmp_udpipv4base_transport(struct sockaddr_in *addr,
+    netsnmp_transport *netsnmp_udpipv4base_transport(const struct sockaddr_in *addr,
                                                      int local);
 
 #if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
@@ -32,8 +32,9 @@ extern          "C" {
                                  struct sockaddr *from, socklen_t *fromlen,
                                  struct sockaddr *dstip, socklen_t *dstlen,
                                  int *if_index);
-    int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
-                               struct sockaddr *remote, void *data, int len);
+    int netsnmp_udpipv4_sendto(int fd, const struct in_addr *srcip,
+                               int if_index, const struct sockaddr *remote,
+                               const void *data, int len);
 #endif
 
 
