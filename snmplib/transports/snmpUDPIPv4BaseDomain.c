@@ -115,15 +115,12 @@ netsnmp_udpipv4base_transport(const struct sockaddr_in *addr, int local)
          * be INADDR_ANY, but certainly includes a port number.
          */
 
-        t->local = (u_char *) malloc(6);
+        t->local_length = sizeof(*addr);
+        t->local = netsnmp_memdup(addr, sizeof(*addr));
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->local, &addr->sin_addr.s_addr, 4);
-        t->local[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
-        t->local[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
-        t->local_length = 6;
 
 #ifndef WIN32
 #if defined(HAVE_IP_PKTINFO)
@@ -214,15 +211,12 @@ netsnmp_udpipv4base_transport(const struct sockaddr_in *addr, int local)
          */
 
         t->data = malloc(sizeof(netsnmp_indexed_addr_pair));
-        t->remote = (u_char *)malloc(6);
+        t->remote_length = sizeof(*addr);
+        t->remote = netsnmp_memdup(addr, sizeof(*addr));
         if (t->data == NULL || t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->remote, &addr->sin_addr.s_addr, 4);
-        t->remote[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
-        t->remote[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
-        t->remote_length = 6;
         memcpy(t->data, &addr_pair, sizeof(netsnmp_indexed_addr_pair));
         t->data_length = sizeof(netsnmp_indexed_addr_pair);
     }

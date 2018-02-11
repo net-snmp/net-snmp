@@ -217,15 +217,12 @@ netsnmp_ipx_transport(const struct sockaddr_ipx *addr, int local)
 
     if (local) {
 #ifndef NETSNMP_NO_LISTEN_SUPPORT
-        t->local = (unsigned char*)malloc(12);
+        t->local_length = sizeof(*addr);
+        t->local = netsnmp_memdup(addr, sizeof(*addr));
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(&(t->local[00]), (const u_char *)&addr->sipx_network, 4);
-        memcpy(&(t->local[04]), (const u_char *)&addr->sipx_node, 6);
-        memcpy(&(t->local[10]), (const u_char *)&addr->sipx_port, 2);
-        t->local_length = 12;
 
         /*
          * This session is inteneded as a server, so we must bind on to the
@@ -245,15 +242,12 @@ netsnmp_ipx_transport(const struct sockaddr_ipx *addr, int local)
         return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
-        t->remote = (unsigned char*)malloc(12);
+        t->remote_length = sizeof(*addr);
+        t->remote = netsnmp_memdup(addr, sizeof(*addr));
         if (t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(&(t->remote[00]), (const u_char *)&addr->sipx_network, 4);
-        memcpy(&(t->remote[04]), (const u_char *)&addr->sipx_node, 6);
-        memcpy(&(t->remote[10]), (const u_char *)&addr->sipx_port, 2);
-        t->remote_length = 12;
 
         /*
          * This is a client session.  Save the address in the
@@ -437,17 +431,11 @@ netsnmp_ipx_create_tstring(const char *str, int local,
 
 
 netsnmp_transport *
-netsnmp_ipx_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_ipx_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_ipx addr;
+    if (o_len == sizeof(struct sockaddr_ipx))
+        return netsnmp_ipx_transport(o, local);
 
-    if (o_len == 12) {
-        addr.sipx_family = AF_IPX;
-        memcpy((u_char *) & (addr.sipx_network), &(o[00]), 4);
-        memcpy((u_char *) & (addr.sipx_node), &(o[04]), 6);
-        memcpy((u_char *) & (addr.sipx_port), &(o[10]), 2);
-        return netsnmp_ipx_transport(&addr, local);
-    }
     return NULL;
 }
 

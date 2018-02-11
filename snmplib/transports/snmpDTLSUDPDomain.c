@@ -1535,28 +1535,16 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
 
 
 netsnmp_transport *
-netsnmp_dtlsudp_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_dtlsudp_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_in addr;
-
-    if (o_len == 6) {
-        unsigned short porttmp = (o[4] << 8) + o[5];
-        addr.sin_family = AF_INET;
-        memcpy((u_char *) & (addr.sin_addr.s_addr), o, 4);
-        addr.sin_port = htons(porttmp);
-        return netsnmp_dtlsudp_transport(&addr, local);
-    }
+    if (o_len == sizeof(struct sockaddr_in))
+        return netsnmp_dtlsudp_transport(o, local);
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-    else if (o_len == 18) {
-        struct sockaddr_in6 addr6;
-        unsigned short porttmp = (o[16] << 8) + o[17];
-        addr6.sin6_family = AF_INET6;
-        memcpy((u_char *) & (addr6.sin6_addr.s6_addr), o, 4);
-        addr6.sin6_port = htons(porttmp);
-        return netsnmp_dtlsudp6_transport(&addr6, local);
-    }
+    else if (o_len == sizeof(struct sockaddr_in6))
+        return netsnmp_dtlsudp6_transport(o, local);
 #endif
-    return NULL;
+    else
+        return NULL;
 }
 
 void

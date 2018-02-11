@@ -1007,7 +1007,7 @@ netsnmp_tlstcp_create_tstring(const char *str, int local,
 
 
 netsnmp_transport *
-netsnmp_tlstcp_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_tlstcp_create_ostring(const void *o, size_t o_len, int local)
 {
     char buf[SPRINT_MAX_LEN];
 

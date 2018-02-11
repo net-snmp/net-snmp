@@ -762,16 +762,13 @@ netsnmp_ssh_transport(const struct sockaddr_in *addr, int local)
             return NULL;
         }
 
-        t->remote = (u_char *)malloc(6);
-        if (t->remote == NULL) {
+        t->remote_length = sizeof(*addr);
+        t->remote = netsnmp_memdup(addr, sizeof(*addr));
+        if (!t->remote) {
             netsnmp_ssh_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->remote, &addr->sin_addr.s_addr, 4);
-        t->remote[4] = (htons(addr->sin_port) & 0xff00) >> 8;
-        t->remote[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
-        t->remote_length = 6;
 
         /*
          * This is a client-type session, so attempt to connect to the far
@@ -907,18 +904,9 @@ netsnmp_ssh_create_tstring(const char *str, int local,
 
 
 netsnmp_transport *
-netsnmp_ssh_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_ssh_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_in addr;
-
-    if (o_len == 6) {
-        unsigned short porttmp = (o[4] << 8) + o[5];
-        addr.sin_family = AF_INET;
-        memcpy((u_char *) & (addr.sin_addr.s_addr), o, 4);
-        addr.sin_port = htons(porttmp);
-        return netsnmp_ssh_transport(&addr, local);
-    }
-    return NULL;
+    return netsnmp_ssh_transport(o, local);
 }
 
 void

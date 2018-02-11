@@ -263,9 +263,9 @@ netsnmp_std_create_tstring(const char *instring, int local,
 }
 
 netsnmp_transport *
-netsnmp_std_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_std_create_ostring(const void *o, size_t o_len, int local)
 {
-    return netsnmp_std_transport((const char*)o, o_len, NULL);
+    return netsnmp_std_transport(o, o_len, NULL);
 }
 
 void

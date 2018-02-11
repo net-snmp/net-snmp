@@ -230,20 +230,12 @@ netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr, int local)
 
     if (local) {
 #ifndef NETSNMP_NO_LISTEN_SUPPORT
-        t->local = (unsigned char*)malloc(8);
+        t->local_length = sizeof(*addr);
+        t->local = netsnmp_memdup(addr, sizeof(*addr));
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
         }
-        t->local[0] = (addr->sap_addr.itf & 0xff00) >> 8;
-        t->local[1] = (addr->sap_addr.itf & 0x00ff) >> 0;
-        t->local[2] = (addr->sap_addr.vpi & 0xff00) >> 8;
-        t->local[3] = (addr->sap_addr.vpi & 0x00ff) >> 0;
-        t->local[4] = (addr->sap_addr.vci & 0xff000000) >> 24;
-        t->local[5] = (addr->sap_addr.vci & 0x00ff0000) >> 16;
-        t->local[6] = (addr->sap_addr.vci & 0x0000ff00) >> 8;
-        t->local[7] = (addr->sap_addr.vci & 0x000000ff) >> 0;
-        t->local_length = 8;
 
         if (bind(t->sock, (const struct sockaddr *)addr,
                  sizeof(struct sockaddr_atmpvc)) < 0) {
@@ -257,20 +249,12 @@ netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr, int local)
         return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
-        t->remote = (unsigned char*)malloc(8);
+        t->remote_length = sizeof(*addr);
+        t->remote = netsnmp_memdup(addr, sizeof(*addr));
         if (t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
         }
-        t->remote[0] = (addr->sap_addr.itf & 0xff00) >> 8;
-        t->remote[1] = (addr->sap_addr.itf & 0x00ff) >> 0;
-        t->remote[2] = (addr->sap_addr.vpi & 0xff00) >> 8;
-        t->remote[3] = (addr->sap_addr.vpi & 0x00ff) >> 0;
-        t->remote[4] = (addr->sap_addr.vci & 0xff000000) >> 24;
-        t->remote[5] = (addr->sap_addr.vci & 0x00ff0000) >> 16;
-        t->remote[6] = (addr->sap_addr.vci & 0x0000ff00) >> 8;
-        t->remote[7] = (addr->sap_addr.vci & 0x000000ff) >> 0;
-        t->remote_length = 8;
 
         if (connect(t->sock, (const struct sockaddr *)addr,
                     sizeof(struct sockaddr_atmpvc)) < 0) {
@@ -340,20 +324,9 @@ netsnmp_aal5pvc_create_tstring(const char *str, int local,
 
 
 netsnmp_transport *
-netsnmp_aal5pvc_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_aal5pvc_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_atmpvc addr;
-
-    if (o_len == 8) {
-        addr.sap_family = AF_ATMPVC;
-        addr.sap_addr.itf = (o[0] << 8) + (o[1] << 0);
-        addr.sap_addr.vpi = (o[2] << 8) + (o[3] << 0);
-        addr.sap_addr.vci =
-	    (o[4] << 24) + (o[5] << 16) + (o[6] << 8) + (o[7] << 0);
-        return netsnmp_aal5pvc_transport(&addr, local);
-    }
-
-    return NULL;
+    return netsnmp_aal5pvc_transport(o, local);
 }
 
 

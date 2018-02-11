@@ -118,12 +118,12 @@ typedef struct netsnmp_transport_s {
 
     /*  Local transport address (in relevant SNMP-style encoding).  */
     
-    unsigned char  *local;
+    void           *local;
     int             local_length;   /*  In octets.  */
 
     /*  Remote transport address (in relevant SNMP-style encoding).  */
 
-    unsigned char  *remote;
+    void           *remote;
     int             remote_length;  /*  In octets.  */
 
     /*  The actual socket.  */
@@ -209,7 +209,7 @@ typedef struct netsnmp_tdomain_s {
      */
     netsnmp_transport *(*f_create_from_tstring) (const char *, int);
 
-    netsnmp_transport *(*f_create_from_ostring) (const u_char *, size_t, int);
+    netsnmp_transport *(*f_create_from_ostring) (const void *, size_t, int);
 
     struct netsnmp_tdomain_s *next;
 
