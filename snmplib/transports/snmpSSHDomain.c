@@ -113,16 +113,12 @@ netsnmp_ssh_fmtaddr(netsnmp_transport *t, const void *data, int len)
         return strdup("SSH: unknown");
     } else {
         const struct sockaddr_in *to;
-	char tmp[64];
+	char *tmp = NULL;
 
         to = (const struct sockaddr_in *) &(addr_pair->remote_addr);
-        if (to == NULL) {
-            return strdup("SSH: unknown");
-        }
-
-        sprintf(tmp, "SSH: [%s]:%hd",
-                inet_ntoa(to->sin_addr), ntohs(to->sin_port));
-        return strdup(tmp);
+        asprintf(&tmp, "SSH: [%s]:%hd",
+                 inet_ntoa(to->sin_addr), ntohs(to->sin_port));
+        return tmp;
     }
 }
 

@@ -58,10 +58,11 @@ netsnmp_aal5pvc_fmtaddr(netsnmp_transport *t, const void *data, int len)
     if (to == NULL) {
         return strdup("AAL5 PVC: unknown");
     } else {
-        char tmp[64];
-        sprintf(tmp, "AAL5 PVC: %hd.%hd.%d", to->sap_addr.itf,
-                to->sap_addr.vpi, to->sap_addr.vci);
-        return strdup(tmp);
+        char *tmp = NULL;
+
+        asprintf(&tmp, "AAL5 PVC: %hd.%hd.%d", to->sap_addr.itf,
+                 to->sap_addr.vpi, to->sap_addr.vci);
+        return tmp;
     }
 }
 

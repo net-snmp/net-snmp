@@ -57,12 +57,13 @@ netsnmp_ipx_fmtaddr(netsnmp_transport *t, const void *data, int len)
     if (to == NULL) {
         return strdup("IPX: unknown");
     } else {
-        char tmp[64];
-        sprintf(tmp, "IPX: %08X:%02X%02X%02X%02X%02X%02X/%hu",
-                ntohl(to->sipx_network), to->sipx_node[0],
-                to->sipx_node[1], to->sipx_node[2], to->sipx_node[3],
-                to->sipx_node[4], to->sipx_node[5], ntohs(to->sipx_port));
-        return strdup(tmp);
+        char *tmp = NULL;
+
+        asprintf(&tmp, "IPX: %08X:%02X%02X%02X%02X%02X%02X/%hu",
+                 ntohl(to->sipx_network), to->sipx_node[0],
+                 to->sipx_node[1], to->sipx_node[2], to->sipx_node[3],
+                 to->sipx_node[4], to->sipx_node[5], ntohs(to->sipx_port));
+        return tmp;
     }
 }
 

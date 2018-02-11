@@ -77,12 +77,10 @@ netsnmp_unix_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
     const struct sockaddr_un *to = NULL;
 
-    if (data != NULL) {
+    if (data != NULL)
         to = (const struct sockaddr_un *) data;
-    } else if (t != NULL && t->data != NULL) {
+    else if (t != NULL && t->data != NULL)
         to = &(((const sockaddr_un_pair *) t->data)->server);
-        len = SUN_LEN(to);
-    }
     if (to == NULL) {
         /*
          * "Local IPC" is the Posix.1g term for Unix domain protocols,
@@ -97,10 +95,9 @@ netsnmp_unix_fmtaddr(netsnmp_transport *t, const void *data, int len)
          */
         return strdup("Local IPC: abstract");
     } else {
-        char           *tmp = (char *) malloc(16 + len);
-        if (tmp != NULL) {
-            sprintf(tmp, "Local IPC: %s", to->sun_path);
-        }
+        char *tmp = NULL;
+
+        asprintf(&tmp, "Local IPC: %s", to->sun_path);
         return tmp;
     }
 }

@@ -99,9 +99,10 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
         return netsnmp_ipv4_fmtaddr("TLSTCP", t, data, len);
     else {
         /* an already ascii formatted string */
-        char buf[1024];
-        snprintf(buf, sizeof(buf)-1, "TLSTCP: %s", (const char *) data);
-        return strdup(buf);
+        char *buf = NULL;
+
+        asprintf(&buf, "TLSTCP: %s", (const char *) data);
+        return buf;
     }
 }
 /*
