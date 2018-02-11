@@ -607,7 +607,6 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 {
     int             rc = -1;
     netsnmp_indexed_addr_pair *addr_pair = NULL;
-    struct sockaddr *from;
     netsnmp_tmStateReference *tmStateRef = NULL;
     _netsnmpTLSBaseData *tlsdata;
     bio_cache *cachep;
@@ -634,14 +633,17 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
     addr_pair = &tmStateRef->addresses;
     tmStateRef->have_addresses = 1;
-    from = (struct sockaddr *) &(addr_pair->remote_addr);
 
     while (rc < 0) {
         char *opaque = NULL;
         int olen;
         rc = t->base_transport->f_recv(t, buf, size, (void**)&opaque, &olen);
-        if (rc > 0)
-            memcpy(from, opaque, olen);
+        if (rc > 0) {
+            if (olen > sizeof(*addr_pair))
+                snmp_log(LOG_ERR, "%s: from address length %d > %d\n",
+                         __func__, olen, (int)sizeof(*addr_pair));
+            memcpy(addr_pair, opaque, SNMP_MIN(sizeof(*addr_pair), olen));
+        }
         SNMP_FREE(opaque);
         if (rc < 0 && errno != EINTR) {
             break;
