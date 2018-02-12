@@ -114,6 +114,10 @@ int             doalltests = 0, docrypt = 0, dokeyedhash = 0, dorandom = 0;
 
 #define MLCOUNT_MAX	6       /* MAC Length Count Maximum. */
 
+static void usage(void);
+static int test_docrypt(void);
+static int test_dokeyedhash(void);
+static int test_dorandom(void);
 
 int
 main(int argc, char **argv)
@@ -142,6 +146,7 @@ main(int argc, char **argv)
             break;
         case 'h':
             rval = 0;
+            /* fall through */
         default:
             usage();
             exit(rval);

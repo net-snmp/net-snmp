@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 
+static void print_hash(const char *label, u_char *MAC, size_t MAC_LEN);
 
 int
 main(int argc, char **argv) {

@@ -102,6 +102,10 @@ const u_char   *oldkey = NULL;
 const u_char   *newkey = NULL;
 int             bequiet = 0;
 
+static void usage(FILE *);
+static int test_genKu(void);
+static int test_genkul(void);
+static int test_keychange(void);
 
 int
 main(int argc, char **argv)
@@ -146,6 +150,7 @@ main(int argc, char **argv)
             break;
         case 'h':
             rval = 0;
+            /* fall through */
         default:
             usage(stdout);
             exit(rval);
