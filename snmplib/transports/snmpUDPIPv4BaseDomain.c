@@ -63,15 +63,16 @@ int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                                     if_index);
 }
 
-int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
-                           struct sockaddr *remote, void *data, int len)
+int netsnmp_udpipv4_sendto(int fd, const struct in_addr *srcip, int if_index,
+                           const struct sockaddr *remote, const void *data,
+                           int len)
 {
     return netsnmp_udpbase_sendto(fd, srcip, if_index, remote, data, len);
 }
 #endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */
 
 netsnmp_transport *
-netsnmp_udpipv4base_transport_init(struct sockaddr_in *addr, int local)
+netsnmp_udpipv4base_transport_init(const struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t;
     u_char *addr_ptr;
@@ -101,7 +102,7 @@ netsnmp_udpipv4base_transport_init(struct sockaddr_in *addr, int local)
         t->remote = addr_ptr;
         t->remote_length = 6;
     }
-    memcpy(addr_ptr, (u_char *) & (addr->sin_addr.s_addr), 4);
+    memcpy(addr_ptr, &addr->sin_addr.s_addr, 4);
     addr_ptr[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
     addr_ptr[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
 
@@ -154,7 +155,7 @@ netsnmp_udpipv4base_transport_socket(int flags)
 
 int
 netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
-                                   struct sockaddr_in *addr, int flags)
+                                   const struct sockaddr_in *addr, int flags)
 {
 #if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
     int                sockopt = 1;
@@ -206,7 +207,7 @@ netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
                     t->sock, str));
         free(str);
     }
-    rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
+    rc = bind(t->sock, addr, sizeof(struct sockaddr));
     if ( rc != 0 ) {
         DEBUGMSGTL(("netsnmp_udpbase",
                     "failed to bind for clientaddr: %d %s\n",
@@ -249,11 +250,12 @@ netsnmp_udpipv4base_transport_get_bound_addr(netsnmp_transport *t)
 }
 
 netsnmp_transport *
-netsnmp_udpipv4base_transport_with_source(struct sockaddr_in *addr, int local,
-                                          struct sockaddr_in *src_addr)
+netsnmp_udpipv4base_transport_with_source(const struct sockaddr_in *addr,
+                                          int local,
+                                          const struct sockaddr_in *src_addr)
 {
     netsnmp_transport         *t = NULL;
-    struct sockaddr_in         *bind_addr;
+    const struct sockaddr_in  *bind_addr;
     int                        rc, flags = 0;
 
     t = netsnmp_udpipv4base_transport_init(addr, local);
@@ -333,7 +335,7 @@ netsnmp_udpipv4base_tspec_transport(netsnmp_tdomain_spec *tspec)
 }
 
 netsnmp_transport *
-netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
+netsnmp_udpipv4base_transport(const struct sockaddr_in *addr, int local)
 {
     if (!local) {
         /*

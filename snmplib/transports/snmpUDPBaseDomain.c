@@ -235,8 +235,9 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     return r;
 }
 
-int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
-                           struct sockaddr *remote, void *data, int len)
+int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
+                           const struct sockaddr *remote, const void *data,
+                           int len)
 {
 #if !defined(WIN32)
     struct iovec iov;
@@ -244,10 +245,10 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
     int           rc;
 
-    iov.iov_base = data;
+    iov.iov_base = NETSNMP_REMOVE_CONST(void *, data);
     iov.iov_len  = len;
 
-    m.msg_name		= remote;
+    m.msg_name		= NETSNMP_REMOVE_CONST(void *, remote);
     m.msg_namelen	= sizeof(struct sockaddr_in);
     m.msg_iov		= &iov;
     m.msg_iovlen	= 1;
@@ -441,17 +442,17 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
 
 
 int
-netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
+netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
                      void **opaque, int *olength)
 {
     int rc = -1;
-    netsnmp_indexed_addr_pair *addr_pair = NULL;
-    struct sockaddr *to = NULL;
+    const netsnmp_indexed_addr_pair *addr_pair = NULL;
+    const struct sockaddr *to = NULL;
 
     if (opaque != NULL && *opaque != NULL && NULL != olength &&
         ((*olength == sizeof(netsnmp_indexed_addr_pair) ||
           (*olength == sizeof(struct sockaddr_in))))) {
-        addr_pair = (netsnmp_indexed_addr_pair *) (*opaque);
+        addr_pair = (const netsnmp_indexed_addr_pair *) (*opaque);
     } else if (t != NULL && t->data != NULL &&
                 t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
         addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
@@ -469,7 +470,7 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
 
     if (to != NULL && t != NULL && t->sock >= 0) {
         DEBUGIF("netsnmp_udp") {
-            char *str = netsnmp_udp_fmtaddr(NULL, (void *) addr_pair,
+            char *str = netsnmp_udp_fmtaddr(NULL, addr_pair,
                                             sizeof(netsnmp_indexed_addr_pair));
             DEBUGMSGTL(("netsnmp_udp", "send %d bytes from %p to %s on fd %d\n",
                         size, buf, str, t->sock));

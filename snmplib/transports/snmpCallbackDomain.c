@@ -153,7 +153,7 @@ callback_pop_queue(int num)
  */
 
 char *
-netsnmp_callback_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_callback_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
     char buf[SPRINT_MAX_LEN];
     netsnmp_callback_info *mystuff;
@@ -222,7 +222,7 @@ netsnmp_callback_recv(netsnmp_transport *t, void *buf, int size,
 
 
 int
-netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
+netsnmp_callback_send(netsnmp_transport *t, const void *buf, int size,
 		      void **opaque, int *olength)
 {
     int from, rc = -1;

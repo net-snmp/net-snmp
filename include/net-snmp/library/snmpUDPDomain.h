@@ -25,15 +25,16 @@ config_require(UDPIPv4Base)
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 
 NETSNMP_IMPORT
-netsnmp_transport *netsnmp_udp_transport(struct sockaddr_in *addr, int local);
+netsnmp_transport *netsnmp_udp_transport(const struct sockaddr_in *addr,
+                                         int local);
 
 NETSNMP_IMPORT
 netsnmp_transport *netsnmp_udp_create_tspec(netsnmp_tdomain_spec *tspec);
 
 NETSNMP_IMPORT
 netsnmp_transport *
-netsnmp_udp_transport_with_source(struct sockaddr_in *addr, int local,
-                                  struct sockaddr_in *src_addr);
+netsnmp_udp_transport_with_source(const struct sockaddr_in *addr, int local,
+                                  const struct sockaddr_in *src_addr);
 
 #define C2SE_ERR_SUCCESS             0
 #define C2SE_ERR_MISSING_ARG        -1
@@ -84,13 +85,14 @@ void            netsnmp_udp_ctor(void);
 /*
  * protected-ish functions used by other core-code
  */
-char *netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len);
+char *netsnmp_udp_fmtaddr(netsnmp_transport *t, const void *data, int len);
 #if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
 int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from,
                          socklen_t *fromlen, struct sockaddr *dstip,
                          socklen_t *dstlen, int *if_index);
-int netsnmp_udp_sendto(int fd, struct in_addr *srcip, int if_index,
-					   struct sockaddr *remote, void *data, int len);
+int netsnmp_udp_sendto(int fd, const struct in_addr *srcip, int if_index,
+                       const struct sockaddr *remote, const void *data,
+                       int len);
 #endif
 
 #ifdef __cplusplus

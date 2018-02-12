@@ -99,22 +99,23 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
  */
 
 static char *
-netsnmp_ssh_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_ssh_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
-    netsnmp_ssh_addr_pair *addr_pair = NULL;
+    const netsnmp_ssh_addr_pair *addr_pair = NULL;
 
     if (data != NULL && len == sizeof(netsnmp_ssh_addr_pair)) {
-	addr_pair = (netsnmp_ssh_addr_pair *) data;
+	addr_pair = (const netsnmp_ssh_addr_pair *) data;
     } else if (t != NULL && t->data != NULL) {
-	addr_pair = (netsnmp_ssh_addr_pair *) t->data;
+	addr_pair = (const netsnmp_ssh_addr_pair *) t->data;
     }
 
     if (addr_pair == NULL) {
         return strdup("SSH: unknown");
     } else {
-        struct sockaddr_in *to = NULL;
+        const struct sockaddr_in *to;
 	char tmp[64];
-        to = (struct sockaddr_in *) &(addr_pair->remote_addr);
+
+        to = (const struct sockaddr_in *) &(addr_pair->remote_addr);
         if (to == NULL) {
             return strdup("SSH: unknown");
         }
@@ -362,13 +363,13 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
 
 
 static int
-netsnmp_ssh_send(netsnmp_transport *t, void *buf, int size,
+netsnmp_ssh_send(netsnmp_transport *t, const void *buf, int size,
 		 void **opaque, int *olength)
 {
     int rc = -1;
 
     netsnmp_ssh_addr_pair *addr_pair = NULL;
-    netsnmp_tmStateReference *tmStateRef = NULL;
+    const netsnmp_tmStateReference *tmStateRef = NULL;
 
     if (t != NULL && t->data != NULL) {
 	addr_pair = (netsnmp_ssh_addr_pair *) t->data;
@@ -376,7 +377,7 @@ netsnmp_ssh_send(netsnmp_transport *t, void *buf, int size,
 
     if (opaque != NULL && *opaque != NULL &&
         *olength == sizeof(netsnmp_tmStateReference)) {
-        tmStateRef = (netsnmp_tmStateReference *) *opaque;
+        tmStateRef = (const netsnmp_tmStateReference *) *opaque;
     }
 
     if (!tmStateRef) {
@@ -569,7 +570,7 @@ netsnmp_ssh_accept(netsnmp_transport *t)
  */
 
 netsnmp_transport *
-netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
+netsnmp_ssh_transport(const struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
     netsnmp_ssh_addr_pair *addr_pair = NULL;
@@ -646,7 +647,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
         }
 
         unlink(unaddr->sun_path);
-        rc = bind(t->sock, (struct sockaddr *) unaddr, SUN_LEN(unaddr));
+        rc = bind(t->sock, unaddr, SUN_LEN(unaddr));
         if (rc != 0) {
             DEBUGMSGTL(("netsnmp_ssh_transport",
                         "couldn't bind \"%s\", errno %d (%s)\n",
@@ -775,7 +776,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->remote, (u_char *) & (addr->sin_addr.s_addr), 4);
+        memcpy(t->remote, &addr->sin_addr.s_addr, 4);
         t->remote[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
         t->remote[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
         t->remote_length = 6;
@@ -787,8 +788,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
          * had completed.  So this can block.
          */
 
-        rc = connect(t->sock, (struct sockaddr *)addr,
-		     sizeof(struct sockaddr));
+        rc = connect(t->sock, addr, sizeof(struct sockaddr));
 
         if (rc < 0) {
             netsnmp_ssh_close(t);

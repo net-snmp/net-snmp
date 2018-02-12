@@ -38,7 +38,7 @@ static netsnmp_tdomain stdDomain;
  */
 
 static char *
-netsnmp_std_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_std_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
     char *buf;
     DEBUGMSGTL(("domain:std","formatting addr.  data=%p\n",t->data));
@@ -90,7 +90,7 @@ netsnmp_std_recv(netsnmp_transport *t, void *buf, int size,
 
 
 static int
-netsnmp_std_send(netsnmp_transport *t, void *buf, int size,
+netsnmp_std_send(netsnmp_transport *t, const void *buf, int size,
 		 void **opaque, int *olength)
 {
     int rc = -1;

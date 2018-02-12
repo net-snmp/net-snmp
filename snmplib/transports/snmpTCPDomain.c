@@ -70,7 +70,7 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
  */
 
 static char *
-netsnmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_tcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
     return netsnmp_ipv4_fmtaddr("TCP", t, data, len);
 }
@@ -148,7 +148,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
  */
 
 netsnmp_transport *
-netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
+netsnmp_tcp_transport(const struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
     netsnmp_udp_addr_pair *addr_pair = NULL;
@@ -220,7 +220,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->local, (u_char *) & (addr->sin_addr.s_addr), 4);
+        memcpy(t->local, &addr->sin_addr.s_addr, 4);
         t->local[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
         t->local[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
         t->local_length = 6;
@@ -233,7 +233,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 		   sizeof(opt));
 
         if (!socket_initialized) {
-            rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
+            rc = bind(t->sock, addr, sizeof(struct sockaddr));
             if (rc != 0) {
                 netsnmp_socketbase_close(t);
                 netsnmp_transport_free(t);
@@ -276,7 +276,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->remote, (u_char *) & (addr->sin_addr.s_addr), 4);
+        memcpy(t->remote, &addr->sin_addr.s_addr, 4);
         t->remote[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
         t->remote[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
         t->remote_length = 6;
@@ -288,8 +288,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
          * had completed.  So this can block.
          */
 
-        rc = connect(t->sock, (struct sockaddr *)addr,
-		     sizeof(struct sockaddr));
+        rc = connect(t->sock, addr, sizeof(struct sockaddr));
 
         if (rc < 0) {
             netsnmp_socketbase_close(t);

@@ -33,13 +33,13 @@ extern          "C" {
      */
     void            netsnmp_udpshared_ctor(void);
 
-    netsnmp_transport *netsnmp_udpshared_transport(struct sockaddr_in *addr,
+    netsnmp_transport *netsnmp_udpshared_transport(const struct sockaddr_in *addr,
                                                    int local);
 
     netsnmp_transport *
-    netsnmp_udpshared_transport_with_source(struct sockaddr_in *addr,
+    netsnmp_udpshared_transport_with_source(const struct sockaddr_in *addr,
                                             int local,
-                                            struct sockaddr_in *src_addr);
+                                            const struct sockaddr_in *src_addr);
 
 #ifdef __cplusplus
 }

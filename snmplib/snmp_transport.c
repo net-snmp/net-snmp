@@ -152,7 +152,7 @@ shutdown_snmp_transport(void)
  * Make a deep copy of an netsnmp_transport.  
  */
 netsnmp_transport *
-netsnmp_transport_copy(netsnmp_transport *t)
+netsnmp_transport_copy(const netsnmp_transport *t)
 {
     netsnmp_transport *n = NULL;
 
@@ -261,7 +261,7 @@ netsnmp_transport_free(netsnmp_transport *t)
  * caller is responsible for freeing the allocated string.
  */
 char *
-netsnmp_transport_peer_string(netsnmp_transport *t, void *data, int len)
+netsnmp_transport_peer_string(netsnmp_transport *t, const void *data, int len)
 {
     char           *str;
 
@@ -381,7 +381,7 @@ netsnmp_transport_filter_cleanup(void)
 
 #ifndef NETSNMP_FEATURE_REMOVE_SOCKADDR_SIZE
 int
-netsnmp_sockaddr_size(struct sockaddr *sa)
+netsnmp_sockaddr_size(const struct sockaddr *sa)
 {
     if (NULL == sa)
         return 0;
@@ -402,7 +402,7 @@ netsnmp_sockaddr_size(struct sockaddr *sa)
 #endif /* NETSNMP_FEATURE_REMOVE_SOCKADDR_SIZE */
     
 int
-netsnmp_transport_send(netsnmp_transport *t, void *packet, int length,
+netsnmp_transport_send(netsnmp_transport *t, const void *packet, int length,
                        void **opaque, int *olength)
 {
     int dumpPacket, debugLength;
@@ -1124,7 +1124,7 @@ _tc_remove(trans_cache *tc)
 }
 
 static trans_cache *
-_tc_create(int af, int type, int local, netsnmp_sockaddr_storage *addr,
+_tc_create(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
            netsnmp_transport *t)
 {
     trans_cache *tc = SNMP_MALLOC_TYPEDEF(trans_cache);
@@ -1147,7 +1147,7 @@ _tc_create(int af, int type, int local, netsnmp_sockaddr_storage *addr,
 }
 
 static trans_cache *
-_tc_add(int af, int type, int local, netsnmp_sockaddr_storage *addr,
+_tc_add(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
         netsnmp_transport *t)
 {
     trans_cache *tc;
@@ -1179,7 +1179,7 @@ _tc_add(int af, int type, int local, netsnmp_sockaddr_storage *addr,
 }
 
 trans_cache *
-_tc_find(int af, int type, int local, netsnmp_sockaddr_storage *addr)
+_tc_find(int af, int type, int local, const netsnmp_sockaddr_storage *addr)
 {
     trans_cache tc, *rtn;
 
@@ -1273,7 +1273,7 @@ netsnmp_transport_cache_remove(netsnmp_transport *t)
  */
 netsnmp_transport *
 netsnmp_transport_cache_get(int af, int type, int local,
-                            netsnmp_sockaddr_storage *bind_addr)
+                            const netsnmp_sockaddr_storage *bind_addr)
 {
     trans_cache       *tc;
     netsnmp_transport *t;
@@ -1321,7 +1321,7 @@ netsnmp_transport_cache_get(int af, int type, int local,
 
 int
 netsnmp_transport_cache_save(int af, int type, int local,
-                             netsnmp_sockaddr_storage *addr,
+                             const netsnmp_sockaddr_storage *addr,
                              netsnmp_transport *t)
 {
     if (NULL == t)

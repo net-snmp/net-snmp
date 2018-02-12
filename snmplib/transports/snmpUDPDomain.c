@@ -95,7 +95,7 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
  */
 
 char *
-netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_udp_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
     return netsnmp_ipv4_fmtaddr("UDP", t, data, len);
 }
@@ -110,8 +110,8 @@ int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, sockl
                                     if_index);
 }
 
-int netsnmp_udp_sendto(int fd, struct in_addr *srcip, int if_index, struct sockaddr *remote,
-                void *data, int len)
+int netsnmp_udp_sendto(int fd, const struct in_addr *srcip, int if_index,
+                       const struct sockaddr *remote, const void *data, int len)
 {
     /** udpiv4 just calls udpbase. should we skip directly to there? */
     return netsnmp_udpipv4_sendto(fd, srcip, if_index, remote, data, len);
@@ -156,7 +156,7 @@ netsnmp_udp_transport_base(netsnmp_transport *t)
  * the remote address to send things to.
  */
 netsnmp_transport *
-netsnmp_udp_transport(struct sockaddr_in *addr, int local)
+netsnmp_udp_transport(const struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
 
@@ -174,8 +174,8 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
  * to send from.
  */
 netsnmp_transport *
-netsnmp_udp_transport_with_source(struct sockaddr_in *addr, int local,
-                                  struct sockaddr_in *src_addr)
+netsnmp_udp_transport_with_source(const struct sockaddr_in *addr, int local,
+                                  const struct sockaddr_in *src_addr)
 
 {
     netsnmp_transport *t = NULL;

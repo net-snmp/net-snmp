@@ -90,7 +90,7 @@ static netsnmp_tdomain udp6Domain;
  */
 
 static char *
-netsnmp_udp6_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_udp6_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
     return netsnmp_ipv6_fmtaddr("UDP/IPv6", t, data, len);
 }
@@ -149,24 +149,24 @@ netsnmp_udp6_recv(netsnmp_transport *t, void *buf, int size,
 
 
 static int
-netsnmp_udp6_send(netsnmp_transport *t, void *buf, int size,
+netsnmp_udp6_send(netsnmp_transport *t, const void *buf, int size,
 		  void **opaque, int *olength)
 {
     int rc = -1;
-    struct sockaddr *to = NULL;
+    const struct sockaddr *to = NULL;
 
     if (opaque != NULL && *opaque != NULL &&
         *olength == sizeof(struct sockaddr_in6)) {
-        to = (struct sockaddr *) (*opaque);
+        to = (const struct sockaddr *) (*opaque);
     } else if (t != NULL && t->data != NULL &&
                ((t->data_length == sizeof(struct sockaddr_in6)) ||
                 (t->data_length == sizeof(netsnmp_indexed_addr_pair)))) {
-        to = (struct sockaddr *) (t->data);
+        to = (const struct sockaddr *) (t->data);
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
         DEBUGIF("netsnmp_udp6") {
-            char *str = netsnmp_udp6_fmtaddr(NULL, (void *)to,
+            char *str = netsnmp_udp6_fmtaddr(NULL, to,
                                              sizeof(struct sockaddr_in6));
             DEBUGMSGTL(("netsnmp_udp6",
                         "send %d bytes from %p to %s on fd %d\n",
@@ -191,7 +191,7 @@ netsnmp_udp6_send(netsnmp_transport *t, void *buf, int size,
  */
 
 netsnmp_transport *
-netsnmp_udp6_transport_init(struct sockaddr_in6 *addr, int flags)
+netsnmp_udp6_transport_init(const struct sockaddr_in6 *addr, int flags)
 {
     netsnmp_transport *t = NULL;
     int             local = flags & NETSNMP_TSPEC_LOCAL;
@@ -232,7 +232,7 @@ netsnmp_udp6_transport_init(struct sockaddr_in6 *addr, int flags)
     addr_ptr[17] = (ntohs(addr->sin6_port) & 0x00ff) >> 0;
 
     DEBUGIF("netsnmp_udp6") {
-        char *str = netsnmp_udp6_fmtaddr(NULL, (void *)addr, sizeof(*addr));
+        char *str = netsnmp_udp6_fmtaddr(NULL, addr, sizeof(*addr));
         DEBUGMSGTL(("netsnmp_udp6", "open %s %s\n", local ? "local" : "remote",
                     str));
         free(str);
@@ -275,7 +275,8 @@ netsnmp_udp6_transport_init(struct sockaddr_in6 *addr, int flags)
 }
 
 int
-netsnmp_udp6_transport_bind(netsnmp_transport *t, struct sockaddr_in6 *addr,
+netsnmp_udp6_transport_bind(netsnmp_transport *t,
+                            const struct sockaddr_in6 *addr,
                             int flags)
 {
     int             local = flags & NETSNMP_TSPEC_LOCAL;
@@ -305,12 +306,12 @@ netsnmp_udp6_transport_bind(netsnmp_transport *t, struct sockaddr_in6 *addr,
 
     DEBUGIF("netsnmp_udp6") {
         char *str;
-        str = netsnmp_udp6_fmtaddr(NULL, (void *)addr, sizeof(*addr));
+        str = netsnmp_udp6_fmtaddr(NULL, addr, sizeof(*addr));
         DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d to %s\n",
                     t->sock, str));
         free(str);
     }
-    rc = bind(t->sock, (struct sockaddr *)addr, sizeof(*addr));
+    rc = bind(t->sock, addr, sizeof(*addr));
     if (rc != 0) {
         DEBUGMSGTL(("netsnmp_udp6", "failed to bind for clientaddr: %d %s\n",
                     errno, strerror(errno)));
@@ -399,11 +400,11 @@ netsnmp_udpipv6base_tspec_transport(netsnmp_tdomain_spec *tspec)
 }
 
 netsnmp_transport *
-netsnmp_udp6_transport_with_source(struct sockaddr_in6 *addr, int local,
-                                   struct sockaddr_in6 *src_addr)
+netsnmp_udp6_transport_with_source(const struct sockaddr_in6 *addr, int local,
+                                   const struct sockaddr_in6 *src_addr)
 {
     netsnmp_transport         *t = NULL;
-    struct sockaddr_in6        *bind_addr;
+    const struct sockaddr_in6 *bind_addr;
     int                        rc, flags = 0;
 
     t = netsnmp_udp6_transport_init(addr, local);
@@ -457,7 +458,7 @@ netsnmp_udp6_transport_with_source(struct sockaddr_in6 *addr, int local,
  */
 
 netsnmp_transport *
-netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
+netsnmp_udp6_transport(const struct sockaddr_in6 *addr, int local)
 {
     if (!local) {
         const char *client_socket;

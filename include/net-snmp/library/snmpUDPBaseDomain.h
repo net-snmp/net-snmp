@@ -21,7 +21,7 @@ extern          "C" {
     void _netsnmp_udp_sockopt_set(int fd, int local);
     int netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
                              void **opaque, int *olength);
-    int netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
+    int netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
                              void **opaque, int *olength);
 
 #if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
@@ -29,8 +29,9 @@ extern          "C" {
                                  struct sockaddr *from, socklen_t *fromlen,
                                  struct sockaddr *dstip, socklen_t *dstlen,
                                  int *if_index);
-    int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
-                               struct sockaddr *remote, void *data, int len);
+    int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip,
+                               int if_index, const struct sockaddr *remote,
+                               const void *data, int len);
 #endif
 
 #ifdef __cplusplus

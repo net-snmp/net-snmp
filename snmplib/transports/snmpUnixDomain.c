@@ -77,14 +77,14 @@ typedef struct _sockaddr_un_pair {
  */
 
 static char *
-netsnmp_unix_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_unix_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
-    struct sockaddr_un *to = NULL;
+    const struct sockaddr_un *to = NULL;
 
     if (data != NULL) {
-        to = (struct sockaddr_un *) data;
+        to = (const struct sockaddr_un *) data;
     } else if (t != NULL && t->data != NULL) {
-        to = &(((sockaddr_un_pair *) t->data)->server);
+        to = &(((const sockaddr_un_pair *) t->data)->server);
         len = SUN_LEN(to);
     }
     if (to == NULL) {
@@ -163,7 +163,7 @@ netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
 
 
 static int
-netsnmp_unix_send(netsnmp_transport *t, void *buf, int size,
+netsnmp_unix_send(netsnmp_transport *t, const void *buf, int size,
                   void **opaque, int *olength)
 {
     int rc = -1;
@@ -294,7 +294,7 @@ void netsnmp_unix_dont_create_path(void)
  */
 
 netsnmp_transport *
-netsnmp_unix_transport(struct sockaddr_un *addr, int local)
+netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
 {
     netsnmp_transport *t = NULL;
     sockaddr_un_pair *sup = NULL;
@@ -318,7 +318,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     }
 
     DEBUGIF("netsnmp_unix") {
-        char *str = netsnmp_unix_fmtaddr(NULL, (void *)addr,
+        char *str = netsnmp_unix_fmtaddr(NULL, addr,
                                          sizeof(struct sockaddr_un));
         DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
                     str));
@@ -375,7 +375,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 
         if (!socket_initialized) {
             unlink(addr->sun_path);
-            rc = bind(t->sock, (struct sockaddr *) addr, SUN_LEN(addr));
+            rc = bind(t->sock, addr, SUN_LEN(addr));
             if (rc != 0 && errno == ENOENT && create_path) {
                 rc = mkdirhier(addr->sun_path, create_mode, 1);
                 if (rc != 0) {
@@ -383,7 +383,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
                     netsnmp_transport_free(t);
                     return NULL;
                 }
-                rc = bind(t->sock, (struct sockaddr *) addr, SUN_LEN(addr));
+                rc = bind(t->sock, addr, SUN_LEN(addr));
             }
             if (rc != 0) {
                 DEBUGMSGTL(("netsnmp_unix_transport",
@@ -428,8 +428,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         memcpy(t->remote, addr->sun_path, strlen(addr->sun_path));
         t->remote_length = strlen(addr->sun_path);
 
-        rc = connect(t->sock, (struct sockaddr *) addr,
-                     sizeof(struct sockaddr_un));
+        rc = connect(t->sock, addr, sizeof(struct sockaddr_un));
         if (rc != 0) {
             DEBUGMSGTL(("netsnmp_unix_transport",
                         "couldn't connect to \"%s\", errno %d (%s)\n",

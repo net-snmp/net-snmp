@@ -94,6 +94,9 @@ int             sleeptime = 2;
 
 #define BLAT "alk;djf;an riu;alicenmrul;aiknglksajhe1 adcfalcenrco2"
 
+static void usage(FILE *);
+static int test_hashindex(void);
+static int test_etime(void);
 
 int
 main(int argc, char **argv)
@@ -127,6 +130,7 @@ main(int argc, char **argv)
             break;
         case 'h':
             rval = 0;
+            /* fall through */
         default:
             usage(stdout);
             exit(rval);

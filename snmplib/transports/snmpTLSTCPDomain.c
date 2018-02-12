@@ -90,9 +90,9 @@ static netsnmp_tdomain tlstcpDomain;
  */
 
 static char *
-netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, void *data, int len)
+netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
-    if (NULL == data || 0 == len || 0 == ((char *) data)[0])
+    if (NULL == data || 0 == len || 0 == ((const char *) data)[0])
         return strdup("TLSTCP: unknown");
     else if (len == sizeof(netsnmp_indexed_addr_pair) ||
              len == sizeof(struct sockaddr_in))
@@ -100,7 +100,7 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, void *data, int len)
     else {
         /* an already ascii formatted string */
         char buf[1024];
-        snprintf(buf, sizeof(buf)-1, "TLSTCP: %s", (char *) data);
+        snprintf(buf, sizeof(buf)-1, "TLSTCP: %s", (const char *) data);
         return strdup(buf);
     }
 }
@@ -111,7 +111,7 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, void *data, int len)
  */
 
 static int
-netsnmp_tlstcp_copy(netsnmp_transport *oldt, netsnmp_transport *newt)
+netsnmp_tlstcp_copy(const netsnmp_transport *oldt, netsnmp_transport *newt)
 {
     _netsnmpTLSBaseData *oldtlsdata = (_netsnmpTLSBaseData *) oldt->data;
     _netsnmpTLSBaseData *newtlsdata = (_netsnmpTLSBaseData *) newt->data;
@@ -300,11 +300,11 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
 
 
 static int
-netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
-		 void **opaque, int *olength)
+netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
+                    void **opaque, int *olength)
 {
     int rc = -1;
-    netsnmp_tmStateReference *tmStateRef = NULL;
+    const netsnmp_tmStateReference *tmStateRef = NULL;
     _netsnmpTLSBaseData *tlsdata;
     
     DEBUGTRACETOK("tlstcp");
@@ -320,7 +320,7 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
     /* Implementation Notes: the tmStateReference is stored in the opaque ptr */
     if (opaque != NULL && *opaque != NULL &&
         *olength == sizeof(netsnmp_tmStateReference)) {
-        tmStateRef = (netsnmp_tmStateReference *) *opaque;
+        tmStateRef = (const netsnmp_tmStateReference *) *opaque;
     } else {
         snmp_log(LOG_ERR, "TLSTCP was called with an invalid state; possibly the wrong security model is in use.  It should be 'tsm'.\n");
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCACHES);

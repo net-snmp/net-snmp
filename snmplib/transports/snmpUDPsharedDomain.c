@@ -89,7 +89,7 @@ _udpshared_recv(netsnmp_transport *t, void *buf, int size,
 }
 
 static int
-_udpshared_send(netsnmp_transport *t, void *buf, int size,
+_udpshared_send(netsnmp_transport *t, const void *buf, int size,
                 void **opaque, int *olength)
 {
     void *_opaque, **_opaque_p = &_opaque;
@@ -116,7 +116,7 @@ _udpshared_send(netsnmp_transport *t, void *buf, int size,
 }
 
 static char *
-_udpshared_fmtaddr(netsnmp_transport *t, void *data, int len)
+_udpshared_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
     if (NULL == t || NULL == t->base_transport ||
         NULL == t->base_transport->f_fmtaddr)
@@ -183,7 +183,7 @@ _transport_common(netsnmp_transport *t)
 }
 
 netsnmp_transport *
-netsnmp_udpshared_transport(struct sockaddr_in *addr, int local)
+netsnmp_udpshared_transport(const struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
 
@@ -197,8 +197,9 @@ netsnmp_udpshared_transport(struct sockaddr_in *addr, int local)
 }
 
 netsnmp_transport *
-netsnmp_udpshared_transport_with_source(struct sockaddr_in *addr, int flags,
-                                        struct sockaddr_in *src_addr)
+netsnmp_udpshared_transport_with_source(const struct sockaddr_in *addr,
+                                        int flags,
+                                        const struct sockaddr_in *src_addr)
 {
     netsnmp_transport *t = NULL, *b = NULL;
     int                local = flags & NETSNMP_TSPEC_LOCAL;
@@ -215,7 +216,7 @@ netsnmp_udpshared_transport_with_source(struct sockaddr_in *addr, int flags,
     if (!local && src_addr) {
         /** check for existing base transport */
         b = netsnmp_transport_cache_get(PF_INET, SOCK_DGRAM, local,
-                                        (netsnmp_sockaddr_storage *)src_addr);
+                                        (const void *)src_addr);
         if (NULL != b && NULL != b->local) {
             /*
              * uh-oh. we've assumed sharedudp is just for clients, and we're
@@ -250,7 +251,7 @@ netsnmp_udpshared_transport_with_source(struct sockaddr_in *addr, int flags,
     /** cache base transport for future use */
     if (!local && src_addr && 1 == b->local_length) {
         netsnmp_transport_cache_save(PF_INET, SOCK_DGRAM, local,
-                                     (netsnmp_sockaddr_storage *)src_addr, b);
+                                     (const void *)src_addr, b);
     }
 
     return t;
@@ -264,7 +265,7 @@ netsnmp_udpshared_transport_with_source(struct sockaddr_in *addr, int flags,
  * the remote address to send things to.
  */
 netsnmp_transport *
-netsnmp_udpshared6_transport(struct sockaddr_in6 *addr, int local)
+netsnmp_udpshared6_transport(const struct sockaddr_in6 *addr, int local)
 {
     netsnmp_transport *t = NULL;
 
@@ -276,8 +277,9 @@ netsnmp_udpshared6_transport(struct sockaddr_in6 *addr, int local)
 }
 
 netsnmp_transport *
-netsnmp_udpshared6_transport_with_source(struct sockaddr_in6 *addr6, int flags,
-                                         struct sockaddr_in6 *src_addr6)
+netsnmp_udpshared6_transport_with_source(const struct sockaddr_in6 *addr6,
+                                         int flags,
+                                         const struct sockaddr_in6 *src_addr6)
 {
     netsnmp_transport *t = NULL, *b = NULL;
     int                local = flags & NETSNMP_TSPEC_LOCAL;
@@ -294,7 +296,7 @@ netsnmp_udpshared6_transport_with_source(struct sockaddr_in6 *addr6, int flags,
     if (!local && src_addr6) {
         /** check for existing base transport */
         b = netsnmp_transport_cache_get(PF_INET6, SOCK_DGRAM, local,
-                                        (netsnmp_sockaddr_storage *)src_addr6);
+                                        (const void *)src_addr6);
         if (NULL != b && NULL != b->local) {
             /*
              * uh-oh. we've assumed sharedudp is just for clients, and we're
@@ -328,7 +330,7 @@ netsnmp_udpshared6_transport_with_source(struct sockaddr_in6 *addr6, int flags,
     /** cache base transport for future use */
     if (!local && src_addr6 && 1 == b->local_length) {
         netsnmp_transport_cache_save(PF_INET6, SOCK_DGRAM, local,
-                                     (netsnmp_sockaddr_storage *)src_addr6, b);
+                                     (const void *)src_addr6, b);
     }
 
     return t;

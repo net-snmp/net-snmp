@@ -129,7 +129,7 @@ output(const char *format, ...)
     ".luos elgnis a neve toN  .siht tuoba *enoyna* llet t'noD ...hhhhS"
 
 
-void
+static void
 usage(void)
 {
     printf( USAGE
@@ -148,6 +148,9 @@ usage(void)
 
 
 
+static int test_docrypt(void);
+static int test_dokeyedhash(void);
+static int test_dorandom(void);
 
 int
 main(int argc, char **argv)
@@ -176,6 +179,7 @@ main(int argc, char **argv)
             break;
         case 'h':
             rval = 0;
+            /* fall through */
         default:
             usage();
             exit(rval);
@@ -353,7 +357,7 @@ test_dokeyedhash(void)
         FAILED(SNMPERR_GENERR, "Wrong hash length returned.  (2)");
     }
     if (hblen > ai->mac_length) {
-        printf("# TRUNCATING %d length hash to %s mac length %d\n", hblen,
+        printf("# TRUNCATING %d length hash to %s mac length %d\n", (int)hblen,
                ai->name, ai->mac_length);
         hblen = ai->mac_length;
     }
