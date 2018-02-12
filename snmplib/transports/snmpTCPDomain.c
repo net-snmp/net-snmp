@@ -214,16 +214,13 @@ netsnmp_tcp_transport(const struct sockaddr_in *addr, int local)
          */
 
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
-        t->local = (u_char *)malloc(6);
-        if (t->local == NULL) {
+        t->local_length = sizeof(*addr);
+        t->local = netsnmp_memdup(addr, sizeof(*addr));
+        if (!t->local) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->local, &addr->sin_addr.s_addr, 4);
-        t->local[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
-        t->local[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
-        t->local_length = 6;
 
         /*
          * We should set SO_REUSEADDR too.  
@@ -270,16 +267,13 @@ netsnmp_tcp_transport(const struct sockaddr_in *addr, int local)
         return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
-      t->remote = (u_char *)malloc(6);
-        if (t->remote == NULL) {
+        t->remote_length = sizeof(*addr);
+        t->remote = netsnmp_memdup(addr, sizeof(*addr));
+        if (!t->remote) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->remote, &addr->sin_addr.s_addr, 4);
-        t->remote[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
-        t->remote[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
-        t->remote_length = 6;
 
         /*
          * This is a client-type session, so attempt to connect to the far
@@ -289,7 +283,6 @@ netsnmp_tcp_transport(const struct sockaddr_in *addr, int local)
          */
 
         rc = connect(t->sock, addr, sizeof(struct sockaddr));
-
         if (rc < 0) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
@@ -338,18 +331,9 @@ netsnmp_tcp_create_tstring(const char *str, int local,
 
 
 netsnmp_transport *
-netsnmp_tcp_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_tcp_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_in addr;
-
-    if (o_len == 6) {
-        unsigned short porttmp = (o[4] << 8) + o[5];
-        addr.sin_family = AF_INET;
-        memcpy((u_char *) & (addr.sin_addr.s_addr), o, 4);
-        addr.sin_port = htons(porttmp);
-        return netsnmp_tcp_transport(&addr, local);
-    }
-    return NULL;
+    return netsnmp_tcp_transport(o, local);
 }
 
 

@@ -187,7 +187,7 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
 {
     const netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct hostent *host;
-    char tmp[64];
+    char *tmp = NULL;
 
     if (data != NULL && len == sizeof(netsnmp_indexed_addr_pair)) {
 	addr_pair = (const netsnmp_indexed_addr_pair *) data;
@@ -196,13 +196,13 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
     }
 
     if (addr_pair == NULL) {
-        snprintf(tmp, sizeof(tmp), "%s: unknown", prefix);
+        asprintf(&tmp, "%s: unknown", prefix);
     } else {
         const struct sockaddr_in *to;
 
         to = (const struct sockaddr_in *) &(addr_pair->remote_addr);
         if (to == NULL) {
-            snprintf(tmp, sizeof(tmp), "%s: unknown->[%s]:%hu", prefix,
+            asprintf(&tmp, "%s: unknown->[%s]:%hu", prefix,
                      inet_ntoa(addr_pair->local_addr.sin.sin_addr),
                      ntohs(addr_pair->local_addr.sin.sin_port));
         } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
@@ -211,14 +211,17 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
             host = netsnmp_gethostbyaddr(&to->sin_addr, sizeof(struct in_addr), AF_INET);
             return (host ? strdup(host->h_name) : NULL); 
         } else {
-            snprintf(tmp, sizeof(tmp), "%s: [%s]:%hu->", prefix,
-                     inet_ntoa(to->sin_addr), ntohs(to->sin_port));
-            snprintf(tmp + strlen(tmp), sizeof(tmp)-strlen(tmp), "[%s]:%hu",
-                     inet_ntoa(addr_pair->local_addr.sin.sin_addr),
+            char a1[16];
+            char a2[16];
+
+            asprintf(&tmp, "%s: [%s]:%hu->[%s]:%hu", prefix,
+                     inet_ntop(AF_INET, &to->sin_addr, a1, sizeof(a1)),
+                     ntohs(to->sin_port),
+                     inet_ntop(AF_INET, &addr_pair->local_addr.sin.sin_addr, a2,
+                               sizeof(a2)),
                      ntohs(addr_pair->local_addr.sin.sin_port));
         }
     }
-    tmp[sizeof(tmp)-1] = '\0';
-    return strdup(tmp);
+    return tmp;
 }
 

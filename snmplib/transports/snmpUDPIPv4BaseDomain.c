@@ -87,7 +87,7 @@ netsnmp_udpipv4base_transport_init(const struct sockaddr_in *addr, int local)
 
     t->sock = -1;
 
-    addr_ptr = (u_char *) malloc(6);
+    addr_ptr = netsnmp_memdup(addr, sizeof(*addr));
     if (NULL == addr_ptr) {
         free(t);
         return NULL;
@@ -95,16 +95,13 @@ netsnmp_udpipv4base_transport_init(const struct sockaddr_in *addr, int local)
 
     if (local) {
         /** This is a server session. */
-        t->local_length = 6;
+        t->local_length = sizeof(*addr);
         t->local = addr_ptr;
     } else {
         /** This is a client session. */
         t->remote = addr_ptr;
-        t->remote_length = 6;
+        t->remote_length = sizeof(*addr);
     }
-    memcpy(addr_ptr, &addr->sin_addr.s_addr, 4);
-    addr_ptr[4] = (ntohs(addr->sin_port) & 0xff00) >> 8;
-    addr_ptr[5] = (ntohs(addr->sin_port) & 0x00ff) >> 0;
 
     DEBUGIF("netsnmp_udpbase") {
         netsnmp_indexed_addr_pair addr_pair;

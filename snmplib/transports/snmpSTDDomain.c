@@ -40,14 +40,13 @@ static netsnmp_tdomain stdDomain;
 static char *
 netsnmp_std_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
-    char *buf;
+    char *buf = NULL;
+
     DEBUGMSGTL(("domain:std","formatting addr.  data=%p\n",t->data));
     if (t->data) {
         netsnmp_std_data *data = (netsnmp_std_data*)t->data;
-        buf = (char*)malloc(SNMP_MAXBUF_MEDIUM);
-        if (!buf)
-            return strdup("STDInOut");
-        snprintf(buf, SNMP_MAXBUF_MEDIUM, "STD:%s", data->prog);
+
+        asprintf(&buf, "STD:%s", data->prog);
         DEBUGMSGTL(("domain:std","  formatted:=%s\n",buf));
         return buf;
     }
@@ -257,9 +256,9 @@ netsnmp_std_create_tstring(const char *instring, int local,
 }
 
 netsnmp_transport *
-netsnmp_std_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_std_create_ostring(const void *o, size_t o_len, int local)
 {
-    return netsnmp_std_transport((const char*)o, o_len, NULL);
+    return netsnmp_std_transport(o, o_len, NULL);
 }
 
 void

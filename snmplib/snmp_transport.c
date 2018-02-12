@@ -174,39 +174,36 @@ netsnmp_transport_copy(const netsnmp_transport *t)
     }
 
     if (t->local != NULL) {
-        n->local = (u_char *) malloc(t->local_length);
+        n->local = netsnmp_memdup(t->local, t->local_length);
         if (n->local == NULL) {
             netsnmp_transport_free(n);
             return NULL;
         }
         n->local_length = t->local_length;
-        memcpy(n->local, t->local, t->local_length);
     } else {
         n->local = NULL;
         n->local_length = 0;
     }
 
     if (t->remote != NULL) {
-        n->remote = (u_char *) malloc(t->remote_length);
+        n->remote = netsnmp_memdup(t->remote, t->remote_length);
         if (n->remote == NULL) {
             netsnmp_transport_free(n);
             return NULL;
         }
         n->remote_length = t->remote_length;
-        memcpy(n->remote, t->remote, t->remote_length);
     } else {
         n->remote = NULL;
         n->remote_length = 0;
     }
 
     if (t->data != NULL && t->data_length > 0) {
-        n->data = malloc(t->data_length);
+        n->data = netsnmp_memdup(t->data, t->data_length);
         if (n->data == NULL) {
             netsnmp_transport_free(n);
             return NULL;
         }
         n->data_length = t->data_length;
-        memcpy(n->data, t->data, t->data_length);
     } else {
         n->data = NULL;
         n->data_length = 0;

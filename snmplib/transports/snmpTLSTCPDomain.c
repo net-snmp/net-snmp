@@ -99,9 +99,10 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
         return netsnmp_ipv4_fmtaddr("TLSTCP", t, data, len);
     else {
         /* an already ascii formatted string */
-        char buf[1024];
-        snprintf(buf, sizeof(buf)-1, "TLSTCP: %s", (const char *) data);
-        return strdup(buf);
+        char *buf = NULL;
+
+        asprintf(&buf, "TLSTCP: %s", (const char *) data);
+        return buf;
     }
 }
 /*
@@ -1006,7 +1007,7 @@ netsnmp_tlstcp_create_tstring(const char *str, int local,
 
 
 netsnmp_transport *
-netsnmp_tlstcp_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_tlstcp_create_ostring(const void *o, size_t o_len, int local)
 {
     char buf[SPRINT_MAX_LEN];
 

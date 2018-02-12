@@ -102,15 +102,8 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
 {
     const struct sockaddr_in6 *to = NULL;
     char scope_id[IF_NAMESIZE + 1] = "";
-    char port[6];
     char addr[INET6_ADDRSTRLEN];
-    /** tmp buffer size */
-    size_t tmplen = sizeof(addr) + sizeof(scope_id) + sizeof(port) +
-        strlen(prefix) + 10; /* 10 is spaces/separators + some wiggle room */
-    char *tmp = malloc(tmplen);
-
-    if (NULL == tmp)
-        return NULL;
+    char *tmp = NULL;
 
     DEBUGMSGTL(("netsnmp_ipv6", "fmtaddr: t = %p, data = %p, len = %d\n", t,
                 data, len));
@@ -124,30 +117,21 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
         to = (const struct sockaddr_in6 *) t->data;
     }
     if (to == NULL) {
-        strlcpy(tmp, prefix, tmplen);
-        strlcat(tmp, ": unknown", tmplen);
+        asprintf(&tmp, "%s: unknown", prefix);
     } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
 	struct hostent *host;
 	host = netsnmp_gethostbyaddr(&to->sin6_addr, sizeof(struct in6_addr), AF_INET6);
 	return (host ? strdup(host->h_name) : NULL);
     } else {
-
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
-	if (to->sin6_scope_id
-            && netsnmp_if_indextoname(to->sin6_scope_id, &scope_id[1])) {
+	if (to->sin6_scope_id &&
+            netsnmp_if_indextoname(to->sin6_scope_id, &scope_id[1]))
             scope_id[0] = '%';
-        }
 #endif
-        strlcpy(tmp, prefix, tmplen);
         inet_ntop(AF_INET6, &to->sin6_addr, addr, sizeof(addr));
-        strlcat(tmp, ": [", tmplen);
-        strlcat(tmp, addr, tmplen);
-        strlcat(tmp, scope_id, tmplen);
-        strlcat(tmp, "]:", tmplen);
-        snprintf(port,sizeof(port), "%hu", ntohs(to->sin6_port));
-        strlcat(tmp, port, tmplen);
+        asprintf(&tmp, "%s: [%s%s]:%hu", prefix, addr, scope_id,
+                 ntohs(to->sin6_port));
     }
-    tmp[tmplen-1] = '\0';
     return tmp;
 }
 

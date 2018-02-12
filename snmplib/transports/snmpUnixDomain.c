@@ -81,12 +81,10 @@ netsnmp_unix_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
     const struct sockaddr_un *to = NULL;
 
-    if (data != NULL) {
+    if (data != NULL)
         to = (const struct sockaddr_un *) data;
-    } else if (t != NULL && t->data != NULL) {
+    else if (t != NULL && t->data != NULL)
         to = &(((const sockaddr_un_pair *) t->data)->server);
-        len = SUN_LEN(to);
-    }
     if (to == NULL) {
         /*
          * "Local IPC" is the Posix.1g term for Unix domain protocols,
@@ -101,10 +99,9 @@ netsnmp_unix_fmtaddr(netsnmp_transport *t, const void *data, int len)
          */
         return strdup("Local IPC: abstract");
     } else {
-        char           *tmp = (char *) malloc(16 + len);
-        if (tmp != NULL) {
-            sprintf(tmp, "Local IPC: %s", to->sun_path);
-        }
+        char *tmp = NULL;
+
+        asprintf(&tmp, "Local IPC: %s", to->sun_path);
         return tmp;
     }
 }
@@ -358,13 +355,12 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
     if (local) {
-        t->local = (u_char *)malloc(strlen(addr->sun_path));
+        t->local_length = SUN_LEN(addr);
+        t->local = netsnmp_memdup(addr, SUN_LEN(addr));
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->local, addr->sun_path, strlen(addr->sun_path));
-        t->local_length = strlen(addr->sun_path);
 
         /*
          * This session is inteneded as a server, so we must bind to the given
@@ -420,13 +416,12 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
             }
         }
     } else {
-        t->remote = (u_char *)malloc(strlen(addr->sun_path));
+        t->remote_length = SUN_LEN(addr);
+        t->remote = netsnmp_memdup(addr, SUN_LEN(addr));
         if (t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
         }
-        memcpy(t->remote, addr->sun_path, strlen(addr->sun_path));
-        t->remote_length = strlen(addr->sun_path);
 
         rc = connect(t->sock, addr, sizeof(struct sockaddr_un));
         if (rc != 0) {
@@ -493,21 +488,9 @@ netsnmp_unix_create_tstring(const char *string, int local,
 
 
 netsnmp_transport *
-netsnmp_unix_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_unix_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_un addr;
-
-    if (o_len > 0 && o_len < (sizeof(addr.sun_path) - 1)) {
-        addr.sun_family = AF_UNIX;
-        memset(addr.sun_path, 0, sizeof(addr.sun_path));
-        strlcpy(addr.sun_path, (const char *)o, sizeof(addr.sun_path));
-        return netsnmp_unix_transport(&addr, local);
-    } else {
-        if (o_len > 0) {
-            snmp_log(LOG_ERR, "Path too long for Unix domain transport\n");
-        }
-    }
-    return NULL;
+    return netsnmp_unix_transport(o, local);
 }
 
 

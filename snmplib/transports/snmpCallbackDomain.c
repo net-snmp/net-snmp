@@ -155,7 +155,7 @@ callback_pop_queue(int num)
 char *
 netsnmp_callback_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
-    char buf[SPRINT_MAX_LEN];
+    char *buf = NULL;
     netsnmp_callback_info *mystuff;
 
     if (!t)
@@ -166,9 +166,9 @@ netsnmp_callback_fmtaddr(netsnmp_transport *t, const void *data, int len)
     if (!mystuff)
         return strdup("callback: unknown");
 
-    snprintf(buf, SPRINT_MAX_LEN, "callback: %d on fd %d",
-             mystuff->callback_num, mystuff->pipefds[0]);
-    return strdup(buf);
+    asprintf(&buf, "callback: %d on fd %d", mystuff->callback_num,
+             mystuff->pipefds[0]);
+    return buf;
 }
 
 

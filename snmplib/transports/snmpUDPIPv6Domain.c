@@ -213,23 +213,20 @@ netsnmp_udp6_transport_init(const struct sockaddr_in6 *addr, int flags)
 
     t->sock = -1;
 
-    addr_ptr = (unsigned char*)malloc(18);
+    addr_ptr = netsnmp_memdup(addr, sizeof(*addr));
     if (addr_ptr == NULL) {
         free(t);
         return NULL;
     }
     if (local) {
         /** This is a server session. */
-        t->local_length = 18;
+        t->local_length = sizeof(*addr);
         t->local = addr_ptr;
     } else {
         /** This is a client session. */
         t->remote = addr_ptr;
-        t->remote_length = 18;
+        t->remote_length = sizeof(*addr);
     }
-    memcpy(addr_ptr, addr->sin6_addr.s6_addr, 16);
-    addr_ptr[16] = (ntohs(addr->sin6_port) & 0xff00) >> 8;
-    addr_ptr[17] = (ntohs(addr->sin6_port) & 0x00ff) >> 0;
 
     DEBUGIF("netsnmp_udp6") {
         char *str = netsnmp_udp6_fmtaddr(NULL, addr, sizeof(*addr));
@@ -929,18 +926,9 @@ netsnmp_udp6_create_tspec(netsnmp_tdomain_spec *tspec)
  */
 
 netsnmp_transport *
-netsnmp_udp6_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_udp6_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_in6 addr;
-
-    if (o_len == 18) {
-        memset((u_char *) & addr, 0, sizeof(struct sockaddr_in6));
-        addr.sin6_family = AF_INET6;
-        memcpy((u_char *) & (addr.sin6_addr.s6_addr), o, 16);
-        addr.sin6_port = htons((o[16] << 8) + o[17]);
-        return netsnmp_udp6_transport(&addr, local);
-    }
-    return NULL;
+    return netsnmp_udp6_transport(o, local);
 }
 
 
