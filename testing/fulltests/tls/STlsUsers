@@ -149,7 +149,7 @@ CONFIGAGENT  rwuser -s tsm causerdirect9cmap authpriv
 # this file contains tests common to both tls and dtls usages
 
 # app flags
-FLAGS="-Dtls -v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+FLAGS="-Dtls -r1 -v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 # start the agent up
 STARTAGENT

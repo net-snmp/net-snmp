@@ -40,7 +40,7 @@ CONFIGAGENT  rwuser -s tsm $TSM_PREFIX:testuser2 authpriv
 CONFIGAGENT rocommunity public
 
 # app flags
-FLAGS="-v3 -On $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+FLAGS="-v3 -r1 -On $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 #
 # Start the agent
