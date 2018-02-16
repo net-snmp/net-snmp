@@ -125,8 +125,13 @@ oid    usmAES256PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,4 };
     /* OIDs from CISCO MIB */
 oid    usmAES192CiscoPrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,1 };
 oid    usmAES256CiscoPrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,2 };
+/*
+ * these OIDs are in pySNMP source as OIDs for AES+Reeder. We'll just
+ * use OIDS from CISCO-SNMP-USM-OIDS-MIB
+ *
 oid    usmAES192Cisco2PrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,101 };
 oid    usmAES256Cisco2PrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,102 };
+ */
 #endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 
 typedef struct usm_alg_type_s {
@@ -174,12 +179,8 @@ static usm_alg_type_t usm_priv_type[] = {
     /** cisco / pysnmp variations */
     { "AES-192-C", USM_CREATE_USER_PRIV_AES192_CISCO },
     { "AES192C", USM_CREATE_USER_PRIV_AES192_CISCO },
-    { "AES-192-C2", USM_CREATE_USER_PRIV_AES192_CISCO2 },
-    { "AES192C2", USM_CREATE_USER_PRIV_AES192_CISCO2 },
     { "AES-256-C", USM_CREATE_USER_PRIV_AES256_CISCO },
     { "AES256C", USM_CREATE_USER_PRIV_AES256_CISCO },
-    { "AES-256-C2", USM_CREATE_USER_PRIV_AES256_CISCO2 },
-    { "AES256C2", USM_CREATE_USER_PRIV_AES256_CISCO2 },
 #endif
 #endif
     { NULL, -1 },
