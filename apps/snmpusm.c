@@ -472,6 +472,9 @@ main(int argc, char *argv[])
             goto close_session;
         }
 
+        DEBUGMSGTL(("9:usm:passwd", "oldpass len %ld, newpass len %ld\n",
+                    strlen(oldpass), strlen(newpass)));
+
         /* 
          * Change the user supplied on command line.
          */
@@ -572,6 +575,7 @@ main(int argc, char *argv[])
 		fprintf(stderr, "generating the old Kul failed\n");
 		goto close_session;
 	    }
+            DEBUGMSGTL(("9:usm:passwd", "oldkul len %ld\n", oldkul_len));
 	}
 	if (uselocalizedkey && (strncmp(newpass, "0x", 2) == 0)) {
 	    /*
@@ -612,6 +616,7 @@ main(int argc, char *argv[])
 		fprintf(stderr, "generating the new Kul failed\n");
 		goto close_session;
 	    }
+            DEBUGMSGTL(("9:usm:passwd", "newkul len %ld\n", newkul_len));
 	}
 
         /*
@@ -632,6 +637,7 @@ main(int argc, char *argv[])
             if (USM_CREATE_USER_PRIV_DES == privtype)
                 oldkulpriv_len *= 2; /* ?? we store salt with key */
             newkulpriv_len = oldkulpriv_len;
+            DEBUGMSGTL(("9:usm:passwd", "proper len %d\n", properlength));
             memcpy(oldkulpriv, oldkul, oldkulpriv_len);
             memcpy(newkulpriv, newkul, newkulpriv_len);
         }
@@ -657,12 +663,16 @@ main(int argc, char *argv[])
         /* which is slightly different for encryption if lengths are
            different */
 	if (doprivkey) {
+            DEBUGMSGTL(("9:usm:passwd:encode", "proper len %ld, old_len %ld, new_len %ld\n",
+                        oldkulpriv_len, oldkulpriv_len, newkulpriv_len));
 	  rval = encode_keychange(session.securityAuthProto,
                                 session.securityAuthProtoLen,
                                 oldkulpriv, oldkulpriv_len,
                                 newkulpriv, newkulpriv_len,
                                 keychangepriv, &keychangepriv_len);
 
+          DEBUGMSGTL(("9:usm:passwd:encode", "keychange len %ld\n",
+                      keychangepriv_len));
 	  if (rval != SNMPERR_SUCCESS) {
             snmp_perror(argv[0]);
             fprintf(stderr, "encoding the keychange failed\n");

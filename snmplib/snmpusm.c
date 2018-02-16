@@ -2870,12 +2870,16 @@ usm_extend_user_kul(struct usmUser *user, u_int privKeyBufSize)
 
     DEBUGMSGTL(("usm", "extending key\n"));
 
-    if (NULL == user)
+    if (NULL == user) {
+        DEBUGMSGTL(("usm", "null user!\n"));
         return SNMPERR_GENERR;
+    }
 
     pai = sc_get_priv_alg_byoid(user->privProtocol, user->privProtocolLen);
-    if (NULL == pai)
+    if (NULL == pai) {
+        DEBUGMSGTL(("usm", "privProtocol lookup failed!\n"));
         return SNMPERR_GENERR;
+    }
 
     return netsnmp_extend_kul(pai->proper_length, user->authProtocol,
                               user->authProtocolLen, pai->type, user->engineID,
@@ -4858,6 +4862,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
         }
         priv_prot = sc_get_priv_oid(priv_type, &newuser->privProtocolLen);
         if (priv_prot)
+        DEBUGMSGTL(("9:usmUser", "privProtocol %s\n", buf));
             newuser->privProtocol =
                 snmp_duplicate_objid(priv_prot, newuser->privProtocolLen);
         if (newuser->privProtocol == NULL) {

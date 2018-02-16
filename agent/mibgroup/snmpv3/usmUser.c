@@ -359,14 +359,14 @@ var_usmUser(struct variable * vp,
                 indexOid =
                     usm_generate_OID(vp->name, vp->namelen, nptr, &len);
                 result = snmp_oid_compare(name, *length, indexOid, len);
-                DEBUGMSGTL(("usmUser", "Checking user: %s - ",
+                DEBUGMSGTL(("9:usmUser", "Checking user: %s - ",
                             nptr->name));
                 for (i = 0; i < (int) nptr->engineIDLen; i++) {
-                    DEBUGMSG(("usmUser", " %x", nptr->engineID[i]));
+                    DEBUGMSG(("9:usmUser", " %x", nptr->engineID[i]));
                 }
-                DEBUGMSG(("usmUser", " - %d \n  -> OID: ", result));
-                DEBUGMSGOID(("usmUser", indexOid, len));
-                DEBUGMSG(("usmUser", "\n"));
+                DEBUGMSG(("9:usmUser", " - %d \n  -> OID: ", result));
+                DEBUGMSGOID(("9:usmUser", indexOid, len));
+                DEBUGMSG(("9:usmUser", "\n"));
 
                 free(indexOid);
 
@@ -959,6 +959,7 @@ write_usmUserPrivProtocol(int action,
         }
     } else if (action == RESERVE2) {
         if ((uptr = usm_parse_user(name, name_len)) == NULL) {
+            DEBUGMSGTL(("usmUser", "usm_parse_user() error\n"));
             return SNMP_ERR_INCONSISTENTNAME;
         }
 
@@ -980,6 +981,7 @@ write_usmUserPrivProtocol(int action,
                                                           var_val_len /
                                                           sizeof(oid));
                 if (uptr->privProtocol == NULL) {
+                    DEBUGMSGTL(("usmUser", "snmp_duplicate_objid() error\n"));
                     return SNMP_ERR_RESOURCEUNAVAILABLE;
                 }
                 uptr->privProtocolLen = var_val_len / sizeof(oid);
@@ -993,6 +995,7 @@ write_usmUserPrivProtocol(int action,
                  */
                 return SNMP_ERR_NOERROR;
             } else {
+                DEBUGMSGTL(("usmUser", "inconsistent value error\n"));
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
         } else {
@@ -1012,6 +1015,7 @@ write_usmUserPrivProtocol(int action,
                     ((oid *) var_val, var_val_len / sizeof(oid),
                      usmNoPrivProtocol,
                      sizeof(usmNoPrivProtocol) / sizeof(oid)) != 0) {
+                    DEBUGMSGTL(("usmUser", "inconsistent value error\n"));
                     return SNMP_ERR_INCONSISTENTVALUE;
                 }
             } else {
@@ -1029,6 +1033,7 @@ write_usmUserPrivProtocol(int action,
                     ((oid *) var_val, var_val_len / sizeof(oid),
                      usmAESPrivProtocol,
                      sizeof(usmAESPrivProtocol) / sizeof(oid)) != 0) {
+                    DEBUGMSGTL(("usmUser", "wrong value error\n"));
                     return SNMP_ERR_WRONGVALUE;
                 }
             }
@@ -1039,6 +1044,7 @@ write_usmUserPrivProtocol(int action,
                                                       var_val_len /
                                                       sizeof(oid));
             if (uptr->privProtocol == NULL) {
+                DEBUGMSGTL(("usmUser", "resource unavailable error\n"));
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
             uptr->privProtocolLen = var_val_len / sizeof(oid);

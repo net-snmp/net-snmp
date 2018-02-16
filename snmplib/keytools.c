@@ -485,12 +485,16 @@ _kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
     DEBUGMSGTL(("usm:extend_kul", " blumenthal called\n"));
 
     if (NULL == hashoid || NULL == origKul || NULL == origKulLen ||
-        needKeyLen > origKulSize)
+        needKeyLen > origKulSize) {
+        DEBUGMSGTL(("usm:extend_kul", "bad parameters\n"));
         return SNMPERR_GENERR;
+   }
 
     authtype = sc_get_authtype(hashoid, hashoid_len);
-    if (authtype < 0 )
+    if (authtype < 0 ) {
+        DEBUGMSGTL(("usm:extend_kul", "unknown authtype\n"));
         return SNMPERR_GENERR;
+    }
 
     saveLen = *origKulLen;
     needKeyLen -= *origKulLen; /* subtract bytes we already have */
@@ -509,6 +513,7 @@ _kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
      *   2)Set c = ceil ( 256 / nnn )
      */
     count = ceil( 256 / hashBits );
+    DEBUGMSGTL(("9:usm:extend_kul:blumenthal", "count ceiling %d\n", count));
 
     /* 3.1.2.1:
      *   3)For i = 1, 2, ..., c
@@ -520,8 +525,10 @@ _kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
 
         newKulLen = sizeof(newKul);
         rc = sc_hash_type( authtype, origKul, *origKulLen, newKul, &newKulLen);
-        if (SNMPERR_SUCCESS != rc)
+        if (SNMPERR_SUCCESS != rc) {
+            DEBUGMSGTL(("usm:extend_kul", "error from sc_hash_type\n"));
             return SNMPERR_GENERR;
+        }
 
         copyLen = SNMP_MIN(needKeyLen, newKulLen);
         memcpy(origKul + *origKulLen, newKul, copyLen);
@@ -650,7 +657,7 @@ netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
     size_t newKulLen;
     /* authType = sc_get_authtype(hashoid, hashoid_len); */
 
-    DEBUGMSGTL(("usm:extend_kul", " called\n"));
+    DEBUGMSGTL(("9:usm:extend_kul", " called\n"));
 
     if (*kulBufLen >= needKeyLen) {
         DEBUGMSGTL(("usm:extend_kul", " key already big enough\n"));
@@ -690,6 +697,16 @@ netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
         newKulLen = *kulBufLen;
     }
 
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+    DEBUGIF("9:usm:extend_kul") {
+        int             i;
+        DEBUGMSG(("9:usm:extend_kul",
+                  "key: key=0x"));
+        for (i = 0; i < newKulLen; i++)
+            DEBUGMSG(("9:usm:extend_kul", "%02x", newKul[i] & 0xff));
+        DEBUGMSG(("9:usm:extend_kul", " (%ld)\n", newKulLen));
+    }
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
     ret = SNMPERR_SUCCESS; /* most privTypes don't need extended kul */
     switch (privType & (USM_PRIV_MASK_ALG | USM_PRIV_MASK_VARIANT)) {
 #ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
@@ -731,6 +748,16 @@ netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
         if (newKul != *kulBuf)
             free(newKul);
     }
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+    DEBUGIF("9:usm:extend_kul") {
+        int             i;
+        DEBUGMSG(("usm:extend_kul",
+                  "key: key=0x"));
+        for (i = 0; i < newKulLen; i++)
+            DEBUGMSG(("usm:extend_kul", "%02x", newKul[i] & 0xff));
+        DEBUGMSG(("usm:extend_kul", " (%ld)\n", newKulLen));
+    }
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
     return ret;
 }
@@ -812,6 +839,9 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
     }
 
     properlength = SNMP_MIN(oldkey_len, (size_t)iproperlength);
+    DEBUGMSGTL(("encode_keychange",
+                "oldkey_len %ld, newkey_len %ld, auth_length %ld\n",
+                oldkey_len, newkey_len, auth_length));
 
     /*
      * Use the old key and some random bytes to encode the new key
@@ -836,6 +866,16 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
     }
 #endif                          /* !NETSNMP_ENABLE_TESTING_CODE */
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+    DEBUGIF("encode_keychange") {
+        int             i;
+        DEBUGMSG(("encode_keychange",
+                  "rand: key=0x"));
+        for (i = 0; i < rand_len; i++)
+            DEBUGMSG(("encode_keychange", "%02x", randp[i] & 0xff));
+        DEBUGMSG(("encode_keychange", " (%ld)\n", rand_len));
+    }
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
     tmpbuf = (u_char *) malloc(properlength * 2);
     if (tmpbuf) {
@@ -847,6 +887,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
                        kcstring + properlength, kcstring_len);
 
         QUITFUN(rval, encode_keychange_quit);
+        DEBUGMSGTL(("encode_keychange", "digest_len %ld\n", digest_len));
 
         *kcstring_len = (properlength * 2);
 
@@ -857,6 +898,28 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
         }
     }
 
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+    DEBUGIF("encode_keychange") {
+        int             i;
+        DEBUGMSG(("encode_keychange",
+                  "oldkey: key=0x"));
+        for (i = 0; i < oldkey_len; i++)
+            DEBUGMSG(("encode_keychange", "%02x", oldkey[i] & 0xff));
+        DEBUGMSG(("encode_keychange", " (%ld)\n", oldkey_len));
+
+        DEBUGMSG(("encode_keychange",
+                  "newkey: key=0x"));
+        for (i = 0; i < newkey_len; i++)
+            DEBUGMSG(("encode_keychange", "%02x", newkey[i] & 0xff));
+        DEBUGMSG(("encode_keychange", " (%ld)\n", newkey_len));
+
+        DEBUGMSG(("encode_keychange",
+                  "kcstring: key=0x"));
+        for (i = 0; i < *kcstring_len; i++)
+            DEBUGMSG(("encode_keychange", "%02x", kcstring[i] & 0xff));
+        DEBUGMSG(("encode_keychange", " (%ld)\n", *kcstring_len));
+    }
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
   encode_keychange_quit:
     if (rval != SNMPERR_SUCCESS)
         memset(kcstring, 0, *kcstring_len);
@@ -925,6 +988,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
      */
     if (!hashtype || !oldkey || !kcstring || !newkey || !newkey_len
         || (oldkey_len <= 0) || (kcstring_len <= 0) || (*newkey_len <= 0)) {
+        DEBUGMSGTL(("decode_keychange", "bad args\n"));
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
     }
 
@@ -935,16 +999,38 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
     auth_type = sc_get_authtype(hashtype, hashtype_len);
     iproperlength = sc_get_proper_auth_length_bytype(auth_type);
     if (iproperlength == SNMPERR_GENERR)
+        DEBUGMSGTL(("decode_keychange", "proper length err\n"));
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
 
     properlength = (size_t) iproperlength;
+    DEBUGMSGTL(("usm:decode_keychange",
+                "oldkey_len %ld, newkey_len %ld, kcstring_len %ld, hash_len %ld\n",
+                oldkey_len, *newkey_len, kcstring_len, hash_len));
 
     if (((oldkey_len * 2) != kcstring_len) || (*newkey_len < oldkey_len)) {
+        DEBUGMSGTL(("decode_keychange", "keylen error\n"));
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
     }
 
     properlength = oldkey_len;
     *newkey_len = properlength;
+    {
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+    DEBUGIF("decode_keychange") {
+        int             i;
+        DEBUGMSG(("decode_keychange",
+                  "oldkey: key=0x"));
+        for (i = 0; i < oldkey_len; i++)
+            DEBUGMSG(("decode_keychange", "%02x", oldkey[i] & 0xff));
+        DEBUGMSG(("decode_keychange", " (%ld)\n", oldkey_len));
+
+        DEBUGMSG(("decode_keychange",
+                  "kcstring: key=0x"));
+        for (i = 0; i < kcstring_len; i++)
+            DEBUGMSG(("decode_keychange", "%02x", kcstring[i] & 0xff));
+        DEBUGMSG(("decode_keychange", " (%ld)\n", kcstring_len));
+    }
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
     /*
      * Use the old key and the given KeyChange TC string to recover
@@ -969,8 +1055,20 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
         }
     }
 
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+    DEBUGIF("decode_keychange") {
+        int             i;
+        DEBUGMSG(("decode_keychange",
+                  "newkey: key=0x"));
+        for (i = 0; i < *newkey_len; i++)
+            DEBUGMSG(("decode_keychange", "%02x", newkey_save[i] & 0xff));
+        DEBUGMSG(("decode_keychange", " (%ld)\n", *newkey_len));
+    }
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
+
   decode_keychange_quit:
     if (rval != SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("decode_keychange", "error %d\n", rval));
         if (newkey)
             memset(newkey, 0, properlength);
     }
