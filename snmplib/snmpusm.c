@@ -4610,9 +4610,10 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     size_t          userKeyLen = SNMP_MAXBUF_SMALL;
     size_t          privKeySize;
     size_t          ret;
-    int             ret2, properLen, properPrivKeyLen, priv_type;
+    int             ret2, properLen, properPrivKeyLen;
     const oid      *def_auth_prot, *def_priv_prot;
     size_t          def_auth_prot_len, def_priv_prot_len;
+    netsnmp_priv_alg_info *pai;
 
     def_auth_prot = get_default_authtype(&def_auth_prot_len);
     def_priv_prot = get_default_privtype(&def_priv_prot_len);
@@ -4850,25 +4851,32 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
             goto fail;
         }
         newuser->privProtocolLen = def_priv_prot_len;
-        priv_type = sc_get_privtype(def_priv_prot, def_priv_prot_len);
-        netsnmp_assert(priv_type > 0);
+        pai = sc_get_priv_alg_byoid(newuser->privProtocol,
+                                    newuser->privProtocolLen);
     } else {
-        const oid *priv_prot;
-        priv_type = usm_lookup_priv_type(buf);
+        int priv_type = usm_lookup_priv_type(buf);
         if (priv_type < 0) {
             *errorMsg = "unknown privProtocol";
             DEBUGMSGTL(("usmUser", "%s %s\n", *errorMsg, buf));
             goto fail;
         }
-        priv_prot = sc_get_priv_oid(priv_type, &newuser->privProtocolLen);
-        if (priv_prot)
         DEBUGMSGTL(("9:usmUser", "privProtocol %s\n", buf));
+        pai = sc_get_priv_alg_bytype(priv_type);
+        if (pai) {
+            SNMP_FREE(newuser->privProtocol);
+            newuser->privProtocolLen = pai->oid_len;
             newuser->privProtocol =
-                snmp_duplicate_objid(priv_prot, newuser->privProtocolLen);
-        if (newuser->privProtocol == NULL) {
-            *errorMsg = "malloc failed";
-            goto fail;
+                snmp_duplicate_objid(pai->alg_oid, newuser->privProtocolLen);
+            DEBUGMSGTL(("9:usmUser", "pai %s\n", pai->name));
+            if (newuser->privProtocol == NULL) {
+                *errorMsg = "malloc failed";
+                goto fail;
+            }
         }
+    }
+    if (NULL == pai) {
+        *errorMsg = "priv protocol lookup failed";
+        goto fail;
     }
 
     if (0 == newuser->privProtocol[0] && NULL == *errorMsg)
@@ -4883,11 +4891,8 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
 
-    properPrivKeyLen = sc_get_proper_priv_length_bytype(priv_type);
-    if (properPrivKeyLen == 0)
-        DEBUGMSGTL(("usmUser",
-                    "warning: unknown keyLen for privacy protocol\n"));
-    if (USM_CREATE_USER_PRIV_DES == priv_type)
+    properPrivKeyLen = pai->proper_length;
+    if (USM_CREATE_USER_PRIV_DES == pai->type)
         properPrivKeyLen *= 2; /* ?? we store salt with key */
 
     /*

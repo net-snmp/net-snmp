@@ -655,7 +655,6 @@ netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
     int ret;
     u_char *newKul;
     size_t newKulLen;
-    /* authType = sc_get_authtype(hashoid, hashoid_len); */
 
     DEBUGMSGTL(("9:usm:extend_kul", " called\n"));
 
@@ -799,6 +798,133 @@ netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
  *
  * XXX FIX:     Does not handle varibable length keys.
  * XXX FIX:     Does not handle keys larger than the hash algorithm used.
+ *
+KeyChange ::=     TEXTUAL-CONVENTION
+   STATUS         current
+   DESCRIPTION
+         "Every definition of an object with this syntax must identify
+          a protocol P, a secret key K, and a hash algorithm H
+          that produces output of L octets.
+
+          The object's value is a manager-generated, partially-random
+          value which, when modified, causes the value of the secret
+          key K, to be modified via a one-way function.
+
+          The value of an instance of this object is the concatenation
+          of two components: first a 'random' component and then a
+          'delta' component.
+
+          The lengths of the random and delta components
+          are given by the corresponding value of the protocol P;
+          if P requires K to be a fixed length, the length of both the
+          random and delta components is that fixed length; if P
+          allows the length of K to be variable up to a particular
+          maximum length, the length of the random component is that
+          maximum length and the length of the delta component is any
+          length less than or equal to that maximum length.
+          For example, usmHMACMD5AuthProtocol requires K to be a fixed
+          length of 16 octets and L - of 16 octets.
+          usmHMACSHAAuthProtocol requires K to be a fixed length of
+          20 octets and L - of 20 octets. Other protocols may define
+          other sizes, as deemed appropriate.
+
+          When a requester wants to change the old key K to a new
+          key keyNew on a remote entity, the 'random' component is
+          obtained from either a true random generator, or from a
+          pseudorandom generator, and the 'delta' component is
+          computed as follows:
+
+           - a temporary variable is initialized to the existing value
+             of K;
+           - if the length of the keyNew is greater than L octets,
+             then:
+              - the random component is appended to the value of the
+                temporary variable, and the result is input to the
+                the hash algorithm H to produce a digest value, and
+                the temporary variable is set to this digest value;
+              - the value of the temporary variable is XOR-ed with
+                the first (next) L-octets (16 octets in case of MD5)
+                of the keyNew to produce the first (next) L-octets
+                (16 octets in case of MD5) of the 'delta' component.
+              - the above two steps are repeated until the unused
+                portion of the keyNew component is L octets or less,
+           - the random component is appended to the value of the
+             temporary variable, and the result is input to the
+             hash algorithm H to produce a digest value;
+           - this digest value, truncated if necessary to be the same
+             length as the unused portion of the keyNew, is XOR-ed
+             with the unused portion of the keyNew to produce the
+             (final portion of the) 'delta' component.
+
+           For example, using MD5 as the hash algorithm H:
+
+              iterations = (lenOfDelta - 1)/16; // integer division
+              temp = keyOld;
+              for (i = 0; i < iterations; i++) {
+                  temp = MD5 (temp || random);
+                  delta[i*16 .. (i*16)+15] =
+                         temp XOR keyNew[i*16 .. (i*16)+15];
+              }
+              temp = MD5 (temp || random);
+              delta[i*16 .. lenOfDelta-1] =
+                     temp XOR keyNew[i*16 .. lenOfDelta-1];
+
+          The 'random' and 'delta' components are then concatenated as
+          described above, and the resulting octet string is sent to
+          the recipient as the new value of an instance of this object.
+
+          At the receiver side, when an instance of this object is set
+          to a new value, then a new value of K is computed as follows:
+
+           - a temporary variable is initialized to the existing value
+             of K;
+           - if the length of the delta component is greater than L
+             octets, then:
+              - the random component is appended to the value of the
+                temporary variable, and the result is input to the
+                hash algorithm H to produce a digest value, and the
+                temporary variable is set to this digest value;
+              - the value of the temporary variable is XOR-ed with
+                the first (next) L-octets (16 octets in case of MD5)
+                of the delta component to produce the first (next)
+                L-octets (16 octets in case of MD5) of the new value
+                of K.
+              - the above two steps are repeated until the unused
+                portion of the delta component is L octets or less,
+           - the random component is appended to the value of the
+             temporary variable, and the result is input to the
+             hash algorithm H to produce a digest value;
+           - this digest value, truncated if necessary to be the same
+             length as the unused portion of the delta component, is
+             XOR-ed with the unused portion of the delta component to
+             produce the (final portion of the) new value of K.
+
+           For example, using MD5 as the hash algorithm H:
+
+              iterations = (lenOfDelta - 1)/16; // integer division
+              temp = keyOld;
+              for (i = 0; i < iterations; i++) {
+                  temp = MD5 (temp || random);
+                  keyNew[i*16 .. (i*16)+15] =
+                         temp XOR delta[i*16 .. (i*16)+15];
+              }
+              temp = MD5 (temp || random);
+              keyNew[i*16 .. lenOfDelta-1] =
+                     temp XOR delta[i*16 .. lenOfDelta-1];
+
+          The value of an object with this syntax, whenever it is
+          retrieved by the management protocol, is always the zero
+          length string.
+
+          Note that the keyOld and keyNew are the localized keys.
+
+          Note that it is probably wise that when an SNMP entity sends
+          a SetRequest to change a key, that it keeps a copy of the old
+          key until it has confirmed that the key change actually
+          succeeded.
+         "
+    SYNTAX       OCTET STRING
+ *
  */
 int
 encode_keychange(const oid * hashtype, u_int hashtype_len,
@@ -807,22 +933,19 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
                  u_char * kcstring, size_t * kcstring_len)
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
+    u_char          tmpbuf[SNMP_MAXBUF_SMALL], digest[SNMP_MAXBUF_SMALL];
+    u_char          delta[SNMP_MAXBUF_SMALL];
+    u_char         *tmpp = tmpbuf, *randp;
     int             rval = SNMPERR_SUCCESS, auth_type;
-    int             iproperlength;
-    size_t          properlength;
-    size_t          nbytes = 0;
-
-    u_char         *tmpbuf = NULL;
-
+    int             iauth_length, tmp_len;
+    size_t          auth_length, rand_len, digest_len, delta_len = 0;
 
     /*
      * Sanity check.
      */
-    if (!kcstring || !kcstring_len)
-	return SNMPERR_GENERR;
-
     if (!hashtype || !oldkey || !newkey || !kcstring || !kcstring_len
-        || (oldkey_len <= 0) || (newkey_len <= 0) || (*kcstring_len <= 0)) {
+        || (oldkey_len != newkey_len ) || (newkey_len == 0)
+        || (*kcstring_len < (2 * newkey_len))) {
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
     }
 
@@ -830,15 +953,12 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
      * Setup for the transform type.
      */
     auth_type = sc_get_authtype(hashtype, hashtype_len);
-    iproperlength = sc_get_proper_auth_length_bytype(auth_type);
-    if (iproperlength == SNMPERR_GENERR)
+    iauth_length = sc_get_proper_auth_length_bytype(auth_type);
+    if (iauth_length == SNMPERR_GENERR)
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
 
-    if ((oldkey_len != newkey_len) || (*kcstring_len < (2 * oldkey_len))) {
-        QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
-    }
+    auth_length = SNMP_MIN(oldkey_len, (size_t)iauth_length);
 
-    properlength = SNMP_MIN(oldkey_len, (size_t)iproperlength);
     DEBUGMSGTL(("encode_keychange",
                 "oldkey_len %ld, newkey_len %ld, auth_length %ld\n",
                 oldkey_len, newkey_len, auth_length));
@@ -852,17 +972,29 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
      *
      * Getting the wrong number of random bytes is considered an error.
      */
-    nbytes = properlength;
+    randp = kcstring;
+    rand_len = oldkey_len;
 
+    memset(randp, 0x0, rand_len);
+    /*
+     * KeyChange ::=     TEXTUAL-CONVENTION
+     *    STATUS         current
+     *    DESCRIPTION
+     *    [...]
+     *    When a requester wants to change the old key K to a new
+     *    key keyNew on a remote entity, the 'random' component is
+     *    obtained from either a true random generator, or from a
+     *    pseudorandom generator, ...
+     */
 #if defined(NETSNMP_ENABLE_TESTING_CODE) && defined(RANDOMZEROS)
-    memset(kcstring, 0, nbytes);
+    memset(randp, 0, rand_len);
     DEBUGMSG(("encode_keychange",
               "** Using all zero bits for \"random\" delta of )"
               "the keychange string! **\n"));
 #else                           /* !NETSNMP_ENABLE_TESTING_CODE */
-    rval = sc_random(kcstring, &nbytes);
+    rval = sc_random(randp, &rand_len);
     QUITFUN(rval, encode_keychange_quit);
-    if (nbytes != properlength) {
+    if (rand_len != oldkey_len) {
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
     }
 #endif                          /* !NETSNMP_ENABLE_TESTING_CODE */
@@ -877,26 +1009,65 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
     }
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
-    tmpbuf = (u_char *) malloc(properlength * 2);
-    if (tmpbuf) {
-        memcpy(tmpbuf, oldkey, properlength);
-        memcpy(tmpbuf + properlength, kcstring, properlength);
+    /*
+     *                        ... and the 'delta' component is
+     *    computed as follows:
+     *
+     *     - a temporary variable is initialized to the existing value
+     *       of K;
+     */
+    memcpy(tmpbuf, oldkey, oldkey_len);
+    tmp_len = oldkey_len;
+    tmpp  = tmpbuf + tmp_len;
 
-        *kcstring_len -= properlength;
-        rval = sc_hash(hashtype, hashtype_len, tmpbuf, properlength * 2,
-                       kcstring + properlength, kcstring_len);
+    delta_len = 0;
+    while (delta_len < newkey_len) {
+        DEBUGMSGTL(("encode_keychange", "%ld < %ld\n", delta_len,
+                    newkey_len));
 
+        /*
+         *  - the random component is appended to the value of the
+         *    temporary variable,
+         */
+        memcpy(tmpp, randp, rand_len);
+        tmp_len += rand_len;
+
+        /*
+         *                        and the result is input to the
+         *    the hash algorithm H to produce a digest value, and
+         *    the temporary variable is set to this digest value;
+         */
+        digest_len = sizeof(digest);
+        rval = sc_hash(hashtype, hashtype_len, tmpbuf, tmp_len,
+                       digest, &digest_len);
         QUITFUN(rval, encode_keychange_quit);
         DEBUGMSGTL(("encode_keychange", "digest_len %ld\n", digest_len));
 
-        *kcstring_len = (properlength * 2);
-
-        kcstring += properlength;
-        nbytes = 0;
-        while ((nbytes++) < properlength) {
-            *kcstring++ ^= *newkey++;
+        memcpy(tmpbuf, digest, digest_len);
+        tmp_len = digest_len;
+        tmpp = tmpbuf;
+        /*
+         *  - the value of the temporary variable is XOR-ed with
+         *    the first (next) L-octets (16 octets in case of MD5)
+         *    of the keyNew to produce the first (next) L-octets
+         *    (16 octets in case of MD5) of the 'delta' component.
+         *  - the above two steps are repeated until the unused
+         *    portion of the keyNew component is L octets or less,
+         */
+        while ((delta_len < newkey_len) && (digest_len-- > 0)) {
+            delta[delta_len] = *tmpp ^ newkey[delta_len];
+            DEBUGMSGTL(("encode_keychange",
+                        "d[%ld] 0x%0x = 0x%0x ^ 0x%0x\n",
+                        delta_len, delta[delta_len], *tmpp, newkey[delta_len]));
+            ++tmpp;
+            ++delta_len;
         }
+        DEBUGMSGTL(("encode_keychange", "delta_len %ld\n", delta_len));
     }
+
+    /** copy results */
+    memcpy(kcstring + rand_len, delta, delta_len);
+    *kcstring_len = rand_len + delta_len;
 
 #ifdef NETSNMP_ENABLE_TESTING_CODE
     DEBUGIF("encode_keychange") {
@@ -923,7 +1094,9 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
   encode_keychange_quit:
     if (rval != SNMPERR_SUCCESS)
         memset(kcstring, 0, *kcstring_len);
-    SNMP_FREE(tmpbuf);
+    memset(tmpbuf, 0, sizeof(tmpbuf));
+    memset(digest, 0, sizeof(digest));
+    memset(delta, 0, sizeof(delta));
 
     return rval;
 
@@ -958,9 +1131,93 @@ _KEYTOOLS_NOT_AVAILABLE
  *
  *
  * ASSUMES	Old key is exactly 1/2 the length of the KeyChange buffer,
- *		although this length may be less than the hash transform
+ *		although this length may not be equal to the hash transform
  *		output.  Thus the new key length will be equal to the old
  *		key length.
+ *
+KeyChange ::=     TEXTUAL-CONVENTION
+   STATUS         current
+   DESCRIPTION
+         "Every definition of an object with this syntax must identify
+          a protocol P, a secret key K, and a hash algorithm H
+          that produces output of L octets.
+
+          The object's value is a manager-generated, partially-random
+          value which, when modified, causes the value of the secret
+          key K, to be modified via a one-way function.
+
+          The value of an instance of this object is the concatenation
+          of two components: first a 'random' component and then a
+          'delta' component.
+
+          The lengths of the random and delta components
+          are given by the corresponding value of the protocol P;
+          if P requires K to be a fixed length, the length of both the
+          random and delta components is that fixed length; if P
+          allows the length of K to be variable up to a particular
+          maximum length, the length of the random component is that
+          maximum length and the length of the delta component is any
+          length less than or equal to that maximum length.
+          For example, usmHMACMD5AuthProtocol requires K to be a fixed
+          length of 16 octets and L - of 16 octets.
+          usmHMACSHAAuthProtocol requires K to be a fixed length of
+          20 octets and L - of 20 octets. Other protocols may define
+          other sizes, as deemed appropriate.
+
+          When a requester wants to change the old key K to a new
+          [... see encode_keychange above ...]
+
+          At the receiver side, when an instance of this object is set
+          to a new value, then a new value of K is computed as follows:
+
+           - a temporary variable is initialized to the existing value
+             of K;
+           - if the length of the delta component is greater than L
+             octets, then:
+              - the random component is appended to the value of the
+                temporary variable, and the result is input to the
+                hash algorithm H to produce a digest value, and the
+                temporary variable is set to this digest value;
+              - the value of the temporary variable is XOR-ed with
+                the first (next) L-octets (16 octets in case of MD5)
+                of the delta component to produce the first (next)
+                L-octets (16 octets in case of MD5) of the new value
+                of K.
+              - the above two steps are repeated until the unused
+                portion of the delta component is L octets or less,
+           - the random component is appended to the value of the
+             temporary variable, and the result is input to the
+             hash algorithm H to produce a digest value;
+           - this digest value, truncated if necessary to be the same
+             length as the unused portion of the delta component, is
+             XOR-ed with the unused portion of the delta component to
+             produce the (final portion of the) new value of K.
+
+           For example, using MD5 as the hash algorithm H:
+
+              iterations = (lenOfDelta - 1)/16; // integer division
+              temp = keyOld;
+              for (i = 0; i < iterations; i++) {
+                  temp = MD5 (temp || random);
+                  keyNew[i*16 .. (i*16)+15] =
+                         temp XOR delta[i*16 .. (i*16)+15];
+              }
+              temp = MD5 (temp || random);
+              keyNew[i*16 .. lenOfDelta-1] =
+                     temp XOR delta[i*16 .. lenOfDelta-1];
+
+          The value of an object with this syntax, whenever it is
+          retrieved by the management protocol, is always the zero
+          length string.
+
+          Note that the keyOld and keyNew are the localized keys.
+
+          Note that it is probably wise that when an SNMP entity sends
+          a SetRequest to change a key, that it keeps a copy of the old
+          key until it has confirmed that the key change actually
+          succeeded.
+         "
+    SYNTAX       OCTET STRING
  */
 /*
  * XXX:  if the newkey is not long enough, it should be freed and remalloced 
@@ -973,37 +1230,37 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS, auth_type;
-    size_t          properlength = 0;
-    int             iproperlength = 0;
+    size_t          hash_len = 0, key_len;
+    int             ihash_len = 0;
     u_int           nbytes = 0;
 
-    u_char         *bufp, tmp_buf[SNMP_MAXBUF];
-    size_t          tmp_buf_len = SNMP_MAXBUF;
+    u_char         *deltap, hash[SNMP_MAXBUF];
+    size_t          delta_len, tmpbuf_len;
     u_char         *tmpbuf = NULL;
-
-
+#ifdef NETSNMP_ENABLE_TESTING_CODE
+    u_char         *newkey_save = newkey;
+#endif
 
     /*
      * Sanity check.
      */
     if (!hashtype || !oldkey || !kcstring || !newkey || !newkey_len
-        || (oldkey_len <= 0) || (kcstring_len <= 0) || (*newkey_len <= 0)) {
+        || (oldkey_len == 0) || (kcstring_len == 0) || (*newkey_len == 0)) {
         DEBUGMSGTL(("decode_keychange", "bad args\n"));
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
     }
-
 
     /*
      * Setup for the transform type.
      */
     auth_type = sc_get_authtype(hashtype, hashtype_len);
-    iproperlength = sc_get_proper_auth_length_bytype(auth_type);
-    if (iproperlength == SNMPERR_GENERR)
+    ihash_len = sc_get_proper_auth_length_bytype(auth_type);
+    if (ihash_len == SNMPERR_GENERR) {
         DEBUGMSGTL(("decode_keychange", "proper length err\n"));
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
-
-    properlength = (size_t) iproperlength;
-    DEBUGMSGTL(("usm:decode_keychange",
+    }
+    hash_len = (size_t) ihash_len;
+    DEBUGMSGTL(("decode_keychange",
                 "oldkey_len %ld, newkey_len %ld, kcstring_len %ld, hash_len %ld\n",
                 oldkey_len, *newkey_len, kcstring_len, hash_len));
 
@@ -1012,9 +1269,11 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
     }
 
-    properlength = oldkey_len;
-    *newkey_len = properlength;
-    {
+    /*********** handle hash len > keylen ******************/
+
+    key_len = oldkey_len;
+    *newkey_len = oldkey_len;
+
 #ifdef NETSNMP_ENABLE_TESTING_CODE
     DEBUGIF("decode_keychange") {
         int             i;
@@ -1033,25 +1292,82 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
     /*
-     * Use the old key and the given KeyChange TC string to recover
-     * the new key:
-     *      . Hash (oldkey | random_bytes) (into newkey),
-     *      . XOR hash and encoded (second) half of kcstring (into newkey).
+     * KeyChange ::=     TEXTUAL-CONVENTION
+     *    STATUS         current
+     *    DESCRIPTION
+     *    [...]
+     *    At the receiver side, when an instance of this object is set
+     *    to a new value, then a new value of K is computed as follows:
+     *
+     *     - a temporary variable is initialized to the existing value
+     *       of K;
      */
-    tmpbuf = (u_char *) malloc(properlength * 2);
-    if (tmpbuf) {
-        memcpy(tmpbuf, oldkey, properlength);
-        memcpy(tmpbuf + properlength, kcstring, properlength);
+    tmpbuf = (u_char *) malloc(key_len * 2);
+    if (NULL == tmpbuf) {
+        DEBUGMSGTL(("decode_keychange", "malloc failed\n"));
+        QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
+    }
+    memcpy(tmpbuf, oldkey, key_len);
+    tmpbuf_len = key_len;
 
-        rval = sc_hash(hashtype, hashtype_len, tmpbuf, properlength * 2,
-                       tmp_buf, &tmp_buf_len);
+    /*
+     * key=0xe27c077c47d4cb4e4473aeac969ba9fa622486e0|d7440406892e0941175cb5ee
+     * key=0xe27c077c47d4cb4e4473aeac969ba9fa622486e0|4fa8e081a6cb2f089f40949c
+     */
+    delta_len = 0;
+    deltap = kcstring + key_len;
+    while (delta_len < key_len) {
+
+        /*
+         * - if the length of the delta component is greater than L
+         *   octets, then:
+         *    - the random component is appended to the value of the
+         *      temporary variable, ...
+         */
+        DEBUGMSGTL(("decode_keychange",
+                    "append random tmpbuf_len %ld key_len %ld\n",
+                    tmpbuf_len, key_len));
+        memcpy(tmpbuf + tmpbuf_len, kcstring, key_len);
+        tmpbuf_len += key_len;
+
+        /*
+         *                      ... and the result is input to the
+         *      hash algorithm H to produce a digest value, ...
+         */
+        hash_len = sizeof(hash);
+        DEBUGMSGTL(("decode_keychange", "get hash\n"));
+        rval = sc_hash(hashtype, hashtype_len, tmpbuf, tmpbuf_len,
+                       hash, &hash_len);
         QUITFUN(rval, decode_keychange_quit);
+        if (hash_len > key_len) {
+            DEBUGMSGTL(("decode_keychange",
+                        "truncating hash to key_len\n"));
+            hash_len = key_len;
+        }
 
-        memcpy(newkey, tmp_buf, properlength);
-        bufp = kcstring + properlength;
+        /*
+         *                                              ... and the
+         *      temporary variable is set to this digest value;
+         */
+        DEBUGMSGTL(("decode_keychange", "copy %ld hash bytes to tmp\n",
+                       hash_len));
+        memcpy(tmpbuf, hash, hash_len);
+        tmpbuf_len = hash_len;
+
+        /*
+         *    - the value of the temporary variable is XOR-ed with
+         *      the first (next) L-octets (16 octets in case of MD5)
+         *      of the delta component to produce the first (next)
+         *      L-octets (16 octets in case of MD5) of the new value
+         *      of K.
+         */
+        DEBUGMSGTL(("decode_keychange",
+                    "xor to get new key; hash_len %ld delta_len %ld\n",
+                    hash_len, delta_len));
         nbytes = 0;
-        while ((nbytes++) < properlength) {
-            *newkey++ ^= *bufp++;
+        while ((nbytes < hash_len) && (delta_len < key_len)) {
+            newkey[delta_len] = tmpbuf[nbytes++] ^ deltap[delta_len];
+            ++delta_len;
         }
     }
 
@@ -1070,9 +1386,9 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
     if (rval != SNMPERR_SUCCESS) {
         DEBUGMSGTL(("decode_keychange", "error %d\n", rval));
         if (newkey)
-            memset(newkey, 0, properlength);
+            memset(newkey, 0, key_len);
     }
-    memset(tmp_buf, 0, SNMP_MAXBUF);
+    memset(hash, 0, SNMP_MAXBUF);
     SNMP_FREE(tmpbuf);
 
     return rval;

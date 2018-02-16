@@ -1081,14 +1081,15 @@ write_usmUserPrivKeyChange(int action,
                            u_char * statP, oid * name, size_t name_len)
 {
     struct usmUser *uptr;
-    unsigned char   buf[SNMP_MAXBUF_SMALL];
-    size_t          buflen = SNMP_MAXBUF_SMALL;
+    unsigned char   buf[SNMP_MAXBUF_SMALL], buf2[SNMP_MAXBUF_SMALL];
+    size_t          buflen = sizeof(buf);
     const char      fnPrivKey[] = "write_usmUserPrivKeyChange";
     const char      fnOwnPrivKey[] = "write_usmUserOwnPrivKeyChange";
     const char     *fname;
     static unsigned char *oldkey;
     static size_t   oldkeylen;
     static int      resetOnFail;
+    int plen, alen;
 
     if (name[USM_MIB_LENGTH - 1] == 9) {
         fname = fnPrivKey;
@@ -1110,32 +1111,41 @@ write_usmUserPrivKeyChange(int action,
         if ((uptr = usm_parse_user(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
-#ifndef NETSNMP_DISABLE_DES
-            if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
-                                 usmDESPrivProtocol,
-                                 sizeof(usmDESPrivProtocol) /
-                                 sizeof(oid)) == 0) {
-                if (var_val_len != 0 && var_val_len != 32) {
-                    return SNMP_ERR_WRONGLENGTH;
-                }
+            netsnmp_priv_alg_info *pai =
+                sc_get_priv_alg_byoid(uptr->privProtocol,
+                                      uptr->privProtocolLen);
+            if (NULL == pai) {
+                DEBUGMSGTL(("usmUser", "%s: unknown privProtocol\n",
+                            fname));
+                return SNMP_ERR_GENERR;
             }
+            alen = sc_get_properlength(uptr->authProtocol,
+                                       uptr->authProtocolLen);
+            plen = pai->proper_length;
+            DEBUGMSGTL(("usmUser", "plen %d, alen %d\n", plen, alen));
+#if 0
+            if (USM_CREATE_USER_PRIV_DES == pai->type)
+                plen *= 2; /* ?? we store salt with key */
 #endif
-            if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
-                                 usmAESPrivProtocol,
-                                 sizeof(usmAESPrivProtocol) /
-                                 sizeof(oid)) == 0) {
-                if (var_val_len != 0 && var_val_len != 32) {
-                    return SNMP_ERR_WRONGLENGTH;
-                }
+            if (var_val_len != 0 && var_val_len != (2 * plen)) {
+                DEBUGMSGTL(("usmUser", "%s: bad len. %ld != %d\n",
+                            fname, var_val_len, (2*alen)));
+                return SNMP_ERR_WRONGLENGTH;
             }
         }
     } else if (action == ACTION) {
+
         if ((uptr = usm_parse_user(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         }
         if (uptr->cloneFrom == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         }
+        plen = sc_get_proper_priv_length(uptr->privProtocol,
+                                         uptr->privProtocolLen);
+        alen = sc_get_properlength(uptr->authProtocol,
+                                   uptr->authProtocolLen);
+        DEBUGMSGTL(("usmUser", "plen %d, alen %d\n", plen, alen));
         if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
                              usmNoPrivProtocol,
                              sizeof(usmNoPrivProtocol) / sizeof(oid)) ==
@@ -1149,6 +1159,35 @@ write_usmUserPrivKeyChange(int action,
                         "%s: noPrivProtocol keyChange... success!\n",
                         fname));
             return SNMP_ERR_NOERROR;
+        }
+
+        /*
+         * extend key as needed
+         */
+        DEBUGMSGTL(("9:usmUser", "%s: var_val_len %ld\n", fname, var_val_len));
+        if (var_val_len < ( 2 * plen )) {
+            struct usmUser dummy;
+            memset(&dummy, 0x0, sizeof(dummy));
+            dummy.engineID = uptr->engineID;
+            dummy.engineIDLen = uptr->engineIDLen;
+            dummy.authProtocol = uptr->authProtocol;
+            dummy.authProtocolLen = uptr->authProtocolLen;
+            dummy.privProtocol = uptr->privProtocol;
+            dummy.privProtocolLen = uptr->privProtocolLen;
+            memcpy(buf2, var_val, var_val_len);
+            dummy.privKey = buf2;
+            dummy.privKeyLen = var_val_len;
+            if (SNMP_ERR_NOERROR != usm_extend_user_kul(&dummy, sizeof(buf2))) {
+                DEBUGMSGTL(("usmUser", "%s: extend kul failed\n", fname));
+                return SNMP_ERR_GENERR;
+            }
+            DEBUGMSGTL(("9:usmUser", "%s: extend kul OK\n", fname));
+            var_val = dummy.privKey;
+            var_val_len = dummy.privKeyLen;
+            /*
+             * make sure no reallocation happened; buf2 must be large enoungh
+             */
+            netsnmp_assert( dummy.privKey == buf2 );
         }
 
         /*

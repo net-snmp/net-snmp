@@ -625,7 +625,8 @@ main(int argc, char *argv[])
          * they're the same lengths.
          */
         if (doprivkey) {
-            int privtype;
+            int privtype, properlength;
+            u_char *okp = oldkulpriv, *nkp = newkulpriv;
             if (!session.securityPrivProto) {
                 snmp_log(LOG_ERR, "no encryption type specified, which I need in order to know to change the key\n");
                 goto close_session;
@@ -633,13 +634,34 @@ main(int argc, char *argv[])
 
             privtype = sc_get_privtype(session.securityPrivProto,
                                        session.securityPrivProtoLen);
-            oldkulpriv_len = sc_get_proper_priv_length_bytype(privtype);
+            properlength = sc_get_proper_priv_length_bytype(privtype);
             if (USM_CREATE_USER_PRIV_DES == privtype)
-                oldkulpriv_len *= 2; /* ?? we store salt with key */
-            newkulpriv_len = oldkulpriv_len;
+                properlength *= 2; /* ?? we store salt with key */
             DEBUGMSGTL(("9:usm:passwd", "proper len %d\n", properlength));
+            oldkulpriv_len = oldkul_len;
+            newkulpriv_len = newkul_len;
             memcpy(oldkulpriv, oldkul, oldkulpriv_len);
             memcpy(newkulpriv, newkul, newkulpriv_len);
+
+            if (oldkulpriv_len > properlength) {
+                oldkulpriv_len = newkulpriv_len = properlength;
+            }
+            else if (oldkulpriv_len < properlength) {
+                rval = netsnmp_extend_kul(properlength,
+                                          session.securityAuthProto,
+                                          session.securityAuthProtoLen,
+                                          privtype,
+                                          usmUserEngineID, usmUserEngineIDLen,
+                                          &okp, &oldkulpriv_len,
+                                          sizeof(oldkulpriv));
+                rval = netsnmp_extend_kul(properlength,
+                                          session.securityAuthProto,
+                                          session.securityAuthProtoLen,
+                                          privtype,
+                                          usmUserEngineID, usmUserEngineIDLen,
+                                          &nkp, &newkulpriv_len,
+                                          sizeof(newkulpriv));
+            }
         }
 
         /*
