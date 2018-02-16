@@ -603,3 +603,25 @@ AC_CHECK_HEADERS([curses.h])
 AC_CHECK_HEADERS([ncurses/curses.h])
 NETSNMP_SEARCH_LIBS([endwin], [curses ncurses],,,,[LIBCURSES])
 AC_SUBST([LIBCURSES])
+
+#   libm for ceil
+#
+AC_MSG_CHECKING([for ceil without -lm])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+  #include <math.h>
+], [
+  ceil((double)2.4);
+])], [
+  AC_MSG_RESULT(yes);
+  # Keep LIBS.
+  need_ceil_lib="no"
+  true
+], [
+  AC_MSG_RESULT(no)
+  need_ceil_lib="yes"
+  # Restore LIBS.
+])
+
+if test "${need_ceil_lib}" = yes; then
+  AC_SEARCH_LIBS([ceil], [m])
+fi
