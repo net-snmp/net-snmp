@@ -512,7 +512,7 @@ _kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
     /* 3.1.2.1:
      *   2)Set c = ceil ( 256 / nnn )
      */
-    count = ceil( 256 / hashBits );
+    count = ceil( (double)256 / (double)hashBits );
     DEBUGMSGTL(("9:usm:extend_kul:blumenthal", "count ceiling %d\n", count));
 
     /* 3.1.2.1:
