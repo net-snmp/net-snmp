@@ -174,6 +174,9 @@ extern          "C" {
                                  size_t priv_salt_length,
                                  u_char * msgSalt);
 
+    int             usm_extend_user_kul(struct usmUser *user,
+                                        u_int privKeyBufSize);
+
     int             usm_parse_security_parameters(u_char * secParams,
                                                   size_t remaining,
                                                   u_char * secEngineID,

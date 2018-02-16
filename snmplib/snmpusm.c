@@ -2863,7 +2863,7 @@ usm_handle_report(void *sessp,
 }
 
 /** utility function to call netsnmp_extend_kul for a usmUser */
-static int
+int
 usm_extend_user_kul(struct usmUser *user, u_int privKeyBufSize)
 {
     netsnmp_priv_alg_info *pai;
