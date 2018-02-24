@@ -214,7 +214,7 @@ CHECK "failed rfc5343"
 # Check *their* certificate with a different one than expected; should fail
 DOFAILSETTEST "incorectServerCertificate" "-r 0 -T our_identity=$OTHERUSERFP -T their_identity=$OTHERUSERFP $FLAGS"
 
-CHECK "failed to verify ssl certificate"
+CHECKCOUNT atleastone "failed to verify ssl certificate"
 
 # using user 5 - a completely remapped certificate (direct specified secname)
 DOSETTEST user5RemappedSecname "-T our_identity=$MAPPEDUSERFP $FLAGS"
