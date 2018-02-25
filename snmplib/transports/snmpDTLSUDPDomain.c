@@ -25,6 +25,7 @@ netsnmp_feature_require(sockaddr_size)
 
 #include <net-snmp/library/snmpDTLSUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -429,26 +430,34 @@ find_or_create_bio_cache(netsnmp_transport *t,
 static const netsnmp_indexed_addr_pair *
 _extract_addr_pair(netsnmp_transport *t, const void *opaque, int olen)
 {
-    const netsnmp_indexed_addr_pair *addr_pair = NULL;
+    if (opaque) {
+        switch (olen) {
+        case sizeof(netsnmp_tmStateReference): {
+            const netsnmp_tmStateReference *tmStateRef = opaque;
 
-    if (opaque && olen == sizeof(netsnmp_tmStateReference)) {
-        const netsnmp_tmStateReference *tmStateRef = opaque;
-
-        if (tmStateRef->have_addresses)
-            addr_pair = &(tmStateRef->addresses);
+            if (tmStateRef->have_addresses)
+                return &tmStateRef->addresses;
+            break;
+        }
+        default:
+            netsnmp_assert(0);
+        }
     }
-    if ((NULL == addr_pair) && (NULL != t)) {
-        if (t->data != NULL &&
-            t->data_length == sizeof(netsnmp_indexed_addr_pair))
-            addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
-        else if (t->data != NULL &&
-                 t->data_length == sizeof(_netsnmpTLSBaseData)) {
-            _netsnmpTLSBaseData *tlsdata = (_netsnmpTLSBaseData *) t->data;
-            addr_pair = (netsnmp_indexed_addr_pair *) (tlsdata->addr);
+    if (t && t->data) {
+        switch (t->data_length) {
+        case sizeof(netsnmp_indexed_addr_pair):
+            return t->data;
+        case sizeof(_netsnmpTLSBaseData): {
+            _netsnmpTLSBaseData *tlsdata = t->data;
+
+            return tlsdata->addr;
+        }
+        default:
+            netsnmp_assert(0);
         }
     }
 
-    return addr_pair;
+    return NULL;
 }
 
 static const struct sockaddr *
