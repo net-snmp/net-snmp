@@ -201,11 +201,7 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
         const struct sockaddr_in *to;
 
         to = (const struct sockaddr_in *) &(addr_pair->remote_addr);
-        if (to == NULL) {
-            asprintf(&tmp, "%s: unknown->[%s]:%hu", prefix,
-                     inet_ntoa(addr_pair->local_addr.sin.sin_addr),
-                     ntohs(addr_pair->local_addr.sin.sin_port));
-        } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
+        if (t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME) {
             /* XXX: hmm...  why isn't this prefixed */
             /* assuming intentional */
             host = netsnmp_gethostbyaddr(&to->sin_addr, sizeof(struct in_addr), AF_INET);
