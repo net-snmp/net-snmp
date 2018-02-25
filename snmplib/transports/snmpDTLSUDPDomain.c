@@ -1275,7 +1275,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
     if (NULL == cachep)
         return netsnmp_socketbase_close(t);
 
-    /* if we have any remaining packtes to send, try to send them */
+    /* if we have any remaining packets to send, try to send them */
     if (cachep->write_cache_len > 0) {
         int i = 0;
         char buf[8192];
