@@ -92,17 +92,35 @@ static netsnmp_tdomain tlstcpDomain;
 static char *
 netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
-    if (NULL == data || 0 == len || 0 == ((const char *) data)[0])
-        return strdup("TLSTCP: unknown");
-    else if (len == sizeof(netsnmp_indexed_addr_pair) ||
-             len == sizeof(struct sockaddr_in))
+    if (t && !data) {
+        data = t->data;
+        len = t->data_length;
+    }
+
+    switch (data ? len : 0) {
+    case sizeof(netsnmp_indexed_addr_pair):
         return netsnmp_ipv4_fmtaddr("TLSTCP", t, data, len);
-    else {
-        /* an already ascii formatted string */
+    case sizeof(netsnmp_tmStateReference): {
+        const netsnmp_tmStateReference *r = data;
+        const netsnmp_indexed_addr_pair *p = &r->addresses;
+
+        return netsnmp_ipv4_fmtaddr("TLSTCP", t, p, sizeof(*p));
+    }
+    case sizeof(_netsnmpTLSBaseData): {
+        const _netsnmpTLSBaseData *b = data;
         char *buf = NULL;
 
-        asprintf(&buf, "TLSTCP: %s", (const char *) data);
+        asprintf(&buf, "TLSTCP: %s", b->addr_string);
         return buf;
+    }
+    case 0:
+        return strdup("TLSTCP: unknown");
+    default: {
+        char *buf = NULL;
+
+        asprintf(&buf, "TLSTCP: len %d", len);
+        return buf;
+    }
     }
 }
 /*
