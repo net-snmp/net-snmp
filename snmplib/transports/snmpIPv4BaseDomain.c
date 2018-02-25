@@ -5,6 +5,7 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #include <stddef.h>
 #include <stdio.h>
@@ -185,39 +186,46 @@ char *
 netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
                      const void *data, int len)
 {
-    const netsnmp_indexed_addr_pair *addr_pair = NULL;
+    const netsnmp_indexed_addr_pair *addr_pair;
+    const struct sockaddr_in *from, *to;
     struct hostent *host;
     char *tmp = NULL;
 
-    if (data != NULL && len == sizeof(netsnmp_indexed_addr_pair)) {
-	addr_pair = (const netsnmp_indexed_addr_pair *) data;
-    } else if (t != NULL && t->data != NULL) {
-	addr_pair = (const netsnmp_indexed_addr_pair *) t->data;
+    if (t && !data) {
+        data = t->data;
+        len = t->data_length;
     }
 
-    if (addr_pair == NULL) {
+    switch (data ? len : 0) {
+    case sizeof(netsnmp_indexed_addr_pair):
+        addr_pair = data;
+        break;
+    default:
+        netsnmp_assert(0);
         asprintf(&tmp, "%s: unknown", prefix);
-    } else {
-        const struct sockaddr_in *to;
-
-        to = (const struct sockaddr_in *) &(addr_pair->remote_addr);
-        if (t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME) {
-            /* XXX: hmm...  why isn't this prefixed */
-            /* assuming intentional */
-            host = netsnmp_gethostbyaddr(&to->sin_addr, sizeof(struct in_addr), AF_INET);
-            return (host ? strdup(host->h_name) : NULL); 
-        } else {
-            char a1[16];
-            char a2[16];
-
-            asprintf(&tmp, "%s: [%s]:%hu->[%s]:%hu", prefix,
-                     inet_ntop(AF_INET, &to->sin_addr, a1, sizeof(a1)),
-                     ntohs(to->sin_port),
-                     inet_ntop(AF_INET, &addr_pair->local_addr.sin.sin_addr, a2,
-                               sizeof(a2)),
-                     ntohs(addr_pair->local_addr.sin.sin_port));
-        }
+        return tmp;
     }
+
+    from = (const struct sockaddr_in *)&addr_pair->local_addr;
+    to = (const struct sockaddr_in *)&addr_pair->remote_addr;
+    netsnmp_assert(from->sin_family == 0 || from->sin_family == AF_INET);
+    netsnmp_assert(to->sin_family == 0 || to->sin_family == AF_INET);
+    if (t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME) {
+        /* XXX: hmm...  why isn't this prefixed */
+        /* assuming intentional */
+        host = netsnmp_gethostbyaddr(&to->sin_addr, sizeof(struct in_addr), AF_INET);
+        return (host ? strdup(host->h_name) : NULL); 
+    } else {
+        char a1[16];
+        char a2[16];
+
+        asprintf(&tmp, "%s: [%s]:%hu->[%s]:%hu", prefix,
+                 inet_ntop(AF_INET, &to->sin_addr, a1, sizeof(a1)),
+                 ntohs(to->sin_port),
+                 inet_ntop(AF_INET, &from->sin_addr, a2, sizeof(a2)),
+                 ntohs(from->sin_port));
+    }
+
     return tmp;
 }
 
