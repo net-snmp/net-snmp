@@ -25,6 +25,7 @@ netsnmp_feature_require(sockaddr_size)
 
 #include <net-snmp/library/snmpDTLSUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -429,26 +430,34 @@ find_or_create_bio_cache(netsnmp_transport *t,
 static const netsnmp_indexed_addr_pair *
 _extract_addr_pair(netsnmp_transport *t, const void *opaque, int olen)
 {
-    const netsnmp_indexed_addr_pair *addr_pair = NULL;
+    if (opaque) {
+        switch (olen) {
+        case sizeof(netsnmp_tmStateReference): {
+            const netsnmp_tmStateReference *tmStateRef = opaque;
 
-    if (opaque && olen == sizeof(netsnmp_tmStateReference)) {
-        const netsnmp_tmStateReference *tmStateRef = opaque;
-
-        if (tmStateRef->have_addresses)
-            addr_pair = &(tmStateRef->addresses);
+            if (tmStateRef->have_addresses)
+                return &tmStateRef->addresses;
+            break;
+        }
+        default:
+            netsnmp_assert(0);
+        }
     }
-    if ((NULL == addr_pair) && (NULL != t)) {
-        if (t->data != NULL &&
-            t->data_length == sizeof(netsnmp_indexed_addr_pair))
-            addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
-        else if (t->data != NULL &&
-                 t->data_length == sizeof(_netsnmpTLSBaseData)) {
-            _netsnmpTLSBaseData *tlsdata = (_netsnmpTLSBaseData *) t->data;
-            addr_pair = (netsnmp_indexed_addr_pair *) (tlsdata->addr);
+    if (t && t->data) {
+        switch (t->data_length) {
+        case sizeof(netsnmp_indexed_addr_pair):
+            return t->data;
+        case sizeof(_netsnmpTLSBaseData): {
+            _netsnmpTLSBaseData *tlsdata = t->data;
+
+            return tlsdata->addr;
+        }
+        default:
+            netsnmp_assert(0);
         }
     }
 
-    return addr_pair;
+    return NULL;
 }
 
 static const struct sockaddr *
@@ -1275,7 +1284,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
     if (NULL == cachep)
         return netsnmp_socketbase_close(t);
 
-    /* if we have any remaining packtes to send, try to send them */
+    /* if we have any remaining packets to send, try to send them */
     if (cachep->write_cache_len > 0) {
         int i = 0;
         char buf[8192];
@@ -1352,17 +1361,50 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
     return netsnmp_socketbase_close(t);
 }
 
-char *
-netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len)
+static char *
+netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
+                        const char *pfx,
+                        char *(*fmt_base_addr)(const char *pfx,
+                                               netsnmp_transport *t,
+                                               const void *data, int len))
 {
-    int              sa_len;
-    const struct sockaddr *sa = _find_remote_sockaddr(t, data, len, &sa_len);
-    if (sa) {
-        data = sa;
-        len = sa_len;
+    if (t && !data) {
+        data = t->data;
+        len = t->data_length;
     }
 
-    return netsnmp_ipv4_fmtaddr("DTLSUDP", t, data, len);
+    switch (data ? len : 0) {
+    case sizeof(netsnmp_indexed_addr_pair):
+        return netsnmp_ipv4_fmtaddr(pfx, t, data, len);
+    case sizeof(netsnmp_tmStateReference): {
+        const netsnmp_tmStateReference *r = data;
+        const netsnmp_indexed_addr_pair *p = &r->addresses;
+
+        return fmt_base_addr("DTLSUDP", t, p, sizeof(*p));
+    }
+    case sizeof(_netsnmpTLSBaseData): {
+        const _netsnmpTLSBaseData *b = data;
+        char *buf = NULL;
+
+        asprintf(&buf, "DTLSUDP: %s", b->addr_string);
+        return buf;
+    }
+    case 0:
+        return strdup("DTLSUDP: unknown");
+    default: {
+        char *buf = NULL;
+
+        asprintf(&buf, "DTLSUDP: len %d", len);
+        return buf;
+    }
+    }
+}
+
+static char *
+netsnmp_dtlsudp4_fmtaddr(netsnmp_transport *t, const void *data, int len)
+{
+    return netsnmp_dtlsudp_fmtaddr(t, data, len, "DTLSUDP",
+                                   netsnmp_ipv4_fmtaddr);
 }
 
 /*
@@ -1415,7 +1457,7 @@ _transport_common(netsnmp_transport *t, int local)
     t->f_config        = netsnmp_tlsbase_config;
     t->f_setup_session = netsnmp_tlsbase_session_init;
     t->f_accept        = NULL;
-    t->f_fmtaddr       = netsnmp_dtlsudp_fmtaddr;
+    t->f_fmtaddr       = netsnmp_dtlsudp4_fmtaddr;
 
     t->flags = NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
@@ -1447,17 +1489,11 @@ netsnmp_dtlsudp_transport(const struct sockaddr_in *addr, int local)
 
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 
-char *
+static char *
 netsnmp_dtlsudp6_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
-    int              sa_len;
-    const struct sockaddr *sa = _find_remote_sockaddr(t, data, len, &sa_len);
-    if (sa) {
-        data = sa;
-        len = sa_len;
-    }
-
-    return netsnmp_ipv6_fmtaddr("DTLSUDP6", t, data, len);
+    return netsnmp_dtlsudp_fmtaddr(t, data, len, "DTLSUDP6",
+                                   netsnmp_ipv6_fmtaddr);
 }
 
 /*

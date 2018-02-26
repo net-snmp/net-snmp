@@ -17,6 +17,7 @@
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmpIPv6BaseDomain.h>
 #include <net-snmp/library/system.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #include <stddef.h>
 #include <stdio.h>
@@ -100,25 +101,38 @@ char *
 netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
                      const void *data, int len)
 {
-    const struct sockaddr_in6 *to = NULL;
+    const struct sockaddr_in6 *to;
     char scope_id[IF_NAMESIZE + 1] = "";
     char addr[INET6_ADDRSTRLEN];
     char *tmp = NULL;
 
     DEBUGMSGTL(("netsnmp_ipv6", "fmtaddr: t = %p, data = %p, len = %d\n", t,
                 data, len));
-    if (data != NULL && len == sizeof(struct sockaddr_in6)) {
-        to = (const struct sockaddr_in6 *) data;
-    } else if (data != NULL && len == sizeof(netsnmp_indexed_addr_pair)) {
-        const netsnmp_indexed_addr_pair *addr_pair =
-            (const netsnmp_indexed_addr_pair *) data;
-        to = (const struct sockaddr_in6 *) &(addr_pair->remote_addr);
-    } else if (t != NULL && t->data != NULL) {
-        to = (const struct sockaddr_in6 *) t->data;
+
+    if (t && !data) {
+        data = t->data;
+        len = t->data_length;
     }
-    if (to == NULL) {
+
+    switch (data ? len : 0) {
+    case sizeof(struct sockaddr_in6):
+        to = data;
+        break;
+    case sizeof(netsnmp_indexed_addr_pair): {
+        const netsnmp_indexed_addr_pair *addr_pair = data;
+
+        to = (const struct sockaddr_in6 *)&addr_pair->remote_addr;
+        break;
+    }
+    default:
+        netsnmp_assert(0);
         asprintf(&tmp, "%s: unknown", prefix);
-    } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
+        return tmp;
+    }
+
+    netsnmp_assert(to->sin6_family == AF_INET6);
+
+    if (t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME) {
 	struct hostent *host;
 	host = netsnmp_gethostbyaddr(&to->sin6_addr, sizeof(struct in6_addr), AF_INET6);
 	return (host ? strdup(host->h_name) : NULL);
