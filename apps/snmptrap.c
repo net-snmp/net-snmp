@@ -127,7 +127,7 @@ main(int argc, char *argv[])
     int             status;
     char           *trap = NULL;
     char           *prognam;
-    int             exitval = 1;
+    int             exitval = 1, needs_engineID_probe;
 #ifndef NETSNMP_DISABLE_SNMPV1
     char           *specific = NULL, *description = NULL, *agent = NULL;
     in_addr_t      *pdu_in_addr_t;
@@ -175,7 +175,15 @@ main(int argc, char *argv[])
             snmpv3_generate_engineID(&session.contextEngineIDLen);
     }
 
-    if (session.version == SNMP_VERSION_3 && !inform) {
+    /*
+     * To do: figure out whether needs_engineID_probe also needs to be set for
+     * other protocols than the DTLS-UDP protocol. Additionally, ask Wes
+     * whether the code below that skips engineID probing can be deleted.
+     */
+    needs_engineID_probe = strncmp(session.peername, "dtlsudp:", 8) == 0;
+
+    if (session.version == SNMP_VERSION_3 && !inform &&
+        !needs_engineID_probe) {
         /*
          * for traps, we use ourselves as the authoritative engine
          * which is really stupid since command line apps don't have a

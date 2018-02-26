@@ -4864,7 +4864,8 @@ _sess_async_send(void *sessp,
      * check to see if we need a v3 engineID probe
      */
     if ((pdu->version == SNMP_VERSION_3) &&
-        (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) &&
+        (pdu->command == SNMP_MSG_TRAP2 ||
+         (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE)) &&
         (session->securityEngineIDLen == 0) &&
         (0 == (session->flags & SNMP_FLAGS_DONT_PROBE))) {
         int rc;
