@@ -400,7 +400,7 @@ test_dokeyedhash(void)
 int
 test_docrypt(void)
 {
-    int             rval, index, secret_len, iv_len,
+    int             rval, index = 0, secret_len, iv_len,
         bigstring_len = strlen((const char *) BIGSTRING);
     netsnmp_priv_alg_info *pi;
     size_t          buf_len, cryptbuf_len;
@@ -409,7 +409,6 @@ test_docrypt(void)
         cryptbuf[LOCAL_MAXBUF], secret[LOCAL_MAXBUF], iv[LOCAL_MAXBUF];
 
     while(1) {
-
         pi = sc_get_priv_alg_byindex(++index);
         if (NULL == pi)
             break;
@@ -419,36 +418,37 @@ test_docrypt(void)
         secret_len = pi->proper_length;
         iv_len = pi->iv_length;
 
-    output("Starting Test %s --", pi->name);
+        output("Starting Test %s --", pi->name);
 
 
-    memset(buf, 0, LOCAL_MAXBUF);
+        memset(buf, 0, LOCAL_MAXBUF);
 
-    memcpy(secret, BIGSECRET, secret_len);
-    memcpy(iv, BKWDSECRET, iv_len);
+        memcpy(secret, BIGSECRET, secret_len);
+        memcpy(iv, BKWDSECRET, iv_len);
 
-    rval = sc_encrypt(pi->alg_oid, pi->oid_len,
-                      secret, secret_len,
-                      iv, iv_len,
-                      BIGSTRING, bigstring_len, cryptbuf, &cryptbuf_len);
-    FAILED(rval, "sc_encrypt() return code.");
+        rval = sc_encrypt(pi->alg_oid, pi->oid_len,
+                          secret, secret_len,
+                          iv, iv_len,
+                          BIGSTRING, bigstring_len, cryptbuf, &cryptbuf_len);
+        FAILED(rval, "sc_encrypt() return code.");
 
-    rval = sc_decrypt(pi->alg_oid, pi->oid_len,
-                      secret, secret_len,
-                      iv, iv_len, cryptbuf, cryptbuf_len, buf, &buf_len);
-    FAILED(rval, "sc_decrypt() return code.");
+        rval = sc_decrypt(pi->alg_oid, pi->oid_len,
+                          secret, secret_len,
+                          iv, iv_len, cryptbuf, cryptbuf_len, buf, &buf_len);
+        FAILED(rval, "sc_decrypt() return code.");
 
-    if (pi->pad_size > 0) {
-        /* ignore the pad */
-        buf_len -= buf[buf_len-1];
-    }
+        if (pi->pad_size > 0) {
+            /* ignore the pad */
+            buf_len -= buf[buf_len-1];
+        }
 
-    FAILED((buf_len != bigstring_len), "Decrypted buffer is the right length.");
-    printf("# original length: %d\n", bigstring_len);
-    printf("# output   length: %" NETSNMP_PRIz "u\n", buf_len);
+        FAILED((buf_len != bigstring_len),
+               "Decrypted buffer is the right length.");
+        printf("# original length: %d\n", bigstring_len);
+        printf("# output   length: %" NETSNMP_PRIz "u\n", buf_len);
 
-    FAILED((memcmp(buf, BIGSTRING, bigstring_len) != 0),
-           "Decrypted buffer is the same as the original plaintext.");
+        FAILED((memcmp(buf, BIGSTRING, bigstring_len) != 0),
+               "Decrypted buffer is the same as the original plaintext.");
 
     } /* while(1) */
 
