@@ -204,7 +204,7 @@ netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
                     t->sock, str));
         free(str);
     }
-    rc = bind(t->sock, addr, sizeof(struct sockaddr));
+    rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
     if ( rc != 0 ) {
         DEBUGMSGTL(("netsnmp_udpbase",
                     "failed to bind for clientaddr: %d %s\n",

@@ -231,7 +231,7 @@ netsnmp_tcp_transport(const struct sockaddr_in *addr, int local)
 		   sizeof(opt));
 
         if (!socket_initialized) {
-            rc = bind(t->sock, addr, sizeof(struct sockaddr));
+            rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
             if (rc != 0) {
                 netsnmp_socketbase_close(t);
                 netsnmp_transport_free(t);
@@ -283,7 +283,7 @@ netsnmp_tcp_transport(const struct sockaddr_in *addr, int local)
          * had completed.  So this can block.
          */
 
-        rc = connect(t->sock, addr, sizeof(struct sockaddr));
+        rc = connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
         if (rc < 0) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
