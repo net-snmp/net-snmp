@@ -37,6 +37,7 @@
 #include <net-snmp/library/default_store.h>
 #include <net-snmp/library/system.h>
 
+#include "inet_ntop.h"
 
 #ifndef INADDR_NONE
 #define INADDR_NONE     -1

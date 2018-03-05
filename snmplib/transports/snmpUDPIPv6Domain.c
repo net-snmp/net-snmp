@@ -237,7 +237,7 @@ netsnmp_udp6_transport(const struct sockaddr_in6 *addr, int local)
         }
 #endif
 
-        rc = bind(t->sock, addr, sizeof(struct sockaddr_in6));
+        rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
         if (rc != 0) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);

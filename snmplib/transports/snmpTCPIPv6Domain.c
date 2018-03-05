@@ -217,7 +217,7 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
 
         setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof(opt));
 
-        rc = bind(t->sock, addr, sizeof(struct sockaddr_in6));
+        rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
         if (rc != 0) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
@@ -267,7 +267,7 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
          * had completed.  So this can block.
          */
 
-        rc = connect(t->sock, addr, sizeof(struct sockaddr_in6));
+        rc = connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
         DEBUGMSGTL(("netsnmp_tcp6", "connect returns %d\n", rc));
         if (rc < 0) {
             netsnmp_socketbase_close(t);

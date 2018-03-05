@@ -158,7 +158,7 @@ netsnmp_udpipv4base_transport(const struct sockaddr_in *addr, int local)
             }
         }
 #endif /* !defined(WIN32) */
-        rc = bind(t->sock, addr, sizeof(struct sockaddr));
+        rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
         if (rc != 0) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
