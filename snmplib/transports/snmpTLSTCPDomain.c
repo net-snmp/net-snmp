@@ -528,7 +528,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
 
     tlsdata->accepted_bio = accepted_bio = BIO_pop(tlsdata->accept_bio);
     if (!accepted_bio) {
-        snmp_log(LOG_ERR, "Failed to pop an accepted bio off the bio staack\n");
+        snmp_log(LOG_ERR, "Failed to pop an accepted bio off the bio stack\n");
         /* XXX: need to close the listening connection here? */
         return -1;
     }
