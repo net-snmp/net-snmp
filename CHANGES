@@ -3,6 +3,30 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.8.pre2*
+    snmplib:
+      - TLS/DTLS fixes
+      - Add more openssl error cases where we check for local cert
+      - fix usm keychanges for new algorithms and longer keylengths
+      - fix some memory leaks in usm processing
+      - IP address formatting fixes
+      - Make the source code C89 compliant
+
+    building:
+      - Fix MinGW build
+      - Unbreak the NetBSD build
+      - Unbreak AIX support
+      - RHEL 5 build fix
+
+    scripts:
+      - A new 'checkbandwidth' script to check host min/max bandwidth
+
+    docs:
+      - Bug 2826: from Tomasz: fix utf-8 encoding
+
+    python:
+      - BUG 2824: from: Tomasz: Fix python module make install
+
 *5.8.pre1*
     snmplib:
       - Fixed reporting 'error writing to /var/xxx/snmpapp.conf'. When a

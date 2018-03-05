@@ -3,6 +3,17 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.8.pre2*
+    Many many bug fixes and minor improvements
+
+    snmplib:
+      - TLS/DTLS fixes
+      - fix usm keychanges for new algorithms and longer keylengths
+      - IP address formatting fixes
+
+    scripts:
+      - A new 'checkbandwidth' script to check host min/max bandwidth
+
 *5.8.pre1*
     Many many bug fixes and minor improvements
 
