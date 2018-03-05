@@ -34,6 +34,8 @@ int usmStatusCheck(struct usmUser *uptr);
 netsnmp_feature_child_of(usmuser_all, libnetsnmpmibs)
 netsnmp_feature_child_of(init_register_usmuser_context, usmuser_all)
 
+netsnmp_feature_require(scapi_get_proper_priv_length)
+
 struct variable4 usmUser_variables[] = {
     {USMUSERSPINLOCK, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_usmUser, 1, {1}},
