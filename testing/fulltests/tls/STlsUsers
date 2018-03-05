@@ -249,7 +249,7 @@ CAPTURE "snmpget -T our_identity=$UNKNOWNUSER -T trust_cert=$CAFP $FLAGS .1.3.6.
 # different types of failure messages for tls/dtls...
 if [ $SNMP_TRANSPORT_SPEC = dtlsudp ]; then
     CHECK              "failed rfc5343 contextEngineID probing"
-    CHECKAGENTCOUNT  1 "TLS Error: no certificate returned"
+    CHECKAGENTCOUNT  1 "TLS Error: no certificate returned\|TLS Error: certificate verify failed"
 else
     CHECK              "failed to ssl_connect"
     CHECKAGENTCOUNT  1 "Failed SSL_accept"

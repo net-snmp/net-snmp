@@ -81,9 +81,9 @@ netsnmp_tcp_accept(netsnmp_transport *t)
     struct sockaddr *farend = NULL;
     netsnmp_udp_addr_pair *addr_pair = NULL;
     int             newsock = -1;
-    socklen_t       farendlen = sizeof(netsnmp_udp_addr_pair);
+    socklen_t       farendlen;
 
-    addr_pair = (netsnmp_udp_addr_pair *)malloc(farendlen);
+    addr_pair = malloc(sizeof(*addr_pair));
     if (addr_pair == NULL) {
         /*
          * Indicate that the acceptance of this socket failed.  
@@ -93,6 +93,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
     }
     memset(addr_pair, 0, sizeof *addr_pair);
     farend = &addr_pair->remote_addr.sa;
+    farendlen = sizeof(addr_pair->remote_addr.sa);
 
     if (t != NULL && t->sock >= 0) {
         newsock = (int) accept(t->sock, farend, &farendlen);

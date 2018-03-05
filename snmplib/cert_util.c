@@ -2082,7 +2082,7 @@ netsnmp_cert_trust_ca(SSL_CTX *ctx, netsnmp_cert *thiscert)
         DEBUGMSGTL(("cert:trust_ca", "  up one to %p\n", thiscert));
     }
 
-    /* Add the found top lever certificate to the store */
+    /* Add the found top level certificate to the store */
     return netsnmp_cert_trust(ctx, thiscert);
 }
 

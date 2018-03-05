@@ -57,7 +57,7 @@ netsnmp_feature_require(cert_util)
 
 int openssl_local_index;
 
-/* this is called during negotiationn */
+/* this is called during negotiation */
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
     char buf[1024], *fingerprint;
@@ -90,7 +90,6 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
        locally known fingerprint and then accept it */
     if (!ok &&
         (X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err ||
-         X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY == err ||
          X509_V_ERR_CERT_UNTRUSTED == err ||
          X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE == err ||
          X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err)) {

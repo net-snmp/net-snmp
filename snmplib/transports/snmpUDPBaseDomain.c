@@ -410,7 +410,7 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
 #ifdef netsnmp_udpbase_recvfrom_sendto_defined
             socklen_t local_addr_len = sizeof(addr_pair->local_addr);
             rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
-                                      (struct sockaddr*)&(addr_pair->local_addr),
+                                      &addr_pair->local_addr.sa,
                                       &local_addr_len, &(addr_pair->if_index));
 #else
             rc = recvfrom(t->sock, buf, size, MSG_DONTWAIT, from, &fromlen);
