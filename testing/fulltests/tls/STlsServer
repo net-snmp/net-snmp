@@ -52,7 +52,7 @@ DOSETTEST hostnameIdentity "-T trust_cert=$CAFP -T their_hostname=a.b.example.co
 DOFAILSETTEST noTrustCACert  "-T their_hostname=a.b.example.com $FLAGS"
 
 # if we specify a different hostname we should fail hostname test
-# ("localhos" without the "t" is intentional here)
+# (".co" without the "m" is intentional here)
 DOFAILSETTEST incorrectNameA.B.Example.Co  "-T their_hostname=a.b.example.co $FLAGS"
 DOFAILSETTEST incorrectNameA.B.Example.Comt  "-T their_hostname=a.b.example.comt $FLAGS"
 
