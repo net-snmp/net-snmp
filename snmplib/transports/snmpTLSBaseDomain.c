@@ -57,7 +57,7 @@ netsnmp_feature_require(cert_util)
 
 int openssl_local_index;
 
-/* this is called during negotiationn */
+/* this is called during negotiation */
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
     char buf[1024], *fingerprint;
