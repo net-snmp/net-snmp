@@ -91,6 +91,10 @@
 #include <netinet/mib_kern.h>
 #endif                          /* hpux11 */
 
+#if defined(cygwin) || defined(mingw32)
+#include <winerror.h>
+#endif
+
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>

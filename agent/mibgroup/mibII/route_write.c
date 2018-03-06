@@ -67,8 +67,9 @@
 #include "route_write.h"
 #include "var_route.h"
 
-#ifdef cygwin
+#if defined(cygwin) || defined(mingw32)
 #include <windows.h>
+#include <winerror.h>
 #endif
 
 #if !defined (WIN32) && !defined (cygwin)
