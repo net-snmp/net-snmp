@@ -301,10 +301,13 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
             if (is_wildcarded) {
                 /* we *only* allow passing till the first '.' */
                 /* ie *.example.com can't match a.b.example.com */
-                check_name = strchr(check_name, '.') + 1;
+                if (check_name)
+                    check_name = strchr(check_name, '.');
+                if (check_name)
+                    check_name++;
             }
 
-            if (strcmp(compare_to, check_name) == 0) {
+            if (check_name && strcmp(compare_to, check_name) == 0) {
                 DEBUGMSGTL(("tls_x509:verify", "Successful match on a common name of %s\n", check_name));
                 return SNMPERR_SUCCESS;
             }
