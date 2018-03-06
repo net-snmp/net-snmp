@@ -960,7 +960,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
     auth_length = SNMP_MIN(oldkey_len, (size_t)iauth_length);
 
     DEBUGMSGTL(("encode_keychange",
-                "oldkey_len %ld, newkey_len %ld, auth_length %ld\n",
+                "oldkey_len %" NETSNMP_PRIz "d, newkey_len %" NETSNMP_PRIz "d, auth_length %" NETSNMP_PRIz "d\n",
                 oldkey_len, newkey_len, auth_length));
 
     /*
@@ -1022,7 +1022,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
 
     delta_len = 0;
     while (delta_len < newkey_len) {
-        DEBUGMSGTL(("encode_keychange", "%ld < %ld\n", delta_len,
+        DEBUGMSGTL(("encode_keychange", "%" NETSNMP_PRIz "d < %" NETSNMP_PRIz "d\n", delta_len,
                     newkey_len));
 
         /*
@@ -1041,7 +1041,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
         rval = sc_hash(hashtype, hashtype_len, tmpbuf, tmp_len,
                        digest, &digest_len);
         QUITFUN(rval, encode_keychange_quit);
-        DEBUGMSGTL(("encode_keychange", "digest_len %ld\n", digest_len));
+        DEBUGMSGTL(("encode_keychange", "digest_len %" NETSNMP_PRIz "d\n", digest_len));
 
         memcpy(tmpbuf, digest, digest_len);
         tmp_len = digest_len;
@@ -1057,12 +1057,12 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
         while ((delta_len < newkey_len) && (digest_len-- > 0)) {
             delta[delta_len] = *tmpp ^ newkey[delta_len];
             DEBUGMSGTL(("encode_keychange",
-                        "d[%ld] 0x%0x = 0x%0x ^ 0x%0x\n",
+                        "d[%" NETSNMP_PRIz "d] 0x%0x = 0x%0x ^ 0x%0x\n",
                         delta_len, delta[delta_len], *tmpp, newkey[delta_len]));
             ++tmpp;
             ++delta_len;
         }
-        DEBUGMSGTL(("encode_keychange", "delta_len %ld\n", delta_len));
+        DEBUGMSGTL(("encode_keychange", "delta_len %" NETSNMP_PRIz "d\n", delta_len));
     }
 
     /** copy results */
@@ -1261,7 +1261,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
     }
     hash_len = (size_t) ihash_len;
     DEBUGMSGTL(("decode_keychange",
-                "oldkey_len %ld, newkey_len %ld, kcstring_len %ld, hash_len %ld\n",
+                "oldkey_len %" NETSNMP_PRIz "d, newkey_len %" NETSNMP_PRIz "d, kcstring_len %" NETSNMP_PRIz "d, hash_len %" NETSNMP_PRIz "d\n",
                 oldkey_len, *newkey_len, kcstring_len, hash_len));
 
     if (((oldkey_len * 2) != kcstring_len) || (*newkey_len < oldkey_len)) {
@@ -1325,7 +1325,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
          *      temporary variable, ...
          */
         DEBUGMSGTL(("decode_keychange",
-                    "append random tmpbuf_len %ld key_len %ld\n",
+                    "append random tmpbuf_len %" NETSNMP_PRIz "d key_len %" NETSNMP_PRIz "d\n",
                     tmpbuf_len, key_len));
         memcpy(tmpbuf + tmpbuf_len, kcstring, key_len);
         tmpbuf_len += key_len;
@@ -1349,7 +1349,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
          *                                              ... and the
          *      temporary variable is set to this digest value;
          */
-        DEBUGMSGTL(("decode_keychange", "copy %ld hash bytes to tmp\n",
+        DEBUGMSGTL(("decode_keychange", "copy %" NETSNMP_PRIz "d hash bytes to tmp\n",
                        hash_len));
         memcpy(tmpbuf, hash, hash_len);
         tmpbuf_len = hash_len;
@@ -1362,7 +1362,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
          *      of K.
          */
         DEBUGMSGTL(("decode_keychange",
-                    "xor to get new key; hash_len %ld delta_len %ld\n",
+                    "xor to get new key; hash_len %" NETSNMP_PRIz "d delta_len %" NETSNMP_PRIz "d\n",
                     hash_len, delta_len));
         nbytes = 0;
         while ((nbytes < hash_len) && (delta_len < key_len)) {

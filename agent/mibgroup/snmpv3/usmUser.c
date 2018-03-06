@@ -1130,7 +1130,7 @@ write_usmUserPrivKeyChange(int action,
                 plen *= 2; /* ?? we store salt with key */
 #endif
             if (var_val_len != 0 && var_val_len != (2 * plen)) {
-                DEBUGMSGTL(("usmUser", "%s: bad len. %ld != %d\n",
+                DEBUGMSGTL(("usmUser", "%s: bad len. %" NETSNMP_PRIz "d != %d\n",
                             fname, var_val_len, (2*alen)));
                 return SNMP_ERR_WRONGLENGTH;
             }
@@ -1166,7 +1166,7 @@ write_usmUserPrivKeyChange(int action,
         /*
          * extend key as needed
          */
-        DEBUGMSGTL(("9:usmUser", "%s: var_val_len %ld\n", fname, var_val_len));
+        DEBUGMSGTL(("9:usmUser", "%s: var_val_len %" NETSNMP_PRIz "d\n", fname, var_val_len));
         if (var_val_len < ( 2 * plen )) {
             struct usmUser dummy;
             memset(&dummy, 0x0, sizeof(dummy));

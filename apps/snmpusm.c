@@ -472,7 +472,7 @@ main(int argc, char *argv[])
             goto close_session;
         }
 
-        DEBUGMSGTL(("9:usm:passwd", "oldpass len %ld, newpass len %ld\n",
+        DEBUGMSGTL(("9:usm:passwd", "oldpass len %" NETSNMP_PRIz "d, newpass len %" NETSNMP_PRIz "d\n",
                     strlen(oldpass), strlen(newpass)));
 
         /* 
@@ -575,7 +575,7 @@ main(int argc, char *argv[])
 		fprintf(stderr, "generating the old Kul failed\n");
 		goto close_session;
 	    }
-            DEBUGMSGTL(("9:usm:passwd", "oldkul len %ld\n", oldkul_len));
+            DEBUGMSGTL(("9:usm:passwd", "oldkul len %" NETSNMP_PRIz "d\n", oldkul_len));
 	}
 	if (uselocalizedkey && (strncmp(newpass, "0x", 2) == 0)) {
 	    /*
@@ -616,7 +616,7 @@ main(int argc, char *argv[])
 		fprintf(stderr, "generating the new Kul failed\n");
 		goto close_session;
 	    }
-            DEBUGMSGTL(("9:usm:passwd", "newkul len %ld\n", newkul_len));
+            DEBUGMSGTL(("9:usm:passwd", "newkul len %" NETSNMP_PRIz "d\n", newkul_len));
 	}
 
         /*
@@ -685,7 +685,7 @@ main(int argc, char *argv[])
         /* which is slightly different for encryption if lengths are
            different */
 	if (doprivkey) {
-            DEBUGMSGTL(("9:usm:passwd:encode", "proper len %ld, old_len %ld, new_len %ld\n",
+            DEBUGMSGTL(("9:usm:passwd:encode", "proper len %" NETSNMP_PRIz "d, old_len %" NETSNMP_PRIz "d, new_len %" NETSNMP_PRIz "d\n",
                         oldkulpriv_len, oldkulpriv_len, newkulpriv_len));
 	  rval = encode_keychange(session.securityAuthProto,
                                 session.securityAuthProtoLen,
@@ -693,7 +693,7 @@ main(int argc, char *argv[])
                                 newkulpriv, newkulpriv_len,
                                 keychangepriv, &keychangepriv_len);
 
-          DEBUGMSGTL(("9:usm:passwd:encode", "keychange len %ld\n",
+          DEBUGMSGTL(("9:usm:passwd:encode", "keychange len %" NETSNMP_PRIz "d\n",
                       keychangepriv_len));
 	  if (rval != SNMPERR_SUCCESS) {
             snmp_perror(argv[0]);
