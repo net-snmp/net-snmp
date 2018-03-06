@@ -174,6 +174,7 @@ extern          "C" {
                                  size_t priv_salt_length,
                                  u_char * msgSalt);
 
+    NETSNMP_IMPORT
     int             usm_extend_user_kul(struct usmUser *user,
                                         u_int privKeyBufSize);
 

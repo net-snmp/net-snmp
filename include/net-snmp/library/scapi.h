@@ -104,6 +104,7 @@ typedef struct netsnmp_priv_alg_info_s {
 
     /** deprectated, use
      *        sc_get_authtype() + sc_get_proper_auth_length_bytype() */
+    NETSNMP_IMPORT
     int             sc_get_properlength(const oid * hashtype,
                                         u_int hashtype_len);
 
