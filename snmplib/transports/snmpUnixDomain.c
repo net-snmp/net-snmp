@@ -339,8 +339,8 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
     if (local) {
-        t->local_length = SUN_LEN(addr);
-        t->local = netsnmp_memdup(addr, SUN_LEN(addr));
+        t->local_length = strlen(addr->sun_path);
+        t->local = strdup(addr->sun_path);
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -398,8 +398,8 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
         }
 
     } else {
-        t->remote_length = SUN_LEN(addr);
-        t->remote = netsnmp_memdup(addr, SUN_LEN(addr));
+        t->remote_length = strlen(addr->sun_path);
+        t->remote = strdup(addr->sun_path);
         if (t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -470,9 +470,21 @@ netsnmp_unix_create_tstring(const char *string, int local,
 
 
 netsnmp_transport *
-netsnmp_unix_create_ostring(const void *o, size_t o_len, int local)
+netsnmp_unix_create_ostring(const void *ostring, size_t o_len, int local)
 {
-    return netsnmp_unix_transport(o, local);
+    struct sockaddr_un addr;
+
+    if (o_len > 0 && o_len < (sizeof(addr.sun_path) - 1)) {
+        addr.sun_family = AF_UNIX;
+        memset(addr.sun_path, 0, sizeof(addr.sun_path));
+        strlcpy(addr.sun_path, ostring, sizeof(addr.sun_path));
+        return netsnmp_unix_transport(&addr, local);
+    } else {
+        if (o_len > 0) {
+            snmp_log(LOG_ERR, "Path too long for Unix domain transport\n");
+        }
+    }
+    return NULL;
 }
 
 
