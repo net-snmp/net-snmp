@@ -38,14 +38,9 @@
 #include <net-snmp/library/lcd_time.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/callback.h>
+#include <net-snmp/library/getopt.h>
 
 static u_int    dummy_etime, dummy_eboot;       /* For ISENGINEKNOWN(). */
-
-
-#include <stdlib.h>
-
-extern char    *optarg;
-extern int      optind, optopt, opterr;
 
 int             testcount=0;
 

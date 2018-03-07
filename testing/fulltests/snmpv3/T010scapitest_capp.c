@@ -39,12 +39,9 @@
 #include <net-snmp/library/callback.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmpusm.h>
+#include <net-snmp/library/getopt.h>
 
 #include <stdlib.h>
-
-extern char    *optarg;
-extern int      optind, optopt, opterr;
-
 
 
 /*

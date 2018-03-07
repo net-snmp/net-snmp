@@ -41,11 +41,9 @@
 #include <net-snmp/library/scapi.h>
 #include <net-snmp/library/transform_oids.h>
 #include <net-snmp/library/callback.h>
+#include <net-snmp/library/getopt.h>
 
 #include <stdlib.h>
-
-extern char    *optarg;
-extern int      optind, optopt, opterr;
 
 int testcount = 0;
 
