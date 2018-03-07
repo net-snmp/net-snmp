@@ -57,7 +57,7 @@
 #ifdef HAVE_VALGRIND_MEMCHECK_H
 #include <valgrind/memcheck.h>
 #endif
-#ifdef cygwin
+#if defined(cygwin) || defined(mingw32)
 #include <windows.h>
 #endif
 

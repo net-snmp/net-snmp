@@ -118,8 +118,9 @@
 #include "ipAddr.h"
 #include "interfaces.h"
 
-#ifdef cygwin
+#if defined(cygwin) || defined(mingw32)
 #include <windows.h>
+#include <winerror.h>
 #endif
 
 netsnmp_feature_require(interface_legacy)

@@ -166,7 +166,7 @@ netsnmp_feature_provide(interface_legacy)
 #include <netinet/mib_kern.h>
 #endif                          /* hpux */
 
-#ifdef cygwin
+#if defined(cygwin) || defined(mingw32)
 #include <windows.h>
 #endif
 

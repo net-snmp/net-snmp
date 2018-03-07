@@ -65,6 +65,10 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "struct.h"
 #include "util_funcs.h"
 
+#if defined(cygwin) || defined(mingw32)
+#include <winerror.h>
+#endif
+
 netsnmp_feature_child_of(get_routes, libnetsnmpmibs)
 
 #ifndef  MIN
