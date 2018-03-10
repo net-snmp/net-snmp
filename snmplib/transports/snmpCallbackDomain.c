@@ -224,7 +224,7 @@ netsnmp_callback_send(netsnmp_transport *t, const void *buf, int size,
 		      void **opaque, int *olength)
 {
     int from, rc = -1;
-    netsnmp_callback_info *mystuff = t->data;
+    netsnmp_callback_info *mystuff = t->data, *theirstuff;
     netsnmp_callback_pass *cp;
 
     /*
@@ -273,12 +273,12 @@ netsnmp_callback_send(netsnmp_transport *t, const void *buf, int size,
             return -1;
         }
 
+        theirstuff = other_side->data;
 	while (rc < 0) {
 #ifdef WIN32
-	    rc = sendto(((netsnmp_callback_info*) other_side->data)->pipefds[1], " ", 1, 0, NULL, 0);
+	    rc = sendto(theirstuff->pipefds[1], " ", 1, 0, NULL, 0);
 #else
-	    rc = write(((netsnmp_callback_info *)other_side->data)->pipefds[1],
-		       " ", 1);
+	    rc = write(theirstuff->pipefds[1], " ", 1);
 #endif
 	    if (rc < 0 && errno != EINTR) {
 		break;
@@ -304,12 +304,12 @@ netsnmp_callback_send(netsnmp_transport *t, const void *buf, int size,
             SNMP_FREE(cp);
             return -1;
         }
+        theirstuff = other_side->data;
 	while (rc < 0) {
 #ifdef WIN32
-	    rc = sendto(((netsnmp_callback_info*) other_side->data)->pipefds[1], " ", 1, 0, NULL, 0);
+	    rc = sendto(theirstuff->pipefds[1], " ", 1, 0, NULL, 0);
 #else
-	    rc = write(((netsnmp_callback_info *)other_side->data)->pipefds[1],
-		       " ", 1);
+	    rc = write(theirstuff->pipefds[1], " ", 1);
 #endif
 	    if (rc < 0 && errno != EINTR) {
 		break;
