@@ -74,11 +74,13 @@ static netsnmp_transport *
 find_transport_from_callback_num(int num)
 {
     netsnmp_transport_list *ptr;
+    netsnmp_callback_info *ci;
 
-    for (ptr = trlist; ptr; ptr = ptr->next)
-        if (((netsnmp_callback_info *) ptr->transport->data)->
-            callback_num == num)
+    for (ptr = trlist; ptr; ptr = ptr->next) {
+        ci = ptr->transport->data;
+        if (ci->callback_num == num)
             return ptr->transport;
+    }
     return NULL;
 }
 
