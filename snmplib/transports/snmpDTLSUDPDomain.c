@@ -498,14 +498,14 @@ _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep) {
 
         /* should always be true. */
         int socksize;
-        const struct sockaddr *sa;
+        void *sa;
 
-        sa = _find_remote_sockaddr(t, NULL, 0, &socksize);
+        sa = NETSNMP_REMOVE_CONST(struct sockaddr *,
+                                  _find_remote_sockaddr(t, NULL, 0, &socksize));
         if (NULL == sa)
             sa = &cachep->sas.sa;
         socksize = netsnmp_sockaddr_size(sa);
-        rc2 = t->base_transport->f_send(t, outbuf, outsize,
-                  (void **)NETSNMP_REMOVE_CONST(struct sockaddr **, &sa), &socksize);
+        rc2 = t->base_transport->f_send(t, outbuf, outsize, &sa, &socksize);
         if (rc2 == -1) {
             snmp_log(LOG_ERR, "failed to send a DTLS specific packet\n");
         }
@@ -1044,7 +1044,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     u_char outbuf[65535];
     _netsnmpTLSBaseData *tlsdata = NULL;
     int socksize;
-    struct sockaddr *sa;
+    void *sa;
     
     DEBUGTRACETOK("9:dtlsudp");
     DEBUGMSGTL(("dtlsudp", "sending %d bytes\n", size));
@@ -1239,7 +1239,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     }
     socksize = netsnmp_sockaddr_size(&cachep->sas.sa);
     sa = &cachep->sas.sa;
-    rc = t->base_transport->f_send(t, outbuf, rc, (void**)&sa, &socksize);
+    rc = t->base_transport->f_send(t, outbuf, rc, &sa, &socksize);
 
     return rc;
 }
