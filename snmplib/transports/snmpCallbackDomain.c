@@ -158,14 +158,10 @@ netsnmp_callback_fmtaddr(netsnmp_transport *t, const void *data, int len)
     char *buf = NULL;
     netsnmp_callback_info *mystuff;
 
-    if (!t)
+    if (!t || !t->data)
         return strdup("callback: unknown");
 
-    mystuff = (netsnmp_callback_info *) t->data;
-
-    if (!mystuff)
-        return strdup("callback: unknown");
-
+    mystuff = t->data;
     asprintf(&buf, "callback: %d on fd %d", mystuff->callback_num,
              mystuff->pipefds[0]);
     return buf;
