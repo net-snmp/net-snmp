@@ -211,8 +211,7 @@ netsnmp_callback_recv(netsnmp_transport *t, void *buf, int size,
          * malloc the space here, but it's filled in by
          * snmp_callback_created_pdu() below 
          */
-        int            *returnnum = (int *) calloc(1, sizeof(int));
-        *opaque = returnnum;
+        *opaque = calloc(1, sizeof(int));
         *olength = sizeof(int);
     }
     DEBUGMSGTL(("transport_callback", "hook_recv exit\n"));
