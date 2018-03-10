@@ -73,7 +73,8 @@ callback_queue *thequeue;
 static netsnmp_transport *
 find_transport_from_callback_num(int num)
 {
-    static netsnmp_transport_list *ptr;
+    netsnmp_transport_list *ptr;
+
     for (ptr = trlist; ptr; ptr = ptr->next)
         if (((netsnmp_callback_info *) ptr->transport->data)->
             callback_num == num)
