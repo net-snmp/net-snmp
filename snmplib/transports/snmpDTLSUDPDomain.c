@@ -1632,21 +1632,13 @@ netsnmp_dtlsudp_ctor(void)
 int cookie_initialized=0;
 unsigned char cookie_secret[NETSNMP_COOKIE_SECRET_LENGTH];
 
-typedef union {
-       struct sockaddr sa;
-       struct sockaddr_in s4;
-#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-       struct sockaddr_in6 s6;
-#endif
-} _peer_union;
-
 int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
                             unsigned int *cookie_len)
 {
     unsigned char *buffer, result[EVP_MAX_MD_SIZE];
     unsigned int length, resultlength;
     bio_cache *cachep = NULL;
-    _peer_union *peer;
+    const netsnmp_sockaddr_storage *peer;
 
     /* Initialize a random secret */
     if (!cookie_initialized) {
@@ -1665,19 +1657,19 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
         snmp_log(LOG_ERR, "dtls: failed to get the peer address\n");
         return 0;
     }
-    peer = (_peer_union *)&cachep->sas;
+    peer = &cachep->sas;
 
     /* Create buffer with peer's address and port */
     length = 0;
     switch (peer->sa.sa_family) {
     case AF_INET:
         length += sizeof(struct in_addr);
-        length += sizeof(peer->s4.sin_port);
+        length += sizeof(peer->sin.sin_port);
         break;
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     case AF_INET6:
         length += sizeof(struct in6_addr);
-        length += sizeof(peer->s6.sin6_port);
+        length += sizeof(peer->sin6.sin6_port);
         break;
 #endif
     default:
@@ -1694,19 +1686,19 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
     switch (peer->sa.sa_family) {
     case AF_INET:
         memcpy(buffer,
-               &peer->s4.sin_port,
-               sizeof(peer->s4.sin_port));
-        memcpy(buffer + sizeof(peer->s4.sin_port),
-               &peer->s4.sin_addr,
+               &peer->sin.sin_port,
+               sizeof(peer->sin.sin_port));
+        memcpy(buffer + sizeof(peer->sin.sin_port),
+               &peer->sin.sin_addr,
                sizeof(struct in_addr));
         break;
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     case AF_INET6:
         memcpy(buffer,
-               &peer->s6.sin6_port,
-               sizeof(peer->s6.sin6_port));
-        memcpy(buffer + sizeof(peer->s6.sin6_port),
-               &peer->s6.sin6_addr,
+               &peer->sin6.sin6_port,
+               sizeof(peer->sin6.sin6_port));
+        memcpy(buffer + sizeof(peer->sin6.sin6_port),
+               &peer->sin6.sin6_addr,
                sizeof(struct in6_addr));
         break;
 #endif
@@ -1736,7 +1728,7 @@ int netsnmp_dtls_verify_cookie(SSL *ssl,
     unsigned char *buffer, result[EVP_MAX_MD_SIZE];
     unsigned int length, resultlength, rc;
     bio_cache *cachep = NULL;
-    _peer_union *peer;
+    const netsnmp_sockaddr_storage *peer;
 
     /* If secret isn't initialized yet, the cookie can't be valid */
     if (!cookie_initialized)
@@ -1749,19 +1741,19 @@ int netsnmp_dtls_verify_cookie(SSL *ssl,
         snmp_log(LOG_ERR, "dtls: failed to get the peer address\n");
         return 0;
     }
-    peer = (_peer_union *)&cachep->sas;
+    peer = &cachep->sas;
 
     /* Create buffer with peer's address and port */
     length = 0;
     switch (peer->sa.sa_family) {
     case AF_INET:
         length += sizeof(struct in_addr);
-        length += sizeof(peer->s4.sin_port);
+        length += sizeof(peer->sin.sin_port);
         break;
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     case AF_INET6:
         length += sizeof(struct in6_addr);
-        length += sizeof(peer->s6.sin6_port);
+        length += sizeof(peer->sin6.sin6_port);
         break;
 #endif
     default:
@@ -1779,19 +1771,19 @@ int netsnmp_dtls_verify_cookie(SSL *ssl,
     switch (peer->sa.sa_family) {
     case AF_INET:
         memcpy(buffer,
-               &peer->s4.sin_port,
-               sizeof(peer->s4.sin_port));
-        memcpy(buffer + sizeof(peer->s4.sin_port),
-               &peer->s4.sin_addr,
+               &peer->sin.sin_port,
+               sizeof(peer->sin.sin_port));
+        memcpy(buffer + sizeof(peer->sin.sin_port),
+               &peer->sin.sin_addr,
                sizeof(struct in_addr));
         break;
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     case AF_INET6:
         memcpy(buffer,
-               &peer->s6.sin6_port,
-               sizeof(peer->s6.sin6_port));
-        memcpy(buffer + sizeof(peer->s6.sin6_port),
-               &peer->s6.sin6_addr,
+               &peer->sin6.sin6_port,
+               sizeof(peer->sin6.sin6_port));
+        memcpy(buffer + sizeof(peer->sin6.sin6_port),
+               &peer->sin6.sin6_addr,
                sizeof(struct in6_addr));
         break;
 #endif
