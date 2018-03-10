@@ -1087,7 +1087,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     */
     if (opaque != NULL && *opaque != NULL &&
         olength != NULL && *olength == sizeof(netsnmp_tmStateReference))
-        tmStateRef = (const netsnmp_tmStateReference *) *opaque;
+        tmStateRef = *opaque;
 
 
     /* RFC5953: section 5.2, step 3:
@@ -1271,7 +1271,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
        + Our session id is stored as the t->data pointer
     */
     if (NULL != t->data && t->data_length == sizeof(_netsnmpTLSBaseData)) {
-        tlsbase = (_netsnmpTLSBaseData *) t->data;
+        tlsbase = t->data;
 
         if (tlsbase->addr)
             cachep = find_bio_cache(&tlsbase->addr->remote_addr);
@@ -1555,7 +1555,7 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
 
     /* see if we can extract the remote hostname */
     if (!isserver && t && t->data && str) {
-        tlsdata = (_netsnmpTLSBaseData *) t->data;
+        tlsdata = t->data;
         /* search for a : */
         if (NULL != (cp = strrchr(str, ':'))) {
             sprintf(buf, "%.*s", (int) SNMP_MIN(cp - str, sizeof(buf) - 1),
@@ -1609,8 +1609,7 @@ netsnmp_dtlsudp_ctor(void)
 
     dtlsudpDomain.name = netsnmpDTLSUDPDomain;
     dtlsudpDomain.name_length = netsnmpDTLSUDPDomain_len;
-    dtlsudpDomain.prefix = (const char**)calloc(num_prefixes + 1,
-                                                sizeof(char *));
+    dtlsudpDomain.prefix = calloc(num_prefixes + 1, sizeof(char *));
     for (i = 0; i < num_prefixes; ++ i)
         dtlsudpDomain.prefix[i] = prefixes[i];
 
