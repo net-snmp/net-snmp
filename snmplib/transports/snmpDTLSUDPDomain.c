@@ -1169,6 +1169,14 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
         if (SNMPERR_GENERR == _netsnmp_bio_try_and_write_buffered(t, cachep)) {
             /* we still have data that can't get out in the buffer */
 
+            DEBUGIF ("9:dtlsudp") {
+                char *str = t->base_transport->f_fmtaddr(t, addr_pair,
+                                            sizeof(netsnmp_indexed_addr_pair));
+                DEBUGMSGTL(("9:dtlsudp", "cached %d bytes for %s on fd %d\n",
+                            size, str, t->sock));
+                free(str);
+            }
+
             /* add the new data to the end of the existing cache */
             if (_netsnmp_add_buffered_data(cachep, buf, size) !=
                 SNMPERR_SUCCESS) {
@@ -1218,6 +1226,9 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
                but we're failing to do so and need to wait till the
                socket is ready again; unfortunately this means we need
                to buffer the SNMP data temporarily in the mean time */
+
+            DEBUGMSGTL(("9:dtlsudp", "cached %d bytes for fd %d\n", size,
+                        t->sock));
 
             /* remember the packet */
             if (_netsnmp_add_buffered_data(cachep, buf, size) !=
@@ -1337,8 +1348,10 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
                 if (rc > 0) {
                     /* junk recv for catching negotiations still in play */
                     opaque_len = 0;
-                    netsnmp_dtlsudp_recv(t, buf, sizeof(buf),
-                                         &opaque, &opaque_len);
+                    rc = netsnmp_dtlsudp_recv(t, buf, sizeof(buf),
+                                              &opaque, &opaque_len);
+                    DEBUGMSGTL(("dtlsudp:close",
+                                "netsnmp_dtlsudp_recv() returned %d\n", rc));
                     SNMP_FREE(opaque);
                 }
             } /* for loop */
