@@ -183,13 +183,12 @@ $linktype = "dynamic";
 # SSL = enabled
 $openssl = "enabled";
 $b_winextdll = "disabled";
-$perl = "enabled";
+$perl = "disabled";
 $install = "enabled";
 $install_devel = "enabled";
 
 chdir $win32_dir;
 &build();
-&create_perl_package();
 
 print "\nCleaning up $install_base/snmp/persist/\n";
 unlink ("$install_base/snmp/persist/snmpd.conf");
@@ -220,8 +219,11 @@ print "Renaming $install_base/bin to $install_base/bin.ssl\n";
 rename ("$install_base/bin","$install_base/bin.ssl") || die ("Could not rename folder: $?");
 print "Renaming $install_base/lib to $install_base/lib.ssl\n";
 rename ("$install_base/lib","$install_base/lib.ssl") || die ("Could not rename folder: $?");
-print "Renaming $install_base/perl to $install_base/perl.ssl\n";
-rename ("$install_base/perl","$install_base/perl.ssl") || die ("Could not rename folder: $?");
+if ($build_options{perl} eq "enabled") {
+    print "Renaming $install_base/perl to $install_base/perl.ssl\n";
+    rename("$install_base/perl","$install_base/perl.ssl") ||
+	die("Could not rename folder: $?");
+}
 
 #***************************************************************
 
@@ -232,13 +234,12 @@ rename ("$install_base/perl","$install_base/perl.ssl") || die ("Could not rename
 # SSL = disabled
 $openssl = "disabled";
 $b_winextdll = "disabled";
-$perl = "enabled";
+$perl = "disabled";
 $install = "enabled";
 $install_devel = "enabled";
 
 chdir $win32_dir;
 &build();
-&create_perl_package();
 
 print "\nCleaning up $install_base/snmp/persist/\n";
 unlink ("$install_base/snmp/persist/snmpd.conf");
@@ -473,6 +474,11 @@ sub build {
   }
 
   print "\nDone!\n";  
+
+  if ($perl eq "enabled") {
+      &create_perl_package();
+  }
+
 } # sub build
 
 
