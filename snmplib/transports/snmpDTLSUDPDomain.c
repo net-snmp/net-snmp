@@ -567,9 +567,7 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep)
 
         /* If want_read/write but failed to actually send anything
            then we need to wait for the other side, so quit */
-        if ((errnum == SSL_ERROR_WANT_READ ||
-             errnum == SSL_ERROR_WANT_WRITE) &&
-            bytesout <= 0) {
+        if (bytesout <= 0) {
             /* sending failed; must wait longer */
             return SNMPERR_GENERR;
         }
@@ -802,9 +800,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         /* If want_read/write but failed to actually send
            anything then we need to wait for the other side,
            so quit */
-        if ((errnum == SSL_ERROR_WANT_READ ||
-             errnum == SSL_ERROR_WANT_WRITE) &&
-            bytesout <= 0)
+        if (bytesout <= 0)
             break;
 
         /* retry reading */
@@ -1211,9 +1207,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
         /* If want_read/write but failed to actually send
            anything then we need to wait for the other side,
            so quit */
-        if ((errnum == SSL_ERROR_WANT_READ ||
-             errnum == SSL_ERROR_WANT_WRITE) &&
-            bytesout <= 0) {
+        if (bytesout <= 0) {
             /* We need more data written to or read from the socket
                but we're failing to do so and need to wait till the
                socket is ready again; unfortunately this means we need
