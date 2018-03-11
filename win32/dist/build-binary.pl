@@ -5,6 +5,7 @@
 # May 10th, 2009
 #
 use strict;
+use warnings;
 use File::Basename;
 use File::Copy;
 use File::Spec;
@@ -88,7 +89,9 @@ else {
   exit;
 }
 
-if (!(-d $ENV{MSVCDir}) && !(-d $ENV{VCINSTALLDIR}) && !defined($ENV{TARGET_CPU})) {
+if (!(defined($ENV{MSVCDir}) && -d $ENV{MSVCDir}) &&
+    !(defined($ENV{VCINSTALLDIR}) && -d $ENV{VCINSTALLDIR}) &&
+    !defined($ENV{TARGET_CPU})) {
   print "\nPlease run VCVARS32.BAT first to set up the Visual Studio build\n" .
         "environment.\n\n";
   exit;
@@ -128,8 +131,7 @@ open (UNIX_CONFIGURE_IN, "<$unix_configure_in") || die "Can't Open $unix_configu
 while (<UNIX_CONFIGURE_IN>)
 {
   chomp;
-  /PACKAGE_VERSION='(.*)'/;
-  if ($1 ne "") {
+  if (/PACKAGE_VERSION='(.*)'/) {
     $version = $1;
     last;
   }
@@ -307,8 +309,8 @@ print "\n\nCopying documentation:\n";
 print "=============================\n\n";
 
 # To do: replace the two lines below with commands that build the .chm file.
-open out, ">$install_base/docs/net-snmp.chm";
-close out;
+open(OUT, ">$install_base/docs/net-snmp.chm");
+close(OUT);
 
 print "\n\nBuilding installer:\n";
 print "=============================\n\n";
@@ -399,7 +401,7 @@ sub build {
   # the configuration files.
   # See the note about environment variables in the Win32 section of 
   # perl/SNMP/README for details on why this is needed. 
-  $ENV{SNMPCONFPATH}="t";$ENV{SNMPCONFPATH};
+  $ENV{SNMPCONFPATH}="t";
   
   print "\nBuilding...\n";
   
