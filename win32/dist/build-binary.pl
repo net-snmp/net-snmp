@@ -54,21 +54,8 @@ my $version_maj;
 my $version_min;
 my $version_rev;
 my $installer_exe_version = 1;
-my $openssl = "disabled";
-my $b_ipv6 = "disabled";
-my $b_winextdll = "disabled";
-my $sdk = "disabled";
 my $default_install_base = "c:/usr";
 my $install_base = $default_install_base;
-my $install = "enabled";
-my $install_devel = "disabled";
-my $perl = "disabled";
-my $perl_install = "disabled";
-my $logging = "enabled";
-my $debug = "disabled";
-my $configOpts = "";
-my $cTmp = "";
-my $linktype = "static";
 my $option;
 
 my $scriptdir = dirname(abs_path($0));
@@ -165,30 +152,23 @@ print "Net-SNMP version MIN2: $version_rev\n\n";
 
 
 
-#***************************************************************
-# Common build options:
-$b_ipv6 = "enabled";
-$sdk = "enabled";
-$default_install_base = "c:/usr";
-$install_base = $default_install_base;
-$perl_install = "disabled";
-$debug = "disabled";
-$configOpts = "";
-$cTmp = "";
-$linktype = "dynamic";
-
-#***************************************************************
-# Build binary:
-# winExtDLL = disabled
-# SSL = enabled
-$openssl = "enabled";
-$b_winextdll = "disabled";
-$perl = "disabled";
-$install = "enabled";
-$install_devel = "enabled";
+my %build_options = (
+    b_ipv6		=> "enabled",
+    b_winextdll		=> "disabled",
+    debug		=> "disabled",
+    install		=> "enabled",
+    install_base	=> $install_base,
+    install_devel	=> "enabled",
+    linktype		=> "dynamic",
+    logging		=> "enabled",
+    openssl		=> "enabled",
+    perl		=> "disabled",
+    perl_install	=> "disabled",
+    sdk			=> "enabled"
+);
 
 chdir $win32_dir;
-&build();
+&build(\%build_options);
 
 print "\nCleaning up $install_base/snmp/persist/\n";
 unlink ("$install_base/snmp/persist/snmpd.conf");
@@ -198,14 +178,13 @@ unlink ("$install_base/snmp/persist/snmptrapd.conf");
 # Build binary:
 # winExtDLL = enabled
 # SSL = enabled
-$openssl = "enabled";
-$b_winextdll = "enabled";
-$perl = "disabled";
-$install = "disabled";
-$install_devel = "disabled";
+$build_options{openssl} = "enabled";
+$build_options{b_winextdll} = "enabled";
+$build_options{install} = "disabled";
+$build_options{install_devel} = "disabled";
 
 chdir $win32_dir;
-&build();
+&build(\%build_options);
 
 print "\nCopying snmpd.exe to snmpd-winExtDLL.exe\n";
 copy("bin/release/snmpd.exe","$install_base/bin/snmpd-winExtDLL.exe") || die ("Could not copy snmpd.exe to snmpd-winExtDLL.exe: $?");
@@ -232,14 +211,14 @@ if ($build_options{perl} eq "enabled") {
 # Build binary:
 # winExtDLL = disabled
 # SSL = disabled
-$openssl = "disabled";
-$b_winextdll = "disabled";
-$perl = "disabled";
-$install = "enabled";
-$install_devel = "enabled";
+$build_options{openssl} = "disabled";
+$build_options{b_winextdll} = "disabled";
+$build_options{perl} = "disabled";
+$build_options{install} = "enabled";
+$build_options{install_devel} = "enabled";
 
 chdir $win32_dir;
-&build();
+&build(\%build_options);
 
 print "\nCleaning up $install_base/snmp/persist/\n";
 unlink ("$install_base/snmp/persist/snmpd.conf");
@@ -249,14 +228,14 @@ unlink ("$install_base/snmp/persist/snmptrapd.conf");
 # Build binary:
 # winExtDLL = enabled
 # SSL = disabled
-$openssl = "disabled";
-$b_winextdll = "enabled";
-$perl = "disabled";
-$install = "disabled";
-$install_devel = "disabled";
+$build_options{openssl} = "disabled";
+$build_options{b_winextdll} = "enabled";
+$build_options{perl} = "disabled";
+$build_options{install} = "disabled";
+$build_options{install_devel} = "disabled";
 
 chdir $win32_dir;
-&build();
+&build(\%build_options);
 
 print "\nCopying snmpd.exe to snmpd-winExtDLL.exe\n";
 copy("bin/release/snmpd.exe","$install_base/bin/snmpd-winExtDLL.exe") || die ("Could not copy snmpd.exe to snmpd-winExtDLL.exe: $?");
@@ -350,37 +329,51 @@ exit;
 
 #***************************************************************
 sub build {
+  my %build_options = %{$_[0]};
+  my $b_ipv6        = $build_options{b_ipv6};
+  my $b_winextdll   = $build_options{b_winextdll};
+  my $debug         = $build_options{debug};
+  my $install       = $build_options{install};
+  my $install_base  = $build_options{install_base};
+  my $install_devel = $build_options{install_devel};
+  my $linktype      = $build_options{linktype};
+  my $logging       = $build_options{logging};
+  my $openssl       = $build_options{openssl};
+  my $perl          = $build_options{perl};
+  my $perl_install  = $build_options{perl_install};
+  my $sdk           = $build_options{sdk};
+
   print "\n\nBuilding with options:\n";
   print "======================\n\n";
-  print "1.  OpenSSL support:                " . $openssl. "\n";
-  print "2.  Platform SDK support:           " . $sdk . "\n";
+  print "1.  OpenSSL support:                $openssl\n";
+  print "2.  Platform SDK support:           $sdk\n";
   print "\n";
-  print "3.  Install path:                   " . $install_base . "\n";
-  print "4.  Install after build:            " . $install . "\n";
+  print "3.  Install path:                   $install_base\n";
+  print "4.  Install after build:            $install\n";
   print "\n";
-  print "5.  Perl modules:                   " . $perl . "\n";
-  print "6.  Install perl modules:           " . $perl_install . "\n";
+  print "5.  Perl modules:                   $perl\n";
+  print "6.  Install perl modules:           $perl_install\n";
   print "\n";
-  print "7.  Quiet build (logged):           " . $logging . "\n";
-  print "8.  Debug mode:                     " . $debug . "\n";
+  print "7.  Quiet build (logged):           $logging\n";
+  print "8.  Debug mode:                     $debug\n";
   print "\n";
-  print "9.  IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
-  print "10. winExtDLL agent (requires SDK): " . $b_winextdll . "\n";
+  print "9.  IPv6 transports (requires SDK): $b_ipv6\n";
+  print "10. winExtDLL agent (requires SDK): $b_winextdll\n";
   print "\n";
-  print "11. Link type:                      " . $linktype . "\n";
+  print "11. Link type:                      $linktype\n";
   print "\n";
-  print "12. Install development files       " . $install_devel . "\n";
+  print "12. Install development files       $install_devel\n";
 
-  $cTmp = ($openssl eq "enabled" ? "--with-ssl" : "" );
-  $configOpts = "$cTmp";
-  $cTmp = ($sdk eq "enabled" ? "--with-sdk" : "" );
-  $configOpts = "$configOpts $cTmp";
-  $cTmp = ($b_ipv6 eq "enabled" ? "--with-ipv6" : "" );
-  $configOpts = "$configOpts $cTmp";
-  $cTmp = ($b_winextdll eq "enabled" ? "--with-winextdll" : "" );
-  $configOpts = "$configOpts $cTmp";
-  $cTmp = ($debug eq "enabled" ? "--config=debug" : "--config=release" );
-  $configOpts = "$configOpts $cTmp";
+  my $configOpts =
+      ($openssl eq "enabled" ? "--with-ssl" : "" )
+      . " " .
+      ($sdk eq "enabled" ? "--with-sdk" : "" )
+      . " " .
+      ($b_ipv6 eq "enabled" ? "--with-ipv6" : "" )
+      . " " .
+      ($b_winextdll eq "enabled" ? "--with-winextdll" : "" )
+      . " " .
+      ($debug eq "enabled" ? "--config=debug" : "--config=release" );
   
   # Set environment variables
   
