@@ -1326,7 +1326,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
          * if negotiations have completed and we've received data, try and
          * send any queued packets.
          */
-        if (cachep->flags & NETSNMP_BIO_CONNECTED) {
+        if (1) {
             /* make configurable:
                - do this at all?
                - retries
