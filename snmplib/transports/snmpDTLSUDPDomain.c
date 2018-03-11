@@ -491,7 +491,7 @@ static int
 _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep)
 {
     int outsize, rc2;
-    u_char outbuf[65535];
+    void *outbuf;
     
     DEBUGTRACETOK("9:dtlsudp");
 
@@ -499,14 +499,15 @@ _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep)
        buffer (ie, the packet to go out) and send it out
        the udp port manually */
 
-    outsize = BIO_read(cachep->write_bio, outbuf, sizeof(outbuf));
-    if (outsize > 0) {
-        DEBUGMSGTL(("dtlsudp", "have %d bytes to send\n", outsize));
-
-        /* should always be true. */
+    outsize = BIO_ctrl_pending(cachep->write_bio);
+    outbuf = malloc(outsize);
+    if (outsize > 0 && outbuf) {
         int socksize;
         void *sa;
 
+        DEBUGMSGTL(("dtlsudp", "have %d bytes to send\n", outsize));
+
+        outsize = BIO_read(cachep->write_bio, outbuf, outsize);
         sa = NETSNMP_REMOVE_CONST(struct sockaddr *,
                                   _find_remote_sockaddr(t, NULL, 0, &socksize));
         if (NULL == sa)
@@ -516,8 +517,13 @@ _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep)
         if (rc2 == -1) {
             snmp_log(LOG_ERR, "failed to send a DTLS specific packet\n");
         }
-    } else
+    } else if (outsize == 0) {
         DEBUGMSGTL(("9:dtlsudp", "have 0 bytes to send\n"));
+    } else {
+        DEBUGMSGTL(("9:dtlsudp", "buffer allocation failed\n"));
+    }
+
+    free(outbuf);
 
     return outsize;
 }
@@ -1045,7 +1051,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     const netsnmp_indexed_addr_pair *addr_pair = NULL;
     bio_cache *cachep = NULL;
     const netsnmp_tmStateReference *tmStateRef = NULL;
-    u_char outbuf[65535];
+    void *outbuf;
     _netsnmpTLSBaseData *tlsdata = NULL;
     int socksize;
     void *sa;
@@ -1234,14 +1240,19 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
 
     /* for memory bios, we now read from openssl's write buffer (ie,
        the packet to go out) and send it out the udp port manually */
-    rc = BIO_read(cachep->write_bio, outbuf, sizeof(outbuf));
+    rc = BIO_ctrl_pending(cachep->write_bio);
     if (rc <= 0) {
         /* in theory an ok thing */
         return 0;
     }
+    outbuf = malloc(rc);
+    if (!outbuf)
+        return -1;
+    rc = BIO_read(cachep->write_bio, outbuf, rc);
     socksize = netsnmp_sockaddr_size(&cachep->sas.sa);
     sa = &cachep->sas.sa;
     rc = t->base_transport->f_send(t, outbuf, rc, &sa, &socksize);
+    free(outbuf);
 
     return rc;
 }
