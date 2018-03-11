@@ -138,7 +138,7 @@ static bio_cache *find_bio_cache(const netsnmp_sockaddr_storage *from_addr)
 {
     bio_cache *cachep = NULL;
     
-    for(cachep = biocache; cachep; cachep = cachep->next) {
+    for (cachep = biocache; cachep; cachep = cachep->next) {
 
         if (cachep->sas.sa.sa_family != from_addr->sa.sa_family)
             continue;
@@ -166,10 +166,12 @@ static bio_cache *find_bio_cache(const netsnmp_sockaddr_storage *from_addr)
 
 /* removes a single cache entry and returns SUCCESS on finding and
    removing it. */
-static int remove_bio_cache(bio_cache *thiscache) {
+static int remove_bio_cache(bio_cache *thiscache)
+{
     bio_cache *cachep = NULL, *prevcache = NULL;
+
     cachep = biocache;
-    while(cachep) {
+    while (cachep) {
         if (cachep == thiscache) {
 
             /* remove it from the list */
@@ -189,18 +191,20 @@ static int remove_bio_cache(bio_cache *thiscache) {
 }
 
 /* frees the contents of a bio_cache */
-static void free_bio_cache(bio_cache *cachep) {
+static void free_bio_cache(bio_cache *cachep)
+{
 /* These are freed by the SSL_free() call */
 /*
         BIO_free(cachep->read_bio);
         BIO_free(cachep->write_bio);
 */
     DEBUGMSGTL(("9:dtlsudp:bio_cache", "releasing %p\n", cachep));
-        SNMP_FREE(cachep->write_cache);
-        netsnmp_tlsbase_free_tlsdata(cachep->tlsdata);
+    SNMP_FREE(cachep->write_cache);
+    netsnmp_tlsbase_free_tlsdata(cachep->tlsdata);
 }
 
-static void remove_and_free_bio_cache(bio_cache *cachep) {
+static void remove_and_free_bio_cache(bio_cache *cachep)
+{
     /** no debug, remove_bio_cache does it */
     remove_bio_cache(cachep);
     free_bio_cache(cachep);
@@ -413,8 +417,10 @@ start_new_cached_connection(netsnmp_transport *t,
 static bio_cache *
 find_or_create_bio_cache(netsnmp_transport *t,
                          const netsnmp_sockaddr_storage *from_addr,
-                         int we_are_client) {
+                         int we_are_client)
+{
     bio_cache *cachep = find_bio_cache(from_addr);
+
     if (NULL == cachep) {
         /* none found; need to start a new context */
         cachep = start_new_cached_connection(t, from_addr, we_are_client);
@@ -482,7 +488,8 @@ _find_remote_sockaddr(netsnmp_transport *t, const void *opaque, int olen,
  * queued packets out the UDP port
  */
 static int
-_netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep) {
+_netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep)
+{
     int outsize, rc2;
     u_char outbuf[65535];
     
@@ -523,7 +530,8 @@ _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep) {
 /* returns SNMPERR_SUCCESS if we succeeded in getting the data out */
 /* returns SNMPERR_GENERR if we still need more time */
 static int
-_netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
+_netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep)
+{
     int rc;
     _netsnmpTLSBaseData *tlsdata;
     
