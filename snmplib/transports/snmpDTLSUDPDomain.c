@@ -115,7 +115,7 @@ typedef struct bio_cache_s {
 
 /** bio_cache flags */
 #define NETSNMP_BIO_HAVE_COOKIE        0x0001 /* verified cookie */
-#define NETSNMP_BIO_CONNECTED          0x0002 /* recieved decoded data */
+#define NETSNMP_BIO_CONNECTED          0x0002 /* received decoded data */
 #define NETSNMP_BIO_DISCONNECTED       0x0004 /* peer shutdown */
 
 static bio_cache *biocache = NULL;
@@ -374,7 +374,7 @@ start_new_cached_connection(netsnmp_transport *t,
            failures and an unexpected presented certificate identity.
     */
     /* Implementation notes:
-       + Because we're working asyncronously the real "end" point of
+       + Because we're working asynchronously the real "end" point of
          opening a connection doesn't occur here as certificate
          verification and other things needs to happen first in the
          verify callback, etc.  See the netsnmp_dtlsudp_recv()
@@ -562,7 +562,7 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
         if ((errnum == SSL_ERROR_WANT_READ ||
              errnum == SSL_ERROR_WANT_WRITE) &&
             bytesout <= 0) {
-            /* we've failed; must need to wait longer */
+            /* sending failed; must wait longer */
             return SNMPERR_GENERR;
         }
 
@@ -1025,7 +1025,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
           IN   tmStateReference    -- transport info
            )
     */
-    /* Implementation notes: those pamateres are all passed outward
+    /* Implementation notes: those parameters are all passed outward
        using the functions arguments and the return code below (the length) */
 
     return rc;
@@ -1143,7 +1143,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
 
     tlsdata = cachep->tlsdata;
     if (NULL == tlsdata || NULL == tlsdata->ssl) {
-        /** xxx mem lean? free created bio cache? */
+        /** xxx mem leak? free created bio cache? */
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONNOSESSIONS);
         snmp_log(LOG_ERR, "bad tls data or ssl ptr in netsnmp_dtlsudp_send\n");
         return -1;
@@ -1219,7 +1219,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
                 return -1;
             }
 
-            /* exit out of the loop until we get caled again from
+            /* exit out of the loop until we get called again from
                socket data */ 
             break;
         }
@@ -1322,7 +1322,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
                 tv.tv_usec = 50000;
                 rc = select(t->sock+1, &readfs, NULL, NULL, &tv);
                 if (rc > 0) {
-                    /* junk recv for catching negotations still in play */
+                    /* junk recv for catching negotiations still in play */
                     opaque_len = 0;
                     netsnmp_dtlsudp_recv(t, buf, sizeof(buf),
                                          &opaque, &opaque_len);
