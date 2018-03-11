@@ -1181,6 +1181,21 @@ Follow these steps to install OpenSSL:
 
 ***************************************************************************
 *
+* Building the Windows Net-SNMP Installer
+*
+***************************************************************************
+
+Proceed as follows:
+ 1. Uninstall Net-SNMP.
+ 2. Remove the C:\usr directory completely.
+ 3. Open a command prompt
+ 4. Run the MSVC vcvarsall.bat script.
+ 5. Change the current working directory to the Net-SNMP win32\dist directory.
+ 6. Run the .\build-binary.bat script.
+ 7. Copy the net-snmp-${version}.x86.exe installer to the desired location.
+
+***************************************************************************
+*
 * Configuring Net-SNMP
 *
 ***************************************************************************
