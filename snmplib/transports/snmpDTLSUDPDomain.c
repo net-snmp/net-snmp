@@ -1586,7 +1586,7 @@ netsnmp_dtlsudp_create_ostring(const void *o, size_t o_len, int local)
 void
 netsnmp_dtlsudp_ctor(void)
 {
-    char indexname[] = "_netsnmp_addr_info";
+    static const char indexname[] = "_netsnmp_addr_info";
     static const char *prefixes[] = { "dtlsudp", "dtls"
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
                                       , "dtlsudp6", "dtls6"
@@ -1594,7 +1594,7 @@ netsnmp_dtlsudp_ctor(void)
     };
     int i, num_prefixes = sizeof(prefixes) / sizeof(char *);
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-    char indexname6[] = "_netsnmp_addr_info6";
+    static const char indexname6[] = "_netsnmp_addr_info6";
 #endif
 
     DEBUGMSGTL(("dtlsudp", "registering DTLS constructor\n"));
@@ -1604,7 +1604,8 @@ netsnmp_dtlsudp_ctor(void)
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     if (!openssl_addr_index6)
         openssl_addr_index6 =
-            SSL_get_ex_new_index(0, indexname6, NULL, NULL, NULL);
+            SSL_get_ex_new_index(0, NETSNMP_REMOVE_CONST(void *, indexname6),
+                                 NULL, NULL, NULL);
 #endif
 
     dtlsudpDomain.name = netsnmpDTLSUDPDomain;
@@ -1619,7 +1620,8 @@ netsnmp_dtlsudp_ctor(void)
 
     if (!openssl_addr_index)
         openssl_addr_index =
-            SSL_get_ex_new_index(0, indexname, NULL, NULL, NULL);
+            SSL_get_ex_new_index(0, NETSNMP_REMOVE_CONST(void *, indexname),
+                                 NULL, NULL, NULL);
 
     netsnmp_tdomain_register(&dtlsudpDomain);
 }
