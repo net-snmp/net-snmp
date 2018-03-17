@@ -301,6 +301,7 @@ Section "Net-SNMP Trap Service" SEC04
   NoTrapService:
 SectionEnd
 
+/*
 Section "Perl SNMP Modules" SEC05
   SetOutPath "$INSTDIR\perl\x86"
 
@@ -320,6 +321,7 @@ Section "Perl SNMP Modules" SEC05
   SetOutPath "$INSTDIR\bin"
   File "bin\net-snmp-perl-test.pl"
 SectionEnd
+*/
 
 Section "Development files" SEC06
   SetOutPath "$INSTDIR"
@@ -391,9 +393,11 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} \
                "The Net-SNMP Trap Service receives SNMP notifications traps and informs) \
                from other SNMP-enabled devices."
+/*
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC05} \
                "The Perl SNMP Modules can be used if this computer will be used to \
                run or develop Perl-based SNMP programs (e.g. 'mib2c')"
+*/
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC06} \
                "The Development files provide header and library files used for developing \
                applications that use the Net-SNMP library."
@@ -770,6 +774,7 @@ Function parseParameters
   SectionSetFlags ${SEC04} $0
 
   ; /{no,}Perl  
+/*
   ClearErrors
   ${GetOptions} $cmdLineParameters "/Perl"  $R0
   IfErrors +4 0
@@ -782,6 +787,7 @@ Function parseParameters
   SectionGetFlags ${SEC05} $0
   IntOp $0 $0 & ${SECTION_OFF}
   SectionSetFlags ${SEC05} $0
+*/
 
   ; /{no,}Dev  
   ClearErrors
