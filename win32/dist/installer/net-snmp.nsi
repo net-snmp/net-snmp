@@ -4,6 +4,7 @@ SetCompressor /SOLID lzma
 !include x64.nsh
 !include "Sections.nsh"
 !include FileFunc.nsh
+!include WinVer.nsh
 !insertmacro GetParameters
 !insertmacro GetOptions
 var cmdLineParameters
@@ -687,18 +688,10 @@ MessageBox MB_OK "Options:$\n  \StartMenu={GroupName}$\n  \Agent=standard|extDLL
 Abort
 
 ; Make sure we're running Windows 2000 (5.0) or higher
-ClearErrors
-ReadRegStr $R0 HKLM \
-  "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
-IfErrors windowsVersionError
-
-IntCmp $R0 '5.0' windowsVersionOK windowsVersionError windowsVersionOK
-windowsVersionError:
+${If} ${AtMostWinME}
 MessageBox MB_ICONINFORMATION|MB_OK "This version of $(^Name) requires Windows 2000 or higher.  For Windows NT and lower, please use Net-SNMP 5.4."
 Quit
-
-windowsVersionOK:
-;MessageBox MB_ICONINFORMATION|MB_OK "Windows version ok: $R0"
+${Endif}
 
 ; Make sure we're running the right platform
 ;INSTALLER_PLATFORM
