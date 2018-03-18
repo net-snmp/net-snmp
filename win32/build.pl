@@ -48,9 +48,8 @@ my $option;
 # Path of this script (source tree path + "win32").
 my $current_pwd = dirname(abs_path($0));
 
-if ( -d $ENV{MSVCDir} || -d $ENV{VCINSTALLDIR} || defined($ENV{TARGET_CPU}) ) {
-}
-else {
+if (!defined($ENV{MSVCDir}) && !defined($ENV{VCINSTALLDIR}) &&
+    !defined($ENV{TARGET_CPU})) {
   print "\nPlease run VCVARS32.BAT first to set up the Visual Studio build\n" .
         "environment.\n\n";
   system("pause");
