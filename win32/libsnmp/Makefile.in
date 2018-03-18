@@ -20,6 +20,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\asn1.obj" \
 	"$(INTDIR)\asprintf.obj" \
 	"$(INTDIR)\callback.obj" \
+	"$(INTDIR)\cert_util.obj" \
 	"$(INTDIR)\check_varbind.obj" \
 	"$(INTDIR)\closedir.obj" \
 	"$(INTDIR)\container.obj" \
@@ -29,7 +30,9 @@ LIB32_OBJS= \
 	"$(INTDIR)\container_null.obj" \
 	"$(INTDIR)\data_list.obj" \
 	"$(INTDIR)\default_store.obj" \
+	"$(INTDIR)\dir_utils.obj" \
 	"$(INTDIR)\fd_event_manager.obj" \
+	"$(INTDIR)\file_utils.obj" \
 	"$(INTDIR)\getopt.obj" \
 	"$(INTDIR)\gettimeofday.obj" \
 	"$(INTDIR)\inet_ntop.obj" \
@@ -50,10 +53,13 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmp-tc.obj" \
 	"$(INTDIR)\snmp.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
+	"$(INTDIR)\snmpDTLSUDPDomain.obj" \
 	"$(INTDIR)\snmpIPv4BaseDomain.obj" \
 	"$(INTDIR)\snmpSocketBaseDomain.obj" \
 	"$(INTDIR)\snmpTCPBaseDomain.obj" \
 	"$(INTDIR)\snmpTCPDomain.obj" \
+	"$(INTDIR)\snmpTLSBaseDomain.obj" \
+	"$(INTDIR)\snmpTLSTCPDomain.obj" \
 	"$(INTDIR)\snmpUDPBaseDomain.obj" \
 	"$(INTDIR)\snmpUDPDomain.obj" \
 	"$(INTDIR)\snmpUDPIPv4BaseDomain.obj" \
@@ -64,11 +70,13 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmp_debug.obj" \
 	"$(INTDIR)\snmp_enum.obj" \
 	"$(INTDIR)\snmp_logging.obj" \
+	"$(INTDIR)\snmp_openssl.obj" \
 	"$(INTDIR)\snmp_parse_args.obj" \
 	"$(INTDIR)\snmp_secmod.obj" \
 	"$(INTDIR)\snmp_service.obj" \
 	"$(INTDIR)\snmp_transport.obj" \
 	"$(INTDIR)\snmp_version.obj" \
+	"$(INTDIR)\snmptsm.obj" \
 	"$(INTDIR)\snmpusm.obj" \
 	"$(INTDIR)\snmpv3.obj" \
 	"$(INTDIR)\strlcat.obj" \
@@ -94,16 +102,14 @@ CLEAN :
 "..\lib\$(OUTDIR)" :
     if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
 
-"$(INTDIR)" :
-    if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
+.SUFFIXES: .c .obj
 
-.c{$(INTDIR)}.obj::
+{..\..\snmplib}.c{$(INTDIR)}.obj:: "$(INTDIR)"
+   @if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $<
 
-.cpp{$(INTDIR)}.obj::
-   $(CPP) $(CPP_PROJ) $<
-
-.cxx{$(INTDIR)}.obj::
+{..\..\snmplib\transports}.c{$(INTDIR)}.obj:: "$(INTDIR)"
+   @if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $<
 
 
@@ -121,401 +127,3 @@ LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\netsnmp.lib"
 !MESSAGE Warning: cannot find "$(PROGNAME).dep"
 !ENDIF 
 !ENDIF 
-
-
-SOURCE=..\..\snmplib\asn1.c
-
-"$(INTDIR)\asn1.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\asprintf.c
-
-"$(INTDIR)\asprintf.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\callback.c
-
-"$(INTDIR)\callback.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\check_varbind.c
-
-"$(INTDIR)\check_varbind.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\closedir.c
-
-"$(INTDIR)\closedir.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\container.c
-
-"$(INTDIR)\container.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\container_binary_array.c
-
-"$(INTDIR)\container_binary_array.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\container_iterator.c
-
-"$(INTDIR)\container_iterator.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\container_list_ssll.c
-
-"$(INTDIR)\container_list_ssll.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\container_null.c
-
-"$(INTDIR)\container_null.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\data_list.c
-
-"$(INTDIR)\data_list.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\default_store.c
-
-"$(INTDIR)\default_store.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\fd_event_manager.c
-
-"$(INTDIR)\fd_event_manager.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\getopt.c
-
-"$(INTDIR)\getopt.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\gettimeofday.c
-
-"$(INTDIR)\gettimeofday.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\inet_ntop.c
-
-"$(INTDIR)\inet_ntop.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\inet_pton.c
-
-"$(INTDIR)\inet_pton.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\int64.c
-
-"$(INTDIR)\int64.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\keytools.c
-
-"$(INTDIR)\keytools.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\large_fd_set.c
-
-"$(INTDIR)\large_fd_set.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\lcd_time.c
-
-"$(INTDIR)\lcd_time.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\md5.c
-
-"$(INTDIR)\md5.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\mib.c
-
-"$(INTDIR)\mib.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\mt_support.c
-
-"$(INTDIR)\mt_support.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\oid_stash.c
-
-"$(INTDIR)\oid_stash.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\opendir.c
-
-"$(INTDIR)\opendir.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\parse.c
-
-"$(INTDIR)\parse.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\read_config.c
-
-"$(INTDIR)\read_config.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\readdir.c
-
-"$(INTDIR)\readdir.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\scapi.c
-
-"$(INTDIR)\scapi.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE="..\..\snmplib\snmp-tc.c"
-
-"$(INTDIR)\snmp-tc.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp.c
-
-"$(INTDIR)\snmp.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpCallbackDomain.c
-
-"$(INTDIR)\snmpCallbackDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpIPv4BaseDomain.c
-
-"$(INTDIR)\snmpIPv4BaseDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpIPv6BaseDomain.c
-
-"$(INTDIR)\snmpIPv6BaseDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpSocketBaseDomain.c
-
-"$(INTDIR)\snmpSocketBaseDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpTCPBaseDomain.c
-
-"$(INTDIR)\snmpTCPBaseDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpTCPDomain.c
-
-"$(INTDIR)\snmpTCPDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpTCPIPv6Domain.c
-
-"$(INTDIR)\snmpTCPIPv6Domain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpUDPBaseDomain.c
-
-"$(INTDIR)\snmpUDPBaseDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpUDPDomain.c
-
-"$(INTDIR)\snmpUDPDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpUDPIPv4BaseDomain.c
-
-"$(INTDIR)\snmpUDPIPv4BaseDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpUDPIPv6Domain.c
-
-"$(INTDIR)\snmpUDPIPv6Domain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_alarm.c
-
-"$(INTDIR)\snmp_alarm.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_api.c
-
-"$(INTDIR)\snmp_api.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_auth.c
-
-"$(INTDIR)\snmp_auth.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_client.c
-
-"$(INTDIR)\snmp_client.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_debug.c
-
-"$(INTDIR)\snmp_debug.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_enum.c
-
-"$(INTDIR)\snmp_enum.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_logging.c
-
-"$(INTDIR)\snmp_logging.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_parse_args.c
-
-"$(INTDIR)\snmp_parse_args.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_secmod.c
-
-"$(INTDIR)\snmp_secmod.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_service.c
-
-"$(INTDIR)\snmp_service.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_transport.c
-
-"$(INTDIR)\snmp_transport.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmp_version.c
-
-"$(INTDIR)\snmp_version.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmpusm.c
-
-"$(INTDIR)\snmpusm.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\snmpv3.c
-
-"$(INTDIR)\snmpv3.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\strlcat.c
-
-"$(INTDIR)\strlcat.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\strlcpy.c
-
-"$(INTDIR)\strlcpy.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\strtok_r.c
-
-"$(INTDIR)\strtok_r.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\strtoull.c
-
-"$(INTDIR)\strtoull.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\system.c
-
-"$(INTDIR)\system.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\tools.c
-
-"$(INTDIR)\tools.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\ucd_compat.c
-
-"$(INTDIR)\ucd_compat.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\vacm.c
-
-"$(INTDIR)\vacm.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\winpipe.c
-
-"$(INTDIR)\winpipe.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
