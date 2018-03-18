@@ -22,7 +22,7 @@ var cmdLineParameters
 
 ; For environment variables
 !define ALL_USERS
-!include "SetEnVar.nsi"
+;!include "SetEnVar.nsi"
 !include "Add2Path.nsi"
 
 ; MUI 1.67 compatible ------
