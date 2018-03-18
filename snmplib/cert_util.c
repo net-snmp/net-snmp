@@ -484,11 +484,13 @@ _new_key(const char *dirname, const char *filename)
         return NULL;
     }
 
+#if !defined(_MSC_VER)
     if ((fstat.st_mode & S_IROTH) || (fstat.st_mode & S_IWOTH)) {
         snmp_log(LOG_ERR,
                  "refusing to read world readable or writable key %s\n", fn);
         return NULL;
     }
+#endif
 
     key = SNMP_MALLOC_TYPEDEF(netsnmp_key);
     if (NULL == key) {

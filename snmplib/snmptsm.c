@@ -30,8 +30,6 @@
 netsnmp_feature_require(snmpv3_probe_contextEngineID_rfc5343)
 netsnmp_feature_require(row_create)
 
-#include <unistd.h>
-
 static int      tsm_session_init(netsnmp_session *);
 static void     tsm_free_state_ref(void *);
 static int      tsm_clone_pdu(netsnmp_pdu *, netsnmp_pdu *);
