@@ -341,11 +341,11 @@ int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
     DWORD         bytes_sent;
     int           rc;
 
-    wsabuf.buf = data;
+    wsabuf.buf = NETSNMP_REMOVE_CONST(void *, data);
     wsabuf.len = len;
 
     memset(&m, 0, sizeof(m));
-    m.name          = remote;
+    m.name          = NETSNMP_REMOVE_CONST(struct sockaddr *, remote);
     m.namelen       = sizeof(struct sockaddr_in);
     m.lpBuffers     = &wsabuf;
     m.dwBufferCount = 1;
