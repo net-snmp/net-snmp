@@ -6,6 +6,7 @@
 #
 use Getopt::Long;
 use strict;
+use warnings;
 
 my $version = "unknown";
 my $config;
@@ -97,8 +98,7 @@ open (UNIX_CONFIGURE_IN, "<$unix_configure_in") || die "Can't Open $unix_configu
 while (<UNIX_CONFIGURE_IN>)
 {
   chomp;
-  /PACKAGE_VERSION='(.*)'/;
-  if ($1 ne "") {
+  if (/PACKAGE_VERSION='(.*)'/) {
     $version = $1;
     last;
   }
