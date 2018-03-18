@@ -140,7 +140,36 @@ sub substitute
 # Perform substitutions
 #
 ###############################################
+
+my @programs = qw
+/
+encode_keychange
+snmpbulkget
+snmpbulkwalk
+snmpdelta
+snmpdf
+snmpget
+snmpgetnext
+snmpset
+snmpstatus
+snmptable
+snmptest
+snmptranslate
+snmptrap
+snmpusm
+snmpvacm
+snmpwalk
+/;
+
+my @apps=sort("snmpnetstat", @programs);
+my @apps_clean;
+foreach my $app (@apps) {
+    push @apps_clean, $app . "_clean";
+}
+
 my %makefile_subs = (
+    "app" => [ "^APPS=",       "APPS=" . join(" ", @apps)	    ],
+    "apc" => [ "^APPS_CLEAN=", "APPS_CLEAN=" . join(" ", @apps_clean)],
     "cfg" => [ "^CFG=",        "CFG=$config"                        ],
     "int" => [ "^INTDIR=",     "INTDIR=.\\$config"                  ],
     "lnk" => [ "^LINKTYPE=",   "LINKTYPE=$linktype"                 ],
@@ -175,25 +204,6 @@ my %makefile_subs = (
 
 substitute("Makefile", "Makefile.in", \%makefile_subs);
 substitute("local/Makefile", "local/Makefile.in", \%makefile_subs);
-
-my @programs = qw
-/encode_keychange
-snmpbulkget
-snmpbulkwalk
-snmpdelta
-snmpdf
-snmpget
-snmpgetnext
-snmpset
-snmpstatus
-snmptable
-snmptest
-snmptranslate
-snmptrap
-snmpusm
-snmpvacm
-snmpwalk
-/;
 
 foreach my $progName (@programs) {
     $makefile_subs{"prg"} = [ "^PROGNAME=", "PROGNAME=$progName" ];
