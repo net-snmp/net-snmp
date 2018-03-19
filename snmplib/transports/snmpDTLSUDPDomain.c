@@ -1505,7 +1505,7 @@ netsnmp_dtlsudp_transport(const struct sockaddr_in *addr, int local)
 
     if (!local) {
         /* dtls needs to bind the socket for SSL_write to work */
-        if (connect(t->sock, addr, sizeof(*addr)) == -1)
+	if (connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr)) < 0)
             snmp_log(LOG_ERR, "dtls: failed to connect\n");
     }
 
@@ -1543,7 +1543,7 @@ netsnmp_dtlsudp6_transport(const struct sockaddr_in6 *addr, int local)
 
     if (!local) {
         /* dtls needs to bind the socket for SSL_write to work */
-        if (connect(t->sock, addr, sizeof(*addr)) == -1)
+        if (connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr)) < 0)
             snmp_log(LOG_ERR, "dtls: failed to connect\n");
     }
 
