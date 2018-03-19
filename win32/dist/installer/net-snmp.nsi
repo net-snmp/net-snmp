@@ -4,6 +4,7 @@ SetCompressor /SOLID lzma
 !include x64.nsh
 !include "Sections.nsh"
 !include FileFunc.nsh
+!include WinVer.nsh
 !insertmacro GetParameters
 !insertmacro GetOptions
 var cmdLineParameters
@@ -22,7 +23,7 @@ var cmdLineParameters
 
 ; For environment variables
 !define ALL_USERS
-!include "SetEnVar.nsi"
+;!include "SetEnVar.nsi"
 !include "Add2Path.nsi"
 
 ; MUI 1.67 compatible ------
@@ -301,6 +302,7 @@ Section "Net-SNMP Trap Service" SEC04
   NoTrapService:
 SectionEnd
 
+/*
 Section "Perl SNMP Modules" SEC05
   SetOutPath "$INSTDIR\perl\x86"
 
@@ -320,6 +322,7 @@ Section "Perl SNMP Modules" SEC05
   SetOutPath "$INSTDIR\bin"
   File "bin\net-snmp-perl-test.pl"
 SectionEnd
+*/
 
 Section "Development files" SEC06
   SetOutPath "$INSTDIR"
@@ -391,9 +394,11 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} \
                "The Net-SNMP Trap Service receives SNMP notifications traps and informs) \
                from other SNMP-enabled devices."
+/*
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC05} \
                "The Perl SNMP Modules can be used if this computer will be used to \
                run or develop Perl-based SNMP programs (e.g. 'mib2c')"
+*/
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC06} \
                "The Development files provide header and library files used for developing \
                applications that use the Net-SNMP library."
@@ -683,18 +688,10 @@ MessageBox MB_OK "Options:$\n  \StartMenu={GroupName}$\n  \Agent=standard|extDLL
 Abort
 
 ; Make sure we're running Windows 2000 (5.0) or higher
-ClearErrors
-ReadRegStr $R0 HKLM \
-  "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
-IfErrors windowsVersionError
-
-IntCmp $R0 '5.0' windowsVersionOK windowsVersionError windowsVersionOK
-windowsVersionError:
+${If} ${AtMostWinME}
 MessageBox MB_ICONINFORMATION|MB_OK "This version of $(^Name) requires Windows 2000 or higher.  For Windows NT and lower, please use Net-SNMP 5.4."
 Quit
-
-windowsVersionOK:
-;MessageBox MB_ICONINFORMATION|MB_OK "Windows version ok: $R0"
+${Endif}
 
 ; Make sure we're running the right platform
 ;INSTALLER_PLATFORM
@@ -770,6 +767,7 @@ Function parseParameters
   SectionSetFlags ${SEC04} $0
 
   ; /{no,}Perl  
+/*
   ClearErrors
   ${GetOptions} $cmdLineParameters "/Perl"  $R0
   IfErrors +4 0
@@ -782,6 +780,7 @@ Function parseParameters
   SectionGetFlags ${SEC05} $0
   IntOp $0 $0 & ${SECTION_OFF}
   SectionSetFlags ${SEC05} $0
+*/
 
   ; /{no,}Dev  
   ClearErrors
