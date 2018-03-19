@@ -15,6 +15,7 @@ my $linktype;
 my $prefix;
 my $prefixdos;
 my $openssl = 0;
+my $opensslincdir;
 my $b_ipv6 = 0;
 my $b_winextdll = 0;
 my $help = 0;
@@ -25,6 +26,7 @@ GetOptions      ('config=s' => \$config,
                  'destdir=s' => \$prefix,
                  'prefix=s' => \$prefix,
                  'with-ssl' => \$openssl,
+                 'with-sslincdir=s' => \$opensslincdir,
                  'with-ipv6' => \$b_ipv6,
                  'with-winextdll' => \$b_winextdll,
                  'help' => \$help);
@@ -43,6 +45,7 @@ Options:
     --prefix=\"path\"                  Set INSTALL_BASE path (install path)
     --destdir=\"path\"                 Same as --prefix
     --with-ssl                       Link against OpenSSL
+    --with-sslincdir=\"path\"          OpenSSL include path
     --with-ipv6                      Build in IPv6 transports (enables SDK)
     --with-winextdll                 Build winExtDLL agent (enables SDK, see README.win32)
     --help                           This help screen
@@ -190,6 +193,7 @@ my %makefile_subs = (
                                "/FR\$(INTDIR)\\ " .
                                "/Fd\$(INTDIR)\\\$(PROGNAME).pdb " .
                                "/Fo\$(INTDIR)\\ " .
+                               ($opensslincdir ? "/I $opensslincdir " : "") .
                                "/c " .
                                "/W3 " .
                                "/Zi " .
