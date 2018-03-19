@@ -1523,10 +1523,6 @@
     available.  */
 /* #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN */
 
-/*  This is defined if support for the TLS transport domain is
-    available.   */
-#define NETSNMP_TRANSPORT_TLSBASE_DOMAIN 1
-
 /*  This is defined if support for the Alias transport domain is
     available.   */
 /* #undef NETSNMP_TRANSPORT_ALIAS_DOMAIN */
@@ -1535,6 +1531,12 @@
     available.   */
 /* #undef NETSNMP_TRANSPORT_SSH_DOMAIN */
 
+#ifdef NETSNMP_USE_OPENSSL
+
+/*  This is defined if support for the TLS transport domain is
+    available.   */
+#define NETSNMP_TRANSPORT_TLSBASE_DOMAIN 1
+
 /*  This is defined if support for the DTLS/UDP transport domain is
     available.   */
 #define NETSNMP_TRANSPORT_DTLSUDP_DOMAIN 1
@@ -1542,6 +1544,8 @@
 /*  This is defined if support for the TLS/TCP transport domain is
     available.   */
 #define NETSNMP_TRANSPORT_TLSTCP_DOMAIN 1
+
+#endif
 
 /*  This is defined if support for stdin/out transport domain is available.   */
 /* #undef NETSNMP_TRANSPORT_STD_DOMAIN */

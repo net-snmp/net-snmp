@@ -179,6 +179,7 @@ my %makefile_subs = (
     "out" => [ "^OUTDIR=",     "OUTDIR=.\\$config"                  ],
     "pfx" => [ "^PREFIX=",     "PREFIX=$prefix"                     ],
     "dos" => [ "^PREFIX_DOS=", "PREFIX_DOS=$prefixdos"              ],
+    "ssl" => [ "^OPENSSL=",    $openssl ? "OPENSSL=true" : "OPENSSL=false" ],
     "sdk" => [ "^SDK=",        $sdk == 1 ? "SDK=true" : "SDK=false" ],
     "cfl" => [ "^CFLAGS=",     "CFLAGS=" .
                                "/D WIN32 " .
