@@ -2,6 +2,7 @@ PROGNAME=
 CFG=
 OUTDIR=
 INTDIR=
+OPENSSL=
 SDK=
 CFLAGS=
 
@@ -54,13 +55,10 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmp-tc.obj" \
 	"$(INTDIR)\snmp.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
-	"$(INTDIR)\snmpDTLSUDPDomain.obj" \
 	"$(INTDIR)\snmpIPv4BaseDomain.obj" \
 	"$(INTDIR)\snmpSocketBaseDomain.obj" \
 	"$(INTDIR)\snmpTCPBaseDomain.obj" \
 	"$(INTDIR)\snmpTCPDomain.obj" \
-	"$(INTDIR)\snmpTLSBaseDomain.obj" \
-	"$(INTDIR)\snmpTLSTCPDomain.obj" \
 	"$(INTDIR)\snmpUDPBaseDomain.obj" \
 	"$(INTDIR)\snmpUDPDomain.obj" \
 	"$(INTDIR)\snmpUDPIPv4BaseDomain.obj" \
@@ -71,7 +69,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmp_debug.obj" \
 	"$(INTDIR)\snmp_enum.obj" \
 	"$(INTDIR)\snmp_logging.obj" \
-	"$(INTDIR)\snmp_openssl.obj" \
 	"$(INTDIR)\snmp_parse_args.obj" \
 	"$(INTDIR)\snmp_secmod.obj" \
 	"$(INTDIR)\snmp_service.obj" \
@@ -95,6 +92,13 @@ LIB32_OBJS=$(LIB32_OBJS)\
 	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
 	"$(INTDIR)\snmpUDPIPv6Domain.obj"
 !ENDIF
+!IF "$(OPENSSL)" == "true"
+LIB32_OBJS=$(LIB32_OBJS)\
+	"$(INTDIR)\snmpDTLSUDPDomain.obj" \
+	"$(INTDIR)\snmpTLSBaseDomain.obj" \
+	"$(INTDIR)\snmpTLSTCPDomain.obj" \
+	"$(INTDIR)\snmp_openssl.obj"
+!ENDIF
 
 CLEAN :
 	-@for %f in $(LIB32_OBJS) do erase %%f
@@ -105,11 +109,11 @@ CLEAN :
 
 .SUFFIXES: .c .obj
 
-{..\..\snmplib}.c{$(INTDIR)}.obj:: "$(INTDIR)"
+{..\..\snmplib}.c{$(INTDIR)}.obj::
    @if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $<
 
-{..\..\snmplib\transports}.c{$(INTDIR)}.obj:: "$(INTDIR)"
+{..\..\snmplib\transports}.c{$(INTDIR)}.obj::
    @if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $<
 
