@@ -4,8 +4,6 @@
 
 netsnmp_feature_require(cert_util)
 
-#include <net-snmp/library/snmpTLSBaseDomain.h>
-
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -39,6 +37,7 @@ netsnmp_feature_require(cert_util)
 
 #include <net-snmp/types.h>
 #include <net-snmp/config_api.h>
+#include <net-snmp/library/container.h>
 #include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/default_store.h>
@@ -52,6 +51,7 @@ netsnmp_feature_require(cert_util)
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/read_config.h>
 #include <net-snmp/library/system.h>
+#include <net-snmp/library/snmpTLSBaseDomain.h>
 
 #define LOGANDDIE(msg) do { snmp_log(LOG_ERR, "%s\n", msg); return 0; } while(0)
 

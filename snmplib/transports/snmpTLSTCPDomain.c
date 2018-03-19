@@ -13,8 +13,6 @@
 
 netsnmp_feature_require(cert_util)
 
-#include <net-snmp/library/snmpTLSTCPDomain.h>
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -62,6 +60,7 @@ netsnmp_feature_require(cert_util)
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/snmpTLSBaseDomain.h>
+#include <net-snmp/library/snmpTLSTCPDomain.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/cert_util.h>

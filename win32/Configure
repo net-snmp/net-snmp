@@ -15,6 +15,7 @@ my $linktype;
 my $prefix;
 my $prefixdos;
 my $openssl = 0;
+my $opensslincdir;
 my $b_ipv6 = 0;
 my $b_winextdll = 0;
 my $help = 0;
@@ -25,6 +26,7 @@ GetOptions      ('config=s' => \$config,
                  'destdir=s' => \$prefix,
                  'prefix=s' => \$prefix,
                  'with-ssl' => \$openssl,
+                 'with-sslincdir=s' => \$opensslincdir,
                  'with-ipv6' => \$b_ipv6,
                  'with-winextdll' => \$b_winextdll,
                  'help' => \$help);
@@ -43,6 +45,7 @@ Options:
     --prefix=\"path\"                  Set INSTALL_BASE path (install path)
     --destdir=\"path\"                 Same as --prefix
     --with-ssl                       Link against OpenSSL
+    --with-sslincdir=\"path\"          OpenSSL include path
     --with-ipv6                      Build in IPv6 transports (enables SDK)
     --with-winextdll                 Build winExtDLL agent (enables SDK, see README.win32)
     --help                           This help screen
@@ -140,7 +143,36 @@ sub substitute
 # Perform substitutions
 #
 ###############################################
-my %subs = (
+
+my @programs = qw
+/
+encode_keychange
+snmpbulkget
+snmpbulkwalk
+snmpdelta
+snmpdf
+snmpget
+snmpgetnext
+snmpset
+snmpstatus
+snmptable
+snmptest
+snmptranslate
+snmptrap
+snmpusm
+snmpvacm
+snmpwalk
+/;
+
+my @apps=sort("snmpnetstat", @programs);
+my @apps_clean;
+foreach my $app (@apps) {
+    push @apps_clean, $app . "_clean";
+}
+
+my %makefile_subs = (
+    "app" => [ "^APPS=",       "APPS=" . join(" ", @apps)	    ],
+    "apc" => [ "^APPS_CLEAN=", "APPS_CLEAN=" . join(" ", @apps_clean)],
     "cfg" => [ "^CFG=",        "CFG=$config"                        ],
     "int" => [ "^INTDIR=",     "INTDIR=.\\$config"                  ],
     "lnk" => [ "^LINKTYPE=",   "LINKTYPE=$linktype"                 ],
@@ -161,6 +193,7 @@ my %subs = (
                                "/FR\$(INTDIR)\\ " .
                                "/Fd\$(INTDIR)\\\$(PROGNAME).pdb " .
                                "/Fo\$(INTDIR)\\ " .
+                               ($opensslincdir ? "/I $opensslincdir " : "") .
                                "/c " .
                                "/W3 " .
                                "/Zi " .
@@ -173,74 +206,55 @@ my %subs = (
              ],
     );
 
-substitute("Makefile", "Makefile.in", \%subs);
-substitute("local/Makefile", "local/Makefile.in", \%subs);
-
-my @programs = qw
-/encode_keychange
-snmpbulkget
-snmpbulkwalk
-snmpdelta
-snmpdf
-snmpget
-snmpgetnext
-snmpset
-snmpstatus
-snmptable
-snmptest
-snmptranslate
-snmptrap
-snmpusm
-snmpvacm
-snmpwalk
-/;
+substitute("Makefile", "Makefile.in", \%makefile_subs);
+substitute("local/Makefile", "local/Makefile.in", \%makefile_subs);
 
 foreach my $progName (@programs) {
-    $subs{"prg"} = [ "^PROGNAME=", "PROGNAME=$progName" ];
-    substitute("$progName/Makefile", "Makefile-apps.in", \%subs);
+    $makefile_subs{"prg"} = [ "^PROGNAME=", "PROGNAME=$progName" ];
+    substitute("$progName/Makefile", "Makefile-apps.in", \%makefile_subs);
 }
 
 foreach my $progName ("libagent", "libnetsnmptrapd", "local",
                       "netsnmpmibs", "snmpd", "snmptrapd", "snmpnetstat",
                       $linktype eq "dynamic" ? "libsnmp_dll" : "libsnmp") {
-    $subs{"prg"} = [ "^PROGNAME=", "PROGNAME=$progName" ];
-    substitute("$progName/Makefile", "$progName/Makefile.in", \%subs);
+    $makefile_subs{"prg"} = [ "^PROGNAME=", "PROGNAME=$progName" ];
+    substitute("$progName/Makefile", "$progName/Makefile.in", \%makefile_subs);
 }
 
-my %subs = (
+my %snmpconf_subs = (
     "env" => [ "\@ENV_SEPARATOR\@", ";" ]
 );
 
-substitute("../local/snmpconf", "../local/snmpconf.in", \%subs);
+substitute("../local/snmpconf", "../local/snmpconf.in", \%snmpconf_subs);
 
 
-my %subs = (
+my %net_snmp_config_subs = (
     "ver" => [ "^#define PACKAGE_VERSION.*",
                "#define PACKAGE_VERSION \"$version\"" ]
     );
 if ($prefix ne "") {
-    $subs{"pfx"} = [ "^#define INSTALL_BASE.*", "#define INSTALL_BASE \"$prefix\"" ];
+    $net_snmp_config_subs{"pfx"} = [ "^#define INSTALL_BASE.*", "#define INSTALL_BASE \"$prefix\"" ];
 }
 if ($linktype eq "dynamic") {
-    $subs{"dll"} = [ "^.*#undef NETSNMP_USE_DLL.*", "#define NETSNMP_USE_DLL 1" ];
+    $net_snmp_config_subs{"dll"} = [ "^.*#undef NETSNMP_USE_DLL.*", "#define NETSNMP_USE_DLL 1" ];
 }
 if ($sdk == 1) {
-    $subs{"sdk"} = [ "^.*#undef HAVE_WIN32_PLATFORM_SDK.*", "#define HAVE_WIN32_PLATFORM_SDK 1" ];
+    $net_snmp_config_subs{"sdk"} = [ "^.*#undef HAVE_WIN32_PLATFORM_SDK.*", "#define HAVE_WIN32_PLATFORM_SDK 1" ];
 }
 if ($openssl == 1) {
-    $subs{"ssl"} = [ "^.*#undef NETSNMP_USE_OPENSSL.*", "#define NETSNMP_USE_OPENSSL 1" ];
+    $net_snmp_config_subs{"ssl"} = [ "^.*#undef NETSNMP_USE_OPENSSL.*", "#define NETSNMP_USE_OPENSSL 1" ];
 } else {
-    $subs{"ssl"} = [ "^.*#undef NETSNMP_USE_INTERNAL_MD5.*", "#define NETSNMP_USE_INTERNAL_MD5 1" ];
+    $net_snmp_config_subs{"ssl"} = [ "^.*#undef NETSNMP_USE_INTERNAL_MD5.*", "#define NETSNMP_USE_INTERNAL_MD5 1" ];
 }
 if ($b_ipv6 == 1) {
-    $subs{"ipv6"} = [ "^.*#undef NETSNMP_ENABLE_IPV6.*", "#define NETSNMP_ENABLE_IPV6 1" ];
+    $net_snmp_config_subs{"ipv6"} = [ "^.*#undef NETSNMP_ENABLE_IPV6.*", "#define NETSNMP_ENABLE_IPV6 1" ];
 }
 if ($b_winextdll == 1) {
-    $subs{"winextdll"} = [ "^.*#undef USING_WINEXTDLL_MODULE.*", "#define USING_WINEXTDLL_MODULE 1" ];
+    $net_snmp_config_subs{"winextdll"} = [ "^.*#undef USING_WINEXTDLL_MODULE.*", "#define USING_WINEXTDLL_MODULE 1" ];
 }
 
 substitute("net-snmp/net-snmp-config.h", "net-snmp/net-snmp-config.h.in",
-           \%subs);
+           \%net_snmp_config_subs);
 
 print qq/
 ---------------------------------------------------------

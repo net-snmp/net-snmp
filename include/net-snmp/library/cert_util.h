@@ -19,11 +19,12 @@ extern "C" {
      *
      *************************************************************************/
 
-void netsnmp_certs_init(void);
-void netsnmp_certs_agent_init(void);
-void netsnmp_certs_shutdown(void);
-void netsnmp_certs_load(void);
-netsnmp_container *netsnmp_cert_get_trustlist(void);
+    void netsnmp_certs_init(void);
+    NETSNMP_IMPORT
+    void netsnmp_certs_agent_init(void);
+    void netsnmp_certs_shutdown(void);
+    void netsnmp_certs_load(void);
+    netsnmp_container *netsnmp_cert_get_trustlist(void);
 
     typedef struct netsnmp_cert_common_s {
         char           *dir;
@@ -97,6 +98,7 @@ netsnmp_container *netsnmp_cert_get_trustlist(void);
      * netsnmp_cert function definitions
      *************************************************************************/
 
+    NETSNMP_IMPORT
     netsnmp_cert *netsnmp_cert_find(int what, int where, void *hint);
 
     int netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var);
@@ -215,6 +217,7 @@ netsnmp_container *netsnmp_cert_get_trustlist(void);
     void netsnmp_tlstmAddr_free(snmpTlstmAddr *entry);
     int netsnmp_tlstmAddr_add(snmpTlstmAddr *entry);
     int netsnmp_tlstmAddr_remove(snmpTlstmAddr *entry);
+    NETSNMP_IMPORT
     char *netsnmp_tlstmAddr_get_serverId(const char *name);
 
 #ifdef __cplusplus

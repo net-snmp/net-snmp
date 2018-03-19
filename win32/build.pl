@@ -41,7 +41,7 @@ my $perl = false;
 my $perl_install = false;
 my $logging = true;
 my $debug = false;
-my $configOpts = "";
+my $configOpts;
 my $link_dynamic = false;
 my $option;
 
@@ -152,15 +152,12 @@ while (1) {
 }
 
 my $linktype = $link_dynamic ? "dynamic" : "static";
-$configOpts .= $openssl ? "--with-ssl" : "";
-$configOpts .= " ";
-$configOpts .= $sdk ? "--with-sdk" : "";
-$configOpts .= " ";
-$configOpts .= $b_ipv6 ? "--with-ipv6" : "";
-$configOpts .= " ";
-$configOpts .= $b_winextdll ? "--with-winextdll" : "";
-$configOpts .= " ";
-$configOpts .= $debug ? "--config=debug" : "--config=release";
+$configOpts = (($openssl ? "--with-ssl" : "")		. " " .
+               ($opensslincdir ? "--with-sslincdir=$opensslincdir" : "") . " " .
+               ($sdk ? "--with-sdk" : "")		. " " .
+               ($b_ipv6 ? "--with-ipv6" : "")		. " " .
+               ($b_winextdll ? "--with-winextdll" : "") . " " .
+               ($debug ? "--config=debug" : "--config=release"));
 
 # Set environment variables
 
@@ -170,7 +167,6 @@ $ENV{NO_EXTERNAL_DEPS}="1";
 # Set PATH environment variable so Perl make tests can locate the DLL
 $ENV{PATH} = File::Spec->catdir($current_pwd, "bin", $debug ? "debug" : "release") . ";$ENV{PATH}";
 
-$ENV{INCLUDE} .= ";$opensslincdir";
 $ENV{LIB}     .= ";$openssllibdir";
 
 # Set MIBDIRS environment variable so Perl make tests can locate the mibs
