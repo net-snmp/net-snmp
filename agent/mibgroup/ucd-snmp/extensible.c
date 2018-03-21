@@ -250,9 +250,8 @@ extensible_parse_config(const char *token, char *cptr)
             if (*tcptr == ';' && ptmp->type == EXECPROC)
                 break;
         free(ptmp->command);
-        ptmp->command = NULL;
-        if (asprintf(&ptmp->command, "%.*s", (int) (tcptr - cptr), cptr) < 0) {
-        }
+        if (asprintf(&ptmp->command, "%.*s", (int) (tcptr - cptr), cptr) < 0)
+            ptmp->command = NULL;
     }
 #ifdef NETSNMP_EXECFIXCMD
     sprintf(ptmp->fixcmd, NETSNMP_EXECFIXCMD, ptmp->name);

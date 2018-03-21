@@ -190,7 +190,7 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
     const netsnmp_indexed_addr_pair *addr_pair;
     const struct sockaddr_in *from, *to;
     struct hostent *host;
-    char *tmp = NULL;
+    char *tmp;
 
     if (t && !data) {
         data = t->data;
@@ -203,7 +203,8 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
         break;
     default:
         netsnmp_assert(0);
-        asprintf(&tmp, "%s: unknown", prefix);
+        if (asprintf(&tmp, "%s: unknown", prefix) < 0)
+            tmp = NULL;
         return tmp;
     }
 
@@ -220,11 +221,12 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
         char a1[16];
         char a2[16];
 
-        asprintf(&tmp, "%s: [%s]:%hu->[%s]:%hu", prefix,
-                 inet_ntop(AF_INET, &to->sin_addr, a1, sizeof(a1)),
-                 ntohs(to->sin_port),
-                 inet_ntop(AF_INET, &from->sin_addr, a2, sizeof(a2)),
-                 ntohs(from->sin_port));
+        if (asprintf(&tmp, "%s: [%s]:%hu->[%s]:%hu", prefix,
+		     inet_ntop(AF_INET, &to->sin_addr, a1, sizeof(a1)),
+		     ntohs(to->sin_port),
+		     inet_ntop(AF_INET, &from->sin_addr, a2, sizeof(a2)),
+		     ntohs(from->sin_port)) < 0)
+            tmp = NULL;
     }
 
     return tmp;

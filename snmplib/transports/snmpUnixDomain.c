@@ -99,9 +99,10 @@ netsnmp_unix_fmtaddr(netsnmp_transport *t, const void *data, int len)
          */
         return strdup("Local IPC: abstract");
     } else {
-        char *tmp = NULL;
+        char *tmp;
 
-        asprintf(&tmp, "Local IPC: %s", to->sun_path);
+        if (asprintf(&tmp, "Local IPC: %s", to->sun_path) < 0)
+            tmp = NULL;
         return tmp;
     }
 }

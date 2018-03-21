@@ -107,17 +107,19 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
     }
     case sizeof(_netsnmpTLSBaseData): {
         const _netsnmpTLSBaseData *b = data;
-        char *buf = NULL;
+        char *buf;
 
-        asprintf(&buf, "TLSTCP: %s", b->addr_string);
+        if (asprintf(&buf, "TLSTCP: %s", b->addr_string) < 0)
+            buf = NULL;
         return buf;
     }
     case 0:
         return strdup("TLSTCP: unknown");
     default: {
-        char *buf = NULL;
+        char *buf;
 
-        asprintf(&buf, "TLSTCP: len %d", len);
+        if (asprintf(&buf, "TLSTCP: len %d", len) < 0)
+            buf = NULL;
         return buf;
     }
     }

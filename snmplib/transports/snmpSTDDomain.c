@@ -40,13 +40,13 @@ static netsnmp_tdomain stdDomain;
 static char *
 netsnmp_std_fmtaddr(netsnmp_transport *t, const void *data, int len)
 {
-    char *buf = NULL;
-
     DEBUGMSGTL(("domain:std","formatting addr.  data=%p\n",t->data));
     if (t->data) {
         netsnmp_std_data *data = (netsnmp_std_data*)t->data;
+	char *buf;
 
-        asprintf(&buf, "STD:%s", data->prog);
+        if (asprintf(&buf, "STD:%s", data->prog) < 0)
+            buf = NULL;
         DEBUGMSGTL(("domain:std","  formatted:=%s\n",buf));
         return buf;
     }
