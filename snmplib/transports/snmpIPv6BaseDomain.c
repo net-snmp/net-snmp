@@ -104,7 +104,7 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
     const struct sockaddr_in6 *to;
     char scope_id[IF_NAMESIZE + 1] = "";
     char addr[INET6_ADDRSTRLEN];
-    char *tmp = NULL;
+    char *tmp;
 
     DEBUGMSGTL(("netsnmp_ipv6", "fmtaddr: t = %p, data = %p, len = %d\n", t,
                 data, len));
@@ -126,7 +126,8 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
     }
     default:
         netsnmp_assert(0);
-        asprintf(&tmp, "%s: unknown", prefix);
+        if (asprintf(&tmp, "%s: unknown", prefix) < 0)
+            tmp = NULL;
         return tmp;
     }
 
@@ -143,8 +144,9 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
             scope_id[0] = '%';
 #endif
         inet_ntop(AF_INET6, &to->sin6_addr, addr, sizeof(addr));
-        asprintf(&tmp, "%s: [%s%s]:%hu", prefix, addr, scope_id,
-                 ntohs(to->sin6_port));
+        if (asprintf(&tmp, "%s: [%s%s]:%hu", prefix, addr, scope_id,
+		     ntohs(to->sin6_port)) < 0)
+            tmp = NULL;
     }
     return tmp;
 }

@@ -1410,17 +1410,19 @@ netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
     }
     case sizeof(_netsnmpTLSBaseData): {
         const _netsnmpTLSBaseData *b = data;
-        char *buf = NULL;
+        char *buf;
 
-        asprintf(&buf, "DTLSUDP: %s", b->addr_string);
+        if (asprintf(&buf, "DTLSUDP: %s", b->addr_string) < 0)
+            buf = NULL;
         return buf;
     }
     case 0:
         return strdup("DTLSUDP: unknown");
     default: {
-        char *buf = NULL;
+        char *buf;
 
-        asprintf(&buf, "DTLSUDP: len %d", len);
+        if (asprintf(&buf, "DTLSUDP: len %d", len) < 0)
+            buf = NULL;
         return buf;
     }
     }

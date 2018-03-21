@@ -238,10 +238,9 @@ var_hrhfilesys(struct variable *vp,
         return (u_char *) string;
     case HRFSYS_RMOUNT:
         free(string);
-        string = NULL;
         if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE) {
-            if (asprintf(&string, "%s", HRFS_entry->device) < 0) {
-            }
+            if (asprintf(&string, "%s", HRFS_entry->device) < 0)
+                string = NULL;
         } else {
             string = strdup("");
         }

@@ -235,10 +235,9 @@ dlmod_load_module(struct dlmod *dlm)
         if (dl_init == NULL) {
             dlmod_dlclose(dlm->handle);
             free(dlm->error);
-            dlm->error = NULL;
             if (asprintf(&dlm->error, "dlsym failed: can't find \'%s\'",
-                         sym_init) < 0) {
-            }
+                         sym_init) < 0)
+                dlm->error = NULL;
             dlm->status = DLMOD_ERROR;
             return;
         }
