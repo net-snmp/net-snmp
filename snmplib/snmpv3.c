@@ -315,11 +315,11 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         break;
 
     case 'A':
-        *Apsz = optarg;
+        *Apsz = strdup(optarg);
         break;
 
     case 'X':
-        *Xpsz = optarg;
+        *Xpsz = strdup(optarg);
         break;
 #endif /* NETSNMP_SECMOD_USM */
 

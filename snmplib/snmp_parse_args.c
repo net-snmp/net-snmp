@@ -608,7 +608,7 @@ netsnmp_parse_args(int argc,
 		    return NETSNMP_PARSE_ARGS_ERROR;
 		}
 	    } else {
-		Apsz = optarg;
+		Apsz = strdup(optarg);
 	    }
             break;
 
@@ -623,7 +623,7 @@ netsnmp_parse_args(int argc,
 		    return NETSNMP_PARSE_ARGS_ERROR;
 		}
 	    } else {
-		Xpsz = optarg;
+		Xpsz = strdup(optarg);
 	    }
             break;
 #endif                          /* SNMPV3_CMD_OPTIONS */
