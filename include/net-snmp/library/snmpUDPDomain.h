@@ -52,7 +52,8 @@ int         netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp,
                                             const char *secName,
                                             const char *contextName,
                                             struct in_addr *network,
-                                            struct in_addr *mask);
+                                            struct in_addr *mask,
+                                            int negate);
 NETSNMP_IMPORT
 void        netsnmp_udp_com2Sec_free(com2SecEntry *e);
 

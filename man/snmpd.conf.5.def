@@ -391,6 +391,20 @@ a particular range of source addresses, or globally (\fI"default"\fR).
 A restricted source can either be a specific hostname (or address), or
 a subnet - represented as IP/MASK (e.g. 10.10.10.0/255.255.255.0), or
 IP/BITS (e.g. 10.10.10.0/24), or the IPv6 equivalents.
+A restriction preceded by an exclamation mark (!) denies access from
+that address or subnet, e.g., !10.10.10.0/24 denies requests from
+that sources in that subnet.  Deny restrictions must be before
+permit.  E.g., the following example permits access from all of 10.0.0.0/8
+except for 10.10.10.0/24:
+.RS
+.RS
+com2sec sec1 !10.10.10.0/24 public
+.br
+com2sec sec1 10.0.0.0/8 public
+.RE
+.RE
+.IP
+Access from outside of 10.0.0.0/8 would still be denied.
 .IP
 The same community string can be specified in several separate directives
 (presumably with different source tokens), and the first source/community

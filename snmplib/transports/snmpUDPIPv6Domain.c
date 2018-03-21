@@ -488,6 +488,7 @@ typedef struct com2Sec6Entry_s {
     struct com2Sec6Entry_s *next;
     struct in6_addr network;
     struct in6_addr mask;
+    int             negate;
     const char      community[1];
 } com2Sec6Entry;
 
@@ -503,6 +504,7 @@ create_com2Sec6Entry(const struct addrinfo* const run,
                      const size_t contextNameLen,
                      const char* const community,
                      const size_t communityLen,
+                     int negate,
                      com2Sec6Entry** const begin,
                      com2Sec6Entry** const end)
 {
@@ -560,6 +562,7 @@ create_com2Sec6Entry(const struct addrinfo* const run,
         memcpy(&e->network, &run_addr->sin6_addr, sizeof(struct in6_addr));
         memcpy(&e->mask, mask, sizeof(struct in6_addr));
 
+        e->negate = negate;
         e->next = NULL;
         if (*end != NULL) {
             (*end)->next = e;
@@ -582,8 +585,10 @@ netsnmp_udp6_parse_security(const char *token, char *param)
     size_t          contextNameLen;
     char            community[COMMUNITY_MAX_LEN + 2];/* overflow + null char */
     size_t          communityLen;
-    char            source[300]; /* dns-name(253)+/(1)+mask(45)+\0(1) */
+    char            source[301]; /* !(1)+dns-name(253)+/(1)+mask(45)+\0(1) */
+    char            *sourcep;
     struct in6_addr mask;
+    int             negate;
 
     /*
      * Get security, source address/netmask and community strings.
@@ -668,9 +673,19 @@ netsnmp_udp6_parse_security(const char *token, char *param)
 
         if (isdefault) {
             memset(mask.s6_addr, '\0', sizeof(mask.s6_addr));
+            negate = 0;
+            sourcep = NULL;    // gcc gets confused about sourcep being used
         } else {
+            if (*source == '!') {
+               negate = 1;
+               sourcep = source + 1;
+            } else {
+               negate = 0;
+               sourcep = source;
+            }
+
             /* Split the source/netmask parts */
-            char *strmask = strchr(source, '/');
+            char *strmask = strchr(sourcep, '/');
             if (strmask != NULL)
                 /* Mask given. */
                 *strmask++ = '\0';
@@ -715,14 +730,14 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             if (isdefault) {
                 memset(&pton_addr.sin6_addr.s6_addr, '\0',
                        sizeof(struct in6_addr));
-            } else if (inet_pton(AF_INET6, source, &pton_addr.sin6_addr) != 1) {
+            } else if (inet_pton(AF_INET6, sourcep, &pton_addr.sin6_addr) != 1) {
                 /* Nope, wasn't a numeric address. Must be a hostname. */
 #if HAVE_GETADDRINFO
                 int             gai_error;
 
                 hints.ai_family = AF_INET6;
                 hints.ai_socktype = SOCK_DGRAM;
-                gai_error = netsnmp_getaddrinfo(source, NULL, &hints, &res);
+                gai_error = netsnmp_getaddrinfo(sourcep, NULL, &hints, &res);
                 if (gai_error != 0) {
                     config_perror(gai_strerror(gai_error));
                     return;
@@ -749,7 +764,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                         create_com2Sec6Entry(run, &mask,
                                              secName, secNameLen,
                                              contextName, contextNameLen,
-                                             community, communityLen,
+                                             community, communityLen, negate,
                                              &begin, &end);
 
                 if (failed) {
@@ -875,6 +890,14 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
                     ok = 0;
             if (ok) {
                 DEBUGMSG(("netsnmp_udp6_getSecName", "... SUCCESS\n"));
+                if (c->negate) {
+                   /*
+                    * If we matched a negative entry, then we are done - claim that we
+                    * matched nothing.
+                    */
+                   DEBUGMSG(("netsnmp_udp6_getSecName", "... <negative entry>\n"));
+                   break;
+                }
                 if (secName != NULL) {
                     *secName = c->secName;
                     *contextName = c->contextName;
