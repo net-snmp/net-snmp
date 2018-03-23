@@ -1,10 +1,14 @@
+use strict;
+use warnings;
 use Cwd 'abs_path';
 use ExtUtils::MakeMaker;
 use File::Basename;
 require 5;
 use Config;
 use Getopt::Long;
+
 my $lib_version;
+my $basedir;
 
 WriteMakefile(InitMakeParams());
 
@@ -42,7 +46,7 @@ sub InitMakeParams {
 		  'NAME'		=> 'NetSNMP::TrapReceiver',
 		  'VERSION_FROM'	=> 'TrapReceiver.pm', # finds $VERSION
 		  'XSPROTOARG'          => '-prototypes',
-		  'PREREQ_PM'		=> { NetSNMP::OID => 5.02 },
+		  'PREREQ_PM'		=> { 'NetSNMP::OID' => 5.02 },
 		  ($] >= 5.005 ? ## Add these new keywords supported since 5.005
 		   (ABSTRACT_FROM => 'TrapReceiver.pm',
 		    AUTHOR        =>
@@ -60,11 +64,12 @@ sub InitMakeParams {
       $opts = NetSNMPGetOpts();	
       $Params{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
       $sep = '\\';
-      $snmp_lib_file = 'netsnmp.lib';
-      $snmp_link_lib = 'netsnmp';
-      $agent_link_lib = 'netsnmpagent';
-      $mibs_link_lib = 'netsnmpmibs';
-      $trapd_link_lib = 'netsnmptrapd';
+      my $snmp_lib_file = 'netsnmp.lib';
+      my $snmp_link_lib = 'netsnmp';
+      my $lib_dir;
+      my $agent_link_lib = 'netsnmpagent';
+      my $mibs_link_lib = 'netsnmpmibs';
+      my $trapd_link_lib = 'netsnmptrapd';
 
       if (lc($opts->{'debug'}) eq "true") {
         $lib_dir = 'lib\\debug';
@@ -83,7 +88,7 @@ sub InitMakeParams {
 	if ($opts->{'prefix'}) {
 	  push (@LibDirs,"$ENV{'NET-SNMP-PATH'}${sep}lib");
 	}
-	$noLibDir = 1;
+	my $noLibDir = 1;
 	while ($noLibDir) {
 	  $LibDir = find_files(["$snmp_lib_file"],\@LibDirs);
 	  if ($LibDir ne '') {
@@ -240,7 +245,7 @@ sub Check_Version {
 	    $perlver =~ s/pre/0./;
 	    # we allow for perl/CPAN-only revisions beyond the default
 	    # version formatting of net-snmp itself.
-	    $perlver =~ s/(\.\d{5}).*/\1/;
+	    $perlver =~ s/(\.\d{5}).*/$1/;
 	    $perlver =~ s/0*$//;
 	    if ($srcfloat ne $perlver) {
 		if (!$foundversion) {
@@ -272,5 +277,11 @@ environmental variable to 1 and re-run the Makefile.PL script.\n";
 
 sub floatize_version {
     my ($major, $minor, $patch, $opps) = ($_[0] =~ /^(\d+)\.(\d+)\.?(\d*)\.?(\d*)/);
+    if (!$patch) {
+        $patch = 0;
+    }
+    if (!$opps) {
+        $opps = 0;
+    }
     return $major + $minor/100 + $patch/10000 + $opps/100000;
 }

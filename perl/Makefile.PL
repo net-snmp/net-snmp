@@ -1,3 +1,5 @@
+use strict;
+use warnings;
 use Cwd 'abs_path';
 use ExtUtils::MakeMaker;
 use File::Basename;
@@ -5,17 +7,20 @@ use Config;
 use Getopt::Long;
 require 5;
 
+my $basedir;
+my $lib_version;
+
 WriteMakefile(InitMakeParams());
 
 sub InitMakeParams {
-    $nsconfig="net-snmp-config"; # in path by default
+    my $nsconfig="net-snmp-config"; # in path by default
     my %Params = (
 		  'NAME' => 'Bundle::NetSNMP',
 		  'DIR' => [qw(default_store ASN OID agent SNMP TrapReceiver)],
 		  );
 
     # bogus, but these options need to be passed to the lower levels
-    $opts = NetSNMPGetOpts("./");
+    my $opts = NetSNMPGetOpts("./");
 
     return(%Params);
 }
@@ -127,7 +132,7 @@ sub Check_Version {
 	    $perlver =~ s/pre/0./;
 	    # we allow for perl/CPAN-only revisions beyond the default
 	    # version formatting of net-snmp itself.
-	    $perlver =~ s/(\.\d{5}).*/\1/;
+	    $perlver =~ s/(\.\d{5}).*/$1/;
 	    $perlver =~ s/0*$//;
 	    if ($srcfloat ne $perlver) {
 		if (!$foundversion) {
@@ -159,5 +164,11 @@ environmental variable to 1 and re-run the Makefile.PL script.\n";
 
 sub floatize_version {
     my ($major, $minor, $patch, $opps) = ($_[0] =~ /^(\d+)\.(\d+)\.?(\d*)\.?(\d*)/);
+    if (!$patch) {
+        $patch = 0;
+    }
+    if (!$opps) {
+        $opps = 0;
+    }
     return $major + $minor/100 + $patch/10000 + $opps/100000;
 }
