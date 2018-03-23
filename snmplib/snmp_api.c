@@ -4830,7 +4830,10 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
     return 0;
 
   fail:
-    DEBUGMSGTL(("recv", "error while parsing VarBindList\n"));
+    {
+        const char *errstr = snmp_api_errstring(SNMPERR_SUCCESS);
+        DEBUGMSGTL(("recv", "error while parsing VarBindList:%s\n", errstr));
+    }
     /** if we were parsing a var, remove it from the pdu and free it */
     if (vp)
         snmp_free_var(vp);
