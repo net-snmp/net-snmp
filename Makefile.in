@@ -186,6 +186,7 @@ perl/Makefile: perl/Makefile.PL
 	if false; then							\
 	    carp=-MCarp::Always;					\
 	fi &&								\
+	export PERL5LIB="$$dir/perl" &&					\
 	$(PERL) $$carp Makefile.PL -NET-SNMP-IN-SOURCE=true		\
 	    -NET-SNMP-CONFIG="sh $$dir/net-snmp-config" $(PERLARGS)
 

@@ -1,3 +1,17 @@
+package MakefileSubs;
+
+use strict;
+use warnings;
+use Config;
+use Getopt::Long;
+use Exporter;
+use vars qw(@ISA @EXPORT_OK);
+
+our $VERSION = 1.00;
+our @ISA     = qw(Exporter);
+our @EXPORT  = qw(NetSNMPGetOpts find_files Check_Version floatize_version);
+our $basedir;
+
 sub NetSNMPGetOpts {
     my %ret;
     my $rootpath = shift;
@@ -89,7 +103,10 @@ sub find_files {
 }
 
 
-sub Check_Version {
+sub Check_Version
+{
+  my $lib_version = shift;
+
   if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} ne '')) {
     my $foundversion = 0;
     return if ($ENV{'NETSNMP_DONT_CHECK_VERSION'});
@@ -143,3 +160,5 @@ sub floatize_version {
     }
     return $major + $minor/100 + $patch/10000 + $opps/100000;
 }
+
+1;

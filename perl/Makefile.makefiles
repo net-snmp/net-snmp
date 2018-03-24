@@ -1,4 +1,0 @@
-GENERATE_LIST=$(shell find -name 'Makefile.PL' | xargs grep -lw NetSNMPGetOpts)
-
-all:
-	perl make-perl-makefiles $(GENERATE_LIST)
