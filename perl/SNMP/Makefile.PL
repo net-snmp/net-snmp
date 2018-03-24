@@ -127,7 +127,6 @@ sub GetTestInfo {
     my $snmpd_path1 = "${prefix}${sep}sbin";
     my $snmpd_path2 = "${sep}usr${sep}sbin";
     my $snmpd_path3 = "${sep}usr${sep}bin";
-    my $win32_snmpd_path = $ENV{'NET-SNMP-PATH'} . $sep . "bin";
 
     open(H, ">$info_file") || die "Error: could not open file '$info_file'($!)";
 
@@ -135,6 +134,7 @@ sub GetTestInfo {
 
         # Windows
         if ($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} eq '') {
+          my $win32_snmpd_path = $ENV{'NET-SNMP-PATH'} . $sep . "bin";
           if (lc ($opts->{'insource'}) eq "true") {
             $mibdir = "../../mibs";
             if (lc($opts->{'debug'}) eq "true") {
