@@ -1064,6 +1064,9 @@
 /* Define to 1 if `tz_dsttime' is a member of `struct timezone'. */
 #undef HAVE_STRUCT_TIMEZONE_TZ_DSTTIME
 
+/* Define to 1 if `tm_isdst' is a member of `struct time'. */
+#undef HAVE_STRUCT_TIME_TM_ISDST
+
 /* Define to 1 if `tm_gmtoff' is a member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_GMTOFF
 
