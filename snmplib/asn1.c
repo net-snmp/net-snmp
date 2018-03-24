@@ -1117,7 +1117,7 @@ asn_parse_header(u_char * data, size_t * datalength, u_char * type)
 
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
 
-    if ((*type == ASN_OPAQUE) && (*bufp == ASN_OPAQUE_TAG1)) {
+    if ((asn_length > 2) && (*type == ASN_OPAQUE) && (*bufp == ASN_OPAQUE_TAG1)) {
 
         /*
          * check if 64-but counter 
@@ -1141,9 +1141,10 @@ asn_parse_header(u_char * data, size_t * datalength, u_char * type)
         /*
          * value is encoded as special format 
          */
+        *datalength = (int) asn_length;
         bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
         if (NULL == bufp) {
-            _asn_short_err("parse opaque header", *datalength, asn_length);
+            _asn_short_err("parse opaque header", *datalength - 2, asn_length);
             return NULL;
         }
     }
