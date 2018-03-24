@@ -85,8 +85,8 @@ sub SupportInitMakeParams {
       
       if (lc($opts->{'insource'}) eq "true") {
 	$Params{'LIBS'} =
-            "-L" . abs_path("../../snmplib/.libs") .
-            " -L" . abs_path("../../snmplib") .
+            "-L" . abs_path("../../../snmplib/.libs") .
+            " -L" . abs_path("../../../snmplib") .
             " " . $Params{'LIBS'};
 	$Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
       }
