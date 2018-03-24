@@ -178,12 +178,16 @@ perlmodules: perlmakefiles subdirs
            exit 1 ; \
         fi
 
-perlmakefiles: net-snmp-config-x
-	@if test ! -f perl/Makefile; then \
-	  (dir=`pwd`; \
-	   cd perl ; \
-	   $(PERL) Makefile.PL -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $$dir/net-snmp-config" $(PERLARGS) ) ; \
-        fi
+perlmakefiles: perl/Makefile net-snmp-config-x
+
+perl/Makefile: perl/Makefile.PL
+	dir=`pwd` &&							\
+	cd perl &&							\
+	if false; then							\
+	    carp=-MCarp::Always;					\
+	fi &&								\
+	$(PERL) $$carp Makefile.PL -NET-SNMP-IN-SOURCE=true		\
+	    -NET-SNMP-CONFIG="sh $$dir/net-snmp-config" $(PERLARGS)
 
 perlinstall:
 	@(cd perl ; $(MAKE) install) ; \
