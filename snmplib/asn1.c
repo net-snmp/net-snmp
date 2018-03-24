@@ -960,7 +960,7 @@ asn_parse_header(u_char * data, size_t * datalength, u_char * type)
 
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
 
-    if ((*type == ASN_OPAQUE) && (*bufp == ASN_OPAQUE_TAG1)) {
+    if ((asn_length > 2) && (*type == ASN_OPAQUE) && (*bufp == ASN_OPAQUE_TAG1)) {
 
         /*
          * check if 64-but counter 
