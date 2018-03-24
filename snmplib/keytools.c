@@ -546,7 +546,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
     }
 
   encode_keychange_quit:
-    if (rval != SNMPERR_SUCCESS)
+    if (kcstring && rval != SNMPERR_SUCCESS)
         memset(kcstring, 0, *kcstring_len);
     SNMP_FREE(tmpbuf);
 
