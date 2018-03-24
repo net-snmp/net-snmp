@@ -102,13 +102,13 @@ int _netsnmp_ioctl_route_set_v4(netsnmp_route_entry * entry)
         return -3;
     }
 
-    memset(&route, 0, sizeof(route));
-
+    memset(&dst, 0, sizeof(dst));
     dst.sin_family = AF_INET;
     memcpy(&dst.sin_addr.s_addr, entry->rt_dest, 4);
     DEBUGSTR = inet_ntoa(dst.sin_addr);
     DEBUGMSGTL(("access:route","add route to %s\n", DEBUGSTR));
 
+    memset(&gateway, 0, sizeof(gateway));
     gateway.sin_family = AF_INET;
     memcpy(&gateway.sin_addr.s_addr, entry->rt_nexthop, 4);
     DEBUGSTR = inet_ntoa(gateway.sin_addr);
@@ -122,6 +122,7 @@ int _netsnmp_ioctl_route_set_v4(netsnmp_route_entry * entry)
     DEBUGSTR = inet_ntoa(mask.sin_addr);
     DEBUGMSGTL(("access:route","    mask %s\n", DEBUGSTR));
 
+    memset(&route, 0, sizeof(route));
     memcpy(&route.rt_dst, &dst, sizeof(struct sockaddr_in));
     memcpy(&route.rt_gateway, &gateway, sizeof(struct sockaddr_in));
     memcpy(&route.rt_genmask, &mask, sizeof(struct sockaddr_in));
