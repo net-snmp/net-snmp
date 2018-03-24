@@ -183,7 +183,7 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
                 return -1;
             };
 
-            if (addr_pair->username[0] == '\0') {
+            if (addr_pair && addr_pair->username[0] == '\0') {
                 /* we don't have a username yet, so this is the first message */
                 struct ucred *remoteuser;
                 struct msghdr msg;
