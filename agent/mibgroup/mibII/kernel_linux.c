@@ -344,7 +344,8 @@ int linux_read_ip6_stat( struct ip6_mib *ip6stat)
             continue;
 
         endp = strchr(line, ' ');
-        *endp = '\0';
+        if (endp)
+            *endp = '\0';
         DEBUGMSGTL(("mibII/kernel_linux/ip6stats", "Find tag: %s\n", line));
 
         match = 1;
@@ -492,7 +493,8 @@ linux_read_icmp6_parse(struct icmp6_mib *icmp6stat,
             continue;
 
         endp = strchr(line, ' ');
-        *endp = '\0';
+        if (endp)
+            *endp = '\0';
         DEBUGMSGTL(("mibII/kernel_linux/icmp6stats", "Find tag: %s\n", line));
 
         vals = name;
@@ -683,7 +685,8 @@ linux_read_udp6_stat(struct udp6_mib *udp6stat)
             continue;
 
         endp = strchr(line, ' ');
-        *endp = '\0';
+        if (endp)
+            *endp = '\0';
         DEBUGMSGTL(("mibII/kernel_linux/udp6stats", "Find tag: %s\n", line));
 
         if (0 == strcmp(line + 4, "OutDatagrams")) {
