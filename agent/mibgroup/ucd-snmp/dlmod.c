@@ -209,8 +209,10 @@ dlmod_load_module(struct dlmod *dlm)
              p = strtok_r(NULL, ENV_SEPARATOR, &st)) {
             free(tmp_path);
             if (asprintf(&tmp_path, "%s/%s.%s", p, dlm->path, dlmod_dl_suffix)
-                < 0)
-                tmp_path = NULL;
+                < 0) {
+                dlm->status = DLMOD_ERROR;
+                return;
+            }
             DEBUGMSGTL(("dlmod", "p: %s tmp_path: %s\n", p, tmp_path));
             dlm->handle = tmp_path ? dlmod_dlopen(tmp_path) : NULL;
             if (dlm->handle == NULL) {

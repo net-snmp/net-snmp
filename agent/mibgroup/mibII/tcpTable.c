@@ -704,6 +704,7 @@ tcpTable_load_netlink(void)
 				continue;
 			}
 
+                        memset(&pcb, 0, sizeof(pcb));
 			memcpy(&pcb.inp_laddr.s_addr, r->id.idiag_src, r->idiag_family == AF_INET ? 4 : 6);
 			memcpy(&pcb.inp_faddr.s_addr, r->id.idiag_dst, r->idiag_family == AF_INET ? 4 : 6);
 

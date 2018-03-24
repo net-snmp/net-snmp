@@ -183,7 +183,7 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
                 return -1;
             };
 
-            if (addr_pair->username[0] == '\0') {
+            if (addr_pair && addr_pair->username[0] == '\0') {
                 /* we don't have a username yet, so this is the first message */
                 struct ucred *remoteuser;
                 struct msghdr msg;
@@ -461,12 +461,7 @@ netsnmp_ssh_close(netsnmp_transport *t)
 
 #ifdef SNMPSSHDOMAIN_USE_EXTERNAL_PIPE
 
-        close(t->sock);
-        
         if (!addr_pair->session && !addr_pair->channel) {
-            /* unix socket based connection */
-            close(t->sock);
-
             /* XXX: make configurable */
             unlink(addr_pair->socket_path);
         }
@@ -520,18 +515,18 @@ netsnmp_ssh_accept(netsnmp_transport *t)
 
         newsock = accept(t->sock, farend, &farendlen);
 
-        /* set the SO_PASSCRED option so we can receive the remote uid */
-        {
-            int one = 1;
-            setsockopt(newsock, SOL_SOCKET, SO_PASSCRED, (void *) &one,
-                       sizeof(one));
-        }
-
         if (newsock < 0) {
             DEBUGMSGTL(("ssh","accept failed rc %d errno %d \"%s\"\n",
                         newsock, errno, strerror(errno)));
             free(addr_pair);
             return newsock;
+        }
+
+        /* set the SO_PASSCRED option so we can receive the remote uid */
+        {
+            int one = 1;
+            setsockopt(newsock, SOL_SOCKET, SO_PASSCRED, (void *) &one,
+                       sizeof(one));
         }
 
         if (t->data != NULL) {
@@ -627,8 +622,9 @@ netsnmp_ssh_transport(const struct sockaddr_in *addr, int local)
             sockpath = tmpsockpath;
         }
 
-        strcpy(unaddr->sun_path, sockpath);
-        strcpy(addr_pair->socket_path, sockpath);
+        snprintf(unaddr->sun_path, sizeof(unaddr->sun_path), "%s", sockpath);
+        snprintf(addr_pair->socket_path, sizeof(addr_pair->socket_path), "%s",
+                 sockpath);
 
         t->sock = socket(PF_UNIX, SOCK_STREAM, 0);
         if (t->sock < 0) {

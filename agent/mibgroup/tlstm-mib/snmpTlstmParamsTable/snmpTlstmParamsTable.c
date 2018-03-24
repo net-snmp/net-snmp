@@ -1137,8 +1137,8 @@ _tlstmParamsTable_save(int majorID, int minorID, void *serverarg,
                 continue;
             _save_params(params, type);
         }
+        ITERATOR_RELEASE(params_itr);
     }
-    ITERATOR_RELEASE(params_itr);
 
     /*
      * save inactive rows from mib

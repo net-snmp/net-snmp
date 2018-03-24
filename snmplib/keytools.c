@@ -1092,7 +1092,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
     }
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
   encode_keychange_quit:
-    if (rval != SNMPERR_SUCCESS)
+    if (kcstring && rval != SNMPERR_SUCCESS)
         memset(kcstring, 0, *kcstring_len);
     memset(tmpbuf, 0, sizeof(tmpbuf));
     memset(digest, 0, sizeof(digest));

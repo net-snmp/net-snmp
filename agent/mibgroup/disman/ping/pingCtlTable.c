@@ -5663,6 +5663,7 @@ send_v6(int icmp_sock, int cmsglen, char *cmsgbuf,
         iov.iov_len = cc;
         iov.iov_base = outpack;
 
+        memset(&mhdr, 0, sizeof(mhdr));
         mhdr.msg_name = whereto;
         mhdr.msg_namelen = sizeof(struct sockaddr_in6);
         mhdr.msg_iov = &iov;

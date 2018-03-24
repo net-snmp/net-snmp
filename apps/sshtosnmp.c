@@ -78,11 +78,8 @@ main(int argc, char **argv) {
     /* Open a connection to the UNIX domain socket or fail */
 
     addr.sun_family = AF_UNIX;
-    if (argc > 1) {
-        strcpy(addr.sun_path, argv[1]);
-    } else {
-        strcpy(addr.sun_path, DEFAULT_SOCK_PATH);
-    }
+    snprintf(addr.sun_path, sizeof(addr.sun_path), "%s",
+             argc > 1 ? argv[1] : DEFAULT_SOCK_PATH);
 
     sock = socket(PF_UNIX, SOCK_STREAM, 0);
     DEBUG("created socket");
@@ -166,6 +163,7 @@ main(int argc, char **argv) {
 
     while(1) {
         /* read from stdin and the socket */
+        FD_ZERO(&read_set);
         FD_SET(sock, &read_set);
         FD_SET(STDIN_FILENO, &read_set);
 

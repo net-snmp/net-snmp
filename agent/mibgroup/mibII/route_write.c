@@ -110,13 +110,15 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 
     flags |= RTF_UP;
 
+    memset(&dst, 0, sizeof(dst));
     dst.sin_family = AF_INET;
     dst.sin_addr.s_addr = htonl(dstip);
 
-
+    memset(&gateway, 0, sizeof(gateway));
     gateway.sin_family = AF_INET;
     gateway.sin_addr.s_addr = htonl(gwip);
 
+    memset(&route, 0, sizeof(route));
     memcpy(&route.rt_dst, &dst, sizeof(struct sockaddr_in));
     memcpy(&route.rt_gateway, &gateway, sizeof(struct sockaddr_in));
 

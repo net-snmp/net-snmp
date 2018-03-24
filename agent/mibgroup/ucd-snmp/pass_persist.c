@@ -337,8 +337,11 @@ var_extensible_pass_persist(struct variable *vp,
 
             free(persistpassthru->command);
             if (asprintf(&persistpassthru->command, "%s\n%s\n",
-                         exact ? "get" : "getnext", buf) < 0)
+                         exact ? "get" : "getnext", buf) < 0) {
                 persistpassthru->command = NULL;
+                *var_len = 0;
+                return NULL;
+            }
 
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "persistpass-sending:\n%s",
@@ -450,8 +453,10 @@ setPassPersist(int action,
                                              var_val_len);
             free(persistpassthru->command);
             if (asprintf(&persistpassthru->command, "set\n%s\n%s\n", buf,
-                         buf2) < 0)
+                         buf2) < 0) {
                 persistpassthru->command = NULL;
+                return SNMP_ERR_GENERR;
+            }
 
             if (!open_persist_pipe(pipe_idx, persistpassthru->name)) {
                 return SNMP_ERR_NOTWRITABLE;

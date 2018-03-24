@@ -28315,6 +28315,29 @@ _ACEOF
 
 
 fi
+ac_fn_c_check_member "$LINENO" "struct time" "tm_isdst" "ac_cv_member_struct_time_tm_isdst" "
+    $ac_includes_default
+
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
+"
+if test "x$ac_cv_member_struct_time_tm_isdst" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_TIME_TM_ISDST 1
+_ACEOF
+
+
+fi
 
 
 #       extern timezone
