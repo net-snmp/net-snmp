@@ -5812,10 +5812,8 @@ _sess_process_packet_handle_pdu(void *sessp, netsnmp_session * sp,
   /*
    * Call USM to free any securityStateRef supplied with the message.  
    */
-  if (pdu != NULL && pdu->securityStateRef &&
-      pdu->command == SNMP_MSG_TRAP2) {
+  if (pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2)
     free_securityStateRef(pdu);
-  }
 
   if (!handled) {
     if (sp->flags & SNMP_FLAGS_SHARED_SOCKET)
