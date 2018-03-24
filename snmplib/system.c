@@ -225,6 +225,8 @@ _daemon_prep(int stderr_log)
     if (stderr_log)
         return;
 
+    fd = open("/dev/null", O_RDWR);
+    
     /*
      * Close inherited file descriptors to avoid
      * keeping unnecessary references.
@@ -236,9 +238,11 @@ _daemon_prep(int stderr_log)
     /*
      * Redirect std{in,out,err} to /dev/null, just in case.
      */
-    if ((fd = open("/dev/null", O_RDWR)) >= 0) {
+    if (fd >= 0) {
+        dup2(fd, STDIN_FILENO);
         dup2(fd, STDOUT_FILENO);
         dup2(fd, STDERR_FILENO);
+        close(fd);
     }
 }
 #endif
