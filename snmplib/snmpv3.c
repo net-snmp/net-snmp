@@ -300,7 +300,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             }
             memset(optarg, 0x0, strlen(optarg));
         } else
-            *Apsz = optarg;
+            *Apsz = strdup(optarg);
         break;
 
     case 'X':
@@ -313,7 +313,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             }
             memset(optarg, 0x0, strlen(optarg));
         } else
-            *Xpsz = optarg;
+            *Xpsz = strdup(optarg);
         break;
 #endif /* NETSNMP_SECMOD_USM */
 
