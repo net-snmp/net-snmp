@@ -561,7 +561,8 @@ run_lookup(struct lookupTable_data *item)
             while (lookup->h_aliases[i]) {
                 temp = add_result(item, n, INETADDRESSTYPE_DNS,
                             lookup->h_aliases[i], strlen(lookup->h_aliases[i]));
-                current->next = temp;
+                if (current)
+                    current->next = temp;
                 current = temp;
                 i = i + 1;
                 n = n + 1;
