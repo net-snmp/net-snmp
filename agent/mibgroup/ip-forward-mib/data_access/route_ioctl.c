@@ -167,11 +167,13 @@ int _netsnmp_ioctl_route_delete_v4(netsnmp_route_entry * entry)
 
     memset(&route, 0, sizeof(route));
 
+    memset(&dst, 0, sizeof(dst));
     dst.sin_family = AF_INET;
     memcpy(&dst.sin_addr.s_addr, entry->rt_dest, 4);
     DEBUGSTR = inet_ntoa(dst.sin_addr);
     DEBUGMSGTL(("access:route","del route to %s\n", DEBUGSTR));
 
+    memset(&mask, 0, sizeof(mask));
     mask.sin_family = AF_INET;
     if (entry->rt_pfx_len != 0)
 	mask.sin_addr.s_addr = netsnmp_ipaddress_ipv4_mask(entry->rt_pfx_len);
