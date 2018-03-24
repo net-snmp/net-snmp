@@ -4746,11 +4746,6 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     }
 #endif /* NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV */
 
-   if (!cp) {
-        *errorMsg = "no authentication pass phrase";
-        goto fail;
-    }
-
     /*
      * READ: Authentication Pass Phrase or key
      */
