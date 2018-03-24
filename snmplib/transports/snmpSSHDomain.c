@@ -520,18 +520,18 @@ netsnmp_ssh_accept(netsnmp_transport *t)
 
         newsock = accept(t->sock, farend, &farendlen);
 
-        /* set the SO_PASSCRED option so we can receive the remote uid */
-        {
-            int one = 1;
-            setsockopt(newsock, SOL_SOCKET, SO_PASSCRED, (void *) &one,
-                       sizeof(one));
-        }
-
         if (newsock < 0) {
             DEBUGMSGTL(("ssh","accept failed rc %d errno %d \"%s\"\n",
                         newsock, errno, strerror(errno)));
             free(addr_pair);
             return newsock;
+        }
+
+        /* set the SO_PASSCRED option so we can receive the remote uid */
+        {
+            int one = 1;
+            setsockopt(newsock, SOL_SOCKET, SO_PASSCRED, (void *) &one,
+                       sizeof(one));
         }
 
         if (t->data != NULL) {
