@@ -163,6 +163,7 @@ main(int argc, char **argv) {
 
     while(1) {
         /* read from stdin and the socket */
+        FD_ZERO(&read_set);
         FD_SET(sock, &read_set);
         FD_SET(STDIN_FILENO, &read_set);
 
