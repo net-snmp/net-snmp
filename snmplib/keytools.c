@@ -1230,7 +1230,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS, auth_type;
-    size_t          hash_len = 0, key_len;
+    size_t          hash_len = 0, key_len = 0;
     int             ihash_len = 0;
     u_int           nbytes = 0;
 
