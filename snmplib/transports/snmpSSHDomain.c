@@ -627,8 +627,9 @@ netsnmp_ssh_transport(const struct sockaddr_in *addr, int local)
             sockpath = tmpsockpath;
         }
 
-        strcpy(unaddr->sun_path, sockpath);
-        strcpy(addr_pair->socket_path, sockpath);
+        snprintf(unaddr->sun_path, sizeof(unaddr->sun_path), "%s", sockpath);
+        snprintf(addr_pair->socket_path, sizeof(addr_pair->socket_path), "%s",
+                 sockpath);
 
         t->sock = socket(PF_UNIX, SOCK_STREAM, 0);
         if (t->sock < 0) {
