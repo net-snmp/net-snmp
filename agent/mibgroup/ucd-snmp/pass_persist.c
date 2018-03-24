@@ -266,8 +266,11 @@ var_extensible_pass_persist(struct variable *vp,
 
             free(persistpassthru->command);
             if (asprintf(&persistpassthru->command, "%s\n%s\n",
-                         exact ? "get" : "getnext", buf) < 0)
+                         exact ? "get" : "getnext", buf) < 0) {
                 persistpassthru->command = NULL;
+                *var_len = 0;
+                return NULL;
+            }
 
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "persistpass-sending:\n%s",
