@@ -73,17 +73,23 @@ void init_cpu_linux( void ) {
 #ifdef DESCR_FIELD
         if (!strncmp( buf, DESCR_FIELD, strlen(DESCR_FIELD))) {
             cp = strchr( buf, ':' );
-            strlcpy(cpu->descr, cp + 2, sizeof(cpu->descr));
-            cp = strchr( cpu->descr, '\n' );
-            *cp = 0;
+            if (cp) {
+                strlcpy(cpu->descr, cp + 2, sizeof(cpu->descr));
+                cp = strchr(cpu->descr, '\n');
+                if (cp)
+                    *cp = 0;
+            }
         }
 #endif
 #ifdef DESCR2_FIELD
         if (!strncmp( buf, DESCR2_FIELD, strlen(DESCR2_FIELD))) {
             cp = strchr( buf, ':' );
-            strlcat(cpu->descr, cp, sizeof(cpu->descr));
-            cp = strchr( cpu->descr, '\n' );
-            *cp = 0;
+            if (cp) {
+                strlcat(cpu->descr, cp, sizeof(cpu->descr));
+                cp = strchr(cpu->descr, '\n');
+                if (cp)
+                    *cp = 0;
+            }
         }
 #endif
     }
