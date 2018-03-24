@@ -87,7 +87,12 @@ sub AgentInitMakeParams {
 	$Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
         $lib_version = `$opts->{'nsconfig'} --version`;
 	if (lc($opts->{'insource'}) eq "true") {
-	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ -L../../agent/.libs -L../../agent/ " . $Params{'LIBS'};
+	    $Params{'LIBS'} =
+                "-L" . abs_path("../../snmplib/.libs") .
+                " -L" . abs_path("../../snmplib") .
+                " -L" . abs_path("../../agent/.libs") .
+                " -L" . abs_path("../../agent") .
+                " " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
 	    $Params{'LIBS'} = `$opts->{'nsconfig'} --libdir` . $Params{'LIBS'};

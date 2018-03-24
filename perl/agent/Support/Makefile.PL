@@ -84,7 +84,10 @@ sub SupportInitMakeParams {
       $lib_version = `$opts->{'nsconfig'} --version`;
       
       if (lc($opts->{'insource'}) eq "true") {
-	$Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
+	$Params{'LIBS'} =
+            "-L" . abs_path("../../snmplib/.libs") .
+            " -L" . abs_path("../../snmplib") .
+            " " . $Params{'LIBS'};
 	$Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
       }
       $Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings

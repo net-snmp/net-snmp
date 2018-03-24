@@ -119,7 +119,14 @@ sub TrapReceiverInitMakeParams {
 	}
 
 	if (lc($opts->{'insource'}) eq "true") {
-            $Params{'LIBS'} = "-L../../apps/.libs -L../../apps -L../../agent/.libs -L../../agent -L../../snmplib/.libs -L../../snmplib " . $Params{'LIBS'};
+            $Params{'LIBS'} =
+                "-L" . abs_path("../../apps/.libs") .
+                " -L" . abs_path("../../apps") .
+                " -L" . abs_path("../../agent/.libs") .
+                " -L" . abs_path("../../agent") .
+                " -L" . abs_path("../../snmplib/.libs") .
+                " -L" . abs_path("../../snmplib") .
+                " " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 	} else {
             $Params{'LIBS'} = `$opts->{'nsconfig'} --libdir` . " $Params{'LIBS'}";

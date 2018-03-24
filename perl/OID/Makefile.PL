@@ -82,7 +82,10 @@ sub OidInitMakeParams {
 	$Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
         $lib_version = `$opts->{'nsconfig'} --version`;
 	if (lc($opts->{'insource'}) eq "true") {
-	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
+	    $Params{'LIBS'} =
+                "-L" . abs_path("../../snmplib/.libs") .
+                " -L" . abs_path("../../snmplib") .
+                " " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
 #	    $Params{'PREREQ_PM'} = {'SNMP' => '5.0'};
