@@ -461,12 +461,7 @@ netsnmp_ssh_close(netsnmp_transport *t)
 
 #ifdef SNMPSSHDOMAIN_USE_EXTERNAL_PIPE
 
-        close(t->sock);
-        
         if (!addr_pair->session && !addr_pair->channel) {
-            /* unix socket based connection */
-            close(t->sock);
-
             /* XXX: make configurable */
             unlink(addr_pair->socket_path);
         }
