@@ -372,8 +372,10 @@ setPassPersist(int action,
                                              var_val_len);
             free(persistpassthru->command);
             if (asprintf(&persistpassthru->command, "set\n%s\n%s\n", buf,
-                         buf2) < 0)
+                         buf2) < 0) {
                 persistpassthru->command = NULL;
+                return SNMP_ERR_GENERR;
+            }
 
             if (!open_persist_pipe(i, persistpassthru->name)) {
                 return SNMP_ERR_NOTWRITABLE;
