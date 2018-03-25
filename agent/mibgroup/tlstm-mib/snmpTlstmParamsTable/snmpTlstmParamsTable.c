@@ -1265,8 +1265,10 @@ _tlstmParamsTable_row_restore_mib(const char *token, char *buf)
 
         row = snmpTlstmParamsTable_createEntry(_table_data, params->name,
                                                strlen(params->name));
-        if (!row)
+        if (!row) {
+            netsnmp_tlstmParams_free(params);
             return;
+        }
 
         entry = row->data;
         
