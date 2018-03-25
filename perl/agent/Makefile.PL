@@ -92,7 +92,6 @@ sub AgentInitMakeParams {
                 " -L" . abs_path("../../snmplib") .
                 " -L" . abs_path("../../agent/.libs") .
                 " -L" . abs_path("../../agent") .
-                " -lnetsnmp" . # This should not be necessary !
                 " " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
