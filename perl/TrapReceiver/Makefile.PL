@@ -126,7 +126,6 @@ sub TrapReceiverInitMakeParams {
                 " -L" . abs_path("../../agent") .
                 " -L" . abs_path("../../snmplib/.libs") .
                 " -L" . abs_path("../../snmplib") .
-                " -lnetsnmp" . # This should not be necessary !
                 " " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 	} else {
