@@ -353,7 +353,8 @@ asn_parse_nlength(u_char *pkt, size_t pkt_len, u_long *data_len)
             return NULL;           /* still too short for length and data */
 
         /* now we know we have enough data to parse length */
-        asn_parse_length(pkt, data_len);
+        if (NULL == asn_parse_length(pkt, data_len))
+            return NULL;           /* propagate error from asn_parse_length */
     } else {
         /*
          * short length; first byte is the length
