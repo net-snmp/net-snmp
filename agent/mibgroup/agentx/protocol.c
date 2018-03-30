@@ -1254,6 +1254,12 @@ agentx_parse_string(u_char * data, size_t * length,
     len >>= 2;
     len <<= 2;
 
+    if (*length < len + 4) {
+        DEBUGMSGTL(("agentx", "Packet too short for string padding (still too short: %d)\n",
+                    (int)*length));
+        return NULL;
+    }
+
     *length -= (len + 4);
     DEBUGDUMPSETUP("recv", data, (len + 4));
     DEBUGIF("dumpv_recv") {
@@ -1352,6 +1358,8 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
     u_int           int_val;
     struct counter64 tmp64;
 
+    if (*length < 4)
+        return NULL;
     DEBUGDUMPHEADER("recv", "VarBind:");
     DEBUGDUMPHEADER("recv", "Type");
     *type = agentx_parse_short(bufp, network_byte_order);
@@ -1372,6 +1380,10 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
     case ASN_GAUGE:
     case ASN_TIMETICKS:
     case ASN_UINTEGER:
+        if (*length < 4) {
+            DEBUGINDENTLESS();
+            return NULL;
+        }
         int_val = agentx_parse_int(bufp, network_byte_order);
         memmove(data_buf, &int_val, 4);
         *data_len = 4;
@@ -1403,6 +1415,10 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
         break;
 
     case ASN_COUNTER64:
+        if (*length < 8) {
+            DEBUGINDENTLESS();
+            return NULL;
+        }
         memset(&tmp64, 0, sizeof(tmp64));
 	if (network_byte_order) {
 	    tmp64.high = agentx_parse_int(bufp,   network_byte_order);
@@ -1622,9 +1638,15 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         buf_len = sizeof(buffer);
     }
 
+#define AGENTX_NEEDLEN( len ) \
+        if ( *length < len ) { \
+            DEBUGINDENTLESS(); \
+            return SNMPERR_ASN_PARSE_ERR; \
+        }
     DEBUGDUMPHEADER("recv", "PDU");
     switch (pdu->command) {
     case AGENTX_MSG_OPEN:
+        AGENTX_NEEDLEN(4);
         pdu->time = *bufp;      /* Timeout */
         bufp += 4;
         *length -= 4;
@@ -1660,6 +1682,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         break;
 
     case AGENTX_MSG_CLOSE:
+        AGENTX_NEEDLEN(4);
         pdu->errstat = *bufp;   /* Reason */
         bufp += 4;
         *length -= 4;
@@ -1668,6 +1691,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
 
     case AGENTX_MSG_UNREGISTER:
     case AGENTX_MSG_REGISTER:
+        AGENTX_NEEDLEN(4);
         DEBUGDUMPHEADER("recv", "Registration Header");
         if (pdu->command == AGENTX_MSG_REGISTER) {
             pdu->time = *bufp;  /* Timeout (Register only) */
@@ -1698,6 +1722,11 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         }
 
         if (pdu->range_subid) {
+            if (pdu->range_subid > oid_buf_len) {
+                DEBUGINDENTLESS();
+                return SNMPERR_ASN_PARSE_ERR;
+            }
+            AGENTX_NEEDLEN(4);
             range_bound = agentx_parse_int(bufp, pdu->flags &
                                            AGENTX_FLAGS_NETWORK_BYTE_ORDER);
             bufp += 4;
@@ -1721,6 +1750,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         break;
 
     case AGENTX_MSG_GETBULK:
+        AGENTX_NEEDLEN(4);
         DEBUGDUMPHEADER("recv", "Non-repeaters");
         pdu->non_repeaters = agentx_parse_short(bufp, pdu->flags &
                                                 AGENTX_FLAGS_NETWORK_BYTE_ORDER);
@@ -1787,6 +1817,8 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
     case AGENTX_MSG_RESPONSE:
 
         pdu->flags |= UCD_MSG_FLAG_RESPONSE_PDU;
+
+        AGENTX_NEEDLEN(8);
 
         /*
          * sysUpTime 
@@ -1891,6 +1923,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
     DEBUGINDENTLESS();
     return SNMP_ERR_NOERROR;
 }
+#undef AGENTX_NEEDLEN
 
 
 
