@@ -1242,7 +1242,7 @@ agentx_parse_string(u_char * data, size_t * length,
                     (int)*length));
         return NULL;
     }
-    if (len > *str_len) {
+    if (len > (*str_len - 1)) {
         DEBUGMSGTL(("agentx", "String too long (too long)\n"));
         return NULL;
     }
@@ -1562,7 +1562,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
              size_t len)
 {
     register u_char *bufp = data;
-    u_char          buffer[65535];
+    u_char          buffer[65536];
     oid             oid_buffer[MAX_OID_LEN], end_oid_buf[MAX_OID_LEN];
     size_t          buf_len = sizeof(buffer);
     size_t          oid_buf_len = MAX_OID_LEN;
