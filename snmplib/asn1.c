@@ -510,7 +510,8 @@ asn_check_packet(u_char * pkt, size_t len)
          */
         if ((int) len < (int) (*(pkt + 1) & ~0x80) + 2)
             return 0;           /* still to short, incomplete length */
-        asn_parse_length(pkt + 1, &asn_length);
+        if (NULL == asn_parse_length(pkt + 1, &asn_length))
+            return 0;           /* propagate error from asn_parse_length() */
         return (asn_length + 2 + (*(pkt + 1) & ~0x80));
     } else {
         /*
@@ -601,7 +602,7 @@ asn_parse_int(u_char * data,
 
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
 
@@ -673,7 +674,7 @@ asn_parse_unsigned_int(u_char * data,
     }
 
     /** need at least 2 bytes to work with: type, length (which might be 0)  */
-    if (*datalength <= 2) {
+    if (*datalength < 2) {
         _asn_short_err(errpre, *datalength, 2);
         return NULL;
     }
@@ -687,7 +688,7 @@ asn_parse_unsigned_int(u_char * data,
 
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
 
@@ -939,7 +940,7 @@ asn_parse_string(u_char * data,
 
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
 
@@ -1101,7 +1102,7 @@ asn_parse_header(u_char * data, size_t * datalength, u_char * type)
 
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
 
@@ -1468,7 +1469,7 @@ asn_parse_objid(u_char * data,
 
     /** need at least 2 bytes to work with: type, length (which might be 0)  */
     if (*datalength < 2) {
-        _asn_short_err(errpre, *datalength, 3);
+        _asn_short_err(errpre, *datalength, 2);
         return NULL;
     }
 
@@ -1479,7 +1480,7 @@ asn_parse_objid(u_char * data,
     }
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
 
@@ -1769,7 +1770,7 @@ asn_parse_null(u_char * data, size_t * datalength, u_char * type)
     *type = *bufp++;
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
     if (asn_length != 0) {
@@ -1862,7 +1863,7 @@ asn_parse_bitstring(u_char * data,
 
     /** need at least 2 bytes to work with: type, length (which might be 0)  */
     if (*datalength < 2) {
-        _asn_short_err(errpre, *datalength, 3);
+        _asn_short_err(errpre, *datalength, 2);
         return NULL;
     }
 
@@ -1874,7 +1875,7 @@ asn_parse_bitstring(u_char * data,
 
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
 
@@ -2000,7 +2001,7 @@ asn_parse_unsigned_int64(u_char * data,
 
     /** need at least 2 bytes to work with: type, length (which might be 0)  */
     if (*datalength < 2) {
-        _asn_short_err(errpre, *datalength, 3);
+        _asn_short_err(errpre, *datalength, 2);
         return NULL;
     }
 
@@ -2015,12 +2016,18 @@ asn_parse_unsigned_int64(u_char * data,
     }
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
 
     DEBUGDUMPSETUP("recv", data, bufp - data);
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
+    /** need at least 2 bytes: ASN_OPAQUE_TAG1 and ASN_OPAQUE_<type> */
+    if ((*type == ASN_OPAQUE) && (asn_length < 2)) {
+        _asn_short_err(errpre, asn_length, 2);
+        return NULL;
+    }
+
     /*
      * 64 bit counters as opaque 
      */
@@ -2036,9 +2043,10 @@ asn_parse_unsigned_int64(u_char * data,
         /*
          * value is encoded as special format 
          */
+        *datalength = asn_length;
         bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
         if (NULL == bufp) {
-            _asn_short_err("parse opaque uint64", *datalength, asn_length);
+            _asn_short_err("parse opaque uint64", *datalength - 2, asn_length);
             return NULL;
         }
     }
@@ -2268,14 +2276,20 @@ asn_parse_signed_int64(u_char * data,
 
     /** need at least 2 bytes to work with: type, length (which might be 0) */
     if (*datalength < 2) {
-        _asn_short_err(errpre, *datalength, 3);
+        _asn_short_err(errpre, *datalength, 2);
         return NULL;
     }
 
     *type = *bufp++;
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
+        return NULL;
+    }
+
+    /** need at least 2 bytes: ASN_OPAQUE_TAG1 and ASN_OPAQUE_I64 */
+    if (asn_length < 2) {
+        _asn_short_err(errpre, asn_length, 2);
         return NULL;
     }
 
@@ -2290,9 +2304,10 @@ asn_parse_signed_int64(u_char * data,
         /*
          * value is encoded as special format 
          */
+        *datalength = asn_length;
         bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
         if (NULL == bufp) {
-            _asn_short_err("parse opaque int64", *datalength, asn_length);
+            _asn_short_err("parse opaque int64", *datalength - 2, asn_length);
             return NULL;
         }
     }
@@ -2481,14 +2496,14 @@ asn_parse_float(u_char * data,
 
     /** need at least 2 bytes to work with: type, length (which might be 0)  */
     if (*datalength < 2) {
-        _asn_short_err(errpre, *datalength, 3);
+        _asn_short_err(errpre, *datalength, 2);
         return NULL;
     }
 
     *type = *bufp++;
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
 
@@ -2503,9 +2518,10 @@ asn_parse_float(u_char * data,
         /*
          * value is encoded as special format 
          */
+        *datalength = asn_length;
         bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
         if (NULL == bufp) {
-            _asn_short_err("parse opaque float", *datalength, asn_length);
+            _asn_short_err("parse opaque float", *datalength - 2, asn_length);
             return NULL;
         }
         /*
@@ -2665,14 +2681,14 @@ asn_parse_double(u_char * data,
 
     /** need at least 2 bytes to work with: type, length (which might be 0)  */
     if (*datalength < 2) {
-        _asn_short_err(errpre, *datalength, 3);
+        _asn_short_err(errpre, *datalength, 2);
         return NULL;
     }
 
     *type = *bufp++;
     bufp = asn_parse_nlength(bufp, *datalength - 1, &asn_length);
     if (NULL == bufp) {
-        _asn_short_err(errpre, *datalength, asn_length);
+        _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
 
@@ -2680,6 +2696,11 @@ asn_parse_double(u_char * data,
     /*
      * the double is encoded as an opaque 
      */
+    /** need at least 2 bytes: ASN_OPAQUE_TAG1 and ASN_OPAQUE_DOUBLE */
+    if ((*type == ASN_OPAQUE) && (asn_length < 2)) {
+        _asn_short_err(errpre, asn_length, 2);
+        return NULL;
+    }
     if ((*type == ASN_OPAQUE) &&
         (asn_length == ASN_OPAQUE_DOUBLE_BER_LEN) &&
         (*bufp == ASN_OPAQUE_TAG1) && (*(bufp + 1) == ASN_OPAQUE_DOUBLE)) {
@@ -2687,9 +2708,10 @@ asn_parse_double(u_char * data,
         /*
          * value is encoded as special format 
          */
+        *datalength = asn_length;
         bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
         if (NULL == bufp) {
-            _asn_short_err("parse opaque double", *datalength, asn_length);
+            _asn_short_err("parse opaque double", *datalength - 2, asn_length);
             return NULL;
         }
 
