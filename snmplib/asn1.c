@@ -2020,7 +2020,7 @@ asn_parse_unsigned_int64(u_char * data,
         return NULL;
     }
 
-    DEBUGDUMPSETUP("recv", data, bufp - data);
+    DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     /** need at least 2 bytes: ASN_OPAQUE_TAG1 and ASN_OPAQUE_<type> */
     if ((*type == ASN_OPAQUE) && (asn_length < 2)) {
@@ -2293,7 +2293,7 @@ asn_parse_signed_int64(u_char * data,
         return NULL;
     }
 
-    DEBUGDUMPSETUP("recv", data, bufp - data);
+    DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
     if ((*type == ASN_OPAQUE) &&
         (asn_length <= ASN_OPAQUE_COUNTER64_MX_BER_LEN) &&
         (*bufp == ASN_OPAQUE_TAG1) && (*(bufp + 1) == ASN_OPAQUE_I64)) {
@@ -2328,7 +2328,7 @@ asn_parse_signed_int64(u_char * data,
         return NULL;
     }
     *datalength -= (int) asn_length + (bufp - data);
-    if (*bufp & 0x80) {
+    if ((asn_length > 0) && (*bufp & 0x80)) {
         low = 0xFFFFFFFFU;   /* first byte bit 1 means start the data with 1s */
         high = 0xFFFFFF;
     }
