@@ -45,7 +45,6 @@ typedef netsnmp_session SnmpSession;
 typedef struct tree SnmpMibNode;
 static int __is_numeric_oid (char*);
 static int __is_leaf (struct tree*);
-static int __translate_appl_type (const char *);
 static int __translate_asn_type (int);
 static int __snprint_value (char **, size_t *,
                             netsnmp_variable_list*, struct tree *,
@@ -56,8 +55,6 @@ static int __get_type_str (int, char *);
 static int __get_label_iid (char *, char **, char **, int);
 static struct tree * __tag2oid (char *, char *, oid  *, int  *, int *, int);
 static int __concat_oid_str (oid *, int *, char *);
-static int __add_var_val_str (netsnmp_pdu *, oid *, int, char *,
-                                 int, int);
 #define USE_NUMERIC_OIDS 0x08
 #define NON_LEAF_NAME 0x04
 #define USE_LONG_NAMES 0x02
@@ -140,6 +137,7 @@ static const struct type_table_entry type_table[] = {
     { }
 };
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static int
 __translate_appl_type(const char *typestr)
 {
@@ -156,6 +154,7 @@ __translate_appl_type(const char *typestr)
 
     return TYPE_UNKNOWN;
 }
+#endif  /* NETSNMP_NO_WRITE_SUPPORT */
 
 static int
 __translate_asn_type(int asn_type)
@@ -609,6 +608,7 @@ __concat_oid_str(oid *doid_arr, int *doid_arr_len, char *soid_str)
    return(SUCCESS);
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 /*
  * add a varbind to PDU
  */
@@ -734,6 +734,7 @@ OCT:
 
      return ret;
 }
+#endif  /* NETSNMP_NO_WRITE_SUPPORT */
 
 /* takes ss and pdu as input and updates the 'response' argument */
 /* the input 'pdu' argument will be freed */
@@ -2325,10 +2326,11 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 static PyObject *
 netsnmp_set(PyObject *self, PyObject *args)
 {
+  PyObject *ret = NULL;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
   PyObject *session;
   PyObject *varlist;
   PyObject *varbind;
-  PyObject *ret = NULL;
   netsnmp_session *ss;
   netsnmp_pdu *pdu, *response;
   struct tree *tp;
@@ -2461,6 +2463,7 @@ netsnmp_set(PyObject *self, PyObject *args)
  done:
   Py_XDECREF(varbind);
   free(oid_arr);
+#endif  /* NETSNMP_NO_WRITE_SUPPORT */
   return (ret ? ret : Py_BuildValue(""));
 }
 
