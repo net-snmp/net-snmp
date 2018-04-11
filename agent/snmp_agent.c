@@ -1925,7 +1925,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
         status = asp->status;
     }
 
-#ifdef NETSNMP_DISABLE_SET_SUPPORT
+#if defined(NETSNMP_DISABLE_SET_SUPPORT) && !defined(NETSNMP_NO_WRITE_SUPPORT)
     if (pdu->command == SNMP_MSG_SET) {
         /** Silvercreek protocol tests send set with 0 varbinds */
         if (NULL == pdu->variables)
@@ -1933,7 +1933,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
         asp->index = 1;
         return netsnmp_wrap_up_request(asp, SNMP_ERR_NOTWRITABLE);
     }
-#endif /* NETSNMP_DISABLE_SET_SUPPORT */
+#endif /* NETSNMP_DISABLE_SET_SUPPORT && !NETSNMP_NO_WRITE_SUPPORT */
 
     if ((access_ret = check_access(asp->pdu)) != 0) {
         if (access_ret == VACM_NOSUCHCONTEXT) {
