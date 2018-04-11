@@ -1694,7 +1694,10 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
          *  types to throw an error for a v1 query.
          *  See RFC2576 - section 4.1.2.3
          */
-        if ((asp->pdu->command != SNMP_MSG_SET) &&
+        if (
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+            (asp->pdu->command != SNMP_MSG_SET) &&
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
             (asp->pdu->version == SNMP_VERSION_1)) {
             netsnmp_variable_list *var_ptr = asp->pdu->variables;
             int                    i = 1;
