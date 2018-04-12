@@ -28,15 +28,6 @@
 #define MIB_UDPCOUNTER_SYMBOL "MIB_udpcounter"
 #endif
 
-#undef ARPTAB_SYMBOL
-#ifndef hpux11
-#define ARPTAB_SYMBOL "arphd"
-#endif
-#undef ARPTAB_SIZE_SYMBOL
-#ifndef hpux11
-#define ARPTAB_SIZE_SYMBOL "arptab_nb"
-#endif
-
 #if defined(hpux10) || defined(hpux11)
 #undef SWDEVT_SYMBOL
 #undef FSWDEVT_SYMBOL
