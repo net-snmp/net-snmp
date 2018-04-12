@@ -124,11 +124,7 @@
 #if !defined (WIN32) && !defined (cygwin)
 #ifndef solaris2
 static void     ARP_Scan_Init(void);
-#ifdef ARP_SCAN_FOUR_ARGUMENTS
 static int      ARP_Scan_Next(in_addr_t *, char *, int *, u_long *, u_short *);
-#else
-static int      ARP_Scan_Next(in_addr_t *, char *, int *, u_long *);
-#endif
 #endif
 #endif
 
@@ -210,9 +206,7 @@ var_atEntry(struct variable *vp,
     in_addr_t       Addr, LowAddr;
     int             foundone;
     static in_addr_t      addr_ret;
-#ifdef ARP_SCAN_FOUR_ARGUMENTS
     u_short         ifIndex, lowIfIndex = 0;
-#endif                          /* ARP_SCAN_FOUR_ARGUMENTS */
     u_long          ifType, lowIfType = 0;
 
     int             oid_length;
@@ -233,7 +227,6 @@ var_atEntry(struct variable *vp,
     foundone = 0;
     ARP_Scan_Init();
     for (;;) {
-#ifdef ARP_SCAN_FOUR_ARGUMENTS
         if (ARP_Scan_Next(&Addr, PhysAddr, &PhysAddrLen, &ifType, &ifIndex) == 0)
             break;
         current[10] = ifIndex;
@@ -244,18 +237,6 @@ var_atEntry(struct variable *vp,
         } else {                /* IP NetToMedia group oid */
             op = current + 11;
         }
-#else                           /* ARP_SCAN_FOUR_ARGUMENTS */
-        if (ARP_Scan_Next(&Addr, PhysAddr, &PhysAddrLen, &ifType) == 0)
-            break;
-        current[10] = 1;
-
-        if (current[6] == 3) {  /* AT group oid */
-            current[11] = 1;
-            op = current + 12;
-        } else {                /* IP NetToMedia group oid */
-            op = current + 11;
-        }
-#endif                          /* ARP_SCAN_FOUR_ARGUMENTS */
         cp = (u_char *) & Addr;
         *op++ = *cp++;
         *op++ = *cp++;
@@ -268,9 +249,7 @@ var_atEntry(struct variable *vp,
                        oid_length * sizeof(oid));
                 LowAddr = Addr;
                 foundone = 1;
-#ifdef ARP_SCAN_FOUR_ARGUMENTS
                 lowIfIndex = ifIndex;
-#endif                          /*  ARP_SCAN_FOUR_ARGUMENTS */
                 memcpy(LowPhysAddr, PhysAddr, sizeof(PhysAddr));
                 LowPhysAddrLen = PhysAddrLen;
                 lowIfType = ifType;
@@ -290,9 +269,7 @@ var_atEntry(struct variable *vp,
                        oid_length * sizeof(oid));
                 LowAddr = Addr;
                 foundone = 1;
-#ifdef ARP_SCAN_FOUR_ARGUMENTS
                 lowIfIndex = ifIndex;
-#endif                          /*  ARP_SCAN_FOUR_ARGUMENTS */
                 memcpy(LowPhysAddr, PhysAddr, sizeof(PhysAddr));
                 LowPhysAddrLen = PhysAddrLen;
                 lowIfType = ifType;
@@ -308,14 +285,11 @@ var_atEntry(struct variable *vp,
     switch (vp->magic) {
     case IPMEDIAIFINDEX:       /* also ATIFINDEX */
         *var_len = sizeof long_return;
-#ifdef ARP_SCAN_FOUR_ARGUMENTS
-        long_return = lowIfIndex;
-#else                           /* ARP_SCAN_FOUR_ARGUMENTS */
+        long_return = lowIfIndex ? lowIfIndex : 1;
 #if NETSNMP_NO_DUMMY_VALUES
-        return NULL;
+        if (lowIfIndex == 0)
+            return NULL;
 #endif
-        long_return = 1;        /* XXX */
-#endif                          /* ARP_SCAN_FOUR_ARGUMENTS */
         return (u_char *) & long_return;
     case IPMEDIAPHYSADDRESS:   /* also ATPHYSADDRESS */
         *var_len = LowPhysAddrLen;
@@ -724,15 +698,9 @@ ARP_Scan_Init(void)
 #endif                          /* NETSNMP_CAN_USE_SYSCTL */
 }
 
-#ifdef ARP_SCAN_FOUR_ARGUMENTS
 static int
 ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
               u_long * ifType, u_short * ifIndex)
-#else
-static int
-ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
-              u_long * ifType)
-#endif
 {
 #ifndef NETSNMP_CAN_USE_SYSCTL
 #ifdef linux
@@ -778,7 +746,7 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
          */
         return (1);
     }
-#elif !defined(ARP_SCAN_FOUR_ARGUMENTS) || defined(hpux)
+#else
     register struct arptab *atab;
 
     while (arptab_current < arptab_size) {
@@ -813,6 +781,7 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
         *ifIndex = at_com.ac_if.if_index;       /* not strictly ARPHD */
 #else                           /* HAVE_STRUCT_ARPHD_AT_NEXT */
         atab = &at[arptab_current++];
+        *ifIndex = 0;
 #endif                          /* HAVE_STRUCT_ARPHD_AT_NEXT */
         if (!(atab->at_flags & ATF_COM))
             continue;
@@ -830,7 +799,7 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
 #endif
         return (1);
     }
-#endif                          /* linux || hpux11 || !ARP_SCAN_FOUR_ARGUMENTS || hpux */
+#endif
 
     return 0;                   /* we need someone with an irix box to fix this section */
 
