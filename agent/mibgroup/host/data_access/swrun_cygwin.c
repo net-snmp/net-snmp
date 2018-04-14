@@ -123,7 +123,6 @@ to_msec(PFILETIME ptr)
     return x;
 }
 
-OSVERSIONINFO   ver;
 HMODULE         h;
 
 /* ---------------------------------------------------------------------
@@ -131,27 +130,18 @@ HMODULE         h;
 void
 netsnmp_arch_swrun_init(void)
 {
-    memset(&ver, 0, sizeof ver);
-    ver.dwOSVersionInfoSize = sizeof ver;
-    GetVersionEx(&ver);
-
-    if (ver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-        h = LoadLibrary("psapi.dll");
-        if (h) {
-            myEnumProcessModules   = (ENUMPROCESSMODULES)
-                       GetProcAddress(h, "EnumProcessModules");
-            myGetModuleFileNameEx  = (GETMODULEFILENAME)
-                       GetProcAddress(h, "GetModuleFileNameExA");
-            myGetProcessMemoryInfo = (GETPROCESSMEMORYINFO)
-                       GetProcAddress(h, "GetProcessMemoryInfo");
-            if (myEnumProcessModules && myGetModuleFileNameEx)
-                query = CW_GETPINFO_FULL;
-            else
-                snmp_log(LOG_ERR, "hr_swrun failed NT init\n");
-        } else
-            snmp_log(LOG_ERR, "hr_swrun failed to load psapi.dll\n");
-    } else {
-        h = GetModuleHandle("KERNEL32.DLL");
+    if ((h = LoadLibrary("psapi.dll")) != NULL) {
+        myEnumProcessModules   = (ENUMPROCESSMODULES)
+            GetProcAddress(h, "EnumProcessModules");
+        myGetModuleFileNameEx  = (GETMODULEFILENAME)
+            GetProcAddress(h, "GetModuleFileNameExA");
+        myGetProcessMemoryInfo = (GETPROCESSMEMORYINFO)
+            GetProcAddress(h, "GetProcessMemoryInfo");
+        if (myEnumProcessModules && myGetModuleFileNameEx)
+            query = CW_GETPINFO_FULL;
+        else
+            snmp_log(LOG_ERR, "hr_swrun failed NT init\n");
+    } elif ((h = GetModuleHandle("KERNEL32.DLL")) != NULL) {
         myCreateToolhelp32Snapshot = (CREATESNAPSHOT)
                        GetProcAddress(h, "CreateToolhelp32Snapshot");
         myProcess32First = (PROCESSWALK) GetProcAddress(h, "Process32First");
@@ -162,7 +152,7 @@ netsnmp_arch_swrun_init(void)
             && myProcess32Next)
 #if 0
             /*
-             * This doesn't work after all on Win98 SE 
+             * This doesn't work at all on Win98 SE
              */
             query = CW_GETPINFO_FULL;
 #else
@@ -171,7 +161,6 @@ netsnmp_arch_swrun_init(void)
         else
             snmp_log(LOG_ERR, "hr_swrun failed non-NT init\n");
     }
-    return;
 }
 
 /* ---------------------------------------------------------------------
