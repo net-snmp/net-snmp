@@ -19,10 +19,6 @@ if ($target_arch ne "x86" && $target_arch ne "x64") {
     die;
 }
 my @perl_arch = split(/-/, $Config{archname});
-if ($perl_arch[1] ne $target_arch) {
-    print "perl_arch = $perl_arch[1] does not match target_arch = $target_arch\n";
-    die;
-}
 my $openssl = false;
 my $default_openssldir = $target_arch eq "x64" ?
     "C:\\OpenSSL-Win64" : "C:\\OpenSSL-Win32";
@@ -149,6 +145,11 @@ while (1) {
   elsif (lc($option) eq "q") {
     exit;
   }
+}
+
+if ($perl && $perl_arch[1] ne $target_arch) {
+    print "perl_arch = $perl_arch[1] does not match target_arch = $target_arch\n";
+    die;
 }
 
 my $linktype = $link_dynamic ? "dynamic" : "static";
