@@ -155,6 +155,7 @@ if ($perl && $perl_arch[1] ne $target_arch) {
 my $linktype = $link_dynamic ? "dynamic" : "static";
 $configOpts = (($openssl ? "--with-ssl" : "")		. " " .
                ($opensslincdir ? "--with-sslincdir=$opensslincdir" : "") . " " .
+               ($openssllibdir ? "--with-ssllibdir=$openssllibdir" : "") . " " .
                ($sdk ? "--with-sdk" : "")		. " " .
                ($b_ipv6 ? "--with-ipv6" : "")		. " " .
                ($b_winextdll ? "--with-winextdll" : "") . " " .
@@ -167,8 +168,6 @@ $ENV{NO_EXTERNAL_DEPS}="1";
 
 # Set PATH environment variable so Perl make tests can locate the DLL
 $ENV{PATH} = File::Spec->catdir($current_pwd, "bin", $debug ? "debug" : "release") . ";$ENV{PATH}";
-
-$ENV{LIB}     .= ";$openssllibdir";
 
 # Set MIBDIRS environment variable so Perl make tests can locate the mibs
 $ENV{MIBDIRS} = File::Spec->catdir(dirname($current_pwd), "mibs");
