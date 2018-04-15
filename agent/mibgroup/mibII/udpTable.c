@@ -319,7 +319,7 @@ udpTable_next_entry( void **loop_context,
                      netsnmp_variable_list *index,
                      netsnmp_iterator_info *data)
 {
-    int i = (int)*loop_context;
+    int i = (intptr_t)*loop_context;
     long port;
 
 #if HAVE_KVM_GETFILES
@@ -349,7 +349,7 @@ udpTable_next_entry( void **loop_context,
      * and update the loop context ready for the next one.
      */
     *data_context = (void*)&udp_head[i];
-    *loop_context = (void*)++i;
+    *loop_context = (void*)(intptr_t)++i;
     return index;
 }
 

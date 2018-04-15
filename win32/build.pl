@@ -19,10 +19,6 @@ if ($target_arch ne "x86" && $target_arch ne "x64") {
     die;
 }
 my @perl_arch = split(/-/, $Config{archname});
-if ($perl_arch[1] ne $target_arch) {
-    print "perl_arch = $perl_arch[1] does not match target_arch = $target_arch\n";
-    die;
-}
 my $openssl = false;
 my $default_openssldir = $target_arch eq "x64" ?
     "C:\\OpenSSL-Win64" : "C:\\OpenSSL-Win32";
@@ -151,9 +147,15 @@ while (1) {
   }
 }
 
+if ($perl && $perl_arch[1] ne $target_arch) {
+    print "perl_arch = $perl_arch[1] does not match target_arch = $target_arch\n";
+    die;
+}
+
 my $linktype = $link_dynamic ? "dynamic" : "static";
 $configOpts = (($openssl ? "--with-ssl" : "")		. " " .
                ($opensslincdir ? "--with-sslincdir=$opensslincdir" : "") . " " .
+               ($openssllibdir ? "--with-ssllibdir=$openssllibdir" : "") . " " .
                ($sdk ? "--with-sdk" : "")		. " " .
                ($b_ipv6 ? "--with-ipv6" : "")		. " " .
                ($b_winextdll ? "--with-winextdll" : "") . " " .
@@ -166,8 +168,6 @@ $ENV{NO_EXTERNAL_DEPS}="1";
 
 # Set PATH environment variable so Perl make tests can locate the DLL
 $ENV{PATH} = File::Spec->catdir($current_pwd, "bin", $debug ? "debug" : "release") . ";$ENV{PATH}";
-
-$ENV{LIB}     .= ";$openssllibdir";
 
 # Set MIBDIRS environment variable so Perl make tests can locate the mibs
 $ENV{MIBDIRS} = File::Spec->catdir(dirname($current_pwd), "mibs");

@@ -1995,9 +1995,10 @@ Enterprise OIDs:  (warning: this should be used with caution.)
 
 Perl:
   --with-perl-modules=ARGS      Install the Perl modules along with the rest
-                                  of the net-snmp toolkit.  If ARGS is
-                                  specified, they're passed to the
-                                  Makefile.PL script.
+                                  of the net-snmp toolkit. If ARGS is specified,
+                                  they're passed to the Makefile.PL script. Use
+                                  --with-perl-modules=verbose while debugging
+                                  the Makefile.PL files
 
 Python:
   --with-python-modules=ARGS    Install the python bindings along with the

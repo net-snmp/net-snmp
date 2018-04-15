@@ -446,8 +446,7 @@ _new_cert(const char *dirname, const char *filename, int certType,
         return NULL;
     }
 
-    DEBUGMSGT(("9:cert:struct:new","new cert 0x%#lx for %s\n", (u_long)cert,
-                  filename));
+    DEBUGMSGT(("9:cert:struct:new","new cert 0x%p for %s\n", cert, filename));
 
     cert->info.dir = strdup(dirname);
     cert->info.filename = strdup(filename);
@@ -499,8 +498,7 @@ _new_key(const char *dirname, const char *filename)
         return NULL;
     }
 
-    DEBUGMSGT(("cert:key:struct:new","new key 0x%#lx for %s\n", (u_long)key,
-               filename));
+    DEBUGMSGT(("cert:key:struct:new","new key %p for %s\n", key, filename));
 
     key->info.type = NS_CERT_TYPE_KEY;
     key->info.dir = strdup(dirname);
@@ -516,8 +514,8 @@ netsnmp_cert_free(netsnmp_cert *cert)
     if (NULL == cert)
         return;
 
-    DEBUGMSGT(("9:cert:struct:free","freeing cert 0x%#lx, %s (fp %s; CN %s)\n",
-               (u_long)cert, cert->info.filename ? cert->info.filename : "UNK",
+    DEBUGMSGT(("9:cert:struct:free","freeing cert %p, %s (fp %s; CN %s)\n",
+               cert, cert->info.filename ? cert->info.filename : "UNK",
                cert->fingerprint ? cert->fingerprint : "UNK",
                cert->common_name ? cert->common_name : "UNK"));
 
@@ -541,8 +539,8 @@ netsnmp_key_free(netsnmp_key *key)
     if (NULL == key)
         return;
 
-    DEBUGMSGT(("cert:key:struct:free","freeing key 0x%#lx, %s\n",
-               (u_long)key, key->info.filename ? key->info.filename : "UNK"));
+    DEBUGMSGT(("cert:key:struct:free","freeing key %p, %s\n",
+               key, key->info.filename ? key->info.filename : "UNK"));
 
     SNMP_FREE(key->info.dir);
     SNMP_FREE(key->info.filename);
@@ -1751,8 +1749,8 @@ netsnmp_cert_find(int what, int where, void *hint)
     netsnmp_cert *result = NULL;
     char         *fp, *hint_str;
 
-    DEBUGMSGT(("cert:find:params", "looking for %s(%d) in %s(0x%x), hint %lu\n",
-               _mode_str(what), what, _where_str(where), where, (u_long)hint));
+    DEBUGMSGT(("cert:find:params", "looking for %s(%d) in %s(0x%x), hint %p\n",
+               _mode_str(what), what, _where_str(where), where, hint));
 
     if (NS_CERTKEY_DEFAULT == where) {
             
@@ -2988,7 +2986,7 @@ netsnmp_tlstmParams_create(const char *name, int hashType, const char *fp,
     stp->hashType = hashType;
     if (fp)
         stp->fingerprint = strdup(fp);
-    DEBUGMSGT(("9:tlstmParams:create", "0x%lx: %s\n", (u_long)stp,
+    DEBUGMSGT(("9:tlstmParams:create", "%p: %s\n", stp,
                stp->name ? stp->name : "null"));
 
     return stp;
@@ -3000,7 +2998,7 @@ netsnmp_tlstmParams_free(snmpTlstmParams *stp)
     if (NULL == stp)
         return;
 
-    DEBUGMSGT(("9:tlstmParams:release", "0x%lx %s\n", (u_long)stp,
+    DEBUGMSGT(("9:tlstmParams:release", "%p %s\n", stp,
                stp->name ? stp->name : "null"));
     SNMP_FREE(stp->name);
     SNMP_FREE(stp->fingerprint);
@@ -3065,8 +3063,7 @@ netsnmp_tlstmParams_add(snmpTlstmParams *stp)
     if (NULL == stp)
         return -1;
 
-    DEBUGMSGTL(("tlstmParams:add", "adding entry 0x%lx %s\n", (u_long)stp,
-                stp->name));
+    DEBUGMSGTL(("tlstmParams:add", "adding entry %p %s\n", stp, stp->name));
 
     if (CONTAINER_INSERT(_tlstmParams, stp) != 0) {
         snmp_log(LOG_ERR, "error inserting tlstmParams %s", stp->name);
@@ -3084,7 +3081,7 @@ netsnmp_tlstmParams_remove(snmpTlstmParams *stp)
     if (NULL == stp)
         return -1;
 
-    DEBUGMSGTL(("tlstmParams:remove", "removing entry 0x%lx %s\n", (u_long)stp,
+    DEBUGMSGTL(("tlstmParams:remove", "removing entry %p %s\n", stp,
                 stp->name));
 
     if (CONTAINER_REMOVE(_tlstmParams, stp) != 0) {
@@ -3283,8 +3280,8 @@ netsnmp_tlstmAddr_add(snmpTlstmAddr *entry)
     if (!entry)
         return -1;
 
-    DEBUGMSGTL(("tlstmAddr:add", "adding entry 0x%lx %s %s\n",
-                (u_long)entry, entry->name, entry->fingerprint));
+    DEBUGMSGTL(("tlstmAddr:add", "adding entry %p %s %s\n",
+                entry, entry->name, entry->fingerprint));
     if (CONTAINER_INSERT(_tlstmAddr, entry) != 0) {
         snmp_log(LOG_ERR, "could not insert addr %s", entry->name);
         netsnmp_tlstmAddr_free(entry);

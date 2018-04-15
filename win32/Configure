@@ -16,6 +16,7 @@ my $prefix;
 my $prefixdos;
 my $openssl = 0;
 my $opensslincdir;
+my $openssllibdir;
 my $b_ipv6 = 0;
 my $b_winextdll = 0;
 my $help = 0;
@@ -27,6 +28,7 @@ GetOptions      ('config=s' => \$config,
                  'prefix=s' => \$prefix,
                  'with-ssl' => \$openssl,
                  'with-sslincdir=s' => \$opensslincdir,
+                 'with-ssllibdir=s' => \$openssllibdir,
                  'with-ipv6' => \$b_ipv6,
                  'with-winextdll' => \$b_winextdll,
                  'help' => \$help);
@@ -46,6 +48,7 @@ Options:
     --destdir=\"path\"                 Same as --prefix
     --with-ssl                       Link against OpenSSL
     --with-sslincdir=\"path\"          OpenSSL include path
+    --with-ssllibdir=\"path\"          OpenSSL library path
     --with-ipv6                      Build in IPv6 transports (enables SDK)
     --with-winextdll                 Build winExtDLL agent (enables SDK, see README.win32)
     --help                           This help screen
@@ -205,6 +208,15 @@ my %makefile_subs = (
                 "/MD  /D NDEBUG /O2 " :
                 "/MDd /D _DEBUG /Od /Gm ")
              ],
+    "lfl" => [ "^LDFLAGS=",    "LDFLAGS=" .
+                               ($config eq "debug" ? "/debug " : "") .
+                               ($openssllibdir ? "/libpath:$openssllibdir" :
+                                "")
+             ],
+    "rsc" => [ "^RSCFLAGS=",   "RSCFLAGS=/l 0x409 " .
+                               ($config eq "release" ? "/d NDEBUG" :
+                                "/d _DEBUG")
+	     ],
     );
 
 substitute("Makefile", "Makefile.in", \%makefile_subs);

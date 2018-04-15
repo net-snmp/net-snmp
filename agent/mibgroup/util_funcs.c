@@ -351,7 +351,7 @@ get_exec_output(struct extensible *ex)
     }
     
     /* Associates a C run-time file descriptor with an existing operating-system file handle. */
-    fd = _open_osfhandle((long) hOutputRead, 0);
+    fd = _open_osfhandle((intptr_t) hOutputRead, 0);
     
     /* Set up STARTUPINFO for CreateProcess with the handles and have it hide the window
      * for the new process. */
@@ -607,8 +607,8 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
     }
     
     /* Associates a C run-time file descriptor with an existing operating-system file handle. */
-    *fdIn = _open_osfhandle((long) hOutputRead, 0);
-    *fdOut = _open_osfhandle((long) hInputWrite, 0);
+    *fdIn = _open_osfhandle((intptr_t) hOutputRead, 0);
+    *fdOut = _open_osfhandle((intptr_t) hInputWrite, 0);
     
     /* Set up STARTUPINFO for CreateProcess with the handles and have it hide the window
      * for the new process. */
@@ -631,7 +631,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
       return 0;
     }
     
-    DEBUGMSGTL(("util_funcs","child hProcess (stored in pid): %d\n",(int)pi.hProcess));
+    DEBUGMSGTL(("util_funcs","child hProcess (stored in pid): %p\n", pi.hProcess));
     DEBUGMSGTL(("util_funcs","child dwProcessId (task manager): %d\n",(int)pi.dwProcessId));
 
     /* Set global child process handle */
