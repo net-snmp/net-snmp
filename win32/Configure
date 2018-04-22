@@ -33,8 +33,8 @@ GetOptions      ('config=s' => \$config,
                  'with-winextdll' => \$b_winextdll,
                  'help' => \$help);
 
-if ($help == 1)
-{
+if ($help == 1 || !defined($config) || !defined($linktype) ||
+    !defined($b_ipv6) || !defined($b_winextdll)) {
 my $USAGE = qq/
 Usage:
     perl Configure [<options>]
@@ -70,7 +70,7 @@ if (($linktype ne "static") && ($linktype ne "dynamic")) {
   $linktype = "static";
 }
 
-if ($prefix eq "") {
+if (!$prefix) {
   $prefix = "c:/usr";
 }
 

@@ -414,13 +414,16 @@ case $target_os in
 	fi
 	;;
 
-    darwin8*|darwin9*|darwin1[[0-4]]*)
+    darwin*)
         #   Flat Namespace linking                      (Mac OS/X)
         #
         AC_MSG_CHECKING([whether darwin ld might need -flat_namespace])
 	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
-		LDFLAGS="-flat_namespace -framework CoreFoundation -framework CoreServices -framework DiskArbitration -framework IOKit $LDFLAGS"
-		AC_MSG_RESULT([yes])
+		saved_LDFLAGS="$LDFLAGS"
+                LDFLAGS="-flat_namespace -framework CoreFoundation -framework CoreServices -framework DiskArbitration -framework IOKit $LDFLAGS"
+                AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],
+                               [AC_MSG_RESULT([yes])],
+                               [LDFLAGS="$saved_LDFLAGS"; AC_MSG_RESULT([no])])
 	else
 		AC_MSG_RESULT([no])
 	fi

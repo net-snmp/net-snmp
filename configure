@@ -15832,15 +15832,34 @@ $as_echo "none" >&6; }
 	fi
 	;;
 
-    darwin8*|darwin9*|darwin1[0-4]*)
+    darwin*)
         #   Flat Namespace linking                      (Mac OS/X)
         #
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether darwin ld might need -flat_namespace" >&5
 $as_echo_n "checking whether darwin ld might need -flat_namespace... " >&6; }
 	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
-		LDFLAGS="-flat_namespace -framework CoreFoundation -framework CoreServices -framework DiskArbitration -framework IOKit $LDFLAGS"
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+		saved_LDFLAGS="$LDFLAGS"
+                LDFLAGS="-flat_namespace -framework CoreFoundation -framework CoreServices -framework DiskArbitration -framework IOKit $LDFLAGS"
+                cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+else
+  LDFLAGS="$saved_LDFLAGS"; { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 	else
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
