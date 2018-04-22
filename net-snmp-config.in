@@ -183,7 +183,7 @@ else
       echo $result
       ;;
     --build-command)
-      echo "@CC@ @CFLAGS@ @DEVFLAGS@"
+      echo "@CC@ @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@"
       ;;
     #################################################### client lib
     --libs)
