@@ -149,16 +149,18 @@ yes
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
                        ;;
 		winsock2)
-			AC_EGREP_CPP(yes, [
-#include <ws2tcpip.h>
-#if defined(_WS2TCPIP_H)
-yes
-#endif],
-				[v6type=$i;
+			AC_CHECK_MEMBER([struct sockaddr_in6.sin6_addr],
+                               [v6type=$i;
 				v6lib=dummy;
 				v6libdir=none
 				v6trylibc=yes;
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"],,[[
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#endif]])
 			;;
 		generic)
                         AC_MSG_RESULT([[postponed]])

@@ -18325,7 +18325,8 @@ if test x$with_socklib = xwinsock2; then
   for ac_header in winsock.h winsock2.h ws2tcpip.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
+"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
@@ -19392,23 +19393,21 @@ rm -f conftest*
 
                        ;;
 		winsock2)
-			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
+			ac_fn_c_check_member "$LINENO" "struct sockaddr_in6" "sin6_addr" "ac_cv_member_struct_sockaddr_in6_sin6_addr" "
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
-#if defined(_WS2TCPIP_H)
-yes
 #endif
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
+#endif
+"
+if test "x$ac_cv_member_struct_sockaddr_in6_sin6_addr" = xyes; then :
   v6type=$i;
 				v6lib=dummy;
 				v6libdir=none
 				v6trylibc=yes;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
 fi
-rm -f conftest*
 
 			;;
 		generic)
