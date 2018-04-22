@@ -47,6 +47,9 @@ ALL : "..\lib\$(OUTDIR)\$(PROGNAME).lib"
 {..\..\agent\mibgroup\mibII}.c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<
 
+{..\..\agent\mibgroup\mibII\data_access}.c{$(INTDIR)}.obj::
+   $(CPP) $(CPP_PROJ) $<
+
 {..\..\agent\mibgroup\notification-log-mib}.c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<
 
@@ -164,6 +167,7 @@ LIB32_OBJS2= \
 !IF "$(SDK)" == "true"
 LIB32_OBJS3= \
 	"$(INTDIR)\at.obj" \
+	"$(INTDIR)\at_iphlpapi.obj" \
 	"$(INTDIR)\icmp.obj" \
 	"$(INTDIR)\interfaces.obj" \
 	"$(INTDIR)\ip.obj" \
@@ -361,6 +365,8 @@ CLEAN :
 "$(INTDIR)\winExtDLL.obj": ..\..\agent\mibgroup\winExtDLL.c "$(INTDIR)"
 
 "$(INTDIR)\at.obj": ..\..\agent\mibgroup\mibII\at.c "$(INTDIR)"
+
+"$(INTDIR)\at_iphlpapi.obj": ..\..\agent\mibgroup\mibII\data_access\at_iphlpapi.c "$(INTDIR)"
 
 "$(INTDIR)\icmp.obj": ..\..\agent\mibgroup\mibII\icmp.c "$(INTDIR)"
 
