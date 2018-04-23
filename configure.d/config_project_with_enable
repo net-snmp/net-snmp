@@ -80,6 +80,7 @@ NETSNMP_ARG_WITH(rsaref,
 
 tryopenssl=defaultyes
 askedopenssl=no
+aes_capable=no
 NETSNMP_ARG_WITH(openssl,
 [  --with-openssl=PATH             Look for openssl in PATH/lib,
                                   or PATH may be "internal" to build with
@@ -107,6 +108,14 @@ if test "x$tryopenssl" = "xdefaultyes"; then
       AC_ADD_SEARCH_PATH(/usr/local/ssl)
       tryopenssl=yes
 fi
+if test "x$tryopenssl" = "xyes"; then
+    AC_CHECK_HEADERS(
+        [openssl/aes.h openssl/evp.h],
+        [aes_capable=yes],
+        []
+    )
+fi
+
 AC_ARG_WITH([ssl],,NETSNMP_INVALID_WITH([openssl]))
 AC_ARG_ENABLE([ssl],,NETSNMP_INVALID_WITH([openssl]))
 
@@ -413,8 +422,12 @@ fi
 NETSNMP_ARG_ENABLE(blumenthal-aes,
 [  --enable-blumenthal-aes         Enable AES-192/AES-256 (Blumenthal draft)])
 if test "x$enable_blumenthal_aes" = "xyes"; then
-  AC_DEFINE([NETSNMP_DRAFT_BLUMENTHAL_AES_04], 1,
+    if test "x$aes_capable" = "xyes"; then
+        AC_DEFINE([NETSNMP_DRAFT_BLUMENTHAL_AES_04], 1,
             [Define if AES-192/AES-256 encryption should be supported])
+    else
+        AC_MSG_ERROR([Blumenthal draft requires OpenSSL with AES functions enabled])
+    fi
 fi
 
 
