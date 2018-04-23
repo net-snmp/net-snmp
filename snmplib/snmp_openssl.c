@@ -219,13 +219,6 @@ netsnmp_openssl_cert_get_commonName(X509 *ocert, char **buf, int *len)
 
 #ifndef NETSNMP_FEATURE_REMOVE_CERT_DUMP_NAMES
 
-#ifndef HAVE_X509_GET_SIGNATURE_NID
-int X509_get_signature_nid(const X509 *x)
-{
-    return OBJ_obj2nid(x->sig_alg->algorithm);
-}
-#endif
-
 /** netsnmp_openssl_cert_dump_name: dump subject names in cert
  */
 void
@@ -965,6 +958,13 @@ netsnmp_openssl_null_checks(SSL *ssl, int *null_auth, int *null_cipher)
         }
     }
 }
+
+#ifndef HAVE_X509_GET_SIGNATURE_NID
+int X509_get_signature_nid(const X509 *x)
+{
+    return OBJ_obj2nid(x->sig_alg->algorithm);
+}
+#endif
 
 #ifndef HAVE_ASN1_STRING_GET0_DATA
 const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *x)
