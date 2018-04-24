@@ -105,7 +105,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         if (NULL == entry)
             continue;   /* error already logged by function */
         if (NULL == (proc_buf = kvm_getproc( kd, pid))) {
-            /* release entry */
+            netsnmp_swrun_entry_free(entry);
             continue;
         }
         rc = CONTAINER_INSERT(container, entry);
