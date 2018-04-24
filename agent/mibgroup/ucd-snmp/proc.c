@@ -797,17 +797,13 @@ sh_count_procs(char *procname)
     if (kvm_setproc(kd) < 0) {
         return (-1);
     }
-    kvm_setproc(kd);
     total = 0;
     while ((p = kvm_nextproc(kd)) != NULL) {
-        if (!p) {
-            return (-1);
-        }
         u = kvm_getu(kd, p);
         /*
          * Skip this entry if u or u->u_comm is a NULL pointer 
          */
-        if (!u) {
+        if (!u || !u->u_comm) {
             continue;
         }
         if (strcmp(procname, u->u_comm) == 0)
