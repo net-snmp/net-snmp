@@ -17,8 +17,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef NETSNMP_CAN_USE_NLIST
-
 #include <sys/types.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -260,7 +258,3 @@ free_kmem(void)
 }
 
 #endif                          /* HAVE_KVM_H */
-
-#else
-int unused;	/* Suppress "empty translation unit" warning */
-#endif                          /* NETSNMP_CAN_USE_NLIST */
