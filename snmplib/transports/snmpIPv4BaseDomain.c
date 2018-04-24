@@ -201,6 +201,16 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
     case sizeof(netsnmp_indexed_addr_pair):
         addr_pair = data;
         break;
+    case sizeof(struct sockaddr_in): {
+        char a[16];
+
+        to = data;
+        if (asprintf(&tmp, "%s: [%s]:%hu", prefix,
+		     inet_ntop(AF_INET, &to->sin_addr, a, sizeof(a)),
+		     ntohs(to->sin_port)) < 0)
+            tmp = NULL;
+        return tmp;
+    }
     default:
         netsnmp_assert(0);
         if (asprintf(&tmp, "%s: unknown", prefix) < 0)
