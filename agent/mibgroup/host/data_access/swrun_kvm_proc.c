@@ -118,16 +118,18 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          *     argv[0]   is hrSWRunPath
          *     argv[1..] is hrSWRunParameters
          */
-        for ( cp = proc_buf->p_user.u_psargs; ' ' == *cp; cp++ )
-            ;
-        *cp = '\0';    /* End of argv[0] */
+        cp = strchr(proc_buf->p_user.u_psargs, ' ');
+        if (cp)
+            *cp = '\0';    /* End of argv[0] */
         entry->hrSWRunPath_len = sprintf(entry->hrSWRunPath, "%.*s",
                                           (int)sizeof(entry->hrSWRunPath)-1,
                                           proc_buf->p_user.u_psargs);
-        entry->hrSWRunParameters_len =
-            sprintf(entry->hrSWRunParameters, "%.*s",
-                    (int)sizeof(entry->hrSWRunParameters) - 1, cp + 1);
-        *cp = ' ';     /* Restore u_psargs value */
+        if (cp) {
+            entry->hrSWRunParameters_len =
+                sprintf(entry->hrSWRunParameters, "%.*s",
+                        (int)sizeof(entry->hrSWRunParameters) - 1, cp + 1);
+            *cp = ' ';     /* Restore u_psargs value */
+        }
 
         /*
          * check for system processes
