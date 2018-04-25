@@ -137,6 +137,8 @@ free_kmem(void)
 
 #else                           /* HAVE_KVM_H */
 
+#ifdef HAVE_KMEM
+
 static off_t    klseek(off_t);
 static int      klread(char *, int);
 int             swap = -1, mem = -1, kmem = -1;
@@ -256,5 +258,7 @@ free_kmem(void)
         kmem = -1;
     }
 }
+
+#endif                          /* HAVE_KMEM */
 
 #endif                          /* HAVE_KVM_H */
