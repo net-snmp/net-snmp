@@ -52,7 +52,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\read_config.obj" \
 	"$(INTDIR)\readdir.obj" \
 	"$(INTDIR)\scapi.obj" \
-	"$(INTDIR)\sd-daemon.obj" \
 	"$(INTDIR)\snmp-tc.obj" \
 	"$(INTDIR)\snmp.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
