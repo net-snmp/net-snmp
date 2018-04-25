@@ -24,7 +24,7 @@ int _cpu_status(char *state);
      */
 void init_cpu_kstat( void ) {
     int               i = 0, n = 0, clock, state_begin;
-    char              ctype[15], ftype[15], state[10];
+    char              ctype[16], ftype[16], state[10];
     kstat_t          *ksp;
     kstat_named_t    *ks_data;
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
