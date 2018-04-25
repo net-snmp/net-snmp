@@ -22676,18 +22676,14 @@ rm -f core conftest.err conftest.$ac_objext \
 
 #   kstat library                                       (Solaris)
 #
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kstat_lookup" >&5
-$as_echo_n "checking for library containing kstat_lookup... " >&6; }
-if ${netsnmp_cv_func_kstat_lookup_LNETSNMPLIBS+:} false; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for kstat_lookup in -lkstat" >&5
+$as_echo_n "checking for kstat_lookup in -lkstat... " >&6; }
+if ${ac_cv_lib_kstat_kstat_lookup+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LNETSNMPLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lkstat  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -22706,11 +22702,32 @@ return kstat_lookup ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
+  ac_cv_lib_kstat_kstat_lookup=yes
 else
-  for netsnmp_cur_lib in kstat ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  ac_cv_lib_kstat_kstat_lookup=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_kstat_kstat_lookup" >&5
+$as_echo "$ac_cv_lib_kstat_kstat_lookup" >&6; }
+if test "x$ac_cv_lib_kstat_kstat_lookup" = xyes; then :
+  LNETSNMPLIBS="$LNETSNMPLIBS -lkstat"
+fi
+
+
+
+#   socket library                                      (Solaris)
+#
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for in6addr_any in -lsocket" >&5
+$as_echo_n "checking for in6addr_any in -lsocket... " >&6; }
+if ${ac_cv_lib_socket_in6addr_any+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsocket  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -22719,39 +22736,29 @@ else
 #ifdef __cplusplus
 extern "C"
 #endif
-char kstat_lookup ();
+char in6addr_any ();
 int
 main ()
 {
-return kstat_lookup ();
+return in6addr_any ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
+  ac_cv_lib_socket_in6addr_any=yes
+else
+  ac_cv_lib_socket_in6addr_any=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-          done
+LIBS=$ac_check_lib_save_LIBS
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_kstat_lookup_LNETSNMPLIBS="${netsnmp_result}"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_socket_in6addr_any" >&5
+$as_echo "$ac_cv_lib_socket_in6addr_any" >&6; }
+if test "x$ac_cv_lib_socket_in6addr_any" = xyes; then :
+  LNETSNMPLIBS="$LNETSNMPLIBS -lsocket"
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kstat_lookup_LNETSNMPLIBS" >&5
-$as_echo "$netsnmp_cv_func_kstat_lookup_LNETSNMPLIBS" >&6; }
- if test "${netsnmp_cv_func_kstat_lookup_LNETSNMPLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kstat_lookup_LNETSNMPLIBS}" != "none required" ; then
-       LNETSNMPLIBS="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-$as_echo "#define HAVE_LIBKSTAT 1" >>confdefs.h
-
-
- fi
 
 
 
