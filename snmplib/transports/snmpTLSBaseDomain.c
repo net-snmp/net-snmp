@@ -1,6 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
-
 #include <net-snmp/net-snmp-features.h>
+#include <net-snmp/types.h>
 
 netsnmp_feature_require(cert_util)
 
@@ -35,7 +35,6 @@ netsnmp_feature_require(cert_util)
 #include <openssl/x509_vfy.h>
 #include <openssl/x509v3.h>
 
-#include <net-snmp/types.h>
 #include <net-snmp/config_api.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/cert_util.h>
