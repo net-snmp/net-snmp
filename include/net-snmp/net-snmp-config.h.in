@@ -381,9 +381,6 @@
 /* Define to 1 if you have the `elf' library (-lelf). */
 #undef HAVE_LIBELF
 
-/* Define to 1 if you have the `kstat' library (-lkstat). */
-#undef HAVE_LIBKSTAT
-
 /* Define to 1 if you have the `mld' library (-lmld). */
 #undef HAVE_LIBMLD
 

@@ -152,10 +152,12 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
 
 #   kstat library                                       (Solaris)
 #
-NETSNMP_SEARCH_LIBS(kstat_lookup, kstat,
-        AC_DEFINE(HAVE_LIBKSTAT, 1,
-        	[Define to 1 if you have the `kstat' library (-lkstat).]),,,
-        LNETSNMPLIBS)
+AC_CHECK_LIB(kstat, kstat_lookup, [LNETSNMPLIBS="$LNETSNMPLIBS -lkstat"])
+
+
+#   socket library                                      (Solaris)
+#
+AC_CHECK_LIB(socket, in6addr_any, [LNETSNMPLIBS="$LNETSNMPLIBS -lsocket"])
 
 
 #
