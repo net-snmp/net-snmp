@@ -582,21 +582,6 @@
 /* Define to 1 if you have the <nlist.h> header file. */
 /* #undef HAVE_NLIST_H */
 
-/* Define to 1 if you have the <openssl/aes.h> header file. */
-/* #undef HAVE_OPENSSL_AES_H */
-
-/* Define to 1 if you have the <openssl/des.h> header file. */
-/* #undef HAVE_OPENSSL_DES_H */
-
-/* Define to 1 if you have the <openssl/dh.h> header file. */
-/* #undef HAVE_OPENSSL_DH_H */
-
-/* Define to 1 if you have the <openssl/evp.h> header file. */
-/* #undef HAVE_OPENSSL_EVP_H */
-
-/* Define to 1 if you have the <openssl/hmac.h> header file. */
-/* #undef HAVE_OPENSSL_HMAC_H */
-
 /* Define to 1 if you have the <osreldate.h> header file. */
 /* #undef HAVE_OSRELDATE_H */
 
@@ -1389,11 +1374,20 @@
 
 #define SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER const
 
+/* Define to 1 if you have the <openssl/aes.h> header file. */
+#define HAVE_OPENSSL_AES_H 1
+
+/* Define to 1 if you have the <openssl/des.h> header file. */
+#define HAVE_OPENSSL_DES_H 1
+
 /* Define to 1 if you have the <openssl/dh.h> header file. */
 #define HAVE_OPENSSL_DH_H 1
 
-/* Define to 1 if you have the <openssl/aes.h> header file. */
-#define HAVE_OPENSSL_AES_H 1
+/* Define to 1 if you have the <openssl/evp.h> header file. */
+#define HAVE_OPENSSL_EVP_H 1
+
+/* Define to 1 if you have the <openssl/hmac.h> header file. */
+#define HAVE_OPENSSL_HMAC_H 1
 
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #define HAVE_AES_CFB128_ENCRYPT 1
