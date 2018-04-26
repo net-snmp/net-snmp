@@ -123,8 +123,7 @@ CLEAN :
    @if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $<
 
-MTL=midl.exe
-MTL_PROJ=/nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32 
+
 RSC=rc.exe
 LINK32=link.exe
 LINK32_FLAGS=advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /pdb:"../bin/$(OUTDIR)/netsnmp.pdb" /def:".\libsnmp.def" /out:"../bin/$(OUTDIR)/netsnmp.dll" /implib:"../lib/$(OUTDIR)/netsnmp.lib" $(LDFLAGS)

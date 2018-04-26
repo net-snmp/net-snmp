@@ -582,21 +582,6 @@
 /* Define to 1 if you have the <nlist.h> header file. */
 /* #undef HAVE_NLIST_H */
 
-/* Define to 1 if you have the <openssl/aes.h> header file. */
-/* #undef HAVE_OPENSSL_AES_H */
-
-/* Define to 1 if you have the <openssl/des.h> header file. */
-/* #undef HAVE_OPENSSL_DES_H */
-
-/* Define to 1 if you have the <openssl/dh.h> header file. */
-/* #undef HAVE_OPENSSL_DH_H */
-
-/* Define to 1 if you have the <openssl/evp.h> header file. */
-/* #undef HAVE_OPENSSL_EVP_H */
-
-/* Define to 1 if you have the <openssl/hmac.h> header file. */
-/* #undef HAVE_OPENSSL_HMAC_H */
-
 /* Define to 1 if you have the <osreldate.h> header file. */
 /* #undef HAVE_OSRELDATE_H */
 
@@ -1389,11 +1374,20 @@
 
 #define SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER const
 
+/* Define to 1 if you have the <openssl/aes.h> header file. */
+#define HAVE_OPENSSL_AES_H 1
+
+/* Define to 1 if you have the <openssl/des.h> header file. */
+#define HAVE_OPENSSL_DES_H 1
+
 /* Define to 1 if you have the <openssl/dh.h> header file. */
 #define HAVE_OPENSSL_DH_H 1
 
-/* Define to 1 if you have the <openssl/aes.h> header file. */
-#define HAVE_OPENSSL_AES_H 1
+/* Define to 1 if you have the <openssl/evp.h> header file. */
+#define HAVE_OPENSSL_EVP_H 1
+
+/* Define to 1 if you have the <openssl/hmac.h> header file. */
+#define HAVE_OPENSSL_HMAC_H 1
 
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #define HAVE_AES_CFB128_ENCRYPT 1
@@ -1754,15 +1748,25 @@ enum {
 #        ifdef OPENSSL_BEFORE_1_1_0
 #          pragma comment(lib, "libeay32MDd.lib")
 #        else
-#          pragma comment(lib, "libcrypto32MDd.lib")
-#          pragma comment(lib, "libssl32MDd.lib")
+#          ifdef _M_X64
+#            pragma comment(lib, "libcrypto64MDd.lib")
+#            pragma comment(lib, "libssl64MDd.lib")
+#          else
+#            pragma comment(lib, "libcrypto32MDd.lib")
+#            pragma comment(lib, "libssl32MDd.lib")
+#          endif
 #        endif
 #      else
 #        ifdef OPENSSL_BEFORE_1_1_0
 #          pragma comment(lib, "libeay32MD.lib")
 #        else
-#          pragma comment(lib, "libcrypto32MD.lib")
-#          pragma comment(lib, "libssl32MD.lib")
+#          ifdef _M_X64
+#            pragma comment(lib, "libcrypto64MD.lib")
+#            pragma comment(lib, "libssl64MD.lib")
+#          else
+#            pragma comment(lib, "libcrypto32MD.lib")
+#            pragma comment(lib, "libssl32MD.lib")
+#          endif
 #        endif
 #      endif
 #    else
@@ -1770,15 +1774,25 @@ enum {
 #        ifdef OPENSSL_BEFORE_1_1_0
 #          pragma comment(lib, "libeay32MTd.lib")
 #        else
-#          pragma comment(lib, "libcrypto32MTd.lib")
-#          pragma comment(lib, "libssl32MTd.lib")
+#          ifdef _M_X64
+#            pragma comment(lib, "libcrypto64MTd.lib")
+#            pragma comment(lib, "libssl64MTd.lib")
+#          else
+#            pragma comment(lib, "libcrypto32MTd.lib")
+#            pragma comment(lib, "libssl32MTd.lib")
+#          endif
 #        endif
 #      else
 #        ifdef OPENSSL_BEFORE_1_1_0
 #          pragma comment(lib, "libeay32MT.lib")
 #        else
-#          pragma comment(lib, "libcrypto32MT.lib")
-#          pragma comment(lib, "libssl32MT.lib")
+#          ifdef _M_X64
+#            pragma comment(lib, "libcrypto64MT.lib")
+#            pragma comment(lib, "libssl64MT.lib")
+#          else
+#            pragma comment(lib, "libcrypto32MT.lib")
+#            pragma comment(lib, "libssl32MT.lib")
+#          endif
 #        endif
 #      endif
 #    endif
