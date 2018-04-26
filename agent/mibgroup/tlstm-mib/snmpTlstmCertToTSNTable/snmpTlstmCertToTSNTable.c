@@ -199,7 +199,7 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
         netsnmp_register_scalar(reg);
         if (cache) 
             netsnmp_inject_handler_before(reg, netsnmp_cache_handler_get(cache),
-                                          "table_container");
+                                          "snmpTlstmCertToTSNCount");
     }
     
     reg_oid[10] = 2;
