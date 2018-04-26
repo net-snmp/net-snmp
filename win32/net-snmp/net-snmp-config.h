@@ -1748,15 +1748,25 @@ enum {
 #        ifdef OPENSSL_BEFORE_1_1_0
 #          pragma comment(lib, "libeay32MDd.lib")
 #        else
-#          pragma comment(lib, "libcrypto32MDd.lib")
-#          pragma comment(lib, "libssl32MDd.lib")
+#          ifdef _M_X64
+#            pragma comment(lib, "libcrypto64MDd.lib")
+#            pragma comment(lib, "libssl64MDd.lib")
+#          else
+#            pragma comment(lib, "libcrypto32MDd.lib")
+#            pragma comment(lib, "libssl32MDd.lib")
+#          endif
 #        endif
 #      else
 #        ifdef OPENSSL_BEFORE_1_1_0
 #          pragma comment(lib, "libeay32MD.lib")
 #        else
-#          pragma comment(lib, "libcrypto32MD.lib")
-#          pragma comment(lib, "libssl32MD.lib")
+#          ifdef _M_X64
+#            pragma comment(lib, "libcrypto64MD.lib")
+#            pragma comment(lib, "libssl64MD.lib")
+#          else
+#            pragma comment(lib, "libcrypto32MD.lib")
+#            pragma comment(lib, "libssl32MD.lib")
+#          endif
 #        endif
 #      endif
 #    else
@@ -1764,15 +1774,25 @@ enum {
 #        ifdef OPENSSL_BEFORE_1_1_0
 #          pragma comment(lib, "libeay32MTd.lib")
 #        else
-#          pragma comment(lib, "libcrypto32MTd.lib")
-#          pragma comment(lib, "libssl32MTd.lib")
+#          ifdef _M_X64
+#            pragma comment(lib, "libcrypto64MTd.lib")
+#            pragma comment(lib, "libssl64MTd.lib")
+#          else
+#            pragma comment(lib, "libcrypto32MTd.lib")
+#            pragma comment(lib, "libssl32MTd.lib")
+#          endif
 #        endif
 #      else
 #        ifdef OPENSSL_BEFORE_1_1_0
 #          pragma comment(lib, "libeay32MT.lib")
 #        else
-#          pragma comment(lib, "libcrypto32MT.lib")
-#          pragma comment(lib, "libssl32MT.lib")
+#          ifdef _M_X64
+#            pragma comment(lib, "libcrypto64MT.lib")
+#            pragma comment(lib, "libssl64MT.lib")
+#          else
+#            pragma comment(lib, "libcrypto32MT.lib")
+#            pragma comment(lib, "libssl32MT.lib")
+#          endif
 #        endif
 #      endif
 #    endif
