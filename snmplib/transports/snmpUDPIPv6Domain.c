@@ -674,7 +674,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
         if (isdefault) {
             memset(mask.s6_addr, '\0', sizeof(mask.s6_addr));
             negate = 0;
-            sourcep = NULL;    // gcc gets confused about sourcep being used
+            sourcep = NULL;    /* gcc gets confused about sourcep being used */
         } else {
             if (*source == '!') {
                negate = 1;
