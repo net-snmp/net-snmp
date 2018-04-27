@@ -1321,7 +1321,7 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
 
     if (index) {
         /** filename = NAME_MAX = 255 */
-        /** fingerprint = 60 */
+        /** fingerprint max = 64*3=192 for sha512 */
         /** common name / CN  = 64 */
         if (cert)
             fprintf(index, "c:%s %d %d %s '%s' '%s'\n", filename,
@@ -1341,7 +1341,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     char           *idxname, *pos;
     struct stat     idx_stat;
     char            tmpstr[SNMP_MAXPATH + 5], filename[NAME_MAX];
-    char            fingerprint[60+1], common_name[64+1], type_str[15];
+    char            fingerprint[EVP_MAX_MD_SIZE*3], common_name[64+1], type_str[15];
     char            subject[SNMP_MAXBUF_SMALL], hash_str[15];
     int             count = 0, type, hash, version;
     netsnmp_cert    *cert;
@@ -2144,7 +2144,7 @@ static netsnmp_cert *
 _cert_find_fp(const char *fingerprint)
 {
     netsnmp_cert cert, *result = NULL;
-    char         fp[EVP_MAX_MD_SIZE];
+    char         fp[EVP_MAX_MD_SIZE*3];
 
     if (NULL == fingerprint)
         return NULL;

@@ -199,7 +199,7 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
         netsnmp_register_scalar(reg);
         if (cache) 
             netsnmp_inject_handler_before(reg, netsnmp_cache_handler_get(cache),
-                                          "table_container");
+                                          "snmpTlstmCertToTSNCount");
     }
     
     reg_oid[10] = 2;
@@ -379,7 +379,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 /*
                  * build SnmpTLSFingerprint
                  */
-                u_char bin[42], *ptr = bin;
+                u_char bin[EVP_MAX_MD_SIZE+1], *ptr = bin;
                 size_t len = sizeof(bin);
                 int    rc;
                 rc = netsnmp_tls_fingerprint_build(entry->hashType,
