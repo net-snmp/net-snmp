@@ -291,29 +291,25 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         break;
 
     case 'A':
-        if (zero_sensitive) {
-            *Apsz = strdup(optarg);
-            if (NULL == *Apsz) {
-                fprintf(stderr, "malloc failure processing -%c flag.\n",
-                        (char)arg);
-                return -1;
-            }
+        *Apsz = strdup(optarg);
+        if (NULL == *Apsz) {
+            fprintf(stderr, "malloc failure processing -%c flag.\n",
+                    (char)arg);
+            return -1;
+        }
+        if (zero_sensitive)
             memset(optarg, 0x0, strlen(optarg));
-        } else
-            *Apsz = strdup(optarg);
         break;
 
     case 'X':
-        if (zero_sensitive) {
-            *Xpsz = strdup(optarg);
-            if (NULL == *Xpsz) {
-                fprintf(stderr, "malloc failure processing -%c flag.\n",
-                        (char)arg);
-                return -1;
-            }
+        *Xpsz = strdup(optarg);
+        if (NULL == *Xpsz) {
+            fprintf(stderr, "malloc failure processing -%c flag.\n",
+                    (char)arg);
+            return -1;
+        }
+        if (zero_sensitive)
             memset(optarg, 0x0, strlen(optarg));
-        } else
-            *Xpsz = strdup(optarg);
         break;
 #endif /* NETSNMP_SECMOD_USM */
 
