@@ -86,26 +86,6 @@ AC_SUBST([PERL_SYSTEM_INVOKES_POSIX_SHELL])
 
 
 ##
-#   Compilation-related program checks:
-##
-
-AC_LANG([C])
-AC_PROG_CC
-AC_PROG_CPP
-LINKCC=${LINKCC-"$CC"}
-AC_SUBST(LINKCC)
-
-AC_C_CONST
-AC_C_INLINE
-
-#       libtool stuff for shared/static libraries.
-#
-LT_PREREQ([2.2.6])
-LT_INIT([win32-dll])
-AC_SUBST(LIBTOOL_DEPS)
-
-
-##
 #   Build environment:
 ##
 

@@ -33,10 +33,30 @@ AC_DEFINE_UNQUOTED(NETSNMP_CONFIGURE_OPTIONS,"$ac_configure_args",
 CONFIGURE_OPTIONS="\"$ac_configure_args\""
 AC_SUBST(CONFIGURE_OPTIONS)
 
+##
+#   Compilation-related program checks:
+##
+
+AC_LANG([C])
+AC_PROG_CC
+AC_PROG_CPP
+LINKCC=${LINKCC-"$CC"}
+AC_SUBST(LINKCC)
+
+AC_C_CONST
+AC_C_INLINE
+
+#       libtool stuff for shared/static libraries.
 #
-# Check whether _GNU_SOURCE etc. should be defined
+LT_PREREQ([2.2.6])
+LT_INIT([win32-dll])
+AC_SUBST(LIBTOOL_DEPS)
+
 #
-AC_USE_SYSTEM_EXTENSIONS
+# Define _GNU_SOURCE for asprintf(); _ALL_SOURCE and _THREAD_SAFE for struct
+# random_data on AIX; __EXTENSIONS__ for Solaris.
+#
+CPPFLAGS="-D_GNU_SOURCE -D_ALL_SOURCE -D_THREAD_SAFE -D__EXTENSIONS__ $CPPFLAGS"
 
 ##
 ## Recommended structure:
