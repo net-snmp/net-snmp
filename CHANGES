@@ -3,6 +3,40 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.8.pre3*
+    snmplib:
+      - Asn1: BUG: 2828: from "Google Autofuzz project": fix off-by-one
+	heap access for opaque types   (and an adjacent bug that was not in
+	5.4, noticed by code inspection)
+      - Asn1: from "Google Autofuzz project": propagate error from
+	asn_parse_length
+
+    snmpd:
+      - BUG: 2810: from "Minzhuan Gong": fix compile with
+	--enable-read-only
+      - BUG: 2845: fix compilation error with NETSNMP_NO_WRITE_SUPPORT
+      - BUG: 2846: fix agent compile when both --enable-read-only and
+	--disable-set-support are given.
+      - Com2sec and com2sec6 SOURCE values may deny sources as well as
+	permit.
+      - TLSTM MIB: Fix support for sha256, 384 and 512 fingerprints
+      - BUG: 2830: Make the agentxperms keyword work again
+
+    agentx:
+      - From "Google AutoFuzz project": account for the nul character we
+	will add to the string.
+      - From "Google Autofuzz project": additional agentx protocol parser
+	bounds checking
+
+    Win32:
+      - Add support for the DTLS-UDP and TLS-TCP transports
+      - Win32/MSVC general cleanup
+
+    unspecified:
+      - Fix bug #2832 for building new checkbandwidth script
+      - Many fixes found by Coverity scans
+
+
 *5.8.pre2*
     snmplib:
       - TLS/DTLS fixes
