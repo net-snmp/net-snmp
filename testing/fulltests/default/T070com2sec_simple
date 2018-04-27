@@ -93,8 +93,6 @@ CONFIGAGENT 'rocommunity public 127.0.0.0/8'
 
 AGENT_FLAGS='-Dnetsnmp_udp_parse_security,netsnmp_udp6_parse_security,netsnmp_unix_parse_security'
 
-export NETSNMP_DNS_WORKAROUND=1
-
 STARTAGENT
 
 SAVECHECKAGENT() {
