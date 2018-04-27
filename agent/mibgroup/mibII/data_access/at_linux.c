@@ -19,6 +19,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
 #include "../at.h"
+#include "at_unix.h"
 #include <linux/if_arp.h>
 
 /*
@@ -30,6 +31,17 @@
  * We never release what we've taken . . .
  */
 #define ARP_CACHE_INCR 1024
+
+/*
+ * arp struct to pass flags, hw-addr and ip-addr in bsd manner:
+ */
+struct arptab {
+    int             at_flags;
+    char            at_enaddr[MAX_MAC_ADDR_LEN];
+    int             at_enaddr_len;
+    struct in_addr  at_iaddr;
+    int             if_index;
+};
 
 static int arptab_size, arptab_current;
 static struct arptab *at;

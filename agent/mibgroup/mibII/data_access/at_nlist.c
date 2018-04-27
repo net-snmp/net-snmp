@@ -20,6 +20,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
 #include <net-snmp/data_access/interface.h>
+#include "at_unix.h"
 #include "../at.h"
 
 #if defined(_AIX)

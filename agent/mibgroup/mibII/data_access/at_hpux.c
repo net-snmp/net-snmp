@@ -19,6 +19,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
 #include "../at.h"
+#include "at_unix.h"
 #if HAVE_STRING_H
 #include <string.h>
 #else
