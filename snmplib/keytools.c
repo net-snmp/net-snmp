@@ -858,7 +858,7 @@ KeyChange ::=     TEXTUAL-CONVENTION
 
            For example, using MD5 as the hash algorithm H:
 
-              iterations = (lenOfDelta - 1)/16; // integer division
+              iterations = (lenOfDelta - 1)/16; -- integer division
               temp = keyOld;
               for (i = 0; i < iterations; i++) {
                   temp = MD5 (temp || random);
@@ -901,7 +901,7 @@ KeyChange ::=     TEXTUAL-CONVENTION
 
            For example, using MD5 as the hash algorithm H:
 
-              iterations = (lenOfDelta - 1)/16; // integer division
+              iterations = (lenOfDelta - 1)/16; -- integer division
               temp = keyOld;
               for (i = 0; i < iterations; i++) {
                   temp = MD5 (temp || random);
@@ -1195,7 +1195,7 @@ KeyChange ::=     TEXTUAL-CONVENTION
 
            For example, using MD5 as the hash algorithm H:
 
-              iterations = (lenOfDelta - 1)/16; // integer division
+              iterations = (lenOfDelta - 1)/16; -- integer division
               temp = keyOld;
               for (i = 0; i < iterations; i++) {
                   temp = MD5 (temp || random);
