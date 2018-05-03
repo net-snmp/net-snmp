@@ -272,6 +272,11 @@ _load(netsnmp_container *container)
                 rtap = RTA_NEXT(rtap, rtcount);
             } /* while RTA_OK(rtap) */
 
+	    /* clip the calculated lifetime if necessary */
+	    if (lifetime > IPDEFAULTROUTERLIFETIME_MAX) {
+		lifetime = IPDEFAULTROUTERLIFETIME_MAX;
+	    }
+
             if (address_len != 0 && if_index != -1 &&
                 lifetime != 0 && preference != -3 ) {
                 DEBUGIF("access:defaultrouter") {
