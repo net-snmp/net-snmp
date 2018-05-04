@@ -217,7 +217,7 @@ do
     else
       AC_MSG_RESULT(old MIT crypto API)
     fi
-    AC_CHECK_FUNCS([krb5_auth_con_getsendsubkey])
+    AC_CHECK_FUNCS([krb5_auth_con_getsendsubkey krb5_auth_con_getrecvsubkey])
   fi
 done
 

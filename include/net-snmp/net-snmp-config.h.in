@@ -348,6 +348,9 @@
 /* Define to 1 if you have the `knlist' function. */
 #undef HAVE_KNLIST
 
+/* Define to 1 if you have the `krb5_auth_con_getrecvsubkey' function. */
+#undef HAVE_KRB5_AUTH_CON_GETRECVSUBKEY
+
 /* Define to 1 if you have the `krb5_auth_con_getsendsubkey' function. */
 #undef HAVE_KRB5_AUTH_CON_GETSENDSUBKEY
 
