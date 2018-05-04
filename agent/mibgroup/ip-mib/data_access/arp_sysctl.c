@@ -129,7 +129,13 @@ _load_arp_table_from_sysctl(netsnmp_arp_access *access)
     mib[2] = 0;
     mib[3] = AF_INET;
     mib[4] = NET_RT_FLAGS;
+#ifdef RTF_LLINFO
     mib[5] = RTF_LLINFO;
+#elif defined(RTF_LLDATA)
+    mib[5] = RTF_LLDATA;
+#else
+    mib[5] = 0;
+#endif
 
     err = 0;
     buf = newbuf = NULL;
@@ -236,7 +242,13 @@ _load_ndp_table_from_sysctl(netsnmp_arp_access *access)
     mib[2] = 0;
     mib[3] = AF_INET6;
     mib[4] = NET_RT_FLAGS;
+#ifdef RTF_LLINFO
     mib[5] = RTF_LLINFO;
+#elif defined(RTF_LLDATA)
+    mib[5] = RTF_LLDATA;
+#else
+    mib[5] = 0;
+#endif
 
     err = 0;
     buf = newbuf = NULL;
