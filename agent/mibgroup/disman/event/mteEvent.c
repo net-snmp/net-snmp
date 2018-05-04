@@ -7,6 +7,7 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "agent_global_vars.h"
 #include "agentx/subagent.h"
 #include "disman/event/mteEvent.h"
 #include "disman/event/mteTrigger.h"

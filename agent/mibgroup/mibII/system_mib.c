@@ -48,6 +48,7 @@
 #include "util_funcs.h"
 #include "system_mib.h"
 #include "updates.h"
+#include "agent_global_vars.h"
 
 netsnmp_feature_require(watcher_read_only_int_scalar)
 

@@ -59,6 +59,7 @@
 #include <net-snmp/agent/agent_callbacks.h>
 
 #include "snmpd.h"
+#include "agent_global_vars.h"
 #include "mibgroup/struct.h"
 #include <net-snmp/agent/old_api.h>
 #include <net-snmp/agent/null.h>

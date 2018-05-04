@@ -11,15 +11,6 @@ config_require(agentx/agentx_config)
 config_error(agentx/subagent depends on the Callback transport)
 #endif
 
-     extern int             callback_master_num;
-
-     extern const oid       snmptrap_oid[];
-     extern const oid       snmptrapenterprise_oid[];
-     extern const oid       sysuptime_oid[];
-     extern const size_t    snmptrap_oid_len;
-     extern const size_t    snmptrapenterprise_oid_len;
-     extern const size_t    sysuptime_oid_len;
-
      int             subagent_init(void);
      int             handle_agentx_packet(int, netsnmp_session *, int,
                                           netsnmp_pdu *, void *);

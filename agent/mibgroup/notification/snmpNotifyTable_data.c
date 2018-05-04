@@ -30,6 +30,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "agent_global_vars.h"
 #include "header_complex.h"
 #include "snmpNotifyTable_data.h"
 #include "notification/snmpNotifyFilterProfileTable_data.h"

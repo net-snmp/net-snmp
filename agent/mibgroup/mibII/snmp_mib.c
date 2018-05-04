@@ -20,6 +20,7 @@
 #include "snmp_mib.h"
 #include "system_mib.h"
 #include "updates.h"
+#include "agent_global_vars.h"
 
 netsnmp_feature_require(helper_statistics)
 #ifndef NETSNMP_NO_WRITE_SUPPORT

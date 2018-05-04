@@ -39,6 +39,7 @@
 #include <net-snmp/agent/agent_index.h>
 
 #include "snmpd.h"
+#include "agent_global_vars.h"
 #include "mibgroup/struct.h"
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_iterator.h>

@@ -40,8 +40,6 @@ extern          "C" {
 #define SNMP_AGENT_FLAGS_NONE                   0x0
 #define SNMP_AGENT_FLAGS_CANCEL_IN_PROGRESS     0x1
 
-    extern int      netsnmp_running;
-
     /*
      * If non-zero, causes the addresses of peers to be logged when receptions
      * occur.  
@@ -54,9 +52,6 @@ extern          "C" {
      */
 
     extern int      lastAddrAge;
-
-    extern const oid version_sysoid[];
-    extern const int version_sysoid_len;
 
     /** @typedef struct netsnmp_request_info_s netsnmp_request_info
      * Typedefs the netsnmp_request_info_s struct into
@@ -220,11 +215,6 @@ extern          "C" {
         int             vbcount;
         int             flags;
     } netsnmp_agent_session;
-
-    extern netsnmp_session *main_session;
-
-    extern netsnmp_agent_session *netsnmp_processing_set;
-    extern netsnmp_agent_session *agent_delegated_list;
 
     /*
      * Address cache handling functions.  
