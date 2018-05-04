@@ -26,6 +26,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "agent_global_vars.h"
 #include "header_complex.h"
 #include "snmpNotifyTable.h"
 #include "snmpNotifyFilterProfileTable.h"
@@ -109,8 +110,6 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
     size_t                 profileNameLen;
     struct vacm_viewEntry *vp, *head;
     int                    vb_oid_excluded = 0;
-    extern const oid       snmptrap_oid[];
-    extern const size_t    snmptrap_oid_len;
 
     netsnmp_assert(NULL != paramName);
     netsnmp_assert(NULL != pdu);

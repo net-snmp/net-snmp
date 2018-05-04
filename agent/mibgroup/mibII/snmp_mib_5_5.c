@@ -8,6 +8,7 @@
 
 #include "snmp_mib_5_5.h"
 #include "updates.h"
+#include "agent_global_vars.h"
 
 netsnmp_feature_require(helper_statistics)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
@@ -17,9 +18,6 @@ netsnmp_feature_require(check_vb_truthvalue)
 #define SNMP_OID 1, 3, 6, 1, 2, 1, 11
 
 static oid snmp_oid[] = { SNMP_OID };
-
-extern long snmp_enableauthentraps;
-extern int snmp_enableauthentrapsset;
 
 static int
 snmp_enableauthentraps_store(int a, int b, void *c, void *d)

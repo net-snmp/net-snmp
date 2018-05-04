@@ -10,14 +10,6 @@ struct agent_add_trap_args {
     int             confirm;
 };
 
-extern long snmp_enableauthentraps;
-extern int snmp_enableauthentrapsset;
-
-extern const oid       snmptrap_oid[];
-extern const oid       sysuptime_oid[];
-extern const size_t    snmptrap_oid_len;
-extern const size_t    sysuptime_oid_len;
-
 void            init_traps(void);
 void            send_easy_trap(int, int);
 void            send_trap_pdu(netsnmp_pdu *);

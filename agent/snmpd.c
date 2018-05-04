@@ -135,6 +135,7 @@ typedef long    fd_mask;
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "agent_global_vars.h"
 
 #include <net-snmp/library/fd_event_manager.h>
 #include <net-snmp/library/large_fd_set.h>

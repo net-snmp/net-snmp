@@ -82,6 +82,7 @@ SOFTWARE.
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_assert.h>
+#include "agent_global_vars.h"
 
 #if HAVE_SYSLOG_H
 #include <syslog.h>

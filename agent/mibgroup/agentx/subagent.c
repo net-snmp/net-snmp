@@ -36,6 +36,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include "snmpd.h"
+#include "agent_global_vars.h"
 #include "agentx/protocol.h"
 #include "agentx/client.h"
 #include "agentx/agentx_config.h"
