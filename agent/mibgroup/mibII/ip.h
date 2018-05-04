@@ -18,6 +18,7 @@ config_arch_require(netbsd,    mibII/kernel_netbsd)
 config_arch_require(netbsd5,   mibII/kernel_netbsd)
 config_arch_require(netbsd6,   mibII/kernel_netbsd)
 config_arch_require(netbsd7,   mibII/kernel_netbsd)
+config_arch_require(netbsd8,   mibII/kernel_netbsd)
 config_arch_require(netbsdelf, mibII/kernel_netbsd)
 config_arch_require(netbsdelf5, mibII/kernel_netbsd)
 

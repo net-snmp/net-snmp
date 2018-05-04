@@ -19438,12 +19438,13 @@ $as_echo "#define NETSNMP_USE_KERBEROS_MIT 1" >>confdefs.h
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: old MIT crypto API" >&5
 $as_echo "old MIT crypto API" >&6; }
     fi
-    for ac_func in krb5_auth_con_getsendsubkey
+    for ac_func in krb5_auth_con_getsendsubkey krb5_auth_con_getrecvsubkey
 do :
-  ac_fn_c_check_func "$LINENO" "krb5_auth_con_getsendsubkey" "ac_cv_func_krb5_auth_con_getsendsubkey"
-if test "x$ac_cv_func_krb5_auth_con_getsendsubkey" = xyes; then :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_KRB5_AUTH_CON_GETSENDSUBKEY 1
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
 fi

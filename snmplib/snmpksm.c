@@ -115,6 +115,10 @@ krb5_error_code krb5_auth_con_getsendsubkey(krb5_context context,
     return krb5_auth_con_getlocalsubkey(context, auth_context, keyblock);
 }
 
+#endif
+
+#if !defined(HAVE_KRB5_AUTH_CON_GETRECVSUBKEY) /* Heimdal */
+
 krb5_error_code krb5_auth_con_getrecvsubkey(krb5_context context,
 				krb5_auth_context auth_context, 
 				krb5_keyblock **keyblock)
