@@ -164,8 +164,6 @@ write_engineBoots(int action,
      * variables we may use later 
      */
     static long     long_ret;
-    size_t          size;
-    int             bigsize = SNMP_MAXBUF_MEDIUM;
     u_char          engineIDBuf[SNMP_MAXBUF_MEDIUM];
     int             engineIDBufLen = 0;
 
@@ -211,8 +209,6 @@ write_engineTime(int action,
      * variables we may use later 
      */
     static long     long_ret;
-    size_t          size;
-    int             bigsize = SNMP_MAXBUF_MEDIUM;
     u_char          engineIDBuf[SNMP_MAXBUF_MEDIUM];
     int             engineIDBufLen = 0;
 
