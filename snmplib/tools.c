@@ -818,6 +818,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
                                  */
         gotviolation = 1;
         s += sprintf(s, "!!! ");
+        /* FALLTHROUGH */
 
     default:                   /* Unknown encoding. */
 
