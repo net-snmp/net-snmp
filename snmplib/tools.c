@@ -738,7 +738,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 {
 #define eb(b)	( *(esp+b) & 0xff )
 
-    int             rval = SNMPERR_SUCCESS, gotviolation = 0, slen = 0;
+    int             gotviolation = 0, slen = 0;
     u_int           remaining_len;
 
     char            buf[SNMP_MAXBUF], *s = NULL, *t;
@@ -752,7 +752,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
      * Sanity check.
      */
     if (!estring || (*estring_len <= 0)) {
-        QUITFUN(SNMPERR_GENERR, dump_snmpEngineID_quit);
+        goto dump_snmpEngineID_quit;
     }
     remaining_len = *estring_len;
     memset(buf, 0, SNMP_MAXBUF);
@@ -855,6 +855,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
                                  */
         gotviolation = 1;
         s += sprintf(s, "!!! ");
+        /* FALLTHROUGH */
 
     default:                   /* Unknown encoding. */
 

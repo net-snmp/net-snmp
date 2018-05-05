@@ -1507,6 +1507,9 @@ read_config_store(const char *type, const char *line)
 #ifdef NETSNMP_PERSISTENT_MASK
     mode_t          oldmask;
 #endif
+#if HAVE_FSYNC
+    int fd;
+#endif
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_DONT_PERSIST_STATE)
@@ -1538,6 +1541,10 @@ read_config_store(const char *type, const char *line)
             fprintf(fout, "\n");
         DEBUGMSGTL(("read_config:store", "storing: %s\n", line));
         fclose(fout);
+#if HAVE_FSYNC
+        fd = fileno(fout);
+        fsync(fd);
+#endif
     } else {
         if (strcmp(NETSNMP_APPLICATION_CONFIG_TYPE, type) != 0) {
             /*

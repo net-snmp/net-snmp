@@ -1471,10 +1471,6 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
     )
 {
     size_t          msgAuthParmLen = 0;
-#ifdef NETSNMP_ENABLE_TESTING_CODE
-    size_t          theTotalLength;
-#endif
-
     u_int           boots_uint;
     u_int           time_uint;
     long            boots_long;
@@ -1699,9 +1695,6 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
          * Write the encrypted scopedPdu back into the packet buffer.  
          */
 
-#ifdef NETSNMP_ENABLE_TESTING_CODE
-        theTotalLength = *wholeMsgLen;
-#endif
         *offset = 0;
         rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset, 1,
                                        (u_char) (ASN_UNIVERSAL |
