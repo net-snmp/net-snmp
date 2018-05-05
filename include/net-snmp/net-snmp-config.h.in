@@ -210,6 +210,9 @@
 /* Define to 1 if you have the <fstab.h> header file. */
 #undef HAVE_FSTAB_H
 
+/* Define to 1 if you have the `fsync' function. */
+#undef HAVE_FSYNC
+
 /* Define to 1 if you have the `funlockfile' function. */
 #undef HAVE_FUNLOCKFILE
 
