@@ -1748,6 +1748,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     netsnmp_transport *transport;
     size_t          len;
     char            tmp[SPRINT_MAX_LEN];
+    char           *clientaddr_save = NULL;
 
     /*
      * inform or trap?  default to trap 
@@ -1792,6 +1793,14 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
         goto cleanup;
     }
 
+    if (NULL != session.localname) {
+        clientaddr_save = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                                NETSNMP_DS_LIB_CLIENT_ADDR);
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_CLIENT_ADDR,
+                              session.localname);
+    }
+
     transport = netsnmp_transport_open_client("snmptrap", session.peername);
     if (transport == NULL) {
         config_perror("snmpd: failed to parse this line.");
@@ -1799,6 +1808,9 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
             free(argv[argn - 1]);
         goto cleanup;
     }
+    if (NULL != session.localname)
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
     if ((rc = netsnmp_sess_config_and_open_transport(&session, transport))
         != SNMPERR_SUCCESS) {
         session.s_snmp_errno = rc;

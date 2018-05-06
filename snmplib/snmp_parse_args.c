@@ -214,7 +214,7 @@ netsnmp_parse_args(int argc,
      * initialize session to default values 
      */
     snmp_sess_init(session);
-    strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:-:3:L:");
+    strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:-:3:L:s:");
     if (localOpts) {
         if (strlen(localOpts) + strlen(Opts) >= sizeof(Opts)) {
             snmp_log(LOG_ERR, "Too many localOpts in snmp_parse_args()\n");
@@ -319,6 +319,10 @@ netsnmp_parse_args(int argc,
         case 'd':
             netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
 				   NETSNMP_DS_LIB_DUMP_PACKET, 1);
+            break;
+
+        case 's':
+            session->localname = strdup(optarg);
             break;
 
         case 'v':
