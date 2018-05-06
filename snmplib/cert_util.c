@@ -1978,7 +1978,7 @@ netsnmp_tls_fingerprint_build(int hash_type, const char *hex_fp,
                                    int realloc)
 {
     int     hex_fp_len, rc;
-    size_t  tls_fp_size;
+    size_t  tls_fp_size = *tls_fp_len;
     size_t  offset;
 
     netsnmp_require_ptr_LRV( hex_fp, SNMPERR_GENERR );
