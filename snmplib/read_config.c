@@ -113,6 +113,9 @@
 #include <netdb.h>
 #endif
 #include <errno.h>
+#if HAVE_IO_H
+#include <io.h>
+#endif
 
 #if HAVE_DIRENT_H
 # include <dirent.h>
@@ -1507,9 +1510,6 @@ read_config_store(const char *type, const char *line)
 #ifdef NETSNMP_PERSISTENT_MASK
     mode_t          oldmask;
 #endif
-#if HAVE_FSYNC
-    int fd;
-#endif
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_DONT_PERSIST_STATE)
@@ -1540,11 +1540,22 @@ read_config_store(const char *type, const char *line)
         if (line[strlen(line)] != '\n')
             fprintf(fout, "\n");
         DEBUGMSGTL(("read_config:store", "storing: %s\n", line));
-        fclose(fout);
-#if HAVE_FSYNC
-        fd = fileno(fout);
-        fsync(fd);
+        fflush(fout);
+#if defined(HAVE_FSYNC)
+        fsync(fileno(fout));
+#elif defined(WIN32) && !defined(cygwin)
+        {
+            int fd;
+            void *h;
+
+            fd = _fileno(fout);
+            netsnmp_assert(fd != -1);
+            h = _get_osfhandle(fd);
+            netsnmp_assert(h != INVALID_HANDLE_VALUE);
+            FlushFileBuffers(h);
+        }
 #endif
+        fclose(fout);
     } else {
         if (strcmp(NETSNMP_APPLICATION_CONFIG_TYPE, type) != 0) {
             /*
