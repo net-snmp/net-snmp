@@ -1796,21 +1796,25 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     if (NULL != session.localname) {
         clientaddr_save = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                                 NETSNMP_DS_LIB_CLIENT_ADDR);
+        if (clientaddr_save)
+            clientaddr_save = strdup(clientaddr_save);
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                               NETSNMP_DS_LIB_CLIENT_ADDR,
                               session.localname);
     }
 
     transport = netsnmp_transport_open_client("snmptrap", session.peername);
+
+    if (NULL != session.localname)
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
+
     if (transport == NULL) {
         config_perror("snmpd: failed to parse this line.");
         for (; argn > 0; argn--)
             free(argv[argn - 1]);
         goto cleanup;
     }
-    if (NULL != session.localname)
-        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                              NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
     if ((rc = netsnmp_sess_config_and_open_transport(&session, transport))
         != SNMPERR_SUCCESS) {
         session.s_snmp_errno = rc;
@@ -1855,6 +1859,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
                                      ss->version, name, tag, profile);
 
   cleanup:
+    SNMP_FREE(clientaddr_save);
     SNMP_FREE(profile);
     SNMP_FREE(name);
     SNMP_FREE(tag);
