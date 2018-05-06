@@ -3,6 +3,19 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.8.rc1*
+    snmpd:
+      - BUG: 2864: use clientaddr properly
+      - Add the ability to set the source address with "-s" for trapsess
+      - BUG: 1366: Pass proper buffer length to netsnmp_tls_fingerprint_build()
+      - Fix/enforce ipDefaultRouterLifetime value range
+
+    libsnmp:
+      - Flush persistent config to persistent storage
+
+    NetBSD:
+      - Support for NetBSD 8
+
 *5.8.pre3*
     snmplib:
       - Asn1: BUG: 2828: from "Google Autofuzz project": fix off-by-one
