@@ -367,7 +367,7 @@ netsnmp_udpipv4base_transport(const struct sockaddr_in *addr, int local)
             rc = netsnmp_sockaddr_in2(&client_addr, client_socket, NULL);
             if (client_address != client_socket)
                 free(client_address);
-            if (rc) {
+            if(!rc) {
                 if (!uses_port || !have_port) /* if port isn't from string, */
                     client_addr.sin_port = 0; /* ... clear it */
                 return netsnmp_udpipv4base_transport_with_source(addr, local,
