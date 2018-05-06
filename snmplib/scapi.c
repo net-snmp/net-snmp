@@ -769,7 +769,7 @@ sc_generate_keyed_hash(const oid * authtypeOID, size_t authtypeOIDlen,
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
 #ifdef NETSNMP_ENABLE_TESTING_CODE
-    DEBUGMSGTL(("scapi", "iproperlength: %d, maclen:%d\n", iproperlength,
+    DEBUGMSGTL(("scapi", "iproperlength: %d, maclen:%" NETSNMP_PRIz "d\n", iproperlength,
                 *maclen));
 #endif
 #ifdef NETSNMP_USE_OPENSSL
