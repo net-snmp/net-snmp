@@ -578,10 +578,20 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     break;
                 case 't': /* new in rfc 3411 */
                 case 'a':
+                    /* A string hint gives the max size - we may not need this much */
                     cnt = SNMP_MIN(width, ecp - cp);
-                    if (!sprint_realloc_asciistring(buf, buf_len, out_len,
-                                                    allow_realloc, cp, cnt))
+                    while ((*out_len + cnt + 1) > *buf_len) {
+                        if (!allow_realloc || !snmp_realloc(buf, buf_len))
+                            return 0;
+                    }
+                    if (memchr(cp, '\0', cnt) == NULL) {
+                        /* No embedded '\0' - use strlcpy() to preserve UTF-8 */
+                        strlcpy((char *)(*buf + *out_len), (char *)cp, cnt + 1);
+                        *out_len += cnt;
+                    } else if (!sprint_realloc_asciistring(buf, buf_len,
+                                     out_len, allow_realloc, cp, cnt)) {
                         return 0;
+                    }
                     cp += cnt;
                     break;
                 default:
