@@ -1546,11 +1546,11 @@ read_config_store(const char *type, const char *line)
 #elif defined(WIN32) && !defined(cygwin)
         {
             int fd;
-            void *h;
+            HANDLE h;
 
             fd = _fileno(fout);
             netsnmp_assert(fd != -1);
-            h = _get_osfhandle(fd);
+            h = (void *)_get_osfhandle(fd);
             netsnmp_assert(h != INVALID_HANDLE_VALUE);
             FlushFileBuffers(h);
         }
