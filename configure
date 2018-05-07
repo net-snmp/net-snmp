@@ -775,6 +775,7 @@ USETRAPLIBS
 TRAPLIBS
 SNMPD
 INSTALL_PREFIX
+LIBTOOLFLAGS
 EGREP
 GREP
 CPP
@@ -785,7 +786,6 @@ CPPFLAGS
 LDFLAGS
 CFLAGS
 CC
-LIBTOOLFLAGS
 CONFIGURE_OPTIONS
 target_alias
 host_alias
@@ -3318,212 +3318,10 @@ _ACEOF
 CONFIGURE_OPTIONS="\"$ac_configure_args\""
 
 
-##
-## Recommended structure:
-##
-#     information on the package
-#     checks for programs
-#     checks for libraries
-#     checks for header files
-#     checks for types
-#     checks for structures
-#     checks for compiler characteristics
-#     checks for library functions
-#     checks for system services
-
-
-
-
-
-# -*- autoconf -*-
-#########################################
-##
-#   Command-line processing - --with/--enable
-##
-#########################################
-
-##
-#   System: Compiler settings
-##
-
-
-# Check whether --with-cc was given.
-if test "${with_cc+set}" = set; then :
-  withval=$with_cc; CC=$with_cc;export CC
-fi
-
-
-
-# Check whether --with-linkcc was given.
-if test "${with_linkcc+set}" = set; then :
-  withval=$with_linkcc; LINKCC=$with_linkcc;export LINKCC
-fi
-
-
-
-# Check whether --with-ar was given.
-if test "${with_ar+set}" = set; then :
-  withval=$with_ar; AR=$with_ar; export AR
-fi
-
-
-
-# Check whether --with-endianness was given.
-if test "${with_endianness+set}" = set; then :
-  withval=$with_endianness; if test $with_endianness != "big" -a $with_endianness != "little" ; then
-       as_fn_error $? "Endianness must be big or little, not \"$with_endianness\"." "$LINENO" 5;
-     fi
-
-fi
-
-
-
-# Check whether --with-cflags was given.
-if test "${with_cflags+set}" = set; then :
-  withval=$with_cflags; CFLAGS=$with_cflags; export CFLAGS
-fi
-
-
-
-# Check whether --with-ldflags was given.
-if test "${with_ldflags+set}" = set; then :
-  withval=$with_ldflags; LDFLAGS=$with_ldflags; export LDFLAGS
-fi
-
-
-# Check whether --enable-as-needed was given.
-if test "${enable_as_needed+set}" = set; then :
-  enableval=$enable_as_needed;
-fi
-
-
-
-# Check whether --with-libs was given.
-if test "${with_libs+set}" = set; then :
-  withval=$with_libs; LIBS=$with_libs; export LIBS
-fi
-
-
-# Check whether --enable-silent-libtool was given.
-if test "${enable_silent_libtool+set}" = set; then :
-  enableval=$enable_silent_libtool; LIBTOOLFLAGS=--silent
-fi
-
-
-
-
-##
-#   System: Library settings
-##
-
-
-# Check whether --with-dmalloc was given.
-if test "${with_dmalloc+set}" = set; then :
-  withval=$with_dmalloc;
-fi
-
-   # Check whether --enable-dmalloc was given.
-if test "${enable_dmalloc+set}" = set; then :
-  enableval=$enable_dmalloc; as_fn_error $? "Invalid option. Use --with-dmalloc/--without-dmalloc instead" "$LINENO" 5
-fi
-
-
-
-# Check whether --with-efence was given.
-if test "${with_efence+set}" = set; then :
-  withval=$with_efence; use_efence="$withval"
-fi
-
-   # Check whether --enable-efence was given.
-if test "${enable_efence+set}" = set; then :
-  enableval=$enable_efence; as_fn_error $? "Invalid option. Use --with-efence/--without-efence instead" "$LINENO" 5
-fi
-
-
-tryrsaref=no
-
-# Check whether --with-rsaref was given.
-if test "${with_rsaref+set}" = set; then :
-  withval=$with_rsaref; if test "x$withval" = "xyes"; then
-      tryrsaref=yes
-    elif test "x$withval" = "xno"; then
-      tryrsaref=no
-    elif test -d "$withval"; then
-
-  if test "x$withval" != x -a -d $withval; then
-     if test -d $withval/lib; then
-       LDFLAGS="-L$withval/lib $LDFLAGS"
-     fi
-     if test -d $withval/include; then
-	CPPFLAGS="-I$withval/include $CPPFLAGS"
-     fi
-  fi
-
-      tryrsaref=yes
-    fi
-fi
-
-   # Check whether --enable-rsaref was given.
-if test "${enable_rsaref+set}" = set; then :
-  enableval=$enable_rsaref; as_fn_error $? "Invalid option. Use --with-rsaref/--without-rsaref instead" "$LINENO" 5
-fi
-
-
-tryopenssl=defaultyes
-askedopenssl=no
-aes_capable=no
-
-# Check whether --with-openssl was given.
-if test "${with_openssl+set}" = set; then :
-  withval=$with_openssl; if test "x$withval" = "xyes"; then
-      tryopenssl=yes
-      askedopenssl=yes
-    elif test "x$withval" = "xinternal"; then
-      tryopenssl=internal
-      askedopenssl=internal
-    elif test "x$withval" = "xno"; then
-      tryopenssl=no
-    elif test -d "$withval"; then
-      if test -d "$withval/lib/MinGW"; then
-        LDFLAGS="-L$withval/lib/MinGW $LDFLAGS"
-        CPPFLAGS="-I$withval/include $CPPFLAGS"
-      else
-
-  if test "x$withval" != x -a -d $withval; then
-     if test -d $withval/lib; then
-       LDFLAGS="-L$withval/lib $LDFLAGS"
-     fi
-     if test -d $withval/include; then
-	CPPFLAGS="-I$withval/include $CPPFLAGS"
-     fi
-  fi
-
-      fi
-      tryopenssl=yes
-      askedopenssl=yes
-    fi
-fi
-
-   # Check whether --enable-openssl was given.
-if test "${enable_openssl+set}" = set; then :
-  enableval=$enable_openssl; as_fn_error $? "Invalid option. Use --with-openssl/--without-openssl instead" "$LINENO" 5
-fi
-
-if test "x$tryopenssl" = "xdefaultyes"; then
-
-  if test "x/usr/local/ssl" != x -a -d /usr/local/ssl; then
-     if test -d /usr/local/ssl/lib; then
-       LDFLAGS="-L/usr/local/ssl/lib $LDFLAGS"
-     fi
-     if test -d /usr/local/ssl/include; then
-	CPPFLAGS="-I/usr/local/ssl/include $CPPFLAGS"
-     fi
-  fi
-
-      tryopenssl=yes
-fi
-if test "x$tryopenssl" = "xyes"; then
-    ac_ext=c
+#
+# Check whether _GNU_SOURCE etc. should be defined
+#
+ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -4711,7 +4509,274 @@ fi
 done
 
 
-for ac_header in openssl/aes.h openssl/evp.h
+
+  ac_fn_c_check_header_mongrel "$LINENO" "minix/config.h" "ac_cv_header_minix_config_h" "$ac_includes_default"
+if test "x$ac_cv_header_minix_config_h" = xyes; then :
+  MINIX=yes
+else
+  MINIX=
+fi
+
+
+  if test "$MINIX" = yes; then
+
+$as_echo "#define _POSIX_SOURCE 1" >>confdefs.h
+
+
+$as_echo "#define _POSIX_1_SOURCE 2" >>confdefs.h
+
+
+$as_echo "#define _MINIX 1" >>confdefs.h
+
+  fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether it is safe to define __EXTENSIONS__" >&5
+$as_echo_n "checking whether it is safe to define __EXTENSIONS__... " >&6; }
+if ${ac_cv_safe_to_define___extensions__+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#	  define __EXTENSIONS__ 1
+	  $ac_includes_default
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_safe_to_define___extensions__=yes
+else
+  ac_cv_safe_to_define___extensions__=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_safe_to_define___extensions__" >&5
+$as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
+  test $ac_cv_safe_to_define___extensions__ = yes &&
+    $as_echo "#define __EXTENSIONS__ 1" >>confdefs.h
+
+  $as_echo "#define _ALL_SOURCE 1" >>confdefs.h
+
+  $as_echo "#define _GNU_SOURCE 1" >>confdefs.h
+
+  $as_echo "#define _POSIX_PTHREAD_SEMANTICS 1" >>confdefs.h
+
+  $as_echo "#define _TANDEM_SOURCE 1" >>confdefs.h
+
+
+
+##
+## Recommended structure:
+##
+#     information on the package
+#     checks for programs
+#     checks for libraries
+#     checks for header files
+#     checks for types
+#     checks for structures
+#     checks for compiler characteristics
+#     checks for library functions
+#     checks for system services
+
+
+
+
+
+# -*- autoconf -*-
+#########################################
+##
+#   Command-line processing - --with/--enable
+##
+#########################################
+
+##
+#   System: Compiler settings
+##
+
+
+# Check whether --with-cc was given.
+if test "${with_cc+set}" = set; then :
+  withval=$with_cc; CC=$with_cc;export CC
+fi
+
+
+
+# Check whether --with-linkcc was given.
+if test "${with_linkcc+set}" = set; then :
+  withval=$with_linkcc; LINKCC=$with_linkcc;export LINKCC
+fi
+
+
+
+# Check whether --with-ar was given.
+if test "${with_ar+set}" = set; then :
+  withval=$with_ar; AR=$with_ar; export AR
+fi
+
+
+
+# Check whether --with-endianness was given.
+if test "${with_endianness+set}" = set; then :
+  withval=$with_endianness; if test $with_endianness != "big" -a $with_endianness != "little" ; then
+       as_fn_error $? "Endianness must be big or little, not \"$with_endianness\"." "$LINENO" 5;
+     fi
+
+fi
+
+
+
+# Check whether --with-cflags was given.
+if test "${with_cflags+set}" = set; then :
+  withval=$with_cflags; CFLAGS=$with_cflags; export CFLAGS
+fi
+
+
+
+# Check whether --with-ldflags was given.
+if test "${with_ldflags+set}" = set; then :
+  withval=$with_ldflags; LDFLAGS=$with_ldflags; export LDFLAGS
+fi
+
+
+# Check whether --enable-as-needed was given.
+if test "${enable_as_needed+set}" = set; then :
+  enableval=$enable_as_needed;
+fi
+
+
+
+# Check whether --with-libs was given.
+if test "${with_libs+set}" = set; then :
+  withval=$with_libs; LIBS=$with_libs; export LIBS
+fi
+
+
+# Check whether --enable-silent-libtool was given.
+if test "${enable_silent_libtool+set}" = set; then :
+  enableval=$enable_silent_libtool; LIBTOOLFLAGS=--silent
+fi
+
+
+
+
+##
+#   System: Library settings
+##
+
+
+# Check whether --with-dmalloc was given.
+if test "${with_dmalloc+set}" = set; then :
+  withval=$with_dmalloc;
+fi
+
+   # Check whether --enable-dmalloc was given.
+if test "${enable_dmalloc+set}" = set; then :
+  enableval=$enable_dmalloc; as_fn_error $? "Invalid option. Use --with-dmalloc/--without-dmalloc instead" "$LINENO" 5
+fi
+
+
+
+# Check whether --with-efence was given.
+if test "${with_efence+set}" = set; then :
+  withval=$with_efence; use_efence="$withval"
+fi
+
+   # Check whether --enable-efence was given.
+if test "${enable_efence+set}" = set; then :
+  enableval=$enable_efence; as_fn_error $? "Invalid option. Use --with-efence/--without-efence instead" "$LINENO" 5
+fi
+
+
+tryrsaref=no
+
+# Check whether --with-rsaref was given.
+if test "${with_rsaref+set}" = set; then :
+  withval=$with_rsaref; if test "x$withval" = "xyes"; then
+      tryrsaref=yes
+    elif test "x$withval" = "xno"; then
+      tryrsaref=no
+    elif test -d "$withval"; then
+
+  if test "x$withval" != x -a -d $withval; then
+     if test -d $withval/lib; then
+       LDFLAGS="-L$withval/lib $LDFLAGS"
+     fi
+     if test -d $withval/include; then
+	CPPFLAGS="-I$withval/include $CPPFLAGS"
+     fi
+  fi
+
+      tryrsaref=yes
+    fi
+fi
+
+   # Check whether --enable-rsaref was given.
+if test "${enable_rsaref+set}" = set; then :
+  enableval=$enable_rsaref; as_fn_error $? "Invalid option. Use --with-rsaref/--without-rsaref instead" "$LINENO" 5
+fi
+
+
+tryopenssl=defaultyes
+askedopenssl=no
+aes_capable=no
+
+# Check whether --with-openssl was given.
+if test "${with_openssl+set}" = set; then :
+  withval=$with_openssl; if test "x$withval" = "xyes"; then
+      tryopenssl=yes
+      askedopenssl=yes
+    elif test "x$withval" = "xinternal"; then
+      tryopenssl=internal
+      askedopenssl=internal
+    elif test "x$withval" = "xno"; then
+      tryopenssl=no
+    elif test -d "$withval"; then
+      if test -d "$withval/lib/MinGW"; then
+        LDFLAGS="-L$withval/lib/MinGW $LDFLAGS"
+        CPPFLAGS="-I$withval/include $CPPFLAGS"
+      else
+
+  if test "x$withval" != x -a -d $withval; then
+     if test -d $withval/lib; then
+       LDFLAGS="-L$withval/lib $LDFLAGS"
+     fi
+     if test -d $withval/include; then
+	CPPFLAGS="-I$withval/include $CPPFLAGS"
+     fi
+  fi
+
+      fi
+      tryopenssl=yes
+      askedopenssl=yes
+    fi
+fi
+
+   # Check whether --enable-openssl was given.
+if test "${enable_openssl+set}" = set; then :
+  enableval=$enable_openssl; as_fn_error $? "Invalid option. Use --with-openssl/--without-openssl instead" "$LINENO" 5
+fi
+
+if test "x$tryopenssl" = "xdefaultyes"; then
+
+  if test "x/usr/local/ssl" != x -a -d /usr/local/ssl; then
+     if test -d /usr/local/ssl/lib; then
+       LDFLAGS="-L/usr/local/ssl/lib $LDFLAGS"
+     fi
+     if test -d /usr/local/ssl/include; then
+	CPPFLAGS="-I/usr/local/ssl/include $CPPFLAGS"
+     fi
+  fi
+
+      tryopenssl=yes
+fi
+if test "x$tryopenssl" = "xyes"; then
+    for ac_header in openssl/aes.h openssl/evp.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -8477,68 +8542,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 LINKCC=${LINKCC-"$CC"}
-
-
-
-  ac_fn_c_check_header_mongrel "$LINENO" "minix/config.h" "ac_cv_header_minix_config_h" "$ac_includes_default"
-if test "x$ac_cv_header_minix_config_h" = xyes; then :
-  MINIX=yes
-else
-  MINIX=
-fi
-
-
-  if test "$MINIX" = yes; then
-
-$as_echo "#define _POSIX_SOURCE 1" >>confdefs.h
-
-
-$as_echo "#define _POSIX_1_SOURCE 2" >>confdefs.h
-
-
-$as_echo "#define _MINIX 1" >>confdefs.h
-
-  fi
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether it is safe to define __EXTENSIONS__" >&5
-$as_echo_n "checking whether it is safe to define __EXTENSIONS__... " >&6; }
-if ${ac_cv_safe_to_define___extensions__+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#	  define __EXTENSIONS__ 1
-	  $ac_includes_default
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_safe_to_define___extensions__=yes
-else
-  ac_cv_safe_to_define___extensions__=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_safe_to_define___extensions__" >&5
-$as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
-  test $ac_cv_safe_to_define___extensions__ = yes &&
-    $as_echo "#define __EXTENSIONS__ 1" >>confdefs.h
-
-  $as_echo "#define _ALL_SOURCE 1" >>confdefs.h
-
-  $as_echo "#define _GNU_SOURCE 1" >>confdefs.h
-
-  $as_echo "#define _POSIX_PTHREAD_SEMANTICS 1" >>confdefs.h
-
-  $as_echo "#define _TANDEM_SOURCE 1" >>confdefs.h
-
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for an ANSI C-conforming const" >&5

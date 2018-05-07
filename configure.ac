@@ -33,6 +33,11 @@ AC_DEFINE_UNQUOTED(NETSNMP_CONFIGURE_OPTIONS,"$ac_configure_args",
 CONFIGURE_OPTIONS="\"$ac_configure_args\""
 AC_SUBST(CONFIGURE_OPTIONS)
 
+#
+# Check whether _GNU_SOURCE etc. should be defined
+#
+AC_USE_SYSTEM_EXTENSIONS
+
 ##
 ## Recommended structure:
 ##
