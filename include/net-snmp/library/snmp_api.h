@@ -37,6 +37,21 @@
 
 #include <net-snmp/net-snmp-features.h>
 
+#ifdef SNMP_NEED_REQUEST_LIST
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h> /* struct timeval */
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#else
+struct timeval;
+#endif
+
 #ifndef DONT_SHARE_ERROR_WITH_OTHER_THREADS
 #define SET_SNMP_ERROR(x) snmp_errno=(x)
 #else
@@ -70,7 +85,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-struct timeval;
 /*
  * A list of all the outstanding requests for a particular session.
  */
