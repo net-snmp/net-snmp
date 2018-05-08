@@ -65,7 +65,7 @@ static int _debug_level;
 
 
 void
-__libraries_init(char *appname)
+__libraries_init(const char *appname)
 {
   static int have_inited = 0;
 
@@ -779,6 +779,7 @@ retry:
                   if (*response) snmp_free_pdu(*response);
                   goto retry;
                }
+               /* fall through */
 
             /* Pv1, SNMPsec, Pv2p, v2c, v2u, v2*, and SNMPv3 PDUs */
             case SNMP_ERR_TOOBIG:
@@ -801,7 +802,7 @@ retry:
             /* in SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
             case SNMP_ERR_INCONSISTENTNAME:
             default:
-               strlcpy(err_str, (char*)snmp_errstring((*response)->errstat),
+               strlcpy(err_str, snmp_errstring((*response)->errstat),
 		       STR_BUF_SIZE);
                *err_num = (int)(*response)->errstat;
 	       *err_ind = (*response)->errindex;
@@ -841,11 +842,11 @@ py_netsnmp_construct_varbind(void)
 
   callable = PyDict_GetItemString(dict, "Varbind");
 
-  return PyObject_CallFunction(callable, "");
+  return PyObject_CallFunction(callable, NULL);
 }
 
 static int
-py_netsnmp_attr_string(PyObject *obj, char * attr_name, char **val,
+py_netsnmp_attr_string(PyObject *obj, const char *attr_name, char **val,
     Py_ssize_t *len)
 {
   *val = NULL;
@@ -863,7 +864,7 @@ py_netsnmp_attr_string(PyObject *obj, char * attr_name, char **val,
 }
 
 static long long
-py_netsnmp_attr_long(PyObject *obj, char * attr_name)
+py_netsnmp_attr_long(PyObject *obj, const char *attr_name)
 {
   long long val = -1;
 
@@ -879,7 +880,7 @@ py_netsnmp_attr_long(PyObject *obj, char * attr_name)
 }
 
 static void *
-py_netsnmp_attr_void_ptr(PyObject *obj, char * attr_name)
+py_netsnmp_attr_void_ptr(PyObject *obj, const char *attr_name)
 {
   void *val = NULL;
 
@@ -908,7 +909,7 @@ py_netsnmp_verbose(void)
 }
 
 static int
-py_netsnmp_attr_set_string(PyObject *obj, char *attr_name,
+py_netsnmp_attr_set_string(PyObject *obj, const char *attr_name,
 			   char *val, size_t len)
 {
   int ret = -1;
