@@ -13,6 +13,10 @@
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h> /* PATH_MAX (Linux), MAXPATHLEN (BSD) */
+#endif
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -20,7 +24,7 @@ extern          "C" {
 
 
     /*
-     * General acros and constants.
+     * General macros and constants.
      */
 #ifdef WIN32
 #  define SNMP_MAXPATH MAX_PATH
