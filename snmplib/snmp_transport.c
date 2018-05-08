@@ -974,7 +974,8 @@ netsnmp_transport_config_compare(netsnmp_transport_config *left,
 }
 
 netsnmp_transport_config *
-netsnmp_transport_create_config(char *key, char *value) {
+netsnmp_transport_create_config(const char *key, const char *value)
+{
     netsnmp_transport_config *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_transport_config);
     entry->key = strdup(key);

@@ -364,8 +364,8 @@ NETSNMP_IMPORT
 int netsnmp_transport_config_compare(netsnmp_transport_config *left,
                                      netsnmp_transport_config *right);
 NETSNMP_IMPORT
-netsnmp_transport_config *netsnmp_transport_create_config(char *key,
-                                                          char *value);
+netsnmp_transport_config *netsnmp_transport_create_config(const char *key,
+                                                          const char *value);
 
 #ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
 NETSNMP_IMPORT
