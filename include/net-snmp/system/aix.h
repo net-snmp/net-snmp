@@ -1,6 +1,6 @@
 #include <net-snmp/system/generic.h>
 #include <sys/select.h>
-#undef TOTAL_MEMORY_SYMBOL
+
 #undef NPROC_SYMBOL
 #undef RTHASHSIZE_SYMBOL
 #undef RTHOST_SYMBOL

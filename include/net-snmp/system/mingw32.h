@@ -30,6 +30,3 @@
 #include <ws2tcpip.h>
 
 #include <net-snmp/system/generic.h>
-#undef bsdlike
-#undef MBSTAT_SYMBOL
-#undef TOTAL_MEMORY_SYMBOL

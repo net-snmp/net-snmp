@@ -18,24 +18,19 @@
 /*
  * inp_next symbol 
  */
-#define HAVE_INPCBTABLE 1
 #undef INP_NEXT_SYMBOL
-#undef INP_PREV_SYMBOL
 
 #if __NetBSD_Version__ >= 700000001
 #define INP_FIRST_SYMBOL inpt_queue.tqh_first
 #define INP_NEXT_SYMBOL inp_queue.tqe_next
-#define INP_PREV_SYMBOL inp_queue.tqe_prev
 #else
 #define INP_FIRST_SYMBOL inpt_queue.cqh_first
 #define INP_NEXT_SYMBOL inp_queue.cqe_next
-#define INP_PREV_SYMBOL inp_queue.cqe_prev
 #endif
 
 #if __NetBSD_Version__ >= 106300000       /* NetBSD 1.6ZD */            
 #undef IFADDR_SYMBOL
 #define IFADDR_SYMBOL "in_ifaddrhead"
-#undef TOTAL_MEMORY_SYMBOL
 #endif
 
 #define UTMP_FILE _PATH_UTMP
