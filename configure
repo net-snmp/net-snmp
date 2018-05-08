@@ -16268,7 +16268,12 @@ fi
 fi
         #  <dirent.h>, <sys/ndir.h>, <sys/dir.h> & <ndir.h>
 #  Apps:
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sys/wait.h that is POSIX.1 compatible" >&5
+# Don't use <sys/wait.h> when using Windows sockets
+case x$with_socklib in
+  xwinsock2)
+    ;;
+  *)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sys/wait.h that is POSIX.1 compatible" >&5
 $as_echo_n "checking for sys/wait.h that is POSIX.1 compatible... " >&6; }
 if ${ac_cv_header_sys_wait_h+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -16308,7 +16313,8 @@ if test $ac_cv_header_sys_wait_h = yes; then
 $as_echo "#define HAVE_SYS_WAIT_H 1" >>confdefs.h
 
 fi
-      #  <sys/wait.h>
+  #  <sys/wait.h>
+esac
 
 # allow for quick module/library/etc processing checks
 if test "x$NETSNMP_QUICK_CHECK" = "x" ; then
@@ -16317,7 +16323,7 @@ if test "x$NETSNMP_QUICK_CHECK" = "x" ; then
 #   Stand-alone headers:
 ##
 #  Core:
-for ac_header in getopt.h   pthread.h  regex.h                        string.h   syslog.h   unistd.h                       stdint.h   inttypes.h                                sys/param.h                          sys/select.h                         sys/syslog.h                         sys/time.h                           sys/timeb.h
+for ac_header in getopt.h   pthread.h  regex.h                        string.h   syslog.h   unistd.h                       stdint.h   inttypes.h                                process.h                            sys/param.h                          sys/select.h                         sys/syslog.h                         sys/time.h                           sys/timeb.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -26323,7 +26329,7 @@ _ACEOF
 #   Stand-alone function checks:
 ##
 #  Core:
-for ac_func in rand   random srand srandom lrand48 srand48                signal sigset
+for ac_func in rand   random srand srandom lrand48 srand48
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -26337,7 +26343,7 @@ done
 
 
 #  Library:
-for ac_func in asprintf                                                         closedir        fgetc_unlocked  flockfile                        fork            funlockfile     getipnodebyname                  gettimeofday    if_nametoindex  mkstemp                          opendir         readdir         regcomp                          setenv          setitimer       setlocale                        setsid          snprintf        strcasestr                       strdup          strerror        strncasecmp                      sysconf         times           vsnprintf
+for ac_func in asprintf        closedir        fgetc_unlocked                   flockfile       funlockfile     getipnodebyname                  gettimeofday    if_nametoindex  mkstemp                          opendir         readdir         regcomp                          setenv          setitimer       setlocale                        setsid          snprintf        strcasestr                       strdup          strerror        strncasecmp                      sysconf         times           vsnprintf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -26470,7 +26476,9 @@ rm -f core conftest.err conftest.$ac_objext \
     ;;
 
   *)
-    for ac_func in closesocket gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname gethostbyaddr
+    # Do not use fork() nor any related function when using Windows sockets
+    # because Windows sockets are not compatible with fork().
+    for ac_func in execv fork signal sigset uname                   closesocket gai_strerror getaddrinfo gethostbyname                   gethostbyname2 gethostname gethostbyaddr                   inet_ntop inet_pton
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -26495,32 +26503,6 @@ else
   case " $LIBOBJS " in
   *" getopt.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS getopt.$ac_objext"
- ;;
-esac
-
-fi
-
-ac_fn_c_check_func "$LINENO" "inet_ntop" "ac_cv_func_inet_ntop"
-if test "x$ac_cv_func_inet_ntop" = xyes; then :
-  $as_echo "#define HAVE_INET_NTOP 1" >>confdefs.h
-
-else
-  case " $LIBOBJS " in
-  *" inet_ntop.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS inet_ntop.$ac_objext"
- ;;
-esac
-
-fi
-
-ac_fn_c_check_func "$LINENO" "inet_pton" "ac_cv_func_inet_pton"
-if test "x$ac_cv_func_inet_pton" = xyes; then :
-  $as_echo "#define HAVE_INET_PTON 1" >>confdefs.h
-
-else
-  case " $LIBOBJS " in
-  *" inet_pton.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS inet_pton.$ac_objext"
  ;;
 esac
 
@@ -26607,7 +26589,7 @@ fi
 
 
 #  Agent:
-for ac_func in cgetnext        chown          execv                           forkall         fsync                                          gai_strerror    getgrnam                                       gethostname     getloadavg                                     getpid          getpwnam                                       hasmntopt       initgroups                                     if_nameindex    if_indextoname if_nametoindex                  localtime_r     mkstemp        mktime                          poll            regcomp                                        setgid          setgroups                                      setmntent       setuid                                         sigaction       sigblock      sighold                          sigprocmask                                                    statfs          statvfs       stime                            strncasecmp     system                                         uname           usleep
+for ac_func in cgetnext        chown          forkall                         fsync           gai_strerror   getgrnam                        gethostname     getloadavg                                     getpid          getpwnam                                       hasmntopt       initgroups                                     if_nameindex    if_indextoname if_nametoindex                  localtime_r     mkstemp        mktime                          poll            regcomp                                        setgid          setgroups                                      setmntent       setuid                                         sigaction       sigblock      sighold                          sigprocmask                                                    statfs          statvfs       stime                            strncasecmp     system        usleep
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

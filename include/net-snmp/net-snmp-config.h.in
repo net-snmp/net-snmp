@@ -723,6 +723,9 @@
 /* Define if prioritynames variable is declared in <syslog.h> */
 #undef HAVE_PRIORITYNAMES
 
+/* Define to 1 if you have the <process.h> header file. */
+#undef HAVE_PROCESS_H
+
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
 
