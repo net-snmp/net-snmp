@@ -32,13 +32,11 @@ AC_TYPE_SIGNAL
 #   Stand-alone function checks:
 ##
 #  Core:
-AC_CHECK_FUNCS([rand   random srand srandom lrand48 srand48] dnl
-               [signal sigset                              ] )
+AC_CHECK_FUNCS([rand   random srand srandom lrand48 srand48])
 
 #  Library:
-AC_CHECK_FUNCS([asprintf                                         ] dnl
-               [closedir        fgetc_unlocked  flockfile        ] dnl
-               [fork            funlockfile     getipnodebyname  ] dnl
+AC_CHECK_FUNCS([asprintf        closedir        fgetc_unlocked   ] dnl
+               [flockfile       funlockfile     getipnodebyname  ] dnl
                [getlogin                                         ] dnl
                [gettimeofday    if_nametoindex  mkstemp          ] dnl
                [opendir         readdir         regcomp          ] dnl
@@ -89,7 +87,12 @@ case x$with_socklib in
     ;;
 
   *)
-    AC_CHECK_FUNCS([closesocket gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname gethostbyaddr])
+    # Do not use fork() nor any related function when using Windows sockets
+    # because Windows sockets are not compatible with fork().
+    AC_CHECK_FUNCS([execv fork signal sigset uname]dnl
+                   [closesocket gai_strerror getaddrinfo gethostbyname]dnl
+                   [gethostbyname2 gethostname gethostbyaddr]dnl
+                   [inet_ntop inet_pton])
     ;;
 esac
 
@@ -138,14 +141,13 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
 
 AC_CONFIG_LIBOBJ_DIR([snmplib])
 
-AC_REPLACE_FUNCS([getopt        inet_ntop     inet_pton        ] dnl
+AC_REPLACE_FUNCS([getopt                                       ] dnl
                  [strlcat       strlcpy       strtok_r         ] dnl
                  [strtol        strtoul       strtoull         ] )
 
 #  Agent:
-AC_CHECK_FUNCS([cgetnext        chown          execv           ] dnl
-               [forkall         fsync                          ] dnl
-               [gai_strerror    getgrnam                       ] dnl
+AC_CHECK_FUNCS([cgetnext        chown          forkall         ] dnl
+               [fsync           gai_strerror   getgrnam        ] dnl
                [gethostname     getloadavg                     ] dnl
                [getpid          getpwnam                       ] dnl
                [hasmntopt       initgroups                     ] dnl
@@ -157,8 +159,7 @@ AC_CHECK_FUNCS([cgetnext        chown          execv           ] dnl
                [sigaction       sigblock      sighold          ] dnl
                [sigprocmask                                    ] dnl
                [statfs          statvfs       stime            ] dnl
-               [strncasecmp     system                         ] dnl
-               [uname           usleep                         ] )
+               [strncasecmp     system        usleep           ] )
 
 #  Apps:
 AC_CHECK_FUNCS([getdtablesize                                  ] dnl

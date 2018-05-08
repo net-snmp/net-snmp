@@ -11,7 +11,13 @@
 AC_HEADER_STDC          #  <stdlib.h>, <stdarg.h>,   <string.h>  & <float.h>
 AC_HEADER_DIRENT        #  <dirent.h>, <sys/ndir.h>, <sys/dir.h> & <ndir.h>
 #  Apps:
-AC_HEADER_SYS_WAIT      #  <sys/wait.h>
+# Don't use <sys/wait.h> when using Windows sockets
+case x$with_socklib in
+  xwinsock2)
+    ;;
+  *)
+    AC_HEADER_SYS_WAIT  #  <sys/wait.h>
+esac
 
 # allow for quick module/library/etc processing checks
 if test "x$NETSNMP_QUICK_CHECK" = "x" ; then
@@ -23,6 +29,7 @@ if test "x$NETSNMP_QUICK_CHECK" = "x" ; then
 AC_CHECK_HEADERS([getopt.h   pthread.h  regex.h      ] dnl
                  [string.h   syslog.h   unistd.h     ] dnl
                  [stdint.h   inttypes.h              ] dnl
+                 [process.h          ] dnl
                  [sys/param.h        ] dnl
                  [sys/select.h       ] dnl
                  [sys/syslog.h       ] dnl
