@@ -30,6 +30,7 @@
 extern          "C" {
 #endif
 
+#include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/data_list.h>
