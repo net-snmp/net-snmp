@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # eval_tools.sh
 #
@@ -685,6 +686,14 @@ FINISHED() {
 	    rm -f core
 	fi
 	echo "$headerStr...FAIL" >> $SNMP_TMPDIR/invoked
+	if [ -n "${TRAVIS_OS_NAME}" ] || [ -n "$APPVEYOR" ]; then
+	    {
+		find "$SNMP_TMPDIR" -type f |
+		    while read -r f; do
+			head -n 256 "$f"; tail -n 256 "$f";
+		    done;
+	    } 1>&2
+	fi
 	exit 1
     fi
 
