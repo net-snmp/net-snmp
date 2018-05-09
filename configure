@@ -27185,8 +27185,8 @@ done
 
 # IPv4/IPv6 function checks. AC_CHECK_FUNC() can't find these on MinGW
 # since these functions have the __cdecl calling convention on MinGW.
-case x$target_os in
-  xmingw*)
+case x$with_socklib in
+  xwinsock2)
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <winsock2.h>

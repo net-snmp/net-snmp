@@ -49,8 +49,8 @@ AC_CHECK_FUNCS([asprintf                                         ] dnl
 
 # IPv4/IPv6 function checks. AC_CHECK_FUNC() can't find these on MinGW
 # since these functions have the __cdecl calling convention on MinGW.
-case x$target_os in
-  xmingw*)
+case x$with_socklib in
+  xwinsock2)
     AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <winsock2.h>],
     [ closesocket(0); ])],
     [ ac_cv_func_closesocket=yes
