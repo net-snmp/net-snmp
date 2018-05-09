@@ -103,11 +103,6 @@
 #undef STRUCT_in6pcb_HAS_inp_vflag
 
 /*
- * utility macro used in several darwin specific files
- */
-#define SNMP_CFRelease(x) do { if (x) { CFRelease(x); x = NULL; } } while(0)
-
-/*
  * Mac OS X runs on both PPC and Intel hardware,
  *   which handle udpTable index values differently
  */

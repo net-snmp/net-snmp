@@ -43,6 +43,9 @@ static netsnmp_container *dirs = NULL;
 
 /* ---------------------------------------------------------------------
  */
+
+#define SNMP_CFRelease(x) do { if (x) { CFRelease(x); x = NULL; } } while(0)
+
 void
 netsnmp_swinst_arch_init( void )
 {
