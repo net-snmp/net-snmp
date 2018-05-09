@@ -24,14 +24,8 @@
 # endif
 #endif
 
-#if STDC_HEADERS
 #include <string.h>
 #include <stdlib.h>
-#else
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif

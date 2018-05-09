@@ -105,11 +105,7 @@
 #define hh(A,B,C,D,i,s,lp)   A = rot((A + h(B,C,D) + X[i] + lp),s) + B
 #define ii(A,B,C,D,i,s,lp)   A = rot((A + i_(B,C,D) + X[i] + lp),s) + B
 
-#ifdef STDC_HEADERS
 #define Uns(num) num##U
-#else
-#define Uns(num) num
-#endif                          /* STDC_HEADERS */
 
 void            MDreverse(unsigned int *);
 static void     MDblock(MDptr, const unsigned int *);

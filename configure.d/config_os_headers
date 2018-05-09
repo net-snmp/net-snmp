@@ -8,7 +8,6 @@
 #   Standard checks:
 ##
 #  Core:
-AC_HEADER_STDC          #  <stdlib.h>, <stdarg.h>,   <string.h>  & <float.h>
 AC_HEADER_DIRENT        #  <dirent.h>, <sys/ndir.h>, <sys/dir.h> & <ndir.h>
 #  Apps:
 AC_HEADER_SYS_WAIT      #  <sys/wait.h>
