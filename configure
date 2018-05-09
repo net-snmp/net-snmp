@@ -16319,7 +16319,7 @@ if test "x$NETSNMP_QUICK_CHECK" = "x" ; then
 #   Stand-alone headers:
 ##
 #  Core:
-for ac_header in getopt.h   pthread.h  regex.h                        string.h   syslog.h   unistd.h                       stdint.h   inttypes.h                                sys/param.h                          sys/select.h                         sys/socket.h                         sys/syslog.h                         sys/time.h                           sys/timeb.h                          sys/un.h
+for ac_header in getopt.h   pthread.h  regex.h                        string.h   syslog.h   unistd.h                       stdint.h   inttypes.h                                sys/param.h                          sys/select.h                         sys/syslog.h                         sys/time.h                           sys/timeb.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -16398,7 +16398,7 @@ fi
 done
 
 
-for ac_header in asm/page.h asm/types.h                                 inet/mib2.h                                            linux/hdreg.h linux/tasks.h                            machine/param.h                                        netinet/tcp_fsm.h                                      ufs/fs.h                                               uvm/uvm_extern.h uvm/uvm_param.h                       vm/vm.h vm/vm_extern.h vm/vm_param.h
+for ac_header in asm/page.h asm/types.h                                 inet/mib2.h                                            linux/hdreg.h linux/tasks.h                            machine/param.h                                        ufs/fs.h                                               uvm/uvm_extern.h uvm/uvm_param.h                       vm/vm.h vm/vm_extern.h vm/vm_param.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -16413,7 +16413,7 @@ done
 
 
 #  Apps:
-for ac_header in fcntl.h    grp.h      pwd.h                        sys/cdefs.h   sys/ioctl.h                          sys/socket.h  sys/sockio.h                         sys/time.h
+for ac_header in fcntl.h    grp.h      pwd.h                        sys/cdefs.h   sys/ioctl.h                          sys/time.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -16570,7 +16570,7 @@ done
 
 #
 #  Library:
-for ac_header in malloc.h        net/if_dl.h   sys/sysctl.h
+for ac_header in malloc.h        sys/sysctl.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
@@ -16593,7 +16593,7 @@ done
 
 #
 #  Agent:
-for ac_header in malloc.h        osreldate.h                                     machine/types.h net/if_dl.h   net/if_types.h                    sys/dkstat.h    sys/conf.h    sys/mbuf.h                        sys/mount.h     sys/proc.h    sys/queue.h                       sys/sysctl.h    sys/user.h
+for ac_header in malloc.h        osreldate.h                                     machine/types.h                   sys/dkstat.h    sys/conf.h    sys/mbuf.h                        sys/mount.h     sys/proc.h    sys/queue.h                       sys/sysctl.h    sys/user.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
@@ -16642,28 +16642,6 @@ do :
 if test "x$ac_cv_header_sys_hashing_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_SYS_HASHING_H 1
-_ACEOF
-
-fi
-
-done
-
-
-#       requiring <sys/socket.h>                        (Solaris 9)
-#  Agent:
-#
-for ac_header in sys/socketvar.h
-do :
-  ac_fn_c_check_header_compile "$LINENO" "sys/socketvar.h" "ac_cv_header_sys_socketvar_h" "$ac_includes_default
-
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
-"
-if test "x$ac_cv_header_sys_socketvar_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SYS_SOCKETVAR_H 1
 _ACEOF
 
 fi
@@ -16811,70 +16789,18 @@ fi
 done
 
 
-
-#       Network headers
-#  Core or Library/Agent/Apps:
 #
-for ac_header in arpa/inet.h        net/if.h                               netinet/in.h       netdb.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_SYS_TIMEOUT_H
-#include <sys/timeout.h>
-#endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if HAVE_SYS_SOCKETVAR_H
-#include <sys/socketvar.h>
-#endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#if HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
-#if HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-#if HAVE_NETINET_IP_ICMP_H
-#include <netinet/ip_icmp.h>
-#endif
-#if HAVE_NETINET_TCP_H
-#include <netinet/tcp.h>
-#endif
-#if HAVE_NETINET_UDP_H
-#include <netinet/udp.h>
-#endif
-#if HAVE_NETINET_TCP_TIMER_H
-#include <netinet/tcp_timer.h>
-#endif
-
-"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
+# Avoid that on MinGW any networking headers get included that are
+# incompatible with <winsock2.h> by only testing for certain headers if not
+# building for one of these two platforms.
 #
-#  Agent:
-for ac_header in net/if_arp.h       net/if_mib.h         net/if_var.h                       netinet/if_ether.h netinet/in_systm.h   netinet/in_var.h                   netinet/ip.h       netinet/ip_icmp.h                                       netinet/icmp_var.h netinet/ip_var.h                                        netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h                  netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h                  net/route.h        netinet/icmp6.h
+
+case x$with_socklib in
+  xwinsock2)
+    ;;
+  *)
+
+for ac_header in sys/socket.h                 sys/un.h                 netinet/tcp_fsm.h                 sys/sockio.h                 sys/socketvar.h                 net/if_dl.h                 net/if_types.h                 arpa/inet.h                 net/if.h                 netinet/in.h                 netdb.h                 net/if_arp.h                 net/if_mib.h                 net/if_var.h                 netinet/if_ether.h                 netinet/in_systm.h                 netinet/in_var.h                 netinet/ip.h                 netinet/ip_icmp.h                 netinet/icmp_var.h                 netinet/ip_var.h                 netinet/tcp.h                 netinet/tcp_timer.h                 netinet/tcp_var.h                 netinet/tcpip.h                 netinet/udp.h                 netinet/udp_var.h                 net/route.h                 netinet/icmp6.h                 netinet/in_pcb.h                 netinet/ip6.h                 netinet6/in6_var.h                 netinet6/in6_pcb.h                 netinet6/ip6_var.h                 netinet6/nd6.h                 netinet6/tcp6.h                 netinet6/tcp6_fsm.h                 netinet6/tcp6_timer.h                 netinet6/tcp6_var.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
@@ -16905,6 +16831,9 @@ ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
 #if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
+#if HAVE_NETINET_IP_H
+#include <netinet/ip_icmp.h>
+#endif
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
@@ -16925,6 +16854,9 @@ ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
 #endif
 #if HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
+#endif
+#if HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
 #endif
 #if HAVE_NETINET_ICMP6_H
 #include <netinet/icmp6.h>
@@ -16941,100 +16873,7 @@ fi
 done
 
 
-#       KAME (IPv6) headers
-#  Agent:
-#
-# KAME
-for ac_header in netinet/ip6.h                                                 netinet6/in6_var.h    netinet6/in6_pcb.h                      netinet6/ip6_var.h    netinet6/nd6.h                          netinet6/tcp6.h       netinet6/tcp6_fsm.h                     netinet6/tcp6_timer.h netinet6/tcp6_var.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_SYS_QUEUE_H
-#include <sys/queue.h>
-#endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#if HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif
-#if HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP6_H
-#include <netinet/ip6.h>
-#endif
-
-"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-
-#       requiring <netinet/in.h>                        (OpenBSD 2.6)
-#  Agent:
-#
-for ac_header in netinet/in_pcb.h
-do :
-  ac_fn_c_check_header_compile "$LINENO" "netinet/in_pcb.h" "ac_cv_header_netinet_in_pcb_h" "
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_SYS_TIMEOUT_H
-#include <sys/timeout.h>
-#endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if HAVE_SYS_SOCKETVAR_H
-#include <sys/socketvar.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
-#if HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
-#if HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-
-"
-if test "x$ac_cv_header_netinet_in_pcb_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_NETINET_IN_PCB_H 1
-_ACEOF
-
-fi
-
-done
-
+esac
 
 ##
 #   Pre-requisite on specific types
