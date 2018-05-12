@@ -13,7 +13,7 @@
 ##
 #   Standard checks:
 ##
-AC_FUNC_ALLOCA          #  alloca()
+
 AC_PROG_GCC_TRADITIONAL
 
 if test "$cross_compiling" = yes -a "${ac_cv_func_memcmp_working+set}" != set
