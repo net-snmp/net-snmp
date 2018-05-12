@@ -385,16 +385,6 @@ elif test "x$askedpkcs" = "xyes"; then
         AC_DEFINE(HAVE_LIBPKCS11)
         LIBPKCS11="-lpkcs11")
 fi
-if test "x$TLSPROG" = "xyes"; then
-   AC_CHECK_DECL([EVP_sha224],
-    AC_DEFINE([HAVE_EVP_SHA224], [], [Define if you have EVP_sha224/256 in openssl]),
-    : ,
-    [[#include <openssl/evp.h>]])
-   AC_CHECK_DECL([EVP_sha384],
-    AC_DEFINE([HAVE_EVP_SHA384], [], [Define if you have EVP_sha384/512 in openssl]),
-    : ,
-    [[#include <openssl/evp.h>]])
-fi
 
 LIBS=$NONAGENTLIBS	 # restore old libraries
 if test "x$SSHPROG" = "xyes"; then
