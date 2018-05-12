@@ -3464,12 +3464,10 @@ handle_getnext_loop(netsnmp_agent_session *asp)
              * reader.]
              */
             rough_size += var_ptr->name_length;
-#if (SIZEOF_LONG == 8)
             /** sizeof(oid) is 8 on 64bit systems :-( Hardcode for 4 */
-            if (ASN_OBJECT_ID == var_ptr->type)
+            if (var_ptr->type == ASN_OBJECT_ID && sizeof(long) == 8)
                 val_len = (var_ptr->val_len / 2);
             else
-#endif
                 val_len = var_ptr->val_len;
 
             DEBUGMSGTL(("results:intermediate", "\t+ %" NETSNMP_PRIz "d %d = %d\n",

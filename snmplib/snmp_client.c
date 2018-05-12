@@ -853,7 +853,6 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                 *(vars->val.integer) = (unsigned long) *val_uint;
             }
         }
-#if SIZEOF_LONG != SIZEOF_INT
         else if (vars->val_len == sizeof(long)){
             const u_long   *val_ulong
                 = (const u_long *) value;
@@ -863,9 +862,6 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                 *(vars->val.integer) &= 0xffffffff;
             }
         }
-#endif
-#if defined(SIZEOF_LONG_LONG) && (SIZEOF_LONG != SIZEOF_LONG_LONG)
-#if !defined(SIZEOF_INTMAX_T) || (SIZEOF_LONG_LONG != SIZEOF_INTMAX_T)
         else if (vars->val_len == sizeof(long long)){
             const unsigned long long   *val_ullong
                 = (const unsigned long long *) value;
@@ -875,9 +871,6 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                 *(vars->val.integer) &= 0xffffffff;
             }
         }
-#endif
-#endif
-#if defined(SIZEOF_INTMAX_T) && (SIZEOF_LONG != SIZEOF_INTMAX_T)
         else if (vars->val_len == sizeof(intmax_t)){
             const uintmax_t *val_uintmax_t
                 = (const uintmax_t *) value;
@@ -887,8 +880,6 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                 *(vars->val.integer) &= 0xffffffff;
             }
         }
-#endif
-#if SIZEOF_SHORT != SIZEOF_INT
         else if (vars->val_len == sizeof(short)) {
             if (ASN_INTEGER == vars->type) {
                 const short      *val_short 
@@ -900,7 +891,6 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                 *(vars->val.integer) = (unsigned long) *val_ushort;
             }
         }
-#endif
         else if (vars->val_len == sizeof(char)) {
             if (ASN_INTEGER == vars->type) {
                 const char      *val_char 

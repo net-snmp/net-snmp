@@ -215,11 +215,7 @@ SOFTWARE.
 #endif
 
 
-#if SIZEOF_LONG == 4
-#  define CHECK_OVERFLOW_S(x,y)
-#  define CHECK_OVERFLOW_U(x,y)
-#else
-#  define CHECK_OVERFLOW_S(x,y) do {                                    \
+#define CHECK_OVERFLOW_S(x,y) do {                                      \
         if (x > INT32_MAX) {                                            \
             DEBUGMSG(("asn","truncating signed value %ld to 32 bits (%d)\n",(long)(x),y)); \
             x &= 0xffffffff;                                            \
@@ -229,13 +225,12 @@ SOFTWARE.
         }                                                               \
     } while(0)
 
-#  define CHECK_OVERFLOW_U(x,y) do {                                    \
+#define CHECK_OVERFLOW_U(x,y) do {                                      \
         if (x > UINT32_MAX) {                                           \
             x &= 0xffffffff;                                            \
             DEBUGMSG(("asn","truncating unsigned value to 32 bits (%d)\n",y)); \
         }                                                               \
     } while(0)
-#endif
 
 /**
  * @internal
