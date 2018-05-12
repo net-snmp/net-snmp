@@ -202,7 +202,7 @@ write_arp(int action,
     int             var, retval = SNMP_ERR_NOERROR;
     static PMIB_IPNETROW oldarp_row = NULL;
     MIB_IPNETROW    temp_row;
-    DWORD           status = NO_ERROR;
+    uint32_t        status = NO_ERROR;
 
     /*
      * IP Net to Media table object identifier is of form:
@@ -280,7 +280,8 @@ write_arp(int action,
                 return SNMP_ERR_WRONGTYPE;
             }
             if (var_val_len != 6) {
-                snmp_log(LOG_ERR, "not correct ipAddress length: %d",
+                snmp_log(LOG_ERR,
+                         "incorrect ipAddress length %" NETSNMP_PRIz "d",
                          var_val_len);
                 return SNMP_ERR_WRONGLENGTH;
             }
@@ -383,7 +384,7 @@ write_arp(int action,
              */
             if (!create_flag) {
                 if ((status = SetIpNetEntry(oldarp_row)) != NO_ERROR) {
-                    snmp_log(LOG_ERR, "Error in case UNDO, status : %lu\n",
+                    snmp_log(LOG_ERR, "Error in case UNDO, status %u\n",
                              status);
                     retval = SNMP_ERR_UNDOFAILED;
                 }
@@ -394,7 +395,7 @@ write_arp(int action,
 
                 if ((status = SetIpNetEntry(arp_row)) != NO_ERROR) {
                     snmp_log(LOG_ERR,
-                             "Error while deleting added row, status : %lu\n",
+                             "Error while deleting added row, status %u\n",
                              status);
                     retval = SNMP_ERR_UNDOFAILED;
                 }
@@ -414,7 +415,7 @@ write_arp(int action,
             if (arp_row->dwPhysAddrLen != 0) {
                 if ((status = CreateIpNetEntry(arp_row)) != NO_ERROR) {
                     snmp_log(LOG_ERR,
-                             "Inside COMMIT: CreateIpNetEntry failed, status %lu\n",
+                             "Inside COMMIT: CreateIpNetEntry failed, status %u\n",
                              status);
                     retval = SNMP_ERR_COMMITFAILED;
                 }

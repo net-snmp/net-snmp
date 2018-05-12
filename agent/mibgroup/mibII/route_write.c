@@ -612,7 +612,7 @@ write_rte(int action,
     static int      mask_flag = 0, nexthop_flag = 0;
     static int      index_flag = 0, metric_flag = 0;
     static int      dest_flag = 0;
-    DWORD           status = NO_ERROR;
+    uint32_t        status = NO_ERROR;
     /*
      * object identifier is of form:
      * 1.3.6.1.2.1.4.21.1.X.A.B.C.D ,  where A.B.C.D is IP address.
@@ -800,7 +800,7 @@ write_rte(int action,
                     if ((status =
                          CreateIpForwardEntry(route_row)) != NO_ERROR) {
                         snmp_log(LOG_ERR,
-                                 "Inside COMMIT: CreateIpNetEntry failed, status %lu\n",
+                                 "Inside COMMIT: CreateIpNetEntry failed, status %u\n",
                                  status);
                         retval = SNMP_ERR_COMMITFAILED;
                     }

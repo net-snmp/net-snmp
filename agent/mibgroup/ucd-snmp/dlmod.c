@@ -143,7 +143,7 @@ static const char *dlmod_dlerror(void)
 {
 #if defined(WIN32)
     static char errstr[256];
-    const DWORD dwErrorcode = GetLastError();
+    const uint32_t dwErrorcode = GetLastError();
     LPTSTR      lpMsgBuf;
 
     FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -161,7 +161,7 @@ static const char *dlmod_dlerror(void)
         snprintf(errstr, sizeof(errstr), "%s", lpMsgBuf);
         LocalFree(lpMsgBuf);
     } else {
-        snprintf(errstr, sizeof(errstr), "error code %ld", dwErrorcode);
+        snprintf(errstr, sizeof(errstr), "error code %d", dwErrorcode);
     }
     return errstr;
 #else

@@ -510,7 +510,7 @@ netsnmp_udp_base_ctor(void)
                       &WSARecvMsgGuid, sizeof(WSARecvMsgGuid),
                       &pfWSARecvMsg, sizeof(pfWSARecvMsg), &nbytes, NULL, NULL);
     if (result == SOCKET_ERROR)
-        DEBUGMSGTL(("netsnmp_udp", "WSARecvMsg() not found (errno %ld)\n",
+        DEBUGMSGTL(("netsnmp_udp", "WSARecvMsg() not found (errno %d)\n",
                     WSAGetLastError()));
 
     /* WSASendMsg(): Windows Vista / Windows Server 2008 and later */
@@ -518,7 +518,7 @@ netsnmp_udp_base_ctor(void)
                       &WSASendMsgGuid, sizeof(WSASendMsgGuid),
                       &pfWSASendMsg, sizeof(pfWSASendMsg), &nbytes, NULL, NULL);
     if (result == SOCKET_ERROR)
-        DEBUGMSGTL(("netsnmp_udp", "WSASendMsg() not found (errno %ld)\n",
+        DEBUGMSGTL(("netsnmp_udp", "WSASendMsg() not found (errno %d)\n",
                     WSAGetLastError()));
 
     closesocket(s);

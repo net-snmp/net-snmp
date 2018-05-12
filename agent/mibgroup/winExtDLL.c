@@ -979,13 +979,14 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                                              ext_dll_view_info->name,
                                              ext_dll_view_info->name_length);
                 DEBUGMSG(("winExtDLL", "extension DLL %s: SNMP query function"
-                          " returned error code %lu (Windows) / %d (Net-SNMP)"
+                          " returned error code %u (Windows) / %d (Net-SNMP)"
                           " for request type %d, OID %s%s, ASN type %d and"
-                          " value %ld.\n",
-                          ext_dll_info->dll_name, ErrorStatus, rc, nRequestType,
-                          oid_name, overflow ? " [TRUNCATED]" : "",
+                          " value %d.\n",
+                          ext_dll_info->dll_name, (unsigned int)ErrorStatus, rc,
+                          nRequestType, oid_name,
+                          overflow ? " [TRUNCATED]" : "",
                           win_varbinds.list[0].value.asnType,
-                          win_varbinds.list[0].value.asnValue.number));
+                          (unsigned int)win_varbinds.list[0].value.asnValue.number));
                 free(oid_name);
             }
             netsnmp_assert(ErrorIndex == 1);

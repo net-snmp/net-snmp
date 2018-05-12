@@ -2929,8 +2929,9 @@ writeIfEntry(int action,
          */
         if (SetIfEntry(&ifEntryRow) != NO_ERROR) {
             snmp_log(LOG_ERR,
-                     "Error in writeIfEntry case COMMIT with index: %lu & adminStatus %lu\n",
-                     ifEntryRow.dwIndex, ifEntryRow.dwAdminStatus);
+                     "Error in writeIfEntry case COMMIT with index %u & adminStatus %u\n",
+                     (unsigned int)ifEntryRow.dwIndex,
+                     (unsigned int)ifEntryRow.dwAdminStatus);
             return SNMP_ERR_COMMITFAILED;
         }
 
