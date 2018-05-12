@@ -24841,28 +24841,6 @@ if test "x$ac_cv_lib_pkcs11_C_Initialize" = xyes; then :
 fi
 
 fi
-if test "x$TLSPROG" = "xyes"; then
-   ac_fn_c_check_decl "$LINENO" "EVP_sha224" "ac_cv_have_decl_EVP_sha224" "#include <openssl/evp.h>
-"
-if test "x$ac_cv_have_decl_EVP_sha224" = xyes; then :
-
-$as_echo "#define HAVE_EVP_SHA224 /**/" >>confdefs.h
-
-else
-  :
-fi
-
-   ac_fn_c_check_decl "$LINENO" "EVP_sha384" "ac_cv_have_decl_EVP_sha384" "#include <openssl/evp.h>
-"
-if test "x$ac_cv_have_decl_EVP_sha384" = xyes; then :
-
-$as_echo "#define HAVE_EVP_SHA384 /**/" >>confdefs.h
-
-else
-  :
-fi
-
-fi
 
 LIBS=$NONAGENTLIBS	 # restore old libraries
 if test "x$SSHPROG" = "xyes"; then
