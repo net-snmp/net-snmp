@@ -166,10 +166,10 @@ static struct icmp6_mib icmp6stat;
  * registering underneath 
  */
 static const oid icmp_oid[] = { SNMP_OID_MIB2, 5 };
+#ifdef USES_SNMP_DESIGNED_ICMPSTAT
 static const oid icmp_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 29 };
 static const oid icmp_msg_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 30 };
 
-#ifdef USES_SNMP_DESIGNED_ICMPSTAT
 struct icmp_stats_table_entry {
 	uint32_t ipVer;
         uint32_t icmpStatsInMsgs;
