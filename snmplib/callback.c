@@ -121,7 +121,7 @@ NETSNMP_STATIC_INLINE int
 _callback_lock(int major, int minor, const char* warn, int do_assert)
 {
     int lock_holded=0;
-    struct timeval lock_time = { 0, 1000 };
+    NETSNMP_SELECT_TIMEVAL lock_time = { 0, 1000 };
 
 #ifdef NETSNMP_PARANOID_LEVEL_HIGH
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {

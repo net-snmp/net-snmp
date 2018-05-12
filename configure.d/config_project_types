@@ -52,3 +52,54 @@ AC_CHECK_TYPES([socklen_t, in_addr_t, ssize_t],,,[
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif])
+
+#
+# Check for the type of the fifth argument of select()
+#
+
+netsnmp_save_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS -Werror"
+
+AC_MSG_CHECKING([for the type of the fifth argument of select()])
+arg_type=void
+for t in "struct timeval" "struct __ms_timeval"; do
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([
+#if defined(HAVE_WINSOCK2_H) && defined(HAVE_WS2TCPIP_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+#include <stddef.h>
+], [return select(0, NULL, NULL, NULL, ($t *)NULL)])],
+    [arg_type=$t; break])
+done
+AC_MSG_RESULT(${arg_type})
+AC_DEFINE_UNQUOTED([NETSNMP_SELECT_TIMEVAL], [${arg_type}],
+        [Type of the fifth argument of select()])
+
+AC_MSG_CHECKING([for the type of the third argument of ioctlsocket()])
+arg_type=void
+for t in "unsigned int" "unsigned long"; do
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([
+#if defined(HAVE_WINSOCK2_H) && defined(HAVE_WS2TCPIP_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+#include <stddef.h>
+], [return ioctlsocket(0, 0, ($t *)NULL)])],
+    [arg_type=$t; break])
+done
+AC_MSG_RESULT(${arg_type})
+AC_DEFINE_UNQUOTED([NETSNMP_IOCTLSOCKET_ARG], [${arg_type}],
+        [Type of the fifth argument of select()])
+
+CFLAGS=$netsnmp_save_CFLAGS

@@ -25613,6 +25613,91 @@ _ACEOF
 fi
 
 
+#
+# Check for the type of the fifth argument of select()
+#
+
+netsnmp_save_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS -Werror"
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for the type of the fifth argument of select()" >&5
+$as_echo_n "checking for the type of the fifth argument of select()... " >&6; }
+arg_type=void
+for t in "struct timeval" "struct __ms_timeval"; do
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#if defined(HAVE_WINSOCK2_H) && defined(HAVE_WS2TCPIP_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+#include <stddef.h>
+
+int
+main ()
+{
+return select(0, NULL, NULL, NULL, ($t *)NULL)
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  arg_type=$t; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${arg_type}" >&5
+$as_echo "${arg_type}" >&6; }
+
+cat >>confdefs.h <<_ACEOF
+#define NETSNMP_SELECT_TIMEVAL ${arg_type}
+_ACEOF
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for the type of the third argument of ioctlsocket()" >&5
+$as_echo_n "checking for the type of the third argument of ioctlsocket()... " >&6; }
+arg_type=void
+for t in "unsigned int" "unsigned long"; do
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#if defined(HAVE_WINSOCK2_H) && defined(HAVE_WS2TCPIP_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+#include <stddef.h>
+
+int
+main ()
+{
+return ioctlsocket(0, 0, ($t *)NULL)
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  arg_type=$t; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${arg_type}" >&5
+$as_echo "${arg_type}" >&6; }
+
+cat >>confdefs.h <<_ACEOF
+#define NETSNMP_IOCTLSOCKET_ARG ${arg_type}
+_ACEOF
+
+
+CFLAGS=$netsnmp_save_CFLAGS
+
 # -*- autoconf -*-
 #########################################
 ##
