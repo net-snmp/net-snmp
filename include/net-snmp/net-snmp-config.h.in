@@ -1528,6 +1528,9 @@
 /* ifnet needs to have _KERNEL_STRUCTURES defined */
 #undef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
 
+/* Type of the fifth argument of select() */
+#undef NETSNMP_IOCTLSOCKET_ARG
+
 /* Define if you want to remove all non-essential code features. */
 #undef NETSNMP_MINIMAL_CODE
 
@@ -1568,6 +1571,9 @@
 /* Define to 1 if you want to build with reentrant/threaded code (incomplete).
    */
 #undef NETSNMP_REENTRANT
+
+/* Type of the fifth argument of select() */
+#undef NETSNMP_SELECT_TIMEVAL
 
 /* define if you do not want snmptrapd to register as an AgentX subagent */
 #undef NETSNMP_SNMPTRAPD_DISABLE_AGENTX

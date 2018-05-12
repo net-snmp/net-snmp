@@ -955,6 +955,12 @@
 /* Define to 1 if you have the <xti.h> header file. */
 /* #undef HAVE_XTI_H */
 
+/* Type of the fifth argument of select() */
+#define NETSNMP_SELECT_TIMEVAL struct timeval
+
+/* Type of the third argument of ioctlsocket() */
+#define NETSNMP_IOCTLSOCKET_ARG u_long
+
 /* Define to the address where bug reports for this package should be sent. */
 /* #undef PACKAGE_BUGREPORT */
 

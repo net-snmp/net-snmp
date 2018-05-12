@@ -1317,7 +1317,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
         void *opaque = NULL;
         int opaque_len = 0;
         fd_set readfs;
-        struct timeval tv;
+        NETSNMP_SELECT_TIMEVAL tv;
  
         DEBUGMSGTL(("dtlsudp:close",
 		    "%" NETSNMP_PRIz "d bytes remain in write_cache\n",
