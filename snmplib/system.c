@@ -129,6 +129,11 @@ SOFTWARE.
 #include <strings.h>
 #endif
 
+#ifdef WIN32
+#include <wchar.h>   /* wcsncmp() */
+#include <winperf.h> /* PERF_DATA_BLOCK */
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
