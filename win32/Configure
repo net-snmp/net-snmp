@@ -185,7 +185,9 @@ my %makefile_subs = (
     "ssl" => [ "^OPENSSL=",    $openssl ? "OPENSSL=true" : "OPENSSL=false" ],
     "sdk" => [ "^SDK=",        $sdk == 1 ? "SDK=true" : "SDK=false" ],
     "cfl" => [ "^CFLAGS=",     "CFLAGS=" .
+                               "/D VC_EXTRALEAN " .
                                "/D WIN32 " .
+                               "/D WIN32_LEAN_AND_MEAN " .
                                "/D _BIND_TO_CURRENT_VCLIBS_VERSION " .
                                "/D _CONSOLE " .
                                "/D _CRT_NONSTDC_NO_WARNINGS " .

@@ -8,11 +8,11 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <stdlib.h>		/* calloc() */
+#include <stdio.h>		/* sprintf() */
 #include <windows.h>
 #include <tchar.h>
-
-#include <stdio.h>		/* sprintf */
-#include <process.h>		/* beginthreadex  */
+#include <process.h>		/* _beginthreadex() */
 
 #include <net-snmp/library/winservice.h>
 
