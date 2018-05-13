@@ -60,6 +60,8 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
+#include <net-snmp/library/snmp.h>
+#include <net-snmp/library/snmp-tc.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/system.h> /* strlcpy() */
 #include <net-snmp/library/tools.h>

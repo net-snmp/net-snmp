@@ -5,7 +5,6 @@
 extern          "C" {
 #endif
 
-#include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 #if HAVE_NETIPX_IPX_H

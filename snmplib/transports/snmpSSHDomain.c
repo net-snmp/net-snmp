@@ -57,6 +57,7 @@
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/default_store.h>
 
+#include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>

@@ -98,8 +98,11 @@ SOFTWARE.
 
 #include <net-snmp/agent/ds_agent.h>
 #include <net-snmp/library/default_store.h>
+#include <net-snmp/library/snmp.h>
+#include <net-snmp/library/snmp-tc.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_client.h>
+#include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpusm.h>
 #include <net-snmp/library/mib.h>

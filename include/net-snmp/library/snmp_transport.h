@@ -33,6 +33,7 @@
 #include <netinet/in.h>
 #endif
 
+#include <net-snmp/types.h>
 #include <net-snmp/library/asn1.h>
 
 #ifdef __cplusplus

@@ -17,7 +17,6 @@ extern          "C" {
 
 #include <atm.h>
 
-#include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 

@@ -45,8 +45,10 @@ netsnmp_feature_require(cert_util);
 #include <net-snmp/library/snmp_logging.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/tools.h>
+#include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/snmp_assert.h>
+#include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/read_config.h>

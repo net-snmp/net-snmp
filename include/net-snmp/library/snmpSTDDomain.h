@@ -3,7 +3,6 @@
 
 #ifdef NETSNMP_TRANSPORT_STD_DOMAIN
 
-#include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>
 
 #ifdef __cplusplus

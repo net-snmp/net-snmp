@@ -30,6 +30,7 @@
 #endif
 
 #include <net-snmp/types.h>
+#include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp-tc.h>   /* for "internal" definitions */
 #include <net-snmp/library/snmp_api.h>
 

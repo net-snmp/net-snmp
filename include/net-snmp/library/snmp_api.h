@@ -755,7 +755,7 @@ struct netsnmp_transport_s;
     struct session_list {
        struct session_list *next;
        netsnmp_session *session;
-       netsnmp_transport *transport;
+       struct netsnmp_transport_s *transport;
        struct snmp_internal_session *internal;
     };
 

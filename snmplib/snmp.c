@@ -69,6 +69,7 @@ SOFTWARE.
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp.h>      /* for "internal" definitions */
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/mib.h>
 
 /** @mainpage Net-SNMP Coding Documentation

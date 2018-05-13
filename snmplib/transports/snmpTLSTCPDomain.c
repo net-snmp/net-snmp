@@ -58,6 +58,7 @@ netsnmp_feature_require(cert_util);
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 #include <net-snmp/library/snmp_assert.h>
+#include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/snmpTLSBaseDomain.h>

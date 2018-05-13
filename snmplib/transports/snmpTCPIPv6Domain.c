@@ -45,6 +45,7 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
+#include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/snmpTCPBaseDomain.h>

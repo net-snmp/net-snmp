@@ -27,6 +27,7 @@ netsnmp_feature_require(sockaddr_size);
 #include <net-snmp/library/snmpDTLSUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmp_assert.h>
+#include <net-snmp/library/snmp_impl.h>
 
 #include <stdio.h>
 #include <sys/types.h>

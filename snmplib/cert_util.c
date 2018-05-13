@@ -67,6 +67,7 @@ netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all);
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
+#include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/system.h>

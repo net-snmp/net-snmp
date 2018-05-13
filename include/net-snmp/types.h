@@ -497,8 +497,6 @@ typedef struct netsnmp_large_fd_set_s {
     fd_set          lfs_set;
 } netsnmp_large_fd_set;
 
-#include <net-snmp/library/snmp_api.h>
-
 #ifdef __cplusplus
 }
 #endif
