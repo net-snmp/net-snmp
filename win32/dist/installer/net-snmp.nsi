@@ -1179,7 +1179,6 @@ Section Uninstall
   Delete "$INSTDIR\include\net-snmp\types.h"
   Delete "$INSTDIR\include\net-snmp\mib_api.h"
   Delete "$INSTDIR\include\net-snmp\pdu_api.h"
-  Delete "$INSTDIR\include\net-snmp\definitions.h"
   Delete "$INSTDIR\include\net-snmp\utilities.h"
   Delete "$INSTDIR\include\net-snmp\net-snmp-includes.h"
   Delete "$INSTDIR\include\net-snmp\varbind_api.h"

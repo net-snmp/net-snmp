@@ -31,7 +31,6 @@ mysubdir=snmplib
 # headers
 INSTALLHEADERS=\
 	config_api.h  \
-	definitions.h \
 	mib_api.h     \
 	net-snmp-includes.h \
 	output_api.h  \

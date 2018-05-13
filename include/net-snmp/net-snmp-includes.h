@@ -64,9 +64,12 @@
     /*
      *  The full Net-SNMP API
      */
-#include <net-snmp/definitions.h>
 #include <net-snmp/types.h>
-
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp_impl.h>
+#include <net-snmp/library/snmp.h>
+#include <net-snmp/library/snmp-tc.h>
 #include <net-snmp/library/getopt.h>
 #include <net-snmp/utilities.h>
 #include <net-snmp/session_api.h>
