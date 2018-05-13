@@ -14,6 +14,7 @@
 #include <sys/un.h>
 #endif
 
+#include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>
 
 config_require(SocketBase)

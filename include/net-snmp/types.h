@@ -121,6 +121,7 @@ typedef union {
 } netsnmp_vardata;
 
 
+#define MIN_OID_LEN	    2
 #define MAX_OID_LEN	    128 /* max subid's in an oid */
 
 /** @typedef struct variable_list netsnmp_variable_list

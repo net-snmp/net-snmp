@@ -43,8 +43,6 @@ SOFTWARE.
  * Use is subject to license terms specified in the COPYING file
  */
 
-#define MIN_OID_LEN	    2
-#define MAX_OID_LEN	    128 /* max subid's in an oid */
 #ifndef MAX_NAME_LEN            /* conflicts with some libraries */
 #define MAX_NAME_LEN	    MAX_OID_LEN /* obsolete. use MAX_OID_LEN */
 #endif
