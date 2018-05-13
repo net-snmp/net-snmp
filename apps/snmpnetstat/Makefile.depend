@@ -7,7 +7,6 @@
 ./if.lo: ../../include/net-snmp/definitions.h
 ./if.lo: ../../include/net-snmp/types.h
 ./if.lo: ../../include/net-snmp/library/oid.h
-./if.lo: ../../include/net-snmp/library/types.h
 ./if.lo: ../../include/net-snmp/library/snmp_api.h
 ./if.lo: ../../include/net-snmp/varbind_api.h
 ./if.lo: ../../include/net-snmp/library/snmp_client.h
@@ -79,7 +78,6 @@
 ./inet.lo: ../../include/net-snmp/definitions.h
 ./inet.lo: ../../include/net-snmp/types.h
 ./inet.lo: ../../include/net-snmp/library/oid.h
-./inet.lo: ../../include/net-snmp/library/types.h
 ./inet.lo: ../../include/net-snmp/library/snmp_api.h
 ./inet.lo: ../../include/net-snmp/varbind_api.h
 ./inet.lo: ../../include/net-snmp/library/snmp_client.h
@@ -150,7 +148,6 @@
 ./inet6.lo: ../../include/net-snmp/definitions.h
 ./inet6.lo: ../../include/net-snmp/types.h
 ./inet6.lo: ../../include/net-snmp/library/oid.h
-./inet6.lo: ../../include/net-snmp/library/types.h
 ./inet6.lo: ../../include/net-snmp/library/snmp_api.h
 ./inet6.lo: ../../include/net-snmp/varbind_api.h
 ./inet6.lo: ../../include/net-snmp/library/snmp_client.h
@@ -221,7 +218,6 @@
 ./inetx.lo: ../../include/net-snmp/definitions.h
 ./inetx.lo: ../../include/net-snmp/types.h
 ./inetx.lo: ../../include/net-snmp/library/oid.h
-./inetx.lo: ../../include/net-snmp/library/types.h
 ./inetx.lo: ../../include/net-snmp/library/snmp_api.h
 ./inetx.lo: ../../include/net-snmp/varbind_api.h
 ./inetx.lo: ../../include/net-snmp/library/snmp_client.h
@@ -292,7 +288,6 @@
 ./main.lo: ../../include/net-snmp/definitions.h
 ./main.lo: ../../include/net-snmp/types.h
 ./main.lo: ../../include/net-snmp/library/oid.h
-./main.lo: ../../include/net-snmp/library/types.h
 ./main.lo: ../../include/net-snmp/library/snmp_api.h
 ./main.lo: ../../include/net-snmp/varbind_api.h
 ./main.lo: ../../include/net-snmp/library/snmp_client.h
@@ -363,7 +358,6 @@
 ./route.lo: ../../include/net-snmp/definitions.h
 ./route.lo: ../../include/net-snmp/types.h
 ./route.lo: ../../include/net-snmp/library/oid.h
-./route.lo: ../../include/net-snmp/library/types.h
 ./route.lo: ../../include/net-snmp/library/snmp_api.h
 ./route.lo: ../../include/net-snmp/varbind_api.h
 ./route.lo: ../../include/net-snmp/library/snmp_client.h
@@ -434,7 +428,6 @@
 ./routex.lo: ../../include/net-snmp/definitions.h
 ./routex.lo: ../../include/net-snmp/types.h
 ./routex.lo: ../../include/net-snmp/library/oid.h
-./routex.lo: ../../include/net-snmp/library/types.h
 ./routex.lo: ../../include/net-snmp/library/snmp_api.h
 ./routex.lo: ../../include/net-snmp/varbind_api.h
 ./routex.lo: ../../include/net-snmp/library/snmp_client.h
@@ -505,7 +498,6 @@
 ./winstub.lo: ../../include/net-snmp/definitions.h
 ./winstub.lo: ../../include/net-snmp/types.h
 ./winstub.lo: ../../include/net-snmp/library/oid.h
-./winstub.lo: ../../include/net-snmp/library/types.h
 ./winstub.lo: ../../include/net-snmp/library/snmp_api.h
 ./winstub.lo: ../../include/net-snmp/varbind_api.h
 ./winstub.lo: ../../include/net-snmp/library/snmp_client.h
