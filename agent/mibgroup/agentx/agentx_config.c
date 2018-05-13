@@ -127,7 +127,7 @@ agentx_parse_agentx_timeout(const char *token, char *cptr)
         return;
     }
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
-                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT, x * ONE_SEC);
+                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT, x * 1000L * 1000L);
 }
 
 void
@@ -216,7 +216,7 @@ agentx_config_init(void)
                                   "AgentX Timeout (seconds)");
     /* default to 1 second */
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
-                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT, 1 * ONE_SEC);
+                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT, 1000L * 1000L);
 
 #ifdef USING_AGENTX_MASTER_MODULE
     /*

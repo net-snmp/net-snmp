@@ -186,7 +186,7 @@ static oid      default_enterprise[] = { 1, 3, 6, 1, 4, 1, 3, 1, 1 };
 
 #define DEFAULT_COMMUNITY   "public"
 #define DEFAULT_RETRIES	    5
-#define DEFAULT_TIMEOUT	    ONE_SEC
+#define DEFAULT_TIMEOUT	    (1000L * 1000L)
 #define DEFAULT_REMPORT	    SNMP_PORT
 #define DEFAULT_ENTERPRISE  default_enterprise
 #define DEFAULT_TIME	    0
@@ -1255,7 +1255,7 @@ _sess_copy(netsnmp_session * in_session)
         if (timeout <= 0)
             session->timeout = DEFAULT_TIMEOUT;
         else
-            session->timeout = timeout * ONE_SEC;
+            session->timeout = timeout * 1000L * 1000L;
     }
     session->sessid = snmp_get_next_sessid();
 

@@ -7,8 +7,6 @@
 
 #define MAX_OID_LEN	    128 /* max subid's in an oid */
 
-#define ONE_SEC         1000000L
-
     /*
      *  For the initial release, this will just refer to the
      *  relevant UCD header files.
