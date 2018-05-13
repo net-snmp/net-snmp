@@ -1238,7 +1238,6 @@ Section Uninstall
   Delete "$INSTDIR\include\net-snmp\library\snmpCallbackDomain.h"
   Delete "$INSTDIR\include\net-snmp\library\snmp_debug.h"
   Delete "$INSTDIR\include\net-snmp\library\snmp_impl.h"
-  Delete "$INSTDIR\include\net-snmp\library\libsnmp.h"
   Delete "$INSTDIR\include\net-snmp\library\snmp_assert.h"
   Delete "$INSTDIR\include\net-snmp\library\callback.h"
   Delete "$INSTDIR\include\net-snmp\library\mt_support.h"
