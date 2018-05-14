@@ -40,17 +40,6 @@
  * Windows XP and higher.  */
 /* #undef NETSNMP_ENABLE_IPV6 */
 
-/* Only use Windows API functions available on Windows 2000 SP4 or later.  
- * We need at least SP1 for some IPv6 defines in ws2ipdef.h
- */
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x600 /*_WIN32_WINNT_WIN6*/
-#else
-#if _WIN32_WINNT < 0x501
-#error _WIN32_WINNT is too low - it should be set to at least 0x501.
-#endif
-#endif
-
 #define INSTALL_BASE "c:/usr"
 
 /* config.h:  a general config file */
