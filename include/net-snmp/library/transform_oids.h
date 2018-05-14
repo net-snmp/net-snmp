@@ -49,6 +49,18 @@ NETSNMP_IMPORT oid      usmDESPrivProtocol[10];
 NETSNMP_IMPORT oid      usmAESPrivProtocol[10];
 NETSNMP_IMPORT oid      *usmAES128PrivProtocol; /* backwards compat */
 
+/*
+ * backwards compatibility. should not be used in internal code.
+ */
+#define USM_AUTH_PROTO_NOAUTH_LEN 10
+#define USM_AUTH_PROTO_MD5_LEN 10
+#define USM_AUTH_PROTO_SHA_LEN 10
+#define USM_PRIV_PROTO_NOPRIV_LEN 10
+#define USM_PRIV_PROTO_DES_LEN 10
+
+#define USM_PRIV_PROTO_AES_LEN 10
+#define USM_PRIV_PROTO_AES128_LEN 10 /* backwards compat */
+
 #ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
 NETSNMP_IMPORT oid      usmAES192PrivProtocol[9];
 NETSNMP_IMPORT oid      usmAES256PrivProtocol[9];
