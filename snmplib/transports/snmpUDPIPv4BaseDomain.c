@@ -191,7 +191,6 @@ netsnmp_udpipv4base_transport(const struct sockaddr_in *addr, int local)
                 netsnmp_transport_free(t);
                 return NULL;
             }
-            memset(&addr_pair, 0, sizeof(netsnmp_indexed_addr_pair));
             local_addr_len = sizeof(addr_pair.local_addr);
             rc2 = getsockname(t->sock, (struct sockaddr*)&addr_pair.local_addr,
                               &local_addr_len);
