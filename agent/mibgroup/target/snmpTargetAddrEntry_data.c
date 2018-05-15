@@ -25,6 +25,8 @@
 #include "snmpTargetAddrEntry_data.h"
 #include "util_funcs/header_generic.h"
 
+netsnmp_feature_require(container_compare_mem)
+
 static struct targetAddrTable_struct *aAddrTable = NULL;
 static int _active = 0;
 
