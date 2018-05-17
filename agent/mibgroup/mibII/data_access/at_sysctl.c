@@ -54,6 +54,8 @@ ARP_Scan_Init(void)
     mib[4] = NET_RT_FLAGS;
 #if defined RTF_LLINFO
     mib[5] = RTF_LLINFO;
+#elif defined(RTF_LLDATA)
+    mib[5] = RTF_LLDATA;
 #else
     mib[5] = 0;
 #endif
