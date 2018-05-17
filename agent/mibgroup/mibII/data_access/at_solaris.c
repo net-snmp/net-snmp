@@ -19,6 +19,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
 #include "kernel_sunos5.h"
+#include "../at.h"
 
 typedef struct if_ip {
     int             ifIdx;
