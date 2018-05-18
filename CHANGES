@@ -3,6 +3,30 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.8.rc2*
+    snmplib:
+      - [BUG 2815]: Display UTF-8 characters again
+      - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
+	sprint_realloc_octet_string() embeds unprintable control characters
+	or binary zeroes in its output. This behavior could cause truncated
+	output in snmptrapd.")
+
+    NetBSD:
+      - Fix for NetBSD 8
+
+    Cygwin64:
+      -  Fix winExtDLL build
+
+    install:
+      - Install missing system header files
+
+    building:
+      - Add Travis and Appveyor CI support
+      - Fix recently introduced autoreconf warnings
+
+    misc:
+      - restore auth/priv defines for protocol OID lengths
+
 *5.8.rc1*
     snmpd:
       - BUG: 2864: use clientaddr properly
@@ -10,7 +34,7 @@ listing of all changes made to the code.
       - BUG: 1366: Pass proper buffer length to netsnmp_tls_fingerprint_build()
       - Fix/enforce ipDefaultRouterLifetime value range
 
-    libsnmp:
+    snmplib:
       - Flush persistent config to persistent storage
 
     NetBSD:
