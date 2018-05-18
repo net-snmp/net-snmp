@@ -417,7 +417,7 @@ netsnmp_feature_require(swrun_count_processes_by_regex)
 int
 sh_count_procs_by_regex(char *procname, netsnmp_regex_ptr regexp)
 {
-  return swrun_count_processes_by_regex( procname, (pcre *) regexp );
+  return swrun_count_processes_by_regex( procname, regexp );
 }
 #endif
 
