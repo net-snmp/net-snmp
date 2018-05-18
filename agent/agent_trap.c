@@ -1272,37 +1272,13 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
             snmp_async_send(sess, pdu, &handle_inform_response, NULL);
     } else {
         if ((sess->version == SNMP_VERSION_3) &&
-            (pdu->command == SNMP_MSG_TRAP2)) {
-
+                (pdu->command == SNMP_MSG_TRAP2) &&
+                (sess->securityEngineIDLen == 0)) {
             u_char          tmp[SPRINT_MAX_LEN];
-            int             len = 0;
 
-            /** get engineID if we need it */
-            if ((sess->securityEngineIDLen == 0) || (sess->engineBoots != 0))
-                len = snmpv3_get_engineID(tmp, sizeof(tmp));
-
-            /** copy engineID to pdu */
-            if (sess->securityEngineIDLen == 0) {
-                pdu->securityEngineID = netsnmp_memdup(tmp, len);
-                pdu->securityEngineIDLen = len;
-            }
-
-            /*
-             * if we already have engineBoots value for the primary agent
-             * engineID, do not change it. For other engineIDs (or when
-             * engeineBoots == 0), set engine time and boot values. This
-             * can happen when agent sends SNMPv3 traps.
-             */
-            if ((sess->engineBoots != 0) && len &&
-                (len == sess->securityEngineIDLen) &&
-                memcmp(sess->securityEngineID, tmp, len) == 0) {
-                snmp_log(LOG_WARNING,
-                         "Refusing to change engineID or engineBoots/Time for our authoritative engine\n");
-            } else {
-                set_enginetime(sess->securityEngineID,
-                               sess->securityEngineIDLen,
-                               sess->engineBoots, sess->engineTime, TRUE);
-            }
+            int len = snmpv3_get_engineID(tmp, sizeof(tmp));
+            pdu->securityEngineID = netsnmp_memdup(tmp, len);
+            pdu->securityEngineIDLen = len;
         }
 
         result = snmp_async_send(sess, pdu, &handle_trap_callback, NULL);
