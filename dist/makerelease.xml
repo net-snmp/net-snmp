@@ -368,7 +368,7 @@
 	<step type="system" stepname="build:make" title="build:make">
 	  <text>Then we need to build the code</text>
 	  <commands>
-	    <command>NETSNMP_DONT_CHECK_VERSION=1 make</command>
+	    <command>NETSNMP_DONT_CHECK_VERSION=1 make 2>&amp;1 | tee -a make-$(date +%y%m%d_%H%M).log</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="build:test" title="testing: default tests">
@@ -376,7 +376,7 @@
 	  set up test results.  If not, this needs to be fixed or at
 	  least understood and accepted as is for some other reason.</text>
 	  <commands>
-	    <command>make test</command>
+	    <command>make test 2>&amp;1 | tee -a make-test-$(date +%y%m%d_%H%M).log</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="build:test:unit" title="testing: unit-tests">
@@ -592,12 +592,12 @@
 	    </step>
 	    <step type="system" stepname="posttest:make" title="posttest:make">
 	      <commands>
-		<command>cd net-snmp-{VERSION} &amp;&amp; make</command>
+		<command>cd net-snmp-{VERSION} &amp;&amp; make 2>&amp;1 | tee -a make-$(date +%y%m%d_%H%M).log</command>
 	      </commands>
 	    </step>
 	    <step type="system" stepname="posttest:test" title="posttest:test">
 	      <commands>
-		<command>cd net-snmp-{VERSION} &amp;&amp; make test</command>
+		<command>cd net-snmp-{VERSION} &amp;&amp; make test 2>&amp;1 | tee -a make-test-$(date +%y%m%d_%H%M).log</command>
 	      </commands>
 	    </step>
 	  </steps>
