@@ -585,9 +585,10 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                             return 0;
                     }
                     if (memchr(cp, '\0', cnt) == NULL) {
-                        /* No embedded '\0' - use strlcpy() to preserve UTF-8 */
-                        strlcpy((char *)(*buf + *out_len), (char *)cp, cnt + 1);
+                        /* No embedded '\0' - use memcpy() to preserve UTF-8 */
+                        memcpy(*buf + *out_len, cp, cnt);
                         *out_len += cnt;
+                        *(*buf + *out_len) = '\0';
                     } else if (!sprint_realloc_asciistring(buf, buf_len,
                                      out_len, allow_realloc, cp, cnt)) {
                         return 0;
