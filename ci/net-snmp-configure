@@ -153,10 +153,6 @@ case "$(uname)" in
       export ENV_SEPARATOR=":"
       mibs+=(ucd-snmp/extensible)
       mibs+=(winExtDLL)
-      # To do: avoid that the Net-SNMP headers trigger the following build
-      # failure: /usr/include/w32api/psdk_inc/_fd_types.h:100:2: warning: #warning "fd_set and associated macros have been defined in sys/types. This can cause runtime problems with W32 sockets" [-Wcpp]
-      # #warning "fd_set and associated macros have been defined in sys/types.
-      options+=("--with-openssl=internal")
       if [ -n "$APPVEYOR" ]; then
           # On Appveyor building the Perl modules fails as follows:
           # /usr/lib/perl5/5.26/i686-cygwin-threads-64int/CORE/reentr.h:104:26: fatal error: crypt.h: No such file or directory
