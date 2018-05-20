@@ -27275,7 +27275,7 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-   ac_cv_func_gethostaddr=yes
+   ac_cv_func_gethostbyaddr=yes
       $as_echo  "#define HAVE_GETHOSTBYADDR 1" >>confdefs.h
 
 fi
