@@ -76,7 +76,7 @@ case x$target_os in
 
     AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <winsock2.h>],
     [ gethostbyaddr(NULL); ])],
-    [ ac_cv_func_gethostaddr=yes
+    [ ac_cv_func_gethostbyaddr=yes
       AS_ECHO "#define HAVE_GETHOSTBYADDR 1" >>confdefs.h
     ], [ ])
 
