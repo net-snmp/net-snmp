@@ -79,9 +79,6 @@
 #include <basetsd.h>
 #define ssize_t SSIZE_T
 #endif
-#if HAVE_RAISE
-#define alarm raise
-#endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
