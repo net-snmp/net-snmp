@@ -1,7 +1,7 @@
+#include <net-snmp/net-snmp-config.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <net-snmp/net-snmp-config.h>
 
 #ifndef HAVE_ASPRINTF
 
