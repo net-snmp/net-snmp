@@ -1622,6 +1622,9 @@
 #include NETSNMP_MACHINE_INCLUDE_FILE
 #endif
 
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
 #if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
 #   define NETSNMP_USE_INLINE 1
 #else
