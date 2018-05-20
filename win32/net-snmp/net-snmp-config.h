@@ -1665,9 +1665,6 @@ enum {
 /* Define if you have the closesocket function.  */
 #define HAVE_CLOSESOCKET 1
 
-/* Define if you have raise() instead of alarm() */
-#define HAVE_RAISE 1
-
 /* define to 1 if you do not want to set global snmp_errno */
 #define DONT_SHARE_ERROR_WITH_OTHER_THREADS 1
 
