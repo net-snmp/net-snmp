@@ -16284,6 +16284,12 @@ EOF
 
 
 
+# Avoid conflicts on Cygwin between <windows.h> and the openssl header files.
+case x$target_os in
+     xcygwin*)
+        CPPFLAGS="-DVC_EXTRALEAN -DWIN32_LEAN_AND_MEAN $CPPFLAGS";;
+esac
+
 #
 #    Whether or not Cygwin's ld recognizes the flag -no-undefined.
 #

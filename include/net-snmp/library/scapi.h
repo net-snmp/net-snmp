@@ -11,15 +11,6 @@
 #define _SCAPI_H
 
 #ifdef NETSNMP_USE_OPENSSL
-#if defined(__CYGWIN__)
-/*
- * Recent versions of the Cygwin openssl header files and <windows.h> are
- * incompatible because both define X509_NAME unless OPENSSL_SYS_WIN32 is
- * defined. Hence define OPENSSL_SYS_WIN32 before including
- * <openssl/ossl_typ.h>.
- */
-#define OPENSSL_SYS_WIN32
-#endif
 #include <openssl/ossl_typ.h> /* EVP_MD */
 #endif
 
