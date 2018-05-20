@@ -18,12 +18,16 @@
  */
 
 /*
- * Make the getnameinfo() function available.
- * Note: according to MSDN getnameinfo() is available in ws2_32 on Windows 2000
- * and above. MinGW only makes getnameinfo() visible when setting _WIN32_WINNT
- * to 0x0501 (Windows XP) or higher, which is a bug in the MinGW 5.1.6 headers.
+ * Make sure that the Winsock header files get included before any <sys/...>
+ * header files to avoid that the build fails as follows:
+ *   In file included from /usr/include/w32api/winsock2.h:56:0,
+ *                    from ../include/net-snmp/types.h:24,
+ *                    from snmp_client.c:87:
+ *   /usr/include/w32api/psdk_inc/_fd_types.h:100:2: warning:  *warning "fd_set and associated macros have been defined in sys/types.      This can cause runtime problems with W32 sockets" [-Wcpp]
+ *   #warning "fd_set and associated macros have been defined in sys/types.
  */
-#define _WIN32_WINNT 0x0501
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
 #include <net-snmp/system/generic.h>
 

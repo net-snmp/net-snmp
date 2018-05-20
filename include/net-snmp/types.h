@@ -37,30 +37,6 @@
 #endif
 
 #include <sys/types.h>
-#if 1
-/*
- * If neither the Microsoft winsock header file nor the MinGW winsock header
- * file has already been included, do this now.
- */
-# if defined(HAVE_WINSOCK2_H) && defined(HAVE_WS2TCPIP_H)
-#  if !defined(__MINGW32__) && !defined(HAVE_WIN32_PLATFORM_SDK) && \
-    _MSC_VER -0 <= 1200 && _WIN32_WINNT -0 >= 0x0400
-    /*
-     * When using the MSVC 6 header files, including <winsock2.h> when
-     * _WIN32_WINNT >= 0x0400 results in a compilation error. Hence include
-     * <windows.h> instead, because <winsock2.h> is included from inside
-     * <windows.h> when _WIN32_WINNT >= 0x0400. The SDK version of <windows.h>
-     * does not include <winsock2.h> however.
-     */
-#   include <windows.h>
-#  else
-#   include <winsock2.h>
-#  endif
-#  include <ws2tcpip.h>
-# elif defined(HAVE_WINSOCK_H)
-#  include <winsock.h>
-# endif
-#endif
 
 #if defined(WIN32) && !defined(cygwin)
 typedef HANDLE netsnmp_pid_t;

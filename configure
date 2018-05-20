@@ -16338,9 +16338,7 @@ esac
 case x$target_os in
   xmingw*)
     with_socklib=winsock2
-    if test "x$enable_ipv6" = "xyes"; then
-      CFLAGS="-D_WIN32_WINNT=0x0501 $CFLAGS"
-    fi
+    CPPFLAGS="-D_WIN32_WINNT=0x0501 -DWIN32 $CPPFLAGS"
     ;;
   *)
     with_socklib=default;;
