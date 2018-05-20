@@ -13,9 +13,9 @@ if [ -z "$OSTYPE" ]; then
 fi
 "${scriptdir}"/net-snmp-configure master || exit $?
 make -s                                  || exit $?
-[ "$OSTYPE" = cygwin ]			 && exit 0
 case "$MODE" in
     disable-set|mini*|read-only)
         exit 0;;
 esac
+[ -n "$APPVEYOR" ]			 && exit 0
 "${scriptdir}"/net-snmp-run-tests        || exit $?

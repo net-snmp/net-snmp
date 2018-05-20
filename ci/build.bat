@@ -10,6 +10,7 @@ call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd6
 cd win32
 perl Configure --config=release --with-sdk --with-ipv6 --with-winextdll --linktype=dynamic --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc
 nmake
+cd ..
 goto eof
 
 :MSVCSTATIC64
@@ -19,6 +20,7 @@ cd win32
 perl Configure --config=release --with-sdk --with-ipv6 --with-winextdll --linktype=static --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc
 
 nmake
+cd ..
 goto eof
 
 :MinGW32

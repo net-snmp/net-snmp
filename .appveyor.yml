@@ -18,3 +18,6 @@ clone_depth: 5
 
 build_script:
   - 'call "ci\build.bat"'
+
+test_script:
+  - 'call "ci\test.bat"'
