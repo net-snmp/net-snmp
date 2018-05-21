@@ -262,7 +262,7 @@ AC_CACHE_CHECK(
     [the underlying type of a size_t],
     netsnmp_cv_size_t_type,
     [m4_foreach([TYPE], [[int],[long],[long long],[short],[char]],
-     [if [[ x$netsnmp_cv_size_t_type = x ]] ; then
+     [if [[ "x$netsnmp_cv_size_t_type" = x ]] ; then
          AC_COMPILE_IFELSE(
 	     [AC_LANG_PROGRAM(
 [AC_INCLUDES_DEFAULT()
