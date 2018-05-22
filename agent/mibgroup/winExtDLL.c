@@ -643,7 +643,7 @@ register_netsnmp_handler(winextdll_view * const ext_dll_view_info)
         memset(ext_dll_view_info, 0, sizeof(*ext_dll_view_info));
         return 1;
     } else {
-        // Create handler registration
+        /* Create handler registration */
         ext_dll_view_info->my_handler
             = netsnmp_create_handler_registration(ext_dll_info->dll_name,
                                                   var_winExtDLL,
