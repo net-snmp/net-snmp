@@ -622,71 +622,65 @@ netsnmp_container_data_dup(netsnmp_container *dup, netsnmp_container *c)
  *
  */
 int
-netsnmp_compare_netsnmp_index(const void *lhs, const void *rhs)
+netsnmp_compare_netsnmp_index(const void *lhs_arg, const void *rhs_arg)
 {
+    const netsnmp_index *lhs = lhs_arg, *rhs = rhs_arg;
     int rc;
+
     netsnmp_assert((NULL != lhs) && (NULL != rhs));
     DEBUGIF("compare:index") {
         DEBUGMSGT(("compare:index", "compare "));
-        DEBUGMSGSUBOID(("compare:index", ((const netsnmp_index *) lhs)->oids,
-                     ((const netsnmp_index *) lhs)->len));
+        DEBUGMSGSUBOID(("compare:index", lhs->oids, lhs->len));
         DEBUGMSG(("compare:index", " to "));
-        DEBUGMSGSUBOID(("compare:index", ((const netsnmp_index *) rhs)->oids,
-                     ((const netsnmp_index *) rhs)->len));
+        DEBUGMSGSUBOID(("compare:index", rhs->oids, rhs->len));
         DEBUGMSG(("compare:index", "\n"));
     }
-    rc = snmp_oid_compare(((const netsnmp_index *) lhs)->oids,
-                          ((const netsnmp_index *) lhs)->len,
-                          ((const netsnmp_index *) rhs)->oids,
-                          ((const netsnmp_index *) rhs)->len);
+    rc = snmp_oid_compare(lhs->oids, lhs->len, rhs->oids, rhs->len);
     DEBUGMSGT(("compare:index", "result was %d\n", rc));
     return rc;
 }
 
 int
-netsnmp_ncompare_netsnmp_index(const void *lhs, const void *rhs)
+netsnmp_ncompare_netsnmp_index(const void *lhs_arg, const void *rhs_arg)
 {
+    const netsnmp_index *lhs = lhs_arg, *rhs = rhs_arg;
     int rc;
+
     netsnmp_assert((NULL != lhs) && (NULL != rhs));
     DEBUGIF("compare:index") {
         DEBUGMSGT(("compare:index", "compare "));
-        DEBUGMSGSUBOID(("compare:index", ((const netsnmp_index *) lhs)->oids,
-                     ((const netsnmp_index *) lhs)->len));
+        DEBUGMSGSUBOID(("compare:index", lhs->oids, lhs->len));
         DEBUGMSG(("compare:index", " to "));
-        DEBUGMSGSUBOID(("compare:index", ((const netsnmp_index *) rhs)->oids,
-                     ((const netsnmp_index *) rhs)->len));
+        DEBUGMSGSUBOID(("compare:index", rhs->oids, rhs->len));
         DEBUGMSG(("compare:index", "\n"));
     }
-    rc = snmp_oid_ncompare(((const netsnmp_index *) lhs)->oids,
-                           ((const netsnmp_index *) lhs)->len,
-                           ((const netsnmp_index *) rhs)->oids,
-                           ((const netsnmp_index *) rhs)->len,
-                           ((const netsnmp_index *) rhs)->len);
+    rc = snmp_oid_ncompare(lhs->oids, lhs->len, rhs->oids, rhs->len, rhs->len);
     DEBUGMSGT(("compare:index", "result was %d\n", rc));
     return rc;
 }
 
 int
-netsnmp_compare_cstring(const void * lhs, const void * rhs)
+netsnmp_compare_cstring(const void *lhs_arg, const void *rhs_arg)
 {
-    return strcmp(((const container_type*)lhs)->name,
-                  ((const container_type*)rhs)->name);
+    const container_type *lhs = lhs_arg, *rhs = rhs_arg;
+
+    return strcmp(lhs->name, rhs->name);
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_NCOMPARE_CSTRING
 int
-netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
+netsnmp_ncompare_cstring(const void *lhs_arg, const void *rhs_arg)
 {
-    return strncmp(((const container_type*)lhs)->name,
-                   ((const container_type*)rhs)->name,
-                   strlen(((const container_type*)rhs)->name));
+    const container_type *lhs = lhs_arg, *rhs = rhs_arg;
+
+    return strncmp(lhs->name, rhs->name, strlen(rhs->name));
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_NCOMPARE_CSTRING */
 
 int
 netsnmp_compare_direct_cstring(const void * lhs, const void * rhs)
 {
-    return strcmp((const char*)lhs, (const char*)rhs);
+    return strcmp(lhs, rhs);
 }
 
 /*
