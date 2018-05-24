@@ -463,9 +463,6 @@
 /* Define to 1 if you have the <mtab.h> header file. */
 /* #undef HAVE_MTAB_H */
 
-/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-/* #undef HAVE_NDIR_H */
-
 /* Define to 1 if you have the <netdb.h> header file. */
 /* #undef HAVE_NETDB_H */
 
@@ -772,10 +769,6 @@
 
 /* Define to 1 if you have the <sys/mount.h> header file. */
 /* #undef HAVE_SYS_MOUNT_H */
-
-/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
-   */
-/* #undef HAVE_SYS_NDIR_H */
 
 /* Define to 1 if you have the <sys/param.h> header file. */
 /* #undef HAVE_SYS_PARAM_H */

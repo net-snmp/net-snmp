@@ -65,11 +65,11 @@ SOFTWARE.
     /*
      * structure of a directory entry 
      */
-    typedef struct direct {
+    typedef struct dirent {
         long            d_ino;  /* inode number (not used by MS-DOS) */
         int             d_namlen;       /* Name length */
         char            d_name[257];    /* file name */
-    } _DIRECT;
+    } _DIRENT;
 
     /*
      * structure for dir operations 
@@ -79,13 +79,13 @@ SOFTWARE.
         char           *curr;   /* Current position */
         long            size;   /* Size of string table */
         long            nfiles; /* number if filenames in table */
-        struct direct   dirstr; /* Directory structure to return */
+        struct dirent   dirstr; /* Directory structure to return */
     } DIR;
 
     NETSNMP_IMPORT
     DIR            *opendir(const char *filename);
     NETSNMP_IMPORT
-    struct direct  *readdir(DIR * dirp);
+    struct dirent  *readdir(DIR * dirp);
     NETSNMP_IMPORT
     int             closedir(DIR * dirp);
 #endif /* HAVE_READDIR */

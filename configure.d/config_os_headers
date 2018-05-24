@@ -7,8 +7,6 @@
 ##
 #   Standard checks:
 ##
-#  Core:
-AC_HEADER_DIRENT        #  <dirent.h>, <sys/ndir.h>, <sys/dir.h> & <ndir.h>
 #  Apps:
 # Don't use <sys/wait.h> when using Windows sockets
 case x$with_socklib in
@@ -45,8 +43,9 @@ AC_INCLUDES_DEFAULT
 ]])
 
 #  Library:
-AC_CHECK_HEADERS([fcntl.h    io.h       kstat.h                 ] dnl
-                 [limits.h   locale.h                  ] dnl
+AC_CHECK_HEADERS([dirent.h         fcntl.h             ] dnl
+                 [io.h             kstat.h             ] dnl
+                 [limits.h         locale.h            ] dnl
                  [sys/file.h       sys/ioctl.h         ] dnl
                  [sys/sockio.h     sys/stat.h          ] dnl
                  [sys/systemcfg.h  sys/systeminfo.h    ] dnl

@@ -133,8 +133,7 @@
 /* Define to 1 if you have the `DH_set0_pqg' function. */
 #undef HAVE_DH_SET0_PQG
 
-/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
-   */
+/* Define to 1 if you have the <dirent.h> header file. */
 #undef HAVE_DIRENT_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
@@ -512,9 +511,6 @@
 
 /* Define to 1 if you have the <ncurses/curses.h> header file. */
 #undef HAVE_NCURSES_CURSES_H
-
-/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-#undef HAVE_NDIR_H
 
 /* Define to 1 if you have the <netdb.h> header file. */
 #undef HAVE_NETDB_H
@@ -1117,10 +1113,6 @@
 /* Define to 1 if you have the <sys/conf.h> header file. */
 #undef HAVE_SYS_CONF_H
 
-/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
-   */
-#undef HAVE_SYS_DIR_H
-
 /* Define to 1 if you have the <sys/diskio.h> header file. */
 #undef HAVE_SYS_DISKIO_H
 
@@ -1168,10 +1160,6 @@
 
 /* Define to 1 if you have the <sys/mount.h> header file. */
 #undef HAVE_SYS_MOUNT_H
-
-/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
-   */
-#undef HAVE_SYS_NDIR_H
 
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H

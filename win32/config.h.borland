@@ -346,9 +346,6 @@
 /* Define if you have the <sys/conf.h> header file.  */
 #undef HAVE_SYS_CONF_H
 
-/* Define if you have the <sys/dir.h> header file.  */
-#undef HAVE_SYS_DIR_H
-
 /* Define if you have the <sys/dmap.h> header file.  */
 #undef HAVE_SYS_DMAP_H
 

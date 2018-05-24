@@ -118,20 +118,7 @@
 #endif
 
 #if HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
-#else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# if HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# if HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# if HAVE_NDIR_H
-#  include <ndir.h>
-# endif
+#include <dirent.h>
 #endif
 
 #if HAVE_DMALLOC_H
@@ -908,7 +895,7 @@ read_config(const char *filename,
                     }
                     while ((entry = readdir( d )) != NULL ) {
                         if ( entry->d_name[0] != '.') {
-                            len = NAMLEN(entry);
+                            len = strlen(entry->d_name);
                             if ((len > 5) && (strcmp(&(entry->d_name[len-5]),".conf") == 0)) {
                                 snprintf(fname, SNMP_MAXPATH, "%s/%s",
                                          cptr, entry->d_name);
