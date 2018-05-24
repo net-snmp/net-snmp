@@ -698,14 +698,7 @@ netsnmp_compare_mem(const char * lhs, size_t lhs_len,
     int rc, min = SNMP_MIN(lhs_len, rhs_len);
 
     rc = memcmp(lhs, rhs, min);
-    if((rc==0) && (lhs_len != rhs_len)) {
-        if(lhs_len < rhs_len)
-            rc = -1;
-        else
-            rc = 1;
-    }
-
-    return rc;
+    return rc ? rc : lhs_len - rhs_len;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_MEM */
 
