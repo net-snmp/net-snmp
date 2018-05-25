@@ -279,11 +279,15 @@
 	      </text>
 	      <commands>
 	        <command>git checkout V5-7-patches</command>
-	        <command>echo {BRANCHPATH} rc >> dist/release </command>
+	        <command>grep -v {BRANCHPATH} dist/release > dist/release.new </command>
+	        <command>echo {BRANCHPATH} rc >> dist/release.new </command>
+	        <command>mv dist/release.new dist/release </command>
 	        <command ignoreerror="1">git commit -m "Release Candidate for {BRANCHPATH}" dist/release</command>
 	        <command>git checkout {BRANCHPATH} </command>
-	        <command>git merge V5-7-patches    </command>
-	        <command>git commit                </command>
+	        <command>grep -v {BRANCHPATH} dist/release > dist/release.new </command>
+	        <command>echo {BRANCHPATH} rc >> dist/release.new </command>
+	        <command>mv dist/release.new dist/release </command>
+	        <command>git commit -m "Release Candidate for {BRANCHPATH}" dist/release</command>
 	      </commands>
 	    </step>
 	    <step type="system" title="Unset RC mode" skipif="'{RELEASETYPE}' eq 'rc'">
@@ -295,7 +299,8 @@
 	        <command>mv dist/release.new dist/release </command>
 	        <command ignoreerror="1">git commit -m "{BRANCHPATH} out of Release Candidate" dist/release</command>
 	        <command>git checkout {BRANCHPATH} </command>
-	        <command>git merge V5-7-patches    </command>
+	        <command>grep -v {BRANCHPATH} dist/release > dist/release.new </command>
+	        <command>mv dist/release.new dist/release </command>
 	        <command>git commit                </command>
 	      </commands>
 	    </step>
