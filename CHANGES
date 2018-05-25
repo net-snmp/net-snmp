@@ -3,6 +3,18 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.8.rc3
+    snmplib:
+      - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
+        sprint_realloc_octet_string() triggers a segmentation fault
+        strlcpy() implementations typically scan for the end of the source
+        argument passed to strlcpy(). Hence avoid passing an unterminated
+        string to strlcpy().
+
+    Cygwin64:
+      -  Fix build with OpenSSL
+
+
 *5.8.rc2*
     snmplib:
       - [BUG 2815]: Display UTF-8 characters again
