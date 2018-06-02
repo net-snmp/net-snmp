@@ -617,7 +617,6 @@ ac_config_libobj_dir=snmplib
 ac_subst_vars='LTLIBOBJS
 ac_cv_NETSNMP_SYSTEM_INCLUDE_FILE
 PARTIALTARGETFLAGS
-DLLIBS
 OTHERAGENTLIBLFTS
 OTHERAGENTLIBLOBJS
 OTHERAGENTLIBOBJS
@@ -21393,27 +21392,6 @@ fi
 ##
 #########################################
 
-##
-#   Compilation-related
-##
-
-#       Dynamic modules require Position-Independent Code
-#	    LIB_CFLAGS/DLLIBS: used in agent Makefile only
-#
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we have to build PIC code" >&5
-$as_echo_n "checking whether we have to build PIC code... " >&6; }
-echo " $module_list " | $GREP " ucd-snmp/dlmod " >/dev/null
-if test $? -eq 0 ; then
-    LIB_CFLAGS="$LIB_CFLAGS $SHLIB_CFLAGS"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-    DLLIBS=""
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
 # -*- autoconf -*-
 #########################################
 ##
@@ -30210,8 +30188,6 @@ export CFLAGS
 #
 # define the agent libraries variables
 #
-
-
 
 
 
