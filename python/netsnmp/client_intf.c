@@ -2331,7 +2331,7 @@ netsnmp_set(PyObject *self, PyObject *args)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
   PyObject *session;
   PyObject *varlist;
-  PyObject *varbind;
+  PyObject *varbind = NULL;
   netsnmp_session *ss;
   netsnmp_pdu *pdu, *response;
   struct tree *tp;

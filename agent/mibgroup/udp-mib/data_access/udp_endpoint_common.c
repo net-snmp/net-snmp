@@ -88,6 +88,11 @@ netsnmp_access_udp_endpoint_container_load(netsnmp_container* container,
     return container;
 }
 
+static void _netsnmp_access_udp_endpoint_entry_free(void *data, void *context)
+{
+    netsnmp_access_udp_endpoint_entry_free(data);
+}
+
 void
 netsnmp_access_udp_endpoint_container_free(netsnmp_container *container,
                                            u_int free_flags)
@@ -104,9 +109,7 @@ netsnmp_access_udp_endpoint_container_free(netsnmp_container *container,
         /*
          * free all items.
          */
-        CONTAINER_CLEAR(container,
-                        (netsnmp_container_obj_func*)
-                        netsnmp_access_udp_endpoint_entry_free,
+        CONTAINER_CLEAR(container, _netsnmp_access_udp_endpoint_entry_free,
                         NULL);
     }
 

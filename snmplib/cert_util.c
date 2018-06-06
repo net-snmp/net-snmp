@@ -148,7 +148,7 @@ void netsnmp_key_free(netsnmp_key *key);
 
 static int _certindex_add( const char *dirname, int i );
 
-static int _time_filter(netsnmp_file *f, struct stat *idx);
+static int _time_filter(const void *text, void *ctx);
 
 static void _init_tlstmCertToTSN(void);
 #define TRUSTCERT_CONFIG_TOKEN "trustCert"
@@ -704,9 +704,9 @@ _type_from_filename(const char *filename)
 /*
  * filter functions; return 1 to include file, 0 to exclude
  */
-static int
-_cert_cert_filter(const char *filename)
+static int _cert_cert_filter(const void *text, void *ctx)
 {
+    const char *filename = text;
     int  len = strlen(filename);
     const char *pos;
 
@@ -1383,8 +1383,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
      */
     newer =
         netsnmp_directory_container_read_some(NULL, dirname,
-                                              (netsnmp_directory_filter*)
-                                              _time_filter,(void*)&idx_stat,
+                                              _time_filter, &idx_stat,
                                               NETSNMP_DIR_NSFILE |
                                               NETSNMP_DIR_NSFILE_STATS);
     if (newer) {
@@ -1546,8 +1545,7 @@ _add_certdir(const char *dirname)
      */
     cert_container =
         netsnmp_directory_container_read_some(NULL, dirname,
-                                              (netsnmp_directory_filter*)
-                                              &_cert_cert_filter, NULL,
+                                              _cert_cert_filter, NULL,
                                               NETSNMP_DIR_RELATIVE_PATH |
                                               NETSNMP_DIR_EMPTY_OK );
     if (NULL == cert_container) {
@@ -2396,8 +2394,11 @@ _key_find_fn(const char *filename)
 #endif
 
 static int
-_time_filter(netsnmp_file *f, struct stat *idx)
+_time_filter(const void *text, void *ctx)
 {
+    const netsnmp_file *f = text;
+    struct stat *idx = ctx;
+
     /** include if mtime or ctime newer than index mtime */
     if (f && idx && f->stats &&
         ((f->stats->st_mtime >= idx->st_mtime) ||
