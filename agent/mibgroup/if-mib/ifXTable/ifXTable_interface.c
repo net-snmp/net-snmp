@@ -1799,8 +1799,7 @@ static int      _ifXTable_container_save_rows(int majorID, int minorID,
                                               void *clientarg);
 static void     _ifXTable_container_row_restore(const char *token,
                                                 char *buf);
-static int      _ifXTable_container_row_save(ifXTable_rowreq_ctx *
-                                             rowreq_ctx, void *type);
+static void     _ifXTable_container_row_save(void *data, void *type);
 static char    *_ifXTable_container_col_restore(ifXTable_rowreq_ctx *
                                                 rowreq_ctx, u_int col,
                                                 char *buf);
@@ -1856,7 +1855,6 @@ _ifXTable_container_save_rows(int majorID, int minorID, void *serverarg,
      * save all rows
      */
     CONTAINER_FOR_EACH(*(netsnmp_container **)clientarg,
-                       (netsnmp_container_obj_func *)
                        _ifXTable_container_row_save, type);
 
     read_config_store((char *) type, sep);
@@ -1873,9 +1871,10 @@ _ifXTable_container_save_rows(int majorID, int minorID, void *serverarg,
 /************************************************************
  * _ifXTable_container_row_save
  */
-static int
-_ifXTable_container_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
+static void _ifXTable_container_row_save(void *data, void *type)
 {
+    ifXTable_rowreq_ctx *rowreq_ctx = data;
+
     /*
      * Allocate space for a line with all data for a row. An
      * attempt is made to come up with a default maximum size, but
@@ -1918,7 +1917,7 @@ _ifXTable_container_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
     int             i;
 
     if (ifXTable_container_should_save(rowreq_ctx) == 0) {
-        return SNMP_ERR_NOERROR;
+        return;
     }
 
     /*
@@ -1930,13 +1929,13 @@ _ifXTable_container_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
     if (NULL == pos) {
         snmp_log(LOG_ERR, "error saving ifXTable row "
                  "to persistent file\n");
-        return SNMP_ERR_GENERR;
+        return;
     }
     *pos++ = ' ';
     if (pos > max) {
         snmp_log(LOG_ERR, "error saving ifXTable row "
                  "to persistent file (too long)\n");
-        return SNMP_ERR_GENERR;
+        return;
     }
 
     /*
@@ -1956,7 +1955,7 @@ _ifXTable_container_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
         if (pos > max) {
             snmp_log(LOG_ERR, "error saving ifXTable row "
                      "to persistent file (too long)\n");
-            return SNMP_ERR_GENERR;
+            return;
         }
     }
 
@@ -1972,14 +1971,12 @@ _ifXTable_container_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
     if (pos > max) {
         snmp_log(LOG_ERR, "error saving ifXTable row "
                  "to persistent file (too long)\n");
-        return SNMP_ERR_GENERR;
+        return;
     }
     read_config_store((char *) type, buf);
 
     DEBUGMSGTL(("internal:ifXTable:_ifXTable_container_row_save",
                 "saving line '%s'\n", buf));
-
-    return SNMP_ERR_NOERROR;
 }
 
 static void
