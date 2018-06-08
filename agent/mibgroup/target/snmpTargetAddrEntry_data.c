@@ -643,9 +643,11 @@ snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
         bptr += snprintf(bptr, buff + sizeof(buff) - bptr,
                          ".%d", (int) newEntry->tDomain[i]);
     }
+    for (i = 0; i < newEntry->tAddressLen; i++)
+        bptr += snprintf(bptr, buff + sizeof(buff) - bptr, " %02x",
+                         ((u_char *)newEntry->tAddress)[i]);
     bptr += snprintf(bptr, buff + sizeof(buff) - bptr,
-                     " %s %d %d %s %s %d %d\n",
-                     newEntry->tAddress, newEntry->timeout,
+                     " %d %d %s %s %d %d\n", newEntry->timeout,
                      newEntry->retryCount, newEntry->tagListData,
                      newEntry->paramsData, newEntry->storageType,
                      newEntry->rowStatus);
