@@ -151,6 +151,33 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
     return tmp;
 }
 
+void netsnmp_ipv6_get_taddr(struct netsnmp_transport_s *t, void **addr,
+                            size_t *addr_len)
+{
+    struct sockaddr_in6 *sin6 = t->remote;
+
+    netsnmp_assert(t->remote_length == sizeof(*sin6));
+
+    *addr_len = 18;
+    if ((*addr = malloc(*addr_len))) {
+        memcpy(*addr,      &sin6->sin6_addr, 16);
+        memcpy(*addr + 16, &sin6->sin6_port, 2);
+    }
+}
+
+int netsnmp_ipv6_ostring_to_sockaddr(struct sockaddr_in6 *sin6, const void *o,
+                                     size_t o_len)
+{
+    if (o_len != 18)
+        return 0;
+
+    memset(sin6, 0, sizeof(*sin6));
+    sin6->sin6_family = AF_INET6;
+    memcpy(&sin6->sin6_addr, o + 0,  16);
+    memcpy(&sin6->sin6_port, o + 16, 2);
+    return 1;
+}
+
 int
 netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                        const char *inpeername, const char *default_target)

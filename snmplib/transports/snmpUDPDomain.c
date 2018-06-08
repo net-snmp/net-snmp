@@ -146,6 +146,7 @@ netsnmp_udp_transport_base(netsnmp_transport *t)
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = NULL;
     t->f_fmtaddr  = netsnmp_udp_fmtaddr;
+    t->f_get_taddr = netsnmp_ipv4_get_taddr;
 
     return t;
 }
@@ -628,7 +629,11 @@ netsnmp_udp_create_tspec(netsnmp_tdomain_spec *tspec)
 netsnmp_transport *
 netsnmp_udp_create_ostring(const void *o, size_t o_len, int local)
 {
-    return netsnmp_udp_transport(o, local);
+    struct sockaddr_in sin;
+
+    if (netsnmp_ipv4_ostring_to_sockaddr(&sin, o, o_len))
+        return netsnmp_udp_transport(&sin, local);
+    return NULL;
 }
 
 

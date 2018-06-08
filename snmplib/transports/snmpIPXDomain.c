@@ -33,6 +33,7 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
+#include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/tools.h>
 
@@ -69,7 +70,19 @@ netsnmp_ipx_fmtaddr(netsnmp_transport *t, const void *data, int len)
     }
 }
 
+static void netsnmp_ipx_get_taddr(struct netsnmp_transport_s *t,
+                                  void **addr, size_t *addr_len)
+{
+    struct sockaddr_ipx *sa = t->remote;
 
+    netsnmp_assert(t->remote_length == sizeof(*sa));
+    *addr_len = 12;
+    if ((*addr = malloc(*addr_len))) {
+        memcpy(*addr + 0,  &sa->sipx_network, 4);
+        memcpy(*addr + 4,  &sa->sipx_node,    6);
+        memcpy(*addr + 10, &sa->sipx_port,    2);
+    }
+}
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -276,6 +289,7 @@ netsnmp_ipx_transport(const struct sockaddr_ipx *addr, int local)
     t->f_close    = netsnmp_ipx_close;
     t->f_accept   = NULL;
     t->f_fmtaddr  = netsnmp_ipx_fmtaddr;
+    t->f_get_taddr = netsnmp_ipx_get_taddr;
 
     return t;
 }
@@ -430,13 +444,27 @@ netsnmp_ipx_create_tstring(const char *str, int local,
     }
 }
 
+static int netsnmp_ipx_ostring_to_sockaddr(struct sockaddr_ipx *sa,
+                                           const void *o, size_t o_len)
+{
+    if (o_len != 12)
+        return 0;
 
+    memset(sa, 0, sizeof(*sa));
+    sa->sipx_family = AF_IPX;
+    memcpy(&sa->sipx_network, o + 0, 4);
+    memcpy(&sa->sipx_node,    o + 4, 6);
+    memcpy(&sa->sipx_port,    o + 10, 2);
+    return 1;
+}
 
 netsnmp_transport *
 netsnmp_ipx_create_ostring(const void *o, size_t o_len, int local)
 {
-    if (o_len == sizeof(struct sockaddr_ipx))
-        return netsnmp_ipx_transport(o, local);
+    struct sockaddr_ipx sa;
+
+    if (netsnmp_ipx_ostring_to_sockaddr(&sa, o, o_len))
+        return netsnmp_ipx_transport(&sa, local);
 
     return NULL;
 }

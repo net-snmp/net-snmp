@@ -310,6 +310,7 @@ netsnmp_tcp_transport(const struct sockaddr_in *addr, int local)
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = netsnmp_tcp_accept;
     t->f_fmtaddr  = netsnmp_tcp_fmtaddr;
+    t->f_get_taddr = netsnmp_ipv4_get_taddr;
 
     return t;
 }
@@ -334,7 +335,11 @@ netsnmp_tcp_create_tstring(const char *str, int local,
 netsnmp_transport *
 netsnmp_tcp_create_ostring(const void *o, size_t o_len, int local)
 {
-    return netsnmp_tcp_transport(o, local);
+    struct sockaddr_in sin;
+
+    if (netsnmp_ipv4_ostring_to_sockaddr(&sin, o, o_len))
+        return netsnmp_tcp_transport(&sin, local);
+    return NULL;
 }
 
 

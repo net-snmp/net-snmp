@@ -1,6 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
+#include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/snmpSSHDomain.h>
 
 #include <stdio.h>
@@ -123,7 +124,18 @@ netsnmp_ssh_fmtaddr(netsnmp_transport *t, const void *data, int len)
     }
 }
 
-
+static void netsnmp_ssh_get_taddr(struct netsnmp_transport_s *t,
+                                  void **addr, size_t *addr_len)
+{
+    switch (t->remote_length) {
+    case sizeof(struct sockaddr_in):
+        netsnmp_ipv4_get_taddr(t, addr, addr_len);
+        break;
+    default:
+        *addr = NULL;
+        netsnmp_assert(0);
+    }
+}
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -883,6 +895,7 @@ netsnmp_ssh_transport(const struct sockaddr_in *addr, int local)
     t->f_close    = netsnmp_ssh_close;
     t->f_accept   = netsnmp_ssh_accept;
     t->f_fmtaddr  = netsnmp_ssh_fmtaddr;
+    t->f_get_taddr = netsnmp_ssh_get_taddr;
 
     return t;
 }
@@ -907,7 +920,13 @@ netsnmp_ssh_create_tstring(const char *str, int local,
 netsnmp_transport *
 netsnmp_ssh_create_ostring(const void *o, size_t o_len, int local)
 {
-    return netsnmp_ssh_transport(o, local);
+    struct sockaddr_in sin;
+
+    if (netsnmp_ipv4_ostring_to_sockaddr(&sin, o, o_len))
+        return netsnmp_ssh_transport(&sin, local);
+    else
+        netsnmp_assert(0);
+    return NULL;
 }
 
 void

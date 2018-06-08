@@ -124,6 +124,14 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
     }
     }
 }
+
+static void netsnmp_tlstcp_get_taddr(struct netsnmp_transport_s *t,
+                                     void **addr, size_t *addr_len)
+{
+    *addr_len = t->remote_length;
+    *addr = netsnmp_memdup(t->remote, *addr_len);
+}
+
 /*
  * You can write something into opaque that will subsequently get passed back 
  * to your send function if you like.  For instance, you might want to
@@ -986,6 +994,7 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     t->f_config        = netsnmp_tlsbase_config;
     t->f_setup_session = netsnmp_tlsbase_session_init;
     t->f_fmtaddr       = netsnmp_tlstcp_fmtaddr;
+    t->f_get_taddr     = netsnmp_tlstcp_get_taddr;
 
     t->flags |= NETSNMP_TRANSPORT_FLAG_TUNNELED | NETSNMP_TRANSPORT_FLAG_STREAM;
 

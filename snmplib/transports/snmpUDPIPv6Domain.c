@@ -263,6 +263,7 @@ netsnmp_udp6_transport_init(const struct sockaddr_in6 *addr, int flags)
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = NULL;
     t->f_fmtaddr  = netsnmp_udp6_fmtaddr;
+    t->f_get_taddr = netsnmp_ipv6_get_taddr;
 
     t->domain = netsnmp_UDPIPv6Domain;
     t->domain_length =
@@ -951,7 +952,11 @@ netsnmp_udp6_create_tspec(netsnmp_tdomain_spec *tspec)
 netsnmp_transport *
 netsnmp_udp6_create_ostring(const void *o, size_t o_len, int local)
 {
-    return netsnmp_udp6_transport(o, local);
+    struct sockaddr_in6 sin6;
+
+    if (netsnmp_ipv6_ostring_to_sockaddr(&sin6, o, o_len))
+        return netsnmp_udp6_transport(&sin6, local);
+    return NULL;
 }
 
 

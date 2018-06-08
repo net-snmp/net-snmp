@@ -1486,6 +1486,7 @@ _transport_common(netsnmp_transport *t, int local)
     t->f_setup_session = netsnmp_tlsbase_session_init;
     t->f_accept        = NULL;
     t->f_fmtaddr       = netsnmp_dtlsudp4_fmtaddr;
+    t->f_get_taddr     = netsnmp_ipv4_get_taddr;
 
     t->flags = NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
@@ -1553,6 +1554,7 @@ netsnmp_dtlsudp6_transport(const struct sockaddr_in6 *addr, int local)
     /* XXX: and buf size */        
 
     t->f_fmtaddr       = netsnmp_dtlsudp6_fmtaddr;
+    t->f_get_taddr     = netsnmp_ipv6_get_taddr;
 
     return t;
 }
@@ -1601,11 +1603,14 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
 netsnmp_transport *
 netsnmp_dtlsudp_create_ostring(const void *o, size_t o_len, int local)
 {
-    if (o_len == sizeof(struct sockaddr_in))
-        return netsnmp_dtlsudp_transport(o, local);
+    struct sockaddr_in sin;
+    struct sockaddr_in6 sin6;
+
+    if (netsnmp_ipv4_ostring_to_sockaddr(&sin, o, o_len))
+        return netsnmp_dtlsudp_transport(&sin, local);
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-    else if (o_len == sizeof(struct sockaddr_in6))
-        return netsnmp_dtlsudp6_transport(o, local);
+    else if (netsnmp_ipv6_ostring_to_sockaddr(&sin6, o, o_len))
+        return netsnmp_dtlsudp6_transport(&sin6, local);
 #endif
     else
         return NULL;

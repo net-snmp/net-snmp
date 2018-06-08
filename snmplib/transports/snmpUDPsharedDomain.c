@@ -178,6 +178,12 @@ _transport_common(netsnmp_transport *t)
     t->f_fmtaddr       = _udpshared_fmtaddr;
     t->f_setup_session = _setup_session;
     t->flags = NETSNMP_TRANSPORT_FLAG_SHARED;
+    if (t->base_transport->domain == netsnmpUDPDomain)
+        t->f_get_taddr = netsnmp_ipv4_get_taddr;
+    else if (t->base_transport->domain == netsnmp_UDPIPv6Domain)
+        t->f_get_taddr = netsnmp_ipv6_get_taddr;
+    else
+        netsnmp_assert(0);
 
     return t;
 }
@@ -340,13 +346,16 @@ netsnmp_udpshared6_transport_with_source(const struct sockaddr_in6 *addr6,
 netsnmp_transport *
 netsnmp_udpshared_create_ostring(const void *o, size_t o_len, int local)
 {
+    struct sockaddr_in sin;
+    struct sockaddr_in6 sin6;
+
     DEBUGMSGTL(("udpshared:create", "from ostring\n"));
 
-    if (o_len == sizeof(struct sockaddr_in))
-        return netsnmp_udpshared_transport(o, local);
+    if (netsnmp_ipv4_ostring_to_sockaddr(&sin, o, o_len))
+        return netsnmp_udpshared_transport(&sin, local);
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-    else if (o_len == sizeof(struct sockaddr_in6))
-        return netsnmp_udpshared6_transport(o, local);
+    else if (netsnmp_ipv6_ostring_to_sockaddr(&sin6, o, o_len))
+        return netsnmp_udpshared6_transport(&sin6, local);
 #endif
     return NULL;
 }

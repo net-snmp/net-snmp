@@ -385,9 +385,9 @@ write_snmpTargetAddrTAddress(int action,
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
 
-            old_addr = (char *) target->tAddress;
+            old_addr = target->tAddress;
             old_len = target->tAddressLen;
-            target->tAddress = (u_char *) malloc(var_val_len);
+            target->tAddress = malloc(var_val_len);
             if (target->tAddress == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
@@ -419,7 +419,7 @@ write_snmpTargetAddrTAddress(int action,
             if (target->storageType != SNMP_STORAGE_READONLY
                 && target->rowStatus != SNMP_ROW_ACTIVE) {
                 SNMP_FREE(target->tAddress);
-                target->tAddress = (u_char *) old_addr;
+                target->tAddress = old_addr;
                 target->tAddressLen = old_len;
                 if (target->rowStatus == SNMP_ROW_NOTINSERVICE &&
                     snmpTargetAddr_rowStatusCheck(target) == 0) {

@@ -316,6 +316,7 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = netsnmp_tcp6_accept;
     t->f_fmtaddr  = netsnmp_tcp6_fmtaddr;
+    t->f_get_taddr = netsnmp_ipv6_get_taddr;
 
     return t;
 }
@@ -346,7 +347,11 @@ netsnmp_tcp6_create_tstring(const char *str, int local,
 netsnmp_transport *
 netsnmp_tcp6_create_ostring(const void *o, size_t o_len, int local)
 {
-    return netsnmp_tcp6_transport(o, local);
+    struct sockaddr_in6 sin6;
+
+    if (netsnmp_ipv6_ostring_to_sockaddr(&sin6, o, o_len))
+        return netsnmp_tcp6_transport(&sin6, local);
+    return NULL;
 }
 
 

@@ -344,8 +344,10 @@ notifyTable_register_notifications(int major, int minor,
     ptr->nameData = netsnmp_memdup_nt(name, nameLen, &ptr->nameLen);
     memcpy(ptr->tDomain, t->domain, t->domain_length * sizeof(oid));
     ptr->tDomainLen = t->domain_length;
-    ptr->tAddressLen = t->remote_length;
-    ptr->tAddress = t->remote;
+    if (t->f_get_taddr)
+        t->f_get_taddr(t, &ptr->tAddress, &ptr->tAddressLen);
+    else
+        netsnmp_assert(0);
 
     ptr->timeout = ss->timeout / 1000;
     ptr->retryCount = ss->retries;

@@ -213,6 +213,11 @@ typedef struct netsnmp_transport_s {
     /* allocated host name identifier; used by configuration system
        to load localhost.conf for host-specific configuration */
     u_char         *identifier; /* udp:localhost:161 -> "localhost" */
+
+    /* Duplicate the remote address in the format required by SNMP-TARGET-MIB */
+    void           (*f_get_taddr)(struct netsnmp_transport_s *t,
+                                  void **addr, size_t *addr_len);
+
 } netsnmp_transport;
 
 typedef struct netsnmp_transport_list_s {
@@ -232,7 +237,9 @@ typedef struct netsnmp_tdomain_s {
      */
     netsnmp_transport *(*f_create_from_tstring) (const char *, int);
 
-    netsnmp_transport *(*f_create_from_ostring) (const void *, size_t, int);
+    /* @o and @o_len define an address in the format used by SNMP-TARGET-MIB */
+    netsnmp_transport *(*f_create_from_ostring) (const void *o, size_t o_len,
+                                                 int local);
 
     struct netsnmp_tdomain_s *next;
 

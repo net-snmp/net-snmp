@@ -53,7 +53,12 @@ netsnmp_std_fmtaddr(netsnmp_transport *t, const void *data, int len)
     return strdup("STDInOut");
 }
 
-
+static void
+netsnmp_std_get_taddr(netsnmp_transport *t, void **addr, size_t *addr_len)
+{
+    *addr_len = t->remote_length;
+    *addr = netsnmp_memdup(t->remote, *addr_len);
+}
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -176,6 +181,7 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
     t->f_close    = netsnmp_std_close;
     t->f_accept   = netsnmp_std_accept;
     t->f_fmtaddr  = netsnmp_std_fmtaddr;
+    t->f_get_taddr = netsnmp_std_get_taddr;
 
     /*
      * if instring is not null length, it specifies a path to a prog

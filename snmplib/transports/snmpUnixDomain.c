@@ -107,7 +107,12 @@ netsnmp_unix_fmtaddr(netsnmp_transport *t, const void *data, int len)
     }
 }
 
-
+static void
+netsnmp_unix_get_taddr(netsnmp_transport *t, void **addr, size_t *addr_len)
+{
+    *addr_len = t->remote_length;
+    *addr = netsnmp_memdup(t->remote, *addr_len);
+}
 
 /*
  * You can write something into opaque that will subsequently get passed back
@@ -459,6 +464,7 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
     t->f_close    = netsnmp_unix_close;
     t->f_accept   = netsnmp_unix_accept;
     t->f_fmtaddr  = netsnmp_unix_fmtaddr;
+    t->f_get_taddr = netsnmp_unix_get_taddr;
 
     return t;
 }

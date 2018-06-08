@@ -44,7 +44,7 @@
          size_t          nameLen;
          oid             tDomain[MAX_OID_LEN];
          int             tDomainLen;
-         unsigned char  *tAddress;
+         void           *tAddress;
          size_t          tAddressLen;
          int             timeout;      /* Timeout in centiseconds */
          int             retryCount;

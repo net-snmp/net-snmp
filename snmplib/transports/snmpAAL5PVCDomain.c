@@ -67,7 +67,25 @@ netsnmp_aal5pvc_fmtaddr(netsnmp_transport *t, const void *data, int len)
     }
 }
 
+static void
+netsnmp_aal5pvc_get_taddr(netsnmp_transport *t, void **addr, size_t *addr_len)
+{
+    struct sockaddr_atmpvc *sa = t->remote;
+    unsigned char *p;
 
+    *addr_len = 8;
+    if (!(*addr = malloc(*addr_len)))
+        return;
+    p = *addr;
+    p[0] = sa->sap_addr.itf >> 8;
+    p[1] = sa->sap_addr.itf >> 0;
+    p[2] = sa->sap_addr.vpi >> 8;
+    p[3] = sa->sap_addr.vpi >> 0;
+    p[4] = sa->sap_addr.vci >> 24;
+    p[5] = sa->sap_addr.vci >> 16;
+    p[6] = sa->sap_addr.vci >> 8;
+    p[7] = sa->sap_addr.vci >> 0;
+}
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -285,6 +303,7 @@ netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr, int local)
     t->f_close    = netsnmp_aal5pvc_close;
     t->f_accept   = NULL;
     t->f_fmtaddr  = netsnmp_aal5pvc_fmtaddr;
+    t->f_get_taddr = netsnmp_aal5pvc_get_taddr;
 
     return t;
 }
@@ -322,12 +341,30 @@ netsnmp_aal5pvc_create_tstring(const char *str, int local,
     }
 }
 
+static int netsnmp_aal5pvc_ostring_to_sockaddr(struct sockaddr_atmpvc *sa,
+                                               const void *o, size_t o_len)
+{
+    const unsigned char *p = o;
 
+    if (o_len != 8)
+        return 0;
+
+    memset(sa, 0, sizeof(*sa));
+    sa->sap_family = AF_ATMPVC;
+    sa->sap_addr.itf = (p[0] << 8) + (p[1] << 0);
+    sa->sap_addr.vpi = (p[2] << 8) + (p[3] << 0);
+    sa->sap_addr.vci = (p[4] << 24) + (p[5] << 16) + (p[6] << 8) + (p[7] << 0);
+    return 1;
+}
 
 netsnmp_transport *
 netsnmp_aal5pvc_create_ostring(const void *o, size_t o_len, int local)
 {
-    return netsnmp_aal5pvc_transport(o, local);
+    struct sockaddr_atmpvc sa;
+
+    if (netsnmp_aal5pvc_ostring_to_sockaddr(&sa, o, o_len))
+        return netsnmp_aal5pvc_transport(&sa, local);
+    return NULL;
 }
 
 
