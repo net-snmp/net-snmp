@@ -1,0 +1,162 @@
+#!/bin/sh
+#
+# SNMPv3 dynamic trap config
+#
+# Input variables:
+#   NOTIFYTYPE     trap|inform
+#   TRAPSESS       yes|no
+#   DYNTRAP        yes|no
+#
+
+SKIPIFNOT NETSNMP_SECMOD_USM
+
+## Defaults
+[ "x$NOTIFYTYPE" = "x" ] && NOTIFYTYPE="trap"
+[ "x$TRAPSESS"   = "x" ] && TRAPSESS="yes"
+[ "x$DYNTRAP"    = "x" ] && DYNTRAP="no"
+
+case "$NOTIFYTYPE" in
+    "trap")
+        notifytype=1
+        trapsess_arg="";;
+    "inform")
+        notifytype=2
+        trapsess_arg="-Ci";;
+    *)
+        echo "Error: NOTIFYTYPE = $NOTIFYTYPE is not supported"
+        return 1;;
+esac
+
+ipv4_2_hex() {
+    # remove the ':' at the end of the first argument
+    local host=${1%:}
+    local port=$2
+
+    printf "0x"
+    for i in $(echo "$host" | tr '.' ' '); do
+	printf "%02x" "$i"
+    done
+    printf "%04x\\n" "$port"
+}
+
+ipv6_2_hex() {
+    # remove the ':' at the end of the first argument
+    local host=${1%:}
+    local port=$2
+
+    printf "0x"
+    if echo "$host" | grep -q ::; then
+	no_of_colons=$(echo "$host" | tr -d -c ':' | awk '{ print length }')
+	case $no_of_colons in
+	    7) host=$(echo "$host" | sed 's/::/:0:/') ;;
+	    6) host=$(echo "$host" | sed 's/::/:0:0:/') ;;
+	    5) host=$(echo "$host" | sed 's/::/:0:0:0:/') ;;
+	    4) host=$(echo "$host" | sed 's/::/:0:0:0:0:/') ;;
+	esac
+    fi
+    for i in $(echo "$host" | tr ':' ' '); do
+	printf "%04x" "${i:-0}"
+    done
+    printf "%04x\\n" "$port"
+}
+
+settmib() {
+    CAPTURE "snmpset -t 3 -r 0 -d $TESTAUTHARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT SNMP-TARGET-MIB::$1 $2 $3"
+}
+
+setnmib() {
+    CAPTURE "snmpset -t 3 -r 0 -d $TESTAUTHARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT SNMP-NOTIFICATION-MIB::$1 $2 $3"
+}
+
+dyntrap_config() {
+    if [ "$SNMP_TRANSPORT_SPEC" = "udp" ]; then
+	tdomain="SNMPv2-TM::snmpUDPDomain"
+	targetaddr=$(ipv4_2_hex "$SNMP_TEST_DEST" "$SNMP_SNMPTRAPD_PORT")
+    elif [ "$SNMP_TRANSPORT_SPEC" = "udp6" ]; then
+	tdomain="SNMPv2-SMI::mib-2.100.1.2"
+	targetaddr=$(ipv6_2_hex "$SNMP_TEST_DEST" "$SNMP_SNMPTRAPD_PORT")
+    else
+	tdomain="NA"
+	targetaddr="NA"
+    fi
+
+    obj="'dynamictrap'"
+    link=dynamictrap
+
+    settmib "snmpTargetParamsRowStatus.$obj"     = 5
+    settmib "snmpTargetParamsStorageType.$obj"   = 3 # nonVolatile
+    settmib "snmpTargetParamsMPModel.$obj"       = 3 # USM
+    settmib "snmpTargetParamsSecurityModel.$obj" = 3 # USM
+    settmib "snmpTargetParamsSecurityName.$obj"  = "$TESTAUTHUSER"
+    settmib "snmpTargetParamsSecurityLevel.$obj" = 2 # authNoPriv
+
+    # snmpNotify
+    setnmib "snmpNotifyRowStatus.$obj"   = 5
+    setnmib "snmpNotifyTag.$obj"         = "$link"
+    setnmib "snmpNotifyType.$obj"        = "$notifytype"
+    setnmib "snmpNotifyStorageType.$obj" = 3
+
+    # snmpTargetAddr
+    settmib "snmpTargetAddrRowStatus.$obj"   = 5
+    settmib "snmpTargetAddrTimeout.$obj"     = 1000
+    settmib "snmpTargetAddrRetryCount.$obj"  = 5
+    settmib "snmpTargetAddrTagList.$obj"     = "$link"
+    settmib "snmpTargetAddrParams.$obj"      = "$link"
+    settmib "snmpTargetAddrStorageType.$obj" = 3
+    settmib "snmpTargetAddrTDomain.$obj"     = "$tdomain"
+    settmib "snmpTargetAddrTAddress.$obj"    x "$targetaddr"
+
+    # enable the trap
+    settmib "snmpTargetAddrRowStatus.$obj" = 1
+    settmib "snmpTargetParamsRowStatus.$obj" = 1
+    setnmib "snmpNotifyRowStatus.$obj" = 1
+
+    if [ "$SNMP_VERBOSE" -gt 0 ]; then
+        for table in SNMP-TARGET-MIB::snmpTargetAddrTable   \
+                     SNMP-TARGET-MIB::snmpTargetParamsTable \
+                     SNMP-NOTIFICATION-MIB::snmpNotifyTable; do
+	    CAPTURE "snmpwalk -v 3 -r 2 -t 10 $TESTAUTHARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT ${table}"
+        done
+    fi
+}
+
+
+## common SNMPv3 USM config
+CREATEUSERENGINEID=0x80001f88802b3d0e1111111111
+. ./Sv3usmconfigbase
+
+CONFIGTRAPD "[snmp]" persistentDir "$SNMP_TMP_PERSISTENTDIR"
+CONFIGTRAPD oldEngineID "$CREATEUSERENGINEID"
+CONFIGTRAPD "$CREATEAUTHUSER"
+CONFIGTRAPD authUser log $TESTAUTHUSER
+
+STARTTRAPD
+
+CONFIGAGENT "[snmp]" persistentdir "$SNMP_TMP_PERSISTENTDIR"
+CONFIGAGENT oldEngineID "$CREATEUSERENGINEID"
+CONFIGAGENT "$CREATEAUTHUSER"
+CONFIGAGENT rwuser "$TESTAUTHUSER" auth
+
+if [ "x$TRAPSESS" = "xyes" ]; then
+    CONFIGAGENT trapsess $trapsess_arg -e $CREATEUSERENGINEID $TESTAUTHARGS \
+		"${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT}"
+fi
+
+#AGENT_FLAGS="$AGENT_FLAGS -Dtrap -Dsend_notifications -DsnmpTargetAddrEntry -Dtarget_sessions -DsnmpNotifyTable_data"
+STARTAGENT
+
+[ "x$DYNTRAP" = "xyes" ] && dyntrap_config
+
+CAPTURE "snmpset -On -t 3 -r 0 -d $TESTAUTHARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.254.8.0 i 1"
+
+STOPAGENT
+
+STOPTRAPD
+
+NO_OF_TRAPS=0
+[ "x$TRAPSESS" = "xyes" ] && NO_OF_TRAPS=$((NO_OF_TRAPS+1))
+[ "x$DYNTRAP"  = "xyes" ] && NO_OF_TRAPS=$((NO_OF_TRAPS+1))
+
+CHECKTRAPDCOUNT $NO_OF_TRAPS "life the universe and everything"
+
+FINISHED
