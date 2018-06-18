@@ -552,6 +552,18 @@ snmp_get_do_debugging(void)
 }
 
 void
+snmp_set_do_debugoutputall(int val)
+{
+    debug_print_everything = val;
+}
+
+int
+snmp_get_do_debugoutputall(void)
+{
+    return debug_print_everything;
+}
+
+void
 snmp_debug_shutdown(void)
 {
     int i;
@@ -675,6 +687,16 @@ int
 snmp_get_do_debugging(void)
 {
     return 0;
+}
+
+void
+snmp_set_do_debugoutputall(int val)
+{ }
+
+int
+snmp_get_do_debugoutputall(void)
+{
+    return 0
 }
 
 void

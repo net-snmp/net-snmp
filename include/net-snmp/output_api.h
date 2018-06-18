@@ -149,6 +149,10 @@ netsnmp_debug_no_dumpsetup(const char *token, const void *buf, size_t len)
     void            snmp_set_do_debugging(int);
     NETSNMP_IMPORT
     int             snmp_get_do_debugging(void);
+    NETSNMP_IMPORT
+    void            snmp_set_do_debugoutputall(int);
+    NETSNMP_IMPORT
+    int             snmp_get_do_debugoutputall(void);
 #ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
     NETSNMP_IMPORT
     void            netsnmp_set_debug_log_level(int val);

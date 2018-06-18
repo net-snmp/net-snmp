@@ -169,7 +169,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
     switch (reqinfo->mode) {
 
     case MODE_GET:
-	enabled = snmp_get_do_debugging();
+	enabled = snmp_get_do_debugoutputall();
 	if ( enabled==0 )
 	    enabled=2;		/* false */
 	for (request = requests; request; request=request->next) {
@@ -205,7 +205,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
         enabled = *requests->requestvb->val.integer;
 	if (enabled == 2 )	/* false */
 	    enabled = 0;
-	snmp_set_do_debugging( enabled );
+	snmp_set_do_debugoutputall( enabled );
         break;
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
