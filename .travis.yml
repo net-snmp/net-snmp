@@ -19,7 +19,7 @@ addons:
       - libatm-dev
       - libperl-dev
       - libsensors4-dev
-      - libssh-dev
+      - libssh2-1-dev
       - libssl-dev
       - make
       - perl-modules

@@ -27,7 +27,8 @@ opensshver="$({
     rpm -q openssh-devel;
     rpm -q libssh2-devel;
     rpm -q libssh-devel; } 2>/dev/null |
-    sed -n 's/^.*ssh[0-9]*-devel-\([0-9a-z.]*\)-.*$/\1/p' | head -n1)"
+    sed -n 's/^.*ssh[0-9]*-devel-\([0-9a-z.]*\)-.*$/\1/p' | head -n1;
+    dpkg-query --show -f '${Version}\n' libssh2-1-dev 2>/dev/null)"
 
 options=()
 options+=(--enable-developer)
