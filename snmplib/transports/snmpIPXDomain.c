@@ -78,9 +78,11 @@ static void netsnmp_ipx_get_taddr(struct netsnmp_transport_s *t,
     netsnmp_assert(t->remote_length == sizeof(*sa));
     *addr_len = 12;
     if ((*addr = malloc(*addr_len))) {
-        memcpy(*addr + 0,  &sa->sipx_network, 4);
-        memcpy(*addr + 4,  &sa->sipx_node,    6);
-        memcpy(*addr + 10, &sa->sipx_port,    2);
+        unsigned char *p = *addr;
+
+        memcpy(p + 0,  &sa->sipx_network, 4);
+        memcpy(p + 4,  &sa->sipx_node,    6);
+        memcpy(p + 10, &sa->sipx_port,    2);
     }
 }
 
@@ -447,14 +449,16 @@ netsnmp_ipx_create_tstring(const char *str, int local,
 static int netsnmp_ipx_ostring_to_sockaddr(struct sockaddr_ipx *sa,
                                            const void *o, size_t o_len)
 {
+    const char *p = o;
+
     if (o_len != 12)
         return 0;
 
     memset(sa, 0, sizeof(*sa));
     sa->sipx_family = AF_IPX;
-    memcpy(&sa->sipx_network, o + 0, 4);
-    memcpy(&sa->sipx_node,    o + 4, 6);
-    memcpy(&sa->sipx_port,    o + 10, 2);
+    memcpy(&sa->sipx_network, p + 0, 4);
+    memcpy(&sa->sipx_node,    p + 4, 6);
+    memcpy(&sa->sipx_port,    p + 10, 2);
     return 1;
 }
 

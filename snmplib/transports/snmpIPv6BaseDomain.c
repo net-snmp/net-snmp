@@ -160,21 +160,25 @@ void netsnmp_ipv6_get_taddr(struct netsnmp_transport_s *t, void **addr,
 
     *addr_len = 18;
     if ((*addr = malloc(*addr_len))) {
-        memcpy(*addr,      &sin6->sin6_addr, 16);
-        memcpy(*addr + 16, &sin6->sin6_port, 2);
+        unsigned char *p = *addr;
+
+        memcpy(p,      &sin6->sin6_addr, 16);
+        memcpy(p + 16, &sin6->sin6_port, 2);
     }
 }
 
 int netsnmp_ipv6_ostring_to_sockaddr(struct sockaddr_in6 *sin6, const void *o,
                                      size_t o_len)
 {
+    const char *p = o;
+
     if (o_len != 18)
         return 0;
 
     memset(sin6, 0, sizeof(*sin6));
     sin6->sin6_family = AF_INET6;
-    memcpy(&sin6->sin6_addr, o + 0,  16);
-    memcpy(&sin6->sin6_port, o + 16, 2);
+    memcpy(&sin6->sin6_addr, p + 0,  16);
+    memcpy(&sin6->sin6_port, p + 16, 2);
     return 1;
 }
 
