@@ -28,6 +28,7 @@
 
 char **argvrestartp, *argvrestartname, *argvrestart;
 
+#ifdef SIGALRM
 static RETSIGTYPE
 restart_doit(int a)
 {
@@ -65,6 +66,7 @@ restart_doit(int a)
     setPerrorstatus(argvrestartname);
 #endif
 }
+#endif
 
 int
 restart_hook(int action,
