@@ -317,7 +317,7 @@ get_exec_output(struct extensible *ex)
     /* Child temporary output pipe with Inheritance on (sa.bInheritHandle is true) */    
     if (!CreatePipe(&hOutputReadTmp,&hOutputWrite,&sa,0)) {
       DEBUGMSGTL(("util_funcs", "get_exec_pipes CreatePipe ChildOut: %u\n",
-                  GetLastError()));
+                  (unsigned int)GetLastError()));
       return -1;
     }
     
@@ -326,7 +326,7 @@ get_exec_output(struct extensible *ex)
     if (!DuplicateHandle(GetCurrentProcess(),hOutputWrite, GetCurrentProcess(),
           &hErrorWrite,0, TRUE,DUPLICATE_SAME_ACCESS)) {
       DEBUGMSGTL(("util_funcs", "get_exec_output DuplicateHandle: %u\n",
-                  GetLastError()));
+                  (unsigned int)GetLastError()));
       return -1;
     }
 
@@ -335,8 +335,9 @@ get_exec_output(struct extensible *ex)
      * be closed.  */
     if (!DuplicateHandle(GetCurrentProcess(), hOutputReadTmp, GetCurrentProcess(),
           &hOutputRead, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_output DupliateHandle ChildOut: %u\n",
-                  GetLastError()));
+      DEBUGMSGTL(("util_funcs",
+		  "get_exec_output DupliateHandle ChildOut: %u\n",
+                  (unsigned int)GetLastError()));
       CloseHandle(hErrorWrite);
       return -1;
     }   
@@ -345,7 +346,7 @@ get_exec_output(struct extensible *ex)
     if (!CloseHandle(hOutputReadTmp)) {
       DEBUGMSGTL(("util_funcs",
                   "get_exec_output CloseHandle (hOutputReadTmp): %u\n",
-                  GetLastError()));
+                  (unsigned int)GetLastError()));
       CloseHandle(hErrorWrite);
       CloseHandle(hOutputRead);
       return -1;
@@ -369,7 +370,7 @@ get_exec_output(struct extensible *ex)
     if (!CreateProcess(NULL, ex->command, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
       DEBUGMSGTL(("util_funcs",
                   "get_exec_output CreateProcess:'%s' %u\n", ex->command,
-                  GetLastError()));
+                  (unsigned int)GetLastError()));
       CloseHandle(hErrorWrite);
       CloseHandle(hOutputRead);
       return -1;
@@ -386,13 +387,15 @@ get_exec_output(struct extensible *ex)
      */
 
     if (!CloseHandle(hOutputWrite)){
-      DEBUGMSGTL(("util_funcs","get_exec_output CloseHandle hOutputWrite: %u\n",
-                  GetLastError()));
+      DEBUGMSGTL(("util_funcs",
+		  "get_exec_output CloseHandle hOutputWrite: %u\n",
+                  (unsigned int)GetLastError()));
       return -1;
     }
     if (!CloseHandle(hErrorWrite)) {
-      DEBUGMSGTL(("util_funcs","get_exec_output CloseHandle hErrorWrite: %u\n",
-                  GetLastError()));
+      DEBUGMSGTL(("util_funcs",
+		  "get_exec_output CloseHandle hErrorWrite: %u\n",
+                  (unsigned int)GetLastError()));
       return -1;
     }
     return fd;
