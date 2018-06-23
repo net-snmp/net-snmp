@@ -139,7 +139,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
   HKEY hKey = NULL;		/* Key to registry entry */
   HKEY hParamKey = NULL;	/* To store startup parameters */
   DWORD dwData;			/* Type of logging supported */
-  DWORD i, j;			/* Loop variables */
+  int i, j;			/* Loop variables */
   int exitStatus = 0;
   GetModuleFileName (NULL, szServicePath, MAX_PATH);
   TRY
@@ -690,7 +690,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
   TCHAR szRegKey[512];
   HKEY hParamKey = NULL;
   DWORD TotalParams = 0;
-  DWORD i;
+  int i;
   InputParams ThreadInputParams;
 
   /*
