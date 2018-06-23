@@ -201,7 +201,7 @@ AC_MSG_CACHE_ADD(Building for:               $PARTIALTARGETOS)
 
 # Avoid conflicts on Cygwin between <windows.h> and the openssl header files.
 case x$target_os in
-     xcygwin*)
+     xcygwin*|xmingw32*)
         CPPFLAGS="-DVC_EXTRALEAN -DWIN32_LEAN_AND_MEAN $CPPFLAGS";;
 esac
 
