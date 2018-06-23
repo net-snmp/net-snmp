@@ -27987,7 +27987,14 @@ $as_echo_n "checking how to printf a size_t... " >&6; }
 case "$netsnmp_cv_size_t_type" in
     char|short|int) netsnmp_PRIz="" ;;
     long) netsnmp_PRIz="l" ;;
-    "long long") netsnmp_PRIz="ll" ;;
+    "long long")
+        case x$host_vendor in
+        xw64)
+            # MinGW-w64
+            netsnmp_PRIz="I64";;
+        *)
+            netsnmp_PRIz="ll";;
+        esac;;
     *) as_fn_error $? "underlying type of size_t not known" "$LINENO" 5 ;;
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_PRIz" >&5

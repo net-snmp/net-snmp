@@ -276,7 +276,14 @@ AC_MSG_CHECKING([how to printf a size_t])
 case "$netsnmp_cv_size_t_type" in
     char|short|int) netsnmp_PRIz="" ;;
     long) netsnmp_PRIz="l" ;;
-    "long long") netsnmp_PRIz="ll" ;;
+    "long long")
+        case x$host_vendor in
+        xw64)
+            # MinGW-w64
+            netsnmp_PRIz="I64";;
+        *)
+            netsnmp_PRIz="ll";;
+        esac;;
     *) AC_MSG_ERROR([underlying type of size_t not known]) ;;
 esac
 AC_MSG_RESULT($netsnmp_PRIz)
