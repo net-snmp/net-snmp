@@ -1785,10 +1785,6 @@ enum {
 /* define if agentx transport is to use domain sockets only */
 /* #undef NETSNMP_AGENTX_DOM_SOCK_ONLY */
 
-#ifndef LOG_DAEMON
-#define       LOG_DAEMON      (3<<3)  /* system daemons */
-#endif
-
 #ifdef UCD_COMPATIBLE
 /* old and in the way */
 #define EXTENSIBLEMIB NETSNMP_UCDAVIS_MIB

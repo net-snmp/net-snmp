@@ -98,6 +98,7 @@ SOFTWARE.
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/fd_event_manager.h>
 #include <net-snmp/agent/netsnmp_close_fds.h>
+#include "../snmplib/snmp_syslog.h"
 #include "../agent_global_vars.h"
 #include "../agent/mibgroup/snmpv3/snmpEngine.h"
 #include "../agent/mibgroup/snmpv3/usmUser.h"
@@ -150,43 +151,6 @@ char           *default_port = ddefault_port;
 #endif
 char           *trap1_fmt_str_remember = NULL;
 int             dofork = 1;
-
-/*
- * These definitions handle 4.2 systems without additional syslog facilities.
- */
-#ifndef LOG_CONS
-#define LOG_CONS	0       /* Don't bother if not defined... */
-#endif
-#ifndef LOG_PID
-#define LOG_PID		0       /* Don't bother if not defined... */
-#endif
-#ifndef LOG_LOCAL0
-#define LOG_LOCAL0	0
-#endif
-#ifndef LOG_LOCAL1
-#define LOG_LOCAL1	0
-#endif
-#ifndef LOG_LOCAL2
-#define LOG_LOCAL2	0
-#endif
-#ifndef LOG_LOCAL3
-#define LOG_LOCAL3	0
-#endif
-#ifndef LOG_LOCAL4
-#define LOG_LOCAL4	0
-#endif
-#ifndef LOG_LOCAL5
-#define LOG_LOCAL5	0
-#endif
-#ifndef LOG_LOCAL6
-#define LOG_LOCAL6	0
-#endif
-#ifndef LOG_LOCAL7
-#define LOG_LOCAL7	0
-#endif
-#ifndef LOG_DAEMON
-#define LOG_DAEMON	0
-#endif
 
 /*
  * Include an extra Facility variable to allow command line adjustment of
