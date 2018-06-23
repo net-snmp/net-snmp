@@ -54,7 +54,7 @@ if test "x$enable_ipv6" = "xyes"; then
 	v6trylibc=no
 
 	AC_MSG_CHECKING([[ipv6 stack type]])
-	for i in v6d toshiba kame inria zeta linux-glibc linux-inet6 cygwin winsock2 generic; do
+	for i in v6d toshiba kame zeta generic; do
 		case $i in
 		v6d)
 			AC_EGREP_CPP(yes, [
@@ -87,39 +87,14 @@ yes
 				v6trylibc=yes;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
-		inria)
-			AC_EGREP_CPP(yes, [
-#include <netinet/in.h>
-#ifdef IPV6_INRIA_VERSION
-yes
-#endif],
-				[v6type=$i;
-				v6lib=dummy;
-				v6libdir=none;
-				v6trylibc=yes;
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
-			;;
 		zeta)
 			AC_EGREP_CPP(yes, [
 #include <sys/param.h>
 #ifdef _ZETA_MINAMI_INET6
-A
 yes
 #endif],
 				[v6type=$i; v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
-			;;
-		linux-glibc)
-			AC_EGREP_CPP(yes, [
-#include <features.h>
-#if defined(__GLIBC__) && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 1) || (__GLIBC_ > 2))
-yes
-#endif],
-				[v6type=$i;
-				v6lib=dummy;
-				v6libdir=none;
-				v6trylibc=yes;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
 		linux-inet6)
@@ -130,35 +105,15 @@ yes
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
 			fi
 			;;
-		cygwin)
-			AC_EGREP_CPP(yes, [
-#include <netinet/in.h>
-#ifdef _CYGWIN_IN6_H
-yes
-#endif],
-				[v6type=$i;
-				v6lib=dummy;
-				v6libdir=none
-				v6trylibc=yes;
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
-                       ;;
-		winsock2)
-			AC_CHECK_MEMBER([struct sockaddr_in6.sin6_addr],
-                               [v6type=$i;
-				v6lib=dummy;
-				v6libdir=none
-				v6trylibc=yes;
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"],,[[
+		generic)
+                        AC_MSG_RESULT([[postponed]])
+                        AC_CHECK_MEMBER([struct sockaddr_in6.sin6_addr],,,[[
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
-#endif]])
-			;;
-		generic)
-                        AC_MSG_RESULT([[postponed]])
-			AC_CHECK_MEMBER([struct sockaddr_in6.sin6_addr],,,[
+#endif]
 AC_INCLUDES_DEFAULT()
 [#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
