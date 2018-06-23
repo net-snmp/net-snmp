@@ -19205,8 +19205,8 @@ if test "x$enable_ipv6" = "xyes"; then
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking ipv6 stack type" >&5
 $as_echo_n "checking ipv6 stack type... " >&6; }
-	for v6type in v6d toshiba kame inria zeta linux-glibc linux-inet6 winsock2 cygwin generic; do
-		case $v6type in
+	for i in v6d toshiba kame zeta generic; do
+		case $i in
 		v6d)
 			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -19262,32 +19262,12 @@ fi
 rm -f conftest*
 
 			;;
-		inria)
-			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <netinet/in.h>
-#ifdef IPV6_INRIA_VERSION
-yes
-#endif
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  v6lib=dummy;
-				v6libdir=none;
-				v6trylibc=yes;
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
-fi
-rm -f conftest*
-
-			;;
 		zeta)
 			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 #include <sys/param.h>
 #ifdef _ZETA_MINAMI_INET6
-A
 yes
 #endif
 _ACEOF
@@ -19300,25 +19280,6 @@ fi
 rm -f conftest*
 
 			;;
-		linux-glibc)
-			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <features.h>
-#if defined(__GLIBC__) && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 1) || (__GLIBC_ > 2))
-yes
-#endif
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  v6lib=dummy;
-				v6libdir=none;
-				v6trylibc=yes;
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
-fi
-rm -f conftest*
-
-			;;
 		linux-inet6)
 			if test -d /usr/inet6; then
 				v6lib=inet6
@@ -19326,48 +19287,16 @@ rm -f conftest*
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
 			fi
 			;;
-		cygwin)
-			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <netinet/in.h>
-#ifdef _CYGWIN_IN6_H
-yes
-#endif
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  v6lib=dummy;
-				v6libdir=none
-				v6trylibc=yes;
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
-fi
-rm -f conftest*
-
-                       ;;
-		winsock2)
-			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <ws2tcpip.h>
-#if defined(_WS2TCPIP_H)
-yes
-#endif
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  v6lib=dummy;
-				v6libdir=none
-				v6trylibc=yes;
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
-fi
-rm -f conftest*
-
-			;;
 		generic)
                         { $as_echo "$as_me:${as_lineno-$LINENO}: result: postponed" >&5
 $as_echo "postponed" >&6; }
-			ac_fn_c_check_member "$LINENO" "struct sockaddr_in6" "sin6_addr" "ac_cv_member_struct_sockaddr_in6_sin6_addr" "
+                        ac_fn_c_check_member "$LINENO" "struct sockaddr_in6" "sin6_addr" "ac_cv_member_struct_sockaddr_in6_sin6_addr" "
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#endif
 $ac_includes_default
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
