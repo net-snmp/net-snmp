@@ -1468,7 +1468,7 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
                                     sizeof(win_varbind->value.asnValue.
                                            ticks));
         break;
-    case MS_ASN_OPAQUE:        // AsnOctetString
+    case MS_ASN_OPAQUE:        /* AsnOctetString */
         snmp_varlist_add_variable_w(net_snmp_varbinds, win_varbind->name.ids,
                                     win_varbind->name.idLength,
                                     ASN_OPAQUE,
@@ -1554,7 +1554,7 @@ convert_to_windows_varbind_list(SnmpVarBindList * pVarBindList,
 
     switch (varbind->type) {
     case ASN_BOOLEAN:
-        // There is no equivalent type in Microsoft's <snmp.h>.
+        /* There is no equivalent type in Microsoft's <snmp.h>. */
         netsnmp_assert(0);
         win_varbind->value.asnType = MS_ASN_INTEGER;
         win_varbind->value.asnValue.number = *(varbind->val.integer);
@@ -1599,7 +1599,7 @@ convert_to_windows_varbind_list(SnmpVarBindList * pVarBindList,
         win_varbind->value.asnValue.string.dynamic = TRUE;
         break;
     case ASN_SET:
-        // There is no equivalent type in Microsoft's <snmp.h>.
+        /* There is no equivalent type in Microsoft's <snmp.h>. */
         netsnmp_assert(0);
         win_varbind->value.asnType = MS_ASN_INTEGER;
         win_varbind->value.asnValue.number = *(varbind->val.integer);
