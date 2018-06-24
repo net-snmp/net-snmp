@@ -41,7 +41,7 @@ AT_Cmp(void *addr, void *ep)
     index = Interface_Index_By_Name(mp->ipNetToMediaIfIndex.o_bytes,
                                     mp->ipNetToMediaIfIndex.o_length);
 #endif
-    DEBUGMSGTL(("mibII/at", "......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
+    DEBUGMSGTL(("mibII/at", "......... AT_Cmp %lx<>%lx %d<>%" NETSNMP_PRIo "d (%.5s)\n",
                 (unsigned long)mp->ipNetToMediaNetAddress,
                 (unsigned long)((if_ip_t *) addr)->ipAddr,
                 ((if_ip_t *) addr)->ifIdx, index,
@@ -165,7 +165,7 @@ var_atEntry(struct variable * vp,
         return (u_char *) & long_return;
     case IPMEDIAPHYSADDRESS:
         *var_len = Lowentry.ipNetToMediaPhysAddress.o_length;
-        return Lowentry.ipNetToMediaPhysAddress.o_bytes;
+        return (u_char *) Lowentry.ipNetToMediaPhysAddress.o_bytes;
     case IPMEDIANETADDRESS:
         *var_len = sizeof(addr_ret);
         addr_ret = Lowentry.ipNetToMediaNetAddress;

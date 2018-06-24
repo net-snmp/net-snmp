@@ -433,7 +433,7 @@ set_solaris_bootcommand_parameter(int action,
         case RESERVE2: {
             /* create copy of old value */
             if(statP) {
-                int old_val_len=strlen(statP);
+                int old_val_len = strlen((const char *)statP);
                 if(old_val_len >= sizeof(old_value)) {
                     p_old_value=(char *)malloc(old_val_len+1);
                     if(p_old_value==NULL) {
@@ -441,7 +441,7 @@ set_solaris_bootcommand_parameter(int action,
                         return SNMP_ERR_GENERR;
                     } 
                 }
-                strlcpy(p_old_value,statP,old_val_len+1);
+                strlcpy(p_old_value, (const char *)statP, old_val_len+1);
             } else { 
                 p_old_value=NULL;
             }
@@ -537,16 +537,16 @@ static long get_max_solaris_processes(void) {
     static long maxprocs=-1;
 
     /* assume only necessary to compute once, since /etc/system must be modified */
-    if (maxprocs == -1) {
-        if ( (ksc=kstat_open()) != NULL && 
-             (ks=kstat_lookup(ksc, "unix", 0, "var")) != NULL && 
-             (kstat_read(ksc, ks, &v) != -1)) {
+    if (maxprocs >= 0)
+        return maxprocs;
 
-            maxprocs=v.v_proc;
-        }
-        if(ksc) {
-            kstat_close(ksc);
-        }
+    ksc = kstat_open();
+    if (ksc) {
+        ks = kstat_lookup(ksc, NETSNMP_REMOVE_CONST(char *, "unix"), 0,
+                          NETSNMP_REMOVE_CONST(char *, "var"));
+        if (ks && kstat_read(ksc, ks, &v) != -1)
+            maxprocs = v.v_proc;
+        kstat_close(ksc);
     }
 
     return maxprocs;
