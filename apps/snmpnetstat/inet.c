@@ -590,7 +590,6 @@ inetname(const struct in_addr *inp)
 {
 	char *cp;
 	static char line[50];
-	struct hostent *hp;
 	struct netent *np;
 	static char domain[MAXHOSTNAMELEN];
 	static int first = 1;
@@ -604,44 +603,42 @@ inetname(const struct in_addr *inp)
 		else
 			domain[0] = '\0';
 	}
-	cp = NULL;
-	if (!nflag && inp->s_addr != INADDR_ANY) {
-		int net = inet_netof(*inp);
-		int lna = inet_lnaof(*inp);
+        if (inp->s_addr == INADDR_ANY) {
+                strlcpy(line, "*", sizeof(line));
+        } else {
+                char host[16];
 
-		if (lna == INADDR_ANY) {
-			np = getnetbyaddr(net, AF_INET);
+                cp = NULL;
+                if (!nflag && inet_lnaof(*inp) == INADDR_ANY) {
+			np = getnetbyaddr(inet_netof(*inp), AF_INET);
 			if (np)
 				cp = np->n_name;
 		}
 		if (cp == NULL) {
-			hp = netsnmp_gethostbyaddr(inp, sizeof (*inp),
-                                                   AF_INET);
-			if (hp) {
-				if ((cp = strchr(hp->h_name, '.')) &&
-				    !strcmp(cp + 1, domain))
-					*cp = '\0';
+                        struct sockaddr_in sin;
+
+                        memset(&sin, 0, sizeof(sin));
+                        sin.sin_family = AF_INET;
+                        sin.sin_addr = *inp;
+                        if (getnameinfo((struct sockaddr*)&sin, sizeof(sin),
+                                        host, sizeof(host), NULL, 0,
+                                        nflag ? NI_NUMERICHOST : 0) < 0)
+                                strlcpy(host, "?", sizeof(host));
+                        if ((cp = strchr(host, '.')) && !strcmp(cp + 1, domain))
+                                *cp = '\0';
 #if defined (WIN32) || defined (cygwin)
-                                /*
-                                 * Windows insists on returning the computer
-                                 * name for 127.0.0.1 even if the hosts file
-                                 * lists something else such as 'localhost'.
-                                 * If we are trying to look up 127.0.0.1, just
-                                 * return 'localhost'.
-                                 */
-                                if (inp->s_addr == htonl(INADDR_LOOPBACK))
-                                        cp = "localhost";
-                                else
+                        /*
+                         * Windows insists on returning the computer name for
+                         * 127.0.0.1 even if the hosts file lists something
+                         * else such as 'localhost'.  If we are trying to look
+                         * up 127.0.0.1, just return 'localhost'.
+                         */
+                        if (inp->s_addr == htonl(INADDR_LOOPBACK))
+                                strlcpy(host, "localhost", sizeof(host));
 #endif                                                                          
-				cp = hp->h_name;
-			}
-		}
-	}
-	if (inp->s_addr == INADDR_ANY)
-		snprintf(line, sizeof line, "*");
-	else if (cp)
-		snprintf(line, sizeof line, "%s", cp);
-	else
-		strlcpy(line, inet_ntoa(*inp), sizeof(line));
+                        cp = host;
+                }
+		strlcpy(line, cp, sizeof(line));
+        }
 	return line;
 }
