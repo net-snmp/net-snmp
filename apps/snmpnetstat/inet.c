@@ -649,12 +649,7 @@ inetname(struct in_addr *inp)
 		snprintf(line, sizeof line, "*");
 	else if (cp)
 		snprintf(line, sizeof line, "%s", cp);
-	else {
-		inp->s_addr = ntohl(inp->s_addr);
-#define C(x)	(unsigned)((x) & 0xff)
-		snprintf(line, sizeof line, "%u.%u.%u.%u",
-		    C(inp->s_addr >> 24), C(inp->s_addr >> 16),
-		    C(inp->s_addr >> 8), C(inp->s_addr));
-	}
-	return (line);
+	else
+		strlcpy(line, inet_ntoa(*inp), sizeof(line));
+	return line;
 }
