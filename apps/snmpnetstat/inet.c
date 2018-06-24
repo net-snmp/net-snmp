@@ -66,7 +66,7 @@ struct stat_table {
     char            description[80];
 };
 
-static char *inetname(struct in_addr *);
+static char *inetname(const struct in_addr *);
 
 	/*
 	 * Print a summary of connections related to
@@ -554,7 +554,7 @@ udp_stats(const char *name)
  * If the nflag was specified, use numbers instead of names.
  */
 void
-inetprint(struct in_addr *in, int port, const char *proto, int local)
+inetprint(const struct in_addr *in, int port, const char *proto, int local)
 {
 	struct servent *sp = NULL;
 	char line[80], *cp;
@@ -586,7 +586,7 @@ inetprint(struct in_addr *in, int port, const char *proto, int local)
  * numeric value, otherwise try for symbolic name.
  */
 char *
-inetname(struct in_addr *inp)
+inetname(const struct in_addr *inp)
 {
 	char *cp;
 	static char line[50];
@@ -618,7 +618,7 @@ inetname(struct in_addr *inp)
 				cp = np->n_name;
 		}
 		if (cp == NULL) {
-			hp = netsnmp_gethostbyaddr((char *)inp, sizeof (*inp),
+			hp = netsnmp_gethostbyaddr(inp, sizeof (*inp),
                                                    AF_INET);
 			if (hp) {
 				if ((cp = strchr(hp->h_name, '.')) &&
