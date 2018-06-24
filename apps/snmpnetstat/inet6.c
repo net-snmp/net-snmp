@@ -79,7 +79,7 @@ struct stat_table {
     char            description[80];
 };
 
-static char *inet6name(const unsigned char *);
+static char *inet6name(const struct in6_addr *);
 
 /*
  * Print a summary of TCPv6 connections
@@ -151,8 +151,8 @@ tcp6protopr(const char *name)
         ifIndex      = vp->name[ 44 ];
 
         printf("%-5.5s", name);
-        inet6print(localAddr,  localPort,  name, 1);
-        inet6print(remoteAddr, remotePort, name, 0);
+        inet6print((struct in6_addr *)localAddr,  localPort,  name, 1);
+        inet6print((struct in6_addr *)remoteAddr, remotePort, name, 0);
         if ( state < 1 || state > TCP_NSTATES )
             printf(" %4d %d\n", ifIndex, state );
         else
@@ -197,7 +197,7 @@ udp6protopr(const char *name)
          */
         localPort = vp->name[ vp->name_length-2 ];
         ifIndex   = vp->name[ vp->name_length-1 ];
-        inet6print(vp->val.string, localPort, name, 1);
+        inet6print((struct in6_addr *)vp->val.string, localPort, name, 1);
         printf(" %4d\n", ifIndex );
     }
     snmp_free_varbind( var );
@@ -400,7 +400,7 @@ icmp6_stats(const char *name)
  */
 
 void
-inet6print(const unsigned char *in6, int port, const char *proto, int local)
+inet6print(const struct in6_addr *in6, int port, const char *proto, int local)
 {
 
 #define GETSERVBYPORT6(port, proto, ret) do { \
@@ -445,7 +445,7 @@ bail:
  */
 
 char *
-inet6name(const unsigned char *in6)
+inet6name(const struct in6_addr *in6p)
 {
 	char *cp;
 	static char line[NI_MAXHOST];
@@ -456,7 +456,6 @@ inet6name(const unsigned char *in6)
 	char hbuf[NI_MAXHOST];
 	const int niflag = NI_NUMERICHOST;
 	struct sockaddr_in6 sin6;
-	const struct in6_addr *in6p = (const struct in6_addr *)in6;
 #endif
 
 	if (first && !nflag) {

@@ -583,7 +583,7 @@ inetxprint(int proto, struct sockaddr_in6 in6, int port, const char *name, int l
 {
 
 	if (proto == 2)
-	    inet6print((u_char *)&in6.sin6_addr.s6_addr, port, name, local);
+	    inet6print(&in6.sin6_addr, port, name, local);
 	else if (proto == 1)
 	    inetprint((struct in_addr *)&in6.sin6_addr.s6_addr, port, name, local);
 	else if (proto == 0)
