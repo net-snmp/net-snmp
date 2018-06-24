@@ -400,7 +400,7 @@ icmp6_stats(const char *name)
  */
 
 void
-inet6print(unsigned char *in6, int port, const char *proto, int local)
+inet6print(const unsigned char *in6, int port, const char *proto, int local)
 {
 
 #define GETSERVBYPORT6(port, proto, ret) do { \
