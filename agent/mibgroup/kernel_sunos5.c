@@ -303,7 +303,8 @@ getKstatInt(const char *classname, const char *statname,
     if ((ksc = kstat_fd) == NULL) {
 	goto Return;
     }
-    ks = kstat_lookup(ksc, classname, -1, statname);
+    ks = kstat_lookup(ksc, NETSNMP_REMOVE_CONST(char *, classname),
+                      -1, NETSNMP_REMOVE_CONST(char *, statname));
     if (ks == NULL) {
 	DEBUGMSGTL(("kernel_sunos5", "class %s, stat %s not found\n",
 		classname ? classname : "NULL",
@@ -316,7 +317,7 @@ getKstatInt(const char *classname, const char *statname,
 		classname ? classname : "NULL", statname ? statname : "NULL"));
 	goto Return;
     }
-    named = kstat_data_lookup(ks, varname);
+    named = kstat_data_lookup(ks, NETSNMP_REMOVE_CONST(char *, varname));
     if (named == NULL) {
 	DEBUGMSGTL(("kernel_sunos5", "no var %s for class %s stat %s\n",
 		varname, classname ? classname : "NULL",
@@ -406,7 +407,8 @@ getKstat(const char *statname, const char *varname, void *value)
      * contain all available modules. 
      */
 
-    if ((ks = kstat_lookup(ksc, "unix", 0, "kstat_headers")) == NULL) {
+    if ((ks = kstat_lookup(ksc, NETSNMP_REMOVE_CONST(char *, "unix"),
+                           0, NETSNMP_REMOVE_CONST(char *, "kstat_headers"))) == NULL) {
 	ret = -10;
 	goto Return;        /* kstat errors */
     }
@@ -440,7 +442,8 @@ getKstat(const char *statname, const char *varname, void *value)
     /*
      * Get the named statistics 
      */
-    if ((ks = kstat_lookup(ksc, module_name, instance, statname)) == NULL) {
+    if ((ks = kstat_lookup(ksc, module_name, instance,
+                           NETSNMP_REMOVE_CONST(char *, statname))) == NULL) {
 	ret = -10;
 	goto Return;        /* kstat errors */
     }
@@ -561,7 +564,8 @@ getKstatString(const char *statname, const char *varname,
      * contain all available modules.
      */
 
-    if ((ks = kstat_lookup(ksc, "unix", 0, "kstat_headers")) == NULL) {
+    if ((ks = kstat_lookup(ksc, NETSNMP_REMOVE_CONST(char *, "unix"),
+                           0, NETSNMP_REMOVE_CONST(char *, "kstat_headers"))) == NULL) {
         ret = -10;
         goto Return;        /* kstat errors */
     }
@@ -595,7 +599,8 @@ getKstatString(const char *statname, const char *varname,
     /*
      * Get the named statistics
      */
-    if ((ks = kstat_lookup(ksc, module_name, instance, statname)) == NULL) {
+    if ((ks = kstat_lookup(ksc, module_name, instance,
+                           NETSNMP_REMOVE_CONST(char *, statname))) == NULL) {
         ret = -10;
         goto Return;        /* kstat errors */
     }
@@ -1756,7 +1761,7 @@ set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,
 static int 
 get_if_stats(mib2_ifEntry_t *ifp)
 {
-    Counter l_tmp;
+    int l_tmp;
     char *name = ifp->ifDescr.o_bytes;
 
     if (strchr(name, ':'))

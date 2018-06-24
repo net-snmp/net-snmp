@@ -32,7 +32,7 @@
 char tmp_persist_file[256];
 char *se_find_result;
 
-sprintf(tmp_persist_file, "/tmp/snmp-enum-unit-test-%d", getpid());
+sprintf(tmp_persist_file, "/tmp/snmp-enum-unit-test-%ld", (long)getpid());
 netsnmp_setenv("SNMP_PERSISTENT_FILE", tmp_persist_file, 1);
 
 init_snmp_enum("snmp");

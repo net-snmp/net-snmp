@@ -148,7 +148,7 @@ var_atEntry(struct variable * vp,
         return (u_char *) & long_return;
     case IPMEDIAPHYSADDRESS:
         *var_len = Lowentry.ipNetToMediaPhysAddress.o_length;
-        return Lowentry.ipNetToMediaPhysAddress.o_bytes;
+        return (u_char *) Lowentry.ipNetToMediaPhysAddress.o_bytes;
     case IPMEDIANETADDRESS:
         *var_len = sizeof(addr_ret);
         addr_ret = Lowentry.ipNetToMediaNetAddress;

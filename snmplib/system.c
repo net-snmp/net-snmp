@@ -705,11 +705,12 @@ get_uptime(void)
     u_long          lbolt = 0;
 
     if (ksc) {
-        ks = kstat_lookup(ksc, "unix", -1, "system_misc");
+        ks = kstat_lookup(ksc, NETSNMP_REMOVE_CONST(char *, "unix"), -1,
+                          NETSNMP_REMOVE_CONST(char *, "system_misc"));
         if (ks) {
             kid = kstat_read(ksc, ks, NULL);
             if (kid != -1) {
-                named = kstat_data_lookup(ks, "lbolt");
+                named = kstat_data_lookup(ks, NETSNMP_REMOVE_CONST(char *, "lbolt"));
                 if (named) {
 #ifdef KSTAT_DATA_UINT32
                     lbolt = named->value.ui32;
