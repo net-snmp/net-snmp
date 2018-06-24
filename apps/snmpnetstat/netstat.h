@@ -102,4 +102,4 @@ int     routexpr(int);
 
 void	intpr(int);
 void	inetprint(const struct in_addr *, int, const char *, int);
-void	inet6print(const unsigned char *, int, const char *, int);
+void	inet6print(const struct in6_addr *, int, const char *, int);
