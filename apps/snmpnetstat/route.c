@@ -392,40 +392,31 @@ routename(in_addr_t in)
 {
 	char *cp;
 	static char line[MAXHOSTNAMELEN];
-	struct hostent *hp;
+	char host[MAXHOSTNAMELEN];
 	static char domain[MAXHOSTNAMELEN];
 	static int first = 1;
+        struct sockaddr_in sin = { };
 
 	if (first) {
 		first = 0;
 		if (gethostname(line, sizeof line) == 0 &&
 		    (cp = strchr(line, '.')))
-			(void) strlcpy(domain, cp + 1, sizeof domain);
+			strlcpy(domain, cp + 1, sizeof domain);
 		else
 			domain[0] = '\0';
 	}
-	cp = NULL;
-	if (!nflag) {
-		hp = netsnmp_gethostbyaddr((char *)&in, sizeof (struct in_addr),
-		    AF_INET);
-		if (hp) {
-			if ((cp = strchr(hp->h_name, '.')) &&
-			    !strcmp(cp + 1, domain))
-				*cp = '\0';
-			cp = hp->h_name;
-		}
-	}
-	if (cp) {
-		strlcpy(line, cp, sizeof(line));
-	} else {
-#define C(x)	(unsigned)((x) & 0xff)
-		in = ntohl(in);
-		snprintf(line, sizeof line, "%u.%u.%u.%u",
-		    C(in >> 24), C(in >> 16), C(in >> 8), C(in));
-	}
-	return (line);
+        sin.sin_family = AF_INET;
+        sin.sin_addr.s_addr = in;
+        if (getnameinfo((struct sockaddr *)&sin, sizeof(sin), host,
+                        sizeof(host), NULL, 0, nflag ? NI_NUMERICHOST : 0) < 0)
+            strlcpy(host, "?", sizeof(host));
+        if ((cp = strchr(host, '.')) && strcmp(cp + 1, domain) == 0)
+            *cp = '\0';
+        strlcpy(line, host, sizeof(line));
+	return line;
 }
 
+#define C(x) ((x) & 0xffU)
 /*
  * Return the name of the network whose address is given.
  * The address is assumed to be that of a net or subnet, not a host.

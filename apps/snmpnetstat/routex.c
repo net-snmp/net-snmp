@@ -456,55 +456,29 @@ netxname(struct sockaddr_storage *in, int mask)
 }
 
 static char *
-routexname(struct sockaddr_storage *in)
+routexname(const struct sockaddr_storage *in)
 {
     char *cp;
     static char line[MAXHOSTNAMELEN];
-    struct hostent *hp = NULL;
+    char name[MAXHOSTNAMELEN];
     static char domain[MAXHOSTNAMELEN];
     static int first = 1;
-    struct sockaddr_in *sin = (struct sockaddr_in *)in;
-    struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)in;
+    const struct sockaddr *sa = (const void *)in;
 
     if (first) {
         first = 0;
-        if (gethostname(line, sizeof line) == 0 &&
-            (cp = strchr(line, '.')))
-            (void) strlcpy(domain, cp + 1, sizeof domain);
+        if (gethostname(line, sizeof(line)) == 0 && (cp = strchr(line, '.')))
+            strlcpy(domain, cp + 1, sizeof(domain));
         else
             domain[0] = '\0';
     }
-    cp = NULL;
-    if (!nflag) {
-        switch (in->ss_family) {
-        case AF_INET:
-            hp = netsnmp_gethostbyaddr(&sin->sin_addr,
-                    sizeof (struct in_addr), AF_INET);
-            break;
-        case AF_INET6:
-            hp = netsnmp_gethostbyaddr(&sin6->sin6_addr,
-                    sizeof (struct in6_addr), AF_INET6);
-            break;
-        }
-        if (hp) {
-            if ((cp = strchr(hp->h_name, '.')) && !strcmp(cp + 1, domain))
-                *cp = '\0';
-            cp = hp->h_name;
-        }
-    }
-    if (cp) {
-        strlcpy(line, cp, sizeof(line));
-    } else {
-        switch (in->ss_family) {
-        case AF_INET:
-            inet_ntop(sin->sin_family, &sin->sin_addr, line, sizeof(line));
-            break;
-        case AF_INET6:
-            inet_ntop(sin6->sin6_family, &sin6->sin6_addr, line, sizeof(line));
-            break;
-        }
-    }
-    return (line);
+    if (getnameinfo(sa, netsnmp_sockaddr_size(sa), name, sizeof(name),
+                    NULL, 0, nflag ? NI_NUMERICHOST : 0) < 0)
+        strlcpy(name, "?", sizeof(name));
+    if ((cp = strchr(name, '.')) && strcmp(cp + 1, domain) == 0)
+        *cp = '\0';
+    strlcpy(line, name, sizeof(line));
+    return line;
 }
 
 
