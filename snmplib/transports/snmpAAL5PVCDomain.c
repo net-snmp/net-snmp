@@ -232,7 +232,7 @@ netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr, int local)
          * Set up the QOS parameters.
          */
 
-        struct atm_qos qos = { 0 };
+        struct atm_qos qos = { };
         qos.aal = ATM_AAL5;
         qos.rxtp.traffic_class = ATM_UBR;
         qos.rxtp.max_sdu = SNMP_MAX_LEN;    /*  Hmm -- this is a bit small?  */
