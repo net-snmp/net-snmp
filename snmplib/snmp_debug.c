@@ -203,7 +203,7 @@ debug_register_tokens(const char *tokens)
             } else if (debug_num_tokens < MAX_DEBUG_TOKENS) {
                 if ('-' == *cp) {
                     ++cp;
-                    status = SNMP_DEBUG_EXCLUDED;
+                    status = SNMP_DEBUG_DISABLED;
                 }
                 else
                     status = SNMP_DEBUG_ACTIVE;
