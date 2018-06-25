@@ -213,7 +213,7 @@ Init_HR_Print(void)
 #if HAVE_PRINTCAP
     FILE           *p;
 #elif HAVE_CGETNEXT
-    const char     *caps[] = { "/etc/printcap", NULL };
+    static const char *caps[] = { "/etc/printcap", NULL };
 #elif HAVE_LPSTAT
     int	            fd;
     FILE           *p;
@@ -247,7 +247,7 @@ Init_HR_Print(void)
 #elif HAVE_CGETNEXT
     {
         char           *buf = NULL, *ptr;
-        while (cgetnext(&buf, caps) > 0) {
+        while (cgetnext(&buf, NETSNMP_REMOVE_CONST(char **, caps)) > 0) {
             if ((ptr = strchr(buf, ':')))
                 *ptr = 0;
             if ((ptr = strchr(buf, '|')))
