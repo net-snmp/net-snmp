@@ -951,7 +951,7 @@ snmpTlstmParamsTable_handler(
 
             /** release undo data for requests with no rowstatus */
             if (table_entry->undo &&
-                !table_entry->undo->req[COLUMN_SNMPTLSTMPARAMSROWSTATUS] != 0) {
+                table_entry->undo->req[COLUMN_SNMPTLSTMPARAMSROWSTATUS] == NULL) {
                 _freeUndo(table_entry);
                 
                 /** update active addrs */

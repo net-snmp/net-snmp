@@ -339,9 +339,8 @@ snmpNotifyFilterTable_indexes_set_tbl_idx(snmpNotifyFilterTable_mib_index *
     /*
      * make sure there is enough space for snmpNotifyFilterProfileName data
      */
-    if ((NULL == tbl_idx->snmpNotifyFilterProfileName) ||
-        (tbl_idx->snmpNotifyFilterProfileName_len <
-         (snmpNotifyFilterProfileName_val_ptr_len))) {
+    if (tbl_idx->snmpNotifyFilterProfileName_len <
+        snmpNotifyFilterProfileName_val_ptr_len) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }
@@ -359,9 +358,8 @@ snmpNotifyFilterTable_indexes_set_tbl_idx(snmpNotifyFilterTable_mib_index *
     /*
      * make sure there is enough space for snmpNotifyFilterSubtree data
      */
-    if ((NULL == tbl_idx->snmpNotifyFilterSubtree) ||
-        (tbl_idx->snmpNotifyFilterSubtree_len <
-         (snmpNotifyFilterSubtree_val_ptr_len))) {
+    if (tbl_idx->snmpNotifyFilterSubtree_len <
+        snmpNotifyFilterSubtree_val_ptr_len) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }

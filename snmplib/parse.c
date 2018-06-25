@@ -4949,14 +4949,14 @@ add_mibdir(const char *dirname)
              * Also skip files ending in '~', or starting/ending
              * with '#' which are typically editor backup files.
              */
-            if (file->d_name != NULL) {
-              fname_len = strlen( file->d_name );
-              if (fname_len > 0 && file->d_name[0] != '.' 
-                                && file->d_name[0] != '#'
-                                && file->d_name[fname_len-1] != '#'
-                                && file->d_name[fname_len-1] != '~') {
-                snprintf(tmpstr, sizeof(tmpstr), "%s/%s", dirname, file->d_name);
-                tmpstr[ sizeof(tmpstr)-1 ] = 0;
+            fname_len = strlen(file->d_name);
+            if (fname_len > 0 && file->d_name[0] != '.' 
+                && file->d_name[0] != '#'
+                && file->d_name[fname_len-1] != '#'
+                && file->d_name[fname_len-1] != '~') {
+                snprintf(tmpstr, sizeof(tmpstr), "%s/%s", dirname,
+                         file->d_name);
+                tmpstr[sizeof(tmpstr)-1] = 0;
                 if ((dir2 = opendir(tmpstr))) {
                     /*
                      * file is a directory, don't read it 
@@ -4966,7 +4966,6 @@ add_mibdir(const char *dirname)
                     if ( !add_mibfile( tmpstr, file->d_name, ip ))
                         count++;
                 }
-              }
             }
         }
         File = oldFile;

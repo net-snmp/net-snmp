@@ -336,13 +336,8 @@ var_extensible_proc(struct variable *vp,
             long_return = fixproc.result;
             return ((u_char *) & long_return);
         case ERRORFIXCMD:
-            if (proc->fixcmd) {
-                *var_len = strlen(proc->fixcmd);
-                return (u_char *) proc->fixcmd;
-            }
-            errmsg[0] = 0;
-            *var_len = 0;
-            return ((u_char *) errmsg);
+            *var_len = strlen(proc->fixcmd);
+            return (u_char *) proc->fixcmd;
         }
         return NULL;
     }
