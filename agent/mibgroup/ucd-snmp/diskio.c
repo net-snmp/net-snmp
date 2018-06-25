@@ -1590,7 +1590,8 @@ collect_drive_stats(io_registry_entry_t driver, long *stats)
     }
 
     /* retrieve the properties */
-    status = IORegistryEntryCreateCFProperties(driver, (CFMutableDictionaryRef *)&properties,
+    status = IORegistryEntryCreateCFProperties(driver,
+                                               NETSNMP_REMOVE_CONST(struct __CFDictionary **, &properties),
 					       kCFAllocatorDefault, kNilOptions);
     if (status != KERN_SUCCESS) {
 	snmp_log(LOG_ERR, "diskio: device has no properties\n");
