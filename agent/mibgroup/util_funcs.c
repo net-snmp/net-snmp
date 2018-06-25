@@ -1134,7 +1134,7 @@ int net_snmp_delete_prefix_info(prefix_cbx **head,
     for (temp_node = *head, prev_node = NULL; temp_node;
          prev_node = temp_node, temp_node = temp_node->next_info) {
 
-         if (temp_node->in6p && strcmp(temp_node->in6p, address) == 0) {
+         if (strcmp(temp_node->in6p, address) == 0) {
             if (prev_node)
                 prev_node->next_info = temp_node->next_info;
             else

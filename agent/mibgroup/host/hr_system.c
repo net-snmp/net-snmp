@@ -607,7 +607,8 @@ ns_set_time(int action,
             newtimetm.tm_mday=(int)var_val[3];
 
             /* determine if day light savings time in effect DST */
-            if ( ( hours_from_utc*60*60+minutes_from_utc*60 ) == abs(timezone) ) {
+            if (hours_from_utc*60*60+minutes_from_utc*60 ==
+                (timezone >= 0 ? timezone : -timezone)) {
                 newtimetm.tm_isdst=0;
             } else {
                 newtimetm.tm_isdst=1;

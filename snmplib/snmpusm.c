@@ -3076,8 +3076,7 @@ usm_create_user_from_session(netsnmp_session * session)
                 return SNMPERR_GENERR;
             }
             user->authKeyLen = session->securityAuthLocalKeyLen;
-        } else if (session->securityAuthKey != NULL
-                   && session->securityAuthKeyLen != 0) {
+        } else if (session->securityAuthKeyLen != 0) {
             SNMP_FREE(user->authKey);
             user->authKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
             user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
@@ -3125,8 +3124,7 @@ usm_create_user_from_session(netsnmp_session * session)
                 return SNMPERR_GENERR;
             }
             keyBufSize = user->privKeyLen = session->securityPrivLocalKeyLen;
-        } else if (session->securityPrivKey != NULL
-                   && session->securityPrivKeyLen != 0) {
+        } else if (session->securityPrivKeyLen != 0) {
             SNMP_FREE(user->privKey);
             user->privKey = (u_char *) calloc(1, keyBufSize);
             user->privKeyLen = keyBufSize;

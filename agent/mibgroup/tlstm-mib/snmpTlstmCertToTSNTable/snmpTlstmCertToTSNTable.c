@@ -956,8 +956,7 @@ _cert_map_add(certToTSN_entry *entry)
 
     map->priority = entry->tlstmCertToTSNID;
     map->mapType = entry->mapType;
-    if (entry->data)
-        map->data = strdup(entry->data);
+    map->data = strdup(entry->data);
     map->hashType = entry->hashType;
 
     map->flags = NSCM_FROM_MIB;
@@ -1302,8 +1301,8 @@ _save_maps(int majorID, int minorID, void *serverarg, void *clientarg)
                 continue;
             _save_map(map, RS_ACTIVE, type);
         }
+        ITERATOR_RELEASE(map_itr);
     }
-    ITERATOR_RELEASE(map_itr);
 
     /*
      * save inactive rows from mib

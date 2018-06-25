@@ -66,8 +66,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
         /*
          * legal row? 
          */
-        if (targaddrs->tDomain == NULL ||
-            targaddrs->tAddress == NULL ||
+        if (targaddrs->tAddress == NULL ||
             targaddrs->rowStatus != SNMP_ROW_ACTIVE) {
             DEBUGMSGTL(("target_sessions", "  which is not ready yet\n"));
             continue;

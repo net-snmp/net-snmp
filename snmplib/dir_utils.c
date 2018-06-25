@@ -140,8 +140,7 @@ netsnmp_directory_container_read_some(netsnmp_container *user_container,
 
     /** iterate over dir */
     while ((file = readdir(dir))) {
-
-        if ((file->d_name == NULL) || (file->d_name[0] == 0))
+        if (file->d_name[0] == 0)
             continue;
 
         /** skip '.' and '..' */

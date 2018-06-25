@@ -844,7 +844,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
             /** release undo data for requests with no rowstatus */
             if (table_entry->undo &&
-                !table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS] != 0) {
+                table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS] == NULL) {
 
                 _freeUndo(table_entry);
 
