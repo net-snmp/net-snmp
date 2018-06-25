@@ -121,12 +121,12 @@ swapsize(void)
     swapSize = -1;
 
 #if defined(SWAPFILE_DIR) && defined(SWAPFILE_PREFIX)
-    dirp = opendir((const char *) SWAPFILE_DIR);
+    dirp = opendir(SWAPFILE_DIR);
     while((dp = readdir(dirp)) != NULL) {
 	/* if the file starts with the same as SWAPFILE_PREFIX
 	 * we want to stat the file to get it's size
 	 */
-	if(strspn(dp->d_name,(char *) SWAPFILE_PREFIX) == strlen((char *) SWAPFILE_PREFIX)) {
+	if(strspn(dp->d_name, SWAPFILE_PREFIX) == strlen(SWAPFILE_PREFIX)) {
                 snprintf(full_name, sizeof(full_name),"%s/%s",SWAPFILE_DIR,dp->d_name);
 		/* we need to stat each swapfile to get it's size */
 		if(stat(full_name,&buf) != 0) {
