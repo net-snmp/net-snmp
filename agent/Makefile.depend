@@ -1418,7 +1418,6 @@
 ./snmp_agent.lo: ../include/net-snmp/library/large_fd_set.h
 ./snmp_agent.lo: agent_global_vars.h snmpd.h
 ./snmp_agent.lo: ../include/net-snmp/agent/mib_modules.h
-./snmp_agent.lo: ../agent/mibgroup/agentx/master.h
 ./snmp_agent.lo: ../agent/mibgroup/smux/smux.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-includes.h

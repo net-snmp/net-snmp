@@ -3464,6 +3464,7 @@
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_enum.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/vacm.h
+./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_assert.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/tools.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/types.h
@@ -3508,7 +3509,8 @@
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/net-snmp-features.h
-./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmpSSHDomain.h
+./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_assert.h
+./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/types.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/oid.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/types.h
@@ -3521,7 +3523,6 @@
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/output_api.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/netsnmp-attribute-format.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3543,6 +3544,7 @@
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp-tc.h
+./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmpSSHDomain.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/tools.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/system.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/default_store.h
