@@ -1168,8 +1168,8 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
     /* other errors */
     while ((numerical_reason =
             ERR_get_error_line_data(&file, &line, &data, &flags)) != 0) {
-        snmp_log(LOG_ERR, " error: #%lu (file %s, line %d)\n",
-                 numerical_reason, file, line);
+        snmp_log(LOG_ERR, "%s (file %s, line %d)\n",
+                 ERR_error_string(numerical_reason, NULL), file, line);
 
         /* if we have a text translation: */
         if (data && (flags & ERR_TXT_STRING)) {
