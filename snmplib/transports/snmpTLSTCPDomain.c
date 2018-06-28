@@ -626,7 +626,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     if ((rc = netsnmp_tlsbase_verify_client_cert(ssl, tlsdata))
         != SNMPERR_SUCCESS) {
         /* XXX: free needed memory */
-        snmp_log(LOG_ERR, "TLSTCP: Falied checking client certificate\n");
+        snmp_log(LOG_ERR, "TLSTCP: Failed checking client certificate\n");
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
         SSL_shutdown(tlsdata->ssl);
         SSL_free(tlsdata->ssl);
@@ -900,14 +900,14 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         t->local = (void *) strdup(tlsdata->addr_string);
         t->local_length = strlen(tlsdata->addr_string)+1;
         if (NULL == tlsdata->accept_bio) {
-            snmp_log(LOG_ERR, "TLSTCP: Falied to create a accept BIO\n");
+            snmp_log(LOG_ERR, "TLSTCP: Failed to create a accept BIO\n");
             return NULL;
         }
 
         /* openssl requires an initial accept to bind() the socket */
         if (BIO_do_accept(tlsdata->accept_bio) <= 0) {
 	    _openssl_log_error(rc, tlsdata->ssl, "BIO_do__accept");
-            snmp_log(LOG_ERR, "TLSTCP: Falied to do first accept on the TLS accept BIO\n");
+            snmp_log(LOG_ERR, "TLSTCP: Failed to do first accept on the TLS accept BIO\n");
             return NULL;
         }
 
