@@ -3,6 +3,10 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.8.rc4*
+    snmpd:
+      - SNMP-TARGET-MIB: Fix snmpTargetAddrTAddress
+
 *5.8.rc3
     snmplib:
       - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
