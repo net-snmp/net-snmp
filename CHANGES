@@ -3,68 +3,45 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
-*5.8.rc4*
-    snmpd:
-      - SNMP-TARGET-MIB: Fix snmpTargetAddrTAddress
-
-*5.8.rc3
+*5.8*
     snmplib:
       - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
         sprint_realloc_octet_string() triggers a segmentation fault
         strlcpy() implementations typically scan for the end of the source
         argument passed to strlcpy(). Hence avoid passing an unterminated
         string to strlcpy().
-
-    Cygwin64:
-      -  Fix build with OpenSSL
-
-
-*5.8.rc2*
-    snmplib:
-      - [BUG 2815]: Display UTF-8 characters again
-      - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
-	sprint_realloc_octet_string() embeds unprintable control characters
-	or binary zeroes in its output. This behavior could cause truncated
-	output in snmptrapd.")
-
-    NetBSD:
-      - Fix for NetBSD 8
-
-    Cygwin64:
-      -  Fix winExtDLL build
-
-    install:
-      - Install missing system header files
-
-    building:
-      - Add Travis and Appveyor CI support
-      - Fix recently introduced autoreconf warnings
-
-    misc:
-      - restore auth/priv defines for protocol OID lengths
-
-*5.8.rc1*
-    snmpd:
-      - BUG: 2864: use clientaddr properly
-      - Add the ability to set the source address with "-s" for trapsess
-      - BUG: 1366: Pass proper buffer length to netsnmp_tls_fingerprint_build()
-      - Fix/enforce ipDefaultRouterLifetime value range
-
-    snmplib:
       - Flush persistent config to persistent storage
-
-    NetBSD:
-      - Support for NetBSD 8
-
-*5.8.pre3*
-    snmplib:
       - Asn1: BUG: 2828: from "Google Autofuzz project": fix off-by-one
 	heap access for opaque types   (and an adjacent bug that was not in
 	5.4, noticed by code inspection)
       - Asn1: from "Google Autofuzz project": propagate error from
 	asn_parse_length
+      - TLS/DTLS fixes
+      - Add more openssl error cases where we check for local cert
+      - fix usm keychanges for new algorithms and longer keylengths
+      - fix some memory leaks in usm processing
+      - IP address formatting fixes
+      - Make the source code C89 compliant
+      - Fixed reporting 'error writing to /var/xxx/snmpapp.conf'. When a
+	client utility, such as snmptrap, tries to write to its persistent
+	configuration file (/var/net-snmp/snmpapp.conf in Fedora), do not
+	report any error when open() fails. The tool is typically run by
+	non-root, who cannot write to /var and the error just confuses
+	users. And when doing it, make sure that "snmpapp" string is
+	defined only on one place, just in case.
+      - BUG: 2622: Fix excessive indents in log file
 
     snmpd:
+      - SNMP-TARGET-MIB: Fix snmpTargetAddrTAddress
+      - [BUG 2815]: Display UTF-8 characters again
+      - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
+	sprint_realloc_octet_string() embeds unprintable control characters
+	or binary zeroes in its output. This behavior could cause truncated
+	output in snmptrapd.")
+      - BUG: 2864: use clientaddr properly
+      - Add the ability to set the source address with "-s" for trapsess
+      - BUG: 1366: Pass proper buffer length to netsnmp_tls_fingerprint_build()
+      - Fix/enforce ipDefaultRouterLifetime value range
       - BUG: 2810: from "Minzhuan Gong": fix compile with
 	--enable-read-only
       - BUG: 2845: fix compilation error with NETSNMP_NO_WRITE_SUPPORT
@@ -74,6 +51,10 @@ listing of all changes made to the code.
 	permit.
       - TLSTM MIB: Fix support for sha256, 384 and 512 fingerprints
       - BUG: 2830: Make the agentxperms keyword work again
+      - Add new snmpd.conf option 'diskio' to monitor only selected disks.
+	On machines with thousands of block devices, parsing
+	/proc/diskstats is really slow. The new option enables monitoring
+	of selected devices, saving lot of CPU time.
 
     agentx:
       - From "Google AutoFuzz project": account for the nul character we
@@ -81,57 +62,20 @@ listing of all changes made to the code.
       - From "Google Autofuzz project": additional agentx protocol parser
 	bounds checking
 
-    Win32:
-      - Add support for the DTLS-UDP and TLS-TCP transports
-      - Win32/MSVC general cleanup
-
-    unspecified:
-      - Fix bug #2832 for building new checkbandwidth script
-      - Many fixes found by Coverity scans
-
-
-*5.8.pre2*
-    snmplib:
-      - TLS/DTLS fixes
-      - Add more openssl error cases where we check for local cert
-      - fix usm keychanges for new algorithms and longer keylengths
-      - fix some memory leaks in usm processing
-      - IP address formatting fixes
-      - Make the source code C89 compliant
+    install:
+      - Install missing system header files
 
     building:
-      - Fix MinGW build
-      - Unbreak the NetBSD build
+      - Add Travis and Appveyor CI support
+      - Fix recently introduced autoreconf warnings
       - Unbreak AIX support
       - RHEL 5 build fix
-
-    scripts:
-      - A new 'checkbandwidth' script to check host min/max bandwidth
 
     docs:
       - Bug 2826: from Tomasz: fix utf-8 encoding
 
     python:
       - BUG 2824: from: Tomasz: Fix python module make install
-
-*5.8.pre1*
-    snmplib:
-      - Fixed reporting 'error writing to /var/xxx/snmpapp.conf'. When a
-	client utility, such as snmptrap, tries to write to its persistent
-	configuration file (/var/net-snmp/snmpapp.conf in Fedora), do not
-	report any error when open() fails. The tool is typically run by
-	non-root, who cannot write to /var and the error just confuses
-	users. And when doing it, make sure that "snmpapp" string is
-	defined only on one place, just in case.
-
-    snmp:
-      - BUG: 2622: Fix excessive indents in log file
-
-    snmpd:
-      - Add new snmpd.conf option 'diskio' to monitor only selected disks.
-	On machines with thousands of block devices, parsing
-	/proc/diskstats is really slow. The new option enables monitoring
-	of selected devices, saving lot of CPU time.
 
     snmptranslate:
       - Introduce bulk translation mode The special argument "-" causes
@@ -154,6 +98,8 @@ listing of all changes made to the code.
       - Patch from David Hankins to fix python binding error codes
 
     unspecified:
+      - A new 'checkbandwidth' script to check host min/max bandwidth
+      - Many fixes found by Coverity scans
       - Fixed crash when receiving non-standard compliant responses. Some
 	HW sends ifOperStatus as NULL instead of INTEGER type. We should
 	not try to dereference this NULL.
@@ -176,6 +122,9 @@ listing of all changes made to the code.
       - UX on ia64: Fix large fd set implementation Reported-by: Dixon
 	Xavier <dixoncx@gmail.com>
 
+    NetBSD:
+      - Fix for NetBSD 8
+
     MIB:
       - Speed up reading /proc/net/tcp and /proc/net/tcp6 The time needed
 	to read Linux procfs files is proportional to the square of the
@@ -187,6 +136,14 @@ listing of all changes made to the code.
       - BUG: 2550: Suppress netsnmp_assert s != (-1) messages
       - Feature-request: 181: Export snmp_api and ASN functions See also
 	http://sourceforge.net/p/net-snmp/feature-requests/181/.
+
+    Cygwin64:
+      -  Fix build with OpenSSL
+      -  Fix winExtDLL build
+
+    Win32:
+      - Add support for the DTLS-UDP and TLS-TCP transports
+      - Win32/MSVC general cleanup
 
 
 *5.7.3*
