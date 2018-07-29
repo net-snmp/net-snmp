@@ -27,37 +27,40 @@ case "$NOTIFYTYPE" in
         return 1;;
 esac
 
+# Arguments: host ($1) and port ($2)
 ipv4_2_hex() {
-    # remove the ':' at the end of the first argument
-    local host=${1%:}
-    local port=$2
-
     printf "0x"
-    for i in $(echo "$host" | tr '.' ' '); do
+    for i in $(echo "${1%:}" | tr '.' ' '); do
 	printf "%02x" "$i"
     done
-    printf "%04x\\n" "$port"
+    printf "%04x\\n" "$2"
 }
 
+# Arguments: host ($1) and port ($2)
 ipv6_2_hex() {
-    # remove the ':' at the end of the first argument
-    local host=${1%:}
-    local port=$2
+    # Convert [<address>]: into <address>
+    ipv6_host=$(echo "$1" | sed 's/^\[//;s/:$//;s/]$//;')
 
-    printf "0x"
-    if echo "$host" | grep -q ::; then
-	no_of_colons=$(echo "$host" | tr -d -c ':' | awk '{ print length }')
+    if echo "${ipv6_host}" | grep -q ::; then
+	no_of_colons=$(echo "${ipv6_host}" | tr -d -c ':' | awk '{ print length }')
 	case $no_of_colons in
-	    7) host=$(echo "$host" | sed 's/::/:0:/') ;;
-	    6) host=$(echo "$host" | sed 's/::/:0:0:/') ;;
-	    5) host=$(echo "$host" | sed 's/::/:0:0:0:/') ;;
-	    4) host=$(echo "$host" | sed 's/::/:0:0:0:0:/') ;;
+	    7) ipv6_host=$(echo "${ipv6_host}" | sed 's/::/:0:/') ;;
+	    6) ipv6_host=$(echo "${ipv6_host}" | sed 's/::/:0:0:/') ;;
+	    5) ipv6_host=$(echo "${ipv6_host}" | sed 's/::/:0:0:0:/') ;;
+	    4) ipv6_host=$(echo "${ipv6_host}" | sed 's/::/:0:0:0:0:/') ;;
+	    3) ipv6_host=$(echo "${ipv6_host}" | sed 's/::/:0:0:0:0:0:/') ;;
+	    2) if [ "${ipv6_host#::}" != "${ipv6_host}" ]; then
+		   ipv6_host=$(echo "${ipv6_host}" | sed 's/::/0:0:0:0:0:0:0:/')
+	       else
+		   ipv6_host=$(echo "${ipv6_host}" | sed 's/::/:0:0:0:0:0:0:/')
+	       fi;;
 	esac
     fi
-    for i in $(echo "$host" | tr ':' ' '); do
-	printf "%04x" "${i:-0}"
+    printf "0x"
+    for i in $(echo "${ipv6_host}" | tr ':' ' '); do
+	printf "%04x" $((0x${i:-0}))
     done
-    printf "%04x\\n" "$port"
+    printf "%04x\\n" "$2"
 }
 
 settmib() {
@@ -125,21 +128,21 @@ dyntrap_config() {
 CREATEUSERENGINEID=0x80001f88802b3d0e1111111111
 . ./Sv3usmconfigbase
 
-CONFIGTRAPD "[snmp]" persistentDir "$SNMP_TMP_PERSISTENTDIR"
-CONFIGTRAPD oldEngineID "$CREATEUSERENGINEID"
+CONFIGTRAPD "[snmp] persistentDir $SNMP_TMP_PERSISTENTDIR"
+CONFIGTRAPD "oldEngineID $CREATEUSERENGINEID"
 CONFIGTRAPD "$CREATEAUTHUSER"
-CONFIGTRAPD authUser log $TESTAUTHUSER
+CONFIGTRAPD "authUser log $TESTAUTHUSER"
 
 STARTTRAPD
 
-CONFIGAGENT "[snmp]" persistentdir "$SNMP_TMP_PERSISTENTDIR"
-CONFIGAGENT oldEngineID "$CREATEUSERENGINEID"
+CONFIGAGENT "[snmp] persistentdir $SNMP_TMP_PERSISTENTDIR"
+CONFIGAGENT "oldEngineID $CREATEUSERENGINEID"
 CONFIGAGENT "$CREATEAUTHUSER"
-CONFIGAGENT rwuser "$TESTAUTHUSER" auth
+CONFIGAGENT "rwuser $TESTAUTHUSER auth"
 
 if [ "x$TRAPSESS" = "xyes" ]; then
-    CONFIGAGENT trapsess $trapsess_arg -e $CREATEUSERENGINEID $TESTAUTHARGS \
-		"${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT}"
+    CONFIGAGENT "trapsess $trapsess_arg -e $CREATEUSERENGINEID $TESTAUTHARGS \
+		 ${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT}"
 fi
 
 #AGENT_FLAGS="$AGENT_FLAGS -Dtrap -Dsend_notifications -DsnmpTargetAddrEntry -Dtarget_sessions -DsnmpNotifyTable_data"

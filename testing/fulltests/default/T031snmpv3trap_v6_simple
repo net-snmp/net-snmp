@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER "snmpv3 IPv6 dynamic and static traps are sent by snmpd API"
+
+SKIPIFNOT NETSNMP_SECMOD_USM
+SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
+
+NOTIFYTYPE="trap"
+TRAPSESS="yes"
+DYNTRAP="yes"
+SNMP_TRANSPORT_SPEC=udp6
+SNMP_TEST_DEST="[::1]:"
+
+#
+# Begin test
+#
+
+. ./Sv3usmtraps
