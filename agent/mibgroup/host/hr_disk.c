@@ -89,8 +89,6 @@
 #include <net-snmp/agent/agent_read_config.h>
 #include <net-snmp/library/read_config.h>
 
-#define HRD_MONOTONICALLY_INCREASING
-
 /*************************************************************
  * constants for enums for the MIB node
  * hrDiskStorageAccess (INTEGER / ASN_INTEGER)
@@ -219,9 +217,7 @@ init_hr_disk(void)
     init_device[HRDEV_DISK] = Init_HR_Disk;
     next_device[HRDEV_DISK] = Get_Next_HR_Disk;
     save_device[HRDEV_DISK] = Save_HR_Disk_General;
-#ifdef HRD_MONOTONICALLY_INCREASING
     dev_idx_inc[HRDEV_DISK] = 1;
-#endif
 
 #if defined(linux)
     Add_HR_Disk_entry("/dev/hd%c%d", -1, -1, 'a', 'l', "/dev/hd%c", 1, 15);
@@ -566,9 +562,7 @@ header_hrdisk(struct variable *vp,
             (LowIndex == -1 || disk_idx < LowIndex)) {
             LowIndex = disk_idx;
             Save_HR_Disk_Specific();
-#ifdef HRD_MONOTONICALLY_INCREASING
             break;
-#endif
         }
     }
 
