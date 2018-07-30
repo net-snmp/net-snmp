@@ -28,7 +28,6 @@
  * Apple, please give us a better way! :)
  */
 int pages_swapped(void) {
-     boolean_t       retval;
      kern_return_t   error;
      processor_set_t *psets, pset;
      task_t          *tasks;
@@ -112,8 +111,6 @@ int pages_swapped(void) {
 off_t 
 swapsize(void)
 {
-    int		pagesize;
-    int		i, n;
     DIR		*dirp;
     struct dirent *dp;
     struct stat	buf;
