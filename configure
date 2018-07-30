@@ -15418,7 +15418,8 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
     for opt in -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
         -Wimplicit-fallthrough=2 -Wlogical-op                                \
         -Wno-format-truncation -Wno-missing-field-initializers               \
-        -Wno-sign-compare -Wno-unused-parameter -Wno-type-limits
+        -Wno-sign-compare -Wno-unused-parameter -Wno-type-limits             \
+        $(test "x${TRAVIS_OS_NAME}" != x && echo -Wno-deprecated-declarations)
     do
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
 $as_echo_n "checking whether the compiler supports $opt... " >&6; }
