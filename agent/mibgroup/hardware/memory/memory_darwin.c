@@ -78,10 +78,14 @@ int pages_swapped(void) {
             for (address = 0;; address += size) {
                 /* Get memory region. */
                 count = VM_REGION_EXTENDED_INFO_COUNT; 
-#if defined(__ppc64__) || defined(__x86_64__)
-                if (vm_region_64(tasks[j], &address, &size, VM_REGION_EXTENDED_INFO, &info, &count, &object_name) != KERN_SUCCESS) {
+#if defined(__LP64__)
+                if (vm_region_64(tasks[j], &address, &size,
+                                 VM_REGION_EXTENDED_INFO, (void *)&info, &count,
+                                 &object_name) != KERN_SUCCESS) {
 #else
-                if (vm_region(tasks[j], &address, &size, VM_REGION_EXTENDED_INFO, &info, &count, &object_name) != KERN_SUCCESS) {
+                if (vm_region(tasks[j], &address, &size,
+                              VM_REGION_EXTENDED_INFO, (void *)&info, &count,
+                              &object_name) != KERN_SUCCESS) {
 #endif
                     /* No more memory regions. */
                     break;
