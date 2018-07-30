@@ -125,8 +125,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
             (0 == processes[i].kp_proc.p_pid)) {
             DEBUGMSGTL(("swrun:load:arch",
                         " skipping p_comm '%s', pid %5d, p_pstat %d\n",
-                        processes[i].kp_proc.p_comm ? 
-                        processes[i].kp_proc.p_comm : "NULL",
+                        processes[i].kp_proc.p_comm,
                         processes[i].kp_proc.p_pid,
                         processes[i].kp_proc.p_stat));
             continue;
