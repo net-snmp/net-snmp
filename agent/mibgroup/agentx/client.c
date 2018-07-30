@@ -117,11 +117,8 @@ agentx_open_session(netsnmp_session * ss)
         return 0;
     timeout = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
-    if (timeout < 0) 
-    pdu->time = 0;
-    else
-	/* for master TIMEOUT is usec, but Agentx Open specifies sec */
-    	pdu->time = timeout/ONE_SEC;
+    /* for master TIMEOUT is usec, but Agentx Open specifies sec */
+    pdu->time = timeout/ONE_SEC;
 
     snmp_add_var(pdu, version_sysoid, version_sysoid_len,
 		 's', "Net-SNMP AgentX sub-agent");
