@@ -873,62 +873,6 @@ Get_Next_HR_Disk_Partition(char *string, size_t str_len, int HRP_index)
     return 0;
 }
 
-#ifdef darwin
-int
-Get_HR_Disk_Label(char *string, size_t str_len, const char *devfull)
-{
-    DASessionRef        sess_ref;
-    DADiskRef           disk;
-    CFDictionaryRef     desc;
-    CFStringRef         str_ref;
-    CFStringEncoding    sys_encoding = CFStringGetSystemEncoding();
-
-    DEBUGMSGTL(("host/hr_disk", "Disk Label type %s\n", devfull));
-
-    sess_ref = DASessionCreate( NULL );
-    if (NULL == sess_ref) {
-        strlcpy(string, devfull, str_len);
-        return -1;
-    }
-
-    disk = DADiskCreateFromBSDName( NULL, sess_ref, devfull );
-    if (NULL == disk) {
-        CFRelease(sess_ref);
-        strlcpy(string, devfull, str_len);
-        return -1;
-    }
-
-    desc = DADiskCopyDescription( disk );
-    if (NULL == desc) {
-        snmp_log(LOG_ERR,
-                 "diskmgr: couldn't get disk description for %s, skipping\n",
-                 devfull);
-        CFRelease(disk);
-        CFRelease(sess_ref);
-        strlcpy(string, devfull, str_len);
-        return -1;
-    }
-
-    /** model */
-    str_ref = (CFStringRef)
-        CFDictionaryGetValue(desc, kDADiskDescriptionMediaNameKey);
-    if (str_ref) {
-        strlcpy(string, CFStringGetCStringPtr(str_ref, sys_encoding),
-                str_len);
-        DEBUGMSGTL(("verbose:diskmgr:darwin", " name %s\n", string));
-    }
-    else {
-        strlcpy(string, devfull, str_len);
-    }
-    
-    CFRelease(disk);
-    CFRelease(desc);
-    CFRelease(sess_ref);
-    
-    return 0;
-}
-#endif
-
 static void
 Save_HR_Disk_Specific(void)
 {
