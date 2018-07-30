@@ -145,7 +145,7 @@ netsnmp_fsys_arch_load( void )
          * values!
          * This should be changed to a signed field.
          */
-        if (stats[i].f_bavail < 0)
+        if (stats[i].f_bavail + 1 < 1)
             entry->avail = 0;
         else
             entry->avail = stats[i].f_bavail;
