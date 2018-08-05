@@ -44,9 +44,7 @@
 static int      HRP_savedDiskIndex;
 static int      HRP_savedPartIndex;
 static char     HRP_savedName[1024];
-#ifdef NETSNMP_CAN_GET_DISK_LABEL
 static char     HRP_savedLabel[1024];
-#endif
 
 static int      HRP_DiskIndex;
 
@@ -242,13 +240,13 @@ var_hrpartition(struct variable * vp,
         long_return = part_idx;
         return (u_char *) & long_return;
     case HRPART_LABEL:
-#ifdef NETSNMP_CAN_GET_DISK_LABEL
-        *var_len = strlen(HRP_savedLabel);
-        return (u_char *) HRP_savedLabel;
-#else
-        *var_len = strlen(HRP_savedName);
-        return (u_char *) HRP_savedName;
-#endif
+        if (HRP_savedLabel[0]) {
+            *var_len = strlen(HRP_savedLabel);
+            return (u_char *) HRP_savedLabel;
+        } else {
+            *var_len = strlen(HRP_savedName);
+            return (u_char *) HRP_savedName;
+        }
     case HRPART_ID:            /* Use the device number */
         sprintf(string, "0x%x", (int) stat_buf.st_rdev);
         *var_len = strlen(string);
@@ -334,7 +332,5 @@ Save_HR_Partition(int disk_idx, int part_idx)
     HRP_savedDiskIndex = disk_idx;
     HRP_savedPartIndex = part_idx;
     (void) Get_Next_HR_Disk_Partition(HRP_savedName, sizeof(HRP_savedName), HRP_index);
-#ifdef NETSNMP_CAN_GET_DISK_LABEL
     (void) Get_HR_Disk_Label(HRP_savedLabel, sizeof(HRP_savedLabel), HRP_savedName);
-#endif
 }

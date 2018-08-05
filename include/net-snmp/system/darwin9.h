@@ -61,7 +61,6 @@
  * use new host resources files as well
  */
 #undef NETSNMP_INCLUDE_HRSWRUN_WRITE_SUPPORT
-#define NETSNMP_CAN_GET_DISK_LABEL 1
 
 /*
  * Enabling this restricts the compiler to mostly public APIs.

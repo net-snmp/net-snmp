@@ -9,6 +9,8 @@ config_require(host/hr_disk)
 
 #if defined(__APPLE__) && defined(__MACH__)
 config_require(host/data_access/hr_partition_darwin)
+#else
+config_require(host/data_access/hr_partition_other)
 #endif
 
 extern void     init_hr_partition(void);
