@@ -29,6 +29,7 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#include <sys/types.h>
 
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_api.h>
