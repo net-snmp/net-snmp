@@ -615,6 +615,8 @@ inetname(const struct in_addr *inp)
         if (inp->s_addr == INADDR_ANY) {
                 strlcpy(line, "*", sizeof(line));
         } else {
+                char host[16];
+
                 cp = NULL;
                 if (!nflag && inet_lnaof(*inp) == INADDR_ANY) {
 			np = getnetbyaddr(inet_netof(*inp), AF_INET);
@@ -623,7 +625,6 @@ inetname(const struct in_addr *inp)
 		}
 		if (cp == NULL) {
                         struct sockaddr_in sin;
-                        char host[16];
 
                         memset(&sin, 0, sizeof(sin));
                         sin.sin_family = AF_INET;
