@@ -592,8 +592,9 @@ void convert_agent_addr(struct in_addr agent_addr, char *name, size_t size)
 {
     const int numeric = !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                                 NETSNMP_DS_APP_NUMERIC_IP);
-    struct sockaddr_in sin = { };
+    struct sockaddr_in sin;
 
+    memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr = agent_addr;
     if (getnameinfo((struct sockaddr *)&sin, sizeof(sin), name, size, NULL, 0,

@@ -267,6 +267,7 @@ int netsnmp_transport_add_to_list(netsnmp_transport_list **transport_list,
 				  netsnmp_transport *transport);
 int netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
 				       netsnmp_transport *transport);
+NETSNMP_IMPORT
 int netsnmp_sockaddr_size(const struct sockaddr *sa);
 
 

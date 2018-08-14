@@ -517,8 +517,9 @@ p_rtnodex( struct route_entry *rp )
     }
     else if (rp->af == AF_INET6) {
         struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&rp->dst;
-        struct in6_addr in6_addr_any = { } /*IN6ADDR_ANY_INIT*/;
+        struct in6_addr in6_addr_any;
 
+        memset(&in6_addr_any, 0, sizeof(in6_addr_any)); /*IN6ADDR_ANY_INIT*/
         printf("%-*s ",
             WID_DST(AF_INET6),
                 memcmp(&sin6->sin6_addr, &in6_addr_any, sizeof(in6_addr_any)) == 0 ? "default" :

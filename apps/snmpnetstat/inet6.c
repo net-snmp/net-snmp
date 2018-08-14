@@ -464,9 +464,10 @@ inet6name(const struct in6_addr *in6p)
 	if (IN6_IS_ADDR_UNSPECIFIED(in6p)) {
 		strlcpy(line, "*", sizeof(line));
         } else {
-                struct sockaddr_in6 sin6 = { };
+                struct sockaddr_in6 sin6;
                 char hbuf[NI_MAXHOST];
 
+                memset(&sin6, 0, sizeof(sin6));
                 sin6.sin6_family = AF_INET6;
                 sin6.sin6_addr = *in6p;
 #ifdef __KAME__

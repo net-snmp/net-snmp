@@ -395,8 +395,9 @@ routename(in_addr_t in)
 	char host[MAXHOSTNAMELEN];
 	static char domain[MAXHOSTNAMELEN];
 	static int first = 1;
-        struct sockaddr_in sin = { };
+        struct sockaddr_in sin;
 
+        memset(&sin, 0, sizeof(sin));
 	if (first) {
 		first = 0;
 		if (gethostname(line, sizeof line) == 0 &&

@@ -622,9 +622,10 @@ inetname(const struct in_addr *inp)
 				cp = np->n_name;
 		}
 		if (cp == NULL) {
-                        struct sockaddr_in sin = { };
+                        struct sockaddr_in sin;
                         char host[16];
 
+                        memset(&sin, 0, sizeof(sin));
                         sin.sin_family = AF_INET;
                         sin.sin_addr = *inp;
                         if (getnameinfo((struct sockaddr*)&sin, sizeof(sin),
