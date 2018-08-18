@@ -1123,9 +1123,10 @@ _tc_remove(trans_cache *tc)
 
 static trans_cache *
 _tc_create(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
-           netsnmp_transport *t)
+           unsigned addr_size, netsnmp_transport *t)
 {
     trans_cache *tc = SNMP_MALLOC_TYPEDEF(trans_cache);
+
     if (NULL == tc) {
         snmp_log(LOG_ERR, "failed to allocate trans_cache\n");
         return NULL;
@@ -1136,7 +1137,7 @@ _tc_create(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
     tc->local = local;
     tc->t = t;
     if (addr)
-        memcpy(&tc->bind_addr, addr, sizeof(tc->bind_addr));
+        memcpy(&tc->bind_addr, addr, addr_size);
     /** we only understand ipv6 and ipv6 sockaddrs in compare */
     if (AF_INET != tc->af && AF_INET6 != tc->af)
         NETSNMP_LOGONCE((LOG_WARNING, "transport cache not tested for af %d\n",
@@ -1146,7 +1147,7 @@ _tc_create(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
 
 static trans_cache *
 _tc_add(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
-        netsnmp_transport *t)
+        unsigned addr_size, netsnmp_transport *t)
 {
     trans_cache *tc;
     int rc;
@@ -1159,7 +1160,7 @@ _tc_add(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
             return NULL;
     }
 
-    tc = _tc_create(af, type, local, addr, t);
+    tc = _tc_create(af, type, local, addr, addr_size, t);
     if (NULL == tc) {
         DEBUGMSGTL(("transport:cache:add",
                     "could not create transport cache\n"));
@@ -1177,7 +1178,8 @@ _tc_add(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
 }
 
 trans_cache *
-_tc_find(int af, int type, int local, const netsnmp_sockaddr_storage *addr)
+_tc_find(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
+         unsigned addr_size)
 {
     trans_cache tc, *rtn;
 
@@ -1191,7 +1193,7 @@ _tc_find(int af, int type, int local, const netsnmp_sockaddr_storage *addr)
     tc.type = type;
     tc.local = local;
     if (addr)
-        memcpy(&tc.bind_addr, addr, sizeof(tc.bind_addr));
+        memcpy(&tc.bind_addr, addr, addr_size);
 
     rtn = CONTAINER_FIND(_container, &tc);
     DEBUGMSGTL(("transport:cache:find", "%p\n", rtn));
@@ -1271,7 +1273,8 @@ netsnmp_transport_cache_remove(netsnmp_transport *t)
  */
 netsnmp_transport *
 netsnmp_transport_cache_get(int af, int type, int local,
-                            const netsnmp_sockaddr_storage *bind_addr)
+                            const netsnmp_sockaddr_storage *bind_addr,
+                            unsigned addr_size)
 {
     trans_cache       *tc;
     netsnmp_transport *t;
@@ -1282,7 +1285,7 @@ netsnmp_transport_cache_get(int af, int type, int local,
 
 #if USE_CACHE
     /** check for existing transport */
-    tc = _tc_find(af, type, local, bind_addr);
+    tc = _tc_find(af, type, local, bind_addr, addr_size);
     if (tc) {
         DEBUGMSGTL(("transport:cache:get", "using existing transport %p\n",
                     tc->t));
@@ -1301,7 +1304,7 @@ netsnmp_transport_cache_get(int af, int type, int local,
 
 #if USE_CACHE
     /** create transport cache for new transport */
-    tc = _tc_add(af, type, local, bind_addr, t);
+    tc = _tc_add(af, type, local, bind_addr, addr_size, t);
     if (NULL == tc) {
         DEBUGMSGTL(("transport:cache:get", "could not create transport cache entry\n"));
         /*
@@ -1319,12 +1322,13 @@ netsnmp_transport_cache_get(int af, int type, int local,
 int
 netsnmp_transport_cache_save(int af, int type, int local,
                              const netsnmp_sockaddr_storage *addr,
+                             unsigned addr_size,
                              netsnmp_transport *t)
 {
     if (NULL == t)
         return 1;
 
-    if (NULL == _tc_add(af, type, local, addr, t))
+    if (NULL == _tc_add(af, type, local, addr, addr_size, t))
         return 1;
 
     return 0;

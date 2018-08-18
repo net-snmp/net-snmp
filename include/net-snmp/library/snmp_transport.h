@@ -290,11 +290,13 @@ void            netsnmp_transport_free(netsnmp_transport *t);
 
 NETSNMP_IMPORT
 netsnmp_transport *netsnmp_transport_cache_get(int af, int type, int local,
-                                               const netsnmp_sockaddr_storage *bind_addr);
+                                               const netsnmp_sockaddr_storage *bind_addr,
+                                               unsigned addr_size);
 
 NETSNMP_IMPORT
 int                netsnmp_transport_cache_save(int af, int type, int local,
                                                 const netsnmp_sockaddr_storage *addr,
+                                                unsigned addr_size,
                                                 netsnmp_transport *t);
 
 NETSNMP_IMPORT
