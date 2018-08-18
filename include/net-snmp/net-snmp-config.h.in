@@ -449,7 +449,7 @@
 /* Define to 1 if you have the <linux/tasks.h> header file. */
 #undef HAVE_LINUX_TASKS_H
 
-/* Define if load_defaults() is available in libmysqlclient */
+/* Define to 1 if you have the `load_defaults' function. */
 #undef HAVE_LOAD_DEFAULTS
 
 /* Define to 1 if you have the <locale.h> header file. */
@@ -500,8 +500,11 @@
 /* Define to 1 if you have the <mtab.h> header file. */
 #undef HAVE_MTAB_H
 
-/* Define if mysql_init() is available in libmysqlclient */
+/* Define to 1 if you have the `mysql_init' function. */
 #undef HAVE_MYSQL_INIT
+
+/* Define to 1 if you have the `mysql_options' function. */
+#undef HAVE_MYSQL_OPTIONS
 
 /* Define to 1 if you have the <my_global.h> header file. */
 #undef HAVE_MY_GLOBAL_H
