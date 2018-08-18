@@ -117,6 +117,14 @@ AC_CHECK_FUNCS([cgetnext        chown          forkall         ] dnl
                [statfs          statvfs       stime            ] dnl
                [strncasecmp     system        usleep           ] )
 
+AC_MSG_CHECKING([for FD_CLOEXEC])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+        [[#include <fcntl.h>]],[[return FD_CLOEXEC]]
+    )], [AC_MSG_RESULT([yes])
+	 AC_DEFINE([HAVE_FD_CLOEXEC], [1],
+            [Define if FD_CLOEXEC is defined in <fcntl.h>])],
+    [AC_MSG_RESULT([no])])
+
 #  Apps:
 AC_CHECK_FUNCS([getdtablesize                                  ] dnl
                [getgrnam        getpid        getpwnam         ] dnl

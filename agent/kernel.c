@@ -143,6 +143,16 @@ static off_t    klseek(off_t);
 static int      klread(char *, int);
 int             swap = -1, mem = -1, kmem = -1;
 
+static void netsnmp_cloexec(int fd)
+{
+    if (fd < 0)
+        return;
+#ifdef HAVE_FD_CLOEXEC
+    if (fcntl(fd, F_SETFD, FD_CLOEXEC) < 0)
+        snmp_log_perror("fcntl(FD_CLOEXEC)");
+#endif
+}
+
 /**
  * Initialize the support for accessing kernel virtual memory.
  *
@@ -160,23 +170,20 @@ init_kmem(const char *file)
         snmp_log_perror(file);
         res = FALSE;
     }
-    if (kmem >= 0)
-        fcntl(kmem, F_SETFD, 1/*FD_CLOEXEC*/);
+    netsnmp_cloexec(kmem);
     mem = open("/dev/mem", O_RDONLY);
     if (mem < 0 && !no_root_access) {
         snmp_log_perror("/dev/mem");
         res = FALSE;
     }
-    if (mem >= 0)
-        fcntl(mem, F_SETFD, 1/*FD_CLOEXEC*/);
+    netsnmp_cloexec(mem);
 #ifdef DMEM_LOC
     swap = open(DMEM_LOC, O_RDONLY);
     if (swap < 0 && !no_root_access) {
         snmp_log_perror(DMEM_LOC);
         res = FALSE;
     }
-    if (swap >= 0)
-        fcntl(swap, F_SETFD, 1/*FD_CLOEXEC*/);
+    netsnmp_cloexec(swap);
 #endif
     return res;
 }

@@ -187,6 +187,9 @@
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
+/* Define if FD_CLOEXEC is defined in <fcntl.h> */
+#undef HAVE_FD_CLOEXEC
+
 /* Define to 1 if you have the `fgetc_unlocked' function. */
 #undef HAVE_FGETC_UNLOCKED
 
