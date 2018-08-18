@@ -24969,19 +24969,17 @@ $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-  ac_fn_c_check_func "$LINENO" "mysql_init" "ac_cv_func_mysql_init"
-if test "x$ac_cv_func_mysql_init" = xyes; then :
-
-$as_echo "#define HAVE_MYSQL_INIT 1" >>confdefs.h
-
-fi
-
-  ac_fn_c_check_func "$LINENO" "load_defaults" "ac_cv_func_load_defaults"
-if test "x$ac_cv_func_load_defaults" = xyes; then :
-
-$as_echo "#define HAVE_LOAD_DEFAULTS 1" >>confdefs.h
+  for ac_func in load_defaults mysql_init mysql_options
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
 
 fi
+done
 
   CPPFLAGS="${_cppflags}"
   LIBS="${_libs}"

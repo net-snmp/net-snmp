@@ -553,14 +553,7 @@ if test "x$with_mysql" = "xyes" ; then
        AC_DEFINE([HAVE_MY_LOAD_DEFAULTS], 1,
                  [Define if having my_load_defaults()])],
       [AC_MSG_RESULT(no)])
-  AC_CHECK_FUNC(
-    [mysql_init],
-    AC_DEFINE([HAVE_MYSQL_INIT], 1,
-              [Define if mysql_init() is available in libmysqlclient]))
-  AC_CHECK_FUNC(
-    [load_defaults],
-    AC_DEFINE([HAVE_LOAD_DEFAULTS], 1,
-              [Define if load_defaults() is available in libmysqlclient]))
+  AC_CHECK_FUNCS([load_defaults mysql_init mysql_options])
   CPPFLAGS="${_cppflags}"
   LIBS="${_libs}"
   AC_MSG_CACHE_ADD(MYSQL Trap Logging:         enabled)
