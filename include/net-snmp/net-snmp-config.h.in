@@ -503,11 +503,17 @@
 /* Define if mysql_init() is available in libmysqlclient */
 #undef HAVE_MYSQL_INIT
 
+/* Define to 1 if you have the <my_global.h> header file. */
+#undef HAVE_MY_GLOBAL_H
+
 /* Define if MY_INIT() is availabe in libmysqlclient */
 #undef HAVE_MY_INIT
 
 /* Define if having my_load_defaults() */
 #undef HAVE_MY_LOAD_DEFAULTS
+
+/* Define to 1 if you have the <my_sys.h> header file. */
+#undef HAVE_MY_SYS_H
 
 /* Define to 1 if you have the <nbutil.h> header file. */
 #undef HAVE_NBUTIL_H
