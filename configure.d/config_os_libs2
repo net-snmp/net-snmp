@@ -522,7 +522,7 @@ if test "x$with_mysql" = "xyes" ; then
   CPPFLAGS="${CPPFLAGS} ${MYSQL_INCLUDES}"
   AC_CHECK_HEADER(mysql.h,,
      [AC_MSG_ERROR([Could not find mysql.h and was specifically asked to use MySQL support])])
-  AC_CHECK_HEADER([my_global.h my_sys.h])
+  AC_CHECK_HEADERS([my_global.h my_sys.h])
   AC_MSG_CHECKING([whether MY_INIT() works])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM(

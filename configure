@@ -24892,11 +24892,18 @@ else
 fi
 
 
-  ac_fn_c_check_header_mongrel "$LINENO" "my_global.h my_sys.h" "ac_cv_header_my_global_h_my_sys_h" "$ac_includes_default"
-if test "x$ac_cv_header_my_global_h_my_sys_h" = xyes; then :
+  for ac_header in my_global.h my_sys.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
 
 fi
 
+done
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether MY_INIT() works" >&5
 $as_echo_n "checking whether MY_INIT() works... " >&6; }
