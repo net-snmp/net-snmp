@@ -1303,13 +1303,12 @@ netsnmp_transport_cache_get(int af, int type, int local,
     /** create transport cache for new transport */
     tc = _tc_add(af, type, local, bind_addr, t);
     if (NULL == tc) {
-        DEBUGMSGTL(("transport:cache:get", "could not create transport cache\n"));
+        DEBUGMSGTL(("transport:cache:get", "could not create transport cache entry\n"));
         /*
-         * hmmm.. this isn't really a critical error, is it? We have a
-         * transport, just no cache for it. Let's continue on and hope for the
-         * best.
+         * We have a transport, just no cache for it. Let's continue on and
+         * hope for the best.
          */
-        /** return -1; */
+        return t;
     }
     tc->count = 1;
 #endif
