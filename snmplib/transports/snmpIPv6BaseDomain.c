@@ -216,10 +216,13 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
     {
         int port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                       NETSNMP_DS_LIB_DEFAULT_PORT);
-        if (port != 0)
+        if (port != 0) {
             addr->sin6_port = htons((u_short)port);
-        else if (default_target != NULL)
-            netsnmp_sockaddr_in6_2(addr, default_target, NULL);
+        } else if (default_target != NULL) {
+            if (!netsnmp_sockaddr_in6_2(addr, default_target, NULL))
+                snmp_log(LOG_ERR, "Invalid default target %s\n",
+                         default_target);
+        }
     }
 
     if (inpeername != NULL) {

@@ -91,8 +91,11 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
 
 	if (port != 0) {
 	    addr->sin_port = htons((u_short)port);
-	} else if (default_target != NULL)
-	    netsnmp_sockaddr_in2(addr, default_target, NULL);
+	} else if (default_target != NULL) {
+	    if (!netsnmp_sockaddr_in2(addr, default_target, NULL))
+                snmp_log(LOG_ERR, "Invalid default target %s\n",
+                         default_target);
+        }
     }
 
     if (inpeername != NULL && *inpeername != '\0') {
