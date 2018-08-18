@@ -6,7 +6,6 @@ killall snmpd snmptrapd >&/dev/null
 
 export SNMP_VERBOSE=1 &&
 export SNMP_SAVE_TMPDIR=1 &&
-export NETSNMP_DNS_WORKAROUND=1 &&
 make -s &&
 (
       export PATH="$PWD/agent/.libs:$PWD/apps/.libs:$PWD:$PATH" &&
