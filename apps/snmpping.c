@@ -202,6 +202,11 @@ add_var(netsnmp_pdu *pdu, const char *mibnodename,
         exit(1);
     }
 
+    if (base_length + indexlen > sizeof(base) / sizeof(base[0])) {
+        fprintf(stderr, "internal error for %s, giving up\n", mibnodename);
+        exit(1);
+    }
+
     if (index && indexlen) {
         memcpy(&(base[base_length]), index, indexlen * sizeof(oid));
         base_length += indexlen;
