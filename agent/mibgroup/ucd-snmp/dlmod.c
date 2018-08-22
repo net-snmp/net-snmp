@@ -232,7 +232,7 @@ dlmod_load_module(struct dlmod *dlm)
         dl_function_ptr dl_init;
 
         snprintf(sym_init, sizeof(sym_init), "init_%s", dlm->name);
-        dl_init = dlmod_dlsym(dlm->handle, sym_init);
+        dl_init = (int (*)(void))dlmod_dlsym(dlm->handle, sym_init);
         if (dl_init == NULL) {
             dlmod_dlclose(dlm->handle);
             free(dlm->error);
@@ -259,10 +259,10 @@ dlmod_unload_module(struct dlmod *dlm)
         return;
 
     snprintf(sym_deinit, sizeof(sym_deinit), "deinit_%s", dlm->name);
-    dl_deinit = dlmod_dlsym(dlm->handle, sym_deinit);
+    dl_deinit = (int (*)(void))dlmod_dlsym(dlm->handle, sym_deinit);
     if (!dl_deinit) {
         snprintf(sym_deinit, sizeof(sym_deinit), "shutdown_%s", dlm->name);
-        dl_deinit = dlmod_dlsym(dlm->handle, sym_deinit);
+        dl_deinit = (int (*)(void))dlmod_dlsym(dlm->handle, sym_deinit);
     }
     if (dl_deinit) {
         DEBUGMSGTL(("dlmod", "Calling %s()\n", sym_deinit));
