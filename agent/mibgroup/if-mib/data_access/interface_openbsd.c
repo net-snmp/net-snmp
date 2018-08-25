@@ -334,7 +334,8 @@ netsnmp_openbsd_interface_get_if_speed(char *name, u_int *speed, u_int *speed_hi
 {
     int s;
     struct ifmediareq ifmr;
-    int *media_list, i;
+    int i;
+    uint64_t *media_list;
     u_int t_speed, t_speed_high; 
     u_int m_speed, m_speed_high;
 
@@ -361,7 +362,7 @@ netsnmp_openbsd_interface_get_if_speed(char *name, u_int *speed, u_int *speed_hi
     _openbsd_interface_ifmedia_to_speed(ifmr.ifm_current, speed, speed_high);
 
     if (*speed == 0 &&
-        (media_list = (int *) malloc(ifmr.ifm_count * sizeof(int))) != NULL ) {
+        (media_list = (uint64_t *) malloc(ifmr.ifm_count * sizeof(uint64_t))) != NULL ) {
 
         ifmr.ifm_ulist = media_list;
 
