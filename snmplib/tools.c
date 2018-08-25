@@ -88,7 +88,7 @@ netsnmp_feature_child_of(memory_malloc, memory_wrappers)
 netsnmp_feature_child_of(memory_realloc, memory_wrappers)
 netsnmp_feature_child_of(memory_free, memory_wrappers)
 
-#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_WRAPPERS
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_STRDUP
 /**
  * This function is a wrapper for the strdup function.
  *
