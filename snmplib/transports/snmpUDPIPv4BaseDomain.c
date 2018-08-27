@@ -373,30 +373,6 @@ netsnmp_udpipv4base_transport(const struct sockaddr_in *addr, int local)
                 return netsnmp_udpipv4base_transport_with_source(addr, local,
                                                                  &client_addr);
             }
-            local_addr_len = sizeof(addr_pair.local_addr);
-            rc2 = getsockname(t->sock, (struct sockaddr*)&addr_pair.local_addr,
-                              &local_addr_len);
-            netsnmp_assert(rc2 == 0);
-        }
-
-        DEBUGIF("netsnmp_udpbase") {
-            char *str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,
-                                            sizeof(netsnmp_indexed_addr_pair));
-            DEBUGMSGTL(("netsnmp_udpbase", "client open %s\n", str));
-            free(str);
-        }
-
-        /*
-         * Save the (remote) address in the
-         * transport-specific data pointer for later use by netsnmp_udp_send.
-         */
-
-        t->data = malloc(sizeof(netsnmp_indexed_addr_pair));
-        t->remote_length = sizeof(*addr);
-        t->remote = netsnmp_memdup(addr, sizeof(*addr));
-        if (t->data == NULL || t->remote == NULL) {
-            netsnmp_transport_free(t);
-            return NULL;
         }
     }
     return netsnmp_udpipv4base_transport_with_source(addr, local, NULL);
