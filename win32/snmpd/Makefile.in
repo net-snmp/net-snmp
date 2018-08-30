@@ -17,14 +17,8 @@ NULL=
 NULL=nul
 !ENDIF 
 
-ALL : "..\bin\$(OUTDIR)\snmpd.exe" "$(INTDIR)"
+ALL : ..\bin\$(OUTDIR)\snmpd.exe
 
-
-"..\bin\$(OUTDIR)" :
-    if not exist "..\bin\$(OUTDIR)/$(NULL)" mkdir "..\bin\$(OUTDIR)"
-
-"$(INTDIR)" :
-    if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
 CPP_PROJ=/I.. /I..\..\include $(CFLAGS)
@@ -51,7 +45,7 @@ CLEAN :
 	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe"
 	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest"
 
-"..\bin\$(OUTDIR)\$(PROGNAME).exe" : "..\bin\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
+"..\bin\$(OUTDIR)\$(PROGNAME).exe" : $(DEF_FILE) $(LINK32_OBJS)
 !IF "$(LINKTYPE)" == "static" || "$(ALLOW_DLL)" == "1"
     $(LINK32) $(LINK32_FLAGS) $(LINK32_OBJS)
  if exist "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest" \
@@ -70,10 +64,5 @@ CLEAN :
 !ENDIF 
 !ENDIF 
 
-"$(INTDIR)\auto_nlist.obj": ..\..\agent\auto_nlist.c "$(INTDIR)"
-"$(INTDIR)\kernel.obj": ..\..\agent\kernel.c "$(INTDIR)"
-"$(INTDIR)\snmpd.obj": ..\..\agent\snmpd.c "$(INTDIR)"
-"$(INTDIR)\winservice.obj": ..\..\snmplib\winservice.c "$(INTDIR)"
-
-"$(INTDIR)\winservice.res": ..\..\snmplib\winservice.rc "$(INTDIR)"
+"$(INTDIR)\winservice.res": ..\..\snmplib\winservice.rc
 	$(RSC) $(RSCFLAGS) /fo$@ /i "..\..\snmplib" ..\..\snmplib\winservice.rc

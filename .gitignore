@@ -3,6 +3,7 @@
 *.bs
 *.ft
 *.ft.1
+*.idb
 *.la
 *.lo
 *.made
@@ -13,6 +14,7 @@
 *.out
 *.pdb
 *.rej
+*.sbr
 *.swp
 .libs/
 agent/*.exe
@@ -117,7 +119,5 @@ stamp-h
 TAGS
 testing/failed_tests
 testing/testing/
-win32/*/debug
-win32/*/release
-win32/bin
-win32/lib
+win32/snmpd/release/winservice.res
+win32/snmptrapd/release/winservice.res
