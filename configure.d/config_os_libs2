@@ -306,13 +306,19 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
         LIBS="$netsnmp_save_LIBS"
 
         if test x$CRYPTO = x; then
-            AC_CHECK_LIB([crypto], [EVP_md5], [CRYPTO="crypto"])
-        fi
+            AC_CHECK_LIB([crypto], [EVP_md5],
+			 [CRYPTO="crypto"; LIBCRYPTO="-lcrypto"], [
+		AC_CHECK_LIB([crypto], [EVP_md5],
+			     [CRYPTO="crypto"; LIBCRYPTO="-lcrypto -lz"], [],
+			     [-lz])
+	    ])
+	else
+	    LIBCRYPTO="-l${CRYPTO}"
+	fi
 
         if test x$CRYPTO != x; then
             AC_DEFINE(HAVE_LIBCRYPTO, 1,
                 [Define to 1 if you have the OpenSSL library (-lcrypto or -leay32).])
-            LIBCRYPTO="-l${CRYPTO}"
             netsnmp_save_LIBS="$LIBS"
             LIBS="$LIBCRYPTO"
             AC_CHECK_FUNCS([AES_cfb128_encrypt]dnl
@@ -342,7 +348,7 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
             LIBS="$netsnmp_save_LIBS"
         fi
         netsnmp_save_LIBS="$LIBS"
-        LIBS="-lssl"
+        LIBS="-lssl $LIBCRYPTO"
         AC_CHECK_FUNCS([TLS_method TLSv1_method DTLS_method DTLSv1_method]dnl
                        [SSL_library_init SSL_load_error_strings])
         LIBS="$netsnmp_save_LIBS"
