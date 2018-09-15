@@ -87,7 +87,7 @@ if test "x$install_perl" != "xno" ; then
     if test "x$enable_perl_cc_checks" != "xno" ; then
         AC_MSG_CHECKING([for Perl cc])
         changequote(, )
-        PERLCC=`$myperl -V:cc | $myperl -n -e 'print if (s/^\s*cc=.([-=\w\s\/]+).;\s*/$1/);'`
+        PERLCC=`$myperl -V:cc | $myperl -n -e 'print if (s/^\s*cc=.([-=\w\s\/.]+).;\s*/$1/);'`
         changequote([, ])
         if test "x$PERLCC" != "x" ; then
             AC_MSG_RESULT([$PERLCC])
