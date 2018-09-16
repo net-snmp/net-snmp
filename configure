@@ -22524,9 +22524,6 @@ fi
 #   Simple checks:
 ##
 
-# AC_CHECK_LIB(des, main)
-# AC_CHECK_LIB(m,   asin)
-
 #   dmalloc
 #
 if test "${with_dmalloc+set}" = set; then
