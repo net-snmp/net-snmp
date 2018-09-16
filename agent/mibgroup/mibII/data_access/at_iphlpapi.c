@@ -287,7 +287,7 @@ write_arp(int action,
             }
             break;
         default:
-            DEBUGMSGTL(("snmpd", "unknown sub-id %d in write_rte\n",
+            DEBUGMSGTL(("snmpd", "unknown sub-id %d in write_arp\n",
                         var + 1));
             return SNMP_ERR_NOTWRITABLE;
         }
