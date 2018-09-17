@@ -23231,6 +23231,7 @@ if test "x$ac_cv_lib_crypto_EVP_md5" = xyes; then :
   CRYPTO="crypto"; LIBCRYPTO="-lcrypto"
 else
 
+		unset ac_cv_lib_crypto_EVP_md5
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_md5 in -lcrypto" >&5
 $as_echo_n "checking for EVP_md5 in -lcrypto... " >&6; }
 if ${ac_cv_lib_crypto_EVP_md5+:} false; then :

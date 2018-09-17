@@ -308,6 +308,7 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
         if test x$CRYPTO = x; then
             AC_CHECK_LIB([crypto], [EVP_md5],
 			 [CRYPTO="crypto"; LIBCRYPTO="-lcrypto"], [
+		unset ac_cv_lib_crypto_EVP_md5
 		AC_CHECK_LIB([crypto], [EVP_md5],
 			     [CRYPTO="crypto"; LIBCRYPTO="-lcrypto -lz"], [],
 			     [-lz])
