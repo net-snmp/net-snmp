@@ -417,7 +417,7 @@ routename(in_addr_t in)
 	return line;
 }
 
-#define C(x) ((x) & 0xffU)
+#define C(x) (unsigned int)((x) & 0xffU)
 /*
  * Return the name of the network whose address is given.
  * The address is assumed to be that of a net or subnet, not a host.
