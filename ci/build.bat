@@ -25,8 +25,11 @@ cd ..
 goto eof
 
 :MinGW32
-REM to do - install MinGW32 first.
-C:\mingw\msys\1.0\usr\bin\bash --login -c 'set -x; cd "${APPVEYOR_BUILD_FOLDER}"; ci/build.sh'
+mkdir C:\mingw
+curl -L "https://osdn.net/dl/mingw/mingw-get-0.6.3-mingw32-pre-20170905-1-bin.zip" -o C:\mingw\mingw-get.zip
+unzip C:\mingw\mingw-get.zip -d C:\mingw
+C:\mingw\bin\mingw-get install mingw32-binutils-bin mingw32-gcc-bin mingw32-gcc-dev mingw32-w32api-dev msys-autoconf-bin msys-automake-bin msys-bash-bin msys-core-bin msys-coreutils-bin msys-file-bin msys-gawk-bin msys-grep-bin msys-m4-bin msys-make-bin msys-openssl-bin msys-perl-bin msys-sed-bin msys-tar-bin
+C:\mingw\msys\1.0\bin\bash --login -c 'set -x; cd "${APPVEYOR_BUILD_FOLDER}"; ci/build.sh'
 goto eof
 
 :MinGW64
