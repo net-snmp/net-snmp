@@ -470,7 +470,7 @@ _new_key(const char *dirname, const char *filename)
         return NULL;
     }
 
-#if !defined(_MSC_VER)
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
     if ((fstat.st_mode & S_IROTH) || (fstat.st_mode & S_IWOTH)) {
         snmp_log(LOG_ERR,
                  "refusing to read world readable or writable key %s\n", fn);
