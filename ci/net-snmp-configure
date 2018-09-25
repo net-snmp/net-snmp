@@ -161,9 +161,6 @@ case "$(uname)" in
     ;;
   MINGW*|MSYS*)
       options+=(--disable-embedded-perl)
-      if [ "$branch_name" != "V5-4-patches" ]; then
-	  options+=("--with-openssl=/c/OpenSSL")
-      fi
       mibs+=(snmp-notification-mib)
       mibs+=(ucd-snmp/dlmod)
       mibs+=(ucd-snmp/extensible)
@@ -173,6 +170,9 @@ case "$(uname)" in
       if [ -n "$APPVEYOR" ]; then
           options+=("--build=x86_64-pc-mingw32")
       fi
+      # To do: figure out why snmpd crashes while initializing the TLS
+      # transports.
+      opensslver=""
     ;;
   *)
     echo "Unknown OS $(uname)."
