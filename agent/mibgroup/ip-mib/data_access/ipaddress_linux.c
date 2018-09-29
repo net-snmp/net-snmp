@@ -527,6 +527,8 @@ netsnmp_access_ipaddress_extra_prefix_info(int index, u_long *preferedlt,
     int                  rtattrlen;
     int                  sd;
     int                  reqaddr = 0;
+    int                  ret = -1;
+
     sd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
     if(sd < 0) {
        snmp_log(LOG_ERR, "could not open netlink socket\n");
@@ -543,16 +545,16 @@ netsnmp_access_ipaddress_extra_prefix_info(int index, u_long *preferedlt,
     status = send (sd, &req, req.nlhdr.nlmsg_len, 0);
     if (status < 0) {
         snmp_log(LOG_ERR, "could not send netlink request\n");
-        return -1;
+        goto out;
     }
     status = recv (sd, buf, sizeof(buf), 0);
     if (status < 0) {
         snmp_log (LOG_ERR, "could not recieve netlink request\n");
-        return -1;
+        goto out;
     }
     if (status == 0) {
        snmp_log (LOG_ERR, "nothing to read\n");
-       return -1;
+       goto out;
     }
     for (nlmp = (struct nlmsghdr *)buf; status > sizeof(*nlmp); ){
 
@@ -561,12 +563,12 @@ netsnmp_access_ipaddress_extra_prefix_info(int index, u_long *preferedlt,
 
         if (req_len < 0 || len > status) {
             snmp_log (LOG_ERR, "invalid netlink message\n");
-            return -1;
+            goto out;
         }
 
         if (!NLMSG_OK (nlmp, status)) {
             snmp_log (LOG_ERR, "invalid NLMSG message\n");
-            return -1;
+            goto out;
         }
         rtmp = (struct ifaddrmsg *)NLMSG_DATA(nlmp);
         rtatp = (struct rtattr *)IFA_RTA(rtmp);
@@ -594,8 +596,11 @@ netsnmp_access_ipaddress_extra_prefix_info(int index, u_long *preferedlt,
         status -= NLMSG_ALIGN(len);
         nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
     }
+    ret = 0;
+
+out:
     close(sd);
-    return 0;
+    return ret;
 }
 #endif
 #endif
