@@ -16,10 +16,6 @@ Xalgorithm="DES"
 token=rwuser
 
 while test "x$done" = "x" -a "x$1" != "x" -a "x$usage" != "xyes"; do
-case "$1" in
-    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
-    *) optarg= ;;
-esac
 
 unset shifted
 case $1 in
