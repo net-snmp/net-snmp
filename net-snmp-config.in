@@ -45,7 +45,8 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 includedir=@includedir@
 libdir=@libdir@
-datarootdir=@datarootdir@
+# Avoid that configure complains that this script ignores @datarootdir@
+echo "@datarootdir@" >/dev/null
 NSC_LDFLAGS="@LDFLAGS@"
 
 NSC_LIBS="@LIBS@"

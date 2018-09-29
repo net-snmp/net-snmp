@@ -136,7 +136,8 @@ if test ! -d $outfile ; then
 fi
 echo $line >> $outfile
 prefix="@prefix@"
-datarootdir="@datarootdir@"
+# Avoid that configure complains that this script ignores @datarootdir@
+echo "@datarootdir@" >/dev/null
 outfile="@datadir@/snmp/snmpd.conf"
 line="$token $user"
 echo "adding the following line to $outfile:"
