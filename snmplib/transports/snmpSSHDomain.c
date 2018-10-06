@@ -352,7 +352,6 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
             /* ruh roh */
             /* XXX: clean up */
             return -1;
-            exit;
         }
 
         /* XXX: detect and throw out overflow secname sizes rather
