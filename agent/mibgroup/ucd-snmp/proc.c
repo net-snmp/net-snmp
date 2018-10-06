@@ -134,9 +134,7 @@ proc_free_config(void)
         ptmp2 = ptmp;
         ptmp = ptmp->next;
 #if HAVE_PCRE_H
-        if (ptmp2->regexp) {
-            free(ptmp2->regexp);
-        }
+        free(ptmp2->regexp.regex_ptr);
 #endif
         free(ptmp2);
     }
@@ -210,7 +208,7 @@ proc_parse_config(const char *token, char *cptr)
         return;                 /* memory alloc error */
     numprocs++;
 #if HAVE_PCRE_H
-    (*procp)->regexp = NULL;
+    (*procp)->regexp.regex_ptr = NULL;
 #endif
     /*
      * not blank and not a comment 
@@ -229,8 +227,9 @@ proc_parse_config(const char *token, char *cptr)
                 int pcre_error_offset;
 
                 DEBUGMSGTL(("ucd-snmp/regexp_proc", "Loading regex %s\n", cptr));
-                (*procp)->regexp = pcre_compile(cptr, 0,  &pcre_error, &pcre_error_offset, NULL);
-                if ((*procp)->regexp == NULL) {
+                (*procp)->regexp.regex_ptr =
+                    pcre_compile(cptr, 0,  &pcre_error, &pcre_error_offset, NULL);
+                if ((*procp)->regexp.regex_ptr == NULL) {
                     config_perror(pcre_error);
                 }
             }
@@ -392,7 +391,7 @@ sh_count_myprocs(struct myproc *proc)
         return 0;
 
 #if defined(USING_HOST_DATA_ACCESS_SWRUN_MODULE) && defined(HAVE_PCRE_H)
-    if (proc->regexp != NULL)
+    if (proc->regexp.regex_ptr != NULL)
       return sh_count_procs_by_regex(proc->name, proc->regexp);
 #endif
 

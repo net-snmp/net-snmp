@@ -90,8 +90,7 @@ extern "C" {
     int  swrun_count_processes_by_name( char *name );
 
 #ifndef NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_REGEX
-    struct real_pcre;
-    int  swrun_count_processes_by_regex(char *name, struct real_pcre *regexp);
+    int  swrun_count_processes_by_regex(char *name, netsnmp_regex_ptr regexp);
 #endif
 
 #define NETSNMP_SWRUN_NOFLAGS            0x00000000

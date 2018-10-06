@@ -88,6 +88,16 @@ typedef long ssize_t;
 typedef unsigned long int nfds_t;
 #endif
 
+#ifdef HAVE_PCRE_H
+/*
+ * Abstract the pcre typedef such that not all *.c files have to include
+ * <pcre.h>.
+ */
+typedef struct {
+    void *regex_ptr;
+} netsnmp_regex_ptr;
+#endif
+ 
     /*
      *  For the initial release, this will just refer to the
      *  relevant UCD header files.
