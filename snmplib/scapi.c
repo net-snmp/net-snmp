@@ -967,7 +967,8 @@ sc_hash_type(int auth_type, const u_char * buf, size_t buf_len, u_char * MAC,
 #endif
     if (!EVP_DigestInit(cptr, hashfn)) {
         /* requested hash function is not available */
-        return SNMPERR_SC_NOT_CONFIGURED;
+        rval = SNMPERR_SC_NOT_CONFIGURED;
+        goto sc_hash_type_quit;
     }
 
 /** pass the data */
@@ -976,6 +977,8 @@ sc_hash_type(int auth_type, const u_char * buf, size_t buf_len, u_char * MAC,
 /** do the final pass */
     EVP_DigestFinal(cptr, MAC, &tmp_len);
     *MAC_len = tmp_len;
+
+sc_hash_type_quit:
 #if defined(HAVE_EVP_MD_CTX_FREE)
     EVP_MD_CTX_free(cptr);
 #elif defined(HAVE_EVP_MD_CTX_DESTROY)
