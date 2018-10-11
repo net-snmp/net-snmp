@@ -186,11 +186,15 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     ctx = EVP_MD_CTX_create();
 #else
     ctx = malloc(sizeof(*ctx));
-    if (!EVP_MD_CTX_init(ctx))
-        return SNMPERR_GENERR;
+    if (!EVP_MD_CTX_init(ctx)) {
+        rval = SNMPERR_GENERR;
+        goto generate_Ku_quit;
+    }
 #endif
-    if (!EVP_DigestInit(ctx, hashfn))
-        return SNMPERR_GENERR;
+    if (!EVP_DigestInit(ctx, hashfn)) {
+        rval = SNMPERR_GENERR;
+        goto generate_Ku_quit;
+    }
 
 #elif NETSNMP_USE_INTERNAL_CRYPTO
 #ifndef NETSNMP_DISABLE_MD5
