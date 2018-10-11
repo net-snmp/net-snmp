@@ -89,7 +89,8 @@ extern "C" {
     int  swrun_max_processes(   void );
     int  swrun_count_processes_by_name( char *name );
 
-#ifndef NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_REGEX
+#if !defined(NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_REGEX) \
+    && defined(HAVE_PCRE_H)
     int  swrun_count_processes_by_regex(char *name, netsnmp_regex_ptr regexp);
 #endif
 
