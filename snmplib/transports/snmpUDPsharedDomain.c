@@ -468,7 +468,6 @@ netsnmp_udpshared_ctor(void)
     domain.prefix = (const char**)calloc(2, sizeof(char *));
     domain.prefix[0] = "udpshared";
 
-    domain.f_create_from_tstring     = NULL;
     domain.f_create_from_tstring_new = netsnmp_udpshared_create_tstring;
     domain.f_create_from_tspec       = netsnmp_udpshared_create_tspec;
     domain.f_create_from_ostring     = netsnmp_udpshared_create_ostring;

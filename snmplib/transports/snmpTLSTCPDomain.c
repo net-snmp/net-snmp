@@ -1062,7 +1062,6 @@ netsnmp_tlstcp_ctor(void)
     tlstcpDomain.prefix[0] = "tlstcp";
     tlstcpDomain.prefix[1] = "tls";
 
-    tlstcpDomain.f_create_from_tstring     = NULL;
     tlstcpDomain.f_create_from_tstring_new = netsnmp_tlstcp_create_tstring;
     tlstcpDomain.f_create_from_ostring     = netsnmp_tlstcp_create_ostring;
 

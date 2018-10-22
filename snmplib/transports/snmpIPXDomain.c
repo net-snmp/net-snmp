@@ -483,7 +483,6 @@ netsnmp_ipx_ctor(void)
     ipxDomain.prefix = (const char**)calloc(2, sizeof(char *));
     ipxDomain.prefix[0] = "ipx";
 
-    ipxDomain.f_create_from_tstring     = NULL;
     ipxDomain.f_create_from_tstring_new = netsnmp_ipx_create_tstring;
     ipxDomain.f_create_from_ostring     = netsnmp_ipx_create_ostring;
 

@@ -360,7 +360,6 @@ netsnmp_tcpipv6_ctor(void)
 {
     tcp6Domain.name = netsnmp_TCPIPv6Domain;
     tcp6Domain.name_length = sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);
-    tcp6Domain.f_create_from_tstring     = NULL;
     tcp6Domain.f_create_from_tstring_new = netsnmp_tcp6_create_tstring;
     tcp6Domain.f_create_from_ostring     = netsnmp_tcp6_create_ostring;
     tcp6Domain.prefix = (const char**)calloc(4, sizeof(char *));
