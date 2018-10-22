@@ -225,7 +225,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
     if (inpeername != NULL) {
         /*
          * Duplicate the peername because we might want to mank around with
-         * it.  
+         * it.
          */
 
         peername = strdup(inpeername);
