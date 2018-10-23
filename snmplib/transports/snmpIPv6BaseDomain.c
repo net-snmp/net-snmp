@@ -182,21 +182,73 @@ int netsnmp_ipv6_ostring_to_sockaddr(struct sockaddr_in6 *sin6, const void *o,
     return 1;
 }
 
+static int netsnmp_resolve_v6_hostname(struct in6_addr *addr,
+                                       const char *hostname)
+{
+#if HAVE_GETADDRINFO
+    struct addrinfo hint = { 0 };
+    struct addrinfo *addrs;
+    int             err;
+
+    hint.ai_family = PF_INET6;
+    hint.ai_socktype = SOCK_DGRAM;
+    err = netsnmp_getaddrinfo(hostname, NULL, &hint, &addrs);
+    if (err)
+        return 0;
+
+    if (addrs) {
+        DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
+        *addr = ((struct sockaddr_in6 *)addrs->ai_addr)->sin6_addr;
+        freeaddrinfo(addrs);
+    } else {
+        DEBUGMSGTL(("netsnmp_sockaddr_in6", "Failed to resolve IPv6 hostname\n"));
+    }
+    return 1;
+#elif HAVE_GETIPNODEBYNAME
+    struct hostent *hp;
+    int             err;
+
+    hp = getipnodebyname(hostname, AF_INET6, 0, &err);
+    if (hp == NULL) {
+        DEBUGMSGTL(("netsnmp_sockaddr_in6",
+                    "hostname (couldn't resolve = %d)\n", err));
+        return 0;
+    }
+    DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
+    memcpy(addr, hp->h_addr, hp->h_length);
+    return 1;
+#elif HAVE_GETHOSTBYNAME
+    struct hostent *hp;
+
+    hp = netsnmp_gethostbyname(hostname);
+    if (hp == NULL) {
+        DEBUGMSGTL(("netsnmp_sockaddr_in6",
+                    "hostname (couldn't resolve)\n"));
+        return 0;
+    }
+    if (hp->h_addrtype != AF_INET6) {
+        DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (not AF_INET6!)\n"));
+        return 0;
+    }
+    DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
+    memcpy(addr, hp->h_addr, hp->h_length);
+    return 1;
+#else                           /*HAVE_GETHOSTBYNAME */
+    /*
+     * There is no name resolving function available.
+     */
+    snmp_log(LOG_ERR,
+             "no getaddrinfo()/getipnodebyname()/gethostbyname()\n");
+    return 0;
+#endif                          /*HAVE_GETHOSTBYNAME */
+}
+
 int
 netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                        const char *inpeername, const char *default_target)
 {
     char           *cp = NULL, *peername = NULL;
     char            debug_addr[INET6_ADDRSTRLEN];
-#if HAVE_GETADDRINFO
-    struct addrinfo *addrs = NULL;
-    int             err;
-#elif HAVE_GETIPNODEBYNAME
-    struct hostent *hp = NULL;
-    int             err;
-#elif HAVE_GETHOSTBYNAME
-    struct hostent *hp = NULL;
-#endif
     int             portno;
 
     if (addr == NULL) {
@@ -408,69 +460,10 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
           free(peername);
           return 0;
         }
-
-#if HAVE_GETADDRINFO
-        {
-            struct addrinfo hint = { 0 };
-            hint.ai_flags = 0;
-            hint.ai_family = PF_INET6;
-            hint.ai_socktype = SOCK_DGRAM;
-            hint.ai_protocol = 0;
-
-            err = netsnmp_getaddrinfo(peername, NULL, &hint, &addrs);
-        }
-        if (err != 0) {
+        if (!netsnmp_resolve_v6_hostname(&addr->sin6_addr, peername)) {
             free(peername);
             return 0;
         }
-        if (addrs != NULL) {
-            DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "hostname (resolved okay)\n"));
-            memcpy(&addr->sin6_addr,
-                   &((struct sockaddr_in6 *) addrs->ai_addr)->sin6_addr,
-                   sizeof(struct in6_addr));
-            freeaddrinfo(addrs);
-        }
-        else {
-            DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "Failed to resolve IPv6 hostname\n"));
-        }
-#elif HAVE_GETIPNODEBYNAME
-        hp = getipnodebyname(peername, AF_INET6, 0, &err);
-        if (hp == NULL) {
-            DEBUGMSGTL(("netsnmp_sockaddr_in6_2",
-                        "hostname (couldn't resolve = %d)\n", err));
-            free(peername);
-            return 0;
-        }
-        DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "hostname (resolved okay)\n"));
-        memcpy(&(addr->sin6_addr), hp->h_addr, hp->h_length);
-#elif HAVE_GETHOSTBYNAME
-        hp = netsnmp_gethostbyname(peername);
-        if (hp == NULL) {
-            DEBUGMSGTL(("netsnmp_sockaddr_in6_2",
-                        "hostname (couldn't resolve)\n"));
-            free(peername);
-            return 0;
-        } else {
-            if (hp->h_addrtype != AF_INET6) {
-                DEBUGMSGTL(("netsnmp_sockaddr_in6_2",
-                            "hostname (not AF_INET6!)\n"));
-                free(peername);
-                return 0;
-            } else {
-                DEBUGMSGTL(("netsnmp_sockaddr_in6_2",
-                            "hostname (resolved okay)\n"));
-                memcpy(&(addr->sin6_addr), hp->h_addr, hp->h_length);
-            }
-        }
-#else                           /*HAVE_GETHOSTBYNAME */
-        /*
-         * There is no name resolving function available.  
-         */
-        snmp_log(LOG_ERR,
-                 "no getaddrinfo()/getipnodebyname()/gethostbyname()\n");
-        free(peername);
-        return 0;
-#endif                          /*HAVE_GETHOSTBYNAME */
     } else {
         DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "NULL peername"));
         return 0;
