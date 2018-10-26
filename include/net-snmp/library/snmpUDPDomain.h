@@ -24,14 +24,14 @@ extern          "C" {
 config_require(UDPIPv4Base)
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 
-netsnmp_transport *netsnmp_udp_transport(const struct sockaddr_in *addr,
-                                         int local);
+netsnmp_transport *
+netsnmp_udp_transport(const struct netsnmp_ep *ep, int local);
 
 netsnmp_transport *netsnmp_udp_create_tspec(netsnmp_tdomain_spec *tspec);
 
 netsnmp_transport *
-netsnmp_udp_transport_with_source(const struct sockaddr_in *addr, int local,
-                                  const struct sockaddr_in *src_addr);
+netsnmp_udp_transport_with_source(const struct netsnmp_ep *ep, int local,
+                                  const struct netsnmp_ep *src_addr);
 
 #define C2SE_ERR_SUCCESS             0
 #define C2SE_ERR_MISSING_ARG        -1

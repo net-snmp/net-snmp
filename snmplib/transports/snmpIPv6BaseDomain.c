@@ -248,13 +248,13 @@ int
 netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                        const char *inpeername, const char *default_target)
 {
-    struct netsnmp_ep ai;
+    struct netsnmp_ep ep;
     int ret;
 
-    ret = netsnmp_sockaddr_in6_3(&ai, inpeername, default_target);
+    ret = netsnmp_sockaddr_in6_3(&ep, inpeername, default_target);
     if (ret == 0)
         return 0;
-    *addr = ai.a.sin6;
+    *addr = ep.a.sin6;
     return ret;
 }
 

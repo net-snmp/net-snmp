@@ -17,6 +17,7 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <net-snmp/types.h>
+#include <net-snmp/library/snmpIPBaseDomain.h>
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 
@@ -157,11 +158,11 @@ netsnmp_udp_transport_base(netsnmp_transport *t)
  * the remote address to send things to.
  */
 netsnmp_transport *
-netsnmp_udp_transport(const struct sockaddr_in *addr, int local)
+netsnmp_udp_transport(const struct netsnmp_ep *ep, int local)
 {
     netsnmp_transport *t = NULL;
 
-    t = netsnmp_udpipv4base_transport(addr, local);
+    t = netsnmp_udpipv4base_transport(ep, local);
     if (NULL != t) {
         netsnmp_udp_transport_base(t);
     }
@@ -175,13 +176,13 @@ netsnmp_udp_transport(const struct sockaddr_in *addr, int local)
  * to send from.
  */
 netsnmp_transport *
-netsnmp_udp_transport_with_source(const struct sockaddr_in *addr, int local,
-                                  const struct sockaddr_in *src_addr)
+netsnmp_udp_transport_with_source(const struct netsnmp_ep *ep, int local,
+                                  const struct netsnmp_ep *src_addr)
 
 {
     netsnmp_transport *t = NULL;
 
-    t = netsnmp_udpipv4base_transport_with_source(addr, local, src_addr);
+    t = netsnmp_udpipv4base_transport_with_source(ep, local, src_addr);
     if (NULL != t) {
         netsnmp_udp_transport_base(t);
     }
@@ -606,9 +607,9 @@ netsnmp_transport *
 netsnmp_udp_create_tstring(const char *str, int local,
 			   const char *default_target)
 {
-    struct sockaddr_in addr;
+    struct netsnmp_ep addr;
 
-    if (netsnmp_sockaddr_in2(&addr, str, default_target)) {
+    if (netsnmp_sockaddr_in3(&addr, str, default_target)) {
         return netsnmp_udp_transport(&addr, local);
     } else {
         return NULL;
@@ -629,10 +630,11 @@ netsnmp_udp_create_tspec(netsnmp_tdomain_spec *tspec)
 netsnmp_transport *
 netsnmp_udp_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_in sin;
+    struct netsnmp_ep ep;
 
-    if (netsnmp_ipv4_ostring_to_sockaddr(&sin, o, o_len))
-        return netsnmp_udp_transport(&sin, local);
+    memset(&ep, 0, sizeof(ep));
+    if (netsnmp_ipv4_ostring_to_sockaddr(&ep.a.sin, o, o_len))
+        return netsnmp_udp_transport(&ep, local);
     return NULL;
 }
 
