@@ -248,18 +248,33 @@ int
 netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                        const char *inpeername, const char *default_target)
 {
+    struct netsnmp_ep ai;
+    int ret;
+
+    ret = netsnmp_sockaddr_in6_3(&ai, inpeername, default_target);
+    if (ret == 0)
+        return 0;
+    *addr = ai.a.sin6;
+    return ret;
+}
+
+int
+netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
+                       const char *inpeername, const char *default_target)
+{
+    struct sockaddr_in6 *addr = &ep->a.sin6;
     char            debug_addr[INET6_ADDRSTRLEN];
 
-    if (addr == NULL) {
+    if (ep == NULL) {
         return 0;
     }
 
-    DEBUGMSGTL(("netsnmp_sockaddr_in6_2",
-		"addr %p, peername \"%s\", default_target \"%s\"\n",
-                addr, inpeername ? inpeername : "[NIL]",
+    DEBUGMSGTL(("netsnmp_sockaddr_in6",
+		"ep %p, peername \"%s\", default_target \"%s\"\n",
+                ep, inpeername ? inpeername : "[NIL]",
 		default_target ? default_target : "[NIL]"));
 
-    memset(addr, 0, sizeof(struct sockaddr_in6));
+    memset(ep, 0, sizeof(*ep));
     addr->sin6_family = AF_INET6;
     addr->sin6_addr = in6addr_any;
     addr->sin6_port = htons((u_short)SNMP_PORT);
@@ -270,7 +285,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         if (port != 0)
             addr->sin6_port = htons((u_short)port);
         else if (default_target != NULL)
-            netsnmp_sockaddr_in6_2(addr, default_target, NULL);
+            netsnmp_sockaddr_in6_3(ep, default_target, NULL);
     }
 
     if (inpeername != NULL) {
@@ -297,13 +312,12 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
             if (ep_str.port)
                 addr->sin6_port = htons(ep_str.port);
         }
-
     } else {
-        DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "NULL peername"));
+        DEBUGMSGTL(("netsnmp_sockaddr_in6", "NULL peername"));
         return 0;
     }
 
-    DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "return { AF_INET6, [%s]:%hu }\n",
+    DEBUGMSGTL(("netsnmp_sockaddr_in6", "return { AF_INET6, [%s]:%hu }\n",
                 inet_ntop(AF_INET6, &addr->sin6_addr, debug_addr,
                           sizeof(debug_addr)), ntohs(addr->sin6_port)));
     return 1;

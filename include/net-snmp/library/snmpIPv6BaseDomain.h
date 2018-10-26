@@ -30,6 +30,9 @@ extern          "C" {
                                const char *default_target);
     int netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                              const char *inpeername, int remote_port);
+    int
+    netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
+                           const char *inpeername, const char *default_target);
 
 #ifdef __cplusplus
 }

@@ -57,19 +57,34 @@ int
 netsnmp_sockaddr_in2(struct sockaddr_in *addr,
                      const char *inpeername, const char *default_target)
 {
+    struct netsnmp_ep ep;
+    int ret;
+
+    ret = netsnmp_sockaddr_in3(&ep, inpeername, default_target);
+    if (ret == 0)
+        return 0;
+    *addr = ep.a.sin;
+    return ret;
+}
+
+int
+netsnmp_sockaddr_in3(struct netsnmp_ep *ep,
+                     const char *inpeername, const char *default_target)
+{
+    struct sockaddr_in *addr = &ep->a.sin;
     struct netsnmp_ep_str ep_str;
     int ret;
 
-    if (addr == NULL) {
+    if (ep == NULL) {
         return 0;
     }
 
     DEBUGMSGTL(("netsnmp_sockaddr_in",
                 "addr %p, inpeername \"%s\", default_target \"%s\"\n",
-                addr, inpeername ? inpeername : "[NIL]",
+                ep, inpeername ? inpeername : "[NIL]",
                 default_target ? default_target : "[NIL]"));
 
-    memset(addr, 0, sizeof(struct sockaddr_in));
+    memset(ep, 0, sizeof(*ep));
     addr->sin_addr.s_addr = htonl(INADDR_ANY);
     addr->sin_family = AF_INET;
     addr->sin_port = htons((u_short)SNMP_PORT);
@@ -82,8 +97,9 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
 	if (port != 0) {
             ep_str.port = port;
 	} else if (default_target != NULL) {
-	    netsnmp_sockaddr_in2(addr, default_target, NULL);
-            strlcpy(ep_str.addr, inet_ntoa(addr->sin_addr), sizeof(ep_str.addr));
+	    netsnmp_sockaddr_in3(ep, default_target, NULL);
+            strlcpy(ep_str.addr, inet_ntoa(addr->sin_addr),
+                    sizeof(ep_str.addr));
             ep_str.port = ntohs(addr->sin_port);
         }
     }
