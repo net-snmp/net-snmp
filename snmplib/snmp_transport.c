@@ -876,6 +876,11 @@ netsnmp_tdomain_transport(const char *str, int local,
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_TDOMAIN_TRANSPORT_OID
+/*
+ * The format of @dom and @o follows the TDomain and TAddress textual
+ * conventions from RFC 2579. For the actual TAddress format definitions,
+ * see e.g. SnmpUDPAddress in RFC 1906.
+ */
 netsnmp_transport *
 netsnmp_tdomain_transport_oid(const oid * dom,
                               size_t dom_len,
