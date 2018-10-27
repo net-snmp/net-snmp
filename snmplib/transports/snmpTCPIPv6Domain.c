@@ -168,11 +168,10 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
         free(str);
     }
 
+    t->sock = -1;
     t->data = malloc(sizeof(netsnmp_indexed_addr_pair));
-    if (t->data == NULL) {
-        netsnmp_transport_free(t);
-        return NULL;
-    }
+    if (t->data == NULL)
+        goto err;
     t->data_length = sizeof(netsnmp_indexed_addr_pair);
     memcpy(t->data, addr, sizeof(struct sockaddr_in6));
 
@@ -192,10 +191,8 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
 #endif
     if (!socket_initialized)
         t->sock = (int) socket(PF_INET6, SOCK_STREAM, 0);
-    if (t->sock < 0) {
-        netsnmp_transport_free(t);
-        return NULL;
-    }
+    if (t->sock < 0)
+        goto err;
 
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
@@ -222,11 +219,8 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
         t->local_length = sizeof(*addr);
         t->local = netsnmp_memdup(addr, sizeof(*addr));
-        if (!t->local) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
-        }
+        if (!t->local)
+            goto err;
 
         /*
          * We should set SO_REUSEADDR too.  
@@ -236,11 +230,8 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
 
         if (!socket_initialized) {
             rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
-            if (rc != 0) {
-                netsnmp_socketbase_close(t);
-                netsnmp_transport_free(t);
-                return NULL;
-            }
+            if (rc != 0)
+                goto err;
         }
 
         /*
@@ -259,11 +250,8 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
 
         if (!socket_initialized) {
             rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
-            if (rc != 0) {
-                netsnmp_socketbase_close(t);
-                netsnmp_transport_free(t);
-                return NULL;
-            }
+            if (rc != 0)
+                goto err;
         }
         
         /*
@@ -275,11 +263,8 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
     } else {
         t->remote_length = sizeof(*addr);
         t->remote = netsnmp_memdup(addr, sizeof(*addr));
-        if (!t->remote) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
-        }
+        if (!t->remote)
+            goto err;
 
         /*
          * This is a client-type session, so attempt to connect to the far
@@ -290,11 +275,8 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
 
         rc = connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
         DEBUGMSGTL(("netsnmp_tcp6", "connect returns %d\n", rc));
-        if (rc < 0) {
-            netsnmp_socketbase_close(t);
-            netsnmp_transport_free(t);
-            return NULL;
-        }
+        if (rc < 0)
+            goto err;
 
         /*
          * Allow user to override the send and receive buffers. Default is
@@ -319,6 +301,11 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
     t->f_get_taddr = netsnmp_ipv6_get_taddr;
 
     return t;
+
+err:
+    netsnmp_socketbase_close(t);
+    netsnmp_transport_free(t);
+    return NULL;
 }
 
 netsnmp_transport *
