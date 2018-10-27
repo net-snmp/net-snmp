@@ -31455,6 +31455,25 @@ And this can be very slow." >&2;}
     ;;
 esac
 
+#   Check whether struct in_pktinfo.ipi_spec_dst is available.
+#
+
+ac_fn_c_check_member "$LINENO" "struct in_pktinfo" "ipi_spec_dst" "ac_cv_member_struct_in_pktinfo_ipi_spec_dst" "
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+"
+if test "x$ac_cv_member_struct_in_pktinfo_ipi_spec_dst" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST 1
+_ACEOF
+
+
+fi
+
+
 #   Check whether IP_PKTINFO is usable.
 #
 
