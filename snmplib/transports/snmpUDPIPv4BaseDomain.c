@@ -208,16 +208,25 @@ netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
                     t->sock, str));
         free(str);
     }
+    rc = netsnmp_bindtodevice(t->sock, ep->iface);
+    if (rc != 0) {
+        DEBUGMSGTL(("netsnmp_udpbase", "failed to bind to iface %s: %s\n",
+                    ep->iface, strerror(errno)));
+        goto err;
+    }
     rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
     if ( rc != 0 ) {
         DEBUGMSGTL(("netsnmp_udpbase",
                     "failed to bind for clientaddr: %d %s\n",
                     errno, strerror(errno)));
-        netsnmp_socketbase_close(t);
-        return 1;
+        goto err;
     }
 
     return 0;
+
+err:
+    netsnmp_socketbase_close(t);
+    return 1;
 }
 
 void

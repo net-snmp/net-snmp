@@ -231,6 +231,12 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
         setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof(opt));
 
         if (!socket_initialized) {
+            rc = netsnmp_bindtodevice(t->sock, ep->iface);
+            if (rc != 0) {
+                DEBUGMSGTL(("netsnmp_tcp6", "failed to bind to iface %s: %s\n",
+                            ep->iface, strerror(errno)));
+                goto err;
+            }
             rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
             if (rc != 0)
                 goto err;

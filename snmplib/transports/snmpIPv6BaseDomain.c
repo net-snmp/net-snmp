@@ -309,6 +309,8 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
                     !netsnmp_resolve_v6_hostname(&addr->sin6_addr, ep_str.addr))
                     return 0;
             }
+            if (ep_str.iface[0])
+                strlcpy(ep->iface, ep_str.iface, sizeof(ep->iface));
             if (ep_str.port)
                 addr->sin6_port = htons(ep_str.port);
         }

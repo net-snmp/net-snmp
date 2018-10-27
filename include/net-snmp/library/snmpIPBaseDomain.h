@@ -26,9 +26,11 @@ struct netsnmp_ep {
  */
 struct netsnmp_ep_str {
     char     addr[64];
+    char     iface[16];
     uint16_t port;
 };
 
 int netsnmp_parse_ep_str(struct netsnmp_ep_str *ep_str, const char *endpoint);
+int netsnmp_bindtodevice(int fd, const char *iface);
 
 #endif /* _SNMPIPBASEDOMAIN_H_ */

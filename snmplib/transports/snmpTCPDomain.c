@@ -227,6 +227,13 @@ netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
 		   sizeof(opt));
 
         if (!socket_initialized) {
+            rc = netsnmp_bindtodevice(t->sock, ep->iface);
+            if (rc != 0) {
+                DEBUGMSGTL(("netsnmp_tcpbase",
+                            "failed to bind to iface %s: %s\n",
+                            ep->iface, strerror(errno)));
+                goto err;
+            }
             rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
             if (rc != 0)
                 goto err;
