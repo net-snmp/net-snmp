@@ -455,14 +455,16 @@ netsnmp_udp6_transport(const struct sockaddr_in6 *addr, int local)
 {
     if (!local) {
         const char *client_socket;
+
         client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                               NETSNMP_DS_LIB_CLIENT_ADDR);
         if (client_socket) {
             struct sockaddr_in6 client_addr;
-            if(!netsnmp_sockaddr_in6_2(&client_addr, client_socket, NULL)) {
-                return netsnmp_udp6_transport_with_source(addr, local,
-                                                          &client_addr);
-            }
+
+            if (!netsnmp_sockaddr_in6_2(&client_addr, client_socket, NULL))
+                return NULL;
+            return netsnmp_udp6_transport_with_source(addr, local,
+                                                      &client_addr);
         }
     }
     return netsnmp_udp6_transport_with_source(addr, local, NULL);
