@@ -257,8 +257,6 @@ int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
     if (srcip && srcip->s_addr != INADDR_ANY) {
         struct cmsghdr *cm;
 
-        DEBUGMSGTL(("udpbase:sendto", "sending from %s\n", inet_ntoa(*srcip)));
-
         memset(cmsg, 0, sizeof(cmsg));
 
         m.msg_control    = &cmsg;
@@ -284,10 +282,13 @@ int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
              * come from.
              */
             ipi.ipi_ifindex = 0;
-#if defined(cygwin)
-            ipi.ipi_addr.s_addr = srcip->s_addr;
-#else
+#ifdef HAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST
+            DEBUGMSGTL(("udpbase:sendto", "sending from %s\n",
+                        inet_ntoa(*srcip)));
             ipi.ipi_spec_dst.s_addr = srcip->s_addr;
+#else
+            DEBUGMSGTL(("udpbase:sendto", "ignoring from address %s\n",
+                        inet_ntoa(*srcip)));
 #endif
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
@@ -309,9 +310,7 @@ int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
 
             memset(&ipi, 0, sizeof(ipi));
             ipi.ipi_ifindex = if_index;
-#if defined(cygwin)
-            ipi.ipi_addr.s_addr = INADDR_ANY;
-#else
+#ifdef HAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST
             ipi.ipi_spec_dst.s_addr = INADDR_ANY;
 #endif
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));

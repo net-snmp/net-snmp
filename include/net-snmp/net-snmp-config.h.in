@@ -959,6 +959,9 @@
 /* Define to 1 if `if_xname' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_XNAME
 
+/* Define to 1 if `ipi_spec_dst' is a member of `struct in_pktinfo'. */
+#undef HAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST
+
 /* Define to 1 if `ip6s_exthdrtoolong ' is a member of `struct ip6stat'. */
 #undef HAVE_STRUCT_IP6STAT_IP6S_EXTHDRTOOLONG_
 

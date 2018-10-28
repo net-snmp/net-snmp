@@ -318,6 +318,15 @@ And this can be very slow.])
     ;;
 esac
 
+#   Check whether struct in_pktinfo.ipi_spec_dst is available.
+#
+
+AC_CHECK_MEMBERS([struct in_pktinfo.ipi_spec_dst], [], [], [
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+])
+
 #   Check whether IP_PKTINFO is usable.
 #
 
