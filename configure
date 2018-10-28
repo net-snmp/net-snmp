@@ -31462,6 +31462,40 @@ And this can be very slow." >&2;}
     ;;
 esac
 
+#   Check whether SO_BINDTODEVICE is available.
+#
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SO_BINDTODEVICE" >&5
+$as_echo_n "checking for SO_BINDTODEVICE... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int
+main ()
+{
+
+return SO_BINDTODEVICE
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+$as_echo "#define HAVE_SO_BINDTODEVICE 1" >>confdefs.h
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
 #   Check whether struct in_pktinfo.ipi_spec_dst is available.
 #
 
