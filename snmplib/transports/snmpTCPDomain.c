@@ -1,6 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <net-snmp/types.h>
+#include <net-snmp/library/snmpIPBaseDomain.h>
 #include <net-snmp/library/snmpTCPDomain.h>
 
 #include <stdio.h>
@@ -149,8 +150,9 @@ netsnmp_tcp_accept(netsnmp_transport *t)
  */
 
 netsnmp_transport *
-netsnmp_tcp_transport(const struct sockaddr_in *addr, int local)
+netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
 {
+    const struct sockaddr_in *addr = &ep->a.sin;
     netsnmp_transport *t = NULL;
     netsnmp_udp_addr_pair *addr_pair = NULL;
     int rc = 0;
@@ -225,6 +227,13 @@ netsnmp_tcp_transport(const struct sockaddr_in *addr, int local)
 		   sizeof(opt));
 
         if (!socket_initialized) {
+            rc = netsnmp_bindtodevice(t->sock, ep->iface);
+            if (rc != 0) {
+                DEBUGMSGTL(("netsnmp_tcpbase",
+                            "failed to bind to iface %s: %s\n",
+                            ep->iface, strerror(errno)));
+                goto err;
+            }
             rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
             if (rc != 0)
                 goto err;
@@ -308,10 +317,10 @@ netsnmp_transport *
 netsnmp_tcp_create_tstring(const char *str, int local,
 			   const char *default_target)
 {
-    struct sockaddr_in addr;
+    struct netsnmp_ep ep;
 
-    if (netsnmp_sockaddr_in2(&addr, str, default_target)) {
-        return netsnmp_tcp_transport(&addr, local);
+    if (netsnmp_sockaddr_in3(&ep, str, default_target)) {
+        return netsnmp_tcp_transport(&ep, local);
     } else {
         return NULL;
     }
@@ -322,10 +331,11 @@ netsnmp_tcp_create_tstring(const char *str, int local,
 netsnmp_transport *
 netsnmp_tcp_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_in sin;
+    struct netsnmp_ep ep;
 
-    if (netsnmp_ipv4_ostring_to_sockaddr(&sin, o, o_len))
-        return netsnmp_tcp_transport(&sin, local);
+    memset(&ep, 0, sizeof(ep));
+    if (netsnmp_ipv4_ostring_to_sockaddr(&ep.a.sin, o, o_len))
+        return netsnmp_tcp_transport(&ep, local);
     return NULL;
 }
 

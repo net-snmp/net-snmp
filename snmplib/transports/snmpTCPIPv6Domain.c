@@ -3,6 +3,7 @@
 #ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 
 #include <net-snmp/types.h>
+#include <net-snmp/library/snmpIPBaseDomain.h>
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 
 #include <stdio.h>
@@ -140,8 +141,9 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
  */
 
 netsnmp_transport *
-netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
+netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
 {
+    const struct sockaddr_in6 *addr = &ep->a.sin6;
     netsnmp_transport *t = NULL;
     int             rc = 0;
     int             socket_initialized = 0;
@@ -229,6 +231,12 @@ netsnmp_tcp6_transport(const struct sockaddr_in6 *addr, int local)
         setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof(opt));
 
         if (!socket_initialized) {
+            rc = netsnmp_bindtodevice(t->sock, ep->iface);
+            if (rc != 0) {
+                DEBUGMSGTL(("netsnmp_tcp6", "failed to bind to iface %s: %s\n",
+                            ep->iface, strerror(errno)));
+                goto err;
+            }
             rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
             if (rc != 0)
                 goto err;
@@ -312,10 +320,10 @@ netsnmp_transport *
 netsnmp_tcp6_create_tstring(const char *str, int local,
 			    const char *default_target)
 {
-    struct sockaddr_in6 addr;
+    struct netsnmp_ep ep;
 
-    if (netsnmp_sockaddr_in6_2(&addr, str, default_target)) {
-        return netsnmp_tcp6_transport(&addr, local);
+    if (netsnmp_sockaddr_in6_3(&ep, str, default_target)) {
+        return netsnmp_tcp6_transport(&ep, local);
     } else {
         return NULL;
     }
@@ -334,10 +342,11 @@ netsnmp_tcp6_create_tstring(const char *str, int local,
 netsnmp_transport *
 netsnmp_tcp6_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct sockaddr_in6 sin6;
+    struct netsnmp_ep ep;
 
-    if (netsnmp_ipv6_ostring_to_sockaddr(&sin6, o, o_len))
-        return netsnmp_tcp6_transport(&sin6, local);
+    memset(&ep, 0, sizeof(ep));
+    if (netsnmp_ipv6_ostring_to_sockaddr(&ep.a.sin6, o, o_len))
+        return netsnmp_tcp6_transport(&ep, local);
     return NULL;
 }
 

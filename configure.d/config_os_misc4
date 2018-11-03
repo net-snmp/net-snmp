@@ -318,6 +318,21 @@ And this can be very slow.])
     ;;
 esac
 
+#   Check whether SO_BINDTODEVICE is available.
+#
+
+AC_MSG_CHECKING([for SO_BINDTODEVICE])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+#include <sys/types.h>
+#include <sys/socket.h>
+], [
+return SO_BINDTODEVICE
+])],
+[AC_DEFINE([HAVE_SO_BINDTODEVICE], [1],
+  [Define to 1 if SO_BINDTODEVICE is available])
+ AC_MSG_RESULT([yes])],
+[AC_MSG_RESULT([no])])
+
 #   Check whether struct in_pktinfo.ipi_spec_dst is available.
 #
 
