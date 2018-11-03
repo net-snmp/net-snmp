@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-static int isnumber(const char *cp)
+static int netsnmp_isnumber(const char *cp)
 {
         while (isdigit((uint8_t)*cp))
             cp++;
@@ -35,7 +35,7 @@ int netsnmp_parse_ep_str(struct netsnmp_ep_str *ep_str, const char *endpoint)
         return 0;
 
     cp = dup;
-    if (isnumber(cp)) {
+    if (netsnmp_isnumber(cp)) {
         portstr = cp;
     } else {
         if (*cp == '[') {
@@ -61,7 +61,7 @@ int netsnmp_parse_ep_str(struct netsnmp_ep_str *ep_str, const char *endpoint)
         if (cp && *cp == ':') {
             *cp++ = '\0';
             portstr = cp;
-            if (!isnumber(cp))
+            if (!netsnmp_isnumber(cp))
                 goto invalid;
         } else if (cp && *cp) {
             goto invalid;
