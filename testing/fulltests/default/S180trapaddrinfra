@@ -30,6 +30,9 @@ INIT() {
 
     CONFIGTRAPD authcommunity log public
     CONFIGTRAPD agentxsocket /dev/null
+
+    # Tracing that helps understand what is being done
+    AGENT_FLAGS="$AGENT_FLAGS -Dtdomain,netsnmp_sockaddr,netsnmp_udp"
 }
 
 INITV4() {
