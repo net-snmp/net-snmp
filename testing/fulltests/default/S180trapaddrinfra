@@ -30,6 +30,9 @@ INIT() {
 
     CONFIGTRAPD authcommunity log public
     CONFIGTRAPD agentxsocket /dev/null
+
+    # Tracing that helps understand what is being done
+    AGENT_FLAGS="$AGENT_FLAGS -Dtdomain,netsnmp_sockaddr,netsnmp_udp"
 }
 
 INITV4() {
@@ -40,7 +43,7 @@ INITV4() {
 
 INITV6() {
     localhost=::1
-    udp=UDP6
+    udp=UDP/IPv6
     SNMP_TRANSPORT_SPEC=udp6
     INIT ipv6
 }
@@ -57,7 +60,9 @@ RUNTEST() {
     STOPTRAPD
 
     # Check that the coldstart trap packet was sourced from localhost
-    CHECKTRAPDCOUNT atleastone "${udp}: \[${localhost}\]:[0-9]*->"
+    # (IPv4 uses <addr>-><addr>; IPv6 uses just [UDP/IPv6: <addr>],
+    #  so match either "-" or "]" after the port.)
+    CHECKTRAPDCOUNT atleastone "${udp}: \[${localhost}\]:[0-9]*[]-]"
 
     FINISHED
 }
