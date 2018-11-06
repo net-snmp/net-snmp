@@ -55,6 +55,8 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 
 #include <net-snmp/net-snmp-includes.h>
 
+netsnmp_feature_require(sockaddr_size)
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
