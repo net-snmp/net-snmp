@@ -8,7 +8,7 @@ SKIPIF NETSNMP_DISABLE_SNMPV2C
 
 . ./S180trapaddrinfra
 
-INITV4
+INITV6
 
 CONFIGAGENT "[snmp] clientaddr $localhost"
 CONFIGAGENT trapsess -v 2c -c public ${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT}
