@@ -268,6 +268,7 @@ netsnmp_udp6_transport(const struct sockaddr_in6 *addr, int local)
         if (client_socket) {
             struct sockaddr_in6 client_addr;
             netsnmp_sockaddr_in6_2(&client_addr, client_socket, NULL);
+            client_addr.sin6_port = 0;
             rc = bind(t->sock, (struct sockaddr *)&client_addr,
                               sizeof(struct sockaddr_in6));
             if ( rc != 0 ) {
