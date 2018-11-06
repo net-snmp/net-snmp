@@ -174,6 +174,11 @@ _trap_version_incr(int version)
         case SNMP_VERSION_3:
             ++_v2_sessions;
             break;
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+        case AGENTX_VERSION_1:
+            /* agentx registers in sinks, no need to count */
+            break;
+#endif
         default:
             snmp_log(LOG_ERR, "unknown snmp version %d\n", version);
     }
@@ -201,6 +206,11 @@ _trap_version_decr(int version)
                 _v2_sessions = 0;
             }
             break;
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+        case AGENTX_VERSION_1:
+            /* agentx registers in sinks, no need to count */
+            break;
+#endif
         default:
             snmp_log(LOG_ERR, "unknown snmp version %d\n", version);
     }
