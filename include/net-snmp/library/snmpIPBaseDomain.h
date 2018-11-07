@@ -22,12 +22,14 @@ struct netsnmp_ep {
 /**
  * SNMP endpoint with the network name in ASCII format.
  * @addr: Network address or host name as an ASCII string.
- * @port: Port number in host byte format.
+ * @iface: Network interface, e.g. "lo".
+ * @port: Port number. "" means that no port number has been specified. "0"
+ *   means "bind to any port".
  */
 struct netsnmp_ep_str {
     char     addr[64];
     char     iface[16];
-    uint16_t port;
+    char     port[6];
 };
 
 int netsnmp_parse_ep_str(struct netsnmp_ep_str *ep_str, const char *endpoint);

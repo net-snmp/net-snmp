@@ -86,11 +86,10 @@ netsnmp_sockaddr_in3(struct netsnmp_ep *ep,
 {
     struct sockaddr_in *addr = &ep->a.sin;
     struct netsnmp_ep_str ep_str;
-    int ret;
+    int port, ret;
 
-    if (ep == NULL) {
+    if (!ep)
         return 0;
-    }
 
     DEBUGMSGTL(("netsnmp_sockaddr_in",
                 "addr %p, inpeername \"%s\", default_target \"%s\"\n",
@@ -103,47 +102,37 @@ netsnmp_sockaddr_in3(struct netsnmp_ep *ep,
     addr->sin_port = htons((u_short)SNMP_PORT);
 
     memset(&ep_str, 0, sizeof(ep_str));
-    {
-	int port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
-				      NETSNMP_DS_LIB_DEFAULT_PORT);
+    port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_DEFAULT_PORT);
+    if (port != 0)
+        snprintf(ep_str.port, sizeof(ep_str.port), "%d", port);
+    else if (default_target &&
+             !netsnmp_parse_ep_str(&ep_str, default_target))
+            snmp_log(LOG_ERR, "Invalid default target %s\n",
+                     default_target);
+    if (inpeername && *inpeername != '\0' &&
+        !netsnmp_parse_ep_str(&ep_str, inpeername))
+        return 0;
 
-	if (port != 0) {
-            ep_str.port = port;
-	} else if (default_target != NULL) {
-	    if (!netsnmp_sockaddr_in3(ep, default_target, NULL)) {
-                snmp_log(LOG_ERR, "Invalid default target %s\n",
-                         default_target);
-            }
-            strlcpy(ep_str.addr, inet_ntoa(addr->sin_addr),
-                    sizeof(ep_str.addr));
-            ep_str.port = ntohs(addr->sin_port);
+    if (ep_str.port[0])
+        addr->sin_port = htons(atoi(ep_str.port));
+    if (ep_str.iface[0])
+        strlcpy(ep->iface, ep_str.iface, sizeof(ep->iface));
+    if (strcmp(ep_str.addr, "255.255.255.255") == 0) {
+        /*
+         * The explicit broadcast address hack
+         */
+        DEBUGMSGTL(("netsnmp_sockaddr_in", "Explicit UDP broadcast\n"));
+        addr->sin_addr.s_addr = INADDR_NONE;
+    } else if (strcmp(ep_str.addr, "") != 0) {
+        ret = netsnmp_gethostbyname_v4(ep_str.addr, &addr->sin_addr.s_addr);
+        if (ret < 0) {
+            DEBUGMSGTL(("netsnmp_sockaddr_in",
+                        "couldn't resolve hostname \"%s\"\n", ep_str.addr));
+            return 0;
         }
-    }
-
-    if (inpeername && *inpeername != '\0') {
-        if (netsnmp_parse_ep_str(&ep_str, inpeername)) {
-            if (ep_str.port)
-                addr->sin_port = htons(ep_str.port);
-            if (ep_str.iface[0])
-                strlcpy(ep->iface, ep_str.iface, sizeof(ep->iface));
-            if (strcmp(ep_str.addr, "255.255.255.255") == 0 ) {
-                /*
-                 * The explicit broadcast address hack
-                 */
-                DEBUGMSGTL(("netsnmp_sockaddr_in", "Explicit UDP broadcast\n"));
-                addr->sin_addr.s_addr = INADDR_NONE;
-            } else {
-                ret = netsnmp_gethostbyname_v4(ep_str.addr,
-                                               &addr->sin_addr.s_addr);
-                if (ret < 0) {
-                    DEBUGMSGTL(("netsnmp_sockaddr_in",
-                                "couldn't resolve hostname\n"));
-                    return 0;
-                }
-                DEBUGMSGTL(("netsnmp_sockaddr_in",
-                            "hostname (resolved okay)\n"));
-            }
-        }
+        DEBUGMSGTL(("netsnmp_sockaddr_in",
+                    "hostname (resolved okay)\n"));
     }
 
     /*

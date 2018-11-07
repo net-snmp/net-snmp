@@ -295,7 +295,7 @@ netsnmp_udpipv4base_transport_with_source(const struct netsnmp_ep *ep,
     if (NULL == bind_addr)
         return t;
 
-    rc = netsnmp_udpipv4base_transport_bind(t, ep, flags);
+    rc = netsnmp_udpipv4base_transport_bind(t, bind_addr, flags);
     if (rc) {
         netsnmp_transport_free(t);
         t = NULL;
