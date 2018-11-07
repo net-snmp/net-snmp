@@ -37,16 +37,14 @@ INIT() {
 
 INITV4() {
     agent_addr=127.0.0.1
-    agent_port=`PROBE_FOR_PORT 1161`
-    SNMP_AGENT_ADDR=${agent_addr}:${agent_port}
+    SNMP_AGENT_ADDR=${agent_addr}
     snmptrapd_log_regex="UDP: \[${agent_addr}\]:[0-9]*->\["
     INIT
 }
 
 INITV6() {
     agent_addr=::1
-    agent_port=`PROBE_FOR_PORT 1161`
-    SNMP_AGENT_ADDR=[${agent_addr}]:${agent_port}
+    SNMP_AGENT_ADDR=[${agent_addr}]
     snmptrapd_log_regex="\[UDP/IPv6: \[${agent_addr}\]:[0-9]*\]"
     SNMP_TRANSPORT_SPEC=udp6
     INIT ipv6
