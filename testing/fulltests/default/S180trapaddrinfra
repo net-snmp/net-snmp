@@ -36,14 +36,16 @@ INIT() {
 }
 
 INITV4() {
-    localhost=127.0.0.1
-    udp=UDP
+    agent_addr=127.0.0.1
+    SNMP_AGENT_ADDR=${agent_addr}
+    snmptrapd_log_regex="UDP: \[${agent_addr}\]:[0-9]*->\["
     INIT
 }
 
 INITV6() {
-    localhost=::1
-    udp=UDP/IPv6
+    agent_addr=::1
+    SNMP_AGENT_ADDR=[${agent_addr}]
+    snmptrapd_log_regex="\[UDP/IPv6: \[${agent_addr}\]:[0-9]*\]"
     SNMP_TRANSPORT_SPEC=udp6
     INIT ipv6
 }
@@ -62,7 +64,7 @@ RUNTEST() {
     # Check that the coldstart trap packet was sourced from localhost
     # (IPv4 uses <addr>-><addr>; IPv6 uses just [UDP/IPv6: <addr>],
     #  so match either "-" or "]" after the port.)
-    CHECKTRAPDCOUNT atleastone "${udp}: \[${localhost}\]:[0-9]*[]-]"
+    CHECKTRAPDCOUNT atleastone "${snmptrapd_log_regex}"
 
     FINISHED
 }
