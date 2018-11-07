@@ -293,7 +293,7 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
 
         memset(&ep_str, 0, sizeof(ep_str));
         if (netsnmp_parse_ep_str(&ep_str, inpeername)) {
-            DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "split: [%s]:%d\n",
+            DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "split: [%s]:%s\n",
                         ep_str.addr, ep_str.port));
             if (ep_str.addr[0]) {
                 char *scope_id;
@@ -311,8 +311,8 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
             }
             if (ep_str.iface[0])
                 strlcpy(ep->iface, ep_str.iface, sizeof(ep->iface));
-            if (ep_str.port)
-                addr->sin6_port = htons(ep_str.port);
+            if (ep_str.port[0])
+                addr->sin6_port = htons(atoi(ep_str.port));
         }
     } else {
         DEBUGMSGTL(("netsnmp_sockaddr_in6", "NULL peername"));

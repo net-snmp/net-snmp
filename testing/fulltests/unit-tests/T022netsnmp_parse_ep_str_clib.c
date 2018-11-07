@@ -9,21 +9,22 @@ struct one_test_data {
 };
 
 static struct one_test_data test_data[] = {
-    { "9999",              1, { "",         "",   9999 } },
-    { ":777",              1, { "",         "",   777  } },
-    { "hostname:777",      1, { "hostname", "",   777  } },
-    { "hostname",          1, { "hostname", "",   0    } },
-    { "1.2.3.4",           1, { "1.2.3.4",  "",   0    } },
-    { "hostname@if",       1, { "hostname", "if", 0    } },
-    { "hostname@if:833",   1, { "hostname", "if", 833  } },
-    { "[hostname]@if:833", 1, { "hostname", "if", 833  } },
-    { "[hostname]?",       0, {                        } },
-    { "[hostname",         0, {                        } },
-    { "@if:844",           1, { "",         "if", 844  } },
-    { "[::1]",             1, { "::1",      "",   0    } },
-    { "[::1]:2",           1, { "::1",      "",   2    } },
-    { "[::1]@if:2",        1, { "::1",      "if", 2    } },
-    { "[::1]:2@if",        0, {                        } },
+    { "9999",              1, { "",         "",   "9999" } },
+    { ":777",              1, { "",         "",   "777"  } },
+    { "hostname:777",      1, { "hostname", "",   "777"  } },
+    { "hostname",          1, { "hostname", "",   ""     } },
+    { "1.2.3.4",           1, { "1.2.3.4",  "",   ""     } },
+    { "hostname@if",       1, { "hostname", "if", ""     } },
+    { "hostname@if:833",   1, { "hostname", "if", "833"  } },
+    { "[hostname]@if:833", 1, { "hostname", "if", "833"  } },
+    { "[hostname]?",       0, {                          } },
+    { "[hostname",         0, {                          } },
+    { "@if:844",           1, { "",         "if", "844"  } },
+    { "[::1]",             1, { "::1",      "",   ""     } },
+    { "[::1]:0",           1, { "::1",      "",   "0"    } },
+    { "[::1]:2",           1, { "::1",      "",   "2"    } },
+    { "[::1]@if:2",        1, { "::1",      "if", "2"    } },
+    { "[::1]:2@if",        0, {                          } },
 };
 
 SOCK_STARTUP;
@@ -46,8 +47,8 @@ SOCK_STARTUP;
             OKF(strcmp(ep_str.iface, p->expected.iface) == 0,
                 ("%s: network interface %s <> %s", p->in, ep_str.iface,
                  p->expected.iface));
-            OKF(ep_str.port == p->expected.port,
-                ("%s: port %d <> %d", p->in, ep_str.port, p->expected.port));
+            OKF(strcmp(ep_str.port, p->expected.port) == 0,
+                ("%s: port %s <> %s", p->in, ep_str.port, p->expected.port));
         }
     }
 }
