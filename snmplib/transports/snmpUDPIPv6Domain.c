@@ -466,20 +466,24 @@ netsnmp_udp6_transport_with_source(const struct netsnmp_ep *ep,
 netsnmp_transport *
 netsnmp_udp6_transport(const struct netsnmp_ep *ep, int local)
 {
-    if (!local) {
-        const char *client_socket;
+    struct netsnmp_ep client_ep;
+    const char *client_addr;
 
-        client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                              NETSNMP_DS_LIB_CLIENT_ADDR);
-        if (client_socket) {
-            struct netsnmp_ep client_addr;
+    memset(&client_ep, 0, sizeof(client_ep));
+    client_ep.a.sin6.sin6_family = AF_INET6;
 
-            if (!netsnmp_sockaddr_in6_3(&client_addr, client_socket, ":0"))
-                return NULL;
-            return netsnmp_udp6_transport_with_source(ep, local, &client_addr);
-        }
-    }
-    return netsnmp_udp6_transport_with_source(ep, local, NULL);
+    if (local)
+        goto out;
+
+    client_addr = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                        NETSNMP_DS_LIB_CLIENT_ADDR);
+    if (!client_addr)
+        goto out;
+
+    netsnmp_sockaddr_in6_3(&client_ep, client_addr, ":0");
+
+out:
+    return netsnmp_udp6_transport_with_source(ep, local, &client_ep);
 }
 
 
