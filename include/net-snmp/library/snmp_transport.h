@@ -114,7 +114,6 @@ typedef struct netsnmp_tmStateReference_s {
 } netsnmp_tmStateReference;
 
 #define NETSNMP_TSPEC_LOCAL                     0x01 /* 1=server, 0=client */
-#define NETSNMP_TSPEC_SHARED                    0x02
 #define NETSNMP_TSPEC_NO_DFTL_CLIENT_ADDR       0x04
 
 struct netsnmp_container_s; /* forward decl */
