@@ -313,11 +313,6 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
                 strlcpy(ep->iface, ep_str.iface, sizeof(ep->iface));
             if (ep_str.port[0])
                 addr->sin6_port = htons(atoi(ep_str.port));
-        } else {
-            /* special case for IPv6: the whole thing is just an IPv6 address
-             * with no decoration, port, interface, anything */
-            if (!inet_pton(AF_INET6, inpeername, &addr->sin6_addr))
-                return 0;
         }
     } else {
         DEBUGMSGTL(("netsnmp_sockaddr_in6", "NULL peername"));
