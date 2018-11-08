@@ -8,9 +8,12 @@
 
 static int netsnmp_isnumber(const char *cp)
 {
-        while (isdigit((uint8_t)*cp))
-            cp++;
-        return *cp == '\0';
+    if (!*cp)
+        return 0;
+
+    while (isdigit((uint8_t)*cp))
+        cp++;
+    return *cp == '\0';
 }
 
 /**
