@@ -335,11 +335,6 @@ netsnmp_udpipv4base_tspec_transport(netsnmp_tdomain_spec *tspec)
             return NULL;
         return netsnmp_udpipv4base_transport_with_source(&addr, local,
                                                          &src_addr);
-     } else {
-        /** if no source and we do not want any default client address */
-        if (tspec->flags & NETSNMP_TSPEC_NO_DFTL_CLIENT_ADDR)
-            return netsnmp_udpipv4base_transport_with_source(&addr, local,
-                                                             NULL);
     }
 
     /** no source and default client address ok */
