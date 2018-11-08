@@ -263,11 +263,12 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
                        const char *inpeername, const char *default_target)
 {
     struct sockaddr_in6 *addr = &ep->a.sin6;
+    struct netsnmp_ep_str ep_str;
     char            debug_addr[INET6_ADDRSTRLEN];
+    int             port;
 
-    if (ep == NULL) {
+    if (!ep)
         return 0;
-    }
 
     DEBUGMSGTL(("netsnmp_sockaddr_in6",
 		"ep %p, peername \"%s\", default_target \"%s\"\n",
@@ -277,49 +278,38 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
     memset(ep, 0, sizeof(*ep));
     addr->sin6_family = AF_INET6;
     addr->sin6_addr = in6addr_any;
-    addr->sin6_port = htons((u_short)SNMP_PORT);
+    addr->sin6_port = htons(SNMP_PORT);
 
-    {
-        int port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
-                                      NETSNMP_DS_LIB_DEFAULT_PORT);
-        if (port != 0) {
-            addr->sin6_port = htons((u_short)port);
-        } else if (default_target != NULL) {
-            if (!netsnmp_sockaddr_in6_3(ep, default_target, NULL))
-                snmp_log(LOG_ERR, "Invalid default target %s\n",
-                         default_target);
-        }
-    }
+    memset(&ep_str, 0, sizeof(ep_str));
+    port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_DEFAULT_PORT);
+    if (port != 0)
+        snprintf(ep_str.port, sizeof(ep_str.port), "%d", port);
+    else if (default_target &&
+             !netsnmp_parse_ep_str(&ep_str, default_target))
+            snmp_log(LOG_ERR, "Invalid default target %s\n",
+                     default_target);
 
-    if (inpeername != NULL) {
-        struct netsnmp_ep_str ep_str;
-
-        memset(&ep_str, 0, sizeof(ep_str));
-        if (netsnmp_parse_ep_str(&ep_str, inpeername)) {
-            DEBUGMSGTL(("netsnmp_sockaddr_in6_2", "split: [%s]:%s\n",
-                        ep_str.addr, ep_str.port));
-            if (ep_str.addr[0]) {
-                char *scope_id;
-
-                scope_id = strchr(ep_str.addr, '%');
-                if (scope_id) {
-                    *scope_id = '0';
-#if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
-                    addr->sin6_scope_id = netsnmp_if_nametoindex(scope_id + 1);
-#endif
-                }
-                if (!inet_pton(AF_INET6, ep_str.addr, &addr->sin6_addr) &&
-                    !netsnmp_resolve_v6_hostname(&addr->sin6_addr, ep_str.addr))
-                    return 0;
-            }
-            if (ep_str.iface[0])
-                strlcpy(ep->iface, ep_str.iface, sizeof(ep->iface));
-            if (ep_str.port[0])
-                addr->sin6_port = htons(atoi(ep_str.port));
-        }
-    } else {
-        DEBUGMSGTL(("netsnmp_sockaddr_in6", "NULL peername"));
+    if (!inpeername || !netsnmp_parse_ep_str(&ep_str, inpeername))
         return 0;
+
+    if (ep_str.port[0])
+        addr->sin6_port = htons(atoi(ep_str.port));
+    if (ep_str.iface[0])
+        strlcpy(ep->iface, ep_str.iface, sizeof(ep->iface));
+    if (ep_str.addr[0]) {
+        char *scope_id;
+
+        scope_id = strchr(ep_str.addr, '%');
+        if (scope_id) {
+            *scope_id = '0';
+#if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
+            addr->sin6_scope_id = netsnmp_if_nametoindex(scope_id + 1);
+#endif
+        }
+        if (!inet_pton(AF_INET6, ep_str.addr, &addr->sin6_addr) &&
+            !netsnmp_resolve_v6_hostname(&addr->sin6_addr, ep_str.addr))
+            return 0;
     }
 
     DEBUGMSGTL(("netsnmp_sockaddr_in6", "return { AF_INET6, [%s]:%hu }\n",

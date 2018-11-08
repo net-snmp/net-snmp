@@ -8,16 +8,19 @@
 
 static int netsnmp_isnumber(const char *cp)
 {
-        while (isdigit((uint8_t)*cp))
-            cp++;
-        return *cp == '\0';
+    if (!*cp)
+        return 0;
+
+    while (isdigit((uint8_t)*cp))
+        cp++;
+    return *cp == '\0';
 }
 
 /**
  * Parse a Net-SNMP endpoint name.
  * @ep_str: Parsed endpoint name.
- * @endpoint: Endpoint specification in the format [<address>]:[<port>] or
- *   <port>.
+ * @endpoint: Endpoint specification in the format
+ *   <address>[@<iface>]:[<port>], <address>[@<iface>] or <port>.
  *
  * Only overwrite those fields of *@ep_str that have been set in
  * @endpoint. Returns 1 upon success and 0 upon failure.
@@ -47,11 +50,14 @@ int netsnmp_parse_ep_str(struct netsnmp_ep_str *ep_str, const char *endpoint)
             } else {
                 goto invalid;
             }
-        } else if (*cp != '@' && *cp != ':') {
+        } else if (*cp != '@' && (*cp != ':' || cp[1] == ':')) {
             addrstr = cp;
             cp = strchr(addrstr, '@');
-            if (!cp)
+            if (!cp) {
                 cp = strrchr(addrstr, ':');
+                if (cp && strchr(dup, ':') < cp)
+                    cp = NULL;
+            }
         }
         if (cp && *cp == '@') {
             *cp = '\0';

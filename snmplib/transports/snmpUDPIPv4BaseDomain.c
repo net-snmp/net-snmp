@@ -325,15 +325,10 @@ netsnmp_udpipv4base_tspec_transport(netsnmp_tdomain_spec *tspec)
         struct netsnmp_ep src_addr;
 
         /** get sockaddr from source */
-        if (!netsnmp_sockaddr_in3(&src_addr, tspec->source, NULL))
+        if (!netsnmp_sockaddr_in3(&src_addr, tspec->source, ":0"))
             return NULL;
         return netsnmp_udpipv4base_transport_with_source(&addr, local,
                                                          &src_addr);
-     } else {
-        /** if no source and we do not want any default client address */
-        if (tspec->flags & NETSNMP_TSPEC_NO_DFTL_CLIENT_ADDR)
-            return netsnmp_udpipv4base_transport_with_source(&addr, local,
-                                                             NULL);
     }
 
     /** no source and default client address ok */
@@ -341,49 +336,29 @@ netsnmp_udpipv4base_tspec_transport(netsnmp_tdomain_spec *tspec)
 }
 
 netsnmp_transport *
-netsnmp_udpipv4base_transport(const struct netsnmp_ep *ep,
-                              int local)
+netsnmp_udpipv4base_transport(const struct netsnmp_ep *ep, int local)
 {
-    if (!local) {
-        /*
-         * This is a client session.  If we've been given a
-         * client address to send from, then bind to that.
-         * Otherwise the send will use "something sensible".
-         */
-        const char *client_socket;
-        client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                              NETSNMP_DS_LIB_CLIENT_ADDR);
-        if (client_socket) {
-            struct netsnmp_ep client_addr;
-            char *client_address = NETSNMP_REMOVE_CONST(char *,client_socket);
-            int have_port, rc;
-            int uses_port =
-                netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+    struct netsnmp_ep client_ep;
+    const char *client_addr;
+    int uses_port;
+
+    memset(&client_ep, 0, sizeof(client_ep));
+    client_ep.a.sin.sin_family = AF_INET;
+
+    if (local)
+        goto out;
+
+    client_addr = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                        NETSNMP_DS_LIB_CLIENT_ADDR);
+    if (!client_addr)
+        goto out;
+
+    netsnmp_sockaddr_in3(&client_ep, client_addr, ":0");
+    uses_port = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_CLIENT_ADDR_USES_PORT);
-            have_port = (strchr(client_socket, ':') != NULL);
-            if ((uses_port == 1) && !have_port) {
-                /*
-                 * if NETSNMP_DS_LIB_CLIENT_ADDR expects a port but there
-                 *  is none specified then provide ephemeral one/
-                 */
-                client_address = malloc(strlen(client_socket) + 3);
-                if (client_address == NULL) {
-                    return NULL;
-                }
-                strcpy(client_address, client_socket);
-                strcat(client_address, ":0");
-                have_port = 1;
-            }
-            rc = netsnmp_sockaddr_in3(&client_addr, client_socket, NULL);
-            if (client_address != client_socket)
-                free(client_address);
-            if(rc) {
-                if (!uses_port || !have_port) /* if port isn't from string, */
-                    client_addr.a.sin.sin_port = 0; /* ... clear it */
-                return netsnmp_udpipv4base_transport_with_source(ep, local,
-                                                                 &client_addr);
-            }
-        }
-    }
-    return netsnmp_udpipv4base_transport_with_source(ep, local, NULL);
+    if (!uses_port)
+        client_ep.a.sin.sin_port = 0;
+
+out:
+    return netsnmp_udpipv4base_transport_with_source(ep, local, &client_ep);
 }
