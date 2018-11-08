@@ -132,7 +132,8 @@ This value is also used by \fBsnmpd\fR when generating notifications.
 .IP "clientaddrUsesPort no"
 specifies, if clientaddr option contains a port number. Set this option
 to "yes", if clientaddr contains a port number and this port should
-be used for sending outgoing SNMP requests.
+be used for sending outgoing SNMP requests. This option only affects
+IPv4 client addresses and is ignored for IPv6 client addresses.
 .IP "clientRecvBuf INTEGER"
 specifies the desired size of the buffer to be used when receiving
 responses to SNMP requests.
