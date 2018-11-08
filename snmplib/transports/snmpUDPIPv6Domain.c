@@ -396,7 +396,7 @@ netsnmp_udpipv6base_tspec_transport(netsnmp_tdomain_spec *tspec)
         struct netsnmp_ep src_addr;
 
         /** get sockaddr from source */
-        if (!netsnmp_sockaddr_in6_3(&src_addr, tspec->source, NULL))
+        if (!netsnmp_sockaddr_in6_3(&src_addr, tspec->source, ":0"))
             return NULL;
         return netsnmp_udp6_transport_with_source(&ep, local, &src_addr);
      } else {
@@ -478,7 +478,7 @@ netsnmp_udp6_transport(const struct netsnmp_ep *ep, int local)
         if (client_socket) {
             struct netsnmp_ep client_addr;
 
-            if (!netsnmp_sockaddr_in6_3(&client_addr, client_socket, NULL))
+            if (!netsnmp_sockaddr_in6_3(&client_addr, client_socket, ":0"))
                 return NULL;
             return netsnmp_udp6_transport_with_source(ep, local, &client_addr);
         }

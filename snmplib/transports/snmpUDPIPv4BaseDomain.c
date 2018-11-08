@@ -331,7 +331,7 @@ netsnmp_udpipv4base_tspec_transport(netsnmp_tdomain_spec *tspec)
         struct netsnmp_ep src_addr;
 
         /** get sockaddr from source */
-        if (!netsnmp_sockaddr_in3(&src_addr, tspec->source, NULL))
+        if (!netsnmp_sockaddr_in3(&src_addr, tspec->source, ":0"))
             return NULL;
         return netsnmp_udpipv4base_transport_with_source(&addr, local,
                                                          &src_addr);
