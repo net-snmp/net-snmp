@@ -475,7 +475,8 @@ netsnmp_udp6_transport(const struct netsnmp_ep *ep, int local)
     if (!client_addr)
         goto out;
 
-    netsnmp_sockaddr_in6_3(&client_ep, client_addr, ":0");
+    if (netsnmp_sockaddr_in6_3(&client_ep, client_addr, ":0") < 0)
+        snmp_log(LOG_ERR, "Parsing clientaddr %s failed\n", client_addr);
 
 out:
     return netsnmp_udp6_transport_with_source(ep, local, &client_ep);
