@@ -4,6 +4,7 @@
 #include <net-snmp/agent/snmp_vars.h>
 #define DKTYPENAMES
 #include <sys/disklabel.h>
+#include <sys/disk.h>
 #include "../hr_disk.h"
 
 static struct disklabel HRD_info;
@@ -14,13 +15,14 @@ void init_hr_disk_entries(void)
     Add_HR_Disk_entry("/dev/ad%ds%d%c", 0, 1, 1, 4, "/dev/ad%ds%d", 'a', 'h');
     Add_HR_Disk_entry("/dev/da%ds%d%c", 0, 1, 1, 4, "/dev/da%ds%d", 'a', 'h');
 #elif defined(freebsd3)
-    Add_HR_Disk_entry("/dev/wd%ds%d%c", 0, 1, 1, 4, "/dev/wd%ds%d", 'a',
-                      'h');
-    Add_HR_Disk_entry("/dev/sd%ds%d%c", 0, 1, 1, 4, "/dev/sd%ds%d", 'a',
-                      'h');
+    Add_HR_Disk_entry("/dev/wd%ds%d%c", 0, 1, 1, 4, "/dev/wd%ds%d", 'a', 'h');
+    Add_HR_Disk_entry("/dev/sd%ds%d%c", 0, 1, 1, 4, "/dev/sd%ds%d", 'a', 'h');
 #elif defined(freebsd2)
     Add_HR_Disk_entry("/dev/wd%d%c", -1, -1, 0, 3, "/dev/wd%d", 'a', 'h');
     Add_HR_Disk_entry("/dev/sd%d%c", -1, -1, 0, 3, "/dev/sd%d", 'a', 'h');
+#elif defined(netbsd6)
+    Add_HR_Disk_entry("/dev/wd%d%c", -1, -1, 0, 3, "/dev/rwd%da", 'a', 'h');
+    Add_HR_Disk_entry("/dev/sd%d%c", -1, -1, 0, 3, "/dev/rsd%da", 'a', 'h');
 #elif defined(netbsd1)
     Add_HR_Disk_entry("/dev/wd%d%c", -1, -1, 0, 3, "/dev/wd%dc", 'a', 'h');
     Add_HR_Disk_entry("/dev/sd%d%c", -1, -1, 0, 3, "/dev/sd%dc", 'a', 'h');
@@ -54,6 +56,8 @@ int Query_Disk(int fd, const char *devfull)
 #elif defined(DIOCGDINFO)
     return ioctl(fd, DIOCGDINFO, &HRD_info);
 #else
+#error No way to query_Disk
+    DEBUGMSGTL(("host/hr_disk_bsd", "No way to Query_Disk\n"));
     return -1;
 #endif
 }
