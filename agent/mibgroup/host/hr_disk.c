@@ -59,7 +59,9 @@
 #if HAVE_SYS_DISKLABEL_H
 #define DKTYPENAMES
 #include <sys/disklabel.h>
+#ifndef dragonfly
 #include <sys/disk.h>
+#endif
 #endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
