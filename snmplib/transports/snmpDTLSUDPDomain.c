@@ -821,7 +821,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         DEBUGMSGTL(("9:dtlsudp", "no decoded data from dtls\n"));
 
         if (SSL_get_error(tlsdata->ssl, rc) == SSL_ERROR_WANT_READ) {
-            DEBUGMSGTL(("9dtlsudp","here: want read!\n"));
+            DEBUGMSGTL(("9:dtlsudp", "ssl error want read\n"));
 
             /* see if we have buffered write date to send out first */
             if (cachep->write_cache) {

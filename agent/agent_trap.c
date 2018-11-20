@@ -1682,7 +1682,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
             cp = skip_token(cp);
             cp = copy_nword(cp, tmp, SPRINT_MAX_LEN);
             name = strdup(tmp);
-        } else if (strncmp(cp, "-tag", 5) == 0) {
+        } else if (strncmp(cp, "-tag", 4) == 0) {
             cp = skip_token(cp);
             cp = copy_nword(cp, tmp, SPRINT_MAX_LEN);
             tag = strdup(tmp);
@@ -1777,6 +1777,8 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
                                      ss->version, name, tag, profile);
 
   cleanup:
+    if (session.securityEngineIDLen > 0)
+        SNMP_FREE(session.securityEngineID);
     SNMP_FREE(clientaddr_save);
     SNMP_FREE(profile);
     SNMP_FREE(name);

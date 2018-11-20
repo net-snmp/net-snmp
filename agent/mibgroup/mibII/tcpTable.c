@@ -336,8 +336,8 @@ int
 TCP_Count_Connections( void ) {
 #if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST))
     tcpTable_load(NULL, NULL);
-    return tcp_estab;
 #endif
+    return tcp_estab;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS */
 
