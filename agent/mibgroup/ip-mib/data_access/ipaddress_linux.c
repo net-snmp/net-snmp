@@ -234,7 +234,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
 
 #define PROCFILE "/proc/net/if_inet6"
     if (!(in = fopen(PROCFILE, "r"))) {
-        snmp_log_perror("ipaddress_linux: could not open " PROCFILE);
+        NETSNMP_LOGONCE((LOG_ERR, "ipaddress_linux: could not open " PROCFILE));
         return -2;
     }
 
