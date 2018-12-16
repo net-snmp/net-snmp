@@ -13,10 +13,6 @@
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h> /* uintptr_t */
-#endif
-
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -92,9 +88,9 @@ extern          "C" {
  */
 #if defined(__GNUC__)
 #define NETSNMP_REMOVE_CONST(t, e)                                      \
-    (__extension__ ({ const t tmp = (e); (t)(uintptr_t)tmp; }))
+    (__extension__ ({ const t tmp = (e); (t)(size_t)tmp; }))
 #else
-#define NETSNMP_REMOVE_CONST(t, e) ((t)(uintptr_t)(e))
+#define NETSNMP_REMOVE_CONST(t, e) ((t)(size_t)(e))
 #endif
 
 

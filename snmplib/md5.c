@@ -49,6 +49,9 @@
 #ifndef NETSNMP_DISABLE_MD5
 
 #include <stdio.h>
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 #include <sys/types.h>
 #if HAVE_STRING_H
 #include <string.h>

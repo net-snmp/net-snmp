@@ -62,10 +62,6 @@ static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #define SS_FAMILY __ss_family
 #endif
 
-#if defined(darwin)
-#include <stdint.h> /* for uint8_t */
-#endif
-
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
@@ -719,7 +715,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                         const int jj = masklength % 8;
                         memset(mask.s6_addr, '\xff', j);
                         if (j < 16) {
-                            mask.s6_addr[j] = ((uint8_t)~0U << (8 - jj));
+                            mask.s6_addr[j] = (0xffu << (8 - jj));
                             memset(mask.s6_addr + j + 1, '\0', 15 - j);
                         }
                     } else {

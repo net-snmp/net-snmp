@@ -13,6 +13,9 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <errno.h>
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif

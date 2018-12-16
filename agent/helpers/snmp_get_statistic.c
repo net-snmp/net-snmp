@@ -9,6 +9,9 @@
  * distributed with the Net-SNMP package.
  */
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>

@@ -11,7 +11,7 @@ static int netsnmp_isnumber(const char *cp)
     if (!*cp)
         return 0;
 
-    while (isdigit((uint8_t)*cp))
+    while (isdigit((unsigned char)*cp))
         cp++;
     return *cp == '\0';
 }

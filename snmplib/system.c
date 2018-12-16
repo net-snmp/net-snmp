@@ -52,6 +52,9 @@ SOFTWARE.
 #include <ctype.h>
 #include <errno.h>
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 #if HAVE_IO_H
 #include <io.h>
 #endif

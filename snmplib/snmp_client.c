@@ -49,6 +49,9 @@ SOFTWARE.
 
 #include <stdio.h>
 #include <errno.h>
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

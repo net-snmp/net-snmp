@@ -22,6 +22,9 @@
 #include <net-snmp/net-snmp-features.h>
 
 #include <ctype.h>
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 #include <stdio.h>
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
