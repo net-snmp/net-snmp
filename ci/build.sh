@@ -13,9 +13,6 @@ if [ -z "$OSTYPE" ]; then
 fi
 case "$OSTYPE" in
     msys)
-	export CFLAGS="-I/c/mingw/msys/1.0/include"
-	export CPPFLAGS="$CFLAGS"
-	export LDFLAGS="-L/c/mingw/msys/1.0/lib"
 	;;
 esac
 "${scriptdir}"/net-snmp-configure master || exit $?
