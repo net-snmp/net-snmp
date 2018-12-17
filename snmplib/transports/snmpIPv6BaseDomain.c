@@ -78,7 +78,13 @@ netsnmp_if_nametoindex(const char *ifname)
 #if defined(WIN32)
     return atoi(ifname);
 #elif defined(HAVE_IF_NAMETOINDEX)
-    return if_nametoindex(ifname);
+    int res;
+
+    res = if_nametoindex(ifname);
+    if (res == 0)
+        res = atoi(ifname);
+
+    return res;
 #else
     return 0;
 #endif
@@ -302,19 +308,23 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
 
         scope_id = strchr(ep_str.addr, '%');
         if (scope_id) {
-            *scope_id = '0';
+            *scope_id = '\0';
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
             addr->sin6_scope_id = netsnmp_if_nametoindex(scope_id + 1);
 #endif
         }
         if (!inet_pton(AF_INET6, ep_str.addr, &addr->sin6_addr) &&
-            !netsnmp_resolve_v6_hostname(&addr->sin6_addr, ep_str.addr))
+            !netsnmp_resolve_v6_hostname(&addr->sin6_addr, ep_str.addr)) {
+            DEBUGMSGTL(("netsnmp_sockaddr_in6", "failed to parse %s\n",
+                        ep_str.addr));
             return 0;
+        }
     }
 
-    DEBUGMSGTL(("netsnmp_sockaddr_in6", "return { AF_INET6, [%s]:%hu }\n",
+    DEBUGMSGTL(("netsnmp_sockaddr_in6", "return { AF_INET6, [%s%%%d]:%hu }\n",
                 inet_ntop(AF_INET6, &addr->sin6_addr, debug_addr,
-                          sizeof(debug_addr)), ntohs(addr->sin6_port)));
+                          sizeof(debug_addr)), addr->sin6_scope_id,
+                ntohs(addr->sin6_port)));
     return 1;
 }
 

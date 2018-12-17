@@ -1,6 +1,11 @@
 /*
  *  Interface MIB architecture support
  */
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 

@@ -22,6 +22,9 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 #include <sys/types.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>

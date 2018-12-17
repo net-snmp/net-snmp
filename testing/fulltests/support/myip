@@ -5,10 +5,14 @@
 # actually matter, we will never send any data to it.
 # We use Google's public DNS server, since, it doesn't
 # matter.
+
+use strict;
+use warnings;
 use IO::Socket::IP;
 use Socket qw(inet_ntop);
-my $v6 = $ARGV[0] eq "ipv6";
-my $af, $dest, $noaddr;
+
+my $v6 = defined($ARGV[0]) && $ARGV[0] eq "ipv6";
+my ($af, $dest, $noaddr);
 if ($v6) {
     $af = AF_INET6;
     $dest = '2001:4860:4860::8888';
@@ -18,9 +22,23 @@ if ($v6) {
     $dest = '8.8.8.8';
     $noaddr = '0.0.0.0';
 }
-my $sock = IO::Socket::IP->new( Proto => 'udp', PeerPort => 53, PeerAddr => $dest );
-exit 1 if !defined( $sock );
-my $myip = inet_ntop( $af, $sock->sockaddr() );
-exit 1 if $myip eq $noaddr;
+my $sock = IO::Socket::IP->new(Proto => 'udp', PeerPort => 53,
+			       PeerAddr => $dest) or
+    die "Socket creation failed - $@";
+my $myip;
+if ($v6) {
+    my ($port, $ip6_address, $scope_id, $flowinfo) = \
+	unpack_sockaddr_in6 getsockname($sock);
+    my $sock2 = IO::Socket::IP->new(Domain => AF_INET6, Proto => 'udp');
+    my $i = 1;
+    while (1) {
+	bind($sock2, sockaddr_in6(0, $$ip6_address, $i)) && last;
+	$i++;
+    }
+    $myip = inet_ntop($af, $$ip6_address) . '%' . $i;
+} else {
+    $myip = inet_ntop( $af, $sock->sockaddr() );
+    exit 1 if $myip eq $noaddr;
+}
 print $myip, "\n";
 exit 0;

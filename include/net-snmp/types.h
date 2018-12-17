@@ -36,9 +36,6 @@
 # endif
 #endif
 
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 #include <sys/types.h>
 
 #if defined(WIN32) && !defined(cygwin)
