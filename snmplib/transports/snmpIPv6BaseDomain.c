@@ -78,7 +78,13 @@ netsnmp_if_nametoindex(const char *ifname)
 #if defined(WIN32)
     return atoi(ifname);
 #elif defined(HAVE_IF_NAMETOINDEX)
-    return if_nametoindex(ifname);
+    int res;
+
+    res = if_nametoindex(ifname);
+    if (res == 0)
+        res = atoi(ifname);
+
+    return res;
 #else
     return 0;
 #endif
@@ -302,7 +308,7 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
 
         scope_id = strchr(ep_str.addr, '%');
         if (scope_id) {
-            *scope_id = '0';
+            *scope_id = '\0';
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
             addr->sin6_scope_id = netsnmp_if_nametoindex(scope_id + 1);
 #endif
