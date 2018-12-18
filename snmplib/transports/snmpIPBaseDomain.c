@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 
 static int netsnmp_isnumber(const char *cp)
 {
