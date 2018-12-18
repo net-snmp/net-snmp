@@ -323,7 +323,7 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
 
     DEBUGMSGTL(("netsnmp_sockaddr_in6", "return { AF_INET6, [%s%%%d]:%hu }\n",
                 inet_ntop(AF_INET6, &addr->sin6_addr, debug_addr,
-                          sizeof(debug_addr)), addr->sin6_scope_id,
+                          sizeof(debug_addr)), (int)addr->sin6_scope_id,
                 ntohs(addr->sin6_port)));
     return 1;
 }
