@@ -863,7 +863,7 @@ var_ifv6Entry(register struct variable * vp,
         p = if_getname(interface);
         if (p) {
             *var_len = strlen(p);
-            return p;
+            return (u_char *)p;
         }
         break;
     case IPV6IFLOWLAYER:
