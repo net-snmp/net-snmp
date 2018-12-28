@@ -30,6 +30,9 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_NET_IF_H
+#include <net/if.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -244,6 +247,8 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
     struct msghdr m = { NULL };
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
     int           rc;
+    char          iface[IFNAMSIZ];
+    socklen_t     ifacelen = IFNAMSIZ;
 
     iov.iov_base = NETSNMP_REMOVE_CONST(void *, data);
     iov.iov_len  = len;
@@ -257,6 +262,7 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
     if (srcip && srcip->s_addr != INADDR_ANY) {
         struct cmsghdr *cm;
         struct in_pktinfo ipi;
+        int use_sendto = FALSE;
 
         memset(cmsg, 0, sizeof(cmsg));
 
@@ -271,15 +277,28 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
         cm->cmsg_type = IP_PKTINFO;
 
         memset(&ipi, 0, sizeof(ipi));
+#ifdef HAVE_SO_BINDTODEVICE
         /*
-         * Except in the case of responding
-         * to a broadcast, setting the ifindex
-         * when responding results in incorrect
-         * behavior of changing the source address
-         * that the manager sees the response
-         * come from.
+         * For asymmetric multihomed users, we only set ifindex to 0 to
+         * let kernel handle return if there was no iface bound to the
+         * socket.
          */
-        ipi.ipi_ifindex = 0;
+        if (getsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface,
+                       &ifacelen) != 0)  {
+            DEBUGMSGTL(("udpbase:sendto",
+                        "getsockopt SO_BINDTODEVICE failed: %s\n",
+                        strerror(errno)));
+        } else if (ifacelen == 0) {
+            DEBUGMSGTL(("udpbase:sendto",
+                        "sendto: SO_BINDTODEVICE not set\n"));
+        } else {
+            DEBUGMSGTL(("udpbase:sendto",
+                        "sendto: SO_BINDTODEVICE dev=%s using ifindex=%d\n",
+                        iface, if_index));
+            use_sendto = TRUE;
+        }
+#endif /* HAVE_SO_BINDTODEVICE */
+
 #ifdef HAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST
         DEBUGMSGTL(("udpbase:sendto", "sending from %s\n",
                     inet_ntoa(*srcip)));
@@ -290,7 +309,16 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
 #endif
         memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
 
-        rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+        /*
+         * For Linux and VRF, use sendto() instead of sendmsg(). Do not pass a
+         * cmsg with IP_PKTINFO set because that would override the bind to
+         * VRF which is set by 'vrf exec' command. That would break VRF.
+         */
+        if (use_sendto)
+            rc = sendto(fd, data, len, MSG_NOSIGNAL|MSG_DONTWAIT,
+                        remote, sizeof(struct sockaddr));
+        else
+            rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
         if (rc >= 0 || errno != EINVAL)
             return rc;
 
