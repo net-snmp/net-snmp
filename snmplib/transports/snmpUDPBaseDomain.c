@@ -256,6 +256,7 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
 
     if (srcip && srcip->s_addr != INADDR_ANY) {
         struct cmsghdr *cm;
+        struct in_pktinfo ipi;
 
         memset(cmsg, 0, sizeof(cmsg));
 
@@ -269,29 +270,25 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
         cm->cmsg_level = SOL_IP;
         cm->cmsg_type = IP_PKTINFO;
 
-        {
-            struct in_pktinfo ipi;
-
-            memset(&ipi, 0, sizeof(ipi));
-            /*
-             * Except in the case of responding
-             * to a broadcast, setting the ifindex
-             * when responding results in incorrect
-             * behavior of changing the source address
-             * that the manager sees the response
-             * come from.
-             */
-            ipi.ipi_ifindex = 0;
+        memset(&ipi, 0, sizeof(ipi));
+        /*
+         * Except in the case of responding
+         * to a broadcast, setting the ifindex
+         * when responding results in incorrect
+         * behavior of changing the source address
+         * that the manager sees the response
+         * come from.
+         */
+        ipi.ipi_ifindex = 0;
 #ifdef HAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST
-            DEBUGMSGTL(("udpbase:sendto", "sending from %s\n",
-                        inet_ntoa(*srcip)));
-            ipi.ipi_spec_dst.s_addr = srcip->s_addr;
+        DEBUGMSGTL(("udpbase:sendto", "sending from %s\n",
+                    inet_ntoa(*srcip)));
+        ipi.ipi_spec_dst.s_addr = srcip->s_addr;
 #else
-            DEBUGMSGTL(("udpbase:sendto", "ignoring from address %s\n",
-                        inet_ntoa(*srcip)));
+        DEBUGMSGTL(("udpbase:sendto", "ignoring from address %s\n",
+                    inet_ntoa(*srcip)));
 #endif
-            memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
-        }
+        memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
 
         rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
         if (rc >= 0 || errno != EINVAL)
