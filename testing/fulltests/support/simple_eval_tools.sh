@@ -690,7 +690,9 @@ FINISHED() {
 	    {
 		find "$SNMP_TMPDIR" -type f |
 		    while read -r f; do
-			head -n 256 "$f"; tail -n 256 "$f";
+			echo "==== $f"
+			head -n 256 "$f"
+			tail -n 256 "$f"
 		    done;
 	    } 1>&2
 	fi
