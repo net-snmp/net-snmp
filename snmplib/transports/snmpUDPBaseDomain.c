@@ -235,11 +235,11 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     return r;
 }
 
-int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
-                           const struct sockaddr *remote, const void *data,
-                           int len)
-{
 #if !defined(WIN32)
+int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
+                                int if_index, const struct sockaddr *remote,
+                                const void *data, int len)
+{
     struct iovec iov;
     struct msghdr m = { NULL };
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
@@ -330,7 +330,12 @@ int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
     }
 
     return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+}
 #else /* !defined(WIN32) */
+int netsnmp_udpbase_sendto_win32(int fd, const struct in_addr *srcip,
+                                 int if_index, const struct sockaddr *remote,
+                                 const void *data, int len)
+{
     WSABUF        wsabuf;
     WSAMSG        m;
     char          cmsg[WSA_CMSG_SPACE(sizeof(struct in_pktinfo))];
@@ -377,6 +382,17 @@ int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
     }
     rc = sendto(fd, data, len, 0, remote, sizeof(struct sockaddr));
     return rc;
+}
+#endif /* !defined(WIN32) */
+
+int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
+                           const struct sockaddr *remote, const void *data,
+                           int len)
+{
+#if !defined(WIN32)
+    return netsnmp_udpbase_sendto_unix(fd, srcip, if_index, remote, data, len);
+#else /* !defined(WIN32) */
+    return netsnmp_udpbase_sendto_win32(fd, srcip, if_index, remote, data, len);
 #endif /* !defined(WIN32) */
 }
 #endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */
