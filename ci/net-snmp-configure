@@ -11,24 +11,32 @@ if [ "${branch_name#master}" != "${branch_name}" ]; then
 elif [ "${branch_name#V5-7-}" != "${branch_name}" ]; then
   is_5_7_or_above="true"
 fi
-case "${OSTYPE}" in
-    linux*)
-        opensslver="$(
-                for p in openssl-devel libopenssl-devel libressl-devel; do
-	            rpm -q --qf '%{version}\n' $p 2>/dev/null;
-                done;
-	        dpkg-query --show -f '${Version}\n' libssl-dev 2>/dev/null;
-	        pacman -Q openssl 2>&1 | sed -n 's/^openssl[[:blank:]]*//p'
-            )";;
-    *)
-	opensslver=1.0;;
-esac
-opensshver="$({
-    rpm -q openssh-devel;
-    rpm -q libssh2-devel;
-    rpm -q libssh-devel; } 2>/dev/null |
-    sed -n 's/^.*ssh[0-9]*-devel-\([0-9a-z.]*\)-.*$/\1/p' | head -n1;
-    dpkg-query --show -f '${Version}\n' libssh2-1-dev 2>/dev/null)"
+if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
+    case "${OSTYPE}" in
+	linux*)
+	    opensslver="$(
+	    for p in openssl-devel libopenssl-devel libressl-devel; do
+	      rpm -q --qf '%{version}\n' $p 2>/dev/null |
+                grep -v 'not installed';
+            done;
+	    dpkg-query --show -f '${Version}\n' libssl-dev 2>/dev/null;
+	    pacman -Q openssl 2>&1 | sed -n 's/^openssl[[:blank:]]*//p')";;
+	*)
+	    opensslver=1.0;;
+	esac
+fi
+echo "opensslver=$opensslver"
+opensshver="$(for p in openssh-devel libssh2-devel libssh-devel; do
+                rpm -q --qf '%{version}\n' $p 2>/dev/null |
+                  grep -v 'not installed';
+              done |
+              head -n1;
+              for p in libopenssh2 libssh2-1-dev; do
+                dpkg-query --show -f '${Version}\n' $p 2>/dev/null;
+              done;
+              pacman -Q libssh2-devel 2>&1 |
+                sed -n 's/^libssh2-devel[[:blank:]]*//p')"
+echo "opensshver=$opensshver"
 
 options=()
 options+=(--enable-developer)
@@ -37,7 +45,6 @@ options+=("--prefix=/usr/local/net-snmp-${branch_name}")
 options+=("--with-cflags=$cflags")
 options+=(--with-defaults)
 transports=()
-[ "$opensshver" != "" ] && transports+=(SSH)
 # Mib names can be found as follows:
 # (cd agent/mibgroup &&
 # git grep -lE 'void[[:blank:]]*init_.*\(void\)|config_require\(' |
@@ -153,11 +160,7 @@ case "$(uname)" in
       export ENV_SEPARATOR=":"
       mibs+=(ucd-snmp/extensible)
       mibs+=(winExtDLL)
-      if [ -n "$APPVEYOR" ]; then
-          # On Appveyor building the Perl modules fails as follows:
-          # /usr/lib/perl5/5.26/i686-cygwin-threads-64int/CORE/reentr.h:104:26: fatal error: crypt.h: No such file or directory
-          options+=(--disable-embedded-perl --without-perl-modules)
-      fi
+      options+=(--disable-embedded-perl --without-perl-modules)
     ;;
   MINGW*|MSYS*)
       options+=(--disable-embedded-perl)
@@ -173,6 +176,7 @@ case "$(uname)" in
       # To do: figure out why snmpd crashes while initializing the TLS
       # transports.
       opensslver=""
+      opensshver=""
     ;;
   *)
     echo "Unknown OS $(uname)."
@@ -185,7 +189,6 @@ for o in "${options[@]}"; do
         with_openssl="${o#--with-openssl=}"
     fi
 done
-set -x
 if [ "$opensslver" != "" ] &&
 	grep -rqw BIO_dgram_get_peer "${with_openssl:-/usr}/include/openssl" 2>/dev/null
 then
@@ -195,7 +198,6 @@ then
 	    transports+=(TLSTCP)
         fi
 fi
-set +x
 if $is_5_8_or_above; then
     [ -e "${with_openssl:-/usr}/openssl/aes.h" ] &&
         [ -e "${with_openssl:-/usr}/openssl/evp.h" ] &&
@@ -222,8 +224,7 @@ case "$MODE" in
         exit 1;;
 esac
 
-set -x
-./configure "${options[@]}" --with-transports="${transports[*]}"	\
-            --with-security-modules="${security_modules[*]}"		\
+[ "$opensshver" != "" ] && transports+=(SSH)
+./configure "${options[@]}" --with-transports="${transports[*]}" \
+            --with-security-modules="${security_modules[*]}"	 \
 	    --with-mib-modules="${mibs[*]}" "$@"
-set +x
