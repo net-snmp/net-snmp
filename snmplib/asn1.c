@@ -174,6 +174,7 @@ SOFTWARE.
 #endif
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <stdio.h>
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
