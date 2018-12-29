@@ -60,10 +60,6 @@
 #define MSG_DONTWAIT 0
 #endif
 
-#ifndef  MSG_NOSIGNAL
-#define MSG_NOSIGNAL 0
-#endif
-
 void
 _netsnmp_udp_sockopt_set(int fd, int local)
 {
@@ -315,10 +311,10 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
          * VRF which is set by 'vrf exec' command. That would break VRF.
          */
         if (use_sendto)
-            rc = sendto(fd, data, len, MSG_NOSIGNAL|MSG_DONTWAIT,
-                        remote, sizeof(struct sockaddr));
+            rc = sendto(fd, data, len, MSG_DONTWAIT, remote,
+                        sizeof(struct sockaddr));
         else
-            rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+            rc = sendmsg(fd, &m, MSG_DONTWAIT);
         if (rc >= 0 || errno != EINVAL)
             return rc;
 
@@ -345,7 +341,7 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
         cm->cmsg_type = IP_SENDSRCADDR;
         memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
 #endif
-        rc = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+        rc = sendmsg(fd, &m, MSG_DONTWAIT);
         if (rc >= 0 || errno != EINVAL)
             return rc;
 
@@ -354,7 +350,7 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
         m.msg_controllen = 0;
     }
 
-    return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+    return sendmsg(fd, &m, MSG_DONTWAIT);
 }
 #else /* !defined(WIN32) */
 int netsnmp_udpbase_sendto_win32(int fd, const struct in_addr *srcip,
