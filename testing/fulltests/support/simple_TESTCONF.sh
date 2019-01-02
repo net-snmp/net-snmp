@@ -214,7 +214,7 @@ fi
 
 PROBE_FOR_PORT() {
     BASE_PORT=$1
-    MAX_RETRIES=10
+    MAX_RETRIES=30
     if test -x "$NETSTAT" ; then
         if test -z "$RANDOM"; then
             RANDOM=2
