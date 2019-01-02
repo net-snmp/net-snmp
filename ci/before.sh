@@ -13,3 +13,21 @@ case "${TRAVIS_OS_NAME}" in
 	    brew upgrade openssl
 	fi;;
 esac
+
+if [ -n "$CIRRUS_CI" ]; then
+    cat <<EOF >>/etc/hosts
+127.0.0.1 localhost
+::1 localhost ipv6-localhost ipv6-loopback
+EOF
+
+    pkg install -y bash
+    pkg install -y gawk
+    #pkg install -y krb5 krb5-appl krb5-devel
+    pkg install -y libssh2
+    pkg install -y p5-ExtUtils-MakeMaker
+    pkg install -y pkgconf
+    pkg install -y py27-setuptools
+    if [ ! -e /usr/bin/perl ]; then
+	ln -s /usr/local/bin/perl /usr/bin/perl
+    fi
+fi
