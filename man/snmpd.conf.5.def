@@ -974,7 +974,9 @@ Note that the event will only be triggered once, when the expression
 first matches.  This monitor entry will not fire again until the
 monitored condition first becomes false, and then matches again.
 NAME is an administrative name for this expression, and is used for
-indexing the \fCmteTriggerTable\fR (and related tables).
+indexing the \fCmteTriggerTable\fR (and related tables). Each monitor
+line must have a unique NAME. Monitor lines with a duplicate name are
+discarded and cause snmpd to log a duplicate index complaint.
 Note also that such monitors use an internal SNMPv3 request to retrieve
 the values being monitored (even if normal agent queries typically use
 SNMPv1 or SNMPv2c).  See the \fIiquerySecName\fP token described above.
