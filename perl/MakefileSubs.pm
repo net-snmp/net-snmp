@@ -18,7 +18,7 @@ sub NetSNMPGetOpts {
     $rootpath = "../" if (!$rootpath);
     $rootpath .= '/' if ($rootpath !~ /\/$/);
 
-    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} eq '')) {
+    if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
 
       # Grab command line options first.  Only used if environment variables are not set
       GetOptions("NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
@@ -70,9 +70,10 @@ sub NetSNMPGetOpts {
 	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
 	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'});
 
-	if (lc($ret{'insource'}) eq "true" && $ret{'nsconfig'} eq "") {
+	if (defined($ret{'insource'}) && lc($ret{'insource'}) eq "true" &&
+	    !defined($ret{'nsconfig'})) {
 	    $ret{'nsconfig'}="sh ROOTPATH../net-snmp-config";
-	} elsif ($ret{'nsconfig'} eq "") {
+	} elsif (!defined($ret{'nsconfig'})) {
 	    $ret{'nsconfig'}="net-snmp-config";
 	}
 
@@ -107,7 +108,7 @@ sub Check_Version
 {
   my $lib_version = shift;
 
-  if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} ne '')) {
+  if ($Config{'osname'} ne 'MSWin32') {
     my $foundversion = 0;
     return if ($ENV{'NETSNMP_DONT_CHECK_VERSION'});
     open(I,"<Makefile");

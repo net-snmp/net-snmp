@@ -52,12 +52,12 @@ sub TrapReceiverInitMakeParams {
 		 );
 
 
-    if ($ENV{'OSTYPE'} eq 'msys') {
+    if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
       $Params{'DEFINE'} = "-DMINGW_PERL";
     }
 
     my ($snmp_lib, $snmp_llib, $sep);
-    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} eq '')) {
+    if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
       $opts = NetSNMPGetOpts();	
       $Params{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
       $sep = '\\';
