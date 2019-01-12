@@ -52,9 +52,6 @@ auto_nlist_value(const char *string)
         }
     }
     if (*ptr == 0) {
-#if !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
-        static char *n_name = NULL;
-#endif
         *ptr = (struct autonlist *) malloc(sizeof(struct autonlist));
         memset(*ptr, 0, sizeof(struct autonlist));
         it = *ptr;
@@ -73,6 +70,8 @@ auto_nlist_value(const char *string)
         sprintf(__DECONST(char*, it->nl[0].n_name), "_%s", string);
 #else
         {
+            static char *n_name;
+
             free(n_name);
 
             n_name = malloc(strlen(string) + 2);
