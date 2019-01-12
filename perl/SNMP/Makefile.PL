@@ -28,12 +28,12 @@ sub SnmpInitMakeParams {
 		  realclean        => { FILES => 'host' },
 		  );
 
-    if ($ENV{'OSTYPE'} eq 'msys') {
+    if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
       $Params{'DEFINE'} = "-DMINGW_PERL";
     }
                                     
     my ($snmp_lib, $snmp_llib, $sep);
-    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} eq '')) {
+    if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
       $opts = NetSNMPGetOpts();	
       $Params{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
       $sep = '\\';
@@ -133,7 +133,7 @@ sub GetTestInfo {
     my ($mibdir, $snmpd, $snmptrapd);
 
         # Windows
-        if ($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} eq '') {
+        if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
           my $win32_snmpd_path = $ENV{'NET-SNMP-PATH'} . $sep . "bin";
           if (lc ($opts->{'insource'}) eq "true") {
             $mibdir = "../../mibs";
@@ -175,12 +175,12 @@ sub GetTestInfo {
 	    prompt("Unable to locate \"snmptrapd\". Please enter the path: ",
 		   $snmpd_path1);
 
-        if ($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} eq '') {
+        if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
           $snmpd = $snmpd . $sep . "snmpd.exe";
           $snmptrapd = $snmptrapd . $sep . "snmptrapd.exe";
         }
         else {
-          if ($ENV{'OSTYPE'} eq 'msys') {
+          if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
             $snmpd =~ s/snmpd$/snmpd.exe/;
             $snmptrapd =~ s/snmptrapd$/snmptrapd.exe/;
           }
