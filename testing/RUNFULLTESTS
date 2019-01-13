@@ -1,11 +1,12 @@
 #!/usr/bin/env perl
 
+use strict;
+use warnings;
 use Getopt::Long;
 #use Data::Dumper;
 use File::Basename;
 use File::Spec;
 use Cwd qw(abs_path);
-use strict;
 
 ########################################
 # Globals and Command Line options
@@ -71,7 +72,7 @@ if (!$ENV{'MIBDIRS'}) {
 }
 
 my $cfp_path = File::Spec->catfile(dirname(abs_path($0)), "check_for_pskill");
-my $rc = `$cfp_path`;
+my $rc = system($cfp_path);
 if ($rc != 0) {
     die "$cfp_path failed with error code $rc\n";
 }
@@ -177,6 +178,9 @@ sub decide_exec {
     # 1) Parse the $testfile argument.
     my ($dirname, $groupname, $basename, $app_extension, $file_extension) = 
       ($testfile =~ /([^\/]+)\/([^\/]+)\/([^\/]+)_([^\/_]+)\.*([^\/\.]*)$/);
+    if (!defined($app_extension)) {
+	return undef;
+    }
     $app_extension =~ s/$opts{'exeext'}\$//;
 
     # 2) we have a RUN_TYPE file in the same directory
