@@ -1,5 +1,7 @@
 package NetSNMPTestTransport;
 
+use strict;
+use warnings;
 use NetSNMPTest;
 use Test;
 use SNMP;
@@ -31,7 +33,7 @@ sub run_tests {
     ######################################################################
     # GET test
     if (ref($session) eq 'SNMP::Session') {
-	$value = $session->get('sysContact.0');
+	my $value = $session->get('sysContact.0');
 	ok($value, 'itworked');
     }
 

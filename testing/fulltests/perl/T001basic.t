@@ -2,6 +2,8 @@
 
 # HEADER Basic perl functionality to a UDP agent
 
+use strict;
+use warnings;
 use NetSNMPTest;
 use Test;
 use SNMP;
@@ -60,7 +62,7 @@ $value = $session->set($varbind);
 
 ok(($value == 0), 1, 'return value from set was a success');
 
-my $value = $session->get('sysLocation.0');
+$value = $session->get('sysLocation.0');
 
 ok($value, 'yep');
 

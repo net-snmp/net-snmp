@@ -2,6 +2,8 @@
 
 # HEADER Perl Unix Domain Socket Test
 
+use strict;
+use warnings;
 use NetSNMPTestTransport;
 
 my $test = new NetSNMPTestTransport(agentaddress => "bogus");
