@@ -197,6 +197,22 @@ sub decide_exec {
     return undef;
 }
 
+sub configured_with {
+    my ($opt) = @_;
+    my $cfglog = "$opts{'srcdir'}/config.log";
+
+    if (open my $fh, $cfglog) {
+	while (my $line = <$fh>) {
+	    if ($line =~ $opt) {
+		return 1;
+	    }
+	}
+    } else {
+	print "Failed to open $cfglog\n"
+    }
+    return 0;
+}
+
 sub gather_tests {
     my ( $groups, $regexp ) = @_;
     my @groups;
@@ -224,6 +240,12 @@ sub gather_tests {
 
 	if (! -d "$opts{'srcdir'}/testing/$opts{'master-directory'}/$group") {
 	    ERROR("group '$group' is not a directory under '$opts{'srcdir'}/testing/$opts{'master-directory'}'; ignoring\n");
+	    next;
+	}
+
+	if (($group eq 'perl' && !configured_with('with-perl-modules')) ||
+	    ($group eq 'python' && !configured_with('with-python-modules'))) {
+	    DEBUG("Skipping group $group\n");
 	    next;
 	}
 
