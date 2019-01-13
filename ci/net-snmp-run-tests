@@ -10,7 +10,7 @@ make -s &&
 (
       export PATH="$PWD/agent/.libs:$PWD/apps/.libs:$PWD:$PATH" &&
       export LD_LIBRARY_PATH="$(find . -name '*.so' | grep -v NetSNMP/agent/default_store | sed 's,^\./,'"$PWD/"',;s,/[^/]*$,,' | sort -u | tr '\n' :)" &&
-      export PERL5LIB="$(find perl -name '*.pm' | sed 's,^,'"$PWD/"',;s,/[^/]*$,,' | sort -u | tr '\n' :)" &&
+      export PERL5LIB="$(find perl testing -name '*.pm' | sed 's,^,'"$PWD/"',;s,/[^/]*$,,' | sort -u | tr '\n' :)" &&
       cd testing &&
       if [ -e RUNFULLTESTS ] &&
 	     perl -e 'require TAP::Harness;' >/dev/null 2>&1; then
