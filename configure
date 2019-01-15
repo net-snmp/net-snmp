@@ -13923,7 +13923,7 @@ fi
       hardcode_shlibpath_var=no
       ;;
 
-    freebsd1*)
+    freebsd1.*)
       ld_shlibs=no
       ;;
 
