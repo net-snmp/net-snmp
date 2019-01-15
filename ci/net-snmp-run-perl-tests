@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # See also the output of the following command:
 # find -name '*.so' | sed 's/^\.\///;s/\/[^\/]*$//' | sort -u

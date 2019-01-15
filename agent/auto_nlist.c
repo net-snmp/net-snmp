@@ -52,9 +52,6 @@ auto_nlist_value(const char *string)
         }
     }
     if (*ptr == 0) {
-#if !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
-        static char *n_name = NULL;
-#endif
         *ptr = (struct autonlist *) malloc(sizeof(struct autonlist));
         memset(*ptr, 0, sizeof(struct autonlist));
         it = *ptr;
@@ -72,17 +69,19 @@ auto_nlist_value(const char *string)
 #elif defined(freebsd9)
         sprintf(__DECONST(char*, it->nl[0].n_name), "_%s", string);
 #else
+        {
+            static char *n_name;
 
-        if (n_name != NULL)
             free(n_name);
 
-        n_name = malloc(strlen(string) + 2);
-        if (n_name == NULL) {
-            snmp_log(LOG_ERR, "nlist err: failed to allocate memory");
-            return (-1);
+            n_name = malloc(strlen(string) + 2);
+            if (n_name == NULL) {
+                snmp_log(LOG_ERR, "nlist err: failed to allocate memory");
+                return -1;
+            }
+            snprintf(n_name, strlen(string) + 2, "_%s", string);
+            it->nl[0].n_name = n_name;
         }
-        snprintf(n_name, strlen(string) + 2, "_%s", string);
-        it->nl[0].n_name = (const char*)n_name;
 #endif
         it->nl[1].n_name = 0;
         init_nlist(it->nl);

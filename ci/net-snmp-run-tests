@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 scriptdir="$(dirname "$0")"
 
-killall snmpd snmptrapd >&/dev/null
+killall snmpd snmptrapd >/dev/null 2>&1
 
 export SNMP_VERBOSE=1 &&
 export SNMP_SAVE_TMPDIR=1 &&
@@ -10,12 +10,18 @@ make -s &&
 (
       export PATH="$PWD/agent/.libs:$PWD/apps/.libs:$PWD:$PATH" &&
       export LD_LIBRARY_PATH="$(find . -name '*.so' | grep -v NetSNMP/agent/default_store | sed 's,^\./,'"$PWD/"',;s,/[^/]*$,,' | sort -u | tr '\n' :)" &&
-      export PERL5LIB="$(find perl -name '*.pm' | sed 's,^,'"$PWD/"',;s,/[^/]*$,,' | sort -u | tr '\n' :)" &&
+      export PERL5LIB="$(find perl testing -name '*.pm' | sed 's,^,'"$PWD/"',;s,/[^/]*$,,' | sort -u | tr '\n' :)" &&
       cd testing &&
       if [ -e RUNFULLTESTS ] &&
 	     perl -e 'require TAP::Harness;' >/dev/null 2>&1; then
-          if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
+          if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
               for g in default snmpv3 unit-tests; do
+                  echo "==== Test group $g ===="
+	          ./RUNFULLTESTS -g $g || exit $?
+                  echo "==== End of test group $g ===="
+              done
+	  elif [ -n "${CIRRUS_CI}" ]; then
+              for g in default snmpv3 transports unit-tests; do
                   echo "==== Test group $g ===="
 	          ./RUNFULLTESTS -g $g || exit $?
                   echo "==== End of test group $g ===="
@@ -27,10 +33,12 @@ make -s &&
 	  make -s test
       fi &&
       cd .. &&
-      if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
+      if grep -q with-perl-modules config.log &&
+	      [ "${TRAVIS_OS_NAME}" != "osx" ]; then
           "$scriptdir/net-snmp-run-perl-tests"
       fi
 ) &&
-if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
+if grep -q with-python-modules config.log &&
+	[ "${TRAVIS_OS_NAME}" != "osx" ]; then
     "$scriptdir/net-snmp-run-python-tests"
 fi
