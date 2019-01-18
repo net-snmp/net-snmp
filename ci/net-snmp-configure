@@ -12,8 +12,8 @@ elif [ "${branch_name#V5-7-}" != "${branch_name}" ]; then
   is_5_7_or_above="true"
 fi
 if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
-    case "${OSTYPE}" in
-	linux*)
+    case "$(uname)" in
+	Linux*|MSYS*|MINGW64*)
 	    opensslver="$(
 	    for p in openssl-devel libopenssl-devel libressl-devel; do
 	      rpm -q --qf '%{version}\n' $p 2>/dev/null |
@@ -191,21 +191,28 @@ case "$(uname)" in
       mibs+=(winExtDLL)
       options+=(--disable-embedded-perl --without-perl-modules)
     ;;
-  MINGW*|MSYS*)
+  MINGW32*)
       options+=(--disable-embedded-perl)
       mibs+=(snmp-notification-mib)
       mibs+=(ucd-snmp/dlmod)
       mibs+=(ucd-snmp/extensible)
       mibs+=(winExtDLL)
       options+=(--without-perl-modules)
-      #options+=(--with-mibdirs="C:/usr/share/snmp/mibs")
-      if [ -n "$APPVEYOR" ]; then
-          options+=("--build=x86_64-pc-mingw32")
-      fi
       # To do: figure out why snmpd crashes while initializing the TLS
       # transports.
       opensslver=""
       opensshver=""
+    ;;
+  MINGW64*|MSYS*)
+      options+=(--disable-embedded-perl)
+      mibs+=(snmp-notification-mib)
+      mibs+=(ucd-snmp/dlmod)
+      mibs+=(ucd-snmp/extensible)
+      mibs+=(winExtDLL)
+      options+=(--without-perl-modules)
+      if [ -n "$APPVEYOR" ]; then
+          options+=("--build=x86_64-pc-mingw32")
+      fi
     ;;
   *)
     echo "Unknown OS $(uname)."
