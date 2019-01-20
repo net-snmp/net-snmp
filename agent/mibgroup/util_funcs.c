@@ -295,9 +295,8 @@ get_exec_output(struct extensible *ex)
         return -1;
     }
     return (cfd);
-#else                           /* !HAVE_EXECV */
-#if defined(WIN32) && !defined(HAVE_EXECV)
-/* MSVC and MinGW.  Cygwin already works as it has execv and fork */
+#elif defined(HAVE__GET_OSFHANDLE) && defined(HAVE__OPEN_OSFHANDLE)
+    /* MSVC and MinGW32. Cygwin has execv() and fork(). */
     int         fd;   
     
     /* Reference:  MS tech note: 190351 */
@@ -399,16 +398,14 @@ get_exec_output(struct extensible *ex)
       return -1;
     }
     return fd;
-#endif                          /* WIN32 */
-#endif       /* HAVE_EXEC */
+#endif       /* HAVE_EXECV */
 #endif /* !defined(USING_UTILITIES_EXECUTE_MODULE) */
     return -1;
 }
 int
 get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
 {
-#if HAVE_EXECV
-#ifdef __uClinux__ /* HAVE uClinux */
+#if defined(HAVE_EXECV) && defined(__uClinux__)
     int in, out;
     char fifo_in_path[256];
     char fifo_out_path[256];
@@ -463,7 +460,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         setPerrorstatus("vfork");
         return 0;
     }
-#else /*HAVE x86*/
+#elif defined(HAVE_EXECV)
     int             fd[2][2], i, cnt;
     char            ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv,
         **aptr;
@@ -543,10 +540,8 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         *fdOut = fd[0][1];
         return (1);             /* We are returning 0 for error... */
     }
-#endif				/* uClinux or x86 */
-#endif                          /* !HAVE_EXECV */
-#if defined(WIN32) && !defined (mingw32) && !defined(HAVE_EXECV)
-/* MSVC (MinGW not working but should use this code).  Cygwin already works as it has execv and fork */
+#elif defined(HAVE__GET_OSFHANDLE) && defined(HAVE__OPEN_OSFHANDLE)
+    /* MSVC and MinGW32. Cygwin has execv() and fork(). */
     /* Reference:  MS tech note: 190351 */
     HANDLE hInputWriteTmp, hInputRead, hInputWrite = NULL;
     HANDLE hOutputReadTmp, hOutputRead, hOutputWrite = NULL;

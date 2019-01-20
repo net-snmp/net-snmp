@@ -156,6 +156,21 @@
 /* Use dmalloc to do malloc debugging? */
 /* #undef HAVE_DMALLOC_H */
 
+/* Define if _beginthreadex() is defined in <process.h> */
+#define HAVE__BEGINTHREADEX 1
+
+/* Define if _cputs() is defined in <conio.h> */
+#define HAVE__CPUTS 1
+
+/* Define if _getch() is defined in <conio.h> */
+#define HAVE__GETCH 1
+
+/* Define if _get_osfhandle() is defined in <io.h> */
+#define HAVE__GET_OSFHANDLE 1
+
+/* Define if _open_osfhandle() is defined in <io.h> */
+#define HAVE__OPEN_OSFHANDLE 1
+
 /* location of UNIX kernel */
 #define KERNEL_LOC "unknown"
 

@@ -95,6 +95,49 @@ case x$with_socklib in
     ;;
 esac
 
+# Check for MSVC functions.
+AC_MSG_CHECKING([for _beginthreadex()])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+#include <stddef.h>
+#include <process.h>
+], [ _beginthreadex(NULL, 0, NULL, NULL, 0, NULL); ])],
+[AC_MSG_RESULT([yes])
+ AC_DEFINE([HAVE__BEGINTHREADEX], [1],
+           [Define if _beginthreadex() is defined in <process.h>])],
+[AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([for _cputs()])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <conio.h>],[ _cputs(0); ])],
+[AC_MSG_RESULT([yes])
+ AC_DEFINE([HAVE__CPUTS], [1],
+           [Define if _cputs() is defined in <conio.h>])],
+[AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([for _get_osfhandle()])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <io.h>],[ _get_osfhandle(0); ])],
+[AC_MSG_RESULT([yes])
+ AC_DEFINE([HAVE__GET_OSFHANDLE], [1],
+           [Define if _get_osfhandle() is defined in <io.h>])],
+[AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([for _getch()])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <conio.h>],[ return _getch(); ])],
+[AC_MSG_RESULT([yes])
+ AC_DEFINE([HAVE__GETCH], [1],
+           [Define if _getch() is defined in <conio.h>])],
+[AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([for _open_osfhandle()])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+#include <stddef.h>
+#include <io.h>
+], [ _open_osfhandle(NULL, 0); ])],
+[AC_MSG_RESULT([yes])
+ AC_DEFINE([HAVE__OPEN_OSFHANDLE], [1],
+           [Define if _open_osfhandle() is defined in <io.h>])],
+[AC_MSG_RESULT([no])])
+
+
 AC_CONFIG_LIBOBJ_DIR([snmplib])
 
 AC_REPLACE_FUNCS([getopt                                       ] dnl

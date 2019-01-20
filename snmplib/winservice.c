@@ -12,7 +12,7 @@
 #include <stdio.h>		/* sprintf() */
 #include <windows.h>
 #include <tchar.h>
-#include <process.h>		/* _beginthreadex() */
+#include <process.h>            /* _beginthreadex() */
 
 #include <net-snmp/library/winservice.h>
 
@@ -117,6 +117,26 @@ static BOOL ReportCurrentServiceStatus (VOID);
 
 VOID
 ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int quiet);
+
+#ifndef HAVE__BEGINTHREADEX
+static uintptr_t
+_beginthreadex(void *security, unsigned stack_size,
+               unsigned (__stdcall *start_address)(void *), void *arglist,
+               unsigned initflag, unsigned *thrdaddr)
+{
+    return (uintptr_t) CreateThread(security, stack_size,
+                                    (LPTHREAD_START_ROUTINE)start_address,
+                                    arglist, initflag, (LPDWORD)thrdaddr);
+}
+
+#if 0
+static void
+_endthreadex(unsigned retval)
+{
+    ExitThread(retval);
+}
+#endif
+#endif
 
     /*
      * To register as Windows Service with SCM(Service Control Manager)
