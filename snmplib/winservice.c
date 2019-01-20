@@ -3,11 +3,11 @@
 #ifdef WIN32
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/library/system.h>
 
 #include <stdlib.h>             /* calloc() */
 #include <stdio.h>              /* sprintf() */
 #include <windows.h>
-#include <tchar.h>
 #include <process.h>            /* _beginthreadex() */
 
 #include <net-snmp/library/winservice.h>
@@ -30,9 +30,6 @@ labelFIN:                                       \
 #endif                          /* mingw32 */
 
 
-#define CountOf(arr) ( sizeof(arr) / sizeof(arr[0]) )
-
-
 #if defined(WIN32) && defined(HAVE_WIN32_PLATFORM_SDK) && !defined(mingw32)
 #pragma comment(lib, "iphlpapi.lib")
 #endif
@@ -53,7 +50,7 @@ labelFIN:                                       \
  * This should be declared by the application, which wants to register as
  * windows service
  */
-extern LPTSTR   app_name_long;
+extern char    *app_name_long;
 
 /*
  * Declare global variable
@@ -72,7 +69,7 @@ static SERVICE_STATUS ServiceStatus;
 /*
  * Service Handle
  */
-static SERVICE_STATUS_HANDLE hServiceStatus = 0L;
+static SERVICE_STATUS_HANDLE hServiceStatus;
 
 /*
  * Service Table Entry
@@ -91,13 +88,13 @@ static HANDLE   hServiceThread = NULL;  /* Thread Handle */
  * Holds calling partys Function Entry point, that should start
  * when entering service mode
  */
-static INT      (*ServiceEntryPoint)(INT Argc, LPTSTR Argv[]) = 0L;
+static int      (*ServiceEntryPoint)(int Argc, char *Argv[]);
 
 /*
  * To hold Stop Function address, to be called when STOP request
  * received from the SCM
  */
-static VOID     (*StopFunction)(VOID) = 0L;
+static void     (*StopFunction)(void);
 
 
 /*
@@ -109,15 +106,15 @@ static BOOL     UpdateServiceStatus(DWORD dwStatus, DWORD dwErrorCode,
 /*
  * To Report current service status to SCM
  */
-static BOOL     ReportCurrentServiceStatus(VOID);
+static BOOL     ReportCurrentServiceStatus(void);
 
-VOID            ProcessError(WORD eventLogType, LPCTSTR pszMessage,
+void            ProcessError(WORD eventLogType, const char *pszMessage,
                              int useGetLastError, int quiet);
 
 #ifndef HAVE__BEGINTHREADEX
 static uintptr_t
 _beginthreadex(void *security, unsigned stack_size,
-               unsigned (__stdcall *start_address)(void *), void *arglist,
+               unsigned (__stdcall *start_address) (void *), void *arglist,
                unsigned initflag, unsigned *thrdaddr)
 {
     return (uintptr_t) CreateThread(security, stack_size,
@@ -140,18 +137,19 @@ _endthreadex(unsigned retval)
  * Service startup arguments
  */
 int
-RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
-                LPCTSTR lpszServiceDescription,
+RegisterService(const char *lpszServiceName,
+                const char *lpszServiceDisplayName,
+                const char *lpszServiceDescription,
                 InputParams *StartUpArg, int quiet)
 {                               /* Startup argument to the service */
-    TCHAR           szServicePath[MAX_PATH];    /* To hold module File name */
-    TCHAR           MsgErrorString[MAX_STR_SIZE];       /* Message or Error string */
-    TCHAR           szServiceCommand[MAX_PATH + 9];     /* Command to execute */
+    char            szServicePath[MAX_PATH];    /* To hold module File name */
+    char            MsgErrorString[MAX_STR_SIZE];       /* Message or Error string */
+    char            szServiceCommand[MAX_PATH + 9];     /* Command to execute */
     SC_HANDLE       hSCManager = NULL;
     SC_HANDLE       hService = NULL;
-    TCHAR           szRegAppLogKey[] =
-        _T("SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\");
-    TCHAR           szRegKey[512];
+    static const char szRegAppLogKey[] =
+        "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\";
+    char            szRegKey[512];
     HKEY            hKey = NULL;        /* Key to registry entry */
     HKEY            hParamKey = NULL;   /* To store startup parameters */
     DWORD           dwData;     /* Type of logging supported */
@@ -166,7 +164,7 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
         hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
         if (hSCManager == NULL) {
             ProcessError(EVENTLOG_ERROR_TYPE,
-                         _T("Can't open SCM (Service Control Manager)"), 1,
+                         "Can't open SCM (Service Control Manager)", 1,
                          quiet);
             exitStatus = SERVICE_ERROR_SCM_OPEN;
             LEAVE;
@@ -175,8 +173,8 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
         /*
          * Generate the command to be executed by the SCM
          */
-        _sntprintf(szServiceCommand, CountOf(szServiceCommand),
-                   _T("\"%s\" %s"), szServicePath, _T("-service"));
+        snprintf(szServiceCommand, sizeof(szServiceCommand),
+                 "\"%s\" %s", szServicePath, "-service");
 
         /*
          * Create the desired service
@@ -187,9 +185,9 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
                                  NULL,  /* account */
                                  NULL); /* password */
         if (hService == NULL) {
-            _sntprintf(MsgErrorString, CountOf(MsgErrorString),
-                       _T("%s %s"), _T("Can't create service"),
-                       lpszServiceDisplayName);
+            snprintf(MsgErrorString, sizeof(MsgErrorString),
+                     "%s %s", "Can't create service",
+                     lpszServiceDisplayName);
             ProcessError(EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
 
             exitStatus = SERVICE_ERROR_CREATE_SERVICE;
@@ -202,18 +200,18 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
         /*
          * Create registry Application event log key
          */
-        _tcscpy(szRegKey, szRegAppLogKey);
-        _tcscat(szRegKey, lpszServiceName);
+        snprintf(szRegKey, sizeof(szRegKey), "%s%s", szRegAppLogKey,
+                 lpszServiceName);
 
         /*
          * Create registry key
          */
         if (RegCreateKey(HKEY_LOCAL_MACHINE, szRegKey, &hKey) !=
             ERROR_SUCCESS) {
-            _sntprintf(MsgErrorString, CountOf(MsgErrorString),
-                       _T("%s %s"),
-                       _T("is unable to create registry entries"),
-                       lpszServiceDisplayName);
+            snprintf(MsgErrorString, sizeof(MsgErrorString),
+                     "%s %s",
+                     "is unable to create registry entries",
+                     lpszServiceDisplayName);
             ProcessError(EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
             exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
             LEAVE;
@@ -222,9 +220,9 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
         /*
          * Add Event ID message file name to the 'EventMessageFile' subkey
          */
-        RegSetValueEx(hKey, _T("EventMessageFile"), 0, REG_EXPAND_SZ,
-                      (CONST BYTE *) szServicePath,
-                      _tcslen(szServicePath) + sizeof(TCHAR));
+        RegSetValueEx(hKey, "EventMessageFile", 0, REG_EXPAND_SZ,
+                      (const void *) szServicePath,
+                      strlen(szServicePath) + sizeof(char));
 
         /*
          * Set the supported types flags.
@@ -232,8 +230,8 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
         dwData =
             EVENTLOG_ERROR_TYPE | EVENTLOG_WARNING_TYPE |
             EVENTLOG_INFORMATION_TYPE;
-        RegSetValueEx(hKey, _T("TypesSupported"), 0, REG_DWORD,
-                      (CONST BYTE *) & dwData, sizeof(DWORD));
+        RegSetValueEx(hKey, "TypesSupported", 0, REG_DWORD,
+                      (const void *) &dwData, sizeof(dwData));
 
         /*
          * Close Registry key
@@ -247,8 +245,9 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
             /*
              * Create Registry Key path
              */
-            _tcscpy(szRegKey, _T("SYSTEM\\CurrentControlSet\\Services\\"));
-            _tcscat(szRegKey, app_name_long);
+            snprintf(szRegKey, sizeof(szRegKey),
+                     "SYSTEM\\CurrentControlSet\\Services\\%s",
+                     app_name_long);
             hKey = NULL;
 
             /*
@@ -256,10 +255,10 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
              */
             if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, szRegKey, 0, KEY_WRITE,
                              &hKey) != ERROR_SUCCESS) {
-                _sntprintf(MsgErrorString, CountOf(MsgErrorString),
-                           _T("%s %s"),
-                           _T("is unable to create registry entries"),
-                           lpszServiceDisplayName);
+                snprintf(MsgErrorString, sizeof(MsgErrorString),
+                         "%s %s",
+                         "is unable to create registry entries",
+                         lpszServiceDisplayName);
                 ProcessError(EVENTLOG_ERROR_TYPE, MsgErrorString, 1,
                              quiet);
                 exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
@@ -270,14 +269,14 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
              * Create description subkey and the set value
              */
             if (lpszServiceDescription != NULL) {
-                if (RegSetValueEx(hKey, _T("Description"), 0, REG_SZ,
-                                  (CONST BYTE *) lpszServiceDescription,
-                                  _tcslen(lpszServiceDescription) +
-                                  sizeof(TCHAR)) != ERROR_SUCCESS) {
-                    _sntprintf(MsgErrorString, CountOf(MsgErrorString),
-                               _T("%s %s"),
-                               _T("is unable to create registry entries"),
-                               lpszServiceDisplayName);
+                if (RegSetValueEx(hKey, "Description", 0, REG_SZ,
+                                  (const void *) lpszServiceDescription,
+                                  strlen(lpszServiceDescription) +
+                                  sizeof(char)) != ERROR_SUCCESS) {
+                    snprintf(MsgErrorString, sizeof(MsgErrorString),
+                             "%s %s",
+                             "is unable to create registry entries",
+                             lpszServiceDisplayName);
                     ProcessError(EVENTLOG_ERROR_TYPE, MsgErrorString, 1,
                                  quiet);
                     exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
@@ -293,13 +292,13 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
                  * Create Subkey parameters
                  */
                 if (RegCreateKeyEx
-                    (hKey, _T("Parameters"), 0, NULL,
+                    (hKey, "Parameters", 0, NULL,
                      REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL,
                      &hParamKey, NULL) != ERROR_SUCCESS) {
-                    _sntprintf(MsgErrorString, CountOf(MsgErrorString),
-                               _T("%s %s"),
-                               _T("is unable to create registry entries"),
-                               lpszServiceDisplayName);
+                    snprintf(MsgErrorString, sizeof(MsgErrorString),
+                             "%s %s",
+                             "is unable to create registry entries",
+                             lpszServiceDisplayName);
                     ProcessError(EVENTLOG_ERROR_TYPE, MsgErrorString, 1,
                                  quiet);
                     exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
@@ -319,22 +318,21 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
                     i = 2;
 
                 for (j = 1; i < StartUpArg->Argc; i++, j++) {
-                    _sntprintf(szRegKey, CountOf(szRegKey), _T("%s%d"),
-                               _T("Param"), j);
+                    snprintf(szRegKey, sizeof(szRegKey), "%s%d", "Param",
+                             j);
 
                     /*
                      * Create registry key
                      */
                     if (RegSetValueEx
                         (hParamKey, szRegKey, 0, REG_SZ,
-                         (CONST BYTE *) StartUpArg->Argv[i],
-                         _tcslen(StartUpArg->Argv[i]) +
-                         sizeof(TCHAR)) != ERROR_SUCCESS) {
-                        _sntprintf(MsgErrorString, CountOf(MsgErrorString),
-                                   _T("%s %s"),
-                                   _T
-                                   ("is unable to create registry entries"),
-                                   lpszServiceDisplayName);
+                         (const void *) StartUpArg->Argv[i],
+                         strlen(StartUpArg->Argv[i]) +
+                         sizeof(char)) != ERROR_SUCCESS) {
+                        snprintf(MsgErrorString, sizeof(MsgErrorString),
+                                 "%s %s",
+                                 "is unable to create registry entries",
+                                 lpszServiceDisplayName);
                         ProcessError(EVENTLOG_ERROR_TYPE, MsgErrorString,
                                      1, quiet);
                         exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
@@ -357,9 +355,8 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
         /*
          * Successfully registered as service
          */
-        _sntprintf(MsgErrorString, CountOf(MsgErrorString), _T("%s %s"),
-                   lpszServiceName,
-                   _T("successfully registered as a service"));
+        snprintf(MsgErrorString, sizeof(MsgErrorString), "%s %s",
+                 lpszServiceName, "successfully registered as a service");
 
         /*
          * Log message to eventlog
@@ -385,15 +382,15 @@ RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
  * Input - ServiceName
  */
 int
-UnregisterService(LPCTSTR lpszServiceName, int quiet)
+UnregisterService(const char *lpszServiceName, int quiet)
 {
-    TCHAR           MsgErrorString[MAX_STR_SIZE];       /* Message or Error string */
+    char            MsgErrorString[MAX_STR_SIZE];       /* Message or Error string */
     SC_HANDLE       hSCManager = NULL;  /* SCM handle */
     SC_HANDLE       hService = NULL;    /* Service Handle */
     SERVICE_STATUS  sStatus;
-    TCHAR           szRegAppLogKey[] =
-        _T("SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\");
-    TCHAR           szRegKey[512];
+    static const char szRegAppLogKey[] =
+        "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\";
+    char            szRegKey[512];
     int             exitStatus = 0;
     /*
      * HKEY hKey = NULL;            ?* Key to registry entry
@@ -405,7 +402,7 @@ UnregisterService(LPCTSTR lpszServiceName, int quiet)
         hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
         if (hSCManager == NULL) {
             ProcessError(EVENTLOG_ERROR_TYPE,
-                         _T("Can't open SCM (Service Control Manager)"), 1,
+                         "Can't open SCM (Service Control Manager)", 1,
                          quiet);
             exitStatus = SERVICE_ERROR_SCM_OPEN;
             LEAVE;
@@ -417,9 +414,8 @@ UnregisterService(LPCTSTR lpszServiceName, int quiet)
         hService =
             OpenService(hSCManager, lpszServiceName, SERVICE_ALL_ACCESS);
         if (hService == NULL) {
-            _sntprintf(MsgErrorString, CountOf(MsgErrorString),
-                       _T("%s %s"), _T("Can't open service"),
-                       lpszServiceName);
+            snprintf(MsgErrorString, sizeof(MsgErrorString),
+                     "%s %s", "Can't open service", lpszServiceName);
             ProcessError(EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
             exitStatus = SERVICE_ERROR_OPEN_SERVICE;
             LEAVE;
@@ -440,9 +436,8 @@ UnregisterService(LPCTSTR lpszServiceName, int quiet)
          * Delete the service
          */
         if (DeleteService(hService) == FALSE) {
-            _sntprintf(MsgErrorString, CountOf(MsgErrorString),
-                       _T("%s %s"), _T("Can't delete service"),
-                       lpszServiceName);
+            snprintf(MsgErrorString, sizeof(MsgErrorString),
+                     "%s %s", "Can't delete service", lpszServiceName);
 
             /*
              * Log message to eventlog
@@ -454,15 +449,15 @@ UnregisterService(LPCTSTR lpszServiceName, int quiet)
         /*
          * Log "Service deleted successfully " message to eventlog
          */
-        _sntprintf(MsgErrorString, CountOf(MsgErrorString), _T("%s %s"),
-                   lpszServiceName, _T("service deleted"));
+        snprintf(MsgErrorString, sizeof(MsgErrorString), "%s %s",
+                 lpszServiceName, "service deleted");
         ProcessError(EVENTLOG_INFORMATION_TYPE, MsgErrorString, 0, quiet);
 
         /*
          * Delete registry entries for EventLog
          */
-        _tcscpy(szRegKey, szRegAppLogKey);
-        _tcscat(szRegKey, lpszServiceName);
+        snprintf(szRegKey, sizeof(szRegKey), "%s%s", szRegAppLogKey,
+                 lpszServiceName);
         RegDeleteKey(HKEY_LOCAL_MACHINE, szRegKey);
     }
 
@@ -481,16 +476,16 @@ UnregisterService(LPCTSTR lpszServiceName, int quiet)
 /*
  * Write a message to the Windows event log.
  */
-VOID
-WriteToEventLog(WORD wType, LPCTSTR pszFormat, ...)
+void
+WriteToEventLog(WORD wType, const char *pszFormat, ...)
 {
-    TCHAR           szMessage[512];
-    LPCTSTR         LogStr[1];
+    char            szMessage[512];
+    const char     *LogStr[1];
     va_list         ArgList;
     HANDLE          hEventSource = NULL;
 
     va_start(ArgList, pszFormat);
-    _vsntprintf(szMessage, CountOf(szMessage), pszFormat, ArgList);
+    vsnprintf(szMessage, sizeof(szMessage), pszFormat, ArgList);
     va_end(ArgList);
     LogStr[0] = szMessage;
     hEventSource = RegisterEventSource(NULL, app_name_long);
@@ -511,8 +506,8 @@ WriteToEventLog(WORD wType, LPCTSTR pszFormat, ...)
  *
  * Return: Type indicating the option specified
  */
-INT
-ParseCmdLineForServiceOption(int argc, TCHAR *argv[], int *quiet)
+int
+ParseCmdLineForServiceOption(int argc, char *argv[], int *quiet)
 {
     int             nReturn = RUN_AS_CONSOLE;   /* default is to run as a console application */
 
@@ -521,15 +516,15 @@ ParseCmdLineForServiceOption(int argc, TCHAR *argv[], int *quiet)
         /*
          * second argument present
          */
-        if (lstrcmpi(_T("-register"), argv[1]) == 0) {
+        if (strcasecmp("-register", argv[1]) == 0) {
             nReturn = REGISTER_SERVICE;
         }
 
-        else if (lstrcmpi(_T("-unregister"), argv[1]) == 0) {
+        else if (strcasecmp("-unregister", argv[1]) == 0) {
             nReturn = UN_REGISTER_SERVICE;
         }
 
-        else if (lstrcmpi(_T("-service"), argv[1]) == 0) {
+        else if (strcasecmp("-service", argv[1]) == 0) {
             nReturn = RUN_AS_SERVICE;
         }
     }
@@ -538,7 +533,7 @@ ParseCmdLineForServiceOption(int argc, TCHAR *argv[], int *quiet)
         /*
          * third argument present
          */
-        if (lstrcmpi(_T("-quiet"), argv[2]) == 0) {
+        if (strcasecmp("-quiet", argv[2]) == 0) {
             *quiet = 1;
         }
     }
@@ -559,52 +554,50 @@ ParseCmdLineForServiceOption(int argc, TCHAR *argv[], int *quiet)
  * EVENTLOG_ERROR_TYPE           MB_ICONSTOP
  *
  */
-VOID
-ProcessError(WORD eventLogType, LPCTSTR pszMessage, int useGetLastError,
-             int quiet)
+void
+ProcessError(WORD eventLogType, const char *pszMessage,
+             int useGetLastError, int quiet)
 {
     HANDLE          hEventSource = NULL;
-    TCHAR           pszMessageFull[MAX_STR_SIZE];       /* Combined pszMessage and GetLastError */
+    char            pszMessageFull[MAX_STR_SIZE];       /* Combined pszMessage and GetLastError */
 
     /*
      * If useGetLastError enabled, generate text from GetLastError() and append to
      * pszMessageFull
      */
     if (useGetLastError) {
-        LPTSTR          pErrorMsgTemp = NULL;
+        char           *pErrorMsgTemp = NULL;
         FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
                       FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
                       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                       (LPTSTR) &pErrorMsgTemp, 0, NULL);
 
-        _sntprintf(pszMessageFull, CountOf(pszMessageFull), _T("%s: %s"),
-                   pszMessage, pErrorMsgTemp);
+        snprintf(pszMessageFull, sizeof(pszMessageFull), "%s: %s",
+                 pszMessage, pErrorMsgTemp);
         if (pErrorMsgTemp) {
             LocalFree(pErrorMsgTemp);
             pErrorMsgTemp = NULL;
         }
     } else {
-        _sntprintf(pszMessageFull, CountOf(pszMessageFull), _T("%s"),
-                   pszMessage);
+        snprintf(pszMessageFull, sizeof(pszMessageFull), "%s", pszMessage);
     }
 
     hEventSource = RegisterEventSource(NULL, app_name_long);
     if (hEventSource != NULL) {
-        LPCTSTR         LogStr[1];
+        const char     *LogStr[1];
         LogStr[0] = pszMessageFull;
 
         if (ReportEvent(hEventSource, eventLogType, 0, DISPLAY_MSG,     /* just output the text to the event log */
                         NULL, 1, 0, LogStr, NULL)) {
         } else {
-            LPTSTR          pErrorMsgTemp = NULL;
+            char           *pErrorMsgTemp = NULL;
             FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
                           FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
                           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                           (LPTSTR) &pErrorMsgTemp, 0, NULL);
-            _ftprintf(stderr,
-                      _T
-                      ("Could NOT lot to Event Log.  Error returned from ReportEvent(): %s\n"),
-                      pErrorMsgTemp);
+            fprintf(stderr,
+                    "Could NOT lot to Event Log.  Error returned from ReportEvent(): %s\n",
+                    pErrorMsgTemp);
             if (pErrorMsgTemp) {
                 LocalFree(pErrorMsgTemp);
                 pErrorMsgTemp = NULL;
@@ -614,7 +607,7 @@ ProcessError(WORD eventLogType, LPCTSTR pszMessage, int useGetLastError,
     }
 
     if (quiet) {
-        _ftprintf(stderr, _T("%s\n"), pszMessageFull);
+        fprintf(stderr, "%s\n", pszMessageFull);
     } else {
         switch (eventLogType) {
         case EVENTLOG_INFORMATION_TYPE:
@@ -687,8 +680,8 @@ ReportCurrentServiceStatus()
 /*
  * ServiceMain function.
  */
-VOID WINAPI
-ServiceMain(DWORD argc, LPTSTR argv[])
+void WINAPI
+ServiceMain(DWORD argc, char *argv[])
 {
     SECURITY_ATTRIBUTES SecurityAttributes;
     unsigned        threadId;
@@ -697,8 +690,8 @@ ServiceMain(DWORD argc, LPTSTR argv[])
      * Input arguments
      */
     DWORD           ArgCount = 0;
-    LPTSTR         *ArgArray = NULL;
-    TCHAR           szRegKey[512];
+    char          **ArgArray = NULL;
+    char            szRegKey[512];
     HKEY            hParamKey = NULL;
     DWORD           TotalParams = 0;
     int             i;
@@ -721,9 +714,9 @@ ServiceMain(DWORD argc, LPTSTR argv[])
     /*
      * Create registry key path
      */
-    _sntprintf(szRegKey, CountOf(szRegKey), _T("%s%s\\%s"),
-               _T("SYSTEM\\CurrentControlSet\\Services\\"), app_name_long,
-               _T("Parameters"));
+    snprintf(szRegKey, sizeof(szRegKey), "%s%s\\%s",
+             "SYSTEM\\CurrentControlSet\\Services\\", app_name_long,
+             "Parameters");
     if (RegOpenKeyEx
         (HKEY_LOCAL_MACHINE, szRegKey, 0, KEY_ALL_ACCESS,
          &hParamKey) == ERROR_SUCCESS) {
@@ -746,25 +739,25 @@ ServiceMain(DWORD argc, LPTSTR argv[])
                 ArgArray = calloc(ArgCount, sizeof(ArgArray[0]));
                 if (ArgArray == 0) {
                     WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                                    _T("Resource failure"));
+                                    "Resource failure");
                     return;
                 }
 
                 /*
                  * Copy first argument
                  */
-                ArgArray[0] = _tcsdup(argv[0]);
+                ArgArray[0] = strdup(argv[0]);
                 for (i = 1; i <= TotalParams; i++) {
                     DWORD           dwErrorcode;
                     DWORD           nSize;
                     DWORD           nRegkeyType;
-                    TCHAR          *szValue;
+                    char           *szValue;
 
                     /*
                      * Create Subkey value name
                      */
-                    _sntprintf(szRegKey, CountOf(szRegKey), _T("%s%d"),
-                               _T("Param"), i);
+                    snprintf(szRegKey, sizeof(szRegKey), "%s%d", "Param",
+                             i);
 
                     /*
                      * Query subkey.
@@ -781,7 +774,7 @@ ServiceMain(DWORD argc, LPTSTR argv[])
                                 dwErrorcode =
                                     RegQueryValueEx(hParamKey, szRegKey,
                                                     NULL, &nRegkeyType,
-                                                    (LPBYTE) szValue,
+                                                    (void *) szValue,
                                                     &nSize);
                                 if (dwErrorcode == ERROR_SUCCESS) {
                                     szValue[nSize] = 0;
@@ -789,24 +782,20 @@ ServiceMain(DWORD argc, LPTSTR argv[])
                                 } else {
                                     free(szValue);
                                     WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                                                    _T
-                                                    ("Querying registry key %s failed: error code %ld"),
+                                                    "Querying registry key %s failed: error code %ld",
                                                     szRegKey, dwErrorcode);
                                 }
                             } else
                                 WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                                                _T
-                                                ("Querying registry key %s failed: out of memory"),
+                                                "Querying registry key %s failed: out of memory",
                                                 szRegKey);
                         } else
                             WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                                            _T
-                                            ("Type %ld of registry key %s is incorrect"),
+                                            "Type %ld of registry key %s is incorrect",
                                             nRegkeyType, szRegKey);
                     } else
                         WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                                        _T
-                                        ("Querying registry key %s failed: error code %ld"),
+                                        "Querying registry key %s failed: error code %ld",
                                         szRegKey, dwErrorcode);
 
                     if (!ArgArray[i]) {
@@ -839,7 +828,7 @@ ServiceMain(DWORD argc, LPTSTR argv[])
         RegisterServiceCtrlHandler(app_name_long, ControlHandler);
     if (hServiceStatus == 0) {
         WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                        _T("RegisterServiceCtrlHandler failed"));
+                        "RegisterServiceCtrlHandler failed");
         return;
     }
 
@@ -855,7 +844,7 @@ ServiceMain(DWORD argc, LPTSTR argv[])
     TRY {
         if (SetSimpleSecurityAttributes(&SecurityAttributes) == FALSE) {
             WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                            _T("Couldn't init security attributes"));
+                            "Couldn't init security attributes");
             LEAVE;
         }
         hServiceThread =
@@ -865,7 +854,7 @@ ServiceMain(DWORD argc, LPTSTR argv[])
                                     &threadId);
         if (hServiceThread == NULL) {
             WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                            _T("Couldn't start worker thread"));
+                            "Couldn't start worker thread");
             LEAVE;
         }
 
@@ -909,7 +898,7 @@ ServiceMain(DWORD argc, LPTSTR argv[])
  * Returns TRUE if the Service is started successfully
  */
 BOOL
-RunAsService(INT (*ServiceFunction)(INT, LPTSTR *))
+RunAsService(int (*ServiceFunction)(int, char **))
 {
 
     /*
@@ -938,7 +927,7 @@ RunAsService(INT (*ServiceFunction)(INT, LPTSTR *))
          * Some other error has occurred.
          */
         WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                        _T("Couldn't start service - %s"), app_name_long);
+                        "Couldn't start service - %s", app_name_long);
     }
     return g_fRunningAsService;
 }
@@ -949,7 +938,7 @@ RunAsService(INT (*ServiceFunction)(INT, LPTSTR *))
  * This service handles 4 commands
  * - interrogate, pause, continue and stop.
  */
-VOID WINAPI
+void WINAPI
 ControlHandler(DWORD dwControl)
 {
     switch (dwControl) {
@@ -978,8 +967,8 @@ ControlHandler(DWORD dwControl)
  * After stopping, Service status is set to STOP in
  * main loop
  */
-VOID
-ProcessServiceStop(VOID)
+void
+ProcessServiceStop(void)
 {
     UpdateServiceStatus(SERVICE_STOP_PENDING, NO_ERROR, SCM_WAIT_INTERVAL);
 
@@ -995,8 +984,8 @@ ProcessServiceStop(VOID)
 /*
  * Returns the current state of the service to the SCM.
  */
-VOID
-ProcessServiceInterrogate(VOID)
+void
+ProcessServiceInterrogate(void)
 {
     ReportCurrentServiceStatus();
 }
@@ -1051,7 +1040,7 @@ SetSimpleSecurityAttributes(SECURITY_ATTRIBUTES *pSecurityAttr)
 /*
  * This function Frees the security descriptor, if any was created.
  */
-VOID
+void
 FreeSecurityAttributes(SECURITY_ATTRIBUTES *pSecurityAttr)
 {
     if (pSecurityAttr && pSecurityAttr->lpSecurityDescriptor)
@@ -1068,7 +1057,7 @@ FreeSecurityAttributes(SECURITY_ATTRIBUTES *pSecurityAttr)
  *   lpParam contains argc and argv, pass to service main function
  */
 unsigned WINAPI
-ThreadFunction(LPVOID lpParam)
+ThreadFunction(void *lpParam)
 {
     InputParams    *pInputArg = (InputParams *) lpParam;
     return (*ServiceEntryPoint) (pInputArg->Argc, pInputArg->Argv);
@@ -1078,8 +1067,8 @@ ThreadFunction(LPVOID lpParam)
  * This function is called to register an application-specific function
  *   which is invoked when the SCM stops the worker thread.
  */
-VOID
-RegisterStopFunction(VOID (*StopFunc)(VOID))
+void
+RegisterStopFunction(void (*StopFunc)(void))
 {
     StopFunction = StopFunc;
 }
@@ -1089,8 +1078,8 @@ RegisterStopFunction(VOID (*StopFunc)(VOID))
  * If the service is not running, this function does nothing.
  * Otherwise, suspend the worker thread and update the status.
  */
-VOID
-ProcessServicePause(VOID)
+void
+ProcessServicePause(void)
 {
     if (ServiceStatus.dwCurrentState == SERVICE_RUNNING) {
         UpdateServiceStatus(SERVICE_PAUSE_PENDING, NO_ERROR,
@@ -1108,8 +1097,8 @@ ProcessServicePause(VOID)
  * If the service is not paused, this function does nothing.
  * Otherwise, resume the worker thread and update the status.
  */
-VOID
-ProcessServiceContinue(VOID)
+void
+ProcessServiceContinue(void)
 {
     if (ServiceStatus.dwCurrentState == SERVICE_PAUSED) {
         UpdateServiceStatus(SERVICE_CONTINUE_PENDING, NO_ERROR,

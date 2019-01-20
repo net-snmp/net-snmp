@@ -54,7 +54,7 @@ extern BOOL     g_fRunningAsService;
  */
 typedef struct _InputParams {
     DWORD           Argc;
-    LPTSTR         *Argv;
+    char          **Argv;
 } InputParams;
 
 /*
@@ -64,68 +64,68 @@ typedef struct _InputParams {
 /*
  * To register application as windows service with SCM
  */
-int             RegisterService(LPCTSTR lpszServiceName,
-                                LPCTSTR lpszServiceDisplayName,
-                                LPCTSTR lpszServiceDescription,
+int             RegisterService(const char *lpszServiceName,
+                                const char *lpszServiceDisplayName,
+                                const char *lpszServiceDescription,
                                 InputParams *StartUpArg, int quiet);
 
 /*
  * To unregister service
  */
-int             UnregisterService(LPCTSTR lpszServiceName, int quiet);
+int             UnregisterService(const char *lpszServiceName, int quiet);
 
 /*
  * To parse command line for startup option
  */
-INT             ParseCmdLineForServiceOption(INT argc, TCHAR *argv[],
+int             ParseCmdLineForServiceOption(int argc, char *argv[],
                                              int *quiet);
 
 /*
  * To write to windows event log
  */
-VOID            WriteToEventLog(WORD wType, LPCTSTR pszFormat, ...);
+void            WriteToEventLog(WORD wType, const char *pszFormat, ...);
 
 /*
  * To display generic windows error
  */
-VOID            DisplayError(LPCTSTR pszTitle, int quite);
+void            DisplayError(const char *pszTitle, int quite);
 
 /*
  * Service Main function,  Which will spawn a thread, and calls the
  * Service run part
  */
-VOID WINAPI     ServiceMain(DWORD argc, LPTSTR argv[]);
+void WINAPI     ServiceMain(DWORD argc, char *argv[]);
 
 /*
  * To start Service
  */
 
-BOOL            RunAsService(INT (*ServiceFunction)(INT, LPTSTR *));
+BOOL            RunAsService(int (*ServiceFunction)(int, char **));
 
 /*
  * Call back function to process SCM Requests
  */
-VOID WINAPI     ControlHandler(DWORD dwControl);
+void WINAPI     ControlHandler(DWORD dwControl);
 
 /*
  * To Stop the service
  */
-VOID            ProcessServiceStop(VOID);
+void            ProcessServiceStop(void);
 
 /*
  * To Pause service
  */
-VOID            ProcessServicePause(VOID);
+void            ProcessServicePause(void);
 
 /*
  * To Continue paused service
  */
-VOID            ProcessServiceContinue(VOID);
+void            ProcessServiceContinue(void);
 
 /*
  * To send Current Service status to SCM when INTERROGATE command is sent
  */
-VOID            ProcessServiceInterrogate(VOID);
+void            ProcessServiceInterrogate(void);
 
 /*
  * To allocate and Set security descriptor
@@ -136,19 +136,19 @@ BOOL            SetSimpleSecurityAttributes(SECURITY_ATTRIBUTES
 /*
  * To free Security Descriptor
  */
-VOID            FreeSecurityAttributes(SECURITY_ATTRIBUTES
+void            FreeSecurityAttributes(SECURITY_ATTRIBUTES
                                        *pSecurityAttr);
 
 /*
  * TheadFunction - To spawan as thread - Invokes registered service function
  */
-unsigned WINAPI ThreadFunction(LPVOID lpParam);
+unsigned WINAPI ThreadFunction(void *lpParam);
 
 /*
  * Service STOP function registration with this framewrok
  * * this function must be invoked before calling RunAsService
  */
-VOID            RegisterStopFunction(VOID (*StopFunc)(VOID));
+void            RegisterStopFunction(void (*StopFunc)(void));
 
 #if 0
 {
