@@ -1425,6 +1425,21 @@
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
 
+/* Define if _beginthreadex() is defined in <process.h> */
+#undef HAVE__BEGINTHREADEX
+
+/* Define if _cputs() is defined in <conio.h> */
+#undef HAVE__CPUTS
+
+/* Define if _getch() is defined in <conio.h> */
+#undef HAVE__GETCH
+
+/* Define if _get_osfhandle() is defined in <io.h> */
+#undef HAVE__GET_OSFHANDLE
+
+/* Define if _open_osfhandle() is defined in <io.h> */
+#undef HAVE__OPEN_OSFHANDLE
+
 /* location of UNIX kernel */
 #undef KERNEL_LOC
 
