@@ -1458,9 +1458,8 @@ snmp_input(int op,
 * Invokes appropriate startup functions depending on the 
 * parameters passed
 *************************************************************/
-int
-    __cdecl
-_tmain(int argc, TCHAR * argv[])
+int __cdecl
+main(int argc, TCHAR * argv[])
 {
     /*
      * Define Service Name and Description, which appears in windows SCM 
