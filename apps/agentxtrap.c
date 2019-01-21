@@ -182,12 +182,12 @@ handle_agentx_response(int operation, netsnmp_session *sp, int reqid,
     return 0;
 }
 
-extern const struct tState_s Connecting;
-extern const struct tState_s Opening;
-extern const struct tState_s Notifying;
-extern const struct tState_s Closing;
-extern const struct tState_s Disconnecting;
-extern const struct tState_s Exit;
+static const struct tState_s Connecting;
+static const struct tState_s Opening;
+static const struct tState_s Notifying;
+static const struct tState_s Closing;
+static const struct tState_s Disconnecting;
+static const struct tState_s Exit;
 
 static void
 StateDisconnect(tState self)
@@ -242,7 +242,7 @@ ConnectingEntry(tState self)
     }
 }
 
-const struct tState_s Connecting = {
+static const struct tState_s Connecting = {
     ConnectingEntry,
     NULL,
     NULL,
@@ -296,7 +296,7 @@ OpeningRes(tState self, netsnmp_pdu *act)
     }
 }
 
-const struct tState_s Opening = {
+static const struct tState_s Opening = {
     OpeningEntry,
     NULL,
     OpeningRes,
@@ -331,7 +331,7 @@ NotifyingRes(tState self, netsnmp_pdu *act)
     change_state(&Closing);
 }
 
-const struct tState_s Notifying = {
+static const struct tState_s Notifying = {
     NotifyingEntry,
     NULL,
     NotifyingRes,
@@ -379,7 +379,7 @@ ClosingClose(tState self, netsnmp_pdu *act)
     change_state(&Disconnecting);
 }
 
-const struct tState_s Closing = {
+static const struct tState_s Closing = {
     ClosingEntry,
     NULL,
     ClosingRes,
@@ -398,7 +398,7 @@ DisconnectingEntry(tState self)
     change_state(&Exit);
 }
 
-const struct tState_s Disconnecting = {
+static const struct tState_s Disconnecting = {
     DisconnectingEntry,
     NULL,
     NULL,
@@ -409,7 +409,7 @@ const struct tState_s Disconnecting = {
     0
 };
 
-const struct tState_s Exit = {
+static const struct tState_s Exit = {
     NULL,
     NULL,
     NULL,
