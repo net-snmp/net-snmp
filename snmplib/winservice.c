@@ -40,6 +40,41 @@ labelFIN:                                       \
 #endif
 #endif
 
+/*
+ * Error levels returned when registering or unregistering the service
+ */
+enum service_status {
+    SERVICE_ERROR_NONE = 0,
+    SERVICE_ERROR_SCM_OPEN = 1, /* Can not open SCM */
+    SERVICE_ERROR_CREATE_SERVICE = 2,   /* Can not create service */
+    SERVICE_ERROR_CREATE_REGISTRY_ENTRIES = 3,  /* Can not create registry entries */
+    SERVICE_ERROR_OPEN_SERVICE = 4,     /* Can not open service (service does not exist) */
+};
+
+/*
+ * Define Message catalog ID
+ * MessageId: DISPLAY_MSG
+ * MessageText:  %1.
+ */
+enum { DISPLAY_MSG = 0x00000064L };
+
+/*
+ * Hint Value to SCM to wait before sending successive commands to service
+ */
+enum { SCM_WAIT_INTERVAL = 7000 };
+
+
+static void WINAPI ServiceMain(DWORD argc, char *argv[]);
+static void WINAPI ControlHandler(DWORD dwControl);
+static void     ProcessServiceStop(void);
+static void     ProcessServicePause(void);
+static void     ProcessServiceContinue(void);
+static void     ProcessServiceInterrogate(void);
+static BOOL     SetSimpleSecurityAttributes(SECURITY_ATTRIBUTES
+                                            *pSecurityAttr);
+static void     FreeSecurityAttributes(SECURITY_ATTRIBUTES *pSecurityAttr);
+static unsigned WINAPI ThreadFunction(void *lpParam);
+
 
 /*
  * External global variables used here
@@ -59,7 +94,7 @@ extern char    *app_name_long;
 /*
  * Flag to indicate whether process is running as Service
  */
-BOOL            g_fRunningAsService = FALSE;
+static BOOL     g_fRunningAsService;
 
 /*
  * Variable to maintain Current Service status
@@ -143,7 +178,7 @@ RegisterService(const char *lpszServiceName,
                 InputParams *StartUpArg, int quiet)
 {                               /* Startup argument to the service */
     char            szServicePath[MAX_PATH];    /* To hold module File name */
-    char            MsgErrorString[MAX_STR_SIZE];       /* Message or Error string */
+    char            MsgErrorString[1024];       /* Message or Error string */
     char            szServiceCommand[MAX_PATH + 9];     /* Command to execute */
     SC_HANDLE       hSCManager = NULL;
     SC_HANDLE       hService = NULL;
@@ -384,7 +419,7 @@ RegisterService(const char *lpszServiceName,
 int
 UnregisterService(const char *lpszServiceName, int quiet)
 {
-    char            MsgErrorString[MAX_STR_SIZE];       /* Message or Error string */
+    char            MsgErrorString[1024];       /* Message or Error string */
     SC_HANDLE       hSCManager = NULL;  /* SCM handle */
     SC_HANDLE       hService = NULL;    /* Service Handle */
     SERVICE_STATUS  sStatus;
@@ -476,7 +511,7 @@ UnregisterService(const char *lpszServiceName, int quiet)
 /*
  * Write a message to the Windows event log.
  */
-void
+static void
 WriteToEventLog(WORD wType, const char *pszFormat, ...)
 {
     char            szMessage[512];
@@ -506,10 +541,10 @@ WriteToEventLog(WORD wType, const char *pszFormat, ...)
  *
  * Return: Type indicating the option specified
  */
-int
+enum net_snmp_cmd_line_action
 ParseCmdLineForServiceOption(int argc, char *argv[], int *quiet)
 {
-    int             nReturn = RUN_AS_CONSOLE;   /* default is to run as a console application */
+    enum net_snmp_cmd_line_action nReturn = RUN_AS_CONSOLE;     /* default is to run as a console application */
 
     if (argc >= 2) {
 
@@ -559,7 +594,7 @@ ProcessError(WORD eventLogType, const char *pszMessage,
              int useGetLastError, int quiet)
 {
     HANDLE          hEventSource = NULL;
-    char            pszMessageFull[MAX_STR_SIZE];       /* Combined pszMessage and GetLastError */
+    char            pszMessageFull[1024];       /* Combined pszMessage and GetLastError */
 
     /*
      * If useGetLastError enabled, generate text from GetLastError() and append to
@@ -680,7 +715,7 @@ ReportCurrentServiceStatus()
 /*
  * ServiceMain function.
  */
-void WINAPI
+static void WINAPI
 ServiceMain(DWORD argc, char *argv[])
 {
     SECURITY_ATTRIBUTES SecurityAttributes;

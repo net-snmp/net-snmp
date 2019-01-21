@@ -1439,7 +1439,7 @@ main(int argc, TCHAR * argv[])
     InputParams     InputOptions;
 
 
-    int             nRunType = RUN_AS_CONSOLE;
+    enum net_snmp_cmd_line_action nRunType = RUN_AS_CONSOLE;
     int             quiet = 0;
     
 #if 0
