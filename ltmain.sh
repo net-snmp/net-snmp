@@ -4515,6 +4515,8 @@ EOF
 
 	    case $host_os in
 	      mingw*)
+		case "$(uname)" in
+		  MINGW32*)
 		cat <<"EOF"
   /* execv doesn't actually work on mingw as expected on unix */
   newargz = prepare_spawn (newargz);
@@ -4529,6 +4531,8 @@ EOF
     }
   return rval;
 EOF
+		;;
+		esac
 		;;
 	      *)
 		cat <<"EOF"
