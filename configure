@@ -14917,7 +14917,7 @@ dgux*)
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
-freebsd1*)
+freebsd1.*)
   dynamic_linker=no
   ;;
 
@@ -27402,7 +27402,7 @@ done
 
 
 #  Library:
-for ac_func in asprintf                                                         closedir        fgetc_unlocked  flockfile                        fork            funlockfile     getipnodebyname                  gettimeofday    if_nametoindex  mkstemp                          opendir         readdir         regcomp                          setenv          setitimer       setlocale                        setsid          snprintf        strcasestr                       strdup          strerror        strncasecmp                      sysconf         times           vsnprintf
+for ac_func in asprintf                                                         closedir        fgetc_unlocked  flockfile                        fork            funlockfile     getipnodebyname                  getlogin                                                         gettimeofday    if_nametoindex  mkstemp                          opendir         readdir         regcomp                          setenv          setitimer       setlocale                        setsid          snprintf        strcasestr                       strdup          strerror        strncasecmp                      sysconf         times           vsnprintf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

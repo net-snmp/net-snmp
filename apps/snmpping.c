@@ -557,7 +557,7 @@ out:
     return 0;
 }
 
-#ifdef WIN32
+#ifndef HAVE_GETLOGIN
 /* To do: port this function to the Win32 platform. */
 const char *getlogin(void)
 {
