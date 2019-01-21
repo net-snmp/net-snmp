@@ -567,6 +567,7 @@ main(int argc, char *argv[])
         int             count;
         fd_set          fdset;
         struct timeval  timeout;
+        NETSNMP_SELECT_TIMEVAL timeout2;
 
         while (next_state) {
             if (state->exit)
@@ -584,7 +585,9 @@ main(int argc, char *argv[])
 
         FD_ZERO(&fdset);
         snmp_sess_select_info(sessp, &numfds, &fdset, &timeout, &block);
-        count = select(numfds, &fdset, NULL, NULL, !block ? &timeout : NULL);
+        timeout2.tv_sec = timeout.tv_sec;
+        timeout2.tv_usec = timeout.tv_usec;
+        count = select(numfds, &fdset, NULL, NULL, !block ? &timeout2 : NULL);
         if (count > 0)
             snmp_sess_read(sessp, &fdset);
         else if (count == 0)
