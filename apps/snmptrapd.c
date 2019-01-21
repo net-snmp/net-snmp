@@ -1387,7 +1387,7 @@ main(int argc, TCHAR * argv[])
 #endif
     InputParams     InputOptions;
 
-    int             nRunType = RUN_AS_CONSOLE;
+    enum net_snmp_cmd_line_action nRunType = RUN_AS_CONSOLE;
     int             quiet = 0;
 
     nRunType = ParseCmdLineForServiceOption(argc, argv, &quiet);
