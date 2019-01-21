@@ -562,12 +562,13 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
     /* Child temporary output pipe with Inheritance on (sa.bInheritHandle is true) */    
     if (!CreatePipe(&hOutputReadTmp,&hOutputWrite,&sa,0)) {
       DEBUGMSGTL(("util_funcs", "get_exec_pipes CreatePipe ChildOut: %d\n",
-            GetLastError()));
+                  (unsigned int)GetLastError()));
       return 0;
     }
     /* Child temporary input pipe with Inheritance on (sa.bInheritHandle is true) */    
     if (!CreatePipe(&hInputRead,&hInputWriteTmp,&sa,0)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_pipes CreatePipe ChildIn: %d\n", GetLastError()));
+        DEBUGMSGTL(("util_funcs", "get_exec_pipes CreatePipe ChildIn: %d\n",
+                    (unsigned int)GetLastError()));
       return 0;
     }
     
@@ -575,41 +576,50 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
      * its stdout handles. */
     if (!DuplicateHandle(GetCurrentProcess(),hOutputWrite, GetCurrentProcess(),
           &hErrorWrite,0, TRUE,DUPLICATE_SAME_ACCESS)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_pipes DuplicateHandle: %d\n", GetLastError()));
-      return 0;
+        DEBUGMSGTL(("util_funcs", "get_exec_pipes DuplicateHandle: %d\n",
+                    (unsigned int)GetLastError()));
+        return 0;
     }
 
     /* Create new copies of the input and output handles but set bInheritHandle to 
      * FALSE so the new handle can not be inherited.  Otherwise the handles can not
      * be closed.  */
-    if (!DuplicateHandle(GetCurrentProcess(), hOutputReadTmp, GetCurrentProcess(),
-          &hOutputRead, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_pipes DupliateHandle ChildOut: %d\n", GetLastError()));
-      CloseHandle(hErrorWrite);
-      return 0;
+    if (!DuplicateHandle(GetCurrentProcess(), hOutputReadTmp,
+                         GetCurrentProcess(), &hOutputRead, 0, FALSE,
+                         DUPLICATE_SAME_ACCESS)) {
+        DEBUGMSGTL(("util_funcs",
+                    "get_exec_pipes DupliateHandle ChildOut: %d\n",
+                    (unsigned int)GetLastError()));
+        CloseHandle(hErrorWrite);
+        return 0;
     }   
     if (!DuplicateHandle(GetCurrentProcess(),hInputWriteTmp,
           GetCurrentProcess(), &hInputWrite, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
-      DEBUGMSGTL(("util_funcs","get_exec_pipes DupliateHandle ChildIn: %d\n", GetLastError()));
-      CloseHandle(hErrorWrite);
-      CloseHandle(hOutputRead);
-      return 0;
+        DEBUGMSGTL(("util_funcs","get_exec_pipes DupliateHandle ChildIn: %d\n",
+                    (unsigned int)GetLastError()));
+        CloseHandle(hErrorWrite);
+        CloseHandle(hOutputRead);
+        return 0;
     }
 
     /* Close the temporary output and input handles */
     if (!CloseHandle(hOutputReadTmp)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_pipes CloseHandle (hOutputReadTmp): %d\n", GetLastError()));
-      CloseHandle(hErrorWrite);
-      CloseHandle(hOutputRead);
-      CloseHandle(hInputWrite);
-      return 0;
+        DEBUGMSGTL(("util_funcs",
+                    "get_exec_pipes CloseHandle (hOutputReadTmp): %d\n",
+                    (unsigned int)GetLastError()));
+        CloseHandle(hErrorWrite);
+        CloseHandle(hOutputRead);
+        CloseHandle(hInputWrite);
+        return 0;
     }
     if (!CloseHandle(hInputWriteTmp)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_pipes CloseHandle (hInputWriteTmp): %d\n", GetLastError()));
-      CloseHandle(hErrorWrite);
-      CloseHandle(hOutputRead);
-      CloseHandle(hInputWrite);
-      return 0;
+        DEBUGMSGTL(("util_funcs",
+                    "get_exec_pipes CloseHandle (hInputWriteTmp): %d\n",
+                    (unsigned int)GetLastError()));
+        CloseHandle(hErrorWrite);
+        CloseHandle(hOutputRead);
+        CloseHandle(hInputWrite);
+        return 0;
     }
     
     /* Associates a C run-time file descriptor with an existing operating-system file handle. */
@@ -630,11 +640,12 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
      * pass_persist    .1.3.6.1.4.1.2021.255  c:/perl/bin/perl c:/temp/pass_persisttest
     */
     if (!CreateProcess(NULL, cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
-      DEBUGMSGTL(("util_funcs","get_exec_pipes CreateProcess:'%s' %d\n",cmd, GetLastError()));
-      CloseHandle(hErrorWrite);
-      CloseHandle(hOutputRead);
-      CloseHandle(hInputWrite);
-      return 0;
+        DEBUGMSGTL(("util_funcs","get_exec_pipes CreateProcess:'%s' %d\n", cmd,
+                    (unsigned int)GetLastError()));
+        CloseHandle(hErrorWrite);
+        CloseHandle(hOutputRead);
+        CloseHandle(hInputWrite);
+        return 0;
     }
     
     DEBUGMSGTL(("util_funcs","child hProcess (stored in pid): %p\n", pi.hProcess));
@@ -654,15 +665,18 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
      */
 
     if (!CloseHandle(hOutputWrite)){
-      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hOutputWrite: %d\n",cmd, GetLastError()));
+      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hOutputWrite: %d\n",
+                  cmd, (unsigned int)GetLastError()));
       return 0;
     }
     if (!CloseHandle(hInputRead)) {
-      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hInputRead: %d\n",cmd, GetLastError()));
+      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hInputRead: %d\n",
+                  cmd, (unsigned int)GetLastError()));
       return 0;
     }
     if (!CloseHandle(hErrorWrite)) {
-      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hErrorWrite: %d\n",cmd, GetLastError()));
+      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hErrorWrite: %d\n",
+                  cmd, (unsigned int)GetLastError()));
       return 0;
     }
     return 1;
