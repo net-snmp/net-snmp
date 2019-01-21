@@ -538,7 +538,8 @@ snmptrapd_main_loop(void)
 {
     int             count, numfds, block;
     fd_set          readfds,writefds,exceptfds;
-    struct timeval  timeout, *tvp;
+    struct timeval  timeout;
+    NETSNMP_SELECT_TIMEVAL timeout2;
 
     while (netsnmp_running) {
         if (reconfig) {
@@ -562,16 +563,16 @@ snmptrapd_main_loop(void)
         FD_ZERO(&writefds);
         FD_ZERO(&exceptfds);
         block = 0;
-        tvp = &timeout;
-        timerclear(tvp);
-        tvp->tv_sec = 5;
-        snmp_select_info(&numfds, &readfds, tvp, &block);
-        if (block == 1)
-            tvp = NULL;         /* block without timeout */
+        timerclear(&timeout);
+        timeout.tv_sec = 5;
+        snmp_select_info(&numfds, &readfds, &timeout, &block);
 #ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
         netsnmp_external_event_info(&numfds, &readfds, &writefds, &exceptfds);
 #endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
-        count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
+        timeout2.tv_sec = timeout.tv_sec;
+        timeout2.tv_usec = timeout.tv_usec;
+        count = select(numfds, &readfds, &writefds, &exceptfds,
+                       !block ? &timeout2 : NULL);
         if (count > 0) {
 #ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
             netsnmp_dispatch_external_events(&count, &readfds, &writefds,
