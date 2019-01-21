@@ -432,6 +432,7 @@ write_arp(int action,
              */
             create_flag = 0;
         }
+        /* fall through. Is this fall-through intentional or not? */
 
     case FREE:
         /*

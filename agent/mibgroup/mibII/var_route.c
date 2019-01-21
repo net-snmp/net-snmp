@@ -1696,6 +1696,7 @@ write_rte(int action,
                 }
             }
         }
+        /* fall through. Is this fall-through intentional or not? */
 
     case FREE:
         /*
