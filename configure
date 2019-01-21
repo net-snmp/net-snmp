@@ -25834,7 +25834,7 @@ done
 
 
 #  Library:
-for ac_func in asprintf        closedir        fgetc_unlocked                   flockfile       funlockfile     getipnodebyname                  gettimeofday    if_nametoindex  mkstemp                          opendir         readdir         regcomp                          setenv          setitimer       setlocale                        setsid          snprintf        strcasestr                       strdup          strerror        strncasecmp                      sysconf         times           vsnprintf
+for ac_func in asprintf        closedir        fgetc_unlocked                   flockfile       funlockfile     getipnodebyname                  gettimeofday    getlogin                                         if_nametoindex  mkstemp                                          opendir         readdir         regcomp                          setenv          setitimer       setlocale                        setsid          snprintf        strcasestr                       strdup          strerror        strncasecmp                      sysconf         times           vsnprintf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
