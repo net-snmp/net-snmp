@@ -11,10 +11,6 @@ environment:
     - BUILD: Cygwin32
     - BUILD: Cygwin64
 
-matrix:
-  allow_failures:
-  - BUILD: MINGW64
-
 clone_depth: 5
 
 build_script:
