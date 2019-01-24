@@ -801,9 +801,9 @@ MSYS2 and Mingw-w64 can be installed as follows:
 3. Open an MSYS2 shell.
 4. Run pacman -S make diffutils
 5. On a 32-bit system, run
-   pacman -S mingw-w64-i686-gcc mingw-w64-i686-openssl-devel
+   pacman -S mingw-w64-i686-gcc mingw-w64-i686-openssl
 6. On a 64-bit system, run
-   pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-openssl-devel
+   pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-openssl
 
 Do not try to make the MinGW64 gcc compiler to use the MSYS2 openssl-devel
 headers by adding /usr/include to the include path because this will trigger
