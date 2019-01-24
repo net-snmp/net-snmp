@@ -12,6 +12,9 @@ goto eof
 :MinGW32
 goto eof
 
+:MSYS2
+goto eof
+
 :MinGW64
 rem C:\msys64\usr\bin\bash --login -c 'set -x; cd "${APPVEYOR_BUILD_FOLDER}"; ci/net-snmp-run-tests'
 goto eof
