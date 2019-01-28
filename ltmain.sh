@@ -4515,8 +4515,8 @@ EOF
 
 	    case $host_os in
 	      mingw*)
-		case "$(uname)" in
-		  MINGW32*)
+		case "$($LTCC -v | sed -n 's/^Target:[[:blank:]]*//')" in
+		  i386-w32-mingw32*)
 		cat <<"EOF"
   /* execv doesn't actually work on mingw as expected on unix */
   newargz = prepare_spawn (newargz);
