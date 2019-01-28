@@ -15,15 +15,15 @@ case $(uname) in
 esac
 case "${BUILD}" in
     MSYS2)
-	"${scriptdir}"/net-snmp-configure master CC=/usr/bin/gcc || exit $?
 	;;
     MinGW64)
-	"${scriptdir}"/net-snmp-configure master CC=/mingw64/bin/gcc || exit $?
+	export PATH="/mingw64/bin:$PATH"
 	;;
     *)
-	"${scriptdir}"/net-snmp-configure master || exit $?
 	;;
 esac
+echo "compiler path: $(type -p gcc)"
+"${scriptdir}"/net-snmp-configure master || exit $?
 make -s                                  || exit $?
 case "$MODE" in
     disable-set|mini*|read-only)
