@@ -8,7 +8,7 @@ environment:
     - BUILD: MSVCSTATIC64
     - BUILD: MinGW32
     - BUILD: MSYS2
-    # - BUILD: MinGW64
+    - BUILD: MinGW64
     - BUILD: Cygwin32
     - BUILD: Cygwin64
 
