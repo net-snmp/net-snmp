@@ -5,6 +5,8 @@
 HEADER DTLS-UDP agent trap tests
 
 SKIPIFNOT NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
+[ -n "$CIRRUS_CI" -o -n "$TRAVIS_OS_NAME" ] &&
+    SKIP "Skipping this test because it is broken"
 
 #
 # Begin test

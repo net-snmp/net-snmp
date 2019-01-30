@@ -228,15 +228,7 @@ done
 if [ "$opensslver" != "" ] &&
 	grep -rqw BIO_dgram_get_peer "${with_openssl:-/usr}/include/openssl" 2>/dev/null
 then
-    # to do: figure out why the TLSTCP and DTLS tests fail on Cirrus
-    # for FreeBSD
-    if [ -z "$CIRRUS_CI" ]; then
-        transports+=(DTLSUDP)
-    fi
-    # to do: figure out why one of the IPv6 TLSTCP test fails on Travis.
-    if [ -z "$CIRRUS_CI" ] && [ "${TRAVIS_OS_NAME}" != linux ]; then
-	transports+=(TLSTCP)
-    fi
+    transports+=(DTLSUDP TLSTCP)
 fi
 if $is_5_8_or_above; then
     [ -e "${with_openssl:-/usr}/openssl/aes.h" ] &&
