@@ -31990,6 +31990,8 @@ ac_config_files="$ac_config_files net-snmp-config:net-snmp-config.in"
 
 ac_config_files="$ac_config_files net-snmp-create-v3-user:net-snmp-create-v3-user.in"
 
+ac_config_files="$ac_config_files netsnmp.pc:netsnmp.pc.in netsnmp-agent.pc:netsnmp-agent.pc.in"
+
 ac_config_files="$ac_config_files dist/generation-scripts/gen-variables:dist/generation-scripts/gen-variables.in"
 
 ac_config_files="$ac_config_files local/snmpconf"
@@ -33013,6 +33015,8 @@ do
     "mibs/Makefile") CONFIG_FILES="$CONFIG_FILES mibs/Makefile:Makefile.top:mibs/Makefile.in:Makefile.rules" ;;
     "net-snmp-config") CONFIG_FILES="$CONFIG_FILES net-snmp-config:net-snmp-config.in" ;;
     "net-snmp-create-v3-user") CONFIG_FILES="$CONFIG_FILES net-snmp-create-v3-user:net-snmp-create-v3-user.in" ;;
+    "netsnmp.pc") CONFIG_FILES="$CONFIG_FILES netsnmp.pc:netsnmp.pc.in" ;;
+    "netsnmp-agent.pc") CONFIG_FILES="$CONFIG_FILES netsnmp-agent.pc:netsnmp-agent.pc.in" ;;
     "dist/generation-scripts/gen-variables") CONFIG_FILES="$CONFIG_FILES dist/generation-scripts/gen-variables:dist/generation-scripts/gen-variables.in" ;;
     "local/snmpconf") CONFIG_FILES="$CONFIG_FILES local/snmpconf" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
