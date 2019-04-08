@@ -352,6 +352,7 @@ static int      snmpv3_build(u_char ** pkt, size_t * pkt_len,
                              netsnmp_pdu *pdu);
 static int      snmp_parse_version(u_char *, size_t);
 static int      snmp_resend_request(struct session_list *slp,
+                                    netsnmp_request_list *orp,
                                     netsnmp_request_list *rp,
                                     int incr_retries);
 static void     register_default_handlers(void);
@@ -5742,7 +5743,7 @@ _sess_process_packet_handle_pdu(void *sessp, netsnmp_session * sp,
 	     * * inifinite resend                      
 	     */
 	    if (rp->retries <= sp->retries) {
-	      snmp_resend_request(slp, rp, TRUE);
+	      snmp_resend_request(slp, orp, rp, TRUE);
 	      break;
 	    } else {
 	      /* We're done with retries, so no longer waiting for a response */
@@ -6682,8 +6683,8 @@ snmp_timeout(void)
 }
 
 static int
-snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
-                    int incr_retries)
+snmp_resend_request(struct session_list *slp, netsnmp_request_list *orp,
+                    netsnmp_request_list *rp, int incr_retries)
 {
     struct snmp_internal_session *isp;
     netsnmp_session *sp;
@@ -6750,9 +6751,11 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
         sp->s_errno = errno;
         snmp_set_detail(strerror(errno));
-        if (rp->callback)
+        if (rp->callback) {
             rp->callback(NETSNMP_CALLBACK_OP_SEND_FAILED, sp,
                          rp->pdu->reqid, rp->pdu, rp->cb_data);
+            remove_request(isp, orp, rp);
+	}
         return -1;
     } else {
         netsnmp_get_monotonic_clock(&now);
@@ -6836,7 +6839,7 @@ snmp_sess_timeout(void *sessp)
                 freeme = rp;
                 continue;       /* don't update orp below */
             } else {
-                if (snmp_resend_request(slp, rp, TRUE)) {
+                if (snmp_resend_request(slp, orp, rp, TRUE)) {
                     break;
                 }
             }
