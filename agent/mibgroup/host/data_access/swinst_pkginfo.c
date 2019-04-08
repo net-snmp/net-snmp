@@ -189,7 +189,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 					  "%s-%s", dp->d_name, v );
 	    if (entry->swName_len >= sizeof(entry->swName))
 		entry->swName_len = sizeof(entry->swName)-1;
-	    entry->swType = (NULL != strstr( c, "system"))
+	    entry->swType = (c && (NULL != strstr( c, "system")))
 			    ? 2      /* operatingSystem */
 			    : 4;     /*  application    */
 
