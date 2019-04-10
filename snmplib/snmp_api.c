@@ -4028,6 +4028,17 @@ free_securityStateRef(netsnmp_pdu* pdu)
     pdu->securityStateRef = NULL;
 }
 
+/*
+ * This function is here to provide a separate call to
+ * free the securityStateRef memory. This is needed to prevent
+ * a double free if this memory is freed in snmp_free_pdu.
+ */
+void
+snmp_free_securityStateRef(netsnmp_pdu* pdu)
+{
+   free_securityStateRef(pdu);
+}
+
 #define ERROR_STAT_LENGTH 11
 
 int
