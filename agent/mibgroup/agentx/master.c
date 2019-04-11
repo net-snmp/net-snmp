@@ -280,6 +280,11 @@ agentx_got_response(int operation,
         netsnmp_free_delegated_cache(cache);
         return 0;
 
+    case NETSNMP_CALLBACK_OP_RESEND:
+        DEBUGMSGTL(("agentx/master", "resend on session %8p req=0x%x\n",
+                    session, (unsigned)reqid));
+        return 0;
+
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
         /*
          * This session is alive 
