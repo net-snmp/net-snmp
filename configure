@@ -3312,7 +3312,7 @@ ac_config_headers="$ac_config_headers include/net-snmp/net-snmp-config.h"
 #
 
 cat >>confdefs.h <<_ACEOF
-#define NETSNMP_CONFIGURE_OPTIONS "$ac_configure_args"
+#define NETSNMP_CONFIGURE_OPTIONS "${NETSNMP_CONFIGURE_OPTIONS-$ac_configure_args}"
 _ACEOF
 
 CONFIGURE_OPTIONS="\"$ac_configure_args\""
