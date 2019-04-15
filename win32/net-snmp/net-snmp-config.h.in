@@ -1709,11 +1709,11 @@ enum {
 #ifdef NETSNMP_USE_DLL
   #ifdef NETSNMP_DLL
     #if defined(_MSC_VER)
-      #define NETSNMP_IMPORT __declspec(dllexport)
+      #define NETSNMP_IMPORT extern __declspec(dllexport)
     #endif
   #else
     #if defined(_MSC_VER)
-      #define NETSNMP_IMPORT __declspec(dllimport)
+      #define NETSNMP_IMPORT extern __declspec(dllimport)
     #endif
   #endif   /* NETSNMP_DLL */
 #endif     /* NETSNMP_USE_DLL */
