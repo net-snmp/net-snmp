@@ -783,7 +783,7 @@ interface_ioctl_dot3stats_get (dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, co
 
 /*
  * @retval  0 success
- * @retval -1 ETHTOOL_GSET failed
+ * @retval -1 Both ETHTOOL_GLINKSETTINGS and ETHTOOL_GSET failed
  * @retval -2 function not supported if HAVE_LINUX_ETHTOOL_H not defined
  */
 
@@ -792,19 +792,36 @@ interface_ioctl_dot3stats_duplex_get(dot3StatsTable_rowreq_ctx *rowreq_ctx, int 
 
 #ifdef HAVE_LINUX_ETHTOOL_H
     dot3StatsTable_data *data = &rowreq_ctx->data;
-    struct ethtool_cmd edata;
     struct ifreq ifr;
+    uint8_t duplex;
     int err;
 
     DEBUGMSGTL(("access:dot3StatsTable:interface_ioctl_dot3Stats_duplex_get",
                 "called\n"));
 
-    memset(&edata, 0, sizeof (edata));
     memset(&ifr, 0, sizeof (ifr));
-    edata.cmd = ETHTOOL_GSET;
-    ifr.ifr_data = (char *)&edata;
+    {
+        struct ethtool_link_settings elinkset;
 
-    err = _dot3Stats_ioctl_get (fd, SIOCETHTOOL, &ifr, name);
+        memset(&elinkset, 0, sizeof(elinkset));
+        elinkset.cmd = ETHTOOL_GLINKSETTINGS;
+        ifr.ifr_data = (char *)&elinkset;
+        err = _dot3Stats_ioctl_get(fd, SIOCETHTOOL, &ifr, name);
+        if (err >= 0)
+            duplex = elinkset.duplex;
+    }
+
+    if (err < 0) {
+        struct ethtool_cmd edata;
+
+        memset(&edata, 0, sizeof(edata));
+        edata.cmd = ETHTOOL_GSET;
+        ifr.ifr_data = (char *)&edata;
+        err = _dot3Stats_ioctl_get(fd, SIOCETHTOOL, &ifr, name);
+        if (err >= 0)
+            duplex = edata.duplex;
+    }
+
     if (err < 0) {
         DEBUGMSGTL(("access:dot3StatsTable:interface_ioctl_dot3Stats_duplex_get",
                     "ETHTOOL_GSET failed\n"));
@@ -814,7 +831,7 @@ interface_ioctl_dot3stats_duplex_get(dot3StatsTable_rowreq_ctx *rowreq_ctx, int 
     
     if (err == 0) {
         rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSDUPLEXSTATUS_FLAG;
-        switch (edata.duplex) {
+        switch (duplex) {
         case DUPLEX_HALF:
             data->dot3StatsDuplexStatus = (u_long) DOT3STATSDUPLEXSTATUS_HALFDUPLEX;
             break;

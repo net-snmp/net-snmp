@@ -926,7 +926,8 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
 
 #ifdef HAVE_LINUX_ETHTOOL_H
 /**
- * Determines network interface speed from ETHTOOL_GSET
+ * Determines network interface speed from ETHTOOL_GLINKSETTINGS
+ * In case of failure revert to obsolete ETHTOOL_GSET
  */
 unsigned long long
 netsnmp_linux_interface_get_if_speed(int fd, const char *name,
@@ -934,35 +935,47 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
 {
     int ret;
     struct ifreq ifr;
-    struct ethtool_cmd edata;
-    uint16_t speed_hi;
-    uint32_t speed;
+    uint32_t speed = -1;
 
     memset(&ifr, 0, sizeof(ifr));
-    memset(&edata, 0, sizeof(edata));
-    edata.cmd = ETHTOOL_GSET;
-    
-    strlcpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
-    ifr.ifr_data = (char *) &edata;
-    
-    ret = ioctl(fd, SIOCETHTOOL, &ifr);
-    if (ret == -1 || edata.speed == 0) {
-        DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed (%d / %d)\n",
-                    ifr.ifr_name, ret, edata.speed));
-        return netsnmp_linux_interface_get_if_speed_mii(fd,name,defaultspeed);
+    {
+        struct ethtool_link_settings elinkset;
+
+        memset(&elinkset, 0, sizeof(elinkset));
+        elinkset.cmd = ETHTOOL_GLINKSETTINGS;
+        strlcpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+        ifr.ifr_data = (char *) &elinkset;
+        ret = ioctl(fd, SIOCETHTOOL, &ifr);
+        if (ret >= 0)
+            speed = elinkset.speed;
     }
 
+    if (ret < 0) {
+        struct ethtool_cmd edata;
+
+        memset(&edata, 0, sizeof(edata));
+        edata.cmd = ETHTOOL_GSET;
+        ifr.ifr_data = (char *) &edata;
+        ret = ioctl(fd, SIOCETHTOOL, &ifr);
+        if (ret >= 0) {
+            speed = edata.speed;
 #ifdef HAVE_STRUCT_ETHTOOL_CMD_SPEED_HI
-    speed_hi = edata.speed_hi;
-#else
-    speed_hi = 0;
+            speed |= edata.speed_hi << 16;
 #endif
-    speed = speed_hi << 16 | edata.speed;
+        }
+    }
+
+    if (ret < 0) {
+        DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed (%d / %d)\n",
+                    ifr.ifr_name, ret, speed));
+        return netsnmp_linux_interface_get_if_speed_mii(fd, name, defaultspeed);
+    }
+
     if (speed == 0xffff || speed == 0xffffffffUL /*SPEED_UNKNOWN*/)
         speed = defaultspeed;
     /* return in bps */
-    DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %#x -> %d\n",
-                ifr.ifr_name, speed_hi << 16 | edata.speed, speed));
+    DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %#x = %d\n",
+                ifr.ifr_name, speed, speed));
     return speed * 1000LL * 1000LL;
 }
 #endif
