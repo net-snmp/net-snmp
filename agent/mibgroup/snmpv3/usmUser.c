@@ -1123,10 +1123,12 @@ write_usmUserPrivKeyChange(int action,
             }
             plen = pai->proper_length;
             DEBUGMSGTL(("usmUser", "plen %d\n", plen));
-#if 0
+            /*
+             * ?? we store salt with key. See also the corresponding statement
+             * in apps/snmpusm.c.
+             */
             if (USM_CREATE_USER_PRIV_DES == pai->type)
-                plen *= 2; /* ?? we store salt with key */
-#endif
+                plen *= 2;
             if (var_val_len != 0 && var_val_len != (2 * plen)) {
                 DEBUGMSGTL(("usmUser", "%s: bad len. %" NETSNMP_PRIz "d != %d\n",
                             fname, var_val_len, 2 * plen));
