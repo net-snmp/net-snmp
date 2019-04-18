@@ -1091,7 +1091,7 @@ write_usmUserPrivKeyChange(int action,
     static unsigned char *oldkey;
     static size_t   oldkeylen;
     static int      resetOnFail;
-    int plen, alen;
+    int plen;
 
     if (name[USM_MIB_LENGTH - 1] == 9) {
         fname = fnPrivKey;
@@ -1121,17 +1121,17 @@ write_usmUserPrivKeyChange(int action,
                             fname));
                 return SNMP_ERR_GENERR;
             }
-            alen = sc_get_properlength(uptr->authProtocol,
-                                       uptr->authProtocolLen);
             plen = pai->proper_length;
-            DEBUGMSGTL(("usmUser", "plen %d, alen %d\n", plen, alen));
-#if 0
+            DEBUGMSGTL(("usmUser", "plen %d\n", plen));
+            /*
+             * ?? we store salt with key. See also the corresponding statement
+             * in apps/snmpusm.c.
+             */
             if (USM_CREATE_USER_PRIV_DES == pai->type)
-                plen *= 2; /* ?? we store salt with key */
-#endif
+                plen *= 2;
             if (var_val_len != 0 && var_val_len != (2 * plen)) {
                 DEBUGMSGTL(("usmUser", "%s: bad len. %" NETSNMP_PRIz "d != %d\n",
-                            fname, var_val_len, (2*alen)));
+                            fname, var_val_len, 2 * plen));
                 return SNMP_ERR_WRONGLENGTH;
             }
         }
@@ -1145,9 +1145,7 @@ write_usmUserPrivKeyChange(int action,
         }
         plen = sc_get_proper_priv_length(uptr->privProtocol,
                                          uptr->privProtocolLen);
-        alen = sc_get_properlength(uptr->authProtocol,
-                                   uptr->authProtocolLen);
-        DEBUGMSGTL(("usmUser", "plen %d, alen %d\n", plen, alen));
+        DEBUGMSGTL(("usmUser", "plen %d\n", plen));
         if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
                              usmNoPrivProtocol,
                              sizeof(usmNoPrivProtocol) / sizeof(oid)) ==
