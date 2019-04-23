@@ -722,11 +722,15 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         /* XXX: check securityLevel and ensure no NULL fingerprints are used */
 
         /* set up the needed SSL context */
-        tlsdata->ssl_context = ctx = sslctx_client_setup(TLSv1_method(), tlsdata);
+        tlsdata->ssl_context = ctx = sslctx_client_setup(TLS_method(), tlsdata);
         if (!ctx) {
             snmp_log(LOG_ERR, "failed to create TLS context\n");
             return NULL;
         }
+
+#ifdef SSL_CTX_set_max_proto_version
+        SSL_CTX_set_max_proto_version(tlsdata->ssl_context, 1);
+#endif
 
         /* RFC5953 Section 5.3.1:  Establishing a Session as a Client
            3)  Using the destTransportDomain and destTransportAddress values,
@@ -912,7 +916,11 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         }
 
         /* create the OpenSSL TLS context */
-        tlsdata->ssl_context = sslctx_server_setup(TLSv1_method());
+        tlsdata->ssl_context = sslctx_server_setup(TLS_method());
+#ifdef SSL_CTX_set_max_proto_version
+        if (tlsdata->ssl_context)
+            SSL_CTX_set_max_proto_version(tlsdata->ssl_context, 1);
+#endif
 
         t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
