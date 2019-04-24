@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "201807040000Z" -- July 4, 2018
+       LAST-UPDATED "201902140000Z" -- February 14, 2019
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -14,10 +14,19 @@
                              Los Angeles, CA 90094-2536
 
                      Tel:    +1 310-301-5800
-                     E-Mail: iana&iana.org"
+                     E-Mail: iana@iana.org"
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "201902140000Z"  -- February 14, 2019
+       DESCRIPTION  "Registration of new tunnelType 18."
+
+       REVISION     "201902080000Z"  -- February 8, 2019
+       DESCRIPTION  "Added missing commas for 295-296."
+
+       REVISION     "201901310000Z"  -- January 31, 2019
+       DESCRIPTION  "Registration of new IANAifTypes 295-296."
 
        REVISION     "201807040000Z"  -- July 4, 2018
        DESCRIPTION  "Added missing commas for 291-293."
@@ -658,7 +667,9 @@
                    otnOtsi (291), -- Optical Tributary Signal
                    otnOtuc (292), -- OTN OTUCn
                    otnOduc (293), -- OTN ODUC
-                   otnOtsig (294) -- OTN OTUC Signal
+                   otnOtsig (294), -- OTN OTUC Signal
+                   microwaveCarrierTermination (295), -- air interface of a single microwave carrier
+                   microwaveRadioLinkTerminal (296) -- radio link interface for one or several aggregated microwave carriers
                    }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
@@ -715,7 +726,8 @@ IANAtunnelType ::= TEXTUAL-CONVENTION
                    teredo(14),       -- Teredo encapsulation
                    ipHttps(15),      -- IPHTTPS
                    softwireMesh(16), -- softwire mesh tunnel
-                   dsLite(17)        -- DS-Lite tunnel
+                   dsLite(17),       -- DS-Lite tunnel
+                   aplusp(18)        -- A+P encapsulation
                }
 
    END
