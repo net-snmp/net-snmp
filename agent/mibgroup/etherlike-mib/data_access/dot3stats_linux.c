@@ -799,6 +799,7 @@ interface_ioctl_dot3stats_duplex_get(dot3StatsTable_rowreq_ctx *rowreq_ctx, int 
     DEBUGMSGTL(("access:dot3StatsTable:interface_ioctl_dot3Stats_duplex_get",
                 "called\n"));
 
+#ifdef ETHTOOL_GLINKSETTINGS
     memset(&ifr, 0, sizeof (ifr));
     {
         struct ethtool_link_settings elinkset;
@@ -810,6 +811,9 @@ interface_ioctl_dot3stats_duplex_get(dot3StatsTable_rowreq_ctx *rowreq_ctx, int 
         if (err >= 0)
             duplex = elinkset.duplex;
     }
+#else
+    err = -1;
+#endif
 
     if (err < 0) {
         struct ethtool_cmd edata;
