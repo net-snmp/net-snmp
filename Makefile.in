@@ -23,7 +23,7 @@ INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h \
 	dragonfly.h dynix.h \
 	freebsd2.h freebsd3.h freebsd4.h freebsd5.h freebsd6.h \
 	freebsd7.h freebsd8.h freebsd9.h freebsd10.h freebsd11.h \
-	freebsd12.h freebsd.h \
+	freebsd12.h freebsd13.h freebsd14.h freebsd.h \
         generic.h \
 	hpux.h irix.h linux.h mingw32.h mips.h netbsd.h osf5.h \
 	openbsd.h openbsd5.h openbsd4.h \
