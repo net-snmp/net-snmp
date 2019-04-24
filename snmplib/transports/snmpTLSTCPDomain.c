@@ -729,7 +729,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         }
 
 #ifdef SSL_CTX_set_max_proto_version
-        SSL_CTX_set_max_proto_version(tlsdata->ssl_context, 1);
+        SSL_CTX_set_max_proto_version(tlsdata->ssl_context, TLS1_VERSION);
 #endif
 
         /* RFC5953 Section 5.3.1:  Establishing a Session as a Client
@@ -919,7 +919,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         tlsdata->ssl_context = sslctx_server_setup(TLS_method());
 #ifdef SSL_CTX_set_max_proto_version
         if (tlsdata->ssl_context)
-            SSL_CTX_set_max_proto_version(tlsdata->ssl_context, 1);
+            SSL_CTX_set_max_proto_version(tlsdata->ssl_context, TLS1_VERSION);
 #endif
 
         t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
