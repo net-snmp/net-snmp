@@ -938,6 +938,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
     uint32_t speed = -1;
 
     memset(&ifr, 0, sizeof(ifr));
+#ifdef ETHTOOL_GLINKSETTINGS
     {
         struct ethtool_link_settings elinkset;
 
@@ -949,6 +950,9 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
         if (ret >= 0)
             speed = elinkset.speed;
     }
+#else
+    ret = -1;
+#endif
 
     if (ret < 0) {
         struct ethtool_cmd edata;
