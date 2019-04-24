@@ -682,6 +682,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             negate = 0;
             sourcep = NULL;    /* gcc gets confused about sourcep being used */
         } else {
+            char *strmask;
             if (*source == '!') {
                negate = 1;
                sourcep = source + 1;
@@ -691,7 +692,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             }
 
             /* Split the source/netmask parts */
-            char *strmask = strchr(sourcep, '/');
+            strmask = strchr(sourcep, '/');
             if (strmask != NULL)
                 /* Mask given. */
                 *strmask++ = '\0';
