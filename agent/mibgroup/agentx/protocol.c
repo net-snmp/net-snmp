@@ -1622,8 +1622,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
             return SNMPERR_ASN_PARSE_ERR;
 
         pdu->community_len = buf_len;
-        snmp_clone_mem((void **) &pdu->community,
-                       (void *) buffer, (unsigned) buf_len);
+        snmp_clone_mem((void **)&pdu->community, buffer, buf_len);
 		
         /* The NetSNMP API stuffs the context into the PDU's community string
          * field, when using the AgentX Protocol.  The rest of the code however,
