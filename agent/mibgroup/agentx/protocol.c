@@ -1033,8 +1033,8 @@ agentx_realloc_build(netsnmp_session * session, netsnmp_pdu *pdu,
 	*
 	***********************/
 
-int
-agentx_parse_int(u_char * data, u_int network_byte_order)
+static int
+agentx_parse_int(const u_char *data, u_int network_byte_order)
 {
     u_int           value = 0;
 
@@ -1071,8 +1071,8 @@ agentx_parse_int(u_char * data, u_int network_byte_order)
 }
 
 
-int
-agentx_parse_short(u_char * data, u_int network_byte_order)
+static int
+agentx_parse_short(const u_char *data, u_int network_byte_order)
 {
     u_short         value = 0;
 
@@ -1101,8 +1101,8 @@ agentx_parse_short(u_char * data, u_int network_byte_order)
 }
 
 
-u_char         *
-agentx_parse_oid(u_char * data, size_t * length, int *inc,
+const u_char *
+agentx_parse_oid(const u_char *data, size_t *length, int *inc,
                  oid * oid_buf, size_t * oid_len, u_int network_byte_order)
 {
     u_int           n_subid;
@@ -1111,7 +1111,7 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     int             i;
     int             int_offset;
     u_int          *int_ptr = (u_int *)oid_buf;
-    u_char         *buf_ptr = data;
+    const u_char   *buf_ptr = data;
 
     if (*length < 4) {
         DEBUGMSGTL(("agentx", "Incomplete Object ID\n"));
@@ -1223,9 +1223,9 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
 
 
 
-u_char         *
-agentx_parse_string(u_char * data, size_t * length,
-                    u_char * string, size_t * str_len,
+static const u_char *
+agentx_parse_string(const u_char *data, size_t *length,
+                    u_char *string, size_t *str_len,
                     u_int network_byte_order)
 {
     u_int           len;
@@ -1279,8 +1279,8 @@ agentx_parse_string(u_char * data, size_t * length,
     return data + (len + 4);
 }
 
-u_char         *
-agentx_parse_opaque(u_char * data, size_t * length, int *type,
+static const u_char *
+agentx_parse_opaque(const u_char *data, size_t *length, int *type,
                     u_char * opaque_buf, size_t * opaque_len,
                     u_int network_byte_order)
 {
@@ -1294,7 +1294,7 @@ agentx_parse_opaque(u_char * data, size_t * length, int *type,
     int             tmp;
     u_char         *buf;
 #endif
-    u_char         *const cp =
+    const u_char   *const cp =
         agentx_parse_string(data, length,
                             opaque_buf, opaque_len, network_byte_order);
 
@@ -1348,13 +1348,13 @@ agentx_parse_opaque(u_char * data, size_t * length, int *type,
 }
 
 
-u_char         *
-agentx_parse_varbind(u_char * data, size_t * length, int *type,
+static const u_char *
+agentx_parse_varbind(const u_char *data, size_t *length, int *type,
                      oid * oid_buf, size_t * oid_len,
                      u_char * data_buf, size_t * data_len,
                      u_int network_byte_order)
 {
-    u_char         *bufp = data;
+    const u_char   *bufp = data;
     u_int           int_val;
     struct counter64 tmp64;
 
@@ -1479,10 +1479,10 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
  *    (and hence we should have the full packet), any subsequent
  *    "running out of room" is indeed an error.
  */
-u_char         *
-agentx_parse_header(netsnmp_pdu *pdu, u_char * data, size_t * length)
+static const u_char *
+agentx_parse_header(netsnmp_pdu *pdu, const u_char *data, size_t *length)
 {
-    register u_char *bufp = data;
+    const u_char   *bufp = data;
     size_t          payload;
 
     if (*length < 20) {         /* Incomplete header */
@@ -1561,7 +1561,7 @@ int
 agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
              size_t len)
 {
-    register u_char *bufp = data;
+    const u_char   *bufp = data;
     u_char          buffer[65536];
     oid             oid_buffer[MAX_OID_LEN], end_oid_buf[MAX_OID_LEN];
     size_t          buf_len = sizeof(buffer);
