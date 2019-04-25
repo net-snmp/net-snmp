@@ -1625,15 +1625,14 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         snmp_clone_mem((void **) &pdu->community,
                        (void *) buffer, (unsigned) buf_len);
 		
-		/* The NetSNMP API stuffs the context into the PDU's community string
-		 * field, when using the AgentX Protocol.  The rest of the code however,
-		 * expects to find the context in the PDU's context field.  Therefore we
-		 * need to copy the context into the PDU's context fields.  */
-		if (pdu->community_len > 0 && pdu->contextName == NULL)
-		{
-			pdu->contextName    = strdup((char *) pdu->community);
-			pdu->contextNameLen = pdu->community_len;
-		}
+        /* The NetSNMP API stuffs the context into the PDU's community string
+         * field, when using the AgentX Protocol.  The rest of the code however,
+         * expects to find the context in the PDU's context field.  Therefore we
+         * need to copy the context into the PDU's context fields.  */
+        if (pdu->community_len > 0 && pdu->contextName == NULL) {
+            pdu->contextName    = strdup((char *) pdu->community);
+            pdu->contextNameLen = pdu->community_len;
+        }
 
         buf_len = sizeof(buffer);
     }
