@@ -1109,8 +1109,7 @@ agentx_parse_oid(const u_char *data, size_t *length, int *inc,
     u_int           prefix;
     u_int           tmp_oid_len;
     int             i;
-    int             int_offset;
-    u_int          *int_ptr = (u_int *)oid_buf;
+    oid            *oid_ptr;
     const u_char   *buf_ptr = data;
 
     if (*length < 4) {
@@ -1136,7 +1135,6 @@ agentx_parse_oid(const u_char *data, size_t *length, int *inc,
     prefix = data[1];
     if (inc)
         *inc = data[2];
-    int_offset = sizeof(oid)/4;
 
     buf_ptr += 4;
     *length -= 4;
@@ -1147,7 +1145,7 @@ agentx_parse_oid(const u_char *data, size_t *length, int *inc,
         /*
          * Null OID 
          */
-        memset(int_ptr, 0, 2 * sizeof(oid));
+        memset(oid_buf, 0, 2 * sizeof(oid));
         *oid_len = 2;
         DEBUGPRINTINDENT("dumpv_recv");
         DEBUGMSG(("dumpv_recv", "OID: NULL (0.0)\n"));
@@ -1158,7 +1156,7 @@ agentx_parse_oid(const u_char *data, size_t *length, int *inc,
     /*
      * Check that the expanded OID will fit in the buffer provided
      */
-    tmp_oid_len = (prefix ? n_subid + 5 : n_subid);
+    tmp_oid_len = n_subid + 5 * (prefix != 0);
     if (*oid_len < tmp_oid_len) {
         DEBUGMSGTL(("agentx", "Oversized Object ID (buf=%" NETSNMP_PRIz "d"
 		    " pdu=%d)\n", *oid_len, tmp_oid_len));
@@ -1166,46 +1164,27 @@ agentx_parse_oid(const u_char *data, size_t *length, int *inc,
         return NULL;
     }
 
-#ifdef WORDS_BIGENDIAN
-# define endianoff 1
-#else
-# define endianoff 0
-#endif
     if (*length < 4 * n_subid) {
         DEBUGMSGTL(("agentx", "Incomplete Object ID\n"));
         DEBUGINDENTLESS();
         return NULL;
     }
 
+    oid_ptr = oid_buf;
+
     if (prefix) {	 
-        if (int_offset == 2) {  	/* align OID values in 64 bit agent */  
-	    memset(int_ptr, 0, 10*sizeof(int_ptr[0])); 
-	    int_ptr[0+endianoff] = 1;
-	    int_ptr[2+endianoff] = 3;
-	    int_ptr[4+endianoff] = 6;
-	    int_ptr[6+endianoff] = 1;
-	    int_ptr[8+endianoff] = prefix;
-        } else { /* assume int_offset == 1 */
-	    int_ptr[0] = 1;
-	    int_ptr[1] = 3;
-	    int_ptr[2] = 6;
-	    int_ptr[3] = 1;
-	    int_ptr[4] = prefix;
-        }
-        int_ptr = int_ptr + (int_offset * 5);
+        *oid_ptr++ = 1;
+        *oid_ptr++ = 3;
+        *oid_ptr++ = 6;
+        *oid_ptr++ = 1;
+        *oid_ptr++ = prefix;
     }
 
-    for (i = 0; i < (int) (int_offset * n_subid); i = i + int_offset) {
+    for (i = 0; i < n_subid; i++) {
 	int x;
 
 	x = agentx_parse_int(buf_ptr, network_byte_order);
-	if (int_offset == 2) {
-            int_ptr[i+0] = 0;
-	    int_ptr[i+1] = 0;
-	    int_ptr[i+endianoff]=x;
-        } else {
-	    int_ptr[i] = x;
-        }
+        *oid_ptr++ = x;
         buf_ptr += 4;
         *length -= 4;
     }
