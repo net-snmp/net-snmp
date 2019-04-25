@@ -28189,8 +28189,8 @@ case "$netsnmp_cv_size_t_type" in
     char|short|int) netsnmp_PRIz="" ;;
     long) netsnmp_PRIz="l" ;;
     "long long")
-        case x$host_vendor in
-        xw64)
+        case x${host_cpu}-${host_vendor}-${host_os} in
+        x*-w64-*|xx86_64-pc-mingw32)
             # MinGW-w64
             netsnmp_PRIz="I64";;
         *)
