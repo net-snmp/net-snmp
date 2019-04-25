@@ -36,16 +36,6 @@ char copyright[] =
 	Regents of the University of California.  All rights reserved.\n";
 #endif /* not lint */
 
-#ifdef  INHERITED_CODE
-#ifndef lint
-#if 0
-static char sccsid[] = "from: @(#)main.c	8.4 (Berkeley) 3/1/94";
-#else
-static char *rcsid = "$OpenBSD: main.c,v 1.52 2005/02/10 14:25:08 itojun Exp $";
-#endif
-#endif /* not lint */
-#endif
-
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/utilities.h>

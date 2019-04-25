@@ -30,16 +30,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef  INHERITED_CODE
-#ifndef lint
-#if 0
-static char sccsid[] = "from: @(#)inet.c	8.4 (Berkeley) 4/20/94";
-#else
-static const char *rcsid = "$OpenBSD: inet.c,v 1.92 2005/02/10 14:25:08 itojun Exp $";
-#endif
-#endif /* not lint */
-#endif
-
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_UNISTD_H

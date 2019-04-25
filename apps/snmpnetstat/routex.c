@@ -30,16 +30,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef  INHERITED_CODE
-#ifndef lint
-#if 0
-static char sccsid[] = "from: @(#)route.c        8.3 (Berkeley) 3/9/94";
-#else
-static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $";
-#endif
-#endif /* not lint */
-#endif
-
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_SYS_TYPES_H
