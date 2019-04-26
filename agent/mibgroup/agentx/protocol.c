@@ -1033,8 +1033,8 @@ agentx_realloc_build(netsnmp_session * session, netsnmp_pdu *pdu,
 	*
 	***********************/
 
-int
-agentx_parse_int(u_char * data, u_int network_byte_order)
+static int
+agentx_parse_int(const u_char *data, u_int network_byte_order)
 {
     u_int           value = 0;
 
@@ -1071,8 +1071,8 @@ agentx_parse_int(u_char * data, u_int network_byte_order)
 }
 
 
-int
-agentx_parse_short(u_char * data, u_int network_byte_order)
+static int
+agentx_parse_short(const u_char *data, u_int network_byte_order)
 {
     u_short         value = 0;
 
@@ -1101,17 +1101,16 @@ agentx_parse_short(u_char * data, u_int network_byte_order)
 }
 
 
-u_char         *
-agentx_parse_oid(u_char * data, size_t * length, int *inc,
+const u_char *
+agentx_parse_oid(const u_char *data, size_t *length, int *inc,
                  oid * oid_buf, size_t * oid_len, u_int network_byte_order)
 {
     u_int           n_subid;
     u_int           prefix;
     u_int           tmp_oid_len;
     int             i;
-    int             int_offset;
-    u_int          *int_ptr = (u_int *)oid_buf;
-    u_char         *buf_ptr = data;
+    oid            *oid_ptr;
+    const u_char   *buf_ptr = data;
 
     if (*length < 4) {
         DEBUGMSGTL(("agentx", "Incomplete Object ID\n"));
@@ -1136,7 +1135,6 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     prefix = data[1];
     if (inc)
         *inc = data[2];
-    int_offset = sizeof(oid)/4;
 
     buf_ptr += 4;
     *length -= 4;
@@ -1147,7 +1145,7 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
         /*
          * Null OID 
          */
-        memset(int_ptr, 0, 2 * sizeof(oid));
+        memset(oid_buf, 0, 2 * sizeof(oid));
         *oid_len = 2;
         DEBUGPRINTINDENT("dumpv_recv");
         DEBUGMSG(("dumpv_recv", "OID: NULL (0.0)\n"));
@@ -1158,7 +1156,7 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     /*
      * Check that the expanded OID will fit in the buffer provided
      */
-    tmp_oid_len = (prefix ? n_subid + 5 : n_subid);
+    tmp_oid_len = n_subid + 5 * (prefix != 0);
     if (*oid_len < tmp_oid_len) {
         DEBUGMSGTL(("agentx", "Oversized Object ID (buf=%" NETSNMP_PRIz "d"
 		    " pdu=%d)\n", *oid_len, tmp_oid_len));
@@ -1166,46 +1164,27 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
         return NULL;
     }
 
-#ifdef WORDS_BIGENDIAN
-# define endianoff 1
-#else
-# define endianoff 0
-#endif
     if (*length < 4 * n_subid) {
         DEBUGMSGTL(("agentx", "Incomplete Object ID\n"));
         DEBUGINDENTLESS();
         return NULL;
     }
 
+    oid_ptr = oid_buf;
+
     if (prefix) {	 
-        if (int_offset == 2) {  	/* align OID values in 64 bit agent */  
-	    memset(int_ptr, 0, 10*sizeof(int_ptr[0])); 
-	    int_ptr[0+endianoff] = 1;
-	    int_ptr[2+endianoff] = 3;
-	    int_ptr[4+endianoff] = 6;
-	    int_ptr[6+endianoff] = 1;
-	    int_ptr[8+endianoff] = prefix;
-        } else { /* assume int_offset == 1 */
-	    int_ptr[0] = 1;
-	    int_ptr[1] = 3;
-	    int_ptr[2] = 6;
-	    int_ptr[3] = 1;
-	    int_ptr[4] = prefix;
-        }
-        int_ptr = int_ptr + (int_offset * 5);
+        *oid_ptr++ = 1;
+        *oid_ptr++ = 3;
+        *oid_ptr++ = 6;
+        *oid_ptr++ = 1;
+        *oid_ptr++ = prefix;
     }
 
-    for (i = 0; i < (int) (int_offset * n_subid); i = i + int_offset) {
+    for (i = 0; i < n_subid; i++) {
 	int x;
 
 	x = agentx_parse_int(buf_ptr, network_byte_order);
-	if (int_offset == 2) {
-            int_ptr[i+0] = 0;
-	    int_ptr[i+1] = 0;
-	    int_ptr[i+endianoff]=x;
-        } else {
-	    int_ptr[i] = x;
-        }
+        *oid_ptr++ = x;
         buf_ptr += 4;
         *length -= 4;
     }
@@ -1223,9 +1202,9 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
 
 
 
-u_char         *
-agentx_parse_string(u_char * data, size_t * length,
-                    u_char * string, size_t * str_len,
+static const u_char *
+agentx_parse_string(const u_char *data, size_t *length,
+                    u_char *string, size_t *str_len,
                     u_int network_byte_order)
 {
     u_int           len;
@@ -1279,8 +1258,8 @@ agentx_parse_string(u_char * data, size_t * length,
     return data + (len + 4);
 }
 
-u_char         *
-agentx_parse_opaque(u_char * data, size_t * length, int *type,
+static const u_char *
+agentx_parse_opaque(const u_char *data, size_t *length, int *type,
                     u_char * opaque_buf, size_t * opaque_len,
                     u_int network_byte_order)
 {
@@ -1294,7 +1273,7 @@ agentx_parse_opaque(u_char * data, size_t * length, int *type,
     int             tmp;
     u_char         *buf;
 #endif
-    u_char         *const cp =
+    const u_char   *const cp =
         agentx_parse_string(data, length,
                             opaque_buf, opaque_len, network_byte_order);
 
@@ -1348,13 +1327,13 @@ agentx_parse_opaque(u_char * data, size_t * length, int *type,
 }
 
 
-u_char         *
-agentx_parse_varbind(u_char * data, size_t * length, int *type,
+static const u_char *
+agentx_parse_varbind(const u_char *data, size_t *length, int *type,
                      oid * oid_buf, size_t * oid_len,
                      u_char * data_buf, size_t * data_len,
                      u_int network_byte_order)
 {
-    u_char         *bufp = data;
+    const u_char   *bufp = data;
     u_int           int_val;
     struct counter64 tmp64;
 
@@ -1479,10 +1458,10 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
  *    (and hence we should have the full packet), any subsequent
  *    "running out of room" is indeed an error.
  */
-u_char         *
-agentx_parse_header(netsnmp_pdu *pdu, u_char * data, size_t * length)
+static const u_char *
+agentx_parse_header(netsnmp_pdu *pdu, const u_char *data, size_t *length)
 {
-    register u_char *bufp = data;
+    const u_char   *bufp = data;
     size_t          payload;
 
     if (*length < 20) {         /* Incomplete header */
@@ -1561,7 +1540,7 @@ int
 agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
              size_t len)
 {
-    register u_char *bufp = data;
+    const u_char   *bufp = data;
     u_char          buffer[65536];
     oid             oid_buffer[MAX_OID_LEN], end_oid_buf[MAX_OID_LEN];
     size_t          buf_len = sizeof(buffer);
@@ -1572,9 +1551,11 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
     int             inc;        /* Inclusive SearchRange flag */
     int             type;       /* VarBind data type */
     size_t         *length = &len;
+    const int       dbgindent = debug_indent_get();
+    int             res = SNMP_ERR_NOERROR;
 
     if (pdu == NULL)
-        return (0);
+        return SNMP_ERR_NOERROR;
  
     if (!IS_AGENTX_VERSION(session->version))
         return SNMPERR_BAD_VERSION;
@@ -1619,29 +1600,26 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                    AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
         if (bufp == NULL)
-            return SNMPERR_ASN_PARSE_ERR;
+            goto parse_err;
 
         pdu->community_len = buf_len;
-        snmp_clone_mem((void **) &pdu->community,
-                       (void *) buffer, (unsigned) buf_len);
+        snmp_clone_mem((void **)&pdu->community, buffer, buf_len);
 		
-		/* The NetSNMP API stuffs the context into the PDU's community string
-		 * field, when using the AgentX Protocol.  The rest of the code however,
-		 * expects to find the context in the PDU's context field.  Therefore we
-		 * need to copy the context into the PDU's context fields.  */
-		if (pdu->community_len > 0 && pdu->contextName == NULL)
-		{
-			pdu->contextName    = strdup((char *) pdu->community);
-			pdu->contextNameLen = pdu->community_len;
-		}
+        /* The NetSNMP API stuffs the context into the PDU's community string
+         * field, when using the AgentX Protocol.  The rest of the code however,
+         * expects to find the context in the PDU's context field.  Therefore we
+         * need to copy the context into the PDU's context fields.  */
+        if (pdu->community_len > 0 && pdu->contextName == NULL) {
+            pdu->contextName    = strdup((char *) pdu->community);
+            pdu->contextNameLen = pdu->community_len;
+        }
 
         buf_len = sizeof(buffer);
     }
 
 #define AGENTX_NEEDLEN( len ) \
         if ( *length < len ) { \
-            DEBUGINDENTLESS(); \
-            return SNMPERR_ASN_PARSE_ERR; \
+            goto parse_err; \
         }
     DEBUGDUMPHEADER("recv", "PDU");
     switch (pdu->command) {
@@ -1660,20 +1638,16 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                 pdu->
                                 flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
-        if (bufp == NULL) {
-            DEBUGINDENTLESS();
-            return SNMPERR_ASN_PARSE_ERR;
-        }
+        if (bufp == NULL)
+            goto parse_err;
         DEBUGDUMPHEADER("recv", "Subagent Description");
         bufp = agentx_parse_string(bufp, length, buffer, &buf_len,
                                    pdu->
                                    flags &
                                    AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
-        if (bufp == NULL) {
-            DEBUGINDENTLESS();
-            return SNMPERR_ASN_PARSE_ERR;
-        }
+        if (bufp == NULL)
+            goto parse_err;
         snmp_pdu_add_variable(pdu, oid_buffer, oid_buf_len,
                               ASN_OCTET_STR, buffer, buf_len);
 
@@ -1716,16 +1690,12 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                 oid_buffer, &oid_buf_len,
                                 pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
-        if (bufp == NULL) {
-            DEBUGINDENTLESS();
-            return SNMPERR_ASN_PARSE_ERR;
-        }
+        if (bufp == NULL)
+            goto parse_err;
 
         if (pdu->range_subid) {
-            if (pdu->range_subid > oid_buf_len) {
-                DEBUGINDENTLESS();
-                return SNMPERR_ASN_PARSE_ERR;
-            }
+            if (pdu->range_subid > oid_buf_len)
+                goto parse_err;
             AGENTX_NEEDLEN(4);
             range_bound = agentx_parse_int(bufp, pdu->flags &
                                            AGENTX_FLAGS_NETWORK_BYTE_ORDER);
@@ -1776,20 +1746,14 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                     oid_buffer, &oid_buf_len,
                                     pdu->flags &
                                     AGENTX_FLAGS_NETWORK_BYTE_ORDER);
-            if (bufp == NULL) {
-                DEBUGINDENTLESS();
-                DEBUGINDENTLESS();
-                return SNMPERR_ASN_PARSE_ERR;
-            }
+            if (bufp == NULL)
+                goto parse_err;
             bufp = agentx_parse_oid(bufp, length, NULL,
                                     end_oid_buf, &end_oid_buf_len,
                                     pdu->flags &
                                     AGENTX_FLAGS_NETWORK_BYTE_ORDER);
-            if (bufp == NULL) {
-                DEBUGINDENTLESS();
-                DEBUGINDENTLESS();
-                return SNMPERR_ASN_PARSE_ERR;
-            }
+            if (bufp == NULL)
+                goto parse_err;
             end_oid_buf_len *= sizeof(oid);
             /*
              * 'agentx_parse_oid()' returns the number of sub_ids 
@@ -1854,11 +1818,8 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                         buffer, &buf_len,
                                         pdu->flags &
                                         AGENTX_FLAGS_NETWORK_BYTE_ORDER);
-            if (bufp == NULL) {
-                DEBUGINDENTLESS();
-                DEBUGINDENTLESS();
-                return SNMPERR_ASN_PARSE_ERR;
-            }
+            if (bufp == NULL)
+                goto parse_err;
             snmp_pdu_add_variable(pdu, oid_buffer, oid_buf_len,
                                   (u_char) type, buffer, buf_len);
 
@@ -1887,12 +1848,12 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                 oid_buffer, &oid_buf_len,
                                 pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         if (bufp == NULL)
-            return SNMPERR_ASN_PARSE_ERR;
+            goto parse_err;
         bufp = agentx_parse_string(bufp, length, buffer, &buf_len,
                                    pdu->flags &
                                    AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         if (bufp == NULL)
-            return SNMPERR_ASN_PARSE_ERR;
+            goto parse_err;
         snmp_pdu_add_variable(pdu, oid_buffer, oid_buf_len,
                               ASN_OCTET_STR, buffer, buf_len);
 
@@ -1908,20 +1869,25 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                 oid_buffer, &oid_buf_len,
                                 pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         if (bufp == NULL)
-            return SNMPERR_ASN_PARSE_ERR;
+            goto parse_err;
         snmp_add_null_var(pdu, oid_buffer, oid_buf_len);
 
         oid_buf_len = MAX_OID_LEN;
         break;
 
     default:
-        DEBUGINDENTLESS();
         DEBUGMSGTL(("agentx", "Unrecognised PDU type: %d\n",
                     pdu->command));
-        return SNMPERR_UNKNOWN_PDU;
+        res = SNMPERR_UNKNOWN_PDU;
     }
-    DEBUGINDENTLESS();
-    return SNMP_ERR_NOERROR;
+
+out:
+    debug_indent_add(dbgindent - debug_indent_get());
+    return res;
+
+parse_err:
+    res = SNMPERR_ASN_PARSE_ERR;
+    goto out;
 }
 #undef AGENTX_NEEDLEN
 
