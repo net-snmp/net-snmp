@@ -1229,9 +1229,7 @@ agentx_parse_string(const u_char *data, size_t *length,
     string[len] = '\0';
     *str_len = len;
 
-    len += 3;                   /* Extend the string length to include the padding */
-    len >>= 2;
-    len <<= 2;
+    len = (len + 3) & ~3UL; /* Include padding. */
 
     if (*length < len + 4) {
         DEBUGMSGTL(("agentx", "Packet too short for string padding (still too short: %d)\n",
