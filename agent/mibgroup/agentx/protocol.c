@@ -323,7 +323,7 @@ agentx_realloc_build_string(u_char ** buf, size_t * buf_len,
     }
 
     DEBUGDUMPSETUP("send", (*buf + ilen + 4), ((string_len + 3) / 4) * 4);
-    DEBUGMSG(("dumpv_send", "  String:\t%s\n", string));
+    DEBUGMSG(("dumpv_send", "  String:\t%.*s\n", (int)string_len, string));
     DEBUGINDENTLESS();
     DEBUGINDENTLESS();
     return 1;
