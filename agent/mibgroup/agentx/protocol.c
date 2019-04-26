@@ -694,16 +694,16 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
         pdu->flags &= ~(AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT);
     }
 
-	/* We've received a PDU that has specified a context.  NetSNMP however, uses
-	 * the pdu->community field to specify context when using the AgentX
-	 * protocol.  Therefore we need to copy the context name and length into the
-	 * pdu->community and pdu->community_len fields, respectively. */
-	if (pdu->contextName != NULL && pdu->community == NULL)
-	{	
-		pdu->community     = (u_char *) strdup(pdu->contextName);
-		pdu->community_len = pdu->contextNameLen;
-		pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
-	}
+    /* We've received a PDU that has specified a context.  NetSNMP however, uses
+     * the pdu->community field to specify context when using the AgentX
+     * protocol.  Therefore we need to copy the context name and length into the
+     * pdu->community and pdu->community_len fields, respectively. */
+    if (pdu->contextName != NULL && pdu->community == NULL)
+    {	
+        pdu->community     = (u_char *) strdup(pdu->contextName);
+        pdu->community_len = pdu->contextNameLen;
+        pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
+    }
 
     /*
      * Build the header (and context if appropriate).  
