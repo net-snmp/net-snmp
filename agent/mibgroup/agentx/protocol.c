@@ -1246,7 +1246,7 @@ agentx_parse_string(const u_char *data, size_t *length, struct rszbuf *string,
         return NULL;
     }
     memmove(string->buf, data + 4, len);
-    memset(string->buf + len, '\0', 1);
+    memset((char *)string->buf + len, '\0', 1);
     string->used = len;
 
     len = (len + 3) & ~3UL; /* Include padding. */
@@ -1556,17 +1556,17 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
     char            data_buffer[64];
     struct rszbuf   data_buf = {
         data_buffer,
-        -sizeof(data_buffer)
+        -(ssize_t)sizeof(data_buffer)
     };
     oid             oid_buffer[32];
     struct rszbuf   oid_buf = {
         oid_buffer,
-        -sizeof(oid_buffer)
+        -(ssize_t)sizeof(oid_buffer)
     };
     oid             end_oid_buffer[32];
     struct rszbuf   end_oid_buf = {
         end_oid_buffer,
-        -sizeof(end_oid_buffer)
+        -(ssize_t)sizeof(end_oid_buffer)
     };
     int             range_bound;        /* OID-range upper bound */
     int             inc;        /* Inclusive SearchRange flag */
