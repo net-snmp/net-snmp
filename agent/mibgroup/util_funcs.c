@@ -646,7 +646,9 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
 
     /* Cleanup */
     if (!CloseHandle(pi.hThread))
-      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle pi.hThread: %d\n",cmd));
+      DEBUGMSGTL(("util_funcs",
+		  "get_exec_pipes(%s) CloseHandle pi.hThread: %d\n",
+		  cmd, (unsigned int)GetLastError()));
 
    /* Close pipe handles to make sure that no handles to the write end of the
      * output pipe are maintained in this process or else the pipe will
@@ -655,17 +657,20 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
      */
 
     if (!CloseHandle(hOutputWrite)){
-      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hOutputWrite: %d\n",
+      DEBUGMSGTL(("util_funcs",
+		  "get_exec_pipes(%s) CloseHandle hOutputWrite: %d\n",
                   cmd, (unsigned int)GetLastError()));
       return 0;
     }
     if (!CloseHandle(hInputRead)) {
-      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hInputRead: %d\n",
+      DEBUGMSGTL(("util_funcs",
+		  "get_exec_pipes(%s) CloseHandle hInputRead: %d\n",
                   cmd, (unsigned int)GetLastError()));
       return 0;
     }
     if (!CloseHandle(hErrorWrite)) {
-      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hErrorWrite: %d\n",
+      DEBUGMSGTL(("util_funcs",
+		  "get_exec_pipes(%s) CloseHandle hErrorWrite: %d\n",
                   cmd, (unsigned int)GetLastError()));
       return 0;
     }
