@@ -316,9 +316,8 @@ init_winExtDLL(void)
 
     GetVersionEx(&s_versioninfo);
 
-    IsWow64Process =
-      (pfIsWow64Process)GetProcAddress(GetModuleHandle("kernel32"),
-                                       "IsWow64Process");
+    IsWow64Process = (pfIsWow64Process)(uintptr_t)
+	GetProcAddress(GetModuleHandle("kernel32"), "IsWow64Process");
     if (IsWow64Process)
         (*IsWow64Process)(GetCurrentProcess(), &is_wow64_process);
 
@@ -378,19 +377,21 @@ init_winExtDLL(void)
         /*
          * Store DLL name and functions in s_extension_dll_info array. 
          */
-        ext_dll_info->pfSnmpExtensionInit = (PFNSNMPEXTENSIONINIT)
+        ext_dll_info->pfSnmpExtensionInit = (PFNSNMPEXTENSIONINIT)(uintptr_t)
             GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionInit");
-        ext_dll_info->pfSnmpExtensionInitEx = (PFNSNMPEXTENSIONINITEX)
+        ext_dll_info->pfSnmpExtensionInitEx =
+	    (PFNSNMPEXTENSIONINITEX)(uintptr_t)
             GetProcAddress(ext_dll_info->dll_handle,
                            "SnmpExtensionInitEx");
         ext_dll_info->pfSnmpExtensionClose = (PFNSNMPEXTENSIONCLOSE)
             GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionClose");
-        ext_dll_info->pfSnmpExtensionQuery = (PFNSNMPEXTENSIONQUERY)
+        ext_dll_info->pfSnmpExtensionQuery = (PFNSNMPEXTENSIONQUERY)(uintptr_t)
             GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionQuery");
-        ext_dll_info->pfSnmpExtensionQueryEx = (PFNSNMPEXTENSIONQUERYEX)
+        ext_dll_info->pfSnmpExtensionQueryEx =
+	    (PFNSNMPEXTENSIONQUERYEX)(uintptr_t)
             GetProcAddress(ext_dll_info->dll_handle,
                            "SnmpExtensionQueryEx");
-        ext_dll_info->pfSnmpExtensionTrap = (PFNSNMPEXTENSIONTRAP)
+        ext_dll_info->pfSnmpExtensionTrap = (PFNSNMPEXTENSIONTRAP)(uintptr_t)
             GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionTrap");
 
 
