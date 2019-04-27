@@ -97,6 +97,7 @@ char           *snmp_getpassphrase(const char *prompt, int fvisible);
 
 #if defined(HAVE__CPUTS) && defined(HAVE__GETCH)
 #include <conio.h>
+#include <io.h>
 #define HAVE_GETPASS 1
 #define isatty _isatty
 static char    *getpass(const char *prompt);
