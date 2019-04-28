@@ -203,16 +203,26 @@ case "$(uname)" in
       opensslver=""
       opensshver=""
     ;;
-  MINGW64*|MSYS*)
+  MSYS*)
       options+=(--disable-embedded-perl)
       mibs+=(snmp-notification-mib)
       mibs+=(ucd-snmp/dlmod)
       mibs+=(ucd-snmp/extensible)
       mibs+=(winExtDLL)
       options+=(--without-perl-modules)
-      if [ -n "$APPVEYOR" ]; then
-          options+=("--build=x86_64-pc-mingw32")
-      fi
+      # The config.guess script in the Net-SNMP source tree is too old to
+      # recognize the MSYS2 environment. Hence the explicit --build=... option.
+      # See also
+      # http://git.savannah.gnu.org/cgit/automake.git/tree/lib/config.guess.
+      options+=("--build=x86_64-pc-mingw32")
+      ;;
+  MINGW64*)
+      options+=(--disable-embedded-perl)
+      mibs+=(snmp-notification-mib)
+      mibs+=(ucd-snmp/dlmod)
+      mibs+=(ucd-snmp/extensible)
+      mibs+=(winExtDLL)
+      options+=(--without-perl-modules)
     ;;
   *)
     echo "Unknown OS $(uname)."

@@ -33,10 +33,12 @@ C:\mingw\msys\1.0\bin\bash --login -c 'set -x; cd "${APPVEYOR_BUILD_FOLDER}"; ci
 goto eof
 
 :MSYS2
+set MSYSTEM=MSYS
 C:\msys64\usr\bin\bash --login -c 'set -x; cd "${APPVEYOR_BUILD_FOLDER}"; ci/build.sh'
 goto eof
 
 :MinGW64
+set MSYSTEM=MINGW64
 C:\msys64\usr\bin\bash --login -c 'set -x; cd "${APPVEYOR_BUILD_FOLDER}"; ci/build.sh'
 goto eof
 
