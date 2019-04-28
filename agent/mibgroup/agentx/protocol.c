@@ -1241,6 +1241,11 @@ agentx_parse_string(const u_char *data, size_t *length, struct rszbuf *string,
     u_int           len;
 
     len = agentx_parse_int(data, network_byte_order);
+    if (*length < len + 4) {
+        DEBUGMSGTL(("agentx", "Incomplete string (still too short: %d)\n",
+                    (int)*length));
+        return NULL;
+    }
     if (!increase_size(string, len + 1)) {
         DEBUGMSGTL(("agentx", "Out of memory\n"));
         return NULL;
