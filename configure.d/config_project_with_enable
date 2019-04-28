@@ -27,6 +27,8 @@ AC_ARG_WITH(endianness,
                                   cross-compiling.],
     [if test $with_endianness != "big" -a $with_endianness != "little" ; then
        AC_MSG_ERROR([Endianness must be big or little, not "$with_endianness".]);
+     else
+       AC_MSG_WARN([--with-endianness is obsolete])
      fi
 ])
 
