@@ -618,13 +618,13 @@ asn_parse_int(u_char * data,
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
     memset(&value.b, *bufp & 0x80 ? 0xff : 0, sizeof(value.b));
-#ifdef WORDS_BIGENDIAN
-    for (i = sizeof(long) - asn_length; asn_length--; i++)
-        value.b[i] = *bufp++;
-#else
-    for (i = asn_length - 1; asn_length--; i--)
-        value.b[i] = *bufp++;
-#endif
+    if (NETSNMP_BIGENDIAN) {
+        for (i = sizeof(long) - asn_length; asn_length--; i++)
+            value.b[i] = *bufp++;
+    } else {
+        for (i = asn_length - 1; asn_length--; i--)
+            value.b[i] = *bufp++;
+    }
 
     CHECK_OVERFLOW_S(value.l, 1);
 

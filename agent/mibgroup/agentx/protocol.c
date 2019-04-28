@@ -98,9 +98,7 @@ agentx_realloc_build_int(u_char ** buf, size_t * buf_len, size_t * out_len,
 {
     unsigned int    ivalue = value;
     size_t          ilen = *out_len;
-#ifdef WORDS_BIGENDIAN
     unsigned int    i = 0;
-#endif
 
     while ((*out_len + 4) >= *buf_len) {
         if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
@@ -109,22 +107,21 @@ agentx_realloc_build_int(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     if (network_order) {
-#ifndef WORDS_BIGENDIAN
-        value = ntohl(value);
-#endif
+        if (!NETSNMP_BIGENDIAN)
+            value = ntohl(value);
         memmove((*buf + *out_len), &value, 4);
         *out_len += 4;
     } else {
-#ifndef WORDS_BIGENDIAN
-        memmove((*buf + *out_len), &value, 4);
-        *out_len += 4;
-#else
-        for (i = 0; i < 4; i++) {
-            *(*buf + *out_len) = (u_char) value & 0xff;
-            (*out_len)++;
-            value >>= 8;
+        if (!NETSNMP_BIGENDIAN) {
+            memmove((*buf + *out_len), &value, 4);
+            *out_len += 4;
+        } else {
+            for (i = 0; i < 4; i++) {
+                *(*buf + *out_len) = (u_char) value & 0xff;
+                (*out_len)++;
+                value >>= 8;
+            }
         }
-#endif
     }
     DEBUGDUMPSETUP("send", (*buf + ilen), 4);
     DEBUGMSG(("dumpv_send", "  Integer:\t%u (0x%.2X)\n", ivalue,
@@ -139,25 +136,24 @@ agentx_build_int(u_char * bufp, u_int value, int network_byte_order)
     u_int           orig_val = value;
 
     if (network_byte_order) {
-#ifndef WORDS_BIGENDIAN
-        value = ntohl(value);
-#endif
+        if (!NETSNMP_BIGENDIAN)
+            value = ntohl(value);
         memmove(bufp, &value, 4);
     } else {
-#ifndef WORDS_BIGENDIAN
-        memmove(bufp, &value, 4);
-#else
-        *bufp = (u_char) value & 0xff;
-        value >>= 8;
-        bufp++;
-        *bufp = (u_char) value & 0xff;
-        value >>= 8;
-        bufp++;
-        *bufp = (u_char) value & 0xff;
-        value >>= 8;
-        bufp++;
-        *bufp = (u_char) value & 0xff;
-#endif
+        if (!NETSNMP_BIGENDIAN) {
+            memmove(bufp, &value, 4);
+        } else {
+            *bufp = (u_char) value & 0xff;
+            value >>= 8;
+            bufp++;
+            *bufp = (u_char) value & 0xff;
+            value >>= 8;
+            bufp++;
+            *bufp = (u_char) value & 0xff;
+            value >>= 8;
+            bufp++;
+            *bufp = (u_char) value & 0xff;
+        }
     }
     DEBUGDUMPSETUP("send", orig_bufp, 4);
     DEBUGMSG(("dumpv_send", "  Integer:\t%u (0x%.2X)\n", orig_val,
@@ -171,9 +167,7 @@ agentx_realloc_build_short(u_char ** buf, size_t * buf_len,
 {
     unsigned short  ivalue = value;
     size_t          ilen = *out_len;
-#ifdef WORDS_BIGENDIAN
     unsigned short  i = 0;
-#endif
 
     while ((*out_len + 2) >= *buf_len) {
         if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
@@ -182,22 +176,21 @@ agentx_realloc_build_short(u_char ** buf, size_t * buf_len,
     }
 
     if (network_order) {
-#ifndef WORDS_BIGENDIAN
-        value = ntohs(value);
-#endif
+        if (!NETSNMP_BIGENDIAN)
+            value = ntohs(value);
         memmove((*buf + *out_len), &value, 2);
         *out_len += 2;
     } else {
-#ifndef WORDS_BIGENDIAN
-        memmove((*buf + *out_len), &value, 2);
-        *out_len += 2;
-#else
-        for (i = 0; i < 2; i++) {
-            *(*buf + *out_len) = (u_char) value & 0xff;
-            (*out_len)++;
-            value >>= 8;
+        if (!NETSNMP_BIGENDIAN) {
+            memmove((*buf + *out_len), &value, 2);
+            *out_len += 2;
+        } else {
+            for (i = 0; i < 2; i++) {
+                *(*buf + *out_len) = (u_char) value & 0xff;
+                (*out_len)++;
+                value >>= 8;
+            }
         }
-#endif
     }
     DEBUGDUMPSETUP("send", (*buf + ilen), 2);
     DEBUGMSG(("dumpv_send", "  Short:\t%hu (0x%.2hX)\n", ivalue, ivalue));
@@ -1045,25 +1038,24 @@ agentx_parse_int(const u_char *data, u_int network_byte_order)
     DEBUGDUMPSETUP("recv", data, 4);
     if (network_byte_order) {
         memmove(&value, data, 4);
-#ifndef WORDS_BIGENDIAN
-        value = ntohl(value);
-#endif
+        if (!NETSNMP_BIGENDIAN)
+            value = ntohl(value);
     } else {
-#ifndef WORDS_BIGENDIAN
-        memmove(&value, data, 4);
-#else
-        /*
-         * The equivalent of the 'ntohl()' macro,
-         * except this macro is null on big-endian systems 
-         */
-        value += data[3];
-        value <<= 8;
-        value += data[2];
-        value <<= 8;
-        value += data[1];
-        value <<= 8;
-        value += data[0];
-#endif
+        if (!NETSNMP_BIGENDIAN) {
+            memmove(&value, data, 4);
+        } else {
+            /*
+             * The equivalent of the 'ntohl()' macro,
+             * except this macro is null on big-endian systems
+             */
+            value += data[3];
+            value <<= 8;
+            value += data[2];
+            value <<= 8;
+            value += data[1];
+            value <<= 8;
+            value += data[0];
+        }
     }
     DEBUGMSG(("dumpv_recv", "  Integer:\t%u (0x%.2X)\n", value, value));
 
@@ -1078,21 +1070,20 @@ agentx_parse_short(const u_char *data, u_int network_byte_order)
 
     if (network_byte_order) {
         memmove(&value, data, 2);
-#ifndef WORDS_BIGENDIAN
-        value = ntohs(value);
-#endif
+        if (!NETSNMP_BIGENDIAN)
+            value = ntohs(value);
     } else {
-#ifndef WORDS_BIGENDIAN
-        memmove(&value, data, 2);
-#else
-        /*
-         * The equivalent of the 'ntohs()' macro,
-         * except this macro is null on big-endian systems 
-         */
-        value += data[1];
-        value <<= 8;
-        value += data[0];
-#endif
+        if (!NETSNMP_BIGENDIAN) {
+            memmove(&value, data, 2);
+        } else {
+            /*
+             * The equivalent of the 'ntohs()' macro,
+             * except this macro is null on big-endian systems
+             */
+            value += data[1];
+            value <<= 8;
+            value += data[0];
+        }
     }
 
     DEBUGDUMPSETUP("recv", data, 2);

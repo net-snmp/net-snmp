@@ -37,10 +37,6 @@
  */
 
 /*
- * code uses WORDS_BIGENDIAN defined by configure now  -- WH 9/27/95 
- */
-
-/*
  * Compile-time includes 
  */
 
@@ -193,9 +189,9 @@ static void
 MDblock(MDptr MDp, const unsigned int *X)
 {
     register unsigned int tmp, A, B, C, D;      /* hpux sysv sun */
-#ifdef WORDS_BIGENDIAN
-    MDreverse(X);
-#endif
+
+    if (NETSNMP_BIGENDIAN)
+        MDreverse(X);
     A = MDp->buffer[0];
     B = MDp->buffer[1];
     C = MDp->buffer[2];
@@ -273,9 +269,8 @@ MDblock(MDptr MDp, const unsigned int *X)
     MDp->buffer[1] += B;
     MDp->buffer[2] += C;
     MDp->buffer[3] += D;
-#ifdef WORDS_BIGENDIAN
-    MDreverse(X);
-#endif
+    if (NETSNMP_BIGENDIAN)
+        MDreverse(X);
 }
 
 /*
