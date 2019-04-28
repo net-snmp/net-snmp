@@ -579,7 +579,11 @@ asn_parse_int(u_char * data,
     static const char *errpre = "parse int";
     register u_char *bufp = data;
     u_long          asn_length;
-    register long   value = 0;
+    int             i;
+    union {
+        long          l;
+        unsigned char b[sizeof(long)];
+    } value;
 
     if (NULL == data || NULL == datalength || NULL == type || NULL == intp) {
         ERROR_MSG("parse int: NULL pointer");
@@ -615,19 +619,23 @@ asn_parse_int(u_char * data,
     }
 
     *datalength -= (int) asn_length + (bufp - data);
-    if (*bufp & 0x80)
-        value = -1;             /* integer is negative */
 
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
-    while (asn_length--)
-        value = (value << 8) | *bufp++;
+    memset(&value.b, *bufp & 0x80 ? 0xff : 0, sizeof(value.b));
+#ifdef WORDS_BIGENDIAN
+    for (i = sizeof(long) - asn_length; asn_length--; i++)
+        value.b[i] = *bufp++;
+#else
+    for (i = asn_length - 1; asn_length--; i--)
+        value.b[i] = *bufp++;
+#endif
 
-    CHECK_OVERFLOW_S(value,1);
+    CHECK_OVERFLOW_S(value.l, 1);
 
-    DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2lX)\n", value, value));
+    DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2lX)\n", value.l, value.l));
 
-    *intp = value;
+    *intp = value.l;
     return bufp;
 }
 
