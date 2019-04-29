@@ -306,7 +306,7 @@ AC_CHECK_MEMBERS([struct tcpstat.tcp_rcvmemdrop],,,[
 #       struct tm
 #   Library:
 #
-AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct time.tm_isdst],,,[
+AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.tm_isdst],,,[
     AC_INCLUDES_DEFAULT()
     [
 #if TIME_WITH_SYS_TIME

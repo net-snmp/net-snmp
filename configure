@@ -29110,7 +29110,7 @@ _ACEOF
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct time" "tm_isdst" "ac_cv_member_struct_time_tm_isdst" "
+ac_fn_c_check_member "$LINENO" "struct tm" "tm_isdst" "ac_cv_member_struct_tm_tm_isdst" "
     $ac_includes_default
 
 #if TIME_WITH_SYS_TIME
@@ -29125,10 +29125,10 @@ ac_fn_c_check_member "$LINENO" "struct time" "tm_isdst" "ac_cv_member_struct_tim
 #endif
 
 "
-if test "x$ac_cv_member_struct_time_tm_isdst" = xyes; then :
+if test "x$ac_cv_member_struct_tm_tm_isdst" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_TIME_TM_ISDST 1
+#define HAVE_STRUCT_TM_TM_ISDST 1
 _ACEOF
 
 
