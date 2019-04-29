@@ -767,6 +767,9 @@
 /* Define to 1 if you have the <rpm/rpmts.h> header file. */
 #undef HAVE_RPM_RPMTS_H
 
+/* Define if timezone declared as a scalar in <time.h> */
+#undef HAVE_SCALAR_TIMEZONE
+
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
 
