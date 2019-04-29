@@ -1545,7 +1545,7 @@ asn_parse_objid(u_char * data,
      *  X is the value of the first subidentifier.
      *  Y is the value of the second subidentifier.
      */
-    subidentifier = (u_long) objid[1];
+    subidentifier = oidp - objid >= 2 ? objid[1] : 0;
     if (subidentifier == 0x2B) {
         objid[0] = 1;
         objid[1] = 3;
