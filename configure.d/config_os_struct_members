@@ -334,6 +334,26 @@ AC_CHECK_DECLS([daylight,timezone],,,[
 #endif
 ])
 
+AC_MSG_CHECKING([whether timezone is a scalar])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+]], [[
+int a[2];
+return &a[timezone] != NULL;
+]])], [AC_MSG_RESULT([yes])
+	 AC_DEFINE([HAVE_SCALAR_TIMEZONE], [1],
+            [Define if timezone declared as a scalar in <time.h>])],
+    [AC_MSG_RESULT([no])])
+
 #       struct timezone
 #   Library:
 #
