@@ -1176,6 +1176,14 @@
 /* define if SIOCGIFADDR exists in sys/ioctl.h */
 /* #undef SYS_IOCTL_H_HAS_SIOCGIFADDR */
 
+#if defined(_M_PPC) || defined(_M_MPPC)
+# define NETSNMP_BIGENDIAN 1
+#elif defined(_M_IX86) || defined(_M_X64)
+# define NETSNMP_BIGENDIAN 0
+#else
+#  error Unknown byte order
+#endif
+
 /* Mib-2 tree Info */
 /* These are the system information variables. */
 
