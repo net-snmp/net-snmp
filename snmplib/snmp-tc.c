@@ -254,7 +254,7 @@ ctime_to_timet(const char *str)
      *  Cope with timezone and DST
      */
 
-#ifdef HAVE_STRUCT_TIME_TM_ISDST
+#ifdef HAVE_STRUCT_TM_TM_ISDST
     tm.tm_isdst = !!daylight;
     tm.tm_sec -= timezone;
 #endif
