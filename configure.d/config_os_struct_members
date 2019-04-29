@@ -321,9 +321,7 @@ AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.tm_isdst],,,[
 #endif
     ]])
 
-#       extern timezone
-AC_MSG_CHECKING([extern timezone])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+AC_CHECK_DECLS([daylight,timezone],,,[
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -334,13 +332,6 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #  include <time.h>
 # endif
 #endif
-]], [[
-  return timezone;
-]])], [
-AC_MSG_RESULT([yes])
-AC_DEFINE([HAVE_TIMEZONE_VARIABLE], [1], [Define if a timezone variable is declared in <sys/time.h>])
-], [
-AC_MSG_RESULT([no])
 ])
 
 #       struct timezone

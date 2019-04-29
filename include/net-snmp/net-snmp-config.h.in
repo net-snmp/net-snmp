@@ -111,9 +111,17 @@
 /* Define to 1 if you have the <curses.h> header file. */
 #undef HAVE_CURSES_H
 
+/* Define to 1 if you have the declaration of `daylight', and to 0 if you
+   don't. */
+#undef HAVE_DECL_DAYLIGHT
+
 /* Define to 1 if you have the declaration of `sensors_get_all_subfeatures',
    and to 0 if you don't. */
 #undef HAVE_DECL_SENSORS_GET_ALL_SUBFEATURES
+
+/* Define to 1 if you have the declaration of `timezone', and to 0 if you
+   don't. */
+#undef HAVE_DECL_TIMEZONE
 
 /* define to 1 if you have IRE_CACHE defined in <inet/ip.h> header file. */
 #undef HAVE_DEFINED_IRE_CACHE
@@ -1310,9 +1318,6 @@
 
 /* Define to 1 if you have the `times' function. */
 #undef HAVE_TIMES
-
-/* Define if a timezone variable is declared in <sys/time.h> */
-#undef HAVE_TIMEZONE_VARIABLE
 
 /* Define to 1 if you have the `TLSv1_method' function. */
 #undef HAVE_TLSV1_METHOD
