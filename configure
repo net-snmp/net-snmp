@@ -29135,12 +29135,7 @@ _ACEOF
 fi
 
 
-#       extern timezone
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking extern timezone" >&5
-$as_echo_n "checking extern timezone... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
+ac_fn_c_check_decl "$LINENO" "daylight" "ac_cv_have_decl_daylight" "
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -29152,32 +29147,39 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 # endif
 #endif
 
-int
-main ()
-{
-
-  return timezone;
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-$as_echo "#define HAVE_TIMEZONE_VARIABLE 1" >>confdefs.h
-
-
+"
+if test "x$ac_cv_have_decl_daylight" = xyes; then :
+  ac_have_decl=1
 else
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
+  ac_have_decl=0
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_DAYLIGHT $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "timezone" "ac_cv_have_decl_timezone" "
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
+"
+if test "x$ac_cv_have_decl_timezone" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_TIMEZONE $ac_have_decl
+_ACEOF
+
 
 #       struct timezone
 #   Library:

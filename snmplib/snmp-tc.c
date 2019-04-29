@@ -163,7 +163,7 @@ date_n_time(const time_t * when, size_t * length)
     string[7] = 0;
     *length = 8;
 
-#if defined(HAVE_STRUCT_TM_TM_GMTOFF) || defined(HAVE_TIMEZONE_VARIABLE)
+#if defined(HAVE_STRUCT_TM_TM_GMTOFF) || HAVE_DECL_TIMEZONE
     /*
      * Timezone offset
      */
@@ -255,8 +255,14 @@ ctime_to_timet(const char *str)
      */
 
 #ifdef HAVE_STRUCT_TM_TM_ISDST
+#if HAVE_DECL_DAYLIGHT
     tm.tm_isdst = !!daylight;
+#else
+    tm.tm_isdst = 0;
+#endif
+#if HAVE_DECL_TIMEZONE
     tm.tm_sec -= timezone;
+#endif
 #endif
 
     return (mktime(&tm));
