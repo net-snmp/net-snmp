@@ -1100,9 +1100,9 @@ agentx_parse_short(const u_char *data, u_int network_byte_order)
  *        @used must be multiplied with sizeof(oid).
  */
 struct rszbuf {
-    void   *buf;
-    ssize_t size;
-    size_t  used;
+    void    *buf;
+    int      size;
+    unsigned used;
 };
 
 /* Free @rb->buf if it has been allocated dynamically. */
@@ -1552,17 +1552,17 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
     char            data_buffer[64];
     struct rszbuf   data_buf = {
         data_buffer,
-        -(ssize_t)sizeof(data_buffer)
+        -(int)sizeof(data_buffer)
     };
     oid             oid_buffer[32];
     struct rszbuf   oid_buf = {
         oid_buffer,
-        -(ssize_t)sizeof(oid_buffer)
+        -(int)sizeof(oid_buffer)
     };
     oid             end_oid_buffer[32];
     struct rszbuf   end_oid_buf = {
         end_oid_buffer,
-        -(ssize_t)sizeof(end_oid_buffer)
+        -(int)sizeof(end_oid_buffer)
     };
     int             range_bound;        /* OID-range upper bound */
     int             inc;        /* Inclusive SearchRange flag */
