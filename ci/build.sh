@@ -5,10 +5,15 @@ export NOAUTODEPS=1
 export SNMP_VERBOSE=1
 case $(uname) in
     MINGW64*|MSYS*)
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-ada
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-fortran
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-libgfortran
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-objc
 	pacman --noconfirm --sync --refresh
 	pacman --noconfirm --sync --needed diffutils
 	pacman --noconfirm --sync --needed make
 	pacman --noconfirm --sync --needed openssl-devel
+	pacman --noconfirm --sync --needed mingw-w64-libmariadbclient
 	pacman --noconfirm --sync --needed mingw-w64-x86_64-gcc
 	pacman --noconfirm --sync --needed mingw-w64-x86_64-openssl
 	;;
