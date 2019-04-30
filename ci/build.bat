@@ -25,6 +25,8 @@ cd ..
 goto eof
 
 :MinGW32
+rem Although the AppVeyor documentation mentions MinGW, MinGW is not present.
+rem See also https://www.appveyor.com/docs/windows-images-software/.
 mkdir C:\mingw
 curl --no-alpn -L "https://osdn.net/dl/mingw/mingw-get-0.6.3-mingw32-pre-20170905-1-bin.zip" -o C:\mingw\mingw-get.zip
 unzip C:\mingw\mingw-get.zip -d C:\mingw
