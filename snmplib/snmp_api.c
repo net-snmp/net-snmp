@@ -1097,13 +1097,12 @@ _sess_copy(netsnmp_session * in_session)
     }
 
     slp->internal = isp;
-    slp->session = (netsnmp_session *)malloc(sizeof(netsnmp_session));
+    slp->session = netsnmp_memdup(in_session, sizeof(netsnmp_session));
     if (slp->session == NULL) {
         snmp_sess_close(slp);
         in_session->s_snmp_errno = SNMPERR_MALLOC;
         return (NULL);
     }
-    memmove(slp->session, in_session, sizeof(netsnmp_session));
     session = slp->session;
 
     /*
@@ -1141,22 +1140,16 @@ _sess_copy(netsnmp_session * in_session)
      */
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     if (in_session->community_len != SNMP_DEFAULT_COMMUNITY_LEN) {
-        ucp = (u_char *) malloc(in_session->community_len);
-        if (ucp != NULL)
-            memmove(ucp, in_session->community, in_session->community_len);
+        ucp = netsnmp_memdup(in_session->community, in_session->community_len);
     } else {
         if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					NETSNMP_DS_LIB_COMMUNITY)) != NULL) {
             session->community_len = strlen(cp);
-            ucp = (u_char *) malloc(session->community_len);
-            if (ucp)
-                memmove(ucp, cp, session->community_len);
+            ucp = netsnmp_memdup(cp, session->community_len);
         } else {
 #ifdef NETSNMP_NO_ZEROLENGTH_COMMUNITY
             session->community_len = strlen(DEFAULT_COMMUNITY);
-            ucp = (u_char *) malloc(session->community_len);
-            if (ucp)
-                memmove(ucp, DEFAULT_COMMUNITY, session->community_len);
+            ucp = netsnmp_memdup(DEFAULT_COMMUNITY, session->community_len);
 #else
             ucp = (u_char *) strdup("");
 #endif
@@ -1177,40 +1170,37 @@ _sess_copy(netsnmp_session * in_session)
     }
 
     if (in_session->securityEngineIDLen > 0) {
-        ucp = (u_char *) malloc(in_session->securityEngineIDLen);
+        ucp = netsnmp_memdup(in_session->securityEngineID,
+                             in_session->securityEngineIDLen);
         if (ucp == NULL) {
             snmp_sess_close(slp);
             in_session->s_snmp_errno = SNMPERR_MALLOC;
             return (NULL);
         }
-        memmove(ucp, in_session->securityEngineID,
-                in_session->securityEngineIDLen);
         session->securityEngineID = ucp;
 
     }
 
     if (in_session->contextEngineIDLen > 0) {
-        ucp = (u_char *) malloc(in_session->contextEngineIDLen);
+        ucp = netsnmp_memdup(in_session->contextEngineID,
+                             in_session->contextEngineIDLen);
         if (ucp == NULL) {
             snmp_sess_close(slp);
             in_session->s_snmp_errno = SNMPERR_MALLOC;
             return (NULL);
         }
-        memmove(ucp, in_session->contextEngineID,
-                in_session->contextEngineIDLen);
         session->contextEngineID = ucp;
     } else if (in_session->securityEngineIDLen > 0) {
         /*
          * default contextEngineID to securityEngineIDLen if defined 
          */
-        ucp = (u_char *) malloc(in_session->securityEngineIDLen);
+        ucp = netsnmp_memdup(in_session->securityEngineID,
+                             in_session->securityEngineIDLen);
         if (ucp == NULL) {
             snmp_sess_close(slp);
             in_session->s_snmp_errno = SNMPERR_MALLOC;
             return (NULL);
         }
-        memmove(ucp, in_session->securityEngineID,
-                in_session->securityEngineIDLen);
         session->contextEngineID = ucp;
         session->contextEngineIDLen = in_session->securityEngineIDLen;
     }
@@ -2935,13 +2925,12 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
          */
         pdu->reqid = 1;         /* give a bogus non-error reqid for traps */
         if (pdu->enterprise_length == SNMP_DEFAULT_ENTERPRISE_LENGTH) {
-            pdu->enterprise = (oid *) malloc(sizeof(DEFAULT_ENTERPRISE));
+            pdu->enterprise = netsnmp_memdup(DEFAULT_ENTERPRISE,
+                                             sizeof(DEFAULT_ENTERPRISE));
             if (pdu->enterprise == NULL) {
                 session->s_snmp_errno = SNMPERR_MALLOC;
                 return -1;
             }
-            memmove(pdu->enterprise, DEFAULT_ENTERPRISE,
-                    sizeof(DEFAULT_ENTERPRISE));
             pdu->enterprise_length =
                 sizeof(DEFAULT_ENTERPRISE) / sizeof(oid);
         }
@@ -2988,13 +2977,12 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                 session->s_snmp_errno = SNMPERR_BAD_COMMUNITY;
                 return -1;
             }
-            pdu->community = (u_char *) malloc(session->community_len);
+            pdu->community = netsnmp_memdup(session->community,
+                                            session->community_len);
             if (pdu->community == NULL) {
                 session->s_snmp_errno = SNMPERR_MALLOC;
                 return -1;
             }
-            memmove(pdu->community,
-                    session->community, session->community_len);
             pdu->community_len = session->community_len;
         }
 #else                           /* !NETSNMP_NO_ZEROLENGTH_COMMUNITY */
@@ -3009,13 +2997,12 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                         session->community, session->community_len);
             } else {
                 SNMP_FREE(pdu->community);
-                pdu->community = (u_char *) malloc(session->community_len);
+                pdu->community = netsnmp_memdup(session->community,
+                                                session->community_len);
                 if (pdu->community == NULL) {
                     session->s_snmp_errno = SNMPERR_MALLOC;
                     return -1;
                 }
-                memmove(pdu->community,
-                        session->community, session->community_len);
             }
             pdu->community_len = session->community_len;
         }
@@ -4326,12 +4313,11 @@ _snmp_parse(void *sessp,
         pdu->community = (u_char *) 0;
         if (community_length) {
             pdu->community_len = community_length;
-            pdu->community = (u_char *) malloc(community_length);
+            pdu->community = netsnmp_memdup(community, community_length);
             if (pdu->community == NULL) {
                 session->s_snmp_errno = SNMPERR_MALLOC;
                 return -1;
             }
-            memmove(pdu->community, community, community_length);
         }
         if (session->authenticator) {
             data = session->authenticator(data, &length,
@@ -4582,13 +4568,11 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                                &pdu->enterprise_length);
         if (data == NULL)
             return -1;
-        pdu->enterprise =
-            (oid *) malloc(pdu->enterprise_length * sizeof(oid));
+        pdu->enterprise = netsnmp_memdup(objid,
+                                         pdu->enterprise_length * sizeof(oid));
         if (pdu->enterprise == NULL) {
             return -1;
         }
-        memmove(pdu->enterprise, objid,
-                pdu->enterprise_length * sizeof(oid));
 
         /*
          * agent-addr 
@@ -4803,11 +4787,9 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
             if (!p)
                 goto fail;
             vp->val_len *= sizeof(oid);
-            vp->val.objid = (oid *) malloc(vp->val_len);
-            if (vp->val.objid == NULL) {
+            vp->val.objid = netsnmp_memdup(objid, vp->val_len);
+            if (vp->val.objid == NULL)
                 goto fail;
-            }
-            memmove(vp->val.objid, objid, vp->val_len);
             break;
         case SNMP_NOSUCHOBJECT:
         case SNMP_NOSUCHINSTANCE:
@@ -4904,8 +4886,7 @@ snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp, size_t * length)
     }
 
     if (tmp_buf_len) {
-        pdu->contextName = (char *) malloc(tmp_buf_len);
-        memmove(pdu->contextName, tmp_buf, tmp_buf_len);
+        pdu->contextName = netsnmp_memdup(tmp_buf, tmp_buf_len);
         pdu->contextNameLen = tmp_buf_len;
     } else {
         pdu->contextName = strdup("");

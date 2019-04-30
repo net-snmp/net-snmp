@@ -1194,10 +1194,9 @@ snmpv3_clone_engineID(u_char ** dest, size_t * destlen, u_char * src,
     *destlen = 0;
 
     if (srclen && src) {
-        *dest = (u_char *) malloc(srclen);
+        *dest = netsnmp_memdup(src, srclen);
         if (*dest == NULL)
             return 0;
-        memmove(*dest, src, srclen);
         *destlen = srclen;
     }
     return *destlen;

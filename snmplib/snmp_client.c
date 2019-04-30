@@ -106,6 +106,7 @@ SOFTWARE.
 #include <net-snmp/library/snmp_logging.h>
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/large_fd_set.h>
+#include <net-snmp/library/tools.h>
 #include <net-snmp/pdu_api.h>
 
 netsnmp_feature_child_of(snmp_client_all, libnetsnmp)
@@ -366,10 +367,9 @@ _clone_pdu_header(netsnmp_pdu *pdu)
     if (!pdu)
         return NULL;
 
-    newpdu = (netsnmp_pdu *) malloc(sizeof(netsnmp_pdu));
+    newpdu = netsnmp_memdup(pdu, sizeof(netsnmp_pdu));
     if (!newpdu)
         return NULL;
-    memmove(newpdu, pdu, sizeof(netsnmp_pdu));
 
     /*
      * reset copied pointers if copy fails 
