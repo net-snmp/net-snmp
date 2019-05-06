@@ -12,8 +12,7 @@ case $(uname) in
 	pacman --noconfirm --sync --refresh
 	pacman --noconfirm --sync --needed diffutils
 	pacman --noconfirm --sync --needed make
-	pacman --noconfirm --sync --needed openssl-devel
-	pacman --noconfirm --sync --needed mingw-w64-libmariadbclient
+	pacman --noconfirm --sync --needed mingw-w64-x86_64-libmariadbclient
 	pacman --noconfirm --sync --needed mingw-w64-x86_64-gcc
 	pacman --noconfirm --sync --needed mingw-w64-x86_64-openssl
 	;;
