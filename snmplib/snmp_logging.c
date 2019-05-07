@@ -1254,6 +1254,7 @@ log_handler_file(    netsnmp_log_handler* logh, int pri, const char *str)
 {
     FILE           *fhandle;
     char            sbuf[40];
+    int             len = strlen( str );
 
     /*
      * We use imagic to save information about whether the next output
@@ -1282,7 +1283,11 @@ log_handler_file(    netsnmp_log_handler* logh, int pri, const char *str)
     }
     fprintf(fhandle, "%s%s", sbuf, str);
     fflush(fhandle);
-    logh->imagic = str[strlen(str) - 1] == '\n';
+    if (len > 0) {
+        logh->imagic = str[len - 1] == '\n';
+    } else {
+        logh->imagic = 0;
+    }
     return 1;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_FILE */
