@@ -221,7 +221,7 @@ agentx_got_response(int operation,
         /* response is too late, free the cache */
         if (magic)
             netsnmp_free_delegated_cache((netsnmp_delegated_cache*) magic);
-        return 0;
+        return 1;
     }
     requests = cache->requests;
 
