@@ -17,6 +17,7 @@ addons:
       - dpkg
       - gcc
       - libatm-dev
+      - libmariadbclient-dev
       - libperl-dev
       - libsensors4-dev
       - libssh2-1-dev
