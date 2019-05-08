@@ -61,8 +61,8 @@ libsensorsver="$(for p in libsensors4-devel; do
 echo "libsensorsver=$libsensorsver"
 
 if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
-    case "$(uname)" in
-	Linux*|MSYS*|MINGW64*)
+    case "$(uname -a)" in
+	Linux*)
 	    opensslver="$(
 	    for p in openssl-devel libopenssl-devel libressl-devel; do
 	      rpm -q --qf '%{version}\n' $p 2>/dev/null |
@@ -71,9 +71,15 @@ if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
 	    dpkg-query --show -f '${Version}\n' libssl-dev 2>/dev/null;
 	    pacman -Q mingw-w64-x86_64-openssl 2>/dev/null |
 	      sed -n 's/^[^[:blank:]]*[[:blank:]]*//p')";;
+	MSYS*x86_64*)
+	    opensslver="$(pacman -Q openssl-devel 2>/dev/null |
+	      sed -n 's/^[^[:blank:]]*[[:blank:]]*//p')";;
+	MINGW64*)
+	    opensslver="$(pacman -Q mingw-w64-x86_64-openssl 2>/dev/null |
+	      sed -n 's/^[^[:blank:]]*[[:blank:]]*//p')";;
 	*)
 	    opensslver=1.0;;
-	esac
+    esac
 fi
 echo "opensslver=$opensslver"
 opensshver="$(for p in openssh-devel libssh2-devel libssh-devel; do
@@ -320,10 +326,10 @@ if [ -e /usr/include/krb5.h ]; then
     security_modules+=(ksm)
 fi
 case "$(uname)" in
-    MINGW32*)
-        # Do not enable Python support on MinGW32 because on MinGW32 the
-        # compiler with which Python has been built (Visual C++) is incompatible
-	# with the MinGW32 gcc compiler.
+    MSYS*|MINGW*)
+	# Do not enable Python support on MinGW32 nor for the MSYS build
+	# environment because the Python interpreter has been built on these
+	# environments with Visual C++. That compiler is incompatible with gcc.
         ;;
     *)
 	# Do not enable Python support for Cirrus CI because on Cirrus linking
