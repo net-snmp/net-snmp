@@ -61,6 +61,7 @@ typedef __u8 u8;           /* ditto */
 
 #include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable_constants.h"
+#include "ip-mib/data_access/ipaddress_ioctl.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -603,6 +604,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     netsnmp_interface_entry *entry = NULL;
     static char     scan_expected = 0;
     int             fd;
+    int             interfaces = 0;
+    struct ifconf   ifc;
 #ifdef NETSNMP_ENABLE_IPV6
     netsnmp_container *addr_container;
 #endif
@@ -663,6 +666,16 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         }
     }
 
+    interfaces = netsnmp_access_ipaddress_ioctl_get_interface_count(fd, &ifc);
+    if (interfaces < 0) {
+        snmp_log(LOG_ERR,"get interface count failed\n");
+        fclose(devin);
+        close(fd);
+        return -2;
+    }
+    netsnmp_assert(NULL != ifc.ifc_buf);
+
+
     /*
      * The rest of the file provides the statistics for each interface.
      * Read in each line in turn, isolate the interface name
@@ -700,8 +713,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          */
         *stats++ = 0; /* null terminate name */
 
-        if_index = netsnmp_arch_interface_index_find(ifstart);
-
         /*
          * set address type flags.
          * the only way I know of to check an interface for
@@ -709,9 +720,10 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * knows a better way, put it here!
          */
 #ifdef NETSNMP_ENABLE_IPV6
+        if_index = netsnmp_arch_interface_index_find(ifstart);
         _arch_interface_has_ipv6(if_index, &flags, addr_container);
 #endif
-        netsnmp_access_interface_ioctl_has_ipv4(fd, ifstart, 0, &flags);
+        netsnmp_access_interface_ioctl_has_ipv4(fd, ifstart, 0, &flags, &ifc);
 
         /*
          * do we only want one address type?
@@ -735,6 +747,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                                                     NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);
             fclose(devin);
             close(fd);
+            free(ifc.ifc_buf);
             return -3;
         }
         entry->ns_flags = flags; /* initial flags; we'll set more later */
@@ -902,6 +915,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 #endif
     fclose(devin);
     close(fd);
+    free(ifc.ifc_buf);
     return 0;
 }
 
