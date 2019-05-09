@@ -12,6 +12,10 @@ ssl_include_path() {
     esac
 }
 
+freebsd_pkg_version() {
+    pkg info "$1" 2>/dev/null | sed -n 's/^Version[[:blank:]]*:[[:blank:]]*//p'
+}
+
 branch_name="$1"
 shift
 
@@ -62,6 +66,8 @@ echo "libsensorsver=$libsensorsver"
 
 if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
     case "$(uname -a)" in
+	FreeBSD*)
+	    opensslver="$(freebsd_pkg_version openssl111 2>/dev/null)";;
 	Linux*)
 	    opensslver="$(
 	    for p in openssl-devel libopenssl-devel libressl-devel; do
@@ -82,7 +88,12 @@ if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
     esac
 fi
 echo "opensslver=$opensslver"
-opensshver="$(for p in openssh-devel libssh2-devel libssh-devel; do
+
+case "$(uname -a)" in
+    FreeBSD*)
+	opensshver="$(freebsd_pkg_version libssh2 2>/dev/null)";;
+    Linux*)
+	opensshver="$(for p in openssh-devel libssh2-devel libssh-devel; do
                 rpm -q --qf '%{version}\n' $p 2>/dev/null |
                   grep -v 'not installed';
               done |
@@ -92,9 +103,15 @@ opensshver="$(for p in openssh-devel libssh2-devel libssh-devel; do
               done | grep -v '^$';
               pacman -Q mingw-w64-x86_64-libssh2 2>/dev/null |
                 sed -n 's/^[^[:blank:]]*[[:blank:]]*//p')"
+	;;
+esac
 echo "opensshver=$opensshver"
 
-perldevver="$(for p in perl; do
+case "$(uname -a)" in
+    FreeBSD*)
+	perldevver="$(freebsd_pkg_version perl5 2>/dev/null)";;
+    Linux*)
+	perldevver="$(for p in perl; do
                 rpm -q --qf '%{version}\n' $p 2>/dev/null |
                   grep -v 'not installed';
               done |
@@ -104,6 +121,8 @@ perldevver="$(for p in perl; do
               done | grep -v '^$';
               pacman -Q mingw-w64-x86_64-perl 2>/dev/null |
                 sed -n 's/^[^[:blank:]]*[[:blank:]]*//p')"
+	;;
+esac
 echo "perldevver=$perldevver"
 
 options=()
@@ -259,7 +278,7 @@ case "$(uname)" in
               ;;
       esac
       options+=(--disable-embedded-perl --without-perl-modules)
-      options+=(--with-out-mib-modules=mibII/ipv6)
+      options+=("--with-out-mib-modules=mibII/ipv6")
     ;;
   CYGWIN*)
       export ENV_SEPARATOR=":"
