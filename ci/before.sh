@@ -22,9 +22,10 @@ EOF
 
     pkg install -y bash
     pkg install -y gawk
-    #pkg install -y krb5 krb5-appl krb5-devel
+    pkg install -y krb5 krb5-appl krb5-devel
     pkg install -y libssh2
-    pkg install -y p5-ExtUtils-MakeMaker
+    #pkg install -y openssl111
+    pkg install -y perl5 perl5-devel p5-ExtUtils-MakeMaker
     pkg install -y pkgconf
     pkg install -y py27-setuptools
     if [ ! -e /usr/bin/perl ]; then
