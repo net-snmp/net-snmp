@@ -533,6 +533,15 @@ parse_config_outputOption(const char *token, char *cptr)
   }
 }
 
+void
+parse_config_addForwarderInfo(const char *token, char *cptr)
+{
+    if (netsnmp_ds_parse_boolean(cptr) == 1) {
+        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_ADD_FORWARDER_INFO, 1);
+    }
+}
+
 static void
 snmptrapd_main_loop(void)
 {
@@ -707,6 +716,10 @@ main(int argc, char *argv[])
 
     register_config_handler("snmptrapd", "outputOption",
                             parse_config_outputOption, NULL, "string");
+
+    register_config_handler("snmptrapd", "addForwarderInfo",
+                            parse_config_addForwarderInfo, NULL,
+                            "(1|yes|true|0|no|false)");
 
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
 #ifdef WIN32
