@@ -104,6 +104,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_DISABLE_V2c         44 /* disable SNMPv2c */
 #define NETSNMP_DS_LIB_DISABLE_V3          45 /* disable SNMPv3 */
 #define NETSNMP_DS_LIB_FILTER_SOURCE       46 /* filter pkt by source IP */
+#define NETSNMP_DS_LIB_ADD_FORWARDER_INFO  47 /* add info about forwarder to SNMP packets */
 #define NETSNMP_DS_LIB_MAX_BOOL_ID         48 /* match NETSNMP_DS_MAX_SUBIDS */
 
     /*
