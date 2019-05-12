@@ -12,6 +12,7 @@ my $version = "unknown";
 my $config;
 my $sdk = 0;
 my $linktype;
+my $blumenthal_aes;
 my $prefix;
 my $prefixdos;
 my $openssl = 0;
@@ -25,6 +26,7 @@ GetOptions      ('config=s' => \$config,
                  'with-sdk' => \$sdk,
                  'linktype=s' => \$linktype,
                  'destdir=s' => \$prefix,
+                 'enable-blumenthal-aes' => \$blumenthal_aes,
                  'prefix=s' => \$prefix,
                  'with-ssl' => \$openssl,
                  'with-sslincdir=s' => \$opensslincdir,
@@ -46,6 +48,7 @@ Options:
     --linktype=[static | dynamic]    Build static or dynamic (DLL)
     --prefix=\"path\"                  Set INSTALL_BASE path (install path)
     --destdir=\"path\"                 Same as --prefix
+    --enable-blumenthal-aes          Enable Blumenthal AES support
     --with-ssl                       Link against OpenSSL
     --with-sslincdir=\"path\"          OpenSSL include path
     --with-ssllibdir=\"path\"          OpenSSL library path
@@ -259,6 +262,9 @@ if ($openssl == 1) {
 } else {
     $net_snmp_config_subs{"ssl"} = [ "^.*#undef NETSNMP_USE_INTERNAL_MD5.*", "#define NETSNMP_USE_INTERNAL_MD5 1" ];
 }
+if ($blumenthal_aes) {
+    $net_snmp_config_subs{"baes"} = [ "^.*#undef NETSNMP_DRAFT_BLUMENTHAL_AES_04.*", "#define NETSNMP_DRAFT_BLUMENTHAL_AES_04 1" ];
+}
 if ($b_ipv6 == 1) {
     $net_snmp_config_subs{"ipv6"} = [ "^.*#undef NETSNMP_ENABLE_IPV6.*", "#define NETSNMP_ENABLE_IPV6 1" ];
 }
@@ -286,6 +292,7 @@ print "  SDK:                        " . ($sdk == 1 ? "enabled" : "disabled") . 
 print "  Link type:                  $linktype\n";
 print "  Prefix / Destdir:           " . ($prefix ne "" ? $prefix : "(default)") . "\n";
 print "  OpenSSL:                    " . ($openssl == 1 ? "enabled" : "disabled") . "\n";
+print "  Blumenthal AES:             " . ($blumenthal_aes ? "enabled" : "disabled") . "\n";
 print "  IPv6 transport:             " . ($b_ipv6 == 1 ? "enabled" : "disabled") . "\n";
 print "  winExtDLL agent:            " . ($b_winextdll == 1 ? "enabled" : "disabled") . "\n";
 

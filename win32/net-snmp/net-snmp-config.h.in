@@ -245,6 +245,9 @@
 /* Define if SNMPv2c code should not be included */
 /* #undef NETSNMP_DISABLE_SNMPV2C */
 
+/* Define if AES-192/AES-256 encryption should be supported */
+/* #undef NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 /* #undef HAVE_AES_CFB128_ENCRYPT */
 
