@@ -32,6 +32,6 @@ STOPAGENT
 STOPTRAPD
 
 CHECKAGENT "write_exampletrap trap sent"
-CHECKTRAPDCOUNT 3 "Forwarding loop detected.*forwarder's IP address=127.0.0.1"
+CHECKTRAPDCOUNT 3 "Forwarding loop detected,.*already has.*IP address=127.0.0.1, not forwarding this trap"
 
 FINISHED
