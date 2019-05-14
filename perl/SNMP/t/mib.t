@@ -19,29 +19,31 @@ $SNMP::save_descriptions = 1;
 use Test;
 BEGIN {plan tests => 38}
 use SNMP;
+use Data::Dumper;
 
 $SNMP::verbose = 0;
 $SNMP::best_guess = 2;
 
 use vars qw($bad_oid);
 require "t/startagent.pl";
+my $DEBUG;
 
 #############################  1  ######################################
 #check if
 my $res = $SNMP::MIB{sysDescr}{label};
-#print("Label is:$res\n");
+print STDERR ("Test 1: label is $res\n") if ($DEBUG);
 ok("sysDescr" eq $res);
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 #############################  2  ######################################
 $res =  $SNMP::MIB{sysDescr}{objectID};
-#print("OID is: $res\n");
+print STDERR ("Test 2: OID is $res\n") if ($DEBUG);
 ok(defined($res));
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 #############################  3  ######################################
 $res =  $SNMP::MIB{sysDescr}{access};
-#print("access is: $res\n");
+print STDERR ("Test 3: access is $res\n") if ($DEBUG);
 ok($res eq 'ReadOnly');
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 ##############################  4  ###################################
 $res =  $SNMP::MIB{sysLocation}{access};
 #$res =  $SNMP::MIB{sysORIndex}{access};
@@ -51,60 +53,61 @@ $res =  $SNMP::MIB{sysLocation}{type};
 ok($res eq 'OCTETSTR');
 #############################  6  ####################################
 $res =  $SNMP::MIB{sysLocation}{status};
-#print STDERR ("status is: $res\n");
+print STDERR ("Test 6: status is $res\n") if ($DEBUG);
 ok($res eq 'Current');
-#print STDERR ("\n");
+print STDERR ("\n") if ($DEBUG);
 #############################  7  #################################
 $res =  $SNMP::MIB{sysORTable}{access};
-#print("access is: $res\n");
+print STDERR ("Test 7: access is $res\n") if ($DEBUG);
 ok($res eq 'NoAccess');
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 #############################  8  ###############################
 $res = $SNMP::MIB{sysLocation}{subID};
-#print("subID is: $res\n");
+print STDERR ("Test 8: subID is $res\n") if ($DEBUG);
 ok(defined($res));
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 ############################  9  ##############################
 $res = $SNMP::MIB{sysLocation}{syntax};
-#print("syntax is: $res\n");
+print STDERR ("Test 9: syntax is $res\n") if ($DEBUG);
 ok($res eq 'DisplayString');
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 ############################  10  ###########################
 $res = $SNMP::MIB{ipAdEntAddr}{syntax};
+print STDERR ("Test 10: syntax is $res\n") if ($DEBUG);
 ok($res eq 'IPADDR');
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 ##########################  11  ##########################
 $res = $SNMP::MIB{atNetAddress}{syntax};
-#print ("syntax is: $res\n");
+print STDERR ("Test 11: syntax is $res\n") if ($DEBUG);
 ok($res eq 'NETADDR');
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 ########################   12  ###############################
 $res = $SNMP::MIB{ipReasmOKs}{syntax};
-#print("syntax is: $res\n");
+print STDERR ("Test 12: syntax is $res\n") if ($DEBUG);
 ok($res eq 'COUNTER');
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 ######################   13  ##############################
 $res = $SNMP::MIB{sysDescr}{moduleID};
-#print("Module ID is: $res\n");
+print STDERR ("Test 13: module ID is $res\n") if ($DEBUG);
 ok(defined($res));
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 ######################  14   #########################
 $des = $SNMP::MIB{atNetAddress}{description};
-#print("des is --> $des\n");
+print STDERR ("Test 14: des is $des\n") if ($DEBUG);
 ok(defined($des));
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 
 ######################  15   #########################
 $res = $SNMP::MIB{atNetAddress}{nextNode};
-#print("res is --> $res\n");
+print STDERR ("Test 15: res is $res\n") if ($DEBUG);
 ok(ref($res) eq "HASH");
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 
 ########################  16   #########################
 $res = $SNMP::MIB{sysDescr}{children};
-#print("res is --> $res\n");
+print STDERR ("Test 16: res is " . Dumper($res) . "\n") if ($DEBUG);
 ok(ref($res) eq "ARRAY");
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 ####################  17   #########################
 
 $res = $SNMP::MIB{sysDescr}{badField};
@@ -113,15 +116,15 @@ ok(!defined($res));
 
 ######################  18   #########################
 $res = $SNMP::MIB{sysDescr}{hint};
-#print("res is --> $res\n");
+print STDERR ("Test 18: res is " . Dumper($res) . "\n") if ($DEBUG);
 ok(defined($res) && $res =~ /^255a/);
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 ######################  19   #########################
 
 $res = $SNMP::MIB{ifPhysAddress}{hint};
-#print("res is --> $res\n");
+print STDERR ("Test 19: res is " . Dumper($res) . "\n") if ($DEBUG);
 ok(defined($res) && $res =~ /^1x:/);
-#print("\n");
+print STDERR ("\n") if ($DEBUG);
 
 
 ######################  some translate tests  #######
