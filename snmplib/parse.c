@@ -4894,6 +4894,79 @@ add_mibfile(const char* tmpstr, const char* d_name, FILE *ip )
     }
 }
 
+static int elemcmp(const void *a, const void *b)
+{
+    const char *const *s1 = a, *const *s2 = b;
+
+    return strcmp(*s1, *s2);
+}
+
+/*
+ * Scan a directory and return all filenames found as an array of pointers to
+ * directory entries (@result).
+ */
+static int scan_directory(char ***result, const char *dirname)
+{
+    DIR            *dir, *dir2;
+    struct dirent  *file;
+    char          **filenames = NULL;
+    int             fname_len, i, filename_count = 0, array_size = 0;
+    char           *tmpstr;
+
+    *result = NULL;
+
+    dir = opendir(dirname);
+    if (!dir)
+        return -1;
+
+    while ((file = readdir(dir))) {
+        /*
+         * Only parse file names that don't begin with a '.'
+         * Also skip files ending in '~', or starting/ending
+         * with '#' which are typically editor backup files.
+         */
+        fname_len = strlen(file->d_name);
+        if (fname_len > 0 && file->d_name[0] != '.'
+            && file->d_name[0] != '#'
+            && file->d_name[fname_len-1] != '#'
+            && file->d_name[fname_len-1] != '~') {
+            if (asprintf(&tmpstr, "%s/%s", dirname, file->d_name) < 0)
+                continue;
+            dir2 = opendir(tmpstr);
+            if (dir2) {
+                /* file is a directory, don't read it */
+                closedir(dir2);
+            } else {
+                if (filename_count >= array_size) {
+                    char **new_filenames;
+
+                    array_size = (array_size + 16) * 2;
+                    new_filenames = realloc(filenames,
+                                        array_size * sizeof(filenames[0]));
+                    if (!new_filenames) {
+                        free(tmpstr);
+                        for (i = 0; i < filename_count; i++)
+                            free(filenames[i]);
+                        free(filenames);
+                        closedir(dir);
+                        return -1;
+                    }
+                    filenames = new_filenames;
+                }
+                filenames[filename_count++] = tmpstr;
+                tmpstr = NULL;
+            }
+            free(tmpstr);
+        }
+    }
+    closedir(dir);
+
+    qsort(filenames, filename_count, sizeof(filenames[0]), elemcmp);
+    *result = filenames;
+
+    return filename_count;
+}
+
 /* For Win32 platforms, the directory does not maintain a last modification
  * date that we can compare with the modification date of the .index file.
  * Therefore there is no way to know whether any .index file is valid.
@@ -4904,12 +4977,11 @@ int
 add_mibdir(const char *dirname)
 {
     FILE           *ip;
-    DIR            *dir, *dir2;
     const char     *oldFile = File;
-    struct dirent  *file;
+    char          **filenames;
     char            tmpstr[300];
     int             count = 0;
-    int             fname_len = 0;
+    int             filename_count, i;
 #if !(defined(WIN32) || defined(cygwin))
     char           *token;
     char space;
@@ -4957,36 +5029,15 @@ add_mibdir(const char *dirname)
         DEBUGMSGTL(("parse-mibs", "No index\n"));
 #endif
 
-    if ((dir = opendir(dirname))) {
-        ip = netsnmp_mibindex_new( dirname );
-        while ((file = readdir(dir))) {
-            /*
-             * Only parse file names that don't begin with a '.' 
-             * Also skip files ending in '~', or starting/ending
-             * with '#' which are typically editor backup files.
-             */
-            if (file->d_name != NULL) {
-              fname_len = strlen( file->d_name );
-              if (fname_len > 0 && file->d_name[0] != '.' 
-                                && file->d_name[0] != '#'
-                                && file->d_name[fname_len-1] != '#'
-                                && file->d_name[fname_len-1] != '~') {
-                snprintf(tmpstr, sizeof(tmpstr), "%s/%s", dirname, file->d_name);
-                tmpstr[ sizeof(tmpstr)-1 ] = 0;
-                if ((dir2 = opendir(tmpstr))) {
-                    /*
-                     * file is a directory, don't read it 
-                     */
-                    closedir(dir2);
-                } else {
-                    if ( !add_mibfile( tmpstr, file->d_name, ip ))
-                        count++;
-                }
-              }
-            }
+    filename_count = scan_directory(&filenames, dirname);
+
+    if (filename_count >= 0) {
+        ip = netsnmp_mibindex_new(dirname);
+        for (i = 0; i < filename_count; i++) {
+            if (add_mibfile(filenames[i], strrchr(filenames[i], '/'), ip) == 0)
+                count++;
         }
         File = oldFile;
-        closedir(dir);
         if (ip)
             fclose(ip);
         return (count);
