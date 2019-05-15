@@ -769,7 +769,7 @@ snmp_sess_init(netsnmp_session * session)
     session->retries = SNMP_DEFAULT_RETRIES;
     session->version = SNMP_DEFAULT_VERSION;
     session->securityModel = SNMP_DEFAULT_SECMODEL;
-    session->rcvMsgMaxSize = SNMP_MAX_MSG_SIZE;
+    session->rcvMsgMaxSize = netsnmp_max_send_msg_size();
     session->sndMsgMaxSize = netsnmp_max_send_msg_size();
     session->flags |= SNMP_FLAGS_DONT_PROBE;
 }

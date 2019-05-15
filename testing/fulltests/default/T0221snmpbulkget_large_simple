@@ -5,9 +5,6 @@
 HEADER large SNMPv3 bulkget
 
 SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
-# To do: figure out why this test fails as follows on BSD systems:
-# Timeout: No Response from udp:127.0.0.1:8767
-[ $(uname) = Linux ] || SKIP "Skipping this test on non-Linux systems"
 
 #
 # Begin test
