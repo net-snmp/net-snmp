@@ -278,7 +278,6 @@ case "$(uname)" in
               ;;
       esac
       options+=(--disable-embedded-perl --without-perl-modules)
-      options+=("--with-out-mib-modules=mibII/ipv6")
     ;;
   CYGWIN*)
       export ENV_SEPARATOR=":"
