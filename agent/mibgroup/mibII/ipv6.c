@@ -1520,7 +1520,6 @@ var_udp6(register struct variable * vp,
 #elif defined(freebsd3) || defined(darwin)
     char           *sysctl_buf;
     struct xinpgen *xig, *oxig;
-    static struct in6pcb udb6;
 #endif
 
     DEBUGMSGTL(("mibII/ipv6", "var_udp6: "));
@@ -1540,9 +1539,13 @@ var_udp6(register struct variable * vp,
     first = p = (caddr_t)udbtable.inpt_queue.cqh_first;
 #endif
 #elif !defined(freebsd3) && !defined(darwin)
+    {
+    static struct in6pcb udb6;
+
     if (!auto_nlist("udb6", (char *) &udb6, sizeof(udb6)))
         return NULL;
     p = (caddr_t) udb6.in6p_next;
+    }
 #elif defined(dragonfly)
     {
         const char     *udblist = "net.inet.udp.pcblist";
@@ -1757,8 +1760,6 @@ var_tcp6(register struct variable * vp,
 #elif defined(freebsd3) || defined(darwin)
     char           *sysctl_buf;
     struct xinpgen *xig, *oxig;
-#else
-    static struct in6pcb tcb6;
 #endif
 
     if (!initialized) {
@@ -1785,9 +1786,13 @@ var_tcp6(register struct variable * vp,
         return NULL;
     first = p = (caddr_t)tcbtable.inpt_queue.cqh_first;
 #elif !defined(freebsd3) && !defined(darwin)
+    {
+    static struct in6pcb tcb6;
+
     if (!auto_nlist("tcb6", (char *) &tcb6, sizeof(tcb6)))
         return NULL;
     p = (caddr_t) tcb6.in6p_next;
+    }
 #else
     {
         const char     *tcblist = "net.inet.tcp.pcblist";
@@ -2089,7 +2094,6 @@ var_tcp6(register struct variable * vp,
 #elif defined(freebsd3) || defined(darwin)
     char           *sysctl_buf;
     struct xinpgen *xig, *oxig;
-    static struct in6pcb tcb6;
 #endif
 
     DEBUGMSGTL(("mibII/ipv6", "var_tcp6: "));
@@ -2107,9 +2111,13 @@ var_tcp6(register struct variable * vp,
     first = p = (caddr_t)tcbtable.inpt_queue.cqh_first;
 #endif
 #elif !defined(freebsd3) && !defined(darwin)
+    {
+    static struct in6pcb tcb6;
+
     if (!auto_nlist("tcb6", (char *) &tcb6, sizeof(tcb6)))
         return NULL;
     p = (caddr_t) tcb6.in6p_next;
+    }
 #elif defined(dragonfly)
     {
         const char     *tcblist = "net.inet.tcp.pcblist";
