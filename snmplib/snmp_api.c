@@ -1148,9 +1148,7 @@ _sess_copy(netsnmp_session * in_session)
         if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					NETSNMP_DS_LIB_COMMUNITY)) != NULL) {
             session->community_len = strlen(cp);
-            ucp = (u_char *) malloc(session->community_len);
-            if (ucp)
-                memmove(ucp, cp, session->community_len);
+            ucp = (u_char *) strdup(cp);
         } else {
 #ifdef NETSNMP_NO_ZEROLENGTH_COMMUNITY
             session->community_len = strlen(DEFAULT_COMMUNITY);
