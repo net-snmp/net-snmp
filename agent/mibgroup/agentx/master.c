@@ -185,6 +185,9 @@ real_init_master(void)
             session =
                 snmp_add_full(&sess, t, NULL, agentx_parse, NULL, NULL,
                               agentx_realloc_build, agentx_check_packet, NULL);
+            /* snmp_add_full() frees 't' upon failure. */
+            if (!session)
+                t = NULL;
         }
         if (session == NULL) {
             netsnmp_transport_free(t);
