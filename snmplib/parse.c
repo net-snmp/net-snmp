@@ -4961,7 +4961,8 @@ static int scan_directory(char ***result, const char *dirname)
     }
     closedir(dir);
 
-    qsort(filenames, filename_count, sizeof(filenames[0]), elemcmp);
+    if (filenames)
+        qsort(filenames, filename_count, sizeof(filenames[0]), elemcmp);
     *result = filenames;
 
     return filename_count;
@@ -5040,6 +5041,7 @@ add_mibdir(const char *dirname)
         File = oldFile;
         if (ip)
             fclose(ip);
+        free(filenames);
         return (count);
     }
     else
