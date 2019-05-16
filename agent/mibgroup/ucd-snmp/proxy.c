@@ -336,10 +336,10 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
             *configured = strdup("-c");
             DEBUGMSGTL(("proxy", "pdu has community string\n"));
             session->community_len = reqinfo->asp->pdu->community_len;
-            session->community = malloc(session->community_len + 1);
-            sprintf((char *)session->community, "%.*s",
-                    (int) session->community_len,
-                    (const char *)reqinfo->asp->pdu->community);
+            if (asprintf((char **)&session->community, "%.*s",
+                         (int)session->community_len,
+                         (const char *)reqinfo->asp->pdu->community) < 0)
+                session->community = NULL;
         }
     }
 #endif
