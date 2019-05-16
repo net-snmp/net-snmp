@@ -436,7 +436,7 @@ netsnmp_parse_args(int argc,
                     goto out;
 		}
 	    } else {
-		Cpsz = optarg;
+		Cpsz = strdup(optarg);
 	    }
             break;
 
@@ -588,6 +588,7 @@ netsnmp_parse_args(int argc,
             goto out;
         }
         free(Apsz);
+        Apsz = NULL;
     }
     if (Xpsz) {
         session->securityPrivKeyLen = USM_PRIV_KU_LEN;
@@ -618,6 +619,7 @@ netsnmp_parse_args(int argc,
             goto out;
         }
         free(Xpsz);
+        Xpsz = NULL;
     }
 #endif /* NETSNMP_SECMOD_USM */
 
@@ -664,10 +666,13 @@ netsnmp_parse_args(int argc,
                     ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
                     goto out;
                 }
-	    }
+	    } else {
+                Cpsz = NULL;
+            }
 	} else {
             session->community = (unsigned char *)Cpsz;
             session->community_len = strlen(Cpsz);
+            Cpsz = NULL;
         }
     }
 #endif /* support for community based SNMP */
@@ -675,6 +680,9 @@ netsnmp_parse_args(int argc,
     ret = optind;
 
 out:
+    free(Apsz);
+    free(Xpsz);
+    free(Cpsz);
     return ret;
 }
 
