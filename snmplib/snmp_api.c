@@ -2731,7 +2731,7 @@ snmpv3_packet_build(netsnmp_session * session, netsnmp_pdu *pdu,
     /*
      * build a scopedPDU structure into spdu_buf
      */
-    spdu_buf_len = SNMP_MAX_MSG_SIZE;
+    spdu_buf_len = sizeof(spdu_buf);
     DEBUGDUMPSECTION("send", "ScopedPdu");
     cp = snmpv3_scopedPDU_header_build(pdu, spdu_buf, &spdu_buf_len,
                                        &spdu_hdr_e);
@@ -2756,7 +2756,7 @@ snmpv3_packet_build(netsnmp_session * session, netsnmp_pdu *pdu,
      * re-encode the actual ASN.1 length of the scopedPdu
      */
     spdu_len = cp - spdu_hdr_e; /* length of scopedPdu minus ASN.1 headers */
-    spdu_buf_len = SNMP_MAX_MSG_SIZE;
+    spdu_buf_len = sizeof(spdu_buf);
     if (asn_build_sequence(spdu_buf, &spdu_buf_len,
                            (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
                            spdu_len) == NULL)
@@ -2769,7 +2769,7 @@ snmpv3_packet_build(netsnmp_session * session, netsnmp_pdu *pdu,
      * message - the entire message to transmitted on the wire is returned
      */
     cp = NULL;
-    *out_length = SNMP_MAX_MSG_SIZE;
+    *out_length = sizeof(spdu_buf);
     DEBUGDUMPSECTION("send", "SM msgSecurityParameters");
     sptr = find_sec_mod(pdu->securityModel);
     if (sptr && sptr->encode_forward) {
