@@ -2743,6 +2743,11 @@ snmpv3_packet_build(netsnmp_session * session, netsnmp_pdu *pdu,
      */
     DEBUGPRINTPDUTYPE("send", ((pdu_data) ? *pdu_data : 0x00));
     if (pdu_data) {
+        if (cp + pdu_data_len > spdu_buf + sizeof(spdu_buf)) {
+            snmp_log(LOG_ERR, "%s: PDU too big (%" NETSNMP_PRIz "d > %" NETSNMP_PRIz "d)\n",
+                     __func__, pdu_data_len, sizeof(spdu_buf));
+            return -1;
+        }
         memcpy(cp, pdu_data, pdu_data_len);
         cp += pdu_data_len;
     } else {
