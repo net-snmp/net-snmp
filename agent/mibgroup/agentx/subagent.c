@@ -870,6 +870,8 @@ subagent_open_master_session(void)
                       agentx_realloc_build, agentx_check_packet, NULL);
 
     if (main_session == NULL) {
+        /* snmp_add_full() frees 't' upon failure. */
+        t = NULL;
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                     NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS)) {
             char buf[1024];

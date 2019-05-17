@@ -769,7 +769,7 @@ snmp_sess_init(netsnmp_session * session)
     session->retries = SNMP_DEFAULT_RETRIES;
     session->version = SNMP_DEFAULT_VERSION;
     session->securityModel = SNMP_DEFAULT_SECMODEL;
-    session->rcvMsgMaxSize = SNMP_MAX_MSG_SIZE;
+    session->rcvMsgMaxSize = netsnmp_max_send_msg_size();
     session->sndMsgMaxSize = netsnmp_max_send_msg_size();
     session->flags |= SNMP_FLAGS_DONT_PROBE;
 }
@@ -1145,7 +1145,7 @@ _sess_copy(netsnmp_session * in_session)
         if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					NETSNMP_DS_LIB_COMMUNITY)) != NULL) {
             session->community_len = strlen(cp);
-            ucp = netsnmp_memdup(cp, session->community_len);
+            ucp = (u_char *) strdup(cp);
         } else {
 #ifdef NETSNMP_NO_ZEROLENGTH_COMMUNITY
             session->community_len = strlen(DEFAULT_COMMUNITY);
@@ -1577,13 +1577,15 @@ netsnmp_sess_config_and_open_transport(netsnmp_session *in_session,
     /** if transport has a max size, make sure session is the same (or less) */
     if (in_session->rcvMsgMaxSize > transport->msgMaxSize) {
         DEBUGMSGTL(("snmp_sess",
-                    "limiting session rcv size to transport max\n"));
+                    "limiting session rcv size (%" NETSNMP_PRIz "d) to transport max (%" NETSNMP_PRIz "d)\n",
+                    in_session->rcvMsgMaxSize, transport->msgMaxSize));
         in_session->rcvMsgMaxSize = transport->msgMaxSize;
     }
 
     if (in_session->sndMsgMaxSize > transport->msgMaxSize) {
         DEBUGMSGTL(("snmp_sess",
-                    "limiting session snd size to transport max\n"));
+                    "limiting session snd size (%" NETSNMP_PRIz "d) to transport max (%" NETSNMP_PRIz "d)\n",
+                    in_session->sndMsgMaxSize, transport->msgMaxSize));
         in_session->sndMsgMaxSize = transport->msgMaxSize;
     }
 
@@ -1827,12 +1829,14 @@ snmp_sess_add_ex(netsnmp_session * in_session,
     /** don't let session max exceed transport max */
     if (slp->session->rcvMsgMaxSize > transport->msgMaxSize) {
         DEBUGMSGTL(("snmp_sess_add",
-                    "limiting session rcv size to transport max\n"));
+                    "limiting session rcv size (%" NETSNMP_PRIz "d) to transport max (%" NETSNMP_PRIz "d)\n",
+                    slp->session->rcvMsgMaxSize, transport->msgMaxSize));
         slp->session->rcvMsgMaxSize = transport->msgMaxSize;
     }
     if (slp->session->sndMsgMaxSize > transport->msgMaxSize) {
         DEBUGMSGTL(("snmp_sess_add",
-                    "limiting session snd size to transport max\n"));
+                    "limiting session snd size (%" NETSNMP_PRIz "d) to transport max (%" NETSNMP_PRIz "d)\n",
+                    slp->session->sndMsgMaxSize, transport->msgMaxSize));
         slp->session->sndMsgMaxSize = transport->msgMaxSize;
     }
 
@@ -2721,7 +2725,7 @@ snmpv3_packet_build(netsnmp_session * session, netsnmp_pdu *pdu,
     /*
      * build a scopedPDU structure into spdu_buf
      */
-    spdu_buf_len = SNMP_MAX_MSG_SIZE;
+    spdu_buf_len = sizeof(spdu_buf);
     DEBUGDUMPSECTION("send", "ScopedPdu");
     cp = snmpv3_scopedPDU_header_build(pdu, spdu_buf, &spdu_buf_len,
                                        &spdu_hdr_e);
@@ -2733,6 +2737,11 @@ snmpv3_packet_build(netsnmp_session * session, netsnmp_pdu *pdu,
      */
     DEBUGPRINTPDUTYPE("send", ((pdu_data) ? *pdu_data : 0x00));
     if (pdu_data) {
+        if (cp + pdu_data_len > spdu_buf + sizeof(spdu_buf)) {
+            snmp_log(LOG_ERR, "%s: PDU too big (%" NETSNMP_PRIz "d > %" NETSNMP_PRIz "d)\n",
+                     __func__, pdu_data_len, sizeof(spdu_buf));
+            return -1;
+        }
         memcpy(cp, pdu_data, pdu_data_len);
         cp += pdu_data_len;
     } else {
@@ -2746,7 +2755,7 @@ snmpv3_packet_build(netsnmp_session * session, netsnmp_pdu *pdu,
      * re-encode the actual ASN.1 length of the scopedPdu
      */
     spdu_len = cp - spdu_hdr_e; /* length of scopedPdu minus ASN.1 headers */
-    spdu_buf_len = SNMP_MAX_MSG_SIZE;
+    spdu_buf_len = sizeof(spdu_buf);
     if (asn_build_sequence(spdu_buf, &spdu_buf_len,
                            (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
                            spdu_len) == NULL)
@@ -2759,7 +2768,7 @@ snmpv3_packet_build(netsnmp_session * session, netsnmp_pdu *pdu,
      * message - the entire message to transmitted on the wire is returned
      */
     cp = NULL;
-    *out_length = SNMP_MAX_MSG_SIZE;
+    *out_length = sizeof(spdu_buf);
     DEBUGDUMPSECTION("send", "SM msgSecurityParameters");
     sptr = find_sec_mod(pdu->securityModel);
     if (sptr && sptr->encode_forward) {
@@ -3800,7 +3809,8 @@ snmpv3_parse(netsnmp_pdu *pdu,
         /** don't increase max msg size if we've already got one */
         if (sess->sndMsgMaxSize < pdu->msgMaxSize) {
             DEBUGMSGTL(("snmpv3_parse:msgMaxSize",
-                        "msgMaxSize greater than session max; reducing\n"));
+                        "msgMaxSize %" NETSNMP_PRIz "d greater than session max %" NETSNMP_PRIz "d; reducing\n",
+                        sess->sndMsgMaxSize, pdu->msgMaxSize));
             pdu->msgMaxSize = sess->sndMsgMaxSize;
         }
     }
@@ -5052,6 +5062,8 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
             pdu->msgMaxSize = transport->msgMaxSize;
         if (pdu->msgMaxSize > session->sndMsgMaxSize)
             pdu->msgMaxSize = session->sndMsgMaxSize;
+        DEBUGMSGTL(("sess_async_send", "max PDU size: %" NETSNMP_PRIz "d\n",
+                    pdu->msgMaxSize));
     }
     netsnmp_assert(pdu->msgMaxSize > 0);
 
@@ -5120,6 +5132,9 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
         /** if length is less than max size, we're done (success). */
         if (length <= pdu->msgMaxSize)
             break;
+
+        DEBUGMSGTL(("sess_async_send", "length %" NETSNMP_PRIz "d exceeds maximum %" NETSNMP_PRIz "d\n",
+                    length, pdu->msgMaxSize));
 
         /** packet too big. if this is not a bulk request, we're done (err). */
         if (!bulk) {
