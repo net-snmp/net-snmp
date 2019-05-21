@@ -859,7 +859,6 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                             snmp_set_var_objid(request->requestvb,
                                                coloid, reginfo->rootoid_len+2);
                             request->processed = TABLE_ITERATOR_NOTAGAIN;
-                            break;
                         } else {
                           table_info->colnum = nc;
                           hintok = 0;
