@@ -1677,14 +1677,17 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
         if (strncmp(cp, "-profile", 8) == 0) {
             cp = skip_token(cp);
             cp = copy_nword(cp, tmp, SPRINT_MAX_LEN);
+            free(profile);
             profile = strdup(tmp);
         } else if (strncmp(cp, "-name", 5) == 0) {
             cp = skip_token(cp);
             cp = copy_nword(cp, tmp, SPRINT_MAX_LEN);
+            free(name);
             name = strdup(tmp);
         } else if (strncmp(cp, "-tag", 4) == 0) {
             cp = skip_token(cp);
             cp = copy_nword(cp, tmp, SPRINT_MAX_LEN);
+            free(tag);
             tag = strdup(tmp);
         } else
             break;
