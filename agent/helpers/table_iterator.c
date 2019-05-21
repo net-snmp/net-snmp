@@ -850,7 +850,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         netsnmp_request_get_list_data(request,
                                                       TI_REQUEST_CACHE);
                     if (!ti_info->results) {
-                      int nc;
+                        int nc;
+
                         table_info = netsnmp_extract_table_info(request);
                         nc = netsnmp_table_next_column(table_info);
                         if (0 == nc) {
