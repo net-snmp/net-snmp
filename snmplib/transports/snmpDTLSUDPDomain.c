@@ -1406,8 +1406,20 @@ netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
     case sizeof(netsnmp_tmStateReference): {
         const netsnmp_tmStateReference *r = data;
         const netsnmp_indexed_addr_pair *p = &r->addresses;
+        netsnmp_transport *bt = t->base_transport;
 
-        return fmt_base_addr("DTLSUDP", t, p, sizeof(*p));
+        if (r->have_addresses) {
+            return fmt_base_addr("DTLSUDP", t, p, sizeof(*p));
+        } else if (bt && t->data_length == sizeof(_netsnmpTLSBaseData)) {
+            _netsnmpTLSBaseData *tlsdata = t->data;
+            netsnmp_indexed_addr_pair *tls_addr = tlsdata->addr;
+
+            return bt->f_fmtaddr(bt, tls_addr, sizeof(*tls_addr));
+        } else if (bt) {
+            return bt->f_fmtaddr(bt, t->data, t->data_length);
+        } else {
+            return strdup("DTLSUDP: unknown");
+        }
     }
     case sizeof(_netsnmpTLSBaseData): {
         const _netsnmpTLSBaseData *b = data;
@@ -1498,7 +1510,7 @@ netsnmp_transport *
 netsnmp_dtlsudp_transport(const struct netsnmp_ep *ep, int local)
 {
     const struct sockaddr_in *addr = &ep->a.sin;
-    netsnmp_transport *t = NULL;
+    netsnmp_transport *t, *t2;
 
     DEBUGTRACETOK("dtlsudp");
 
@@ -1506,7 +1518,11 @@ netsnmp_dtlsudp_transport(const struct netsnmp_ep *ep, int local)
     if (NULL == t)
         return NULL;
 
-    _transport_common(t, local);
+    t2 = _transport_common(t, local);
+    if (!t2) {
+        netsnmp_transport_free(t);
+        return NULL;
+    }
 
     if (!local) {
         /* dtls needs to bind the socket for SSL_write to work */
@@ -1514,7 +1530,7 @@ netsnmp_dtlsudp_transport(const struct netsnmp_ep *ep, int local)
             snmp_log(LOG_ERR, "dtls: failed to connect\n");
     }
 
-    return t;
+    return t2;
 }
 
 
@@ -1537,7 +1553,7 @@ netsnmp_transport *
 netsnmp_dtlsudp6_transport(const struct netsnmp_ep *ep, int local)
 {
     const struct sockaddr_in6 *addr = &ep->a.sin6;
-    netsnmp_transport *t = NULL;
+    netsnmp_transport *t, *t2;
 
     DEBUGTRACETOK("dtlsudp");
 
@@ -1545,7 +1561,11 @@ netsnmp_dtlsudp6_transport(const struct netsnmp_ep *ep, int local)
     if (NULL == t)
         return NULL;
 
-    _transport_common(t, local);
+    t2 = _transport_common(t, local);
+    if (!t2) {
+        netsnmp_transport_free(t);
+        return NULL;
+    }
 
     if (!local) {
         /* dtls needs to bind the socket for SSL_write to work */
@@ -1556,10 +1576,10 @@ netsnmp_dtlsudp6_transport(const struct netsnmp_ep *ep, int local)
     /* XXX: Potentially set sock opts here (SO_SNDBUF/SO_RCV_BUF) */      
     /* XXX: and buf size */        
 
-    t->f_fmtaddr       = netsnmp_dtlsudp6_fmtaddr;
-    t->f_get_taddr     = netsnmp_ipv6_get_taddr;
+    t2->f_fmtaddr   = netsnmp_dtlsudp6_fmtaddr;
+    t2->f_get_taddr = netsnmp_ipv6_get_taddr;
 
-    return t;
+    return t2;
 }
 #endif
 
