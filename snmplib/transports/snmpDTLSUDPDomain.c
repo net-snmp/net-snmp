@@ -1406,8 +1406,20 @@ netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
     case sizeof(netsnmp_tmStateReference): {
         const netsnmp_tmStateReference *r = data;
         const netsnmp_indexed_addr_pair *p = &r->addresses;
+        netsnmp_transport *bt = t->base_transport;
 
-        return fmt_base_addr("DTLSUDP", t, p, sizeof(*p));
+        if (r->have_addresses) {
+            return fmt_base_addr("DTLSUDP", t, p, sizeof(*p));
+        } else if (bt && t->data_length == sizeof(_netsnmpTLSBaseData)) {
+            _netsnmpTLSBaseData *tlsdata = t->data;
+            netsnmp_indexed_addr_pair *tls_addr = tlsdata->addr;
+
+            return bt->f_fmtaddr(bt, tls_addr, sizeof(*tls_addr));
+        } else if (bt) {
+            return bt->f_fmtaddr(bt, t->data, t->data_length);
+        } else {
+            return strdup("DTLSUDP: unknown");
+        }
     }
     case sizeof(_netsnmpTLSBaseData): {
         const _netsnmpTLSBaseData *b = data;
