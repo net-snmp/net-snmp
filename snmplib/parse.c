@@ -4964,7 +4964,6 @@ add_mibdir(const char *dirname)
     FILE           *ip;
     const char     *oldFile = File;
     char          **filenames;
-    char            tmpstr[300];
     int             count = 0;
     int             filename_count, i;
 #if !(defined(WIN32) || defined(cygwin))
@@ -4972,6 +4971,7 @@ add_mibdir(const char *dirname)
     char space;
     char newline;
     struct stat     dir_stat, idx_stat;
+    char            tmpstr[300];
     char            tmpstr1[300];
 #endif
 
