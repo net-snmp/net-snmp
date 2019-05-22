@@ -607,8 +607,6 @@ static int     read_module_replacements(const char *);
 static int     read_import_replacements(const char *,
                                          struct module_import *);
 
-static void     new_module(const char *, const char *);
-
 static struct node *merge_parse_objectid(struct node *, FILE *, char *);
 static struct index_list *getIndexes(FILE * fp, struct index_list **);
 static struct varbind_list *getVarbinds(FILE * fp, struct varbind_list **);
@@ -4859,7 +4857,7 @@ snmp_get_token(FILE * fp, char *token, int maxtlen)
 #endif /* NETSNMP_FEATURE_REMOVE_PARSE_GET_TOKEN */
 
 int
-add_mibfile(const char* tmpstr, const char* d_name, FILE *ip )
+add_mibfile(const char* tmpstr, const char* d_name)
 {
     FILE           *fp;
     char            token[MAXTOKEN], token2[MAXTOKEN];
@@ -4884,8 +4882,6 @@ add_mibfile(const char* tmpstr, const char* d_name, FILE *ip )
      */
     if (get_token(fp, token2, MAXTOKEN) == DEFINITIONS) {
         new_module(token, tmpstr);
-        if (ip)
-            fprintf(ip, "%s %s\n", token, d_name);
         fclose(fp);
         return 0;
     } else {
@@ -4977,71 +4973,22 @@ static int scan_directory(char ***result, const char *dirname)
 int
 add_mibdir(const char *dirname)
 {
-    FILE           *ip;
     const char     *oldFile = File;
     char          **filenames;
     int             count = 0;
     int             filename_count, i;
-#if !(defined(WIN32) || defined(cygwin))
-    char           *token;
-    char space;
-    char newline;
-    struct stat     dir_stat, idx_stat;
-    char            tmpstr[300];
-    char            tmpstr1[300];
-#endif
 
     DEBUGMSGTL(("parse-mibs", "Scanning directory %s\n", dirname));
-#if !(defined(WIN32) || defined(cygwin))
-    token = netsnmp_mibindex_lookup( dirname );
-    if (token && stat(token, &idx_stat) == 0 && stat(dirname, &dir_stat) == 0) {
-        if (dir_stat.st_mtime < idx_stat.st_mtime) {
-            DEBUGMSGTL(("parse-mibs", "The index is good\n"));
-            if ((ip = fopen(token, "r")) != NULL) {
-                fgets(tmpstr, sizeof(tmpstr), ip); /* Skip dir line */
-                while (fscanf(ip, "%127s%c%299[^\n]%c", token, &space, tmpstr,
-		    &newline) == 4) {
-
-		    /*
-		     * If an overflow of the token or tmpstr buffers has been
-		     * found log a message and break out of the while loop,
-		     * thus the rest of the file tokens will be ignored.
-		     */
-		    if (space != ' ' || newline != '\n') {
-			snmp_log(LOG_ERR,
-			    "add_mibdir: strings scanned in from %s/%s " \
-			    "are too large.  count = %d\n ", dirname,
-			    ".index", count);
-			    break;
-		    }
-		   
-		    snprintf(tmpstr1, sizeof(tmpstr1), "%s/%s", dirname, tmpstr);
-                    tmpstr1[ sizeof(tmpstr1)-1 ] = 0;
-                    new_module(token, tmpstr1);
-                    count++;
-                }
-                fclose(ip);
-                return count;
-            } else
-                DEBUGMSGTL(("parse-mibs", "Can't read index\n"));
-        } else
-            DEBUGMSGTL(("parse-mibs", "Index outdated\n"));
-    } else
-        DEBUGMSGTL(("parse-mibs", "No index\n"));
-#endif
 
     filename_count = scan_directory(&filenames, dirname);
 
     if (filename_count >= 0) {
-        ip = netsnmp_mibindex_new(dirname);
         for (i = 0; i < filename_count; i++) {
-            if (add_mibfile(filenames[i], strrchr(filenames[i], '/'), ip) == 0)
+            if (add_mibfile(filenames[i], strrchr(filenames[i], '/')) == 0)
                 count++;
 	    free(filenames[i]);
         }
         File = oldFile;
-        if (ip)
-            fclose(ip);
         free(filenames);
         return (count);
     }

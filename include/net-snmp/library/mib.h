@@ -124,9 +124,6 @@ SOFTWARE.
     NETSNMP_IMPORT
     char            *netsnmp_get_mib_directory(void);
     void            netsnmp_fixup_mib_directory(void);
-    void            netsnmp_mibindex_load( void );
-    char *          netsnmp_mibindex_lookup( const char * );
-    FILE *          netsnmp_mibindex_new( const char * );
     int             sprint_realloc_description(u_char ** buf, size_t * buf_len,
                                 size_t * out_len, int allow_realloc,
                                 oid * objid, size_t objidlen, int width);
