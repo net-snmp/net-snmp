@@ -3820,7 +3820,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
         /** don't increase max msg size if we've already got one */
         if (sess->sndMsgMaxSize < pdu->msgMaxSize) {
             DEBUGMSGTL(("snmpv3_parse:msgMaxSize",
-                        "msgMaxSize %" NETSNMP_PRIz "d greater than session max %" NETSNMP_PRIz "d; reducing\n",
+                        "msgMaxSize %" NETSNMP_PRIz "d greater than session max %ld; reducing\n",
                         sess->sndMsgMaxSize, pdu->msgMaxSize));
             pdu->msgMaxSize = sess->sndMsgMaxSize;
         }
@@ -5079,7 +5079,7 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
             pdu->msgMaxSize = transport->msgMaxSize;
         if (pdu->msgMaxSize > session->sndMsgMaxSize)
             pdu->msgMaxSize = session->sndMsgMaxSize;
-        DEBUGMSGTL(("sess_async_send", "max PDU size: %" NETSNMP_PRIz "d\n",
+        DEBUGMSGTL(("sess_async_send", "max PDU size: %ld\n",
                     pdu->msgMaxSize));
     }
     netsnmp_assert(pdu->msgMaxSize > 0);
@@ -5150,7 +5150,7 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
         if (length <= pdu->msgMaxSize)
             break;
 
-        DEBUGMSGTL(("sess_async_send", "length %" NETSNMP_PRIz "d exceeds maximum %" NETSNMP_PRIz "d\n",
+        DEBUGMSGTL(("sess_async_send", "length %" NETSNMP_PRIz "d exceeds maximum %ld\n",
                     length, pdu->msgMaxSize));
 
         /** packet too big. if this is not a bulk request, we're done (err). */
