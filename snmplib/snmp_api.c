@@ -5506,15 +5506,15 @@ snmp_free_pdu(netsnmp_pdu *pdu)
         (*sptr->pdu_free) (pdu);
     }
     snmp_free_varbind(pdu->variables);
-    SNMP_FREE(pdu->enterprise);
-    SNMP_FREE(pdu->community);
-    SNMP_FREE(pdu->contextEngineID);
-    SNMP_FREE(pdu->securityEngineID);
-    SNMP_FREE(pdu->contextName);
-    SNMP_FREE(pdu->securityName);
-    SNMP_FREE(pdu->transport_data);
+    free(pdu->enterprise);
+    free(pdu->community);
+    free(pdu->contextEngineID);
+    free(pdu->securityEngineID);
+    free(pdu->contextName);
+    free(pdu->securityName);
+    free(pdu->transport_data);
     memset(pdu, 0, sizeof(netsnmp_pdu));
-    free((char *) pdu);
+    free(pdu);
 }
 
 netsnmp_pdu    *
