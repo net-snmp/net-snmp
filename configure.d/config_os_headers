@@ -542,7 +542,7 @@ AC_CHECK_HEADERS([windows.h iphlpapi.h], [], [], [
 #  Core:
 #
 if test x$with_socklib = xwinsock2; then
-  AC_CHECK_HEADERS([winsock.h winsock2.h ws2tcpip.h])
+  AC_CHECK_HEADERS([winsock.h winsock2.h ws2tcpip.h],,,[#include <windows.h>])
 fi
 
 #
