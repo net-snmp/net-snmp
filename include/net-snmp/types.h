@@ -38,7 +38,8 @@
 
 #include <sys/types.h>
 
-#if defined(WIN32) && !defined(cygwin)
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
 typedef HANDLE netsnmp_pid_t;
 #define NETSNMP_NO_SUCH_PROCESS INVALID_HANDLE_VALUE
 #else
