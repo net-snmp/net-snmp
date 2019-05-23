@@ -4389,12 +4389,7 @@ _snmp_parse(void *sessp,
                                              result, pdu);
                 }
             }
-            if (pdu->securityStateRef != NULL) {
-                if (secmod && secmod->pdu_free_state_ref) {
-                    secmod->pdu_free_state_ref(pdu->securityStateRef);
-                    pdu->securityStateRef = NULL;
-                }
-            }
+            free_securityStateRef(pdu);
         }
 
         /* Implement RFC5343 here for two reasons:
