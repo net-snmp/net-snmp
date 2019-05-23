@@ -30,8 +30,7 @@ case "$(uname -a)" in
 esac
 echo "compiler path: $(type -p gcc)"
 "${scriptdir}"/net-snmp-configure master || exit $?
-make -s                                  ||
-    { echo "config.log:"; cat config.log; exit 1; }
+make -s                                  || exit $?
 case "$MODE" in
     disable-set|mini*|read-only)
         exit 0;;
