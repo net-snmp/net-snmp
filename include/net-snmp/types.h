@@ -62,7 +62,7 @@
 # endif
 #endif
 
-#ifdef HAVE_WINDOWS_H
+#if defined(HAVE_WINDOWS_H) && !defined(__CYGWIN__)
 #include <windows.h>
 typedef HANDLE netsnmp_pid_t;
 #define NETSNMP_NO_SUCH_PROCESS INVALID_HANDLE_VALUE
