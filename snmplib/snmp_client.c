@@ -408,6 +408,7 @@ _clone_pdu_header(netsnmp_pdu *pdu)
     if (pdu->securityStateRef &&
         pdu->command == SNMP_MSG_TRAP2) {
 
+        netsnmp_assert(pdu->securityModel == SNMP_DEFAULT_SECMODEL);
         ret = usm_clone_usmStateReference((struct usmStateReference *) pdu->securityStateRef,
                 (struct usmStateReference **) &newpdu->securityStateRef );
 
