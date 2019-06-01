@@ -342,8 +342,8 @@ _etherStats_ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
      */
     if(NULL == name) {
         DEBUGMSGTL(("access:etherStatsTable:ioctl",
-                    "_etherStats_ioctl_get invalid ifname '%s'\n", name));
-        snmp_log (LOG_ERR, "access:etherStatsTable:ioctl, _etherStats_ioctl_get error on inerface '%s'\n", name);
+                    "_etherStats_ioctl_get interface name is NULL"));
+        snmp_log (LOG_ERR, "access:etherStatsTable:ioctl, _etherStats_ioctl_get interface name is NULL");
         return -1;
     }
 

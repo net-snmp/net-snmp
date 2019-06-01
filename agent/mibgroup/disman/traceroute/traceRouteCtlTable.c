@@ -5003,14 +5003,14 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
 
     if (inet_pton(AF_INET6, hostname, &to->sin6_addr) <= 0) {
         hp = gethostbyname2(hostname, AF_INET6);
-        free(hostname);
-        hostname = NULL;
         if (hp != NULL) {
             memmove((caddr_t) & to->sin6_addr, hp->h_addr, 16);
+            free(hostname);
             hostname = strdup((char *) hp->h_name);
         } else {
-            (void) fprintf(stderr,
-                           "traceroute: unknown host %s\n", hostname);
+            fprintf(stderr, "traceroute: unknown host %s\n", hostname);
+            free(hostname);
+            hostname = NULL;
             goto out;
         }
     }

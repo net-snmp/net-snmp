@@ -925,8 +925,8 @@ _dot3Stats_ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
      */
     if(NULL == name) {
         DEBUGMSGTL(("access:dot3StatsTable:ioctl",
-                    "_dot3Stats_ioctl_get invalid ifname '%s'\n", name));
-        snmp_log (LOG_ERR, "access:dot3StatsTable:ioctl, _dot3Stats_ioctl_get error on interface '%s'\n", name);
+                    "_dot3Stats_ioctl_get interface name is NULL"));
+        snmp_log (LOG_ERR, "access:dot3StatsTable:ioctl, _dot3Stats_ioctl_get interface name is NULL");
         return -1;
     }
 
