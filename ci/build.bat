@@ -24,6 +24,23 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..
 goto eof
 
+:INSTALLER
+call "ci\openssl.bat"
+call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+set OPENSSLDIR=C:\OpenSSL-Win64
+set PATH=%PATH%;C:\cygwin64\bin
+perl win32\dist\build-binary.pl
+if %errorlevel% neq 0 goto installer_build_error
+mkdir installer
+copy c:\usr\*.exe installer
+goto eof
+
+:installer_build_error
+set e=%errorlevel%
+type win32\make.out
+exit /b %e%
+goto eof
+
 :MinGW32
 rem Although the AppVeyor documentation mentions MinGW, MinGW is not present.
 rem See also https://www.appveyor.com/docs/windows-images-software/.

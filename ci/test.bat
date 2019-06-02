@@ -9,6 +9,9 @@ goto eof
 :MSVCSTATIC64
 goto eof
 
+:INSTALLER
+goto eof
+
 :MinGW32
 goto eof
 
