@@ -6,11 +6,15 @@ environment:
   matrix:
     - BUILD: MSVCDYNAMIC64
     - BUILD: MSVCSTATIC64
+    - BUILD: INSTALLER
     - BUILD: MinGW32
     - BUILD: MSYS2
     - BUILD: MinGW64
     - BUILD: Cygwin32
     - BUILD: Cygwin64
+
+artifacts:
+  - path: installer
 
 clone_depth: 5
 

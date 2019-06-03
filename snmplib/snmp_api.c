@@ -4009,7 +4009,12 @@ snmpv3_parse(netsnmp_pdu *pdu,
 static void
 free_securityStateRef(netsnmp_pdu* pdu)
 {
-    struct snmp_secmod_def *sptr = find_sec_mod(pdu->securityModel);
+    struct snmp_secmod_def *sptr;
+
+    if (!pdu->securityStateRef)
+        return;
+
+    sptr = find_sec_mod(pdu->securityModel);
     if (sptr) {
         if (sptr->pdu_free_state_ref) {
             (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
@@ -4131,9 +4136,7 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
      * FIX - yes they should but USM needs to follow new EoP to determine
      * which cached values to use 
      */
-    if (pdu->securityStateRef) {
-        free_securityStateRef(pdu);
-    }
+    free_securityStateRef(pdu);
 
     if (error == SNMPERR_USM_NOTINTIMEWINDOW) {
         pdu->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
@@ -4374,12 +4377,7 @@ _snmp_parse(void *sessp,
                                              result, pdu);
                 }
             }
-            if (pdu->securityStateRef != NULL) {
-                if (secmod && secmod->pdu_free_state_ref) {
-                    secmod->pdu_free_state_ref(pdu->securityStateRef);
-                    pdu->securityStateRef = NULL;
-                }
-            }
+            free_securityStateRef(pdu);
         }
 
         /* Implement RFC5343 here for two reasons:
@@ -5641,9 +5639,7 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
     /*
      * Call the security model to free any securityStateRef supplied w/ msg.  
      */
-    if (pdu->securityStateRef != NULL) {
-      free_securityStateRef(pdu);
-    }
+    free_securityStateRef(pdu);
     snmp_free_pdu(pdu);
     return NULL;
   }
@@ -5681,9 +5677,7 @@ _sess_process_packet_handle_pdu(void *sessp, netsnmp_session * sp,
     /*
      * Call USM to free any securityStateRef supplied with the message.  
      */
-    if (pdu->securityStateRef) {
-      free_securityStateRef(pdu);
-    }
+    free_securityStateRef(pdu);
 
     for (rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
       snmp_callback   callback;
@@ -5828,7 +5822,7 @@ _sess_process_packet_handle_pdu(void *sessp, netsnmp_session * sp,
   /*
    * Call USM to free any securityStateRef supplied with the message.  
    */
-  if (pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2)
+  if (pdu->command == SNMP_MSG_TRAP2)
     free_securityStateRef(pdu);
 
   if (!handled) {

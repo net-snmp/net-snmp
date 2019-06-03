@@ -9,17 +9,13 @@ use warnings;
 use File::Basename;
 use File::Copy;
 use File::Spec;
+use File::Which;
 use Cwd 'abs_path';
 
 print "------------------------------------------------------\n";
 
-my $tar_command;
-my $gzip_command;
-for my $msysbindir (("C:\\msys\\1.0\\bin", "C:\\mingw\\msys\\1.0\\bin")) {
-    $tar_command = File::Spec->catfile($msysbindir, "tar.exe");
-    $gzip_command = File::Spec->catfile($msysbindir, "gzip.exe");
-    last if (-f $tar_command);
-}
+my $tar_command = which 'tar';
+my $gzip_command = which 'gzip';
 
 if (! (-f $tar_command)) {
   die ("Could not find tar command");
@@ -43,7 +39,8 @@ die("makensis.exe not found") if (!(-f $makensis));
 
 my $target_arch = $ENV{TARGET_CPU} ? $ENV{TARGET_CPU} : $ENV{Platform} ?
                   $ENV{Platform} : "x86";
-my $openssldir = $target_arch eq "x64" ? "C:\\OpenSSL-Win64" :
+my $openssldir = $ENV{OPENSSLDIR} ? $ENV{OPENSSLDIR} :
+                 $target_arch eq "x64" ? "C:\\OpenSSL-Win64" :
                  "C:\\OpenSSL-Win32";
 my $opensslincdir = $openssldir . "\\include";
 my $openssllibdir = $openssldir . "\\lib\\VC";
@@ -65,6 +62,7 @@ my $perl_dir = File::Spec->catdir($top_dir, "perl");
 
 print "\ntop_dir:      $top_dir\n";
 print "win32_dir:    $win32_dir\n";
+print "openssldir:   $openssldir\n";
 print "perl_dir:     $perl_dir\n";
 print "install base: $install_base\n\n";
 
@@ -296,7 +294,8 @@ print "\n\nBuilding installer:\n";
 print "=============================\n\n";
 
 my $suffix = $ENV{LIB} =~ /\\x64|\\amd64/ ? "x64" : "x86";
-if (system("\"$makensis\" /DPRODUCT_MAJ_VERSION=\"$version_maj\" /DPRODUCT_MIN_VERSION=\"$version_min\" /DPRODUCT_REVISION=\"$version_rev\" /DPRODUCT_EXE_VERSION=\"$installer_exe_version\" /DINSTALLER_PLATFORM=\"$suffix\" \"$install_base/net-snmp.nsi\"") != 0) {
+if (system("\"$makensis\" /DPRODUCT_MAJ_VERSION=\"$version_maj\" /DPRODUCT_MIN_VERSION=\"$version_min\" /DPRODUCT_REVISION=\"$version_rev\" /DPRODUCT_EXE_VERSION=\"$installer_exe_version\" /DINSTALLER_PLATFORM=\"$suffix\" \"$install_base/net-snmp.nsi\" >makensis.out") != 0) {
+    system("type makensis.out");
     die("Building installer failed");
 }
 
