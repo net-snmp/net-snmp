@@ -5037,6 +5037,7 @@ add_mibdir(const char *dirname)
         for (i = 0; i < filename_count; i++) {
             if (add_mibfile(filenames[i], strrchr(filenames[i], '/'), ip) == 0)
                 count++;
+	    free(filenames[i]);
         }
         File = oldFile;
         if (ip)
