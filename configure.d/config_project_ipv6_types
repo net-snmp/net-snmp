@@ -102,13 +102,6 @@ yes
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
-		linux-inet6)
-			if test -d /usr/inet6; then
-				v6lib=inet6
-				v6libdir=/usr/inet6/lib
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
-			fi
-			;;
 		generic)
                         AC_MSG_RESULT([[postponed]])
                         AC_CHECK_MEMBER([struct sockaddr_in6.sin6_addr],,,[[

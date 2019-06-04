@@ -19280,13 +19280,6 @@ fi
 rm -f conftest*
 
 			;;
-		linux-inet6)
-			if test -d /usr/inet6; then
-				v6lib=inet6
-				v6libdir=/usr/inet6/lib
-				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
-			fi
-			;;
 		generic)
                         { $as_echo "$as_me:${as_lineno-$LINENO}: result: postponed" >&5
 $as_echo "postponed" >&6; }
