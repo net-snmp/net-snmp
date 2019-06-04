@@ -18036,14 +18036,13 @@ fi
 #
 
 if test "x$enable_ipv6" = "xyes"; then
-	v6type=unknown
 	v6lib=none
 	v6trylibc=no
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking ipv6 stack type" >&5
 $as_echo_n "checking ipv6 stack type... " >&6; }
-	for i in v6d toshiba kame zeta generic; do
-		case $i in
+	for v6type in v6d toshiba kame zeta generic; do
+		case $v6type in
 		v6d)
 			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -18055,7 +18054,7 @@ yes
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "yes" >/dev/null 2>&1; then :
-  v6type=$i; v6lib=v6;
+  v6lib=v6;
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-I/usr/local/v6/include $CFLAGS"
 fi
@@ -18073,7 +18072,7 @@ yes
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "yes" >/dev/null 2>&1; then :
-  v6type=$i; v6lib=inet6;
+  v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
 fi
@@ -18091,7 +18090,7 @@ yes
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "yes" >/dev/null 2>&1; then :
-  v6type=$i; v6lib=inet6;
+  v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				v6trylibc=yes;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
@@ -18110,7 +18109,7 @@ yes
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "yes" >/dev/null 2>&1; then :
-  v6type=$i; v6lib=inet6;
+  v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
 fi
@@ -18146,7 +18145,6 @@ fi
 	                { $as_echo "$as_me:${as_lineno-$LINENO}: checking ipv6 stack type" >&5
 $as_echo_n "checking ipv6 stack type... " >&6; }
                         if test "x$ac_cv_member_struct_sockaddr_in6_sin6_addr" = "xyes"; then
-				v6type=$i
 				v6lib=dummy
 				v6libdir=none
 				v6trylibc=yes
@@ -18154,7 +18152,7 @@ $as_echo_n "checking ipv6 stack type... " >&6; }
                         fi
 			;;
 		esac
-		if test "$v6type" != "unknown"; then
+		if test "$v6lib" != "none"; then
 			break
 		fi
 	done
@@ -18174,6 +18172,7 @@ $as_echo "\"$v6type, $enable_ipv6, using libc\"" >&6; }
 			exit 1
 		fi
 	else
+		v6type="unknown"
 		enable_ipv6="no"
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"$v6type, $enable_ipv6\"" >&5
 $as_echo "\"$v6type, $enable_ipv6\"" >&6; }
