@@ -55,20 +55,19 @@ AC_CHECK_TYPES([mib2_ipIfStatsEntry_t],,,[#include <inet/mib2.h>])
 #
 
 if test "x$enable_ipv6" = "xyes"; then
-	v6type=unknown
 	v6lib=none
 	v6trylibc=no
 
 	AC_MSG_CHECKING([[ipv6 stack type]])
-	for i in v6d toshiba kame inria zeta linux-glibc linux-inet6 cygwin winsock2 generic; do
-		case $i in
+	for v6type in v6d toshiba kame inria zeta linux-glibc linux-inet6 cygwin winsock2 generic; do
+		case $v6type in
 		v6d)
 			AC_EGREP_CPP(yes, [
 #include </usr/local/v6/include/sys/types.h>
 #ifdef __V6D__
 yes
 #endif],
-				[v6type=$i; v6lib=v6;
+				[v6lib=v6;
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-I/usr/local/v6/include $CFLAGS"])
 			;;
@@ -78,7 +77,7 @@ yes
 #ifdef _TOSHIBA_INET6
 yes
 #endif],
-				[v6type=$i; v6lib=inet6;
+				[v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
@@ -88,7 +87,7 @@ yes
 #ifdef __KAME__
 yes
 #endif],
-				[v6type=$i; v6lib=inet6;
+				[v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				v6trylibc=yes;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
@@ -99,8 +98,7 @@ yes
 #ifdef IPV6_INRIA_VERSION
 yes
 #endif],
-				[v6type=$i;
-				v6lib=dummy;
+				[v6lib=dummy;
 				v6libdir=none;
 				v6trylibc=yes;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
@@ -112,7 +110,7 @@ yes
 A
 yes
 #endif],
-				[v6type=$i; v6lib=inet6;
+				[v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
@@ -122,15 +120,13 @@ yes
 #if defined(__GLIBC__) && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 1) || (__GLIBC_ > 2))
 yes
 #endif],
-				[v6type=$i;
-				v6lib=dummy;
+				[v6lib=dummy;
 				v6libdir=none;
 				v6trylibc=yes;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
 		linux-inet6)
 			if test -d /usr/inet6; then
-				v6type=$i
 				v6lib=inet6
 				v6libdir=/usr/inet6/lib
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
@@ -142,8 +138,7 @@ yes
 #ifdef _CYGWIN_IN6_H
 yes
 #endif],
-				[v6type=$i;
-				v6lib=dummy;
+				[v6lib=dummy;
 				v6libdir=none
 				v6trylibc=yes;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
@@ -154,8 +149,7 @@ yes
 #if defined(_WS2TCPIP_H)
 yes
 #endif],
-				[v6type=$i;
-				v6lib=dummy;
+				[v6lib=dummy;
 				v6libdir=none
 				v6trylibc=yes;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
@@ -176,7 +170,6 @@ AC_INCLUDES_DEFAULT()
 ]])
 	                AC_MSG_CHECKING([[ipv6 stack type]])
                         if test "x$ac_cv_member_struct_sockaddr_in6_sin6_addr" = "xyes"; then
-				v6type=$i
 				v6lib=dummy
 				v6libdir=none
 				v6trylibc=yes
@@ -184,7 +177,7 @@ AC_INCLUDES_DEFAULT()
                         fi
 			;;
 		esac
-		if test "$v6type" != "unknown"; then
+		if test "$v6lib" != "none"; then
 			break
 		fi
 	done
@@ -202,6 +195,7 @@ AC_INCLUDES_DEFAULT()
 			exit 1
 		fi
 	else
+		v6type="unknown"
 		enable_ipv6="no"
 		AC_MSG_RESULT(["$v6type, $enable_ipv6"])
 	fi
