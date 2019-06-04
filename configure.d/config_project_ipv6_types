@@ -59,8 +59,8 @@ if test "x$enable_ipv6" = "xyes"; then
 	v6trylibc=no
 
 	AC_MSG_CHECKING([[ipv6 stack type]])
-	for i in v6d toshiba kame zeta generic; do
-		case $i in
+	for v6type in v6d toshiba kame zeta generic; do
+		case $v6type in
 		v6d)
 			AC_EGREP_CPP(yes, [
 #include </usr/local/v6/include/sys/types.h>
