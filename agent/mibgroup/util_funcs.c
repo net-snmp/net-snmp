@@ -1185,15 +1185,33 @@ int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
 
 #ifdef ETHTOOL_GLINKSETTINGS
     {
-        struct ethtool_link_settings elinkset;
+        /*
+         * For Linux kernel v5.2 __ETHTOOL_LINK_MODE_MASK_NBITS == 67 or
+         * 3 32-bit words. Increase the 'nwords' constant if necessary.
+         */
+        enum { mask_nwords = 4 };
+        struct {
+            struct ethtool_link_settings elinkset;
+            uint32_t masks[3 * mask_nwords];
+        } data;
 
-        memset(&elinkset, 0, sizeof(elinkset));
-        elinkset.cmd = ETHTOOL_GLINKSETTINGS;
-        ifr.ifr_data = &elinkset;
+        memset(&data, 0, sizeof(data));
+        data.elinkset.cmd = ETHTOOL_GLINKSETTINGS;
+        ifr.ifr_data = &data.elinkset;
         err = ioctl(fd, SIOCETHTOOL, &ifr, name);
+        /*
+         * See also the struct ethtool_link_settings documentation in
+         * Linux kernel header file include/uapi/linux/ethtool.h.
+         */
+        if (data.elinkset.link_mode_masks_nwords < 0 &&
+            -data.elinkset.link_mode_masks_nwords <= mask_nwords) {
+            data.elinkset.link_mode_masks_nwords =
+                -data.elinkset.link_mode_masks_nwords;
+            err = ioctl(fd, SIOCETHTOOL, &ifr);
+        }
         if (err >= 0) {
-            nlls->duplex = elinkset.duplex;
-            nlls->speed = elinkset.speed;
+            nlls->duplex = data.elinkset.duplex;
+            nlls->speed = data.elinkset.speed;
         }
     }
 #endif /* ETHTOOL_GLINKSETTINGS */
