@@ -305,7 +305,7 @@ usm_free_usmStateReference(void *old)
             SNMP_FREE(old_ref->usr_engine_id);
         if (old_ref->usr_auth_protocol_length)
             SNMP_FREE(old_ref->usr_auth_protocol);
-        if (old_ref->usr_auth_protocol_length)
+        if (old_ref->usr_priv_protocol_length)
             SNMP_FREE(old_ref->usr_priv_protocol);
 
         if (old_ref->usr_auth_key_length && old_ref->usr_auth_key) {
