@@ -1711,7 +1711,7 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
                                          ss->version, notif_name, notif_tag,
                                          notif_profile) != 1) {
         DEBUGMSGTL(("trap:v3user_notif_sess", "add notification failed\n"));
-        snmp_sess_close(ss);
+        snmp_close(ss);
         ss = NULL;
         goto bail;
     }
