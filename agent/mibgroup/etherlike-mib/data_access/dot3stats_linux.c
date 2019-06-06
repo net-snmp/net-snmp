@@ -6,6 +6,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "util_funcs.h"
+
 /*
  * include our parent header 
  */
@@ -788,72 +790,29 @@ interface_ioctl_dot3stats_get (dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, co
  */
 
 int
-interface_ioctl_dot3stats_duplex_get(dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, const char* name) {
-
-#ifdef HAVE_LINUX_ETHTOOL_H
+interface_ioctl_dot3stats_duplex_get(dot3StatsTable_rowreq_ctx *rowreq_ctx, int fd, const char* name)
+{
     dot3StatsTable_data *data = &rowreq_ctx->data;
-    struct ifreq ifr;
-    uint8_t duplex;
+    struct netsnmp_linux_link_settings nlls;
     int err;
 
-    DEBUGMSGTL(("access:dot3StatsTable:interface_ioctl_dot3Stats_duplex_get",
-                "called\n"));
-
-#ifdef ETHTOOL_GLINKSETTINGS
-    memset(&ifr, 0, sizeof (ifr));
-    {
-        struct ethtool_link_settings elinkset;
-
-        memset(&elinkset, 0, sizeof(elinkset));
-        elinkset.cmd = ETHTOOL_GLINKSETTINGS;
-        ifr.ifr_data = (char *)&elinkset;
-        err = _dot3Stats_ioctl_get(fd, SIOCETHTOOL, &ifr, name);
-        if (err >= 0)
-            duplex = elinkset.duplex;
-    }
-#else
-    err = -1;
-#endif
-
-    if (err < 0) {
-        struct ethtool_cmd edata;
-
-        memset(&edata, 0, sizeof(edata));
-        edata.cmd = ETHTOOL_GSET;
-        ifr.ifr_data = (char *)&edata;
-        err = _dot3Stats_ioctl_get(fd, SIOCETHTOOL, &ifr, name);
-        if (err >= 0)
-            duplex = edata.duplex;
-    }
-
-    if (err < 0) {
-        DEBUGMSGTL(("access:dot3StatsTable:interface_ioctl_dot3Stats_duplex_get",
-                    "ETHTOOL_GSET failed\n"));
-
-        return -1;
-    }
-    
+    err = netsnmp_get_link_settings(&nlls, fd, name);
     if (err == 0) {
         rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSDUPLEXSTATUS_FLAG;
-        switch (duplex) {
+        switch (nlls.duplex) {
         case DUPLEX_HALF:
-            data->dot3StatsDuplexStatus = (u_long) DOT3STATSDUPLEXSTATUS_HALFDUPLEX;
+            data->dot3StatsDuplexStatus = DOT3STATSDUPLEXSTATUS_HALFDUPLEX;
             break;
         case DUPLEX_FULL:
-            data->dot3StatsDuplexStatus = (u_long) DOT3STATSDUPLEXSTATUS_FULLDUPLEX;
+            data->dot3StatsDuplexStatus = DOT3STATSDUPLEXSTATUS_FULLDUPLEX;
             break;
         default:
-            data->dot3StatsDuplexStatus = (u_long) DOT3STATSDUPLEXSTATUS_UNKNOWN;
+            data->dot3StatsDuplexStatus = DOT3STATSDUPLEXSTATUS_UNKNOWN;
             break;
-        };
+        }
     }
 
-    DEBUGMSGTL(("access:dot3StatsTable:interface_ioctl_dot3Stats_duplex_get",
-                "ETHTOOL_GSET processed\n"));
     return err;
-#else
-    return -2;
-#endif
 }
 
 

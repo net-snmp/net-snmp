@@ -67,6 +67,15 @@ int net_snmp_search_update_prefix_info(prefix_cbx **head,
 int net_snmp_delete_prefix_info(prefix_cbx **head,
                                 char *address);
 #endif
+
+struct netsnmp_linux_link_settings {
+    uint32_t   speed;
+    uint8_t    duplex;
+};
+
+int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
+                              int fd, const char *name);
+
 #define NIP6(addr) \
         ntohs((addr).s6_addr16[0]), \
         ntohs((addr).s6_addr16[1]), \
