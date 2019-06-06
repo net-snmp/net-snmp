@@ -85,6 +85,19 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#ifdef HAVE_LINUX_ETHTOOL_H
+#include <sys/ioctl.h>
+#include <linux/if.h>
+#include <linux/sockios.h>
+#ifdef HAVE_LINUX_ETHTOOL_NEEDS_U64
+#include <linux/types.h>
+typedef __u64 u64;         /* hack, so we may include kernel's ethtool.h */
+typedef __u32 u32;         /* ditto */
+typedef __u16 u16;         /* ditto */
+typedef __u8 u8;           /* ditto */
+#endif
+#include <linux/ethtool.h>
+#endif /* HAVE_LINUX_ETHTOOL_H */
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_logging.h>
@@ -1150,3 +1163,59 @@ int net_snmp_delete_prefix_info(prefix_cbx **head,
 
 #endif /* HAVE_LINUX_RTNETLINK_H */
          
+/**
+ * netsnmp_get_link_settings
+ * @name
+ *
+ * @returns  0 success
+ * @returns -1 Both ETHTOOL_GLINKSETTINGS and ETHTOOL_GSET failed
+ * @returns -2 HAVE_LINUX_ETHTOOL_H is not defined
+ */
+int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
+                              int fd, const char *name)
+{
+    int err = -2;
+
+#ifdef HAVE_LINUX_ETHTOOL_H
+    struct ifreq ifr;
+
+    err = -1;
+    memset(&ifr, 0, sizeof(ifr));
+    strlcpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+
+#ifdef ETHTOOL_GLINKSETTINGS
+    {
+        struct ethtool_link_settings elinkset;
+
+        memset(&elinkset, 0, sizeof(elinkset));
+        elinkset.cmd = ETHTOOL_GLINKSETTINGS;
+        ifr.ifr_data = &elinkset;
+        err = ioctl(fd, SIOCETHTOOL, &ifr, name);
+        if (err >= 0) {
+            nlls->duplex = elinkset.duplex;
+            nlls->speed = elinkset.speed;
+        }
+    }
+#endif /* ETHTOOL_GLINKSETTINGS */
+
+    if (err < 0) {
+        struct ethtool_cmd edata;
+
+        memset(&edata, 0, sizeof(edata));
+        edata.cmd = ETHTOOL_GSET;
+        ifr.ifr_data = (char *)&edata;
+        err = ioctl(fd, SIOCETHTOOL, &ifr, name);
+        if (err >= 0) {
+            nlls->duplex = edata.duplex;
+            nlls->speed = edata.speed;
+#ifdef HAVE_STRUCT_ETHTOOL_CMD_SPEED_HI
+            nlls->speed |= edata.speed_hi << 16;
+#endif
+        } else {
+            err = -1;
+        }
+    }
+#endif /* HAVE_LINUX_ETHTOOL_H */
+
+    return err;
+}
