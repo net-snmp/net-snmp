@@ -14,12 +14,14 @@
 extern "C" {
 #endif
 
+    struct session_list;
+
     /* Error reporting */
     NETSNMP_IMPORT
     void    snmp_error(netsnmp_session *sess, int *clib_errorno,
                            int *snmp_errorno, char **errstring);
     NETSNMP_IMPORT
-    void    snmp_sess_error(      void *sess, int *clib_errorno,
+    void    snmp_sess_error(struct session_list *slp, int *clib_errorno,
                            int *snmp_errorno, char **errstring);
 
     NETSNMP_IMPORT

@@ -230,7 +230,7 @@ agentx_got_response(int operation,
 
     switch (operation) {
     case NETSNMP_CALLBACK_OP_TIMED_OUT:{
-            void           *s = snmp_sess_pointer(session);
+            struct session_list *s = snmp_sess_pointer(session);
             DEBUGMSGTL(("agentx/master", "timeout on session %8p req=0x%x\n",
                         session, (unsigned)reqid));
 

@@ -90,7 +90,7 @@ static netsnmp_pdu *pdu;        /**<< The trap pdu that is to be sent */
 static long     packetid;
 /** The session id of the session to the master */
 static long     session;
-static void    *sessp;          /**<< The current communication session */
+static struct session_list *sessp; /**<< The current communication session */
 
 #define STATE_CALL(method)                                              \
     if (!state->method) {                                               \
@@ -210,7 +210,7 @@ ConnectingEntry(tState self)
 {
     netsnmp_session init;
     netsnmp_transport *t;
-    void           *sess;
+    struct session_list *sess;
 
     if (sessp) {
         snmp_sess_close(sessp);

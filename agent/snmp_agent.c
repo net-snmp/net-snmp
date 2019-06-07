@@ -1252,7 +1252,7 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
     netsnmp_session *s, *sp = NULL;
     agent_nsap     *a = NULL, *n = NULL, **prevNext = &agent_nsap_list;
     int             handle = 0;
-    void           *isp = NULL;
+    struct session_list *isp = NULL;
 
     if (t == NULL) {
         return -1;

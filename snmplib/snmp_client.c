@@ -1121,7 +1121,7 @@ snmp_synch_response(netsnmp_session * ss,
 }
 
 int
-snmp_sess_synch_response(void *sessp,
+snmp_sess_synch_response(struct session_list *slp,
                          netsnmp_pdu *pdu, netsnmp_pdu **response)
 {
     netsnmp_session      *ss;
@@ -1133,7 +1133,7 @@ snmp_sess_synch_response(void *sessp,
     struct timeval        timeout, *tvp;
     int                   block;
 
-    ss = snmp_sess_session(sessp);
+    ss = snmp_sess_session(slp);
     if (ss == NULL) {
         return STAT_ERROR;
     }
@@ -1146,7 +1146,7 @@ snmp_sess_synch_response(void *sessp,
     ss->callback_magic = (void *) state;
     netsnmp_large_fd_set_init(&fdset, FD_SETSIZE);
 
-    if (snmp_sess_send(sessp, pdu) == 0) {
+    if (snmp_sess_send(slp, pdu) == 0) {
         snmp_free_pdu(pdu);
         state->status = STAT_ERROR;
     } else {
@@ -1160,17 +1160,17 @@ snmp_sess_synch_response(void *sessp,
         block = NETSNMP_SNMPBLOCK;
         tvp = &timeout;
         timerclear(tvp);
-        snmp_sess_select_info2_flags(sessp, &numfds, &fdset, tvp, &block,
+        snmp_sess_select_info2_flags(slp, &numfds, &fdset, tvp, &block,
                                      NETSNMP_SELECT_NOALARMS);
         if (block == 1)
             tvp = NULL;         /* block without timeout */
         count = netsnmp_large_fd_set_select(numfds, &fdset, NULL, NULL, tvp);
         if (count > 0) {
-            snmp_sess_read2(sessp, &fdset);
+            snmp_sess_read2(slp, &fdset);
         } else
             switch (count) {
             case 0:
-                snmp_sess_timeout(sessp);
+                snmp_sess_timeout(slp);
                 break;
             case -1:
                 if (errno == EINTR) {
