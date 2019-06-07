@@ -19362,7 +19362,7 @@ if test "x$enable_ipv6" = "xyes"; then
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking ipv6 stack type" >&5
 $as_echo_n "checking ipv6 stack type... " >&6; }
-	for v6type in v6d toshiba kame inria zeta linux-glibc linux-inet6 cygwin winsock2 generic; do
+	for v6type in v6d toshiba kame inria zeta linux-glibc linux-inet6 winsock2 cygwin generic; do
 		case $v6type in
 		v6d)
 			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
