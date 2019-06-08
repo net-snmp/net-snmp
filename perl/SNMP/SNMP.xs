@@ -1227,12 +1227,7 @@ void *cb_data;
         reply_pdu->command = SNMP_MSG_RESPONSE;
         reply_pdu->reqid = pdu->reqid;
         reply_pdu->errstat = reply_pdu->errindex = 0;
-	if(api_mode == SNMP_API_SINGLE)
-	{
-        	snmp_sess_send(ss, reply_pdu);
-	} else {
-	        snmp_send(ss, reply_pdu);
-	}
+        snmp_send(ss, reply_pdu);
       } else {
         warn("Couldn't clone PDU for inform response");
       }
