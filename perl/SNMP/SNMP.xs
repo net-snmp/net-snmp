@@ -121,10 +121,6 @@ static struct tree * __tag2oid _((char *, char *, oid  *, size_t *, int *, int))
 static int __concat_oid_str _((oid *, size_t *, char *));
 static int __add_var_val_str _((netsnmp_pdu *, oid *, size_t, char *,
                                  int, int));
-static int __send_sync_pdu _((netsnmp_session *, netsnmp_pdu *,
-                              netsnmp_pdu **, int , SV *, SV *, SV *));
-static int __snmp_xs_cb __P((int, netsnmp_session *, int,
-                             netsnmp_pdu *, void *));
 static SV* __push_cb_args2 _((SV * sv, SV * esv, SV * tsv));
 #define __push_cb_args(a,b) __push_cb_args2(a,b,NULL)
 static int __call_callback _((SV * sv, int flags));
@@ -177,7 +173,7 @@ static int _bulkwalk_async_cb _((int op, SnmpSession *ss, int reqid,
 				     netsnmp_pdu *pdu, void *context_ptr));
 
 /* Prototype for error handler */
-void snmp_return_err( struct snmp_session *ss, SV *err_str, SV *err_num, SV *err_ind );
+void snmp_return_err(void *ss, SV *err_str, SV *err_num, SV *err_ind);
 
 /* Structure to hold valid context sessions. */
 struct valid_contexts {
@@ -1083,7 +1079,7 @@ as_oct:
 static int
 __send_sync_pdu(ss, pdu, response, retry_nosuch,
 	        err_str_sv, err_num_sv, err_ind_sv)
-netsnmp_session *ss;
+void *ss;
 netsnmp_pdu *pdu;
 netsnmp_pdu **response;
 int retry_nosuch;
@@ -1759,7 +1755,7 @@ _bulkwalk_send_pdu(walk_context *context)
    */
 
    SV **sess_ptr_sv = hv_fetch((HV*)SvRV(context->sess_ref), "SessPtr", 7, 1);
-   netsnmp_session *ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
+   void *ss = (void *)SvIV((SV*)SvRV(*sess_ptr_sv));
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
    SV **err_ind_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorInd", 8, 1);
@@ -2461,7 +2457,7 @@ not_there:
   snmp_error or snmp_sess_error to populate ErrorStr,ErrorNum, and ErrorInd
   in SNMP::Session objects
 */
-void snmp_return_err( struct snmp_session *ss, SV *err_str, SV *err_num, SV *err_ind )
+void snmp_return_err(void *ss, SV *err_str, SV *err_num, SV *err_ind)
 {
 	int err;
 	int liberr;
@@ -2547,7 +2543,7 @@ snmp_new_session(version, community, peer, lport, retries, timeout)
 	CODE:
 	{
 	   SnmpSession session = {0};
-	   SnmpSession *ss = NULL;
+	   void *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
            snmp_sess_init(&session);
@@ -2626,7 +2622,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
 	CODE:
 	{
 	   SnmpSession session = {0};
-	   SnmpSession *ss = NULL;
+	   void *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
            snmp_sess_init(&session);
@@ -3053,7 +3049,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-           SnmpSession *ss;
+           void *ss;
            netsnmp_pdu *pdu, *response;
            struct tree *tp;
 	   oid *oid_arr;
@@ -3262,7 +3258,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
            AV *varbind;
            I32 varlist_len;
            I32 varlist_ind;
-           netsnmp_session *ss;
+           void *ss;
            netsnmp_pdu *pdu, *response;
            netsnmp_variable_list *vars;
            struct tree *tp;
@@ -3488,7 +3484,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            AV *varbind;
            I32 varlist_len;
            I32 varlist_ind;
-           netsnmp_session *ss;
+           void *ss;
            netsnmp_pdu *pdu, *response;
            netsnmp_variable_list *vars;
            struct tree *tp;
@@ -3740,7 +3736,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-           netsnmp_session *ss;
+           void *ss;
            netsnmp_pdu *pdu, *response;
            netsnmp_variable_list *vars;
            struct tree *tp;
@@ -3979,7 +3975,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-           netsnmp_session *ss;
+           void *ss;
            netsnmp_pdu *pdu = NULL;
 	   oid oid_arr[MAX_OID_LEN];
 	   size_t oid_arr_len;
@@ -4289,7 +4285,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-           SnmpSession *ss;
+           void *ss;
            netsnmp_pdu *pdu = NULL;
            struct tree *tp;
 	   oid *oid_arr;
@@ -4433,7 +4429,7 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-           SnmpSession *ss;
+           void *ss;
            netsnmp_pdu *pdu = NULL;
            struct tree *tp;
 	   oid *oid_arr;
@@ -4579,7 +4575,7 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-           SnmpSession *ss;
+           void *ss;
            netsnmp_pdu *pdu = NULL;
            netsnmp_pdu *response;
            struct tree *tp;
@@ -4976,7 +4972,7 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback,ss=(SnmpSession*)NULL)
 	int 	timeout_sec
 	int 	timeout_usec
 	SV *	perl_callback
-	SnmpSession *ss
+	void *  ss
 	CODE:
 	{
         int numfds, fd_count;
@@ -5457,7 +5453,7 @@ MODULE = SNMP	PACKAGE = SnmpSessionPtr	PREFIX = snmp_session_
 
 void
 snmp_session_DESTROY(sess_ptr)
-	SnmpSession *sess_ptr
+	void *sess_ptr
 	CODE:
 	{
 	if(sess_ptr != NULL)
