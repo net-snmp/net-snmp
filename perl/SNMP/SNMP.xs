@@ -3211,6 +3211,7 @@ snmp_catch(sess_ref, perl_callback)
         SV *    perl_callback
 	PPCODE:
 	{
+           void *sess_ptr;
 	   netsnmp_session *ss;
            SV **sess_ptr_sv;
            SV **err_str_svp;
@@ -3219,7 +3220,7 @@ snmp_catch(sess_ref, perl_callback)
 
            if (SvROK(sess_ref)) {
               sess_ptr_sv = hv_fetch((HV*)SvRV(sess_ref), "SessPtr", 7, 1);
-	      ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
+	      sess_ptr = (void *)SvIV((SV*)SvRV(*sess_ptr_sv));
               err_str_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorStr", 8, 1);
               err_num_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorNum", 8, 1);
               err_ind_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorInd", 8, 1);
@@ -3227,6 +3228,8 @@ snmp_catch(sess_ref, perl_callback)
               sv_setiv(*err_num_svp, 0);
               sv_setiv(*err_ind_svp, 0);
 
+              ss = api_mode == SNMP_API_SINGLE ? snmp_sess_session(sess_ptr) :
+                  sess_ptr;
               ss->callback = NULL;
               ss->callback_magic = NULL;
 
