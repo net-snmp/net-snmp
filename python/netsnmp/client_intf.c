@@ -739,8 +739,9 @@ OCT:
 /* takes ss and pdu as input and updates the 'response' argument */
 /* the input 'pdu' argument will be freed */
 static int
-__send_sync_pdu(netsnmp_session *ss, netsnmp_pdu *pdu, netsnmp_pdu **response,
-                int retry_nosuch, char *err_str, int *err_num, int *err_ind)
+__send_sync_pdu(struct session_list *ss, netsnmp_pdu *pdu,
+                netsnmp_pdu **response, int retry_nosuch,
+                char *err_str, int *err_num, int *err_ind)
 {
    int status = 0;
    long command = pdu->command;
@@ -818,7 +819,7 @@ retry:
 
       default:
          strcat(err_str, "send_sync_pdu: unknown status");
-         *err_num = ss->s_snmp_errno;
+         *err_num = ss->session->s_snmp_errno;
          break;
    }
 done:
@@ -978,7 +979,7 @@ netsnmp_create_session(PyObject *self, PyObject *args)
   int  retries;
   int  timeout;
   SnmpSession session = {0};
-  SnmpSession *ss = NULL;
+  struct session_list *ss = NULL;
   int verbose = py_netsnmp_verbose();
 
   if (!PyArg_ParseTuple(args, "issiii", &version,
@@ -1025,7 +1026,7 @@ netsnmp_create_session(PyObject *self, PyObject *args)
       printf("error:snmp_new_session: Couldn't open SNMP session");
   }
  end:
-  return PyLong_FromVoidPtr((void *)ss);
+  return PyLong_FromVoidPtr(ss);
 }
 
 static PyObject *
@@ -1049,7 +1050,7 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
   int     eng_boots;
   int     eng_time;
   SnmpSession session = {0};
-  SnmpSession *ss = NULL;
+  struct session_list *ss = NULL;
   int verbose = py_netsnmp_verbose();
 
   if (!PyArg_ParseTuple(args, "isiiisisssssssii", &version,
@@ -1164,7 +1165,7 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
   free (session.securityEngineID);
   free (session.contextEngineID);
 
-  return PyLong_FromVoidPtr((void *)ss);
+  return PyLong_FromVoidPtr(ss);
 }
 
 static PyObject *
@@ -1184,7 +1185,7 @@ netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
   char *  their_hostname;
   char *  trust_cert;
   SnmpSession session = {0};
-  SnmpSession *ss = NULL;
+  struct session_list *ss;
   int verbose = py_netsnmp_verbose();
 
   if (!PyArg_ParseTuple(args, "isiiisissssss", &version,
@@ -1264,13 +1265,13 @@ static PyObject *
 netsnmp_delete_session(PyObject *self, PyObject *args)
 {
   PyObject *session;
-  SnmpSession *ss = NULL;
+  struct session_list *ss;
 
   if (!PyArg_ParseTuple(args, "O", &session)) {
     return NULL;
   }
 
-  ss = (SnmpSession *)py_netsnmp_attr_void_ptr(session, "sess_ptr");
+  ss = py_netsnmp_attr_void_ptr(session, "sess_ptr");
 
   snmp_sess_close(ss);
   return (Py_BuildValue(""));
@@ -1286,7 +1287,7 @@ netsnmp_get(PyObject *self, PyObject *args)
   PyObject *val_tuple = NULL;
   int varlist_len = 0;
   int varlist_ind;
-  netsnmp_session *ss;
+  struct session_list *ss;
   netsnmp_pdu *pdu, *response;
   netsnmp_variable_list *vars;
   struct tree *tp;
@@ -1321,7 +1322,7 @@ netsnmp_get(PyObject *self, PyObject *args)
       goto done;
     }
 
-    ss = (SnmpSession *)py_netsnmp_attr_void_ptr(session, "sess_ptr");
+    ss = py_netsnmp_attr_void_ptr(session, "sess_ptr");
 
     if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
       goto done;
@@ -1501,7 +1502,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   PyObject *val_tuple = NULL;
   int varlist_len = 0;
   int varlist_ind;
-  netsnmp_session *ss;
+  struct session_list *ss;
   netsnmp_pdu *pdu, *response;
   netsnmp_variable_list *vars;
   struct tree *tp;
@@ -1536,7 +1537,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
       goto done;
     }
 
-    ss = (SnmpSession *)py_netsnmp_attr_void_ptr(session, "sess_ptr");
+    ss = py_netsnmp_attr_void_ptr(session, "sess_ptr");
 
     if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
       goto done;
@@ -1726,7 +1727,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   PyObject *varbinds  = NULL;
   int varlist_len = 0;
   int varlist_ind;
-  netsnmp_session *ss;
+  struct session_list *ss;
   netsnmp_pdu *pdu, *response;
   netsnmp_pdu *newpdu;
   netsnmp_variable_list *vars, *oldvars;
@@ -1772,7 +1773,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
     if ((varbinds = PyObject_GetAttrString(varlist, "varbinds")) == NULL) {
       goto done;
     }
-    ss = (SnmpSession *)py_netsnmp_attr_void_ptr(session, "sess_ptr");
+    ss = py_netsnmp_attr_void_ptr(session, "sess_ptr");
 
     if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
       goto done;
@@ -2088,7 +2089,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   PyObject *varbinds_iter;
   PyObject *val_tuple = NULL;
   int varbind_ind;
-  netsnmp_session *ss;
+  struct session_list *ss;
   netsnmp_pdu *pdu, *response;
   netsnmp_variable_list *vars;
   struct tree *tp;
@@ -2126,7 +2127,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 
     if (varlist && (varbinds = PyObject_GetAttrString(varlist, "varbinds"))) {
 
-      ss = (SnmpSession *)py_netsnmp_attr_void_ptr(session, "sess_ptr");
+      ss = py_netsnmp_attr_void_ptr(session, "sess_ptr");
 
       if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
         goto done;
@@ -2331,7 +2332,7 @@ netsnmp_set(PyObject *self, PyObject *args)
   PyObject *session;
   PyObject *varlist;
   PyObject *varbind = NULL;
-  netsnmp_session *ss;
+  struct session_list *ss;
   netsnmp_pdu *pdu, *response;
   struct tree *tp;
   char *tag;
@@ -2362,7 +2363,7 @@ netsnmp_set(PyObject *self, PyObject *args)
       goto done;
     }
 
-    ss = (SnmpSession *)py_netsnmp_attr_void_ptr(session, "sess_ptr");
+    ss = py_netsnmp_attr_void_ptr(session, "sess_ptr");
 
     /* PyObject_SetAttrString(); */
     if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
