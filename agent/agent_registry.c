@@ -1278,7 +1278,6 @@ netsnmp_register_mib(const char *moduleName,
         reg_parms.range_ubound = range_ubound;
         reg_parms.timeout = timeout;
         reg_parms.flags = (u_char) flags;
-        reg_parms.contextName = context;
         reg_parms.session = ss;
         reg_parms.reginfo = reginfo;
         reg_parms.contextName = context;
