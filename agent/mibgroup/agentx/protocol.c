@@ -1600,6 +1600,8 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
 #define SNMPERR_INCOMPLETE_PACKET SNMPERR_ASN_PARSE_ERR
 #endif
 
+    if (len > 65536)
+        goto parse_err;
 
     /*
      *  Handle (common) header ....
