@@ -16,6 +16,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/types.h>
+#include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_debug.h>
 
 #ifndef NETSNMP_NO_SYSTEMD
@@ -318,7 +319,7 @@ int netsnmp_sd_notify(int unset_environment, const char *state) {
                 sockaddr.un.sun_path[0] = 0;
 
         memset(&iovec, 0, sizeof(iovec));
-        iovec.iov_base = (char *)state;
+        iovec.iov_base = NETSNMP_REMOVE_CONST(char *, state);
         iovec.iov_len = strlen(state);
 
         memset(&msghdr, 0, sizeof(msghdr));
