@@ -229,6 +229,7 @@ case "$(uname)" in
 	  mibs+=(tsm-mib)
       fi
       options+=("--with-default-snmp-version=2")
+      options+=("--with-systemd")
       # Disabled modules because troublesome: Rmon ipfwchains/ipfwchains ucd-snmp/lmSensors
     ;;
   darwin*|Darwin*)
