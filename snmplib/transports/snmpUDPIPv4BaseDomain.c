@@ -275,7 +275,7 @@ netsnmp_udpipv4base_transport_with_source(const struct netsnmp_ep *ep,
          * Maybe the socket was already provided by systemd...
          */
         t->sock = netsnmp_sd_find_inet_socket(PF_INET, SOCK_DGRAM, -1,
-                                              ntohs(addr->sin_port));
+                                              ntohs(ep->a.sin.sin_port));
 #endif
     }
     else

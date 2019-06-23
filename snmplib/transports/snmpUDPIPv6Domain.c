@@ -417,7 +417,7 @@ netsnmp_udp6_transport_with_source(const struct netsnmp_ep *ep,
          * Maybe the socket was already provided by systemd...
          */
         t->sock = netsnmp_sd_find_inet_socket(PF_INET6, SOCK_DGRAM, -1,
-                                              ntohs(addr->sin6_port));
+                                              ntohs(ep->a.sin6.sin6_port));
 #endif
     }
     else
