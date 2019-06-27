@@ -304,6 +304,12 @@ case "$(uname)" in
       mibs+=(ucd-snmp/dlmod)
       mibs+=(ucd-snmp/extensible)
       mibs+=(winExtDLL)
+      if [ -n "$APPVEYOR" ] &&
+	     [ "${branch_name#V5-8-}" != "${branch_name}" ]; then
+	  # To do: figure out why using OpenSSL triggers a build error
+	  # on Appveyor for the v5.8 branch.
+	  options+=("--with-openssl=internal")
+      fi
       options+=(--without-perl-modules)
       # The config.guess script in the Net-SNMP source tree is too old to
       # recognize the MSYS2 environment. Hence the explicit --build=... option.
