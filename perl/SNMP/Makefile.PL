@@ -33,8 +33,10 @@ sub SnmpInitMakeParams {
     }
                                     
     my ($snmp_lib, $snmp_llib, $sep);
+
+    $opts = NetSNMPGetOpts("../");
+
     if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
-      $opts = NetSNMPGetOpts();	
       $Params{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
       $sep = '\\';
       my $snmp_lib_file = 'netsnmp.lib';
@@ -78,7 +80,6 @@ sub SnmpInitMakeParams {
       $Params{'INC'} = "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ";
     }
     else {
-	$opts = NetSNMPGetOpts();
 	$Params{'LDDLFLAGS'} = "$Config{lddlflags} " . `$opts->{'nsconfig'} --ldflags`;
 	if (!$ENV{'NETSNMP_LIBS'}) {
 	    $Params{'LIBS'}    = `$opts->{'nsconfig'} --libs`;
