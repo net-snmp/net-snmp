@@ -9,13 +9,9 @@
 /*
  * Try to use an initial size that will cover default cases. We aren't talking
  * about huge files, so why fiddle about with reallocs?
- * I checked /proc/meminfo sizes on 3 different systems: 598, 644, 654
- * 
- * On newer systems, the size is up to around 930 (2.6.27 kernel)
- *   or 1160  (2.6.28 kernel)
  */
-#define MEMINFO_INIT_SIZE   1279
-#define MEMINFO_STEP_SIZE   256
+#define MEMINFO_INIT_SIZE   4096
+#define MEMINFO_STEP_SIZE   4096
 #define MEMINFO_FILE   "/proc/meminfo"
 
     /*
@@ -29,7 +25,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     ssize_t      bytes_read;
     char        *b;
     unsigned long memtotal = 0,  memfree = 0, memshared = 0,
-                  buffers = 0,   cached = 0,
+                  buffers = 0,   cached = 0, sreclaimable = 0,
                   swaptotal = 0, swapfree = 0;
 
     netsnmp_memory_info *mem;
@@ -134,6 +130,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (first)
             snmp_log(LOG_ERR, "No SwapFree line in /proc/meminfo\n");
     }
+    b = strstr(buff, "SReclaimable: ");
+    if (b)
+        sscanf(b, "SReclaimable: %lu", &sreclaimable);
     first = 0;
 
 
@@ -183,7 +182,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (!mem->descr)
              mem->descr = strdup("Cached memory");
         mem->units = 1024;
-        mem->size  = cached;
+        mem->size  = cached + sreclaimable;
         mem->free  = 0;     /* Report cached size/used as equal */
         mem->other = -1;
     }
