@@ -147,7 +147,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
              mem->descr = strdup("Physical memory");
         mem->units = 1024;
         mem->size  = memtotal;
-        mem->free  = memfree;
+        mem->free  = memfree + buffers + cached + sreclaimable;
         mem->other = -1;
     }
 
@@ -159,7 +159,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
              mem->descr = strdup("Virtual memory");
         mem->units = 1024;
         mem->size  = memtotal+swaptotal;
-        mem->free  = memfree +swapfree;
+        mem->free  = memfree + swapfree + buffers + cached + sreclaimable;
         mem->other = -1;
     }
 
