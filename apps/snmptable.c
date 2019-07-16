@@ -709,7 +709,6 @@ get_table_entries(netsnmp_session * ss)
                              vars->name_length)) {
                             break;
                         }
-                        i = vars->name_length - rootlen + 1;
                         if (localdebug || show_index) {
                             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                               NETSNMP_DS_LIB_EXTENDED_INDEX)) {
@@ -752,6 +751,14 @@ get_table_entries(netsnmp_session * ss)
 
                     if (localdebug && buf) {
                         printf("%s => taken\n", buf);
+                    }
+                    if (dp[col]) {
+                        fprintf(stderr, "OID not increasing: %s\n", buf);
+                        running = 0;
+                        vars = NULL;
+                        end_of_table = 1;
+                        exitval = 2;
+                        break;
                     }
                     out_len = 0;
                     sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 1,
@@ -967,6 +974,13 @@ getbulk_table_entries(netsnmp_session * ss)
                             index_width = i;
                     }
                     dp = data + row * fields;
+                    if (dp[col]) {
+                        fprintf(stderr, "OID not increasing: %s\n", buf);
+                        exitval = 2;
+                        end_of_table = 1;
+                        running = 0;
+                        break;
+                    }
                     out_len = 0;
                     sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length,
