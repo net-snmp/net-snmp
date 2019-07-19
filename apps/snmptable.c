@@ -777,8 +777,11 @@ get_table_entries(netsnmp_session * ss)
                         column[col].width = i;
                     }
                 }
-                if (buf)
+                if (buf) {
                     free(buf);
+                    buf = NULL;
+                    buf_len = 0;
+                }
 
                 if (end_of_table) {
                     --entries;
@@ -1002,8 +1005,11 @@ getbulk_table_entries(netsnmp_session * ss)
                     memcpy(name, last_var->name,
                            name_length * sizeof(oid));
                 }
-                if (buf)
+                if (buf) {
                     free(buf);
+                    buf = NULL;
+                    buf_len = 0;
+                }
             } else {
                 /*
                  * error in response, print it 

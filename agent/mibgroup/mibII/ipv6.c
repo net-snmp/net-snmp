@@ -1541,14 +1541,6 @@ var_udp6(register struct variable * vp,
 #else
     first = p = (caddr_t)udbtable.inpt_queue.cqh_first;
 #endif
-#elif !defined(__FreeBSD__) && !defined(darwin)
-    {
-    static struct in6pcb udb6;
-
-    if (!auto_nlist("udb6", (char *) &udb6, sizeof(udb6)))
-        return NULL;
-    p = (caddr_t) udb6.in6p_next;
-    }
 #elif defined(dragonfly)
     {
         const char     *udblist = "net.inet.udp.pcblist";
@@ -1569,6 +1561,14 @@ var_udp6(register struct variable * vp,
 	    return NULL;
 	}
         p = (caddr_t) ((char *) xig); /* silence compiler warning */
+    }
+#elif !defined(__FreeBSD__) && !defined(darwin)
+    {
+    static struct in6pcb udb6;
+
+    if (!auto_nlist("udb6", (char *) &udb6, sizeof(udb6)))
+        return NULL;
+    p = (caddr_t) udb6.in6p_next;
     }
 #else
     {
@@ -1693,10 +1693,10 @@ var_udp6(register struct variable * vp,
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 106250000	/*1.6Y*/
         p = (caddr_t)in6pcb.in6p_queue.cqe_next;
 	if (p == first) break;
-#elif !defined(__FreeBSD__) && !defined(darwin)
-        p = (caddr_t)in6pcb.in6p_next;
 #elif defined(__DragonFly__)
         xig = (struct xinpcb *) ((char *) xig + xig->xi_len);
+#elif !defined(__FreeBSD__) && !defined(darwin)
+        p = (caddr_t)in6pcb.in6p_next;
 #else
         xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
 #endif
@@ -2116,14 +2116,6 @@ var_tcp6(register struct variable * vp,
 #else
     first = p = (caddr_t)tcbtable.inpt_queue.cqh_first;
 #endif
-#elif !defined(__FreeBSD__) && !defined(darwin)
-    {
-    static struct in6pcb tcb6;
-
-    if (!auto_nlist("tcb6", (char *) &tcb6, sizeof(tcb6)))
-        return NULL;
-    p = (caddr_t) tcb6.in6p_next;
-    }
 #elif defined(dragonfly)
     {
         const char     *tcblist = "net.inet.tcp.pcblist";
@@ -2144,6 +2136,14 @@ var_tcp6(register struct variable * vp,
 	    return NULL;
 	}
         p = (caddr_t) ((char *) xtp); /* silence compiler warning */
+    }
+#elif !defined(__FreeBSD__) && !defined(darwin)
+    {
+    static struct in6pcb tcb6;
+
+    if (!auto_nlist("tcb6", (char *) &tcb6, sizeof(tcb6)))
+        return NULL;
+    p = (caddr_t) tcb6.in6p_next;
     }
 #else
     {
@@ -2279,10 +2279,10 @@ var_tcp6(register struct variable * vp,
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 106250000 || defined(openbsd4)	/*1.6Y*/
         p = (caddr_t)in6pcb.in6p_queue.cqe_next;
 	if (p == first) break;
-#elif !defined(__FreeBSD__) && !defined(darwin)
-        p = (caddr_t) in6pcb.in6p_next;
 #elif defined(dragonfly)
 	xtp = (struct xtcpcb *) ((char *)xtp + xtp->xt_len);
+#elif !defined(__FreeBSD__) && !defined(darwin)
+        p = (caddr_t) in6pcb.in6p_next;
 #else
         xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
 #endif
