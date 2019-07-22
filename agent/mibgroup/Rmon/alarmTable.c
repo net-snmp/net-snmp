@@ -805,7 +805,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                         netsnmp_query_set_default_session(sess);
                         DEBUGMSGTL(("rmon:alarmTable", "user name %s\n", secName));
                     } else { 
-                        snmp_log(LOG_ERR, "user name %s not found\n", secName);
+                        snmp_log(LOG_ERR, "user name not found\n");
                         config_perror("Unknown user name\n");
                     }
 
