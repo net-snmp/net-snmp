@@ -2753,9 +2753,6 @@ usm_check_secLevel(int level, struct usmUser *user)
  *
  *
  * ASSUMES size of decrypt_buf will always be >= size of encrypted sPDU.
- *
- * FIX  Memory leaks if secStateRef is allocated and a return occurs
- *	without cleaning up.  May contain secrets...
  */
 static int
 usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
@@ -2837,10 +2834,12 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
              * This indicates a decryptionError.  
              */
             snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
-            return SNMPERR_USM_DECRYPTIONERROR;
+            error = SNMPERR_USM_DECRYPTIONERROR;
+        } else {
+            snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+            error = SNMPERR_USM_PARSEERROR;
         }
-        snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
-        return SNMPERR_USM_PARSEERROR;
+        goto err;
     }
 
     /*
@@ -2851,7 +2850,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
      */
     if ((secLevel == SNMP_SEC_LEVEL_AUTHPRIV) && (salt_length != 8)) {
         snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
-        return SNMPERR_USM_DECRYPTIONERROR;
+        error = SNMPERR_USM_DECRYPTIONERROR;
+        goto err;
     }
 
     if (secLevel != SNMP_SEC_LEVEL_AUTHPRIV) {
@@ -2871,19 +2871,22 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         if (usm_set_usmStateReference_name
             (*secStateRef, secName, *secNameLen) == -1) {
             DEBUGMSGTL(("usm", "%s\n", "Couldn't cache name."));
-            return SNMPERR_USM_GENERICERROR;
+            error = SNMPERR_USM_GENERICERROR;
+            goto err;
         }
 
         if (usm_set_usmStateReference_engine_id
             (*secStateRef, secEngineID, *secEngineIDLen) == -1) {
             DEBUGMSGTL(("usm", "%s\n", "Couldn't cache engine id."));
-            return SNMPERR_USM_GENERICERROR;
+            error = SNMPERR_USM_GENERICERROR;
+            goto err;
         }
 
         if (usm_set_usmStateReference_sec_level(*secStateRef, secLevel) ==
             -1) {
             DEBUGMSGTL(("usm", "%s\n", "Couldn't cache security level."));
-            return SNMPERR_USM_GENERICERROR;
+            error = SNMPERR_USM_GENERICERROR;
+            goto err;
         }
     }
 
@@ -2899,13 +2902,15 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         if (ISENGINEKNOWN(secEngineID, *secEngineIDLen) == FALSE) {
             DEBUGMSGTL(("usm", "Unknown Engine ID.\n"));
             snmp_increment_statistic(STAT_USMSTATSUNKNOWNENGINEIDS);
-            return SNMPERR_USM_UNKNOWNENGINEID;
+            error = SNMPERR_USM_UNKNOWNENGINEID;
+            goto err;
         }
     } else {
         if (ENSURE_ENGINE_RECORD(secEngineID, *secEngineIDLen)
             != SNMPERR_SUCCESS) {
             DEBUGMSGTL(("usm", "%s\n", "Couldn't ensure engine record."));
-            return SNMPERR_USM_GENERICERROR;
+            error = SNMPERR_USM_GENERICERROR;
+            goto err;
         }
 
     }
@@ -2923,13 +2928,15 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         == NULL) {
         DEBUGMSGTL(("usm", "Unknown User(%s)\n", secName));
         snmp_increment_statistic(STAT_USMSTATSUNKNOWNUSERNAMES);
-        return SNMPERR_USM_UNKNOWNSECURITYNAME;
+        error = SNMPERR_USM_UNKNOWNSECURITYNAME;
+        goto err;
     }
 
     /* ensure the user is active */
     if (user->userStatus != RS_ACTIVE) {
         DEBUGMSGTL(("usm", "Attempt to use an inactive user.\n"));
-        return SNMPERR_USM_UNKNOWNSECURITYNAME;
+        error = SNMPERR_USM_UNKNOWNSECURITYNAME;
+        goto err;
     }
 
     /*
@@ -2941,10 +2948,12 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         DEBUGMSGTL(("usm", "Unsupported Security Level (%d).\n",
                     secLevel));
         snmp_increment_statistic(STAT_USMSTATSUNSUPPORTEDSECLEVELS);
-        return SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL;
+        error = SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL;
+        goto err;
     } else if (rc != 0) {
         DEBUGMSGTL(("usm", "Unknown issue.\n"));
-        return SNMPERR_USM_GENERICERROR;
+        error = SNMPERR_USM_GENERICERROR;
+        goto err;
     }
 
     /*
@@ -2961,7 +2970,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             snmp_increment_statistic(STAT_USMSTATSWRONGDIGESTS);
 	    snmp_log(LOG_WARNING, "Authentication failed for %s\n",
 				user->name);
-            return SNMPERR_USM_AUTHENTICATIONFAILURE;
+            error = SNMPERR_USM_AUTHENTICATIONFAILURE;
+            goto err;
         }
 
         DEBUGMSGTL(("usm", "Verification succeeded.\n"));
@@ -2982,7 +2992,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             -1) {
             DEBUGMSGTL(("usm", "%s\n",
                         "Couldn't cache authentication protocol."));
-            return SNMPERR_USM_GENERICERROR;
+            error = SNMPERR_USM_GENERICERROR;
+            goto err;
         }
 
         if (usm_set_usmStateReference_auth_key(*secStateRef,
@@ -2990,7 +3001,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                                                user->authKeyLen) == -1) {
             DEBUGMSGTL(("usm", "%s\n",
                         "Couldn't cache authentication key."));
-            return SNMPERR_USM_GENERICERROR;
+            error = SNMPERR_USM_GENERICERROR;
+            goto err;
         }
 
         if (usm_set_usmStateReference_priv_protocol(*secStateRef,
@@ -3000,14 +3012,16 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             -1) {
             DEBUGMSGTL(("usm", "%s\n",
                         "Couldn't cache privacy protocol."));
-            return SNMPERR_USM_GENERICERROR;
+            error = SNMPERR_USM_GENERICERROR;
+            goto err;
         }
 
         if (usm_set_usmStateReference_priv_key(*secStateRef,
                                                user->privKey,
                                                user->privKeyLen) == -1) {
             DEBUGMSGTL(("usm", "%s\n", "Couldn't cache privacy key."));
-            return SNMPERR_USM_GENERICERROR;
+            error = SNMPERR_USM_GENERICERROR;
+            goto err;
         }
     }
 
@@ -3020,7 +3034,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         if (usm_check_and_update_timeliness(secEngineID, *secEngineIDLen,
                                             boots_uint, time_uint,
                                             &error) == -1) {
-            return error;
+            goto err;
         }
     }
 #ifdef							LCD_TIME_SYNC_OPT
@@ -3054,7 +3068,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
             usm_free_usmStateReference(*secStateRef);
             *secStateRef = NULL;
-            return SNMPERR_USM_PARSEERROR;
+            error = SNMPERR_USM_PARSEERROR;
+            goto err;
         }
 
 #ifndef NETSNMP_DISABLE_DES
@@ -3075,7 +3090,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                 snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
                 usm_free_usmStateReference(*secStateRef);
                 *secStateRef = NULL;
-                return SNMPERR_USM_DECRYPTIONERROR;
+                error = SNMPERR_USM_DECRYPTIONERROR;
+                goto err;
             }
 
             end_of_overhead = value_ptr;
@@ -3085,7 +3101,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                 snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
                 usm_free_usmStateReference(*secStateRef);
                 *secStateRef = NULL;
-                return SNMPERR_USM_DECRYPTIONERROR;
+                error = SNMPERR_USM_DECRYPTIONERROR;
+                goto err;
             }
 
             /*
@@ -3123,7 +3140,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             != SNMP_ERR_NOERROR) {
             DEBUGMSGTL(("usm", "%s\n", "Failed decryption."));
             snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
-            return SNMPERR_USM_DECRYPTIONERROR;
+            error = SNMPERR_USM_DECRYPTIONERROR;
+            goto err;
         }
 #ifdef NETSNMP_ENABLE_TESTING_CODE
         if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
@@ -3155,6 +3173,11 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 
     return SNMPERR_SUCCESS;
 
+err:
+    usm_free_usmStateReference(*secStateRef);
+    *secStateRef = NULL;
+    netsnmp_assert(error != SNMPERR_SUCCESS);
+    return error;
 }                               /* end usm_process_in_msg() */
 
 static int
