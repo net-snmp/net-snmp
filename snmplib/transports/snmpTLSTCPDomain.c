@@ -49,6 +49,7 @@ netsnmp_feature_require(cert_util)
 #include <arpa/inet.h>
 #endif
 
+#include "../memcheck.h"
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -280,6 +281,9 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     /* read the packet from openssl */
     do {
         rc = SSL_read(tlsdata->ssl, buf, size);
+        MAKE_MEM_DEFINED(&rc, sizeof(rc));
+        if (rc > 0)
+            MAKE_MEM_DEFINED(buf, rc);
         if (rc == 0) {
             /* XXX closed connection */
             DEBUGMSGTL(("tlstcp", "remote side closed connection\n"));

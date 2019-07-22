@@ -51,6 +51,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "memcheck.h"
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -595,6 +596,7 @@ sc_random(u_char * buf, size_t * buflen)
 
 #ifdef NETSNMP_USE_OPENSSL
     RAND_bytes(buf, *buflen);   /* will never fail */
+    MAKE_MEM_DEFINED(buf, *buflen);
 #elif NETSNMP_USE_PKCS11			/* NETSNMP_USE_PKCS11 */
     pkcs_random(buf, *buflen);
 #else                           /* NETSNMP_USE_INTERNAL_MD5 */
