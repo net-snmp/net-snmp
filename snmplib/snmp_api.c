@@ -5451,26 +5451,6 @@ snmp_free_pdu(netsnmp_pdu *pdu)
     if (!pdu)
         return;
 
-    /*
-     * If the command field is empty, that probably indicates
-     *   that this PDU structure has already been freed.
-     *   Log a warning and return (rather than freeing things again)
-     *
-     * Note that this does not pick up dual-frees where the
-     *   memory is set to random junk, which is probably more serious.
-     *
-     * rks: while this is a good idea, there are two problems.
-     *         1) agentx sets command to 0 in some cases
-     *         2) according to Wes, a bad decode of a v3 message could
-     *            result in a 0 at this offset.
-     *      so I'm commenting it out until a better solution is found.
-     *      note that I'm leaving the memset, below....
-     *
-    if (pdu->command == 0) {
-        snmp_log(LOG_WARNING, "snmp_free_pdu probably called twice\n");
-        return;
-    }
-     */
     if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
         sptr->pdu_free != NULL) {
         (*sptr->pdu_free) (pdu);
@@ -5483,7 +5463,6 @@ snmp_free_pdu(netsnmp_pdu *pdu)
     free(pdu->contextName);
     free(pdu->securityName);
     free(pdu->transport_data);
-    memset(pdu, 0, sizeof(netsnmp_pdu));
     free(pdu);
 }
 

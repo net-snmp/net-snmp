@@ -60,6 +60,7 @@ netsnmp_feature_require(sockaddr_size)
 #include <sys/uio.h>
 #endif
 
+#include "../memcheck.h"
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -509,6 +510,7 @@ _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep)
         DEBUGMSGTL(("dtlsudp", "have %d bytes to send\n", outsize));
 
         outsize = BIO_read(cachep->write_bio, outbuf, outsize);
+        MAKE_MEM_DEFINED(outbuf, outsize);
         sa = NETSNMP_REMOVE_CONST(struct sockaddr *,
                                   _find_remote_sockaddr(t, NULL, 0, &socksize));
         if (NULL == sa)
@@ -781,6 +783,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
        net-snmp select loop because it's already been pulled
        out; need to deal with this) */
     rc = SSL_read(tlsdata->ssl, buf, size);
+    MAKE_MEM_DEFINED(&rc, sizeof(rc));
+    if (rc > 0)
+        MAKE_MEM_DEFINED(buf, rc);
 
     /*
      * moved netsnmp_openssl_null_checks to netsnmp_tlsbase_wrapup_recv.
@@ -813,6 +818,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         /* retry reading */
         DEBUGMSGTL(("9:dtlsudp", "recalling ssl_read\n")); 
         rc = SSL_read(tlsdata->ssl, buf, size);
+        MAKE_MEM_DEFINED(&rc, sizeof(rc));
+        if (rc > 0)
+            MAKE_MEM_DEFINED(buf, rc);
     }
 
     if (rc == -1) {
@@ -1261,6 +1269,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     if (!outbuf)
         return -1;
     rc = BIO_read(cachep->write_bio, outbuf, rc);
+    MAKE_MEM_DEFINED(outbuf, rc);
     socksize = netsnmp_sockaddr_size(&cachep->sas.sa);
     sa = &cachep->sas.sa;
     rc = t->base_transport->f_send(t, outbuf, rc, &sa, &socksize);
@@ -1700,6 +1709,7 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
             snmp_log(LOG_ERR, "dtls: error setting random cookie secret\n");
             return 0;
         }
+        MAKE_MEM_DEFINED(cookie_secret, NETSNMP_COOKIE_SECRET_LENGTH);
         cookie_initialized = 1;
     }
 

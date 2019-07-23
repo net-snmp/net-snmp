@@ -3,6 +3,8 @@ package MakefileSubs;
 use strict;
 use warnings;
 use Config;
+use Cwd 'abs_path';
+use File::Basename;
 use Getopt::Long;
 use Exporter;
 use vars qw(@ISA @EXPORT_OK);
@@ -19,32 +21,6 @@ sub NetSNMPGetOpts {
     $rootpath .= '/' if ($rootpath !~ /\/$/);
 
     if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
-
-      # Grab command line options first.  Only used if environment variables are not set
-      GetOptions("NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
-        "NET-SNMP-PATH=s"      => \$ret{'prefix'},
-        "NET-SNMP-DEBUG=s"     => \$ret{'debug'});
-
-      if ($ENV{'NET-SNMP-IN-SOURCE'})
-      {
-	$ret{'insource'} = $ENV{'NET-SNMP-IN-SOURCE'};
-        undef ($ret{'prefix'});
-      }
-      elsif ($ENV{'NET-SNMP-PATH'})
-      {
-	$ret{'prefix'} = $ENV{'NET-SNMP-PATH'};
-      }
-
-      if ($ENV{'NET-SNMP-DEBUG'})
-      {
-	$ret{'debug'} = $ENV{'NET-SNMP-DEBUG'};
-      }
-
-      # Update environment variables in case they are needed
-      $ENV{'NET-SNMP-IN-SOURCE'}    = $ret{'insource'};
-      $ENV{'NET-SNMP-PATH'}         = $ret{'prefix'};
-      $ENV{'NET-SNMP-DEBUG'}        = $ret{'debug'};
-
       $basedir = abs_path($0);
       while (1) {
           my $basename = basename($basedir);
@@ -58,32 +34,34 @@ sub NetSNMPGetOpts {
             "supported\nPlease rename the folder and try again.\n\n";
       }
     }
-    else
-    {
-      if ($ENV{'NET-SNMP-CONFIG'} &&
-        $ENV{'NET-SNMP-IN-SOURCE'}) {
+
+    if ($ENV{'NET-SNMP-CONFIG'} && $ENV{'NET-SNMP-IN-SOURCE'}) {
 	# have env vars, pull from there
 	$ret{'nsconfig'} = $ENV{'NET-SNMP-CONFIG'};
 	$ret{'insource'} = $ENV{'NET-SNMP-IN-SOURCE'};
-      } else {
+    } else {
 	# don't have env vars, pull from command line and put there
 	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
 	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'});
 
-	if (defined($ret{'insource'}) && lc($ret{'insource'}) eq "true" &&
-	    !defined($ret{'nsconfig'})) {
-	    $ret{'nsconfig'}="sh ROOTPATH../net-snmp-config";
+	my $use_default_nsconfig;
+
+	if ($ret{'insource'}) {
+	    if (lc($ret{'insource'}) eq "true" && !defined($ret{'nsconfig'})) {
+		$use_default_nsconfig = 1;
+	    }
+	}
+
+	if ($use_default_nsconfig) {
+	    $ret{'nsconfig'}="sh ${rootpath}../net-snmp-config";
 	} elsif (!defined($ret{'nsconfig'})) {
 	    $ret{'nsconfig'}="net-snmp-config";
 	}
 
 	$ENV{'NET-SNMP-CONFIG'}    = $ret{'nsconfig'};
 	$ENV{'NET-SNMP-IN-SOURCE'} = $ret{'insource'};
-      }
     }
-
-    $ret{'nsconfig'} =~ s/ROOTPATH/$rootpath/;
-
+    
     $ret{'rootpath'} = $rootpath;
 
     \%ret;

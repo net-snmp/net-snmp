@@ -11,6 +11,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <limits.h>
 #include <stdio.h>
 #include <errno.h>
 #if HAVE_STDLIB_H
@@ -1238,6 +1239,10 @@ agentx_parse_string(const u_char *data, size_t *length, struct rszbuf *string,
     }
 
     len = agentx_parse_int(data, network_byte_order);
+    if (len > UINT_MAX - 4) {
+        DEBUGMSGTL(("agentx", "Too long: %u\n", len));
+        return NULL;
+    }
     if (*length < len + 4) {
         DEBUGMSGTL(("agentx", "Incomplete string (still too short: %d)\n",
                     (int)*length));

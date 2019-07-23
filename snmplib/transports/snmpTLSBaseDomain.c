@@ -26,6 +26,7 @@ netsnmp_feature_require(cert_util)
 #endif
 #include <errno.h>
 #include <ctype.h>
+#include "../memcheck.h"
 
 /* OpenSSL Includes */
 #include <openssl/bio.h>
@@ -517,6 +518,7 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
         snmp_log(LOG_ERR, "ack: %p\n", the_ctx);
         LOGANDDIE("can't create a new context");
     }
+    MAKE_MEM_DEFINED(the_ctx, 256/*sizeof(*the_ctx)*/);
     SSL_CTX_set_read_ahead (the_ctx, 1); /* Required for DTLS */
         
     SSL_CTX_set_verify(the_ctx,
@@ -591,6 +593,7 @@ sslctx_server_setup(const SSL_METHOD *method) {
     if (!the_ctx) {
         LOGANDDIE("can't create a new context");
     }
+    MAKE_MEM_DEFINED(the_ctx, 256/*sizeof(*the_ctx)*/);
 
     id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, NULL);
     if (!id_cert)
