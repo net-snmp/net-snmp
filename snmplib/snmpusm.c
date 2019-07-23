@@ -84,6 +84,22 @@ netsnmp_feature_child_of(usm_support, usm_all)
 
 netsnmp_feature_require(usm_support)
 
+struct usmStateReference {
+    char           *usr_name;
+    size_t          usr_name_length;
+    u_char         *usr_engine_id;
+    size_t          usr_engine_id_length;
+    oid            *usr_auth_protocol;
+    size_t          usr_auth_protocol_length;
+    u_char         *usr_auth_key;
+    size_t          usr_auth_key_length;
+    oid            *usr_priv_protocol;
+    size_t          usr_priv_protocol_length;
+    u_char         *usr_priv_key;
+    size_t          usr_priv_key_length;
+    u_int           usr_sec_level;
+};
+
 oid    usmNoAuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                  NETSNMP_USMAUTH_NOAUTH };
 #ifndef NETSNMP_DISABLE_MD5
