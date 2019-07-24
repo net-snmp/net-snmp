@@ -31,9 +31,7 @@ BEGIN {
 
 sub NetSNMPGetOpts {
     my %ret;
-    my $rootpath = shift;
-    $rootpath = "../" if (!$rootpath);
-    $rootpath .= '/' if ($rootpath !~ /\/$/);
+    my $rootpath = $basedir;
 
     if ($ENV{'NET-SNMP-CONFIG'} && $ENV{'NET-SNMP-IN-SOURCE'}) {
 	# have env vars, pull from there
@@ -53,7 +51,7 @@ sub NetSNMPGetOpts {
 	}
 
 	if ($use_default_nsconfig) {
-	    $ret{'nsconfig'}="sh ${rootpath}../net-snmp-config";
+	    $ret{'nsconfig'}="sh ${rootpath}/../net-snmp-config";
 	} elsif (!defined($ret{'nsconfig'})) {
 	    $ret{'nsconfig'}="net-snmp-config";
 	}
@@ -70,7 +68,7 @@ sub NetSNMPGetOpts {
 
 sub AddCommonParams {
     my $Params = shift;
-    my $opts = NetSNMPGetOpts("../");
+    my $opts = NetSNMPGetOpts();
 
     if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
 	# MinGW or MSYS.

@@ -29,7 +29,7 @@ sub AsnInitMakeParams {
                   
     my ($snmp_lib, $snmp_llib, $sep);
 
-    $opts = NetSNMPGetOpts("../");
+    $opts = NetSNMPGetOpts();
 
     if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
       $sep = '\\';
