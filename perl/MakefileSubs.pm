@@ -37,10 +37,12 @@ sub NetSNMPGetOpts {
 	# have env vars, pull from there
 	$ret{'nsconfig'} = $ENV{'NET-SNMP-CONFIG'};
 	$ret{'insource'} = $ENV{'NET-SNMP-IN-SOURCE'};
+	$ret{'cflags'}   = $ENV{'NET-SNMP-CFLAGS'};
     } else {
 	# don't have env vars, pull from command line and put there
 	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
-	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'});
+	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
+		   "NET-SNMP-CFLAGS=s" => \$ret{'cflags'});
 
 	my $use_default_nsconfig;
 
@@ -58,6 +60,7 @@ sub NetSNMPGetOpts {
 
 	$ENV{'NET-SNMP-CONFIG'}    = $ret{'nsconfig'};
 	$ENV{'NET-SNMP-IN-SOURCE'} = $ret{'insource'};
+	$ENV{'NET-SNMP-CFLAGS'}    = $ret{'cflags'};
     }
     
     $ret{'rootpath'} = $rootpath;
@@ -69,6 +72,8 @@ sub NetSNMPGetOpts {
 sub AddCommonParams {
     my $Params = shift;
     my $opts = NetSNMPGetOpts();
+
+    $Params->{'CCFLAGS'} = $opts->{'cflags'};
 
     if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
 	# MinGW or MSYS.
