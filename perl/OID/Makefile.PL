@@ -23,16 +23,13 @@ sub OidInitMakeParams {
 		  'PREREQ_PM'           => {},
 		  );
 
-    if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
-      $Params{'DEFINE'} = "-DMINGW_PERL";
-    }
+    AddCommonParams(\%Params);
                   
     my ($snmp_lib, $snmp_llib, $sep);
 
     $opts = NetSNMPGetOpts("../");
 
     if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
-      $Params{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
       $sep = '\\';
       my $snmp_lib_file = 'netsnmp.lib';
       my $snmp_link_lib = 'netsnmp';
@@ -71,19 +68,11 @@ sub OidInitMakeParams {
 	}
 	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib";
       }
-
-      $Params{'INC'} = "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ";
     }
     else {
-	$Params{'LDDLFLAGS'} = "$Config{lddlflags} " . `$opts->{'nsconfig'} --ldflags` or
-	    die "net-snmp-config failed\n";
 	$Params{'LIBS'}    = `$opts->{'nsconfig'} --libs` or
 	    die "net-snmp-config failed\n";
 	chomp($Params{'LIBS'});
-	$Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags` or
-	    die "net-snmp-config failed\n";
-	chomp($Params{'CCFLAGS'});
-	$Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
         $lib_version = `$opts->{'nsconfig'} --version` or
 	    die "net-snmp-config failed\n";
 	if (lc($opts->{'insource'}) eq "true") {
@@ -91,12 +80,9 @@ sub OidInitMakeParams {
                 "-L" . abs_path("../../snmplib/.libs") .
                 " -L" . abs_path("../../snmplib") .
                 " " . $Params{'LIBS'};
-	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
 #	    $Params{'PREREQ_PM'} = {'SNMP' => '5.0'};
 	}
-	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
-        $Params{'CCFLAGS'} .= ' -Wformat';
     }
 
     return(%Params);

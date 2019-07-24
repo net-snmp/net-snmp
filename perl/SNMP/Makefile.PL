@@ -28,16 +28,13 @@ sub SnmpInitMakeParams {
 		  realclean        => { FILES => 'host' },
 		  );
 
-    if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
-      $Params{'DEFINE'} = "-DMINGW_PERL";
-    }
+    AddCommonParams(\%Params);
                                     
     my ($snmp_lib, $snmp_llib, $sep);
 
     $opts = NetSNMPGetOpts("../");
 
     if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
-      $Params{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
       $sep = '\\';
       my $snmp_lib_file = 'netsnmp.lib';
       my $snmp_link_lib = 'netsnmp';
@@ -76,26 +73,14 @@ sub SnmpInitMakeParams {
 	}
 	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib";
       }
-
-      $Params{'INC'} = "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ";
     }
     else {
-	$Params{'LDDLFLAGS'} = "$Config{lddlflags} " . `$opts->{'nsconfig'} --ldflags` or
-	    die "net-snmp-config failed\n";
 	if (!$ENV{'NETSNMP_LIBS'}) {
 	    $Params{'LIBS'}    = `$opts->{'nsconfig'} --libs` or
 		die "net-snmp-config failed\n";
 	    chomp($Params{'LIBS'});
 	} else {
 	    $Params{'LIBS'} = $ENV{'NETSNMP_LIBS'};
-	}
-	if (!$ENV{'NETSNMP_CCFLAGS'}) {
-	    $Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags` or
-		die "net-snmp-config failed\n";
-	    chomp($Params{'CCFLAGS'});
-	    $Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
-	} else {
-	    $Params{'CCFLAGS'} = $ENV{'NETSNMP_CCFLAGS'};
 	}
         $lib_version = `$opts->{'nsconfig'} --version` or
 	    die "net-snmp-config failed\n";
@@ -104,12 +89,9 @@ sub SnmpInitMakeParams {
                 "-L" . abs_path("../../snmplib/.libs") .
                 " -L" . abs_path("../../snmplib") .
                 " " . $Params{'LIBS'};
-	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
 #	    $Params{'PREREQ_PM'} = { 'NetSNMP::default_store' => 0.01 };
 	}
-	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
-        $Params{'CCFLAGS'} .= ' -Wformat';
 	if (!$ENV{'NETSNMP_PREFIX'}) {
 	    $prefix            = `$opts->{'nsconfig'} --prefix` or
 		die "net-snmp-config failed\n";

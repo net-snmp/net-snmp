@@ -11,7 +11,8 @@ use vars qw(@ISA @EXPORT_OK);
 
 our $VERSION = 1.00;
 our @ISA     = qw(Exporter);
-our @EXPORT  = qw(NetSNMPGetOpts find_files Check_Version floatize_version);
+our @EXPORT  = qw(NetSNMPGetOpts AddCommonParams find_files Check_Version
+                  floatize_version);
 our $basedir;
 
 BEGIN {
@@ -65,6 +66,32 @@ sub NetSNMPGetOpts {
     $ret{'debug'} = 'false';
 
     \%ret;
+}
+
+sub AddCommonParams {
+    my $Params = shift;
+    my $opts = NetSNMPGetOpts("../");
+
+    if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
+	# MinGW or MSYS.
+	$Params->{'DEFINE'} = "-DMINGW_PERL";
+    } elsif ($Config{'osname'} eq 'MSWin32') {
+	# Microsoft Visual Studio.
+	$Params->{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
+	$Params->{'INC'} = "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ";
+    } else {
+	# Unix.
+	$Params->{'LDDLFLAGS'} = "$Config{lddlflags} " .
+	    `$opts->{'nsconfig'} --ldflags`;
+	$Params->{'CCFLAGS'} = "-I" . $MakefileSubs::basedir . "/include ";
+	$Params->{'CCFLAGS'} .= `$opts->{'nsconfig'} --cflags` or
+	    die "net-snmp-config failed\n";
+	chomp($Params->{'CCFLAGS'});
+	$Params->{'CCFLAGS'} .= " " . $Config{'ccflags'};
+	# Suppress known Perl header shortcomings.
+	$Params->{'CCFLAGS'} =~ s/ -W(cast-qual|write-strings)//g;
+	$Params->{'CCFLAGS'} .= ' -Wformat';
+    }
 }
 
 sub find_files {
