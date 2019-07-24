@@ -834,6 +834,27 @@ Check_HR_FileSys_NFS (void)
     return 0;		/* no NFS file system */
 }
 
+/* This function checks whether current file system is an AutoFs
+ * HRFS_entry must be valid prior to calling this function
+ * return 1 if AutoFs, 0 otherwise
+ */
+int
+Check_HR_FileSys_AutoFs(void)
+{
+#if HAVE_GETFSSTAT
+    if (HRFS_entry->HRFS_type != NULL && 
+#if defined(MNTTYPE_AUTOFS)
+        !strcmp(HRFS_entry->HRFS_type, MNTTYPE_AUTOFS)
+#else
+        !strcmp(HRFS_entry->HRFS_type, "autofs")
+#endif
+        )
+#endif /* HAVE_GETFSSTAT */
+        return 1;  /* AUTOFS */
+
+    return 0; /* no AUTOFS */
+}
+
 void
 End_HR_FileSys(void)
 {

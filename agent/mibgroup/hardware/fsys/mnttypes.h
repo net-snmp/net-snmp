@@ -165,6 +165,9 @@
 #ifndef MNTTYPE_APP
 #define MNTTYPE_APP      "app"
 #endif
+#ifndef MNTTYPE_AUTOFS
+#define MNTTYPE_AUTOFS   "autofs"
+#endif
 #ifndef MNTTYPE_DEVPTS
 #define MNTTYPE_DEVPTS   "devpts"
 #endif

@@ -42,22 +42,7 @@ extern          "C" {
     /*
      * Structures.
      */
-    struct usmStateReference {
-        char           *usr_name;
-        size_t          usr_name_length;
-        u_char         *usr_engine_id;
-        size_t          usr_engine_id_length;
-        oid            *usr_auth_protocol;
-        size_t          usr_auth_protocol_length;
-        u_char         *usr_auth_key;
-        size_t          usr_auth_key_length;
-        oid            *usr_priv_protocol;
-        size_t          usr_priv_protocol_length;
-        u_char         *usr_priv_key;
-        size_t          usr_priv_key_length;
-        u_int           usr_sec_level;
-    };
-
+    struct usmStateReference;
 
     /*
      * struct usmUser: a structure to represent a given user in a list 

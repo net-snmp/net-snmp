@@ -188,6 +188,7 @@ my %makefile_subs = (
     "ssl" => [ "^OPENSSL=",    $openssl ? "OPENSSL=true" : "OPENSSL=false" ],
     "sdk" => [ "^SDK=",        $sdk == 1 ? "SDK=true" : "SDK=false" ],
     "cfl" => [ "^CFLAGS=",     "CFLAGS=" .
+                               "/D NETSNMP_REMOVE_U64 " .
                                "/D VC_EXTRALEAN " .
                                "/D WIN32 " .
                                "/D WIN32_LEAN_AND_MEAN " .
