@@ -371,6 +371,8 @@ really_try_next:
                                    NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) &&
             Check_HR_FileSys_NFS())
             return NULL;
+        if (Check_HR_FileSys_AutoFs())
+            return NULL;
         if (store_idx <= NETSNMP_MEM_TYPE_MAX ) {
 	    mem = (netsnmp_memory_info*)ptr;
         }
@@ -508,7 +510,8 @@ Get_Next_HR_Store(void)
 		if (HRS_index >= 0) {
 			if (!(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 							NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) && 
-						Check_HR_FileSys_NFS())) {
+						Check_HR_FileSys_NFS()) &&
+                         !Check_HR_FileSys_AutoFs()) {
 				return HRS_index + NETSNMP_MEM_TYPE_MAX;	
 			}
 		} else {

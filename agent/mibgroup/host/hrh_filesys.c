@@ -429,3 +429,9 @@ Check_HR_FileSys_NFS (void)
 {
     return (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE) ? 1 : 0;
 }
+
+int
+Check_HR_FileSys_AutoFs (void)
+{
+    return HRFS_entry->type == NETSNMP_FS_TYPE_AUTOFS;
+}

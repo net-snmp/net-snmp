@@ -150,6 +150,13 @@ _fsys_type( char *typename )
               !strcmp(typename, MNTTYPE_LOFS))
        return NETSNMP_FS_TYPE_OTHER;
 
+    /* Detection of AUTOFS.
+     * This file system will be ignored by default
+     */ 
+    else if (!strcmp(typename, MNTTYPE_AUTOFS))
+        return NETSNMP_FS_TYPE_AUTOFS;
+
+
     /*    
      *  All other types are silently skipped
      */
@@ -237,6 +244,10 @@ netsnmp_fsys_arch_load( void )
         if ( (entry->flags & NETSNMP_FS_FLAG_REMOTE) &&
             netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES))
+            continue;
+
+        /* Skip AUTOFS entries */
+        if (entry->type == NETSNMP_FS_TYPE_AUTOFS)
             continue;
 
 #ifdef irix6
