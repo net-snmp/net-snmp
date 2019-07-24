@@ -70,13 +70,17 @@ sub DefaultStoreInitMakeParams {
       $Params{'INC'} = "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ";
     }
     else {
-	$Params{'LDDLFLAGS'} = "$Config{lddlflags} " . `$opts->{'nsconfig'} --ldflags`;
-	$Params{'LIBS'}    = `$opts->{'nsconfig'} --libs`;
+	$Params{'LDDLFLAGS'} = "$Config{lddlflags} " . `$opts->{'nsconfig'} --ldflags` or
+	    die "net-snmp-config failed\n";
+	$Params{'LIBS'}    = `$opts->{'nsconfig'} --libs` or
+	    die "net-snmp-config failed\n";
 	chomp($Params{'LIBS'});
-	$Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
+	$Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags` or
+	    die "net-snmp-config failed\n";
 	chomp($Params{'CCFLAGS'});
 	$Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
-        $lib_version = `$opts->{'nsconfig'} --version`;
+        $lib_version = `$opts->{'nsconfig'} --version` or
+	    die "net-snmp-config failed\n";
 	if (lc($opts->{'insource'}) eq "true") {
 	    $Params{'LIBS'} =
                 "-L" . abs_path("../../snmplib/.libs") .
@@ -86,9 +90,6 @@ sub DefaultStoreInitMakeParams {
 	}
 	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
         $Params{'CCFLAGS'} .= ' -Wformat';
-	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
-	    die "You need to install net-snmp first (I can't find net-snmp-config)";
-	}
     }
 
     return(%Params);
