@@ -18,6 +18,9 @@ artifacts:
 
 clone_depth: 5
 
+install:
+  - 'call "ci\openssl.bat"'
+
 build_script:
   - 'call "ci\build.bat"'
 
