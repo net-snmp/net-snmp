@@ -14,26 +14,25 @@ our @ISA     = qw(Exporter);
 our @EXPORT  = qw(NetSNMPGetOpts find_files Check_Version floatize_version);
 our $basedir;
 
+BEGIN {
+    $basedir = abs_path($0);
+    while (1) {
+	my $basename = basename($basedir);
+	last if (length($basename) <= 2);
+	$basedir = dirname($basedir);
+	last if ($basename eq "perl");
+    }
+    if ($Config{'osname'} eq 'MSWin32' && $basedir =~ / /) {
+        die "\nA space has been detected in the base directory.  This is not " .
+            "supported\nPlease rename the folder and try again.\n\n";
+    }
+}
+
 sub NetSNMPGetOpts {
     my %ret;
     my $rootpath = shift;
     $rootpath = "../" if (!$rootpath);
     $rootpath .= '/' if ($rootpath !~ /\/$/);
-
-    if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
-      $basedir = abs_path($0);
-      while (1) {
-          my $basename = basename($basedir);
-          last if (length($basename) <= 2);
-          $basedir = dirname($basedir);
-          last if ($basename eq "perl");
-      }
-      print "Net-SNMP base directory: $basedir\n";
-      if ($basedir =~ / /) {
-        die "\nA space has been detected in the base directory.  This is not " .
-            "supported\nPlease rename the folder and try again.\n\n";
-      }
-    }
 
     if ($ENV{'NET-SNMP-CONFIG'} && $ENV{'NET-SNMP-IN-SOURCE'}) {
 	# have env vars, pull from there
