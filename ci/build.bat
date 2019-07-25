@@ -5,7 +5,6 @@ echo "Error: unknown build type %BUILD%"
 goto eof
 
 :MSVCDYNAMIC64
-call "ci\openssl.bat"
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 cd win32
 perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=dynamic --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc
@@ -15,7 +14,6 @@ cd ..
 goto eof
 
 :MSVCSTATIC64
-call "ci\openssl.bat"
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 cd win32
 perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=static --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc
@@ -25,7 +23,6 @@ cd ..
 goto eof
 
 :INSTALLER
-call "ci\openssl.bat"
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 set OPENSSLDIR=C:\OpenSSL-Win64
 set PATH=%PATH%;C:\cygwin64\bin

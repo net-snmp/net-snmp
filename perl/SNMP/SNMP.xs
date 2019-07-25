@@ -7,10 +7,6 @@
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 */
-#define WIN32SCK_IS_STDSCK
-#if defined(_WIN32) && !defined(_WIN32_WINNT)
-#define _WIN32_WINNT 0x501
-#endif
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -1077,15 +1073,9 @@ as_oct:
 /* takes ss and pdu as input and updates the 'response' argument */
 /* the input 'pdu' argument will be freed */
 static int
-__send_sync_pdu(ss, pdu, response, retry_nosuch,
-	        err_str_sv, err_num_sv, err_ind_sv)
-void *ss;
-netsnmp_pdu *pdu;
-netsnmp_pdu **response;
-int retry_nosuch;
-SV * err_str_sv;
-SV * err_num_sv;
-SV * err_ind_sv;
+__send_sync_pdu(void *ss, netsnmp_pdu *pdu, netsnmp_pdu **response,
+                int retry_nosuch, SV *err_str_sv, SV *err_num_sv,
+                SV *err_ind_sv)
 {
    int status;
    long command = pdu->command;
@@ -1158,12 +1148,8 @@ retry:
 }
 
 static int
-__snmp_xs_cb (op, ss, reqid, pdu, cb_data)
-int op;
-netsnmp_session *ss;
-int reqid;
-netsnmp_pdu *pdu;
-void *cb_data;
+__snmp_xs_cb(int op, netsnmp_session *ss, int reqid, netsnmp_pdu *pdu,
+             void *cb_data)
 {
   SV *varlist_ref;
   AV *varlist;

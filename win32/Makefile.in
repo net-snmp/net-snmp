@@ -3,6 +3,7 @@ LINKTYPE=
 CFG=
 PREFIX=
 PREFIX_DOS=
+DEFINES=
 PERL=
 NMAKE=nmake /nologo
 APPS=
@@ -61,10 +62,11 @@ perl :
 	-@echo .
 !ENDIF	# dynamic/static check
 	cd ..\perl
+	set PERL5LIB=$(MAKEDIR)\..\perl
 !IF "$(CFG)" == "release"
-	perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE
+	perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE -NET-SNMP-CONFIG=do-not-use-net-snmp-config -NET-SNMP-CFLAGS="$(DEFINES)"
 !ELSE	# release/debug check
-	perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE -NET-SNMP-DEBUG=TRUE
+	perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE -NET-SNMP-CONFIG=do-not-use-net-snmp-config -NET-SNMP-CFLAGS="$(DEFINES)" -NET-SNMP-DEBUG=TRUE
 !ENDIF	# release/debug check
 	$(NMAKE)
 	cd ..\win32

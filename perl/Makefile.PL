@@ -15,7 +15,7 @@ sub TopLevelInitMakeParams {
 		  );
 
     # bogus, but these options need to be passed to the lower levels
-    my $opts = NetSNMPGetOpts("./");
+    my $opts = NetSNMPGetOpts();
 
     return(%Params);
 }

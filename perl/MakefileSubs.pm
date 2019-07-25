@@ -11,38 +11,38 @@ use vars qw(@ISA @EXPORT_OK);
 
 our $VERSION = 1.00;
 our @ISA     = qw(Exporter);
-our @EXPORT  = qw(NetSNMPGetOpts find_files Check_Version floatize_version);
+our @EXPORT  = qw(NetSNMPGetOpts AddCommonParams find_files Check_Version
+                  floatize_version);
 our $basedir;
+
+BEGIN {
+    $basedir = abs_path($0);
+    while (1) {
+	my $basename = basename($basedir);
+	last if (length($basename) <= 2);
+	$basedir = dirname($basedir);
+	last if ($basename eq "perl");
+    }
+    if ($Config{'osname'} eq 'MSWin32' && $basedir =~ / /) {
+        die "\nA space has been detected in the base directory.  This is not " .
+            "supported\nPlease rename the folder and try again.\n\n";
+    }
+}
 
 sub NetSNMPGetOpts {
     my %ret;
-    my $rootpath = shift;
-    $rootpath = "../" if (!$rootpath);
-    $rootpath .= '/' if ($rootpath !~ /\/$/);
-
-    if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
-      $basedir = abs_path($0);
-      while (1) {
-          my $basename = basename($basedir);
-          last if (length($basename) <= 2);
-          $basedir = dirname($basedir);
-          last if ($basename eq "perl");
-      }
-      print "Net-SNMP base directory: $basedir\n";
-      if ($basedir =~ / /) {
-        die "\nA space has been detected in the base directory.  This is not " .
-            "supported\nPlease rename the folder and try again.\n\n";
-      }
-    }
+    my $rootpath = $basedir;
 
     if ($ENV{'NET-SNMP-CONFIG'} && $ENV{'NET-SNMP-IN-SOURCE'}) {
 	# have env vars, pull from there
 	$ret{'nsconfig'} = $ENV{'NET-SNMP-CONFIG'};
 	$ret{'insource'} = $ENV{'NET-SNMP-IN-SOURCE'};
+	$ret{'cflags'}   = $ENV{'NET-SNMP-CFLAGS'};
     } else {
 	# don't have env vars, pull from command line and put there
 	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
-	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'});
+	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
+		   "NET-SNMP-CFLAGS=s" => \$ret{'cflags'});
 
 	my $use_default_nsconfig;
 
@@ -53,18 +53,48 @@ sub NetSNMPGetOpts {
 	}
 
 	if ($use_default_nsconfig) {
-	    $ret{'nsconfig'}="sh ${rootpath}../net-snmp-config";
+	    $ret{'nsconfig'}="sh ${rootpath}/../net-snmp-config";
 	} elsif (!defined($ret{'nsconfig'})) {
 	    $ret{'nsconfig'}="net-snmp-config";
 	}
 
 	$ENV{'NET-SNMP-CONFIG'}    = $ret{'nsconfig'};
 	$ENV{'NET-SNMP-IN-SOURCE'} = $ret{'insource'};
+	$ENV{'NET-SNMP-CFLAGS'}    = $ret{'cflags'};
     }
     
     $ret{'rootpath'} = $rootpath;
+    $ret{'debug'} = 'false';
 
     \%ret;
+}
+
+sub AddCommonParams {
+    my $Params = shift;
+    my $opts = NetSNMPGetOpts();
+
+    $Params->{'CCFLAGS'} = $opts->{'cflags'};
+
+    if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
+	# MinGW or MSYS.
+	$Params->{'DEFINE'} = "-DMINGW_PERL";
+    } elsif ($Config{'osname'} eq 'MSWin32') {
+	# Microsoft Visual Studio.
+	$Params->{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
+	$Params->{'INC'} = "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ";
+    } else {
+	# Unix.
+	$Params->{'LDDLFLAGS'} = "$Config{lddlflags} " .
+	    `$opts->{'nsconfig'} --ldflags`;
+	$Params->{'CCFLAGS'} = "-I" . $MakefileSubs::basedir . "/include ";
+	$Params->{'CCFLAGS'} .= `$opts->{'nsconfig'} --cflags` or
+	    die "net-snmp-config failed\n";
+	chomp($Params->{'CCFLAGS'});
+	$Params->{'CCFLAGS'} .= " " . $Config{'ccflags'};
+	# Suppress known Perl header shortcomings.
+	$Params->{'CCFLAGS'} =~ s/ -W(cast-qual|write-strings)//g;
+	$Params->{'CCFLAGS'} .= ' -Wformat';
+    }
 }
 
 sub find_files {

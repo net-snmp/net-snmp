@@ -25,16 +25,13 @@ sub AgentInitMakeParams {
 		  'PREREQ_PM'           => {},
 		  );
 
-    if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
-      $Params{'DEFINE'} = "-DMINGW_PERL";
-    }
+    AddCommonParams(\%Params);
                                    
     my ($snmp_lib, $snmp_llib, $sep);
 
-    $opts = NetSNMPGetOpts("../");
+    $opts = NetSNMPGetOpts();
 
     if ($Config{'osname'} eq 'MSWin32' && !defined($ENV{'OSTYPE'})) {
-      $Params{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
       $sep = '\\';
       my $snmp_lib_file = 'netsnmp.lib';
       my $snmp_link_lib = 'netsnmp';
@@ -76,17 +73,13 @@ sub AgentInitMakeParams {
 	}
 	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib -l$agent_link_lib -l$mibs_link_lib";
       }
-
-      $Params{'INC'} = "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ";
     }
     else {
-	$Params{'LDDLFLAGS'} = "$Config{lddlflags} " . `$opts->{'nsconfig'} --ldflags`;
-	$Params{'LIBS'}   = `$opts->{'nsconfig'} --base-agent-libs`;
+	$Params{'LIBS'}   = `$opts->{'nsconfig'} --base-agent-libs` or
+	    die "net-snmp-config failed\n";
 	chomp($Params{'LIBS'});
-	$Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
-	chomp($Params{'CCFLAGS'});
-	$Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
-        $lib_version = `$opts->{'nsconfig'} --version`;
+        $lib_version = `$opts->{'nsconfig'} --version` or
+	    die "net-snmp-config failed\n";
 	if (lc($opts->{'insource'}) eq "true") {
 	    $Params{'LIBS'} =
                 "-L" . abs_path("../../snmplib/.libs") .
@@ -94,15 +87,9 @@ sub AgentInitMakeParams {
                 " -L" . abs_path("../../agent/.libs") .
                 " -L" . abs_path("../../agent") .
                 " " . $Params{'LIBS'};
-	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
 	    $Params{'LIBS'} = `$opts->{'nsconfig'} --libdir` . $Params{'LIBS'};
 #	    $Params{'PREREQ_PM'} = {'NetSNMP::OID' => '0.1'};
-	}
-	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
-        $Params{'CCFLAGS'} .= ' -Wformat';
-	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
-	    die "You need to install net-snmp first (I can't find net-snmp-config)";
 	}
     }
 
