@@ -63,6 +63,7 @@ sub NetSNMPGetOpts {
     }
     
     $ret{'rootpath'} = $rootpath;
+    $ret{'debug'} = 'false';
 
     \%ret;
 }
