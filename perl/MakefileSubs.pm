@@ -37,12 +37,14 @@ sub NetSNMPGetOpts {
 	# have env vars, pull from there
 	$ret{'nsconfig'} = $ENV{'NET-SNMP-CONFIG'};
 	$ret{'insource'} = $ENV{'NET-SNMP-IN-SOURCE'};
-	$ret{'cflags'}   = $ENV{'NET-SNMP-CFLAGS'};
+	$ret{'define'}   = $ENV{'NET-SNMP-DEFINE'};
+	$ret{'inc'}      = $ENV{'NET-SNMP-INC'};
     } else {
 	# don't have env vars, pull from command line and put there
-	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
+	GetOptions("NET-SNMP-CONFIG=s"    => \$ret{'nsconfig'},
 	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
-		   "NET-SNMP-CFLAGS=s" => \$ret{'cflags'});
+		   "NET-SNMP-DEFINE=s"    => \$ret{'define'},
+		   "NET-SNMP-INC=s"       => \$ret{'inc'});
 
 	my $use_default_nsconfig;
 
@@ -60,7 +62,8 @@ sub NetSNMPGetOpts {
 
 	$ENV{'NET-SNMP-CONFIG'}    = $ret{'nsconfig'};
 	$ENV{'NET-SNMP-IN-SOURCE'} = $ret{'insource'};
-	$ENV{'NET-SNMP-CFLAGS'}    = $ret{'cflags'};
+	$ENV{'NET-SNMP-DEFINE'}    = $ret{'define'};
+	$ENV{'NET-SNMP-INC'}       = $ret{'inc'};
     }
     
     $ret{'rootpath'} = $rootpath;
@@ -69,31 +72,45 @@ sub NetSNMPGetOpts {
     \%ret;
 }
 
+sub append {
+    if ($_[0] && $_[1]) {
+	$_[0] = $_[0] . " " . $_[1];
+    } elsif ($_[1]) {
+	$_[0] = $_[1];
+    }
+}
+
 sub AddCommonParams {
     my $Params = shift;
     my $opts = NetSNMPGetOpts();
 
-    $Params->{'CCFLAGS'} = $opts->{'cflags'};
+    append($Params->{'DEFINE'}, $opts->{'define'});
+    append($Params->{'INC'}, $opts->{'inc'});
 
     if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
 	# MinGW or MSYS.
-	$Params->{'DEFINE'} = "-DMINGW_PERL";
+	append($Params->{'DEFINE'}, "-DMINGW_PERL");
     } elsif ($Config{'osname'} eq 'MSWin32') {
 	# Microsoft Visual Studio.
-	$Params->{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
-	$Params->{'INC'} = "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ";
+	append($Params->{'DEFINE'}, "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS");
+	append($Params->{'INC'}, "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ");
     } else {
 	# Unix.
-	$Params->{'LDDLFLAGS'} = "$Config{lddlflags} " .
-	    `$opts->{'nsconfig'} --ldflags`;
-	$Params->{'CCFLAGS'} = "-I" . $MakefileSubs::basedir . "/include ";
-	$Params->{'CCFLAGS'} .= `$opts->{'nsconfig'} --cflags` or
+	append($Params->{'LDDLFLAGS'}, $Config{'lddlflags'});
+	my $ldflags = `$opts->{'nsconfig'} --ldflags` or
 	    die "net-snmp-config failed\n";
-	chomp($Params->{'CCFLAGS'});
-	$Params->{'CCFLAGS'} .= " " . $Config{'ccflags'};
+	chomp($ldflags);
+	append($Params->{'LDDLFLAGS'}, $ldflags);
+	append($Params->{'CCFLAGS'},
+	       "-I" . $MakefileSubs::basedir . "/include");
+	my $cflags = `$opts->{'nsconfig'} --cflags` or
+	    die "net-snmp-config failed\n";
+	chomp($cflags);
+	append($Params->{'CCFLAGS'}, $cflags);
+	append($Params->{'CCFLAGS'}, $Config{'ccflags'});
 	# Suppress known Perl header shortcomings.
 	$Params->{'CCFLAGS'} =~ s/ -W(cast-qual|write-strings)//g;
-	$Params->{'CCFLAGS'} .= ' -Wformat';
+	append($Params->{'CCFLAGS'}, '-Wformat');
     }
 }
 
