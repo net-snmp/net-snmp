@@ -17,7 +17,6 @@ addons:
       - dpkg
       - gcc
       - libatm-dev
-      - libmariadbclient-dev
       - libperl-dev
       - libsensors4-dev
       - libssh2-1-dev
@@ -27,6 +26,9 @@ addons:
       - pkg-config
       - python-dev
       - python-setuptools
+
+before_install:
+  - sudo bash -c 'apt-get install -y libmariadbclient-dev || sudo apt-get install -y libmariadb-client-lgpl-dev'
 
 sudo: required
 
