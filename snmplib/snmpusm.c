@@ -470,6 +470,328 @@ emergency_print(u_char * field, u_int length)
 }                               /* end emergency_print() */
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
+static struct usmUser *
+usm_get_user_from_list(u_char * engineID, size_t engineIDLen,
+                       char *name, struct usmUser *puserList,
+                       int use_default)
+{
+    struct usmUser *ptr;
+    char            noName[] = "";
+    if (name == NULL)
+        name = noName;
+    for (ptr = puserList; ptr != NULL; ptr = ptr->next) {
+        if (ptr->name && !strcmp(ptr->name, name)) {
+          DEBUGMSGTL(("usm", "match on user %s\n", ptr->name));
+          if (ptr->engineIDLen == engineIDLen &&
+            ((ptr->engineID == NULL && engineID == NULL) ||
+             (ptr->engineID != NULL && engineID != NULL &&
+              memcmp(ptr->engineID, engineID, engineIDLen) == 0)))
+            return ptr;
+          DEBUGMSGTL(("usm", "no match on engineID ("));
+          if (engineID) {
+              DEBUGMSGHEX(("usm", engineID, engineIDLen));
+          } else {
+              DEBUGMSGTL(("usm", "Empty EngineID"));
+          }
+          DEBUGMSG(("usm", ")\n"));
+        }
+    }
+
+    /*
+     * return "" user used to facilitate engineID discovery
+     */
+    if (use_default && !strcmp(name, ""))
+        return noNameUser;
+    return NULL;
+}
+
+/*
+ * usm_get_user(): Returns a user from userList based on the engineID,
+ * engineIDLen and name of the requested user.
+ */
+struct usmUser *
+usm_get_user(u_char * engineID, size_t engineIDLen, char *name)
+{
+    DEBUGMSGTL(("usm", "getting user %s\n", name));
+    return usm_get_user_from_list(engineID, engineIDLen, name, userList,
+                                  1);
+}
+
+static struct usmUser *
+usm_add_user_to_list(struct usmUser *user, struct usmUser *puserList)
+{
+    struct usmUser *nptr, *pptr, *optr;
+
+    /*
+     * loop through puserList till we find the proper, sorted place to
+     * insert the new user
+     */
+    /* XXX - how to handle a NULL user->name ?? */
+    /* XXX - similarly for a NULL nptr->name ?? */
+    for (nptr = puserList, pptr = NULL; nptr != NULL;
+         pptr = nptr, nptr = nptr->next) {
+        if (nptr->engineIDLen > user->engineIDLen)
+            break;
+
+        if (user->engineID == NULL && nptr->engineID != NULL)
+            break;
+
+        if (nptr->engineIDLen == user->engineIDLen &&
+            (nptr->engineID != NULL && user->engineID != NULL &&
+             memcmp(nptr->engineID, user->engineID,
+                    user->engineIDLen) > 0))
+            break;
+
+        if (!(nptr->engineID == NULL && user->engineID != NULL)) {
+            if (nptr->engineIDLen == user->engineIDLen &&
+                ((nptr->engineID == NULL && user->engineID == NULL) ||
+                 memcmp(nptr->engineID, user->engineID,
+                        user->engineIDLen) == 0)
+                && strlen(nptr->name) > strlen(user->name))
+                break;
+
+            if (nptr->engineIDLen == user->engineIDLen &&
+                ((nptr->engineID == NULL && user->engineID == NULL) ||
+                 memcmp(nptr->engineID, user->engineID,
+                        user->engineIDLen) == 0)
+                && strlen(nptr->name) == strlen(user->name)
+                && strcmp(nptr->name, user->name) > 0)
+                break;
+
+            if (nptr->engineIDLen == user->engineIDLen &&
+                ((nptr->engineID == NULL && user->engineID == NULL) ||
+                 memcmp(nptr->engineID, user->engineID,
+                        user->engineIDLen) == 0)
+                && strlen(nptr->name) == strlen(user->name)
+                && strcmp(nptr->name, user->name) == 0) {
+                /*
+                 * the user is an exact match of a previous entry.
+                 * Credentials may be different, though, so remove
+                 * the old entry (and add the new one)!
+                 */
+                if (pptr) { /* change prev's next pointer */
+                  pptr->next = nptr->next;
+                }
+                if (nptr->next) { /* change next's prev pointer */
+                  nptr->next->prev = pptr;
+                }
+                optr = nptr;
+                nptr = optr->next; /* add new user at this position */
+                /* free the old user */
+                optr->next=NULL;
+                optr->prev=NULL;
+                usm_free_user(optr);
+                break; /* new user will be added below */
+            }
+        }
+    }
+
+    /*
+     * nptr should now point to the user that we need to add ourselves
+     * in front of, and pptr should be our new 'prev'.
+     */
+
+    /*
+     * change our pointers
+     */
+    user->prev = pptr;
+    user->next = nptr;
+
+    /*
+     * change the next's prev pointer
+     */
+    if (user->next)
+        user->next->prev = user;
+
+    /*
+     * change the prev's next pointer
+     */
+    if (user->prev)
+        user->prev->next = user;
+
+    /*
+     * rewind to the head of the list and return it (since the new head
+     * could be us, we need to notify the above routine who the head now is.
+     */
+    for (pptr = user; pptr->prev != NULL; pptr = pptr->prev);
+    return pptr;
+}
+
+/*
+ * usm_add_user(): Add's a user to the userList, sorted by the
+ * engineIDLength then the engineID then the name length then the name
+ * to facilitate getNext calls on a usmUser table which is indexed by
+ * these values.
+ *
+ * returns the head of the list (which could change due to this add).
+ */
+
+struct usmUser *
+usm_add_user(struct usmUser *user)
+{
+    struct usmUser *uptr;
+    uptr = usm_add_user_to_list(user, userList);
+    if (uptr != NULL)
+        userList = uptr;
+    return uptr;
+}
+
+/*
+ * usm_remove_usmUser_from_list remove user from (optional) list
+ *
+ * if list is not specified, defaults to global userList.
+ *
+ * returns SNMPERR_SUCCESS or SNMPERR_USM_UNKNOWNSECURITYNAME
+ */
+static int
+usm_remove_usmUser_from_list(struct usmUser *user, struct usmUser **ppuserList)
+{
+    struct usmUser *nptr, *pptr;
+
+    /*
+     * NULL pointers aren't allowed
+     */
+    if (ppuserList == NULL)
+        ppuserList = &userList;
+
+    if (*ppuserList == NULL)
+        return SNMPERR_USM_UNKNOWNSECURITYNAME;
+
+    /*
+     * find the user in the list
+     */
+    for (nptr = *ppuserList, pptr = NULL; nptr != NULL;
+         pptr = nptr, nptr = nptr->next) {
+        if (nptr == user)
+            break;
+    }
+
+    if (nptr) {
+        /*
+         * remove the user from the linked list
+         */
+        if (pptr) {
+            pptr->next = nptr->next;
+        }
+        if (nptr->next) {
+            nptr->next->prev = pptr;
+        }
+    } else {
+        /*
+         * user didn't exist
+         */
+        return SNMPERR_USM_UNKNOWNSECURITYNAME;
+    }
+    if (nptr == *ppuserList)    /* we're the head of the list, need to change
+                                 * * the head to the next user */
+        *ppuserList = nptr->next;
+    return SNMPERR_SUCCESS;
+}                               /* end usm_remove_usmUser_from_list() */
+
+/*
+ * usm_remove_user_from_list
+ *
+ * removes user from list.
+ *
+ * returns new list head on success, or NULL on error.
+ *
+ * NOTE: if there was only one user in the list, list head will be NULL.
+ *       So NULL can also mean success. Use the newer usm_remove_usmUser() for
+ *       more specific return codes. This function is kept for backwards
+ *       compatability with this ambiguous behaviour.
+ */
+static struct usmUser *
+usm_remove_user_from_list(struct usmUser *user,
+                          struct usmUser **ppuserList)
+{
+    int rc = usm_remove_usmUser_from_list(user, ppuserList);
+    if (rc != SNMPERR_SUCCESS || NULL == ppuserList)
+        return NULL;
+
+    return *ppuserList;
+}                               /* end usm_remove_user_from_list() */
+
+/*
+ * usm_remove_user(): finds and removes a user from a list
+ */
+struct usmUser *
+usm_remove_user(struct usmUser *user)
+{
+    return usm_remove_user_from_list(user, &userList);
+}
+
+int
+usm_remove_usmUser(struct usmUser *user)
+{
+    return usm_remove_usmUser_from_list(user, &userList);
+}
+
+/*
+ * usm_free_user():  calls free() on all needed parts of struct usmUser and
+ * the user himself.
+ *
+ * Note: This should *not* be called on an object in a list (IE,
+ * remove it from the list first, and set next and prev to NULL), but
+ * will try to reconnect the list pieces again if it is called this
+ * way.  If called on the head of the list, the entire list will be
+ * lost.
+ */
+struct usmUser *
+usm_free_user(struct usmUser *user)
+{
+    if (user == NULL)
+        return NULL;
+
+    SNMP_FREE(user->engineID);
+    SNMP_FREE(user->name);
+    SNMP_FREE(user->secName);
+    SNMP_FREE(user->cloneFrom);
+    SNMP_FREE(user->userPublicString);
+    SNMP_FREE(user->authProtocol);
+    SNMP_FREE(user->privProtocol);
+
+    if (user->authKey != NULL) {
+        SNMP_ZERO(user->authKey, user->authKeyLen);
+        SNMP_FREE(user->authKey);
+    }
+
+    if (user->privKey != NULL) {
+        SNMP_ZERO(user->privKey, user->privKeyLen);
+        SNMP_FREE(user->privKey);
+    }
+
+    if (user->authKeyKu != NULL) {
+        SNMP_ZERO(user->authKeyKu, user->authKeyKuLen);
+        SNMP_FREE(user->authKeyKu);
+    }
+
+    if (user->privKeyKu != NULL) {
+        SNMP_ZERO(user->privKeyKu, user->privKeyKuLen);
+        SNMP_FREE(user->privKeyKu);
+    }
+
+
+    /*
+     * FIX  Why not put this check *first?*
+     */
+    if (user->prev != NULL) {   /* ack, this shouldn't happen */
+        user->prev->next = user->next;
+    }
+    if (user->next != NULL) {
+        user->next->prev = user->prev;
+        if (user->prev != NULL) /* ack this is really bad, because it means
+                                 * * we'll loose the head of some structure tree */
+            DEBUGMSGTL(("usm",
+                        "Severe: Asked to free the head of a usmUser tree somewhere."));
+    }
+
+
+    SNMP_ZERO(user, sizeof(*user));
+    SNMP_FREE(user);
+
+    return NULL;                /* for convenience to returns from calling functions */
+
+}                               /* end usm_free_user() */
 
 /*******************************************************************-o-******
  * asn_predict_int_length
@@ -3484,339 +3806,6 @@ usm_check_secLevel_vs_protocols(int level,
     return 0;
 
 }                               /* end usm_check_secLevel_vs_protocols() */
-
-
-
-
-/*
- * usm_get_user(): Returns a user from userList based on the engineID,
- * engineIDLen and name of the requested user. 
- */
-
-struct usmUser *
-usm_get_user(u_char * engineID, size_t engineIDLen, char *name)
-{
-    DEBUGMSGTL(("usm", "getting user %s\n", name));
-    return usm_get_user_from_list(engineID, engineIDLen, name, userList,
-                                  1);
-}
-
-struct usmUser *
-usm_get_user_from_list(u_char * engineID, size_t engineIDLen,
-                       char *name, struct usmUser *puserList,
-                       int use_default)
-{
-    struct usmUser *ptr;
-    char            noName[] = "";
-    if (name == NULL)
-        name = noName;
-    for (ptr = puserList; ptr != NULL; ptr = ptr->next) {
-        if (ptr->name && !strcmp(ptr->name, name)) {
-          DEBUGMSGTL(("usm", "match on user %s\n", ptr->name));
-          if (ptr->engineIDLen == engineIDLen &&
-            ((ptr->engineID == NULL && engineID == NULL) ||
-             (ptr->engineID != NULL && engineID != NULL &&
-              memcmp(ptr->engineID, engineID, engineIDLen) == 0)))
-            return ptr;
-          DEBUGMSGTL(("usm", "no match on engineID ("));
-          if (engineID) {
-              DEBUGMSGHEX(("usm", engineID, engineIDLen));
-          } else {
-              DEBUGMSGTL(("usm", "Empty EngineID"));
-          }
-          DEBUGMSG(("usm", ")\n"));
-        }
-    }
-
-    /*
-     * return "" user used to facilitate engineID discovery 
-     */
-    if (use_default && !strcmp(name, ""))
-        return noNameUser;
-    return NULL;
-}
-
-/*
- * usm_add_user(): Add's a user to the userList, sorted by the
- * engineIDLength then the engineID then the name length then the name
- * to facilitate getNext calls on a usmUser table which is indexed by
- * these values.
- * 
- * returns the head of the list (which could change due to this add).
- */
-
-struct usmUser *
-usm_add_user(struct usmUser *user)
-{
-    struct usmUser *uptr;
-    uptr = usm_add_user_to_list(user, userList);
-    if (uptr != NULL)
-        userList = uptr;
-    return uptr;
-}
-
-struct usmUser *
-usm_add_user_to_list(struct usmUser *user, struct usmUser *puserList)
-{
-    struct usmUser *nptr, *pptr, *optr;
-
-    /*
-     * loop through puserList till we find the proper, sorted place to
-     * insert the new user 
-     */
-    /* XXX - how to handle a NULL user->name ?? */
-    /* XXX - similarly for a NULL nptr->name ?? */
-    for (nptr = puserList, pptr = NULL; nptr != NULL;
-         pptr = nptr, nptr = nptr->next) {
-        if (nptr->engineIDLen > user->engineIDLen)
-            break;
-
-        if (user->engineID == NULL && nptr->engineID != NULL)
-            break;
-
-        if (nptr->engineIDLen == user->engineIDLen &&
-            (nptr->engineID != NULL && user->engineID != NULL &&
-             memcmp(nptr->engineID, user->engineID,
-                    user->engineIDLen) > 0))
-            break;
-
-        if (!(nptr->engineID == NULL && user->engineID != NULL)) {
-            if (nptr->engineIDLen == user->engineIDLen &&
-                ((nptr->engineID == NULL && user->engineID == NULL) ||
-                 memcmp(nptr->engineID, user->engineID,
-                        user->engineIDLen) == 0)
-                && strlen(nptr->name) > strlen(user->name))
-                break;
-
-            if (nptr->engineIDLen == user->engineIDLen &&
-                ((nptr->engineID == NULL && user->engineID == NULL) ||
-                 memcmp(nptr->engineID, user->engineID,
-                        user->engineIDLen) == 0)
-                && strlen(nptr->name) == strlen(user->name)
-                && strcmp(nptr->name, user->name) > 0)
-                break;
-
-            if (nptr->engineIDLen == user->engineIDLen &&
-                ((nptr->engineID == NULL && user->engineID == NULL) ||
-                 memcmp(nptr->engineID, user->engineID,
-                        user->engineIDLen) == 0)
-                && strlen(nptr->name) == strlen(user->name)
-                && strcmp(nptr->name, user->name) == 0) {
-                /*
-                 * the user is an exact match of a previous entry.
-                 * Credentials may be different, though, so remove
-                 * the old entry (and add the new one)!
-                 */
-                if (pptr) { /* change prev's next pointer */
-                  pptr->next = nptr->next;
-                }
-                if (nptr->next) { /* change next's prev pointer */
-                  nptr->next->prev = pptr;
-                } 
-                optr = nptr;
-                nptr = optr->next; /* add new user at this position */
-                /* free the old user */
-                optr->next=NULL;
-                optr->prev=NULL;
-                usm_free_user(optr); 
-                break; /* new user will be added below */
-            }
-        }
-    }
-
-    /*
-     * nptr should now point to the user that we need to add ourselves
-     * in front of, and pptr should be our new 'prev'. 
-     */
-
-    /*
-     * change our pointers 
-     */
-    user->prev = pptr;
-    user->next = nptr;
-
-    /*
-     * change the next's prev pointer 
-     */
-    if (user->next)
-        user->next->prev = user;
-
-    /*
-     * change the prev's next pointer 
-     */
-    if (user->prev)
-        user->prev->next = user;
-
-    /*
-     * rewind to the head of the list and return it (since the new head
-     * could be us, we need to notify the above routine who the head now is. 
-     */
-    for (pptr = user; pptr->prev != NULL; pptr = pptr->prev);
-    return pptr;
-}
-
-/*
- * usm_remove_user(): finds and removes a user from a list 
- */
-struct usmUser *
-usm_remove_user(struct usmUser *user)
-{
-    return usm_remove_user_from_list(user, &userList);
-}
-
-/*
- * usm_remove_usmUser remove user from (optional) list
- *
- * if list is not specified, defaults to global userList.
- *
- * returns SNMPERR_SUCCESS or SNMPERR_USM_UNKNOWNSECURITYNAME
- */
-int
-usm_remove_usmUser_from_list(struct usmUser *user, struct usmUser **ppuserList)
-{
-    struct usmUser *nptr, *pptr;
-
-    /*
-     * NULL pointers aren't allowed 
-     */
-    if (ppuserList == NULL)
-        ppuserList = &userList;
-
-    if (*ppuserList == NULL)
-        return SNMPERR_USM_UNKNOWNSECURITYNAME;
-
-    /*
-     * find the user in the list 
-     */
-    for (nptr = *ppuserList, pptr = NULL; nptr != NULL;
-         pptr = nptr, nptr = nptr->next) {
-        if (nptr == user)
-            break;
-    }
-
-    if (nptr) {
-        /*
-         * remove the user from the linked list 
-         */
-        if (pptr) {
-            pptr->next = nptr->next;
-        }
-        if (nptr->next) {
-            nptr->next->prev = pptr;
-        }
-    } else {
-        /*
-         * user didn't exist 
-         */
-        return SNMPERR_USM_UNKNOWNSECURITYNAME;
-    }
-    if (nptr == *ppuserList)    /* we're the head of the list, need to change
-                                 * * the head to the next user */
-        *ppuserList = nptr->next;
-    return SNMPERR_SUCCESS;
-}                               /* end usm_remove_user_from_list() */
-
-int
-usm_remove_usmUser(struct usmUser *user)
-{
-    return usm_remove_usmUser_from_list(user, &userList);
-}
-
-/*
- * usm_remove_user_from_list
- *
- * removes user from list.
- *
- * returns new list head on success, or NULL on error.
- *
- * NOTE: if there was only one user in the list, list head will be NULL.
- *       So NULL can also mean success. Use the newer usm_remove_usmUser() for
- *       more specific return codes. This function is kept for backwards
- *       compatability with this ambiguous behaviour.
- */
-struct usmUser *
-usm_remove_user_from_list(struct usmUser *user,
-                          struct usmUser **ppuserList)
-{
-    int rc = usm_remove_usmUser_from_list(user, ppuserList);
-    if (rc != SNMPERR_SUCCESS || NULL == ppuserList)
-        return NULL;
-
-    return *ppuserList;
-}                               /* end usm_remove_user_from_list() */
-
-
-
-
-/*
- * usm_free_user():  calls free() on all needed parts of struct usmUser and
- * the user himself.
- * 
- * Note: This should *not* be called on an object in a list (IE,
- * remove it from the list first, and set next and prev to NULL), but
- * will try to reconnect the list pieces again if it is called this
- * way.  If called on the head of the list, the entire list will be
- * lost. 
- */
-struct usmUser *
-usm_free_user(struct usmUser *user)
-{
-    if (user == NULL)
-        return NULL;
-
-    SNMP_FREE(user->engineID);
-    SNMP_FREE(user->name);
-    SNMP_FREE(user->secName);
-    SNMP_FREE(user->cloneFrom);
-    SNMP_FREE(user->userPublicString);
-    SNMP_FREE(user->authProtocol);
-    SNMP_FREE(user->privProtocol);
-
-    if (user->authKey != NULL) {
-        SNMP_ZERO(user->authKey, user->authKeyLen);
-        SNMP_FREE(user->authKey);
-    }
-
-    if (user->privKey != NULL) {
-        SNMP_ZERO(user->privKey, user->privKeyLen);
-        SNMP_FREE(user->privKey);
-    }
-
-    if (user->authKeyKu != NULL) {
-        SNMP_ZERO(user->authKeyKu, user->authKeyKuLen);
-        SNMP_FREE(user->authKeyKu);
-    }
-
-    if (user->privKeyKu != NULL) {
-        SNMP_ZERO(user->privKeyKu, user->privKeyKuLen);
-        SNMP_FREE(user->privKeyKu);
-    }
-
-
-    /*
-     * FIX  Why not put this check *first?*
-     */
-    if (user->prev != NULL) {   /* ack, this shouldn't happen */
-        user->prev->next = user->next;
-    }
-    if (user->next != NULL) {
-        user->next->prev = user->prev;
-        if (user->prev != NULL) /* ack this is really bad, because it means
-                                 * * we'll loose the head of some structure tree */
-            DEBUGMSGTL(("usm",
-                        "Severe: Asked to free the head of a usmUser tree somewhere."));
-    }
-
-
-    SNMP_ZERO(user, sizeof(*user));
-    SNMP_FREE(user);
-
-    return NULL;                /* for convenience to returns from calling functions */
-
-}                               /* end usm_free_user() */
-
-
-
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 /*
