@@ -45,7 +45,7 @@ libmysqlver="$(for p in libmariadb-devel; do
                   grep -v 'not installed';
               done |
               head -n1;
-	      for p in libmariadbclient-dev; do
+	      for p in libmariadbclient-dev libmariadb-client-lgpl-dev; do
 	        dpkg-query --show -f '${Version}\n' $p 2>/dev/null;
               done | grep -v '^$';
               pacman -Q mingw-w64-x86_64-libmariadbclient 2>/dev/null |
