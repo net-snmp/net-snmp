@@ -257,12 +257,6 @@ extern          "C" {
     void            init_usm(void);
     NETSNMP_IMPORT
     void            init_usm_conf(const char *app);
-    int             init_usm_post_config(int majorid, int minorid,
-                                         void *serverarg, void *clientarg);
-    int             deinit_usm_post_config(int majorid, int minorid, void *serverarg,
-					   void *clientarg);
-    NETSNMP_IMPORT
-    void            clear_user_list(void);
     NETSNMP_IMPORT
     void            shutdown_usm(void);
 

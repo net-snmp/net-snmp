@@ -3307,91 +3307,6 @@ int usm_discover_engineid(void *slpv, netsnmp_session *session) {
     return SNMPERR_SUCCESS;
 }
 
-void
-init_usm(void)
-{
-    struct snmp_secmod_def *def;
-    char *type;
-
-    DEBUGMSGTL(("init_usm", "unit_usm: %" NETSNMP_PRIo "u %" NETSNMP_PRIo "u\n",
-                usmNoPrivProtocol[0], usmNoPrivProtocol[1]));
-
-    sc_init();                  /* initalize scapi code */
-
-    /*
-     * register ourselves as a security service 
-     */
-    def = SNMP_MALLOC_STRUCT(snmp_secmod_def);
-    if (def == NULL)
-        return;
-    /*
-     * XXX: def->init_sess_secmod move stuff from snmp_api.c 
-     */
-    def->encode_reverse = usm_secmod_rgenerate_out_msg;
-    def->encode_forward = usm_secmod_generate_out_msg;
-    def->decode = usm_secmod_process_in_msg;
-    def->pdu_free_state_ref = usm_free_usmStateReference;
-    def->session_setup = usm_session_init;
-    def->handle_report = usm_handle_report;
-    def->probe_engineid = usm_discover_engineid;
-    def->post_probe_engineid = usm_create_user_from_session_hook;
-    if (register_sec_mod(USM_SEC_MODEL_NUMBER, "usm", def) != SNMPERR_SUCCESS) {
-        SNMP_FREE(def);
-        snmp_log(LOG_ERR, "could not register usm sec mod\n");
-        return;
-    }
-
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
-                           init_usm_post_config, NULL);
-
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_SHUTDOWN,
-                           deinit_usm_post_config, NULL);
-
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_SHUTDOWN,
-                           free_engineID, NULL);
-
-    register_config_handler("snmp", "defAuthType", snmpv3_authtype_conf,
-                            NULL, "MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224");
-    register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
-                            NULL,
-                            "DES"
-#ifdef HAVE_AES
-                            "|AES|AES-128"
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-                            "|AES-192|AES-256"
-#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
-#else
-                            " (AES support not available)"
-#endif
-                           );
-
-    /*
-     * Free stuff at shutdown time
-     */
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_SHUTDOWN,
-                           free_enginetime_on_shutdown, NULL);
-
-
-    type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE);
-
-    register_config_handler(type, "userSetAuthPass", usm_set_password,
-                            NULL, NULL);
-    register_config_handler(type, "userSetPrivPass", usm_set_password,
-                            NULL, NULL);
-    register_config_handler(type, "userSetAuthKey", usm_set_password, NULL,
-                            NULL);
-    register_config_handler(type, "userSetPrivKey", usm_set_password, NULL,
-                            NULL);
-    register_config_handler(type, "userSetAuthLocalKey", usm_set_password,
-                            NULL, NULL);
-    register_config_handler(type, "userSetPrivLocalKey", usm_set_password,
-                            NULL, NULL);
-}
-
 int
 usm_lookup_alg_type(const char *str, usm_alg_type_t *types)
 {
@@ -3439,91 +3354,7 @@ usm_lookup_priv_str(int value)
     return usm_lookup_alg_str(value, usm_priv_type );
 }
 
-void
-init_usm_conf(const char *app)
-{
-    register_config_handler(app, "usmUser",
-                                  usm_parse_config_usmUser, NULL, NULL);
-    register_config_handler(app, "createUser",
-                                  usm_parse_create_usmUser, NULL,
-                                  "username [-e ENGINEID] (MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224|default) authpassphrase [(DES|AES|default) [privpassphrase]]");
-
-    /*
-     * we need to be called back later 
-     */
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                           usm_store_users, NULL);
-}
-
-/*
- * initializations for the USM.
- *
- * Should be called after the (engineid) configuration files have been read.
- *
- * Set "arbitrary" portion of salt to a random number.
- */
-int
-init_usm_post_config(int majorid, int minorid, void *serverarg,
-                     void *clientarg)
-{
-    size_t          salt_integer_len = sizeof(salt_integer);
-
-    if (sc_random((u_char *) & salt_integer, &salt_integer_len) !=
-        SNMPERR_SUCCESS) {
-        DEBUGMSGTL(("usm", "sc_random() failed: using time() as salt.\n"));
-        salt_integer = (u_int) time(NULL);
-    }
-
-#ifdef HAVE_AES
-    salt_integer_len = sizeof (salt_integer64_1);
-    if (sc_random((u_char *) & salt_integer64_1, &salt_integer_len) !=
-        SNMPERR_SUCCESS) {
-        DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes1 salt.\n"));
-        salt_integer64_1 = (u_int) time(NULL);
-    }
-    salt_integer_len = sizeof (salt_integer64_1);
-    if (sc_random((u_char *) & salt_integer64_2, &salt_integer_len) !=
-        SNMPERR_SUCCESS) {
-        DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes2 salt.\n"));
-        salt_integer64_2 = (u_int) time(NULL);
-    }
-#endif
-    
-#ifndef NETSNMP_DISABLE_MD5
-    noNameUser = usm_create_initial_user("", usmHMACMD5AuthProtocol,
-                                         OID_LENGTH(usmHMACMD5AuthProtocol),
-                                         SNMP_DEFAULT_PRIV_PROTO,
-                                         SNMP_DEFAULT_PRIV_PROTOLEN);
-#else
-    noNameUser = usm_create_initial_user("", usmHMACSHA1AuthProtocol,
-                                         OID_LENGTH(usmHMACSHA1AuthProtocol),
-                                         SNMP_DEFAULT_PRIV_PROTO,
-                                         SNMP_DEFAULT_PRIV_PROTOLEN);
-#endif
-
-    if ( noNameUser ) {
-        SNMP_FREE(noNameUser->engineID);
-        noNameUser->engineIDLen = 0;
-    }
-
-    return SNMPERR_SUCCESS;
-}                               /* end init_usm_post_config() */
-
-int
-deinit_usm_post_config(int majorid, int minorid, void *serverarg,
-		       void *clientarg)
-{
-    if (usm_free_user(noNameUser) != NULL) {
-	DEBUGMSGTL(("deinit_usm_post_config", "could not free initial user\n"));
-	return SNMPERR_GENERR;
-    }
-    noNameUser = NULL;
-
-    DEBUGMSGTL(("deinit_usm_post_config", "initial user removed\n"));
-    return SNMPERR_SUCCESS;
-}                               /* end deinit_usm_post_config() */
-
-void
+static void
 clear_user_list(void)
 {
     struct usmUser *tmp = userList, *next = NULL;
@@ -3535,13 +3366,6 @@ clear_user_list(void)
     }
     userList = NULL;
 
-}
-
-void
-shutdown_usm(void)
-{
-    free_etimelist();
-    clear_user_list();
 }
 
 /*******************************************************************-o-******
@@ -5104,3 +4928,178 @@ get_default_privtype(size_t * len)
     return defaultPrivType;
 }
 
+void
+init_usm_conf(const char *app)
+{
+    register_config_handler(app, "usmUser",
+                                  usm_parse_config_usmUser, NULL, NULL);
+    register_config_handler(app, "createUser",
+                                  usm_parse_create_usmUser, NULL,
+                                  "username [-e ENGINEID] (MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224|default) authpassphrase [(DES|AES|default) [privpassphrase]]");
+
+    /*
+     * we need to be called back later
+     */
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                           usm_store_users, NULL);
+}
+
+/*
+ * initializations for the USM.
+ *
+ * Should be called after the (engineid) configuration files have been read.
+ *
+ * Set "arbitrary" portion of salt to a random number.
+ */
+static int
+init_usm_post_config(int majorid, int minorid, void *serverarg,
+                     void *clientarg)
+{
+    size_t          salt_integer_len = sizeof(salt_integer);
+
+    if (sc_random((u_char *) & salt_integer, &salt_integer_len) !=
+        SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("usm", "sc_random() failed: using time() as salt.\n"));
+        salt_integer = (u_int) time(NULL);
+    }
+
+#ifdef HAVE_AES
+    salt_integer_len = sizeof (salt_integer64_1);
+    if (sc_random((u_char *) & salt_integer64_1, &salt_integer_len) !=
+        SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes1 salt.\n"));
+        salt_integer64_1 = (u_int) time(NULL);
+    }
+    salt_integer_len = sizeof (salt_integer64_1);
+    if (sc_random((u_char *) & salt_integer64_2, &salt_integer_len) !=
+        SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes2 salt.\n"));
+        salt_integer64_2 = (u_int) time(NULL);
+    }
+#endif
+
+#ifndef NETSNMP_DISABLE_MD5
+    noNameUser = usm_create_initial_user("", usmHMACMD5AuthProtocol,
+                                         OID_LENGTH(usmHMACMD5AuthProtocol),
+                                         SNMP_DEFAULT_PRIV_PROTO,
+                                         SNMP_DEFAULT_PRIV_PROTOLEN);
+#else
+    noNameUser = usm_create_initial_user("", usmHMACSHA1AuthProtocol,
+                                         OID_LENGTH(usmHMACSHA1AuthProtocol),
+                                         SNMP_DEFAULT_PRIV_PROTO,
+                                         SNMP_DEFAULT_PRIV_PROTOLEN);
+#endif
+
+    if ( noNameUser ) {
+        SNMP_FREE(noNameUser->engineID);
+        noNameUser->engineIDLen = 0;
+    }
+
+    return SNMPERR_SUCCESS;
+}                               /* end init_usm_post_config() */
+
+static int
+deinit_usm_post_config(int majorid, int minorid, void *serverarg,
+		       void *clientarg)
+{
+    if (usm_free_user(noNameUser) != NULL) {
+	DEBUGMSGTL(("deinit_usm_post_config", "could not free initial user\n"));
+	return SNMPERR_GENERR;
+    }
+    noNameUser = NULL;
+
+    DEBUGMSGTL(("deinit_usm_post_config", "initial user removed\n"));
+    return SNMPERR_SUCCESS;
+}                               /* end deinit_usm_post_config() */
+
+void
+init_usm(void)
+{
+    struct snmp_secmod_def *def;
+    char *type;
+
+    DEBUGMSGTL(("init_usm", "unit_usm: %" NETSNMP_PRIo "u %" NETSNMP_PRIo "u\n",
+                usmNoPrivProtocol[0], usmNoPrivProtocol[1]));
+
+    sc_init();                  /* initalize scapi code */
+
+    /*
+     * register ourselves as a security service
+     */
+    def = SNMP_MALLOC_STRUCT(snmp_secmod_def);
+    if (def == NULL)
+        return;
+    /*
+     * XXX: def->init_sess_secmod move stuff from snmp_api.c
+     */
+    def->encode_reverse = usm_secmod_rgenerate_out_msg;
+    def->encode_forward = usm_secmod_generate_out_msg;
+    def->decode = usm_secmod_process_in_msg;
+    def->pdu_free_state_ref = usm_free_usmStateReference;
+    def->session_setup = usm_session_init;
+    def->handle_report = usm_handle_report;
+    def->probe_engineid = usm_discover_engineid;
+    def->post_probe_engineid = usm_create_user_from_session_hook;
+    if (register_sec_mod(USM_SEC_MODEL_NUMBER, "usm", def) != SNMPERR_SUCCESS) {
+        SNMP_FREE(def);
+        snmp_log(LOG_ERR, "could not register usm sec mod\n");
+        return;
+    }
+
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+                           init_usm_post_config, NULL);
+
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_SHUTDOWN,
+                           deinit_usm_post_config, NULL);
+
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_SHUTDOWN,
+                           free_engineID, NULL);
+
+    register_config_handler("snmp", "defAuthType", snmpv3_authtype_conf,
+                            NULL, "MD5|SHA|SHA-512|SHA-384|SHA-256|SHA-224");
+    register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
+                            NULL,
+                            "DES"
+#ifdef HAVE_AES
+                            "|AES|AES-128"
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+                            "|AES-192|AES-256"
+#endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+#else
+                            " (AES support not available)"
+#endif
+                           );
+
+    /*
+     * Free stuff at shutdown time
+     */
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_SHUTDOWN,
+                           free_enginetime_on_shutdown, NULL);
+
+
+    type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE);
+
+    register_config_handler(type, "userSetAuthPass", usm_set_password,
+                            NULL, NULL);
+    register_config_handler(type, "userSetPrivPass", usm_set_password,
+                            NULL, NULL);
+    register_config_handler(type, "userSetAuthKey", usm_set_password, NULL,
+                            NULL);
+    register_config_handler(type, "userSetPrivKey", usm_set_password, NULL,
+                            NULL);
+    register_config_handler(type, "userSetAuthLocalKey", usm_set_password,
+                            NULL, NULL);
+    register_config_handler(type, "userSetPrivLocalKey", usm_set_password,
+                            NULL, NULL);
+}
+
+void
+shutdown_usm(void)
+{
+    free_etimelist();
+    clear_user_list();
+}
