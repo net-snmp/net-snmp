@@ -454,7 +454,7 @@ typedef struct request_list {
     NETSNMP_IMPORT
     int             create_user_from_session(netsnmp_session * session);
     NETSNMP_IMPORT
-    int snmpv3_probe_contextEngineID_rfc5343(void *slp,
+    int snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
                                              netsnmp_session *session);
 
     /*

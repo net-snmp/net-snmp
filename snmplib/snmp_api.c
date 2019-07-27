@@ -1328,7 +1328,9 @@ snmp_sess_copy(netsnmp_session * pss)
  * multiple future security models.  E.G. both SSH and DTLS.
  */
 int
-snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
+snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
+                                     netsnmp_session *session)
+{
     netsnmp_pdu    *pdu = NULL, *response = NULL;
     static oid      snmpEngineIDoid[]   = { 1,3,6,1,6,3,10,2,1,1,0};
     static size_t   snmpEngineIDoid_len = 11;

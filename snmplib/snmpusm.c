@@ -3145,7 +3145,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 }                               /* end usm_process_in_msg() */
 
 void
-usm_handle_report(void *sessp,
+usm_handle_report(struct session_list *slp,
                   netsnmp_transport *transport, netsnmp_session *session,
                   int result, netsnmp_pdu *pdu)
 {
@@ -3186,7 +3186,7 @@ usm_handle_report(void *sessp,
             pdu2 = snmp_clone_pdu(pdu);
             pdu->flags = pdu2->flags = flags;
             snmpv3_make_report(pdu2, result);
-            if (0 == snmp_sess_send(sessp, pdu2)) {
+            if (0 == snmp_sess_send(slp, pdu2)) {
                 snmp_free_pdu(pdu2);
                 /*
                  * TODO: indicate error 
@@ -3544,7 +3544,8 @@ usm_create_user_from_session(netsnmp_session * session)
 
 /* A wrapper around the hook */
 int
-usm_create_user_from_session_hook(void *slp, netsnmp_session *session)
+usm_create_user_from_session_hook(struct session_list *slp,
+                                  netsnmp_session *session)
 {
     DEBUGMSGTL(("usm", "potentially bootstrapping the USM table from session data\n"));
     return usm_create_user_from_session(session);
@@ -3593,10 +3594,10 @@ usm_build_probe_pdu(netsnmp_pdu **pdu)
     return 0;
 }
 
-int usm_discover_engineid(void *slpv, netsnmp_session *session) {
+int usm_discover_engineid(struct session_list *slp, netsnmp_session *session)
+{
     netsnmp_pdu    *pdu = NULL, *response = NULL;
     int status, i;
-    struct session_list *slp = (struct session_list *) slpv;
 
     if (usm_build_probe_pdu(&pdu) != 0) {
         DEBUGMSGTL(("snmp_api", "unable to create probe PDU\n"));
