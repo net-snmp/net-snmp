@@ -232,27 +232,6 @@ static struct usmUser *noNameUser = NULL;
 static struct usmUser *userList = NULL;
 
 /*
- * Prototypes
- */
-int
-                usm_check_secLevel_vs_protocols(int level,
-                                                const oid * authProtocol,
-                                                u_int authProtocolLen,
-                                                const oid * privProtocol,
-                                                u_int privProtocolLen);
-int
-                usm_calc_offsets(size_t globalDataLen,
-                                 int secLevel, size_t secEngineIDLen,
-                                 size_t secNameLen, size_t scopedPduLen,
-                                 u_long engineboots, long engine_time,
-                                 size_t * theTotalLength,
-                                 size_t * authParamsOffset,
-                                 size_t * privParamsOffset,
-                                 size_t * dataOffset, size_t * datalen,
-                                 size_t * msgAuthParmLen,
-                                 size_t * msgPrivParmLen, size_t * otstlen,
-                                 size_t * seq_len, size_t * msgSecParmLen);
-/*
  * Set a given field of the secStateRef.
  *
  * Allocate <len> bytes for type <type> pointed to by ref-><field>.
@@ -882,9 +861,6 @@ asn_predict_length(int type, u_char * ptr, size_t u_char_len)
 
 }                               /* end asn_predict_length() */
 
-
-
-
 /*******************************************************************-o-******
  * usm_calc_offsets
  *
@@ -940,7 +916,7 @@ asn_predict_length(int type, u_char * ptr, size_t u_char_len)
  *	[11] = theTotalLength - the length of the header itself
  *	[12] = theTotalLength
  */
-int
+static int
 usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
                  int secLevel, size_t secEngineIDLen, size_t secNameLen, size_t scopedPduLen,   /* An BER encoded sequence. */
                  u_long engineboots,    /* XXX (asn1.c works in long, not int.) */
@@ -1200,6 +1176,63 @@ usm_set_aes_iv(u_char * iv,
     return 0;
 }                               /* end usm_set_salt() */
 #endif /* HAVE_AES */
+
+/*******************************************************************-o-******
+ * usm_check_secLevel_vs_protocols
+ *
+ * Parameters:
+ *	 level
+ *	*authProtocol
+ *	 authProtocolLen
+ *	*privProtocol
+ *	 privProtocolLen
+ *
+ * Returns:
+ *	0	On success,
+ *	1	Otherwise.
+ *
+ * Same as above but with explicitly named transform types instead of taking
+ * from the usmUser structure.
+ */
+static int
+usm_check_secLevel_vs_protocols(int level,
+                                const oid * authProtocol,
+                                u_int authProtocolLen,
+                                const oid * privProtocol,
+                                u_int privProtocolLen)
+{
+
+    if (level == SNMP_SEC_LEVEL_AUTHPRIV
+        &&
+        (netsnmp_oid_equals
+         (privProtocol, privProtocolLen, usmNoPrivProtocol,
+          sizeof(usmNoPrivProtocol) / sizeof(oid)) == 0)) {
+        DEBUGMSGTL(("usm", "Level: %d\n", level));
+        DEBUGMSGTL(("usm", "Auth Protocol: "));
+        DEBUGMSGOID(("usm", authProtocol, authProtocolLen));
+        DEBUGMSG(("usm", ", Priv Protocol: "));
+        DEBUGMSGOID(("usm", privProtocol, privProtocolLen));
+        DEBUGMSG(("usm", "\n"));
+        return 1;
+    }
+    if ((level == SNMP_SEC_LEVEL_AUTHPRIV
+         || level == SNMP_SEC_LEVEL_AUTHNOPRIV)
+        &&
+        (netsnmp_oid_equals
+         (authProtocol, authProtocolLen, usmNoAuthProtocol,
+          sizeof(usmNoAuthProtocol) / sizeof(oid)) == 0)) {
+        DEBUGMSGTL(("usm", "Level: %d\n", level));
+        DEBUGMSGTL(("usm", "Auth Protocol: "));
+        DEBUGMSGOID(("usm", authProtocol, authProtocolLen));
+        DEBUGMSG(("usm", ", Priv Protocol: "));
+        DEBUGMSGOID(("usm", privProtocol, privProtocolLen));
+        DEBUGMSG(("usm", "\n"));
+        return 1;
+    }
+
+    return 0;
+
+}                               /* end usm_check_secLevel_vs_protocols() */
 
 int
 usm_secmod_generate_out_msg(struct snmp_secmod_outgoing_params *parms)
@@ -3746,66 +3779,6 @@ usm_check_secLevel(int level, struct usmUser *user)
     return 0;
 
 }                               /* end usm_check_secLevel() */
-
-
-
-
-/*******************************************************************-o-******
- * usm_check_secLevel_vs_protocols
- *
- * Parameters:
- *	 level
- *	*authProtocol
- *	 authProtocolLen
- *	*privProtocol
- *	 privProtocolLen
- *      
- * Returns:
- *	0	On success,
- *	1	Otherwise.
- *
- * Same as above but with explicitly named transform types instead of taking
- * from the usmUser structure.
- */
-int
-usm_check_secLevel_vs_protocols(int level,
-                                const oid * authProtocol,
-                                u_int authProtocolLen,
-                                const oid * privProtocol,
-                                u_int privProtocolLen)
-{
-
-    if (level == SNMP_SEC_LEVEL_AUTHPRIV
-        &&
-        (netsnmp_oid_equals
-         (privProtocol, privProtocolLen, usmNoPrivProtocol,
-          sizeof(usmNoPrivProtocol) / sizeof(oid)) == 0)) {
-        DEBUGMSGTL(("usm", "Level: %d\n", level));
-        DEBUGMSGTL(("usm", "Auth Protocol: "));
-        DEBUGMSGOID(("usm", authProtocol, authProtocolLen));
-        DEBUGMSG(("usm", ", Priv Protocol: "));
-        DEBUGMSGOID(("usm", privProtocol, privProtocolLen));
-        DEBUGMSG(("usm", "\n"));
-        return 1;
-    }
-    if ((level == SNMP_SEC_LEVEL_AUTHPRIV
-         || level == SNMP_SEC_LEVEL_AUTHNOPRIV)
-        &&
-        (netsnmp_oid_equals
-         (authProtocol, authProtocolLen, usmNoAuthProtocol,
-          sizeof(usmNoAuthProtocol) / sizeof(oid)) == 0)) {
-        DEBUGMSGTL(("usm", "Level: %d\n", level));
-        DEBUGMSGTL(("usm", "Auth Protocol: "));
-        DEBUGMSGOID(("usm", authProtocol, authProtocolLen));
-        DEBUGMSG(("usm", ", Priv Protocol: "));
-        DEBUGMSGOID(("usm", privProtocol, privProtocolLen));
-        DEBUGMSG(("usm", "\n"));
-        return 1;
-    }
-
-    return 0;
-
-}                               /* end usm_check_secLevel_vs_protocols() */
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 /*
