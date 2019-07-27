@@ -371,7 +371,7 @@ really_try_next:
                                    NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) &&
             Check_HR_FileSys_NFS())
             return NULL;
-        if (Check_HR_FileSys_AutoFs())
+        if (HRFS_entry && Check_HR_FileSys_AutoFs())
             return NULL;
         if (store_idx <= NETSNMP_MEM_TYPE_MAX ) {
 	    mem = (netsnmp_memory_info*)ptr;

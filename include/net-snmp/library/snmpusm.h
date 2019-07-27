@@ -210,14 +210,8 @@ extern          "C" {
     NETSNMP_IMPORT
     struct usmUser *usm_get_user(u_char * engineID, size_t engineIDLen,
                                  char *name);
-    struct usmUser *usm_get_user_from_list(u_char * engineID,
-                                           size_t engineIDLen, char *name,
-                                           struct usmUser *userList,
-                                           int use_default);
     NETSNMP_IMPORT
     struct usmUser *usm_add_user(struct usmUser *user);
-    struct usmUser *usm_add_user_to_list(struct usmUser *user,
-                                         struct usmUser *userList);
     NETSNMP_IMPORT
     struct usmUser *usm_free_user(struct usmUser *user);
     NETSNMP_IMPORT
@@ -233,8 +227,6 @@ extern          "C" {
                                        struct usmUser *to);
     NETSNMP_IMPORT
     struct usmUser *usm_remove_user(struct usmUser *user);
-    struct usmUser *usm_remove_user_from_list(struct usmUser *user,
-                                              struct usmUser **userList);
     char           *get_objid(char *line, oid ** optr, size_t * len);
     NETSNMP_IMPORT
     void            usm_save_users(const char *token, const char *type);
@@ -257,12 +249,6 @@ extern          "C" {
     void            init_usm(void);
     NETSNMP_IMPORT
     void            init_usm_conf(const char *app);
-    int             init_usm_post_config(int majorid, int minorid,
-                                         void *serverarg, void *clientarg);
-    int             deinit_usm_post_config(int majorid, int minorid, void *serverarg,
-					   void *clientarg);
-    NETSNMP_IMPORT
-    void            clear_user_list(void);
     NETSNMP_IMPORT
     void            shutdown_usm(void);
 
@@ -332,10 +318,6 @@ extern          "C" {
 
     NETSNMP_IMPORT
     int             usm_remove_usmUser(struct usmUser *user);
-
-    NETSNMP_IMPORT
-    int             usm_remove_usmUser_from_list(struct usmUser *user,
-                                                 struct usmUser **ppuserList);
 
     NETSNMP_IMPORT
     struct usmUser *usm_create_usmUser_from_string(char *line,
