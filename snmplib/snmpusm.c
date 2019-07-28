@@ -85,6 +85,7 @@ netsnmp_feature_child_of(usm_support, usm_all)
 netsnmp_feature_require(usm_support)
 
 struct usmStateReference {
+    int             refcnt;
     char           *usr_name;
     size_t          usr_name_length;
     u_char         *usr_engine_id;
@@ -280,42 +281,63 @@ free_enginetime_on_shutdown(int majorid, int minorid, void *serverarg,
 static struct usmStateReference *
 usm_malloc_usmStateReference(void)
 {
-    struct usmStateReference *retval = (struct usmStateReference *)
-        calloc(1, sizeof(struct usmStateReference));
+    struct usmStateReference *retval;
+
+    retval = calloc(1, sizeof(struct usmStateReference));
+    if (retval)
+        retval->refcnt = 1;
 
     return retval;
 }                               /* end usm_malloc_usmStateReference() */
 
+static int
+usm_clone(netsnmp_pdu *pdu, netsnmp_pdu *new_pdu)
+{
+    struct usmStateReference *ref = pdu->securityStateRef;
+    struct usmStateReference **new_ref =
+        (struct usmStateReference **)&new_pdu->securityStateRef;
+    int ret = 0;
+
+    if (!ref)
+        return ret;
+
+    if (pdu->command == SNMP_MSG_TRAP2) {
+        netsnmp_assert(pdu->securityModel == SNMP_DEFAULT_SECMODEL);
+        ret = usm_clone_usmStateReference(ref, new_ref);
+    } else {
+        netsnmp_assert(ref == *new_ref);
+        ref->refcnt++;
+    }
+
+    return ret;
+}
+
 static void
 usm_free_usmStateReference(void *old)
 {
-    struct usmStateReference *old_ref = (struct usmStateReference *) old;
+    struct usmStateReference *ref = old;
 
-    if (old_ref) {
+    if (!ref)
+        return;
 
-        if (old_ref->usr_name_length)
-            SNMP_FREE(old_ref->usr_name);
-        if (old_ref->usr_engine_id_length)
-            SNMP_FREE(old_ref->usr_engine_id);
-        if (old_ref->usr_auth_protocol_length)
-            SNMP_FREE(old_ref->usr_auth_protocol);
-        if (old_ref->usr_priv_protocol_length)
-            SNMP_FREE(old_ref->usr_priv_protocol);
+    if (--ref->refcnt > 0)
+        return;
 
-        if (old_ref->usr_auth_key_length && old_ref->usr_auth_key) {
-            SNMP_ZERO(old_ref->usr_auth_key, old_ref->usr_auth_key_length);
-            SNMP_FREE(old_ref->usr_auth_key);
-        }
-        if (old_ref->usr_priv_key_length && old_ref->usr_priv_key) {
-            SNMP_ZERO(old_ref->usr_priv_key, old_ref->usr_priv_key_length);
-            SNMP_FREE(old_ref->usr_priv_key);
-        }
+    SNMP_FREE(ref->usr_name);
+    SNMP_FREE(ref->usr_engine_id);
+    SNMP_FREE(ref->usr_auth_protocol);
+    SNMP_FREE(ref->usr_priv_protocol);
 
-        SNMP_ZERO(old_ref, sizeof(*old_ref));
-        SNMP_FREE(old_ref);
-
+    if (ref->usr_auth_key_length && ref->usr_auth_key) {
+        SNMP_ZERO(ref->usr_auth_key, ref->usr_auth_key_length);
+        SNMP_FREE(ref->usr_auth_key);
+    }
+    if (ref->usr_priv_key_length && ref->usr_priv_key) {
+        SNMP_ZERO(ref->usr_priv_key, ref->usr_priv_key_length);
+        SNMP_FREE(ref->usr_priv_key);
     }
 
+    SNMP_FREE(ref);
 }                               /* end usm_free_usmStateReference() */
 
 struct usmUser *
@@ -4916,6 +4938,7 @@ init_usm(void)
     def->encode_reverse = usm_secmod_rgenerate_out_msg;
     def->encode_forward = usm_secmod_generate_out_msg;
     def->decode = usm_secmod_process_in_msg;
+    def->pdu_clone = usm_clone;
     def->pdu_free_state_ref = usm_free_usmStateReference;
     def->session_setup = usm_session_init;
     def->handle_report = usm_handle_report;

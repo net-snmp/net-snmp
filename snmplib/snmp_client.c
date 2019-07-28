@@ -405,26 +405,14 @@ _clone_pdu_header(netsnmp_pdu *pdu)
         return NULL;
     }
 
-    if (pdu->securityStateRef &&
-        pdu->command == SNMP_MSG_TRAP2) {
-
-        netsnmp_assert(pdu->securityModel == SNMP_DEFAULT_SECMODEL);
-        ret = usm_clone_usmStateReference((struct usmStateReference *) pdu->securityStateRef,
-                (struct usmStateReference **) &newpdu->securityStateRef );
-
-        if (ret)
-        {
+    sptr = find_sec_mod(newpdu->securityModel);
+    if (sptr && sptr->pdu_clone) {
+        /* call security model if it needs to know about this */
+        ret = sptr->pdu_clone(pdu, newpdu);
+        if (ret) {
             snmp_free_pdu(newpdu);
             return NULL;
         }
-    }
-
-    if ((sptr = find_sec_mod(newpdu->securityModel)) != NULL &&
-        sptr->pdu_clone != NULL) {
-        /*
-         * call security model if it needs to know about this 
-         */
-        (*sptr->pdu_clone) (pdu, newpdu);
     }
 
     return newpdu;
