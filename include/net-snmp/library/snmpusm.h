@@ -179,7 +179,6 @@ extern          "C" {
 
     NETSNMP_IMPORT
     int             usm_create_user_from_session(netsnmp_session * session);
-    SecmodPostDiscovery usm_create_user_from_session_hook;
     NETSNMP_IMPORT
     const oid      *get_default_authtype(size_t *);
     NETSNMP_IMPORT

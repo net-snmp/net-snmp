@@ -3602,7 +3602,7 @@ usm_create_user_from_session(netsnmp_session * session)
 }
 
 /* A wrapper around the hook */
-int
+static int
 usm_create_user_from_session_hook(struct session_list *slp,
                                   netsnmp_session *session)
 {
