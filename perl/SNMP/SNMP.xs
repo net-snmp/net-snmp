@@ -1209,7 +1209,8 @@ __snmp_xs_cb(int op, netsnmp_session *ss, int reqid, netsnmp_pdu *pdu,
         reply_pdu->command = SNMP_MSG_RESPONSE;
         reply_pdu->reqid = pdu->reqid;
         reply_pdu->errstat = reply_pdu->errindex = 0;
-        snmp_send(ss, reply_pdu);
+        if (!snmp_send(ss, reply_pdu))
+            snmp_free_pdu(reply_pdu);
       } else {
         warn("Couldn't clone PDU for inform response");
       }
