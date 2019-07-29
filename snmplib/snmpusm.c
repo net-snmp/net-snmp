@@ -2806,16 +2806,14 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 
     DEBUGMSGTL(("usm", "USM processing begun...\n"));
 
+    netsnmp_assert(secStateRef);
 
-    if (secStateRef) {
-        usm_free_usmStateReference(*secStateRef);
-        *secStateRef = usm_malloc_usmStateReference();
-        if (*secStateRef == NULL) {
-            DEBUGMSGTL(("usm", "Out of memory.\n"));
-            return SNMPERR_USM_GENERICERROR;
-        }
+    usm_free_usmStateReference(*secStateRef);
+    *secStateRef = usm_malloc_usmStateReference();
+    if (*secStateRef == NULL) {
+        DEBUGMSGTL(("usm", "Out of memory.\n"));
+        return SNMPERR_USM_GENERICERROR;
     }
-
 
     /*
      * Make sure the *secParms is an OCTET STRING.
@@ -2863,33 +2861,30 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         end_of_overhead = data_ptr;
     }
 
-    if (secStateRef) {
-        /*
-         * Cache the name, engine ID, and security level,
-         * * per step 2 (section 3.2)
-         */
-        if (usm_set_usmStateReference_name
-            (*secStateRef, secName, *secNameLen) == -1) {
-            DEBUGMSGTL(("usm", "%s\n", "Couldn't cache name."));
-            error = SNMPERR_USM_GENERICERROR;
-            goto err;
-        }
-
-        if (usm_set_usmStateReference_engine_id
-            (*secStateRef, secEngineID, *secEngineIDLen) == -1) {
-            DEBUGMSGTL(("usm", "%s\n", "Couldn't cache engine id."));
-            error = SNMPERR_USM_GENERICERROR;
-            goto err;
-        }
-
-        if (usm_set_usmStateReference_sec_level(*secStateRef, secLevel) ==
-            -1) {
-            DEBUGMSGTL(("usm", "%s\n", "Couldn't cache security level."));
-            error = SNMPERR_USM_GENERICERROR;
-            goto err;
-        }
+    /*
+     * Cache the name, engine ID, and security level,
+     * * per step 2 (section 3.2)
+     */
+    if (usm_set_usmStateReference_name
+        (*secStateRef, secName, *secNameLen) == -1) {
+        DEBUGMSGTL(("usm", "%s\n", "Couldn't cache name."));
+        error = SNMPERR_USM_GENERICERROR;
+        goto err;
     }
 
+    if (usm_set_usmStateReference_engine_id
+        (*secStateRef, secEngineID, *secEngineIDLen) == -1) {
+        DEBUGMSGTL(("usm", "%s\n", "Couldn't cache engine id."));
+        error = SNMPERR_USM_GENERICERROR;
+        goto err;
+    }
+
+    if (usm_set_usmStateReference_sec_level(*secStateRef, secLevel) ==
+        -1) {
+        DEBUGMSGTL(("usm", "%s\n", "Couldn't cache security level."));
+        error = SNMPERR_USM_GENERICERROR;
+        goto err;
+    }
 
     /*
      * Locate the engine ID record.
@@ -2984,45 +2979,41 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
      *
      * Cache the keys and protocol oids, per step 11 (s3.2).
      */
-    if (secStateRef) {
-        if (usm_set_usmStateReference_auth_protocol(*secStateRef,
-                                                    user->authProtocol,
-                                                    user->
-                                                    authProtocolLen) ==
-            -1) {
-            DEBUGMSGTL(("usm", "%s\n",
-                        "Couldn't cache authentication protocol."));
-            error = SNMPERR_USM_GENERICERROR;
-            goto err;
-        }
+    if (usm_set_usmStateReference_auth_protocol(*secStateRef,
+                                                user->authProtocol,
+                                                user->
+                                                authProtocolLen) == -1) {
+        DEBUGMSGTL(("usm", "%s\n",
+                    "Couldn't cache authentication protocol."));
+        error = SNMPERR_USM_GENERICERROR;
+        goto err;
+    }
 
-        if (usm_set_usmStateReference_auth_key(*secStateRef,
-                                               user->authKey,
-                                               user->authKeyLen) == -1) {
-            DEBUGMSGTL(("usm", "%s\n",
-                        "Couldn't cache authentication key."));
-            error = SNMPERR_USM_GENERICERROR;
-            goto err;
-        }
+    if (usm_set_usmStateReference_auth_key(*secStateRef,
+                                           user->authKey,
+                                           user->authKeyLen) == -1) {
+        DEBUGMSGTL(("usm", "%s\n",
+                    "Couldn't cache authentication key."));
+        error = SNMPERR_USM_GENERICERROR;
+        goto err;
+    }
 
-        if (usm_set_usmStateReference_priv_protocol(*secStateRef,
-                                                    user->privProtocol,
-                                                    user->
-                                                    privProtocolLen) ==
-            -1) {
-            DEBUGMSGTL(("usm", "%s\n",
-                        "Couldn't cache privacy protocol."));
-            error = SNMPERR_USM_GENERICERROR;
-            goto err;
-        }
+    if (usm_set_usmStateReference_priv_protocol(*secStateRef,
+                                                user->privProtocol,
+                                                user->
+                                                privProtocolLen) == -1) {
+        DEBUGMSGTL(("usm", "%s\n",
+                    "Couldn't cache privacy protocol."));
+        error = SNMPERR_USM_GENERICERROR;
+        goto err;
+    }
 
-        if (usm_set_usmStateReference_priv_key(*secStateRef,
-                                               user->privKey,
-                                               user->privKeyLen) == -1) {
-            DEBUGMSGTL(("usm", "%s\n", "Couldn't cache privacy key."));
-            error = SNMPERR_USM_GENERICERROR;
-            goto err;
-        }
+    if (usm_set_usmStateReference_priv_key(*secStateRef,
+                                           user->privKey,
+                                           user->privKeyLen) == -1) {
+        DEBUGMSGTL(("usm", "%s\n", "Couldn't cache privacy key."));
+        error = SNMPERR_USM_GENERICERROR;
+        goto err;
     }
 
 
