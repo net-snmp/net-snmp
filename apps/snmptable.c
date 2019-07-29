@@ -789,8 +789,7 @@ get_table_entries(netsnmp_session * ss)
                      * not part of this subtree 
                      */
                     if (localdebug) {
-                        printf("End of table: %s\n",
-                               buf ? (char *) buf : "[NIL]");
+                        printf("End of table\n");
                     }
                     snmp_free_pdu(response);
                     running = 0;
