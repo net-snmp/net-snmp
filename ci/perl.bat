@@ -1,14 +1,15 @@
 REM Download and install Perl
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 echo on
+set PERL_VERSION=5.31.2
 set INST_DRV=c:
 set INST_TOP=c:\perl-msvc
 rd /q /s %INST_TOP%
-curl https://www.cpan.org/src/5.0/perl-5.30.0.tar.gz -o perl-5.30.0.tar.gz
+curl https://www.cpan.org/src/5.0/perl-%PERL_VERSION%.tar.gz -o perl-%PERL_VERSION%.tar.gz
 if %errorlevel% neq 0 goto build_error
-tar xaf perl-5.30.0.tar.gz
+tar xaf perl-%PERL_VERSION%.tar.gz
 if %errorlevel% neq 0 goto build_error
-cd perl-5.30.0\win32
+cd perl-%PERL_VERSION%\win32
 if %errorlevel% neq 0 goto build_error
 (echo CCTYPE=MSVC140 && echo INST_DRV=%INST_DRV% && echo INST_TOP=%INST_TOP% && type Makefile | findstr /r /v "^CCTYPE" | findstr /r /v "^INST_DRV" | findstr /r /v "^INST_TOP") > Makefile2
 if %errorlevel% neq 0 goto build_error
