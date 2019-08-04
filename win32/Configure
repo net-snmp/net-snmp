@@ -225,7 +225,8 @@ my %makefile_subs = (
     "lfl" => [ "^LDFLAGS=",    "LDFLAGS=" .
                                ($config eq "debug" ? "/debug " : "") .
                                ($openssllibdir ? "/libpath:$openssllibdir" :
-                                "")
+                                "") . " " .
+                               "/MANIFEST:EMBED"
              ],
     "rsc" => [ "^RSCFLAGS=",   "RSCFLAGS=/l 0x409 " .
                                ($config eq "release" ? "/d NDEBUG" :
