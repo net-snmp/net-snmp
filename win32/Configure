@@ -180,7 +180,6 @@ my $perl_define =
     "/D NETSNMP_REMOVE_U64 " .
     "/D VC_EXTRALEAN " .
     "/D WIN32 " .
-    "/D _BIND_TO_CURRENT_VCLIBS_VERSION " .
     "/D _CONSOLE " .
     "/D _CRT_NONSTDC_NO_WARNINGS " .
     "/D _CRT_SECURE_NO_WARNINGS " .
@@ -226,7 +225,8 @@ my %makefile_subs = (
     "lfl" => [ "^LDFLAGS=",    "LDFLAGS=" .
                                ($config eq "debug" ? "/debug " : "") .
                                ($openssllibdir ? "/libpath:$openssllibdir" :
-                                "")
+                                "") . " " .
+                               "/MANIFEST:EMBED"
              ],
     "rsc" => [ "^RSCFLAGS=",   "RSCFLAGS=/l 0x409 " .
                                ($config eq "release" ? "/d NDEBUG" :
