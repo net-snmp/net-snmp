@@ -5218,6 +5218,19 @@ snmp_async_send(netsnmp_session * session,
     return snmp_sess_async_send(sessp, pdu, callback, cb_data);
 }
 
+/**
+ * Send a PDU asynchronously.
+ *
+ * @param[in] slp      Session pointer.
+ * @param[in] pdu      PDU to send.
+ * @param[in] callback Callback function called after processing of the PDU
+ *                     finished. This function is called if the PDU has not
+ *                     been sent or after a response has been received.
+ * @param[in] cb_data  Will be passed as fifth argument to @callback.
+ *
+ * @return Returns 0 if sending failed or a non-zero request ID if sending
+ *   succeeded.
+ */
 static int
 _sess_async_send(struct session_list *slp,
                  netsnmp_pdu *pdu, snmp_callback callback, void *cb_data)
@@ -6460,7 +6473,7 @@ snmp_sess_select_info2(struct session_list *slp, int *numfds, netsnmp_large_fd_s
 /**
  * Compute/update the arguments to be passed to select().
  *
- * @param[in]     slp   Which sessions to process: either a pointer to a
+ * @param[in]     sessp   Which sessions to process: either a pointer to a
  *   specific session or NULL which means to process all sessions.
  * @param[in,out] numfds  On POSIX systems one more than the the largest file
  *   descriptor that is present in *fdset. On systems that use Winsock (MinGW

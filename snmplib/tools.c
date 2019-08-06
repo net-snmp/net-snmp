@@ -303,7 +303,7 @@ void *netsnmp_memdup(const void *from, size_t size)
  *
  * @param[in] from Pointer to copy memory from.
  * @param[in] from_size Size of the data to be copied.
- * @param[out] new_size Pointer to size var for new block (OPTIONAL)
+ * @param[out] to_size Pointer to size var for new block (OPTIONAL)
  *
  * @return Pointer to the duplicated memory block, or NULL if memory allocation
  * failed.

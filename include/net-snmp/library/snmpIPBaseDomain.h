@@ -5,8 +5,8 @@
 
 /**
  * SNMP endpoint specification.
- * @a: Address family, network address and port number.
- * @iface: Network interface name in ASCII format. May be empty.
+ * @param a     Address family, network address and port number.
+ * @param iface Network interface name in ASCII format. May be empty.
  */
 struct netsnmp_ep {
     union {
@@ -21,9 +21,9 @@ struct netsnmp_ep {
 
 /**
  * SNMP endpoint with the network name in ASCII format.
- * @addr: Network address or host name as an ASCII string.
- * @iface: Network interface, e.g. "lo".
- * @port: Port number. "" means that no port number has been specified. "0"
+ * @param addr Network address or host name as an ASCII string.
+ * @param iface Network interface, e.g. "lo".
+ * @param port Port number. "" means that no port number has been specified. "0"
  *   means "bind to any port".
  */
 struct netsnmp_ep_str {
