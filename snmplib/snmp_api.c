@@ -5242,6 +5242,19 @@ snmp_async_send(netsnmp_session * session,
     return snmp_sess_async_send(sessp, pdu, callback, cb_data);
 }
 
+/**
+ * Send a PDU asynchronously.
+ *
+ * @param[in] slp      Session pointer.
+ * @param[in] pdu      PDU to send.
+ * @param[in] callback Callback function called after processing of the PDU
+ *                     finished. This function is called if the PDU has not
+ *                     been sent or after a response has been received.
+ * @param[in] cb_data  Will be passed as fifth argument to @callback.
+ *
+ * @return Returns 0 if sending failed or a non-zero request ID if sending
+ *   succeeded.
+ */
 static int
 _sess_async_send(void *sessp,
                  netsnmp_pdu *pdu, snmp_callback callback, void *cb_data)
