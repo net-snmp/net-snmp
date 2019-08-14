@@ -62,7 +62,7 @@
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/read_config.h>
 
-netsnmp_feature_require(user_information)
+netsnmp_feature_require(user_information);
 
 #define MAX_NAME_LENGTH 127
 

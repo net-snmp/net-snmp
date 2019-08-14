@@ -927,7 +927,7 @@ exactEngineID_conf(const char *word, char *cptr)
 /*
  * merely call 
  */
-netsnmp_feature_child_of(get_enginetime_alarm, netsnmp_unused)
+netsnmp_feature_child_of(get_enginetime_alarm, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_GET_ENGINETIME_ALARM
 void
 get_enginetime_alarm(unsigned int regnum, void *clientargs)

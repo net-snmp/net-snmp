@@ -47,18 +47,18 @@
 
 #include <ctype.h>
 
-netsnmp_feature_child_of(inetNetToMediaTable_external_access, libnetsnmpmibs)
+netsnmp_feature_child_of(inetNetToMediaTable_external_access, libnetsnmpmibs);
 
-netsnmp_feature_require(row_merge)
-netsnmp_feature_require(baby_steps)
-netsnmp_feature_require(table_container_row_insert)
-netsnmp_feature_require(check_all_requests_error)
+netsnmp_feature_require(row_merge);
+netsnmp_feature_require(baby_steps);
+netsnmp_feature_require(table_container_row_insert);
+netsnmp_feature_require(check_all_requests_error);
 
 
-netsnmp_feature_child_of(inetNetToMediaTable_container_size, inetNetToMediaTable_external_access)
-netsnmp_feature_child_of(inetNetToMediaTable_registration_set, inetNetToMediaTable_external_access)
-netsnmp_feature_child_of(inetNetToMediaTable_registration_get, inetNetToMediaTable_external_access)
-netsnmp_feature_child_of(inetNetToMediaTable_container_get, inetNetToMediaTable_external_access)
+netsnmp_feature_child_of(inetNetToMediaTable_container_size, inetNetToMediaTable_external_access);
+netsnmp_feature_child_of(inetNetToMediaTable_registration_set, inetNetToMediaTable_external_access);
+netsnmp_feature_child_of(inetNetToMediaTable_registration_get, inetNetToMediaTable_external_access);
+netsnmp_feature_child_of(inetNetToMediaTable_container_get, inetNetToMediaTable_external_access);
 
 /**********************************************************************
  **********************************************************************

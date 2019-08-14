@@ -43,7 +43,7 @@
 #include "agentx/client.h"
 #include "agentx/subagent.h"
 
-netsnmp_feature_require(set_agent_uptime)
+netsnmp_feature_require(set_agent_uptime);
 
         /*
          * AgentX handling utility routines

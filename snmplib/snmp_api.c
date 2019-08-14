@@ -145,10 +145,10 @@ SOFTWARE.
 #include <net-snmp/library/cert_util.h>
 #endif
 
-netsnmp_feature_child_of(statistics, libnetsnmp)
-netsnmp_feature_child_of(snmp_api, libnetsnmp)
-netsnmp_feature_child_of(oid_is_subtree, snmp_api)
-netsnmp_feature_child_of(snmpv3_probe_contextEngineID_rfc5343, snmp_api)
+netsnmp_feature_child_of(statistics, libnetsnmp);
+netsnmp_feature_child_of(snmp_api, libnetsnmp);
+netsnmp_feature_child_of(oid_is_subtree, snmp_api);
+netsnmp_feature_child_of(snmpv3_probe_contextEngineID_rfc5343, snmp_api);
 
 static void     _init_snmp(void);
 
@@ -1029,7 +1029,7 @@ snmp_open(netsnmp_session *session)
 /*
  * extended open 
  */
-netsnmp_feature_child_of(snmp_open_ex, netsnmp_unused)
+netsnmp_feature_child_of(snmp_open_ex, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_SNMP_OPEN_EX
 netsnmp_session *
 snmp_open_ex(netsnmp_session *session,

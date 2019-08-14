@@ -83,12 +83,12 @@ DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
 /** TLS/DTLS certificatte support */
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
 
-netsnmp_feature_require(container_free_all)
+netsnmp_feature_require(container_free_all);
 
-netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused)
-netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused)
-netsnmp_feature_child_of(openssl_err_log, netsnmp_unused)
-netsnmp_feature_child_of(cert_dump_names, netsnmp_unused)
+netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused);
+netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused);
+netsnmp_feature_child_of(openssl_err_log, netsnmp_unused);
+netsnmp_feature_child_of(cert_dump_names, netsnmp_unused);
 
 #include <ctype.h>
 

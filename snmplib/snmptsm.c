@@ -27,8 +27,8 @@
 #include <net-snmp/library/snmpDTLSSCTPDomain.h>
 #endif
 
-netsnmp_feature_require(snmpv3_probe_contextEngineID_rfc5343)
-netsnmp_feature_require(row_create)
+netsnmp_feature_require(snmpv3_probe_contextEngineID_rfc5343);
+netsnmp_feature_require(row_create);
 
 static int      tsm_session_init(netsnmp_session *);
 static void     tsm_free_state_ref(void *);

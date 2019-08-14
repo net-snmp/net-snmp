@@ -149,10 +149,10 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>
 
-netsnmp_feature_child_of(read_config_all, libnetsnmp)
+netsnmp_feature_child_of(read_config_all, libnetsnmp);
 
-netsnmp_feature_child_of(unregister_app_config_handler, read_config_all)
-netsnmp_feature_child_of(read_config_register_app_prenetsnmp_mib_handler, netsnmp_unused)
+netsnmp_feature_child_of(unregister_app_config_handler, read_config_all);
+netsnmp_feature_child_of(read_config_register_app_prenetsnmp_mib_handler, netsnmp_unused);
 
 static int      config_errors;
 

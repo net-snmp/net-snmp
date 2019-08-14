@@ -13,28 +13,28 @@
 #include <net-snmp/net-snmp-features.h>
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && NETSNMP_TRANSPORT_TLSBASE_DOMAIN
-netsnmp_feature_child_of(cert_util_all, libnetsnmp)
-netsnmp_feature_child_of(cert_util, cert_util_all)
+netsnmp_feature_child_of(cert_util_all, libnetsnmp);
+netsnmp_feature_child_of(cert_util, cert_util_all);
 #ifdef NETSNMP_FEATURE_REQUIRE_CERT_UTIL
-netsnmp_feature_require(container_directory)
-netsnmp_feature_require(container_fifo)
-netsnmp_feature_require(container_dup)
-netsnmp_feature_require(container_free_all)
-netsnmp_feature_require(subcontainer_find)
+netsnmp_feature_require(container_directory);
+netsnmp_feature_require(container_fifo);
+netsnmp_feature_require(container_dup);
+netsnmp_feature_require(container_free_all);
+netsnmp_feature_require(subcontainer_find);
 
-netsnmp_feature_child_of(cert_map_remove, netsnmp_unused)
-netsnmp_feature_child_of(cert_map_find, netsnmp_unused)
-netsnmp_feature_child_of(tlstmparams_external, cert_util_all)
-netsnmp_feature_child_of(tlstmparams_container, tlstmparams_external)
-netsnmp_feature_child_of(tlstmparams_remove, tlstmparams_external)
-netsnmp_feature_child_of(tlstmparams_find, tlstmparams_external)
-netsnmp_feature_child_of(tlstmAddr_remove, netsnmp_unused)
-netsnmp_feature_child_of(tlstmaddr_external, cert_util_all)
-netsnmp_feature_child_of(tlstmaddr_container, tlstmaddr_external)
-netsnmp_feature_child_of(tlstmAddr_get_serverId, tlstmaddr_external)
+netsnmp_feature_child_of(cert_map_remove, netsnmp_unused);
+netsnmp_feature_child_of(cert_map_find, netsnmp_unused);
+netsnmp_feature_child_of(tlstmparams_external, cert_util_all);
+netsnmp_feature_child_of(tlstmparams_container, tlstmparams_external);
+netsnmp_feature_child_of(tlstmparams_remove, tlstmparams_external);
+netsnmp_feature_child_of(tlstmparams_find, tlstmparams_external);
+netsnmp_feature_child_of(tlstmAddr_remove, netsnmp_unused);
+netsnmp_feature_child_of(tlstmaddr_external, cert_util_all);
+netsnmp_feature_child_of(tlstmaddr_container, tlstmaddr_external);
+netsnmp_feature_child_of(tlstmAddr_get_serverId, tlstmaddr_external);
 
-netsnmp_feature_child_of(cert_fingerprints, cert_util_all)
-netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all)
+netsnmp_feature_child_of(cert_fingerprints, cert_util_all);
+netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all);
 
 #endif /* NETSNMP_FEATURE_REQUIRE_CERT_UTIL */
 

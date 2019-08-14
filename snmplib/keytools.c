@@ -73,8 +73,8 @@
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpusm.h>
 
-netsnmp_feature_child_of(usm_support, libnetsnmp)
-netsnmp_feature_child_of(usm_keytools, usm_support)
+netsnmp_feature_child_of(usm_support, libnetsnmp);
+netsnmp_feature_child_of(usm_keytools, usm_support);
 
 #ifndef NETSNMP_FEATURE_REMOVE_USM_KEYTOOLS
 

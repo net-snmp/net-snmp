@@ -5,9 +5,9 @@
 #include <net-snmp/net-snmp-features.h>
 #include "hw_mem.h"
 
-netsnmp_feature_child_of(hardware_memory, netsnmp_unused)
+netsnmp_feature_child_of(hardware_memory, netsnmp_unused);
 
-netsnmp_feature_child_of(memory_get_cache, hardware_memory)
+netsnmp_feature_child_of(memory_get_cache, hardware_memory);
 
 netsnmp_memory_info *_mem_head  = NULL;
 netsnmp_cache       *_mem_cache = NULL;

@@ -53,10 +53,10 @@
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_api.h>
 
-netsnmp_feature_child_of(callbacks_all, libnetsnmp)
+netsnmp_feature_child_of(callbacks_all, libnetsnmp);
 
-netsnmp_feature_child_of(callback_count, callbacks_all)
-netsnmp_feature_child_of(callback_list, callbacks_all)
+netsnmp_feature_child_of(callback_count, callbacks_all);
+netsnmp_feature_child_of(callback_list, callbacks_all);
 
 /*
  * the inline callback methods use major/minor to index into arrays.

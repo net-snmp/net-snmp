@@ -47,10 +47,10 @@
 
 #include "subagent.h"
 
-netsnmp_feature_child_of(agentx_subagent, agentx_all)
-netsnmp_feature_child_of(agentx_enable_subagent, agentx_subagent)
+netsnmp_feature_child_of(agentx_subagent, agentx_all);
+netsnmp_feature_child_of(agentx_enable_subagent, agentx_subagent);
 
-netsnmp_feature_require(remove_trap_session)
+netsnmp_feature_require(remove_trap_session);
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 

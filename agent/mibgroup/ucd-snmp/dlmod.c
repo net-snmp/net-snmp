@@ -700,7 +700,7 @@ init_dlmod(void)
     DEBUGMSGTL(("dlmod", "dlmod_path: %s\n", dlmod_path));
 }
 
-netsnmp_feature_require(snmpd_unregister_config_handler)
+netsnmp_feature_require(snmpd_unregister_config_handler);
 
 void
 shutdown_dlmod(void)

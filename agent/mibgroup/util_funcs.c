@@ -116,23 +116,23 @@ typedef __u8 u8;           /* ditto */
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 
-netsnmp_feature_child_of(util_funcs, libnetsnmpmibs)
+netsnmp_feature_child_of(util_funcs, libnetsnmpmibs);
 
-netsnmp_feature_child_of(shell_command, util_funcs)
-netsnmp_feature_child_of(get_exten_instance, util_funcs)
-netsnmp_feature_child_of(clear_cache, util_funcs)
-netsnmp_feature_child_of(find_field, util_funcs)
-netsnmp_feature_child_of(parse_miboid, util_funcs)
-netsnmp_feature_child_of(string_append_int, util_funcs)
-netsnmp_feature_child_of(internal_mib_table, util_funcs)
+netsnmp_feature_child_of(shell_command, util_funcs);
+netsnmp_feature_child_of(get_exten_instance, util_funcs);
+netsnmp_feature_child_of(clear_cache, util_funcs);
+netsnmp_feature_child_of(find_field, util_funcs);
+netsnmp_feature_child_of(parse_miboid, util_funcs);
+netsnmp_feature_child_of(string_append_int, util_funcs);
+netsnmp_feature_child_of(internal_mib_table, util_funcs);
 
 #if defined(HAVE_LINUX_RTNETLINK_H)
-netsnmp_feature_child_of(prefix_info_all, util_funcs)
-netsnmp_feature_child_of(prefix_info, prefix_info_all)
-netsnmp_feature_child_of(update_prefix_info, prefix_info_all)
-netsnmp_feature_child_of(delete_prefix_info, prefix_info_all)
-netsnmp_feature_child_of(find_prefix_info, prefix_info_all)
-netsnmp_feature_child_of(create_prefix_info, prefix_info_all)
+netsnmp_feature_child_of(prefix_info_all, util_funcs);
+netsnmp_feature_child_of(prefix_info, prefix_info_all);
+netsnmp_feature_child_of(update_prefix_info, prefix_info_all);
+netsnmp_feature_child_of(delete_prefix_info, prefix_info_all);
+netsnmp_feature_child_of(find_prefix_info, prefix_info_all);
+netsnmp_feature_child_of(create_prefix_info, prefix_info_all);
 #endif /* HAVE_LINUX_RTNETLINK_H */
 
 #if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)

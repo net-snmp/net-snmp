@@ -61,9 +61,9 @@
 #include "tcp.h"
 #include "tcpTable.h"
 
-netsnmp_feature_child_of(tcptable_all, libnetsnmpmibs)
+netsnmp_feature_child_of(tcptable_all, libnetsnmpmibs);
 
-netsnmp_feature_child_of(tcp_count_connections, tcptable_all)
+netsnmp_feature_child_of(tcp_count_connections, tcptable_all);
 
 #ifdef hpux11
 #define	TCPTABLE_ENTRY_TYPE	mib_tcpConnEnt 

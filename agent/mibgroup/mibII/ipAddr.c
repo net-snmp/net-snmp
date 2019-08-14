@@ -123,7 +123,7 @@
 #include <winerror.h>
 #endif
 
-netsnmp_feature_require(interface_legacy)
+netsnmp_feature_require(interface_legacy);
 
         /*********************
 	 *

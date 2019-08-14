@@ -27,9 +27,9 @@
 
 #include <net-snmp/agent/bulk_to_next.h>
 
-netsnmp_feature_child_of(agent_handler, libnetsnmpagent)
+netsnmp_feature_child_of(agent_handler, libnetsnmpagent);
 
-netsnmp_feature_child_of(handler_mark_requests_as_delegated, agent_handler)
+netsnmp_feature_child_of(handler_mark_requests_as_delegated, agent_handler);
 
 static netsnmp_mib_handler *_clone_handler(netsnmp_mib_handler *it);
 
@@ -667,7 +667,7 @@ netsnmp_call_next_handler(netsnmp_mib_handler *current,
  *
  *  @return Returns SNMPERR_SUCCESS or SNMP_ERR_* error code.
  */
-netsnmp_feature_child_of(netsnmp_call_next_handler_one_request,netsnmp_unused)
+netsnmp_feature_child_of(netsnmp_call_next_handler_one_request,netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_CALL_NEXT_HANDLER_ONE_REQUEST
 NETSNMP_INLINE int
 netsnmp_call_next_handler_one_request(netsnmp_mib_handler *current,

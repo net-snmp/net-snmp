@@ -21,23 +21,23 @@
 #include <net-snmp/library/container_list_ssll.h>
 #include <net-snmp/library/container_null.h>
 
-netsnmp_feature_child_of(container_all, libnetsnmp)
+netsnmp_feature_child_of(container_all, libnetsnmp);
 
-netsnmp_feature_child_of(container_factories, container_all)
-netsnmp_feature_child_of(container_types, container_all)
-netsnmp_feature_child_of(container_compare, container_all)
-netsnmp_feature_child_of(container_dup, container_all)
-netsnmp_feature_child_of(container_free_all, container_all)
-netsnmp_feature_child_of(subcontainer_find, container_all)
+netsnmp_feature_child_of(container_factories, container_all);
+netsnmp_feature_child_of(container_types, container_all);
+netsnmp_feature_child_of(container_compare, container_all);
+netsnmp_feature_child_of(container_dup, container_all);
+netsnmp_feature_child_of(container_free_all, container_all);
+netsnmp_feature_child_of(subcontainer_find, container_all);
 
-netsnmp_feature_child_of(container_ncompare_cstring, container_compare)
-netsnmp_feature_child_of(container_compare_mem, container_compare)
-netsnmp_feature_child_of(container_compare_long, container_compare)
-netsnmp_feature_child_of(container_compare_ulong, container_compare)
-netsnmp_feature_child_of(container_compare_int32, container_compare)
-netsnmp_feature_child_of(container_compare_uint32, container_compare)
+netsnmp_feature_child_of(container_ncompare_cstring, container_compare);
+netsnmp_feature_child_of(container_compare_mem, container_compare);
+netsnmp_feature_child_of(container_compare_long, container_compare);
+netsnmp_feature_child_of(container_compare_ulong, container_compare);
+netsnmp_feature_child_of(container_compare_int32, container_compare);
+netsnmp_feature_child_of(container_compare_uint32, container_compare);
 
-netsnmp_feature_child_of(container_find_factory, container_factories)
+netsnmp_feature_child_of(container_find_factory, container_factories);
 
 /** @defgroup container container
  */

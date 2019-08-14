@@ -108,12 +108,12 @@ SOFTWARE.
 #include <net-snmp/library/large_fd_set.h>
 #include <net-snmp/pdu_api.h>
 
-netsnmp_feature_child_of(snmp_client_all, libnetsnmp)
+netsnmp_feature_child_of(snmp_client_all, libnetsnmp);
 
-netsnmp_feature_child_of(snmp_split_pdu, snmp_client_all)
-netsnmp_feature_child_of(snmp_reset_var_types, snmp_client_all)
-netsnmp_feature_child_of(query_set_default_session, snmp_client_all)
-netsnmp_feature_child_of(row_create, snmp_client_all)
+netsnmp_feature_child_of(snmp_split_pdu, snmp_client_all);
+netsnmp_feature_child_of(snmp_reset_var_types, snmp_client_all);
+netsnmp_feature_child_of(query_set_default_session, snmp_client_all);
+netsnmp_feature_child_of(row_create, snmp_client_all);
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -749,7 +749,7 @@ count_varbinds(netsnmp_variable_list * var_ptr)
     return count;
 }
 
-netsnmp_feature_child_of(count_varbinds_of_type, netsnmp_unused)
+netsnmp_feature_child_of(count_varbinds_of_type, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_COUNT_VARBINDS_OF_TYPE
 int
 count_varbinds_of_type(netsnmp_variable_list * var_ptr, u_char type)
@@ -764,7 +764,7 @@ count_varbinds_of_type(netsnmp_variable_list * var_ptr, u_char type)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_COUNT_VARBINDS_OF_TYPE */
 
-netsnmp_feature_child_of(find_varind_of_type, netsnmp_unused)
+netsnmp_feature_child_of(find_varind_of_type, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_FIND_VARIND_OF_TYPE
 netsnmp_variable_list *
 find_varbind_of_type(netsnmp_variable_list * var_ptr, u_char type)

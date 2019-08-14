@@ -79,10 +79,10 @@
 #include <net-snmp/library/transform_oids.h>
 #include <net-snmp/library/snmp_enum.h>
 
-netsnmp_feature_child_of(usm_all, libnetsnmp)
-netsnmp_feature_child_of(usm_support, usm_all)
+netsnmp_feature_child_of(usm_all, libnetsnmp);
+netsnmp_feature_child_of(usm_support, usm_all);
 
-netsnmp_feature_require(usm_support)
+netsnmp_feature_require(usm_support);
 
 struct usmStateReference {
     int             refcnt;

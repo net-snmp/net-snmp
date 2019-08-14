@@ -62,8 +62,8 @@
 #include <sys/statfs.h>
 #endif
 
-netsnmp_feature_require(date_n_time)
-netsnmp_feature_require(ctime_to_timet)
+netsnmp_feature_require(date_n_time);
+netsnmp_feature_require(ctime_to_timet);
 
 #define HRFS_MONOTONICALLY_INCREASING
 

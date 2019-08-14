@@ -9,7 +9,7 @@
 #include <inttypes.h>
 #endif
 
-netsnmp_feature_child_of(hw_fsys_get_container, netsnmp_unused)
+netsnmp_feature_child_of(hw_fsys_get_container, netsnmp_unused);
 
 static int  _fsys_load( void );
 static void _fsys_free( void );

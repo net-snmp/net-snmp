@@ -47,18 +47,18 @@
 
 #include <ctype.h>
 
-netsnmp_feature_child_of(ipAddressTable_external_access, libnetsnmpmibs)
+netsnmp_feature_child_of(ipAddressTable_external_access, libnetsnmpmibs);
 
-netsnmp_feature_require(row_merge)
-netsnmp_feature_require(baby_steps)
-netsnmp_feature_require(table_container_row_insert)
-netsnmp_feature_require(check_all_requests_error)
+netsnmp_feature_require(row_merge);
+netsnmp_feature_require(baby_steps);
+netsnmp_feature_require(table_container_row_insert);
+netsnmp_feature_require(check_all_requests_error);
 
 
-netsnmp_feature_child_of(ipAddressTable_container_size, ipAddressTable_external_access)
-netsnmp_feature_child_of(ipAddressTable_registration_set, ipAddressTable_external_access)
-netsnmp_feature_child_of(ipAddressTable_registration_get, ipAddressTable_external_access)
-netsnmp_feature_child_of(ipAddressTable_container_get, ipAddressTable_external_access)
+netsnmp_feature_child_of(ipAddressTable_container_size, ipAddressTable_external_access);
+netsnmp_feature_child_of(ipAddressTable_registration_set, ipAddressTable_external_access);
+netsnmp_feature_child_of(ipAddressTable_registration_get, ipAddressTable_external_access);
+netsnmp_feature_child_of(ipAddressTable_container_get, ipAddressTable_external_access);
 
 /**********************************************************************
  **********************************************************************

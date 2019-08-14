@@ -113,18 +113,18 @@ SOFTWARE.
 #include <net-snmp/library/int64.h>
 #include <net-snmp/library/snmp_client.h>
 
-netsnmp_feature_child_of(mib_api, libnetsnmp)
-netsnmp_feature_child_of(mib_strings_all, mib_api)
+netsnmp_feature_child_of(mib_api, libnetsnmp);
+netsnmp_feature_child_of(mib_strings_all, mib_api);
 
-netsnmp_feature_child_of(mib_snprint, mib_strings_all)
-netsnmp_feature_child_of(mib_snprint_description, mib_strings_all)
-netsnmp_feature_child_of(mib_snprint_variable, mib_strings_all)
-netsnmp_feature_child_of(mib_string_conversions, mib_strings_all)
-netsnmp_feature_child_of(print_mib, mib_strings_all)
-netsnmp_feature_child_of(snprint_objid, mib_strings_all)
-netsnmp_feature_child_of(snprint_value, mib_strings_all)
+netsnmp_feature_child_of(mib_snprint, mib_strings_all);
+netsnmp_feature_child_of(mib_snprint_description, mib_strings_all);
+netsnmp_feature_child_of(mib_snprint_variable, mib_strings_all);
+netsnmp_feature_child_of(mib_string_conversions, mib_strings_all);
+netsnmp_feature_child_of(print_mib, mib_strings_all);
+netsnmp_feature_child_of(snprint_objid, mib_strings_all);
+netsnmp_feature_child_of(snprint_value, mib_strings_all);
 
-netsnmp_feature_child_of(mib_to_asn_type, mib_api)
+netsnmp_feature_child_of(mib_to_asn_type, mib_api);
 
 /** @defgroup mib_utilities mib parsing and datatype manipulation routines.
  *  @ingroup library

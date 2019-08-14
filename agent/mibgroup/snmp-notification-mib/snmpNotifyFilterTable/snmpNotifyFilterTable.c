@@ -27,7 +27,7 @@
 
 #include "snmpNotifyFilterTable_interface.h"
 
-netsnmp_feature_require(check_storage_transition)
+netsnmp_feature_require(check_storage_transition);
 
 const oid       snmpNotifyFilterTable_oid[] =
     { SNMPNOTIFYFILTERTABLE_OID };

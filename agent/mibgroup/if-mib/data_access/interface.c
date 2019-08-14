@@ -16,13 +16,13 @@
 #include "if-mib/data_access/interface.h"
 #include "interface_private.h"
 
-netsnmp_feature_child_of(interface_all, libnetsnmpmibs)
-netsnmp_feature_child_of(interface, interface_all)
-netsnmp_feature_child_of(interface_access_entry_set_admin_status, interface_all)
-netsnmp_feature_child_of(interface_legacy, interface_all)
+netsnmp_feature_child_of(interface_all, libnetsnmpmibs);
+netsnmp_feature_child_of(interface, interface_all);
+netsnmp_feature_child_of(interface_access_entry_set_admin_status, interface_all);
+netsnmp_feature_child_of(interface_legacy, interface_all);
 
 #ifdef NETSNMP_FEATURE_REQUIRE_INTERFACE_ACCESS_ENTRY_SET_ADMIN_STATUS
-netsnmp_feature_require(interface_arch_set_admin_status)
+netsnmp_feature_require(interface_arch_set_admin_status);
 #endif /* NETSNMP_FEATURE_REQUIRE_INTERFACE_ACCESS_ENTRY_SET_ADMIN_STATUS */
 
 /**---------------------------------------------------------------------*/

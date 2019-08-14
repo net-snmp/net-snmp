@@ -29,9 +29,9 @@
 
 #include "ipAddressTable_interface.h"
 
-netsnmp_feature_require(check_storage_transition)
-netsnmp_feature_require(ipaddress_entry_copy)
-netsnmp_feature_require(ipaddress_prefix_copy)
+netsnmp_feature_require(check_storage_transition);
+netsnmp_feature_require(ipaddress_entry_copy);
+netsnmp_feature_require(ipaddress_prefix_copy);
 
 const oid       ipAddressTable_oid[] = { IPADDRESSTABLE_OID };
 const int       ipAddressTable_oid_size = OID_LENGTH(ipAddressTable_oid);

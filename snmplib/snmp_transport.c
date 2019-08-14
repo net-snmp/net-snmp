@@ -80,12 +80,12 @@
 #include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/read_config.h>
 
-netsnmp_feature_child_of(transport_all, libnetsnmp)
+netsnmp_feature_child_of(transport_all, libnetsnmp);
 
-netsnmp_feature_child_of(tdomain_support, transport_all)
-netsnmp_feature_child_of(tdomain_transport_oid, transport_all)
-netsnmp_feature_child_of(sockaddr_size, transport_all)
-netsnmp_feature_child_of(transport_cache, transport_all)
+netsnmp_feature_child_of(tdomain_support, transport_all);
+netsnmp_feature_child_of(tdomain_transport_oid, transport_all);
+netsnmp_feature_child_of(sockaddr_size, transport_all);
+netsnmp_feature_child_of(transport_cache, transport_all);
 
 /*
  * Our list of supported transport domains.  
@@ -565,7 +565,7 @@ netsnmp_tdomain_register(netsnmp_tdomain *n)
 
 
 
-netsnmp_feature_child_of(tdomain_unregister, netsnmp_unused)
+netsnmp_feature_child_of(tdomain_unregister, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_TDOMAIN_UNREGISTER
 int
 netsnmp_tdomain_unregister(netsnmp_tdomain *n)

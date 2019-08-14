@@ -33,12 +33,12 @@
 #include <net-snmp/library/snmp-tc.h>   /* for "internal" definitions */
 #include <net-snmp/library/snmp_api.h>
 
-netsnmp_feature_child_of(snmp_tc_all, libnetsnmp)
+netsnmp_feature_child_of(snmp_tc_all, libnetsnmp);
 
-netsnmp_feature_child_of(netsnmp_dateandtime_set_buf_from_vars, netsnmp_unused)
-netsnmp_feature_child_of(date_n_time, snmp_tc_all)
-netsnmp_feature_child_of(ctime_to_timet, snmp_tc_all)
-netsnmp_feature_child_of(check_rowstatus_with_storagetype_transition, snmp_tc_all)
+netsnmp_feature_child_of(netsnmp_dateandtime_set_buf_from_vars, netsnmp_unused);
+netsnmp_feature_child_of(date_n_time, snmp_tc_all);
+netsnmp_feature_child_of(ctime_to_timet, snmp_tc_all);
+netsnmp_feature_child_of(check_rowstatus_with_storagetype_transition, snmp_tc_all);
 
 #ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_DATEANDTIME_SET_BUF_FROM_VARS
 /*
@@ -435,7 +435,7 @@ check_rowstatus_with_storagetype_transition(int oldValue, int newValue,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CHECK_ROWSTATUS_WITH_STORAGETYPE_TRANSITION */
 
-netsnmp_feature_child_of(check_storage_transition, snmp_tc_all)
+netsnmp_feature_child_of(check_storage_transition, snmp_tc_all);
 #ifndef NETSNMP_FEATURE_REMOVE_CHECK_STORAGE_TRANSITION
 char
 check_storage_transition(int oldValue, int newValue)

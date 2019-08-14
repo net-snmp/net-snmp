@@ -47,21 +47,21 @@
 
 #include <ctype.h>
 
-netsnmp_feature_child_of(snmpNotifyFilterTable_external_access, libnetsnmpmibs)
+netsnmp_feature_child_of(snmpNotifyFilterTable_external_access, libnetsnmpmibs);
 
-netsnmp_feature_require(row_merge)
-netsnmp_feature_require(baby_steps)
-netsnmp_feature_require(table_container_row_insert)
-netsnmp_feature_require(check_all_requests_error)
+netsnmp_feature_require(row_merge);
+netsnmp_feature_require(baby_steps);
+netsnmp_feature_require(table_container_row_insert);
+netsnmp_feature_require(check_all_requests_error);
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(check_vb_type_and_max_size);
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 
-netsnmp_feature_child_of(snmpNotifyFilterTable_container_size, snmpNotifyFilterTable_external_access)
-netsnmp_feature_child_of(snmpNotifyFilterTable_registration_set, snmpNotifyFilterTable_external_access)
-netsnmp_feature_child_of(snmpNotifyFilterTable_registration_get, snmpNotifyFilterTable_external_access)
-netsnmp_feature_child_of(snmpNotifyFilterTable_container_get, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_size, snmpNotifyFilterTable_external_access);
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_set, snmpNotifyFilterTable_external_access);
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_get, snmpNotifyFilterTable_external_access);
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_get, snmpNotifyFilterTable_external_access);
 
 /**********************************************************************
  **********************************************************************

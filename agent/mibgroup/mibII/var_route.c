@@ -69,7 +69,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <winerror.h>
 #endif
 
-netsnmp_feature_child_of(get_routes, libnetsnmpmibs)
+netsnmp_feature_child_of(get_routes, libnetsnmpmibs);
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
@@ -1184,8 +1184,8 @@ Route_Scan_Reload(void)
 #else
 
 #if HAVE_SYS_MBUF_H
-netsnmp_feature_require(string_append_int)
-netsnmp_feature_require(interface_legacy)
+netsnmp_feature_require(string_append_int);
+netsnmp_feature_require(interface_legacy);
 static void
 Route_Scan_Reload(void)
 {

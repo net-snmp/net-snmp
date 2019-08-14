@@ -2,7 +2,7 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/types.h>
 
-netsnmp_feature_require(cert_util)
+netsnmp_feature_require(cert_util);
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -944,7 +944,7 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
     return SNMPERR_SUCCESS;
 }
 
-netsnmp_feature_child_of(_x509_get_error, netsnmp_unused)
+netsnmp_feature_child_of(_x509_get_error, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE__X509_GET_ERROR
 const char * _x509_get_error(int x509failvalue, const char *location) {
     static const char *reason = NULL;
