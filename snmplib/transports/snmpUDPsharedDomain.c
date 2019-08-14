@@ -47,7 +47,7 @@
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 
-netsnmp_feature_require(transport_cache)
+netsnmp_feature_require(transport_cache);
 
 oid    netsnmpUDPsharedDomain[] = { 1,3,6,1,2,1,100,1,999 }; /** made up */
 size_t netsnmpUDPsharedDomain_len = OID_LENGTH(netsnmpUDPsharedDomain);

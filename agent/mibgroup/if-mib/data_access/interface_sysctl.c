@@ -31,7 +31,7 @@
 #include <net/if_types.h>
 #include <net/if_media.h>
 
-netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all);
 
 /*
  * account for minor differences between FreeBSD and OpenBSD.

@@ -9,7 +9,7 @@
 #include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable_constants.h"
 
-netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all);
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 

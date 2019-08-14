@@ -103,7 +103,7 @@
 #include "util_funcs.h"
 #include "winExtDLL.h"
 
-netsnmp_feature_require(oid_is_subtree)
+netsnmp_feature_require(oid_is_subtree);
 
 
 #define MAX_VALUE_NAME          16383

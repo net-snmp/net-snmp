@@ -10,13 +10,13 @@
 #include <net-snmp/agent/snmp_vars.h>
 #include "interface_private.h"
 
-netsnmp_feature_require(fd_event_manager)
-netsnmp_feature_require(delete_prefix_info)
-netsnmp_feature_require(create_prefix_info)
-netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
+netsnmp_feature_require(fd_event_manager);
+netsnmp_feature_require(delete_prefix_info);
+netsnmp_feature_require(create_prefix_info);
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all);
 
 #ifdef NETSNMP_FEATURE_REQUIRE_INTERFACE_ARCH_SET_ADMIN_STATUS
-netsnmp_feature_require(interface_ioctl_flags_set)
+netsnmp_feature_require(interface_ioctl_flags_set);
 #endif /* NETSNMP_FEATURE_REQUIRE_INTERFACE_ARCH_SET_ADMIN_STATUS */
 
 #ifdef HAVE_PCI_LOOKUP_NAME

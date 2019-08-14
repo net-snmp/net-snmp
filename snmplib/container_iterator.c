@@ -29,7 +29,7 @@
 
 #include <net-snmp/library/container_iterator.h>
 
-netsnmp_feature_child_of(container_iterator, container_types)
+netsnmp_feature_child_of(container_iterator, container_types);
 
 #ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_ITERATOR
 /**

@@ -112,9 +112,9 @@
 #include "agent_module_includes.h"
 #include "mib_module_includes.h"
 
-netsnmp_feature_child_of(agent_read_config_all, libnetsnmpagent)
+netsnmp_feature_child_of(agent_read_config_all, libnetsnmpagent);
 
-netsnmp_feature_child_of(snmpd_unregister_config_handler, agent_read_config_all)
+netsnmp_feature_child_of(snmpd_unregister_config_handler, agent_read_config_all);
 
 #ifdef HAVE_UNISTD_H
 void
@@ -333,7 +333,7 @@ snmpd_register_const_config_handler(const char *token,
 }
 
 #ifdef NETSNMP_FEATURE_REQUIRE_SNMPD_UNREGISTER_CONFIG_HANDLER
-netsnmp_feature_require(unregister_app_config_handler)
+netsnmp_feature_require(unregister_app_config_handler);
 #endif /* NETSNMP_FEATURE_REQUIRE_SNMPD_UNREGISTER_CONFIG_HANDLER */
 
 #ifndef NETSNMP_FEATURE_REMOVE_SNMPD_UNREGISTER_CONFIG_HANDLER

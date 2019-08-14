@@ -17,8 +17,8 @@
 #include "../agent/mibgroup/agentx/protocol.h"
 #include "../agent/mibgroup/agentx/subagent.h"
 
-netsnmp_feature_require(snmp_split_pdu)
-netsnmp_feature_require(snmp_reset_var_types)
+netsnmp_feature_require(snmp_split_pdu);
+netsnmp_feature_require(snmp_reset_var_types);
 
 
 static void

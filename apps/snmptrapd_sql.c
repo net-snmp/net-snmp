@@ -60,7 +60,7 @@
 #include "snmptrapd_log.h"
 #include "snmptrapd_sql.h"
 
-netsnmp_feature_require(container_fifo)
+netsnmp_feature_require(container_fifo);
 
 /*
  * define a structure to hold all the file globals

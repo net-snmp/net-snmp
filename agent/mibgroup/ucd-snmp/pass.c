@@ -37,8 +37,8 @@
 #include "extensible.h"
 #include "util_funcs.h"
 
-netsnmp_feature_require(get_exten_instance)
-netsnmp_feature_require(parse_miboid)
+netsnmp_feature_require(get_exten_instance);
+netsnmp_feature_require(parse_miboid);
 
 struct extensible *passthrus = NULL;
 int             numpassthrus = 0;

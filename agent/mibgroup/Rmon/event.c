@@ -50,7 +50,7 @@
 #include "agutil_api.h"
 #include "row_api.h"
 
-netsnmp_feature_require(snprint_objid)
+netsnmp_feature_require(snprint_objid);
 
 /*
  * File scope definitions section 

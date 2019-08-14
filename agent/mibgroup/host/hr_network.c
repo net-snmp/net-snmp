@@ -24,7 +24,7 @@
 #include "hr_network.h"
 
 #if !defined( solaris2 )
-netsnmp_feature_require(interface_legacy)
+netsnmp_feature_require(interface_legacy);
 #endif /* !solaris2 */
 
         /*********************

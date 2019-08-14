@@ -21,11 +21,11 @@
 #include <pcre.h>
 #endif
 
-netsnmp_feature_child_of(software_running, libnetsnmpmibs)
+netsnmp_feature_child_of(software_running, libnetsnmpmibs);
 
-netsnmp_feature_child_of(swrun_max_processes, software_running)
-netsnmp_feature_child_of(swrun_count_processes_by_name, software_running)
-netsnmp_feature_child_of(swrun_count_processes_by_regex, software_running)
+netsnmp_feature_child_of(swrun_max_processes, software_running);
+netsnmp_feature_child_of(swrun_count_processes_by_name, software_running);
+netsnmp_feature_child_of(swrun_count_processes_by_regex, software_running);
 
 /**---------------------------------------------------------------------*/
 /*

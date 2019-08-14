@@ -168,7 +168,7 @@
 #undef in6pcb
 #endif
 
-netsnmp_feature_require(linux_read_ip6_stat)
+netsnmp_feature_require(linux_read_ip6_stat);
 
 #if defined(netbsd1) && !defined(openbsd4)
 #define inp_lport in6p_lport

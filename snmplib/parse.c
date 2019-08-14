@@ -93,8 +93,8 @@ SOFTWARE.
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/tools.h>
 
-netsnmp_feature_child_of(find_module, mib_api)
-netsnmp_feature_child_of(get_tc_description, mib_api)
+netsnmp_feature_child_of(find_module, mib_api);
+netsnmp_feature_child_of(get_tc_description, mib_api);
 
 /*
  * A linked list of nodes.
@@ -765,7 +765,7 @@ init_node_hash(struct node *nodes)
 
 static int      erroneousMibs = 0;
 
-netsnmp_feature_child_of(parse_get_error_count, netsnmp_unused)
+netsnmp_feature_child_of(parse_get_error_count, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_PARSE_GET_ERROR_COUNT
 int
 get_mib_parse_error_count(void)
@@ -3774,7 +3774,7 @@ module_name(int modid, char *cp)
  *      or those relating to a specified identifier (read_import_replacements)
  *      plus an interface to add new replacement requirements
  */
-netsnmp_feature_child_of(parse_add_module_replacement, netsnmp_unused)
+netsnmp_feature_child_of(parse_add_module_replacement, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_PARSE_ADD_MODULE_REPLACEMENT
 void
 add_module_replacement(const char *old_module,
@@ -4831,7 +4831,7 @@ get_token(FILE * fp, char *token, int maxtlen)
     }
 }
 
-netsnmp_feature_child_of(parse_get_token, netsnmp_unused)
+netsnmp_feature_child_of(parse_get_token, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_PARSE_GET_TOKEN
 int
 snmp_get_token(FILE * fp, char *token, int maxtlen)
@@ -5334,7 +5334,7 @@ find_node(const char *name, struct tree *subtree)
     return (find_tree_node(name, -1));
 }
 
-netsnmp_feature_child_of(parse_find_node2, netsnmp_unused)
+netsnmp_feature_child_of(parse_find_node2, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_PARSE_FIND_NODE2
 struct tree    *
 find_node2(const char *name, const char *module)

@@ -202,10 +202,10 @@ SOFTWARE.
 /* NetSNMP and DNSSEC-Tools both define FREE. We'll not use either here. */
 #undef FREE
 
-netsnmp_feature_child_of(system_all, libnetsnmp)
+netsnmp_feature_child_of(system_all, libnetsnmp);
 
-netsnmp_feature_child_of(user_information, system_all)
-netsnmp_feature_child_of(calculate_sectime_diff, system_all)
+netsnmp_feature_child_of(user_information, system_all);
+netsnmp_feature_child_of(calculate_sectime_diff, system_all);
 
 #ifndef IFF_LOOPBACK
 #	define IFF_LOOPBACK 0
@@ -1128,7 +1128,7 @@ setenv(const char *name, const char *value, int overwrite)
 }
 #endif                          /* HAVE_SETENV */
 
-netsnmp_feature_child_of(calculate_time_diff, netsnmp_unused)
+netsnmp_feature_child_of(calculate_time_diff, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_CALCULATE_TIME_DIFF
 /**
  * Compute (*now - *then) in centiseconds.
@@ -1409,7 +1409,7 @@ netsnmp_os_kernel_width(void)
 #endif
 }
 
-netsnmp_feature_child_of(str_to_uid, user_information)
+netsnmp_feature_child_of(str_to_uid, user_information);
 #ifndef NETSNMP_FEATURE_REMOVE_STR_TO_UID
 /**
  * Convert a user name or number into numeric form.
@@ -1442,7 +1442,7 @@ int netsnmp_str_to_uid(const char *useroruid) {
 }
 #endif /* NETSNMP_FEATURE_REMOVE_STR_TO_UID */
 
-netsnmp_feature_child_of(str_to_gid, user_information)
+netsnmp_feature_child_of(str_to_gid, user_information);
 #ifndef NETSNMP_FEATURE_REMOVE_STR_TO_GID
 /**
  * Convert a group name or number into numeric form.

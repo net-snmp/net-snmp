@@ -41,8 +41,8 @@
 #include <net-snmp/library/sd-daemon.h>
 #endif
 
-netsnmp_feature_child_of(transport_unix_socket_all, transport_all)
-netsnmp_feature_child_of(unix_socket_paths, transport_unix_socket_all)
+netsnmp_feature_child_of(transport_unix_socket_all, transport_all);
+netsnmp_feature_child_of(unix_socket_paths, transport_unix_socket_all);
 
 #ifndef NETSNMP_STREAM_QUEUE_LEN
 #define NETSNMP_STREAM_QUEUE_LEN  5

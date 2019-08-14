@@ -45,7 +45,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 
-netsnmp_feature_require(sockaddr_size)
+netsnmp_feature_require(sockaddr_size);
 
 #if HAVE_UNISTD_H
 #include <unistd.h>

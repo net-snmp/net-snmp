@@ -399,7 +399,7 @@ sh_count_myprocs(struct myproc *proc)
 }
 
 #ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
-netsnmp_feature_require(swrun_count_processes_by_name)
+netsnmp_feature_require(swrun_count_processes_by_name);
 int
 sh_count_procs(char *procname)
 {
@@ -407,7 +407,7 @@ sh_count_procs(char *procname)
 }
 
 #if HAVE_PCRE_H
-netsnmp_feature_require(swrun_count_processes_by_regex)
+netsnmp_feature_require(swrun_count_processes_by_regex);
 int
 sh_count_procs_by_regex(char *procname, netsnmp_regex_ptr regexp)
 {
@@ -859,7 +859,7 @@ sh_count_procs(char *procname)
 }
 #endif                          /* _SLASH_PROC_METHOD_ */
 #else
-netsnmp_feature_require(find_field)
+netsnmp_feature_require(find_field);
 int
 sh_count_procs(char *procname)
 {

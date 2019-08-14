@@ -19,12 +19,12 @@
 
 #include <net-snmp/agent/snmp_get_statistic.h>
 
-netsnmp_feature_provide(helper_statistics)
-netsnmp_feature_child_of(helper_statistics, mib_helpers)
+netsnmp_feature_provide(helper_statistics);
+netsnmp_feature_child_of(helper_statistics, mib_helpers);
 
 #ifdef NETSNMP_FEATURE_REQUIRE_HELPER_STATISTICS
 /* if we're not needed, then neither is this */
-netsnmp_feature_require(statistics)
+netsnmp_feature_require(statistics);
 #endif
 
 #ifndef NETSNMP_FEATURE_REMOVE_HELPER_STATISTICS

@@ -80,21 +80,21 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
 
-netsnmp_feature_child_of(tools_all, libnetsnmp)
+netsnmp_feature_child_of(tools_all, libnetsnmp);
 
-netsnmp_feature_child_of(memory_wrappers, tools_all)
-netsnmp_feature_child_of(valgrind, tools_all)
-netsnmp_feature_child_of(string_time_to_secs, tools_all)
-netsnmp_feature_child_of(netsnmp_check_definedness, valgrind)
+netsnmp_feature_child_of(memory_wrappers, tools_all);
+netsnmp_feature_child_of(valgrind, tools_all);
+netsnmp_feature_child_of(string_time_to_secs, tools_all);
+netsnmp_feature_child_of(netsnmp_check_definedness, valgrind);
 
-netsnmp_feature_child_of(uatime_ready, netsnmp_unused)
-netsnmp_feature_child_of(timeval_tticks, netsnmp_unused)
+netsnmp_feature_child_of(uatime_ready, netsnmp_unused);
+netsnmp_feature_child_of(timeval_tticks, netsnmp_unused);
 
-netsnmp_feature_child_of(memory_strdup, memory_wrappers)
-netsnmp_feature_child_of(memory_calloc, memory_wrappers)
-netsnmp_feature_child_of(memory_malloc, memory_wrappers)
-netsnmp_feature_child_of(memory_realloc, memory_wrappers)
-netsnmp_feature_child_of(memory_free, memory_wrappers)
+netsnmp_feature_child_of(memory_strdup, memory_wrappers);
+netsnmp_feature_child_of(memory_calloc, memory_wrappers);
+netsnmp_feature_child_of(memory_malloc, memory_wrappers);
+netsnmp_feature_child_of(memory_realloc, memory_wrappers);
+netsnmp_feature_child_of(memory_free, memory_wrappers);
 
 #ifndef NETSNMP_FEATURE_REMOVE_MEMORY_STRDUP
 /**

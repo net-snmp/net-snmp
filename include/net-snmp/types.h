@@ -265,9 +265,10 @@ typedef struct snmp_pdu {
 } netsnmp_pdu;
 
 
-/** @typedef struct snmp_session netsnmp_session
- * Typedefs the snmp_session struct intonetsnmp_session */
-        struct snmp_session;
+/**
+ * @typedef struct snmp_session netsnmp_session
+ * Typedefs the snmp_session struct into netsnmp_session.
+ */
 typedef struct snmp_session netsnmp_session;
 
 /** for openssl this should match up with EVP_MAX_MD_SIZE */

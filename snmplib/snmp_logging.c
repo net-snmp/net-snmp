@@ -94,21 +94,21 @@
 #include "snprintf.h"
 #endif
 
-netsnmp_feature_child_of(logging_all, libnetsnmp)
+netsnmp_feature_child_of(logging_all, libnetsnmp);
 
-netsnmp_feature_child_of(logging_outputs, logging_all)
-netsnmp_feature_child_of(logging_file, logging_outputs)
-netsnmp_feature_child_of(logging_stdio, logging_outputs)
-netsnmp_feature_child_of(logging_syslog, logging_outputs)
-netsnmp_feature_child_of(logging_external, logging_all)
+netsnmp_feature_child_of(logging_outputs, logging_all);
+netsnmp_feature_child_of(logging_file, logging_outputs);
+netsnmp_feature_child_of(logging_stdio, logging_outputs);
+netsnmp_feature_child_of(logging_syslog, logging_outputs);
+netsnmp_feature_child_of(logging_external, logging_all);
 
-netsnmp_feature_child_of(enable_stderrlog, logging_all)
+netsnmp_feature_child_of(enable_stderrlog, logging_all);
 
-netsnmp_feature_child_of(logging_enable_calllog, netsnmp_unused)
-netsnmp_feature_child_of(logging_enable_loghandler, netsnmp_unused)
+netsnmp_feature_child_of(logging_enable_calllog, netsnmp_unused);
+netsnmp_feature_child_of(logging_enable_loghandler, netsnmp_unused);
 
 /* default to the file/stdio/syslog set */
-netsnmp_feature_want(logging_outputs)
+netsnmp_feature_want(logging_outputs);
 
 /*
  * logh_head:  A list of all log handlers, in increasing order of priority

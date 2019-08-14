@@ -14,9 +14,9 @@
 
 #include "udp_endpoint_private.h"
 
-netsnmp_feature_child_of(udp_endpoint_common, libnetsnmpmibs)
+netsnmp_feature_child_of(udp_endpoint_common, libnetsnmpmibs);
 
-netsnmp_feature_child_of(udp_endpoint_entry_create, udp_endpoint_common)
+netsnmp_feature_child_of(udp_endpoint_entry_create, udp_endpoint_common);
 
 /**---------------------------------------------------------------------*/
 /*

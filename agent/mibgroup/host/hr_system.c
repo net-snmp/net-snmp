@@ -79,7 +79,7 @@
 #include <sys/sysctl.h>
 #endif
 
-netsnmp_feature_require(date_n_time)
+netsnmp_feature_require(date_n_time);
 
 #if !defined(UTMP_FILE) && defined(_PATH_UTMP)
 #define UTMP_FILE _PATH_UTMP

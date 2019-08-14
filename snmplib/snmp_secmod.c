@@ -118,7 +118,7 @@ register_sec_mod(int secmod, const char *modname,
     return SNMPERR_SUCCESS;
 }
 
-netsnmp_feature_child_of(unregister_sec_mod, netsnmp_unused)
+netsnmp_feature_child_of(unregister_sec_mod, netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_UNREGISTER_SEC_MOD
 int
 unregister_sec_mod(int secmod)

@@ -50,14 +50,14 @@
 
 #include <ctype.h>
 
-netsnmp_feature_child_of(ifXTable_external_access, libnetsnmpmibs)
+netsnmp_feature_child_of(ifXTable_external_access, libnetsnmpmibs);
 
-netsnmp_feature_require(row_merge)
-netsnmp_feature_require(cache_find_by_oid)
-netsnmp_feature_require(baby_steps)
-netsnmp_feature_require(check_all_requests_error)
+netsnmp_feature_require(row_merge);
+netsnmp_feature_require(cache_find_by_oid);
+netsnmp_feature_require(baby_steps);
+netsnmp_feature_require(check_all_requests_error);
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(check_vb_type_and_max_size);
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /**********************************************************************

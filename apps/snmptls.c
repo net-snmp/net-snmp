@@ -8,8 +8,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-netsnmp_feature_require(tls_fingerprint_build)
-netsnmp_feature_require(row_create)
+netsnmp_feature_require(tls_fingerprint_build);
+netsnmp_feature_require(row_create);
 
 #include <ctype.h>
 

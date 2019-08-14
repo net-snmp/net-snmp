@@ -11,7 +11,7 @@
 
 #include <net-snmp/net-snmp-features.h>
 
-netsnmp_feature_require(cert_util)
+netsnmp_feature_require(cert_util);
 
 #include <stdio.h>
 #include <sys/types.h>

@@ -27,8 +27,8 @@
 
 #include "inetCidrRouteTable_interface.h"
 
-netsnmp_feature_require(inetCidrRouteTable_container_get)
-netsnmp_feature_require(inetCidrRouteTable_container_size)
+netsnmp_feature_require(inetCidrRouteTable_container_get);
+netsnmp_feature_require(inetCidrRouteTable_container_size);
 
 const oid       inetCidrRouteTable_oid[] = { INETCIDRROUTETABLE_OID };
 const int       inetCidrRouteTable_oid_size =

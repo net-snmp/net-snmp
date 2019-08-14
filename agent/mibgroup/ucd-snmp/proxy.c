@@ -29,8 +29,8 @@
 
 #include "proxy.h"
 
-netsnmp_feature_require(handler_mark_requests_as_delegated)
-netsnmp_feature_require(request_set_error_idx)
+netsnmp_feature_require(handler_mark_requests_as_delegated);
+netsnmp_feature_require(request_set_error_idx);
 
 static struct simple_proxy *proxies = NULL;
 

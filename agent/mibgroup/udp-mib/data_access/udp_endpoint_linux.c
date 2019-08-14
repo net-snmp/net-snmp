@@ -23,9 +23,9 @@
 
 #include <fcntl.h>
 
-netsnmp_feature_require(text_utils)
-netsnmp_feature_child_of(udp_endpoint_all, libnetsnmpmibs)
-netsnmp_feature_child_of(udp_endpoint_writable, udp_endpoint_all)
+netsnmp_feature_require(text_utils);
+netsnmp_feature_child_of(udp_endpoint_all, libnetsnmpmibs);
+netsnmp_feature_child_of(udp_endpoint_writable, udp_endpoint_all);
 
 static int _load4(netsnmp_container *container, u_int flags);
 #if defined (NETSNMP_ENABLE_IPV6)

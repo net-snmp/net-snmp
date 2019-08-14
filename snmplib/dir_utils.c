@@ -48,10 +48,10 @@
 #include <net-snmp/library/file_utils.h>
 #include <net-snmp/library/dir_utils.h>
 
-netsnmp_feature_child_of(container_directory, container_types)
+netsnmp_feature_child_of(container_directory, container_types);
 #ifdef NETSNMP_FEATURE_REQUIRE_CONTAINER_DIRECTORY
-netsnmp_feature_require(file_utils)
-netsnmp_feature_require(container_free_all)
+netsnmp_feature_require(file_utils);
+netsnmp_feature_require(container_free_all);
 #endif /* NETSNMP_FEATURE_REQUIRE_CONTAINER_DIRECTORY */
 
 #ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_DIRECTORY

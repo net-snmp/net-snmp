@@ -41,7 +41,7 @@
 #include "snmptrapd_log.h"
 #include "notification-log-mib/notification_log.h"
 
-netsnmp_feature_child_of(add_default_traphandler, snmptrapd)
+netsnmp_feature_child_of(add_default_traphandler, snmptrapd);
 
 char *syslog_format1 = NULL;
 char *syslog_format2 = NULL;
