@@ -1605,12 +1605,6 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
     DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p freed\n",
                 asp, asp->reqinfo));
 
-    /* Clean up securityStateRef here to prevent a double free */
-    if (asp->orig_pdu)
-        snmp_free_securityStateRef(asp->orig_pdu);
-    if (asp->pdu)
-        snmp_free_securityStateRef(asp->pdu);
-
     if (asp->orig_pdu)
         snmp_free_pdu(asp->orig_pdu);
     if (asp->pdu)

@@ -4027,17 +4027,6 @@ free_securityStateRef(netsnmp_pdu* pdu)
     pdu->securityStateRef = NULL;
 }
 
-/*
- * This function is here to provide a separate call to
- * free the securityStateRef memory. This is needed to prevent
- * a double free if this memory is freed in snmp_free_pdu.
- */
-void
-snmp_free_securityStateRef(netsnmp_pdu* pdu)
-{
-   free_securityStateRef(pdu);
-}
-
 #define ERROR_STAT_LENGTH 11
 
 int
@@ -5464,6 +5453,8 @@ snmp_free_pdu(netsnmp_pdu *pdu)
     if (!pdu)
         return;
 
+    free_securityStateRef(pdu);
+
     if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
         sptr->pdu_free != NULL) {
         (*sptr->pdu_free) (pdu);
@@ -5617,10 +5608,6 @@ _sess_process_packet_parse_pdu(struct session_list *slp, netsnmp_session * sp,
   }
 
   if (ret != SNMP_ERR_NOERROR) {
-    /*
-     * Call the security model to free any securityStateRef supplied w/ msg.  
-     */
-    free_securityStateRef(pdu);
     snmp_free_pdu(pdu);
     return NULL;
   }
@@ -5798,12 +5785,6 @@ _sess_process_packet_handle_pdu(struct session_list *slp, netsnmp_session * sp,
        */
     }
   }
-
-  /*
-   * Call USM to free any securityStateRef supplied with the message.  
-   */
-  if (pdu->command == SNMP_MSG_TRAP2)
-    free_securityStateRef(pdu);
 
   if (!handled) {
     if (sp->flags & SNMP_FLAGS_SHARED_SOCKET)
