@@ -390,9 +390,9 @@ nmake is required to build Net-SNMP with Microsoft Visual Studio.
 To use nmake on the command line, the Configure script is run first to create
 the various makefiles.  Once these have been created, nmake is used to build
 the applications.  Perl is required to use this method, as the Configure
-script is written in Perl.  ActiveState ActivePerl is available at:
+script is written in Perl.  Perl source code is available at:
 
-        http://www.activestate.com/Products/ActivePerl/
+        https://www.cpan.org/src/
 
 The make file system is based on and uses the directory structure of the
 projects contained in the Workspace files which are described below.  It is
@@ -428,10 +428,18 @@ The first and easiest method is by running the win32\build.bat script.  The
 second is manually running Configure and nmake.
 
 Note:  Perl is required to use this method as the Configure script is
-       written in Perl.  ActiveState ActivePerl is available at:
+       written in Perl.  The Perl source code is available at:
 
-        http://www.activestate.com/Products/ActivePerl/
+        https://www.cpan.org/src/
 
+The Perl interpreter can be built as follows:
+1. Extract the Perl source code archive.
+2. In win32/Makefile, change CCTYPE to the string that corresponds to your
+   Visual Studio version, e.g. MSVC140.
+3. Edit INST_DRV and INST_TOP if necessary.
+4. Run vcvarsall.bat.
+5. Run nmake.
+6. Run nmake install.
 
 Win32\build.bat script
 ======================

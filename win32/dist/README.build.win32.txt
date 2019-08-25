@@ -35,7 +35,7 @@ Requirements
  -Windows XP 32-bit SP2 or higher
  -Microsoft Visual Studio 2008 SP1 with Platform SDK and latest updates from Microsoft
   including updates to the redistributable components
- -ActivePerl 5.10
+ -Perl 5.10 or later
  -MSYS / MinGW -or- tar.exe and gzip.exe
  -win32/dist folder from MAIN in CVS
  -OpenSSL binary and library files from http://www.slproweb.com/products/Win32OpenSSL.html
@@ -45,7 +45,7 @@ Requirements
  -Windows 7 64-bit
  -Microsoft Visual Studio 2008 SP1 with Platform SDK and latest updates from Microsoft
   including updates to the redistributable components.  Also need are the 64-bit compiler options.
- -ActivePerl 5.10 (64-bit)
+ -Perl 5.10 or later (64-bit)
  -MSYS / MinGW -or- tar.exe and gzip.exe
  -win32/dist folder from MAIN in CVS
  -OpenSSL 64-bit binary and library files from http://www.slproweb.com/products/Win32OpenSSL.html
@@ -68,7 +68,7 @@ Part 1
       Latest updates from Microsoft to ensure the redistributable DLLs have the latest
       security fixes.
 
-    ActivePerl:
+    Perl:
       For 64-bit, make sure you install the 64-bit version otherwise compiling will fail.
 
     MSYS / MinGW:
