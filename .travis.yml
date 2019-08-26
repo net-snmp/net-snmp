@@ -5,11 +5,11 @@ os:
   - osx
 
 env:
-  - env: MODE=regular
-  - env: MODE=disable-set
-  - env: MODE=mini
-  - env: MODE=minimalist
-  - env: MODE=read-only
+  - MODE=regular
+  - MODE=disable-set
+  - MODE=mini
+  - MODE=minimalist
+  - MODE=read-only
 
 addons:
   apt:
