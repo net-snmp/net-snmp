@@ -222,11 +222,14 @@ case "$(uname)" in
       if [ "$opensslver" = "" ]; then
 	  options+=("--with-openssl=internal")
       else
-	  mibs+=(snmp-usm-dh-objects-mib)
-	  if [ -z "$CIRRUS_CI" ]; then
-	      mibs+=(tlstm-mib)
+	  if [ "$MODE" != "read-only" ]; then
+	      # these MIB modules do not support read-only
+	      mibs+=(snmp-usm-dh-objects-mib)
+	      if [ -z "$CIRRUS_CI" ]; then
+		  mibs+=(tlstm-mib)
+	      fi
+	      mibs+=(tsm-mib)
 	  fi
-	  mibs+=(tsm-mib)
       fi
       options+=("--with-default-snmp-version=2")
       options+=("--with-systemd")
