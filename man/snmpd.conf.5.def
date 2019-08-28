@@ -851,9 +851,9 @@ can configure \fIsnmpd\fR to take a more active role.
 defines the default community string to be used when sending traps.
 Note that this directive must be used prior to any community-based
 trap destination directives that need to use it.
-.IP "trapsink [-profile p] [-name n] [-tag t] HOST [COMMUNITY [PORT]]"
-.IP "trap2sink [-profile p] [-name n] [-tag t] HOST [COMMUNITY [PORT]]"
-.IP "informsink [-profile p] [-name n] [-tag t] HOST [COMMUNITY [PORT]]"
+.IP "trapsink [-profile p] [-name n] [-tag t] [-s src] HOST [COMMUNITY [PORT]]"
+.IP "trap2sink [-profile p] [-name n] [-tag t] [-s src] HOST [COMMUNITY [PORT]]"
+.IP "informsink [-profile p] [-name n] [-tag t] [-s src] HOST [COMMUNITY [PORT]]"
 define the address of a notification receiver that should be sent
 SNMPv1 TRAPs, SNMPv2c TRAP2s, or SNMPv2 INFORM notifications respectively.
 See the section 
@@ -880,6 +880,16 @@ be used for SNMP-NOTIFICATION-MIB table entries. The profile specifies
 which notification filter profile entry will be used for filtering
 outgoing notifications. (See \fInotificationFilter\fR)
 .IP
+The optional src parameter specifies the source address that will
+be used when sending the trap packet to this sink.
+It is specified as a <transport-address>, using the same
+<transport-specifier> as the destination HOST.
+See the section 
+.B LISTENING ADDRESSES
+in the
+.I snmpd(8)
+manual page for more information about the format.
+.IP
 If several sink directives are specified, multiple
 copies of each notification (in the appropriate formats)
 will be generated.
@@ -888,7 +898,7 @@ will be generated.
 It is \fBnot\fR normally appropriate to list two (or all three)
 sink directives with the same destination.
 .RE
-.IP "trapsess [-profile p] [-name n] [-tag t] [SNMPCMD_ARGS] HOST"
+.IP "trapsess [-profile p] [-name n] [-tag t] [-s src] [SNMPCMD_ARGS] HOST"
 provides a more generic mechanism for defining notification destinations.
 .I "SNMPCMD_ARGS"
 should be the command-line options required for an equivalent
