@@ -1408,9 +1408,12 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
         ip = (struct ip *) ptr; /* start of IP header */
         hlen1 = ip->ip_hl << 2; /* length of IP header */
 
-        icmp = (struct icmp *) (ptr + hlen1);   /* start of ICMP header */
-        if ((icmplen = len - hlen1) < 8)
+        if ((icmplen = len - hlen1) < 8) {
             DEBUGMSGTL(("pingCtlTable", "icmplen (%d) < 8", icmplen));
+            return SNMP_ERR_BADVALUE;
+        }
+
+        icmp = (struct icmp *) (ptr + hlen1);   /* start of ICMP header */
 
         DEBUGMSGTL(("pingCtlTable", "ICMP type = %d (%sa reply)\n",
                     icmp->icmp_type,
@@ -1422,8 +1425,10 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                 return SNMP_ERR_NOERROR;
             }
 
-            if (icmplen < 16)
+            if (icmplen < 16) {
                 DEBUGMSGTL(("pingCtlTable", "icmplen (%d) < 16", icmplen));
+                return SNMP_ERR_BADVALUE;
+            }
 
             tvsend = (struct timeval *) icmp->icmp_data;
 
