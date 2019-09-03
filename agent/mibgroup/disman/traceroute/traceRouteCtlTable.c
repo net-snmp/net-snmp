@@ -5880,6 +5880,10 @@ packet_ok(u_char * buf, int cc, struct sockaddr_in *from,
         struct ip *hip;
         struct udphdr *up;
 
+        if(cc < offsetof(struct icmp, icmp_ip) + sizeof(icp->icmp_ip)) {
+            return (0);
+        }
+
         hip = &icp->icmp_ip;
         hlen = hip->ip_hl << 2;
         up = (struct udphdr *) ((u_char *) hip + hlen);
@@ -5905,6 +5909,9 @@ packet_ok_v6(u_char * buf, int cc, struct sockaddr_in6 *from, int seq,
 {
     struct icmp6_hdr *icp = NULL;
     u_char          type, code;
+
+    if(cc < sizeof(struct icmp6_hdr))
+        return 0;
 
     icp = (struct icmp6_hdr *) buf;
 
