@@ -8,7 +8,7 @@ listing of all changes made to the code.
       - Add IPv6 support to DTLSUDP transport
       - use new netsnmp_sockaddr_storage in netsnmp_addr_pair
       - add base_transport ptr for tunneled transports
-      - Add support for OpenSSL 1.1.0
+      - Add support for OpenSSL 1.1.1
       - Dtls: overhaul of debug
       - Remove inline versions of container funcs
 
