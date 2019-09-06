@@ -840,18 +840,8 @@ Check_HR_FileSys_NFS (void)
 int
 Check_HR_FileSys_AutoFs(void)
 {
-#if HAVE_GETFSSTAT
-    if (HRFS_entry->HRFS_type != NULL && 
-#if defined(MNTTYPE_AUTOFS)
-        !strcmp(HRFS_entry->HRFS_type, MNTTYPE_AUTOFS)
-#else
-        !strcmp(HRFS_entry->HRFS_type, "autofs")
-#endif
-        )
-#endif /* HAVE_GETFSSTAT */
-        return 1;  /* AUTOFS */
-
-    return 0; /* no AUTOFS */
+    return HRFS_entry->HRFS_type &&
+        strcmp(HRFS_entry->HRFS_type, MNTTYPE_AUTOFS) == 0;
 }
 
 void
