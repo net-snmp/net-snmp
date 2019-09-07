@@ -68,6 +68,10 @@ netsnmp_feature_require(se_find_free_value_in_slist);
 netsnmp_feature_require(date_n_time);
 netsnmp_feature_require(ctime_to_timet);
 
+#ifndef MNTTYPE_AUTOFS
+#define MNTTYPE_AUTOFS	"autofs"
+#endif
+
 #if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5) || defined(darwin)
 #if HAVE_GETFSSTAT && defined(MFSNAMELEN)
 #define MOUNT_NFS	"nfs"
@@ -664,7 +668,7 @@ Init_HR_FileSys(void)
 #endif
 }
 
-const char     *HRFS_ignores[] = {
+static const char *HRFS_ignores[] = {
 #ifdef MNTTYPE_IGNORE
     MNTTYPE_IGNORE,
 #endif
@@ -677,13 +681,8 @@ const char     *HRFS_ignores[] = {
 #ifdef MNTTYPE_PROCFS
     MNTTYPE_PROCFS,
 #endif
-#ifdef MNTTYPE_AUTOFS
     MNTTYPE_AUTOFS,
-#else
-    "autofs",
-#endif
 #ifdef linux
-    "autofs",
     "bdev",
     "binfmt_misc",
     "cpuset",
@@ -841,18 +840,8 @@ Check_HR_FileSys_NFS (void)
 int
 Check_HR_FileSys_AutoFs(void)
 {
-#if HAVE_GETFSSTAT
-    if (HRFS_entry->HRFS_type != NULL && 
-#if defined(MNTTYPE_AUTOFS)
-        !strcmp(HRFS_entry->HRFS_type, MNTTYPE_AUTOFS)
-#else
-        !strcmp(HRFS_entry->HRFS_type, "autofs")
-#endif
-        )
-#endif /* HAVE_GETFSSTAT */
-        return 1;  /* AUTOFS */
-
-    return 0; /* no AUTOFS */
+    return HRFS_entry->HRFS_type &&
+        strcmp(HRFS_entry->HRFS_type, MNTTYPE_AUTOFS) == 0;
 }
 
 void
