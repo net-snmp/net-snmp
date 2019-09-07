@@ -140,6 +140,22 @@ agentx_parse_agentx_retries(const char *token, char *cptr)
 }
 #endif                          /* USING_AGENTX_MASTER_MODULE */
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+void
+agentx_parse_agentx_ping_interval(const char *token, char *cptr)
+{
+    int x = atoi(cptr);
+
+    DEBUGMSGTL(("agentx/config/ping", "%s\n", cptr));
+    if (x < 1) {
+        config_perror("Invalid ping interval value");
+        return;
+    }
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL, x);
+}
+#endif                          /* USING_AGENTX_SUBAGENT_MODULE */
+
 /* ---------------------------------------------------------------------
  *
  * Sub-agent
@@ -187,6 +203,21 @@ agentx_config_init(void)
     agentx_register_config_handler("agentxsocket",
                                   agentx_parse_agentx_socket, NULL,
                                   "AgentX bind address");
+
+    agentx_register_config_handler("agentxRetries",
+                                  agentx_parse_agentx_retries, NULL,
+                                  "AgentX Retries");
+    /* default to 5 retries */
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_AGENTX_RETRIES, 5);
+
+    agentx_register_config_handler("agentxTimeout",
+                                  agentx_parse_agentx_timeout, NULL,
+                                  "AgentX Timeout (seconds)");
+    /* default to 1 second */
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT, 1 * ONE_SEC);
+
 #ifdef USING_AGENTX_MASTER_MODULE
     /*
      * tokens for master agent
@@ -198,33 +229,20 @@ agentx_config_init(void)
     agentx_register_config_handler("agentxperms",
                                   agentx_parse_agentx_perms, NULL,
                                   "AgentX socket permissions: socket_perms [directory_perms [username|userid [groupname|groupid]]]");
-    agentx_register_config_handler("agentxRetries",
-                                  agentx_parse_agentx_retries, NULL,
-                                  "AgentX Retries");
-    agentx_register_config_handler("agentxTimeout",
-                                  agentx_parse_agentx_timeout, NULL,
-                                  "AgentX Timeout (seconds)");
     }
 #endif                          /* USING_AGENTX_MASTER_MODULE */
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
     /*
-     * tokens for master agent
+     * tokens for subagent
      */
     if (SUB_AGENT == agent_role) {
-        /*
-         * set up callbacks to initiate master agent pings for this session 
-         */
-        netsnmp_ds_register_config(ASN_INTEGER,
-                                   netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                                         NETSNMP_DS_LIB_APPTYPE),
-                                   "agentxPingInterval",
-                                   NETSNMP_DS_APPLICATION_ID,
-                                   NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
-        /* ping and/or reconnect by default every 15 seconds */
-        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
-                           NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL, 15);
-        
+      agentx_register_config_handler("agentxPingInterval",
+                                     agentx_parse_agentx_ping_interval, NULL,
+                                     "AgentX ping interval");
+      /* ping and/or reconnect by default every 15 seconds */
+      netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                         NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL, 15);
     }
 #endif /* USING_AGENTX_SUBAGENT_MODULE */
 }
