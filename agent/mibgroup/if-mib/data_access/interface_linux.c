@@ -19,6 +19,10 @@ netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all);
 netsnmp_feature_require(interface_ioctl_flags_set);
 #endif /* NETSNMP_FEATURE_REQUIRE_INTERFACE_ARCH_SET_ADMIN_STATUS */
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
 #ifdef HAVE_PCI_LOOKUP_NAME
 #include <pci/pci.h>
 #include <setjmp.h>
