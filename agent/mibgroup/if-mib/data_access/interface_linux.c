@@ -24,6 +24,10 @@ netsnmp_feature_require(interface_ioctl_flags_set);
 #include <setjmp.h>
 static struct pci_access *pci_access;
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
 /* Avoid letting libpci call exit(1) when no PCI bus is available. */
 static int do_longjmp =0;
 static jmp_buf err_buf;
