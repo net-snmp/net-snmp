@@ -468,7 +468,6 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
      *  [               OUT                               ]
      *   byte pkts errs drop fifo colls carrier compressed
      */
-#ifdef SCNuMAX
     uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
     uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
     const char     *scan_line_2_2 =
@@ -480,14 +479,6 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
         "%"   SCNuMAX " %"  SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
         " %*" SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %*" SCNuMAX
         " %*" SCNuMAX " %"  SCNuMAX;
-#else
-    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
-    unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
-    const char     *scan_line_2_2 =
-        "%lu %lu %lu %lu %*lu %*lu %*lu %lu %lu %lu %lu %lu %*lu %lu";
-    const char     *scan_line_2_0 =
-        "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
-#endif
     static const char     *scan_line_to_use = NULL;
     int             scan_count;
 
@@ -527,10 +518,8 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
              */
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
-#ifdef SCNuMAX   /* XXX - should be flag for 64-bit variables */
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES;
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS;
-#endif
         }
     } else {
         scan_count = sscanf(stats, scan_line_to_use,
@@ -566,13 +555,11 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
     entry->stats.imcast.low = rec_mcast & 0xffffffff;
     entry->stats.obytes.low = snd_oct & 0xffffffff;
     entry->stats.oucast.low = snd_pkt & 0xffffffff;
-#ifdef SCNuMAX   /* XXX - should be flag for 64-bit variables */
     entry->stats.ibytes.high = rec_oct >> 32;
     entry->stats.iall.high = rec_pkt >> 32;
     entry->stats.imcast.high = rec_mcast >> 32;
     entry->stats.obytes.high = snd_oct >> 32;
     entry->stats.oucast.high = snd_pkt >> 32;
-#endif
     entry->stats.ierrors   = rec_err;
     entry->stats.idiscards = rec_drop;
     entry->stats.oerrors   = snd_err;
