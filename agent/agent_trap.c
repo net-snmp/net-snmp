@@ -1164,8 +1164,19 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
                     template_pdu->command, sess->version));
         return;
     }
-    DEBUGMSGTL(("trap", "sending trap type=%d, version=%ld\n",
-                template_pdu->command, sess->version));
+    DEBUGIF("trap") {
+        struct session_list *sessp = snmp_sess_pointer(sess);
+        netsnmp_transport *t = sessp->transport;
+        const void *dst = template_pdu->transport_data;
+        const int dst_len = template_pdu->transport_data_length;
+        char *peer = NULL;
+
+        if (t && t->f_fmtaddr)
+            peer = t->f_fmtaddr(t, dst, dst_len);
+        DEBUGMSGTL(("trap", "sending trap type=%d, version=%ld to %s\n",
+                    template_pdu->command, sess->version, peer ? peer : "(?)"));
+        free(peer);
+    }
 
 #ifndef NETSNMP_DISABLE_SNMPV1
     if (sess->version == SNMP_VERSION_1 &&
