@@ -1364,6 +1364,7 @@ static int get_sysfs_stats(void)
 static int
 getstats(void)
 {
+    struct stat stbuf;
     FILE* parts;
     time_t now;
     
@@ -1412,6 +1413,10 @@ getstats(void)
 	        head.length++;
 	}
     }
+    else if (stat("/proc/vz", &stbuf) == 0) {
+        // OpenVZ / Virtuozzo containers do not have /proc/diskstats
+        goto update_cache_time;
+    }
     else {
 	/* See if a 2.4 kernel */
 	char buffer[1024];
@@ -1453,6 +1458,8 @@ getstats(void)
     }
 
     fclose(parts);
+
+update_cache_time:
     cache_time = now;
     return 0;
 }

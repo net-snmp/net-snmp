@@ -137,6 +137,41 @@ netsnmp_prefix_listen_info list_info;
 int netsnmp_prefix_listen(void);
 #endif
 
+#ifdef HAVE_PCI_LOOKUP_NAME
+static void init_libpci(void)
+{
+    struct stat stbuf;
+
+    /*
+     * When snmpd is run inside an OpenVZ container /proc/bus/pci is not
+     * available.
+     */
+    if (stat("/proc/vz", &stbuf) == 0)
+        return;
+
+    pci_access = pci_alloc();
+    if (!pci_access) {
+	snmp_log(LOG_ERR, "pcilib: pci_alloc failed\n");
+	return;
+    }
+
+    pci_access->error = netsnmp_pci_error;
+
+    do_longjmp = 1;
+    if (setjmp(err_buf)) {
+        pci_cleanup(pci_access);
+	snmp_log(LOG_ERR, "pcilib: pci_init failed\n");
+        pci_access = NULL;
+    }
+    else if (pci_access)
+	pci_init(pci_access);
+    do_longjmp = 0;
+}
+#else
+static void init_libpci(void)
+{
+}
+#endif
 
 void
 netsnmp_arch_interface_init(void)
@@ -176,25 +211,7 @@ netsnmp_arch_interface_init(void)
     netsnmp_prefix_listen();
 #endif
 
-#ifdef HAVE_PCI_LOOKUP_NAME
-    pci_access = pci_alloc();
-    if (!pci_access) {
-	snmp_log(LOG_ERR, "pcilib: pci_alloc failed\n");
-	return;
-    }
-
-    pci_access->error = netsnmp_pci_error;
-
-    do_longjmp = 1;
-    if (setjmp(err_buf)) {
-        pci_cleanup(pci_access);
-	snmp_log(LOG_ERR, "pcilib: pci_init failed\n");
-        pci_access = NULL;
-    }
-    else if (pci_access)
-	pci_init(pci_access);
-    do_longjmp = 0;
-#endif
+    init_libpci();
 }
 
 /*
