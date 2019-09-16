@@ -187,9 +187,6 @@ netsnmp_add_notification_session(netsnmp_session * ss, int pdutype,
                                  int confirm, int version, const char *name,
                                  const char *tag, const char* profile)
 {
-    netsnmp_assert(pdutype == SNMP_MSG_TRAP || pdutype == SNMP_MSG_TRAP2 ||
-                   pdutype == SNMP_MSG_INFORM || pdutype == AGENTX_MSG_NOTIFY);
-
     if (NETSNMP_RUNTIME_PROTOCOL_SKIP(version)) {
         DEBUGMSGTL(("trap", "skipping trap sink (version 0x%02x disabled)\n",
                     version));
