@@ -191,7 +191,7 @@ proc_parse_config(const char *token, char *cptr)
     /*
      * don't allow two entries with the same name 
      */
-    copy_nword(cptr, tmpname, sizeof(tmpname));
+    cptr = copy_nword(cptr, tmpname, sizeof(tmpname));
     if (get_proc_by_name(tmpname) != NULL) {
         config_perror("Already have an entry for this process.");
         return;
@@ -213,9 +213,8 @@ proc_parse_config(const char *token, char *cptr)
     /*
      * not blank and not a comment 
      */
-    copy_nword(cptr, (*procp)->name, sizeof((*procp)->name));
-    cptr = skip_not_white(cptr);
-    if ((cptr = skip_white(cptr))) {
+    strlcpy((*procp)->name, tmpname, sizeof((*procp)->name));
+    if (cptr) {
         (*procp)->max = atoi(cptr);
         cptr = skip_not_white(cptr);
         if ((cptr = skip_white(cptr))) {
