@@ -1429,8 +1429,8 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
             }
             type = atoi(type_str);
             hash = atoi(hash_str);
-            cert = (void*)_new_cert(dirname, filename, type, hash, fingerprint,
-                                    common_name, subject);
+            cert = _new_cert(dirname, filename, type, hash, fingerprint,
+                             common_name, subject);
             if (cert && 0 == CONTAINER_INSERT(found, cert))
                 ++count;
             else {
