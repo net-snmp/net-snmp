@@ -1661,7 +1661,9 @@ The default is 'noAuthNoPriv'.
 =item SecEngineId
 
 The SNMPv3 security engineID to use (if the snmpv3 security model
-needs it; for example USM).
+needs it; for example USM). The format is as a string without the leading '0x'.
+So if snmptrapd.conf has C<-e 0x8000000001020304>, use C<< SecEngineId =>
+'8000000001020304' >>.
 
 The default is <none>, security engineID and it will be probed if not
 supplied (v3)
