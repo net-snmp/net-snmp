@@ -1234,7 +1234,7 @@ sub inform {
    my $trap_oid = $param{oid} || $param{trapoid};
    my $uptime = $param{uptime} || SNMP::_sys_uptime();
 
-   if($this->{Version} eq '3') {
+   if ($this->{Version} =~ '^[23]') {
      @res = SNMP::_inform($this, $uptime, $trap_oid, $varbind_list_ref, $cb);
    } else {
      warn("error:inform: This version doesn't support the command\n");
