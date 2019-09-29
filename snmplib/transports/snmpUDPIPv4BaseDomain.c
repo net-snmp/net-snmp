@@ -302,13 +302,13 @@ netsnmp_udpipv4base_transport_with_source(const struct netsnmp_ep *ep,
         return t;
 
     /* for Linux VRF Traps we try to bind the iface if clientaddr is not set */
-    if (ep && ep->iface && t->sock) {
+    if (ep && ep->iface) {
         rc =  netsnmp_bindtodevice(t->sock, ep->iface);
         if (rc)
-            DEBUGMSGTL(("netsnmp_udpbase", "VRF: Could not bind socket %d bound to %s\n",
+            DEBUGMSGTL(("netsnmp_udpbase", "VRF: Could not bind socket %d to %s\n",
                         t->sock, ep->iface));
         else
-            DEBUGMSGTL(("netsnmp_udpbase", "VRF: Bound socket %d bound to %s\n",
+            DEBUGMSGTL(("netsnmp_udpbase", "VRF: Bound socket %d to %s\n",
                         t->sock, ep->iface));
     }
 
