@@ -965,7 +965,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     case ASN_OPAQUE_I64:
 #endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
     case ASN_COUNTER64:
-        if (largeval) {
+        if (largeval || vars->val_len != sizeof(struct counter64)) {
             snmp_log(LOG_ERR,"bad size for counter 64 (%d)\n",
                      (int)vars->val_len);
             return (1);
