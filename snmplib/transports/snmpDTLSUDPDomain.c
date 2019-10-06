@@ -1774,7 +1774,7 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
     /* Calculate HMAC of buffer using the secret */
     HMAC(EVP_sha1(), cookie_secret, NETSNMP_COOKIE_SECRET_LENGTH,
          buffer, length, result, &resultlength);
-    OPENSSL_free(buffer);
+    free(buffer);
 
     memcpy(cookie, result, resultlength);
     *cookie_len = resultlength;
@@ -1861,7 +1861,7 @@ int netsnmp_dtls_verify_cookie(SSL *ssl,
     /* Calculate HMAC of buffer using the secret */
     HMAC(EVP_sha1(), cookie_secret, NETSNMP_COOKIE_SECRET_LENGTH,
          buffer, length, result, &resultlength);
-    OPENSSL_free(buffer);
+    free(buffer);
 
     if (cookie_len != resultlength || memcmp(result, cookie, resultlength) != 0)
         rc = 0;
