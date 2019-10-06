@@ -279,6 +279,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         if (ioctl(sd, SIOCGIFFLAGS, ifrp) < 0) {
             snmp_log(LOG_ERR,
                      "error getting if_flags for interface %d\n", i);
+            netsnmp_access_ipaddress_entry_free(bcastentry);
             netsnmp_access_ipaddress_entry_free(entry);
             continue;
         }
