@@ -17391,8 +17391,7 @@ done
 
 #       requiring <sys/param.h>                         (FreeBSD)
 #
-#  Core:      (? Tested above? )
-for ac_header in stdlib.h
+for ac_header in malloc.h        osreldate.h                                     machine/types.h                   sys/dkstat.h    sys/conf.h    sys/mbuf.h                        sys/mount.h     sys/proc.h    sys/queue.h                       sys/user.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
@@ -17413,52 +17412,28 @@ fi
 
 done
 
-#
-#  Library:
-for ac_header in malloc.h        sys/sysctl.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
 
-"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+case "$target_os" in
+    linux*)
+	# <sys/sysctl.h> is considered deprecated on Linux and including that
+	# header file triggers a compiler warning. See also
+	# https://savannah.gnu.org/forum/forum.php?forum_id=9515.
+        ;;
+    *)
+	for ac_header in sys/sysctl.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/sysctl.h" "ac_cv_header_sys_sysctl_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_sysctl_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_SYS_SYSCTL_H 1
 _ACEOF
 
 fi
 
 done
 
-#
-#  Agent:
-for ac_header in malloc.h        osreldate.h                                     machine/types.h                   sys/dkstat.h    sys/conf.h    sys/mbuf.h                        sys/mount.h     sys/proc.h    sys/queue.h                       sys/sysctl.h    sys/user.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-
-"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
+        ;;
+esac
 
 #       requiring <sys/sema.h>                          (IRIX 6.5)
 #  Agent:
