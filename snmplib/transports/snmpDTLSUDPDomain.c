@@ -1768,6 +1768,7 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
 #endif
     default:
         snmp_log(LOG_ERR, "dtls: unknown address family generating a cookie\n");
+        free(buffer);
         return 0;
     }
 
@@ -1855,6 +1856,7 @@ int netsnmp_dtls_verify_cookie(SSL *ssl,
         snmp_log(LOG_ERR,
                  "dtls: unknown address family %d generating a cookie\n",
                  peer->sa.sa_family);
+        free(buffer);
         return 0;
     }
 
