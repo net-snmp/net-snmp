@@ -1044,8 +1044,9 @@ asn_build_string(u_char * data,
         u_char         *buf = (u_char *) malloc(1 + strlength);
         size_t          l = (buf != NULL) ? (1 + strlength) : 0, ol = 0;
 
-        if (sprint_realloc_asciistring
-            (&buf, &l, &ol, 1, str, strlength)) {
+        if (sprint_realloc_asciistring(&buf, &l, &ol, 1,
+                                       str ? str : (const u_char *)"",
+                                       strlength)) {
             DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
         } else {
             if (buf == NULL) {
