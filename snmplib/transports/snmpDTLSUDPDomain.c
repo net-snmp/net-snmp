@@ -1404,7 +1404,7 @@ netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
                                                netsnmp_transport *t,
                                                const void *data, int len))
 {
-    if (t && !data) {
+    if (!data) {
         data = t->data;
         len = t->data_length;
     }

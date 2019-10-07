@@ -947,7 +947,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
     /*
      * Sanity check.
      */
-    if (!hashtype || !oldkey || !newkey || !kcstring || !kcstring_len
+    if (!hashtype || !oldkey || !newkey || !kcstring
         || (oldkey_len != newkey_len ) || (newkey_len == 0)
         || (*kcstring_len < (2 * newkey_len))) {
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
