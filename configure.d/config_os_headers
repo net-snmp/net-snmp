@@ -126,34 +126,11 @@ AC_CHECK_HEADERS(sys/swap.h,,,
 
 #       requiring <sys/param.h>                         (FreeBSD)
 #
-#  Core:      (? Tested above? )
-AC_CHECK_HEADERS([stdlib.h  ],,,
-    [[
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-    ]])
-#
-#  Library:
-AC_CHECK_HEADERS([malloc.h        sys/sysctl.h    ],,,
-    [[
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-    ]])
-#
-#  Agent:
 AC_CHECK_HEADERS([malloc.h        osreldate.h                   ] dnl
                  [machine/types.h ] dnl
                  [sys/dkstat.h    sys/conf.h    sys/mbuf.h      ] dnl
                  [sys/mount.h     sys/proc.h    sys/queue.h     ] dnl
-                 [sys/sysctl.h    sys/user.h                    ],,,
+                 [sys/user.h                                    ],,,
     [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -162,6 +139,17 @@ AC_CHECK_HEADERS([malloc.h        osreldate.h                   ] dnl
 #include <sys/param.h>
 #endif
     ]])
+
+case "$target_os" in
+    linux*)
+	# <sys/sysctl.h> is considered deprecated on Linux and including that
+	# header file triggers a compiler warning. See also
+	# https://savannah.gnu.org/forum/forum.php?forum_id=9515.
+        ;;
+    *)
+	AC_CHECK_HEADERS([sys/sysctl.h])
+        ;;
+esac
 
 #       requiring <sys/sema.h>                          (IRIX 6.5)
 #  Agent:

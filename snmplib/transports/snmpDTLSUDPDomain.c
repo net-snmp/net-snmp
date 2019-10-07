@@ -1768,13 +1768,14 @@ int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
 #endif
     default:
         snmp_log(LOG_ERR, "dtls: unknown address family generating a cookie\n");
+        free(buffer);
         return 0;
     }
 
     /* Calculate HMAC of buffer using the secret */
     HMAC(EVP_sha1(), cookie_secret, NETSNMP_COOKIE_SECRET_LENGTH,
          buffer, length, result, &resultlength);
-    OPENSSL_free(buffer);
+    free(buffer);
 
     memcpy(cookie, result, resultlength);
     *cookie_len = resultlength;
@@ -1855,13 +1856,14 @@ int netsnmp_dtls_verify_cookie(SSL *ssl,
         snmp_log(LOG_ERR,
                  "dtls: unknown address family %d generating a cookie\n",
                  peer->sa.sa_family);
+        free(buffer);
         return 0;
     }
 
     /* Calculate HMAC of buffer using the secret */
     HMAC(EVP_sha1(), cookie_secret, NETSNMP_COOKIE_SECRET_LENGTH,
          buffer, length, result, &resultlength);
-    OPENSSL_free(buffer);
+    free(buffer);
 
     if (cookie_len != resultlength || memcmp(result, cookie, resultlength) != 0)
         rc = 0;

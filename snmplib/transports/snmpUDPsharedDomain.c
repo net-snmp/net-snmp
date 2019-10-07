@@ -218,7 +218,8 @@ netsnmp_udpshared_transport_with_source(const struct netsnmp_ep *ep,
     if (NULL == t)
         return NULL;
 
-    _transport_common(t);
+    if (!_transport_common(t))
+        return NULL;
 
     if (!local && src_addr) {
         /** check for existing base transport */
@@ -300,7 +301,8 @@ netsnmp_udpshared6_transport_with_source(const struct netsnmp_ep *ep,
     if (NULL == t)
         return NULL;
 
-    _transport_common(t);
+    if (!_transport_common(t))
+        return NULL;
 
     if (!local && src_addr6) {
         /** check for existing base transport */
