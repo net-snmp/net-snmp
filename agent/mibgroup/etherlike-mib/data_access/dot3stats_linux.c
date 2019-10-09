@@ -5,6 +5,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/data_access/interface.h>
 
 #include "util_funcs.h"
 
@@ -123,6 +124,9 @@ dot3stats_interface_ioctl_ifindex_get (int fd, const char *name) {
 #else
     struct ifreq    ifrq;
     int rc = 0;
+
+    if (!netsnmp_access_interface_include(name))
+        return 0;
 
     DEBUGMSGTL(("access:dot3StatsTable:interface_ioctl_ifindex_get", "called\n"));
                  

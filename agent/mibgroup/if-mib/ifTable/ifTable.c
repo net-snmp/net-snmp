@@ -59,21 +59,24 @@ _if_number_handler(netsnmp_mib_handler *handler,
 
 
 /**
- * Initializes the ifTable module
+ * Initializes the ifTable module. Called after the snmpd configuration has
+ * been read.
  */
-void
-init_ifTable(void)
+static int
+_init_ifTable(int majorID, int minorID, void *serverargs, void *clientarg)
 {
     static int      ifTable_did_init = 0;
 
     DEBUGMSGTL(("verbose:ifTable:init_ifTable", "called\n"));
+
+    netsnmp_access_interface_init();
 
     /*
      * TODO:300:o: Perform ifTable one-time module initialization.
      */
     if (++ifTable_did_init != 1) {
         DEBUGMSGTL(("ifTable:init_ifTable", "ignoring duplicate call\n"));
-        return;
+        return 0;
     }
 
     /*
@@ -98,7 +101,17 @@ init_ifTable(void)
             initialize_table_ifXTable();
 #endif
     }
+
+    return 0;
 }                               /* init_ifTable */
+
+void
+init_ifTable(void)
+{
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           _init_ifTable, NULL);
+}
 
 /**
  * Shut-down the ifTable module (agent is exiting)
