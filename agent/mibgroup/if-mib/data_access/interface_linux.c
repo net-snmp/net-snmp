@@ -721,6 +721,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          */
         *stats++ = 0; /* null terminate name */
 
+	if (!netsnmp_access_interface_include(ifstart))
+		continue;
+
         /*
          * set address type flags.
          * the only way I know of to check an interface for

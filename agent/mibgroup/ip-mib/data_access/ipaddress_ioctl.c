@@ -172,6 +172,9 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
             continue;
         }
 
+        if (!netsnmp_access_interface_include(ifrp->ifr_name))
+            continue;
+
         /*
          */
         entry = netsnmp_access_ipaddress_entry_create();

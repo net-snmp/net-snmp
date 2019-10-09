@@ -124,6 +124,9 @@ dot3stats_interface_ioctl_ifindex_get (int fd, const char *name) {
     struct ifreq    ifrq;
     int rc = 0;
 
+    if (!netsnmp_access_interface_include(name))
+        return 0;
+
     DEBUGMSGTL(("access:dot3StatsTable:interface_ioctl_ifindex_get", "called\n"));
                  
     rc = _dot3Stats_ioctl_get(fd, SIOCGIFINDEX, &ifrq, name);
