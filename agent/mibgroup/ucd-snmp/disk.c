@@ -825,6 +825,7 @@ var_extensible_disk(struct variable *vp,
     struct dsk_entry entry;
     static long     long_ret;
     static char    *errmsg;
+    static char     empty_str[1];
 
 tryAgain:
     if (header_simple_table
@@ -926,7 +927,7 @@ tryAgain:
                 *var_len = strlen(errmsg);
             }
         }
-        return (u_char *) (errmsg);
+        return (u_char *)(errmsg ? errmsg : empty_str);
     }
     return NULL;
 }
