@@ -95,8 +95,10 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
     table_info->min_column = COLUMN_LMSENSORS_INDEX;
     table_info->max_column = COLUMN_LMSENSORS_VALUE;
     if (netsnmp_container_table_register(reg, table_info, container, 0) !=
-        SNMPERR_SUCCESS)
+        SNMPERR_SUCCESS) {
+        snmp_log(LOG_ERR, "Failed to register the sensors container table\n");
         return;
+    }
 
     /*
      * If the HAL sensors module was configured as an on-demand caching
