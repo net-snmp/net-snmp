@@ -265,7 +265,7 @@ var_extensible_proc(struct variable *vp,
     struct myproc  *proc;
     static long     long_ret;
     static char    *errmsg;
-
+    static char     empty_str[1];
 
     if (header_simple_table
         (vp, name, length, exact, var_len, write_method, numprocs))
@@ -328,7 +328,7 @@ var_extensible_proc(struct variable *vp,
                 }
             }
             *var_len = errmsg ? strlen(errmsg) : 0;
-            return ((u_char *) errmsg);
+            return (u_char *)(errmsg ? errmsg : empty_str);
         case ERRORFIX:
             *write_method = fixProcError;
             long_return = fixproc.result;
