@@ -975,6 +975,8 @@ int snmptop(int argc, char **argv)
     }
     endwin();
 
+    free_perf(oproc, ocount);
+
     snmp_close(ss);
     SOCK_CLEANUP;
     return 0;
