@@ -675,11 +675,13 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
         pdu->variables = NULL;  /* the variables were added by us */
     }
 
-    netsnmp_assert(retsess != NULL);
-    pdu->command = AGENTX_MSG_RESPONSE;
-    pdu->version = retsess->version;
+    if (retsess && pdu) {
+        pdu->command = AGENTX_MSG_RESPONSE;
+        pdu->version = retsess->version;
 
-    if (!snmp_send(retsess, pdu)) {
+        if (!snmp_send(retsess, pdu))
+            snmp_free_pdu(pdu);
+    } else if (pdu) {
         snmp_free_pdu(pdu);
     }
     DEBUGMSGTL(("agentx/subagent", "  FINISHED\n"));
