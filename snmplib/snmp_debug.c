@@ -696,7 +696,7 @@ snmp_set_do_debugoutputall(int val)
 int
 snmp_get_do_debugoutputall(void)
 {
-    return 0
+    return 0;
 }
 
 void
