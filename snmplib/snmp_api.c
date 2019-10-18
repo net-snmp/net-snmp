@@ -342,9 +342,6 @@ static int      snmp_detail_f = 0;
 /*
  * Prototypes.
  */
-static int      snmp_parse(struct session_list *, netsnmp_pdu *,
-                           u_char *, size_t);
-
 static void     snmpv3_calc_msg_flags(int, int, u_char *);
 static int      snmpv3_verify_msg(netsnmp_request_list *, netsnmp_pdu *);
 static int      snmpv3_build(u_char ** pkt, size_t * pkt_len,
@@ -4526,7 +4523,7 @@ _snmp_parse(void *sessp,
     return result;
 }
 
-static int
+int
 snmp_parse(struct session_list *slp, netsnmp_pdu *pdu, u_char *data,
            size_t length)
 {
