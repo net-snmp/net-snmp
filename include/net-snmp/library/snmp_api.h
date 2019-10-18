@@ -384,9 +384,15 @@ typedef struct request_list {
     NETSNMP_IMPORT
     void            init_snmp(const char *);
 
+    NETSNMP_IMPORT
     int
     snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                netsnmp_session * pss, netsnmp_pdu *pdu);
+
+    NETSNMP_IMPORT
+    int
+    snmp_parse(struct session_list * slp, netsnmp_session * pss,
+               netsnmp_pdu * pdu, u_char * data, size_t length);
 
     NETSNMP_IMPORT
     u_char         *snmp_pdu_build(netsnmp_pdu *, u_char *, size_t *);
