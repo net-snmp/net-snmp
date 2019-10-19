@@ -3191,11 +3191,22 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     return 0;
 }
 
+/**
+ * Serialize a PDU into ASN format.
+ * @param pkt     [out] Serialized PDU.
+ * @param pkt_len [out] Size of pkt.
+ * @param offset  [out] Number of bytes written into *pkt.
+ * @param pss     [in]  Session pointer.
+ * @param pdu     [in]  PDU to serialize.
+ *
+ * @returns 0 upon success; -1 upon failure.
+ */
 int
 snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
            netsnmp_session * pss, netsnmp_pdu *pdu)
 {
     int             rc;
+
     rc = _snmp_build(pkt, pkt_len, offset, pss, pdu);
     if (rc) {
         if (!pss->s_snmp_errno) {
@@ -4523,6 +4534,15 @@ _snmp_parse(void *sessp,
     return result;
 }
 
+/**
+ * Parse a PDU.
+ * @param slp    [in]  Session pointer.
+ * @param pdu    [out] Parsed PDU.
+ * @param data   [in]  PDU to parse.
+ * @param length [in]  Length of data.
+ *
+ * @returns 0 upon success; -1 upon failure.
+ */
 int
 snmp_parse(struct session_list *slp, netsnmp_pdu *pdu, u_char *data,
            size_t length)
