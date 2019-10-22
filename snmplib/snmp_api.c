@@ -4536,7 +4536,8 @@ _snmp_parse(void *sessp,
 
 /**
  * Parse a PDU.
- * @param slp    [in]  Session pointer.
+ * @param slp    [in]  Session pointer (struct session_list).
+ * @param pss    [in]  Session pointer (netsnmp_session).
  * @param pdu    [out] Parsed PDU.
  * @param data   [in]  PDU to parse.
  * @param length [in]  Length of data.
@@ -4544,10 +4545,10 @@ _snmp_parse(void *sessp,
  * @returns 0 upon success; -1 upon failure.
  */
 int
-snmp_parse(struct session_list *slp, netsnmp_pdu *pdu, u_char *data,
-           size_t length)
+snmp_parse(struct session_list *slp,
+           netsnmp_session * pss,
+           netsnmp_pdu *pdu, u_char * data, size_t length)
 {
-    netsnmp_session *pss = slp->session;
     int             rc;
 
     rc = _snmp_parse(slp, pss, pdu, data, length);
@@ -5637,7 +5638,7 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
   if (isp->hook_parse) {
     ret = isp->hook_parse(sp, pdu, packetptr, length);
   } else {
-    ret = snmp_parse(sessp, pdu, packetptr, length);
+    ret = snmp_parse(sessp, sp, pdu, packetptr, length);
   }
 
   DEBUGMSGTL(("sess_process_packet", "received message id#%ld reqid#%ld len "

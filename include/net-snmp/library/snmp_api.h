@@ -391,8 +391,8 @@ typedef struct request_list {
 
     NETSNMP_IMPORT
     int
-    snmp_parse(struct session_list * slp, netsnmp_pdu * pdu, u_char * data,
-               size_t length);
+    snmp_parse(struct session_list *sessp, netsnmp_session *pss,
+               netsnmp_pdu *pdu, u_char *data, size_t length);
 
     NETSNMP_IMPORT
     u_char         *snmp_pdu_build(netsnmp_pdu *, u_char *, size_t *);
