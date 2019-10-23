@@ -57,6 +57,17 @@ netsnmp_feature_require(cert_util);
 
 int openssl_local_index;
 
+#ifndef HAVE_ERR_GET_ERROR_ALL
+/* A backport of the OpenSSL 1.1.1e ERR_get_error_all() function. */
+static unsigned long ERR_get_error_all(const char **file, int *line,
+                                       const char **func,
+                                       const char **data, int *flags)
+{
+    *func = NULL;
+    return ERR_get_error_line_data(file, line, data, flags);
+}
+#endif
+
 /* this is called during negotiation */
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
@@ -1104,7 +1115,7 @@ const char * _x509_get_error(int x509failvalue, const char *location) {
 #endif /* NETSNMP_FEATURE_REMOVE__X509_GET_ERROR */
 
 void _openssl_log_error(int rc, SSL *con, const char *location) {
-    const char     *reason, *file, *data;
+    const char     *reason, *file, *func, *data;
     unsigned long   numerical_reason;
     int             flags, line;
 
@@ -1170,9 +1181,9 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
 
     /* other errors */
     while ((numerical_reason =
-            ERR_get_error_line_data(&file, &line, &data, &flags)) != 0) {
-        snmp_log(LOG_ERR, " error: #%lu (file %s, line %d)\n",
-                 numerical_reason, file, line);
+            ERR_get_error_all(&file, &line, &func, &data, &flags)) != 0) {
+        snmp_log(LOG_ERR, "%s (file %s, func %s, line %d)\n",
+                 ERR_error_string(numerical_reason, NULL), file, func, line);
 
         /* if we have a text translation: */
         if (data && (flags & ERR_TXT_STRING)) {

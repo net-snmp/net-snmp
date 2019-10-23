@@ -175,6 +175,9 @@
 /* Define to 1 if you have the `DTLS_method' function. */
 #undef HAVE_DTLS_METHOD
 
+/* Define to 1 if you have the `ERR_get_error_all' function. */
+#undef HAVE_ERR_GET_ERROR_ALL
+
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
 
