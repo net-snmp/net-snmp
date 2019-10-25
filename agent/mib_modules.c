@@ -65,6 +65,8 @@ init_mib_modules(void)
 {
     static int once = 0;
 
+    netsnmp_include_interface_init();
+
 #ifdef USING_IF_MIB_DATA_ACCESS_INTERFACE_MODULE
     netsnmp_access_interface_init();
 #endif

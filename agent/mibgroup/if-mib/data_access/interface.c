@@ -32,7 +32,7 @@ netsnmp_feature_require(interface_arch_set_admin_status);
 static netsnmp_conf_if_list *conf_list = NULL;
 static int need_wrap_check = -1;
 static int _access_interface_init = 0;
-static netsnmp_include_if_list *include_list = NULL;
+static netsnmp_include_if_list *include_list;
 
 /*
  * local static prototypes
@@ -49,6 +49,7 @@ static void _free_interface_config(void);
 static void _parse_include_if_config(const char *token, char *cptr);
 static void _free_include_if_config(void);
 
+SNMPCallback _prune_include_if_list;
 
 /**
  * initialization
@@ -59,13 +60,20 @@ init_interface(void)
     snmpd_register_config_handler("interface", _parse_interface_config,
                                   _free_interface_config,
                                   "name type speed");
-    snmpd_register_config_handler("include_ifmib_iface_prefix",
-                                   _parse_include_if_config,
-                                   _free_include_if_config,
-                                   "IF-MIB iface names included");
-
 }
 
+void
+netsnmp_include_interface_init(void)
+{
+    snmpd_register_config_handler("include_ifmib_iface_prefix",
+                                  _parse_include_if_config,
+                                  _free_include_if_config,
+                                  "IF-MIB iface names included");
+
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           _prune_include_if_list, NULL);
+}
 
 void
 netsnmp_access_interface_init(void)
@@ -794,19 +802,19 @@ netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *entry)
 /*
  * include_ifmib_iface_prefix config token
  *
- *     If there is an iface name match, we return 1 for True
+ *     If there is an iface prefix name match, we return 1 for True
  *     otherwise return 0 for False.
  *     If there are no ifaces defined at all, return 1 so that the
  *     default behavior is to include all ifaces (include everything).
- *     (Note: including at least one iface name means we will only include
- *     those iface names and exclude all others.)
+ *     (Note: including at least one iface prefix means we will only include
+ *     those iface names that match the prefix and exclude all others.)
  *
  */
 int netsnmp_access_interface_include(const char * name)
 {
-    netsnmp_include_if_list * if_ptr;
+    netsnmp_include_if_list *if_ptr;
 
-    netsnmp_assert(1 == _access_interface_init);
+    /*netsnmp_assert(_access_interface_init == 1);*/
     if (NULL == name)
         return 1;
 
@@ -818,7 +826,7 @@ int netsnmp_access_interface_include(const char * name)
         return 1;
 
     for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next)
-        if (memcmp(name, if_ptr->name, strlen(if_ptr->name)) == 0)
+        if (strncmp(name, if_ptr->name, strlen(if_ptr->name)) == 0)
             return 1;
 
     return 0;
@@ -900,6 +908,25 @@ _free_interface_config(void)
     conf_list = NULL;
 }
 
+int
+_prune_include_if_list(int majorID, int minorID,
+                       void *serverargs, void *clientarg)
+{
+    netsnmp_container * ifcontainer;
+
+    _access_interface_init = 1;
+    netsnmp_arch_interface_init();
+
+    /*
+     * load once to set up ifIndexes
+     */
+    ifcontainer = netsnmp_access_interface_container_load(NULL, 0);
+    if(NULL != ifcontainer)
+        netsnmp_access_interface_container_free(ifcontainer, 0);
+
+    return SNMPERR_SUCCESS;
+}
+
 /**---------------------------------------------------------------------*/
 /*
  * include interface config token
@@ -910,24 +937,23 @@ static void
 _parse_include_if_config(const char *token, char *cptr)
 {
     netsnmp_include_if_list *if_ptr, *if_new;
-    char                   *name, *st;
+    char                    *name, *st;
 
     name = strtok_r(cptr, " \t", &st);
     if (!name) {
         config_perror("Missing NAME parameter");
         return;
     }
-    if_ptr = include_list;
-    while (if_ptr)
-        if (strcmp(if_ptr->name, name))
-            if_ptr = if_ptr->next;
-        else
-            break;
-    if (if_ptr) {
-        config_pwarn("Duplicate include interface specification");
-        return;
-    }
+
+    /* check for duplicate prefix configuration */
     while (name != NULL) {
+        for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
+            if (strncmp(name, if_ptr->name, strlen(if_ptr->name)) == 0) {
+                config_pwarn("Duplicate include interface prefix specification");
+                return;
+            }
+        }
+        /* now save the prefixes */
         if_new = SNMP_MALLOC_TYPEDEF(netsnmp_include_if_list);
         if (!if_new) {
             config_perror("Out of memory");
@@ -951,7 +977,7 @@ _free_include_if_config(void)
     netsnmp_include_if_list   *if_ptr = include_list, *if_next;
     while (if_ptr) {
         if_next = if_ptr->next;
-        free(NETSNMP_REMOVE_CONST(char *, if_ptr->name));
+        free(if_ptr->name);
         free(if_ptr);
         if_ptr = if_next;
     }
