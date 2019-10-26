@@ -351,7 +351,8 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
         netsnmp_save_LIBS="$LIBS"
         LIBS="-lssl $LIBCRYPTO"
         AC_CHECK_FUNCS([TLS_method TLSv1_method DTLS_method DTLSv1_method]dnl
-                       [SSL_library_init SSL_load_error_strings])
+                       [SSL_library_init SSL_load_error_strings]dnl
+		       [ERR_get_error_all])
         LIBS="$netsnmp_save_LIBS"
         if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
 	    if test x$ac_cv_func_DTLSv1_method = xyes -o \

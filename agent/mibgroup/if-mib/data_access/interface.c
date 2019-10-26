@@ -32,6 +32,7 @@ netsnmp_feature_require(interface_arch_set_admin_status);
 static netsnmp_conf_if_list *conf_list = NULL;
 static int need_wrap_check = -1;
 static int _access_interface_init = 0;
+static netsnmp_include_if_list *include_list;
 
 /*
  * local static prototypes
@@ -45,7 +46,19 @@ static void _access_interface_entry_release(netsnmp_interface_entry * entry,
 static void _access_interface_entry_save_name(const char *name, oid index);
 static void _parse_interface_config(const char *token, char *cptr);
 static void _free_interface_config(void);
+static void _parse_include_if_config(const char *token, char *cptr);
+static void _free_include_if_config(void);
 
+/*
+ * This function is called after the snmpd configuration has been read
+ * and loads the interface list if it has not yet been loaded.
+ */
+static int
+_load_if_list(int majorID, int minorID, void *serverargs, void *clientarg)
+{
+    netsnmp_access_interface_init();
+    return 0;
+}
 
 /**
  * initialization
@@ -56,14 +69,21 @@ init_interface(void)
     snmpd_register_config_handler("interface", _parse_interface_config,
                                   _free_interface_config,
                                   "name type speed");
+
+    snmpd_register_config_handler("include_ifmib_iface_prefix",
+                                  _parse_include_if_config,
+                                  _free_include_if_config,
+                                  "IF-MIB iface names included");
+
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           _load_if_list, NULL);
 }
 
-
+/* May be called multiple times. */
 void
 netsnmp_access_interface_init(void)
 {
-    netsnmp_assert(0 == _access_interface_init); /* who is calling twice? */
-
     if (1 == _access_interface_init)
         return;
 
@@ -782,6 +802,36 @@ netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *entry)
     }
 }
 
+/*
+ * include_ifmib_iface_prefix config token
+ *
+ * If and only if there is an iface prefix name match, we return TRUE.
+ * If there are no ifaces defined at all, return 1 so that the
+ * default behavior is to include all ifaces (include everything).
+ * (Note: including at least one iface prefix means we will only include
+ * those iface names that match the prefix and exclude all others.)
+ */
+int netsnmp_access_interface_include(const char *name)
+{
+    netsnmp_include_if_list *if_ptr;
+
+    if (!name)
+        return TRUE;
+
+    if (!include_list)
+        /*
+         * If include_ifmib_iface_prefix was not configured, we should include
+         * all interfaces (which is the default).
+         */
+        return TRUE;
+
+    for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next)
+        if (strncmp(name, if_ptr->name, strlen(if_ptr->name)) == 0)
+            return TRUE;
+
+    return FALSE;
+}
+
 /**---------------------------------------------------------------------*/
 /*
  * interface config token
@@ -856,4 +906,59 @@ _free_interface_config(void)
         if_ptr = if_next;
     }
     conf_list = NULL;
+}
+
+/*
+ * include interface config token
+ */
+static void
+_parse_include_if_config(const char *token, char *cptr)
+{
+    netsnmp_include_if_list *if_ptr, *if_new;
+    char                    *name, *st;
+
+    name = strtok_r(cptr, " \t", &st);
+    if (!name) {
+        config_perror("Missing NAME parameter");
+        return;
+    }
+
+    /* check for duplicate prefix configuration */
+    while (name != NULL) {
+        for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
+            if (strncmp(name, if_ptr->name, strlen(if_ptr->name)) == 0) {
+                config_pwarn("Duplicate include interface prefix specification");
+                return;
+            }
+        }
+        /* now save the prefixes */
+        if_new = SNMP_MALLOC_TYPEDEF(netsnmp_include_if_list);
+        if (!if_new) {
+            config_perror("Out of memory");
+            return;
+        }
+        if_new->name = strdup(name);
+        if (!if_new->name) {
+            config_perror("Out of memory");
+            free(if_new);
+            return;
+        }
+        if_new->next = include_list;
+        include_list = if_new;
+        name = strtok_r(NULL, " \t", &st);
+    }
+}
+
+static void
+_free_include_if_config(void)
+{
+    netsnmp_include_if_list   *if_ptr = include_list, *if_next;
+
+    while (if_ptr) {
+        if_next = if_ptr->next;
+        free(if_ptr->name);
+        free(if_ptr);
+        if_ptr = if_next;
+    }
+    include_list = NULL;
 }

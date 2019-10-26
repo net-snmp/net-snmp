@@ -204,6 +204,11 @@ typedef struct _conf_if_list {
 
     typedef netsnmp_conf_if_list conf_if_list; /* backwards compat */
 
+typedef struct _include_if_list {
+    char                    *name;
+    struct _include_if_list *next;
+} netsnmp_include_if_list;
+
 /**---------------------------------------------------------------------*/
 /*
  * ACCESS function prototypes
@@ -282,6 +287,8 @@ void netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *);
 
 netsnmp_conf_if_list *
 netsnmp_access_interface_entry_overrides_get(const char * name);
+
+int netsnmp_access_interface_include(const char * name);
 
 /**---------------------------------------------------------------------*/
 

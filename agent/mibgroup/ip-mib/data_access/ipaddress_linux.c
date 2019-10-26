@@ -262,6 +262,9 @@ _load_v6(netsnmp_container *container, int idx_offset)
         DEBUGMSGTL(("access:ipaddress:container",
                     "addr %s, index %d, pfx %d, scope %d, flags 0x%X, name %s\n",
                     addr, if_index, pfx_len, scope, flags, if_name));
+
+        if (!netsnmp_access_interface_include(if_name))
+            continue;
         /*
          */
         entry = netsnmp_access_ipaddress_entry_create();
