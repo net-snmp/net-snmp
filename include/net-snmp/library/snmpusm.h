@@ -113,6 +113,9 @@ extern          "C" {
     NETSNMP_IMPORT
     struct usmUser *usm_remove_user(struct usmUser *user);
     NETSNMP_IMPORT
+    void            usm_parse_config_usmUser(const char *token,
+                                             char *line);
+    NETSNMP_IMPORT
     void            usm_set_user_password(struct usmUser *user,
                                           const char *token, char *line);
     void            init_usm(void);
@@ -179,6 +182,9 @@ extern          "C" {
 
     NETSNMP_IMPORT
     int             usm_create_user_from_session(netsnmp_session * session);
+    NETSNMP_IMPORT
+    void            usm_parse_create_usmUser(const char *token,
+                                             char *line);
     NETSNMP_IMPORT
     const oid      *get_default_authtype(size_t *);
     NETSNMP_IMPORT

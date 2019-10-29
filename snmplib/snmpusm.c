@@ -4155,7 +4155,7 @@ usm_read_user(const char *line)
 /*
  * snmpd.conf parsing routines 
  */
-static void
+void
 usm_parse_config_usmUser(const char *token, char *line)
 {
     struct usmUser *uptr;
@@ -4778,7 +4778,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     return NULL;
 }
 
-static void
+void
 usm_parse_create_usmUser(const char *token, char *line)
 {
     const char *error = NULL;
