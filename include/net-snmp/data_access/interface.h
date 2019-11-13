@@ -289,6 +289,7 @@ netsnmp_conf_if_list *
 netsnmp_access_interface_entry_overrides_get(const char * name);
 
 int netsnmp_access_interface_include(const char * name);
+int netsnmp_access_interface_max_reached(const char * name);
 
 /**---------------------------------------------------------------------*/
 

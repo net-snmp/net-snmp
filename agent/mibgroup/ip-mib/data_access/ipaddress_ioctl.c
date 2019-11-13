@@ -175,6 +175,9 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         if (!netsnmp_access_interface_include(ifrp->ifr_name))
             continue;
 
+	if (netsnmp_access_interface_max_reached(ifrp->ifr_name))
+            /* we may need to stop tracking ifaces if a max was set */
+            continue;
         /*
          */
         entry = netsnmp_access_ipaddress_entry_create();

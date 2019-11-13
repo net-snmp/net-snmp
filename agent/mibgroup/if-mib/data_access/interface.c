@@ -6,6 +6,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
+#include <errno.h>
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_enum.h>
@@ -33,6 +34,7 @@ static netsnmp_conf_if_list *conf_list = NULL;
 static int need_wrap_check = -1;
 static int _access_interface_init = 0;
 static netsnmp_include_if_list *include_list;
+static int ifmib_max_num_ifaces = 0;
 
 /*
  * local static prototypes
@@ -45,6 +47,7 @@ static void _access_interface_entry_release(netsnmp_interface_entry * entry,
 #endif
 static void _access_interface_entry_save_name(const char *name, oid index);
 static void _parse_interface_config(const char *token, char *cptr);
+static void _parse_ifmib_max_num_ifaces(const char *token, char *cptr);
 static void _free_interface_config(void);
 static void _parse_include_if_config(const char *token, char *cptr);
 static void _free_include_if_config(void);
@@ -69,6 +72,11 @@ init_interface(void)
     snmpd_register_config_handler("interface", _parse_interface_config,
                                   _free_interface_config,
                                   "name type speed");
+
+    snmpd_register_config_handler("ifmib_max_num_ifaces",
+                                  _parse_ifmib_max_num_ifaces,
+                                  NULL,
+                                  "IF-MIB MAX Number of ifaces");
 
     snmpd_register_config_handler("include_ifmib_iface_prefix",
                                   _parse_include_if_config,
@@ -803,6 +811,30 @@ netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *entry)
 }
 
 /*
+ * ifmib_max_num_ifaces config token
+ *
+ * Users may configure a maximum number if interfaces for
+ * the IF-MIB to include. This is useful in case there are
+ * a large number of interfaces (bridges, bonds, SVIs) that
+ * can slow things down.
+ */
+int netsnmp_access_interface_max_reached(const char *name)
+{
+    if (!name)
+        return FALSE;
+
+    if (ifmib_max_num_ifaces == 0)
+        /* nothing was set as a max so we include it all */
+        return FALSE;
+
+    if (netsnmp_arch_interface_index_find(name) > ifmib_max_num_ifaces)
+        /* We have gone over the max configured iface count */
+        return TRUE;
+
+    return FALSE;
+}
+
+/*
  * include_ifmib_iface_prefix config token
  *
  * If and only if there is an iface prefix name match, we return TRUE.
@@ -907,6 +939,30 @@ _free_interface_config(void)
     }
     conf_list = NULL;
 }
+
+/*
+ * Maximum number of interfaces to include in IF-MIB
+ */
+static void
+_parse_ifmib_max_num_ifaces(const char *token, char *cptr)
+{
+    int temp_max;
+    char *name, *st;
+
+    errno = 0;
+    name = strtok_r(cptr, " \t", &st);
+    if (!name) {
+        config_perror("Missing NUMBER parameter");
+        return;
+    }
+    if (sscanf(cptr, "%d", &temp_max) != 1) {
+        config_perror("Error converting parameter");
+        return;
+    }
+
+    ifmib_max_num_ifaces = temp_max;
+}
+
 
 /*
  * include interface config token
