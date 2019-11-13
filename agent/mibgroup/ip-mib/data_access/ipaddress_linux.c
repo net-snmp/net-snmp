@@ -225,6 +225,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
     char            if_name[IFNAMSIZ+1];/* +1 for '\0' because of the ugly sscanf below */ 
     u_char          *buf;
     int             if_index, pfx_len, scope, flags, rc = 0;
+    int             iface_counter;
     size_t          in_len, out_len;
     netsnmp_ipaddress_entry *entry;
     _ioctl_extras           *extras;
@@ -264,6 +265,10 @@ _load_v6(netsnmp_container *container, int idx_offset)
                     addr, if_index, pfx_len, scope, flags, if_name));
 
         if (!netsnmp_access_interface_include(if_name))
+            continue;
+
+	if (netsnmp_access_interface_max_reached(if_name))
+            /* we may need to stop tracking ifaces if a max was set */
             continue;
         /*
          */

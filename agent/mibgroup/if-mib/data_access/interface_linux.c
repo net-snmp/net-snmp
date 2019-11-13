@@ -724,6 +724,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 	if (!netsnmp_access_interface_include(ifstart))
 		continue;
 
+	if (netsnmp_access_interface_max_reached(ifstart))
+		/* we may need to stop tracking ifaces if a max was set */
+		continue;
         /*
          * set address type flags.
          * the only way I know of to check an interface for
