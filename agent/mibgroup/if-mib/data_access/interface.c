@@ -946,7 +946,7 @@ _free_interface_config(void)
 static void
 _parse_ifmib_max_num_ifaces(const char *token, char *cptr)
 {
-    long long_val;
+    int temp_max;
     char *name, *st;
 
     errno = 0;
@@ -955,13 +955,12 @@ _parse_ifmib_max_num_ifaces(const char *token, char *cptr)
         config_perror("Missing NUMBER parameter");
         return;
     }
-    long_val = strtol(cptr, NULL, 10);
-    if (errno) {
-           config_perror("Error converting parameter");
-           return;
+    if (sscanf(cptr, "%d", &temp_max) != 1) {
+        config_perror("Error converting parameter");
+        return;
     }
 
-    ifmib_max_num_ifaces = (int) long_val;
+    ifmib_max_num_ifaces = temp_max;
 }
 
 
