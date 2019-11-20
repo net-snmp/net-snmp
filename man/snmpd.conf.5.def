@@ -92,6 +92,16 @@ will be an integer multiple of the number of variables requested times
 the calculated number of repeats allow to fit below this number.
 .IP
 Also note that processing of maxGetbulkRepeats is handled first.
+.IP "ifmib_max_num_ifaces NUM"
+Sets the maximum number of interfaces included in IF-MIB data collection.
+For servers with a large number of interfaces (ppp, dummy, bridge, etc)
+the IF-MIB processing will take a large chunk of CPU for ioctl calls
+(on Linux). Setting a reasonable maximum for the CPU used will
+reduce the CPU load for IF-MIB processing.  For example, configuring
+"ifmib_max_num_ifaces 500" will include only the first 500 interfaces
+based on ifindex and ignore all others for IF-MIB processing.
+.IP
+The default (without this configured) is to include all interfaces.
 .IP "include_ifmib_iface_prefix PREFIX1 PREFIX2 ..."
 Sets the interface name prefixes to include in the IF-MIB data collection.
 For servers with a large number of interfaces (ppp, dummy, bridge, etc)

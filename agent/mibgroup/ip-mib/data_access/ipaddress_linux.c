@@ -265,6 +265,10 @@ _load_v6(netsnmp_container *container, int idx_offset)
 
         if (!netsnmp_access_interface_include(if_name))
             continue;
+
+	if (netsnmp_access_interface_max_reached(if_name))
+            /* we may need to stop tracking ifaces if a max was set */
+            continue;
         /*
          */
         entry = netsnmp_access_ipaddress_entry_create();
