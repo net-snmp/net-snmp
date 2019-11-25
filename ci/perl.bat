@@ -1,7 +1,7 @@
 REM Download and install Perl
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 echo on
-set PERL_VERSION=5.31.2
+set PERL_VERSION=5.31.6
 set INST_DRV=c:
 set INST_TOP=c:\perl-msvc
 rd /q /s %INST_TOP%
