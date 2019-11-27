@@ -1,4 +1,3 @@
-*~
 *.bak
 *.bs
 *.ft
@@ -16,6 +15,7 @@
 *.rej
 *.sbr
 *.swp
+*~
 .libs/
 agent/*.exe
 agent/mibgroup/agent_module_dot_conf.h
@@ -84,6 +84,8 @@ net-snmp-6*
 net-snmp-config
 net-snmp-config-x
 net-snmp-create-v3-user
+netsnmp-agent.pc
+netsnmp.pc
 NEWS.new*
 perl/*.json
 perl/*.yml
