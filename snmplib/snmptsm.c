@@ -346,7 +346,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
        and tmStateReference are returned to the calling Message
        Processing Model with the statusInformation set to success. */
 
-    /* For the Net-SNMP implemantion that actually means we start
+    /* For the Net-SNMP implementation that actually means we start
        encoding the full packet sequence from here before returning it */
 
     /*
