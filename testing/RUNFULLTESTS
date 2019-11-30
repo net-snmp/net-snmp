@@ -25,6 +25,7 @@ GetOptions(\%opts,
            "quiet|q",
            "groups|g=s",
            "r=s",
+           "exclude|e=s",
            "debug",
            "srcdir|D=s",
            "builddir|d=s",
@@ -126,7 +127,7 @@ if ($opts{'f'}) {
 	push @tests, build_test($_);
     }
 } else {
-    @tests = gather_tests($opts{'groups'}, $opts{'r'});
+    @tests = gather_tests($opts{'groups'}, $opts{'r'}, $opts{'exclude'});
 }
 
 ########################################
@@ -221,7 +222,7 @@ sub configured_with {
 }
 
 sub gather_tests {
-    my ( $groups, $regexp ) = @_;
+    my ( $groups, $incl_regexp, $excl_regexp ) = @_;
     my @groups;
 
     # figure out the list of groups we need to search through
@@ -257,18 +258,20 @@ sub gather_tests {
 	}
 
 	# push on all files that start with T[NUM]*
-	push_or_skip(\@tests, $regexp, glob("$opts{'srcdir'}/testing/$opts{'master-directory'}/$group/T[0-9]*"));
+	push_or_skip(\@tests, $incl_regexp, $excl_regexp,
+		     glob("$opts{'srcdir'}/testing/$opts{'master-directory'}/$group/T[0-9]*"));
     }
 
     return @tests;
 }
 
 sub push_or_skip {
-    my ($array, $regexp, @files) = @_;
+    my ($array, $incl_regexp, $excl_regexp, @files) = @_;
     foreach my $file (@files) {
 	next if ($file =~ /.(bak|old|orig|rej)$/);
 	next if ($file =~ /~$/);
-	next if (defined($regexp) && $file !~ /$regexp/i);
+	next if (defined($excl_regexp) && $file =~ /$excl_regexp/i);
+	next if (defined($incl_regexp) && $file !~ /$incl_regexp/i);
 	DEBUG("  Adding file $file\n");
 	push @$array, build_test($file);
     }
@@ -486,6 +489,7 @@ sub usage {
     print "    --group GROUP\n";
     print "\t\t\t(use 'all' to run all tests)\n";
     print "  -r REGEXP\t\tOnly run test files matching this regexp\n";
+    print "  -e REGEXP\t\tExclude test files matching this regexp\n";
     print "  -f\t\t\tRun only the failed tests from the last run\n";
     print "  -F\t\t\tDon't create the failed_tests file\n";
     print "  --failed-file FILE\tThe location of the failed state file\n";
