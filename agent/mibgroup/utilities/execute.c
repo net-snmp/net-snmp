@@ -189,8 +189,8 @@ run_exec_command( char *command, char *input,
     int argc;
 
     DEBUGMSGTL(("run:exec", "running '%s'\n", command));
-    pipe(ipipe);
-    pipe(opipe);
+    NETSNMP_IGNORE_RESULT(pipe(ipipe));
+    NETSNMP_IGNORE_RESULT(pipe(opipe));
     if ((pid = fork()) == 0) {
         /*
          * Child process
@@ -201,17 +201,17 @@ run_exec_command( char *command, char *input,
          *   and close everything else
          */
         close(0);
-        dup(  ipipe[0]);
+        NETSNMP_IGNORE_RESULT(dup(ipipe[0]));
         close(ipipe[0]);
 	close(ipipe[1]);
 
         close(1);
-        dup(  opipe[1]);
+        NETSNMP_IGNORE_RESULT(dup(opipe[1]));
         close(opipe[0]);
         close(opipe[1]);
 
         close(2);
-        dup(1);
+        NETSNMP_IGNORE_RESULT(dup(1));
 
         netsnmp_close_fds(2);
 
@@ -245,7 +245,7 @@ run_exec_command( char *command, char *input,
 	close(ipipe[0]);
 	close(opipe[1]);
 	if (input) {
-	   write(ipipe[1], input, strlen(input));
+            NETSNMP_IGNORE_RESULT(write(ipipe[1], input, strlen(input)));
 	   close(ipipe[1]);	/* or flush? */
         }
 	else close(ipipe[1]);

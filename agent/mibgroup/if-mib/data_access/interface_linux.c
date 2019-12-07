@@ -659,8 +659,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
      * to detect the position of individual fields directly,
      * but I suspect this is probably more trouble than it's worth.
      */
-    fgets(line, sizeof(line), devin);
-    fgets(line, sizeof(line), devin);
+    NETSNMP_IGNORE_RESULT(fgets(line, sizeof(line), devin));
+    NETSNMP_IGNORE_RESULT(fgets(line, sizeof(line), devin));
 
     if( 0 == scan_expected ) {
         if (strstr(line, "compressed")) {

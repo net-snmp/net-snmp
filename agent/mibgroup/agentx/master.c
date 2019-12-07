@@ -178,7 +178,8 @@ real_init_master(void)
                         agentx_sock_user = -1;
                     if (agentx_sock_group == 0 )
                         agentx_sock_group = -1;
-                    chown(name, agentx_sock_user, agentx_sock_group);
+                    NETSNMP_IGNORE_RESULT(chown(name, agentx_sock_user,
+                                                agentx_sock_group));
                 }
             }
 #endif

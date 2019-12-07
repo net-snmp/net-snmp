@@ -1409,7 +1409,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     /*
      * check index format version
      */
-    fgets(tmpstr, sizeof(tmpstr), index);
+    NETSNMP_IGNORE_RESULT(fgets(tmpstr, sizeof(tmpstr), index));
     pos = strrchr(tmpstr, ' ');
     if (pos) {
         ++pos;
