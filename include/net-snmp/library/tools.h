@@ -132,6 +132,8 @@ extern          "C" {
 #define TRUE  1
 #endif
 
+#define NETSNMP_IGNORE_RESULT(e) do { if (e) { } } while (0)
+
     /*
      * QUIT the FUNction:
      *      e       Error code variable

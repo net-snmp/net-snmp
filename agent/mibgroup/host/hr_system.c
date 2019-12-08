@@ -303,7 +303,7 @@ var_hrsys(struct variable * vp,
     case HRSYS_LOAD_PARAM:
 #ifdef linux
         if((fp = fopen("/proc/cmdline", "r")) != NULL) {
-            fgets(string, sizeof(string), fp);
+            NETSNMP_IGNORE_RESULT(fgets(string, sizeof(string), fp));
             fclose(fp);
         } else {
             return NULL;

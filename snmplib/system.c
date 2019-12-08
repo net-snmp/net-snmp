@@ -228,7 +228,7 @@ _daemon_prep(int stderr_log)
     int fd;
 
     /* Avoid keeping any directory in use. */
-    chdir("/");
+    NETSNMP_IGNORE_RESULT(chdir("/"));
 
     if (stderr_log)
         return;

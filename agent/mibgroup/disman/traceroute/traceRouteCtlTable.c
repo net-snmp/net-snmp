@@ -4394,8 +4394,8 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
     /*
      * Revert to non-privileged user after opening sockets 
      */
-    setgid(getgid());
-    setuid(getuid());
+    NETSNMP_IGNORE_RESULT(setgid(getgid()));
+    NETSNMP_IGNORE_RESULT(setuid(getuid()));
 
     outip->ip_src = from->sin_addr;
 #ifndef IP_HDRINCL
@@ -4981,7 +4981,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
     icmp_sock = socket(AF_INET6, SOCK_RAW, IPPROTO_ICMPV6);
     socket_errno = errno;
 
-    setuid(getuid());
+    NETSNMP_IGNORE_RESULT(setuid(getuid()));
 
     on = 1;
     seq = tos = 0;

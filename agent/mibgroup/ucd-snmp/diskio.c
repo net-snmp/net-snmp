@@ -1430,8 +1430,8 @@ getstats(void)
 	/*
 	 * first few fscanfs are garbage we don't care about. skip it.
 	 */
-	fgets(buffer, sizeof(buffer), parts);
-	fgets(buffer, sizeof(buffer), parts);
+	NETSNMP_IGNORE_RESULT(fgets(buffer, sizeof(buffer), parts));
+	NETSNMP_IGNORE_RESULT(fgets(buffer, sizeof(buffer), parts));
 
 	while (! feof(parts)) {
 	    linux_diskio* pTemp;

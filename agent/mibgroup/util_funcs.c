@@ -293,7 +293,7 @@ get_exec_output(struct extensible *ex)
                 return -1;
         }
         if (cachebytes > 0)
-            write(cfd, (void *) cache, cachebytes);
+            NETSNMP_IGNORE_RESULT(write(cfd, cache, cachebytes));
         close(cfd);
 #ifdef NETSNMP_EXCACHETIME
         lastresult = ex->result;
@@ -507,7 +507,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
          * close all non-standard open file descriptors 
          */
         netsnmp_close_fds(1);
-        (void) dup(1);          /* stderr */
+        NETSNMP_IGNORE_RESULT(dup(1));  /* stderr */
 
         for (cnt = 1, cptr1 = cmd, cptr2 = argvs; *cptr1 != 0;
              cptr2++, cptr1++) {

@@ -987,7 +987,7 @@ main(int argc, char *argv[])
     
 #ifdef HAVE_CHOWN
     if ( uid != 0 || gid != 0 )
-        chown( persistent_dir, uid, gid );
+        NETSNMP_IGNORE_RESULT(chown(persistent_dir, uid, gid));
 #endif
 
 #ifdef HAVE_SETGID
