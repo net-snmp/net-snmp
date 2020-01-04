@@ -100,6 +100,6 @@ AC_COMPILE_IFELSE(
 done
 AC_MSG_RESULT(${arg_type})
 AC_DEFINE_UNQUOTED([NETSNMP_IOCTLSOCKET_ARG], [${arg_type}],
-        [Type of the fifth argument of select()])
+        [Type of the third argument of ioctlsocket()])
 
 CFLAGS=$netsnmp_save_CFLAGS

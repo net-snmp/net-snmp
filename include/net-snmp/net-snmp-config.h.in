@@ -1542,7 +1542,7 @@
 /* ifnet needs to have _KERNEL_STRUCTURES defined */
 #undef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
 
-/* Type of the fifth argument of select() */
+/* Type of the third argument of ioctlsocket() */
 #undef NETSNMP_IOCTLSOCKET_ARG
 
 /* Define if you want to remove all non-essential code features. */
