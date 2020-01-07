@@ -157,6 +157,12 @@
 #ifndef MNTTYPE_ACFS
 #define MNTTYPE_ACFS      "acfs"
 #endif
+#ifndef MNTTYPE_NSS_VOL
+#define MNTTYPE_NSS_VOL   "nssvol"
+#endif
+#ifndef MNTTYPE_NSS_POOL
+#define MNTTYPE_NSS_POOL  "nsspool"
+#endif
 
 /*
  *  File systems to skip

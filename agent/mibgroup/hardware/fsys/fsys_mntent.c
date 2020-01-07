@@ -147,6 +147,8 @@ _fsys_type( char *typename )
               !strcmp(typename, MNTTYPE_ZFS) ||
               !strcmp(typename, MNTTYPE_NVMFS) ||
               !strcmp(typename, MNTTYPE_ACFS) ||
+              !strcmp(typename, MNTTYPE_NSS_VOL) ||
+              !strcmp(typename, MNTTYPE_NSS_POOL) ||
               !strcmp(typename, MNTTYPE_LOFS))
        return NETSNMP_FS_TYPE_OTHER;
 
