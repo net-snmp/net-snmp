@@ -201,8 +201,6 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     size_t         mcpu_size;
 #endif
     NETSNMP_VM_STATS_TYPE mem_stats;
-    int            mem_mib[] = { CTL_VM, NETSNMP_VM_STATS };
-    size_t         mem_size  = sizeof(NETSNMP_VM_STATS_TYPE);
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
 
 #if defined(__FreeBSD__) || defined(__NetBSD__)
@@ -218,10 +216,6 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     cpu->intrpt_ticks = cpu_stats[CP_INTR];
         /* wait_ticks, sirq_ticks unused */
     
-        /*
-         * Interrupt/Context Switch statistics
-         *   XXX - Do these really belong here ?
-         */
 #ifdef __FreeBSD__
 #define	GET_VM_STATS(space, name) sysctlbyname("vm.stats." #space "." #name, &mem_stats.name, &len, NULL, 0)
     {
@@ -237,8 +231,19 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     }
 #undef GET_VM_STATS
 #else
-    sysctl(mem_mib, 2, &mem_stats, &mem_size, NULL, 0);
+    {
+        static const int mem_mib[] = { CTL_VM, NETSNMP_VM_STATS };
+        size_t           mem_size  = sizeof(mem_stats);
+
+        sysctl(mem_mib, sizeof(mem_mib) / sizeof(mem_mib[0]), &mem_stats,
+               &mem_size, NULL, 0);
+        netsnmp_assert(mem_size == sizeof(mem_stats));
+    }
 #endif
+    /*
+     * Interrupt/Context Switch statistics
+     *   XXX - Do these really belong here ?
+     */
     cpu->nInterrupts  = mem_stats.NS_VM_INTR;
     cpu->nCtxSwitches = mem_stats.NS_VM_SWTCH;
     cpu->swapIn       = mem_stats.NS_VM_SWAPIN;
