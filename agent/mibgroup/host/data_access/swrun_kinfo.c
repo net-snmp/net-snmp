@@ -207,6 +207,10 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         if (NULL == entry)
             continue;   /* error already logged by function */
         rc = CONTAINER_INSERT(container, entry);
+        if (rc < 0) {
+            netsnmp_swrun_entry_free(entry);
+            continue;
+        }
 
         /*
          * There are two possible sources for the command being run:
