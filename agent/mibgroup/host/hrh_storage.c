@@ -27,7 +27,6 @@
 # ifdef WIN32
 #  include <windows.h>
 #  include <errno.h>
-#  include <sys/timeb.h>
 # else
 #  include <sys/time.h>
 # endif
