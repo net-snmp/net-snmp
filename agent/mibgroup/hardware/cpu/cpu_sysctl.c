@@ -218,10 +218,6 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     cpu->intrpt_ticks = cpu_stats[CP_INTR];
         /* wait_ticks, sirq_ticks unused */
     
-        /*
-         * Interrupt/Context Switch statistics
-         *   XXX - Do these really belong here ?
-         */
 #ifdef __FreeBSD__
 #define	GET_VM_STATS(space, name) sysctlbyname("vm.stats." #space "." #name, &mem_stats.name, &len, NULL, 0)
     {
@@ -239,6 +235,10 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #else
     sysctl(mem_mib, 2, &mem_stats, &mem_size, NULL, 0);
 #endif
+    /*
+     * Interrupt/Context Switch statistics
+     *   XXX - Do these really belong here ?
+     */
     cpu->nInterrupts  = mem_stats.NS_VM_INTR;
     cpu->nCtxSwitches = mem_stats.NS_VM_SWTCH;
     cpu->swapIn       = mem_stats.NS_VM_SWAPIN;
