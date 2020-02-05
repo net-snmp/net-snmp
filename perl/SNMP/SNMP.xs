@@ -1027,7 +1027,8 @@ as_oct:
             vars->val_len = len;
             memcpy((char *)vars->val.string, val, len);
         } else {
-            ret = FAILURE;
+            if (! val)
+                ret = FAILURE;
             vars->val.string = (u_char *) netsnmp_strdup("");
             vars->val_len = 0;
         }
