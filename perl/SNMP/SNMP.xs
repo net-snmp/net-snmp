@@ -971,8 +971,7 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
     }
 
     vars->next_variable = NULL;
-    vars->name = netsnmp_malloc(name_length * sizeof(oid));
-    memcpy((char *)vars->name, (char *)name, name_length * sizeof(oid));
+    vars->name = netsnmp_memdup(name, name_length * sizeof(oid));
     vars->name_length = name_length;
     switch (type) {
       case TYPE_INTEGER:
@@ -1022,23 +1021,19 @@ as_uint:
       case TYPE_OPAQUE:
         vars->type = ASN_OCTET_STR;
 as_oct:
-        vars->val.string = netsnmp_malloc(len);
+        vars->val.string = netsnmp_memdup(val && len ? val : "", len ? len : 1);
         vars->val_len = len;
-        if (val && len)
-            memcpy((char *)vars->val.string, val, len);
-        else {
+        if (!val)
             ret = FAILURE;
-            vars->val.string = (u_char *) netsnmp_strdup("");
-            vars->val_len = 0;
-        }
         break;
 
       case TYPE_IPADDR:
         vars->type = ASN_IPADDRESS;
-        vars->val.integer = netsnmp_malloc(sizeof(in_addr_t));
-        if (val)
-            *((in_addr_t *)vars->val.integer) = inet_addr(val);
-        else {
+        if (val) {
+            const in_addr_t addr = inet_addr(val);
+
+            vars->val.integer = netsnmp_memdup(&addr, sizeof(addr));
+        } else {
             ret = FAILURE;
             *(vars->val.integer) = 0;
         }
@@ -1055,8 +1050,7 @@ as_oct:
 	    ret = FAILURE;
         } else {
             vars->val_len *= sizeof(oid);
-            vars->val.objid = netsnmp_malloc(vars->val_len);
-            memcpy((char *)vars->val.objid, (char *)oidbuf, vars->val_len);
+            vars->val.objid = netsnmp_memdup(oidbuf, vars->val_len);
         }
         break;
 

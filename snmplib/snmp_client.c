@@ -888,8 +888,8 @@ snmp_set_var_value(netsnmp_variable_list * vars,
         }
         else if (vars->val_len == sizeof(char)) {
             if (ASN_INTEGER == vars->type) {
-                const char      *val_char 
-                    = (const char *) value;
+                const signed char   *val_char
+                    = (const signed char *) value;
                 *(vars->val.integer) = (long) *val_char;
             } else {
                     const u_char    *val_uchar
