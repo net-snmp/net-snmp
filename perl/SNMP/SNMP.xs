@@ -1022,11 +1022,10 @@ as_uint:
       case TYPE_OPAQUE:
         vars->type = ASN_OCTET_STR;
 as_oct:
-        vars->val.string = netsnmp_malloc(len);
-        vars->val_len = len;
-        if (val && len)
-            memcpy((char *)vars->val.string, val, len);
-        else {
+        if (val && len) {
+            vars->val.string = netsnmp_memdup(val, len);
+            vars->val_len = len;
+        } else {
             ret = FAILURE;
             vars->val.string = (u_char *) netsnmp_strdup("");
             vars->val_len = 0;
