@@ -1022,14 +1022,10 @@ as_uint:
       case TYPE_OPAQUE:
         vars->type = ASN_OCTET_STR;
 as_oct:
-        if (val && len) {
-            vars->val.string = netsnmp_memdup(val, len);
-            vars->val_len = len;
-        } else {
+        vars->val.string = netsnmp_memdup(val && len ? val : "", len ? len : 1);
+        vars->val_len = len;
+        if (!val)
             ret = FAILURE;
-            vars->val.string = (u_char *) netsnmp_strdup("");
-            vars->val_len = 0;
-        }
         break;
 
       case TYPE_IPADDR:
