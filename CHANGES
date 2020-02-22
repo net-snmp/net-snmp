@@ -20,6 +20,16 @@ listing of all changes made to the code.
 	legacy ethtool link settings API, link modes are only partially
 	reported See also https://sourceforge.net/p/net-snmp/patches/1387/.
 	[bvanassche: reworked this patch significantly]
+      - Reduce the time needed to execute "pass" scripts on BSD systems See
+	also https://github.com/net-snmp/net-snmp/issues/8.
+      - [BUG 2926]: Make it possible to set agentXPingInterval for a
+	subagent - register agentXPingInterval for the subagent list
+	handler, before it was registered for snmp - added agentxTimeout to
+	the subagent list handler. It's now possible to set for snmpd and
+	the subagent. See 'man snmpd.conf' - added agentxRetries to the
+	subagent list handler. See 'man snmpd.conf'. It's never used in the
+	subagent, but it's now following the documentation Signed-off-by:
+	Anders Wallin <wallinux@gmail.com>
 
     snmptrap:
       - BUG: 2899: Patch from Drew Roedersheimer to set library
@@ -40,9 +50,16 @@ listing of all changes made to the code.
 	field. See also https://sourceforge.net/p/net-snmp/bugs/2930/. See
 	also https://sourceforge.net/p/net-snmp/patches/1390/.
 
+    FreeBSD:
+      - Fix first byte of IF-MIB::ifPhysAddress   Don't write past the
+	interface name, and use temporary copy instead. This fixes the
+	first byte of ifPhysAddress always being 0 on FreeBSD. See also
+	https://sourceforge.net/p/net-snmp/code/merge-requests/20/. [
+	bvanassche: edited patch title / added test for malloc() result /
+	reduced number of free(if_name) calls ]
+
     Win32:
       - BUG: 2779541 Fixed handle leak in pass_persist.
-
 
 *5.8*
     snmplib:
