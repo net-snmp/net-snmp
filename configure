@@ -25147,50 +25147,18 @@ $as_echo "$netsnmp_cv_func_endwin_LIBCURSES" >&6; }
 
 #   libm for ceil
 #
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ceil without -lm" >&5
-$as_echo_n "checking for ceil without -lm... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
 
-  #include <math.h>
-
-int
-main ()
-{
-
-  ceil((double)2.4);
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; };
-  # Keep LIBS.
-  need_ceil_lib="no"
-  true
-
-else
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-  need_ceil_lib="yes"
-  # Restore LIBS.
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-if test "${need_ceil_lib}" = yes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing ceil" >&5
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing ceil" >&5
 $as_echo_n "checking for library containing ceil... " >&6; }
-if ${ac_cv_search_ceil+:} false; then :
+if ${netsnmp_cv_func_ceil_LNETSNMPLIBS+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LNETSNMPLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -25208,39 +25176,52 @@ return ceil ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' m; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_ceil=$ac_res
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in m ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ceil ();
+int
+main ()
+{
+return ceil ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
 fi
 rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_ceil+:} false; then :
-  break
+    conftest$ac_exeext conftest.$ac_ext
+          done
 fi
-done
-if ${ac_cv_search_ceil+:} false; then :
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_ceil_LNETSNMPLIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_ceil_LNETSNMPLIBS" >&5
+$as_echo "$netsnmp_cv_func_ceil_LNETSNMPLIBS" >&6; }
+ if test "${netsnmp_cv_func_ceil_LNETSNMPLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_ceil_LNETSNMPLIBS}" != "none required" ; then
+       LNETSNMPLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
 
-else
-  ac_cv_search_ceil=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_ceil" >&5
-$as_echo "$ac_cv_search_ceil" >&6; }
-ac_res=$ac_cv_search_ceil
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-fi
+ fi
 
-fi
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
