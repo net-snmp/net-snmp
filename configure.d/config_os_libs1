@@ -68,7 +68,7 @@ AC_CHECK_FUNCS(kinfo_get_cpus)
 #
 # diskIOLAx requires exp which may require -lm
 #
-AC_SEARCH_LIBS(exp, [m])
+NETSNMP_SEARCH_LIBS([exp], [m],,,, [LMIBLIBS])
 
 #
 #   libkvm
