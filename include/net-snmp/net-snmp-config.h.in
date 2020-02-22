@@ -163,9 +163,6 @@
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
 
-/* Define to 1 if you have the <dmalloc.h> header file. */
-#undef HAVE_DMALLOC_H
-
 /* Set if the dpkg-query command is available */
 #undef HAVE_DPKG_QUERY
 

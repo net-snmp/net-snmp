@@ -43,10 +43,6 @@
 
 #include <errno.h>
 
-#if HAVE_DMALLOC_H
-#  include <dmalloc.h>
-#endif
-
 #include <net-snmp/types.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/file_utils.h>

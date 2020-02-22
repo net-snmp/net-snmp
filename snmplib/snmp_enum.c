@@ -18,9 +18,6 @@
 #include <strings.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
 #include <sys/types.h>
 
 #include <net-snmp/types.h>

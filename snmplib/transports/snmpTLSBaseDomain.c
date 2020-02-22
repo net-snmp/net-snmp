@@ -4,9 +4,6 @@
 
 netsnmp_feature_require(cert_util);
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else

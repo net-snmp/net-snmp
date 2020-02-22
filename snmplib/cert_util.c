@@ -72,10 +72,6 @@ netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all);
 # endif
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>

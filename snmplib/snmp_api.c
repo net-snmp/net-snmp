@@ -106,10 +106,6 @@ SOFTWARE.
 #include <locale.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #define SNMP_NEED_REQUEST_LIST
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>

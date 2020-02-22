@@ -27,10 +27,6 @@
 #include <net-snmp/agent/table_container.h>
 #include <net-snmp/agent/read_only.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 netsnmp_feature_child_of(table_tdata_all, mib_helpers);
 netsnmp_feature_child_of(table_tdata, table_tdata_all);
 netsnmp_feature_child_of(table_tdata_delete_table, table_tdata_all);

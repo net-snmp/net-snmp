@@ -879,10 +879,6 @@ with_ldflags
 enable_as_needed
 with_libs
 enable_silent_libtool
-with_dmalloc
-enable_dmalloc
-with_efence
-enable_efence
 with_rsaref
 enable_rsaref
 with_openssl
@@ -1798,8 +1794,6 @@ Compiler Options:
   --with-cflags=CFLAGS            use CFLAGS as compile time arguments.
   --with-ldflags=LDFLAGS          use LDFLAGS as link time arguments to ld.
   --with-libs=LIBS                use LIBS as link time arguments to ld.
-  --with-dmalloc=PATH     Use dmalloc library (www.dmalloc.com)
-  --with-efence                   Look for and use libefence (malloc).
   --with-rsaref=PATH              Look for librsaref in PATH/lib.
   --with-openssl=PATH             Look for openssl in PATH/lib,
                                   or PATH may be "internal" to build with
@@ -4696,30 +4690,6 @@ fi
 ##
 #   System: Library settings
 ##
-
-
-# Check whether --with-dmalloc was given.
-if test "${with_dmalloc+set}" = set; then :
-  withval=$with_dmalloc;
-fi
-
-   # Check whether --enable-dmalloc was given.
-if test "${enable_dmalloc+set}" = set; then :
-  enableval=$enable_dmalloc; as_fn_error $? "Invalid option. Use --with-dmalloc/--without-dmalloc instead" "$LINENO" 5
-fi
-
-
-
-# Check whether --with-efence was given.
-if test "${with_efence+set}" = set; then :
-  withval=$with_efence; use_efence="$withval"
-fi
-
-   # Check whether --enable-efence was given.
-if test "${enable_efence+set}" = set; then :
-  enableval=$enable_efence; as_fn_error $? "Invalid option. Use --with-efence/--without-efence instead" "$LINENO" 5
-fi
-
 
 tryrsaref=no
 
@@ -22509,154 +22479,6 @@ fi
 ##
 #   Simple checks:
 ##
-
-#   dmalloc
-#
-if test "${with_dmalloc+set}" = set; then
-   if test "$with_dmalloc" = yes -a -d $with_dmalloc ; then
-
-  if test "x$with_dmalloc" != x -a -d $with_dmalloc; then
-     if test -d $with_dmalloc/lib; then
-       LDFLAGS="-L$with_dmalloc/lib $LDFLAGS"
-     fi
-     if test -d $with_dmalloc/include; then
-	CPPFLAGS="-I$with_dmalloc/include $CPPFLAGS"
-     fi
-  fi
-
-   fi
-   for ac_header in dmalloc.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "dmalloc.h" "ac_cv_header_dmalloc_h" "$ac_includes_default"
-if test "x$ac_cv_header_dmalloc_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_DMALLOC_H 1
-_ACEOF
-
-fi
-
-done
-
-   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dmalloc_message" >&5
-$as_echo_n "checking for library containing dmalloc_message... " >&6; }
-if ${ac_cv_search_dmalloc_message+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dmalloc_message ();
-int
-main ()
-{
-return dmalloc_message ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' dmalloc; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_dmalloc_message=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_dmalloc_message+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_dmalloc_message+:} false; then :
-
-else
-  ac_cv_search_dmalloc_message=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_dmalloc_message" >&5
-$as_echo "$ac_cv_search_dmalloc_message" >&6; }
-ac_res=$ac_cv_search_dmalloc_message
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
-
-fi
-
-#   EFence
-#       (This used to be on by default for developer checkout)
-#
-if test "x$use_efence" = "xyes"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing EF_Exit" >&5
-$as_echo_n "checking for library containing EF_Exit... " >&6; }
-if ${ac_cv_search_EF_Exit+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char EF_Exit ();
-int
-main ()
-{
-return EF_Exit ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' efence; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_EF_Exit=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_EF_Exit+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_EF_Exit+:} false; then :
-
-else
-  ac_cv_search_EF_Exit=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_EF_Exit" >&5
-$as_echo "$ac_cv_search_EF_Exit" >&6; }
-ac_res=$ac_cv_search_EF_Exit
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
-
-fi
-
 
 #   ELF libraries
 #       Typically used for 'nlist'  (needed for uptime)

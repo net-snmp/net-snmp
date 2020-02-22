@@ -189,10 +189,6 @@ SOFTWARE.
 #include <in.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
