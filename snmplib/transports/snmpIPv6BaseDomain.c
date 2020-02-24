@@ -48,10 +48,6 @@
 #include <net/if.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_debug.h>

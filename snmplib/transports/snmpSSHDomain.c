@@ -41,9 +41,6 @@
 #include <fcntl.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
 #include <pwd.h>
 
 #ifndef MAXPATHLEN

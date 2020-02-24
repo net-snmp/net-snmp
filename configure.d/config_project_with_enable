@@ -59,14 +59,6 @@ AC_SUBST(LIBTOOLFLAGS)
 #   System: Library settings
 ##
 
-NETSNMP_ARG_WITH(dmalloc,
-        AS_HELP_STRING([--with-dmalloc=PATH],
-                [Use dmalloc library (www.dmalloc.com)]))
-
-NETSNMP_ARG_WITH(efence,
-[  --with-efence                   Look for and use libefence (malloc).],
-      use_efence="$withval")
-
 tryrsaref=no
 NETSNMP_ARG_WITH(rsaref,
 [  --with-rsaref=PATH              Look for librsaref in PATH/lib.],

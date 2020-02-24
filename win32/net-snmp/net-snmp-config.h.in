@@ -153,9 +153,6 @@
 /* Use libwrap to handle allow/deny hosts? */
 /* #undef NETSNMP_USE_LIBWRAP */
 
-/* Use dmalloc to do malloc debugging? */
-/* #undef HAVE_DMALLOC_H */
-
 /* Define if _beginthreadex() is defined in <process.h> */
 #define HAVE__BEGINTHREADEX 1
 
@@ -405,9 +402,6 @@
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 /* #undef HAVE_LIBCRYPTO */
-
-/* Define to 1 if you have the `efence' library (-lefence). */
-/* #undef HAVE_LIBEFENCE */
 
 /* Define to 1 if you have the `elf' library (-lelf). */
 /* #undef HAVE_LIBELF */

@@ -34,10 +34,6 @@
 #include <errno.h>
 
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #ifdef NETSNMP_USE_KERBEROS_HEIMDAL
 #ifndef NETSNMP_USE_KERBEROS_MIT
 #define OLD_HEIMDAL

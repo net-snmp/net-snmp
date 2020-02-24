@@ -90,10 +90,6 @@ SOFTWARE.
 #include <syslog.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include <net-snmp/types.h>
 
 #include <net-snmp/agent/ds_agent.h>

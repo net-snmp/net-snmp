@@ -134,10 +134,6 @@ SOFTWARE.
 #include <winperf.h> /* PERF_DATA_BLOCK */
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif

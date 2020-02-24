@@ -47,10 +47,6 @@
 #include <net/if.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #if HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
 #define SS_FAMILY ss_family
 #elif HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY

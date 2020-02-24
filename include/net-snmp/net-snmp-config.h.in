@@ -147,9 +147,6 @@
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
 
-/* Define to 1 if you have the <dmalloc.h> header file. */
-#undef HAVE_DMALLOC_H
-
 /* Set if the dpkg-query command is available */
 #undef HAVE_DPKG_QUERY
 
@@ -1445,8 +1442,7 @@
 /* Path to the lpstat command */
 #undef LPSTAT_PATH
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* define if agentx transport is to use domain sockets only */

@@ -97,21 +97,10 @@ SOFTWARE.
 
 #endif                         /* MSVC_PERL */
 
-/*
- * Note: when compiling Net-SNMP with dmalloc enabled on a system without
- * strcasecmp() or strncasecmp(), the macro HAVE_STRNCASECMP is
- * not defined but strcasecmp() and strncasecmp() are defined as macros in
- * <dmalloc.h>. In order to prevent a compilation error, do not declare
- * strcasecmp() or strncasecmp() when the <dmalloc.h> header has been included.
- */
-#if !defined(HAVE_STRNCASECMP) && !defined(strcasecmp)
     NETSNMP_IMPORT
     int             strcasecmp(const char *s1, const char *s2);
-#endif
-#if !defined(HAVE_STRNCASECMP) && !defined(strncasecmp)
     NETSNMP_IMPORT
     int             strncasecmp(const char *s1, const char *s2, size_t n);
-#endif
 
 #ifdef WIN32
     NETSNMP_IMPORT
