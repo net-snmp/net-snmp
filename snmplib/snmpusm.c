@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -347,7 +347,7 @@ static int
 usm_set_usmStateReference_name(struct usmStateReference *ref,
                                char *name, size_t name_len)
 {
-    MAKE_ENTRY(ref, char, name, name_len, usr_name, usr_name_length);
+    MAKE_ENTRY(ref, char, name, name_len, usr_name, usr_name_length)
 }
 
 static int
@@ -356,7 +356,7 @@ usm_set_usmStateReference_engine_id(struct usmStateReference *ref,
                                     size_t engine_id_len)
 {
     MAKE_ENTRY(ref, u_char, engine_id, engine_id_len,
-               usr_engine_id, usr_engine_id_length);
+               usr_engine_id, usr_engine_id_length)
 }
 
 static int
@@ -365,7 +365,7 @@ usm_set_usmStateReference_auth_protocol(struct usmStateReference *ref,
                                         size_t auth_protocol_len)
 {
     MAKE_ENTRY(ref, oid, auth_protocol, auth_protocol_len,
-               usr_auth_protocol, usr_auth_protocol_length);
+               usr_auth_protocol, usr_auth_protocol_length)
 }
 
 static int
@@ -373,7 +373,7 @@ usm_set_usmStateReference_auth_key(struct usmStateReference *ref,
                                    u_char * auth_key, size_t auth_key_len)
 {
     MAKE_ENTRY(ref, u_char, auth_key, auth_key_len,
-               usr_auth_key, usr_auth_key_length);
+               usr_auth_key, usr_auth_key_length)
 }
 
 static int
@@ -382,7 +382,7 @@ usm_set_usmStateReference_priv_protocol(struct usmStateReference *ref,
                                         size_t priv_protocol_len)
 {
     MAKE_ENTRY(ref, oid, priv_protocol, priv_protocol_len,
-               usr_priv_protocol, usr_priv_protocol_length);
+               usr_priv_protocol, usr_priv_protocol_length)
 }
 
 static int
@@ -390,7 +390,7 @@ usm_set_usmStateReference_priv_key(struct usmStateReference *ref,
                                    u_char * priv_key, size_t priv_key_len)
 {
     MAKE_ENTRY(ref, u_char, priv_key, priv_key_len,
-               usr_priv_key, usr_priv_key_length);
+               usr_priv_key, usr_priv_key_length)
 }
 
 static int
