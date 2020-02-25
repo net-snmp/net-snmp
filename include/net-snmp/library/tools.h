@@ -143,11 +143,12 @@ extern          "C" {
      *      preprocessor in context.  Limited to a single error return value.
      *      Temporary hack at best.
      */
-#define QUITFUN(e, l)			\
-	if ( (e) != SNMPERR_SUCCESS) {	\
-		rval = SNMPERR_GENERR;	\
-		goto l ;		\
-	}
+#define QUITFUN(e, l) do {               \
+          if ( (e) != SNMPERR_SUCCESS) { \
+             rval = SNMPERR_GENERR;      \
+             goto l ;                    \
+          }                              \
+        } while (0)
 
 /**
  * Compute res = a + b.
