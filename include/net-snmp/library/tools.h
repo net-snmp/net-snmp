@@ -157,15 +157,14 @@ extern          "C" {
  * @note res may be the same variable as one of the operands. In other
  *   words, &a == &res || &b == &res may hold.
  */
-#define NETSNMP_TIMERADD(a, b, res)                  \
-{                                                    \
+#define NETSNMP_TIMERADD(a, b, res) do {             \
     (res)->tv_sec  = (a)->tv_sec  + (b)->tv_sec;     \
     (res)->tv_usec = (a)->tv_usec + (b)->tv_usec;    \
     if ((res)->tv_usec >= 1000000L) {                \
         (res)->tv_usec -= 1000000L;                  \
         (res)->tv_sec++;                             \
     }                                                \
-}
+} while (0)
 
 /**
  * Compute res = a - b.
@@ -175,15 +174,14 @@ extern          "C" {
  * @note res may be the same variable as one of the operands. In other
  *   words, &a == &res || &b == &res may hold.
  */
-#define NETSNMP_TIMERSUB(a, b, res)                             \
-{                                                               \
+#define NETSNMP_TIMERSUB(a, b, res) do {                        \
     (res)->tv_sec  = (a)->tv_sec  - (b)->tv_sec - 1;            \
     (res)->tv_usec = (a)->tv_usec - (b)->tv_usec + 1000000L;    \
     if ((res)->tv_usec >= 1000000L) {                           \
         (res)->tv_usec -= 1000000L;                             \
         (res)->tv_sec++;                                        \
     }                                                           \
-}
+} while (0)
 
 #define ENGINETIME_MAX	2147483647      /* ((2^31)-1) */
 #define ENGINEBOOT_MAX	2147483647      /* ((2^31)-1) */
