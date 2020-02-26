@@ -237,28 +237,24 @@ static struct usmUser *userList = NULL;
  *
  * Return 0 on success, -1 otherwise.
  */
-#define MAKE_ENTRY(ref, type, item, len, field, field_len)              \
-{									\
-	if (ref == NULL)						\
-		return -1;						\
-	if (ref->field != NULL)	{					\
-		SNMP_ZERO(ref->field, ref->field_len);			\
-		SNMP_FREE(ref->field);					\
-	}								\
-	ref->field_len = 0;						\
-        if (len == 0 || item == NULL) {					\
-		return 0;						\
-	}					 			\
-	if ((ref->field = (type*) malloc (len * sizeof(type))) == NULL)	\
-	{								\
-		return -1;						\
-	}								\
-									\
-	memcpy (ref->field, item, len * sizeof(type));			\
-	ref->field_len = len;						\
-									\
-	return 0;							\
-}
+#define MAKE_ENTRY(ref, type, item, len, field, field_len)      \
+do {                                                            \
+	if (ref == NULL)                                        \
+		return -1;                                      \
+	if (ref->field != NULL)	{                               \
+		SNMP_ZERO(ref->field, ref->field_len);          \
+		SNMP_FREE(ref->field);                          \
+	}                                                       \
+	ref->field_len = 0;                                     \
+        if (len == 0 || item == NULL)                           \
+		return 0;                                       \
+	ref->field = netsnmp_memdup(item, len * sizeof(type));  \
+        if (ref->field == NULL)                                 \
+		return -1;                                      \
+                                                                \
+	ref->field_len = len;                                   \
+	return 0;                                               \
+} while (0)
 
 static int
 free_enginetime_on_shutdown(int majorid, int minorid, void *serverarg,
