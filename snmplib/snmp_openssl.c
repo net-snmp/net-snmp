@@ -697,8 +697,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         DEBUGMSGT(("ssl:cert:chain", "examining cert chain\n"));
         for(i = 0; i < sk_num((const void *)ochain); ++i) {
             ocert_tmp = (X509*)sk_value((const void *)ochain,i);
-            fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp,
-                                                               NS_HASH_SHA1);
+            fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, -1);
             if (NULL == fingerprint)
                 break;
             cert_map = netsnmp_cert_map_alloc(NULL, ocert);
