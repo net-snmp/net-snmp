@@ -5,7 +5,6 @@
 HEADER TLS-TCP over IPV6
 
 SKIPIFNOT NETSNMP_TRANSPORT_TLSTCP_DOMAIN
-[ -n "$TRAVIS_OS_NAME" ] && SKIP "Skipping this test on Travis CI"
 
 openssl_version=$(openssl version | cut -d ' ' -f2)
 major=$(echo $openssl_version | cut -c1)

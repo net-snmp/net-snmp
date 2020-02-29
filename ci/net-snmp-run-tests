@@ -24,7 +24,7 @@ make -s &&
                   echo "==== End of test group $g ===="
               done
           else
-	      ./RUNFULLTESTS -g all -e dtls
+	      ./RUNFULLTESTS -g all -e dtls -e tls
           fi
       else
 	  make -s test

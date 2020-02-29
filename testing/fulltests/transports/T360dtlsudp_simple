@@ -5,7 +5,6 @@
 HEADER DTLS-UDP Transport
 
 SKIPIFNOT NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
-[ -n "$CIRRUS_CI" ] && SKIP "Skipping this test on Cirrus CI"
 
 #
 # Begin test
