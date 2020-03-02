@@ -293,7 +293,9 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 	case LSSUSPENDED:
         case LSSTOP:  entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
                       break;
+#ifdef LSDEAD
 	case LSDEAD:
+#endif
         case LSZOMB:  entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
 		      break;
         default:   

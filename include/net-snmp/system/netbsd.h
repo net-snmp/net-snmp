@@ -57,6 +57,9 @@
 #define netbsd3
 #endif
 
+#if defined(netbsd9) && !defined(netbsd8)
+#define netbsd8 netbsd8
+#endif
 #if defined(netbsd8) && !defined(netbsd7)
 #define netbsd7 netbsd7
 #endif
