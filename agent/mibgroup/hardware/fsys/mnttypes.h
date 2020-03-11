@@ -121,6 +121,12 @@
 #ifndef MNTTYPE_GFS2
 #define MNTTYPE_GFS2     "gfs2"
 #endif
+#ifndef MNTTYPE_GLUSTERFS
+#define MNTTYPE_GLUSTERFS         "glusterfs"
+#endif
+#ifndef MNTTYPE_FUSEGLUSTERFS
+#define MNTTYPE_FUSEGLUSTERFS     "fuse.glusterfs"
+#endif
 #ifndef MNTTYPE_XFS
 #define MNTTYPE_XFS      "xfs"
 #endif
