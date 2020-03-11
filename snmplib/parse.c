@@ -131,7 +131,7 @@ struct subid_s {
     char           *label;
 };
 
-#define MAXTC   16384
+#define TC_INCR 100
 struct tc {                     /* textual conventions */
     int             type;
     int             modid;
@@ -140,7 +140,8 @@ struct tc {                     /* textual conventions */
     struct enum_list *enums;
     struct range_list *ranges;
     char           *description;
-} tclist[MAXTC];
+} *tclist;
+int tc_alloc;
 
 int             mibLine = 0;
 const char     *File = "(none)";
@@ -728,7 +729,8 @@ netsnmp_init_mib_internals(void)
 
     memset(nbuckets, 0, sizeof(nbuckets));
     memset(tbuckets, 0, sizeof(tbuckets));
-    memset(tclist, 0, MAXTC * sizeof(struct tc));
+    tc_alloc = TC_INCR;
+    tclist = calloc(tc_alloc, sizeof(struct tc));
     build_translation_table();
     init_tree_roots();          /* Set up initial roots */
     /*
@@ -2113,7 +2115,7 @@ get_tc_index(const char *descriptor, int modid)
         }
 
 
-    for (i = 0, tcp = tclist; i < MAXTC; i++, tcp++) {
+    for (i = 0, tcp = tclist; i < tc_alloc; i++, tcp++) {
         if (tcp->type == 0)
             break;
         if (!label_compare(descriptor, tcp->descriptor) &&
@@ -2132,9 +2134,9 @@ get_tc_index(const char *descriptor, int modid)
 const char     *
 get_tc_descriptor(int tc_index)
 {
-    if (tc_index < 0 || tc_index >= MAXTC)
+    if (tc_index < 0 || tc_index >= tc_alloc)
         return NULL;
-    return (tclist[tc_index].descriptor);
+    return tclist[tc_index].descriptor;
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_GET_TC_DESCRIPTION
@@ -2142,9 +2144,9 @@ get_tc_descriptor(int tc_index)
 const char     *
 get_tc_description(int tc_index)
 {
-    if (tc_index < 0 || tc_index >= MAXTC)
+    if (tc_index < 0 || tc_index >= tc_alloc)
         return NULL;
-    return (tclist[tc_index].description);
+    return tclist[tc_index].description;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_GET_TC_DESCRIPTION */
 
@@ -2417,14 +2419,16 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
         /*
          * textual convention 
          */
-        for (i = 0; i < MAXTC; i++) {
+        for (i = 0; i < tc_alloc; i++) {
             if (tclist[i].type == 0)
                 break;
         }
 
-        if (i == MAXTC) {
-            print_error("Too many textual conventions", token, type);
-            goto err;
+        if (i == tc_alloc) {
+            tclist = realloc(tclist, (tc_alloc + TC_INCR)*sizeof(struct tc));
+            memset(tclist+tc_alloc, 0, TC_INCR*sizeof(struct tc));
+            tc_alloc += TC_INCR;
+            snmp_log(LOG_ERR, "tcalloc=%d\n", tc_alloc);
         }
         if (!(type & SYNTAX_MASK)) {
             print_error("Textual convention doesn't map to real type",
@@ -4179,7 +4183,7 @@ unload_all_mibs(void)
      * tree nodes are cleared 
      */
 
-    for (i = 0, ptc = tclist; i < MAXTC; i++, ptc++) {
+    for (i = 0, ptc = tclist; i < tc_alloc; i++, ptc++) {
         if (ptc->type == 0)
             continue;
         free_enums(&ptc->enums);
@@ -4190,7 +4194,7 @@ unload_all_mibs(void)
         if (ptc->description)
             free(ptc->description);
     }
-    memset(tclist, 0, MAXTC * sizeof(struct tc));
+    memset(tclist, 0, tc_alloc * sizeof(struct tc));
 
     memset(buckets, 0, sizeof(buckets));
     memset(nbuckets, 0, sizeof(nbuckets));
