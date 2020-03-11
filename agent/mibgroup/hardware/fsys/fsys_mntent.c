@@ -135,6 +135,8 @@ _fsys_type( char *typename )
               !strcmp(typename, MNTTYPE_TMPFS) ||
               !strcmp(typename, MNTTYPE_GFS) ||
               !strcmp(typename, MNTTYPE_GFS2) ||
+              !strcmp(typename, MNTTYPE_GLUSTERFS) ||
+              !strcmp(typename, MNTTYPE_FUSEGLUSTERFS) ||    
               !strcmp(typename, MNTTYPE_XFS) ||
               !strcmp(typename, MNTTYPE_JFS) ||
               !strcmp(typename, MNTTYPE_VXFS) ||
