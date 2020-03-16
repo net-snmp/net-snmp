@@ -16,16 +16,6 @@
 
 AC_PROG_GCC_TRADITIONAL
 
-if test "$cross_compiling" = yes -a "${ac_cv_func_memcmp_working+set}" != set
-then
-  # Cross-compiling and ac_cv_func_memcmp_working has not been set - assume
-  # that memcmp() is available.
-  ac_cv_func_memcmp_working=yes
-else
-  # Native compilation - test for the availability of memcmp().
-  AC_FUNC_MEMCMP
-fi
-
 AC_TYPE_SIGNAL
 
 ##
