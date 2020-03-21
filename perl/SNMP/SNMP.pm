@@ -1185,7 +1185,7 @@ sub trap {
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    }
 
-   if ($this->{Version} eq '1') {
+   if ($this->{Version} =~ '^1') {
        my $enterprise = $param{enterprise} || 'ucdavis';
        $enterprise = SNMP::translateObj($enterprise)
 	   unless $enterprise =~ /^[\.\d]+$/;
@@ -1200,6 +1200,8 @@ sub trap {
        my $trap_oid = $param{oid} || $param{trapoid} || '.0.0';
        my $uptime = $param{uptime} || SNMP::_sys_uptime();
        @res = SNMP::_trapV2($this, $uptime, $trap_oid, $varbind_list_ref);
+   } else {
+     warn("error:trap: Unsupported SNMP version " . $this->{Version} . "\n");
    }
 
    return(wantarray() ? @res : $res[0]);
