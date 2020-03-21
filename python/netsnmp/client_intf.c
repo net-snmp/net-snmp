@@ -852,10 +852,10 @@ py_netsnmp_attr_string(PyObject *obj, char * attr_name, char **val,
   return -1;
 }
 
-static long long
+static long
 py_netsnmp_attr_long(PyObject *obj, char * attr_name)
 {
-  long long val = -1;
+  long val = -1;
 
   if (obj && attr_name  && PyObject_HasAttrString(obj, attr_name)) {
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
