@@ -57,7 +57,7 @@ AC_PATH_PROG(AUTOCONF,    autoconf,   [:])
 AC_PATH_PROG(AUTOHEADER,  autoheader, [:])
 AC_PATH_PROG([PERLPROG],  perl)
 AC_PATH_PROG([PSPROG],    ps)
-AC_PATH_PROG([PYTHONPROG],python)
+AC_PATH_PROG([PYTHONPROG],python3)
 
 AC_PATH_PROG([UNAMEPROG], uname)
 AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG", [Where is the uname command])

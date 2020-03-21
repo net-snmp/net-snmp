@@ -221,8 +221,7 @@ static int
 __snprint_value(char **buf, size_t *buf_len, const netsnmp_variable_list *var,
                 const struct tree *tp, int type, int flag)
 {
-   size_t out_len = 0;
-   int len = 0;
+   size_t out_len = 0, len = 0;
    u_char* ip;
    struct enum_list *ep;
 
@@ -480,7 +479,7 @@ __get_label_iid(char *name, char **last_label, char **iid, int flag)
  * returns : SUCCESS, FAILURE
  */
 static int
-__concat_oid_str(oid *doid_arr, int *doid_arr_len, const char *soid_str)
+__concat_oid_str(oid *doid_arr, size_t *doid_arr_len, const char *soid_str)
 {
    char *soid_buf;
    char *cp;
@@ -506,7 +505,7 @@ __concat_oid_str(oid *doid_arr, int *doid_arr_len, const char *soid_str)
 /* Convert a tag (string) to an OID array              */
 /* Tag can be either a symbolic name, or an OID string */
 static struct tree *
-__tag2oid(const char *tag, const char *iid, oid *oid_arr, int *oid_arr_len,
+__tag2oid(const char *tag, const char *iid, oid *oid_arr, size_t *oid_arr_len,
           int *type, int best_guess)
 {
    struct tree *tp = NULL;
@@ -869,7 +868,7 @@ py_netsnmp_attr_string(PyObject *obj, const char *attr_name, char **val,
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
     if (attr) {
       int retval;
-      retval = PyString_AsStringAndSize(attr, val, len);
+      retval = PyBytes_AsStringAndSize(attr, val, len);
       Py_DECREF(attr);
       return retval;
     }
@@ -890,7 +889,7 @@ py_netsnmp_attr_long(PyObject *obj, const char *attr_name)
   if (obj && attr_name && PyObject_HasAttrString(obj, attr_name)) {
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
     if (attr) {
-      val = PyInt_AsLong(attr);
+      val = PyLong_AsLong(attr);
       Py_DECREF(attr);
     }
   }
@@ -983,13 +982,13 @@ __py_netsnmp_update_session_errors(PyObject *session, char *err_str,
 
     py_netsnmp_attr_set_string(session, "ErrorStr", err_str, STRLEN(err_str));
 
-    tmp_for_conversion = PyInt_FromLong(err_num);
+    tmp_for_conversion = PyLong_FromLong(err_num);
     if (!tmp_for_conversion)
         return; /* nothing better to do? */
     PyObject_SetAttrString(session, "ErrorNum", tmp_for_conversion);
     Py_DECREF(tmp_for_conversion);
 
-    tmp_for_conversion = PyInt_FromLong(err_ind);
+    tmp_for_conversion = PyLong_FromLong(err_ind);
     if (!tmp_for_conversion)
         return; /* nothing better to do? */
     PyObject_SetAttrString(session, "ErrorInd", tmp_for_conversion);
@@ -1313,7 +1312,7 @@ netsnmp_get(PyObject *self, PyObject *args)
   struct tree *tp;
   int len;
   oid *oid_arr;
-  int oid_arr_len = MAX_OID_LEN;
+  size_t oid_arr_len = MAX_OID_LEN;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
   u_char *str_buf = NULL;
@@ -1532,7 +1531,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   struct tree *tp;
   int len;
   oid *oid_arr;
-  int oid_arr_len = MAX_OID_LEN;
+  size_t oid_arr_len = MAX_OID_LEN;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
   u_char *str_buf = NULL;
@@ -1596,8 +1595,8 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 	}
 
 	if (_debug_level)
-	  printf("netsnmp_getnext: filling request: %s:%s:%d:%d\n",
-		 tag, iid, oid_arr_len,best_guess);
+	  printf("netsnmp_getnext: filling request: %s:%s:%zd:%d\n",
+		 tag, iid, oid_arr_len, best_guess);
 
 	if (oid_arr_len) {
 	  snmp_add_null_var(pdu, oid_arr, oid_arr_len);
@@ -1760,9 +1759,9 @@ netsnmp_walk(PyObject *self, PyObject *args)
   struct tree *tp;
   int len;
   oid **oid_arr = NULL;
-  int *oid_arr_len = NULL;
+  size_t *oid_arr_len = NULL;
   oid **oid_arr_broken_check = NULL;
-  int *oid_arr_broken_check_len = NULL;
+  size_t *oid_arr_broken_check_len = NULL;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
   int status;
@@ -1829,8 +1828,9 @@ netsnmp_walk(PyObject *self, PyObject *args)
     }
     Py_DECREF(varlist_iter);
 
-    oid_arr_len              = calloc(varlist_len, sizeof(int));
-    oid_arr_broken_check_len = calloc(varlist_len, sizeof(int));
+    oid_arr_len              = calloc(varlist_len, sizeof(*oid_arr_len));
+    oid_arr_broken_check_len = calloc(varlist_len,
+                                      sizeof(*oid_arr_broken_check_len));
 
     oid_arr                  = calloc(varlist_len, sizeof(oid *));
     oid_arr_broken_check     = calloc(varlist_len, sizeof(oid *));
@@ -1860,8 +1860,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
       }
 
       if (_debug_level)
-	printf("netsnmp_walk: filling request: %s:%s:%d:%d\n",
-	       tag, iid, oid_arr_len[varlist_ind],best_guess);
+	printf("netsnmp_walk: filling request: %s:%s:%zd:%d\n",
+	       tag, iid, oid_arr_len[varlist_ind], best_guess);
 
       if (oid_arr_len[varlist_ind]) {
         snmp_add_null_var(pdu, oid_arr[varlist_ind], oid_arr_len[varlist_ind]);
@@ -2123,7 +2123,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   struct tree *tp;
   int len;
   oid *oid_arr;
-  int oid_arr_len = MAX_OID_LEN;
+  size_t oid_arr_len = MAX_OID_LEN;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
   u_char *str_buf = NULL;
@@ -2371,7 +2371,7 @@ netsnmp_set(PyObject *self, PyObject *args)
   char *type_str;
   int len;
   oid *oid_arr;
-  int oid_arr_len = MAX_OID_LEN;
+  size_t oid_arr_len = MAX_OID_LEN;
   int type;
   u_char tmp_val_str[STR_BUF_SIZE];
   int use_enums;
@@ -2445,7 +2445,7 @@ netsnmp_set(PyObject *self, PyObject *args)
 	  goto done;
 	}
 	memset(tmp_val_str, 0, sizeof(tmp_val_str));
-        if ( tmplen >= sizeof(tmp_val_str)) {
+        if (tmplen >= (Py_ssize_t)sizeof(tmp_val_str)) {
             tmplen = sizeof(tmp_val_str)-1;
         }
 	memcpy(tmp_val_str, val, tmplen);
@@ -2522,11 +2522,26 @@ static PyMethodDef ClientMethods[] = {
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+#if PY_VERSION_HEX < 0x03000000
 PyMODINIT_FUNC
 initclient_intf(void)
 {
     (void) Py_InitModule("client_intf", ClientMethods);
 }
+#else
+static PyModuleDef module_def = {
+    .m_base = PyModuleDef_HEAD_INIT,
+    .m_name = "client_intf",
+    .m_size = -1,
+    .m_methods = ClientMethods,
+};
+
+PyMODINIT_FUNC
+PyInit_client_intf(void)
+{
+    return PyModule_Create(&module_def);
+}
+#endif
 
 
 
