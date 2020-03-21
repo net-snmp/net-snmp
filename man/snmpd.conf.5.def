@@ -109,7 +109,9 @@ the IF-MIB processing will take a large chunk of CPU for ioctl calls
 (on Linux). A set of space separated interface name prefixes will
 reduce the CPU load for IF-MIB processing.  For example, configuring
 "include_ifmib_iface_prefix eth dummy lo" will include only interfaces
-with these prefixes and ignore all others for IF-MIB processing.
+with these prefixes and ignore all others for IF-MIB processing. If
+regex support is compiled in, each of the prefixes is a regular
+expression (which is not permitted to contain a space or tab character).
 .IP
 The default (without this configured) is to include all interfaces.
 .SS SNMPv3 Configuration - Real Security

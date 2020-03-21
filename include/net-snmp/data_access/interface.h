@@ -10,6 +10,12 @@
 extern          "C" {
 #endif
 
+#if HAVE_PCRE_H
+#include <pcre.h>
+#elif HAVE_REGEX_H
+#include <regex.h>
+#endif
+
 /*
  * define flags to indicate the availability of certain data
  */
@@ -205,6 +211,11 @@ typedef struct _conf_if_list {
     typedef netsnmp_conf_if_list conf_if_list; /* backwards compat */
 
 typedef struct _include_if_list {
+#if HAVE_PCRE_H
+    pcre                    *regex_ptr;
+#elif HAVE_REGEX_H
+    regex_t                 *regex_ptr;
+#endif
     char                    *name;
     struct _include_if_list *next;
 } netsnmp_include_if_list;

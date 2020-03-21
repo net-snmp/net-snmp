@@ -16,6 +16,12 @@
 #include "if-mib/ifTable/ifTable.h"
 #include "if-mib/data_access/interface.h"
 #include "interface_private.h"
+#if HAVE_PCRE_H
+#include <pcre.h>
+#elif HAVE_REGEX_H
+#include <sys/types.h>
+#include <regex.h>
+#endif
 
 netsnmp_feature_child_of(interface_all, libnetsnmpmibs);
 netsnmp_feature_child_of(interface, interface_all);
@@ -846,6 +852,9 @@ int netsnmp_access_interface_max_reached(const char *name)
 int netsnmp_access_interface_include(const char *name)
 {
     netsnmp_include_if_list *if_ptr;
+#if HAVE_PCRE_H
+    int                      found_ndx[3];
+#endif
 
     if (!name)
         return TRUE;
@@ -857,9 +866,20 @@ int netsnmp_access_interface_include(const char *name)
          */
         return TRUE;
 
-    for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next)
+
+    for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
+#if HAVE_PCRE_H
+        if (pcre_exec(if_ptr->regex_ptr, NULL, name, strlen(name), 0, 0,
+                      found_ndx, 3) >= 0)
+            return TRUE;
+#elif HAVE_REGEX_H
+        if (regexec(if_ptr->regex_ptr, name, NULL, NULL, NULL) == 0)
+            return TRUE;
+#else
         if (strncmp(name, if_ptr->name, strlen(if_ptr->name)) == 0)
             return TRUE;
+#endif
+    }
 
     return FALSE;
 }
@@ -972,6 +992,12 @@ _parse_include_if_config(const char *token, char *cptr)
 {
     netsnmp_include_if_list *if_ptr, *if_new;
     char                    *name, *st;
+#if HAVE_PCRE_H
+    const char              *pcre_error;
+    int                     pcre_error_offset;
+#elif HAVE_REGEX_H
+    int                     r = 0;
+#endif
 
     name = strtok_r(cptr, " \t", &st);
     if (!name) {
@@ -991,18 +1017,53 @@ _parse_include_if_config(const char *token, char *cptr)
         if_new = SNMP_MALLOC_TYPEDEF(netsnmp_include_if_list);
         if (!if_new) {
             config_perror("Out of memory");
-            return;
+            goto err;
         }
         if_new->name = strdup(name);
         if (!if_new->name) {
             config_perror("Out of memory");
-            free(if_new);
-            return;
+            goto err;
         }
+#if HAVE_PCRE_H
+        if_new->regex_ptr = pcre_compile(if_new->name, 0,  &pcre_error,
+                                         &pcre_error_offset, NULL);
+        if (!if_new->regex_ptr) {
+            config_perror(pcre_error);
+            goto err;
+        }
+#elif HAVE_REGEX_H
+        if_new->regex_ptr = malloc(sizeof(regex_t));
+        if (!if_new->regex_ptr) {
+            config_perror("Out of memory");
+            goto err;
+        }
+        r = regcomp(if_new->regex_ptr, if_new->name, REG_NOSUB);
+        if (r) {
+            char buf[BUFSIZ];
+            size_t regerror_len = 0;
+
+            regerror_len = regerror(r, if_new->regex_ptr, buf, BUFSIZ);
+            if (regerror_len >= BUFSIZ)
+                buf[BUFSIZ - 1] = '\0';
+            else
+                buf[regerror_len] = '\0';
+            config_perror(buf);
+            goto err;
+        }
+#endif
         if_new->next = include_list;
         include_list = if_new;
+        if_new = NULL;
         name = strtok_r(NULL, " \t", &st);
     }
+    return;
+
+err:
+    if (if_new) {
+        free(if_new->regex_ptr);
+        free(if_new->name);
+    }
+    free(if_new);
 }
 
 static void
@@ -1012,6 +1073,12 @@ _free_include_if_config(void)
 
     while (if_ptr) {
         if_next = if_ptr->next;
+#if HAVE_PCRE_H
+        free(if_ptr->regex_ptr);
+#elif HAVE_REGEX_H
+        regfree(if_ptr->regex_ptr);
+        free(if_ptr->regex_ptr);
+#endif
         free(if_ptr->name);
         free(if_ptr);
         if_ptr = if_next;
