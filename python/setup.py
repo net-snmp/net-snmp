@@ -2,16 +2,15 @@ from distutils.core import setup, Extension
 from setuptools import setup, Extension, find_packages
 import os
 import re
-import string
 import sys
 
 intree=0
 
 args = sys.argv[:]
 for arg in args:
-    if string.find(arg,'--basedir=') == 0:
-        basedir = string.split(arg,'=')[1]
-	sys.argv.remove(arg)
+    if arg.find('--basedir=') == 0:
+        basedir = arg.split('=')[1]
+        sys.argv.remove(arg)
         intree=1
 
 if intree:
