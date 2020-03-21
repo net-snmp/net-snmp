@@ -834,6 +834,10 @@ py_netsnmp_construct_varbind(void)
   return PyObject_CallFunction(callable, "");
 }
 
+/*
+ * Retrieve attribute @attr_name of @obj, store it in buffer @val and
+ * store its length in *@len. Terminate @val with '\0' if @len == NULL.
+ */
 static int
 py_netsnmp_attr_string(PyObject *obj, char * attr_name, char **val,
     Py_ssize_t *len)
@@ -852,6 +856,10 @@ py_netsnmp_attr_string(PyObject *obj, char * attr_name, char **val,
   return -1;
 }
 
+/*
+ * Retrieve attribute @attr_name of @obj and return it as a long. Returns -1
+ * on error.
+ */
 static long
 py_netsnmp_attr_long(PyObject *obj, char * attr_name)
 {
@@ -868,6 +876,10 @@ py_netsnmp_attr_long(PyObject *obj, char * attr_name)
   return val;
 }
 
+/*
+ * Retrieve attribute @attr_name of @obj and return it as a void ponter.
+ * Returns NULL on error.
+ */
 static void *
 py_netsnmp_attr_void_ptr(PyObject *obj, char * attr_name)
 {
@@ -897,6 +909,9 @@ py_netsnmp_verbose(void)
   return verbose;
 }
 
+/*
+ * Set attribute @attr_name of @obj to the string @val.
+ */
 static int
 py_netsnmp_attr_set_string(PyObject *obj, char *attr_name,
 			   char *val, size_t len)
