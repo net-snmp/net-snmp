@@ -43,18 +43,7 @@ typedef int Py_ssize_t;
 
 typedef netsnmp_session SnmpSession;
 typedef struct tree SnmpMibNode;
-static int __is_numeric_oid (char*);
-static int __is_leaf (struct tree*);
-static int __translate_asn_type (int);
-static int __snprint_value (char **, size_t *,
-                            netsnmp_variable_list*, struct tree *,
-                            int, int);
-static int __sprint_num_objid (char **, size_t *, oid *, int);
-static int __scan_num_objid (char *, oid *, size_t *);
-static int __get_type_str (int, char *);
-static int __get_label_iid (char *, char **, char **, int);
-static struct tree * __tag2oid (char *, char *, oid  *, int  *, int *, int);
-static int __concat_oid_str (oid *, int *, char *);
+
 #define USE_NUMERIC_OIDS 0x08
 #define NON_LEAF_NAME 0x04
 #define USE_LONG_NAMES 0x02
@@ -62,45 +51,6 @@ static int __concat_oid_str (oid *, int *, char *);
 #define NO_FLAGS 0x00
 
 static int _debug_level;
-
-
-void
-__libraries_init(char *appname)
-{
-  static int have_inited = 0;
-
-  if (have_inited)
-    return;
-  have_inited = 1;
-
-  netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
-                         NETSNMP_DS_LIB_QUICK_PRINT, 1);
-  snmp_enable_stderrlog();
-  init_snmp(appname);
-
-  netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, 1);
-  netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
-  netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
-		     NETSNMP_OID_OUTPUT_SUFFIX);
-}
-
-static int
-__is_numeric_oid(char* oidstr)
-{
-  if (!oidstr) return 0;
-  for (; *oidstr; oidstr++) {
-     if (isalpha((int)*oidstr)) return 0;
-  }
-  return(1);
-}
-
-static int
-__is_leaf(struct tree* tp)
-{
-   char buf[MAX_TYPE_NAME_LEN];
-   return (tp && (__get_type_str(tp->type,buf) ||
-		  (tp->parent && __get_type_str(tp->parent->type,buf) )));
-}
 
 struct type_table_entry {
     uint8_t	mib_type;
@@ -136,6 +86,64 @@ static const struct type_table_entry type_table[] = {
 
     { }
 };
+
+
+void
+__libraries_init(char *appname)
+{
+  static int have_inited = 0;
+
+  if (have_inited)
+    return;
+  have_inited = 1;
+
+  netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                         NETSNMP_DS_LIB_QUICK_PRINT, 1);
+  snmp_enable_stderrlog();
+  init_snmp(appname);
+
+  netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+  netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
+  netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+		     NETSNMP_OID_OUTPUT_SUFFIX);
+}
+
+static int
+__is_numeric_oid(char* oidstr)
+{
+  if (!oidstr) return 0;
+  for (; *oidstr; oidstr++) {
+     if (isalpha((int)*oidstr)) return 0;
+  }
+  return(1);
+}
+
+static int
+__get_type_str(int type, char * str)
+{
+    const struct type_table_entry *e;
+
+    for (e = type_table; e->name; e++) {
+        if (type == e->mib_type) {
+            strcpy(str, e->name);
+            return SUCCESS;
+        }
+    }
+
+    strcpy(str, "");
+    if (_debug_level)
+        printf("__get_type_str:FAILURE(%d)\n", type);
+
+    return FAILURE;
+}
+
+static int
+__is_leaf(struct tree* tp)
+{
+   char buf[MAX_TYPE_NAME_LEN];
+   return (tp && (__get_type_str(tp->type,buf) ||
+		  (tp->parent && __get_type_str(tp->parent->type,buf) )));
+}
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 static int
@@ -183,6 +191,22 @@ static void *enlarge_buffer(char **buf, size_t *buf_len, size_t desired_len)
         *buf_len = desired_len;
     }
     return *buf;
+}
+
+static int
+__sprint_num_objid(char **buf, size_t *buf_len, oid *objid, int len)
+{
+   char *p, *end;
+   int i;
+
+   enlarge_buffer(buf, buf_len, len * 16);
+   p = *buf;
+   end = *buf + *buf_len;
+   (*buf)[0] = '\0';
+   for (i = 0; i < len; i++)
+       p += snprintf(p, end - p, ".%lu", *objid++);
+
+   return SUCCESS;
 }
 
 #define USE_BASIC 0
@@ -310,22 +334,6 @@ __snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
 }
 
 static int
-__sprint_num_objid(char **buf, size_t *buf_len, oid *objid, int len)
-{
-   char *p, *end;
-   int i;
-
-   enlarge_buffer(buf, buf_len, len * 16);
-   p = *buf;
-   end = *buf + *buf_len;
-   (*buf)[0] = '\0';
-   for (i = 0; i < len; i++)
-       p += snprintf(p, end - p, ".%lu", *objid++);
-
-   return SUCCESS;
-}
-
-static int
 __scan_num_objid(char *buf, oid *objid, size_t *len)
 {
    char *cp;
@@ -348,25 +356,6 @@ __scan_num_objid(char *buf, oid *objid, size_t *len)
    /* *objid++ = atoi(cp); */
    (*len)++;
    return SUCCESS;
-}
-
-static int
-__get_type_str(int type, char * str)
-{
-    const struct type_table_entry *e;
-
-    for (e = type_table; e->name; e++) {
-        if (type == e->mib_type) {
-            strcpy(str, e->name);
-            return SUCCESS;
-        }
-    }
-
-    strcpy(str, "");
-    if (_debug_level)
-        printf("__get_type_str:FAILURE(%d)\n", type);
-
-    return FAILURE;
 }
 
 /* does a destructive disection of <label1>...<labeln>.<iid> returning
@@ -474,6 +463,36 @@ __get_label_iid(char *name, char **last_label, char **iid, int flag)
    return(SUCCESS);
 }
 
+/* function: __concat_oid_str
+ *
+ * This function converts a dotted-decimal string, soid_str, to an array
+ * of oid types and concatenates them on doid_arr begining at the index
+ * specified by doid_arr_len.
+ *
+ * returns : SUCCESS, FAILURE
+ */
+static int
+__concat_oid_str(oid *doid_arr, int *doid_arr_len, char *soid_str)
+{
+   char *soid_buf;
+   char *cp;
+   char *st;
+
+   if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
+   if (*soid_str == '.') soid_str++;
+   soid_buf = strdup(soid_str);
+   if (!soid_buf)
+       return FAILURE;
+   cp = strtok_r(soid_buf,".",&st);
+   while (cp) {
+     sscanf(cp, "%lu", &(doid_arr[(*doid_arr_len)++]));
+     /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
+     cp = strtok_r(NULL,".",&st);
+   }
+   free(soid_buf);
+   return(SUCCESS);
+}
+
 /* Convert a tag (string) to an OID array              */
 /* Tag can be either a symbolic name, or an OID string */
 static struct tree *
@@ -576,36 +595,6 @@ __tag2oid(char *tag, char *iid, oid  *oid_arr, int  *oid_arr_len, int *type,
    if (iid && *iid && oid_arr_len)
        __concat_oid_str(oid_arr, oid_arr_len, iid);
    return(rtp);
-}
-
-/* function: __concat_oid_str
- *
- * This function converts a dotted-decimal string, soid_str, to an array
- * of oid types and concatenates them on doid_arr begining at the index
- * specified by doid_arr_len.
- *
- * returns : SUCCESS, FAILURE
- */
-static int
-__concat_oid_str(oid *doid_arr, int *doid_arr_len, char *soid_str)
-{
-   char *soid_buf;
-   char *cp;
-   char *st;
-
-   if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
-   if (*soid_str == '.') soid_str++;
-   soid_buf = strdup(soid_str);
-   if (!soid_buf)
-       return FAILURE;
-   cp = strtok_r(soid_buf,".",&st);
-   while (cp) {
-     sscanf(cp, "%lu", &(doid_arr[(*doid_arr_len)++]));
-     /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
-     cp = strtok_r(NULL,".",&st);
-   }
-   free(soid_buf);
-   return(SUCCESS);
 }
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
