@@ -89,7 +89,7 @@ static const struct type_table_entry type_table[] = {
 
 
 void
-__libraries_init(char *appname)
+__libraries_init(const char *appname)
 {
   static int have_inited = 0;
 
@@ -102,24 +102,28 @@ __libraries_init(char *appname)
   snmp_enable_stderrlog();
   init_snmp(appname);
 
-  netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, 1);
-  netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
+  netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                         NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+  netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY,
+                     1);
   netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
 		     NETSNMP_OID_OUTPUT_SUFFIX);
 }
 
 static int
-__is_numeric_oid(char* oidstr)
+__is_numeric_oid(const char *oidstr)
 {
-  if (!oidstr) return 0;
+  if (!oidstr)
+      return 0;
   for (; *oidstr; oidstr++) {
-     if (isalpha((int)*oidstr)) return 0;
+     if (isalpha((unsigned char)*oidstr))
+         return 0;
   }
-  return(1);
+  return 1;
 }
 
 static int
-__get_type_str(int type, char * str)
+__get_type_str(int type, char *str)
 {
     const struct type_table_entry *e;
 
@@ -141,8 +145,9 @@ static int
 __is_leaf(struct tree* tp)
 {
    char buf[MAX_TYPE_NAME_LEN];
-   return (tp && (__get_type_str(tp->type,buf) ||
-		  (tp->parent && __get_type_str(tp->parent->type,buf) )));
+
+   return tp && (__get_type_str(tp->type,buf) ||
+                 (tp->parent && __get_type_str(tp->parent->type,buf)));
 }
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
@@ -194,7 +199,7 @@ static void *enlarge_buffer(char **buf, size_t *buf_len, size_t desired_len)
 }
 
 static int
-__sprint_num_objid(char **buf, size_t *buf_len, oid *objid, int len)
+__sprint_num_objid(char **buf, size_t *buf_len, const oid *objid, int len)
 {
    char *p, *end;
    int i;
@@ -213,14 +218,13 @@ __sprint_num_objid(char **buf, size_t *buf_len, oid *objid, int len)
 #define USE_ENUMS 1
 #define USE_SPRINT_VALUE 2
 static int
-__snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
-                struct tree *tp, int type, int flag)
+__snprint_value(char **buf, size_t *buf_len, const netsnmp_variable_list *var,
+                const struct tree *tp, int type, int flag)
 {
    size_t out_len = 0;
    int len = 0;
    u_char* ip;
    struct enum_list *ep;
-
 
    enlarge_buffer(buf, buf_len, 32);
    (*buf)[0] = '\0';
@@ -252,7 +256,7 @@ __snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
         case ASN_COUNTER:
         case ASN_TIMETICKS:
         case ASN_UINTEGER:
-           snprintf(*buf, *buf_len, "%lu", (unsigned long) *var->val.integer);
+           snprintf(*buf, *buf_len, "%lu", *var->val.integer);
            len = STRLEN(*buf);
            break;
 
@@ -275,8 +279,8 @@ __snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
            break;
 
         case ASN_OBJECT_ID:
-          __sprint_num_objid(buf, buf_len, (oid *)(var->val.objid),
-                             var->val_len/sizeof(oid));
+          __sprint_num_objid(buf, buf_len, var->val.objid,
+                             var->val_len / sizeof(oid));
           len = STRLEN(*buf);
           break;
 
@@ -295,13 +299,13 @@ __snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
         case ASN_OPAQUE_COUNTER64:
         case ASN_OPAQUE_U64:
 #endif
-          printU64(*buf,(struct counter64 *)var->val.counter64);
+          printU64(*buf, var->val.counter64);
           len = STRLEN(*buf);
           break;
 
 #ifdef OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_I64:
-          printI64(*buf,(struct counter64 *)var->val.counter64);
+          printI64(*buf, var->val.counter64);
           len = STRLEN(*buf);
           break;
 #endif
@@ -334,11 +338,13 @@ __snprint_value(char **buf, size_t *buf_len, netsnmp_variable_list *var,
 }
 
 static int
-__scan_num_objid(char *buf, oid *objid, size_t *len)
+__scan_num_objid(const char *buf, oid *objid, size_t *len)
 {
-   char *cp;
+   const char *cp;
+
    *len = 0;
-   if (*buf == '.') buf++;
+   if (*buf == '.')
+       buf++;
    cp = buf;
    while (*buf) {
       if (*buf++ == '.') {
@@ -347,7 +353,7 @@ __scan_num_objid(char *buf, oid *objid, size_t *len)
          (*len)++;
          cp = buf;
       } else {
-         if (isalpha((int)*buf)) {
+         if (isalpha((unsigned char)*buf)) {
 	    return FAILURE;
          }
       }
@@ -358,7 +364,7 @@ __scan_num_objid(char *buf, oid *objid, size_t *len)
    return SUCCESS;
 }
 
-/* does a destructive disection of <label1>...<labeln>.<iid> returning
+/* does a destructive dissection of <label1>...<labeln>.<iid> returning
    <labeln> and <iid> in seperate strings (note: will destructively
    alter input string, 'name') */
 static int
@@ -371,45 +377,45 @@ __get_label_iid(char *name, char **last_label, char **iid, int flag)
 
    *last_label = *iid = NULL;
 
-   if (len == 0) return(FAILURE);
+   if (len == 0)
+       return FAILURE;
 
    /* Handle case where numeric oid's have been requested.  The input 'name'
    ** in this case should be a numeric OID -- return failure if not.
    */
    if ((flag & USE_NUMERIC_OIDS)) {
       if (!__is_numeric_oid(name))
-       return(FAILURE);
+         return FAILURE;
 
       /* Walk backward through the string, looking for first two '.' chars */
       lcp = &(name[len]);
       icp = NULL;
       while (lcp > name) {
-       if (*lcp == '.') {
-
-          /* If this is the first occurence of '.', note it in icp.
-          ** Otherwise, this must be the second occurrence, so break
-          ** out of the loop.
-          */
-          if (icp == NULL)
-             icp = lcp;
-          else
-             break;
-       }
-       lcp --;
+         if (*lcp == '.') {
+            /* If this is the first occurrence of '.', note it in icp.
+            ** Otherwise, this must be the second occurrence, so break
+            ** out of the loop.
+            */
+            if (icp == NULL)
+               icp = lcp;
+            else
+               break;
+         }
+         lcp --;
       }
 
       /* Make sure we found at least a label and index. */
       if (!icp)
-         return(FAILURE);
+         return FAILURE;
 
       /* Push forward past leading '.' chars and separate the strings. */
-      lcp ++;
-      *icp ++ = '\0';
+      lcp++;
+      *icp++ = '\0';
 
-      *last_label = (flag & USE_LONG_NAMES) ? name : lcp;
+      *last_label = flag & USE_LONG_NAMES ? name : lcp;
       *iid        = icp;
 
-      return(SUCCESS);
+      return SUCCESS;
    }
 
    lcp = icp = &(name[len]);
@@ -423,12 +429,14 @@ __get_label_iid(char *name, char **last_label, char **iid, int flag)
            icp = lcp;
         }
       }
-      if (!found_label && isalpha((int)*lcp)) found_label = 1;
+      if (!found_label && isalpha((unsigned char)*lcp))
+         found_label = 1;
       lcp--;
    }
 
-   if (!found_label || (!isdigit((int)*(icp+1)) && (flag & FAIL_ON_NULL_IID)))
-      return(FAILURE);
+   if (!found_label || (!isdigit((unsigned char)*(icp+1)) &&
+                        (flag & FAIL_ON_NULL_IID)))
+      return FAILURE;
 
    if (flag & NON_LEAF_NAME) { /* dont know where to start instance id */
      /* put the whole thing in label */
@@ -460,7 +468,7 @@ __get_label_iid(char *name, char **last_label, char **iid, int flag)
 
    *iid = icp;
 
-   return(SUCCESS);
+   return SUCCESS;
 }
 
 /* function: __concat_oid_str
@@ -472,14 +480,16 @@ __get_label_iid(char *name, char **last_label, char **iid, int flag)
  * returns : SUCCESS, FAILURE
  */
 static int
-__concat_oid_str(oid *doid_arr, int *doid_arr_len, char *soid_str)
+__concat_oid_str(oid *doid_arr, int *doid_arr_len, const char *soid_str)
 {
    char *soid_buf;
    char *cp;
    char *st;
 
-   if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
-   if (*soid_str == '.') soid_str++;
+   if (!soid_str || !*soid_str)
+      return SUCCESS; /* successfully added nothing */
+   if (*soid_str == '.')
+      soid_str++;
    soid_buf = strdup(soid_str);
    if (!soid_buf)
        return FAILURE;
@@ -490,23 +500,26 @@ __concat_oid_str(oid *doid_arr, int *doid_arr_len, char *soid_str)
      cp = strtok_r(NULL,".",&st);
    }
    free(soid_buf);
-   return(SUCCESS);
+   return SUCCESS;
 }
 
 /* Convert a tag (string) to an OID array              */
 /* Tag can be either a symbolic name, or an OID string */
 static struct tree *
-__tag2oid(char *tag, char *iid, oid  *oid_arr, int  *oid_arr_len, int *type,
-          int best_guess)
+__tag2oid(const char *tag, const char *iid, oid *oid_arr, int *oid_arr_len,
+          int *type, int best_guess)
 {
    struct tree *tp = NULL;
    struct tree *rtp = NULL;
    oid newname[MAX_OID_LEN], *op;
    size_t newname_len = 0;
 
-   if (type) *type = TYPE_UNKNOWN;
-   if (oid_arr_len) *oid_arr_len = 0;
-   if (!tag) goto done;
+   if (type)
+      *type = TYPE_UNKNOWN;
+   if (oid_arr_len)
+      *oid_arr_len = 0;
+   if (!tag)
+      goto done;
 
    /*********************************************************/
    /* best_guess = 0 - same as no switches (read_objid)     */
@@ -541,9 +554,11 @@ __tag2oid(char *tag, char *iid, oid  *oid_arr, int  *oid_arr_len, int *type,
      else {
        rtp = tp = get_tree(newname, newname_len, get_tree_head());
      }
-     if (type) *type = (tp ? tp->type : TYPE_UNKNOWN);
-     if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
-     memcpy(oid_arr,(char*)newname,newname_len*sizeof(oid));
+     if (type)
+        *type = (tp ? tp->type : TYPE_UNKNOWN);
+     if ((oid_arr == NULL) || (oid_arr_len == NULL))
+        return rtp;
+     memcpy(oid_arr, newname, newname_len * sizeof(oid));
      *oid_arr_len = newname_len;
    }
 
@@ -565,9 +580,11 @@ __tag2oid(char *tag, char *iid, oid  *oid_arr, int  *oid_arr_len, int *type,
       else {
 	rtp = tp = get_tree(newname, newname_len, get_tree_head());
       }
-      if (type) *type = (tp ? tp->type : TYPE_UNKNOWN);
-      if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
-      memcpy(oid_arr,(char*)newname,newname_len*sizeof(oid));
+      if (type)
+         *type = (tp ? tp->type : TYPE_UNKNOWN);
+      if ((oid_arr == NULL) || (oid_arr_len == NULL))
+         return rtp;
+      memcpy(oid_arr, newname, newname_len*sizeof(oid));
       *oid_arr_len = newname_len;
    }
 
@@ -576,8 +593,10 @@ __tag2oid(char *tag, char *iid, oid  *oid_arr, int  *oid_arr_len, int *type,
    else {
       rtp = tp = find_node(tag, get_tree_head());
       if (tp) {
-         if (type) *type = tp->type;
-         if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
+         if (type)
+            *type = tp->type;
+         if ((oid_arr == NULL) || (oid_arr_len == NULL))
+            return rtp;
          /* code taken from get_node in snmp_client.c */
          for(op = newname + MAX_OID_LEN - 1; op >= newname; op--){
            *op = tp->subid;
@@ -602,8 +621,8 @@ __tag2oid(char *tag, char *iid, oid  *oid_arr, int  *oid_arr_len, int *type,
  * add a varbind to PDU
  */
 static int
-__add_var_val_str(netsnmp_pdu *pdu, oid *name, int name_length, char *val,
-                  int len, int type)
+__add_var_val_str(netsnmp_pdu *pdu, const oid *name, int name_length,
+                  const char *val, int len, int type)
 {
     netsnmp_variable_list *vars;
     oid oidbuf[MAX_OID_LEN];
@@ -756,7 +775,8 @@ retry:
    status = snmp_sess_synch_response(ss, pdu, response);
    Py_END_ALLOW_THREADS
 
-   if ((*response == NULL) && (status == STAT_SUCCESS)) status = STAT_ERROR;
+   if ((*response == NULL) && (status == STAT_SUCCESS))
+      status = STAT_ERROR;
 
    switch (status) {
       case STAT_SUCCESS:
@@ -766,7 +786,8 @@ retry:
 
             case SNMP_ERR_NOSUCHNAME:
                if (retry_nosuch && (pdu = snmp_fix_pdu(*response, command))) {
-                  if (*response) snmp_free_pdu(*response);
+                  if (*response)
+                     snmp_free_pdu(*response);
                   goto retry;
                }
 
@@ -793,7 +814,7 @@ retry:
             default:
                strlcpy(err_str, (char*)snmp_errstring((*response)->errstat),
 		       STR_BUF_SIZE);
-               *err_num = (int)(*response)->errstat;
+               *err_num = (*response)->errstat;
 	       *err_ind = (*response)->errindex;
                status = (*response)->errstat;
                break;
@@ -815,7 +836,8 @@ done:
    if (tmp_err_str) {
    	free(tmp_err_str);
    }
-   if (_debug_level && *err_num) printf("XXX sync PDU: %s\n", err_str);
+   if (_debug_level && *err_num)
+      printf("XXX sync PDU: %s\n", err_str);
    return(status);
 }
 
@@ -839,8 +861,8 @@ py_netsnmp_construct_varbind(void)
  * store its length in *@len. Terminate @val with '\0' if @len == NULL.
  */
 static int
-py_netsnmp_attr_string(PyObject *obj, char * attr_name, char **val,
-    Py_ssize_t *len)
+py_netsnmp_attr_string(PyObject *obj, const char *attr_name, char **val,
+                       Py_ssize_t *len)
 {
   *val = NULL;
   if (obj && attr_name && PyObject_HasAttrString(obj, attr_name)) {
@@ -861,11 +883,11 @@ py_netsnmp_attr_string(PyObject *obj, char * attr_name, char **val,
  * on error.
  */
 static long
-py_netsnmp_attr_long(PyObject *obj, char * attr_name)
+py_netsnmp_attr_long(PyObject *obj, const char *attr_name)
 {
   long val = -1;
 
-  if (obj && attr_name  && PyObject_HasAttrString(obj, attr_name)) {
+  if (obj && attr_name && PyObject_HasAttrString(obj, attr_name)) {
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
     if (attr) {
       val = PyInt_AsLong(attr);
@@ -881,11 +903,11 @@ py_netsnmp_attr_long(PyObject *obj, char * attr_name)
  * Returns NULL on error.
  */
 static void *
-py_netsnmp_attr_void_ptr(PyObject *obj, char * attr_name)
+py_netsnmp_attr_void_ptr(PyObject *obj, const char *attr_name)
 {
   void *val = NULL;
 
-  if (obj && attr_name  && PyObject_HasAttrString(obj, attr_name)) {
+  if (obj && attr_name && PyObject_HasAttrString(obj, attr_name)) {
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
     if (attr) {
       val = PyLong_AsVoidPtr(attr);
@@ -913,10 +935,11 @@ py_netsnmp_verbose(void)
  * Set attribute @attr_name of @obj to the string @val.
  */
 static int
-py_netsnmp_attr_set_string(PyObject *obj, char *attr_name,
-			   char *val, size_t len)
+py_netsnmp_attr_set_string(PyObject *obj, const char *attr_name,
+			   const char *val, size_t len)
 {
   int ret = -1;
+
   if (obj && attr_name) {
     PyObject* val_obj =  (val ?
 			  Py_BuildValue("s#", val, len) :
@@ -1438,11 +1461,13 @@ netsnmp_get(PyObject *self, PyObject *args)
 	if (__is_leaf(tp)) {
 	  type = (tp->type ? tp->type : tp->parent->type);
 	  getlabel_flag &= ~NON_LEAF_NAME;
-	  if (_debug_level) printf("netsnmp_get:is_leaf:%d\n",type);
+	  if (_debug_level)
+             printf("netsnmp_get:is_leaf:%d\n",type);
 	} else {
 	  getlabel_flag |= NON_LEAF_NAME;
 	  type = __translate_asn_type(vars->type);
-	  if (_debug_level) printf("netsnmp_get:!is_leaf:%d\n",tp->type);
+	  if (_debug_level)
+             printf("netsnmp_get:!is_leaf:%d\n",tp->type);
 	}
 	__get_label_iid((char *) str_buf, &tag, &iid, getlabel_flag);
 
@@ -1481,12 +1506,14 @@ netsnmp_get(PyObject *self, PyObject *args)
 		       NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
 		       old_format);
 
-    if (response) snmp_free_pdu(response);
+    if (response)
+       snmp_free_pdu(response);
   }
 
  done:
   free(oid_arr);
-  if (str_buf != NULL) netsnmp_free(str_buf);
+  if (str_buf != NULL)
+     netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
@@ -1704,12 +1731,14 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 		       NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
 		       old_format);
 
-    if (response) snmp_free_pdu(response);
+    if (response)
+       snmp_free_pdu(response);
   }
 
  done:
   free(oid_arr);
-  if (str_buf != NULL) netsnmp_free(str_buf);
+  if (str_buf != NULL)
+     netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
@@ -1999,7 +2028,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
                   __get_label_iid((char *) str_buf, &tag, &iid, getlabel_flag);
 
-                  if (_debug_level) printf("netsnmp_walk: filling response: %s:%s\n", tag, iid);
+                  if (_debug_level)
+                     printf("netsnmp_walk: filling response: %s:%s\n", tag, iid);
 
                   py_netsnmp_attr_set_string(varbind, "tag", tag, STRLEN(tag));
                   py_netsnmp_attr_set_string(varbind, "iid", iid, STRLEN(iid));
@@ -2069,7 +2099,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
   }
   free(oid_arr);
   free(oid_arr_broken_check);
-  if (str_buf != NULL) netsnmp_free(str_buf);
+  if (str_buf != NULL)
+     netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
@@ -2299,7 +2330,8 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 			 NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
 			 old_format);
 
-      if (response) snmp_free_pdu(response);
+      if (response)
+         snmp_free_pdu(response);
 
       Py_DECREF(varbinds);
 
@@ -2317,7 +2349,8 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 
  done:
   free(oid_arr);
-  if (str_buf != NULL) netsnmp_free(str_buf);
+  if (str_buf != NULL)
+     netsnmp_free(str_buf);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
@@ -2451,7 +2484,8 @@ netsnmp_set(PyObject *self, PyObject *args)
 			     err_str, &err_num, &err_ind);
     __py_netsnmp_update_session_errors(session, err_str, err_num, err_ind);
 
-    if (response) snmp_free_pdu(response);
+    if (response)
+       snmp_free_pdu(response);
 
     if (status == STAT_SUCCESS)
       ret = Py_BuildValue("i",1); /* success, return True */
