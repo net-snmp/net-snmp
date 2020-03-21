@@ -1240,14 +1240,7 @@ netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
                                                        trust_cert));
 
   ss = snmp_sess_open(&session);
-
-  if (!ss)
-      return NULL;
-  /*
-   * Note: on a 64-bit system the statement below discards the upper 32 bits of
-   * "ss", which is most likely a bug.
-   */
-  return Py_BuildValue("i", (int)(uintptr_t)ss);
+  return ss ? PyLong_FromVoidPtr(ss) : NULL;
 }
 
 static PyObject *
