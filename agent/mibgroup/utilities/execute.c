@@ -177,7 +177,7 @@ tokenize_exec_command( char *command, int *argc )
 
 int
 run_exec_command( char *command, char *input,
-                  char *output,  int  *out_len)	/* Or realloc style ? */
+                  char *output,  int  *out_len) /* Or realloc style ? */
 {
 #if HAVE_EXECV
     int ipipe[2];
@@ -203,7 +203,7 @@ run_exec_command( char *command, char *input,
         close(0);
         NETSNMP_IGNORE_RESULT(dup(ipipe[0]));
         close(ipipe[0]);
-	close(ipipe[1]);
+        close(ipipe[1]);
 
         close(1);
         NETSNMP_IGNORE_RESULT(dup(opipe[1]));
@@ -223,7 +223,7 @@ run_exec_command( char *command, char *input,
         argv = tokenize_exec_command( command, &argc );
         execv( argv[0], argv );
         perror( argv[0] );
-        exit(1);	/* End of child */
+        exit(1);        /* End of child */
 
     } else if (pid > 0) {
         char            cache[NETSNMP_MAXCACHESIZE];
@@ -238,17 +238,17 @@ run_exec_command( char *command, char *input,
          */
 
         /*
-	 * Pass the input message (if any) to the child,
+         * Pass the input message (if any) to the child,
          * wait for the child to finish executing, and read
          *    any output into the output buffer (if provided)
          */
-	close(ipipe[0]);
-	close(opipe[1]);
-	if (input) {
+        close(ipipe[0]);
+        close(opipe[1]);
+        if (input) {
             NETSNMP_IGNORE_RESULT(write(ipipe[1], input, strlen(input)));
-	   close(ipipe[1]);	/* or flush? */
+           close(ipipe[1]);        /* or flush? */
         }
-	else close(ipipe[1]);
+        else close(ipipe[1]);
 
         /*
          * child will block if it writes a lot of data and
@@ -383,24 +383,24 @@ run_exec_command( char *command, char *input,
          * null terminate any output
          */
         if (output) {
-	    output[offset] = 0;
-	    *out_len = offset;
+            output[offset] = 0;
+            *out_len = offset;
         }
         DEBUGMSGTL(("run:exec","  child %d finished. result=%d\n",
                     pid,result));
 
-	return WEXITSTATUS(result);
+        return WEXITSTATUS(result);
 
     } else {
         /*
          * Parent process - fork failed
          */
         snmp_log_perror("fork");
-	close(ipipe[0]);
-	close(ipipe[1]);
-	close(opipe[0]);
-	close(opipe[1]);
-	return -1;
+        close(ipipe[0]);
+        close(ipipe[1]);
+        close(opipe[0]);
+        close(opipe[1]);
+        return -1;
     }
     
 #else
