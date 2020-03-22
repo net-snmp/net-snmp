@@ -5227,11 +5227,12 @@ snmp_async_send(netsnmp_session * session,
  * @param[in] pdu      PDU to send.
  * @param[in] callback Callback function called after processing of the PDU
  *                     finished. This function is called if the PDU has not
- *                     been sent or after a response has been received.
+ *                     been sent or after a response has been received. Must
+ *                     not free @pdu.
  * @param[in] cb_data  Will be passed as fifth argument to @callback.
  *
- * @return Returns 0 if sending failed or a non-zero request ID if sending
- *   succeeded.
+ * @return If successful, returns the request id of @pdu and frees @pdu.
+ * If not successful, returns zero and expects the caller to free @pdu.
  */
 static int
 _sess_async_send(struct session_list *slp,
@@ -5393,6 +5394,20 @@ _sess_async_send(struct session_list *slp,
     return reqid;
 }
 
+/**
+ * Send a PDU asynchronously.
+ *
+ * @param[in] slp      Session pointer.
+ * @param[in] pdu      PDU to send.
+ * @param[in] callback Callback function called after processing of the PDU
+ *                     finished. This function is called if the PDU has not
+ *                     been sent or after a response has been received. Must
+ *                     not free @pdu.
+ * @param[in] cb_data  Will be passed as fifth argument to @callback.
+ *
+ * @return If successful, returns the request id of @pdu and frees @pdu.
+ * If not successful, returns zero and expects the caller to free @pdu.
+ */
 int
 snmp_sess_async_send(struct session_list *slp,
                      netsnmp_pdu *pdu,
