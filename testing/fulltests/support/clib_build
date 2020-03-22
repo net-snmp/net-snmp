@@ -16,6 +16,7 @@ cat >>"$2.c" <<EOF
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/large_fd_set.h>
 #include <net-snmp/library/snmpIPBaseDomain.h>
+#include <utilities/execute.h>
 
 /* testing specific header */
 #include <net-snmp/library/testing.h>
@@ -74,5 +75,5 @@ cat >>"$2.c" <<EOF
 EOF
 
 # ... and compile it.
-${builddir}/libtool --mode=link `${builddir}/net-snmp-config --build-command` -I$builddir/include -I$srcdir -I$srcdir/include -o $2 $2.c ${builddir}/snmplib/libnetsnmp.la `${builddir}/net-snmp-config --external-libs`
+${builddir}/libtool --mode=link `${builddir}/net-snmp-config --build-command` -I$builddir/include -I$srcdir -I$srcdir/include -I$srcdir/agent/mibgroup -o $2 $2.c ${builddir}/snmplib/libnetsnmp.la `${builddir}/net-snmp-config --external-libs` `${builddir}/net-snmp-config --agent-libs`
 echo $2
