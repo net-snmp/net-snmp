@@ -49,8 +49,8 @@
 
 
 int
-run_shell_command( char *command, char *input,
-                   char *output,  int *out_len)	/* Or realloc style ? */
+run_shell_command(const char *command, const char *input,
+                  char *output, int *out_len)
 {
 #if HAVE_SYSTEM
     int         result;    /* and the return value of the command */
@@ -148,10 +148,10 @@ run_shell_command( char *command, char *input,
  * ready to be passed to 'execv'
  */
 char **
-tokenize_exec_command( char *command, int *argc )
+tokenize_exec_command(const char *command, int *argc)
 {
     char ctmp[STRMAX];
-    char *cp;
+    const char *cp;
     char **argv;
     int  i;
 
@@ -160,7 +160,7 @@ tokenize_exec_command( char *command, int *argc )
 
     for ( i=0; cp; i++ ) {
         memset( ctmp, 0, STRMAX );
-        cp = copy_nword( cp, ctmp, STRMAX );
+        cp = copy_nword_const( cp, ctmp, STRMAX );
         argv[i] = strdup( ctmp );
         if (i == 99)
             break;
@@ -176,8 +176,8 @@ tokenize_exec_command( char *command, int *argc )
 
 
 int
-run_exec_command( char *command, char *input,
-                  char *output,  int  *out_len) /* Or realloc style ? */
+run_exec_command(const char *command, const char *input,
+                 char *output, int *out_len)
 {
 #if HAVE_EXECV
     int ipipe[2];

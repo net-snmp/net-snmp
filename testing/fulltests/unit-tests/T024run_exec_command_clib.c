@@ -36,9 +36,7 @@ debug_register_tokens("run:exec");
         int res;
 
         output_len = sizeof(output);
-        res = run_exec_command(NETSNMP_REMOVE_CONST(char *, p->command),
-                               NETSNMP_REMOVE_CONST(char *, p->input), output,
-                               &output_len);
+        res = run_exec_command(p->command, p->input, output, &output_len);
         OKF(res == p->res, ("%s: return value %d <> %d", p->command, res,
                             p->res));
         if (res == p->res && p->expected_output) {
