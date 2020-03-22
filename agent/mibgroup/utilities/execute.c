@@ -145,27 +145,24 @@ run_shell_command(const char *command, const char *input,
  * Split the given command up into separate tokens,
  * ready to be passed to 'execv'
  */
-char **
+static char **
 tokenize_exec_command(const char *command, int *argc)
 {
     char ctmp[STRMAX];
-    const char *cp;
+    const char *cp = command;
     char **argv;
     int  i;
 
-    argv = (char **) calloc(100, sizeof(char *));
-    cp = command;
+    argv = calloc(100, sizeof(char *));
+    if (!argv)
+        return argv;
 
-    for ( i=0; cp; i++ ) {
-        memset( ctmp, 0, STRMAX );
-        cp = copy_nword_const( cp, ctmp, STRMAX );
-        argv[i] = strdup( ctmp );
-        if (i == 99)
-            break;
+    for (i = 0; cp && i + 2 < 100; i++) {
+        cp = copy_nword_const(cp, ctmp, sizeof(ctmp));
+        argv[i] = strdup(ctmp);
     }
-    if (cp) {
-        argv[i++] = strdup( cp );
-    }
+    if (cp)
+        argv[i++] = strdup(cp);
     argv[i] = NULL;
     *argc = i;
 
