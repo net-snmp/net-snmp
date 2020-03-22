@@ -698,8 +698,6 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                                  "proxy OID return length too long.\n");
                         netsnmp_set_request_error(cache->reqinfo, requests,
                                                   SNMP_ERR_GENERR);
-                        if (pdu)
-                            snmp_free_pdu(pdu);
                         netsnmp_free_delegated_cache(cache);
                         return 1;
                     }
@@ -723,8 +721,6 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
              * ack, this is bad.  The # of varbinds don't match and
              * there is no way to fix the problem 
              */
-            if (pdu)
-                snmp_free_pdu(pdu);
             snmp_log(LOG_ERR,
                      "response to proxy request illegal.  We're screwed.\n");
             netsnmp_set_request_error(cache->reqinfo, requests,
@@ -735,11 +731,6 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
         if (cache->reqinfo->mode == MODE_GETBULK)
             netsnmp_bulk_to_next_fix_requests(requests);
         
-        /*
-         * free the response 
-         */
-        if (pdu && 0)
-            snmp_free_pdu(pdu);
 	break;
 
     default:
