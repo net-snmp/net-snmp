@@ -40,8 +40,6 @@
 #include "execute.h"
 #include "struct.h"
 
-#define setPerrorstatus(x) snmp_log_perror(x)
-
 #ifdef _MSC_VER
 #define popen  _popen
 #define pclose _pclose
@@ -293,7 +291,7 @@ run_exec_command(const char *command, const char *input,
                 else {
                     DEBUGMSGTL(("verbose:run:exec", "      errno %d\n",
                                 errno));
-                    setPerrorstatus("read");
+                    snmp_log_perror("read");
                     break;
                 }
             } else if (0 == count) {
@@ -355,7 +353,7 @@ run_exec_command(const char *command, const char *input,
                  */
                 DEBUGMSGTL(("verbose:run:exec", "      errno %d\n",
                             errno));
-                setPerrorstatus("read");
+                snmp_log_perror("read");
                 break;
             }
         }
