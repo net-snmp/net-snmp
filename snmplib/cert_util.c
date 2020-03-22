@@ -3205,7 +3205,7 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
                                  char *id, size_t *id_len, char *fp,
                                  size_t *fp_len, u_char *ht)
 {
-    size_t fp_len_save = *fp_len;
+    size_t fp_len_save = *fp_len - 1;
 
     /*
      * Calling this function with name == NULL, fp == NULL or id == NULL would

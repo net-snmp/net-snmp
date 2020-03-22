@@ -4595,6 +4595,7 @@ parse(FILE * fp, struct node *root)
 static int
 is_labelchar(int ich)
 {
+    netsnmp_assert(ich == EOF || (0 <= ich && ich < 256));
     if ((isalnum(ich)) || (ich == '-'))
         return 1;
     if (ich == '_' && netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
