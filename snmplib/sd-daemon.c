@@ -108,8 +108,8 @@ int netsnmp_sd_listen_fds(int unset_environment) {
         errno = 0;
         l = strtoul(e, &p, 10);
 
-        if (errno != 0) {
-                r = -errno;
+        if (errno != 0 || l != (int)l) {
+                r = errno ? -errno : -EINVAL;
                 goto finish;
         }
 
