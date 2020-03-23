@@ -16,8 +16,8 @@
 void netsnmp_close_fds(int fd)
 {
 #if defined(HAVE_FORK)
-    DIR            *dir;
-    struct dirent  *ent;
+    DIR            *dir NETSNMP_ATTRIBUTE_UNUSED;
+    struct dirent  *ent NETSNMP_ATTRIBUTE_UNUSED;
     int             i, largest_fd = -1;
 
     if (fd < -1)
