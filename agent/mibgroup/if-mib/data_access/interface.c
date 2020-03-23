@@ -1074,6 +1074,9 @@ _free_include_if_config(void)
         if_next = if_ptr->next;
 #if HAVE_PCRE_H
         free(if_ptr->regex_ptr);
+#elif HAVE_REGEX_H
+        regfree(if_ptr->regex_ptr);
+        free(if_ptr->regex_ptr);
 #endif
         free(if_ptr->name);
         free(if_ptr);
