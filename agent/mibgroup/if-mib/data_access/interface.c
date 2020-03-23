@@ -870,11 +870,11 @@ int netsnmp_access_interface_include(const char *name)
     for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
 #if HAVE_PCRE_H
         if (pcre_exec(if_ptr->regex_ptr, NULL, name, strlen(name), 0, 0, found_ndx, 3) >= 0)
-	{
+        {
             return TRUE;
-	}
+        }
 #elif HAVE_REGEX_H
-	if (regexec(if_ptr->regex_ptr, name, NULL, NULL, NULL) == 0) {
+        if (regexec(if_ptr->regex_ptr, name, NULL, NULL, NULL) == 0) {
             return TRUE;
         }
 #else
