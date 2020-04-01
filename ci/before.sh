@@ -2,9 +2,11 @@
 
 case "${TRAVIS_OS_NAME}" in
     linux)
+	sudo sh -c 'apt-get install -y libmariadbclient-dev || sudo apt-get install -y libmariadb-client-lgpl-dev'
+
 	# Add an IPv6 config - see the corresponding Travis issue
 	# https://github.com/travis-ci/travis-ci/issues/8361
-	sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6; printf "\n::1 localhost ipv6-localhost ipv6-loopback\n" >>/etc/hosts; cat /etc/hosts';;
+	sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6; printf "\n::1 localhost ipv6-localhost ipv6-loopback\n" >>/etc/hosts';;
     osx)
 	# Upgrade openssl such that Net-SNMP can be built with Blumenthal
 	# AES support. Disabled because this upgrade takes long and even
@@ -32,3 +34,5 @@ EOF
 	ln -s /usr/local/bin/perl /usr/bin/perl
     fi
 fi
+
+head -n 999 /etc/hosts
