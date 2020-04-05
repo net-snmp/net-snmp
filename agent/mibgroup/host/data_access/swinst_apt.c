@@ -33,14 +33,17 @@
 
 config_require(date_n_time)
 
+char pkg_directory[SNMP_MAXBUF];
 static char apt_fmt[SNMP_MAXBUF];
+static char file[SNMP_MAXBUF];
 
 /* ---------------------------------------------------------------------
  */
 void
 netsnmp_swinst_arch_init(void)
 {
-    snprintf(apt_fmt, SNMP_MAXBUF, "%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%lld",
+    strlcpy(pkg_directory, "/var/lib/dpkg/info", sizeof(pkg_directory));
+    snprintf(apt_fmt, SNMP_MAXBUF, "%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%d[^#]#%%%ds",
 	SNMP_MAXBUF-1, SNMP_MAXBUF-1, SNMP_MAXBUF-1, SNMP_MAXBUF-1,
 	SNMP_MAXBUF-1, SNMP_MAXBUF-1, SNMP_MAXBUF-1);
 }
@@ -57,7 +60,7 @@ netsnmp_swinst_arch_shutdown(void)
 int
 netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 {
-    FILE *p = popen("dpkg-query --show --showformat '${Package}#${Version}#${Section}#${Priority}#${Essential}#${Architecture}#${Status}#${db-fsys:Last-Modified}\n'", "r");
+    FILE *p = popen("dpkg-query --show --showformat '${Package}#${Version}#${Section}#${Priority}#${Essential}#${Architecture}#${Status}\n'", "r");
     char package[SNMP_MAXBUF];
     char version[SNMP_MAXBUF];
     char section[SNMP_MAXBUF];
@@ -65,8 +68,8 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     char essential[SNMP_MAXBUF];
     char arch[SNMP_MAXBUF];
     char status[SNMP_MAXBUF];
-    long long last_modified;
     char buf[BUFSIZ];
+    struct stat stat_buf;
     netsnmp_swinst_entry *entry;
     u_char *date_buf;
     size_t date_len;
@@ -78,15 +81,13 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     }
 
     while (fgets(buf, BUFSIZ, p)) {
-        time_t last_modified_t = last_modified;
-
 	DEBUGMSG(("swinst_apt", "entry: %s\n", buf));
         entry = netsnmp_swinst_entry_create( i++ );
         if (NULL == entry)
             continue;   /* error already logged by function */
         CONTAINER_INSERT(container, entry);
 
-	sscanf(buf, apt_fmt, package, version, section, priority, essential, arch, status, &last_modified);
+	sscanf(buf, apt_fmt, package, version, section, priority, essential, arch, status);
 	if (strstr(status, "not-installed"))
 	    continue;
 
@@ -98,10 +99,21 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
                         ? 2      /* operatingSystem */
                         : 4;     /*  application    */
 
-        date_buf = date_n_time(&last_modified_t, &date_len);
-        entry->swDate_len = date_len;
-        memcpy(entry->swDate, date_buf, entry->swDate_len);
-
+        /* get the last mod date */
+        snprintf(file, sizeof(file), "%s/%s.list", pkg_directory, package);
+        if(stat(file, &stat_buf) != -1) {
+            date_buf = date_n_time(&stat_buf.st_mtime, &date_len);
+            entry->swDate_len = date_len;
+            memcpy(entry->swDate, date_buf, entry->swDate_len);
+        } else {
+            /* somewhy some files include :arch in .list name */
+            snprintf(file, sizeof(file), "%s/%s:%s.list", pkg_directory, package, arch);
+            if(stat(file, &stat_buf) != -1) {
+                date_buf = date_n_time(&stat_buf.st_mtime, &date_len);
+                entry->swDate_len = date_len;
+                memcpy(entry->swDate, date_buf, entry->swDate_len);
+            }
+        }
         /* FIXME, or fallback to whatever nonsesnse was here before, or leave it uninitialied?
              else {
         entry->swDate_len = 8;
