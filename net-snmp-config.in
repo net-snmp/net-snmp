@@ -31,7 +31,9 @@ check_build_dir()
 # effect: returns the (n+1)th argument
 index()
 {
-    eval echo \$`expr $1 + 1`
+    [ $# -gt $1 ] || return
+    shift $1
+    echo $1
 }
 
 # usage: count arguments
