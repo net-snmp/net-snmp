@@ -237,7 +237,7 @@ if test "x$with_nl" != "xno"; then
         NETSNMP_SEARCH_LIBS(nl_connect, nl-3,
             [AC_CHECK_HEADERS(netlink/netlink.h)
             EXTERNAL_MIBGROUP_INCLUDES="$EXTERNAL_MIBGROUP_INCLUDES ${LIBNL3_CFLAGS}"],
-            [CPPFLAGS="$netsnmp_save_CPPFLAGS"], [], [], [LMIBLIBS])
+            [CPPFLAGS="$netsnmp_save_CPPFLAGS"], [], [LMIBLIBS])
         if test "x$ac_cv_header_netlink_netlink_h" != xyes; then
             NETSNMP_SEARCH_LIBS(nl_connect, nl, [
                 AC_CHECK_HEADERS(netlink/netlink.h)], [], [], LMIBLIBS)
