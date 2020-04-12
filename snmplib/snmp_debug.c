@@ -81,15 +81,15 @@ debug_indent_get(void)
 const char*
 debug_indent(void)
 {
-#define SPACES "                                        " \
-               "                                        "
+    static const char SPACES[] = "                                        "
+        "                                        ";
+
     if ((sizeof(SPACES) - 1) < (unsigned int)debugindent) {
         snmp_log(LOG_ERR, "Too deep indentation for debug_indent. "
                  "Consider using \"%%*s\", debug_indent_get(), \"\" instead.");
         return SPACES;
     }
-    return SPACES + sizeof(SPACES) - 1 - debugindent;
-#undef SPACES
+    return &SPACES[sizeof(SPACES) - 1 - debugindent];
 }
 
 void

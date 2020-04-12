@@ -260,18 +260,15 @@ netsnmp_fsys_arch_load( void )
         if ( NSFS_STATFS( entry->path, &stat_buf ) < 0 )
 #endif
         {
-            tmpbuf = NULL;
-            if (asprintf(&tmpbuf, "Cannot statfs %s", entry->path) >= 0)
+            static char logged = 0;
+
+            if (!logged &&
+                asprintf(&tmpbuf, "Cannot statfs %s", entry->path) >= 0) {
                 snmp_log_perror(tmpbuf);
-            free(tmpbuf);
-            entry->units = stat_buf.NSFS_SIZE;
-            entry->size  = 0;
-            entry->used  = 0;
-            entry->avail = 0;
-            entry->inums_total = stat_buf.f_files;
-            entry->inums_avail = stat_buf.f_ffree;
-            netsnmp_fsys_calculate32(entry);
-            continue;
+                free(tmpbuf);
+                logged = 1;
+            }
+            memset(&stat_buf, 0, sizeof(stat_buf));
         }
         entry->units =  stat_buf.NSFS_SIZE;
         entry->size  =  stat_buf.f_blocks;

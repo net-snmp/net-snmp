@@ -873,7 +873,7 @@ int netsnmp_access_interface_include(const char *name)
                       found_ndx, 3) >= 0)
             return TRUE;
 #elif HAVE_REGEX_H
-        if (regexec(if_ptr->regex_ptr, name, NULL, NULL, NULL) == 0)
+        if (regexec(if_ptr->regex_ptr, name, 0, NULL, 0) == 0)
             return TRUE;
 #else
         if (strncmp(name, if_ptr->name, strlen(if_ptr->name)) == 0)
