@@ -66,6 +66,8 @@
 #include <et/com_err.h>
 #elif HAVE_COM_ERR_H
 #include <com_err.h>
+#else
+static const char *error_message(int ret) { return "(?)"; }
 #endif
 
 #include <net-snmp/output_api.h>
