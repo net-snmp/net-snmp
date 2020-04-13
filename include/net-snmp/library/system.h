@@ -97,10 +97,12 @@ SOFTWARE.
 
 #endif                         /* MSVC_PERL */
 
+#if !defined(HAVE_STRNCASECMP) && !defined(strncasecmp)
     NETSNMP_IMPORT
     int             strcasecmp(const char *s1, const char *s2);
     NETSNMP_IMPORT
     int             strncasecmp(const char *s1, const char *s2, size_t n);
+#endif
 
 #ifdef WIN32
     NETSNMP_IMPORT
