@@ -1034,7 +1034,7 @@ netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
 
 /*******************************************************************/
 
-#ifndef HAVE_STRNCASECMP
+#if !defined(HAVE_STRNCASECMP) && !defined(strncasecmp)
 
 /*
  * test for NULL pointers before and NULL characters after
@@ -1083,7 +1083,7 @@ strcasecmp(const char *s1, const char *s2)
     return strncasecmp(s1, s2, 1000000);
 }
 
-#endif                          /* HAVE_STRNCASECMP */
+#endif                /* !defined(HAVE_STRNCASECMP) && !defined(strncasecmp) */
 
 
 #ifndef HAVE_STRDUP
