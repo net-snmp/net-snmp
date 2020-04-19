@@ -1,5 +1,7 @@
 /* HEADER Testing snmp_enum */
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNMP_ENUM_STORE_LIST
+
 #define CONFIG_TYPE "snmp-enum-unit-test"
 #define STRING1 "life, and everything"
 #define STRING2 "restaurant at the end of the universe"
@@ -101,3 +103,5 @@ OK(se_find_result && strcmp(se_find_result, "pear") == 0,
 
 clear_snmp_enum();
 unregister_all_config_handlers();
+
+#endif
