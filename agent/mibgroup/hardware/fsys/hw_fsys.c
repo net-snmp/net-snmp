@@ -17,9 +17,10 @@ static void _fsys_free( void );
 static int _fsysAutoUpdate = 0;   /* 0 means on-demand caching */
 static void _fsys_update_stats( unsigned int, void* );
 
-netsnmp_cache     *_fsys_cache     = NULL;
-netsnmp_container *_fsys_container = NULL;
-static int         _fsys_idx       = 0;
+static netsnmp_cache     *_fsys_cache;
+static netsnmp_container *_fsys_container;
+static int         _fsys_idx;
+
 static netsnmp_fsys_info * _fsys_create_entry( void );
 
 void init_hw_fsys( void ) {
