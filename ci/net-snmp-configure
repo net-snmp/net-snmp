@@ -289,20 +289,18 @@ case "$(uname)" in
       mibs+=(winExtDLL)
       options+=(--disable-embedded-perl --without-perl-modules)
     ;;
-  MINGW32*)
+  MINGW*)
       options+=(--disable-embedded-perl)
+      mibs+=(host)
       mibs+=(snmp-notification-mib)
       mibs+=(ucd-snmp/dlmod)
       mibs+=(ucd-snmp/extensible)
       mibs+=(winExtDLL)
       options+=(--without-perl-modules)
-      # To do: figure out why snmpd crashes while initializing the TLS
-      # transports.
-      opensslver=""
-      opensshver=""
     ;;
   MSYS*)
       options+=(--disable-embedded-perl)
+      mibs+=(host)
       mibs+=(snmp-notification-mib)
       mibs+=(ucd-snmp/dlmod)
       mibs+=(ucd-snmp/extensible)
@@ -313,14 +311,6 @@ case "$(uname)" in
       # See also
       # http://git.savannah.gnu.org/cgit/automake.git/tree/lib/config.guess.
       options+=("--build=x86_64-pc-mingw32")
-      ;;
-  MINGW64*)
-      options+=(--disable-embedded-perl)
-      mibs+=(snmp-notification-mib)
-      mibs+=(ucd-snmp/dlmod)
-      mibs+=(ucd-snmp/extensible)
-      mibs+=(winExtDLL)
-      options+=(--without-perl-modules)
     ;;
   *)
     echo "Unknown OS $(uname)."
