@@ -43,7 +43,7 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
 	OKF(build_result + encoded_length == encoded + sizeof(encoded),
 	    ("asn_build_int(%ld)", input));
         OKF(build_result - encoded == data[i].encoded_len,
-            ("input %ld: encoded len %zd <> %d\n",
+            ("input %ld: encoded len %" NETSNMP_PRIz "d <> %d\n",
              input, build_result - encoded, data[i].encoded_len));
         OKF(memcmp(encoded, data[i].encoded, data[i].encoded_len) == 0,
             ("encoded data for input %ld\n", input));

@@ -36,6 +36,9 @@
  * DAMAGE.
  */
 
+/* For getlogin() on MinGW */
+#define _POSIX
+
 #include <net-snmp/net-snmp-config.h>
 
 #include <signal.h>
@@ -55,6 +58,9 @@
 #endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_IO_H
+#include <io.h>
 #endif
 
 #include <math.h>

@@ -50,6 +50,7 @@ AC_C_INLINE
 #
 LT_PREREQ([2.2.6])
 LT_INIT([win32-dll])
+LT_LANG([Windows Resource])
 AC_SUBST(LIBTOOL_DEPS)
 
 #
