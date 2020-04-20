@@ -453,6 +453,9 @@
 /* Define to 1 if you have the <linux/tasks.h> header file. */
 /* #undef HAVE_LINUX_TASKS_H */
 
+/* Define to 1 if you have the <lm.h> header file. */
+#define HAVE_LM_H 1
+
 /* Define to 1 if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
 
