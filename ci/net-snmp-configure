@@ -67,7 +67,15 @@ echo "libsensorsver=$libsensorsver"
 if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
     case "$(uname -a)" in
 	FreeBSD*)
-	    opensslver="$(freebsd_pkg_version openssl111 2>/dev/null)";;
+	    opensslver="$(freebsd_pkg_version openssl111 2>/dev/null)"
+	    if [ -z "$opensslver" ]; then
+		opensslver="$(freebsd_pkg_version openssl 2>/dev/null)"
+	    fi
+	    if [ -z "$opensslver" ]; then
+		opensslver="$(openssl version 2>&1 |
+				{ read a b c; echo "$b"; })"
+	    fi
+	    ;;
 	Linux*)
 	    opensslver="$(
 	    for p in openssl-devel libopenssl-devel libressl-devel; do
