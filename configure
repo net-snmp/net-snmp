@@ -22067,22 +22067,22 @@ LIBS="$netsnmp_save_LIBS"
 #
 #   regex in process table
 #
-ac_fn_c_check_header_mongrel "$LINENO" "pcre.h" "ac_cv_header_pcre_h" "$ac_includes_default"
+if test "x$with_pcre" != "xno"; then
+  ac_fn_c_check_header_mongrel "$LINENO" "pcre.h" "ac_cv_header_pcre_h" "$ac_includes_default"
 if test "x$ac_cv_header_pcre_h" = xyes; then :
 
 
 $as_echo "#define HAVE_PCRE_H 1" >>confdefs.h
 
-    pcre_h=yes
+      pcre_h=yes
 
 else
-
-    pcre_h=no
-
+  pcre_h=no
 
 fi
 
 
+fi
 if test "x$pcreheader_h" = "xno" -o "x$pcre_h" = "xno" ; then
   if test "x$with_pcre" = "xyes" ; then
     as_fn_error $? "Could not find the pcre header file needed and was specifically asked to use pcre support" "$LINENO" 5
