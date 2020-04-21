@@ -2662,6 +2662,11 @@ WriteMethod     writeIfEntry;
 long            admin_status = 0;
 long            oldadmin_status = 0;
 
+void
+Interface_Scan_Init(void)
+{
+}
+
 static int
 header_ifEntry(struct variable *vp,
                oid * name,

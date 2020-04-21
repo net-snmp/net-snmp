@@ -457,6 +457,9 @@
 /* Define to 1 if you have the <linux/tasks.h> header file. */
 #undef HAVE_LINUX_TASKS_H
 
+/* Define to 1 if you have the <lm.h> header file. */
+#undef HAVE_LM_H
+
 /* Define to 1 if you have the `load_defaults' function. */
 #undef HAVE_LOAD_DEFAULTS
 

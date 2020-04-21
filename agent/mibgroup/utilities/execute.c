@@ -158,7 +158,7 @@ run_shell_command(const char *command, const char *input,
 #endif
 }
 
-
+#if HAVE_EXECV
 /*
  * Split the given command up into separate tokens,
  * ready to be passed to 'execv'
@@ -186,7 +186,7 @@ tokenize_exec_command(const char *command, int *argc)
 
     return argv;
 }
-
+#endif
 
 /**
  * Run a command by calling execv().

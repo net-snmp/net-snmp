@@ -45,7 +45,7 @@
 #include <signal.h>
 #include <errno.h>
 
-#ifdef WIN32
+#if HAVE_LM_H
 #include <lm.h>
 #endif
 

@@ -761,8 +761,8 @@ snmp_enable_syslog_ident(const char *ident, const int facility)
 	     * Hmmm.....
 	     * Maybe disable this handler, and log the error ?
 	     */
-        fprintf(stderr, "Could not open event log for %s. "
-                "Last error: %d\n", ident, (unsigned int)GetLastError());
+        fprintf(stderr, "Could not open event log for %s. Last error: %u\n",
+                ident, (unsigned int)GetLastError());
         enable = 0;
     }
 #else
@@ -1170,8 +1170,8 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *str)
 	     * Hmmm.....
 	     * Maybe disable this handler, and log the error ?
 	     */
-        fprintf(stderr, "Could not report event.  Last error: %d\n",
-		(unsigned int)GetLastError());
+        fprintf(stderr, "Could not report event.  Last error: %u\n",
+                (unsigned int)GetLastError());
         return 0;
     }
     return 1;

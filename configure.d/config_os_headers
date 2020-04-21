@@ -440,6 +440,12 @@ AC_CHECK_HEADERS([windows.h iphlpapi.h], [], [], [
 #endif
 ])
 
+AC_CHECK_HEADERS([lm.h], [LAGENTLIBS="$LAGENTLIBS -lnetapi32"], [], [
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+])
+
 #       for MIB-2 info                                  (MinGW)
 #  Core:
 #
