@@ -24484,30 +24484,6 @@ fi
 done
 
 
-for ac_header in curses.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "curses.h" "ac_cv_header_curses_h" "$ac_includes_default"
-if test "x$ac_cv_header_curses_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_CURSES_H 1
-_ACEOF
-
-fi
-
-done
-
-for ac_header in ncurses/curses.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "ncurses/curses.h" "ac_cv_header_ncurses_curses_h" "$ac_includes_default"
-if test "x$ac_cv_header_ncurses_curses_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_NCURSES_CURSES_H 1
-_ACEOF
-
-fi
-
-done
-
 
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing endwin" >&5
 $as_echo_n "checking for library containing endwin... " >&6; }
@@ -24579,6 +24555,30 @@ $as_echo "$netsnmp_cv_func_endwin_LIBCURSES" >&6; }
     if test "${netsnmp_cv_func_endwin_LIBCURSES}" != "none required" ; then
        LIBCURSES="${netsnmp_result} ${netsnmp_target_val}"
     fi
+
+  for ac_header in curses.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "curses.h" "ac_cv_header_curses_h" "$ac_includes_default"
+if test "x$ac_cv_header_curses_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CURSES_H 1
+_ACEOF
+
+fi
+
+done
+
+  for ac_header in ncurses/curses.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "ncurses/curses.h" "ac_cv_header_ncurses_curses_h" "$ac_includes_default"
+if test "x$ac_cv_header_ncurses_curses_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NCURSES_CURSES_H 1
+_ACEOF
+
+fi
+
+done
 
 
  fi

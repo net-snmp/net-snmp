@@ -66,13 +66,16 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmpdelta$(EXEEXT) 			\
 		snmptest$(EXEEXT)			\
 		snmpdf$(EXEEXT) 			\
-		snmpps$(EXEEXT) 			\
 		$(SNMPPINGINSTALLBINPROG)               \
 		$(AGENTXTRAP)				\
 		$(SNMPVACMINSTALLBINPROG)	        \
                 $(SSHINSTALLBINPROG) $(TLSINSTALLBINPROG) \
 		$(USMINSTALLBINPROG) $(EKCSTALLBINPROG) \
 		$(SNMPPCAPINSTALLBINPROG)
+
+ifneq (@LIBCURSES@,)
+INSTALLBINPROGS += snmpps$(EXEEXT)
+endif
 
 INSTALLSBINPROGS = snmptrapd$(EXEEXT)
 
@@ -149,8 +152,13 @@ FTOBJS=$(LIBTRAPD_FTS) \
 
 all: standardall
 
-OTHERINSTALL=snmpinforminstall snmptopinstall snmptrapdperlinstall
-OTHERUNINSTALL=snmpinformuninstall snmptopuninstall snmptrapdperluninstall
+OTHERINSTALL=snmpinforminstall snmptrapdperlinstall
+OTHERUNINSTALL=snmpinformuninstall snmptrapdperluninstall
+
+ifneq (@LIBCURSES@,)
+OTHERINSTALL+=snmptopinstall
+OTHERUNINSTALL+=snmptopuninstall
+endif
 
 #
 # build rules
