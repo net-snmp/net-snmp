@@ -30,29 +30,24 @@ config_require(if-mib/data_access/interface)
 
 config_exclude(mibII/interfaces)
 
-#   if defined( linux )
-
-    config_require(util_funcs)
-    config_require(if-mib/data_access/interface_linux)
-    config_require(if-mib/data_access/interface_ioctl)
-
-#   elif defined( openbsd3 ) || \
-         defined( freebsd4 ) || defined( freebsd5 ) || defined( freebsd6 ) || \
-         defined( darwin )   || defined( dragonfly ) || defined( netbsd1 )
-
-    config_require(if-mib/data_access/interface_sysctl)
-
-#   elif defined( solaris2 )
-
-    config_require(if-mib/data_access/interface_solaris2)
-
-#   else
-
-    config_error(This platform does not yet support IF-MIB rewrites)
-
-#   endif
+#if defined(linux)
+config_require(util_funcs)
+config_require(if-mib/data_access/interface_linux)
+config_require(if-mib/data_access/interface_ioctl)
+#elif defined( openbsd3 ) ||                                         \
+    defined( freebsd4 ) || defined( freebsd5 ) || defined( freebsd6 ) || \
+    defined( darwin )   || defined( dragonfly ) || defined( netbsd1 )
+config_require(if-mib/data_access/interface_sysctl)
+#elif defined(solaris2)
+config_require(if-mib/data_access/interface_solaris2)
+#elif defined(HAVE_IPHLPAPI_H)
+config_warning(This platform does not yet support the IF-MIB)
+config_require(if-mib/data_access/interface_unsup)
 #else
-#   define NETSNMP_ACCESS_INTERFACE_NOARCH 1
+config_error(This platform does not yet support IF-MIB rewrites)
+#endif
+#else
+#define NETSNMP_ACCESS_INTERFACE_NOARCH 1
 #endif
 
 #endif /* NETSNMP_ACCESS_INTERFACE_CONFIG_H */

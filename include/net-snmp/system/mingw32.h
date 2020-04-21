@@ -33,3 +33,5 @@
 #undef bsdlike
 #undef MBSTAT_SYMBOL
 #undef TOTAL_MEMORY_SYMBOL
+
+#define NETSNMP_INCLUDE_IFTABLE_REWRITES
