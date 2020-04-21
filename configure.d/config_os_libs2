@@ -564,9 +564,10 @@ AC_SUBST(NETSNMP_BUILD_PCAP_PROG_FALSE)
 # nlist
 AC_CHECK_FUNCS(nlist nlist64 knlist)
 
-AC_CHECK_HEADERS([curses.h])
-AC_CHECK_HEADERS([ncurses/curses.h])
-NETSNMP_SEARCH_LIBS([endwin], [curses ncurses],,,,[LIBCURSES])
+NETSNMP_SEARCH_LIBS([endwin], [curses ncurses], [
+  AC_CHECK_HEADERS([curses.h])
+  AC_CHECK_HEADERS([ncurses/curses.h])],,,
+  [LIBCURSES])
 AC_SUBST([LIBCURSES])
 
 #   libm for ceil
