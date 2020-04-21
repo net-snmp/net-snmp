@@ -280,7 +280,8 @@ write_arp(int action,
                 return SNMP_ERR_WRONGTYPE;
             }
             if (var_val_len != 6) {
-                snmp_log(LOG_ERR, "not correct ipAddress length: %d",
+                snmp_log(LOG_ERR,
+                         "incorrect ipAddress length %" NETSNMP_PRIz "d",
                          var_val_len);
                 return SNMP_ERR_WRONGLENGTH;
             }
@@ -431,6 +432,7 @@ write_arp(int action,
              */
             create_flag = 0;
         }
+        /* FALL THROUGH */
 
     case FREE:
         /*

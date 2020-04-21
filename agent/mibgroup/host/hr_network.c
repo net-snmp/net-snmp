@@ -215,7 +215,9 @@ static char     HRN_savedName[MAX_PHYSADDR_LEN];
 #else
 static char     HRN_savedName[16];
 #endif
+#if !defined(WIN32)
 static u_short  HRN_savedFlags;
+#endif
 static int      HRN_savedErrors;
 
 
@@ -299,8 +301,10 @@ network_status(int idx)
         return 2;               /* running */
     else
         return 5;               /* down */
+#else
+    /* To do: implement network_status() for Windows. */
+    return 2;                   /* running */
 #endif /* WIN32 */
-
 }
 
 int

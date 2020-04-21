@@ -814,6 +814,7 @@ write_rte(int action,
                 }
             }
         }
+        /* FALL THROUGH */
 
     case FREE:
         /*
