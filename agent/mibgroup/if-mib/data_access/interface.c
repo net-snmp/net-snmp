@@ -1060,7 +1060,9 @@ _parse_include_if_config(const char *token, char *cptr)
 
 err:
     if (if_new) {
+#if defined(HAVE_PCRE_H) || defined(HAVE_REGEX_H)
         free(if_new->regex_ptr);
+#endif
         free(if_new->name);
     }
     free(if_new);
