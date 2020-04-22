@@ -22,7 +22,7 @@ config_require(host/data_access/hr_disk_solaris)
 config_require(host/data_access/hr_disk_aix)
 #elif defined(__hpux)
 config_require(host/data_access/hr_disk_hpux)
-#elif defined(_WIN32)
+#elif defined(WIN32)
 config_require(host/data_access/hr_disk_windows)
 #endif
 
