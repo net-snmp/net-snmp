@@ -215,9 +215,7 @@ static char     HRN_savedName[MAX_PHYSADDR_LEN];
 #else
 static char     HRN_savedName[16];
 #endif
-#if !defined(WIN32)
 static u_short  HRN_savedFlags;
-#endif
 static int      HRN_savedErrors;
 
 

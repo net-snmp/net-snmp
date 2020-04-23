@@ -30,3 +30,5 @@
 #include <ws2tcpip.h>
 
 #include <net-snmp/system/generic.h>
+
+#define NETSNMP_INCLUDE_IFTABLE_REWRITES
