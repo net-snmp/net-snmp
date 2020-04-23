@@ -21,9 +21,7 @@ config_require(mibII/udp)
 config_require(mibII/ipv6)
 #endif
 
-#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
 config_require(if-mib)
-#endif
 
 /*
  * these new module re-rewrites have only been implemented for

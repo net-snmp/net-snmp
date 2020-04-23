@@ -52,12 +52,6 @@
 #endif
 
 /*
- * looks like the IFTable stuff works better than the mibII versions
- */
- 
-#define NETSNMP_INCLUDE_IFTABLE_REWRITES
-
-/*
  * use new host resources files as well
  */
 #define NETSNMP_INCLUDE_HOST_RESOURCES

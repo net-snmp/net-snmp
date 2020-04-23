@@ -26,8 +26,6 @@ config_require(if-mib/data_access/interface)
  *    be handled in the *_hpux.h header file.
  */
 
-#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
-
 config_exclude(mibII/interfaces)
 
 #if defined(linux)
@@ -44,10 +42,8 @@ config_require(if-mib/data_access/interface_solaris2)
 config_warning(This platform does not yet support the IF-MIB)
 config_require(if-mib/data_access/interface_unsup)
 #else
-config_error(This platform does not yet support IF-MIB rewrites)
-#endif
-#else
-#define NETSNMP_ACCESS_INTERFACE_NOARCH 1
+config_error(This platform does not yet support the IF-MIB)
+config_require(if-mib/data_access/interface_unsup)
 #endif
 
 #endif /* NETSNMP_ACCESS_INTERFACE_CONFIG_H */

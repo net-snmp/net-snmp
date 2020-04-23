@@ -191,19 +191,17 @@ set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,
             int mtu);
 static int get_if_stats(mib2_ifEntry_t *ifp);
 
-#if defined(HAVE_IF_NAMEINDEX) && defined(NETSNMP_INCLUDE_IFTABLE_REWRITES)
+#if defined(HAVE_IF_NAMEINDEX)
 static int _dlpi_open(const char *devname);
 static int _dlpi_get_phys_address(int fd, char *paddr, int maxlen,
                                   int *paddrlen);
 static int _dlpi_get_iftype(int fd, unsigned int *iftype);
 static int _dlpi_attach(int fd, int ppa);
 static int _dlpi_parse_devname(char *devname, int *ppap);
-#endif
-
-
-
+#else
 static int
 Name_cmp(void *, void *);
+#endif
 
 static void
 init_mibcache_element(mibcache * cp);
@@ -1068,11 +1066,10 @@ getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
  * to be substituted later if SunSoft decides to extend its mib2 interface.
  */
 
-#if defined(HAVE_IF_NAMEINDEX) && defined(NETSNMP_INCLUDE_IFTABLE_REWRITES)
+#if defined(HAVE_IF_NAMEINDEX)
 
 /*
- * If IFTABLE_REWRITES is enabled, then we will also rely on DLPI to obtain
- * information from the NIC.
+ * Use DLPI to obtain information from the NIC.
  */
 
 /*
@@ -1616,7 +1613,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
     close(ifsd);
     return ret;
 }
-#endif /*defined(HAVE_IF_NAMEINDEX)&&defined(NETSNMP_INCLUDE_IFTABLE_REWRITES)*/
+#endif /*defined(HAVE_IF_NAMEINDEX)*/
 
 static void
 set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,
@@ -1846,6 +1843,7 @@ Get_everything(void *x, void *y)
     return 0;             /* Always TRUE */
 }
 
+#if !defined(HAVE_IF_NAMEINDEX)
 /*
  * Compare name and IP address of the interface to ARP table entry.
  * Needed to obtain the physical address of the interface in getif.
@@ -1866,6 +1864,7 @@ Name_cmp(void *ifrp, void *ep)
 	return 1;
     }
 }
+#endif
 
 /*
  * Try to determine the index of a particular interface. If mfd-rewrites is

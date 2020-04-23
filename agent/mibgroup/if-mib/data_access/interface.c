@@ -47,10 +47,8 @@ static int ifmib_max_num_ifaces = 0;
  */
 static int _access_interface_entry_compare_name(const void *lhs,
                                                 const void *rhs);
-#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 static void _access_interface_entry_release(netsnmp_interface_entry * entry,
                                             void *unused);
-#endif
 static void _access_interface_entry_save_name(const char *name, oid index);
 static void _parse_interface_config(const char *token, char *cptr);
 static void _parse_ifmib_max_num_ifaces(const char *token, char *cptr);
@@ -103,7 +101,6 @@ netsnmp_access_interface_init(void)
 
     _access_interface_init = 1;
 
-#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
     {
         netsnmp_container * ifcontainer;
 
@@ -116,7 +113,6 @@ netsnmp_access_interface_init(void)
         if(NULL != ifcontainer)
             netsnmp_access_interface_container_free(ifcontainer, 0);
     }
-#endif
 }
 
 /**---------------------------------------------------------------------*/
@@ -167,7 +163,6 @@ netsnmp_access_interface_container_init(u_int flags)
  * @retval NULL  error
  * @retval !NULL pointer to container
  */
-#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 netsnmp_container*
 netsnmp_access_interface_container_load(netsnmp_container* container, u_int load_flags)
 {
@@ -226,7 +221,6 @@ netsnmp_access_interface_index_find(const char *name)
 
     return netsnmp_arch_interface_index_find(name);
 }
-#endif
 
 /**---------------------------------------------------------------------*/
 /*
@@ -313,11 +307,9 @@ netsnmp_access_interface_entry_create(const char *name, oid if_index)
     /*
      * get if index, and save name for reverse lookup
      */
-#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
     if (0 == if_index)
         entry->index = netsnmp_access_interface_index_find(name);
     else
-#endif
         entry->index = if_index;
     _access_interface_entry_save_name(name, entry->index);
 
@@ -451,7 +443,6 @@ Interface_Scan_NextInt(int *index, char *name, netsnmp_interface_entry **entry,
  * @retval 0   : success
  * @retval < 0 : error
  */
-#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 int
 netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
                                                 int ifAdminStatus)
@@ -473,7 +464,6 @@ netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
 
     return rc;
 }
-#endif
 #endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ACCESS_ENTRY_SET_ADMIN_STATUS */
 
 /**---------------------------------------------------------------------*/
@@ -490,7 +480,6 @@ _access_interface_entry_compare_name(const void *lhs, const void *rhs)
                   ((const netsnmp_interface_entry *) rhs)->name);
 }
 
-#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 /**
  */
 static void
@@ -498,7 +487,6 @@ _access_interface_entry_release(netsnmp_interface_entry * entry, void *context)
 {
     netsnmp_access_interface_entry_free(entry);
 }
-#endif
 
 /**
  */
