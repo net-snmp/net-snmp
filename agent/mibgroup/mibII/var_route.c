@@ -822,16 +822,10 @@ var_ipRouteEntry(struct variable * vp,
         addr_ret = Lowentry.ipRouteDest;
         return (u_char *) & addr_ret;
     case IPROUTEIFINDEX:
-#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
         Lowentry.ipRouteIfIndex.o_bytes[Lowentry.ipRouteIfIndex.o_length] = '\0';
         long_return =
             netsnmp_access_interface_index_find(
                 Lowentry.ipRouteIfIndex.o_bytes);
-#else
-        long_return =
-           Interface_Index_By_Name(Lowentry.ipRouteIfIndex.o_bytes,
-                                   Lowentry.ipRouteIfIndex.o_length);
-#endif
         return (u_char *) & long_return;
     case IPROUTEMETRIC1:
         long_return = Lowentry.ipRouteMetric1;
