@@ -234,7 +234,7 @@ AC_SUBST(LD_NO_UNDEFINED)
 case x$target_os in
   xmingw*)
     with_socklib=winsock2
-    CPPFLAGS="-D_WIN32_WINNT=0x0501 -DWIN32 $CPPFLAGS"
+    CPPFLAGS="-D_WIN32_WINNT=0xffff -DWIN32 $CPPFLAGS"
     ;;
   *)
     with_socklib=default;;
