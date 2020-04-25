@@ -4,6 +4,10 @@ os:
   - linux
   - osx
 
+# Xcode 11.3.1 + OS/X 10.14. See also
+# https://docs.travis-ci.com/user/reference/osx/
+osx_image: xcode11.3
+
 env:
   - MODE=regular
   - MODE=disable-set
