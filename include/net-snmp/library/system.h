@@ -43,6 +43,9 @@ SOFTWARE.
  */
 
 
+    struct timeval;
+
+
     /*
      * function to create a daemon. Will fork and call setsid().
      *

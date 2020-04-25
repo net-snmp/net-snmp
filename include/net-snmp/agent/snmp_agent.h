@@ -40,6 +40,8 @@ extern          "C" {
 #define SNMP_AGENT_FLAGS_NONE                   0x0
 #define SNMP_AGENT_FLAGS_CANCEL_IN_PROGRESS     0x1
 
+    struct timeval;
+
     /*
      * If non-zero, causes the addresses of peers to be logged when receptions
      * occur.  
