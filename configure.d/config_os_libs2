@@ -93,6 +93,20 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
   esac
 ])
 
+AC_MSG_CHECKING([for MIB_IF_TABLE2])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+  #define _WIN32_WINNT 0xffff
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
+  #include <iphlpapi.h>
+],[
+  return sizeof(MIB_IF_TABLE2)
+])],[
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([HAVE_MIB_IF_TABLE2], 1,
+    [Define if MIB_IF_TABLE2 is available])],
+  [AC_MSG_RESULT([no])])
+
 
 #   libregex                                            (MinGW)
 #

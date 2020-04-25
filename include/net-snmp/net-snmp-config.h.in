@@ -499,6 +499,9 @@
 /* Define to 1 if the system has the type `mib2_ipIfStatsEntry_t'. */
 #undef HAVE_MIB2_IPIFSTATSENTRY_T
 
+/* Define if MIB_IF_TABLE2 is available */
+#undef HAVE_MIB_IF_TABLE2
+
 /* Define to 1 if you have the `mkstemp' function. */
 #undef HAVE_MKSTEMP
 

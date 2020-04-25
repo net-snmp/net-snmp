@@ -16327,7 +16327,7 @@ esac
 case x$target_os in
   xmingw*)
     with_socklib=winsock2
-    CPPFLAGS="-D_WIN32_WINNT=0x0501 -DWIN32 $CPPFLAGS"
+    CPPFLAGS="-D_WIN32_WINNT=0xffff -DWIN32 $CPPFLAGS"
     ;;
   *)
     with_socklib=default;;
@@ -22504,6 +22504,40 @@ else
     ;;
   esac
 
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for MIB_IF_TABLE2" >&5
+$as_echo_n "checking for MIB_IF_TABLE2... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+  #define _WIN32_WINNT 0xffff
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
+  #include <iphlpapi.h>
+
+int
+main ()
+{
+
+  return sizeof(MIB_IF_TABLE2)
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_MIB_IF_TABLE2 1" >>confdefs.h
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
