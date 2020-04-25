@@ -26946,6 +26946,12 @@ _ACEOF
 fi
 
 
+if test "x$ac_cv_type_in_addr_t" != xyes; then
+
+$as_echo "#define in_addr_t unsigned long" >>confdefs.h
+
+fi
+
 #
 # Check for the type of the fifth argument of select()
 #

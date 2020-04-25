@@ -2,6 +2,9 @@
 #define _SNMPIPBASEDOMAIN_H_
 
 #include <net-snmp/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 /**
  * SNMP endpoint specification.
