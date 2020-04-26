@@ -44,13 +44,8 @@
 #include "kernel.h"
 #include <net-snmp/agent/ds_agent.h>
 
-#ifndef NULL
-#define NULL 0
-#endif
-
-
 #if HAVE_KVM_H
-kvm_t *kd = NULL;
+kvm_t *kd;
 
 /**
  * Initialize the support for accessing kernel virtual memory.
@@ -135,9 +130,7 @@ free_kmem(void)
     }
 }
 
-#else                           /* HAVE_KVM_H */
-
-#ifdef HAVE_KMEM
+#elif defined(HAVE_NLIST_H)
 
 static off_t    klseek(off_t);
 static int      klread(char *, int);
@@ -259,6 +252,15 @@ free_kmem(void)
     }
 }
 
-#endif                          /* HAVE_KMEM */
+#else
+int
+init_kmem(const char *file)
+{
+    return 0;
+}
 
-#endif                          /* HAVE_KVM_H */
+void
+free_kmem(void)
+{
+}
+#endif

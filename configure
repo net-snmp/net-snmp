@@ -31246,33 +31246,6 @@ _ACEOF
 
 
 
-#       /dev/kmem existence
-#	    used in agent only
-#
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for /dev/kmem" >&5
-$as_echo_n "checking for /dev/kmem... " >&6; }
-if ${ac_cv_HAVE_KMEM+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test $CDEV_TEST_FLAG /dev/kmem; then
-        ac_cv_HAVE_KMEM="/dev/kmem"
-    fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_HAVE_KMEM" >&5
-$as_echo "$ac_cv_HAVE_KMEM" >&6; }
-#
-#  Note that it's OK if this device is not found
-#
-if test "x$ac_cv_HAVE_KMEM" = "x/dev/kmem"; then
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_KMEM "$ac_cv_HAVE_KMEM"
-_ACEOF
-
-fi
-
-
 #       Swap device Location
 #           (/dev/dmem or /dev/drum)
 #	    used in agent only
