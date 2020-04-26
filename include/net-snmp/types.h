@@ -22,20 +22,6 @@
 #error "Please include <net-snmp/net-snmp-config.h> before this file"
 #endif
 
-                        /*
-                         * For 'timeval' 
-                         */
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-
 #include <sys/types.h>
 
 #if defined(WIN32) && !defined(cygwin)
@@ -51,10 +37,6 @@ typedef pid_t netsnmp_pid_t;
 #define NETSNMP_NO_SUCH_PROCESS -1
 #endif
 
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>		/* For definition of in_addr_t */
-#endif
-
 #include <net-snmp/library/oid.h>
 
 #ifdef __cplusplus
@@ -63,14 +45,6 @@ extern "C" {
 
 #ifndef HAVE_SOCKLEN_T
 typedef u_int socklen_t;
-#endif
-
-#ifndef HAVE_IN_ADDR_T
-  /*
-   * The type in_addr_t must match the type of sockaddr_in::sin_addr.
-   * For MSVC and MinGW32, this is u_long.
-   */
-typedef u_long in_addr_t;
 #endif
 
 #ifndef HAVE_SSIZE_T

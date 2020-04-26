@@ -1131,7 +1131,7 @@
 /* #undef NETSNMP_CAN_USE_SYSCTL */
 
 /* type check for in_addr_t */
-/* #undef in_addr_t */
+#define in_addr_t unsigned long
 
 /* define if SIOCGIFADDR exists in sys/ioctl.h */
 /* #undef SYS_IOCTL_H_HAS_SIOCGIFADDR */

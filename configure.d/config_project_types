@@ -53,6 +53,11 @@ AC_CHECK_TYPES([socklen_t, in_addr_t, ssize_t],,,[
 #include <netinet/in.h>
 #endif])
 
+if test "x$ac_cv_type_in_addr_t" != xyes; then
+AC_DEFINE([in_addr_t], [unsigned long],
+          [in_addr_t definition if not defined in <netinet/in.h>. Must match the type of sockaddr_in::sin_addr])
+fi
+
 #
 # Check for the type of the fifth argument of select()
 #

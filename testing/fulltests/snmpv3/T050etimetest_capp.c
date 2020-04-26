@@ -29,7 +29,9 @@
 #include <netinet/in.h>
 #endif
 
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_api.h>

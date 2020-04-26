@@ -587,8 +587,11 @@ AC_CHECK_FUNCS(nlist nlist64 knlist)
 
 NETSNMP_SEARCH_LIBS([endwin], [curses ncurses], [
   AC_CHECK_HEADERS([curses.h])
-  AC_CHECK_HEADERS([ncurses/curses.h])],,,
+  AC_CHECK_HEADERS([ncurses/curses.h])
+  HAVE_LIBCURSES=TRUE],
+  [HAVE_LIBCURSES=FALSE],,
   [LIBCURSES])
+AC_SUBST([HAVE_LIBCURSES])
 AC_SUBST([LIBCURSES])
 
 #   libm for ceil

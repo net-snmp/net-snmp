@@ -31,7 +31,9 @@
 #include <netinet/in.h>
 #endif
 
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <ctype.h>
 
 #include <net-snmp/library/asn1.h>

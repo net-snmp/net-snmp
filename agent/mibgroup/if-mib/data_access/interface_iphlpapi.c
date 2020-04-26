@@ -1,10 +1,12 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
-#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/library/container.h>
+#include <net-snmp/library/snmp.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/snmp_vars.h>
 #include "interface_private.h"
 #include "net-snmp/data_access/interface.h"
+#include <ws2tcpip.h>
 #include <iphlpapi.h>
 
 /* For Cygwin, MinGW32 and MSYS */
@@ -12,10 +14,12 @@
 #define NETIO_STATUS DWORD
 #endif
 
+#ifdef HAVE_MIB_IF_TABLE2
 static void (*pFreeMibTable)(void *Table);
 static NETIO_STATUS (*pGetIfEntry2)(MIB_IF_ROW2 *Row);
 static NETIO_STATUS (*pGetIfTable2)(MIB_IF_TABLE2 **Table);
 static NETIO_STATUS (*pSetIfEntry2)(MIB_IF_ROW2 *Row);
+#endif
 
 void
 netsnmp_arch_interface_init(void)
@@ -165,8 +169,12 @@ int
 netsnmp_arch_interface_container_load(netsnmp_container *container,
                                       u_int load_flags)
 {
+#ifdef HAVE_MIB_IF_TABLE2
     return pGetIfTable2 ? netsnmp_arch_interface_load_new(container) :
         netsnmp_arch_interface_load_old(container);
+#else
+    return netsnmp_arch_interface_load_old(container);
+#endif
 }
 
 oid

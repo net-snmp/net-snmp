@@ -33,6 +33,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
+#include <stdint.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif

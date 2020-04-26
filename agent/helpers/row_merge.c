@@ -17,6 +17,8 @@
 
 #include <net-snmp/agent/row_merge.h>
 
+#include <stdint.h>
+
 #if HAVE_STRING_H
 #include <string.h>
 #else

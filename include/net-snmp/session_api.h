@@ -26,6 +26,7 @@ extern          "C" {
     struct session_list;
     struct timeval;
 
+
     NETSNMP_IMPORT
     void            snmp_sess_init(netsnmp_session *);
 

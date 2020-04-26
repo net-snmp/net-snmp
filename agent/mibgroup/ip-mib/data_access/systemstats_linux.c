@@ -14,6 +14,7 @@
 #include "systemstats.h"
 #include "systemstats_private.h"
 
+#include <stdint.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <ctype.h>

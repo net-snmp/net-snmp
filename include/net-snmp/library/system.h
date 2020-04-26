@@ -43,6 +43,9 @@ SOFTWARE.
  */
 
 
+    struct timeval;
+
+
     /*
      * function to create a daemon. Will fork and call setsid().
      *
@@ -117,6 +120,9 @@ SOFTWARE.
 #endif                          /* WIN32 */
 
 #include <net-snmp/types.h>     /* For definition of in_addr_t */
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
     /* Simply resolve a hostname and return first IPv4 address.
      * Returns -1 on error */

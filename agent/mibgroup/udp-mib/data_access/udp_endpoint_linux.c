@@ -2,10 +2,6 @@
  *  udpEndpointTable MIB architecture support
  */
 
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
-
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -22,6 +18,7 @@
 #include "udp_endpoint_private.h"
 
 #include <fcntl.h>
+#include <stdint.h>
 
 netsnmp_feature_require(text_utils);
 netsnmp_feature_child_of(udp_endpoint_all, libnetsnmpmibs);

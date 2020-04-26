@@ -385,7 +385,7 @@ write_arp(int action,
             if (!create_flag) {
                 if ((status = SetIpNetEntry(oldarp_row)) != NO_ERROR) {
                     snmp_log(LOG_ERR, "Error in case UNDO, status %u\n",
-                             status);
+                             (unsigned int)status);
                     retval = SNMP_ERR_UNDOFAILED;
                 }
             }
@@ -396,7 +396,7 @@ write_arp(int action,
                 if ((status = SetIpNetEntry(arp_row)) != NO_ERROR) {
                     snmp_log(LOG_ERR,
                              "Error while deleting added row, status %u\n",
-                             status);
+                             (unsigned int)status);
                     retval = SNMP_ERR_UNDOFAILED;
                 }
             }
@@ -416,7 +416,7 @@ write_arp(int action,
                 if ((status = CreateIpNetEntry(arp_row)) != NO_ERROR) {
                     snmp_log(LOG_ERR,
                              "Inside COMMIT: CreateIpNetEntry failed, status %u\n",
-                             status);
+                             (unsigned int)status);
                     retval = SNMP_ERR_COMMITFAILED;
                 }
             } else {

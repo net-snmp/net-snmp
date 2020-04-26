@@ -664,6 +664,7 @@ PERLLDOPTS_FOR_LIBS
 EMBEDPERLUNINSTALL
 EMBEDPERLINSTALL
 LIBCURSES
+HAVE_LIBCURSES
 NETSNMP_BUILD_PCAP_PROG_FALSE
 NETSNMP_BUILD_PCAP_PROG_TRUE
 MYSQL_INCLUDES
@@ -24614,8 +24615,11 @@ fi
 
 done
 
-
+  HAVE_LIBCURSES=TRUE
+ else
+    HAVE_LIBCURSES=FALSE
  fi
+
 
 
 
@@ -25802,6 +25806,12 @@ _ACEOF
 
 fi
 
+
+if test "x$ac_cv_type_in_addr_t" != xyes; then
+
+$as_echo "#define in_addr_t unsigned long" >>confdefs.h
+
+fi
 
 #
 # Check for the type of the fifth argument of select()
