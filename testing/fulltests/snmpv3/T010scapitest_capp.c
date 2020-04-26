@@ -43,6 +43,9 @@
 #include <net-snmp/library/getopt.h>
 
 #include <stdlib.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 
 /*

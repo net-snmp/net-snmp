@@ -9,15 +9,12 @@
  * distributed with the Net-SNMP package.
  */
 
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-
 #include <net-snmp/agent/snmp_get_statistic.h>
+#include <stdint.h>
 
 netsnmp_feature_provide(helper_statistics);
 netsnmp_feature_child_of(helper_statistics, mib_helpers);

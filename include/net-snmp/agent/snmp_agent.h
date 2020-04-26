@@ -26,6 +26,8 @@
 #ifndef SNMP_AGENT_H
 #define SNMP_AGENT_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
