@@ -44,7 +44,11 @@ extern "C" {
 #endif
 
 #ifndef HAVE_SOCKLEN_T
+#ifdef WIN32
+typedef int socklen_t;
+#else
 typedef u_int socklen_t;
+#endif
 #endif
 
 #ifndef HAVE_SSIZE_T
