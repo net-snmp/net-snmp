@@ -1,6 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
-#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/library/container.h>
+#include <net-snmp/library/snmp.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/snmp_vars.h>
 #include "interface_private.h"
