@@ -49,23 +49,6 @@ AC_CACHE_CHECK([for location of system kernel],
 AC_DEFINE_UNQUOTED(KERNEL_LOC,"$ac_cv_KERNEL_LOC", [location of UNIX kernel])
 
 
-#       /dev/kmem existence
-#	    used in agent only
-#
-AC_CACHE_CHECK([for /dev/kmem],
-    ac_cv_HAVE_KMEM,
-   [if test $CDEV_TEST_FLAG /dev/kmem; then
-        ac_cv_HAVE_KMEM="/dev/kmem"
-    fi
-])
-#
-#  Note that it's OK if this device is not found
-#
-if test "x$ac_cv_HAVE_KMEM" = "x/dev/kmem"; then
-    AC_DEFINE_UNQUOTED(HAVE_KMEM,"$ac_cv_HAVE_KMEM", [Define if you have /dev/kmem])
-fi
-
-
 #       Swap device Location
 #           (/dev/dmem or /dev/drum)
 #	    used in agent only

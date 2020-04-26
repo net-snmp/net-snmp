@@ -18,6 +18,9 @@
 #include "hr_disk.h"
 #include <fcntl.h>
 #include <limits.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <net-snmp/agent/agent_read_config.h>
 #include <net-snmp/library/read_config.h>
 
