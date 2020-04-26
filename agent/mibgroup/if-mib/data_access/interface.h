@@ -38,10 +38,10 @@ config_require(if-mib/data_access/interface_ioctl)
 config_require(if-mib/data_access/interface_sysctl)
 #elif defined(solaris2)
 config_require(if-mib/data_access/interface_solaris2)
-#elif defined(HAVE_IPHLPAPI_H)
+#elif defined(HAVE_IPHLPAPI_H) && !defined(cygwin)
 config_require(if-mib/data_access/interface_iphlpapi)
 #else
-config_error(This platform does not yet support the IF-MIB)
+config_warning(This platform does not yet support the IF-MIB)
 config_require(if-mib/data_access/interface_unsup)
 #endif
 
