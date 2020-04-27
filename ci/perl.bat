@@ -7,7 +7,7 @@ set INST_TOP=c:\perl-msvc
 rd /q /s %INST_TOP%
 curl https://www.cpan.org/src/5.0/perl-%PERL_VERSION%.tar.gz -o perl-%PERL_VERSION%.tar.gz
 if %errorlevel% neq 0 goto build_error
-tar xaf perl-%PERL_VERSION%.tar.gz
+tar xzf perl-%PERL_VERSION%.tar.gz
 if %errorlevel% neq 0 goto build_error
 cd perl-%PERL_VERSION%\win32
 if %errorlevel% neq 0 goto build_error
