@@ -92,14 +92,10 @@ sub SnmpInitMakeParams {
 #	} else {
 #	    $Params{'PREREQ_PM'} = { 'NetSNMP::default_store' => 0.01 };
 	}
-	if (!$ENV{'NETSNMP_PREFIX'}) {
-	    $prefix            = `$opts->{'nsconfig'} --prefix` or
-		die "net-snmp-config failed\n";
-	    chomp($prefix);
-	    $sep = '/';
-	} else {
-	    $prefix = $ENV{'NETSNMP_PREFIX'};
-	}
+	$prefix = ($opts->{'prefix'} or `$opts->{'nsconfig'} --prefix` or
+	    die "net-snmp-config failed\n");
+	chomp($prefix);
+	$sep = '/';
     }
 
     return(%Params);
