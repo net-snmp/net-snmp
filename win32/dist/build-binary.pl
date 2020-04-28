@@ -9,8 +9,15 @@ use warnings;
 use File::Basename;
 use File::Copy;
 use File::Spec;
-use File::Which;
 use Cwd 'abs_path';
+
+sub which {
+    my ($cmd) = @_;
+    for my $p (split(';', $ENV{'PATH'})) {
+	my $q = File::Spec->catfile($p, $cmd . '.exe');
+	return $q if -e $q;
+    }
+}
 
 print "------------------------------------------------------\n";
 
