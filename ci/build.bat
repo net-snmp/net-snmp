@@ -9,6 +9,7 @@ call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd6
 set PATH=c:\perl-msvc\bin;%PATH%
 cd win32
 perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=dynamic --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc
+if %errorlevel% neq 0 exit /b %errorlevel%
 nmake /nologo
 if %errorlevel% neq 0 exit /b %errorlevel%
 nmake /nologo perl
@@ -23,6 +24,7 @@ call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd6
 set PATH=c:\perl-msvc\bin;%PATH%
 cd win32
 perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=static --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc
+if %errorlevel% neq 0 exit /b %errorlevel%
 nmake /nologo
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..

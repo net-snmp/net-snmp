@@ -46,7 +46,8 @@ sub NetSNMPGetOpts {
 	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
 		   "NET-SNMP-DEFINE=s"    => \$ret{'define'},
 		   "NET-SNMP-INC=s"       => \$ret{'inc'},
-		   "NET-SNMP-CFLAGS=s"    => \$ret{'cflags'});
+		   "NET-SNMP-CFLAGS=s"    => \$ret{'cflags'},
+		   "NET-SNMP-PATH=s"      => \$ret{'prefix'});
 
 	my $use_default_nsconfig;
 
@@ -67,6 +68,7 @@ sub NetSNMPGetOpts {
 	$ENV{'NET-SNMP-DEFINE'}    = $ret{'define'};
 	$ENV{'NET-SNMP-INC'}       = $ret{'inc'};
 	$ENV{'NET-SNMP-CFLAGS'}    = $ret{'cflags'};
+	$ENV{'NET-SNMP-PATH'}      = $ret{'prefix'};
     }
     
     $ret{'rootpath'} = $rootpath;
