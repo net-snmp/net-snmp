@@ -13,12 +13,11 @@ BEGIN {
 # serious problem because they linked with static libraries instead of
 # shared ones as the memory space is different.
 
+use Config;
 use Test;
 BEGIN {plan tests => 3}
 
-my $envsep = ($^O =~ /win32/i) ? ';' : ':';
-
-SNMP::setenv('SNMPCONFPATH', '.' . $envsep . 't', 1);
+SNMP::setenv('SNMPCONFPATH', '.' . $Config{path_sep} . 't', 1);
 
 ok(1); # just start up
 
