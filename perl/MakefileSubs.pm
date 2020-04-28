@@ -95,17 +95,14 @@ sub AddCommonParams {
     append($Params->{'INC'},     $opts->{'inc'});
     append($Params->{'CCFLAGS'}, $opts->{'cflags'});
 
-    if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
-	# MinGW or MSYS.
-	append($Params->{'DEFINE'}, "-DMINGW_PERL");
-    } elsif ($Config{'osname'} eq 'MSWin32') {
+    if ($Config{'osname'} eq 'MSWin32') {
 	# Microsoft Visual Studio.
 	append($Params->{'DEFINE'}, "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS");
 	append($Params->{'INC'},
 	       "-I" . File::Spec->catdir($basedir, "include") . " " .
 	       "-I" . File::Spec->catdir($basedir, "win32") . " ");
     } else {
-	# Unix.
+	# Unix or MinGW.
 	append($Params->{'LDDLFLAGS'}, $Config{'lddlflags'});
 	my $ldflags = `$opts->{'nsconfig'} --ldflags` or
 	    die "net-snmp-config failed\n";
