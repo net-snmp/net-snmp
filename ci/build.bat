@@ -53,8 +53,7 @@ exit /b %e%
 goto eof
 
 :MinGW32
-rem Although the AppVeyor documentation mentions MinGW, MinGW is not present
-rem in the Visual Studio 2017 image. See also
+rem MinGW is not present in the Visual Studio 2017 image. See also
 rem https://www.appveyor.com/docs/windows-images-software/.
 if exist C:\mingw goto MinGW32-get
 mkdir C:\mingw
