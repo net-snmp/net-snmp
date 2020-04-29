@@ -22,3 +22,5 @@ my $s = new SNMP::Session(DestHost=>$agent_host, Version=>1, Community=>$comm,
 print Dumper($s->get('anything'));
 
 ok(1);
+
+snmptest_cleanup();
