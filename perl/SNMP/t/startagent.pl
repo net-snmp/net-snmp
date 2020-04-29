@@ -4,11 +4,22 @@ use strict;
 use warnings;
 use Exporter;
 
+#Open the snmptest.cmd file and get the info
+require "t/readsnmptest.pl";
+use vars qw($agent_host $agent_port $mibdir $snmpd_cmd $snmptrapd_cmd);
+
+our @ISA = 'Exporter';
+our @EXPORT_OK = qw($agent_host $agent_port $mibdir
+$trap_port $comm $comm2 $comm3 $sec_name $oid $name
+$name_module $name_module2 $name_long $name_module_long $name_module_long2
+$auth_pass $priv_pass $bad_comm $bad_name $bad_oid $bad_port $bad_host
+$bad_auth_pass $bad_priv_pass $bad_sec_name $bad_version);
+
 # common parameters used in SNMP::Session creation and tests
-our $agent_host = 'localhost';
-our $agent_port = 8765;
+$agent_host = 'localhost' if (!defined($agent_host));
+$agent_port = 8765 if (!defined($agent_port));
 our $trap_port = 8764;
-our $mibdir = '/usr/local/share/snmp/mibs';
+$mibdir = '/usr/local/share/snmp/mibs' if (!defined($mibdir));
 our $comm = 'v1_private';
 our $comm2 = 'v2c_private';
 our $comm3 = 'v3_private';
@@ -36,10 +47,6 @@ our $bad_auth_pass = 'bad_auth_pass';
 our $bad_priv_pass = 'bad_priv_pass';
 our $bad_sec_name = 'bad_sec_name';
 our $bad_version = 7;
-
-my $snmpd_cmd;
-my $snmptrapd_cmd;
-my $line;
 
 if ($^O =~ /win32/i) {
   require Win32::Process;
@@ -90,26 +97,6 @@ sub kill_by_pid_file {
 
 # Stop any processes started during a previous test.
 snmptest_cleanup();
-
-#Open the snmptest.cmd file and get the info
-if (open(CMD, "<t/snmptest.cmd")) {
-  while ($line = <CMD>) {
-    if ($line =~ /HOST\s*=>\s*(.*?)\s+$/) {
-      $agent_host = $1;
-    } elsif ($line =~ /MIBDIR\s*=>\s*(.*?)\s+$/) {
-      $mibdir = $1;
-    } elsif ($line =~ /AGENT_PORT\s*=>\s*(.*?)\s+$/) {
-      $agent_port = $1;
-    } elsif ($line =~ /SNMPD\s*=>\s*(.*?)\s+$/) {
-      $snmpd_cmd = $1;
-    } elsif ($line =~ /SNMPTRAPD\s*=>\s*(.*?)\s+$/) {
-      $snmptrapd_cmd = $1;
-    }
-  } # end of while
-  close CMD;
-} else {
-  die ("Could not start agent. Couldn't find snmptest.cmd file\n");
-}
 
 # Start snmpd and snmptrapd.
 
