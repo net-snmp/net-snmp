@@ -1,15 +1,19 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     eval "use Cwd qw(abs_path)";
     $ENV{'SNMPCONFPATH'} = 'nopath';
     $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
 }
 use Test;
-BEGIN { $n = 11; plan tests => $n }
+BEGIN { plan tests => 11 }
 use SNMP;
-use vars qw($agent_port $comm $comm2 $trap_port $agent_host $sec_name $priv_pass $auth_pass $bad_name);
 require 't/startagent.pl';
+use vars qw($agent_host $agent_port $auth_pass $bad_name $comm $comm2
+            $priv_pass $sec_name $trap_port);
 $SNMP::debugging = 0;
 
 my $res;
@@ -26,7 +30,10 @@ ok(defined($s1));
 ########################  2  ############################
 # test v1 trap
 if (defined($s1)) {
-  $res = $s1->trap(enterprise => $enterprise, agent=>$agent_host, generic=>$generic,[[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+    $res = $s1->trap(enterprise => $enterprise, agent=>$agent_host,
+		     generic => $generic,
+		     [['sysContact', 0, 'root@localhost'],
+		      ['sysLocation', 0, 'here']] );
 }
 ok($res =~ /^0 but true/);
 
@@ -34,7 +41,8 @@ ok($res =~ /^0 but true/);
 # test with wrong varbind
 undef $res;
 if (defined($s1)) {
-  $res = $s1->trap([[$bad_name, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+    $res = $s1->trap([[$bad_name, 0, 'root@localhost'],
+		      ['sysLocation', 0, 'here']] );
   #print("res is $res\n");
 }
 ok(!defined($res));
@@ -50,7 +58,9 @@ ok(defined($s2));
 # test v2 trap
 undef $res;
 if (defined($s2)) {
-  $res = $s2->trap(uptime=>200, trapoid=>'coldStart',[[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+    $res = $s2->trap(uptime=>200, trapoid=>'coldStart',
+		     [['sysContact', 0, 'root@localhost'],
+		      ['sysLocation', 0, 'here']] );
   #print("res is $res\n");
 }
 ok($res =~ /^0 but true/);
@@ -58,7 +68,8 @@ ok($res =~ /^0 but true/);
 # no trapoid and uptime given. Should take defaults...
 my $ret;
 if (defined($s2)) {
-  $ret = $s2->trap([[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+    $ret = $s2->trap([['sysContact', 0, 'root@localhost'],
+		      ['sysLocation', 0, 'here']] );
   #print("res is $ret\n");
 }
 ok(defined($ret));
@@ -81,19 +92,26 @@ ok(defined($s3));
 
 ########################  9  ############################
 if (defined($s3)) {
-  $res = $s3->inform(uptime=>111, trapoid=>'coldStart', [[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+    $res = $s3->inform(uptime=>111, trapoid=>'coldStart',
+		       [['sysContact', 0, 'root@localhost'],
+			['sysLocation', 0, 'here']] );
 }
 ok($res =~ /^0 but true/);
 
 ######################## 10  ############################
 # Fire up a v3 trap session.
-$s3 = new SNMP::Session(Version=>3, DestHost=> $agent_host, RemotePort=>$trap_port, SecName => $sec_name, SecLevel => authPriv, AuthPass => $auth_pass, PrivPass => $priv_pass);
+$s3 = new SNMP::Session(Version => 3, DestHost=> $agent_host,
+			RemotePort => $trap_port, SecName => $sec_name,
+			SecLevel => 'authPriv', AuthPass => $auth_pass,
+			PrivPass => $priv_pass);
 ok(defined($s3));
 
 ######################## 11  ############################
 undef $res;
 if (defined($s3)) {
-    $res = $s3->inform(uptime=>111, trapoid=>'coldStart', [[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+    $res = $s3->inform(uptime=>111, trapoid=>'coldStart',
+		       [['sysContact', 0, 'root@localhost'],
+			['sysLocation', 0, 'here']] );
     print "res = $res\n";
 }
   

@@ -2,6 +2,9 @@
 
 # Written by John Stoffel (jfs@fluent.com) - 10/13/1997
 
+use strict;
+use warnings;
+
 BEGIN {
     eval "use Cwd qw(abs_path)";
     $ENV{'SNMPCONFPATH'} = 'nopath';
@@ -20,8 +23,9 @@ use Data::Dumper;
 $SNMP::verbose = 0;
 $SNMP::best_guess = 2;
 
-use vars qw($bad_oid);
 require "t/startagent.pl";
+use vars qw($bad_name $bad_oid $name $name_long $name_module $name_module2
+            $name_module_long $name_module_long2 $oid);
 my $DEBUG;
 
 #############################  1  ######################################
@@ -88,7 +92,7 @@ print STDERR ("Test 13: module ID is $res\n") if ($DEBUG);
 ok(defined($res));
 print STDERR ("\n") if ($DEBUG);
 ######################  14   #########################
-$des = $SNMP::MIB{atNetAddress}{description};
+my $des = $SNMP::MIB{atNetAddress}{description};
 print STDERR ("Test 14: des is $des\n") if ($DEBUG);
 ok(defined($des));
 print STDERR ("\n") if ($DEBUG);
@@ -147,7 +151,7 @@ ok(defined($type3));
 ######################################################################
 # Translation tests from Name -> OID
 # sysDescr to .1.3.6.1.2.1.1.1
-$oid_tag = SNMP::translateObj($name);
+my $oid_tag = SNMP::translateObj($name);
 ok($oid eq $oid_tag);
 
 ######################################################################
@@ -172,7 +176,7 @@ ok(!defined($oid_tag));
 ######################################################################
 # OID -> name
 # .1.3.6.1.2.1.1.1 to sysDescr
-$name_tag = SNMP::translateObj($oid);
+my $name_tag = SNMP::translateObj($oid);
 ok($name eq $name_tag);
 
 ######################################################################
@@ -180,7 +184,6 @@ ok($name eq $name_tag);
 # .1.3.6.1.2.1.1.1 to RFC1213-MIB::sysDescr or
 # .1.3.6.1.2.1.1.1 to SNMPv2-MIB::sysDescr
 $name_tag = SNMP::translateObj($oid,0,1);
-$name_module2 = $name_module2; # To eliminate 'only use once' variable warning
 ok(($name_module eq $name_tag) || ($name_module2 eq $name_tag));
 
 ######################################################################
@@ -193,8 +196,6 @@ ok($name_long eq $name_tag);
 # OID -> name
 # .1.3.6.1.2.1.1.1 to RFC1213-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr or
 # .1.3.6.1.2.1.1.1 to SNMPv2-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr
-$name_module_long = $name_module_long; # To eliminate 'only use once' variable warning
-$name_module_long2 = $name_module_long2; # To eliminate 'only use once' variable warning
 $name_tag = SNMP::translateObj($oid,1,1);
 ok(($name_module_long eq $name_tag) || ($name_module_long2 eq $name_tag));
 
@@ -209,9 +210,9 @@ ok($name ne $name_tag);
 ######################################################################
 # ranges
 
-$node = $SNMP::MIB{snmpTargetAddrMMS};
+my $node = $SNMP::MIB{snmpTargetAddrMMS};
 ok($node);
-$ranges = $node->{ranges};
+my $ranges = $node->{ranges};
 ok($ranges and ref $ranges eq 'ARRAY');
 ok(@$ranges == 2);
 ok($$ranges[0]{low} == 0);

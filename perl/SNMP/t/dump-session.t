@@ -1,6 +1,7 @@
 #!./perl
 
 use strict;
+use warnings;
 use Test;
 
 BEGIN {
@@ -12,8 +13,8 @@ BEGIN {
 
 use SNMP;
 use Data::Dumper;
-use vars qw($agent_port $comm $agent_host);
 require "t/startagent.pl";
+use vars qw($agent_host $agent_port $comm);
 
 # See also https://sourceforge.net/p/net-snmp/bugs/2488/
 

@@ -1,5 +1,8 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     eval "use Cwd qw(abs_path)";
     $ENV{'SNMPCONFPATH'} = 'nopath';
@@ -8,8 +11,8 @@ BEGIN {
 use Test;
 BEGIN { plan tests => 7 }
 use SNMP;
-use vars qw($agent_port $comm $agent_host);
 require "t/startagent.pl";
+use vars qw($agent_host $agent_port $comm);
 
 
 my $junk_oid = ".1.3.6.1.2.1.1.1.1.1.1";
@@ -19,10 +22,6 @@ my $junk_host = 'no.host.here';
 my $name = "gmarzot\@nortelnetworks.com";
 
 $SNMP::debugging = 0;
-$n = 15;  # Number of tests to run
-
-#print "1..$n\n";
-if ($n == 0) { exit 0; }
 
 # create list of varbinds for GETS, val field can be null or omitted
 my $vars = new SNMP::VarList (
@@ -78,10 +77,10 @@ my $vars = new SNMP::VarList (
 #######################  2  ##########################################
 # Set some value and see if the value is set properly.
 
-$originalLocation = $s1->get('sysLocation.0');
-$value = 'Router Management Labs';
+my $originalLocation = $s1->get('sysLocation.0');
+my $value = 'Router Management Labs';
 $s1->set('sysLocation.0', $value);
-$finalvalue = $s1->get('sysLocation.0');
+my $finalvalue = $s1->get('sysLocation.0');
 ok($originalLocation ne $finalvalue);
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";
 #print("set value is: $finalvalue\n\n");
@@ -107,9 +106,9 @@ $s1->set('sysLocation.0', $originalLocation);
 #######################   4   #####################################
 
 # Test for an integer (READ-ONLY)
-$originalservice = $s1->get('sysServices.0');
+my $originalservice = $s1->get('sysServices.0');
 #print("services is: $originalservice\n");
-$junk_service = "Nortel Networks";
+my $junk_service = "Nortel Networks";
 $s1->set('sysServices.0', $junk_service);
 
 $finalvalue = $s1->get('sysServices.0');
@@ -126,9 +125,9 @@ $s1->set('sysServices.0',$originalservice);
 # If any other value is tried to be set, it doesn't set and
 # retains the old value.
 
-$originalTrap = $s1->get('snmpEnableAuthenTraps.0');
+my $originalTrap = $s1->get('snmpEnableAuthenTraps.0');
 #print("trap is -- $originalTrap\n");
-$junk_trap = "Nortel Networks";
+my $junk_trap = "Nortel Networks";
 $s1->set('snmpEnableAuthenTraps.0', $junk_trap);
 $finalvalue = $s1->get('snmpEnableAuthenTraps.0');
 #print("final trap is: $finalvalue\n");
@@ -197,9 +196,9 @@ ok($s1->{ErrorStr} =~ /^Bad/ );
 # OID test
 my $oldoid = $s1->get("sysORID.1");
 #print("OID is : $oldoid\n");
-$junk_OID = ".6.6.6.6.6.6";
+my $junk_OID = ".6.6.6.6.6.6";
 $s1->set('sysORID.1', $junk_OID);
-$newOID = $s1->get("sysORID.1");
+my $newOID = $s1->get("sysORID.1");
 #print("new oid is $newOID\n");
 ok($oldoid eq $newOID);
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";
@@ -207,7 +206,7 @@ ok($oldoid eq $newOID);
 ################  14  ##########################
 
 # Try setting an unregistered OID.
-$junk_data = 'hehehe';
+my $junk_data = 'hehehe';
 $s1->set('ifmyData.0', $junk_data);
 
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";

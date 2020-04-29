@@ -1,16 +1,17 @@
 #!./perl
+
+use strict;
+use warnings;
+
 BEGIN {
     eval "use Cwd qw(abs_path)";
     $ENV{'SNMPCONFPATH'} = 'nopath';
     $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
-
-    $skipped_tests = ($^O =~ /win32/i) ? 20 : 0;
 }
 
 use Test;
-BEGIN {plan tests => 20 - $skipped_tests}
+BEGIN {plan tests => ($^O =~ /win32/i) ? 0 : 20}
 use SNMP;
-use vars qw($agent_port $comm $agent_host);
 
 if ($^O =~ /win32/i) {
   warn "Win32/Win64 detected - skipping async calls\n";
@@ -18,6 +19,7 @@ if ($^O =~ /win32/i) {
 }
 
 require "t/startagent.pl";
+use vars qw($agent_host $agent_port $comm);
 
 
 sub cb1; # forward reference

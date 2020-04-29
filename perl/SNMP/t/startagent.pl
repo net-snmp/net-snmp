@@ -1,38 +1,44 @@
+#!./perl
+
+use strict;
+use warnings;
+use Exporter;
+
 # common parameters used in SNMP::Session creation and tests
-$agent_host = 'localhost';
-$agent_port = 8765;
-$trap_port = 8764;
-$mibdir = '/usr/local/share/snmp/mibs';
-$comm = 'v1_private';
-$comm2 = 'v2c_private';
-$comm3 = 'v3_private';
-$sec_name = 'v3_user';
-$oid = '.1.3.6.1.2.1.1.1';
-$name = 'sysDescr';
-$name_module = 'RFC1213-MIB::sysDescr';
-$name_module2 = 'SNMPv2-MIB::sysDescr';
-$name_long = '.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
-$name_module_long = 'RFC1213-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
-$name_module_long2 = 'SNMPv2-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
-$auth_pass = 'test_pass_auth';
-$priv_pass = 'test_pass_priv';
+our $agent_host = 'localhost';
+our $agent_port = 8765;
+our $trap_port = 8764;
+our $mibdir = '/usr/local/share/snmp/mibs';
+our $comm = 'v1_private';
+our $comm2 = 'v2c_private';
+our $comm3 = 'v3_private';
+our $sec_name = 'v3_user';
+our $oid = '.1.3.6.1.2.1.1.1';
+our $name = 'sysDescr';
+our $name_module = 'RFC1213-MIB::sysDescr';
+our $name_module2 = 'SNMPv2-MIB::sysDescr';
+our $name_long = '.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
+our $name_module_long = 'RFC1213-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
+our $name_module_long2 = 'SNMPv2-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
+our $auth_pass = 'test_pass_auth';
+our $priv_pass = 'test_pass_priv';
 
 # don't use any .conf files other than those specified.
 $ENV{'SNMPCONFPATH'} |= "bogus";
 
 # erroneous input to test failure cases
-$bad_comm = 'BAD_COMMUNITY';
-$bad_name = "badName";
-$bad_oid = ".1.3.6.1.2.1.1.1.1.1.1";
-$bad_host = 'bad.host.here';
-$bad_port = '9999999';
-$bad_auth_pass = 'bad_auth_pass';
-$bad_priv_pass = 'bad_priv_pass';
-$bad_sec_name = 'bad_sec_name';
-$bad_version = 7;
+our $bad_comm = 'BAD_COMMUNITY';
+our $bad_name = "badName";
+our $bad_oid = ".1.3.6.1.2.1.1.1.1.1.1";
+our $bad_host = 'bad.host.here';
+our $bad_port = '9999999';
+our $bad_auth_pass = 'bad_auth_pass';
+our $bad_priv_pass = 'bad_priv_pass';
+our $bad_sec_name = 'bad_sec_name';
+our $bad_version = 7;
 
-local $snmpd_cmd;
-local $snmptrapd_cmd;
+my $snmpd_cmd;
+my $snmptrapd_cmd;
 my $line;
 
 if ($^O =~ /win32/i) {
@@ -49,7 +55,7 @@ sub run_async {
       system "$cmd @args 2>&1";
     }
     # Wait at most three seconds for the pid file to appear.
-    for ($i = 0; ($i < 3) && ! (-r "$pidfile"); ++$i) {
+    for (my $i = 0; ($i < 3) && ! (-r "$pidfile"); ++$i) {
       sleep 1;
     }
   } else {
