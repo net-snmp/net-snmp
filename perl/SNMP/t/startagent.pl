@@ -75,32 +75,40 @@ sub run_async {
 }
 
 sub snmptest_cleanup {
-  kill_by_pid_file("t/snmpd.pid");
+  my $ignore_failures = shift;
+
+  kill_by_pid_file("t/snmpd.pid", $ignore_failures);
   unlink("t/snmpd.pid");
-  kill_by_pid_file("t/snmptrapd.pid");
+  kill_by_pid_file("t/snmptrapd.pid", $ignore_failures);
   unlink("t/snmptrapd.pid");
 }
 
 sub kill_by_pid_file {
-  if ((-e "$_[0]") && (-r "$_[0]")) {
-    if ($^O !~ /win32/i) {
-      # Unix or Windows + Cygwin.
-      system "kill `cat $_[0]` > /dev/null 2>&1";
-    } else {
-      # Windows + MSVC or Windows + MinGW.
-      open(H, "<$_[0]");
-      my $pid = (<H>);
-      close (H);
-      if ($pid > 0) {
-        Win32::Process::KillProcess($pid, 0)
-      }
-    }
+  my $pidfile = shift;
+  my $ignore_failures = shift;
+
+  if (!open(H, "<$pidfile")) {
+    return;
   }
+  my $pid = (<H>);
+  close (H);
+  if (!$pid) {
+    defined($ignore_failures) or die "Reading $pidfile failed\n";
+    return;
+  }
+  if ($^O !~ /win32/i) {
+    # Unix or Windows + Cygwin.
+    system "kill $pid > /dev/null 2>&1";
+  } else {
+    # Windows + MSVC or Windows + MinGW.
+    Win32::Process::KillProcess($pid, 0);
+  }
+  return 1;
 }
 
 
 # Stop any processes started during a previous test.
-snmptest_cleanup();
+snmptest_cleanup(1);
 
 # Start snmpd and snmptrapd.
 
