@@ -81,6 +81,7 @@ perl_test :
 	-@echo .
 !ELSE	# dynamic/static check
 	cd ..\perl
+	set PERL5LIB=$(MAKEDIR)\..\perl;$(MAKEDIR)\..\perl\SNMP
 	$(NMAKE) test
 	cd ..\win32
 !ENDIF	# dynamic/static check

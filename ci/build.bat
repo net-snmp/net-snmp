@@ -18,8 +18,9 @@ nmake /nologo
 if %errorlevel% neq 0 exit /b %errorlevel%
 nmake /nologo perl
 if %errorlevel% neq 0 exit /b %errorlevel%
-rem nmake /nologo perl_test - to do: fix Perl module tests on Win32
-if %errorlevel% neq 0 exit /b %errorlevel%
+nmake /nologo perl_test
+rem to do: fix Perl module tests on Win32
+rem if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..
 goto eof
 
@@ -53,8 +54,7 @@ exit /b %e%
 goto eof
 
 :MinGW32
-rem Although the AppVeyor documentation mentions MinGW, MinGW is not present
-rem in the Visual Studio 2017 image. See also
+rem MinGW is not present in the Visual Studio 2017 image. See also
 rem https://www.appveyor.com/docs/windows-images-software/.
 if exist C:\mingw goto MinGW32-get
 mkdir C:\mingw

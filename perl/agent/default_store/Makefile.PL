@@ -42,7 +42,7 @@ sub AgentDefaultStoreInitMakeParams {
 	$Params{'LIBS'} = "-L" . $MakefileSubs::basedir . "\\win32\\$lib_dir\\ -l$snmp_link_lib";
       }
       else {
-	my @LibDirs = split (';',$ENV{LIB});
+	my @LibDirs = split($Config{path_sep}, $ENV{LIB});
         my $LibDir;
 	if ($opts->{'prefix'}) {
 	  push (@LibDirs,"$ENV{'NET-SNMP-PATH'}${sep}lib");
