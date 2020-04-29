@@ -4,9 +4,10 @@
 # Written by Alex Burger
 # March 5th, 2004
 #
-use Getopt::Long;
 use strict;
 use warnings;
+use ExtUtils::Embed;
+use Getopt::Long;
 
 my $version = "unknown";
 my $config;
@@ -189,7 +190,7 @@ my $perl_define =
 
 my $perl_inc = $opensslincdir ? "/I $opensslincdir" : "";
 
-my $perl_cflags = "/wd4244 /wd4267";
+my $perl_cflags = ExtUtils::Embed::ccopts();
 
 my %makefile_subs = (
     "app" => [ "^APPS=",       "APPS=" . join(" ", @apps)	    ],
