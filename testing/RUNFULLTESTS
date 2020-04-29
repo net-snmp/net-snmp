@@ -251,7 +251,7 @@ sub gather_tests {
 	    next;
 	}
 
-	if (($group eq 'perl' && !configured_with('with-perl-modules')) ||
+	if (($group eq 'perl' && !configured_with("PERLTARGS='perlmodules'")) ||
 	    ($group eq 'python' && !configured_with('with-python-modules'))) {
 	    DEBUG("Skipping group $group\n");
 	    next;
