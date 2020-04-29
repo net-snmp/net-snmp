@@ -2,14 +2,12 @@
 
 use strict;
 use warnings;
+use Test;
 
 BEGIN {
     eval "use Cwd qw(abs_path)";
-    $ENV{'SNMPCONFPATH'} = 'nopath';
-    $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
+    plan tests => 17
 }
-use Test;
-BEGIN { plan tests => 17 }
 use SNMP;
 require "t/startagent.pl";
 use vars qw($agent_host $agent_port $comm);

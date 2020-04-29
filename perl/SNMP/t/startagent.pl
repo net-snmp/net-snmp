@@ -34,9 +34,6 @@ our $name_module_long2 = 'SNMPv2-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sy
 our $auth_pass = 'test_pass_auth';
 our $priv_pass = 'test_pass_priv';
 
-# don't use any .conf files other than those specified.
-$ENV{'SNMPCONFPATH'} |= "bogus";
-
 # erroneous input to test failure cases
 our $bad_comm = 'BAD_COMMUNITY';
 our $bad_name = "badName";

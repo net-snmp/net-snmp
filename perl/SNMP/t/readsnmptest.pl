@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use Cwd qw(getcwd);
 use Exporter;
 
 our @ISA = 'Exporter';
@@ -26,3 +27,19 @@ if (open(CMD, "<../SNMP/t/snmptest.cmd")) {
 } else {
   die ("Could not start agent. Couldn't find snmptest.cmd file\n");
 }
+
+# On Windows %ENV changes only affect new processes but not the current
+# process. Hence write the MIB dir into an snmp.conf file instead of setting
+# $ENV{'MIBDIRS'}.
+open(H, ">snmp.conf") or die "Failed to open snmp.conf: $!";
+print H "mibdirs +$mibdir\n";
+close(H);
+# use SNMP;
+# SNMP::register_debug_tokens("get_mib_directory");
+# SNMP::register_debug_tokens("read_config");
+use NetSNMP::default_store (':all');
+netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CONFIGURATION_DIR,
+		      getcwd()) == 0 or
+    die "Failed to set configuration directory";
+
+1;

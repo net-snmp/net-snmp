@@ -6,8 +6,6 @@ use Test;
 
 BEGIN {
     eval "use Cwd qw(abs_path)";
-    $ENV{'SNMPCONFPATH'} = 'nopath';
-    $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
     plan tests => 1;
 }
 

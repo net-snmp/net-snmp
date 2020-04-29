@@ -7,8 +7,6 @@ use warnings;
 
 BEGIN {
     eval "use Cwd qw(abs_path)";
-    $ENV{'SNMPCONFPATH'} = 'nopath';
-    $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
 }
 use Test;
 BEGIN { plan test => ($^O =~ /win32/i) ? 41 : 62; }

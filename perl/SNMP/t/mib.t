@@ -7,8 +7,6 @@ use warnings;
 
 BEGIN {
     eval "use Cwd qw(abs_path)";
-    $ENV{'SNMPCONFPATH'} = 'nopath';
-    $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
     $ENV{'MIBS'} = 'ALL';
 }
 
@@ -26,6 +24,8 @@ $SNMP::best_guess = 2;
 require "t/startagent.pl";
 use vars qw($bad_name $bad_oid $name $name_long $name_module $name_module2
             $name_module_long $name_module_long2 $oid);
+require "t/startagent.pl";
+
 my $DEBUG;
 
 #############################  1  ######################################

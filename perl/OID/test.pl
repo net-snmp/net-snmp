@@ -10,10 +10,9 @@ use Test;
 
 BEGIN {
     plan tests => 38;
-    $ENV{'SNMPCONFPATH'} = 'nopath';
-    $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
 }
 
+require "../SNMP/t/readsnmptest.pl";
 use NetSNMP::OID;
 
 ok(1); # If we made it this far, we're ok.
