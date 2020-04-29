@@ -49,6 +49,13 @@ if ($^O =~ /win32/i) {
   require Win32::Process;
 }
 
+# Variant of sleep that accepts a floating point number as argument.
+sub delay {
+  my ($timeout) = @_;
+
+  select(undef, undef, undef, $timeout);
+}
+
 sub run_async {
   my ($pidfile, $cmd, @args) = @_;
   if (-r "$cmd" and -x "$cmd") {
@@ -59,8 +66,8 @@ sub run_async {
       system "$cmd @args 2>&1";
     }
     # Wait at most three seconds for the pid file to appear.
-    for (my $i = 0; ($i < 3) && ! (-r "$pidfile"); ++$i) {
-      sleep 1;
+    for (my $i = 0; ($i < 30) && ! (-r "$pidfile"); ++$i) {
+      delay 0.1;
     }
   } else {
     warn "Couldn't run $cmd\n";
