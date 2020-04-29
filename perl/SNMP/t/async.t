@@ -1,9 +1,5 @@
 #!./perl
 BEGIN {
-    unless(grep /blib/, @INC) {
-        chdir 't' if -d 't';
-        @INC = '../lib' if -d '../lib';
-    }
     eval "use Cwd qw(abs_path)";
     $ENV{'SNMPCONFPATH'} = 'nopath';
     $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");

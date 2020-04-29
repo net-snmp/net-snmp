@@ -1,10 +1,6 @@
 #!./perl
 
 BEGIN {
-    unless(grep /blib/, @INC) {
-        chdir 't' if -d 't';
-        @INC = '../lib' if -d '../lib';
-    }
     $ENV{'MIBS'} = '';
 }
 
