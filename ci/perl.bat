@@ -24,7 +24,7 @@ findstr /r "^INST_TOP" Makefile
 @rem For mt.exe
 @rem dir /b /s "C:\Program Files (x86)" | findstr /i /e "\mt.exe"
 set "PATH=%PATH%;C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
-nmake
+nmake "BUILDOPTEXTRA=/wd4244 /wd4267"
 if %errorlevel% neq 0 goto build_error
 nmake install
 if %errorlevel% neq 0 goto build_error

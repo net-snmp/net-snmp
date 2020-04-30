@@ -1,27 +1,20 @@
 #!./perl
 #
-# $Id$
-#
 # Test bulkwalk functionality.
 
+use strict;
+use warnings;
+
 BEGIN {
-    unless(grep /blib/, @INC) {
-        chdir 't' if -d 't';
-        @INC = '../lib' if -d '../lib';
-    }
     eval "use Cwd qw(abs_path)";
-    $ENV{'SNMPCONFPATH'} = 'nopath';
-    $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
-    $skipped_tests = ($^O =~ /win32/i) ? 21 : 0;
 }
 use Test;
-BEGIN { $num = 62 - $skipped_tests; plan test => $num; }
+BEGIN { plan test => ($^O =~ /win32/i) ? 41 : 62; }
 
 use SNMP;
 
 require "t/startagent.pl";
-
-use vars qw($agent_port $comm2 $agent_host);
+use vars qw($agent_host $agent_port $comm2);
 
 $SNMP::debugging = 0;
 $SNMP::verbose = 0;
@@ -30,7 +23,7 @@ $SNMP::verbose = 0;
 
 ######################################################################
 # Fire up a session.
-$s1 = new SNMP::Session(
+my $s1 = new SNMP::Session(
     'DestHost'   => $agent_host,
     'Community'  => $comm2,
     'RemotePort' => $agent_port,
@@ -46,11 +39,11 @@ ok(defined($s1));
 # Attempt to use the bulkwalk method to get a few variables from the
 # SNMP agent.
 # test 1
-$vars = new SNMP::VarList ( ['sysUpTime'], ['ifNumber'], # NON-repeaters
-			    ['ifSpeed'], ['ifDescr']);	 # Repeated variables.
+my $vars = new SNMP::VarList(['sysUpTime'], ['ifNumber'], # NON-repeaters
+			     ['ifSpeed'], ['ifDescr']);	 # Repeated variables.
 
-$expect = scalar @$vars;
-@list = $s1->bulkwalk(2, 16, $vars);
+my $expect = scalar @$vars;
+my @list = $s1->bulkwalk(2, 16, $vars);
 
 ok($s1->{ErrorNum} == 0);
 
@@ -70,6 +63,7 @@ else {
   ok(0);
   ok(0);
 }
+my $ifaces;
 if (defined($list[1][0])) {
   # Find out how many interfaces to expect.  list[1] is ifNumber nonrepeater.
   ok($list[1][0]->tag eq ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
@@ -114,7 +108,7 @@ if (defined($list[3][0])) {
 
   # This might fail on systems that don't have lo0/loopback as their first
   # interface. Please adjust accordingly.
-  $loopback = $list[3][0]->val;
+  my $loopback = $list[3][0]->val;
   if ($^O =~ /win32/i) {
     ok(($loopback =~ /loopback/i));
   } elsif ($^O =~ /(irix|hpux)/i) {

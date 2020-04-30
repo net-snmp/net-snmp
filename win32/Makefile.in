@@ -11,6 +11,9 @@ NMAKE=nmake /nologo
 APPS=
 APPS_CLEAN=
 
+# To make it possible for the Perl tests to find netsnmp.dll.
+PATH=$(MAKEDIR)\bin\$(CFG);$(PATH)
+
 all : libs apps snmptrapd snmpd local
 
 clean : apps_clean libs_clean snmptrapd_clean snmpd_clean local_clean
@@ -64,6 +67,7 @@ perl :
 	-@echo .
 !ENDIF	# dynamic/static check
 	cd ..\perl
+	REM For MakefileSubs.pm
 	set PERL5LIB=$(MAKEDIR)\..\perl
 !IF "$(CFG)" == "release"
 	perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE -NET-SNMP-CONFIG=do-not-use-net-snmp-config -NET-SNMP-DEFINE="$(PERL_DEFINE)" -NET-SNMP-INC="$(PERL_INC)" -NET-SNMP-CFLAGS="$(PERL_CFLAGS)" -NET-SNMP-PATH="$(PREFIX)"
@@ -80,8 +84,9 @@ perl_test :
 	-@echo Perl modules must be build against dynamic (DLL) libraries
 	-@echo .
 !ELSE	# dynamic/static check
+	cpan Win32::Process <NUL
 	cd ..\perl
-	set PERL5LIB=$(MAKEDIR)\..\perl;$(MAKEDIR)\..\perl\SNMP
+	REM set PERL5LIB=$(MAKEDIR)\..\perl;$(MAKEDIR)\..\perl\SNMP
 	$(NMAKE) test
 	cd ..\win32
 !ENDIF	# dynamic/static check

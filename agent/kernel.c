@@ -130,7 +130,7 @@ free_kmem(void)
     }
 }
 
-#elif defined(HAVE_NLIST_H)
+#elif defined(HAVE_NLIST_H) && !defined(__linux__)
 
 static off_t    klseek(off_t);
 static int      klread(char *, int);
@@ -263,7 +263,7 @@ free_kmem(void)
 int
 init_kmem(const char *file)
 {
-    return 0;
+    return 1;  /* success */
 }
 
 void
