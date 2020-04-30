@@ -19,8 +19,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 nmake /nologo perl
 if %errorlevel% neq 0 exit /b %errorlevel%
 nmake /nologo perl_test
-rem to do: fix Perl module tests on Win32
-rem if %errorlevel% neq 0 exit /b %errorlevel%
+if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..
 goto eof
 
