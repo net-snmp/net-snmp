@@ -4,11 +4,9 @@
 
 use strict;
 use warnings;
-
-BEGIN {
-    eval "use Cwd qw(abs_path)";
-}
+use Cwd qw(abs_path);
 use Test;
+
 BEGIN { plan test => ($^O =~ /win32/i) ? 41 : 62; }
 
 use SNMP;
@@ -18,8 +16,6 @@ use vars qw($agent_host $agent_port $comm2);
 
 $SNMP::debugging = 0;
 $SNMP::verbose = 0;
-
-#print "1..$num\n";
 
 ######################################################################
 # Fire up a session.
@@ -43,7 +39,7 @@ my $vars = new SNMP::VarList(['sysUpTime'], ['ifNumber'], # NON-repeaters
 			     ['ifSpeed'], ['ifDescr']);	 # Repeated variables.
 
 my $expect = scalar @$vars;
-my @list = $s1->bulkwalk(2, 16, $vars);
+my @list = $s1->bulkwalk(2, 256, $vars);
 
 ok($s1->{ErrorNum} == 0);
 
@@ -63,7 +59,7 @@ else {
   ok(0);
   ok(0);
 }
-my $ifaces;
+my $ifaces = 0;
 if (defined($list[1][0])) {
   # Find out how many interfaces to expect.  list[1] is ifNumber nonrepeater.
   ok($list[1][0]->tag eq ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
@@ -99,30 +95,16 @@ else {
   ok(0);
 }
 
-if (defined($list[3][0])) {
-  ok($list[3][0]->tag eq ".1.3.6.1.2.1.2.2.1.2");	# Should be system.ifDescr OID.
-  ok($list[3][0]->iid eq "1");			# Instance should be 1.
-
-  # The first interface is probably loopback.  Check this.
-  ok($list[3][0]->type eq "OCTETSTR");		# Description is a string.
-
-  # This might fail on systems that don't have lo0/loopback as their first
-  # interface. Please adjust accordingly.
-  my $loopback = $list[3][0]->val;
-  if ($^O =~ /win32/i) {
-    ok(($loopback =~ /loopback/i));
-  } elsif ($^O =~ /(irix|hpux)/i) {
-    # IRIX/HP-UX may have lo0 at the *end* of the interface list,
-    # so just check for a non-empty string
-    ok(($loopback ne ''));
-  } elsif ($^O eq 'freebsd') {
-    $loopback = $list[3][-1]->val;
-    ok(($loopback =~ /^lo/));
-  } else {
-    ok(($loopback =~ /^lo/));
-  }
+for my $ifdescr ($list[3][0]) {
+  next if (!($ifdescr->val =~ /Software Loopback Interface/) and
+	   !($ifdescr->val =~ /^lo/));
+  ok(1);
+  ok($ifdescr->tag eq ".1.3.6.1.2.1.2.2.1.2");	# Should be system.ifDescr OID.
+  ok($ifdescr->iid eq "1");			# Instance should be 1.
+  ok($ifdescr->type eq "OCTETSTR");		# Description is a string.
+  last;
 }
-else {
+if (!defined($list[3][0])) {
   ok(0);
   ok(0);
   ok(0);
@@ -136,7 +118,6 @@ $vars = new SNMP::VarList ( ['sysUpTime'], ['ifNumber'] ); # NON-repeaters
 
 $expect = scalar @$vars;
 @list = $s1->bulkwalk(2, 0, $vars);
-#@list = $s1->bulkwalk(2, 16, $vars);
 ok($s1->{ErrorNum} == 0);
 
 # Did we get back the list of references to returned values?
@@ -178,7 +159,7 @@ else {
 $vars = new SNMP::VarList ( ['ifIndex'], ['ifSpeed'] ); # repeaters
 
 $expect = scalar @$vars;
-@list = $s1->bulkwalk(0, 16, $vars);
+@list = $s1->bulkwalk(0, 256, $vars);
 ok($s1->{ErrorNum} == 0);
 
 # Did we get back the list of references to returned values?
@@ -284,29 +265,18 @@ sub async_cb1 {
       ok(0);
       ok(0);
     }
-  
-    if (defined($list->[3][0])) {
-      $vbr = $list->[3][0];
-      ok($vbr->tag eq ".1.3.6.1.2.1.2.2.1.2");	# Should be ifDescr OID
-      ok($vbr->iid eq "1");			# Instance should be 1.
 
-      # The first interface is probably loopback.  Check this.
-      ok($vbr->type eq "OCTETSTR");
-
-      # This might fail on systems that don't have lo0/loopback as their first
-      # interface. Please adjust accordingly.
-      if ($^O =~ /(irix|hpux)/i) {
-        # IRIX/HP-UX may have lo0 at the *end* of the interface list,
-        # so just check for a non-empty string
-        ok(($vbr->val ne ''));
-      } elsif ($^O eq 'freebsd') {
-        $vbr = $list->[3][-1];
-        ok(($vbr->val =~ /^lo/));
-      } else {
-        ok(($vbr->val =~ /^lo/));
-      }
+    for my $ifdescr (@{$list->[3]}) {
+      next if (!($ifdescr->val =~ /Software Loopback Interface/) and
+	       !($ifdescr->val =~ /^lo/));
+      ok(1);
+      # Should be system.ifDescr OID.
+      ok($ifdescr->tag eq ".1.3.6.1.2.1.2.2.1.2");
+      ok($ifdescr->iid >= 1);			# Instance should be >= 1.
+      ok($ifdescr->type eq "OCTETSTR");		# Description is a string.
+      last;
     }
-    else {
+    if (!defined($list->[3][0])) {
       ok(0);
       ok(0);
       ok(0);
@@ -323,7 +293,7 @@ if ($^O =~ /win32/i) {
   warn "Win32/Win64 detected - skipping async calls\n";
 }
 else {
-  @list = $s1->bulkwalk(2, 16, $vars, [ \&async_cb1, $vars ] );
+  @list = $s1->bulkwalk(2, 256, $vars, [ \&async_cb1, $vars ] );
   ok($s1->{ErrorNum} == 0);
   SNMP::MainLoop();
 }
