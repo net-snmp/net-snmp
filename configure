@@ -26797,17 +26797,22 @@ fi
 #   Check how to print a size_t variable
 ##
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking the underlying type of a size_t" >&5
-$as_echo_n "checking the underlying type of a size_t... " >&6; }
+case x${host_cpu}-${host_vendor}-${host_os} in
+  x*mingw*)
+    # MinGW or MinGW-w64.
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking the underlying type of size_t" >&5
+$as_echo_n "checking the underlying type of size_t... " >&6; }
 if ${netsnmp_cv_size_t_type+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if [ "x$netsnmp_cv_size_t_type" = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  for TYPE in int long "long long" short char; do
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-$ac_includes_default
-extern unsigned int variable;
-extern size_t variable;
+
+            $ac_includes_default
+            extern unsigned $TYPE variable;
+            extern size_t variable;
+
 int
 main ()
 {
@@ -26817,236 +26822,36 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_size_t_type="int"
+  netsnmp_cv_size_t_type="$TYPE"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-    if [ "x$netsnmp_cv_size_t_type" = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-extern unsigned long variable;
-extern size_t variable;
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_size_t_type="long"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-    if [ "x$netsnmp_cv_size_t_type" = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-extern unsigned long long variable;
-extern size_t variable;
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_size_t_type="long long"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-    if [ "x$netsnmp_cv_size_t_type" = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-extern unsigned short variable;
-extern size_t variable;
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_size_t_type="short"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-    if [ "x$netsnmp_cv_size_t_type" = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-extern unsigned char variable;
-extern size_t variable;
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_size_t_type="char"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-
+        if test "x$netsnmp_cv_size_t_type" != x; then break; fi
+      done
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_size_t_type" >&5
 $as_echo "$netsnmp_cv_size_t_type" >&6; }
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking how to printf a size_t" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to printf a size_t" >&5
 $as_echo_n "checking how to printf a size_t... " >&6; }
-case "$netsnmp_cv_size_t_type" in
-    char|short|int) netsnmp_PRIz="" ;;
-    long) netsnmp_PRIz="l" ;;
-    "long long")
-        case x${host_cpu}-${host_vendor}-${host_os} in
-        x*-w64-*|xx86_64-pc-mingw32)
-            # MinGW-w64
-            netsnmp_PRIz="I64";;
-        *)
-            netsnmp_PRIz="ll";;
-        esac;;
-    *) as_fn_error $? "underlying type of size_t not known" "$LINENO" 5 ;;
+    case "$netsnmp_cv_size_t_type" in
+      char|short|int)
+        netsnmp_PRIz="";;
+      long)
+        netsnmp_PRIz="l";;
+      "long long")
+        netsnmp_PRIz="I64";;
+      *)
+        as_fn_error $? "underlying type of size_t not known" "$LINENO" 5;;
+    esac
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_PRIz" >&5
+$as_echo "$netsnmp_PRIz" >&6; };;
+  *)
+    # Unix or Cygwin.
+    netsnmp_PRIz="z";;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_PRIz" >&5
-$as_echo "$netsnmp_PRIz" >&6; }
 
 cat >>confdefs.h <<_ACEOF
 #define NETSNMP_PRIz "$netsnmp_PRIz"
-_ACEOF
-
-
-##
-#   Check how to print a uint32_t variable
-##
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking the underlying type of an uint32_t" >&5
-$as_echo_n "checking the underlying type of an uint32_t... " >&6; }
-if ${netsnmp_cv_uint32_t_type+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if [ x$netsnmp_cv_uint32_t_type = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-extern unsigned char variable;
-extern uint32_t variable;
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_uint32_t_type="char"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-    if [ x$netsnmp_cv_uint32_t_type = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-extern unsigned short variable;
-extern uint32_t variable;
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_uint32_t_type="short"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-    if [ x$netsnmp_cv_uint32_t_type = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-extern unsigned int variable;
-extern uint32_t variable;
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_uint32_t_type="int"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-    if [ x$netsnmp_cv_uint32_t_type = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-extern unsigned long variable;
-extern uint32_t variable;
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_uint32_t_type="long"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-    if [ x$netsnmp_cv_uint32_t_type = x ] ; then
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-extern unsigned long long variable;
-extern uint32_t variable;
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  netsnmp_cv_uint32_t_type="long long"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_uint32_t_type" >&5
-$as_echo "$netsnmp_cv_uint32_t_type" >&6; }
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking how to printf a uint32_t" >&5
-$as_echo_n "checking how to printf a uint32_t... " >&6; }
-case "$netsnmp_cv_uint32_t_type" in
-    char|short|int) netsnmp_PRI32="" ;;
-    long) netsnmp_PRI32="l" ;;
-    "long long") netsnmp_PRI32="ll" ;;
-    *) as_fn_error $? "underlying type of uint32_t not known" "$LINENO" 5 ;;
-esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_PRI32" >&5
-$as_echo "$netsnmp_PRI32" >&6; }
-
-cat >>confdefs.h <<_ACEOF
-#define NETSNMP_PRI32 "$netsnmp_PRI32"
 _ACEOF
 
 

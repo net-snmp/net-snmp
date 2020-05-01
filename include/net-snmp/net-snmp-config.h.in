@@ -1575,9 +1575,6 @@
 /* umask permissions to set up persistent files with */
 #undef NETSNMP_PERSISTENT_MASK
 
-/* Size prefix to use to printf a uint32_t */
-#undef NETSNMP_PRI32
-
 /* Size prefix to use to printf a size_t or ssize_t */
 #undef NETSNMP_PRIz
 

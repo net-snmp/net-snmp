@@ -5,6 +5,7 @@ use warnings;
 use Config;
 use Cwd 'abs_path';
 use File::Basename;
+use File::Spec;
 use Getopt::Long;
 use Exporter;
 use vars qw(@ISA @EXPORT_OK);
@@ -58,7 +59,8 @@ sub NetSNMPGetOpts {
 	}
 
 	if ($use_default_nsconfig) {
-	    $ret{'nsconfig'}="sh ${rootpath}/../net-snmp-config";
+	    $ret{'nsconfig'}="sh " . File::Spec->catfile(${rootpath}, "..",
+							 "net-snmp-config");
 	} elsif (!defined($ret{'nsconfig'})) {
 	    $ret{'nsconfig'}="net-snmp-config";
 	}
@@ -93,22 +95,21 @@ sub AddCommonParams {
     append($Params->{'INC'},     $opts->{'inc'});
     append($Params->{'CCFLAGS'}, $opts->{'cflags'});
 
-    if (defined($ENV{'OSTYPE'}) && $ENV{'OSTYPE'} eq 'msys') {
-	# MinGW or MSYS.
-	append($Params->{'DEFINE'}, "-DMINGW_PERL");
-    } elsif ($Config{'osname'} eq 'MSWin32') {
+    if ($Config{'osname'} eq 'MSWin32') {
 	# Microsoft Visual Studio.
 	append($Params->{'DEFINE'}, "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS");
-	append($Params->{'INC'}, "-I" . $MakefileSubs::basedir . "\\include\\ -I" . $MakefileSubs::basedir . "\\include\\net-snmp\\ -I" . $MakefileSubs::basedir . "\\win32\\ ");
+	append($Params->{'INC'},
+	       "-I" . File::Spec->catdir($basedir, "include") . " " .
+	       "-I" . File::Spec->catdir($basedir, "win32") . " ");
     } else {
-	# Unix.
+	# Unix or MinGW.
 	append($Params->{'LDDLFLAGS'}, $Config{'lddlflags'});
 	my $ldflags = `$opts->{'nsconfig'} --ldflags` or
 	    die "net-snmp-config failed\n";
 	chomp($ldflags);
 	append($Params->{'LDDLFLAGS'}, $ldflags);
 	append($Params->{'CCFLAGS'},
-	       "-I" . $MakefileSubs::basedir . "/include");
+	       "-I" . File::Spec->catdir($basedir, "include"));
 	my $cflags = `$opts->{'nsconfig'} --cflags` or
 	    die "net-snmp-config failed\n";
 	chomp($cflags);
@@ -135,8 +136,7 @@ sub find_files {
 }
 
 
-sub Check_Version
-{
+sub Check_Version {
   my $lib_version = shift;
 
   if ($Config{'osname'} ne 'MSWin32') {
