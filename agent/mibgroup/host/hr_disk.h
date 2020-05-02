@@ -11,7 +11,7 @@ config_require(host/hr_device)
 config_require(host/data_access/hr_disk_linux)
 #elif defined(__APPLE__) && defined(__MACH__)
 config_require(host/data_access/hr_disk_darwin)
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
+#elif defined(freebsd3) || defined(__NetBSD__) || defined(__OpenBSD__) || \
     defined(__bsdi__)
 config_require(host/data_access/hr_disk_bsd)
 #elif defined(__DragonFly__)
