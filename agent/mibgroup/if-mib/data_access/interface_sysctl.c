@@ -136,7 +136,7 @@ netsnmp_sysctl_ifmedia_to_speed(int media, u_int *speed,
                     *speed = (u_int) -1; /* 4294967295; */
                     *speed_high = 10000; break;
 #endif
-#if defined(__FreeBSD__)
+#if defined(freebsd3)
 #ifdef IFM_10G_LR
                 case IFM_10G_LR:
 #ifdef IFM_10G_SR
@@ -248,7 +248,7 @@ netsnmp_sysctl_ifmedia_to_speed(int media, u_int *speed,
                     *speed = (u_int) -1; /* 4294967295; */
                     *speed_high = 100000; break;
 #endif /* IFM_100G_CR4 */
-#endif /* __FreeBSD__ */
+#endif /* freebsd3 */
             }
             break;
         case IFM_IEEE80211:
