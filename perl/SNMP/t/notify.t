@@ -94,7 +94,7 @@ if (defined($s3)) {
 		       [['sysContact', 0, 'root@localhost'],
 			['sysLocation', 0, 'here']] );
 }
-ok($res =~ /^0 but true/);
+ok(defined($res) && $res =~ /^0 but true/);
 
 ######################## 10  ############################
 # Fire up a v3 trap session.
@@ -110,7 +110,7 @@ if (defined($s3)) {
     $res = $s3->inform(uptime=>111, trapoid=>'coldStart',
 		       [['sysContact', 0, 'root@localhost'],
 			['sysLocation', 0, 'here']] );
-    print "res = $res\n";
+    print "# res = " . ($res ? $res : "(undefined)") . "\n";
 }
   
 ok(defined($res) && ($res =~ /^0 but true/));
