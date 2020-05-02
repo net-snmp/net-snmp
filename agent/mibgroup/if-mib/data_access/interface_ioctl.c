@@ -417,7 +417,7 @@ netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
         return 0;
     }
 
-#if defined(__FreeBSD__)    /* ? Should use HAVE_STRUCT_IFREQ_IFR_INDEX */
+#if defined(freebsd3)    /* ? Should use HAVE_STRUCT_IFREQ_IFR_INDEX */
     return ifrq.ifr_index;
 #else
     return ifrq.ifr_ifindex;

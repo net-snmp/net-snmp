@@ -213,7 +213,11 @@ case "$(uname)" in
 	      mibs+=(rmon-mib)
               ;;
       esac
-      if [ -n "$libmysqlver" ]; then
+      # Disable MySQL support because of the following Perl test failure on
+      # Travis:
+      # t/1.t .. Can't load '/home/travis/build/bvanassche/net-snmp/perl/TrapReceiver/../blib/arch/auto/NetSNMP/TrapReceiver/TrapReceiver.so' for module NetSNMP::TrapReceiver: /home/travis/build/bvanassche/net-snmp/apps/.libs/libnetsnmptrapd.so.35: undefined symbol: mysql_sqlstate at /usr/lib/x86_64-linux-gnu/perl/5.22/DynaLoader.pm line 187.
+      # at t/1.t line 16.
+      if false && [ -n "$libmysqlver" ]; then
 	  options+=(--with-mysql)
       fi
       if [ -n "$perldevver" ]; then

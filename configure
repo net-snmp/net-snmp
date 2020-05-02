@@ -16283,18 +16283,16 @@ case x$target_os in
         CPPFLAGS="-DVC_EXTRALEAN -DWIN32_LEAN_AND_MEAN $CPPFLAGS";;
 esac
 
+
 #
-#    Whether or not Cygwin's ld recognizes the flag -no-undefined.
+#    Whether the linker supports the flag -Wl,-no-undefined.
 #
 
-case x$target_os in
-xcygwin*)
-  saved_LDFLAGS=$LDFLAGS
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker supports -no-undefined" >&5
-$as_echo_n "checking whether the linker supports -no-undefined... " >&6; }
-  LDFLAGS="$saved_LDFLAGS -Wl,-no-undefined"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+saved_LDFLAGS=$LDFLAGS
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker supports -Wl,-no-undefined" >&5
+$as_echo_n "checking whether the linker supports -Wl,-no-undefined... " >&6; }
+LDFLAGS="$saved_LDFLAGS -Wl,-no-undefined"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
@@ -16307,18 +16305,14 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; };                   LD_NO_UNDEFINED=-no-undefined
+$as_echo "yes" >&6; };                 LD_NO_UNDEFINED=-Wl,-no-undefined
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-
-  LDFLAGS="$saved_LDFLAGS"
-  ;;
-esac
-
+LDFLAGS="$saved_LDFLAGS"
 
 
 
@@ -19238,6 +19232,9 @@ EOF
 rebuilt_new_with_security=
 already_checked_krb5=no
 
+netsnmp_save_LIBS=$LIBS
+CRYPTO_LIBS=""
+
 for sec in $new_with_security
 do
   if test "x$sec" = "xksm"; then
@@ -19302,7 +19299,7 @@ fi
 
     if test no != $krb5_config; then
       CPPFLAGS="$CPPFLAGS `$krb5_config --cflags`"
-      LIBS="$LIBS `$krb5_config --libs`"
+      CRYPTO_LIBS="$CRYPTO_LIBS `$krb5_config --libs`"
     elif test $krb5path != no; then
 
   if test "x$krb5path" != x -a -d $krb5path; then
@@ -19327,19 +19324,18 @@ fi
 
     fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for krb5" >&5
-$as_echo_n "checking for krb5... " >&6; }
-    if ${ac_cv_have_krb5+:} false; then :
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing krb5_init_context" >&5
+$as_echo_n "checking for library containing krb5_init_context... " >&6; }
+if ${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for krb5_init_context in -lkrb5" >&5
-$as_echo_n "checking for krb5_init_context in -lkrb5... " >&6; }
-if ${ac_cv_lib_krb5_krb5_init_context+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lkrb5  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$CRYPTO_LIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -19358,27 +19354,130 @@ return krb5_init_context ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_krb5_krb5_init_context=yes
+  netsnmp_result="none required"
 else
-  ac_cv_lib_krb5_krb5_init_context=no
+  for netsnmp_cur_lib in krb5 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char krb5_init_context ();
+int
+main ()
+{
+return krb5_init_context ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+          done
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_krb5_krb5_init_context" >&5
-$as_echo "$ac_cv_lib_krb5_krb5_init_context" >&6; }
-if test "x$ac_cv_lib_krb5_krb5_init_context" = xyes; then :
-  ac_cv_have_krb5=yes
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&5
+$as_echo "$netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&6; }
+ if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "none required" ; then
+       CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+    ac_cv_have_krb5=yes
+ else
+    ac_cv_have_krb5=no
+ fi
+
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing error_message" >&5
+$as_echo_n "checking for library containing error_message... " >&6; }
+if ${netsnmp_cv_func_error_message_CRYPTO_LIBS+:} false; then :
+  $as_echo_n "(cached) " >&6
 else
-  ac_cv_have_krb5=no
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$CRYPTO_LIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char error_message ();
+int
+main ()
+{
+return error_message ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in com_err ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char error_message ();
+int
+main ()
+{
+return error_message ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
 fi
-
-
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
 fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_error_message_CRYPTO_LIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_error_message_CRYPTO_LIBS" >&5
+$as_echo "$netsnmp_cv_func_error_message_CRYPTO_LIBS" >&6; }
+ if test "${netsnmp_cv_func_error_message_CRYPTO_LIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_error_message_CRYPTO_LIBS}" != "none required" ; then
+       CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
 
 
+ fi
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for krb5" >&5
+$as_echo_n "checking for krb5... " >&6; }
     if test $ac_cv_have_krb5 = no; then
       if test "x$askedkrb5" = "xyes"; then
 	as_fn_error $? "Asked to use krb5 but I couldn't find it." "$LINENO" 5
@@ -19424,25 +19523,27 @@ $as_echo "$ac_cv_heimdal" >&6; }
 $as_echo "#define NETSNMP_USE_KERBEROS_HEIMDAL 1" >>confdefs.h
 
       if test no = $krb5_config; then
-	LIBS="$LIBS -lkrb5 -lasn1 -lcom_err -lroken"
+	CRYPTO_LIBS="$CRYPTO_LIBS -lkrb5 -lasn1 -lcom_err -lroken"
       fi
     elif test no = $krb5_config; then
-	LIBS="$LIBS -lkrb5 -lcom_err"
+	CRYPTO_LIBS="$CRYPTO_LIBS -lkrb5 -lcom_err"
     fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking to see which crypto API we need to use" >&5
-$as_echo_n "checking to see which crypto API we need to use... " >&6; }
     if ${ac_cv_NETSNMP_USE_KERBEROS_MIT+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for krb5_init_context in -lk5crypto" >&5
-$as_echo_n "checking for krb5_init_context in -lk5crypto... " >&6; }
-if ${ac_cv_lib_k5crypto_krb5_init_context+:} false; then :
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing krb5_init_context" >&5
+$as_echo_n "checking for library containing krb5_init_context... " >&6; }
+if ${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lk5crypto  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$CRYPTO_LIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -19461,40 +19562,144 @@ return krb5_init_context ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_k5crypto_krb5_init_context=yes
+  netsnmp_result="none required"
 else
-  ac_cv_lib_k5crypto_krb5_init_context=no
+  for netsnmp_cur_lib in k5crypto ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char krb5_init_context ();
+int
+main ()
+{
+return krb5_init_context ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+          done
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_k5crypto_krb5_init_context" >&5
-$as_echo "$ac_cv_lib_k5crypto_krb5_init_context" >&6; }
-if test "x$ac_cv_lib_k5crypto_krb5_init_context" = xyes; then :
-  ac_cv_NETSNMP_USE_KERBEROS_MIT=yes
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&5
+$as_echo "$netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&6; }
+ if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "none required" ; then
+       CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+    ac_cv_NETSNMP_USE_KERBEROS_MIT=yes
+ else
+    ac_cv_NETSNMP_USE_KERBEROS_MIT=no
+ fi
+
+
+fi
+
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing krb5_c_keyed_checksum_types" >&5
+$as_echo_n "checking for library containing krb5_c_keyed_checksum_types... " >&6; }
+if ${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS+:} false; then :
+  $as_echo_n "(cached) " >&6
 else
-  ac_cv_NETSNMP_USE_KERBEROS_MIT=no
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$CRYPTO_LIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char krb5_c_keyed_checksum_types ();
+int
+main ()
+{
+return krb5_c_keyed_checksum_types ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in k5crypto ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char krb5_c_keyed_checksum_types ();
+int
+main ()
+{
+return krb5_c_keyed_checksum_types ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
 fi
-
-
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
 fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS" >&5
+$as_echo "$netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS" >&6; }
+ if test "${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS}" != "none required" ; then
+       CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
 
 
+ fi
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking to see which crypto API we need to use" >&5
+$as_echo_n "checking to see which crypto API we need to use... " >&6; }
     if test yes = $ac_cv_NETSNMP_USE_KERBEROS_MIT; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: new MIT crypto API" >&5
 $as_echo "new MIT crypto API" >&6; }
 
 $as_echo "#define NETSNMP_USE_KERBEROS_MIT 1" >>confdefs.h
 
-      if test no = $krb5_config; then
-	LIBS="$LIBS -lk5crypto"
-      fi
     else
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: old MIT crypto API" >&5
 $as_echo "old MIT crypto API" >&6; }
     fi
+    LIBS="$CRYPTO_LIBS $netsnmp_save_LIBS"
     for ac_func in krb5_auth_con_getsendsubkey krb5_auth_con_getrecvsubkey
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -19509,6 +19714,9 @@ done
 
   fi
 done
+
+LNETSNMPLIBS="$LNETSNMPLIBS $CRYPTO_LIBS"
+LIBS=$netsnmp_save_LIBS
 
 new_with_security=$rebuilt_new_with_security
 

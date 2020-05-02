@@ -39,9 +39,6 @@
 #  include <time.h>
 # endif
 #endif
-#if HAVE_KVM_H
-#include <kvm.h>
-#endif
 #if HAVE_PCRE_H
 #include <pcre.h>
 #endif
@@ -49,6 +46,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "mibdefs.h"
 #include "struct.h"
 #include "proc.h"
 #ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
@@ -60,7 +58,10 @@
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 #include "util_funcs.h"
-#include "kernel.h"
+
+#define PROCMIN 3
+#define PROCMAX 4
+#define PROCCOUNT 5
 
 static struct myproc *get_proc_instance(struct myproc *, oid);
 struct myproc  *procwatch = NULL;

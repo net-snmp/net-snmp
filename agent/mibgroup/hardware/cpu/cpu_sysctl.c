@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#if defined(__FreeBSD__)
+#if defined(freebsd3)
 #include <sys/resource.h>
 #if !defined(CPUSTATES)
 #include <sys/dkstat.h>
@@ -92,7 +92,7 @@ void init_cpu_sysctl( void ) {
 #elif defined(KERN_CPTIME)                /* OpenBSD */
 #define NETSNMP_KERN_CPU  KERN_CPTIME
 
-#elif defined(__FreeBSD__)
+#elif defined(freebsd3)
 #define NETSNMP_KERN_MCPU 1    /* Enable support for multi-cpu stats. Valid for FreeBSD >=6.4, >=7.1, >=8.0 and beyond */
 #define NETSNMP_KERN_MCPU_TYPE NETSNMP_CPU_STATS
 
@@ -132,7 +132,7 @@ void init_cpu_sysctl( void ) {
 #define NETSNMP_VM_STATS_TYPE  struct uvmexp
 #endif  /* VM_UVMEXP2 || VM_UVMEXP */
 
-#elif defined(__FreeBSD__)                /* FreeBSD */
+#elif defined(freebsd3)                /* FreeBSD */
 #if __FreeBSD_version >= 1200028
 #define	VMMETER_TYPE	uint64_t
 #else
@@ -185,10 +185,10 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
      */
     NETSNMP_CPU_STATS cpu_stats[CPUSTATES];
     size_t         cpu_size  = sizeof(cpu_stats);
-#if !defined(__FreeBSD__) && !defined(__NetBSD__)
+#if !defined(freebsd3) && !defined(__NetBSD__)
     int            cpu_mib[] = { CTL_KERN, NETSNMP_KERN_CPU };
 #endif
-#ifdef __FreeBSD__
+#ifdef freebsd3
     static int     cp_times = -1;
 #endif
 #ifdef KERN_CPTIME2
@@ -203,7 +203,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     NETSNMP_VM_STATS_TYPE mem_stats;
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
 
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(freebsd3) || defined(__NetBSD__)
     sysctlbyname("kern.cp_time", cpu_stats, &cpu_size, NULL, 0);
 #else
     sysctl(cpu_mib, 2,  cpu_stats, &cpu_size, NULL, 0);
@@ -216,7 +216,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     cpu->intrpt_ticks = cpu_stats[CP_INTR];
         /* wait_ticks, sirq_ticks unused */
     
-#ifdef __FreeBSD__
+#ifdef freebsd3
 #define	GET_VM_STATS(space, name) sysctlbyname("vm.stats." #space "." #name, &mem_stats.name, &len, NULL, 0)
     {
 	size_t len;
@@ -263,7 +263,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     mcpu_size  = cpu_num*sizeof(cpu_stats);
     mcpu_stats = malloc(mcpu_size);
     sysctlbyname("kern.cp_time", mcpu_stats, &mcpu_size, NULL, 0);
-#elif defined(__FreeBSD__)
+#elif defined(freebsd3)
     if (cp_times == -1) {
 	int ret = sysctlbyname("kern.cp_times", NULL, &mcpu_size, NULL, 0);
 	cp_times = ret == -1 ? 0 : 1;
