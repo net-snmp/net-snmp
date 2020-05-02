@@ -67,7 +67,6 @@ config_require(if-mib/ifXTable/ifXTable_data_access)
     typedef ifTable_undo_data ifXTable_undo_data;
     typedef ifTable_mib_index ifXTable_mib_index;
     typedef ifTable_rowreq_ctx ifXTable_rowreq_ctx;
-    typedef ifTable_ref_rowreq_ctx ifXTable_ref_rowreq_ctx;
 
 #define ifXTable_data_list           ifTable_data_list
 #define ifXTable_reg                 ifTable_reg

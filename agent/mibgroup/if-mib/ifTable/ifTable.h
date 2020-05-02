@@ -335,10 +335,6 @@ config_exclude(mibII/interfaces)
 
     } ifTable_rowreq_ctx;
 
-    typedef struct ifTable_ref_rowreq_ctx_s {
-        ifTable_rowreq_ctx *rowreq_ctx;
-    } ifTable_ref_rowreq_ctx;
-
     /*
      *********************************************************************
      * function prototypes
