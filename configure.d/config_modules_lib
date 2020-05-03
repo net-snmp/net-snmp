@@ -220,6 +220,10 @@ do
     NETSNMP_SEARCH_LIBS([krb5_c_keyed_checksum_types], [k5crypto], [], [], [],
                         [CRYPTO_LIBS])
 
+    AC_CHECK_MEMBERS([krb5_keyblock.enctype], [],
+                     [ac_cv_NETSNMP_USE_KERBEROS_MIT=no],
+                     [[#include <krb5.h>]])
+
     AC_MSG_CHECKING([to see which crypto API we need to use])
     if test yes = $ac_cv_NETSNMP_USE_KERBEROS_MIT; then
       AC_MSG_RESULT(new MIT crypto API)
