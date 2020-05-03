@@ -7,6 +7,10 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include "util_funcs.h"
 
 /*
