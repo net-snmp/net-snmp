@@ -172,7 +172,7 @@ static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
 #endif                          /* darwin */
 
 #if !defined(solaris2) && !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
-static int      getstats(void);
+static int      diskio_getstats(void);
 #endif
 
 #if defined (HAVE_GETDEVS) || defined(HAVE_DEVSTAT_GETDEVS)
@@ -595,7 +595,7 @@ static struct diskstats *dk;
 static char   **dkname;
 
 static int
-getstats(void)
+diskio_getstats(void)
 {
     time_t          now;
     int             mib[2];
@@ -664,7 +664,7 @@ var_diskio(struct variable * vp,
     static long     long_ret;
     unsigned int    indx;
 
-    if (getstats() == 0)
+    if (diskio_getstats() == 0)
         return 0;
 
     if (header_simple_table
@@ -707,7 +707,7 @@ static struct diskstats *dk;
 static char   **dkname;
 
 static int
-getstats(void)
+diskio_getstats(void)
 {
     time_t          now;
     int             mib[2];
@@ -780,7 +780,7 @@ var_diskio(struct variable * vp,
     static struct counter64 c64_ret;
     unsigned int    indx;
 
-    if (getstats() == 0)
+    if (diskio_getstats() == 0)
         return 0;
 
     if (header_simple_table
@@ -854,7 +854,7 @@ static struct io_sysctl *dk;
 static char   **dkname;
 
 static int
-getstats(void)
+diskio_getstats(void)
 {
     time_t          now;
     char           *t, *tp;
@@ -919,7 +919,7 @@ var_diskio(struct variable * vp,
     static struct counter64 c64_ret;
     unsigned int    indx;
 
-    if (getstats() == 0)
+    if (diskio_getstats() == 0)
         return 0;
 
     if (header_simple_table
@@ -1118,7 +1118,7 @@ static struct statinfo *stat;
 FILE           *file;
 
 static int
-getstats(void)
+diskio_getstats(void)
 {
     time_t          now;
     int             i;
@@ -1133,7 +1133,7 @@ getstats(void)
             stat->dinfo = (struct devinfo *) calloc(sizeof(struct devinfo), 1);
         if (stat == NULL || stat->dinfo == NULL) {
 		SNMP_FREE(stat);
-        	ERROR_MSG("Memory alloc failure - getstats\n");
+        	ERROR_MSG("Memory alloc failure - diskio_getstats()\n");
 		return 1;
 	}
     }
@@ -1167,7 +1167,7 @@ var_diskio(struct variable * vp,
     long long       longlong_ret;
     unsigned int    indx;
 
-    if (getstats() == 1) {
+    if (diskio_getstats() == 1) {
         return NULL;
     }
 
@@ -1363,7 +1363,7 @@ static int get_sysfs_stats(void)
 }
 
 static int
-getstats(void)
+diskio_getstats(void)
 {
     struct stat stbuf;
     FILE* parts;
@@ -1477,7 +1477,7 @@ var_diskio(struct variable * vp,
     static unsigned long long_ret;
     static struct counter64 c64_ret;
 
-    if (getstats() == 1) {
+    if (diskio_getstats() == 1) {
 	return NULL;
     }
 
@@ -1713,7 +1713,7 @@ handle_drive(io_registry_entry_t drive, struct drivestats * dstat)
 }
 
 static int
-getstats(void)
+diskio_getstats(void)
 {
     time_t                 now;
     io_iterator_t          drivelist;
@@ -1757,7 +1757,7 @@ var_diskio(struct variable * vp,
     static struct   counter64 c64_ret;
     unsigned int    indx;
 
-    if (getstats() == 1) {
+    if (diskio_getstats() == 1) {
         return NULL;
     }
 
