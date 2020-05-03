@@ -69,17 +69,15 @@ auto_nlist_value(const char *string)
         sprintf(__DECONST(char*, it->nl[0].n_name), "_%s", string);
 #else
         {
-            static char *n_name;
+            static char *name;
 
-            free(n_name);
-
-            n_name = malloc(strlen(string) + 2);
-            if (n_name == NULL) {
+            free(name);
+	    name = NULL;
+	    if (asprintf(&name, "_%s", string) < 0) {
                 snmp_log(LOG_ERR, "nlist err: failed to allocate memory");
                 return -1;
             }
-            snprintf(n_name, strlen(string) + 2, "_%s", string);
-            it->nl[0].n_name = n_name;
+            it->nl[0].n_name = name;
         }
 #endif
         it->nl[1].n_name = 0;
@@ -102,7 +100,7 @@ auto_nlist_value(const char *string)
                 return (-1);
             }
             strcpy(n_name2, string);
-            it->nl[0].n_name = (const char*)n_name2;
+            it->nl[0].n_name = n_name2;
 #endif
             init_nlist(it->nl);
         }
