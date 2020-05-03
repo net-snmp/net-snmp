@@ -370,6 +370,9 @@
 /* Define to 1 if you have the `krb5_auth_con_getsendsubkey' function. */
 #undef HAVE_KRB5_AUTH_CON_GETSENDSUBKEY
 
+/* Define to 1 if `enctype' is a member of `krb5_keyblock'. */
+#undef HAVE_KRB5_KEYBLOCK_ENCTYPE
+
 /* Define to 1 if you have the <kstat.h> header file. */
 #undef HAVE_KSTAT_H
 

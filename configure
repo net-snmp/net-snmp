@@ -20850,6 +20850,20 @@ $as_echo "$netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS" >&6; }
  fi
 
 
+    ac_fn_c_check_member "$LINENO" "krb5_keyblock" "enctype" "ac_cv_member_krb5_keyblock_enctype" "#include <krb5.h>
+"
+if test "x$ac_cv_member_krb5_keyblock_enctype" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_KRB5_KEYBLOCK_ENCTYPE 1
+_ACEOF
+
+
+else
+  ac_cv_NETSNMP_USE_KERBEROS_MIT=no
+fi
+
+
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking to see which crypto API we need to use" >&5
 $as_echo_n "checking to see which crypto API we need to use... " >&6; }
     if test yes = $ac_cv_NETSNMP_USE_KERBEROS_MIT; then
