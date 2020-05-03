@@ -49,8 +49,7 @@
  */
 #include "diskio.h"
 
-#define CACHE_TIMEOUT 1
-static time_t   cache_time = 0;
+static time_t cache_time;
 
 #ifdef solaris2
 #include <kstat.h>
@@ -486,6 +485,15 @@ diskio_parse_config_disks(const char *token, char *cptr)
 
 #endif /* linux */
 
+int diskio_cache_valid(time_t now)
+{
+    return cache_time + 1/*second*/ > now;
+}
+
+void diskio_set_cache_time(time_t now)
+{
+    cache_time = now;
+}
 
 #ifdef solaris2
 int
@@ -496,7 +504,7 @@ get_disk(int disknr)
     kstat_t *tksp;
 
     now = time(NULL);
-    if (disknr == cache_disknr && cache_time + CACHE_TIMEOUT > now) {
+    if (disknr == cache_disknr && diskio_cache_valid(now)) {
         return 1;
     }
 
@@ -513,7 +521,7 @@ get_disk(int disknr)
                 if (kstat_read(kc, tksp, &kio) == -1)
                     snmp_log(LOG_ERR, "diskio: kstat_read failed\n");
 		ksp = tksp;
-                cache_time = now;
+                diskio_set_cache_time(now);
                 cache_disknr = disknr;
                 return 1;
             } else {
@@ -604,7 +612,7 @@ diskio_getstats(void)
     int             i;
 
     now = time(NULL);
-    if (cache_time + CACHE_TIMEOUT > now) {
+    if (diskio_cache_valid(now)) {
         return 1;
     }
     mib[0] = CTL_HW;
@@ -651,7 +659,7 @@ diskio_getstats(void)
         perror("Can't get HW_DISKSTATS mib");
         return 0;
     }
-    cache_time = now;
+    diskio_set_cache_time(now);
     return 1;
 }
 
@@ -716,7 +724,7 @@ diskio_getstats(void)
     int             i;
 
     now = time(NULL);
-    if (cache_time + CACHE_TIMEOUT > now) {
+    if (diskio_cache_valid(now)) {
         return 1;
     }
     mib[0] = CTL_HW;
@@ -765,7 +773,7 @@ diskio_getstats(void)
         perror("Can't get HW_DISKSTATS mib");
         return 0;
     }
-    cache_time = now;
+    diskio_set_cache_time(now);
     return 1;
 }
 
@@ -862,7 +870,7 @@ diskio_getstats(void)
     int             i;
 
     now = time(NULL);
-    if (cache_time + CACHE_TIMEOUT > now) {
+    if (diskio_cache_valid(now)) {
         return 1;
     }
     size = 0;
@@ -904,7 +912,7 @@ diskio_getstats(void)
         perror("Can't get HW_DISKSTATS/HW_IOSTATS mib");
         return 0;
     }
-    cache_time = now;
+    diskio_set_cache_time(now);
     return 1;
 }
 
@@ -1124,7 +1132,7 @@ diskio_getstats(void)
     int             i;
 
     now = time(NULL);
-    if (cache_time + CACHE_TIMEOUT > now) {
+    if (diskio_cache_valid(now)) {
         return 0;
     }
     if (stat == NULL) {
@@ -1152,7 +1160,7 @@ diskio_getstats(void)
       cp += len;
       sprintf(cp, "%d", stat->dinfo->devices[i].unit_number);
     }
-    cache_time = now;
+    diskio_set_cache_time(now);
     return 0;
 }
 
@@ -1370,7 +1378,7 @@ diskio_getstats(void)
     time_t now;
     
     now = time(NULL);
-    if (cache_time + CACHE_TIMEOUT > now) {
+    if (diskio_cache_valid(now)) {
         return 0;
     }
 
@@ -1385,7 +1393,7 @@ diskio_getstats(void)
     if (numdisks>0) {
         /* 'diskio' configuration is used - go through the whitelist only and
          * read /sys/dev/block/xxx */
-        cache_time = now;
+        diskio_set_cache_time(now);
         return get_sysfs_stats();
     }
     /* 'diskio' configuration is not used - report all devices */
@@ -1461,7 +1469,7 @@ diskio_getstats(void)
     fclose(parts);
 
 update_cache_time:
-    cache_time = now;
+    diskio_set_cache_time(now);
     return 0;
 }
 
@@ -1722,7 +1730,7 @@ diskio_getstats(void)
     kern_return_t          status;
 
     now = time(NULL);	/* register current time and check wether cache can be used */
-    if (cache_time + CACHE_TIMEOUT > now) {
+    if (diskio_cache_valid(now)) {
         return 0;
     }
 
@@ -1743,7 +1751,7 @@ diskio_getstats(void)
     }
     IOObjectRelease(drivelist);
 
-    cache_time = now;
+    diskio_set_cache_time(now);
     return 0;
 }
 
@@ -1822,7 +1830,7 @@ collect_disks(void)
 
     /* cache valid? if yes, just return */
     now = time(NULL);
-    if (ps_disk != NULL && cache_time + CACHE_TIMEOUT > now) {
+    if (ps_disk != NULL && diskio_cache_valid(now)) {
         return 0;
     }
 
@@ -1843,7 +1851,7 @@ collect_disks(void)
     i = perfstat_disk(&first, ps_disk, sizeof(perfstat_disk_t), ps_numdisks);
     if(i != ps_numdisks) return 1;
 
-    cache_time = now;
+    diskio_set_cache_time(now);
     return 0;
 }
 
