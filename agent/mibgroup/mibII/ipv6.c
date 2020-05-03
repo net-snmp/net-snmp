@@ -81,6 +81,9 @@
 #if HAVE_NETINET_IP_VAR_H
 # include <netinet/ip_var.h>
 #endif
+#if HAVE_NETINET_ICMP6_H
+# include <netinet/icmp6.h>
+#endif
 #if HAVE_NETINET6_IP6_VAR_H
 # include <sys/queue.h>
 # include <netinet6/ip6_var.h>

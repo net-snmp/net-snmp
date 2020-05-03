@@ -35,6 +35,9 @@
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/ip_var.h>
+#if HAVE_NETINET_ICMP6_H
+#include <netinet/icmp6.h>
+#endif
 #if HAVE_NETINET6_IP6_VAR_H
 #include <sys/queue.h>
 #include <netinet6/ip6_var.h>

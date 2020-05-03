@@ -14,11 +14,10 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
 #if HAVE_KVM_H
 #include <kvm.h>
+#elif defined(HAVE_NLIST_H)
+#include <nlist.h>
 #endif
 
 #include <net-snmp/agent/auto_nlist.h>
