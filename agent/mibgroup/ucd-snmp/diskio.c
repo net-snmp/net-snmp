@@ -226,7 +226,7 @@ init_diskio(void)
      * last entry. 
      */
 
-    struct variable2 diskio_variables[] = {
+    static const struct variable2 diskio_variables[] = {
         {DISKIO_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
          var_diskio, 1, {1}},
         {DISKIO_DEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
@@ -259,8 +259,9 @@ init_diskio(void)
      * Define the OID pointer to the top of the mib tree that we're
      * registering underneath. 
      */
-    oid             diskio_variables_oid[] =
-        { 1, 3, 6, 1, 4, 1, 2021, 13, 15, 1, 1 };
+    static const oid diskio_variables_oid[] = {
+        1, 3, 6, 1, 4, 1, 2021, 13, 15, 1, 1
+    };
 
     /*
      * register ourselves with the agent to handle our mib tree
