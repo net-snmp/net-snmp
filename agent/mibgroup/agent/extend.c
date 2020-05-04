@@ -1526,52 +1526,49 @@ var_extensible_old(struct variable * vp,
     idx = name[*length-1] -1;
 	if (idx > max_compatability_entries)
 		return NULL;
-    exten = &compatability_entries[ idx ];
-    if (exten) {
-        switch (vp->magic) {
-        case MIBINDEX:
-            long_ret = name[*length - 1];
-            return ((u_char *) (&long_ret));
-        case ERRORNAME:        /* name defined in config file */
-            *var_len = strlen(exten->exec_entry->token);
-            return ((u_char *) (exten->exec_entry->token));
-        case SHELLCOMMAND:
-            cmdline = _get_cmdline(exten->exec_entry);
+    exten = &compatability_entries[idx];
+    switch (vp->magic) {
+    case MIBINDEX:
+        long_ret = name[*length - 1];
+        return (u_char *) &long_ret;
+    case ERRORNAME:        /* name defined in config file */
+        *var_len = strlen(exten->exec_entry->token);
+        return ((u_char *) (exten->exec_entry->token));
+    case SHELLCOMMAND:
+        cmdline = _get_cmdline(exten->exec_entry);
+        if (cmdline)
+            *var_len = strlen(cmdline);
+        return (u_char *) cmdline;
+    case ERRORFLAG:        /* return code from the process */
+        netsnmp_cache_check_and_reload( exten->exec_entry->cache );
+        long_ret = exten->exec_entry->result;
+        return (u_char *) &long_ret;
+    case ERRORMSG:         /* first line of text returned from the process */
+        netsnmp_cache_check_and_reload( exten->exec_entry->cache );
+        if (exten->exec_entry->numlines > 1) {
+            *var_len = (exten->exec_entry->lines[1])-
+                (exten->exec_entry->output) -1;
+        } else if (exten->exec_entry->output) {
+            *var_len = strlen(exten->exec_entry->output);
+        } else {
+            *var_len = 0;
+        }
+        return (u_char *) exten->exec_entry->output;
+    case ERRORFIX:
+        *write_method = fixExec2Error;
+        long_return = 0;
+        return (u_char *) &long_return;
+
+    case ERRORFIXCMD:
+        if (exten->efix_entry) {
+            cmdline = _get_cmdline(exten->efix_entry);
             if (cmdline)
                 *var_len = strlen(cmdline);
-            return ((u_char *) cmdline);
-        case ERRORFLAG:        /* return code from the process */
-            netsnmp_cache_check_and_reload( exten->exec_entry->cache );
-            long_ret = exten->exec_entry->result;
-            return ((u_char *) (&long_ret));
-        case ERRORMSG:         /* first line of text returned from the process */
-            netsnmp_cache_check_and_reload( exten->exec_entry->cache );
-            if (exten->exec_entry->numlines > 1) {
-                *var_len = (exten->exec_entry->lines[1])-
-                           (exten->exec_entry->output) -1;
-            } else if (exten->exec_entry->output) {
-                *var_len = strlen(exten->exec_entry->output);
-            } else {
-                *var_len = 0;
-            }
-            return ((u_char *) (exten->exec_entry->output));
-        case ERRORFIX:
-            *write_method = fixExec2Error;
-            long_return = 0;
-            return ((u_char *) &long_return);
-
-        case ERRORFIXCMD:
-            if (exten->efix_entry) {
-                cmdline = _get_cmdline(exten->efix_entry);
-		if (cmdline)
-                    *var_len = strlen(cmdline);
-                return ((u_char *) cmdline);
-            } else {
-                *var_len = 0;
-                return ((u_char *) &long_return);  /* Just needs to be non-null! */
-            }
+            return (u_char *) cmdline;
+        } else {
+            *var_len = 0;
+            return (u_char *) &long_return;  /* Just needs to be non-null! */
         }
-        return NULL;
     }
     return NULL;
 }
