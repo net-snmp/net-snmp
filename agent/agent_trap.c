@@ -1556,8 +1556,7 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
         engineId = tmp_engineId;
     }
 
-    usmUser = usm_get_user(NETSNMP_REMOVE_CONST(u_char *,engineId),
-                           engineId_len, NETSNMP_REMOVE_CONST(char *,user));
+    usmUser = usm_get_user(engineId, engineId_len, user);
     if (NULL == usmUser) {
         DEBUGMSGTL(("trap:v3user_notif_sess", "usmUser %s not found\n", user));
         return NULL;

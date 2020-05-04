@@ -1574,7 +1574,11 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     DEBUGMSGTL(("snmp_agent","agent_sesion %8p created\n", asp));
     asp->session = session;
     asp->pdu = snmp_clone_pdu(pdu);
+    if (!asp->pdu)
+        goto err;
     asp->orig_pdu = snmp_clone_pdu(pdu);
+    if (!asp->orig_pdu)
+        goto err;
     asp->rw = READ;
     asp->exact = TRUE;
     asp->next = NULL;
@@ -1590,6 +1594,12 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
                 asp, asp->reqinfo));
 
     return asp;
+
+err:
+    snmp_free_pdu(asp->orig_pdu);
+    snmp_free_pdu(asp->pdu);
+    free(asp);
+    return NULL;
 }
 
 void

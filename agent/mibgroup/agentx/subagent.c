@@ -247,6 +247,8 @@ static void
 send_agentx_error(netsnmp_session *session, netsnmp_pdu *pdu, int errstat, int errindex)
 {
     pdu = snmp_clone_pdu(pdu);
+    if (!pdu)
+        return;
     pdu->command   = AGENTX_MSG_RESPONSE;
     pdu->version   = session->version;
     pdu->errstat   = errstat;
@@ -503,6 +505,8 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
      */
 
     internal_pdu = snmp_clone_pdu(pdu);
+    if (!internal_pdu)
+        return 1;
     free(internal_pdu->contextName);
     internal_pdu->contextName = (char *) internal_pdu->community;
     internal_pdu->contextNameLen = internal_pdu->community_len;
@@ -549,6 +553,8 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
     }
 
     pdu = snmp_clone_pdu(pdu);
+    if (!pdu)
+        return 1;
     DEBUGMSGTL(("agentx/subagent",
                 "handling AgentX response (cmd 0x%02x orig_cmd 0x%02x)"
                 " (req=0x%x,trans=0x%x,sess=0x%x)\n",
@@ -643,6 +649,8 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
                 (unsigned)pdu->command, (unsigned)pdu->reqid,
 		(unsigned)pdu->transid, (unsigned)pdu->sessid));
     pdu = snmp_clone_pdu(pdu);
+    if (!pdu)
+        return 1;
 
     asi = (struct agent_netsnmp_set_info *) magic;
     retsess = asi->sess;

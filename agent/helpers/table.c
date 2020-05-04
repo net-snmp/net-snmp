@@ -998,7 +998,8 @@ netsnmp_update_indexes_from_variable_list(netsnmp_table_request_info *tri)
     if (!tri)
         return SNMPERR_GENERR;
 
-    return build_oid_noalloc(tri->index_oid, sizeof(tri->index_oid),
+    return build_oid_noalloc(tri->index_oid,
+                             sizeof(tri->index_oid) / sizeof(tri->index_oid[0]),
                              &tri->index_oid_len, NULL, 0, tri->indexes);
 }
 
