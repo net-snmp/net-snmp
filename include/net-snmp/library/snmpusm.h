@@ -99,8 +99,8 @@ extern          "C" {
     NETSNMP_IMPORT
     struct usmUser *usm_get_userList(void);
     NETSNMP_IMPORT
-    struct usmUser *usm_get_user(u_char * engineID, size_t engineIDLen,
-                                 char *name);
+    struct usmUser *usm_get_user(const u_char *engineID, size_t engineIDLen,
+                                 const char *name);
     NETSNMP_IMPORT
     struct usmUser *usm_add_user(struct usmUser *user);
     NETSNMP_IMPORT

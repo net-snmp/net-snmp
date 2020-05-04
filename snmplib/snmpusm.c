@@ -464,14 +464,14 @@ emergency_print(u_char * field, u_int length)
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
 static struct usmUser *
-usm_get_user_from_list(u_char * engineID, size_t engineIDLen,
-                       char *name, struct usmUser *puserList,
+usm_get_user_from_list(const u_char *engineID, size_t engineIDLen,
+                       const char *name, struct usmUser *puserList,
                        int use_default)
 {
     struct usmUser *ptr;
-    char            noName[] = "";
+
     if (name == NULL)
-        name = noName;
+        name = "";
     for (ptr = puserList; ptr != NULL; ptr = ptr->next) {
         if (ptr->name && !strcmp(ptr->name, name)) {
           DEBUGMSGTL(("usm", "match on user %s\n", ptr->name));
@@ -503,7 +503,7 @@ usm_get_user_from_list(u_char * engineID, size_t engineIDLen,
  * engineIDLen and name of the requested user.
  */
 struct usmUser *
-usm_get_user(u_char * engineID, size_t engineIDLen, char *name)
+usm_get_user(const u_char *engineID, size_t engineIDLen, const char *name)
 {
     DEBUGMSGTL(("usm", "getting user %s\n", name));
     return usm_get_user_from_list(engineID, engineIDLen, name, userList,
@@ -1809,7 +1809,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                        * Length of the entire packet buffer, **not** the length of the
                        * packet.  
                        */
-                      size_t * offset   /*  IN/OUT  */
+                      size_t * offset           /*  IN/OUT  */
                       /*
                        * Offset from the end of the packet buffer to the start of the packet,
                        * also known as the packet length.  
