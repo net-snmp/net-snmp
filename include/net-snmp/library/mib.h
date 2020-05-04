@@ -146,7 +146,7 @@ SOFTWARE.
                                       netsnmp_variable_list * data);
     NETSNMP_IMPORT
     int             build_oid_noalloc(oid * in, size_t in_len,
-                                      size_t * out_len, oid * prefix,
+                                      size_t * out_len, const oid * prefix,
                                       size_t prefix_len,
                                       netsnmp_variable_list * indexes);
     NETSNMP_IMPORT
