@@ -3780,7 +3780,7 @@ build_oid(oid ** out, size_t * out_len,
      *
      * then see if it fits in existing buffer, or realloc buffer.
      */
-    if (build_oid_noalloc(tmpout, sizeof(tmpout), out_len,
+    if (build_oid_noalloc(tmpout, sizeof(tmpout) / sizeof(tmpout[0]), out_len,
                           prefix, prefix_len, indexes) != SNMPERR_SUCCESS)
         return SNMPERR_GENERR;
 
