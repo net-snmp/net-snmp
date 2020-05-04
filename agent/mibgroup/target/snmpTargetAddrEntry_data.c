@@ -314,7 +314,7 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
                           void *clientarg)
 {
     const struct targetAddrTable_struct *curr_struct;
-    char            line[1024], *cur, *ep = line + sizeof(line);
+    char            line[1024], *ep = line + sizeof(line);
     int             i;
 
     curr_struct = aAddrTable;
@@ -323,6 +323,8 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
              curr_struct->storageType == SNMP_STORAGE_PERMANENT) &&
             (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
              curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE)) {
+            char *cur;
+
             cur = line + snprintf(line, sizeof(line), "targetAddr ");
             cur = read_config_save_octet_string(
                  cur, (const u_char*)curr_struct->nameData,
@@ -335,12 +337,11 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
             *cur++ = ' ';
             cur = read_config_save_octet_string(
                 cur, curr_struct->tAddress, curr_struct->tAddressLen);
-            cur += snprintf(cur, ep - cur, " %i %i \"%s\" %s %i %i",
-                            curr_struct->timeout,
-                            curr_struct->retryCount, curr_struct->tagListData,
-                            curr_struct->paramsData, curr_struct->storageType,
-                            curr_struct->rowStatus);
-            line[ sizeof(line)-1 ] = 0;
+            snprintf(cur, ep - cur, " %i %i \"%s\" %s %i %i",
+                     curr_struct->timeout,
+                     curr_struct->retryCount, curr_struct->tagListData,
+                     curr_struct->paramsData, curr_struct->storageType,
+                     curr_struct->rowStatus);
 
             /*
              * store to file
