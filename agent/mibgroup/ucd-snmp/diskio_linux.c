@@ -330,11 +330,109 @@ is_excluded(const char *name)
     return 0;
 }
 
+static int read_proc_partitions(void)
+{
+    FILE           *parts;
+    char            buffer[1024];
+    int             rc;
+
+    /*
+     * /proc/partitions was introduced before 2002. See also
+     * get_partition_list() in b/fs/partitions/check.c. Today the code that
+     * implements /proc/partitions exists in show_partition() in block/genhd.c.
+     */
+    parts = fopen("/proc/partitions", "r");
+    if (!parts) {
+        snmp_log_perror("/proc/partitions");
+        return FALSE;
+    }
+
+    /* Skip the first two lines since these contain header information. */
+    NETSNMP_IGNORE_RESULT(fgets(buffer, sizeof(buffer), parts));
+    NETSNMP_IGNORE_RESULT(fgets(buffer, sizeof(buffer), parts));
+
+    while (!feof(parts)) {
+        linux_diskio   *pTemp;
+
+        if (head.length == head.alloc) {
+            head.alloc += DISK_INCR;
+            head.indices = realloc(head.indices,
+                                   head.alloc * sizeof(linux_diskio));
+        }
+        pTemp = &head.indices[head.length];
+
+        rc = fscanf(parts,
+                    "%d %d %lu %255s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+                    &pTemp->major, &pTemp->minor, &pTemp->blocks,
+                    pTemp->name, &pTemp->rio, &pTemp->rmerge,
+                    &pTemp->rsect, &pTemp->ruse, &pTemp->wio,
+                    &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
+                    &pTemp->running, &pTemp->use, &pTemp->aveq);
+        if (rc != 15) {
+            snmp_log(LOG_ERR,
+                     "diskio.c: cannot find statistics in /proc/partitions\n");
+            fclose(parts);
+            return FALSE;
+        }
+        if (!is_excluded(pTemp->name))
+            head.length++;
+    }
+
+    fclose(parts);
+
+    return TRUE;
+}
+
+static int read_proc_diskstats(void)
+{
+    FILE           *parts;
+    char            buffer[1024];
+
+    /*
+     * /proc/diskstats was introduced by Linux kernel commit 3422161186a4
+     * ("[PATCH] Aggregated disk statistics") # v2.6.12.
+     */
+    parts = fopen("/proc/diskstats", "r");
+    if (!parts)
+        return FALSE;
+
+    while (fgets(buffer, sizeof(buffer), parts)) {
+        linux_diskio *pTemp;
+
+        if (head.length == head.alloc) {
+            head.alloc += DISK_INCR;
+            head.indices = realloc(head.indices,
+                                   head.alloc * sizeof(linux_diskio));
+        }
+        pTemp = &head.indices[head.length];
+        sscanf(buffer, "%d %d", &pTemp->major, &pTemp->minor);
+        if (sscanf(buffer,
+                   "%d %d %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+                   &pTemp->major, &pTemp->minor, pTemp->name, &pTemp->rio,
+                   &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse, &pTemp->wio,
+                   &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
+                   &pTemp->running, &pTemp->use, &pTemp->aveq) != 14 &&
+            sscanf(buffer, "%d %d %s %lu %lu %lu %lu\n", &pTemp->major,
+                   &pTemp->minor, pTemp->name, &pTemp->rio,
+                   &pTemp->rsect, &pTemp->wio, &pTemp->wsect) != 7) {
+            fclose(parts);
+            snmp_log(LOG_ERR,
+                     "diskio.c: failed to parse /proc/diskstats\n");
+            return FALSE;
+        }
+        if (!is_excluded(pTemp->name))
+            head.length++;
+    }
+
+    fclose(parts);
+
+    return TRUE;
+}
+
 static int
 diskio_getstats(void)
 {
     struct stat     stbuf;
-    FILE           *parts;
     time_t          now;
 
     now = time(NULL);
@@ -359,84 +457,13 @@ diskio_getstats(void)
         return get_sysfs_stats();
     }
     /* 'diskio' configuration is not used - report all devices */
-    /* Is this a 2.6 kernel? */
-    parts = fopen("/proc/diskstats", "r");
-    if (parts) {
-        char            buffer[1024];
-
-        while (fgets(buffer, sizeof(buffer), parts)) {
-            linux_diskio   *pTemp;
-
-            if (head.length == head.alloc) {
-                head.alloc += DISK_INCR;
-                head.indices = realloc(head.indices,
-                                       head.alloc * sizeof(linux_diskio));
-            }
-            pTemp = &head.indices[head.length];
-            sscanf(buffer, "%d %d", &pTemp->major, &pTemp->minor);
-            if (sscanf (buffer,
-                        "%d %d %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-                        &pTemp->major, &pTemp->minor, pTemp->name, &pTemp->rio,
-                        &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse, &pTemp->wio,
-                        &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
-                        &pTemp->running, &pTemp->use, &pTemp->aveq) != 14)
-                sscanf(buffer, "%d %d %s %lu %lu %lu %lu\n", &pTemp->major,
-                       &pTemp->minor, pTemp->name, &pTemp->rio,
-                       &pTemp->rsect, &pTemp->wio, &pTemp->wsect);
-            if (!is_excluded(pTemp->name))
-                head.length++;
-        }
+    if (read_proc_diskstats()) {
     } else if (stat("/proc/vz", &stbuf) == 0) {
         // OpenVZ / Virtuozzo containers do not have /proc/diskstats
-        goto update_cache_time;
-    } else {
-        /* See if a 2.4 kernel */
-        char            buffer[1024];
-        int             rc;
-
-        parts = fopen("/proc/partitions", "r");
-        if (!parts) {
-            snmp_log_perror("/proc/partitions");
-            return 1;
-        }
-
-        /*
-         * first few fscanfs are garbage we don't care about. skip it.
-         */
-        NETSNMP_IGNORE_RESULT(fgets(buffer, sizeof(buffer), parts));
-        NETSNMP_IGNORE_RESULT(fgets(buffer, sizeof(buffer), parts));
-
-        while (!feof(parts)) {
-            linux_diskio   *pTemp;
-
-            if (head.length == head.alloc) {
-                head.alloc += DISK_INCR;
-                head.indices = realloc(head.indices,
-                                       head.alloc * sizeof(linux_diskio));
-            }
-            pTemp = &head.indices[head.length];
-
-            rc = fscanf(parts,
-                        "%d %d %lu %255s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-                        &pTemp->major, &pTemp->minor, &pTemp->blocks,
-                        pTemp->name, &pTemp->rio, &pTemp->rmerge,
-                        &pTemp->rsect, &pTemp->ruse, &pTemp->wio,
-                        &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
-                        &pTemp->running, &pTemp->use, &pTemp->aveq);
-            if (rc != 15) {
-                snmp_log(LOG_ERR,
-                         "diskio.c: cannot find statistics in /proc/partitions\n");
-                fclose(parts);
-                return 1;
-            }
-            if (!is_excluded(pTemp->name))
-                head.length++;
-        }
+    } else if (!read_proc_partitions()) {
+        return 1;
     }
 
-    fclose(parts);
-
-update_cache_time:
     diskio_set_cache_time(now);
     return 0;
 }
