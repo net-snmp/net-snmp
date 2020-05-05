@@ -780,6 +780,71 @@ usm_free_user(struct usmUser *user)
 
 }                               /* end usm_free_user() */
 
+int usm_set_priv_key(struct usmUser *user, const char *fname,
+                     u_char **old_key, size_t *old_key_len,
+                     const u_char *new_key, u_int new_key_len)
+{
+    u_char buf[SNMP_MAXBUF_SMALL], buf2[SNMP_MAXBUF_SMALL];
+    size_t buflen = sizeof(buf);
+    int plen, res;
+
+    plen = sc_get_proper_priv_length(user->privProtocol,
+                                     user->privProtocolLen);
+    DEBUGMSGTL(("usmUser", "plen %d\n", plen));
+    /*
+     * extend key as needed
+     */
+    DEBUGMSGTL(("9:usmUser", "%s: new_key_len %d\n", fname, new_key_len));
+    if (new_key_len < 2 * plen) {
+        struct usmUser dummy;
+
+        memset(&dummy, 0x0, sizeof(dummy));
+        dummy.engineID = user->engineID;
+        dummy.engineIDLen = user->engineIDLen;
+        dummy.authProtocol = user->authProtocol;
+        dummy.authProtocolLen = user->authProtocolLen;
+        dummy.privProtocol = user->privProtocol;
+        dummy.privProtocolLen = user->privProtocolLen;
+        memcpy(buf2, new_key, new_key_len);
+        dummy.privKey = buf2;
+        dummy.privKeyLen = new_key_len;
+        res = usm_extend_user_kul(&dummy, sizeof(buf2));
+        if (res != SNMP_ERR_NOERROR) {
+            DEBUGMSGTL(("usmUser", "%s: extend kul failed\n", fname));
+            return SNMP_ERR_GENERR;
+        }
+        DEBUGMSGTL(("9:usmUser", "%s: extend kul OK\n", fname));
+        new_key = dummy.privKey;
+        new_key_len = dummy.privKeyLen;
+        /*
+         * make sure no reallocation happened; buf2 must be large enoungh
+         */
+        netsnmp_assert(dummy.privKey == buf2);
+    }
+
+    /*
+     * Change the key. 
+     */
+    DEBUGMSGTL(("usmUser", "%s: changing priv key for user %s\n",
+                fname, user->secName));
+
+    res = decode_keychange(user->authProtocol, user->authProtocolLen,
+                           user->privKey, user->privKeyLen, new_key,
+                           new_key_len, buf, &buflen);
+    if (res != SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("usmUser", "%s failed\n", fname));
+        return SNMP_ERR_GENERR;
+    }
+    DEBUGMSGTL(("usmUser", "%s succeeded\n", fname));
+    *old_key = user->privKey;
+    *old_key_len = user->privKeyLen;
+    user->privKey = netsnmp_memdup(buf, buflen);
+    if (user->privKey == NULL)
+        return SNMP_ERR_RESOURCEUNAVAILABLE;
+    user->privKeyLen = buflen;
+    return SNMP_ERR_NOERROR;
+}
+
 /*******************************************************************-o-******
  * usm_generate_OID
  *

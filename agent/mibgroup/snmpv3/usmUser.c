@@ -1042,13 +1042,10 @@ write_usmUserPrivKeyChange(int action,
                            u_char * statP, oid * name, size_t name_len)
 {
     struct usmUser *uptr;
-    unsigned char   buf[SNMP_MAXBUF_SMALL], buf2[SNMP_MAXBUF_SMALL];
-    size_t          buflen = sizeof(buf);
     const char     *fname;
     static unsigned char *oldkey;
     static size_t   oldkeylen;
     static int      resetOnFail;
-    int plen;
 
     switch (name[USM_MIB_LENGTH - 1]) {
     case 9:
@@ -1080,6 +1077,8 @@ write_usmUserPrivKeyChange(int action,
             netsnmp_priv_alg_info *pai =
                 sc_get_priv_alg_byoid(uptr->privProtocol,
                                       uptr->privProtocolLen);
+            int plen;
+
             if (NULL == pai) {
                 DEBUGMSGTL(("usmUser", "%s: unknown privProtocol\n",
                             fname));
@@ -1100,6 +1099,7 @@ write_usmUserPrivKeyChange(int action,
             }
         }
     } else if (action == ACTION) {
+        int res;
 
         if ((uptr = usm_parse_user(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
@@ -1107,9 +1107,6 @@ write_usmUserPrivKeyChange(int action,
         if (uptr->cloneFrom == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         }
-        plen = sc_get_proper_priv_length(uptr->privProtocol,
-                                         uptr->privProtocolLen);
-        DEBUGMSGTL(("usmUser", "plen %d\n", plen));
         if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
                              usmNoPrivProtocol,
                              OID_LENGTH(usmNoPrivProtocol)) ==
@@ -1125,57 +1122,11 @@ write_usmUserPrivKeyChange(int action,
             return SNMP_ERR_NOERROR;
         }
 
-        /*
-         * extend key as needed
-         */
-        DEBUGMSGTL(("9:usmUser", "%s: var_val_len %" NETSNMP_PRIz "d\n", fname, var_val_len));
-        if (var_val_len < ( 2 * plen )) {
-            struct usmUser dummy;
-            memset(&dummy, 0x0, sizeof(dummy));
-            dummy.engineID = uptr->engineID;
-            dummy.engineIDLen = uptr->engineIDLen;
-            dummy.authProtocol = uptr->authProtocol;
-            dummy.authProtocolLen = uptr->authProtocolLen;
-            dummy.privProtocol = uptr->privProtocol;
-            dummy.privProtocolLen = uptr->privProtocolLen;
-            memcpy(buf2, var_val, var_val_len);
-            dummy.privKey = buf2;
-            dummy.privKeyLen = var_val_len;
-            if (SNMP_ERR_NOERROR != usm_extend_user_kul(&dummy, sizeof(buf2))) {
-                DEBUGMSGTL(("usmUser", "%s: extend kul failed\n", fname));
-                return SNMP_ERR_GENERR;
-            }
-            DEBUGMSGTL(("9:usmUser", "%s: extend kul OK\n", fname));
-            var_val = dummy.privKey;
-            var_val_len = dummy.privKeyLen;
-            /*
-             * make sure no reallocation happened; buf2 must be large enoungh
-             */
-            netsnmp_assert( dummy.privKey == buf2 );
-        }
-
-        /*
-         * Change the key. 
-         */
-        DEBUGMSGTL(("usmUser", "%s: changing priv key for user %s\n",
-                    fname, uptr->secName));
-
-        if (decode_keychange(uptr->authProtocol, uptr->authProtocolLen,
-                             uptr->privKey, uptr->privKeyLen,
-                             var_val, var_val_len,
-                             buf, &buflen) != SNMPERR_SUCCESS) {
-            DEBUGMSGTL(("usmUser", "%s: ... failed\n", fname));
-            return SNMP_ERR_GENERR;
-        }
-        DEBUGMSGTL(("usmUser", "%s: ... succeeded\n", fname));
+        res = usm_set_priv_key(uptr, fname, &oldkey, &oldkeylen, var_val,
+                               var_val_len);
+        if (res != SNMP_ERR_NOERROR)
+            return res;
         resetOnFail = 1;
-        oldkey = uptr->privKey;
-        oldkeylen = uptr->privKeyLen;
-        uptr->privKey = netsnmp_memdup(buf, buflen);
-        if (uptr->privKey == NULL) {
-            return SNMP_ERR_RESOURCEUNAVAILABLE;
-        }
-        uptr->privKeyLen = buflen;
     } else if (action == COMMIT) {
         SNMP_FREE(oldkey);
     } else if (action == UNDO) {
