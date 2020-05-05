@@ -70,7 +70,7 @@
 #include "inet_ntop.h"
 #include "inet_pton.h"
 
-oid netsnmp_UDPIPv6Domain[] = { TRANSPORT_DOMAIN_UDP_IPV6 };
+const oid netsnmp_UDPIPv6Domain[] = { TRANSPORT_DOMAIN_UDP_IPV6 };
 static netsnmp_tdomain udp6Domain;
 
 /*

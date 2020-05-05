@@ -175,7 +175,7 @@ static int      _snmp_store_needed = 0;
 #define BSD4_2
 #endif
 
-static oid      default_enterprise[] = { 1, 3, 6, 1, 4, 1, 3, 1, 1 };
+static const oid default_enterprise[] = { 1, 3, 6, 1, 4, 1, 3, 1, 1 };
 /*
  * enterprises.cmu.systems.cmuSNMP 
  */
@@ -1318,7 +1318,7 @@ snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
                                      netsnmp_session *session)
 {
     netsnmp_pdu    *pdu = NULL, *response = NULL;
-    static oid      snmpEngineIDoid[]   = { 1,3,6,1,6,3,10,2,1,1,0};
+    static const oid snmpEngineIDoid[]   = { 1,3,6,1,6,3,10,2,1,1,0};
     static size_t   snmpEngineIDoid_len = 11;
 
     static char     probeEngineID[] = { (char)0x80, 0, 0, 0, 6 };
@@ -4038,18 +4038,18 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
 {
 
     long            ltmp;
-    static oid      unknownSecurityLevel[] =
+    static const oid unknownSecurityLevel[] =
         { 1, 3, 6, 1, 6, 3, 15, 1, 1, 1, 0 };
-    static oid      notInTimeWindow[] =
+    static const oid notInTimeWindow[] =
         { 1, 3, 6, 1, 6, 3, 15, 1, 1, 2, 0 };
-    static oid      unknownUserName[] =
+    static const oid unknownUserName[] =
         { 1, 3, 6, 1, 6, 3, 15, 1, 1, 3, 0 };
-    static oid      unknownEngineID[] =
+    static const oid unknownEngineID[] =
         { 1, 3, 6, 1, 6, 3, 15, 1, 1, 4, 0 };
-    static oid      wrongDigest[] = { 1, 3, 6, 1, 6, 3, 15, 1, 1, 5, 0 };
-    static oid      decryptionError[] =
+    static const oid wrongDigest[] = { 1, 3, 6, 1, 6, 3, 15, 1, 1, 5, 0 };
+    static const oid decryptionError[] =
         { 1, 3, 6, 1, 6, 3, 15, 1, 1, 6, 0 };
-    oid            *err_var;
+    const oid      *err_var;
     int             err_var_len;
 #ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
     int             stat_ind;
@@ -4155,9 +4155,9 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
 int
 snmpv3_get_report_type(netsnmp_pdu *pdu)
 {
-    static oid      snmpMPDStats[] = { 1, 3, 6, 1, 6, 3, 11, 2, 1 };
-    static oid      targetStats[]  = { 1, 3, 6, 1, 6, 3, 12, 1    };
-    static oid      usmStats[]     = { 1, 3, 6, 1, 6, 3, 15, 1, 1 };
+    static const oid snmpMPDStats[] = { 1, 3, 6, 1, 6, 3, 11, 2, 1 };
+    static const oid targetStats[]  = { 1, 3, 6, 1, 6, 3, 12, 1    };
+    static const oid usmStats[]     = { 1, 3, 6, 1, 6, 3, 15, 1, 1 };
     netsnmp_variable_list *vp;
     int             rpt_type = SNMPERR_UNKNOWN_REPORT;
 
@@ -4241,7 +4241,7 @@ _snmp_parse(struct session_list *slp,
 #endif
     int             result = -1;
 
-    static oid      snmpEngineIDoid[]   = { 1,3,6,1,6,3,10,2,1,1,0};
+    static const oid snmpEngineIDoid[]   = { 1,3,6,1,6,3,10,2,1,1,0};
     static size_t   snmpEngineIDoid_len = 11;
 
     static char     ourEngineID[SNMP_SEC_PARAM_BUF_SIZE];

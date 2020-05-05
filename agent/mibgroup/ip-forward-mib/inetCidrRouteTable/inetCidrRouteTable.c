@@ -370,7 +370,7 @@ inetCidrRouteTable_indexes_set_tbl_idx(inetCidrRouteTable_mib_index *
                                        size_t
                                        inetCidrRouteDest_val_ptr_len,
                                        u_long inetCidrRoutePfxLen_val,
-                                       oid * inetCidrRoutePolicy_val_ptr,
+                                       const oid * inetCidrRoutePolicy_val_ptr,
                                        size_t
                                        inetCidrRoutePolicy_val_ptr_len,
                                        u_long inetCidrRouteNextHopType_val,

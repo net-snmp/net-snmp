@@ -25,7 +25,7 @@
 #include <net-snmp/utilities.h>
 #include <net-snmp/config_api.h>
 
-oid netsnmp_snmpALIASDomain[] = { 1,3,6,1,4,1,8072,3,3,7 };
+const oid netsnmp_snmpALIASDomain[] = { 1,3,6,1,4,1,8072,3,3,7 };
 static netsnmp_tdomain aliasDomain;
 
 /* simple storage mechanism */

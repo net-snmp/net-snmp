@@ -54,7 +54,7 @@ netsnmp_feature_child_of(unix_socket_paths, transport_unix_socket_all);
                       + strlen ((ptr)->sun_path))
 #endif
 
-oid netsnmp_UnixDomain[] = { TRANSPORT_DOMAIN_LOCAL };
+const oid netsnmp_UnixDomain[] = { TRANSPORT_DOMAIN_LOCAL };
 static netsnmp_tdomain unixDomain;
 
 

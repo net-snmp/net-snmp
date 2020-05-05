@@ -51,7 +51,7 @@
  */
 typedef netsnmp_indexed_addr_pair netsnmp_udp_addr_pair;
 
-oid netsnmp_snmpTCPDomain[] = { TRANSPORT_DOMAIN_TCP_IP };
+const oid netsnmp_snmpTCPDomain[] = { TRANSPORT_DOMAIN_TCP_IP };
 static netsnmp_tdomain tcpDomain;
 
 /*

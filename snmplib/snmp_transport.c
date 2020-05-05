@@ -96,15 +96,15 @@ static netsnmp_tdomain *domain_list = NULL;
  * The standard SNMP domains.  
  */
 
-oid             netsnmpUDPDomain[] = { 1, 3, 6, 1, 6, 1, 1 };
+const oid       netsnmpUDPDomain[] = { 1, 3, 6, 1, 6, 1, 1 };
 size_t          netsnmpUDPDomain_len = OID_LENGTH(netsnmpUDPDomain);
-oid             netsnmpCLNSDomain[] = { 1, 3, 6, 1, 6, 1, 2 };
+const oid       netsnmpCLNSDomain[] = { 1, 3, 6, 1, 6, 1, 2 };
 size_t          netsnmpCLNSDomain_len = OID_LENGTH(netsnmpCLNSDomain);
-oid             netsnmpCONSDomain[] = { 1, 3, 6, 1, 6, 1, 3 };
+const oid       netsnmpCONSDomain[] = { 1, 3, 6, 1, 6, 1, 3 };
 size_t          netsnmpCONSDomain_len = OID_LENGTH(netsnmpCONSDomain);
-oid             netsnmpDDPDomain[] = { 1, 3, 6, 1, 6, 1, 4 };
+const oid       netsnmpDDPDomain[] = { 1, 3, 6, 1, 6, 1, 4 };
 size_t          netsnmpDDPDomain_len = OID_LENGTH(netsnmpDDPDomain);
-oid             netsnmpIPXDomain[] = { 1, 3, 6, 1, 6, 1, 5 };
+const oid       netsnmpIPXDomain[] = { 1, 3, 6, 1, 6, 1, 5 };
 size_t          netsnmpIPXDomain_len = OID_LENGTH(netsnmpIPXDomain);
 
 static netsnmp_container *_container = NULL;

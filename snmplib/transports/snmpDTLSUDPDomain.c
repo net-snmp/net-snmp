@@ -90,7 +90,7 @@ netsnmp_feature_require(sockaddr_size);
 #define WE_ARE_SERVER 0
 #define WE_ARE_CLIENT 1
 
-oid             netsnmpDTLSUDPDomain[] = { TRANSPORT_DOMAIN_DTLS_UDP_IP };
+const oid       netsnmpDTLSUDPDomain[] = { TRANSPORT_DOMAIN_DTLS_UDP_IP };
 size_t          netsnmpDTLSUDPDomain_len = OID_LENGTH(netsnmpDTLSUDPDomain);
 
 static netsnmp_tdomain dtlsudpDomain;

@@ -27,7 +27,7 @@ config_require(UDPBase)
  */
 
 #define TRANSPORT_DOMAIN_UDP_IPV6	1,3,6,1,2,1,100,1,2
-NETSNMP_IMPORT oid      netsnmp_UDPIPv6Domain[];
+NETSNMP_IMPORT const oid netsnmp_UDPIPv6Domain[];
 
 netsnmp_transport *netsnmp_udp6_transport(const struct netsnmp_ep *ep,
                                           int local);

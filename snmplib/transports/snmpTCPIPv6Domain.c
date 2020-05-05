@@ -53,7 +53,7 @@
 
 #include "inet_ntop.h"
 
-oid netsnmp_TCPIPv6Domain[] = { TRANSPORT_DOMAIN_TCP_IPV6 };
+const oid netsnmp_TCPIPv6Domain[] = { TRANSPORT_DOMAIN_TCP_IPV6 };
 static netsnmp_tdomain tcp6Domain;
 
 /*

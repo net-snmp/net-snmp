@@ -175,7 +175,7 @@ var_hrproc(struct variable * vp,
     switch (vp->magic) {
     case HRPROC_ID:
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     case HRPROC_LOAD:
         cpu = netsnmp_cpu_get_byIdx( proc_idx & HRDEV_TYPE_MASK, 0 );
         if ( !cpu || !cpu->history || !cpu->history[0].total_hist ||

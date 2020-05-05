@@ -60,11 +60,11 @@ extern          "C" {
 
 /*  The standard SNMP domains.  */
 
-NETSNMP_IMPORT oid      netsnmpUDPDomain[]; 	/*      = { 1, 3, 6, 1, 6, 1, 1 };  */
-NETSNMP_IMPORT oid      netsnmpCLNSDomain[];    /*      = { 1, 3, 6, 1, 6, 1, 2 };  */
-NETSNMP_IMPORT oid      netsnmpCONSDomain[];    /*      = { 1, 3, 6, 1, 6, 1, 3 };  */
-NETSNMP_IMPORT oid      netsnmpDDPDomain[]; 	/*      = { 1, 3, 6, 1, 6, 1, 4 };  */
-NETSNMP_IMPORT oid      netsnmpIPXDomain[]; 	/*      = { 1, 3, 6, 1, 6, 1, 5 };  */
+NETSNMP_IMPORT const oid netsnmpUDPDomain[];
+NETSNMP_IMPORT const oid netsnmpCLNSDomain[];
+NETSNMP_IMPORT const oid netsnmpCONSDomain[];
+NETSNMP_IMPORT const oid netsnmpDDPDomain[];
+NETSNMP_IMPORT const oid netsnmpIPXDomain[];
 NETSNMP_IMPORT size_t   netsnmpUDPDomain_len;
 NETSNMP_IMPORT size_t   netsnmpCLNSDomain_len;
 NETSNMP_IMPORT size_t   netsnmpCONSDomain_len;

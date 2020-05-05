@@ -32,7 +32,7 @@
 #include <net-snmp/library/tools.h>
 
 
-oid netsnmp_AAL5PVCDomain[10] = { NETSNMP_ENTERPRISE_MIB, 3, 3, 3 };
+const oid netsnmp_AAL5PVCDomain[10] = { NETSNMP_ENTERPRISE_MIB, 3, 3, 3 };
 static netsnmp_tdomain aal5pvcDomain;
 
 

@@ -93,8 +93,8 @@ PERFORMANCE OF THIS SOFTWARE.
     extern long     long_return;
     extern u_char   return_buf[];
 
-    extern oid      nullOid[];
-    extern int      nullOidLen;
+    extern const oid nullOid[];
+    extern const int nullOidLen;
 
 #define INST	0xFFFFFFFF      /* used to fill out the instance field of the variables table */
 

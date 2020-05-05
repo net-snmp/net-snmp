@@ -77,7 +77,7 @@ netsnmp_feature_require(cert_util);
 #define WE_ARE_SERVER 0
 #define WE_ARE_CLIENT 1
 
-oid             netsnmpTLSTCPDomain[] = { TRANSPORT_DOMAIN_TLS_TCP_IP };
+const oid       netsnmpTLSTCPDomain[] = { TRANSPORT_DOMAIN_TLS_TCP_IP };
 size_t          netsnmpTLSTCPDomain_len = OID_LENGTH(netsnmpTLSTCPDomain);
 
 static netsnmp_tdomain tlstcpDomain;

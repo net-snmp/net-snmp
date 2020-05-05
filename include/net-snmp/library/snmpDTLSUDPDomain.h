@@ -16,7 +16,7 @@ extern          "C" {
 #endif
 
 #define TRANSPORT_DOMAIN_DTLS_UDP_IP	1,3,6,1,6,1,9
-NETSNMP_IMPORT oid netsnmpDTLSUDPDomain[7];
+NETSNMP_IMPORT const oid netsnmpDTLSUDPDomain[];
 NETSNMP_IMPORT size_t netsnmpDTLSUDPDomain_len;
 
 netsnmp_transport *

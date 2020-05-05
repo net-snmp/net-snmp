@@ -363,8 +363,8 @@ init_agent(const char *app)
     return r;
 }                               /* end init_agent() */
 
-oid             nullOid[] = { 0, 0 };
-int             nullOidLen = sizeof(nullOid);
+const oid       nullOid[] = { 0, 0 };
+const int       nullOidLen = sizeof(nullOid);
 
 void
 shutdown_agent(void) {

@@ -2438,7 +2438,7 @@ var_ifv6Entry(register struct variable * vp,
          * should check if type, this is a hard one... 
          */
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     case IPV6IFEFFECTMTU:
         {
             p = if_getname(interface);

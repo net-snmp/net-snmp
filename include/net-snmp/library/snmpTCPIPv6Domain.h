@@ -21,7 +21,7 @@ extern          "C" {
  */
 
 #define TRANSPORT_DOMAIN_TCP_IPV6	1,3,6,1,2,1,100,1,6
-NETSNMP_IMPORT oid      netsnmp_TCPIPv6Domain[];
+NETSNMP_IMPORT const oid netsnmp_TCPIPv6Domain[];
 
 netsnmp_transport *
 netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local);

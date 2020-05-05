@@ -25,7 +25,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/tools.h>
 
-oid netsnmp_snmpSTDDomain[] = { TRANSPORT_DOMAIN_STD_IP };
+const oid netsnmp_snmpSTDDomain[] = { TRANSPORT_DOMAIN_STD_IP };
 static netsnmp_tdomain stdDomain;
 
 /*
