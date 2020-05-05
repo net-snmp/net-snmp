@@ -17014,6 +17014,7 @@ esac
 #    Whether the linker supports the flag -Wl,-no-undefined.
 #
 
+if ! echo "$CFLAGS" | grep -q -- -fsanitize=; then
 saved_LDFLAGS=$LDFLAGS
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker supports -Wl,-no-undefined" >&5
 $as_echo_n "checking whether the linker supports -Wl,-no-undefined... " >&6; }
@@ -17040,6 +17041,7 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LDFLAGS="$saved_LDFLAGS"
 
+fi
 
 
 #
