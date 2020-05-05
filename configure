@@ -20461,8 +20461,11 @@ fi
 
 
     if test no != $krb5_config; then
+
       CPPFLAGS="$CPPFLAGS `$krb5_config --cflags`"
-      CRYPTO_LIBS="$CRYPTO_LIBS `$krb5_config --libs`"
+      CRYPTO_LIBS="$CRYPTO_LIBS `$krb5_config --libs |
+				 $SED 's/-flto=[^[:blank:]]*//g'`"
+
     elif test $krb5path != no; then
 
   if test "x$krb5path" != x -a -d $krb5path; then

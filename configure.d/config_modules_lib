@@ -166,8 +166,11 @@ do
     AC_PATH_PROG([krb5_config],krb5-config,[no],$krb5path/bin:$PATH)
 
     if test no != $krb5_config; then
+      [
       CPPFLAGS="$CPPFLAGS `$krb5_config --cflags`"
-      CRYPTO_LIBS="$CRYPTO_LIBS `$krb5_config --libs`"
+      CRYPTO_LIBS="$CRYPTO_LIBS `$krb5_config --libs |
+				 $SED 's/-flto=[^[:blank:]]*//g'`"
+      ]
     elif test $krb5path != no; then
       AC_ADD_SEARCH_PATH($krb5path)
     else
