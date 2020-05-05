@@ -36,7 +36,7 @@ netsnmp_feature_child_of(init_register_usmuser_context, usmuser_all);
 
 netsnmp_feature_require(scapi_get_proper_priv_length);
 
-struct variable4 usmUser_variables[] = {
+static const struct variable4 usmUser_variables[] = {
     {USMUSERSPINLOCK, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_usmUser, 1, {1}},
     {USMUSERSECURITYNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
@@ -64,7 +64,7 @@ struct variable4 usmUser_variables[] = {
 
 };
 
-oid             usmUser_variables_oid[] = { 1, 3, 6, 1, 6, 3, 15, 1, 2 };
+static const oid usmUser_variables_oid[] = { 1, 3, 6, 1, 6, 3, 15, 1, 2 };
 
 
 /*
@@ -87,7 +87,7 @@ init_usmUser(void)
 void
 init_register_usmUser_context(const char *contextName) {
     register_mib_context("snmpv3/usmUser",
-                         (struct variable *) usmUser_variables,
+                         (const struct variable *) usmUser_variables,
                          sizeof(struct variable4),
                          sizeof(usmUser_variables)/sizeof(struct variable4),
                          usmUser_variables_oid,
