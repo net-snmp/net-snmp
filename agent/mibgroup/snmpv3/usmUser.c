@@ -831,17 +831,22 @@ write_usmUserAuthKeyChange(int action,
     struct usmUser *uptr;
     unsigned char   buf[SNMP_MAXBUF_SMALL];
     size_t          buflen = SNMP_MAXBUF_SMALL;
-    const char      fnAuthKey[] = "write_usmUserAuthKeyChange";
-    const char      fnOwnAuthKey[] = "write_usmUserOwnAuthKeyChange";
     const char     *fname;
     static unsigned char *oldkey;
     static size_t   oldkeylen;
     static int      resetOnFail;
 
-    if (name[USM_MIB_LENGTH - 1] == 6) {
-        fname = fnAuthKey;
-    } else {
-        fname = fnOwnAuthKey;
+    switch (name[USM_MIB_LENGTH - 1]) {
+    case 6:
+        fname = "write_usmUserAuthKeyChange";
+        break;
+    case 7:
+        fname = "write_usmUserOwnAuthKeyChange";
+        break;
+    default:
+        fname = "?";
+        netsnmp_assert(FALSE);
+        break;
     }
 
     if (action == RESERVE1) {
@@ -1085,18 +1090,23 @@ write_usmUserPrivKeyChange(int action,
     struct usmUser *uptr;
     unsigned char   buf[SNMP_MAXBUF_SMALL], buf2[SNMP_MAXBUF_SMALL];
     size_t          buflen = sizeof(buf);
-    const char      fnPrivKey[] = "write_usmUserPrivKeyChange";
-    const char      fnOwnPrivKey[] = "write_usmUserOwnPrivKeyChange";
     const char     *fname;
     static unsigned char *oldkey;
     static size_t   oldkeylen;
     static int      resetOnFail;
     int plen;
 
-    if (name[USM_MIB_LENGTH - 1] == 9) {
-        fname = fnPrivKey;
-    } else {
-        fname = fnOwnPrivKey;
+    switch (name[USM_MIB_LENGTH - 1]) {
+    case 9:
+        fname = "write_usmUserPrivKeyChange";
+        break;
+    case 10:
+        fname = "write_usmUserOwnPrivKeyChange";
+        break;
+    default:
+        fname = "?";
+        netsnmp_assert(FALSE);
+        break;
     }
 
     if (action == RESERVE1) {
