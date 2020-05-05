@@ -1224,10 +1224,10 @@ KeyChange ::=     TEXTUAL-CONVENTION
  * XXX:  if the newkey is not long enough, it should be freed and remalloced 
  */
 int
-decode_keychange(const oid * hashtype, u_int hashtype_len,
-                 u_char * oldkey, size_t oldkey_len,
-                 u_char * kcstring, size_t kcstring_len,
-                 u_char * newkey, size_t * newkey_len)
+decode_keychange(const oid *hashtype, u_int hashtype_len,
+                 const u_char *oldkey, size_t oldkey_len,
+                 const u_char *kcstring, size_t kcstring_len,
+                 u_char *newkey, size_t *newkey_len)
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS, auth_type;
@@ -1235,7 +1235,8 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
     int             ihash_len = 0;
     u_int           nbytes = 0;
 
-    u_char         *deltap, hash[SNMP_MAXBUF];
+    const u_char   *deltap;
+    u_char          hash[SNMP_MAXBUF];
     size_t          delta_len, tmpbuf_len;
     u_char         *tmpbuf = NULL;
 #ifdef NETSNMP_ENABLE_TESTING_CODE
