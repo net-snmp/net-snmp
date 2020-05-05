@@ -266,8 +266,12 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
     case 'a': {
         int auth_type = usm_lookup_auth_type(optarg);
         if (auth_type > 0) {
-            session->securityAuthProto =
-                sc_get_auth_oid(auth_type, &session->securityAuthProtoLen);
+            const oid *auth_proto;
+
+            auth_proto = sc_get_auth_oid(auth_type,
+                                         &session->securityAuthProtoLen);
+            session->securityAuthProto = snmp_duplicate_objid(auth_proto,
+                                             session->securityAuthProtoLen);
          } else {
             fprintf(stderr,
                     "Invalid authentication protocol specified after -3a flag: %s\n",
@@ -277,7 +281,9 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
     }
         break;
 
-    case 'x':
+    case 'x': {
+        const oid *priv_proto;
+
         priv_type = usm_lookup_priv_type(optarg);
         if (priv_type < 0) {
             fprintf(stderr,
@@ -285,10 +291,11 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                     optarg);
             return (-1);
         }
-        session->securityPrivProto =
-            sc_get_priv_oid(priv_type, &session->securityPrivProtoLen);
+        priv_proto = sc_get_priv_oid(priv_type, &session->securityPrivProtoLen);
+        session->securityPrivProto = snmp_duplicate_objid(priv_proto,
+                                         session->securityPrivProtoLen);
         break;
-
+    }
     case 'A':
         *Apsz = strdup(optarg);
         if (NULL == *Apsz) {
