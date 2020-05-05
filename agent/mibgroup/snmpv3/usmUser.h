@@ -49,7 +49,7 @@ config_add_mib(SNMP-USER-BASED-SM-MIB)
      oid            *usm_generate_OID(oid * prefix, size_t prefixLen,
                                       struct usmUser *uptr,
                                       size_t * length);
-     int             usm_parse_oid(oid * oidIndex, size_t oidLen,
+     int             usm_parse_oid(const oid * oidIndex, size_t oidLen,
                                    unsigned char **engineID,
                                    size_t * engineIDLen,
                                    unsigned char **name, size_t * nameLen);

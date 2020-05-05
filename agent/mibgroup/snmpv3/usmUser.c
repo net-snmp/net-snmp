@@ -155,7 +155,7 @@ usm_generate_OID(oid * prefix, size_t prefixLen, struct usmUser *uptr,
  * returns 1 if an error is encountered, or 0 if successful.
  */
 int
-usm_parse_oid(oid * oidIndex, size_t oidLen,
+usm_parse_oid(const oid * oidIndex, size_t oidLen,
               unsigned char **engineID, size_t * engineIDLen,
               unsigned char **name, size_t * nameLen)
 {
