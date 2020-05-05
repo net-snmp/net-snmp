@@ -408,7 +408,7 @@ sc_get_proper_auth_length_bytype(int hashtype)
  * 
  * Given a type, return the OID and optionally set OID length.
  */
-oid *
+const oid *
 sc_get_auth_oid(int type, size_t *oid_len)
 {
     netsnmp_auth_alg_info *ai;
@@ -449,7 +449,7 @@ sc_get_auth_name(int type)
  * 
  * Given a type, return the OID and optionally set OID length.
  */
-oid *
+const oid *
 sc_get_priv_oid(int type, size_t *oid_len)
 {
     netsnmp_priv_alg_info *ai;

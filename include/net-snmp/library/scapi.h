@@ -54,7 +54,7 @@ extern          "C" {
 typedef struct netsnmp_auth_alg_info_s {
     int          type;
     const char * name;
-    oid *        alg_oid;
+    const oid *  alg_oid;
     int          oid_len;
     int          proper_length;
     int          mac_length;
@@ -63,7 +63,7 @@ typedef struct netsnmp_auth_alg_info_s {
 typedef struct netsnmp_priv_alg_info_s {
     int          type;
     const char * name;
-    oid *        alg_oid;
+    const oid *  alg_oid;
     int          oid_len;
     int          proper_length;
     int         iv_length;
@@ -85,7 +85,7 @@ typedef struct netsnmp_priv_alg_info_s {
     NETSNMP_IMPORT
     const char*     sc_get_auth_name(int auth_type);
     NETSNMP_IMPORT
-    oid *           sc_get_auth_oid(int auth_type, size_t *oid_len);
+    const oid *     sc_get_auth_oid(int auth_type, size_t *oid_len);
     NETSNMP_IMPORT
     netsnmp_auth_alg_info * sc_get_auth_alg_byoid(const oid *oid, u_int len);
     NETSNMP_IMPORT
@@ -109,7 +109,7 @@ typedef struct netsnmp_priv_alg_info_s {
     NETSNMP_IMPORT
     int             sc_get_privtype(const oid * privtype, u_int privtype_len);
     NETSNMP_IMPORT
-    oid *           sc_get_priv_oid(int type, size_t *oid_len);
+    const oid *     sc_get_priv_oid(int type, size_t *oid_len);
     NETSNMP_IMPORT
     int             sc_get_proper_priv_length(const oid * privtype,
                                               u_int privtype_len);

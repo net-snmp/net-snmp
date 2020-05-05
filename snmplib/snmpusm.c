@@ -98,53 +98,53 @@ struct usmStateReference {
     u_int           usr_sec_level;
 };
 
-oid    usmNoAuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+const oid usmNoAuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                  NETSNMP_USMAUTH_NOAUTH };
 #ifndef NETSNMP_DISABLE_MD5
-oid    usmHMACMD5AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+const oid usmHMACMD5AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                       NETSNMP_USMAUTH_HMACMD5 };
 #endif
-oid    usmHMACSHA1AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+const oid usmHMACSHA1AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                        NETSNMP_USMAUTH_HMACSHA1 };
 
 #ifdef HAVE_EVP_SHA384
-oid    usmHMAC384SHA512AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+const oid usmHMAC384SHA512AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                             NETSNMP_USMAUTH_HMAC384SHA512 };
-oid    usmHMAC256SHA384AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+const oid usmHMAC256SHA384AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                             NETSNMP_USMAUTH_HMAC256SHA384 };
 #endif /* HAVE_EVP_SHA384 */
 
 #ifdef HAVE_EVP_SHA224
-oid    usmHMAC192SHA256AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+const oid usmHMAC192SHA256AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                             NETSNMP_USMAUTH_HMAC192SHA256 };
-oid    usmHMAC128SHA224AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
+const oid usmHMAC128SHA224AuthProtocol[10] = { NETSNMP_USMAUTH_BASE_OID,
                                             NETSNMP_USMAUTH_HMAC128SHA224 };
 #endif /* HAVE_EVP_SHA384 */
 
-oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
+const oid usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
 
 #ifndef NETSNMP_DISABLE_DES
-oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
+const oid usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
 #endif
 
 
-oid    usmAESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
+const oid usmAESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
 /* backwards compat */
-oid    *usmAES128PrivProtocol = usmAESPrivProtocol;
+const oid *usmAES128PrivProtocol = usmAESPrivProtocol;
 
 #ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
     /* OIDs from http://www.snmp.com/eso/esoConsortiumMIB.txt */
-oid    usmAES192PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,3 };
-oid    usmAES256PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,4 };
+const oid usmAES192PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,3 };
+const oid usmAES256PrivProtocol[9] = { 1,3,6,1,4,1,14832,1,4 };
     /* OIDs from CISCO MIB */
-oid    usmAES192CiscoPrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,1 };
-oid    usmAES256CiscoPrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,2 };
+const oid usmAES192CiscoPrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,1 };
+const oid usmAES256CiscoPrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,2 };
 /*
  * these OIDs are in pySNMP source as OIDs for AES+Reeder. We'll just
  * use OIDS from CISCO-SNMP-USM-OIDS-MIB
  *
-oid    usmAES192Cisco2PrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,101 };
-oid    usmAES256Cisco2PrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,102 };
+const oid usmAES192Cisco2PrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,101 };
+const oid usmAES256Cisco2PrivProtocol[11]  = { 1,3,6,1,4,1,9,12,6,1,102 };
  */
 #endif /* NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
 
@@ -153,7 +153,7 @@ typedef struct usm_alg_type_s {
     int         value;
 } usm_alg_type_t;
 
-static usm_alg_type_t usm_auth_type[] = {
+static const usm_alg_type_t usm_auth_type[] = {
     { "NOAUTH", NETSNMP_USMAUTH_NOAUTH },
     { "SHA", NETSNMP_USMAUTH_HMACSHA1 },
     { "SHA-1", NETSNMP_USMAUTH_HMACSHA1 },
@@ -176,7 +176,7 @@ static usm_alg_type_t usm_auth_type[] = {
     { NULL, -1 }
 };
 
-static usm_alg_type_t usm_priv_type[] = {
+static const usm_alg_type_t usm_priv_type[] = {
     { "NOPRIV", USM_CREATE_USER_PRIV_NONE },
 #ifndef NETSNMP_DISABLE_DES
     { "DES", USM_CREATE_USER_PRIV_DES },
@@ -3728,7 +3728,7 @@ static int usm_discover_engineid(struct session_list *slp,
 }
 
 static int
-usm_lookup_alg_type(const char *str, usm_alg_type_t *types)
+usm_lookup_alg_type(const char *str, const usm_alg_type_t *types)
 {
     int i, l;
     l = strlen(str);
@@ -3741,7 +3741,7 @@ usm_lookup_alg_type(const char *str, usm_alg_type_t *types)
 }
 
 static const char *
-usm_lookup_alg_str(int value, usm_alg_type_t *types)
+usm_lookup_alg_str(int value, const usm_alg_type_t *types)
 {
     int i;
     for (i = 0; types[i].label; ++i)
