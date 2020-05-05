@@ -631,7 +631,7 @@ main()
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_INTEGER, NULL, 0);
     ret =
         header_complex_parse_oid(testparse,
-                                 sizeof(testparse) / sizeof(oid), vars);
+                                 OID_LENGTH(testparse), vars);
     DEBUGMSGTL(("header_complex_test", "parse returned %d...\n", ret));
 
 }

@@ -71,7 +71,7 @@ register_snmpEngine_scalars_context(const char *contextName)
                          sizeof(struct variable2),
                          sizeof(snmpEngine_variables)/sizeof(struct variable2),
                          snmpEngine_variables_oid,
-                         sizeof(snmpEngine_variables_oid)/sizeof(oid),
+                         OID_LENGTH(snmpEngine_variables_oid),
                          DEFAULT_MIB_PRIORITY, 0, 0, NULL,
                          contextName, -1, 0);
 }

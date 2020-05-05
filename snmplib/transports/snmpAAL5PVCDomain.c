@@ -370,7 +370,7 @@ void
 netsnmp_aal5pvc_ctor(void)
 {
     aal5pvcDomain.name = netsnmp_AAL5PVCDomain;
-    aal5pvcDomain.name_length = sizeof(netsnmp_AAL5PVCDomain) / sizeof(oid);
+    aal5pvcDomain.name_length = OID_LENGTH(netsnmp_AAL5PVCDomain);
     aal5pvcDomain.prefix = (const char**)calloc(3, sizeof(char *));
     aal5pvcDomain.prefix[0] = "aal5pvc";
     aal5pvcDomain.prefix[1] = "pvc";

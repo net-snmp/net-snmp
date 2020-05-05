@@ -233,7 +233,7 @@ main(int argc, char *argv[])
          * use default value 
          */
         memmove(root, objid_mib, sizeof(objid_mib));
-        rootlen = sizeof(objid_mib) / sizeof(oid);
+        rootlen = OID_LENGTH(objid_mib);
     }
 
     /*

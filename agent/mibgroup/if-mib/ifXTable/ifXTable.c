@@ -327,7 +327,7 @@ ifXTable_indexes_set(ifXTable_rowreq_ctx * rowreq_ctx, long ifIndex_val)
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
+    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
     if (0 != ifXTable_index_to_oid(&rowreq_ctx->oid_idx,
                                    &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;

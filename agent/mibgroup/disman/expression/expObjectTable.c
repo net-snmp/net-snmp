@@ -153,7 +153,7 @@ create_expObjectTable_data(void)
     StorageNew->expObjectDeltaDiscontinuityID =
         netsnmp_memdup(TimeInstance, sizeof(TimeInstance));
     StorageNew->expObjectDeltaDiscontinuityIDLen =
-        sizeof(TimeInstance) / sizeof(oid);
+        OID_LENGTH(TimeInstance);
 
 
 
@@ -498,7 +498,7 @@ write_expObjectID(int action,
     struct expObjectTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(expObjectTable_variables_oid) +
                     3 - 1);
 
 
@@ -587,7 +587,7 @@ write_expObjectIDWildcard(int action,
     static int      tmpvar;
     struct expObjectTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(expObjectTable_variables_oid) +
                     3 - 1);
 
 
@@ -669,7 +669,7 @@ write_expObjectSampleType(int action,
     static int      tmpvar;
     struct expObjectTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(expObjectTable_variables_oid) +
                     3 - 1);
 
 
@@ -754,7 +754,7 @@ write_expObjectDeltaDiscontinuityID(int action,
     struct expObjectTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(expObjectTable_variables_oid) +
                     3 - 1);
 
 
@@ -850,7 +850,7 @@ write_expObjectDiscontinuityIDWildcard(int action,
     static int      tmpvar;
     struct expObjectTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(expObjectTable_variables_oid) +
                     3 - 1);
 
 
@@ -934,7 +934,7 @@ write_expObjectDiscontinuityIDType(int action,
     static int      tmpvar;
     struct expObjectTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(expObjectTable_variables_oid) +
                     3 - 1);
 
 
@@ -1018,7 +1018,7 @@ write_expObjectConditional(int action,
     struct expObjectTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(expObjectTable_variables_oid) +
                     3 - 1);
 
 
@@ -1113,7 +1113,7 @@ write_expObjectConditionalWildcard(int action,
     static int      tmpvar;
     struct expObjectTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(expObjectTable_variables_oid) +
                     3 - 1);
 
 
@@ -1197,7 +1197,7 @@ write_expObjectEntryStatus(int action,
     struct expObjectTable_data *StorageTmp = NULL;
     static struct expObjectTable_data *StorageNew, *StorageDel;
     size_t          newlen =
-        name_len - (sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(expObjectTable_variables_oid) +
                     3 - 1);
     static int      old_value;
     int             set_value;
@@ -1308,7 +1308,7 @@ write_expObjectEntryStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [sizeof(expObjectTable_variables_oid) / sizeof(oid) +
+                  [OID_LENGTH(expObjectTable_variables_oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 /*
                  * XXX: free, zero vars 

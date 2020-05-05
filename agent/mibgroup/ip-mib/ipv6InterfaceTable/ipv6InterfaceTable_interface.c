@@ -1392,7 +1392,7 @@ ipv6InterfaceTable_row_find_by_mib_index(ipv6InterfaceTable_mib_index *
      * set up storage for OID
      */
     oid_idx.oids = oid_tmp;
-    oid_idx.len = sizeof(oid_tmp) / sizeof(oid);
+    oid_idx.len = OID_LENGTH(oid_tmp);
 
     /*
      * convert

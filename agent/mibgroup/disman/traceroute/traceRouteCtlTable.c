@@ -1485,7 +1485,7 @@ send_traceRoute_trap(struct traceRouteCtlTable_data *item,
      * snmpTrap oid 
      */
     snmp_varlist_add_variable(&var_list, objid_snmptrap,
-                              sizeof(objid_snmptrap) / sizeof(oid),
+                              OID_LENGTH(objid_snmptrap),
                               ASN_OBJECT_ID, (u_char *) trap_oid,
                               trap_oid_len * sizeof(oid));
 
@@ -1561,7 +1561,7 @@ write_traceRouteCtlTargetAddressType(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -1646,7 +1646,7 @@ write_traceRouteCtlTargetAddress(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -1743,7 +1743,7 @@ write_traceRouteCtlByPassRouteTable(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -1825,7 +1825,7 @@ write_traceRouteCtlDataSize(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -1912,7 +1912,7 @@ write_traceRouteCtlTimeOut(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2002,7 +2002,7 @@ write_traceRouteCtlProbesPerHop(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2089,7 +2089,7 @@ write_traceRouteCtlPort(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2170,7 +2170,7 @@ write_traceRouteCtlMaxTtl(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2255,7 +2255,7 @@ write_traceRouteCtlDSField(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2337,7 +2337,7 @@ write_traceRouteCtlSourceAddressType(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2420,7 +2420,7 @@ write_traceRouteCtlSourceAddress(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2517,7 +2517,7 @@ write_traceRouteCtlIfIndex(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2601,7 +2601,7 @@ write_traceRouteCtlMiscOptions(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2695,7 +2695,7 @@ write_traceRouteCtlMaxFailures(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2784,7 +2784,7 @@ write_traceRouteCtlDontFragment(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2868,7 +2868,7 @@ write_traceRouteCtlInitialTtl(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -2953,7 +2953,7 @@ write_traceRouteCtlFrequency(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -3038,7 +3038,7 @@ write_traceRouteCtlStorageType(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -3132,7 +3132,7 @@ write_traceRouteCtlAdminStatus(int action,
     struct traceRouteResultsTable_data *StorageNew = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -3249,7 +3249,7 @@ write_traceRouteCtlDescr(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
 
     if ((StorageTmp =
@@ -3348,7 +3348,7 @@ write_traceRouteCtlMaxRows(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -3431,7 +3431,7 @@ write_traceRouteCtlTrapGeneration(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
                         &name[sizeof(traceRouteCtlTable_variables_oid) /
@@ -3527,7 +3527,7 @@ write_traceRouteCtlCreateHopsEntries(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -3609,7 +3609,7 @@ write_traceRouteCtlType(int action,
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
 
     if ((StorageTmp =
          header_complex(traceRouteCtlTableStorage, NULL,
@@ -3702,7 +3702,7 @@ write_traceRouteCtlRowStatus(int action,
     static struct traceRouteCtlTable_data *StorageDel = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(traceRouteCtlTable_variables_oid) + 3 - 1);
     static int      old_value;
     int             set_value;
     static netsnmp_variable_list *vars = NULL;
@@ -3823,7 +3823,7 @@ write_traceRouteCtlRowStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [sizeof(traceRouteCtlTable_variables_oid) / sizeof(oid) +
+                  [OID_LENGTH(traceRouteCtlTable_variables_oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 /*
                  * XXX: free, zero vars 

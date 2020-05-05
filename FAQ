@@ -3974,7 +3974,7 @@ How can I register a MIB module in a different (SNMPv3) context?
                                my_variables, sizeof(variable1),
                                sizeof(my_variables)/sizeof(variable1),
                                my_variables_oid,
-                               sizeof(my_variables_oid)/sizeof(oid),
+                               OID_LENGTH(my_variables_oid),
                                DEFAULT_MIB_PRIORITY, 0, 0, NULL,
                                "my_context", -1, 0);
 

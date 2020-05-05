@@ -154,7 +154,7 @@ void            register_mib_detach	   (void);
     if (register_mib(descr, (const struct variable *) var,              \
                      sizeof(struct vartype),                            \
                      sizeof(var)/sizeof(struct vartype),                \
-                     theoid, sizeof(theoid)/sizeof(oid)) !=             \
+                     theoid, OID_LENGTH(theoid)) !=             \
         MIB_REGISTERED_OK)                                              \
 	DEBUGMSGTL(("register_mib", "%s registration failed\n", descr));
 

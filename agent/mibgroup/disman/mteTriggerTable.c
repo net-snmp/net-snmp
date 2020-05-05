@@ -285,7 +285,7 @@ create_mteTriggerTable_data(void)
     StorageNew->mteTriggerDeltaDiscontinuityID =
         netsnmp_memdup(sysUpTimeInstance, sizeof(sysUpTimeInstance));
     StorageNew->mteTriggerDeltaDiscontinuityIDLen =
-        sizeof(sysUpTimeInstance) / sizeof(oid);
+        OID_LENGTH(sysUpTimeInstance);
     StorageNew->mteTriggerDeltaDiscontinuityIDWildcard = TV_FALSE;
     StorageNew->mteTriggerDeltaDiscontinuityIDType =
         MTETRIGGERDELTADISCONTINUITYIDTYPE_TIMETICKS;
@@ -1626,7 +1626,7 @@ write_mteTriggerComment(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -1716,7 +1716,7 @@ write_mteTriggerTest(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -1802,7 +1802,7 @@ write_mteTriggerSampleType(int action,
     static int      tmpvar;
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -1886,7 +1886,7 @@ write_mteTriggerValueID(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -1980,7 +1980,7 @@ write_mteTriggerValueIDWildcard(int action,
     static int      tmpvar;
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -2064,7 +2064,7 @@ write_mteTriggerTargetTag(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -2153,7 +2153,7 @@ write_mteTriggerContextName(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -2243,7 +2243,7 @@ write_mteTriggerContextNameWildcard(int action,
     static int      tmpvar;
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -2326,7 +2326,7 @@ write_mteTriggerFrequency(int action,
     static int      tmpvar;
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -2414,7 +2414,7 @@ write_mteTriggerObjectsOwner(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -2504,7 +2504,7 @@ write_mteTriggerObjects(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -2592,7 +2592,7 @@ write_mteTriggerEnabled(int action,
     static int      tmpvar;
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
 
 
@@ -2681,7 +2681,7 @@ write_mteTriggerEntryStatus(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     static struct mteTriggerTable_data *StorageNew, *StorageDel;
     size_t          newlen =
-        name_len - (sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteTriggerTable_variables_oid) +
                     3 - 1);
     static int      old_value;
     int             set_value;
@@ -2791,7 +2791,7 @@ write_mteTriggerEntryStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [sizeof(mteTriggerTable_variables_oid) / sizeof(oid) +
+                  [OID_LENGTH(mteTriggerTable_variables_oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 /*
                  * XXX: free, zero vars 
@@ -3019,7 +3019,7 @@ send_mte_trap(struct mteTriggerTable_data *item,
      * snmpTrap oid 
      */
     snmp_varlist_add_variable(&var_list, objid_snmptrap,
-                              sizeof(objid_snmptrap) / sizeof(oid),
+                              OID_LENGTH(objid_snmptrap),
                               ASN_OBJECT_ID, (u_char *) trap_oid,
                               trap_oid_len * sizeof(oid));
 
@@ -3027,7 +3027,7 @@ send_mte_trap(struct mteTriggerTable_data *item,
      * mteHotTrigger 
      */
     snmp_varlist_add_variable(&var_list, mteHotTrigger,
-                              sizeof(mteHotTrigger) / sizeof(oid),
+                              OID_LENGTH(mteHotTrigger),
                               ASN_OCTET_STR,
                               (u_char *) item->mteTriggerName,
                               item->mteTriggerNameLen);
@@ -3035,20 +3035,20 @@ send_mte_trap(struct mteTriggerTable_data *item,
     /*
      * mteHotTargetName 
      */
-    snmp_varlist_add_variable(&var_list, mteHotTargetName, sizeof(mteHotTargetName) / sizeof(oid), ASN_OCTET_STR, (u_char *) item->mteTriggerTargetTag, /*XXX: targetName,not tag */
+    snmp_varlist_add_variable(&var_list, mteHotTargetName, OID_LENGTH(mteHotTargetName), ASN_OCTET_STR, (u_char *) item->mteTriggerTargetTag, /*XXX: targetName,not tag */
                               item->mteTriggerTargetTagLen);    /*XXX */
 
     /*
      * mteHotContextName 
      */
     snmp_varlist_add_variable(&var_list, mteHotContextName,
-                              sizeof(mteHotContextName) / sizeof(oid),
+                              OID_LENGTH(mteHotContextName),
                               ASN_OCTET_STR,
                               (u_char *) item->mteTriggerContextName,
                               item->mteTriggerContextNameLen);
 
     snmp_varlist_add_variable(&var_list, mteHotOID,
-                              sizeof(mteHotOID) / sizeof(oid),
+                              OID_LENGTH(mteHotOID),
                               ASN_OBJECT_ID, (u_char *) name_oid,
                               sizeof(oid) * name_oid_len);
 
@@ -3057,7 +3057,7 @@ send_mte_trap(struct mteTriggerTable_data *item,
          * mteFailedReason  
          */
         snmp_varlist_add_variable(&var_list, mteFailedReason,
-                                  sizeof(mteFailedReason) / sizeof(oid),
+                                  OID_LENGTH(mteFailedReason),
                                   ASN_INTEGER, (u_char *) value,
                                   sizeof(value));
     } else {
@@ -3065,7 +3065,7 @@ send_mte_trap(struct mteTriggerTable_data *item,
          * mteHotValue  
          */
         snmp_varlist_add_variable(&var_list, mteHotValue,
-                                  sizeof(mteHotValue) / sizeof(oid),
+                                  OID_LENGTH(mteHotValue),
                                   ASN_INTEGER, (u_char *) value,
                                   sizeof(value));
     }
@@ -3244,7 +3244,7 @@ mte_discontinuity_occurred(struct mteTriggerTable_data *item)
         (snmp_oid_compare(item->mteTriggerDeltaDiscontinuityID,
                           item->mteTriggerDeltaDiscontinuityIDLen,
                           sysUpTimeInstance,
-                          sizeof(sysUpTimeInstance) / sizeof(oid)) == 0)) {
+                          OID_LENGTH(sysUpTimeInstance)) == 0)) {
         DEBUGMSGTL(("mte_disco",
                     "discoID either zero-length or sysUpTimeInstance\n"));
     } else {
@@ -3344,7 +3344,7 @@ mte_discontinuity_occurred(struct mteTriggerTable_data *item)
     if (snmp_oid_compare(item->mteTriggerDeltaDiscontinuityID,
                          item->mteTriggerDeltaDiscontinuityIDLen,
                          sysUpTimeInstance,
-                         sizeof(sysUpTimeInstance) / sizeof(oid)) != 0) {
+                         OID_LENGTH(sysUpTimeInstance)) != 0) {
         DEBUGMSGTL(("mte_disco", "discoID != sysUpTimeInstance\n"));
         /*
          * At the moment we only support checking the local system so there's no
@@ -3434,7 +3434,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
             !mte_is_integer_type(response->variables->type)) {
             long            failure = MTE_FAILURE_BADTYPE;
             send_mte_trap(item, mteTriggerFailure,
-                          sizeof(mteTriggerFailure) / sizeof(oid),
+                          OID_LENGTH(mteTriggerFailure),
                           next_oid, next_oid_len, &failure,
                           NULL, NULL, "failure: bad type");
             /*
@@ -3496,7 +3496,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                  * existence status? 
                  */
                 send_mte_trap(item, mteTriggerFired,
-                              sizeof(mteTriggerFired) / sizeof(oid),
+                              OID_LENGTH(mteTriggerFired),
                               next_oid, next_oid_len,
                               value, item->mteTriggerExistenceObjectsOwner,
                               item->mteTriggerExistenceObjects,
@@ -3516,7 +3516,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                  * existence status? 
                  */
                 send_mte_trap(item, mteTriggerFired,
-                              sizeof(mteTriggerFired) / sizeof(oid),
+                              OID_LENGTH(mteTriggerFired),
                               next_oid, next_oid_len,
                               value, item->mteTriggerExistenceObjectsOwner,
                               item->mteTriggerExistenceObjects,
@@ -3601,7 +3601,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                   MTETRIGGERBOOLEANSTARTUP_TRUE
                   && lastbool == (char)-1) || lastbool != boolresult)) {
                 send_mte_trap(item, mteTriggerFired,
-                              sizeof(mteTriggerFired) / sizeof(oid),
+                              OID_LENGTH(mteTriggerFired),
                               next_oid, next_oid_len,
                               &x, item->mteTriggerBooleanObjectsOwner,
                               item->mteTriggerBooleanObjects,
@@ -3653,7 +3653,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                    MTETRIGGERTHRESHOLDSTARTUP_RISINGORFALLING)))
                 && (*value >= item->mteTriggerThresholdRising)) {
                 send_mte_trap(item, mteTriggerRising,
-                              sizeof(mteTriggerRising) / sizeof(oid),
+                              OID_LENGTH(mteTriggerRising),
                               next_oid, next_oid_len, value,
                               item->mteTriggerThresholdObjectsOwner,
                               item->mteTriggerThresholdObjects,
@@ -3671,7 +3671,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                    MTETRIGGERTHRESHOLDSTARTUP_RISINGORFALLING)))
                 && (*value <= item->mteTriggerThresholdFalling)) {
                 send_mte_trap(item, mteTriggerFalling,
-                              sizeof(mteTriggerFalling) / sizeof(oid),
+                              OID_LENGTH(mteTriggerFalling),
                               next_oid, next_oid_len, value,
                               item->mteTriggerThresholdObjectsOwner,
                               item->mteTriggerThresholdObjects,
@@ -3754,7 +3754,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
         for (iter = item->hc_storage_old; iter; iter = iter->next) {
             laststate = (struct last_state *) iter->data;
             send_mte_trap(item, mteTriggerFired,
-                          sizeof(mteTriggerFired) / sizeof(oid),
+                          OID_LENGTH(mteTriggerFired),
                           iter->name, iter->namelen, laststate->value,
                           item->mteTriggerExistenceObjectsOwner,
                           item->mteTriggerExistenceObjects,

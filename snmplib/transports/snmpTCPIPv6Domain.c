@@ -175,7 +175,7 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
     memcpy(t->data, addr, sizeof(struct sockaddr_in6));
 
     t->domain = netsnmp_TCPIPv6Domain;
-    t->domain_length = sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);
+    t->domain_length = OID_LENGTH(netsnmp_TCPIPv6Domain);
 
 #ifndef NETSNMP_NO_SYSTEMD
     /*
@@ -352,7 +352,7 @@ void
 netsnmp_tcpipv6_ctor(void)
 {
     tcp6Domain.name = netsnmp_TCPIPv6Domain;
-    tcp6Domain.name_length = sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);
+    tcp6Domain.name_length = OID_LENGTH(netsnmp_TCPIPv6Domain);
     tcp6Domain.f_create_from_tstring_new = netsnmp_tcp6_create_tstring;
     tcp6Domain.f_create_from_ostring     = netsnmp_tcp6_create_ostring;
     tcp6Domain.prefix = (const char**)calloc(4, sizeof(char *));

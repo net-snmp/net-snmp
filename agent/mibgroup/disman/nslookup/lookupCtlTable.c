@@ -933,7 +933,7 @@ write_lookupCtlTargetAddressType(int action,
     static size_t   tmpvar;
     struct lookupTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(lookupCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(lookupCtlTable_variables_oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -1015,7 +1015,7 @@ write_lookupCtlTargetAddress(int action,
     static size_t   tmplen;
     struct lookupTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(lookupCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(lookupCtlTable_variables_oid) +
                     3 - 1);
     if ((StorageTmp =
          header_complex(lookupCtlTableStorage, NULL,
@@ -1113,7 +1113,7 @@ write_lookupCtlRowStatus(int action,
     struct lookupTable_data *StorageTmp = NULL;
     static struct lookupTable_data *StorageNew = NULL, *StorageDel = NULL;
     size_t          newlen =
-        name_len - (sizeof(lookupCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(lookupCtlTable_variables_oid) +
                     3 - 1);
     static int      old_value;
     int             set_value;
@@ -1230,7 +1230,7 @@ write_lookupCtlRowStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [sizeof(lookupCtlTable_variables_oid) / sizeof(oid) +
+                  [OID_LENGTH(lookupCtlTable_variables_oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 /*
                  * XXX: free, zero vars 

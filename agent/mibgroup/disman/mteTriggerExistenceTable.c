@@ -235,7 +235,7 @@ write_mteTriggerExistenceTest(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerExistenceTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerExistenceTable_variables_oid) + 3 -
          1);
 
 
@@ -327,7 +327,7 @@ write_mteTriggerExistenceStartup(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerExistenceTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerExistenceTable_variables_oid) + 3 -
          1);
 
 
@@ -419,7 +419,7 @@ write_mteTriggerExistenceObjectsOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerExistenceTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerExistenceTable_variables_oid) + 3 -
          1);
 
 
@@ -511,7 +511,7 @@ write_mteTriggerExistenceObjects(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerExistenceTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerExistenceTable_variables_oid) + 3 -
          1);
 
 
@@ -603,7 +603,7 @@ write_mteTriggerExistenceEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerExistenceTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerExistenceTable_variables_oid) + 3 -
          1);
 
 
@@ -694,7 +694,7 @@ write_mteTriggerExistenceEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerExistenceTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerExistenceTable_variables_oid) + 3 -
          1);
 
 

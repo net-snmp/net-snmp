@@ -1991,13 +1991,13 @@ main()
     pdu1.priority = 5;
     pdu1.range_subid = 0;
 
-    snmp_pdu_add_variable(&pdu1, oid_buf, sizeof(oid_buf) / sizeof(oid),
+    snmp_pdu_add_variable(&pdu1, oid_buf, OID_LENGTH(oid_buf),
                           ASN_OBJECT_ID, (char *) oid_buf2,
                           sizeof(oid_buf2));
-    snmp_pdu_add_variable(&pdu1, oid_buf, sizeof(oid_buf) / sizeof(oid),
+    snmp_pdu_add_variable(&pdu1, oid_buf, OID_LENGTH(oid_buf),
                           ASN_INTEGER, (char *) &pdu1.reqid,
                           sizeof(pdu1.reqid));
-    snmp_pdu_add_variable(&pdu1, oid_buf, sizeof(oid_buf) / sizeof(oid),
+    snmp_pdu_add_variable(&pdu1, oid_buf, OID_LENGTH(oid_buf),
                           ASN_OCTET_STR, (char *) string, strlen(string));
 
     printf("Test with non-network order.....\n");

@@ -267,7 +267,7 @@ void
 netsnmp_std_ctor(void)
 {
     stdDomain.name = netsnmp_snmpSTDDomain;
-    stdDomain.name_length = sizeof(netsnmp_snmpSTDDomain) / sizeof(oid);
+    stdDomain.name_length = OID_LENGTH(netsnmp_snmpSTDDomain);
     stdDomain.prefix = (const char **)calloc(2, sizeof(char *));
     stdDomain.prefix[0] = "std";
 

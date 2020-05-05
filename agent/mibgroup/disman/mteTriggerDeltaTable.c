@@ -188,7 +188,7 @@ write_mteTriggerDeltaDiscontinuityID(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerDeltaTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(mteTriggerDeltaTable_variables_oid) + 3 - 1);
 
 
     DEBUGMSGTL(("mteTriggerDeltaTable",
@@ -278,7 +278,7 @@ write_mteTriggerDeltaDiscontinuityIDWildcard(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerDeltaTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(mteTriggerDeltaTable_variables_oid) + 3 - 1);
 
 
     DEBUGMSGTL(("mteTriggerDeltaTable",
@@ -363,7 +363,7 @@ write_mteTriggerDeltaDiscontinuityIDType(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerDeltaTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(mteTriggerDeltaTable_variables_oid) + 3 - 1);
 
 
     DEBUGMSGTL(("mteTriggerDeltaTable",

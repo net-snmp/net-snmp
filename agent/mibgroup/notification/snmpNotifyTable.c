@@ -317,7 +317,7 @@ static struct snmpNotifyTable_data *StorageNew;
 #ifndef NETSNMP_NO_WRITE_SUPPORT 
 
 static const int snmpNotifyTable_offset =
-    sizeof(snmpNotifyTable_variables_oid) / sizeof(oid) + 3 - 1;
+    OID_LENGTH(snmpNotifyTable_variables_oid) + 3 - 1;
 
 int
 write_snmpNotifyTag(int action,
@@ -585,7 +585,7 @@ write_snmpNotifyRowStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [sizeof(snmpNotifyTable_variables_oid) / sizeof(oid) +
+                  [OID_LENGTH(snmpNotifyTable_variables_oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 /*
                  * XXX: free, zero vars 

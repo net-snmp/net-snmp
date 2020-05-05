@@ -91,7 +91,7 @@ init_register_usmUser_context(const char *contextName) {
                          sizeof(struct variable4),
                          sizeof(usmUser_variables)/sizeof(struct variable4),
                          usmUser_variables_oid,
-                         sizeof(usmUser_variables_oid)/sizeof(oid),
+                         OID_LENGTH(usmUser_variables_oid),
                          DEFAULT_MIB_PRIORITY, 0, 0, NULL,
                          contextName, -1, 0);
 }
@@ -703,7 +703,7 @@ write_usmUserAuthProtocol(int action,
             if (snmp_oid_compare
                 ((oid *) var_val, var_val_len / sizeof(oid),
                  usmNoAuthProtocol,
-                 sizeof(usmNoAuthProtocol) / sizeof(oid)) == 0) {
+                 OID_LENGTH(usmNoAuthProtocol)) == 0) {
                 /*
                  * ... and then only if the privProtocol is equal to
                  * usmNoPrivProtocol.  
@@ -711,7 +711,7 @@ write_usmUserAuthProtocol(int action,
                 if (snmp_oid_compare
                     (uptr->privProtocol, uptr->privProtocolLen,
                      usmNoPrivProtocol,
-                     sizeof(usmNoPrivProtocol) / sizeof(oid)) != 0) {
+                     OID_LENGTH(usmNoPrivProtocol)) != 0) {
                     return SNMP_ERR_INCONSISTENTVALUE;
                 }
                 optr = uptr->authProtocol;
@@ -747,7 +747,7 @@ write_usmUserAuthProtocol(int action,
             if (snmp_oid_compare
                 ((oid *) var_val, var_val_len / sizeof(oid),
                  usmNoAuthProtocol,
-                 sizeof(usmNoAuthProtocol) / sizeof(oid)) == 0
+                 OID_LENGTH(usmNoAuthProtocol)) == 0
 #ifndef NETSNMP_DISABLE_MD5
                 || snmp_oid_compare((oid *) var_val,
                                     var_val_len / sizeof(oid),
@@ -871,7 +871,7 @@ write_usmUserAuthKeyChange(int action,
                 if (snmp_oid_compare
                     (uptr->authProtocol, uptr->authProtocolLen,
                      usmHMACSHA1AuthProtocol,
-                     sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid)) == 0) {
+                     OID_LENGTH(usmHMACSHA1AuthProtocol)) == 0) {
                 if (var_val_len != 0 && var_val_len != 40) {
                     return SNMP_ERR_WRONGLENGTH;
                 }
@@ -886,7 +886,7 @@ write_usmUserAuthKeyChange(int action,
         }
         if (snmp_oid_compare(uptr->authProtocol, uptr->authProtocolLen,
                              usmNoAuthProtocol,
-                             sizeof(usmNoAuthProtocol) / sizeof(oid)) ==
+                             OID_LENGTH(usmNoAuthProtocol)) ==
             0) {
             /*
              * "When the value of the corresponding usmUserAuthProtocol is
@@ -975,7 +975,7 @@ write_usmUserPrivProtocol(int action,
             if (snmp_oid_compare
                 ((oid *) var_val, var_val_len / sizeof(oid),
                  usmNoPrivProtocol,
-                 sizeof(usmNoPrivProtocol) / sizeof(oid)) == 0) {
+                 OID_LENGTH(usmNoPrivProtocol)) == 0) {
                 resetOnFail = 1;
                 optr = uptr->privProtocol;
                 olen = uptr->privProtocolLen;
@@ -1016,7 +1016,7 @@ write_usmUserPrivProtocol(int action,
                 if (snmp_oid_compare
                     ((oid *) var_val, var_val_len / sizeof(oid),
                      usmNoPrivProtocol,
-                     sizeof(usmNoPrivProtocol) / sizeof(oid)) != 0) {
+                     OID_LENGTH(usmNoPrivProtocol)) != 0) {
                     DEBUGMSGTL(("usmUser", "inconsistent value error\n"));
                     return SNMP_ERR_INCONSISTENTVALUE;
                 }
@@ -1024,17 +1024,17 @@ write_usmUserPrivProtocol(int action,
                 if (snmp_oid_compare
                     ((oid *) var_val, var_val_len / sizeof(oid),
                      usmNoPrivProtocol,
-                     sizeof(usmNoPrivProtocol) / sizeof(oid)) != 0
+                     OID_LENGTH(usmNoPrivProtocol)) != 0
 #ifndef NETSNMP_DISABLE_DES
                  && snmp_oid_compare
                     ((oid *) var_val, var_val_len / sizeof(oid),
                      usmDESPrivProtocol,
-                     sizeof(usmDESPrivProtocol) / sizeof(oid)) != 0
+                     OID_LENGTH(usmDESPrivProtocol)) != 0
 #endif
                  && snmp_oid_compare
                     ((oid *) var_val, var_val_len / sizeof(oid),
                      usmAESPrivProtocol,
-                     sizeof(usmAESPrivProtocol) / sizeof(oid)) != 0) {
+                     OID_LENGTH(usmAESPrivProtocol)) != 0) {
                     DEBUGMSGTL(("usmUser", "wrong value error\n"));
                     return SNMP_ERR_WRONGVALUE;
                 }
@@ -1148,7 +1148,7 @@ write_usmUserPrivKeyChange(int action,
         DEBUGMSGTL(("usmUser", "plen %d\n", plen));
         if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
                              usmNoPrivProtocol,
-                             sizeof(usmNoPrivProtocol) / sizeof(oid)) ==
+                             OID_LENGTH(usmNoPrivProtocol)) ==
             0) {
             /*
              * "When the value of the corresponding usmUserPrivProtocol is
@@ -1330,7 +1330,7 @@ write_usmUserStorageType(int action,
                        (snmp_oid_compare
                         (uptr->privProtocol, uptr->privProtocolLen,
                          usmNoPrivProtocol,
-                         sizeof(usmNoPrivProtocol) / sizeof(oid)) != 0
+                         OID_LENGTH(usmNoPrivProtocol)) != 0
                         || snmp_oid_compare(uptr->authProtocol,
                                             uptr->authProtocolLen,
                                             usmNoAuthProtocol,

@@ -513,7 +513,7 @@ write_expExpression(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(expExpressionTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(expExpressionTable_variables_oid) + 3 - 1);
 
 
     DEBUGMSGTL(("expExpressionTable",
@@ -605,7 +605,7 @@ write_expExpressionValueType(int action,
     struct expExpressionTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(expExpressionTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(expExpressionTable_variables_oid) + 3 - 1);
 
 
     DEBUGMSGTL(("expExpressionTable",
@@ -690,7 +690,7 @@ write_expExpressionComment(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(expExpressionTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(expExpressionTable_variables_oid) + 3 - 1);
 
 
     DEBUGMSGTL(("expExpressionTable",
@@ -779,7 +779,7 @@ write_expExpressionDeltaInterval(int action,
     struct expExpressionTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(expExpressionTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(expExpressionTable_variables_oid) + 3 - 1);
 
 
     DEBUGMSGTL(("expExpressionTable",
@@ -863,7 +863,7 @@ write_expExpressionEntryStatus(int action,
     static struct expExpressionTable_data *StorageNew, *StorageDel;
     size_t          newlen =
         name_len -
-        (sizeof(expExpressionTable_variables_oid) / sizeof(oid) + 3 - 1);
+        (OID_LENGTH(expExpressionTable_variables_oid) + 3 - 1);
     static int      old_value;
     int             set_value;
     static netsnmp_variable_list *vars, *vp;
@@ -972,7 +972,7 @@ write_expExpressionEntryStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [sizeof(expExpressionTable_variables_oid) / sizeof(oid) +
+                  [OID_LENGTH(expExpressionTable_variables_oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 /*
                  * XXX: free, zero vars 

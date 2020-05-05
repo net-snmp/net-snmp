@@ -2180,7 +2180,7 @@ ifXTable_row_find_by_mib_index(ifXTable_mib_index * mib_idx)
      * set up storage for OID
      */
     oid_idx.oids = oid_tmp;
-    oid_idx.len = sizeof(oid_tmp) / sizeof(oid);
+    oid_idx.len = OID_LENGTH(oid_tmp);
 
     /*
      * convert

@@ -342,7 +342,7 @@ void
 netsnmp_tcp_ctor(void)
 {
     tcpDomain.name = netsnmp_snmpTCPDomain;
-    tcpDomain.name_length = sizeof(netsnmp_snmpTCPDomain) / sizeof(oid);
+    tcpDomain.name_length = OID_LENGTH(netsnmp_snmpTCPDomain);
     tcpDomain.prefix = (const char **)calloc(2, sizeof(char *));
     tcpDomain.prefix[0] = "tcp";
 

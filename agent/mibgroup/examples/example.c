@@ -704,7 +704,7 @@ write_exampletrap2(int action,
 
         var_trap.next_variable = &var_obj;      /* next variable */
         var_trap.name = objid_snmptrap; /* snmpTrapOID.0 */
-        var_trap.name_length = sizeof(objid_snmptrap) / sizeof(oid);    /* number of sub-ids */
+        var_trap.name_length = OID_LENGTH(objid_snmptrap);    /* number of sub-ids */
         var_trap.type = ASN_OBJECT_ID;
         var_trap.val.objid = demo_trap; /* demo-trap objid */
         var_trap.val_len = sizeof(demo_trap);   /* length in bytes (not number of subids!) */
@@ -717,7 +717,7 @@ write_exampletrap2(int action,
 
         var_obj.next_variable = NULL;   /* No more variables after this one */
         var_obj.name = example_string_oid;
-        var_obj.name_length = sizeof(example_string_oid) / sizeof(oid); /* number of sub-ids */
+        var_obj.name_length = OID_LENGTH(example_string_oid); /* number of sub-ids */
         var_obj.type = ASN_OCTET_STR;   /* type of variable */
         var_obj.val.string = (u_char *)example_str;       /* value */
         var_obj.val_len = strlen(example_str);

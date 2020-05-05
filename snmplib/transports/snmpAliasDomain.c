@@ -97,7 +97,7 @@ void
 netsnmp_alias_ctor(void)
 {
     aliasDomain.name = netsnmp_snmpALIASDomain;
-    aliasDomain.name_length = sizeof(netsnmp_snmpALIASDomain) / sizeof(oid);
+    aliasDomain.name_length = OID_LENGTH(netsnmp_snmpALIASDomain);
     aliasDomain.prefix = (const char **)calloc(2, sizeof(char *));
     aliasDomain.prefix[0] = "alias";
 

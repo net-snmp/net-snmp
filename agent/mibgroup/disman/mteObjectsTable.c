@@ -389,7 +389,7 @@ write_mteObjectsID(int action,
     struct mteObjectsTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (sizeof(mteObjectsTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteObjectsTable_variables_oid) +
                     3 - 1);
 
 
@@ -478,7 +478,7 @@ write_mteObjectsIDWildcard(int action,
     static int      tmpvar;
     struct mteObjectsTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(mteObjectsTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteObjectsTable_variables_oid) +
                     3 - 1);
 
 
@@ -567,7 +567,7 @@ write_mteObjectsEntryStatus(int action,
     struct mteObjectsTable_data *StorageTmp = NULL;
     static struct mteObjectsTable_data *StorageNew, *StorageDel;
     size_t          newlen =
-        name_len - (sizeof(mteObjectsTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(mteObjectsTable_variables_oid) +
                     3 - 1);
     static int      old_value;
     int             set_value;
@@ -670,7 +670,7 @@ write_mteObjectsEntryStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [sizeof(mteObjectsTable_variables_oid) / sizeof(oid) +
+                  [OID_LENGTH(mteObjectsTable_variables_oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 /*
                  * XXX: free, zero vars 

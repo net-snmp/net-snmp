@@ -351,7 +351,7 @@ write_mteTriggerThresholdStartup(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -437,7 +437,7 @@ write_mteTriggerThresholdRising(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -523,7 +523,7 @@ write_mteTriggerThresholdFalling(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -609,7 +609,7 @@ write_mteTriggerThresholdDeltaRising(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -695,7 +695,7 @@ write_mteTriggerThresholdDeltaFalling(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -782,7 +782,7 @@ write_mteTriggerThresholdObjectsOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -874,7 +874,7 @@ write_mteTriggerThresholdObjects(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -966,7 +966,7 @@ write_mteTriggerThresholdRisingEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -1058,7 +1058,7 @@ write_mteTriggerThresholdRisingEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -1150,7 +1150,7 @@ write_mteTriggerThresholdFallingEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -1242,7 +1242,7 @@ write_mteTriggerThresholdFallingEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -1334,7 +1334,7 @@ write_mteTriggerThresholdDeltaRisingEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -1427,7 +1427,7 @@ write_mteTriggerThresholdDeltaRisingEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -1520,7 +1520,7 @@ write_mteTriggerThresholdDeltaFallingEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 
@@ -1613,7 +1613,7 @@ write_mteTriggerThresholdDeltaFallingEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
+        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
          1);
 
 

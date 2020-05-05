@@ -51,7 +51,7 @@ netsnmp_feature_require(header_complex_find_entry);
 oid             snmpNotifyFilterProfileTable_variables_oid[] =
     { 1, 3, 6, 1, 6, 3, 13, 1, 2 };
 static const size_t table_offset =
-    sizeof(snmpNotifyFilterProfileTable_variables_oid)/sizeof(oid) + 3 - 1;
+    OID_LENGTH(snmpNotifyFilterProfileTable_variables_oid) + 3 - 1;
 
 
 /*

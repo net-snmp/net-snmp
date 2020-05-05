@@ -3636,7 +3636,7 @@ build_oid_segment(netsnmp_variable_list * var)
         
     case ASN_PRIV_IMPLIED_OBJECT_ID:
         var->name_length = var->val_len / sizeof(oid);
-        if (var->name_length > (sizeof(var->name_loc) / sizeof(oid)))
+        if (var->name_length > (OID_LENGTH(var->name_loc)))
             var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
         else
             var->name = var->name_loc;
@@ -3649,7 +3649,7 @@ build_oid_segment(netsnmp_variable_list * var)
 
     case ASN_OBJECT_ID:
         var->name_length = var->val_len / sizeof(oid) + 1;
-        if (var->name_length > (sizeof(var->name_loc) / sizeof(oid)))
+        if (var->name_length > (OID_LENGTH(var->name_loc)))
             var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
         else
             var->name = var->name_loc;
@@ -3663,7 +3663,7 @@ build_oid_segment(netsnmp_variable_list * var)
 
     case ASN_PRIV_IMPLIED_OCTET_STR:
         var->name_length = var->val_len;
-        if (var->name_length > (sizeof(var->name_loc) / sizeof(oid)))
+        if (var->name_length > (OID_LENGTH(var->name_loc)))
             var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
         else
             var->name = var->name_loc;
@@ -3677,7 +3677,7 @@ build_oid_segment(netsnmp_variable_list * var)
     case ASN_OPAQUE:
     case ASN_OCTET_STR:
         var->name_length = var->val_len + 1;
-        if (var->name_length > (sizeof(var->name_loc) / sizeof(oid)))
+        if (var->name_length > (OID_LENGTH(var->name_loc)))
             var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
         else
             var->name = var->name_loc;

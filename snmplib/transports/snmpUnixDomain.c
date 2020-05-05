@@ -518,7 +518,7 @@ void
 netsnmp_unix_ctor(void)
 {
     unixDomain.name = netsnmp_UnixDomain;
-    unixDomain.name_length = sizeof(netsnmp_UnixDomain) / sizeof(oid);
+    unixDomain.name_length = OID_LENGTH(netsnmp_UnixDomain);
     unixDomain.prefix = (const char**)calloc(2, sizeof(char *));
     unixDomain.prefix[0] = "unix";
 

@@ -1193,7 +1193,7 @@ send_ping_trap(struct pingCtlTable_data *item,
      * snmpTrap oid 
      */
     snmp_varlist_add_variable(&var_list, objid_snmptrap,
-                              sizeof(objid_snmptrap) / sizeof(oid),
+                              OID_LENGTH(objid_snmptrap),
                               ASN_OBJECT_ID, (u_char *) trap_oid,
                               trap_oid_len * sizeof(oid));
     /*
@@ -1201,7 +1201,7 @@ send_ping_trap(struct pingCtlTable_data *item,
      */
     memset(newoid, '\0', MAX_OID_LEN * sizeof(oid));
     header_complex_generate_oid(newoid, &newoid_len, pingCtlTargetAddress,
-                                sizeof(pingCtlTargetAddress) / sizeof(oid),
+                                OID_LENGTH(pingCtlTargetAddress),
                                 vars);
 
     snmp_varlist_add_variable(&var_list, newoid,
@@ -1215,7 +1215,7 @@ send_ping_trap(struct pingCtlTable_data *item,
      */
     memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsMinRtt,
-                                sizeof(pingResultsMinRtt) / sizeof(oid),
+                                OID_LENGTH(pingResultsMinRtt),
                                 vars);
 
     snmp_varlist_add_variable(&var_list, newoid,
@@ -1228,7 +1228,7 @@ send_ping_trap(struct pingCtlTable_data *item,
      */
     memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsMaxRtt,
-                                sizeof(pingResultsMaxRtt) / sizeof(oid),
+                                OID_LENGTH(pingResultsMaxRtt),
                                 vars);
 
     snmp_varlist_add_variable(&var_list, newoid,
@@ -1637,7 +1637,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             0) {
             if (probeFailed >= item->pingCtlTrapProbeFailureFilter)
                 send_ping_trap(item, pingProbeFailed,
-                               sizeof(pingProbeFailed) / sizeof(oid));
+                               OID_LENGTH(pingProbeFailed));
         }
 
 
@@ -1648,7 +1648,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
              pingCtlTrapGeneration[0] & PINGTRAPGENERATION_TESTCOMPLETED)
             != 0) {
             send_ping_trap(item, pingTestCompleted,
-                           sizeof(pingTestCompleted) / sizeof(oid));
+                           OID_LENGTH(pingTestCompleted));
         } else
             if ((item->
                  pingCtlTrapGeneration[0] & PINGTRAPGENERATION_TESTFAILED)
@@ -1656,7 +1656,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
 
             if (testFailed >= item->pingCtlTrapTestFailureFilter)
                 send_ping_trap(item, pingTestFailed,
-                               sizeof(pingTestFailed) / sizeof(oid));
+                               OID_LENGTH(pingTestFailed));
         }
 
         else if ((item->
@@ -2259,7 +2259,7 @@ write_pingCtlTargetAddressType(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -2348,7 +2348,7 @@ write_pingCtlTargetAddress(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -2445,7 +2445,7 @@ write_pingCtlDataSize(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -2536,7 +2536,7 @@ write_pingCtlTimeOut(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -2628,7 +2628,7 @@ write_pingCtlProbeCount(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -2719,7 +2719,7 @@ write_pingCtlAdminStatus(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -2824,7 +2824,7 @@ write_pingCtlDataFill(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -2918,7 +2918,7 @@ write_pingCtlFrequency(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -3004,7 +3004,7 @@ write_pingCtlMaxRows(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -3092,7 +3092,7 @@ write_pingCtlStorageType(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -3181,7 +3181,7 @@ write_pingCtlTrapGeneration(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -3277,7 +3277,7 @@ write_pingCtlTrapProbeFailureFilter(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -3370,7 +3370,7 @@ write_pingCtlTrapTestFailureFilter(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -3465,7 +3465,7 @@ write_pingCtlType(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -3562,7 +3562,7 @@ write_pingCtlDescr(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -3656,7 +3656,7 @@ write_pingCtlSourceAddressType(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -3746,7 +3746,7 @@ write_pingCtlSourceAddress(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -3843,7 +3843,7 @@ write_pingCtlIfIndex(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -3930,7 +3930,7 @@ write_pingCtlByPassRouteTable(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -4020,7 +4020,7 @@ write_pingCtlDSField(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
 
 
@@ -4106,7 +4106,7 @@ write_pingCtlRowStatus(int action,
     struct pingCtlTable_data *StorageTmp;
     static struct pingCtlTable_data *StorageNew, *StorageDel;
     size_t          newlen =
-        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
                     3 - 1);
     static int      old_value;
     int             set_value;
@@ -4227,7 +4227,7 @@ write_pingCtlRowStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
+                  [OID_LENGTH(pingCtlTable_variables_oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 snmp_free_varbind(vars);
                 return SNMP_ERR_INCONSISTENTNAME;
@@ -5174,7 +5174,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
              pingCtlTrapGeneration[0] & PINGTRAPGENERATION_TESTCOMPLETED)
             != 0) {
             send_ping_trap(item, pingTestCompleted,
-                           sizeof(pingTestCompleted) / sizeof(oid));
+                           OID_LENGTH(pingTestCompleted));
         } else
             if ((item->
                  pingCtlTrapGeneration[0] & PINGTRAPGENERATION_TESTFAILED)
@@ -5182,7 +5182,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
 
             if (testFailed >= item->pingCtlTrapTestFailureFilter)
                 send_ping_trap(item, pingTestFailed,
-                               sizeof(pingTestFailed) / sizeof(oid));
+                               OID_LENGTH(pingTestFailed));
         }
 
         else if ((item->

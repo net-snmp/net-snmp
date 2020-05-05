@@ -141,7 +141,7 @@ oid             ipaddr_variables_oid[]  = { SNMP_OID_MIB2, 4, 20, 1 };
 oid             iproute_variables_oid[] = { SNMP_OID_MIB2, 4, 21, 1 };
 oid             ipmedia_variables_oid[] = { SNMP_OID_MIB2, 4, 22, 1 };
 oid             ip_module_oid[] = { SNMP_OID_MIB2, 4 };
-int             ip_module_oid_len = sizeof(ip_module_oid) / sizeof(oid);
+int             ip_module_oid_len = OID_LENGTH(ip_module_oid);
 int             ip_module_count = 0;    /* Need to liaise with icmp.c */
 
 void

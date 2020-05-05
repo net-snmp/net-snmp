@@ -253,7 +253,7 @@ main(int argc, char *argv[])
             memcpy(pdu->enterprise, objid_enterprise,
                    sizeof(objid_enterprise));
             pdu->enterprise_length =
-                sizeof(objid_enterprise) / sizeof(oid);
+                OID_LENGTH(objid_enterprise);
         } else {
             name_length = MAX_OID_LEN;
             if (!snmp_parse_oid(argv[arg], name, &name_length)) {
@@ -327,14 +327,14 @@ main(int argc, char *argv[])
             trap = csysuptime;
         }
         snmp_add_var(pdu, objid_sysuptime,
-                     sizeof(objid_sysuptime) / sizeof(oid), 't', trap);
+                     OID_LENGTH(objid_sysuptime), 't', trap);
         if (++arg == argc) {
             fprintf(stderr, "Missing trap-oid parameter\n");
             usage();
             goto out;
         }
         if (snmp_add_var
-            (pdu, objid_snmptrap, sizeof(objid_snmptrap) / sizeof(oid),
+            (pdu, objid_snmptrap, OID_LENGTH(objid_snmptrap),
              'o', argv[arg]) != 0) {
             snmp_perror(argv[arg]);
             goto out;

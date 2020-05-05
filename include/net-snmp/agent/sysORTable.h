@@ -35,7 +35,7 @@ struct register_sysOR_parameters {
   } while(0);
 
 #define REGISTER_SYSOR_ENTRY(theoid, descr)                     \
-  REGISTER_SYSOR_TABLE(theoid, sizeof(theoid) / sizeof(oid),    \
+  REGISTER_SYSOR_TABLE(theoid, OID_LENGTH(theoid),    \
                        descr)
 
 #define UNREGISTER_SYSOR_TABLE(theoid, len)                     \
@@ -51,7 +51,7 @@ struct register_sysOR_parameters {
   } while(0);
 
 #define UNREGISTER_SYSOR_ENTRY(theoid)                          \
-  UNREGISTER_SYSOR_TABLE(theoid, sizeof(theoid) / sizeof(oid))
+  UNREGISTER_SYSOR_TABLE(theoid, OID_LENGTH(theoid))
 
 #define UNREGISTER_SYSOR_SESS(sess)                             \
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,                \

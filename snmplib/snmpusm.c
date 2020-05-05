@@ -1207,7 +1207,7 @@ usm_check_secLevel_vs_protocols(int level,
         &&
         (netsnmp_oid_equals
          (privProtocol, privProtocolLen, usmNoPrivProtocol,
-          sizeof(usmNoPrivProtocol) / sizeof(oid)) == 0)) {
+          OID_LENGTH(usmNoPrivProtocol)) == 0)) {
         DEBUGMSGTL(("usm", "Level: %d\n", level));
         DEBUGMSGTL(("usm", "Auth Protocol: "));
         DEBUGMSGOID(("usm", authProtocol, authProtocolLen));
@@ -1221,7 +1221,7 @@ usm_check_secLevel_vs_protocols(int level,
         &&
         (netsnmp_oid_equals
          (authProtocol, authProtocolLen, usmNoAuthProtocol,
-          sizeof(usmNoAuthProtocol) / sizeof(oid)) == 0)) {
+          OID_LENGTH(usmNoAuthProtocol)) == 0)) {
         DEBUGMSGTL(("usm", "Level: %d\n", level));
         DEBUGMSGTL(("usm", "Auth Protocol: "));
         DEBUGMSGOID(("usm", authProtocol, authProtocolLen));
@@ -1419,12 +1419,12 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
              */
             theAuthProtocol = usmNoAuthProtocol;
             theAuthProtocolLength =
-                sizeof(usmNoAuthProtocol) / sizeof(oid);
+                OID_LENGTH(usmNoAuthProtocol);
             theAuthKey = NULL;
             theAuthKeyLength = 0;
             thePrivProtocol = usmNoPrivProtocol;
             thePrivProtocolLength =
-                sizeof(usmNoPrivProtocol) / sizeof(oid);
+                OID_LENGTH(usmNoPrivProtocol);
             thePrivKey = NULL;
             thePrivKeyLength = 0;
         }
@@ -1915,12 +1915,12 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
              */
             theAuthProtocol = usmNoAuthProtocol;
             theAuthProtocolLength =
-                sizeof(usmNoAuthProtocol) / sizeof(oid);
+                OID_LENGTH(usmNoAuthProtocol);
             theAuthKey = NULL;
             theAuthKeyLength = 0;
             thePrivProtocol = usmNoPrivProtocol;
             thePrivProtocolLength =
-                sizeof(usmNoPrivProtocol) / sizeof(oid);
+                OID_LENGTH(usmNoPrivProtocol);
             thePrivKey = NULL;
             thePrivKeyLength = 0;
         }
@@ -2714,12 +2714,12 @@ usm_check_secLevel(int level, struct usmUser *user)
     DEBUGMSGTL(("comparex", "Comparing: %" NETSNMP_PRIo "u %" NETSNMP_PRIo "u ",
                 usmNoPrivProtocol[0], usmNoPrivProtocol[1]));
     DEBUGMSGOID(("comparex", usmNoPrivProtocol,
-                 sizeof(usmNoPrivProtocol) / sizeof(oid)));
+                 OID_LENGTH(usmNoPrivProtocol)));
     DEBUGMSG(("comparex", "\n"));
     if (level == SNMP_SEC_LEVEL_AUTHPRIV
         && (netsnmp_oid_equals(user->privProtocol, user->privProtocolLen,
                              usmNoPrivProtocol,
-                             sizeof(usmNoPrivProtocol) / sizeof(oid)) ==
+                             OID_LENGTH(usmNoPrivProtocol)) ==
             0)) {
         DEBUGMSGTL(("usm", "Level: %d\n", level));
         DEBUGMSGTL(("usm", "User (%s) Auth Protocol: ", user->name));
@@ -2734,7 +2734,7 @@ usm_check_secLevel(int level, struct usmUser *user)
         &&
         (netsnmp_oid_equals
          (user->authProtocol, user->authProtocolLen, usmNoAuthProtocol,
-          sizeof(usmNoAuthProtocol) / sizeof(oid)) == 0)) {
+          OID_LENGTH(usmNoAuthProtocol)) == 0)) {
         DEBUGMSGTL(("usm", "Level: %d\n", level));
         DEBUGMSGTL(("usm", "User (%s) Auth Protocol: ", user->name));
         DEBUGMSGOID(("usm", user->authProtocol, user->authProtocolLen));
@@ -3646,10 +3646,10 @@ usm_build_probe_pdu(netsnmp_pdu **pdu)
         }
         user->name = strdup((*pdu)->securityName);
         user->secName = strdup((*pdu)->securityName);
-        user->authProtocolLen = sizeof(usmNoAuthProtocol) / sizeof(oid);
+        user->authProtocolLen = OID_LENGTH(usmNoAuthProtocol);
         user->authProtocol =
             snmp_duplicate_objid(usmNoAuthProtocol, user->authProtocolLen);
-        user->privProtocolLen = sizeof(usmNoPrivProtocol) / sizeof(oid);
+        user->privProtocolLen = OID_LENGTH(usmNoPrivProtocol);
         user->privProtocol =
             snmp_duplicate_objid(usmNoPrivProtocol, user->privProtocolLen);
         usm_add_user(user);
@@ -3906,17 +3906,17 @@ usm_create_user(void)
      */
     if ((newUser->authProtocol =
          snmp_duplicate_objid(usmNoAuthProtocol,
-                              sizeof(usmNoAuthProtocol) / sizeof(oid))) ==
+                              OID_LENGTH(usmNoAuthProtocol))) ==
         NULL)
         return usm_free_user(newUser);
-    newUser->authProtocolLen = sizeof(usmNoAuthProtocol) / sizeof(oid);
+    newUser->authProtocolLen = OID_LENGTH(usmNoAuthProtocol);
 
     if ((newUser->privProtocol =
          snmp_duplicate_objid(usmNoPrivProtocol,
-                              sizeof(usmNoPrivProtocol) / sizeof(oid))) ==
+                              OID_LENGTH(usmNoPrivProtocol))) ==
         NULL)
         return usm_free_user(newUser);
-    newUser->privProtocolLen = sizeof(usmNoPrivProtocol) / sizeof(oid);
+    newUser->privProtocolLen = OID_LENGTH(usmNoPrivProtocol);
 
     /*
      * set the storage type to nonvolatile, and the status to ACTIVE 

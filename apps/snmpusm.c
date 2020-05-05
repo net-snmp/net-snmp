@@ -513,13 +513,13 @@ main(int argc, char *argv[])
              */
 #ifndef NETSNMP_DISABLE_MD5
             session.securityAuthProtoLen =
-                sizeof(usmHMACMD5AuthProtocol) / sizeof(oid);
+                OID_LENGTH(usmHMACMD5AuthProtocol);
             session.securityAuthProto =
                 snmp_duplicate_objid(usmHMACMD5AuthProtocol,
                                      session.securityAuthProtoLen);
 #else
             session.securityAuthProtoLen =
-                sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid);
+                OID_LENGTH(usmHMACSHA1AuthProtocol);
             session.securityAuthProto =
                 snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
                                      session.securityAuthProtoLen);

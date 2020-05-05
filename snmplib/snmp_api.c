@@ -2930,7 +2930,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                 return -1;
             }
             pdu->enterprise_length =
-                sizeof(DEFAULT_ENTERPRISE) / sizeof(oid);
+                OID_LENGTH(DEFAULT_ENTERPRISE);
         }
         if (pdu->time == SNMP_DEFAULT_TIME)
             pdu->time = DEFAULT_TIME;

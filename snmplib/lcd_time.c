@@ -500,17 +500,17 @@ hash_engineID(const u_char * engineID, u_int engineID_len)
      */
 #ifndef NETSNMP_DISABLE_MD5
     rval = sc_hash(usmHMACMD5AuthProtocol,
-                   sizeof(usmHMACMD5AuthProtocol) / sizeof(oid),
+                   OID_LENGTH(usmHMACMD5AuthProtocol),
                    engineID, engineID_len, buf, &buf_len);
     if (rval == SNMPERR_SC_NOT_CONFIGURED) {
         /* fall back to sha1 */
         rval = sc_hash(usmHMACSHA1AuthProtocol,
-                   sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid),
+                   OID_LENGTH(usmHMACSHA1AuthProtocol),
                    engineID, engineID_len, buf, &buf_len);
     }
 #else
     rval = sc_hash(usmHMACSHA1AuthProtocol,
-                   sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid),
+                   OID_LENGTH(usmHMACSHA1AuthProtocol),
                    engineID, engineID_len, buf, &buf_len);
 #endif
     QUITFUN(rval, hash_engineID_quit);
