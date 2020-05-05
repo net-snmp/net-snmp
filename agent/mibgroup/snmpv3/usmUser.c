@@ -97,52 +97,6 @@ init_register_usmUser_context(const char *contextName) {
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INIT_REGISTER_USMUSER_CONTEXT */
 
-/*******************************************************************-o-******
- * usm_generate_OID
- *
- * Parameters:
- *	*prefix		(I) OID prefix to the usmUser table entry.
- *	 prefixLen	(I)
- *	*uptr		(I) Pointer to a user in the user list.
- *	*length		(O) Length of generated index OID.
- *      
- * Returns:
- *	Pointer to the OID index for the user (uptr)  -OR-
- *	NULL on failure.
- *
- *
- * Generate the index OID for a given usmUser name.  'length' is set to
- * the length of the index OID.
- *
- * Index OID format is:
- *
- *    <...prefix>.<engineID_length>.<engineID>.<user_name_length>.<user_name>
- */
-oid            *
-usm_generate_OID(oid * prefix, size_t prefixLen, struct usmUser *uptr,
-                 size_t * length)
-{
-    oid            *indexOid;
-    int             i;
-
-    *length = 2 + uptr->engineIDLen + strlen(uptr->name) + prefixLen;
-    indexOid = (oid *) malloc(*length * sizeof(oid));
-    if (indexOid) {
-        memmove(indexOid, prefix, prefixLen * sizeof(oid));
-
-        indexOid[prefixLen] = uptr->engineIDLen;
-        for (i = 0; i < (int) uptr->engineIDLen; i++)
-            indexOid[prefixLen + 1 + i] = (oid) uptr->engineID[i];
-
-        indexOid[prefixLen + uptr->engineIDLen + 1] = strlen(uptr->name);
-        for (i = 0; i < (int) strlen(uptr->name); i++)
-            indexOid[prefixLen + uptr->engineIDLen + 2 + i] =
-                (oid) uptr->name[i];
-    }
-    return indexOid;
-
-}                               /* end usm_generate_OID() */
-
 /*
  * usm_parse_oid(): parses an index to the usmTable to break it down into
  * a engineID component and a name component.  The results are stored in:

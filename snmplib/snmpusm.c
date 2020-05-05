@@ -781,6 +781,52 @@ usm_free_user(struct usmUser *user)
 }                               /* end usm_free_user() */
 
 /*******************************************************************-o-******
+ * usm_generate_OID
+ *
+ * Parameters:
+ *	*prefix		(I) OID prefix to the usmUser table entry.
+ *	 prefixLen	(I)
+ *	*uptr		(I) Pointer to a user in the user list.
+ *	*length		(O) Length of generated index OID.
+ *      
+ * Returns:
+ *	Pointer to the OID index for the user (uptr)  -OR-
+ *	NULL on failure.
+ *
+ *
+ * Generate the index OID for a given usmUser name.  'length' is set to
+ * the length of the index OID.
+ *
+ * Index OID format is:
+ *
+ *    <...prefix>.<engineID_length>.<engineID>.<user_name_length>.<user_name>
+ */
+oid            *
+usm_generate_OID(const oid *prefix, size_t prefixLen,
+                 const struct usmUser *uptr, size_t *length)
+{
+    oid            *indexOid;
+    int             i;
+
+    *length = 2 + uptr->engineIDLen + strlen(uptr->name) + prefixLen;
+    indexOid = malloc(*length * sizeof(oid));
+    if (!indexOid)
+        return indexOid;
+
+    memmove(indexOid, prefix, prefixLen * sizeof(oid));
+
+    indexOid[prefixLen] = uptr->engineIDLen;
+    for (i = 0; i < uptr->engineIDLen; i++)
+        indexOid[prefixLen + 1 + i] = (oid) uptr->engineID[i];
+
+    indexOid[prefixLen + uptr->engineIDLen + 1] = strlen(uptr->name);
+    for (i = 0; i < strlen(uptr->name); i++)
+        indexOid[prefixLen + uptr->engineIDLen + 2 + i] = (oid) uptr->name[i];
+
+    return indexOid;
+}                               /* end usm_generate_OID() */
+
+/*******************************************************************-o-******
  * asn_predict_int_length
  *
  * Parameters:

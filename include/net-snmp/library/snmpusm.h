@@ -118,6 +118,9 @@ extern          "C" {
     NETSNMP_IMPORT
     void            usm_set_user_password(struct usmUser *user,
                                           const char *token, char *line);
+    NETSNMP_IMPORT
+    oid            *usm_generate_OID(const oid *prefix, size_t prefixLen,
+                                   const struct usmUser *uptr, size_t *length);
     void            init_usm(void);
     NETSNMP_IMPORT
     void            init_usm_conf(const char *app);
