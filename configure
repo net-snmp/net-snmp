@@ -16288,6 +16288,7 @@ esac
 #    Whether the linker supports the flag -Wl,-no-undefined.
 #
 
+if ! echo "$CFLAGS" | grep -q -- -fsanitize=; then
 saved_LDFLAGS=$LDFLAGS
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker supports -Wl,-no-undefined" >&5
 $as_echo_n "checking whether the linker supports -Wl,-no-undefined... " >&6; }
@@ -16314,6 +16315,7 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LDFLAGS="$saved_LDFLAGS"
 
+fi
 
 
 #
@@ -19298,8 +19300,11 @@ fi
 
 
     if test no != $krb5_config; then
+
       CPPFLAGS="$CPPFLAGS `$krb5_config --cflags`"
-      CRYPTO_LIBS="$CRYPTO_LIBS `$krb5_config --libs`"
+      CRYPTO_LIBS="$CRYPTO_LIBS `$krb5_config --libs |
+				 $SED 's/-flto=[^[:blank:]]*//g'`"
+
     elif test $krb5path != no; then
 
   if test "x$krb5path" != x -a -d $krb5path; then
