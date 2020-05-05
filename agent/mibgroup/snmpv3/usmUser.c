@@ -204,7 +204,7 @@ usm_parse_user(oid * name, size_t name_len)
 {
     struct usmUser *uptr;
 
-    char           *newName;
+    u_char         *newName;
     u_char         *engineID;
     size_t          nameLen, engineIDLen;
 
@@ -212,14 +212,13 @@ usm_parse_user(oid * name, size_t name_len)
      * get the name and engineID out of the incoming oid 
      */
     if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
-                      &engineID, &engineIDLen, (u_char **) & newName,
-                      &nameLen))
+                      &engineID, &engineIDLen, &newName, &nameLen))
         return NULL;
 
     /*
      * Now see if a user exists with these index values 
      */
-    uptr = usm_get_user(engineID, engineIDLen, newName);
+    uptr = usm_get_user2(engineID, engineIDLen, newName, nameLen);
     free(engineID);
     free(newName);
 
@@ -1316,7 +1315,7 @@ write_usmUserStatus(int action,
     static long     long_ret;
     unsigned char  *engineID;
     size_t          engineIDLen;
-    char           *newName;
+    u_char         *newName;
     size_t          nameLen;
     struct usmUser *uptr = NULL;
 
@@ -1340,8 +1339,7 @@ write_usmUserStatus(int action,
          * See if we can parse the oid for engineID/name first.  
          */
         if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
-                          &engineID, &engineIDLen, (u_char **) & newName,
-                          &nameLen)) {
+                          &engineID, &engineIDLen, &newName, &nameLen)) {
             DEBUGMSGTL(("usmUser",
                         "can't parse the OID for engineID or name\n"));
             return SNMP_ERR_INCONSISTENTNAME;
@@ -1357,7 +1355,7 @@ write_usmUserStatus(int action,
         /*
          * Now see if a user already exists with these index values. 
          */
-        uptr = usm_get_user(engineID, engineIDLen, newName);
+        uptr = usm_get_user2(engineID, engineIDLen, newName, nameLen);
 
         if (uptr != NULL) {
             if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
@@ -1381,7 +1379,7 @@ write_usmUserStatus(int action,
                     return SNMP_ERR_RESOURCEUNAVAILABLE;
                 }
                 uptr->engineID = engineID;
-                uptr->name = newName;
+                uptr->name = (char *)newName;
                 uptr->secName = strdup(uptr->name);
                 if (uptr->secName == NULL) {
                     usm_free_user(uptr);
@@ -1409,9 +1407,8 @@ write_usmUserStatus(int action,
         }
     } else if (action == ACTION) {
         usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
-                      &engineID, &engineIDLen, (u_char **) & newName,
-                      &nameLen);
-        uptr = usm_get_user(engineID, engineIDLen, newName);
+                      &engineID, &engineIDLen, &newName, &nameLen);
+        uptr = usm_get_user2(engineID, engineIDLen, newName, nameLen);
         SNMP_FREE(engineID);
         SNMP_FREE(newName);
 
@@ -1441,9 +1438,8 @@ write_usmUserStatus(int action,
         }
     } else if (action == COMMIT) {
         usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
-                      &engineID, &engineIDLen, (u_char **) & newName,
-                      &nameLen);
-        uptr = usm_get_user(engineID, engineIDLen, newName);
+                      &engineID, &engineIDLen, &newName, &nameLen);
+        uptr = usm_get_user2(engineID, engineIDLen, newName, nameLen);
         SNMP_FREE(engineID);
         SNMP_FREE(newName);
 
@@ -1455,12 +1451,11 @@ write_usmUserStatus(int action,
         }
     } else if (action == UNDO || action == FREE) {
         if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
-                      &engineID, &engineIDLen, (u_char **) & newName,
-                      &nameLen)) {
+                      &engineID, &engineIDLen, &newName, &nameLen)) {
             /* Can't extract engine info from the OID - nothing to undo */
             return SNMP_ERR_NOERROR;
         }
-        uptr = usm_get_user(engineID, engineIDLen, newName);
+        uptr = usm_get_user2(engineID, engineIDLen, newName, nameLen);
         SNMP_FREE(engineID);
         SNMP_FREE(newName);
 
@@ -1481,14 +1476,13 @@ write_usmUserStatus(int action,
      * see if we can parse the oid for engineID/name first 
      */
 if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
-                  &engineID, &engineIDLen, (u_char **) & newName,
-                  &nameLen))
+                  &engineID, &engineIDLen, &newName, &nameLen))
     return SNMP_ERR_INCONSISTENTNAME;
 
     /*
      * Now see if a user already exists with these index values 
      */
-uptr = usm_get_user(engineID, engineIDLen, newName);
+uptr = usm_get_user2(engineID, engineIDLen, newName, nameLen);
 
 
 if (uptr) {                     /* If so, we set the appropriate value... */
