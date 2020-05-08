@@ -32,9 +32,8 @@ ok(defined($s1));
 
 ######################################################################
 # 
-# Attempt to use the bulkwalk method to get a few variables from the
-# SNMP agent.
-# test 1
+print("# Attempt to use the bulkwalk method to get a few variables from the SNMP agent.\n");
+print("# test 1\n");
 my $vars = new SNMP::VarList(['sysUpTime'], ['ifNumber'], # NON-repeaters
 			     ['ifSpeed'], ['ifDescr']);	 # Repeated variables.
 
@@ -75,7 +74,9 @@ else {
   ok(0);
   ok(0);
 }
-    
+
+print("# Expecting $ifaces network interfaces.\n");
+
 # Make sure we got an ifSpeed for each interface.  list[2] is ifSpeed repeater.
 ok(scalar @{$list[2]} == $ifaces);
 # Make sure we got an ifDescr for each interface.  list[3] is ifDescr repeater.
@@ -95,16 +96,20 @@ else {
   ok(0);
 }
 
+print("# Looking up loopback network interface ...\n");
+my $found;
 for my $ifdescr ($list[3][0]) {
+  print("# " . $ifdescr->val . "\n");
   next if (!($ifdescr->val =~ /Software Loopback Interface/) and
 	   !($ifdescr->val =~ /^lo/));
+  $found = $ifdescr->val;
   ok(1);
   ok($ifdescr->tag eq ".1.3.6.1.2.1.2.2.1.2");	# Should be system.ifDescr OID.
   ok($ifdescr->iid eq "1");			# Instance should be 1.
   ok($ifdescr->type eq "OCTETSTR");		# Description is a string.
   last;
 }
-if (!defined($list[3][0])) {
+if (!$found) {
   ok(0);
   ok(0);
   ok(0);
@@ -112,8 +117,8 @@ if (!defined($list[3][0])) {
 }
   
 ###############################################################################
-# Attempt to use the bulkwalk method to get only non-repeaters
-# test 2
+print("# Attempt to use the bulkwalk method to get only non-repeaters.\n");
+print("# test 2\n");
 $vars = new SNMP::VarList ( ['sysUpTime'], ['ifNumber'] ); # NON-repeaters
 
 $expect = scalar @$vars;
@@ -154,8 +159,8 @@ else {
 }
 
 ###############################################################################
-# Attempt to use the bulkwalk method to get only repeated variables
-# test 3
+print("# Attempt to use the bulkwalk method to get only repeated variables\n");
+print("# test 3\n");
 $vars = new SNMP::VarList ( ['ifIndex'], ['ifSpeed'] ); # repeaters
 
 $expect = scalar @$vars;
@@ -203,9 +208,8 @@ else {
 #  Asynchronous Bulkwalk Methods
 ######################################################################
 # 
-# Attempt to use the bulkwalk method to get a few variables from the
-# SNMP agent.
-# test 4
+print("# Attempt to use the bulkwalk method to get a few variables from the SNMP agent.\n");
+print("# test 4\n");
 sub async_cb1 {
     my ($vars, $list) = @_;
     ok(defined $list && ref($list) =~ m/ARRAY/);
