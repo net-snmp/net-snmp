@@ -301,7 +301,7 @@ var_ipRouteEntry(struct variable *vp,
         }
     case IPROUTEINFO:
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n",
                     vp->magic));
@@ -1916,7 +1916,7 @@ var_ipRouteEntry(struct variable *vp,
         return (u_char *) & addr_ret;
     case IPROUTEINFO:
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n",
                     vp->magic));
@@ -2228,7 +2228,7 @@ var_ipRouteEntry(struct variable * vp,
 
     case IPROUTEINFO:
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n",
                     vp->magic));

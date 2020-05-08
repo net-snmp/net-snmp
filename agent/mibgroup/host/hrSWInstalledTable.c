@@ -212,7 +212,8 @@ hrSWInstalledTable_handler(netsnmp_mib_handler *handler,
                 } break;
             case COLUMN_HRSWINSTALLEDID:
                 snmp_set_var_typed_value(request->requestvb, ASN_OBJECT_ID,
-                                         (u_char *) &nullOid, nullOidLen);
+                                         NETSNMP_REMOVE_CONST(void *, nullOid),
+                                         nullOidLen);
                 break;
             case COLUMN_HRSWINSTALLEDTYPE:
                 snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,

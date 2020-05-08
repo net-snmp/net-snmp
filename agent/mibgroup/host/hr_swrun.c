@@ -753,7 +753,7 @@ var_hrswrun(struct variable * vp,
         return (u_char *) string;
     case HRSWRUN_ID:
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     case HRSWRUN_PATH:
 #ifdef HAVE_SYS_PSTAT_H
         /*

@@ -1035,7 +1035,7 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFSPECIFIC:
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n",
                     vp->magic));
@@ -1307,7 +1307,7 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFSPECIFIC:
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n",
                     vp->magic));
@@ -2642,7 +2642,7 @@ var_ifEntry(struct variable * vp,
         return (u_char *) & long_return;
     case NETSNMP_IFSPECIFIC:
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n",
                     vp->magic));
@@ -2857,7 +2857,7 @@ var_ifEntry(struct variable * vp,
         return (u_char *) & long_return;
     case NETSNMP_IFSPECIFIC:
         *var_len = nullOidLen;
-        return (u_char *) nullOid;
+        return NETSNMP_REMOVE_CONST(void *, nullOid);
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n",
                     vp->magic));

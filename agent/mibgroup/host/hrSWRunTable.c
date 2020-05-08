@@ -195,7 +195,8 @@ hrSWRunTable_handler(netsnmp_mib_handler *handler,
                                          (u_char *) table_entry->hrSWRunID,
                                          table_entry->hrSWRunID_len
 #else
-                                         (u_char *) &nullOid, nullOidLen
+                                         NETSNMP_REMOVE_CONST(void *, nullOid),
+                                         nullOidLen
 #endif
                     );
                 break;

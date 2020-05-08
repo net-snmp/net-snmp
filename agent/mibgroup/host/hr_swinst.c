@@ -447,7 +447,7 @@ var_hrswinst(struct variable * vp,
         break;
     case HRSWINST_ID:
         *var_len = nullOidLen;
-        ret = (u_char *) nullOid;
+        ret = NETSNMP_REMOVE_CONST(void *, nullOid);
         break;
     case HRSWINST_TYPE:
         {
