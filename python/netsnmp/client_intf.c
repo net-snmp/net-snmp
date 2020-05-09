@@ -789,6 +789,7 @@ retry:
                      snmp_free_pdu(*response);
                   goto retry;
                }
+               /* fall through */
 
             /* Pv1, SNMPsec, Pv2p, v2c, v2u, v2*, and SNMPv3 PDUs */
             case SNMP_ERR_TOOBIG:
@@ -811,7 +812,7 @@ retry:
             /* in SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
             case SNMP_ERR_INCONSISTENTNAME:
             default:
-               strlcpy(err_str, (char*)snmp_errstring((*response)->errstat),
+               strlcpy(err_str, snmp_errstring((*response)->errstat),
 		       STR_BUF_SIZE);
                *err_num = (*response)->errstat;
 	       *err_ind = (*response)->errindex;
