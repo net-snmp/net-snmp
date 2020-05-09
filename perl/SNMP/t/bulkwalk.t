@@ -7,7 +7,7 @@ use warnings;
 use Cwd qw(abs_path);
 use Test;
 
-BEGIN { plan test => ($^O =~ /win32/i) ? 41 : 62; }
+BEGIN { plan test => ($^O =~ /win32/i) ? 43 : 64; }
 
 use SNMP;
 
@@ -47,10 +47,10 @@ ok($s1->{ErrorNum} == 0);
 ok(scalar @list == $expect);
 if (defined($list[0][0])) {
   # Sanity check the returned values.  list[0] is sysUptime nonrepeater.
-  ok($list[0][0]->tag eq ".1.3.6.1.2.1.1.3");	# check system.sysUptime OID
-  ok($list[0][0]->iid eq "0");			# check system.sysUptime.0 IID
+  ok($list[0][0]->tag, ".1.3.6.1.2.1.1.3");	# check system.sysUptime OID
+  ok($list[0][0]->iid, "0");			# check system.sysUptime.0 IID
   ok($list[0][0]->val =~ m/^\d+$/);		# Uptime is numeric 
-  ok($list[0][0]->type eq "TICKS");		# Uptime should be in ticks.
+  ok($list[0][0]->type, "TICKS");		# Uptime should be in ticks.
 }
 else {
   ok(0);
@@ -61,11 +61,11 @@ else {
 my $ifaces = 0;
 if (defined($list[1][0])) {
   # Find out how many interfaces to expect.  list[1] is ifNumber nonrepeater.
-  ok($list[1][0]->tag eq ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
-  ok($list[1][0]->iid eq "0");			# system.ifNumber.0 IID.
+  ok($list[1][0]->tag, ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
+  ok($list[1][0]->iid, "0");			# system.ifNumber.0 IID.
   ok($list[1][0]->val =~ m/^\d+$/);		# Number is all numeric 
   #XXX: test fails due SMIv1 codes being returned intstead of SMIv2...
-  #ok($list[1][0]->type eq "INTEGER32");		# Number should be integer.
+  #ok($list[1][0]->type, "INTEGER32");		# Number should be integer.
 
   $ifaces = $list[1][0]->val;
 }
@@ -84,10 +84,10 @@ ok(scalar @{$list[3]} == $ifaces);
 
 if (defined($list[2][0])) {
   # Test for reasonable values from the agent.
-  ok($list[2][0]->tag eq ".1.3.6.1.2.1.2.2.1.5");	# Should be system.ifSpeed OID.
-  ok($list[2][0]->iid eq "1");			# Instance should be 1.
+  ok($list[2][0]->tag, ".1.3.6.1.2.1.2.2.1.5");	# Should be system.ifSpeed OID.
+  ok($list[2][0]->iid, "1");			# Instance should be 1.
   ok($list[2][0]->val =~ m/^\d+$/);		# Number is all numeric 
-  ok($list[2][0]->type eq "GAUGE");		# Number should be a gauge.
+  ok($list[2][0]->type, "GAUGE");		# Number should be a gauge.
 }
 else {
   ok(0);
@@ -97,19 +97,22 @@ else {
 }
 
 print("# Looking up loopback network interface ...\n");
+ok(ref($list[3]), 'SNMP::VarList');
 my $found;
-for my $ifdescr ($list[3][0]) {
+for my $ifdescr (@{$list[3]}) {
+  ok(ref($ifdescr), 'SNMP::Varbind');
   print("# " . $ifdescr->val . "\n");
   next if (!($ifdescr->val =~ /Software Loopback Interface/) and
 	   !($ifdescr->val =~ /^lo/));
   $found = $ifdescr->val;
   ok(1);
-  ok($ifdescr->tag eq ".1.3.6.1.2.1.2.2.1.2");	# Should be system.ifDescr OID.
-  ok($ifdescr->iid eq "1");			# Instance should be 1.
-  ok($ifdescr->type eq "OCTETSTR");		# Description is a string.
+  ok($ifdescr->tag, ".1.3.6.1.2.1.2.2.1.2");	# Should be system.ifDescr OID.
+  ok($ifdescr->iid =~ m/^\d+$/);		# Instance should be 1.
+  ok($ifdescr->type, "OCTETSTR");		# Description is a string.
   last;
 }
 if (!$found) {
+  ok(0);
   ok(0);
   ok(0);
   ok(0);
@@ -131,10 +134,10 @@ ok(scalar @list == $expect);
 
 if (defined($list[0][0])) {
   # Sanity check the returned values.  list[0] is sysUptime nonrepeater.
-  ok($list[0][0]->tag eq ".1.3.6.1.2.1.1.3");	# check system.sysUptime OID
-  ok($list[0][0]->iid eq "0");			# check system.sysUptime.0 IID
+  ok($list[0][0]->tag, ".1.3.6.1.2.1.1.3");	# check system.sysUptime OID
+  ok($list[0][0]->iid, "0");			# check system.sysUptime.0 IID
   ok($list[0][0]->val =~ m/^\d+$/);		# Uptime is numeric 
-  ok($list[0][0]->type eq "TICKS");		# Uptime should be in ticks.
+  ok($list[0][0]->type, "TICKS");		# Uptime should be in ticks.
 }
 else {
   ok(0);
@@ -145,11 +148,11 @@ else {
 
 if (defined($list[1][0])) {
   # Find out how many interfaces to expect.  list[1] is ifNumber nonrepeater.
-  ok($list[1][0]->tag eq ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
-  ok($list[1][0]->iid eq "0");			# system.ifNumber.0 IID.
+  ok($list[1][0]->tag, ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
+  ok($list[1][0]->iid, "0");			# system.ifNumber.0 IID.
   ok($list[1][0]->val =~ m/^\d+$/);		# Number is all numeric 
   #XXX: test fails due SMIv1 codes being returned intstead of SMIv2...
-  #ok($list[1][0]->type eq "INTEGER32");		# Number should be integer.
+  #ok($list[1][0]->type, "INTEGER32");		# Number should be integer.
   $ifaces = $list[1][0]->val;
 }
 else {
@@ -179,11 +182,11 @@ ok(scalar @{$list[1]} == $ifaces);
 
 if (defined($list[0][0])) {
   # Test for reasonable values from the agent.
-  ok($list[0][0]->tag eq ".1.3.6.1.2.1.2.2.1.1");	# Should be system.ifIndex OID.
-  ok($list[0][0]->iid eq "1");			# Instance should be 1.
+  ok($list[0][0]->tag, ".1.3.6.1.2.1.2.2.1.1");	# Should be system.ifIndex OID.
+  ok($list[0][0]->iid, "1");			# Instance should be 1.
   ok($list[0][0]->val =~ m/^\d+$/);		# Number is all numeric 
   #XXX: test fails due SMIv1 codes being returned intstead of SMIv2...
-  #ok($list[0][0]->type eq "INTEGER32");		# Number should be an integer.
+  #ok($list[0][0]->type, "INTEGER32");		# Number should be an integer.
 }
 else {
   ok(0);
@@ -192,10 +195,10 @@ else {
 }
 
 if (defined($list[1][0])) {
-  ok($list[1][0]->tag eq ".1.3.6.1.2.1.2.2.1.5");	# Should be system.ifSpeed OID.
-  ok($list[1][0]->iid eq "1");			# Instance should be 1.
+  ok($list[1][0]->tag, ".1.3.6.1.2.1.2.2.1.5");	# Should be system.ifSpeed OID.
+  ok($list[1][0]->iid, "1");			# Instance should be 1.
   ok($list[1][0]->val =~ m/^\d+$/);		# Number is all numeric 
-  ok($list[1][0]->type eq "GAUGE");		# Number should be a gauge.
+  ok($list[1][0]->type, "GAUGE");		# Number should be a gauge.
 }
 else {
   ok(0);
@@ -222,10 +225,10 @@ sub async_cb1 {
     if (defined($list->[0][0])) {
       # Sanity check the returned values.  First is sysUptime nonrepeater.
       $vbr = $list->[0][0];
-      ok($vbr->tag eq ".1.3.6.1.2.1.1.3");	# check system.sysUptime OID
-      ok($vbr->iid eq "0");			# check system.sysUptime.0 IID
+      ok($vbr->tag, ".1.3.6.1.2.1.1.3");	# check system.sysUptime OID
+      ok($vbr->iid, "0");			# check system.sysUptime.0 IID
       ok($vbr->val =~ m/^\d+$/);			# Uptime is numeric 
-      ok($vbr->type eq "TICKS");			# Uptime should be in ticks.
+      ok($vbr->type, "TICKS");			# Uptime should be in ticks.
     }
     else {
       ok(0);
@@ -237,11 +240,11 @@ sub async_cb1 {
     if (defined($list->[1][0])) {
       # Find out how many interfaces to expect.  Next is ifNumber nonrepeater.
       $vbr = $list->[1][0];
-      ok($vbr->tag eq ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
-      ok($vbr->iid eq "0");			# system.ifNumber.0 IID.
+      ok($vbr->tag, ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
+      ok($vbr->iid, "0");			# system.ifNumber.0 IID.
       ok($vbr->val =~ m/^\d+$/);			# Number is all numeric 
       #XXX: test fails due SMIv1 codes being returned intstead of SMIv2...
-      #    ok($vbr->type eq "INTEGER32");		# Number should be integer.
+      #    ok($vbr->type, "INTEGER32");		# Number should be integer.
       $ifaces = $vbr->[2];
     }
     else {
@@ -255,10 +258,10 @@ sub async_cb1 {
     
     if (defined($list->[2][0])) {
       $vbr = $list->[2][0];
-      ok($vbr->tag eq ".1.3.6.1.2.1.2.2.1.5");	# Should be ifSpeed OID
-      ok($vbr->iid eq "1");			# Instance should be 1.
+      ok($vbr->tag, ".1.3.6.1.2.1.2.2.1.5");	# Should be ifSpeed OID
+      ok($vbr->iid, "1");			# Instance should be 1.
       ok($vbr->val =~ m/^\d+$/);			# Number is all numeric 
-      ok($vbr->type eq "GAUGE");			# Should be a gauge.
+      ok($vbr->type, "GAUGE");			# Should be a gauge.
 
       ok(scalar @{$list->[3]} == $ifaces);
     }
@@ -275,9 +278,9 @@ sub async_cb1 {
 	       !($ifdescr->val =~ /^lo/));
       ok(1);
       # Should be system.ifDescr OID.
-      ok($ifdescr->tag eq ".1.3.6.1.2.1.2.2.1.2");
+      ok($ifdescr->tag, ".1.3.6.1.2.1.2.2.1.2");
       ok($ifdescr->iid >= 1);			# Instance should be >= 1.
-      ok($ifdescr->type eq "OCTETSTR");		# Description is a string.
+      ok($ifdescr->type, "OCTETSTR");		# Description is a string.
       last;
     }
     if (!defined($list->[3][0])) {
