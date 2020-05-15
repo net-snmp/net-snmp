@@ -408,7 +408,7 @@ static union {
     u_short         data[128];
 } klgetsatmp;
 
-struct sockaddr_in *
+static struct sockaddr_in *
 klgetsa(struct sockaddr_in *dst)
 {
     if (!NETSNMP_KLOOKUP(dst, (char *) &klgetsatmp.sin, sizeof klgetsatmp.sin)) {
@@ -874,7 +874,7 @@ static int      qsort_compare(const void *, const void *);
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT) || defined (hpux11)
 
 #if defined(RTENTRY_4_4) && !defined(hpux11)
-void
+static void
 load_rtentries(struct radix_node *pt)
 {
     struct radix_node node;

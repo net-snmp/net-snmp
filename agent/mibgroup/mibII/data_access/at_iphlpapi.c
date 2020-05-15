@@ -29,7 +29,7 @@
 
 static WriteMethod write_arp;
 MIB_IPNETROW   *arp_row = NULL;
-int             create_flag = 0;
+static int      create_flag;
 
 u_char         *
 var_atEntry(struct variable *vp,
