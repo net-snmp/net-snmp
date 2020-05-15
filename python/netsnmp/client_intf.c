@@ -367,7 +367,7 @@ __scan_num_objid(const char *buf, oid *objid, size_t *len)
    <labeln> and <iid> in seperate strings (note: will destructively
    alter input string, 'name') */
 static int
-__get_label_iid(char *name, char **last_label, char **iid, int flag)
+__get_label_iid(char *name, const char **last_label, const char **iid, int flag)
 {
    char *lcp;
    char *icp;
@@ -861,17 +861,16 @@ py_netsnmp_construct_varbind(void)
  * store its length in *@len. Terminate @val with '\0' if @len == NULL.
  */
 static int
-py_netsnmp_attr_string(PyObject *obj, const char *attr_name, char **val,
+py_netsnmp_attr_string(PyObject *obj, const char *attr_name, const char **val,
                        Py_ssize_t *len)
 {
   *val = NULL;
   if (obj && attr_name && PyObject_HasAttrString(obj, attr_name)) {
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
     if (attr) {
-      int retval;
-      retval = PyBytes_AsStringAndSize(attr, val, len);
+      *val = PyUnicode_AsUTF8AndSize(attr, len);
       Py_DECREF(attr);
-      return retval;
+      return 0;
     }
   }
 
@@ -1320,8 +1319,8 @@ netsnmp_get(PyObject *self, PyObject *args)
   size_t str_buf_len = 0;
   size_t out_len = 0;
   int buf_over = 0;
-  char *tag;
-  char *iid;
+  const char *tag;
+  const char *iid;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
   int verbose = py_netsnmp_verbose();
@@ -1331,7 +1330,7 @@ netsnmp_get(PyObject *self, PyObject *args)
   int err_ind;
   int err_num;
   char err_str[STR_BUF_SIZE];
-  char *tmpstr;
+  const char *tmpstr;
   Py_ssize_t tmplen;
 
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
@@ -1539,8 +1538,8 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   size_t str_buf_len = 0;
   size_t out_len = 0;
   int buf_over = 0;
-  char *tag;
-  char *iid = NULL;
+  const char *tag;
+  const char *iid = NULL;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
   int verbose = py_netsnmp_verbose();
@@ -1550,7 +1549,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   int err_ind;
   int err_num;
   char err_str[STR_BUF_SIZE];
-  char *tmpstr;
+  const char *tmpstr;
   Py_ssize_t tmplen;
 
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
@@ -1770,8 +1769,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
   size_t str_buf_len = 0;
   size_t out_len = 0;
   int buf_over = 0;
-  char *tag;
-  char *iid = NULL;
+  const char *tag;
+  const char *iid = NULL;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
   int verbose = py_netsnmp_verbose();
@@ -1783,7 +1782,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   char err_str[STR_BUF_SIZE];
   int notdone = 1;
   int result_count = 0;
-  char *tmpstr;
+  const char *tmpstr;
   Py_ssize_t tmplen;
 
   if (args) {
@@ -2131,8 +2130,8 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   size_t str_buf_len = 0;
   size_t out_len = 0;
   int buf_over = 0;
-  char *tag;
-  char *iid;
+  const char *tag;
+  const char *iid;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
   int verbose = py_netsnmp_verbose();
@@ -2142,7 +2141,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   int err_ind;
   int err_num;
   char err_str[STR_BUF_SIZE];
-  char *tmpstr;
+  const char *tmpstr;
   Py_ssize_t tmplen;
 
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
@@ -2366,10 +2365,10 @@ netsnmp_set(PyObject *self, PyObject *args)
   struct session_list *ss;
   netsnmp_pdu *pdu, *response;
   struct tree *tp;
-  char *tag;
-  char *iid;
-  char *val;
-  char *type_str;
+  const char *tag;
+  const char *iid;
+  const char *val;
+  const char *type_str;
   int len;
   oid *oid_arr;
   size_t oid_arr_len = MAX_OID_LEN;
@@ -2383,7 +2382,7 @@ netsnmp_set(PyObject *self, PyObject *args)
   int err_ind;
   int err_num;
   char err_str[STR_BUF_SIZE];
-  char *tmpstr;
+  const char *tmpstr;
   Py_ssize_t tmplen;
 
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));

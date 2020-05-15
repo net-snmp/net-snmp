@@ -9,7 +9,12 @@ def snmp_dest(**kwargs):
     """Return information about how to communicate with snmpd"""
     dest = {
         'Version':    1,
-        'DestHost':   'localhost:' + os.environ.get("SNMP_SNMPD_PORT", 161),
+        'DestHost':   'localhost:' + str(os.environ.get("SNMP_SNMPD_PORT", 161)),
+         # Both the community strings "public" and "private"
+         # cannot be used to set variables using "snmpset"
+         # operations. Run the "snmpset" tests after replacing
+         # the following 'Community' string with any other
+         # configured community string from the snmpd.conf file.  
         'Community':  'public',
     }
     for key, value in kwargs.items():
@@ -94,16 +99,21 @@ class BasicTests(unittest.TestCase):
     def test_v1_set(self):
         print("\n")
         print("---v1 SET tests-------------------------------------\n")
-        var = netsnmp.Varbind('sysLocation', '0', 'my new location')
+        # snmpset fails for the 'sysLocation' variable, 
+        # as the syslocation token is configured in the
+        # snmpd.conf file, which disables write access
+        # to the variable.
+        # Hence using the 'sysName' variable for the set tests.
+        var = netsnmp.Varbind('sysName', '0', 'my new name')
         res = netsnmp.snmpset(var, **snmp_dest())
 
         print("v1 snmpset result: ", res, "\n")
         self.assertEqual(res, 1)
 
         print("v1 set var: ", var.tag, var.iid, "=", var.val, '(', var.type, ')')
-        self.assertEqual(var.tag, 'sysLocation')
+        self.assertEqual(var.tag, 'sysName')
         self.assertEqual(var.iid, '0')
-        self.assertEqual(var.val, 'my new location')
+        self.assertEqual(var.val, 'my new name')
         self.assertTrue(var.type is None)
 
     def test_v1_walk(self):
@@ -182,8 +192,13 @@ class BasicTests(unittest.TestCase):
         print("---v1 set2-------------------------------------\n")
 
         sess = setup_v1()
+        # snmpset fails for the 'sysLocation' variable, 
+        # as the syslocation token is configured in the
+        # snmpd.conf file, which disables write access
+        # to the variable.
+        # Hence using the 'sysName' variable for the set tests.
         varlist = netsnmp.VarList(
-            netsnmp.Varbind('sysLocation', '0', 'my newer location'))
+            netsnmp.Varbind('sysName', '0', 'my newer name'))
         res = sess.set(varlist)
         print("v1 sess.set result: ", res, "\n")
 
@@ -257,9 +272,13 @@ class BasicTests(unittest.TestCase):
         print("---v2c set-------------------------------------\n")
 
         sess = setup_v2()
-
+        # snmpset fails for the 'sysLocation' variable, 
+        # as the syslocation token is configured in the
+        # snmpd.conf file, which disables write access
+        # to the variable.
+        # Hence using the 'sysName' variable for the set tests.
         varlist = netsnmp.VarList(
-            netsnmp.Varbind('sysLocation', '0', 'my even newer location'))
+            netsnmp.Varbind('sysName', '0', 'my even newer name'))
 
         res = sess.set(varlist)
         print("v2 sess.set result: ", res, "\n")
@@ -332,8 +351,13 @@ class BasicTests(unittest.TestCase):
         print("---v3 set-------------------------------------\n")
 
         sess = setup_v3();
+        # snmpset fails for the 'sysLocation' variable, 
+        # as the syslocation token is configured in the
+        # snmpd.conf file, which disables write access
+        # to the variable.
+        # Hence using the 'sysName' variable for the set tests.
         varlist = netsnmp.VarList(
-            netsnmp.Varbind('sysLocation', '0', 'my final destination'))
+            netsnmp.Varbind('sysName', '0', 'my final name'))
         res = sess.set(varlist)
         print("v3 sess.set result: ", res, "\n")
         self.assertEqual(res, 1)
