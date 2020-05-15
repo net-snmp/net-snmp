@@ -1,3 +1,5 @@
+#define PY_SSIZE_T_CLEAN
+
 #include <Python.h>
 
 #if PY_VERSION_HEX < 0x02050000
