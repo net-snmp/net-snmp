@@ -1969,26 +1969,38 @@ int
 Interface_Scan_NextInt(int *Index, char *Name, nmapi_phystat * Retifnet)
 {
     static nmapi_phystat *if_ptr = (nmapi_phystat *) 0;
-    int             count = Interface_Scan_Get_Count();
+    static int             count = 0;
     unsigned int    ulen;
     int             ret;
-
-    if (!if_ptr) {
+    int             count_prev;
+       
+    if (!if_ptr || (saveIndex==0)) { /* we get physical stat only when begining an enumeration */
+                                    /*  to limit the cost of walking the interfaces*/
+        count_prev=count;
+        count=Interface_Scan_Get_Count();
         if (count) {
-            if_ptr =
-                (nmapi_phystat *) malloc(sizeof(nmapi_phystat) * count);
+            if (!if_ptr){
+                if_ptr =
+                     (nmapi_phystat *) malloc(sizeof(nmapi_phystat) * count);
+            } else if (count >count_prev) {
+                if_ptr =
+                     (nmapi_phystat *) realloc((void *)if_ptr,sizeof(nmapi_phystat) * count);
+            }
             if (if_ptr == NULL)
                 return (0);
 
-        } else
+            ulen = (unsigned int) count *sizeof(nmapi_phystat);
+            if ((ret = get_physical_stat(if_ptr, &ulen)) < 0)
+                return (0);             /* EOF */
+           
+
+        } else {
             return (0);         /* EOF */
-    }
-
+        }
+                   
+    }              
+               
     if (saveIndex >= count)
-        return (0);             /* EOF */
-
-    ulen = (unsigned int) count *sizeof(nmapi_phystat);
-    if ((ret = get_physical_stat(if_ptr, &ulen)) < 0)
         return (0);             /* EOF */
 
     if (Retifnet)
