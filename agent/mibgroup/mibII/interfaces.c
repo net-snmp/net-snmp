@@ -1960,26 +1960,36 @@ int
 Interface_Scan_NextInt(int *Index, char *Name, nmapi_phystat * Retifnet)
 {
     static nmapi_phystat *if_ptr = (nmapi_phystat *) 0;
-    int             count = Interface_Scan_Get_Count();
+    static int             count = 0;
     unsigned int    ulen;
     int             ret;
+    int             count_prev;
 
-    if (!if_ptr) {
+    if (!if_ptr || (saveIndex==0)) {
+        count_prev = count;
+        count=Interface_Scan_Get_Count();
         if (count) {
-            if_ptr =
-                (nmapi_phystat *) malloc(sizeof(nmapi_phystat) * count);
+            if (!if_ptr){
+                if_ptr =
+                     (nmapi_phystat *) malloc(sizeof(nmapi_phystat) * count);
+            } else if (count >count_prev)
+            {
+                if_ptr =
+                     (nmapi_phystat *) realloc((void *)if_ptr,sizeof(nmapi_phystat) * count);
+            }
             if (if_ptr == NULL)
                 return (0);
 
-        } else
+            ulen = (unsigned int) count *sizeof(nmapi_phystat);
+            if ((ret = get_physical_stat(if_ptr, &ulen)) < 0)
+                return (0);             /* EOF */
+
+        } else {
             return (0);         /* EOF */
+        }
     }
 
     if (saveIndex >= count)
-        return (0);             /* EOF */
-
-    ulen = (unsigned int) count *sizeof(nmapi_phystat);
-    if ((ret = get_physical_stat(if_ptr, &ulen)) < 0)
         return (0);             /* EOF */
 
     if (Retifnet)
@@ -1990,6 +2000,8 @@ Interface_Scan_NextInt(int *Index, char *Name, nmapi_phystat * Retifnet)
     if (Index)
         *Index = saveIndex;
     return (1);                 /* DONE */
+}
+
 }
 
 #else                           /* hpux11 */
