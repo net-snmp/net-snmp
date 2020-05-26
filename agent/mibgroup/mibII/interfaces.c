@@ -1976,7 +1976,7 @@ Interface_Scan_NextInt(int *Index, char *Name, nmapi_phystat * Retifnet)
        
     if (!if_ptr || (saveIndex==0)) { /* we get physical stat only when begining an enumeration */
                                     /*  to limit the cost of walking the interfaces*/
-        count_prev=count;
+        count_prev = count;
         count=Interface_Scan_Get_Count();
         if (count) {
             if (!if_ptr){
