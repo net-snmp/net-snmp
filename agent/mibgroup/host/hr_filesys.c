@@ -704,7 +704,6 @@ static const char *HRFS_ignores[] = {
     "shm",
     "sockfs",
     "sysfs",
-    "tmpfs",
     "usbdevfs",
     "usbfs",
 #endif
@@ -719,6 +718,7 @@ static const char *HRFS_ignores[] = {
 int
 Get_Next_HR_FileSys(void)
 {
+next:
 #if HAVE_GETFSSTAT
     if (HRFS_index >= fscount)
         return -1;
@@ -745,8 +745,7 @@ Get_Next_HR_FileSys(void)
         case MNT_PROCFS:
 #endif
         case MNT_SFS:
-            return Get_Next_HR_FileSys();
-            break;
+            goto next;
     }
     return HRFS_index++;
 #else
@@ -766,7 +765,7 @@ Get_Next_HR_FileSys(void)
 
     for (cpp = HRFS_ignores; *cpp != NULL; ++cpp)
         if (!strcmp(HRFS_entry->HRFS_type, *cpp))
-            return Get_Next_HR_FileSys();
+            goto next;
 
     /*
      * Try and ensure that index values are persistent
