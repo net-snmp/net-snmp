@@ -704,7 +704,6 @@ static const char *HRFS_ignores[] = {
     "shm",
     "sockfs",
     "sysfs",
-    "tmpfs",
     "usbdevfs",
     "usbfs",
 #endif
