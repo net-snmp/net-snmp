@@ -481,7 +481,7 @@ SOFTWARE.
 	                             unsigned char **new_val, int *new_val_len);
 
     NETSNMP_IMPORT
-    void            clear_tree_flags(register struct tree *tp);
+    void            clear_tree_flags(struct tree *tp);
 
     NETSNMP_IMPORT
     char           *snmp_out_toggle_options(char *);
