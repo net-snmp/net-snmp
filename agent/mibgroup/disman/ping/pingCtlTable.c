@@ -74,6 +74,10 @@ static struct proto {
     int             icmpproto;  /* IPPROTO_xxx value for ICMP */
 } *pr;
 
+static volatile int    exiting;
+static volatile int    status_snapshot;
+
+
 /*
  *pingCtlTable_variables_oid:
  *                                                      
