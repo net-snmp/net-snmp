@@ -90,9 +90,6 @@ extern          "C" {
     /*
      * Prototypes.
      */
-    int             usm_clone_usmStateReference(struct usmStateReference *from,
-                                                    struct usmStateReference **to);
-
     NETSNMP_IMPORT
     int             usm_extend_user_kul(struct usmUser *user,
                                         u_int privKeyBufSize);

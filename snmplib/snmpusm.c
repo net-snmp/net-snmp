@@ -257,6 +257,10 @@ do {                                                            \
 } while (0)
 
 static int
+usm_clone_usmStateReference(struct usmStateReference *from,
+                            struct usmStateReference **to);
+
+static int
 free_enginetime_on_shutdown(int majorid, int minorid, void *serverarg,
 			    void *clientarg)
 {
@@ -399,8 +403,9 @@ usm_set_usmStateReference_sec_level(struct usmStateReference *ref,
     return 0;
 }
 
-int
-usm_clone_usmStateReference(struct usmStateReference *from, struct usmStateReference **to)
+static int
+usm_clone_usmStateReference(struct usmStateReference *from,
+                            struct usmStateReference **to)
 {
     struct usmStateReference *cloned_usmStateRef;
 
