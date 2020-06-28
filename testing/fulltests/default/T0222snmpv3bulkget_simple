@@ -12,7 +12,7 @@ SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
 
 DEFAUTHTYPE=SHA
 DEFPRIVTYPE=AES
-# standard V3 configuration: 
+# standard V3 configuration:
 . ./Sv3config
 
 STARTAGENT
@@ -22,6 +22,5 @@ CAPTURE "snmpbulkget $SNMP_FLAGS -On -Cn1 -Cr1472 $PRIVTESTARGS $SNMP_TRANSPORT_
 STOPAGENT
 
 CHECKORDIE ".1.3.6.1.2.1.1.5.0 = STRING:"
-CHECKCOUNT atleastone ".1.3.6.1.2.1.2.2.1.[0-9]*.5 = Counter32: "
 
 FINISHED
