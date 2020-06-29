@@ -3388,6 +3388,45 @@ usm_session_init(netsnmp_session *in_session, netsnmp_session *session)
     return SNMPERR_SUCCESS;
 }
 
+static int usm_build_user(struct usmUser **result,
+                          const netsnmp_session *session)
+{
+    struct usmUser *user;
+
+    DEBUGMSGTL(("usm", "Building user %s...\n", session->securityName));
+    /*
+     * user doesn't exist so we create and add it
+     */
+    user = calloc(1, sizeof(struct usmUser));
+    if (user == NULL)
+        goto err;
+
+    /*
+     * copy in the securityName
+     */
+    if (session->securityName) {
+        user->name = strdup(session->securityName);
+        user->secName = strdup(session->securityName);
+        if (user->name == NULL || user->secName == NULL)
+            goto err;
+    }
+
+    /*
+     * copy in the engineID
+     */
+    user->engineID = netsnmp_memdup(session->securityEngineID,
+                                    session->securityEngineIDLen);
+    if (session->securityEngineID && !user->engineID)
+        goto err;
+    user->engineIDLen = session->securityEngineIDLen;
+    *result = user;
+    return SNMPERR_SUCCESS;
+
+err:
+    usm_free_user(user);
+    return SNMPERR_GENERR;
+}
+
 /*
  * usm_create_user_from_session(netsnmp_session *session):
  * 
@@ -3431,42 +3470,11 @@ usm_create_user_from_session(netsnmp_session * session)
                                   session->securityEngineIDLen,
                                   session->securityName,
                                   usm_get_userList(), 0);
-    if (NULL != user) 
+    if (NULL != user) {
         DEBUGMSGTL(("usm", "user exists x=%p\n", user));
-    else
-    if (user == NULL) {
-        DEBUGMSGTL(("usm", "Building user %s...\n",
-                    session->securityName));
-        /*
-         * user doesn't exist so we create and add it 
-         */
-        user = (struct usmUser *) calloc(1, sizeof(struct usmUser));
-        if (user == NULL)
+    } else {
+        if (usm_build_user(&user, session) != SNMPERR_SUCCESS)
             return SNMPERR_GENERR;
-
-        /*
-         * copy in the securityName 
-         */
-        if (session->securityName) {
-            user->name = strdup(session->securityName);
-            user->secName = strdup(session->securityName);
-            if (user->name == NULL || user->secName == NULL) {
-                usm_free_user(user);
-                return SNMPERR_GENERR;
-            }
-        }
-
-        /*
-         * copy in the engineID 
-         */
-        user->engineID = netsnmp_memdup(session->securityEngineID,
-                                        session->securityEngineIDLen);
-        if (session->securityEngineID && !user->engineID) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->engineIDLen = session->securityEngineIDLen;
-
         user_just_created = 1;
     }
 
