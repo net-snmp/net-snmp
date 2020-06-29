@@ -444,17 +444,12 @@ agentx_notify(netsnmp_session * session, netsnmp_pdu *pdu)
      *     as this is valid AgentX syntax.
      */
 
-	/* If a context name was specified, send the trap using that context.
-	 * Otherwise, send the trap without the context using the old method */
-	if (pdu->contextName != NULL)
-	{
-        send_trap_vars_with_context(-1, -1, pdu->variables, 
-                       pdu->contextName);
-	}
-	else
-	{
+    /* If a context name was specified, send the trap using that context.
+     * Otherwise, send the trap without the context using the old method */
+    if (pdu->contextName != NULL)
+        send_trap_vars_with_context(-1, -1, pdu->variables, pdu->contextName);
+    else
         send_trap_vars(-1, -1, pdu->variables);
-	}
 
     return AGENTX_ERR_NOERROR;
 }
