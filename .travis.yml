@@ -4,9 +4,28 @@ os:
   - linux
   - osx
 
-# Xcode 11.3.1 + OS/X 10.14. See also
-# https://docs.travis-ci.com/user/reference/osx/
-osx_image: xcode11.3
+# See also https://docs.travis-ci.com/user/reference/osx/
+osx_image:
+  - xcode12
+  - xcode11.6
+  - xcode11.5
+  - xcode11.4
+  - xcode11.3
+  - xcode11.2
+  - xcode11.1
+  - xcode11
+  - xcode10.3
+  - xcode10.2
+  - xcode10.1
+  - xcode10
+  - xcode9.4
+  - xcode9.3
+  - xcode9.2
+  - xcode9.1
+  - xcode9
+  - xcode8.3
+  - xcode8
+  - xcode7.3
 
 env:
   - MODE=regular
