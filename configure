@@ -17912,7 +17912,7 @@ done
 
 
 #  Library:
-for ac_header in fcntl.h    io.h       kstat.h                                   limits.h   locale.h                                    sys/file.h       sys/ioctl.h                           sys/sockio.h     sys/stat.h                            sys/systemcfg.h  sys/systeminfo.h                      sys/times.h      sys/uio.h                             sys/utsname.h                        netipx/ipx.h
+for ac_header in crt_externs.h                                          fcntl.h    io.h       kstat.h                          limits.h   locale.h                                    mach-o/dyld.h                                          sys/file.h       sys/ioctl.h                           sys/sockio.h     sys/stat.h                            sys/systemcfg.h  sys/systeminfo.h                      sys/times.h      sys/uio.h                             sys/utsname.h                        netipx/ipx.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -27693,6 +27693,62 @@ _ACEOF
 fi
 done
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for _NSGetArgv()" >&5
+$as_echo_n "checking for _NSGetArgv()... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <crt_externs.h>
+int
+main ()
+{
+return _NSGetArgv
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+$as_echo "#define HAVE__NSGETARGV 1" >>confdefs.h
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for _NSGetExecutablePath()" >&5
+$as_echo_n "checking for _NSGetExecutablePath()... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <mach-o/dyld.h>
+int
+main ()
+{
+return _NSGetExecutablePath
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+$as_echo "#define HAVE__NSGETEXECUTABLEPATH 1" >>confdefs.h
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 
 # IPv4/IPv6 function checks. AC_CHECK_FUNC() can't find these on MinGW
 # since these functions have the __cdecl calling convention on MinGW.

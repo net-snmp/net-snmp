@@ -35,6 +35,26 @@ AC_CHECK_FUNCS([asprintf        closedir        fgetc_unlocked   ] dnl
                [strdup          strerror        strncasecmp      ] dnl
                [sysconf         times           vsnprintf        ] )
 
+AC_MSG_CHECKING([for _NSGetArgv()])
+AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM([#include <crt_externs.h>], [return _NSGetArgv])],
+  [AC_DEFINE([HAVE__NSGETARGV], [1],
+    [Define to 1 if you have the `_NSGetArgv' function.])
+    AC_MSG_RESULT([yes])
+  ],
+  [AC_MSG_RESULT([no])]
+)
+
+AC_MSG_CHECKING([for _NSGetExecutablePath()])
+AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM([#include <mach-o/dyld.h>], [return _NSGetExecutablePath])],
+  [AC_DEFINE([HAVE__NSGETEXECUTABLEPATH], [1],
+    [Define to 1 if you have the `_NSGetExecutablePath' function.])
+    AC_MSG_RESULT([yes])
+  ],
+  [AC_MSG_RESULT([no])]
+)
+
 # IPv4/IPv6 function checks. AC_CHECK_FUNC() can't find these on MinGW
 # since these functions have the __cdecl calling convention on MinGW.
 case x$with_socklib in

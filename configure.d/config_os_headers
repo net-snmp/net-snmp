@@ -46,8 +46,10 @@ AC_INCLUDES_DEFAULT
 ]])
 
 #  Library:
-AC_CHECK_HEADERS([fcntl.h    io.h       kstat.h                 ] dnl
+AC_CHECK_HEADERS([crt_externs.h                        ] dnl
+                 [fcntl.h    io.h       kstat.h        ] dnl
                  [limits.h   locale.h                  ] dnl
+                 [mach-o/dyld.h                        ] dnl
                  [sys/file.h       sys/ioctl.h         ] dnl
                  [sys/sockio.h     sys/stat.h          ] dnl
                  [sys/systemcfg.h  sys/systeminfo.h    ] dnl
