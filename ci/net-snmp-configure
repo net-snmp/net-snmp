@@ -145,7 +145,6 @@ transports=()
 # git grep -lE 'void[[:blank:]]*init_.*\(void\)|config_require\(' |
 #  sed -n 's/\.h$//p')
 mibs=()
-mibs+=(mibII)
 case "$MODE" in
     read-only)
         ;;

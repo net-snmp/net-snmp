@@ -1001,6 +1001,9 @@
 /* Define to 1 if `if_xname' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_XNAME
 
+/* Define to 1 if `ia_subnetmask' is a member of `struct in_ifaddr'. */
+#undef HAVE_STRUCT_IN_IFADDR_IA_SUBNETMASK
+
 /* Define to 1 if `ipi_spec_dst' is a member of `struct in_pktinfo'. */
 #undef HAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST
 

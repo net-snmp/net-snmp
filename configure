@@ -19869,6 +19869,25 @@ fi
 #         the later 'config_types' sub-script
 #
 
+#  Darwin: check whether or not struct in_ifaddr is available.
+#
+#
+ac_fn_c_check_member "$LINENO" "struct in_ifaddr" "ia_subnetmask" "ac_cv_member_struct_in_ifaddr_ia_subnetmask" "
+#ifdef HAVE_NETINET_IN_VAR_H
+#include <netinet/in_var.h>
+#endif
+
+"
+if test "x$ac_cv_member_struct_in_ifaddr_ia_subnetmask" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_IN_IFADDR_IA_SUBNETMASK 1
+_ACEOF
+
+
+fi
+
+
 
 ##
 #   Determine the IPv6 stack type

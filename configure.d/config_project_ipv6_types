@@ -45,6 +45,15 @@ AC_CHECK_TYPES([mib2_ipIfStatsEntry_t],,,[#include <inet/mib2.h>])
 #         the later 'config_types' sub-script
 #
 
+#  Darwin: check whether or not struct in_ifaddr is available.
+#
+#
+AC_CHECK_MEMBERS([struct in_ifaddr.ia_subnetmask],,,[
+#ifdef HAVE_NETINET_IN_VAR_H
+#include <netinet/in_var.h>
+#endif
+])
+
 
 ##
 #   Determine the IPv6 stack type

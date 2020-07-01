@@ -8,9 +8,15 @@
 
 
 config_require(mibII/ifTable)
+#if !defined(darwin) || defined(HAVE_STRUCT_IN_IFADDR_IA_SUBNETMASK)
+/*
+ * To do: port mibII/ipAddr and mibII/var_route to Darwin versions that do not
+ * export struct in_ifaddr.
+ */
 config_require(mibII/ipAddr)
-config_require(mibII/at)
 config_require(mibII/var_route mibII/route_write)
+#endif /* !defined(darwin) || defined(HAVE_STRUCT_IN_IFADDR_IA_SUBNETMASK) */
+config_require(mibII/at)
 
 config_arch_require(solaris2,        kernel_sunos5)
 config_arch_require(linux,     mibII/kernel_linux)
