@@ -2444,7 +2444,6 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
             tclist = realloc(tclist, (tc_alloc + TC_INCR)*sizeof(struct tc));
             memset(tclist+tc_alloc, 0, TC_INCR*sizeof(struct tc));
             tc_alloc += TC_INCR;
-            snmp_log(LOG_ERR, "tcalloc=%d\n", tc_alloc);
         }
         if (!(type & SYNTAX_MASK)) {
             print_error("Textual convention doesn't map to real type",
