@@ -108,6 +108,9 @@
 /* Define to 1 if the system has the type `Counter64'. */
 #undef HAVE_COUNTER64
 
+/* Define to 1 if you have the <crt_externs.h> header file. */
+#undef HAVE_CRT_EXTERNS_H
+
 /* Define to 1 if you have the <curses.h> header file. */
 #undef HAVE_CURSES_H
 
@@ -489,6 +492,9 @@
 
 /* Define to 1 if you have the <machine/types.h> header file. */
 #undef HAVE_MACHINE_TYPES_H
+
+/* Define to 1 if you have the <mach-o/dyld.h> header file. */
+#undef HAVE_MACH_O_DYLD_H
 
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
@@ -979,6 +985,9 @@
 /* Define to 1 if `if_xname' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_XNAME
 
+/* Define to 1 if `ia_subnetmask' is a member of `struct in_ifaddr'. */
+#undef HAVE_STRUCT_IN_IFADDR_IA_SUBNETMASK
+
 /* Define to 1 if `ipi_spec_dst' is a member of `struct in_pktinfo'. */
 #undef HAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST
 
@@ -1438,6 +1447,12 @@
 
 /* Define if _get_osfhandle() is defined in <io.h> */
 #undef HAVE__GET_OSFHANDLE
+
+/* Define to 1 if you have the `_NSGetArgv' function. */
+#undef HAVE__NSGETARGV
+
+/* Define to 1 if you have the `_NSGetExecutablePath' function. */
+#undef HAVE__NSGETEXECUTABLEPATH
 
 /* Define if _open_osfhandle() is defined in <io.h> */
 #undef HAVE__OPEN_OSFHANDLE

@@ -157,8 +157,12 @@ SOFTWARE.
 #include <sys/systeminfo.h>
 #endif
 
-#if defined(darwin9)
+#if HAVE_CRT_EXTERNS_H
 #include <crt_externs.h>        /* for _NSGetArgv() */
+#endif
+
+#ifdef HAVE_MACH_O_DYLD_H
+#include <mach-o/dyld.h>
 #endif
 
 #if HAVE_PWD_H
@@ -279,7 +283,7 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
     int i = 0;
     DEBUGMSGT(("daemonize","deamonizing...\n"));
 #if HAVE_FORK
-#if defined(darwin9)
+#if HAVE__NSGETEXECUTABLEPATH
      char            path [PATH_MAX] = "";
      uint32_t        size = sizeof (path);
 
@@ -345,7 +349,7 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
             
             DEBUGMSGT(("daemonize","child continuing\n"));
 
-#if ! defined(darwin9)
+#if !defined(HAVE__NSGETARGV)
             _daemon_prep(stderr_log);
 #else
              /*
