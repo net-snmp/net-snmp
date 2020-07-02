@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "201902140000Z" -- February 14, 2019
+       LAST-UPDATED "202004020000Z" -- April 2, 2020
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -14,10 +14,22 @@
                              Los Angeles, CA 90094-2536
 
                      Tel:    +1 310-301-5800
-                     E-Mail: iana@iana.org"
+                     E-Mail: iana&iana.org"
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "202004020000Z"  -- April 2, 2020
+       DESCRIPTION  "Added reference to ifType definitions registry."
+
+       REVISION     "202001100000Z"  -- January 10, 2020
+       DESCRIPTION  "Addition of IANAifType 299."
+
+       REVISION     "201912030000Z"  -- December 3, 2019
+       DESCRIPTION  "Updated email address for IANA"
+
+       REVISION     "201910160000Z"  -- October 16, 2019
+       DESCRIPTION  "Addition of IANAifTypes 297-298."
 
        REVISION     "201902140000Z"  -- February 14, 2019
        DESCRIPTION  "Registration of new tunnelType 18."
@@ -348,8 +360,10 @@
                latest arrangements can be obtained by contacting the
                IANA.)
 
-               Requests for new values should be made to IANA via
-               email (iana&iana.org).
+               Interface types must not be directly added to the
+               IANAifType-MIB MIB module.  They must instead be added
+               to the 'ifType definitions' registry at
+               https://www.iana.org/assignments/smi-numbers.
 
                The relationship between the assignment of ifType
                values and of OIDs to particular media-specific MIBs
@@ -669,7 +683,10 @@
                    otnOduc (293), -- OTN ODUC
                    otnOtsig (294), -- OTN OTUC Signal
                    microwaveCarrierTermination (295), -- air interface of a single microwave carrier
-                   microwaveRadioLinkTerminal (296) -- radio link interface for one or several aggregated microwave carriers
+                   microwaveRadioLinkTerminal (296), -- radio link interface for one or several aggregated microwave carriers
+                   ieee8021axDrni (297), -- IEEE 802.1AX Distributed Resilient Network Interface
+                   ax25 (298), -- AX.25 network interfaces
+                   ieee19061nanocom (299) -- Nanoscale and Molecular Communication
                    }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
