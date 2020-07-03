@@ -352,6 +352,17 @@ case "$(uname)" in
 	# environment because the Python interpreter has been built on these
 	# environments with Visual C++. That compiler is incompatible with gcc.
         ;;
+    Darwin*)
+	case "$(uname -r)" in
+	    11.*|12.*)
+		if python3 -c 'import setuptools' 1>/dev/null 2>&1; then
+		    options+=(--with-python-modules)
+		fi
+		;;
+	    *)
+		;;
+	esac
+	;;
     *)
 	# Do not enable Python support for Cirrus CI because on Cirrus linking
 	# with Python fails as follows (this is probably a bug in Net-SNMP):
