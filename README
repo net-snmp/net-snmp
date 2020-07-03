@@ -247,6 +247,6 @@ THANKS
 
   This project has been graciously supported by a long list of people
   (too long to keep roperly up to date).  To them we owe our deepest
-  thanks (and you do too!).  Please see the git log, where the core
-  developers are careful to have pointed out where patches have come
-  from.
+  thanks (and you do too!).  Please see the git log or ChangeLog file,
+  where the core developers are careful to have (hopefully always)
+  pointed out where patches have come from.
