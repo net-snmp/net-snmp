@@ -13,7 +13,14 @@ ssl_include_path() {
 }
 
 freebsd_pkg_version() {
-    pkg info "$1" 2>/dev/null | sed -n 's/^Version[[:blank:]]*:[[:blank:]]*//p'
+    local pkg ver
+
+    for pkg in "$@"; do
+	ver=$(pkg info "$pkg" 2>/dev/null |
+		     sed -n 's/^Version[[:blank:]]*:[[:blank:]]*//p') &&
+	    [ -n "$ver" ] && echo "$ver" && return
+    done
+    return 1
 }
 
 branch_name="$1"
@@ -64,16 +71,14 @@ libsensorsver="$(for p in libsensors4-devel; do
                 sed -n 's/^[^[:blank:]]*[[:blank:]]*//p')"
 echo "libsensorsver=$libsensorsver"
 
-if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
+if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)|without-openssl'; then
     case "$(uname -a)" in
 	FreeBSD*)
-	    opensslver="$(freebsd_pkg_version openssl111 2>/dev/null)"
-	    if [ -z "$opensslver" ]; then
-		opensslver="$(freebsd_pkg_version openssl 2>/dev/null)"
-	    fi
+	    opensslver="$(freebsd_pkg_version libressl-devel openssl111 openssl\
+	                  2>/dev/null)"
 	    if [ -z "$opensslver" ]; then
 		opensslver="$(openssl version 2>&1 |
-				{ read a b c; echo "$b"; })"
+				{ read -r a b c; echo "$b"; })"
 	    fi
 	    ;;
 	Linux*)
@@ -95,13 +100,16 @@ if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
 	    opensslver=1.0;;
     esac
 fi
+if grep -q 'CentOS release 4' /etc/issue 2>/dev/null; then
+  opensslver=""
+fi
 echo "opensslver=$opensslver"
 
-case "$(uname -a)" in
+case "$(uname)" in
     FreeBSD*)
-	opensshver="$(freebsd_pkg_version libssh2 2>/dev/null)";;
+	libssh2ver="$(freebsd_pkg_version libssh2 2>/dev/null)";;
     Linux*)
-	opensshver="$(for p in openssh-devel libssh2-devel libssh-devel; do
+	libssh2ver="$(for p in openssh-devel libssh2-devel libssh-devel; do
                 rpm -q --qf '%{version}\n' $p 2>/dev/null |
                   grep -v 'not installed';
               done |
@@ -113,9 +121,9 @@ case "$(uname -a)" in
                 sed -n 's/^[^[:blank:]]*[[:blank:]]*//p')"
 	;;
 esac
-echo "opensshver=$opensshver"
+echo "libssh2ver=$libssh2ver"
 
-case "$(uname -a)" in
+case "$(uname)" in
     FreeBSD*)
 	perldevver="$(freebsd_pkg_version perl5 2>/dev/null)";;
     Linux*)
@@ -194,7 +202,6 @@ case "$(uname)" in
               mibs+=(ip-mib/ipv4InterfaceTable)
               mibs+=(ip-mib/ipv6InterfaceTable)
               mibs+=(ip-mib/ipv6ScopeZoneIndexTable)
-              mibs+=(mibII/ipAddr)
               mibs+=(mibII/mta_sendmail)
               mibs+=(misc/ipfwacc)
               mibs+=(sctp-mib)
@@ -230,18 +237,6 @@ case "$(uname)" in
       transports+=(IPX)
       transports+=(STD)
       $is_5_8_or_above && transports+=(UDPshared)
-      if [ "$opensslver" = "" ]; then
-	  options+=("--with-openssl=internal")
-      else
-	  if [ "$MODE" != "read-only" ]; then
-	      # these MIB modules do not support read-only
-	      mibs+=(snmp-usm-dh-objects-mib)
-	      if [ -z "$CIRRUS_CI" ]; then
-		  mibs+=(tlstm-mib)
-	      fi
-	      mibs+=(tsm-mib)
-	  fi
-      fi
       options+=("--with-default-snmp-version=2")
       options+=("--with-systemd")
       # Disabled modules because troublesome: Rmon ipfwchains/ipfwchains ucd-snmp/lmSensors
@@ -257,7 +252,6 @@ case "$(uname)" in
               mibs+=(mibII/mta_sendmail)
               mibs+=(misc/ipfwacc)
               mibs+=(snmp-notification-mib)
-              mibs+=(snmp-usm-dh-objects-mib)
               mibs+=(tcp-mib)
               mibs+=(ucd-snmp/diskio)
               mibs+=(ucd-snmp/extensible)
@@ -284,7 +278,6 @@ case "$(uname)" in
               mibs+=(misc/ipfwacc)
               mibs+=(sctp-mib)
               mibs+=(snmp-notification-mib)
-              mibs+=(snmp-usm-dh-objects-mib)
               mibs+=(tcp-mib)
               mibs+=(ucd-snmp/diskio)
               mibs+=(ucd-snmp/extensible)
@@ -334,10 +327,23 @@ for o in "${options[@]}"; do
         with_openssl="${o#--with-openssl=}"
     fi
 done
-if [ "$opensslver" != "" ] &&
-	grep -rqw BIO_dgram_get_peer "$(ssl_include_path)" 2>/dev/null
-then
-    transports+=(DTLSUDP TLSTCP)
+if [ "$opensslver" = "" ]; then
+    options+=("--with-openssl=internal")
+    with_openssl="internal"
+else
+    if grep -rqw BIO_dgram_get_peer "$(ssl_include_path)" 2>/dev/null; then
+	transports+=(DTLSUDP TLSTCP)
+    fi
+    if [ "$MODE" != "read-only" ]; then
+	# these MIB modules do not support read-only
+	if [ -e "$(ssl_include_path)/dh.h" ]; then
+	    mibs+=(snmp-usm-dh-objects-mib)
+	fi
+	if [ -e "$(ssl_include_path)/ssl.h" ]; then
+	    mibs+=(tlstm-mib)
+	fi
+	mibs+=(tsm-mib)
+    fi
 fi
 if [ "$with_openssl" != "internal" ] && $is_5_8_or_above &&
        [ -e "$(ssl_include_path)/aes.h" ] &&
@@ -391,7 +397,7 @@ case "$MODE" in
         exit 1;;
 esac
 
-[ "${opensshver#2}" != "${opensshver}" ] && transports+=(SSH)
+[ "${libssh2ver#2}" != "${libssh2ver}" ] && transports+=(SSH)
 set -x
 ./configure "${options[@]}" --with-transports="${transports[*]}" \
             --with-security-modules="${security_modules[*]}"	 \
