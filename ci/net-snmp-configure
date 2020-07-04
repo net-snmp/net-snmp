@@ -13,7 +13,14 @@ ssl_include_path() {
 }
 
 freebsd_pkg_version() {
-    pkg info "$1" 2>/dev/null | sed -n 's/^Version[[:blank:]]*:[[:blank:]]*//p'
+    local pkg ver
+
+    for pkg in "$@"; do
+	ver=$(pkg info "$pkg" 2>/dev/null |
+		     sed -n 's/^Version[[:blank:]]*:[[:blank:]]*//p') &&
+	    [ -n "$ver" ] && echo "$ver" && return
+    done
+    return 1
 }
 
 branch_name="$1"
@@ -64,16 +71,14 @@ libsensorsver="$(for p in libsensors4-devel; do
                 sed -n 's/^[^[:blank:]]*[[:blank:]]*//p')"
 echo "libsensorsver=$libsensorsver"
 
-if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
+if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)|without-openssl'; then
     case "$(uname -a)" in
 	FreeBSD*)
-	    opensslver="$(freebsd_pkg_version openssl111 2>/dev/null)"
-	    if [ -z "$opensslver" ]; then
-		opensslver="$(freebsd_pkg_version openssl 2>/dev/null)"
-	    fi
+	    opensslver="$(freebsd_pkg_version libressl-devel openssl111 openssl\
+	                  2>/dev/null)"
 	    if [ -z "$opensslver" ]; then
 		opensslver="$(openssl version 2>&1 |
-				{ read a b c; echo "$b"; })"
+				{ read -r a b c; echo "$b"; })"
 	    fi
 	    ;;
 	Linux*)
@@ -95,13 +100,16 @@ if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)'; then
 	    opensslver=1.0;;
     esac
 fi
+if grep -q 'CentOS release 4' /etc/issue 2>/dev/null; then
+  opensslver=""
+fi
 echo "opensslver=$opensslver"
 
-case "$(uname -a)" in
+case "$(uname)" in
     FreeBSD*)
-	opensshver="$(freebsd_pkg_version libssh2 2>/dev/null)";;
+	libssh2ver="$(freebsd_pkg_version libssh2 2>/dev/null)";;
     Linux*)
-	opensshver="$(for p in openssh-devel libssh2-devel libssh-devel; do
+	libssh2ver="$(for p in openssh-devel libssh2-devel libssh-devel; do
                 rpm -q --qf '%{version}\n' $p 2>/dev/null |
                   grep -v 'not installed';
               done |
@@ -113,9 +121,9 @@ case "$(uname -a)" in
                 sed -n 's/^[^[:blank:]]*[[:blank:]]*//p')"
 	;;
 esac
-echo "opensshver=$opensshver"
+echo "libssh2ver=$libssh2ver"
 
-case "$(uname -a)" in
+case "$(uname)" in
     FreeBSD*)
 	perldevver="$(freebsd_pkg_version perl5 2>/dev/null)";;
     Linux*)
@@ -194,7 +202,6 @@ case "$(uname)" in
               mibs+=(ip-mib/ipv4InterfaceTable)
               mibs+=(ip-mib/ipv6InterfaceTable)
               mibs+=(ip-mib/ipv6ScopeZoneIndexTable)
-              mibs+=(mibII/ipAddr)
               mibs+=(mibII/mta_sendmail)
               mibs+=(misc/ipfwacc)
               mibs+=(sctp-mib)
@@ -322,6 +329,7 @@ for o in "${options[@]}"; do
 done
 if [ "$opensslver" = "" ]; then
     options+=("--with-openssl=internal")
+    with_openssl="internal"
 else
     if grep -rqw BIO_dgram_get_peer "$(ssl_include_path)" 2>/dev/null; then
 	transports+=(DTLSUDP TLSTCP)
@@ -389,7 +397,7 @@ case "$MODE" in
         exit 1;;
 esac
 
-[ "${opensshver#2}" != "${opensshver}" ] && transports+=(SSH)
+[ "${libssh2ver#2}" != "${libssh2ver}" ] && transports+=(SSH)
 set -x
 ./configure "${options[@]}" --with-transports="${transports[*]}" \
             --with-security-modules="${security_modules[*]}"	 \
