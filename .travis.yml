@@ -14,10 +14,13 @@ osx_image:
   - xcode11.2
   - xcode11.1
   - xcode11
-  - xcode10.3
-  - xcode10.2
-  - xcode10.1
-  - xcode10
+  # Apparently when building with Xcode 10, the internal crypto code is
+  # selected. The SNMPv3 tests fail when built with the internal crypto code
+  # (snmpd reports "security service 3 error parsing ScopedPDU").
+  # - xcode10.3
+  # - xcode10.2
+  # - xcode10.1
+  # - xcode10
   - xcode9.4
   - xcode9.3
   - xcode9.2
