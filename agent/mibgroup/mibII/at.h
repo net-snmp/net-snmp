@@ -10,8 +10,6 @@
 #include <net/route.h>
 #endif
 
-config_arch_require(solaris2, kernel_sunos5)
-
      extern void     init_at(void);
      extern FindVarMethod var_atEntry;
 
@@ -31,6 +29,7 @@ config_arch_require(solaris2, kernel_sunos5)
 #if defined(WIN32) || defined(cygwin)
 config_require(mibII/data_access/at_iphlpapi)
 #elif defined(solaris2)
+config_require(kernel_sunos5)
 config_require(mibII/data_access/at_solaris)
 #elif defined(linux)
 config_require(mibII/data_access/at_linux)
