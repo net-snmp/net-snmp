@@ -35767,7 +35767,7 @@ else $as_nop
 #include <stddef.h>
 #include <stdlib.h>
 
-int main(void)
+int main(int argc, char **argv)
 {
   int                 mib[2];
   size_t              len;
@@ -35777,11 +35777,7 @@ int main(void)
   mib[1] = KERN_BOOTTIME;
 
   len = sizeof(boottime);
-  sysctl(mib, 2, &boottime, &len, NULL, NULL);
-  if (boottime.tv_sec != 0)
-    exit(0);
-  else
-    exit(1);
+  return 1 - (sysctl(mib, 2, &boottime, &len, NULL, 0) == 0 && boottime.tv_sec);
 }
 
 _ACEOF
