@@ -36869,7 +36869,7 @@ else $as_nop
 #include <stddef.h>
 #include <stdlib.h>
 
-int main(void)
+int main(int argc, char **argv)
 {
   int                 mib[2];
   size_t              len;
