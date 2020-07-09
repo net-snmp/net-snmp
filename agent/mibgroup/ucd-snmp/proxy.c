@@ -572,6 +572,17 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
     }
 
     switch (operation) {
+    case NETSNMP_CALLBACK_OP_RESEND:
+         /*
+         * Issue#147: Net-SNMP not responding when proxy requests times out
+         *
+         * When snmp_api issue a resend, the default case was hit and the 
+         * delagated cache was freed.
+         * As a result, the NETSNMP_CALLBACK_OP_TIMED_OUT never came in.
+         */
+        DEBUGMSGTL(("proxy", "pdu has been resent for request = %8p\n", requests));
+        return SNMP_ERR_NOERROR;
+
     case NETSNMP_CALLBACK_OP_TIMED_OUT:
         /*
          * WWWXXX: don't leave requests delayed if operation is
