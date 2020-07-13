@@ -109,7 +109,7 @@ void
 init_ifTable(void)
 {
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           SNMP_CALLBACK_PRE_READ_CONFIG,
                            _init_ifTable, NULL);
 }
 
