@@ -129,7 +129,7 @@ init_snmp_transport(void)
 #ifndef NETSNMP_FEATURE_REMOVE_FILTER_SOURCE
     register_app_config_handler("sourceFilterType",
                                 netsnmp_transport_parse_filterType,
-                                NULL, "none|whitelist|blacklist");
+                                NULL, "none|acceptlist|blocklist");
     register_app_config_handler("sourceFilterAddress",
                                 netsnmp_transport_parse_filter,
                                 netsnmp_transport_filter_cleanup,
@@ -338,11 +338,17 @@ void
 netsnmp_transport_parse_filterType(const char *word, char *cptr)
 {
     int type = 42;
-    if (strcmp(cptr,"whitelist") == 0)
+    if (strcmp(cptr,"acceptlist") == 0)
         type = 1;
-    else if (strcmp(cptr,"blacklist") == 0)
+    else if (strcmp(cptr,"whitelist") == 0) {
+	netsnmp_config_warn("Deprecated configuration term found -- Please use 'acceptlist' instead");
+        type = 1;
+    } else if (strcmp(cptr,"blocklist") == 0)
         type = -1;
-    else if (strcmp(cptr,"none") == 0)
+    else if (strcmp(cptr,"blacklist") == 0) {
+	netsnmp_config_warn("Deprecated configuration term found -- Please use 'blocklist' instead");
+        type = -1;
+    } else if (strcmp(cptr,"none") == 0)
         type = 0;
     else
         netsnmp_config_error("unknown source filter type: %s", cptr);

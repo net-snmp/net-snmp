@@ -753,13 +753,13 @@ e.g. "loop0"
 Excludes all LInux ramdisk block devices, whose names start with "ram", e.g.
 "ram0"
 .PP
-On Linux systems, it is also possible to report only explicitly whitelisted
+On Linux systems, it is also possible to report only explicitly accepted
 devices. It may take significant amount of time to process diskIOTable data
-on systems with tens of thousands of block devices and whitelisting only the
+on systems with tens of thousands of block devices and accept only the
 important ones avoids large CPU consumption.
 .IP "diskio <device>"
-Enables whitelisting of devices and adds the device to the whitelist. Only
-explicitly whitelisted devices will be reported. This option may be used
+Enables acceptlist of devices and adds the device to the acceptlist. Only
+explicitly acceptlisted devices will be reported. This option may be used
 multiple times.
 .SS System Load Monitoring
 This requires that the agent was built with support for either the

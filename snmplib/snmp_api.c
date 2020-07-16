@@ -5599,9 +5599,9 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
               filtered = netsnmp_transport_filter_check(sourceaddr);
           }
           if ((filter == -1) && filtered)
-              dropstr = "matched blacklist";
+              dropstr = "matched blocklist";
           else if ((filter == 1) && !filtered)
-              dropstr = "didn't match whitelist";
+              dropstr = "didn't match acceptlist";
           if (dropstr) {
               DEBUGMSGTL(("sess_process_packet:filter",
                           "packet from %s %s\n",
