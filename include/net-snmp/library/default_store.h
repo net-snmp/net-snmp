@@ -129,7 +129,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_TIMEOUT             14
 #define NETSNMP_DS_LIB_RETRIES             15
 #define NETSNMP_DS_LIB_MSG_SEND_MAX        16 /* global max response size */
-#define NETSNMP_DS_LIB_FILTER_TYPE         17 /* 0=NONE, 1=whitelist, -1=blacklist */
+#define NETSNMP_DS_LIB_FILTER_TYPE         17 /* 0=NONE, 1=acceptlist, -1=blocklist */
 #define NETSNMP_DS_LIB_MAX_INT_ID          48 /* match NETSNMP_DS_MAX_SUBIDS */
     
     /*

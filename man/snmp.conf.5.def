@@ -319,15 +319,15 @@ This directive will be ignored if the platforms does not support
 is similar to \fIserverRecvBuf\fR, but applies to the size
 of the buffer used when sending SNMP responses.
 .IP
-.IP "sourceFilterType none|whitelist|blacklist"
+.IP "sourceFilterType none|acceptlist|blocklist"
 specifies whether or not addresses added with \fIsourceFilterAddress\fR are
-whitelisted or blacklisted. The default is none, indicating that incoming
+accepted or blocked. The default is none, indicating that incoming
 packets will not be checked agains the filter list.
 .IP
 .IP "sourceFilterAddress ADDRESS"
 specifies an address to be added to the source address filter list.
 \fIsourceFilterType\fR configuration determines whether or not addresses are
-whitelisted or blacklisted.
+accepted or blocked.
 .IP
 .SH MIB HANDLING
 .IP "mibdirs DIRLIST"
