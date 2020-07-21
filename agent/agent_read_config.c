@@ -118,7 +118,7 @@ netsnmp_feature_child_of(snmpd_unregister_config_handler, agent_read_config_all)
 
 #ifdef HAVE_UNISTD_H
 void
-snmpd_set_agent_user(const char *token, char *cptr)
+netsnmp_parse_agent_user(const char *token, char *cptr)
 {
     if (cptr[0] == '#') {
         char           *ecp;
@@ -147,7 +147,7 @@ snmpd_set_agent_user(const char *token, char *cptr)
 }
 
 void
-snmpd_set_agent_group(const char *token, char *cptr)
+netsnmp_parse_agent_group(const char *token, char *cptr)
 {
     if (cptr[0] == '#') {
         char           *ecp;
@@ -256,9 +256,9 @@ init_agent_read_config(const char *app)
                                NETSNMP_DS_AGENT_TRAP_ADDR);
 #ifdef HAVE_UNISTD_H
     register_app_config_handler("agentuser",
-                                snmpd_set_agent_user, NULL, "userid");
+                                netsnmp_parse_agent_user, NULL, "userid");
     register_app_config_handler("agentgroup",
-                                snmpd_set_agent_group, NULL, "groupid");
+                                netsnmp_parse_agent_group, NULL, "groupid");
 #endif
 #ifndef NETSNMP_NO_LISTEN_SUPPORT
     register_app_config_handler("agentaddress",

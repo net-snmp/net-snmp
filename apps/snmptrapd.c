@@ -412,65 +412,6 @@ parse_config_pidFile(const char *token, char *cptr)
   pid_file = strdup (cptr);
 }
 
-#ifdef HAVE_UNISTD_H
-void
-parse_config_agentuser(const char *token, char *cptr)
-{
-    if (cptr[0] == '#') {
-        char           *ecp;
-        int             uid;
-
-        uid = strtoul(cptr + 1, &ecp, 10);
-        if (*ecp != 0) {
-            config_perror("Bad number");
-	} else {
-	    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-			       NETSNMP_DS_AGENT_USERID, uid);
-	}
-#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
-    } else {
-        struct passwd *info;
-
-        info = getpwnam(cptr);
-        if (info)
-            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-                               NETSNMP_DS_AGENT_USERID, info->pw_uid);
-        else
-            config_perror("User not found in passwd database");
-        endpwent();
-#endif
-    }
-}
-
-void
-parse_config_agentgroup(const char *token, char *cptr)
-{
-    if (cptr[0] == '#') {
-        char           *ecp;
-        int             gid = strtoul(cptr + 1, &ecp, 10);
-
-        if (*ecp != 0) {
-            config_perror("Bad number");
-	} else {
-            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-			       NETSNMP_DS_AGENT_GROUPID, gid);
-	}
-#if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
-    } else {
-        struct group   *info;
-
-        info = getgrnam(cptr);
-        if (info)
-            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-                               NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
-        else
-            config_perror("Group not found in group database");
-        endgrent();
-#endif
-    }
-}
-#endif
-
 void
 parse_config_doNotFork(const char *token, char *cptr)
 {
@@ -667,11 +608,11 @@ main(int argc, char *argv[])
 #endif
 #ifdef HAVE_UNISTD_H
     register_config_handler("snmptrapd", "agentuser",
-                            parse_config_agentuser, NULL, "userid");
+                            netsnmp_parse_agent_user, NULL, "userid");
     register_config_handler("snmptrapd", "agentgroup",
-                            parse_config_agentgroup, NULL, "groupid");
+                            netsnmp_parse_agent_group, NULL, "groupid");
 #endif
-    
+
     register_config_handler("snmptrapd", "doNotFork",
                             parse_config_doNotFork, NULL, "(1|yes|true|0|no|false)");
 
