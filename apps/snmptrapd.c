@@ -713,8 +713,8 @@ main(int argc, char *argv[])
 #if HAVE_UNISTD_H
         case 'g':
             if (optarg != NULL) {
-                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_GROUPID, gid = atoi(optarg));
+                gid = atoi(optarg);
+                netsnmp_set_agent_group_id(gid);
             } else {
                 usage();
                 goto out;
@@ -843,8 +843,7 @@ main(int argc, char *argv[])
                     fprintf(stderr, "Bad user id: %s\n", optarg);
                     goto out;
                 }
-                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_USERID, uid);
+                netsnmp_set_agent_user_id(uid);
             } else {
                 usage();
                 goto out;
