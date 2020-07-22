@@ -118,11 +118,25 @@ netsnmp_feature_child_of(snmpd_unregister_config_handler, agent_read_config_all)
 
 void netsnmp_set_agent_user_id(int uid)
 {
+    static int agent_user_id = -1;
+
+    if (agent_user_id != -1 && uid != agent_user_id) {
+        snmp_log(LOG_ERR, "User ID has already been set -- can not change\n");
+        return;
+    }
+    agent_user_id = uid;
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_USERID, uid);
 }
 
 void netsnmp_set_agent_group_id(int gid)
 {
+    static int agent_group_id = -1;
+
+    if (agent_group_id != -1 && gid != agent_group_id) {
+        snmp_log(LOG_ERR, "Group ID has already been set -- can not change\n");
+        return;
+    }
+    agent_group_id = gid;
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_GROUPID,
                        gid);
 }
