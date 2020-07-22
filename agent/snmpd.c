@@ -568,8 +568,7 @@ main(int argc, char *argv[])
                     fprintf(stderr, "Bad group id: %s\n", optarg);
                     goto out;
                 }
-                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_GROUPID, gid);
+                netsnmp_set_agent_group_id(gid);
             } else {
                 usage(argv[0]);
             }
@@ -747,8 +746,7 @@ main(int argc, char *argv[])
                     fprintf(stderr, "Bad user id: %s\n", optarg);
                     goto out;
                 }
-                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_USERID, uid);
+                netsnmp_set_agent_user_id(uid);
             } else {
                 usage(argv[0]);
             }
