@@ -12,6 +12,8 @@ listing of all changes made to the code.
     snmpd:
       - Security vulnerabilty in the ping MIB reported by Christopher Ertl
 	from Microsoft fixed
+      - Changing to a different uid/gid can only be done once
+      - The extend mib is now read-only by default
 
     snmptrap:
       - BUG: 2899: Patch from Drew Roedersheimer to set library
