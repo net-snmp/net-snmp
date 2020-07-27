@@ -19059,7 +19059,7 @@ while test "x$new_transport_list" != "x"; do
       #---------------------
       # build a pseudo include header that includes current config and
       # system symbols:
-      rm -f conftest.$ac_ext module_tmp_header.h
+      rm -f conftest.$ac_ext module_tmp_header.i
       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -19072,12 +19072,12 @@ while test "x$new_transport_list" != "x"; do
 #define config_error(foo) config_checkit_error(foo)
 #include "$rel_transport_hdr"
 _ACEOF
-      mv conftest.$ac_ext module_tmp_header.h
+      $MODULECPP conftest.$ac_ext >module_tmp_header.i 2>/dev/null
 
       #
       # check for dependencies using config_require() macro
       #
-      sub_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require *( *\(.*\) *).*/\1/'`
+      sub_list=`cat module_tmp_header.i | $SED -n 's/.*config_checkit_require *( *\(.*\) *).*/\1/p'`
       if test "x$sub_list" != "x" ; then
         for j in $sub_list ; do
 	  if echo " $future_new_transport_list $new_transport_list " | $GREP " $j " > /dev/null ; then
@@ -19091,7 +19091,7 @@ _ACEOF
       #
       # check for errors using config_error() macro
       #
-      error_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_error | $SED 's/.*config_checkit_error(\(.*\)).*/\1/g'`
+      error_list=`cat module_tmp_header.i | $SED -n 's/.*config_checkit_error(\(.*\)).*/\1/gp'`
       if test "x$error_list" != "x" ; then
         echo ""
         as_fn_error $? "$error_list" "$LINENO" 5
@@ -21475,14 +21475,14 @@ while test "x$new_module_list" != "x"; do
     #---------------------
     # build a pseudo include header that includes current config and
     # system symbols:
-    rm -f conftest.$ac_ext module_tmp_header.h
+    rm -f conftest.$ac_ext module_tmp_header.i
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 #include NETSNMP_SYSTEM_INCLUDE_FILE
 #include "$srcdir/$mibdir/$i.h"
 _ACEOF
-    mv conftest.$ac_ext module_tmp_header.h
+    $MODULECPP conftest.$ac_ext >module_tmp_header.i 2>/dev/null
 
     #---------------------
     # macro: config_belongs_in(ARG)
@@ -21494,7 +21494,7 @@ _ACEOF
     module_type=mib_module
     if test -f $srcdir/$mibdir/$i.h; then
 
-      module_type=`$MODULECPP module_tmp_header.h | \
+      module_type=`cat module_tmp_header.i | \
                    $SED -n 's@.*config_belongs_in(\([^)]*\)).*@\1@p'`
 
     fi
@@ -21596,7 +21596,7 @@ _ACEOF
         # check if $i has any conflicts
         #
 
-        new_list_excl=`$MODULECPP module_tmp_header.h | \
+        new_list_excl=`cat module_tmp_header.i | \
                        $SED -n 's/.*config_exclude(\(.*\)).*/\1/p'`
 	if test "x$new_list_excl" != "x"; then
 
@@ -21642,7 +21642,7 @@ EOF
         #
 
 
-        new_list_arch=`$MODULECPP module_tmp_header.h | \
+        new_list_arch=`cat module_tmp_header.i | \
                        $SED -n 's/.*config_arch_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xarchx-\2/p'`
 
 	if test "x$new_list_arch" != "x"; then
@@ -21673,7 +21673,7 @@ EOF
       	#  - lists alternative modules used from different versions.
         #
 
-        new_list_alt3=`$MODULECPP module_tmp_header.h | \
+        new_list_alt3=`cat module_tmp_header.i | \
             $AWK '
                 BEGIN {
                     if("'"$enable_new_features"'" == "yes")
@@ -21720,7 +21720,7 @@ EOF
         # check if $i has any other required modules
         #
 
-        new_list="$new_list `$MODULECPP module_tmp_header.h | \
+        new_list="$new_list `cat module_tmp_header.i | \
                   $SED -n 's/.*config_require(\(.*\)).*/\1/p'`"
 
   if test $module_debug = 1; then
@@ -21779,7 +21779,7 @@ EOF
         # check if $i has any mibs to add
         #
 
-        new_mibs=`$MODULECPP module_tmp_header.h | \
+        new_mibs=`cat module_tmp_header.i | \
                   $SED -n 's/.*config_add_mib(\(.*\)).*/\1/p'`
 	if test "x$new_mibs" != "x"; then
 	    for j in $new_mibs
@@ -21821,7 +21821,7 @@ EOF
         #-------------------
         # check for unsupported config_load_mib
         #
-        if $MODULECPP module_tmp_header.h | $GREP -q config_load_mib; then
+        if cat module_tmp_header.i | $GREP -q config_load_mib; then
           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: mib module error" >&5
 $as_echo "$as_me: WARNING: mib module error" >&2;}
       	  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: mib module \"$i\" uses the \"config_load_mib\" directive, which is no longer supported.  It probably won't work." >&5
@@ -21834,7 +21834,7 @@ $as_echo "$as_me: WARNING: mib module \"$i\" uses the \"config_load_mib\" direct
         #
 
 
-        $MODULECPP module_tmp_header.h | \
+        cat module_tmp_header.i | \
         $SED -n 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@p' >> $mibdir/mib_module_dot_conf.h
 
 
@@ -21845,7 +21845,7 @@ $as_echo "$as_me: WARNING: mib module \"$i\" uses the \"config_load_mib\" direct
         # check if $i has any errors, or warnings
         #
 
-        error=`$MODULECPP module_tmp_header.h | \
+        error=`cat module_tmp_header.i | \
                $SED -n 's/.*config_error(\(.*\)).*/\1/p'`
 	if test "x$error" != "x"; then
           echo
@@ -21858,7 +21858,7 @@ $as_echo "$as_me: WARNING: mib module \"$i\" uses the \"config_load_mib\" direct
       	#  - used to signal a configuration "warning" to be printed to the user
         #
 
-        warning=`$MODULECPP module_tmp_header.h | \
+        warning=`cat module_tmp_header.i | \
                  $SED -n 's/.*config_warning(\(.*\)).*/\1/p'`
 	if test "x$warning" != "x"; then
           all_warnings="$all_warnings $warning
@@ -22090,7 +22090,7 @@ EOFOCFIN
 done
 
 # cleanup
-rm -f conftest.$ac_ext module_tmp_header.h
+rm -f conftest.$ac_ext module_tmp_header.i
 
 #-------------------
 # build module lists for Makefiles

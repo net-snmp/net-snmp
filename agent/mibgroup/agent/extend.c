@@ -646,9 +646,9 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
     netsnmp_request_info       *request;
     netsnmp_table_request_info *table_info;
     netsnmp_extend             *extension;
-    extend_registration_block  *eptr;
+    extend_registration_block  *eptr NETSNMP_ATTRIBUTE_UNUSED;
     int  i;
-    int  need_to_validate = 0;
+    int  need_to_validate NETSNMP_ATTRIBUTE_UNUSED = 0;
 
     for ( request=requests; request; request=request->next ) {
         if (request->processed)

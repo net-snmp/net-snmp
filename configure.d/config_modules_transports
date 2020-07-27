@@ -68,7 +68,7 @@ while test "x$new_transport_list" != "x"; do
       #---------------------
       # build a pseudo include header that includes current config and
       # system symbols:
-      rm -f conftest.$ac_ext module_tmp_header.h
+      rm -f conftest.$ac_ext module_tmp_header.i
       AC_LANG_CONFTEST([AC_LANG_SOURCE([[
 #include NETSNMP_SYSTEM_INCLUDE_FILE
 #undef NETSNMP_MINIMAL_CODE
@@ -78,12 +78,12 @@ while test "x$new_transport_list" != "x"; do
 #undef config_error
 #define config_error(foo) config_checkit_error(foo)
 #include "$rel_transport_hdr"]])])
-      mv conftest.$ac_ext module_tmp_header.h
+      $MODULECPP conftest.$ac_ext >module_tmp_header.i 2>/dev/null
 
       #
       # check for dependencies using config_require() macro
       #
-      sub_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require *( *\(.*\) *).*/\1/'`
+      sub_list=`cat module_tmp_header.i | $SED -n 's/.*config_checkit_require *( *\(.*\) *).*/\1/p'`
       if test "x$sub_list" != "x" ; then
         for j in $sub_list ; do
 	  if echo " $future_new_transport_list $new_transport_list " | $GREP " $j " > /dev/null ; then
@@ -97,7 +97,7 @@ while test "x$new_transport_list" != "x"; do
       #
       # check for errors using config_error() macro
       #
-      error_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_error | $SED 's/.*config_checkit_error(\(.*\)).*/\1/g'`
+      error_list=`cat module_tmp_header.i | $SED -n 's/.*config_checkit_error(\(.*\)).*/\1/gp'`
       if test "x$error_list" != "x" ; then
         echo ""
         AC_MSG_ERROR($error_list)
