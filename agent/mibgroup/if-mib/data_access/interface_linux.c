@@ -1256,9 +1256,9 @@ void netsnmp_prefix_process(int fd, void *data)
         iret = net_snmp_delete_prefix_info (list_info.list_head, in6pAddr);
         if(iret < 0)
             DEBUGMSGTL(("access:interface:prefix", "Unable to delete the prefix info\n"));
-            if(!iret)
-                DEBUGMSGTL(("access:interface:prefix", "Unable to find the node to delete\n"));
-            have_addr = 0;
+        if(!iret)
+            DEBUGMSGTL(("access:interface:prefix", "Unable to find the node to delete\n"));
+        have_addr = 0;
     }
 }
 #endif
