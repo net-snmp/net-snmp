@@ -341,8 +341,8 @@ tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
     DEBUGIF("tlstmAddrTable:entry:delete") {
         char name[sizeof(entry->snmpTargetAddrName)+1];
         snprintf(name, sizeof(name), "%s", entry->snmpTargetAddrName);
-        DEBUGMSGT(("tlstmAddrTable:entry:delete", "entry %s %p / row %p\n",
-                   name, entry, row));
+        DEBUGMSGT(("tlstmAddrTable:entry:delete", "entry %s %p\n", name,
+                   entry));
     }
     if (entry && entry->undo)
         _freeUndo(entry);
