@@ -642,13 +642,11 @@ OTHERAGENTLIBLFTS
 OTHERAGENTLIBLOBJS
 OTHERAGENTLIBOBJS
 AGENTLIBS
-LMIBLIBS
 PSCMD
 LPSTAT_PATH
 LIBOBJS
 ALLOCA
 VAL_LIBS
-LAGENTLIBS
 LNETSNMPLIBS
 PYTHONFEATURES
 PYTHONARGS
@@ -694,6 +692,8 @@ NETSNMP_DEFAULT_MIBS
 ENV_SEPARATOR
 dllcleans
 default_mibs_install
+LMIBLIBS
+LAGENTLIBS
 krb5_config
 security_ftobj_list
 security_lobj_list
@@ -18546,8 +18546,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_pkginfo_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_pkginfo_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_pkginfo_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_pkginfo_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_pkginfo_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_pkginfo_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -18635,8 +18635,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_pkg_init_LIBS" >&5
 $as_echo "$netsnmp_cv_func_pkg_init_LIBS" >&6; }
- if test "${netsnmp_cv_func_pkg_init_LIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_pkg_init_LIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_pkg_init_LIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_pkg_init_LIBS}" != "xnone required" ; then
        LIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -18731,8 +18731,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_pkg_init_LIBS" >&5
 $as_echo "$netsnmp_cv_func_pkg_init_LIBS" >&6; }
- if test "${netsnmp_cv_func_pkg_init_LIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_pkg_init_LIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_pkg_init_LIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_pkg_init_LIBS}" != "xnone required" ; then
        LIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -18836,8 +18836,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -18926,8 +18926,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_open_mib_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_open_mib_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_open_mib_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_open_mib_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_open_mib_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_open_mib_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -20578,8 +20578,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&5
 $as_echo "$netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&6; }
- if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "xnone required" ; then
        CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
     ac_cv_have_krb5=yes
@@ -20654,8 +20654,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_error_message_CRYPTO_LIBS" >&5
 $as_echo "$netsnmp_cv_func_error_message_CRYPTO_LIBS" >&6; }
- if test "${netsnmp_cv_func_error_message_CRYPTO_LIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_error_message_CRYPTO_LIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_error_message_CRYPTO_LIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_error_message_CRYPTO_LIBS}" != "xnone required" ; then
        CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -20786,8 +20786,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&5
 $as_echo "$netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&6; }
- if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "xnone required" ; then
        CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
     ac_cv_NETSNMP_USE_KERBEROS_MIT=yes
@@ -20865,8 +20865,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS" >&5
 $as_echo "$netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS" >&6; }
- if test "${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS}" != "xnone required" ; then
        CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -21158,8 +21158,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_rpmGetPath__rpmlibs" >&5
 $as_echo "$netsnmp_cv_func_rpmGetPath__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_rpmGetPath__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_rpmGetPath__rpmlibs}" != "none required" ; then
+ if test "x${netsnmp_cv_func_rpmGetPath__rpmlibs}" != "xno" ; then
+    if test "x${netsnmp_cv_func_rpmGetPath__rpmlibs}" != "xnone required" ; then
        _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -21235,8 +21235,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_rpmdbOpen__rpmlibs" >&5
 $as_echo "$netsnmp_cv_func_rpmdbOpen__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "none required" ; then
+ if test "x${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "xno" ; then
+    if test "x${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "xnone required" ; then
        _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -21311,8 +21311,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_rpmReadConfigFiles__rpmlibs" >&5
 $as_echo "$netsnmp_cv_func_rpmReadConfigFiles__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_rpmReadConfigFiles__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_rpmReadConfigFiles__rpmlibs}" != "none required" ; then
+ if test "x${netsnmp_cv_func_rpmReadConfigFiles__rpmlibs}" != "xno" ; then
+    if test "x${netsnmp_cv_func_rpmReadConfigFiles__rpmlibs}" != "xnone required" ; then
        _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -21365,8 +21365,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_headerGet_LIBS" >&5
 $as_echo "$netsnmp_cv_func_headerGet_LIBS" >&6; }
- if test "${netsnmp_cv_func_headerGet_LIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_headerGet_LIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_headerGet_LIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_headerGet_LIBS}" != "xnone required" ; then
        LIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -21665,8 +21665,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_exp_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_exp_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_exp_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_exp_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_exp_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_exp_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -21744,8 +21744,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kvm_read_LAGENTLIBS" >&5
 $as_echo "$netsnmp_cv_func_kvm_read_LAGENTLIBS" >&6; }
- if test "${netsnmp_cv_func_kvm_read_LAGENTLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kvm_read_LAGENTLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_kvm_read_LAGENTLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_kvm_read_LAGENTLIBS}" != "xnone required" ; then
        LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -21819,8 +21819,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kvm_openfiles_LAGENTLIBS" >&5
 $as_echo "$netsnmp_cv_func_kvm_openfiles_LAGENTLIBS" >&6; }
- if test "${netsnmp_cv_func_kvm_openfiles_LAGENTLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kvm_openfiles_LAGENTLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_kvm_openfiles_LAGENTLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_kvm_openfiles_LAGENTLIBS}" != "xnone required" ; then
        LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -21894,8 +21894,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kvm_getprocs_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_kvm_getprocs_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_kvm_getprocs_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kvm_getprocs_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_kvm_getprocs_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_kvm_getprocs_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -21969,8 +21969,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kvm_getproc2_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_kvm_getproc2_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_kvm_getproc2_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kvm_getproc2_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_kvm_getproc2_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_kvm_getproc2_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -22044,8 +22044,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kvm_getfiles_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_kvm_getfiles_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -22119,8 +22119,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kvm_getfile2_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_kvm_getfile2_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -22194,8 +22194,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -22288,8 +22288,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_dlopen_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_dlopen_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_dlopen_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_dlopen_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_dlopen_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_dlopen_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -22341,16 +22341,14 @@ fi
 #
 # pcre libraries only needed for the ucd process agent mib software
 #
-if test "x$with_pcre" != "xno"; then
-  _pcrelibs=""
 
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pcre_exec" >&5
 $as_echo_n "checking for library containing pcre_exec... " >&6; }
-if ${netsnmp_cv_func_pcre_exec__pcrelibs+:} false; then :
+if ${netsnmp_cv_func_pcre_exec_LAGENTLIBS+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_pcrelibs"
+     netsnmp_target_val="$LAGENTLIBS"
           netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
@@ -22406,23 +22404,22 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
      LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_pcre_exec__pcrelibs="${netsnmp_result}"
+     netsnmp_cv_func_pcre_exec_LAGENTLIBS="${netsnmp_result}"
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_pcre_exec__pcrelibs" >&5
-$as_echo "$netsnmp_cv_func_pcre_exec__pcrelibs" >&6; }
- if test "${netsnmp_cv_func_pcre_exec__pcrelibs}" != "no" ; then
-    if test "${netsnmp_cv_func_pcre_exec__pcrelibs}" != "none required" ; then
-       _pcrelibs="${netsnmp_result} ${netsnmp_target_val}"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_pcre_exec_LAGENTLIBS" >&5
+$as_echo "$netsnmp_cv_func_pcre_exec_LAGENTLIBS" >&6; }
+ if test "x${netsnmp_cv_func_pcre_exec_LAGENTLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_pcre_exec_LAGENTLIBS}" != "xnone required" ; then
+       LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
+
+  LMIBLIBS="$LMIBLIBS -lpcre"
 
 
  fi
 
-  if test "x$_pcrelibs" != "x"; then
-    LAGENTLIBS="$LAGENTLIBS $_pcrelibs"
-    LMIBLIBS="$LMIBLIBS $_pcrelibs"
-  fi
-fi
+
+
 
 # -*- autoconf -*-
 #
@@ -24202,8 +24199,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_clock_gettime_LNETSNMPLIBS" >&5
 $as_echo "$netsnmp_cv_func_clock_gettime_LNETSNMPLIBS" >&6; }
- if test "${netsnmp_cv_func_clock_gettime_LNETSNMPLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_clock_gettime_LNETSNMPLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_clock_gettime_LNETSNMPLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_clock_gettime_LNETSNMPLIBS}" != "xnone required" ; then
        LNETSNMPLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -24292,8 +24289,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_getdevs_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_getdevs_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_getdevs_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_getdevs_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_getdevs_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_getdevs_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -24369,8 +24366,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_devstat_getdevs_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_devstat_getdevs_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_devstat_getdevs_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_devstat_getdevs_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_devstat_getdevs_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_devstat_getdevs_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -24451,8 +24448,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_pci_lookup_name_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_pci_lookup_name_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_pci_lookup_name_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_pci_lookup_name_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_pci_lookup_name_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_pci_lookup_name_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -24569,8 +24566,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -24895,8 +24892,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_nl_connect_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_nl_connect_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
     for ac_header in netlink/netlink.h
@@ -24984,8 +24981,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_nl_connect_LMIBLIBS" >&5
 $as_echo "$netsnmp_cv_func_nl_connect_LMIBLIBS" >&6; }
- if test "${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "xnone required" ; then
        LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -25644,7 +25641,7 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-  LAGENTLIBS="$_wraplibs"
+  LAGENTLIBS="$LAGENTLIBS $_wraplibs"
   CPPFLAGS=${_cppflags}
   LDFLAGS=${_ldflags}
   LIBS=${_libs}
@@ -25971,8 +25968,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_endwin_LIBCURSES" >&5
 $as_echo "$netsnmp_cv_func_endwin_LIBCURSES" >&6; }
- if test "${netsnmp_cv_func_endwin_LIBCURSES}" != "no" ; then
-    if test "${netsnmp_cv_func_endwin_LIBCURSES}" != "none required" ; then
+ if test "x${netsnmp_cv_func_endwin_LIBCURSES}" != "xno" ; then
+    if test "x${netsnmp_cv_func_endwin_LIBCURSES}" != "xnone required" ; then
        LIBCURSES="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
@@ -26077,8 +26074,8 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_ceil_LNETSNMPLIBS" >&5
 $as_echo "$netsnmp_cv_func_ceil_LNETSNMPLIBS" >&6; }
- if test "${netsnmp_cv_func_ceil_LNETSNMPLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_ceil_LNETSNMPLIBS}" != "none required" ; then
+ if test "x${netsnmp_cv_func_ceil_LNETSNMPLIBS}" != "xno" ; then
+    if test "x${netsnmp_cv_func_ceil_LNETSNMPLIBS}" != "xnone required" ; then
        LNETSNMPLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
