@@ -494,7 +494,7 @@ if test "$with_libwrap" != "no"; then
 	_wraplibs="$_wraplibs -lwrap -lnsl"],
        [AC_MSG_RESULT(no)
 	AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.)])])
-  LAGENTLIBS="$_wraplibs"
+  LAGENTLIBS="$LAGENTLIBS $_wraplibs"
   CPPFLAGS=${_cppflags}
   LDFLAGS=${_ldflags}
   LIBS=${_libs}
