@@ -775,32 +775,12 @@ close_persist_pipe(int iindex)
         fclose(persist_pipes[iindex].fOut);
         persist_pipes[iindex].fOut = (FILE *) 0;
     }
-    if (persist_pipes[iindex].fdOut != -1) {
-#ifndef WIN32
-        /*
-         * The sequence open()/fdopen()/fclose()/close() triggers an access
-         * violation with the MSVC runtime. Hence skip the close() call when
-         * using the MSVC runtime.
-         */
-        close(persist_pipes[iindex].fdOut);
-#endif
-        persist_pipes[iindex].fdOut = -1;
-    }
+    persist_pipes[iindex].fdOut = -1;
     if (persist_pipes[iindex].fIn) {
         fclose(persist_pipes[iindex].fIn);
         persist_pipes[iindex].fIn = (FILE *) 0;
     }
-    if (persist_pipes[iindex].fdIn != -1) {
-#ifndef WIN32
-        /*
-         * The sequence open()/fdopen()/fclose()/close() triggers an access
-         * violation with the MSVC runtime. Hence skip the close() call when
-         * using the MSVC runtime.
-         */
-        close(persist_pipes[iindex].fdIn);
-#endif
-        persist_pipes[iindex].fdIn = -1;
-    }
+    persist_pipes[iindex].fdIn = -1;
 
 #ifdef __uClinux__
 	/*remove the pipes*/

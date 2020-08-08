@@ -955,17 +955,13 @@ main(int argc, char *argv[])
             }
         } else {
             if ((PID = fdopen(fd, "w")) == NULL) {
+                close(fd);
                 snmp_log_perror(pid_file);
                 goto out;
             } else {
                 fprintf(PID, "%d\n", (int) getpid());
                 fclose(PID);
             }
-#ifndef _MSC_VER
-            /* The sequence open()/fdopen()/fclose()/close() makes MSVC crash,
-               hence skip the close() call when using the MSVC runtime. */
-            close(fd);
-#endif
         }
     }
 #endif
