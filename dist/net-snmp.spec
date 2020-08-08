@@ -37,7 +37,7 @@
 %endif
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.8
+Version: 5.10
 # update release for vendor release. (eg 1.fc6, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
 URL: http://www.net-snmp.org/
