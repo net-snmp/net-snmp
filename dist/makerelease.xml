@@ -81,8 +81,10 @@
               my ($major, $minor, $patch, $opps) =
 	          ($self->{'parameters'}{'VERSION'} =~
                       /^(\d+)\.(\d+)\.?(\d*)\.?(\d*)/);
+	      my $digits = $opps ? 5 : $patch ? 4 : 2;
 	      $self->{'parameters'}{'VERSIONFLOAT'} = 
-                  $major + $minor/100 + $patch/10000 + $opps/100000;
+		  sprintf("%.*f", $digits, $major + $minor/100 + $patch/10000 +
+			  $opps/100000);
 
 	      # find out the git branch we're on.
 	      open(GITINFO,"git branch|");
