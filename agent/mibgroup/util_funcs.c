@@ -410,12 +410,13 @@ get_exec_output(struct extensible *ex)
     return -1;
 }
 int
-get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
+get_exec_pipes(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
 {
 #if defined(HAVE_EXECV)
     int             fd[2][2], i, cnt;
-    char            ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv,
-        **aptr;
+    char            ctmp[STRMAX], *cptr2, argvs[STRMAX], **argv, **aptr;
+    const char     *cptr1;
+
     /*
      * Setup our pipes 
      */
@@ -453,7 +454,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
             *cptr2 = *cptr1;
             if (*cptr1 == ' ') {
                 *(cptr2++) = 0;
-                if ((cptr1 = skip_white(cptr1)) == NULL)
+                if ((cptr1 = skip_white_const(cptr1)) == NULL)
                     break;
                 *cptr2 = *cptr1;
                 if (*cptr1 != 0)
@@ -475,7 +476,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         while (*cptr2 != 0)
             cptr2++;
         *(aptr++) = NULL;
-        copy_nword(cmd, ctmp, sizeof(ctmp));
+        copy_nword_const(cmd, ctmp, sizeof(ctmp));
         execv(ctmp, argv);
         perror(ctmp);
         exit(1);
