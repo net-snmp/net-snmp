@@ -3,7 +3,7 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
-*5.8.1*
+*5.9*
     snmplib:
       - Add IPv6 support to DTLSUDP transport
       - use new netsnmp_sockaddr_storage in netsnmp_addr_pair
