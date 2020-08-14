@@ -418,62 +418,7 @@ get_exec_output(struct extensible *ex)
 int
 get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
 {
-#if defined(HAVE_EXECV) && defined(__uClinux__)
-    int in, out;
-    char fifo_in_path[256];
-    char fifo_out_path[256];
-    pid_t tpid;
-
-    /*
-     * Alexander Prömel, alexander@proemel.de 08/24/2006. The following code,
-     * is tested on picotux rev. 1.01.  I think, it will be better to put the
-     * named pipes, into /var/run or make it selectable via CONFIG file. If
-     * the pipe file already exist, the creation will fail. I put the pipes
-     * into /flash, the pipepath has to change in ucd-snmp/pass_persist.c
-     * too, if you change it here.
-     */
-    if ((tpid = vfork()) == 0) {
-        /* child */
-        execve(cmd, NULL,NULL);
-        perror(cmd);
-        exit(1);
-    } else if (tpid > 0) {
-        /* parent */
-        snprintf(fifo_in_path, sizeof(fifo_in_path), "/flash/cp_%d", tpid);
-        snprintf(fifo_out_path, sizeof(fifo_out_path), "/flash/pc_%d", tpid);
-
-        in = mkfifo(fifo_in_path, S_IRWXU);	/*Create Input Pipe, 700*/
-        if (in) {
-            perror("parent: inpipe");
-            return 0;
-        }
-        out = mkfifo(fifo_out_path, S_IRWXU);	/*Create Output Pipe, 700*/
-        if (out) {
-            perror("parent: outpipe");
-            return 0;
-        }
-
-        in = open(fifo_in_path,O_RDONLY);	/*open the Input Pipe read Only*/
-        if (in < 0) {
-            perror("parent: input");
-            return 0;
-        }
-        out = open(fifo_out_path,O_WRONLY); 	/*open the Output Pipe write Only*/
-        if (out < 0) {
-            perror("parent: output");
-            return 0;
-        }
-
-        *fdIn = in;	/*read*/
-        *fdOut = out;	/*write*/
-        *pid = tpid;
-        return 1;
-    } else {
-        /* pid < 0 */
-        setPerrorstatus("vfork");
-        return 0;
-    }
-#elif defined(HAVE_EXECV)
+#if defined(HAVE_EXECV)
     int             fd[2][2], i, cnt;
     char            ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv,
         **aptr;

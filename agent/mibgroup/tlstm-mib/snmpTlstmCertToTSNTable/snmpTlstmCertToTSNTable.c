@@ -119,8 +119,9 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
     netsnmp_table_registration_info *info;
     netsnmp_cache                   *cache;
     netsnmp_watcher_info            *watcher;
-    const char *mib_map_help = 
+    static const char mib_map_help[] =
         MAP_MIB_CONFIG_TOKEN " table persistence (internal use)";
+    int rc;
 
     DEBUGMSGTL(("tlstmCertToSN:init",
                 "initializing table tlstmCertToTSNTable\n"));
@@ -175,9 +176,13 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
     cache->magic = (void *)_table;
     cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 
-    netsnmp_tdata_register(reg, _table, info);
-
-    if (cache) 
+    rc = netsnmp_tdata_register(reg, _table, info);
+    if (rc) {
+        snmp_log(LOG_ERR, "%s: netsnmp_tdata_register() returned %d\n",
+                 __func__, rc);
+        return;
+    }
+    if (cache)
         netsnmp_inject_handler_before( reg, netsnmp_cache_handler_get(cache),
                                        "table_container");
 
@@ -193,11 +198,18 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmCertToTSNCount\n");
     else {
+        int rc;
+
         if (NULL != contextName)
             reg->contextName = strdup(contextName);
 
-        netsnmp_register_scalar(reg);
-        if (cache) 
+        rc = netsnmp_register_scalar(reg);
+        if (rc) {
+            snmp_log(LOG_ERR, "%s: netsnmp_register_scalar() returned %d\n",
+                     __func__, rc);
+            return;
+        }
+        if (cache)
             netsnmp_inject_handler_before(reg, netsnmp_cache_handler_get(cache),
                                           "snmpTlstmCertToTSNCount");
     }

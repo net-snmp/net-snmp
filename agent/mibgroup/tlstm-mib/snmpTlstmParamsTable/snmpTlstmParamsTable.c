@@ -104,6 +104,7 @@ init_snmpTlstmParamsTable(void)
     netsnmp_table_registration_info *table_info;
     netsnmp_cache                   *cache;
     netsnmp_watcher_info            *watcher;
+    int                              rc;
 
     DEBUGMSGTL(("tlstmParamsTable:init", "initializing table snmpTlstmParamsTable\n"));
 
@@ -147,9 +148,14 @@ init_snmpTlstmParamsTable(void)
     table_info->min_column = SNMPTLSTMPARAMSTABLE_MIN_COLUMN;
     table_info->max_column = SNMPTLSTMPARAMSTABLE_MAX_COLUMN;
     
-    netsnmp_tdata_register( reg, _table_data, table_info );
-    netsnmp_inject_handler_before( reg, netsnmp_cache_handler_get(cache),
-                                   "table_container");
+    rc = netsnmp_tdata_register(reg, _table_data, table_info);
+    if (rc) {
+        snmp_log(LOG_ERR, "%s: netsnmp_tdata_register() returned %d\n",
+                 __func__, rc);
+        return;
+    }
+    netsnmp_inject_handler_before(reg, netsnmp_cache_handler_get(cache),
+                                      "table_container");
 
     /*
      * register scalars
@@ -163,8 +169,13 @@ init_snmpTlstmParamsTable(void)
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmParamsCount\n");
     else {
-        netsnmp_register_scalar(reg);
-        if (cache) 
+        const int rc = netsnmp_register_scalar(reg);
+        if (rc) {
+            snmp_log(LOG_ERR, "%s: netsnmp_register_scalar() returned %d\n",
+                     __func__, rc);
+            return;
+        }
+        if (cache)
             netsnmp_inject_handler_before(reg,
                                           netsnmp_cache_handler_get(cache),
                                           "snmpTlstmParamsCount");

@@ -697,7 +697,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             /* Try to interpret the mask */
             if (strmask == NULL || *strmask == '\0') {
                 /* No mask was given. Assume /128 */
-                memset(mask.s6_addr, '\xff', sizeof(mask.s6_addr));
+                memset(mask.s6_addr, 0xff, sizeof(mask.s6_addr));
             } else {
                 /* Try to interpret mask as a "number of 1 bits". */
                 char* cp;
@@ -706,7 +706,8 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                     if (0 <= masklength && masklength <= 128) {
                         const int j = masklength / 8;
                         const int jj = masklength % 8;
-                        memset(mask.s6_addr, '\xff', j);
+
+                        memset(mask.s6_addr, 0xff, j);
                         if (j < 16) {
                             mask.s6_addr[j] = (0xffu << (8 - jj));
                             memset(mask.s6_addr + j + 1, '\0', 15 - j);
