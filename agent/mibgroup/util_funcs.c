@@ -415,13 +415,58 @@ get_exec_output(struct extensible *ex)
 #endif /* !defined(USING_UTILITIES_EXECUTE_MODULE) */
     return -1;
 }
+
+/*
+ * Split @cmd into words and return an array with pointers to these words.
+ * Store a pointer to the split command string into *@args. The caller must
+ * free both *@args and the returned pointer.
+ */
+static char **parse_cmd(char **args, const char *cmd)
+{
+    int             i, cnt;
+    const char     *cptr1;
+    char           *cptr2, **argv, **aptr;
+
+    *args = strdup(cmd);
+    if (!*args)
+        return NULL;
+    for (cnt = 1, cptr1 = cmd, cptr2 = *args; *cptr1 != '\0';
+         cptr2++, cptr1++) {
+        *cptr2 = *cptr1;
+        if (*cptr1 == ' ') {
+            *cptr2++ = '\0';
+            cptr1 = skip_white_const(cptr1);
+            if (!cptr1)
+                break;
+            *cptr2 = *cptr1;
+            if (*cptr1)
+                cnt++;
+        }
+    }
+    argv = malloc((cnt + 1) * sizeof(argv[0]));
+    if (argv == NULL) {
+        free(args);
+        return NULL;
+    }
+    aptr = argv;
+    *aptr++ = *args;
+    for (cptr2 = *args, i = 1; i != cnt; cptr2++) {
+        if (*cptr2 == '\0') {
+            *aptr++ = cptr2 + 1;
+            i++;
+        }
+    }
+    *aptr++ = NULL;
+    return argv;
+}
+
 int
-get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
+get_exec_pipes(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
 {
 #if defined(HAVE_EXECV)
-    int             fd[2][2], i, cnt;
-    char            ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv,
-        **aptr;
+    int             fd[2][2];
+    char           **argv, *args;
+
     /*
      * Setup our pipes 
      */
@@ -454,36 +499,16 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         netsnmp_close_fds(1);
         NETSNMP_IGNORE_RESULT(dup(1));  /* stderr */
 
-        for (cnt = 1, cptr1 = cmd, cptr2 = argvs; *cptr1 != 0;
-             cptr2++, cptr1++) {
-            *cptr2 = *cptr1;
-            if (*cptr1 == ' ') {
-                *(cptr2++) = 0;
-                if ((cptr1 = skip_white(cptr1)) == NULL)
-                    break;
-                *cptr2 = *cptr1;
-                if (*cptr1 != 0)
-                    cnt++;
-            }
+        argv = parse_cmd(&args, cmd);
+        if (!argv) {
+            DEBUGMSGTL(("util_funcs", "get_exec_pipes(): argv == NULL\n"));
+            return 0;
         }
-        *cptr2 = 0;
-        *(cptr2 + 1) = 0;
-        argv = (char **) malloc((cnt + 2) * sizeof(char *));
-        if (argv == NULL)
-            return 0;           /* memory alloc error */
-        aptr = argv;
-        *(aptr++) = argvs;
-        for (cptr2 = argvs, i = 1; i != cnt; cptr2++)
-            if (*cptr2 == 0) {
-                *(aptr++) = cptr2 + 1;
-                i++;
-            }
-        while (*cptr2 != 0)
-            cptr2++;
-        *(aptr++) = NULL;
-        copy_nword(cmd, ctmp, sizeof(ctmp));
-        execv(ctmp, argv);
-        perror(ctmp);
+        DEBUGMSGTL(("util_funcs", "get_exec_pipes(): argv[0] = %s\n", argv[0]));
+        execv(argv[0], argv);
+        perror(argv[0]);
+        free(argv);
+        free(args);
         exit(1);
     } else {
         close(fd[0][0]);
