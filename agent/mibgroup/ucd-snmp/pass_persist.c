@@ -48,8 +48,8 @@ netsnmp_feature_require(parse_miboid);
 struct extensible *persistpassthrus = NULL;
 int             numpersistpassthrus = 0;
 struct persist_pipe_type {
-    FILE           *fIn, *fOut;
-    int             fdIn, fdOut;
+    FILE           *fIn;
+    int             fdOut;
     netsnmp_pid_t   pid;
 }              *persist_pipes = (struct persist_pipe_type *) NULL;
 static unsigned pipe_check_alarm_id;
@@ -521,8 +521,8 @@ init_persist_pipes(void)
                (numpersistpassthrus + 1));
     if (persist_pipes) {
         for (i = 0; i <= numpersistpassthrus; i++) {
-            persist_pipes[i].fIn = persist_pipes[i].fOut = (FILE *) 0;
-            persist_pipes[i].fdIn = persist_pipes[i].fdOut = -1;
+            persist_pipes[i].fIn = (FILE *) 0;
+            persist_pipes[i].fdOut = -1;
             persist_pipes[i].pid = NETSNMP_NO_SUCH_PROCESS;
         }
     }
@@ -623,15 +623,9 @@ open_persist_pipe(int iindex, char *command)
          * If not, fill out our structure 
          */
         persist_pipes[iindex].pid = pid;
-        persist_pipes[iindex].fdIn = fdIn;
         persist_pipes[iindex].fdOut = fdOut;
         persist_pipes[iindex].fIn = fdopen(fdIn, "r");
-        persist_pipes[iindex].fOut = fdopen(fdOut, "w");
 
-        /*
-         * Setup our -non-buffered-io- 
-         */
-        setbuf(persist_pipes[iindex].fOut, (char *) 0);
         DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: opened the pipes\n"));
     }
 
@@ -758,16 +752,14 @@ close_persist_pipe(int iindex)
     /*
      * Check and nix every item 
      */
-    if (persist_pipes[iindex].fOut) {
-        fclose(persist_pipes[iindex].fOut);
-        persist_pipes[iindex].fOut = (FILE *) 0;
+    if (persist_pipes[iindex].fdOut != -1) {
+        close(persist_pipes[iindex].fdOut);
+        persist_pipes[iindex].fdOut = -1;
     }
-    persist_pipes[iindex].fdOut = -1;
     if (persist_pipes[iindex].fIn) {
         fclose(persist_pipes[iindex].fIn);
         persist_pipes[iindex].fIn = (FILE *) 0;
     }
-    persist_pipes[iindex].fdIn = -1;
 
     if (persist_pipes[iindex].pid != NETSNMP_NO_SUCH_PROCESS) {
         /*
