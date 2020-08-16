@@ -675,12 +675,10 @@ open_persist_pipe(int iindex, char *command)
 static int
 write_persist_pipe(int iindex, const char *data)
 {
-#if HAVE_SIGNAL
-    struct sigaction sa, osa;
-    int             wret = 0, werrno = 0;
+    int             len, wret;
 
     /*
-     * Don't write to a non-existant process 
+     * Don't write to a non-existent process
      */
     if (persist_pipes[iindex].pid == NETSNMP_NO_SUCH_PROCESS) {
         DEBUGMSGTL(("ucd-snmp/pass_persist",
@@ -690,58 +688,26 @@ write_persist_pipe(int iindex, const char *data)
     }
 
     /*
-     * Setup our signal action to ignore SIGPIPEs 
-     */
-    sa.sa_handler = SIG_IGN;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    if (sigaction(SIGPIPE, &sa, &osa)) {
-        DEBUGMSGTL(("ucd-snmp/pass_persist",
-                    "write_persist_pipe: sigaction failed: %d", errno));
-    }
-
-    /*
      * Do the write 
      */
-    wret = write(persist_pipes[iindex].fdOut, data, strlen(data));
-    werrno = errno;
-
-    /*
-     * Reset the signal handler 
-     */
-    sigaction(SIGPIPE, &osa, (struct sigaction *) 0);
-
+    len = strlen(data);
+    wret = write(persist_pipes[iindex].fdOut, data, len);
+    if (wret == len)
+        return 1;
     if (wret < 0) {
+        int werrno = errno;
+
         if (werrno != EPIPE) {
             DEBUGMSGTL(("ucd-snmp/pass_persist",
-                        "write_persist_pipe: write returned unknown error %d (%s)\n",
+                        "write_persist_pipe: write returned unexpected error %d (%s)\n",
                         werrno, strerror(werrno)));
         }
         close_persist_pipe(iindex);
-        return 0;
+    } else {
+        DEBUGMSGTL(("ucd-snmp/pass_persist",
+                    "write_persist_pipe: short write (%d < %d)\n", wret, len));
     }
-#endif                          /* HAVE_SIGNAL */
-#if defined(WIN32) && !defined (mingw32) && !defined (HAVE_SIGNAL)
-/* We have no signal here (maybe we can make a Thread?) so write may block, 
- * but probably never will.
- */
-    int wret = 0, werrno = 0;
-
-    /*
-     * Do the write 
-     */
-    wret = write(persist_pipes[iindex].fdOut, data,strlen(data));
-    werrno = errno;
-    
-    if (wret < 0) {
-      if (werrno != EINTR) {
-        DEBUGMSGTL(("ucd-snmp/pass_persist", "write_persist_pipe: write returned unknown error %d\n",errno));
-      }
-      close_persist_pipe(iindex);
-      return 0;
-    }
-#endif                          /* WIN32 */
-    return 1;
+    return 0;
 }
 
 static void
