@@ -85,6 +85,9 @@
    variables */
 #define NETSNMP_ATTRIBUTE_DEPRECATED
 
+/* Used to suppress compiler warnings about unused functions and variables */
+#define NETSNMP_ATTRIBUTE_UNUSED
+
 /* add in recent CMU library extensions (not complete) */
 /* #undef CMU_COMPATIBLE */
 

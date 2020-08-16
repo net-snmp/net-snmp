@@ -55,8 +55,6 @@
 #define	NO	0
 
 static void sidewaysintpr(u_int);
-static void timerSet(int interval_seconds);
-static void timerPause(void);
 
     struct _if_info {
         char            name[128];
@@ -82,6 +80,34 @@ static void timerPause(void);
         struct _if_info *next;
     };
 
+
+static struct timeval deadline;
+
+static void
+timerSet(int interval_seconds)
+{
+    const struct timeval interval = { interval_seconds, 0 };
+
+    netsnmp_get_monotonic_clock(&deadline);
+    NETSNMP_TIMERADD(&deadline, &interval, &deadline);
+}
+
+static void
+timerPause(void)
+{
+    struct timeval now, delta;
+
+    netsnmp_get_monotonic_clock(&now);
+    NETSNMP_TIMERSUB(&deadline, &now, &delta);
+    if (delta.tv_sec < 0)
+        return;
+#ifdef WIN32
+    Sleep(delta.tv_sec * 1000 + delta.tv_usec / 1000);
+#else
+    if (select(0, NULL, NULL, NULL, &delta) < 0)
+        snmp_perror("select");
+#endif
+}
 
 /*
  * Retrieve the interface addressing information
@@ -836,84 +862,3 @@ loop:
     	goto loop;
     /*NOTREACHED*/
 }
-
-
-/*
- * timerSet sets or resets the timer to fire in "interval" seconds.
- * timerPause waits only if the timer has not fired.
- * timing precision is not considered important.
- */
-
-#if (defined(WIN32) || defined(cygwin))
-static int      sav_int;
-static time_t   timezup;
-static void
-timerSet(int interval_seconds)
-{
-    sav_int = interval_seconds;
-    timezup = time(0) + interval_seconds;
-}
-
-/*
- * you can do better than this ! 
- */
-static void
-timerPause(void)
-{
-    time_t          now;
-    while (time(&now) < timezup)
-#ifdef WIN32
-        Sleep(400);
-#else
-    {
-        struct timeval  tx;
-        tx.tv_sec = 0;
-        tx.tv_usec = 400 * 1000;        /* 400 milliseconds */
-        select(0, 0, 0, 0, &tx);
-    }
-#endif
-}
-
-#else
-
-/*
- * Called if an interval expires before sidewaysintpr has completed a loop.
- * Sets a flag to not wait for the alarm.
- */
-RETSIGTYPE
-catchalarm(int sig)
-{
-    signalled = YES;
-}
-
-static void
-timerSet(int interval_seconds)
-{
-#ifdef HAVE_SIGSET
-    (void) sigset(SIGALRM, catchalarm);
-#else
-    (void) signal(SIGALRM, catchalarm);
-#endif
-    signalled = NO;
-    (void) alarm(interval_seconds);
-}
-
-static void
-timerPause(void)
-{
-#ifdef HAVE_SIGHOLD
-    sighold(SIGALRM);
-    if (!signalled) {
-        sigpause(SIGALRM);
-    }
-#else
-    int             oldmask;
-    oldmask = sigblock(sigmask(SIGALRM));
-    if (!signalled) {
-        sigpause(0);
-    }
-    sigsetmask(oldmask);
-#endif
-}
-
-#endif                          /* !WIN32 && !cygwin */
