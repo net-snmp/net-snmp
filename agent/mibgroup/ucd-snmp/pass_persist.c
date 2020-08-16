@@ -509,24 +509,22 @@ init_persist_pipes(void)
     /*
      * if we are already taken care of, just return 
      */
-    if (persist_pipes) {
-        return persist_pipes ? 1 : 0;
-    }
+    if (persist_pipes)
+        return 1;
 
     /*
      * Otherwise malloc and initialize 
      */
-    persist_pipes = (struct persist_pipe_type *)
-        malloc(sizeof(struct persist_pipe_type) *
-               (numpersistpassthrus + 1));
-    if (persist_pipes) {
-        for (i = 0; i <= numpersistpassthrus; i++) {
-            persist_pipes[i].fIn = (FILE *) 0;
-            persist_pipes[i].fdOut = -1;
-            persist_pipes[i].pid = NETSNMP_NO_SUCH_PROCESS;
-        }
+    persist_pipes = malloc(sizeof(persist_pipes[0]) *
+                           (numpersistpassthrus + 1));
+    if (!persist_pipes)
+        return 0;
+    for (i = 0; i <= numpersistpassthrus; i++) {
+        persist_pipes[i].fIn = NULL;
+        persist_pipes[i].fdOut = -1;
+        persist_pipes[i].pid = NETSNMP_NO_SUCH_PROCESS;
     }
-    return persist_pipes ? 1 : 0;
+    return 1;
 }
 
 /**
