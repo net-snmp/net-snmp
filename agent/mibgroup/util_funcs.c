@@ -661,6 +661,8 @@ get_exec_pipes(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
     }
     return 1;
 #endif                          /* WIN32 */
+    DEBUGMSGTL(("util_funcs",
+                "get_exec_pipes() has not yet been implemented for this platform"));
     return 0;
 }
 
