@@ -415,7 +415,8 @@ get_exec_output(struct extensible *ex)
  * Store a pointer to the split command string into *@args. The caller must
  * free both *@args and the returned pointer.
  */
-static char **parse_cmd(char **args, const char *cmd)
+static NETSNMP_ATTRIBUTE_UNUSED char **
+parse_cmd(char **args, const char *cmd)
 {
     int             i, cnt;
     const char     *cptr1;
@@ -612,7 +613,8 @@ get_exec_pipes(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
     /* Launch the process that you want to redirect.  Example snmpd.conf pass_persist:
      * pass_persist    .1.3.6.1.4.1.2021.255  c:/perl/bin/perl c:/temp/pass_persisttest
     */
-    if (!CreateProcess(NULL, cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
+    if (!CreateProcess(NULL, NETSNMP_REMOVE_CONST(char *, cmd), NULL, NULL,
+		       TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
         DEBUGMSGTL(("util_funcs","get_exec_pipes CreateProcess:'%s' %d\n", cmd,
                     (unsigned int)GetLastError()));
         CloseHandle(hErrorWrite);
