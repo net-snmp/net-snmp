@@ -6766,7 +6766,8 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *orp,
             rp->callback(NETSNMP_CALLBACK_OP_SEND_FAILED, sp,
                          rp->pdu->reqid, rp->pdu, rp->cb_data);
             remove_request(isp, orp, rp);
-	}
+            rp->cb_data = NULL;
+        }
         return -1;
     } else {
         netsnmp_get_monotonic_clock(&now);
@@ -6776,9 +6777,11 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *orp,
         tv.tv_sec += tv.tv_usec / 1000000L;
         tv.tv_usec %= 1000000L;
         rp->expireM = tv;
-        if (rp->callback)
+        if (rp->callback) {
             rp->callback(NETSNMP_CALLBACK_OP_RESEND, sp,
                          rp->pdu->reqid, rp->pdu, rp->cb_data);
+            rp->cb_data = NULL;
+        }
     }
     return 0;
 }
