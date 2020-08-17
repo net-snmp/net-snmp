@@ -536,10 +536,9 @@ init_persist_pipes(void)
 static int process_stopped(int idx)
 {
     if (persist_pipes[idx].pid != NETSNMP_NO_SUCH_PROCESS) {
-#if HAVE_SYS_WAIT_H
+#if HAVE_WAITPID
         return waitpid(persist_pipes[idx].pid, NULL, WNOHANG) > 0;
-#endif
-#if defined(WIN32) && !defined (mingw32) && !defined(HAVE_SIGNAL)
+#elif defined(WIN32) && !defined (mingw32) && !defined(HAVE_SIGNAL)
         return WaitForSingleObject(persist_pipes[idx].pid, 0) == WAIT_OBJECT_0;
 #endif
     }
@@ -733,12 +732,12 @@ close_persist_pipe(int iindex)
 #ifdef HAVE_SIGNAL
         (void)kill(persist_pipes[iindex].pid, SIGKILL);
 #endif
-#if HAVE_SYS_WAIT_H
+#if HAVE_WAITPID
         waitpid(persist_pipes[iindex].pid, NULL, 0);
-#endif
-#if defined(WIN32) && !defined (mingw32) && !defined (HAVE_SIGNAL)
+#elif defined(WIN32) && !defined (mingw32) && !defined (HAVE_SIGNAL)
         if (!CloseHandle(persist_pipes[iindex].pid)) {
-            DEBUGMSGTL(("ucd-snmp/pass_persist","close_persist_pipe pid: close error\n"));
+            DEBUGMSGTL(("ucd-snmp/pass_persist",
+                        "close_persist_pipe pid: close error\n"));
         }
 #endif
         persist_pipes[iindex].pid = NETSNMP_NO_SUCH_PROCESS;
