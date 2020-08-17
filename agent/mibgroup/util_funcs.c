@@ -455,10 +455,10 @@ parse_cmd(char **args, const char *cmd)
     return argv;
 }
 
-int
-get_exec_pipes(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
-{
 #if defined(HAVE_EXECV)
+static int
+get_exec_pipes_fork(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
+{
     int             fd[2][2];
     char           **argv, *args;
 
@@ -518,7 +518,13 @@ get_exec_pipes(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         *fdOut = fd[0][1];
         return (1);             /* We are returning 0 for error... */
     }
-#elif defined(HAVE__GET_OSFHANDLE) && defined(HAVE__OPEN_OSFHANDLE)
+}
+#endif
+
+#if defined(HAVE__GET_OSFHANDLE) && defined(HAVE__OPEN_OSFHANDLE)
+static int
+get_exec_pipes_win32(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
+{
     /* MSVC and MinGW32. Cygwin has execv() and fork(). */
     /* Reference:  MS tech note: 190351 */
     HANDLE hInputWriteTmp, hInputRead, hInputWrite = NULL;
@@ -660,7 +666,17 @@ get_exec_pipes(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
       return 0;
     }
     return 1;
+}
 #endif                          /* WIN32 */
+
+int
+get_exec_pipes(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
+{
+#if defined(HAVE_EXECV)
+    return get_exec_pipes_fork(cmd, fdIn, fdOut, pid);
+#elif defined(HAVE__GET_OSFHANDLE) && defined(HAVE__OPEN_OSFHANDLE)
+    return get_exec_pipes_win32(cmd, fdIn, fdOut, pid);
+#endif
     DEBUGMSGTL(("util_funcs",
                 "get_exec_pipes() has not yet been implemented for this platform"));
     return 0;
