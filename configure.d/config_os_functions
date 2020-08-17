@@ -99,7 +99,7 @@ case x$with_socklib in
   *)
     # Do not use fork() nor any related function when using Windows sockets
     # because Windows sockets are not compatible with fork().
-    AC_CHECK_FUNCS([execv fork signal sigset uname]dnl
+    AC_CHECK_FUNCS([execv fork signal sigset uname vfork waitpid]dnl
                    [closesocket gai_strerror getaddrinfo gethostbyname]dnl
                    [gethostbyname2 gethostname gethostbyaddr]dnl
                    [inet_ntop inet_pton])
