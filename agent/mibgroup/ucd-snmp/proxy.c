@@ -272,7 +272,6 @@ proxy_free_config(void)
         unregister_mib_context(rm->name, rm->name_len,
                                DEFAULT_MIB_PRIORITY, 0, 0,
                                rm->context);
-        SNMP_FREE(rm->variables);
         SNMP_FREE(rm->context);
         snmp_close(rm->sess);
         SNMP_FREE(rm);

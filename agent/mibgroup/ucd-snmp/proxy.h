@@ -2,7 +2,6 @@
 #define UCD_SNMP_PROXY_H
 
 struct simple_proxy {
-    struct variable2 *variables;
     oid             name[MAX_OID_LEN];
     size_t          name_len;
     oid             base[MAX_OID_LEN];
