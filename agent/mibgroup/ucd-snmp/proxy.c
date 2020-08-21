@@ -280,7 +280,6 @@ proxy_free_config(void)
         unregister_mib_context(rm->name, rm->name_len,
                                DEFAULT_MIB_PRIORITY, 0, 0,
                                rm->context);
-        SNMP_FREE(rm->variables);
         SNMP_FREE(rm->context);
         snmp_close(rm->sess);
         SNMP_FREE(rm);
@@ -463,7 +462,7 @@ proxy_handler(netsnmp_mib_handler *handler,
         if (sp->base_len &&
             reqinfo->mode == MODE_GETNEXT &&
             (snmp_oid_compare(ourname, ourlength,
-                              sp->base, sp->base_len) < 0)) {
+                              sp->name, sp->name_len) < 0)) {
             DEBUGMSGTL(( "proxy", "request is out of registered range\n"));
             /*
              * Create GETNEXT request with an OID so the
