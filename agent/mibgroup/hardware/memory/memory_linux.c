@@ -24,7 +24,8 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     static int   first = 1;
     ssize_t      bytes_read;
     char        *b;
-    unsigned long memtotal = 0,  memfree = 0, memshared = 0,
+    int          have_memavail = 0;
+    unsigned long memtotal = 0,  memavail = 0, memfree = 0, memshared = 0,
                   buffers = 0,   cached = 0, sreclaimable = 0,
                   swaptotal = 0, swapfree = 0;
 
@@ -80,6 +81,11 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     else {
         if (first)
             snmp_log(LOG_ERR, "No MemTotal line in /proc/meminfo\n");
+    }
+    b = strstr(buff, "MemAvailable: ");
+    if (b) {
+        have_memavail = 1;
+        sscanf(b, "MemAvailable: %lu", &memavail);
     }
     b = strstr(buff, "MemFree: ");
     if (b) 
@@ -149,6 +155,18 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->size  = memtotal;
         mem->free  = memfree;
         mem->other = -1;
+    }
+
+    if (have_memavail) {
+        mem = netsnmp_memory_get_byIdx(NETSNMP_MEM_TYPE_AVAILMEM, 1);
+        if (mem) {
+            if (!mem->descr)
+                mem->descr = strdup("Available memory");
+            mem->units = 1024;
+            mem->size  = memavail;
+            mem->free  = memavail;
+            mem->other = -1;
+        }
     }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_VIRTMEM, 1 );
