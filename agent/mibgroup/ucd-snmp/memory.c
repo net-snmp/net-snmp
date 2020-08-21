@@ -111,6 +111,13 @@ handle_memory(netsnmp_mib_handler *handler,
             val  =  mem_info->free;     /* memfree */
             val *= (mem_info->units/1024);
             break;
+        case MEMORY_SYS_AVAIL:
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_AVAILMEM, 0);
+            if (!mem_info)
+                goto NOSUCH;
+            val = mem_info->size;       /* memavail */
+            val *= (mem_info->units/1024);
+            break;
         case MEMORY_STXT_TOTAL:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_STEXT, 0 );
             if (!mem_info)

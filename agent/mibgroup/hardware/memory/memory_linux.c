@@ -24,7 +24,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     static int   first = 1;
     ssize_t      bytes_read;
     char        *b;
-    unsigned long memtotal = 0,  memfree = 0, memshared = 0,
+    unsigned long memtotal = 0,  memavail = 0, memfree = 0, memshared = 0,
                   buffers = 0,   cached = 0, sreclaimable = 0,
                   swaptotal = 0, swapfree = 0;
 
@@ -80,6 +80,13 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     else {
         if (first)
             snmp_log(LOG_ERR, "No MemTotal line in /proc/meminfo\n");
+    }
+    b = strstr(buff, "MemAvailable: ");
+    if (b)
+        sscanf(b, "MemAvailable: %lu", &memavail);
+    else {
+        if (first)
+            snmp_log(LOG_INFO, "No MemAvailable line in /proc/meminfo. It's only available in kernel v3.14 or above\n");
     }
     b = strstr(buff, "MemFree: ");
     if (b) 
@@ -148,6 +155,18 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->units = 1024;
         mem->size  = memtotal;
         mem->free  = memfree;
+        mem->other = -1;
+    }
+
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_AVAILMEM, 1);
+    if (!mem) {
+        snmp_log(LOG_INFO, "No Available Memory info entry\n");
+    } else {
+        if (!mem->descr)
+            mem->descr = strdup("Available memory");
+        mem->units = 1024;
+        mem->size  = memavail;
+        mem->free  = memavail;
         mem->other = -1;
     }
 
