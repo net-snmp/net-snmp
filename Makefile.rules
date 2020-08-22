@@ -298,7 +298,7 @@ install_pkgconfig: $(INSTALL_PKGCONFIG)
 		for i in $(INSTALL_PKGCONFIG); do			\
 			echo "installing $$i in $(INSTALL_PREFIX)$(libdir)/pkgconfig"; \
 		done;							\
-		$(INSTALL) $(INSTALL_PKGCONFIG) $(INSTALL_PREFIX)$(libdir)/pkgconfig; \
+		$(INSTALL_DATA) $(INSTALL_PKGCONFIG) $(INSTALL_PREFIX)$(libdir)/pkgconfig; \
 	fi
 
 uninstall_pkgconfig:
