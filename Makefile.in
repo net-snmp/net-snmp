@@ -456,6 +456,16 @@ perlcalloccheck:
 
 dist: tar
 
+rpm: dist
+	rpmtopdir=$$PWD/rpmbuilddir &&					\
+	for d in BUILD RPMS SOURCES SPECS SRPMS; do			\
+	  mkdir -p $${rpmtopdir}/$$d;					\
+	done &&								\
+	cp net-snmp-$(VERSION).tar.gz $${rpmtopdir}/SOURCES &&		\
+	MAKE="$(MAKE)" rpmbuild --define="%_topdir $${rpmtopdir}"	\
+	    -ba dist/net-snmp.spec &&					\
+	find $${rpmtopdir} -name '*rpm'
+
 FAQ.html:
 	local/FAQ2HTML FAQ
 
