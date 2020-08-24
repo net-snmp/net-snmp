@@ -2222,15 +2222,17 @@ handle_mibs_conf(const char *token, char *line)
 
     if (confmibs) {
         if ((*line == '+') || (*line == '-')) {
-            ctmp = (char *) malloc(strlen(confmibs) + strlen(line) + 2);
-            if (!ctmp) {
+            int res;
+
+            res = *line++ == '+' ?
+                /* Add specified dirs after existing ones */
+                asprintf(&ctmp, "%s%c%s", confmibs, ENV_SEPARATOR_CHAR, line) :
+                /* Add specified dirs before existing ones */
+                asprintf(&ctmp, "%s%c%s", line, ENV_SEPARATOR_CHAR, confmibs);
+            if (res < 0) {
                 DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
                 return;
             }
-            if(*line++ == '+')
-                sprintf(ctmp, "%s%c%s", confmibs, ENV_SEPARATOR_CHAR, line);
-            else
-                sprintf(ctmp, "%s%c%s", line, ENV_SEPARATOR_CHAR, confmibdir);
         } else {
             ctmp = strdup(line);
             if (!ctmp) {
@@ -2488,7 +2490,7 @@ register_mib_handlers(void)
                                     "[mib-dirs|+mib-dirs|-mib-dirs]");
     register_prenetsnmp_mib_handler("snmp", "mibs",
                                     handle_mibs_conf, NULL,
-                                    "[mib-tokens|+mib-tokens]");
+                                    "[mib-tokens|+mib-tokens|-mib-tokens]");
     register_config_handler("snmp", "mibfile",
                             handle_mibfile_conf, NULL, "mibfile-to-read");
     /*
