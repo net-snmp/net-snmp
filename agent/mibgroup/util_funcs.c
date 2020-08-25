@@ -446,7 +446,7 @@ parse_cmd(char **args, const char *cmd)
     }
     argv = malloc((cnt + 1) * sizeof(argv[0]));
     if (argv == NULL) {
-        free(args);
+        free(*args);
         return NULL;
     }
     aptr = argv;
