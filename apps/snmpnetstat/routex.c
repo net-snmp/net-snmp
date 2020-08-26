@@ -548,7 +548,7 @@ p_rtnodex(struct route_entry *rp)
                (rp->mask == 32 ?
                 routexname(&rp->dst) : netxname(&rp->dst, rp->mask)));
     } else if (rp->af == AF_INET6) {
-        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) &rp->dst;
+        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&rp->dst;
         struct in6_addr in6_addr_any;
 
         memset(&in6_addr_any, 0, sizeof(in6_addr_any)); /*IN6ADDR_ANY_INIT */
