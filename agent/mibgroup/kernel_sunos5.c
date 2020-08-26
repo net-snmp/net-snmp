@@ -1027,6 +1027,7 @@ getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
 		    break;
 		}
 		strbuf.buf = (char *)*statbuf + (oldsize - strbuf.len);
+		/* fallthrough */
 	    case 0:
 		/* fix buffer to real size & position */
 		strbuf.len += strbuf.buf - (char*)*statbuf;
