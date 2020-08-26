@@ -1197,7 +1197,7 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS)) {
         char            str[32];
-        sprintf(str, "%lu", *(u_long *) var->val.integer);
+        snprintf(str, sizeof(str), "%lu", *(u_long *) var->val.integer);
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc, (const u_char *) str)) {
             return 0;
@@ -1206,7 +1206,8 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         char            str[32];
-        sprintf(str, "Timeticks: (%lu) ", *(u_long *) var->val.integer);
+        snprintf(str, sizeof(str), "Timeticks: (%lu) ",
+                 *(u_long *) var->val.integer);
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc, (const u_char *) str)) {
             return 0;
@@ -1387,7 +1388,7 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
             }
         } else {
             char            str[32];
-            sprintf(str, "%ld", *var->val.integer);
+            snprintf(str, sizeof(str), "%ld", *var->val.integer);
             if (!snmp_strcat
                 (buf, buf_len, out_len, allow_realloc,
                  (const u_char *) str)) {
@@ -1402,7 +1403,7 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     } else {
         char            str[32];
-        sprintf(str, "(%ld)", *var->val.integer);
+        snprintf(str, sizeof(str), "(%ld)", *var->val.integer);
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) enum_string)) {
@@ -1484,7 +1485,7 @@ sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
             }
         } else {
             char            str[32];
-            sprintf(str, "%lu", *var->val.integer);
+            snprintf(str, sizeof(str), "%lu", *var->val.integer);
             if (!snmp_strcat
                 (buf, buf_len, out_len, allow_realloc,
                  (const u_char *) str)) {
@@ -1499,7 +1500,7 @@ sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     } else {
         char            str[32];
-        sprintf(str, "(%lu)", *var->val.integer);
+        snprintf(str, sizeof(str), "(%lu)", *var->val.integer);
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) enum_string)) {
@@ -1908,7 +1909,7 @@ sprint_realloc_bitstring(u_char ** buf, size_t * buf_len, size_t * out_len,
                         netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM)) {
                         char            str[32];
-                        sprintf(str, "%d ", (len * 8) + bit);
+                        snprintf(str, sizeof(str), "%d ", (len * 8) + bit);
                         if (!snmp_strcat
                             (buf, buf_len, out_len, allow_realloc,
                              (const u_char *) str)) {
@@ -1916,7 +1917,7 @@ sprint_realloc_bitstring(u_char ** buf, size_t * buf_len, size_t * out_len,
                         }
                     } else {
                         char            str[32];
-                        sprintf(str, "(%d) ", (len * 8) + bit);
+                        snprintf(str, sizeof(str), "(%d) ", (len * 8) + bit);
                         if (!snmp_strcat
                             (buf, buf_len, out_len, allow_realloc,
                              (const u_char *) enum_string)) {
@@ -4946,7 +4947,7 @@ print_tree_node(u_char ** buf, size_t * buf_len,
         }
 #if NETSNMP_ENABLE_TESTING_CODE
         if (!cp && (tp->ranges || tp->enums)) { /* ranges without type ? */
-            sprintf(str, "?0 with %s %s ?",
+            snprintf(str, sizeof(str), "?0 with %s %s ?",
                     tp->ranges ? "Range" : "", tp->enums ? "Enum" : "");
             cp = str;
         }
@@ -4966,21 +4967,23 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 case TYPE_INTEGER:
                 case TYPE_INTEGER32:
                     if (rp->low == rp->high)
-                        sprintf(str, "%s%d", (first ? "" : " | "), rp->low );
+                        snprintf(str, sizeof(str), "%s%d", first ? "" : " | ",
+                                 rp->low );
                     else
-                        sprintf(str, "%s%d..%d", (first ? "" : " | "),
-                                rp->low, rp->high);
+                        snprintf(str, sizeof(str), "%s%d..%d",
+                                 first ? "" : " | ", rp->low, rp->high);
                     break;
                 case TYPE_UNSIGNED32:
                 case TYPE_OCTETSTR:
                 case TYPE_GAUGE:
                 case TYPE_UINTEGER:
                     if (rp->low == rp->high)
-                        sprintf(str, "%s%u", (first ? "" : " | "),
+                        snprintf(str, sizeof(str), "%s%u", first ? "" : " | ",
                                 (unsigned)rp->low );
                     else
-                        sprintf(str, "%s%u..%u", (first ? "" : " | "),
-                                (unsigned)rp->low, (unsigned)rp->high);
+                        snprintf(str, sizeof(str), "%s%u..%u",
+                                 first ? "" : " | ", (unsigned)rp->low,
+                                 (unsigned)rp->high);
                     break;
                 default:
                     /* No other range types allowed */
@@ -5062,7 +5065,7 @@ print_tree_node(u_char ** buf, size_t * buf_len,
             cp = NULL;
             break;
         default:
-            sprintf(str, "access_%d", tp->access);
+            snprintf(str, sizeof(str), "access_%d", tp->access);
             cp = str;
         }
         if (cp)
@@ -5091,12 +5094,13 @@ print_tree_node(u_char ** buf, size_t * buf_len,
             cp = NULL;
             break;
         default:
-            sprintf(str, "status_%d", tp->status);
+            snprintf(str, sizeof(str), "status_%d", tp->status);
             cp = str;
         }
 #if NETSNMP_ENABLE_TESTING_CODE
         if (!cp && (tp->indexes)) {     /* index without status ? */
-            sprintf(str, "?0 with %s ?", tp->indexes ? "Index" : "");
+            snprintf(str, sizeof(str), "?0 with %s ?",
+                     tp->indexes ? "Index" : "");
             cp = str;
         }
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
