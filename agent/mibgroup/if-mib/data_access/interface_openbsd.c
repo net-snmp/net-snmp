@@ -143,8 +143,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
         entry = netsnmp_access_interface_entry_create(if_name, ifp->ifm_index);
         if(NULL == entry) {
-            netsnmp_access_interface_container_free(container,
-                                                    NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);
             free(if_list);
             return -3;
         }

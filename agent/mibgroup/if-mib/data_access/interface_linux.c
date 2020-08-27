@@ -757,8 +757,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 #ifdef NETSNMP_ENABLE_IPV6
             netsnmp_access_ipaddress_container_free(addr_container, 0);
 #endif
-            netsnmp_access_interface_container_free(container,
-                                                    NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);
             fclose(devin);
             close(fd);
             free(ifc.ifc_buf);
