@@ -211,8 +211,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     if (error) {
         DEBUGMSGTL(("access:interface:container:arch", 
                     "error %d, free container\n", error));
-        netsnmp_access_interface_container_free(container,
-            NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);
         return -2;
     }
 
