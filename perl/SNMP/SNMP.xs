@@ -5319,11 +5319,11 @@ snmp_mib_node_FETCH(tp_ref, key)
                  mib_hv = perl_get_hv("SNMP::MIB", FALSE);
                  if (SvMAGICAL(mib_hv)) mg = mg_find((SV*)mib_hv, 'P');
                  if (mg) mib_tied_href = (SV*)mg->mg_obj;
-                 next_node_href = newRV((SV*)newHV());
                  __tp_sprint_num_objid(str_buf, tp);
                  nn_hrefp = hv_fetch((HV*)SvRV(mib_tied_href),
                                      str_buf, strlen(str_buf), 1);
                  if (!SvROK(*nn_hrefp)) {
+                 next_node_href = newRV((SV*)newHV());
                  sv_setsv(*nn_hrefp, next_node_href);
                  ENTER ;
                  SAVETMPS ;
