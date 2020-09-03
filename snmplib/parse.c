@@ -3620,7 +3620,7 @@ parse_imports(FILE * fp)
     register int    type;
     char            token[MAXTOKEN];
     char            modbuf[256];
-#define MAX_IMPORTS	256
+#define MAX_IMPORTS	512
     struct module_import import_list[MAX_IMPORTS];
     int             this_module;
     struct module  *mp;
