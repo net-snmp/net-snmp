@@ -16285,15 +16285,22 @@ esac
 
 
 #
-#    Whether the linker supports the flag -Wl,-no-undefined.
+#    Whether the linker supports the flag -Wl,-no-undefined. Do not use
+#    -Wl,-no-undefined on OpenBSD because it breaks linking of shared
+#    libraries. Use -Wl,-no-undefined on all other platforms such that
+#    undefined symbols are detected at compile time instead of at runtime.
 #
 
-if ! echo "$CFLAGS" | grep -q -- -fsanitize=; then
-saved_LDFLAGS=$LDFLAGS
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker supports -Wl,-no-undefined" >&5
+case x$target_os in
+  xopenbsd*)
+    ;;
+  *)
+    if ! echo "$CFLAGS" | grep -q -- -fsanitize=; then
+      saved_LDFLAGS=$LDFLAGS
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker supports -Wl,-no-undefined" >&5
 $as_echo_n "checking whether the linker supports -Wl,-no-undefined... " >&6; }
-LDFLAGS="$saved_LDFLAGS -Wl,-no-undefined"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+      LDFLAGS="$saved_LDFLAGS -Wl,-no-undefined"
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
@@ -16306,16 +16313,18 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; };                 LD_NO_UNDEFINED=-Wl,-no-undefined
+$as_echo "yes" >&6; }; 		      LD_NO_UNDEFINED=-Wl,-no-undefined
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LDFLAGS="$saved_LDFLAGS"
+      LDFLAGS="$saved_LDFLAGS"
 
-fi
+    fi
+    ;;
+esac
 
 
 #

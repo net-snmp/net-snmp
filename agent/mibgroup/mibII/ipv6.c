@@ -21,6 +21,9 @@
 #define _KERNEL_STRUCTURES
 #endif
 #include <sys/param.h>
+#ifdef _I_DEFINED_KERNEL
+#undef _KERNEL
+#endif
 #if HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
