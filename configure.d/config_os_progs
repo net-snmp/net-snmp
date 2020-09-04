@@ -208,20 +208,29 @@ esac
 
 
 #
-#    Whether the linker supports the flag -Wl,-no-undefined.
+#    Whether the linker supports the flag -Wl,-no-undefined. Do not use
+#    -Wl,-no-undefined on OpenBSD because it breaks linking of shared
+#    libraries. Use -Wl,-no-undefined on all other platforms such that
+#    undefined symbols are detected at compile time instead of at runtime.
 #
 
-if ! echo "$CFLAGS" | grep -q -- -fsanitize=; then
-saved_LDFLAGS=$LDFLAGS
-AC_MSG_CHECKING([whether the linker supports -Wl,-no-undefined])
-LDFLAGS="$saved_LDFLAGS -Wl,-no-undefined"
-AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],
-               [AC_MSG_RESULT([yes]); dnl
-                LD_NO_UNDEFINED=-Wl,-no-undefined],
-               [AC_MSG_RESULT([no])])
-LDFLAGS="$saved_LDFLAGS"
-AC_SUBST(LD_NO_UNDEFINED)
-fi
+case x$target_os in
+  xopenbsd*)
+    ;;
+  *)
+    if ! echo "$CFLAGS" | grep -q -- -fsanitize=; then
+      saved_LDFLAGS=$LDFLAGS
+      AC_MSG_CHECKING([whether the linker supports -Wl,-no-undefined])
+      LDFLAGS="$saved_LDFLAGS -Wl,-no-undefined"
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],
+		     [AC_MSG_RESULT([yes]); dnl
+		      LD_NO_UNDEFINED=-Wl,-no-undefined],
+		     [AC_MSG_RESULT([no])])
+      LDFLAGS="$saved_LDFLAGS"
+      AC_SUBST(LD_NO_UNDEFINED)
+    fi
+    ;;
+esac
 
 
 #
