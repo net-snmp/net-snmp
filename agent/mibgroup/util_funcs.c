@@ -472,15 +472,13 @@ get_exec_pipes_fork(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
     if ((*pid = fork()) == 0) { /* First handle for the child */
         close(fd[0][1]);
         close(fd[1][0]);
-        close(0);
-        if (dup(fd[0][0]) != 0) {
-            setPerrorstatus("dup 0");
+        if (dup2(fd[0][0], STDIN_FILENO) < 0) {
+            setPerrorstatus("dup stdin");
             return 0;
         }
         close(fd[0][0]);
-        close(1);
-        if (dup(fd[1][1]) != 1) {
-            setPerrorstatus("dup 1");
+        if (dup2(fd[1][1], STDOUT_FILENO) < 0) {
+            setPerrorstatus("dup stdout");
             return 0;
         }
         close(fd[1][1]);
@@ -491,8 +489,8 @@ get_exec_pipes_fork(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         /*
          * close all non-standard open file descriptors 
          */
-        netsnmp_close_fds(1);
-        NETSNMP_IGNORE_RESULT(dup(1));  /* stderr */
+        netsnmp_close_fds(STDOUT_FILENO);
+        NETSNMP_IGNORE_RESULT(dup2(STDOUT_FILENO, STDERR_FILENO));
 
         argv = parse_cmd(&args, cmd);
         if (!argv) {
