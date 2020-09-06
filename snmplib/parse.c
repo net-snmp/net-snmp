@@ -3656,7 +3656,7 @@ parse_imports(FILE * fp)
                 do {
                     type = get_token(fp, token, MAXTOKEN);
                 } while (type != SEMI && type != ENDOFFILE);
-                return;
+                goto out;
             }
             import_list[import_count++].label = strdup(token);
         } else if (type == FROM) {
@@ -3693,10 +3693,10 @@ parse_imports(FILE * fp)
      * Save the import information
      *   in the global module table
      */
-    for (mp = module_head; mp; mp = mp->next)
+    for (mp = module_head; mp; mp = mp->next) {
         if (mp->modid == current_module) {
             if (import_count == 0)
-                return;
+                goto out;
             if (mp->imports && (mp->imports != root_imports)) {
                 /*
                  * this can happen if all modules are in one source file. 
@@ -3706,14 +3706,14 @@ parse_imports(FILE * fp)
                                 "#### freeing Module %d '%s' %d\n",
                                 mp->modid, mp->imports[i].label,
                                 mp->imports[i].modid));
-                    free((char *) mp->imports[i].label);
+                    free(mp->imports[i].label);
                 }
-                free((char *) mp->imports);
+                free(mp->imports);
             }
             mp->imports = (struct module_import *)
                 calloc(import_count, sizeof(struct module_import));
             if (mp->imports == NULL)
-                return;
+                goto out;
             for (i = 0; i < import_count; ++i) {
                 mp->imports[i].label = import_list[i].label;
                 mp->imports[i].modid = import_list[i].modid;
@@ -3722,13 +3722,16 @@ parse_imports(FILE * fp)
                             mp->imports[i].label, mp->imports[i].modid));
             }
             mp->no_imports = import_count;
-            return;
+            goto out;
         }
+    }
 
     /*
      * Shouldn't get this far
      */
     print_module_not_found(module_name(current_module, modbuf));
+
+out:
     return;
 }
 
