@@ -62,7 +62,7 @@ AC_CHECK_HEADERS([dlfcn.h    err.h      fcntl.h    fstab.h      ] dnl
                  [           grp.h      io.h                    ] dnl
                  [ioctls.h   kstat.h    kvm.h      limits.h     ] dnl
                  [           mntent.h   mtab.h                  ] dnl
-                 [           pkglocs.h             pwd.h        ] dnl
+                 [pkglocs.h  pwd.h      spawn.h                 ] dnl
                  [           com_err.h             et/com_err.h ] dnl
                  [           utmpx.h    utsname.h               ])
 

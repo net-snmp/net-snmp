@@ -17936,7 +17936,7 @@ done
 
 
 #  Agent:
-for ac_header in dlfcn.h    err.h      fcntl.h    fstab.h                                   grp.h      io.h                                      ioctls.h   kstat.h    kvm.h      limits.h                                  mntent.h   mtab.h                                               pkglocs.h             pwd.h                                     com_err.h             et/com_err.h                              utmpx.h    utsname.h
+for ac_header in dlfcn.h    err.h      fcntl.h    fstab.h                                   grp.h      io.h                                      ioctls.h   kstat.h    kvm.h      limits.h                                  mntent.h   mtab.h                                    pkglocs.h  pwd.h      spawn.h                                              com_err.h             et/com_err.h                              utmpx.h    utsname.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -27897,7 +27897,7 @@ rm -f core conftest.err conftest.$ac_objext \
   *)
     # Do not use fork() nor any related function when using Windows sockets
     # because Windows sockets are not compatible with fork().
-    for ac_func in execv fork signal sigset uname vfork waitpid                   closesocket gai_strerror getaddrinfo gethostbyname                   gethostbyname2 gethostname gethostbyaddr                   inet_ntop inet_pton
+    for ac_func in execv fork signal sigset uname posix_spawn waitpid                   closesocket gai_strerror getaddrinfo gethostbyname                   gethostbyname2 gethostname gethostbyaddr                   inet_ntop inet_pton
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
