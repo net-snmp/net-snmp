@@ -3637,12 +3637,14 @@ parse_imports(FILE * fp)
     char            token[MAXTOKEN];
     char            modbuf[256];
 #define MAX_IMPORTS	512
-    struct module_import import_list[MAX_IMPORTS];
+    struct module_import *import_list;
     int             this_module;
     struct module  *mp;
 
     int             import_count = 0;   /* Total number of imported descriptors */
     int             i = 0, old_i;       /* index of first import from each module */
+
+    import_list = malloc(MAX_IMPORTS * sizeof(*import_list));
 
     type = get_token(fp, token, MAXTOKEN);
 
@@ -3732,6 +3734,7 @@ parse_imports(FILE * fp)
     print_module_not_found(module_name(current_module, modbuf));
 
 out:
+    free(import_list);
     return;
 }
 
