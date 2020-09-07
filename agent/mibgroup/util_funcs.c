@@ -20,6 +20,9 @@
 #if HAVE_IO_H
 #include <io.h>
 #endif
+#ifdef HAVE_SPAWN_H
+#include <spawn.h>
+#endif
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -478,15 +481,13 @@ get_exec_pipes_fork(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
     if ((*pid = fork()) == 0) { /* First handle for the child */
         close(fd[0][1]);
         close(fd[1][0]);
-        close(0);
-        if (dup(fd[0][0]) != 0) {
-            setPerrorstatus("dup 0");
+        if (dup2(fd[0][0], STDIN_FILENO) < 0) {
+            setPerrorstatus("dup stdin");
             return 0;
         }
         close(fd[0][0]);
-        close(1);
-        if (dup(fd[1][1]) != 1) {
-            setPerrorstatus("dup 1");
+        if (dup2(fd[1][1], STDOUT_FILENO) < 0) {
+            setPerrorstatus("dup stdout");
             return 0;
         }
         close(fd[1][1]);
@@ -497,8 +498,8 @@ get_exec_pipes_fork(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         /*
          * close all non-standard open file descriptors 
          */
-        netsnmp_close_fds(1);
-        NETSNMP_IGNORE_RESULT(dup(1));  /* stderr */
+        netsnmp_close_fds(STDOUT_FILENO);
+        NETSNMP_IGNORE_RESULT(dup2(STDOUT_FILENO, STDERR_FILENO));
 
         argv = parse_cmd(&args, cmd);
         if (!argv) {
@@ -524,6 +525,68 @@ get_exec_pipes_fork(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
         *fdOut = fd[0][1];
         return (1);             /* We are returning 0 for error... */
     }
+}
+#endif
+
+#if defined(HAVE_POSIX_SPAWN)
+static int
+NETSNMP_ATTRIBUTE_UNUSED
+get_exec_pipes_spawn(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
+{
+    int             fd[2][2], spawn_res;
+    char           **argv, *args;
+    posix_spawnattr_t attr;
+    posix_spawn_file_actions_t file_actions;
+
+    argv = parse_cmd(&args, cmd);
+    if (!argv) {
+        DEBUGMSGTL(("util_funcs", "get_exec_pipes(): argv == NULL\n"));
+        goto err;
+    }
+    if (pipe(fd[0])) {
+        setPerrorstatus("pipe 0");
+        goto free_argv;
+    }
+    if (pipe(fd[1])) {
+        setPerrorstatus("pipe 1");
+        goto close_pipe_0;
+    }
+    posix_spawnattr_init(&attr);
+    posix_spawn_file_actions_init(&file_actions);
+    posix_spawn_file_actions_addclose(&file_actions, fd[0][1]);
+    posix_spawn_file_actions_addclose(&file_actions, fd[1][0]);
+    posix_spawn_file_actions_adddup2(&file_actions,  fd[0][0], STDIN_FILENO);
+    posix_spawn_file_actions_addclose(&file_actions, fd[0][0]);
+    posix_spawn_file_actions_adddup2(&file_actions,  fd[1][1], STDOUT_FILENO);
+    posix_spawn_file_actions_addclose(&file_actions, fd[1][1]);
+    posix_spawn_file_actions_adddup2(&file_actions,  STDOUT_FILENO,
+                                     STDERR_FILENO);
+    spawn_res = posix_spawn(pid, argv[0], &file_actions, &attr, argv, NULL);
+    posix_spawn_file_actions_destroy(&file_actions);
+    posix_spawnattr_destroy(&attr);
+    if (spawn_res != 0) {
+        setPerrorstatus("posix_spawn");
+        goto close_pipe_1;
+    }
+    close(fd[0][0]);
+    close(fd[1][1]);
+    *fdIn = fd[1][0];
+    *fdOut = fd[0][1];
+    return 1;
+
+close_pipe_1:
+    close(fd[1][0]);
+    close(fd[1][1]);
+
+close_pipe_0:
+    close(fd[0][0]);
+    close(fd[0][1]);
+
+free_argv:
+    free(argv);
+
+err:
+    return 0;
 }
 #endif
 
@@ -679,6 +742,8 @@ int
 get_exec_pipes(const char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
 {
 #if defined(HAVE_EXECV)
+    return get_exec_pipes_fork(cmd, fdIn, fdOut, pid);
+#elif defined(HAVE_POSIX_SPAWN)
     return get_exec_pipes_fork(cmd, fdIn, fdOut, pid);
 #elif defined(HAVE__GET_OSFHANDLE) && defined(HAVE__OPEN_OSFHANDLE)
     return get_exec_pipes_win32(cmd, fdIn, fdOut, pid);
