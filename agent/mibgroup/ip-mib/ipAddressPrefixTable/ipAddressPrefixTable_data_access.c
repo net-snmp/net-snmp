@@ -246,6 +246,7 @@ ipAddressPrefixTable_container_load(netsnmp_container *container)
             rowreq_ctx = ipAddressPrefixTable_allocate_rowreq_ctx(NULL);
             if (NULL == rowreq_ctx) {
                 snmp_log(LOG_ERR, "memory allocation failed\n");
+                ITERATOR_RELEASE(addr_it);
                 return MFD_RESOURCE_UNAVAILABLE;
             }
         }
@@ -314,11 +315,17 @@ ipAddressPrefixTable_container_load(netsnmp_container *container)
         /*
          * insert into table container, clear ptr so we reallocate
          */
-        CONTAINER_INSERT(container, rowreq_ctx);
-        rowreq_ctx = NULL;
-        ++count;
+        if (CONTAINER_INSERT(container, rowreq_ctx) == 0) {
+          rowreq_ctx = NULL;
+          ++count;
+        }
     }
     ITERATOR_RELEASE(addr_it);
+
+    /** clean up if "do we already have this prefix?" was true and no CONTAINER_INSERT happened afterwards */
+    if (rowreq_ctx) {
+      ipAddressPrefixTable_release_rowreq_ctx(rowreq_ctx);
+    }
 
     DEBUGMSGT(("verbose:ipAddressPrefixTable:ipAddressPrefixTable_container_load", "inserted %d records\n", count));
 
