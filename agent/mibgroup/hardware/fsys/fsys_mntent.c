@@ -146,6 +146,7 @@ _fsys_type( char *typename )
               !strcmp(typename, MNTTYPE_CVFS) ||
               !strcmp(typename, MNTTYPE_SIMFS) ||
               !strcmp(typename, MNTTYPE_BTRFS) ||
+              !strcmp(typename, MNTTYPE_F2FS) ||
               !strcmp(typename, MNTTYPE_ZFS) ||
               !strcmp(typename, MNTTYPE_NVMFS) ||
               !strcmp(typename, MNTTYPE_ACFS) ||

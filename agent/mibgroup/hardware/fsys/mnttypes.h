@@ -154,6 +154,9 @@
 #ifndef MNTTYPE_BTRFS
 #define MNTTYPE_BTRFS     "btrfs"
 #endif
+#ifndef MNTTYPE_F2FS
+#define MNTTYPE_F2FS      "f2fs"
+#endif
 #ifndef MNTTYPE_ZFS
 #define MNTTYPE_ZFS       "zfs"
 #endif
