@@ -1,0 +1,45 @@
+name: Build and test
+
+on: [workflow_dispatch]
+#on:
+#  push:
+#    branches: [ master ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: install required packages
+      run: sudo apt-get install libatm-dev libperl-dev libpopt-dev libsensors4-dev libssh2-1-dev libxml2-dev uuid-dev libkrb5-dev python3-setuptools
+
+    - name: configure
+      run: MODE=regular; ci/net-snmp-configure ${GITHUB_REF##*/}
+
+    - name: build
+      run: make
+
+    - name: test default
+      run: cd testing; ./RUNFULLTESTS -g default
+
+    - name: test perl
+      run: cd testing; ./RUNFULLTESTS -g perl
+
+    - name: test read-only
+      continue-on-error: true
+      run: cd testing; ./RUNFULLTESTS -g read-only
+
+    - name: test snmv3
+      run: cd testing; ./RUNFULLTESTS -g snmpv3
+
+    - name: test tls
+      continue-on-error: true
+      run: cd testing; ./RUNFULLTESTS -g tls
+
+    - name: test transports
+      run: cd testing; ./RUNFULLTESTS -g transports
+
+    - name: test unit-tests
+      run: cd testing; ./RUNFULLTESTS -g unit-tests
