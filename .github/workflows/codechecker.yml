@@ -46,9 +46,7 @@ jobs:
         CodeChecker version
 
     - name: configure
-      run: |
-        ./configure --enable-developer --enable-ipv6 --prefix=/usr/local/net-snmp-master --with-cflags= --with-defaults --enable-new-features --with-perl-modules --with-default-snmp-version=2 --with-systemd --enable-blumenthal-aes --with-python-modules '--with-transports=AAL5PVC IPX STD UDPshared DTLSUDP TLSTCP' '--with-security-modules=usm tsm ksm' '--with-mib-modules=examples/data_set examples/delayed_instance examples/example examples/notification examples/scalar_int examples/ucdDemoPublic examples/watched smux deliver/deliverByNotify disman/event disman/mteEventNotificationTable disman/mteEventTable disman/mteObjectsTable disman/mteTriggerBooleanTable disman/mteTriggerDeltaTable disman/mteTriggerExistenceTable disman/mteTriggerTable disman/mteTriggerThresholdTable disman/nslookup-mib disman/ping-mib disman/schedule disman/traceroute-mib etherlike-mib examples/netSnmpHostsTable hardware/cpu hardware/fsys hardware/memory host ip-forward-mib ip-mib/inetNetToMediaTable ip-mib/ipDefaultRouterTable ip-mib/ipv4InterfaceTable ip-mib/ipv6InterfaceTable ip-mib/ipv6ScopeZoneIndexTable mibII/ipAddr mibII/mta_sendmail misc/ipfwacc sctp-mib snmp-notification-mib tcp-mib testhandler tunnel ucd-snmp/diskio hardware/sensors ucd-snmp/lmsensorsMib ucd-snmp/extensible udp-mib rmon-mib snmp-usm-dh-objects-mib tlstm-mib tsm-mib'
-        git status
+      run: MODE=regular; ci/net-snmp-configure ${GITHUB_REF##*/}
 
     - name: Codechecker log
       run: |
