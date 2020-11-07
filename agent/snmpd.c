@@ -1169,7 +1169,7 @@ receive(void)
     int             numfds;
     netsnmp_large_fd_set readfds, writefds, exceptfds;
     struct timeval  timeout, *tvp = &timeout;
-    int             count, block, i;
+    int             count, block, i, ret;
 #ifdef	USING_SMUX_MODULE
     int             sd;
 #endif                          /* USING_SMUX_MODULE */
@@ -1192,8 +1192,13 @@ receive(void)
      */
     while (netsnmp_running) {
         if (reconfig) {
-#if HAVE_SIGHOLD
-            sighold(SIGHUP);
+#if HAVE_SIGPROCMASK
+            sigset_t set;
+
+            sigemptyset(&set);
+            sigaddset(&set, SIGHUP);
+            ret = sigprocmask(SIG_BLOCK, &set, NULL);
+            netsnmp_assert(ret == 0);
 #endif
             reconfig = 0;
             snmp_log(LOG_INFO, "Reconfiguring daemon\n");
@@ -1204,8 +1209,9 @@ receive(void)
 		     netsnmp_get_version());
             update_config();
             send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
-#if HAVE_SIGHOLD
-            sigrelse(SIGHUP);
+#if HAVE_SIGPROCMASK
+            ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
+            netsnmp_assert(ret == 0);
 #endif
         }
 
