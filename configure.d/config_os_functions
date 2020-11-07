@@ -166,8 +166,7 @@ AC_CHECK_FUNCS([cgetnext        chown          forkall         ] dnl
                [poll            regcomp                        ] dnl
                [setgid          setgroups                      ] dnl
                [setmntent       setuid                         ] dnl
-               [sigaction       sigblock      sighold          ] dnl
-               [sigprocmask                                    ] dnl
+               [sigaction       sigblock      sigprocmask      ] dnl
                [statfs          statvfs       stime            ] dnl
                [strncasecmp     system        usleep           ] )
 

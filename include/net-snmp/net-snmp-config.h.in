@@ -829,9 +829,6 @@
 /* Define to 1 if you have the `sigblock' function. */
 #undef HAVE_SIGBLOCK
 
-/* Define to 1 if you have the `sighold' function. */
-#undef HAVE_SIGHOLD
-
 /* Define if SIGHUP is defined in <signal.h>. */
 #undef HAVE_SIGHUP
 
