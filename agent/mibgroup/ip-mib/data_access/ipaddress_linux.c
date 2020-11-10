@@ -19,6 +19,7 @@
 
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 
 netsnmp_feature_require(prefix_info);
 netsnmp_feature_require(find_prefix_info);
@@ -234,7 +235,18 @@ _load_v6(netsnmp_container *container, int idx_offset)
 
 #define PROCFILE "/proc/net/if_inet6"
     if (!(in = fopen(PROCFILE, "r"))) {
-        NETSNMP_LOGONCE((LOG_ERR, "ipaddress_linux: could not open " PROCFILE));
+        /*
+         * If opening /proc/net/if_inet6 fails, only complain if that file
+         * does not exist. If it exists but if it is not readable, do not
+         * log an error message because this probably is the result of IPv6
+         * support having been disabled intentionally.
+         */
+        struct stat st;
+
+        if (stat(PROCFILE, &st) == 0) {
+            NETSNMP_LOGONCE((LOG_ERR,
+                             "ipaddress_linux: could not open " PROCFILE));
+        }
         return -2;
     }
 
