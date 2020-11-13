@@ -164,7 +164,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (!mem->descr)
              mem->descr = strdup("Cached memory");
         mem->units = pagesize;
-        mem->size  = cache_count;
+        mem->size  = cache_count + inact_count;
         mem->free  = 0;
     }
 
