@@ -120,7 +120,11 @@ fi
 fi
 outdir="@PERSISTENT_DIRECTORY@"
 outfile="$outdir/snmpd.conf"
-line="createUser $user $Aalgorithm \"$apassphrase\" $Xalgorithm \"$xpassphrase\""
+if test "x$xpassphrase" = "x" ; then
+    line="createUser $user $Aalgorithm \"$apassphrase\" $Xalgorithm"
+else
+    line="createUser $user $Aalgorithm \"$apassphrase\" $Xalgorithm \"$xpassphrase\""
+fi
 echo "adding the following line to $outfile:"
 echo "  " $line
 # in case it hasn't ever been started yet, start it.
