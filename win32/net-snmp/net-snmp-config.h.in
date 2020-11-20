@@ -709,7 +709,7 @@
 /* #undef HAVE_STATVFS */
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || (defined(_MSC_VER) && (_MSC_VER >= 1600))
 #define HAVE_STDINT_H 1
 #endif
 
