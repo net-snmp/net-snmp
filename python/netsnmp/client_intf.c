@@ -851,10 +851,14 @@ py_netsnmp_construct_varbind(void)
   PyObject *callable;
 
   module = PyImport_ImportModule("netsnmp");
+  if (!module)
+      return NULL;
   dict = PyModule_GetDict(module);
-
+  if (!dict)
+      return NULL;
   callable = PyDict_GetItemString(dict, "Varbind");
-
+  if (!callable)
+      return NULL;
   return PyObject_CallFunction(callable, "");
 }
 
@@ -932,6 +936,18 @@ py_netsnmp_verbose(void)
   return verbose;
 }
 
+static int is_hex(const char* str, int len)
+{
+    const unsigned char *cp = (const unsigned char *) str;
+    int i;
+
+    for (i = 0; i < len; i++, cp++)
+        if (!isprint(*cp) && !isspace(*cp))
+            return 1;
+
+    return 0;
+}
+
 /*
  * Set attribute @attr_name of @obj to the string @val.
  */
@@ -942,9 +958,10 @@ py_netsnmp_attr_set_string(PyObject *obj, const char *attr_name,
   int ret = -1;
 
   if (obj && attr_name) {
-    PyObject* val_obj =  (val ?
-			  Py_BuildValue("s#", val, len) :
-			  Py_BuildValue(""));
+    int hex = is_hex(val, len);
+    PyObject* val_obj = val ? Py_BuildValue(hex ? "y#" : "s#", val, len) :
+        Py_BuildValue("");
+
     if (!val_obj)
         return -1;
     ret = PyObject_SetAttrString(obj, attr_name, val_obj);
@@ -1518,8 +1535,11 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
               PyTuple_SetItem(val_tuple, varlist_ind,
                               Py_BuildValue(""));
           } else {
+              const int hex = is_hex(str_buf, len);
+
               PyTuple_SetItem(val_tuple, varlist_ind,
-                              Py_BuildValue("s#", str_buf, len));
+                              Py_BuildValue(hex ? "y#" : "s#",
+                                            str_buf, len));
           }
           Py_DECREF(varbind);
       } else {
@@ -1813,9 +1833,11 @@ netsnmp_walk(PyObject *self, PyObject *args)
               }
 
               varbind = py_netsnmp_construct_varbind();
-              if (build_python_varbind(varbind, vars, varlist_ind,
+              if (varbind && build_python_varbind(varbind, vars, varlist_ind,
                                        sprintval_flag, &len, &str_buf) !=
                   TYPE_OTHER) {
+                  const int hex = is_hex(str_buf, len);
+
                   py_netsnmp_attr_set_string(varbind, "val", str_buf, len);
 
                   /* push the varbind onto the return varbinds */
@@ -1825,7 +1847,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
                   /* save in return tuple as well - steals ref */
                   _PyTuple_Resize(&val_tuple, result_count+1);
                   PyTuple_SetItem(val_tuple, result_count++,
-                                  Py_BuildValue("s#", str_buf, len));
+                                  Py_BuildValue(hex ? "y#" : "s#", str_buf,
+                                                len));
               } else {
                   /* Return None for this variable. */
                   _PyTuple_Resize(&val_tuple, result_count+1);
@@ -2033,15 +2056,17 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	    vars = vars->next_variable, varbind_ind++) {
 
 	  varbind = py_netsnmp_construct_varbind();
-          if (build_python_varbind(varbind, vars, varbind_ind, sprintval_flag,
-                                   &len, &str_buf) != TYPE_OTHER) {
-	    /* push varbind onto varbinds */
+          if (varbind && build_python_varbind(varbind, vars, varbind_ind,
+                              sprintval_flag, &len, &str_buf) != TYPE_OTHER) {
+            const int hex = is_hex(str_buf, len);
+
+            /* push varbind onto varbinds */
 	    PyList_Append(varbinds, varbind);
 
 	    /* save in return tuple as well - steals ref */
 	    _PyTuple_Resize(&val_tuple, varbind_ind+1);
 	    PyTuple_SetItem(val_tuple, varbind_ind,
-			       Py_BuildValue("s#", str_buf, len));
+                            Py_BuildValue(hex ? "y#" : "s#", str_buf, len));
 
 	    Py_DECREF(varbind);
 
