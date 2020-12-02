@@ -1299,6 +1299,63 @@ netsnmp_delete_session(PyObject *self, PyObject *args)
 }
 
 
+static int build_python_varbind(PyObject *varbind, netsnmp_variable_list *vars,
+                                int varlist_ind, int sprintval_flag, int *len,
+                                char **str_buf)
+{
+    struct tree *tp;
+    int type;
+    char type_str[MAX_TYPE_NAME_LEN];
+    size_t str_buf_len = 0;
+    size_t out_len = 0;
+    int buf_over = 0;
+    const char *tag;
+    const char *iid;
+    int getlabel_flag = NO_FLAGS;
+
+    if (!PyObject_HasAttrString(varbind, "tag"))
+        return TYPE_OTHER;
+
+    if (*str_buf == NULL) {
+        *str_buf = netsnmp_malloc(STR_BUF_SIZE);
+        str_buf_len = STR_BUF_SIZE;
+    }
+    strcpy(*str_buf, ".");
+    out_len = 0;
+    tp = netsnmp_sprint_realloc_objid_tree((u_char **)str_buf, &str_buf_len,
+                                           &out_len, 1, &buf_over,
+                                           vars->name, vars->name_length);
+    if (_debug_level)
+        printf("%s:str_buf:%s:%d:%d\n", __func__, *str_buf, (int)str_buf_len,
+               (int)out_len);
+
+    if (__is_leaf(tp)) {
+        type = tp->type ? tp->type : tp->parent->type;
+        getlabel_flag &= ~NON_LEAF_NAME;
+        if (_debug_level)
+            printf("%s:is_leaf:%d\n", __func__, type);
+    } else {
+        getlabel_flag |= NON_LEAF_NAME;
+        type = __translate_asn_type(vars->type);
+        if (_debug_level)
+            printf("%s:!is_leaf:%d\n", __func__, tp->type);
+    }
+    __get_label_iid(*str_buf, &tag, &iid, getlabel_flag);
+
+    py_netsnmp_attr_set_string(varbind, "tag", tag, STRLEN(tag));
+    py_netsnmp_attr_set_string(varbind, "iid", iid, STRLEN(iid));
+
+    __get_type_str(type, type_str);
+
+    py_netsnmp_attr_set_string(varbind, "type", type_str, strlen(type_str));
+
+    *len = __snprint_value(str_buf, &str_buf_len, vars, tp, type,
+                           sprintval_flag);
+    (*str_buf)[*len] = '\0';
+    py_netsnmp_attr_set_string(varbind, "val", *str_buf, *len);
+    return type;
+}
+
 static PyObject *
 netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
                        const char *func_name)
@@ -1312,16 +1369,11 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
   struct session_list *ss;
   netsnmp_pdu *pdu, *response;
   netsnmp_variable_list *vars;
-  struct tree *tp;
   int len;
   oid *oid_arr;
   size_t oid_arr_len = MAX_OID_LEN;
   int type;
-  char type_str[MAX_TYPE_NAME_LEN];
-  u_char *str_buf = NULL;
-  size_t str_buf_len = 0;
-  size_t out_len = 0;
-  int buf_over = 0;
+  char *str_buf = NULL;
   const char *tag;
   const char *iid;
   int getlabel_flag = NO_FLAGS;
@@ -1379,7 +1431,7 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
 	{
 	  oid_arr_len = 0;
 	} else {
-	  tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, NULL, best_guess);
+	  __tag2oid(tag, iid, oid_arr, &oid_arr_len, NULL, best_guess);
 	}
 
 	if (_debug_level)
@@ -1455,59 +1507,21 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
 	vars = vars->next_variable, varlist_ind++) {
 
       varbind = PySequence_GetItem(varlist, varlist_ind);
-
-      if (PyObject_HasAttrString(varbind, "tag")) {
-        if (str_buf == NULL) {
-          str_buf = (u_char *) netsnmp_malloc(STR_BUF_SIZE);
-          str_buf_len = STR_BUF_SIZE;
-        }
-	*str_buf = '.';
-	*(str_buf+1) = '\0';
-	out_len = 0;
-	tp = netsnmp_sprint_realloc_objid_tree(&str_buf, &str_buf_len,
-					       &out_len, 1, &buf_over,
-					       vars->name,vars->name_length);
-	if (_debug_level) 
-            printf("%s:str_buf:%s:%d:%d\n", func_name, str_buf,
-                   (int)str_buf_len, (int)out_len);
-
-	if (__is_leaf(tp)) {
-	  type = (tp->type ? tp->type : tp->parent->type);
-	  getlabel_flag &= ~NON_LEAF_NAME;
-	  if (_debug_level)
-             printf("%s:is_leaf:%d\n", func_name, type);
-	} else {
-	  getlabel_flag |= NON_LEAF_NAME;
-	  type = __translate_asn_type(vars->type);
-	  if (_debug_level)
-             printf("%s:!is_leaf:%d\n", func_name, tp->type);
-	}
-	__get_label_iid((char *) str_buf, &tag, &iid, getlabel_flag);
-
-	py_netsnmp_attr_set_string(varbind, "tag", tag, STRLEN(tag));
-	py_netsnmp_attr_set_string(varbind, "iid", iid, STRLEN(iid));
-
-	__get_type_str(type, type_str);
-
-	py_netsnmp_attr_set_string(varbind, "type", type_str, strlen(type_str));
-
-	len = __snprint_value((char **)&str_buf, &str_buf_len,
-                              vars, tp, type, sprintval_flag);
-	str_buf[len] = '\0';
-	py_netsnmp_attr_set_string(varbind, "val", (char *) str_buf, len);
-
-	/* save in return tuple as well */
-	if ((type == SNMP_ENDOFMIBVIEW) ||
-			(type == SNMP_NOSUCHOBJECT) ||
-			(type == SNMP_NOSUCHINSTANCE)) {
-		/* Translate error to None */
-		PyTuple_SetItem(val_tuple, varlist_ind,
-			Py_BuildValue(""));
-	} else {
-		PyTuple_SetItem(val_tuple, varlist_ind,
-			Py_BuildValue("s#", str_buf, len));
-	}
-	Py_DECREF(varbind);
+      type = build_python_varbind(varbind, vars, varlist_ind, sprintval_flag,
+                                  &len, &str_buf);
+      if (type != TYPE_OTHER) {
+          /* save in return tuple as well */
+          if ((type == SNMP_ENDOFMIBVIEW) ||
+              (type == SNMP_NOSUCHOBJECT) ||
+              (type == SNMP_NOSUCHINSTANCE)) {
+              /* Translate error to None */
+              PyTuple_SetItem(val_tuple, varlist_ind,
+                              Py_BuildValue(""));
+          } else {
+              PyTuple_SetItem(val_tuple, varlist_ind,
+                              Py_BuildValue("s#", str_buf, len));
+          }
+          Py_DECREF(varbind);
       } else {
 	printf("%s: bad varbind (%d)\n", func_name, varlist_ind);
 	Py_XDECREF(varbind);
@@ -1557,19 +1571,13 @@ netsnmp_walk(PyObject *self, PyObject *args)
   netsnmp_pdu *pdu, *response;
   netsnmp_pdu *newpdu;
   netsnmp_variable_list *vars, *oldvars;
-  struct tree *tp;
   int len;
   oid **oid_arr = NULL;
   size_t *oid_arr_len = NULL;
   oid **oid_arr_broken_check = NULL;
   size_t *oid_arr_broken_check_len = NULL;
-  int type;
-  char type_str[MAX_TYPE_NAME_LEN];
   int status;
-  u_char *str_buf = NULL;
-  size_t str_buf_len = 0;
-  size_t out_len = 0;
-  int buf_over = 0;
+  char *str_buf = NULL;
   const char *tag;
   const char *iid = NULL;
   int getlabel_flag = NO_FLAGS;
@@ -1655,9 +1663,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
       {
         oid_arr_len[varlist_ind] = 0;
       } else {
-        tp = __tag2oid(tag, iid,
-                       oid_arr[varlist_ind], &oid_arr_len[varlist_ind],
-                       NULL, best_guess);
+        __tag2oid(tag, iid, oid_arr[varlist_ind], &oid_arr_len[varlist_ind],
+                  NULL, best_guess);
       }
 
       if (_debug_level)
@@ -1806,46 +1813,10 @@ netsnmp_walk(PyObject *self, PyObject *args)
               }
 
               varbind = py_netsnmp_construct_varbind();
-
-              if (PyObject_HasAttrString(varbind, "tag")) {
-                  if (str_buf == NULL) {
-                      str_buf = (u_char *) netsnmp_malloc(STR_BUF_SIZE);
-                      str_buf_len = STR_BUF_SIZE;
-                  }
-                  str_buf[0] = '.';
-                  str_buf[1] = '\0';
-                  out_len = 0;
-                  tp = netsnmp_sprint_realloc_objid_tree(&str_buf, &str_buf_len,
-                                                         &out_len, 1, &buf_over,
-                                                         vars->name,vars->name_length);
-
-                  if (__is_leaf(tp)) {
-                      type = (tp->type ? tp->type : tp->parent->type);
-                      getlabel_flag &= ~NON_LEAF_NAME;
-                  } else {
-                      getlabel_flag |= NON_LEAF_NAME;
-                      type = __translate_asn_type(vars->type);
-                  }
-
-                  __get_label_iid((char *) str_buf, &tag, &iid, getlabel_flag);
-
-                  if (_debug_level)
-                     printf("netsnmp_walk: filling response: %s:%s\n", tag, iid);
-
-                  py_netsnmp_attr_set_string(varbind, "tag", tag, STRLEN(tag));
-                  py_netsnmp_attr_set_string(varbind, "iid", iid, STRLEN(iid));
-
-                  __get_type_str(type, type_str);
-
-                  py_netsnmp_attr_set_string(varbind, "type", type_str,
-                                             strlen(type_str));
-
-                  len = __snprint_value((char **)&str_buf, &str_buf_len,
-                                        vars, tp, type, sprintval_flag);
-                  str_buf[len] = '\0';
-
-                  py_netsnmp_attr_set_string(varbind, "val", (char *) str_buf,
-                                             len);
+              if (build_python_varbind(varbind, vars, varlist_ind,
+                                       sprintval_flag, &len, &str_buf) !=
+                  TYPE_OTHER) {
+                  py_netsnmp_attr_set_string(varbind, "val", str_buf, len);
 
                   /* push the varbind onto the return varbinds */
                   PyList_Append(varbinds, varbind);
@@ -1921,16 +1892,10 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   struct session_list *ss;
   netsnmp_pdu *pdu, *response;
   netsnmp_variable_list *vars;
-  struct tree *tp;
   int len;
   oid *oid_arr;
   size_t oid_arr_len = MAX_OID_LEN;
-  int type;
-  char type_str[MAX_TYPE_NAME_LEN];
-  u_char *str_buf = NULL;
-  size_t str_buf_len = 0;
-  size_t out_len = 0;
-  int buf_over = 0;
+  char *str_buf = NULL;
   const char *tag;
   const char *iid;
   int getlabel_flag = NO_FLAGS;
@@ -1989,7 +1954,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
         {
           oid_arr_len = 0;
         } else {
-          tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, NULL, best_guess);
+          __tag2oid(tag, iid, oid_arr, &oid_arr_len, NULL, best_guess);
         }
 
 	if (oid_arr_len) {
@@ -2068,43 +2033,8 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	    vars = vars->next_variable, varbind_ind++) {
 
 	  varbind = py_netsnmp_construct_varbind();
-
-	  if (PyObject_HasAttrString(varbind, "tag")) {
-            if (str_buf == NULL) {
-              str_buf = (u_char *) netsnmp_malloc(STR_BUF_SIZE);
-              str_buf_len = STR_BUF_SIZE;
-            }
-	    *str_buf = '.';
-	    *(str_buf+1) = '\0';
-	    out_len = 0;
-	    buf_over = 0;
-	    tp = netsnmp_sprint_realloc_objid_tree(&str_buf, &str_buf_len,
-						   &out_len, 1, &buf_over,
-						   vars->name,vars->name_length);
-	    if (__is_leaf(tp)) {
-	      type = (tp->type ? tp->type : tp->parent->type);
-	      getlabel_flag &= ~NON_LEAF_NAME;
-	    } else {
-	      getlabel_flag |= NON_LEAF_NAME;
-	      type = __translate_asn_type(vars->type);
-	    }
-
-	    __get_label_iid((char *) str_buf, &tag, &iid, getlabel_flag);
-
-	    py_netsnmp_attr_set_string(varbind, "tag", tag, STRLEN(tag));
-	    py_netsnmp_attr_set_string(varbind, "iid", iid, STRLEN(iid));
-
-	    __get_type_str(type, type_str);
-
-	    py_netsnmp_attr_set_string(varbind, "type", type_str,
-				       strlen(type_str));
-
-	    len = __snprint_value((char **)&str_buf, &str_buf_len,
-				  vars, tp, type, sprintval_flag);
-	    str_buf[len] = '\0';
-
-	    py_netsnmp_attr_set_string(varbind, "val", (char *) str_buf, len);
-
+          if (build_python_varbind(varbind, vars, varbind_ind, sprintval_flag,
+                                   &len, &str_buf) != TYPE_OTHER) {
 	    /* push varbind onto varbinds */
 	    PyList_Append(varbinds, varbind);
 
