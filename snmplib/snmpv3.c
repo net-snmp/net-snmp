@@ -994,7 +994,7 @@ init_snmpv3(const char *type)
                                     engineIDType_conf, NULL, "num");
     register_prenetsnmp_mib_handler(type, "engineIDNic", engineIDNic_conf,
                                     NULL, "string");
-    register_config_handler(type, "engineBoots", engineBoots_conf, NULL,
+    register_prenetsnmp_mib_handler(type, "engineBoots", engineBoots_conf, NULL,
                             NULL);
 
     /*
