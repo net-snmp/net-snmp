@@ -2661,7 +2661,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                 OID_LENGTH(usmHMAC192SHA256AuthProtocol)
             );
             session.securityAuthProtoLen = OID_LENGTH(usmHMAC192SHA256AuthProtocol);
-        }
+        } else
 #endif
 #ifdef HAVE_EVP_SHA384
         if (!strcmp(auth_proto, "SHA384")) {
@@ -2676,7 +2676,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                 OID_LENGTH(usmHMAC384SHA512AuthProtocol)
             );
             session.securityAuthProtoLen = OID_LENGTH(usmHMAC384SHA512AuthProtocol);
-        }
+        } else
 #endif
         if (!strcmp(auth_proto, "SHA")) {
             session.securityAuthProto = snmp_duplicate_objid(
