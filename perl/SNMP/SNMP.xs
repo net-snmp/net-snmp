@@ -2644,6 +2644,32 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
               session.securityAuthProtoLen = OID_LENGTH(usmHMACMD5AuthProtocol);
            } else
 #endif
+#ifdef HAVE_EVP_SHA224
+        if (!strcmp(auth_proto, "SHA224")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMAC128SHA224AuthProtocol,
+                OID_LENGTH(usmHMAC128SHA224AuthProtocol));
+            session.securityAuthProtoLen = OID_LENGTH(usmHMAC128SHA224AuthProtocol);
+        } else if (!strcmp(auth_proto, "SHA256")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMAC192SHA256AuthProtocol,
+                OID_LENGTH(usmHMAC192SHA256AuthProtocol));
+            session.securityAuthProtoLen = OID_LENGTH(usmHMAC192SHA256AuthProtocol);
+        } else
+#endif
+#ifdef HAVE_EVP_SHA384
+        if (!strcmp(auth_proto, "SHA384")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMAC256SHA384AuthProtocol,
+                OID_LENGTH(usmHMAC256SHA384AuthProtocol));
+            session.securityAuthProtoLen = OID_LENGTH(usmHMAC256SHA384AuthProtocol);
+        } else if (!strcmp(auth_proto, "SHA512")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMAC384SHA512AuthProtocol,
+                OID_LENGTH(usmHMAC384SHA512AuthProtocol));
+            session.securityAuthProtoLen = OID_LENGTH(usmHMAC384SHA512AuthProtocol);
+        } else
+#endif
                if (!strcmp(auth_proto, "SHA")) {
                session.securityAuthProto = 
                    snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
@@ -2693,6 +2719,29 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                                        OID_LENGTH(usmDESPrivProtocol));
               session.securityPrivProtoLen = OID_LENGTH(usmDESPrivProtocol);
            } else
+#endif
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+        if (!strcmp(priv_proto, "AES192C")) {
+            session.securityPrivProto = snmp_duplicate_objid(
+                usmAES192CiscoPrivProtocol,
+                OID_LENGTH(usmAES192CiscoPrivProtocol));
+            session.securityPrivProtoLen = OID_LENGTH(usmAES192CiscoPrivProtocol);
+        } else if (!strcmp(priv_proto, "AES256C")) {
+            session.securityPrivProto = snmp_duplicate_objid(
+                usmAES256CiscoPrivProtocol,
+                OID_LENGTH(usmAES256CiscoPrivProtocol));
+            session.securityPrivProtoLen = OID_LENGTH(usmAES256CiscoPrivProtocol);
+        } else if (!strcmp(priv_proto, "AES256")) {
+            session.securityPrivProto = snmp_duplicate_objid(
+                usmAES256PrivProtocol,
+                OID_LENGTH(usmAES256PrivProtocol));
+            session.securityPrivProtoLen = OID_LENGTH(usmAES256PrivProtocol);
+        } else if (!strcmp(priv_proto, "AES192")) {
+            session.securityPrivProto = snmp_duplicate_objid(
+                usmAES192PrivProtocol,
+                OID_LENGTH(usmAES192PrivProtocol));
+            session.securityPrivProtoLen = OID_LENGTH(usmAES192PrivProtocol);
+        } else
 #endif
                if (!strncmp(priv_proto, "AES", 3)) {
               session.securityPrivProto =
