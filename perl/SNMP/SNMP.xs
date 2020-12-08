@@ -2602,158 +2602,196 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
         size_t  priv_localized_key_len
 	CODE:
 	{
-	   SnmpSession session = {0};
-	   void *ss = NULL;
-           int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+        SnmpSession session = {0};
+        void *ss = NULL;
+        int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
-           snmp_sess_init(&session);
+        snmp_sess_init(&session);
 
-           __libraries_init("perl");
+        __libraries_init("perl");
 
-	   if (version == 3) {
-		session.version = SNMP_VERSION_3;
-           } else {
-		if (verbose)
-                   warn("error:snmp_new_v3_session:Unsupported SNMP version (%d)\n", version);
-                goto end;
-	   }
+        if (version == 3) {
+            session.version = SNMP_VERSION_3;
+        } else {
+            if (verbose)
+                warn("error:snmp_new_v3_session:Unsupported SNMP version (%d)\n", version);
+            goto end;
+        }
 
-	   session.peername = peer;
-           session.retries = retries; /* 5 */
-           session.timeout = timeout; /* 1000000L */
-           session.authenticator = NULL;
-           session.contextNameLen = strlen(context);
-           session.contextName = context;
-           session.securityNameLen = strlen(sec_name);
-           session.securityName = sec_name;
-           session.securityLevel = sec_level;
-           session.securityModel = USM_SEC_MODEL_NUMBER;
-           session.securityEngineIDLen =
-	     hex_to_binary2((u_char*)sec_eng_id, strlen(sec_eng_id),
-                             (char **) &session.securityEngineID);
-           session.contextEngineIDLen =
-              hex_to_binary2((u_char*)context_eng_id, strlen(context_eng_id),
-                             (char **) &session.contextEngineID);
-           session.engineBoots = eng_boots;
-           session.engineTime = eng_time;
+        session.peername = peer;
+        session.retries = retries; /* 5 */
+        session.timeout = timeout; /* 1000000L */
+        session.authenticator = NULL;
+        session.contextNameLen = strlen(context);
+        session.contextName = context;
+        session.securityNameLen = strlen(sec_name);
+        session.securityName = sec_name;
+        session.securityLevel = sec_level;
+        session.securityModel = USM_SEC_MODEL_NUMBER;
+        session.securityEngineIDLen =
+        hex_to_binary2(
+            (u_char*)sec_eng_id, strlen(sec_eng_id),
+            (char **) &session.securityEngineID
+        );
+        session.contextEngineIDLen = hex_to_binary2(
+            (u_char*)context_eng_id, strlen(context_eng_id),
+            (char **) &session.contextEngineID
+        );
+        session.engineBoots = eng_boots;
+        session.engineTime = eng_time;
 #ifndef NETSNMP_DISABLE_MD5
-           if (!strcmp(auth_proto, "MD5")) {
-               session.securityAuthProto = 
-                  snmp_duplicate_objid(usmHMACMD5AuthProtocol,
-                                          OID_LENGTH(usmHMACMD5AuthProtocol));
-              session.securityAuthProtoLen = OID_LENGTH(usmHMACMD5AuthProtocol);
-           } else
+        if (!strcmp(auth_proto, "MD5")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMACMD5AuthProtocol,
+                OID_LENGTH(usmHMACMD5AuthProtocol)
+            );
+            session.securityAuthProtoLen = OID_LENGTH(usmHMACMD5AuthProtocol);
+        } else
 #endif
-               if (!strcmp(auth_proto, "SHA")) {
-               session.securityAuthProto = 
-                   snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
-                                        OID_LENGTH(usmHMACSHA1AuthProtocol));
-              session.securityAuthProtoLen = OID_LENGTH(usmHMACSHA1AuthProtocol);
-           } else if (!strcmp(auth_proto, "DEFAULT")) {
-               const oid *theoid =
-                   get_default_authtype(&session.securityAuthProtoLen);
-               session.securityAuthProto = 
-                   snmp_duplicate_objid(theoid, session.securityAuthProtoLen);
-           } else {
-              if (verbose)
-                 warn("error:snmp_new_v3_session:Unsupported authentication protocol(%s)\n", auth_proto);
-              goto end;
-           }
-           if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHNOPRIV) {
-               if (auth_localized_key_len) {
-                   session.securityAuthLocalKey =
-                       netsnmp_memdup(auth_localized_key,
-                                      auth_localized_key_len);
-                   session.securityAuthLocalKeyLen = auth_localized_key_len;
-               } else if (auth_master_key_len) {
-                   session.securityAuthKeyLen =
-                       SNMP_MIN(auth_master_key_len,
-                                sizeof(session.securityAuthKey));
-                   memcpy(session.securityAuthKey, auth_master_key,
-                          session.securityAuthKeyLen);
-               } else {
-                   if (strlen(auth_pass) > 0) {
-                       session.securityAuthKeyLen = USM_AUTH_KU_LEN;
-                       if (generate_Ku(session.securityAuthProto,
-                                       session.securityAuthProtoLen,
-                                       (u_char *)auth_pass, strlen(auth_pass),
-                                       session.securityAuthKey,
-                                       &session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
-                           if (verbose)
-                               warn("error:snmp_new_v3_session:Error generating Ku from authentication password.\n");
-                           goto end;
-                       }
-                   }
-               }
-           }
-#ifndef NETSNMP_DISABLE_DES
-           if (!strcmp(priv_proto, "DES")) {
-              session.securityPrivProto =
-                  snmp_duplicate_objid(usmDESPrivProtocol,
-                                       OID_LENGTH(usmDESPrivProtocol));
-              session.securityPrivProtoLen = OID_LENGTH(usmDESPrivProtocol);
-           } else
+#ifdef HAVE_EVP_SHA224
+        if (!strcmp(auth_proto, "SHA224")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMAC128SHA224AuthProtocol,
+                OID_LENGTH(usmHMAC128SHA224AuthProtocol)
+            );
+            session.securityAuthProtoLen = OID_LENGTH(usmHMAC128SHA224AuthProtocol);
+        } else if (!strcmp(auth_proto, "SHA256")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMAC192SHA256AuthProtocol,
+                OID_LENGTH(usmHMAC192SHA256AuthProtocol)
+            );
+            session.securityAuthProtoLen = OID_LENGTH(usmHMAC192SHA256AuthProtocol);
+        }
 #endif
-               if (!strncmp(priv_proto, "AES", 3)) {
-              session.securityPrivProto =
-                  snmp_duplicate_objid(usmAESPrivProtocol,
-                                       OID_LENGTH(usmAESPrivProtocol));
-              session.securityPrivProtoLen = OID_LENGTH(usmAESPrivProtocol);
-           } else if (!strcmp(priv_proto, "DEFAULT")) {
-               const oid *theoid =
-                   get_default_privtype(&session.securityPrivProtoLen);
-               session.securityPrivProto = 
-                   snmp_duplicate_objid(theoid, session.securityPrivProtoLen);
-           } else {
-              if (verbose)
-                 warn("error:snmp_new_v3_session:Unsupported privacy protocol(%s)\n", priv_proto);
-              goto end;
-           }
-           if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHPRIV) {
-               if (priv_localized_key_len) {
-                   session.securityPrivLocalKey =
-                       netsnmp_memdup(priv_localized_key,
-                                      priv_localized_key_len);
-                   session.securityPrivLocalKeyLen = priv_localized_key_len;
-               } else if (priv_master_key_len) {
-                   session.securityPrivKeyLen =
-                       SNMP_MIN(auth_master_key_len,
-                                sizeof(session.securityPrivKey));
-                   memcpy(session.securityPrivKey, priv_master_key,
-                          session.securityPrivKeyLen);
-               } else {
-                   session.securityPrivKeyLen = USM_PRIV_KU_LEN;
-                   if (generate_Ku(session.securityAuthProto,
-                                   session.securityAuthProtoLen,
-                                   (u_char *)priv_pass, strlen(priv_pass),
-                                   session.securityPrivKey,
-                                   &session.securityPrivKeyLen) != SNMPERR_SUCCESS) {
-                       if (verbose)
-                           warn("error:snmp_new_v3_session:Error generating Ku from privacy pass phrase.\n");
-                       goto end;
-                   }
-               }
+#ifdef HAVE_EVP_SHA384
+        if (!strcmp(auth_proto, "SHA384")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMAC256SHA384AuthProtocol,
+                OID_LENGTH(usmHMAC256SHA384AuthProtocol)
+            );
+            session.securityAuthProtoLen = OID_LENGTH(usmHMAC256SHA384AuthProtocol);
+        } else if (!strcmp(auth_proto, "SHA512")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMAC384SHA512AuthProtocol,
+                OID_LENGTH(usmHMAC384SHA512AuthProtocol)
+            );
+            session.securityAuthProtoLen = OID_LENGTH(usmHMAC384SHA512AuthProtocol);
+        }
+#endif
+        if (!strcmp(auth_proto, "SHA")) {
+            session.securityAuthProto = snmp_duplicate_objid(
+                usmHMACSHA1AuthProtocol,
+                OID_LENGTH(usmHMACSHA1AuthProtocol)
+            );
+            session.securityAuthProtoLen = OID_LENGTH(usmHMACSHA1AuthProtocol);
+        } else if (!strcmp(auth_proto, "DEFAULT")) {
+            const oid *theoid = get_default_authtype(&session.securityAuthProtoLen);
+            session.securityAuthProto = snmp_duplicate_objid(theoid, session.securityAuthProtoLen);
+        } else {
+            if (verbose)
+                warn("error:snmp_new_v3_session:Unsupported authentication protocol(%s)\n", auth_proto);
+            goto end;
+        }
+        if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHNOPRIV) {
+            if (auth_localized_key_len) {
+                session.securityAuthLocalKey = netsnmp_memdup(
+                    auth_localized_key,
+                    auth_localized_key_len
+                );
+                session.securityAuthLocalKeyLen = auth_localized_key_len;
+            } else if (auth_master_key_len) {
+                session.securityAuthKeyLen = SNMP_MIN(
+                    auth_master_key_len,
+                    sizeof(session.securityAuthKey)
+                );
+                memcpy(
+                    session.securityAuthKey,
+                    auth_master_key,
+                    session.securityAuthKeyLen
+                );
+            } else {
+                if (strlen(auth_pass) > 0) {
+                    session.securityAuthKeyLen = USM_AUTH_KU_LEN;
+                    if (generate_Ku(session.securityAuthProto,
+                            session.securityAuthProtoLen,
+                            (u_char *)auth_pass, strlen(auth_pass),
+                            session.securityAuthKey,
+                            &session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
+                        if (verbose)
+                            warn("error:snmp_new_v3_session:Error generating Ku from authentication password.\n");
+                        goto end;
+                    }
+                }
             }
+        }
+#ifndef NETSNMP_DISABLE_DES
+        if (!strcmp(priv_proto, "DES")) {
+            session.securityPrivProto = snmp_duplicate_objid(
+                usmDESPrivProtocol,
+                OID_LENGTH(usmDESPrivProtocol)
+            );
+            session.securityPrivProtoLen = OID_LENGTH(usmDESPrivProtocol);
+        } else
+#endif
+        if (!strncmp(priv_proto, "AES", 3)) {
+            session.securityPrivProto = snmp_duplicate_objid(
+                usmAESPrivProtocol,
+                OID_LENGTH(usmAESPrivProtocol)
+            );
+            session.securityPrivProtoLen = OID_LENGTH(usmAESPrivProtocol);
+        } else if (!strcmp(priv_proto, "DEFAULT")) {
+            const oid *theoid = get_default_privtype(&session.securityPrivProtoLen);
+            session.securityPrivProto = snmp_duplicate_objid(theoid, session.securityPrivProtoLen);
+        } else {
+            if (verbose)
+                warn("error:snmp_new_v3_session:Unsupported privacy protocol(%s)\n", priv_proto);
+            goto end;
+        }
+        if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHPRIV) {
+            if (priv_localized_key_len) {
+                session.securityPrivLocalKey = netsnmp_memdup(
+                    priv_localized_key,
+                    priv_localized_key_len
+                );
+                session.securityPrivLocalKeyLen = priv_localized_key_len;
+            } else if (priv_master_key_len) {
+                session.securityPrivKeyLen = SNMP_MIN(
+                    auth_master_key_len,
+                    sizeof(session.securityPrivKey)
+                );
+                memcpy(session.securityPrivKey, priv_master_key, session.securityPrivKeyLen);
+            } else {
+                session.securityPrivKeyLen = USM_PRIV_KU_LEN;
+                if (generate_Ku(session.securityAuthProto,
+                        session.securityAuthProtoLen,
+                        (u_char *)priv_pass, strlen(priv_pass),
+                        session.securityPrivKey,
+                        &session.securityPrivKeyLen) != SNMPERR_SUCCESS) {
+                    if (verbose)
+                        warn("error:snmp_new_v3_session:Error generating Ku from privacy pass phrase.\n");
+                    goto end;
+                }
+            }
+        }
 
-	   if(api_mode == SNMP_API_SINGLE)
-	   {
-	           ss = snmp_sess_open(&session);
-	   } else {
-		   ss = snmp_open(&session);
-	   }
+        if (api_mode == SNMP_API_SINGLE) {
+            ss = snmp_sess_open(&session);
+        } else {
+            ss = snmp_open(&session);
+        }
 
-           if (ss == NULL) {
-	      if (verbose) warn("error:snmp_new_v3_session:Couldn't open SNMP session");
-           }
+        if (ss == NULL) {
+            if (verbose) warn("error:snmp_new_v3_session:Couldn't open SNMP session");
+        }
         end:
-           RETVAL = ss;
-	   netsnmp_free(session.securityPrivLocalKey);
-	   netsnmp_free(session.securityPrivProto);
-	   netsnmp_free(session.securityAuthLocalKey);
-	   netsnmp_free(session.securityAuthProto);
-	   netsnmp_free(session.contextEngineID);
-	   netsnmp_free(session.securityEngineID);
-	}
+            RETVAL = ss;
+        netsnmp_free(session.securityPrivLocalKey);
+        netsnmp_free(session.securityPrivProto);
+        netsnmp_free(session.securityAuthLocalKey);
+        netsnmp_free(session.securityAuthProto);
+        netsnmp_free(session.contextEngineID);
+        netsnmp_free(session.securityEngineID);
+    }
         OUTPUT:
         RETVAL
 
