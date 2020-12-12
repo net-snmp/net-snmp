@@ -533,9 +533,6 @@ netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
 void
 netsnmp_udp_base_ctor(void)
 {
-    netsnmp_static_assert(sizeof(in_addr_t) ==
-                          sizeof((struct sockaddr_in *)NULL)->sin_addr);
-
 #if defined(WIN32) && defined(HAVE_IP_PKTINFO)
     SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
     GUID WSARecvMsgGuid = WSAID_WSARECVMSG;
@@ -543,6 +540,8 @@ netsnmp_udp_base_ctor(void)
     DWORD nbytes;
     int result;
 
+    netsnmp_static_assert(sizeof(in_addr_t) ==
+                          sizeof((struct sockaddr_in *)NULL)->sin_addr);
     netsnmp_assert(s != SOCKET_ERROR);
     /* WSARecvMsg(): Windows XP / Windows Server 2003 and later */
     result = WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER,
