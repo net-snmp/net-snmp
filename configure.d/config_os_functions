@@ -170,6 +170,9 @@ AC_CHECK_FUNCS([cgetnext        chown          forkall         ] dnl
                [statfs          statvfs       stime            ] dnl
                [strncasecmp     system        usleep           ] )
 
+# Agent, Darwin (Apple):
+AC_CHECK_FUNCS([vm_region vm_region_64])
+
 #  Apps:
 AC_CHECK_FUNCS([getdtablesize                                  ] dnl
                [getgrnam        getpid        getpwnam         ] dnl

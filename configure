@@ -28159,6 +28159,20 @@ fi
 done
 
 
+# Agent, Darwin (Apple):
+for ac_func in vm_region vm_region_64
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+
 #  Apps:
 for ac_func in getdtablesize                                                  getgrnam        getpid        getpwnam                         setgid          setgroups     setuid                           tcgetattr
 do :
