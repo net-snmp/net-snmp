@@ -199,6 +199,9 @@
 /* If we don't want to use kmem. */
 /* #undef NETSNMP_NO_KMEM_USAGE */
 
+/* Should evaluate to the name of the current function if defined */
+#define NETSNMP_FUNCTION __FUNCTION__
+
 /* If you don't want the agent to report on variables it doesn't have data for */
 #define NETSNMP_NO_DUMMY_VALUES 1
 
