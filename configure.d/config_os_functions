@@ -220,12 +220,12 @@ AC_CACHE_VAL(
 #ifdef HAVE_SYS_FS_TYPES_H
 #include <sys/fs_types.h>
 #endif
-main ()
+int main ()
 {
 struct fs_data fsd;
 /* Ultrix's statfs returns 1 for success,
    0 for not mounted, -1 for failure.  */
-exit (statfs (".", &fsd) != 1);
+return statfs (".", &fsd) != 1;
 }]])],
     [fu_cv_sys_stat_fs_data=yes],
     [fu_cv_sys_stat_fs_data=no],

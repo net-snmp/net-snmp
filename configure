@@ -26929,12 +26929,12 @@ else
 #ifdef HAVE_SYS_FS_TYPES_H
 #include <sys/fs_types.h>
 #endif
-main ()
+int main ()
 {
 struct fs_data fsd;
 /* Ultrix's statfs returns 1 for success,
    0 for not mounted, -1 for failure.  */
-exit (statfs (".", &fsd) != 1);
+return statfs (".", &fsd) != 1;
 }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -30582,6 +30582,7 @@ else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h> /* inet_ntoa() */
 
 int
 main ()
@@ -30654,6 +30655,7 @@ else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h> /* inet_ntoa() */
 
 int
 main ()
