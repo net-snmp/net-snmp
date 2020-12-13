@@ -667,7 +667,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         if (rc > 0) {
             if (olen > sizeof(*addr_pair))
                 snmp_log(LOG_ERR, "%s: from address length %d > %d\n",
-                         __func__, olen, (int)sizeof(*addr_pair));
+                         NETSNMP_FUNCTION, olen, (int)sizeof(*addr_pair));
             memcpy(addr_pair, opaque, SNMP_MIN(sizeof(*addr_pair), olen));
         }
         SNMP_FREE(opaque);
