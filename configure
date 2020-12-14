@@ -26827,6 +26827,20 @@ fi
 done
 
 
+# Agent, Darwin (Apple):
+for ac_func in vm_region vm_region_64
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for FD_CLOEXEC" >&5
 $as_echo_n "checking for FD_CLOEXEC... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext

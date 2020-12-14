@@ -1400,6 +1400,12 @@
 /* Define to 1 if you have the <validator/validator-config.h> header file. */
 #undef HAVE_VALIDATOR_VALIDATOR_CONFIG_H
 
+/* Define to 1 if you have the `vm_region' function. */
+#undef HAVE_VM_REGION
+
+/* Define to 1 if you have the `vm_region_64' function. */
+#undef HAVE_VM_REGION_64
+
 /* Define to 1 if you have the <vm/swap_pager.h> header file. */
 #undef HAVE_VM_SWAP_PAGER_H
 

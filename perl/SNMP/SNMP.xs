@@ -2602,9 +2602,58 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
         size_t  priv_localized_key_len
 	CODE:
 	{
+#ifndef _MSC_VER
+	   static
+#endif
+	   const struct {
+	       const char *name;
+	       const oid *oid;
+	       int oid_len;
+	   } auth_table[] = {
+#ifndef NETSNMP_DISABLE_MD5
+	       { "MD5", usmHMACMD5AuthProtocol, OID_LENGTH(usmHMACMD5AuthProtocol) },
+#endif
+#ifdef HAVE_EVP_SHA224
+	       { "SHA224", usmHMAC128SHA224AuthProtocol,
+	         OID_LENGTH(usmHMAC128SHA224AuthProtocol) },
+	       { "SHA256", usmHMAC192SHA256AuthProtocol,
+	         OID_LENGTH(usmHMAC192SHA256AuthProtocol) },
+#endif
+#ifdef HAVE_EVP_SHA384
+	       { "SHA384", usmHMAC256SHA384AuthProtocol,
+	         OID_LENGTH(usmHMAC256SHA384AuthProtocol) },
+	       { "SHA512", usmHMAC384SHA512AuthProtocol,
+	         OID_LENGTH(usmHMAC384SHA512AuthProtocol) },
+#endif
+	       { "SHA", usmHMACSHA1AuthProtocol, OID_LENGTH(usmHMACSHA1AuthProtocol) },
+	   };
+#ifndef _MSC_VER
+	   static
+#endif
+	   const struct {
+	       const char *name;
+	       int match_prefix;
+	       const oid *oid;
+	       int oid_len;
+	   } priv_table[] = {
+#ifndef NETSNMP_DISABLE_DES
+	       { "DES", 0, usmDESPrivProtocol, OID_LENGTH(usmDESPrivProtocol) },
+#endif
+#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+	       { "AES192C", 0, usmAES192CiscoPrivProtocol,
+	         OID_LENGTH(usmAES192CiscoPrivProtocol)},
+	       { "AES256C", 0, usmAES256CiscoPrivProtocol,
+	         OID_LENGTH(usmAES256CiscoPrivProtocol) },
+	       { "AES256", 0, usmAES256PrivProtocol, OID_LENGTH(usmAES256PrivProtocol) },
+	       { "AES192", 0, usmAES192PrivProtocol, OID_LENGTH(usmAES192PrivProtocol) },
+#endif
+	       { "AES", 1, usmAESPrivProtocol, OID_LENGTH(usmAESPrivProtocol) },
+	   };
+
 	   SnmpSession session = {0};
 	   void *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+           int i;
 
            snmp_sess_init(&session);
 
@@ -2636,25 +2685,21 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                              (char **) &session.contextEngineID);
            session.engineBoots = eng_boots;
            session.engineTime = eng_time;
-#ifndef NETSNMP_DISABLE_MD5
-           if (!strcmp(auth_proto, "MD5")) {
+           for (i = 0; i < sizeof(auth_table) / sizeof(auth_table[0]); i++) {
+               if (strcmp(auth_proto, auth_table[i].name) != 0)
+                   continue;
                session.securityAuthProto = 
-                  snmp_duplicate_objid(usmHMACMD5AuthProtocol,
-                                          OID_LENGTH(usmHMACMD5AuthProtocol));
-              session.securityAuthProtoLen = OID_LENGTH(usmHMACMD5AuthProtocol);
-           } else
-#endif
-               if (!strcmp(auth_proto, "SHA")) {
-               session.securityAuthProto = 
-                   snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
-                                        OID_LENGTH(usmHMACSHA1AuthProtocol));
-              session.securityAuthProtoLen = OID_LENGTH(usmHMACSHA1AuthProtocol);
-           } else if (!strcmp(auth_proto, "DEFAULT")) {
+                   snmp_duplicate_objid(auth_table[i].oid,
+                                        auth_table[i].oid_len);
+               session.securityAuthProtoLen = auth_table[i].oid_len;
+           }
+           if (strcmp(auth_proto, "DEFAULT") == 0) {
                const oid *theoid =
                    get_default_authtype(&session.securityAuthProtoLen);
                session.securityAuthProto = 
                    snmp_duplicate_objid(theoid, session.securityAuthProtoLen);
-           } else {
+           }
+           if (session.securityAuthProto == NULL) {
               if (verbose)
                  warn("error:snmp_new_v3_session:Unsupported authentication protocol(%s)\n", auth_proto);
               goto end;
@@ -2686,25 +2731,32 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                    }
                }
            }
-#ifndef NETSNMP_DISABLE_DES
-           if (!strcmp(priv_proto, "DES")) {
-              session.securityPrivProto =
-                  snmp_duplicate_objid(usmDESPrivProtocol,
-                                       OID_LENGTH(usmDESPrivProtocol));
-              session.securityPrivProtoLen = OID_LENGTH(usmDESPrivProtocol);
-           } else
-#endif
-               if (!strncmp(priv_proto, "AES", 3)) {
-              session.securityPrivProto =
-                  snmp_duplicate_objid(usmAESPrivProtocol,
-                                       OID_LENGTH(usmAESPrivProtocol));
-              session.securityPrivProtoLen = OID_LENGTH(usmAESPrivProtocol);
-           } else if (!strcmp(priv_proto, "DEFAULT")) {
+           for (i = 0; i < sizeof(priv_table) / sizeof(priv_table[0]); i++) {
+               switch (priv_table[i].match_prefix) {
+               case 0:
+                   /* Exact match */
+                   if (strcmp(priv_proto, priv_table[i].name) != 0)
+                       continue;
+                   break;
+               default:
+                   /* Prefix match */
+                   if (strncmp(priv_proto, priv_table[i].name,
+                               strlen(priv_table[i].name)) != 0)
+                       continue;
+                   break;
+               }
+               session.securityPrivProto =
+                  snmp_duplicate_objid(priv_table[i].oid,
+                                       priv_table[i].oid_len);
+               session.securityPrivProtoLen = priv_table[i].oid_len;
+           }
+           if (strcmp(priv_proto, "DEFAULT") == 0) {
                const oid *theoid =
                    get_default_privtype(&session.securityPrivProtoLen);
                session.securityPrivProto = 
                    snmp_duplicate_objid(theoid, session.securityPrivProtoLen);
-           } else {
+           }
+           if (session.securityPrivProto == NULL) {
               if (verbose)
                  warn("error:snmp_new_v3_session:Unsupported privacy protocol(%s)\n", priv_proto);
               goto end;

@@ -170,6 +170,9 @@ AC_CHECK_FUNCS([cgetnext        chown          forkall         ] dnl
                [statfs          statvfs       stime            ] dnl
                [strncasecmp     system        usleep           ] )
 
+# Agent, Darwin (Apple):
+AC_CHECK_FUNCS([vm_region vm_region_64])
+
 AC_MSG_CHECKING([for FD_CLOEXEC])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
         [[#include <fcntl.h>]],[[return FD_CLOEXEC]]
