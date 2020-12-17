@@ -499,6 +499,8 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
         extension_name = OBJ_nid2sn(nid);
         buf_len = sizeof(buf);
         str = _cert_get_extension_str_at(ocert, i, &buf_ptr, &buf_len, 0);
+        if (!str)
+            continue;
         lf = strchr(str, '\n'); /* look for multiline strings */
         if (NULL != lf)
             *lf = '\0'; /* only log first line of multiline here */
