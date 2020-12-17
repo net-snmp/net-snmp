@@ -290,8 +290,12 @@ _cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
 
     space = BIO_get_mem_data(bio, &data);
     if (buf && *buf) {
-        if (*len < space) 
-            buf_ptr = NULL;
+        if (*len < space) {
+            snmp_log(LOG_ERR,
+                     "not enough buffer space to print extension\n");
+            BIO_vfree(bio);
+            return NULL;
+        }
         else
             buf_ptr = *buf;
     }
@@ -300,7 +304,7 @@ _cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
     
     if (!buf_ptr) {
         snmp_log(LOG_ERR,
-                 "not enough space or error in allocation for extension\n");
+                 "error in allocation for extension\n");
         BIO_vfree(bio);
         return NULL;
     }
@@ -479,7 +483,7 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
 {
     X509_EXTENSION  *extension;
     const char      *extension_name;
-    char             buf[SNMP_MAXBUF_SMALL], *buf_ptr = buf, *str, *lf;
+    char             buf[SNMP_MAXBUF], *buf_ptr = buf, *str, *lf;
     int              i, num_extensions, buf_len, nid;
 
     if (NULL == ocert)
@@ -499,8 +503,11 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
         extension_name = OBJ_nid2sn(nid);
         buf_len = sizeof(buf);
         str = _cert_get_extension_str_at(ocert, i, &buf_ptr, &buf_len, 0);
-        if (!str)
+        if (!str) {
+            DEBUGMSGT(("9:cert:dump", "    %2d: %s\n", i,
+                        extension_name));
             continue;
+        }
         lf = strchr(str, '\n'); /* look for multiline strings */
         if (NULL != lf)
             *lf = '\0'; /* only log first line of multiline here */
