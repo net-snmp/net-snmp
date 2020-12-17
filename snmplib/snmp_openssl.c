@@ -300,7 +300,7 @@ _cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
     
     if (!buf_ptr) {
         snmp_log(LOG_ERR,
-                 "not enough space or error in allocation for extenstion\n");
+                 "not enough space or error in allocation for extension\n");
         BIO_vfree(bio);
         return NULL;
     }
