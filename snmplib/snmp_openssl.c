@@ -284,33 +284,30 @@ _cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
     }
     if (X509V3_EXT_print(bio, oext, 0, 0) != 1) {
         snmp_log(LOG_ERR, "could not print extension!\n");
-        BIO_vfree(bio);
-        return NULL;
+        goto out;
     }
 
     space = BIO_get_mem_data(bio, &data);
     if (buf && *buf) {
         if (*len < space + 1) {
             snmp_log(LOG_ERR, "not enough buffer space to print extension\n");
-            BIO_vfree(bio);
-            return NULL;
+            goto out;
         }
-        else
-            buf_ptr = *buf;
+        buf_ptr = *buf;
+    } else {
+        buf_ptr = calloc(1, space + 1);
     }
-    else
-        buf_ptr = calloc(1,space + 1);
     
     if (!buf_ptr) {
         snmp_log(LOG_ERR, "error in allocation for extension\n");
-        BIO_vfree(bio);
-        return NULL;
+        goto out;
     }
     memcpy(buf_ptr, data, space);
     buf_ptr[space] = 0;
     if (len)
         *len = space;
 
+out:
     BIO_vfree(bio);
 
     return buf_ptr;
