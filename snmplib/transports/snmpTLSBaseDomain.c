@@ -450,7 +450,7 @@ _trust_this_cert(SSL_CTX *the_ctx, char *certspec) {
         LOGANDDIE("failed to find requested certificate to trust");
         
     /* Add the certificate to the context */
-    if (netsnmp_cert_trust_ca(the_ctx, trustcert) != SNMPERR_SUCCESS)
+    if (netsnmp_cert_trust(the_ctx, trustcert) != SNMPERR_SUCCESS)
         LOGANDDIE("failed to load trust certificate");
 
     return 1;
@@ -490,7 +490,7 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
                                     NETSNMP_DS_LIB_X509_CRL_FILE);
     if (NULL != crlFile) {
         cert_store = SSL_CTX_get_cert_store(the_ctx);
-        DEBUGMSGTL(("sslctx_client", "loading CRL: %s\n", crlFile));
+        DEBUGMSGTL(("sslctx_common", "loading CRL: %s\n", crlFile));
         if (!cert_store)
             LOGANDDIE("failed to find certificate store");
         if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
@@ -556,13 +556,19 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
                 id_cert->key->info.filename));
 
     if (SSL_CTX_use_certificate(the_ctx, id_cert->ocert) <= 0)
-        LOGANDDIE("failed to set the certificate to use");
+        LOGANDDIE("failed to set the client certificate to use");
 
     if (SSL_CTX_use_PrivateKey(the_ctx, id_cert->key->okey) <= 0)
-        LOGANDDIE("failed to set the private key to use");
+        LOGANDDIE("failed to set the client private key to use");
 
     if (!SSL_CTX_check_private_key(the_ctx))
-        LOGANDDIE("public and private keys incompatible");
+        LOGANDDIE("client public and private keys incompatible");
+
+    while (id_cert->issuer_cert) {
+        id_cert = id_cert->issuer_cert;
+        if (!SSL_CTX_add_extra_chain_cert(the_ctx, id_cert->ocert))
+            LOGANDDIE("failed to add intermediate client certificate");
+    }
 
     if (tlsbase->their_identity)
         peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
@@ -576,11 +582,11 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
                     peer_cert ? peer_cert->info.filename : "none"));
 
         /* Trust the expected certificate */
-        if (netsnmp_cert_trust_ca(the_ctx, peer_cert) != SNMPERR_SUCCESS)
+        if (netsnmp_cert_trust(the_ctx, peer_cert) != SNMPERR_SUCCESS)
             LOGANDDIE ("failed to set verify paths");
     }
 
-    /* trust a certificate (possibly a CA) aspecifically passed in */
+    /* trust a certificate (possibly a CA) specifically passed in */
     if (tlsbase->trust_cert) {
         if (!_trust_this_cert(the_ctx, tlsbase->trust_cert))
             return 0;
@@ -599,7 +605,7 @@ sslctx_server_setup(const SSL_METHOD *method) {
     /* setting up for ssl */
     SSL_CTX *the_ctx = SSL_CTX_new(NETSNMP_REMOVE_CONST(SSL_METHOD *, method));
     if (!the_ctx) {
-        LOGANDDIE("can't create a new context");
+        LOGANDDIE("can't create a new server context");
     }
     MAKE_MEM_DEFINED(the_ctx, 256/*sizeof(*the_ctx)*/);
 
@@ -608,7 +614,7 @@ sslctx_server_setup(const SSL_METHOD *method) {
         LOGANDDIE ("error finding server identity keys");
 
     if (!id_cert->key || !id_cert->key->okey)
-        LOGANDDIE("failed to load private key");
+        LOGANDDIE("failed to load server private key");
 
     DEBUGMSGTL(("sslctx_server", "using public key: %s\n",
                 id_cert->info.filename));
@@ -616,13 +622,19 @@ sslctx_server_setup(const SSL_METHOD *method) {
                 id_cert->key->info.filename));
 
     if (SSL_CTX_use_certificate(the_ctx, id_cert->ocert) <= 0)
-        LOGANDDIE("failed to set the certificate to use");
+        LOGANDDIE("failed to set the server certificate to use");
 
     if (SSL_CTX_use_PrivateKey(the_ctx, id_cert->key->okey) <= 0)
-        LOGANDDIE("failed to set the private key to use");
+        LOGANDDIE("failed to set the server private key to use");
 
     if (!SSL_CTX_check_private_key(the_ctx))
-        LOGANDDIE("public and private keys incompatible");
+        LOGANDDIE("server public and private keys incompatible");
+
+    while (id_cert->issuer_cert) {
+        id_cert = id_cert->issuer_cert;
+        if (!SSL_CTX_add_extra_chain_cert(the_ctx, id_cert->ocert))
+            LOGANDDIE("failed to add intermediate server certificate");
+    }
 
     SSL_CTX_set_read_ahead(the_ctx, 1); /* XXX: DTLS only? */
 
