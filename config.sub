@@ -339,6 +339,7 @@ case $basic_machine in
 	# Recognize the basic CPU types with company name.
 	580-* \
 	| a29k-* \
+    | aarch*-* \
 	| alpha-* | alphaev[4-8]-* | alphaev56-* | alphaev6[78]-* \
 	| alpha64-* | alpha64ev[4-8]-* | alpha64ev56-* | alpha64ev6[78]-* \
 	| alphapca5[67]-* | alpha64pca5[67]-* | arc-* \
