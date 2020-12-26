@@ -3388,7 +3388,7 @@ usm_handle_report(struct session_list *slp,
 int
 usm_extend_user_kul(struct usmUser *user, u_int privKeyBufSize)
 {
-    netsnmp_priv_alg_info *pai;
+    const netsnmp_priv_alg_info *pai;
 
     DEBUGMSGTL(("usm", "extending key\n"));
 
@@ -4512,7 +4512,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     int             ret2, properLen, properPrivKeyLen;
     const oid      *def_auth_prot, *def_priv_prot;
     size_t          def_auth_prot_len, def_priv_prot_len;
-    netsnmp_priv_alg_info *pai;
+    const netsnmp_priv_alg_info *pai;
 
     def_auth_prot = get_default_authtype(&def_auth_prot_len);
     def_priv_prot = get_default_privtype(&def_priv_prot_len);
