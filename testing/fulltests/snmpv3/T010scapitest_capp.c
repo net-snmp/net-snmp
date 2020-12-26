@@ -304,7 +304,7 @@ test_dokeyedhash(void)
         auth_idx = 0,
         mlcount = 0;        /* MAC Length count.   */
     size_t          hblen;      /* Hash Buffer length. */
-    netsnmp_auth_alg_info *ai;
+    const netsnmp_auth_alg_info *ai;
     u_int           hashbuf_len[] = {
         LOCAL_MAXBUF,
         USM_MD5_AND_SHA_AUTH_LEN,
@@ -400,7 +400,7 @@ test_docrypt(void)
 {
     int             rval, index = 0, secret_len, iv_len,
         bigstring_len = strlen((const char *) BIGSTRING);
-    netsnmp_priv_alg_info *pi;
+    const netsnmp_priv_alg_info *pi;
     size_t          buf_len, cryptbuf_len;
 
     u_char            buf[LOCAL_MAXBUF],

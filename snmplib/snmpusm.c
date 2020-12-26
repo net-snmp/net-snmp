@@ -153,7 +153,7 @@ typedef struct usm_alg_type_s {
     int         value;
 } usm_alg_type_t;
 
-static usm_alg_type_t usm_auth_type[] = {
+static const usm_alg_type_t usm_auth_type[] = {
     { "NOAUTH", NETSNMP_USMAUTH_NOAUTH },
     { "SHA", NETSNMP_USMAUTH_HMACSHA1 },
     { "SHA-1", NETSNMP_USMAUTH_HMACSHA1 },
@@ -176,7 +176,7 @@ static usm_alg_type_t usm_auth_type[] = {
     { NULL, -1 }
 };
 
-static usm_alg_type_t usm_priv_type[] = {
+static const usm_alg_type_t usm_priv_type[] = {
     { "NOPRIV", USM_CREATE_USER_PRIV_NONE },
 #ifndef NETSNMP_DISABLE_DES
     { "DES", USM_CREATE_USER_PRIV_DES },
@@ -3270,7 +3270,7 @@ usm_handle_report(struct session_list *slp,
 int
 usm_extend_user_kul(struct usmUser *user, u_int privKeyBufSize)
 {
-    netsnmp_priv_alg_info *pai;
+    const netsnmp_priv_alg_info *pai;
 
     DEBUGMSGTL(("usm", "extending key\n"));
 
@@ -3741,7 +3741,7 @@ static int usm_discover_engineid(struct session_list *slp,
 }
 
 static int
-usm_lookup_alg_type(const char *str, usm_alg_type_t *types)
+usm_lookup_alg_type(const char *str, const usm_alg_type_t *types)
 {
     int i, l;
     l = strlen(str);
@@ -3754,7 +3754,7 @@ usm_lookup_alg_type(const char *str, usm_alg_type_t *types)
 }
 
 static const char *
-usm_lookup_alg_str(int value, usm_alg_type_t *types)
+usm_lookup_alg_str(int value, const usm_alg_type_t *types)
 {
     int i;
     for (i = 0; types[i].label; ++i)
@@ -4392,7 +4392,7 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     int             ret2, properLen, properPrivKeyLen;
     const oid      *def_auth_prot, *def_priv_prot;
     size_t          def_auth_prot_len, def_priv_prot_len;
-    netsnmp_priv_alg_info *pai;
+    const netsnmp_priv_alg_info *pai;
 
     def_auth_prot = get_default_authtype(&def_auth_prot_len);
     def_priv_prot = get_default_privtype(&def_priv_prot_len);

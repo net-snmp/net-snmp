@@ -1113,7 +1113,7 @@ write_usmUserPrivKeyChange(int action,
         if ((uptr = usm_parse_user(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
-            netsnmp_priv_alg_info *pai =
+            const netsnmp_priv_alg_info *pai =
                 sc_get_priv_alg_byoid(uptr->privProtocol,
                                       uptr->privProtocolLen);
             if (NULL == pai) {
