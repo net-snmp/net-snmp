@@ -87,9 +87,9 @@ typedef struct netsnmp_priv_alg_info_s {
     NETSNMP_IMPORT
     oid *           sc_get_auth_oid(int auth_type, size_t *oid_len);
     NETSNMP_IMPORT
-    netsnmp_auth_alg_info * sc_get_auth_alg_byoid(const oid *oid, u_int len);
+    netsnmp_auth_alg_info * sc_find_auth_alg_byoid(const oid *oid, u_int len);
     NETSNMP_IMPORT
-    netsnmp_auth_alg_info * sc_get_auth_alg_bytype(u_int type);
+    netsnmp_auth_alg_info * sc_find_auth_alg_bytype(u_int type);
     NETSNMP_IMPORT
     netsnmp_auth_alg_info * sc_get_auth_alg_byindex(u_int index);
 
