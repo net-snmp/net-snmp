@@ -83,7 +83,6 @@ typedef struct tlstmAddrTable_entry_s {
     /*
      * user data
      */
-    struct netsnmp_cert_s   *cert;
     char                     addr_flags;
 
 } tlstmAddrTable_entry;
