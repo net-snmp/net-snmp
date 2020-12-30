@@ -107,6 +107,9 @@ netsnmp_directory_container_read_some(netsnmp_container *user_container,
         /** default to unsorted */
         if (! (flags & NETSNMP_DIR_SORTED))
             CONTAINER_SET_OPTIONS(container, CONTAINER_KEY_UNSORTED, rc);
+        /** default to duplicates not allowed */
+        if (! (flags & NETSNMP_DIR_ALLOW_DUPLICATES))
+           CONTAINER_SET_OPTIONS(container, CONTAINER_KEY_ALLOW_DUPLICATES, rc);
     }
 
     dir = opendir(dirname);
