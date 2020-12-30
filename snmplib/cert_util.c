@@ -1361,8 +1361,7 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
 
            okey = PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
            if (NULL == okey)
-               snmp_log(LOG_ERR, "error parsing key file %s\n",
-                     key->info.filename);
+               snmp_log(LOG_ERR, "error parsing key file %s\n", filename);
            else {
                key = _add_key(okey, dirname, filename, index);
                if (NULL == key) {
