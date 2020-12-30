@@ -29,7 +29,7 @@ extern "C" {
     typedef struct netsnmp_cert_common_s {
         char           *dir;
         char           *filename;
-        
+
         u_char          type;
         u_char          allowed_uses;
         u_char          _pad[2]; /* for future use */
@@ -56,6 +56,8 @@ extern "C" {
 
         u_char          hash_type;
         u_char          _pad[3]; /* for future use */
+
+        int             offset;
     } netsnmp_cert;
 
 /** types */
