@@ -1869,6 +1869,32 @@ netsnmp_cert_find(int what, int where, void *hint)
     return result;
 }
 
+netsnmp_void_array *
+netsnmp_certs_find(int what, int where, void *hint)
+{
+
+    DEBUGMSGT(("certs:find:params", "looking for %s(%d) in %s(0x%x), hint %p\n",
+               _mode_str(what), what, _where_str(where), where, hint));
+
+    if (NS_CERTKEY_FILE == where) {
+        /** hint == filename */
+        char               *filename = (char*)hint;
+        netsnmp_void_array *matching;
+
+        DEBUGMSGT(("cert:find:params", " hint = %s\n", (char *)hint));
+        matching = _cert_reduce_subset_what(_cert_find_subset_fn(
+                                            filename, NULL ), what);
+
+        return matching;
+    } /* where = NS_CERTKEY_FILE */
+    else { /* unknown location */
+
+        DEBUGMSGT(("certs:find:err", "unhandled location %d for %d\n", where,
+                   what));
+        return NULL;
+    }
+}
+
 #ifndef NETSNMP_FEATURE_REMOVE_CERT_FINGERPRINTS
 int
 netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var)

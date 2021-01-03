@@ -436,21 +436,48 @@ netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 int
 _trust_this_cert(SSL_CTX *the_ctx, char *certspec) {
     netsnmp_cert *trustcert;
+    netsnmp_cert *candidate;
+    netsnmp_void_array *matching = NULL;
+
+    int                 i;
 
     DEBUGMSGTL(("sslctx_client", "Trying to load a trusted certificate: %s\n",
                 certspec));
 
     /* load this identifier into the trust chain */
     trustcert = netsnmp_cert_find(NS_CERT_CA,
-                                  NS_CERTKEY_MULTIPLE,
+                                  NS_CERTKEY_FINGERPRINT,
                                   certspec);
+
+    /* loop through all CA certs in the given files */
+    if (!trustcert) {
+        matching = netsnmp_certs_find(NS_CERT_CA,
+                                      NS_CERTKEY_FILE,
+                                      certspec);
+        for (i = 0; (matching) && (i < matching->size); ++i) {
+            candidate = (netsnmp_cert*)matching->array[i];
+            if (netsnmp_cert_trust(the_ctx, candidate) != SNMPERR_SUCCESS) {
+                free(matching->array);
+                free(matching);
+                LOGANDDIE("failed to load trust certificate");
+            }
+        } /** matching loop */
+
+        if (matching) {
+            free(matching->array);
+            free(matching);
+            return 1;
+	}
+    }
+
+    /* fall back to trusting the remote peer certificate */
     if (!trustcert)
         trustcert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
                                       NS_CERTKEY_MULTIPLE,
                                       certspec);
     if (!trustcert)
         LOGANDDIE("failed to find requested certificate to trust");
-        
+
     /* Add the certificate to the context */
     if (netsnmp_cert_trust_ca(the_ctx, trustcert) != SNMPERR_SUCCESS)
         LOGANDDIE("failed to load trust certificate");
