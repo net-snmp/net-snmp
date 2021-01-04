@@ -53,8 +53,6 @@ extern "C" {
 #define NETSNMP_DIR_NSFILE                            0x0010
 /** load stats in netsnmp_file */
 #define NETSNMP_DIR_NSFILE_STATS                      0x0020
-/** allow files to be indexed more than once */
-#define NETSNMP_DIR_ALLOW_DUPLICATES                  0x0040
 
     
         
