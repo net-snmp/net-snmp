@@ -345,7 +345,7 @@ asn_parse_nlength(u_char *pkt, size_t pkt_len, u_long *data_len)
          * long length; first byte is length of length (after masking high bit)
          */
         len_len = (int) ((*pkt & ~0x80) + 1);
-        if ((int) pkt_len <= len_len )
+        if (pkt_len < len_len)
             return NULL;           /* still too short for length and data */
 
         /* now we know we have enough data to parse length */
