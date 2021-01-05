@@ -399,6 +399,8 @@ snmp_pdu_type(int type)
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
     case SNMP_MSG_RESPONSE:
         return "RESPONSE";
+    case SNMP_MSG_TRAP:
+        return "TRAP";
     case SNMP_MSG_INFORM:
         return "INFORM";
     case SNMP_MSG_TRAP2:

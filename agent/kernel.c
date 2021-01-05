@@ -44,7 +44,7 @@
 #include "kernel.h"
 #include <net-snmp/agent/ds_agent.h>
 
-#if HAVE_KVM_H
+#if defined(HAVE_KVM_H) && !defined(NETSNMP_NO_KMEM_USAGE)
 kvm_t *kd;
 
 /**
@@ -131,6 +131,10 @@ free_kmem(void)
 }
 
 #elif defined(HAVE_NLIST_H) && !defined(__linux__)
+
+#if defined(NETSNMP_NO_KMEM_USAGE)
+#error Define only one of HAVE_NLIST_H or NETSNMP_NO_KMEM_USAGE
+#endif
 
 static off_t    klseek(off_t);
 static int      klread(char *, int);

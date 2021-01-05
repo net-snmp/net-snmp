@@ -56,6 +56,7 @@ extern "C" {
 
         u_char          hash_type;
         u_char          _pad[3]; /* for future use */
+        uint32_t        offset;
     } netsnmp_cert;
 
 /** types */

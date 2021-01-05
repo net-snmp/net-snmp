@@ -2602,58 +2602,10 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
         size_t  priv_localized_key_len
 	CODE:
 	{
-#ifndef _MSC_VER
-	   static
-#endif
-	   const struct {
-	       const char *name;
-	       const oid *oid;
-	       int oid_len;
-	   } auth_table[] = {
-#ifndef NETSNMP_DISABLE_MD5
-	       { "MD5", usmHMACMD5AuthProtocol, OID_LENGTH(usmHMACMD5AuthProtocol) },
-#endif
-#ifdef HAVE_EVP_SHA224
-	       { "SHA224", usmHMAC128SHA224AuthProtocol,
-	         OID_LENGTH(usmHMAC128SHA224AuthProtocol) },
-	       { "SHA256", usmHMAC192SHA256AuthProtocol,
-	         OID_LENGTH(usmHMAC192SHA256AuthProtocol) },
-#endif
-#ifdef HAVE_EVP_SHA384
-	       { "SHA384", usmHMAC256SHA384AuthProtocol,
-	         OID_LENGTH(usmHMAC256SHA384AuthProtocol) },
-	       { "SHA512", usmHMAC384SHA512AuthProtocol,
-	         OID_LENGTH(usmHMAC384SHA512AuthProtocol) },
-#endif
-	       { "SHA", usmHMACSHA1AuthProtocol, OID_LENGTH(usmHMACSHA1AuthProtocol) },
-	   };
-#ifndef _MSC_VER
-	   static
-#endif
-	   const struct {
-	       const char *name;
-	       int match_prefix;
-	       const oid *oid;
-	       int oid_len;
-	   } priv_table[] = {
-#ifndef NETSNMP_DISABLE_DES
-	       { "DES", 0, usmDESPrivProtocol, OID_LENGTH(usmDESPrivProtocol) },
-#endif
-#ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
-	       { "AES192C", 0, usmAES192CiscoPrivProtocol,
-	         OID_LENGTH(usmAES192CiscoPrivProtocol)},
-	       { "AES256C", 0, usmAES256CiscoPrivProtocol,
-	         OID_LENGTH(usmAES256CiscoPrivProtocol) },
-	       { "AES256", 0, usmAES256PrivProtocol, OID_LENGTH(usmAES256PrivProtocol) },
-	       { "AES192", 0, usmAES192PrivProtocol, OID_LENGTH(usmAES192PrivProtocol) },
-#endif
-	       { "AES", 1, usmAESPrivProtocol, OID_LENGTH(usmAESPrivProtocol) },
-	   };
-
 	   SnmpSession session = {0};
 	   void *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
-           int i;
+           int auth_type, priv_type;
 
            snmp_sess_init(&session);
 
@@ -2685,13 +2637,17 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                              (char **) &session.contextEngineID);
            session.engineBoots = eng_boots;
            session.engineTime = eng_time;
-           for (i = 0; i < sizeof(auth_table) / sizeof(auth_table[0]); i++) {
-               if (strcmp(auth_proto, auth_table[i].name) != 0)
-                   continue;
-               session.securityAuthProto = 
-                   snmp_duplicate_objid(auth_table[i].oid,
-                                        auth_table[i].oid_len);
-               session.securityAuthProtoLen = auth_table[i].oid_len;
+           /* NETSNMP_USMAUTH_* */
+           auth_type = usm_lookup_auth_type(auth_proto);
+           if (auth_type >= 0) {
+               const netsnmp_auth_alg_info *auth_alg_info =
+                   sc_find_auth_alg_bytype(auth_type);
+               if (auth_alg_info) {
+                   session.securityAuthProto = 
+                       snmp_duplicate_objid(auth_alg_info->alg_oid,
+                                            auth_alg_info->oid_len);
+                   session.securityAuthProtoLen = auth_alg_info->oid_len;
+               }
            }
            if (strcmp(auth_proto, "DEFAULT") == 0) {
                const oid *theoid =
@@ -2731,24 +2687,16 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                    }
                }
            }
-           for (i = 0; i < sizeof(priv_table) / sizeof(priv_table[0]); i++) {
-               switch (priv_table[i].match_prefix) {
-               case 0:
-                   /* Exact match */
-                   if (strcmp(priv_proto, priv_table[i].name) != 0)
-                       continue;
-                   break;
-               default:
-                   /* Prefix match */
-                   if (strncmp(priv_proto, priv_table[i].name,
-                               strlen(priv_table[i].name)) != 0)
-                       continue;
-                   break;
+           priv_type = usm_lookup_priv_type(priv_proto);
+           if (priv_type >= 0) {
+               const netsnmp_priv_alg_info *priv_alg_info =
+                   sc_get_priv_alg_bytype(priv_type);
+               if (priv_alg_info) {
+                   session.securityPrivProto =
+                       snmp_duplicate_objid(priv_alg_info->alg_oid,
+                                            priv_alg_info->oid_len);
+                   session.securityPrivProtoLen = priv_alg_info->oid_len;
                }
-               session.securityPrivProto =
-                  snmp_duplicate_objid(priv_table[i].oid,
-                                       priv_table[i].oid_len);
-               session.securityPrivProtoLen = priv_table[i].oid_len;
            }
            if (strcmp(priv_proto, "DEFAULT") == 0) {
                const oid *theoid =

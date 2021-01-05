@@ -296,16 +296,13 @@ _asn_length_err(const char *str, size_t wrongsize, size_t rightsize)
  * @param wrongsize  wrong  length
  * @param rightsize  expected length
  */
-static
-    void
+static void
 _asn_short_err(const char *str, size_t wrongsize, size_t rightsize)
 {
     char            ebuf[128];
 
-    snprintf(ebuf, sizeof(ebuf),
-            "%s length %lu too short: need %lu", str,
+    snprintf(ebuf, sizeof(ebuf), "%s length %lu too short: need %lu", str,
 	    (unsigned long)wrongsize, (unsigned long)rightsize);
-    ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
 }
 
@@ -343,7 +340,7 @@ asn_parse_nlength(u_char *pkt, size_t pkt_len, u_long *data_len)
          * long length; first byte is length of length (after masking high bit)
          */
         len_len = (int) ((*pkt & ~0x80) + 1);
-        if ((int) pkt_len <= len_len )
+        if (pkt_len < len_len)
             return NULL;           /* still too short for length and data */
 
         /* now we know we have enough data to parse length */
