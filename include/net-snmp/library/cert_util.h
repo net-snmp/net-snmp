@@ -101,6 +101,7 @@ extern "C" {
 
     NETSNMP_IMPORT
     netsnmp_cert *netsnmp_cert_find(int what, int where, void *hint);
+    netsnmp_void_array *netsnmp_certs_find(int what, int where, void *hint);
 
     int netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var);
 
