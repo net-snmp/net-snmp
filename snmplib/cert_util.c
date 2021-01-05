@@ -424,8 +424,8 @@ netsnmp_cert_map_container(void)
 
 static netsnmp_cert *
 _new_cert(const char *dirname, const char *filename, int certType, int offset,
-          int hashType, const char *fingerprint, const char *common_name,
-          const char *subject)
+          int allowed_uses, int hashType, const char *fingerprint,
+          const char *common_name,  const char *subject)
 {
     netsnmp_cert    *cert;
 
@@ -446,7 +446,7 @@ _new_cert(const char *dirname, const char *filename, int certType, int offset,
     cert->info.dir = strdup(dirname);
     cert->info.filename = strdup(filename);
     /* only the first certificate is allowed to be a remote peer */
-    cert->info.allowed_uses = offset ? 0 : NS_CERT_REMOTE_PEER;
+    cert->info.allowed_uses = allowed_uses;
     cert->info.type = certType;
     cert->offset = offset;
     if (fingerprint) {
@@ -1286,11 +1286,13 @@ _add_key(EVP_PKEY *okey, const char* dirname, const char* filename, FILE *index)
 }
 
 static netsnmp_cert *
-_add_cert(X509 *ocert, const char* dirname, const char* filename, int type, int offset, FILE *index)
+_add_cert(X509 *ocert, const char* dirname, const char* filename, int type, int offset,
+          int allowed_uses, FILE *index)
 {
     netsnmp_cert *cert;
 
-    cert = _new_cert(dirname, filename, type, offset, -1, NULL, NULL, NULL);
+    cert = _new_cert(dirname, filename, type, offset,
+                     allowed_uses, -1, NULL, NULL, NULL);
     if (NULL == cert)
         return NULL;
 
@@ -1308,8 +1310,9 @@ _add_cert(X509 *ocert, const char* dirname, const char* filename, int type, int 
         /** fingerprint max = 64*3=192 for sha512 */
         /** common name / CN  = 64 */
         if (cert)
-            fprintf(index, "c:%s %d %d %d %s '%s' '%s'\n", filename,
-                    cert->info.type, cert->offset, cert->hash_type, cert->fingerprint,
+            fprintf(index, "c:%s %d %d %d %d %s '%s' '%s'\n", filename,
+                    cert->info.type, cert->offset, cert->info.allowed_uses,
+                    cert->hash_type, cert->fingerprint,
                     cert->common_name, cert->subject);
     }
 
@@ -1363,7 +1366,8 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
 
             ocert = d2i_X509_bio(certbio, NULL); /* DER/ASN1 */
             if (NULL != ocert) {
-                if (!_add_cert(ocert, dirname, filename, type, 0, index)) {
+                if (!_add_cert(ocert, dirname, filename, type, 0,
+                               NS_CERT_REMOTE_PEER, index)) {
                     X509_free(ocert);
                     ocert = NULL;
                 }
@@ -1379,9 +1383,18 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
                 DEBUGMSGT(("9:cert:read", "Changing type from DER to PEM\n"));
                 type = NS_CERT_TYPE_PEM;
             }
-            ocert = ncert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
+
+            /* read the private key first so we can record this in the index */
+            okey = PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
+
+            (void)BIO_reset(certbio);
+
+            /* certs are read after the key */
+	    ocert = ncert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
             if (NULL != ocert) {
-                cert = _add_cert(ncert, dirname, filename, type, offset, index);
+                cert = _add_cert(ncert, dirname, filename, type, 0,
+                                 okey ? NS_CERT_IDENTITY | NS_CERT_REMOTE_PEER :
+                                 NS_CERT_REMOTE_PEER, index);
                 if (NULL == cert) {
                     X509_free(ocert);
                     ocert = ncert = NULL;
@@ -1391,17 +1404,12 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
                 offset = BIO_tell(certbio);
                 ncert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
                 if (ncert) {
-                    if (NULL == _add_cert(ncert, dirname, filename, type, offset, index)) {
+                    if (NULL == _add_cert(ncert, dirname, filename, type, offset, 0, index)) {
                         X509_free(ncert);
                         ncert = NULL;
                     }
                 }
             }
-
-            BIO_seek(certbio, offset);
-
-            /** check for private key too */
-            okey = PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
 
             if (NULL != okey) {
                 DEBUGMSGT(("cert:read:key", "found key with cert in %s\n",
@@ -1412,7 +1420,6 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
                                cert->info.filename));
                     key->cert = cert;
                     cert->key = key;
-                    cert->info.allowed_uses |= NS_CERT_IDENTITY;
                 }
                 else {
                     EVP_PKEY_free(okey);
@@ -1449,8 +1456,9 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     char            tmpstr[SNMP_MAXPATH + 5], filename[NAME_MAX];
     char            fingerprint[EVP_MAX_MD_SIZE*3], common_name[64+1], type_str[15];
     char            subject[SNMP_MAXBUF_SMALL], hash_str[15], offset_str[15];
+    char            allowed_uses_str[15];
     ssize_t         offset;
-    int             count = 0, type, hash, version;
+    int             count = 0, type, allowed_uses, hash, version;
     netsnmp_cert    *cert;
     netsnmp_key     *key;
     netsnmp_container *newer, *found;
@@ -1538,6 +1546,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
             if ((NULL == (pos=copy_nword(pos, filename, sizeof(filename)))) ||
                 (NULL == (pos=copy_nword(pos, type_str, sizeof(type_str)))) ||
                 (NULL == (pos=copy_nword(pos, offset_str, sizeof(offset_str)))) ||
+                (NULL == (pos=copy_nword(pos, allowed_uses_str, sizeof(allowed_uses_str)))) ||
                 (NULL == (pos=copy_nword(pos, hash_str, sizeof(hash_str)))) ||
                 (NULL == (pos=copy_nword(pos, fingerprint,
                                          sizeof(fingerprint)))) ||
@@ -1551,9 +1560,10 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
             }
             type = atoi(type_str);
             offset = atoi(offset_str);
+            allowed_uses = atoi(allowed_uses_str);
             hash = atoi(hash_str);
-            cert = _new_cert(dirname, filename, type, offset, hash, fingerprint,
-                             common_name, subject);
+            cert = _new_cert(dirname, filename, type, offset, allowed_uses, hash,
+                             fingerprint, common_name, subject);
             if (cert && 0 == CONTAINER_INSERT(found, cert))
                 ++count;
             else {
@@ -1995,6 +2005,32 @@ netsnmp_cert_find(int what, int where, void *hint)
                result->info.allowed_uses));
             
     return result;
+}
+
+netsnmp_void_array *
+netsnmp_certs_find(int what, int where, void *hint)
+{
+
+    DEBUGMSGT(("certs:find:params", "looking for %s(%d) in %s(0x%x), hint %p\n",
+               _mode_str(what), what, _where_str(where), where, hint));
+
+    if (NS_CERTKEY_FILE == where) {
+        /** hint == filename */
+        char               *filename = (char*)hint;
+        netsnmp_void_array *matching;
+
+        DEBUGMSGT(("cert:find:params", " hint = %s\n", (char *)hint));
+        matching = _cert_reduce_subset_what(_cert_find_subset_fn(
+                                            filename, NULL ), what);
+
+        return matching;
+    } /* where = NS_CERTKEY_FILE */
+    else { /* unknown location */
+
+        DEBUGMSGT(("certs:find:err", "unhandled location %d for %d\n", where,
+                   what));
+        return NULL;
+    }
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_CERT_FINGERPRINTS

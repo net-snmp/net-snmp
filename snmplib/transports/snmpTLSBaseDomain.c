@@ -70,7 +70,7 @@ static unsigned long ERR_get_error_all(const char **file, int *line,
 /* this is called during negotiation */
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
-    char buf[1024], *fingerprint;
+    char subject[SNMP_MAXBUF_MEDIUM], issuer[SNMP_MAXBUF_MEDIUM], *fingerprint;
     X509 *thecert;
     netsnmp_cert *cert;
     _netsnmp_verify_info *verify_info;
@@ -82,10 +82,12 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     
     /* things to do: */
 
-    X509_NAME_oneline(X509_get_subject_name(thecert), buf, sizeof(buf));
+    X509_NAME_oneline(X509_get_subject_name(thecert), subject, sizeof(subject));
+    X509_NAME_oneline(X509_get_issuer_name(thecert), issuer, sizeof(issuer));
     fingerprint = netsnmp_openssl_cert_get_fingerprint(thecert, -1);
-    DEBUGMSGTL(("tls_x509:verify", "Cert: %s\n", buf));
-    DEBUGMSGTL(("tls_x509:verify", "  fp: %s\n", fingerprint ?
+    DEBUGMSGTL(("tls_x509:verify", " subject: %s\n", subject));
+    DEBUGMSGTL(("tls_x509:verify", "  issuer: %s\n", issuer));
+    DEBUGMSGTL(("tls_x509:verify", "      fp: %s\n", fingerprint ?
                 fingerprint : "unknown"));
 
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
@@ -120,7 +122,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
         } else {
             DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
             /* log where we are and why called */
-            snmp_log(LOG_ERR, "tls verification failure: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err));
+            snmp_log(LOG_ERR, "tls verification failure: ok=%d ctx=%p depth=%d fp=%s subject='%s' issuer='%s' err=%i:%s\n", ok, ctx, depth, fingerprint, subject, issuer, err, X509_verify_cert_error_string(err));
             SNMP_FREE(fingerprint);
             return 0;
         }
@@ -436,21 +438,48 @@ netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 int
 _trust_this_cert(SSL_CTX *the_ctx, char *certspec) {
     netsnmp_cert *trustcert;
+    netsnmp_cert *candidate;
+    netsnmp_void_array *matching = NULL;
+
+    int                 i;
 
     DEBUGMSGTL(("sslctx_client", "Trying to load a trusted certificate: %s\n",
                 certspec));
 
     /* load this identifier into the trust chain */
     trustcert = netsnmp_cert_find(NS_CERT_CA,
-                                  NS_CERTKEY_MULTIPLE,
+                                  NS_CERTKEY_FINGERPRINT,
                                   certspec);
+
+    /* loop through all CA certs in the given files */
+    if (!trustcert) {
+        matching = netsnmp_certs_find(NS_CERT_CA,
+                                      NS_CERTKEY_FILE,
+                                      certspec);
+        for (i = 0; (matching) && (i < matching->size); ++i) {
+            candidate = (netsnmp_cert*)matching->array[i];
+            if (netsnmp_cert_trust(the_ctx, candidate) != SNMPERR_SUCCESS) {
+                free(matching->array);
+                free(matching);
+                LOGANDDIE("failed to load trust certificate");
+            }
+        } /** matching loop */
+
+        if (matching) {
+            free(matching->array);
+            free(matching);
+            return 1;
+	}
+    }
+
+    /* fall back to trusting the remote peer certificate */
     if (!trustcert)
         trustcert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
                                       NS_CERTKEY_MULTIPLE,
                                       certspec);
     if (!trustcert)
         LOGANDDIE("failed to find requested certificate to trust");
-        
+
     /* Add the certificate to the context */
     if (netsnmp_cert_trust(the_ctx, trustcert) != SNMPERR_SUCCESS)
         LOGANDDIE("failed to load trust certificate");
