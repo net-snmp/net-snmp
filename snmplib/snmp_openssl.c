@@ -521,18 +521,50 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
     }
 }
 
-static int _htmap[NS_HASH_MAX + 1] = {
-    0, NID_md5WithRSAEncryption, NID_sha1WithRSAEncryption,
-    NID_sha224WithRSAEncryption, NID_sha256WithRSAEncryption,
-    NID_sha384WithRSAEncryption, NID_sha512WithRSAEncryption };
+static int _htmap2[] = {
+    0, NS_HASH_NONE,
+#ifdef NID_md5WithRSAEncryption
+    NID_md5WithRSAEncryption, NS_HASH_MD5,
+#endif
+#ifdef NID_sha1WithRSAEncryption
+    NID_sha1WithRSAEncryption, NS_HASH_SHA1,
+#endif
+#ifdef NID_ecdsa_with_SHA1
+    NID_ecdsa_with_SHA1, NS_HASH_SHA1,
+#endif
+#ifdef NID_sha224WithRSAEncryption
+    NID_sha224WithRSAEncryption, NS_HASH_SHA224,
+#endif
+#ifdef NID_ecdsa_with_SHA224
+    NID_ecdsa_with_SHA224, NS_HASH_SHA224,
+#endif
+#ifdef NID_sha256WithRSAEncryption
+    NID_sha256WithRSAEncryption, NS_HASH_SHA256,
+#endif
+#ifdef NID_ecdsa_with_SHA256
+    NID_ecdsa_with_SHA256, NS_HASH_SHA256,
+#endif
+#ifdef NID_sha384WithRSAEncryption
+    NID_sha384WithRSAEncryption, NS_HASH_SHA384,
+#endif
+#ifdef NID_ecdsa_with_SHA384
+    NID_ecdsa_with_SHA384, NS_HASH_SHA384,
+#endif
+#ifdef NID_sha512WithRSAEncryption
+    NID_sha512WithRSAEncryption, NS_HASH_SHA512,
+#endif
+#ifdef NID_ecdsa_with_SHA512
+    NID_ecdsa_with_SHA512, NS_HASH_SHA512,
+#endif
+};
 
 int
 _nid2ht(int nid)
 {
     int i;
-    for (i=1; i<= NS_HASH_MAX; ++i) {
-        if (nid == _htmap[i])
-            return i;
+    for (i = 0; i < (sizeof(_htmap2) / 2); i += 2) {
+        if (nid == _htmap2[i])
+            return _htmap2[i + 1];
     }
     return 0;
 }
@@ -541,9 +573,12 @@ _nid2ht(int nid)
 int
 _ht2nid(int ht)
 {
-    if ((ht < 0) || (ht > NS_HASH_MAX))
-        return 0;
-    return _htmap[ht];
+    int i;
+    for (i = 0; i < (sizeof(_htmap2) / 2); i += 2) {
+        if (ht == _htmap2[i + 1])
+            return _htmap2[i];
+    }
+    return 0;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_OPENSSL_HT2NID */
 
