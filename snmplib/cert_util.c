@@ -424,8 +424,8 @@ netsnmp_cert_map_container(void)
 
 static netsnmp_cert *
 _new_cert(const char *dirname, const char *filename, int certType, int offset,
-          int hashType, const char *fingerprint, const char *common_name,
-          const char *subject)
+          int allowed_uses, int hashType, const char *fingerprint,
+          const char *common_name,  const char *subject)
 {
     netsnmp_cert    *cert;
 
@@ -446,7 +446,7 @@ _new_cert(const char *dirname, const char *filename, int certType, int offset,
     cert->info.dir = strdup(dirname);
     cert->info.filename = strdup(filename);
     /* only the first certificate is allowed to be a remote peer */
-    cert->info.allowed_uses = offset ? 0 : NS_CERT_REMOTE_PEER;
+    cert->info.allowed_uses = allowed_uses;
     cert->info.type = certType;
     cert->offset = offset;
     if (fingerprint) {
@@ -1286,11 +1286,14 @@ _add_key(EVP_PKEY *okey, const char* dirname, const char* filename, FILE *index)
 }
 
 static netsnmp_cert *
-_add_cert(X509 *ocert, const char* dirname, const char* filename, int type, int offset, FILE *index)
+_add_cert(X509 *ocert, const char* dirname, const char* filename, int type, int offset,
+          FILE *index)
 {
     netsnmp_cert *cert;
 
-    cert = _new_cert(dirname, filename, type, offset, -1, NULL, NULL, NULL);
+    cert = _new_cert(dirname, filename, type, offset,
+                     offset ? 0 : NS_CERT_REMOTE_PEER,
+                     -1, NULL, NULL, NULL);
     if (NULL == cert)
         return NULL;
 
@@ -1308,8 +1311,9 @@ _add_cert(X509 *ocert, const char* dirname, const char* filename, int type, int 
         /** fingerprint max = 64*3=192 for sha512 */
         /** common name / CN  = 64 */
         if (cert)
-            fprintf(index, "c:%s %d %d %d %s '%s' '%s'\n", filename,
-                    cert->info.type, cert->offset, cert->hash_type, cert->fingerprint,
+            fprintf(index, "c:%s %d %d %d %d %s '%s' '%s'\n", filename,
+                    cert->info.type, cert->offset, cert->info.allowed_uses,
+                    cert->hash_type, cert->fingerprint,
                     cert->common_name, cert->subject);
     }
 
@@ -1449,8 +1453,9 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     char            tmpstr[SNMP_MAXPATH + 5], filename[NAME_MAX];
     char            fingerprint[EVP_MAX_MD_SIZE*3], common_name[64+1], type_str[15];
     char            subject[SNMP_MAXBUF_SMALL], hash_str[15], offset_str[15];
+    char            allowed_uses_str[15];
     ssize_t         offset;
-    int             count = 0, type, hash, version;
+    int             count = 0, type, allowed_uses, hash, version;
     netsnmp_cert    *cert;
     netsnmp_key     *key;
     netsnmp_container *newer, *found;
@@ -1538,6 +1543,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
             if ((NULL == (pos=copy_nword(pos, filename, sizeof(filename)))) ||
                 (NULL == (pos=copy_nword(pos, type_str, sizeof(type_str)))) ||
                 (NULL == (pos=copy_nword(pos, offset_str, sizeof(offset_str)))) ||
+                (NULL == (pos=copy_nword(pos, allowed_uses_str, sizeof(allowed_uses_str)))) ||
                 (NULL == (pos=copy_nword(pos, hash_str, sizeof(hash_str)))) ||
                 (NULL == (pos=copy_nword(pos, fingerprint,
                                          sizeof(fingerprint)))) ||
@@ -1551,9 +1557,10 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
             }
             type = atoi(type_str);
             offset = atoi(offset_str);
+            allowed_uses = atoi(allowed_uses_str);
             hash = atoi(hash_str);
-            cert = _new_cert(dirname, filename, type, offset, hash, fingerprint,
-                             common_name, subject);
+            cert = _new_cert(dirname, filename, type, offset, allowed_uses, hash,
+                             fingerprint, common_name, subject);
             if (cert && 0 == CONTAINER_INSERT(found, cert))
                 ++count;
             else {
