@@ -1287,13 +1287,12 @@ _add_key(EVP_PKEY *okey, const char* dirname, const char* filename, FILE *index)
 
 static netsnmp_cert *
 _add_cert(X509 *ocert, const char* dirname, const char* filename, int type, int offset,
-          FILE *index)
+          int allowed_uses, FILE *index)
 {
     netsnmp_cert *cert;
 
     cert = _new_cert(dirname, filename, type, offset,
-                     offset ? 0 : NS_CERT_REMOTE_PEER,
-                     -1, NULL, NULL, NULL);
+                     allowed_uses, -1, NULL, NULL, NULL);
     if (NULL == cert)
         return NULL;
 
@@ -1367,7 +1366,8 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
 
             ocert = d2i_X509_bio(certbio, NULL); /* DER/ASN1 */
             if (NULL != ocert) {
-                if (!_add_cert(ocert, dirname, filename, type, 0, index)) {
+                if (!_add_cert(ocert, dirname, filename, type, 0,
+                               NS_CERT_REMOTE_PEER, index)) {
                     X509_free(ocert);
                     ocert = NULL;
                 }
@@ -1383,9 +1383,18 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
                 DEBUGMSGT(("9:cert:read", "Changing type from DER to PEM\n"));
                 type = NS_CERT_TYPE_PEM;
             }
-            ocert = ncert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
+
+            /* read the private key first so we can record this in the index */
+            okey = PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
+
+            (void)BIO_reset(certbio);
+
+            /* certs are read after the key */
+	    ocert = ncert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
             if (NULL != ocert) {
-                cert = _add_cert(ncert, dirname, filename, type, offset, index);
+                cert = _add_cert(ncert, dirname, filename, type, 0,
+                                 okey ? NS_CERT_IDENTITY | NS_CERT_REMOTE_PEER :
+                                 NS_CERT_REMOTE_PEER, index);
                 if (NULL == cert) {
                     X509_free(ocert);
                     ocert = ncert = NULL;
@@ -1395,17 +1404,12 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
                 offset = BIO_tell(certbio);
                 ncert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
                 if (ncert) {
-                    if (NULL == _add_cert(ncert, dirname, filename, type, offset, index)) {
+                    if (NULL == _add_cert(ncert, dirname, filename, type, offset, 0, index)) {
                         X509_free(ncert);
                         ncert = NULL;
                     }
                 }
             }
-
-            BIO_seek(certbio, offset);
-
-            /** check for private key too */
-            okey = PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
 
             if (NULL != okey) {
                 DEBUGMSGT(("cert:read:key", "found key with cert in %s\n",
@@ -1416,7 +1420,6 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
                                cert->info.filename));
                     key->cert = cert;
                     cert->key = key;
-                    cert->info.allowed_uses |= NS_CERT_IDENTITY;
                 }
                 else {
                     EVP_PKEY_free(okey);
