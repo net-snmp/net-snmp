@@ -289,6 +289,10 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
 
     vp = (struct variable *) handler->myvoid;
 
+    if (reqinfo)
+      snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
+			  SNMP_CALLBACK_MIB_REQUEST_INFO,
+			  reqinfo);
     /*
      * create old variable structure with right information 
      */
