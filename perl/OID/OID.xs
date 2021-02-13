@@ -228,7 +228,7 @@ nsop_to_array(oid1)
         int i;
 
     PPCODE:
-        EXTEND(SP, oid1->len);
+        EXTEND(SP, (int)oid1->len);
         for(i=0; i < (int)oid1->len; i++) {
             PUSHs(sv_2mortal(newSVnv(oid1->name[i])));
         }

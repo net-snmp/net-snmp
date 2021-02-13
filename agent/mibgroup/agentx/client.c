@@ -105,7 +105,7 @@ int
 agentx_open_session(netsnmp_session * ss)
 {
     netsnmp_pdu    *pdu, *response;
-    u_long 	    timeout;
+    int 	    timeout;
 
     DEBUGMSGTL(("agentx/subagent", "opening session \n"));
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
@@ -117,8 +117,11 @@ agentx_open_session(netsnmp_session * ss)
         return 0;
     timeout = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
-    /* for master TIMEOUT is usec, but Agentx Open specifies sec */
-    pdu->time = timeout / (1000L * 1000L);
+    if (timeout < 0) 
+        pdu->time = 0;
+    else
+        /* for master TIMEOUT is usec, but Agentx Open specifies sec */
+        pdu->time = timeout / (1000L * 1000L);
 
     snmp_add_var(pdu, version_sysoid, version_sysoid_len,
 		 's', "Net-SNMP AgentX sub-agent");

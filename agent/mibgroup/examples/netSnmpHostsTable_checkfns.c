@@ -83,7 +83,7 @@ check_netSnmpHostAddress(int type, char *val, size_t val_len,
         return SNMP_ERR_WRONGTYPE;
 
     /** Check the ranges of the passed value for legality */
-    if (!(val_len >= 0 && val_len <= 255))
+    if (val_len > 255)
         return SNMP_ERR_WRONGVALUE;
 
     /** looks ok, call the local version of the same function. */
