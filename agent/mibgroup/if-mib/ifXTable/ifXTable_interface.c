@@ -1144,9 +1144,7 @@ _ifXTable_check_column(ifXTable_rowreq_ctx * rowreq_ctx,
         /*
          * check defined range(s). 
          */
-        if ((SNMPERR_SUCCESS == rc)
-            && ((var->val_len < 0) || (var->val_len > 64))
-            ) {
+        if (rc == SNMPERR_SUCCESS && var->val_len > 64) {
             rc = SNMP_ERR_WRONGLENGTH;
         }
         if (SNMPERR_SUCCESS != rc) {

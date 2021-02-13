@@ -4027,7 +4027,7 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
         return 1;
 
     for (i = 0; i < objidlen; i++)
-        if (objid[i] < 0 || objid[i] > 255)
+        if (objid[i] > 255)
             return 2;
 
     p = intbuf;

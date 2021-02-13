@@ -81,7 +81,7 @@ int netsnmp_parse_ep_str(struct netsnmp_ep_str *ep_str, const char *endpoint)
         strlcpy(ep_str->iface, iface, sizeof(ep_str->iface));
     if (portstr) {
         port = atoi(portstr);
-        if (port >= 0 && port <= 0xffff)
+        if (port <= 0xffff)
             strlcpy(ep_str->port, portstr, sizeof(ep_str->port));
         else
             goto invalid;

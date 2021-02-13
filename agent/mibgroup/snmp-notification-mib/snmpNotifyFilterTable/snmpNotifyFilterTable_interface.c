@@ -1125,9 +1125,7 @@ _snmpNotifyFilterTable_check_column(snmpNotifyFilterTable_rowreq_ctx *
         /*
          * check defined range(s). 
          */
-        if ((SNMPERR_SUCCESS == rc)
-            && ((var->val_len < 0) || (var->val_len > 16))
-            ) {
+        if (rc == SNMPERR_SUCCESS && var->val_len > 16) {
             rc = SNMP_ERR_WRONGLENGTH;
         }
         if (SNMPERR_SUCCESS != rc) {
