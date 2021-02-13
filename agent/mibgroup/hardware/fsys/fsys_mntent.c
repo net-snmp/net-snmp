@@ -59,6 +59,36 @@
 
 #endif
 
+/*
+ * File systems to monitor and that are not covered by any hrFSTypes
+ * enumeration.
+ */
+static const char *other_fs[] = {
+    "acfs",
+    "btrfs",
+    "cvfs",
+    "f2fs",
+    "fuse.glusterfs",
+    "gfs",
+    "gfs2",
+    "glusterfs",
+    "jfs",
+    "jffs2",
+    "lofs",
+    "mvfs",
+    "nsspool",
+    "nssvol",
+    "nvmfs",
+    "ocfs2",
+    "reiserfs",
+    "simfs",
+    "tmpfs",
+    "vxfs",
+    "xfs",
+    "zfs",
+    NULL,
+};
+
 static int
 _fsys_remote( char *device, int type )
 {
@@ -72,6 +102,8 @@ _fsys_remote( char *device, int type )
 static int
 _fsys_type( char *typename )
 {
+    const char **fs;
+
     DEBUGMSGTL(("fsys:type", "Classifying %s\n", typename));
 
     if ( !typename || *typename=='\0' )
@@ -124,49 +156,21 @@ _fsys_type( char *typename )
               !strcmp(typename, MNTTYPE_VFAT) )
        return NETSNMP_FS_TYPE_FAT32;
 
-    /*
-     *  The following code covers selected filesystems
-     *    which are not covered by the HR-TYPES enumerations,
-     *    but should still be monitored.
-     *  These are all mapped into type "other"
-     *
-     *    (The systems listed are not fixed in stone,
-     *     but are simply here to illustrate the principle!)
-     */    
-    else if ( !strcmp(typename, MNTTYPE_TMPFS) ||
-              !strcmp(typename, MNTTYPE_GFS) ||
-              !strcmp(typename, MNTTYPE_GFS2) ||
-              !strcmp(typename, MNTTYPE_GLUSTERFS) ||
-              !strcmp(typename, MNTTYPE_FUSEGLUSTERFS) ||    
-              !strcmp(typename, MNTTYPE_XFS) ||
-              !strcmp(typename, MNTTYPE_JFS) ||
-              !strcmp(typename, MNTTYPE_VXFS) ||
-              !strcmp(typename, MNTTYPE_REISERFS) ||
-              !strcmp(typename, MNTTYPE_OCFS2) ||
-              !strcmp(typename, MNTTYPE_CVFS) ||
-              !strcmp(typename, MNTTYPE_SIMFS) ||
-              !strcmp(typename, MNTTYPE_BTRFS) ||
-              !strcmp(typename, MNTTYPE_F2FS) ||
-              !strcmp(typename, MNTTYPE_ZFS) ||
-              !strcmp(typename, MNTTYPE_NVMFS) ||
-              !strcmp(typename, MNTTYPE_ACFS) ||
-              !strcmp(typename, MNTTYPE_NSS_VOL) ||
-              !strcmp(typename, MNTTYPE_NSS_POOL) ||
-              !strcmp(typename, MNTTYPE_LOFS))
-       return NETSNMP_FS_TYPE_OTHER;
+    for (fs = other_fs; *fs; fs++)
+        if (strcmp(typename, *fs) == 0)
+            return NETSNMP_FS_TYPE_OTHER;
 
     /* Detection of AUTOFS.
      * This file system will be ignored by default
      */ 
-    else if (!strcmp(typename, MNTTYPE_AUTOFS))
+    if (!strcmp(typename, MNTTYPE_AUTOFS))
         return NETSNMP_FS_TYPE_AUTOFS;
 
 
     /*    
      *  All other types are silently skipped
      */
-    else
-       return NETSNMP_FS_TYPE_IGNORE;
+    return NETSNMP_FS_TYPE_IGNORE;
 }
 
 void
