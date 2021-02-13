@@ -73,6 +73,7 @@ static const char *other_fs[] = {
     "gfs2",
     "glusterfs",
     "jfs",
+    "jffs2",
     "lofs",
     "mvfs",
     "nsspool",
