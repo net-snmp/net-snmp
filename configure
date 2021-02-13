@@ -16864,7 +16864,7 @@ $as_echo_n "checking for developer gcc flags... " >&6; }
     for opt in -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
         -Wimplicit-fallthrough=2 -Wlogical-op                                \
         -Wno-format-truncation -Wno-missing-field-initializers               \
-        -Wno-sign-compare -Wno-unused-parameter -Wno-type-limits
+        -Wno-sign-compare -Wno-unused-parameter
     do
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
 $as_echo_n "checking whether the compiler supports $opt... " >&6; }
