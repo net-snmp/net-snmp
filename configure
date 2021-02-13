@@ -16855,10 +16855,9 @@ CFLAGS=$lt_save_CFLAGS
 if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
     developer="yes"
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for developer gcc flags" >&5
-$as_echo_n "checking for developer gcc flags... " >&6; }
 if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
-
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for developer gcc flags" >&5
+$as_echo_n "checking for developer gcc flags... " >&6; }
     #       WWWXXX - strict type checking
     #
     netsnmp_save_CFLAGS="$CFLAGS"
@@ -16901,12 +16900,11 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
       CFLAGS="$netsnmp_save_CFLAGS"
     done
-
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $DEVFLAGS" >&5
+$as_echo "$DEVFLAGS" >&6; }
 else
     DEVFLAGS=""
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $DEVFLAGS" >&5
-$as_echo "$DEVFLAGS" >&6; }
 
 
 
