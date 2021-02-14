@@ -695,9 +695,9 @@ UINT:
 OCT:
         vars->val.string = malloc(len);
         vars->val_len = len;
-        if (val && len)
+        if (val && len) {
             memcpy((char *)vars->val.string, val, len);
-        else {
+        } else if (len) {
             ret = FAILURE;
             vars->val.string = (u_char*)strdup("");
             vars->val_len = 0;
