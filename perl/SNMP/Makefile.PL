@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use Carp;
 use Config;
 use Cwd 'abs_path';
 use ExtUtils::MakeMaker;
@@ -75,6 +76,7 @@ sub SnmpInitMakeParams {
 	}
 	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib";
       }
+      $prefix = $opts->{'prefix'} or die "NET-SNMP-PATH has not been set\n";
     }
     else {
 	if (!$ENV{'NETSNMP_LIBS'}) {
@@ -105,6 +107,8 @@ sub SnmpInitMakeParams {
 }
 
 sub GetTestInfo {
+    croak "\$prefix has not been set" if (!defined($prefix));
+
     my $info_file = File::Spec->catfile("t", "snmptest.cmd");
     my $snmpd_path1 = abs_path("${prefix}/sbin");
     my $snmpd_path2 = "/usr/sbin";
