@@ -503,5 +503,25 @@ class HexStringGetNext(unittest.TestCase):
             print(var)
         self.assertEqual(varlist[0].iid, '0');
 
+class HexStringSet(unittest.TestCase):
+    """SNMP hex string tests for the Net-SNMP Python interface"""
+    def testFunc(self):
+        """HexStringSet"""
+        session = setup_v2()
+
+        varlist = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.6.3.10.2.1.1.0'))
+        session.get(varlist)
+        print("varlist length =", len(varlist))
+        for var in varlist:
+            print(var)
+        self.assertEqual(varlist[0].iid, '0');
+        res = netsnmp.snmpset(var, **snmp_dest());
+        print("first SNMP set result:", res)
+        self.assertEqual(res, 0)
+        var.val = ""
+        res = netsnmp.snmpset(var, **snmp_dest());
+        print("second SNMP set result:", res)
+        self.assertEqual(res, 0)
+
 if __name__ == '__main__':
     unittest.main()
