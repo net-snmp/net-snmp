@@ -76,7 +76,6 @@ sub SnmpInitMakeParams {
 	}
 	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib";
       }
-      $prefix = $opts->{'prefix'} or die "NET-SNMP-PATH has not been set\n";
     }
     else {
 	if (!$ENV{'NETSNMP_LIBS'}) {
@@ -107,11 +106,7 @@ sub SnmpInitMakeParams {
 }
 
 sub GetTestInfo {
-    croak "\$prefix has not been set" if (!defined($prefix));
-
     my $info_file = File::Spec->catfile("t", "snmptest.cmd");
-    my $snmpd_path1 = abs_path("${prefix}/sbin");
-    my $snmpd_path2 = "/usr/sbin";
 
     open(H, ">$info_file") || die "Error: could not open file '$info_file'($!)";
 
@@ -140,7 +135,10 @@ sub GetTestInfo {
             $snmpd = abs_path("../../agent/snmpd");
             $snmptrapd = abs_path("../../apps/snmptrapd");
 	} else {
+            croak "\$prefix has not been set" if (!defined($prefix));
             $mibdir = "${prefix}/share/snmp/mibs";
+            my $snmpd_path1 = abs_path("${prefix}/sbin");
+            my $snmpd_path2 = "/usr/sbin";
             $snmpd = find_files(["snmpd"], [$snmpd_path1, $snmpd_path2]);
             $snmptrapd = find_files(["snmptrapd"], [$snmpd_path1, $snmpd_path2]);
 	}
@@ -150,11 +148,9 @@ sub GetTestInfo {
 
     $mibdir ||= prompt("Unable to locate the MIBs, Please enter the path: ",
 		       $mibdir);
-    $snmpd ||= prompt("Unable to locate \"snmpd\". Please enter the path: ",
-		      $snmpd_path1);
+    $snmpd ||= prompt("Unable to locate \"snmpd\". Please enter the path: ");
     $snmptrapd ||=
-	prompt("Unable to locate \"snmptrapd\". Please enter the path: ",
-	       $snmpd_path1);
+	prompt("Unable to locate \"snmptrapd\". Please enter the path: ");
 
     print H "SNMPD => $snmpd\n";
     print H "SNMPTRAPD => $snmptrapd\n";
