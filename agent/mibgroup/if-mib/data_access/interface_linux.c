@@ -143,10 +143,10 @@ static void init_libpci(void)
     struct stat stbuf;
 
     /*
-     * When snmpd is run inside an OpenVZ container /proc/bus/pci is not
-     * available.
+     * When snmpd is run inside an OpenVZ container or on a Raspberry Pi system
+     * /proc/bus/pci is not available.
      */
-    if (stat("/proc/vz", &stbuf) == 0)
+    if (stat("/proc/bus/pci", &stbuf) == 0)
         return;
 
     pci_access = pci_alloc();
