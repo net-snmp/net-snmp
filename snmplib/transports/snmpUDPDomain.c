@@ -386,7 +386,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
             /* Nope, wasn't a dotted quad.  Must be a hostname. */
             int ret = netsnmp_gethostbyname_v4(sourcep, &network.s_addr);
             if (ret < 0) {
-                config_perror("cannot resolve source hostname");
+                config_perror("cannot resolve IPv4 source hostname");
                 return;
             }
         }

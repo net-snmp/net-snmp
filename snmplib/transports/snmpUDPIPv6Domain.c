@@ -735,7 +735,15 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                 memset(&pton_addr.sin6_addr.s6_addr, '\0',
                        sizeof(struct in6_addr));
             } else if (inet_pton(AF_INET6, sourcep, &pton_addr.sin6_addr) != 1) {
-                /* Nope, wasn't a numeric address. Must be a hostname. */
+                /* Nope, wasn't a numeric IPv6 address. Must be IPv4 or a hostname. */
+
+                /* Try interpreting as dotted quad - IPv4 */
+                struct in_addr network;
+                if (inet_pton(AF_INET, sourcep, &network) > 0){
+                    /* Yes, it's IPv4 - so it's already parsed and we can return. */
+                    DEBUGMSGTL(("com2sec6", "IPv4 detected for IPv6 parser. Skipping.\n"));
+                    return;
+                }
 #if HAVE_GETADDRINFO
                 int             gai_error;
 
