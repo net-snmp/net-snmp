@@ -295,9 +295,14 @@ netsnmp_udp6_transport_bind(netsnmp_transport *t,
     DEBUGIF("netsnmp_udp6") {
         char *str;
         str = netsnmp_udp6_fmtaddr(NULL, addr, sizeof(*addr));
-        DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d to %s\n",
+        DEBUGMSGTL(("netsnmp_udp6", "binding socket: %d to %s\n",
                     t->sock, str));
         free(str);
+    }
+    if (flags & NETSNMP_TSPEC_PREBOUND) {
+        DEBUGMSGTL(("netsnmp_udp6", "socket %d is prebound, nothing to do\n",
+                    t->sock));
+        return 0;
     }
     rc = netsnmp_bindtodevice(t->sock, ep->iface);
     if (rc != 0) {
@@ -414,6 +419,8 @@ netsnmp_udp6_transport_with_source(const struct netsnmp_ep *ep,
          */
         t->sock = netsnmp_sd_find_inet_socket(PF_INET6, SOCK_DGRAM, -1,
                                               ntohs(ep->a.sin6.sin6_port));
+        if (t->sock >= 0)
+            flags |= NETSNMP_TSPEC_PREBOUND;
 #endif
     }
     else
