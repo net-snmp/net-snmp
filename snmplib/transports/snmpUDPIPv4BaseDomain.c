@@ -202,6 +202,11 @@ netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
                     t->sock, str));
         free(str);
     }
+    if (flags & NETSNMP_TSPEC_PREBOUND) {
+        DEBUGMSGTL(("netsnmp_udpbase", "socket %d is prebound, nothing to do\n",
+                    t->sock));
+        return 0;
+    }
     rc = netsnmp_bindtodevice(t->sock, ep->iface);
     if (rc != 0) {
         DEBUGMSGTL(("netsnmp_udpbase", "failed to bind to iface %s: %s\n",
@@ -276,6 +281,8 @@ netsnmp_udpipv4base_transport_with_source(const struct netsnmp_ep *ep,
          */
         t->sock = netsnmp_sd_find_inet_socket(PF_INET, SOCK_DGRAM, -1,
                                               ntohs(ep->a.sin.sin_port));
+        if (t->sock >= 0)
+            flags |= NETSNMP_TSPEC_PREBOUND;
 #endif
     }
     else
