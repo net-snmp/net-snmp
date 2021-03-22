@@ -692,11 +692,9 @@ UINT:
       case TYPE_OPAQUE:
         vars->type = ASN_OCTET_STR;
 OCT:
-        vars->val.string = malloc(len);
+        vars->val.string = netsnmp_memdup(val, len);
         vars->val_len = len;
-        if (val && len)
-            memcpy((char *)vars->val.string, val, len);
-        else {
+        if (!vars->val.string && len) {
             ret = FAILURE;
             vars->val.string = (u_char*)strdup("");
             vars->val_len = 0;
@@ -2128,7 +2126,7 @@ netsnmp_set(PyObject *self, PyObject *args)
   oid *oid_arr;
   size_t oid_arr_len = MAX_OID_LEN;
   int type;
-  u_char tmp_val_str[STR_BUF_SIZE];
+  char* tmp_val_str = NULL;
   int use_enums;
   struct enum_list *ep;
   int verbose = py_netsnmp_verbose();
@@ -2199,23 +2197,20 @@ netsnmp_set(PyObject *self, PyObject *args)
 	  snmp_free_pdu(pdu);
 	  goto done;
 	}
-	memset(tmp_val_str, 0, sizeof(tmp_val_str));
-        if (tmplen >= (Py_ssize_t)sizeof(tmp_val_str)) {
-            tmplen = sizeof(tmp_val_str)-1;
-        }
-	memcpy(tmp_val_str, val, tmplen);
-	if (type==TYPE_INTEGER && use_enums && tp && tp->enums) {
-	  for(ep = tp->enums; ep; ep = ep->next) {
+	if (type == TYPE_INTEGER && use_enums && tp && tp->enums) {
+	  for (ep = tp->enums; ep; ep = ep->next) {
 	    if (val && !strcmp(ep->label, val)) {
-              snprintf((char *) tmp_val_str, sizeof(tmp_val_str), "%d",
-                      ep->value);
+              if (asprintf(&tmp_val_str, "%d", ep->value) < 0)
+                tmp_val_str = NULL;
 	      break;
 	    }
 	  }
-	}
+	} else {
+            tmp_val_str = netsnmp_memdup(val, tmplen);
+        }
 	len = (int)tmplen;
-	status = __add_var_val_str(pdu, oid_arr, oid_arr_len,
-                                   (char *) tmp_val_str, len, type);
+	status = __add_var_val_str(pdu, oid_arr, oid_arr_len, tmp_val_str, len,
+                                   type);
 
 	if (verbose && status == FAILURE)
 	  printf("error: set: adding variable/value to PDU");

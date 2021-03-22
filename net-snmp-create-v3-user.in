@@ -1,7 +1,5 @@
 #!/bin/sh
 #
-# $Id$
-#
 # this shell script is designed to add new SNMPv3 users
 # to Net-SNMP config file.
 
@@ -21,6 +19,7 @@ unset shifted
 case $1 in
     --version|--ver*)
       echo @VERSION@
+      exit 0
       ;;
     --help)
       usage="yes"

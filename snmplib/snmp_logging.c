@@ -996,11 +996,11 @@ netsnmp_register_loghandler( int type, int priority )
 
     logh->type     = type;
     switch ( type ) {
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
     case NETSNMP_LOGHANDLER_STDOUT:
         logh->imagic  = 1;
         logh->handler = log_handler_stdouterr;
         break;
-#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
     case NETSNMP_LOGHANDLER_STDERR:
         logh->handler = log_handler_stdouterr;
         break;

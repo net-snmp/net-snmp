@@ -80,11 +80,13 @@ goto eof
 
 :Cygwin32
 c:\cygwin\setup-x86.exe --quiet-mode --no-shortcuts --only-site --site "%CYG_MIRROR%" --packages openssl-devel > NUL
+c:\cygwin\setup-x86.exe --quiet-mode --no-shortcuts --only-site --site "%CYG_MIRROR%" --packages python38-devel > NUL
 c:\cygwin\bin\bash --login -c 'set -x; cd "${APPVEYOR_BUILD_FOLDER}"; ci/build.sh'
 goto eof
 
 :Cygwin64
 c:\cygwin64\setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --site "%CYG_MIRROR%" --packages openssl-devel > NUL
+c:\cygwin64\setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --site "%CYG_MIRROR%" --packages python38-devel > NUL
 c:\cygwin64\bin\bash --login -c 'set -x; cd "${APPVEYOR_BUILD_FOLDER}"; ci/build.sh'
 goto eof
 

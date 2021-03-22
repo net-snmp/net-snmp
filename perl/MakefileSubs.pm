@@ -41,6 +41,7 @@ sub NetSNMPGetOpts {
 	$ret{'define'}   = $ENV{'NET-SNMP-DEFINE'};
 	$ret{'inc'}      = $ENV{'NET-SNMP-INC'};
 	$ret{'cflags'}   = $ENV{'NET-SNMP-CFLAGS'};
+	# $ret{'prefix'} is not used on Windows.
     } else {
 	# don't have env vars, pull from command line and put there
 	GetOptions("NET-SNMP-CONFIG=s"    => \$ret{'nsconfig'},
