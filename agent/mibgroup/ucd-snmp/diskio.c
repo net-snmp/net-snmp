@@ -1414,7 +1414,7 @@ getstats(void)
 	}
     }
     else if (stat("/proc/vz", &stbuf) == 0) {
-        // OpenVZ / Virtuozzo containers do not have /proc/diskstats
+        /* OpenVZ / Virtuozzo containers do not have /proc/diskstats */
         goto update_cache_time;
     }
     else {
