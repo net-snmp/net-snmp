@@ -507,6 +507,16 @@ find_and_add_allDisks(int minpercent)
      */
   }
 #endif /* HAVE_SETMNTENT */
+#elif defined(HAVE_GETMNTINFO)
+  if (1) {
+    struct statfs *mntbuf;
+    size_t i, mntsize;
+    mntsize = getmntinfo(&mntbuf, MNT_NOWAIT);
+    for (i = 0; i < mntsize; i++) {
+	add_device(mntbuf[i].f_mntonname, mntbuf[i].f_mntfromname, -1,
+                   minpercent, 0);
+    }
+  }
 #elif HAVE_FSTAB_H
   setfsent();			/* open /etc/fstab */
   while((fstab1 = getfsent()) != NULL) {
@@ -514,18 +524,6 @@ find_and_add_allDisks(int minpercent)
     dummy = 1;
   }
   endfsent();			/* close /etc/fstab */
-#if defined(__FreeBSD__) && __FreeBSD_version >= 700055
-  {
-    struct statfs *mntbuf;
-    size_t i, mntsize;
-    mntsize = getmntinfo(&mntbuf, MNT_NOWAIT);
-    for (i = 0; i < mntsize; i++) {
-      if (strncmp(mntbuf[i].f_fstypename, "zfs", 3) == 0) {
-	add_device(mntbuf[i].f_mntonname, mntbuf[i].f_mntfromname, -1, minpercent, 0);
-      }
-    }
-  }
-#endif
   if(dummy != 0) {
     /*
      * dummy clause for else below
