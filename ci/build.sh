@@ -29,7 +29,12 @@ case "$(uname -a)" in
 esac
 echo "compiler path: $(type -p gcc)"
 "${scriptdir}"/net-snmp-configure V5-8-patches || exit $?
-make -s                                  || exit $?
+if type nproc >&/dev/null; then
+    nproc=$(nproc)
+else
+    nproc=1
+fi
+make -s -j${nproc}                       || exit $?
 case "$MODE" in
     disable-set|mini*|read-only)
         exit 0;;
