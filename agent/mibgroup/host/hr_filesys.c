@@ -622,7 +622,7 @@ Init_HR_FileSys(void)
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
     fscount = getvfsstat(NULL, 0, ST_NOWAIT);
 #else
-    fscount = getfsstat(NULL, 0, MNT_NOWAIT);
+    fscount = getfsstat(NULL, 0, MNT_WAIT);
 #endif
     if (fsstats)
         free((char *) fsstats);
@@ -631,7 +631,7 @@ Init_HR_FileSys(void)
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
     getvfsstat(fsstats, fscount * sizeof(*fsstats), ST_NOWAIT);
 #else
-    getfsstat(fsstats, fscount * sizeof(*fsstats), MNT_NOWAIT);
+    getfsstat(fsstats, fscount * sizeof(*fsstats), MNT_WAIT);
 #endif
     HRFS_index = 0;
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)

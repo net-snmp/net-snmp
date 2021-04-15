@@ -255,6 +255,7 @@ void shutdown_snmp_transport(void);
 
 /*  Some utility functions.  */
 
+NETSNMP_IMPORT
 char *netsnmp_transport_peer_string(netsnmp_transport *t, const void *data,
                                     int len);
 

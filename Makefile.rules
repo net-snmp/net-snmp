@@ -70,7 +70,7 @@ cleanfeaturessubdirs:
 		> $(top_builddir)/include/net-snmp/feature-details.h
 	$(FEATURECHECK) --feature-global $(top_builddir)/include/net-snmp/feature-details.h $(mysubdir) $< $@ $(CC) -E $(CPPFLAGS) $(CFLAGS) -c
 
-subdirs:
+subdirs: $(SUBDIRDEPS)
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
 		for i in $$it ; do \

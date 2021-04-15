@@ -6,6 +6,7 @@
 VPATH		= @srcdir@
 
 SUBDIRS		= snmplib @MAINSUBS@
+SUBDIRDEPS      = sedscript
 FTSUBDIRS	= @FTMAINSUBS@ snmplib
 TESTDIRS	= testing
 
@@ -179,7 +180,7 @@ perlmodules: perlmakefiles subdirs
 
 perlmakefiles: perl/Makefile net-snmp-config-x
 
-perl/Makefile: perl/Makefile.PL
+perl/Makefile: perl/Makefile.PL subdirs
 	dir=`pwd` &&							\
 	cd perl &&							\
 	if false; then							\
