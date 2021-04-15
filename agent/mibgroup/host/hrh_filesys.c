@@ -23,7 +23,6 @@
 #include "hrh_filesys.h"
 #include "hrh_storage.h"
 #include "hr_disk.h"
-#include "hr_filesys.h"
 #include <net-snmp/utilities.h>
 
 #if HAVE_MNTENT_H

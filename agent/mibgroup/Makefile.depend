@@ -5501,7 +5501,7 @@
 ./host/hr_partition.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_partition.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_partition.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_partition.lo: ./host/hr_partition.h ./host/hr_filesys.h
+./host/hr_partition.lo: ./host/hr_partition.h ./host/hrh_filesys.h
 ./host/hr_partition.lo: ./host/hr_disk.h
 ./host/hr_print.lo: ../../include/net-snmp/net-snmp-config.h
 ./host/hr_print.lo: host_res.h
@@ -6191,7 +6191,7 @@
 ./host/hrh_filesys.lo: ../../include/net-snmp/agent/hardware/memory.h
 ./host/hrh_filesys.lo: ../../include/net-snmp/agent/hardware/fsys.h
 ./host/hrh_filesys.lo: host_res.h ./host/hrh_filesys.h ./host/hrh_storage.h
-./host/hrh_filesys.lo: ./host/hr_disk.h ./host/hr_filesys.h
+./host/hrh_filesys.lo: ./host/hr_disk.h ./host/hrh_filesys.h
 ./host/hrh_storage.lo: ../../include/net-snmp/net-snmp-config.h
 ./host/hrh_storage.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hrh_storage.lo: ../../include/net-snmp/types.h
@@ -6303,7 +6303,7 @@
 ./host/hrh_storage.lo: ../../include/net-snmp/agent/hardware/memory.h
 ./host/hrh_storage.lo: ../../include/net-snmp/agent/hardware/fsys.h
 ./host/hrh_storage.lo: host_res.h ./host/hrh_filesys.h ./host/hrh_storage.h
-./host/hrh_storage.lo: ./host/hr_disk.h ./host/hr_filesys.h
+./host/hrh_storage.lo: ./host/hr_disk.h ./host/hrh_filesys.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/net-snmp-config.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/net-snmp-features.h
 ./ip-mib/ip_scalars.lo: ../../include/net-snmp/net-snmp-includes.h

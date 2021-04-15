@@ -105,7 +105,7 @@
 
 #ifdef USING_HOST_MODULE
 #include "mibgroup/host/hr_system.h"
-#include "mibgroup/host/hr_storage.h"
+#include "mibgroup/host/hrh_storage.h"
 #include "mibgroup/host/hr_device.h"
 #include "mibgroup/host/hr_other.h"
 #include "mibgroup/host/hr_proc.h"
@@ -113,7 +113,7 @@
 #include "mibgroup/host/hr_print.h"
 #include "mibgroup/host/hr_disk.h"
 #include "mibgroup/host/hr_partition.h"
-#include "mibgroup/host/hr_filesys.h"
+#include "mibgroup/host/hrh_filesys.h"
 #include "mibgroup/host/hr_swrun.h"
 #include "mibgroup/host/hr_swinst.h"
 #endif

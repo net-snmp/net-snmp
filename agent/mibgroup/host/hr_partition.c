@@ -27,7 +27,7 @@
 
 #include "host_res.h"
 #include "hr_partition.h"
-#include "hr_filesys.h"
+#include "hrh_filesys.h"
 #include "hr_disk.h"
 
 #include <sys/stat.h>
