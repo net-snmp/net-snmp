@@ -22,8 +22,8 @@
 	config_require(host/hr_disk)
 	config_require(host/hr_partition)
 
-	config_version_require((host/hr_storage, 5.7, host/hrh_storage))
-	config_version_require((host/hr_filesys, 5.7, host/hrh_filesys))
+	config_require(host/hrh_storage)
+	config_require(host/hrh_filesys)
 
 	config_version_require((host/hr_swinst,  5.6, host/hrSWInstalledTable))
 	config_version_require((host/hr_swrun,   5.6, host/hrSWRunTable))
