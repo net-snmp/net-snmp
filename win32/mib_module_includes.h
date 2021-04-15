@@ -114,8 +114,8 @@
 #include "mibgroup/host/hr_disk.h"
 #include "mibgroup/host/hr_partition.h"
 #include "mibgroup/host/hrh_filesys.h"
-#include "mibgroup/host/hr_swrun.h"
-#include "mibgroup/host/hr_swinst.h"
+#include "mibgroup/host/hrh_swrun.h"
+#include "mibgroup/host/hrh_swinst.h"
 #endif
 
 #ifdef USING_RMON_MODULE

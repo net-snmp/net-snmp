@@ -25,8 +25,8 @@
 	config_require(host/hrh_storage)
 	config_require(host/hrh_filesys)
 
-	config_version_require((host/hr_swinst,  5.6, host/hrSWInstalledTable))
-	config_version_require((host/hr_swrun,   5.6, host/hrSWRunTable))
+	config_require(host/hrSWInstalledTable)
+	config_require(host/hrSWRunTable)
 
 /* add the host resources mib to the default mibs to load */
 config_add_mib(HOST-RESOURCES-MIB)
