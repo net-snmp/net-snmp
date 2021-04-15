@@ -13957,7 +13957,7 @@
 ./ucd-snmp/disk.lo: ../../include/net-snmp/agent/mfd.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/agent/snmp_get_statistic.h
 ./ucd-snmp/disk.lo: ../../include/net-snmp/agent/auto_nlist.h struct.h
-./ucd-snmp/disk.lo: ./ucd-snmp/disk.h mibdefs.h
+./ucd-snmp/disk.lo: mibdefs.h
 ./ucd-snmp/disk.lo: util_funcs/header_simple_table.h ./ucd-snmp/errormib.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/net-snmp-config.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/net-snmp-includes.h
@@ -14068,7 +14068,7 @@
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/agent/mfd.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/agent/snmp_get_statistic.h
 ./ucd-snmp/disk_hw.lo: ../../include/net-snmp/agent/hardware/fsys.h struct.h
-./ucd-snmp/disk_hw.lo: ./ucd-snmp/disk.h mibdefs.h ./ucd-snmp/disk_hw.h
+./ucd-snmp/disk_hw.lo: mibdefs.h ./ucd-snmp/disk_hw.h
 ./ucd-snmp/disk_hw.lo: util_funcs/header_simple_table.h ./ucd-snmp/errormib.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/net-snmp-config.h
 ./ucd-snmp/diskio.lo: ../../include/net-snmp/net-snmp-includes.h
