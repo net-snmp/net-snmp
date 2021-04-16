@@ -16,7 +16,7 @@ extern "C" {
         const char                           *product;
 
         /*
-         * a function to create an object in newly allcoated memory
+         * a function to create an object in newly allocated memory
          */
         netsnmp_factory_produce_f            *produce;
 
