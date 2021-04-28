@@ -70,7 +70,7 @@ cleanfeaturessubdirs:
 		> $(top_builddir)/include/net-snmp/feature-details.h
 	$(FEATURECHECK) --feature-global $(top_builddir)/include/net-snmp/feature-details.h $(mysubdir) $< $@ $(CC) -E $(CPPFLAGS) $(CFLAGS) -c
 
-subdirs:
+subdirs: $(SUBDIRDEPS)
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
 		for i in $$it ; do \
@@ -438,13 +438,17 @@ lint:
 #
 depend: dependdirs
 	@if test -f Makefile.depend ; then \
-		makedepend `echo $(CPPFLAGS) | sed 's/-f[-a-z]*//g'` -o .lo $(srcdir)/*.c $(srcdir)/*/*.c ; \
+		makedepend `echo $(CPPFLAGS) | \
+		awk '{for(i=1;i<=NF;i++) if (match(substr($$i,1,2), "-[ID]")) print $$i}'` \
+		-o .lo $(srcdir)/*.c $(srcdir)/*/*.c ; \
 	fi
 
 
 nosysdepend: nosysdependdirs
 	@if test -f Makefile.depend ; then \
-		makedepend `echo $(CPPFLAGS) | sed 's/-f[-a-z]*//g'` -o .lo $(srcdir)/*.c $(srcdir)/*/*.c ; \
+		makedepend `echo $(CPPFLAGS) | \
+		awk '{for(i=1;i<=NF;i++) if (match(substr($$i,1,2), "-[ID]")) print $$i}'` \
+		-o .lo $(srcdir)/*.c $(srcdir)/*/*.c ; \
 		$(PERL) -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile ; \
 	fi
 

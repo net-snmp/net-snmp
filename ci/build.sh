@@ -29,7 +29,22 @@ case "$(uname -a)" in
 esac
 echo "compiler path: $(type -p gcc)"
 "${scriptdir}"/net-snmp-configure V5-8-patches || exit $?
-make -s                                  || exit $?
+case "$MODE" in
+    mini*)
+	# Net-SNMP uses static dependencies, the Makefile.depend files have
+	# been generated for MODE=regular, net-snmp-features.h includes
+	# <net-snmp/library/features.h> in minimalist mode and that file is
+	# generated dynamically and is not in Makefile.depend. Hence disable
+	# parallel compilation for minimalist mode.
+	nproc=1;;
+    *)
+	if type nproc >&/dev/null; then
+	    nproc=$(nproc)
+	else
+	    nproc=1
+	fi;;
+esac
+make -s -j${nproc}                       || exit $?
 case "$MODE" in
     disable-set|mini*|read-only)
         exit 0;;
