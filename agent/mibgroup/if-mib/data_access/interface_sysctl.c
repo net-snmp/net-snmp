@@ -637,6 +637,13 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         /* try to guess the speed from media type */
         netsnmp_sysctl_get_if_speed(entry->name, &entry->speed,
                                     &entry->speed_high);
+#ifdef __FreeBSD__
+	if (entry->speed == 0) {
+		entry->speed = ifp->ifm_data.ifi_baudrate;
+		entry->speed_high = (ifp->ifm_data.ifi_baudrate +
+		    499999) / 1000000;
+	}
+#endif
         if (entry->speed_high != 0) {
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
         } else {
