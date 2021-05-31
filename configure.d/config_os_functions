@@ -156,14 +156,15 @@ AC_REPLACE_FUNCS([getopt                                       ] dnl
                  [strtol        strtoul       strtoull         ] )
 
 #  Agent:
-AC_CHECK_FUNCS([cgetnext        chown          forkall         ] dnl
-               [fsync           gai_strerror   getgrnam        ] dnl
-               [gethostname     getloadavg                     ] dnl
+AC_CHECK_FUNCS([cgetnext        chown          endfsent        ] dnl
+               [forkall         fsync          gai_strerror    ] dnl
+               [getfsent        getgrnam       gethostname     ] dnl
+               [getloadavg      getmntent      getmntinfo      ] dnl
                [getpid          getpwnam                       ] dnl
                [hasmntopt       initgroups                     ] dnl
                [if_nameindex    if_indextoname if_nametoindex  ] dnl
                [localtime_r     mkstemp        mktime          ] dnl
-               [poll            regcomp                        ] dnl
+               [poll            regcomp        setfsent        ] dnl
                [setgid          setgroups                      ] dnl
                [setmntent       setuid                         ] dnl
                [sigaction       sigblock      sigprocmask      ] dnl
