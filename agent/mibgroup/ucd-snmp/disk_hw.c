@@ -49,8 +49,6 @@ static void     disk_free_config(void);
 static void     disk_parse_config(const char *, char *);
 static void     disk_parse_config_all(const char *, char *);
 
-static netsnmp_fsys_info **_expand_disk_array(char *cptr);
-
 #define MAX_INT_32 0x7fffffff
 #define MAX_UINT_32 0xffffffff
 
@@ -144,6 +142,29 @@ disk_free_config(void)
     }
     allDisksIncluded = 0;
     allDisksMinPercent = 0;
+}
+
+static netsnmp_fsys_info **
+_expand_disk_array(char *cptr)
+{
+    int prev_max = maxdisks;
+
+    if (maxdisks == 0)
+        maxdisks = 50;
+    else
+        maxdisks *= 2;
+
+    disks = realloc(disks, maxdisks * sizeof(netsnmp_fsys_info *));
+    if (!disks) {
+        config_perror("malloc failed for new disk allocation.");
+        netsnmp_config_error("\tignoring: %s", cptr);
+        return NULL;
+    }
+
+    memset(disks + prev_max, 0, (maxdisks - prev_max) *
+           sizeof(netsnmp_fsys_info *));
+
+    return disks;
 }
 
 static void
@@ -272,32 +293,6 @@ _percent(unsigned long long value, unsigned long long total)
     pct += 0.5;                 /* rounding */
     return (int) pct;
 }
-
-static netsnmp_fsys_info **
-_expand_disk_array(char *cptr)
-{
-
-    if (maxdisks == 0)
-        maxdisks = 50;
-    else
-        maxdisks *= 2;
-
-    disks = realloc(disks, maxdisks * sizeof(netsnmp_fsys_info *));
-    if (!disks) {
-        config_perror("malloc failed for new disk allocation.");
-        netsnmp_config_error("\tignoring: %s", cptr);
-        return NULL;
-    }
-
-    if (maxdisks == 50)
-        memset(disks, 0, maxdisks * sizeof(netsnmp_fsys_info *));
-    else
-        memset(disks + maxdisks / 2, 0,
-               maxdisks / 2 * sizeof(netsnmp_fsys_info *));
-
-    return disks;
-}
-
 
 /*
  * var_extensible_disk(...
