@@ -42,13 +42,6 @@
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 
-/*
- *  * config file parsing routines
- *   */
-static void     disk_free_config(void);
-static void     disk_parse_config(const char *, char *);
-static void     disk_parse_config_all(const char *, char *);
-
 #define MAX_INT_32 0x7fffffff
 #define MAX_UINT_32 0xffffffff
 
@@ -96,53 +89,6 @@ static const struct variable2 extensible_disk_variables[] = {
     {DISKUSEDHIGH, ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
      var_extensible_disk, 1, {DISKUSEDHIGH}},
 };
-
-/*
- * Define the OID pointer to the top of the mib tree that we're
- * registering underneath 
- */
-static const oid disk_variables_oid[] = {
-    NETSNMP_UCDAVIS_MIB, NETSNMP_DISKMIBNUM, 1
-};
-
-void
-init_disk_hw(void)
-{
-    /*
-     * register ourselves with the agent to handle our mib tree 
-     */
-    REGISTER_MIB("ucd-snmp/disk", extensible_disk_variables, variable2,
-                 disk_variables_oid);
-
-    snmpd_register_config_handler("disk", disk_parse_config,
-                                  disk_free_config,
-                                  "path [ minspace | minpercent% ]");
-    snmpd_register_config_handler("includeAllDisks", disk_parse_config_all,
-                                  disk_free_config, "minpercent%");
-    allDisksIncluded = 0;
-    allDisksMinPercent = 0;
-}
-
-static void
-disk_free_config(void)
-{
-    netsnmp_fsys_info *entry;
-
-    for (entry = netsnmp_fsys_get_first();
-         entry != NULL; entry = netsnmp_fsys_get_next(entry)) {
-
-        entry->minspace = -1;
-        entry->minpercent = -1;
-        entry->flags &= ~NETSNMP_FS_FLAG_UCD;
-    }
-    if (disks) {
-        free(disks);
-        disks = NULL;
-        maxdisks = numdisks = 0;
-    }
-    allDisksIncluded = 0;
-    allDisksMinPercent = 0;
-}
 
 static netsnmp_fsys_info **
 _expand_disk_array(char *cptr)
@@ -245,6 +191,53 @@ disk_parse_config_all(const char *token, char *cptr)
         allDisksIncluded = 1;
         allDisksMinPercent = minpercent;
     }
+}
+
+static void
+disk_free_config(void)
+{
+    netsnmp_fsys_info *entry;
+
+    for (entry = netsnmp_fsys_get_first();
+         entry != NULL; entry = netsnmp_fsys_get_next(entry)) {
+
+        entry->minspace = -1;
+        entry->minpercent = -1;
+        entry->flags &= ~NETSNMP_FS_FLAG_UCD;
+    }
+    if (disks) {
+        free(disks);
+        disks = NULL;
+        maxdisks = numdisks = 0;
+    }
+    allDisksIncluded = 0;
+    allDisksMinPercent = 0;
+}
+
+/*
+ * Define the OID pointer to the top of the mib tree that we're
+ * registering underneath
+ */
+static const oid disk_variables_oid[] = {
+    NETSNMP_UCDAVIS_MIB, NETSNMP_DISKMIBNUM, 1
+};
+
+void
+init_disk_hw(void)
+{
+    /*
+     * register ourselves with the agent to handle our mib tree
+     */
+    REGISTER_MIB("ucd-snmp/disk", extensible_disk_variables, variable2,
+                 disk_variables_oid);
+
+    snmpd_register_config_handler("disk", disk_parse_config,
+                                  disk_free_config,
+                                  "path [ minspace | minpercent% ]");
+    snmpd_register_config_handler("includeAllDisks", disk_parse_config_all,
+                                  disk_free_config, "minpercent%");
+    allDisksIncluded = 0;
+    allDisksMinPercent = 0;
 }
 
 /*
