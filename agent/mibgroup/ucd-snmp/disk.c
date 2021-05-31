@@ -172,12 +172,12 @@ struct diskpart {
 #define MAX_INT_32 0x7fffffff
 #define MAX_UINT_32 0xffffffff
 
-unsigned int    numdisks;
-int             allDisksIncluded = 0;
-unsigned int    maxdisks = 0;
-struct diskpart *disks;
+static unsigned int    numdisks;
+static int             allDisksIncluded;
+static unsigned int    maxdisks;
+static struct diskpart *disks;
 
-struct variable2 extensible_disk_variables[] = {
+static const struct variable2 extensible_disk_variables[] = {
   {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
    var_extensible_disk, 1, {MIBINDEX}},
   {ERRORNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
@@ -220,7 +220,9 @@ struct variable2 extensible_disk_variables[] = {
  * Define the OID pointer to the top of the mib tree that we're
  * registering underneath 
  */
-oid             disk_variables_oid[] = { NETSNMP_UCDAVIS_MIB, NETSNMP_DISKMIBNUM, 1 };
+static const oid disk_variables_oid[] = {
+    NETSNMP_UCDAVIS_MIB, NETSNMP_DISKMIBNUM, 1
+};
 
 void
 init_disk(void)
