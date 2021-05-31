@@ -642,7 +642,7 @@ get_boottime(void)
 #if defined(hpux10) || defined(hpux11)
     pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0);
     boottime_csecs = pst_buf.boot_time * 100;
-#elif NETSNMP_CAN_USE_SYSCTL
+#elif defined(NETSNMP_CAN_USE_SYSCTL)
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
 
