@@ -54,13 +54,13 @@ static netsnmp_fsys_info **_expand_disk_array(char *cptr);
 #define MAX_INT_32 0x7fffffff
 #define MAX_UINT_32 0xffffffff
 
-int             numdisks;
-int             allDisksIncluded = 0;
-int             allDisksMinPercent = 0;
-int             maxdisks = 0;
-netsnmp_fsys_info **disks = NULL;
+static int     numdisks;
+static int     allDisksIncluded;
+static int     allDisksMinPercent;
+static int     maxdisks;
+static netsnmp_fsys_info **disks;
 
-struct variable2 extensible_disk_variables[] = {
+static const struct variable2 extensible_disk_variables[] = {
     {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
      var_extensible_disk, 1, {MIBINDEX}},
     {ERRORNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
@@ -103,8 +103,9 @@ struct variable2 extensible_disk_variables[] = {
  * Define the OID pointer to the top of the mib tree that we're
  * registering underneath 
  */
-oid             disk_variables_oid[] =
-    { NETSNMP_UCDAVIS_MIB, NETSNMP_DISKMIBNUM, 1 };
+static const oid disk_variables_oid[] = {
+    NETSNMP_UCDAVIS_MIB, NETSNMP_DISKMIBNUM, 1
+};
 
 void
 init_disk_hw(void)
