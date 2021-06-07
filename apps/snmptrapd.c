@@ -772,8 +772,23 @@ main(int argc, char *argv[])
 #if HAVE_UNISTD_H
         case 'g':
             if (optarg != NULL) {
-                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_GROUPID, gid = atoi(optarg));
+                char *ecp;
+
+                gid = strtoul(optarg, &ecp, 10);
+#if HAVE_GETGRNAM && HAVE_PWD_H
+                if (*ecp) {
+                    struct group  *info;
+
+                    info = getgrnam(optarg);
+                    gid = info ? info->gr_gid : -1;
+                    endgrent();
+                }
+#endif
+                if (gid < 0) {
+                    fprintf(stderr, "Bad group id: %s\n", optarg);
+                    goto out;
+                }
+                netsnmp_set_agent_group_id(gid);
             } else {
                 usage();
                 goto out;
