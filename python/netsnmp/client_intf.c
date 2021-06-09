@@ -1316,7 +1316,7 @@ netsnmp_delete_session(PyObject *self, PyObject *args)
 
 static int build_python_varbind(PyObject *varbind, netsnmp_variable_list *vars,
                                 int varlist_ind, int sprintval_flag, int *len,
-                                char **str_buf)
+                                char **str_buf, int getlabel_flag)
 {
     struct tree *tp;
     int type;
@@ -1326,7 +1326,6 @@ static int build_python_varbind(PyObject *varbind, netsnmp_variable_list *vars,
     int buf_over = 0;
     const char *tag;
     const char *iid;
-    int getlabel_flag = NO_FLAGS;
 
     if (!PyObject_HasAttrString(varbind, "tag"))
         return TYPE_OTHER;
@@ -1523,7 +1522,7 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
 
       varbind = PySequence_GetItem(varlist, varlist_ind);
       type = build_python_varbind(varbind, vars, varlist_ind, sprintval_flag,
-                                  &len, &str_buf);
+                                  &len, &str_buf, getlabel_flag);
       if (type != TYPE_OTHER) {
           /* save in return tuple as well */
           if ((type == SNMP_ENDOFMIBVIEW) ||
@@ -1832,7 +1831,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
               varbind = py_netsnmp_construct_varbind();
               if (varbind && build_python_varbind(varbind, vars, varlist_ind,
-                                       sprintval_flag, &len, &str_buf) !=
+                                       sprintval_flag, &len, &str_buf, getlabel_flag) !=
                   TYPE_OTHER) {
                   const int hex = is_hex(str_buf, len);
 
@@ -2055,7 +2054,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 
 	  varbind = py_netsnmp_construct_varbind();
           if (varbind && build_python_varbind(varbind, vars, varbind_ind,
-                              sprintval_flag, &len, &str_buf) != TYPE_OTHER) {
+                              sprintval_flag, &len, &str_buf, getlabel_flag) != TYPE_OTHER) {
             const int hex = is_hex(str_buf, len);
 
             /* push varbind onto varbinds */
