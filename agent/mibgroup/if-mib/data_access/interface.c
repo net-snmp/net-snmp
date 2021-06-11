@@ -16,7 +16,7 @@
 #include "if-mib/ifTable/ifTable.h"
 #include "if-mib/data_access/interface.h"
 #include "interface_private.h"
-#if HAVE_PCRE_H
+#ifdef HAVE_PCRE_H
 #include <pcre.h>
 #elif HAVE_REGEX_H
 #include <sys/types.h>
@@ -840,7 +840,7 @@ int netsnmp_access_interface_max_reached(const char *name)
 int netsnmp_access_interface_include(const char *name)
 {
     netsnmp_include_if_list *if_ptr;
-#if HAVE_PCRE_H
+#ifdef HAVE_PCRE_H
     int                      found_ndx[3];
 #endif
 
@@ -856,7 +856,7 @@ int netsnmp_access_interface_include(const char *name)
 
 
     for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
-#if HAVE_PCRE_H
+#ifdef HAVE_PCRE_H
         if (pcre_exec(if_ptr->regex_ptr, NULL, name, strlen(name), 0, 0,
                       found_ndx, 3) >= 0)
             return TRUE;
@@ -980,7 +980,7 @@ _parse_include_if_config(const char *token, char *cptr)
 {
     netsnmp_include_if_list *if_ptr, *if_new;
     char                    *name, *st;
-#if HAVE_PCRE_H
+#ifdef HAVE_PCRE_H
     const char              *pcre_error;
     int                     pcre_error_offset;
 #elif HAVE_REGEX_H
@@ -1012,7 +1012,7 @@ _parse_include_if_config(const char *token, char *cptr)
             config_perror("Out of memory");
             goto err;
         }
-#if HAVE_PCRE_H
+#ifdef HAVE_PCRE_H
         if_new->regex_ptr = pcre_compile(if_new->name, 0,  &pcre_error,
                                          &pcre_error_offset, NULL);
         if (!if_new->regex_ptr) {
@@ -1063,7 +1063,7 @@ _free_include_if_config(void)
 
     while (if_ptr) {
         if_next = if_ptr->next;
-#if HAVE_PCRE_H
+#ifdef HAVE_PCRE_H
         free(if_ptr->regex_ptr);
 #elif HAVE_REGEX_H
         regfree(if_ptr->regex_ptr);
