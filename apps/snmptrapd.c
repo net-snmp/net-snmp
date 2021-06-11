@@ -607,7 +607,6 @@ main(int argc, char *argv[])
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
-    int             uid = 0, gid = 0;
     int             exit_code = 1;
     char           *cp, *listen_ports = NULL;
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
@@ -772,8 +771,25 @@ main(int argc, char *argv[])
 #if HAVE_UNISTD_H
         case 'g':
             if (optarg != NULL) {
+                int gid;
+                char *ecp;
+
+                gid = strtoul(optarg, &ecp, 10);
+#if HAVE_GETGRNAM && HAVE_PWD_H
+                if (*ecp) {
+                    struct group  *info;
+
+                    info = getgrnam(optarg);
+                    gid = info ? info->gr_gid : -1;
+                    endgrent();
+                }
+#endif
+                if (gid < 0) {
+                    fprintf(stderr, "Bad group id: %s\n", optarg);
+                    goto out;
+                }
                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_GROUPID, gid = atoi(optarg));
+				   NETSNMP_DS_AGENT_GROUPID, gid);
             } else {
                 usage();
                 goto out;
@@ -886,6 +902,7 @@ main(int argc, char *argv[])
 #if HAVE_UNISTD_H
         case 'u':
             if (optarg != NULL) {
+                int             uid;
                 char           *ecp;
 
                 uid = strtoul(optarg, &ecp, 10);
@@ -1240,6 +1257,9 @@ main(int argc, char *argv[])
 
 #if HAVE_UNISTD_H
 #ifdef HAVE_SETGID
+    {
+    int gid;
+
     if ((gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 				  NETSNMP_DS_AGENT_GROUPID)) > 0) {
         DEBUGMSGTL(("snmptrapd/main", "Changing gid to %d.\n", gid));
@@ -1255,8 +1275,12 @@ main(int argc, char *argv[])
             }
         }
     }
+    }
 #endif
 #ifdef HAVE_SETUID
+    {
+    int uid;
+
     if ((uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 				  NETSNMP_DS_AGENT_USERID)) > 0) {
         DEBUGMSGTL(("snmptrapd/main", "Changing uid to %d.\n", uid));
@@ -1267,6 +1291,7 @@ main(int argc, char *argv[])
                 goto sock_cleanup;
             }
         }
+    }
     }
 #endif
 #endif
