@@ -4,7 +4,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#if HAVE_IO_H
+#ifdef HAVE_IO_H
 #include <io.h>
 #endif
 #include <stdio.h>

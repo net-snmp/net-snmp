@@ -15,7 +15,7 @@
 #endif
 #endif /* NETSNMP_ENABLE_IPV6 */
 
-#if HAVE_NETINET_ICMP_VAR_H
+#ifdef HAVE_NETINET_ICMP_VAR_H
 #include <netinet/icmp_var.h>
 #endif
 

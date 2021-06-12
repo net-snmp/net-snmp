@@ -6,10 +6,10 @@
 #include <net-snmp/net-snmp-config.h>
 #include "mibII_common.h"
 
-#if HAVE_SYS_HASHING_H
+#ifdef HAVE_SYS_HASHING_H
 #include <sys/hashing.h>
 #endif
-#if HAVE_NETINET_IN_VAR_H
+#ifdef HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
 #if HAVE_SYSLOG_H

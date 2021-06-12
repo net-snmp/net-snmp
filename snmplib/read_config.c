@@ -113,7 +113,7 @@
 #include <netdb.h>
 #endif
 #include <errno.h>
-#if HAVE_IO_H
+#ifdef HAVE_IO_H
 #include <io.h>
 #endif
 

@@ -27,7 +27,7 @@
 #if HAVE_SYS_UN_H
 #include <sys/un.h>
 #endif
-#if HAVE_IO_H
+#ifdef HAVE_IO_H
 #include <io.h>
 #endif
 #if HAVE_FCNTL_H

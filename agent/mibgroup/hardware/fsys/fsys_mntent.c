@@ -9,7 +9,7 @@
 #if HAVE_MNTENT_H
 #include <mntent.h>
 #endif
-#if HAVE_SYS_MNTTAB_H
+#ifdef HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
 #if HAVE_SYS_VFS_H

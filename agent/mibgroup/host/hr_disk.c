@@ -500,7 +500,7 @@ Add_HR_Disk_entry(const char *devpart_string,
             first_partn;
         disk_devices[HR_number_disk_types].disk_partition_last =
             last_partn;
-#if DEBUG_TEST
+#ifdef DEBUG_TEST
         DEBUGMSGTL(("host/hr_disk",
                     "Add_HR %02d '%s' first=%d last=%d\n",
                     HR_number_disk_types, devpart_string, lodev, hidev));
@@ -515,7 +515,7 @@ Add_HR_Disk_entry(const char *devpart_string,
                     "WARNING! Add_HR_Disk_entry '%s' incomplete, %d created\n",
                     devpart_string, nbr_created));
     }
-#if DEBUG_TEST
+#ifdef DEBUG_TEST
     else
         DEBUGMSGTL(("host/hr_disk",
                     "Add_HR_Disk_entry '%s' completed, %d created\n",
