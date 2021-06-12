@@ -1575,14 +1575,7 @@
 #endif
 
 /*
- * this must be before the system/machine includes, to allow them to
- * override and turn off inlining. To do so, they should do the
- * following:
- *
- *    #undef NETSNMP_ENABLE_INLINE
- *    #define NETSNMP_ENABLE_INLINE 0
- *
- * A user having problems with their compiler can also turn off
+ * A user having problems with their compiler can turn off
  * the use of inline by defining NETSNMP_NO_INLINE via their cflags:
  *
  *    -DNETSNMP_NO_INLINE
@@ -1604,6 +1597,11 @@
  *    static NETSNMP_INLINE function(int parm) { return parm -1; }
  *
  */
+#ifdef NETSNMP_NO_INLINE
+#define NETSNMP_INLINE
+#define NETSNMP_STATIC_INLINE static
+#else
+#define NETSNMP_USE_INLINE 1
 /*
  * Win32 needs extern for inline function declarations in headers.
  * See MS tech note Q123768:
@@ -1611,7 +1609,7 @@
  */
 #define NETSNMP_INLINE extern inline
 #define NETSNMP_STATIC_INLINE static inline
-#define NETSNMP_ENABLE_INLINE 1
+#endif
 
 #if notused
 #include NETSNMP_SYSTEM_INCLUDE_FILE
@@ -1620,15 +1618,6 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
-
-#if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
-#   define NETSNMP_USE_INLINE 1
-#else
-#   undef  NETSNMP_INLINE
-#   define NETSNMP_INLINE 
-#   undef  NETSNMP_STATIC_INLINE
-#   define NETSNMP_STATIC_INLINE static
-#endif
 
 #ifdef WIN32
 
