@@ -2232,12 +2232,6 @@
  *
  *    -DNETSNMP_NO_INLINE
  *
- * Header and source files should only test against NETSNMP_USE_INLINE:
- *
- *   #ifdef NETSNMP_USE_INLINE
- *   NETSNMP_INLINE function(int parm) { return parm -1; }
- *   #endif
- *
  * Functions which should be static, regardless of whether or not inline
  * is available or enabled should use the NETSNMP_STATIC_INLINE macro,
  * like so:
@@ -2259,7 +2253,6 @@
 #include NETSNMP_MACHINE_INCLUDE_FILE
 
 #if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
-#   define NETSNMP_USE_INLINE 1
 #   ifndef NETSNMP_INLINE
 #      define NETSNMP_INLINE __inline__
 #   endif

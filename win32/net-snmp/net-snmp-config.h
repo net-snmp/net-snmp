@@ -1580,12 +1580,6 @@
  *
  *    -DNETSNMP_NO_INLINE
  *
- * Header and source files should only test against NETSNMP_USE_INLINE:
- *
- *   #ifdef NETSNMP_USE_INLINE
- *   NETSNMP_INLINE function(int parm) { return parm -1; }
- *   #endif
- *
  * Functions which should be static, regardless of whether or not inline
  * is available or enabled should use the NETSNMP_STATIC_INLINE macro,
  * like so:
@@ -1601,7 +1595,6 @@
 #define NETSNMP_INLINE
 #define NETSNMP_STATIC_INLINE static
 #else
-#define NETSNMP_USE_INLINE 1
 /*
  * Win32 needs extern for inline function declarations in headers.
  * See MS tech note Q123768:
