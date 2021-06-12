@@ -398,28 +398,18 @@ netsnmp_container_table_container_extract(netsnmp_request_info *request)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_EXTRACT */
 
-#ifndef NETSNMP_USE_INLINE
 /** find the context data used by the table_container helper */
 void *
 netsnmp_container_table_row_extract(netsnmp_request_info *request)
 {
-    /*
-     * NOTE: this function must match in table_container.c and table_container.h.
-     *       if you change one, change them both!
-     */
     return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
 }
 /** find the context data used by the table_container helper */
 void *
 netsnmp_container_table_extract_context(netsnmp_request_info *request)
 {
-    /*
-     * NOTE: this function must match in table_container.c and table_container.h.
-     *       if you change one, change them both!
-     */
     return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
 }
-#endif /* inline */
 
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER_ROW_INSERT
 /** inserts a newly created table_container entry into a request list */
