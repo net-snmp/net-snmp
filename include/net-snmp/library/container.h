@@ -403,11 +403,6 @@ extern "C" {
 #define CONTAINER_FOR_EACH(x,f,c)   (x)->for_each(x,f,c)
 
     /*
-     * if you are getting multiple definitions of these three
-     * inline functions, you most likely have optimizations turned off.
-     * Either turn them back on, or define NETSNMP_NO_INLINE
-     */
-    /*
      * insert k into all containers
      */
     NETSNMP_IMPORT
