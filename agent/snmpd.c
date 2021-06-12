@@ -39,7 +39,7 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/types.h>
 
-#if HAVE_IO_H
+#ifdef HAVE_IO_H
 #include <io.h>
 #endif
 #include <stdio.h>
@@ -81,7 +81,7 @@
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
-#if HAVE_INET_MIB2_H
+#ifdef HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
 #if HAVE_SYS_IOCTL_H
@@ -100,7 +100,7 @@
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#if HAVE_PROCESS_H              /* Win32-getpid */
+#ifdef HAVE_PROCESS_H
 #include <process.h>
 #endif
 #if HAVE_LIMITS_H

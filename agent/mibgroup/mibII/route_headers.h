@@ -61,10 +61,10 @@
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
-#if HAVE_MACHINE_PARAM_H
+#ifdef HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif
-#if HAVE_SYS_MBUF_H
+#ifdef HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
 #if HAVE_NET_IF_H
@@ -73,14 +73,14 @@
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
-#if HAVE_SYS_HASHING_H
+#ifdef HAVE_SYS_HASHING_H
 #include <sys/hashing.h>
 #endif
-#if HAVE_NETINET_IN_VAR_H
+#ifdef HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
 #define KERNEL                  /* to get routehash and RTHASHSIZ */
-#if HAVE_SYS_STREAM_H
+#ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
 #if HAVE_NET_ROUTE_H
@@ -116,10 +116,10 @@
 #ifndef NULL
 #define NULL 0
 #endif
-#if HAVE_KVM_OPENFILES
+#ifdef HAVE_KVM_OPENFILES
 #include <fcntl.h>
 #endif
-#if HAVE_KVM_H
+#ifdef HAVE_KVM_H
 #include <kvm.h>
 #endif
 
@@ -131,13 +131,13 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if HAVE_INET_MIB2_H
+#ifdef HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-#if HAVE_SYS_SYSCTL_H
+#ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
-#if HAVE_NET_IF_DL_H
+#ifdef HAVE_NET_IF_DL_H
 #ifndef dynix
 #include <net/if_dl.h>
 #else

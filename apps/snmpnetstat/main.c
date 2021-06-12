@@ -53,7 +53,7 @@ char            copyright[] = "@(#) Copyright (c) 1983, 1988, 1993\n\
 #include "main.h"
 #include "netstat.h"
 
-#if HAVE_WINSOCK_H
+#ifdef HAVE_WINSOCK_H
 #include "winstub.h"
 #endif
 

@@ -63,7 +63,7 @@
 #include "main.h"
 #include "netstat.h"
 #include "ffs.h"
-#if HAVE_WINSOCK_H
+#ifdef HAVE_WINSOCK_H
 #include "winstub.h"
 #endif
 

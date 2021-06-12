@@ -43,7 +43,7 @@ SOFTWARE.
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_SYS_SOCKIO_H
+#ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
 #if HAVE_NETINET_IN_H
@@ -82,7 +82,7 @@ SOFTWARE.
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_PROCESS_H              /* Win32-getpid */
+#ifdef HAVE_PROCESS_H
 #include <process.h>
 #endif
 #if HAVE_PWD_H
@@ -127,7 +127,7 @@ SOFTWARE.
 
 #endif
 
-#if NETSNMP_USE_LIBWRAP
+#ifdef NETSNMP_USE_LIBWRAP
 #include <tcpd.h>
 #endif
 
@@ -281,7 +281,7 @@ static int
 pre_parse(netsnmp_session * session, netsnmp_transport *transport,
           void *transport_data, int transport_data_length)
 {
-#if NETSNMP_USE_LIBWRAP
+#ifdef NETSNMP_USE_LIBWRAP
     char *addr_string = NULL;
 
     if (transport != NULL && transport->f_fmtaddr != NULL) {
@@ -1140,7 +1140,7 @@ main(int argc, char *argv[])
     if (dofork && netsnmp_running) {
         int             fd;
 
-#if HAVE_FORKALL
+#ifdef HAVE_FORKALL
         switch (forkall()) {
 #else
         switch (fork()) {

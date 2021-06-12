@@ -6,7 +6,7 @@
 #include <sys/types.h>          /* helps define struct rlimit */
 #endif
 
-#if HAVE_IO_H                   /* win32 */
+#ifdef HAVE_IO_H                   /* win32 */
 #include <io.h>
 #endif
 #if HAVE_STDLIB_H

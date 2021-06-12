@@ -55,10 +55,10 @@ SOFTWARE.
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
-#if HAVE_IO_H
+#ifdef HAVE_IO_H
 #include <io.h>
 #endif
-#if HAVE_DIRECT_H
+#ifdef HAVE_DIRECT_H
 #include <direct.h>
 #endif
 #if HAVE_UNISTD_H
@@ -96,7 +96,7 @@ SOFTWARE.
 #endif
 
 
-#if HAVE_SYS_SOCKIO_H
+#ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
 
@@ -112,14 +112,14 @@ SOFTWARE.
 #include <sys/file.h>
 #endif
 
-#if HAVE_KSTAT_H
+#ifdef HAVE_KSTAT_H
 #include <kstat.h>
 #endif
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#if HAVE_SYS_SYSCTL_H
+#ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
 
@@ -149,15 +149,15 @@ SOFTWARE.
 #include <sys/utsname.h>
 #endif
 
-#if HAVE_SYS_SYSTEMCFG_H
+#ifdef HAVE_SYS_SYSTEMCFG_H
 #include <sys/systemcfg.h>
 #endif
 
-#if HAVE_SYS_SYSTEMINFO_H
+#ifdef HAVE_SYS_SYSTEMINFO_H
 #include <sys/systeminfo.h>
 #endif
 
-#if HAVE_CRT_EXTERNS_H
+#ifdef HAVE_CRT_EXTERNS_H
 #include <crt_externs.h>        /* for _NSGetArgv() */
 #endif
 
@@ -282,8 +282,8 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
 {
     int i = 0;
     DEBUGMSGT(("daemonize","deamonizing...\n"));
-#if HAVE_FORK
-#if HAVE__NSGETEXECUTABLEPATH
+#ifdef HAVE_FORK
+#ifdef HAVE__NSGETEXECUTABLEPATH
      char            path [PATH_MAX] = "";
      uint32_t        size = sizeof (path);
 
@@ -303,7 +303,7 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
      * Fork to return control to the invoking process and to
      * guarantee that we aren't a process group leader.
      */
-#if HAVE_FORKALL
+#ifdef HAVE_FORKALL
     i = forkall();
 #else
     i = fork();
@@ -329,7 +329,7 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
         /*
          * Fork to let the process/session group leader exit.
          */
-#if HAVE_FORKALL
+#ifdef HAVE_FORKALL
 	i = forkall();
 #else
 	i = fork();

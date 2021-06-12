@@ -29,7 +29,7 @@
 #endif
 #include <sys/types.h>
 
-#if HAVE_UTSNAME_H
+#ifdef HAVE_UTSNAME_H
 #include <utsname.h>
 #else
 #if HAVE_SYS_UTSNAME_H

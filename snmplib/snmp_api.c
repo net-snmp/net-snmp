@@ -81,7 +81,7 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_IO_H
+#ifdef HAVE_IO_H
 #include <io.h>
 #endif
 #if HAVE_SYS_SOCKET_H
@@ -93,7 +93,7 @@ SOFTWARE.
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#if HAVE_NET_IF_DL_H
+#ifdef HAVE_NET_IF_DL_H
 #ifndef dynix
 #include <net/if_dl.h>
 #else
@@ -5121,7 +5121,7 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
         return SNMPERR_MALLOC;
     }
 
-#if TEMPORARILY_DISABLED
+#ifdef TEMPORARILY_DISABLED
     /*
      *  NULL variable are allowed in certain PDU types.
      *  In particular, SNMPv3 engineID probes are of this form.

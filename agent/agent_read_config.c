@@ -64,7 +64,7 @@
 #endif
 #endif
 #endif
-#if HAVE_SYS_STREAM_H
+#ifdef HAVE_SYS_STREAM_H
 #   ifdef sysv5UnixWare7
 #      define _KMEMUSER 1   /* <sys/stream.h> needs this for queue_t */
 #   endif
@@ -73,18 +73,18 @@
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
-#if HAVE_NETINET_IP_VAR_H
+#ifdef HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
 #ifdef NETSNMP_ENABLE_IPV6
-#if HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
+#ifdef HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
 #include <netinet6/ip6_var.h>
 #endif
 #endif
-#if HAVE_NETINET_IN_PCB_H
+#ifdef HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
-#if HAVE_INET_MIB2_H
+#ifdef HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
 

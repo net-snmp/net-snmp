@@ -4945,7 +4945,7 @@ print_tree_node(u_char ** buf, size_t * buf_len,
             cp = NULL;
             break;
         }
-#if NETSNMP_ENABLE_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         if (!cp && (tp->ranges || tp->enums)) { /* ranges without type ? */
             snprintf(str, sizeof(str), "?0 with %s %s ?",
                     tp->ranges ? "Range" : "", tp->enums ? "Enum" : "");
@@ -5097,7 +5097,7 @@ print_tree_node(u_char ** buf, size_t * buf_len,
             snprintf(str, sizeof(str), "status_%d", tp->status);
             cp = str;
         }
-#if NETSNMP_ENABLE_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         if (!cp && (tp->indexes)) {     /* index without status ? */
             snprintf(str, sizeof(str), "?0 with %s ?",
                      tp->indexes ? "Index" : "");

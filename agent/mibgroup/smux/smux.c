@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <ctype.h>
 
-#if HAVE_IO_H                   /* win32 */
+#ifdef HAVE_IO_H
 #include <io.h>
 #endif
 #include <stdio.h>
@@ -45,7 +45,7 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_SYS_FILIO_H
+#ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
 

@@ -17,7 +17,7 @@
 #include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
-#if HAVE_IO_H
+#ifdef HAVE_IO_H
 #include <io.h>
 #endif
 #ifdef HAVE_SPAWN_H
@@ -78,11 +78,11 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_BASETSD_H
+#ifdef HAVE_BASETSD_H
 #include <basetsd.h>
 #define ssize_t SSIZE_T
 #endif
-#if HAVE_RAISE
+#ifdef HAVE_RAISE
 #define alarm raise
 #endif
 #ifdef HAVE_SYS_STAT_H

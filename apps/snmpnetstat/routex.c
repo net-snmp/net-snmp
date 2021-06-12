@@ -64,7 +64,7 @@ netsnmp_feature_require(sockaddr_size);
 
 #include "main.h"
 #include "netstat.h"
-#if HAVE_WINSOCK_H
+#ifdef HAVE_WINSOCK_H
 #include "winstub.h"
 #endif
 

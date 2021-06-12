@@ -45,7 +45,7 @@
 #include <signal.h>
 #include <errno.h>
 
-#if HAVE_LM_H
+#ifdef HAVE_LM_H
 #include <lm.h>
 #endif
 

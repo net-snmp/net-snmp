@@ -35,7 +35,7 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_KVM_H
+#ifdef HAVE_KVM_H
 #include <kvm.h>
 #endif
 
