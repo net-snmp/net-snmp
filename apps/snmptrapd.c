@@ -424,7 +424,7 @@ parse_config_agentuser(const char *token, char *cptr)
         if (*ecp != 0) {
             config_perror("Bad number");
 	} else {
-	    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+	    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_USERID, uid);
 	}
 #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
@@ -433,7 +433,7 @@ parse_config_agentuser(const char *token, char *cptr)
 
         info = getpwnam(cptr);
         if (info)
-            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_USERID, info->pw_uid);
         else
             config_perror("User not found in passwd database");
@@ -452,7 +452,7 @@ parse_config_agentgroup(const char *token, char *cptr)
         if (*ecp != 0) {
             config_perror("Bad number");
 	} else {
-            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_GROUPID, gid);
 	}
 #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
@@ -461,7 +461,7 @@ parse_config_agentgroup(const char *token, char *cptr)
 
         info = getgrnam(cptr);
         if (info)
-            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
         else
             config_perror("Group not found in group database");
@@ -670,7 +670,7 @@ main(int argc, char *argv[])
     register_config_handler("snmptrapd", "agentgroup",
                             parse_config_agentgroup, NULL, "groupid");
 #endif
-    
+
     register_config_handler("snmptrapd", "doNotFork",
                             parse_config_doNotFork, NULL, "(1|yes|true|0|no|false)");
 
