@@ -1513,12 +1513,10 @@ asn_parse_objid(u_char * data,
                 return NULL;
             }
         }
-#if defined(EIGHTBIT_SUBIDS) || (SIZEOF_LONG != 4)
         if (subidentifier > MAX_SUBID) {
             ERROR_MSG("subidentifier too large");
             return NULL;
         }
-#endif
         *oidp++ = (oid) subidentifier;
     }
 
