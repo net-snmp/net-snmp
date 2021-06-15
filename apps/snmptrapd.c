@@ -37,16 +37,16 @@ SOFTWARE.
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <stdio.h>
@@ -58,25 +58,25 @@ SOFTWARE.
 #else
 # include <time.h>
 #endif
-#if HAVE_SYS_SELECT_H
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#if HAVE_SYSLOG_H
+#ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
-#if HAVE_SYS_IOCTL_H
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#if HAVE_NET_IF_H
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif
-#if HAVE_NETDB_H
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #if HAVE_FCNTL_H
@@ -85,10 +85,10 @@ SOFTWARE.
 #ifdef HAVE_PROCESS_H
 #include <process.h>
 #endif
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
-#if HAVE_GRP_H
+#ifdef HAVE_GRP_H
 #include <grp.h>
 #endif
 #include <signal.h>
@@ -716,7 +716,7 @@ main(int argc, char *argv[])
                 char *ecp;
 
                 gid = strtoul(optarg, &ecp, 10);
-#if HAVE_GETGRNAM && HAVE_PWD_H
+#if defined(HAVE_GETGRNAM) && defined(HAVE_PWD_H)
                 if (*ecp) {
                     struct group  *info;
 
@@ -846,7 +846,7 @@ main(int argc, char *argv[])
                 char           *ecp;
 
                 uid = strtoul(optarg, &ecp, 10);
-#if HAVE_GETPWNAM && HAVE_PWD_H
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
                 if (*ecp) {
                     struct passwd  *info;
 

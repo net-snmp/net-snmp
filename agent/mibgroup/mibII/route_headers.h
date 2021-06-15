@@ -36,7 +36,7 @@
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #if TIME_WITH_SYS_TIME
@@ -49,16 +49,16 @@
 #  include <time.h>
 # endif
 #endif
-#if HAVE_SYS_SELECT_H
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#if HAVE_SYSLOG_H
+#ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
 #ifdef HAVE_MACHINE_PARAM_H
@@ -67,7 +67,7 @@
 #ifdef HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
-#if HAVE_NET_IF_H
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif
 #ifdef HAVE_NET_IF_VAR_H
@@ -83,7 +83,7 @@
 #ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
-#if HAVE_NET_ROUTE_H
+#ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
 #undef	KERNEL
@@ -145,7 +145,7 @@
 #endif
 #endif
 
-#if HAVE_NLIST_H
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
 #endif
 

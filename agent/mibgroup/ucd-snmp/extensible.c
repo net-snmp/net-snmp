@@ -38,7 +38,7 @@
 #ifdef HAVE_ASM_PAGE_H
 #include <asm/page.h>
 #endif
-#if HAVE_SYS_SWAP_H
+#ifdef HAVE_SYS_SWAP_H
 #include <sys/swap.h>
 #endif
 #ifdef HAVE_SYS_FS_H
@@ -60,16 +60,16 @@
 #endif
 #include <sys/stat.h>
 #include <errno.h>
-#if HAVE_FSTAB_H
+#ifdef HAVE_FSTAB_H
 #include <fstab.h>
 #endif
-#if HAVE_SYS_STATFS_H
+#ifdef HAVE_SYS_STATFS_H
 #include <sys/statfs.h>
 #endif
-#if HAVE_SYS_STATVFS_H
+#ifdef HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
-#if HAVE_SYS_VFS_H
+#ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
 #if (!defined(HAVE_STATVFS)) && defined(HAVE_STATFS)

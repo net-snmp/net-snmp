@@ -17,7 +17,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include "mibII_common.h"
 
-#if HAVE_NETINET_UDP_H
+#ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
 #ifdef HAVE_NETINET_UDP_VAR_H
@@ -326,7 +326,7 @@ udpTable_next_entry( void **loop_context,
     int i = (intptr_t)*loop_context;
     long port;
 
-#if HAVE_KVM_GETFILES
+#ifdef HAVE_KVM_GETFILES
     while (i < udp_size && (udp_head[i].so_protocol != IPPROTO_UDP
 	    || udp_head[i].so_family != AF_INET))
 	i++;
@@ -553,7 +553,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     return 0;
 }
 
-#elif HAVE_KVM_GETFILES
+#elif defined(HAVE_KVM_GETFILES)
 
 int
 udpTable_load(netsnmp_cache *cache, void *vmagic)

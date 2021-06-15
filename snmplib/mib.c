@@ -69,7 +69,7 @@ SOFTWARE.
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if TIME_WITH_SYS_TIME
@@ -90,7 +90,7 @@ SOFTWARE.
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if HAVE_SYS_SELECT_H
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 

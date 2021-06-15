@@ -43,7 +43,7 @@
 #  include <ndir.h>
 # endif
 #endif
-#if HAVE_SYS_IOCTL_H
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
 
@@ -53,7 +53,7 @@
 #ifdef HAVE_SYS_DISKIO_H           /* HP-UX only ? */
 #include <sys/diskio.h>
 #endif
-#if HAVE_LINUX_HDREG_H
+#ifdef HAVE_LINUX_HDREG_H
 #include <linux/hdreg.h>
 #endif
 #ifdef HAVE_SYS_DISKLABEL_H

@@ -21,10 +21,10 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_SYS_UN_H
+#ifdef HAVE_SYS_UN_H
 #include <sys/un.h>
 #endif
 #ifdef HAVE_IO_H

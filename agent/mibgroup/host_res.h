@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #endif
 #include <sys/types.h>
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
@@ -21,10 +21,10 @@
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_NET_IF_H
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif
 #ifdef _I_DEFINED_KERNEL

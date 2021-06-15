@@ -45,7 +45,7 @@ SOFTWARE.
 #else
 #include <strings.h>
 #endif
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #ifdef HAVE_SYS_SELECT_H

@@ -26,7 +26,7 @@
 #include "hr_filesys.h"
 #include <net-snmp/utilities.h>
 
-#if HAVE_MNTENT_H
+#ifdef HAVE_MNTENT_H
 #include <mntent.h>
 #endif
 #ifdef HAVE_SYS_MNTENT_H
@@ -35,10 +35,10 @@
 #ifdef HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
-#if HAVE_SYS_STATVFS_H
+#ifdef HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
-#if HAVE_SYS_VFS_H
+#ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
 #ifdef HAVE_SYS_PARAM_H

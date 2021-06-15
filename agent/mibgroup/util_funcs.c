@@ -36,7 +36,7 @@
 #define _myBSD
 #endif
 #endif
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 # include <sys/wait.h>
 #endif
 #ifdef __alpha
@@ -75,7 +75,7 @@
 #include <strings.h>
 #endif
 #include <ctype.h>
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #ifdef HAVE_BASETSD_H
@@ -261,7 +261,7 @@ get_exec_output(struct extensible *ex)
     ex->result = -1;
     NETSNMP_LOGONCE((LOG_WARNING, "support for run_exec_command not available\n"));
 #else
-#if HAVE_EXECV
+#ifdef HAVE_EXECV
     char            cachefile[STRMAX];
     char            cache[NETSNMP_MAXCACHESIZE];
     int             cachebytes;

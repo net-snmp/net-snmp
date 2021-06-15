@@ -81,17 +81,17 @@ SOFTWARE.
 
 #include <sys/types.h>
 
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_NET_IF_H
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif
-#if HAVE_NETDB_H
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
 
@@ -100,7 +100,7 @@ SOFTWARE.
 #include <sys/sockio.h>
 #endif
 
-#if HAVE_SYS_IOCTL_H
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
 
@@ -145,7 +145,7 @@ SOFTWARE.
 #include <sys/pstat.h>
 #endif
 
-#if HAVE_SYS_UTSNAME_H
+#ifdef HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
 #endif
 
@@ -165,10 +165,10 @@ SOFTWARE.
 #include <mach-o/dyld.h>
 #endif
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
-#if HAVE_GRP_H
+#ifdef HAVE_GRP_H
 #include <grp.h>
 #endif
 
@@ -176,7 +176,7 @@ SOFTWARE.
 #include <limits.h>
 #endif
 
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -993,7 +993,7 @@ netsnmp_gethostbyname(const char *name)
 struct hostent *
 netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
 {
-#if HAVE_GETHOSTBYADDR
+#ifdef HAVE_GETHOSTBYADDR
     struct hostent *hp = NULL;
     char buf[64];
 
@@ -1356,7 +1356,7 @@ int
 netsnmp_os_prematch(const char *ospmname,
                     const char *ospmrelprefix)
 {
-#if HAVE_SYS_UTSNAME_H
+#ifdef HAVE_SYS_UTSNAME_H
   static int printOSonce = 1;
   struct utsname utsbuf;
   if ( 0 > uname(&utsbuf))
@@ -1422,14 +1422,14 @@ netsnmp_feature_child_of(str_to_uid, user_information);
  */
 int netsnmp_str_to_uid(const char *useroruid) {
     int uid;
-#if HAVE_GETPWNAM && HAVE_PWD_H
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
     struct passwd *pwd;
 #endif
 
     uid = atoi(useroruid);
 
     if (uid == 0) {
-#if HAVE_GETPWNAM && HAVE_PWD_H
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
         pwd = getpwnam(useroruid);
         uid = pwd ? pwd->pw_uid : 0;
         endpwent();
@@ -1460,7 +1460,7 @@ int netsnmp_str_to_gid(const char *grouporgid)
     gid = atoi(grouporgid);
 
     if (gid == 0) {
-#if HAVE_GETGRNAM && HAVE_GRP_H
+#if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
         struct group  *grp;
 
         grp = getgrnam(grouporgid);
