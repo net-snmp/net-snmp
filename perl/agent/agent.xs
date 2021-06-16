@@ -3,6 +3,8 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include <float.h>
+#include <math.h>
 #include <netdb.h>
 #include <sys/socket.h>
 
@@ -635,7 +637,7 @@ nari_setValue(me, type, value)
 		  /* Might be ok - got a double that might be an actual integer */
 		  dtmp = SvNVX(value);
 		  ltmp = SvIV(value);
-		  if (dtmp != ltmp) {
+		  if (fabs(dtmp - ltmp) > fabs(NV_EPSILON * dtmp)) {
 			snmp_log(LOG_ERR, "Could not convert double to integer in setValue: '%.20g'\n", dtmp);
 			RETVAL = 0;
 			break;
@@ -685,7 +687,7 @@ nari_setValue(me, type, value)
 		  /* Might be ok - got a double that might be an actual unsigned */
 		  dtmp = SvNVX(value);
 		  utmp = SvIV(value);
-		  if (dtmp != utmp) {
+		  if (fabs(dtmp - utmp) > fabs(NV_EPSILON * dtmp)) {
 			snmp_log(LOG_ERR, "Could not convert double to unsigned in setValue: '%.20g'\n", dtmp);
 			RETVAL = 0;
 			break;
@@ -728,7 +730,7 @@ nari_setValue(me, type, value)
 		  /* Might be ok - got a double that might be an actual unsigned */
 		  dtmp = SvNVX(value);
 		  ulltmp = SvIV(value);
-		  if (dtmp != ulltmp) {
+		  if (fabs(dtmp - ulltmp) > fabs(NV_EPSILON * dtmp)) {
 			snmp_log(LOG_ERR, "Could not convert double to unsigned in setValue: '%.20g'\n", dtmp);
 			RETVAL = 0;
 			break;
