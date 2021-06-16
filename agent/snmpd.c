@@ -1169,7 +1169,7 @@ receive(void)
     int             numfds;
     netsnmp_large_fd_set readfds, writefds, exceptfds;
     struct timeval  timeout, *tvp = &timeout;
-    int             count, block, i, ret;
+    int             count, block, i;
 #ifdef	USING_SMUX_MODULE
     int             sd;
 #endif                          /* USING_SMUX_MODULE */
@@ -1194,6 +1194,7 @@ receive(void)
         if (reconfig) {
 #if HAVE_SIGPROCMASK
             sigset_t set;
+            int ret;
 
             sigemptyset(&set);
             sigaddset(&set, SIGHUP);
