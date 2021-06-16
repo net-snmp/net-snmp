@@ -2995,7 +2995,7 @@ set_function(struct tree *subtree)
  * When called, out_len must hold the maximum length of the output array.
  *
  * @param input     the input string.
- * @param output    the oid wirte.
+ * @param output    the oid write.
  * @param out_len   number of subid's in output.
  * 
  * @return 1 if successful.
@@ -3006,7 +3006,7 @@ set_function(struct tree *subtree)
  */
 int
 read_objid(const char *input, oid * output, size_t * out_len)
-{                               /* number of subid's in "output" */
+{
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     struct tree    *root = tree_top;
     char            buf[SPRINT_MAX_LEN];

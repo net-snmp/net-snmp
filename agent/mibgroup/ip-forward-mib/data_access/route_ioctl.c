@@ -114,6 +114,7 @@ int _netsnmp_ioctl_route_set_v4(netsnmp_route_entry * entry)
     DEBUGSTR = inet_ntoa(gateway.sin_addr);
     DEBUGMSGTL(("access:route","    via %s\n", DEBUGSTR));
 
+    memset(&mask, 0, sizeof(mask));
     mask.sin_family = AF_INET;
     if (entry->rt_pfx_len != 0)
 	mask.sin_addr.s_addr = netsnmp_ipaddress_ipv4_mask(entry->rt_pfx_len);
