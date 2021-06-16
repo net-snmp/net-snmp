@@ -636,7 +636,7 @@ nari_setValue(me, type, value)
 		  dtmp = SvNVX(value);
 		  ltmp = SvIV(value);
 		  if (dtmp != ltmp) {
-			snmp_log(LOG_ERR, "Could not convert double to integer in setValue: '%f'", dtmp);
+			snmp_log(LOG_ERR, "Could not convert double to integer in setValue: '%f'\n", dtmp);
 			RETVAL = 0;
 			break;
 		  }
@@ -650,7 +650,7 @@ nari_setValue(me, type, value)
 	          stringptr = SvPV(value, stringlen);
 		  ltmp = strtol( stringptr, NULL, 0 );
 		  if (errno == EINVAL) {
-		  	snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
+			snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'\n", stringptr);
 			RETVAL = 0;
 			break;
 		  }
@@ -686,7 +686,7 @@ nari_setValue(me, type, value)
 		  dtmp = SvNVX(value);
 		  utmp = SvIV(value);
 		  if (dtmp != utmp) {
-			snmp_log(LOG_ERR, "Could not convert double to unsigned in setValue: '%f'", dtmp);
+			snmp_log(LOG_ERR, "Could not convert double to unsigned in setValue: '%f'\n", dtmp);
 			RETVAL = 0;
 			break;
 		  }
@@ -700,7 +700,7 @@ nari_setValue(me, type, value)
 	          stringptr = SvPV(value, stringlen);
 		  utmp = strtoul( stringptr, NULL, 0 );
 		  if (errno == EINVAL) {
-		  	snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
+			snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'\n", stringptr);
 			RETVAL = 0;
 			break;
 		  }
@@ -729,7 +729,7 @@ nari_setValue(me, type, value)
 		  dtmp = SvNVX(value);
 		  ulltmp = SvIV(value);
 		  if (dtmp != ulltmp) {
-			snmp_log(LOG_ERR, "Could not convert double to unsigned in setValue: '%f'", dtmp);
+			snmp_log(LOG_ERR, "Could not convert double to unsigned in setValue: '%f'\n", dtmp);
 			RETVAL = 0;
 			break;
 		  }
@@ -744,7 +744,7 @@ nari_setValue(me, type, value)
 	          errno = 0;
 		  ulltmp = strtoull( stringptr, NULL, 0 );
 		  if (errno != 0) {
-		      snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
+		      snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'\n", stringptr);
 		      RETVAL = 0;
 		  } else
 
