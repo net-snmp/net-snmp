@@ -37,24 +37,24 @@
 #  include <time.h>
 # endif
 #endif
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_NETINET_IN_SYSTM_H
+#ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
-#if HAVE_NETINET_IP_H
+#ifdef HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
 #ifdef NETSNMP_ENABLE_IPV6
-#if HAVE_NETINET_IP6_H
+#ifdef HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
 #endif
-#if HAVE_SYS_QUEUE_H
+#ifdef HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #if HAVE_SYS_SOCKETVAR_H
 #ifndef dynix
@@ -70,7 +70,7 @@
 #   endif
 #include <sys/stream.h>
 #endif
-#if HAVE_NET_ROUTE_H
+#ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
 #ifdef HAVE_NETINET_IP_VAR_H

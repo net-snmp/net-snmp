@@ -56,10 +56,10 @@
 #include <unistd.h>
 #endif
 #include <sys/types.h>
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #if TIME_WITH_SYS_TIME
@@ -72,19 +72,19 @@
 #  include <time.h>
 # endif
 #endif
-#if HAVE_SYS_SELECT_H
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_NET_IF_H
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif
 #ifdef HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-#if HAVE_SYS_IOCTL_H
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
 #if HAVE_SYS_FILE_H
@@ -93,7 +93,7 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
 #include <signal.h>
@@ -106,10 +106,10 @@
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
-#if HAVE_GRP_H
+#ifdef HAVE_GRP_H
 #include <grp.h>
 #endif
 #ifdef HAVE_CRTDBG_H
@@ -555,7 +555,7 @@ main(int argc, char *argv[])
                 int             gid;
 
                 gid = strtoul(optarg, &ecp, 10);
-#if HAVE_GETGRNAM && HAVE_PWD_H
+#if defined(HAVE_GETGRNAM) && defined(HAVE_PWD_H)
                 if (*ecp) {
                     struct group  *info;
 
@@ -733,7 +733,7 @@ main(int argc, char *argv[])
                 int             uid;
 
                 uid = strtoul(optarg, &ecp, 10);
-#if HAVE_GETPWNAM && HAVE_PWD_H
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
                 if (*ecp) {
                     struct passwd  *info;
 
@@ -1169,7 +1169,7 @@ receive(void)
     int             numfds;
     netsnmp_large_fd_set readfds, writefds, exceptfds;
     struct timeval  timeout, *tvp = &timeout;
-    int             count, block, i, ret;
+    int             count, block, i;
 #ifdef	USING_SMUX_MODULE
     int             sd;
 #endif                          /* USING_SMUX_MODULE */
@@ -1192,8 +1192,9 @@ receive(void)
      */
     while (netsnmp_running) {
         if (reconfig) {
-#if HAVE_SIGPROCMASK
+#ifdef HAVE_SIGPROCMASK
             sigset_t set;
+            int ret;
 
             sigemptyset(&set);
             sigaddset(&set, SIGHUP);
@@ -1209,7 +1210,7 @@ receive(void)
 		     netsnmp_get_version());
             update_config();
             send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
-#if HAVE_SIGPROCMASK
+#ifdef HAVE_SIGPROCMASK
             ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
             netsnmp_assert(ret == 0);
 #endif

@@ -16,7 +16,7 @@
 #include <sys/param.h>
 #endif
 
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #ifdef HAVE_SYS_SYSMP_H
@@ -29,10 +29,10 @@
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_NET_IF_H
+#ifdef HAVE_NET_IF_H
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
@@ -54,22 +54,22 @@
 #ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
-#if HAVE_NET_ROUTE_H
+#ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
-#if HAVE_NETINET_IN_SYSTM_H
+#ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
-#if HAVE_NETINET_IP_H
+#ifdef HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
-#if HAVE_SYS_QUEUE_H
+#ifdef HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
 /* IRIX 6.5 build breaks on sys/socketvar.h because _KMEMUSER brings in 
    sys/pda.h which doesn't compile */
 #ifndef irix6
-#if HAVE_SYS_SOCKETVAR_H
+#ifdef HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
 #endif
 #endif  /* irix6 */

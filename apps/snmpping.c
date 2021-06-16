@@ -45,15 +45,15 @@
 
 #include <ctype.h>
 
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
 #include <sys/types.h>
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_NETDB_H
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #if HAVE_UNISTD_H

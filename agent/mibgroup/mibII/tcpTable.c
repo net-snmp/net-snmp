@@ -18,7 +18,7 @@
 #include <net-snmp/net-snmp-features.h>
 #include "mibII_common.h"
 
-#if HAVE_NETINET_TCP_H
+#ifdef HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
 #ifdef HAVE_NETINET_TCP_TIMER_H
@@ -30,7 +30,7 @@
 #ifdef HAVE_NETINET_TCP_VAR_H
 #include <netinet/tcp_var.h>
 #endif
-#if HAVE_NETLINK_NETLINK_H
+#ifdef HAVE_NETLINK_NETLINK_H
 #include <netlink/netlink.h>
 #include <netlink/msg.h>
 #include <linux/inet_diag.h>
@@ -381,7 +381,7 @@ tcpTable_next_entry( void **loop_context,
     netsnmp_variable_list *idx;
     long port;
 
-#if HAVE_KVM_GETFILES
+#ifdef HAVE_KVM_GETFILES
     while (i < tcp_size && (tcp_head[i].so_protocol != IPPROTO_TCP
 	    || tcp_head[i].so_family != AF_INET))
 	i++;
@@ -868,7 +868,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     return -1;
 }
 
-#elif HAVE_KVM_GETFILES
+#elif defined(HAVE_KVM_GETFILES)
 
 int
 tcpTable_load(netsnmp_cache *cache, void *vmagic)

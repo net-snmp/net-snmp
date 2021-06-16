@@ -16,9 +16,9 @@
 #include "if-mib/ifTable/ifTable.h"
 #include "if-mib/data_access/interface.h"
 #include "interface_private.h"
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE_H)
 #include <pcre.h>
-#elif HAVE_REGEX_H
+#elif defined(HAVE_REGEX_H)
 #include <sys/types.h>
 #include <regex.h>
 #endif
@@ -856,11 +856,11 @@ int netsnmp_access_interface_include(const char *name)
 
 
     for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE_H)
         if (pcre_exec(if_ptr->regex_ptr, NULL, name, strlen(name), 0, 0,
                       found_ndx, 3) >= 0)
             return TRUE;
-#elif HAVE_REGEX_H
+#elif defined(HAVE_REGEX_H)
         if (regexec(if_ptr->regex_ptr, name, 0, NULL, 0) == 0)
             return TRUE;
 #else
@@ -980,10 +980,10 @@ _parse_include_if_config(const char *token, char *cptr)
 {
     netsnmp_include_if_list *if_ptr, *if_new;
     char                    *name, *st;
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE_H)
     const char              *pcre_error;
     int                     pcre_error_offset;
-#elif HAVE_REGEX_H
+#elif defined(HAVE_REGEX_H)
     int                     r = 0;
 #endif
 
@@ -1012,14 +1012,14 @@ _parse_include_if_config(const char *token, char *cptr)
             config_perror("Out of memory");
             goto err;
         }
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE_H)
         if_new->regex_ptr = pcre_compile(if_new->name, 0,  &pcre_error,
                                          &pcre_error_offset, NULL);
         if (!if_new->regex_ptr) {
             config_perror(pcre_error);
             goto err;
         }
-#elif HAVE_REGEX_H
+#elif defined(HAVE_REGEX_H)
         if_new->regex_ptr = malloc(sizeof(regex_t));
         if (!if_new->regex_ptr) {
             config_perror("Out of memory");
@@ -1063,9 +1063,9 @@ _free_include_if_config(void)
 
     while (if_ptr) {
         if_next = if_ptr->next;
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE_H)
         free(if_ptr->regex_ptr);
-#elif HAVE_REGEX_H
+#elif defined(HAVE_REGEX_H)
         regfree(if_ptr->regex_ptr);
         free(if_ptr->regex_ptr);
 #endif

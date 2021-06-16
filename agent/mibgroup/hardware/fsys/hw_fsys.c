@@ -1,3 +1,4 @@
+#define __USE_MINGW_ANSI_STDIO 0
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>

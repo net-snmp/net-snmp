@@ -18,7 +18,7 @@
 #ifdef HAVE_SYS_PROTOSW_H
 #include <sys/protosw.h>
 #endif
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -31,7 +31,7 @@
 #undef TCP_NODELAY
 #undef TCP_MAXSEG
 #endif
-#if HAVE_NETINET_TCP_H
+#ifdef HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
 #ifdef HAVE_NETINET_TCPIP_H

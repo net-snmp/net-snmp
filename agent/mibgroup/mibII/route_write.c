@@ -17,13 +17,13 @@
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
-#if HAVE_SYS_IOCTL_H
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
 #ifdef HAVE_SYS_MBUF_H
@@ -34,16 +34,16 @@
 #ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
-#if HAVE_NET_ROUTE_H
+#ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#if HAVE_NETDB_H
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
 

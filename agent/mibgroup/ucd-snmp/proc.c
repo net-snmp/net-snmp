@@ -26,7 +26,7 @@
 #include <math.h>
 #include <ctype.h>
 #include <sys/types.h>
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if TIME_WITH_SYS_TIME
