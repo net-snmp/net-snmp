@@ -94,48 +94,45 @@ while (1) {
     $openssllibdir =~ s/\\/\//g;
     $openssllibdir = $default_openssllibdir if ($openssllibdir eq "");
   }
-  elsif ($option eq "4") {
-    $sdk = !$sdk;
-  }
-  elsif ($option eq "11") {
+  elsif ($option eq "10") {
     $b_ipv6 = !$b_ipv6;
     if ($b_ipv6 && !$sdk) {
       print "\n\n* SDK required for IPv6 and has been automatically enabled";
       $sdk = true;
     }
   }
-  elsif ($option eq "12") {
+  elsif ($option eq "11") {
     $b_winextdll = !$b_winextdll;
     if ($b_winextdll && !$sdk) {
       print "\n\n* SDK required for IPv6 and has been automatically enabled";
       $sdk = true;
     }
   }
-  elsif ($option eq "5") {
+  elsif ($option eq "4") {
     print "Please enter the new install path [$default_install_base]: ";
     chomp ($install_base = <>);
     $install_base =~ s/\\/\//g;
     $install_base = $default_install_base if ($install_base eq "");
   }
-  elsif ($option eq "6") {
+  elsif ($option eq "5") {
     $install = !$install;
   }
-  elsif ($option eq "14") {
+  elsif ($option eq "13") {
     $install_devel = !$install_devel;
   }
-  elsif ($option eq "7") {
+  elsif ($option eq "6") {
     $perl = !$perl;
   }
-  elsif ($option eq "8") {
+  elsif ($option eq "7") {
     $perl_install = !$perl_install;
   }
-  elsif ($option eq "9") {
+  elsif ($option eq "8") {
     $logging = !$logging;
   }
-  elsif ($option eq "10") {
+  elsif ($option eq "9") {
     $debug = !$debug;
   }
-  elsif ($option eq "13") {
+  elsif ($option eq "12") {
     $link_dynamic = !$link_dynamic;
   }
   elsif (lc($option) eq "f") {
