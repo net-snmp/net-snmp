@@ -768,48 +768,6 @@ netsnmp_validator_context(void)
 }
 #endif /* DNSSEC_LOCAL_VALIDATION */
 
-#if (defined(_MSC_VER) || defined(__MINGW32__)) && !defined(HAVE_GETADDRINFO)
-static int getaddrinfo_wrapper(const char *nodename, const char *servname,
-                       const struct addrinfo *hints, struct addrinfo **res)
-{
-    typedef int (WSAAPI * pf_getaddrinfo)
-        (const char *pNodeName, const char *pServiceName,
-         const struct addrinfo *pHints, struct addrinfo **ppResult);
-    pf_getaddrinfo getaddrinfo_ptr;
-
-    getaddrinfo_ptr = (pf_getaddrinfo)(uintptr_t)
-        GetProcAddress(GetModuleHandle("ws2_32"), "getaddrinfo");
-    if (getaddrinfo_ptr)
-        return getaddrinfo_ptr(nodename, servname, hints, res);
-    /* For Windows 7 and older, fall back to gethostbyname(). */
-    {
-        struct hostent *hp = gethostbyname(nodename);
-        struct addrinfo result;
-
-        if (!hp ||
-            (hints && hints->ai_family && hp->h_addrtype != hints->ai_family))
-            return EAI_FAIL;
-        memset(&result, 0, sizeof(result));
-        result.ai_family = hp->h_addrtype;
-        result.ai_addr = (void *)hp->h_addr_list[0];
-        switch (hp->h_addrtype) {
-        case AF_INET:
-            result.ai_addrlen = sizeof(struct sockaddr_in);
-            break;
-        case AF_INET6:
-            result.ai_addrlen = sizeof(struct sockaddr_in6);
-            break;
-        default:
-            return EAI_FAIL;
-        }
-        *res = netsnmp_memdup(&result, sizeof(result));
-        return *res ? 0 : EAI_MEMORY;
-    }
-}
-#define HAVE_GETADDRINFO 1
-#define getaddrinfo getaddrinfo_wrapper
-#endif
-
 int
 netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 {
