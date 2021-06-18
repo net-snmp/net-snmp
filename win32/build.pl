@@ -21,7 +21,7 @@ if ($target_arch ne "x86" && $target_arch ne "x64") {
 my @perl_arch = split(/-/, $Config{archname});
 my $openssl = false;
 my $default_openssldir = $target_arch eq "x64" ?
-    "C:\\OpenSSL-Win64" : "C:\\OpenSSL-Win32";
+    "C:\\Progra~1\\OpenSSL-Win64" : "C:\\Progra~1\\OpenSSL-Win32";
 my $default_opensslincdir = $default_openssldir . "\\include";
 my $opensslincdir = $default_opensslincdir;
 my $default_openssllibdir = $default_openssldir . "\\lib\\VC";
@@ -66,10 +66,10 @@ while (1) {
   print "7.  Install perl modules:           " . ($perl_install ? "enabled" : "disabled") . "\n";
   print "\n";
   print "8.  Quiet build (logged):           " . ($logging ? "enabled" : "disabled") . "\n";
-  print "9. Debug mode:                     " . ($debug ? "enabled" : "disabled") . "\n";
+  print "9.  Debug mode:                     " . ($debug ? "enabled" : "disabled") . "\n";
   print "\n";
-  print "10. IPv6 transports (requires SDK): " . ($b_ipv6 ? "enabled" : "disabled") . "\n";
-  print "11. winExtDLL agent (requires SDK): " . ($b_winextdll ? "enabled" : "disabled") . "\n";
+  print "10. IPv6 transports:                " . ($b_ipv6 ? "enabled" : "disabled") . "\n";
+  print "11. winExtDLL agent:                " . ($b_winextdll ? "enabled" : "disabled") . "\n";
   print "\n";
   print "12. Link type:                      " . ($link_dynamic ? "dynamic" : "static") . "\n";
   print "\n";
