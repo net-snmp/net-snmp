@@ -768,48 +768,6 @@ netsnmp_validator_context(void)
 }
 #endif /* DNSSEC_LOCAL_VALIDATION */
 
-#if (defined(_MSC_VER) || defined(__MINGW32__)) && !defined(HAVE_GETADDRINFO)
-static int getaddrinfo_wrapper(const char *nodename, const char *servname,
-                       const struct addrinfo *hints, struct addrinfo **res)
-{
-    typedef int (WSAAPI * pf_getaddrinfo)
-        (const char *pNodeName, const char *pServiceName,
-         const struct addrinfo *pHints, struct addrinfo **ppResult);
-    pf_getaddrinfo getaddrinfo_ptr;
-
-    getaddrinfo_ptr = (pf_getaddrinfo)(uintptr_t)
-        GetProcAddress(GetModuleHandle("ws2_32"), "getaddrinfo");
-    if (getaddrinfo_ptr)
-        return getaddrinfo_ptr(nodename, servname, hints, res);
-    /* For Windows 7 and older, fall back to gethostbyname(). */
-    {
-        struct hostent *hp = gethostbyname(nodename);
-        struct addrinfo result;
-
-        if (!hp ||
-            (hints && hints->ai_family && hp->h_addrtype != hints->ai_family))
-            return EAI_FAIL;
-        memset(&result, 0, sizeof(result));
-        result.ai_family = hp->h_addrtype;
-        result.ai_addr = (void *)hp->h_addr_list[0];
-        switch (hp->h_addrtype) {
-        case AF_INET:
-            result.ai_addrlen = sizeof(struct sockaddr_in);
-            break;
-        case AF_INET6:
-            result.ai_addrlen = sizeof(struct sockaddr_in6);
-            break;
-        default:
-            return EAI_FAIL;
-        }
-        *res = netsnmp_memdup(&result, sizeof(result));
-        return *res ? 0 : EAI_MEMORY;
-    }
-}
-#define HAVE_GETADDRINFO 1
-#define getaddrinfo getaddrinfo_wrapper
-#endif
-
 int
 netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 {
@@ -901,7 +859,11 @@ netsnmp_getaddrinfo(const char *name, const char *service,
 	DEBUGMSG(("dns:getaddrinfo", ":\"%s\"", service));
 
     if (hints)
-	DEBUGMSG(("dns:getaddrinfo", " with hint ({ ... })"));
+	DEBUGMSG(("dns:getaddrinfo",
+                  " with hints ({.ai_flags = %#x, .ai_family = %s})",
+                  hints->ai_flags, hints->ai_family == 0 ? "0" :
+                  hints->ai_family == AF_INET ? "AF_INET" :
+                  hints->ai_family == AF_INET6 ? "AF_INET6" : "?"));
     else
 	DEBUGMSG(("dns:getaddrinfo", " with no hint"));
 
@@ -948,10 +910,34 @@ netsnmp_getaddrinfo(const char *name, const char *service,
 
 #endif /* DNSSEC_LOCAL_VALIDATION */
     *res = addrs;
-    if ((0 == err) && addrs && addrs->ai_addr) {
-        DEBUGMSGTL(("dns:getaddrinfo", "answer { AF_INET, %s:%hu }\n",
-                    inet_ntoa(((struct sockaddr_in*)addrs->ai_addr)->sin_addr),
-                    ntohs(((struct sockaddr_in*)addrs->ai_addr)->sin_port)));
+    DEBUGIF("dns:getaddrinfo") {
+        if (err == 0 && addrs && addrs->ai_addr) {
+            const char *fam = "?";
+            char dst[64] = "?";
+            uint16_t port = 0;
+
+            switch (addrs->ai_addr->sa_family) {
+            case AF_INET: {
+                struct sockaddr_in *sin = (struct sockaddr_in *)addrs->ai_addr;
+
+                fam = "AF_INET";
+                inet_ntop(AF_INET, &sin->sin_addr, dst, sizeof(dst));
+                port = ntohs(sin->sin_port);
+                break;
+            }
+            case AF_INET6: {
+                struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)
+                    addrs->ai_addr;
+
+                fam = "AF_INET6";
+                inet_ntop(AF_INET6, &sin6->sin6_addr, dst, sizeof(dst));
+                port = ntohs(sin6->sin6_port);
+                break;
+            }
+            }
+            DEBUGMSGTL(("dns:getaddrinfo", "answer { %s, %s:%hu }\n", fam, dst,
+                        port));
+        }
     }
     return err;
 #else

@@ -308,7 +308,7 @@ start_ping(netsnmp_session *ss, oid * index, size_t indexlen, char *pingDest)
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_flags = AI_CANONNAME;
-    status = netsnmp_getaddrinfo(pingDest, NULL, &hints, &dest);
+    status = getaddrinfo(pingDest, NULL, &hints, &dest);
     if (status != 0) {
         fprintf(stderr, "snmpping: %s: %s\n", pingDest, gai_strerror(status));
         return 1;
