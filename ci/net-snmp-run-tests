@@ -11,21 +11,25 @@ make -s &&
       cd testing &&
       if [ -e RUNFULLTESTS ] &&
 	     perl -e 'require TAP::Harness;' >/dev/null 2>&1; then
-          if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
-              for g in default snmpv3 unit-tests; do
-                  echo "==== Test group $g ===="
-	          ./RUNFULLTESTS -g $g || exit $?
-                  echo "==== End of test group $g ===="
-              done
-	  elif [ -n "${CIRRUS_CI}" ]; then
-              for g in default snmpv3 transports unit-tests; do
-                  echo "==== Test group $g ===="
-	          ./RUNFULLTESTS -g $g || exit $?
-                  echo "==== End of test group $g ===="
-              done
-          else
-	      ./RUNFULLTESTS -g all -e dtls -e tls
-          fi
+          case "$(uname)" in
+	      Darwin)
+		  for g in default snmpv3 unit-tests; do
+                      echo "==== Test group $g ===="
+	              ./RUNFULLTESTS -g $g || exit $?
+                      echo "==== End of test group $g ===="
+		  done
+		  ;;
+	      FreeBSD)
+		  for g in default snmpv3 transports unit-tests; do
+                      echo "==== Test group $g ===="
+	              ./RUNFULLTESTS -g $g || exit $?
+                      echo "==== End of test group $g ===="
+		  done
+		  ;;
+              *)
+		  ./RUNFULLTESTS -g all -e dtls -e tls
+		  ;;
+          esac
       else
 	  make -s test
       fi &&
