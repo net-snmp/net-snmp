@@ -1,4 +1,9 @@
 image:
+  - Ubuntu
+  - Ubuntu1604
+  - Ubuntu2004
+  # - macos
+  - macos-mojave
   - Visual Studio 2019
 
 environment:
@@ -17,10 +22,13 @@ artifacts:
 clone_depth: 5
 
 install:
-  - 'call "ci\openssl.bat"'
+  - cmd: 'ci\openssl.bat'
+  - sh:  'if [ $BUILD = MSVCDYNAMIC64 ]; then ci/before.sh; fi'
 
 build_script:
-  - 'call "ci\build.bat"'
+  - cmd: 'ci\build.bat'
+  - sh:  'if [ $BUILD = MSVCDYNAMIC64 ]; then ci/build.sh; fi'
 
 test_script:
-  - 'call "ci\test.bat"'
+  - cmd: 'ci\test.bat'
+  - sh:  'if [ $BUILD = MSVCDYNAMIC64 ]; then ci/test.sh; fi'
