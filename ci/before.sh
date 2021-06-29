@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Instead of relying on the hosts file provided by the CI host, replace it.
 # See also
@@ -7,8 +7,20 @@ sudo sh -c 'printf "127.0.0.1 ipv4-loopback\n::1 localhost ipv6-localhost ipv6-l
 
 case "$(uname)" in
     Linux)
-	sudo sh -c 'apt-get install -y python3-dev'
-	sudo sh -c 'apt-get install -y libmariadbclient-dev || sudo apt-get install -y libmariadb-client-lgpl-dev'
+	packages=(
+	    libatm1-dev
+	    libncurses5-dev
+	    libperl-dev
+	    libsensors-dev
+	    libsensors4-dev
+	    libssh2-1-dev
+	    libssl-dev
+	    python3-dev
+	)
+	for p in "${packages[@]}"; do
+	    sudo sh -c "apt-get install -y $p"
+	done
+	sudo sh -c 'apt-get install -y libmariadbclient-dev || sudo apt-get install -y libmariadb-client-lgpl-dev || sudo apt-get install -y libmysqlclient-dev'
 
 	# Add an IPv6 config - see the corresponding Travis issue
 	# https://github.com/travis-ci/travis-ci/issues/8361
