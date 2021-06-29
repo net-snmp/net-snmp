@@ -3,7 +3,7 @@ image:
   - Ubuntu1604
   - Ubuntu2004
   # - macos
-  - macos-mojave
+  # - macos-mojave
   - Visual Studio 2019
 
 environment:
