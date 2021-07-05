@@ -1150,6 +1150,32 @@ static void join_stdin_waiter_thread(void)
 }
 #endif
 
+static void
+snmpd_reconfig(void)
+{
+#ifdef HAVE_SIGPROCMASK
+    sigset_t set;
+    int ret;
+
+    sigemptyset(&set);
+    sigaddset(&set, SIGHUP);
+    ret = sigprocmask(SIG_BLOCK, &set, NULL);
+    netsnmp_assert(ret == 0);
+#endif
+    reconfig = 0;
+    snmp_log(LOG_INFO, "Reconfiguring daemon\n");
+    /* Stop and restart logging.  This allows logfiles to be rotated etc. */
+    netsnmp_logging_restart();
+    snmp_log(LOG_INFO, "NET-SNMP version %s restarted\n",
+             netsnmp_get_version());
+    update_config();
+    send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
+#ifdef HAVE_SIGPROCMASK
+    ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
+    netsnmp_assert(ret == 0);
+#endif
+}
+
 /*******************************************************************-o-******
  * receive
  *
@@ -1191,30 +1217,8 @@ receive(void)
      * Loop-forever: execute message handlers for sockets with data
      */
     while (netsnmp_running) {
-        if (reconfig) {
-#ifdef HAVE_SIGPROCMASK
-            sigset_t set;
-            int ret;
-
-            sigemptyset(&set);
-            sigaddset(&set, SIGHUP);
-            ret = sigprocmask(SIG_BLOCK, &set, NULL);
-            netsnmp_assert(ret == 0);
-#endif
-            reconfig = 0;
-            snmp_log(LOG_INFO, "Reconfiguring daemon\n");
-	    /*  Stop and restart logging.  This allows logfiles to be
-		rotated etc.  */
-	    netsnmp_logging_restart();
-	    snmp_log(LOG_INFO, "NET-SNMP version %s restarted\n",
-		     netsnmp_get_version());
-            update_config();
-            send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
-#ifdef HAVE_SIGPROCMASK
-            ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
-            netsnmp_assert(ret == 0);
-#endif
-        }
+        if (reconfig)
+            snmpd_reconfig();
 
         /*
          * default to sleeping for a really long time. INT_MAX
