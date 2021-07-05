@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -268,7 +268,30 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
         init_callbacks();
 
     _callback_lock(major,minor, "netsnmp_register_callback", 1);
-    
+	
+    //--------------------------------------------------------------------------
+    // Added check to prevent duplicate registrations of callbacks.
+    // Return SUCCESS if already registered, and free provided "arg"
+    // to prevent memory leaks.
+    for (scp = thecallbacks[major][minor]; scp != NULL; scp = scp->next)
+    {
+        if (scp->sc_callback == new_callback && scp->priority == priority)
+        {
+            if (arg != NULL)
+            {
+                if(scp->sc_client_arg != NULL && scp->sc_client_arg != arg)
+                    SNMP_FREE(scp->sc_client_arg);
+                scp->sc_client_arg = arg;
+            }
+            DEBUGMSGTL(("callback",
+             "Callback already registered (%d,%d) at %p with priority %d\n",
+              major, minor, scp, priority));
+            _callback_unlock(major, minor);
+            return SNMPERR_SUCCESS;
+        }
+    }
+    //--------------------------------------------------------------------------
+	
     if ((newscp = SNMP_MALLOC_STRUCT(snmp_gen_callback)) == NULL) {
         _callback_unlock(major,minor);
         return SNMPERR_GENERR;
