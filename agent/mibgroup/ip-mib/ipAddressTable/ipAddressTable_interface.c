@@ -1988,11 +1988,8 @@ _container_free(netsnmp_container *container)
 {
     DEBUGMSGTL(("internal:ipAddressTable:_container_free", "called\n"));
 
-    if (NULL == container) {
-        snmp_log(LOG_ERR,
-                 "invalid container in ipAddressTable_container_free\n");
+    if (!container)
         return;
-    }
 
     /*
      * call user code

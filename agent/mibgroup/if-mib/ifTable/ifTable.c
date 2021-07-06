@@ -59,7 +59,7 @@ _if_number_handler(netsnmp_mib_handler *handler,
 
 
 /**
- * Initializes the ifTable module. Called after the snmpd configuration has
+ * Initializes the ifTable module. Called before the snmpd configuration has
  * been read.
  */
 static int

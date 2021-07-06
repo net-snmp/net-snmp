@@ -195,13 +195,6 @@ ipAddressTable_container_shutdown(netsnmp_container *container_ptr)
 {
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressTable_container_shutdown",
                 "called\n"));
-
-    if (NULL == container_ptr) {
-        snmp_log(LOG_ERR,
-                 "bad params to ipAddressTable_container_shutdown\n");
-        return;
-    }
-
 }                               /* ipAddressTable_container_shutdown */
 
 /**
