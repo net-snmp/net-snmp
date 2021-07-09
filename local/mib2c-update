@@ -69,11 +69,11 @@ safecp()
 check_setup()
 {
     rc=1
-    for d in $UPDATE_CURR $UPDATE_ORIG $UPDATE_NEW $UPDATE_MERGED $UPDATE_PATCH $UPDATE_BACKUP $UPDATE_BACKUP/curr $UPDATE_BACKUP/orig
+    for d in "$UPDATE_CURR" "$UPDATE_ORIG" "$UPDATE_NEW" "$UPDATE_MERGED" "$UPDATE_PATCH" "$UPDATE_BACKUP" "$UPDATE_BACKUP/curr" "$UPDATE_BACKUP/orig"
     do
-        if [ ! -d $d ]; then
+        if [ ! -d "$d" ]; then
             echo "Creating missing directory $d"
-            mkdir -p $d
+            mkdir -p "$d"
             if [ $? -ne 0 ]; then
                 error "Could not create directory $d"
                 rc=0
@@ -308,8 +308,8 @@ if [ -f $HOME/.mib2c-updaterc ]; then
     . $HOME/.mib2c-updaterc
 fi
 
-if [ -f $PWD/.mib2c-updaterc ]; then
-    . $PWD/.mib2c-updaterc
+if [ -f "$PWD/.mib2c-updaterc" ]; then
+    . "$PWD/.mib2c-updaterc"
 else
    echo "creating example .mib2c-udpaterc. edit as needed and re-run "
    echo "mib2c-update."
