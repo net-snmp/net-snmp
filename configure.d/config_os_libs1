@@ -117,10 +117,9 @@ fi
 # pcre libraries only needed for the ucd process agent mib software
 #
 if test "x$with_pcre" != "xno"; then
-  _pcrelibs=""
-  NETSNMP_SEARCH_LIBS([pcre_exec], [pcre],,,, _pcrelibs)
-  if test "x$_pcrelibs" != "x"; then
-    LAGENTLIBS="$LAGENTLIBS $_pcrelibs"
-    LMIBLIBS="$LMIBLIBS $_pcrelibs"
-  fi
+  NETSNMP_SEARCH_LIBS([pcre_exec], [pcre], [
+    LMIBLIBS="$LMIBLIBS -lpcre"
+    ],,, LAGENTLIBS)
+  AC_SUBST(LAGENTLIBS)
+  AC_SUBST(LMIBLIBS)
 fi
