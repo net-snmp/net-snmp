@@ -10,7 +10,7 @@
 #define _WANT_TCPCB 1
 #include <sys/types.h>
 #include <sys/socket.h>
-#if HAVE_SYS_IOCTL_H
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
 #if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
@@ -24,16 +24,16 @@
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
-#if HAVE_SYS_SOCKETVAR_H
+#ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
 
 #include <string.h>
 #include <stdlib.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #ifdef HAVE_SYS_SYSCTL_H
@@ -84,7 +84,7 @@
 #ifdef HAVE_NETINET_IP_VAR_H
 # include <netinet/ip_var.h>
 #endif
-#if HAVE_NETINET_ICMP6_H
+#ifdef HAVE_NETINET_ICMP6_H
 # include <netinet/icmp6.h>
 #endif
 #ifdef HAVE_NETINET6_IP6_VAR_H
@@ -92,7 +92,7 @@
 # include <netinet6/ip6_var.h>
 #endif
 #include <net/route.h>
-#if HAVE_NETINET_IP_H
+#ifdef HAVE_NETINET_IP_H
 # include <netinet/ip.h>
 #endif
 #ifdef HAVE_NETINET_IN_PCB_H

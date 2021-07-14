@@ -607,7 +607,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
 static const int linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
-#if HAVE_NETLINK_NETLINK_H
+#ifdef HAVE_NETLINK_NETLINK_H
 
 #if !defined(HAVE_LIBNL3)
 /* libnl3 API implemented on top of the libnl1 API */
@@ -757,7 +757,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
     tcpTable_free(cache, NULL);
 
-#if HAVE_NETLINK_NETLINK_H
+#ifdef HAVE_NETLINK_NETLINK_H
 	if (tcpTable_load_netlink() == 0) {
 		return 0;
 	}
