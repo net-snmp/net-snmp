@@ -339,8 +339,7 @@ netsnmp_container_get_ssll(void)
     sl->c.for_each = _ssll_for_each;
     sl->c.clear = _ssll_clear;
 
-       
-    return (netsnmp_container*)sl;
+    return &sl->c;
 }
 
 netsnmp_factory *
