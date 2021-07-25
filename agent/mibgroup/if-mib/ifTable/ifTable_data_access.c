@@ -50,9 +50,7 @@ static int fadeout = IFTABLE_REMOVE_MISSING_AFTER;
  */
 static int replace_old = 0;
 
-static void
-_delete_missing_interface(ifTable_rowreq_ctx *rowreq_ctx,
-                          netsnmp_container *container);
+static void __delete_missing_interface(void *rowreq_ctx, void *container);
 
 /** @ingroup interface 
  * @defgroup data_access data_access: Routines to access data
@@ -447,6 +445,11 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
     }
 }
 
+static void __check_interface_entry_for_updates(void *rowreq_ctx, void *cdc)
+{
+    _check_interface_entry_for_updates(rowreq_ctx, cdc);
+}
+
 /**
  * Remove all old interfaces with the same name as the newly added one.
  */
@@ -475,9 +478,7 @@ _check_and_replace_old(netsnmp_interface_entry *ifentry,
     }
     ITERATOR_RELEASE(it);
 
-    CONTAINER_FOR_EACH(to_delete,
-                       (netsnmp_container_obj_func *) _delete_missing_interface,
-                       container);
+    CONTAINER_FOR_EACH(to_delete, __delete_missing_interface, container);
     CONTAINER_FREE(to_delete);
 }
 
@@ -532,6 +533,11 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
     }
 }
 
+static void __add_new_interface(void *ifentry, void *container)
+{
+    _add_new_interface(ifentry, container);
+}
+
 /**
  * add new entry
  */
@@ -545,6 +551,11 @@ _delete_missing_interface(ifTable_rowreq_ctx *rowreq_ctx,
     CONTAINER_REMOVE(container, rowreq_ctx);
 
     ifTable_release_rowreq_ctx(rowreq_ctx);
+}
+
+static void __delete_missing_interface(void *rowreq_ctx, void *container)
+{
+    _delete_missing_interface(rowreq_ctx, container);
 }
 
 /**
@@ -631,25 +642,20 @@ ifTable_container_load(netsnmp_container *container)
      * we just got a fresh copy of interface data. compare it to
      * what we've already got, and make any adjustements...
      */
-    CONTAINER_FOR_EACH(container, (netsnmp_container_obj_func *)
-                       _check_interface_entry_for_updates, &cdc);
+    CONTAINER_FOR_EACH(container, __check_interface_entry_for_updates, &cdc);
 
     /*
      * now remove any missing interfaces
      */
     if (NULL != cdc.deleted) {
-       CONTAINER_FOR_EACH(cdc.deleted,
-                          (netsnmp_container_obj_func *) _delete_missing_interface,
-                          container);
+       CONTAINER_FOR_EACH(cdc.deleted, __delete_missing_interface, container);
        CONTAINER_FREE(cdc.deleted);
     }
 
     /*
      * now add any new interfaces
      */
-    CONTAINER_FOR_EACH(cdc.current,
-                       (netsnmp_container_obj_func *) _add_new_interface,
-                       container);
+    CONTAINER_FOR_EACH(cdc.current, __add_new_interface, container);
 
     /*
      * free the container. we've either claimed each ifentry, or released it,

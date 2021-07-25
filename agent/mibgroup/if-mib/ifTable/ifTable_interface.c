@@ -1907,6 +1907,11 @@ _container_item_free(ifTable_rowreq_ctx * rowreq_ctx, void *context)
     ifTable_release_rowreq_ctx(rowreq_ctx);
 }                               /* _container_item_free */
 
+static void __container_item_free(void *rowreq_ctx, void *context)
+{
+    _container_item_free(rowreq_ctx, context);
+}
+
 /**
  * @internal
  */
@@ -1928,9 +1933,7 @@ _container_free(netsnmp_container *container)
     /*
      * free all items. inefficient, but easy.
      */
-    CONTAINER_CLEAR(container,
-                    (netsnmp_container_obj_func *) _container_item_free,
-                    NULL);
+    CONTAINER_CLEAR(container, __container_item_free, NULL);
 }                               /* _container_free */
 
 /**
