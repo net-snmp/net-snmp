@@ -80,6 +80,7 @@ parse_interface_fadeout(const char *token, char *line)
 {
     fadeout = atoi(line);
 }
+
 static void
 parse_interface_replace_old(const char *token, char *line)
 {
