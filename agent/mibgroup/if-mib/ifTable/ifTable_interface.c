@@ -398,19 +398,17 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
      * register ifTableLastChanged
      */
     {
-        const oid       iftlc_oid[] = { IFTABLE_LAST_CHANGE };
-        netsnmp_register_watched_scalar2(netsnmp_create_handler_registration
-                                        ("ifTableLastChanged", NULL,
-                                         iftlc_oid, OID_LENGTH(iftlc_oid),
-                                         HANDLER_CAN_RONLY),
-                                        netsnmp_create_watcher_info((void
-                                                                     *)
-                                                                    &ifTable_if_ctx.
-                                                                    last_changed,
-                                                                    sizeof
-                                                                    (u_long),
-                                                                    ASN_TIMETICKS,
-                                                                    WATCHER_FIXED_SIZE));
+        static const oid iftlc_oid[] = { IFTABLE_LAST_CHANGE };
+        netsnmp_handler_registration *reginfo;
+        netsnmp_watcher_info *winfo;
+
+        reginfo = netsnmp_create_handler_registration
+                        ("ifTableLastChanged", NULL,
+                         iftlc_oid, OID_LENGTH(iftlc_oid), HANDLER_CAN_RONLY);
+        winfo = netsnmp_create_watcher_info(&ifTable_if_ctx.last_changed,
+                                            sizeof(u_long), ASN_TIMETICKS,
+                                            WATCHER_FIXED_SIZE);
+        netsnmp_register_watched_scalar2(reginfo, winfo);
     }
 #endif                          /* USING_MIBII_INTERFACES_MODULE */
 
