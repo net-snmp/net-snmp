@@ -574,12 +574,7 @@ ifTable_container_shutdown(netsnmp_container *container_ptr)
 }                               /* ifTable_container_shutdown */
 
 /**
- * load initial data
- *
- * TODO:350:M: Implement ifTable data load
- * This function will also be called by the cache helper to load
- * the container again (after the container free function has been
- * called to free the previous contents).
+ * Query the list of interfaces from the operating system and update ifTable.
  *
  * @param container container to which items should be inserted
  *
