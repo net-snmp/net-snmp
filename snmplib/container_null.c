@@ -33,6 +33,7 @@
 #include <net-snmp/library/container_null.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_assert.h>
+#include "factory.h"
 
 netsnmp_feature_child_of(container_null, container_types);
 

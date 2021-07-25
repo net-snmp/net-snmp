@@ -20,6 +20,7 @@
 #include <net-snmp/library/container_binary_array.h>
 #include <net-snmp/library/container_list_ssll.h>
 #include <net-snmp/library/container_null.h>
+#include "factory.h"
 
 #include <stdint.h>
 

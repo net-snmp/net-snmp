@@ -39,6 +39,7 @@
 #include <net-snmp/library/container_binary_array.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_assert.h>
+#include "factory.h"
 
 typedef struct binary_array_table_s {
     size_t                     max_size;   /* Size of the current data table */
