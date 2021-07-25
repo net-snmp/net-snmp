@@ -30,10 +30,10 @@ netsnmp_feature_require(container_linked_list);
 #   include "mibgroup/ip-mib/ipv6InterfaceTable/ipv6InterfaceTable.h"
 #endif
 
-typedef struct cd_container_s {
+struct cd_container {
     netsnmp_container *current;
     netsnmp_container *deleted;
-} cd_container;
+};
 
 /*
  * flag so we know not to set row/table last change times
@@ -312,7 +312,7 @@ send_linkUpDownNotifications(oid *notification_oid, size_t notification_oid_len,
  */
 static void
 _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
-                                   cd_container *cdc)
+                                   struct cd_container *cdc)
 {
     char            oper_changed = 0;
     int lastchanged = rowreq_ctx->data.ifLastChange;
@@ -609,7 +609,7 @@ ifTable_container_shutdown(netsnmp_container *container_ptr)
 int
 ifTable_container_load(netsnmp_container *container)
 {
-    cd_container cdc;
+    struct cd_container cdc;
 
     DEBUGMSGTL(("verbose:ifTable:ifTable_container_load", "called\n"));
 
