@@ -343,16 +343,6 @@ netsnmp_container_get_ssll(void)
     return &sl->c;
 }
 
-netsnmp_factory *
-netsnmp_container_get_ssll_factory(void)
-{
-    static netsnmp_factory f = {"sorted_singly_linked_list",
-                                netsnmp_container_get_ssll };
-    
-    return &f;
-}
-
-
 netsnmp_container *
 netsnmp_container_get_usll(void)
 {
@@ -386,35 +376,26 @@ netsnmp_container_get_fifo(void)
     return netsnmp_container_get_singly_linked_list(1);
 }
 
-netsnmp_factory *
-netsnmp_container_get_usll_factory(void)
-{
-    static netsnmp_factory f = {"unsorted_singly_linked_list-lifo",
-                                netsnmp_container_get_usll };
-    
-    return &f;
-}
-
-netsnmp_factory *
-netsnmp_container_get_fifo_factory(void)
-{
-    static netsnmp_factory f = {"unsorted_singly_linked_list-fifo",
-                                netsnmp_container_get_fifo };
-    
-    return &f;
-}
-
 void
 netsnmp_container_ssll_init(void)
 {
-    netsnmp_container_register("sorted_singly_linked_list",
-                               netsnmp_container_get_ssll_factory());
-    netsnmp_container_register("unsorted_singly_linked_list",
-                               netsnmp_container_get_usll_factory());
-    netsnmp_container_register("lifo",
-                               netsnmp_container_get_usll_factory());
-    netsnmp_container_register("fifo",
-                               netsnmp_container_get_fifo_factory());
+    static netsnmp_factory ssll = {
+        "sorted_singly_linked_list",
+        netsnmp_container_get_ssll
+    };
+    static netsnmp_factory usll = {
+        "unsorted_singly_linked_list-lifo",
+        netsnmp_container_get_usll
+    };
+    static netsnmp_factory fifo = {
+        "unsorted_singly_linked_list-fifo",
+        netsnmp_container_get_fifo
+    };
+
+    netsnmp_container_register("sorted_singly_linked_list", &ssll);
+    netsnmp_container_register("unsorted_singly_linked_list", &usll);
+    netsnmp_container_register("lifo", &usll);
+    netsnmp_container_register("fifo", &fifo);
 }
 
 
