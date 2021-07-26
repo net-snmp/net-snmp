@@ -20,6 +20,7 @@
 #include <net-snmp/library/container_binary_array.h>
 #include <net-snmp/library/container_list_ssll.h>
 #include <net-snmp/library/container_null.h>
+#include "factory.h"
 
 #include <stdint.h>
 
@@ -284,7 +285,15 @@ netsnmp_container_get(const char *type)
     return NULL;
 }
 
-/*------------------------------------------------------------------
+/**
+ * Allocate a new container of a given type.
+ *
+ * @param type A colon-separated string with the container name, followed by
+ * a colon-separated list of container types.
+ *
+ * Creates a new container. The type of the container is the first type
+ * mentioned in @type for which a factory has been registered with
+ * netsnmp_container_register_with_compare() or netsnmp_container_register().
  */
 netsnmp_container *
 netsnmp_container_find(const char *type)

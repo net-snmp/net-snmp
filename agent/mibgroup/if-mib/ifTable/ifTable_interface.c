@@ -398,19 +398,17 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
      * register ifTableLastChanged
      */
     {
-        const oid       iftlc_oid[] = { IFTABLE_LAST_CHANGE };
-        netsnmp_register_watched_scalar2(netsnmp_create_handler_registration
-                                        ("ifTableLastChanged", NULL,
-                                         iftlc_oid, OID_LENGTH(iftlc_oid),
-                                         HANDLER_CAN_RONLY),
-                                        netsnmp_create_watcher_info((void
-                                                                     *)
-                                                                    &ifTable_if_ctx.
-                                                                    last_changed,
-                                                                    sizeof
-                                                                    (u_long),
-                                                                    ASN_TIMETICKS,
-                                                                    WATCHER_FIXED_SIZE));
+        static const oid iftlc_oid[] = { IFTABLE_LAST_CHANGE };
+        netsnmp_handler_registration *reginfo;
+        netsnmp_watcher_info *winfo;
+
+        reginfo = netsnmp_create_handler_registration
+                        ("ifTableLastChanged", NULL,
+                         iftlc_oid, OID_LENGTH(iftlc_oid), HANDLER_CAN_RONLY);
+        winfo = netsnmp_create_watcher_info(&ifTable_if_ctx.last_changed,
+                                            sizeof(u_long), ASN_TIMETICKS,
+                                            WATCHER_FIXED_SIZE);
+        netsnmp_register_watched_scalar2(reginfo, winfo);
     }
 #endif                          /* USING_MIBII_INTERFACES_MODULE */
 
@@ -1048,7 +1046,7 @@ _mfd_ifTable_get_values(netsnmp_mib_handler *handler,
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
-         * was allcoated memory)  and the get routine replaced the pointer,
+         * was allocated memory)  and the get routine replaced the pointer,
          * we need to free the previous pointer.
          */
         if (old_string && (old_string != requests->requestvb->buf) &&
@@ -1909,6 +1907,11 @@ _container_item_free(ifTable_rowreq_ctx * rowreq_ctx, void *context)
     ifTable_release_rowreq_ctx(rowreq_ctx);
 }                               /* _container_item_free */
 
+static void __container_item_free(void *rowreq_ctx, void *context)
+{
+    _container_item_free(rowreq_ctx, context);
+}
+
 /**
  * @internal
  */
@@ -1930,9 +1933,7 @@ _container_free(netsnmp_container *container)
     /*
      * free all items. inefficient, but easy.
      */
-    CONTAINER_CLEAR(container,
-                    (netsnmp_container_obj_func *) _container_item_free,
-                    NULL);
+    CONTAINER_CLEAR(container, __container_item_free, NULL);
 }                               /* _container_free */
 
 /**

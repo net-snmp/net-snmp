@@ -39,6 +39,7 @@
 #include <net-snmp/library/container_binary_array.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_assert.h>
+#include "factory.h"
 
 typedef struct binary_array_table_s {
     size_t                     max_size;   /* Size of the current data table */
@@ -788,7 +789,6 @@ netsnmp_factory *
 netsnmp_container_get_binary_array_factory(void)
 {
     static netsnmp_factory f = { "binary_array",
-                                 (netsnmp_factory_produce_f*)
                                  netsnmp_container_get_binary_array };
     
     return &f;
