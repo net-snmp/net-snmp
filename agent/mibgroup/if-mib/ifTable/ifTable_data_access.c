@@ -307,11 +307,14 @@ send_linkUpDownNotifications(oid *notification_oid, size_t notification_oid_len,
 }
 
 /**
- * check entry for update
- *
+ * Update ifTable.
+ * @param rowreq_ctx ifTable row to examine.
+ * @param cdc Operating system interface information. @cdc->current [in] is the
+ *   result of the latest interface scan. @cdc->deleted [out] are the rows that
+ *   should be deleted by the caller from ifTable.
  */
 static void
-_check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
+_check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
                                    struct cd_container *cdc)
 {
     char            oper_changed = 0;
@@ -439,10 +442,9 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
             }
         }
 #endif
-    }
-
-    else
+    } else {
         rowreq_ctx->data.ifLastChange = lastchanged;
+    }
 }
 
 /**
