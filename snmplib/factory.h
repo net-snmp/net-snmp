@@ -7,8 +7,6 @@ extern "C" {
 }
 #endif
 
-typedef void * (netsnmp_factory_produce_f)(void);
-
 typedef struct netsnmp_factory_s {
     /*
      * a string describing the product the factory creates
@@ -16,9 +14,9 @@ typedef struct netsnmp_factory_s {
     const char                           *product;
 
     /*
-     * a function to create an object in newly allocated memory
+     * a function to allocate a new container
      */
-    netsnmp_factory_produce_f            *produce;
+    netsnmp_container *                 (*produce)(void);
 } netsnmp_factory;
 
 #ifdef __cplusplus

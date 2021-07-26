@@ -347,7 +347,6 @@ netsnmp_factory *
 netsnmp_container_get_ssll_factory(void)
 {
     static netsnmp_factory f = {"sorted_singly_linked_list",
-                                (netsnmp_factory_produce_f*)
                                 netsnmp_container_get_ssll };
     
     return &f;
@@ -391,7 +390,6 @@ netsnmp_factory *
 netsnmp_container_get_usll_factory(void)
 {
     static netsnmp_factory f = {"unsorted_singly_linked_list-lifo",
-                                (netsnmp_factory_produce_f*)
                                 netsnmp_container_get_usll };
     
     return &f;
@@ -401,7 +399,6 @@ netsnmp_factory *
 netsnmp_container_get_fifo_factory(void)
 {
     static netsnmp_factory f = {"unsorted_singly_linked_list-fifo",
-                                (netsnmp_factory_produce_f*)
                                 netsnmp_container_get_fifo };
     
     return &f;

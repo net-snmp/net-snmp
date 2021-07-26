@@ -827,7 +827,6 @@ netsnmp_factory *
 netsnmp_container_get_binary_array_factory(void)
 {
     static netsnmp_factory f = { "binary_array",
-                                 (netsnmp_factory_produce_f*)
                                  netsnmp_container_get_binary_array };
     
     return &f;

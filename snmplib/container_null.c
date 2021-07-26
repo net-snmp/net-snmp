@@ -172,7 +172,6 @@ netsnmp_factory *
 netsnmp_container_get_null_factory(void)
 {
     static netsnmp_factory f = { "null",
-                                 (netsnmp_factory_produce_f*)
                                  netsnmp_container_get_null};
     
     DEBUGMSGTL(("container:null:get_null_factory","in\n"));
