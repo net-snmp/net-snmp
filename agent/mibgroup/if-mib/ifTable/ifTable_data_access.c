@@ -323,8 +323,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
      * check for matching entry. We can do this directly, since
      * both containers use the same index.
      */
-    netsnmp_interface_entry *ifentry =
-        (netsnmp_interface_entry*)CONTAINER_FIND(ifcontainer, rowreq_ctx);
+    netsnmp_interface_entry *ifentry = CONTAINER_FIND(ifcontainer, rowreq_ctx);
 
 #ifdef USING_IP_MIB_IPV4INTERFACETABLE_IPV4INTERFACETABLE_MODULE
     /*
