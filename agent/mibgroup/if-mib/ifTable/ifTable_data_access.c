@@ -489,6 +489,7 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
                    netsnmp_container *container)
 {
     ifTable_rowreq_ctx *rowreq_ctx;
+    int rc;
 
     DEBUGMSGTL(("ifTable:access", "creating new entry\n"));
 
@@ -502,7 +503,8 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
         if (replace_old)
                 _check_and_replace_old(ifentry, container);
 
-        CONTAINER_INSERT(container, rowreq_ctx);
+        rc = CONTAINER_INSERT(container, rowreq_ctx);
+        netsnmp_assert(rc == 0);
         if (0 == _first_load) {
             rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
             ifTable_lastChange_set(rowreq_ctx->data.ifLastChange);
