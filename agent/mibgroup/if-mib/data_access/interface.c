@@ -701,14 +701,11 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
      * update data
      */
     lhs->ns_flags = rhs->ns_flags;
-    if((NULL != lhs->descr) && (NULL != rhs->descr) &&
-       (0 == strcmp(lhs->descr, rhs->descr)))
-        ;
-    else {
+    if (!lhs->descr || !rhs->descr || strcmp(lhs->descr, rhs->descr) != 0) {
         SNMP_FREE(lhs->descr);
         if (rhs->descr) {
             lhs->descr = strdup(rhs->descr);
-            if(NULL == lhs->descr)
+            if (!lhs->descr)
                 return -2;
         }
     }
