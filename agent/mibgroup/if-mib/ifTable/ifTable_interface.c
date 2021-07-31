@@ -598,13 +598,8 @@ ifTable_allocate_rowreq_ctx(netsnmp_interface_entry *ifentry)
     /*
      * if we allocated data, call init routine
      */
-    if (!(rowreq_ctx->rowreq_flags & MFD_ROW_DATA_FROM_USER)) {
-        if (SNMPERR_SUCCESS !=
-            ifTable_rowreq_ctx_init(rowreq_ctx, ifentry)) {
-            ifTable_release_rowreq_ctx(rowreq_ctx);
-            rowreq_ctx = NULL;
-        }
-    }
+    if (!(rowreq_ctx->rowreq_flags & MFD_ROW_DATA_FROM_USER))
+        rowreq_ctx->data.ifentry = ifentry;
 
     return rowreq_ctx;
 }                               /* ifTable_allocate_rowreq_ctx */
@@ -621,7 +616,10 @@ ifTable_release_rowreq_ctx(ifTable_rowreq_ctx * rowreq_ctx)
 
     netsnmp_assert(NULL != rowreq_ctx);
 
-    ifTable_rowreq_ctx_cleanup(rowreq_ctx);
+    if (rowreq_ctx->data.ifentry) {
+        netsnmp_access_interface_entry_free(rowreq_ctx->data.ifentry);
+        rowreq_ctx->data.ifentry = NULL;
+    }
 
     if (rowreq_ctx->undo) {
         ifTable_release_data(rowreq_ctx->undo);
