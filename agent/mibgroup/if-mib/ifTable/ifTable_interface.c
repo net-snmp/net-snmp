@@ -577,7 +577,7 @@ ifTable_release_data(ifTable_data * data)
  * allocate resources for a ifTable_rowreq_ctx
  */
 ifTable_rowreq_ctx *
-ifTable_allocate_rowreq_ctx(void *user_init_ctx)
+ifTable_allocate_rowreq_ctx(netsnmp_interface_entry *ifentry)
 {
     ifTable_rowreq_ctx *rowreq_ctx =
         SNMP_MALLOC_TYPEDEF(ifTable_rowreq_ctx);
@@ -600,7 +600,7 @@ ifTable_allocate_rowreq_ctx(void *user_init_ctx)
      */
     if (!(rowreq_ctx->rowreq_flags & MFD_ROW_DATA_FROM_USER)) {
         if (SNMPERR_SUCCESS !=
-            ifTable_rowreq_ctx_init(rowreq_ctx, user_init_ctx)) {
+            ifTable_rowreq_ctx_init(rowreq_ctx, ifentry)) {
             ifTable_release_rowreq_ctx(rowreq_ctx);
             rowreq_ctx = NULL;
         }

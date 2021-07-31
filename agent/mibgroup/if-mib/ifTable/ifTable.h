@@ -353,7 +353,7 @@ config_exclude(mibII/interfaces)
 
     int             ifTable_rowreq_ctx_init(ifTable_rowreq_ctx *
                                             rowreq_ctx,
-                                            void *user_init_ctx);
+                                            netsnmp_interface_entry *ifentry);
     void            ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx *
                                                rowreq_ctx);
 

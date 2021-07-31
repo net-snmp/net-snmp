@@ -197,28 +197,21 @@ shutdown_table_ifTable(void)
  * extra context initialization (eg default values)
  *
  * @param rowreq_ctx    : row request context
- * @param user_init_ctx : void pointer for user (parameter to rowreq_ctx_allocate)
+ * @param ifentry       : pointer to network interface information
  *
  * @retval MFD_SUCCESS  : no errors
  * @retval MFD_ERROR    : error (context allocate will fail)
  */
 int
 ifTable_rowreq_ctx_init(ifTable_rowreq_ctx * rowreq_ctx,
-                        void *user_init_ctx)
+                        netsnmp_interface_entry *ifentry)
 {
     DEBUGMSGTL(("verbose:ifTable:ifTable_rowreq_ctx_init", "called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
-    /*
-     * TODO:210:o: |-> Perform extra ifTable rowreq initialization. (eg DEFVALS)
-     */
-    if (NULL == user_init_ctx)
-        rowreq_ctx->data.ifentry =
-            netsnmp_access_interface_entry_create(NULL, 0);
-    else
-        rowreq_ctx->data.ifentry =
-            (netsnmp_interface_entry *) user_init_ctx;
+    rowreq_ctx->data.ifentry = ifentry ? ifentry :
+        netsnmp_access_interface_entry_create(NULL, 0);
 
     return MFD_SUCCESS;
 }                               /* ifTable_rowreq_ctx_init */
