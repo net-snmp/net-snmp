@@ -342,18 +342,10 @@ netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry)
      * since the whole entry is about to be freed
      */
 
-    if (NULL != entry->old_stats)
-        free(entry->old_stats);
-
-    if (NULL != entry->name)
-        free(entry->name);
-
-    if (NULL != entry->descr)
-        free(entry->descr);
-
-    if (NULL != entry->paddr)
-        free(entry->paddr);
-
+    free(entry->old_stats);
+    free(entry->name);
+    free(entry->descr);
+    free(entry->paddr);
     free(entry);
 }
 
