@@ -1995,26 +1995,12 @@ _ifTable_container_shutdown(ifTable_interface_ctx * if_ctx)
 ifTable_rowreq_ctx *
 ifTable_row_find_by_mib_index(ifTable_mib_index * mib_idx)
 {
-    ifTable_rowreq_ctx *rowreq_ctx;
     oid             oid_tmp[MAX_OID_LEN];
-    netsnmp_index   oid_idx;
+    netsnmp_index   oid_idx = { MAX_OID_LEN, oid_tmp };
     int             rc;
 
-    /*
-     * set up storage for OID
-     */
-    oid_idx.oids = oid_tmp;
-    oid_idx.len = sizeof(oid_tmp) / sizeof(oid);
-
-    /*
-     * convert
-     */
     rc = ifTable_index_to_oid(&oid_idx, mib_idx);
-    if (MFD_SUCCESS != rc)
-        return NULL;
-
-    rowreq_ctx = (ifTable_rowreq_ctx*)CONTAINER_FIND(ifTable_if_ctx.container, &oid_idx);
-
-    return rowreq_ctx;
+    return rc == MFD_SUCCESS ?
+        CONTAINER_FIND(ifTable_if_ctx.container, &oid_idx) : NULL;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_EXTERNAL_ACCESS */
