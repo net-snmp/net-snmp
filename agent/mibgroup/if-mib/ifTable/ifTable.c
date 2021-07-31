@@ -194,56 +194,6 @@ shutdown_table_ifTable(void)
 }
 
 /**
- * extra context initialization (eg default values)
- *
- * @param rowreq_ctx    : row request context
- * @param user_init_ctx : void pointer for user (parameter to rowreq_ctx_allocate)
- *
- * @retval MFD_SUCCESS  : no errors
- * @retval MFD_ERROR    : error (context allocate will fail)
- */
-int
-ifTable_rowreq_ctx_init(ifTable_rowreq_ctx * rowreq_ctx,
-                        void *user_init_ctx)
-{
-    DEBUGMSGTL(("verbose:ifTable:ifTable_rowreq_ctx_init", "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-    /*
-     * TODO:210:o: |-> Perform extra ifTable rowreq initialization. (eg DEFVALS)
-     */
-    if (NULL == user_init_ctx)
-        rowreq_ctx->data.ifentry =
-            netsnmp_access_interface_entry_create(NULL, 0);
-    else
-        rowreq_ctx->data.ifentry =
-            (netsnmp_interface_entry *) user_init_ctx;
-
-    return MFD_SUCCESS;
-}                               /* ifTable_rowreq_ctx_init */
-
-/**
- * extra context cleanup
- * @param rowreq_ctx
- */
-void
-ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx * rowreq_ctx)
-{
-    DEBUGMSGTL(("verbose:ifTable:ifTable_rowreq_ctx_cleanup", "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-    /*
-     * TODO:211:o: |-> Perform extra ifTable rowreq cleanup.
-     */
-    if (NULL != rowreq_ctx->data.ifentry) {
-        netsnmp_access_interface_entry_free(rowreq_ctx->data.ifentry);
-        rowreq_ctx->data.ifentry = NULL;
-    }
-}                               /* ifTable_rowreq_ctx_cleanup */
-
-/**
  * pre-request callback
  * @param  user_context
  *
@@ -1892,10 +1842,7 @@ ifSpecific_get(ifTable_rowreq_ctx * rowreq_ctx,
  * functions are called. If you need to do any undo setup that is not
  * related to a specific column, you can do it here.
  *
- * Note that the undo context has been allocated with
- * ifTable_allocate_data(), but may need extra
- * initialization similar to what you may have done in
- * ifTable_rowreq_ctx_init().
+ * Note that the undo context has been allocated with ifTable_allocate_data().
  * Note that an individual node's undo_setup function will only be called
  * if that node is being set to a new value.
  *

@@ -577,7 +577,7 @@ ifTable_release_data(ifTable_data * data)
  * allocate resources for a ifTable_rowreq_ctx
  */
 ifTable_rowreq_ctx *
-ifTable_allocate_rowreq_ctx(void *user_init_ctx)
+ifTable_allocate_rowreq_ctx(netsnmp_interface_entry *ifentry)
 {
     ifTable_rowreq_ctx *rowreq_ctx =
         SNMP_MALLOC_TYPEDEF(ifTable_rowreq_ctx);
@@ -598,13 +598,8 @@ ifTable_allocate_rowreq_ctx(void *user_init_ctx)
     /*
      * if we allocated data, call init routine
      */
-    if (!(rowreq_ctx->rowreq_flags & MFD_ROW_DATA_FROM_USER)) {
-        if (SNMPERR_SUCCESS !=
-            ifTable_rowreq_ctx_init(rowreq_ctx, user_init_ctx)) {
-            ifTable_release_rowreq_ctx(rowreq_ctx);
-            rowreq_ctx = NULL;
-        }
-    }
+    if (!(rowreq_ctx->rowreq_flags & MFD_ROW_DATA_FROM_USER))
+        rowreq_ctx->data.ifentry = ifentry;
 
     return rowreq_ctx;
 }                               /* ifTable_allocate_rowreq_ctx */
@@ -621,7 +616,10 @@ ifTable_release_rowreq_ctx(ifTable_rowreq_ctx * rowreq_ctx)
 
     netsnmp_assert(NULL != rowreq_ctx);
 
-    ifTable_rowreq_ctx_cleanup(rowreq_ctx);
+    if (rowreq_ctx->data.ifentry) {
+        netsnmp_access_interface_entry_free(rowreq_ctx->data.ifentry);
+        rowreq_ctx->data.ifentry = NULL;
+    }
 
     if (rowreq_ctx->undo) {
         ifTable_release_data(rowreq_ctx->undo);
@@ -1995,26 +1993,12 @@ _ifTable_container_shutdown(ifTable_interface_ctx * if_ctx)
 ifTable_rowreq_ctx *
 ifTable_row_find_by_mib_index(ifTable_mib_index * mib_idx)
 {
-    ifTable_rowreq_ctx *rowreq_ctx;
     oid             oid_tmp[MAX_OID_LEN];
-    netsnmp_index   oid_idx;
+    netsnmp_index   oid_idx = { MAX_OID_LEN, oid_tmp };
     int             rc;
 
-    /*
-     * set up storage for OID
-     */
-    oid_idx.oids = oid_tmp;
-    oid_idx.len = OID_LENGTH(oid_tmp);
-
-    /*
-     * convert
-     */
     rc = ifTable_index_to_oid(&oid_idx, mib_idx);
-    if (MFD_SUCCESS != rc)
-        return NULL;
-
-    rowreq_ctx = (ifTable_rowreq_ctx*)CONTAINER_FIND(ifTable_if_ctx.container, &oid_idx);
-
-    return rowreq_ctx;
+    return rc == MFD_SUCCESS ?
+        CONTAINER_FIND(ifTable_if_ctx.container, &oid_idx) : NULL;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_EXTERNAL_ACCESS */
