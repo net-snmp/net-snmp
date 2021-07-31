@@ -921,7 +921,15 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         /*
          * add to container
          */
-        CONTAINER_INSERT(container, entry);
+        if (CONTAINER_INSERT(container, entry) != 0) {
+            netsnmp_interface_entry *existing =
+                CONTAINER_FIND(container, entry);
+            NETSNMP_LOGONCE((LOG_WARNING,
+                             "Encountered interface with index %" NETSNMP_PRIz "u twice: %s <> %s",
+                             entry->index, existing ? existing->name : "(?)",
+                             entry->name));
+            netsnmp_access_interface_entry_free(entry);
+        }
     }
 #ifdef NETSNMP_ENABLE_IPV6
     netsnmp_access_ipaddress_container_free(addr_container, 0);
