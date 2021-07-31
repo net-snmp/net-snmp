@@ -669,7 +669,6 @@ netsnmp_access_interface_entry_calculate_stats(netsnmp_interface_entry *entry)
  * copy interface entry data (after checking for counter wraps)
  *
  * @retval -2 : malloc failed
- * @retval -1 : interfaces not the same
  * @retval  0 : no error
  */
 int
@@ -677,11 +676,6 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
                                     netsnmp_interface_entry * rhs)
 {
     DEBUGMSGTL(("access:interface", "copy\n"));
-    
-    if ((NULL == lhs) || (NULL == rhs) ||
-        (NULL == lhs->name) || (NULL == rhs->name) ||
-        (0 != strncmp(lhs->name, rhs->name, strlen(rhs->name))))
-        return -1;
 
     /*
      * update stats
