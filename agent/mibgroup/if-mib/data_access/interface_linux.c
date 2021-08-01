@@ -866,13 +866,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             } else
                 entry->speed = speed;
             entry->speed_high = speed / 1000000LL;
-        }
-#ifdef APPLIED_PATCH_836390   /* xxx-rks ifspeed fixes */
-        else if (IANAIFTYPE_PROPVIRTUAL == entry->type)
-            entry->speed = _get_bonded_if_speed(entry);
-#endif
-        else
+        } else {
             netsnmp_access_interface_entry_guess_speed(entry);
+        }
         
         netsnmp_access_interface_ioctl_flags_get(fd, entry);
 
