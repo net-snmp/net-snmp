@@ -596,7 +596,47 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
     return 0;
 }
 
-/*
+/* Guess the IANA network interface type from the network interface name. */
+static int netsnmp_guess_interface_type(const netsnmp_interface_entry *entry)
+{
+    struct match_if {
+        int             mi_type;
+        const char     *mi_name;
+    };
+
+    static const struct match_if lmatch_if[] = {
+        {IANAIFTYPE_SOFTWARELOOPBACK, "lo"},
+        {IANAIFTYPE_ETHERNETCSMACD, "eth"},
+        {IANAIFTYPE_ETHERNETCSMACD, "vmnet"},
+        {IANAIFTYPE_ISO88025TOKENRING, "tr"},
+        {IANAIFTYPE_FASTETHER, "feth"},
+        {IANAIFTYPE_GIGABITETHERNET,"gig"},
+        {IANAIFTYPE_INFINIBAND,"ib"},
+        {IANAIFTYPE_PPP, "ppp"},
+        {IANAIFTYPE_SLIP, "sl"},
+        {IANAIFTYPE_TUNNEL, "sit"},
+        {IANAIFTYPE_BASICISDN, "ippp"},
+        {IANAIFTYPE_PROPVIRTUAL, "bond"}, /* Bonding driver find fastest slave */
+        {IANAIFTYPE_PROPVIRTUAL, "vad"},  /* ANS driver - ?speed? */
+        {0, NULL}                  /* end of list */
+    };
+
+    const struct match_if *pm;
+
+    for (pm = lmatch_if; pm->mi_name; pm++) {
+        const int len = strlen(pm->mi_name);
+
+        if (strncmp(entry->name, pm->mi_name, len) == 0)
+            return pm->mi_type;
+    }
+    return IANAIFTYPE_OTHER;
+}
+
+/**
+ * Read network interface information from /proc/net/dev.
+ *
+ * @param container:  Container to store network information in.
+ * @param load_flags: One or more NETSNMP_ACCESS_INTERFACE_LOAD_* flags.
  *
  * @retval  0 success
  * @retval -1 no container specified
@@ -782,42 +822,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * physaddr should have set type. make some guesses (based
          * on name) if not.
          */
-        if(0 == entry->type) {
-            typedef struct _match_if {
-               int             mi_type;
-               const char     *mi_name;
-            }              *pmatch_if, match_if;
-            
-            static match_if lmatch_if[] = {
-                {IANAIFTYPE_SOFTWARELOOPBACK, "lo"},
-                {IANAIFTYPE_ETHERNETCSMACD, "eth"},
-                {IANAIFTYPE_ETHERNETCSMACD, "vmnet"},
-                {IANAIFTYPE_ISO88025TOKENRING, "tr"},
-                {IANAIFTYPE_FASTETHER, "feth"},
-                {IANAIFTYPE_GIGABITETHERNET,"gig"},
-                {IANAIFTYPE_INFINIBAND,"ib"},
-                {IANAIFTYPE_PPP, "ppp"},
-                {IANAIFTYPE_SLIP, "sl"},
-                {IANAIFTYPE_TUNNEL, "sit"},
-                {IANAIFTYPE_BASICISDN, "ippp"},
-                {IANAIFTYPE_PROPVIRTUAL, "bond"}, /* Bonding driver find fastest slave */
-                {IANAIFTYPE_PROPVIRTUAL, "vad"},  /* ANS driver - ?speed? */
-                {0, NULL}                  /* end of list */
-            };
-
-            int             len;
-            register pmatch_if pm;
-            
-            for (pm = lmatch_if; pm->mi_name; pm++) {
-                len = strlen(pm->mi_name);
-                if (0 == strncmp(entry->name, pm->mi_name, len)) {
-                    entry->type = pm->mi_type;
-                    break;
-                }
-            }
-            if(NULL == pm->mi_name)
-                entry->type = IANAIFTYPE_OTHER;
-        }
+        if (entry->type == 0)
+            entry->type = netsnmp_guess_interface_type(entry);
 
         /*
          * interface identifier is specified based on physaddr and type
