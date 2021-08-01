@@ -277,36 +277,6 @@ ifTable_post_request(ifTable_registration * user_context, int rc)
  * * TODO:200:r: Implement ifTable data context functions.
  */
 
-
-/**
- * set mib index(es)
- *
- * @param tbl_idx mib index structure
- * @param ifIndex_val
- *
- * @retval MFD_SUCCESS     : success.
- * @retval MFD_ERROR       : other error.
- *
- * @remark
- *  This convenience function is useful for setting all the MIB index
- *  components with a single function call. It is assume that the C values
- *  have already been mapped from their native/rawformat to the MIB format.
- */
-int
-ifTable_indexes_set_tbl_idx(ifTable_mib_index * tbl_idx, long ifIndex_val)
-{
-    DEBUGMSGTL(("verbose:ifTable:ifTable_indexes_set_tbl_idx",
-                "called\n"));
-
-    /*
-     * ifIndex(1)/InterfaceIndex/ASN_INTEGER/long(long)//l/A/w/e/R/d/H 
-     */
-    tbl_idx->ifIndex = ifIndex_val;
-
-
-    return MFD_SUCCESS;
-}                               /* ifTable_indexes_set_tbl_idx */
-
 /**
  * @internal
  * set row context indexes
@@ -326,9 +296,7 @@ ifTable_indexes_set(ifTable_rowreq_ctx * rowreq_ctx, long ifIndex_val)
 {
     DEBUGMSGTL(("verbose:ifTable:ifTable_indexes_set", "called\n"));
 
-    if (MFD_SUCCESS !=
-        ifTable_indexes_set_tbl_idx(&rowreq_ctx->tbl_idx, ifIndex_val))
-        return MFD_ERROR;
+    rowreq_ctx->tbl_idx.ifIndex = ifIndex_val;
 
     /*
      * convert mib index to oid index
