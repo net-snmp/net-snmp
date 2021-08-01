@@ -434,8 +434,6 @@ config_exclude(mibII/interfaces)
                                    size_t * ifSpecific_val_ptr_len_ptr);
 
 
-    int             ifTable_indexes_set_tbl_idx(ifTable_mib_index *
-                                                tbl_idx, long ifIndex_val);
     int             ifTable_indexes_set(ifTable_rowreq_ctx * rowreq_ctx,
                                         long ifIndex_val);
 

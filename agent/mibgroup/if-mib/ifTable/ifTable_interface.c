@@ -440,48 +440,13 @@ ifTable_valid_columns_set(netsnmp_column_info *vc)
 int
 ifTable_index_to_oid(netsnmp_index * oid_idx, ifTable_mib_index * mib_idx)
 {
-    int             err = SNMP_ERR_NOERROR;
+    if (oid_idx->len < 1)
+        return SNMP_ERR_GENERR;
 
-    /*
-     * temp storage for parsing indexes
-     */
-    /*
-     * ifIndex(1)/InterfaceIndex/ASN_INTEGER/long(long)//l/A/w/e/R/d/H
-     */
-    netsnmp_variable_list var_ifIndex;
+    oid_idx->oids[0] = mib_idx->ifIndex;
+    oid_idx->len = 1;
 
-    /*
-     * set up varbinds
-     */
-    memset(&var_ifIndex, 0x00, sizeof(var_ifIndex));
-    var_ifIndex.type = ASN_INTEGER;
-
-    /*
-     * chain temp index varbinds together
-     */
-    var_ifIndex.next_variable = NULL;
-
-
-    DEBUGMSGTL(("verbose:ifTable:ifTable_index_to_oid", "called\n"));
-
-    /*
-     * ifIndex(1)/InterfaceIndex/ASN_INTEGER/long(long)//l/A/w/e/R/d/H 
-     */
-    snmp_set_var_value(&var_ifIndex, (u_char *) & mib_idx->ifIndex,
-                       sizeof(mib_idx->ifIndex));
-
-
-    err = build_oid_noalloc(oid_idx->oids, oid_idx->len, &oid_idx->len,
-                            NULL, 0, &var_ifIndex);
-    if (err)
-        snmp_log(LOG_ERR, "error %d converting index to oid\n", err);
-
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers(&var_ifIndex);
-
-    return err;
+    return SNMP_ERR_NOERROR;
 }                               /* ifTable_index_to_oid */
 
 /**

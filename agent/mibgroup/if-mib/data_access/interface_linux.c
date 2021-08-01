@@ -733,8 +733,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * ip version is to look for ip addresses. If anyone
          * knows a better way, put it here!
          */
-#ifdef NETSNMP_ENABLE_IPV6
         if_index = netsnmp_arch_interface_index_find(ifstart);
+        netsnmp_assert(if_index != 0);
+#ifdef NETSNMP_ENABLE_IPV6
         _arch_interface_has_ipv6(if_index, &flags, addr_container);
 #endif
         netsnmp_access_interface_ioctl_has_ipv4(fd, ifstart, 0, &flags, &ifc);
@@ -752,7 +753,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             continue;
         }
 
-        entry = netsnmp_access_interface_entry_create(ifstart, 0);
+        entry = netsnmp_access_interface_entry_create(ifstart, if_index);
         if(NULL == entry) {
 #ifdef NETSNMP_ENABLE_IPV6
             netsnmp_access_ipaddress_container_free(addr_container, 0);
@@ -920,7 +921,15 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         /*
          * add to container
          */
-        CONTAINER_INSERT(container, entry);
+        if (CONTAINER_INSERT(container, entry) != 0) {
+            netsnmp_interface_entry *existing =
+                CONTAINER_FIND(container, entry);
+            NETSNMP_LOGONCE((LOG_WARNING,
+                             "Encountered interface with index %" NETSNMP_PRIz "u twice: %s <> %s",
+                             entry->index, existing ? existing->name : "(?)",
+                             entry->name));
+            netsnmp_access_interface_entry_free(entry);
+        }
     }
 #ifdef NETSNMP_ENABLE_IPV6
     netsnmp_access_ipaddress_container_free(addr_container, 0);
