@@ -632,6 +632,39 @@ static int netsnmp_guess_interface_type(const netsnmp_interface_entry *entry)
     return IANAIFTYPE_OTHER;
 }
 
+static void netsnmp_derive_interface_id(netsnmp_interface_entry *entry)
+{
+    /*
+     * interface identifier is specified based on physaddr and type
+     */
+    switch (entry->type) {
+    case IANAIFTYPE_ETHERNETCSMACD:
+    case IANAIFTYPE_ETHERNET3MBIT:
+    case IANAIFTYPE_FASTETHER:
+    case IANAIFTYPE_FASTETHERFX:
+    case IANAIFTYPE_GIGABITETHERNET:
+    case IANAIFTYPE_FDDI:
+    case IANAIFTYPE_ISO88025TOKENRING:
+        if (entry->paddr && entry->paddr_len != ETH_ALEN)
+            break;
+
+        entry->v6_if_id_len = entry->paddr_len + 2;
+        memcpy(entry->v6_if_id, entry->paddr, 3);
+        memcpy(entry->v6_if_id + 5, entry->paddr + 3, 3);
+        entry->v6_if_id[0] ^= 2;
+        entry->v6_if_id[3] = 0xFF;
+        entry->v6_if_id[4] = 0xFE;
+
+        entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
+        break;
+
+    case IANAIFTYPE_SOFTWARELOOPBACK:
+        entry->v6_if_id_len = 0;
+        entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
+        break;
+    }
+}
+
 /**
  * Read network interface information from /proc/net/dev.
  *
@@ -825,35 +858,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         if (entry->type == 0)
             entry->type = netsnmp_guess_interface_type(entry);
 
-        /*
-         * interface identifier is specified based on physaddr and type
-         */
-        switch (entry->type) {
-        case IANAIFTYPE_ETHERNETCSMACD:
-        case IANAIFTYPE_ETHERNET3MBIT:
-        case IANAIFTYPE_FASTETHER:
-        case IANAIFTYPE_FASTETHERFX:
-        case IANAIFTYPE_GIGABITETHERNET:
-        case IANAIFTYPE_FDDI:
-        case IANAIFTYPE_ISO88025TOKENRING:
-            if (NULL != entry->paddr && ETH_ALEN != entry->paddr_len)
-                break;
-
-            entry->v6_if_id_len = entry->paddr_len + 2;
-            memcpy(entry->v6_if_id, entry->paddr, 3);
-            memcpy(entry->v6_if_id + 5, entry->paddr + 3, 3);
-            entry->v6_if_id[0] ^= 2;
-            entry->v6_if_id[3] = 0xFF;
-            entry->v6_if_id[4] = 0xFE;
-
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
-            break;
-
-        case IANAIFTYPE_SOFTWARELOOPBACK:
-            entry->v6_if_id_len = 0;
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
-            break;
-        }
+        netsnmp_derive_interface_id(entry);
 
         if (IANAIFTYPE_ETHERNETCSMACD == entry->type) {
             unsigned long long speed;
