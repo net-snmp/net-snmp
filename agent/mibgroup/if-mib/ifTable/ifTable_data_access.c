@@ -498,40 +498,39 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
      * the container and set ifTableLastChanged.
      */
     rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
-    if ((NULL != rowreq_ctx) &&
-        (MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
-        if (replace_old)
-                _check_and_replace_old(ifentry, container);
+    if (!rowreq_ctx) {
+        snmp_log(LOG_ERR,
+                 "memory allocation failed while loading ifTable cache.\n");
+        netsnmp_access_interface_entry_free(ifentry);
+        return;
+    }
+    if (ifTable_indexes_set(rowreq_ctx, ifentry->index) != MFD_SUCCESS) {
+        snmp_log(LOG_ERR, "error setting index while loading ifTable cache.\n");
+        ifTable_release_rowreq_ctx(rowreq_ctx);
+        return;
+    }
 
-        rc = CONTAINER_INSERT(container, rowreq_ctx);
-        netsnmp_assert(rc == 0);
-        if (0 == _first_load) {
-            rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
-            ifTable_lastChange_set(rowreq_ctx->data.ifLastChange);
-        }
+    if (replace_old)
+        _check_and_replace_old(ifentry, container);
+
+    rc = CONTAINER_INSERT(container, rowreq_ctx);
+    netsnmp_assert(rc == 0);
+    if (0 == _first_load) {
+        rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
+        ifTable_lastChange_set(rowreq_ctx->data.ifLastChange);
+    }
 #ifdef USING_IP_MIB_IPV4INTERFACETABLE_IPV4INTERFACETABLE_MODULE
-        /*
-         * give ipv4If table a crack at the entry
-         */
-        ipv4InterfaceTable_check_entry_for_updates(rowreq_ctx, ifentry);
+    /*
+     * give ipv4If table a crack at the entry
+     */
+    ipv4InterfaceTable_check_entry_for_updates(rowreq_ctx, ifentry);
 #endif
 #ifdef USING_IP_MIB_IPV6INTERFACETABLE_IPV6INTERFACETABLE_MODULE
-        /*
-         * give ipv6If table a crack at the entry
-         */
-        ipv6InterfaceTable_check_entry_for_updates(rowreq_ctx, ifentry);
+    /*
+     * give ipv6If table a crack at the entry
+     */
+    ipv6InterfaceTable_check_entry_for_updates(rowreq_ctx, ifentry);
 #endif
-    } else {
-        if (rowreq_ctx) {
-            snmp_log(LOG_ERR, "error setting index while loading "
-                     "ifTable cache.\n");
-            ifTable_release_rowreq_ctx(rowreq_ctx);
-        } else {
-            snmp_log(LOG_ERR, "memory allocation failed while loading "
-                     "ifTable cache.\n");
-            netsnmp_access_interface_entry_free(ifentry);
-        }
-    }
 }
 
 static void __add_new_interface(void *ifentry, void *container)
