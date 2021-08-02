@@ -22348,6 +22348,7 @@ fi
 #
 # pcre libraries only needed for the ucd process agent mib software
 #
+if test "x$with_pcre" != "xno"; then
 
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pcre_exec" >&5
 $as_echo_n "checking for library containing pcre_exec... " >&6; }
@@ -22420,13 +22421,14 @@ $as_echo "$netsnmp_cv_func_pcre_exec_LAGENTLIBS" >&6; }
        LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
-  LMIBLIBS="$LMIBLIBS -lpcre"
+    LMIBLIBS="$LMIBLIBS -lpcre"
 
 
  fi
 
 
 
+fi
 
 # -*- autoconf -*-
 #
