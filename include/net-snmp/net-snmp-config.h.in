@@ -689,6 +689,9 @@
 /* Define to 1 if you have the <netlink/netlink.h> header file. */
 #undef HAVE_NETLINK_NETLINK_H
 
+/* Define to 1 if you have the <netlink/route/link.h> header file. */
+#undef HAVE_NETLINK_ROUTE_LINK_H
+
 /* Define to 1 if you have the <net/if_arp.h> header file. */
 #undef HAVE_NET_IF_ARP_H
 
