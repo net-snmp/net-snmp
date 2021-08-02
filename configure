@@ -679,6 +679,8 @@ NETSNMP_BUILD_TLS_PROG_FALSE
 NETSNMP_BUILD_TLS_PROG_TRUE
 NETSNMP_BUILD_SSH_PROG_FALSE
 NETSNMP_BUILD_SSH_PROG_TRUE
+LIBNLROUTE3_LIBS
+LIBNLROUTE3_CFLAGS
 LIBNL3_LIBS
 LIBNL3_CFLAGS
 PKG_CONFIG_LIBDIR
@@ -1090,7 +1092,9 @@ PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
 LIBNL3_CFLAGS
-LIBNL3_LIBS'
+LIBNL3_LIBS
+LIBNLROUTE3_CFLAGS
+LIBNLROUTE3_LIBS'
 
 
 # Initialize some variables set by options.
@@ -2069,6 +2073,10 @@ Some influential environment variables:
   LIBNL3_CFLAGS
               C compiler flags for LIBNL3, overriding pkg-config
   LIBNL3_LIBS linker flags for LIBNL3, overriding pkg-config
+  LIBNLROUTE3_CFLAGS
+              C compiler flags for LIBNLROUTE3, overriding pkg-config
+  LIBNLROUTE3_LIBS
+              linker flags for LIBNLROUTE3, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -23646,6 +23654,104 @@ $as_echo "yes" >&6; }
 
 fi
 fi
+	   if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnl-route-3.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnl-route-3.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBNLROUTE3" >&5
+$as_echo_n "checking for LIBNLROUTE3... " >&6; }
+
+if test -n "$LIBNLROUTE3_CFLAGS"; then
+    pkg_cv_LIBNLROUTE3_CFLAGS="$LIBNLROUTE3_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnl-route-3.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnl-route-3.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBNLROUTE3_CFLAGS=`$PKG_CONFIG --cflags "libnl-route-3.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBNLROUTE3_LIBS"; then
+    pkg_cv_LIBNLROUTE3_LIBS="$LIBNLROUTE3_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnl-route-3.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnl-route-3.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBNLROUTE3_LIBS=`$PKG_CONFIG --libs "libnl-route-3.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBNLROUTE3_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libnl-route-3.0" 2>&1`
+        else
+	        LIBNLROUTE3_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libnl-route-3.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBNLROUTE3_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (libnl-route-3.0) were not met:
+
+$LIBNLROUTE3_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables LIBNLROUTE3_CFLAGS
+and LIBNLROUTE3_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables LIBNLROUTE3_CFLAGS
+and LIBNLROUTE3_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	LIBNLROUTE3_CFLAGS=$pkg_cv_LIBNLROUTE3_CFLAGS
+	LIBNLROUTE3_LIBS=$pkg_cv_LIBNLROUTE3_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+fi
 
 
         netsnmp_save_CPPFLAGS="$CPPFLAGS"
@@ -23734,6 +23840,94 @@ fi
 done
 
             EXTERNAL_MIBGROUP_INCLUDES="$EXTERNAL_MIBGROUP_INCLUDES ${LIBNL3_CFLAGS}"
+ else
+    CPPFLAGS="$netsnmp_save_CPPFLAGS"
+ fi
+
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing rtnl_link_alloc_cache" >&5
+$as_echo_n "checking for library containing rtnl_link_alloc_cache... " >&6; }
+if ${netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LMIBLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rtnl_link_alloc_cache ();
+int
+main ()
+{
+return rtnl_link_alloc_cache ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in nl-route-3 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rtnl_link_alloc_cache ();
+int
+main ()
+{
+return rtnl_link_alloc_cache ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS" >&5
+$as_echo "$netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+    for ac_header in netlink/route/link.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "netlink/route/link.h" "ac_cv_header_netlink_route_link_h" "$ac_includes_default"
+if test "x$ac_cv_header_netlink_route_link_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NETLINK_ROUTE_LINK_H 1
+_ACEOF
+
+fi
+
+done
+
+            EXTERNAL_MIBGROUP_INCLUDES="$EXTERNAL_MIBGROUP_INCLUDES ${LIBNLROUTE3_CFLAGS}"
  else
     CPPFLAGS="$netsnmp_save_CPPFLAGS"
  fi

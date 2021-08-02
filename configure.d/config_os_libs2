@@ -241,6 +241,8 @@ if test "x$with_nl" != "xno"; then
           [PKG_CHECK_EXISTS],
           [PKG_CHECK_EXISTS([libnl-3.0],
             [PKG_CHECK_MODULES([LIBNL3], [libnl-3.0])])
+	   PKG_CHECK_EXISTS([libnl-route-3.0],
+            [PKG_CHECK_MODULES([LIBNLROUTE3], [libnl-route-3.0])])
           ],
           AC_MSG_WARN([pkg-config has not been installed or is too old.])
           AC_MSG_WARN([Detection of libnl-3.0 will be skipped.])
@@ -251,6 +253,10 @@ if test "x$with_nl" != "xno"; then
         NETSNMP_SEARCH_LIBS(nl_connect, nl-3,
             [AC_CHECK_HEADERS(netlink/netlink.h)
             EXTERNAL_MIBGROUP_INCLUDES="$EXTERNAL_MIBGROUP_INCLUDES ${LIBNL3_CFLAGS}"],
+            [CPPFLAGS="$netsnmp_save_CPPFLAGS"], [], [LMIBLIBS])
+        NETSNMP_SEARCH_LIBS(rtnl_link_alloc_cache, nl-route-3,
+            [AC_CHECK_HEADERS(netlink/route/link.h)
+            EXTERNAL_MIBGROUP_INCLUDES="$EXTERNAL_MIBGROUP_INCLUDES ${LIBNLROUTE3_CFLAGS}"],
             [CPPFLAGS="$netsnmp_save_CPPFLAGS"], [], [LMIBLIBS])
         if test "x$ac_cv_header_netlink_netlink_h" != xyes; then
             NETSNMP_SEARCH_LIBS(nl_connect, nl, [
