@@ -211,6 +211,40 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
 }
 #endif /* SIOCGIFHWADDR */
 
+void
+netsnmp_process_link_flags(netsnmp_interface_entry *ifentry,
+                           unsigned int os_flags)
+{
+    ifentry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
+    ifentry->os_flags = os_flags;
+
+    /*
+     * ifOperStatus description:
+     *   If ifAdminStatus is down(2) then ifOperStatus should be down(2).
+     */
+    if (ifentry->os_flags & IFF_UP) {
+        ifentry->admin_status = IFADMINSTATUS_UP;
+        if (ifentry->os_flags & IFF_RUNNING)
+            ifentry->oper_status = IFOPERSTATUS_UP;
+        else
+            ifentry->oper_status = IFOPERSTATUS_DOWN;
+    } else {
+        ifentry->admin_status = IFADMINSTATUS_DOWN;
+        ifentry->oper_status = IFOPERSTATUS_DOWN;
+    }
+
+    /*
+     * ifConnectorPresent description:
+     *   This object has the value 'true(1)' if the interface sublayer has a
+     *   physical connector and the value 'false(2)' otherwise."
+     * So, at very least, false(2) should be returned for loopback devices.
+     */
+    if (ifentry->os_flags & IFF_LOOPBACK) {
+        ifentry->connector_present = 0;
+    } else {
+        ifentry->connector_present = 1;
+    }
+}
 
 #ifdef SIOCGIFFLAGS
 /**
@@ -237,39 +271,8 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
     if (rc < 0) {
         ifentry->ns_flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
         return rc;
-    }
-    else {
-        ifentry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
-        ifentry->os_flags = ifrq.ifr_flags;
-
-        /*
-         * ifOperStatus description:
-         *   If ifAdminStatus is down(2) then ifOperStatus should be down(2).
-         */
-        if(ifentry->os_flags & IFF_UP) {
-            ifentry->admin_status = IFADMINSTATUS_UP;
-            if(ifentry->os_flags & IFF_RUNNING)
-                ifentry->oper_status = IFOPERSTATUS_UP;
-            else
-                ifentry->oper_status = IFOPERSTATUS_DOWN;
-        }
-        else {
-            ifentry->admin_status = IFADMINSTATUS_DOWN;
-            ifentry->oper_status = IFOPERSTATUS_DOWN;
-        }
-
-        /*
-         * ifConnectorPresent description:
-         *   This object has the value 'true(1)' if the interface sublayer has a
-         *   physical connector and the value 'false(2)' otherwise."
-         * So, at very least, false(2) should be returned for loopback devices.
-         */
-        if(ifentry->os_flags & IFF_LOOPBACK) {
-            ifentry->connector_present = 0;
-        }
-        else {	
-            ifentry->connector_present = 1;
-        }
+    } else {
+        netsnmp_process_link_flags(ifentry, ifrq.ifr_flags);
     }
     
     return rc;
