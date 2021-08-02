@@ -23,6 +23,13 @@ netsnmp_feature_require(interface_ioctl_flags_set);
 #include <inttypes.h>
 #endif
 
+#ifndef HAVE_LIBNL3
+#error libnl-3 is required
+#endif
+#include <netlink/cache.h>
+#include <netlink/netlink.h>
+#include <netlink/route/addr.h>
+
 #ifdef HAVE_PCI_LOOKUP_NAME
 #include <pci/pci.h>
 #include <setjmp.h>
@@ -472,130 +479,6 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
 }
 #endif /* NETSNMP_ENABLE_IPV6 */
 
-/**
- * @internal
- */
-static int
-_parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
-{
-    /*
-     * scanline_2_2:
-     *  [               IN                        ]
-     *   byte pkts errs drop fifo frame cmprs mcst |
-     *  [               OUT                               ]
-     *   byte pkts errs drop fifo colls carrier compressed
-     */
-    uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
-    uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
-    const char     *scan_line_2_2 =
-        "%"   SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
-        " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX " %"  SCNuMAX
-        " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
-        " %*" SCNuMAX " %"  SCNuMAX;
-    const char     *scan_line_2_0 =
-        "%"   SCNuMAX " %"  SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
-        " %*" SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %*" SCNuMAX
-        " %*" SCNuMAX " %"  SCNuMAX;
-    static const char     *scan_line_to_use = NULL;
-    int             scan_count;
-
-    if (10 == expected)
-        scan_line_to_use = scan_line_2_2;
-    else {
-        netsnmp_assert(5 == expected);
-        scan_line_to_use = scan_line_2_0;
-    }
-
-    while (*stats == ' ')
-        stats++;
-
-    if ((*stats == 'N') &&
-        (0 == strncmp(stats, "No statistics available",
-                      strlen("No statistics available"))))
-        return -1;
-
-    /*
-     * Now parse the rest of the line (i.e. starting from 'stats')
-     *      to extract the relevant statistics, and populate
-     *      data structure accordingly.
-     * Use the entry flags field to indicate which counters are valid
-     */
-    rec_pkt = rec_oct = rec_err = rec_drop = rec_mcast = 0;
-    snd_pkt = snd_oct = snd_err = snd_drop = coll = 0;
-    if (scan_line_to_use == scan_line_2_2) {
-        scan_count = sscanf(stats, scan_line_to_use,
-                            &rec_oct, &rec_pkt, &rec_err, &rec_drop, &rec_mcast,
-                            &snd_oct, &snd_pkt, &snd_err, &snd_drop,
-                            &coll);
-        if (scan_count == expected) {
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_BYTES;
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_DROPS;
-            /*
-             *  2.4 kernel includes a single multicast (input) counter?
-             */
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES;
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS;
-        }
-    } else {
-        scan_count = sscanf(stats, scan_line_to_use,
-                            &rec_pkt, &rec_err,
-                            &snd_pkt, &snd_err, &coll);
-        if (scan_count == expected) {
-            entry->ns_flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
-            rec_oct = rec_drop = 0;
-            snd_oct = snd_drop = 0;
-        }
-    }
-    if(scan_count != expected) {
-        snmp_log(LOG_ERR,
-                 "error scanning interface data (expected %d, got %d)\n",
-                 expected, scan_count);
-        return scan_count;
-    }
-    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_ACTIVE;
-    
-    /*
-     * linux previous to 1.3.~13 may miss transmitted loopback pkts: 
-     */
-    if (!strcmp(entry->name, "lo") && rec_pkt > 0 && !snd_pkt)
-        snd_pkt = rec_pkt;
-    
-    /*
-     * subtract out multicast packets from rec_pkt before
-     * we store it as unicast counter.
-     */
-    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_CALCULATE_UCAST;
-    entry->stats.ibytes.low = rec_oct & 0xffffffff;
-    entry->stats.iall.low = rec_pkt & 0xffffffff;
-    entry->stats.imcast.low = rec_mcast & 0xffffffff;
-    entry->stats.obytes.low = snd_oct & 0xffffffff;
-    entry->stats.oucast.low = snd_pkt & 0xffffffff;
-    entry->stats.ibytes.high = rec_oct >> 32;
-    entry->stats.iall.high = rec_pkt >> 32;
-    entry->stats.imcast.high = rec_mcast >> 32;
-    entry->stats.obytes.high = snd_oct >> 32;
-    entry->stats.oucast.high = snd_pkt >> 32;
-    entry->stats.ierrors   = rec_err;
-    entry->stats.idiscards = rec_drop;
-    entry->stats.oerrors   = snd_err;
-    entry->stats.odiscards = snd_drop;
-    entry->stats.collisions = coll;
-    
-    /*
-     * calculated stats.
-     *
-     *  we have imcast, but not ibcast.
-     */
-    entry->stats.inucast = entry->stats.imcast.low +
-        entry->stats.ibcast.low;
-    entry->stats.onucast = entry->stats.omcast.low +
-        entry->stats.obcast.low;
-    
-    return 0;
-}
-
 /* Guess the IANA network interface type from the network interface name. */
 static int netsnmp_guess_interface_type(const netsnmp_interface_entry *entry)
 {
@@ -645,7 +528,7 @@ static void netsnmp_derive_interface_id(netsnmp_interface_entry *entry)
     case IANAIFTYPE_GIGABITETHERNET:
     case IANAIFTYPE_FDDI:
     case IANAIFTYPE_ISO88025TOKENRING:
-        if (entry->paddr && entry->paddr_len != ETH_ALEN)
+        if (!entry->paddr || entry->paddr_len != ETH_ALEN)
             break;
 
         entry->v6_if_id_len = entry->paddr_len + 2;
@@ -665,30 +548,274 @@ static void netsnmp_derive_interface_id(netsnmp_interface_entry *entry)
     }
 }
 
+static void netsnmp_retrieve_link_speed(int fd, netsnmp_interface_entry *entry)
+{
+    unsigned long long defaultspeed = NOMINAL_LINK_SPEED;
+
+    if (!(entry->os_flags & IFF_RUNNING)) {
+        /*
+         * use speed 0 if the if speed cannot be determined *and* the
+         * interface is down
+         */
+        defaultspeed = 0;
+    }
+    entry->speed = netsnmp_linux_interface_get_if_speed(fd, entry->name,
+                                                        defaultspeed);
+    entry->speed_high = entry->speed / 1000000LL;
+}
+
 /**
- * Read network interface information from /proc/net/dev.
+ * @internal
+ */
+static void
+_retrieve_stats(netsnmp_interface_entry *entry, struct rtnl_link *rtnl_link)
+{
+    uint64_t rec_oct, rec_pkt, rec_err, rec_drop, rec_mcast, snd_oct;
+    uint64_t snd_pkt, snd_err, snd_drop, coll;
+
+    /*
+     * See also dev_seq_printf_stats() in the Linux kernel source file
+     * net/core/net-procfs.c.
+     */
+    rec_oct = rtnl_link_get_stat(rtnl_link, RTNL_LINK_RX_BYTES);
+    rec_pkt = rtnl_link_get_stat(rtnl_link, RTNL_LINK_RX_PACKETS);
+    rec_err = rtnl_link_get_stat(rtnl_link, RTNL_LINK_RX_ERRORS);
+    rec_drop = rtnl_link_get_stat(rtnl_link, RTNL_LINK_RX_DROPPED) +
+        rtnl_link_get_stat(rtnl_link, RTNL_LINK_RX_MISSED_ERR);
+    rec_mcast = rtnl_link_get_stat(rtnl_link, RTNL_LINK_MULTICAST);
+    /*
+     * Some libnl versions incorrectly report zero received packets. If that
+     * is the case, fetch the number of received packets from sysfs.
+     */
+    if (rec_oct && rec_pkt == 0) {
+        char path[256];
+        FILE *f;
+
+        snprintf(path, sizeof(path), "/sys/class/net/%s/statistics/rx_packets",
+                 entry->name);
+        f = fopen(path, "rb");
+        if (f) {
+            NETSNMP_IGNORE_RESULT(fscanf(f, "%" SCNu64, &rec_pkt));
+            fclose(f);
+        }
+        if (rec_pkt < rec_mcast)
+            rec_pkt = rec_mcast;
+        DEBUGMSGTL(("access:ifcontainer",
+                    "%s: rec_oct = %" PRIu64 ", rec_pkt = 0 -> %" PRIu64 "\n",
+                    entry->name, rec_oct, rec_pkt));
+    }
+    snd_oct = rtnl_link_get_stat(rtnl_link, RTNL_LINK_TX_BYTES);
+    snd_pkt = rtnl_link_get_stat(rtnl_link, RTNL_LINK_TX_PACKETS);
+    snd_err = rtnl_link_get_stat(rtnl_link, RTNL_LINK_TX_ERRORS);
+    snd_drop = rtnl_link_get_stat(rtnl_link, RTNL_LINK_TX_DROPPED);
+    coll = rtnl_link_get_stat(rtnl_link, RTNL_LINK_COLLISIONS);
+
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_BYTES;
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_DROPS;
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES;
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS;
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_ACTIVE;
+    /*
+     * subtract out multicast packets from rec_pkt before
+     * we store it as unicast counter.
+     */
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_CALCULATE_UCAST;
+    entry->stats.ibytes.low = rec_oct & 0xffffffff;
+    entry->stats.iall.low = rec_pkt & 0xffffffff;
+    entry->stats.imcast.low = rec_mcast & 0xffffffff;
+    entry->stats.obytes.low = snd_oct & 0xffffffff;
+    entry->stats.oucast.low = snd_pkt & 0xffffffff;
+    entry->stats.ibytes.high = rec_oct >> 32;
+    entry->stats.iall.high = rec_pkt >> 32;
+    entry->stats.imcast.high = rec_mcast >> 32;
+    entry->stats.obytes.high = snd_oct >> 32;
+    entry->stats.oucast.high = snd_pkt >> 32;
+    entry->stats.ierrors   = rec_err;
+    entry->stats.idiscards = rec_drop;
+    entry->stats.oerrors   = snd_err;
+    entry->stats.odiscards = snd_drop;
+    entry->stats.collisions = coll;
+
+    /*
+     * calculated stats.
+     *
+     *  we have imcast, but not ibcast.
+     */
+    entry->stats.inucast = entry->stats.imcast.low +
+        entry->stats.ibcast.low;
+    entry->stats.onucast = entry->stats.omcast.low +
+        entry->stats.obcast.low;
+}
+
+static void netsnmp_retrieve_one_link_info(struct rtnl_link *rtnl_link, int fd,
+                                           netsnmp_interface_entry *entry,
+                                           int load_stats)
+{
+    struct nl_addr *nl_addr = rtnl_link_get_addr(rtnl_link);
+    void *paddr = nl_addr_get_binary_addr(nl_addr);
+    int paddr_len = nl_addr_get_len(nl_addr);
+    unsigned int link_flags;
+
+    free(entry->paddr);
+    entry->paddr = netsnmp_memdup(paddr, paddr_len);
+    entry->paddr_len = paddr_len;
+    entry->type = netsnmp_convert_arphrd_type(
+                              rtnl_link_get_arptype(rtnl_link));
+    if (entry->type == 0)
+        netsnmp_guess_interface_type(entry);
+    netsnmp_derive_interface_id(entry);
+    /* IFF_* flags */
+    link_flags = rtnl_link_get_flags(rtnl_link);
+    netsnmp_process_link_flags(entry, link_flags);
+    /* MTU */
+    entry->mtu = rtnl_link_get_mtu(rtnl_link);
+    /* link speed */
+    netsnmp_retrieve_link_speed(fd, entry);
+
+    /*
+     * Zero speed means link problem - I'm not sure this is always true.
+     */
+    if (entry->speed == 0 && entry->os_flags & IFF_UP)
+        entry->os_flags &= ~IFF_RUNNING;
+
+    /*
+     * check for promiscuous mode.
+     *  NOTE: there are 2 ways to set promiscuous mode in Linux
+     *  (kernels later than 2.2.something) - using ioctls and
+     *  using setsockopt. The ioctl method tested here does not
+     *  detect if an interface was set using setsockopt. google
+     *  on IFF_PROMISC and linux to see lots of arguments about it.
+     */
+    if (entry->os_flags & IFF_PROMISC)
+        entry->promiscuous = 1; /* boolean */
+
+    /*
+     * Hardcoded maximum packet size. See also the following code in the Linux
+     * kernel function ip_frag_reasm(): if (len > 65535) goto out_oversize;
+     */
+    entry->reasm_max_v4 = entry->reasm_max_v6 = 65535;
+    entry->ns_flags |=
+        NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX |
+        NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX;
+
+    netsnmp_access_interface_entry_overrides(entry);
+
+    if (load_stats)
+        _retrieve_stats(entry, rtnl_link);
+
+    _arch_interface_flags_v4_get(entry);
+
+#ifdef NETSNMP_ENABLE_IPV6
+    _arch_interface_flags_v6_get(entry);
+#endif /* NETSNMP_ENABLE_IPV6 */
+}
+
+/*
+ * Iterate over all network interfaces (links) and store information about
+ * the network interfaces in @container.
+ */
+static void netsnmp_retrieve_link_info(struct nl_sock *nl_sock, int fd,
+                                       netsnmp_container *container)
+{
+    struct nl_cache *link_cache;
+    int ret;
+
+    ret = rtnl_link_alloc_cache(nl_sock, AF_UNSPEC, &link_cache);
+    if (ret)
+        return;
+#if 0
+    {
+        // Debugging code: dump the statistics in ASCII format.
+        char buf[16384];
+        struct nl_dump_params dump_params = {
+            .dp_type = NL_DUMP_STATS,
+            .dp_buf = buf,
+            .dp_buflen = sizeof(buf)
+        };
+        nl_cache_dump(link_cache, &dump_params);
+        write(1, buf, strlen(buf));
+    }
+#endif
+    for (struct nl_object *nl_object = nl_cache_get_first(link_cache);
+         nl_object;
+         nl_object = nl_cache_get_next(nl_object)) {
+        struct rtnl_link *rtnl_link = (void *)nl_object;
+        int if_index = rtnl_link_get_ifindex(rtnl_link);
+        const char *ifname = rtnl_link_get_name(rtnl_link);
+        netsnmp_interface_entry *entry;
+
+        netsnmp_assert(if_index > 0);
+        if (if_index <= 0)
+            continue;
+	if (!netsnmp_access_interface_include(ifname))
+            continue;
+        entry = netsnmp_access_interface_entry_create(ifname, if_index);
+        if (!entry)
+            continue;
+#ifdef HAVE_PCI_LOOKUP_NAME
+	_arch_interface_description_get(entry);
+#endif
+        netsnmp_retrieve_one_link_info(rtnl_link, fd, entry, TRUE);
+        ret = CONTAINER_INSERT(container, entry);
+        netsnmp_assert(ret == 0);
+    }
+    nl_cache_put(link_cache);
+}
+
+/* Iterate over all network addresses and set ns_flags in @container. */
+static void netsnmp_retrieve_addr_info(struct nl_sock *nl_sock,
+                                       netsnmp_container *container)
+{
+    struct nl_cache *addr_cache;
+    int ret;
+
+    ret = rtnl_addr_alloc_cache(nl_sock, &addr_cache);
+    if (ret)
+        return;
+    for (struct nl_object *nl_object = nl_cache_get_first(addr_cache);
+         nl_object;
+         nl_object = nl_cache_get_next(nl_object)) {
+        struct rtnl_addr *rtnl_addr = (struct rtnl_addr *)nl_object;
+        struct nl_addr *local_addr = rtnl_addr_get_local(rtnl_addr);
+        const int if_index = rtnl_addr_get_ifindex(rtnl_addr);
+        oid oid_array[1] = { if_index };
+        netsnmp_index oid_index = { 1, oid_array };
+        netsnmp_interface_entry *entry = CONTAINER_FIND(container, &oid_index);
+
+        if (!entry)
+            continue;
+
+        switch (nl_addr_get_family(local_addr)) {
+        case AF_INET:
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_IPV4;
+            break;
+        case AF_INET6:
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_IPV6;
+            break;
+        }
+    }
+    nl_cache_put(addr_cache);
+}
+
+/**
+ * Retrieve network interface information.
  *
  * @param container:  Container to store network information in.
  * @param load_flags: One or more NETSNMP_ACCESS_INTERFACE_LOAD_* flags.
  *
  * @retval  0 success
  * @retval -1 no container specified
- * @retval -2 could not open /proc/net/dev
+ * @retval -2 could not retrieve network interface information from OS
  * @retval -3 could not create entry (probably malloc)
  */
 int
 netsnmp_arch_interface_container_load(netsnmp_container* container,
                                       u_int load_flags)
 {
-    FILE           *devin;
-    char            line[256];
-    static char     scan_expected = 0;
-    int             fd, rc;
-    int             interfaces = 0;
-    struct ifconf   ifc;
-#ifdef NETSNMP_ENABLE_IPV6
-    netsnmp_container *addr_container;
-#endif
+    struct nl_sock *nl_sock;
+    int fd, ret;
 
     DEBUGMSGTL(("access:interface:container:arch", "load (flags %x)\n",
                 load_flags));
@@ -698,265 +825,41 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         return -1;
     }
 
-    if (!(devin = fopen("/proc/net/dev", "r"))) {
-        DEBUGMSGTL(("access:interface",
-                    "Failed to load Interface Table (linux1)\n"));
-        snmp_log_perror("interface_linux: cannot open /proc/net/dev");
-        return -2;
-    }
-
     /*
      * create socket for ioctls
      */
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if(fd < 0) {
         snmp_log_perror("interface_linux: could not create socket");
-        rc = -2;
-        goto close_devin;
+        return -2;
     }
 
-#ifdef NETSNMP_ENABLE_IPV6
-    /*
-     * get ipv6 addresses
-     */
-    addr_container = netsnmp_access_ipaddress_container_load(NULL, 0);
-#endif
-
-    /*
-     * Read the first two lines of the file, containing the header
-     * This indicates which version of the kernel we're working with,
-     * and hence which statistics are actually available.
-     *
-     * Wes originally suggested parsing the field names in this header
-     * to detect the position of individual fields directly,
-     * but I suspect this is probably more trouble than it's worth.
-     */
-    NETSNMP_IGNORE_RESULT(fgets(line, sizeof(line), devin));
-    NETSNMP_IGNORE_RESULT(fgets(line, sizeof(line), devin));
-
-    if( 0 == scan_expected ) {
-        if (strstr(line, "compressed")) {
-            scan_expected = 10;
-            DEBUGMSGTL(("access:interface",
-                        "using linux 2.2 kernel /proc/net/dev\n"));
-        } else {
-            scan_expected = 5;
-            DEBUGMSGTL(("access:interface",
-                        "using linux 2.0 kernel /proc/net/dev\n"));
-        }
+    nl_sock = nl_socket_alloc();
+    if (!nl_sock) {
+        snmp_log(LOG_ERR, "Failed to initialize netlink library\n");
+        ret = -2;
+        goto close_fd;
     }
 
-    interfaces = netsnmp_access_ipaddress_ioctl_get_interface_count(fd, &ifc);
-    if (interfaces < 0) {
-        snmp_log(LOG_ERR,"get interface count failed\n");
-        rc = -2;
-        goto free_addr_container;
-    }
-    netsnmp_assert(NULL != ifc.ifc_buf);
-
-
-    /*
-     * The rest of the file provides the statistics for each interface.
-     * Read in each line in turn, isolate the interface name
-     *   and retrieve (or create) the corresponding data structure.
-     */
-    while (fgets(line, sizeof(line), devin)) {
-        netsnmp_interface_entry *entry = NULL;
-        char           *stats, *ifstart = line;
-        u_int           flags;
-        oid             if_index;
-
-        flags = 0;
-        if (line[strlen(line) - 1] == '\n')
-            line[strlen(line) - 1] = '\0';
-
-        while (*ifstart && *ifstart == ' ')
-            ifstart++;
-
-        if ((!*ifstart) || ((stats = strrchr(ifstart, ':')) == NULL)) {
-            snmp_log(LOG_ERR,
-                     "interface data format error 1, line ==|%s|\n", line);
-            continue;
-        }
-        if ((scan_expected == 10) && ((stats - line) < 6)) {
-            snmp_log(LOG_ERR,
-                     "interface data format error 2 (%d < 6), line ==|%s|\n",
-                     (int)(stats - line), line);
-        }
-
-        DEBUGMSGTL(("9:access:ifcontainer", "processing '%s'\n", ifstart));
-
-        /*
-         * get index via ioctl.
-         * If we've met this interface before, use the same index.
-         * Otherwise find an unused index value and use that.
-         */
-        *stats++ = 0; /* null terminate name */
-
-	if (!netsnmp_access_interface_include(ifstart))
-            continue;
-
-        /* we may need to stop tracking ifaces if a max was set */
-	if (netsnmp_access_interface_max_reached(ifstart))
-            continue;
-
-        /*
-         * set address type flags.
-         * the only way I know of to check an interface for
-         * ip version is to look for ip addresses. If anyone
-         * knows a better way, put it here!
-         */
-        if_index = netsnmp_arch_interface_index_find(ifstart);
-        if (if_index == 0) {
-            DEBUGMSGTL(("access:interface", "network interface %s is gone",
-                        ifstart));
-            continue;
-        }
-#ifdef NETSNMP_ENABLE_IPV6
-        _arch_interface_has_ipv6(if_index, &flags, addr_container);
-#endif
-        netsnmp_access_interface_ioctl_has_ipv4(fd, ifstart, 0, &flags, &ifc);
-
-        /*
-         * do we only want one address type?
-         */
-        if (((load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP4_ONLY) &&
-             ((flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4) == 0)) ||
-            ((load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP6_ONLY) &&
-             ((flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV6) == 0))) {
-            DEBUGMSGTL(("9:access:ifcontainer",
-                        "interface '%s' excluded by ip version\n",
-                        ifstart));
-            continue;
-        }
-
-        entry = netsnmp_access_interface_entry_create(ifstart, if_index);
-        if(NULL == entry) {
-#ifdef NETSNMP_ENABLE_IPV6
-            netsnmp_access_ipaddress_container_free(addr_container, 0);
-#endif
-            rc = -3;
-            goto free_ifc;
-        }
-        entry->ns_flags = flags; /* initial flags; we'll set more later */
-
-#ifdef HAVE_PCI_LOOKUP_NAME
-	_arch_interface_description_get(entry);
-#endif
-
-
-        /*
-         * use ioctls for some stuff
-         *  (ignore rc, so we get as much info as possible)
-         */
-        netsnmp_access_interface_ioctl_physaddr_get(fd, entry);
-
-        /*
-         * physaddr should have set type. make some guesses (based
-         * on name) if not.
-         */
-        if (entry->type == 0)
-            entry->type = netsnmp_guess_interface_type(entry);
-
-        netsnmp_derive_interface_id(entry);
-
-        if (IANAIFTYPE_ETHERNETCSMACD == entry->type) {
-            unsigned long long speed;
-            unsigned long long defaultspeed = NOMINAL_LINK_SPEED;
-            if (!(entry->os_flags & IFF_RUNNING)) {
-                /*
-                 * use speed 0 if the if speed cannot be determined *and* the
-                 * interface is down
-                 */
-                defaultspeed = 0;
-            }
-            speed = netsnmp_linux_interface_get_if_speed(fd,
-                    entry->name, defaultspeed);
-            if (speed > 0xffffffffL) {
-                entry->speed = 0xffffffff;
-            } else
-                entry->speed = speed;
-            entry->speed_high = speed / 1000000LL;
-        } else {
-            netsnmp_access_interface_entry_guess_speed(entry);
-        }
-        
-        netsnmp_access_interface_ioctl_flags_get(fd, entry);
-
-        netsnmp_access_interface_ioctl_mtu_get(fd, entry);
-
-        /*
-         * Zero speed means link problem.
-         * - i'm not sure this is always true...
-         */
-        if((entry->speed == 0) && (entry->os_flags & IFF_UP)) {
-            entry->os_flags &= ~IFF_RUNNING;
-        }
-
-        /*
-         * check for promiscuous mode.
-         *  NOTE: there are 2 ways to set promiscuous mode in Linux
-         *  (kernels later than 2.2.something) - using ioctls and
-         *  using setsockopt. The ioctl method tested here does not
-         *  detect if an interface was set using setsockopt. google
-         *  on IFF_PROMISC and linux to see lots of arguments about it.
-         */
-        if(entry->os_flags & IFF_PROMISC) {
-            entry->promiscuous = 1; /* boolean */
-        }
-
-        /*
-         * hardcoded max packet size
-         * (see ip_frag_reasm: if(len > 65535) goto out_oversize;)
-         */
-        entry->reasm_max_v4 = entry->reasm_max_v6 = 65535;
-        entry->ns_flags |= 
-            NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX |
-            NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX;
-
-        netsnmp_access_interface_entry_overrides(entry);
-
-        if (! (load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_NO_STATS))
-            _parse_stats(entry, stats, scan_expected);
-
-        if (flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4)
-            _arch_interface_flags_v4_get(entry);
-
-#ifdef NETSNMP_ENABLE_IPV6
-        if (flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV6)
-            _arch_interface_flags_v6_get(entry);
-#endif /* NETSNMP_ENABLE_IPV6 */
-
-        /*
-         * add to container
-         */
-        if (CONTAINER_INSERT(container, entry) != 0) {
-            netsnmp_interface_entry *existing =
-                CONTAINER_FIND(container, entry);
-            NETSNMP_LOGONCE((LOG_WARNING,
-                             "Encountered interface with index %" NETSNMP_PRIz "u twice: %s <> %s\n",
-                             entry->index, existing ? existing->name : "(?)",
-                             entry->name));
-            netsnmp_access_interface_entry_free(entry);
-        }
+    ret = nl_connect(nl_sock, NETLINK_ROUTE);
+    if (ret) {
+        snmp_log(LOG_ERR, "Failed to read network interface information\n");
+        ret = -2;
+        goto free_nl_sock;
     }
 
-    rc = 0;
+    netsnmp_retrieve_link_info(nl_sock, fd, container);
+    netsnmp_retrieve_addr_info(nl_sock, container);
 
-free_ifc:
-    free(ifc.ifc_buf);
+    ret = 0;
 
-free_addr_container:
-#ifdef NETSNMP_ENABLE_IPV6
-    netsnmp_access_ipaddress_container_free(addr_container, 0);
-#endif
+free_nl_sock:
+    nl_socket_free(nl_sock);
 
+close_fd:
     close(fd);
 
-close_devin:
-    fclose(devin);
-
-    return rc;
+    return ret;
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS
