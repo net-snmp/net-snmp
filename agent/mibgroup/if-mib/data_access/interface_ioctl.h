@@ -19,6 +19,9 @@ extern          "C" {
 /**/
 
 int
+netsnmp_convert_arphrd_type(int arphrd_type);
+
+int
 netsnmp_access_interface_ioctl_physaddr_get(int fd,
                                             netsnmp_interface_entry *ifentry);
 
