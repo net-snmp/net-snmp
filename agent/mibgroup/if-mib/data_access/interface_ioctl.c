@@ -413,7 +413,7 @@ netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
     rc = _ioctl_get(fd, SIOCGIFINDEX, &ifrq, name);
     if (rc < 0) {
         DEBUGMSGTL(("access:interface:ioctl",
-                   "ifindex_get error on inerface '%s'\n", name));
+                   "ifindex_get error on interface '%s'\n", name));
         return 0;
     }
 
