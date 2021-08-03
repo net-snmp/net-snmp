@@ -2,8 +2,8 @@ image:
   - Ubuntu
   - Ubuntu1604
   # - Ubuntu2004 - Disabled because apt-get fails.
-  # - macos
-  # - macos-mojave - Fails with 'openssl/dh.h' file not found. See also https://ci.appveyor.com/project/BVanAssche87257/net-snmp/builds/39799138/job/fujvihpf1bex8283
+  - macos
+  - macos-mojave
   - Visual Studio 2019
 
 environment:
@@ -31,4 +31,4 @@ build_script:
 
 test_script:
   - cmd: 'ci\test.bat'
-  - sh:  'if [ $BUILD = MSVCDYNAMIC64 ]; then ci/test.sh; fi'
+  - sh:  'if [ $BUILD = MSVCDYNAMIC64 ] && [ $(uname) != Darwin ]; then ci/test.sh; fi'
