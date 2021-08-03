@@ -72,10 +72,8 @@ _ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
 
     strlcpy(ifrq->ifr_name, name, sizeof(ifrq->ifr_name));
     rc = ioctl(fd, which, ifrq);
-    if (rc < 0) {
-        snmp_log(LOG_ERR,"ioctl %d returned %d\n", which, rc);
+    if (rc < 0)
         rc = -3;
-    }
 
     if(ourfd >= 0)
         close(ourfd);
@@ -129,9 +127,8 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
         rc = _ioctl_get(fd, SIOCGIFHWADDR, &ifrq, ifentry->name);
         if (rc < 0) {
             memset(ifentry->paddr, (0), IFHWADDRLEN);
-            rc = -3; /* msg already logged */
-        }
-        else {
+            rc = -3;
+        } else {
             memcpy(ifentry->paddr, ifrq.ifr_hwaddr.sa_data, IFHWADDRLEN);
 
             /*
@@ -246,7 +243,7 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
     rc = _ioctl_get(fd, SIOCGIFFLAGS, &ifrq, ifentry->name);
     if (rc < 0) {
         ifentry->ns_flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
-        return rc; /* msg already logged */
+        return rc;
     }
     else {
         ifentry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
@@ -380,9 +377,8 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
     rc = _ioctl_get(fd, SIOCGIFMTU, &ifrq, ifentry->name);
     if (rc < 0) {
         ifentry->mtu = 0;
-        return rc; /* msg already logged */
-    }
-    else {
+        return rc;
+    } else {
         ifentry->mtu = ifrq.ifr_mtu;
     }
 
@@ -413,7 +409,7 @@ netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
     rc = _ioctl_get(fd, SIOCGIFINDEX, &ifrq, name);
     if (rc < 0) {
         DEBUGMSGTL(("access:interface:ioctl",
-                   "ifindex_get error on inerface '%s'\n", name));
+                   "ifindex_get error on interface '%s'\n", name));
         return 0;
     }
 

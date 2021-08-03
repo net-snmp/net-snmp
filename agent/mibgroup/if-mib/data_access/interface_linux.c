@@ -734,7 +734,11 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * knows a better way, put it here!
          */
         if_index = netsnmp_arch_interface_index_find(ifstart);
-        netsnmp_assert(if_index != 0);
+        if (if_index == 0) {
+            DEBUGMSGTL(("access:interface", "network interface %s is gone",
+                        ifstart));
+            goto free_entry;
+        }
 #ifdef NETSNMP_ENABLE_IPV6
         _arch_interface_has_ipv6(if_index, &flags, addr_container);
 #endif
@@ -928,6 +932,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                              "Encountered interface with index %" NETSNMP_PRIz "u twice: %s <> %s",
                              entry->index, existing ? existing->name : "(?)",
                              entry->name));
+free_entry:
             netsnmp_access_interface_entry_free(entry);
         }
     }
