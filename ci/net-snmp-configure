@@ -265,8 +265,8 @@ case "$(uname)" in
               mibs+=(Rmon)
               ;;
       esac
+      options+=("--with-openssl=$(brew --prefix openssl)")
       if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-          options+=("--with-openssl=$(brew --prefix openssl)")
           # On Travis OS/X linking the Perl modules fails with "undefined symbol
           # _BN_bin2bn" etc.
           options+=(--disable-embedded-perl --without-perl-modules)
