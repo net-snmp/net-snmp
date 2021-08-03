@@ -1,9 +1,9 @@
 image:
   - Ubuntu
   - Ubuntu1604
-  - Ubuntu2004
+  # - Ubuntu2004 - Disabled because apt-get fails.
   # - macos
-  # - macos-mojave
+  # - macos-mojave - Fails with 'openssl/dh.h' file not found. See also https://ci.appveyor.com/project/BVanAssche87257/net-snmp/builds/39799138/job/fujvihpf1bex8283
   - Visual Studio 2019
 
 environment:
