@@ -99,13 +99,10 @@ linear_search(const void *val, netsnmp_container *c)
 
     for (; pos < t->count; ++pos) {
         if (c->compare(t->data[pos], val) == 0)
-            break;
+            return pos;
     }
 
-    if (pos >= t->count)
-        return -1;
-
-    return pos;
+    return -1;
 }
 
 static int
