@@ -251,6 +251,12 @@ netsnmp_binary_array_release(netsnmp_container *c)
     SNMP_FREE(c);
 }
 
+/**
+ * Set or test the options of a binary array container.
+ * @param c: Container.
+ * @param set: Set (1) or test (0).
+ * @param flags: Zero or more CONTAINER_KEY_* flags.
+ */
 int
 netsnmp_binary_array_options_set(netsnmp_container *c, int set, u_int flags)
 {
@@ -267,12 +273,13 @@ netsnmp_binary_array_options_set(netsnmp_container *c, int set, u_int flags)
                 t->dirty = 1; /* force sort */
                 Sort_Array(c);
             }
-        } else
-            flags = (u_int)-1; /* unsupported flag */
-    }
-    else
+            return flags;
+        } else {
+            return -1; /* unsupported flag */
+        }
+    } else {
         return ((c->flags & flags) == flags);
-    return flags;
+    }
 }
 
 NETSNMP_STATIC_INLINE size_t
