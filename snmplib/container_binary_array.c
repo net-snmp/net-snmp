@@ -498,7 +498,7 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *const_entry)
      */
     if (! (c->flags & CONTAINER_KEY_ALLOW_DUPLICATES) && t->count) {
         i = binary_search(entry, c, 1, &next);
-        if (i > 0) {
+        if (i >= 0) {
             DEBUGMSGTL(("container","not inserting duplicate key\n"));
             return -1;
         }
