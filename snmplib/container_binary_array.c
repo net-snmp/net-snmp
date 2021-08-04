@@ -447,7 +447,7 @@ netsnmp_binary_array_insert_before(netsnmp_container *c, size_t index,
     if (NULL == entry)
         return -1;
 
-    if (index > (t->count + 1)) {
+    if (index > t->count) {
         DEBUGMSGTL(("container:insert:before", "index out of range\n"));
         return -1;
     }
@@ -456,6 +456,8 @@ netsnmp_binary_array_insert_before(netsnmp_container *c, size_t index,
       * check if we need to resize the array
       */
     _ba_resize_check(t);
+
+    netsnmp_assert(t->count < t->max_size);
 
     /*
      * shift array
@@ -468,6 +470,9 @@ netsnmp_binary_array_insert_before(netsnmp_container *c, size_t index,
      */
     t->data[index] = NETSNMP_REMOVE_CONST(void *, entry);
     ++t->count;
+
+    netsnmp_assert(index < t->count);
+    netsnmp_assert(t->count <= t->max_size);
 
     if (dirty)
         t->dirty = 1;
