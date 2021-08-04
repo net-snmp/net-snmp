@@ -311,6 +311,7 @@ netsnmp_access_interface_entry_create(const char *name, oid if_index)
         entry->index = netsnmp_access_interface_index_find(name);
     else
         entry->index = if_index;
+    netsnmp_assert(entry->index != 0);
     _access_interface_entry_save_name(name, entry->index);
 
     if (name)
@@ -322,7 +323,7 @@ netsnmp_access_interface_entry_create(const char *name, oid if_index)
     entry->connector_present = 1;
 
     entry->oid_index.len = 1;
-    entry->oid_index.oids = (oid *) & entry->index;
+    entry->oid_index.oids = &entry->index;
 
     return entry;
 }

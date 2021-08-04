@@ -70,37 +70,33 @@ static netsnmp_iterator *_ssll_iterator_get(netsnmp_container *c);
 
 
 static void *
-_get(netsnmp_container *c, const void *key, int exact)
+_get(netsnmp_container *c, const void *key, int return_next)
 {
-    sl_container *sl = (sl_container*)c;
-    sl_node  *curr = sl->head;
+    sl_container *sl = (sl_container *)c;
+    sl_node *curr = sl->head;
     int rc = 0;
-    
-    /*
-     * note: get-next on unsorted list is meaningless. we
-     * don't try to search whole array, looking for the next highest.
-     */
-    if( (NULL != curr) && (NULL != key)) {
-        while (curr) {
-            rc = sl->c.compare(curr->data, key);
-            if (rc == 0)
-                break;
-            else if (rc > 0) {
-                if (0 == sl->unsorted) {
-                    /*
-                     * if sorted, we can stop.
-                     */
-                    break;
-                }
-            }
-            curr = curr->next;
+
+    /* If the key is NULL, return the first item in the container. */
+    if (!key)
+        return curr ? curr->data : NULL;
+
+    for ( ; curr; curr = curr->next) {
+        rc = sl->c.compare(curr->data, key);
+        if (rc < 0)
+            continue;
+        if (rc == 0) {
+            if (return_next)
+                curr = curr->next;
+            break;
         }
-        
-        if((curr) && (!exact) && (rc == 0)) {
-            curr = curr->next;
+        if (!sl->unsorted) {
+            /* If sorted, we can stop. */
+            if (!return_next)
+                curr = NULL;
+            break;
         }
     }
-    
+
     return curr ? curr->data : NULL;
 }
 
@@ -124,7 +120,7 @@ _ssll_find(netsnmp_container *c, const void *data)
     if((NULL == c) || (NULL == data))
         return NULL;
 
-    return _get(c, data, 1);
+    return _get(c, data, 0);
 }
 
 static void *
@@ -133,7 +129,7 @@ _ssll_find_next(netsnmp_container *c, const void *data)
     if(NULL == c)
         return NULL;
 
-    return _get(c, data, 0);
+    return _get(c, data, 1);
 }
 
 static int
