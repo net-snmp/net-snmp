@@ -56,48 +56,6 @@ typedef struct binary_array_iterator_s {
 
 static netsnmp_iterator *_ba_iterator_get(netsnmp_container *c);
 
-/**********************************************************************
- *
- * 
- *
- */
-static void
-array_qsort(void **data, int first, int last, netsnmp_container_compare *f)
-{
-    int i, j;
-    void *mid, *tmp;
-    
-    i = first;
-    j = last;
-    mid = data[(first+last)/2];
-    
-    do {
-        while (i < last && (*f)(data[i], mid) < 0)
-            ++i;
-        while (j > first && (*f)(mid, data[j]) < 0)
-            --j;
-
-        if(i < j) {
-            tmp = data[i];
-            data[i] = data[j];
-            data[j] = tmp;
-            ++i;
-            --j;
-        }
-        else if (i == j) {
-            ++i;
-            --j;
-            break;
-        }
-    } while(i <= j);
-
-    if (j > first)
-        array_qsort(data, first, j, f);
-    
-    if (i < last)
-        array_qsort(data, i, last, f);
-}
-
 static int
 Sort_Array(netsnmp_container *c)
 {
@@ -112,8 +70,7 @@ Sort_Array(netsnmp_container *c)
         /*
          * Sort the table 
          */
-        if (t->count > 1)
-            array_qsort(t->data, 0, t->count - 1, c->compare);
+        qsort(t->data, t->count, sizeof(void *), c->compare);
         t->dirty = 0;
 
         /*
