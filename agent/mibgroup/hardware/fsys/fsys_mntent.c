@@ -59,6 +59,9 @@
 
 #endif
 
+static void     parse_mount_config(const char *, char *);
+static void     free_mount_config(void);
+
 /*
  * File systems to monitor and that are not covered by any hrFSTypes
  * enumeration.
@@ -176,7 +179,240 @@ _fsys_type( char *typename )
 void
 netsnmp_fsys_arch_init( void )
 {
-    return;
+    snmpd_register_config_handler("ignoremount", parse_mount_config,
+                                  free_mount_config, "name");
+}
+
+#define ITEM_STRING	1
+#define ITEM_SET	2
+#define ITEM_STAR	3
+#define ITEM_ANY	4
+
+typedef unsigned char details_set[32];
+
+typedef struct _conf_mount_item {
+    int             item_type;  /* ITEM_STRING, ITEM_SET, ITEM_STAR, ITEM_ANY */
+    void           *item_details;       /* content depends upon item_type */
+    struct _conf_mount_item *item_next;
+} conf_mount_item;
+
+typedef struct _conf_mount_list {
+    conf_mount_item *list_item;
+    struct _conf_mount_list *list_next;
+} conf_mount_list;
+static conf_mount_list *conf_list = NULL;
+
+static int      match_mount_config(const char *);
+static int      match_mount_config_item(const char *, conf_mount_item *);
+
+static void
+parse_mount_config(const char *token, char *cptr)
+{
+    conf_mount_list *d_new = NULL;
+    conf_mount_item *di_curr = NULL;
+    details_set    *d_set = NULL;
+    char           *name = NULL, *p = NULL, *d_str = NULL, c;
+    unsigned int    i, neg, c1, c2;
+    char           *st = NULL;
+
+    name = strtok_r(cptr, " \t", &st);
+    if (!name) {
+        config_perror("Missing NAME parameter");
+        return;
+    }
+    d_new = (conf_mount_list *) malloc(sizeof(conf_mount_list));
+    if (!d_new) {
+        config_perror("Out of memory");
+        return;
+    }
+    di_curr = (conf_mount_item *) malloc(sizeof(conf_mount_item));
+    if (!di_curr) {
+        SNMP_FREE(d_new);
+        config_perror("Out of memory");
+        return;
+    }
+    d_new->list_item = di_curr;
+    /* XXX: on error/return conditions we need to free the entire new
+       list, not just the last node like this is doing! */
+    for (;;) {
+        if (*name == '?') {
+            di_curr->item_type = ITEM_ANY;
+            di_curr->item_details = (void *) 0;
+            name++;
+        } else if (*name == '*') {
+            di_curr->item_type = ITEM_STAR;
+            di_curr->item_details = (void *) 0;
+            name++;
+        } else if (*name == '[') {
+            d_set = (details_set *) calloc(sizeof(details_set), 1);
+            if (!d_set) {
+                config_perror("Out of memory");
+                SNMP_FREE(d_new);
+                SNMP_FREE(di_curr);
+                SNMP_FREE(d_set);
+                SNMP_FREE(d_str);
+                return;
+            }
+            name++;
+            if (*name == '^' || *name == '!') {
+                neg = 1;
+                name++;
+            } else {
+                neg = 0;
+            }
+            while (*name && *name != ']') {
+                c1 = ((unsigned int) *name++) & 0xff;
+                if (*name == '-' && *(name + 1) != ']') {
+                    name++;
+                    c2 = ((unsigned int) *name++) & 0xff;
+                } else {
+                    c2 = c1;
+                }
+                for (i = c1; i <= c2; i++)
+                    (*d_set)[i / 8] |= (unsigned char) (1 << (i % 8));
+            }
+            if (*name != ']') {
+                config_perror
+                    ("Syntax error in NAME: invalid set specified");
+                SNMP_FREE(d_new);
+                SNMP_FREE(di_curr);
+                SNMP_FREE(d_set);
+                SNMP_FREE(d_str);
+                return;
+            }
+            if (neg) {
+                for (i = 0; i < sizeof(details_set); i++)
+                    (*d_set)[i] = (*d_set)[i] ^ (unsigned char) 0xff;
+            }
+            di_curr->item_type = ITEM_SET;
+            di_curr->item_details = (void *) d_set;
+            name++;
+        } else {
+            for (p = name;
+                 *p != '\0' && *p != '?' && *p != '*' && *p != '['; p++);
+            c = *p;
+            *p = '\0';
+            d_str = (char *) malloc(strlen(name) + 1);
+            if (!d_str) {
+                SNMP_FREE(d_new);
+                SNMP_FREE(d_str);
+                SNMP_FREE(di_curr);
+                SNMP_FREE(d_set);
+                config_perror("Out of memory");
+                return;
+            }
+            strcpy(d_str, name);
+            *p = c;
+            di_curr->item_type = ITEM_STRING;
+            di_curr->item_details = (void *) d_str;
+            name = p;
+        }
+        if (!*name) {
+            di_curr->item_next = (conf_mount_item *) 0;
+            break;
+        }
+        di_curr->item_next =
+            (conf_mount_item *) malloc(sizeof(conf_mount_item));
+        if (!di_curr->item_next) {
+            SNMP_FREE(di_curr->item_next);
+            SNMP_FREE(d_new);
+            SNMP_FREE(di_curr);
+            SNMP_FREE(d_set);
+            SNMP_FREE(d_str);
+            config_perror("Out of memory");
+            return;
+        }
+        di_curr = di_curr->item_next;
+    }
+    d_new->list_next = conf_list;
+    conf_list = d_new;
+}
+
+static void
+free_mount_config(void)
+{
+    conf_mount_list *d_ptr = conf_list, *d_next;
+    conf_mount_item *di_ptr, *di_next;
+
+    while (d_ptr) {
+        d_next = d_ptr->list_next;
+        di_ptr = d_ptr->list_item;
+        while (di_ptr) {
+            di_next = di_ptr->item_next;
+            if (di_ptr->item_details)
+                free(di_ptr->item_details);
+            free((void *) di_ptr);
+            di_ptr = di_next;
+        }
+        free((void *) d_ptr);
+        d_ptr = d_next;
+    }
+    conf_list = (conf_mount_list *) 0;
+}
+
+static int
+match_mount_config_item(const char *name, conf_mount_item * di_ptr)
+{
+    int             result = 0;
+    size_t          len;
+    details_set    *d_set;
+    unsigned int    c;
+
+    if (di_ptr) {
+        switch (di_ptr->item_type) {
+        case ITEM_STRING:
+            len = strlen((const char *) di_ptr->item_details);
+            if (!strncmp(name, (const char *) di_ptr->item_details, len))
+                result = match_mount_config_item(name + len,
+                                                di_ptr->item_next);
+            break;
+        case ITEM_SET:
+            if (*name) {
+                d_set = (details_set *) di_ptr->item_details;
+                c = ((unsigned int) *name) & 0xff;
+                if ((*d_set)[c / 8] & (unsigned char) (1 << (c % 8)))
+                    result = match_mount_config_item(name + 1,
+                                                    di_ptr->item_next);
+            }
+            break;
+        case ITEM_STAR:
+            if (di_ptr->item_next) {
+                for (; !result && *name; name++)
+                    result = match_mount_config_item(name,
+                                                    di_ptr->item_next);
+            } else {
+                result = 1;
+            }
+            break;
+        case ITEM_ANY:
+            if (*name)
+                result = match_mount_config_item(name + 1,
+                                                di_ptr->item_next);
+            break;
+        }
+    } else {
+        if (*name == '\0')
+            result = 1;
+    }
+
+    return result;
+}
+
+static int
+match_mount_config(const char *name)
+{
+    conf_mount_list *d_ptr = conf_list;
+
+    while (d_ptr) {
+        if (match_mount_config_item(name, d_ptr->list_item))
+            return 1;           /* match found in ignorelist */
+        d_ptr = d_ptr->list_next;
+    }
+
+    /*
+     * no match in ignorelist 
+     */
+    return 0;
 }
 
 void
@@ -248,8 +484,11 @@ netsnmp_fsys_arch_load( void )
          */
 
         /*
-         *  Optionally skip retrieving statistics for remote mounts
+         *  Optionally skip retrieving statistics for remote mounts or ignored mounts
          */
+	if (match_mount_config(entry->path)) 
+	    continue;
+
         if ( (entry->flags & NETSNMP_FS_FLAG_REMOTE) &&
             netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES))
