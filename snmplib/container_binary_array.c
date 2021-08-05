@@ -309,6 +309,25 @@ netsnmp_binary_array_get_at(netsnmp_container *c, size_t pos, void **entry)
     return 0;
 }
 
+/**
+ * Returns 1 if and only if the elements in @c are sorted in ascending order.
+ *
+ * To do: stop calling this function after
+ * https://github.com/net-snmp/net-snmp/issues/107 and
+ * https://github.com/net-snmp/net-snmp/issues/293 have been fixed.
+ */
+static int _ba_is_sorted(const netsnmp_container *c)
+{
+    const binary_array_table *t = c->container_data;
+    int i;
+
+    for (i = 0; i + 1 < t->count; ++i)
+        if (c->compare(t->data[i], t->data[i + 1]) > 0)
+            return 0;
+
+    return 1;
+}
+
 int
 netsnmp_binary_array_remove_at(netsnmp_container *c, size_t index, void **save)
 {
@@ -342,6 +361,8 @@ netsnmp_binary_array_remove_at(netsnmp_container *c, size_t index, void **save)
 
         ++c->sync;
     }
+
+    netsnmp_assert(t->dirty || _ba_is_sorted(c));
 
     return 0;
 }
@@ -476,6 +497,8 @@ netsnmp_binary_array_insert_before(netsnmp_container *c, size_t index,
 
     if (dirty)
         t->dirty = 1;
+
+    netsnmp_assert(t->dirty || _ba_is_sorted(c));
 
     ++c->sync;
 
