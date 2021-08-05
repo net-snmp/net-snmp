@@ -486,7 +486,9 @@ NETSNMP_STATIC_INLINE int
 netsnmp_binary_array_insert(netsnmp_container *c, const void *const_entry)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
-    int             dirty = 0, i = -2;
+    const int duplicates_allowed = c->flags & CONTAINER_KEY_ALLOW_DUPLICATES;
+    const int sorted = !(c->flags & CONTAINER_KEY_UNSORTED);
+    int             i = -2;
     size_t          next, pos;
     void           *entry = NETSNMP_REMOVE_CONST(void *, const_entry);
 
@@ -496,7 +498,7 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *const_entry)
     /*
      * check key if we have at least 1 item and duplicates aren't allowed
      */
-    if (! (c->flags & CONTAINER_KEY_ALLOW_DUPLICATES) && t->count) {
+    if (!duplicates_allowed && t->count) {
         i = binary_search(entry, c, 1, &next);
         if (i >= 0) {
             DEBUGMSGTL(("container","not inserting duplicate key\n"));
@@ -507,26 +509,27 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *const_entry)
     /*
      * if unsorted, just add at the end
      */
-    if (c->flags & CONTAINER_KEY_UNSORTED) {
+    if (!sorted) {
         pos = t->count;
-        dirty = 1;
     } else {
         /** if we haven't searched for key yet, do it now */
         if (-2 == i) {
             if (0 == t->count) {
                 next = 0;
                 i = -1;
-            } else
+            } else {
                 i = binary_search(entry, c, 1, &next);
+            }
         }
 
         pos = next;
-        if ( i > 0 )  /* if key found, advance past any dups */
+        /* if key found, advance past any duplicates */
+        if (duplicates_allowed && i >= 0)
             while (pos < t->count && c->compare(t->data[pos], entry) == 0)
                 ++pos;
     }
 
-    return netsnmp_binary_array_insert_before(c, pos, entry, dirty);
+    return netsnmp_binary_array_insert_before(c, pos, entry, !sorted);
 }
 
 /**********************************************************************
