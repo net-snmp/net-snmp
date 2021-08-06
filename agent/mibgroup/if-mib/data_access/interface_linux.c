@@ -609,7 +609,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 {
     FILE           *devin;
     char            line[256];
-    netsnmp_interface_entry *entry = NULL;
     static char     scan_expected = 0;
     int             fd;
     int             interfaces = 0;
@@ -690,6 +689,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
      *   and retrieve (or create) the corresponding data structure.
      */
     while (fgets(line, sizeof(line), devin)) {
+        netsnmp_interface_entry *entry = NULL;
         char           *stats, *ifstart = line;
         u_int           flags;
         oid             if_index;
@@ -738,7 +738,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         if (if_index == 0) {
             DEBUGMSGTL(("access:interface", "network interface %s is gone",
                         ifstart));
-            goto free_entry;
+            continue;
         }
 #ifdef NETSNMP_ENABLE_IPV6
         _arch_interface_has_ipv6(if_index, &flags, addr_container);
@@ -933,7 +933,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                              "Encountered interface with index %" NETSNMP_PRIz "u twice: %s <> %s",
                              entry->index, existing ? existing->name : "(?)",
                              entry->name));
-free_entry:
             netsnmp_access_interface_entry_free(entry);
         }
     }
