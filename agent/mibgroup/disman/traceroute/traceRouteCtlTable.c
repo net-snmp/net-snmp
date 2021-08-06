@@ -22,6 +22,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <pthread.h>
 #include <math.h>
+#include <stddef.h>
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(header_complex_find_entry);
