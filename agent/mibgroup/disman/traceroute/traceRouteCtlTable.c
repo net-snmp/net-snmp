@@ -5779,7 +5779,7 @@ send_probe(struct sockaddr_in *whereto, int seq, int ttl,
 #else
 
     cc = sendto(sndsock, (char *) outip,
-                packlen, 0, whereto, sizeof(*whereto));
+                packlen, 0, (void *)whereto, sizeof(*whereto));
 #endif
     if (cc < 0 || cc != packlen) {
         if (cc < 0)
