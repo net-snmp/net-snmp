@@ -609,9 +609,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 {
     FILE           *devin;
     char            line[256];
-    netsnmp_interface_entry *entry = NULL;
     static char     scan_expected = 0;
-    int             fd;
+    int             fd, rc;
     int             interfaces = 0;
     struct ifconf   ifc;
 #ifdef NETSNMP_ENABLE_IPV6
@@ -639,8 +638,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if(fd < 0) {
         snmp_log_perror("interface_linux: could not create socket");
-        fclose(devin);
-        return -2;
+        rc = -2;
+        goto close_devin;
     }
 
 #ifdef NETSNMP_ENABLE_IPV6
@@ -677,9 +676,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     interfaces = netsnmp_access_ipaddress_ioctl_get_interface_count(fd, &ifc);
     if (interfaces < 0) {
         snmp_log(LOG_ERR,"get interface count failed\n");
-        fclose(devin);
-        close(fd);
-        return -2;
+        rc = -2;
+        goto free_addr_container;
     }
     netsnmp_assert(NULL != ifc.ifc_buf);
 
@@ -690,6 +688,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
      *   and retrieve (or create) the corresponding data structure.
      */
     while (fgets(line, sizeof(line), devin)) {
+        netsnmp_interface_entry *entry = NULL;
         char           *stats, *ifstart = line;
         u_int           flags;
         oid             if_index;
@@ -722,11 +721,12 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         *stats++ = 0; /* null terminate name */
 
 	if (!netsnmp_access_interface_include(ifstart))
-		continue;
+            continue;
 
+        /* we may need to stop tracking ifaces if a max was set */
 	if (netsnmp_access_interface_max_reached(ifstart))
-		/* we may need to stop tracking ifaces if a max was set */
-		continue;
+            continue;
+
         /*
          * set address type flags.
          * the only way I know of to check an interface for
@@ -737,7 +737,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         if (if_index == 0) {
             DEBUGMSGTL(("access:interface", "network interface %s is gone",
                         ifstart));
-            goto free_entry;
+            continue;
         }
 #ifdef NETSNMP_ENABLE_IPV6
         _arch_interface_has_ipv6(if_index, &flags, addr_container);
@@ -762,10 +762,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 #ifdef NETSNMP_ENABLE_IPV6
             netsnmp_access_ipaddress_container_free(addr_container, 0);
 #endif
-            fclose(devin);
-            close(fd);
-            free(ifc.ifc_buf);
-            return -3;
+            rc = -3;
+            goto free_ifc;
         }
         entry->ns_flags = flags; /* initial flags; we'll set more later */
 
@@ -932,17 +930,26 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                              "Encountered interface with index %" NETSNMP_PRIz "u twice: %s <> %s",
                              entry->index, existing ? existing->name : "(?)",
                              entry->name));
-free_entry:
             netsnmp_access_interface_entry_free(entry);
         }
     }
+
+    rc = 0;
+
+free_ifc:
+    free(ifc.ifc_buf);
+
+free_addr_container:
 #ifdef NETSNMP_ENABLE_IPV6
     netsnmp_access_ipaddress_container_free(addr_container, 0);
 #endif
-    fclose(devin);
+
     close(fd);
-    free(ifc.ifc_buf);
-    return 0;
+
+close_devin:
+    fclose(devin);
+
+    return rc;
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS

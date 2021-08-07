@@ -5261,13 +5261,13 @@ get_module_node(const char *fname,
 static int
 node_to_oid(struct tree *tp, oid * objid, size_t * objidlen)
 {
-    int             numids, lenids;
+    size_t          numids, lenids;
     oid            *op;
 
     if (!tp || !objid || !objidlen)
         return 0;
 
-    lenids = (int) *objidlen;
+    lenids = *objidlen;
     op = objid + lenids;        /* points after the last element */
 
     for (numids = 0; tp; tp = tp->parent, numids++) {
@@ -5277,7 +5277,7 @@ node_to_oid(struct tree *tp, oid * objid, size_t * objidlen)
         *op = tp->subid;
     }
 
-    *objidlen = (size_t) numids;
+    *objidlen = numids;
     if (numids > lenids) {
         return 0;
     }
@@ -5285,7 +5285,7 @@ node_to_oid(struct tree *tp, oid * objid, size_t * objidlen)
     if (numids < lenids)
         memmove(objid, op, numids * sizeof(oid));
 
-    return (numids);
+    return numids;
 }
 
 /*

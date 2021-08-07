@@ -318,12 +318,18 @@ netsnmp_binary_array_get_at(netsnmp_container *c, size_t pos, void **entry)
  */
 static int _ba_is_sorted(const netsnmp_container *c)
 {
+    /*
+     * The code below has been commented out because it negatively affects
+     * performance.
+     */
+#if 0
     const binary_array_table *t = c->container_data;
     int i;
 
     for (i = 0; i + 1 < t->count; ++i)
         if (c->compare(t->data[i], t->data[i + 1]) > 0)
             return 0;
+#endif
 
     return 1;
 }

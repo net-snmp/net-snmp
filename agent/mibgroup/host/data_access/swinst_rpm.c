@@ -79,7 +79,7 @@ netsnmp_swinst_arch_init(void)
     rpmFreeRpmrc();
 #endif
     if (-1 == stat( pkg_directory, &stat_buf )) {
-        snmp_log(LOG_ERR, "Can't find directory of RPM packages");
+        snmp_log(LOG_ERR, "Can't find directory of RPM packages\n");
         pkg_directory[0] = '\0';
     }
 }
