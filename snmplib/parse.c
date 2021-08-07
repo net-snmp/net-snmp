@@ -564,7 +564,6 @@ static void     init_tree_roots(void);
 static void     merge_anon_children(struct tree *, struct tree *);
 static void     unlink_tbucket(struct tree *);
 static void     unlink_tree(struct tree *);
-static int      getoid(FILE *, struct subid_s *, int);
 static struct node *parse_objectid(FILE *, char *);
 static int      get_tc(const char *, int, int *, struct enum_list **,
                        struct range_list **, char **);
@@ -1850,18 +1849,22 @@ do_linkup(struct module *mp, struct node *np)
 }
 
 
-/*
+/**
+ * Read an OID from a file.
+ * @param[in]  file   File to read from.
+ * @param[out] id_arg Array to store the OID in.
+ * @param[in]  length Number of elements in the @id_arg array.
+ *
  * Takes a list of the form:
  * { iso org(3) dod(6) 1 }
  * and creates several nodes, one for each parent-child pair.
  * Returns 0 on error.
  */
 static int
-getoid(FILE * fp, struct subid_s *id,   /* an array of subids */
-       int length)
-{                               /* the length of the array */
-    register int    count;
-    int             type;
+getoid(FILE * fp, struct subid_s *id_arg, int length)
+{
+    struct subid_s *id = id_arg;
+    int             i, count, type;
     char            token[MAXTOKEN];
 
     if ((type = get_token(fp, token, MAXTOKEN)) != LEFTBRACKET) {
@@ -1889,11 +1892,11 @@ getoid(FILE * fp, struct subid_s *id,   /* an array of subids */
                          get_token(fp, token, MAXTOKEN)) != RIGHTPAREN) {
                         print_error("Expected a closing parenthesis",
                                     token, type);
-                        return 0;
+                        goto free_labels;
                     }
                 } else {
                     print_error("Expected a number", token, type);
-                    return 0;
+                    goto free_labels;
                 }
             } else {
                 continue;
@@ -1905,11 +1908,18 @@ getoid(FILE * fp, struct subid_s *id,   /* an array of subids */
             id->subid = strtoul(token, NULL, 10);
         } else {
             print_error("Expected label or number", token, type);
-            return 0;
+            goto free_labels;
         }
         type = get_token(fp, token, MAXTOKEN);
     }
     print_error("Too long OID", token, type);
+
+free_labels:
+    for (i = 0; i < count; i++) {
+        free(id[i].label);
+        id[i].label = NULL;
+    }
+
     return 0;
 }
 
