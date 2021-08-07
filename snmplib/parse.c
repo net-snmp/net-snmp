@@ -580,7 +580,6 @@ static void     init_tree_roots(void);
 static void     merge_anon_children(struct tree *, struct tree *);
 static void     unlink_tbucket(struct tree *);
 static void     unlink_tree(struct tree *);
-static int      getoid(FILE *, struct subid_s *, int);
 static struct node *parse_objectid(FILE *, char *);
 static int      get_tc(const char *, int, int *, struct enum_list **,
                        struct range_list **, char **);
