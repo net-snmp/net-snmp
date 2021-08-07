@@ -5670,6 +5670,8 @@ _add_strings_to_oid(void *tp, char *cp,
         case '"':
         case '\'':
             doingquote = *cp++;
+            if (*cp == '\0')
+                goto bad_id;
             /*
              * insert length if requested 
              */
