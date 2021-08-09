@@ -927,7 +927,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             netsnmp_interface_entry *existing =
                 CONTAINER_FIND(container, entry);
             NETSNMP_LOGONCE((LOG_WARNING,
-                             "Encountered interface with index %" NETSNMP_PRIz "u twice: %s <> %s",
+                             "Encountered interface with index %" NETSNMP_PRIz "u twice: %s <> %s\n",
                              entry->index, existing ? existing->name : "(?)",
                              entry->name));
             netsnmp_access_interface_entry_free(entry);
