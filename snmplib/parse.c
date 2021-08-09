@@ -1929,11 +1929,12 @@ getoid(FILE * fp, struct subid_s *id_arg, int length)
         type = get_token(fp, token, MAXTOKEN);
     }
     print_error("Too long OID", token, type);
+    --count;
 
 free_labels:
-    for (i = 0; i < count; i++) {
-        free(id[i].label);
-        id[i].label = NULL;
+    for (i = 0; i <= count; i++) {
+        free(id_arg[i].label);
+        id_arg[i].label = NULL;
     }
 
     return 0;
