@@ -8,7 +8,19 @@ of the fuzzing in net-snmp is to catch any potential bugs, in particular memory
 corruption issues. The net-snmp code is instrumented with different sanitizers
 e.g. AddressSanitizer, when being fuzzed. 
 
-The OSS-Fuzz set up can be test in the following way:
+## Building fuzz tests
+The fuzz tests can be built as follows:
+- Build Net-SNMP
+- Run the testing/fuzzing/build.sh script
+
+The generated executables are stored in the testing/fuzzing directory. These
+executables can be run directly. However, running the fuzz tests directly does
+not enable any of the OSS-Fuzz infrastructure like automatically generating a
+bug report. Additionally, if not run inside a container, a fuzz test may modify
+or overwrite data it should not modify.
+
+## Running fuzz tests
+The OSS-Fuzz set up can be tested in the following way:
 
 ```
 git clone https://github.com/google/oss-fuzz
