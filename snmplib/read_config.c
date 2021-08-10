@@ -499,6 +499,8 @@ read_config_find_handler(struct config_line *line_handlers,
 {
     struct config_line *lptr;
 
+    netsnmp_assert(token);
+
     for (lptr = line_handlers; lptr != NULL; lptr = lptr->next) {
         if (!strcasecmp(token, lptr->config_token)) {
             return lptr;
@@ -516,6 +518,9 @@ run_config_handler(struct config_line *lptr,
                    const char *token, char *cptr, int when)
 {
     char           *cp;
+
+    netsnmp_assert(token);
+
     lptr = read_config_find_handler(lptr, token);
     if (lptr != NULL) {
         if (when == EITHER_CONFIG || lptr->config_time == when) {
@@ -596,6 +601,7 @@ snmp_config_when(char *line, int when)
             return SNMPERR_GENERR;
         }
         cptr = strtok_r(NULL, SNMP_CONFIG_DELIMETERS, &st);
+        netsnmp_assert(cptr);
         lptr = read_config_find_handler(lptr, cptr);
     } else {
         /*
@@ -745,6 +751,9 @@ read_config(const char *filename,
     FILE           *ifile;
     char           *line = NULL;  /* current line buffer */
     size_t          linesize = 0; /* allocated size of line */
+
+    netsnmp_assert(line_handler);
+    netsnmp_assert(line_handler->config_token);
 
     /* reset file counter when recursion depth is 0 */
     if (depth == 0)
