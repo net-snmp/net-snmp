@@ -33,6 +33,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+int SecmodInMsg_CB (struct snmp_secmod_incoming_params *sp1) {
+    return SNMPERR_SUCCESS;
+}
+
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
     if (getenv("NETSNMP_DEBUGGING") != NULL) {
         /*
@@ -43,6 +47,10 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
         snmp_set_do_debugging(1);
         debug_register_tokens("");
     }
+
+    struct snmp_secmod_def *sndef = SNMP_MALLOC_STRUCT(snmp_secmod_def);
+    sndef->decode = SecmodInMsg_CB;
+    register_sec_mod(-1, "modname", sndef);
     return 0;
 }
 
@@ -53,5 +61,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     netsnmp_session sess = { };
     snmpv3_parse(pdu, (unsigned char *)data, &bytes_remaining, NULL, &sess);
     snmp_free_pdu(pdu);
+
+    pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
+    sess = { };
+    snmp_parse(NULL, &sess, pdu, data, size);
+    snmp_free_pdu(pdu);
+
     return 0;
 }
