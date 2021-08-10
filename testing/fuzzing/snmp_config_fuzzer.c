@@ -32,6 +32,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
     if (getenv("NETSNMP_DEBUGGING") != NULL) {
@@ -47,6 +48,8 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 }
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+    register_mib_handlers();
+
     char *filename;
     if (asprintf(&filename, "/tmp/libfuzzer-%d.config", getpid()) == -1) {
         return 0;
@@ -59,8 +62,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     fwrite(data, size, 1, fp);
     fclose(fp);
 
-    struct config_line cl = { };
-    read_config(filename, &cl, 0);
+    read_config(filename, read_config_get_handlers("snmp"), 0);
 
     unlink(filename);
     free(filename);
