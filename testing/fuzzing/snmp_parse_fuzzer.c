@@ -63,8 +63,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     snmp_free_pdu(pdu);
 
     pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
-    sess = { };
-    snmp_parse(NULL, &sess, pdu, data, size);
+    memset(&sess, 0, sizeof(sess));
+    snmp_parse(NULL, &sess, pdu, (unsigned char *)data, size);
     snmp_free_pdu(pdu);
 
     return 0;
