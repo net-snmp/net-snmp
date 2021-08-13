@@ -5,7 +5,7 @@
 
 VPATH		= @srcdir@
 
-SUBDIRS		= snmplib @MAINSUBS@
+SUBDIRS		= snmplib @MAINSUBS@ testing
 SUBDIRDEPS      = sedscript
 FTSUBDIRS	= @FTMAINSUBS@ snmplib
 TESTDIRS	= testing

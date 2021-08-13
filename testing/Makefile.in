@@ -19,6 +19,9 @@ CPPFLAGS	= $(SNMPLIB_INCLUDES) @CPPFLAGS@
 CC		= @CC@ $(CPPFLAGS)
 
 all:
+	(cd fuzzing && ./build.sh)
+
+help:
 	@echo "Select one of the following targets to run:"
 	@echo ""
 	@echo "  make test        -- default test suites"
