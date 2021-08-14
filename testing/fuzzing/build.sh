@@ -1,5 +1,8 @@
 #!/bin/bash -eu
 
+# Skip building the fuzz tests on OS/X and MinGW.
+[ "$(uname)" = Linux ] || exit 0
+
 scriptdir=$(cd "$(dirname "$0")" && pwd)
 CC=clang
 CXX=clang++
