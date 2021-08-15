@@ -9,7 +9,12 @@ case "$(uname)" in
     Linux)
 	packages=(
 	    libatm1-dev
+	    #libkrb5-dev
+	    libmariadb-client-lgpl-dev
+	    libmariadbclient-dev
+	    libmysqlclient-dev
 	    libncurses5-dev
+	    libpcre3-dev
 	    libperl-dev
 	    libsensors-dev
 	    libsensors4-dev
@@ -18,9 +23,8 @@ case "$(uname)" in
 	    python3-dev
 	)
 	for p in "${packages[@]}"; do
-	    sudo sh -c "apt-get install -y $p"
+	    sudo sh -c "apt-get -qq install -y $p"
 	done
-	sudo sh -c 'apt-get install -y libmariadbclient-dev || sudo apt-get install -y libmariadb-client-lgpl-dev || sudo apt-get install -y libmysqlclient-dev'
 
 	# Add an IPv6 config - see the corresponding Travis issue
 	# https://github.com/travis-ci/travis-ci/issues/8361
