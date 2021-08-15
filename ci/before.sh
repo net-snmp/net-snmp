@@ -9,10 +9,11 @@ case "$(uname)" in
     Linux)
 	packages=(
 	    libatm1-dev
-	    #libkrb5-dev
+	    libkrb5-dev
 	    libmariadb-client-lgpl-dev
 	    libmariadbclient-dev
 	    libmysqlclient-dev
+	    libncurses-dev
 	    libncurses5-dev
 	    libpcre3-dev
 	    libperl-dev
