@@ -29020,12 +29020,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct sigaction" "sa_sigaction" "ac_cv_member_struct_sigaction_sa_sigaction" "
     $ac_includes_default
 
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_SIGNAL_H
-#include <sys/signal.h>
-#endif
+#include <signal.h>
 
 "
 if test "x$ac_cv_member_struct_sigaction_sa_sigaction" = xyes; then :
