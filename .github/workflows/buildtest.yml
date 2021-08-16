@@ -4,7 +4,9 @@ name: Build and test
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - V5-9-patches
 
 jobs:
   build_and_test:
@@ -14,7 +16,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: install required packages
-      run: sudo ci/before.sh
+      run: sudo ci/install.sh
 
     - name: build
       run: ci/build.sh
