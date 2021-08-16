@@ -1,0 +1,23 @@
+name: Build and test
+
+# on: [workflow_dispatch]
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: install required packages
+      run: sudo ci/before.sh
+
+    - name: build
+      run: ci/build.sh
+
+    - name: test
+      run: ci/test.sh
