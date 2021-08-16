@@ -23,7 +23,7 @@ clone_depth: 5
 
 install:
   - cmd: 'ci\openssl.bat'
-  - sh:  'if [ $BUILD = MSVCDYNAMIC64 ]; then ci/before.sh; fi'
+  - sh:  'if [ $BUILD = MSVCDYNAMIC64 ]; then ci/install.sh; fi'
 
 build_script:
   - cmd: 'ci\build.bat'
