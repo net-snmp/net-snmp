@@ -15,6 +15,7 @@ case "$(uname)" in
 	    libmysqlclient-dev
 	    libncurses-dev
 	    libncurses5-dev
+	    libnl-route-3-dev
 	    libpcre3-dev
 	    libperl-dev
 	    libsensors-dev
