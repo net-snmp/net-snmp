@@ -4,7 +4,9 @@ name: Build and test
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - V5-9-patches
 
 jobs:
   build_and_test:
