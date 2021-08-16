@@ -52,7 +52,7 @@ int SecmodInMsg_CB(struct snmp_secmod_incoming_params *sp1) {
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     oid *root = malloc(MAX_OID_LEN * sizeof(oid));
-    size_t rootlen;
+    size_t rootlen = MAX_OID_LEN;
     char *input;
 
     input = strndup((const char *)data, size);
