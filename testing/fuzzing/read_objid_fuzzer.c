@@ -52,7 +52,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     char *input;
 
     input = strndup((const char *)data, size);
-    read_objid(input, objid, &objidlen);
+    NETSNMP_IGNORE_RESULT(read_objid(input, objid, &objidlen));
     free(objid);
     free(input);
     return 0;
