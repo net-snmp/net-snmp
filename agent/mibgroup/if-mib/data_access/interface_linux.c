@@ -596,7 +596,80 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
     return 0;
 }
 
-/*
+/* Guess the IANA network interface type from the network interface name. */
+static int netsnmp_guess_interface_type(const netsnmp_interface_entry *entry)
+{
+    struct match_if {
+        int             mi_type;
+        const char     *mi_name;
+    };
+
+    static const struct match_if lmatch_if[] = {
+        {IANAIFTYPE_SOFTWARELOOPBACK, "lo"},
+        {IANAIFTYPE_ETHERNETCSMACD, "eth"},
+        {IANAIFTYPE_ETHERNETCSMACD, "vmnet"},
+        {IANAIFTYPE_ISO88025TOKENRING, "tr"},
+        {IANAIFTYPE_FASTETHER, "feth"},
+        {IANAIFTYPE_GIGABITETHERNET,"gig"},
+        {IANAIFTYPE_INFINIBAND,"ib"},
+        {IANAIFTYPE_PPP, "ppp"},
+        {IANAIFTYPE_SLIP, "sl"},
+        {IANAIFTYPE_TUNNEL, "sit"},
+        {IANAIFTYPE_BASICISDN, "ippp"},
+        {IANAIFTYPE_PROPVIRTUAL, "bond"}, /* Bonding driver find fastest slave */
+        {IANAIFTYPE_PROPVIRTUAL, "vad"},  /* ANS driver - ?speed? */
+        {0, NULL}                  /* end of list */
+    };
+
+    const struct match_if *pm;
+
+    for (pm = lmatch_if; pm->mi_name; pm++) {
+        const int len = strlen(pm->mi_name);
+
+        if (strncmp(entry->name, pm->mi_name, len) == 0)
+            return pm->mi_type;
+    }
+    return IANAIFTYPE_OTHER;
+}
+
+static void netsnmp_derive_interface_id(netsnmp_interface_entry *entry)
+{
+    /*
+     * interface identifier is specified based on physaddr and type
+     */
+    switch (entry->type) {
+    case IANAIFTYPE_ETHERNETCSMACD:
+    case IANAIFTYPE_ETHERNET3MBIT:
+    case IANAIFTYPE_FASTETHER:
+    case IANAIFTYPE_FASTETHERFX:
+    case IANAIFTYPE_GIGABITETHERNET:
+    case IANAIFTYPE_FDDI:
+    case IANAIFTYPE_ISO88025TOKENRING:
+        if (entry->paddr && entry->paddr_len != ETH_ALEN)
+            break;
+
+        entry->v6_if_id_len = entry->paddr_len + 2;
+        memcpy(entry->v6_if_id, entry->paddr, 3);
+        memcpy(entry->v6_if_id + 5, entry->paddr + 3, 3);
+        entry->v6_if_id[0] ^= 2;
+        entry->v6_if_id[3] = 0xFF;
+        entry->v6_if_id[4] = 0xFE;
+
+        entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
+        break;
+
+    case IANAIFTYPE_SOFTWARELOOPBACK:
+        entry->v6_if_id_len = 0;
+        entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
+        break;
+    }
+}
+
+/**
+ * Read network interface information from /proc/net/dev.
+ *
+ * @param container:  Container to store network information in.
+ * @param load_flags: One or more NETSNMP_ACCESS_INTERFACE_LOAD_* flags.
  *
  * @retval  0 success
  * @retval -1 no container specified
@@ -782,72 +855,10 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * physaddr should have set type. make some guesses (based
          * on name) if not.
          */
-        if(0 == entry->type) {
-            typedef struct _match_if {
-               int             mi_type;
-               const char     *mi_name;
-            }              *pmatch_if, match_if;
-            
-            static match_if lmatch_if[] = {
-                {IANAIFTYPE_SOFTWARELOOPBACK, "lo"},
-                {IANAIFTYPE_ETHERNETCSMACD, "eth"},
-                {IANAIFTYPE_ETHERNETCSMACD, "vmnet"},
-                {IANAIFTYPE_ISO88025TOKENRING, "tr"},
-                {IANAIFTYPE_FASTETHER, "feth"},
-                {IANAIFTYPE_GIGABITETHERNET,"gig"},
-                {IANAIFTYPE_INFINIBAND,"ib"},
-                {IANAIFTYPE_PPP, "ppp"},
-                {IANAIFTYPE_SLIP, "sl"},
-                {IANAIFTYPE_TUNNEL, "sit"},
-                {IANAIFTYPE_BASICISDN, "ippp"},
-                {IANAIFTYPE_PROPVIRTUAL, "bond"}, /* Bonding driver find fastest slave */
-                {IANAIFTYPE_PROPVIRTUAL, "vad"},  /* ANS driver - ?speed? */
-                {0, NULL}                  /* end of list */
-            };
+        if (entry->type == 0)
+            entry->type = netsnmp_guess_interface_type(entry);
 
-            int             len;
-            register pmatch_if pm;
-            
-            for (pm = lmatch_if; pm->mi_name; pm++) {
-                len = strlen(pm->mi_name);
-                if (0 == strncmp(entry->name, pm->mi_name, len)) {
-                    entry->type = pm->mi_type;
-                    break;
-                }
-            }
-            if(NULL == pm->mi_name)
-                entry->type = IANAIFTYPE_OTHER;
-        }
-
-        /*
-         * interface identifier is specified based on physaddr and type
-         */
-        switch (entry->type) {
-        case IANAIFTYPE_ETHERNETCSMACD:
-        case IANAIFTYPE_ETHERNET3MBIT:
-        case IANAIFTYPE_FASTETHER:
-        case IANAIFTYPE_FASTETHERFX:
-        case IANAIFTYPE_GIGABITETHERNET:
-        case IANAIFTYPE_FDDI:
-        case IANAIFTYPE_ISO88025TOKENRING:
-            if (NULL != entry->paddr && ETH_ALEN != entry->paddr_len)
-                break;
-
-            entry->v6_if_id_len = entry->paddr_len + 2;
-            memcpy(entry->v6_if_id, entry->paddr, 3);
-            memcpy(entry->v6_if_id + 5, entry->paddr + 3, 3);
-            entry->v6_if_id[0] ^= 2;
-            entry->v6_if_id[3] = 0xFF;
-            entry->v6_if_id[4] = 0xFE;
-
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
-            break;
-
-        case IANAIFTYPE_SOFTWARELOOPBACK:
-            entry->v6_if_id_len = 0;
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
-            break;
-        }
+        netsnmp_derive_interface_id(entry);
 
         if (IANAIFTYPE_ETHERNETCSMACD == entry->type) {
             unsigned long long speed;
@@ -866,13 +877,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             } else
                 entry->speed = speed;
             entry->speed_high = speed / 1000000LL;
-        }
-#ifdef APPLIED_PATCH_836390   /* xxx-rks ifspeed fixes */
-        else if (IANAIFTYPE_PROPVIRTUAL == entry->type)
-            entry->speed = _get_bonded_if_speed(entry);
-#endif
-        else
+        } else {
             netsnmp_access_interface_entry_guess_speed(entry);
+        }
         
         netsnmp_access_interface_ioctl_flags_get(fd, entry);
 
