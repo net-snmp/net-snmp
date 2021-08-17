@@ -249,7 +249,7 @@ if test "x$with_nl" != "xno"; then
         )
 
         netsnmp_save_CPPFLAGS="$CPPFLAGS"
-        CPPFLAGS="${LIBNL3_CFLAGS} $CPPFLAGS"
+        CPPFLAGS="${LIBNL3_CFLAGS} ${LIBNLROUTE3_CFLAGS} $CPPFLAGS"
         NETSNMP_SEARCH_LIBS(nl_connect, nl-3,
             [AC_CHECK_HEADERS(netlink/netlink.h)
             EXTERNAL_MIBGROUP_INCLUDES="$EXTERNAL_MIBGROUP_INCLUDES ${LIBNL3_CFLAGS}"],
