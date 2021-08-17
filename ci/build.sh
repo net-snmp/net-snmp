@@ -27,7 +27,7 @@ case "$(uname -a)" in
 	export PATH="/mingw64/bin:$PATH"
 	;;
 esac
-echo "compiler path: $(type -p gcc)"
+echo "compiler path: $(type -p "${CC:-gcc}")"
 "${scriptdir}"/net-snmp-configure master || exit $?
 case "$MODE" in
     mini*)
