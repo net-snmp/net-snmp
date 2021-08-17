@@ -12,8 +12,7 @@ CC=clang
 CXX=clang++
 CFLAGS="-Wall -Werror -fsanitize=fuzzer-no-link"
 CXXFLAGS="${CFLAGS} -lssl"
-SRC=${scriptdir}
-WORK=$SRC
+WORK=${scriptdir}
 OUT=$WORK
 LIB_FUZZING_ENGINE="-fsanitize=fuzzer"
 
