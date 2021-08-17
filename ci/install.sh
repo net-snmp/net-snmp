@@ -22,22 +22,21 @@ case "$(uname)" in
 	    libsensors4-dev
 	    libssh2-1-dev
 	    libssl-dev
+	    make
 	    python3-dev
 	)
 	for p in "${packages[@]}"; do
-	    sudo sh -c "apt-get -qq install -y $p"
+	    sh -c "apt-get -qq install -y $p"
 	done
-
-	# Add an IPv6 config - see the corresponding Travis issue
-	# https://github.com/travis-ci/travis-ci/issues/8361
-	sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6';;
+	;;
     Darwin)
 	# Upgrade openssl such that Net-SNMP can be built with Blumenthal
 	# AES support. Disabled because this upgrade takes long and even
 	# sometimes fails.
 	if false; then
 	    brew upgrade openssl
-	fi;;
+	fi
+	;;
     FreeBSD)
 	pkg install -y bash
 	pkg install -y gawk
@@ -49,7 +48,8 @@ case "$(uname)" in
 	pkg install -y py27-setuptools
 	if [ ! -e /usr/bin/perl ]; then
 	    ln -s /usr/local/bin/perl /usr/bin/perl
-	fi;;
+	fi
+	;;
 esac
 
 head -n 999 /etc/hosts
