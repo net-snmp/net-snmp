@@ -24833,7 +24833,7 @@ fi
 
 
         netsnmp_save_CPPFLAGS="$CPPFLAGS"
-        CPPFLAGS="${LIBNL3_CFLAGS} $CPPFLAGS"
+        CPPFLAGS="${LIBNL3_CFLAGS} ${LIBNLROUTE3_CFLAGS} $CPPFLAGS"
 
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing nl_connect" >&5
 $as_echo_n "checking for library containing nl_connect... " >&6; }
