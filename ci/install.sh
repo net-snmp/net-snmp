@@ -23,6 +23,7 @@ case "$(uname)" in
 	    libssh2-1-dev
 	    libssl-dev
 	    make
+	    pkg-config
 	    python3-dev
 	)
 	for p in "${packages[@]}"; do
