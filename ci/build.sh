@@ -27,8 +27,8 @@ case "$(uname -a)" in
 	export PATH="/mingw64/bin:$PATH"
 	;;
 esac
-echo "compiler path: $(type -p gcc)"
-"${scriptdir}"/net-snmp-configure V5-8-patches || exit $?
+echo "compiler path: $(type -p "${CC:-gcc}")"
+"${scriptdir}"/net-snmp-configure V5-9-patches || exit $?
 case "$MODE" in
     mini*)
 	# Net-SNMP uses static dependencies, the Makefile.depend files have
