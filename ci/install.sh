@@ -22,6 +22,7 @@ case "$(uname)" in
 	    libsensors4-dev
 	    libssh2-1-dev
 	    libssl-dev
+	    make
 	    python3-dev
 	)
 	for p in "${packages[@]}"; do
