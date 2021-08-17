@@ -3,18 +3,19 @@
 # Skip building the fuzz tests on OS/X and MinGW.
 [ "$(uname)" = Linux ] || exit 0
 
-# Skip building the fuzz tests if the oss-fuzz build infrastructure will be
-# used.
-[ -n "${LIB_FUZZING_ENGINE+x}" ] && exit 0
-
 scriptdir=$(cd "$(dirname "$0")" && pwd)
-CC=clang
-CXX=clang++
-CFLAGS="-Wall -Werror -fsanitize=fuzzer-no-link"
-CXXFLAGS="${CFLAGS} -lssl"
-WORK=${scriptdir}
-OUT=$WORK
-LIB_FUZZING_ENGINE="-fsanitize=fuzzer"
+
+# Only set environment variables if the oss-fuzz build infrastructure is not
+# used.
+if [ -z "${LIB_FUZZING_ENGINE+x}" ]; then
+    CC=clang
+    CXX=clang++
+    CFLAGS="-Wall -Werror -fsanitize=fuzzer-no-link"
+    CXXFLAGS="${CFLAGS} -lssl"
+    WORK=${scriptdir}
+    OUT=$WORK
+    LIB_FUZZING_ENGINE="-fsanitize=fuzzer"
+fi
 
 export CC CXX CFLAGS CXXFLAGS SRC WORK OUT LIB_FUZZING_ENGINE
 
