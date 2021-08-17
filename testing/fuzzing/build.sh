@@ -3,6 +3,10 @@
 # Skip building the fuzz tests on OS/X and MinGW.
 [ "$(uname)" = Linux ] || exit 0
 
+# Skip building the fuzz tests if the oss-fuzz build infrastructure will be
+# used.
+[ -n "${LIB_FUZZING_ENGINE+x}" ] && exit 0
+
 scriptdir=$(cd "$(dirname "$0")" && pwd)
 CC=clang
 CXX=clang++
