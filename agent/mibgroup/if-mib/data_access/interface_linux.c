@@ -308,7 +308,7 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
     snprintf(proc_path,  sizeof(proc_path),
              PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 4, entry->name);
 
-    if ((stat(proc_path, &st) == 0)) {
+    if (stat(proc_path, &st) == 0) {
         proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS;
         retrans_time_factor = 1;
     } else {
@@ -416,7 +416,7 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     snprintf(proc_path,  sizeof(proc_path),
              PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 6, entry->name);
 
-    if ((stat(proc_path, &st) == 0)) {
+    if (stat(proc_path, &st) == 0) {
         proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS;
         retrans_time_factor = 1;
     } else {
