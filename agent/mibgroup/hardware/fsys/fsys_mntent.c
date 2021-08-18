@@ -179,8 +179,7 @@ _fsys_type( char *typename )
 void
 netsnmp_fsys_arch_init( void )
 {
-    snmpd_register_config_handler("ignoremount", parse_mount_config,
-                                  free_mount_config, "name");
+    return;
 }
 
 #define ITEM_STRING	1
@@ -220,7 +219,7 @@ parse_mount_config(const char *token, char *cptr)
         config_perror("Missing NAME parameter");
         return;
     }
-    d_new = (conf_mount_list *) malloc(sizeof(conf_mount_list));
+    d_new = malloc(sizeof(conf_mount_list));
     if (!d_new) {
         config_perror("Out of memory");
         return;

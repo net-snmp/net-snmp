@@ -90,6 +90,9 @@ void init_hw_fsys( void ) {
         DEBUGMSGTL(("fsys", "Reloading Hardware FileSystems on-demand (%p)\n",
                                _fsys_cache));
     }
+
+    snmpd_register_config_handler("ignoremount", parse_mount_config,
+                                  free_mount_config, "name");
 }
 
 void shutdown_hw_fsys( void ) {
