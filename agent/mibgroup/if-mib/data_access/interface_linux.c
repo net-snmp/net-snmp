@@ -120,14 +120,8 @@ netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name,
 
 #define PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS "/proc/sys/net/ipv%d/neigh/%s/retrans_time_ms"
 #define PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME    "/proc/sys/net/ipv%d/neigh/%s/retrans_time"
-static const char *proc_sys_retrans_time;
-static unsigned short retrans_time_factor = 1;
-
-
 #define PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS "/proc/sys/net/ipv%d/neigh/%s/base_reachable_time_ms"
 #define PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME "/proc/sys/net/ipv%d/neigh/%s/base_reachable_time"
-static const char *proc_sys_basereachable_time;
-static unsigned short basereachable_time_ms = 0;
 #ifdef SUPPORT_PREFIX_FLAGS
 prefix_cbx *prefix_head_list = NULL;
 netsnmp_prefix_listen_info list_info;
@@ -176,36 +170,6 @@ static void init_libpci(void)
 void
 netsnmp_arch_interface_init(void)
 {
-    /*
-     * Check which retransmit time interface is available
-     */
-    char proc_path[ 64+IF_NAMESIZE];
-    char proc_path2[64+IF_NAMESIZE];
-    struct stat st;
-
-    snprintf(proc_path,  sizeof(proc_path),
-             PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 6, "default");
-    snprintf(proc_path2, sizeof(proc_path2),
-             PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 4, "default");
-
-    if ((stat(proc_path, &st) == 0) || (stat(proc_path2, &st) == 0)) {
-        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS;
-    } else {
-        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME;
-        retrans_time_factor = 10;
-    }
-
-    snprintf(proc_path,  sizeof(proc_path),  PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS, 6, "default");
-    snprintf(proc_path2,  sizeof(proc_path),  PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME, 4, "default");
-
-    if ((stat(proc_path, &st) == 0) || (stat(proc_path2, &st) == 0)) {
-        proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS;
-        basereachable_time_ms = 1;
-    }
-    else {
-        proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME;
-    }
-
 #ifdef SUPPORT_PREFIX_FLAGS
     list_info.list_head = &prefix_head_list;
     netsnmp_prefix_listen();
@@ -322,17 +286,29 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
 {
     FILE           *fin;
     char            line[256];
+    struct          stat st;
+    unsigned short retrans_time_factor;
+
+    /*
+     * Check which retransmit time interface is available
+     */
+    snprintf(line, sizeof(line), PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 4,
+             entry->name);
+    if (stat(line, &st) == 0) {
+        retrans_time_factor = 1;
+    } else {
+        snprintf(line, sizeof(line), PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME, 4,
+                 entry->name);
+        retrans_time_factor = 10;
+    }
 
     /*
      * get the retransmit time
      */
-    snprintf(line,sizeof(line), proc_sys_retrans_time, 4,
-             entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
                     "Failed to open %s\n", line));
-    }
-    else {
+    } else {
         if (fgets(line, sizeof(line), fin)) {
             entry->retransmit_v4 = atoi(line) * retrans_time_factor;
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V4_RETRANSMIT;
@@ -414,12 +390,26 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
 {
     FILE           *fin;
     char            line[256];
+    struct          stat st;
+    unsigned short retrans_time_factor;
+    unsigned short basereachable_time_ms;
 
+    /*
+     * Check which retransmit time interface is available
+     */
+    snprintf(line, sizeof(line), PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 6,
+             entry->name);
+    if (stat(line, &st) == 0) {
+        retrans_time_factor = 1;
+    } else {
+        snprintf(line, sizeof(line), PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME, 6,
+                 entry->name);
+        retrans_time_factor = 10;
+    }
+	
     /*
      * get the retransmit time
      */
-    snprintf(line,sizeof(line), proc_sys_retrans_time, 6,
-             entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
                     "Failed to open %s\n", line));
@@ -448,11 +438,24 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
         }
         fclose(fin);
     }
+	
+    /*
+     *  Check which base reachable time interface is available.
+     */
+
+    snprintf(line, sizeof(line), PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS, 6,
+             entry->name);
+    if (stat(line, &st) == 0) {
+        basereachable_time_ms = 1;
+    } else {
+        snprintf(line, sizeof(line), PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME, 6,
+                 entry->name);
+        basereachable_time_ms = 0;
+    }
 
     /*
      * get the reachable time
      */
-    snprintf(line, sizeof(line), proc_sys_basereachable_time, 6, entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
                     "Failed to open %s\n", line));
