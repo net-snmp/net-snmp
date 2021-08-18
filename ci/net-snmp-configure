@@ -137,7 +137,7 @@ options=()
 options+=(--enable-developer)
 options+=(--enable-ipv6)
 options+=("--prefix=/usr/local/net-snmp-${branch_name}")
-options+=("--with-cflags=$cflags")
+options+=("--with-cflags=$CFLAGS")
 options+=(--with-defaults)
 transports=()
 # Mib names can be found as follows:
