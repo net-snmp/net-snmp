@@ -183,36 +183,6 @@ static void init_libpci(void)
 void
 netsnmp_arch_interface_init(void)
 {
-    /*
-     * Check which retransmit time interface is available
-     */
-    char proc_path[ 64+IF_NAMESIZE];
-    char proc_path2[64+IF_NAMESIZE];
-    struct stat st;
-
-    snprintf(proc_path,  sizeof(proc_path),
-             PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 6, "default");
-    snprintf(proc_path2, sizeof(proc_path2),
-             PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 4, "default");
-
-    if ((stat(proc_path, &st) == 0) || (stat(proc_path2, &st) == 0)) {
-        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS;
-    } else {
-        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME;
-        retrans_time_factor = 10;
-    }
-
-    snprintf(proc_path,  sizeof(proc_path),  PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS, 6, "default");
-    snprintf(proc_path2,  sizeof(proc_path),  PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME, 4, "default");
-
-    if ((stat(proc_path, &st) == 0) || (stat(proc_path2, &st) == 0)) {
-        proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS;
-        basereachable_time_ms = 1;
-    }
-    else {
-        proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME;
-    }
-
 #ifdef SUPPORT_PREFIX_FLAGS
     list_info.list_head = &prefix_head_list;
     netsnmp_prefix_listen();
@@ -329,6 +299,22 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
 {
     FILE           *fin;
     char            line[256];
+    char            proc_path[ 64+IF_NAMESIZE];
+    struct          stat st;
+
+    /*
+     * Check which retransmit time interface is available
+     */
+    snprintf(proc_path,  sizeof(proc_path),
+             PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 4, entry->name);
+
+    if ((stat(proc_path, &st) == 0)) {
+        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS;
+        retrans_time_factor = 1;
+    } else {
+        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME;
+        retrans_time_factor = 10;
+    }
 
     /*
      * get the retransmit time
@@ -421,7 +407,23 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
 {
     FILE           *fin;
     char            line[256];
+    char            proc_path[ 64+IF_NAMESIZE];
+    struct          stat st;
 
+    /*
+     * Check which retransmit time interface is available
+     */
+    snprintf(proc_path,  sizeof(proc_path),
+             PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 6, entry->name);
+
+    if ((stat(proc_path, &st) == 0)) {
+        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS;
+        retrans_time_factor = 1;
+    } else {
+        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME;
+        retrans_time_factor = 10;
+    }
+	
     /*
      * get the retransmit time
      */
@@ -454,6 +456,21 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_FORWARDING;
         }
         fclose(fin);
+    }
+	
+    /*
+     *  Check which base reachable time interface is available.
+     */
+
+    snprintf(proc_path,  sizeof(proc_path),  PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS, 6, entry->name);
+
+    if (stat(proc_path, &st) == 0)) {
+        proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS;
+        basereachable_time_ms = 1;
+    }
+    else {
+        proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME;
+        basereachable_time_ms = 0;
     }
 
     /*
