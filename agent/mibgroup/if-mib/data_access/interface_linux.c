@@ -464,7 +464,7 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
 
     snprintf(proc_path,  sizeof(proc_path),  PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS, 6, entry->name);
 
-    if (stat(proc_path, &st) == 0)) {
+    if (stat(proc_path, &st) == 0) {
         proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS;
         basereachable_time_ms = 1;
     }
