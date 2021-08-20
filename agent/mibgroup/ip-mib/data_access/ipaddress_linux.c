@@ -220,7 +220,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
                 "cannot get ip address information"
                 "as netlink socket is not available\n"));
     return -1;
-#else
+#else /* HAVE_LINUX_RTNETLINK_H */
     FILE           *in;
     char            line[80], addr[40];
     char            if_name[IFNAMSIZ+1];/* +1 for '\0' because of the ugly sscanf below */ 
@@ -519,7 +519,7 @@ netsnmp_access_other_info_get(int index, int family)
 out:
     close(sd);
     return addr;
-#endif
+#endif /* HAVE_LINUX_RTNETLINK_H */
 }
 
 #ifdef HAVE_LINUX_RTNETLINK_H
@@ -621,6 +621,5 @@ out:
     close(sd);
     return ret;
 }
-#endif
-#endif
-
+#endif /* HAVE_LINUX_RTNETLINK_H */
+#endif /* defined(NETSNMP_ENABLE_IPV6) */
