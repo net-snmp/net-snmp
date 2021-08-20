@@ -55,7 +55,7 @@ typedef struct netsnmp_fsys_info_s netsnmp_fsys_info;
 
 struct netsnmp_fsys_info_s {
      netsnmp_index  idx;
-  /* int  idx; */
+     oid fsys_idx;
  
      char path[  SNMP_MAXPATH+1];
      char device[SNMP_MAXPATH+1];

@@ -148,12 +148,9 @@ _fsys_create_entry(void)
 
     /*
      * Set up the index value.
-     *
-     * All this trouble, just for a simple integer.
-     * Surely there must be a better way?
      */
     sp->idx.len  = 1;
-    sp->idx.oids = SNMP_MALLOC_TYPEDEF( oid );
+    sp->idx.oids = &sp->fsys_idx;
     sp->idx.oids[0] = ++_fsys_idx;
 
     DEBUGMSGTL(("fsys:new", "Create filesystem entry (index = %d)\n", _fsys_idx));
