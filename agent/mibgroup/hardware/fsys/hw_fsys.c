@@ -143,17 +143,18 @@ _fsys_create_entry(void)
     netsnmp_fsys_info *sp;
 
     sp = SNMP_MALLOC_TYPEDEF(netsnmp_fsys_info);
-    if (sp) {
-        /*
-         * Set up the index value.
-         *
-         * All this trouble, just for a simple integer.
-         * Surely there must be a better way?
-         */
-        sp->idx.len  = 1;
-        sp->idx.oids = SNMP_MALLOC_TYPEDEF( oid );
-        sp->idx.oids[0] = ++_fsys_idx;
-    }
+    if (!sp)
+        return NULL;
+
+    /*
+     * Set up the index value.
+     *
+     * All this trouble, just for a simple integer.
+     * Surely there must be a better way?
+     */
+    sp->idx.len  = 1;
+    sp->idx.oids = SNMP_MALLOC_TYPEDEF( oid );
+    sp->idx.oids[0] = ++_fsys_idx;
 
     DEBUGMSGTL(("fsys:new", "Create filesystem entry (index = %d)\n", _fsys_idx));
     CONTAINER_INSERT(_fsys_container, sp);
