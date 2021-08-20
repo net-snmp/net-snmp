@@ -79,8 +79,6 @@ struct netsnmp_fsys_info_s {
      int  minpercent;
 
      long flags;
-
-     netsnmp_fsys_info *next;
 };
 
 
