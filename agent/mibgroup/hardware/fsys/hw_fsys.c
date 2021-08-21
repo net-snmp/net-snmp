@@ -96,13 +96,6 @@ void shutdown_hw_fsys( void ) {
     _fsys_free();
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_HW_FSYS_GET_CONTAINER
-/*
- *  Return the main fsys container
- */
-netsnmp_container *netsnmp_fsys_get_container( void ) { return _fsys_container; }
-#endif /* NETSNMP_FEATURE_REMOVE_HW_FSYS_GET_CONTAINER */
-
 /*
  *  Return the main fsys cache control structure (if defined)
  */
