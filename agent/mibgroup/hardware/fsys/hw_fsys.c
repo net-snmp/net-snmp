@@ -12,6 +12,9 @@
 
 netsnmp_feature_child_of(hw_fsys_get_container, netsnmp_unused);
 
+static int netsnmp_fsys_load( netsnmp_cache *cache, void *data);
+static void netsnmp_fsys_free( netsnmp_cache *cache, void *data);
+
 static int _fsysAutoUpdate = 0;   /* 0 means on-demand caching */
 
 static netsnmp_cache     *_fsys_cache;
