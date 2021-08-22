@@ -87,8 +87,6 @@ struct netsnmp_fsys_info_s {
      */
 netsnmp_fsys_info *netsnmp_fsys_get_first( void );
 netsnmp_fsys_info *netsnmp_fsys_get_next( netsnmp_fsys_info* );
-netsnmp_fsys_info *netsnmp_fsys_get_byIdx(  int,   int );
-netsnmp_fsys_info *netsnmp_fsys_get_next_byIdx(int,int );
 
 netsnmp_fsys_info *netsnmp_fsys_by_device(  char*, int );
 netsnmp_fsys_info *netsnmp_fsys_by_path(    char*, int );
