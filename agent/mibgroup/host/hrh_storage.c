@@ -358,23 +358,23 @@ var_hrstore(struct variable *vp,
     netsnmp_memory_info *mem = NULL;
 
 really_try_next:
-	ptr = header_hrstoreEntry(vp, name, length, exact, var_len,
-					write_method);
-	if (ptr == NULL)
-	    return NULL;
+    ptr = header_hrstoreEntry(vp, name, length, exact, var_len,
+                              write_method);
+    if (ptr == NULL)
+        return NULL;
 
-        store_idx = name[ HRSTORE_ENTRY_NAME_LENGTH ];
-        if (HRFS_entry &&
-	    store_idx > NETSNMP_MEM_TYPE_MAX &&
-            netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                                   NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) &&
-            Check_HR_FileSys_NFS())
-            return NULL;
-        if (HRFS_entry && Check_HR_FileSys_AutoFs())
-            return NULL;
-        if (store_idx <= NETSNMP_MEM_TYPE_MAX ) {
-	    mem = (netsnmp_memory_info*)ptr;
-        }
+    store_idx = name[ HRSTORE_ENTRY_NAME_LENGTH ];
+    if (HRFS_entry &&
+        store_idx > NETSNMP_MEM_TYPE_MAX &&
+        netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) &&
+        Check_HR_FileSys_NFS())
+        return NULL;
+    if (HRFS_entry && Check_HR_FileSys_AutoFs())
+        return NULL;
+    if (store_idx <= NETSNMP_MEM_TYPE_MAX ) {
+        mem = (netsnmp_memory_info*)ptr;
+    }
 
 
 
@@ -420,7 +420,7 @@ really_try_next:
     case HRSTORE_UNITS:
         if (store_idx > NETSNMP_MEM_TYPE_MAX) {
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                    NETSNMP_DS_AGENT_REALSTORAGEUNITS))
+                                       NETSNMP_DS_AGENT_REALSTORAGEUNITS))
                 long_return = HRFS_entry->units & 0x7fffffff;
             else
                 long_return = HRFS_entry->units_32;
@@ -433,7 +433,7 @@ really_try_next:
     case HRSTORE_SIZE:
         if (store_idx > NETSNMP_MEM_TYPE_MAX) {
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                    NETSNMP_DS_AGENT_REALSTORAGEUNITS))
+                                       NETSNMP_DS_AGENT_REALSTORAGEUNITS))
                 long_return = HRFS_entry->size & 0x7fffffff;
             else
                 long_return = HRFS_entry->size_32;
@@ -446,7 +446,7 @@ really_try_next:
     case HRSTORE_USED:
         if (store_idx > NETSNMP_MEM_TYPE_MAX) {
             if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                    NETSNMP_DS_AGENT_REALSTORAGEUNITS))
+                                       NETSNMP_DS_AGENT_REALSTORAGEUNITS))
                 long_return = HRFS_entry->used & 0x7fffffff;
             else
                 long_return = HRFS_entry->used_32;
@@ -461,7 +461,7 @@ really_try_next:
 #if NETSNMP_NO_DUMMY_VALUES
 	    goto try_next;
 #else
-            long_return = 0;
+        long_return = 0;
 #endif
         else {
             if ( !mem || mem->other == -1 )
@@ -475,7 +475,7 @@ really_try_next:
     }
     return NULL;
 
-  try_next:
+try_next:
     if (!exact)
         goto really_try_next;
 
@@ -504,18 +504,18 @@ Get_Next_HR_Store(void)
     /*
      * File-based storage 
      */
-	for (;;) {
+    for (;;) {
     	HRS_index = Get_Next_HR_FileSys();
-		if (HRS_index >= 0) {
-			if (!(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-							NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) && 
-						Check_HR_FileSys_NFS()) &&
-                         !Check_HR_FileSys_AutoFs()) {
-				return HRS_index + NETSNMP_MEM_TYPE_MAX;	
-			}
-		} else {
-			return -1;
-		}	
-	}
+        if (HRS_index >= 0) {
+            if (!(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                         NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) && 
+                  Check_HR_FileSys_NFS()) &&
+                !Check_HR_FileSys_AutoFs()) {
+                return HRS_index + NETSNMP_MEM_TYPE_MAX;	
+            }
+        } else {
+            return -1;
+        }	
+    }
 }
 
