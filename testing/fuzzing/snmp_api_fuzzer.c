@@ -52,7 +52,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     af_gb_init();
-    uint8_t *data2 = data;
+    const uint8_t *data2 = data;
     size_t size2 = size;
 
     netsnmp_pdu *pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
@@ -75,7 +75,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     if (cp1 != NULL) {
         // Target snmp_pdu_build
         size_t build_out_length = strlen(cp1);
-        snmp_pdu_build(pdu, cp1, &build_out_length);
+        snmp_pdu_build(pdu, (u_char *)cp1, &build_out_length);
 
         // Target snmp_parse
         char *parse_data = af_gb_get_null_terminated(&data2, &size2);
@@ -88,7 +88,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         }
 
         // Target snmp_build
-        char *out_pkt = malloc(1000);
+        u_char *out_pkt = malloc(1000);
         size_t pkt_len = 1000;
         size_t offset = 0;
         snmp_build(&out_pkt, &pkt_len, &offset, &sess, pdu);
