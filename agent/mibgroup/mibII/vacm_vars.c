@@ -997,6 +997,9 @@ access_parse_oid(oid * oidIndex, size_t oidLen,
         return 1;
     }
     groupNameL = oidIndex[0];
+    if ((groupNameL + 1) > (int) oidLen) {
+        return 1;
+    }
     contextPrefixL = oidIndex[groupNameL + 1];  /* the initial name length */
     if ((int) oidLen != groupNameL + contextPrefixL + 4) {
         return 1;
