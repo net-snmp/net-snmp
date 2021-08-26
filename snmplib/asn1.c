@@ -780,7 +780,7 @@ asn_build_int(u_char * data,
     *datalength -= intsize;
     mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
     /*
-     * mask is 0xFF000000 on a big-endian machine 
+     * mask is 0xFF000000 if sizeof(long) == 4.
      */
     while (intsize--) {
         *data++ = (u_char) ((integer & mask) >> (8 * (sizeof(long) - 1)));
