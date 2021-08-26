@@ -784,7 +784,7 @@ asn_build_int(u_char * data,
      */
     while (intsize--) {
         *data++ = (u_char) ((integer & mask) >> (8 * (sizeof(long) - 1)));
-        integer <<= 8;
+        integer = (u_long)integer << 8;
     }
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
     DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2lX)\n", *intp, *intp));
