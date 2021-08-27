@@ -289,6 +289,8 @@ usage(char *prog)
            "  -S d|i|0-7\t\tuse -Ls <facility> instead\n"
            "\n"
            );
+    SOCK_CLEANUP;
+    exit(1);
 }
 
 static void
@@ -494,7 +496,6 @@ main(int argc, char *argv[])
         case '-':
             if (strcasecmp(optarg, "help") == 0) {
                 usage(argv[0]);
-                goto out;
             }
             if (strcasecmp(optarg, "version") == 0) {
                 version();
@@ -783,7 +784,6 @@ main(int argc, char *argv[])
             fprintf(stderr, "%s: Illegal argument -X:"
 		            "AgentX support not compiled in.\n", argv[0]);
             usage(argv[0]);
-            goto out;
 #endif
             break;
 
