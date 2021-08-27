@@ -200,7 +200,6 @@ snmpd_set_agent_address(const char *token, char *cptr)
          * append to the older specification string 
          */
         snprintf(buf, sizeof(buf), "%s,%s", ptr, cptr);
-	buf[sizeof(buf) - 1] = '\0';
     } else {
         strlcpy(buf, cptr, sizeof(buf));
     }
