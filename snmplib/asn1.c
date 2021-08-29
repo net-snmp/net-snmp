@@ -771,7 +771,7 @@ asn_build_int(u_char * data,
     while ((((integer & mask) == 0) || ((integer & mask) == mask))
            && intsize > 1) {
         intsize--;
-        integer <<= 8;
+        integer = (u_long)integer << 8;
     }
     data = asn_build_header(data, datalength, type, intsize);
     if (_asn_build_header_check(errpre, data, *datalength, intsize))
