@@ -47,6 +47,12 @@ freebsd_pkg_version() {
     return 1
 }
 
+# Given the name of a compiler executable ($1), derive the compiler type (gcc,
+# clang, xlc, ...).
+compiler_type() {
+    "$1" -v |& sed -n 's/^gcc version .*/gcc/p;s/^clang version .*/clang/p;s/.*xlc.*IBM.*xlc.*/xlc/p'
+}
+
 branch_name="$1"
 shift
 
@@ -129,6 +135,10 @@ case "$(uname)" in
 	;;
 esac
 echo "perldevver=$perldevver"
+# Set the perlcc variable.
+eval "perl$(perl -V:cc)"
+perlcc=$(compiler_type "$perlcc")
+echo "perlcc=$perlcc"
 
 options=()
 options+=(--enable-developer)
@@ -215,7 +225,8 @@ case "$(uname)" in
       if false && [ -n "$libmysqlver" ]; then
 	  options+=(--with-mysql)
       fi
-      if [ -n "$perldevver" ]; then
+      if [ -n "$perldevver" ] && [ "$perlcc" = "$(compiler_type "${CC:-cc}")" ];
+      then
 	  options+=(--with-perl-modules)
       else
 	  options+=(--disable-embedded-perl --without-perl-modules)
