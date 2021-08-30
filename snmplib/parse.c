@@ -826,13 +826,16 @@ static struct node *
 alloc_node(int modid)
 {
     struct node    *np;
-    np = (struct node *) calloc(1, sizeof(struct node));
-    if (np) {
-        np->tc_index = -1;
-        np->modid = modid;
-	np->filename = strdup(File);
-	np->lineno = mibLine;
-    }
+
+    np = calloc(1, sizeof(struct node));
+    if (!np)
+        return NULL;
+
+    np->tc_index = -1;
+    np->modid = modid;
+    np->filename = strdup(File);
+    np->lineno = mibLine;
+
     return np;
 }
 
