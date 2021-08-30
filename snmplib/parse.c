@@ -932,25 +932,16 @@ free_node(struct node *np)
     free_ranges(&np->ranges);
     free_indexes(&np->indexes);
     free_varbinds(&np->varbinds);
-    if (np->label)
-        free(np->label);
-    if (np->hint)
-        free(np->hint);
-    if (np->units)
-        free(np->units);
-    if (np->description)
-        free(np->description);
-    if (np->reference)
-        free(np->reference);
-    if (np->defaultValue)
-        free(np->defaultValue);
-    if (np->parent)
-        free(np->parent);
-    if (np->augments)
-        free(np->augments);
-    if (np->filename)
-	free(np->filename);
-    free((char *) np);
+    free(np->label);
+    free(np->hint);
+    free(np->units);
+    free(np->description);
+    free(np->reference);
+    free(np->defaultValue);
+    free(np->parent);
+    free(np->augments);
+    free(np->filename);
+    free(np);
 }
 
 static void
