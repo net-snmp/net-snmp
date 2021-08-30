@@ -254,7 +254,7 @@ int main(int argc, char **argv)
         return 2;
     }
 
-    char * app_name = "snmppcap";
+    const char *app_name = "snmppcap";
     if (acting_as_agent) {
 	if (init_agent(app_name) != 0) {
 	    snmp_log(LOG_ERR, "Agent initialization failed\n");
