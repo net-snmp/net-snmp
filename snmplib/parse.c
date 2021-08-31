@@ -2015,10 +2015,8 @@ parse_objectid(FILE * fp, char *name)
                     goto err;
             } else {
                 if (!nop->label) {
-                    nop->label = (char *) malloc(20 + ANON_LEN);
-                    if (nop->label == NULL)
+                    if (asprintf(&nop->label, "%s%d", ANON, anonymous++) < 0)
                         goto err;
-                    sprintf(nop->label, "%s%d", ANON, anonymous++);
                 }
                 np->label = strdup(nop->label);
             }
@@ -2042,8 +2040,8 @@ out:
      * free the loid array 
      */
     for (count = 0, op = loid; count < length; count++, op++) {
-        if (op->label)
-            free(op->label);
+        free(op->label);
+        op->label = NULL;
     }
 
     return root;
