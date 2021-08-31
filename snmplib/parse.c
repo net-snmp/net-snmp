@@ -2031,10 +2031,8 @@ parse_objectid(FILE * fp, char *name)
                     goto err;
             } else {
                 if (!nop->label) {
-                    nop->label = (char *) malloc(20 + ANON_LEN);
-                    if (nop->label == NULL)
+                    if (asprintf(&nop->label, "%s%d", ANON, anonymous++) < 0)
                         goto err;
-                    sprintf(nop->label, "%s%d", ANON, anonymous++);
                 }
                 np->label = strdup(nop->label);
             }
