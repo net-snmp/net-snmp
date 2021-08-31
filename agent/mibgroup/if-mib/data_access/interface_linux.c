@@ -24,7 +24,7 @@ netsnmp_feature_require(interface_ioctl_flags_set);
 #endif
 
 #ifndef HAVE_LIBNL3
-#error libnl-3 is required
+#error libnl-3 is required. Please install the libnl-3 and libnl-route-3 development packages and remove --without-nl from the configure options if necessary.
 #endif
 #include <netlink/cache.h>
 #include <netlink/netlink.h>
