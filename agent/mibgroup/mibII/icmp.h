@@ -12,7 +12,7 @@ config_require(mibII/kernel_linux)
 #elif defined(freebsd4) || defined(openbsd4) || defined(dragonfly2) || \
     defined(darwin)
 config_require(mibII/kernel_sysctl)
-#elif defined(netbsd) || defined(netbsdelf)
+#elif defined(netbsd5) || defined(netbsdelf5)
 config_require(mibII/kernel_netbsd)
 #endif
 

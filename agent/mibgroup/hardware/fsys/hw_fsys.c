@@ -3,7 +3,7 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include <net-snmp/agent/hardware/fsys.h>
+#include "hardware/fsys/fsys.h"
 #include "hw_fsys.h"
 #include "hardware/fsys/hw_fsys_private.h"
 #ifdef HAVE_INTTYPES_H
@@ -11,6 +11,9 @@
 #endif
 
 netsnmp_feature_child_of(hw_fsys_get_container, netsnmp_unused);
+
+static int netsnmp_fsys_load( netsnmp_cache *cache, void *data);
+static void netsnmp_fsys_free( netsnmp_cache *cache, void *data);
 
 static int _fsysAutoUpdate = 0;   /* 0 means on-demand caching */
 
@@ -96,13 +99,6 @@ void shutdown_hw_fsys( void ) {
     _fsys_free();
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_HW_FSYS_GET_CONTAINER
-/*
- *  Return the main fsys container
- */
-netsnmp_container *netsnmp_fsys_get_container( void ) { return _fsys_container; }
-#endif /* NETSNMP_FEATURE_REMOVE_HW_FSYS_GET_CONTAINER */
-
 /*
  *  Return the main fsys cache control structure (if defined)
  */
@@ -143,17 +139,15 @@ _fsys_create_entry(void)
     netsnmp_fsys_info *sp;
 
     sp = SNMP_MALLOC_TYPEDEF(netsnmp_fsys_info);
-    if (sp) {
-        /*
-         * Set up the index value.
-         *
-         * All this trouble, just for a simple integer.
-         * Surely there must be a better way?
-         */
-        sp->idx.len  = 1;
-        sp->idx.oids = SNMP_MALLOC_TYPEDEF( oid );
-        sp->idx.oids[0] = ++_fsys_idx;
-    }
+    if (!sp)
+        return NULL;
+
+    /*
+     * Set up the index value.
+     */
+    sp->idx.len  = 1;
+    sp->idx.oids = &sp->fsys_idx;
+    sp->idx.oids[0] = ++_fsys_idx;
 
     DEBUGMSGTL(("fsys:new", "Create filesystem entry (index = %d)\n", _fsys_idx));
     CONTAINER_INSERT(_fsys_container, sp);

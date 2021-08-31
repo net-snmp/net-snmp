@@ -1417,8 +1417,6 @@ write_usmUserStatus(int action,
                 if (usmStatusCheck(uptr)) {
                     uptr->userStatus = RS_ACTIVE;
                 } else {
-                    SNMP_FREE(engineID);
-                    SNMP_FREE(newName);
                     return SNMP_ERR_INCONSISTENTVALUE;
                 }
             } else if (long_ret == RS_CREATEANDWAIT) {

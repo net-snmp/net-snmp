@@ -55,7 +55,7 @@ typedef struct netsnmp_fsys_info_s netsnmp_fsys_info;
 
 struct netsnmp_fsys_info_s {
      netsnmp_index  idx;
-  /* int  idx; */
+     oid fsys_idx;
  
      char path[  SNMP_MAXPATH+1];
      char device[SNMP_MAXPATH+1];
@@ -79,8 +79,6 @@ struct netsnmp_fsys_info_s {
      int  minpercent;
 
      long flags;
-
-     netsnmp_fsys_info *next;
 };
 
 
@@ -89,15 +87,11 @@ struct netsnmp_fsys_info_s {
      */
 netsnmp_fsys_info *netsnmp_fsys_get_first( void );
 netsnmp_fsys_info *netsnmp_fsys_get_next( netsnmp_fsys_info* );
-netsnmp_fsys_info *netsnmp_fsys_get_byIdx(  int,   int );
-netsnmp_fsys_info *netsnmp_fsys_get_next_byIdx(int,int );
 
 netsnmp_fsys_info *netsnmp_fsys_by_device(  char*, int );
 netsnmp_fsys_info *netsnmp_fsys_by_path(    char*, int );
 
 netsnmp_cache *netsnmp_fsys_get_cache( void );
-int  netsnmp_fsys_load( netsnmp_cache *cache, void *data );
-void netsnmp_fsys_free( netsnmp_cache *cache, void *data );
 
 int netsnmp_fsys_size( netsnmp_fsys_info* );
 int netsnmp_fsys_used( netsnmp_fsys_info* );
