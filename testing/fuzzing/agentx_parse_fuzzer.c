@@ -53,7 +53,15 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     netsnmp_session session;
 
     session.version = AGENTX_VERSION_1;
-    agentx_parse(&session, pdu, (unsigned char *)data, size);
+    if (agentx_parse(&session, pdu, (unsigned char *)data, size) == SNMP_ERR_NOERROR) {
+      u_char *buf = malloc(size);
+      memcpy(buf, data, size);
+      size_t buf_len = size;
+      size_t out_len = size;
+      agentx_realloc_build(&session, pdu, &buf, &buf_len, &out_len);
+      free(buf);
+    }
+
     snmp_free_pdu(pdu);
     return 0;
 }
