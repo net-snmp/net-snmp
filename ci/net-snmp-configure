@@ -50,7 +50,8 @@ freebsd_pkg_version() {
 # Given the name of a compiler executable ($1), derive the compiler type (gcc,
 # clang, xlc, ...).
 compiler_type() {
-    "$1" -v |& sed -n 's/^gcc version .*/gcc/p;s/^clang version .*/clang/p;s/.*xlc.*IBM.*xlc.*/xlc/p'
+    "$1" -v 2>&1 |
+        sed -n 's/^gcc version .*/gcc/p;s/^clang version .*/clang/p;s/.*xlc.*IBM.*xlc.*/xlc/p'
 }
 
 branch_name="$1"
