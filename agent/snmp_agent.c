@@ -81,6 +81,7 @@ SOFTWARE.
 #define SNMP_NEED_REQUEST_LIST
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/library/large_fd_set.h>
 #include <net-snmp/library/snmp_assert.h>
 #include "agent_global_vars.h"
@@ -2214,6 +2215,8 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
      */
     if (pdu->version  == SNMP_VERSION_3 && 
         session->s_snmp_errno == SNMPERR_USM_AUTHENTICATIONFAILURE) {
+            snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                                SNMPD_CALLBACK_AUTH_FAILURE, (void *)pdu);
            send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
            return 1;
     } 
@@ -2258,6 +2261,8 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
             /*
              * access control setup is incorrect 
              */
+            snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                                SNMPD_CALLBACK_AUTH_FAILURE, (void *)pdu);
             send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 #if defined(NETSNMP_DISABLE_SNMPV1)
