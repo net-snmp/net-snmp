@@ -2058,8 +2058,8 @@ out:
      * free the loid array 
      */
     for (count = 0, op = loid; count < length; count++, op++) {
-        if (op->label)
-            free(op->label);
+        free(op->label);
+        op->label = NULL;
     }
 
     return root;
