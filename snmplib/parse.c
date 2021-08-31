@@ -810,13 +810,16 @@ static struct node *
 alloc_node(int modid)
 {
     struct node    *np;
-    np = (struct node *) calloc(1, sizeof(struct node));
-    if (np) {
-        np->tc_index = -1;
-        np->modid = modid;
-	np->filename = strdup(File);
-	np->lineno = mibLine;
-    }
+
+    np = calloc(1, sizeof(struct node));
+    if (!np)
+        return NULL;
+
+    np->tc_index = -1;
+    np->modid = modid;
+    np->filename = strdup(File);
+    np->lineno = mibLine;
+
     return np;
 }
 
@@ -916,25 +919,16 @@ free_node(struct node *np)
     free_ranges(&np->ranges);
     free_indexes(&np->indexes);
     free_varbinds(&np->varbinds);
-    if (np->label)
-        free(np->label);
-    if (np->hint)
-        free(np->hint);
-    if (np->units)
-        free(np->units);
-    if (np->description)
-        free(np->description);
-    if (np->reference)
-        free(np->reference);
-    if (np->defaultValue)
-        free(np->defaultValue);
-    if (np->parent)
-        free(np->parent);
-    if (np->augments)
-        free(np->augments);
-    if (np->filename)
-	free(np->filename);
-    free((char *) np);
+    free(np->label);
+    free(np->hint);
+    free(np->units);
+    free(np->description);
+    free(np->reference);
+    free(np->defaultValue);
+    free(np->parent);
+    free(np->augments);
+    free(np->filename);
+    free(np);
 }
 
 static void
