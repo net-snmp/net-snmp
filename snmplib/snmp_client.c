@@ -853,7 +853,8 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                 = (const u_long *) value;
             *(vars->val.integer) = *val_ulong;
             if (*(vars->val.integer) > 0xffffffff) {
-                snmp_log(LOG_ERR,"truncating integer value > 32 bits\n");
+                NETSNMP_LOGONCE((LOG_INFO,
+                                 "truncating integer value > 32 bits\n"));
                 *(vars->val.integer) &= 0xffffffff;
             }
         }
@@ -865,7 +866,8 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                 = (const unsigned long long *) value;
             *(vars->val.integer) = (long) *val_ullong;
             if (*(vars->val.integer) > 0xffffffff) {
-                snmp_log(LOG_ERR,"truncating integer value > 32 bits\n");
+                NETSNMP_LOGONCE((LOG_INFO,
+                                 "truncating integer value > 32 bits\n"));
                 *(vars->val.integer) &= 0xffffffff;
             }
         }
@@ -877,7 +879,8 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                 = (const uintmax_t *) value;
             *(vars->val.integer) = (long) *val_uintmax_t;
             if (*(vars->val.integer) > 0xffffffff) {
-                snmp_log(LOG_ERR,"truncating integer value > 32 bits\n");
+                NETSNMP_LOGONCE((LOG_INFO,
+                                 "truncating integer value > 32 bits\n"));
                 *(vars->val.integer) &= 0xffffffff;
             }
         }
