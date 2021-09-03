@@ -32,7 +32,7 @@
 #define GB_SIZE 100
 
 void *pointer_arr[GB_SIZE];
-static int pointer_idx = 0;
+int pointer_idx;
 
 // If the garbage collector is used then this must be called as first thing
 // during a fuzz run.
@@ -52,30 +52,30 @@ void af_gb_cleanup() {
   }
 }
 
-char *af_get_null_terminated(const uint8_t **data, size_t *size) {
+void *af_get_null_terminated(const uint8_t **data, size_t *size) {
 #define STR_SIZE 75
   if (*size < STR_SIZE || (int)*size < 0) {
     return NULL;
   }
 
-  char *new_s = malloc(STR_SIZE + 1);
+  void *new_s = malloc(STR_SIZE + 1);
   memcpy(new_s, *data, STR_SIZE);
-  new_s[STR_SIZE] = '\0';
+  ((uint8_t *)new_s)[STR_SIZE] = '\0';
 
   *data = *data+STR_SIZE;
   *size -= STR_SIZE;
   return new_s;
 }
 
-char *af_gb_get_random_data(const uint8_t **data, size_t *size, size_t to_get) {
+void *af_gb_get_random_data(const uint8_t **data, size_t *size, size_t to_get) {
   if (*size < to_get || (int)*size < 0) {
     return NULL;
   }
 
-  char *new_s = malloc(to_get);
+  void *new_s = malloc(to_get);
   memcpy(new_s, *data, to_get);
 
-  pointer_arr[pointer_idx++] = (void*)new_s;
+  pointer_arr[pointer_idx++] = new_s;
   
   *data = *data + to_get;
   *size -= to_get;
@@ -83,19 +83,19 @@ char *af_gb_get_random_data(const uint8_t **data, size_t *size, size_t to_get) {
   return new_s;
 }
 
-char *af_gb_get_null_terminated(const uint8_t **data, size_t *size) {
+void *af_gb_get_null_terminated(const uint8_t **data, size_t *size) {
 
-  char *nstr = af_get_null_terminated(data, size);
+  void *nstr = af_get_null_terminated(data, size);
   if (nstr == NULL) {
     return NULL;
   }
-  pointer_arr[pointer_idx++] = (void*)nstr;
+  pointer_arr[pointer_idx++] = nstr;
   return nstr;
 }
 
-char *af_gb_alloc_data(size_t len) {
-  char *ptr = calloc(1, len);
-  pointer_arr[pointer_idx++] = (void*)ptr;
+void *af_gb_alloc_data(size_t len) {
+  void *ptr = calloc(1, len);
+  pointer_arr[pointer_idx++] = ptr;
   
   return ptr;
 }

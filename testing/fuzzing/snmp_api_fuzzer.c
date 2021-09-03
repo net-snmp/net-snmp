@@ -35,7 +35,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <net-snmp/ada_fuzz_header.h>
+#include "ada_fuzz_header.h"
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
     if (getenv("NETSNMP_DEBUGGING") != NULL) {
@@ -52,13 +52,12 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     af_gb_init();
+
     const uint8_t *data2 = data;
     size_t size2 = size;
-
     netsnmp_pdu *pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
-    netsnmp_session session;
+    netsnmp_session session = { .version = AGENTX_VERSION_1 };
 
-    session.version = AGENTX_VERSION_1;
     agentx_parse(&session, pdu, (unsigned char *)data, size);
 
     // Add a variable with random type and value to the PDU
@@ -71,20 +70,20 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         snmp_add_var(pdu, name, name_len, c, value);
     }
 
-    char *cp1 = af_gb_get_null_terminated(&data2, &size2);
+    void *cp1 = af_gb_get_null_terminated(&data2, &size2);
     if (cp1 != NULL) {
         // Target snmp_pdu_build
         size_t build_out_length = strlen(cp1);
-        snmp_pdu_build(pdu, (u_char *)cp1, &build_out_length);
+        snmp_pdu_build(pdu, cp1, &build_out_length);
 
         // Target snmp_parse
-        char *parse_data = af_gb_get_null_terminated(&data2, &size2);
+        void *parse_data = af_gb_get_null_terminated(&data2, &size2);
         netsnmp_session sess = {};
-        memset(&sess, 0, sizeof(sess));
+
         sess.version = af_get_int(&data2, &size2);
         if (parse_data != NULL) {
             size_t parse_data_len = strlen(parse_data);
-            snmp_parse(NULL, &sess, pdu, (unsigned char *)parse_data, parse_data_len);
+            snmp_parse(NULL, &sess, pdu, parse_data, parse_data_len);
         }
 
         // Target snmp_build
