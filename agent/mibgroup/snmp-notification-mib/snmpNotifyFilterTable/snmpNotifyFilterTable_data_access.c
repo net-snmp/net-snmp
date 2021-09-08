@@ -21,7 +21,7 @@
  */
 #include "snmpNotifyFilterTable.h"
 
-
+#include "snmpNotifyFilterTable_data_storage.h"
 #include "snmpNotifyFilterTable_data_access.h"
 
 netsnmp_feature_require(snmpNotifyFilterTable_container_get);
@@ -110,7 +110,7 @@ snmpNotifyFilterTable_container_init(netsnmp_container **container_ptr_ptr)
      * For advanced users, you can use a custom container. If you
      * do not create one, one will be created for you.
      */
-    *container_ptr_ptr = NULL;
+    *container_ptr_ptr = snmpNotifyFilter_storage_container_create();
 
 }                               /* snmpNotifyFilterTable_container_init */
 

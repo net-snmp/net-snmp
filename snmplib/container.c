@@ -302,13 +302,16 @@ netsnmp_container_find(const char *type)
     netsnmp_container *c = ct ? (netsnmp_container *)(ct->factory->produce()) : NULL;
 
     /*
-     * provide default compare
+     * provide default compare and ncompare
      */
     if (c) {
         if (ct->compare)
             c->compare = ct->compare;
         else if (NULL == c->compare)
             c->compare = netsnmp_compare_netsnmp_index;
+
+        if (NULL == c->ncompare)
+            c->ncompare = netsnmp_ncompare_netsnmp_index;
     }
 
     return c;
