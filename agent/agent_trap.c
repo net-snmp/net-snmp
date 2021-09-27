@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright ï¿½ 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -1707,6 +1707,7 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
     /** free any allocated mem in session */
     SNMP_FREE(session.securityAuthProto);
     SNMP_FREE(session.securityPrivProto);
+    SNMP_FREE(session.contextEngineID);
 
     return ss;
 }
