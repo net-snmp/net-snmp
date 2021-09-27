@@ -1662,6 +1662,7 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
     /** free any allocated mem in session */
     SNMP_FREE(session.securityAuthProto);
     SNMP_FREE(session.securityPrivProto);
+    SNMP_FREE(session.contextEngineID);
 
     return ss;
 }
