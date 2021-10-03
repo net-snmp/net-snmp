@@ -10,7 +10,7 @@ struct netsnmp_fsys_info_s;
 extern void     init_hrh_filesys(void);
 extern void     Init_HR_FileSys(void);
 extern FindVarMethod var_hrhfilesys;
-extern int      Get_Next_HR_FileSys(struct netsnmp_fsys_info_s **entry);
+extern int      Get_Next_HR_FileSys(const struct netsnmp_fsys_info_s **entry);
 extern int      Check_HR_FileSys_NFS(const struct netsnmp_fsys_info_s *entry);
 extern int	Check_HR_FileSys_AutoFs(const struct netsnmp_fsys_info_s *entry);
 

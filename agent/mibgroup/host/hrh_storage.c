@@ -71,7 +71,7 @@ static void parse_storage_config(const char *, char *);
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-int             Get_Next_HR_Store(struct netsnmp_fsys_info_s **entry);
+int             Get_Next_HR_Store(const struct netsnmp_fsys_info_s **entry);
 void            Init_HR_Store(void);
 
 Netsnmp_Node_Handler handle_memsize;
@@ -169,7 +169,7 @@ parse_storage_config(const char *token, char *cptr)
 static void *
 header_hrstoreEntry(struct variable *vp, oid *name, size_t *length, int exact,
                     size_t *var_len, WriteMethod **write_method,
-                    netsnmp_fsys_info **entry)
+                    const netsnmp_fsys_info **entry)
 {
 #define HRSTORE_ENTRY_NAME_LENGTH	11
     oid             newname[MAX_OID_LEN];
@@ -350,7 +350,7 @@ var_hrstore(struct variable *vp,
     int             store_idx = 0;
     static char     string[1024];
     void                *ptr;
-    netsnmp_fsys_info *entry = NULL;
+    const netsnmp_fsys_info *entry = NULL;
     netsnmp_memory_info *mem = NULL;
 
 really_try_next:
@@ -492,7 +492,7 @@ Init_HR_Store(void)
 }
 
 int
-Get_Next_HR_Store(struct netsnmp_fsys_info_s **entry)
+Get_Next_HR_Store(const struct netsnmp_fsys_info_s **entry)
 {
     /*
      * File-based storage 
