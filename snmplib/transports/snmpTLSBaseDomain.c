@@ -1229,9 +1229,9 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
         if (data && (flags & ERR_TXT_STRING)) {
             snmp_log(LOG_ERR, "  Textual Error: %s\n", data);
         }
+    }
     /* clear openssl error ring buffer */
     ERR_clear_error();
-    }
-    
+
     snmp_log(LOG_ERR, "---- End of OpenSSL Errors ----\n");
 }
