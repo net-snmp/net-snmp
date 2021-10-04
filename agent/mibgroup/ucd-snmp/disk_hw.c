@@ -305,7 +305,7 @@ var_extensible_disk(struct variable *vp,
                     size_t *var_len, WriteMethod ** write_method)
 {
     int             disknum = 0;
-    netsnmp_fsys_info *entry;
+    const netsnmp_fsys_info *entry;
     unsigned long long val;
     static long     long_ret;
     static char    *errmsg;
@@ -344,10 +344,10 @@ var_extensible_disk(struct variable *vp,
         return ((u_char *) (&long_ret));
     case ERRORNAME:            /* DISKPATH */
         *var_len = strlen(entry->path);
-        return ((u_char *) entry->path);
+        return (u_char *)NETSNMP_REMOVE_CONST(char *, entry->path);
     case DISKDEVICE:
         *var_len = strlen(entry->device);
-        return ((u_char *) entry->device);
+        return (u_char *)NETSNMP_REMOVE_CONST(char *, entry->device);
     case DISKMINIMUM:
         long_ret = entry->minspace;
         return ((u_char *) (&long_ret));

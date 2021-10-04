@@ -129,7 +129,7 @@ netsnmp_fsys_info *netsnmp_fsys_get_first(void) {
     return CONTAINER_FIRST(_fsys_container);
 }
 
-netsnmp_fsys_info *netsnmp_fsys_get_next(netsnmp_fsys_info *this_ptr) {
+netsnmp_fsys_info *netsnmp_fsys_get_next(const netsnmp_fsys_info *this_ptr) {
     return CONTAINER_NEXT(_fsys_container, this_ptr);
 }
 
@@ -262,7 +262,8 @@ _fsys_to_K( unsigned long long size, unsigned long long units )
 }
 
 unsigned long long
-netsnmp_fsys_size_ull( netsnmp_fsys_info *f) {
+netsnmp_fsys_size_ull(const netsnmp_fsys_info *f)
+{
     if ( !f ) {
         return 0;
     }
@@ -270,7 +271,8 @@ netsnmp_fsys_size_ull( netsnmp_fsys_info *f) {
 }
 
 unsigned long long
-netsnmp_fsys_used_ull( netsnmp_fsys_info *f) {
+netsnmp_fsys_used_ull(const netsnmp_fsys_info *f)
+{
     if ( !f ) {
         return 0;
     }
@@ -278,7 +280,8 @@ netsnmp_fsys_used_ull( netsnmp_fsys_info *f) {
 }
 
 unsigned long long
-netsnmp_fsys_avail_ull( netsnmp_fsys_info *f) {
+netsnmp_fsys_avail_ull(const netsnmp_fsys_info *f)
+{
     if ( !f ) {
         return 0;
     }
@@ -287,19 +290,22 @@ netsnmp_fsys_avail_ull( netsnmp_fsys_info *f) {
 
 
 int
-netsnmp_fsys_size( netsnmp_fsys_info *f) {
+netsnmp_fsys_size(const netsnmp_fsys_info *f)
+{
     unsigned long long v = netsnmp_fsys_size_ull(f);
     return (int)v;
 }
 
 int
-netsnmp_fsys_used( netsnmp_fsys_info *f) {
+netsnmp_fsys_used(const netsnmp_fsys_info *f)
+{
     unsigned long long v = netsnmp_fsys_used_ull(f);
     return (int)v;
 }
 
 int
-netsnmp_fsys_avail( netsnmp_fsys_info *f) {
+netsnmp_fsys_avail(const netsnmp_fsys_info *f)
+{
     unsigned long long v = netsnmp_fsys_avail_ull(f);
     return (int)v;
 }

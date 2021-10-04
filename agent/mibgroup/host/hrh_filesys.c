@@ -76,7 +76,7 @@ netsnmp_feature_require(ctime_to_timet);
 #define	FULL_DUMP	0
 #define	PART_DUMP	1
 
-static u_char  *when_dumped(char *filesys, int level, size_t * length);
+static u_char *when_dumped(const char *filesys, int level, size_t *length);
 
         /*********************
 	 *
@@ -138,7 +138,7 @@ init_hrh_filesys(void)
 static int
 header_hrhfilesys(struct variable *vp, oid *name, size_t *length,
                   int exact, size_t *var_len, WriteMethod **write_method,
-                  netsnmp_fsys_info **entry)
+                  const netsnmp_fsys_info **entry)
 {
 #define HRFSYS_ENTRY_NAME_LENGTH	11
     oid             newname[MAX_OID_LEN];
@@ -216,7 +216,7 @@ var_hrhfilesys(struct variable *vp,
     int             fsys_idx;
     static char    *string;
     static char     empty_str[1];
-    netsnmp_fsys_info *entry = NULL;
+    const netsnmp_fsys_info *entry = NULL;
 
     fsys_idx = header_hrhfilesys(vp, name, length, exact, var_len, write_method,
                                  &entry);
@@ -287,7 +287,7 @@ Init_HR_FileSys(void)
 }
 
 int
-Get_Next_HR_FileSys(netsnmp_fsys_info **entry)
+Get_Next_HR_FileSys(const netsnmp_fsys_info **entry)
 {
     *entry = *entry ? netsnmp_fsys_get_next(*entry) : netsnmp_fsys_get_first();
     /* Skip "inactive" entries */
@@ -300,12 +300,13 @@ Get_Next_HR_FileSys(netsnmp_fsys_info **entry)
 
 
 static u_char  *
-when_dumped(char *filesys, int level, size_t * length)
+when_dumped(const char *filesys, int level, size_t *length)
 {
     time_t          dumpdate = 0, tmp;
     FILE           *dump_fp;
     char            line[1024];
-    char           *cp1, *cp2, *cp3;
+    const char     *cp1;
+    char           *cp2, *cp3;
 
     /*
      * Look for the relevent entries in /etc/dumpdates
