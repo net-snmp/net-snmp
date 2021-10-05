@@ -1228,17 +1228,10 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
         /* if we have a text translation: */
         if (data && (flags & ERR_TXT_STRING)) {
             snmp_log(LOG_ERR, "  Textual Error: %s\n", data);
-            /*
-             * per openssl man page: If it has been allocated by
-             * OPENSSL_malloc(), *flags&ERR_TXT_MALLOCED is true.
-             *
-             * arggh... stupid openssl prototype for ERR_get_error_line_data
-             * wants a const char **, but returns something that we might
-             * need to free??
-             */
-            if (flags & ERR_TXT_MALLOCED)
-                OPENSSL_free(NETSNMP_REMOVE_CONST(void *, data));        }
+        }
     }
-    
+    /* clear openssl error ring buffer */
+    ERR_clear_error();
+
     snmp_log(LOG_ERR, "---- End of OpenSSL Errors ----\n");
 }
