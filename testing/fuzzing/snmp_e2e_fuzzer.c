@@ -26,7 +26,7 @@
   * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
   * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/large_fd_set.h>
@@ -41,11 +41,12 @@
 
 #define FAKE_FD 3
 
-const void *recv_data;
-int recv_datalen;
+const void     *recv_data;
+int             recv_datalen;
 
 int
-snmpfuzz_recv(netsnmp_transport *t, void *buf, int bufsiz, void **opaque, int *opaque_len)
+snmpfuzz_recv(netsnmp_transport *t, void *buf, int bufsiz, void **opaque,
+              int *opaque_len)
 {
     if (bufsiz > recv_datalen) {
         memcpy(buf, recv_data, recv_datalen);
@@ -56,16 +57,19 @@ snmpfuzz_recv(netsnmp_transport *t, void *buf, int bufsiz, void **opaque, int *o
 }
 
 static int
-snmpfuzz_callback(int op, netsnmp_session *sess, int reqid, netsnmp_pdu *pdu,
-                  void *magic)
+snmpfuzz_callback(int op, netsnmp_session *sess, int reqid,
+                  netsnmp_pdu *pdu, void *magic)
 {
-    /* We leave this empty for now */
+    /*
+     * We leave this empty for now
+     */
     return 0;
 }
 
 void
-fuzz_fake_pcap(const u_char *buf, size_t len) {
-    netsnmp_large_fd_set lfdset;    
+fuzz_fake_pcap(const u_char * buf, size_t len)
+{
+    netsnmp_large_fd_set lfdset;
 
     recv_data = buf;
     recv_datalen = len;
@@ -77,18 +81,21 @@ fuzz_fake_pcap(const u_char *buf, size_t len) {
 }
 
 int
-LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
+{
     netsnmp_session *ss;
     netsnmp_transport *transport;
 
-    u_char *fuzz_buf = malloc(size+1);
+    u_char         *fuzz_buf = malloc(size + 1);
     memcpy(fuzz_buf, data, size);
     fuzz_buf[size] = '\0';
 
     ss = SNMP_MALLOC_TYPEDEF(netsnmp_session);
 
-    /* We allocate with malloc to avoid constants */
-    char **fake_argv = malloc(sizeof(char*)*3);
+    /*
+     * We allocate with malloc to avoid constants
+     */
+    char          **fake_argv = malloc(sizeof(char *) * 3);
     fake_argv[0] = strdup("snmp_e2e_fuzzer");
     fake_argv[1] = strdup("-Dall");
     fake_argv[2] = strdup("localhost");
@@ -100,11 +107,13 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     transport->f_recv = snmpfuzz_recv;
 
     ss->callback = snmpfuzz_callback;
-    ss->callback_magic = (void *)NULL;
+    ss->callback_magic = (void *) NULL;
     ss->securityModel = SNMP_SEC_MODEL_USM;
     create_user_from_session(ss);
 
-    /* Use snamp_add() to specify transport explicitly */
+    /*
+     * Use snamp_add() to specify transport explicitly
+     */
     snmp_add(ss, transport, NULL, NULL);
 
     fuzz_fake_pcap(fuzz_buf, size);
