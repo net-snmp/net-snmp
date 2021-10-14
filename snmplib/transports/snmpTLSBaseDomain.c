@@ -60,7 +60,7 @@ static unsigned long ERR_get_error_all(const char **file, int *line,
                                        const char **func,
                                        const char **data, int *flags)
 {
-    *func = NULL;
+    *func = "(?)";
     return ERR_get_error_line_data(file, line, data, flags);
 }
 #endif
