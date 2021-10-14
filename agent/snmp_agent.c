@@ -3768,7 +3768,9 @@ handle_pdu(netsnmp_agent_session *asp)
     case SNMP_MSG_INTERNAL_SET_RESERVE1:
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
         asp->vbcount = count_varbinds(asp->pdu->variables);
-        asp->requests = calloc(asp->vbcount, sizeof(netsnmp_request_info));
+        asp->requests =
+            calloc(asp->vbcount ? asp->vbcount : 1,
+                   sizeof(netsnmp_request_info));
         /*
          * collect varbinds 
          */
