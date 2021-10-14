@@ -76,7 +76,9 @@
 #include <net-snmp/library/transform_oids.h>
 #include <net-snmp/library/snmp_enum.h>
 
+#ifdef HAVE_OPENSSL_DH_H
 #include <openssl/dh.h>
+#endif
 
 netsnmp_feature_child_of(usm_all, libnetsnmp);
 netsnmp_feature_child_of(usm_support, usm_all);
