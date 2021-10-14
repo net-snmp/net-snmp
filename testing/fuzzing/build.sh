@@ -15,6 +15,11 @@ if [ -z "${LIB_FUZZING_ENGINE+x}" ]; then
     WORK=${scriptdir}
     OUT=$WORK
     LIB_FUZZING_ENGINE="-fsanitize=fuzzer"
+    if ! $CC $CFLAGS $LIB_FUZZING_ENGINE -c -xc /dev/null -o /dev/null \
+	 >&/dev/null; then
+	echo "Skipping compilation of fuzz tests"
+	exit 0
+    fi
 fi
 
 export CC CXX CFLAGS CXXFLAGS SRC WORK OUT LIB_FUZZING_ENGINE
