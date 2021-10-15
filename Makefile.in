@@ -5,7 +5,7 @@
 
 VPATH		= @srcdir@
 
-SUBDIRS		= snmplib @MAINSUBS@ testing
+SUBDIRS		= snmplib @MAINSUBS@
 SUBDIRDEPS      = sedscript
 FTSUBDIRS	= @FTMAINSUBS@ snmplib
 TESTDIRS	= testing
@@ -78,6 +78,7 @@ FTOTHERTARGS=@PERLFEATURES@ @PYTHONFEATURES@
 # targets
 #
 all:    sedscript EXAMPLE.conf  @FEATURETARGS@ standardall net-snmp-config-x net-snmp-create-v3-user @PERLTARGS@ @PYTHONTARGS@
+	cd testing && make fuzz-tests
 
 start-flag:
 	@touch build-in-progress-flag

@@ -18,9 +18,6 @@ PARSEOBJS	=
 CPPFLAGS	= $(SNMPLIB_INCLUDES) @CPPFLAGS@
 CC		= @CC@ $(CPPFLAGS)
 
-all:
-	(cd fuzzing && ./build.sh)
-
 help:
 	@echo "Select one of the following targets to run:"
 	@echo ""
@@ -32,6 +29,9 @@ help:
 	@echo "Set additional test parameters with TESTOPTS=args"
 	@echo ""
 	@echo "Also see the RUNFULLTESTS script for details"
+
+fuzz-tests:
+	(cd fuzzing && ./build.sh)
 
 test:
 	@$(srcdir)/check_for_pskill
