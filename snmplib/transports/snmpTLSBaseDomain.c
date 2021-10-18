@@ -221,8 +221,8 @@ int
 netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
     X509            *remote_cert;
-    char            *check_name;
     int              ret;
+    size_t           their_hostname_len;
     
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
     netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
@@ -245,86 +245,39 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 
     case NO_FINGERPRINT_AVAILABLE:
         if (tlsdata->their_hostname && tlsdata->their_hostname[0] != '\0') {
-            GENERAL_NAMES      *onames;
-            const GENERAL_NAME *oname = NULL;
-            int                 i, j;
-            int                 count;
-            char                buf[SPRINT_MAX_LEN];
-            int                 is_wildcarded = 0;
-            char               *compare_to;
+            their_hostname_len = strlen(tlsdata->their_hostname);
+            their_hostname = tlsdata->their_hostname;
 
-            /* see if the requested hostname has a wildcard prefix */
-            if (strncmp(tlsdata->their_hostname, "*.", 2) == 0) {
-                is_wildcarded = 1;
-                compare_to = tlsdata->their_hostname + 2;
-            } else {
-                compare_to = tlsdata->their_hostname;
+            /* RFC 6353: convert their_hostname to lowercase */
+            char *lower_hostname = calloc(their_hostname_len + 1, sizeof(char));
+            if (NULL == lower_hostname) {
+                LOGANDDIE("Failed to allocate memory to convert hostname to lowercase");
             }
-
-            /* if the hostname we were expecting to talk to matches
-               the cert, then we can accept this connection. */
-
-            /* check against the DNS subjectAltName */
-            onames = (GENERAL_NAMES *)X509_get_ext_d2i(remote_cert,
-                                                       NID_subject_alt_name,
-                                                       NULL, NULL );
-            if (NULL != onames) {
-                count = sk_GENERAL_NAME_num(onames);
-
-                for (i=0 ; i <count; ++i)  {
-                    oname = sk_GENERAL_NAME_value(onames, i);
-                    if (GEN_DNS == oname->type) {
-
-                        /* get the value */
-                        ASN1_STRING_to_UTF8((unsigned char**)&check_name,
-                                            oname->d.ia5);
-
-                        /* convert to lowercase for comparisons */
-                        for (j = 0; *check_name && j < sizeof(buf)-1;
-                             ++check_name, ++j) {
-                            buf[j] = tolower(0xFF & *check_name);
-                        }
-                        if (j < sizeof(buf))
-                            buf[j] = '\0';
-                        check_name = buf;
-                        
-                        if (is_wildcarded) {
-                            /* we *only* allow passing till the first '.' */
-                            /* ie *.example.com can't match a.b.example.com */
-                            check_name = strchr(check_name, '.') + 1;
-                        }
-
-                        DEBUGMSGTL(("tls_x509:verify", "checking subjectAltname of dns:%s\n", check_name));
-                        if (strcmp(compare_to, check_name) == 0) {
-
-                            DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns:%s\n", check_name));
-                            return SNMPERR_SUCCESS;
-                        }
-                    }
-                }
+            for (i = 0; i < their_hostname_len; ++i) {
+                lower_hostname[i] = tolower((unsigned char) their_hostname[i]);
             }
-
-            /* check the common name for a match */
-            check_name =
-                netsnmp_openssl_cert_get_commonName(remote_cert, NULL, NULL);
-
-            if (is_wildcarded) {
-                /* we *only* allow passing till the first '.' */
-                /* ie *.example.com can't match a.b.example.com */
-                if (check_name)
-                    check_name = strchr(check_name, '.');
-                if (check_name)
-                    check_name++;
-            }
-
-            if (check_name && strcmp(compare_to, check_name) == 0) {
-                DEBUGMSGTL(("tls_x509:verify", "Successful match on a common name of %s\n", check_name));
+            /* RFC 1034 section 3.5
+               Disable support for "w*.example.com" and "*w.example.com"
+               multilevel wildcards
+            */
+            if (1 == X509_check_host(remote_cert,
+                                   lower_hostname,
+                                   their_hostname_len,
+                                   X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS | X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS,
+                                   NULL)) {
+                DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns or a common name: %s\n", lower_hostname));
+                free(lower_hostname);
                 return SNMPERR_SUCCESS;
             }
-
-            snmp_log(LOG_ERR, "No matching names in the certificate to match the expected %s\n", tlsdata->their_hostname);
+            free(lower_hostname);
+            if (1 == X509_check_ip_asc(remote_cert,
+                                      their_hostname,
+                                      0)) {
+                DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of IP: %s\n", their_hostname));
+                return SNMPERR_SUCCESS;
+            }
+            snmp_log(LOG_ERR, "No matching names in the certificate to match the expected %s\n", their_hostname);
             return SNMPERR_GENERR;
-
         }
         /* XXX: check for hostname match instead */
         snmp_log(LOG_ERR, "Can not verify a remote server identity without configuration\n");
