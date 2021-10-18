@@ -280,11 +280,9 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
                                             oname->d.ia5);
 
                         /* convert to lowercase for comparisons */
-                        for (j = 0 ;
-                             *check_name && j < sizeof(buf)-1;
-                             ++check_name, ++j ) {
-                            if (isascii(*check_name))
-                                buf[j] = tolower(0xFF & *check_name);
+                        for (j = 0; *check_name && j < sizeof(buf)-1;
+                             ++check_name, ++j) {
+                            buf[j] = tolower(0xFF & *check_name);
                         }
                         if (j < sizeof(buf))
                             buf[j] = '\0';

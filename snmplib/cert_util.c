@@ -1860,7 +1860,7 @@ netsnmp_fp_lowercase_and_strip_colon(char *fp)
     for (++pos; *pos; ++pos) {
         if (':' == *pos)
             continue;
-        *dest++ = isalpha(0xFF & *pos) ? tolower(0xFF & *pos) : *pos;
+        *dest++ = tolower(0xFF & *pos);
     }
     *dest = *pos; /* nul termination */
 }
