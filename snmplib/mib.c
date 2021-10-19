@@ -5688,6 +5688,8 @@ _add_strings_to_oid(void *tp, char *cp,
                 objid[*objidlen] = *cp++;
                 (*objidlen)++;
             }
+            if (!*cp)
+                goto bad_id;
             cp2 = cp + 1;
             if (!*cp2)
                 cp2 = NULL;
