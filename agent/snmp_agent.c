@@ -570,7 +570,7 @@ get_set_cache(netsnmp_agent_session *asp)
              * yyy-rks: investigate when/why sometimes they match,
              * sometimes they don't.
              */
-            if(asp->requests->agent_req_info != asp->reqinfo) {
+            if(asp->requests && asp->requests->agent_req_info != asp->reqinfo) {
                 /*
                  * - one don't match case: agentx subagents. prev asp & reqinfo
                  *   freed, request reqinfo ptrs not cleared.
