@@ -7600,6 +7600,13 @@ snmp_add_var(netsnmp_pdu *pdu,
                 result = SNMPERR_MALLOC;
                 break;
             }
+            if (ix < 0 || ix >= buf_len) {
+               result = SNMPERR_RANGE;
+               snmp_set_detail(cp);
+               SNMP_FREE(buf);
+               SNMP_FREE(vp);
+               goto out;
+            }
             bit = 0x80 >> ltmp % 8;
             buf[ix] |= bit;
 	    
