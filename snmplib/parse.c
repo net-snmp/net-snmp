@@ -1592,6 +1592,10 @@ do_subtree(struct tree *root, struct node **nodes)
         tp->number_modules = 1;
         tp->module_list = &(tp->modid);
         tree_from_node(tp, np);
+        if (!otp && !xxroot) {
+          free(tp);
+          return;
+        }
         tp->next_peer = otp ? otp->next_peer : xxroot->child_list;
         if (otp)
             otp->next_peer = tp;
