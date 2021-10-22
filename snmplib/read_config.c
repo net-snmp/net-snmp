@@ -829,7 +829,7 @@ read_config(const char *filename,
 
             linelen += strlen(line + linelen);
 
-            if (line[linelen - 1] == '\n') {
+            if (linelen > 0 && line[linelen - 1] == '\n') {
               line[linelen - 1] = '\0';
               break;
             }
