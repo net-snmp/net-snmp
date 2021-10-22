@@ -56,7 +56,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     size--;
 
     // Allocate a large destination buffer
-    char *dst_buf = malloc((size*3) + 100);
+    char *dst_buf = malloc((size*sizeof(oid)));
     size_t len = size;
     
     char *src_buf = malloc(size+1);
