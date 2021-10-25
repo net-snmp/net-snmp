@@ -581,13 +581,15 @@ get_set_cache(netsnmp_agent_session *asp)
                             asp->reqinfo, asp->requests->agent_req_info));
                 for(; tmp; tmp = tmp->next)
                     tmp->agent_req_info = asp->reqinfo;
-            } else {
+            } else if (asp->requests) {
                 /*
                  * - match case: ?
                  */
                 DEBUGMSGTL(("verbose:asp",
                             "  reqinfo %p matches cached reqinfo %p\n",
                             asp->reqinfo, asp->requests->agent_req_info));
+            } else {
+                DEBUGMSGTL(("verbose:asp", "  asp->requests is NULL\n"));
             }
 
             SNMP_FREE(ptr);
