@@ -1,12 +1,8 @@
+# See also https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions
+
 name: Build and test
 
-# on: [workflow_dispatch]
-
-on:
-  push:
-    branches:
-      - master
-      - V5-9-patches
+on: [push, pull_request]
 
 jobs:
   build_and_test:
