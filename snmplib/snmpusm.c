@@ -773,6 +773,7 @@ usm_free_user(struct usmUser *user)
         SNMP_FREE(user->privKeyKu);
     }
 
+#ifdef NETSNMP_USE_OPENSSL
     if (user->usmDHUserAuthKeyChange)
     {
         DH_free(user->usmDHUserAuthKeyChange);
@@ -784,6 +785,7 @@ usm_free_user(struct usmUser *user)
         DH_free(user->usmDHUserPrivKeyChange);
         user->usmDHUserPrivKeyChange = NULL;
     }
+#endif
 
     /*
      * FIX  Why not put this check *first?*
