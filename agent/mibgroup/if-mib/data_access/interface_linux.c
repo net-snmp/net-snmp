@@ -723,6 +723,7 @@ static void netsnmp_retrieve_link_info(struct nl_sock *nl_sock, int fd,
                                        netsnmp_container *container)
 {
     struct nl_cache *link_cache;
+    struct nl_object *nl_object;
     int ret;
 
     ret = rtnl_link_alloc_cache(nl_sock, AF_UNSPEC, &link_cache);
@@ -741,8 +742,7 @@ static void netsnmp_retrieve_link_info(struct nl_sock *nl_sock, int fd,
         write(1, buf, strlen(buf));
     }
 #endif
-    for (struct nl_object *nl_object = nl_cache_get_first(link_cache);
-         nl_object;
+    for (nl_object = nl_cache_get_first(link_cache); nl_object;
          nl_object = nl_cache_get_next(nl_object)) {
         struct rtnl_link *rtnl_link = (void *)nl_object;
         int if_index = rtnl_link_get_ifindex(rtnl_link);
@@ -772,13 +772,13 @@ static void netsnmp_retrieve_addr_info(struct nl_sock *nl_sock,
                                        netsnmp_container *container)
 {
     struct nl_cache *addr_cache;
+    struct nl_object *nl_object;
     int ret;
 
     ret = rtnl_addr_alloc_cache(nl_sock, &addr_cache);
     if (ret)
         return;
-    for (struct nl_object *nl_object = nl_cache_get_first(addr_cache);
-         nl_object;
+    for (nl_object = nl_cache_get_first(addr_cache); nl_object;
          nl_object = nl_cache_get_next(nl_object)) {
         struct rtnl_addr *rtnl_addr = (struct rtnl_addr *)nl_object;
         struct nl_addr *local_addr = rtnl_addr_get_local(rtnl_addr);
