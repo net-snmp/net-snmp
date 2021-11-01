@@ -3447,6 +3447,10 @@ check_utc(const char *utc)
     int             len, year, month, day, hour, minute;
 
     len = strlen(utc);
+    if (len == 0) {
+        print_error("Timestamp has zero length", utc, QUOTESTRING);
+        return;
+    }
     if (utc[len - 1] != 'Z' && utc[len - 1] != 'z') {
         print_error("Timestamp should end with Z", utc, QUOTESTRING);
         return;
