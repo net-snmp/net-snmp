@@ -28,6 +28,12 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+/*
+ * Declare functions.
+ */
+void af_gb_init(void);
+void af_gb_cleanup(void);
+
 // Simple garbage collector 
 #define GB_SIZE 100
 
@@ -111,7 +117,7 @@ short af_get_short(const uint8_t **data, size_t *size) {
 int af_get_int(const uint8_t **data, size_t *size) {
   if (*size <= 4) return 0;
   const uint8_t *ptr = *data;
-  int val = *((int*)ptr);
+  int val = *((const int*)ptr);
   *data += 4;
   *size -= 4;
   return val;
