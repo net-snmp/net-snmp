@@ -20,7 +20,17 @@ if [ -z "${LIB_FUZZING_ENGINE+x}" ]; then
 	echo "Skipping compilation of fuzz tests"
 	exit 0
     fi
+else
+  # Handle OSS-Specific actions.
+  # Some fuzzers will leak memory. Surpress leak checking on these as
+  # ASAN will report leaks instantly and exit the fuzzing process.
+  # The goal is to prioritise more important bugs for now.
+  for fuzzer in transport mib agent_e2e api; do
+    echo "[libfuzzer]" > $OUT/snmp_${fuzzer}_fuzzer.options
+    echo "detect_leaks=0" >> $OUT/snmp_${fuzzer}_fuzzer.options
+  done
 fi
+
 
 export CC CXX CFLAGS CXXFLAGS SRC WORK OUT LIB_FUZZING_ENGINE
 
