@@ -1643,6 +1643,11 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
          * expects to find the context in the PDU's context field.  Therefore we
          * need to copy the context into the PDU's context fields.  */
         if (pdu->community_len > 0 && pdu->contextName == NULL) {
+            /*
+             * strlen() is safe here because snmp_clone_mem() '\0'-terminates its output
+             */
+            if (strlen(pdu->community) != pdu->community_len)
+                goto parse_err;
             pdu->contextName    = strdup((char *) pdu->community);
             pdu->contextNameLen = pdu->community_len;
         }
