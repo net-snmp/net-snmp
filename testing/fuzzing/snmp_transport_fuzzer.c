@@ -95,7 +95,8 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
         netsnmp_ipv6_fmtaddr(prefix, t2, fmt_data, strlen(fmt_data));
 
         struct sockaddr_in6 addr;
-        netsnmp_sockaddr_in6(&addr, prefix, 5123);
+        if (!netsnmp_sockaddr_in6(&addr, prefix, 5123))
+            return 0;
     }
 
     /*
@@ -115,9 +116,8 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 
     struct netsnmp_ep_str ep_str;
     char           *endpoint = af_gb_get_null_terminated(&data2, &size2);
-    if (endpoint) {
-        netsnmp_parse_ep_str(&ep_str, endpoint);
-    }
+    if (endpoint && !netsnmp_parse_ep_str(&ep_str, endpoint))
+        return 0;
 
     char           *unix_token = af_gb_get_null_terminated(&data2, &size2);
     char           *unix_param = af_gb_get_null_terminated(&data2, &size2);
