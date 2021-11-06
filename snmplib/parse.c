@@ -2728,6 +2728,15 @@ parse_objecttype(FILE * fp, char *name)
                     return NULL;
                 }
 
+                /*
+                 * Ensure strlen(defbuf) is above zero
+                 */
+                if (strlen(defbuf) == 0) {
+                    print_error("Bad DEFAULTVALUE", quoted_string_buffer,
+                                type);
+                    free_node(np);
+                    return NULL;
+                }
                 defbuf[strlen(defbuf) - 1] = 0;
                 np->defaultValue = strdup(defbuf);
             }
