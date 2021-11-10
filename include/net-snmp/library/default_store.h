@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -183,6 +183,8 @@ extern          "C" {
 #define NETSNMP_DS_LIB_SSH_PUBKEY        33
 #define NETSNMP_DS_LIB_SSH_PRIVKEY       34
 #define NETSNMP_DS_LIB_OUTPUT_PRECISION  35
+#define NETSNMP_DS_LIB_TLS_MIN_VERSION   36
+#define NETSNMP_DS_LIB_TLS_MAX_VERSION   37
 #define NETSNMP_DS_LIB_MAX_STR_ID        48 /* match NETSNMP_DS_MAX_SUBIDS */
 
     /*

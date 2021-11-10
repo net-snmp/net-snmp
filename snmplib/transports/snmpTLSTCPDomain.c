@@ -719,10 +719,6 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
         return NULL;
     }
 
-#ifdef SSL_CTX_set_max_proto_version
-    SSL_CTX_set_max_proto_version(tlsdata->ssl_context, TLS1_VERSION);
-#endif
-
     /* RFC5953 Section 5.3.1:  Establishing a Session as a Client
        3)  Using the destTransportDomain and destTransportAddress values,
        the client will initiate the (D)TLS handshake protocol to
@@ -919,10 +915,6 @@ netsnmp_tlstcp_open_server(netsnmp_transport *t)
 
     /* create the OpenSSL TLS context */
     tlsdata->ssl_context = sslctx_server_setup(TLS_method());
-#ifdef SSL_CTX_set_max_proto_version
-    if (tlsdata->ssl_context)
-        SSL_CTX_set_max_proto_version(tlsdata->ssl_context, TLS1_VERSION);
-#endif
 
     t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
     t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
