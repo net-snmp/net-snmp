@@ -69,7 +69,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     netsnmp_pdu *pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
     netsnmp_session session = { .version = AGENTX_VERSION_1 };
 
-    agentx_parse(&session, pdu, (unsigned char *)data, size);
+    agentx_parse(&session, pdu, NETSNMP_REMOVE_CONST(uint8_t *, data), size);
 
     // Add a variable with random type and value to the PDU
     char *value = af_gb_get_random_data(&data2, &size2, 20);
