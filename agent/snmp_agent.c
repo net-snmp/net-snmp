@@ -4017,7 +4017,7 @@ netsnmp_request_set_error_idx(netsnmp_request_info *request,
     /*
      * Skip to the indicated varbind
      */
-    for ( i=2; i<idx; i++) {
+    for ( i=2; i<=idx; i++) {
         req = req->next;
         if (!req)
             return SNMPERR_NO_VARS;
