@@ -274,7 +274,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 
     variable.type = ASN_UINTEGER;
     long            value2 = 3;
-    variable.val.integer = (long *) &value2;
+    variable.val.integer = &value2;
     variable.val_len = 4;
     variable.next_variable = NULL;
     char            out_buf2[100];
