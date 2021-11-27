@@ -462,6 +462,9 @@ SSL_CTX *
 _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     char         *crlFile;
     char         *cipherList;
+    char         *tlsMinVersion;
+    char         *tlsMaxVersion;
+    int          tlsVersion;
     X509_LOOKUP  *lookup;
     X509_STORE   *cert_store = NULL;
 
@@ -484,6 +487,65 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
         X509_STORE_set_flags(cert_store,
                              X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
     }
+
+#ifdef SSL_CTX_set_min_proto_version
+    tlsVersion = TLS1_2_VERSION;
+    tlsMinVersion = "tls1_2";
+    tlsMinVersion = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                          NETSNMP_DS_LIB_TLS_MIN_VERSION);
+    if (NULL != tlsMinVersion) {
+        if (strcmp("tls1",tlsMinVersion) == 0) {
+           tlsVersion = TLS1_VERSION;
+        }
+        else if (strcmp("tls1_1",tlsMinVersion) == 0) {
+           tlsVersion = TLS1_1_VERSION;
+        }
+        else if (strcmp("tls1_2",tlsMinVersion) == 0) {
+           tlsVersion = TLS1_2_VERSION;
+        }
+        else if (strcmp("tls1_3",tlsMinVersion) == 0) {
+           tlsVersion = TLS1_3_VERSION;
+        }
+        else {
+            LOGANDDIE("Invalid tlsMinVersion value");
+        }
+    }
+    if (1 == SSL_CTX_set_min_proto_version(the_ctx, tlsVersion)) {
+        snmp_log(LOG_INFO,"Set tlsMinVersion to '%s'\n", tlsMinVersion);
+    }
+    else {
+        LOGANDDIE("Set tlsMinVersion failed");
+    }
+
+    tlsVersion = TLS1_3_VERSION;
+    tlsMaxVersion = "tls1_3";
+    tlsMaxVersion = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                          NETSNMP_DS_LIB_TLS_MAX_VERSION);
+    if (NULL != tlsMaxVersion) {
+        if (strcmp("tls1",tlsMaxVersion) == 0) {
+            tlsVersion = TLS1_VERSION;
+        }
+        else if (strcmp("tls1_1",tlsMaxVersion) == 0) {
+            tlsVersion = TLS1_1_VERSION;
+        }
+        else if (strcmp("tls1_2",tlsMaxVersion) == 0) {
+            tlsVersion = TLS1_2_VERSION;
+        }
+        else if (strcmp("tls1_3",tlsMaxVersion) == 0) {
+            tlsVersion = TLS1_3_VERSION;
+        }
+        else {
+            LOGANDDIE("Invalid tlsMaxVersion value");
+        }
+    }
+
+    if (1 == SSL_CTX_set_max_proto_version(the_ctx, tlsVersion)) {
+        snmp_log(LOG_INFO,"Set tlsMaxVersion to '%s'\n", tlsMaxVersion);
+    }
+    else {
+        LOGANDDIE("Set tlsMaxVersion failed");
+    }
+#endif
 
     cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_TLS_ALGORITMS);
@@ -773,6 +835,16 @@ netsnmp_tlsbase_ctor(void) {
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "tlsAlgorithms",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_TLS_ALGORITMS);
+
+    /* What TLS version should be used at least */
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "tlsMinVersion",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_TLS_MIN_VERSION);
+
+    /* What TLS version should be used at max */
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "tlsMaxVersion",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_TLS_MAX_VERSION);
 
     /*
      * for the client

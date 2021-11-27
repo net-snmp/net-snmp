@@ -203,6 +203,12 @@ HIGH:!AES128\-SHA
 .RE
 .IP
 The default value is whatever openssl itself was configured with.
+.IP "tlsMinVersion STRING"
+The function sets the minimum supported TLS protocol version. 
+OPTION can be one of < tls1 | tls1_1| tls1_2 | tls1_3 >.
+.IP "tlsMaxVersion STRING"
+The function sets the maximum supported TLS protocol version. 
+OPTION can be one of < tls1 | tls1_1| tls1_2 | tls1_3 >.
 .IP "[snmp] x509CRLFile"
 If you are using a Certificate Authority (CA) that publishes a
 Certificate Revocation List (CRL) then this token can be used to
