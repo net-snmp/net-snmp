@@ -458,12 +458,16 @@ _load_trusted_certs(SSL_CTX *the_ctx) {
     }
 }    
 
+#ifndef TLS1_3_VERSION
+#define TLS1_3_VERSION 0x304
+#endif
+
 SSL_CTX *
 _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     char         *crlFile;
     char         *cipherList;
-    char         *tlsMinVersion;
-    char         *tlsMaxVersion;
+    const char   *tlsMinVersion;
+    const char   *tlsMaxVersion;
     int          tlsVersion;
     X509_LOOKUP  *lookup;
     X509_STORE   *cert_store = NULL;
