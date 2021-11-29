@@ -26282,16 +26282,15 @@ $as_echo "$PERLCC" >&6; }
                 as_fn_error $? "Could not determine the compiler that was used to build $myperl. Either set the environment variable PERLPROG to a different perl binary or use --without-perl-modules to build without Perl." "$LINENO" 5
             fi
         fi
-    fi
 
-    #       Was GCC used to build the perl binary?
-    #
-    if test "x$install_perl" != "xno" ; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $PERLCC is a GNU C compiler" >&5
+	#       Was GCC used to build the perl binary?
+	#
+	if test "x$install_perl" != "xno" ; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $PERLCC is a GNU C compiler" >&5
 $as_echo_n "checking whether $PERLCC is a GNU C compiler... " >&6; }
-        OLDCC=$CC
-        CC="$PERLCC"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	    OLDCC=$CC
+	    CC="$PERLCC"
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
@@ -26313,31 +26312,32 @@ else
   perlcc_is_gnu=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $perlcc_is_gnu" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $perlcc_is_gnu" >&5
 $as_echo "$perlcc_is_gnu" >&6; }
-        CC=$OLDCC
+	    CC=$OLDCC
 
-        #       Check compatability:  Gnu Net-SNMP vs Non-Gnu perl
-        #
-        if test "x$GCC" = "xyes" -a "x$perlcc_is_gnu" = "xno" ; then
-            if test "x$install_perl" = "xtry" ; then
-      	        install_perl="no"
-      	    else
-      	        as_fn_error $? "This build is using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU (or non-working) compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules)." "$LINENO" 5
-      	    fi
-        fi
-    fi
+	    #       Check compatability:  Gnu Net-SNMP vs Non-Gnu perl
+	    #
+	    if test "x$GCC" = "xyes" -a "x$perlcc_is_gnu" = "xno" ; then
+		if test "x$install_perl" = "xtry" ; then
+			install_perl="no"
+		    else
+			as_fn_error $? "This build is using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU (or non-working) compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules)." "$LINENO" 5
+		    fi
+	    fi
+	fi
 
-    #       Check compatability:  Non-Gnu Net-SNMP vs Gnu perl
-    #
-    if test "x$install_perl" != "xno" ; then
-        if test "x$GCC" != "xyes" -a "x$perlcc_is_gnu" = "xyes" ; then
-      	    if test "x$install_perl" = "xtry" ; then
-      	        install_perl="no"
-      	    else
-                as_fn_error $? "This build is using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules)." "$LINENO" 5
-      	    fi
-        fi
+	#       Check compatability:  Non-Gnu Net-SNMP vs Gnu perl
+	#
+	if test "x$install_perl" != "xno" ; then
+	    if test "x$GCC" != "xyes" -a "x$perlcc_is_gnu" = "xyes" ; then
+		    if test "x$install_perl" = "xtry" ; then
+			install_perl="no"
+		    else
+		    as_fn_error $? "This build is using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules)." "$LINENO" 5
+		    fi
+	    fi
+	fi
     fi
 
     #       Are we clear to proceed?
