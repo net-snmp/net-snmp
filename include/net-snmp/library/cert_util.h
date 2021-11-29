@@ -2,11 +2,17 @@
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
+#if 0
+/*
+ * The code below has been commented out since it depends on deprecated SSL
+ * macros.
+ */
 #ifndef HEADER_SSL_H
 #error "must include <openssl/ssl.h> before cert_util.h"
 #endif
 #ifndef HEADER_X509_H
 #error "must include <openssl/x509.h> before cert_util.h"
+#endif
 #endif
 
 #ifdef  __cplusplus

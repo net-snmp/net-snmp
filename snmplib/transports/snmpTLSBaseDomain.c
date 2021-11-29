@@ -222,8 +222,13 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
     netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
-    
-    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
+
+#ifdef HAVE_SSL_GET1_PEER_CERTIFICATE
+    remote_cert = SSL_get1_peer_certificate(ssl);
+#else
+    remote_cert = SSL_get_peer_certificate(ssl);
+#endif
+    if (!remote_cert) {
         /* no peer cert */
         DEBUGMSGTL(("tls_x509:verify",
                     "remote connection provided no certificate (yet)\n"));
@@ -353,7 +358,12 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
          above.
        + fingerprint verification happens below.
     */
-    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
+#ifdef HAVE_SSL_GET1_PEER_CERTIFICATE
+    remote_cert = SSL_get1_peer_certificate(ssl);
+#else
+    remote_cert = SSL_get_peer_certificate(ssl);
+#endif
+    if (!remote_cert) {
         /* no peer cert */
         DEBUGMSGTL(("tls_x509:verify",
                     "remote connection provided no certificate (yet)\n"));
