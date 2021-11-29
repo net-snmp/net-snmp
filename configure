@@ -24366,7 +24366,7 @@ _ACEOF
         fi
         netsnmp_save_LIBS="$LIBS"
         LIBS="-lssl $LIBCRYPTO"
-        for ac_func in TLS_method TLSv1_method DTLS_method DTLSv1_method                       SSL_library_init SSL_load_error_strings		       ERR_get_error_all
+        for ac_func in ERR_get_error_all                       OpenSSL_add_all_algorithms OPENSSL_sk_num                       OPENSSL_sk_value                       SSL_get1_peer_certificate                       SSL_library_init SSL_load_error_strings                       TLS_method TLSv1_method DTLS_method DTLSv1_method
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -24378,7 +24378,44 @@ _ACEOF
 fi
 done
 
+	# The declaration for DES_key_sched() may be ifdef-ed out even if
+	# this function has been defined in the OpenSSL library. Hence use
+	# AC_COMPILE_IFELSE() instead of AC_CHECK_FUNCS().
+	for func in DES_key_sched ERR_load_BIO_strings; do
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
+$as_echo_n "checking for $func... " >&6; }
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stddef.h>
+#include <openssl/des.h>
+int
+main ()
+{
+return ${func} != NULL;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+cat >>confdefs.h <<_ACEOF
+#define `$as_echo ""${func}"" | $as_tr_cpp` 1
+_ACEOF
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	done
         LIBS="$netsnmp_save_LIBS"
+	if test x$ac_cv_func_DES_key_sched != xyes; then
+
+$as_echo "#define NETSNMP_DISABLE_DES 1" >>confdefs.h
+
+	fi
         if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
 	    if test x$ac_cv_func_DTLSv1_method = xyes -o \
                     x$ac_cv_func_DTLS_method = xyes; then
@@ -25337,16 +25374,15 @@ $as_echo "$PERLCC" >&6; }
                 as_fn_error $? "Could not determine the compiler that was used to build $myperl. Either set the environment variable PERLPROG to a different perl binary or use --without-perl-modules to build without Perl." "$LINENO" 5
             fi
         fi
-    fi
 
-    #       Was GCC used to build the perl binary?
-    #
-    if test "x$install_perl" != "xno" ; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $PERLCC is a GNU C compiler" >&5
+	#       Was GCC used to build the perl binary?
+	#
+	if test "x$install_perl" != "xno" ; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $PERLCC is a GNU C compiler" >&5
 $as_echo_n "checking whether $PERLCC is a GNU C compiler... " >&6; }
-        OLDCC=$CC
-        CC="$PERLCC"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	    OLDCC=$CC
+	    CC="$PERLCC"
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
@@ -25368,31 +25404,32 @@ else
   perlcc_is_gnu=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $perlcc_is_gnu" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $perlcc_is_gnu" >&5
 $as_echo "$perlcc_is_gnu" >&6; }
-        CC=$OLDCC
+	    CC=$OLDCC
 
-        #       Check compatability:  Gnu Net-SNMP vs Non-Gnu perl
-        #
-        if test "x$GCC" = "xyes" -a "x$perlcc_is_gnu" = "xno" ; then
-            if test "x$install_perl" = "xtry" ; then
-      	        install_perl="no"
-      	    else
-      	        as_fn_error $? "This build is using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU (or non-working) compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules)." "$LINENO" 5
-      	    fi
-        fi
-    fi
+	    #       Check compatability:  Gnu Net-SNMP vs Non-Gnu perl
+	    #
+	    if test "x$GCC" = "xyes" -a "x$perlcc_is_gnu" = "xno" ; then
+		if test "x$install_perl" = "xtry" ; then
+			install_perl="no"
+		    else
+			as_fn_error $? "This build is using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU (or non-working) compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules)." "$LINENO" 5
+		    fi
+	    fi
+	fi
 
-    #       Check compatability:  Non-Gnu Net-SNMP vs Gnu perl
-    #
-    if test "x$install_perl" != "xno" ; then
-        if test "x$GCC" != "xyes" -a "x$perlcc_is_gnu" = "xyes" ; then
-      	    if test "x$install_perl" = "xtry" ; then
-      	        install_perl="no"
-      	    else
-                as_fn_error $? "This build is using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules)." "$LINENO" 5
-      	    fi
-        fi
+	#       Check compatability:  Non-Gnu Net-SNMP vs Gnu perl
+	#
+	if test "x$install_perl" != "xno" ; then
+	    if test "x$GCC" != "xyes" -a "x$perlcc_is_gnu" = "xyes" ; then
+		    if test "x$install_perl" = "xtry" ; then
+			install_perl="no"
+		    else
+		    as_fn_error $? "This build is using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules)." "$LINENO" 5
+		    fi
+	    fi
+	fi
     fi
 
     #       Are we clear to proceed?
