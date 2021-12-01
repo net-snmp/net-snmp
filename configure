@@ -26318,7 +26318,21 @@ CFLAGS="$CFLAGS -Werror"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the type of the fifth argument of select()" >&5
 $as_echo_n "checking for the type of the fifth argument of select()... " >&6; }
-arg_type=void
+arg_type="struct timeval"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+# The compiler supports -Werror.
 for t in "struct timeval" "struct __ms_timeval"; do
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -26349,6 +26363,13 @@ if ac_fn_c_try_compile "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
+
+else
+
+: # The compiler does not support -Werror.
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${arg_type}" >&5
 $as_echo "${arg_type}" >&6; }
 
@@ -26359,7 +26380,21 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the type of the third argument of ioctlsocket()" >&5
 $as_echo_n "checking for the type of the third argument of ioctlsocket()... " >&6; }
-arg_type=void
+arg_type=unknown
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+# The compiler supports -Werror.
 for t in "unsigned int" "unsigned long"; do
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -26387,6 +26422,13 @@ if ac_fn_c_try_compile "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
+
+else
+
+: # The compiler does not support -Werror.
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${arg_type}" >&5
 $as_echo "${arg_type}" >&6; }
 
