@@ -126,12 +126,8 @@ void netsnmp_init_openssl(void) {
 #ifdef HAVE_SSL_LOAD_ERROR_STRINGS
     SSL_load_error_strings();
 #endif
-#ifdef HAVE_ERR_LOAD_BIO_STRINGS
     ERR_load_BIO_strings();
-#endif
-#ifdef HAVE_OPENSSL_ADD_ALL_ALGORITHMS
     OpenSSL_add_all_algorithms();
-#endif
 }
 
 /** netsnmp_openssl_cert_get_name: get subject name field from cert
@@ -693,16 +689,11 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     char                  *fingerprint;
     netsnmp_container     *chain_map;
     netsnmp_cert_map      *cert_map;
-    int                    i, sk_num_res;
+    int                    i;
 
     netsnmp_assert_or_return(ssl != NULL, NULL);
-
-#ifdef HAVE_SSL_GET1_PEER_CERTIFICATE
-    ocert = SSL_get1_peer_certificate(ssl);
-#else
-    ocert = SSL_get_peer_certificate(ssl);
-#endif
-    if (!ocert) {
+    
+    if (NULL == (ocert = SSL_get_peer_certificate(ssl))) {
         /** no peer cert */
         snmp_log(LOG_ERR, "SSL peer has no certificate\n");
         return NULL;
@@ -740,12 +731,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
 
     /** check for a chain to a CA */
     ochain = SSL_get_peer_cert_chain(ssl);
-#ifdef HAVE_OPENSSL_SK_NUM
-    sk_num_res = OPENSSL_sk_num((const void *)ochain);
-#else
-    sk_num_res = sk_num((const void *)ochain);
-#endif
-    if (!ochain || sk_num_res == 0) {
+    if ((NULL == ochain) || (0 == sk_num((const void *)ochain))) {
         DEBUGMSGT(("ssl:cert:chain", "peer has no cert chain\n"));
     }
     else {
@@ -753,17 +739,8 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
          * loop over chain, adding fingerprint / cert for each
          */
         DEBUGMSGT(("ssl:cert:chain", "examining cert chain\n"));
-#ifdef HAVE_OPENSSL_SK_NUM
-        sk_num_res = OPENSSL_sk_num((const void *)ochain);
-#else
-        sk_num_res = sk_num((const void *)ochain);
-#endif
-        for(i = 0; i < sk_num_res; ++i) {
-#ifdef HAVE_OPENSSL_SK_VALUE
-            ocert_tmp = (X509*)OPENSSL_sk_value((const void *)ochain, i);
-#else
-            ocert_tmp = (X509*)sk_value((const void *)ochain, i);
-#endif
+        for(i = 0; i < sk_num((const void *)ochain); ++i) {
+            ocert_tmp = (X509*)sk_value((const void *)ochain,i);
             fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, -1);
             if (NULL == fingerprint)
                 break;
@@ -780,12 +757,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         /*
          * if we broke out of loop before finishing, clean up
          */
-#ifdef HAVE_OPENSSL_SK_NUM
-        sk_num_res = OPENSSL_sk_num((const void *)ochain);
-#else
-        sk_num_res = sk_num((const void *)ochain);
-#endif
-        if (i < sk_num_res)
+        if (i < sk_num((const void *)ochain)) 
             CONTAINER_FREE_ALL(chain_map, NULL);
     } /* got peer chain */
 
