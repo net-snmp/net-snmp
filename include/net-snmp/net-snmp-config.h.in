@@ -695,6 +695,9 @@
 /* Define to 1 if you have the `opendir' function. */
 #undef HAVE_OPENDIR
 
+/* Define to 1 if you have the `OpenSSL_add_all_algorithms' function. */
+#undef HAVE_OPENSSL_ADD_ALL_ALGORITHMS
+
 /* Define to 1 if you have the <openssl/aes.h> header file. */
 #undef HAVE_OPENSSL_AES_H
 
@@ -709,6 +712,12 @@
 
 /* Define to 1 if you have the <openssl/hmac.h> header file. */
 #undef HAVE_OPENSSL_HMAC_H
+
+/* Define to 1 if you have the `OPENSSL_sk_num' function. */
+#undef HAVE_OPENSSL_SK_NUM
+
+/* Define to 1 if you have the `OPENSSL_sk_value' function. */
+#undef HAVE_OPENSSL_SK_VALUE
 
 /* Define to 1 if you have the <osreldate.h> header file. */
 #undef HAVE_OSRELDATE_H
@@ -895,6 +904,9 @@
 
 /* Define to 1 if the system has the type `ssize_t'. */
 #undef HAVE_SSIZE_T
+
+/* Define to 1 if you have the `SSL_get1_peer_certificate' function. */
+#undef HAVE_SSL_GET1_PEER_CERTIFICATE
 
 /* Define to 1 if you have the `SSL_library_init' function. */
 #undef HAVE_SSL_LIBRARY_INIT
