@@ -455,11 +455,12 @@ init_winExtDLL(void)
                   ext_dll_info->dll_name, view.idLength));
         if (view.idLength) {
             /*
-             * Skip the mib-2 system section on Windows Vista and later because
-             * at least on a 64-bit Windows 7 system all queries in that section
-             * fail with status "generic error".
+             * Skip the mib-2 system section on Windows Vista and later, but not
+             * on Win 10 (v6.2), because at least on a 64-bit Windows 7 system
+             * all queries in that section fail with status "generic error",
+             * whereas all queries work on Win 10 64-bit.
              */
-            if (s_versioninfo.dwMajorVersion >= 6
+            if ((s_versioninfo.dwMajorVersion >= 6 && s_versioninfo.dwMinorVersion != 2)
                 && snmp_oid_compare_w_n(view.ids, view.idLength,
                                         mibii_system_mib,
                                         sizeof(mibii_system_mib) /
