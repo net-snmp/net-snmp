@@ -2,7 +2,7 @@
  * @brief winExtDLL Net-SNMP agent extension module.
  *
  * Copyright (c) 2006-2009 Alex Burger.
- * Copyright (c) 2009-2010 Bart Van Assche <bart.vanassche@gmail.com>.
+ * Copyright (c) 2009-2021 Bart Van Assche <bart.vanassche@gmail.com>.
  *
  * This Net-SNMP agent extension module loads Windows SNMP Extension Agent
  * DLLs in the Net-SNMP agent. Not only extension DLLs provided with Windows
@@ -366,8 +366,7 @@ init_winExtDLL(void)
                     *p = '\0';
             }
             snmp_log(LOG_ERR,
-                     "init_winExtDLL: could not load SNMP extension"
-                     " DLL %s: %s\n",
+                     "init_winExtDLL: could not load SNMP extension DLL %s: %s\n",
                      ext_dll_info->dll_name, lpMsgBuf ? lpMsgBuf : "(?)");
             if (lpMsgBuf)
                 LocalFree(lpMsgBuf);
@@ -381,16 +380,14 @@ init_winExtDLL(void)
             GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionInit");
         ext_dll_info->pfSnmpExtensionInitEx =
 	    (PFNSNMPEXTENSIONINITEX)(uintptr_t)
-            GetProcAddress(ext_dll_info->dll_handle,
-                           "SnmpExtensionInitEx");
+            GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionInitEx");
         ext_dll_info->pfSnmpExtensionClose = (PFNSNMPEXTENSIONCLOSE)
             GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionClose");
         ext_dll_info->pfSnmpExtensionQuery = (PFNSNMPEXTENSIONQUERY)(uintptr_t)
             GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionQuery");
         ext_dll_info->pfSnmpExtensionQueryEx =
 	    (PFNSNMPEXTENSIONQUERYEX)(uintptr_t)
-            GetProcAddress(ext_dll_info->dll_handle,
-                           "SnmpExtensionQueryEx");
+            GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionQueryEx");
         ext_dll_info->pfSnmpExtensionTrap = (PFNSNMPEXTENSIONTRAP)(uintptr_t)
             GetProcAddress(ext_dll_info->dll_handle, "SnmpExtensionTrap");
 
@@ -861,8 +858,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         rc = convert_to_windows_varbind_list(&win_varbinds, varbind);
         if (rc != SNMP_ERR_NOERROR) {
             DEBUGMSG(("winExtDLL",
-                      "converting varbind list to Windows format failed with"
-                      " error code %d.\n", request->status));
+                      "converting varbind list to Windows format failed with error code %d.\n",
+                      request->status));
             netsnmp_request_set_error(requests, rc);
             goto free_win_varbinds;
         }
@@ -951,10 +948,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                                              &outlen, 1, &overflow,
                                              ext_dll_view_info->name,
                                              ext_dll_view_info->name_length);
-                DEBUGMSG(("winExtDLL", "extension DLL %s: SNMP query function"
-                          " returned error code %u (Windows) / %d (Net-SNMP)"
-                          " for request type %d, OID %s%s, ASN type %d and"
-                          " value %d.\n",
+                DEBUGMSG(("winExtDLL",
+                          "extension DLL %s: SNMP query function returned error code %u (Windows) / %d (Net-SNMP) for request type %d, OID %s%s, ASN type %d and value %d.\n",
                           ext_dll_info->dll_name, (unsigned int)ErrorStatus, rc,
                           nRequestType, oid_name,
                           overflow ? " [TRUNCATED]" : "",
@@ -1127,10 +1122,7 @@ read_extension_dll_path_from_registry(const TCHAR * keyName)
     if (retCode != ERROR_SUCCESS)
         return 0;
 
-    retCode = RegQueryValueExA(hKey,
-                               "Pathname",
-                               NULL,
-                               &key_value_type,
+    retCode = RegQueryValueExA(hKey, "Pathname", NULL, &key_value_type,
                                (BYTE *) valueName, &key_value_size);
 
     if (retCode != ERROR_SUCCESS) {
@@ -1190,8 +1182,7 @@ subagentTrapCheck(unsigned int clientreg, void *clientarg)
 
         if (!ext_dll_info->pfSnmpExtensionTrap) {
             snmp_log(LOG_ERR,
-                     "internal error in SNMP extension DLL %s: a trap is ready"
-                     " but the function SnmpExtensionTrap() is missing.\n",
+                     "internal error in SNMP extension DLL %s: a trap is ready but the function SnmpExtensionTrap() is missing.\n",
                      ext_dll_info->dll_name);
             return;
         }
