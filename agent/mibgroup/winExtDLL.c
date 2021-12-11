@@ -454,25 +454,10 @@ init_winExtDLL(void)
                   "init_winExtDLL: DLL %s view length %d\n",
                   ext_dll_info->dll_name, view.idLength));
         if (view.idLength) {
-            /*
-             * Skip the mib-2 system section on Windows Vista and later because
-             * at least on a 64-bit Windows 7 system all queries in that section
-             * fail with status "generic error".
-             */
-            if (s_versioninfo.dwMajorVersion >= 6
-                && snmp_oid_compare_w_n(view.ids, view.idLength,
-                                        mibii_system_mib,
-                                        sizeof(mibii_system_mib) /
-                                        sizeof(mibii_system_mib[0])) == 0) {
-                DEBUGMSG(("winExtDLL",
-                          "init_winExtDLL: skipping system section of DLL %s.\n",
-                          ext_dll_info->dll_name));
-            } else {
-                copy_oid_n_w(ext_dll_view_info.name,
-                             &ext_dll_view_info.name_length,
-                             view.ids, view.idLength);
-                xarray_push_back(&s_winextdll_view, &ext_dll_view_info);
-            }
+            copy_oid_n_w(ext_dll_view_info.name,
+                         &ext_dll_view_info.name_length,
+                         view.ids, view.idLength);
+            xarray_push_back(&s_winextdll_view, &ext_dll_view_info);
         }
 
         /*
