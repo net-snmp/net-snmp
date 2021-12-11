@@ -138,6 +138,20 @@ Limitations
   see also https://connect.microsoft.com/onecare/feedback/ViewFeedback.aspx?FeedbackID=504908.
 
 
+Installing the Windows SNMP Service
+-----------------------------------
+
+The procedure for installing the Windows SNMP service on Windows 10 is as
+follows:
+
+1. Use the Windows + I key combination to open the Settings App.
+2. Go to the Apps category and move to Apps & features tab.
+3. Tap on the Optional features button.
+4. On the new page, click on the Add a feature button.
+5. Scroll down to Simple Network Management Protocol (SNMP) and select it.
+6. Press the Install button to install SNMP on your PC.
+
+
 Enabling the Windows SNMP extension agents
 ------------------------------------------
 
