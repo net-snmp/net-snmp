@@ -291,6 +291,7 @@ static void    *xarray_reserve(xarray * a, int reserved);
 #define TRAPEVENT(i)            ((HANDLE*)s_trapevent.p)[i]
 #define TRAPEVENT_TO_DLLINFO(i) ((winextdll**)s_trapevent_to_dllinfo.p)[i]
 static const oid mibii_system_mib[] = { 1, 3, 6, 1, 2, 1, 1 };
+static const oid lmmib2_mib[] = { 1, 3, 6, 1, 4, 1, 77, 1, 1, 3, 0 };
 static OSVERSIONINFO s_versioninfo = { sizeof(s_versioninfo) };
 static xarray   s_winextdll = { 0, sizeof(winextdll) };
 static xarray   s_winextdll_view = { 0, sizeof(winextdll_view) };
@@ -405,7 +406,7 @@ init_winExtDLL(void)
          * lmmib2.dll fail with "generic error" on a 64-bit Windows 7 system.
          * So skip these two DLLs.
          */
-        if (s_versioninfo.dwMajorVersion >= 6
+        if (s_versioninfo.dwMajorVersion == 6
             && ((is_wow64_process
                  && basename_equals(ext_dll_info->dll_name, "evntagnt.dll"))
                 || basename_equals(ext_dll_info->dll_name, "lmmib2.dll"))) {
@@ -640,7 +641,9 @@ register_netsnmp_handler(winextdll_view * const ext_dll_view_info)
                 }
                 return 1;
             } else {
-                snmp_log(LOG_ERR, "handler registration failed.\n");
+                snmp_log(LOG_ERR,
+                         "winExtDLL: handler registration failed for %s.\n",
+                         ext_dll_info->dll_name);
                 ext_dll_view_info->my_handler = 0;
             }
         } else {
@@ -852,6 +855,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         varbind = request->requestvb;
         netsnmp_assert(varbind);
 
+retry:
         /*
          * Convert the Net-SNMP varbind to a Windows SNMP varbind list.
          */
@@ -938,6 +942,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 
         rc = convert_win_snmp_err(ErrorStatus);
         if (rc != SNMP_ERR_NOERROR) {
+            copy_oid_n_w(varbind->name, &varbind->name_length,
+                         win_varbinds.list[0].name.ids,
+                         win_varbinds.list[0].name.idLength);
+
             DEBUGIF("winExtDLL") {
                 size_t          oid_namelen = 0, outlen = 0;
                 char           *oid_name = NULL;
@@ -946,8 +954,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                 netsnmp_sprint_realloc_objid((u_char **) & oid_name,
                                              &oid_namelen,
                                              &outlen, 1, &overflow,
-                                             ext_dll_view_info->name,
-                                             ext_dll_view_info->name_length);
+                                             varbind->name,
+                                             varbind->name_length);
                 DEBUGMSG(("winExtDLL",
                           "extension DLL %s: SNMP query function returned error code %u (Windows) / %d (Net-SNMP) for request type %d, OID %s%s, ASN type %d and value %d.\n",
                           ext_dll_info->dll_name, (unsigned int)ErrorStatus, rc,
@@ -958,11 +966,28 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                 free(oid_name);
             }
             netsnmp_assert(ErrorIndex == 1);
-            netsnmp_request_set_error(requests, rc);
-            if (rc == SNMP_NOSUCHOBJECT || rc == SNMP_NOSUCHINSTANCE
-                || rc == SNMP_ERR_NOSUCHNAME)
-                rc = SNMP_ERR_NOERROR;
-            goto free_win_varbinds;
+            if (rc == SNMP_ERR_GENERR &&
+                reqinfo->mode == MODE_GETNEXT &&
+                varbind->name_length > 0 &&
+                (snmp_oid_compare(varbind->name, varbind->name_length,
+                                  mibii_system_mib,
+                                  sizeof(mibii_system_mib) /
+                                  sizeof(mibii_system_mib[0])) == 0 ||
+                 snmp_oid_compare(varbind->name, varbind->name_length,
+                                  mibii_system_mib,
+                                  sizeof(lmmib2_mib) /
+                                  sizeof(lmmib2_mib[0])) == 0)) {
+                // Quirk: ignore 'generic error' for the MIB-II system MIB OID.
+                DEBUGMSG(("winExtDLL", "Ignoring the above error\n"));
+                varbind->name[varbind->name_length - 1]++;
+                goto retry;
+            } else {
+                netsnmp_request_set_error(requests, rc);
+                if (rc == SNMP_NOSUCHOBJECT || rc == SNMP_NOSUCHINSTANCE ||
+                    rc == SNMP_ERR_NOSUCHNAME)
+                    rc = SNMP_ERR_NOERROR;
+                goto free_win_varbinds;
+            }
         }
 
         copy_value = FALSE;
