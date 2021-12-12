@@ -291,7 +291,7 @@ static void    *xarray_reserve(xarray * a, int reserved);
 #define TRAPEVENT(i)            ((HANDLE*)s_trapevent.p)[i]
 #define TRAPEVENT_TO_DLLINFO(i) ((winextdll**)s_trapevent_to_dllinfo.p)[i]
 static const oid mibii_system_mib[] = { 1, 3, 6, 1, 2, 1, 1 };
-static const oid lmmib2_mib[] = { 1, 3, 6, 1, 4, 1, 77, 1, 1, 3, 0 };
+static const oid lmmib2_mib[] = { 1, 3, 6, 1, 4, 1, 77 };
 static OSVERSIONINFO s_versioninfo = { sizeof(s_versioninfo) };
 static xarray   s_winextdll = { 0, sizeof(winextdll) };
 static xarray   s_winextdll_view = { 0, sizeof(winextdll_view) };
@@ -339,11 +339,29 @@ init_winExtDLL(void)
         winextdll      *const ext_dll_info = &WINEXTDLL(i);
         AsnObjectIdentifier view;
         winextdll_view  ext_dll_view_info;
+        const char *dll_basename, *last_slash, *last_backslash;
 
         netsnmp_assert(ext_dll_info);
         if (!ext_dll_info->dll_name)
             continue;
 
+        last_slash = strrchr(ext_dll_info->dll_name, '/');
+        last_backslash = strrchr(ext_dll_info->dll_name, '\\');
+        if (last_slash && last_backslash)
+            dll_basename = last_slash > last_backslash ? last_slash + 1:
+                last_backslash + 1;
+        else if (last_slash)
+            dll_basename = last_slash + 1;
+        else if (last_backslash)
+            dll_basename = last_backslash + 1;
+        else
+            dll_basename = ext_dll_info->dll_name;
+        DEBUGMSG(("winExtDLL", "dll_basename = %s\n", dll_basename));
+        if (!should_init(dll_basename)) {
+            DEBUGMSG(("winExtDLL", "Skipping DLL %s.\n",
+                      ext_dll_info->dll_name));
+            continue;
+        }
         DEBUGMSG(("winExtDLL", "loading DLL %s.\n",
                   ext_dll_info->dll_name));
         ext_dll_info->dll_handle = LoadLibrary(ext_dll_info->dll_name);
@@ -398,21 +416,6 @@ init_winExtDLL(void)
             snmp_log(LOG_ERR,
                      "error in extension DLL %s: SNMP query function missing.\n",
                      ext_dll_info->dll_name);
-        }
-
-        /*
-         * At least on a 64-bit Windows 7 system invoking SnmpExtensionInit()
-         * in the 32-bit version of evntagnt.dll hangs. Also, all queries in
-         * lmmib2.dll fail with "generic error" on a 64-bit Windows 7 system.
-         * So skip these two DLLs.
-         */
-        if (s_versioninfo.dwMajorVersion == 6
-            && ((is_wow64_process
-                 && basename_equals(ext_dll_info->dll_name, "evntagnt.dll"))
-                || basename_equals(ext_dll_info->dll_name, "lmmib2.dll"))) {
-            DEBUGMSG(("winExtDLL", "init_winExtDLL: skipped DLL %s.\n",
-                      ext_dll_info->dll_name));
-            continue;
         }
 
         /*
@@ -973,10 +976,10 @@ retry:
                                   mibii_system_mib,
                                   sizeof(mibii_system_mib) /
                                   sizeof(mibii_system_mib[0])) == 0 ||
-                 snmp_oid_compare(varbind->name, varbind->name_length,
-                                  mibii_system_mib,
-                                  sizeof(lmmib2_mib) /
-                                  sizeof(lmmib2_mib[0])) == 0)) {
+                 snmp_oidtree_compare(varbind->name, varbind->name_length,
+				      lmmib2_mib,
+				      sizeof(lmmib2_mib) /
+				      sizeof(lmmib2_mib[0])) == 0)) {
                 // Quirk: ignore 'generic error' for the MIB-II system MIB OID.
                 DEBUGMSG(("winExtDLL", "Ignoring the above error\n"));
                 varbind->name[varbind->name_length - 1]++;

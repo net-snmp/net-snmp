@@ -5419,16 +5419,16 @@ _sess_async_send(struct session_list *slp,
 /**
  * Send a PDU asynchronously.
  *
- * @param[in] slp      Session pointer.
+ * @param[in] sessp    Session pointer.
  * @param[in] pdu      PDU to send.
  * @param[in] callback Callback function called after processing of the PDU
  *                     finished. This function is called if the PDU has not
  *                     been sent or after a response has been received. Must
- *                     not free @pdu.
- * @param[in] cb_data  Will be passed as fifth argument to @callback.
+ *                     not free @p pdu.
+ * @param[in] cb_data  Will be passed as fifth argument to @p callback.
  *
- * @return If successful, returns the request id of @pdu and frees @pdu.
- * If not successful, returns zero and expects the caller to free @pdu.
+ * @return If successful, returns the request id of @p pdu and frees @p pdu.
+ * If not successful, returns zero and expects the caller to free @p pdu.
  */
 int
 snmp_sess_async_send(struct session_list *slp,
@@ -6909,7 +6909,13 @@ snmp_oid_ncompare(const oid * in_name1,
     return 0;
 }
 
-/** lexicographical compare two object identifiers.
+/**
+ * Lexicographically compare two object identifiers.
+ *
+ * @param[in] in_name1 Left hand side OID.
+ * @param[in] len1     Length of LHS OID.
+ * @param[in] in_name2 Rigth and side OID.
+ * @param[in] len2     Length of RHS OID.
  * 
  * Caution: this method is called often by
  *          command responder applications (ie, agent).
@@ -6958,17 +6964,24 @@ snmp_oid_compare(const oid * in_name1,
     return 0;
 }
 
-/** lexicographical compare two object identifiers and return the point where they differ
- * 
- * Caution: this method is called often by
- *          command responder applications (ie, agent).
+/**
+ * Lexicographically compare two object identifiers.
  *
- * @return -1 if name1 < name2, 0 if name1 = name2, 1 if name1 > name2 and offpt = len where name1 != name2
+ * @param[in] in_name1 Left hand side OID.
+ * @param[in] len1     Length of LHS OID.
+ * @param[in] in_name2 Rigth and side OID.
+ * @param[in] len2     Length of RHS OID.
+ * @param[out] offpt   First offset at which the two OIDs differ.
+ * 
+ * Caution: this method is called often by command responder applications (ie,
+ * agent).
+ *
+ * @return -1 if name1 < name2, 0 if name1 = name2, 1 if name1 > name2 and
+ * offpt = len where name1 != name2
  */
 int
-netsnmp_oid_compare_ll(const oid * in_name1,
-                       size_t len1, const oid * in_name2, size_t len2,
-                       size_t *offpt)
+netsnmp_oid_compare_ll(const oid * in_name1, size_t len1, const oid * in_name2,
+                       size_t len2, size_t *offpt)
 {
     register int    len;
     register const oid *name1 = in_name1;
@@ -7022,18 +7035,18 @@ int
 snmp_oidtree_compare(const oid * in_name1,
                      size_t len1, const oid * in_name2, size_t len2)
 {
-    int             len = ((len1 < len2) ? len1 : len2);
+    int len = len1 < len2 ? len1 : len2;
 
-    return (snmp_oid_compare(in_name1, len, in_name2, len));
+    return snmp_oid_compare(in_name1, len, in_name2, len);
 }
 
 int
 snmp_oidsubtree_compare(const oid * in_name1,
                      size_t len1, const oid * in_name2, size_t len2)
 {
-    int             len = ((len1 < len2) ? len1 : len2);
+    int len = len1 < len2 ? len1 : len2;
 
-    return (snmp_oid_compare(in_name1, len1, in_name2, len));
+    return snmp_oid_compare(in_name1, len1, in_name2, len);
 }
 
 /** Compares 2 OIDs to determine if they are exactly equal.
