@@ -3726,13 +3726,13 @@ build_oid_segment(netsnmp_variable_list * var)
  * Concatenate a prefix and the OIDs of a variable list.
  *
  * @param[out]    in         Output buffer.
- * @param[in]     in_len     Maximum number of OID components that fit in @in.
+ * @param[in]     in_len     Maximum number of OID components that fit in @p in.
  * @param[out]    out_len    Number of OID components of the result.
  * @param[in]     prefix     OID to be copied to the start of the output buffer.
- * @param[in]     prefix_len Number of OID components to copy from @prefix.
- * @param[in/out] indexes    Variable list for which var->name should be set
+ * @param[in]     prefix_len Number of OID components to copy from @p prefix.
+ * @param[in,out] indexes    Variable list for which var->name should be set
  *                           for each variable var in the list and whose OIDs
- *                           should be appended to @in.
+ *                           should be appended to @p in.
  */
 int
 build_oid_noalloc(oid * in, size_t in_len, size_t * out_len,

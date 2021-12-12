@@ -74,7 +74,7 @@ SOFTWARE.
    incomplete, but when combined with the manual page set and
    tutorials forms a pretty comprehensive starting point.
 
-   @section Starting out
+   @section Starting_out Starting out
 
    The best places to start learning are the @e Net-SNMP @e tutorial
    (http://www.Net-SNMP.org/tutorial-5/) and the @e Modules and @e
