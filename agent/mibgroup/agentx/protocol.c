@@ -1646,7 +1646,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
             /*
              * strlen() is safe here because snmp_clone_mem() '\0'-terminates its output
              */
-            if (strlen(pdu->community) != pdu->community_len)
+            if (strlen((const char *)pdu->community) != pdu->community_len)
                 goto parse_err;
             pdu->contextName    = strdup((char *) pdu->community);
             pdu->contextNameLen = pdu->community_len;
