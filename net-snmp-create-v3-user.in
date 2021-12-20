@@ -134,8 +134,12 @@ if test ! -d "$outfile"; then
     touch "$outfile"
 fi
 echo "$line" >> "$outfile"
-# Avoid that configure complains that this script ignores @datarootdir@
-echo "@datarootdir@" >/dev/null
+prefix="@prefix@"
+datarootdir="@datarootdir@"
+# Avoid that shellcheck complains about unused variables.
+# The data directory (@datadir@) may contain references
+# to these variables.
+: "${prefix}" "${datarootdir}"
 outfile="@datadir@/snmp/snmpd.conf"
 line="$token $user"
 echo "adding the following line to $outfile:"
