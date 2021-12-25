@@ -681,6 +681,8 @@ NETSNMP_BUILD_TLS_PROG_FALSE
 NETSNMP_BUILD_TLS_PROG_TRUE
 NETSNMP_BUILD_SSH_PROG_FALSE
 NETSNMP_BUILD_SSH_PROG_TRUE
+OPENSSL_LIBS
+OPENSSL_CFLAGS
 LIBNL3_LIBS
 LIBNL3_CFLAGS
 PKG_CONFIG_LIBDIR
@@ -1092,7 +1094,9 @@ PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
 LIBNL3_CFLAGS
-LIBNL3_LIBS'
+LIBNL3_LIBS
+OPENSSL_CFLAGS
+OPENSSL_LIBS'
 
 
 # Initialize some variables set by options.
@@ -2071,6 +2075,10 @@ Some influential environment variables:
   LIBNL3_CFLAGS
               C compiler flags for LIBNL3, overriding pkg-config
   LIBNL3_LIBS linker flags for LIBNL3, overriding pkg-config
+  OPENSSL_CFLAGS
+              C compiler flags for OPENSSL, overriding pkg-config
+  OPENSSL_LIBS
+              linker flags for OPENSSL, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -24592,26 +24600,28 @@ fi
 # libnl (netlink)
 #
 
-if test "x$with_nl" != "xno"; then
-    case $target_os in
-    linux*) # Check for libnl (linux)
-        # The test below verifies whether the libnl-3 package been installed.
-        # This test works as follows:
-        # - If pkg-config was not installed at the time autogen.sh was run,
-        #   the definition of the PKG_CHECK_EXISTS() macro will not be found by
-        #   autogen.sh. Augogen.sh will generate a configure script that prints
-        #   a warning about pkg-config and proceeds as if libnl-3 has not been
-        #   installed.
-        # - If pkg-config was installed at the time autogen.sh was run,
-        #   the generated configure script will try to detect the presence of
-        #   the libnl-3 library by looking up compile and linker flags in the
-        #   file called libnl-3.pc.
-        # - pkg-config settings can be overridden via the configure variables
-        #   LIBNL3_CFLAGS and LIBNL3_LIBS (added by the pkg-config m4 macro's to
-        #   the configure script -- see also ./configure --help).
-        # - The LIBNL3_CFLAGS and LIBNL3_LIBS configure variables can be used
-        #   even if the pkg-config executable is not present on the system on
-        #   which the configure script is run.
+# The test below verifies whether the libnl-3 package been installed.
+# This test works as follows:
+# - If pkg-config was not installed at the time autogen.sh was run,
+#   the definition of the PKG_CHECK_EXISTS() macro will not be found by
+#   autogen.sh. Augogen.sh will generate a configure script that prints
+#   a warning about pkg-config and proceeds as if libnl-3 has not been
+#   installed.
+# - If pkg-config was installed at the time autogen.sh was run,
+#   the generated configure script will try to detect the presence of
+#   the libnl-3 library by looking up compile and linker flags in the
+#   file called libnl-3.pc.
+# - pkg-config settings can be overridden via the configure variables
+#   LIBNL3_CFLAGS and LIBNL3_LIBS (added by the pkg-config m4 macro's to
+#   the configure script -- see also ./configure --help).
+# - The LIBNL3_CFLAGS and LIBNL3_LIBS configure variables can be used
+#   even if the pkg-config executable is not present on the system on
+#   which the configure script is run.
+# - Although libnl-3 is only used on Linux, test presence of libnl-3 on
+#   all platforms because this code is the first occurrence in the configure
+#   script of PKG_* macros and because the search for the pkg-config executable
+#   only occurs once.
+
 
 
 
@@ -24832,6 +24842,9 @@ fi
 fi
 
 
+if test "x$with_nl" != "xno"; then
+    case $target_os in
+    linux*) # Check for libnl (linux)
         netsnmp_save_CPPFLAGS="$CPPFLAGS"
         CPPFLAGS="${LIBNL3_CFLAGS} ${LIBNLROUTE3_CFLAGS} $CPPFLAGS"
 
@@ -25181,14 +25194,134 @@ fi
 
         fi
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -leay32" >&5
+
+	    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENSSL" >&5
+$as_echo_n "checking for OPENSSL... " >&6; }
+
+if test -n "$OPENSSL_CFLAGS"; then
+    pkg_cv_OPENSSL_CFLAGS="$OPENSSL_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_OPENSSL_CFLAGS=`$PKG_CONFIG --cflags "openssl" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$OPENSSL_LIBS"; then
+    pkg_cv_OPENSSL_LIBS="$OPENSSL_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_OPENSSL_LIBS=`$PKG_CONFIG --libs "openssl" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "openssl" 2>&1`
+        else
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "openssl" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$OPENSSL_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (openssl) were not met:
+
+$OPENSSL_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables OPENSSL_CFLAGS
+and OPENSSL_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables OPENSSL_CFLAGS
+and OPENSSL_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	OPENSSL_CFLAGS=$pkg_cv_OPENSSL_CFLAGS
+	OPENSSL_LIBS=$pkg_cv_OPENSSL_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+fi
+	    if test "x${PKG_CONFIG}" != "x"; then
+	      { $as_echo "$as_me:${as_lineno-$LINENO}: OPENSSL_CFLAGS=${OPENSSL_CFLAGS}" >&5
+$as_echo "$as_me: OPENSSL_CFLAGS=${OPENSSL_CFLAGS}" >&6;}
+	      { $as_echo "$as_me:${as_lineno-$LINENO}: OPENSSL_LIBS=${OPENSSL_LIBS}" >&5
+$as_echo "$as_me: OPENSSL_LIBS=${OPENSSL_LIBS}" >&6;}
+              CRYPTO=use_pkg_config_for_openssl
+	      LIBCRYPTO="-lssl ${OPENSSL_LIBS}"
+              netsnmp_save_LIBS="$LIBS"
+	      LIBS="-lssl ${OPENSSL_LIBS}"
+	      ac_fn_c_check_func "$LINENO" "EVP_md5" "ac_cv_func_EVP_md5"
+if test "x$ac_cv_func_EVP_md5" = xyes; then :
+
+fi
+
+              LIBS="$netsnmp_save_LIBS"
+	    fi
+
+
+	if test "x${PKG_CONFIG}" = "x"; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: Could not find pkg-config." >&5
+$as_echo "$as_me: Could not find pkg-config." >&6;}
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -leay32" >&5
 $as_echo_n "checking for -leay32... " >&6; }
-        netsnmp_save_LIBS="$LIBS"
-        LIBS="-leay32"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+            netsnmp_save_LIBS="$LIBS"
+            LIBS="-leay32"
+            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-                #include <openssl/evp.h>
+                    #include <openssl/evp.h>
 int
 main ()
 {
@@ -25199,7 +25332,11 @@ return EVP_md5();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }; ac_cv_lib_eay32_EVP_md5=yes; CRYPTO="eay32"
+$as_echo "yes" >&6; }
+		 ac_cv_lib_eay32_EVP_md5=yes
+		 CRYPTO="eay32"
+		 LIBCRYPTO="-leay32"
+
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -25207,10 +25344,10 @@ $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-        LIBS="$netsnmp_save_LIBS"
+            LIBS="$netsnmp_save_LIBS"
 
-        if test x$CRYPTO = x; then
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_md5 in -lcrypto" >&5
+            if test x$CRYPTO = x; then
+                { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_md5 in -lcrypto" >&5
 $as_echo_n "checking for EVP_md5 in -lcrypto... " >&6; }
 if ${ac_cv_lib_crypto_EVP_md5+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25250,8 +25387,8 @@ if test "x$ac_cv_lib_crypto_EVP_md5" = xyes; then :
   CRYPTO="crypto"; LIBCRYPTO="-lcrypto"
 else
 
-		unset ac_cv_lib_crypto_EVP_md5
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_md5 in -lcrypto" >&5
+                    unset ac_cv_lib_crypto_EVP_md5
+                    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_md5 in -lcrypto" >&5
 $as_echo_n "checking for EVP_md5 in -lcrypto... " >&6; }
 if ${ac_cv_lib_crypto_EVP_md5+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25294,8 +25431,7 @@ fi
 
 fi
 
-	else
-	    LIBCRYPTO="-l${CRYPTO}"
+            fi
 	fi
 
         if test x$CRYPTO != x; then
@@ -26721,7 +26857,10 @@ fi
 
 #       Check for OpenSSL
 #
-if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -a "x$ac_cv_lib_eay32_EVP_md5" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
+if test \( "x$ac_cv_func_EVP_md5" != "xyes" -a \
+           "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -a \
+	   "x$ac_cv_lib_eay32_EVP_md5" != "xyes" \) -o \
+	"x$ac_cv_header_openssl_hmac_h" != "xyes"; then
     if test "x$askedopenssl" = "xyes"; then
         as_fn_error $? "Asked to use OpenSSL but I couldn't find it." "$LINENO" 5
     fi
