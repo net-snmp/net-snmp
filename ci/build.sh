@@ -19,11 +19,13 @@ esac
 case "$(uname -a)" in
     MSYS*x86_64*)
 	pacman --noconfirm --sync --needed openssl-devel
+	pacman --noconfirm --sync --needed pkg-config
 	;;
     MINGW64*)
-	pacman --noconfirm --sync --needed mingw-w64-x86_64-libmariadbclient
 	pacman --noconfirm --sync --needed mingw-w64-x86_64-gcc
+	pacman --noconfirm --sync --needed mingw-w64-x86_64-libmariadbclient
 	pacman --noconfirm --sync --needed mingw-w64-x86_64-openssl
+	pacman --noconfirm --sync --needed mingw-w64-x86_64-pkg-config
 	export PATH="/mingw64/bin:$PATH"
 	;;
 esac
