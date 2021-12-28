@@ -2018,8 +2018,13 @@ parse_objectid(FILE * fp, char *name)
             np = alloc_node(nop->modid);
             if (np == NULL)
                 goto err;
-            if (root == NULL)
+            if (root == NULL) {
                 root = np;
+            } else {
+                netsnmp_assert(oldnp);
+                oldnp->next = np;
+            }
+            oldnp = np;
 
             np->parent = strdup(op->label);
             if (count == (length - 2)) {
@@ -2041,13 +2046,6 @@ parse_objectid(FILE * fp, char *name)
             else
                 print_error("Warning: This entry is pretty silly",
                             np->label, CONTINUE);
-
-            /*
-             * set up next entry 
-             */
-            if (oldnp)
-                oldnp->next = np;
-            oldnp = np;
         }                       /* end if(op->label... */
     }
 
