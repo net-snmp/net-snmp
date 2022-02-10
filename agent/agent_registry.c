@@ -157,8 +157,14 @@ get_context_lookup_cache(const char *context) {
     if (!ptr) {
         if (netsnmp_subtree_find_first(context)) {
             ptr = SNMP_MALLOC_TYPEDEF(lookup_cache_context);
+            if (!ptr)
+                return NULL;
             ptr->next = thecontextcache;
             ptr->context = strdup(context);
+            if (!ptr->context) {
+                SNMP_FREE(ptr);
+                return NULL;
+            }
             thecontextcache = ptr;
         } else {
             return NULL;
@@ -357,6 +363,10 @@ add_subtree(netsnmp_subtree *new_tree, const char *context_name)
     ptr->next = context_subtrees;
     ptr->first_subtree = new_tree;
     ptr->context_name = strdup(context_name);
+    if (!ptr->context_name) {
+        SNMP_FREE(ptr);
+        return NULL;
+    }
     context_subtrees = ptr;
 
     return ptr->first_subtree;

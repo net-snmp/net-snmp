@@ -730,6 +730,8 @@ netsnmp_init_mib_internals(void)
     memset(tbuckets, 0, sizeof(tbuckets));
     tc_alloc = TC_INCR;
     tclist = calloc(tc_alloc, sizeof(struct tc));
+    if (tclist == NULL)
+        tc_alloc = 0;
     build_translation_table();
     init_tree_roots();          /* Set up initial roots */
     /*
@@ -1170,6 +1172,10 @@ init_tree_roots(void)
     if (tp == NULL)
         return;
     tp->label = strdup("joint-iso-ccitt");
+    if (tp->label == NULL) {
+        free(tp);
+        return;
+    }
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
@@ -1182,6 +1188,7 @@ init_tree_roots(void)
     lasttp = tp;
     root_imports[0].label = strdup(tp->label);
     root_imports[0].modid = base_modid;
+    tree_head = tp;
 
     /*
      * build root node 
@@ -1191,6 +1198,10 @@ init_tree_roots(void)
         return;
     tp->next_peer = lasttp;
     tp->label = strdup("ccitt");
+    if (tp->label == NULL) {
+        free(tp);
+        return;
+    }
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
@@ -1203,6 +1214,7 @@ init_tree_roots(void)
     lasttp = tp;
     root_imports[1].label = strdup(tp->label);
     root_imports[1].modid = base_modid;
+    tree_head = tp;
 
     /*
      * build root node 
@@ -1212,6 +1224,10 @@ init_tree_roots(void)
         return;
     tp->next_peer = lasttp;
     tp->label = strdup("iso");
+    if (tp->label == NULL) {
+        free(tp);
+        return;
+    }
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
@@ -1295,6 +1311,8 @@ compute_match(const char *search_base, const char *key)
     char           *st;
 
 
+    if (newkey == NULL)
+        return MAX_BAD;
     entry = strtok_r(newkey, "*", &st);
     position = search_base;
     while (entry) {
@@ -2430,7 +2448,10 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
         }
 
         if (i == tc_alloc) {
-            tclist = realloc(tclist, (tc_alloc + TC_INCR)*sizeof(struct tc));
+            void *tmp = realloc(tclist, (tc_alloc + TC_INCR)*sizeof(struct tc));
+            if (tmp == NULL)
+                goto err;
+            tclist = tmp;
             memset(tclist+tc_alloc, 0, TC_INCR*sizeof(struct tc));
             tc_alloc += TC_INCR;
         }

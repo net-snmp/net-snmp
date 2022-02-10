@@ -270,6 +270,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
 
             auth_proto = sc_get_auth_oid(auth_type,
                                          &session->securityAuthProtoLen);
+            free(session->securityAuthProto);
             session->securityAuthProto = snmp_duplicate_objid(auth_proto,
                                              session->securityAuthProtoLen);
          } else {
@@ -292,11 +293,13 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             return (-1);
         }
         priv_proto = sc_get_priv_oid(priv_type, &session->securityPrivProtoLen);
+        free(session->securityPrivProto);
         session->securityPrivProto = snmp_duplicate_objid(priv_proto,
                                          session->securityPrivProtoLen);
         break;
     }
     case 'A':
+        free(*Apsz);
         *Apsz = strdup(optarg);
         if (NULL == *Apsz) {
             fprintf(stderr, "malloc failure processing -%c flag.\n",
@@ -308,6 +311,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         break;
 
     case 'X':
+        free(*Xpsz);
         *Xpsz = strdup(optarg);
         if (NULL == *Xpsz) {
             fprintf(stderr, "malloc failure processing -%c flag.\n",

@@ -195,6 +195,11 @@ internal_register_config_handler(const char *type_param,
         }
 
         (*ctmp)->fileHeader = strdup(type);
+        if (!(*ctmp)->fileHeader) {
+            free(*ctmp);
+            *ctmp = NULL;
+            return NULL;
+        }
         DEBUGMSGTL(("9:read_config:type", "new type %s\n", type));
     }
 
@@ -219,6 +224,11 @@ internal_register_config_handler(const char *type_param,
 
         (*ltmp)->config_time = when;
         (*ltmp)->config_token = strdup(token);
+        if (!(*ltmp)->config_token) {
+            free(*ltmp);
+            *ltmp = NULL;
+            return NULL;
+        }
         if (help != NULL)
             (*ltmp)->help = strdup(help);
     }
@@ -1712,6 +1722,8 @@ config_vlog(int level, const char *levelmsg, const char *str, va_list args)
 		       curfilename, linecount, levelmsg, str);
     if (len >= (int)sizeof(tmpbuf)) {
 	buf = (char*)malloc(len + 1);
+        if (buf == NULL)
+            return;
 	sprintf(buf, "%s: line %d: %s: %s\n",
 		curfilename, linecount, levelmsg, str);
     }

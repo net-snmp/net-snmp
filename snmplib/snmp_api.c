@@ -3694,7 +3694,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
     u_char          type, msg_flags;
     long            ver, msg_sec_model;
     size_t          max_size_response;
-    u_char          tmp_buf[SNMP_MAX_MSG_SIZE];
+    u_char          tmp_buf[2];
     size_t          tmp_buf_len;
     u_char          pdu_buf[SNMP_MAX_MSG_SIZE];
     u_char         *mallocbuf = NULL;
@@ -3840,7 +3840,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
     /*
      * msgFlags 
      */
-    tmp_buf_len = SNMP_MAX_MSG_SIZE;
+    tmp_buf_len = sizeof(tmp_buf);
     DEBUGDUMPHEADER("recv", "msgFlags");
     data = asn_parse_string(data, length, &type, tmp_buf, &tmp_buf_len);
     DEBUGINDENTLESS();
@@ -4872,7 +4872,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
 u_char         *
 snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp, size_t * length)
 {
-    u_char          tmp_buf[SNMP_MAX_MSG_SIZE];
+    u_char          tmp_buf[SNMP_MAX_CONTEXT_SIZE];
     size_t          tmp_buf_len;
     u_char          type;
     size_t          asn_len;
@@ -6696,12 +6696,12 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *orp,
         return 0;
     }
 
-    if ((pktbuf = (u_char *)malloc(2048)) == NULL) {
+    if ((pktbuf = (u_char *)malloc(SNMP_MAX_LEN)) == NULL) {
         DEBUGMSGTL(("sess_resend",
                     "couldn't malloc initial packet buffer\n"));
         return 0;
     } else {
-        pktbuf_len = 2048;
+        pktbuf_len = SNMP_MAX_LEN;
     }
 
     if (incr_retries) {
@@ -7140,7 +7140,7 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
     min_size = SNMP_MIN(len1, len2);
     for(i = 0; i < (int)min_size; i++) {
         if (in_name1[i] != in_name2[i])
-            return i;    /* 'í' is the first differing subidentifier
+            return i;    /* 'i' is the first differing subidentifier
                             So the common prefix is 0..(i-1), of length i */
     }
     return min_size;	/* The shorter OID is a prefix of the longer, and

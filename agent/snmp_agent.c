@@ -982,6 +982,8 @@ netsnmp_addrcache_add(const char *addr)
              * If we have a slot free anyway, use it
              */
             addrCache[unused].addr = strdup(addr);
+            if (addrCache[unused].addr == NULL)
+                return -1;
             addrCache[unused].status = SNMP_ADDRCACHE_USED;
             addrCache[unused].lastHitM = now;
         }
@@ -993,6 +995,10 @@ netsnmp_addrcache_add(const char *addr)
             
             free(addrCache[oldest].addr);
             addrCache[oldest].addr = strdup(addr);
+            if (addrCache[unused].addr == NULL) {
+                addrCache[unused].status = SNMP_ADDRCACHE_UNUSED;
+                return -1;
+            }
             addrCache[oldest].lastHitM = now;
         }
         rc = 1;
@@ -1488,6 +1494,8 @@ init_master_agent(void)
          * No, so just specify the default port.  
          */
         buf = strdup("");
+        if (!buf)
+            return 1;
     }
 
     DEBUGMSGTL(("snmp_agent", "final port spec: \"%s\"\n", buf));
@@ -1592,6 +1600,8 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     asp->treecache_num = -1;
     asp->treecache_len = 0;
     asp->reqinfo = SNMP_MALLOC_TYPEDEF(netsnmp_agent_request_info);
+    if (!asp->reqinfo)
+        goto err;
     asp->flags = SNMP_AGENT_FLAGS_NONE;
     DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p created\n",
                 asp, asp->reqinfo));
@@ -2468,14 +2478,17 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                  * WWW: non-linear expansion needed (with cap) 
                  */
 #define CACHE_GROW_SIZE 16
-                asp->treecache_len =
-                    (asp->treecache_len + CACHE_GROW_SIZE);
-                asp->treecache =
+                netsnmp_tree_cache *new_treecache =
                     (netsnmp_tree_cache *)realloc(asp->treecache,
                             sizeof(netsnmp_tree_cache) *
-                            asp->treecache_len);
-                if (asp->treecache == NULL)
+                            (asp->treecache_len + CACHE_GROW_SIZE));
+                if (new_treecache == NULL) {
+                    asp->treecache_num--;
                     return NULL;
+                }
+                asp->treecache_len =
+                    (asp->treecache_len + CACHE_GROW_SIZE);
+                asp->treecache = new_treecache;
                 memset(asp->treecache + cacheid, 0,
                        sizeof(netsnmp_tree_cache) * (CACHE_GROW_SIZE));
             }
@@ -2609,8 +2622,10 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
         asp->treecache_len = SNMP_MAX(1 + asp->vbcount / 4, 16);
         asp->treecache =
             (netsnmp_tree_cache *)calloc(asp->treecache_len, sizeof(netsnmp_tree_cache));
-        if (asp->treecache == NULL)
+        if (asp->treecache == NULL) {
+            asp->treecache_len = 0;
             return SNMP_ERR_GENERR;
+        }
     }
     asp->treecache_num = -1;
 
@@ -2843,8 +2858,10 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
         (netsnmp_tree_cache *) calloc(asp->treecache_len,
                                       sizeof(netsnmp_tree_cache));
 
-    if (asp->treecache == NULL)
+    if (asp->treecache == NULL) {
+        asp->treecache = old_treecache;
         return SNMP_ERR_GENERR;
+    }
 
     asp->treecache_num = -1;
     if (asp->cache_store) {
@@ -2864,7 +2881,7 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
             if (!netsnmp_add_varbind_to_cache(asp, asp->requests[i].index,
                                               asp->requests[i].requestvb,
                                               asp->requests[i].subtree->next)) {
-                SNMP_FREE(old_treecache);
+
             }
         } else if (asp->requests[i].requestvb->type == ASN_PRIV_RETRY) {
             /*
@@ -2874,7 +2891,7 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
             if (!netsnmp_add_varbind_to_cache(asp, asp->requests[i].index,
                                               asp->requests[i].requestvb,
                                               asp->requests[i].subtree)) {
-                SNMP_FREE(old_treecache);
+
             }
         }
     }
@@ -3776,6 +3793,10 @@ handle_pdu(netsnmp_agent_session *asp)
         asp->requests =
             calloc(asp->vbcount ? asp->vbcount : 1,
                    sizeof(netsnmp_request_info));
+        if (asp->requests == NULL) {
+            asp->vbcount = 0;
+            return SNMPERR_GENERR;
+        }
         /*
          * collect varbinds 
          */
