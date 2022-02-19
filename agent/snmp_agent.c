@@ -995,8 +995,8 @@ netsnmp_addrcache_add(const char *addr)
             
             free(addrCache[oldest].addr);
             addrCache[oldest].addr = strdup(addr);
-            if (addrCache[unused].addr == NULL) {
-                addrCache[unused].status = SNMP_ADDRCACHE_UNUSED;
+            if (addrCache[oldest].addr == NULL) {
+                addrCache[oldest].status = SNMP_ADDRCACHE_UNUSED;
                 return -1;
             }
             addrCache[oldest].lastHitM = now;
