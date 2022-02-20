@@ -236,8 +236,10 @@ main(int argc, char *argv[])
         }
     }
 
-    if (failures)
+    if (failures) {
+        snmp_free_pdu(pdu);
         goto close_session;
+    }
 
     exitval = 0;
 
@@ -282,6 +284,11 @@ close_session:
     snmp_close(ss);
 
 out:
+    free(session.community);
+    free(session.securityPrivProto);
+    free(session.securityAuthProto);
+    free(session.securityEngineID);
+    free(session.contextEngineID);
     SOCK_CLEANUP;
     return exitval;
 }

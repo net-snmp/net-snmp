@@ -430,6 +430,11 @@ main(int argc, char *argv[])
     }
 
 out:
+    free(session.community);
+    free(session.securityPrivProto);
+    free(session.securityAuthProto);
+    free(session.securityEngineID);
+    free(session.contextEngineID);
     SOCK_CLEANUP;
     return exitval;
 }

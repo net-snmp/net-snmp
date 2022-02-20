@@ -381,6 +381,11 @@ close_session:
     snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
 
 out:
+    free(session.community);
+    free(session.securityPrivProto);
+    free(session.securityAuthProto);
+    free(session.securityEngineID);
+    free(session.contextEngineID);
     SOCK_CLEANUP;
     return exitval;
 }
