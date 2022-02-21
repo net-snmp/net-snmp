@@ -1061,7 +1061,7 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
 
     c_engineID = snmpv3_generate_engineID(&engineIDLen);
 
-    if (engineIDLen == 0 || !c_engineID) {
+    if (!c_engineID || engineIDLen == 0) {
         /*
          * Somethine went wrong - help! 
          */

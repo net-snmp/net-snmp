@@ -327,13 +327,13 @@ asn_parse_nlength(u_char *pkt, size_t pkt_len, u_long *data_len)
 {
     int len_len;
 
-    if (pkt_len < 1)
-        return NULL;               /* always too short */
-
-    if (NULL == pkt || NULL == data_len || NULL == data_len)
+    if (NULL == data_len)
         return NULL;
 
     *data_len = 0;
+
+    if (NULL == pkt || pkt_len < 1)
+        return NULL;               /* always too short */
 
     if (*pkt & 0x80) {
         /*
