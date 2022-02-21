@@ -356,6 +356,8 @@ netsnmp_tcpipv6_ctor(void)
     tcp6Domain.f_create_from_tstring_new = netsnmp_tcp6_create_tstring;
     tcp6Domain.f_create_from_ostring     = netsnmp_tcp6_create_ostring;
     tcp6Domain.prefix = (const char**)calloc(4, sizeof(char *));
+    if (tcp6Domain.prefix == NULL)
+        return;
     tcp6Domain.prefix[0] = "tcp6";
     tcp6Domain.prefix[1] = "tcpv6";
     tcp6Domain.prefix[2] = "tcpipv6";
