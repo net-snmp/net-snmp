@@ -2750,6 +2750,8 @@ netsnmp_init_mib(void)
     } else {
         env_var = strdup(env_var);
     }
+    if (env_var == NULL)
+        return;
     if (env_var && ((*env_var == '+') || (*env_var == '-'))) {
         entry =
             (char *) malloc(strlen(NETSNMP_DEFAULT_MIBS) + strlen(env_var) + 2);
