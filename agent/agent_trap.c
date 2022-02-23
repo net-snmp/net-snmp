@@ -1846,6 +1846,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     SNMP_FREE(session.securityAuthProto);
     SNMP_FREE(session.securityEngineID);
     SNMP_FREE(session.contextEngineID);
+    SNMP_FREE(session.localname);
     SNMP_FREE(clientaddr_save);
     SNMP_FREE(profile);
     SNMP_FREE(name);

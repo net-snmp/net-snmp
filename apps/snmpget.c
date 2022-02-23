@@ -258,6 +258,7 @@ out:
     free(session.securityAuthProto);
     free(session.securityEngineID);
     free(session.contextEngineID);
+    free(session.localname);
     SOCK_CLEANUP;
     return exitval;
 }                               /* end main() */
