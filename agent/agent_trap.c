@@ -1840,8 +1840,12 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
 
   cleanup:
     SNMP_FREE(session.community);
-    if (session.securityEngineIDLen > 0)
-        SNMP_FREE(session.securityEngineID);
+    SNMP_FREE(session.securityPrivLocalKey);
+    SNMP_FREE(session.securityAuthLocalKey);
+    SNMP_FREE(session.securityPrivProto);
+    SNMP_FREE(session.securityAuthProto);
+    SNMP_FREE(session.securityEngineID);
+    SNMP_FREE(session.contextEngineID);
     SNMP_FREE(clientaddr_save);
     SNMP_FREE(profile);
     SNMP_FREE(name);
