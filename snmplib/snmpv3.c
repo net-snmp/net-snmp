@@ -361,6 +361,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             SNMP_FREE(kbuf);
             return (-1);
         }
+        free(session->securityAuthLocalKey);
         session->securityAuthLocalKey = kbuf;
         session->securityAuthLocalKeyLen = kout_len;
         break;
@@ -380,6 +381,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             SNMP_FREE(kbuf);
             return (-1);
         }
+        free(session->securityPrivLocalKey);
         session->securityPrivLocalKey = kbuf;
         session->securityPrivLocalKeyLen = kout_len;
         break;

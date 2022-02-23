@@ -1047,6 +1047,8 @@ close_session:
 
 out:
     free(session.community);
+    free(session.securityPrivLocalKey);
+    free(session.securityAuthLocalKey);
     free(session.securityPrivProto);
     free(session.securityAuthProto);
     free(session.securityEngineID);
