@@ -270,6 +270,8 @@ extend_clear_callback(int majorID, int minorID,
         netsnmp_unregister_handler( eptr->reg[1] );
         netsnmp_unregister_handler( eptr->reg[2] );
         netsnmp_unregister_handler( eptr->reg[3] );
+        netsnmp_table_data_delete_table(eptr->dinfo);
+        free(eptr->root_oid);
         SNMP_FREE(eptr);
     }
     ereg_head = NULL;
