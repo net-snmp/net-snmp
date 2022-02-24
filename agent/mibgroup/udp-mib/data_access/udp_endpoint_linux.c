@@ -215,6 +215,8 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
      */
     ep->rmt_port = strtol(ptr, &ptr, 16);
     ptr = skip_white(ptr);
+    if (ptr == NULL)
+        return PMLP_RC_MEMORY_UNUSED;
 
     /*
      * get state too
@@ -229,6 +231,8 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
 	ptr = skip_not_white(ptr);
 	count++;
     }
+    if (ptr == NULL)
+        return PMLP_RC_MEMORY_UNUSED;
     inode = strtoull(ptr, &ptr, 0);
     ep->instance = (u_int)inode;
 
