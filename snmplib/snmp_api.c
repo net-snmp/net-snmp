@@ -4138,7 +4138,9 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
     pdu->errindex = 0;
     SNMP_FREE(pdu->contextName);
     pdu->contextName = strdup("");
-    pdu->contextNameLen = strlen(pdu->contextName);
+    pdu->contextNameLen = 0;
+    if (pdu->contextName == NULL)
+        return SNMPERR_GENERR;
 
     /*
      * reports shouldn't cache previous data. 
