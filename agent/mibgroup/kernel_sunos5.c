@@ -1640,6 +1640,7 @@ set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,
     ifp->flags = flags;
     ifp->ifMtu = mtu;
     ifp->ifSpeed = 0;
+    ifp->ifHighSpeed = 0;
 
     /*
      * Get link speed
@@ -1648,8 +1649,8 @@ set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,
         /*
          * check for SunOS patch with half implemented ifSpeed 
          */
-        if (ifp->ifSpeed > 0 && ifp->ifSpeed < 10000) {
-            ifp->ifSpeed *= 1000000;
+	if (ifspeed > 0 && ifspeed < 10000) {
+	    ifspeed *= 1000000;
         }
 	havespeed = B_TRUE;
     } else if (getKstat(name, "ifSpeed", &ifspeed) == 0) {
