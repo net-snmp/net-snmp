@@ -2235,6 +2235,8 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
 	
     if (magic == NULL) {
         asp = init_agent_snmp_session(session, pdu);
+        if (asp == NULL)
+            return 1;
         status = SNMP_ERR_NOERROR;
     } else {
         asp = (netsnmp_agent_session *) magic;
