@@ -512,6 +512,8 @@ netsnmp_subtree_deepcopy(netsnmp_subtree *a)
     b->start_a = snmp_duplicate_objid(a->start_a, a->start_len);
     b->end_a   = snmp_duplicate_objid(a->end_a,   a->end_len);
     b->label_a = strdup(a->label_a);
+    b->reginfo = NULL;
+    b->variables = NULL;
     
     if (b->name_a == NULL || b->start_a == NULL || 
 	b->end_a  == NULL || b->label_a == NULL) {
