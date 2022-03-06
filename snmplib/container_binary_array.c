@@ -482,7 +482,8 @@ netsnmp_binary_array_insert_before(netsnmp_container *c, size_t index,
      /*
       * check if we need to resize the array
       */
-    _ba_resize_check(t);
+    if (_ba_resize_check(t) < 0)
+        return -1;
 
     netsnmp_assert(t->count < t->max_size);
 
