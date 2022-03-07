@@ -88,8 +88,10 @@ netsnmp_register_scalar(netsnmp_handler_registration *reginfo)
      */
     new_rootoid = (oid*)realloc(reginfo->rootoid,
                                 (reginfo->rootoid_len+1) * sizeof(oid) );
-    if (new_rootoid == NULL)
+    if (new_rootoid == NULL) {
+        netsnmp_handler_registration_free(reginfo);
         return MIB_REGISTRATION_FAILED;
+    }
     reginfo->rootoid = new_rootoid;
     reginfo->rootoid[ reginfo->rootoid_len ] = 0;
 
