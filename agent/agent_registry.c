@@ -834,7 +834,8 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	    if (new_sub->prev) {
                 netsnmp_subtree_change_next(new_sub->prev, new_sub);
 	    } else {
-		netsnmp_subtree_replace_first(new_sub, context_name);
+                if (!netsnmp_subtree_replace_first(new_sub, context_name))
+                    return MIB_REGISTRATION_FAILED;
 	    }
 
             netsnmp_subtree_change_next(new_sub, tree2);
