@@ -952,7 +952,11 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
             {
                 netsnmp_subtree *new2 =
                     netsnmp_subtree_split(new_sub, tree1->end_a,tree1->end_len);
-                int res = netsnmp_subtree_load(new_sub, context_name);
+                int res;
+
+                if (new2 == NULL)
+                    return MIB_REGISTRATION_FAILED;
+                res = netsnmp_subtree_load(new_sub, context_name);
                 if (res != MIB_REGISTERED_OK) {
                     netsnmp_remove_subtree(new2);
                     netsnmp_subtree_free(new2);
