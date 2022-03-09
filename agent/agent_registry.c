@@ -958,7 +958,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
                     netsnmp_subtree_free(new2);
                     return res;
                 }
-                return netsnmp_subtree_load(new2, context_name);
+                netsnmp_subtree_load(new2, context_name);
             }
         }
     }
