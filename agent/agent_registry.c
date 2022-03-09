@@ -881,7 +881,8 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 
 	case -1:
 	    /*  Existing subtree contains new one.  */
-	    netsnmp_subtree_split(tree1, new_sub->end_a, new_sub->end_len);
+	    if (!netsnmp_subtree_split(tree1, new_sub->end_a, new_sub->end_len))
+                return MIB_REGISTRATION_FAILED;
 	    /* Fall Through */
 
 	case  0:
