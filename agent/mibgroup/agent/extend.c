@@ -234,6 +234,7 @@ bail:
         netsnmp_unregister_handler(eptr->reg[1]);
     if (eptr->reg[0])
         netsnmp_unregister_handler(eptr->reg[0]);
+    netsnmp_table_data_delete_table(eptr->dinfo);
     free(eptr->root_oid);
     ereg_head = eptr->next;
     SNMP_FREE(eptr);
