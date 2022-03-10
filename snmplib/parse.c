@@ -734,6 +734,11 @@ netsnmp_init_mib_internals(void)
         tc_alloc = 0;
     build_translation_table();
     init_tree_roots();          /* Set up initial roots */
+    if (tree_head == NULL) {
+        free(tclist);
+        tclist = NULL;
+        tc_alloc = 0;
+    }
     /*
      * Relies on 'add_mibdir' having set up the modules 
      */
