@@ -962,6 +962,8 @@ get_enginetime_alarm(unsigned int regnum, void *clientargs)
 void
 init_snmpv3(const char *type)
 {
+    char *dup;
+
     netsnmp_get_monotonic_clock(&snmpv3starttime);
 
     if (!type)
@@ -980,8 +982,11 @@ init_snmpv3(const char *type)
     /*
      * we need to be called back later 
      */
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                           snmpv3_store, (void *) strdup(type));
+    dup = strdup(type);
+    if (dup != NULL &&
+        snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                               snmpv3_store, (void *) dup) != SNMPERR_SUCCESS)
+        free(dup);
 
     /*
      * initialize submodules 
