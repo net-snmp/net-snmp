@@ -2201,8 +2201,10 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
              */
             *epp =
                 (struct enum_list *) calloc(1, sizeof(struct enum_list));
-            if (*epp == NULL)
+            if (*epp == NULL) {
+                free_enums(&ep);
                 return (NULL);
+            }
             /*
              * a reasonable approximation for the length 
              */
@@ -2210,17 +2212,20 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
             type = get_token(fp, token, MAXTOKEN);
             if (type != LEFTPAREN) {
                 print_error("Expected \"(\"", token, type);
+                free_enums(&ep);
                 return NULL;
             }
             type = get_token(fp, token, MAXTOKEN);
             if (type != NUMBER) {
                 print_error("Expected integer", token, type);
+                free_enums(&ep);
                 return NULL;
             }
             (*epp)->value = strtol(token, NULL, 10);
             type = get_token(fp, token, MAXTOKEN);
             if (type != RIGHTPAREN) {
                 print_error("Expected \")\"", token, type);
+                free_enums(&ep);
                 return NULL;
             }
             epp = &(*epp)->next;
@@ -2228,6 +2233,7 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
     }
     if (type == ENDOFFILE) {
         print_error("Expected \"}\"", token, type);
+        free_enums(&ep);
         return NULL;
     }
     *retp = ep;
