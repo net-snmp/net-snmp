@@ -91,6 +91,7 @@ register_sec_mod(int secmod, const char *modname,
         result = se_add_pair_to_slist("snmp_secmods", modname2, secmod);
     if (result != SE_OK) {
         registered_services = sptr->next;
+        free(sptr);
         switch (result) {
         case SE_NOMEM:
             snmp_log(LOG_CRIT, "snmp_secmod: no memory\n");
