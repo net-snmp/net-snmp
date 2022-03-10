@@ -920,6 +920,8 @@ marker_t
 atime_newMarker(void)
 {
     marker_t        pm = (marker_t) calloc(1, sizeof(struct timeval));
+    if (!pm)
+        return NULL;
     gettimeofday((struct timeval *) pm, NULL);
     return pm;
 }
