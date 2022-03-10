@@ -3753,6 +3753,7 @@ parse_imports(FILE * fp)
                             mp->imports[i].label, mp->imports[i].modid));
             }
             mp->no_imports = import_count;
+            import_count = 0;
             goto out;
         }
     }
@@ -3763,6 +3764,8 @@ parse_imports(FILE * fp)
     print_module_not_found(module_name(current_module, modbuf));
 
 out:
+    while (import_count > 0)
+        free(import_list[--import_count].label);
     free(import_list);
     return;
 }
