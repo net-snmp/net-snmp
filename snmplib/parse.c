@@ -1568,7 +1568,7 @@ do_subtree(struct tree *root, struct node **nodes)
                  */
                 int_p = malloc((tp->number_modules + 1) * sizeof(int));
                 if (int_p == NULL)
-                    return;
+                    continue;
                 memcpy(int_p, tp->module_list,
                        tp->number_modules * sizeof(int));
                 int_p[tp->number_modules] = np->modid;
@@ -1604,7 +1604,7 @@ do_subtree(struct tree *root, struct node **nodes)
 
         tp = (struct tree *) calloc(1, sizeof(struct tree));
         if (tp == NULL)
-            return;
+            continue;
         tp->parent = xxroot;
         tp->modid = np->modid;
         tp->number_modules = 1;
