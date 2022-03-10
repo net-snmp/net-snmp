@@ -4385,7 +4385,7 @@ parse(FILE * fp, struct node *root)
             if (state != IN_MIB) {
                 print_error("Error, END before start of MIB", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             } else {
                 struct module  *mp;
 #ifdef TEST
@@ -4473,7 +4473,7 @@ parse(FILE * fp, struct node *root)
             if (type == ENDOFFILE) {
                 print_error("Expected \"}\"", token, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             type = get_token(fp, token, MAXTOKEN);
         }
@@ -4483,7 +4483,7 @@ parse(FILE * fp, struct node *root)
             if (state != BETWEEN_MIBS) {
                 print_error("Error, nested MIBS", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             state = IN_MIB;
             current_module = which_module(name);
@@ -4508,7 +4508,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT-TYPE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case OBJGROUP:
@@ -4516,7 +4516,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT-GROUP", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case NOTIFGROUP:
@@ -4524,7 +4524,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of NOTIFICATION-GROUP", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case TRAPTYPE:
@@ -4532,7 +4532,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of TRAP-TYPE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case NOTIFTYPE:
@@ -4540,7 +4540,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of NOTIFICATION-TYPE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case COMPLIANCE:
@@ -4548,7 +4548,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of MODULE-COMPLIANCE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case AGENTCAP:
@@ -4556,7 +4556,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of AGENT-CAPABILITIES", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case MACRO:
@@ -4576,7 +4576,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of MODULE-IDENTITY", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case OBJIDENTITY:
@@ -4584,7 +4584,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT-IDENTITY", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case OBJECT:
@@ -4592,19 +4592,19 @@ parse(FILE * fp, struct node *root)
             if (type != IDENTIFIER) {
                 print_error("Expected IDENTIFIER", token, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             type = get_token(fp, token, MAXTOKEN);
             if (type != EQUALS) {
                 print_error("Expected \"::=\"", token, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             nnp = parse_objectid(fp, name);
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT IDENTIFIER", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case EQUALS:
@@ -4616,7 +4616,7 @@ parse(FILE * fp, struct node *root)
         default:
             print_error("Bad operator", token, type);
             gMibError = MODULE_SYNTAX_ERROR;
-            return NULL;
+            goto err;
         }
         if (nnp) {
             if (np)
@@ -4631,6 +4631,23 @@ parse(FILE * fp, struct node *root)
     }
     DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));
     return root;
+
+err:
+    while (root) {
+        np = root;
+        root = np->next;
+        free_node(np);
+    }
+    scan_objlist(NULL, module_head, objgroups, "Cleanup");
+    scan_objlist(NULL, module_head, objects, "Cleanup");
+    scan_objlist(NULL, module_head, notifs, "Cleanup");
+    scan_objlist(NULL, module_head, oldgroups, "Cleanup");
+    scan_objlist(NULL, module_head, oldobjects, "Cleanup");
+    scan_objlist(NULL, module_head, oldnotifs, "Cleanup");
+    objgroups = NULL;
+    objects = NULL;
+    notifs = NULL;
+    return NULL;
 }
 
 /*
