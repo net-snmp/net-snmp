@@ -444,8 +444,10 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
          * allocate the table if one wasn't allocated 
          */
         table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-        if (table_info == NULL)
+        if (table_info == NULL) {
+            netsnmp_handler_registration_free(reginfo);
             return SNMP_ERR_GENERR;
+        }
     }
 
     if (NULL == table_info->indexes && data_set->table->indexes_template) {
@@ -480,6 +482,7 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
         snmp_log(LOG_ERR, "could not create table data set handler\n");
         netsnmp_handler_free(handler);
         netsnmp_handler_registration_free(reginfo);
+        netsnmp_table_registration_info_free(table_info);
         return MIB_REGISTRATION_FAILED;
     }
 
@@ -487,6 +490,8 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
                                        table_info);
     if (ret == SNMPERR_SUCCESS && reginfo->handler)
         netsnmp_handler_owns_table_info(reginfo->handler->next);
+    else if (ret != SNMPERR_SUCCESS)
+        netsnmp_table_registration_info_free(table_info);
     return ret;
 }
 
