@@ -161,6 +161,7 @@ _register_extend( oid *base, size_t len )
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
     rc = netsnmp_register_table_data( reg, dinfo, tinfo );
     if (rc != SNMPERR_SUCCESS) {
+        netsnmp_table_registration_info_free(tinfo);
         goto bail;
     }
     netsnmp_handler_owns_table_info(reg->handler->next);
@@ -181,8 +182,10 @@ _register_extend( oid *base, size_t len )
                 "nsExtendOut1Table", handle_nsExtendOutput1Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
     rc = netsnmp_register_table_data( reg, dinfo, tinfo );
-    if (rc != SNMPERR_SUCCESS)
+    if (rc != SNMPERR_SUCCESS) {
+        netsnmp_table_registration_info_free(tinfo);
         goto bail;
+    }
     netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[1] = reg;
 
@@ -203,8 +206,10 @@ _register_extend( oid *base, size_t len )
                 "nsExtendOut2Table", handle_nsExtendOutput2Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
     rc = netsnmp_register_table( reg, tinfo );
-    if (rc != SNMPERR_SUCCESS)
+    if (rc != SNMPERR_SUCCESS) {
+        netsnmp_table_registration_info_free(tinfo);
         goto bail;
+    }
     netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[2] = reg;
 
