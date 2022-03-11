@@ -2038,6 +2038,8 @@ parse_objectid(FILE * fp, char *name)
             oldnp = np;
 
             np->parent = strdup(op->label);
+            if (np->parent == NULL)
+                goto err;
             if (count == (length - 2)) {
                 /*
                  * The name for this node is the label for this entry 
@@ -2214,6 +2216,10 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
              * a reasonable approximation for the length 
              */
             (*epp)->label = strdup(token);
+            if ((*epp)->label == NULL) {
+                free_enums(&ep);
+                return (NULL);
+            }
             type = get_token(fp, token, MAXTOKEN);
             if (type != LEFTPAREN) {
                 print_error("Expected \"(\"", token, type);
@@ -2474,6 +2480,8 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
         tcp = &tclist[i];
         tcp->modid = current_module;
         tcp->descriptor = strdup(name);
+        if (tcp->descriptor == NULL)
+            goto err;
         tcp->hint = hint;
         tcp->description = descr;
         tcp->type = type;
@@ -2824,6 +2832,11 @@ parse_objectgroup(FILE * fp, char *name, int what, struct objgroup **ol)
             }
             o->line = mibLine;
             o->name = strdup(token);
+            if (!o->name) {
+                free(o);
+                print_error("Resource failure", token, type);
+                goto skip;
+            }
             o->next = *ol;
             *ol = o;
             type = get_token(fp, token, MAXTOKEN);
@@ -3140,6 +3153,10 @@ compliance_lookup(const char *name, int modid)
             return 0;
         op->next = objgroups;
         op->name = strdup(name);
+        if (!op->name) {
+            free(op);
+            return 0;
+        }
         op->line = mibLine;
         objgroups = op;
         return 1;
@@ -3695,6 +3712,8 @@ parse_imports(FILE * fp)
                 goto out;
             }
             import_list[import_count++].label = strdup(token);
+            if (import_list[import_count-1].label == NULL)
+                goto out;
         } else if (type == FROM) {
             type = get_token(fp, token, MAXTOKEN);
             if (import_count == i) {    /* All imports are handled internally */
@@ -4308,6 +4327,12 @@ new_module(const char *name, const char *file)
         return;
     mp->name = strdup(name);
     mp->file = strdup(file);
+    if (mp->name == NULL || mp->file == NULL) {
+        free(mp->name);
+        free(mp->file);
+        free(mp);
+        return;
+    }
     mp->imports = NULL;
     mp->no_imports = -1;        /* Not yet loaded */
     mp->modid = max_module;
