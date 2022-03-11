@@ -1422,6 +1422,7 @@ netsnmp_agent_listen_on(const char *port)
     if (handle < 0) {
         snmp_log(LOG_ERR, "Error registering specified transport \"%s\" as an "
                  "agent NSAP\n", port);
+        netsnmp_transport_free(transport);
         return -1;
     } else {
         DEBUGMSGTL(("snmp_agent",
