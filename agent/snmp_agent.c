@@ -2762,6 +2762,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
                              * XXXWWW: ack!!! 
                              */
                             DEBUGMSGTL(("snmp_agent", "NextVar malloc failed\n"));
+                            asp->vbcount--;
                         } else {
                             vbptr = vbptr->next_variable;
                             vbptr->name_length = 0;
