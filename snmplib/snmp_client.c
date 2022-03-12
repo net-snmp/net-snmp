@@ -403,6 +403,7 @@ _clone_pdu_header(netsnmp_pdu *pdu)
         || snmp_clone_mem((void **) &newpdu->transport_data,
                           pdu->transport_data,
                           pdu->transport_data_length)) {
+        newpdu->securityStateRef = NULL;
         snmp_free_pdu(newpdu);
         return NULL;
     }
