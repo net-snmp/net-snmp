@@ -3696,6 +3696,8 @@ parse_imports(FILE * fp)
     int             i = 0, old_i;       /* index of first import from each module */
 
     import_list = malloc(MAX_IMPORTS * sizeof(*import_list));
+    if (import_list == NULL)
+        return;
 
     type = get_token(fp, token, MAXTOKEN);
 
