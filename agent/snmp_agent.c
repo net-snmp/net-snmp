@@ -1271,11 +1271,13 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
 
     n = (agent_nsap *) malloc(sizeof(agent_nsap));
     if (n == NULL) {
+        netsnmp_transport_free(t);
         return -1;
     }
     s = (netsnmp_session *) malloc(sizeof(netsnmp_session));
     if (s == NULL) {
         SNMP_FREE(n);
+        netsnmp_transport_free(t);
         return -1;
     }
     snmp_sess_init(s);
@@ -1297,17 +1299,22 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
         != SNMPERR_SUCCESS) {
         SNMP_FREE(s);
         SNMP_FREE(n);
+        netsnmp_transport_free(t);
         return -1;
     }
 
 
-    if (t->f_open)
-        t = t->f_open(t);
+    if (t->f_open) {
+        netsnmp_transport *o = t->f_open(t);
 
-    if (NULL == t) {
-        SNMP_FREE(s);
-        SNMP_FREE(n);
-        return -1;
+        if (o == NULL) {
+            SNMP_FREE(s);
+            SNMP_FREE(n);
+            netsnmp_transport_free(t);
+            return -1;
+        }
+
+        t = o;
     }
 
     t->flags |= NETSNMP_TRANSPORT_FLAG_OPENED;
@@ -1422,7 +1429,6 @@ netsnmp_agent_listen_on(const char *port)
     if (handle < 0) {
         snmp_log(LOG_ERR, "Error registering specified transport \"%s\" as an "
                  "agent NSAP\n", port);
-        netsnmp_transport_free(transport);
         return -1;
     } else {
         DEBUGMSGTL(("snmp_agent",
