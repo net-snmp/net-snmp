@@ -802,6 +802,10 @@ netsnmp_container_get_binary_array(void)
     }
 
     c->container_data = netsnmp_binary_array_initialize();
+    if (c->container_data == NULL) {
+        SNMP_FREE(c);
+        return NULL;
+    }
 
     /*
      * NOTE: CHANGES HERE MUST BE DUPLICATED IN duplicate AS WELL!!
