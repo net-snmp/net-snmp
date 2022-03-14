@@ -1418,3 +1418,95 @@ netsnmp_string_time_to_secs(const char *time_string) {
     return secs;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_STRING_TIME_TO_SECS */
+
+#ifdef ERROR_INJECT
+#undef malloc
+#undef calloc
+#undef realloc
+#undef strdup
+#ifdef __SANITIZE_ADDRESS__
+#include <sanitizer/asan_interface.h>
+#endif
+static uint64_t my_seed = 88172645463325252LL;
+static void my_srand(uint32_t seed)
+{
+  uint64_t y = seed;
+  y ^= (~y) << 32;
+  my_seed = y;
+}
+static uint32_t my_rand(void)
+{
+  /*
+   * Implement the 64 bit xorshift as suggested by George Marsaglia in:
+   *      https://doi.org/10.18637/jss.v008.i14
+   */
+  uint64_t y = my_seed;
+  y ^= y << 13;
+  y ^= y >> 7;
+  y ^= y << 17;
+  my_seed = y;
+  return y;
+}
+static void my_init(void)
+{
+  static int init = 0;
+  if(!init) {
+    uint32_t seed;
+    char *env = getenv("ERROR_INJECT");
+    if (env && *env)
+      seed = atoi(env);
+    else {
+      struct timeval tv;
+      gettimeofday(&tv, NULL);
+      seed = (uint32_t)(tv.tv_sec ^ tv.tv_usec);
+    }
+    my_srand(seed);
+    init = 1;
+    if (env && !*env) {
+#ifdef __SANITIZE_ADDRESS__
+      char msg[40];
+      sprintf(msg, "ERROR_INJECT=%u", seed);
+      __sanitizer_report_error_summary(msg);
+#else
+      fprintf(stderr, "ERROR_INJECT=%u\n", seed);
+      fflush(stderr);
+#endif
+    }
+  }
+}
+void* malloc(size_t);
+void* calloc(size_t, size_t);
+void* realloc(void *, size_t);
+char* strdup(const char *s);
+#ifdef ERROR_CALLSTACK
+#undef NULL
+#ifdef __SANITIZE_ADDRESS__
+#define NULL (__sanitizer_print_stack_trace(),(void*)0)
+#else
+void break_here(void)
+{
+}
+#define NULL (break_here(),(void*)0)
+#endif
+#endif
+void* my_malloc(size_t s)
+{
+  my_init();
+  return my_rand() % 1000 ? malloc(s) : NULL;
+}
+void* my_calloc(size_t a, size_t b)
+{
+  my_init();
+  return my_rand() % 1000 ? calloc(a,b) : NULL;
+}
+void* my_realloc(void *p, size_t s)
+{
+  my_init();
+  return my_rand() % 1000 ? realloc(p,s) : NULL;
+}
+char* my_strdup(const char *s)
+{
+  my_init();
+  return my_rand() % 1000 ? strdup(s) : NULL;
+}
+#endif

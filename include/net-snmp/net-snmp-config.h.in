@@ -27,6 +27,13 @@
 #define NET_SNMP_CONFIG_H
 
 
+#ifdef ERROR_INJECT
+#define malloc my_malloc
+#define calloc my_calloc
+#define realloc my_realloc
+#define strdup my_strdup
+#endif
+
 /* ********* NETSNMP_MARK_BEGIN_AUTOCONF_DEFINITIONS ********* */
 /*
  * put all autoconf-specific definitions below here
