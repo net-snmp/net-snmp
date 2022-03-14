@@ -963,10 +963,8 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
                     return res;
                 }
                 res = netsnmp_subtree_load(new2, context_name);
-                if (res != MIB_REGISTERED_OK) {
-                    netsnmp_remove_subtree(new2);
+                if (res != MIB_REGISTERED_OK)
                     netsnmp_subtree_free(new2);
-                }
             }
         }
     }
