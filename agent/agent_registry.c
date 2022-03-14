@@ -783,12 +783,19 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
             oid iso[1]             = { 1 };
             oid joint_ccitt_iso[1] = { 2 };
             inloop = 1;
-            netsnmp_register_null_context(snmp_duplicate_objid(ccitt, 1), 1,
-                                          context_name);
-            netsnmp_register_null_context(snmp_duplicate_objid(iso, 1), 1,
-                                          context_name);
-            netsnmp_register_null_context(snmp_duplicate_objid(joint_ccitt_iso, 1),
-                                          1, context_name);
+            if (netsnmp_register_null_context(snmp_duplicate_objid(ccitt, 1), 1,
+                                              context_name) != MIB_REGISTERED_OK ||
+                netsnmp_register_null_context(snmp_duplicate_objid(iso, 1), 1,
+                                              context_name) != MIB_REGISTERED_OK ||
+                netsnmp_register_null_context(snmp_duplicate_objid(joint_ccitt_iso, 1),
+                                              1, context_name) != MIB_REGISTERED_OK) {
+                inloop = 0;
+                while ((tree1 = netsnmp_subtree_find_first(context_name)) != NULL) {
+                    netsnmp_remove_subtree(tree1);
+                    netsnmp_subtree_free(tree1);
+                }
+                return MIB_REGISTRATION_FAILED;
+            }
             inloop = 0;
         }
     }
