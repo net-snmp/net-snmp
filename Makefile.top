@@ -83,7 +83,7 @@ LINKCC	        = @LINKCC@
 #
 # Most recent change: 40 for the v5.8.1 release.
 LIBCURRENT  = 41
-LIBAGE      = 1
+LIBAGE      = 2
 LIBREVISION = 0
 
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(LINKCC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) @LD_NO_UNDEFINED@ -o
