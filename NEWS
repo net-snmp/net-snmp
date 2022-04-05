@@ -3,6 +3,14 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.9.2*:
+    general: Many bug fixes
+
+    misc:
+      - Snmp-create-v3-user: Fix the snmpd.conf path   @datadir@ is
+	expanded in ${datarootdir} so datarootdir must be set before
+	@datadir@ is used.
+
 *5.9.1*:
     General: Many bug fixes
 

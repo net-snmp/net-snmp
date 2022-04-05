@@ -3,6 +3,31 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.9.2*:
+    misc:
+      - snmp-create-v3-user: Fix the snmpd.conf path   @datadir@ is
+	expanded in ${datarootdir} so datarootdir must be set before
+	@datadir@ is used.
+
+    Windows:
+      - WinExtDLL: Fix multiple compiler warnings
+      - WinExtDLL: Make long strings occupy a single line Make it easier to
+	look up error messages in the source code by making long strings
+	occupy a single source code line.
+      - WinExtDLL: Restore MIB-II support Make winExtDLL work on 64-bit
+	Windows systems") caused snmpd to skip MIB-II on 64-bit systems.
+
+    IF-MIB: Update ifTable entries even if the interface name has changed
+	At least on Linux a network interface index may be reused for a
+	network interface with a different name. Hence this patch that
+	enables replacing network interface information even if the network
+	interface name has changed.
+
+    unspecified:
+      - Moved transport code into a separate subdirectory in snmplib
+      - Snmplib: remove inline versions of container funcs".
+
+
 *5.9.1*:
     General: Many bug fixes
 
