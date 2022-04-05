@@ -1519,6 +1519,9 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
 	vars && (varlist_ind < varlist_len);
 	vars = vars->next_variable, varlist_ind++) {
 
+      if (err_ind >= 1 && varlist_ind >= err_ind - 1)
+          continue;
+
       varbind = PySequence_GetItem(varlist, varlist_ind);
       type = build_python_varbind(varbind, vars, varlist_ind, sprintval_flag,
                                   &len, &str_buf, getlabel_flag);
