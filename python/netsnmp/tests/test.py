@@ -91,14 +91,15 @@ class BasicTests(unittest.TestCase):
 
         print("v1 snmpget result: ", res, "\n")
         self.assertEqual(len(res), 1)
-        self.assertIsNotNone(res[0])
-        self.assertEqual(res[0], '');
+        self.assertIsNone(res[0])
 
         print("v1 get var: ", var.tag, var.iid, "=", var.val, '(', var.type, ')')
-        self.assertEqual(var.tag, 'sysDescr')
-        self.assertEqual(var.iid, '123.0')
-        self.assertEqual(var.val, res[0])
-        self.assertEqual(var.type, 'OCTETSTR')
+        self.assertIsNotNone(var.tag)
+        self.assertEqual(var.tag, '.1.3.6.1.2.1.1.1.123')
+        self.assertIsNotNone(var.iid)
+        self.assertEqual(var.iid, '0')
+        self.assertIsNone(var.val)
+        self.assertIsNone(var.type)
 
 
     def test_v1_getnext(self):
