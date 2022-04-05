@@ -74,12 +74,32 @@ class BasicTests(unittest.TestCase):
 
         print("v1 snmpget result: ", res, "\n")
         self.assertEqual(len(res), 1)
+        self.assertIsNotNone(res[0])
+        self.assertNotEqual(len(res), '')
 
         print("v1 get var: ", var.tag, var.iid, "=", var.val, '(', var.type, ')')
         self.assertEqual(var.tag, 'sysDescr')
         self.assertEqual(var.iid, '0')
         self.assertEqual(var.val, res[0])
         self.assertEqual(var.type, 'OCTETSTR')
+
+    def test_v1_get_no_such_oid(self):
+        print("\n")
+        print("---v1 GET test of nonexistent OID -------------------\n")
+        var = netsnmp.Varbind('.1.3.6.1.2.1.1.1.123', '0')
+        res = netsnmp.snmpget(var, **snmp_dest())
+
+        print("v1 snmpget result: ", res, "\n")
+        self.assertEqual(len(res), 1)
+        self.assertIsNotNone(res[0])
+        self.assertEqual(res[0], '');
+
+        print("v1 get var: ", var.tag, var.iid, "=", var.val, '(', var.type, ')')
+        self.assertEqual(var.tag, 'sysDescr')
+        self.assertEqual(var.iid, '123.0')
+        self.assertEqual(var.val, res[0])
+        self.assertEqual(var.type, 'OCTETSTR')
+
 
     def test_v1_getnext(self):
         print("\n")
