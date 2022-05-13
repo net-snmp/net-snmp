@@ -109,8 +109,7 @@ _find_typed_mteEvent_entry( const char *owner, const char *ename, int type )
      *    same type, then throw an error and discard it.
      *  But allow combined Set/Notification events.
      */
-    if ( entry &&
-        (entry->flags & MTE_EVENT_FLAG_VALID) &&
+    if ((entry->flags & MTE_EVENT_FLAG_VALID) &&
         (entry->mteEventActions & type )) {
         config_perror("error: duplicate event name");
         return NULL;
