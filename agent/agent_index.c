@@ -553,7 +553,7 @@ unregister_index(netsnmp_variable_list * varbind, int remember,
         if (res2 <= 0)
             break;
     }
-    if (res2 != 0 || (res2 == 0 && !idxptr2->allocated)) {
+    if (res2 != 0 || !idxptr2->allocated) {
         return INDEX_ERR_NOT_ALLOCATED;
     }
     if (ss != idxptr2->session)
