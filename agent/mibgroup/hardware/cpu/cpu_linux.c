@@ -247,7 +247,8 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
         }
         while ((bytes_read = read(vmstatfd, vmbuff, vmbsize)) == vmbsize) {
 	    vmbsize += BUFSIZ;
-	    vmbuff = (char*)realloc(vmbuff, vmbsize+1);
+	    char* tmp_vmbuff = (char*)realloc(vmbuff, vmbsize+1);
+        if (tmp_vmbuff) vmbuff = tmp_vmbuff;
 	    close(vmstatfd);
 	    vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0);
 	    if (vmstatfd == -1) {
