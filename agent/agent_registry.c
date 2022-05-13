@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright ï¿½ 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -157,6 +157,7 @@ get_context_lookup_cache(const char *context) {
     if (!ptr) {
         if (netsnmp_subtree_find_first(context)) {
             ptr = SNMP_MALLOC_TYPEDEF(lookup_cache_context);
+            if (!ptr) return NULL;
             ptr->next = thecontextcache;
             ptr->context = strdup(context);
             thecontextcache = ptr;
