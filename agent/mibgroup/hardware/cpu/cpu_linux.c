@@ -128,7 +128,8 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     }
     while ((bytes_read = read(statfd, buff, bsize)) == bsize) {
         bsize += BUFSIZ;
-        buff = (char*)realloc(buff, bsize+1);
+        char *tmp_buf = (char*)realloc(buff, bsize+1);
+        if (tmp_buf) buff = tmp_buf;
         DEBUGMSGTL(("cpu", "/proc/stat buffer increased to %d\n", bsize));
         close(statfd);
         statfd = open(STAT_FILE, O_RDONLY, 0);
