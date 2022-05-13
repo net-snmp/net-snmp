@@ -157,6 +157,8 @@ get_context_lookup_cache(const char *context) {
     if (!ptr) {
         if (netsnmp_subtree_find_first(context)) {
             ptr = SNMP_MALLOC_TYPEDEF(lookup_cache_context);
+            if (!ptr)
+                return NULL;
             ptr->next = thecontextcache;
             ptr->context = strdup(context);
             thecontextcache = ptr;
