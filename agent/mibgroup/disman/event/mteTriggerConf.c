@@ -117,8 +117,7 @@ _find_typed_mteTrigger_entry( const char *owner, char *tname, int type )
      *    same type, then throw an error and discard it.
      *  But allow combined Existence/Boolean/Threshold trigger.
      */
-    if ( entry &&
-        (entry->flags & MTE_TRIGGER_FLAG_VALID) &&
+    if ((entry->flags & MTE_TRIGGER_FLAG_VALID) &&
         (entry->mteTriggerTest & type )) {
         config_perror("duplicate trigger name");
         return NULL;
