@@ -168,8 +168,10 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          */
         if (0 == nexthop) {
             entry->rt_policy = calloc(3, sizeof(oid));
-            entry->rt_policy[2] = entry->if_index;
-            entry->rt_policy_len = sizeof(oid)*3;
+            if (entry->rt_policy) {
+                entry->rt_policy[2] = entry->if_index;
+                entry->rt_policy_len = sizeof(oid)*3;
+            }
         }
 #endif
 
@@ -316,8 +318,10 @@ _load_ipv6(netsnmp_container* container, u_long *index )
          * as the policy, to distinguish between them.
          */
         entry->rt_policy = calloc(3, sizeof(oid));
-        entry->rt_policy[2] = entry->ns_rt_index;
-        entry->rt_policy_len = sizeof(oid)*3;
+        if (entry->rt_policy) {
+            entry->rt_policy[2] = entry->ns_rt_index;
+            entry->rt_policy_len = sizeof(oid)*3;
+        }
 #endif
 
         /*
