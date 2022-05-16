@@ -127,7 +127,7 @@ header_complex_parse_oid(oid * oidIndex, size_t oidLen,
         case ASN_GAUGE:
         case ASN_TIMETICKS:
             var->val.integer = (long *) calloc(1, sizeof(long));
-            if (var->val.string == NULL)
+            if (var->val.integer == NULL)
                 return SNMPERR_GENERR;
 
             *var->val.integer = (long) *oidIndex++;
