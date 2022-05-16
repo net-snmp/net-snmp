@@ -318,7 +318,7 @@ _load_ipv6(netsnmp_container* container, u_long *index )
          * as the policy, to distinguish between them.
          */
         entry->rt_policy = calloc(3, sizeof(oid));
-        if(NULL == entry->rt_policy){
+        if(NULL != entry->rt_policy){
         entry->rt_policy[2] = entry->ns_rt_index;
         entry->rt_policy_len = sizeof(oid)*3;
         }
