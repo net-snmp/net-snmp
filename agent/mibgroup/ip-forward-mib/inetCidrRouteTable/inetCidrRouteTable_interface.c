@@ -1267,8 +1267,6 @@ _inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
     /*
      * (INDEX) inetCidrRoutePolicy(4)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h 
      */
-    if (MFD_SUCCESS != rc)
-        return rc;
     rc = inetCidrRoutePolicy_check_index(rowreq_ctx);
     if (MFD_SUCCESS != rc)
         return SNMP_ERR_NOCREATION;
