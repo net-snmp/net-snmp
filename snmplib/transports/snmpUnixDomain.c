@@ -700,6 +700,10 @@ netsnmp_unix_parse_security(const char *token, char *param)
     {
         void* v = malloc(offsetof(com2SecUnixEntry, community) + communityLen +
                          sockpathLen + secNameLen + contextNameLen);
+        if(NULL == v) {
+            config_perror("memory error");
+            return;
+        }
         com2SecUnixEntry* e = (com2SecUnixEntry*)v;
         char* last = ((char*)v) + offsetof(com2SecUnixEntry, community);
         if (e == NULL) {
