@@ -9,7 +9,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/data_access/ip_scalars.h>
-
+#include <limits.h>
 #include "ip_scalars.h"
 
 static int
@@ -445,7 +445,7 @@ handle_ipAddressSpinLock(netsnmp_mib_handler *handler,
             } else {
                 ipAddressSpinLockValue++;
                 /* and check it for overflow */
-                if (ipAddressSpinLockValue > 2147483647 || ipAddressSpinLockValue < 0)
+                if (((unsigned long)ipAddressSpinLockValue > INT_MAX) || ipAddressSpinLockValue < 0)
                     ipAddressSpinLockValue = 0;
             }
             break;
