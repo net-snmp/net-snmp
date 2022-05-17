@@ -31,7 +31,7 @@ PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 /*
  * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright ï¿½ 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -1374,9 +1374,12 @@ Route_Scan_Reload(void)
          *  Allocate a block to hold it and add it to the database
          */
         if (rtsize >= rtallocate) {
-            rthead = (struct rtentry **) realloc((char *) rthead,
+            (struct rtentry **) tmp_rthead = (struct rtentry **) realloc((char *) rthead,
                                                  2 * rtallocate *
                                                  sizeof(struct rtentry *));
+            if (tmp_rthead) {
+                rthead = tmp_rthead;
+            }
             memset(&rthead[rtallocate], 0,
                    rtallocate * sizeof(struct rtentry *));
             rtallocate *= 2;
