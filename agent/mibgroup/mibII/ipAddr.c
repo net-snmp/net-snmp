@@ -520,9 +520,9 @@ Address_Scan_Init(void)
 	num_interfaces += 16;
 
 	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
-	char* tmp__buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
+	char* tmp_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
 	if(tmp_buf) {
-        ifc.ifc_buf = tmp__buf;
+        ifc.ifc_buf = tmp_buf;
     }
 	    if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
 	    {
