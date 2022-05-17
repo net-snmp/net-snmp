@@ -9,7 +9,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright ï¿½ 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -520,8 +520,10 @@ Address_Scan_Init(void)
 	num_interfaces += 16;
 
 	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
-	ifc.ifc_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
-	
+	char* tmp__buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
+	if(tmp_buf) {
+        ifc.ifc_buf = tmp__buf;
+    }
 	    if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
 	    {
 		ifr=NULL;
