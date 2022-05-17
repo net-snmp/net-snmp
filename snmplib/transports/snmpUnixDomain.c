@@ -697,14 +697,14 @@ netsnmp_unix_parse_security(const char *token, char *param)
     }
 
     {
-        void* v = malloc(offsetof(com2SecUnixEntry, community) + communityLen +
-                         sockpathLen + secNameLen + contextNameLen);
-        com2SecUnixEntry* e = (com2SecUnixEntry*)v;
-        char* last = ((char*)v) + offsetof(com2SecUnixEntry, community);
-        if (e == NULL) {
-            config_perror("memory error");
+        com2SecUnixEntry* e = malloc(offsetof(com2SecUnixEntry, community) +
+                                     communityLen + sockpathLen + secNameLen +
+                                     contextNameLen);
+        if (!e) {
+            config_perror("memory allocation failed");
             return;
         }
+        char* last = (char *)e + offsetof(com2SecUnixEntry, community);
 
         DEBUGMSGTL(("netsnmp_unix_parse_security",
                     "<\"%s\", \"%.*s\"> => \"%s\"\n",
