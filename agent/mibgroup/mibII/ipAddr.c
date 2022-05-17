@@ -511,6 +511,8 @@ Address_Scan_Init(void)
     ifr_counter = 0;
 
     do {
+        char *tmp_buf;
+
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
 	    return;
@@ -518,7 +520,15 @@ Address_Scan_Init(void)
 	num_interfaces += 16;
 
 	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
-	ifc.ifc_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
+        tmp_buf = realloc(ifc.ifc_buf, ifc.ifc_len);
+        if (!tmp_buf) {
+            snmp_log(LOG_ERR, "%s: out of memory", __func__);
+            num_interfaces -= 16;
+            ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
+            close(fd);
+            return;
+        }
+	ifc.ifc_buf = tmp_buf;
 	
         if (ioctl(fd, SIOCGIFCONF, &ifc) < 0) {
             ifr = NULL;
