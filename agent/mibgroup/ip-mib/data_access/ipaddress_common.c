@@ -206,7 +206,9 @@ netsnmp_access_ipaddress_entry_create(void)
     netsnmp_ipaddress_entry *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_ipaddress_entry);
     int rc = 0;
-
+    if (!entry) {
+        return NULL;
+    }
     entry->oid_index.len = 1;
     entry->oid_index.oids = &entry->ns_ia_index;
 
