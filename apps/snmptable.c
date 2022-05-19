@@ -651,15 +651,26 @@ get_table_entries(netsnmp_session * ss)
                         if (show_index)
                             indices = malloc(allocated * sizeof(char *));
                     } else {
+                        void *tmp_data = NULL, *tmp_indices = NULL;
+
                         allocated += 10;
-                        data = realloc(data, allocated * fields *
-                                       sizeof(char *));
-                        memset(data + entries * fields, 0,
-                               (allocated -
-                                entries) * fields * sizeof(char *));
+                        tmp_data = realloc(data, allocated * fields *
+                                           sizeof(char *));
                         if (show_index)
-                            indices = realloc(indices, allocated *
-                                              sizeof(char *));
+                            tmp_indices = realloc(indices, allocated *
+                                                  sizeof(char *));
+                        if (tmp_data && (!show_index || tmp_indices)) {
+                            data = tmp_data;
+                            memset(data + entries * fields, 0,
+                                   (allocated - entries) * fields *
+                                   sizeof(char *));
+                            if (show_index)
+                                indices = tmp_indices;
+                        } else {
+                            free(tmp_data);
+                            free(tmp_indices);
+                            allocated -= 10;
+                        }
                     }
                 }
                 dp = data + (entries - 1) * fields;
