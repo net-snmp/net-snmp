@@ -655,13 +655,16 @@ get_table_entries(netsnmp_session * ss)
                                                  sizeof(char *));
                     } else {
                         allocated += 10;
-                        data =
+                        (char**) tmp_data =
                             (char **) realloc(data,
                                               allocated * fields *
                                               sizeof(char *));
+                        if(tmp_data){
+                        data = tmp_data;
                         memset(data + entries * fields, 0,
                                (allocated -
                                 entries) * fields * sizeof(char *));
+                        }
                         if (show_index)
                             indices =
                                 (char **) realloc(indices,
