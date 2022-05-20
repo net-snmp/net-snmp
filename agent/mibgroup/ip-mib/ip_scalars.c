@@ -445,7 +445,7 @@ handle_ipAddressSpinLock(netsnmp_mib_handler *handler,
             } else {
                 ipAddressSpinLockValue++;
                 /* and check it for overflow */
-                if (((unsigned long)ipAddressSpinLockValue > INT_MAX) || ipAddressSpinLockValue < 0)
+                if (ipAddressSpinLockValue == INT_MAX || ipAddressSpinLockValue < 0)
                     ipAddressSpinLockValue = 0;
             }
             break;
