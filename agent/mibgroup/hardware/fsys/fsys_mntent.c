@@ -27,6 +27,12 @@
 #ifdef HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
+#if defined(HAVE_PCRE_H)
+#include <pcre.h>
+#elif defined(HAVE_REGEX_H)
+#include <sys/types.h>
+#include <regex.h>
+#endif
 
 #ifdef solaris2
 #define _NETSNMP_GETMNTENT_TWO_ARGS 1
@@ -180,6 +186,44 @@ netsnmp_fsys_arch_init( void )
     return;
 }
 
+static int
+ignore_mount_point(const char *name)
+{
+    conf_mount_list *m_ptr;
+#ifdef HAVE_PCRE_H
+    int                      found_ndx[3];
+#endif
+
+    if (!ignoremount_list)
+        return FALSE;
+
+    for (m_ptr = ignoremount_list; m_ptr; m_ptr = m_ptr->next) {
+#if defined(HAVE_PCRE_H)
+        if (m_ptr->regex_ptr) {
+            if (pcre_exec(m_ptr->regex_ptr, NULL, name, strlen(name), 0, 0,
+                found_ndx, 3) >= 0)
+                return TRUE;
+        } else {
+            if (strcmp(name, m_ptr->name) == 0)
+                return TRUE;
+        }
+#elif defined(HAVE_REGEX_H)
+        if (m_ptr->regex_ptr) {
+            if (regexec(m_ptr->regex_ptr, name, 0, NULL, 0) == 0)
+                return TRUE;
+        } else {
+            if (strcmp(name, m_ptr->name) == 0)
+                return TRUE;
+        }
+#else
+        if (strcmp(name, m_ptr->name) == 0)
+            return TRUE;
+#endif
+    }
+
+    return FALSE;
+}
+
 void
 netsnmp_fsys_arch_load( void )
 {
@@ -247,6 +291,12 @@ netsnmp_fsys_arch_load( void )
         /*
          *  XXX - identify removeable disks
          */
+
+        /*
+         *  Skip ignored mount points
+         */
+        if (ignore_mount_point(entry->path))
+            continue;
 
         /*
          *  Optionally skip retrieving statistics for remote mounts
