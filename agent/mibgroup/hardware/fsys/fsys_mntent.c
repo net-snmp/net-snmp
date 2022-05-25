@@ -83,6 +83,7 @@ static const char *other_fs[] = {
     "reiserfs",
     "simfs",
     "tmpfs",
+    "virtiofs",
     "vxfs",
     "xfs",
     "zfs",
