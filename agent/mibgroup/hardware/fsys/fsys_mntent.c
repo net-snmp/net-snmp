@@ -27,6 +27,12 @@
 #if HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
+#if defined(HAVE_PCRE_H)
+#include <pcre.h>
+#elif defined(HAVE_REGEX_H)
+#include <sys/types.h>
+#include <regex.h>
+#endif
 
 #ifdef solaris2
 #define _NETSNMP_GETMNTENT_TWO_ARGS 1
@@ -179,6 +185,48 @@ netsnmp_fsys_arch_init( void )
     return;
 }
 
+extern conf_mount_list *ignoremount_list;
+
+static int
+match_mount_config(const char *name)
+{
+    conf_mount_list *m_ptr;
+#ifdef HAVE_PCRE_H
+    int                      found_ndx[3];
+#endif
+
+    if (!ignoremount_list)
+        return FALSE;
+
+    m_ptr = ignoremount_list;
+    while (m_ptr) {
+#if defined(HAVE_PCRE_H)
+        if (m_ptr->regex_ptr) {
+            if (pcre_exec(m_ptr->regex_ptr, NULL, name, strlen(name), 0, 0,
+                found_ndx, 3) >= 0)
+                return TRUE;
+        } else {
+            if (strcmp(name, m_ptr->name) == 0)
+                return TRUE;
+        }
+#elif defined(HAVE_REGEX_H)
+        if (m_ptr->regex_ptr) {
+            if (regexec(m_ptr->regex_ptr, name, 0, NULL, 0) == 0)
+                return TRUE;
+        } else {
+            if (strcmp(name, m_ptr->name) == 0)
+                return TRUE;
+        }
+#else
+        if (strcmp(name, m_ptr->name) == 0)
+            return TRUE;
+#endif
+        m_ptr = m_ptr->next;
+    }
+
+    return FALSE;
+}
+
 void
 netsnmp_fsys_arch_load( void )
 {
@@ -248,8 +296,11 @@ netsnmp_fsys_arch_load( void )
          */
 
         /*
-         *  Optionally skip retrieving statistics for remote mounts
+         *  Optionally skip retrieving statistics for remote mounts or ignored mounts
          */
+	if (match_mount_config(entry->path))
+	    continue;
+
         if ( (entry->flags & NETSNMP_FS_FLAG_REMOTE) &&
             netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES))
