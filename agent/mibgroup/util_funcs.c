@@ -1095,7 +1095,6 @@ prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
       return NULL;
    }
    if(!node) {
-      free(node);
       return NULL;
    }
    node->next_info = NULL;
