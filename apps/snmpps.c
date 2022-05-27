@@ -386,9 +386,15 @@ collect_perf(netsnmp_session *ss, struct hrSWRunTable **fproc)
         proc.hrSWRunPerfMem = *vlp2->val.integer;
 
         count++;
-        procs = realloc(procs, count*sizeof(procs[0]));
-        procs[count-1] = proc;
+        {
+            struct hrSWRunTable *tmp_procs;
 
+            tmp_procs = realloc(procs, count * sizeof(procs[0]));
+            if (tmp_procs) {
+                procs = tmp_procs;
+                procs[count - 1] = proc;
+            }
+        }
         snmp_free_pdu(response);
         vlp2 = vlp;
         vlp = vlp->next_variable;
