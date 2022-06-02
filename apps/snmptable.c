@@ -547,9 +547,16 @@ get_field_names(void)
         if (fields == 1) {
             column = (struct column *) malloc(sizeof(*column));
         } else {
-            column =
+            (struct column *)tmp_column =
                 (struct column *) realloc(column,
                                           fields * sizeof(*column));
+            if (tmp_column){
+                column = tmp_column;
+            }
+        }
+        if (!column) {
+            if (buf != NULL) free(buf);
+            return;
         }
         column[fields - 1].label = strdup(name_p);
         column[fields - 1].width = strlen(name_p);
