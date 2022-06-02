@@ -257,12 +257,12 @@ int
 netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                           void *arg, int priority)
 {
-    struct snmp_gen_callback *newscp = NULL, *scp = NULL;
-    struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
-
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
+
+    struct snmp_gen_callback *newscp = NULL, *scp = NULL;
+    struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
 
     if (_callback_need_init)
         init_callbacks();
