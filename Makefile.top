@@ -69,7 +69,7 @@ LINKCC	        = @LINKCC@
 #   last update, increment current (+5), and set age and revision to 0. Stop.
 #
 # - If any interfaces have been added since the last public release, then
-#   increment current and age, and set revision to 0. Stop.
+#   increment current AND age, and set revision to 0. Stop.
 # 
 # - If the source code has changed at all since the last update,
 #   then increment revision (c:r:a becomes c:r+1:a). 
@@ -82,7 +82,7 @@ LINKCC	        = @LINKCC@
 # changes for past releases if absolutely necessary.
 #
 # Most recent change: 40 for the v5.8.1 release.
-LIBCURRENT  = 41
+LIBCURRENT  = 42
 LIBAGE      = 2
 LIBREVISION = 0
 
