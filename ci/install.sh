@@ -24,6 +24,7 @@ case "$(uname)" in
 	for p in "${packages[@]}"; do
 	    sh -c "apt-get -qq install -y $p"
 	done
+	true
 	;;
     Darwin)
 	# Upgrade openssl such that Net-SNMP can be built with Blumenthal
