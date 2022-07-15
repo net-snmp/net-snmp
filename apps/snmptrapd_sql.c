@@ -23,11 +23,13 @@
 #undef PACKAGE_STRING
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
+#if !defined(HAVE_MYSQL_INIT)
 #ifdef HAVE_MY_GLOBAL_H
 #include <my_global.h>
 #endif
 #ifdef HAVE_MY_SYS_H
 #include <my_sys.h>
+#endif
 #endif
 #include <mysql.h>
 #include <errmsg.h>
