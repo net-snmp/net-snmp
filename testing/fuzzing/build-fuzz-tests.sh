@@ -7,6 +7,7 @@ libs=$(sed -n 's/^NSC_LNETSNMPLIBS="\(.*\)"$/\1/p' ./net-snmp-config;
 for fuzzname in testing/fuzzing/*_fuzzer.c; do
     fuzzname=${fuzzname%_fuzzer.c}
     fuzzname=${fuzzname#testing/fuzzing/}
+    echo "Compiling testing/fuzzing/${fuzzname}_fuzzer.c"
     $CC $CFLAGS -c -Iinclude -Iagent/mibgroup/agentx \
 	testing/fuzzing/${fuzzname}_fuzzer.c -o $WORK/${fuzzname}_fuzzer.o
     $CXX $CXXFLAGS $WORK/${fuzzname}_fuzzer.o \
