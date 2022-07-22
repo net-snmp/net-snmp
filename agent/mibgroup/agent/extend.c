@@ -573,8 +573,12 @@ extend_parse_config(const char *token, char *cptr)
     if (!strcmp( token, "execFix"   ) ||
         !strcmp( token, "extendfix" ) ||
         !strcmp( token, "execFix2" )) {
-        strcpy( exec_name2, exec_name );
-        strcat( exec_name, "Fix" );
+        strlcpy(exec_name2, exec_name, sizeof(exec_name2));
+        if (snprintf(exec_name, sizeof(exec_name), "%sFix", exec_name2) >=
+            sizeof(exec_name)) {
+            config_perror("ERROR: argument too long");
+            return;
+        }
         flags |= NS_EXTEND_FLAGS_WRITEABLE;
         /* XXX - Check for shell... */
     }
