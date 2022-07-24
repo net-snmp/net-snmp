@@ -11,7 +11,7 @@ FTSUBDIRS	= @FTMAINSUBS@ snmplib
 TESTDIRS	= testing
 
 CPP		= @CPP@ 					        \
-		-Iinclude -I$(srcdir)/include -I$(srcdir)/agent/mibgroup -I. -I$(srcdir)	\
+		-I$(srcdir)/include -I.					\
 		-DDONT_INC_STRUCTS -DBINDIR=$(bindir) 		        \
 		$(EXTRACPPFLAGS)
 
