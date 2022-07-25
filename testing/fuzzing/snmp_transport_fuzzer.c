@@ -76,18 +76,6 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
     /*
      * Main fuzzing logic
      */
-    char           *app = af_gb_get_null_terminated(&data2, &size2);
-    char           *str = af_gb_get_null_terminated(&data2, &size2);
-    char           *default_domain =
-        af_gb_get_null_terminated(&data2, &size2);
-    char           *default_target =
-        af_gb_get_null_terminated(&data2, &size2);
-
-    if (app && str && default_domain && default_target) {
-        netsnmp_tdomain_transport_full(app, str, 0, default_domain,
-                                       default_target);
-    }
-
     char           *prefix = af_gb_get_null_terminated(&data2, &size2);
     char           *fmt_data = af_gb_get_null_terminated(&data2, &size2);
     netsnmp_transport *t2 = NULL;
