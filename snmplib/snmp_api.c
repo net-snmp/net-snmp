@@ -1935,7 +1935,7 @@ snmp_free_session(netsnmp_session * s)
          */
         netsnmp_callback_clear_client_arg(s, 0, 0);
 
-        free((char *) s);
+        free(s);
     }
 }
 
@@ -1983,10 +1983,10 @@ snmp_sess_close(struct session_list *slp)
                               orp->pdu, orp->cb_data);
             }
             snmp_free_pdu(orp->pdu);
-            free((char *) orp);
+            free(orp);
         }
 
-        free((char *) isp);
+        free(isp);
     }
 
     transport = slp->transport;
@@ -2020,7 +2020,7 @@ snmp_sess_close(struct session_list *slp)
     }
 
     snmp_free_session(sesp);
-    free((char *) slp);
+    free(slp);
     return 1;
 }
 
@@ -5478,7 +5478,7 @@ void
 snmp_free_var(netsnmp_variable_list * var)
 {
     snmp_free_var_internals(var);
-    free((char *) var);
+    free(var);
 }
 
 void
@@ -6796,7 +6796,7 @@ snmp_sess_timeout(struct session_list *slp)
             /*
              * frees rp's after the for loop goes on to the next_request 
              */
-            free((char *) freeme);
+            free(freeme);
             freeme = NULL;
         }
 
@@ -6841,7 +6841,7 @@ snmp_sess_timeout(struct session_list *slp)
     }
 
     if (freeme != NULL) {
-        free((char *) freeme);
+        free(freeme);
         freeme = NULL;
     }
 }
