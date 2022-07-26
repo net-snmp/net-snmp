@@ -5464,6 +5464,10 @@ snmp_free_var_internals(netsnmp_variable_list * var)
         SNMP_FREE(var->name);
     if (var->val.string != var->buf)
         SNMP_FREE(var->val.string);
+    if (var->val.bitstring)
+        SNMP_FREE(var->val.bitstring);
+    if (var->val.objid)
+        SNMP_FREE(var->val.objid);
     if (var->data) {
         if (var->dataFreeHook) {
             var->dataFreeHook(var->data);
@@ -7140,7 +7144,7 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
     min_size = SNMP_MIN(len1, len2);
     for(i = 0; i < (int)min_size; i++) {
         if (in_name1[i] != in_name2[i])
-            return i;    /* 'í' is the first differing subidentifier
+            return i;    /* 'ï¿½' is the first differing subidentifier
                             So the common prefix is 0..(i-1), of length i */
     }
     return min_size;	/* The shorter OID is a prefix of the longer, and
