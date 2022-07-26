@@ -444,7 +444,7 @@ _copy_varlist(netsnmp_variable_list * var,      /* source varList */
             malloc(sizeof(netsnmp_variable_list));
         if (snmp_clone_var(var, newvar)) {
             if (newvar)
-                free((char *) newvar);
+                free(newvar);
             snmp_free_varbind(newhead);
             return NULL;
         }

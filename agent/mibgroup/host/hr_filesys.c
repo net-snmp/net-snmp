@@ -625,7 +625,7 @@ Init_HR_FileSys(void)
     fscount = getfsstat(NULL, 0, MNT_WAIT);
 #endif
     if (fsstats)
-        free((char *) fsstats);
+        free(fsstats);
     fsstats = NULL;
     fsstats = malloc(fscount * sizeof(*fsstats));
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
@@ -848,7 +848,7 @@ End_HR_FileSys(void)
 {
 #ifdef HAVE_GETFSSTAT
     if (fsstats)
-        free((char *) fsstats);
+        free(fsstats);
     fsstats = NULL;
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     if(aixmnt != NULL) {

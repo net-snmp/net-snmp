@@ -1576,7 +1576,7 @@ Init_HR_SWRun(void)
     bytes = nproc * sizeof(struct proc);
 
     if (proc_table)
-        free((char *) proc_table);
+        free(proc_table);
     if ((proc_table = (struct proc *) malloc(bytes)) == NULL) {
         nproc = 0;
         snmp_log_perror("Init_HR_SWRun-malloc");

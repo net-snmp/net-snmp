@@ -151,10 +151,10 @@ main(int argc, char *argv[])
                  * free the last (unused) variable 
                  */
                 if (vp->name)
-                    free((char *) vp->name);
+                    free(vp->name);
                 if (vp->val.string)
-                    free((char *) vp->val.string);
-                free((char *) vp);
+                    free(vp->val.string);
+                free(vp);
 
                 if (command == SNMP_MSG_GETBULK) {
                     if (nonRepeaters == -1) {

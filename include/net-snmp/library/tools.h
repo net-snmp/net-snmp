@@ -55,7 +55,7 @@ extern          "C" {
 
 /** @def SNMP_FREE(s)
     Frees a pointer only if it is !NULL and sets its value to NULL */
-#define SNMP_FREE(s)    do { if (s) { free((void *)s); s=NULL; } } while(0)
+#define SNMP_FREE(s)    do { if (s) { free(s); s=NULL; } } while(0)
 
     /*
      * XXX Not optimal everywhere. 
