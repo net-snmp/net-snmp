@@ -896,6 +896,8 @@ with_rsaref
 enable_rsaref
 with_openssl
 enable_openssl
+with_wolfssl
+enable_wolfssl
 with_ssl
 enable_ssl
 with_pkcs
@@ -1817,6 +1819,7 @@ Compiler Options:
   --with-openssl=PATH             Look for openssl in PATH/lib,
                                   or PATH may be "internal" to build with
                                   minimal copied OpenSSL code for USM only.
+  --with-wolfssl=PATH             Look for wolfssl in PATH/lib.
 
   --with-pkcs=PATH                Look for pkcs11 in PATH/lib.
   --with-krb5=PATH                Look for krb5 in PATH/lib.
@@ -13071,6 +13074,29 @@ if test "${enable_openssl+set}" = set; then :
   enableval=$enable_openssl; as_fn_error $? "Invalid option. Use --with-openssl/--without-openssl instead" "$LINENO" 5
 fi
 
+
+# Check whether --with-wolfssl was given.
+if test "${with_wolfssl+set}" = set; then :
+  withval=$with_wolfssl; if test "x$withval" = xyes; then
+        tryopenssl=yes
+        askedopenssl=yes
+        CPPFLAGS="-I/usr/include/wolfssl -DWC_NO_HARDEN -DNO_OLD_TIMEVAL_NAME -DOPENSSL_EXTRA -DEXTERNAL_OPTS_OPENVPN $CPPFLAGS"
+    elif test -d "$withval" && test -d "$withval/include/wolfssl"; then
+        tryopenssl=yes
+        askedopenssl=yes
+        LDFLAGS="-L$withval/lib $LDFLAGS"
+        CPPFLAGS="-I$withval/include -I$withval/include/wolfssl -DWC_NO_HARDEN -DNO_OLD_TIMEVAL_NAME -DOPENSSL_EXTRA -DEXTERNAL_OPTS_OPENVPN $CPPFLAGS"
+    else
+        as_fn_error $? "Cannot find wolfSSL in ${withval}." "$LINENO" 5
+    fi
+
+fi
+
+   # Check whether --enable-wolfssl was given.
+if test "${enable_wolfssl+set}" = set; then :
+  enableval=$enable_wolfssl; as_fn_error $? "Invalid option. Use --with-wolfssl/--without-wolfssl instead" "$LINENO" 5
+fi
+
 if test "x$tryopenssl" = "xyes"; then
     for ac_header in openssl/aes.h openssl/evp.h
 do :
@@ -24178,8 +24204,71 @@ fi
 
         fi
 
+	if test "x${with_wolfssl}" != x; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wolfSSL_EVP_md5 in -lwolfssl" >&5
+$as_echo_n "checking for wolfSSL_EVP_md5 in -lwolfssl... " >&6; }
+if ${ac_cv_lib_wolfssl_wolfSSL_EVP_md5+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lwolfssl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
-	    if test -n "$PKG_CONFIG" && \
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char wolfSSL_EVP_md5 ();
+int
+main ()
+{
+return wolfSSL_EVP_md5 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_wolfssl_wolfSSL_EVP_md5=yes
+else
+  ac_cv_lib_wolfssl_wolfSSL_EVP_md5=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_wolfssl_wolfSSL_EVP_md5" >&5
+$as_echo "$ac_cv_lib_wolfssl_wolfSSL_EVP_md5" >&6; }
+if test "x$ac_cv_lib_wolfssl_wolfSSL_EVP_md5" = xyes; then :
+
+	                   ac_cv_lib_EVP_md5=yes
+			   CRYPTO="wolfssl"
+			   LIBCRYPTO="-lwolfssl"
+
+fi
+
+	    for ac_header in wolfssl/wolfcrypt/asn.h		\
+			      wolfssl/wolfcrypt/logging.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+$as_echo "#define HAVE_VOID_EVP_MD_CTX_INIT 1" >>confdefs.h
+
+	else
+
+	        if test -n "$PKG_CONFIG" && \
     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl\""; } >&5
   ($PKG_CONFIG --exists --print-errors "openssl") 2>&5
   ac_status=$?
@@ -24277,35 +24366,35 @@ $as_echo "yes" >&6; }
 
 fi
 fi
-	    if test "x${PKG_CONFIG}" != "x"; then
-	      { $as_echo "$as_me:${as_lineno-$LINENO}: OPENSSL_CFLAGS=${OPENSSL_CFLAGS}" >&5
+	        if test "x${PKG_CONFIG}" != "x"; then
+	          { $as_echo "$as_me:${as_lineno-$LINENO}: OPENSSL_CFLAGS=${OPENSSL_CFLAGS}" >&5
 $as_echo "$as_me: OPENSSL_CFLAGS=${OPENSSL_CFLAGS}" >&6;}
-	      { $as_echo "$as_me:${as_lineno-$LINENO}: OPENSSL_LIBS=${OPENSSL_LIBS}" >&5
+	          { $as_echo "$as_me:${as_lineno-$LINENO}: OPENSSL_LIBS=${OPENSSL_LIBS}" >&5
 $as_echo "$as_me: OPENSSL_LIBS=${OPENSSL_LIBS}" >&6;}
-              CRYPTO=use_pkg_config_for_openssl
-	      LIBCRYPTO="-lssl ${OPENSSL_LIBS}"
-              netsnmp_save_LIBS="$LIBS"
-	      LIBS="-lssl ${OPENSSL_LIBS}"
-	      ac_fn_c_check_func "$LINENO" "EVP_md5" "ac_cv_func_EVP_md5"
+                  CRYPTO=use_pkg_config_for_openssl
+	          LIBCRYPTO="-lssl ${OPENSSL_LIBS}"
+                  netsnmp_save_LIBS="$LIBS"
+	          LIBS="-lssl ${OPENSSL_LIBS}"
+	          ac_fn_c_check_func "$LINENO" "EVP_md5" "ac_cv_func_EVP_md5"
 if test "x$ac_cv_func_EVP_md5" = xyes; then :
 
 fi
 
-              LIBS="$netsnmp_save_LIBS"
-	    fi
+                  LIBS="$netsnmp_save_LIBS"
+	        fi
 
 
-	if test "x${PKG_CONFIG}" = "x"; then
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: Could not find pkg-config." >&5
+	    if test "x${PKG_CONFIG}" = "x"; then
+	        { $as_echo "$as_me:${as_lineno-$LINENO}: Could not find pkg-config." >&5
 $as_echo "$as_me: Could not find pkg-config." >&6;}
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -leay32" >&5
+                { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -leay32" >&5
 $as_echo_n "checking for -leay32... " >&6; }
-            netsnmp_save_LIBS="$LIBS"
-            LIBS="-leay32"
-            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+                netsnmp_save_LIBS="$LIBS"
+                LIBS="-leay32"
+                cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-                    #include <openssl/evp.h>
+                        #include <openssl/evp.h>
 int
 main ()
 {
@@ -24317,9 +24406,9 @@ _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-		 ac_cv_lib_EVP_md5=yes
-		 CRYPTO="eay32"
-		 LIBCRYPTO="-leay32"
+		     ac_cv_lib_EVP_md5=yes
+		     CRYPTO="eay32"
+		     LIBCRYPTO="-leay32"
 
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -24328,10 +24417,10 @@ $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-            LIBS="$netsnmp_save_LIBS"
+                LIBS="$netsnmp_save_LIBS"
 
-            if test x$CRYPTO = x; then
-                { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_md5 in -lcrypto" >&5
+                if test x$CRYPTO = x; then
+                    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_md5 in -lcrypto" >&5
 $as_echo_n "checking for EVP_md5 in -lcrypto... " >&6; }
 if ${ac_cv_lib_crypto_EVP_md5+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -24369,12 +24458,12 @@ fi
 $as_echo "$ac_cv_lib_crypto_EVP_md5" >&6; }
 if test "x$ac_cv_lib_crypto_EVP_md5" = xyes; then :
   ac_cv_lib_EVP_md5=yes
-			      CRYPTO="crypto"
-			      LIBCRYPTO="-lcrypto"
+			          CRYPTO="crypto"
+			          LIBCRYPTO="-lcrypto"
 else
 
-                    unset ac_cv_lib_crypto_EVP_md5
-                    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_md5 in -lcrypto" >&5
+                        unset ac_cv_lib_crypto_EVP_md5
+                        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_md5 in -lcrypto" >&5
 $as_echo_n "checking for EVP_md5 in -lcrypto... " >&6; }
 if ${ac_cv_lib_crypto_EVP_md5+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -24412,51 +24501,149 @@ fi
 $as_echo "$ac_cv_lib_crypto_EVP_md5" >&6; }
 if test "x$ac_cv_lib_crypto_EVP_md5" = xyes; then :
   ac_cv_lib_EVP_md5=yes
-			          CRYPTO="crypto"
-				  LIBCRYPTO="-lcrypto -lz"
+			              CRYPTO="crypto"
+				      LIBCRYPTO="-lcrypto -lz"
 fi
 
 
 fi
 
-            fi
+                fi
+	    fi
 	fi
 
         if test x$CRYPTO != x; then
 
 $as_echo "#define HAVE_LIBCRYPTO 1" >>confdefs.h
 
-            netsnmp_save_LIBS="$LIBS"
-            LIBS="$LIBCRYPTO"
-            for ac_func in AES_cfb128_encrypt                           EVP_sha224        EVP_sha384                                   EVP_MD_CTX_create EVP_MD_CTX_destroy                           EVP_MD_CTX_new    EVP_MD_CTX_free                              DH_set0_pqg DH_get0_pqg DH_get0_key                           ASN1_STRING_get0_data X509_NAME_ENTRY_get_object                           X509_NAME_ENTRY_get_data X509_get_signature_nid
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
+	fi
 
-fi
-done
 
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether 2nd app_verify_cookie_cb() arg is const" >&5
-$as_echo_n "checking whether 2nd app_verify_cookie_cb() arg is const... " >&6; }
-            netsnmp_save_CFLAGS="$CFLAGS"
-            CFLAGS="$CFLAGS -Werror"
-            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	for symbol in				\
+	    AES_cfb128_encrypt			\
+	    ASN1_STRING_get0_data		\
+	    DH_get0_key				\
+	    DH_get0_pqg				\
+	    DH_set0_pqg				\
+	    DTLS_method				\
+	    DTLSv1_method			\
+	    ERR_get_error_all			\
+	    EVP_MD_CTX_create			\
+	    EVP_MD_CTX_destroy			\
+	    EVP_MD_CTX_free			\
+	    EVP_MD_CTX_new			\
+	    EVP_aes_128_cfb			\
+	    EVP_sha224				\
+	    EVP_sha384				\
+	    OPENSSL_sk_num			\
+	    OPENSSL_sk_value			\
+	    OpenSSL_add_all_algorithms		\
+	    SSL_CTX_set_cookie_generate_cb	\
+	    SSL_get1_peer_certificate		\
+	    SSL_library_init			\
+	    SSL_load_error_strings		\
+	    TLS_method				\
+	    TLSv1_method			\
+	    X509_NAME_ENTRY_get_data		\
+	    X509_NAME_ENTRY_get_object		\
+	    X509_get_signature_nid		\
+	; do
+            have_symbol=$(echo "HAVE_${symbol}" | tr '[:lower:]' '[:upper:]')
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${symbol}" >&5
+$as_echo_n "checking for ${symbol}... " >&6; }
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-              #include <openssl/ssl.h>
+		#ifdef HAVE_OPENSSL_AES_H
+		#include <openssl/aes.h>
+		#endif
+		#ifdef HAVE_OPENSSL_ERR_H
+		#include <openssl/err.h>
+		#endif
+		#ifdef HAVE_OPENSSL_EVP_H
+		#include <openssl/evp.h>
+		#endif
+		#ifdef HAVE_OPENSSL_SSL_H
+		#include <openssl/ssl.h>
+		#endif
+		#ifdef HAVE_OPENSSL_STACK_H
+		#include <openssl/stack.h>
+		#endif
+		#ifdef HAVE_OPENSSL_X509_H
+		#include <openssl/x509.h>
+		#endif
+		#ifdef HAVE_OPENSSL_X509V3_H
+		#include <openssl/x509v3.h>
+		#endif
 
 int
 main ()
 {
 
-              int (*app_verify_cookie_cb)(SSL *ssl,
-                                          const unsigned char *cookie,
-                                          unsigned int cookie_len) = NULL;
-              SSL_CTX_set_cookie_verify_cb(NULL, app_verify_cookie_cb);
+		#ifndef ${symbol}
+		return !${symbol}
+		#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+		 eval "ac_cv_func_${symbol}=yes"
+		 cat >>confdefs.h <<_ACEOF
+#define ${have_symbol} 1
+_ACEOF
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	done
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether 2nd app_verify_cookie_cb() arg is const" >&5
+$as_echo_n "checking whether 2nd app_verify_cookie_cb() arg is const... " >&6; }
+        netsnmp_save_CFLAGS="$CFLAGS"
+        CFLAGS="$CFLAGS -Werror"
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+          #include <openssl/ssl.h>
+
+int
+main ()
+{
+
+          int (*app_verify_cookie_cb)(SSL *ssl,
+                                      const unsigned char *cookie,
+                                      unsigned int cookie_len) = NULL;
+          SSL_CTX_set_cookie_verify_cb(NULL, app_verify_cookie_cb);
 
   ;
   return 0;
@@ -24475,31 +24662,17 @@ cat >>confdefs.h <<_ACEOF
 #define SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER $ac_cv_saccaq
 _ACEOF
 
-            CFLAGS="$netsnmp_save_CFLAGS"
-            LIBS="$netsnmp_save_LIBS"
-        fi
-        netsnmp_save_LIBS="$LIBS"
-        LIBS="-lssl $LIBCRYPTO"
-        for ac_func in ERR_get_error_all                       OpenSSL_add_all_algorithms OPENSSL_sk_num                       OPENSSL_sk_value                       SSL_get1_peer_certificate                       SSL_library_init SSL_load_error_strings                       TLS_method TLSv1_method DTLS_method DTLSv1_method
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
+        CFLAGS="$netsnmp_save_CFLAGS"
 
-fi
-done
-
-        LIBS="$netsnmp_save_LIBS"
         if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
 	    if test x$ac_cv_func_DTLSv1_method = xyes -o \
                     x$ac_cv_func_DTLS_method = xyes; then
 
 $as_echo "#define HAVE_LIBSSL_DTLS 1" >>confdefs.h
 
-                LIBCRYPTO=" -lssl $LIBCRYPTO"
+                if test "x$with_wolfssl" = x; then
+                    LIBCRYPTO=" -lssl $LIBCRYPTO"
+		fi
 	    else
 		as_fn_error $? "The DTLS based transports require the libssl library from OpenSSL to be available and support DTLS" "$LINENO" 5
             fi
@@ -24511,7 +24684,9 @@ $as_echo "#define HAVE_LIBSSL_DTLS 1" >>confdefs.h
 
 $as_echo "#define HAVE_LIBSSL 1" >>confdefs.h
 
-                LIBCRYPTO=" -lssl $LIBCRYPTO"
+                if test "x$with_wolfssl" = x; then
+                    LIBCRYPTO=" -lssl $LIBCRYPTO"
+                fi
             else
 		as_fn_error $? "The TLS based transports require the libssl library from OpenSSL to be available" "$LINENO" 5
             fi
@@ -24611,6 +24786,43 @@ fi
 
 fi
 
+
+
+
+
+
+for symbol in ASN_BOOLEAN ASN_INTEGER ASN_OBJECT_ID ASN_SEQUENCE ASN_SET; do
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${symbol}" >&5
+$as_echo_n "checking for ${symbol}... " >&6; }
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <openssl/ssl.h>
+int
+main ()
+{
+
+    #ifndef ${symbol}
+    return !${symbol}
+    #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+     cat >>confdefs.h <<_ACEOF
+#define HAVE_${symbol} 1
+_ACEOF
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+
 LIBS=$NONAGENTLIBS	 # restore old libraries
 if test "x$SSHPROG" = "xyes"; then
     NETSNMP_BUILD_SSH_PROG_TRUE=''
@@ -24670,7 +24882,8 @@ if test "x$tryopenssl" != "xno" -a "x$CRYPTO" = "x"; then
    crypto_files_c="openssl/openssl_sha1.c openssl/openssl_md5.c openssl/openssl_set_key.c openssl/openssl_des_enc.c openssl/openssl_cbc_enc.c openssl/openssl_aes_cfb.c openssl/openssl_aes_core.c openssl/openssl_cfb128.c"
    crypto_files_o="openssl/openssl_sha1.o openssl/openssl_md5.o openssl/openssl_set_key.o openssl/openssl_des_enc.o openssl/openssl_cbc_enc.o openssl/openssl_aes_cfb.o openssl/openssl_aes_core.oo openssl/openssl_cfb128.o"
    crypto_files_lo="openssl/openssl_sha1.lo openssl/openssl_md5.lo openssl/openssl_set_key.lo openssl/openssl_des_enc.lo openssl/openssl_cbc_enc.lo openssl/openssl_aes_cfb.lo openssl/openssl_aes_core.lo openssl/openssl_cfb128.lo"
-   $as_echo "#define HAVE_AES_CFB128_ENCRYPT 1" >>confdefs.h
+
+$as_echo "#define HAVE_AES_CFB128_ENCRYPT 1" >>confdefs.h
 
 fi
 
