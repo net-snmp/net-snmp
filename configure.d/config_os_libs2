@@ -325,7 +325,7 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
                     #include <openssl/evp.h>],
                     [return EVP_md5();])],
                 [AC_MSG_RESULT(yes)
-		 ac_cv_lib_eay32_EVP_md5=yes
+		 ac_cv_lib_EVP_md5=yes
 		 CRYPTO="eay32"
 		 LIBCRYPTO="-leay32"
 		],
@@ -335,10 +335,14 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
     
             if test x$CRYPTO = x; then
                 AC_CHECK_LIB([crypto], [EVP_md5],
-                             [CRYPTO="crypto"; LIBCRYPTO="-lcrypto"], [
+                             [ac_cv_lib_EVP_md5=yes
+			      CRYPTO="crypto"
+			      LIBCRYPTO="-lcrypto"], [
                     unset ac_cv_lib_crypto_EVP_md5
                     AC_CHECK_LIB([crypto], [EVP_md5],
-                                 [CRYPTO="crypto"; LIBCRYPTO="-lcrypto -lz"],
+                                 [ac_cv_lib_EVP_md5=yes
+			          CRYPTO="crypto"
+				  LIBCRYPTO="-lcrypto -lz"],
 				 [], [-lz])
                 ])
             fi

@@ -29384,7 +29384,7 @@ if ac_fn_c_try_link "$LINENO"
 then :
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 printf "%s\n" "yes" >&6; }
-		 ac_cv_lib_eay32_EVP_md5=yes
+		 ac_cv_lib_EVP_md5=yes
 		 CRYPTO="eay32"
 		 LIBCRYPTO="-leay32"
 
@@ -29435,7 +29435,9 @@ fi
 printf "%s\n" "$ac_cv_lib_crypto_EVP_md5" >&6; }
 if test "x$ac_cv_lib_crypto_EVP_md5" = xyes
 then :
-  CRYPTO="crypto"; LIBCRYPTO="-lcrypto"
+  ac_cv_lib_EVP_md5=yes
+			      CRYPTO="crypto"
+			      LIBCRYPTO="-lcrypto"
 else $as_nop
 
                     unset ac_cv_lib_crypto_EVP_md5
@@ -29476,7 +29478,9 @@ fi
 printf "%s\n" "$ac_cv_lib_crypto_EVP_md5" >&6; }
 if test "x$ac_cv_lib_crypto_EVP_md5" = xyes
 then :
-  CRYPTO="crypto"; LIBCRYPTO="-lcrypto -lz"
+  ac_cv_lib_EVP_md5=yes
+			          CRYPTO="crypto"
+				  LIBCRYPTO="-lcrypto -lz"
 fi
 
 
@@ -31039,8 +31043,7 @@ fi
 #       Check for OpenSSL
 #
 if test \( "x$ac_cv_func_EVP_md5" != "xyes" -a \
-           "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -a \
-	   "x$ac_cv_lib_eay32_EVP_md5" != "xyes" \) -o \
+           "x$ac_cv_lib_EVP_md5" != "xyes" \) -o \
 	"x$ac_cv_header_openssl_hmac_h" != "xyes"; then
     if test "x$askedopenssl" = "xyes"; then
         as_fn_error $? "Asked to use OpenSSL but I couldn't find it." "$LINENO" 5
@@ -31164,8 +31167,7 @@ fi
     if test "$ac_cv_header_validator_validator_config_h" != yes; then
         as_fn_error $? "Can't find validator.h" "$LINENO" 5
     fi
-    if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -a \
-            "x$ac_cv_lib_eay32_EVP_md5" != "xyes" -o \
+    if test "x$ac_cv_lib_EVP_md5" != "xyes" -o \
             "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
         as_fn_error $? "Couldn't find OpenSSL for local DNSSEC validation support." "$LINENO" 5
     fi
