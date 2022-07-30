@@ -95,6 +95,25 @@
 /* Define to 1 if you have the `ASN1_STRING_get0_data' function. */
 #undef HAVE_ASN1_STRING_GET0_DATA
 
+/* Define to 1 if the `ASN_BOOLEAN' constant is defined in an SSL header file.
+   */
+#undef HAVE_ASN_BOOLEAN
+
+/* Define to 1 if the `ASN_INTEGER' constant is defined in an SSL header file.
+   */
+#undef HAVE_ASN_INTEGER
+
+/* Define to 1 if the `ASN_OBJECT_ID' constant is defined in an SSL header
+   file. */
+#undef HAVE_ASN_OBJECT_ID
+
+/* Define to 1 if the `ASN_SEQUENCE' constant is defined in an SSL header
+   file. */
+#undef HAVE_ASN_SEQUENCE
+
+/* Define to 1 if the `ASN_SET' constant is defined in an SSL header file. */
+#undef HAVE_ASN_SET
+
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
 
@@ -185,6 +204,9 @@
 
 /* Define to 1 if you have the `eval_pv' function. */
 #undef HAVE_EVAL_PV
+
+/* Define to 1 if you have the `EVP_aes_128_cfb' function. */
+#undef HAVE_EVP_AES_128_CFB
 
 /* Define to 1 if you have the `EVP_MD_CTX_create' function. */
 #undef HAVE_EVP_MD_CTX_CREATE
@@ -456,10 +478,10 @@
 /* Define to 1 if you have the `ssh2' library (-lssh2). */
 #undef HAVE_LIBSSH2
 
-/* Define to 1 if you have the `ssl' library (-lssl). */
+/* Define to 1 if you have the `ssl' library. */
 #undef HAVE_LIBSSL
 
-/* Define to 1 if your `ssl' library supports DTLS (-lssl). */
+/* Define to 1 if your `ssl' library supports DTLS. */
 #undef HAVE_LIBSSL_DTLS
 
 /* Define to 1 if you have the <limits.h> header file. */
@@ -909,6 +931,9 @@
 
 /* Define to 1 if the system has the type `ssize_t'. */
 #undef HAVE_SSIZE_T
+
+/* Define to 1 if you have the `SSL_CTX_set_cookie_generate_cb' function. */
+#undef HAVE_SSL_CTX_SET_COOKIE_GENERATE_CB
 
 /* Define to 1 if you have the `SSL_get1_peer_certificate' function. */
 #undef HAVE_SSL_GET1_PEER_CERTIFICATE
@@ -1480,6 +1505,9 @@
 /* Define to 1 if you have the <vm/vm_param.h> header file. */
 #undef HAVE_VM_VM_PARAM_H
 
+/* Define this macro if EVP_MD_CTX_init() returns void */
+#undef HAVE_VOID_EVP_MD_CTX_INIT
+
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
 
@@ -1497,6 +1525,12 @@
 
 /* Define to 1 if you have the <winsock.h> header file. */
 #undef HAVE_WINSOCK_H
+
+/* Define to 1 if you have the <wolfssl/wolfcrypt/asn.h> header file. */
+#undef HAVE_WOLFSSL_WOLFCRYPT_ASN_H
+
+/* Define to 1 if you have the <wolfssl/wolfcrypt/logging.h> header file. */
+#undef HAVE_WOLFSSL_WOLFCRYPT_LOGGING_H
 
 /* Define to 1 if you have the <ws2tcpip.h> header file. */
 #undef HAVE_WS2TCPIP_H
@@ -1985,7 +2019,11 @@
 
 /* If you have openssl 0.9.7 or above, you likely have AES support. */
 #undef NETSNMP_USE_OPENSSL
-#if (defined(NETSNMP_USE_OPENSSL) && defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#if (defined(NETSNMP_USE_OPENSSL) &&            \
+     defined(HAVE_OPENSSL_AES_H) &&             \
+     defined(HAVE_AES_CFB128_ENCRYPT) &&        \
+     defined(HAVE_EVP_AES_128_CFB)) ||          \
+    defined(NETSNMP_USE_INTERNAL_CRYPTO)
 #define HAVE_AES 1
 #endif
 
