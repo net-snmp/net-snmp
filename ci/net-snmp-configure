@@ -82,33 +82,9 @@ libsensorsver="$(rpm_version libsensors4-devel;
 echo "libsensorsver=$libsensorsver"
 
 if ! echo "$*" | grep -Eq 'with-openssl=(no|internal)|without-openssl'; then
-    case "$(uname -a)" in
-	FreeBSD*)
-	    opensslver="$(freebsd_pkg_version libressl-devel openssl111 openssl)"
-	    if [ -z "$opensslver" ]; then
-		opensslver="$(openssl version 2>&1 |
-				{ read -r a b c; echo "$b"; echo "$a $c" >/dev/null; })"
-	    fi
-	    ;;
-	Linux*)
-	    opensslver="$(
-	    for p in openssl-devel libopenssl-devel libressl-devel; do
-	      rpm_version "$p";
-            done;
-	    dpkg_version libssl-dev;
-	    pacman_version mingw-w64-x86_64-openssl)";;
-	MSYS*x86_64*)
-	    opensslver="$(pacman_version openssl-devel)";;
-	MINGW64*)
-	    opensslver="$(pacman_version mingw-w64-x86_64-openssl)";;
-	*)
-	    opensslver=1.0;;
-    esac
+    have_ssl=true
 fi
-if grep -q 'CentOS release 4' /etc/issue 2>/dev/null; then
-  opensslver=""
-fi
-echo "opensslver=$opensslver"
+echo "have_ssl=$have_ssl"
 
 case "$(uname)" in
     FreeBSD*)
@@ -330,7 +306,7 @@ for o in "${options[@]}"; do
         with_openssl="${o#--with-openssl=}"
     fi
 done
-if [ "$opensslver" = "" ]; then
+if [ -z "$have_ssl" ]; then
     options+=("--with-openssl=internal")
     with_openssl="internal"
 else
