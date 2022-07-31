@@ -688,11 +688,17 @@
 /* Define to 1 if you have the <openssl/aes.h> header file. */
 #undef HAVE_OPENSSL_AES_H
 
+/* Define to 1 if you have the <openssl/bio.h> header file. */
+#undef HAVE_OPENSSL_BIO_H
+
 /* Define to 1 if you have the <openssl/des.h> header file. */
 #undef HAVE_OPENSSL_DES_H
 
 /* Define to 1 if you have the <openssl/dh.h> header file. */
 #undef HAVE_OPENSSL_DH_H
+
+/* Define to 1 if you have the <openssl/err.h> header file. */
+#undef HAVE_OPENSSL_ERR_H
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
 #undef HAVE_OPENSSL_EVP_H
@@ -700,11 +706,32 @@
 /* Define to 1 if you have the <openssl/hmac.h> header file. */
 #undef HAVE_OPENSSL_HMAC_H
 
+/* Define to 1 if you have the <openssl/objects.h> header file. */
+#undef HAVE_OPENSSL_OBJECTS_H
+
+/* Define to 1 if you have the <openssl/ossl_typ.h> header file. */
+#undef HAVE_OPENSSL_OSSL_TYP_H
+
+/* Define to 1 if you have the <openssl/rand.h> header file. */
+#undef HAVE_OPENSSL_RAND_H
+
 /* Define to 1 if you have the `OPENSSL_sk_num' function. */
 #undef HAVE_OPENSSL_SK_NUM
 
 /* Define to 1 if you have the `OPENSSL_sk_value' function. */
 #undef HAVE_OPENSSL_SK_VALUE
+
+/* Define to 1 if you have the <openssl/ssl.h> header file. */
+#undef HAVE_OPENSSL_SSL_H
+
+/* Define to 1 if you have the <openssl/x509v3.h> header file. */
+#undef HAVE_OPENSSL_X509V3_H
+
+/* Define to 1 if you have the <openssl/x509.h> header file. */
+#undef HAVE_OPENSSL_X509_H
+
+/* Define to 1 if you have the <openssl/x509_vfy.h> header file. */
+#undef HAVE_OPENSSL_X509_VFY_H
 
 /* Define to 1 if you have the <osreldate.h> header file. */
 #undef HAVE_OSRELDATE_H

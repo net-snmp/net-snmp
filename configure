@@ -17041,34 +17041,23 @@ fi
 done
 
 # OpenSSL
-for ac_header in openssl/aes.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
+for ac_header in 				\
+openssl/aes.h					\
+openssl/bio.h					\
+openssl/des.h					\
+openssl/dh.h					\
+openssl/err.h					\
+openssl/evp.h					\
+openssl/hmac.h					\
+openssl/objects.h				\
+openssl/ossl_typ.h				\
+openssl/rand.h					\
+openssl/ssl.h					\
+openssl/x509.h					\
+openssl/x509_vfy.h				\
+openssl/x509v3.h				\
+security/cryptoki.h				\
 
-fi
-
-done
-     #  (Core)
-for ac_header in openssl/dh.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-     #  (Apps)
-#  Not-Used:
-for ac_header in openssl/des.h  openssl/hmac.h                   openssl/evp.h  security/cryptoki.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
