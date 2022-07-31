@@ -42,6 +42,8 @@ netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all);
 
 #include <ctype.h>
 
+#include <stddef.h>
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
