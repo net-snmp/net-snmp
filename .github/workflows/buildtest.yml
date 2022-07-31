@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mode: [regular, disable-set, mini, read-only]
+        mode: [regular, disable-set, mini, read-only, wolfssl]
 
     env:
       MODE: ${{ matrix.mode }}
@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: install required packages
-      run: sudo ci/install.sh
+      run: sudo bash -c "MODE=$MODE ci/install.sh"
 
     - name: build
       run: ci/build.sh
