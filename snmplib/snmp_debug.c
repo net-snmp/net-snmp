@@ -680,9 +680,25 @@ snmp_debug_shutdown(void)
 
 #endif /* NETSNMP_NO_DEBUGGING */
 
+#ifdef HAVE_WOLFSSL_WOLFCRYPT_LOGGING_H
+#include <wolfssl/options.h>
+#include <wolfssl/wolfcrypt/logging.h>
+
+static void snmp_log_wolfssl_msg(const int logLevel NETSNMP_ATTRIBUTE_UNUSED,
+                                 const char* const msg)
+{
+    DEBUGMSGTL(("snmp_openssl", msg, "\n"));
+}
+#endif
+
 void
 snmp_debug_init(void)
 {
+#ifdef HAVE_WOLFSSL_WOLFCRYPT_LOGGING_H
+    wolfSSL_Debugging_ON();
+    wolfSSL_SetLoggingCb(snmp_log_wolfssl_msg);
+#endif
+
     register_prenetsnmp_mib_handler("snmp", "doDebugging",
                                     debug_config_turn_on_debugging, NULL,
                                     "(1|0)");

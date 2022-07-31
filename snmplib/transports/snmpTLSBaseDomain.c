@@ -50,6 +50,10 @@ netsnmp_feature_require(cert_util);
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/snmpTLSBaseDomain.h>
 
+#ifndef X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS
+#define X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS 0
+#endif
+
 #define LOGANDDIE(msg) do { snmp_log(LOG_ERR, "%s\n", msg); return 0; } while(0)
 
 int openssl_local_index;
