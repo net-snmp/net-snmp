@@ -27553,46 +27553,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-# check to see if the openssl is good enough for DTLS
-# (BIO_dgram_get_peer is a macro, not a true function)
-if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
-    if ${netsnmp_cv_bio_dgram_get_peer+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for BIO_dgram_get_peer" >&5
-$as_echo_n "checking for BIO_dgram_get_peer... " >&6; }
-
-        oldLIBS="$LIBS"
-        LIBS="$LIBS -lcrypto"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <openssl/bio.h>
-int
-main ()
-{
-BIO_dgram_get_peer(NULL, NULL);
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-
-else
-  as_fn_error $? "DTLS support requires a newer version of OpenSSL" "$LINENO" 5
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-        LIBS="$oldLIBS"
-
-       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-fi
-
-fi
-
-
 # -*- autoconf -*-
 #########################################
 ##

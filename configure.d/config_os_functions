@@ -358,25 +358,3 @@ case x${host_cpu}-${host_vendor}-${host_os} in
 esac
 AC_DEFINE_UNQUOTED([NETSNMP_PRIz], ["$netsnmp_PRIz"],
                    [Size prefix to use to printf a size_t or ssize_t])
-
-# check to see if the openssl is good enough for DTLS
-# (BIO_dgram_get_peer is a macro, not a true function)
-if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
-    AC_CACHE_VAL(
-       netsnmp_cv_bio_dgram_get_peer,
-       AC_MSG_CHECKING([[for BIO_dgram_get_peer]])
-       [
-        oldLIBS="$LIBS"
-        LIBS="$LIBS -lcrypto"
-        AC_LINK_IFELSE(
-          [AC_LANG_PROGRAM(
-            [[#include <openssl/bio.h>]],
-            [[BIO_dgram_get_peer(NULL, NULL);]])], [],
-          [AC_MSG_ERROR(DTLS support requires a newer version of OpenSSL)])
-
-        LIBS="$oldLIBS"
-       ]
-       AC_MSG_RESULT(yes)
-    )
-fi
-
