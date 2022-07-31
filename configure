@@ -5068,7 +5068,7 @@ then :
 fi
 
 
-tryopenssl=defaultyes
+tryopenssl=yes
 askedopenssl=no
 aes_capable=no
 
@@ -5110,19 +5110,6 @@ then :
   enableval=$enable_openssl; as_fn_error $? "Invalid option. Use --with-openssl/--without-openssl instead" "$LINENO" 5
 fi
 
-if test "x$tryopenssl" = "xdefaultyes"; then
-
-  if test "x/usr/local/ssl" != x -a -d /usr/local/ssl; then
-     if test -d /usr/local/ssl/lib; then
-       LDFLAGS="-L/usr/local/ssl/lib $LDFLAGS"
-     fi
-     if test -d /usr/local/ssl/include; then
-	CPPFLAGS="-I/usr/local/ssl/include $CPPFLAGS"
-     fi
-  fi
-
-      tryopenssl=yes
-fi
 if test "x$tryopenssl" = "xyes"; then
            for ac_header in openssl/aes.h openssl/evp.h
 do :

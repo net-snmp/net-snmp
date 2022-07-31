@@ -72,7 +72,7 @@ NETSNMP_ARG_WITH(rsaref,
     fi,
 )
 
-tryopenssl=defaultyes
+tryopenssl=yes
 askedopenssl=no
 aes_capable=no
 NETSNMP_ARG_WITH(openssl,
@@ -98,10 +98,6 @@ NETSNMP_ARG_WITH(openssl,
       askedopenssl=yes
     fi,
 )
-if test "x$tryopenssl" = "xdefaultyes"; then
-      AC_ADD_SEARCH_PATH(/usr/local/ssl)
-      tryopenssl=yes
-fi
 if test "x$tryopenssl" = "xyes"; then
     AC_CHECK_HEADERS(
         [openssl/aes.h openssl/evp.h],
