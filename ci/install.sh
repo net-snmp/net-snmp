@@ -1,5 +1,7 @@
 #!/bin/sh
 
+scriptdir="$(cd "$(dirname "$0")" && pwd)"
+
 case "$(uname)" in
     Linux)
 	packages="
@@ -20,6 +22,7 @@ case "$(uname)" in
 	    make
 	    pkg-config
 	    python3-dev
+	    setpriv
 	"
 	apt-get update
 	for p in ${packages}; do
@@ -46,6 +49,24 @@ case "$(uname)" in
 	pkg install -y py27-setuptools
 	if [ ! -e /usr/bin/perl ]; then
 	    ln -s /usr/local/bin/perl /usr/bin/perl
+	fi
+	;;
+esac
+
+case "$MODE" in
+    wolfssl)
+	if [ -n "$SUDO_UID" ] && [ -n "$SUDO_GID" ]; then
+	    if type setpriv >&/dev/null; then
+		setpriv --reuid="$SUDO_UID" --regid="$SUDO_GID" --init-groups \
+			--inh-caps=-CHOWN,-SETUID,-SETGID \
+			"${scriptdir}/wolfssl.sh"
+	    elif [ -n "${SUDO_USER}" ]; then
+		sudo -u "${SUDO_USER}" "${scriptdir}/wolfssl.sh"
+	    else
+		"${scriptdir}/wolfssl.sh"
+	    fi
+	else
+	    "${scriptdir}/wolfssl.sh"
 	fi
 	;;
 esac
