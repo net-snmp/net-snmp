@@ -437,7 +437,7 @@ else
     NETSNMP_BUILD_TLS_PROG_TRUE='#'
     NETSNMP_BUILD_TLS_PROG_FALSE=''
 fi
-if echo " ${security_mod_list} " | grep ' usm ' ; then
+if echo " ${security_mod_list} " | grep -q ' usm ' ; then
     if test "x$enable_read_only" != "xyes" ; then
     	NETSNMP_BUILD_USM_PROG_TRUE=''
     	NETSNMP_BUILD_USM_PROG_FALSE='#'
