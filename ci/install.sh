@@ -22,7 +22,7 @@ case "$(uname)" in
 	    python3-dev
 	)
 	for p in "${packages[@]}"; do
-	    sh -c "apt-get -qq install -y $p"
+	    apt-get install -qq -o=Dpkg::Use-Pty=0 -y "$p"
 	done
 	true
 	;;
