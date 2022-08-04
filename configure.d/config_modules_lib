@@ -70,8 +70,8 @@ AC_SUBST(other_lagentobjs)
 AC_SUBST(other_ftagentobjs)
 AC_SUBST(other_trapd_objects)
 
-AC_MSG_RESULT([$other_src_list $other_objs_list $other_lobjs_list])
-AC_MSG_RESULT([$other_agentobjs $other_lagentobjs $other_trapd_objects])
+AC_MSG_RESULT([$other_src_list $other_objs_list $other_lobjs_list ]dnl
+[$other_agentobjs $other_lagentobjs $other_trapd_objects])
   
 #
 # Create directory structure for build

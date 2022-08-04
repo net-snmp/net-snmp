@@ -18974,10 +18974,8 @@ fi
 
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $other_src_list $other_objs_list $other_lobjs_list" >&5
-$as_echo "$other_src_list $other_objs_list $other_lobjs_list" >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $other_agentobjs $other_lagentobjs $other_trapd_objects" >&5
-$as_echo "$other_agentobjs $other_lagentobjs $other_trapd_objects" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $other_src_list $other_objs_list $other_lobjs_list $other_agentobjs $other_lagentobjs $other_trapd_objects" >&5
+$as_echo "$other_src_list $other_objs_list $other_lobjs_list $other_agentobjs $other_lagentobjs $other_trapd_objects" >&6; }
 
 #
 # Create directory structure for build
