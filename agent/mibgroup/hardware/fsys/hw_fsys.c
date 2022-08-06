@@ -370,10 +370,18 @@ _parse_mount_config(const char *token, char *cptr)
 #endif
 
     name = strtok_r(cptr, " \t", &st);
+    if (!name) {
+        config_perror("Invalid configuration string");
+        return;
+    }
     if (strcmp(name, "-r") == 0) {
 #if defined(HAVE_PCRE_H) || defined(HAVE_REGEX_H)
         is_regex = 1;
         name = strtok_r(NULL, " \t", &st);
+        if (!name) {
+            config_perror("Invalid configuration string");
+            return;
+        }
 #else
         config_perror("Missing regex support");
         return;
