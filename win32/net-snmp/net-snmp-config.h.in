@@ -1265,8 +1265,6 @@
 
 /* The assigned enterprise number for sysObjectID. */
 #define NETSNMP_SYSTEM_MIB		1,3,6,1,4,1,8072,3,2,OSTYPE
-#define NETSNMP_SYSTEM_DOT_MIB		1.3.6.1.4.1.8072.3.2.OSTYPE
-#define NETSNMP_SYSTEM_DOT_MIB_LENGTH	10
 
 /* The assigned enterprise number for notifications. */
 #define NETSNMP_NOTIFICATION_MIB		1,3,6,1,4,1,8072,4
