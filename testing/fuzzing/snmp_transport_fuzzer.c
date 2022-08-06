@@ -80,7 +80,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
     char           *fmt_data = af_gb_get_null_terminated(&data2, &size2);
     netsnmp_transport *t2 = NULL;
     if (prefix && fmt_data) {
-        netsnmp_ipv6_fmtaddr(prefix, t2, fmt_data, strlen(fmt_data));
+        free(netsnmp_ipv6_fmtaddr(prefix, t2, fmt_data, strlen(fmt_data)));
 
         struct sockaddr_in6 addr;
         if (!netsnmp_sockaddr_in6(&addr, prefix, 5123))
