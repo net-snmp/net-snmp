@@ -4650,15 +4650,19 @@ static int netsnmp_getc(FILE *stream)
  * Warning: this method may recurse.
  */
 static int
-get_token(FILE * fp, char *token, int maxtlen)
+get_token(FILE *const fp, char *const token, const int maxtlen)
 {
-    register int    ch, ch_next;
-    register char  *cp = token;
-    register int    hash = 0;
-    register struct tok *tp;
-    int             too_long = 0;
+    int             ch, ch_next;
+    char           *cp;
+    int             hash;
+    struct tok     *tp;
+    int             too_long;
     enum { bdigits, xdigits, other } seenSymbols;
 
+fetch_next_token:
+    cp = token;
+    hash = 0;
+    too_long = 0;
     /*
      * skip all white space 
      */
@@ -4802,7 +4806,7 @@ get_token(FILE * fp, char *token, int maxtlen)
                 return ENDOFFILE;
             if (ch_next == '\n')
                 mibLine++;
-            return get_token(fp, token, maxtlen);
+            goto fetch_next_token;
         }
         ungetc(ch_next, fp);
 	/* fallthrough */
