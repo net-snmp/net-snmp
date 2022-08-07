@@ -390,15 +390,18 @@ ECHOSENDSIGKILL() {
     fi
 }
 
-# Wait until the shell statement "$@" evaluates to false.
-WAITFORNOTCOND() {
+# Wait until the shell statement "$@" evaluates to true.
+WAITFORCOND() {
     CAN_USLEEP
     if [ $SNMP_CAN_USLEEP = 1 ] ; then
         sleeptime=`expr $SNMP_SLEEP '*' 50`
     else 
         sleeptime=`expr $SNMP_SLEEP '*' 5`
     fi
-    while [ $sleeptime -gt 0 ] && eval "$@"; do
+    while [ $sleeptime -gt 0 ]; do
+	if eval "$*"; then
+	    break
+	fi
         if [ $SNMP_CAN_USLEEP = 1 ]; then
             sleep .1
         else
@@ -406,11 +409,6 @@ WAITFORNOTCOND() {
         fi
         sleeptime=`expr $sleeptime - 1`
     done
-}
-
-# Wait until the shell statement "$@" evaluates to true.
-WAITFORCOND() {
-    WAITFORNOTCOND if "$@;" then false ";" else true ";" fi
 }
 
 WAITFORAGENT() {
@@ -614,7 +612,7 @@ STOPPROG() {
 	echo "$COMMAND ($1)" >> $SNMP_TMPDIR/invoked
 	VERBOSE_OUT 0 "$COMMAND ($1)"
         $COMMAND >/dev/null 2>&1
-        WAITFORNOTCOND "ISRUNNING $pid"
+        WAITFORCOND "! ISRUNNING $pid"
     fi
 }
 
