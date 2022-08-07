@@ -13,25 +13,25 @@ ssl_include_path() {
 }
 
 rpm_version() {
-    if type -p rpm >&/dev/null; then
+    if type -p rpm >/dev/null 2>&1; then
 	rpm -q --qf '%{version}\n' "$1" 2>/dev/null | grep -v 'not installed'
     fi
 }
 
 dpkg_version() {
-    if type -p dpkg-query >&/dev/null; then
+    if type -p dpkg-query >/dev/null 2>&1; then
 	dpkg-query --show -f '${Version}\n' "$1" 2>/dev/null | grep -v '^$'
     fi
 }
 
 pacman_version() {
-    if type -p pacman >&/dev/null; then
+    if type -p pacman >/dev/null 2>&1; then
 	pacman -Q "$1" 2>/dev/null | sed -n 's/^[^[:blank:]]*[[:blank:]]*//p'
     fi
 }
 
 apk_version() {
-    if type -p apk >&/dev/null; then
+    if type -p apk >/dev/null 2>&1; then
 	apk info -d "$1" | sed -n "s/^$1-\(.*\)-r[0-9]* description:/\1/p"
     fi
 }

@@ -1,6 +1,6 @@
-#!/bin/bash -eu
+#!/bin/sh -eu
 
-# Skip building the fuzz tests on OS/X and MinGW.
+# Only build the fuzz tests on Linux systems.
 [ "$(uname)" = Linux ] || exit 0
 
 scriptdir=$(cd "$(dirname "$0")" && pwd)
@@ -16,7 +16,7 @@ if [ -z "${LIB_FUZZING_ENGINE+x}" ]; then
     OUT=$WORK
     LIB_FUZZING_ENGINE="-fsanitize=fuzzer"
     if ! $CC $CFLAGS $LIB_FUZZING_ENGINE -c -xc /dev/null -o /dev/null \
-	 >&/dev/null; then
+	 >/dev/null 2>&1; then
 	echo "Skipping compilation of fuzz tests"
 	exit 0
     fi
@@ -26,8 +26,8 @@ else
   # ASAN will report leaks instantly and exit the fuzzing process.
   # The goal is to prioritise more important bugs for now.
   for fuzzer in transport mib agent_e2e api; do
-    echo "[libfuzzer]" > $OUT/snmp_${fuzzer}_fuzzer.options
-    echo "detect_leaks=0" >> $OUT/snmp_${fuzzer}_fuzzer.options
+    echo "[libfuzzer]" > "$OUT/snmp_${fuzzer}_fuzzer.options"
+    echo "detect_leaks=0" >> "$OUT/snmp_${fuzzer}_fuzzer.options"
   done
 fi
 
@@ -35,4 +35,4 @@ fi
 export CC CXX CFLAGS CXXFLAGS SRC WORK OUT LIB_FUZZING_ENGINE
 
 cd "$(dirname "$(dirname "${scriptdir}")")"
-$scriptdir/build-fuzz-tests.sh
+"$scriptdir/build-fuzz-tests.sh"
