@@ -140,7 +140,7 @@ VERIFY() {	# <path_to_file(s)>
 		missingfiles=true
 	done
 
-	[ "$missingfiles" = true ] && exit 1000
+	[ "$missingfiles" = true ] && exit 255
 }
 
 NEWOUTPUTFILE() {
@@ -157,7 +157,7 @@ STARTTEST() {
 		return
 	}
 	echo "FAILED: Output file already exists: \"$junkoutputfile\"."
-	exit 1000
+	exit 255
 }
 
 
