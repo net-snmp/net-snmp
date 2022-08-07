@@ -161,6 +161,7 @@ _register_extend( oid *base, size_t len )
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
     rc = netsnmp_register_table_data( reg, dinfo, tinfo );
     if (rc != SNMPERR_SUCCESS) {
+        netsnmp_table_registration_info_free(tinfo);
         goto bail;
     }
     netsnmp_handler_owns_table_info(reg->handler->next);
@@ -181,8 +182,10 @@ _register_extend( oid *base, size_t len )
                 "nsExtendOut1Table", handle_nsExtendOutput1Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
     rc = netsnmp_register_table_data( reg, dinfo, tinfo );
-    if (rc != SNMPERR_SUCCESS)
+    if (rc != SNMPERR_SUCCESS) {
+        netsnmp_table_registration_info_free(tinfo);
         goto bail;
+    }
     netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[1] = reg;
 
@@ -203,8 +206,10 @@ _register_extend( oid *base, size_t len )
                 "nsExtendOut2Table", handle_nsExtendOutput2Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
     rc = netsnmp_register_table( reg, tinfo );
-    if (rc != SNMPERR_SUCCESS)
+    if (rc != SNMPERR_SUCCESS) {
+        netsnmp_table_registration_info_free(tinfo);
         goto bail;
+    }
     netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[2] = reg;
 
@@ -234,8 +239,15 @@ bail:
         netsnmp_unregister_handler(eptr->reg[1]);
     if (eptr->reg[0])
         netsnmp_unregister_handler(eptr->reg[0]);
+    netsnmp_table_data_delete_table(eptr->dinfo);
+    free(eptr->root_oid);
+    ereg_head = eptr->next;
+    SNMP_FREE(eptr);
     return NULL;
 }
+
+void
+_free_extension( netsnmp_extend *extension, extend_registration_block *ereg );
 
 static void
 _unregister_extend(extend_registration_block *eptr)
@@ -253,6 +265,8 @@ _unregister_extend(extend_registration_block *eptr)
 	ereg_head = eptr->next;
     }
 
+    while(eptr->ehead)
+        _free_extension(eptr->ehead, eptr);
     netsnmp_table_data_delete_table(eptr->dinfo);
     free(eptr->root_oid);
     free(eptr);
@@ -270,6 +284,10 @@ extend_clear_callback(int majorID, int minorID,
         netsnmp_unregister_handler( eptr->reg[1] );
         netsnmp_unregister_handler( eptr->reg[2] );
         netsnmp_unregister_handler( eptr->reg[3] );
+        while(eptr->ehead)
+            _free_extension(eptr->ehead, eptr);
+        netsnmp_table_data_delete_table(eptr->dinfo);
+        free(eptr->root_oid);
         SNMP_FREE(eptr);
     }
     ereg_head = NULL;
@@ -348,8 +366,8 @@ extend_load_cache(netsnmp_cache *cache, void *magic)
         ret = run_exec_command(  cmd_buf, extension->input, out_buf, &out_len);
     DEBUGMSG(( "nsExtendTable:cache", ": %s : %d\n", cmd_buf, ret));
     if (ret >= 0) {
-        if (out_buf[   out_len-1 ] == '\n')
-            out_buf[ --out_len   ] =  '\0';	/* Stomp on trailing newline */
+        if (out_len > 0 && out_buf[ out_len-1 ] == '\n')
+            out_buf[ --out_len ] = '\0';        /* Stomp on trailing newline */
         extension->output   = strdup( out_buf );
         extension->out_len  = out_len;
         /*
@@ -433,8 +451,8 @@ _free_extension( netsnmp_extend *extension, extend_registration_block *ereg )
         netsnmp_table_data_remove_and_delete_row( ereg->dinfo, extension->row);
     }
 
+    netsnmp_cache_free( extension->cache );
     SNMP_FREE( extension->token );
-    SNMP_FREE( extension->cache );
     SNMP_FREE( extension->command );
     SNMP_FREE( extension->args  );
     SNMP_FREE( extension->input );
@@ -464,8 +482,8 @@ _new_extension( char *exec_name, int exec_flags, extend_registration_block *ereg
 
     row = netsnmp_create_table_data_row();
     if (!row || !extension->cache) {
-        _free_extension( extension, ereg );
-        SNMP_FREE( row );
+        _free_extension( extension, NULL );
+        netsnmp_table_data_delete_row( row );
         return NULL;
     }
     row->data = (void *)extension;
@@ -473,9 +491,8 @@ _new_extension( char *exec_name, int exec_flags, extend_registration_block *ereg
     netsnmp_table_row_add_index( row, ASN_OCTET_STR,
                                  exec_name, strlen(exec_name));
     if ( netsnmp_table_data_add_row( dinfo, row) != SNMPERR_SUCCESS ) {
-        /* _free_extension( extension, ereg ); */
-        SNMP_FREE( extension );  /* Probably not sufficient */
-        SNMP_FREE( row );
+        _free_extension( extension, NULL );
+        netsnmp_table_data_delete_row( row );
         return NULL;
     }
 

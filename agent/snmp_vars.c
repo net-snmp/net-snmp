@@ -411,7 +411,13 @@ add_to_init_list(char *module_list)
     cp = strtok_r(cp, ", :", &st);
     while (cp) {
         newitem = (struct module_init_list *) calloc(1, sizeof(*initlist));
+        if (newitem == NULL)
+            return;
         newitem->module_name = strdup(cp);
+        if (newitem->module_name == NULL) {
+            free(newitem);
+            return;
+        }
         newitem->next = *list;
         *list = newitem;
         cp = strtok_r(NULL, ", :", &st);

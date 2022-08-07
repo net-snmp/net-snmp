@@ -710,6 +710,8 @@ netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
         const char *cp;
         if ((cp = strchr(str, ':')) != NULL) {
             char* mystring = (char*)malloc(cp + 1 - str);
+            if (mystring == NULL)
+                return NULL;
             memcpy(mystring, str, cp - str);
             mystring[cp - str] = '\0';
             addr = cp + 1;
@@ -742,9 +744,15 @@ netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
                 const char *cp = default_domain;
                 char *ptr = NULL;
                 tokenized_domain = strdup(default_domain);
+                if (!tokenized_domain)
+                    return NULL;
 
                 while (*++cp) if (*cp == ',') commas++;
                 lspec = calloc(commas+2, sizeof(char *));
+                if (!lspec) {
+                    free(tokenized_domain);
+                    return NULL;
+                }
                 commas = 1;
                 lspec[0] = strtok_r(tokenized_domain, ",", &ptr);
                 while ((lspec[commas++] = strtok_r(NULL, ",", &ptr)))
@@ -980,8 +988,16 @@ netsnmp_transport_create_config(const char *key, const char *value)
 {
     netsnmp_transport_config *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_transport_config);
+    if (!entry)
+        return NULL;
     entry->key = strdup(key);
     entry->value = strdup(value);
+    if (!entry->key || !entry->value) {
+        free(entry->key);
+        free(entry->value);
+        SNMP_FREE(entry);
+        return NULL;
+    }
     return entry;
 }
 

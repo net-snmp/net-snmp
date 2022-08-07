@@ -203,6 +203,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                 free(ebuf);
                 return (-1);
             }
+            free(session->securityEngineID);
             session->securityEngineID = ebuf;
             session->securityEngineIDLen = eout_len;
             break;
@@ -227,6 +228,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                 free(ebuf);
                 return (-1);
             }
+            free(session->contextEngineID);
             session->contextEngineID = ebuf;
             session->contextEngineIDLen = eout_len;
             break;
@@ -270,6 +272,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
 
             auth_proto = sc_get_auth_oid(auth_type,
                                          &session->securityAuthProtoLen);
+            free(session->securityAuthProto);
             session->securityAuthProto = snmp_duplicate_objid(auth_proto,
                                              session->securityAuthProtoLen);
          } else {
@@ -292,11 +295,13 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             return (-1);
         }
         priv_proto = sc_get_priv_oid(priv_type, &session->securityPrivProtoLen);
+        free(session->securityPrivProto);
         session->securityPrivProto = snmp_duplicate_objid(priv_proto,
                                          session->securityPrivProtoLen);
         break;
     }
     case 'A':
+        free(*Apsz);
         *Apsz = strdup(optarg);
         if (NULL == *Apsz) {
             fprintf(stderr, "malloc failure processing -%c flag.\n",
@@ -308,6 +313,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         break;
 
     case 'X':
+        free(*Xpsz);
         *Xpsz = strdup(optarg);
         if (NULL == *Xpsz) {
             fprintf(stderr, "malloc failure processing -%c flag.\n",
@@ -355,6 +361,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             SNMP_FREE(kbuf);
             return (-1);
         }
+        free(session->securityAuthLocalKey);
         session->securityAuthLocalKey = kbuf;
         session->securityAuthLocalKeyLen = kout_len;
         break;
@@ -374,6 +381,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             SNMP_FREE(kbuf);
             return (-1);
         }
+        free(session->securityPrivLocalKey);
         session->securityPrivLocalKey = kbuf;
         session->securityPrivLocalKeyLen = kout_len;
         break;
@@ -954,6 +962,8 @@ get_enginetime_alarm(unsigned int regnum, void *clientargs)
 void
 init_snmpv3(const char *type)
 {
+    char *dup;
+
     netsnmp_get_monotonic_clock(&snmpv3starttime);
 
     if (!type)
@@ -972,8 +982,11 @@ init_snmpv3(const char *type)
     /*
      * we need to be called back later 
      */
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                           snmpv3_store, (void *) strdup(type));
+    dup = strdup(type);
+    if (dup != NULL &&
+        snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                               snmpv3_store, (void *) dup) != SNMPERR_SUCCESS)
+        free(dup);
 
     /*
      * initialize submodules 
@@ -1055,7 +1068,7 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
 
     c_engineID = snmpv3_generate_engineID(&engineIDLen);
 
-    if (engineIDLen == 0 || !c_engineID) {
+    if (!c_engineID || engineIDLen == 0) {
         /*
          * Somethine went wrong - help! 
          */

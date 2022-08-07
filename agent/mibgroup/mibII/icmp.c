@@ -749,11 +749,7 @@ bail:
 #ifdef USES_SNMP_DESIGNED_ICMPSTAT
     if (msg_stats_reginfo)
         netsnmp_handler_registration_free(msg_stats_reginfo);
-    if (table_reginfo)
-        netsnmp_handler_registration_free(table_reginfo);
 #endif
-    if (scalar_reginfo)
-        netsnmp_handler_registration_free(scalar_reginfo);
 }
 
 

@@ -168,6 +168,10 @@ netsnmp_container_register_with_compare(const char* name, netsnmp_factory *f,
         if (NULL == ct)
             return -1;
         ct->name = strdup(name);
+        if (ct->name == NULL) {
+            free(ct);
+            return -1;
+        }
         ct->factory = f;
         ct->compare = c;
         CONTAINER_INSERT(containers, ct);

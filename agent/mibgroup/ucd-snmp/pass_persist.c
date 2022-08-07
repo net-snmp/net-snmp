@@ -251,6 +251,7 @@ pass_persist_free_config(void)
         etmp2 = etmp;
         etmp = etmp->next;
         unregister_mib_priority(etmp2->miboid, etmp2->miblen, etmp2->mibpriority);
+        free(etmp2->command);
         free(etmp2);
     }
     if (persist_pipes) {

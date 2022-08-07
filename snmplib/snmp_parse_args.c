@@ -330,6 +330,7 @@ netsnmp_parse_args(int argc,
             break;
 
         case 's':
+            free(session->localname);
             session->localname = strdup(optarg);
             break;
 
@@ -370,6 +371,10 @@ netsnmp_parse_args(int argc,
             
             /* ensure we have a proper argument */
             tmpopt = strdup(optarg);
+            if (!tmpopt) {
+                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
+                goto out;
+            }
             tmpcp = strchr(tmpopt, '=');
             if (!tmpcp) {
                 fprintf(stderr, "-T expects a NAME=VALUE pair.\n");
@@ -436,6 +441,7 @@ netsnmp_parse_args(int argc,
                     goto out;
 		}
 	    } else {
+                SNMP_FREE(Cpsz);
 		Cpsz = strdup(optarg);
 	    }
             break;

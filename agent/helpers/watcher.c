@@ -620,6 +620,7 @@ register_scalar_watcher(const char* name,
         if (whandler) {
             whandler->myvoid = watchinfo;
             netsnmp_owns_watcher_info(whandler);
+            watchinfo = NULL;
             reginfo =
                 netsnmp_create_handler_registration(name, subhandler,
                                                     reg_oid, reg_oid_len,

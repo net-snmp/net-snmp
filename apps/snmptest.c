@@ -282,6 +282,14 @@ main(int argc, char *argv[])
     /* NOTREACHED */
 
 out:
+    free(session.community);
+    free(session.securityPrivLocalKey);
+    free(session.securityAuthLocalKey);
+    free(session.securityPrivProto);
+    free(session.securityAuthProto);
+    free(session.securityEngineID);
+    free(session.contextEngineID);
+    free(session.localname);
     SOCK_CLEANUP;
     return exit_code;
 }

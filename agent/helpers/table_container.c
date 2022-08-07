@@ -310,7 +310,7 @@ netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
                                      _container_table_handler);
     if((NULL == tad) || (NULL == handler)) {
         if(tad) free(tad); /* SNMP_FREE wasted on locals */
-        if(handler) free(handler); /* SNMP_FREE wasted on locals */
+        netsnmp_handler_free(handler);
         snmp_log(LOG_ERR,
                  "malloc failure in netsnmp_container_table_register\n");
         return NULL;

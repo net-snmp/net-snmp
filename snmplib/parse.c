@@ -730,8 +730,15 @@ netsnmp_init_mib_internals(void)
     memset(tbuckets, 0, sizeof(tbuckets));
     tc_alloc = TC_INCR;
     tclist = calloc(tc_alloc, sizeof(struct tc));
+    if (tclist == NULL)
+        tc_alloc = 0;
     build_translation_table();
     init_tree_roots();          /* Set up initial roots */
+    if (tree_head == NULL) {
+        free(tclist);
+        tclist = NULL;
+        tc_alloc = 0;
+    }
     /*
      * Relies on 'add_mibdir' having set up the modules 
      */
@@ -1170,6 +1177,10 @@ init_tree_roots(void)
     if (tp == NULL)
         return;
     tp->label = strdup("joint-iso-ccitt");
+    if (tp->label == NULL) {
+        free(tp);
+        return;
+    }
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
@@ -1182,6 +1193,7 @@ init_tree_roots(void)
     lasttp = tp;
     root_imports[0].label = strdup(tp->label);
     root_imports[0].modid = base_modid;
+    tree_head = tp;
 
     /*
      * build root node 
@@ -1191,6 +1203,10 @@ init_tree_roots(void)
         return;
     tp->next_peer = lasttp;
     tp->label = strdup("ccitt");
+    if (tp->label == NULL) {
+        free(tp);
+        return;
+    }
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
@@ -1203,6 +1219,7 @@ init_tree_roots(void)
     lasttp = tp;
     root_imports[1].label = strdup(tp->label);
     root_imports[1].modid = base_modid;
+    tree_head = tp;
 
     /*
      * build root node 
@@ -1212,6 +1229,10 @@ init_tree_roots(void)
         return;
     tp->next_peer = lasttp;
     tp->label = strdup("iso");
+    if (tp->label == NULL) {
+        free(tp);
+        return;
+    }
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
@@ -1295,6 +1316,8 @@ compute_match(const char *search_base, const char *key)
     char           *st;
 
 
+    if (newkey == NULL)
+        return MAX_BAD;
     entry = strtok_r(newkey, "*", &st);
     position = search_base;
     while (entry) {
@@ -1550,7 +1573,7 @@ do_subtree(struct tree *root, struct node **nodes)
                  */
                 int_p = malloc((tp->number_modules + 1) * sizeof(int));
                 if (int_p == NULL)
-                    return;
+                    continue;
                 memcpy(int_p, tp->module_list,
                        tp->number_modules * sizeof(int));
                 int_p[tp->number_modules] = np->modid;
@@ -1586,7 +1609,7 @@ do_subtree(struct tree *root, struct node **nodes)
 
         tp = (struct tree *) calloc(1, sizeof(struct tree));
         if (tp == NULL)
-            return;
+            continue;
         tp->parent = xxroot;
         tp->modid = np->modid;
         tp->number_modules = 1;
@@ -2015,6 +2038,8 @@ parse_objectid(FILE * fp, char *name)
             oldnp = np;
 
             np->parent = strdup(op->label);
+            if (np->parent == NULL)
+                goto err;
             if (count == (length - 2)) {
                 /*
                  * The name for this node is the label for this entry 
@@ -2183,26 +2208,35 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
              */
             *epp =
                 (struct enum_list *) calloc(1, sizeof(struct enum_list));
-            if (*epp == NULL)
+            if (*epp == NULL) {
+                free_enums(&ep);
                 return (NULL);
+            }
             /*
              * a reasonable approximation for the length 
              */
             (*epp)->label = strdup(token);
+            if ((*epp)->label == NULL) {
+                free_enums(&ep);
+                return (NULL);
+            }
             type = get_token(fp, token, MAXTOKEN);
             if (type != LEFTPAREN) {
                 print_error("Expected \"(\"", token, type);
+                free_enums(&ep);
                 return NULL;
             }
             type = get_token(fp, token, MAXTOKEN);
             if (type != NUMBER) {
                 print_error("Expected integer", token, type);
+                free_enums(&ep);
                 return NULL;
             }
             (*epp)->value = strtol(token, NULL, 10);
             type = get_token(fp, token, MAXTOKEN);
             if (type != RIGHTPAREN) {
                 print_error("Expected \")\"", token, type);
+                free_enums(&ep);
                 return NULL;
             }
             epp = &(*epp)->next;
@@ -2210,6 +2244,7 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
     }
     if (type == ENDOFFILE) {
         print_error("Expected \"}\"", token, type);
+        free_enums(&ep);
         return NULL;
     }
     *retp = ep;
@@ -2430,7 +2465,10 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
         }
 
         if (i == tc_alloc) {
-            tclist = realloc(tclist, (tc_alloc + TC_INCR)*sizeof(struct tc));
+            void *tmp = realloc(tclist, (tc_alloc + TC_INCR)*sizeof(struct tc));
+            if (tmp == NULL)
+                goto err;
+            tclist = tmp;
             memset(tclist+tc_alloc, 0, TC_INCR*sizeof(struct tc));
             tc_alloc += TC_INCR;
         }
@@ -2442,6 +2480,8 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
         tcp = &tclist[i];
         tcp->modid = current_module;
         tcp->descriptor = strdup(name);
+        if (tcp->descriptor == NULL)
+            goto err;
         tcp->hint = hint;
         tcp->description = descr;
         tcp->type = type;
@@ -2792,6 +2832,11 @@ parse_objectgroup(FILE * fp, char *name, int what, struct objgroup **ol)
             }
             o->line = mibLine;
             o->name = strdup(token);
+            if (!o->name) {
+                free(o);
+                print_error("Resource failure", token, type);
+                goto skip;
+            }
             o->next = *ol;
             *ol = o;
             type = get_token(fp, token, MAXTOKEN);
@@ -3108,6 +3153,10 @@ compliance_lookup(const char *name, int modid)
             return 0;
         op->next = objgroups;
         op->name = strdup(name);
+        if (!op->name) {
+            free(op);
+            return 0;
+        }
         op->line = mibLine;
         objgroups = op;
         return 1;
@@ -3647,6 +3696,8 @@ parse_imports(FILE * fp)
     int             i = 0, old_i;       /* index of first import from each module */
 
     import_list = malloc(MAX_IMPORTS * sizeof(*import_list));
+    if (import_list == NULL)
+        return;
 
     type = get_token(fp, token, MAXTOKEN);
 
@@ -3663,6 +3714,8 @@ parse_imports(FILE * fp)
                 goto out;
             }
             import_list[import_count++].label = strdup(token);
+            if (import_list[import_count-1].label == NULL)
+                goto out;
         } else if (type == FROM) {
             type = get_token(fp, token, MAXTOKEN);
             if (import_count == i) {    /* All imports are handled internally */
@@ -3726,6 +3779,7 @@ parse_imports(FILE * fp)
                             mp->imports[i].label, mp->imports[i].modid));
             }
             mp->no_imports = import_count;
+            import_count = 0;
             goto out;
         }
     }
@@ -3736,6 +3790,8 @@ parse_imports(FILE * fp)
     print_module_not_found(module_name(current_module, modbuf));
 
 out:
+    while (import_count > 0)
+        free(import_list[--import_count].label);
     free(import_list);
     return;
 }
@@ -4273,6 +4329,12 @@ new_module(const char *name, const char *file)
         return;
     mp->name = strdup(name);
     mp->file = strdup(file);
+    if (mp->name == NULL || mp->file == NULL) {
+        free(mp->name);
+        free(mp->file);
+        free(mp);
+        return;
+    }
     mp->imports = NULL;
     mp->no_imports = -1;        /* Not yet loaded */
     mp->modid = max_module;
@@ -4364,7 +4426,7 @@ parse(FILE * fp, struct node *root)
             if (state != IN_MIB) {
                 print_error("Error, END before start of MIB", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             } else {
                 struct module  *mp;
 #ifdef TEST
@@ -4452,7 +4514,7 @@ parse(FILE * fp, struct node *root)
             if (type == ENDOFFILE) {
                 print_error("Expected \"}\"", token, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             type = get_token(fp, token, MAXTOKEN);
         }
@@ -4462,7 +4524,7 @@ parse(FILE * fp, struct node *root)
             if (state != BETWEEN_MIBS) {
                 print_error("Error, nested MIBS", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             state = IN_MIB;
             current_module = which_module(name);
@@ -4487,7 +4549,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT-TYPE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case OBJGROUP:
@@ -4495,7 +4557,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT-GROUP", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case NOTIFGROUP:
@@ -4503,7 +4565,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of NOTIFICATION-GROUP", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case TRAPTYPE:
@@ -4511,7 +4573,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of TRAP-TYPE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case NOTIFTYPE:
@@ -4519,7 +4581,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of NOTIFICATION-TYPE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case COMPLIANCE:
@@ -4527,7 +4589,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of MODULE-COMPLIANCE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case AGENTCAP:
@@ -4535,7 +4597,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of AGENT-CAPABILITIES", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case MACRO:
@@ -4555,7 +4617,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of MODULE-IDENTITY", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case OBJIDENTITY:
@@ -4563,7 +4625,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT-IDENTITY", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case OBJECT:
@@ -4571,19 +4633,19 @@ parse(FILE * fp, struct node *root)
             if (type != IDENTIFIER) {
                 print_error("Expected IDENTIFIER", token, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             type = get_token(fp, token, MAXTOKEN);
             if (type != EQUALS) {
                 print_error("Expected \"::=\"", token, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             nnp = parse_objectid(fp, name);
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT IDENTIFIER", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto err;
             }
             break;
         case EQUALS:
@@ -4595,7 +4657,7 @@ parse(FILE * fp, struct node *root)
         default:
             print_error("Bad operator", token, type);
             gMibError = MODULE_SYNTAX_ERROR;
-            return NULL;
+            goto err;
         }
         if (nnp) {
             if (np)
@@ -4610,6 +4672,23 @@ parse(FILE * fp, struct node *root)
     }
     DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));
     return root;
+
+err:
+    while (root) {
+        np = root;
+        root = np->next;
+        free_node(np);
+    }
+    scan_objlist(NULL, module_head, objgroups, "Cleanup");
+    scan_objlist(NULL, module_head, objects, "Cleanup");
+    scan_objlist(NULL, module_head, notifs, "Cleanup");
+    scan_objlist(NULL, module_head, oldgroups, "Cleanup");
+    scan_objlist(NULL, module_head, oldobjects, "Cleanup");
+    scan_objlist(NULL, module_head, oldnotifs, "Cleanup");
+    objgroups = NULL;
+    objects = NULL;
+    notifs = NULL;
+    return NULL;
 }
 
 /*

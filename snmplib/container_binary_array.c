@@ -482,7 +482,8 @@ netsnmp_binary_array_insert_before(netsnmp_container *c, size_t index,
      /*
       * check if we need to resize the array
       */
-    _ba_resize_check(t);
+    if (_ba_resize_check(t) < 0)
+        return -1;
 
     netsnmp_assert(t->count < t->max_size);
 
@@ -801,6 +802,10 @@ netsnmp_container_get_binary_array(void)
     }
 
     c->container_data = netsnmp_binary_array_initialize();
+    if (c->container_data == NULL) {
+        SNMP_FREE(c);
+        return NULL;
+    }
 
     /*
      * NOTE: CHANGES HERE MUST BE DUPLICATED IN duplicate AS WELL!!

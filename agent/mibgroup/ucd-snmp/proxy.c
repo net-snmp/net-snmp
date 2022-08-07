@@ -722,6 +722,10 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
         
 	break;
 
+    case NETSNMP_CALLBACK_OP_RESEND:
+        DEBUGMSGTL(("proxy", "resend... requests = %8p\n", requests));
+        return 1;
+
     default:
         DEBUGMSGTL(("proxy", "no response received: op = %d\n",
                     operation));

@@ -26,6 +26,13 @@ netsnmp_feature_require(interface_ioctl_flags_set);
 #ifndef HAVE_LIBNL3
 #error libnl-3 is required. Please install the libnl-3 and libnl-route-3 development packages and remove --without-nl from the configure options if necessary.
 #endif
+/*
+ * Avoid conflict between old netlink headers which try to include
+ * an old <linux/if.h> which does conflict with <net/if.h>.
+ * Just pretend we did already include <linux/if.H> since <net/if.h>
+ * will be included anyway, and works too.
+ */
+#define _LINUX_IF_H
 #include <netlink/cache.h>
 #include <netlink/netlink.h>
 #include <netlink/route/addr.h>

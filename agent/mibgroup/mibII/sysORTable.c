@@ -232,15 +232,19 @@ init_sysORTable(void)
 	    &sysORLastChange_winfo,
             &sysORLastChange, sizeof(u_long),
             ASN_TIMETICKS, WATCHER_FIXED_SIZE);
-    netsnmp_register_watched_scalar(sysORLastChange_reg,
-				    &sysORLastChange_winfo);
+    if (netsnmp_register_watched_scalar(sysORLastChange_reg,
+					&sysORLastChange_winfo)
+        != MIB_REGISTERED_OK)
+        sysORLastChange_reg = NULL;
 
     sysORTable_reg =
         netsnmp_create_handler_registration(
             "mibII/sysORTable", sysORTable_handler,
             sysORTable_oid, OID_LENGTH(sysORTable_oid), HANDLER_CAN_RONLY);
-    netsnmp_container_table_register(sysORTable_reg, sysORTable_table_info,
-                                     table, TABLE_CONTAINER_KEY_NETSNMP_INDEX);
+    if (netsnmp_container_table_register(sysORTable_reg, sysORTable_table_info,
+                                         table, TABLE_CONTAINER_KEY_NETSNMP_INDEX)
+        != MIB_REGISTERED_OK)
+        sysORTable_reg = NULL;
 
     sysORLastChange = netsnmp_get_agent_uptime();
 

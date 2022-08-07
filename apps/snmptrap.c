@@ -120,7 +120,7 @@ int
 main(int argc, char *argv[])
 {
     netsnmp_session session, *ss;
-    netsnmp_pdu    *pdu, *response;
+    netsnmp_pdu    *pdu = NULL, *response;
     oid             name[MAX_OID_LEN];
     size_t          name_length;
     int             arg;
@@ -379,8 +379,19 @@ main(int argc, char *argv[])
 close_session:
     snmp_close(ss);
     snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
+    pdu = NULL;
 
 out:
+    if (pdu != NULL)
+        snmp_free_pdu(pdu);
+    free(session.community);
+    free(session.securityPrivLocalKey);
+    free(session.securityAuthLocalKey);
+    free(session.securityPrivProto);
+    free(session.securityAuthProto);
+    free(session.securityEngineID);
+    free(session.contextEngineID);
+    free(session.localname);
     SOCK_CLEANUP;
     return exitval;
 }

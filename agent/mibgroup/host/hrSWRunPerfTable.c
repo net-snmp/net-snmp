@@ -127,8 +127,10 @@ initialize_table_hrSWRunPerfTable(void)
     if (handler)
         netsnmp_handler_free(handler);
 
-    if (table_info)
+    if (table_info) {
         netsnmp_table_registration_info_free(table_info);
+        table_info = NULL;
+    }
 
     if (reg) 
         netsnmp_handler_registration_free(reg);
