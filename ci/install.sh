@@ -56,7 +56,7 @@ esac
 case "$MODE" in
     wolfssl)
 	if [ -n "$SUDO_UID" ] && [ -n "$SUDO_GID" ]; then
-	    if type setpriv >&/dev/null; then
+	    if type setpriv >/dev/null 2>&1; then
 		setpriv --reuid="$SUDO_UID" --regid="$SUDO_GID" --init-groups \
 			--inh-caps=-CHOWN,-SETUID,-SETGID \
 			"${scriptdir}/wolfssl.sh"
