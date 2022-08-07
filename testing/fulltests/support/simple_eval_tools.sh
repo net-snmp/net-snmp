@@ -431,7 +431,7 @@ WAITFORTRAPD() {
 
 # Wait until pattern "$1" appears in file "$2".
 WAITFOR() {
-    WAITFORCOND grep "$1" "$2" ">/dev/null" "2>&1"
+    WAITFORCOND "grep $1 $2 >/dev/null 2>&1"
 }
 
 GOOD() {
