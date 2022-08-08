@@ -1245,12 +1245,20 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
     char            fmt[10] = "%l@", tmp[256];
     int             shift = 0, len, negative = 0;
 
+    if (!strchr("bdoux", decimaltype)) {
+        snmp_log(LOG_ERR, "Invalid decimal type '%c'\n", decimaltype);
+        return 0;
+    }
+
     if (hint[0] == 'd') {
         /*
          * We might *actually* want a 'u' here.  
          */
-        if (hint[1] == '-')
+        if (hint[1] == '-') {
             shift = atoi(hint + 2);
+            if (shift < 0)
+                shift = 0;
+        }
         fmt[2] = decimaltype;
         if (val < 0) {
             negative = 1;
@@ -1284,7 +1292,7 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
                 len--;
             }
             tmp[len] = '.';
-        } else {
+        } else if (shift + 1 < sizeof(tmp)) {
             tmp[shift + 1] = 0;
             while (shift) {
                 if (len-- > 0) {
