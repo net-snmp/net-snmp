@@ -5505,10 +5505,10 @@ snmp_free_pdu(netsnmp_pdu *pdu)
 
     free_securityStateRef(pdu);
 
-    if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
-        sptr->pdu_free != NULL) {
-        (*sptr->pdu_free) (pdu);
-    }
+    sptr = find_sec_mod(pdu->securityModel);
+    if (sptr && sptr->pdu_free)
+        (*sptr->pdu_free)(pdu);
+
     snmp_free_varbind(pdu->variables);
     free(pdu->enterprise);
     free(pdu->community);
