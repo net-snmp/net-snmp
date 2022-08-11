@@ -111,6 +111,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
             pdu->securityNameLen = strlen(pdu->securityName);
         }
 
+        snmp_free_pdu(pdu);
+        pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
+
         sess.version = af_get_int(&data2, &size2);
         if (parse_data != NULL) {
             size_t parse_data_len = strlen(parse_data);
