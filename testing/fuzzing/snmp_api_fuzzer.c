@@ -106,7 +106,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         }
         sess.securityLevel = af_get_int(&data2, &size2);
 
-        pdu->securityName = af_gb_get_null_terminated(&data2, &size2);
+        pdu->securityName = af_get_null_terminated(&data2, &size2);
         if (pdu->securityName) {
             pdu->securityNameLen = strlen(pdu->securityName);
         }
