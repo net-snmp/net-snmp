@@ -1292,7 +1292,7 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
                 len--;
             }
             tmp[len] = '.';
-        } else if (shift + 1 < sizeof(tmp)) {
+        } else if (shift < sizeof(tmp) - 1) {
             tmp[shift + 1] = 0;
             while (shift) {
                 if (len-- > 0) {
