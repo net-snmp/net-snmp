@@ -7603,6 +7603,9 @@ snmp_add_var(netsnmp_pdu *pdu,
             }
 
             ix = ltmp / 8;
+            if (ix >= INT_MAX) {
+                goto value_error;
+            }
             if (ix >= (int) tint) {
                 tint = ix + 1;
             }
