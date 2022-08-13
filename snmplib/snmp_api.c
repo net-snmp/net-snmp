@@ -7583,6 +7583,11 @@ snmp_add_var(netsnmp_pdu *pdu,
             int             ix, bit;
 
             ltmp = strtoul(cp, &ecp, 0);
+            if (ltmp < 0) {
+                result = SNMPERR_VALUE;
+                snmp_set_detail(cp);
+                goto err;
+            }
             if (*ecp != 0) {
 #ifndef NETSNMP_DISABLE_MIB_LOADING
                 for (ep = tp ? tp->enums : NULL; ep != NULL; ep = ep->next) {
