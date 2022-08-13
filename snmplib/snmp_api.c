@@ -7487,16 +7487,17 @@ snmp_add_var(netsnmp_pdu *pdu,
             goto type_error;
         }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
-        if ((buf = (u_char *)malloc(sizeof(oid) * MAX_OID_LEN)) == NULL) {
+        buf = malloc(sizeof(oid) * MAX_OID_LEN);
+        if (buf == NULL) {
             result = SNMPERR_MALLOC;
+            break;
+        }
+        tint = MAX_OID_LEN;
+        if (snmp_parse_oid(value, (oid *) buf, &tint)) {
+            snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID,
+                                  buf, sizeof(oid) * tint);
         } else {
-            tint = MAX_OID_LEN;
-            if (snmp_parse_oid(value, (oid *) buf, &tint)) {
-                snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID,
-                                      buf, sizeof(oid) * tint);
-            } else {
-                result = snmp_errno;    /*MTCRITICAL_RESOURCE */
-            }
+            result = snmp_errno;    /*MTCRITICAL_RESOURCE */
         }
         break;
 
@@ -7559,12 +7560,11 @@ snmp_add_var(netsnmp_pdu *pdu,
         }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         tint = 0;
-        if ((buf = (u_char *) malloc(256)) == NULL) {
+        buf_len = 256;
+        buf = calloc(1, buf_len);
+        if (buf == NULL) {
             result = SNMPERR_MALLOC;
             break;
-        } else {
-            buf_len = 256;
-            memset(buf, 0, buf_len);
         }
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
