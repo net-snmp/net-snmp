@@ -7737,8 +7737,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             var_type = undef_msg;
         }
         snprintf(error_msg, sizeof(error_msg),
-               "Type of attribute is %s, not %s", var_type, value);
-        error_msg[ sizeof(error_msg)-1 ] = 0;
+                 "Type of attribute is %s, not %s", var_type, value);
         result = SNMPERR_VAR_TYPE;
         snmp_set_detail(error_msg);
         goto out;
