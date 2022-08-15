@@ -3463,14 +3463,12 @@ check_utc(const char *utc)
         return;
     }
     if (len == 11) {
-        len =
-            sscanf(utc, "%2d%2d%2d%2d%2dZ", &year, &month, &day, &hour,
-                   &minute);
+        len = sscanf(utc, "%2d%2d%2d%2d%2dZ", &year, &month, &day, &hour,
+                     &minute);
         year += 1900;
     } else if (len == 13)
-        len =
-            sscanf(utc, "%4d%2d%2d%2d%2dZ", &year, &month, &day, &hour,
-                   &minute);
+        len = sscanf(utc, "%4d%2d%2d%2d%2dZ", &year, &month, &day, &hour,
+                     &minute);
     else {
         print_error("Bad timestamp format (11 or 13 characters)",
                     utc, QUOTESTRING);
