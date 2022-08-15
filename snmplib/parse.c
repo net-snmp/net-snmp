@@ -5107,17 +5107,20 @@ parseQuoteString(FILE * fp, char *token, int maxtlen)
         if (ch == '\n') {
             mibLine++;
         } else if (ch == '"') {
+            netsnmp_assert(token - token_start < maxtlen);
             *token = '\0';
             if (too_long && netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 					   NETSNMP_DS_LIB_MIB_WARNINGS) > 1) {
                 /*
                  * show short form for brevity sake 
                  */
-                char            ch_save = *(token_start + 50);
-                *(token_start + 50) = '\0';
+                int             truncate_at = SNMP_MIN(50, maxtlen - 1);
+                char            ch_save = *(token_start + truncate_at);
+
+                *(token_start + truncate_at) = '\0';
                 print_error("Warning: string too long",
                             token_start, QUOTESTRING);
-                *(token_start + 50) = ch_save;
+                *(token_start + truncate_at) = ch_save;
             }
             return QUOTESTRING;
         }
