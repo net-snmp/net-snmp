@@ -552,12 +552,6 @@ get_set_cache(netsnmp_agent_session *asp)
 		    snmp_free_varbind(asp->pdu->variables);
 		asp->pdu->variables = ptr->saved_vars;
                 asp->vbcount = ptr->vbcount;
-	    } else {
-                /*
-                 * when would we not have saved variables? someone
-                 * let me know if they hit this condition. -- rstory
-                 */
-                netsnmp_assert(NULL != ptr->saved_vars);
             }
             asp->requests = ptr->requests;
 
