@@ -626,8 +626,8 @@ netsnmp_ssh_transport(const struct sockaddr_in *addr, int local)
         /* XXX: get data from the transport def for it's location */
         unaddr->sun_family = AF_UNIX;
         if (NULL == sockpath) {
-            sprintf(tmpsockpath, "%s/%s", get_persistent_directory(),
-                    DEFAULT_SOCK_NAME);
+            snprintf(tmpsockpath, sizeof(tmpsocketpath), "%s/%s",
+                     get_persistent_directory(), DEFAULT_SOCK_NAME);
             sockpath = tmpsockpath;
         }
 
