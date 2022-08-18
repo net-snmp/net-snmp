@@ -56,7 +56,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     char *input;
 
     input = strndup((const char *)data, size);
-    snmp_parse_oid((const char *)input, root, &rootlen);
+    if (root && input)
+        snmp_parse_oid((const char *)input, root, &rootlen);
     free(root);
     free(input);
     return 0; 

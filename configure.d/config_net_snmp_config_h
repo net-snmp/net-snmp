@@ -38,7 +38,11 @@ AH_BOTTOM([/* end of definitions added by configure on-the-fly */
 
 /* If you have openssl 0.9.7 or above, you likely have AES support. */
 #undef NETSNMP_USE_OPENSSL
-#if (defined(NETSNMP_USE_OPENSSL) && defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#if (defined(NETSNMP_USE_OPENSSL) &&            \
+     defined(HAVE_OPENSSL_AES_H) &&             \
+     defined(HAVE_AES_CFB128_ENCRYPT) &&        \
+     defined(HAVE_EVP_AES_128_CFB)) ||          \
+    defined(NETSNMP_USE_INTERNAL_CRYPTO)
 #define HAVE_AES 1
 #endif
 
@@ -260,8 +264,6 @@ AH_BOTTOM([/* end of definitions added by configure on-the-fly */
 
 /* The assigned enterprise number for sysObjectID. */
 #define NETSNMP_SYSTEM_MIB		1,3,6,1,4,1,8072,3,2,NETSNMP_OSTYPE
-#define NETSNMP_SYSTEM_DOT_MIB		1.3.6.1.4.1.8072.3.2.NETSNMP_OSTYPE
-#define NETSNMP_SYSTEM_DOT_MIB_LENGTH	10
 
 /* The assigned enterprise number for notifications. */
 #define NETSNMP_NOTIFICATION_MIB		1,3,6,1,4,1,8072,4
@@ -663,8 +665,6 @@ NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
 #define ENTERPRISE_DOT_MIB_LENGTH NETSNMP_ENTERPRISE_DOT_MIB_LENGTH
 
 #define SYSTEM_MIB		  NETSNMP_SYSTEM_MIB
-#define SYSTEM_DOT_MIB		  NETSNMP_SYSTEM_DOT_MIB
-#define SYSTEM_DOT_MIB_LENGTH	  NETSNMP_SYSTEM_DOT_MIB_LENGTH
 
 #define NOTIFICATION_MIB	    NETSNMP_NOTIFICATION_MIB	
 #define NOTIFICATION_DOT_MIB	    NETSNMP_NOTIFICATION_DOT_MIB

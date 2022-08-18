@@ -12,7 +12,7 @@
 #ifdef HAVE_AES
 #include <openssl/aes.h>
 #endif
-#endif /* HAVE_OPENSSL */
+#endif /* NETSNMP_USE_OPENSSL */
 
 #ifdef EVP_MAX_MD_SIZE
 #define MAX_HASH_LEN   EVP_MAX_MD_SIZE

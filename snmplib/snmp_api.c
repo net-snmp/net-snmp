@@ -514,7 +514,7 @@ void
 snmp_set_detail(const char *detail_string)
 {
     if (detail_string != NULL) {
-        strlcpy((char *) snmp_detail, detail_string, sizeof(snmp_detail));
+        strlcpy(snmp_detail, detail_string, sizeof(snmp_detail));
         snmp_detail_f = 1;
     }
 }
@@ -1935,7 +1935,7 @@ snmp_free_session(netsnmp_session * s)
          */
         netsnmp_callback_clear_client_arg(s, 0, 0);
 
-        free((char *) s);
+        free(s);
     }
 }
 
@@ -1983,10 +1983,10 @@ snmp_sess_close(struct session_list *slp)
                               orp->pdu, orp->cb_data);
             }
             snmp_free_pdu(orp->pdu);
-            free((char *) orp);
+            free(orp);
         }
 
-        free((char *) isp);
+        free(isp);
     }
 
     transport = slp->transport;
@@ -2020,7 +2020,7 @@ snmp_sess_close(struct session_list *slp)
     }
 
     snmp_free_session(sesp);
-    free((char *) slp);
+    free(slp);
     return 1;
 }
 
@@ -5478,7 +5478,7 @@ void
 snmp_free_var(netsnmp_variable_list * var)
 {
     snmp_free_var_internals(var);
-    free((char *) var);
+    free(var);
 }
 
 void
@@ -5505,10 +5505,10 @@ snmp_free_pdu(netsnmp_pdu *pdu)
 
     free_securityStateRef(pdu);
 
-    if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
-        sptr->pdu_free != NULL) {
-        (*sptr->pdu_free) (pdu);
-    }
+    sptr = find_sec_mod(pdu->securityModel);
+    if (sptr && sptr->pdu_free)
+        (*sptr->pdu_free)(pdu);
+
     snmp_free_varbind(pdu->variables);
     free(pdu->enterprise);
     free(pdu->community);
@@ -6796,7 +6796,7 @@ snmp_sess_timeout(struct session_list *slp)
             /*
              * frees rp's after the for loop goes on to the next_request 
              */
-            free((char *) freeme);
+            free(freeme);
             freeme = NULL;
         }
 
@@ -6841,7 +6841,7 @@ snmp_sess_timeout(struct session_list *slp)
     }
 
     if (freeme != NULL) {
-        free((char *) freeme);
+        free(freeme);
         freeme = NULL;
     }
 }
@@ -7271,7 +7271,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 {
     char           *st;
     const char     *cp;
-    char           *ecp, *vp;
+    char           *ecp, *vp = NULL;
     int             result = SNMPERR_SUCCESS;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     int             check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
@@ -7354,7 +7354,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         if (!*value)
-            goto fail;
+            goto value_error;
         ltmp = strtol(value, &ecp, 10);
         if (*ecp) {
 #ifndef NETSNMP_DISABLE_MIB_LOADING
@@ -7397,7 +7397,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
                                   &ltmp, sizeof(ltmp));
         else
-            goto fail;
+            goto value_error;
         break;
 
     case '3':
@@ -7413,7 +7413,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
                                   &ltmp, sizeof(ltmp));
         else
-            goto fail;
+            goto value_error;
         break;
 
     case 'c':
@@ -7429,7 +7429,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
                                   &ltmp, sizeof(ltmp));
         else
-            goto fail;
+            goto value_error;
         break;
 
     case 'C':
@@ -7444,7 +7444,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER64,
                                   &c64tmp, sizeof(c64tmp));
         else
-            goto fail;
+            goto value_error;
         break;
 
     case 't':
@@ -7460,7 +7460,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
                                   &ltmp, sizeof(long));
         else
-            goto fail;
+            goto value_error;
         break;
 
     case 'a':
@@ -7476,7 +7476,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
                                   &atmp, sizeof(atmp));
         else
-            goto fail;
+            goto value_error;
         break;
 
     case 'o':
@@ -7487,16 +7487,17 @@ snmp_add_var(netsnmp_pdu *pdu,
             goto type_error;
         }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
-        if ((buf = (u_char *)malloc(sizeof(oid) * MAX_OID_LEN)) == NULL) {
+        buf = malloc(sizeof(oid) * MAX_OID_LEN);
+        if (buf == NULL) {
             result = SNMPERR_MALLOC;
+            break;
+        }
+        tint = MAX_OID_LEN;
+        if (snmp_parse_oid(value, (oid *) buf, &tint)) {
+            snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID,
+                                  buf, sizeof(oid) * tint);
         } else {
-            tint = MAX_OID_LEN;
-            if (snmp_parse_oid(value, (oid *) buf, &tint)) {
-                snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID,
-                                      buf, sizeof(oid) * tint);
-            } else {
-                result = snmp_errno;    /*MTCRITICAL_RESOURCE */
-            }
+            result = snmp_errno;    /*MTCRITICAL_RESOURCE */
         }
         break;
 
@@ -7559,12 +7560,11 @@ snmp_add_var(netsnmp_pdu *pdu,
         }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         tint = 0;
-        if ((buf = (u_char *) malloc(256)) == NULL) {
+        buf_len = 256;
+        buf = calloc(1, buf_len);
+        if (buf == NULL) {
             result = SNMPERR_MALLOC;
             break;
-        } else {
-            buf_len = 256;
-            memset(buf, 0, buf_len);
         }
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
@@ -7576,14 +7576,18 @@ snmp_add_var(netsnmp_pdu *pdu,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 	vp = strdup(value);
-        if (!vp) {
-            SNMP_FREE(buf);
-            goto fail;
-        }
+        if (!vp)
+            goto value_error;
+
 	for (cp = strtok_r(vp, " ,\t", &st); cp; cp = strtok_r(NULL, " ,\t", &st)) {
             int             ix, bit;
 
             ltmp = strtoul(cp, &ecp, 0);
+            if (ltmp < 0) {
+                result = SNMPERR_VALUE;
+                snmp_set_detail(cp);
+                goto err;
+            }
             if (*ecp != 0) {
 #ifndef NETSNMP_DISABLE_MIB_LOADING
                 for (ep = tp ? tp->enums : NULL; ep != NULL; ep = ep->next) {
@@ -7597,15 +7601,16 @@ snmp_add_var(netsnmp_pdu *pdu,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
                     result = SNMPERR_RANGE;   /* ?? or SNMPERR_VALUE; */
                     snmp_set_detail(cp);
-                    SNMP_FREE(buf);
-		    SNMP_FREE(vp);
-                    goto out;
+                    goto err;
 #ifndef NETSNMP_DISABLE_MIB_LOADING
                 }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
             }
 
             ix = ltmp / 8;
+            if (ix >= INT_MAX) {
+                goto value_error;
+            }
             if (ix >= (int) tint) {
                 tint = ix + 1;
             }
@@ -7616,9 +7621,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             if (ix < 0 || ix >= buf_len) {
                result = SNMPERR_RANGE;
                snmp_set_detail(cp);
-               SNMP_FREE(buf);
-               SNMP_FREE(vp);
-               goto out;
+               goto err;
             }
             bit = 0x80 >> ltmp % 8;
             buf[ix] |= bit;
@@ -7635,7 +7638,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_U64,
                                   &c64tmp, sizeof(c64tmp));
         else
-            goto fail;
+            goto value_error;
         break;
 
     case 'I':
@@ -7643,7 +7646,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_I64,
                                   &c64tmp, sizeof(c64tmp));
         else
-            goto fail;
+            goto value_error;
         break;
 
     case 'F':
@@ -7651,7 +7654,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_FLOAT,
                                   &ftmp, sizeof(ftmp));
         else
-            goto fail;
+            goto value_error;
         break;
 
     case 'D':
@@ -7659,7 +7662,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_DOUBLE,
                                   &dtmp, sizeof(dtmp));
         else
-            goto fail;
+            goto value_error;
         break;
 #endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
@@ -7737,17 +7740,22 @@ snmp_add_var(netsnmp_pdu *pdu,
             var_type = undef_msg;
         }
         snprintf(error_msg, sizeof(error_msg),
-               "Type of attribute is %s, not %s", var_type, value);
-        error_msg[ sizeof(error_msg)-1 ] = 0;
+                 "Type of attribute is %s, not %s", var_type, value);
         result = SNMPERR_VAR_TYPE;
         snmp_set_detail(error_msg);
         goto out;
     }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
-  fail:
+
+value_error:
     result = SNMPERR_VALUE;
     snmp_set_detail(value);
-  out:
+
+err:
+    free(buf);
+    free(vp);
+
+out:
     SET_SNMP_ERROR(result);
     return result;
 }

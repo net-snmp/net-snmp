@@ -252,10 +252,10 @@ free_disk_config(void)
             di_next = di_ptr->item_next;
             if (di_ptr->item_details)
                 free(di_ptr->item_details);
-            free((void *) di_ptr);
+            free(di_ptr);
             di_ptr = di_next;
         }
-        free((void *) d_ptr);
+        free(d_ptr);
         d_ptr = d_next;
     }
     conf_list = (conf_disk_list *) 0;

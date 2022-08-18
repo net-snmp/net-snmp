@@ -102,7 +102,7 @@ netsnmp_feature_child_of(usm_scapi, usm_support);
 #endif
 #endif
 
-#endif /* HAVE_OPENSSL */
+#endif /* NETSNMP_FEATURE_REMOVE_USM_SCAPI */
 
 #ifdef NETSNMP_USE_INTERNAL_CRYPTO
 #endif

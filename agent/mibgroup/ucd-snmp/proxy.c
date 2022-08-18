@@ -355,7 +355,7 @@ proxy_free_filled_in_session_args(netsnmp_session *session, void **configured)
         session->community_len = 0;
     }
 
-    free((u_char *)(*configured));
+    free(*configured);
     *configured = NULL;
 }
 

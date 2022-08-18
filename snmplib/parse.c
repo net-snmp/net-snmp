@@ -3463,14 +3463,12 @@ check_utc(const char *utc)
         return;
     }
     if (len == 11) {
-        len =
-            sscanf(utc, "%2d%2d%2d%2d%2dZ", &year, &month, &day, &hour,
-                   &minute);
+        len = sscanf(utc, "%2d%2d%2d%2d%2dZ", &year, &month, &day, &hour,
+                     &minute);
         year += 1900;
     } else if (len == 13)
-        len =
-            sscanf(utc, "%4d%2d%2d%2d%2dZ", &year, &month, &day, &hour,
-                   &minute);
+        len = sscanf(utc, "%4d%2d%2d%2d%2dZ", &year, &month, &day, &hour,
+                     &minute);
     else {
         print_error("Bad timestamp format (11 or 13 characters)",
                     utc, QUOTESTRING);
@@ -4650,15 +4648,19 @@ static int netsnmp_getc(FILE *stream)
  * Warning: this method may recurse.
  */
 static int
-get_token(FILE * fp, char *token, int maxtlen)
+get_token(FILE *const fp, char *const token, const int maxtlen)
 {
-    register int    ch, ch_next;
-    register char  *cp = token;
-    register int    hash = 0;
-    register struct tok *tp;
-    int             too_long = 0;
+    int             ch, ch_next;
+    char           *cp;
+    int             hash;
+    struct tok     *tp;
+    int             too_long;
     enum { bdigits, xdigits, other } seenSymbols;
 
+fetch_next_token:
+    cp = token;
+    hash = 0;
+    too_long = 0;
     /*
      * skip all white space 
      */
@@ -4802,7 +4804,7 @@ get_token(FILE * fp, char *token, int maxtlen)
                 return ENDOFFILE;
             if (ch_next == '\n')
                 mibLine++;
-            return get_token(fp, token, maxtlen);
+            goto fetch_next_token;
         }
         ungetc(ch_next, fp);
 	/* fallthrough */
@@ -5105,17 +5107,20 @@ parseQuoteString(FILE * fp, char *token, int maxtlen)
         if (ch == '\n') {
             mibLine++;
         } else if (ch == '"') {
+            netsnmp_assert(token - token_start < maxtlen);
             *token = '\0';
             if (too_long && netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 					   NETSNMP_DS_LIB_MIB_WARNINGS) > 1) {
                 /*
                  * show short form for brevity sake 
                  */
-                char            ch_save = *(token_start + 50);
-                *(token_start + 50) = '\0';
+                int             truncate_at = SNMP_MIN(50, maxtlen - 1);
+                char            ch_save = *(token_start + truncate_at);
+
+                *(token_start + truncate_at) = '\0';
                 print_error("Warning: string too long",
                             token_start, QUOTESTRING);
-                *(token_start + 50) = ch_save;
+                *(token_start + truncate_at) = ch_save;
             }
             return QUOTESTRING;
         }

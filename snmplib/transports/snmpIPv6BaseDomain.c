@@ -129,13 +129,13 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
         break;
     }
     default:
-        netsnmp_assert(0);
         if (asprintf(&tmp, "%s: unknown", prefix) < 0)
             tmp = NULL;
         return tmp;
     }
 
-    netsnmp_assert(to->sin6_family == AF_INET6);
+    if (to->sin6_family != AF_INET6)
+        return strdup("unsupported address family");
 
     if (t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME) {
 	struct hostent *host;

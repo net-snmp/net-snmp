@@ -1144,10 +1144,8 @@ setenv(const char *name, const char *value, int overwrite)
         if (getenv(name))
             return 0;
     }
-    cp = (char *) malloc(strlen(name) + strlen(value) + 2);
-    if (cp == NULL)
+    if (asprintf(&cp, "%s=%s", name, value) < 0)
         return -1;
-    sprintf(cp, "%s=%s", name, value);
     ret = putenv(cp);
 #ifdef WIN32
     free(cp);

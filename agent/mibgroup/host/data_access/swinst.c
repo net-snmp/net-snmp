@@ -90,6 +90,7 @@ netsnmp_swinst_container_load( netsnmp_container *user_container, int flags )
         netsnmp_swinst_container_free_items(container);
         if (container != user_container) {
             netsnmp_swinst_container_free(container, flags);
+            container = NULL;
         }
     }
     
