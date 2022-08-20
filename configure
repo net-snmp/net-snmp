@@ -30865,41 +30865,42 @@ fi
 
 
 #   Check whether TCP timer constants are indeed constant
-#       or depend on the kernel clock tick 'hz'.        (FreeBSD 4.x)
+#       or depend on the kernel clock tick 'hz'.        (FreeBSD)
 #
 #       If the latter, then we will need to have a local
 #       variable 'hz' defined and with a suitable value,
 #       whenever we want to  use one one of these 'constants'.
 #
-# 	    used in agent only
-#
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether TCP timers depend on 'hz'" >&5
-$as_echo_n "checking whether TCP timers depend on 'hz'... " >&6; }
-if ${ac_cv_TCPTV_NEEDS_HZ+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether TCP timers depend on 'hz'" >&5
+printf %s "checking whether TCP timers depend on 'hz'... " >&6; }
+if test ${ac_cv_TCPTV_NEEDS_HZ+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 #include <netinet/tcp_timer.h>
-TCPTV_SRTTDFLT
+TCPTV_MIN
+TCPTV_REXMTMAX
 
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "hz" >/dev/null 2>&1; then :
+  $EGREP "hz" >/dev/null 2>&1
+then :
   ac_cv_TCPTV_NEEDS_HZ=yes
-else
+else $as_nop
   ac_cv_TCPTV_NEEDS_HZ=no
 fi
-rm -f conftest*
+rm -rf conftest*
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_TCPTV_NEEDS_HZ" >&5
-$as_echo "$ac_cv_TCPTV_NEEDS_HZ" >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_TCPTV_NEEDS_HZ" >&5
+printf "%s\n" "$ac_cv_TCPTV_NEEDS_HZ" >&6; }
 
 if test "x$ac_cv_TCPTV_NEEDS_HZ" = "xyes"; then
 
-$as_echo "#define TCPTV_NEEDS_HZ 1" >>confdefs.h
+printf "%s\n" "#define TCPTV_NEEDS_HZ 1" >>confdefs.h
 
 fi
 
