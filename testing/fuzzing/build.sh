@@ -11,7 +11,7 @@ if [ -z "${LIB_FUZZING_ENGINE+x}" ]; then
     CC=clang
     CXX=clang++
     CFLAGS="-g3 -Wall -Werror -fsanitize=fuzzer-no-link -fsanitize=address"
-    CXXFLAGS="${CFLAGS} -lssl"
+    CXXFLAGS="${CFLAGS}"
     WORK=${scriptdir}
     OUT=$WORK
     LIB_FUZZING_ENGINE="-fsanitize=fuzzer"
