@@ -1561,8 +1561,7 @@ shutdown_master_agent(void)
 netsnmp_agent_session *
 init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
 {
-    netsnmp_agent_session *asp = (netsnmp_agent_session *)
-        calloc(1, sizeof(netsnmp_agent_session));
+    netsnmp_agent_session *asp = calloc(1, sizeof(netsnmp_agent_session));
 
     if (asp == NULL) {
         return NULL;
