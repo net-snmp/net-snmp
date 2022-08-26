@@ -10,8 +10,8 @@ scriptdir=$(cd "$(dirname "$0")" && pwd)
 if [ -z "${LIB_FUZZING_ENGINE+x}" ]; then
     CC=clang
     CXX=clang++
-    CFLAGS="-Wall -Werror -fsanitize=fuzzer-no-link"
-    CXXFLAGS="${CFLAGS} -lssl"
+    CFLAGS="-g3 -Wall -Werror -fsanitize=fuzzer-no-link -fsanitize=address"
+    CXXFLAGS="${CFLAGS}"
     WORK=${scriptdir}
     OUT=$WORK
     LIB_FUZZING_ENGINE="-fsanitize=fuzzer"

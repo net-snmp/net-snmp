@@ -30865,13 +30865,11 @@ fi
 
 
 #   Check whether TCP timer constants are indeed constant
-#       or depend on the kernel clock tick 'hz'.        (FreeBSD 4.x)
+#       or depend on the kernel clock tick 'hz'.        (FreeBSD)
 #
 #       If the latter, then we will need to have a local
 #       variable 'hz' defined and with a suitable value,
 #       whenever we want to  use one one of these 'constants'.
-#
-# 	    used in agent only
 #
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether TCP timers depend on 'hz'" >&5
 $as_echo_n "checking whether TCP timers depend on 'hz'... " >&6; }
@@ -30882,7 +30880,8 @@ else
 /* end confdefs.h.  */
 
 #include <netinet/tcp_timer.h>
-TCPTV_SRTTDFLT
+TCPTV_MIN
+TCPTV_REXMTMAX
 
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |

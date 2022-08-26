@@ -13,7 +13,7 @@ OTHERUNINSTALL=manuninstall
 # local stuff
 #
 
-MAN1  = snmpinform.1 snmp-bridge-mib.1 snmptop.1
+MAN1  = snmpinform.1 snmp-bridge-mib.1
 
 @NETSNMP_HAVE_AGENTX_LIBS_TRUE@AGENTXTRAP = agentxtrap.1
 @NETSNMP_HAVE_AGENTX_LIBS_FALSE@AGENTXTRAP =
