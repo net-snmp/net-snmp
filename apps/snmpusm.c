@@ -477,7 +477,7 @@ main(int argc, char *argv[])
          * Change the user supplied on command line.
          */
         if ((passwd_user != NULL) && (strlen(passwd_user) > 0)) {
-            session.securityName = passwd_user;
+            session.securityName = strdup(passwd_user);
         } else {
             /*
              * Use own key object if no user was supplied.
@@ -1046,6 +1046,7 @@ close_session:
     snmp_close(ss);
 
 out:
+    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }
