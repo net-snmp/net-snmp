@@ -36,16 +36,11 @@ if [ "x$TESTCONF_SH_EVALED" != "xyes" ]; then
     TESTCONF_SH_EVALED=yes
 
 #
-# set cpu and memory limits to prevent major damage
+# set cpu limit to 1h.
 #
-# defaults: 1h CPU, 500MB VMEM
-#
-[ "x$SNMP_LIMIT_VMEM" = "x" ] && SNMP_LIMIT_VMEM=512000
 [ "x$SNMP_LIMIT_CPU" = "x" ] && SNMP_LIMIT_CPU=3600
 # ulimit will fail if existing limit is lower -- ignore because it's ok
 ulimit -S -t $SNMP_LIMIT_CPU 2>/dev/null
-# not all sh-alikes support "ulimit -v" -- play safe
-[ "x$BASH_VERSION" != "x" ] && ulimit -S -v $SNMP_LIMIT_VMEM 2>/dev/null
 
 #
 # Set up an NL suppressing echo command
