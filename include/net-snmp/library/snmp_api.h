@@ -573,6 +573,9 @@ struct netsnmp_transport_s;
      */
 
     NETSNMP_IMPORT
+    void netsnmp_cleanup_session(netsnmp_session *s);
+
+    NETSNMP_IMPORT
     struct session_list *
     snmp_sess_add_ex(netsnmp_session *,
                      struct netsnmp_transport_s *,
