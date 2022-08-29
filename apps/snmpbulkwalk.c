@@ -385,6 +385,7 @@ main(int argc, char *argv[])
     }
 
 out:
+    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }
