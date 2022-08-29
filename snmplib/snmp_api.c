@@ -1917,6 +1917,25 @@ create_user_from_session(netsnmp_session * session) {
 #endif
 }
 
+/* Free the memory owned by a session but not the session object itself. */
+void netsnmp_cleanup_session(netsnmp_session *s)
+{
+    SNMP_FREE(s->localname);
+    SNMP_FREE(s->peername);
+    SNMP_FREE(s->community);
+    SNMP_FREE(s->contextEngineID);
+    SNMP_FREE(s->contextName);
+    SNMP_FREE(s->securityEngineID);
+    SNMP_FREE(s->securityName);
+    SNMP_FREE(s->securityAuthProto);
+    SNMP_FREE(s->securityAuthLocalKey);
+    SNMP_FREE(s->securityPrivProto);
+    SNMP_FREE(s->securityPrivLocalKey);
+    SNMP_FREE(s->paramName);
+#ifndef NETSNMP_NO_TRAP_STATS
+    SNMP_FREE(s->trap_stats);
+#endif /* NETSNMP_NO_TRAP_STATS */
+}
 
 /*
  *  Do a "deep free()" of a netsnmp_session.
@@ -1924,24 +1943,11 @@ create_user_from_session(netsnmp_session * session) {
  *  CAUTION:  SHOULD ONLY BE USED FROM snmp_sess_close() OR SIMILAR.
  *                                                      (hence it is static)
  */
-
 static void
 snmp_free_session(netsnmp_session * s)
 {
     if (s) {
-        SNMP_FREE(s->localname);
-        SNMP_FREE(s->peername);
-        SNMP_FREE(s->community);
-        SNMP_FREE(s->contextEngineID);
-        SNMP_FREE(s->contextName);
-        SNMP_FREE(s->securityEngineID);
-        SNMP_FREE(s->securityName);
-        SNMP_FREE(s->securityAuthProto);
-        SNMP_FREE(s->securityPrivProto);
-        SNMP_FREE(s->paramName);
-#ifndef NETSNMP_NO_TRAP_STATS
-        SNMP_FREE(s->trap_stats);
-#endif /* NETSNMP_NO_TRAP_STATS */
+        netsnmp_cleanup_session(s);
 
         /*
          * clear session from any callbacks
