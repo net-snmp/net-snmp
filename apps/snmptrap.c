@@ -119,7 +119,7 @@ optProc(int argc, char *const *argv, int opt)
 int
 main(int argc, char *argv[])
 {
-    netsnmp_session session, *ss;
+    netsnmp_session session, *ss = NULL;
     netsnmp_pdu    *pdu, *response;
     oid             name[MAX_OID_LEN];
     size_t          name_length;
