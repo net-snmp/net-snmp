@@ -28,7 +28,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 /*
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -4215,7 +4215,8 @@ unload_all_mibs(void)
         if (ptc->description)
             free(ptc->description);
     }
-    memset(tclist, 0, tc_alloc * sizeof(struct tc));
+    SNMP_FREE(tclist);
+    tc_alloc = 0;
 
     memset(buckets, 0, sizeof(buckets));
     memset(nbuckets, 0, sizeof(nbuckets));
