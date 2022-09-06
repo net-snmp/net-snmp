@@ -111,6 +111,7 @@ SOFTWARE.
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
+#include <net-snmp/agent/agent_callbacks.h>
 
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp.h>      /* for xdump & {build,parse}_var_op */
@@ -4378,6 +4379,11 @@ _snmp_parse(struct session_list *slp,
                     pdu->securityName, secLevelName[pdu->securityLevel],
                     snmp_api_errstring(result)));
 
+        if (result == SNMPERR_USM_UNKNOWNSECURITYNAME) {
+            snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                                SNMPD_CALLBACK_AUTH_FAILURE, pdu);
+        }
+        
         if (result) {
             struct snmp_secmod_def *secmod =
                 find_sec_mod(pdu->securityModel);
