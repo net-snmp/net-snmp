@@ -119,6 +119,8 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
     fuzz_fake_pcap(fuzz_buf, size);
 
     snmp_close(ss);
+    /* To do: register session 'ss' properly and remove the call below. */
+    netsnmp_cleanup_session(ss);
     free(ss);
     free(fuzz_buf);
 
