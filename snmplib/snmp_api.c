@@ -7152,7 +7152,7 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
     min_size = SNMP_MIN(len1, len2);
     for(i = 0; i < (int)min_size; i++) {
         if (in_name1[i] != in_name2[i])
-            return i;    /* 'í' is the first differing subidentifier
+            return i;    /* 'i' is the first differing subidentifier
                             So the common prefix is 0..(i-1), of length i */
     }
     return min_size;	/* The shorter OID is a prefix of the longer, and
