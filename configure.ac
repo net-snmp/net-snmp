@@ -2,7 +2,7 @@
 # the Net-SNMP's COPYING file for more details and other copyrights
 # that may apply:
 #
-# Portions Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+# Portions Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
 # Use is subject to license terms specified in the COPYING file
 # distributed with the Net-SNMP package.
 #
