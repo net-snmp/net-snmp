@@ -3395,7 +3395,6 @@ check_getnext_results(netsnmp_agent_session *asp)
                  * illegal response from a subagent.  Change it back to NULL 
                  *  xxx-rks: err, how do we know this is a subagent?
                  */
-                request->requestvb->type = ASN_NULL;
                 request->inclusive = 1;
             }
 
