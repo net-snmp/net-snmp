@@ -4381,7 +4381,7 @@ _snmp_parse(struct session_list *slp,
 
         if (result == SNMPERR_USM_UNKNOWNSECURITYNAME) {
             snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
-                                SNMPD_CALLBACK_AUTH_FAILURE, (void *)pdu);
+                                SNMPD_CALLBACK_AUTH_FAILURE, pdu);
         }
         
         if (result) {
