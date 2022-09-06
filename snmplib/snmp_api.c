@@ -111,6 +111,7 @@ SOFTWARE.
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
+#include <net-snmp/agent/agent_callbacks.h>
 
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp.h>      /* for xdump & {build,parse}_var_op */
@@ -4378,6 +4379,11 @@ _snmp_parse(struct session_list *slp,
                     pdu->securityName, secLevelName[pdu->securityLevel],
                     snmp_api_errstring(result)));
 
+        if (result == SNMPERR_USM_UNKNOWNSECURITYNAME) {
+            snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                                SNMPD_CALLBACK_AUTH_FAILURE, (void *)pdu);
+        }
+        
         if (result) {
             struct snmp_secmod_def *secmod =
                 find_sec_mod(pdu->securityModel);
@@ -7146,7 +7152,7 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
     min_size = SNMP_MIN(len1, len2);
     for(i = 0; i < (int)min_size; i++) {
         if (in_name1[i] != in_name2[i])
-            return i;    /* 'í' is the first differing subidentifier
+            return i;    /* 'Ã­' is the first differing subidentifier
                             So the common prefix is 0..(i-1), of length i */
     }
     return min_size;	/* The shorter OID is a prefix of the longer, and
