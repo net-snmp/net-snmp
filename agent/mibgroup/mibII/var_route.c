@@ -1056,12 +1056,11 @@ Route_Scan_Reload(void)
      * *  Makes sure we have SOME space allocated for new routing entries
      */
     if (!rthead) {
-        rthead = (RTENTRY **) malloc(100 * sizeof(RTENTRY *));
+        rthead = calloc(100, sizeof(RTENTRY *));
         if (!rthead) {
             snmp_log(LOG_ERR, "route table malloc fail\n");
             return;
         }
-        memset((char *) rthead, (0), 100 * sizeof(RTENTRY *));
         rtallocate = 100;
     }
 
