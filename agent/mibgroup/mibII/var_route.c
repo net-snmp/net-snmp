@@ -871,6 +871,27 @@ var_ipRouteEntry(struct variable * vp,
 static int      qsort_compare(const void *, const void *);
 #endif
 
+static void append_rtentry(struct rtentry *rt)
+{
+    if (rtsize >= rtallocate) {
+        struct rtentry **tmp_rthead;
+
+        tmp_rthead = realloc(rthead, 2 * rtallocate * sizeof(struct rtentry *));
+        if (!tmp_rthead)
+            return;
+        rthead = tmp_rthead;
+        memset(&rthead[rtallocate], 0, rtallocate * sizeof(struct rtentry *));
+        rtallocate *= 2;
+    }
+    if (!rthead[rtsize]) {
+        rthead[rtsize] = malloc(sizeof(struct rtentry));
+        if (!rthead[rtsize])
+            return;
+    }
+    memcpy(rthead[rtsize], rt, sizeof(struct rtentry));
+    rtsize++;
+}
+
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT) || defined (hpux11)
 
 #if defined(RTENTRY_4_4) && !defined(hpux11)
@@ -952,26 +973,7 @@ load_rtentries(struct radix_node *pt)
         if (((rt.rt_flags & RTF_CLONING) != RTF_CLONING)
             && ((rt.rt_flags & RTF_LLINFO) != RTF_LLINFO)) {
 #endif
-            /*
-             * check for space and malloc 
-             */
-            if (rtsize >= rtallocate) {
-                rthead =
-                    (RTENTRY **) realloc((char *) rthead,
-                                         2 * rtallocate *
-                                         sizeof(RTENTRY *));
-                memset((char *) &rthead[rtallocate], (0),
-                       rtallocate * sizeof(RTENTRY *));
-
-                rtallocate *= 2;
-            }
-            if (!rthead[rtsize])
-                rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
-            /*
-             *      Add this to the database
-             */
-            memcpy((char *) rthead[rtsize], (char *) &rt, sizeof(RTENTRY));
-            rtsize++;
+            append_rtentry(&rt);
 #if CHECK_RT_FLAGS
         }
 #endif
@@ -1135,27 +1137,7 @@ Route_Scan_Reload(void)
                             break;
                     }
                 }
-                /*
-                 *      Allocate a block to hold it and add it to the database
-                 */
-                if (rtsize >= rtallocate) {
-                    rthead =
-                        (RTENTRY **) realloc((char *) rthead,
-                                             2 * rtallocate *
-                                             sizeof(RTENTRY *));
-                    memset((char *) &rthead[rtallocate], (0),
-                           rtallocate * sizeof(RTENTRY *));
-
-                    rtallocate *= 2;
-                }
-                if (!rthead[rtsize])
-                    rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
-                /*
-                 *      Add this to the database
-                 */
-                memcpy((char *) rthead[rtsize], (char *) rt,
-                       sizeof(RTENTRY));
-                rtsize++;
+                append_rtentry(rt);
             }
         }
         free(routehash);
@@ -1266,27 +1248,7 @@ Route_Scan_Reload(void)
                             break;
                     }
                 }
-                /*
-                 *  Allocate a block to hold it and add it to the database
-                 */
-                if (rtsize >= rtallocate) {
-                    rthead =
-                        (RTENTRY **) realloc((char *) rthead,
-                                             2 * rtallocate *
-                                             sizeof(RTENTRY *));
-                    memset((char *) &rthead[rtallocate], (0),
-                           rtallocate * sizeof(RTENTRY *));
-
-                    rtallocate *= 2;
-                }
-                if (!rthead[rtsize])
-                    rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
-                /*
-                 * *      Add this to the database
-                 */
-                memcpy((char *) rthead[rtsize], (char *) rt,
-                       sizeof(RTENTRY));
-                rtsize++;
+                append_rtentry(rt);
             }
         }
         free(routehash);
@@ -1369,26 +1331,7 @@ Route_Scan_Reload(void)
 
         rt->rt_unit = netsnmp_access_interface_index_find(name);
 
-        /*
-         *  Allocate a block to hold it and add it to the database
-         */
-        if (rtsize >= rtallocate) {
-            rthead = (struct rtentry **) realloc((char *) rthead,
-                                                 2 * rtallocate *
-                                                 sizeof(struct rtentry *));
-            memset(&rthead[rtallocate], 0,
-                   rtallocate * sizeof(struct rtentry *));
-            rtallocate *= 2;
-        }
-        if (!rthead[rtsize])
-            rthead[rtsize] =
-                (struct rtentry *) malloc(sizeof(struct rtentry));
-        /*
-         *  Add this to the database
-         */
-        memcpy((char *) rthead[rtsize], (char *) rt,
-               sizeof(struct rtentry));
-        rtsize++;
+        append_rtentry(rt);
     }
 
     fclose(in);
