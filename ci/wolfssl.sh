@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
@@ -8,12 +8,12 @@ fi
 cd wolfssl
 git clean -f
 ./autogen.sh
-options=(
+options="
     --enable-all
     --enable-openssh
     --enable-opensslextra
-    --prefix="$PWD/../wolfssl-inst"
-)
-./configure "${options[@]}"
+    --prefix=$PWD/../wolfssl-inst
+"
+./configure ${options}
 make -j"$(nproc)"
 make install
