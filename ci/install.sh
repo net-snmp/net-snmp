@@ -45,7 +45,7 @@ case "$(uname)" in
 	pkg install -y libssh2
 	#pkg install -y openssl111
 	pkg install -y perl5 perl5-devel p5-ExtUtils-MakeMaker
-	pkg install -y pkgconf
+	#pkg install -y pkgconf
 	pkg install -y py27-setuptools
 	if [ ! -e /usr/bin/perl ]; then
 	    ln -s /usr/local/bin/perl /usr/bin/perl
