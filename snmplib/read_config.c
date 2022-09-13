@@ -539,7 +539,7 @@ run_config_handler(struct config_line *lptr,
             /*
              * Stomp on any trailing whitespace
              */
-            cp = &(cptr[strlen(cptr)-1]);
+            cp = cptr[0] ? &(cptr[strlen(cptr)-1]) : cptr;
             while ((cp > cptr) && isspace((unsigned char)(*cp))) {
                 *(cp--) = '\0';
             }
