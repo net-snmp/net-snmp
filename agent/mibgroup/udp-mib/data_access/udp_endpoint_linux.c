@@ -238,7 +238,7 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     ep->pid = netsnmp_get_pid_from_inode(inode);
 
     ep->index = (uintptr_t)(lpi->user_context);
-    lpi->user_context = (void*)((char*)(lpi->user_context) + 1);
+    lpi->user_context = (void*)((uintptr_t)lpi->user_context + 1);
 
     ep->oid_index.oids = &ep->index;
     ep->oid_index.len = 1;

@@ -458,7 +458,7 @@ var_extensible_shell(struct variable * vp,
                                                   exten->output, &len);
 	    }
             *var_len = strlen(exten->output);
-            if (exten->output[*var_len - 1] == '\n')
+            if (*var_len > 0 && exten->output[*var_len - 1] == '\n')
                 exten->output[--(*var_len)] = '\0';
             return ((u_char *) (exten->output));
         case ERRORFIX:
