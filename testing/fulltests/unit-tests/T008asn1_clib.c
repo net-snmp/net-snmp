@@ -152,7 +152,7 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
 
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
 
-#define TOINT64(c) ((int64_t)(long)(c).high << 32 | (c).low)
+#define TOINT64(c) (int64_t)((uint64_t)(c).high << 32 | (c).low)
 
 {
     const struct counter64 intval[] = {
