@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Instead of relying on the hosts file provided by the CI host, replace it.
 # See also

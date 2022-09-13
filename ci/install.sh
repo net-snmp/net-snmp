@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 case "$(uname)" in
     Linux)
-	packages=(
+	packages="
 	    libatm1-dev
 	    libkrb5-dev
 	    libmariadb-client-lgpl-dev
@@ -20,8 +20,8 @@ case "$(uname)" in
 	    make
 	    pkg-config
 	    python3-dev
-	)
-	for p in "${packages[@]}"; do
+	"
+	for p in ${packages}; do
 	    apt-get install -qq -o=Dpkg::Use-Pty=0 -y "$p"
 	done
 	true
