@@ -31,6 +31,11 @@ static oid      my_instance_oid[5] = { 1, 2, 3, 6, 1 };
 static oid      my_data_table_oid[4] = { 1, 2, 3, 7 };
 static oid      my_data_ulong_instance[4] = { 1, 2, 3, 9 };
 
+static netsnmp_handler_registration *ro_scalar_h, *rw_scalar_h, *table_h;
+static netsnmp_handler_registration *my_test, *table_h;
+static netsnmp_table_registration_info *table_info;
+static netsnmp_table_data *table;
+
 static u_long   my_ulong = 0;
 
 void
@@ -39,10 +44,7 @@ init_testhandler(void)
     /*
      * we're registering at .1.2.3.4 
      */
-    netsnmp_handler_registration *my_test;
-    netsnmp_table_registration_info *table_info;
     u_long          ind1;
-    netsnmp_table_data *table;
     netsnmp_table_row *row;
 
     DEBUGMSGTL(("testhandler", "initializing\n"));
@@ -50,17 +52,16 @@ init_testhandler(void)
     /*
      * basic handler test
      */
-    netsnmp_register_handler(netsnmp_create_handler_registration
-                             ("myTest", my_test_handler, my_test_oid, 4,
-                              HANDLER_CAN_RONLY));
+    ro_scalar_h = netsnmp_create_handler_registration("myTest", my_test_handler,
+                                            my_test_oid, 4, HANDLER_CAN_RONLY);
+    netsnmp_register_handler(ro_scalar_h);
 
     /*
      * instance handler test
      */
-
-    netsnmp_register_instance(netsnmp_create_handler_registration
-                              ("myInstance", my_test_instance_handler,
-                               my_instance_oid, 5, HANDLER_CAN_RWRITE));
+    rw_scalar_h = netsnmp_create_handler_registration("myInstance",
+             my_test_instance_handler, my_instance_oid, 5, HANDLER_CAN_RWRITE);
+    netsnmp_register_instance(rw_scalar_h);
 
     netsnmp_register_ulong_instance("myulong",
                                     my_data_ulong_instance, 4,
@@ -137,11 +138,22 @@ init_testhandler(void)
     table_info->min_column = 3;
     table_info->max_column = 3;
 
-    netsnmp_register_read_only_table_data
-        (netsnmp_create_handler_registration
-         ("12days", my_data_table_handler, my_data_table_oid, 4,
-          HANDLER_CAN_RONLY), table, table_info);
+    table_h = netsnmp_create_handler_registration("12days",
+                my_data_table_handler, my_data_table_oid, 4, HANDLER_CAN_RONLY);
+    netsnmp_register_read_only_table_data(table_h, table, table_info);
 
+}
+
+void
+cleanup_testhandler(void)
+{
+    netsnmp_unregister_table(table_h);
+    netsnmp_table_data_delete_table(table);
+    netsnmp_table_registration_info_free(table_info);
+    netsnmp_unregister_handler(my_test);
+    netsnmp_unregister_handler(table_h);
+    netsnmp_unregister_handler(rw_scalar_h);
+    netsnmp_unregister_handler(ro_scalar_h);
 }
 
 int
