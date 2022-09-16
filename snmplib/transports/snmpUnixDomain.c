@@ -46,13 +46,12 @@ netsnmp_feature_child_of(unix_socket_paths, transport_unix_socket_all);
 #define NETSNMP_STREAM_QUEUE_LEN  5
 #endif
 
-#ifndef SUN_LEN
+#undef SUN_LEN
 /*
  * Evaluate to actual length of the `sockaddr_un' structure.
  */
-#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path)         \
+#define SUN_LEN(ptr) ((size_t)&(((struct sockaddr_un *)NULL)->sun_path)      \
                       + strlen ((ptr)->sun_path))
-#endif
 
 const oid netsnmp_UnixDomain[] = { TRANSPORT_DOMAIN_LOCAL };
 static netsnmp_tdomain unixDomain;
