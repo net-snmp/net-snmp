@@ -1092,7 +1092,7 @@ retry:
 
             case SNMP_ERR_NOSUCHNAME:
                if (retry_nosuch && (pdu = snmp_fix_pdu(*response, command))) {
-                  if (*response) snmp_free_pdu(*response);
+                  snmp_free_pdu(*response);
                   goto retry;
                }
                /* FALLTHROUGH */
