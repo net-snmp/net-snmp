@@ -1477,6 +1477,8 @@ _parse_config_sink(const char *token, char *cptr, int version, int type)
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
     sp = strtok_r(cptr, " \t\n", &st);
+    if (!sp)
+        return;
     /*
      * check for optional arguments
      */
