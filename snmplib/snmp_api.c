@@ -5143,7 +5143,7 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
      * forward encoding and set a flag to drop varbinds to make it fit.
      */
     do {
-        packet = pktbuf;
+        packet = NULL;
         length = 0;
         result = netsnmp_build_packet(isp, session, pdu, &pktbuf, &pktbuf_len,
                                       &packet, &length);
