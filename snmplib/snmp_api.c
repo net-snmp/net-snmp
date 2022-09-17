@@ -4954,7 +4954,7 @@ snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp, size_t * length)
  *
  * build pdu packet
  */
-int
+static int
 netsnmp_build_packet(struct snmp_internal_session *isp, netsnmp_session *sp,
                      netsnmp_pdu *pdu, u_char **pktbuf_p,
                      size_t *pktbuf_len_p, u_char **pkt_p, size_t *len_p)
