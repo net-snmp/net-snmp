@@ -251,7 +251,6 @@ store_mteObjectsTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
-    size_t          tmpint;
     struct mteObjectsTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -280,7 +279,7 @@ store_mteObjectsTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->mteObjectsIndex,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->mteObjectsID,
@@ -288,11 +287,11 @@ store_mteObjectsTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->mteObjectsIDWildcard,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->mteObjectsEntryStatus,
-                                       &tmpint);
+                                       NULL);
 
 
 

@@ -1152,7 +1152,6 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
-    size_t          tmpint;
     struct mteTriggerTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -1188,7 +1187,7 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->mteTriggerSampleType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->mteTriggerValueID,
@@ -1196,7 +1195,7 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       mteTriggerValueIDWildcard, &tmpint);
+                                       mteTriggerValueIDWildcard, NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->mteTriggerTargetTag,
@@ -1211,11 +1210,11 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        mteTriggerContextNameWildcard,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->mteTriggerFrequency,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->mteTriggerObjectsOwner,
@@ -1228,11 +1227,11 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->mteTriggerEnabled,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->mteTriggerEntryStatus,
-                                       &tmpint);
+                                       NULL);
 
             /*
              * delta table 
@@ -1247,12 +1246,12 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        mteTriggerDeltaDiscontinuityIDWildcard,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        mteTriggerDeltaDiscontinuityIDType,
-                                       &tmpint);
+                                       NULL);
 
             /*
              * existence table 
@@ -1301,15 +1300,15 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        mteTriggerBooleanComparison,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->mteTriggerBooleanValue,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       mteTriggerBooleanStartup, &tmpint);
+                                       mteTriggerBooleanStartup, NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
@@ -1341,26 +1340,26 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        mteTriggerThresholdStartup,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       mteTriggerThresholdRising, &tmpint);
+                                       mteTriggerThresholdRising, NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        mteTriggerThresholdFalling,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        mteTriggerThresholdDeltaRising,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        mteTriggerThresholdDeltaFalling,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
@@ -1428,20 +1427,20 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->have_copied_auth_info,
-                                       &tmpint);
+                                       NULL);
             if (StorageTmp->have_copied_auth_info) {
                 cptr =
                     read_config_store_data(ASN_INTEGER, cptr,
                                            &StorageTmp->pdu_version,
-                                           &tmpint);
+                                           NULL);
                 cptr =
                     read_config_store_data(ASN_INTEGER, cptr,
                                            &StorageTmp->pdu_securityModel,
-                                           &tmpint);
+                                           NULL);
                 cptr =
                     read_config_store_data(ASN_INTEGER, cptr,
                                            &StorageTmp->pdu_securityLevel,
-                                           &tmpint);
+                                           NULL);
                 cptr =
                     read_config_store_data(ASN_OBJECT_ID, cptr,
                                            (void *)(&StorageTmp->pdu_tDomain),

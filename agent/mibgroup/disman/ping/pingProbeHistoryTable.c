@@ -197,7 +197,6 @@ store_pingProbeHistoryTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
-    size_t          tmpint;
     struct pingProbeHistoryTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -225,19 +224,19 @@ store_pingProbeHistoryTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingProbeHistoryIndex,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       pingProbeHistoryResponse, &tmpint);
+                                       pingProbeHistoryResponse, NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingProbeHistoryStatus,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingProbeHistoryLastRC,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingProbeHistoryTime,

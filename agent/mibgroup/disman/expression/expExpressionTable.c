@@ -319,7 +319,6 @@ store_expExpressionTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
-    size_t          tmpint;
     struct expExpressionTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -355,7 +354,7 @@ store_expExpressionTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->expExpressionValueType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->expExpressionComment,
@@ -365,7 +364,7 @@ store_expExpressionTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        expExpressionDeltaInterval,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->expExpressionPrefix,
@@ -374,28 +373,28 @@ store_expExpressionTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->expExpressionErrors,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       expExpressionEntryStatus, &tmpint);
+                                       expExpressionEntryStatus, NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->have_copied_auth_info,
-                                       &tmpint);
+                                       NULL);
             if (StorageTmp->have_copied_auth_info) {
                 cptr =
                     read_config_store_data(ASN_INTEGER, cptr,
                                            &StorageTmp->pdu_version,
-                                           &tmpint);
+                                           NULL);
                 cptr =
                     read_config_store_data(ASN_INTEGER, cptr,
                                            &StorageTmp->pdu_securityModel,
-                                           &tmpint);
+                                           NULL);
                 cptr =
                     read_config_store_data(ASN_INTEGER, cptr,
                                            &StorageTmp->pdu_securityLevel,
-                                           &tmpint);
+                                           NULL);
                 cptr =
                     read_config_store_data(ASN_OBJECT_ID, cptr,
                                            (void *) (&StorageTmp->

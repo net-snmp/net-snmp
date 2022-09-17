@@ -321,7 +321,6 @@ store_expObjectTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
-    size_t          tmpint;
     struct expObjectTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -353,7 +352,7 @@ store_expObjectTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->expObjectIndex,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->expObjectID,
@@ -361,11 +360,11 @@ store_expObjectTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->expObjectIDWildcard,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->expObjectSampleType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->
@@ -376,12 +375,12 @@ store_expObjectTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        expObjectDiscontinuityIDWildcard,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        expObjectDiscontinuityIDType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->expObjectConditional,
@@ -391,11 +390,11 @@ store_expObjectTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        expObjectConditionalWildcard,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->expObjectEntryStatus,
-                                       &tmpint);
+                                       NULL);
             snmpd_store_config(line);
         }
     }

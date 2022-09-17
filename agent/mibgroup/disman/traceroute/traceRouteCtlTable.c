@@ -1010,7 +1010,6 @@ store_traceRouteCtlTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr = NULL;
-    size_t          tmpint;
     struct traceRouteCtlTable_data *StorageTmp = NULL;
     struct header_complex_index *hcindex = NULL;
 
@@ -1042,7 +1041,7 @@ store_traceRouteCtlTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        traceRouteCtlTargetAddressType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
@@ -1053,37 +1052,37 @@ store_traceRouteCtlTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        traceRouteCtlByPassRouteTable,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteCtlDataSize,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteCtlTimeOut,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       traceRouteCtlProbesPerHop, &tmpint);
+                                       traceRouteCtlProbesPerHop, NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteCtlPort,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteCtlMaxTtl,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteCtlDSField,
-                                       &tmpint);
+                                       NULL);
 
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        traceRouteCtlSourceAddressType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
@@ -1093,7 +1092,7 @@ store_traceRouteCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->traceRouteCtlIfIndex,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
@@ -1103,28 +1102,28 @@ store_traceRouteCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       traceRouteCtlMaxFailures, &tmpint);
+                                       traceRouteCtlMaxFailures, NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       traceRouteCtlDontFragment, &tmpint);
+                                       traceRouteCtlDontFragment, NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       traceRouteCtlInitialTtl, &tmpint);
+                                       traceRouteCtlInitialTtl, NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteCtlFrequency,
-                                       &tmpint);
+                                       NULL);
 
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       traceRouteCtlStorageType, &tmpint);
+                                       traceRouteCtlStorageType, NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       traceRouteCtlAdminStatus, &tmpint);
+                                       traceRouteCtlAdminStatus, NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->traceRouteCtlDescr,
@@ -1132,7 +1131,7 @@ store_traceRouteCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteCtlMaxRows,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
@@ -1143,7 +1142,7 @@ store_traceRouteCtlTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        traceRouteCtlCreateHopsEntries,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->traceRouteCtlType,
@@ -1151,12 +1150,12 @@ store_traceRouteCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->traceRouteCtlRowStatus,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        traceRouteProbeHistoryMaxIndex,
-                                       &tmpint);
+                                       NULL);
 
 
 

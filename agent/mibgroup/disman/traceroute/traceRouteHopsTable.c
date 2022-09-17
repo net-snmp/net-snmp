@@ -229,7 +229,6 @@ store_traceRouteHopsTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr = NULL;
-    size_t          tmpint;
     struct traceRouteHopsTable_data *StorageTmp = NULL;
     struct header_complex_index *hcindex = NULL;
 
@@ -260,12 +259,12 @@ store_traceRouteHopsTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteHopsHopIndex,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        traceRouteHopsIpTgtAddressType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
@@ -275,29 +274,29 @@ store_traceRouteHopsTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteHopsMinRtt,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->traceRouteHopsMaxRtt,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       traceRouteHopsAverageRtt, &tmpint);
+                                       traceRouteHopsAverageRtt, NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        traceRouteHopsRttSumOfSquares,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       traceRouteHopsSentProbes, &tmpint);
+                                       traceRouteHopsSentProbes, NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        traceRouteHopsProbeResponses,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->

@@ -322,7 +322,6 @@ store_lookupCtlTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
-    size_t          tmpint;
     struct lookupTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -351,7 +350,7 @@ store_lookupCtlTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        lookupCtlTargetAddressType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->lookupCtlTargetAddress,
@@ -361,18 +360,18 @@ store_lookupCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->lookupCtlOperStatus,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->lookupCtlTime,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
-                                       &StorageTmp->lookupCtlRc, &tmpint);
+                                       &StorageTmp->lookupCtlRc, NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->lookupCtlRowStatus,
-                                       &tmpint);
+                                       NULL);
             snmpd_store_config(line);
         }
     }

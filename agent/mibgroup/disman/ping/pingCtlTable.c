@@ -574,7 +574,6 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr = NULL;
-    size_t          tmpint;
     struct pingCtlTable_data *StorageTmp = NULL;
     struct header_complex_index *hcindex = NULL;
 
@@ -603,7 +602,7 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       pingCtlTargetAddressType, &tmpint);
+                                       pingCtlTargetAddressType, NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingCtlTargetAddress,
@@ -612,20 +611,20 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlDataSize,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlTimeOut,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlProbeCount,
-                                       &tmpint);
+                                       NULL);
 
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingCtlAdminStatus,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingCtlDataFill,
@@ -634,16 +633,16 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlFrequency,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlMaxRows,
-                                       &tmpint);
+                                       NULL);
 
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingCtlStorageType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingCtlTrapGeneration,
@@ -653,12 +652,12 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        pingCtlTrapProbeFailureFilter,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        pingCtlTrapTestFailureFilter,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->pingCtlType,
@@ -670,7 +669,7 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       pingCtlSourceAddressType, &tmpint);
+                                       pingCtlSourceAddressType, NULL);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingCtlSourceAddress,
@@ -679,15 +678,15 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingCtlIfIndex,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       pingCtlByPassRouteTable, &tmpint);
+                                       pingCtlByPassRouteTable, NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlDSField,
-                                       &tmpint);
+                                       NULL);
 
             if (StorageTmp->pingCtlRowStatus == RS_ACTIVE)
                 StorageTmp->pingCtlRowStatus = RS_NOTINSERVICE;
@@ -695,11 +694,11 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingCtlRowStatus,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       pingProbeHistoryMaxIndex, &tmpint);
+                                       pingProbeHistoryMaxIndex, NULL);
 
 
 

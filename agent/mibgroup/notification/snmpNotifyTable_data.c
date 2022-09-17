@@ -748,7 +748,6 @@ store_snmpNotifyTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
-    size_t          tmpint;
     struct snmpNotifyTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -782,15 +781,15 @@ store_snmpNotifyTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->snmpNotifyType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->snmpNotifyStorageType,
-                                       &tmpint);
+                                       NULL);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->snmpNotifyRowStatus,
-                                       &tmpint);
+                                       NULL);
 
             snmpd_store_config(line);
         }
