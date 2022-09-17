@@ -4998,7 +4998,7 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
     struct snmp_internal_session *isp;
     netsnmp_transport *transport = NULL;
     u_char         *pktbuf = NULL, *packet = NULL;
-    size_t          pktbuf_len = 0, offset = 0, length = 0, orig_length = 0;
+    size_t          pktbuf_len = 0, length = 0, orig_length = 0;
     int             result, orig_count = 0, curr_count = 0;
 
     if (slp == NULL) {
@@ -5144,7 +5144,7 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
      */
     do {
         packet = pktbuf;
-        length = offset = 0;
+        length = 0;
         result = netsnmp_build_packet(isp, session, pdu, &pktbuf, &pktbuf_len,
                                       &packet, &length);
         if (0 != result)
