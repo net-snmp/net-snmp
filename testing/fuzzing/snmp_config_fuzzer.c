@@ -63,6 +63,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
     FILE *fp = fopen(filename, "wb");
     if (!fp) {
+        free(filename);
         return 0;
     }
     fwrite(data, size, 1, fp);
