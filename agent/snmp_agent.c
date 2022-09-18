@@ -2080,11 +2080,13 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         asp->orig_pdu = NULL;
     }
     if (asp->pdu) {
+        int rc;
+
         asp->pdu->command = SNMP_MSG_RESPONSE;
         asp->pdu->errstat = asp->status;
         asp->pdu->errindex = asp->index;
-        if (!snmp_send(asp->session, asp->pdu) &&
-             asp->session->s_snmp_errno != SNMPERR_SUCCESS) {
+        rc = snmp_send(asp->session, asp->pdu);
+        if (rc == 0 && asp->session->s_snmp_errno != SNMPERR_SUCCESS) {
             netsnmp_variable_list *var_ptr;
             snmp_perror("send response");
             for (var_ptr = asp->pdu->variables; var_ptr != NULL;
@@ -2103,8 +2105,9 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                     SNMP_FREE(c_oid);
                 }
             }
-            snmp_free_pdu(asp->pdu);
         }
+        if (rc == 0)
+            snmp_free_pdu(asp->pdu);
         snmp_increment_statistic(STAT_SNMPOUTPKTS);
         snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
         asp->pdu = NULL;
