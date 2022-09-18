@@ -253,20 +253,16 @@ void
 netsnmp_certs_shutdown(void)
 {
     DEBUGMSGT(("cert:util:shutdown","shutdown\n"));
-    if (_maps) {
-        CONTAINER_FREE_ALL(_maps, NULL);
-        CONTAINER_FREE(_maps);
-        _maps = NULL;
-    }
-    if (NULL != _certs) {
-        CONTAINER_FREE_ALL(_certs, NULL);
-        CONTAINER_FREE(_certs);
-        _certs = NULL;
-    }
-    if (NULL != _keys) {
-        CONTAINER_FREE_ALL(_keys, NULL);
-        CONTAINER_FREE(_keys);
-        _keys = NULL;
+    netsnmp_container ***c, **containers[] = {
+        &_tlstmParams, &_tlstmAddr, &_maps, &_certs, &_keys, NULL
+    };
+
+    for (c = containers; *c; c++) {
+        if (!**c)
+            continue;
+        CONTAINER_FREE_ALL(**c, NULL);
+        CONTAINER_FREE(**c);
+        **c = NULL;
     }
     _netsnmp_release_trustcerts();
 }

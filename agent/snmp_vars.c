@@ -367,8 +367,11 @@ const oid       nullOid[] = { 0, 0 };
 const int       nullOidLen = sizeof(nullOid);
 
 void
-shutdown_agent(void) {
-
+shutdown_agent(void)
+{
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && NETSNMP_TRANSPORT_TLSBASE_DOMAIN
+    netsnmp_certs_shutdown();
+#endif
     /* probably some of this can be called as shutdown callback */
     shutdown_tree();
     clear_context();
