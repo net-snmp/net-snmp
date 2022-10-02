@@ -21,7 +21,7 @@
 	    them before continuing!
 	  </text>
 	  <commands>
-	    <command expectfailure="1">find . -name 'net-snmp-5*' | egrep '^[^\?]'</command>
+	    <command expectfailure="1">find . -name 'net-snmp-5*' | grep -E '^[^\?]'</command>
 	  </commands>
 	</step>
 	<step type="system" title="Setup Check">
@@ -130,7 +130,7 @@
 	  this step finds outstanding modified files you need to check
 	  them in or revert them before continuing!</text>
 	  <commands>
-	    <command expectfailure="1">git status --porcelain | egrep '^[^\?]'</command>
+	    <command expectfailure="1">git status --porcelain | grep -E '^[^\?]'</command>
 	  </commands>
 	</step>
       </steps>

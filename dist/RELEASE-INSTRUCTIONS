@@ -87,7 +87,7 @@ STEP: 1.6: Check for changes
 
   Commands to execute:
 
-    svn -u status | egrep '^[^\?]'
+    svn -u status | grep -E '^[^\?]'
 
   (Leaving Step: 1)
 

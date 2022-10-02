@@ -364,10 +364,10 @@ nsb_make()
    # checking $? would only get us the rc from tee, which is useless
 
    nsb_info "Checking for errors..."
-   egrep -i "error|fail|warn|no such|exists|t find |ermission denied" $nsb_make_OUTPUT \
+   grep -E -i "error|fail|warn|no such|exists|t find |ermission denied" $nsb_make_OUTPUT \
          > nsb_make-$target-allerrs.$NSB_DATE
    # allow for a few exceptions
-   egrep -v -i "^ok|testing .*failure|[a-z&_](fail|error)|warn|error(mib|\.3)|(LOG|SNMP)_ERR|In function|= FAILURE|DEBUGMSG|/\*|static library .* is not portable" nsb_make-$target-allerrs.$NSB_DATE \
+   grep -E -v -i "^ok|testing .*failure|[a-z&_](fail|error)|warn|error(mib|\.3)|(LOG|SNMP)_ERR|In function|= FAILURE|DEBUGMSG|/\*|static library .* is not portable" nsb_make-$target-allerrs.$NSB_DATE \
          > nsb_make-$target-errs.$NSB_DATE
    if [ -s nsb_make-$target-errs.$NSB_DATE ]; then
       nsb_prompt "press enter to view errors"
