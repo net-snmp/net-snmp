@@ -546,11 +546,16 @@ get_field_names(void)
             break;
         }
         if (fields == 1) {
-            column = (struct column *) malloc(sizeof(*column));
+            column = malloc(sizeof(*column));
         } else {
-            column =
-                (struct column *) realloc(column,
-                                          fields * sizeof(*column));
+            struct column *tmp_column;
+
+            tmp_column = realloc(column, fields * sizeof(*column));
+            if (!tmp_column) {
+                fprintf(stderr, "Out of memory\n");
+                exit(1);
+            }
+            column = tmp_column;
         }
         column[fields - 1].label = strdup(name_p);
         column[fields - 1].width = strlen(name_p);
