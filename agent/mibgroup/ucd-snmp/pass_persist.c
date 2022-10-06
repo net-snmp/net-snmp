@@ -452,7 +452,7 @@ setPassPersist(int action,
             netsnmp_internal_pass_set_format(buf2, var_val, var_val_type,
                                              var_val_len);
             free(persistpassthru->command);
-            if (asprintf(&persistpassthru->command, "set\n%s\n%s\n", buf,
+            if (asprintf(&persistpassthru->command, "set\n%s\n%s", buf,
                          buf2) < 0) {
                 persistpassthru->command = NULL;
                 return SNMP_ERR_GENERR;
