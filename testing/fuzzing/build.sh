@@ -1,9 +1,20 @@
 #!/bin/sh -eu
 
+scriptdir=$(cd "$(dirname "$0")" && pwd)
+
 # Only build the fuzz tests on Linux systems.
 [ "$(uname)" = Linux ] || exit 0
-
-scriptdir=$(cd "$(dirname "$0")" && pwd)
+# Only build the fuzz tests if not cross-compiling.
+target=$($("${scriptdir}/../../net-snmp-config" --build-command) -v 2>&1 |
+      sed -n 's/^Target: *//p')
+echo "target=$target"
+case "${target}" in
+    *-linux)
+	;;
+    *)
+	echo "Cross-compiling - not building fuzzing tests"
+	exit 0;;
+esac
 
 # Only set environment variables if the oss-fuzz build infrastructure is not
 # used.
