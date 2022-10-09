@@ -195,23 +195,23 @@ snmp_parse_var_op(u_char * data,
 
 /*
  * u_char * snmp_build_var_op(
- * u_char *data      IN - pointer to the beginning of the output buffer
- * oid *var_name        IN - object id of variable 
+ * u_char *data         IN - pointer to the beginning of the output buffer
+ * const oid *var_name  IN - object id of variable 
  * int *var_name_len    IN - length of object id 
  * u_char var_val_type  IN - type of variable 
  * int    var_val_len   IN - length of variable 
- * u_char *var_val      IN - value of variable 
+ * const void *var_val  IN - value of variable
  * int *listlength      IN/OUT - number of valid bytes left in
  * output buffer 
  */
 
 u_char         *
 snmp_build_var_op(u_char * data,
-                  oid * var_name,
+                  const oid * var_name,
                   size_t * var_name_len,
                   u_char var_val_type,
                   size_t var_val_len,
-                  u_char * var_val, size_t * listlength)
+                  const void * var_val, size_t * listlength)
 {
     size_t          dummyLen, headerLen;
     u_char         *dataPtr;
@@ -247,14 +247,14 @@ snmp_build_var_op(u_char * data,
     switch (var_val_type) {
     case ASN_INTEGER:
         data = asn_build_int(data, listlength, var_val_type,
-                             (long *) var_val, var_val_len);
+                             var_val, var_val_len);
         break;
     case ASN_GAUGE:
     case ASN_COUNTER:
     case ASN_TIMETICKS:
     case ASN_UINTEGER:
         data = asn_build_unsigned_int(data, listlength, var_val_type,
-                                      (u_long *) var_val, var_val_len);
+                                      var_val, var_val_len);
         break;
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_COUNTER64:
@@ -262,8 +262,7 @@ snmp_build_var_op(u_char * data,
 #endif
     case ASN_COUNTER64:
         data = asn_build_unsigned_int64(data, listlength, var_val_type,
-                                        (struct counter64 *) var_val,
-                                        var_val_len);
+                                        var_val, var_val_len);
         break;
     case ASN_OCTET_STR:
     case ASN_IPADDRESS:
@@ -274,7 +273,7 @@ snmp_build_var_op(u_char * data,
         break;
     case ASN_OBJECT_ID:
         data = asn_build_objid(data, listlength, var_val_type,
-                               (oid *) var_val, var_val_len / sizeof(oid));
+                               var_val, var_val_len / sizeof(oid));
         break;
     case ASN_NULL:
         data = asn_build_null(data, listlength, var_val_type);
@@ -291,16 +290,15 @@ snmp_build_var_op(u_char * data,
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
         data = asn_build_float(data, listlength, var_val_type,
-                               (float *) var_val, var_val_len);
+                               var_val, var_val_len);
         break;
     case ASN_OPAQUE_DOUBLE:
         data = asn_build_double(data, listlength, var_val_type,
-                                (double *) var_val, var_val_len);
+                                var_val, var_val_len);
         break;
     case ASN_OPAQUE_I64:
         data = asn_build_signed_int64(data, listlength, var_val_type,
-                                      (struct counter64 *) var_val,
-                                      var_val_len);
+                                      var_val, var_val_len);
         break;
 #endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
     default:

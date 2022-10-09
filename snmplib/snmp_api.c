@@ -3395,8 +3395,7 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
 
         DEBUGDUMPSECTION("send", "VarBind");
         cp = snmp_build_var_op(cp, vp->name, &vp->name_length, vp->type,
-                               vp->val_len, (u_char *) vp->val.string,
-                               out_length);
+                               vp->val_len, vp->val.string, out_length);
         DEBUGINDENTLESS();
         if (cp == NULL) {
             if (save_vp && (pdu->flags & UCD_MSG_FLAG_BULK_TOOBIG)) {
