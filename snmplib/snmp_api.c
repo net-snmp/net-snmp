@@ -3303,8 +3303,7 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
         cp = asn_build_objid(cp, out_length,
                              (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                        ASN_OBJECT_ID),
-                             (oid *) pdu->enterprise,
-                             pdu->enterprise_length);
+                             pdu->enterprise, pdu->enterprise_length);
         DEBUGINDENTLESS();
         if (cp == NULL)
             return NULL;

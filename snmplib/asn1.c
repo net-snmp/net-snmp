@@ -1583,7 +1583,7 @@ asn_parse_objid(u_char * data,
 u_char         *
 asn_build_objid(u_char * data,
                 size_t * datalength,
-                u_char type, oid * objid, size_t objidlength)
+                u_char type, const oid * objid, size_t objidlength)
 {
     /*
      * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
@@ -1592,7 +1592,7 @@ asn_build_objid(u_char * data,
      * lastbyte ::= 0 7bitvalue
      */
     size_t          asnlength;
-    register oid   *op = objid;
+    const oid      *op = objid;
     u_char          objid_size[MAX_OID_LEN];
     register u_long objid_val;
     u_long          first_objid_val;
