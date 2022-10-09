@@ -94,7 +94,7 @@ netsnmp_large_fd_is_set(SOCKET fd, netsnmp_large_fd_set * fdset)
 NETSNMP_STATIC_INLINE void LFD_SET(unsigned n, fd_set *p)
 {
     enum { nfdbits = 8 * sizeof(p->fds_bits[0]) };
-    __fd_mask *fds_array = p->fds_bits;
+    NETSNMP_FD_MASK_TYPE *fds_array = p->fds_bits;
 
     fds_array[n / nfdbits] |= (1ULL << (n % nfdbits));
 }
@@ -102,7 +102,7 @@ NETSNMP_STATIC_INLINE void LFD_SET(unsigned n, fd_set *p)
 NETSNMP_STATIC_INLINE void LFD_CLR(unsigned n, fd_set *p)
 {
     enum { nfdbits = 8 * sizeof(p->fds_bits[0]) };
-    __fd_mask *fds_array = p->fds_bits;
+    NETSNMP_FD_MASK_TYPE *fds_array = p->fds_bits;
 
     fds_array[n / nfdbits] &= ~(1ULL << (n % nfdbits));
 }
@@ -110,7 +110,7 @@ NETSNMP_STATIC_INLINE void LFD_CLR(unsigned n, fd_set *p)
 NETSNMP_STATIC_INLINE unsigned LFD_ISSET(unsigned n, const fd_set *p)
 {
     enum { nfdbits = 8 * sizeof(p->fds_bits[0]) };
-    const __fd_mask *fds_array = p->fds_bits;
+    const NETSNMP_FD_MASK_TYPE *fds_array = p->fds_bits;
 
     return (fds_array[n / nfdbits] & (1ULL << (n % nfdbits))) != 0;
 }

@@ -26591,6 +26591,53 @@ $as_echo "#define in_addr_t unsigned long" >>confdefs.h
 fi
 
 #
+# Determine the type of fd_set::fds_bits on Unix systems.
+#
+
+netsnmp_save_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS -Werror"
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for the type of fd_set::fds_bits" >&5
+$as_echo_n "checking for the type of fd_set::fds_bits... " >&6; }
+for type in __fd_mask __int32_t unknown; do
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <sys/select.h>
+#include <stddef.h>
+#include <string.h>
+
+int
+main ()
+{
+
+      fd_set set;
+      memset(&set, 0, sizeof(set));
+      {
+        ${type} *fds_array = set.fds_bits;
+        return fds_array != NULL;
+      }
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${type}" >&5
+$as_echo "${type}" >&6; }
+
+cat >>confdefs.h <<_ACEOF
+#define NETSNMP_FD_MASK_TYPE ${type}
+_ACEOF
+
+
+CFLAGS=$netsnmp_save_CFLAGS
+
+#
 # Check for the type of the fifth argument of select()
 #
 
