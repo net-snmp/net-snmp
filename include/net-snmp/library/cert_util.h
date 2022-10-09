@@ -15,6 +15,7 @@ extern "C" {
     void netsnmp_certs_init(void);
     NETSNMP_IMPORT
     void netsnmp_certs_agent_init(void);
+    NETSNMP_IMPORT
     void netsnmp_certs_shutdown(void);
     void netsnmp_certs_load(void);
     netsnmp_container *netsnmp_cert_get_trustlist(void);
