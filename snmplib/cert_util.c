@@ -1409,7 +1409,7 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
                 }
             }
 
-            if (NULL != okey) {
+            if (okey && cert) {
                 DEBUGMSGT(("cert:read:key", "found key with cert in %s\n",
                            cert->info.filename));
                 key = _add_key(okey, dirname, filename, NULL);
@@ -1423,6 +1423,9 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
                     EVP_PKEY_free(okey);
                     okey = NULL;
                 }
+            } else if (okey) {
+                EVP_PKEY_free(okey);
+                okey = NULL;
             }
 
             break;
