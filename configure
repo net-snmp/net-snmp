@@ -27563,8 +27563,8 @@ printf "%s\n" "$NETSNMP_DEFAULT_MIBS" >&6; }
 #
 
 if echo " $agent_module_list " | \
-   fgrep ' agentx/agentx_config ' | \
-   fgrep ' agentx/protocol ' > /dev/null ; then
+   $FGREP ' agentx/agentx_config ' | \
+   $FGREP ' agentx/protocol ' > /dev/null ; then
    NETSNMP_HAVE_AGENTX_LIBS_TRUE=''
    NETSNMP_HAVE_AGENTX_LIBS_FALSE='#'
 else
@@ -31628,6 +31628,52 @@ if test "x$ac_cv_type_in_addr_t" != xyes; then
 printf "%s\n" "#define in_addr_t unsigned long" >>confdefs.h
 
 fi
+
+#
+# Determine the type of fd_set::fds_bits on Unix systems.
+#
+
+netsnmp_save_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS -Werror"
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for the type of fd_set::fds_bits" >&5
+printf %s "checking for the type of fd_set::fds_bits... " >&6; }
+for type in __fd_mask __int32_t unknown; do
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <sys/select.h>
+#include <stddef.h>
+#include <string.h>
+
+int
+main (void)
+{
+
+      fd_set set;
+      memset(&set, 0, sizeof(set));
+      {
+        ${type} *fds_array = set.fds_bits;
+        return fds_array != NULL;
+      }
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+done
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ${type}" >&5
+printf "%s\n" "${type}" >&6; }
+
+printf "%s\n" "#define NETSNMP_FD_MASK_TYPE ${type}" >>confdefs.h
+
+
+CFLAGS=$netsnmp_save_CFLAGS
 
 #
 # Check for the type of the fifth argument of select()

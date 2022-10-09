@@ -1609,6 +1609,9 @@
 /* testing code sections. */
 #undef NETSNMP_ENABLE_TESTING_CODE
 
+/* Type of fd_set::fds_bits */
+#undef NETSNMP_FD_MASK_TYPE
+
 /* if defined always use default auth/priv protocol when creating usmUsers */
 #undef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
 
