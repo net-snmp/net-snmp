@@ -177,9 +177,9 @@ snmp_realloc(u_char ** buf, size_t * buf_len)
     }
 
     if (*buf == NULL) {
-        new_buf = (u_char *) malloc(new_buf_len);
+        new_buf = malloc(new_buf_len);
     } else {
-        new_buf = (u_char *) realloc(*buf, new_buf_len);
+        new_buf = realloc(*buf, new_buf_len);
     }
 
     if (new_buf != NULL) {
