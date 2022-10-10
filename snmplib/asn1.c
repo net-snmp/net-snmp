@@ -1557,6 +1557,22 @@ asn_parse_objid(u_char * data,
     return bufp;
 }
 
+/* Number of bytes occupied by an ASN.1-encoded object identifier. */
+static unsigned int encoded_oid_len(oid objid)
+{
+    unsigned int encoded_len = 0;
+
+    if (objid == 0)
+        return 1;
+
+    while (objid) {
+        encoded_len++;
+        objid >>= 7;
+    }
+
+    return encoded_len;
+}
+
 /**
  * @internal
  * asn_build_objid - Builds an ASN object identifier object containing the
@@ -1593,7 +1609,6 @@ asn_build_objid(u_char * data,
      */
     size_t          asnlength;
     const oid      *op = objid;
-    u_char          objid_size[MAX_OID_LEN];
     register u_long objid_val;
     u_long          first_objid_val;
     register int    i;
@@ -1642,24 +1657,8 @@ asn_build_objid(u_char * data,
      * calculate the number of bytes needed to store the encoded value 
      */
     for (i = 1, asnlength = 0;;) {
-
         CHECK_OVERFLOW_U(objid_val,5);
-        if (objid_val < (unsigned) 0x80) {
-            objid_size[i] = 1;
-            asnlength += 1;
-        } else if (objid_val < (unsigned) 0x4000) {
-            objid_size[i] = 2;
-            asnlength += 2;
-        } else if (objid_val < (unsigned) 0x200000) {
-            objid_size[i] = 3;
-            asnlength += 3;
-        } else if (objid_val < (unsigned) 0x10000000) {
-            objid_size[i] = 4;
-            asnlength += 4;
-        } else {
-            objid_size[i] = 5;
-            asnlength += 5;
-        }
+        asnlength += encoded_oid_len(objid_val);
         i++;
         if (i >= (int) objidlength)
             break;
@@ -1682,39 +1681,18 @@ asn_build_objid(u_char * data,
     } else {
         for (i = 1, objid_val = first_objid_val, op = objid + 2;
              i < (int) objidlength; i++) {
+            unsigned int encoded_len;
+            int j;
+
             if (i != 1)
                 objid_val = (uint32_t)(*op++); /* already logged warning above */
-            switch (objid_size[i]) {
-            case 1:
-                *data++ = (u_char) objid_val;
-                break;
-
-            case 2:
-                *data++ = (u_char) ((objid_val >> 7) | 0x80);
-                *data++ = (u_char) (objid_val & 0x07f);
-                break;
-
-            case 3:
-                *data++ = (u_char) ((objid_val >> 14) | 0x80);
-                *data++ = (u_char) ((objid_val >> 7 & 0x7f) | 0x80);
-                *data++ = (u_char) (objid_val & 0x07f);
-                break;
-
-            case 4:
-                *data++ = (u_char) ((objid_val >> 21) | 0x80);
-                *data++ = (u_char) ((objid_val >> 14 & 0x7f) | 0x80);
-                *data++ = (u_char) ((objid_val >> 7 & 0x7f) | 0x80);
-                *data++ = (u_char) (objid_val & 0x07f);
-                break;
-
-            case 5:
-                *data++ = (u_char) ((objid_val >> 28) | 0x80);
-                *data++ = (u_char) ((objid_val >> 21 & 0x7f) | 0x80);
-                *data++ = (u_char) ((objid_val >> 14 & 0x7f) | 0x80);
-                *data++ = (u_char) ((objid_val >> 7 & 0x7f) | 0x80);
-                *data++ = (u_char) (objid_val & 0x07f);
-                break;
+            encoded_len = encoded_oid_len(objid_val);
+            for (j = encoded_len - 1; j >= 0; j--) {
+                data[j] = (objid_val & 0x7f) |
+                    (j == encoded_len - 1 ? 0 : 0x80);
+                objid_val >>= 7;
             }
+            data += encoded_len;
         }
     }
 
