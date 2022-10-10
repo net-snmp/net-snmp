@@ -1607,7 +1607,7 @@ asn_build_objid(u_char * data,
          * there are not, so make OID have two with value of zero 
          */
         objid_val = 0;
-        objidlength = 2;
+        objidlength = 1;
     } else if (objid[0] > 2) {
         ERROR_MSG("build objid: bad first subidentifier");
         return NULL;
@@ -1677,40 +1677,44 @@ asn_build_objid(u_char * data,
     /*
      * store the encoded OID value 
      */
-    for (i = 1, objid_val = first_objid_val, op = objid + 2;
-         i < (int) objidlength; i++) {
-        if (i != 1)
-            objid_val = (uint32_t)(*op++); /* already logged warning above */
-        switch (objid_size[i]) {
-        case 1:
-            *data++ = (u_char) objid_val;
-            break;
+    if (objidlength <= 1) {
+        *data++ = 0;
+    } else {
+        for (i = 1, objid_val = first_objid_val, op = objid + 2;
+             i < (int) objidlength; i++) {
+            if (i != 1)
+                objid_val = (uint32_t)(*op++); /* already logged warning above */
+            switch (objid_size[i]) {
+            case 1:
+                *data++ = (u_char) objid_val;
+                break;
 
-        case 2:
-            *data++ = (u_char) ((objid_val >> 7) | 0x80);
-            *data++ = (u_char) (objid_val & 0x07f);
-            break;
+            case 2:
+                *data++ = (u_char) ((objid_val >> 7) | 0x80);
+                *data++ = (u_char) (objid_val & 0x07f);
+                break;
 
-        case 3:
-            *data++ = (u_char) ((objid_val >> 14) | 0x80);
-            *data++ = (u_char) ((objid_val >> 7 & 0x7f) | 0x80);
-            *data++ = (u_char) (objid_val & 0x07f);
-            break;
+            case 3:
+                *data++ = (u_char) ((objid_val >> 14) | 0x80);
+                *data++ = (u_char) ((objid_val >> 7 & 0x7f) | 0x80);
+                *data++ = (u_char) (objid_val & 0x07f);
+                break;
 
-        case 4:
-            *data++ = (u_char) ((objid_val >> 21) | 0x80);
-            *data++ = (u_char) ((objid_val >> 14 & 0x7f) | 0x80);
-            *data++ = (u_char) ((objid_val >> 7 & 0x7f) | 0x80);
-            *data++ = (u_char) (objid_val & 0x07f);
-            break;
+            case 4:
+                *data++ = (u_char) ((objid_val >> 21) | 0x80);
+                *data++ = (u_char) ((objid_val >> 14 & 0x7f) | 0x80);
+                *data++ = (u_char) ((objid_val >> 7 & 0x7f) | 0x80);
+                *data++ = (u_char) (objid_val & 0x07f);
+                break;
 
-        case 5:
-            *data++ = (u_char) ((objid_val >> 28) | 0x80);
-            *data++ = (u_char) ((objid_val >> 21 & 0x7f) | 0x80);
-            *data++ = (u_char) ((objid_val >> 14 & 0x7f) | 0x80);
-            *data++ = (u_char) ((objid_val >> 7 & 0x7f) | 0x80);
-            *data++ = (u_char) (objid_val & 0x07f);
-            break;
+            case 5:
+                *data++ = (u_char) ((objid_val >> 28) | 0x80);
+                *data++ = (u_char) ((objid_val >> 21 & 0x7f) | 0x80);
+                *data++ = (u_char) ((objid_val >> 14 & 0x7f) | 0x80);
+                *data++ = (u_char) ((objid_val >> 7 & 0x7f) | 0x80);
+                *data++ = (u_char) (objid_val & 0x07f);
+                break;
+            }
         }
     }
 
@@ -3284,7 +3288,6 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
             }
         }
 
-        *(*pkt + *pkt_len - (++*offset)) = 0;
         *(*pkt + *pkt_len - (++*offset)) = 0;
     } else if (objid[0] > 2) {
         ERROR_MSG("build objid: bad first subidentifier");
