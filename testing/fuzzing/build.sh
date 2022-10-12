@@ -9,7 +9,7 @@ target=$($("${scriptdir}/../../net-snmp-config" --build-command) -v 2>&1 |
       sed -n 's/^Target: *//p')
 echo "target=$target"
 case "${target}" in
-    *-linux)
+    *-linux|*-linux-gnu)
 	;;
     *)
 	echo "Cross-compiling - not building fuzzing tests"
