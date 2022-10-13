@@ -32,7 +32,7 @@
 #define MAXPATHLEN 2048
 #endif
 
-#define DEFAULT_SOCK_PATH "/var/net-snmp/sshdomainsocket"
+#define DEFAULT_SOCK_PATH NETSNMP_PERSISTENT_DIRECTORY "/sshdomainsocket"
 
 #define NETSNMP_SSHTOSNMP_VERSION_NUMBER 1
 
@@ -122,42 +122,36 @@ main(int argc, char **argv) {
     
     /* send the prelim message and the credentials together using sendmsg() */
     {
-        struct msghdr m;
-        /*
-         * Ancillary data buffer, wrapped in a union in order to ensure it is
-         * suitably aligned.
-         */
-        union {
-            char buf[CMSG_SPACE(sizeof(struct ucred))];
-            struct cmsghdr cm;
-        } cmsg;
-        struct ucred *const ouruser = (void *)CMSG_DATA(&cmsg.cm);
+        struct msghdr msg = { 0 };
         struct iovec iov = { buf, buf_len };
+        struct ucred ouruser = { 0 };
+        struct cmsghdr *cmsg;
+	char cmsgbuf[CMSG_SPACE(sizeof(ouruser))];
 
-        /* Make sure that even padding fields get initialized.*/
-        memset(&cmsg, 0, sizeof(cmsg));
-        memset(&m, 0, sizeof(m));
+        ouruser.uid = getuid();
+        ouruser.gid = getgid();
+        ouruser.pid = getpid();
 
-        /* set up the message header */
-        cmsg.cm.cmsg_len = sizeof(cmsg);
-        cmsg.cm.cmsg_level = SOL_SOCKET;
-        cmsg.cm.cmsg_type = SCM_CREDENTIALS;
+        msg.msg_control = cmsgbuf;
+        msg.msg_controllen = sizeof(cmsgbuf);
 
-        ouruser->uid = getuid();
-        ouruser->gid = getgid();
-        ouruser->pid = getpid();
+	cmsg = CMSG_FIRSTHDR(&msg);
+	cmsg->cmsg_len = CMSG_LEN(sizeof(ouruser));
+	cmsg->cmsg_level = SOL_SOCKET;
+	cmsg->cmsg_type = SCM_CREDENTIALS;
+	memcpy(CMSG_DATA(cmsg), &ouruser, sizeof(ouruser));
 
-        m.msg_iov               = &iov;
-        m.msg_iovlen            = 1;
-        m.msg_control           = &cmsg;
-        m.msg_controllen        = sizeof(cmsg);
-        m.msg_flags             = 0;
-        
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+	iov.iov_base = buf;
+	iov.iov_len = buf_len;
+	msg.msg_iov = &iov;
+	msg.msg_iovlen = 1;
+
         DEBUG("sending to sock");
-        rc = sendmsg(sock, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+        rc = sendmsg(sock, &msg, MSG_NOSIGNAL|MSG_DONTWAIT);
         if (rc < 0) {
-            fprintf(stderr, "failed to send startup message\n");
-            DEBUG("failed to send startup message\n");
+            fprintf(stderr, "failed to send startup message: %s\n", strerror(errno));
             exit(1);
         }
     }
