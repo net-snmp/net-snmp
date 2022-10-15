@@ -1,17 +1,24 @@
 /* HEADER ASN OBJECT ID parsing and encoding */
 
 static const struct testdata_s {
-    oid      objid[4];
+    oid      objid[5];
     uint16_t objid_length;
-    u_char   encoded[8];
+    u_char   encoded[14];
     uint16_t encoded_length;
 } testdata[] = {
     { {},                0, { 6, 1, 0 },       3 },
     { { 0 },             1, { 6, 1, 0 },       3 },
+    { { 1 },             1, { 6, 1, 40 },      3 },
     { { 0, 0 },          2, { 6, 1, 0 },       3 },
     { { 1, 3 },          2, { 6, 1, 0x2b },    3 },
     { { 1, 3, 4 },       3, { 6, 2, 0x2b, 4 }, 4 },
     { { 1, 3, 4444444 }, 3, { 6, 5, 0x2b, 0x82, 0x8f, 0xa2, 0x1c }, 7 },
+    { { 0, 0, 4294967295, 0, 4294967295 }, 5,
+      { 6, 12, 0, 0x8f, 0xff, 0xff, 0xff, 0x7f, 0, 0x8f, 0xff, 0xff, 0xff, 0x7f },
+      14 },
+    { { 1, 3, 1ull << 32 }, 3, { 6, 2, 0x2b, 0 }, 4 },
+    { { 2, (1ull << 32) - 2 * 40 - 1 }, 2,
+      { 6, 5, 0x8f, 0xff, 0xff, 0xff, 0x7f }, 7 },
 };
 
 int i, j;
@@ -81,7 +88,10 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
             OKF(exp_len == objid_len, ("[%d] objid len %d <> %zd", i, exp_len,
                                        objid_len));
             if (exp_len == objid_len) {
-                int cmp_res = memcmp(t->objid, objid, objid_len * sizeof(oid));
+                int cmp_res = 0;
+                for (j = 0; j < objid_len; j++)
+                    if ((uint32_t)t->objid[j] != objid[j])
+                        cmp_res |= 1;
                 OKF(cmp_res == 0, ("[%d] asn_parse_objid() memcmp()", i));
                 if (cmp_res != 0) {
                     for (j = 0; j < objid_len; j++)
