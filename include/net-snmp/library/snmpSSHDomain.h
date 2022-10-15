@@ -19,14 +19,16 @@ extern          "C" {
 /*
  * The SNMP over SSH over IPv4 transport domain is identified by
  * transportDomainSshIpv4 as defined in RFC 3419.
+ *
+ * FIXME: above is wrong. Closest definition seems to be
+ * transportDomainTcpIpv4 and transportDomainTcpIpv6
+ *
+ * Looks like oid is 1.3.6.1.6.1.7 snmpSSHDomain from rfc5592
  */
 
 #define TRANSPORT_DOMAIN_SSH_IP		1,3,6,1,2,1,100,1,100
 NETSNMP_IMPORT const oid netsnmp_snmpSSHDomain[];
 enum { netsnmp_snmpSSHDomain_len = 9 };
-
-netsnmp_transport *netsnmp_ssh_transport(const struct sockaddr_in *addr,
-                                         int local);
 
 /*
  * "Constructor" for transport domain object.
