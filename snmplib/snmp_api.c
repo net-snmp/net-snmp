@@ -2094,6 +2094,7 @@ snmpv3_verify_msg(netsnmp_request_list *rp, netsnmp_pdu *pdu)
 {
     netsnmp_pdu    *rpdu;
 
+    /* XX: This function silently rejects. Add error handling. */
     if (!rp || !rp->pdu || !pdu)
         return 0;
     /*

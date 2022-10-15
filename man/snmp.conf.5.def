@@ -275,6 +275,8 @@ through the \fBsshtosnmp\fR unix socket.  The socket needs to be read/write
 privileged for SSH users that are allowed to connect to the SNMP
 service (VACM access still needs to be granted as well, most likely
 through the TSM security model).
+.IP "sshagent yes"
+Should ssh attempt to obtain keys from an ssh agent in addition to local keys.
 .IP "sshusername NAME"
 Sets the SSH user name for logging into the remote system.
 .IP "sshpubkey FILE"

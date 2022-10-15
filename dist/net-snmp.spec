@@ -57,6 +57,7 @@ BuildRequires: bzip2
 BuildRequires: gcc
 BuildRequires: perl
 BuildRequires: rpm-devel
+BuildRequires: libnl3-devel
 %if 0%{?netsnmp_embedded_perl}
 Requires: perl
 BuildRequires: perl(ExtUtils::Embed)
