@@ -2299,7 +2299,7 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
 
 
 static u_char  *
-snmpv3_header_build(netsnmp_session * session, netsnmp_pdu *pdu,
+snmpv3_header_build(netsnmp_session * session, const netsnmp_pdu *pdu,
                     u_char * packet, size_t * out_length,
                     size_t length, u_char ** msg_hdr_e)
 {
@@ -2330,7 +2330,7 @@ snmpv3_header_build(netsnmp_session * session, netsnmp_pdu *pdu,
     DEBUGDUMPHEADER("send", "SNMP Version Number");
     cp = asn_build_int(cp, out_length,
                        (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
-                                 ASN_INTEGER), (long *) &pdu->version,
+                                 ASN_INTEGER), (const long *) &pdu->version,
                        sizeof(pdu->version));
     DEBUGINDENTLESS();
     if (cp == NULL)
@@ -2520,7 +2520,7 @@ snmpv3_header_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
 #endif                          /* NETSNMP_USE_REVERSE_ASNENCODING */
 
 static u_char  *
-snmpv3_scopedPDU_header_build(netsnmp_pdu *pdu,
+snmpv3_scopedPDU_header_build(const netsnmp_pdu *pdu,
                               u_char * packet, size_t * out_length,
                               u_char ** spdu_e)
 {
@@ -3231,7 +3231,7 @@ snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
  * on error, returns NULL (likely an encoding problem). 
  */
 u_char         *
-snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
+snmp_pdu_build(const netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
 {
     u_char         *h1, *h1e, *h2, *h2e, *save_ptr;
     netsnmp_variable_list *vp, *save_vp = NULL;
@@ -3314,7 +3314,7 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
         DEBUGDUMPHEADER("send", "agent Address");
         cp = asn_build_string(cp, out_length,
                               (u_char) (ASN_IPADDRESS | ASN_PRIMITIVE),
-                              (u_char *) pdu->agent_addr, 4);
+                              (const u_char *) pdu->agent_addr, 4);
         DEBUGINDENTLESS();
         if (cp == NULL)
             return NULL;
@@ -3326,7 +3326,7 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
         cp = asn_build_int(cp, out_length,
                            (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                      ASN_INTEGER),
-                           (long *) &pdu->trap_type,
+                           (const long *) &pdu->trap_type,
                            sizeof(pdu->trap_type));
         DEBUGINDENTLESS();
         if (cp == NULL)
@@ -3339,7 +3339,7 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
         cp = asn_build_int(cp, out_length,
                            (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                      ASN_INTEGER),
-                           (long *) &pdu->specific_type,
+                           (const long *) &pdu->specific_type,
                            sizeof(pdu->specific_type));
         DEBUGINDENTLESS();
         if (cp == NULL)
@@ -3443,7 +3443,7 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
  */
 int
 snmp_pdu_realloc_rbuild(u_char ** pkt, size_t * pkt_len, size_t * offset,
-                        netsnmp_pdu *pdu)
+                        const netsnmp_pdu *pdu)
 {
 #ifndef VPCACHE_SIZE
 #define VPCACHE_SIZE 50
@@ -3605,7 +3605,7 @@ snmp_pdu_realloc_rbuild(u_char ** pkt, size_t * pkt_len, size_t * offset,
         rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
                                     (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE
                                               | ASN_INTEGER),
-                                    (long *) &pdu->specific_type,
+                                    (const long *) &pdu->specific_type,
                                     sizeof(pdu->specific_type));
         DEBUGINDENTLESS();
         if (rc == 0) {
@@ -3619,7 +3619,7 @@ snmp_pdu_realloc_rbuild(u_char ** pkt, size_t * pkt_len, size_t * offset,
         rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
                                     (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE
                                               | ASN_INTEGER),
-                                    (long *) &pdu->trap_type,
+                                    (const long *) &pdu->trap_type,
                                     sizeof(pdu->trap_type));
         DEBUGINDENTLESS();
         if (rc == 0) {
@@ -3633,7 +3633,7 @@ snmp_pdu_realloc_rbuild(u_char ** pkt, size_t * pkt_len, size_t * offset,
         rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, 1,
                                        (u_char) (ASN_IPADDRESS |
                                                  ASN_PRIMITIVE),
-                                       (u_char *) pdu->agent_addr, 4);
+                                       (const u_char *) pdu->agent_addr, 4);
         DEBUGINDENTLESS();
         if (rc == 0) {
             return 0;

@@ -409,10 +409,10 @@ typedef struct request_list {
                netsnmp_pdu *pdu, u_char *data, size_t length);
 
     NETSNMP_IMPORT
-    u_char         *snmp_pdu_build(netsnmp_pdu *, u_char *, size_t *);
+    u_char         *snmp_pdu_build(const netsnmp_pdu *, u_char *, size_t *);
 #ifdef NETSNMP_USE_REVERSE_ASNENCODING
     NETSNMP_IMPORT
-    u_char         *snmp_pdu_rbuild(netsnmp_pdu *, u_char *, size_t *);
+    u_char         *snmp_pdu_rbuild(const netsnmp_pdu *, u_char *, size_t *);
 #endif
     NETSNMP_IMPORT
     int             snmpv3_parse(netsnmp_pdu *, u_char *, size_t *,
@@ -491,7 +491,7 @@ typedef struct request_list {
 
     NETSNMP_IMPORT
     int        snmp_pdu_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
-                                size_t * offset, netsnmp_pdu *pdu);
+                                       size_t * offset, const netsnmp_pdu *pdu);
 #endif
 
 
