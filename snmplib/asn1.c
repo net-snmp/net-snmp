@@ -2091,26 +2091,26 @@ asn_build_unsigned_int64(u_char * data,
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
      */
 
-    register u_long low, high;
-    register u_long mask, mask2;
+    uint64_t        value;
     int             add_null_byte = 0;
-    size_t          intsize;
+    size_t          intsize = 8;
     u_char         *initdatap = data;
 
     if (countersize != sizeof(struct counter64)) {
-        _asn_size_err("build uint64", countersize,
-                      sizeof(struct counter64));
+        _asn_size_err("build uint64", countersize, sizeof(struct counter64));
         return NULL;
     }
-    intsize = 8;
-    low = cp->low;
-    high = cp->high;
 
-    CHECK_OVERFLOW_U(high,7);
-    CHECK_OVERFLOW_U(low,7);
+    {
+        u_long high = cp->high, low = cp->low;
 
-    mask = 0xff000000U;
-    if (high & 0x80000000U) {
+        CHECK_OVERFLOW_U(high,7);
+        CHECK_OVERFLOW_U(low,7);
+
+        value = ((uint64_t)cp->high << 32) | cp->low;
+    }
+
+    if (value >> 63) {
         /*
          * if MSB is set 
          */
@@ -2118,17 +2118,15 @@ asn_build_unsigned_int64(u_char * data,
         intsize++;
     } else {
         /*
-         * Truncate "unnecessary" bytes off of the most significant end of this 2's
-         * complement integer.
+         * Truncate "unnecessary" bytes off of the most significant end of this
+         * 2's complement integer.
          * There should be no sequence of 9 consecutive 1's or 0's at the most
          * significant end of the integer.
          */
-        mask2 = 0xff800000U;
-        while ((((high & mask2) == 0) || ((high & mask2) == mask2))
-               && intsize > 1) {
+        static const uint64_t mask = 0xff8ull << 52;
+        while (((value & mask) == 0 || (value & mask) == mask) && intsize > 1) {
             intsize--;
-            high = ((high & 0x00ffffffu) << 8) | ((low & mask) >> 24);
-            low = (low & 0x00ffffffu) << 8;
+            value <<= 8;
         }
     }
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
@@ -2193,10 +2191,8 @@ asn_build_unsigned_int64(u_char * data,
         intsize--;
     }
     while (intsize--) {
-        *data++ = (u_char) (high >> 24);
-        high = ((high & 0x00ffffff) << 8) | ((low & mask) >> 24);
-        low = (low & 0x00ffffff) << 8;
-
+        *data++ = value >> 56;
+        value <<= 8;
     }
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
     DEBUGIF("dumpv_send") {
