@@ -1246,7 +1246,7 @@ int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
 #ifdef ETHTOOL_GLINKSETTINGS
     {
         /*
-         * For Linux kernel v5.2 __ETHTOOL_LINK_MODE_MASK_NBITS == 67 or
+         * For Linux kernel v6.0 __ETHTOOL_LINK_MODE_MASK_NBITS == 93 or
          * 3 32-bit words. Increase the 'nwords' constant if necessary.
          */
         enum { mask_nwords = 4 };
