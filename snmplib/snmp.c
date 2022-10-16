@@ -193,16 +193,16 @@ snmp_parse_var_op(u_char * data,
     return data;
 }
 
-/*
- * u_char * snmp_build_var_op(
- * u_char *data         IN - pointer to the beginning of the output buffer
- * const oid *var_name  IN - object id of variable 
- * int *var_name_len    IN - length of object id 
- * u_char var_val_type  IN - type of variable 
- * int    var_val_len   IN - length of variable 
- * const void *var_val  IN - value of variable
- * int *listlength      IN/OUT - number of valid bytes left in
- * output buffer 
+/**
+ * ASN encode a varbind
+ *
+ * @param data[in]           pointer to the beginning of the output buffer
+ * @param var_name[in]       object id of variable
+ * @param var_name_len[in]   length of object id
+ * @param var_val_type[in]   type of variable
+ * @param var_val_len[in]    length of variable
+ * @param var_val[in]        value of variable
+ * @param listlength[in|out] number of valid bytes left in output buffer
  */
 
 u_char         *
@@ -213,26 +213,15 @@ snmp_build_var_op(u_char * data,
                   size_t var_val_len,
                   const void * var_val, size_t * listlength)
 {
-    size_t          dummyLen, headerLen;
-    u_char         *dataPtr;
+    const size_t    headerLen = 4;
+    size_t          sequenceLen;
+    u_char   *const dataPtr = data;
 
-    dummyLen = *listlength;
-    dataPtr = data;
-#if 0
-    data = asn_build_sequence(data, &dummyLen,
-                              (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                              0);
-    if (data == NULL) {
+    if (*listlength < headerLen)
         return NULL;
-    }
-#endif
-    if (dummyLen < 4)
-        return NULL;
-    data += 4;
-    dummyLen -= 4;
-
-    headerLen = data - dataPtr;
+    data += headerLen;
     *listlength -= headerLen;
+
     DEBUGDUMPHEADER("send", "Name");
     data = asn_build_objid(data, listlength,
                            (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
@@ -314,11 +303,10 @@ snmp_build_var_op(u_char * data,
     if (data == NULL) {
         return NULL;
     }
-    dummyLen = (data - dataPtr) - headerLen;
 
-    asn_build_sequence(dataPtr, &dummyLen,
-                       (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                       dummyLen);
+    sequenceLen = (data - dataPtr) - headerLen;
+    asn_build_sequence(dataPtr, &sequenceLen, ASN_SEQUENCE | ASN_CONSTRUCTOR,
+                       headerLen);
     return data;
 }
 
