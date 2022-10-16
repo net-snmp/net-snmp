@@ -3317,7 +3317,7 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
         /*
          * Encode the first value.  
          */
-        if (!store_byte(pkt, pkt_len, offset, r, objid[0]))
+        if (!store_byte(pkt, pkt_len, offset, r, 40 * objid[0]))
             return 0;
     } else {
         for (i = objidlength - 1; i >= 2; i--) {
