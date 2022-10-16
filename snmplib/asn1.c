@@ -1608,7 +1608,6 @@ asn_build_objid(u_char * data,
      * lastbyte ::= 0 7bitvalue
      */
     size_t          asnlength;
-    const oid      *op = objid;
     register u_long objid_val;
     u_long          first_objid_val;
     register int    i;
@@ -1631,20 +1630,17 @@ asn_build_objid(u_char * data,
         /*
          * encode the first value 
          */
-        objid_val = (op[0] * 40);
+        objid_val = objid[0] * 40;
         objidlength = 2;
-        op++;
     } else {
         /*
          * combine the first two values 
          */
-        if ((op[1] > 40) &&
-            (op[0] < 2)) {
+        if (objid[1] > 40 && objid[0] < 2) {
             ERROR_MSG("build objid: bad second subidentifier");
             return NULL;
         }
-        objid_val = (op[0] * 40) + op[1];
-        op += 2;
+        objid_val = objid[0] * 40 + objid[1];
     }
     first_objid_val = objid_val;
     CHECK_OVERFLOW_U(first_objid_val, 14);
@@ -1658,21 +1654,22 @@ asn_build_objid(u_char * data,
     /*
      * calculate the number of bytes needed to store the encoded value 
      */
-    for (i = 1, asnlength = 0;;) {
-        CHECK_OVERFLOW_U(objid_val,5);
-        asnlength += encoded_oid_len(objid_val);
-        i++;
-        if (i >= (int) objidlength)
-            break;
-        objid_val = *op++;	/* XXX - doesn't handle 2.X (X > 40) */
+    if (objidlength <= 1) {
+        asnlength = encoded_oid_len(first_objid_val);
+    } else {
+        asnlength = 0;
+        for (i = 1; i < objidlength; i++) {
+            objid_val = i == 1 ? first_objid_val : objid[i];
+            CHECK_OVERFLOW_U(objid_val, 5);
+            asnlength += encoded_oid_len(objid_val);
+        }
     }
 
     /*
      * store the ASN.1 tag and length 
      */
     data = asn_build_header(data, datalength, type, asnlength);
-    if (_asn_build_header_check
-        ("build objid", data, *datalength, asnlength))
+    if (_asn_build_header_check("build objid", data, *datalength, asnlength))
         return NULL;
 
     /*
@@ -1681,13 +1678,11 @@ asn_build_objid(u_char * data,
     if (objidlength <= 1) {
         *data++ = 0;
     } else {
-        for (i = 1, objid_val = first_objid_val, op = objid + 2;
-             i < (int) objidlength; i++) {
+        for (i = 1; i < objidlength; i++) {
             unsigned int encoded_len;
             int j;
 
-            if (i != 1)
-                objid_val = (uint32_t)(*op++); /* already logged warning above */
+            objid_val = (uint32_t)(i == 1 ? first_objid_val : objid[i]);
             encoded_len = encoded_oid_len(objid_val);
             for (j = encoded_len - 1; j >= 0; j--) {
                 data[j] = (objid_val & 0x7f) |
