@@ -1619,7 +1619,8 @@ asn_build_objid(u_char * data,
      */
     if (objidlength == 0) {
         /*
-         * there are not, so make OID have two with value of zero 
+         * there are not, so make the OID have two sub-identifiers with value
+         * zero. Both sub-identifiers are encoded as a single byte.
          */
         objid_val = 0;
         objidlength = 1;
