@@ -3221,6 +3221,52 @@ asn_realloc_rbuild_sequence(u_char ** pkt, size_t * pkt_len,
 
 /**
  * @internal
+ * Store a single byte while reverse encoding.
+ * @param pkt[in|out]     Start of the buffer.
+ * @param pkt_len[in|out] Size of the buffer in bytes.
+ * @param offset[in|out]  Offset from the end of the buffer where to write.
+ * @param r[in]           If not zero, increase the buffer size if needed.
+ * @param byte[in]        Data to store.
+ *
+ * @return 1 on success, 0 on error.
+ */
+static int store_byte(uint8_t **pkt, size_t *pkt_len, size_t *offset, int r,
+                      uint8_t byte)
+{
+    netsnmp_assert(*offset <= *pkt_len);
+    if (*offset >= *pkt_len && (!r || !asn_realloc(pkt, pkt_len)))
+        return 0;
+    netsnmp_assert(*offset < *pkt_len);
+    *(*pkt + *pkt_len - (++*offset)) = byte;
+    return 1;
+}
+
+/**
+ * @internal
+ * Store 32 bits while reverse encoding.
+ * @param pkt[in|out]     Start of the buffer.
+ * @param pkt_len[in|out] Size of the buffer in bytes.
+ * @param offset[in|out]  Offset from the end of the buffer where to write.
+ * @param r[in]           If not zero, increase the buffer size if needed.
+ * @param subid[in]       Data to store.
+ *
+ * @return 1 on success, 0 on error.
+ */
+static int store_uint32(uint8_t **pkt, size_t *pkt_len, size_t *offset, int r,
+                        uint32_t subid)
+{
+    if (!store_byte(pkt, pkt_len, offset, r, subid & 0x7f))
+        return 0;
+
+    for (subid >>= 7; subid; subid >>= 7)
+        if (!store_byte(pkt, pkt_len, offset, r, subid | 0x80))
+            return 0;
+
+    return 1;
+}
+
+/**
+ * @internal
  * builds an ASN object containing an objid.
  *
  * @see asn_build_objid
@@ -3259,15 +3305,11 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
      */
     if (objidlength == 0) {
         /*
-         * There are not, so make OID have two with value of zero.  
+         * There are not, so make the OID have two sub-identifiers with value
+         * zero. Encode both sub-identifiers as a single byte.
          */
-        while ((*pkt_len - *offset) < 2) {
-            if (!(r && asn_realloc(pkt, pkt_len))) {
-                return 0;
-            }
-        }
-
-        *(*pkt + *pkt_len - (++*offset)) = 0;
+        if (!store_byte(pkt, pkt_len, offset, r, 0))
+            return 0;
     } else if (objid[0] > 2) {
         ERROR_MSG("build objid: bad first subidentifier");
         return 0;
@@ -3275,70 +3317,33 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
         /*
          * Encode the first value.  
          */
-        if (((*pkt_len - *offset) < 1)
-            && !(r && asn_realloc(pkt, pkt_len))) {
+        if (!store_byte(pkt, pkt_len, offset, r, objid[0]))
             return 0;
-        }
-        *(*pkt + *pkt_len - (++*offset)) = (u_char) objid[0];
     } else {
-        for (i = objidlength; i > 2; i--) {
-            tmpint = objid[i - 1];
-            CHECK_OVERFLOW_U(tmpint,12);
-
-            if (((*pkt_len - *offset) < 1)
-                && !(r && asn_realloc(pkt, pkt_len))) {
+        for (i = objidlength - 1; i >= 2; i--) {
+            tmpint = objid[i];
+            CHECK_OVERFLOW_U(tmpint, 12);
+            if (!store_uint32(pkt, pkt_len, offset, r, tmpint))
                 return 0;
-            }
-            *(*pkt + *pkt_len - (++*offset)) = (u_char) tmpint & 0x7f;
-            tmpint >>= 7;
-
-            while (tmpint > 0) {
-                if (((*pkt_len - *offset) < 1)
-                    && !(r && asn_realloc(pkt, pkt_len))) {
-                    return 0;
-                }
-                *(*pkt + *pkt_len - (++*offset)) =
-                    (u_char) ((tmpint & 0x7f) | 0x80);
-                tmpint >>= 7;
-            }
         }
 
         /*
          * Combine the first two values.  
          */
-        if ((objid[1] > 40) &&
-            (objid[0] < 2)) {
+        if (objid[1] > 40 && objid[0] < 2) {
             ERROR_MSG("build objid: bad second subidentifier");
             return 0;
         }
-        tmpint = ((objid[0] * 40) + objid[1]);
-        if (((*pkt_len - *offset) < 1)
-            && !(r && asn_realloc(pkt, pkt_len))) {
+        if (!store_uint32(pkt, pkt_len, offset, r, objid[0] * 40 + objid[1]))
             return 0;
-        }
-        *(*pkt + *pkt_len - (++*offset)) = (u_char) tmpint & 0x7f;
-        tmpint >>= 7;
-
-        while (tmpint > 0) {
-            if (((*pkt_len - *offset) < 1)
-                && !(r && asn_realloc(pkt, pkt_len))) {
-                return 0;
-            }
-            *(*pkt + *pkt_len - (++*offset)) =
-                (u_char) ((tmpint & 0x7f) | 0x80);
-            tmpint >>= 7;
-        }
     }
 
     tmpint = *offset - start_offset;
-    if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type,
-                                  (*offset - start_offset))) {
-        if (_asn_realloc_build_header_check(errpre, pkt, pkt_len,
-                                            (*offset - start_offset))) {
+    if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type, tmpint)) {
+        if (_asn_realloc_build_header_check(errpre, pkt, pkt_len, tmpint)) {
             return 0;
         } else {
-            DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset),
-                           (*offset - start_offset));
+            DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset), tmpint);
             DEBUGMSG(("dumpv_send", "  ObjID: "));
             DEBUGMSGOID(("dumpv_send", objid, objidlength));
             DEBUGMSG(("dumpv_send", "\n"));
