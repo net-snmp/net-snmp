@@ -1558,7 +1558,7 @@ asn_parse_objid(u_char * data,
 }
 
 /* Number of bytes occupied by an ASN.1-encoded object identifier. */
-static unsigned int encoded_oid_len(oid objid)
+static unsigned int encoded_oid_len(uint32_t objid)
 {
     unsigned int encoded_len = 0;
 
@@ -1647,6 +1647,7 @@ asn_build_objid(u_char * data,
         op += 2;
     }
     first_objid_val = objid_val;
+    CHECK_OVERFLOW_U(first_objid_val, 14);
 
     /*
      * ditch illegal calls now 
