@@ -9,6 +9,7 @@ cat >>"$2.c" <<EOF
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <agentx/protocol.h>
+#include <../agent/mibgroup/agentx/protocol.h>
 
 /* testing specific header */
 #include <net-snmp/library/testing.h>
