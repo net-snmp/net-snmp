@@ -642,7 +642,11 @@ netsnmp_udp_ctor(void)
 {
     udpDomain.name = netsnmpUDPDomain;
     udpDomain.name_length = netsnmpUDPDomain_len;
-    udpDomain.prefix = (const char**)calloc(2, sizeof(char *));
+    udpDomain.prefix = calloc(2, sizeof(char *));
+    if (!udpDomain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     udpDomain.prefix[0] = "udp";
 
     udpDomain.f_create_from_tstring_new = netsnmp_udp_create_tstring;
