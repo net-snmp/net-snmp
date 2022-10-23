@@ -98,7 +98,11 @@ netsnmp_alias_ctor(void)
 {
     aliasDomain.name = netsnmp_snmpALIASDomain;
     aliasDomain.name_length = OID_LENGTH(netsnmp_snmpALIASDomain);
-    aliasDomain.prefix = (const char **)calloc(2, sizeof(char *));
+    aliasDomain.prefix = calloc(2, sizeof(char *));
+    if (!aliasDomain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     aliasDomain.prefix[0] = "alias";
 
     aliasDomain.f_create_from_tstring_new = netsnmp_alias_create_tstring;

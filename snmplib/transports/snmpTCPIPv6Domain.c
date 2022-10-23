@@ -366,7 +366,11 @@ netsnmp_tcpipv6_ctor(void)
     tcp6Domain.name_length = OID_LENGTH(netsnmp_TCPIPv6Domain);
     tcp6Domain.f_create_from_tstring_new = netsnmp_tcp6_create_tstring;
     tcp6Domain.f_create_from_ostring     = netsnmp_tcp6_create_ostring;
-    tcp6Domain.prefix = (const char**)calloc(4, sizeof(char *));
+    tcp6Domain.prefix = calloc(4, sizeof(char *));
+    if (!tcp6Domain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     tcp6Domain.prefix[0] = "tcp6";
     tcp6Domain.prefix[1] = "tcpv6";
     tcp6Domain.prefix[2] = "tcpipv6";

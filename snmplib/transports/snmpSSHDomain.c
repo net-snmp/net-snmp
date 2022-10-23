@@ -977,7 +977,11 @@ netsnmp_ssh_ctor(void)
 {
     sshDomain.name = netsnmp_snmpSSHDomain;
     sshDomain.name_length = netsnmp_snmpSSHDomain_len;
-    sshDomain.prefix = (const char **)calloc(2, sizeof(char *));
+    sshDomain.prefix = calloc(2, sizeof(char *));
+    if (!sshDomain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     sshDomain.prefix[0] = "ssh";
 
     sshDomain.f_create_from_tstring_new = netsnmp_ssh_create_tstring;

@@ -518,7 +518,11 @@ netsnmp_unix_ctor(void)
 {
     unixDomain.name = netsnmp_UnixDomain;
     unixDomain.name_length = OID_LENGTH(netsnmp_UnixDomain);
-    unixDomain.prefix = (const char**)calloc(2, sizeof(char *));
+    unixDomain.prefix = calloc(2, sizeof(char *));
+    if (!unixDomain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     unixDomain.prefix[0] = "unix";
 
     unixDomain.f_create_from_tstring_new = netsnmp_unix_create_tstring;

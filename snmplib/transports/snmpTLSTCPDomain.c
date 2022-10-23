@@ -1078,7 +1078,11 @@ netsnmp_tlstcp_ctor(void)
 
     tlstcpDomain.name = netsnmpTLSTCPDomain;
     tlstcpDomain.name_length = netsnmpTLSTCPDomain_len;
-    tlstcpDomain.prefix = (const char**)calloc(3, sizeof(char *));
+    tlstcpDomain.prefix = calloc(3, sizeof(char *));
+    if (!tlstcpDomain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     tlstcpDomain.prefix[0] = "tlstcp";
     tlstcpDomain.prefix[1] = "tls";
 

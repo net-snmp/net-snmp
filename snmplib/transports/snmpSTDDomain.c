@@ -268,7 +268,11 @@ netsnmp_std_ctor(void)
 {
     stdDomain.name = netsnmp_snmpSTDDomain;
     stdDomain.name_length = OID_LENGTH(netsnmp_snmpSTDDomain);
-    stdDomain.prefix = (const char **)calloc(2, sizeof(char *));
+    stdDomain.prefix = calloc(2, sizeof(char *));
+    if (!stdDomain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     stdDomain.prefix[0] = "std";
 
     stdDomain.f_create_from_tstring_new = netsnmp_std_create_tstring;

@@ -476,7 +476,11 @@ netsnmp_ipx_ctor(void)
 {
     ipxDomain.name = netsnmpIPXDomain;
     ipxDomain.name_length = netsnmpIPXDomain_len;
-    ipxDomain.prefix = (const char**)calloc(2, sizeof(char *));
+    ipxDomain.prefix = calloc(2, sizeof(char *));
+    if (!ipxDomain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     ipxDomain.prefix[0] = "ipx";
 
     ipxDomain.f_create_from_tstring_new = netsnmp_ipx_create_tstring;

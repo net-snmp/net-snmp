@@ -459,7 +459,11 @@ netsnmp_udpshared_ctor(void)
     domain.name = netsnmpUDPsharedDomain;
     domain.name_length = netsnmpUDPsharedDomain_len;
 
-    domain.prefix = (const char**)calloc(2, sizeof(char *));
+    domain.prefix = calloc(2, sizeof(char *));
+    if (!domain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     domain.prefix[0] = "udpshared";
 
     domain.f_create_from_tstring_new = netsnmp_udpshared_create_tstring;

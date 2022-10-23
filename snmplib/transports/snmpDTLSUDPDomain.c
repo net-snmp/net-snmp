@@ -1675,6 +1675,10 @@ netsnmp_dtlsudp_ctor(void)
     dtlsudpDomain.name = netsnmpDTLSUDPDomain;
     dtlsudpDomain.name_length = netsnmpDTLSUDPDomain_len;
     dtlsudpDomain.prefix = calloc(num_prefixes + 1, sizeof(char *));
+    if (!dtlsudpDomain.prefix) {
+        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
+        return;
+    }
     for (i = 0; i < num_prefixes; ++ i)
         dtlsudpDomain.prefix[i] = prefixes[i];
 
