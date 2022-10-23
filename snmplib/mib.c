@@ -2866,7 +2866,7 @@ netsnmp_init_mib(void)
     }
 
     Mib = tree_head;            /* Backwards compatibility */
-    tree_top = (struct tree *) calloc(1, sizeof(struct tree));
+    tree_top = calloc(1, sizeof(struct tree));
     /*
      * XX error check ? 
      */
@@ -3103,7 +3103,7 @@ netsnmp_sprint_realloc_objid(u_char ** buf, size_t * buf_len,
     int             tbuf_overflow = 0;
     int             output_format;
 
-    if ((tbuf = (u_char *) calloc(tbuf_len, 1)) == NULL) {
+    if ((tbuf = calloc(tbuf_len, 1)) == NULL) {
         tbuf_overflow = 1;
     } else {
         *tbuf = '.';
@@ -3174,7 +3174,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
     int             tbuf_overflow = 0;
     int             output_format;
 
-    if ((tbuf = (u_char *) calloc(tbuf_len, 1)) == NULL) {
+    if ((tbuf = calloc(tbuf_len, 1)) == NULL) {
         tbuf_overflow = 1;
     } else {
         *tbuf = '.';
@@ -3342,7 +3342,7 @@ fprint_objid(FILE * f, const oid * objid, size_t objidlen)
     size_t          buf_len = 256, out_len = 0;
     int             buf_overflow = 0;
 
-    if ((buf = (u_char *) calloc(buf_len, 1)) == NULL) {
+    if ((buf = calloc(buf_len, 1)) == NULL) {
         fprintf(f, "[TRUNCATED]\n");
         return;
     } else {
@@ -3499,7 +3499,7 @@ fprint_variable(FILE * f,
     u_char         *buf = NULL;
     size_t          buf_len = 256, out_len = 0;
 
-    if ((buf = (u_char *) calloc(buf_len, 1)) == NULL) {
+    if ((buf = calloc(buf_len, 1)) == NULL) {
         fprintf(f, "[TRUNCATED]\n");
         return;
     } else {
@@ -3594,7 +3594,7 @@ fprint_value(FILE * f,
     u_char         *buf = NULL;
     size_t          buf_len = 256, out_len = 0;
 
-    if ((buf = (u_char *) calloc(buf_len, 1)) == NULL) {
+    if ((buf = calloc(buf_len, 1)) == NULL) {
         fprintf(f, "[TRUNCATED]\n");
         return;
     } else {
@@ -3967,7 +3967,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
              * malloc by size+1 to allow a null to be appended. 
              */
             var->val_len = uitmp;
-            var->val.string = (u_char *) calloc(1, uitmp + 1);
+            var->val.string = calloc(1, uitmp + 1);
             if (var->val.string == NULL)
                 return SNMPERR_GENERR;
 
@@ -4700,7 +4700,7 @@ fprint_description(FILE * f, oid * objid, size_t objidlen,
     u_char         *buf = NULL;
     size_t          buf_len = 256, out_len = 0;
 
-    if ((buf = (u_char *) calloc(buf_len, 1)) == NULL) {
+    if ((buf = calloc(buf_len, 1)) == NULL) {
         fprintf(f, "[TRUNCATED]\n");
         return;
     } else {

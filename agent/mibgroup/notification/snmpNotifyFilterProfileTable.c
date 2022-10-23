@@ -247,7 +247,7 @@ write_snmpNotifyFilterProfileName(int action,
          */
         tmpvar = StorageTmp->snmpNotifyFilterProfileName;
         tmplen = StorageTmp->snmpNotifyFilterProfileNameLen;
-        StorageTmp->snmpNotifyFilterProfileName = (char*)calloc(1, var_val_len + 1);
+        StorageTmp->snmpNotifyFilterProfileName = calloc(1, var_val_len + 1);
         if (NULL == StorageTmp->snmpNotifyFilterProfileName)
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         break;

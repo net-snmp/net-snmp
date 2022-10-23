@@ -539,7 +539,7 @@ get_user_passphrases(void)
         len = strlen(buf);
         if (buf[len - 1] == '\n')
             buf[--len] = '\0';
-        oldpass = (char *) calloc(1, len + 1);
+        oldpass = calloc(1, len + 1);
         if (oldpass)
             memcpy(oldpass, buf, len + 1);
     }
@@ -555,7 +555,7 @@ get_user_passphrases(void)
         len = strlen(buf);
         if (buf[len - 1] == '\n')
             buf[--len] = '\0';
-        newpass = (char *) calloc(1, len + 1);
+        newpass = calloc(1, len + 1);
         if (newpass)
             memcpy(newpass, buf, len + 1);
     }
@@ -747,7 +747,7 @@ snmp_getpassphrase(const char *prompt, int bvisible)
     if (buffer[len - 1] == '\n')
         buffer[--len] = '\0';
 
-    bufp = (char *) calloc(1, len + 1);
+    bufp = calloc(1, len + 1);
     if (bufp)
         memcpy(bufp, buffer, len + 1);
 

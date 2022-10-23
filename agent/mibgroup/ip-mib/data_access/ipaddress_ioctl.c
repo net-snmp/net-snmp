@@ -676,7 +676,7 @@ netsnmp_access_ipaddress_ioctl_get_interface_count(int sd, struct ifconf * ifc)
      */
 
     for (i = 8;; i *= 2) {
-        ifc->ifc_buf = (caddr_t)calloc(i, sizeof(struct ifreq));
+        ifc->ifc_buf = calloc(i, sizeof(struct ifreq));
         if (NULL == ifc->ifc_buf) {
             snmp_log(LOG_ERR, "could not allocate memory for %d interfaces\n",
                      i);

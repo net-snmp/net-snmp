@@ -126,7 +126,7 @@ header_complex_parse_oid(oid * oidIndex, size_t oidLen,
         case ASN_COUNTER:
         case ASN_GAUGE:
         case ASN_TIMETICKS:
-            var->val.integer = (long *) calloc(1, sizeof(long));
+            var->val.integer = calloc(1, sizeof(long));
             if (var->val.integer == NULL)
                 return SNMPERR_GENERR;
 
@@ -153,7 +153,7 @@ header_complex_parse_oid(oid * oidIndex, size_t oidLen,
                 break;          /* zero length strings shouldn't malloc */
 
             var->val_len = itmp * sizeof(oid);
-            var->val.objid = (oid *) calloc(1, var->val_len);
+            var->val.objid = calloc(1, var->val_len);
             if (var->val.objid == NULL)
                 return SNMPERR_GENERR;
 
@@ -186,7 +186,7 @@ header_complex_parse_oid(oid * oidIndex, size_t oidLen,
              * malloc by size+1 to allow a null to be appended. 
              */
             var->val_len = itmp;
-            var->val.string = (u_char *) calloc(1, itmp + 1);
+            var->val.string = calloc(1, itmp + 1);
             if (var->val.string == NULL)
                 return SNMPERR_GENERR;
 

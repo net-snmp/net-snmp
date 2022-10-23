@@ -2603,8 +2603,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
 
     if (asp->treecache == NULL && asp->treecache_len == 0) {
         asp->treecache_len = SNMP_MAX(1 + asp->vbcount / 4, 16);
-        asp->treecache =
-            (netsnmp_tree_cache *)calloc(asp->treecache_len, sizeof(netsnmp_tree_cache));
+        asp->treecache = calloc(asp->treecache_len, sizeof(netsnmp_tree_cache));
         if (asp->treecache == NULL)
             return SNMP_ERR_GENERR;
     }
@@ -2835,9 +2834,7 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
     /*
      * malloc new space 
      */
-    asp->treecache =
-        (netsnmp_tree_cache *) calloc(asp->treecache_len,
-                                      sizeof(netsnmp_tree_cache));
+    asp->treecache = calloc(asp->treecache_len, sizeof(netsnmp_tree_cache));
 
     if (asp->treecache == NULL)
         return SNMP_ERR_GENERR;

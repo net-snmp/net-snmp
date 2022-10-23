@@ -364,12 +364,12 @@ set_enginetime(const u_char * engineID,
             QUITFUN(SNMPERR_GENERR, set_enginetime_quit);
         }
 
-        e = (Enginetime) calloc(1, sizeof(*e));
+        e = calloc(1, sizeof(*e));
 
         e->next = etimelist[iindex];
         etimelist[iindex] = e;
 
-        e->engineID = (u_char *) calloc(1, engineID_len);
+        e->engineID = calloc(1, engineID_len);
         memcpy(e->engineID, engineID, engineID_len);
 
         e->engineID_len = engineID_len;

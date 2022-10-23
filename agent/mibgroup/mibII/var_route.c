@@ -1279,7 +1279,7 @@ Route_Scan_Reload(void)
      *  Makes sure we have SOME space allocated for new routing entries
      */
     if (!rthead) {
-        rthead = (struct rtentry **) calloc(100, sizeof(struct rtentry *));
+        rthead = calloc(100, sizeof(struct rtentry *));
         if (!rthead) {
             snmp_log(LOG_ERR, "route table malloc fail\n");
             return;

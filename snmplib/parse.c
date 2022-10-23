@@ -1166,7 +1166,7 @@ init_tree_roots(void)
     /*
      * build root node 
      */
-    tp = (struct tree *) calloc(1, sizeof(struct tree));
+    tp = calloc(1, sizeof(struct tree));
     if (tp == NULL)
         return;
     tp->label = strdup("joint-iso-ccitt");
@@ -1186,7 +1186,7 @@ init_tree_roots(void)
     /*
      * build root node 
      */
-    tp = (struct tree *) calloc(1, sizeof(struct tree));
+    tp = calloc(1, sizeof(struct tree));
     if (tp == NULL)
         return;
     tp->next_peer = lasttp;
@@ -1207,7 +1207,7 @@ init_tree_roots(void)
     /*
      * build root node 
      */
-    tp = (struct tree *) calloc(1, sizeof(struct tree));
+    tp = calloc(1, sizeof(struct tree));
     if (tp == NULL)
         return;
     tp->next_peer = lasttp;
@@ -1584,7 +1584,7 @@ do_subtree(struct tree *root, struct node **nodes)
 	    }
         }
 
-        tp = (struct tree *) calloc(1, sizeof(struct tree));
+        tp = calloc(1, sizeof(struct tree));
         if (tp == NULL)
             return;
         tp->parent = xxroot;
@@ -4267,7 +4267,7 @@ new_module(const char *name, const char *file)
      */
     DEBUGMSGTL(("parse-mibs", "  Module %d %s is in %s\n", max_module,
                 name, file));
-    mp = (struct module *) calloc(1, sizeof(struct module));
+    mp = calloc(1, sizeof(struct module));
     if (mp == NULL)
         return;
     mp->name = strdup(name);
@@ -5166,8 +5166,7 @@ getIndexes(FILE * fp, struct index_list **retp)
     type = get_token(fp, token, MAXTOKEN);
     while (type != RIGHTBRACKET && type != ENDOFFILE) {
         if ((type == LABEL) || (type & SYNTAX_MASK)) {
-            *mypp =
-                (struct index_list *) calloc(1, sizeof(struct index_list));
+            *mypp = calloc(1, sizeof(struct index_list));
             if (*mypp) {
                 (*mypp)->ilabel = strdup(token);
                 (*mypp)->isimplied = nextIsImplied;
@@ -5204,10 +5203,7 @@ getVarbinds(FILE * fp, struct varbind_list **retp)
     type = get_token(fp, token, MAXTOKEN);
     while (type != RIGHTBRACKET && type != ENDOFFILE) {
         if ((type == LABEL) || (type & SYNTAX_MASK)) {
-            *mypp =
-                (struct varbind_list *) calloc(1,
-                                               sizeof(struct
-                                                      varbind_list));
+            *mypp = calloc(1, sizeof(struct varbind_list));
             if (*mypp) {
                 (*mypp)->vblabel = strdup(token);
                 mypp = &(*mypp)->next;
@@ -5300,7 +5296,7 @@ copy_enums(struct enum_list *sp)
     struct enum_list *xp = NULL, **spp = &xp;
 
     while (sp) {
-        *spp = (struct enum_list *) calloc(1, sizeof(struct enum_list));
+        *spp = calloc(1, sizeof(struct enum_list));
         if (!*spp)
             break;
         (*spp)->label = strdup(sp->label);
@@ -5317,7 +5313,7 @@ copy_ranges(struct range_list *sp)
     struct range_list *xp = NULL, **spp = &xp;
 
     while (sp) {
-        *spp = (struct range_list *) calloc(1, sizeof(struct range_list));
+        *spp = calloc(1, sizeof(struct range_list));
         if (!*spp)
             break;
         (*spp)->low = sp->low;
@@ -5575,7 +5571,7 @@ print_mib_leaves(FILE * f, struct tree *tp, int width)
         for (ntp = tp->child_list; ntp; ntp = ntp->next_peer)
             count++;
         if (count) {
-            leaves = (struct leave *) calloc(count, sizeof(struct leave));
+            leaves = calloc(count, sizeof(struct leave));
             if (!leaves)
                 return;
             for (ntp = tp->child_list, count = 0; ntp;

@@ -136,7 +136,7 @@ diskio_getstats(void)
     if (stat == NULL) {
         stat = (struct statinfo *) malloc(sizeof(struct statinfo));
         if (stat != NULL)
-            stat->dinfo = (struct devinfo *) calloc(sizeof(struct devinfo), 1);
+            stat->dinfo = calloc(sizeof(struct devinfo), 1);
         if (stat == NULL || stat->dinfo == NULL) {
 		SNMP_FREE(stat);
         	ERROR_MSG("Memory alloc failure - diskio_getstats()\n");

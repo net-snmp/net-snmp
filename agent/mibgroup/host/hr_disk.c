@@ -156,7 +156,7 @@ parse_disk_config(const char *token, char *cptr)
             di_curr->item_details = (void *) 0;
             name++;
         } else if (*name == '[') {
-            d_set = (details_set *) calloc(sizeof(details_set), 1);
+            d_set = calloc(sizeof(details_set), 1);
             if (!d_set) {
                 config_perror("Out of memory");
                 SNMP_FREE(d_new);

@@ -128,8 +128,7 @@ smux_parse_peer_auth(const char *token, char *cptr)
     char           *password_cptr;
     int             rv;
 
-    if ((aptr =
-         (smux_peer_auth *) calloc(1, sizeof(smux_peer_auth))) == NULL) {
+    if ((aptr = calloc(1, sizeof(smux_peer_auth))) == NULL) {
         snmp_log_perror("smux_parse_peer_auth: malloc");
         return;
     }

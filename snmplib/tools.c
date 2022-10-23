@@ -250,7 +250,7 @@ u_char         *
 malloc_random(size_t * size)
 {
     int             rval = SNMPERR_SUCCESS;
-    u_char         *buf = (u_char *) calloc(1, *size);
+    u_char         *buf = calloc(1, *size);
 
     if (buf) {
         rval = sc_random(buf, size);
@@ -394,7 +394,7 @@ netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len, int allow_realloc,
         return 0;
 
     if (NULL == *dest) {
-        s = (unsigned char *) calloc(1, olen);
+        s = calloc(1, olen);
         *dest_len = olen;
     }
     else
@@ -916,7 +916,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 marker_t
 atime_newMarker(void)
 {
-    marker_t        pm = (marker_t) calloc(1, sizeof(struct timeval));
+    marker_t        pm = calloc(1, sizeof(struct timeval));
     gettimeofday((struct timeval *) pm, NULL);
     return pm;
 }

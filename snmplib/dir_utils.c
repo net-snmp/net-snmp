@@ -227,7 +227,7 @@ _insert_nsfile( netsnmp_container *c, const char *name, struct stat *stats,
     }
 
     if (flags & NETSNMP_DIR_NSFILE_STATS) {
-        ns_file->stats = (struct stat*)calloc(1,sizeof(*(ns_file->stats)));
+        ns_file->stats = calloc(1,sizeof(*(ns_file->stats)));
         if (NULL == ns_file->stats) {
             snmp_log(LOG_ERR, "error creating stats for ns_file\n");
             netsnmp_file_release(ns_file);

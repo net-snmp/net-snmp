@@ -192,7 +192,7 @@ extensible_parse_config(const char *token, char *cptr)
     /*
      * allocate and clear memory structure 
      */
-    ptmp = (struct extensible *) calloc(1, sizeof(struct extensible));
+    ptmp = calloc(1, sizeof(struct extensible));
     if (ptmp == NULL)
         return;                 /* XXX memory alloc error */
 

@@ -715,12 +715,10 @@ netsnmp_view_create(struct vacm_viewEntry **head, const char *viewName,
     glen = (int) strlen(viewName);
     if (glen < 0 || glen > VACM_MAX_STRING || viewSubtreeLen > MAX_OID_LEN)
         return NULL;
-    vp = (struct vacm_viewEntry *) calloc(1,
-                                          sizeof(struct vacm_viewEntry));
+    vp = calloc(1, sizeof(struct vacm_viewEntry));
     if (vp == NULL)
         return NULL;
-    vp->reserved =
-        (struct vacm_viewEntry *) calloc(1, sizeof(struct vacm_viewEntry));
+    vp->reserved = calloc(1, sizeof(struct vacm_viewEntry));
     if (vp->reserved == NULL) {
         free(vp);
         return NULL;
@@ -841,13 +839,10 @@ vacm_createGroupEntry(int securityModel, const char *securityName)
     glen = (int) strlen(securityName);
     if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
-    gp = (struct vacm_groupEntry *) calloc(1,
-                                           sizeof(struct vacm_groupEntry));
+    gp = calloc(1, sizeof(struct vacm_groupEntry));
     if (gp == NULL)
         return NULL;
-    gp->reserved =
-        (struct vacm_groupEntry *) calloc(1,
-                                          sizeof(struct vacm_groupEntry));
+    gp->reserved = calloc(1, sizeof(struct vacm_groupEntry));
     if (gp->reserved == NULL) {
         free(gp);
         return NULL;
@@ -1026,15 +1021,10 @@ vacm_createAccessEntry(const char *groupName,
     clen = (int) strlen(contextPrefix);
     if (clen < 0 || clen > VACM_MAX_STRING)
         return NULL;
-    vp = (struct vacm_accessEntry *) calloc(1,
-                                            sizeof(struct
-                                                   vacm_accessEntry));
+    vp = calloc(1, sizeof(struct vacm_accessEntry));
     if (vp == NULL)
         return NULL;
-    vp->reserved =
-        (struct vacm_accessEntry *) calloc(1,
-                                           sizeof(struct
-                                                  vacm_accessEntry));
+    vp->reserved = calloc(1, sizeof(struct vacm_accessEntry));
     if (vp->reserved == NULL) {
         free(vp);
         return NULL;

@@ -251,7 +251,7 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
     /** alloc space for struct + 3 strings with NULLs */
     len = offsetof(com2SecEntry, community) + communityLen + secNameLen +
         contextNameLen + 3;
-    e = (com2SecEntry*)calloc(len, 1);
+    e = calloc(len, 1);
     if (e == NULL)
         return C2SE_ERR_MEMORY;
     last = ((char*)e) + offsetof(com2SecEntry, community);

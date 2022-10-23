@@ -131,7 +131,7 @@ snmp_pdu_create(int command)
 {
     netsnmp_pdu    *pdu;
 
-    pdu = (netsnmp_pdu *) calloc(1, sizeof(netsnmp_pdu));
+    pdu = calloc(1, sizeof(netsnmp_pdu));
     if (pdu) {
         pdu->version = SNMP_DEFAULT_VERSION;
         pdu->command = command;

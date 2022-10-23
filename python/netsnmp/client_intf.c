@@ -629,15 +629,13 @@ __add_var_val_str(netsnmp_pdu *pdu, const oid *name, int name_length,
     int ret = SUCCESS;
 
     if (pdu->variables == NULL){
-	pdu->variables = vars =
-           (netsnmp_variable_list *)calloc(1,sizeof(netsnmp_variable_list));
+	pdu->variables = vars = calloc(1,sizeof(netsnmp_variable_list));
     } else {
 	for(vars = pdu->variables;
             vars->next_variable;
             vars = vars->next_variable)
 	    /*EXIT*/;
-	vars->next_variable =
-           (netsnmp_variable_list *)calloc(1,sizeof(netsnmp_variable_list));
+	vars->next_variable = calloc(1,sizeof(netsnmp_variable_list));
 	vars = vars->next_variable;
     }
 

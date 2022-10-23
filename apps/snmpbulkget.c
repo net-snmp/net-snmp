@@ -164,7 +164,7 @@ main(int argc, char *argv[])
         goto out;
     }
 
-    namep = name = (struct nameStruct *) calloc(names, sizeof(*name));
+    namep = name = calloc(names, sizeof(*name));
     while (arg < argc) {
         namep->name_len = MAX_OID_LEN;
         if (snmp_parse_oid(argv[arg], namep->name, &namep->name_len) ==

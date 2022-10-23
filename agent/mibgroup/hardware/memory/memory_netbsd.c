@@ -202,7 +202,7 @@ swapinfo(long pagesize)
     if ( n <= 1 )
         return;
 
-    s = (struct swapent*)calloc(n, sizeof(struct swapent));
+    s = calloc(n, sizeof(struct swapent));
     swapctl( SWAP_STATS, s, n );
 
     for (i = 0; i < n; ++i) {

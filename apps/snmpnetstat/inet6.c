@@ -235,7 +235,7 @@ _dump_v6stats(const char *name, oid * oid_buf, size_t buf_len,
                                   ASN_NULL, NULL, 0);
     }
     oid_buf[buf_len - 1] = stable[0].entry;
-    stats = (long *) calloc(max_stat + 1, sizeof(long));
+    stats = calloc(max_stat + 1, sizeof(long));
 
     /*
      * Walk the specified column(s), and total the individual statistics

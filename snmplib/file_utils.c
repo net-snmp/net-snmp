@@ -91,7 +91,7 @@ netsnmp_file_new(const char *name, int fs_flags, mode_t mode, u_int ns_flags)
         return NULL;
 
     if (ns_flags & NETSNMP_FILE_STATS) {
-        filei->stats = (struct stat*)calloc(1, sizeof(*(filei->stats)));
+        filei->stats = calloc(1, sizeof(*(filei->stats)));
         if (NULL == filei->stats)
             DEBUGMSGT(("nsfile:new", "no memory for stats\n"));
         else if (stat(name, filei->stats) != 0)

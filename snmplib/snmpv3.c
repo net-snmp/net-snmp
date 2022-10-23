@@ -564,7 +564,7 @@ setup_engineID(u_char ** eidp, const char *text)
     /*
      * Allocate memory and store enterprise ID.
      */
-    if ((bufp = (u_char *) calloc(1, len)) == NULL) {
+    if ((bufp = calloc(1, len)) == NULL) {
         snmp_log_perror("setup_engineID malloc");
         return -1;
     }

@@ -1617,7 +1617,7 @@ Interface_Scan_Init(void)
             continue;
         }
 
-        nnew = (struct ifnet *) calloc(1, sizeof(struct ifnet));
+        nnew = calloc(1, sizeof(struct ifnet));
         if (nnew == NULL)
             break;              /* alloc error */
 

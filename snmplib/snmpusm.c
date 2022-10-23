@@ -3661,7 +3661,7 @@ usm_create_user_from_session(netsnmp_session * session)
             user->authKeyLen = session->securityAuthLocalKeyLen;
         } else if (session->securityAuthKeyLen != 0) {
             SNMP_FREE(user->authKey);
-            user->authKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
+            user->authKey = calloc(1, USM_LENGTH_KU_HASHBLOCK);
             user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
             if ((user->authKey == NULL) ||
                 generate_kul(user->authProtocol, user->authProtocolLen,
@@ -3709,7 +3709,7 @@ usm_create_user_from_session(netsnmp_session * session)
             keyBufSize = user->privKeyLen = session->securityPrivLocalKeyLen;
         } else if (session->securityPrivKeyLen != 0) {
             SNMP_FREE(user->privKey);
-            user->privKey = (u_char *) calloc(1, keyBufSize);
+            user->privKey = calloc(1, keyBufSize);
             user->privKeyLen = keyBufSize;
             if ((user->privKey == NULL) ||
                 generate_kul(user->authProtocol, user->authProtocolLen,
@@ -3788,7 +3788,7 @@ usm_build_probe_pdu(netsnmp_pdu **pdu)
     user = usm_get_user2(NULL, 0, (*pdu)->securityName,
                          (*pdu)->securityNameLen);
     if (user == NULL) {
-        user = (struct usmUser *) calloc(1, sizeof(struct usmUser));
+        user = calloc(1, sizeof(struct usmUser));
         if (user == NULL) {
             snmp_free_pdu(*pdu);
             *pdu = (netsnmp_pdu *) NULL;
@@ -4047,7 +4047,7 @@ usm_create_user(void)
     /*
      * create the new user 
      */
-    newUser = (struct usmUser *) calloc(1, sizeof(struct usmUser));
+    newUser = calloc(1, sizeof(struct usmUser));
     if (newUser == NULL)
         return NULL;
 

@@ -204,7 +204,7 @@ proc_parse_config(const char *token, char *cptr)
     while (*procp != NULL)
         procp = &((*procp)->next);
 
-    (*procp) = (struct myproc *) calloc(1, sizeof(struct myproc));
+    (*procp) = calloc(1, sizeof(struct myproc));
     if (*procp == NULL)
         return;                 /* memory alloc error */
     numprocs++;

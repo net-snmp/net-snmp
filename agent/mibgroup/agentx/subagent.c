@@ -348,8 +348,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     if (pdu->command == AGENTX_MSG_GET
         || pdu->command == AGENTX_MSG_GETNEXT
         || pdu->command == AGENTX_MSG_GETBULK) {
-        smagic =
-            (ns_subagent_magic *) calloc(1, sizeof(ns_subagent_magic));
+        smagic = calloc(1, sizeof(ns_subagent_magic));
         if (smagic == NULL) {
             DEBUGMSGTL(("agentx/subagent", "couldn't malloc() smagic\n"));
             /* would like to send_agentx_error(), but it needs memory too */

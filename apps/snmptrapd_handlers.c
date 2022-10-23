@@ -649,7 +649,7 @@ int   syslog_handler(  netsnmp_pdu           *pdu,
     if (SyslogTrap)
         return NETSNMPTRAPD_HANDLER_OK;
 
-    if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
+    if ((rbuf = calloc(r_len, 1)) == NULL) {
         snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
         return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
     }
@@ -735,7 +735,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
     if (pdu->trap_type == SNMP_TRAP_AUTHFAIL && dropauth)
         return NETSNMPTRAPD_HANDLER_OK;
 
-    if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
+    if ((rbuf = calloc(r_len, 1)) == NULL) {
         snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
         return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
     }
@@ -826,7 +826,7 @@ int   command_handler( netsnmp_pdu           *pdu,
         /*
 	 * Format the trap and pass this string to the external command
 	 */
-        if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
+        if ((rbuf = calloc(r_len, 1)) == NULL) {
             snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
             return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
         }

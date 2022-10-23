@@ -1105,7 +1105,7 @@ _sess_copy(netsnmp_session * in_session)
 
     slp->transport = NULL;
 
-    isp = (struct snmp_internal_session *)calloc(1, sizeof(struct snmp_internal_session));
+    isp = calloc(1, sizeof(struct snmp_internal_session));
 
     if (isp == NULL) {
         snmp_sess_close(slp);
@@ -3905,7 +3905,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
      * securtityParameters OCTET STRING begins after msgGlobalData 
      */
     sec_params = data;
-    pdu->contextEngineID = (u_char *) calloc(1, SNMP_MAX_ENG_SIZE);
+    pdu->contextEngineID = calloc(1, SNMP_MAX_ENG_SIZE);
     pdu->contextEngineIDLen = SNMP_MAX_ENG_SIZE;
 
     /*
@@ -3914,9 +3914,9 @@ snmpv3_parse(netsnmp_pdu *pdu,
      * limit).  We'll use double that here to be on the safe side.  
      */
 
-    pdu->securityEngineID = (u_char *) calloc(1, SNMP_MAX_ENG_SIZE * 2);
+    pdu->securityEngineID = calloc(1, SNMP_MAX_ENG_SIZE * 2);
     pdu->securityEngineIDLen = SNMP_MAX_ENG_SIZE * 2;
-    pdu->securityName = (char *) calloc(1, SNMP_MAX_SEC_NAME_SIZE);
+    pdu->securityName = calloc(1, SNMP_MAX_SEC_NAME_SIZE);
     pdu->securityNameLen = SNMP_MAX_SEC_NAME_SIZE;
 
     if ((pdu->securityName == NULL) ||
@@ -3930,7 +3930,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
         /*
          * space needed is larger than we have in the default buffer 
          */
-        mallocbuf = (u_char *) calloc(1, msg_len);
+        mallocbuf = calloc(1, msg_len);
         pdu_buf_len = msg_len;
         cp = mallocbuf;
     } else {
@@ -5372,8 +5372,7 @@ _sess_async_send(struct session_list *slp,
         netsnmp_request_list *rp;
         struct timeval  tv;
 
-        rp = (netsnmp_request_list *) calloc(1,
-                                             sizeof(netsnmp_request_list));
+        rp = calloc(1, sizeof(netsnmp_request_list));
         if (rp == NULL) {
             session->s_snmp_errno = SNMPERR_GENERR;
             return 0;
@@ -5534,7 +5533,7 @@ netsnmp_pdu    *
 snmp_create_sess_pdu(netsnmp_transport *transport, void *opaque,
                      size_t olength)
 {
-    netsnmp_pdu *pdu = (netsnmp_pdu *)calloc(1, sizeof(netsnmp_pdu));
+    netsnmp_pdu *pdu = calloc(1, sizeof(netsnmp_pdu));
     if (pdu == NULL) {
         DEBUGMSGTL(("sess_process_packet", "can't malloc space for PDU\n"));
         return NULL;
@@ -7678,7 +7677,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 
     default:
         result = SNMPERR_VAR_TYPE;
-	buf = (u_char *)calloc(1, 4);
+	buf = calloc(1, 4);
 	if (buf != NULL) {
 	    sprintf((char *)buf, "\"%c\"", type);
 	    snmp_set_detail((char *)buf);

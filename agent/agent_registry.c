@@ -496,7 +496,7 @@ netsnmp_subtree_free(netsnmp_subtree *a)
 netsnmp_subtree *
 netsnmp_subtree_deepcopy(netsnmp_subtree *a)
 {
-  netsnmp_subtree *b = (netsnmp_subtree *)calloc(1, sizeof(netsnmp_subtree));
+  netsnmp_subtree *b = calloc(1, sizeof(netsnmp_subtree));
 
   if (b != NULL) {
     memcpy(b, a, sizeof(netsnmp_subtree));
@@ -1148,7 +1148,7 @@ netsnmp_register_mib(const char *moduleName,
         netsnmp_handler_registration_free(reginfo);
         return MIB_REGISTRATION_FAILED;
     }
-    subtree = (netsnmp_subtree *)calloc(1, sizeof(netsnmp_subtree));
+    subtree = calloc(1, sizeof(netsnmp_subtree));
     if (subtree == NULL) {
         netsnmp_handler_registration_free(reginfo);
         return MIB_REGISTRATION_FAILED;
@@ -2258,9 +2258,9 @@ dump_registry(void)
     size_t sl = 256, el = 256, vl = 256, sl_o = 0, el_o = 0, vl_o = 0;
     int i = 0;
 
-    if ((s = (u_char *) calloc(sl, 1)) != NULL &&
-        (e = (u_char *) calloc(sl, 1)) != NULL &&
-        (v = (u_char *) calloc(sl, 1)) != NULL) {
+    if ((s = calloc(sl, 1)) != NULL &&
+        (e = calloc(sl, 1)) != NULL &&
+        (v = calloc(sl, 1)) != NULL) {
 
         subtree_context_cache *ptr;
         for (ptr = context_subtrees; ptr; ptr = ptr->next) {

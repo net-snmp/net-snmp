@@ -298,7 +298,7 @@ register_index(netsnmp_variable_list * varbind, int flags,
      *      We proceed by creating the new entry
      *         (by copying the entry provided)
      */
-    new_index = (struct snmp_index *) calloc(1, sizeof(struct snmp_index));
+    new_index = calloc(1, sizeof(struct snmp_index));
     if (new_index == NULL)
         return NULL;
 

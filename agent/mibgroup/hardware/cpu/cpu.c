@@ -194,7 +194,7 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
              * First time through, we need to create buffers
              * for the historical stats
              */
-            cpu->history  = (struct netsnmp_cpu_history *)calloc( _cpuHistoryLen, sizeof(struct netsnmp_cpu_history));
+            cpu->history = calloc( _cpuHistoryLen, sizeof(struct netsnmp_cpu_history));
         } else {
             /*
              * Otherwise, rotate these values - in descending order

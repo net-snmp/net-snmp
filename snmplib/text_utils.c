@@ -335,7 +335,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
             li.line_max =  lpi->line_max;
         else
             li.line_max = STRINGMAX;
-        li.line = (char *)calloc(li.line_max, 1);
+        li.line = calloc(li.line_max, 1);
         if (NULL == li.line) {
             snmp_log(LOG_ERR,"malloc failed\n");
             return;
@@ -406,7 +406,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
             mem = NULL;
             
             if (lpi->flags & PMLP_FLAG_ALLOC_LINE) {
-	        li.line = (char *)calloc(li.line_max, 1);
+	        li.line = calloc(li.line_max, 1);
                 if (NULL == li.line) {
                     snmp_log(LOG_ERR,"malloc failed\n");
                     break;

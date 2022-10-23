@@ -290,8 +290,8 @@ void init_extend( void )
     snmpd_register_config_handler("exec", extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("sh",   extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("execFix", extend_parse_config, NULL, NULL);
-    compatability_entries = (netsnmp_old_extend *)
-        calloc( max_compatability_entries, sizeof(netsnmp_old_extend));
+    compatability_entries = calloc(max_compatability_entries,
+                                   sizeof(netsnmp_old_extend));
     REGISTER_MIB("ucd-extensible", old_extensible_variables,
                  variable2, old_extensible_variables_oid);
 #endif
@@ -365,7 +365,7 @@ extend_load_cache(netsnmp_cache *cache, void *magic)
             }
         }
         if ( extension->numlines > 1 ) {
-            extension->lines = (char**)calloc( sizeof(char *), extension->numlines );
+            extension->lines = calloc(sizeof(char *), extension->numlines);
             if (extension->lines)
                 memcpy(extension->lines, line_buf,
                        sizeof(char *) * extension->numlines);

@@ -261,7 +261,7 @@ Init_HR_Print(void)
 #endif
             if (HRP_nbrnames == HRP_maxnames) {
                 char          **tmp;
-                tmp = (char **) calloc(HRP_maxnames + HRP_MAX_INCR, sizeof(char *));
+                tmp = calloc(HRP_maxnames + HRP_MAX_INCR, sizeof(char *));
                 if (!tmp)
                     goto finish;
 		if (HRP_name) {

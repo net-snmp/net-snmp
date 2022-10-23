@@ -457,7 +457,7 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     char           *safe_bfr = NULL;
     char            fmt_cmd = options->cmd;     /* the format command to use */
 
-    if ((safe_bfr = (char *) calloc(30, 1)) == NULL) {
+    if ((safe_bfr = calloc(30, 1)) == NULL) {
         return 0;
     }
 
@@ -630,7 +630,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     char           *tstr;
     unsigned int    oflags;
 
-    if ((temp_buf = (u_char*)calloc(temp_buf_len, 1)) == NULL) {
+    if ((temp_buf = calloc(temp_buf_len, 1)) == NULL) {
         return 0;
     }
 
@@ -767,7 +767,7 @@ realloc_handle_ent_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     u_char         *temp_buf = NULL;
     size_t          temp_buf_len = 64, temp_out_len = 0;
 
-    if ((temp_buf = (u_char *) calloc(temp_buf_len, 1)) == NULL) {
+    if ((temp_buf = calloc(temp_buf_len, 1)) == NULL) {
         return 0;
     }
 
@@ -840,7 +840,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     const char           *default_sep = "\t";
     const char           *default_alt_sep = ", ";
 
-    if ((temp_buf = (u_char *) calloc(tbuf_len, 1)) == NULL) {
+    if ((temp_buf = calloc(tbuf_len, 1)) == NULL) {
         return 0;
     }
 
@@ -878,7 +878,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
             u_char         *obuf = NULL;
             char           *ptr = NULL;
 
-            if ((obuf = (u_char *) calloc(obuf_len, 1)) == NULL) {
+            if ((obuf = calloc(obuf_len, 1)) == NULL) {
                 free(temp_buf);
                 return 0;
             }
@@ -993,7 +993,7 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     size_t          tbuf_len = 64;
     unsigned int    i;
 
-    if ((temp_buf = (u_char*)calloc(tbuf_len, 1)) == NULL) {
+    if ((temp_buf = calloc(tbuf_len, 1)) == NULL) {
         return 0;
     }
 
@@ -1452,7 +1452,7 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
         char           *ent_spec_code = NULL;
         u_char         *obuf = NULL;
 
-        if ((obuf = (u_char *) calloc(obuf_len, 1)) == NULL) {
+        if ((obuf = calloc(obuf_len, 1)) == NULL) {
             return 0;
         }
 

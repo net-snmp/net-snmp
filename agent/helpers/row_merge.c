@@ -268,10 +268,9 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
         /*
          * allocate memory for saved structure
          */
-        rm_status->saved_requests =
-            (netsnmp_request_info**)calloc(count+1,
+        rm_status->saved_requests = calloc(count+1,
                                            sizeof(netsnmp_request_info*));
-        rm_status->saved_status = (char*)calloc(count,sizeof(char));
+        rm_status->saved_status = calloc(count, sizeof(char));
     }
 
     saved_status = rm_status->saved_status;

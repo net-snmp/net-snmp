@@ -524,7 +524,7 @@ get_myaddr(void)
      */
 
     for (i = 8;; i += 8) {
-        buf = (char *) calloc(i, sizeof(struct ifreq));
+        buf = calloc(i, sizeof(struct ifreq));
         if (buf == NULL) {
             close(sd);
             return 0;
