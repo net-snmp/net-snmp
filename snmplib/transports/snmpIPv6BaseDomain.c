@@ -299,7 +299,7 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
         addr->sin6_port = htons(atoi(ep_str.port));
     if (ep_str.iface[0])
         strlcpy(ep->iface, ep_str.iface, sizeof(ep->iface));
-    if (ep_str.addr[0]) {
+    if (ep_str.addr && ep_str.addr[0]) {
         char *scope_id;
 
         scope_id = strchr(ep_str.addr, '%');
@@ -313,6 +313,7 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
             !netsnmp_resolve_v6_hostname(&addr->sin6_addr, ep_str.addr)) {
             DEBUGMSGTL(("netsnmp_sockaddr_in6", "failed to parse %s\n",
                         ep_str.addr));
+            free(ep_str.addr);
             return 0;
         }
     }
@@ -321,6 +322,7 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
                 inet_ntop(AF_INET6, &addr->sin6_addr, debug_addr,
                           sizeof(debug_addr)), (int)addr->sin6_scope_id,
                 ntohs(addr->sin6_port)));
+    free(ep_str.addr);
     return 1;
 }
 
