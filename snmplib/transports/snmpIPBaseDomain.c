@@ -1,7 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 #include <net-snmp/library/system.h>
-#include <net-snmp/library/snmpIPBaseDomain.h>
+#include "snmpIPBaseDomain.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>

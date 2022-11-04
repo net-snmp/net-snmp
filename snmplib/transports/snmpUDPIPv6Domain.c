@@ -6,7 +6,7 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
-#include <net-snmp/library/snmpIPBaseDomain.h>
+#include "snmpIPBaseDomain.h"
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/system.h>
 
