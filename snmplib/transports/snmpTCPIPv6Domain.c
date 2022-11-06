@@ -3,7 +3,7 @@
 #ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 
 #include <net-snmp/types.h>
-#include <net-snmp/library/snmpIPBaseDomain.h>
+#include "snmpIPBaseDomain.h"
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 
 #include <stdio.h>

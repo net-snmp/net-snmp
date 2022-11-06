@@ -29,7 +29,7 @@
   */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/library/snmpIPBaseDomain.h>
+#include "../../snmplib/transports/snmpIPBaseDomain.h"
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmpIPXDomain.h>
 #include <stddef.h>
@@ -102,7 +102,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
         netsnmp_udp_parse_security(udp_token, udp_param);
     }
 
-    struct netsnmp_ep_str ep_str;
+    struct netsnmp_ep_str ep_str = { };
     char           *endpoint = af_gb_get_null_terminated(&data2, &size2);
     if (endpoint && !netsnmp_parse_ep_str(&ep_str, endpoint))
         goto cleanup;
@@ -116,6 +116,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
     /*
      * Cleanup
      */
+    free(ep_str.addr);
 cleanup:
     netsnmp_clear_tdomain_list();
     shutdown_snmp_transport();

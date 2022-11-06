@@ -30,7 +30,7 @@ struct netsnmp_ep {
  *   means "bind to any port".
  */
 struct netsnmp_ep_str {
-    char     addr[64];
+    char     *addr;
     char     iface[16];
     char     port[6];
 };
