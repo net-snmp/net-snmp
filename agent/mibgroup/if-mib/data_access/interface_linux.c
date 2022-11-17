@@ -31,7 +31,7 @@ static struct pci_access *pci_access;
 /* Avoid letting libpci call exit(1) when no PCI bus is available. */
 static int do_longjmp =0;
 static jmp_buf err_buf;
-static void
+PCI_NONRET static void
 netsnmp_pci_error(char *msg, ...)
 {
     va_list args;
