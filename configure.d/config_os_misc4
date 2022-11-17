@@ -185,8 +185,13 @@ else
 #if HAVE_SYS_SYSCTL_H
 # include <sys/sysctl.h>
 #endif
+#if HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 
-main() {
+#include <stddef.h>
+
+int main(void) {
   int                 mib[2];
   size_t              len;
   struct timeval boottime;
