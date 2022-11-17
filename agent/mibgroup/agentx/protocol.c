@@ -1900,7 +1900,7 @@ parse_err:
 
 #ifdef TESTING
 
-testit(netsnmp_pdu *pdu1)
+void testit(netsnmp_pdu *pdu1)
 {
     char            packet1[BUFSIZ];
     char            packet2[BUFSIZ];
@@ -1969,7 +1969,8 @@ testit(netsnmp_pdu *pdu1)
 
 
 
-main()
+int
+main(void)
 {
     netsnmp_pdu     pdu1;
     oid             oid_buf[] = { 1, 3, 6, 1, 2, 1, 10 };
