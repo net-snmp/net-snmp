@@ -28483,7 +28483,14 @@ else
 #ifdef HAVE_SYS_FS_TYPES_H
 #include <sys/fs_types.h>
 #endif
-int main ()
+#ifdef HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
+#endif
+#ifdef HAVE_SYS_STATVFS_H
+#include <sys/statvfs.h>
+#endif
+
+int main(void)
 {
 struct fs_data fsd;
 /* Ultrix's statfs returns 1 for success,
@@ -31851,8 +31858,10 @@ else
 #if HAVE_SYS_SYSCTL_H
 # include <sys/sysctl.h>
 #endif
+#include <stddef.h>
+#include <stdlib.h>
 
-int main(int argc, char **argv)
+int main(void)
 {
   int                 mib[2];
   size_t              len;
