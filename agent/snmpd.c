@@ -503,7 +503,7 @@ main(int argc, char *argv[])
                 goto out;
             }
 
-            handle_long_opt(optarg);
+            if(optarg) handle_long_opt(optarg);
             break;
 
         case 'a':
