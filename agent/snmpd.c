@@ -494,10 +494,10 @@ main(int argc, char *argv[])
     while ((arg = getopt(argc, argv, options)) != EOF) {
         switch (arg) {
         case '-':
-            if (strcasecmp(optarg, "help") == 0) {
+            if (optarg && (strcasecmp(optarg, "help") == 0)) {
                 usage(argv[0]);
             }
-            if (strcasecmp(optarg, "version") == 0) {
+            if (optarg && (strcasecmp(optarg, "version") == 0)) {
                 version();
                 exit_code = 0;
                 goto out;
