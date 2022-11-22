@@ -139,7 +139,7 @@ netsnmp_arch_ip_scalars_ipDefaultTTL_set(u_long value)
 
     rc = fprintf(filep, "%ld", value);
     fclose(filep);
-    if (1 != rc) {
+    if (rc <= 0) {
         DEBUGMSGTL(("access:ipDefaultTTL", "could not write %s\n",
                     ipttl_name));
         return SNMP_ERR_GENERR;
