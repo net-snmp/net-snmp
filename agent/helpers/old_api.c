@@ -278,7 +278,7 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
     int             exact = 1;
     int             status;
 
-    struct variable *vp;
+    struct variable *vp = NULL;
     netsnmp_old_api_cache *cacheptr;
     netsnmp_agent_session *oldasp = NULL;
     u_char         *access = NULL;
@@ -286,12 +286,15 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
     size_t          len;
     size_t          tmp_len;
     oid             tmp_name[MAX_OID_LEN];
-
-    vp = (struct variable *) handler->myvoid;
+    if(handler)
+        vp = (struct variable *) handler->myvoid;
 
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
                         SNMP_CALLBACK_MIB_REQUEST_INFO,
                         reqinfo);
+    if (!vp)
+        return netsnmp_set_request_error(reqinfo, requests,
+                                                 SNMP_ERR_BADVALUE);
     /*
      * create old variable structure with right information 
      */
