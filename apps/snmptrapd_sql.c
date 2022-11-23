@@ -256,6 +256,13 @@ netsnmp_sql_disconnected(void)
     }
 }
 
+static bool
+netsnmp_sql_server_disconnected(int err)
+{
+    // CR_SERVER_GONE_ERROR | CR_SERVER_LOST | ER_CLIENT_INTERACTION_TIMEOUT
+    return CR_SERVER_GONE_ERROR == err || CR_SERVER_LOST == err || 4031 == err;
+}
+
 /*
  * convenience function to log mysql errors
  */
@@ -263,17 +270,20 @@ static void
 netsnmp_sql_error(const char *message)
 {
     u_int err = mysql_errno(_sql.conn);
-    snmp_log(LOG_ERR, "%s\n", message);
-    if (_sql.conn != NULL) {
+
+    if (0 == _sql.connected || !netsnmp_sql_server_disconnected(err)) {
+        snmp_log(LOG_ERR, "%s\n", message);
+        if (_sql.conn != NULL) {
 #if MYSQL_VERSION_ID >= 40101
-        snmp_log(LOG_ERR, "Error %u (%s): %s\n",
-                 err, mysql_sqlstate(_sql.conn), mysql_error(_sql.conn));
+            snmp_log(LOG_ERR, "Error %u (%s): %s\n",
+                     err, mysql_sqlstate(_sql.conn), mysql_error(_sql.conn));
 #else
-        snmp(LOG_ERR, "Error %u: %s\n",
-             mysql_errno(_sql.conn), mysql_error(_sql.conn));
+            snmp(LOG_ERR, "Error %u: %s\n",
+                 mysql_errno(_sql.conn), mysql_error(_sql.conn));
 #endif
+        }
     }
-    if (CR_SERVER_GONE_ERROR == err)
+    if (netsnmp_sql_server_disconnected(err))
         netsnmp_sql_disconnected();
 }
 
@@ -285,14 +295,15 @@ netsnmp_sql_stmt_error (MYSQL_STMT *stmt, const char *message)
 {
     u_int err = mysql_errno(_sql.conn);
 
-    snmp_log(LOG_ERR, "%s\n", message);
-    if (stmt) {
-        snmp_log(LOG_ERR, "SQL Error %u (%s): %s\n",
-                 mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt),
-                 mysql_stmt_error(stmt));
+    if (0 == _sql.connected || !netsnmp_sql_server_disconnected(err)) {
+        snmp_log(LOG_ERR, "%s\n", message);
+        if (stmt) {
+            snmp_log(LOG_ERR, "SQL Error %u (%s): %s\n",
+                     mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt),
+                     mysql_stmt_error(stmt));
+        }
     }
-    
-    if (CR_SERVER_GONE_ERROR == err)
+    if (netsnmp_sql_server_disconnected(err))
         netsnmp_sql_disconnected();
 }
 
@@ -315,15 +326,6 @@ netsnmp_mysql_cleanup(void)
     CONTAINER_FREE(_sql.queue);
     _sql.queue = NULL;
 
-    if (_sql.trap_stmt) {
-        mysql_stmt_close(_sql.trap_stmt);
-        _sql.trap_stmt = NULL;
-    }
-    if (_sql.vb_stmt) {
-        mysql_stmt_close(_sql.vb_stmt);
-        _sql.vb_stmt = NULL;
-    }
-    
     /** disconnect from server */
     netsnmp_sql_disconnected();
 
@@ -380,6 +382,21 @@ netsnmp_mysql_connect(void)
         return 0;
 
     DEBUGMSGTL(("sql:connection","connecting\n"));
+
+    if (_sql.conn) {
+        mysql_close(_sql.conn);
+        _sql.conn = NULL;
+    }
+
+    _sql.conn = mysql_init (NULL);
+    if (_sql.conn == NULL) {
+        netsnmp_sql_error("mysql_init() failed (out of memory?)");
+        goto err;
+    }
+
+#if HAVE_MYSQL_OPTIONS
+    mysql_options(_sql.conn, MYSQL_READ_DEFAULT_GROUP, "snmptrapd");
+#endif
 
     /** connect to server */
     if (mysql_real_connect (_sql.conn, _sql.host_name, _sql.user_name,
@@ -556,16 +573,6 @@ netsnmp_mysql_init(void)
     _vbind[VBIND_VAL].buffer_type = MYSQL_TYPE_BLOB;
 #endif
     _vbind[VBIND_VAL].length = &_vbind[VBIND_VAL].buffer_length;
-
-    _sql.conn = mysql_init (NULL);
-    if (_sql.conn == NULL) {
-        netsnmp_sql_error("mysql_init() failed (out of memory?)");
-        return -1;
-    }
-
-#if HAVE_MYSQL_OPTIONS
-    mysql_options(_sql.conn, MYSQL_READ_DEFAULT_GROUP, "snmptrapd");
-#endif
 
     /** try to connect; we'll try again later if we fail */
     (void) netsnmp_mysql_connect();
@@ -1123,6 +1130,8 @@ _sql_process_queue(u_int dontcare, void *meeither)
         (void) netsnmp_mysql_connect();
     }
 
+    bool sql_has_connected = _sql.connected;
+
     CONTAINER_FOR_EACH(_sql.queue, (netsnmp_container_obj_func*)_sql_save,
                        NULL);
 
@@ -1136,8 +1145,10 @@ _sql_process_queue(u_int dontcare, void *meeither)
         }
     }
 
-    CONTAINER_CLEAR(_sql.queue, (netsnmp_container_obj_func*)_sql_buf_free,
-                    NULL);
+    if (!sql_has_connected || _sql.connected) {
+        CONTAINER_CLEAR(_sql.queue, (netsnmp_container_obj_func*)_sql_buf_free,
+                        NULL);
+    }
 }
 
 #else
