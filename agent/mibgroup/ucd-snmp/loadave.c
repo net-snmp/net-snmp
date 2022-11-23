@@ -234,8 +234,10 @@ loadave_parse_config(const char *token, char *cptr)
     for (i = 0; i <= 2; i++) {
         if (cptr != NULL)
             maxload[i] = atof(cptr);
-        else
+        else if(i != 0) 
             maxload[i] = maxload[i - 1];
+        else
+            maxload[i] = NETSNMP_DEFMAXLOADAVE; 
         cptr = skip_not_white(cptr);
         cptr = skip_white(cptr);
     }
