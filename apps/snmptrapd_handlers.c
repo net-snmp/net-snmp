@@ -810,9 +810,10 @@ int   command_handler( netsnmp_pdu           *pdu,
     size_t          r_len = 64, o_len = 0;
     int             oldquick;
 
+
+    if (handler && handler->token && *handler->token) {
     DEBUGMSGTL(( "snmptrapd", "command_handler\n"));
     DEBUGMSGTL(( "snmptrapd", "token = '%s'\n", handler->token));
-    if (handler && handler->token && *handler->token) {
 	netsnmp_pdu    *v2_pdu = NULL;
 	if (pdu->command == SNMP_MSG_TRAP)
 	    v2_pdu = convert_v1pdu_to_v2(pdu);
