@@ -812,49 +812,49 @@ int   command_handler( netsnmp_pdu           *pdu,
 
 
     if (handler && handler->token && *handler->token) {
-    DEBUGMSGTL(( "snmptrapd", "command_handler\n"));
-    DEBUGMSGTL(( "snmptrapd", "token = '%s'\n", handler->token));
-	netsnmp_pdu    *v2_pdu = NULL;
-	if (pdu->command == SNMP_MSG_TRAP)
-	    v2_pdu = convert_v1pdu_to_v2(pdu);
-	else
-	    v2_pdu = pdu;
-        oldquick = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-                                          NETSNMP_DS_LIB_QUICK_PRINT);
-        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
-                               NETSNMP_DS_LIB_QUICK_PRINT, 1);
+        DEBUGMSGTL(( "snmptrapd", "command_handler\n"));
+        DEBUGMSGTL(( "snmptrapd", "token = '%s'\n", handler->token));
+        netsnmp_pdu    *v2_pdu = NULL;
+        if (pdu->command == SNMP_MSG_TRAP)
+            v2_pdu = convert_v1pdu_to_v2(pdu);
+        else
+            v2_pdu = pdu;
+            oldquick = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                            NETSNMP_DS_LIB_QUICK_PRINT);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                NETSNMP_DS_LIB_QUICK_PRINT, 1);
 
-        /*
-	 * Format the trap and pass this string to the external command
-	 */
-        if ((rbuf = calloc(r_len, 1)) == NULL) {
-            snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
-            return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
-        }
-
-        /*
-         *  If there's a format string registered for this trap, then use it.
-         *  Otherwise use the standard execution format setting.
-         */
-        if (handler && handler->format && *handler->format) {
-            DEBUGMSGTL(( "snmptrapd", "format = '%s'\n", handler->format));
-            realloc_format_trap(&rbuf, &r_len, &o_len, 1,
-                                             handler->format,
-                                             v2_pdu, transport);
-        } else {
-	    if ( pdu->command == SNMP_MSG_TRAP && exec_format1 ) {
-                DEBUGMSGTL(( "snmptrapd", "exec v1 = '%s'\n", exec_format1));
-                realloc_format_trap(&rbuf, &r_len, &o_len, 1,
-                                             exec_format1, pdu, transport);
-	    } else if ( pdu->command != SNMP_MSG_TRAP && exec_format2 ) {
-                DEBUGMSGTL(( "snmptrapd", "exec v2/3 = '%s'\n", exec_format2));
-                realloc_format_trap(&rbuf, &r_len, &o_len, 1,
-                                             exec_format2, pdu, transport);
-	    } else {
-                DEBUGMSGTL(( "snmptrapd", "execute format\n"));
-                realloc_format_trap(&rbuf, &r_len, &o_len, 1, EXECUTE_FORMAT,
-                                             v2_pdu, transport);
+            /*
+        * Format the trap and pass this string to the external command
+        */
+            if ((rbuf = calloc(r_len, 1)) == NULL) {
+                snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
+                return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
             }
+
+            /*
+            *  If there's a format string registered for this trap, then use it.
+            *  Otherwise use the standard execution format setting.
+            */
+            if (handler && handler->format && *handler->format) {
+                DEBUGMSGTL(( "snmptrapd", "format = '%s'\n", handler->format));
+                realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                                                handler->format,
+                                                v2_pdu, transport);
+            } else {
+            if ( pdu->command == SNMP_MSG_TRAP && exec_format1 ) {
+                    DEBUGMSGTL(( "snmptrapd", "exec v1 = '%s'\n", exec_format1));
+                    realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                                                exec_format1, pdu, transport);
+            } else if ( pdu->command != SNMP_MSG_TRAP && exec_format2 ) {
+                    DEBUGMSGTL(( "snmptrapd", "exec v2/3 = '%s'\n", exec_format2));
+                    realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                                                exec_format2, pdu, transport);
+            } else {
+                    DEBUGMSGTL(( "snmptrapd", "execute format\n"));
+                    realloc_format_trap(&rbuf, &r_len, &o_len, 1, EXECUTE_FORMAT,
+                                                v2_pdu, transport);
+                }
 	}
 
         /*
