@@ -438,9 +438,6 @@ linux_read_icmp_msg_stat(struct icmp_mib *icmpstat,
 
     if ((ret = linux_read_mibII_stats()) == -1) {
         return -1;
-    } else if (ret) {
-       memcpy(icmpmsgstat, &cached_icmp4_msg_mib, sizeof(*icmpmsgstat));
-       *flag = 1; /* We have a valid icmpmsg */
     }
 
     memcpy(icmpstat, &cached_icmp_mib, sizeof(*icmpstat));
