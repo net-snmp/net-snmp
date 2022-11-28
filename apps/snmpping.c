@@ -334,6 +334,7 @@ start_ping(netsnmp_session *ss, oid * index, size_t indexlen, char *pingDest)
           break;
 #endif
        default:
+          freeaddrinfo(dest);
           fprintf(stderr, "Unsupported address family\n");
           return 3;
     }
