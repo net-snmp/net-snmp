@@ -65,7 +65,7 @@ if test "x$enable_ipv6" = "xyes"; then
 	for v6type in v6d toshiba kame zeta generic; do
 		case $v6type in
 		v6d)
-			AC_EGREP_CPP(yes, [
+			AC_EGREP_CPP(^yes$, [
 #include </usr/local/v6/include/sys/types.h>
 #ifdef __V6D__
 yes
@@ -75,7 +75,7 @@ yes
 				CFLAGS="-I/usr/local/v6/include $CFLAGS"])
 			;;
 		toshiba)
-			AC_EGREP_CPP(yes, [
+			AC_EGREP_CPP(^yes$, [
 #include <sys/param.h>
 #ifdef _TOSHIBA_INET6
 yes
@@ -85,7 +85,7 @@ yes
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
 		kame)
-			AC_EGREP_CPP(yes, [
+			AC_EGREP_CPP(^yes$, [
 #include <netinet/in.h>
 #ifdef __KAME__
 yes
@@ -96,7 +96,7 @@ yes
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
 		zeta)
-			AC_EGREP_CPP(yes, [
+			AC_EGREP_CPP(^yes$, [
 #include <sys/param.h>
 #ifdef _ZETA_MINAMI_INET6
 yes

@@ -18767,7 +18767,7 @@ yes
 #endif
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
+  $EGREP "^yes$" >/dev/null 2>&1; then :
   v6lib=v6;
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-I/usr/local/v6/include $CFLAGS"
@@ -18785,7 +18785,7 @@ yes
 #endif
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
+  $EGREP "^yes$" >/dev/null 2>&1; then :
   v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
@@ -18803,7 +18803,7 @@ yes
 #endif
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
+  $EGREP "^yes$" >/dev/null 2>&1; then :
   v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				v6trylibc=yes;
@@ -18822,7 +18822,7 @@ yes
 #endif
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
+  $EGREP "^yes$" >/dev/null 2>&1; then :
   v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
