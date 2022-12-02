@@ -64,16 +64,16 @@ test-mibs:
 	cd $(srcdir)/rfc1213 ; ./run
 
 etest:    etimetest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ etimetest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} ${LDFLAGS} -o $@ etimetest.o $(PARSEOBJS) ${LIBS}
 
 ktest:    keymanagetest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ keymanagetest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} ${LDFLAGS} -o $@ keymanagetest.o $(PARSEOBJS) ${LIBS}
 
 misctest:    misctest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ misctest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} ${LDFLAGS} -o $@ misctest.o $(PARSEOBJS) ${LIBS}
 
 stest:    scapitest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ scapitest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} ${LDFLAGS} -o $@ scapitest.o $(PARSEOBJS) ${LIBS}
 
 clean: testclean
 	rm -f *.o core *.core $(TARG)
