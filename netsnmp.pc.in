@@ -9,4 +9,4 @@ URL: http://www.net-snmp.org
 Version: @PACKAGE_VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lnetsnmp
-Libs.private: @LDFLAGS@ @LNETSNMPLIBS@ @LIBS@ @PERLLDOPTS_FOR_APPS@
+Libs.private: @LNETSNMPLIBS@ @LIBS@
