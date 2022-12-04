@@ -408,8 +408,7 @@ _parse_storage_type(const char *arg)
     return;
 }
 
-void
-usage(void)
+ __attribute__((noreturn)) static void usage(void)
 {
     fprintf(stderr, "USAGE: snmptls [-Cm mapTypeOID] [-Cd data] [-Cs storageType] ");
     snmp_parse_args_usage(stderr);

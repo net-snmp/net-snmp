@@ -1127,7 +1127,7 @@ handle_inform_response(int op, netsnmp_session * session,
                 break;
         }
         /** AUTH failures fall through to sec error */
-	/* FALL THROUGH */
+	NETSNMP_FALLTHROUGH;
 
     case NETSNMP_CALLBACK_OP_SEC_ERROR:
         DEBUGMSGTL(("trap", "sec error sending an inform for reqid=%d\n",

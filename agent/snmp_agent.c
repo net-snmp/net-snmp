@@ -3758,7 +3758,7 @@ handle_pdu(netsnmp_agent_session *asp)
                 snmp_set_var_typed_value(v, ASN_NULL, NULL, 0);
             }
         }
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
 
     default:
 #ifndef NETSNMP_NO_WRITE_SUPPORT
@@ -3808,7 +3808,7 @@ handle_pdu(netsnmp_agent_session *asp)
 
     case SNMP_MSG_GETNEXT:
         snmp_increment_statistic(STAT_SNMPINGETNEXTS);
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
 
     case SNMP_MSG_GETBULK:     /* note: there is no getbulk stat */
         /*

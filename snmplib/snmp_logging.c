@@ -376,7 +376,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         if (priority == -1)  return -1;
         if (inc_optind)
             optind++;
-        /* Fallthrough */
+        NETSNMP_FALLTHROUGH;
     case 'e':
         logh = netsnmp_register_stdio_loghandler(0, priority, pri_max, "stderr");
         break;
@@ -389,7 +389,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         if (priority == -1)  return -1;
         if (inc_optind)
             optind++;
-        /* Fallthrough */
+        NETSNMP_FALLTHROUGH;
     case 'o':
         logh = netsnmp_register_stdio_loghandler( 1, priority, pri_max, "stdout" );
         break;
@@ -405,7 +405,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         while (*optarg == ' ') optarg++;
         if (!*optarg && !argv) return -1;
         else if (!*optarg) optarg = argv[++optind];
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
     case 'f':
         if (inc_optind)
             optind++;
@@ -433,7 +433,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             if (optind < argc)
                 optarg = argv[optind];
         }
-        /* Fallthrough */
+        NETSNMP_FALLTHROUGH;
     case 's':
         if (inc_optind)
             optind++;
@@ -464,7 +464,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         if (priority == -1)  return -1;
         if (inc_optind)
             optind++;
-        /* Fallthrough */
+        NETSNMP_FALLTHROUGH;
     case 'n':
         /*
          * disable all logs to clean them up (close files, etc),

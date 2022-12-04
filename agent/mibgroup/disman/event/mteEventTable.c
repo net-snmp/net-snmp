@@ -352,7 +352,7 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
                     break;
                 case RS_CREATEANDGO:
                     entry->flags |= MTE_EVENT_FLAG_ACTIVE;
-                    /* fall-through */
+                    NETSNMP_FALLTHROUGH;
                 case RS_CREATEANDWAIT:
                     entry->flags |= MTE_EVENT_FLAG_VALID;
                     entry->session =

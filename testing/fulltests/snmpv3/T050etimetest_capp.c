@@ -125,7 +125,7 @@ main(int argc, char **argv)
             break;
         case 'h':
             rval = 0;
-            /* fall through */
+            NETSNMP_FALLTHROUGH;
         default:
             usage(stdout);
             exit(rval);

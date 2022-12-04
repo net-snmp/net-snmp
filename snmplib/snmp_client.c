@@ -928,7 +928,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
         if (4 != vars->val_len) {
             netsnmp_assert("ipaddress length == 4");
         }
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
     case ASN_PRIV_IMPLIED_OCTET_STR:
     case ASN_OCTET_STR:
     case ASN_BIT_STR:
@@ -1088,7 +1088,7 @@ snmp_synch_response_cb(netsnmp_session * ss,
                      */
                     snmp_set_detail(strerror(errno));
                 }
-                /* FALLTHRU */
+                NETSNMP_FALLTHROUGH;
             default:
                 state->status = STAT_ERROR;
                 state->waiting = 0;
@@ -1182,7 +1182,7 @@ snmp_sess_synch_response(struct session_list *slp,
                      */
                     snmp_set_detail(strerror(errno));
                 }
-                /* FALLTHRU */
+                NETSNMP_FALLTHROUGH;
             default:
                 state->status = STAT_ERROR;
                 state->waiting = 0;

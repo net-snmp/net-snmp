@@ -3373,7 +3373,7 @@ usm_handle_report(struct session_list *slp,
         }
         session->s_snmp_errno = res;
     }  
-    /* fallthrough */
+    NETSNMP_FALLTHROUGH;
     case SNMPERR_USM_UNKNOWNENGINEID:
     case SNMPERR_USM_UNKNOWNSECURITYNAME:
     case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:

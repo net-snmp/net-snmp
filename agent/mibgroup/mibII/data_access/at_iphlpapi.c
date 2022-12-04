@@ -432,7 +432,7 @@ write_arp(int action,
              */
             create_flag = 0;
         }
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
 
     case FREE:
         /*

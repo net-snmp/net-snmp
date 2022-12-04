@@ -6221,9 +6221,9 @@ static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
     do {
 	base = 0;
 	switch (ph->format) {
-	case 'x': base += 6;	/* fall through */
-	case 'd': base += 2;	/* fall through */
-	case 'o': base += 8;	/* fall through */
+	case 'x': base += 6;	NETSNMP_FALLTHROUGH;
+	case 'd': base += 2;	NETSNMP_FALLTHROUGH;
+	case 'o': base += 8;
 	    {
 		int i;
 		unsigned long number = strtol(v, &nv, base);

@@ -332,7 +332,7 @@ smux_handler(netsnmp_mib_handler *handler,
             if (reqinfo->mode != MODE_SET_RESERVE1)
                 break;
             /* fall through if MODE_SET_RESERVE1 */
-	    /* FALL THROUGH */
+	    NETSNMP_FALLTHROUGH;
 
         default:
             /* SET processing */

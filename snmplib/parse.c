@@ -2342,7 +2342,7 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
                                 *ntype);
                     return NULL;
                 }
-                /* FALL THROUGH */
+                NETSNMP_FALLTHROUGH;
             case INTEGER:
                 *ntype = get_token(fp, ntoken, MAXTOKEN);
                 do {
@@ -4084,7 +4084,7 @@ unload_module_by_ID(int modID, struct tree *tree_top)
                 switch (cnt) {
                 case 0:
                     tp->module_list[0] = -1;    /* Mark unused, */
-		    /* FALL THROUGH */
+		    NETSNMP_FALLTHROUGH;
 
                 case 1:        /* save the remaining module */
                     if (&(tp->modid) != tp->module_list) {
@@ -4686,11 +4686,12 @@ fetch_next_token:
                 if (ch == '0' || ch == '1')
                     break;
                 seenSymbols = xdigits;
-		/* FALL THROUGH */
+                NETSNMP_FALLTHROUGH;
             case xdigits:
                 if (isxdigit(ch))
                     break;
                 seenSymbols = other;
+                NETSNMP_FALLTHROUGH;
             case other:
                 break;
             }
@@ -4808,7 +4809,7 @@ fetch_next_token:
             goto fetch_next_token;
         }
         ungetc(ch_next, fp);
-	/* fallthrough */
+	NETSNMP_FALLTHROUGH;
     default:
         /*
          * Accumulate characters until end of token is found.  Then attempt to

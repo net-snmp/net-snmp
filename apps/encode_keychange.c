@@ -170,7 +170,7 @@ main(int argc, char **argv)
             break;
         case 'h':
             rval = 0;
-	    /* fallthrough */
+	    NETSNMP_FALLTHROUGH;
         default:
             usage_to_file(stdout);
             exit(rval);

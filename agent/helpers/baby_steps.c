@@ -147,7 +147,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
          * merge helper as well (or if requests are serialized).
          */
         bs_modes->completed = 0;
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
     case MODE_SET_COMMIT:

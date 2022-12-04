@@ -866,7 +866,7 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
         DEBUGINDENTLESS();
 
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
 
     case AGENTX_MSG_GET:
     case AGENTX_MSG_GETNEXT:
@@ -921,7 +921,7 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
         DEBUGMSG(("dumpv_send", "  errindex:\t%ld\n", pdu->errindex));
         DEBUGINDENTLESS();
 
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
 
     case AGENTX_MSG_INDEX_ALLOCATE:
     case AGENTX_MSG_INDEX_DEALLOCATE:
@@ -1758,7 +1758,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         DEBUGINDENTLESS();
         bufp += 4;
         *length -= 4;
-        /* FALLTHROUGH */
+        NETSNMP_FALLTHROUGH;
 
     case AGENTX_MSG_GETNEXT:
     case AGENTX_MSG_GET:
@@ -1813,7 +1813,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         bufp += 4;
         *length -= 4;
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
 
     case AGENTX_MSG_INDEX_ALLOCATE:
     case AGENTX_MSG_INDEX_DEALLOCATE:

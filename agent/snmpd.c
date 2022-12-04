@@ -647,7 +647,7 @@ main(int argc, char *argv[])
 
         case 'P':
             printf("Warning: -P option is deprecated, use -p instead\n");
-	    /* FALL THROUGH */
+	    NETSNMP_FALLTHROUGH;
         case 'p':
             if (optarg != NULL) {
                 pid_file = optarg;

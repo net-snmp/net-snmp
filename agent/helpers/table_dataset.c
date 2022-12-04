@@ -1128,11 +1128,11 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         switch (tp->access) {
         case MIB_ACCESS_CREATE:
             table_set->allow_creation = 1;
-            /* fallthrough */
+            NETSNMP_FALLTHROUGH;
         case MIB_ACCESS_READWRITE:
         case MIB_ACCESS_WRITEONLY:
             canwrite = 1;
-            /* fallthrough */
+            NETSNMP_FALLTHROUGH;
         case MIB_ACCESS_READONLY:
             DEBUGMSGTL(("table_set_add_table",
                         "adding column %ld of type %d\n", tp->subid, type));

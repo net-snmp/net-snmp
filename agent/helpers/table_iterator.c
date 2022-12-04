@@ -908,7 +908,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 }
                 snmp_free_varbind(table_info->indexes);
                 table_info->indexes = snmp_clone_varbind(ti_info->results);
-                /* FALL THROUGH */
+                NETSNMP_FALLTHROUGH;
 
             case MODE_GET:
 #ifndef NETSNMP_NO_WRITE_SUPPORT

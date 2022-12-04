@@ -992,7 +992,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
             if (NULL != ocert)
                 break;
             /* Check for PEM if DER didn't work */
-            /* FALLTHROUGH */
+            NETSNMP_FALLTHROUGH;
 
         case NS_CERT_TYPE_PEM:
             (void)BIO_seek(certbio, cert->offset);
@@ -1373,7 +1373,7 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
             }
             (void)BIO_reset(certbio);
             /* Check for PEM if DER didn't work */
-            /* FALLTHROUGH */
+            NETSNMP_FALLTHROUGH;
 
         case NS_CERT_TYPE_PEM:
 

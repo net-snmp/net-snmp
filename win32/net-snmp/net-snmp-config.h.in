@@ -1152,6 +1152,8 @@
 #  error Unknown byte order
 #endif
 
+#define NETSNMP_FALLTHROUGH do { } while (0)
+
 /* Mib-2 tree Info */
 /* These are the system information variables. */
 

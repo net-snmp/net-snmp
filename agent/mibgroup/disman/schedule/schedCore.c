@@ -313,7 +313,7 @@ sched_nextTime( struct schedTable_entry *entry )
             return;
         }
         DEBUGMSGTL(("disman:schedule:time", "one-shot: fallthrough\n"));
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
     case SCHED_TYPE_CALENDAR:
         /*
          *  Check for complete time specification

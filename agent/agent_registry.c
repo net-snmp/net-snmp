@@ -871,7 +871,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	case -1:
 	    /*  Existing subtree contains new one.  */
 	    netsnmp_subtree_split(tree1, new_sub->end_a, new_sub->end_len);
-	    /* Fall Through */
+	    NETSNMP_FALLTHROUGH;
 
 	case  0:
 	    /*  The two trees match precisely.  */

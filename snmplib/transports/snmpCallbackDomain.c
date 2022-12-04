@@ -472,7 +472,7 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
         pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
-        /* FALL THROUGH */
+        NETSNMP_FALLTHROUGH;
     default:
         if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
             pdu->errstat = 0;

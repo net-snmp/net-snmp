@@ -612,12 +612,13 @@ writeLocalAddress(int action, unsigned char *var_val,
         if (var_val_len != 4) {
             return SNMP_ERR_WRONGLENGTH;
         }
-	/* FALL THROUGH */
+	NETSNMP_FALLTHROUGH;
     case RESERVE2:
         tunnel = getTunnelByIfIndex((int) name[name_len - 1]);
         if (!tunnel) {
             return SNMP_ERR_NOSUCHNAME;
         }
+        NETSNMP_FALLTHROUGH;
     case FREE:
         break;
     case ACTION:
@@ -658,7 +659,7 @@ writeRemoteAddress(int action, unsigned char *var_val,
         if (var_val_len != 4) {
             return SNMP_ERR_WRONGLENGTH;
         }
-	/* FALL THROUGH */
+	NETSNMP_FALLTHROUGH;
     case RESERVE2:
         tunnel = getTunnelByIfIndex((int) name[name_len - 1]);
         if (!tunnel) {
@@ -705,7 +706,7 @@ writeHopLimit(int action, unsigned char *var_val,
         if (var_val_len > sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
-	/* FALL THROUGH */
+	NETSNMP_FALLTHROUGH;
     case RESERVE2:
         tunnel = getTunnelByIfIndex((int) name[name_len - 1]);
         if (!tunnel) {
@@ -752,7 +753,7 @@ writeTOS(int action, unsigned char *var_val,
         if (var_val_len > sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
-	/* FALL THROUGH */
+	NETSNMP_FALLTHROUGH;
     case RESERVE2:
         tunnel = getTunnelByIfIndex((int) name[name_len - 1]);
         if (!tunnel) {

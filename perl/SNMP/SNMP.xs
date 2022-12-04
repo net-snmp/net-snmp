@@ -1095,7 +1095,7 @@ retry:
                   snmp_free_pdu(*response);
                   goto retry;
                }
-               /* FALLTHROUGH */
+               NETSNMP_FALLTHROUGH;
 
             /* Pv1, SNMPsec, Pv2p, v2c, v2u, v2*, and SNMPv3 PDUs */
             case SNMP_ERR_TOOBIG:
@@ -1208,7 +1208,7 @@ __snmp_xs_cb(int op, netsnmp_session *ss, int reqid, netsnmp_pdu *pdu,
       } else {
         warn("Couldn't clone PDU for inform response");
       }
-      /* FALLTHRU */
+      NETSNMP_FALLTHROUGH;
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
       traplist = newAV();
@@ -1241,7 +1241,7 @@ __snmp_xs_cb(int op, netsnmp_session *ss, int reqid, netsnmp_pdu *pdu,
         sv_setuv(tmp_sv, pdu->time);
         av_push(traplist, tmp_sv);
     }
-      /* FALLTHRU */
+      NETSNMP_FALLTHROUGH;
     case SNMP_MSG_RESPONSE:
       {
       varlist = newAV();
