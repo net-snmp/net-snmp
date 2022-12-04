@@ -96,12 +96,12 @@ if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
     developer="yes"
 fi
 if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
-    AC_MSG_CHECKING([for developer gcc flags])
+    AC_MSG_NOTICE([Checking for developer compiler flags])
     #       WWWXXX - strict type checking
     #
     netsnmp_save_CFLAGS="$CFLAGS"
     for opt in -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
-        -Wimplicit-fallthrough=2 -Wlogical-op -Wundef                        \
+        -Wimplicit-fallthrough -Wlogical-op -Wundef                          \
         -Wno-format-truncation -Wno-missing-field-initializers               \
         -Wno-sign-compare -Wno-unused-parameter                              \
         $(test "x${TRAVIS_OS_NAME}" != x && echo -Wno-deprecated-declarations)

@@ -117,6 +117,7 @@ sub AddCommonParams {
 	# Remove -Wimplicit-fallthrough since it is not supported by older
 	# versions of gcc.
 	$cflags =~ s/-Wimplicit-fallthrough=[0-9]//g;
+	$cflags =~ s/-Wimplicit-fallthrough//g;
 	append($Params->{'CCFLAGS'}, $cflags);
 	append($Params->{'CCFLAGS'}, $Config{'ccflags'});
 	# Suppress known Perl header shortcomings.

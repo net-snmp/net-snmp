@@ -16148,13 +16148,13 @@ if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
     developer="yes"
 fi
 if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for developer gcc flags" >&5
-$as_echo_n "checking for developer gcc flags... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Checking for developer compiler flags" >&5
+$as_echo "$as_me: Checking for developer compiler flags" >&6;}
     #       WWWXXX - strict type checking
     #
     netsnmp_save_CFLAGS="$CFLAGS"
     for opt in -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
-        -Wimplicit-fallthrough=2 -Wlogical-op -Wundef                        \
+        -Wimplicit-fallthrough -Wlogical-op -Wundef                          \
         -Wno-format-truncation -Wno-missing-field-initializers               \
         -Wno-sign-compare -Wno-unused-parameter                              \
         $(test "x${TRAVIS_OS_NAME}" != x && echo -Wno-deprecated-declarations)
