@@ -65,4 +65,7 @@ rc = snmp_build(&packet, &packet_len, &offset, ss, pdu);
 OKF((rc == SNMPERR_SUCCESS),
     ("Building an INFORM PDU/packet should have succeed: %d", rc));
 
+free(packet);
+netsnmp_cleanup_session(&session);
+
 SOCK_CLEANUP;
