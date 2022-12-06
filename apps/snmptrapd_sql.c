@@ -256,7 +256,7 @@ netsnmp_sql_disconnected(void)
     }
 }
 
-static bool
+static int
 netsnmp_sql_server_disconnected(int err)
 {
     // CR_SERVER_GONE_ERROR | CR_SERVER_LOST | ER_CLIENT_INTERACTION_TIMEOUT
@@ -1130,7 +1130,7 @@ _sql_process_queue(u_int dontcare, void *meeither)
         (void) netsnmp_mysql_connect();
     }
 
-    bool sql_has_connected = _sql.connected;
+    int sql_has_connected = _sql.connected;
 
     CONTAINER_FOR_EACH(_sql.queue, (netsnmp_container_obj_func*)_sql_save,
                        NULL);
