@@ -315,9 +315,7 @@ tcpprotopr_bulkget(const char *name, oid * root, size_t root_len)
                  */
                 running = 0;
             }
-        } else if (status == STAT_TIMEOUT) {
-            running = 0;
-        } else {                /* status == STAT_ERROR */
+        } else if ((status == STAT_TIMEOUT) || (status == STAT_ERROR)) {
             running = 0;
         }
 
