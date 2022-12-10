@@ -100,7 +100,7 @@ const char     *tcpstates[] = {
 #define TCP_NSTATES 11
 
 static void
-tcpprotoprint_line(const char *name, netsnmp_variable_list * vp,
+tcpprotoprint_line(const char *name, const netsnmp_variable_list *vp,
                    int *first)
 {
     int             state, width;
@@ -158,7 +158,7 @@ tcpprotoprint_line(const char *name, netsnmp_variable_list * vp,
 }
 
 static void
-tcpprotopr_get(const char *name, oid * root, size_t root_len)
+tcpprotopr_get(const char *name, const oid *root, size_t root_len)
 {
     netsnmp_variable_list *var, *vp;
     int             first = 1;
@@ -242,7 +242,7 @@ udpprotopr(const char *name)
 }
 
 void
-tcpprotopr_bulkget(const char *name, oid * root, size_t root_len)
+tcpprotopr_bulkget(const char *name, const oid *root, size_t root_len)
 {
     netsnmp_variable_list *vp;
     netsnmp_pdu    *pdu, *response;
@@ -353,11 +353,11 @@ tcpprotopr(const char *name)
 	 *********************/
 
 void
-_dump_stats(const char *name, oid * oid_buf, size_t buf_len,
-            struct stat_table *stable)
+_dump_stats(const char *name, oid *oid_buf, size_t buf_len,
+            const struct stat_table *stable)
 {
     netsnmp_variable_list *var, *vp;
-    struct stat_table *sp;
+    const struct stat_table *sp;
     oid             stat;
 
     var = NULL;
