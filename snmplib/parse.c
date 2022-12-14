@@ -2192,28 +2192,31 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
             type = get_token(fp, token, MAXTOKEN);
             if (type != LEFTPAREN) {
                 print_error("Expected \"(\"", token, type);
-                return NULL;
+                goto out_err;
             }
             type = get_token(fp, token, MAXTOKEN);
             if (type != NUMBER) {
                 print_error("Expected integer", token, type);
-                return NULL;
+                goto out_err;
             }
             (*epp)->value = strtol(token, NULL, 10);
             type = get_token(fp, token, MAXTOKEN);
             if (type != RIGHTPAREN) {
                 print_error("Expected \")\"", token, type);
-                return NULL;
+                goto out_err;
             }
             epp = &(*epp)->next;
         }
     }
     if (type == ENDOFFILE) {
         print_error("Expected \"}\"", token, type);
-        return NULL;
+        goto out_err;
     }
     *retp = ep;
     return ep;
+    out_err:
+        free(epp);
+        return NULL;
 }
 
 static struct range_list *
