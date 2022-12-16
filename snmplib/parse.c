@@ -2215,8 +2215,12 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
     *retp = ep;
     return ep;
     out_err:
-        free(epp);
-        return NULL;
+        if((*epp)->label) { 
+            free((*epp)->label); 
+        }
+        free(*epp);
+        *epp = NULL;
+        return *epp;
 }
 
 static struct range_list *
