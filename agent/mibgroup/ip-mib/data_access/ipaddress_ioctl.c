@@ -249,6 +249,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         if(addr_info.bcastflg) {
            bcastentry = netsnmp_access_ipaddress_entry_create();
            if(NULL == bcastentry) {
+              netsnmp_access_ipaddress_entry_free(entry);
               rc = -3;
               break;
            }
@@ -267,6 +268,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         if (ioctl(sd, SIOCGIFNETMASK, ifrp) < 0) {
             snmp_log(LOG_ERR,
                      "error getting netmask for interface %d\n", i);
+            netsnmp_access_ipaddress_entry_free(bcastentry);
             netsnmp_access_ipaddress_entry_free(entry);
             continue;
         }
