@@ -395,9 +395,14 @@ write_snmpNotifyFilterProfileRowStatus(int action,
     static struct snmpNotifyFilterProfileTable_data *StorageDel;
     size_t          newlen = name_len - table_offset;
     static int      old_value;
-    if (!var_val) return SNMP_ERR_WRONGTYPE; 
-    int             set_value = *((long *) var_val);
+    int             set_value;
     netsnmp_variable_list *vars;
+    
+    if (!var_val) {
+        return SNMP_ERR_WRONGTYPE;
+    }
+    
+    set_value= *((long *) var_val)
 
 
     DEBUGMSGTL(("snmpNotifyFilterProfileTable",

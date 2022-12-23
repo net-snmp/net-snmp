@@ -523,9 +523,15 @@ write_snmpNotifyRowStatus(int action,
     static struct snmpNotifyTable_data *StorageDel;
     size_t          newlen = name_len - snmpNotifyTable_offset;
     static int      old_value;
-    int             set_value = *((long *) var_val);
+    int             set_value;
     static netsnmp_variable_list *vars, *vp;
 
+    if (!var_val) {
+        return SNMP_ERR_WRONGTYPE; 
+    }
+
+    set_value = *((long *) var_val)
+    
     DEBUGMSGTL(("snmpNotifyTable",
                 "write_snmpNotifyRowStatus entering action=%d...  \n",
                 action));
