@@ -30,6 +30,7 @@ if (! (-f $tar_command)) {
 else {
   print "tar command:  $tar_command\n";
 }
+if (! (-f $gzip_command)) { $gzip_command = "c:/msys64/usr/bin/gzip.exe"; }
 if (! (-f $gzip_command)) {
   die ("Could not find gzip command");
 }
@@ -47,8 +48,8 @@ die("makensis.exe not found") if (!(-f $makensis));
 my $target_arch = $ENV{TARGET_CPU} ? $ENV{TARGET_CPU} : $ENV{Platform} ?
                   $ENV{Platform} : "x86";
 my $openssldir = $ENV{OPENSSLDIR} ? $ENV{OPENSSLDIR} :
-                 $target_arch eq "x64" ? "C:\\OpenSSL-Win64" :
-                 "C:\\OpenSSL-Win32";
+                 $target_arch eq "x64" ? "C:\\Progra~1\\OpenSSL-Win64" :
+                 "C:\\Progra~1\\OpenSSL-Win32";
 my $opensslincdir = $openssldir . "\\include";
 my $openssllibdir = $openssldir . "\\lib\\VC";
 
