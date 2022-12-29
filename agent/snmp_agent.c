@@ -3717,11 +3717,43 @@ netsnmp_handle_request(netsnmp_agent_session *asp, int status)
     return 1;
 }
 
+static int
+check_set_pdu_for_null_varbind(netsnmp_agent_session *asp)
+{
+    int i;
+    netsnmp_variable_list *v = NULL;
+
+    for (i = 1, v = asp->pdu->variables; v != NULL; i++, v = v->next_variable) {
+	if (v->type == ASN_NULL) {
+	    /*
+	     * Protect SET implementations that do not protect themselves
+	     * against wrong type.
+	     */
+	    DEBUGMSGTL(("snmp_agent", "disallowing SET with NULL var for varbind %d\n", i));
+	    asp->index = i;
+	    return SNMP_ERR_WRONGTYPE;
+	}
+    }
+    return SNMP_ERR_NOERROR;
+}
+
 int
 handle_pdu(netsnmp_agent_session *asp)
 {
     int             status, inclusives = 0;
     netsnmp_variable_list *v = NULL;
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+    /*
+     * Check for ASN_NULL in SET request
+     */
+    if (asp->pdu->command == SNMP_MSG_SET) {
+	status = check_set_pdu_for_null_varbind(asp);
+	if (status != SNMP_ERR_NOERROR) {
+	    return status;
+	}
+    }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     /*
      * for illegal requests, mark all nodes as ASN_NULL 
