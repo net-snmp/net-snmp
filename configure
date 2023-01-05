@@ -16374,7 +16374,7 @@ yes
     ]
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
+  $EGREP "^yes$" >/dev/null 2>&1; then :
     PARTIALTARGETFLAGS="-U$PARTIALTARGETOS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -30582,20 +30582,16 @@ $as_echo_n "checking for struct rtentry... " >&6; }
 if ${ac_cv_struct_rtentry+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
+  ac_fn_c_check_type "$LINENO" "struct ortentry" "ac_cv_type_struct_ortentry" "
 #define KERNEL
 #include <net/route.h>
 
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "ortentry" >/dev/null 2>&1; then :
+"
+if test "x$ac_cv_type_struct_ortentry" = xyes; then :
   ac_cv_struct_rtentry=ortentry
 else
   ac_cv_struct_rtentry=rtentry
 fi
-rm -f conftest*
 
         if test "x$ac_cv_struct_rtentry" = "xrtentry" ; then
              ac_cv_struct_rtentry="rtentry"
@@ -31022,7 +31018,7 @@ TCPTV_REXMTMAX
 
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "hz" >/dev/null 2>&1; then :
+  $EGREP "\<hz\>" >/dev/null 2>&1; then :
   ac_cv_TCPTV_NEEDS_HZ=yes
 else
   ac_cv_TCPTV_NEEDS_HZ=no
