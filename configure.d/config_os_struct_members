@@ -696,13 +696,10 @@ fi
 if test "x$ac_cv_RTENTRY_TYPE" = "xunknown"; then
     AC_CACHE_CHECK([for struct rtentry],
         [ac_cv_struct_rtentry],
-        [AC_EGREP_CPP(ortentry,
-            [
-#define KERNEL
-#include <net/route.h>
-            ],
+	[AC_CHECK_TYPE([struct ortentry],
             [ac_cv_struct_rtentry=ortentry],
-            [ac_cv_struct_rtentry=rtentry ])
+	    [ac_cv_struct_rtentry=rtentry],
+	    [[#include <net/route.h>]])
         if test "x$ac_cv_struct_rtentry" = "xrtentry" ; then
              ac_cv_struct_rtentry="rtentry"
         else

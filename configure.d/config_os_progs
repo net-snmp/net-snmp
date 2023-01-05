@@ -231,7 +231,7 @@ AC_MSG_CHECKING([whether to un-define target system token (before redefining)])
 OLD_CPPFLAGS="$CPPFLAGS"
 CPPFLAGS="-U$PARTIALTARGETOS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
 
-AC_EGREP_CPP(yes,
+AC_EGREP_CPP([^yes$],
     [[
 #ifdef $PARTIALTARGETOS
 yes

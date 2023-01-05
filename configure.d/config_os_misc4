@@ -224,7 +224,7 @@ fi
 #
 AC_CACHE_CHECK([whether TCP timers depend on 'hz'],
     ac_cv_TCPTV_NEEDS_HZ,
-   [AC_EGREP_CPP(hz,
+   [AC_EGREP_CPP([\<hz\>],
         [
 #include <netinet/tcp_timer.h>
 TCPTV_MIN
