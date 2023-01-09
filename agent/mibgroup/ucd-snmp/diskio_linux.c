@@ -94,6 +94,8 @@ diskio_free_config(void)
                            NETSNMP_DS_AGENT_DISKIO_NO_LOOP, 0);
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_DISKIO_NO_RAM, 0);
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_DISKIO_NO_MD, 0);
 
     if (la_head.length) {
         /*
@@ -253,6 +255,9 @@ void init_diskio_linux(void)
     netsnmp_ds_register_config(ASN_BOOLEAN, app, "diskio_exclude_ram",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_DISKIO_NO_RAM);
+    netsnmp_ds_register_config(ASN_BOOLEAN, app, "diskio_exclude_md",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_MD);
 
     snmpd_register_config_handler("diskio", diskio_parse_config_disks,
         diskio_free_config, "path | device");
@@ -326,6 +331,10 @@ is_excluded(const char *name)
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_DISKIO_NO_RAM)
         && !(strncmp(name, "ram", 3)))
+        return 1;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_MD)
+        && !(strncmp(name, "md", 2)))
         return 1;
     return 0;
 }
