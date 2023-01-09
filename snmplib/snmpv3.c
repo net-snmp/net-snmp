@@ -1052,6 +1052,8 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
 
     size_t          engineIDLen;
     u_char         *c_engineID;
+    u_long          localEngineTime;
+    u_long          localEngineBoots;
 
     c_engineID = snmpv3_generate_engineID(&engineIDLen);
 
@@ -1076,9 +1078,11 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
     /*
      * for USM set our local engineTime in the LCD timing cache 
      */
+    localEngineTime = snmpv3_local_snmpEngineTime();
+    localEngineBoots = snmpv3_local_snmpEngineBoots();
     set_enginetime(c_engineID, engineIDLen,
-                   snmpv3_local_snmpEngineBoots(),
-                   snmpv3_local_snmpEngineTime(), TRUE);
+                   localEngineBoots,
+                   localEngineTime, TRUE);
 #endif /* NETSNMP_SECMOD_USM */
 
     SNMP_FREE(c_engineID);
