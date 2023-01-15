@@ -176,7 +176,6 @@
         case 2: *(--(c))=(unsigned char)(((l1)>> 8L)&0xff);     \
             NETSNMP_FALLTHROUGH;                                \
         case 1: *(--(c))=(unsigned char)(((l1)     )&0xff);     \
-            NETSNMP_FALLTHROUGH;                                \
         }                                                       \
     }
 
