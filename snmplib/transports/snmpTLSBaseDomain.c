@@ -625,7 +625,7 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
         if (id_cert->ocert)
         {
             ocert = X509_dup(id_cert->ocert);
-            DEBUGMSGTL(("sslctx_client", "adding cert-chain certificate %p", ocert));
+            DEBUGMSGTL(("sslctx_client", "adding cert-chain certificate %p", ocert);
             if (!ocert || !SSL_CTX_add_extra_chain_cert(the_ctx, ocert))
                 LOGANDDIE("failed to add intermediate client certificate");
         }
@@ -697,7 +697,7 @@ sslctx_server_setup(const SSL_METHOD *method) {
         if (id_cert->ocert)
         {
             ocert = X509_dup(id_cert->ocert);
-            DEBUGMSGTL(("sslctx_server", "adding cert-chain certificate %p", ocert));
+            DEBUGMSGTL(("sslctx_server", "adding cert-chain certificate %p", ocert);
             if (!ocert || !SSL_CTX_add_extra_chain_cert(the_ctx, ocert))
                 LOGANDDIE("failed to add intermediate server certificate");
         }
