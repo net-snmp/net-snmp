@@ -25,7 +25,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <stdio.h>
-#if HAVE_MALLOC_H
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #if HAVE_STRING_H

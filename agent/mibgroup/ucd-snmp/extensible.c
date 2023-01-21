@@ -90,7 +90,7 @@
 #ifdef HAVE_SYS_FIXPOINT_H
 #include <sys/fixpoint.h>
 #endif
-#if HAVE_MALLOC_H
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #if HAVE_STRING_H

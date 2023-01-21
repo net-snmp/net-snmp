@@ -20,7 +20,7 @@
 #else
 #include <strings.h>
 #endif
-#if HAVE_MALLOC_H
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #include <math.h>

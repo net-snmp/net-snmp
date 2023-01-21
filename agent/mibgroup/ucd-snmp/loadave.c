@@ -92,7 +92,7 @@
 #ifdef HAVE_SYS_LOADAVG_H
 #include <sys/loadavg.h>
 #endif
-#if HAVE_MALLOC_H
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #if HAVE_STRING_H

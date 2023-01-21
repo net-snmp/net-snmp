@@ -16,7 +16,7 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if HAVE_MALLOC_H
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #include <sys/types.h>
