@@ -684,8 +684,7 @@ FINISHED() {
 	    rm -f core
 	fi
 	echo "$headerStr...FAIL" >> $SNMP_TMPDIR/invoked
-	if [ -n "${TRAVIS_OS_NAME}" ] || [ -n "$APPVEYOR" ] ||
-	   [ -n "$CIRRUS_CI" ]; then
+	if [ -n "$APPVEYOR" ] || [ -n "$CIRRUS_CI" ]; then
 	    {
 		find "$SNMP_TMPDIR" -type f |
 		    while read -r f; do
