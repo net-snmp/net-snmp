@@ -104,7 +104,7 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
         -Wimplicit-fallthrough -Wlogical-op -Wundef                          \
         -Wno-format-truncation -Wno-missing-field-initializers               \
         -Wno-sign-compare -Wno-unused-parameter                              \
-        $(test "x${TRAVIS_OS_NAME}" != x && echo -Wno-deprecated-declarations)
+        -Wno-deprecated-declarations
     do
       AC_MSG_CHECKING([whether the compiler supports $opt])
       if test x$opt != x-Wstrict-prototypes; then
