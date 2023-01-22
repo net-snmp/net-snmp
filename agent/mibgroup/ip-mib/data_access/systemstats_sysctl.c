@@ -25,7 +25,7 @@
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
-#if NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
 #define _KERNEL_STRUCTURES
 #endif
 #include <net/if.h>
