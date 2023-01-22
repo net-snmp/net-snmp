@@ -53,7 +53,7 @@ netsnmp_feature_provide(interface_legacy);
 #include <sys/socket.h>
 #endif
 #ifndef STREAM_NEEDS_KERNEL_ISLANDS
-#if HAVE_SYS_STREAM_H
+#ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
 #endif
@@ -96,7 +96,7 @@ netsnmp_feature_provide(interface_legacy);
 #undef _KERNEL
 #endif
 #ifdef STREAM_NEEDS_KERNEL_ISLANDS
-#if HAVE_SYS_STREAM_H
+#ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
 #endif

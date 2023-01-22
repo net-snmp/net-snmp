@@ -79,7 +79,7 @@
 #include <sys/net/if_dl.h>
 #endif
 #endif
-#if HAVE_SYS_STREAM_H
+#ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
 #if HAVE_NET_ROUTE_H

@@ -15,7 +15,7 @@
 #endif
 
 #include <net/if_dl.h>
-#if HAVE_SYS_STREAM_H
+#ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
 #include <net/route.h>

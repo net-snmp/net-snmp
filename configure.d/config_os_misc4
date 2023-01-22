@@ -251,7 +251,7 @@ case $target_os in
     AC_CHECK_HEADERS(inet/ip.h,ac_inet_ip_h=yes,ac_inet_ip_h=no,
         AC_INCLUDES_DEFAULT([])
         [
-#if HAVE_SYS_STREAM_H
+#ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
 #if HAVE_INET_COMMON_H

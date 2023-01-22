@@ -31059,7 +31059,7 @@ done
 do :
   ac_fn_c_check_header_compile "$LINENO" "inet/ip.h" "ac_cv_header_inet_ip_h" "$ac_includes_default
 
-#if HAVE_SYS_STREAM_H
+#ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
 #if HAVE_INET_COMMON_H
