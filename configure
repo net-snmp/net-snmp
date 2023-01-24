@@ -16338,10 +16338,21 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
       LDFLAGS="$saved_LDFLAGS"
-
     fi
     ;;
 esac
+
+# On Windows targets, due to limitations of the PE executable format, the
+# linker will always operate as if -Wl,-no-undefined was supplied. Supply the
+# libtool flag -no-undefined to authorize libtool to build shared libraries.
+# To do: enable the libtool flag -no-undefined on more platforms.
+case x$target_os in
+  xlinux*|xcygwin*)
+    LD_NO_UNDEFINED="-no-undefined $LD_NO_UNDEFINED"
+    ;;
+esac
+
+
 
 
 #
