@@ -16302,16 +16302,11 @@ esac
 
 
 #
-#    Whether the linker supports the flag -Wl,-no-undefined.
+#    Whether the linker supports the flag -Wl,-no-undefined. Do not use
+#    -Wl,-no-undefined on OpenBSD because it breaks linking of shared
+#    libraries. Use -Wl,-no-undefined on all other platforms such that
+#    undefined symbols are detected at compile time instead of at runtime.
 #
-#    Do not use -Wl,-no-undefined on OpenBSD because it breaks linking of shared
-#    libraries. Use -Wl,-no-undefined on all other platforms such that undefined
-#    symbols are detected at compile time instead of at runtime.
-#
-#    On Windows targets, due to limitations of the PE executable format, the
-#    linker will always operate as if -Wl,-no-undefined was supplied.  Also
-#    supply the libtool flag -no-undefined to authorize it to build shared
-#    libraries.
 
 case x$target_os in
   xopenbsd*)
@@ -16335,7 +16330,7 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }; 		      LD_NO_UNDEFINED="-no-undefined -Wl,-no-undefined"
+$as_echo "yes" >&6; }; 		      LD_NO_UNDEFINED=-Wl,-no-undefined
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
