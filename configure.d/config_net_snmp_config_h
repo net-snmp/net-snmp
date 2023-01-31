@@ -502,10 +502,13 @@ NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
 # define NETSNMP_BIGENDIAN netsnmp_bigendian()
 #endif
 
-#if defined(__has_attribute) && __has_attribute(__fallthrough__)
-# define NETSNMP_FALLTHROUGH __attribute__((__fallthrough__))
-#else
-# define NETSNMP_FALLTHROUGH do {} while (0) /* fallthrough */
+#if defined(__has_attribute)
+#  if __has_attribute(__fallthrough__)
+#    define NETSNMP_FALLTHROUGH __attribute__((__fallthrough__))
+#  endif
+#endif
+#if !defined NETSNMP_FALLTHROUGH
+#  define NETSNMP_FALLTHROUGH do {} while (0) /* fallthrough */
 #endif
 
 /* ********* NETSNMP_MARK_BEGIN_LEGACY_DEFINITIONS *********/
