@@ -16157,7 +16157,7 @@ $as_echo "$as_me: Checking for developer compiler flags" >&6;}
         -Wimplicit-fallthrough -Wlogical-op -Wundef                          \
         -Wno-format-truncation -Wno-missing-field-initializers               \
         -Wno-sign-compare -Wno-unused-parameter                              \
-        -Wno-deprecated-declarations
+        -Wno-deprecated-declarations -Wextra-semi
     do
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
 $as_echo_n "checking whether the compiler supports $opt... " >&6; }
