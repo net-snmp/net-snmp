@@ -86,6 +86,7 @@ static const char *other_fs[] = {
     "nssvol",
     "nvmfs",
     "ocfs2",
+    "overlay",
     "reiserfs",
     "simfs",
     "tmpfs",
