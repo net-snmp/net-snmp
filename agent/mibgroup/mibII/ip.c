@@ -248,6 +248,13 @@ long            ipTTL, oldipTTL;
 #define	USES_TRADITIONAL_IPSTAT
 #endif
 
+#ifdef IP_NSTATS
+typedef struct ipstat {
+        uint64_t st[IP_NSTATS];
+};
+#define IP_STAT_STRUCTURE      struct ipstat
+#endif
+
 #ifdef dragonfly
 #define IP_STAT_STRUCTURE	struct ip_stats
 #define	USES_TRADITIONAL_IPSTAT
