@@ -151,6 +151,12 @@ init_udp(void)
 #define USES_TRADITIONAL_UDPSTAT
 #endif
 
+#ifdef UDP_NSTATS
+typedef struct udpstat {
+	uint64_t st[UDP_NSTATS];
+};
+#define UDP_STAT_STRUCTURE	struct udpstat
+#endif
 
 #if !defined(UDP_STAT_STRUCTURE)
 #define UDP_STAT_STRUCTURE	struct udpstat
