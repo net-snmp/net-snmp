@@ -792,8 +792,8 @@ if test "x$NETSNMP_DEFAULT_MIBS" = "x"; then
 fi
 if test "x$ENV_SEPARATOR" != "x"; then
   :
-elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
-  # mingw32 and cygwin use ';' as the default environment variable separator
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+  # mingw32 uses ';' as the default environment variable separator
   ENV_SEPARATOR=";"
   NETSNMP_DEFAULT_MIBS=`echo "$NETSNMP_DEFAULT_MIBS" | $SED 's/:/;/g'`
   default_mibs=`echo "$default_mibs" | $SED 's/:/;/g'`
