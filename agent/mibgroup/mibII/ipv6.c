@@ -170,7 +170,7 @@
 
 netsnmp_feature_require(linux_read_ip6_stat);
 
-#if defined(netbsd1) && !defined(openbsd4)
+#if defined(netbsd1) && !defined(openbsd4) && __NetBSD_Version__ < 999010400
 #define inp_lport in6p_lport
 #define inp_fport in6p_fport
 #define inp_ppcb in6p_ppcb
@@ -1621,8 +1621,13 @@ var_udp6(register struct variable * vp,
         }
 #endif
 #if defined(__NetBSD__) && __NetBSD_Version__ >= 106250000	/*1.6Y*/
+# if __NetBSD_Version__ < 999010400
         if (in6pcb.in6p_af != AF_INET6)
             goto skip;
+# else
+        if (in6pcb.in6p_pcb.inp_af != AF_INET6)
+	    goto skip;
+# endif
 #elif defined(INP_ISIPV6)
 	if (!INP_ISIPV6(&in6pcb))
 	    goto skip;
@@ -1642,6 +1647,15 @@ var_udp6(register struct variable * vp,
         if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.inp_laddr6))
             newname[j++] =
                 ntohs(*(uint16_t *) &in6pcb.inp_laddr6.s6_addr[2]);
+        else
+            newname[j++] = 0;
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
+        for (i = 0; i < sizeof(struct in6_addr); i++)
+            newname[j++] = in6pcb.in6p_ip6.ip6_src.s6_addr[i];
+        newname[j++] = ntohs(in6pcb.in6p_pcb.inp_lport);
+        if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_ip6.ip6_src))
+            newname[j++] =
+                ntohs(*(uint16_t *) &in6pcb.in6p_ip6.ip6_src.s6_addr[2]);
         else
             newname[j++] = 0;
 #else
@@ -1687,6 +1701,9 @@ var_udp6(register struct variable * vp,
 #elif defined(openbsd4)
         p = (caddr_t)in6pcb.inp_queue.cqe_next;
 	if (p == first) break;
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
+        p = (caddr_t)in6pcb.in6p_pcb.inp_queue.tqe_next;
+        if (p == first) break;
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
         p = (caddr_t)in6pcb.in6p_queue.tqe_next;
 	if (p == first) break;
@@ -1725,6 +1742,12 @@ var_udp6(register struct variable * vp,
         if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.inp_laddr6))
             long_return =
                 ntohs(*(uint16_t *) & in6pcb.inp_laddr6.s6_addr[2]);
+        else
+            long_return = 0;
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
+        if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_ip6.ip6_src))
+            long_return =
+                ntohs(*(uint16_t *) & in6pcb.in6p_ip6.ip6_src.s6_addr[2]);
         else
             long_return = 0;
 #else
@@ -2198,8 +2221,13 @@ var_tcp6(register struct variable * vp,
         }
 #endif
 #if defined(__NetBSD__) && __NetBSD_Version__ >= 106250000	/*1.6Y*/
+# if __NetBSD_Version__ < 999010400
         if (in6pcb.in6p_af != AF_INET6)
             goto skip;
+# else
+        if (in6pcb.in6p_pcb.inp_af != AF_INET6)
+	    goto skip;
+# endif
 #elif defined(INP_ISIPV6)
 	if (!INP_ISIPV6(&in6pcb))
 	    goto skip;
@@ -2223,6 +2251,18 @@ var_tcp6(register struct variable * vp,
                 ntohs(*(uint16_t *) &in6pcb.inp_laddr6.s6_addr[2]);
         else
             newname[j++] = 0;
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
+        for (i = 0; i < sizeof(struct in6_addr); i++)
+            newname[j++] = in6pcb.in6p_ip6.ip6_src.s6_addr[i];
+        newname[j++] = ntohs(in6pcb.in6p_pcb.inp_lport);
+        for (i = 0; i < sizeof(struct in6_addr); i++)
+            newname[j++] = in6pcb.in6p_ip6.ip6_dst.s6_addr[i];
+        newname[j++] = ntohs(in6pcb.in6p_pcb.inp_fport);
+        if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_ip6.ip6_src))
+            newname[j++] =
+                ntohs(*(uint16_t *) &in6pcb.in6p_ip6.ip6_src.s6_addr[2]);
+        else
+            newname[j++] = 0;
 #else
         for (i = 0; i < sizeof(struct in6_addr); i++)
             newname[j++] = in6pcb.in6p_laddr.s6_addr[i];
@@ -2243,7 +2283,11 @@ var_tcp6(register struct variable * vp,
         DEBUGMSG(("mibII/ipv6", " %d\n", exact));
 
 #if 1                           /* this is very odd but sometimes happen, and cause infinite loop */
+#if defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
+        if (ntohs(in6pcb.in6p_pcb.inp_lport) == 0)
+#else
         if (ntohs(in6pcb.inp_lport) == 0)
+#endif
             goto skip;
 #endif
         result = snmp_oid_compare(name, *length, newname, j);
@@ -2273,6 +2317,9 @@ var_tcp6(register struct variable * vp,
 #elif defined(openbsd4)
         p = (caddr_t)in6pcb.inp_queue.cqe_next;
 	if (p == first) break;
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
+        p = (caddr_t)in6pcb.in6p_pcb.inp_queue.tqe_next;
+        if (p == first) break;
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 700000001
         p = (caddr_t)in6pcb.in6p_queue.tqe_next;
 	if (p == first) break;
@@ -2296,9 +2343,15 @@ var_tcp6(register struct variable * vp,
     *length = savnameLen;
     memcpy((char *) name, (char *) savname, *length * sizeof(oid));
     memcpy(&in6pcb, &savpcb, sizeof(savpcb));
+#if defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
+    if (!NETSNMP_KLOOKUP(in6pcb.in6p_pcb.inp_ppcb, (char *) &tcpcb, sizeof(tcpcb))) {
+        DEBUGMSGTL(("mibII/ipv6", "klookup fail for tcb6.tcpcb at %p\n",
+                    in6pcb.in6p_pcb.inp_ppcb));
+#else
     if (!NETSNMP_KLOOKUP(in6pcb.inp_ppcb, (char *) &tcpcb, sizeof(tcpcb))) {
 	DEBUGMSGTL(("mibII/ipv6", "klookup fail for tcb6.tcpcb at %p\n",
 		    in6pcb.inp_ppcb));
+#endif
 	found = 0;
 	return NULL;
     }

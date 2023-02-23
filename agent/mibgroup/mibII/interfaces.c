@@ -863,24 +863,30 @@ var_ifEntry(struct variable *vp,
 #if defined(HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC) && !(defined(freebsd2) && __FreeBSD_version < 199607)
         /*
          * XXX - SNMP's ifLastchange is time when op. status changed
-         * * FreeBSD's if_lastchange is time when packet was input or output
-         * * (at least in 2.1.0-RELEASE. Changed in later versions of the kernel?)
-         */
-        /*
          * FreeBSD's if_lastchange before the 2.1.5 release is the time when
-         * * a packet was last input or output.  In the 2.1.5 and later releases,
-         * * this is fixed, thus the 199607 comparison.
+         * a packet was last input or output.  In the 2.1.5 and later releases,
+         * this is fixed, thus the 199607 comparison.
          */
         if (ifnet.if_lastchange.tv_sec == 0 &&
-            ifnet.if_lastchange.tv_usec == 0)
+#if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_NSEC
+            ifnet.if_lastchange.tv_nsec == 0
+#else
+            ifnet.if_lastchange.tv_usec == 0
+#endif
+            )
             long_return = 0;
         else if (ifnet.if_lastchange.tv_sec < starttime.tv_sec)
             long_return = 0;
         else {
             long_return = (u_long)
                 ((ifnet.if_lastchange.tv_sec - starttime.tv_sec) * 100
-                 + (ifnet.if_lastchange.tv_usec -
-                    starttime.tv_usec) / 10000);
+                 + (
+#if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_NSEC
+                   ifnet.if_lastchange.tv_nsec / 1000
+#else
+                   ifnet.if_lastchange.tv_usec
+#endif
+                   - starttime.tv_usec) / 10000);
         }
 #else
 #if NETSNMP_NO_DUMMY_VALUES
