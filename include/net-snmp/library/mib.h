@@ -120,6 +120,7 @@ SOFTWARE.
     NETSNMP_IMPORT
     void            print_ascii_dump(FILE *);
     void            register_mib_handlers(void);
+    NETSNMP_IMPORT
     void            netsnmp_set_mib_directory(const char *dir);
     NETSNMP_IMPORT
     char            *netsnmp_get_mib_directory(void);
