@@ -110,26 +110,25 @@ fi
 AC_CACHE_CHECK([for correct flags to ps],
      ac_cv_ps_flags,
      [
-if test "`($PSPROG -e 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-e"
-elif test "`($PSPROG -el 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-el"
-elif test "`($PSPROG acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="acx"
-elif test "`($PSPROG -acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-acx"
-elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | $EGREP ' ps *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
-elif test "`($PSPROG ax 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="ax"
-elif test "x$PARTIALTARGETOS" = "xcygwin"; then
-    ac_cv_ps_flags="-e"
-elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then 
-    ac_cv_ps_flags="-e"
-else
-    AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
-    ac_cv_ps_flags="-acx"
-fi
+case "x$PARTIALTARGETOS" in
+    xcygwin|xmingw32*)
+	ac_cv_ps_flags="-e";;
+    *)
+	ac_cv_ps_flags=""
+	for args in -e -el acx -acx "-o pid,tt,state,time,ucomm" ax; do
+	    if test "`($PSPROG $args 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps"; then
+		ac_cv_ps_flags=$args
+		break
+	    fi
+	done
+	if test "x${ac_cv_ps_flags}" = x; then
+	    AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
+	    ac_cv_ps_flags="-acx"
+	elif $PSPROG $ac_cv_ps_flags -J 0 >/dev/null 2>&1; then
+	    ac_cv_ps_flags="$ac_cv_ps_flags -J 0"
+	fi
+	;;
+esac
 ])
 
 PSCMD="$PSPROG $ac_cv_ps_flags"

@@ -1144,7 +1144,7 @@ UCD-SNMP NEWS:
  Ports:
     - HPUX 11
     - Dynix/PTX 4.4
-    - The snmpd demon can properly run as a windows service
+    - The snmpd daemon can properly run as a windows service
 
 *4.2.3*
  New:
