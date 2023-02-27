@@ -19,7 +19,7 @@
  */
 
 
-config_require(header_complex);
+config_require(header_complex)
 
     /*
      * our storage structure(s) 
