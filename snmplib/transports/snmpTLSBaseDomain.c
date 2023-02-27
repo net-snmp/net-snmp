@@ -472,9 +472,11 @@ SSL_CTX *
 _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     char         *crlFile;
     char         *cipherList;
+#ifdef SSL_CTX_set_min_proto_version
     const char   *tlsMinVersion;
     const char   *tlsMaxVersion;
     int          tlsVersion;
+#endif
     X509_LOOKUP  *lookup;
     X509_STORE   *cert_store = NULL;
 
