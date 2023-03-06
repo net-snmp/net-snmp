@@ -574,6 +574,7 @@ SSL_CTX *
 sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
     SSL_CTX      *the_ctx;
+    X509         *ocert;
 
     /***********************************************************************
      * Set up the client context
@@ -623,8 +624,13 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
 
     while (id_cert->issuer_cert) {
         id_cert = id_cert->issuer_cert;
-        if (!SSL_CTX_add_extra_chain_cert(the_ctx, id_cert->ocert))
-            LOGANDDIE("failed to add intermediate client certificate");
+        if (id_cert->ocert)
+        {
+            ocert = X509_dup(id_cert->ocert);
+            DEBUGMSGTL(("sslctx_client", "adding cert-chain certificate %p", ocert));
+            if (!ocert || !SSL_CTX_add_extra_chain_cert(the_ctx, ocert))
+                LOGANDDIE("failed to add intermediate client certificate");
+        }
     }
 
     if (tlsbase->their_identity)
@@ -655,6 +661,7 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
 SSL_CTX *
 sslctx_server_setup(const SSL_METHOD *method) {
     netsnmp_cert *id_cert;
+    X509         *ocert;
 
     /***********************************************************************
      * Set up the server context
@@ -689,8 +696,13 @@ sslctx_server_setup(const SSL_METHOD *method) {
 
     while (id_cert->issuer_cert) {
         id_cert = id_cert->issuer_cert;
-        if (!SSL_CTX_add_extra_chain_cert(the_ctx, id_cert->ocert))
-            LOGANDDIE("failed to add intermediate server certificate");
+        if (id_cert->ocert)
+        {
+            ocert = X509_dup(id_cert->ocert);
+            DEBUGMSGTL(("sslctx_server", "adding cert-chain certificate %p", ocert));
+            if (!ocert || !SSL_CTX_add_extra_chain_cert(the_ctx, ocert))
+                LOGANDDIE("failed to add intermediate server certificate");
+        }
     }
 
     SSL_CTX_set_read_ahead(the_ctx, 1); /* XXX: DTLS only? */
