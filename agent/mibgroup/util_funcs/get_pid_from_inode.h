@@ -11,7 +11,7 @@ config_error(get_pid_from_inode is only suppored on linux)
 
 #define _LARGEFILE64_SOURCE 1
 
-#if HAVE_DIRENT_H
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #else
 # define dirent direct

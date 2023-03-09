@@ -17,13 +17,13 @@
 
 
 #include <sys/types.h>
-#if HAVE_SYS_PARAM_H
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <windows.h>
 #  include <errno.h>
@@ -39,11 +39,11 @@
 # endif
 #endif
 
-#if HAVE_FCNTL_H
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
-#if HAVE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -454,7 +454,7 @@ really_try_next:
         return (u_char *) & long_return;
     case HRSTORE_FAILS:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
 	    goto try_next;
 #else
         long_return = 0;

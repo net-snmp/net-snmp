@@ -13,7 +13,7 @@ netsnmp_feature_require(tls_fingerprint_build);
 netsnmp_feature_require(row_create);
 
 #include <ctype.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 

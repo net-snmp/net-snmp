@@ -69,7 +69,7 @@ typedef __u8 u8;           /* ditto */
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#if HAVE_SYS_IOCTL_H
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #else
 #error "linux should have sys/ioctl header"

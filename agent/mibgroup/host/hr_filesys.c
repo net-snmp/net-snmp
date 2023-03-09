@@ -24,19 +24,19 @@
 #include "hr_disk.h"
 #include <net-snmp/utilities.h>
 
-#if HAVE_MNTENT_H
+#ifdef HAVE_MNTENT_H
 #include <mntent.h>
 #endif
-#if HAVE_SYS_MNTENT_H
+#ifdef HAVE_SYS_MNTENT_H
 #include <sys/mntent.h>
 #endif
-#if HAVE_SYS_MNTTAB_H
+#ifdef HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
-#if HAVE_SYS_STATVFS_H
+#ifdef HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
-#if HAVE_SYS_VFS_H
+#ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
 #ifdef HAVE_SYS_PARAM_H
@@ -47,14 +47,14 @@
 #endif
 
 #include <ctype.h>
-#if HAVE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
-#if HAVE_NBUTIL_H
+#ifdef HAVE_NBUTIL_H
 #include <nbutil.h>
 #endif
 
@@ -564,7 +564,7 @@ var_hrfilesys(struct variable *vp,
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
 	long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
 #elif defined(HAVE_GETFSSTAT)
-#if HAVE_STRUCT_STATFS_F_FLAGS
+#ifdef HAVE_STRUCT_STATFS_F_FLAGS
         long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
 #else
         long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
@@ -574,7 +574,7 @@ var_hrfilesys(struct variable *vp,
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (HRFS_entry->HRFS_flags & MNT_READONLY) == 0 ? 1 : 2;
 #else
-#if HAVE_HASMNTOPT
+#ifdef HAVE_HASMNTOPT
         if (hasmntopt(HRFS_entry, "ro") != NULL)
             long_return = 2;    /* Read Only */
         else
@@ -618,7 +618,7 @@ static FILE    *fp;
 void
 Init_HR_FileSys(void)
 {
-#if HAVE_GETFSSTAT
+#ifdef HAVE_GETFSSTAT
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
     fscount = getvfsstat(NULL, 0, ST_NOWAIT);
 #else
@@ -719,7 +719,7 @@ int
 Get_Next_HR_FileSys(void)
 {
 next:
-#if HAVE_GETFSSTAT
+#ifdef HAVE_GETFSSTAT
     if (HRFS_index >= fscount)
         return -1;
     HRFS_entry = fsstats + HRFS_index;

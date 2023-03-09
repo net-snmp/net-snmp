@@ -16,20 +16,20 @@
 #include <net-snmp/net-snmp-config.h>
 #include "host_res.h"
 #include "hr_disk.h"
-#if HAVE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 
 #include <fcntl.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifdef HAVE_KVM_H
 #include <kvm.h>
 #endif
-#if HAVE_DIRENT_H
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #else
 # define dirent direct
@@ -63,7 +63,7 @@
 #include <sys/disk.h>
 #endif
 #endif
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
@@ -78,7 +78,7 @@
 #include <regex.h>
 #endif
 
-#if HAVE_LIMITS_H
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
 #ifdef HAVE_UNISTD_H

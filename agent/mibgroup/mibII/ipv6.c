@@ -1417,7 +1417,7 @@ var_icmpv6Entry(register struct variable * vp,
 #endif
 }
 
-#if HAVE_KVM_GETFILES
+#ifdef HAVE_KVM_GETFILES
 
 u_char         *
 var_udp6(register struct variable * vp,
@@ -1970,7 +1970,7 @@ var_tcp6(register struct variable * vp,
     return NULL;
 }
 
-#elif HAVE_KVM_GETFILES
+#elif defined(HAVE_KVM_GETFILES)
 
 u_char         *
 var_tcp6(register struct variable * vp,

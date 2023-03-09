@@ -107,7 +107,7 @@ struct netsnmp_tcpConnEntry_s {
 #define	TCPTABLE_REMOTEPORT	inp_fport
 #define	TCPTABLE_IS_LINKED_LIST
 
-#elif HAVE_KVM_GETFILES
+#elif defined(HAVE_KVM_GETFILES)
 #define	TCPTABLE_ENTRY_TYPE	struct kinfo_file
 #define	TCPTABLE_STATE		t_state 
 #define	TCPTABLE_LOCALADDRESS	inp_laddru[0]
