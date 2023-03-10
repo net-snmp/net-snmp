@@ -31222,6 +31222,12 @@ then :
   printf "%s\n" "#define HAVE_CLOSEDIR 1" >>confdefs.h
 
 fi
+ac_fn_c_check_func "$LINENO" "endnetgrent" "ac_cv_func_endnetgrent"
+if test "x$ac_cv_func_endnetgrent" = xyes
+then :
+  printf "%s\n" "#define HAVE_ENDNETGRENT 1" >>confdefs.h
+
+fi
 ac_fn_c_check_func "$LINENO" "fgetc_unlocked" "ac_cv_func_fgetc_unlocked"
 if test "x$ac_cv_func_fgetc_unlocked" = xyes
 then :
@@ -31256,6 +31262,12 @@ ac_fn_c_check_func "$LINENO" "getlogin" "ac_cv_func_getlogin"
 if test "x$ac_cv_func_getlogin" = xyes
 then :
   printf "%s\n" "#define HAVE_GETLOGIN 1" >>confdefs.h
+
+fi
+ac_fn_c_check_func "$LINENO" "getnetgrent" "ac_cv_func_getnetgrent"
+if test "x$ac_cv_func_getnetgrent" = xyes
+then :
+  printf "%s\n" "#define HAVE_GETNETGRENT 1" >>confdefs.h
 
 fi
 ac_fn_c_check_func "$LINENO" "if_nametoindex" "ac_cv_func_if_nametoindex"
@@ -31304,6 +31316,12 @@ ac_fn_c_check_func "$LINENO" "setlocale" "ac_cv_func_setlocale"
 if test "x$ac_cv_func_setlocale" = xyes
 then :
   printf "%s\n" "#define HAVE_SETLOCALE 1" >>confdefs.h
+
+fi
+ac_fn_c_check_func "$LINENO" "setnetgrent" "ac_cv_func_setnetgrent"
+if test "x$ac_cv_func_setnetgrent" = xyes
+then :
+  printf "%s\n" "#define HAVE_SETNETGRENT 1" >>confdefs.h
 
 fi
 ac_fn_c_check_func "$LINENO" "setsid" "ac_cv_func_setsid"

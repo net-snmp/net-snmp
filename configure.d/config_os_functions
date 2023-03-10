@@ -25,12 +25,14 @@ AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([rand   random srand srandom lrand48 srand48])
 
 #  Library:
-AC_CHECK_FUNCS([asprintf        closedir        fgetc_unlocked   ] dnl
+AC_CHECK_FUNCS([asprintf        closedir        endnetgrent      ] dnl
+               [fgetc_unlocked                                   ] dnl
                [flockfile       funlockfile     getipnodebyname  ] dnl
-               [gettimeofday    getlogin                         ] dnl
+               [gettimeofday    getlogin        getnetgrent      ] dnl
                [if_nametoindex  mkstemp                          ] dnl
                [opendir         readdir         regcomp          ] dnl
                [setenv          setitimer       setlocale        ] dnl
+               [setnetgrent                                      ] dnl
                [setsid          snprintf        strcasestr       ] dnl
                [strdup          strerror        strncasecmp      ] dnl
                [sysconf         times           vsnprintf        ] )

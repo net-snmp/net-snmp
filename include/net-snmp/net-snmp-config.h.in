@@ -183,6 +183,9 @@
 /* Define to 1 if you have the `endfsent' function. */
 #undef HAVE_ENDFSENT
 
+/* Define to 1 if you have the `endnetgrent' function. */
+#undef HAVE_ENDNETGRENT
+
 /* Define to 1 if you have the `ERR_get_error_all' function. */
 #undef HAVE_ERR_GET_ERROR_ALL
 
@@ -293,6 +296,9 @@
 
 /* Define to 1 if you have the `getmntinfo' function. */
 #undef HAVE_GETMNTINFO
+
+/* Define to 1 if you have the `getnetgrent' function. */
+#undef HAVE_GETNETGRENT
 
 /* Define to 1 if you have the `getopt' function. */
 #undef HAVE_GETOPT
@@ -882,6 +888,9 @@
 
 /* Define to 1 if you have the `setmntent' function. */
 #undef HAVE_SETMNTENT
+
+/* Define to 1 if you have the `setnetgrent' function. */
+#undef HAVE_SETNETGRENT
 
 /* Define to 1 if you have the `setsid' function. */
 #undef HAVE_SETSID
