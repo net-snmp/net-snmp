@@ -347,6 +347,33 @@ netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp, const char *community,
 }
 
 void
+netsnmp_udp_com2SecEntry_check_return_code(int rc)
+{
+    /*
+     * Check return code of the newly created com2Sec entry.
+     */
+    switch(rc) {
+        case C2SE_ERR_SUCCESS:
+            break;
+        case C2SE_ERR_CONTEXT_TOO_LONG:
+            config_perror("context name too long");
+            break;
+        case C2SE_ERR_COMMUNITY_TOO_LONG:
+            config_perror("community name too long");
+            break;
+        case C2SE_ERR_SECNAME_TOO_LONG:
+            config_perror("security name too long");
+            break;
+        case C2SE_ERR_MASK_MISMATCH:
+            config_perror("source/mask mismatch");
+            break;
+        case C2SE_ERR_MISSING_ARG:
+        default:
+            config_perror("unexpected error; could not create com2SecEntry");
+    }
+}
+
+void
 netsnmp_udp_parse_security(const char *token, char *param)
 {
     /** copy_nword does null term, so we need vars of max size + 2. */
@@ -440,25 +467,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
      */
     rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
                                          &network, &mask, negate);
-    switch(rc) {
-        case C2SE_ERR_SUCCESS:
-            break;
-        case C2SE_ERR_CONTEXT_TOO_LONG:
-            config_perror("context name too long");
-            break;
-        case C2SE_ERR_COMMUNITY_TOO_LONG:
-            config_perror("community name too long");
-            break;
-        case C2SE_ERR_SECNAME_TOO_LONG:
-            config_perror("security name too long");
-            break;
-        case C2SE_ERR_MASK_MISMATCH:
-            config_perror("source/mask mismatch");
-            break;
-        case C2SE_ERR_MISSING_ARG:
-        default:
-            config_perror("unexpected error; could not create com2SecEntry");
-    }
+    netsnmp_udp_com2SecEntry_check_return_code(rc);
 }
 
 void
