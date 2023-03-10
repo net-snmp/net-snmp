@@ -434,6 +434,14 @@ com2sec sec1 10.0.0.0/8 public
 .IP
 Access from outside of 10.0.0.0/8 would still be denied.
 .IP
+It is also possible to reference a specific \fInetgroup\fR starting with an
+'@' character (e.g.  @adminhosts). The \fInetgroup\fR lookup is running
+through the NSS (Name Services Switch) making it possible to define the
+group locally or via NIS/LDAP.
+.IP
+Note: The hostname DNS lookup and \fInetgroup\fR resolution is done only
+during snmpd start or reload.
+.IP
 The same community string can be specified in several separate directives
 (presumably with different source tokens), and the first source/community
 combination that matches the incoming request will be selected.

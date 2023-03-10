@@ -445,6 +445,10 @@ netsnmp_udp_parse_security(const char *token, char *param)
         network.s_addr = 0;
         mask.s_addr = 0;
         negate = 0;
+        /* Create a new com2Sec entry. */
+        rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
+                                             &network, &mask, negate);
+        netsnmp_udp_com2SecEntry_check_return_code(rc);
     } else {
         char *strmask;
         if (*source == '!') {
@@ -454,20 +458,44 @@ netsnmp_udp_parse_security(const char *token, char *param)
             negate = 0;
             sourcep = source;
         }
-        /* Parse source address and network mask. */
-        if(netsnmp_udp_resolve_source(sourcep, &network, &mask)) {
-            config_perror("source address/network mask parsing issue");
-            return;
+#if HAVE_ENDNETGRENT && HAVE_GETNETGRENT && HAVE_SETNETGRENT
+        /* Interpret as netgroup */
+        if (*sourcep == '@') {
+            char *netgroup = sourcep+1;
+            char *host, *user, *domain;
+            if(setnetgrent(netgroup)) {
+                while (getnetgrent(&host, &user, &domain)) {
+                    /* Parse source address and network mask for each netgroup host. */
+                    if (netsnmp_udp_resolve_source(host, &network, &mask) == 0) {
+                        /* Create a new com2Sec entry. */
+                        rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
+                                                             &network, &mask, negate);
+                        netsnmp_udp_com2SecEntry_check_return_code(rc);
+                    } else {
+                        config_perror("netgroup host address parsing issue");
+                        break;
+                    }
+                }
+                endnetgrent();
+            } else {
+                config_perror("netgroup could not be found");
+            }
+        }
+        /* Without '@' it has to be an address or hostname */
+        else
+#endif
+        {
+            /* Parse source address and network mask. */
+            if(netsnmp_udp_resolve_source(sourcep, &network, &mask) == 0) {
+                /* Create a new com2Sec entry. */
+                rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
+                                                     &network, &mask, negate);
+                netsnmp_udp_com2SecEntry_check_return_code(rc);
+            } else {
+                config_perror("source address/network mask parsing issue");
+            }
         }
     }
-
-    /*
-     * Everything is okay.  Copy the parameters to the structure allocated
-     * above and add it to END of the list.
-     */
-    rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
-                                         &network, &mask, negate);
-    netsnmp_udp_com2SecEntry_check_return_code(rc);
 }
 
 void
