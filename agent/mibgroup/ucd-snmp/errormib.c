@@ -1,16 +1,16 @@
 #include <net-snmp/net-snmp-config.h>
 
-#if HAVE_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_FCNTL_H
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #include <signal.h>
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
@@ -23,7 +23,7 @@
 #ifdef HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif
-#if HAVE_SYS_PARAM_H
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_VMMETER_H
@@ -82,13 +82,13 @@
 #include <sys/vfs.h>
 #endif
 #if (!defined(HAVE_STATVFS)) && defined(HAVE_STATFS)
-#if HAVE_SYS_PARAM_H
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#if HAVE_SYS_MOUNT_H
+#ifdef HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
 #endif
-#if HAVE_SYS_SYSCTL_H
+#ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
 #define statvfs statfs
@@ -105,7 +105,7 @@
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
-#if HAVE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #endif
 

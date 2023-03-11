@@ -2,7 +2,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/snmp_vars.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <sys/dkio.h>

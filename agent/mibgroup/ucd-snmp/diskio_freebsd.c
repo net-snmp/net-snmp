@@ -3,7 +3,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <math.h>
 #include <sys/param.h>
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
 #include <sys/resource.h>       /* for CPUSTATES in devstat.h */
 #elif HAVE_SYS_DKSTAT_H
 #include <sys/dkstat.h>
@@ -14,14 +14,14 @@
 #include "diskio_freebsd.h"
 #include "util_funcs/header_simple_table.h"
 
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
   #define GETDEVS(x) devstat_getdevs(NULL, (x))
 #else
   #define GETDEVS(x) getdevs((x))
 #endif
 
 struct dev_la {
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
         struct bintime prev;
 #else
         struct timeval prev;
@@ -97,7 +97,7 @@ void devla_getstats(unsigned int regno, void *dummy)
     }
 
     for (i=0; i<ndevs; i++) {
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
         busy_time = devstat_compute_etime(&lastat->dinfo->devices[i].busy_time,
                                           &devloads[i].prev);
 #else
@@ -196,14 +196,14 @@ var_diskio(struct variable * vp,
         *var_len = strlen(stat->dinfo->devices[indx].device_name);
         return (u_char *) stat->dinfo->devices[indx].device_name;
     case DISKIO_NREAD:
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
         long_ret = (signed long) stat->dinfo->devices[indx].bytes[DEVSTAT_READ] & 0xFFFFFFFF;
 #else
         long_ret = (signed long) stat->dinfo->devices[indx].bytes_read;
 #endif
         return (u_char *) & long_ret;
     case DISKIO_NWRITTEN:
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
         long_ret = (signed long) stat->dinfo->devices[indx].bytes[DEVSTAT_WRITE] & 0xFFFFFFFF;
 #else
         long_ret = (signed long) stat->dinfo->devices[indx].bytes_written;
@@ -211,7 +211,7 @@ var_diskio(struct variable * vp,
         return (u_char *) & long_ret;
     case DISKIO_NREADX:
         *var_len = sizeof(struct counter64);
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
         longlong_ret = stat->dinfo->devices[indx].bytes[DEVSTAT_READ];
 #else
         longlong_ret = stat->dinfo->devices[indx].bytes_read;
@@ -221,7 +221,7 @@ var_diskio(struct variable * vp,
         return (u_char *) & c64_ret;
     case DISKIO_NWRITTENX:
         *var_len = sizeof(struct counter64);
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
         longlong_ret = stat->dinfo->devices[indx].bytes[DEVSTAT_WRITE];
 #else
         longlong_ret = stat->dinfo->devices[indx].bytes_written;
@@ -230,14 +230,14 @@ var_diskio(struct variable * vp,
         c64_ret.high = longlong_ret >> 32;
         return (u_char *) & c64_ret;
     case DISKIO_READS:
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
         long_ret = (signed long) stat->dinfo->devices[indx].operations[DEVSTAT_READ] & 0xFFFFFFFF;
 #else
         long_ret = (signed long) stat->dinfo->devices[indx].num_reads;
 #endif
         return (u_char *) & long_ret;
     case DISKIO_WRITES:
-#if HAVE_DEVSTAT_GETDEVS
+#ifdef HAVE_DEVSTAT_GETDEVS
         long_ret = (signed long) stat->dinfo->devices[indx].operations[DEVSTAT_WRITE] & 0xFFFFFFFF;
 #else
         long_ret = (signed long) stat->dinfo->devices[indx].num_writes;

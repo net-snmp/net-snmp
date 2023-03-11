@@ -14,7 +14,7 @@
 /*
  * needed by util_funcs.h 
  */
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else

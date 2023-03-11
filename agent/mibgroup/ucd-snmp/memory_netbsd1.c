@@ -233,7 +233,7 @@ var_extensible_mem(struct variable *vp,
     case MEMUSEDSWAPTXT:
     case MEMTOTALREALTXT:
     case MEMUSEDREALTXT:
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_ret = -1;

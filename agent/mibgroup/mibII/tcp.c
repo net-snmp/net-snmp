@@ -8,10 +8,10 @@
 #include <net-snmp/net-snmp-features.h>
 #include "mibII_common.h"
 
-#if HAVE_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 

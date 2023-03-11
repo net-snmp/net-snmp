@@ -167,7 +167,7 @@ else
     AC_CACHE_CHECK([if sysctl can read kernel information],
         ac_cv_NETSNMP_CAN_USE_SYSCTL,
        [AC_TRY_RUN([
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
@@ -177,11 +177,11 @@ else
 #  include <time.h>
 # endif
 #endif
-#if HAVE_SYS_PARAM_H
+#ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
 #include <sys/types.h>
-#if HAVE_SYS_SYSCTL_H
+#ifdef HAVE_SYS_SYSCTL_H
 # include <sys/sysctl.h>
 #endif
 #include <stddef.h>
@@ -253,7 +253,7 @@ case $target_os in
 #ifdef HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
-#if HAVE_INET_COMMON_H
+#ifdef HAVE_INET_COMMON_H
 #include <inet/common.h>
 #endif
         ])
@@ -261,7 +261,7 @@ case $target_os in
         AC_CACHE_CHECK([for mib2_ipRouteEntry_t in inet/mib2.h],
             ac_cv_mib2_ipRouteEntry_t,
            [AC_TRY_COMPILE([
-#if HAVE_INET_MIB2_H
+#ifdef HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
                ],[
@@ -276,7 +276,7 @@ case $target_os in
             AC_CACHE_CHECK([whether IRE_CACHE is defined in inet/ip.h],
                 ac_cv_ire_cache,
                [AC_TRY_COMPILE([
-#if HAVE_INET_IP_H
+#ifdef HAVE_INET_IP_H
 #include <inet/ip.h>
 #endif
                    ],[

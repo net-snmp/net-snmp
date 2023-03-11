@@ -223,7 +223,7 @@ add_device(char *path, int addNewDisks)
 static void
 diskio_parse_config_disks(const char *token, char *cptr)
 {
-#if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
+#if defined(HAVE_FSTAB_H) || defined(HAVE_GETMNTENT) || defined(HAVE_STATFS)
     char            path[STRMAX];
 
     /*

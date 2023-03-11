@@ -244,7 +244,7 @@ udp_handler(netsnmp_mib_handler          *handler,
 #define udpstat          udpstat.udpstat
 #endif
     case UDPINDATAGRAMS:
-#if HAVE_STRUCT_UDPSTAT_UDPS_IPACKETS
+#ifdef HAVE_STRUCT_UDPSTAT_UDPS_IPACKETS
         ret_value = udpstat.udps_ipackets;
         break;
 #else
@@ -253,7 +253,7 @@ udp_handler(netsnmp_mib_handler          *handler,
 #endif
 
     case UDPNOPORTS:
-#if HAVE_STRUCT_UDPSTAT_UDPS_NOPORT
+#ifdef HAVE_STRUCT_UDPSTAT_UDPS_NOPORT
         ret_value = udpstat.udps_noport;
         break;
 #else
@@ -262,7 +262,7 @@ udp_handler(netsnmp_mib_handler          *handler,
 #endif
 
     case UDPOUTDATAGRAMS:
-#if HAVE_STRUCT_UDPSTAT_UDPS_OPACKETS
+#ifdef HAVE_STRUCT_UDPSTAT_UDPS_OPACKETS
         ret_value = udpstat.udps_opackets;
         break;
 #else

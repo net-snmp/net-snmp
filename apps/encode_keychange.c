@@ -26,10 +26,10 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>

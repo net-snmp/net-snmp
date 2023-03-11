@@ -241,25 +241,25 @@ var_ipRouteEntry(struct variable *vp,
         long_return = (rtp->rtm_flags & RTF_UP) ? 1 : 0;
         return (u_char *) & long_return;
     case IPROUTEMETRIC2:
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC3:
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC4:
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC5:
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
@@ -285,7 +285,7 @@ var_ipRouteEntry(struct variable *vp,
             ? 2 : (rtp->rtm_flags & RTF_DYNAMIC) ? 4 : 1;
         return (u_char *) & long_return;
     case IPROUTEAGE:
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -457,7 +457,7 @@ var_ipRouteEntry(struct variable * vp,
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
      **/
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
     saveNameLen = 0;
 #endif
     if (rtsize <= 1)
@@ -600,7 +600,7 @@ var_ipRouteEntry(struct variable * vp,
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC5:
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
@@ -655,7 +655,7 @@ var_ipRouteEntry(struct variable * vp,
          * XXX - Almost certainly not right
          * but I don't have a suitable system to test this on 
          */
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         addr_ret = 0;
@@ -902,7 +902,7 @@ load_rtentries(struct radix_node *pt)
     RTENTRY         rt;
     struct ifnet    ifnet;
     char            name[16], temp[16];
-#if !HAVE_STRUCT_IFNET_IF_XNAME
+#if !defined(HAVE_STRUCT_IFNET_IF_XNAME)
     register char  *cp;
 #endif
 
@@ -935,7 +935,7 @@ load_rtentries(struct radix_node *pt)
                 DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
                 return;
             }
-#if HAVE_STRUCT_IFNET_IF_XNAME
+#ifdef HAVE_STRUCT_IFNET_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
             strlcpy(name, ifnet.if_xname, sizeof(name));
 #else
@@ -969,12 +969,12 @@ load_rtentries(struct radix_node *pt)
                     break;
             }
         }
-#if CHECK_RT_FLAGS
+#ifdef CHECK_RT_FLAGS
         if (((rt.rt_flags & RTF_CLONING) != RTF_CLONING)
             && ((rt.rt_flags & RTF_LLINFO) != RTF_LLINFO)) {
 #endif
             append_rtentry(&rt);
-#if CHECK_RT_FLAGS
+#ifdef CHECK_RT_FLAGS
         }
 #endif
 
@@ -1678,7 +1678,7 @@ var_ipRouteEntry(struct variable *vp,
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
      **/
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
     saveNameLen = 0;
 #endif
     if (route_row == NULL) {
@@ -2157,7 +2157,7 @@ var_ipRouteEntry(struct variable * vp,
         return (u_char *) & long_return;
 
     case IPROUTEAGE:
-#if NETSNMP_NO_DUMMY_VALUES
+#ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -2224,7 +2224,7 @@ snmp_socket_length(int family)
     case AF_LINK:
 #ifdef _MAX_SA_LEN
         length = _MAX_SA_LEN;
-#elif SOCK_MAXADDRLEN
+#elif defined(SOCK_MAXADDRLEN)
         length = SOCK_MAXADDRLEN;
 #else
         length = sizeof(struct sockaddr_dl);

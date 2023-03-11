@@ -3,7 +3,7 @@
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/snmp_vars.h>
 #include "../hr_disk.h"
-#if HAVE_DIRENT_H
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
 #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)

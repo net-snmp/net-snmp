@@ -48,7 +48,7 @@ SOFTWARE.
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
@@ -69,7 +69,7 @@ SOFTWARE.
 #endif
 #ifdef HAVE_NCURSES_CURSES_H
 #include <ncurses/curses.h>
-#elif HAVE_CURSES_H
+#elif defined(HAVE_CURSES_H)
 #include <curses.h>
 #endif
 #include <signal.h>
