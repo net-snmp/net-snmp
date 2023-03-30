@@ -64,13 +64,13 @@ SOFTWARE.
 #else
 # define dirent direct
 # define NAMLEN(dirent) (dirent)->d_namlen
-# if HAVE_SYS_NDIR_H
+# ifdef HAVE_SYS_NDIR_H
 #  include <sys/ndir.h>
 # endif
-# if HAVE_SYS_DIR_H
+# ifdef HAVE_SYS_DIR_H
 #  include <sys/dir.h>
 # endif
-# if HAVE_NDIR_H
+# ifdef HAVE_NDIR_H
 #  include <ndir.h>
 # endif
 #endif
@@ -78,7 +78,7 @@ SOFTWARE.
 # include <sys/time.h>
 # include <time.h>
 #else
-# if HAVE_SYS_TIME_H
+# ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>

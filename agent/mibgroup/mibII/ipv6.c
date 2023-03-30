@@ -111,7 +111,7 @@
 # define TCP6
 #endif
 #ifndef TCP6
-# if HAVE_NETINET_TCP_H
+# ifdef HAVE_NETINET_TCP_H
 #  include <netinet/tcp.h>
 # endif
 # ifdef HAVE_NETINET_TCP_TIMER_H

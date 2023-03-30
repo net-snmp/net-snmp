@@ -52,7 +52,7 @@ SOFTWARE.
 #include <stdio.h>
 #if !defined(mingw32) && defined(HAVE_SYS_TIME_H)
 # include <sys/time.h>
-# if TIME_WITH_SYS_TIME
+# ifdef TIME_WITH_SYS_TIME
 #  include <time.h>
 # endif
 #else
