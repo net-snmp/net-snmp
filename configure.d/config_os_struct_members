@@ -308,7 +308,7 @@ AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.tm_isdst],,,[
 # include <sys/time.h>
 # include <time.h>
 #else
-# if HAVE_SYS_TIME_H
+# ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -321,7 +321,7 @@ AC_CHECK_DECLS([daylight,timezone],,,[
 # include <sys/time.h>
 # include <time.h>
 #else
-# if HAVE_SYS_TIME_H
+# ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -335,7 +335,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 # include <sys/time.h>
 # include <time.h>
 #else
-# if HAVE_SYS_TIME_H
+# ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
