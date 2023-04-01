@@ -1,19 +1,15 @@
 /*
- *  Host Resources MIB - storage group implementation - hrh_storage.c
+ *  Host Resources MIB - storage group implementation - hr_storage.c
  *
  */
 
 #include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-#include <net-snmp/agent/hardware/memory.h>
-#include "hardware/fsys/fsys.h"
-#include "host_res.h"
-#include "hrh_filesys.h"
-#include "hrh_storage.h"
-#include "hr_disk.h"
-#include <net-snmp/utilities.h>
 
+#if defined(freebsd5)
+/* undefine these in order to use getfsstat */
+#undef HAVE_STATVFS
+#undef HAVE_STRUCT_STATVFS_F_FRSIZE
+#endif
 
 #include <sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
@@ -23,12 +19,7 @@
 #include <unistd.h>
 #endif
 #ifdef TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <windows.h>
-#  include <errno.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <sys/time.h>
 # include <time.h>
 #else
 # ifdef HAVE_SYS_TIME_H
@@ -38,8 +29,127 @@
 # endif
 #endif
 
+#if (!defined(mingw32) && !defined(WIN32))
+#ifdef HAVE_UTMPX_H
+#include <utmpx.h>
+#else
+#include <utmp.h>
+#endif
+#endif /* mingw32 */
+#ifndef dynix
+#ifdef HAVE_SYS_VM_H
+#include <sys/vm.h>
+#if (!defined(KERNEL) || defined(MACH_USER_API)) && defined(HAVE_SYS_VMMETER_H) /*OS X does not #include <sys/vmmeter.h> if (defined(KERNEL) && !defined(MACH_USER_API)) */
+#include <sys/vmmeter.h>
+#endif
+#else
+#ifdef HAVE_VM_VM_H
+#include <vm/vm.h>
+#ifdef HAVE_MACHINE_TYPES_H
+#include <machine/types.h>
+#endif
+#ifdef HAVE_SYS_VMMETER_H
+#include <sys/vmmeter.h>
+#endif
+#ifdef HAVE_VM_VM_PARAM_H
+#include <vm/vm_param.h>
+#endif
+#else
+#ifdef HAVE_SYS_VMPARAM_H
+#include <sys/vmparam.h>
+#endif
+#ifdef HAVE_SYS_VMMAC_H
+#include <sys/vmmac.h>
+#endif
+#ifdef HAVE_SYS_VMMETER_H
+#include <sys/vmmeter.h>
+#endif
+#ifdef HAVE_SYS_VMSYSTM_H
+#include <sys/vmsystm.h>
+#endif
+#endif                          /* vm/vm.h */
+#endif                          /* sys/vm.h */
+#if defined(HAVE_UVM_UVM_PARAM_H) && defined(HAVE_UVM_UVM_EXTERN_H)
+#include <uvm/uvm_param.h>
+#include <uvm/uvm_extern.h>
+#elif defined(HAVE_VM_VM_PARAM_H) && defined(HAVE_VM_VM_EXTERN_H)
+#include <vm/vm_param.h>
+#include <vm/vm_extern.h>
+#endif
+#ifdef HAVE_KVM_H
+#include <kvm.h>
+#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#ifdef HAVE_SYS_POOL_H
+#if defined(MBPOOL_SYMBOL) && defined(MCLPOOL_SYMBOL)
+#define __POOL_EXPOSE
+#include <sys/pool.h>
+#else
+#undef HAVE_SYS_POOL_H
+#endif
+#endif
+#ifdef HAVE_SYS_MBUF_H
+#include <sys/mbuf.h>
+#endif
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#if defined(CTL_HW) && defined(HW_PAGESIZE)
+#define USE_SYSCTL
+#endif
+#ifdef USE_MACH_HOST_STATISTICS
+#include <mach/mach.h>
+#elif defined(CTL_VM) && (defined(VM_METER) || defined(VM_UVMEXP))
+#define USE_SYSCTL_VM
+#endif
+#endif                          /* if HAVE_SYS_SYSCTL_H */
+#endif                          /* ifndef dynix */
+
+#if (defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)) && HAVE_LIBPERFSTAT_H
+#ifdef HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
+#include <libperfstat.h>
+#endif
+
+
+#include "host_res.h"
+#include "hr_storage.h"
+#include "hr_filesys.h"
+#include <net-snmp/agent/auto_nlist.h>
+
+#ifdef HAVE_MNTENT_H
+#include <mntent.h>
+#endif
+#ifdef HAVE_SYS_MNTTAB_H
+#include <sys/mnttab.h>
+#endif
+#ifdef HAVE_SYS_STATVFS_H
+#include <sys/statvfs.h>
+#endif
+#ifdef HAVE_SYS_VFS_H
+#include <sys/vfs.h>
+#endif
+#ifdef HAVE_SYS_MOUNT_H
+#ifdef __osf__
+#undef m_next
+#undef m_data
+#endif
+#include <sys/mount.h>
+#endif
+#ifdef HAVE_MACHINE_PARAM_H
+#include <machine/param.h>
+#endif
+#include <sys/stat.h>
+
+#if defined(hpux10) || defined(hpux11)
+#include <sys/pstat.h>
+#endif
+#if defined(solaris2)
+#ifdef HAVE_SYS_SWAP_H
+#include <sys/swap.h>
+#endif
 #endif
 
 #ifdef HAVE_STRING_H
@@ -47,8 +157,19 @@
 #else
 #include <strings.h>
 #endif
+#ifdef HAVE_NBUTIL_H
+#include <nbutil.h>
+#endif
 
+#include <net-snmp/utilities.h>
 #include <net-snmp/output_api.h>
+
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/hardware/memory.h>
+
+#ifdef solaris2
+#include "kernel_sunos5.h"
+#endif
 
 #include <net-snmp/agent/agent_read_config.h>
 #include <net-snmp/library/read_config.h>
@@ -63,6 +184,66 @@
 	 *********************/
 
 
+#ifdef solaris2
+
+extern struct mnttab *HRFS_entry;
+#define HRFS_mount	mnt_mountp
+#define HRFS_statfs	statvfs
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATVFS_F_FRSIZE
+
+#elif defined(WIN32)
+/* fake block size */
+#define FAKED_BLOCK_SIZE 512
+
+extern struct win_statfs *HRFS_entry;
+#define HRFS_statfs	win_statfs
+#define HRFS_mount	f_driveletter
+
+#elif defined(HAVE_STATVFS) && defined(__NetBSD__)
+
+extern struct statvfs *HRFS_entry;
+extern int      fscount;
+#define HRFS_statfs	statvfs
+#define HRFS_mount	f_mntonname
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATVFS_F_FRSIZE
+
+#elif defined(HAVE_STATVFS)  && defined(HAVE_STRUCT_STATVFS_MNT_DIR)
+
+extern struct mntent *HRFS_entry;
+extern int      fscount;
+#define HRFS_statfs	statvfs
+#define HRFS_mount	mnt_dir
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATVFS_F_FRSIZE
+
+#elif defined(HAVE_GETFSSTAT) && !defined(HAVE_STATFS) && defined(HAVE_STATVFS)
+
+extern struct statfs *HRFS_entry;
+extern int      fscount;
+#define HRFS_statfs	statvfs
+#define HRFS_mount	f_mntonname
+#define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
+
+#elif defined(HAVE_GETFSSTAT)
+
+extern struct statfs *HRFS_entry;
+extern int      fscount;
+#define HRFS_statfs	statfs
+#define HRFS_mount	f_mntonname
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATFS_F_FRSIZE
+
+#else
+
+extern struct mntent *HRFS_entry;
+#define HRFS_mount	mnt_dir
+#define HRFS_statfs	statfs
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATFS_F_FRSIZE
+
+#endif
+	
+#if defined(USE_MACH_HOST_STATISTICS)
+mach_port_t myHost;
+#endif
+
 static void parse_storage_config(const char *, char *);
 
         /*********************
@@ -70,11 +251,13 @@ static void parse_storage_config(const char *, char *);
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-int             Get_Next_HR_Store(const struct netsnmp_fsys_info_s **entry);
+int             Get_Next_HR_Store(void);
 void            Init_HR_Store(void);
-
+int             header_hrstore(struct variable *, oid *, size_t *, int,
+                               size_t *, WriteMethod **);
+void*           header_hrstoreEntry(struct variable *, oid *, size_t *,
+                                    int, size_t *, WriteMethod **);
 Netsnmp_Node_Handler handle_memsize;
-
 
 #define	HRSTORE_MEMSIZE		1
 #define	HRSTORE_INDEX		2
@@ -101,13 +284,12 @@ struct variable2 hrstore_variables[] = {
     {HRSTORE_FAILS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
      var_hrstore, 1, {7}}
 };
-oid             hrstore_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 2 };
 oid             hrMemorySize_oid[]   = { 1, 3, 6, 1, 2, 1, 25, 2, 2 };
 oid             hrStorageTable_oid[] = { 1, 3, 6, 1, 2, 1, 25, 2, 3, 1 };
 
 
 void
-init_hrh_storage(void)
+init_hr_storage(void)
 {
     char *appname;
 
@@ -123,10 +305,6 @@ init_hrh_storage(void)
     netsnmp_ds_register_config(ASN_BOOLEAN, appname, "skipNFSInHostResources", 
 			       NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES);
-
-    netsnmp_ds_register_config(ASN_BOOLEAN, appname, "realStorageUnits",
-                   NETSNMP_DS_APPLICATION_ID,
-                   NETSNMP_DS_AGENT_REALSTORAGEUNITS);
 
     snmpd_register_config_handler("storageUseNFS", parse_storage_config, NULL,
 	"1 | 2\t\t(1 = enable, 2 = disable)");
@@ -165,10 +343,13 @@ parse_storage_config(const char *token, char *cptr)
  * write_method
  * 
  */
-static void *
-header_hrstoreEntry(struct variable *vp, oid *name, size_t *length, int exact,
-                    size_t *var_len, WriteMethod **write_method,
-                    const netsnmp_fsys_info **entry)
+
+void *
+header_hrstoreEntry(struct variable *vp,
+                    oid * name,
+                    size_t * length,
+                    int exact,
+                    size_t * var_len, WriteMethod ** write_method)
 {
 #define HRSTORE_ENTRY_NAME_LENGTH	11
     oid             newname[MAX_OID_LEN];
@@ -235,10 +416,9 @@ header_hrstoreEntry(struct variable *vp, oid *name, size_t *length, int exact,
      *   then consider the disk-based storage.
      */
     else {
-        *entry = NULL;
         Init_HR_Store();
         for (;;) {
-            storage_idx = Get_Next_HR_Store(entry);
+            storage_idx = Get_Next_HR_Store();
             DEBUGMSG(("host/hr_storage", "(index %d ....", storage_idx));
             if (storage_idx == -1)
                 break;
@@ -348,28 +528,31 @@ var_hrstore(struct variable *vp,
 {
     int             store_idx = 0;
     static char     string[1024];
+    struct HRFS_statfs stat_buf;
     void                *ptr;
-    const netsnmp_fsys_info *entry = NULL;
     netsnmp_memory_info *mem = NULL;
 
 really_try_next:
-    ptr = header_hrstoreEntry(vp, name, length, exact, var_len, write_method,
-                              &entry);
-    if (ptr == NULL)
-        return NULL;
+	ptr = header_hrstoreEntry(vp, name, length, exact, var_len,
+					write_method);
+	if (ptr == NULL)
+	    return NULL;
 
-    store_idx = name[ HRSTORE_ENTRY_NAME_LENGTH ];
-    if (entry &&
-        store_idx > NETSNMP_MEM_TYPE_MAX &&
-        netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                               NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) &&
-        Check_HR_FileSys_NFS(entry))
-        return NULL;
-    if (entry && Check_HR_FileSys_AutoFs(entry))
-        return NULL;
-    if (store_idx <= NETSNMP_MEM_TYPE_MAX ) {
-        mem = (netsnmp_memory_info*)ptr;
-    }
+        store_idx = name[ HRSTORE_ENTRY_NAME_LENGTH ];
+        if (store_idx > NETSNMP_MEM_TYPE_MAX ) {
+            if ( netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                        NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) &&
+                 Check_HR_FileSys_NFS())
+                return NULL;  /* or goto try_next; */
+            if (Check_HR_FileSys_AutoFs())
+                return NULL;
+	    if (HRFS_statfs(HRFS_entry->HRFS_mount, &stat_buf) < 0) {
+		snmp_log_perror(HRFS_entry->HRFS_mount);
+		goto try_next;
+	    }
+	} else {
+	    mem = (netsnmp_memory_info*)ptr;
+        }
 
 
 
@@ -379,10 +562,16 @@ really_try_next:
         return (u_char *) & long_return;
     case HRSTORE_TYPE:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
-            if (entry->flags & NETSNMP_FS_FLAG_REMOTE && storageUseNFS)
+            if (storageUseNFS && Check_HR_FileSys_NFS())
                 storage_type_id[storage_type_len - 1] = 10;     /* Network Disk */
-            else if (entry->flags & NETSNMP_FS_FLAG_REMOVE )
+#if HAVE_HASMNTOPT && !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
+            /* 
+             * hasmntopt takes "const struct mntent*", but HRFS_entry has been
+             * defined differently for AIX, so skip this for AIX
+             */
+            else if (hasmntopt(HRFS_entry, "loop") != NULL)
                 storage_type_id[storage_type_len - 1] = 5;      /* Removable Disk */
+#endif
             else
                 storage_type_id[storage_type_len - 1] = 4;      /* Assume fixed */
         else
@@ -403,7 +592,7 @@ really_try_next:
         return (u_char *) storage_type_id;
     case HRSTORE_DESCR:
         if (store_idx > NETSNMP_MEM_TYPE_MAX) {
-            strlcpy(string, entry->path, sizeof(string));
+            strlcpy(string, HRFS_entry->HRFS_mount, sizeof(string));
             *var_len = strlen(string);
             return (u_char *) string;
         } else {
@@ -413,42 +602,34 @@ really_try_next:
             return (u_char *) mem->descr;
         }
     case HRSTORE_UNITS:
-        if (store_idx > NETSNMP_MEM_TYPE_MAX) {
-            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                                       NETSNMP_DS_AGENT_REALSTORAGEUNITS))
-                long_return = entry->units & 0x7fffffff;
-            else
-                long_return = entry->units_32;
-        } else {
+        if (store_idx > NETSNMP_MEM_TYPE_MAX)
+#ifdef HRFS_HAS_FRSIZE
+            long_return = stat_buf.f_frsize;
+#else
+            long_return = stat_buf.f_bsize;
+#endif
+        else {
             if ( !mem || mem->units == -1 )
                 goto try_next;
-            long_return = mem->units & 0x7fffffff;
+            long_return = mem->units;
         }
         return (u_char *) & long_return;
     case HRSTORE_SIZE:
-        if (store_idx > NETSNMP_MEM_TYPE_MAX) {
-            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                                       NETSNMP_DS_AGENT_REALSTORAGEUNITS))
-                long_return = entry->size & 0x7fffffff;
-            else
-                long_return = entry->size_32;
-        } else {
+        if (store_idx > NETSNMP_MEM_TYPE_MAX)
+            long_return = stat_buf.f_blocks;
+        else {
             if ( !mem || mem->size == -1 )
                 goto try_next;
-            long_return = mem->size & 0x7fffffff;
+            long_return = mem->size;
         }
         return (u_char *) & long_return;
     case HRSTORE_USED:
-        if (store_idx > NETSNMP_MEM_TYPE_MAX) {
-            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                                       NETSNMP_DS_AGENT_REALSTORAGEUNITS))
-                long_return = entry->used & 0x7fffffff;
-            else
-                long_return = entry->used_32;
-        } else {
+        if (store_idx > NETSNMP_MEM_TYPE_MAX)
+            long_return = (stat_buf.f_blocks - stat_buf.f_bfree);
+        else {
             if ( !mem || mem->size == -1 || mem->free == -1 )
                 goto try_next;
-            long_return = (mem->size - mem->free) & 0x7fffffff;
+            long_return = mem->size - mem->free;
         }
         return (u_char *) & long_return;
     case HRSTORE_FAILS:
@@ -456,7 +637,7 @@ really_try_next:
 #ifdef NETSNMP_NO_DUMMY_VALUES
 	    goto try_next;
 #else
-        long_return = 0;
+            long_return = 0;
 #endif
         else {
             if ( !mem || mem->other == -1 )
@@ -470,7 +651,7 @@ really_try_next:
     }
     return NULL;
 
-try_next:
+  try_next:
     if (!exact)
         goto really_try_next;
 
@@ -484,28 +665,127 @@ try_next:
 	 *
 	 *********************/
 
+static int      HRS_index;
+
 void
 Init_HR_Store(void)
 {
+    HRS_index = 0;
     Init_HR_FileSys();
 }
 
 int
-Get_Next_HR_Store(const struct netsnmp_fsys_info_s **entry)
+Get_Next_HR_Store(void)
 {
     /*
      * File-based storage 
      */
-    for (;;) {
-	Get_Next_HR_FileSys(entry);
-        if (!*entry)
-            return -1;
-        if (!(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-                                  NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) && 
-              Check_HR_FileSys_NFS(*entry)) &&
-            !Check_HR_FileSys_AutoFs(*entry)) {
-            return (*entry)->idx.oids[0] + NETSNMP_MEM_TYPE_MAX;	
-        }
-    }
+	for (;;) {
+    	HRS_index = Get_Next_HR_FileSys();
+		if (HRS_index >= 0) {
+			if (!(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+							NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) && 
+						Check_HR_FileSys_NFS()) &&
+                            !Check_HR_FileSys_AutoFs()) {
+				return HRS_index + NETSNMP_MEM_TYPE_MAX;	
+			}
+		} else {
+			return -1;
+		}	
+	}
 }
 
+#if 0
+void
+sol_get_swapinfo(int *totalP, int *usedP)
+{
+    struct anoninfo ainfo;
+
+    if (swapctl(SC_AINFO, &ainfo) < 0) {
+        *totalP = *usedP = 0;
+        return;
+    }
+
+    *totalP = ainfo.ani_max;
+    *usedP = ainfo.ani_resv;
+}
+#endif                          /* solaris2 */
+
+#ifdef WIN32
+char *win_realpath(const char *file_name, char *resolved_name)
+{
+	char szFile[_MAX_PATH + 1];
+	char *pszRet;
+ 	
+	pszRet = _fullpath(szFile, resolved_name, MAX_PATH);
+ 	
+	return pszRet;  
+}
+
+static int win_statfs (const char *path, struct win_statfs *buf)
+{
+    HINSTANCE h;
+    FARPROC f;
+    int retval = 0;
+    char tmp [MAX_PATH], resolved_path [MAX_PATH];
+    GetFullPathName(path, MAX_PATH, resolved_path, NULL);
+    /* TODO - Fix this! The realpath macro needs defined
+     * or rewritten into the function.
+     */
+    
+    win_realpath(path, resolved_path);
+    
+    if (!resolved_path)
+    	retval = - 1;
+    else {
+    	/* check whether GetDiskFreeSpaceExA is supported */
+        h = LoadLibraryA ("kernel32.dll");
+        if (h)
+			f = GetProcAddress (h, "GetDiskFreeSpaceExA");
+        else
+        	f = NULL;
+		
+        if (f) {
+			ULARGE_INTEGER bytes_free, bytes_total, bytes_free2;
+            if (!f (resolved_path, &bytes_free2, &bytes_total, &bytes_free)) {
+				errno = ENOENT;
+				retval = - 1;
+			} else {
+				buf -> f_bsize = FAKED_BLOCK_SIZE;
+				buf -> f_bfree = (bytes_free.QuadPart) / FAKED_BLOCK_SIZE;
+				buf -> f_files = buf -> f_blocks = (bytes_total.QuadPart) / FAKED_BLOCK_SIZE;
+				buf -> f_ffree = buf -> f_bavail = (bytes_free2.QuadPart) / FAKED_BLOCK_SIZE;
+			}
+		} else {
+			DWORD sectors_per_cluster, bytes_per_sector;
+			if (h) FreeLibrary (h);
+			if (!GetDiskFreeSpaceA (resolved_path, &sectors_per_cluster,
+					&bytes_per_sector, &buf -> f_bavail, &buf -> f_blocks)) {
+                errno = ENOENT;
+                retval = - 1;
+            } else {
+                buf -> f_bsize = sectors_per_cluster * bytes_per_sector;
+                buf -> f_files = buf -> f_blocks;
+                buf -> f_ffree = buf -> f_bavail;
+                buf -> f_bfree = buf -> f_bavail;
+            }
+		}
+		if (h) FreeLibrary (h);
+	}
+
+	/* get the FS volume information */
+	if (strspn (":", resolved_path) > 0) resolved_path [3] = '\0'; /* we want only the root */    
+	if (GetVolumeInformation (resolved_path, NULL, 0, &buf -> f_fsid, &buf -> f_namelen, 
+									NULL, tmp, MAX_PATH)) {
+		if (strcasecmp ("NTFS", tmp) == 0) {
+			buf -> f_type = NTFS_SUPER_MAGIC;
+		} else {
+			buf -> f_type = MSDOS_SUPER_MAGIC;
+		}
+	} else {
+		errno = ENOENT;
+		retval = - 1;
+	}
+	return retval;
+}
+#endif	/* WIN32 */

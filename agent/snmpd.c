@@ -66,7 +66,7 @@
 # include <sys/time.h>
 # include <time.h>
 #else
-# if HAVE_SYS_TIME_H
+# ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -1004,7 +1004,7 @@ main(int argc, char *argv[])
 #ifdef HAVE_SETUID
     if ((uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 				  NETSNMP_DS_AGENT_USERID)) > 0) {
-#ifdef HAVE_GETPWNAM && HAVE_PWD_H && HAVE_INITGROUPS
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H) && defined(HAVE_INITGROUPS)
         struct passwd *info;
 
         /*
