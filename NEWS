@@ -4,6 +4,9 @@ that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
 *5.9.3*:
+   - misc bug fixes
+   
+*5.9.3*:
     security:
       - These two CVEs can be exploited by a user with read-only credentials:
           - CVE-2022-24805 A buffer overflow in the handling of the INDEX of
