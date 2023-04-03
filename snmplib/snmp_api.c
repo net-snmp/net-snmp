@@ -47,26 +47,26 @@ SOFTWARE.
 
 #include <stdio.h>
 #include <ctype.h>
-#if HAVE_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if HAVE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <sys/types.h>
-#if HAVE_SYS_PARAM_H
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# if HAVE_SYS_TIME_H
+# ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -102,7 +102,7 @@ SOFTWARE.
 #endif
 #include <errno.h>
 
-#if HAVE_LOCALE_H
+#ifdef HAVE_LOCALE_H
 #include <locale.h>
 #endif
 
@@ -1948,7 +1948,7 @@ snmp_free_session(netsnmp_session * s)
          */
         netsnmp_callback_clear_client_arg(s, 0, 0);
 
-        free((char *) s);
+        free(s);
     }
 }
 
@@ -1997,10 +1997,10 @@ snmp_sess_close(void *sessp)
                               orp->pdu, orp->cb_data);
             }
             snmp_free_pdu(orp->pdu);
-            free((char *) orp);
+            free(orp);
         }
 
-        free((char *) isp);
+        free(isp);
     }
 
     transport = slp->transport;
@@ -2034,7 +2034,7 @@ snmp_sess_close(void *sessp)
     }
 
     snmp_free_session(sesp);
-    free((char *) slp);
+    free(slp);
     return 1;
 }
 
@@ -5509,7 +5509,7 @@ void
 snmp_free_var(netsnmp_variable_list * var)
 {
     snmp_free_var_internals(var);
-    free((char *) var);
+    free(var);
 }
 
 void
@@ -6836,7 +6836,7 @@ snmp_sess_timeout(void *sessp)
             /*
              * frees rp's after the for loop goes on to the next_request 
              */
-            free((char *) freeme);
+            free(freeme);
             freeme = NULL;
         }
 
@@ -6881,7 +6881,7 @@ snmp_sess_timeout(void *sessp)
     }
 
     if (freeme != NULL) {
-        free((char *) freeme);
+        free(freeme);
         freeme = NULL;
     }
 }

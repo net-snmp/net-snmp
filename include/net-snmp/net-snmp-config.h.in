@@ -1776,7 +1776,7 @@
 #undef SYS_IOCTL_H_HAS_SIOCGIFADDR
 
 /* Define if the TCP timer constants in <netinet/tcp_timer.h> depend on the
-   integer variable 'hz'. [FreeBSD 4.x] */
+   integer variable 'hz'. [FreeBSD] */
 #undef TCPTV_NEEDS_HZ
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */

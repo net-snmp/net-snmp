@@ -17529,7 +17529,7 @@ _ACEOF
 #
 if test "x$NETSNMP_DEFAULT_MIBDIRS" = "x"; then
     NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
-    if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+    if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
         #
         #    USe Windows-style path separator
         NETSNMP_DEFAULT_MIBDIRS=`echo "$NETSNMP_DEFAULT_MIBDIRS" | $SED 's/:/;/g'`
@@ -20218,7 +20218,12 @@ while test "x$new_transport_list" != "x"; do
       transport_src="transports/snmp"$i"Domain.c"
       transport_hdr="snmp"$i"Domain.h"
       rel_transport_src="snmplib/"$transport_src
-      rel_transport_hdr="include/net-snmp/library/"$transport_hdr
+      case $i in
+	  IPBase)
+	      rel_transport_hdr="snmplib/transports/$transport_hdr";;
+	  *)
+	      rel_transport_hdr="include/net-snmp/library/$transport_hdr";;
+      esac
       lc_i=`echo $i | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
       ctor_fn="netsnmp_"$lc_i"_ctor"
       if test -f "$srcdir/$rel_transport_src"; then
@@ -23390,8 +23395,8 @@ if test "x$NETSNMP_DEFAULT_MIBS" = "x"; then
 fi
 if test "x$ENV_SEPARATOR" != "x"; then
   :
-elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
-  # mingw32 and cygwin use ';' as the default environment variable separator
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+  # mingw32 uses ';' as the default environment variable separator
   ENV_SEPARATOR=";"
   NETSNMP_DEFAULT_MIBS=`echo "$NETSNMP_DEFAULT_MIBS" | $SED 's/:/;/g'`
   default_mibs=`echo "$default_mibs" | $SED 's/:/;/g'`
@@ -28478,7 +28483,14 @@ else
 #ifdef HAVE_SYS_FS_TYPES_H
 #include <sys/fs_types.h>
 #endif
-int main ()
+#ifdef HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
+#endif
+#ifdef HAVE_SYS_STATVFS_H
+#include <sys/statvfs.h>
+#endif
+
+int main(void)
 {
 struct fs_data fsd;
 /* Ultrix's statfs returns 1 for success,
@@ -31740,27 +31752,26 @@ if ${ac_cv_ps_flags+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-if test "`($PSPROG -e 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-e"
-elif test "`($PSPROG -el 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-el"
-elif test "`($PSPROG acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="acx"
-elif test "`($PSPROG -acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-acx"
-elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | $EGREP ' ps *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
-elif test "`($PSPROG ax 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="ax"
-elif test "x$PARTIALTARGETOS" = "xcygwin"; then
-    ac_cv_ps_flags="-e"
-elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
-    ac_cv_ps_flags="-e"
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to determine valid ps flags...  defaulting..." >&5
+case "x$PARTIALTARGETOS" in
+    xcygwin|xmingw32*)
+	ac_cv_ps_flags="-e";;
+    *)
+	ac_cv_ps_flags=""
+	for args in -e -el acx -acx "-o pid,tt,state,time,ucomm" ax; do
+	    if test "`($PSPROG $args 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps"; then
+		ac_cv_ps_flags=$args
+		break
+	    fi
+	done
+	if test "x${ac_cv_ps_flags}" = x; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to determine valid ps flags...  defaulting..." >&5
 $as_echo "$as_me: WARNING: Unable to determine valid ps flags...  defaulting..." >&2;}
-    ac_cv_ps_flags="-acx"
-fi
+	    ac_cv_ps_flags="-acx"
+	elif $PSPROG $ac_cv_ps_flags -J 0 >/dev/null 2>&1; then
+	    ac_cv_ps_flags="$ac_cv_ps_flags -J 0"
+	fi
+	;;
+esac
 
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_ps_flags" >&5
@@ -31846,8 +31857,10 @@ else
 #if HAVE_SYS_SYSCTL_H
 # include <sys/sysctl.h>
 #endif
+#include <stddef.h>
+#include <stdlib.h>
 
-int main(int argc, char **argv)
+int main(void)
 {
   int                 mib[2];
   size_t              len;
@@ -31883,13 +31896,11 @@ fi
 
 
 #   Check whether TCP timer constants are indeed constant
-#       or depend on the kernel clock tick 'hz'.        (FreeBSD 4.x)
+#       or depend on the kernel clock tick 'hz'.        (FreeBSD)
 #
 #       If the latter, then we will need to have a local
 #       variable 'hz' defined and with a suitable value,
 #       whenever we want to  use one one of these 'constants'.
-#
-# 	    used in agent only
 #
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether TCP timers depend on 'hz'" >&5
 $as_echo_n "checking whether TCP timers depend on 'hz'... " >&6; }
@@ -31900,7 +31911,8 @@ else
 /* end confdefs.h.  */
 
 #include <netinet/tcp_timer.h>
-TCPTV_SRTTDFLT
+TCPTV_MIN
+TCPTV_REXMTMAX
 
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |

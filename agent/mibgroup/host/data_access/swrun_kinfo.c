@@ -221,7 +221,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          * We'll use SWRUN_K_COMM for hrSWRunName,
          *   and as an alternative for hrSWRunPath
          */
-#if HAVE_KVM_GETPROC2
+#ifdef HAVE_KVM_GETPROC2
         argv = kvm_getargv2( kd, &(proc_table[i]), 0);
 #else
         argv = kvm_getargv(  kd, &(proc_table[i]), BUFSIZ);

@@ -8,7 +8,7 @@ config_require(SocketBase)
 
 #include <net-snmp/library/snmp_transport.h>
 
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
