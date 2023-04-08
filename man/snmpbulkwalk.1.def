@@ -95,7 +95,7 @@ takes the common options described in the
 .I snmpcmd(1)
 manual page.
 Note that
-.B snmpbulkwalk
+.B snmpbulkget
 REQUIRES an argument specifying the agent to query
 and at most one OID argument, as described above.
 .SH EXAMPLE
