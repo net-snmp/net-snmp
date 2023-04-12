@@ -73,7 +73,7 @@ netsnmp_feature_require(ctime_to_timet);
 #endif
 
 #if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5) || defined(darwin)
-#if HAVE_GETFSSTAT && defined(MFSNAMELEN)
+#if defined(HAVE_GETFSSTAT) && defined(MFSNAMELEN)
 #define MOUNT_NFS	"nfs"
 #define MNTTYPE_UFS	"ufs"
 #define BerkelyFS
@@ -379,7 +379,7 @@ var_hrfilesys(struct variable *vp,
          * Not sufficient to identity the file
          *   type precisely, but it's a start.
          */
-#if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
+#if defined(HAVE_GETFSSTAT) && !defined(MFSNAMELEN)
         switch (HRFS_entry->HRFS_type) {
         case MOUNT_UFS:
             fsys_type_id[fsys_type_len - 1] = 3;
@@ -792,7 +792,7 @@ next:
 int
 Check_HR_FileSys_NFS (void)
 {
-#if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
+#if defined(HAVE_GETFSSTAT) && !defined(MFSNAMELEN)
     if ((HRFS_entry->HRFS_type == MOUNT_NFS) ||
         (HRFS_entry->HRFS_type == MOUNT_AFS))
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)

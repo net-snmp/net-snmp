@@ -564,7 +564,7 @@ really_try_next:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
             if (storageUseNFS && Check_HR_FileSys_NFS())
                 storage_type_id[storage_type_len - 1] = 10;     /* Network Disk */
-#if HAVE_HASMNTOPT && !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
+#if defined(HAVE_HASMNTOPT) && !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
             /* 
              * hasmntopt takes "const struct mntent*", but HRFS_entry has been
              * defined differently for AIX, so skip this for AIX

@@ -63,7 +63,7 @@
 #define SWRUN_K_FLAG	ki_flag
 #define SWRUN_K_CLASS	ki_pri.pri_class
 
-#elif HAVE_KVM_GETPROC2 || defined(openbsd5)
+#elif defined(HAVE_KVM_GETPROC2) || defined(openbsd5)
     /*
      * newer NetBSD, OpenBSD kinfo_proc2 field names
      */

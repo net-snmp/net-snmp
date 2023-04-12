@@ -821,7 +821,7 @@ var_ifEntry(struct variable *vp,
             long_return = ifnet.if_baudrate;
 #elif defined(HAVE_STRUCT_IFNET_IF_SPEED)
             long_return = ifnet.if_speed;
-#elif HAVE_STRUCT_IFNET_IF_TYPE && defined(IFT_ETHER)
+#elif defined(HAVE_STRUCT_IFNET_IF_TYPE) && defined(IFT_ETHER)
             if (ifnet.if_type == IFT_ETHER)
                 long_return = 10000000;
             if (ifnet.if_type == IFT_P10)

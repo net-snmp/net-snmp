@@ -1004,7 +1004,7 @@ main(int argc, char *argv[])
 #ifdef HAVE_SETUID
     if ((uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 				  NETSNMP_DS_AGENT_USERID)) > 0) {
-#if HAVE_GETPWNAM && HAVE_PWD_H && HAVE_INITGROUPS
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H) && defined(HAVE_INITGROUPS)
         struct passwd *info;
 
         /*

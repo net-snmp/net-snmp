@@ -260,7 +260,7 @@ ctime_to_timet(const char *str)
 #else
     tm.tm_isdst = 0;
 #endif
-#if HAVE_DECL_TIMEZONE && defined(HAVE_SCALAR_TIMEZONE)
+#if defined(HAVE_DECL_TIMEZONE) && defined(HAVE_SCALAR_TIMEZONE)
     tm.tm_sec -= timezone;
 #endif
 #endif
