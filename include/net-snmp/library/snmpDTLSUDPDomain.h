@@ -5,8 +5,8 @@
 #include <netinet/in.h>
 #endif
 
-config_require(UDP)
-config_require(TLSBase)
+config_require(UDP);
+config_require(TLSBase);
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>

@@ -1,8 +1,8 @@
 #ifndef _SNMPSSHDOMAIN_H
 #define _SNMPSSHDOMAIN_H
 
-config_require(IPv4Base)
-config_require(SocketBase)
+config_require(IPv4Base);
+config_require(SocketBase);
 
 #ifdef NETSNMP_TRANSPORT_SSH_DOMAIN
 

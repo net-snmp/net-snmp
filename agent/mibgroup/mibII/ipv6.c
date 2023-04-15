@@ -325,8 +325,8 @@ struct variable3 ipv6_variables[] = {
 oid             ipv6_variables_oid[] = { SNMP_OID_MIB2, 55, 1 };
 #if 0
 config_load_mib(MIB .55 .1, 8, ipv6_variables)
-    config_add_mib(IPV6 - TC)
-    config_add_mib(IPV6 - MIB)
+    config_add_mib(IPV6 - TC);
+    config_add_mib(IPV6 - MIB);
 #endif
      struct variable3 ipv6icmp_variables[] = {
          {IPV6IFICMPINMSG, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
@@ -401,7 +401,7 @@ config_load_mib(MIB .55 .1, 8, ipv6_variables)
 oid             ipv6icmp_variables_oid[] = { 1, 3, 6, 1, 2, 1, 56, 1 };
 #if 0
 config_load_mib(MIB .56 .1, 8, ipv6icmp_variables)
-    config_add_mib(IPV6 - ICMP - MIB)
+    config_add_mib(IPV6 - ICMP - MIB);
 #endif
      struct variable2 ipv6udp_variables[] = {
          {IPV6UDPIFINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
@@ -410,7 +410,7 @@ config_load_mib(MIB .56 .1, 8, ipv6icmp_variables)
 oid             ipv6udp_variables_oid[] = { 1, 3, 6, 1, 2, 1, 7, 6 };
 #if 0
 config_load_mib(1.3 .6 .1 .3 .87 .1, 7, ipv6udp_variables)
-    config_add_mib(IPV6 - UDP - MIB)
+    config_add_mib(IPV6 - UDP - MIB);
 #endif
      struct variable2 ipv6tcp_variables[] = {
          {IPV6TCPCONNSTATE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
@@ -419,7 +419,7 @@ config_load_mib(1.3 .6 .1 .3 .87 .1, 7, ipv6udp_variables)
 oid             ipv6tcp_variables_oid[] = { 1, 3, 6, 1, 2, 1, 6, 16 };
 #if 0
 config_load_mib(1.3 .6 .1 .3 .86 .1, 7, ipv6tcp_variables)
-    config_add_mib(IPV6 - TCP - MIB)
+    config_add_mib(IPV6 - TCP - MIB);
 #endif
 
 void
