@@ -166,7 +166,7 @@ if test $cross_compiling = yes; then
 else
     AC_CACHE_CHECK([if sysctl can read kernel information],
         ac_cv_NETSNMP_CAN_USE_SYSCTL,
-       [AC_TRY_RUN([
+       [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -203,10 +203,7 @@ int main(void)
   else
     exit(1);
 }
-        ],
-        ac_cv_NETSNMP_CAN_USE_SYSCTL=yes,
-        ac_cv_NETSNMP_CAN_USE_SYSCTL=no,
-        ac_cv_NETSNMP_CAN_USE_SYSCTL=no)])
+        ]])],[ac_cv_NETSNMP_CAN_USE_SYSCTL=yes],[ac_cv_NETSNMP_CAN_USE_SYSCTL=no],[ac_cv_NETSNMP_CAN_USE_SYSCTL=no])])
 fi
 
 if test "x$ac_cv_NETSNMP_CAN_USE_SYSCTL" = "xyes"; then
@@ -260,32 +257,28 @@ case $target_os in
     if test $ac_inet_ip_h = yes ; then
         AC_CACHE_CHECK([for mib2_ipRouteEntry_t in inet/mib2.h],
             ac_cv_mib2_ipRouteEntry_t,
-           [AC_TRY_COMPILE([
+           [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-               ],[
+               ]], [[
   mib2_ipRouteEntry_t testit;
   if(sizeof(testit))
     return(0);
-               ],
-               ac_cv_mib2_ipRouteEntry_t=yes,
-               ac_cv_mib2_ipRouteEntry_t=no)])
+               ]])],[ac_cv_mib2_ipRouteEntry_t=yes],[ac_cv_mib2_ipRouteEntry_t=no])])
 
         if test "x$ac_cv_mib2_ipRouteEntry_t" = "xyes" ; then
             AC_CACHE_CHECK([whether IRE_CACHE is defined in inet/ip.h],
                 ac_cv_ire_cache,
-               [AC_TRY_COMPILE([
+               [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_INET_IP_H
 #include <inet/ip.h>
 #endif
-                   ],[
+                   ]], [[
   int testit=IRE_CACHE;
   if(testit)
     return(0);
-                   ],
-                   ac_cv_ire_cache=yes,
-                   ac_cv_ire_cache=no)])
+                   ]])],[ac_cv_ire_cache=yes],[ac_cv_ire_cache=no])])
         else
             ac_cv_ire_cache=no
         fi

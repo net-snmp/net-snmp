@@ -13,24 +13,24 @@
  * distributed with the Net-SNMP package.
  */
 
-	config_require(host/hr_system)
-	config_require(host/hr_device)
-	config_require(host/hr_other)
-	config_require(host/hr_proc)
-	config_require(host/hr_network)
-	config_require(host/hr_print)
-	config_require(host/hr_disk)
-	config_require(host/hr_partition)
+	config_require(host/hr_system);
+	config_require(host/hr_device);
+	config_require(host/hr_other);
+	config_require(host/hr_proc);
+	config_require(host/hr_network);
+	config_require(host/hr_print);
+	config_require(host/hr_disk);
+	config_require(host/hr_partition);
 
-	config_require(host/hrh_storage)
-	config_require(host/hrh_filesys)
+	config_require(host/hrh_storage);
+	config_require(host/hrh_filesys);
 
-	config_require(host/hrSWInstalledTable)
-	config_require(host/hrSWRunTable)
+	config_require(host/hrSWInstalledTable);
+	config_require(host/hrSWRunTable);
 
 /* add the host resources mib to the default mibs to load */
-config_add_mib(HOST-RESOURCES-MIB)
-config_add_mib(HOST-RESOURCES-TYPES)
+config_add_mib(HOST-RESOURCES-MIB);
+config_add_mib(HOST-RESOURCES-TYPES);
 
 /*********************************************
  *

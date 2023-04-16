@@ -15,7 +15,7 @@
 #include <netinet/in.h>
 #endif
 
-config_require(UDP)
+config_require(UDP);
 
 #include <net-snmp/library/snmpUDPBaseDomain.h>
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>

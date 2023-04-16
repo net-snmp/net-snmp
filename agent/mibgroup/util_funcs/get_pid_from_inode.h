@@ -6,7 +6,7 @@
 #define NETSNMP_MIBGROUP_UTIL_FUNCS_GET_PID_FROM_INODE_H
 
 #ifndef linux
-config_error(get_pid_from_inode is only suppored on linux)
+config_error(get_pid_from_inode is only suppored on linux);
 #endif
 
 #define _LARGEFILE64_SOURCE 1

@@ -622,7 +622,7 @@ AC_CACHE_CHECK([type of rtentry structure],
         # BSD 4.4 compatible structure
         #    ('rt_nodes' array)
         #
-        AC_TRY_COMPILE([
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -640,7 +640,7 @@ AC_CACHE_CHECK([type of rtentry structure],
 #undef KERNEL
 #undef _KERNEL
 #include <net/route.h>
-        ],[
+        ]], [[
 
 #ifndef HAVE_STRUCT_RTENTRY_RT_DST
 #define rt_dst rt_nodes->rn_key
@@ -649,13 +649,13 @@ AC_CACHE_CHECK([type of rtentry structure],
   struct rtentry rt; 
   rt.rt_nodes[0].rn_flags = 1;
   rt.rt_dst;
-        ], ac_cv_RTENTRY_TYPE="BSD-4.4")
+        ]])],[ac_cv_RTENTRY_TYPE="BSD-4.4"],[])
 
         if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
         # BSD 4.3 compatible structure
         #    ('rt_hash')
         #
-        AC_TRY_COMPILE([
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -673,11 +673,11 @@ AC_CACHE_CHECK([type of rtentry structure],
 #undef KERNEL
 #undef _KERNEL
 #include <net/route.h>
-        ],[
+        ]], [[
 
 struct rtentry rt; 
 rt.rt_hash;
-        ], ac_cv_RTENTRY_TYPE="BSD-4.3")
+        ]])],[ac_cv_RTENTRY_TYPE="BSD-4.3"],[])
         fi
 
         if test "x$ac_cv_RTENTRY_TYPE" = "x"; then

@@ -5,25 +5,25 @@
 #ifndef _MIBGROUP_HRDISK_H
 #define _MIBGROUP_HRDISK_H
 
-config_require(host/hr_device)
+config_require(host/hr_device);
 
 #if defined(__linux__)
-config_require(host/data_access/hr_disk_linux)
+config_require(host/data_access/hr_disk_linux);
 #elif defined(__APPLE__) && defined(__MACH__)
-config_require(host/data_access/hr_disk_darwin)
+config_require(host/data_access/hr_disk_darwin);
 #elif defined(__DragonFly__)
-config_require(host/data_access/hr_disk_dfly)
+config_require(host/data_access/hr_disk_dfly);
 #elif defined(freebsd3) || defined(__NetBSD__) || defined(__OpenBSD__) || \
     defined(__bsdi__)
-config_require(host/data_access/hr_disk_bsd)
+config_require(host/data_access/hr_disk_bsd);
 #elif defined(__sun)
-config_require(host/data_access/hr_disk_solaris)
+config_require(host/data_access/hr_disk_solaris);
 #elif defined(_AIX)
-config_require(host/data_access/hr_disk_aix)
+config_require(host/data_access/hr_disk_aix);
 #elif defined(__hpux)
-config_require(host/data_access/hr_disk_hpux)
+config_require(host/data_access/hr_disk_hpux);
 #elif defined(WIN32)
-config_require(host/data_access/hr_disk_windows)
+config_require(host/data_access/hr_disk_windows);
 #endif
 
 /*************************************************************

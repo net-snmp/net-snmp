@@ -1,24 +1,24 @@
 #ifndef _MIBGROUP_DISKIO_H
 #define _MIBGROUP_DISKIO_H
 
-config_require(util_funcs/header_simple_table)
-config_add_mib(UCD-DISKIO-MIB)
+config_require(util_funcs/header_simple_table);
+config_add_mib(UCD-DISKIO-MIB);
 #if defined(aix4)
-config_require(ucd-snmp/diskio_aix)
+config_require(ucd-snmp/diskio_aix);
 #elif defined(bsdi3)
-config_require(ucd-snmp/diskio_bsdi)
+config_require(ucd-snmp/diskio_bsdi);
 #elif defined(darwin)
-config_require(ucd-snmp/diskio_darwin)
+config_require(ucd-snmp/diskio_darwin);
 #elif defined(freebsd3)
-config_require(ucd-snmp/diskio_freebsd)
+config_require(ucd-snmp/diskio_freebsd);
 #elif defined(linux)
-config_require(ucd-snmp/diskio_linux)
+config_require(ucd-snmp/diskio_linux);
 #elif defined(openbsd4)
-config_require(ucd-snmp/diskio_openbsd)
+config_require(ucd-snmp/diskio_openbsd);
 #elif defined(netbsd1)
-config_require(ucd-snmp/diskio_netbsd)
+config_require(ucd-snmp/diskio_netbsd);
 #elif defined(solaris2)
-config_require(ucd-snmp/diskio_solaris)
+config_require(ucd-snmp/diskio_solaris);
 #endif
 
 void            init_diskio(void);

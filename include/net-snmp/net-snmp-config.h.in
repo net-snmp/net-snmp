@@ -36,23 +36,25 @@
 
 /* definitions added by configure on-the-fly */
 
-#define config_error(x)
+#define config_parse_dot_conf(w,x,y,z) NETSNMP_REQUIRE_SEMICOLON
 
-#define config_warning(x)
+#define config_error(x) NETSNMP_REQUIRE_SEMICOLON
 
-#define config_belongs_in(x)
+#define config_warning(x) NETSNMP_REQUIRE_SEMICOLON
 
-#define config_exclude(x)
+#define NETSNMP_REQUIRE_SEMICOLON extern void netsnmp_unused_function(void)
 
-#define config_arch_require(x,y)
+#define config_belongs_in(x) NETSNMP_REQUIRE_SEMICOLON
 
-#define config_version_require(x)
+#define config_exclude(x) NETSNMP_REQUIRE_SEMICOLON
 
-#define config_require(x)
+#define config_arch_require(x,y) NETSNMP_REQUIRE_SEMICOLON
 
-#define config_add_mib(x)
+#define config_version_require(x) NETSNMP_REQUIRE_SEMICOLON
 
-#define config_parse_dot_conf(w,x,y,z)
+#define config_require(x) NETSNMP_REQUIRE_SEMICOLON
+
+#define config_add_mib(x) NETSNMP_REQUIRE_SEMICOLON
 
 /* location of swap device */
 #undef DMEM_LOC

@@ -12,7 +12,7 @@
 # endif
 #endif
 
-config_add_mib(NET-SNMP-PERIODIC-NOTIFY-MIB)
+config_add_mib(NET-SNMP-PERIODIC-NOTIFY-MIB);
 
 void init_deliverByNotify(void);
 
