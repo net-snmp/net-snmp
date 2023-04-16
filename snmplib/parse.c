@@ -4658,7 +4658,7 @@ static int netsnmp_getc(FILE *stream)
  * Warning: this method may recurse.
  */
 static int
-get_token(FILE * fp, char *token, int maxtlen)
+get_token(FILE *const fp, char *const token, const int maxtlen)
 {
     register int    ch, ch_next;
     register char  *cp = token;
