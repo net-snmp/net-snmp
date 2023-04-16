@@ -768,10 +768,12 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         char           *stats, *ifstart = line;
         u_int           flags;
         oid             if_index;
+        size_t          len;
 
         flags = 0;
-        if (line[strlen(line) - 1] == '\n')
-            line[strlen(line) - 1] = '\0';
+        len = strlen(line);
+        if (len && line[len - 1] == '\n')
+            line[len - 1] = '\0';
 
         while (*ifstart && *ifstart == ' ')
             ifstart++;

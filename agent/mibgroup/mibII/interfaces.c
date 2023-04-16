@@ -1584,9 +1584,11 @@ Interface_Scan_Init(void)
     while (fgets(line, sizeof(line), devin)) {
         struct ifnet   *nnew;
         char           *stats, *ifstart = line;
+        size_t          len;
 
-        if (line[strlen(line) - 1] == '\n')
-            line[strlen(line) - 1] = '\0';
+        len = strlen(line);
+        if (len && line[len - 1] == '\n')
+            line[len - 1] = '\0';
 
         while (*ifstart && *ifstart == ' ')
             ifstart++;
