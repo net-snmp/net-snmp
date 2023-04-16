@@ -821,7 +821,7 @@ var_ifEntry(struct variable *vp,
             long_return = ifnet.if_baudrate;
 #elif defined(HAVE_STRUCT_IFNET_IF_SPEED)
             long_return = ifnet.if_speed;
-#elif HAVE_STRUCT_IFNET_IF_TYPE && defined(IFT_ETHER)
+#elif defined(HAVE_STRUCT_IFNET_IF_TYPE) && defined(IFT_ETHER)
             if (ifnet.if_type == IFT_ETHER)
                 long_return = 10000000;
             if (ifnet.if_type == IFT_P10)
@@ -1584,9 +1584,11 @@ Interface_Scan_Init(void)
     while (fgets(line, sizeof(line), devin)) {
         struct ifnet   *nnew;
         char           *stats, *ifstart = line;
+        size_t          len;
 
-        if (line[strlen(line) - 1] == '\n')
-            line[strlen(line) - 1] = '\0';
+        len = strlen(line);
+        if (len && line[len - 1] == '\n')
+            line[len - 1] = '\0';
 
         while (*ifstart && *ifstart == ' ')
             ifstart++;

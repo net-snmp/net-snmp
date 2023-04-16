@@ -2274,7 +2274,7 @@ parse_ranges(FILE * fp, struct range_list **retp)
     if (size && nexttype <= MAXTOKEN) {
         if (nexttype != RIGHTPAREN)
             print_error("Expected \")\" after SIZE", nexttoken, nexttype);
-        nexttype = get_token(fp, nexttoken, nexttype);
+        nexttype = get_token(fp, nexttoken, MAXTOKEN);
     }
     if (nexttype != RIGHTPAREN)
         print_error("Expected \")\"", nexttoken, nexttype);

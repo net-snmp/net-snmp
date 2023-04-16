@@ -307,7 +307,7 @@ input_variable(netsnmp_variable_list * vp)
         vp->name_length = 0;
         return 0;
     }
-    if (buf[val_len - 1] == '\n')
+    if (val_len && buf[val_len - 1] == '\n')
         buf[--val_len] = 0;
     if (*buf == '$') {
         switch (toupper((unsigned char)(buf[1]))) {

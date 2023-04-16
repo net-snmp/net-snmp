@@ -349,7 +349,7 @@ extend_load_cache(netsnmp_cache *cache, void *magic)
     DEBUGMSG(( "nsExtendTable:cache", ": %s : %d\n", cmd_buf, ret));
     if (ret >= 0) {
         if (out_len > 0 && out_buf[out_len - 1] == '\n')
-            out_buf[--out_len] = '\0';	/* Stomp on trailing newline */
+            out_buf[--out_len] = '\0';	/* Strip trailing newline */
         extension->output   = strdup( out_buf );
         extension->out_len  = out_len;
         /*

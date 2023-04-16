@@ -45,7 +45,7 @@
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
-#if HAVE_DIRENT_H && !defined(cygwin)
+#if defined(HAVE_DIRENT_H) && !defined(cygwin)
 #include <dirent.h>
 #else
 # define dirent direct
@@ -1272,7 +1272,7 @@ var_hrswrun(struct variable * vp,
             proc_table[LowProcIndex].p_vm_ssize +
             proc_table[LowProcIndex].p_vm_dsize;
         long_return = long_return * (getpagesize() / 1024);
-#elif HAVE_KVM_GETPROCS && !defined(darwin8)
+#elif defined(HAVE_KVM_GETPROCS) && !defined(darwin8)
   #if defined(NOT_DEFINED) && defined(freebsd5) && __FreeBSD_version >= 500014
 	    /* XXX
 	    long_return = proc_table[LowProcIndex].ki_vmspace->vm_tsize +

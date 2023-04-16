@@ -2111,11 +2111,15 @@ snmpv3_verify_msg(netsnmp_request_list *rp, netsnmp_pdu *pdu)
     if (rpdu->securityLevel != pdu->securityLevel)
         return 0;
 
-    if (rpdu->contextEngineIDLen != pdu->contextEngineIDLen ||
+    if (rpdu->contextEngineIDLen != pdu->contextEngineIDLen)
+        return 0;
+    if (pdu->contextEngineIDLen &&
         memcmp(rpdu->contextEngineID, pdu->contextEngineID,
                pdu->contextEngineIDLen))
         return 0;
-    if (rpdu->contextNameLen != pdu->contextNameLen ||
+    if (rpdu->contextNameLen != pdu->contextNameLen)
+        return 0;
+    if (pdu->contextNameLen &&
         memcmp(rpdu->contextName, pdu->contextName, pdu->contextNameLen))
         return 0;
 

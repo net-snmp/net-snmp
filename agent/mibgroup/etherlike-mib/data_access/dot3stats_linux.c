@@ -147,7 +147,7 @@ dot3stats_interface_ioctl_ifindex_get (int fd, const char *name) {
 #endif /* SIOCGIFINDEX */
 }
 
-# if HAVE_LINUX_RTNETLINK_H /* { NETLINK */
+# if defined(HAVE_LINUX_RTNETLINK_H) /* { NETLINK */
 /*
  * The following code is based upon code I got from Stephen Hemminger
  */
