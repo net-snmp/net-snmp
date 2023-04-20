@@ -41,7 +41,13 @@
 #include <netinet/tcp_timer.h>
 #endif
 #ifdef HAVE_NETINET_TCP_VAR_H
+#ifdef openbsd7
+#define _KERNEL /* OpenBSD 7.3 */
+#endif
 #include <netinet/tcp_var.h>
+#ifdef openbsd7
+#undef _KERNEL
+#endif
 #endif
 #ifdef HAVE_NETINET_TCP_FSM_H
 #include <netinet/tcp_fsm.h>
