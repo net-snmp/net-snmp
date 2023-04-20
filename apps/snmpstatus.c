@@ -276,6 +276,7 @@ main(int argc, char *argv[])
                uptime_string(uptime, buf));
     }
 
+    free(sysdescr);
     if (response)
         snmp_free_pdu(response);
 
