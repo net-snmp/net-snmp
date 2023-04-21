@@ -28,12 +28,12 @@ int callback_called = 0;
 static void test_callback(void);
 static void test_callback(void) {
 	++callback_called;
-};
+}
 
 static void parse_config(const char *token, char *cptr);
 static void parse_config(const char *token, char *cptr) {
 	/* do nothing */
-};
+}
 
 /* each test returns 0 on success, and >0 on failure */
 int test1(void);
