@@ -11,16 +11,6 @@
 
 netsnmp_container *sensorContainer = NULL;
 
-static void initialize_lmSensorsTable(const char *tableName,
-                                      const oid *tableOID,
-                                      netsnmp_container_op *filter,
-                                      int mult);
-
-static int _sensor_filter_temp( netsnmp_container *c, const void *v );
-static int _sensor_filter_fan(  netsnmp_container *c, const void *v );
-static int _sensor_filter_volt( netsnmp_container *c, const void *v );
-static int _sensor_filter_misc( netsnmp_container *c, const void *v );
-
 static const oid lmTempSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,2};
 static const oid lmFanSensorsTable_oid[]    = {1,3,6,1,4,1,2021,13,16,3};
 static const oid lmVoltSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,4};
@@ -29,31 +19,10 @@ static const oid lmMiscSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,5};
 const size_t lmSensorsTables_oid_len = OID_LENGTH(lmMiscSensorsTable_oid);
 
 
-/* Initialise the LM Sensors MIB module */
-void
-init_lmsensorsMib(void)
-{
-    DEBUGMSGTL(("ucd-snmp/lmsensorsMib","Initializing LM-SENSORS-MIB tables\n"));
-
-    /* 
-     * Initialise the four LM-SENSORS-MIB tables
-     *
-     * They are almost identical, so we can use the same registration code.
-     */
-    initialize_lmSensorsTable( "lmTempSensorsTable", lmTempSensorsTable_oid,
-                                _sensor_filter_temp, 1000 );  /* MIB asks for mC */
-    initialize_lmSensorsTable( "lmFanSensorsTable",  lmFanSensorsTable_oid,
-                                _sensor_filter_fan,  1);
-    initialize_lmSensorsTable( "lmVoltSensorsTable", lmVoltSensorsTable_oid,
-                                _sensor_filter_volt, 1000 );  /* MIB asks for mV */
-    initialize_lmSensorsTable( "lmMiscSensorsTable", lmMiscSensorsTable_oid,
-                                _sensor_filter_misc, 1 );
-}
-
 /*
  * Common initialisation code, used for setting up all four tables
  */
-void
+static void
 initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
                           netsnmp_container_op *filter, int mult )
 {
@@ -119,26 +88,30 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
  *
  *  Used to ensure that sensor entries appear in the appropriate table.
  */
-int _sensor_filter_temp( netsnmp_container *c, const void *v ) {
+static int _sensor_filter_temp( netsnmp_container *c, const void *v )
+{
     const netsnmp_sensor_info *sp = (const netsnmp_sensor_info *)v;
     /* Only matches temperature sensors */
     return (( sp->type == NETSNMP_SENSOR_TYPE_TEMPERATURE ) ? 0 : 1 );
 }
 
-int _sensor_filter_fan( netsnmp_container *c, const void *v ) {
+static int _sensor_filter_fan( netsnmp_container *c, const void *v )
+{
     const netsnmp_sensor_info *sp = (const netsnmp_sensor_info *)v;
     /* Only matches fan sensors */
     return (( sp->type == NETSNMP_SENSOR_TYPE_RPM ) ? 0 : 1 );
 }
 
-int _sensor_filter_volt( netsnmp_container *c, const void *v ) {
+static int _sensor_filter_volt( netsnmp_container *c, const void *v )
+{
     const netsnmp_sensor_info *sp = (const netsnmp_sensor_info *)v;
     /* Only matches voltage sensors (AC or DC) */
     return ((( sp->type == NETSNMP_SENSOR_TYPE_VOLTAGE_DC ) ||
              ( sp->type == NETSNMP_SENSOR_TYPE_VOLTAGE_AC )) ? 0 : 1 );
 }
 
-int _sensor_filter_misc( netsnmp_container *c, const void *v ) {
+static int _sensor_filter_misc( netsnmp_container *c, const void *v )
+{
     const netsnmp_sensor_info *sp = (const netsnmp_sensor_info *)v;
     /* Matches everything except temperature, fan or voltage sensors */
     return ((( sp->type == NETSNMP_SENSOR_TYPE_TEMPERATURE ) ||
@@ -147,6 +120,26 @@ int _sensor_filter_misc( netsnmp_container *c, const void *v ) {
              ( sp->type == NETSNMP_SENSOR_TYPE_VOLTAGE_AC  )) ? 1 : 0 );
 }
 
+/* Initialize the LM Sensors MIB module */
+void
+init_lmsensorsMib(void)
+{
+    DEBUGMSGTL(("ucd-snmp/lmsensorsMib","Initializing LM-SENSORS-MIB tables\n"));
+
+    /*
+     * Initialize the four LM-SENSORS-MIB tables
+     *
+     * They are almost identical, so we can use the same registration code.
+     */
+    initialize_lmSensorsTable( "lmTempSensorsTable", lmTempSensorsTable_oid,
+                                _sensor_filter_temp, 1000 );  /* MIB asks for mC */
+    initialize_lmSensorsTable( "lmFanSensorsTable",  lmFanSensorsTable_oid,
+                                _sensor_filter_fan,  1);
+    initialize_lmSensorsTable( "lmVoltSensorsTable", lmVoltSensorsTable_oid,
+                                _sensor_filter_volt, 1000 );  /* MIB asks for mV */
+    initialize_lmSensorsTable( "lmMiscSensorsTable", lmMiscSensorsTable_oid,
+                                _sensor_filter_misc, 1 );
+}
 
 /*
  * Handle requests for any of the four lmXxxxSensorsTables 
