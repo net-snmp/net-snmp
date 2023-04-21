@@ -736,6 +736,7 @@ snmpps(int argc, char *argv[])
         pinx++;
     }
 
+    free_perf(procs, count);
     snmp_close(ss);
     SOCK_CLEANUP;
     return 0;
