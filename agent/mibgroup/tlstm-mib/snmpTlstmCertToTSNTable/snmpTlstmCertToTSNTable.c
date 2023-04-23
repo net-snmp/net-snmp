@@ -83,6 +83,11 @@ typedef struct certToTSN_entry_s {
     certToTSN_undo *undo;
 } certToTSN_entry;
 
+static netsnmp_handler_registration *to_tsn_reg;
+static netsnmp_handler_registration *to_tsn_count_reg;
+static netsnmp_handler_registration *to_tsn_last_changed_reg;
+static netsnmp_table_registration_info *to_tsn_table;
+
 static netsnmp_tdata *_table = NULL;
 static uint32_t _last_changed = 0;
 
@@ -1217,8 +1222,6 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
 {
     oid             reg_oid[]   =  { SNMP_TLS_TM_CERT_TABLE };
     const size_t    reg_oid_len =  OID_LENGTH(reg_oid);
-    netsnmp_handler_registration    *reg;
-    netsnmp_table_registration_info *info;
     netsnmp_cache                   *cache;
     netsnmp_watcher_info            *watcher;
     static const char mib_map_help[] =
@@ -1228,18 +1231,18 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
     DEBUGMSGTL(("tlstmCertToSN:init",
                 "initializing table tlstmCertToTSNTable\n"));
 
-    reg = netsnmp_create_handler_registration
+    to_tsn_reg = netsnmp_create_handler_registration
         ("tlstmCertToTSNTable", tlstmCertToTSNTable_handler,
          reg_oid, reg_oid_len,
          HANDLER_CAN_RWRITE);
-    if (NULL == reg) {
+    if (!to_tsn_reg) {
         snmp_log(LOG_ERR,
                  "error creating handler registration for tlstmCertToSN\n");
         return;
     }
 
     if (NULL != contextName)
-        reg->contextName = strdup(contextName);
+        to_tsn_reg->contextName = strdup(contextName);
 
     _table = netsnmp_tdata_create_table("tlstmCertToTSNTable", 0);
     if (NULL == _table) {
@@ -1247,20 +1250,20 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
                  "error creating tdata table for tlstmCertToTSNTable\n");
         return;
     }
-    info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-    if (NULL == info) {
+    to_tsn_table = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    if (!to_tsn_table) {
         snmp_log(LOG_ERR,
                  "error creating table info for tlstmCertToTSNTable\n");
         netsnmp_tdata_delete_table(_table);
         _table = NULL;
         return;
     }
-    netsnmp_table_helper_add_indexes(info, 
+    netsnmp_table_helper_add_indexes(to_tsn_table, 
                                      /* index: tlstmCertToTSNID */
                                      ASN_UNSIGNED,  0);
 
-    info->min_column = SNMPTLSTMCERTTOTSN_TABLE_MIN_COL;
-    info->max_column = SNMPTLSTMCERTTOTSN_TABLE_MAX_COL;
+    to_tsn_table->min_column = SNMPTLSTMCERTTOTSN_TABLE_MIN_COL;
+    to_tsn_table->max_column = SNMPTLSTMCERTTOTSN_TABLE_MAX_COL;
 
     /*
      * cache init
@@ -1278,59 +1281,62 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
     cache->magic = (void *)_table;
     cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 
-    rc = netsnmp_tdata_register(reg, _table, info);
+    rc = netsnmp_tdata_register(to_tsn_reg, _table, to_tsn_table);
     if (rc) {
         snmp_log(LOG_ERR, "%s: netsnmp_tdata_register() returned %d\n",
                  __func__, rc);
         return;
     }
     if (cache)
-        netsnmp_inject_handler_before( reg, netsnmp_cache_handler_get(cache),
-                                       "table_container");
+        netsnmp_inject_handler_before(to_tsn_reg,
+                                      netsnmp_cache_handler_get(cache),
+                                      "table_container");
 
     /*
      * register scalars
      */
     reg_oid[10] = 1;
-    reg = netsnmp_create_handler_registration("snmpTlstmCertToTSNCount",
-                                              _count_handler, reg_oid,
-                                              OID_LENGTH(reg_oid),
-                                              HANDLER_CAN_RONLY);
-    if (NULL == reg)
+    to_tsn_count_reg =
+        netsnmp_create_handler_registration("snmpTlstmCertToTSNCount",
+                                            _count_handler, reg_oid,
+                                            OID_LENGTH(reg_oid),
+                                            HANDLER_CAN_RONLY);
+    if (!to_tsn_count_reg)
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmCertToTSNCount\n");
     else {
         int rc;
 
         if (NULL != contextName)
-            reg->contextName = strdup(contextName);
+            to_tsn_count_reg->contextName = strdup(contextName);
 
-        rc = netsnmp_register_scalar(reg);
+        rc = netsnmp_register_scalar(to_tsn_count_reg);
         if (rc) {
             snmp_log(LOG_ERR, "%s: netsnmp_register_scalar() returned %d\n",
                      __func__, rc);
             return;
         }
         if (cache)
-            netsnmp_inject_handler_before(reg, netsnmp_cache_handler_get(cache),
+            netsnmp_inject_handler_before(to_tsn_count_reg,
+                                          netsnmp_cache_handler_get(cache),
                                           "snmpTlstmCertToTSNCount");
     }
     
     reg_oid[10] = 2;
-    reg = netsnmp_create_handler_registration(
+    to_tsn_last_changed_reg = netsnmp_create_handler_registration(
         "snmpTlstmCertToTSNTableLastChanged", NULL, reg_oid,
         OID_LENGTH(reg_oid), HANDLER_CAN_RONLY);
     watcher = netsnmp_create_watcher_info((void*)&_last_changed,
                                           sizeof(_last_changed),
                                           ASN_TIMETICKS,
                                           WATCHER_FIXED_SIZE);
-    if ((NULL == reg) || (NULL == watcher))
+    if (!to_tsn_last_changed_reg || !watcher)
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmCertToTSNCount\n");
     else {
         if (NULL != contextName)
-            reg->contextName = strdup(contextName);
-        netsnmp_register_watched_scalar2(reg, watcher);
+            to_tsn_last_changed_reg->contextName = strdup(contextName);
+        netsnmp_register_watched_scalar2(to_tsn_last_changed_reg, watcher);
     }
 
     /*
@@ -1350,4 +1356,13 @@ void
 init_snmpTlstmCertToTSNTable(void)
 {
     init_snmpTlstmCertToTSNTable_context(NULL);
+}
+
+void
+shutdown_snmpTlstmCertToTSNTable(void)
+{
+    netsnmp_tdata_unregister(to_tsn_last_changed_reg);
+    netsnmp_tdata_unregister(to_tsn_count_reg);
+    netsnmp_tdata_unregister(to_tsn_reg);
+    netsnmp_table_registration_info_free(to_tsn_table);
 }
