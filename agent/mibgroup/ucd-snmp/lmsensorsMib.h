@@ -6,6 +6,7 @@ config_add_mib(LM-SENSORS-MIB);
 
 /* function declarations */
 void init_lmsensorsMib(void);
+void shutdown_lmsensorsMib(void);
 
 /*
  * Handler and Column definitions for lmXxxxSensorsTable

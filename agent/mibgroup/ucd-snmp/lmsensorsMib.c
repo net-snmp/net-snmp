@@ -9,7 +9,16 @@
 #include "hardware/sensors/hw_sensors.h"
 #include "ucd-snmp/lmsensorsMib.h"
 
-netsnmp_container *sensorContainer = NULL;
+struct reg_and_table {
+    netsnmp_handler_registration *reg;
+    netsnmp_table_registration_info *table;
+};
+
+static netsnmp_container *sensorContainer;
+static struct reg_and_table temp_reg;
+static struct reg_and_table fan_reg;
+static struct reg_and_table volt_reg;
+static struct reg_and_table misc_reg;
 
 static const oid lmTempSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,2};
 static const oid lmFanSensorsTable_oid[]    = {1,3,6,1,4,1,2021,13,16,3};
@@ -22,7 +31,7 @@ const size_t lmSensorsTables_oid_len = OID_LENGTH(lmMiscSensorsTable_oid);
 /*
  * Common initialisation code, used for setting up all four tables
  */
-static void
+static struct reg_and_table
 initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
                           netsnmp_container_op *filter, int mult )
 {
@@ -30,6 +39,9 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
     netsnmp_table_registration_info *table_info;
     netsnmp_cache     *cache;
     netsnmp_container *container;
+    struct reg_and_table res;
+
+    memset(&res, 0, sizeof(res));
 
     /*
      * Ensure the HAL sensors module has been initialised,
@@ -66,7 +78,7 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
     if (netsnmp_container_table_register(reg, table_info, container, 0) !=
         SNMPERR_SUCCESS) {
         snmp_log(LOG_ERR, "Failed to register the sensors container table\n");
-        return;
+        return res;
     }
 
     /*
@@ -80,6 +92,9 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
                                             "table_container");
     }
 
+    res.reg = reg;
+    res.table = table_info;
+    return res;
 }
 
 
@@ -131,14 +146,29 @@ init_lmsensorsMib(void)
      *
      * They are almost identical, so we can use the same registration code.
      */
-    initialize_lmSensorsTable( "lmTempSensorsTable", lmTempSensorsTable_oid,
-                                _sensor_filter_temp, 1000 );  /* MIB asks for mC */
-    initialize_lmSensorsTable( "lmFanSensorsTable",  lmFanSensorsTable_oid,
-                                _sensor_filter_fan,  1);
-    initialize_lmSensorsTable( "lmVoltSensorsTable", lmVoltSensorsTable_oid,
-                                _sensor_filter_volt, 1000 );  /* MIB asks for mV */
-    initialize_lmSensorsTable( "lmMiscSensorsTable", lmMiscSensorsTable_oid,
-                                _sensor_filter_misc, 1 );
+    temp_reg = initialize_lmSensorsTable("lmTempSensorsTable",
+                   lmTempSensorsTable_oid, _sensor_filter_temp,
+                   1000);  /* MIB asks for mC */
+    fan_reg = initialize_lmSensorsTable("lmFanSensorsTable",
+                   lmFanSensorsTable_oid, _sensor_filter_fan,  1);
+    volt_reg = initialize_lmSensorsTable("lmVoltSensorsTable",
+                   lmVoltSensorsTable_oid, _sensor_filter_volt,
+                   1000);  /* MIB asks for mV */
+    misc_reg = initialize_lmSensorsTable("lmMiscSensorsTable",
+                   lmMiscSensorsTable_oid, _sensor_filter_misc, 1);
+}
+
+void
+shutdown_lmsensorsMib(void)
+{
+    netsnmp_table_registration_info_free(misc_reg.table);
+    netsnmp_unregister_table(misc_reg.reg);
+    netsnmp_table_registration_info_free(volt_reg.table);
+    netsnmp_unregister_table(volt_reg.reg);
+    netsnmp_table_registration_info_free(fan_reg.table);
+    netsnmp_unregister_table(fan_reg.reg);
+    netsnmp_table_registration_info_free(temp_reg.table);
+    netsnmp_unregister_table(temp_reg.reg);
 }
 
 /*
