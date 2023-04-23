@@ -2127,8 +2127,9 @@ snmpv3_verify_msg(netsnmp_request_list *rp, netsnmp_pdu *pdu)
        USM specific (and maybe other future ones) */
     if (pdu->securityModel == SNMP_SEC_MODEL_USM &&
         (rpdu->securityEngineIDLen != pdu->securityEngineIDLen ||
-        memcmp(rpdu->securityEngineID, pdu->securityEngineID,
-               pdu->securityEngineIDLen)))
+         (pdu->securityEngineIDLen &&
+          memcmp(rpdu->securityEngineID, pdu->securityEngineID,
+                 pdu->securityEngineIDLen))))
         return 0;
 
     /* the securityName must match though regardless of secmodel */
