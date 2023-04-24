@@ -501,13 +501,11 @@ netsnmp_udp_parse_security(const char *token, char *param)
         if (!netsnmp_parse_source_as_netgroup(sourcep, community, secName,
                                               contextName, negate)) {
             /* Parse source address and network mask. */
-            if(netsnmp_udp_resolve_source(sourcep, &network, &mask) == 0) {
+            if (netsnmp_udp_resolve_source(sourcep, &network, &mask) == 0) {
                 /* Create a new com2Sec entry. */
                 rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
                                                      &network, &mask, negate);
                 netsnmp_udp_com2SecEntry_check_return_code(rc);
-            } else {
-                config_perror("source address/network mask parsing issue");
             }
         }
     }
