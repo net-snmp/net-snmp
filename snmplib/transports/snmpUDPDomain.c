@@ -373,6 +373,47 @@ netsnmp_udp_com2SecEntry_check_return_code(int rc)
     }
 }
 
+#if HAVE_ENDNETGRENT && HAVE_GETNETGRENT && HAVE_SETNETGRENT
+int netsnmp_parse_source_as_netgroup(const char *sourcep, const char *community,
+                       const char *secName, const char *contextName, int negate)
+{
+    const char *netgroup = sourcep+1;
+    char *host, *user, *domain;
+    struct in_addr network, mask;
+    int rc;
+
+    /* Without '@' it has to be an address or hostname */
+    if (*sourcep != '@')
+        return 0;
+
+    /* Interpret as netgroup */
+    if (setnetgrent(netgroup)) {
+        while (getnetgrent(&host, &user, &domain)) {
+            /* Parse source address and network mask for each netgroup host. */
+            if (netsnmp_udp_resolve_source(host, &network, &mask) == 0) {
+                /* Create a new com2Sec entry. */
+                rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
+                                                     &network, &mask, negate);
+                netsnmp_udp_com2SecEntry_check_return_code(rc);
+            } else {
+                config_perror("netgroup host address parsing issue");
+                break;
+            }
+        }
+        endnetgrent();
+    } else {
+        config_perror("netgroup could not be found");
+    }
+    return 1;
+}
+#else
+int netsnmp_parse_source_as_netgroup(const char *sourcep, const char *community,
+                       const char *secName, const char *contextName, int negate)
+{
+    return 0;
+}
+#endif
+
 void
 netsnmp_udp_parse_security(const char *token, char *param)
 {
@@ -450,7 +491,6 @@ netsnmp_udp_parse_security(const char *token, char *param)
                                              &network, &mask, negate);
         netsnmp_udp_com2SecEntry_check_return_code(rc);
     } else {
-        char *strmask;
         if (*source == '!') {
             negate = 1;
             sourcep = source + 1;
@@ -458,33 +498,8 @@ netsnmp_udp_parse_security(const char *token, char *param)
             negate = 0;
             sourcep = source;
         }
-#if HAVE_ENDNETGRENT && HAVE_GETNETGRENT && HAVE_SETNETGRENT
-        /* Interpret as netgroup */
-        if (*sourcep == '@') {
-            char *netgroup = sourcep+1;
-            char *host, *user, *domain;
-            if(setnetgrent(netgroup)) {
-                while (getnetgrent(&host, &user, &domain)) {
-                    /* Parse source address and network mask for each netgroup host. */
-                    if (netsnmp_udp_resolve_source(host, &network, &mask) == 0) {
-                        /* Create a new com2Sec entry. */
-                        rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
-                                                             &network, &mask, negate);
-                        netsnmp_udp_com2SecEntry_check_return_code(rc);
-                    } else {
-                        config_perror("netgroup host address parsing issue");
-                        break;
-                    }
-                }
-                endnetgrent();
-            } else {
-                config_perror("netgroup could not be found");
-            }
-        }
-        /* Without '@' it has to be an address or hostname */
-        else
-#endif
-        {
+        if (!netsnmp_parse_source_as_netgroup(sourcep, community, secName,
+                                              contextName, negate)) {
             /* Parse source address and network mask. */
             if(netsnmp_udp_resolve_source(sourcep, &network, &mask) == 0) {
                 /* Create a new com2Sec entry. */
