@@ -37,6 +37,16 @@ AC_CHECK_FUNCS([asprintf        closedir        endnetgrent      ] dnl
                [strdup          strerror        strncasecmp      ] dnl
                [sysconf         times           vsnprintf        ] )
 
+if test x$ac_cv_func_setnetgrent = xyes; then
+AC_MSG_CHECKING([return type of setnetgrent()])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+        [[#include <netdb.h>]],[[return setnetgrent("")]]
+    )], [AC_MSG_RESULT([int])
+	 AC_DEFINE([SETNETGRENT_RETURNS_INT], [1],
+            [Define if the setnetgrent() return type is 'int'])],
+    [AC_MSG_RESULT([void])])
+fi
+
 AC_MSG_CHECKING([for _NSGetArgv()])
 AC_LINK_IFELSE(
   [AC_LANG_PROGRAM([#include <crt_externs.h>], [return _NSGetArgv])],

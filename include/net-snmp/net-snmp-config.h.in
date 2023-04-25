@@ -1793,6 +1793,9 @@
    function */
 #undef SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER
 
+/* Define if the setnetgrent() return type is 'int' */
+#undef SETNETGRENT_RETURNS_INT
+
 /* The size of `sockaddr_un.sun_path', as computed by sizeof. */
 #undef SIZEOF_SOCKADDR_UN_SUN_PATH
 

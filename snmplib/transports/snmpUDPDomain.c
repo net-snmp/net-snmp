@@ -373,7 +373,8 @@ netsnmp_udp_com2SecEntry_check_return_code(int rc)
     }
 }
 
-#if HAVE_ENDNETGRENT && HAVE_GETNETGRENT && HAVE_SETNETGRENT
+#if defined(HAVE_ENDNETGRENT) && defined(HAVE_GETNETGRENT) &&   \
+    defined(SETNETGRENT_RETURNS_INT)
 int netsnmp_parse_source_as_netgroup(const char *sourcep, const char *community,
                        const char *secName, const char *contextName, int negate)
 {
