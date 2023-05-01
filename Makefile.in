@@ -114,7 +114,7 @@ agentxtrap snmptrapd: @FEATURETARGS@
 # local build rules
 #
 sedscript: $(srcdir)/sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgroup/mibdefs.h
-	$(CPP) -I$(srcdir) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
+	$(CPP) -I$(srcdir) -Iinclude $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
 	echo 's/VERSIONINFO/$(VERSION)/g' >> sedscript
 	echo 's#DATADIR#$(datadir)#g' >> sedscript
 	echo 's#LIBDIR#$(libdir)#g' >> sedscript
