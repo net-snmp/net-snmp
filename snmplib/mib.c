@@ -2307,6 +2307,10 @@ snmp_out_options(char *options, int argc, char *const *argv)
         case 'p':
             /* What if argc/argv are null ? */
             if (!*(options)) {
+		if (optind == argc) {
+		    fprintf(stderr, "Missing precision for -Op\n");
+		    return options-1;
+		}
                 options = argv[optind++];
             }
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,

@@ -693,7 +693,7 @@ if_getifnet(int idx, struct ifnet *result)
 
 #endif /* !__OpenBSD__ */
 
-#if TRUST_IFLASTCHANGE         /*untrustable value returned... */
+#ifdef TRUST_IFLASTCHANGE         /*untrustable value returned... */
 #ifdef HAVE_NET_IF_MIB_H
 #if defined(HAVE_SYS_SYSCTL_H) && defined(CTL_NET)
 static int
@@ -1057,7 +1057,7 @@ var_ifv6Entry(register struct variable * vp,
 #endif
             return (u_char *) & long_return;
         }
-#if TRUST_IFLASTCHANGE         /*untrustable value returned... */
+#ifdef TRUST_IFLASTCHANGE         /*untrustable value returned... */
     case IPV6IFLASTCHANGE:
         {
             struct timeval  lastchange;
