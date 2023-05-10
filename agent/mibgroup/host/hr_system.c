@@ -85,7 +85,7 @@ netsnmp_feature_require(date_n_time);
 #define UTMP_FILE _PATH_UTMP
 #endif
 
-#if defined(UTMP_FILE) && !HAVE_UTMPX_H
+#if defined(UTMP_FILE) && !defined(HAVE_UTMPX_H)
 void            setutent(void);
 void            endutent(void);
 struct utmp    *getutent(void);
@@ -722,7 +722,7 @@ count_users(void)
     return total;
 }
 
-#if defined(UTMP_FILE) && !HAVE_UTMPX_H
+#if defined(UTMP_FILE) && !defined(HAVE_UTMPX_H)
 
 static FILE    *utmp_file;
 static struct utmp utmp_rec;

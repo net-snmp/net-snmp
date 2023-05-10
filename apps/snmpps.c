@@ -738,6 +738,7 @@ snmpps(int argc, char *argv[])
 
     free_perf(procs, count);
     snmp_close(ss);
+    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return 0;
 }
@@ -996,8 +997,8 @@ int snmptop(int argc, char **argv)
     endwin();
 
     free_perf(oproc, ocount);
-
     snmp_close(ss);
+    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return 0;
 }
