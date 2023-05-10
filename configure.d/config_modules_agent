@@ -816,8 +816,8 @@ AC_MSG_RESULT($NETSNMP_DEFAULT_MIBS)
 #
 
 if echo " $agent_module_list " | \
-   fgrep ' agentx/agentx_config ' | \
-   fgrep ' agentx/protocol ' > /dev/null ; then
+   $FGREP ' agentx/agentx_config ' | \
+   $FGREP ' agentx/protocol ' > /dev/null ; then
    NETSNMP_HAVE_AGENTX_LIBS_TRUE=''
    NETSNMP_HAVE_AGENTX_LIBS_FALSE='#'
 else
