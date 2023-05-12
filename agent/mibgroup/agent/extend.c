@@ -254,6 +254,10 @@ _unregister_extend(extend_registration_block *eptr)
     }
 
     netsnmp_table_data_delete_table(eptr->dinfo);
+    netsnmp_unregister_handler( eptr->reg[0] );
+    netsnmp_unregister_handler( eptr->reg[1] );
+    netsnmp_unregister_handler( eptr->reg[2] );
+    netsnmp_unregister_handler( eptr->reg[3] );
     free(eptr->root_oid);
     free(eptr);
 }
@@ -266,11 +270,14 @@ extend_clear_callback(int majorID, int minorID,
 
     for ( eptr=ereg_head; eptr; eptr=enext ) {
         enext=eptr->next;
+        netsnmp_table_data_delete_table(eptr->dinfo);
         netsnmp_unregister_handler( eptr->reg[0] );
         netsnmp_unregister_handler( eptr->reg[1] );
         netsnmp_unregister_handler( eptr->reg[2] );
         netsnmp_unregister_handler( eptr->reg[3] );
-        SNMP_FREE(eptr);
+        if (eptr->root_oid)
+            free(eptr->root_oid);
+        free(eptr);
     }
     ereg_head = NULL;
     return 0;

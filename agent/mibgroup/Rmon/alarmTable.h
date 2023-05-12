@@ -20,6 +20,7 @@ config_require(Rmon/event);
  * function declarations 
  */
 void            init_alarmTable(void);
+void            shutdown_alarmTable(void);
 void            initialize_table_alarmTable(void);
 Netsnmp_Node_Handler alarmTable_handler;
 
