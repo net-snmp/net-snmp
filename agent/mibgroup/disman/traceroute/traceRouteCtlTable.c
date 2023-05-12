@@ -578,10 +578,8 @@ traceRouteProbeHistoryTable_addall(struct traceRouteCtlTable_data *thedata)
 
             p = p->next;
         } while (p != NULL);
-    else {
-        return SNMP_ERR_INCONSISTENTNAME;
-    }
 
+    return SNMP_ERR_INCONSISTENTNAME;
 }
 
 
