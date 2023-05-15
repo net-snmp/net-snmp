@@ -618,6 +618,15 @@ Include the full list of MIB objects when displaying an OID:
 .RE
 .RE
 .TP
+.B \-OF
+Include the full list of MIB objects AND their numeric equivalents when displaying an OID:
+.RS
+\fC    .iso(1).org(3).dod(6).internet(1).mgmt(2).mib\-2(1).system(1).sysUpTime(3).sysUpTimeInstance(0) =\fR
+.RS
+\fC        Timeticks: (14096763) 1 day, 15:09:27.63\fR
+.RE
+.RE
+.TP
 .B \-On
 Displays the OID numerically:
 .br

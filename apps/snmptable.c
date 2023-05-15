@@ -734,6 +734,7 @@ get_table_entries(netsnmp_session * ss)
                                     break;
                                 case NETSNMP_OID_OUTPUT_FULL:
                                 case NETSNMP_OID_OUTPUT_NUMERIC:
+				case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC: /*RHG: 2021.09.08*/
                                 case NETSNMP_OID_OUTPUT_UCD:
                                     name_p = buf + strlen(table_name)+1;
                                     name_p = strchr(name_p, '.')+1;
@@ -927,6 +928,7 @@ getbulk_table_entries(netsnmp_session * ss)
                             break;
                         case NETSNMP_OID_OUTPUT_FULL:
                         case NETSNMP_OID_OUTPUT_NUMERIC:
+			case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC: /*RHG: 2021.09.08*/
                         case NETSNMP_OID_OUTPUT_UCD:
                             name_p = buf + strlen(table_name)+1;
                             name_p = strchr(name_p, '.')+1;

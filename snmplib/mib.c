@@ -647,9 +647,15 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     case NETSNMP_STRING_OUTPUT_GUESS:
         hex = 0;
         for (cp = var->val.string, x = 0; x < (int) var->val_len; x++, cp++) {
-            if (!isprint(*cp) && !isspace(*cp)) {
+#if defined(WIN32) /*RHG 2021.09.10: Windows includes non-ascii characters (above 0x7F) as printing, which can generate ugly strings */
+	    if (! (/*RHG 2021.09.10*/isprint(*cp) && isascii(*cp) )/*RHG 2021.09.10*/ && !isspace(*cp) ) {
                 hex = 1;
             }
+#else /* defined(WIN32) */ /*RHG 2021.09.10*/
+		if (!isprint(*cp) && !isspace(*cp)) {
+			hex = 1;
+		}
+#endif /* defined(WIN32) */ /*RHG 2021.09.10*/
         }
         break;
 
@@ -2300,6 +2306,10 @@ snmp_out_options(char *options, int argc, char *const *argv)
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_FULL);
             break;
+	case 'F': /*RHG: 2021.09.08*/
+		netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, /*RHG: 2021.09.08*/
+				   NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC); /*RHG: 2021.09.08*/
+		break; /*RHG: 2021.09.08*/
         case 'n':
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_NUMERIC);
@@ -3134,6 +3144,7 @@ netsnmp_sprint_realloc_objid(u_char ** buf, size_t * buf_len,
     switch (output_format) {
     case NETSNMP_OID_OUTPUT_FULL:
     case NETSNMP_OID_OUTPUT_NUMERIC:
+    case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC: /*RHG: 2021.09.08*/
     case NETSNMP_OID_OUTPUT_SUFFIX:
     case NETSNMP_OID_OUTPUT_MODULE:
         cp = tbuf;
@@ -3205,6 +3216,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
     }
     switch (output_format) {
     case NETSNMP_OID_OUTPUT_FULL:
+    case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC: /*RHG: 2021.09.08*/
     case NETSNMP_OID_OUTPUT_NUMERIC:
         cp = tbuf;
         break;
@@ -4279,6 +4291,14 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                                                    subtree->label)) {
                     *buf_overflow = 1;
                 }
+		if (NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC == output_format) { /*RHG: 2021.09.08*/
+			sprintf(intbuf, "(%lu)", subtree->subid); /*RHG: 2021.09.08*/
+			if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len, /*RHG: 2021.09.08*/
+				allow_realloc, /*RHG: 2021.09.08*/
+				(const u_char *) intbuf)) { /*RHG: 2021.09.08*/
+				*buf_overflow = 1; /*RHG: 2021.09.08*/
+			} /*RHG: 2021.09.08*/
+		} /*RHG: 2021.09.08*/
             }
 
             if (objidlen > 1) {
