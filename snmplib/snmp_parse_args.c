@@ -482,7 +482,7 @@ netsnmp_parse_args(int argc,
             goto out;
 
         default:
-            proc(argc, argv, arg);
+            if (proc) proc(argc, argv, arg);
             break;
         }
     }

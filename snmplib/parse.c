@@ -3955,7 +3955,7 @@ read_module_internal(const char *name)
 void
 adopt_orphans(void)
 {
-    struct node    *np, *onp;
+    struct node    *np = NULL, *onp;
     struct tree    *tp;
     int             i, adopted = 1;
 

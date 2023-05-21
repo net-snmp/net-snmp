@@ -52,10 +52,14 @@ typedef u_int socklen_t;
 #endif
 
 #ifndef HAVE_SSIZE_T
+#ifdef _BASETSD_H_
+typedef SSIZE_T ssize_t;
+#else
 #if defined(__INT_MAX__) && __INT_MAX__ == 2147483647
 typedef int ssize_t;
 #else
 typedef long ssize_t;
+#endif
 #endif
 #endif
 

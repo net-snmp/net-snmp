@@ -21,6 +21,14 @@
 #pragma warning (disable: 4018)
 #endif
 
+#if defined (WIN32)
+#  define ENV_SEPARATOR ";"
+#  define ENV_SEPARATOR_CHAR ';'
+#else
+#  define ENV_SEPARATOR ":"
+#  define ENV_SEPARATOR_CHAR ':'
+#endif
+
 /* Automatically set by Windows perl Configure script.
  * When compiling with the MSVC workspace, this must be set manually.
  * See the PACKAGE_VERSION variable in Unix /configure script
@@ -57,7 +65,8 @@
 #define NETSNMP_DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;HOST-RESOURCES-MIB;SNMPv2-MIB;RFC1213-MIB;NOTIFICATION-LOG-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;NET-SNMP-AGENT-MIB;DISMAN-EVENT-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
 
 /* default location to look for mibs to load using the above tokens
-   and/or those in the MIBS envrionment variable*/
+   and/or those in the MIBS environment variable
+   Note that the "##" is only needed for pre-C99 compilers. */
 #define NETSNMP_DEFAULT_MIBDIRS INSTALL_BASE ## "/share/snmp/mibs"
 
 /* default mib files to load, specified by path. */
@@ -97,7 +106,7 @@
 /* debugging stuff */
 /* if defined, we optimize the code to exclude all debugging calls. */
 /* #undef NETSNMP_NO_DEBUGGING */
-/* ignore the -D flag and always print debugging information */
+/* 0/1: 1 => ignore the -D flag and always print debugging information */
 #define NETSNMP_ALWAYS_DEBUG 0
 
 /* reverse encoding BER packets is both faster and more efficient in space. */
@@ -1002,9 +1011,11 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
 
+#ifdef _MSC_VER
 /* Define as `__inline' if that's what the C compiler calls it, or to nothing
    if it is not supported. */
-#define inline __inline
+#  define inline __inline
+#endif
 
 /* Define to `long' if <sys/types.h> does not define. */
 /* #undef off_t */
@@ -1566,14 +1577,6 @@
 #define config_add_mib(x)
 #define config_belongs_in(x)
 
-#if defined (WIN32)
-#define ENV_SEPARATOR ";"
-#define ENV_SEPARATOR_CHAR ';'
-#else
-#define ENV_SEPARATOR ":"
-#define ENV_SEPARATOR_CHAR ':'
-#endif
-
 /*
  * A user having problems with their compiler can turn off
  * the use of inline by defining NETSNMP_NO_INLINE via their cflags:
@@ -1704,16 +1707,16 @@ enum {
  */
 
 #ifdef NETSNMP_USE_DLL
-  #ifdef NETSNMP_DLL
-    #if defined(_MSC_VER)
-      #define NETSNMP_IMPORT extern __declspec(dllexport)
-    #endif
-  #else
-    #if defined(_MSC_VER)
-      #define NETSNMP_IMPORT extern __declspec(dllimport)
-    #endif
-  #endif   /* NETSNMP_DLL */
-#endif     /* NETSNMP_USE_DLL */
+#  ifdef NETSNMP_DLL
+#    if defined(_MSC_VER)
+#      define NETSNMP_IMPORT extern __declspec(dllexport)
+#	endif
+#  else
+#    if defined(_MSC_VER)
+#      define NETSNMP_IMPORT extern __declspec(dllimport)
+#    endif
+#  endif /* NETSNMP_DLL */
+#endif /* NETSNMP_USE_DLL */
 
 /* MSVC OpenSSL linker settings. */
 #if defined(_MSC_VER)
