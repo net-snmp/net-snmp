@@ -17,7 +17,10 @@
 #include "swrun.h"
 #include "swrun_private.h"
 
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE2_H)
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
+#elif defined(HAVE_PCRE_H)
 #include <pcre.h>
 #endif
 
@@ -100,32 +103,52 @@ swrun_max_processes( void )
 #endif /* NETSNMP_FEATURE_REMOVE_SWRUN_MAX_PROCESSES */
 
 #ifndef NETSNMP_FEATURE_REMOVE_SWRUN_COUNT_PROCESSES_BY_REGEX
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
 int
 swrun_count_processes_by_regex( char *name, netsnmp_regex_ptr regexp )
 {
     netsnmp_swrun_entry *entry;
     netsnmp_iterator  *it;
     int i = 0;
+#ifdef HAVE_PCRE2_H
+    pcre2_match_data *ndx_match;
+    int *found_ndx;
+    ndx_match = pcre2_match_data_create(30, NULL);
+    found_ndx = pcre2_get_ovector_pointer(ndx_match);
+#elif HAVE_PCRE_H
     int found_ndx[30];
+#endif
     int found;
     char fullCommand[64 + 128 + 128 + 3];
 
     netsnmp_cache_check_and_reload(swrun_cache);
     if ( !swrun_container || !name || !regexp.regex_ptr )
+#ifdef HAVE_PCRE2_H
+      { 
+        pcre2_match_data_free(ndx_match);
+        return 0;
+      }
+#else 
         return 0;    /* or -1 */
+#endif
 
     it = CONTAINER_ITERATOR( swrun_container );
     while ((entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) != NULL) {
         /* need to assemble full command back so regexps can get full picture */
         sprintf(fullCommand, "%s %s", entry->hrSWRunPath, entry->hrSWRunParameters);
+#ifdef HAVE_PCRE2_H
+        found = pcre2_match(regexp.regex_ptr, fullCommand, strlen(fullCommand), 0, 0, ndx_match, NULL);
+#elif  HAVE_PCRE_H
         found = pcre_exec(regexp.regex_ptr, NULL, fullCommand, strlen(fullCommand), 0, 0, found_ndx, 30);
+#endif
         if (found > 0) {
             i++;
         }
     }
     ITERATOR_RELEASE( it );
-
+#ifdef HAVE_PCRE2_H
+    pcre2_match_data_free(ndx_match);
+#endif
     return i;
 }
 #endif /* HAVE_PCRE_H */

@@ -10,7 +10,10 @@
 extern          "C" {
 #endif
 
-#if defined(HAVE_PCRE_H)
+#if defined(HAVE_PCRE2_H)
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
+#elif defined(HAVE_PCRE_H)
 #include <pcre.h>
 #elif defined(HAVE_REGEX_H)
 #include <regex.h>
@@ -211,7 +214,9 @@ typedef struct _conf_if_list {
     typedef netsnmp_conf_if_list conf_if_list; /* backwards compat */
 
 typedef struct _include_if_list {
-#if defined(HAVE_PCRE_H)
+#if defined(HAVE_PCRE2_H)
+    pcre2_code              *regex_ptr;
+#elif defined(HAVE_PCRE_H)
     pcre                    *regex_ptr;
 #elif defined(HAVE_REGEX_H)
     regex_t                 *regex_ptr;

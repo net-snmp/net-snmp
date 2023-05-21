@@ -63,7 +63,7 @@ typedef long ssize_t;
 typedef unsigned long int nfds_t;
 #endif
 
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
 /*
  * Abstract the pcre typedef such that not all *.c files have to include
  * <pcre.h>.

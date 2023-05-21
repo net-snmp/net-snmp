@@ -171,6 +171,10 @@ NETSNMP_ARG_WITH(rpm,
                                   management system when building the host MIB
                                   module.])
 
+NETSNMP_ARG_WITH(pcre2-8,
+[  --without-pcre2                  Don't include pcre2 process searching
+                                  support in the agent.],
+      with_pcre2="$withval", with_pcre2="maybe")
 
 NETSNMP_ARG_WITH(pcre,
 [  --without-pcre                  Don't include pcre process searching
