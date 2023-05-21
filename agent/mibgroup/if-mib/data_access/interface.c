@@ -829,12 +829,8 @@ int netsnmp_access_interface_max_reached(const char *name)
 int netsnmp_access_interface_include(const char *name)
 {
     netsnmp_include_if_list *if_ptr;
-#if defined(HAVE_PCRE2_H) 
-    //pcre_exec->pcre2_match
-    //ovector->pcre2_match_data
-    pcre2_match_data *ndx_match;
-    ndx_match = pcre2_match_data_create(3, NULL);
-    int *found_ndx = pcre2_get_ovector_pointer(ndx_match);
+#if defined(HAVE_PCRE2_H)
+    pcre2_match_data *ndx_match = pcre2_match_data_create(3, NULL);
 #elif defined(HAVE_PCRE_H)
     int                      found_ndx[3];
 #endif
@@ -852,8 +848,8 @@ int netsnmp_access_interface_include(const char *name)
 
     for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
 #if defined(HAVE_PCRE2_H)
-        if (pcre2_match(if_ptr->regex_ptr, name, strlen(name), 0, 0, 
-                                ndx_match, NULL) >= 0)  {
+        if (pcre2_match(if_ptr->regex_ptr, (const unsigned char *)name,
+                        strlen(name), 0, 0, ndx_match, NULL) >= 0)  {
                 pcre2_match_data_free(ndx_match);
                 return TRUE;
         }
@@ -985,11 +981,13 @@ _parse_include_if_config(const char *token, char *cptr)
     netsnmp_include_if_list *if_ptr, *if_new;
     char                    *name, *st;
 #if defined(HAVE_PCRE2_H)
-    //we can only get the message upon calling pcre2_error_message.
-    // so an additional variable is required.
+    /*
+     * We can only get the message upon calling pcre2_error_message.
+     * so an additional variable is required.
+     */
     int                     pcre2_err_code;
-    unsigned char           pcre2_error[128];
-    int                     pcre2_error_offset;
+    char                    pcre2_error[128];
+    size_t                  pcre2_error_offset;
 #elif defined(HAVE_PCRE_H)
     const char              *pcre_error;
     int                     pcre_error_offset;
@@ -1023,10 +1021,14 @@ _parse_include_if_config(const char *token, char *cptr)
             goto err;
         }
 #if defined(HAVE_PCRE2_H)
-        if_new->regex_ptr = pcre2_compile(if_new->name, PCRE2_ZERO_TERMINATED, 0,
-                         &pcre2_err_code, &pcre2_error_offset, NULL);
+        if_new->regex_ptr = pcre2_compile((const unsigned char *)if_new->name,
+                                          PCRE2_ZERO_TERMINATED, 0,
+                                          &pcre2_err_code, &pcre2_error_offset,
+                                          NULL);
         if (!if_new->regex_ptr) {
-            pcre2_get_error_message(pcre2_err_code, pcre2_error, 128);
+            pcre2_get_error_message(pcre2_err_code,
+                                    (unsigned char *)pcre2_error,
+                                    sizeof(pcre2_error));
             config_perror(pcre2_error);
             goto err;
         }

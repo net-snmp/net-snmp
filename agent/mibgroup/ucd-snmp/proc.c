@@ -226,15 +226,17 @@ proc_parse_config(const char *token, char *cptr)
 #if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
             cptr = skip_not_white(cptr);
             if ((cptr = skip_white(cptr))) {
-                DEBUGMSGTL(("ucd-snmp/regexp_proc", "Loading regex %s\n", cptr));
 #ifdef HAVE_PCRE2_H
-                unsigned char pcre2_error_msg[128];
+                char pcre2_error_msg[128];
                 int pcre2_err_code;
-                int pcre2_error_offset;
+                size_t pcre2_error_offset;
 
+                DEBUGMSGTL(("ucd-snmp/regexp_proc", "Loading regex %s\n", cptr));
                 (*procp)->regexp.regex_ptr =
-                    pcre2_compile(cptr, PCRE2_ZERO_TERMINATED, 0, &pcre2_err_code, &pcre2_error_offset, NULL);
-                pcre2_get_error_message(pcre2_err_code, pcre2_error_msg, 128);
+                    pcre2_compile((const unsigned char *)cptr, PCRE2_ZERO_TERMINATED, 0, &pcre2_err_code, &pcre2_error_offset, NULL);
+                pcre2_get_error_message(pcre2_err_code,
+                                        (unsigned char *)pcre2_error_msg,
+                                        sizeof(pcre2_error_msg));
                 if ((*procp)->regexp.regex_ptr == NULL) {
                     config_perror(pcre2_error_msg);
                 }
@@ -242,6 +244,7 @@ proc_parse_config(const char *token, char *cptr)
                 const char *pcre_error;
                 int pcre_error_offset;
 
+                DEBUGMSGTL(("ucd-snmp/regexp_proc", "Loading regex %s\n", cptr));
                 (*procp)->regexp.regex_ptr =
                     pcre_compile(cptr, 0,  &pcre_error, &pcre_error_offset, NULL);
                 if ((*procp)->regexp.regex_ptr == NULL) {
