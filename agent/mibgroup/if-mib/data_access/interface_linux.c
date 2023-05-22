@@ -26,6 +26,9 @@ netsnmp_feature_require(interface_ioctl_flags_set);
 #ifdef HAVE_PCI_LOOKUP_NAME
 #include <pci/pci.h>
 #include <setjmp.h>
+#ifndef PCI_NONRET
+#define PCI_NONRET
+#endif
 static struct pci_access *pci_access;
 
 /* Avoid letting libpci call exit(1) when no PCI bus is available. */
