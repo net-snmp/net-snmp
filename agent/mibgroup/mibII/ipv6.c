@@ -1976,7 +1976,7 @@ var_tcp6(register struct variable * vp,
     oid             savname[MAX_OID_LEN];
     int             result, count, found, savnameLen, savstate;
     int             p, i, j;
-    u_char         *lsa, *savlsa, *fsa, *savfsa;
+    u_char         *lsa, *fsa;
     struct kinfo_file *tcp;
     static int      tcp6statemap[16];
     static int      initialized = 0;
@@ -2024,8 +2024,6 @@ var_tcp6(register struct variable * vp,
         if (exact && result == 0) {
                 savnameLen = j;
                 memcpy(savname, newname, j * sizeof(oid));
-                savlsa = lsa;
-                savfsa = fsa;
                 savstate = tcp[p].t_state;
                 found++;
                 break;
@@ -2035,10 +2033,8 @@ var_tcp6(register struct variable * vp,
              */
             if (savnameLen == 0 || snmp_oid_compare(savname, savnameLen, newname, j) > 0) {
                 savnameLen = j;
-                savlsa = lsa;
-                savfsa = fsa;
-                savstate = tcp[p].t_state;
                 memcpy(savname, newname, j * sizeof(oid));
+                savstate = tcp[p].t_state;
 		found++;
             }
         }
