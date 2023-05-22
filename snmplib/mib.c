@@ -2300,6 +2300,10 @@ snmp_out_options(char *options, int argc, char *const *argv)
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_FULL);
             break;
+        case 'F':
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC);
+            break;
         case 'n':
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_NUMERIC);
@@ -3134,6 +3138,7 @@ netsnmp_sprint_realloc_objid(u_char ** buf, size_t * buf_len,
     switch (output_format) {
     case NETSNMP_OID_OUTPUT_FULL:
     case NETSNMP_OID_OUTPUT_NUMERIC:
+    case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
     case NETSNMP_OID_OUTPUT_SUFFIX:
     case NETSNMP_OID_OUTPUT_MODULE:
         cp = tbuf;
@@ -3205,6 +3210,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
     }
     switch (output_format) {
     case NETSNMP_OID_OUTPUT_FULL:
+    case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
     case NETSNMP_OID_OUTPUT_NUMERIC:
         cp = tbuf;
         break;
@@ -4278,6 +4284,12 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                                                    (const u_char *)
                                                    subtree->label)) {
                     *buf_overflow = 1;
+                }
+                if (output_format == NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC) {
+                    snprintf(intbuf, sizeof intbuf, "(%lu)", subtree->subid);
+                    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char *) intbuf)) {
+                        *buf_overflow = 1;
+                    }
                 }
             }
 
