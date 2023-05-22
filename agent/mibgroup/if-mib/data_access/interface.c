@@ -830,7 +830,7 @@ int netsnmp_access_interface_include(const char *name)
 {
     netsnmp_include_if_list *if_ptr;
 #if defined(HAVE_PCRE2_H)
-    pcre2_match_data *ndx_match = pcre2_match_data_create(3, NULL);
+    pcre2_match_data *ndx_match;
 #elif defined(HAVE_PCRE_H)
     int                      found_ndx[3];
 #endif
@@ -845,6 +845,9 @@ int netsnmp_access_interface_include(const char *name)
          */
         return TRUE;
 
+#if defined(HAVE_PCRE2_H)
+    ndx_match = pcre2_match_data_create(3, NULL);
+#endif
 
     for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
 #if defined(HAVE_PCRE2_H)
