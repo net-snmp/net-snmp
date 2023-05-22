@@ -142,7 +142,7 @@ static void     _oid_finish_printing(const oid * objid, size_t objidlen,
                                      int allow_realloc, int *buf_overflow);
 
 /*
- * helper functions for get_module_node 
+ * helper functions for get_module_node
  */
 #ifndef NETSNMP_DISABLE_MIB_LOADING
 static int      node_to_oid(struct tree *, oid *, size_t *);
@@ -164,7 +164,7 @@ struct tree    *Mib;            /* Backwards compatibility */
 static char     Standard_Prefix[] = ".1.3.6.1.2.1";
 
 /*
- * Set default here as some uses of read_objid require valid pointer. 
+ * Set default here as some uses of read_objid require valid pointer.
  */
 #ifndef NETSNMP_DISABLE_MIB_LOADING
 static char    *Prefix = &Standard_Prefix[0];
@@ -204,9 +204,9 @@ enum inet_address_type {
  * Converts timeticks to hours, minutes, seconds string.
  *
  * @param timeticks    The timeticks to convert.
- * @param buf          Buffer to write to, has to be at 
+ * @param buf          Buffer to write to, has to be at
  *                     least 40 Bytes large.
- *       
+ *
  * @return The buffer.
  */
 static char    *
@@ -276,17 +276,17 @@ sprint_char(char *buf, const u_char ch)
  *
  * The characters pointed by *cp are encoded as hexadecimal string.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      address of the buffer to print to.
  * @param buf_len  address to an integer containing the size of buf.
  * @param out_len  incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param cp       the array of characters to encode.
  * @param line_len the array length of cp.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -371,18 +371,18 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
  * Prints an ascii string into a buffer.
  *
  * The characters pointed by *cp are encoded as an ascii string.
- * 
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      address of the buffer to print to.
  * @param buf_len  address to an integer containing the size of buf.
  * @param out_len  incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param cp       the array of characters to encode.
  * @param len      the array length of cp.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -428,21 +428,21 @@ sprint_realloc_asciistring(u_char ** buf, size_t * buf_len,
  * Prints an octet string into a buffer.
  *
  * The variable var is encoded as octet string.
- * 
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -647,9 +647,9 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     case NETSNMP_STRING_OUTPUT_GUESS:
         hex = 0;
         for (cp = var->val.string, x = 0; x < (int) var->val_len; x++, cp++) {
-            if (!isprint(*cp) && !isspace(*cp)) {
-                hex = 1;
-            }
+        if (!isprint(*cp) && !isspace(*cp)) {
+            hex = 1;
+        }
         }
         break;
 
@@ -722,21 +722,21 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
  * Prints a float into a buffer.
  *
  * The variable var is encoded as a floating point value.
- * 
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -770,7 +770,7 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
 
 
     /*
-     * How much space needed for max. length float?  128 is overkill.  
+     * How much space needed for max. length float?  128 is overkill.
      */
 
     while ((*out_len + 128 + 1) >= *buf_len) {
@@ -799,21 +799,21 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
  * Prints a double into a buffer.
  *
  * The variable var is encoded as a double precision floating point value.
- * 
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -846,7 +846,7 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
     }
 
     /*
-     * How much space needed for max. length double?  128 is overkill.  
+     * How much space needed for max. length double?  128 is overkill.
      */
 
     while ((*out_len + 128 + 1) >= *buf_len) {
@@ -878,21 +878,21 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
  * Prints a counter into a buffer.
  *
  * The variable var is encoded as a counter value.
- * 
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -983,20 +983,20 @@ sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
 /**
  * Prints an object identifier into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1075,20 +1075,20 @@ sprint_realloc_opaque(u_char ** buf, size_t * buf_len,
 /**
  * Prints an object identifier into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1144,20 +1144,20 @@ sprint_realloc_object_identifier(u_char ** buf, size_t * buf_len,
 /**
  * Prints a timetick variable into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1219,20 +1219,20 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
 /**
  * Prints an integer according to the hint into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param val      The variable to encode.
  * @param decimaltype 'd' or 'u' depending on integer type
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may _NOT_ be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1252,7 +1252,7 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
 
     if (hint[0] == 'd') {
         /*
-         * We might *actually* want a 'u' here.  
+         * We might *actually* want a 'u' here.
          */
         if (hint[1] == '-') {
             shift = atoi(hint + 2);
@@ -1266,7 +1266,7 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
         }
     } else {
         /*
-         * DISPLAY-HINT character is 'b', 'o', or 'x'.  
+         * DISPLAY-HINT character is 'b', 'o', or 'x'.
          */
         fmt[2] = hint[0];
     }
@@ -1320,20 +1320,20 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
 /**
  * Prints an integer into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1424,20 +1424,20 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
 /**
  * Prints an unsigned integer into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1521,20 +1521,20 @@ sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
 /**
  * Prints a gauge value into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1593,20 +1593,20 @@ sprint_realloc_gauge(u_char ** buf, size_t * buf_len, size_t * out_len,
 /**
  * Prints a counter value into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1656,20 +1656,20 @@ sprint_realloc_counter(u_char ** buf, size_t * buf_len, size_t * out_len,
 /**
  * Prints a network address into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1722,20 +1722,20 @@ sprint_realloc_networkaddress(u_char ** buf, size_t * buf_len,
 /**
  * Prints an ip-address into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1782,20 +1782,20 @@ sprint_realloc_ipaddress(u_char ** buf, size_t * buf_len, size_t * out_len,
 /**
  * Prints a null value into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1827,20 +1827,20 @@ sprint_realloc_null(u_char ** buf, size_t * buf_len, size_t * out_len,
 /**
  * Prints a bit string into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1966,20 +1966,20 @@ sprint_realloc_nsapaddress(u_char ** buf, size_t * buf_len,
 /**
  * Fallback routine for a bad type, prints "Variable has bad type" into a buffer.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -1998,23 +1998,23 @@ sprint_realloc_badtype(u_char ** buf, size_t * buf_len, size_t * out_len,
 
 
 /**
- * Universal print routine, prints a variable into a buffer according to the variable 
+ * Universal print routine, prints a variable into a buffer according to the variable
  * type.
  *
- * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the
  * needed size. (Note: *buf may change due to this.)
- * 
+ *
  * @param buf      Address of the buffer to print to.
  * @param buf_len  Address to an integer containing the size of buf.
  * @param out_len  Incremented by the number of characters printed.
- * @param allow_realloc if not zero reallocate the buffer to fit the 
+ * @param allow_realloc if not zero reallocate the buffer to fit the
  *                      needed size.
  * @param var      The variable to encode.
  * @param enums    The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
- * 
+ *
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
  */
@@ -2100,14 +2100,14 @@ sprint_realloc_by_type(u_char ** buf, size_t * buf_len, size_t * out_len,
  * Example:
  * If the original format string is "%f", and the NETSNMP_DS_LIB_OUTPUT_PRECISION
  * is "5.2", the returned format string will be "%5.2f".
- * 
+ *
  * The PRECISION string is inserted after the '%' of the original format string.
  * To prevent buffer overflow if NETSNMP_DS_LIB_OUTPUT_PRECISION is set to an
  * illegal size (e.g. with -Op 10000) snprintf should be used to prevent buffer
  * overflow.
- * 
+ *
  * @param printf_format_default  The format string used by the original printf.
- * 
+ *
  * @return The address of of the new allocated format string (which must be freed
  *         if no longer used), or NULL if any error (malloc).
  */
@@ -2265,7 +2265,7 @@ handle_print_numeric(const char *token, char *line)
 
     value = strtok_r(line, " \t\n", &st);
     if (value && (
-	    (strcasecmp(value, "yes")  == 0) || 
+	    (strcasecmp(value, "yes")  == 0) ||
 	    (strcasecmp(value, "true") == 0) ||
 	    (*value == '1') )) {
 
@@ -2300,6 +2300,10 @@ snmp_out_options(char *options, int argc, char *const *argv)
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_FULL);
             break;
+        case 'F':
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC);
+            break;
         case 'n':
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_NUMERIC);
@@ -2307,10 +2311,10 @@ snmp_out_options(char *options, int argc, char *const *argv)
         case 'p':
             /* What if argc/argv are null ? */
             if (!*(options)) {
-		if (optind == argc) {
-		    fprintf(stderr, "Missing precision for -Op\n");
-		    return options-1;
-		}
+        if (optind == argc) {
+            fprintf(stderr, "Missing precision for -Op\n");
+            return options-1;
+        }
                 options = argv[optind++];
             }
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
@@ -2459,7 +2463,7 @@ snmp_in_toggle_options(char *options)
  *
  * @param lead      The lead to print for every line.
  * @param outf      The file descriptor to write to.
- * 
+ *
  */
 void
 snmp_in_toggle_options_usage(const char *lead, FILE * outf)
@@ -2480,7 +2484,7 @@ snmp_in_toggle_options_usage(const char *lead, FILE * outf)
 
 /***
  *
- */ 
+ */
 void
 register_mib_handlers(void)
 {
@@ -2495,7 +2499,7 @@ register_mib_handlers(void)
                             handle_mibfile_conf, NULL, "mibfile-to-read");
     /*
      * register the snmp.conf configuration handlers for default
-     * parsing behaviour 
+     * parsing behaviour
      */
 
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "showMibErrors",
@@ -2561,9 +2565,9 @@ netsnmp_set_mib_directory(const char *dir)
     if (NULL == dir) {
         return;
     }
-    
+
     olddir = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-				   NETSNMP_DS_LIB_MIBDIRS);
+                   NETSNMP_DS_LIB_MIBDIRS);
     if (olddir) {
         if ((*dir == '+') || (*dir == '-')) {
             /** New dir starts with '+', thus we add it. */
@@ -2667,29 +2671,29 @@ netsnmp_fixup_mib_directory(void)
         DEBUGMSGTL(("fixup_mib_directory", "mib directories '%s'\n", mibpath));
         while ((ptr_home = strstr(mibpath, "$HOME"))) {
             new_mibpath = (char *)malloc(strlen(mibpath) - strlen("$HOME") +
-					 strlen(homepath)+1);
+                     strlen(homepath)+1);
             if (new_mibpath) {
                 *ptr_home = 0; /* null out the spot where we stop copying */
                 sprintf(new_mibpath, "%s%s%s", mibpath, homepath,
-			ptr_home + strlen("$HOME"));
+            ptr_home + strlen("$HOME"));
                 /** swap in the new value and repeat */
                 mibpath = new_mibpath;
-		if (oldmibpath != NULL) {
-		    SNMP_FREE(oldmibpath);
-		}
-		oldmibpath = new_mibpath;
+        if (oldmibpath != NULL) {
+            SNMP_FREE(oldmibpath);
+        }
+        oldmibpath = new_mibpath;
             } else {
                 break;
             }
         }
 
         netsnmp_set_mib_directory(mibpath);
-	
-	/*  The above copies the mibpath for us, so...  */
 
-	if (oldmibpath != NULL) {
-	    SNMP_FREE(oldmibpath);
-	}
+    /*  The above copies the mibpath for us, so...  */
+
+    if (oldmibpath != NULL) {
+        SNMP_FREE(oldmibpath);
+    }
 
     }
 
@@ -2713,7 +2717,7 @@ netsnmp_init_mib(void)
     netsnmp_init_mib_internals();
 
     /*
-     * Initialise the MIB directory/ies 
+     * Initialise the MIB directory/ies
      */
     netsnmp_fixup_mib_directory();
     env_var = strdup(netsnmp_get_mib_directory());
@@ -2746,7 +2750,7 @@ netsnmp_init_mib(void)
     netsnmp_init_mib_internals();
 
     /*
-     * Read in any modules or mibs requested 
+     * Read in any modules or mibs requested
      */
 
     env_var = netsnmp_getenv("MIBS");
@@ -2852,7 +2856,7 @@ netsnmp_init_mib(void)
                 "Seen PREFIX: Looking in '%s' for prefix ...\n", Prefix));
 
     /*
-     * remove trailing dot 
+     * remove trailing dot
      */
     if (Prefix) {
         env_var = &Prefix[strlen(Prefix) - 1];
@@ -2862,7 +2866,7 @@ netsnmp_init_mib(void)
 
     pp->str = Prefix;           /* fixup first mib_prefix entry */
     /*
-     * now that the list of prefixes is built, save each string length. 
+     * now that the list of prefixes is built, save each string length.
      */
     while (pp->str) {
         pp->len = strlen(pp->str);
@@ -2872,7 +2876,7 @@ netsnmp_init_mib(void)
     Mib = tree_head;            /* Backwards compatibility */
     tree_top = calloc(1, sizeof(struct tree));
     /*
-     * XX error check ? 
+     * XX error check ?
      */
     if (tree_top) {
         tree_top->label = strdup("(top)");
@@ -3003,15 +3007,15 @@ set_function(struct tree *subtree)
 
 /**
  * Reads an object identifier from an input string into internal OID form.
- * 
+ *
  * When called, out_len must hold the maximum length of the output array.
  *
  * @param input     the input string.
  * @param output    the oid write.
  * @param out_len   number of subid's in output.
- * 
+ *
  * @return 1 if successful.
- * 
+ *
  * If an error occurs, this function returns 0 and MAY set snmp_errno.
  * snmp_errno is NOT set if SET_SNMP_ERROR evaluates to nothing.
  * This can make multi-threaded use a tiny bit more robust.
@@ -3047,7 +3051,7 @@ read_objid(const char *input, oid * output, size_t * out_len)
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_READ_UCD_STYLE_OID)) {
         /*
-         * get past leading '.', append '.' to Prefix. 
+         * get past leading '.', append '.' to Prefix.
          */
         if (*Prefix == '.')
             strlcpy(buf, Prefix + 1, sizeof(buf));
@@ -3094,7 +3098,7 @@ read_objid(const char *input, oid * output, size_t * out_len)
 }
 
 /**
- * 
+ *
  */
 void
 netsnmp_sprint_realloc_objid(u_char ** buf, size_t * buf_len,
@@ -3134,6 +3138,7 @@ netsnmp_sprint_realloc_objid(u_char ** buf, size_t * buf_len,
     switch (output_format) {
     case NETSNMP_OID_OUTPUT_FULL:
     case NETSNMP_OID_OUTPUT_NUMERIC:
+    case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
     case NETSNMP_OID_OUTPUT_SUFFIX:
     case NETSNMP_OID_OUTPUT_MODULE:
         cp = tbuf;
@@ -3152,7 +3157,7 @@ netsnmp_sprint_realloc_objid(u_char ** buf, size_t * buf_len,
 }
 
 /**
- * 
+ *
  */
 #ifdef NETSNMP_DISABLE_MIB_LOADING
 void
@@ -3205,6 +3210,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
     }
     switch (output_format) {
     case NETSNMP_OID_OUTPUT_FULL:
+    case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
     case NETSNMP_OID_OUTPUT_NUMERIC:
         cp = tbuf;
         break;
@@ -3240,7 +3246,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
 
             /*
              * Don't add the module ID if it's just numeric (i.e. we couldn't look
-             * it up properly.  
+             * it up properly.
              */
 
             if (!*buf_overflow && modbuf[0] != '#') {
@@ -3429,9 +3435,9 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
             units = subtree->units;
         }
 
-		if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                     NETSNMP_DS_LIB_NO_DISPLAY_HINT)) {
-			hint = subtree->hint;
+            hint = subtree->hint;
         }
 
         if (subtree->printomat) {
@@ -3448,7 +3454,7 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
     } else {
         /*
-         * Handle rare case where tree is empty.  
+         * Handle rare case where tree is empty.
          */
         return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
                                       variable, NULL, NULL, NULL);
@@ -3540,24 +3546,24 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
 #ifndef NETSNMP_DISABLE_MIB_LOADING
         const char *units = NULL;
         struct tree *subtree = tree_head;
-	subtree = get_tree(objid, objidlen, subtree);
+    subtree = get_tree(objid, objidlen, subtree);
         if (subtree && !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                             NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
             units = subtree->units;
         }
         if (subtree) {
-	    if(subtree->printomat) {
-		return (*subtree->printomat) (buf, buf_len, out_len,
-					      allow_realloc, variable,
-					      subtree->enums, subtree->hint,
-					      units);
-	    } else {
-		return sprint_realloc_by_type(buf, buf_len, out_len,
-					      allow_realloc, variable,
-					      subtree->enums, subtree->hint,
-					      units);
-	    }
-	}
+        if(subtree->printomat) {
+        return (*subtree->printomat) (buf, buf_len, out_len,
+                          allow_realloc, variable,
+                          subtree->enums, subtree->hint,
+                          units);
+        } else {
+        return sprint_realloc_by_type(buf, buf_len, out_len,
+                          allow_realloc, variable,
+                          subtree->enums, subtree->hint,
+                          units);
+        }
+    }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         return sprint_realloc_by_type(buf, buf_len, out_len,
                                       allow_realloc, variable,
@@ -3616,10 +3622,10 @@ fprint_value(FILE * f,
 
 /**
  * Takes the value in VAR and turns it into an OID segment in var->name.
- *  
+ *
  * @param var    The variable.
  *
- * @return SNMPERR_SUCCESS or SNMPERR_GENERR 
+ * @return SNMPERR_SUCCESS or SNMPERR_GENERR
  */
 int
 build_oid_segment(netsnmp_variable_list * var)
@@ -3648,7 +3654,7 @@ build_oid_segment(netsnmp_variable_list * var)
         var->name[2] = (ipaddr >>  8) & 0xff;
         var->name[3] = (ipaddr >>  0) & 0xff;
         break;
-        
+
     case ASN_PRIV_IMPLIED_OBJECT_ID:
         var->name_length = var->val_len / sizeof(oid);
         if (var->name_length > (OID_LENGTH(var->name_loc)))
@@ -3856,7 +3862,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
         case ASN_IPADDRESS:
             if ((4 > *oidLen) && (complete == 0))
                 return SNMPERR_GENERR;
-            
+
             for (i = 0; i < 4 && i < *oidLen; ++i) {
                 if (oidIndex[i] > 255) {
                     DEBUGMSGTL(("parse_oid_indexes",
@@ -3874,7 +3880,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
                 (*oidLen) -= 4;
             }
             uitmp = htonl(uitmp); /* put it in proper order for byte copies */
-            uitmp = 
+            uitmp =
                 snmp_set_var_value(var, (u_char *) &uitmp, 4);
             DEBUGMSGTL(("parse_oid_indexes",
                         "Parsed ipaddr(%d): %d.%d.%d.%d\n", var->type,
@@ -3958,7 +3964,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
             /*
              * we handle this one ourselves since we don't have
              * pre-allocated memory to copy from using
-             * snmp_set_var_value() 
+             * snmp_set_var_value()
              */
 
             if (uitmp == 0)
@@ -3968,7 +3974,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
                 return SNMPERR_GENERR;  /* too big and illegal */
 
             /*
-             * malloc by size+1 to allow a null to be appended. 
+             * malloc by size+1 to allow a null to be appended.
              */
             var->val_len = uitmp;
             var->val.string = calloc(1, uitmp + 1);
@@ -4010,10 +4016,10 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
  *   return 2 for not handled
  */
 
-int 
-dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t objidlen, 
+int
+dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t objidlen,
                                 u_char ** buf, size_t * buf_len,
-                                size_t * out_len, int allow_realloc, 
+                                size_t * out_len, int allow_realloc,
                                 char quotechar)
 {
     int             i, len;
@@ -4091,7 +4097,7 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
         break;
 
     case DNS:
-    default: 
+    default:
         /* DNS can just be handled by dump_realloc_oid_to_string() */
         return 2;
     }
@@ -4207,13 +4213,13 @@ _oid_finish_printing(const oid * objid, size_t objidlen,
 #ifndef NETSNMP_DISABLE_MIB_LOADING
 static void
 _get_realloc_symbol_octet_string(size_t numids, const oid * objid,
-				 u_char ** buf, size_t * buf_len,
-				 size_t * out_len, int allow_realloc,
-				 int *buf_overflow, struct tree* tp)
+                 u_char ** buf, size_t * buf_len,
+                 size_t * out_len, int allow_realloc,
+                 int *buf_overflow, struct tree* tp)
 {
-  netsnmp_variable_list	var = { 0 };
-  u_char		buffer[1024];
-  size_t		i;
+  netsnmp_variable_list var = { 0 };
+  u_char        buffer[1024];
+  size_t        i;
 
   for (i = 0; i < numids; i++)
     buffer[i] = (u_char) objid[i];
@@ -4222,9 +4228,9 @@ _get_realloc_symbol_octet_string(size_t numids, const oid * objid,
   var.val_len = numids;
   if (!*buf_overflow) {
     if (!sprint_realloc_octet_string(buf, buf_len, out_len,
-				     allow_realloc, &var,
-				     NULL, tp->hint,
-				     NULL)) {
+                     allow_realloc, &var,
+                     NULL, tp->hint,
+                     NULL)) {
       *buf_overflow = 1;
     }
   }
@@ -4251,8 +4257,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
 
     for (; subtree; subtree = subtree->next_peer) {
         if (*objid == subtree->subid) {
-	    while (subtree->next_peer && subtree->next_peer->subid == *objid)
-		subtree = subtree->next_peer;
+        while (subtree->next_peer && subtree->next_peer->subid == *objid)
+        subtree = subtree->next_peer;
             if (subtree->indexes) {
                 in_dices = subtree->indexes;
             } else if (subtree->augments) {
@@ -4278,6 +4284,12 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                                                    (const u_char *)
                                                    subtree->label)) {
                     *buf_overflow = 1;
+                }
+                if (output_format == NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC) {
+                    snprintf(intbuf, sizeof intbuf, "(%lu)", subtree->subid);
+                    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char *) intbuf)) {
+                        *buf_overflow = 1;
+                    }
                 }
             }
 
@@ -4309,19 +4321,19 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
     }
 
     /*
-     * Subtree not found.  
+     * Subtree not found.
      */
 
     if (orgtree && in_dices && objidlen > 0) {
-	sprintf(intbuf, "%" NETSNMP_PRIo "u.", *objid);
-	if (!*buf_overflow
-	    && !snmp_strcat(buf, buf_len, out_len,
-			    allow_realloc,
-			    (const u_char *) intbuf)) {
-	    *buf_overflow = 1;
-	}
-	objid++;
-	objidlen--;
+    sprintf(intbuf, "%" NETSNMP_PRIo "u.", *objid);
+    if (!*buf_overflow
+        && !snmp_strcat(buf, buf_len, out_len,
+                allow_realloc,
+                (const u_char *) intbuf)) {
+        *buf_overflow = 1;
+    }
+    objid++;
+    objidlen--;
     }
 
     while (in_dices && (objidlen > 0) &&
@@ -4334,7 +4346,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
 
         if (!tp) {
             /*
-             * Can't find an index in the mib tree.  Bail.  
+             * Can't find an index in the mib tree.  Bail.
              */
             goto finish_it;
         }
@@ -4371,9 +4383,9 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                 }
                 if (numids > objidlen)
                     goto finish_it;
-		_get_realloc_symbol_octet_string(numids, objid, buf, buf_len,
-						 out_len, allow_realloc,
-						 buf_overflow, tp);
+        _get_realloc_symbol_octet_string(numids, objid, buf, buf_len,
+                         out_len, allow_realloc,
+                         buf_overflow, tp);
             } else if (in_dices->isimplied) {
                 numids = objidlen;
                 if (numids > objidlen)
@@ -4389,7 +4401,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
             } else if (tp->ranges && !tp->ranges->next
                        && tp->ranges->low == tp->ranges->high) {
                 /*
-                 * a fixed-length octet string 
+                 * a fixed-length octet string
                  */
                 numids = tp->ranges->low;
                 if (numids > objidlen)
@@ -4447,19 +4459,19 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                         }
 
                         /* Try handling the InetAddress in the OID, in case of failure,
-                         * use the normal_handling. 
+                         * use the normal_handling.
                          */
                         if (tp->next_peer &&
                             tp->tc_index != -1 &&
                             next_peer->tc_index != -1 &&
                             strcmp(get_tc_descriptor(tp->tc_index), "InetAddress") == 0 &&
-                            strcmp(get_tc_descriptor(next_peer->tc_index), 
+                            strcmp(get_tc_descriptor(next_peer->tc_index),
                                     "InetAddressType") == 0 ) {
 
                             int ret;
                             int addr_type = *(objid - 1);
 
-                            ret = dump_realloc_oid_to_inetaddress(addr_type, 
+                            ret = dump_realloc_oid_to_inetaddress(addr_type,
                                         objid + 1, numids - 1, buf, buf_len, out_len,
                                         allow_realloc, '"');
                             if (ret != 2) {
@@ -4469,7 +4481,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                                 }
 
                             }
-                        } 
+                        }
                         if (normal_handling && !dump_realloc_oid_to_string
                             (objid + 1, numids - 1, buf, buf_len, out_len,
                              allow_realloc, '"')) {
@@ -4527,7 +4539,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                 uptimeString( *objid, intbuf, sizeof( intbuf ) );
             } else {
                 sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
-            }   
+            }
             if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
                                                allow_realloc,
                                                (const u_char *)
@@ -4666,7 +4678,7 @@ get_tree(const oid * objid, size_t objidlen, struct tree *subtree)
 
   found:
     while (subtree->next_peer && subtree->next_peer->subid == *objid)
-	subtree = subtree->next_peer;
+    subtree = subtree->next_peer;
     if (objidlen > 1)
         return_tree =
             get_tree(objid + 1, objidlen - 1, subtree->child_list);
@@ -4691,7 +4703,7 @@ print_description(oid * objid, size_t objidlen, /* number of subidentifiers */
 
 /**
  * Prints on oid description into a file descriptor.
- * 
+ *
  * @param f         The file descriptor to print to.
  * @param objid     The object identifier.
  * @param objidlen  The object id length.
@@ -5218,7 +5230,7 @@ get_module_node(const char *fname,
     }
 
     /*
-     * Isolate the first component of the name ... 
+     * Isolate the first component of the name ...
      */
     name = strdup(fname);
     cp = strchr(name, '.');
@@ -5227,21 +5239,21 @@ get_module_node(const char *fname,
         cp++;
     }
     /*
-     * ... and locate it in the tree. 
+     * ... and locate it in the tree.
      */
     tp = find_tree_node(name, modid);
     if (tp) {
         size_t          maxlen = *objidlen;
 
         /*
-         * Set the first element of the object ID 
+         * Set the first element of the object ID
          */
         if (node_to_oid(tp, objid, objidlen)) {
             rc = 1;
 
             /*
              * If the name requested was more than one element,
-             * tag on the rest of the components 
+             * tag on the rest of the components
              */
             if (cp != NULL)
                 rc = _add_strings_to_oid(tp, cp, objid, objidlen, maxlen);
@@ -5263,7 +5275,7 @@ get_module_node(const char *fname,
  *
  * The buffer length is set to the number of subidentifiers
  * for the object identifier associated with the MIB node.
- * 
+ *
  * @return the number of subidentifiers copied.
  *
  * If 0 is returned, the objid buffer is too small,
@@ -5308,28 +5320,28 @@ static char *_apply_escapes(char *src, char eos_marker)
 {
     char *dst;
     int backslash = 0;
-    
+
     dst = src;
     while (*src) {
-	if (backslash) {
-	    backslash = 0;
-	    *dst++ = *src;
-	} else {
-	    if (eos_marker == *src) break;
-	    if ('\\' == *src) {
-		backslash = 1;
-	    } else {
-		*dst++ = *src;
-	    }
-	}
-	src++;
+    if (backslash) {
+        backslash = 0;
+        *dst++ = *src;
+    } else {
+        if (eos_marker == *src) break;
+        if ('\\' == *src) {
+        backslash = 1;
+        } else {
+        *dst++ = *src;
+        }
+    }
+    src++;
     }
     if (!*src) {
-	/* never found eos_marker */
-	return NULL;
+    /* never found eos_marker */
+    return NULL;
     } else {
-	*dst = 0;
-	return src;
+    *dst = 0;
+    return src;
     }
 }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
@@ -5360,14 +5372,14 @@ _add_strings_to_oid(void *tp, char *cp,
         fcp = cp;
         tp2 = tp->child_list;
         /*
-         * Isolate the next entry 
+         * Isolate the next entry
          */
         cp2 = strchr(cp, '.');
         if (cp2)
             *cp2++ = '\0';
 
         /*
-         * Search for the appropriate child 
+         * Search for the appropriate child
          */
         if (isdigit((unsigned char)(*cp))) {
             subid = strtoul(cp, &ecp, 0);
@@ -5384,8 +5396,8 @@ _add_strings_to_oid(void *tp, char *cp,
         }
         if (*objidlen >= maxlen)
             goto bad_id;
-	while (tp2 && tp2->next_peer && tp2->next_peer->subid == subid)
-	    tp2 = tp2->next_peer;
+    while (tp2 && tp2->next_peer && tp2->next_peer->subid == subid)
+        tp2 = tp2->next_peer;
         objid[*objidlen] = subid;
         (*objidlen)++;
 
@@ -5421,7 +5433,7 @@ _add_strings_to_oid(void *tp, char *cp,
         case TYPE_UNSIGNED32:
         case TYPE_TIMETICKS:
             /*
-             * Isolate the next entry 
+             * Isolate the next entry
              */
             cp2 = strchr(cp, '.');
             if (cp2)
@@ -5497,7 +5509,7 @@ _add_strings_to_oid(void *tp, char *cp,
             if (*cp == '"' || *cp == '\'') {
                 doingquote = *cp++;
                 /*
-                 * insert length if requested 
+                 * insert length if requested
                  */
                 if (!in_dices->isimplied && len == -1) {
                     if (doingquote == '\'') {
@@ -5515,46 +5527,46 @@ _add_strings_to_oid(void *tp, char *cp,
                     return 0;
                 }
 
-		cp2 = _apply_escapes(cp, doingquote);
-		if (!cp2) goto bad_id;
-		else {
-		    unsigned char *new_val;
-		    int new_val_len;
-		    int parsed_hint = 0;
-		    const char *parsed_value;
+        cp2 = _apply_escapes(cp, doingquote);
+        if (!cp2) goto bad_id;
+        else {
+            unsigned char *new_val;
+            int new_val_len;
+            int parsed_hint = 0;
+            const char *parsed_value;
 
-		    if (do_hint && tp->hint) {
-			parsed_value = parse_octet_hint(tp->hint, cp,
-			                                &new_val, &new_val_len);
-			parsed_hint = parsed_value == NULL;
-		    }
-		    if (parsed_hint) {
-			int i;
-			for (i = 0; i < new_val_len; i++) {
-			    if (*objidlen >= maxlen) goto bad_id;
-			    objid[ *objidlen ] = new_val[i];
-			    (*objidlen)++;
-			    pos++;
-			}
-			SNMP_FREE(new_val);
-		    } else {
-			while(*cp) {
-			    if (*objidlen >= maxlen) goto bad_id;
-			    objid[ *objidlen ] = *cp++;
-			    (*objidlen)++;
-			    pos++;
-			}
-		    }
-		}
-		
-		cp2++;
+            if (do_hint && tp->hint) {
+            parsed_value = parse_octet_hint(tp->hint, cp,
+                                            &new_val, &new_val_len);
+            parsed_hint = parsed_value == NULL;
+            }
+            if (parsed_hint) {
+            int i;
+            for (i = 0; i < new_val_len; i++) {
+                if (*objidlen >= maxlen) goto bad_id;
+                objid[ *objidlen ] = new_val[i];
+                (*objidlen)++;
+                pos++;
+            }
+            SNMP_FREE(new_val);
+            } else {
+            while(*cp) {
+                if (*objidlen >= maxlen) goto bad_id;
+                objid[ *objidlen ] = *cp++;
+                (*objidlen)++;
+                pos++;
+            }
+            }
+        }
+
+        cp2++;
                 if (!*cp2)
                     cp2 = NULL;
                 else if (*cp2 != '.')
                     goto bad_id;
                 else
                     cp2++;
-		if (check) {
+        if (check) {
                     if (len == -1) {
                         struct range_list *rp = tp->ranges;
                         int             ok = 0;
@@ -5569,9 +5581,9 @@ _add_strings_to_oid(void *tp, char *cp,
                             objid[len_index] = pos;
                     } else if (pos != len)
                         goto bad_id;
-		}
-		else if (len == -1 && !in_dices->isimplied)
-		    objid[len_index] = pos;
+        }
+        else if (len == -1 && !in_dices->isimplied)
+            objid[len_index] = pos;
             } else {
                 if (!in_dices->isimplied && len == -1) {
                     fcp = cp;
@@ -5607,41 +5619,41 @@ _add_strings_to_oid(void *tp, char *cp,
             in_dices = NULL;
             cp2 = cp;
             break;
-	case TYPE_NETADDR:
-	    fcp = cp;
-	    cp2 = strchr(cp, '.');
-	    if (cp2)
-		*cp2++ = 0;
-	    subid = strtoul(cp, &ecp, 0);
-	    if (*ecp)
-		goto bad_id;
-	    if (*objidlen + 1 >= maxlen)
-		goto bad_id;
-	    objid[*objidlen] = subid;
-	    (*objidlen)++;
-	    cp = cp2;
-	    if (subid == 1) {
-		for (len = 0; cp && len < 4; len++) {
-		    fcp = cp;
-		    cp2 = strchr(cp, '.');
-		    if (cp2)
-			*cp2++ = 0;
-		    subid = strtoul(cp, &ecp, 0);
-		    if (*ecp)
-			goto bad_id;
-		    if (*objidlen + 1 >= maxlen)
-			goto bad_id;
-		    if (check && subid > 255)
-			goto bad_id;
-		    objid[*objidlen] = subid;
-		    (*objidlen)++;
-		    cp = cp2;
-		}
-	    }
-	    else {
-		in_dices = NULL;
-	    }
-	    break;
+    case TYPE_NETADDR:
+        fcp = cp;
+        cp2 = strchr(cp, '.');
+        if (cp2)
+        *cp2++ = 0;
+        subid = strtoul(cp, &ecp, 0);
+        if (*ecp)
+        goto bad_id;
+        if (*objidlen + 1 >= maxlen)
+        goto bad_id;
+        objid[*objidlen] = subid;
+        (*objidlen)++;
+        cp = cp2;
+        if (subid == 1) {
+        for (len = 0; cp && len < 4; len++) {
+            fcp = cp;
+            cp2 = strchr(cp, '.');
+            if (cp2)
+            *cp2++ = 0;
+            subid = strtoul(cp, &ecp, 0);
+            if (*ecp)
+            goto bad_id;
+            if (*objidlen + 1 >= maxlen)
+            goto bad_id;
+            if (check && subid > 255)
+            goto bad_id;
+            objid[*objidlen] = subid;
+            (*objidlen)++;
+            cp = cp2;
+        }
+        }
+        else {
+        in_dices = NULL;
+        }
+        break;
         default:
             snmp_log(LOG_ERR, "Unexpected index type: %d %s %s\n",
                      tp->type, in_dices->ilabel, cp);
@@ -5685,7 +5697,7 @@ _add_strings_to_oid(void *tp, char *cp,
             if (*cp == '\0')
                 goto bad_id;
             /*
-             * insert length if requested 
+             * insert length if requested
              */
             if (doingquote == '"') {
                 if (*objidlen >= maxlen)
@@ -5786,7 +5798,7 @@ get_node(const char *name, oid * objid, size_t * objidlen)
             cp++;
 
         /*
-         * 'cp' and 'name' *do* go that way round! 
+         * 'cp' and 'name' *do* go that way round!
          */
         res = get_module_node(cp, module, objid, objidlen);
         SNMP_FREE(module);
@@ -5829,7 +5841,7 @@ main(int argc, char *argv[])
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
 /*
- * initialize: no peers included in the report. 
+ * initialize: no peers included in the report.
  */
 void
 clear_tree_flags(register struct tree *tp)
@@ -5852,7 +5864,7 @@ static int      print_subtree_oid_report_mibchildoid = 0;
 static int      print_subtree_oid_report_suffix = 0;
 
 /*
- * These methods recurse. 
+ * These methods recurse.
  */
 static void     print_parent_labeledoid(FILE *, struct tree *);
 static void     print_parent_oid(FILE *, struct tree *);
@@ -5948,9 +5960,9 @@ static void print_parent_mibchildoid(FILE * f, struct tree *tp)
     }
     for (i = elem_cnt - 1; i >= 0; i--) {
         if (i == elem_cnt - 1) {
-            fprintf(f, "%lu", elems[i]);           
+            fprintf(f, "%lu", elems[i]);
             } else {
-            fprintf(f, ".%lu", elems[i]);          
+            fprintf(f, ".%lu", elems[i]);
         }
     }
 }
@@ -5985,7 +5997,7 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
     count++;
 
     /*
-     * sanity check 
+     * sanity check
      */
     if (!tree) {
         return;
@@ -6026,7 +6038,7 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
             fprintf(f, "\n");
         }
         if (print_subtree_oid_report_mibchildoid) {
-	    fprintf(f, "\"%s\"\t", tp->label);
+        fprintf(f, "\"%s\"\t", tp->label);
             fprintf(f, "\t\t\"");
             print_parent_mibchildoid(f, tp);
             fprintf(f, "\"\n");
@@ -6055,9 +6067,9 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
  * Converts timeticks to hours, minutes, seconds string.
  *
  * @param timeticks    The timeticks to convert.
- * @param buf          Buffer to write to, has to be at 
+ * @param buf          Buffer to write to, has to be at
  *                     least 40 Bytes large.
- *       
+ *
  * @return The buffer
  *
  * @see uptimeString
@@ -6089,7 +6101,7 @@ uptime_string_n(u_long timeticks, char *buf, size_t buflen)
  *
  * @return        The root oid pointer if successful, or NULL otherwise.
  */
- 
+
 oid            *
 snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
 {
@@ -6126,7 +6138,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
             goto out;
     } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                       NETSNMP_DS_LIB_REGEX_ACCESS)) {
-	clear_tree_flags(tree_head);
+    clear_tree_flags(tree_head);
         if (get_wild_node(argv, root, rootlen))
             goto out;
     } else {
@@ -6139,7 +6151,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
             goto out;
         *rootlen = savlen;
         DEBUGMSGTL(("parse_oid", "wildly parsing\n"));
-	clear_tree_flags(tree_head);
+    clear_tree_flags(tree_head);
         if (get_wild_node(argv, root, rootlen))
             goto out;
     }
@@ -6193,20 +6205,20 @@ static void parse_hints_ctor(struct parse_hints *ph)
 static int parse_hints_add_result_octet(struct parse_hints *ph, unsigned char octet)
 {
     if (!(ph->result_len < ph->result_max)) {
-	ph->result_max = ph->result_len + 32;
-	if (!ph->result) {
-	    ph->result = (unsigned char *)malloc(ph->result_max);
-	} else {
-	    ph->result = (unsigned char *)realloc(ph->result, ph->result_max);
-	}
-    }
-    
+    ph->result_max = ph->result_len + 32;
     if (!ph->result) {
-	return 0;		/* failed */
+        ph->result = (unsigned char *)malloc(ph->result_max);
+    } else {
+        ph->result = (unsigned char *)realloc(ph->result, ph->result_max);
+    }
+    }
+
+    if (!ph->result) {
+    return 0;       /* failed */
     }
 
     ph->result[ph->result_len++] = octet;
-    return 1;			/* success */
+    return 1;           /* success */
 }
 
 static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
@@ -6216,64 +6228,64 @@ static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
     int base;
     int repeats = 0;
     int repeat_fixup = ph->result_len;
-    
+
     if (ph->repeat) {
-	if (!parse_hints_add_result_octet(ph, 0)) {
-	    return 0;
-	}
+    if (!parse_hints_add_result_octet(ph, 0)) {
+        return 0;
+    }
     }
     do {
-	base = 0;
-	switch (ph->format) {
-	case 'x': base += 6;	NETSNMP_FALLTHROUGH;
-	case 'd': base += 2;	NETSNMP_FALLTHROUGH;
-	case 'o': base += 8;
-	    {
-		int i;
-		unsigned long number = strtol(v, &nv, base);
-		if (nv == v) return 0;
-		v = nv;
-		for (i = 0; i < ph->length; i++) {
-		    int shift = 8 * (ph->length - 1 - i);
-		    if (!parse_hints_add_result_octet(ph, (u_char)(number >> shift) )) {
-			return 0; /* failed */
-		    }
-		}
-	    }
-	    break;
+    base = 0;
+    switch (ph->format) {
+    case 'x': base += 6;    NETSNMP_FALLTHROUGH;
+    case 'd': base += 2;    NETSNMP_FALLTHROUGH;
+    case 'o': base += 8;
+        {
+        int i;
+        unsigned long number = strtol(v, &nv, base);
+        if (nv == v) return 0;
+        v = nv;
+        for (i = 0; i < ph->length; i++) {
+            int shift = 8 * (ph->length - 1 - i);
+            if (!parse_hints_add_result_octet(ph, (u_char)(number >> shift) )) {
+            return 0; /* failed */
+            }
+        }
+        }
+        break;
 
-	case 'a':
-	    {
-		int i;
-		    
-		for (i = 0; i < ph->length && *v; i++) {
-		    if (!parse_hints_add_result_octet(ph, *v++)) {
-			return 0;	/* failed */
-		    }
-		}
-	    }
-	    break;
-	}
+    case 'a':
+        {
+        int i;
 
-	repeats++;
+        for (i = 0; i < ph->length && *v; i++) {
+            if (!parse_hints_add_result_octet(ph, *v++)) {
+            return 0;   /* failed */
+            }
+        }
+        }
+        break;
+    }
 
-	if (ph->separator && *v) {
-	    if (*v == ph->separator) {
-		v++;
-	    } else {
-		return 0;		/* failed */
-	    }
-	}
+    repeats++;
 
-	if (ph->terminator) {
-	    if (*v == ph->terminator) {
-		v++;
-		break;
-	    }
-	}
+    if (ph->separator && *v) {
+        if (*v == ph->separator) {
+        v++;
+        } else {
+        return 0;       /* failed */
+        }
+    }
+
+    if (ph->terminator) {
+        if (*v == ph->terminator) {
+        v++;
+        break;
+        }
+    }
     } while (ph->repeat && *v);
     if (ph->repeat) {
-	ph->result[repeat_fixup] = repeats;
+    ph->result[repeat_fixup] = repeats;
     }
 
     *v_in_out = v;
@@ -6294,95 +6306,95 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
     int retval = 1;
     /* See RFC 1443 */
     enum {
-	HINT_1_2,
-	HINT_2_3,
-	HINT_1_2_4,
-	HINT_1_2_5
+    HINT_1_2,
+    HINT_2_3,
+    HINT_1_2_4,
+    HINT_1_2_5
     } state = HINT_1_2;
 
     parse_hints_ctor(&ph);
     while (*h && *v && retval) {
-	switch (state) {
-	case HINT_1_2:
-	    if ('*' == *h) {
-		ph.repeat = 1;
-		state = HINT_2_3;
-	    } else if (isdigit((unsigned char)(*h))) {
-		parse_hints_length_add_digit(&ph, *h);
-		state = HINT_2_3;
-	    } else {
-		return v;	/* failed */
-	    }
-	    break;
+    switch (state) {
+    case HINT_1_2:
+        if ('*' == *h) {
+        ph.repeat = 1;
+        state = HINT_2_3;
+        } else if (isdigit((unsigned char)(*h))) {
+        parse_hints_length_add_digit(&ph, *h);
+        state = HINT_2_3;
+        } else {
+        return v;   /* failed */
+        }
+        break;
 
-	case HINT_2_3:
-	    if (isdigit((unsigned char)(*h))) {
-		parse_hints_length_add_digit(&ph, *h);
-		/* state = HINT_2_3 */
-	    } else if ('x' == *h || 'd' == *h || 'o' == *h || 'a' == *h) {
-		ph.format = *h;
-		state = HINT_1_2_4;
-	    } else {
-		return v;	/* failed */
-	    }
-	    break;
+    case HINT_2_3:
+        if (isdigit((unsigned char)(*h))) {
+        parse_hints_length_add_digit(&ph, *h);
+        /* state = HINT_2_3 */
+        } else if ('x' == *h || 'd' == *h || 'o' == *h || 'a' == *h) {
+        ph.format = *h;
+        state = HINT_1_2_4;
+        } else {
+        return v;   /* failed */
+        }
+        break;
 
-	case HINT_1_2_4:
-	    if ('*' == *h) {
-		retval = parse_hints_parse(&ph, &v);
-		parse_hints_reset(&ph);
-		
-		ph.repeat = 1;
-		state = HINT_2_3;
-	    } else if (isdigit((unsigned char)(*h))) {
-		retval = parse_hints_parse(&ph, &v);
-		parse_hints_reset(&ph);
-		
-		parse_hints_length_add_digit(&ph, *h);
-		state = HINT_2_3;
-	    } else {
-		ph.separator = *h;
-		state = HINT_1_2_5;
-	    }
-	    break;
+    case HINT_1_2_4:
+        if ('*' == *h) {
+        retval = parse_hints_parse(&ph, &v);
+        parse_hints_reset(&ph);
 
-	case HINT_1_2_5:
-	    if ('*' == *h) {
-		retval = parse_hints_parse(&ph, &v);
-		parse_hints_reset(&ph);
-		
-		ph.repeat = 1;
-		state = HINT_2_3;
-	    } else if (isdigit((unsigned char)(*h))) {
-		retval = parse_hints_parse(&ph, &v);
-		parse_hints_reset(&ph);
-		
-		parse_hints_length_add_digit(&ph, *h);
-		state = HINT_2_3;
-	    } else {
-		ph.terminator = *h;
+        ph.repeat = 1;
+        state = HINT_2_3;
+        } else if (isdigit((unsigned char)(*h))) {
+        retval = parse_hints_parse(&ph, &v);
+        parse_hints_reset(&ph);
 
-		retval = parse_hints_parse(&ph, &v);
-		parse_hints_reset(&ph);
+        parse_hints_length_add_digit(&ph, *h);
+        state = HINT_2_3;
+        } else {
+        ph.separator = *h;
+        state = HINT_1_2_5;
+        }
+        break;
 
-		state = HINT_1_2;
-	    }
-	    break;
-	}
-	h++;
+    case HINT_1_2_5:
+        if ('*' == *h) {
+        retval = parse_hints_parse(&ph, &v);
+        parse_hints_reset(&ph);
+
+        ph.repeat = 1;
+        state = HINT_2_3;
+        } else if (isdigit((unsigned char)(*h))) {
+        retval = parse_hints_parse(&ph, &v);
+        parse_hints_reset(&ph);
+
+        parse_hints_length_add_digit(&ph, *h);
+        state = HINT_2_3;
+        } else {
+        ph.terminator = *h;
+
+        retval = parse_hints_parse(&ph, &v);
+        parse_hints_reset(&ph);
+
+        state = HINT_1_2;
+        }
+        break;
+    }
+    h++;
     }
     while (*v && retval) {
-	retval = parse_hints_parse(&ph, &v);
+    retval = parse_hints_parse(&ph, &v);
     }
     if (retval) {
-	*new_val = ph.result;
-	*new_val_len = ph.result_len;
+    *new_val = ph.result;
+    *new_val_len = ph.result_len;
     } else {
-	if (ph.result) {
-	    SNMP_FREE(ph.result);
-	}
-	*new_val = NULL;
-	*new_val_len = 0;
+    if (ph.result) {
+        SNMP_FREE(ph.result);
+    }
+    *new_val = NULL;
+    *new_val_len = 0;
     }
     return retval ? NULL : v;
 }
@@ -6397,10 +6409,10 @@ int main(int argc, const char **argv)
     unsigned char *new_val;
     int new_val_len;
     char *r;
-    
+
     if (argc < 3) {
-	fprintf(stderr, "usage: dh <hint> <value>\n");
-	exit(2);
+    fprintf(stderr, "usage: dh <hint> <value>\n");
+    exit(2);
     }
     hint = argv[1];
     value = argv[2];
@@ -6408,17 +6420,17 @@ int main(int argc, const char **argv)
     printf("{\"%s\", \"%s\"}: \n\t", hint, value);
     if (r) {
         *r = 0;
-    	printf("returned failed\n");
-	printf("value syntax error at: %s\n", value);
+        printf("returned failed\n");
+    printf("value syntax error at: %s\n", value);
     }
     else {
-	int i;
-	printf("returned success\n");
-	for (i = 0; i < new_val_len; i++) {
-	    int c = new_val[i] & 0xFF;
-	    printf("%02X(%c) ", c, isprint(c) ? c : ' ');
-	}
-	SNMP_FREE(new_val);
+    int i;
+    printf("returned success\n");
+    for (i = 0; i < new_val_len; i++) {
+        int c = new_val[i] & 0xFF;
+        printf("%02X(%c) ", c, isprint(c) ? c : ' ');
+    }
+    SNMP_FREE(new_val);
     }
     printf("\n");
     exit(0);
@@ -6501,13 +6513,13 @@ netsnmp_str2oid(const char *S, oid * O, int L)
         *o = *c;
 
     /*
-     * make sure we got to the end of the string 
+     * make sure we got to the end of the string
      */
     if (*c != 0)
         return 1;
 
     /*
-     * set the length of the oid 
+     * set the length of the oid
      */
     *O = c - S;
 
