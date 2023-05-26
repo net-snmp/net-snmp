@@ -740,7 +740,7 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
 }
 
 int
-tls_get_verify_info_index() {
+tls_get_verify_info_index(void) {
     return openssl_local_index;
 }
 
