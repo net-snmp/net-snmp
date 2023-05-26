@@ -1241,13 +1241,14 @@ int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
 #ifdef ETHTOOL_GLINKSETTINGS
     {
         /*
-         * For Linux kernel v5.2 __ETHTOOL_LINK_MODE_MASK_NBITS == 67 or
-         * 3 32-bit words. Increase the 'nwords' constant if necessary.
+         * For Linux kernel v6.3 __ETHTOOL_LINK_MODE_MASK_NBITS == 101 or
+         * 4 32-bit words. Increase the 'nwords' constant if necessary.
          */
-        enum { mask_nwords = 4 };
-        struct {
+        enum { mask_nwords = 8 };
+        union {
             struct ethtool_link_settings elinkset;
-            uint32_t masks[3 * mask_nwords];
+            uint32_t _masks[sizeof(struct ethtool_link_settings) /
+                            sizeof(uint32_t) + 3 * mask_nwords];
         } data;
 
         memset(&data, 0, sizeof(data));
