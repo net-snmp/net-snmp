@@ -1247,8 +1247,8 @@ int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
         enum { mask_nwords = 8 };
         union {
             struct ethtool_link_settings elinkset;
-            uint32_t _masks[sizeof(struct ethtool_link_settings) /
-                            sizeof(uint32_t) + 3 * mask_nwords];
+            uint8_t _data[sizeof(struct ethtool_link_settings) +
+                          mask_nwords * 3 * 4];
         } data;
 
         memset(&data, 0, sizeof(data));
