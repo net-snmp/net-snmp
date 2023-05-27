@@ -481,7 +481,8 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
         u_char         *ecp;
 
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "STRING: ")) {
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                              "STRING: ")) {
                 return 0;
             }
         }
@@ -626,9 +627,8 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
         }
 
         if (units) {
-            return (snmp_cstrcat
-                    (buf, buf_len, out_len, allow_realloc, " ")
-                    && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
+            return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                    snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
         }
         if ((*out_len >= *buf_len) &&
             !(allow_realloc && snmp_realloc(buf, buf_len))) {
@@ -710,8 +710,8 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     }
 
     if (units) {
-        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ")
-                && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -788,8 +788,8 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
     *out_len += strlen((char *) (*buf + *out_len));
 
     if (units) {
-        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ")
-                && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -864,9 +864,8 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
     *out_len += strlen((char *) (*buf + *out_len));
 
     if (units) {
-        return (snmp_cstrcat
-                (buf, buf_len, out_len, allow_realloc, " ")
-                && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -973,8 +972,8 @@ sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
 #endif
 
     if (units) {
-        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ")
-                && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -1062,11 +1061,8 @@ sprint_realloc_opaque(u_char ** buf, size_t * buf_len,
     }
 #endif
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -1130,11 +1126,8 @@ sprint_realloc_object_identifier(u_char ** buf, size_t * buf_len,
     }
 
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -1185,8 +1178,7 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS)) {
         char            str[32];
         snprintf(str, sizeof(str), "%lu", *(u_long *) var->val.integer);
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc, (const u_char *) str)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
         }
         return 1;
@@ -1195,22 +1187,17 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
         char            str[32];
         snprintf(str, sizeof(str), "Timeticks: (%lu) ",
                  *(u_long *) var->val.integer);
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc, (const u_char *) str)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
         }
     }
     uptimeString(*(u_long *) (var->val.integer), timebuf, sizeof(timebuf));
-    if (!snmp_strcat
-        (buf, buf_len, out_len, allow_realloc, (const u_char *) timebuf)) {
+    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, timebuf)) {
         return 0;
     }
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -1313,7 +1300,7 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
         }
         tmp[0] = '-';
     }
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tmp);
+    return snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tmp);
 }
 
 
@@ -1366,8 +1353,7 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                         (const u_char *) "INTEGER: ")) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "INTEGER: ")) {
             return 0;
         }
     }
@@ -1384,38 +1370,28 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
         } else {
             char            str[32];
             snprintf(str, sizeof(str), "%ld", *var->val.integer);
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) str)) {
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str)) {
                 return 0;
             }
         }
     } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) enum_string)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, enum_string)) {
             return 0;
         }
     } else {
         char            str[32];
         snprintf(str, sizeof(str), "(%ld)", *var->val.integer);
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) enum_string)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, enum_string)) {
             return 0;
         }
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc, (const u_char *) str)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
         }
     }
 
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -1481,38 +1457,28 @@ sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
         } else {
             char            str[32];
             snprintf(str, sizeof(str), "%lu", *var->val.integer);
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) str)) {
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str)) {
                 return 0;
             }
         }
     } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) enum_string)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, enum_string)) {
             return 0;
         }
     } else {
         char            str[32];
         snprintf(str, sizeof(str), "(%lu)", *var->val.integer);
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) enum_string)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, enum_string)) {
             return 0;
         }
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc, (const u_char *) str)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
         }
     }
 
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -1574,17 +1540,13 @@ sprint_realloc_gauge(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     } else {
         sprintf(tmp, "%u", (unsigned int)(*var->val.integer & 0xffffffff));
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc, (const u_char *) tmp)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tmp)) {
             return 0;
         }
     }
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -1638,16 +1600,12 @@ sprint_realloc_counter(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
     sprintf(tmp, "%u", (unsigned int)(*var->val.integer & 0xffffffff));
-    if (!snmp_strcat
-        (buf, buf_len, out_len, allow_realloc, (const u_char *) tmp)) {
+    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tmp)) {
         return 0;
     }
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ") &&
+                snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -1905,22 +1863,19 @@ sprint_realloc_bitstring(u_char ** buf, size_t * buf_len, size_t * out_len,
                                        NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM)) {
                         char            str[32];
                         snprintf(str, sizeof(str), "%d ", (len * 8) + bit);
-                        if (!snmp_strcat
-                            (buf, buf_len, out_len, allow_realloc,
-                             (const u_char *) str)) {
+                        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                          str)) {
                             return 0;
                         }
                     } else {
                         char            str[32];
                         snprintf(str, sizeof(str), "(%d) ", (len * 8) + bit);
-                        if (!snmp_strcat
-                            (buf, buf_len, out_len, allow_realloc,
-                             (const u_char *) enum_string)) {
+                        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                          enum_string)) {
                             return 0;
                         }
-                        if (!snmp_strcat
-                            (buf, buf_len, out_len, allow_realloc,
-                             (const u_char *) str)) {
+                        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                          str)) {
                             return 0;
                         }
                     }
@@ -3250,11 +3205,8 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
              */
 
             if (!*buf_overflow && modbuf[0] != '#') {
-                if (!snmp_strcat
-                    (buf, buf_len, out_len, allow_realloc,
-                     (const u_char *) mod)
-                    || !snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                                    (const u_char *) "::")) {
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, mod) ||
+                    !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "::")) {
                     *buf_overflow = 1;
                 }
             }
@@ -3390,22 +3342,17 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
     }
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE)) {
         if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT)) {
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " = ")) {
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " = ")) {
                 return 0;
             }
         } else {
             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-                if (!snmp_strcat
-                    (buf, buf_len, out_len, allow_realloc,
-                     (const u_char *) " ")) {
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ")) {
                     return 0;
                 }
             } else {
-                if (!snmp_strcat
-                    (buf, buf_len, out_len, allow_realloc,
-                     (const u_char *) " = ")) {
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                  " = ")) {
                     return 0;
                 }
             }                   /* end if-else NETSNMP_DS_LIB_QUICK_PRINT */
@@ -3415,17 +3362,14 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
     }
 
     if (variable->type == SNMP_NOSUCHOBJECT) {
-        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *)
-                           "No Such Object available on this agent at this OID");
+        return snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                            "No Such Object available on this agent at this OID");
     } else if (variable->type == SNMP_NOSUCHINSTANCE) {
-        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *)
-                           "No Such Instance currently exists at this OID");
+        return snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                            "No Such Instance currently exists at this OID");
     } else if (variable->type == SNMP_ENDOFMIBVIEW) {
-        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *)
-                           "No more variables left in this MIB View (It is past the end of the MIB tree)");
+        return snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                            "No more variables left in this MIB View (It is past the end of the MIB tree)");
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     } else if (subtree) {
         const char *units = NULL;
@@ -3531,17 +3475,14 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
                      const netsnmp_variable_list * variable)
 {
     if (variable->type == SNMP_NOSUCHOBJECT) {
-        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *)
-                           "No Such Object available on this agent at this OID");
+        return snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                            "No Such Object available on this agent at this OID");
     } else if (variable->type == SNMP_NOSUCHINSTANCE) {
-        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *)
-                           "No Such Instance currently exists at this OID");
+        return snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                            "No Such Instance currently exists at this OID");
     } else if (variable->type == SNMP_ENDOFMIBVIEW) {
-        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *)
-                           "No more variables left in this MIB View (It is past the end of the MIB tree)");
+        return snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                            "No more variables left in this MIB View (It is past the end of the MIB tree)");
     } else {
 #ifndef NETSNMP_DISABLE_MIB_LOADING
         const char *units = NULL;
@@ -4188,18 +4129,16 @@ _oid_finish_printing(const oid * objid, size_t objidlen,
                      int allow_realloc, int *buf_overflow) {
     char            intbuf[64];
     if (*buf != NULL && *(*buf + *out_len - 1) != '.') {
-        if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                           allow_realloc,
-                                           (const u_char *) ".")) {
+        if (!*buf_overflow && !snmp_cstrcat(buf, buf_len, out_len,
+                                            allow_realloc, ".")) {
             *buf_overflow = 1;
         }
     }
 
     while (objidlen-- > 0) {    /* output rest of name, uninterpreted */
         sprintf(intbuf, "%" NETSNMP_PRIo "u.", *objid++);
-        if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                           allow_realloc,
-                                           (const u_char *) intbuf)) {
+        if (!*buf_overflow && !snmp_cstrcat(buf, buf_len, out_len,
+                                            allow_realloc, intbuf)) {
             *buf_overflow = 1;
         }
     }
@@ -4272,31 +4211,29 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
             if (!strncmp(subtree->label, ANON, ANON_LEN) ||
                 (NETSNMP_OID_OUTPUT_NUMERIC == output_format)) {
                 sprintf(intbuf, "%lu", subtree->subid);
-                if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                                   allow_realloc,
-                                                   (const u_char *)
-                                                   intbuf)) {
+                if (!*buf_overflow && !snmp_cstrcat(buf, buf_len, out_len,
+                                                    allow_realloc, intbuf)) {
                     *buf_overflow = 1;
                 }
             } else {
-                if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                                   allow_realloc,
-                                                   (const u_char *)
-                                                   subtree->label)) {
+                if (!*buf_overflow &&
+                    !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                  subtree->label)) {
                     *buf_overflow = 1;
                 }
                 if (output_format == NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC) {
                     snprintf(intbuf, sizeof intbuf, "(%lu)", subtree->subid);
-                    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char *) intbuf)) {
+                    if (!*buf_overflow &&
+                        !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      intbuf)) {
                         *buf_overflow = 1;
                     }
                 }
             }
 
             if (objidlen > 1) {
-                if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                                   allow_realloc,
-                                                   (const u_char *) ".")) {
+                if (!*buf_overflow &&
+                    !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ".")) {
                     *buf_overflow = 1;
                 }
 
@@ -4327,9 +4264,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
     if (orgtree && in_dices && objidlen > 0) {
 	sprintf(intbuf, "%" NETSNMP_PRIo "u.", *objid);
 	if (!*buf_overflow
-	    && !snmp_strcat(buf, buf_len, out_len,
-			    allow_realloc,
-			    (const u_char *) intbuf)) {
+	    && !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
 	    *buf_overflow = 1;
 	}
 	objid++;
@@ -4355,9 +4290,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
             if (*buf != NULL && *(*buf + *out_len - 1) == '.') {
                 (*out_len)--;
             }
-            if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                               allow_realloc,
-                                               (const u_char *) "[")) {
+            if (!*buf_overflow &&
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "[")) {
                 *buf_overflow = 1;
             }
         }
@@ -4421,32 +4355,28 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                 if (numids == 1) {
                     if (netsnmp_ds_get_boolean
                         (NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES)) {
-                        if (!*buf_overflow
-                            && !snmp_strcat(buf, buf_len, out_len,
-                                            allow_realloc,
-                                            (const u_char *) "\\")) {
+                        if (!*buf_overflow &&
+                            !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                          "\\")) {
                             *buf_overflow = 1;
                         }
                     }
-                    if (!*buf_overflow
-                        && !snmp_strcat(buf, buf_len, out_len,
-                                        allow_realloc,
-                                        (const u_char *) "\"")) {
+                    if (!*buf_overflow &&
+                        !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      "\"")) {
                         *buf_overflow = 1;
                     }
                     if (netsnmp_ds_get_boolean
                         (NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES)) {
-                        if (!*buf_overflow
-                            && !snmp_strcat(buf, buf_len, out_len,
-                                            allow_realloc,
-                                            (const u_char *) "\\")) {
+                        if (!*buf_overflow &&
+                            !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                          "\\")) {
                             *buf_overflow = 1;
                         }
                     }
-                    if (!*buf_overflow
-                        && !snmp_strcat(buf, buf_len, out_len,
-                                        allow_realloc,
-                                        (const u_char *) "\"")) {
+                    if (!*buf_overflow &&
+                        !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      "\"")) {
                         *buf_overflow = 1;
                     }
                 } else {
@@ -4505,27 +4435,24 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                     ep = ep->next;
                 }
                 if (ep) {
-                    if (!*buf_overflow
-                        && !snmp_strcat(buf, buf_len, out_len,
-                                        allow_realloc,
-                                        (const u_char *) ep->label)) {
+                    if (!*buf_overflow &&
+                        !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      ep->label)) {
                         *buf_overflow = 1;
                     }
                 } else {
                     sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
-                    if (!*buf_overflow
-                        && !snmp_strcat(buf, buf_len, out_len,
-                                        allow_realloc,
-                                        (const u_char *) intbuf)) {
+                    if (!*buf_overflow &&
+                        !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      intbuf)) {
                         *buf_overflow = 1;
                     }
                 }
             } else {
                 sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
-                if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                                   allow_realloc,
-                                                   (const u_char *)
-                                                   intbuf)) {
+                if (!*buf_overflow &&
+                    !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                  intbuf)) {
                     *buf_overflow = 1;
                 }
             }
@@ -4540,10 +4467,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
             } else {
                 sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
             }   
-            if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                               allow_realloc,
-                                               (const u_char *)
-                                               intbuf)) {
+            if (!*buf_overflow &&
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
                 *buf_overflow = 1;
             }
             objid++;
@@ -4598,9 +4523,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                     objid[0], objid[1], objid[2], objid[3]);
             objid += 4;
             objidlen -= 4;
-            if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                               allow_realloc,
-                                               (const u_char *) intbuf)) {
+            if (!*buf_overflow &&
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
                 *buf_overflow = 1;
             }
             break;
@@ -4610,10 +4534,9 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
 
                 objidlen--;
                 sprintf(intbuf, "%" NETSNMP_PRIo "u.", ntype);
-                if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                                   allow_realloc,
-                                                   (const u_char *)
-                                                   intbuf)) {
+                if (!*buf_overflow &&
+                    !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                  intbuf)) {
                     *buf_overflow = 1;
                 }
 
@@ -4621,10 +4544,9 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                     sprintf(intbuf, "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
                             "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u",
                             objid[0], objid[1], objid[2], objid[3]);
-                    if (!*buf_overflow
-                        && !snmp_strcat(buf, buf_len, out_len,
-                                        allow_realloc,
-                                        (const u_char *) intbuf)) {
+                    if (!*buf_overflow &&
+                        !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      intbuf)) {
                         *buf_overflow = 1;
                     }
                     objid += 4;
@@ -4642,15 +4564,13 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
         }
 
         if (extended_index) {
-            if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                               allow_realloc,
-                                               (const u_char *) "]")) {
+            if (!*buf_overflow &&
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "]")) {
                 *buf_overflow = 1;
             }
         } else {
-            if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-                                               allow_realloc,
-                                               (const u_char *) ".")) {
+            if (!*buf_overflow &&
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ".")) {
                 *buf_overflow = 1;
             }
         }
@@ -4868,7 +4788,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
 
     if (tp) {
         module_name(tp->modid, str);
-        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "  -- FROM\t") ||
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                          "  -- FROM\t") ||
             !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str))
             return 0;
         pos = 16+strlen(str);
@@ -4883,7 +4804,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                     pos = 16;
                 }
                 else {
-                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ", "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      ", "))
                         return 0;
                     pos += 2;
                 }
@@ -5019,7 +4941,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 if (first)
                     first = 0;
                 else
-                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ", "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      ", "))
                         return 0;
                 snprintf(str, sizeof(str), "%s(%d)", ep->label, ep->value);
                 str[ sizeof(str)-1 ] = 0;
@@ -5050,7 +4973,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
         if (tp->units)
             if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
                              "  UNITS\t\t\"") ||
-                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->units) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                              tp->units) ||
                 !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
                 return 0;
         switch (tp->access) {
@@ -5124,7 +5048,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
         if (tp->augments)
             if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
                              "  AUGMENTS\t{ ") ||
-                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->augments) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                              tp->augments) ||
                 !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " }\n"))
                 return 0;
         if (tp->indexes) {
@@ -5138,7 +5063,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 if (first)
                     first = 0;
                 else
-                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ", "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      ", "))
                         return 0;
                 snprintf(str, sizeof(str), "%s%s",
                         ip->isimplied ? "IMPLIED " : "",
@@ -5146,7 +5072,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
-                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n\t\t  "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      "\n\t\t  "))
                         return 0;
                     pos = 16 + 2;
                 }
@@ -5176,7 +5103,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 if (first)
                     first = 0;
                 else
-                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ", "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      ", "))
                         return 0;
                 strlcpy(str, vp->vblabel, sizeof(str));
                 len = strlen(str);
@@ -5197,17 +5125,20 @@ print_tree_node(u_char ** buf, size_t * buf_len,
         if (tp->description)
             if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
                               "  DESCRIPTION\t\"") ||
-                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->description) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                              tp->description) ||
                 !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
                 return 0;
         if (tp->defaultValue)
             if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
                               "  DEFVAL\t{ ") ||
-                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->defaultValue) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                              tp->defaultValue) ||
                 !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " }\n"))
                 return 0;
     } else
-        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "No description\n"))
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                          "No description\n"))
             return 0;
     return 1;
 }
