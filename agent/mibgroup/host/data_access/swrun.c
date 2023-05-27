@@ -112,7 +112,7 @@ swrun_count_processes_by_regex( char *name, netsnmp_regex_ptr regexp )
     int i = 0;
 #ifdef HAVE_PCRE2_H
     pcre2_match_data *ndx_match = pcre2_match_data_create(30, NULL);
-#elif HAVE_PCRE_H
+#elif defined(HAVE_PCRE_H)
     int found_ndx[30];
 #endif
     int found;

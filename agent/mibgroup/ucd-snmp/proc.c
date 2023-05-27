@@ -39,10 +39,10 @@
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_PCRE2_H
+#if defined(HAVE_PCRE2_H)
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
-#elif HAVE_PCRE_H
+#elif defined(HAVE_PCRE_H)
 #include <pcre.h>
 #endif
 
@@ -240,7 +240,7 @@ proc_parse_config(const char *token, char *cptr)
                 if ((*procp)->regexp.regex_ptr == NULL) {
                     config_perror(pcre2_error_msg);
                 }
-#elif HAVE_PCRE_H
+#elif defined(HAVE_PCRE_H)
                 const char *pcre_error;
                 int pcre_error_offset;
 
