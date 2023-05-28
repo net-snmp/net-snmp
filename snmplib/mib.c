@@ -647,9 +647,15 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     case NETSNMP_STRING_OUTPUT_GUESS:
         hex = 0;
         for (cp = var->val.string, x = 0; x < (int) var->val_len; x++, cp++) {
+#if defined(_MSC_VER) /* Windows MSVC library includes non-ascii characters (above 0x7F) as printing, which can generate ugly strings */
+            if ((!isprint(*cp) || !isascii(*cp)) && !isspace(*cp) ) {
+                hex = 1;
+            }
+#else /* defined(_MSC_VER) */
             if (!isprint(*cp) && !isspace(*cp)) {
                 hex = 1;
             }
+#endif /* defined(_MSC_VER) */
         }
         break;
 
