@@ -26,7 +26,7 @@
  * See the PACKAGE_VERSION variable in Unix /configure script
 */
 #ifndef PACKAGE_VERSION
-#define PACKAGE_VERSION "unknown"
+#define PACKAGE_VERSION "5.10"
 #endif
 
 /* Define HAVE_WIN32_PLATFORM_SDK if you have:
@@ -38,7 +38,7 @@
 
 /* Define NETSNMP_ENABLE_IPV6 to enable IPv6.  IPv6 is only available on
  * Windows XP and higher.  */
-/* #undef NETSNMP_ENABLE_IPV6 */
+#define NETSNMP_ENABLE_IPV6 1
 
 #define INSTALL_BASE "c:/usr"
 
@@ -58,7 +58,7 @@
 
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
-#define NETSNMP_DEFAULT_MIBDIRS INSTALL_BASE ## "/share/snmp/mibs"
+#define NETSNMP_DEFAULT_MIBDIRS INSTALL_BASE /*##*/ "/share/snmp/mibs"
 
 /* default mib files to load, specified by path. */
 /* #undef NETSNMP_DEFAULT_MIBFILES */
@@ -238,7 +238,7 @@
 /* #undef NETSNMP_DISABLE_SNMPV2C */
 
 /* Define if AES-192/AES-256 encryption should be supported */
-/* #undef NETSNMP_DRAFT_BLUMENTHAL_AES_04 */
+#define NETSNMP_DRAFT_BLUMENTHAL_AES_04 1
 
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 /* #undef HAVE_AES_CFB128_ENCRYPT */
@@ -1002,9 +1002,11 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
 
+#ifdef _MSC_VER
 /* Define as `__inline' if that's what the C compiler calls it, or to nothing
    if it is not supported. */
-#define inline __inline
+#  define inline __inline
+#endif
 
 /* Define to `long' if <sys/types.h> does not define. */
 /* #undef off_t */
@@ -1357,7 +1359,7 @@
 #endif
 
 /* If you have openssl 0.9.7 or above, you likely have AES support. */
-/* #undef NETSNMP_USE_OPENSSL */
+#define NETSNMP_USE_OPENSSL 1
 
 #ifdef NETSNMP_USE_OPENSSL
 
@@ -1704,16 +1706,16 @@ enum {
  */
 
 #ifdef NETSNMP_USE_DLL
-  #ifdef NETSNMP_DLL
-    #if defined(_MSC_VER)
-      #define NETSNMP_IMPORT extern __declspec(dllexport)
-    #endif
-  #else
-    #if defined(_MSC_VER)
-      #define NETSNMP_IMPORT extern __declspec(dllimport)
-    #endif
-  #endif   /* NETSNMP_DLL */
-#endif     /* NETSNMP_USE_DLL */
+#  ifdef NETSNMP_DLL
+#    if defined(_MSC_VER)
+#      define NETSNMP_IMPORT extern __declspec(dllexport)
+#	endif
+#  else
+#    if defined(_MSC_VER)
+#      define NETSNMP_IMPORT extern __declspec(dllimport)
+#    endif
+#  endif /* NETSNMP_DLL */
+#endif /* NETSNMP_USE_DLL */
 
 /* MSVC OpenSSL linker settings. */
 #if defined(_MSC_VER)
