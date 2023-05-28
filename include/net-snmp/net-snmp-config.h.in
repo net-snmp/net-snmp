@@ -772,6 +772,9 @@
 /* Define to 1 if you have the <pci/pci.h> header file. */
 #undef HAVE_PCI_PCI_H
 
+/* Define to 1 if you have <pcre2.h>. */
+#undef HAVE_PCRE2_H
+
 /* Define to 1 if you have <pcre.h>. */
 #undef HAVE_PCRE_H
 
