@@ -278,7 +278,7 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
     int             exact = 1;
     int             status;
 
-    struct variable *vp;
+    struct variable *const vp = handler->myvoid;
     netsnmp_old_api_cache *cacheptr;
     netsnmp_agent_session *oldasp = NULL;
     u_char         *access = NULL;
@@ -286,8 +286,6 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
     size_t          len;
     size_t          tmp_len;
     oid             tmp_name[MAX_OID_LEN];
-
-    vp = (struct variable *) handler->myvoid;
 
     /*
      * create old variable structure with right information 
@@ -322,7 +320,7 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
             /*
              * Actually call the old mib-module function 
              */
-            if (vp && vp->findVar) {
+            if (vp->findVar) {
                 tmp_len = requests->requestvb->name_length*sizeof(oid);
                 memcpy(tmp_name, requests->requestvb->name, tmp_len);
                 /** clear the rest of tmp_name to keep valgrind happy */
