@@ -1284,9 +1284,9 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
 	    bit >>= 1;
 	}
 	*bp = 0;
+    } else {
+        snprintf(tmp, sizeof(tmp), fmt, val);
     }
-    else
-	sprintf(tmp, fmt, val);
 
     if (shift != 0) {
         len = strlen(tmp);
