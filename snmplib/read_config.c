@@ -2017,7 +2017,7 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
         if (ilen % 2) {
             snmp_log(LOG_WARNING,"invalid hex string: wrong length\n");
             DEBUGMSGTL(("read_config_read_octet_string",
-                        "invalid hex string: wrong length"));
+                        "invalid hex string: wrong length\n"));
             return NULL;
         }
         ilen = ilen / 2;
@@ -2037,7 +2037,7 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
                 snmp_log(LOG_WARNING,"buffer too small to read octet string (%lu < %lu)\n",
                          (unsigned long)*len, (unsigned long)ilen);
                 DEBUGMSGTL(("read_config_read_octet_string",
-                            "buffer too small (%lu < %lu)", (unsigned long)*len, (unsigned long)ilen));
+                            "buffer too small (%lu < %lu)\n", (unsigned long)*len, (unsigned long)ilen));
                 *len = 0;
                 cptr1 = skip_not_white_const(readfrom);
                 return skip_white_const(cptr1);
@@ -2153,7 +2153,7 @@ read_config_read_objid_const(const char *readfrom, oid ** objid, size_t * len)
         copy_nword_const(readfrom, buf, sizeof(buf));
 
         if (!read_objid(buf, *objid, len)) {
-            DEBUGMSGTL(("read_config_read_objid", "Invalid OID"));
+            DEBUGMSGTL(("read_config_read_objid", "Invalid OID\n"));
             *len = 0;
             return NULL;
         }
@@ -2232,7 +2232,7 @@ read_config_read_data(int type, char *readfrom, void *dataptr,
             return read_config_read_objid(readfrom, oidpp, len);
 
         default:
-            DEBUGMSGTL(("read_config_read_data", "Fail: Unknown type: %d",
+            DEBUGMSGTL(("read_config_read_data", "Fail: Unknown type: %d\n",
                         type));
             return NULL;
         }
@@ -2311,7 +2311,7 @@ read_config_read_memory(int type, char *readfrom,
         return readfrom;
     }
 
-    DEBUGMSGTL(("read_config_read_memory", "Fail: Unknown type: %d", type));
+    DEBUGMSGTL(("read_config_read_memory", "Fail: Unknown type: %d\n", type));
     return NULL;
 }
 
@@ -2390,7 +2390,7 @@ read_config_store_data_prefix(char prefix, int type, char *storeto,
 
         default:
             DEBUGMSGTL(("read_config_store_data_prefix",
-                        "Fail: Unknown type: %d", type));
+                        "Fail: Unknown type: %d\n", type));
             return NULL;
         }
     return NULL;
