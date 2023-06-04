@@ -1237,7 +1237,8 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
         return 0;
     }
 
-    if (hint[0] == 'd') {
+    switch (hint[0]) {
+    case 'd':
         /*
          * We might *actually* want a 'u' here.  
          */
@@ -1251,14 +1252,14 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
             negative = 1;
             val = -val;
         }
-    } else {
-        /*
-         * DISPLAY-HINT character is 'b', 'o', or 'x'.  
-         */
+        snprintf(tmp, sizeof(tmp), fmt, val);
+        break;
+    case 'o':
+    case 'x':
         fmt[2] = hint[0];
-    }
-
-    if (hint[0] == 'b') {
+        snprintf(tmp, sizeof(tmp), fmt, val);
+        break;
+    case 'b': {
 	unsigned long int bit = 0x80000000LU;
 	char *bp = tmp;
 	while (bit) {
@@ -1266,8 +1267,10 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
 	    bit >>= 1;
 	}
 	*bp = 0;
-    } else {
-        snprintf(tmp, sizeof(tmp), fmt, val);
+        break;
+    }
+    default:
+        return 0;
     }
 
     if (shift != 0) {
