@@ -21,6 +21,7 @@ case "$(uname)" in
 	    pkg-config
 	    python3-dev
 	"
+	apt-get update
 	for p in ${packages}; do
 	    apt-get install -qq -o=Dpkg::Use-Pty=0 -y "$p"
 	done
