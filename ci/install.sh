@@ -24,6 +24,7 @@ case "$(uname)" in
 	    python3-dev
 	    setpriv
 	"
+	apt-get update
 	for p in ${packages}; do
 	    apt-get install -qq -o=Dpkg::Use-Pty=0 -y "$p"
 	done
