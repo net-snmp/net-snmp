@@ -1036,6 +1036,8 @@ snmp_open(netsnmp_session *session)
         return NULL;
     }
 
+    slp->session->flags &= ~SNMP_FLAGS_SESSION_USER;
+
     snmp_session_insert(slp);
 
     return (slp->session);
@@ -1072,6 +1074,8 @@ snmp_open_ex(netsnmp_session *session,
     slp->internal->hook_build = fbuild;
     slp->internal->hook_realloc_build = frbuild;
     slp->internal->check_packet = fcheck;
+
+    slp->session->flags &= ~SNMP_FLAGS_SESSION_USER;
 
     snmp_session_insert(slp);
 
@@ -1329,6 +1333,19 @@ _sess_copy(netsnmp_session * in_session)
             }
         }
     }
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+    if (in_session->sessUser) {
+        struct usmUser *user;
+
+        user = calloc(1, sizeof(struct usmUser));
+        if (user == NULL) {
+            snmp_sess_close(slp);
+            return NULL;
+        }
+        session->sessUser = usm_cloneFrom_user(in_session->sessUser, user);
+    }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     /* Anything below this point should only be done if the transport
        had no say in the matter */
@@ -1918,6 +1935,9 @@ void           *
 snmp_sess_open(netsnmp_session * pss)
 {
     void           *pvoid;
+
+    pss->flags |= SNMP_FLAGS_SESSION_USER;
+
     pvoid = _sess_open(pss);
     if (!pvoid) {
         SET_SNMP_ERROR(pss->s_snmp_errno);
@@ -1954,7 +1974,7 @@ void netsnmp_cleanup_session(netsnmp_session *s)
 #ifndef NETSNMP_NO_TRAP_STATS
     free(s->trap_stats);
 #endif /* NETSNMP_NO_TRAP_STATS */
-    memset(s, 0, sizeof(*s));
+    usm_free_user(s->sessUser);
 }
 
 /*
