@@ -93,6 +93,7 @@ open_agentx_session(netsnmp_session * session, netsnmp_pdu *pdu)
     sp->contextName = NULL;
     sp->securityEngineID = NULL;
     sp->securityPrivProto = NULL;
+    sp->sessUser = NULL;
 
     /*
      * This next bit utilises unused SNMPv3 fields
