@@ -418,6 +418,11 @@ struct snmp_session {
      * XXX: or should we add a new field into this structure?
      */
     void           *myvoid;
+
+    /**
+     * session specific user
+     */
+    struct usmUser *sessUser;
 };
 
 typedef struct netsnmp_index_s {
