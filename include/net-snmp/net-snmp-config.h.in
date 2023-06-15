@@ -1974,6 +1974,12 @@
 #define HAVE_AES 1
 #endif
 
+#ifdef NETSNMP_USE_OPENSSL
+/* Suppress deprecation warnings from OpenSSL 3.0+ */
+/* Our interface match OpenSSL 1.0.0 */
+#define OPENSSL_API_COMPAT 0x10000000L
+#endif
+
 /* define signal if DNE */
 
 #ifndef HAVE_SIGNAL
