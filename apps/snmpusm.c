@@ -17,6 +17,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/library/openssl_config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmp_openssl.h>
 #if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
