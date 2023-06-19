@@ -65,6 +65,7 @@ netsnmp_feature_child_of(usm_scapi, usm_support);
 #ifdef NETSNMP_USE_INTERNAL_MD5
 #include <net-snmp/library/md5.h>
 #endif
+#include <net-snmp/library/openssl_config.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_secmod.h>
