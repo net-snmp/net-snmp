@@ -62,6 +62,7 @@
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
 
+#include <net-snmp/library/openssl_config.h>
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>

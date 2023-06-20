@@ -21,6 +21,7 @@
 #if defined(NETSNMP_USE_OPENSSL)
 
 #include <string.h>
+#include <net-snmp/library/openssl_config.h>
 #include <openssl/dh.h>
 
 #ifndef HAVE_DH_GET0_PQG
