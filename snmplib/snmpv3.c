@@ -862,6 +862,11 @@ version_conf(const char *word, char *cptr)
 void
 oldengineID_conf(const char *word, char *cptr)
 {
+    if (oldEngineID) {
+        free(oldEngineID);
+        oldEngineID = NULL;
+        oldEngineIDLength = 0;
+    }
     read_config_read_octet_string(cptr, &oldEngineID, &oldEngineIDLength);
 }
 

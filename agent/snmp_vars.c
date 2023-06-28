@@ -165,19 +165,6 @@ struct module_init_list *initlist = NULL;
 struct module_init_list *noinitlist = NULL;
 
 /*
- * mib clients are passed a pointer to a oid buffer.  Some mib clients
- * * (namely, those first noticed in mibII/vacm.c) modify this oid buffer
- * * before they determine if they really need to send results back out
- * * using it.  If the master agent determined that the client was not the
- * * right one to talk with, it will use the same oid buffer to pass to the
- * * rest of the clients, which may not longer be valid.  This should be
- * * fixed in all clients rather than the master.  However, its not a
- * * particularily easy bug to track down so this saves debugging time at
- * * the expense of a few memcpy's.
- */
-#define MIB_CLIENTS_ARE_EVIL 1
-
-/*
  *      Each variable name is placed in the variable table, without the
  * terminating substring that determines the instance of the variable.  When
  * a string is found that is lexicographicly preceded by the input string,
