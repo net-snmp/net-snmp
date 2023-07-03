@@ -347,7 +347,6 @@ netsnmp_cache_timer_start(netsnmp_cache *cache)
         return 0;
     }
 
-    cache->flags &= ~NETSNMP_CACHE_AUTO_RELOAD;
     DEBUGMSGT(("cache_timer:start",
                "starting timer %lu for cache %p\n", cache->timer_id, cache));
     return cache->timer_id;
@@ -370,7 +369,6 @@ netsnmp_cache_timer_stop(netsnmp_cache *cache)
 
     snmp_alarm_unregister(cache->timer_id);
     cache->timer_id = 0;
-    cache->flags |= NETSNMP_CACHE_AUTO_RELOAD;
 }
 
 
@@ -395,7 +393,7 @@ netsnmp_cache_handler_get(netsnmp_cache* cache)
                  */
                 (void)_cache_load(cache);
             }
-            if (cache->flags & NETSNMP_CACHE_AUTO_RELOAD)
+            if (cache->flags & NETSNMP_CACHE_AUTO_RELOAD && !cache->timer_id)
                 netsnmp_cache_timer_start(cache);
             
         }
