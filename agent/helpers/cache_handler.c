@@ -369,6 +369,7 @@ netsnmp_cache_timer_stop(netsnmp_cache *cache)
                "stopping timer %lu for cache %p\n", cache->timer_id, cache));
 
     snmp_alarm_unregister(cache->timer_id);
+    cache->timer_id = 0;
     cache->flags |= NETSNMP_CACHE_AUTO_RELOAD;
 }
 
