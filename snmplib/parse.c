@@ -3903,6 +3903,7 @@ read_module_internal(const char *name)
     struct module  *mp;
     FILE           *fp;
     struct node    *np;
+    int             res;
 
     netsnmp_init_mib_internals();
 
@@ -3944,9 +3945,14 @@ read_module_internal(const char *name)
             File = oldFile;
             mibLine = oldLine;
             current_module = oldModule;
-            if ((np == NULL) && (gMibError == MODULE_SYNTAX_ERROR) )
-                return MODULE_SYNTAX_ERROR;
-            return MODULE_LOADED_OK;
+            res = !np && gMibError == MODULE_SYNTAX_ERROR ?
+                MODULE_SYNTAX_ERROR : MODULE_LOADED_OK;
+            while (np) {
+                struct node *nnp = np->next;
+                free_node(np);
+                np = nnp;
+            }
+            return res;
         }
 
     return MODULE_NOT_FOUND;
