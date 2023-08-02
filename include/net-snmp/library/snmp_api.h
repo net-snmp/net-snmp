@@ -180,6 +180,7 @@ typedef struct request_list {
 
 #define SNMP_DETAIL_SIZE        512
 
+#define SNMP_FLAGS_TIME_CREATED    0x2000
 #define SNMP_FLAGS_SESSION_USER    0x1000
 #define SNMP_FLAGS_UDP_BROADCAST   0x800
 #define SNMP_FLAGS_RESP_CALLBACK   0x400      /* Additional callback on response */
@@ -477,6 +478,7 @@ typedef struct request_list {
     NETSNMP_IMPORT
     int snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
                                              netsnmp_session *session);
+    netsnmp_pdu *snmpv3_probe_usm_pdu_create(void);
 
     /*
      * New re-allocating reverse encoding functions.  
