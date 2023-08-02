@@ -1345,6 +1345,31 @@ snmp_sess_copy(netsnmp_session * pss)
     return psl;
 }
 
+/**
+ * Allocate a PDU for probing for the engineID
+ *
+ * The returned PDU can be used to probe synchronously or asynchronously.
+ * SNMP_FLAGS_DONT_PROBE must be set to disable internal synchronous probing,
+ * when response is received and all callbacks have executed the rest of PDUs
+ * can be sent as usual.
+ */
+netsnmp_pdu *snmpv3_probe_usm_pdu_create(void)
+{
+        netsnmp_pdu     *pdu;
+
+        pdu = snmp_pdu_create(SNMP_MSG_GET);
+        if (!pdu)
+                return NULL;
+
+        pdu->version = SNMP_VERSION_3;
+        pdu->securityName = strdup("");
+        pdu->securityNameLen = 0;
+        pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+        pdu->securityModel = SNMP_SEC_MODEL_USM;
+
+        return pdu;
+}
+
 #ifndef NETSNMP_FEATURE_REMOVE_SNMPV3_PROBE_CONTEXTENGINEID_RFC5343
 /**
  * probe for engineID using RFC 5343 probing mechanisms
@@ -5093,12 +5118,13 @@ _build_initial_pdu_packet(struct session_list *slp, netsnmp_pdu *pdu, int bulk)
     }
 
     /*
-     * check to see if we need a v3 engineID probe
+     * Check if we need to perform a v3 engineID probe. Call post probe hook to
+     * create user from information in a session even if SNMP_FLAGS_DONT_PROBE
+     * is set, as this may indicate that probe was already sent by other means
+     * for example asynchronously.
      */
     if ((pdu->version == SNMP_VERSION_3) &&
-        (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) &&
-        (session->securityEngineIDLen == 0) &&
-        (0 == (session->flags & SNMP_FLAGS_DONT_PROBE))) {
+        (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE)) {
         int rc;
         DEBUGMSGTL(("snmpv3_build", "delayed probe for engineID\n"));
         rc = snmpv3_engineID_probe(slp, session);

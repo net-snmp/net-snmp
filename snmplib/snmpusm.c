@@ -3587,7 +3587,7 @@ err:
  * 
  * creates a user in the usm table from the information in a session.
  * If the user already exists, it is updated with the current
- * information from the session
+ * information from the session, also update boot/time set
  * 
  * Parameters:
  * session -- IN: pointer to the session to use when creating the user.
@@ -3602,6 +3602,20 @@ usm_create_user_from_session(netsnmp_session * session)
     struct usmUser *user;
     int             user_just_created = 0;
     char *cp;
+
+    /*
+     * If boot/time supplied set it for this engineID. Do it from hook when
+     * creating user in case probe was sent by other means for example
+     * asynchronously.
+     */
+    if (!(session->flags & SNMP_FLAGS_TIME_CREATED) &&
+        (session->engineBoots || session->engineTime)) {
+        set_enginetime(session->securityEngineID,
+                       session->securityEngineIDLen,
+                       session->engineBoots, session->engineTime,
+                       TRUE);
+        session->flags |= SNMP_FLAGS_TIME_CREATED;
+    }
 
     /*
      * - don't create-another/copy-into user for this session by default
@@ -3806,14 +3820,9 @@ usm_build_probe_pdu(netsnmp_pdu **pdu, struct usmUser **sessUser)
      */
     if (!pdu)
         return -1;
-    *pdu = snmp_pdu_create(SNMP_MSG_GET);
+    *pdu = snmpv3_probe_usm_pdu_create();
     if (!(*pdu))
         return -1;
-    (*pdu)->version = SNMP_VERSION_3;
-    (*pdu)->securityName = strdup("");
-    (*pdu)->securityNameLen = strlen((*pdu)->securityName);
-    (*pdu)->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-    (*pdu)->securityModel = SNMP_SEC_MODEL_USM;
 
     /*
      * create the empty user 
@@ -3914,6 +3923,7 @@ static int usm_discover_engineid(struct session_list *slp,
                        session->securityEngineIDLen,
                        session->engineBoots, session->engineTime,
                        TRUE);
+        session->flags |= SNMP_FLAGS_TIME_CREATED;
     }
     return SNMPERR_SUCCESS;
 }
