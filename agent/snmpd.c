@@ -1170,7 +1170,6 @@ snmpd_reconfig(void)
     netsnmp_logging_restart();
     snmp_log(LOG_INFO, "NET-SNMP version %s restarted\n",
              netsnmp_get_version());
-    clear_user_list();
     read_premib_configs();
     update_config();
     send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
