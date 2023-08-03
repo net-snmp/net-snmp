@@ -125,6 +125,10 @@ extern          "C" {
     NETSNMP_IMPORT
     oid            *usm_generate_OID(const oid *prefix, size_t prefixLen,
                                    const struct usmUser *uptr, size_t *length);
+    
+    NETSNMP_IMPORT
+    void            clear_user_list(void);
+
     void            init_usm(void);
     NETSNMP_IMPORT
     void            init_usm_conf(const char *app);

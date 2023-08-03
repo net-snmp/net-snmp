@@ -165,6 +165,8 @@
 #include <net-snmp/library/sd-daemon.h>
 #endif
 
+#include <net-snmp/library/snmpusm.h>
+
 netsnmp_feature_want(logging_file);
 netsnmp_feature_want(logging_stdio);
 netsnmp_feature_want(logging_syslog);
