@@ -169,6 +169,8 @@ netsnmp_feature_want(logging_file);
 netsnmp_feature_want(logging_stdio);
 netsnmp_feature_want(logging_syslog);
 
+#include <net-snmp/library/snmpusm.h>
+
 /*
  * Globals.
  */
