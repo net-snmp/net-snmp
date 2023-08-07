@@ -660,7 +660,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     case NETSNMP_STRING_OUTPUT_GUESS:
         hex = 0;
         for (cp = var->val.string, x = 0; x < (int) var->val_len; x++, cp++) {
-            if (!isprint(*cp) && !isspace(*cp)) {
+            if ((!isprint(*cp) || !isascii(*cp)) && !isspace(*cp)) {
                 hex = 1;
             }
         }
