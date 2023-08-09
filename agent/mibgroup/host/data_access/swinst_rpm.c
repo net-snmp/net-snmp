@@ -73,15 +73,23 @@ netsnmp_swinst_arch_init(void)
 #endif
 
     snprintf( pkg_directory, SNMP_MAXPATH, "%s/Packages", dbpath );
+    
+    if (-1 == stat( pkg_directory, &stat_buf )) {
+
+        /* check for SQLite DB backend */
+        snprintf( pkg_directory, SNMP_MAXPATH, "%s/rpmdb.sqlite", dbpath );
+        
+        if (-1 == stat( pkg_directory, &stat_buf )) {
+            snmp_log(LOG_ERR, "Can't find directory of RPM packages\n");
+            pkg_directory[0] = '\0';
+        }
+    }
+
     SNMP_FREE(rpmdbpath);
     dbpath = NULL;
 #ifdef HAVE_RPMGETPATH
     rpmFreeRpmrc();
-#endif
-    if (-1 == stat( pkg_directory, &stat_buf )) {
-        snmp_log(LOG_ERR, "Can't find directory of RPM packages\n");
-        pkg_directory[0] = '\0';
-    }
+#endif    
 }
 
 void
