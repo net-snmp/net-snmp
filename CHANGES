@@ -8,8 +8,23 @@ listing of all changes made to the code.
     libsnmp:
       - Remove the SNMP_SWIPE_MEM() macro Remove this macro since it is not
 	used in the Net-SNMP code base.
+      - DISPLAY-HINT fixes
+      - Miscellanious improvements to the transports
+      - Handle multiple oldEngineID configuration lines 
+      - fixes for DNS names longer than 63 characters
 
-    - misc bug fixes
+    agent:
+      - Added a ignoremount configuration option for the HOST-MIB
+      - disallow SETs with a NULL varbind
+      - fix the --enable-minimalist build
+
+    apps:
+      - snmpset: allow SET with NULL varbind for testing
+      - snmptrapd: improved MySQL logging code
+
+    general:
+      - configure: Remove -Wno-deprecated as it is no longer needed
+      - miscellanious ther bug fixes, build fixes and cleanups
 
 *5.9.3*:
     security:
