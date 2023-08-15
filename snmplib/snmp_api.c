@@ -1592,7 +1592,7 @@ netsnmp_sess_config_and_open_transport(netsnmp_session *in_session,
         transport = transport->f_open(transport);
 
     if (transport == NULL) {
-        DEBUGMSGTL(("snmp_sess", "couldn't interpret peername\n"));
+        DEBUGMSGTL(("snmp_sess", "couldn't open transport connection\n"));
         in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
         in_session->s_errno = errno;
         snmp_set_detail(in_session->peername);
