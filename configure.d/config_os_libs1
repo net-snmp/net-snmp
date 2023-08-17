@@ -36,8 +36,6 @@ if test "x$with_rpm" != "xno"; then
   # rpm-4.0.x needs rpmio.
   NETSNMP_SEARCH_LIBS(rpmGetPath, rpmio,,, $LMIBLIBS, _rpmlibs)
   
-  # rpm-4.0.3 librpmdb actually contains what we need.
-  NETSNMP_SEARCH_LIBS(rpmdbOpen, rpmdb,,, $LMIBLIBS, _rpmlibs)
   # now check for rpm using the appropriate libraries.
   NETSNMP_SEARCH_LIBS(rpmReadConfigFiles, rpm, [
     AC_DEFINE(HAVE_LIBRPM, 1,
