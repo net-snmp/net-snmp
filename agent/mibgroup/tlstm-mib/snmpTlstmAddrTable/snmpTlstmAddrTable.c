@@ -407,7 +407,6 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
     netsnmp_request_info *request = NULL;
     netsnmp_table_request_info *table_info;
     netsnmp_tdata  *table_data;
-    netsnmp_tdata_row *table_row;
     tlstmAddrTable_entry *table_entry;
     int             ret = SNMP_ERR_NOERROR;
 
@@ -544,6 +543,8 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
      */
     case MODE_SET_RESERVE2:
         for (request = requests; request; request = request->next) {
+            netsnmp_tdata_row *table_row = NULL;
+
             table_entry = (tlstmAddrTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_data = netsnmp_tdata_extract_table(request);
@@ -625,7 +626,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
          * release undo resources,  remove any newly created rows
          */
         for (request = requests; request; request = request->next) {
-            table_row = netsnmp_tdata_extract_row(request);
+            netsnmp_tdata_row *table_row = netsnmp_tdata_extract_row(request);
             table_data  =  netsnmp_tdata_extract_table(request);
             table_entry =
                 (tlstmAddrTable_entry *) table_row ? table_row->
@@ -799,7 +800,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
      */
     case MODE_SET_UNDO:
         for (request = requests; request; request = request->next) {
-            table_row = netsnmp_tdata_extract_row(request);
+            netsnmp_tdata_row *table_row = netsnmp_tdata_extract_row(request);
             table_entry =
                 (tlstmAddrTable_entry *) table_row ? table_row->
                 data : NULL;
@@ -850,7 +851,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
          * or remove any newly created rows
          */
         for (request = requests; request; request = request->next) {
-            table_row = netsnmp_tdata_extract_row(request);
+            netsnmp_tdata_row *table_row = netsnmp_tdata_extract_row(request);
             table_entry =
                 (tlstmAddrTable_entry *) table_row ? table_row->
                 data : NULL;
@@ -877,7 +878,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
      */
     case MODE_SET_COMMIT:
         for (request = requests; request; request = request->next) {
-            table_row = netsnmp_tdata_extract_row(request);
+            netsnmp_tdata_row *table_row = netsnmp_tdata_extract_row(request);
             table_data = netsnmp_tdata_extract_table(request);
             table_info = netsnmp_extract_table_info(request);
             table_entry = (tlstmAddrTable_entry *)
@@ -938,7 +939,6 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                         /** disassociate row with requests */
                         netsnmp_remove_tdata_row(request, table_row);
                         tlstmAddrTable_removeEntry(table_data, table_row);
-                        table_row = NULL;
                         table_entry = NULL;
                     }
                     /** release undo data */
