@@ -457,7 +457,7 @@ _schedule_next_execute_time(void) {
     for(obj = ITERATOR_FIRST(iterator); obj;
         obj = ITERATOR_NEXT(iterator)) {
         next_time = calculate_time_until_next_run(obj, &local_now);
-        DEBUGMSGTL(("deliverByNotify", "  obj: %d (last=%d, next_run=%d)\n", next_time, obj->last_run, obj->next_run));
+        DEBUGMSGTL(("deliverByNotify", "  obj: %d (last=%lld, next_run=%lld)\n", next_time, (long long)obj->last_run, (long long)obj->next_run));
         if (next_time < sleep_for)
             sleep_for = next_time;
     }
