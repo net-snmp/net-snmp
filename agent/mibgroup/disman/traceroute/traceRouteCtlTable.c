@@ -4455,7 +4455,6 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                 count = traceRouteHopsTable_count(item);
 
 
-                struct traceRouteHopsTable_data *StorageTmp = NULL;
                 struct header_complex_index *hciptr2, *nhciptr2;
                 netsnmp_variable_list *vars = NULL;
                 oid             newoid[MAX_OID_LEN];
@@ -4473,7 +4472,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                     if (snmp_oid_compare
                         (newoid, newoid_len, hciptr2->name,
                          newoid_len) == 0) {
-                        StorageTmp =
+                        struct traceRouteHopsTable_data *StorageTmp =
                             header_complex_extract_entry
                             (&traceRouteHopsTableStorage, hciptr2);
 
@@ -4493,7 +4492,6 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                             = '\0';
 
                         k++;
-                        StorageTmp = NULL;
                     }
                 }
                 traceRouteHopsTable_del(item);
