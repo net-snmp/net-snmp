@@ -863,8 +863,6 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 		    netsnmp_create_data_list(TABLE_DATA_ROW, newrow, NULL));
         	    	}
     		    }
-
-		    row = NULL;
                 }
                 if (newrowstash->deleted) {
                     netsnmp_table_dataset_remove_and_delete_row(datatable, newrow);
