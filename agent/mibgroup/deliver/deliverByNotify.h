@@ -27,8 +27,8 @@ SNMPAlarmCallback deliver_execute;
 /* implementation details */
 typedef struct deliver_by_notify_s {
    int     frequency;
-   int     last_run;
-   int     next_run;
+   time_t  last_run;
+   time_t  next_run;
    oid    *target;
    size_t  target_len;
    int     max_packet_size;
