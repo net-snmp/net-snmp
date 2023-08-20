@@ -840,7 +840,6 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                     /** disassociate row with requests */
                     netsnmp_remove_tdata_row(request, row);
                     tlstmCertToTSNTable_removeEntry(table, row);
-                    row = NULL;
                     entry = NULL;
                 }
                 /** release undo data */
