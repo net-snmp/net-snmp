@@ -756,7 +756,6 @@ get_table_entries(netsnmp_session * ss)
                     if (dp[col]) {
                         fprintf(stderr, "OID not increasing: %s\n", buf);
                         running = 0;
-                        vars = NULL;
                         end_of_table = 1;
                         exitval = 2;
                         break;
