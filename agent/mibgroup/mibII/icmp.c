@@ -751,6 +751,8 @@ bail:
         netsnmp_handler_registration_free(msg_stats_reginfo);
     if (table_reginfo)
         netsnmp_handler_registration_free(table_reginfo);
+    if (msg_stats_table_info)
+        free(msg_stats_table_info);
 #endif
     if (scalar_reginfo)
         netsnmp_handler_registration_free(scalar_reginfo);
