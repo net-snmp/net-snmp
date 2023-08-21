@@ -82,6 +82,7 @@ init_nsDebug(void)
      */
     iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
     if (!iinfo) {
+        free(table_info);
         return;
     }
     iinfo->get_first_data_point = get_first_debug_entry;
