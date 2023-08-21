@@ -519,6 +519,9 @@ run_lookup(struct lookupTable_data *item)
     addressType = (long) item->lookupCtlTargetAddressType;
     addresslen = (size_t) item->lookupCtlTargetAddressLen;
     address = (char *) malloc(addresslen + 1);
+    if (!address) {
+        return;
+    }
     memcpy(address, item->lookupCtlTargetAddress, addresslen + 1);
     address[addresslen] = '\0';
 
@@ -530,6 +533,7 @@ run_lookup(struct lookupTable_data *item)
             DEBUGMSGTL(("lookupResultsTable", "Invalid argument: %s\n",
                         address));
             modify_lookupCtlRc(item, 99);
+            free(address);
             return;
         }
 
