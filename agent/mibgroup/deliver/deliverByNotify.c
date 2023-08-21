@@ -298,6 +298,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
             /* XXX: disable? and reset the next query time point! */
             snmp_log(LOG_ERR, "deliverByNotify: failed to issue the query");
             ITERATOR_RELEASE(iterator);
+            free(vars);
             return;
         }
 
