@@ -480,6 +480,7 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
         snmp_log(LOG_ERR, "could not create table data set handler\n");
         netsnmp_handler_free(handler);
         netsnmp_handler_registration_free(reginfo);
+        free(table_info);
         return MIB_REGISTRATION_FAILED;
     }
 
