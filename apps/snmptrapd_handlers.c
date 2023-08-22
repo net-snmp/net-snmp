@@ -837,7 +837,7 @@ int   command_handler( netsnmp_pdu           *pdu,
          *  If there's a format string registered for this trap, then use it.
          *  Otherwise use the standard execution format setting.
          */
-        if (handler && handler->format && *handler->format) {
+        if (handler->format && *handler->format) {
             DEBUGMSGTL(( "snmptrapd", "format = '%s'\n", handler->format));
             realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              handler->format,
