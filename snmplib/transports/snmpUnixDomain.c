@@ -149,6 +149,7 @@ netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
             if (rc < 0 && errno != EINTR) {
                 DEBUGMSGTL(("netsnmp_unix", "recv fd %d err %d (\"%s\")\n",
                             t->sock, errno, strerror(errno)));
+                free(to);
                 return rc;
             }
             *opaque = (void*)to;
