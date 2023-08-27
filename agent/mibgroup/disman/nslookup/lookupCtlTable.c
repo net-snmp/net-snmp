@@ -766,6 +766,7 @@ run_lookup(struct lookupTable_data *item)
                         "Can't get a network host entry for %s\n",
                         address));
             modify_lookupCtlRc(item, h_errno);
+            free(address);
             return;
         } else {
             modify_lookupCtlRc(item, 0L);
