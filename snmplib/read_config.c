@@ -1451,7 +1451,7 @@ read_config_files(int when) {
 void
 read_config_print_usage(const char *lead)
 {
-    struct config_files *ctmp = config_files;
+    struct config_files *ctmp;
     struct config_line *ltmp;
 
     if (lead == NULL)
