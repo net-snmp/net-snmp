@@ -471,6 +471,7 @@ notifyTable_register_notifications(int major, int minor,
 
     if (NULL != nptr)
         snmpNotifyTable_remove(nptr);
+    free(nptr);
 
     if (NULL != pptr)
         snmpTargetParamTable_remove(pptr);
