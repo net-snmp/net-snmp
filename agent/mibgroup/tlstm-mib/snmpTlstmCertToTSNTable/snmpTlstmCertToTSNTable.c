@@ -1322,16 +1322,20 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
     }
     
     reg_oid[10] = 2;
-    to_tsn_last_changed_reg = netsnmp_create_handler_registration(
-        "snmpTlstmCertToTSNTableLastChanged", NULL, reg_oid,
-        OID_LENGTH(reg_oid), HANDLER_CAN_RONLY);
     watcher = netsnmp_create_watcher_info((void*)&_last_changed,
                                           sizeof(_last_changed),
                                           ASN_TIMETICKS,
                                           WATCHER_FIXED_SIZE);
-    if (!to_tsn_last_changed_reg || !watcher)
+    if (watcher) {
+        to_tsn_last_changed_reg = netsnmp_create_handler_registration(
+            "snmpTlstmCertToTSNTableLastChanged", NULL, reg_oid,
+            OID_LENGTH(reg_oid), HANDLER_CAN_RONLY);
+    }
+    if (!watcher || !to_tsn_last_changed_reg) {
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmCertToTSNCount\n");
+        free(watcher);
+    }
     else {
         if (NULL != contextName)
             to_tsn_last_changed_reg->contextName = strdup(contextName);
