@@ -394,7 +394,9 @@ netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len, int allow_realloc,
         return 0;
 
     if (NULL == *dest) {
-        s = (unsigned char *) calloc(1, olen);
+        s = calloc(1, olen);
+        if (s == NULL)
+            return 0;
         *dest_len = olen;
     }
     else
@@ -1072,6 +1074,8 @@ atime_ready(const_marker_t pm, int delta_ms)
         return 0;
 
     now = atime_newMarker();
+    if (!now)
+        return 0;
 
     diff = atime_diff(pm, now);
     free(now);
@@ -1097,6 +1101,8 @@ uatime_ready(const_marker_t pm, unsigned int delta_ms)
         return 0;
 
     now = atime_newMarker();
+    if (!now)
+        return 0;
 
     diff = uatime_diff(pm, now);
     free(now);
@@ -1148,6 +1154,8 @@ marker_tticks(const_marker_t pm)
 {
     int             res;
     marker_t        now = atime_newMarker();
+    if (!now)
+        return 0;
 
     res = atime_diff(pm, now);
     free(now);
