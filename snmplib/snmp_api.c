@@ -5630,6 +5630,13 @@ _sess_process_packet_parse_pdu(void *sessp, netsnmp_session * sp,
                   *c = 0;
               filtered = netsnmp_transport_filter_check(sourceaddr);
           }
+          else if (!strncmp(addrtxt, "callback", 8)) {
+              /* do not filter internal request */
+              DEBUGMSGTL(("sess_process_packet:filter",
+                          "bypass packet from %s \n",
+                          addrtxt));
+              filtered = 1;
+          }
           if ((filter == -1) && filtered)
               dropstr = "matched blocklist";
           else if ((filter == 1) && !filtered)
