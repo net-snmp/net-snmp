@@ -195,6 +195,11 @@ internal_register_config_handler(const char *type_param,
         }
 
         (*ctmp)->fileHeader = strdup(type);
+        if (!(*ctmp)->fileHeader) {
+            free(*ctmp);
+            *ctmp = NULL;
+            return NULL;
+        }
         DEBUGMSGTL(("9:read_config:type", "new type %s\n", type));
     }
 
@@ -219,6 +224,12 @@ internal_register_config_handler(const char *type_param,
 
         (*ltmp)->config_time = when;
         (*ltmp)->config_token = strdup(token);
+        if (!(*ltmp)->config_token) {
+            free(*ltmp);
+            *ltmp = NULL;
+            return NULL;
+        }
+
         if (help != NULL)
             (*ltmp)->help = strdup(help);
     }
@@ -1241,6 +1252,9 @@ read_config_files_in_path(const char *path, struct config_files *ctmp,
         return SNMPERR_GENERR;
 
     envconfpath = strdup(path);
+    if (NULL == envconfpath) {
+        return SNMPERR_GENERR;
+    }
 
     DEBUGMSGTL(("read_config:path", " config path used for %s:%s (persistent path:%s)\n",
                 ctmp->fileHeader, envconfpath, perspath));
@@ -1390,6 +1404,9 @@ read_config_files_of_type(int when, struct config_files *ctmp)
          * keyword transforms the perspath pointer into a dangling pointer.
          */
         perspath = strdup(get_persistent_directory());
+        if (perspath == NULL) {
+            return SNMPERR_GENERR;
+        }
         if (envconfpath == NULL) {
             /*
              * read just the config files (no persistent stuff), since
@@ -1401,6 +1418,9 @@ read_config_files_of_type(int when, struct config_files *ctmp)
                 ret = SNMPERR_SUCCESS;
             free(perspath);
             perspath = strdup(get_persistent_directory());
+            if (perspath == NULL) {
+                return SNMPERR_GENERR;
+            }
             if ( read_config_files_in_path(perspath, ctmp, when, perspath,
                                       persfile) == SNMPERR_SUCCESS )
                 ret = SNMPERR_SUCCESS;
