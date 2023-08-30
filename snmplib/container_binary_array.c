@@ -801,6 +801,11 @@ netsnmp_container_get_binary_array(void)
     }
 
     c->container_data = netsnmp_binary_array_initialize();
+    if (NULL == c->container_data) {
+        free(c);
+        snmp_log(LOG_ERR, "couldn't allocate memory for container_data\n");
+        return NULL;
+    }
 
     /*
      * NOTE: CHANGES HERE MUST BE DUPLICATED IN duplicate AS WELL!!
