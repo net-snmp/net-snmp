@@ -396,6 +396,11 @@ se_add_pair_to_slist(const char *listname, char *label, int value)
         }
         sptr->next = sliststorage;
         sptr->name = strdup(listname);
+        if (!sptr->name) {
+            free(sptr);
+            free_enum_list(list);
+            return SE_NOMEM;
+        }
         sptr->list = list;
         sliststorage = sptr;
     }
