@@ -231,6 +231,9 @@ init_hr_swinst(void)
             snprintf(path, sizeof(path), "%s/packages.rpm", swi->swi_dbpath);
         path[ sizeof(path)-1 ] = 0;
         swi->swi_directory = strdup(path);
+#ifdef HAVE_RPMGETPATH
+        rpmFreeRpmrc();
+#endif
     }
 #else
 #  ifdef _PATH_HRSW_directory
