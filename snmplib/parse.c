@@ -3120,6 +3120,10 @@ compliance_lookup(const char *name, int modid)
             return 0;
         op->next = objgroups;
         op->name = strdup(name);
+        if (!op->name) {
+            free(op);
+            return 0;
+        }
         op->line = mibLine;
         objgroups = op;
         return 1;
@@ -4287,6 +4291,12 @@ new_module(const char *name, const char *file)
         return;
     mp->name = strdup(name);
     mp->file = strdup(file);
+    if (mp->name == NULL || mp->file == NULL) {
+        free(mp->name);
+        free(mp->file);
+        free(mp);
+        return;
+    }
     mp->imports = NULL;
     mp->no_imports = -1;        /* Not yet loaded */
     mp->modid = max_module;
