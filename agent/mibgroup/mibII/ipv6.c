@@ -117,6 +117,12 @@
 # ifdef HAVE_NETINET_TCP_TIMER_H
 #  include <netinet/tcp_timer.h>
 # endif
+# ifdef HAVE_SYS_CALLOUT_H
+#  include <sys/callout.h>
+# endif
+# ifdef HAVE_SYS_OSD_H
+#  include <sys/osd.h>
+# endif
 # ifdef HAVE_NETINET_TCP_VAR_H
 #  include <netinet/tcp_var.h>
 # endif
