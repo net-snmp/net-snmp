@@ -234,6 +234,21 @@ create_pingCtlTable_data(void)
 
     StorageNew->storageType = ST_NONVOLATILE;
     StorageNew->pingProbeHistoryMaxIndex = 0;
+
+    if (StorageNew->pingCtlTargetAddress == NULL ||
+        StorageNew->pingCtlTrapGeneration == NULL ||
+        StorageNew->pingCtlType == NULL ||
+        StorageNew->pingCtlDescr == NULL ||
+        StorageNew->pingCtlSourceAddress == NULL) {
+        free(StorageNew->pingCtlTargetAddress);
+        free(StorageNew->pingCtlTrapGeneration);
+        free(StorageNew->pingCtlType);
+        free(StorageNew->pingCtlDescr);
+        free(StorageNew->pingCtlSourceAddress);
+        free(StorageNew);
+        return NULL;
+    }
+
     return StorageNew;
 }
 
