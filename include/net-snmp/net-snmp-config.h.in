@@ -1247,6 +1247,9 @@
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM
 
+/* Define to 1 if you have the <sys/callout.h> header file. */
+#undef HAVE_SYS_CALLOUT_H
+
 /* Define to 1 if you have the <sys/cdefs.h> header file. */
 #undef HAVE_SYS_CDEFS_H
 
@@ -1300,6 +1303,9 @@
 
 /* Define to 1 if you have the <sys/mount.h> header file. */
 #undef HAVE_SYS_MOUNT_H
+
+/* Define to 1 if you have the <sys/osd.h> header file. */
+#undef HAVE_SYS_OSD_H
 
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
