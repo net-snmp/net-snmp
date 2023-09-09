@@ -327,7 +327,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
 	 */
     char            missing_opt = 'e';	/* old -L is new -Le */
     int             priority = LOG_DEBUG;
-    int             pri_max  = LOG_EMERG;
+    int             pri_max  = LOG_DEBUG;
     int             inc_optind = 0;
     netsnmp_log_handler *logh;
 
@@ -1327,7 +1327,7 @@ snmp_log_string(int priority, const char *str)
          *     ensure this logging is turned on (see snmp_disable_stderrlog
          *     and its cohorts).
          */
-        if (logh->enabled && (priority >= logh->pri_max))
+        if (logh->enabled && priority <= logh->pri_max)
             logh->handler( logh, priority, str );
     }
 }
