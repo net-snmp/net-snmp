@@ -32192,6 +32192,12 @@ then :
   printf "%s\n" "#define HAVE_IF_NAMETOINDEX 1" >>confdefs.h
 
 fi
+ac_fn_c_check_func "$LINENO" "malloc_trim" "ac_cv_func_malloc_trim"
+if test "x$ac_cv_func_malloc_trim" = xyes
+then :
+  printf "%s\n" "#define HAVE_MALLOC_TRIM 1" >>confdefs.h
+
+fi
 ac_fn_c_check_func "$LINENO" "mkstemp" "ac_cv_func_mkstemp"
 if test "x$ac_cv_func_mkstemp" = xyes
 then :
