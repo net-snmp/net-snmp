@@ -581,7 +581,7 @@ static struct node *parse_capabilities(FILE *, char *);
 static struct node *parse_moduleIdentity(FILE *, char *);
 static struct node *parse_macro(FILE *, char *);
 static void     parse_imports(FILE *);
-static struct node *parse(FILE *, struct node *);
+static struct node *parse(FILE *);
 
 static int     read_module_internal(const char *);
 static int     read_module_replacements(const char *);
@@ -3941,7 +3941,7 @@ read_module_internal(const char *name)
             /*
              * Parse the file
              */
-            np = parse(fp, NULL);
+            np = parse(fp);
 #ifdef HAVE_FUNLOCKFILE
             funlockfile(fp);
 #endif
@@ -4343,7 +4343,7 @@ scan_objlist(struct node *root, struct module *mp, struct objgroup *list, const 
  * Returns NULL on error.
  */
 static struct node *
-parse(FILE * fp, struct node *root)
+parse(FILE * fp)
 {
 #ifdef TEST
     extern void     xmalloc_stats(FILE *);
@@ -4356,7 +4356,7 @@ parse(FILE * fp, struct node *root)
 #define BETWEEN_MIBS          1
 #define IN_MIB                2
     int             state = BETWEEN_MIBS;
-    struct node    *np, *nnp;
+    struct node    *np = NULL, *root = NULL;
     struct objgroup *oldgroups = NULL, *oldobjects = NULL, *oldnotifs =
         NULL;
 
@@ -4366,16 +4366,9 @@ parse(FILE * fp, struct node *root)
         free(last_err_module);
     last_err_module = NULL;
 
-    np = root;
-    if (np != NULL) {
-        /*
-         * now find end of chain 
-         */
-        while (np->next)
-            np = np->next;
-    }
-
     while (type != ENDOFFILE) {
+        struct node *nnp;
+
         if (lasttype == CONTINUE)
             lasttype = type;
         else
