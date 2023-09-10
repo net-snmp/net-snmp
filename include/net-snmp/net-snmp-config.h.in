@@ -538,6 +538,9 @@
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
 
+/* Define to 1 if you have the `malloc_trim' function. */
+#undef HAVE_MALLOC_TRIM
+
 /* Define to 1 if the system has the type `mib2_ipIfStatsEntry_t'. */
 #undef HAVE_MIB2_IPIFSTATSENTRY_T
 

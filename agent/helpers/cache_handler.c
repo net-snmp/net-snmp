@@ -16,7 +16,9 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -799,9 +801,11 @@ release_cached_resources(unsigned int regNo, void *clientargs)
         }
     }
 
-    if (do_trim)
-        /* Release freed memory back to the system */
+    if (do_trim) {
+#ifdef HAVE_MALLOC_TRIM
         malloc_trim(0);
+#endif
+    }
 
     /*
      * If there are any caches still valid & active,
