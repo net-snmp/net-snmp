@@ -33909,7 +33909,7 @@ else $as_nop
 int
 main (void)
 {
-struct ifnet test; test.if_mtu = 0;
+struct ifnet test; test.if_mtu = 0; return sizeof(struct in_ifaddr);
   ;
   return 0;
 }
@@ -33941,7 +33941,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 int
 main (void)
 {
-struct ifnet test; test.if_mtu = 0;
+struct ifnet test; test.if_mtu = 0; return sizeof(struct in_ifaddr);
   ;
   return 0;
 }
@@ -33991,7 +33991,7 @@ else $as_nop
 int
 main (void)
 {
-struct ifnet test; test.if_mtu = 0;
+struct ifnet test; test.if_mtu = 0; return sizeof(struct in_ifaddr);
   ;
   return 0;
 }
@@ -34023,7 +34023,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 int
 main (void)
 {
-struct ifnet test; test.if_mtu = 0;
+struct ifnet test; test.if_mtu = 0; return sizeof(struct in_ifaddr);
   ;
   return 0;
 }
