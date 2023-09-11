@@ -86,18 +86,18 @@ LIBCURRENT  = 45
 LIBAGE      = 0
 LIBREVISION = 0
 
-LIB_LD_CMD      = $(LIBTOOL) --mode=link $(LINKCC) $(CFLAGS) $(LDFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) @LD_NO_UNDEFINED@ -o
+LIB_LD_CMD      = $(LIBTOOL) --mode=link --tag=CC $(LINKCC) $(CFLAGS) $(LDFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) @LD_NO_UNDEFINED@ -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
 LIB_LDCONFIG_CMD = $(LIBTOOL) --mode=finish $(INSTALL_PREFIX)$(libdir)
-LINK		= $(LIBTOOL) --mode=link $(LINKCC) $(LDFLAGS)
+LINK		= $(LIBTOOL) --mode=link --tag=CC $(LINKCC) $(LDFLAGS)
 # RANLIB 	= @RANLIB@
 RANLIB		= :
 
 # libtool definitions
 .SUFFIXES: .c .o .lo .rc
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 .rc.lo:
 	$(LIBTOOL) --mode=compile --tag=RC @RC@ -o $@ -i $<
 

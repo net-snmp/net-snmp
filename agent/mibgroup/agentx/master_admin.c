@@ -501,6 +501,9 @@ handle_master_agentx_packet(int operation,
         asp = (netsnmp_agent_session *) magic;
     } else {
         asp = init_agent_snmp_session(session, pdu);
+        if (asp == NULL) {
+            return 1;
+        }
     }
 
     DEBUGMSGTL(("agentx/master", "handle pdu (req=0x%lx,trans=0x%lx,sess=0x%lx)\n",

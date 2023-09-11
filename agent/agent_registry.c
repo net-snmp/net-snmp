@@ -161,6 +161,10 @@ get_context_lookup_cache(const char *context) {
                 return NULL;
             ptr->next = thecontextcache;
             ptr->context = strdup(context);
+            if (!ptr->context) {
+                free(ptr);
+                return NULL;
+            }
             thecontextcache = ptr;
         } else {
             return NULL;
@@ -359,6 +363,11 @@ add_subtree(netsnmp_subtree *new_tree, const char *context_name)
     ptr->next = context_subtrees;
     ptr->first_subtree = new_tree;
     ptr->context_name = strdup(context_name);
+    if (!ptr->context_name) {
+        free(ptr);
+        return NULL;
+    }
+
     context_subtrees = ptr;
 
     return ptr->first_subtree;

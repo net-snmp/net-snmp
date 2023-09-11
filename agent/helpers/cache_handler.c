@@ -16,6 +16,10 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -347,7 +351,6 @@ netsnmp_cache_timer_start(netsnmp_cache *cache)
         return 0;
     }
 
-    cache->flags &= ~NETSNMP_CACHE_AUTO_RELOAD;
     DEBUGMSGT(("cache_timer:start",
                "starting timer %lu for cache %p\n", cache->timer_id, cache));
     return cache->timer_id;
@@ -369,7 +372,7 @@ netsnmp_cache_timer_stop(netsnmp_cache *cache)
                "stopping timer %lu for cache %p\n", cache->timer_id, cache));
 
     snmp_alarm_unregister(cache->timer_id);
-    cache->flags |= NETSNMP_CACHE_AUTO_RELOAD;
+    cache->timer_id = 0;
 }
 
 
@@ -394,7 +397,7 @@ netsnmp_cache_handler_get(netsnmp_cache* cache)
                  */
                 (void)_cache_load(cache);
             }
-            if (cache->flags & NETSNMP_CACHE_AUTO_RELOAD)
+            if (cache->flags & NETSNMP_CACHE_AUTO_RELOAD && !cache->timer_id)
                 netsnmp_cache_timer_start(cache);
             
         }
@@ -770,6 +773,7 @@ void
 release_cached_resources(unsigned int regNo, void *clientargs)
 {
     netsnmp_cache  *cache = NULL;
+    int do_trim = 0;
 
     cache_outstanding_valid = 0;
     DEBUGMSGTL(("helper:cache_handler", "running auto-release\n"));
@@ -786,13 +790,23 @@ release_cached_resources(unsigned int regNo, void *clientargs)
              *   least one active cache.
              */
             if (netsnmp_cache_check_expired(cache)) {
-                if(! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED))
+                if(! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED)) {
                     _cache_free(cache);
+                    if (cache->free_cache && !cache->timer_id)
+                        do_trim = 1;
+                }
             } else {
                 cache_outstanding_valid = 1;
             }
         }
     }
+
+    if (do_trim) {
+#ifdef HAVE_MALLOC_TRIM
+        malloc_trim(0);
+#endif
+    }
+
     /*
      * If there are any caches still valid & active,
      *   then schedule another pass.

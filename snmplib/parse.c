@@ -581,7 +581,7 @@ static struct node *parse_capabilities(FILE *, char *);
 static struct node *parse_moduleIdentity(FILE *, char *);
 static struct node *parse_macro(FILE *, char *);
 static void     parse_imports(FILE *);
-static struct node *parse(FILE *, struct node *);
+static struct node *parse(FILE *);
 
 static int     read_module_internal(const char *);
 static int     read_module_replacements(const char *);
@@ -3115,6 +3115,10 @@ compliance_lookup(const char *name, int modid)
             return 0;
         op->next = objgroups;
         op->name = strdup(name);
+        if (!op->name) {
+            free(op);
+            return 0;
+        }
         op->line = mibLine;
         objgroups = op;
         return 1;
@@ -3937,7 +3941,7 @@ read_module_internal(const char *name)
             /*
              * Parse the file
              */
-            np = parse(fp, NULL);
+            np = parse(fp);
 #ifdef HAVE_FUNLOCKFILE
             funlockfile(fp);
 #endif
@@ -4285,6 +4289,12 @@ new_module(const char *name, const char *file)
         return;
     mp->name = strdup(name);
     mp->file = strdup(file);
+    if (mp->name == NULL || mp->file == NULL) {
+        free(mp->name);
+        free(mp->file);
+        free(mp);
+        return;
+    }
     mp->imports = NULL;
     mp->no_imports = -1;        /* Not yet loaded */
     mp->modid = max_module;
@@ -4333,7 +4343,7 @@ scan_objlist(struct node *root, struct module *mp, struct objgroup *list, const 
  * Returns NULL on error.
  */
 static struct node *
-parse(FILE * fp, struct node *root)
+parse(FILE * fp)
 {
 #ifdef TEST
     extern void     xmalloc_stats(FILE *);
@@ -4346,7 +4356,7 @@ parse(FILE * fp, struct node *root)
 #define BETWEEN_MIBS          1
 #define IN_MIB                2
     int             state = BETWEEN_MIBS;
-    struct node    *np, *nnp;
+    struct node    *np = NULL, *root = NULL;
     struct objgroup *oldgroups = NULL, *oldobjects = NULL, *oldnotifs =
         NULL;
 
@@ -4356,16 +4366,9 @@ parse(FILE * fp, struct node *root)
         free(last_err_module);
     last_err_module = NULL;
 
-    np = root;
-    if (np != NULL) {
-        /*
-         * now find end of chain 
-         */
-        while (np->next)
-            np = np->next;
-    }
-
     while (type != ENDOFFILE) {
+        struct node *nnp;
+
         if (lasttype == CONTINUE)
             lasttype = type;
         else
@@ -4376,7 +4379,7 @@ parse(FILE * fp, struct node *root)
             if (state != IN_MIB) {
                 print_error("Error, END before start of MIB", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             } else {
                 struct module  *mp;
 #ifdef TEST
@@ -4440,9 +4443,6 @@ parse(FILE * fp, struct node *root)
                 if (nnp == NULL) {
                     print_error("Bad parse of MACRO", NULL, type);
                     gMibError = MODULE_SYNTAX_ERROR;
-                    /*
-                     * return NULL;
-                     */
                 }
                 free_node(nnp); /* IGNORE */
                 nnp = NULL;
@@ -4464,7 +4464,7 @@ parse(FILE * fp, struct node *root)
             if (type == ENDOFFILE) {
                 print_error("Expected \"}\"", token, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             type = get_token(fp, token, MAXTOKEN);
         }
@@ -4474,7 +4474,7 @@ parse(FILE * fp, struct node *root)
             if (state != BETWEEN_MIBS) {
                 print_error("Error, nested MIBS", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             state = IN_MIB;
             current_module = which_module(name);
@@ -4499,7 +4499,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT-TYPE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case OBJGROUP:
@@ -4507,7 +4507,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT-GROUP", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case NOTIFGROUP:
@@ -4515,7 +4515,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of NOTIFICATION-GROUP", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case TRAPTYPE:
@@ -4523,7 +4523,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of TRAP-TYPE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case NOTIFTYPE:
@@ -4531,7 +4531,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of NOTIFICATION-TYPE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case COMPLIANCE:
@@ -4539,7 +4539,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of MODULE-COMPLIANCE", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case AGENTCAP:
@@ -4547,7 +4547,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of AGENT-CAPABILITIES", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case MACRO:
@@ -4555,9 +4555,6 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of MACRO", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                /*
-                 * return NULL;
-                 */
             }
             free_node(nnp);     /* IGNORE */
             nnp = NULL;
@@ -4567,7 +4564,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of MODULE-IDENTITY", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case OBJIDENTITY:
@@ -4575,7 +4572,7 @@ parse(FILE * fp, struct node *root)
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT-IDENTITY", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case OBJECT:
@@ -4583,19 +4580,19 @@ parse(FILE * fp, struct node *root)
             if (type != IDENTIFIER) {
                 print_error("Expected IDENTIFIER", token, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             type = get_token(fp, token, MAXTOKEN);
             if (type != EQUALS) {
                 print_error("Expected \"::=\"", token, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             nnp = parse_objectid(fp, name);
             if (nnp == NULL) {
                 print_error("Bad parse of OBJECT IDENTIFIER", NULL, type);
                 gMibError = MODULE_SYNTAX_ERROR;
-                return NULL;
+                goto free_mib;
             }
             break;
         case EQUALS:
@@ -4607,7 +4604,7 @@ parse(FILE * fp, struct node *root)
         default:
             print_error("Bad operator", token, type);
             gMibError = MODULE_SYNTAX_ERROR;
-            return NULL;
+            goto free_mib;
         }
         if (nnp) {
             if (np)
@@ -4622,6 +4619,13 @@ parse(FILE * fp, struct node *root)
     }
     DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));
     return root;
+
+free_mib:
+    for (; root; root = np) {
+        np = root->next;
+        free_node(root);
+    }
+    return NULL;
 }
 
 /*

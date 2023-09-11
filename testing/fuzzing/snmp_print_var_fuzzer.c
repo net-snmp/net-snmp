@@ -257,7 +257,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
      * Adjusting the fuzzers input-space according to meet the preconditions
      * of these functions.
      */
-    for (int i = 0; i < strlen(snprint_hints); i++) {
+    for (size_t i = 0; i < strlen(snprint_hints); i++) {
         if (snprint_hints[i] == 'p' || snprint_hints[i] == 'n'
             || snprint_hints[i] == 's' || snprint_hints[i] == 'S') {
             snprint_hints[i] = 'o';

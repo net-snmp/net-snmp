@@ -18217,6 +18217,12 @@ then :
 fi
 
 
+ac_fn_c_check_header_compile "$LINENO" "sys/callout.h" "ac_cv_header_sys_callout_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_callout_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_SYS_CALLOUT_H 1" >>confdefs.h
+
+fi
 ac_fn_c_check_header_compile "$LINENO" "sys/diskio.h" "ac_cv_header_sys_diskio_h" "$ac_includes_default"
 if test "x$ac_cv_header_sys_diskio_h" = xyes
 then :
@@ -18275,6 +18281,12 @@ ac_fn_c_check_header_compile "$LINENO" "sys/mnttab.h" "ac_cv_header_sys_mnttab_h
 if test "x$ac_cv_header_sys_mnttab_h" = xyes
 then :
   printf "%s\n" "#define HAVE_SYS_MNTTAB_H 1" >>confdefs.h
+
+fi
+ac_fn_c_check_header_compile "$LINENO" "sys/osd.h" "ac_cv_header_sys_osd_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_osd_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_SYS_OSD_H 1" >>confdefs.h
 
 fi
 ac_fn_c_check_header_compile "$LINENO" "sys/pool.h" "ac_cv_header_sys_pool_h" "$ac_includes_default"
@@ -31326,6 +31338,12 @@ ac_fn_c_check_func "$LINENO" "if_nametoindex" "ac_cv_func_if_nametoindex"
 if test "x$ac_cv_func_if_nametoindex" = xyes
 then :
   printf "%s\n" "#define HAVE_IF_NAMETOINDEX 1" >>confdefs.h
+
+fi
+ac_fn_c_check_func "$LINENO" "malloc_trim" "ac_cv_func_malloc_trim"
+if test "x$ac_cv_func_malloc_trim" = xyes
+then :
+  printf "%s\n" "#define HAVE_MALLOC_TRIM 1" >>confdefs.h
 
 fi
 ac_fn_c_check_func "$LINENO" "mkstemp" "ac_cv_func_mkstemp"

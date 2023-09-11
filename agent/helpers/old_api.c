@@ -119,6 +119,11 @@ netsnmp_register_old_api(const char *moduleName,
 	vp = netsnmp_duplicate_variable((const struct variable *)
 					((const char *) var + varsize * i));
 
+        if (vp == NULL) {
+            SNMP_FREE(reginfo);
+            return SNMP_ERR_GENERR;
+        }
+
         reginfo->handler = get_old_api_handler();
         reginfo->handlerName = strdup(moduleName);
         reginfo->rootoid_len = (mibloclen + vp->namelen);

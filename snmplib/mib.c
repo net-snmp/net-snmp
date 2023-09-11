@@ -2269,7 +2269,7 @@ snmp_out_options(char *options, int argc, char *const *argv)
         case 'p':
             /* What if argc/argv are null ? */
             if (!*(options)) {
-		if (optind == argc) {
+		if (optind == argc || argc == 0) {
 		    fprintf(stderr, "Missing precision for -Op\n");
 		    return options-1;
 		}
