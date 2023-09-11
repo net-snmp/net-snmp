@@ -556,7 +556,7 @@ static void netsnmp_derive_interface_id(netsnmp_interface_entry *entry)
 
 static void netsnmp_retrieve_link_speed(int fd, netsnmp_interface_entry *entry)
 {
-    unsigned long long defaultspeed = NOMINAL_LINK_SPEED;
+    unsigned long long defaultspeed = NOMINAL_LINK_SPEED, speed;
 
     if (!(entry->os_flags & IFF_RUNNING)) {
         /*
@@ -565,9 +565,12 @@ static void netsnmp_retrieve_link_speed(int fd, netsnmp_interface_entry *entry)
          */
         defaultspeed = 0;
     }
-    entry->speed = netsnmp_linux_interface_get_if_speed(fd, entry->name,
-                                                        defaultspeed);
-    entry->speed_high = entry->speed / 1000000LL;
+    speed = netsnmp_linux_interface_get_if_speed(fd, entry->name,
+                                                 defaultspeed);
+    entry->speed_high = speed / 1000000LL;
+    entry->speed = speed;
+    if (speed > 0xffffffff)
+        entry->speed = 0xffffffff; /* 4294967295; */
 }
 
 /**
