@@ -194,10 +194,9 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
 
             if (addr_pair && addr_pair->username[0] == '\0') {
                 /* we don't have a username yet, so this is the first message */
-                struct ucred *remoteuser;
                 struct msghdr msg;
                 struct iovec iov[1];
-                char cmsg[CMSG_SPACE(sizeof(remoteuser))+4096];
+                char cmsg[2 * 4096];
                 struct cmsghdr *cmsgptr;
                 u_char *charbuf  = buf;
 
@@ -225,8 +224,10 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
                 DEBUGMSGTL(("ssh", "received first msg over SSH; internal SSH protocol version %d\n", charbuf[0]));
 
                 for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
+#if defined(SCM_CREDENTIALS)
                     if (cmsgptr->cmsg_level == SOL_SOCKET && cmsgptr->cmsg_type == SCM_CREDENTIALS) {
                         /* received credential info */
+		        struct ucred *remoteuser;
                         struct passwd *user_pw;
 
                         remoteuser = (struct ucred *) CMSG_DATA(cmsgptr);
@@ -246,8 +247,32 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
                         strlcpy(addr_pair->username, user_pw->pw_name,
                                 sizeof(addr_pair->username));
                     }
-                    DEBUGMSGTL(("ssh", "Setting user name to %s\n",
-                                addr_pair->username));
+#elif defined(SCM_CREDS)
+                    if (cmsgptr->cmsg_level == SOL_SOCKET && cmsgptr->cmsg_type == SCM_CREDS) {
+                        /* received credential info */
+		        struct cmsgcred *remoteuser;
+                        struct passwd *user_pw;
+
+                        remoteuser = (void *)CMSG_DATA(cmsgptr);
+
+                        if ((user_pw = getpwuid(remoteuser->cmcred_uid)) == NULL) {
+                            snmp_log(LOG_ERR, "No user found for uid %d\n",
+				     remoteuser->cmcred_uid);
+                            return -1;
+                        }
+                        if (strlen(user_pw->pw_name) >
+                            sizeof(addr_pair->username)-1) {
+                            snmp_log(LOG_ERR,
+                                     "User name '%s' too long for snmp\n",
+                                     user_pw->pw_name);
+                            return -1;
+                        }
+                        strlcpy(addr_pair->username, user_pw->pw_name,
+                                sizeof(addr_pair->username));
+                    }
+#endif
+		    DEBUGMSGTL(("ssh", "Setting user name to %s\n",
+				addr_pair->username));
                 }
 
                 if (addr_pair->username[0] == '\0') {
@@ -531,12 +556,20 @@ netsnmp_ssh_accept(netsnmp_transport *t)
             return newsock;
         }
 
+#ifdef SO_PASSCRED
         /* set the SO_PASSCRED option so we can receive the remote uid */
         {
             int one = 1;
             setsockopt(newsock, SOL_SOCKET, SO_PASSCRED, (void *) &one,
                        sizeof(one));
         }
+#elif defined(LOCAL_CREDS)
+        {
+            int one = 1;
+            setsockopt(newsock, SOL_SOCKET, LOCAL_CREDS, (void *) &one,
+                       sizeof(one));
+        }
+#endif
 
         if (t->data != NULL) {
             free(t->data);
@@ -641,15 +674,24 @@ netsnmp_ssh_transport(const struct sockaddr_in *addr, int local)
             return NULL;
         }
 
+#if defined(SO_PASSCRED)
         /* set the SO_PASSCRED option so we can receive the remote uid */
         {
             int one = 1;
             setsockopt(t->sock, SOL_SOCKET, SO_PASSCRED, (void *) &one,
                        sizeof(one));
         }
+#elif defined(LOCAL_CREDS)
+        {
+            int one = 1;
+            setsockopt(t->sock, SOL_SOCKET, LOCAL_CREDS, (void *) &one,
+                       sizeof(one));
+        }
+#endif
+
 
         unlink(unaddr->sun_path);
-        rc = bind(t->sock, unaddr, SUN_LEN(unaddr));
+        rc = bind(t->sock, (struct sockaddr *)unaddr, SUN_LEN(unaddr));
         if (rc != 0) {
             DEBUGMSGTL(("netsnmp_ssh_transport",
                         "couldn't bind \"%s\", errno %d (%s)\n",
