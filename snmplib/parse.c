@@ -3729,6 +3729,7 @@ parse_imports(FILE * fp)
                 goto out;
             for (i = 0; i < import_count; ++i) {
                 mp->imports[i].label = import_list[i].label;
+                import_list[i].label = NULL;
                 mp->imports[i].modid = import_list[i].modid;
                 DEBUGMSGTL(("parse-mibs",
                             "#### adding Module %d '%s' %d\n", mp->modid,
@@ -3745,6 +3746,8 @@ parse_imports(FILE * fp)
     print_module_not_found(module_name(current_module, modbuf));
 
 out:
+    for (i = 0; i < import_count; ++i)
+        free(import_list[i].label);
     free(import_list);
     return;
 }
