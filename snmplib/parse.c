@@ -4343,6 +4343,16 @@ scan_objlist(struct node *root, struct module *mp, struct objgroup *list, const 
     mibLine = oLine;
 }
 
+static void free_objgroup(struct objgroup *o)
+{
+    while (o) {
+        struct objgroup *next = o->next;
+
+        free(o);
+        o = next;
+    }
+}
+
 /*
  * Parses a mib file and returns a linked list of nodes found in the file.
  * Returns NULL on error.
@@ -4630,6 +4640,12 @@ free_mib:
         np = root->next;
         free_node(root);
     }
+    free_objgroup(objgroups);
+    objgroups = NULL;
+    free_objgroup(objects);
+    objects = NULL;
+    free_objgroup(notifs);
+    notifs = NULL;
     return NULL;
 }
 
