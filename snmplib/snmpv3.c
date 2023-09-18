@@ -299,6 +299,10 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         break;
     }
     case 'A':
+        if (*Apsz && zero_sensitive) {
+            memset(*Apsz, 0x0, strlen(*Apsz));
+        }
+        free(*Apsz);
         *Apsz = strdup(optarg);
         if (NULL == *Apsz) {
             fprintf(stderr, "malloc failure processing -%c flag.\n",
@@ -310,6 +314,10 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         break;
 
     case 'X':
+        if (*Xpsz && zero_sensitive) {
+            memset(*Xpsz, 0x0, strlen(*Xpsz));
+        }
+        free(*Xpsz);
         *Xpsz = strdup(optarg);
         if (NULL == *Xpsz) {
             fprintf(stderr, "malloc failure processing -%c flag.\n",
