@@ -232,7 +232,7 @@ netsnmp_parse_args(int argc,
     }
 
     optind = 1;
-    while ((arg = getopt(argc, argv, Opts)) != EOF) {
+    while (optind < argc && (arg = getopt(argc, argv, Opts)) != EOF) {
         DEBUGMSGTL(("snmp_parse_args", "handling (#%d): %c (optarg %s) (sp %d)\n",
                     optind, arg, optarg, sp));
         switch (arg) {
