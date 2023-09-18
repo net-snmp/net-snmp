@@ -202,7 +202,7 @@ netsnmp_parse_args(int argc,
                    int flags)
 {
     int             arg, ret, sp = 0;
-    char           *cp;
+    const char     *cp;
     char           *Apsz = NULL;
     char           *Xpsz = NULL;
     char           *Cpsz = NULL;
