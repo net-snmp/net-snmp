@@ -2381,18 +2381,22 @@ snmp_in_options(char *optarg, int argc, char *const *argv)
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_READ_UCD_STYLE_OID);
             break;
         case 's':
-            /* What if argc/argv are null ? */
-            if (!*(++cp))
+            if (!*(++cp)) {
                 cp = argv[optind++];
+                if (!cp)
+                    return "?";
+            }
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                                   NETSNMP_DS_LIB_OIDSUFFIX,
                                   cp);
             return NULL;  /* -Is... is a standalone option, so we're done here */
 
         case 'S':
-            /* What if argc/argv are null ? */
-            if (!*(++cp))
+            if (!*(++cp)) {
                 cp = argv[optind++];
+                if (!cp)
+                    return "?";
+            }
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                                   NETSNMP_DS_LIB_OIDPREFIX,
                                   cp);
