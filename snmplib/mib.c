@@ -2412,7 +2412,7 @@ snmp_out_toggle_options_usage(const char *lead, FILE * outf)
     fprintf(outf, "%sX:  extended index format\n", lead);
 }
 
-char *
+const char *
 snmp_in_options(char *optarg, int argc, char *const *argv)
 {
     char *cp;
@@ -2467,7 +2467,7 @@ snmp_in_options(char *optarg, int argc, char *const *argv)
     return NULL;
 }
 
-char           *
+const char     *
 snmp_in_toggle_options(char *options)
 {
     return snmp_in_options( options, 0, NULL );
