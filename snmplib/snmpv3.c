@@ -233,11 +233,13 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         }
 
     case 'n':
+        free(session->contextName);
         session->contextName = strdup(optarg);
         session->contextNameLen = strlen(optarg);
         break;
 
     case 'u':
+        free(session->securityName);
         session->securityName = strdup(optarg);
         session->securityNameLen = strlen(optarg);
         break;
@@ -355,6 +357,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             SNMP_FREE(kbuf);
             return (-1);
         }
+        free(session->securityAuthLocalKey);
         session->securityAuthLocalKey = kbuf;
         session->securityAuthLocalKeyLen = kout_len;
         break;
@@ -374,6 +377,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             SNMP_FREE(kbuf);
             return (-1);
         }
+        free(session->securityPrivLocalKey);
         session->securityPrivLocalKey = kbuf;
         session->securityPrivLocalKeyLen = kout_len;
         break;
