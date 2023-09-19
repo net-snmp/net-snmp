@@ -750,6 +750,8 @@ sslctx_server_setup(const SSL_METHOD *method) {
                        SSL_VERIFY_CLIENT_ONCE,
                        &verify_callback);
 
+    SSL_CTX_set_options(the_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
+
     return _sslctx_common_setup(the_ctx, NULL);
     
 err:
