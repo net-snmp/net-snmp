@@ -203,6 +203,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                 free(ebuf);
                 return (-1);
             }
+	    free(session->securityEngineID);
             session->securityEngineID = ebuf;
             session->securityEngineIDLen = eout_len;
             break;
@@ -227,6 +228,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                 free(ebuf);
                 return (-1);
             }
+	    free(session->contextEngineID);
             session->contextEngineID = ebuf;
             session->contextEngineIDLen = eout_len;
             break;
