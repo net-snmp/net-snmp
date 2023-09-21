@@ -1791,7 +1791,9 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
                                      ss->version, name, tag, profile);
 
   cleanup:
-    netsnmp_cleanup_session(&session);
+    SNMP_FREE(session.community);
+    if (session.securityEngineIDLen > 0)
+        SNMP_FREE(session.securityEngineID);
     SNMP_FREE(clientaddr_save);
     SNMP_FREE(profile);
     SNMP_FREE(name);

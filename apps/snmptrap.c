@@ -381,8 +381,6 @@ close_session:
     snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
 
 out:
-    if (ss == NULL)
-        netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }
