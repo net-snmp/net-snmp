@@ -478,7 +478,6 @@ main(int argc, char *argv[])
          * Change the user supplied on command line.
          */
         if ((passwd_user != NULL) && (strlen(passwd_user) > 0)) {
-            SNMP_FREE(session.securityName);
             session.securityName = strdup(passwd_user);
         } else {
             /*
