@@ -499,7 +499,6 @@ main(int argc, char *argv[])
     exit_code = 0;
 
   out:
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exit_code;
 }
