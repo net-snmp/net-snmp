@@ -367,7 +367,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
     session.callback = handle_disconnect_packet;
     session.version = version;
     if (com) {
-        session.community = (u_char *) NETSNMP_REMOVE_CONST(char *, com);
+        session.community = (u_char *)strdup(com);
         session.community_len = strlen(com);
     }
 
@@ -396,7 +396,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
             client_addr = "localhost";
         tspec.source = client_addr;
     }
-    session.localname = NETSNMP_REMOVE_CONST(char *,tspec.source);
+    session.localname = tspec.source ? strdup(tspec.source) : NULL;
 
     tspec.application = "snmptrap";
     if (NULL == sinkport)
@@ -413,9 +413,12 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
         /** diagnose snmp_open errors with the input netsnmp_session pointer */
         snmp_sess_perror("snmpd: netsnmp_create_notification_session",
                          &session);
+        netsnmp_cleanup_session(&session);
         /* transport freed by snmp_add */
         return NULL;
     }
+
+    netsnmp_cleanup_session(&session);
 
     rc = netsnmp_add_closable_notification_session(sesp,
                                                    !(t->flags & NETSNMP_TRANSPORT_FLAG_STREAM),
@@ -1609,13 +1612,13 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
 
     session.version = SNMP_VERSION_3;
 
-    session.peername = NETSNMP_REMOVE_CONST(char*,dest);
+    session.peername = strdup(dest);
 
-    session.securityName = NETSNMP_REMOVE_CONST(char*,user);
+    session.securityName = strdup(user);
     session.securityNameLen = strlen(user);
 
-    if (NULL != context) {
-        session.contextName = NETSNMP_REMOVE_CONST(char*,context);
+    if (context) {
+        session.contextName = strdup(context);
         session.contextNameLen = strlen(context);
     }
 
@@ -1699,15 +1702,12 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
                                                   notif_profile) != 1) {
         DEBUGMSGTL(("trap:v3user_notif_sess", "add notification failed\n"));
         snmp_close(ss);
-        ss = NULL;
-        goto bail;
+        return NULL;
     }
 
   bail:
     /** free any allocated mem in session */
-    SNMP_FREE(session.securityAuthProto);
-    SNMP_FREE(session.securityPrivProto);
-    SNMP_FREE(session.contextEngineID);
+    netsnmp_cleanup_session(&session);
 
     return ss;
 }
@@ -1839,9 +1839,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
                                               ss->version, name, tag, profile);
 
   cleanup:
-    SNMP_FREE(session.community);
-    if (session.securityEngineIDLen > 0)
-        SNMP_FREE(session.securityEngineID);
+    netsnmp_cleanup_session(&session);
     SNMP_FREE(clientaddr_save);
     SNMP_FREE(profile);
     SNMP_FREE(name);

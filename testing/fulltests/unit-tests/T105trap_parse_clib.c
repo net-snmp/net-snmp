@@ -40,3 +40,5 @@ rc = snmp_parse(NULL, &session, pdu, trap_pdu, trap_pdu_length);
 OKF((rc == 0), ("Parsing of a trap PDU"));
 
 snmp_free_pdu(pdu);
+
+netsnmp_cleanup_session(&session);

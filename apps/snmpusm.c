@@ -119,7 +119,7 @@ oid            *dhauthKeyChange = usmDHUserAuthKeyChange,
 int             doauthkey = 0, doprivkey = 0, uselocalizedkey = 0;
 size_t          usmUserEngineIDLen = 0;
 u_char         *usmUserEngineID = NULL;
-char           *usmUserPublic_val = NULL;
+const char     *usmUserPublic_val = NULL;
 int             docreateandwait = 0;
 
 
@@ -368,7 +368,7 @@ main(int argc, char *argv[])
         keychange_len = SNMP_MAXBUF_SMALL,
         keychangepriv_len = SNMP_MAXBUF_SMALL;
 
-    char           *newpass = NULL, *oldpass = NULL;
+    const char     *newpass = NULL, *oldpass = NULL;
     u_char          oldKu[SNMP_MAXBUF_SMALL],
         newKu[SNMP_MAXBUF_SMALL],
         oldkul[SNMP_MAXBUF_SMALL],
@@ -447,7 +447,7 @@ main(int argc, char *argv[])
          * XXX:  Uses the auth type of the calling user, a MD5 user can't
          *       change a SHA user's key.
          */
-        char *passwd_user;
+        const char *passwd_user;
 
         command = CMD_PASSWD;
         oldpass = argv[++arg];
@@ -478,7 +478,8 @@ main(int argc, char *argv[])
          * Change the user supplied on command line.
          */
         if ((passwd_user != NULL) && (strlen(passwd_user) > 0)) {
-            session.securityName = passwd_user;
+            SNMP_FREE(session.securityName);
+            session.securityName = strdup(passwd_user);
         } else {
             /*
              * Use own key object if no user was supplied.
@@ -552,7 +553,7 @@ main(int argc, char *argv[])
 	     */
 	    rval = generate_Ku(session.securityAuthProto,
 			       session.securityAuthProtoLen,
-			       (u_char *) oldpass, strlen(oldpass),
+			       (const u_char *) oldpass, strlen(oldpass),
 			       oldKu, &oldKu_len);
 	    
 	    if (rval != SNMPERR_SUCCESS) {
@@ -596,7 +597,7 @@ main(int argc, char *argv[])
 	} else {
             rval = generate_Ku(session.securityAuthProto,
                                session.securityAuthProtoLen,
-                               (u_char *) newpass, strlen(newpass),
+                               (const u_char *) newpass, strlen(newpass),
                                newKu, &newKu_len);
 
             if (rval != SNMPERR_SUCCESS) {
@@ -873,7 +874,7 @@ main(int argc, char *argv[])
          * change the key of a user if DH is available
          */
 
-        char *passwd_user;
+        const char *passwd_user;
         netsnmp_pdu *dhpdu, *dhresponse = NULL;
         netsnmp_variable_list *vars, *dhvar;
         
@@ -890,7 +891,8 @@ main(int argc, char *argv[])
          * Change the user supplied on command line.
          */
         if ((passwd_user != NULL) && (strlen(passwd_user) > 0)) {
-            session.securityName = passwd_user;
+            free(session.securityName);
+            session.securityName = strdup(passwd_user);
         } else {
             /*
              * Use own key object if no user was supplied.
@@ -1045,8 +1047,10 @@ main(int argc, char *argv[])
 
 close_session:
     snmp_close(ss);
+    memset(&session, 0, sizeof(session));
 
 out:
+    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }
