@@ -52,6 +52,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     netsnmp_pdu *pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
     netsnmp_session session;
 
+    memset(&session, 0, sizeof(session));
     session.version = AGENTX_VERSION_1;
     if (agentx_parse(&session, pdu, NETSNMP_REMOVE_CONST(u_char*, data), size) ==
         SNMP_ERR_NOERROR) {
@@ -64,5 +65,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     }
 
     snmp_free_pdu(pdu);
+    netsnmp_cleanup_session(&session);
     return 0;
 }

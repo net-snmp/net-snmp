@@ -126,7 +126,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 
     free(fake_argv[0]);
     free(fake_argv[1]);
-    /*free(fake_argv[2]); -- freed by netsnmp_cleanup_session() */
+    free(fake_argv[2]);
     free(fake_argv);
 
     return 0;
