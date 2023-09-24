@@ -631,7 +631,7 @@ netsnmp_parse_args(int argc,
         ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
         goto out;
     }
-    session->peername = argv[optind++]; /* hostname */
+    session->peername = strdup(argv[optind++]); /* hostname */
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     /*

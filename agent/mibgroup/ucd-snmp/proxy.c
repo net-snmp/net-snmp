@@ -132,6 +132,8 @@ proxy_parse_config(const char *token, char *line)
                     argv[arg]));
     }
 
+    memset(&session, 0, sizeof(session));
+
     DEBUGMSGTL(("proxy_config", "parsing args: %d\n", argn));
     /* Call special parse_args that allows for no specified community string */
     arg = netsnmp_parse_args(argn, argv, &session, "C:", proxyOptProc,
@@ -249,6 +251,7 @@ out:
     /* Free the memory allocated */
     while(argn--)
         SNMP_FREE(argv[argn]);
+    netsnmp_cleanup_session(&session);
 }
 
 void

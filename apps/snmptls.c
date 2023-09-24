@@ -558,6 +558,7 @@ main(int argc, char **argv)
 
     netsnmp_row_create(ss, var_list, rs_idx);
 
+    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return 0;
 }
