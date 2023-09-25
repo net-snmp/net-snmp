@@ -1946,16 +1946,17 @@ void netsnmp_cleanup_session(netsnmp_session *s)
 static void
 snmp_free_session(netsnmp_session * s)
 {
-    if (s) {
-        netsnmp_cleanup_session(s);
+    if (!s)
+        return;
 
-        /*
-         * clear session from any callbacks
-         */
-        netsnmp_callback_clear_client_arg(s, 0, 0);
+    netsnmp_cleanup_session(s);
 
-        free(s);
-    }
+    /*
+     * clear session from any callbacks
+     */
+    netsnmp_callback_clear_client_arg(s, 0, 0);
+
+    free(s);
 }
 
 /*
