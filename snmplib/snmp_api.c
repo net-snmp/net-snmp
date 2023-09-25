@@ -1920,21 +1920,22 @@ create_user_from_session(netsnmp_session * session) {
 /* Free the memory owned by a session but not the session object itself. */
 void netsnmp_cleanup_session(netsnmp_session *s)
 {
-    SNMP_FREE(s->localname);
-    SNMP_FREE(s->peername);
-    SNMP_FREE(s->community);
-    SNMP_FREE(s->contextEngineID);
-    SNMP_FREE(s->contextName);
-    SNMP_FREE(s->securityEngineID);
-    SNMP_FREE(s->securityName);
-    SNMP_FREE(s->securityAuthProto);
-    SNMP_FREE(s->securityAuthLocalKey);
-    SNMP_FREE(s->securityPrivProto);
-    SNMP_FREE(s->securityPrivLocalKey);
-    SNMP_FREE(s->paramName);
+    free(s->localname);
+    free(s->peername);
+    free(s->community);
+    free(s->contextEngineID);
+    free(s->contextName);
+    free(s->securityEngineID);
+    free(s->securityName);
+    free(s->securityAuthProto);
+    free(s->securityAuthLocalKey);
+    free(s->securityPrivProto);
+    free(s->securityPrivLocalKey);
+    free(s->paramName);
 #ifndef NETSNMP_NO_TRAP_STATS
-    SNMP_FREE(s->trap_stats);
+    free(s->trap_stats);
 #endif /* NETSNMP_NO_TRAP_STATS */
+    memset(s, 0, sizeof(*s));
 }
 
 /*
