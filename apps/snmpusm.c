@@ -145,7 +145,7 @@ usage(void)
     fprintf(stderr, "\t-CE ENGINE-ID\tSet usmUserEngineID (e.g. 800000020109840301).\n");
     fprintf(stderr, "\t-Cp STRING\tSet usmUserPublic value to STRING.\n");
     fprintf(stderr, "\t-Cw\t\tCreate the user with createAndWait.\n");
-    fprintf(stderr, "\t\t\t(it won't be active until you active it)\n");
+    fprintf(stderr, "\t\t\t(it won't be active until you activate it)\n");
     fprintf(stderr, "\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t-Ca\t\tChange the authentication key.\n");
     fprintf(stderr, "\t-Ck\t\tAllows one to use localized key (must start with 0x)\n");
