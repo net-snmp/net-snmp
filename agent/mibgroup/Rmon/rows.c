@@ -67,7 +67,7 @@ rowapi_delete(RMON_ENTRY_T * eold)
     }
 
     /*
-     * delete it in users's sense
+     * delete it in the user's sense
      */
     if (table_ptr->ClbkDelete)
         table_ptr->ClbkDelete((RMON_ENTRY_T *) eold->body);
