@@ -434,7 +434,7 @@ parse_config_agentuser(const char *token, char *cptr)
         if (info)
             netsnmp_set_agent_user_id(info->pw_uid);
         else
-            config_perror("User not found in passwd database");
+            config_perror("User not found in password database");
         endpwent();
 #endif
     }

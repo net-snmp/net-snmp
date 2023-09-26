@@ -220,7 +220,7 @@ _add_connection(netsnmp_tcpconn_entry *entry, netsnmp_container *container)
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
  *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or peforming calculations to derive the data),
+ *  some other existing data, or performing calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  tcpListenerTable_row_prep() for populating data.
