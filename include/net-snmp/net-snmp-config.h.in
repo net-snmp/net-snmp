@@ -360,6 +360,9 @@
 /* Define to 1 if you have the <iphlpapi.h> header file. */
 #undef HAVE_IPHLPAPI_H
 
+/* Set if IPV6_RECVPKTINFO is usable */
+#undef HAVE_IPV6_RECVPKTINFO
+
 /* Set if IP_PKTINFO is usable */
 #undef HAVE_IP_PKTINFO
 
