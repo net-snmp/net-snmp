@@ -53,6 +53,12 @@
 
 #include "inet_ntop.h"
 
+/*
+ * needs to be in sync with the definitions in snmplib/snmpTCPDomain.c
+ * and perl/agent/agent.xs
+ */
+typedef netsnmp_indexed_addr_pair netsnmp_udp_addr_pair;
+
 const oid netsnmp_TCPIPv6Domain[] = { TRANSPORT_DOMAIN_TCP_IPV6 };
 static netsnmp_tdomain tcp6Domain;
 
@@ -70,13 +76,13 @@ netsnmp_tcp6_fmtaddr(netsnmp_transport *t, const void *data, int len)
 static int
 netsnmp_tcp6_accept(netsnmp_transport *t)
 {
-    struct sockaddr_in6 *farend = NULL;
+    netsnmp_udp_addr_pair *addr_pair;
+    struct sockaddr       *farend;
     int             newsock = -1;
-    socklen_t       farendlen = sizeof(struct sockaddr_in6);
+    socklen_t              farendlen;
 
-    farend = (struct sockaddr_in6 *) malloc(sizeof(struct sockaddr_in6));
-
-    if (farend == NULL) {
+    addr_pair = calloc(1, sizeof(*addr_pair));
+    if (addr_pair == NULL) {
         /*
          * Indicate that the acceptance of this socket failed.  
          */
@@ -84,24 +90,27 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
         return -1;
     }
 
-    if (t != NULL && t->sock >= 0) {
-        newsock = (int) accept(t->sock, (struct sockaddr *) farend, &farendlen);
+    farend = &addr_pair->remote_addr.sa;
+    farendlen = sizeof(addr_pair->remote_addr.sa);
+
+    if (t && t->sock >= 0) {
+        newsock = accept(t->sock, farend, &farendlen);
 
         if (newsock < 0) {
-            DEBUGMSGTL(("netsnmp_tcp6","accept failed rc %d errno %d \"%s\"\n",
-			newsock, errno, strerror(errno)));
-            free(farend);
+            DEBUGMSGTL(("netsnmp_tcp6",
+                        "accept failed rc %d errno %d \"%s\"\n", newsock,
+                        errno, strerror(errno)));
+            free(addr_pair);
             return newsock;
         }
 
-        if (t->data != NULL) {
-            free(t->data);
-        }
-
-        t->data = farend;
-        t->data_length = farendlen;
+        free(t->data);
+        t->data = addr_pair;
+        t->data_length = sizeof(netsnmp_udp_addr_pair);
         DEBUGIF("netsnmp_tcp6") {
-            char *str = netsnmp_tcp6_fmtaddr(NULL, farend, farendlen);
+            char *str = netsnmp_tcp6_fmtaddr(NULL, addr_pair,
+                                             sizeof(netsnmp_udp_addr_pair));
+
             DEBUGMSGTL(("netsnmp_tcp6", "accept succeeded (from %s)\n", str));
             free(str);
         }
@@ -142,6 +151,7 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
 {
     const struct sockaddr_in6 *addr = &ep->a.sin6;
     netsnmp_transport *t = NULL;
+    netsnmp_udp_addr_pair     *addr_pair = NULL;
     int             rc = 0;
     int             socket_initialized = 0;
 
@@ -150,29 +160,29 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
         return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
 
-    if (addr == NULL || addr->sin6_family != AF_INET6) {
+    if (addr == NULL || addr->sin6_family != AF_INET6)
         return NULL;
-    }
 
     t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
-    if (t == NULL) {
+    if (t == NULL)
         return NULL;
-    }
 
     DEBUGIF("netsnmp_tcp6") {
         char *str = netsnmp_tcp6_fmtaddr(NULL, addr,
                                          sizeof(struct sockaddr_in6));
+
         DEBUGMSGTL(("netsnmp_tcp6", "open %s %s\n", local ? "local" : "remote",
                     str));
         free(str);
     }
 
     t->sock = -1;
-    t->data = malloc(sizeof(netsnmp_indexed_addr_pair));
-    if (t->data == NULL)
+    addr_pair = calloc(1, sizeof(netsnmp_udp_addr_pair));
+    if (addr_pair == NULL)
         goto err;
-    t->data_length = sizeof(netsnmp_indexed_addr_pair);
-    memcpy(t->data, addr, sizeof(struct sockaddr_in6));
+    t->data = addr_pair;
+    t->data_length = sizeof(netsnmp_udp_addr_pair);
+    memcpy(&addr_pair->remote_addr.sin6, addr, sizeof(struct sockaddr_in6));
 
     t->domain = netsnmp_TCPIPv6Domain;
     t->domain_length = OID_LENGTH(netsnmp_TCPIPv6Domain);
@@ -189,7 +199,7 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
     }
 #endif
     if (!socket_initialized)
-        t->sock = (int) socket(PF_INET6, SOCK_STREAM, 0);
+        t->sock = socket(PF_INET6, SOCK_STREAM, 0);
     if (t->sock < 0)
         goto err;
 
@@ -269,7 +279,7 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
             if (rc != 0)
                 goto err;
         }
-        
+
         /*
          * no buffer size on listen socket - doesn't make sense
          */
