@@ -378,7 +378,6 @@ main(int argc, char *argv[])
 
 close_session:
     snmp_close(ss);
-    memset(&session, 0, sizeof(session));
     snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
 
 out:
