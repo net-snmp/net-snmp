@@ -2110,8 +2110,7 @@ _cache_free(netsnmp_cache * cache, void *magic)
  * @internal
  */
 static void
-_container_item_free(etherStatsTable_rowreq_ctx * rowreq_ctx,
-                     void *context)
+_container_item_free(void* rowreq_ctx, void *context)
 {
     DEBUGMSGTL(("internal:etherStatsTable:_container_item_free",
                 "called\n"));
@@ -2144,9 +2143,7 @@ _container_free(netsnmp_container * container)
     /*
      * free all items. inefficient, but easy.
      */
-    CONTAINER_CLEAR(container,
-                    (netsnmp_container_obj_func *) _container_item_free,
-                    NULL);
+    CONTAINER_CLEAR(container, _container_item_free, NULL);
 }                               /* _container_free */
 
 /**

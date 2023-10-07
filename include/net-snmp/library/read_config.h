@@ -37,7 +37,8 @@ extern          "C" {
     struct config_line {
         char           *config_token;   /* Label for each line parser
                                          * in the given file. */
-        void            (*parse_line) (const char *, char *);
+        void            (*parse_line1) (const char *, char *);
+        void            (*parse_line2) (const char *, const char *);
         void            (*free_func) (void);
         struct config_line *next;
         char            config_time;    /* {NORMAL,PREMIB,EITHER}_CONFIG */

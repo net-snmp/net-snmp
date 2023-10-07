@@ -984,8 +984,10 @@ netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
 }
 
 int
-netsnmp_transport_config_compare(netsnmp_transport_config *left,
-                                 netsnmp_transport_config *right) {
+netsnmp_transport_config_compare(const void *p, const void *q)
+{
+    const netsnmp_transport_config *left = p, *right = q;
+
     return strcmp(left->key, right->key);
 }
 
@@ -1021,8 +1023,8 @@ typedef struct trans_cache_s {
     int count; /* number of times this transport has been returned */
 } trans_cache;
 
-static void _tc_free_item(trans_cache *tc, void *context);
-static int _tc_compare(trans_cache *lhs, trans_cache *rhs);
+static void _tc_free_item(void *tc, void *context);
+static int _tc_compare(const void *p, const void *q);
 
 /** initialize transport cache */
 static int
@@ -1041,8 +1043,8 @@ _tc_init(void)
     }
 
     _container->container_name = strdup("trans_cache");
-    _container->free_item = (netsnmp_container_obj_func*) _tc_free_item;
-    _container->compare = (netsnmp_container_compare*) _tc_compare;
+    _container->free_item = _tc_free_item;
+    _container->compare = _tc_compare;
 
     return 0;
 }
@@ -1053,8 +1055,10 @@ _tc_init(void)
  * sort by af, type, local
  */
 static int
-_tc_compare(trans_cache *lhs, trans_cache *rhs)
+_tc_compare(const void *p, const void *q)
 {
+    const trans_cache *lhs = p, *rhs = q;
+
     netsnmp_assert((lhs != NULL) && (rhs != NULL));
 
     DEBUGMSGTL(("9:transport:cache:compare", "%p/%p\n", lhs, rhs));
@@ -1075,7 +1079,7 @@ _tc_compare(trans_cache *lhs, trans_cache *rhs)
         return 1;
 
     if (AF_INET == lhs->af) {
-        struct sockaddr_in *lha = &lhs->bind_addr.sin,
+        const struct sockaddr_in *lha = &lhs->bind_addr.sin,
             *rha = &rhs->bind_addr.sin;
         if (lha->sin_addr.s_addr < rha->sin_addr.s_addr)
             return -1;
@@ -1089,7 +1093,7 @@ _tc_compare(trans_cache *lhs, trans_cache *rhs)
     }
 #ifdef NETSNMP_ENABLE_IPV6
     else if (AF_INET6 == lhs->af) {
-        struct sockaddr_in6 *lha = &lhs->bind_addr.sin6,
+        const struct sockaddr_in6 *lha = &lhs->bind_addr.sin6,
             *rha = &rhs->bind_addr.sin6;
         int rc = memcmp(lha->sin6_addr.s6_addr, rha->sin6_addr.s6_addr,
                         sizeof(rha->sin6_addr.s6_addr));
@@ -1129,7 +1133,7 @@ _tc_free(trans_cache *tc)
 }
 
 static void
-_tc_free_item(trans_cache *tc, void *context)
+_tc_free_item(void *tc, void *context)
 {
     _tc_free(tc);
 }
