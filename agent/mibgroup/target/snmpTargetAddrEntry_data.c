@@ -264,7 +264,7 @@ init_snmpTargetAddrEntry_data(void)
 
     snmpd_register_config_handler("targetAddr",
                                   snmpd_parse_config_targetAddr,
-                                  (void (*)(void))0, NULL);
+                                  NULL, NULL);
 
     /*
      * we need to be called back later 

@@ -50,7 +50,10 @@ unsigned int alarm_reg;
 static netsnmp_container *deliver_container;
 
 static int
-_deliver_compare(deliver_by_notify *lhs, deliver_by_notify *rhs) {
+_deliver_compare(const void *p, const void *q)
+{
+    const deliver_by_notify *lhs = p, *rhs = q;
+
     /* sort by the next_run time */
     if (lhs->next_run < rhs->next_run)
         return -1;
@@ -99,7 +102,7 @@ init_deliverByNotify(void)
         return;
     }
     deliver_container->container_name = strdup("deliverByNotify");
-    deliver_container->compare = (netsnmp_container_compare *) _deliver_compare;
+    deliver_container->compare = _deliver_compare;
 
     /* set the defaults */
     default_max_size = DEFAULT_MAX_DELIVER_SIZE;
@@ -239,7 +242,10 @@ parse_deliver_maxsize_config(const char *token, char *line) {
 }
 
 static void
-_free_deliver_obj(deliver_by_notify *obj, void *context) {
+_free_deliver_obj(void *p, void *context)
+{
+    deliver_by_notify *obj = p;
+
     netsnmp_assert_or_return(obj != NULL, );
     SNMP_FREE(obj->target);
     SNMP_FREE(obj);
@@ -248,8 +254,7 @@ _free_deliver_obj(deliver_by_notify *obj, void *context) {
 void
 free_deliver_config(void) {
     default_max_size = DEFAULT_MAX_DELIVER_SIZE;
-    CONTAINER_CLEAR(deliver_container,
-                    (netsnmp_container_obj_func *) _free_deliver_obj, NULL);
+    CONTAINER_CLEAR(deliver_container, _free_deliver_obj, NULL);
     if (alarm_reg) {
         snmp_alarm_unregister(alarm_reg);
         alarm_reg = 0;

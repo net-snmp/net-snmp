@@ -167,8 +167,10 @@ tcpListenerTable_container_shutdown(netsnmp_container *container_ptr)
  * add new entry
  */
 static void
-_add_connection(netsnmp_tcpconn_entry *entry, netsnmp_container *container)
+_add_connection(void *p, void *q)
 {
+    netsnmp_tcpconn_entry *entry = p;
+    netsnmp_container *container = q;
     tcpListenerTable_rowreq_ctx *rowreq_ctx;
 
     DEBUGMSGTL(("tcpListenerTable:access", "creating new entry\n"));
@@ -247,8 +249,7 @@ tcpListenerTable_container_load(netsnmp_container *container)
     /*
      * got all the connections. pull out the active ones.
      */
-    CONTAINER_FOR_EACH(raw_data, (netsnmp_container_obj_func *)
-                       _add_connection, container);
+    CONTAINER_FOR_EACH(raw_data, _add_connection, container);
 
     /*
      * free the container. we've either claimed each entry, or released it,

@@ -158,7 +158,8 @@ struct config_files *config_files = NULL;
 static struct config_line *
 internal_register_config_handler(const char *type_param,
 				 const char *token,
-				 void (*parser) (const char *, char *),
+				 void (*parser1) (const char *, char *),
+				 void (*parser2) (const char *, const char *),
 				 void (*releaser) (void), const char *help,
 				 int when)
 {
@@ -187,7 +188,7 @@ internal_register_config_handler(const char *type_param,
                 *cptr = '\0';
                 ++cptr;
             }
-            ltmp2 = internal_register_config_handler(c, token, parser,
+            ltmp2 = internal_register_config_handler(c, token, parser1, parser2,
                                                      releaser, help, when);
         }
         return ltmp2;
@@ -251,7 +252,8 @@ internal_register_config_handler(const char *type_param,
      * Add/Replace the parse/free functions for the given line type
      * in the given file type.
      */
-    (*ltmp)->parse_line = parser;
+    (*ltmp)->parse_line1 = parser1;
+    (*ltmp)->parse_line2 = parser2;
     (*ltmp)->free_func = releaser;
 
     return (*ltmp);
@@ -264,7 +266,7 @@ register_prenetsnmp_mib_handler(const char *type,
                                 void (*parser) (const char *, char *),
                                 void (*releaser) (void), const char *help)
 {
-    return internal_register_config_handler(type, token, parser, releaser,
+    return internal_register_config_handler(type, token, parser, NULL, releaser,
 					    help, PREMIB_CONFIG);
 }
 
@@ -319,7 +321,7 @@ register_config_handler(const char *type,
 			void (*parser) (const char *, char *),
 			void (*releaser) (void), const char *help)
 {
-    return internal_register_config_handler(type, token, parser, releaser,
+    return internal_register_config_handler(type, token, parser, NULL, releaser,
 					    help, NORMAL_CONFIG);
 }
 
@@ -329,9 +331,7 @@ register_const_config_handler(const char *type,
                               void (*parser) (const char *, const char *),
                               void (*releaser) (void), const char *help)
 {
-    return internal_register_config_handler(type, token,
-                                            (void(*)(const char *, char *))
-                                            parser, releaser,
+    return internal_register_config_handler(type, token, NULL, parser, releaser,
 					    help, NORMAL_CONFIG);
 }
 
@@ -340,9 +340,16 @@ register_app_config_handler(const char *token,
                             void (*parser) (const char *, char *),
                             void (*releaser) (void), const char *help)
 {
-    return (register_config_handler(NULL, token, parser, releaser, help));
+    return register_config_handler(NULL, token, parser, releaser, help);
 }
 
+struct config_line *
+register_const_app_config_handler(const char *token,
+                                  void (*parser) (const char *, const char *),
+                                  void (*releaser) (void), const char *help)
+{
+    return register_const_config_handler(NULL, token, parser, releaser, help);
+}
 
 
 /**
@@ -567,7 +574,10 @@ run_config_handler(struct config_line *lptr,
             while ((cp > cptr) && isspace((unsigned char)(*cp))) {
                 *(cp--) = '\0';
             }
-            (*(lptr->parse_line)) (token, cptr);
+            if (lptr->parse_line1)
+                lptr->parse_line1(token, cptr);
+            else
+                lptr->parse_line2(token, cptr);
         }
         else
             DEBUGMSGTL(("9:read_config:parser",

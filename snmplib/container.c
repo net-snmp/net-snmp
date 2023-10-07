@@ -138,7 +138,7 @@ netsnmp_container_free_list(void)
     /*
      * free memory used by each factory entry
      */
-    CONTAINER_FOR_EACH(containers, ((netsnmp_container_obj_func *)_factory_free), NULL);
+    CONTAINER_FOR_EACH(containers, _factory_free, NULL);
 
     /*
      * free factory container
@@ -775,4 +775,9 @@ netsnmp_container_simple_free(void *data, void *context)
                 "netsnmp_container_simple_free) called for %p/%p\n",
                 data, context));
     free(data); /* SNMP_FREE wasted on param */
+}
+
+int netsnmp_str_compare(const void *left, const void *right)
+{
+    return strcmp(left, right);
 }

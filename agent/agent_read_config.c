@@ -348,8 +348,7 @@ snmpd_register_const_config_handler(const char *token,
 {
     DEBUGMSGTL(("snmpd_register_app_config_handler",
                 "registering .conf token for \"%s\"\n", token));
-    register_app_config_handler(token, (void(*)(const char *, char *))parser,
-                                releaser, help);
+    register_const_app_config_handler(token, parser, releaser, help);
 }
 
 #ifdef NETSNMP_FEATURE_REQUIRE_SNMPD_UNREGISTER_CONFIG_HANDLER

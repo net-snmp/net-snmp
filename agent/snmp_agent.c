@@ -142,9 +142,10 @@ netsnmp_get_pdu_stats(void)
     return _pdu_stats;
 }
 
-int _pdu_stats_compare(const netsnmp_pdu_stats * lhs,
-                       const netsnmp_pdu_stats * rhs)
+int _pdu_stats_compare(const void *p, const void *q)
 {
+    const netsnmp_pdu_stats *lhs = p, *rhs = q;
+
     if (NULL == lhs || NULL == rhs) {
         snmp_log(LOG_WARNING,
                  "WARNING: results undefined for compares with NULL\n");
@@ -178,7 +179,7 @@ _pdu_stats_init(void) {
         return;
     }
 
-    _pdu_stats->compare = (netsnmp_container_compare*)_pdu_stats_compare;
+    _pdu_stats->compare = _pdu_stats_compare;
     _pdu_stats->get_subset = NULL; /** subsets not supported */
 
     _pdu_stats_max = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,

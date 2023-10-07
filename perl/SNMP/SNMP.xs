@@ -2812,7 +2812,6 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
                }
 
                session.transport_configuration->compare =
-                   (netsnmp_container_compare*)
                    netsnmp_transport_config_compare;
            }
 

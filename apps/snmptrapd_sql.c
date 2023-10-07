@@ -595,8 +595,9 @@ netsnmp_mysql_init(void)
  * to CONTAINER_FOR_EACH.
  */
 static void
-_sql_log(sql_buf *sqlb, void* dontcare)
+_sql_log(void *p, void *dontcare)
 {
+    sql_buf              *sqlb = p;
     netsnmp_iterator     *it;
     sql_vb_buf           *sqlvb;
 
@@ -655,8 +656,10 @@ _sql_log(sql_buf *sqlb, void* dontcare)
  * to CONTAINER_FOR_EACH.
  */
 static void
-_sql_vb_buf_free(sql_vb_buf *sqlvb, void* dontcare)
+_sql_vb_buf_free(void *p, void *dontcare)
 {
+    sql_vb_buf *sqlvb = p;
+
     if (NULL == sqlvb)
         return;
 
@@ -672,15 +675,16 @@ _sql_vb_buf_free(sql_vb_buf *sqlvb, void* dontcare)
  * to CONTAINER_FOR_EACH.
  */
 static void
-_sql_buf_free(sql_buf *sqlb, void* dontcare)
+_sql_buf_free(void *p, void* dontcare)
 {
+    sql_buf *sqlb = p;
+
     if (NULL == sqlb)
         return;
 
     /** do varbinds first */
     if (sqlb->varbinds) {
-        CONTAINER_CLEAR(sqlb->varbinds,
-                        (netsnmp_container_obj_func*)_sql_vb_buf_free, NULL);
+        CONTAINER_CLEAR(sqlb->varbinds, _sql_vb_buf_free, NULL);
         CONTAINER_FREE(sqlb->varbinds);
     }
 
@@ -976,8 +980,9 @@ mysql_handler(netsnmp_pdu           *pdu,
  * save a buffered trap to sql database
  */
 static void
-_sql_save(sql_buf *sqlb, void *dontcare)
+_sql_save(void *p, void *dontcare)
 {
+    sql_buf              *sqlb = p;
     netsnmp_iterator     *it;
     sql_vb_buf           *sqlvb;
     u_long                trap_id;
@@ -1123,21 +1128,21 @@ _sql_process_queue(u_int dontcare, void *meeither)
         (void) netsnmp_mysql_connect();
     }
 
-    CONTAINER_FOR_EACH(_sql.queue, (netsnmp_container_obj_func*)_sql_save,
-                       NULL);
+    int sql_has_connected = _sql.connected;
+
+    CONTAINER_FOR_EACH(_sql.queue, _sql_save, NULL);
 
     if (_sql.connected) {
         rc = mysql_commit(_sql.conn);
         if (rc) { /* nuts... now what? */
             netsnmp_sql_error("commit failed");
-            CONTAINER_FOR_EACH(_sql.queue,
-                               (netsnmp_container_obj_func*)_sql_log,
-                               NULL);
+            CONTAINER_FOR_EACH(_sql.queue, _sql_log, NULL);
         }
     }
 
-    CONTAINER_CLEAR(_sql.queue, (netsnmp_container_obj_func*)_sql_buf_free,
-                    NULL);
+    if (!sql_has_connected || _sql.connected) {
+        CONTAINER_CLEAR(_sql.queue, _sql_buf_free, NULL);
+    }
 }
 
 #else

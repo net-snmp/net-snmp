@@ -154,9 +154,10 @@ ipv6ScopeZoneIndexTable_container_shutdown(netsnmp_container *container_ptr)
  *
  */
 static void
-_snarf_zoneindex_entry(netsnmp_v6scopezone_entry *scopezone_entry,
-                       netsnmp_container *container)
+_snarf_zoneindex_entry(void *p, void *q)
 {
+    netsnmp_v6scopezone_entry *scopezone_entry = p;
+    netsnmp_container *container = q;
     ipv6ScopeZoneIndexTable_rowreq_ctx *rowreq_ctx;
 
     DEBUGTRACE;
@@ -234,9 +235,7 @@ ipv6ScopeZoneIndexTable_container_load(netsnmp_container * container)
      * the container.
      */
 
-     CONTAINER_FOR_EACH(zoneindex,
-                       (netsnmp_container_obj_func *) _snarf_zoneindex_entry,
-                        container);
+     CONTAINER_FOR_EACH(zoneindex, _snarf_zoneindex_entry, container);
     /*
      * free the container. we've either claimed each entry, or released it,
      * so the access function doesn't need to clear the container.
