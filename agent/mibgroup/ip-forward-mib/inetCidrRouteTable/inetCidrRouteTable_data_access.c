@@ -136,9 +136,10 @@ inetCidrRouteTable_container_init(netsnmp_container **container_ptr_ptr,
  * check entry for update
  */
 static void
-_snarf_route_entry(netsnmp_route_entry *route_entry,
-                   netsnmp_container *container)
+_snarf_route_entry(void *p, void *q)
 {
+    netsnmp_route_entry *route_entry = p;
+    netsnmp_container *container = q;
     inetCidrRouteTable_rowreq_ctx *rowreq_ctx;
 
     netsnmp_assert(NULL != route_entry);
@@ -272,9 +273,7 @@ inetCidrRouteTable_container_load(netsnmp_container *container)
     /*
      * we just got a fresh copy of route data. snarf data
      */
-    CONTAINER_FOR_EACH(route_container,
-                       (netsnmp_container_obj_func *) _snarf_route_entry,
-                       container);
+    CONTAINER_FOR_EACH(route_container, _snarf_route_entry, container);
 
     /*
      * free the container. we've either claimed each ifentry, or released it,

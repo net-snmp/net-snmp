@@ -220,16 +220,20 @@ netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
     return cache;
 }
 
-static netsnmp_cache *
-netsnmp_cache_ref(netsnmp_cache *cache)
+static void *
+netsnmp_cache_ref(void *p)
 {
+    netsnmp_cache *cache = p;
+
     cache->refcnt++;
     return cache;
 }
 
 static void
-netsnmp_cache_deref(netsnmp_cache *cache)
+netsnmp_cache_deref(void *p)
 {
+    netsnmp_cache *cache = p;
+
     if (--cache->refcnt == 0) {
         netsnmp_cache_remove(cache);
         netsnmp_cache_free(cache);
@@ -412,8 +416,8 @@ void netsnmp_cache_handler_owns_cache(netsnmp_mib_handler *handler)
 {
     netsnmp_assert(handler->myvoid);
     ((netsnmp_cache *)handler->myvoid)->refcnt++;
-    handler->data_clone = (void *(*)(void *))netsnmp_cache_ref;
-    handler->data_free = (void(*)(void*))netsnmp_cache_deref;
+    handler->data_clone = netsnmp_cache_ref;
+    handler->data_free = netsnmp_cache_deref;
 }
 
 /** returns a cache handler that can be injected into a given handler chain.  

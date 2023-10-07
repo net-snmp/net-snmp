@@ -42,8 +42,7 @@ static netsnmp_container *swrun_container = NULL;
 /*
  * local static prototypes
  */
-static void _swrun_entry_release(netsnmp_swrun_entry * entry,
-                                            void *unused);
+static void _swrun_entry_release(void* entry, void *unused);
 
 /**
  * initialization
@@ -309,9 +308,7 @@ netsnmp_swrun_container_free_items(netsnmp_container *container)
     /*
      * free all items.
      */
-    CONTAINER_CLEAR(container,
-                    (netsnmp_container_obj_func*)_swrun_entry_release,
-                    NULL);
+    CONTAINER_CLEAR(container, _swrun_entry_release, NULL);
 }
 
 /**---------------------------------------------------------------------*/
@@ -384,7 +381,7 @@ netsnmp_swrun_entry_free(netsnmp_swrun_entry * entry)
 /**
  */
 static void
-_swrun_entry_release(netsnmp_swrun_entry * entry, void *context)
+_swrun_entry_release(void *entry, void *context)
 {
     netsnmp_swrun_entry_free(entry);
 }

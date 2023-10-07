@@ -47,6 +47,13 @@ extern          "C" {
                                                 const char *usageLine);
 
     NETSNMP_IMPORT
+    struct config_line *register_const_app_config_handler(
+                                                const char *token,
+                                                void (*parser) (const char *, const char *),
+                                                void (*releaser) (void),
+                                                const char *usageLine);
+
+    NETSNMP_IMPORT
     struct config_line *register_app_prenetsnmp_mib_handler(
                                                 const char *token,
                                                 void (*parser) (const char *, char *),

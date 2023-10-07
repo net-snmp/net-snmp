@@ -392,7 +392,6 @@ netsnmp_parse_args(int argc,
                 }
 
                 session->transport_configuration->compare =
-                    (netsnmp_container_compare*)
                     netsnmp_transport_config_compare;
             }
 

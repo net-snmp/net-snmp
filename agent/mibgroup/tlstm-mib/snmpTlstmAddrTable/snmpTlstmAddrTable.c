@@ -93,8 +93,8 @@ static netsnmp_handler_registration *addr_count_reg;
 static netsnmp_handler_registration *last_changed_reg;
 
 static Netsnmp_Node_Handler tlstmAddrTable_handler;
-static int _cache_load(netsnmp_cache *cache, netsnmp_tdata *table);
-static void _cache_free(netsnmp_cache *cache, netsnmp_tdata *table);
+static int _cache_load(netsnmp_cache *cache, void *table);
+static void _cache_free(netsnmp_cache *cache, void *table);
 static uint32_t _last_changed = 0;
 static int _count_handler(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -147,8 +147,7 @@ init_snmpTlstmAddrTable(void)
     /*
      * cache init
      */
-    cache = netsnmp_cache_create(30, (NetsnmpCacheLoad*)_cache_load,
-                                 (NetsnmpCacheFree*)_cache_free,
+    cache = netsnmp_cache_create(30, _cache_load, _cache_free,
                                  reg_oid, reg_oid_len);
     if (!cache) {
         snmp_log(LOG_ERR,"error creating cache for tlstmCertToTSNTable\n");
@@ -1149,8 +1148,9 @@ _entry_from_addr(snmpTlstmAddr  *addr)
 }
 
 static int
-_cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
+_cache_load(netsnmp_cache *cache, void *q)
 {
+    netsnmp_tdata     *table = q;
     netsnmp_container *addrs;
     netsnmp_iterator  *itr;
     snmpTlstmAddr     *addr;
@@ -1201,8 +1201,9 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
 }
 
 static void
-_cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
+_cache_free(netsnmp_cache *cache, void *q)
 {
+    netsnmp_tdata     *table = q;
     netsnmp_tdata_row *row;
     netsnmp_iterator   *tbl_itr;
     tlstmAddrTable_entry   *entry;

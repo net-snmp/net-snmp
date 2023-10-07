@@ -1266,7 +1266,6 @@ netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
       }
 
       session.transport_configuration->compare =
-          (netsnmp_container_compare*)
           netsnmp_transport_config_compare;
   }
 

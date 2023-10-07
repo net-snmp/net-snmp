@@ -340,9 +340,10 @@ updateLogmatch(int iindex)
 
 
 static void
-updateLogmatch_Scheduled(unsigned int registrationNumber,
-                         struct logmatchstat *logmatchtable)
+updateLogmatch_Scheduled(unsigned int registrationNumber, void *p)
 {
+    struct logmatchstat *logmatchtable = p;
+
     updateLogmatch(logmatchtable->thisIndex);
 }
 
@@ -451,8 +452,7 @@ logmatch_parse_config(const char *token, char *cptr)
         }
         else if (logmatchTable[logmatchCount].frequency > 0) {
             snmp_alarm_register(logmatchTable[logmatchCount].frequency,
-                                SA_REPEAT,
-                                (SNMPAlarmCallback *) updateLogmatch_Scheduled,
+                                SA_REPEAT, updateLogmatch_Scheduled,
                                 &logmatchTable[logmatchCount]);
         }
 
