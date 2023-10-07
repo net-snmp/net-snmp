@@ -417,7 +417,6 @@ main(int argc, char *argv[])
         }
     }
     snmp_close(ss);
-    memset(&session, 0, sizeof(session));
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_WALK_PRINT_STATISTICS)) {
