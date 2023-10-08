@@ -1133,7 +1133,10 @@ _sess_copy(netsnmp_session * in_session)
     session->securityEngineID = NULL;
     session->securityName = NULL;
     session->securityAuthProto = NULL;
+    session->securityAuthLocalKey = NULL;
     session->securityPrivProto = NULL;
+    session->securityPrivLocalKey = NULL;
+    session->sessUser = NULL;
     /*
      * session now points to the new structure that still contains pointers to
      * data allocated elsewhere.  Some of this data is copied to space malloc'd
@@ -1264,6 +1267,22 @@ _sess_copy(netsnmp_session * in_session)
         }
         session->securityName = cp;
         session->securityNameLen = strlen(cp);
+    }
+
+    if (in_session->securityAuthLocalKey) {
+            session->securityAuthLocalKey =
+                netsnmp_memdup(in_session->securityAuthLocalKey,
+                               in_session->securityAuthLocalKeyLen);
+            session->securityAuthLocalKeyLen =
+                in_session->securityAuthLocalKeyLen;
+    }
+
+    if (in_session->securityPrivLocalKey) {
+            session->securityPrivLocalKey =
+                netsnmp_memdup(in_session->securityPrivLocalKey,
+                               in_session->securityPrivLocalKeyLen);
+            session->securityPrivLocalKeyLen =
+                in_session->securityPrivLocalKeyLen;
     }
 
     if (session->retries == SNMP_DEFAULT_RETRIES) {
