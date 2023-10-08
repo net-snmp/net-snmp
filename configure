@@ -17878,7 +17878,7 @@ printf %s "checking for developer gcc flags... " >&6; }
     for opt in -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
         -Wimplicit-fallthrough=2 -Wlogical-op -Wundef                        \
         -Wno-format-truncation -Wno-missing-field-initializers               \
-        -Wno-sign-compare -Wno-unused-parameter
+        -Wno-sign-compare -Wno-unused-parameter -Wcast-function-type
     do
       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
 printf %s "checking whether the compiler supports $opt... " >&6; }
