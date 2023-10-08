@@ -124,7 +124,7 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
     for opt in -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
         -Wimplicit-fallthrough=2 -Wlogical-op -Wundef                        \
         -Wno-format-truncation -Wno-missing-field-initializers               \
-        -Wno-sign-compare -Wno-unused-parameter
+        -Wno-sign-compare -Wno-unused-parameter -Wcast-function-type
     do
       AC_MSG_CHECKING([whether the compiler supports $opt])
       if test x$opt != x-Wstrict-prototypes; then
