@@ -477,6 +477,18 @@ netsnmp_udp6_transport_init(const struct netsnmp_ep *ep, int flags)
     return t;
 }
 
+static void set_ipv6_recvpktinfo_sockopt(int sd)
+{
+#if defined(HAVE_IPV6_RECVPKTINFO) && !defined(WIN32)
+    int sockopt = 1;
+    if (setsockopt(sd, IPPROTO_IPV6, IPV6_RECVPKTINFO, &sockopt, sizeof(sockopt)) == -1) {
+        DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_RECVPKTINFO: %s\n", strerror(errno)));
+    } else {
+        DEBUGMSGTL(("netsnmp_udp6", "set IPV6_RECVPKTINFO\n"));
+    }
+#endif
+}
+
 int
 netsnmp_udp6_transport_bind(netsnmp_transport *t,
                             const struct netsnmp_ep *ep,
@@ -503,16 +515,7 @@ netsnmp_udp6_transport_bind(netsnmp_transport *t,
             } 
         }
 #endif
-#if defined(HAVE_IPV6_RECVPKTINFO) && !defined(WIN32)
-        {
-            int sockopt = 1;
-            if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_RECVPKTINFO, &sockopt, sizeof(sockopt)) == -1) {
-                DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_RECVPKTINFO: %s\n", strerror(errno)));
-                return -1;
-            }
-            DEBUGMSGTL(("netsnmp_udp6", "set IPV6_RECVPKTINFO\n"));
-        }
-#endif
+        set_ipv6_recvpktinfo_sockopt(t->sock);
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
         return -1;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
