@@ -478,6 +478,20 @@ netsnmp_udp6_transport_init(const struct netsnmp_ep *ep, int flags)
     return t;
 }
 
+static void set_ipv6_v6only_sockopt(int sd)
+{
+#ifdef IPV6_V6ONLY
+    /* Try to restrict PF_INET6 socket to IPv6 communications only. */
+    int optval = 1;
+
+    if (setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, &optval,
+                   sizeof(optval)) != 0) {
+        DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY: %s\n",
+                    strerror(errno)));
+    }
+#endif
+}
+
 static void set_ipv6_recvpktinfo_sockopt(int sd)
 {
 #if defined(HAVE_IPV6_RECVPKTINFO) && !defined(WIN32)
@@ -510,15 +524,7 @@ netsnmp_udp6_transport_bind(netsnmp_transport *t,
          * be INADDR_ANY, but certainly includes a port number.
          */
 
-#ifdef IPV6_V6ONLY
-        /* Try to restrict PF_INET6 socket to IPv6 communications only. */
-        {
-            int one=1;
-            if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
-                DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
-            } 
-        }
-#endif
+        set_ipv6_v6only_sockopt(t->sock);
         set_ipv6_recvpktinfo_sockopt(t->sock);
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
         return -1;
