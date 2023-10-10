@@ -1,0 +1,26 @@
+# Creates a Coverity build on a schedule
+# Uses https://github.com/vapier/coverity-scan-action
+# for Coverity integration
+
+name: Coverity Scan
+
+on:
+  schedule:
+    # Run daily
+    - cron: '0 0 * * *'
+  # Support manual execution
+  workflow_dispatch:
+jobs:
+  coverity:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@main
+    - name: install required packages
+      run: sudo bash -c "MODE=regular ci/install.sh"
+    - name: configure
+      run: ci/net-snmp-configure master
+    - uses: vapier/coverity-scan-action@v1
+      with:
+        command: make
+        email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+        token: ${{ secrets.COVERITY_SCAN_TOKEN }}
