@@ -1153,6 +1153,7 @@
 #endif
 
 #define NETSNMP_FALLTHROUGH do { } while (0)
+#define NETSNMP_NONNULL(...) /* nonnull */
 
 /* Mib-2 tree Info */
 /* These are the system information variables. */

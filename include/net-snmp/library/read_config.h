@@ -107,8 +107,7 @@ extern          "C" {
                                                  size_t * len);
     NETSNMP_IMPORT
     char           *read_config_save_objid(char *saveto, oid * objid,
-                                           size_t len)
-        __attribute__((nonnull (1, 2)));
+                                           size_t len) NETSNMP_NONNULL(1, 2);
     NETSNMP_IMPORT
     char           *read_config_read_data(int type, char *readfrom,
                                           void *dataptr, size_t * len);
