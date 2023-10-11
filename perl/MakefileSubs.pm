@@ -123,6 +123,7 @@ sub AddCommonParams {
 	# Suppress known Perl header shortcomings.
 	$Params->{'CCFLAGS'} =~ s/ -W(cast-qual|write-strings)//g;
 	append($Params->{'CCFLAGS'}, '-Wformat');
+	append($Params->{'CCFLAGS'}, '-Wno-compound-token-split-by-macro');
     }
 }
 
