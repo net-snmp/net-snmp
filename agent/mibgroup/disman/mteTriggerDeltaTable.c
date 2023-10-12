@@ -216,7 +216,7 @@ write_mteTriggerDeltaDiscontinuityID(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -232,7 +232,7 @@ write_mteTriggerDeltaDiscontinuityID(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerDeltaDiscontinuityID;
         tmplen = StorageTmp->mteTriggerDeltaDiscontinuityIDLen;
@@ -306,7 +306,7 @@ write_mteTriggerDeltaDiscontinuityIDWildcard(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -322,7 +322,7 @@ write_mteTriggerDeltaDiscontinuityIDWildcard(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerDeltaDiscontinuityIDWildcard;
         StorageTmp->mteTriggerDeltaDiscontinuityIDWildcard =
@@ -391,7 +391,7 @@ write_mteTriggerDeltaDiscontinuityIDType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -407,7 +407,7 @@ write_mteTriggerDeltaDiscontinuityIDType(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerDeltaDiscontinuityIDType;
         StorageTmp->mteTriggerDeltaDiscontinuityIDType =

@@ -42,7 +42,7 @@ netsnmp_feature_child_of(container_iterator, container_types);
  */
 typedef struct iterator_info_s {
    /*
-    * netsnmp_conatiner  must be first
+    * netsnmp_container  must be first
     */
    netsnmp_container c;
 
@@ -183,7 +183,7 @@ _iterator_get_next(iterator_info *ii, const void *key)
              * than the key, but less than any previous match.
              *
              * if there is no key, this is a get-first, and we need to
-             * compare the best value agains the tmp value to see if the
+             * compare the best value against the tmp value to see if the
              * tmp value is lesser than the best match.
              */
             if(key) /* get next */

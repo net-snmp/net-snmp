@@ -588,7 +588,7 @@ netsnmp_feature_child_of(register_int_instance,instance);
 /**
  * This function registers an int helper handler to a specified OID.
  *
- * @param name         the name used for registration pruposes.
+ * @param name         the name used for registration purposes.
  *
  * @param reg_oid      the OID where you want to register your integer at
  *

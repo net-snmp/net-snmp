@@ -371,7 +371,7 @@ etherStatsTable_undo_commit(etherStatsTable_rowreq_ctx * rowreq_ctx)
      * check the column's flag in rowreq_ctx->column_set_flags to see
      * if it was set during commit, then undo it.
      *
-     * eg: if (rowreq_ctx->column_set_flags & COLUMN__FLAG) {}
+     * e.g.: if (rowreq_ctx->column_set_flags & COLUMN__FLAG) {}
      */
 
 
@@ -450,7 +450,7 @@ This object identifies the source of the data that
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -646,7 +646,7 @@ The entity that configured this entry and is therefore
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -838,7 +838,7 @@ The status of this etherStats entry.
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note

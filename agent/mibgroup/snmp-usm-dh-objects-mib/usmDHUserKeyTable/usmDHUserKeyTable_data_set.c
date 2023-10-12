@@ -518,7 +518,7 @@ The object used to change any given user's Authentication Key
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note
@@ -719,7 +719,7 @@ The object used to change the agents own Authentication Key
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note
@@ -903,7 +903,7 @@ The object used to change any given user's Privacy Key using
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note
@@ -1105,7 +1105,7 @@ The object used to change the agent's own Privacy Key using a
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note

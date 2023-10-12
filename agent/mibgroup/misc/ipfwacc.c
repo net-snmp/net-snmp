@@ -1,7 +1,7 @@
 /****************************************************************************
  * Module for ucd-snmpd reading IP Firewall accounting rules.               *
  * It reads "/proc/net/ip_acct". If the file has a wrong format it silently *
- * returns erroneous data but doesn't do anything harmfull. Based (on the   *
+ * returns erroneous data but doesn't do anything harmful. Based (on the   *
  * output of) mib2c, wombat.c, proc.c and the Linux kernel.                 *
  * Author: Cristian.Estan@net.utcluj.ro                                     *
  ***************************************************************************/
@@ -148,7 +148,7 @@ getflags(void)
 /*
  * This function reads into ret_val a field from the rule buffer. The field
  * * is a base 10 long integer and the parameter skip tells us how many fields
- * * to skip after the "via addrress" field (including the flag field)
+ * * to skip after the "via address" field (including the flag field)
  */
 
 static void
@@ -256,7 +256,7 @@ var_ipfwacc(struct variable *vp,
             size_t * length,
             int exact, size_t * var_len, WriteMethod ** write_method)
 {
-    *write_method = NULL;       /* assume it isnt writable for the time being */
+    *write_method = NULL;       /* assume it isn't writable for the time being */
     *var_len = sizeof(ret_val); /* assume an integer and change later if not */
 
     if (header_simple_table

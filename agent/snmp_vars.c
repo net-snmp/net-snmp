@@ -246,7 +246,7 @@ _init_agent_callback_transport(void)
 #endif
 
 /**
- * Initialize the agent.  Calls into init_agent_read_config to set tha app's
+ * Initialize the agent.  Calls into init_agent_read_config to set that app's
  * configuration file in the appropriate default storage space,
  *  NETSNMP_DS_LIB_APPTYPE.  Need to call init_agent before calling init_snmp.
  *

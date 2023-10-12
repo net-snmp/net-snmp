@@ -859,7 +859,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 vp1->index &= ~MTE_ARMED_BOOLEAN;
                 /*
                  * NB: Clear the trigger armed flag even if the
-                 *   (starting) event dosn't actually fire.
+                 *   (starting) event doesn't actually fire.
                  *   Otherwise initially true (but suppressed)
                  *   triggers will fire on the *second* probe.
                  */
@@ -964,7 +964,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 cmp |=  MTE_ARMED_TH_FALL;
                 /*
                  * NB: Clear the trigger armed flag even if the
-                 *   (starting) event dosn't actually fire.
+                 *   (starting) event doesn't actually fire.
                  *   Otherwise initially true (but suppressed)
                  *   triggers will fire on the *second* probe.
                  * Similarly for falling thresholds (see below).

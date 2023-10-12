@@ -33,7 +33,7 @@ netsnmp_feature_child_of(mode_end_call, mib_helpers);
  *  above other helpers like the serialize helper to be useful.
  *
  *  Multiple mode specific handlers can be registered and will be
- *  called in the order they were regestered in.  Callbacks regesterd
+ *  called in the order they were registered in.  Callbacks registered
  *  with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all
  *  modes.
  * 

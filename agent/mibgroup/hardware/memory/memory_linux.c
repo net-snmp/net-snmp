@@ -73,7 +73,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     }
 
     /*
-     * ... parse this into a more useable form...
+     * ... parse this into a more usable form...
      */
     b = strstr(buff, "MemTotal: ");
     if (b) 

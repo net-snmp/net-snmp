@@ -809,7 +809,7 @@ checkmib(struct variable *vp, oid * name, size_t * length,
          int exact, size_t * var_len, WriteMethod ** write_method, int max)
 {
     /*
-     * checkmib used to be header_simple_table, with reveresed boolean
+     * checkmib used to be header_simple_table, with reversed boolean
      * return output.  header_simple_table() was created to match
      * header_generic(). 
      */

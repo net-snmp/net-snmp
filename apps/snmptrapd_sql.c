@@ -345,7 +345,7 @@ netsnmp_mysql_bind(const char *text, size_t text_size, MYSQL_STMT **stmt,
                    MYSQL_BIND *bind)
 {
     if ((NULL == text) || (NULL == stmt) || (NULL == bind)) {
-        snmp_log(LOG_ERR,"invalid paramaters to netsnmp_mysql_bind()\n");
+        snmp_log(LOG_ERR,"invalid parameters to netsnmp_mysql_bind()\n");
         return -1;
     }
 

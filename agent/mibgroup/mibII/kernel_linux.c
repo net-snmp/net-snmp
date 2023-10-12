@@ -195,7 +195,7 @@ decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
         return -1;
 
     /*
-     * Since we are using strtok, there is a possiblity of the orginal data
+     * Since we are using strtok, there is a possibility of the original data
      * getting modified. So we take a local copy for this purpose even though
      * its expensive.
      */

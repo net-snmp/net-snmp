@@ -161,7 +161,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
         /*
          * on linux, default routes all look alike, and would have the same
          * indexed based on dest and next hop. So we use the if index
-         * as the policy, to distinguise between them. Hopefully this is
+         * as the policy, to distinguish between them. Hopefully this is
          * unique.
          * xxx-rks: It should really only be for the duplicate case, but that
          *     would be more complicated than I want to get into now. Fix later.

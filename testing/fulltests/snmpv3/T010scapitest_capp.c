@@ -379,7 +379,7 @@ test_dokeyedhash(void)
         goto test_dokeyedhash_again;
     }
 
-    } /* whilte(1) */
+    } /* while(1) */
 
     return failcount;
 

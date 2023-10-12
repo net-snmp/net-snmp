@@ -416,7 +416,7 @@ write_mteObjectsID(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -432,7 +432,7 @@ write_mteObjectsID(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteObjectsID;
         tmplen = StorageTmp->mteObjectsIDLen;
@@ -507,7 +507,7 @@ write_mteObjectsIDWildcard(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -523,7 +523,7 @@ write_mteObjectsIDWildcard(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteObjectsIDWildcard;
         StorageTmp->mteObjectsIDWildcard = *((long *) var_val);
@@ -653,7 +653,7 @@ write_mteObjectsEntryStatus(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         if (StorageTmp == NULL) {
             /*
@@ -728,7 +728,7 @@ write_mteObjectsEntryStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in
+         * it.  Note that anything done here must be reversible in
          * the UNDO case 
          */
 

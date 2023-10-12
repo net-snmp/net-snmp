@@ -586,7 +586,7 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
 
     /***************************
      *
-     *   Convenience registration routines - modelled on
+     *   Convenience registration routines - modeled on
      *   the equivalent netsnmp_register_*_instance() calls
      *
      ***************************/

@@ -1101,7 +1101,7 @@ _ifTable_check_column(ifTable_rowreq_ctx * rowreq_ctx,
          * ifAdminStatus(7)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h 
          */
     case COLUMN_IFADMINSTATUS:
-        /** special case: we are using exernal storage w/smaller data size
+        /** special case: we are using external storage w/smaller data size
          ** for storage, so we can't use sizeof on data context. So we
          ** just check that it's the expected size. The enum tests below
          ** will ensure that there is no data overflow. */

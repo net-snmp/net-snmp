@@ -566,7 +566,7 @@ netsnmp_access_ipaddress_extra_prefix_info(int index, u_long *preferedlt,
     }
     status = recv (sd, buf, sizeof(buf), 0);
     if (status < 0) {
-        snmp_log (LOG_ERR, "could not recieve netlink request\n");
+        snmp_log (LOG_ERR, "could not receive netlink request\n");
         goto out;
     }
     if (status == 0) {

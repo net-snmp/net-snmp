@@ -1185,7 +1185,7 @@ void netsnmp_prefix_process(int fd, void *data)
                 DEBUGMSGTL(("access:interface:prefix", "Unable to add/update prefix info\n"));
                 free(new);
             }
-            if(iret == 2) /*Only when enrty already exists and we are only updating*/
+            if(iret == 2) /*Only when entry already exists and we are only updating*/
                 free(new);
         }
         have_addr = have_prefix = 0;

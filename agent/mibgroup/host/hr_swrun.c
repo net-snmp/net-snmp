@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -1248,7 +1248,7 @@ var_hrswrun(struct variable * vp,
                 long_return = 0;/* Tried my best, giving up.*/
             } 
             else 
-            {/* 0x8000 is the maximum range of pr_pctmem. devision of 1024 is to go from B to kB*/
+            {/* 0x8000 is the maximum range of pr_pctmem. division of 1024 is to go from B to kB*/
                 uint32_t pct_unit = (mem->size/0x8000) * (mem->units/1024);
                 long_return = proc_buf ? proc_buf->pr_pctmem * pct_unit : 0;
             }

@@ -1245,7 +1245,7 @@ realloc_handle_backslash(u_char ** buf, size_t * buf_len, size_t * out_len,
       *    fmt_cmd - the character after the backslash
       */
 {
-    char            temp_bfr[3];        /* for bulding temporary strings */
+    char            temp_bfr[3];        /* for building temporary strings */
 
     /*
      * select the proper output character(s) 

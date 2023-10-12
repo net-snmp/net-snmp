@@ -233,7 +233,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
             continue;
         }
 
-        /* restore the interface name if we modifed it due to unaliasing
+        /* restore the interface name if we modified it due to unaliasing
          * above
          */
         if (entry->flags & NETSNMP_ACCESS_IPADDRESS_ISALIAS) {
@@ -655,7 +655,7 @@ _netsnmp_ioctl_ipaddress_delete_v6(netsnmp_ipaddress_entry * entry)
 /**
  * get the interface count and populate the ifc_buf
  *
- * Note: the caller assumes responsbility for the ifc->ifc_buf
+ * Note: the caller assumes responsibility for the ifc->ifc_buf
  *       memory, and should free() it when done.
  *
  * @retval -1 : malloc error

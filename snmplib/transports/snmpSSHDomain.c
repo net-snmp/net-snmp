@@ -915,7 +915,7 @@ netsnmp_ssh_transport(const struct netsnmp_ep *ep, int local, int domain)
             return NULL;
         }
 
-        /* At this point we havn't authenticated, The first thing to
+        /* At this point we haven't authenticated, The first thing to
            do is check the hostkey's fingerprint against our known
            hosts Your app may have it hard coded, may go to a file,
            may present it to the user, that's your call
@@ -1014,7 +1014,7 @@ netsnmp_ssh_transport(const struct netsnmp_ep *ep, int local, int domain)
             goto shutdown;
         }
 
-        /* we've now authenticated both sides; contining onward ... */
+        /* we've now authenticated both sides; continuing onward ... */
         authenticated:
 
         /* Request a channel */

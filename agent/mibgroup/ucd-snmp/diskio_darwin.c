@@ -162,7 +162,7 @@ handle_drive(io_registry_entry_t drive, struct drivestats * dstat)
 	number = (CFNumberRef)CFDictionaryGetValue(properties,
 					    CFSTR(kIOBSDUnitKey));
 
-	/* Collect stats and if succesful store them with the name and unitnumber */
+	/* Collect stats and if successful store them with the name and unitnumber */
 	if (name && number && !collect_drive_stats(parent, dstat->stats)) {
 
 	    CFStringGetCString(name, dstat->name, MAXDRIVENAME, CFStringGetSystemEncoding());
@@ -189,7 +189,7 @@ diskio_getstats(void)
     CFMutableDictionaryRef match;
     kern_return_t          status;
 
-    now = time(NULL);	/* register current time and check wether cache can be used */
+    now = time(NULL);	/* register current time and check whether cache can be used */
     if (diskio_cache_valid(now)) {
         return 0;
     }

@@ -57,7 +57,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 
     /*
      * Extract the fuzz data. We do this early to avoid overhead
-     * from intiailising the agent and then having to exit due to
+     * from initializing the agent and then having to exit due to
      * limited fuzz data. 
      */
     char           *mib_file_data =

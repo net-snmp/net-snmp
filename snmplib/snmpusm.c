@@ -710,7 +710,7 @@ usm_remove_usmUser_from_list(struct usmUser *user, struct usmUser **ppuserList)
  * NOTE: if there was only one user in the list, list head will be NULL.
  *       So NULL can also mean success. Use the newer usm_remove_usmUser() for
  *       more specific return codes. This function is kept for backwards
- *       compatability with this ambiguous behaviour.
+ *       compatibility with this ambiguous behaviour.
  */
 static struct usmUser *
 usm_remove_user_from_list(struct usmUser *user,
@@ -849,7 +849,7 @@ int usm_set_priv_key(struct usmUser *user, const char *fname,
         new_key = dummy.privKey;
         new_key_len = dummy.privKeyLen;
         /*
-         * make sure no reallocation happened; buf2 must be large enoungh
+         * make sure no reallocation happened; buf2 must be large enough
          */
         netsnmp_assert(dummy.privKey == buf2);
     }
@@ -1479,7 +1479,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
      * 
      * None of these are to be free'd - they are either pointing to
      * what's in the secStateRef or to something either in the
-     * actual prarmeter list or the user list.
+     * actual parameter list or the user list.
      */
 
     const char     *theName = NULL;
@@ -2537,7 +2537,7 @@ usm_parse_security_parameters(u_char * secParams,
 
     /*
      * Retrieve the engine boots, notice switch in the way next_ptr and
-     * remaining_bytes are used (to accomodate the asn code).
+     * remaining_bytes are used (to accommodate the asn code).
      */
     DEBUGDUMPHEADER("recv", "msgAuthoritativeEngineBoots");
     if ((next_ptr = asn_parse_int(next_ptr, &remaining_bytes, &type_value,
@@ -4558,7 +4558,7 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
  * create a usm user from a string.
  *
  * The format for the string is described in the createUser
- * secion of the snmpd.conf man page.
+ * section of the snmpd.conf man page.
  *
  * On success, a pointer to the created usmUser struct is returned.
  * On error, a NULL pointer is returned. In this case, if a pointer to a
@@ -5119,7 +5119,7 @@ init_usm(void)
     DEBUGMSGTL(("init_usm", "unit_usm: %" NETSNMP_PRIo "u %" NETSNMP_PRIo "u\n",
                 usmNoPrivProtocol[0], usmNoPrivProtocol[1]));
 
-    sc_init();                  /* initalize scapi code */
+    sc_init();                  /* initialize scapi code */
 
     /*
      * register ourselves as a security service

@@ -551,7 +551,7 @@ particular branches if necessary.
 
 In fact, the default validation routines make the assumption that the
 variable is both read-only, and of integer type (which includes the COUNTER
-and GAUGE types among others), and set the return paramaters write_method and
+and GAUGE types among others), and set the return parameters write_method and
 var_len appropriately. These settings can then be corrected for those cases
 when either or both of these assumptions are wrong. Examples of this can be
 seen in the example module.

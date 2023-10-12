@@ -244,7 +244,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
         entry->stats.columnAvail[IPSYSTEMSTATSTABLE_REFRESHRATE] = 1;
 
         /*
-         * load addtional statistics defined by RFC 4293
+         * load additional statistics defined by RFC 4293
          * As these are supported linux 2.6.22 or later, it is no problem
          * if loading them are failed.
          */
@@ -275,7 +275,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
     int             retval = 0;
 
     DEBUGMSGTL(("access:systemstats:container:arch",
-                "load addtional v4 (flags %u)\n", load_flags));
+                "load additional v4 (flags %u)\n", load_flags));
 
     if (!(devin = fopen("/proc/net/netstat", "r"))) {
         snmp_log_perror("systemstats_linux: cannot open /proc/net/netstat");
@@ -287,7 +287,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
      */
     while (fgets(line, sizeof(line), devin)) {
         if (strncmp(IP_EXT_HEAD, line, sizeof(IP_EXT_HEAD) - 1) == 0) {
-            /* next line should includes IPv4 addtional statistics */
+            /* next line should include IPv4 additional statistics */
             if ((fgets(line, sizeof(line), devin)) == NULL) {
                 retval = -4;
                 break;
@@ -307,7 +307,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
                                 &scan_vals[9], &scan_vals[10], &scan_vals[11]);
             if (scan_count < 6) {
                 snmp_log(LOG_ERR,
-                        "error scanning addtional systemstats data"
+                        "error scanning additional systemstats data"
                         "(minimum expected %d, got %d)\n",
                         6, scan_count);
                 retval = -4;
@@ -354,7 +354,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
 
     if (retval < 0)
         DEBUGMSGTL(("access:systemstats",
-                    "/proc/net/netstat does not include addtional stats\n"));
+                    "/proc/net/netstat does not include additional stats\n"));
 
     return retval;
 }

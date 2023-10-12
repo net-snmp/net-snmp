@@ -217,7 +217,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 
 /* ---------------------------------------------------------------------
  * The following code was snagged from Darwin code, and the original
- * file had the following licences:
+ * file had the following licenses:
  */
 
 /*

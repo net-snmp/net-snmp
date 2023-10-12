@@ -404,7 +404,7 @@ run_exec_command(const char *command, const char *input,
             DEBUGMSGTL(("run:exec", "  got %d bytes\n", *out_len));
             
         /*
-         * close pipe to signal that we aren't listenting any more.
+         * close pipe to signal that we aren't listening any more.
          */
         close(opipe[0]);
 

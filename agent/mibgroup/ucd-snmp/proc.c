@@ -256,7 +256,7 @@ proc_parse_config(const char *token, char *cptr)
         } else
             (*procp)->min = 0;
     } else {
-        /* Default to asssume that we require at least one
+        /* Default to assume that we require at least one
          *  such process to be running, but no upper limit */
         (*procp)->max = 0;
         (*procp)->min = 1;
@@ -597,7 +597,7 @@ sh_count_procs(char *procname)
 
 #elif NETSNMP_OSTYPE == NETSNMP_ULTRIXID
 
-#define	NPROCS		32      /* number of proces to read at once */
+#define	NPROCS		32      /* number of processes to read at once */
 
 extern int      kmem, mem, swap;
 

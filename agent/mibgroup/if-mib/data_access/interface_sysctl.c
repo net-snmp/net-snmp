@@ -1,7 +1,7 @@
 /*
  *  Interface MIB architecture support
  *
- *  Based on patch 1362403, submited by Rojer
+ *  Based on patch 1362403, submitted by Rojer
  *
  * $Id$
  */

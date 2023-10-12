@@ -550,7 +550,7 @@ netSnmpHostsTable_handler(netsnmp_mib_handler *handler,
         }
     }
 
-    /** clean up after all requset processing has ended */
+    /** clean up after all request processing has ended */
     switch (reqinfo->mode) {
     case MODE_SET_UNDO:
     case MODE_SET_FREE:

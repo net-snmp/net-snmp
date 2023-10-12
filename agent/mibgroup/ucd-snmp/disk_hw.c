@@ -180,7 +180,7 @@ disk_parse_config_all(const char *token, char *cptr)
     /*
      * if we have already seen the "includeAllDisks" directive
      * then search for the disk in the "disks" array and modify
-     * the values. if we havent seen the "includeAllDisks"
+     * the values. if we haven't seen the "includeAllDisks"
      * directive then include this disk
      */
     if (allDisksIncluded) {

@@ -1565,7 +1565,7 @@ Interface_Scan_Init(void)
     /*
      * read the second line (a header) and determine the fields we
      * should read from.  This should be done in a better way by
-     * actually looking for the field names we want.  But thats too
+     * actually looking for the field names we want.  But that's too
      * much work for today.  -- Wes 
      */
     fgets(line, sizeof(line), devin);
@@ -2258,12 +2258,12 @@ Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
     }
 #ifdef freebsd2
     if (saveifnet.if_type != IFT_ETHER) {
-        return (0);             /* Not an ethernet if */
+        return (0);             /* Not an Ethernet if */
     }
 #endif
     /*
      *  the arpcom structure is an extended ifnet structure which
-     *  contains the ethernet address.
+     *  contains the Ethernet address.
      */
 #ifndef linux
 #if !(defined(netbsd1) || defined(bsdi2) || defined(openbsd2))
@@ -2929,7 +2929,7 @@ writeIfEntry(int action,
         ifEntryRow.dwIndex = (int) name[10];
         ifEntryRow.dwAdminStatus = admin_status;
         /*
-         * Only UP and DOWN status are supported. Thats why done in COMMIT 
+         * Only UP and DOWN status are supported. That's why done in COMMIT 
          */
         if (SetIfEntry(&ifEntryRow) != NO_ERROR) {
             snmp_log(LOG_ERR,

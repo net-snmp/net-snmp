@@ -269,7 +269,7 @@ static int create_path = 0;
 static mode_t create_mode;
 
 #ifndef NETSNMP_FEATURE_REMOVE_UNIX_SOCKET_PATHS
-/** If trying to create unix sockets in nonexisting directories then
+/** If trying to create unix sockets in non-existing directories then
  *  try to create the directory with mask mode.
  */
 void netsnmp_unix_create_path_with_mode(int mode)
@@ -278,7 +278,7 @@ void netsnmp_unix_create_path_with_mode(int mode)
     create_mode = mode;
 }
 
-/** If trying to create unix sockets in nonexisting directories then
+/** If trying to create unix sockets in non-existing directories then
  *  fail.
  */
 void netsnmp_unix_dont_create_path(void)
@@ -304,7 +304,7 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
 
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     /* SPECIAL CIRCUMSTANCE: We still want AgentX to be able to operate,
-       so we allow for unix domain socktes to still listen when everything
+       so we allow for unix domain sockets to still listen when everything
        else isn't allowed to.  Thus, we ignore this define in this file.
     */
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
@@ -367,7 +367,7 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
         }
 
         /*
-         * This session is inteneded as a server, so we must bind to the given
+         * This session is intended as a server, so we must bind to the given
          * path (unlinking it first, to avoid errors).
          */
 

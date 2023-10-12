@@ -323,7 +323,7 @@ ipSystemStatsTable_container_load(netsnmp_container *container)
      */
     /*
      * we just got a fresh copy of data. compare it to
-     * what we've already got, and make any adjustements...
+     * what we've already got, and make any adjustments...
      */
     CONTAINER_FOR_EACH(container, _check_for_updates, stats);
 

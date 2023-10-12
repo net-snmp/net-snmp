@@ -474,7 +474,7 @@ FAQ.html:
 	local/FAQ2HTML FAQ
 
 .PHONY: docs docsdir mancp testdirs test TAGS
-# note: tags and docs are phony to force rebulding
+# note: tags and docs are phony to force rebuilding
 .PHONY: snmplib agent apps \
 	snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus \
 	snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext \

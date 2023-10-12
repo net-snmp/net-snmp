@@ -152,7 +152,7 @@ add_device(char *path, int addNewDisks)
             maxdisks = 50;
             disks = malloc(maxdisks * sizeof(struct diskiopart));
             if (!disks) {
-                config_perror("malloc failed for new disko allocation.");
+                config_perror("malloc failed for new diskio allocation.");
                 netsnmp_config_error("\tignoring:  %s", path);
                 return;
             }
@@ -164,7 +164,7 @@ add_device(char *path, int addNewDisks)
             if (!newdisks) {
                 free(disks);
                 disks = NULL;
-                config_perror("malloc failed for new disko allocation.");
+                config_perror("malloc failed for new diskio allocation.");
                 netsnmp_config_error("\tignoring:  %s", path);
                 return;
             }

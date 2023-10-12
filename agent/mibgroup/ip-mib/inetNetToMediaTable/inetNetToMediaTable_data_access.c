@@ -537,7 +537,7 @@ The IP Address corresponding to the media-dependent
             specified in inetNetToMediaAddressType.
 
 
-            Implementors need to be aware that if the size of
+            Implementers need to be aware that if the size of
             inetNetToMediaNetAddress exceeds 115 octets then OIDS of
             instances of columns in this row will have more than 128
             sub-identifiers and cannot be accessed using SNMPv1, SNMPv2c

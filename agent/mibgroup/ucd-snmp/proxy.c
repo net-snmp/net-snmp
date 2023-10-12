@@ -590,7 +590,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
              *
              * 2005/06 rks: actually, it doesn't do the right thing for
              * a get-next request that returns NOSUCHNAME. If we do nothing,
-             * it passes that error back to the comman initiator. What it should
+             * it passes that error back to the command initiator. What it should
              * do is ignore the error and move on to the next tree. To
              * accomplish that, all we need to do is clear the delegated flag.
              * Not sure if any other error codes need the same treatment. Left

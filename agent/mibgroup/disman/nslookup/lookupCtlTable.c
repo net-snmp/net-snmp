@@ -969,7 +969,7 @@ write_lookupCtlTargetAddressType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -983,7 +983,7 @@ write_lookupCtlTargetAddressType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case
+         * it.  Note that anything done here must be reversible in the UNDO case
          */
         tmpvar = StorageTmp->lookupCtlTargetAddressType;
         StorageTmp->lookupCtlTargetAddressType = *((long *) var_val);
@@ -1051,7 +1051,7 @@ write_lookupCtlTargetAddress(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -1065,7 +1065,7 @@ write_lookupCtlTargetAddress(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case
+         * it.  Note that anything done here must be reversible in the UNDO case
          */
         tmpvar = StorageTmp->lookupCtlTargetAddress;
         tmplen = StorageTmp->lookupCtlTargetAddressLen;
@@ -1218,7 +1218,7 @@ write_lookupCtlRowStatus(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         if (StorageTmp == NULL) {
             /*
@@ -1293,7 +1293,7 @@ write_lookupCtlRowStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in
+         * it.  Note that anything done here must be reversible in
          * the UNDO case 
          */
         if (StorageTmp == NULL) {

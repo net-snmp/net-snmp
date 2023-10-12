@@ -3633,7 +3633,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
              || (item->mteTriggerSampleType ==
                  MTETRIGGERSAMPLETYPE_DELTAVALUE && value && old_value))) {
             /*
-             * XXX: correct intepretation of mteTriggerThresholdStartup? 
+             * XXX: correct interpretation of mteTriggerThresholdStartup? 
              */
             /*
              * only fires when passed and just set to active?  What

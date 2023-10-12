@@ -681,7 +681,7 @@ char * str;
 }
 
 /* does a destructive disection of <label1>...<labeln>.<iid> returning
-   <labeln> and <iid> in seperate strings (note: will destructively
+   <labeln> and <iid> in separate strings (note: will destructively
    alter input string, 'name') */
 static int
 __get_label_iid (name, last_label, iid, flag)

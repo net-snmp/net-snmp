@@ -604,7 +604,7 @@ extend_parse_config(const char *token, char *cptr)
 
 #ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
     /*
-     *  Compatability with the UCD extTable
+     *  Compatibility with the UCD extTable
      */
     if (!strcmp( token, "execFix"  )) {
         int  i;
