@@ -1983,7 +1983,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
             (asp->pdu->command != SNMP_MSG_SET) &&
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
-            (asp->pdu->version == SNMP_VERSION_1)) {
+            (asp->pdu->version == SNMP_VERSION_1) && asp->index < 1) {
             netsnmp_variable_list *var_ptr = asp->pdu->variables;
             int                    i = 1;
 
@@ -2001,6 +2001,11 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                 var_ptr = var_ptr->next_variable;
                 ++i;
             }
+        }
+        
+        else
+        {
+          status = asp->status ;
         }
 #endif /* snmpv1 support */
 
@@ -4045,7 +4050,7 @@ netsnmp_request_set_error_idx(netsnmp_request_info *request,
     /*
      * Skip to the indicated varbind
      */
-    for ( i=2; i<idx; i++) {
+    for ( i=2; i<=idx; i++) {
         req = req->next;
         if (!req)
             return SNMPERR_NO_VARS;
